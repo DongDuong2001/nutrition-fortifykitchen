@@ -27,7 +27,7 @@ export function BottomNav({ currentTab, onAddClick, className = "" }: BottomNavP
         href="/today"
         aria-current={isToday ? "page" : undefined}
         className={`flex flex-col items-center justify-center gap-[3px] min-h-[56px] text-xs font-semibold no-underline transition-colors ${
-          isToday ? "text-white" : "text-[#8C92A0] hover:text-white"
+          isToday ? "text-white" : "text-muted-on-dark hover:text-white"
         }`}
       >
         <svg
@@ -50,7 +50,7 @@ export function BottomNav({ currentTab, onAddClick, className = "" }: BottomNavP
         href="/micros"
         aria-current={isMicros ? "page" : undefined}
         className={`flex flex-col items-center justify-center gap-[3px] min-h-[56px] text-xs font-semibold no-underline transition-colors ${
-          isMicros ? "text-white" : "text-[#8C92A0] hover:text-white"
+          isMicros ? "text-white" : "text-muted-on-dark hover:text-white"
         }`}
       >
         <svg
@@ -82,7 +82,7 @@ export function BottomNav({ currentTab, onAddClick, className = "" }: BottomNavP
               height="26"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="#FFFFFF"
+              stroke="white"
               strokeWidth="2.4"
               strokeLinecap="round"
               aria-hidden="true"
@@ -101,7 +101,7 @@ export function BottomNav({ currentTab, onAddClick, className = "" }: BottomNavP
               height="26"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="#FFFFFF"
+              stroke="white"
               strokeWidth="2.4"
               strokeLinecap="round"
               aria-hidden="true"
@@ -116,7 +116,7 @@ export function BottomNav({ currentTab, onAddClick, className = "" }: BottomNavP
         href="/training"
         aria-current={isTraining ? "page" : undefined}
         className={`flex flex-col items-center justify-center gap-[3px] min-h-[56px] text-xs font-semibold no-underline transition-colors ${
-          isTraining ? "text-white" : "text-[#8C92A0] hover:text-white"
+          isTraining ? "text-white" : "text-muted-on-dark hover:text-white"
         }`}
       >
         <svg
@@ -139,7 +139,7 @@ export function BottomNav({ currentTab, onAddClick, className = "" }: BottomNavP
         href="/profile"
         aria-current={isProfile ? "page" : undefined}
         className={`flex flex-col items-center justify-center gap-[3px] min-h-[56px] text-xs font-semibold no-underline transition-colors ${
-          isProfile ? "text-white" : "text-[#8C92A0] hover:text-white"
+          isProfile ? "text-white" : "text-muted-on-dark hover:text-white"
         }`}
       >
         <svg

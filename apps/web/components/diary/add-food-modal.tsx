@@ -135,18 +135,18 @@ export function AddFoodModal({ slot, isOpen, onClose, onLog }: AddFoodModalProps
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-xs">
-      <div className="w-full max-w-lg rounded-lg bg-[#141C2B] border-2 sm:border-[3px] border-black shadow-[6px_6px_0px_0px_#000] p-4 sm:p-6 overflow-hidden max-h-[90vh] flex flex-col">
+      <div className="w-full max-w-lg rounded-lg bg-ink border-2 sm:border-[3px] border-black shadow-[6px_6px_0px_0px_black] p-4 sm:p-6 overflow-hidden max-h-[90vh] flex flex-col">
         {/* Modal Header */}
         <div className="flex items-center justify-between pb-3.5 border-b-2 border-black shrink-0">
           <div>
-            <h3 className="text-base sm:text-lg font-black text-[#F8FAFC] uppercase tracking-tight">
-              Log Meal: <span className="text-[#10B981]">{slot}</span>
+            <h3 className="text-base sm:text-lg font-black text-white uppercase tracking-tight">
+              Log Meal: <span className="text-level-green">{slot}</span>
             </h3>
-            <p className="text-xs text-[#94A3B8] font-medium">Select item and calculate 26 nutrients</p>
+            <p className="text-xs text-muted-on-dark font-medium">Select item and calculate 26 nutrients</p>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-[4px] bg-[#0B0F17] border-2 border-black text-[#F8FAFC] hover:bg-rose-500 hover:text-black font-black flex items-center justify-center text-sm shadow-[2px_2px_0px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] transition-colors"
+            className="w-8 h-8 rounded-[4px] bg-ink border-2 border-black text-white hover:bg-rose-500 hover:text-black font-black flex items-center justify-center text-sm shadow-[2px_2px_0px_0px_black] active:translate-x-[1px] active:translate-y-[1px] transition-colors"
           >
             X
           </button>
@@ -155,7 +155,7 @@ export function AddFoodModal({ slot, isOpen, onClose, onLog }: AddFoodModalProps
         {/* Modal Form */}
         <form onSubmit={handleSubmit} className="mt-4 space-y-4 overflow-y-auto pr-1 flex-1">
           <div>
-            <label className="block text-[11px] font-black text-[#F8FAFC] uppercase tracking-wider mb-2">
+            <label className="block text-[11px] font-black text-white uppercase tracking-wider mb-2">
               Choose Food Item
             </label>
             <div className="space-y-2 max-h-44 overflow-y-auto pr-1">
@@ -166,17 +166,17 @@ export function AddFoodModal({ slot, isOpen, onClose, onLog }: AddFoodModalProps
                   onClick={() => handleSelectFood(food)}
                   className={`w-full p-2.5 sm:p-3 rounded-[4px] border-2 border-black text-left flex justify-between items-center transition-all min-h-[44px] ${
                     selectedFood.id === food.id
-                      ? "bg-[#10B981] text-black shadow-[3px_3px_0px_0px_#000] font-black"
-                      : "bg-[#0B0F17] text-[#94A3B8] shadow-[2px_2px_0px_0px_#000] hover:bg-[#1C263B]"
+                      ? "bg-level-green text-black shadow-[3px_3px_0px_0px_black] font-black"
+                      : "bg-ink text-muted-on-dark shadow-[2px_2px_0px_0px_black] hover:bg-level-empty-dark"
                   }`}
                 >
                   <div className="min-w-0 pr-2">
                     <div className="text-xs sm:text-sm font-black truncate">{food.name}</div>
-                    <div className={`text-[10px] font-mono mt-0.5 ${selectedFood.id === food.id ? "text-black/80 font-bold" : "text-[#64748B]"}`}>
+                    <div className={`text-[10px] font-mono mt-0.5 ${selectedFood.id === food.id ? "text-black/80 font-bold" : "text-secondary"}`}>
                       {food.serving_size_g}g serving • {food.per_100g_nutrients.calories} kcal/100g
                     </div>
                   </div>
-                  <div className={`text-xs font-black font-mono shrink-0 ${selectedFood.id === food.id ? "text-black" : "text-[#10B981]"}`}>
+                  <div className={`text-xs font-black font-mono shrink-0 ${selectedFood.id === food.id ? "text-black" : "text-level-green"}`}>
                     P: {food.per_100g_nutrients.protein}g
                   </div>
                 </button>
@@ -186,7 +186,7 @@ export function AddFoodModal({ slot, isOpen, onClose, onLog }: AddFoodModalProps
 
           <div className="grid grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <label className="block text-[11px] font-black text-[#F8FAFC] uppercase tracking-wider mb-1.5">
+              <label className="block text-[11px] font-black text-white uppercase tracking-wider mb-1.5">
                 Quantity (Servings)
               </label>
               <input
@@ -199,7 +199,7 @@ export function AddFoodModal({ slot, isOpen, onClose, onLog }: AddFoodModalProps
               />
             </div>
             <div>
-              <label className="block text-[11px] font-black text-[#F8FAFC] uppercase tracking-wider mb-1.5">
+              <label className="block text-[11px] font-black text-white uppercase tracking-wider mb-1.5">
                 Serving Size (g)
               </label>
               <input
@@ -212,11 +212,11 @@ export function AddFoodModal({ slot, isOpen, onClose, onLog }: AddFoodModalProps
           </div>
 
           {/* Dynamic Preview */}
-          <div className="p-3 rounded-[4px] bg-[#0B0F17] border-2 border-black shadow-[2px_2px_0px_0px_#000] flex justify-between items-center text-xs">
-            <span className="text-[#94A3B8] font-bold">
-              Total Weight: <strong className="text-[#F8FAFC] font-mono">{calculatedGrams}g</strong>
+          <div className="p-3 rounded-[4px] bg-ink border-2 border-black shadow-[2px_2px_0px_0px_black] flex justify-between items-center text-xs">
+            <span className="text-muted-on-dark font-bold">
+              Total Weight: <strong className="text-white font-mono">{calculatedGrams}g</strong>
             </span>
-            <span className="text-[#10B981] font-black text-sm font-mono">
+            <span className="text-level-green font-black text-sm font-mono">
               ≈ {calculatedCalories} kcal
             </span>
           </div>

@@ -29,6 +29,14 @@ export interface CompleteTargets {
   fastCarbs?: TargetRange;
 }
 
+/**
+ * Flag marking targets that are provisional until confirmed by coach.
+ */
+export const PROVISIONAL_TARGETS = {
+  fiber: true,
+  fastCarbs: true,
+} as const;
+
 export function calculateEnergyTarget(weightKg: number, goal: GoalType): TargetRange {
   switch (goal) {
     case "build": // Tăng cơ
@@ -92,9 +100,14 @@ export function calculateCalciumTarget(): TargetRange {
   return { min: 1200, max: 1500 };
 }
 
-export function calculateMagnesiumTarget(): TargetRange {
-  // 50% of calcium: 600–750 mg
-  return { min: 600, max: 750 };
+/**
+ * Derives magnesium target as 50% of calcium target.
+ */
+export function calculateMagnesiumTarget(calciumTarget: TargetRange = calculateCalciumTarget()): TargetRange {
+  return {
+    min: Math.round(calciumTarget.min * 0.5),
+    max: Math.round(calciumTarget.max * 0.5),
+  };
 }
 
 export function calculateIronTarget(sex: SexType, isPeriod = false): TargetRange {
@@ -112,8 +125,10 @@ export function calculateZincTarget(sex: SexType): TargetRange {
   return { min: val, max: val };
 }
 
+/**
+ * PROVISIONAL: 14 g per 1000 kcal, kept within men 30–40 g, women 20–30 g.
+ */
 export function calculateFiberTarget(caloriesMin: number, sex: SexType): TargetRange {
-  // 14 g per 1000 kcal, kept within men 30–40 g, women 20–30 g
   const rawFiber = Math.round((caloriesMin / 1000) * 14);
   if (sex === "male") {
     return {
@@ -127,11 +142,13 @@ export function calculateFiberTarget(caloriesMin: number, sex: SexType): TargetR
   };
 }
 
+/**
+ * PROVISIONAL: Training fast carbs 30–45 g * trainingMinutes / 60.
+ */
 export function calculateFastCarbsTarget(trainingMinutes: number): TargetRange {
   if (trainingMinutes <= 0) {
     return { min: 0, max: 0 };
   }
-  // 30–45 g * trainingMinutes / 60
   return {
     min: Math.round((30 * trainingMinutes) / 60),
     max: Math.round((45 * trainingMinutes) / 60),
@@ -151,7 +168,7 @@ export function calculateTargets(profile: UserProfileForTargets): CompleteTarget
   const sodium = calculateSodiumTarget(trainingMinutes);
   const potassium = calculatePotassiumTarget(profile.weightKg);
   const calcium = calculateCalciumTarget();
-  const magnesium = calculateMagnesiumTarget();
+  const magnesium = calculateMagnesiumTarget(calcium);
   const iron = calculateIronTarget(profile.sex, profile.isPeriod);
   const zinc = calculateZincTarget(profile.sex);
   const fiber = calculateFiberTarget(calories.min, profile.sex);

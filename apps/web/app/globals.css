@@ -29,6 +29,10 @@
 
   --color-divider: #EEF0F3;
   --color-muted-dark: #A3A8B5;
+  --color-muted-subtitle: #C9CDD6;
+  --color-muted-on-dark: #8C92A0;
+  --color-grabber: #D5D8DF;
+  --color-scrim: rgba(10, 10, 11, 0.5);
 }
 
 :root {

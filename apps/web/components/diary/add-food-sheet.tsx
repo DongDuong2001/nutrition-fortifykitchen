@@ -353,7 +353,7 @@ export function AddFoodSheet({
           <button
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="w-full py-3.5 rounded-2xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-black text-sm tracking-wide transition-all shadow-md active:scale-98"
+            className="w-full py-3.5 rounded-2xl bg-blue text-white font-black text-sm tracking-wide transition-all shadow-md active:scale-98"
           >
             {isSubmitting
               ? "Đang lưu..."

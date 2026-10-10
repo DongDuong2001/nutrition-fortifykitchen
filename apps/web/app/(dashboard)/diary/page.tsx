@@ -231,6 +231,7 @@ export default function DiaryPage() {
                 </span>
               </div>
               <SegmentedBar
+                aria-label="Tiến độ Đạm"
                 totalSegments={8}
                 filledSegments={Math.round((proteinConsumed / proteinTarget) * 8)}
                 color="gold"
@@ -246,6 +247,7 @@ export default function DiaryPage() {
                 </span>
               </div>
               <SegmentedBar
+                aria-label="Tiến độ Tinh bột"
                 totalSegments={8}
                 filledSegments={Math.round((carbConsumed / carbTarget) * 8)}
                 color="gold"
@@ -261,6 +263,7 @@ export default function DiaryPage() {
                 </span>
               </div>
               <SegmentedBar
+                aria-label="Tiến độ Béo"
                 totalSegments={8}
                 filledSegments={Math.round((fatConsumed / fatTarget) * 8)}
                 color="gold"
@@ -276,6 +279,7 @@ export default function DiaryPage() {
                 </span>
               </div>
               <SegmentedBar
+                aria-label="Tiến độ Chất xơ"
                 totalSegments={8}
                 filledSegments={Math.round((fiberConsumed / fiberTarget) * 8)}
                 color="coral"

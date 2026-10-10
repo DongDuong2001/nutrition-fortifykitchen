@@ -8,6 +8,7 @@ import {
 } from "@/lib/levels";
 
 export interface SegmentedBarProps {
+  "aria-label": string;
   percentage?: number;
   filledSegments?: number;
   totalSegments?: number;
@@ -19,13 +20,10 @@ export interface SegmentedBarProps {
 
 /**
  * H1T MICRO 10-segment nutrient bar.
- * Automatic level colouring:
- *  - <50%: red (#D93036 on light / #FF6B6B on dark)
- *  - 50–79%: yellow (#D99A00 on light / #F5C518 on dark)
- *  - 80–99%: green (#16A34A on light / #4ADE80 on dark)
- *  - >=100%: blue (#1E55F0 on light / #5C86F2 on dark)
+ * Automatic level colouring across 4 tiers (thiếu, trung bình, gần đủ, đạt).
  */
 export function SegmentedBar({
+  "aria-label": ariaLabel,
   percentage,
   filledSegments,
   totalSegments = 10,
@@ -44,11 +42,13 @@ export function SegmentedBar({
   const lvl = getLevel(pct);
   const filledColor = getLevelColor(lvl, tone);
   const emptyColor = getEmptySegmentColor(tone);
+  const clampedValueNow = Math.min(100, Math.max(0, Math.round(pct)));
 
   return (
     <div
       role="progressbar"
-      aria-valuenow={Math.round(pct)}
+      aria-label={ariaLabel}
+      aria-valuenow={clampedValueNow}
       aria-valuemin={0}
       aria-valuemax={100}
       className={`grid grid-cols-10 items-center w-full ${className}`}

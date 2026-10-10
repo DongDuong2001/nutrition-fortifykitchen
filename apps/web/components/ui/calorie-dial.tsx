@@ -31,22 +31,23 @@ export function CalorieDial({
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="#1F2937"
+          stroke="currentColor"
           strokeWidth={strokeWidth}
           fill="transparent"
+          className="text-level-empty-dark"
         />
         {/* Active Progress */}
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="#2563EB"
+          stroke="currentColor"
           strokeWidth={strokeWidth}
           strokeDasharray={circumference}
           strokeDashoffset={strokeDashoffset}
           strokeLinecap="round"
           fill="transparent"
-          className="transition-all duration-500 ease-out"
+          className="text-blue transition-all duration-500 ease-out"
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center">

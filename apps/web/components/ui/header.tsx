@@ -133,7 +133,7 @@ export function Header({
         )}
 
         {/* Step indicator */}
-        {stepText && <div className="text-[13px] text-[#A3A8B5]">{stepText}</div>}
+        {stepText && <div className="text-[13px] text-muted-dark">{stepText}</div>}
       </div>
 
       {/* Step progress bar if provided */}
@@ -163,7 +163,7 @@ export function Header({
 
       {/* Subtitle */}
       {subtitle && (
-        <p className="m-0 text-sm text-[#C9CDD6] leading-relaxed">{subtitle}</p>
+        <p className="m-0 text-sm text-muted-subtitle leading-relaxed">{subtitle}</p>
       )}
 
       {/* Custom Header Children (e.g. calorie ring, macros) */}

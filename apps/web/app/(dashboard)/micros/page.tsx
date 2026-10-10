@@ -158,6 +158,7 @@ export default function MicrosPage() {
               </div>
 
               <SegmentedBar
+                aria-label={`Tiến độ ${item.name}`}
                 totalSegments={8}
                 filledSegments={Math.round((ratio / 100) * 8)}
                 color={statusColor}

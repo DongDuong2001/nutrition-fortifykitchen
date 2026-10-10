@@ -58,7 +58,7 @@ export default function DevUiPage() {
                 <span>Thiếu (&lt;50%): Canxi 28%</span>
                 <span className="font-semibold text-level-red">28%</span>
               </div>
-              <SegmentedBar percentage={28} />
+              <SegmentedBar aria-label="Tiến độ Canxi 28%" percentage={28} />
             </div>
 
             <div className="flex flex-col gap-1">
@@ -66,7 +66,7 @@ export default function DevUiPage() {
                 <span>Trung bình (50–79%): Béo 64%</span>
                 <span className="font-semibold text-level-yellow">64%</span>
               </div>
-              <SegmentedBar percentage={64} />
+              <SegmentedBar aria-label="Tiến độ Béo 64%" percentage={64} />
             </div>
 
             <div className="flex flex-col gap-1">
@@ -74,7 +74,7 @@ export default function DevUiPage() {
                 <span>Gần đủ (80–99%): Đồng 89%</span>
                 <span className="font-semibold text-level-green">89%</span>
               </div>
-              <SegmentedBar percentage={89} />
+              <SegmentedBar aria-label="Tiến độ Đồng 89%" percentage={89} />
             </div>
 
             <div className="flex flex-col gap-1">
@@ -82,7 +82,7 @@ export default function DevUiPage() {
                 <span>Đạt (≥100%): Natri 100%</span>
                 <span className="font-semibold text-blue">100%</span>
               </div>
-              <SegmentedBar percentage={100} />
+              <SegmentedBar aria-label="Tiến độ Natri 100%" percentage={100} />
             </div>
           </Card>
 
@@ -94,16 +94,16 @@ export default function DevUiPage() {
             <div className="flex flex-col gap-1">
               <div className="flex justify-between text-xs">
                 <span>Đạm 60%</span>
-                <span className="text-[#D5D8DF] tabular-nums">62 / 104 g</span>
+                <span className="text-grabber tabular-nums">62 / 104 g</span>
               </div>
-              <SegmentedBar percentage={60} tone="dark" />
+              <SegmentedBar aria-label="Tiến độ Đạm 60%" percentage={60} tone="dark" />
             </div>
             <div className="flex flex-col gap-1">
               <div className="flex justify-between text-xs">
                 <span>Chất xơ 47%</span>
-                <span className="text-[#D5D8DF] tabular-nums">14 / 30 g</span>
+                <span className="text-grabber tabular-nums">14 / 30 g</span>
               </div>
-              <SegmentedBar percentage={47} tone="dark" />
+              <SegmentedBar aria-label="Tiến độ Chất xơ 47%" percentage={47} tone="dark" />
             </div>
           </div>
         </section>

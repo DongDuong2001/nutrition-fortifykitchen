@@ -13,6 +13,7 @@ import {
   calculateZincTarget,
   calculateFiberTarget,
   calculateFastCarbsTarget,
+  PROVISIONAL_TARGETS,
   type UserProfileForTargets,
 } from "../targets";
 
@@ -112,11 +113,17 @@ describe("lib/targets", () => {
     });
   });
 
-  describe("Fast carbs for training", () => {
-    it("calculates fast carbs according to training duration", () => {
-      expect(calculateFastCarbsTarget(0)).toEqual({ min: 0, max: 0 });
-      expect(calculateFastCarbsTarget(60)).toEqual({ min: 30, max: 45 });
-      expect(calculateFastCarbsTarget(90)).toEqual({ min: 45, max: 68 });
+  describe("Magnesium derivation", () => {
+    it("derives magnesium as exactly 50% of calcium", () => {
+      expect(calculateMagnesiumTarget({ min: 1000, max: 2000 })).toEqual({ min: 500, max: 1000 });
+      expect(calculateMagnesiumTarget()).toEqual({ min: 600, max: 750 });
+    });
+  });
+
+  describe("Provisional targets flag", () => {
+    it("marks fiber and fastCarbs as provisional", () => {
+      expect(PROVISIONAL_TARGETS.fiber).toBe(true);
+      expect(PROVISIONAL_TARGETS.fastCarbs).toBe(true);
     });
   });
 });

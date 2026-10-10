@@ -12,7 +12,7 @@ const beVietnamPro = Be_Vietnam_Pro({
 const saira = Saira({
   subsets: ["vietnamese", "latin"],
   style: ["italic"],
-  weight: ["700", "800", "900"],
+  axes: ["wdth"],
   variable: "--font-saira",
   display: "swap",
 });

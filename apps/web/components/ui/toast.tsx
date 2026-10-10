@@ -47,7 +47,7 @@ export function Toast({
       </div>
 
       {progressPercent !== undefined && (
-        <div aria-hidden="true" className="h-1 bg-[#2B2D33] w-full">
+        <div aria-hidden="true" className="h-1 bg-level-empty-dark w-full">
           <div
             className="h-1 bg-blue transition-all duration-100 ease-linear"
             style={{ width: `${Math.max(0, Math.min(100, progressPercent))}%` }}

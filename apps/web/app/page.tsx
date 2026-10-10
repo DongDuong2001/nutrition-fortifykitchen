@@ -47,21 +47,21 @@ export default function HomePage() {
                 <span>Đạm</span>
                 <span className="font-mono">62 / 104 g</span>
               </div>
-              <SegmentedBar totalSegments={8} filledSegments={5} color="gold" />
+              <SegmentedBar aria-label="Tiến độ Đạm" totalSegments={8} filledSegments={5} color="gold" />
             </div>
             <div>
               <div className="flex justify-between text-xs font-bold text-neutral-300 mb-1">
                 <span>Tinh bột</span>
                 <span className="font-mono">133 / 254 g</span>
               </div>
-              <SegmentedBar totalSegments={8} filledSegments={4} color="gold" />
+              <SegmentedBar aria-label="Tiến độ Tinh bột" totalSegments={8} filledSegments={4} color="gold" />
             </div>
             <div>
               <div className="flex justify-between text-xs font-bold text-neutral-300 mb-1">
                 <span>Chất xơ</span>
                 <span className="font-mono">14 / 30 g</span>
               </div>
-              <SegmentedBar totalSegments={8} filledSegments={4} color="coral" />
+              <SegmentedBar aria-label="Tiến độ Chất xơ" totalSegments={8} filledSegments={4} color="coral" />
             </div>
           </div>
         </div>
