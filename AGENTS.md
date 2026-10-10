@@ -81,7 +81,8 @@ Read each skill's `SKILL.md` before first use.
 - **`systematic-debugging`:** use it for any bug, failing test or build error. Find the root cause before changing code, and never stack guess-fixes.
 - **`verification-before-completion`:** required before every commit and every "done" report. Run the gates and the visual check, and show the evidence (command output, screenshot path). Never claim done without it.
 - **`webapp-testing`** (Playwright): use it for the visual check and for click-through flows at 390×844 and 1440×900, for example Today → Add food → Today, and Micros → Vitamin tab → Nutrient detail. Save screenshots to `apps/web/.screenshots/`, which is gitignored.
-  - One-time setup: `pip3 install playwright && python3 -m playwright install chromium`.
+  - Playwright and Chromium are **already installed** on this machine. Do **not** run `pip3 install playwright` or `playwright install` as part of a task.
+  - Only if `python3 -c "import playwright"` fails, or launching Chromium errors with "Executable doesn't exist", stop and tell the user. Don't install anything yourself.
 
 ## Dev server and ports
 Always use **port 3100** for this app. Never pick a new port.
