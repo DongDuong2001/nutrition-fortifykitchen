@@ -51,8 +51,13 @@ export function SegmentedBar({
       aria-valuenow={clampedValueNow}
       aria-valuemin={0}
       aria-valuemax={100}
-      className={`grid grid-cols-10 items-center w-full ${className}`}
-      style={{ gap: `${gap}px` }}
+      className={`w-full ${className}`}
+      style={{
+        display: "grid",
+        gridTemplateColumns: `repeat(${totalSegments}, minmax(0, 1fr))`,
+        gap: `${gap}px`,
+        alignItems: "center",
+      }}
     >
       {Array.from({ length: 10 }).map((_, idx) => (
         <div

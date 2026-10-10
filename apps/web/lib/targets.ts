@@ -30,11 +30,49 @@ export interface CompleteTargets {
 }
 
 /**
+ * Provisional reference values from Vietnam 2016 recommended intakes (VN2016).
+ */
+export const VN2016_TARGETS: Record<string, TargetRange> = {
+  b1: { min: 1.2, max: 1.2 },
+  b2: { min: 1.3, max: 1.3 },
+  b3: { min: 16, max: 16 },
+  b5: { min: 5, max: 5 },
+  b6: { min: 1.3, max: 1.3 },
+  b12: { min: 2.4, max: 2.4 },
+  folate: { min: 400, max: 400 },
+  vitamin_a: { min: 650, max: 650 },
+  vitamin_c: { min: 100, max: 100 },
+  vitamin_d: { min: 15, max: 15 },
+  vitamin_e: { min: 6.5, max: 6.5 },
+  vitamin_k: { min: 150, max: 150 },
+  copper: { min: 0.9, max: 0.9 },
+  manganese: { min: 2.3, max: 2.3 },
+  phosphorus: { min: 700, max: 700 },
+  selenium: { min: 34, max: 34 },
+};
+
+/**
  * Flag marking targets that are provisional until confirmed by coach.
  */
 export const PROVISIONAL_TARGETS = {
   fiber: true,
   fastCarbs: true,
+  b1: true,
+  b2: true,
+  b3: true,
+  b5: true,
+  b6: true,
+  b12: true,
+  folate: true,
+  vitamin_a: true,
+  vitamin_c: true,
+  vitamin_d: true,
+  vitamin_e: true,
+  vitamin_k: true,
+  copper: true,
+  manganese: true,
+  phosphorus: true,
+  selenium: true,
 } as const;
 
 export function calculateEnergyTarget(weightKg: number, goal: GoalType): TargetRange {

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { SegmentedBar } from "@/components/ui/segmented-bar";
-import { BottomDock } from "@/components/layout/bottom-dock";
+import { BottomNav } from "@/components/ui/bottom-nav";
 import { CheckIcon, ChevronRightIcon } from "@/lib/runeicons";
 
 interface MicronutrientItem {
@@ -169,7 +169,7 @@ export default function MicrosPage() {
       </div>
 
       {/* Mobile Dock */}
-      <BottomDock />
+      <BottomNav currentTab="micros" />
     </div>
   );
 }

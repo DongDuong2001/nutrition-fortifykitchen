@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BottomDock } from "@/components/layout/bottom-dock";
+import { BottomNav } from "@/components/ui/bottom-nav";
 import { CheckIcon } from "@/lib/runeicons";
 
 export default function TrainingPage() {
@@ -193,7 +193,7 @@ export default function TrainingPage() {
       </div>
 
       {/* Mobile Dock */}
-      <BottomDock />
+      <BottomNav currentTab="training" />
     </div>
   );
 }

@@ -13,7 +13,7 @@ const saira = Saira({
   subsets: ["vietnamese", "latin"],
   style: ["italic"],
   axes: ["wdth"],
-  variable: "--font-saira",
+  variable: "--font-saira-face",
   display: "swap",
 });
 

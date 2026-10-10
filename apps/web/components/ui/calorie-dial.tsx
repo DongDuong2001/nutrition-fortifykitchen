@@ -3,58 +3,74 @@ import React from "react";
 interface CalorieDialProps {
   current: number;
   target: number;
+  targetMax?: number;
   size?: number;
   strokeWidth?: number;
+  ariaLabel?: string;
+  className?: string;
 }
 
 export function CalorieDial({
   current,
   target,
-  size = 110,
-  strokeWidth = 9,
+  targetMax,
+  size = 100,
+  strokeWidth = 10,
+  ariaLabel,
+  className = "",
 }: CalorieDialProps) {
-  const radius = (size - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * radius;
+  const radius = 52;
+  const circumference = 2 * Math.PI * radius; // 326.72
   const progress = target > 0 ? Math.min(Math.max(current / target, 0), 1) : 0;
-  const strokeDashoffset = circumference - progress * circumference;
+  const strokeDashoffset = circumference * (1 - progress);
+
+  const defaultLabel = targetMax
+    ? `Năng lượng ${current.toLocaleString("vi-VN")} trên mục tiêu ${target.toLocaleString("vi-VN")} đến ${targetMax.toLocaleString("vi-VN")} kcal`
+    : `Năng lượng ${current.toLocaleString("vi-VN")} trên mục tiêu ${target.toLocaleString("vi-VN")} kcal`;
 
   return (
-    <div className="relative inline-flex items-center justify-center shrink-0">
+    <div
+      className={`relative inline-flex items-center justify-center shrink-0 ${className}`}
+      style={{ width: size, height: size }}
+    >
       <svg
         width={size}
         height={size}
-        className="-rotate-90 transform"
-        aria-hidden="true"
+        viewBox="0 0 120 120"
+        role="img"
+        aria-label={ariaLabel || defaultLabel}
       >
         {/* Background Track */}
         <circle
-          cx={size / 2}
-          cy={size / 2}
+          cx="60"
+          cy="60"
           r={radius}
+          fill="none"
           stroke="currentColor"
           strokeWidth={strokeWidth}
-          fill="transparent"
           className="text-level-empty-dark"
         />
         {/* Active Progress */}
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          stroke="currentColor"
-          strokeWidth={strokeWidth}
-          strokeDasharray={circumference}
-          strokeDashoffset={strokeDashoffset}
-          strokeLinecap="round"
-          fill="transparent"
-          className="text-blue transition-all duration-500 ease-out"
-        />
+        {progress > 0 && (
+          <circle
+            cx="60"
+            cy="60"
+            r={radius}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={strokeWidth}
+            strokeLinecap="round"
+            strokeDasharray={`${(circumference * progress).toFixed(1)} ${circumference.toFixed(1)}`}
+            transform="rotate(-90 60 60)"
+            className="text-blue"
+          />
+        )}
       </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-        <span className="text-xl font-black italic tracking-tighter text-white font-mono leading-none">
+      <div className="absolute inset-0 flex flex-col items-center justify-center text-center select-none pointer-events-none">
+        <span className="font-saira italic font-extrabold text-2xl text-white leading-tight tracking-tight">
           {current.toLocaleString("vi-VN")}
         </span>
-        <span className="text-[11px] font-bold text-neutral-400 mt-1">
+        <span className="text-[13px] text-muted-dark leading-none">
           kcal
         </span>
       </div>

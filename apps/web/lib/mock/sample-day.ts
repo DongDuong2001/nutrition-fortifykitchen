@@ -1,8 +1,11 @@
+import type { FoodNutrientValue, TargetSource } from "../nutrients";
+
 export interface MockFoodItem {
   id: string;
   name: string;
   qty: string;
   kcal: number;
+  nutrients?: Record<string, FoodNutrientValue>;
 }
 
 export interface MockMeal {
@@ -16,30 +19,32 @@ export interface MockMeal {
 export interface MockMacroStat {
   key: "protein" | "carbs" | "fat" | "fiber";
   label: string;
-  consumed: number;
-  targetMin: number;
+  consumed: number | null;
+  targetMin: number | null;
   targetMax?: number;
   unit: string;
   displayValue: string;
-  percentage: number;
+  percentage: number | null;
 }
 
 export interface MockMicroStat {
   key: string;
   name: string;
   group: "mineral" | "vitamin";
-  consumed: number;
-  targetMin: number;
+  consumed: number | null;
+  targetMin: number | null;
   targetMax?: number;
   unit: string;
   displayValue: string;
-  percentage: number;
+  percentage: number | null;
   isCoachRule: boolean;
+  targetSource?: TargetSource;
 }
 
 export interface MockDayData {
   date: string; // e.g. "2026-10-10"
-  dateLabel: string; // "Thứ Bảy, 10/10"
+  dateLabel: string; // "Hôm nay, 10/10"
+  desktopDateLabel?: string; // "Thứ Bảy, 10/10/2026 · Ngày tập 60' · Giữ cân · 65 kg"
   user: {
     sex: "male";
     weightKg: number;
@@ -73,7 +78,8 @@ export interface MockDayData {
 
 export const SAMPLE_DAY: MockDayData = {
   date: "2026-10-10",
-  dateLabel: "Thứ Bảy, 10/10",
+  dateLabel: "Hôm nay, 10/10",
+  desktopDateLabel: "Thứ Bảy, 10/10/2026 · Ngày tập 60' · Giữ cân · 65 kg",
   user: {
     sex: "male",
     weightKg: 65,
@@ -282,6 +288,19 @@ export const SAMPLE_DAY: MockDayData = {
       displayValue: "331 / 1.200 mg",
       percentage: 28,
       isCoachRule: true,
+      targetSource: "coach",
+    },
+    {
+      key: "manganese",
+      name: "Mangan",
+      group: "mineral",
+      consumed: 1.8,
+      targetMin: 2.3,
+      unit: "mg",
+      displayValue: "1,8 / 2,3 mg",
+      percentage: 78,
+      isCoachRule: false,
+      targetSource: "vn2016",
     },
   ],
   vitamins: [
@@ -295,6 +314,7 @@ export const SAMPLE_DAY: MockDayData = {
       displayValue: "3,1 / 2,4 µg",
       percentage: 100,
       isCoachRule: false,
+      targetSource: "vn2016",
     },
     {
       key: "b2",
@@ -306,6 +326,7 @@ export const SAMPLE_DAY: MockDayData = {
       displayValue: "1,4 / 1,3 mg",
       percentage: 100,
       isCoachRule: false,
+      targetSource: "vn2016",
     },
     {
       key: "b3",
@@ -317,6 +338,7 @@ export const SAMPLE_DAY: MockDayData = {
       displayValue: "18 / 16 mg",
       percentage: 100,
       isCoachRule: false,
+      targetSource: "vn2016",
     },
     {
       key: "b6",
@@ -328,6 +350,7 @@ export const SAMPLE_DAY: MockDayData = {
       displayValue: "1,1 / 1,3 mg",
       percentage: 85,
       isCoachRule: false,
+      targetSource: "vn2016",
     },
     {
       key: "b5",
@@ -339,6 +362,7 @@ export const SAMPLE_DAY: MockDayData = {
       displayValue: "4,1 / 5 mg",
       percentage: 82,
       isCoachRule: false,
+      targetSource: "vn2016",
     },
     {
       key: "a",
@@ -350,6 +374,7 @@ export const SAMPLE_DAY: MockDayData = {
       displayValue: "520 / 650 µg",
       percentage: 80,
       isCoachRule: false,
+      targetSource: "vn2016",
     },
     {
       key: "b1",
@@ -361,6 +386,7 @@ export const SAMPLE_DAY: MockDayData = {
       displayValue: "0,9 / 1,2 mg",
       percentage: 75,
       isCoachRule: false,
+      targetSource: "vn2016",
     },
     {
       key: "b9",
@@ -372,6 +398,7 @@ export const SAMPLE_DAY: MockDayData = {
       displayValue: "290 / 400 µg",
       percentage: 73,
       isCoachRule: false,
+      targetSource: "vn2016",
     },
     {
       key: "k",
@@ -383,6 +410,7 @@ export const SAMPLE_DAY: MockDayData = {
       displayValue: "85 / 150 µg",
       percentage: 57,
       isCoachRule: false,
+      targetSource: "vn2016",
     },
     {
       key: "e",
@@ -394,6 +422,7 @@ export const SAMPLE_DAY: MockDayData = {
       displayValue: "3,2 / 6,5 mg",
       percentage: 49,
       isCoachRule: false,
+      targetSource: "vn2016",
     },
     {
       key: "c",
@@ -405,6 +434,7 @@ export const SAMPLE_DAY: MockDayData = {
       displayValue: "48 / 100 mg",
       percentage: 48,
       isCoachRule: false,
+      targetSource: "vn2016",
     },
     {
       key: "d",
@@ -416,13 +446,14 @@ export const SAMPLE_DAY: MockDayData = {
       displayValue: "2,1 / 15 µg",
       percentage: 14,
       isCoachRule: false,
+      targetSource: "vn2016",
     },
   ],
   microsSummary: {
     achieved: 8,
-    total: 21,
+    total: 22,
     mineralsAchieved: 5,
-    mineralsTotal: 9,
+    mineralsTotal: 10,
     vitaminsAchieved: 3,
     vitaminsTotal: 12,
     mostLacking: ["Vitamin D", "Canxi"],

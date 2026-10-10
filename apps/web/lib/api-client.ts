@@ -7,6 +7,7 @@ import {
   type MockMicroStat,
 } from "./mock/sample-day";
 
+export * from "./nutrients";
 export type { MockDayData, MockMeal, MockMacroStat, MockMicroStat };
 
 export interface NutrientValues {

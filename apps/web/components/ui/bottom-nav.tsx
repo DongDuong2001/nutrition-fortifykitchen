@@ -21,7 +21,11 @@ export function BottomNav({ currentTab, onAddClick, className = "" }: BottomNavP
   return (
     <nav
       aria-label="Điều hướng chính"
-      className={`h-[72px] flex-none bg-ink grid grid-cols-5 items-center w-full max-w-[390px] mx-auto ${className}`}
+      className={`h-[72px] flex-none bg-ink items-center w-full max-w-[390px] mx-auto ${className}`}
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(5, 1fr)",
+      }}
     >
       <Link
         href="/today"
