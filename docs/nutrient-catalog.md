@@ -94,4 +94,19 @@ This file is the single source for which nutrients the app tracks, how they are 
 **Totals:** about 58 nutrients. 27 have a target (5 macros and fibre, 12 vitamins, 10 minerals); the rest are tracked only.
 
 ## Food data
-Vietnamese food composition tables don't cover many of these nutrients (amino acids, omega breakdowns, B5, manganese, oxalate, phytate). The primary source is **NCCDB** (Nutrition Coordinating Center Food & Nutrient Database, University of Minnesota), the database Cronometer relies on. It needs a **paid licence** for commercial use. Fill gaps with **USDA FoodData Central** (public domain), and add Vietnamese dishes from the VN food composition tables or from recipes built out of NCCDB ingredients. A missing value is stored as **unknown (null), never 0**. The UI should not count unknowns as 0, and shows "chưa đủ dữ liệu" when foods with unknown values make up a large share of the day.
+
+Release 1 uses only free sources (no licence fees).
+
+| Priority | Source | Use | Licence |
+|---|---|---|---|
+| 1 | **USDA FoodData Central: SR Legacy + Foundation Foods** | Base ingredient data, ~150 nutrients, including amino acids, fatty acids, B5 and manganese | Public domain (CC0) |
+| 2 | **Canadian Nutrient File (CNF)** | Fills USDA's missing values (imputed, few gaps) | Open Government Licence – Canada (attribution) |
+| 3 | **Vietnam Food Composition Table (Viện Dinh dưỡng Quốc gia)** | Vietnamese ingredients; Vietnamese dishes are built as recipes from ingredients | Check usage rights before import |
+| Later | **Open Food Facts** | Packaged products / barcode scanning | ODbL (share-alike on the database) |
+| Later | **NCCDB** (Univ. of Minnesota) | Upgrade for curated mixed and restaurant foods once there are paying users | Paid licence, 2-year term, quote only |
+
+**Rules**
+- Store the source and source ID for every nutrient value, so it can be traced and attributed.
+- A missing value is **unknown (null), never 0**. The UI excludes nulls from totals and shows "chưa đủ dữ liệu" when foods with unknown values make up a large share of the day.
+- Map units and definitions across sources: vitamin A as RAE µg, folate as DFE µg, vitamin E as α-tocopherol mg, vitamin D as µg (40 IU = 1 µg).
+- Show the attribution required by CNF (and any CC BY source) on an "Nguồn dữ liệu" page.
