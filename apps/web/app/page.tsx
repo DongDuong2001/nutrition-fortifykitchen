@@ -1,90 +1,106 @@
 import Link from "next/link";
-import { SparklesIcon, FlameIcon, UtensilsIcon } from "runeicons";
+import { CalorieDial } from "@/components/ui/calorie-dial";
+import { SegmentedBar } from "@/components/ui/segmented-bar";
+import { BottomDock } from "@/components/layout/bottom-dock";
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col items-center justify-center py-8 sm:py-16 text-center max-w-5xl mx-auto">
-      {/* Top Category Tag */}
-      <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-[4px] border-2 border-black bg-[#10B981] text-black font-black text-[11px] sm:text-xs uppercase tracking-wider shadow-[3px_3px_0px_0px_#000] mb-6 sm:mb-8">
-        <span className="w-2 h-2 bg-black rounded-none" />
-        Nutritional Tracking Platform • 26 Nutrients Monitored
-      </div>
-
-      {/* Main Headline */}
-      <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight text-[#F8FAFC] uppercase max-w-4xl leading-[1.08]">
-        Nutritional Intake and{" "}
-        <span className="bg-[#10B981] text-black px-2 py-0.5 border-2 border-black shadow-[3px_3px_0px_0px_#000] inline-block -rotate-1">
-          Meal Logging
-        </span>
-      </h1>
-
-      <p className="mt-5 sm:mt-7 text-sm sm:text-base md:text-lg text-[#94A3B8] max-w-2xl font-medium leading-relaxed px-2">
-        Meal logging system with idempotent record handling, automated 26-nutrient calculations, and menu synchronization.
-      </p>
-
-      {/* Action Buttons */}
-      <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3.5 w-full sm:w-auto px-4">
-        <Link
-          href="/diary"
-          className="neo-btn neo-btn-emerald w-full sm:w-auto px-7 py-3.5 text-sm sm:text-base font-black text-black border-2 border-black min-h-[48px]"
-        >
-          Open Meal Diary
-        </Link>
-        <Link
-          href="/foods"
-          className="neo-btn neo-btn-dark w-full sm:w-auto px-7 py-3.5 text-sm sm:text-base font-black text-[#F8FAFC] border-2 border-black min-h-[48px]"
-        >
-          View Food Catalog
-        </Link>
-      </div>
-
-      {/* Feature Highlights Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mt-14 sm:mt-20 w-full text-left">
-        <div className="neo-card p-5 sm:p-6 flex flex-col justify-between">
-          <div>
-            <div className="w-10 h-10 rounded-[4px] bg-[#10B981] text-black border-2 border-black font-black text-base flex items-center justify-center shadow-[2px_2px_0px_0px_#000] mb-4">
-              26
-            </div>
-            <h3 className="text-base sm:text-lg font-black uppercase text-[#F8FAFC]">26 Nutrients Tracked</h3>
-            <p className="text-xs sm:text-sm text-[#94A3B8] mt-2 font-medium">
-              Calculates macronutrients, electrolytes, minerals, and vitamins per entry based on gram weight and reference data.
-            </p>
+    <div className="min-h-screen bg-[#F3F4F6] pb-24 md:pb-12">
+      {/* Black Header Hero */}
+      <div className="bg-[#0A0A0A] text-white rounded-b-3xl md:rounded-3xl p-6 md:p-12 shadow-lg">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="inline-block mb-3 px-3 py-1 rounded-full bg-neutral-900 border border-neutral-800 text-[11px] font-bold tracking-wider text-blue-400 uppercase">
+            Khoa học dinh dưỡng & Vận động
           </div>
-          <div className="mt-4 pt-3 border-t-2 border-black text-[10px] font-black uppercase text-[#10B981] font-mono">
-            Nutritional Reference
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-black italic uppercase tracking-tighter leading-tight">
+            H1T <span className="text-[#2563EB]">MICRO</span>
+          </h1>
+          <p className="mt-3 text-sm sm:text-base text-neutral-400 max-w-xl mx-auto font-medium">
+            Theo dõi chính xác 26 vi chất, bù khoáng theo giờ tập và cân bằng năng lượng từng bữa ăn.
+          </p>
+
+          {/* Action CTAs */}
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link
+              href="/diary"
+              className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-black text-sm tracking-wide transition-all shadow-md active:scale-98"
+            >
+              Mở nhật ký hôm nay
+            </Link>
+            <Link
+              href="/micros"
+              className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-neutral-900 hover:bg-neutral-800 text-neutral-200 font-black text-sm tracking-wide transition-all border border-neutral-800"
+            >
+              Xem bảng 21+ vi chất
+            </Link>
           </div>
         </div>
 
-        <div className="neo-card p-5 sm:p-6 flex flex-col justify-between">
-          <div>
-            <div className="w-10 h-10 rounded-[4px] bg-[#3B82F6] text-black border-2 border-black font-black text-base flex items-center justify-center shadow-[2px_2px_0px_0px_#000] mb-4">
-              <FlameIcon className="w-5 h-5 text-black" />
+        {/* Feature Preview Preview Card */}
+        <div className="mt-10 p-5 bg-neutral-950 rounded-2xl border border-neutral-800 max-w-2xl mx-auto grid grid-cols-1 sm:grid-cols-12 gap-6 items-center">
+          <div className="sm:col-span-5 flex justify-center">
+            <CalorieDial current={1041} target={2000} />
+          </div>
+          <div className="sm:col-span-7 space-y-2.5">
+            <div>
+              <div className="flex justify-between text-xs font-bold text-neutral-300 mb-1">
+                <span>Đạm</span>
+                <span className="font-mono">62 / 104 g</span>
+              </div>
+              <SegmentedBar totalSegments={8} filledSegments={5} color="gold" />
             </div>
-            <h3 className="text-base sm:text-lg font-black uppercase text-[#F8FAFC]">Optimistic State Updates</h3>
-            <p className="text-xs sm:text-sm text-[#94A3B8] mt-2 font-medium">
-              Generates client UUIDs for idempotent writes and updates interface state before server confirmation.
-            </p>
-          </div>
-          <div className="mt-4 pt-3 border-t-2 border-black text-[10px] font-black uppercase text-[#3B82F6] font-mono">
-            Idempotent Processing
-          </div>
-        </div>
-
-        <div className="neo-card p-5 sm:p-6 flex flex-col justify-between">
-          <div>
-            <div className="w-10 h-10 rounded-[4px] bg-[#F59E0B] text-black border-2 border-black font-black text-base flex items-center justify-center shadow-[2px_2px_0px_0px_#000] mb-4">
-              <UtensilsIcon className="w-5 h-5 text-black" />
+            <div>
+              <div className="flex justify-between text-xs font-bold text-neutral-300 mb-1">
+                <span>Tinh bột</span>
+                <span className="font-mono">133 / 254 g</span>
+              </div>
+              <SegmentedBar totalSegments={8} filledSegments={4} color="gold" />
             </div>
-            <h3 className="text-base sm:text-lg font-black uppercase text-[#F8FAFC]">Service Integrations</h3>
-            <p className="text-xs sm:text-sm text-[#94A3B8] mt-2 font-medium">
-              Connects to Fortify Kitchen Core API menu items, PayOS VietQR payment webhooks, and coach draft repositories.
-            </p>
-          </div>
-          <div className="mt-4 pt-3 border-t-2 border-black text-[10px] font-black uppercase text-[#F59E0B] font-mono">
-            API & Webhooks
+            <div>
+              <div className="flex justify-between text-xs font-bold text-neutral-300 mb-1">
+                <span>Chất xơ</span>
+                <span className="font-mono">14 / 30 g</span>
+              </div>
+              <SegmentedBar totalSegments={8} filledSegments={4} color="coral" />
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Overview Cards */}
+      <div className="max-w-4xl mx-auto px-4 md:px-0 mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white rounded-2xl p-5 border border-neutral-100 shadow-xs">
+          <div className="text-2xl font-black italic text-[#2563EB] font-mono mb-2">
+            26
+          </div>
+          <h3 className="font-black text-base text-neutral-900">Vi chất & Khoáng</h3>
+          <p className="text-xs text-neutral-500 mt-1">
+            Theo dõi chi tiết canxi, kali, natri, magie, vitamin D và toàn bộ nhóm B theo nhu cầu cá nhân.
+          </p>
+        </div>
+
+        <div className="bg-white rounded-2xl p-5 border border-neutral-100 shadow-xs">
+          <div className="text-2xl font-black italic text-[#EAB308] font-mono mb-2">
+            60&apos;
+          </div>
+          <h3 className="font-black text-base text-neutral-900">Chiến lược tập luyện</h3>
+          <p className="text-xs text-neutral-500 mt-1">
+            Gợi ý bù muối, điện giải và carb hấp thu nhanh chuẩn xác theo từng mốc 20 phút tập luyện.
+          </p>
+        </div>
+
+        <div className="bg-white rounded-2xl p-5 border border-neutral-100 shadow-xs">
+          <div className="text-2xl font-black italic text-[#10B981] font-mono mb-2">
+            0s
+          </div>
+          <h3 className="font-black text-base text-neutral-900">Cập nhật tức thì</h3>
+          <p className="text-xs text-neutral-500 mt-1">
+            Giao diện phản hồi ngay lập tức với mã định danh idempotent trên mọi thiết bị.
+          </p>
+        </div>
+      </div>
+
+      <BottomDock />
     </div>
   );
 }
