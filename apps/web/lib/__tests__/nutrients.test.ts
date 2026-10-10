@@ -73,4 +73,33 @@ describe("Nutrient Catalogue & Null Handling", () => {
     expect(PROVISIONAL_TARGETS.copper).toBe(true);
     expect(PROVISIONAL_TARGETS.manganese).toBe(true);
   });
+
+  it("percentage calculation uses lower bound for range targets and handles single target values", () => {
+    // For range targets (e.g. sodium 2.751–4.127 mg), lower bound is 2.751 mg
+    // 2900 mg / 2751 mg = 105%
+    const sodiumPct = calculateNutrientPercentage(2900, 2751);
+    expect(sodiumPct).toBe(105);
+
+    // Potassium: 3900 / 5200 = 75%
+    const potassiumPct = calculateNutrientPercentage(3900, 5200);
+    expect(potassiumPct).toBe(75);
+
+    // Tracked-only rows with targetMin null have no percentage
+    expect(calculateNutrientPercentage(100, null)).toBeNull();
+  });
+
+  it("vi chat đạt count only counts vitamins + minerals with a target", () => {
+    // There are 22 total vitamins + minerals with a target (12 vitamins + 10 minerals)
+    const vitaminsAndMineralsWithTarget = NUTRIENT_CATALOG.filter(
+      (n) => (n.group === "vitamins" || n.group === "minerals") && n.targetSource !== "none"
+    );
+    expect(vitaminsAndMineralsWithTarget.length).toBe(22);
+
+    // General, carbs, lipids, protein (macros) are NOT in the 22 count
+    const macroTargets = NUTRIENT_CATALOG.filter(
+      (n) => (n.group !== "vitamins" && n.group !== "minerals") && n.targetSource !== "none"
+    );
+    expect(macroTargets.length).toBe(5); // energy, carbs, fiber, fat, protein
+  });
 });
+

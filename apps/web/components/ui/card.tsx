@@ -7,7 +7,7 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 
 /**
  * H1T MICRO Card (Cobalt Sign).
- * White surface with 1px #E0DACF border on paper background.
+ * White surface with 1px border-card-border on paper background.
  */
 export function Card({
   as: Component = "div",
