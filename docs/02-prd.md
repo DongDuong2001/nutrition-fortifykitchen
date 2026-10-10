@@ -91,3 +91,8 @@ The design now covers 36 phone screens, a mobile-browser set and 7 desktop pages
 | Fortify Kitchen menu sync | Later | Kept for later; the product works standalone, like Cronometer |
 
 The UI shows no "Coach" tags. Coach rules stay the only source of targets and suggestions.
+
+## Update 10/10/2026: features learned from Cronometer
+See `BACKLOG.md`.
+- **Release 1 adds:** water tracking; copy and multi-select of meals and days; recent and favourite foods; recipes built from ingredients; a data-source page.
+- **Release 2+:** barcode scanning (Open Food Facts); auto-repeat items and the recipe importer (Pro); AI photo logging; voice logging.
