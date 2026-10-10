@@ -107,26 +107,26 @@ export const SAMPLE_DAY: MockDayData = {
     phytate: null,
 
     // Carbohydrates
-    carbs: 135,
-    net_carbs: 121,
+    carbs: 133,
+    net_carbs: 119,
     fiber: 14,
     insoluble_fiber: 8.5,
     soluble_fiber: 5.5,
     starch: 78,
-    sugars: 44,
+    sugars: 41,
     added_sugars: 0,
 
     // Lipids
-    fat: 28,
-    monounsaturated_fat: 11.2,
+    fat: 21,
+    monounsaturated_fat: 8.1,
     polyunsaturated_fat: 3.4,
     omega3: 0.55,
     ala: 0.45,
     dha: 0.05,
     epa: 0.05,
     omega6: 2.85,
-    saturated_fat: 11.4,
-    trans_fat: 0.4,
+    saturated_fat: 7.2,
+    trans_fat: 0.3,
     cholesterol: 115,
 
     // Protein & Amino Acids

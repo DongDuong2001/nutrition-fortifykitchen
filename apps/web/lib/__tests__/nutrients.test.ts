@@ -7,6 +7,7 @@ import {
   getNutrientDefinition,
 } from "../nutrients";
 import { PROVISIONAL_TARGETS, VN2016_TARGETS } from "../targets";
+import { SAMPLE_DAY } from "../mock/sample-day";
 
 describe("Nutrient Catalogue & Null Handling", () => {
   it("contains complete catalogue matching docs/nutrient-catalog.md", () => {
@@ -100,6 +101,34 @@ describe("Nutrient Catalogue & Null Handling", () => {
       (n) => (n.group !== "vitamins" && n.group !== "minerals") && n.targetSource !== "none"
     );
     expect(macroTargets.length).toBe(5); // energy, carbs, fiber, fat, protein
+  });
+
+  it("checks SAMPLE_DAY nutrient totals consistency and breakdown invariants", () => {
+    const n = SAMPLE_DAY.nutrients;
+    expect(n).toBeDefined();
+    if (!n) return;
+
+    // 1. monounsaturated + polyunsaturated + saturated + trans <= total fat
+    const fatBreakdown =
+      (n.monounsaturated_fat ?? 0) +
+      (n.polyunsaturated_fat ?? 0) +
+      (n.saturated_fat ?? 0) +
+      (n.trans_fat ?? 0);
+    expect(Number(fatBreakdown.toFixed(2))).toBeLessThanOrEqual(n.fat ?? 0);
+
+    // 2. omega-3 + omega-6 <= polyunsaturated
+    const pufaBreakdown = (n.omega3 ?? 0) + (n.omega6 ?? 0);
+    expect(Number(pufaBreakdown.toFixed(2))).toBeLessThanOrEqual(n.polyunsaturated_fat ?? 0);
+
+    // 3. ALA + DHA + EPA <= omega-3
+    const omega3Breakdown = (n.ala ?? 0) + (n.dha ?? 0) + (n.epa ?? 0);
+    expect(Number(omega3Breakdown.toFixed(2))).toBeLessThanOrEqual(n.omega3 ?? 0);
+
+    // 4. soluble + insoluble fibre = fibre
+    expect((n.soluble_fiber ?? 0) + (n.insoluble_fiber ?? 0)).toBe(n.fiber);
+
+    // 5. net carbs = carbs - fibre
+    expect(n.net_carbs).toBe((n.carbs ?? 0) - (n.fiber ?? 0));
   });
 });
 

@@ -740,7 +740,7 @@ function GroupCard({
   return (
     <section
       id={`${idPrefix}${group.key}`}
-      className="bg-card border border-card-border rounded-[18px] overflow-hidden flex flex-col scroll-mt-[calc(var(--chipbar-h,52px)+8px)] lg:scroll-mt-6 break-inside-avoid"
+      className="bg-card border border-card-border rounded-[18px] overflow-clip flex flex-col scroll-mt-[calc(var(--chipbar-h,52px)+8px)] lg:scroll-mt-6 break-inside-avoid"
     >
       {/* Sticky group header: offset by --chipbar-h on mobile, top-0 on desktop */}
       <div className="sticky top-[var(--chipbar-h,52px)] lg:top-0 z-10 bg-card border-b border-card-border">
