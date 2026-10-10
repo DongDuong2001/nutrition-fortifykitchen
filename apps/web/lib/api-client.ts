@@ -6,8 +6,12 @@ import {
   type MockMacroStat,
   type MockMicroStat,
 } from "./mock/sample-day";
+import { calculateTargets } from "./targets";
+import { MOCK_FOODS, type FoodItem } from "./mock/foods";
+import { searchFoods as searchMockFoods } from "./search";
 
 export * from "./nutrients";
+export * from "./mock/foods";
 export type { MockDayData, MockMeal, MockMacroStat, MockMicroStat };
 
 export interface NutrientValues {
@@ -136,6 +140,13 @@ export const apiClient = {
     }
 
     // Convert SAMPLE_DAY to DailyProgress fallback
+    const targets = calculateTargets({
+      weightKg: 65,
+      goal: "maintain",
+      trainingMinutes: 60,
+      sex: "male",
+    });
+
     const mockProgress: DailyProgress = {
       log_date: date || SAMPLE_DAY.date,
       total_nutrients: {
@@ -152,17 +163,17 @@ export const apiClient = {
         zinc: 12.4,
       },
       target_nutrients: {
-        calories: SAMPLE_DAY.calories.targetMin,
-        protein: 104,
-        carbohydrates: 254,
-        fat: 33,
-        fiber: 30,
-        sodium: 2751,
-        potassium: 5200,
-        calcium: 1200,
-        magnesium: 600,
-        iron: 8,
-        zinc: 12,
+        calories: targets.calories.min,
+        protein: targets.protein.min,
+        carbohydrates: targets.carbs.min,
+        fat: targets.fat.min,
+        fiber: targets.fiber.min,
+        sodium: targets.sodium.min,
+        potassium: targets.potassium.min,
+        calcium: targets.calcium.min,
+        magnesium: targets.magnesium.min,
+        iron: targets.iron.min,
+        zinc: targets.zinc.min,
       },
       completion_percentages: {
         calories: SAMPLE_DAY.calories.percentage,
@@ -216,106 +227,115 @@ export const apiClient = {
     return { log: dummyLog, today_progress: progress };
   },
 
-  async searchFoods(query = ""): Promise<Food[]> {
+  async searchFoods(query = ""): Promise<FoodItem[]> {
     try {
       const headers = await getAuthHeaders();
       const res = await fetch(`${API_BASE_URL}/foods?q=${encodeURIComponent(query)}`, { headers });
       if (res.ok) {
         const json = await res.json();
-        return json.data || [];
+        if (json.data && Array.isArray(json.data) && json.data.length > 0) {
+          return json.data;
+        }
       }
     } catch {
       // Fallback
     }
 
-    // Default mock foods from sample day
-    const mockFoods: Food[] = [
-      {
-        id: "food-1",
-        name: "Yến mạch",
-        serving_size_g: 60,
-        is_custom: false,
-        created_at: "2026-10-10",
-        per_100g_nutrients: { calories: 380, protein: 13, carbohydrates: 68, fat: 7, fiber: 10, sodium: 5 },
-      },
-      {
-        id: "food-2",
-        name: "Yogurt kefir",
-        serving_size_g: 200,
-        is_custom: false,
-        created_at: "2026-10-10",
-        per_100g_nutrients: { calories: 63, protein: 3.5, carbohydrates: 4.8, fat: 3.2, fiber: 0, sodium: 40 },
-      },
-      {
-        id: "food-3",
-        name: "Chuối",
-        serving_size_g: 120,
-        is_custom: false,
-        created_at: "2026-10-10",
-        per_100g_nutrients: { calories: 88, protein: 1.1, carbohydrates: 23, fat: 0.3, fiber: 2.6, sodium: 1 },
-      },
-      {
-        id: "food-4",
-        name: "Cơm gạo lứt",
-        serving_size_g: 150,
-        is_custom: false,
-        created_at: "2026-10-10",
-        per_100g_nutrients: { calories: 112, protein: 2.6, carbohydrates: 24, fat: 0.9, fiber: 1.8, sodium: 2 },
-      },
-      {
-        id: "food-5",
-        name: "Thịt bò nạc",
-        serving_size_g: 150,
-        is_custom: false,
-        created_at: "2026-10-10",
-        per_100g_nutrients: { calories: 213, protein: 26, carbohydrates: 0, fat: 12, fiber: 0, sodium: 70 },
-      },
-      {
-        id: "food-6",
-        name: "Chà là",
-        serving_size_g: 30,
-        is_custom: false,
-        created_at: "2026-10-10",
-        per_100g_nutrients: { calories: 280, protein: 2.5, carbohydrates: 75, fat: 0.4, fiber: 8, sodium: 2 },
-      },
-      {
-        id: "food-7",
-        name: "Bột củ dền",
-        serving_size_g: 3,
-        is_custom: false,
-        created_at: "2026-10-10",
-        per_100g_nutrients: { calories: 333, protein: 12, carbohydrates: 65, fat: 1, fiber: 20, sodium: 250 },
-      },
-    ];
-
-    if (!query) return mockFoods;
-    const q = query.toLowerCase();
-    return mockFoods.filter((f) => f.name.toLowerCase().includes(q));
+    return searchMockFoods(MOCK_FOODS, query);
   },
 
-  async createCustomFood(food: Partial<Food>): Promise<Food> {
+  async getFood(id: string): Promise<FoodItem | null> {
     try {
       const headers = await getAuthHeaders();
-      const res = await fetch(`${API_BASE_URL}/foods/custom`, {
+      const res = await fetch(`${API_BASE_URL}/foods/${encodeURIComponent(id)}`, { headers });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.data) return json.data;
+      }
+    } catch {
+      // Fallback
+    }
+
+    return MOCK_FOODS.find((f) => f.id === id) || null;
+  },
+
+  async createFood(input: {
+    nameVi: string;
+    servingUnit: string;
+    servingSize: number;
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+    micros?: {
+      sodium?: number;
+      calcium?: number;
+      iron?: number;
+      potassium?: number;
+      vitamin_d?: number;
+    };
+  }): Promise<FoodItem> {
+    try {
+      const headers = await getAuthHeaders();
+      const res = await fetch(`${API_BASE_URL}/foods`, {
         method: "POST",
         headers,
-        body: JSON.stringify(food),
+        body: JSON.stringify(input),
       });
       if (res.ok) {
         const json = await res.json();
-        return json.data;
+        if (json.data) return json.data;
       }
     } catch {
       // Fallback
     }
 
-    return {
+    const factor = input.servingSize > 0 ? 100 / input.servingSize : 1;
+    const newFood: FoodItem = {
       id: `custom-${Date.now()}`,
-      name: food.name || "Món tuỳ chỉnh",
-      serving_size_g: food.serving_size_g || 100,
-      per_100g_nutrients: food.per_100g_nutrients || { calories: 0, protein: 0, carbohydrates: 0, fat: 0, fiber: 0, sodium: 0 },
-      is_custom: true,
-      created_at: new Date().toISOString(),
+      nameVi: input.nameVi,
+      source: "user",
+      servings: [
+        { label: `${input.servingSize} ${input.servingUnit}`, grams: input.servingSize },
+        { label: "100 g", grams: 100 },
+      ],
+      nutrients: {
+        energy: Math.round(input.calories * factor),
+        protein: Math.round(input.protein * factor * 10) / 10,
+        carbs: Math.round(input.carbs * factor * 10) / 10,
+        fat: Math.round(input.fat * factor * 10) / 10,
+        sodium: input.micros?.sodium ? Math.round(input.micros.sodium * factor) : null,
+        calcium: input.micros?.calcium ? Math.round(input.micros.calcium * factor) : null,
+        iron: input.micros?.iron ? Math.round(input.micros.iron * factor * 10) / 10 : null,
+        potassium: input.micros?.potassium ? Math.round(input.micros.potassium * factor) : null,
+        vitamin_d: input.micros?.vitamin_d ? Math.round(input.micros.vitamin_d * factor * 10) / 10 : null,
+      },
     };
+    MOCK_FOODS.unshift(newFood);
+    return newFood;
+  },
+
+  async addEntry(payload: {
+    foodId: string;
+    grams: number;
+    mealSlot: string;
+    date?: string;
+  }): Promise<{ success: boolean; id: string }> {
+    try {
+      const headers = await getAuthHeaders();
+      const res = await fetch(`${API_BASE_URL}/diary/entries`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        const json = await res.json();
+        return json.data || { success: true, id: `entry-${Date.now()}` };
+      }
+    } catch {
+      // Fallback
+    }
+    return { success: true, id: `entry-${Date.now()}` };
   },
 };
+

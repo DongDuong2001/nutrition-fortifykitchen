@@ -1,0 +1,52 @@
+import { describe, it, expect } from "vitest";
+import { getDefaultMealSlot, getMealSlotNameVi, type MealSlot } from "../meal-slot";
+
+describe("lib/meal-slot", () => {
+  it("05:00–09:59 returns breakfast (Bữa sáng)", () => {
+    const d1 = new Date("2026-10-10T05:00:00");
+    const d2 = new Date("2026-10-10T09:59:59");
+    expect(getDefaultMealSlot(d1, true)).toBe("breakfast");
+    expect(getDefaultMealSlot(d2, true)).toBe("breakfast");
+    expect(getMealSlotNameVi("breakfast")).toBe("Bữa sáng");
+  });
+
+  it("10:00–13:59 returns lunch (Bữa trưa)", () => {
+    const d1 = new Date("2026-10-10T10:00:00");
+    const d2 = new Date("2026-10-10T12:30:00");
+    const d3 = new Date("2026-10-10T13:59:00");
+    expect(getDefaultMealSlot(d1, true)).toBe("lunch");
+    expect(getDefaultMealSlot(d2, false)).toBe("lunch");
+    expect(getDefaultMealSlot(d3, true)).toBe("lunch");
+    expect(getMealSlotNameVi("lunch")).toBe("Bữa trưa");
+  });
+
+  it("14:00–16:59 returns pre_workout on training day, otherwise snack", () => {
+    const at1405 = new Date("2026-10-10T14:05:00");
+    expect(getDefaultMealSlot(at1405, true)).toBe("pre_workout");
+    expect(getMealSlotNameVi("pre_workout")).toBe("Trước tập");
+
+    expect(getDefaultMealSlot(at1405, false)).toBe("snack");
+    expect(getMealSlotNameVi("snack")).toBe("Bữa phụ");
+
+    const at1630 = new Date("2026-10-10T16:30:00");
+    expect(getDefaultMealSlot(at1630, true)).toBe("pre_workout");
+    expect(getDefaultMealSlot(at1630, false)).toBe("snack");
+  });
+
+  it("17:00–20:59 returns dinner (Bữa tối)", () => {
+    const at1700 = new Date("2026-10-10T17:00:00");
+    const at1930 = new Date("2026-10-10T19:30:00");
+    const at2059 = new Date("2026-10-10T20:59:59");
+    expect(getDefaultMealSlot(at1700, true)).toBe("dinner");
+    expect(getDefaultMealSlot(at1930, false)).toBe("dinner");
+    expect(getDefaultMealSlot(at2059, true)).toBe("dinner");
+    expect(getMealSlotNameVi("dinner")).toBe("Bữa tối");
+  });
+
+  it("otherwise (e.g. 21:00 or 02:00) returns snack (Bữa phụ)", () => {
+    const at2130 = new Date("2026-10-10T21:30:00");
+    const at0200 = new Date("2026-10-10T02:00:00");
+    expect(getDefaultMealSlot(at2130, true)).toBe("snack");
+    expect(getDefaultMealSlot(at0200, false)).toBe("snack");
+  });
+});

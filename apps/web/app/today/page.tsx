@@ -10,7 +10,8 @@ import { Sheet } from "@/components/ui/sheet";
 import { PillButton } from "@/components/ui/pill-button";
 import { apiClient } from "@/lib/api-client";
 import { formatNumber } from "@/lib/format";
-import type { MockDayData } from "@/lib/mock/sample-day";
+import { SAMPLE_DAY, type MockDayData } from "@/lib/mock/sample-day";
+import { useDiary } from "@/lib/diary-store";
 
 function subscribeOnline(callback: () => void) {
   window.addEventListener("online", callback);
@@ -43,6 +44,8 @@ function TodayContent() {
   const forceLoading = searchParams?.get("loading") === "1";
   const forceOffline = searchParams?.get("offline") === "1";
 
+  const { data: diaryData, toast, highlightedMeal, setHighlightedMeal } = useDiary();
+
   const [data, setData] = useState<MockDayData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isCopySheetOpen, setIsCopySheetOpen] = useState(false);
@@ -61,9 +64,10 @@ function TodayContent() {
     };
   }, []);
 
-  const showLoading = forceLoading || (isLoading && !data);
+  const showLoading = forceLoading || (isLoading && !diaryData && !data);
   const showOfflineBanner = forceOffline || !isOnline;
-  const isEmpty = forceEmpty || (!showLoading && data && data.meals.every((m) => m.items.length === 0));
+  const currentData = diaryData || data || SAMPLE_DAY;
+  const isEmpty = forceEmpty || (!showLoading && currentData.meals.every((m) => m.items.length === 0));
 
   // --- 1. SKELETON LOADING STATE (TodayStates.dc.html) ---
   if (showLoading) {
@@ -132,7 +136,6 @@ function TodayContent() {
     );
   }
 
-  const currentData = data!;
   const { calories, macros, meals, microsSummary, minerals, vitamins } = currentData;
 
   // --- 2. EMPTY STATE (EmptyToday.dc.html) ---
@@ -360,14 +363,26 @@ function TodayContent() {
           {/* All 5 Meal Slots */}
           {meals.map((meal) => {
             const hasItems = meal.items.length > 0;
+            const isHighlighted = highlightedMeal === meal.slot;
             if (hasItems) {
               return (
                 <section
                   key={meal.id}
-                  className="bg-card border border-card-border rounded-[18px] px-4 pt-2.5 pb-1.5 flex flex-col"
+                  id={`meal-${meal.slot}`}
+                  className={`bg-card border border-card-border rounded-[18px] px-4 pt-2.5 pb-1.5 flex flex-col transition-all duration-300 ${
+                    isHighlighted ? "ring-2 ring-blue/80 shadow-md" : ""
+                  }`}
                 >
                   <div className="flex items-baseline justify-between pb-0.5">
-                    <h2 className="m-0 text-base font-bold text-text">{meal.name}</h2>
+                    <div className="flex items-center gap-2">
+                      <h2 className="m-0 text-base font-bold text-text">{meal.name}</h2>
+                      <Link
+                        href={`/add?meal=${meal.slot}`}
+                        className="text-xs font-semibold text-blue hover:underline min-h-[44px] flex items-center"
+                      >
+                        + Thêm
+                      </Link>
+                    </div>
                     <div className="text-[15px] font-bold tabular-nums text-text">
                       {formatNumber(meal.kcal)} kcal
                     </div>
@@ -394,8 +409,11 @@ function TodayContent() {
             return (
               <Link
                 key={meal.id}
+                id={`meal-${meal.slot}`}
                 href={`/add?meal=${meal.slot}`}
-                className="no-underline bg-card border border-card-border rounded-[18px] px-4 min-h-[52px] flex items-center justify-between text-[15px] active:scale-[0.97] transition-transform"
+                className={`no-underline bg-card border border-card-border rounded-[18px] px-4 min-h-[52px] flex items-center justify-between text-[15px] active:scale-[0.97] transition-all duration-300 ${
+                  isHighlighted ? "ring-2 ring-blue/80 shadow-md" : ""
+                }`}
               >
                 <span className="font-bold text-text">{meal.name}</span>
                 <span className="font-semibold text-blue">+ Thêm món</span>
@@ -589,38 +607,55 @@ function TodayContent() {
                 <h2 className="m-0 text-lg font-bold text-text">Bữa ăn</h2>
                 <span className="text-[13px] text-secondary">Chọn món để sửa hoặc xoá</span>
               </div>
-              {meals.map((meal) => (
-                <div key={meal.id} className="border-t border-divider py-2">
-                  <div className="flex justify-between items-baseline">
-                    <h3 className="m-0 text-[15px] font-bold text-text">{meal.name}</h3>
-                    <span className="text-sm font-bold tabular-nums text-text">
-                      {meal.kcal > 0 ? `${formatNumber(meal.kcal)} kcal` : "0 kcal"}
-                    </span>
+              {meals.map((meal) => {
+                const isHighlighted = highlightedMeal === meal.slot;
+                return (
+                  <div
+                    key={meal.id}
+                    id={`desktop-meal-${meal.slot}`}
+                    className={`border-t border-divider py-2 transition-all duration-300 rounded-lg px-2 -mx-2 ${
+                      isHighlighted ? "bg-blue/10 ring-2 ring-blue/80" : ""
+                    }`}
+                  >
+                    <div className="flex justify-between items-baseline">
+                      <div className="flex items-center gap-2">
+                        <h3 className="m-0 text-[15px] font-bold text-text">{meal.name}</h3>
+                        <Link
+                          href={`/add?meal=${meal.slot}`}
+                          className="text-xs font-semibold text-blue no-underline hover:underline min-h-[44px] inline-flex items-center"
+                        >
+                          + Thêm
+                        </Link>
+                      </div>
+                      <span className="text-sm font-bold tabular-nums text-text">
+                        {meal.kcal > 0 ? `${formatNumber(meal.kcal)} kcal` : "0 kcal"}
+                      </span>
+                    </div>
+                    {meal.items.map((it) => (
+                      <Link
+                        key={it.id}
+                        href={`/entry/${it.id}`}
+                        className="no-underline flex justify-between items-center min-h-[44px] px-2 -mx-2 rounded-lg text-sm hover:bg-page transition-colors"
+                      >
+                        <span className="truncate text-text font-normal">
+                          {it.name} <span className="text-secondary">· {it.qty}</span>
+                        </span>
+                        <span className="text-secondary tabular-nums shrink-0">
+                          {formatNumber(it.kcal)}
+                        </span>
+                      </Link>
+                    ))}
+                    {meal.items.length === 0 && (
+                      <Link
+                        href={`/add?meal=${meal.slot}`}
+                        className="inline-flex items-center min-h-[44px] text-sm font-semibold text-blue no-underline"
+                      >
+                        + Thêm món
+                      </Link>
+                    )}
                   </div>
-                  {meal.items.map((it) => (
-                    <Link
-                      key={it.id}
-                      href={`/entry/${it.id}`}
-                      className="no-underline flex justify-between items-center min-h-[44px] px-2 -mx-2 rounded-lg text-sm hover:bg-page transition-colors"
-                    >
-                      <span className="truncate text-text font-normal">
-                        {it.name} <span className="text-secondary">· {it.qty}</span>
-                      </span>
-                      <span className="text-secondary tabular-nums shrink-0">
-                        {formatNumber(it.kcal)}
-                      </span>
-                    </Link>
-                  ))}
-                  {meal.items.length === 0 && (
-                    <Link
-                      href={`/add?meal=${meal.slot}`}
-                      className="inline-flex items-center min-h-[44px] text-sm font-semibold text-blue no-underline"
-                    >
-                      + Thêm món
-                    </Link>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Column 2: Vi chất */}
@@ -715,6 +750,32 @@ function TodayContent() {
           </PillButton>
         </div>
       </Sheet>
+
+      {/* Floating Toast Notification (Responsive for Mobile and Desktop) */}
+      {toast && (
+        <div
+          role="status"
+          className="fixed bottom-20 lg:bottom-8 left-4 right-4 lg:left-auto lg:right-8 lg:w-[400px] max-w-[528px] mx-auto z-50 bg-ink text-white rounded-2xl p-2.5 pl-4 flex items-center justify-between gap-3 shadow-2xl border border-card-border/20"
+        >
+          <span className="text-sm font-medium truncate">{toast.message}</span>
+          <button
+            type="button"
+            onClick={() => {
+              setHighlightedMeal(toast.mealSlot);
+              const el =
+                document.getElementById(`meal-${toast.mealSlot}`) ||
+                document.getElementById(`desktop-meal-${toast.mealSlot}`);
+              if (el) {
+                el.scrollIntoView({ behavior: "smooth", block: "center" });
+              }
+              setTimeout(() => setHighlightedMeal(null), 2500);
+            }}
+            className="shrink-0 min-h-[44px] px-3.5 rounded-xl text-sky font-bold text-sm bg-transparent border-0 cursor-pointer hover:bg-surface-dark active:scale-[0.97]"
+          >
+            Xem
+          </button>
+        </div>
+      )}
     </div>
   );
 }

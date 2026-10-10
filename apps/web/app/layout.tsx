@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Manrope, Saira_Condensed } from "next/font/google";
 import "./globals.css";
+import { DiaryProviderWrapper } from "@/components/diary-provider-wrapper";
 
 const manrope = Manrope({
   subsets: ["vietnamese", "latin"],
@@ -29,7 +30,7 @@ export default function RootLayout({
   return (
     <html lang="vi" className={`${manrope.variable} ${sairaCondensed.variable}`}>
       <body className="bg-page text-text antialiased min-h-screen flex flex-col font-sans">
-        {children}
+        <DiaryProviderWrapper>{children}</DiaryProviderWrapper>
       </body>
     </html>
   );

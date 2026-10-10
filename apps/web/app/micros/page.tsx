@@ -15,6 +15,7 @@ import {
 } from "@/lib/nutrients";
 import { formatNumber } from "@/lib/format";
 import type { MockDayData } from "@/lib/mock/sample-day";
+import { useDiary } from "@/lib/diary-store";
 
 interface GroupConfig {
   key: NutrientGroup;
@@ -161,6 +162,7 @@ export default function MicrosPage() {
 }
 
 function MicrosContent() {
+  const { data: diaryData } = useDiary();
   const [data, setData] = useState<MockDayData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeGroup, setActiveGroup] = useState<NutrientGroup>("vitamins");
@@ -193,6 +195,8 @@ function MicrosContent() {
     };
   }, []);
 
+  const currentData = diaryData || data;
+
   // Measure chip bar height for --chipbar-h CSS variable
   useEffect(() => {
     if (chipBarRef.current) {
@@ -216,7 +220,7 @@ function MicrosContent() {
 
   // Scroll-spy using IntersectionObserver on the group cards
   useEffect(() => {
-    if (isLoading || !data) return;
+    if (isLoading || !currentData) return;
 
     const groupKeys: NutrientGroup[] = ["vitamins", "minerals", "protein", "lipids", "carbs", "general"];
     const elements = groupKeys
@@ -256,7 +260,7 @@ function MicrosContent() {
     return () => {
       observer.disconnect();
     };
-  }, [isLoading, data, chipBarHeight]);
+  }, [isLoading, currentData, chipBarHeight]);
 
   const toggleGroup = (group: NutrientGroup) => {
     setOpenGroups((prev) => ({
@@ -285,11 +289,11 @@ function MicrosContent() {
     }
   };
 
-  const rowsByGroup = useMemo(() => buildNutrientRows(data), [data]);
+  const rowsByGroup = useMemo(() => buildNutrientRows(currentData), [currentData]);
 
   // Summary counts: 8/22 vi chất đạt (strictly vitamins + minerals with a target)
   const achievedMicrosCount = useMemo(() => {
-    if (!data) return { achieved: 0, total: 22 };
+    if (!currentData) return { achieved: 0, total: 22 };
     const allMicros = [...rowsByGroup.vitamins, ...rowsByGroup.minerals];
     const withTarget = allMicros.filter((m) => m.targetSource !== "none" && m.targetMin !== null);
     const achieved = withTarget.filter((m) => (m.percentage ?? 0) >= 100).length;
@@ -297,7 +301,7 @@ function MicrosContent() {
       achieved,
       total: withTarget.length,
     };
-  }, [data, rowsByGroup]);
+  }, [currentData, rowsByGroup]);
 
   // Group chip counts (e.g. Vitamin · 3/12, Khoáng chất · 5/10)
   const chipLabels = useMemo(() => {
@@ -317,10 +321,10 @@ function MicrosContent() {
     };
   }, [rowsByGroup]);
 
-  const isEmpty = !isLoading && data && data.meals.every((m) => m.items.length === 0);
+  const isEmpty = !isLoading && currentData && currentData.meals.every((m) => m.items.length === 0);
 
   // 1. SKELETON LOADING STATE
-  if (isLoading && !data) {
+  if (isLoading && !currentData) {
     return (
       <div className="w-full min-h-screen bg-page text-text font-sans flex flex-col pb-[88px] lg:pb-0">
         <h1 className="sr-only">Vi chất — Đang tải</h1>
@@ -367,7 +371,7 @@ function MicrosContent() {
             <div className="flex items-center justify-between min-h-[44px]">
               <div className="w-11 h-11" />
               <div className="text-[15px] font-semibold text-white">
-                {data?.dateLabel || "Hôm nay, 10/10"}
+                {currentData?.dateLabel || "Hôm nay, 10/10"}
               </div>
               <div className="w-11 h-11" />
             </div>
@@ -437,7 +441,7 @@ function MicrosContent() {
                 </svg>
               </button>
               <div className="text-[15px] font-semibold text-white tracking-tight">
-                {data?.dateLabel}
+                {currentData?.dateLabel}
               </div>
               <button
                 type="button"
@@ -457,7 +461,7 @@ function MicrosContent() {
                   VI CHẤT
                 </h1>
                 <div className="text-[13px] text-muted-subtitle mt-1">
-                  Thiếu nhiều nhất: {data?.microsSummary.mostLacking.join(", ")}
+                  Thiếu nhiều nhất: {currentData?.microsSummary.mostLacking.join(", ")}
                 </div>
               </div>
 
@@ -601,7 +605,7 @@ function MicrosContent() {
                 VI CHẤT
               </h1>
               <div className="text-sm text-secondary">
-                {data?.desktopDateLabel || "Thứ Bảy, 10/10/2026 · Giữ cân · 65 kg"} · Thiếu nhiều nhất: {data?.microsSummary.mostLacking.join(", ")}
+                {currentData?.desktopDateLabel || "Thứ Bảy, 10/10/2026 · Giữ cân · 65 kg"} · Thiếu nhiều nhất: {currentData?.microsSummary.mostLacking.join(", ")}
               </div>
             </div>
 
