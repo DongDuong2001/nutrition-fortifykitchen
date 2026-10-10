@@ -17,6 +17,7 @@ export default function DevUiPage() {
   const [switch2, setSwitch2] = useState(false);
   const [selectedChip, setSelectedChip] = useState("all");
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [sheetInput, setSheetInput] = useState("");
 
   return (
     <div className="w-full max-w-[390px] min-h-[844px] mx-auto bg-page text-text flex flex-col relative font-sans pb-24">
@@ -202,7 +203,17 @@ export default function DevUiPage() {
             title="Chép bữa hôm qua?"
             description="Thứ Sáu 09/10 · 1.980 kcal"
           >
-            <div className="flex flex-col gap-2 py-2">
+            <div className="flex flex-col gap-3 py-2">
+              <label className="text-xs font-semibold text-text flex flex-col gap-1">
+                Kiểm tra gõ phím không mất focus:
+                <input
+                  type="text"
+                  value={sheetInput}
+                  onChange={(e) => setSheetInput(e.target.value)}
+                  placeholder="Gõ thử vào đây..."
+                  className="h-10 px-3 rounded-lg border border-divider bg-page text-sm outline-none focus-visible:outline-2 focus-visible:outline-blue"
+                />
+              </label>
               <div className="text-sm text-secondary">
                 Món đã có hôm nay sẽ không bị ghi đè.
               </div>
