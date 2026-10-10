@@ -93,3 +93,17 @@ Always use **port 3100** for this app. Never pick a new port.
 3. Never start servers on 3000–3099 or other ports, and don't ask the user to open a new one.
 4. When a task is done, stop any server you started, unless the user asked to keep it running.
 5. Playwright screenshots use `http://localhost:3100`.
+
+## Layout and alignment rules (hard rules, checked in review)
+1. **Spacing scale only.** Use 4 · 8 · 12 · 16 · 20 · 24 · 32 px (Tailwind 1, 2, 3, 4, 5, 6, 8). No other margins, paddings or gaps.
+2. **Shared edges.** Inside a card or panel, every row starts and ends on the same left and right edges. No row stops short, leaving a ragged right side.
+3. **Rows that sit above one another share one grid.** If a row of stats sits under a row of chips or inputs, both use the same `grid grid-cols-N` with the same gap, so item *i* is directly above item *i*. Use one text alignment per grid (all centered or all start), never a mix.
+4. **Fill or align, never float.** A row of N controls is either a full-width equal-column grid, or a start-aligned flex row with a defined gap. Never leave leftover space without a reason.
+5. **No truncating meaningful text.** Tips, food names and nutrient names wrap to a second line (`line-clamp-2` at most). Ellipsis is only for user-generated long strings, with the full text in `title`.
+6. **One control per action.** Don't add an icon button that does the same thing as a visible text link.
+7. **Use the shared primitives.** Use `ChipGroup`, `StatGroup`, `FormRow` and `Card` sections from `components/ui` instead of hand-built rows. If a primitive is missing, create it there first.
+
+### Alignment self-check (required before "done")
+- Run the Playwright alignment check, `apps/web/tests/alignment.spec.ts`. Every element with `data-align-group="<name>"` must share left and right edges within 1 px with the other members of its group. Put the attribute on the rows of every card, panel and sheet you build.
+- In PROGRESS.md, write one line per screen: "Edges: <groups checked> pass".
+- Open each screenshot at 390 and 1440 and look specifically at column alignment and right edges. Don't just confirm that the screen renders.
