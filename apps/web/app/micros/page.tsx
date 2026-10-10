@@ -19,16 +19,16 @@ import type { MockDayData } from "@/lib/mock/sample-day";
 interface GroupConfig {
   key: NutrientGroup;
   title: string;
-  defaultOpen: boolean;
 }
 
+// Exactly in required order: Vitamin, Khoáng chất, Đạm, Chất béo, Tinh bột, Tổng quan
 const GROUPS_CONFIG: GroupConfig[] = [
-  { key: "general", title: "Tổng quan", defaultOpen: false },
-  { key: "carbs", title: "Tinh bột", defaultOpen: false },
-  { key: "lipids", title: "Chất béo", defaultOpen: false },
-  { key: "protein", title: "Đạm", defaultOpen: false },
-  { key: "vitamins", title: "Vitamin", defaultOpen: true },
-  { key: "minerals", title: "Khoáng chất", defaultOpen: true },
+  { key: "vitamins", title: "Vitamin" },
+  { key: "minerals", title: "Khoáng chất" },
+  { key: "protein", title: "Đạm" },
+  { key: "lipids", title: "Chất béo" },
+  { key: "carbs", title: "Tinh bột" },
+  { key: "general", title: "Tổng quan" },
 ];
 
 export interface NutrientRowData {
@@ -54,7 +54,6 @@ function buildNutrientRows(data: MockDayData | null): Record<NutrientGroup, Nutr
 
   if (!data) return result;
 
-  // Build lookup from sample-day data
   const consumedMap: Record<string, { consumed: number | null; targetMin: number | null; targetMax?: number }> = {};
 
   // 1. General: Energy
@@ -88,7 +87,6 @@ function buildNutrientRows(data: MockDayData | null): Record<NutrientGroup, Nutr
 
   // 4. Vitamins
   data.vitamins.forEach((vit) => {
-    // Map keys like 'a', 'c', 'd', 'e', 'k', 'b9' to catalog ids if needed
     let catId = vit.key;
     if (vit.key === "a") catId = "vitamin_a";
     else if (vit.key === "c") catId = "vitamin_c";
@@ -149,13 +147,14 @@ export default function MicrosPage() {
 function MicrosContent() {
   const [data, setData] = useState<MockDayData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeGroup, setActiveGroup] = useState<NutrientGroup>("vitamins");
   const [openGroups, setOpenGroups] = useState<Record<NutrientGroup, boolean>>({
-    general: false,
-    carbs: false,
-    lipids: false,
-    protein: false,
     vitamins: true,
     minerals: true,
+    protein: true,
+    lipids: true,
+    carbs: true,
+    general: true,
   });
 
   useEffect(() => {
@@ -178,9 +177,22 @@ function MicrosContent() {
     }));
   };
 
+  const scrollToGroup = (group: NutrientGroup) => {
+    setActiveGroup(group);
+    // Ensure the group is opened when jumped to
+    setOpenGroups((prev) => ({
+      ...prev,
+      [group]: true,
+    }));
+    const el = document.getElementById(`group-${group}`);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   const rowsByGroup = useMemo(() => buildNutrientRows(data), [data]);
 
-  // Compute summary: 8/22 vi chất đạt (counts only vitamins + minerals with a target)
+  // Summary counts: 8/22 vi chất đạt (strictly vitamins + minerals with a target)
   const achievedMicrosCount = useMemo(() => {
     if (!data) return { achieved: 0, total: 22 };
     const allMicros = [...rowsByGroup.vitamins, ...rowsByGroup.minerals];
@@ -192,6 +204,24 @@ function MicrosContent() {
     };
   }, [data, rowsByGroup]);
 
+  // Group chip counts (e.g. Vitamin · 3/12, Khoáng chất · 5/10)
+  const chipLabels = useMemo(() => {
+    const vWithTarget = rowsByGroup.vitamins.filter((m) => m.targetSource !== "none" && m.targetMin !== null);
+    const vAchieved = vWithTarget.filter((m) => (m.percentage ?? 0) >= 100).length;
+
+    const mWithTarget = rowsByGroup.minerals.filter((m) => m.targetSource !== "none" && m.targetMin !== null);
+    const mAchieved = mWithTarget.filter((m) => (m.percentage ?? 0) >= 100).length;
+
+    return {
+      vitamins: `Vitamin · ${vAchieved}/${vWithTarget.length}`,
+      minerals: `Khoáng chất · ${mAchieved}/${mWithTarget.length}`,
+      protein: "Đạm",
+      lipids: "Chất béo",
+      carbs: "Tinh bột",
+      general: "Tổng quan",
+    };
+  }, [rowsByGroup]);
+
   const isEmpty = !isLoading && data && data.meals.every((m) => m.items.length === 0);
 
   // 1. SKELETON LOADING STATE
@@ -199,28 +229,33 @@ function MicrosContent() {
     return (
       <div className="w-full min-h-screen bg-page text-text font-sans flex flex-col pb-[88px] lg:pb-0">
         <h1 className="sr-only">Vi chất — Đang tải</h1>
-        {/* Mobile Header Skeleton */}
         <div className="bg-ink text-white rounded-b-[20px]">
-          <div className="w-full max-w-[560px] mx-auto px-4 pt-3 pb-4 flex flex-col gap-2.5">
+          <div className="w-full max-w-[560px] mx-auto px-4 pt-3 pb-5 flex flex-col gap-3">
             <div className="flex items-center justify-between min-h-[44px]">
-              <div className="h-6 w-24 bg-surface-dark rounded animate-pulse" />
-              <div className="h-4 w-28 bg-surface-dark rounded animate-pulse" />
+              <div className="w-11 h-11 bg-surface-dark rounded-lg animate-pulse" />
+              <div className="h-4 w-28 bg-surface-dark rounded-lg animate-pulse" />
+              <div className="w-11 h-11 bg-surface-dark rounded-lg animate-pulse" />
             </div>
-            <div className="h-4 w-40 bg-surface-dark rounded animate-pulse" />
+            <div className="flex items-end justify-between pt-1">
+              <div className="flex flex-col gap-2">
+                <div className="h-7 w-28 bg-surface-dark rounded animate-pulse" />
+                <div className="h-3.5 w-44 bg-surface-dark rounded animate-pulse" />
+              </div>
+              <div className="h-9 w-16 bg-surface-dark rounded animate-pulse" />
+            </div>
           </div>
         </div>
 
-        {/* Body Skeleton */}
         <div className="flex-1 w-full max-w-[560px] mx-auto px-4 py-4 flex flex-col gap-4">
+          <div className="h-9 w-full bg-level-empty rounded-full animate-pulse" />
+          <div className="h-14 w-full bg-level-empty rounded-xl animate-pulse" />
           <div className="bg-card border border-card-border rounded-[18px] p-4 flex flex-col gap-3 animate-pulse">
             <div className="h-4 w-1/3 bg-level-empty rounded" />
             <div className="h-8 w-full bg-level-empty rounded" />
             <div className="h-8 w-full bg-level-empty rounded" />
-            <div className="h-8 w-full bg-level-empty rounded" />
           </div>
         </div>
 
-        {/* Bottom Nav */}
         <div className="fixed bottom-0 left-0 right-0 z-40 bg-ink lg:hidden">
           <BottomNav currentTab="micros" />
         </div>
@@ -233,17 +268,29 @@ function MicrosContent() {
     return (
       <div className="w-full min-h-screen bg-page text-text font-sans flex flex-col pb-[88px] lg:pb-0">
         <div className="bg-ink text-white rounded-b-[20px]">
-          <div className="w-full max-w-[560px] mx-auto px-4 pt-3 pb-4 flex flex-col gap-2.5">
+          <div className="w-full max-w-[560px] mx-auto px-4 pt-3 pb-5 flex flex-col gap-2.5">
             <div className="flex items-center justify-between min-h-[44px]">
-              <h1 className="m-0 font-display italic font-black text-2xl uppercase tracking-tight">
-                VI CHẤT
-              </h1>
-              <div className="text-sm font-semibold text-muted-subtitle">
+              <div className="w-11 h-11" />
+              <div className="text-[15px] font-semibold text-white">
                 {data?.dateLabel || "Hôm nay, 10/10"}
               </div>
+              <div className="w-11 h-11" />
             </div>
-            <div className="text-[13px] text-muted-subtitle">
-              0/22 vi chất đạt
+            <div className="flex items-end justify-between pt-1">
+              <div>
+                <h1 className="m-0 font-display italic font-black text-2xl uppercase tracking-tight">
+                  VI CHẤT
+                </h1>
+                <div className="text-[13px] text-muted-subtitle mt-0.5">
+                  Bắt đầu ghi món để đo lường
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="font-display italic font-black text-3xl leading-none tabular-nums text-white">
+                  0<span className="text-muted-subtitle text-xl">/22</span>
+                </div>
+                <div className="text-xs text-sky font-medium mt-0.5">đã đạt</div>
+              </div>
             </div>
           </div>
         </div>
@@ -276,56 +323,93 @@ function MicrosContent() {
       {/* ============================================================== */}
       {/* MOBILE / TABLET LAYOUT (<1024px)                               */}
       {/* ============================================================== */}
-      <div className="w-full min-h-screen bg-page flex flex-col relative lg:hidden pb-[88px] overflow-x-hidden">
-        {/* Header (Ink) */}
-        <header className="bg-ink text-white rounded-b-[20px]">
-          <div className="w-full max-w-[560px] mx-auto px-4 pt-2.5 pb-4 flex flex-col gap-1.5">
+      <div className="w-full max-w-full min-w-0 min-h-screen bg-page flex flex-col relative lg:hidden pb-[88px]">
+        {/* Header (Ink): date row (44px arrows, centered date) + title & "Thiếu nhiều nhất: …" + right big stat "8/22" (Saira Condensed) with "đã đạt" in sky */}
+        <header className="bg-ink text-white rounded-b-[20px] w-full min-w-0">
+          <div className="w-full max-w-[560px] mx-auto px-4 pt-2 pb-4 flex flex-col gap-1">
+            {/* Row 1: Date row with 44px hit targets and centered text */}
             <div className="flex items-center justify-between min-h-[44px]">
+              <button
+                type="button"
+                aria-label="Ngày trước"
+                className="w-11 h-11 rounded-lg bg-transparent border-0 text-white flex items-center justify-center cursor-pointer hover:text-sky transition-colors active:scale-[0.97]"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                  <path d="M15 5l-7 7 7 7" />
+                </svg>
+              </button>
+              <div className="text-[15px] font-semibold text-white tracking-tight">
+                {data?.dateLabel}
+              </div>
+              <button
+                type="button"
+                aria-label="Ngày sau"
+                className="w-11 h-11 rounded-lg bg-transparent border-0 text-white flex items-center justify-center cursor-pointer hover:text-sky transition-colors active:scale-[0.97]"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                  <path d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Row 2: Title + Subtitle on Left, Big Stat on Right */}
+            <div className="flex items-end justify-between pt-1">
               <div>
-                <h1 className="m-0 font-display italic font-black text-2xl uppercase tracking-tight leading-none">
+                <h1 className="m-0 font-display italic font-black text-[28px] uppercase tracking-tight leading-none">
                   VI CHẤT
                 </h1>
-                <div className="flex items-baseline gap-1.5 mt-1">
-                  <span className="font-display italic font-bold text-base text-sky tabular-nums">
-                    {achievedMicrosCount.achieved}/{achievedMicrosCount.total}
-                  </span>
-                  <span className="text-xs text-muted-subtitle font-normal">vi chất đạt</span>
+                <div className="text-[13px] text-muted-subtitle mt-1">
+                  Thiếu nhiều nhất: {data?.microsSummary.mostLacking.join(", ")}
                 </div>
               </div>
 
-              {/* Date with prev / next arrows */}
-              <div className="flex items-center">
-                <button
-                  type="button"
-                  aria-label="Ngày trước"
-                  className="w-10 h-10 rounded-lg bg-transparent border-0 text-white flex items-center justify-center cursor-pointer hover:text-sky transition-colors active:scale-[0.97]"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-                    <path d="M15 5l-7 7 7 7" />
-                  </svg>
-                </button>
-                <div className="text-xs font-semibold whitespace-nowrap px-0.5">{data?.dateLabel}</div>
-                <button
-                  type="button"
-                  aria-label="Ngày sau"
-                  className="w-10 h-10 rounded-lg bg-transparent border-0 text-white flex items-center justify-center cursor-pointer hover:text-sky transition-colors active:scale-[0.97]"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-                    <path d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
+              <div className="text-right shrink-0">
+                <div className="font-display italic font-black text-3xl leading-none tabular-nums text-white">
+                  {achievedMicrosCount.achieved}
+                  <span className="text-muted-subtitle text-2xl font-bold">/{achievedMicrosCount.total}</span>
+                </div>
+                <div className="text-xs text-sky font-semibold mt-0.5">
+                  đã đạt
+                </div>
               </div>
             </div>
           </div>
         </header>
 
-        {/* Content Container (max-w-[560px] mx-auto px-4) */}
-        <main className="flex-1 w-full max-w-[560px] mx-auto px-4 pt-3 pb-6 flex flex-col gap-3">
-          {/* Legend under header */}
+        {/* Sticky Horizontally Scrolling Group Chips */}
+        <div className="sticky top-0 z-30 w-full min-w-0 max-w-full bg-page/95 backdrop-blur-sm border-b border-card-border/60">
+          <div className="w-full max-w-[560px] mx-auto px-4 py-2 overflow-x-auto scrollbar-none flex items-center gap-2">
+            {GROUPS_CONFIG.map((group) => {
+              const isActive = activeGroup === group.key;
+              return (
+                <button
+                  key={group.key}
+                  type="button"
+                  onClick={() => scrollToGroup(group.key)}
+                  className={`min-h-[44px] flex items-center shrink-0 cursor-pointer bg-transparent border-0 p-0 active:scale-[0.97] transition-all`}
+                >
+                  <span
+                    className={`h-9 px-3.5 rounded-full text-xs font-semibold flex items-center justify-center whitespace-nowrap transition-colors ${
+                      isActive
+                        ? "bg-ink text-white shadow-xs"
+                        : "bg-white text-text border border-card-border hover:bg-page"
+                    }`}
+                  >
+                    {chipLabels[group.key]}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Main Content Container (max-w-[560px] mx-auto px-4) */}
+        <main className="flex-1 w-full max-w-[560px] mx-auto px-4 pt-3 pb-6 flex flex-col gap-3.5 min-w-0">
+          {/* 4-column equal grid Legend */}
           <Legend />
 
-          {/* Six groups in catalogue order */}
-          <div className="flex flex-col gap-3">
+          {/* Groups in required order */}
+          <div className="flex flex-col gap-3.5">
             {GROUPS_CONFIG.map((group) => (
               <GroupCard
                 key={group.key}
@@ -409,12 +493,12 @@ function MicrosContent() {
                 VI CHẤT
               </h1>
               <div className="text-sm text-secondary">
-                {data?.desktopDateLabel || "Thứ Bảy, 10/10/2026 · Giữ cân · 65 kg"}
+                {data?.desktopDateLabel || "Thứ Bảy, 10/10/2026 · Giữ cân · 65 kg"} · Thiếu nhiều nhất: {data?.microsSummary.mostLacking.join(", ")}
               </div>
             </div>
 
             <div className="flex items-baseline gap-2 mr-2">
-              <span className="font-display italic font-black text-2xl text-blue tabular-nums">
+              <span className="font-display italic font-black text-3xl text-blue tabular-nums">
                 {achievedMicrosCount.achieved}/{achievedMicrosCount.total}
               </span>
               <span className="text-sm text-secondary font-semibold">vi chất đạt</span>
@@ -440,14 +524,36 @@ function MicrosContent() {
             </button>
           </header>
 
-          {/* Legend */}
+          {/* Desktop Filter Chips */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1">
+            {GROUPS_CONFIG.map((group) => (
+              <button
+                key={group.key}
+                type="button"
+                onClick={() => scrollToGroup(group.key)}
+                className={`min-h-[44px] flex items-center shrink-0 cursor-pointer bg-transparent border-0 p-0 active:scale-[0.97] transition-all`}
+              >
+                <span
+                  className={`h-9 px-4 rounded-full text-xs font-semibold flex items-center justify-center transition-colors ${
+                    activeGroup === group.key
+                      ? "bg-ink text-white shadow-xs"
+                      : "bg-card text-text border border-card-border hover:bg-page"
+                  }`}
+                >
+                  {chipLabels[group.key]}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {/* 4-column Legend */}
           <Legend />
 
-          {/* 2 Columns Layout */}
+          {/* 2 Columns Layout: Column 1 (Vitamin, Khoáng chất); Column 2 (Đạm, Chất béo, Tinh bột, Tổng quan) */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-            {/* Left Column: Tổng quan, Tinh bột, Chất béo, Đạm */}
+            {/* Column 1: Vitamin, Khoáng chất */}
             <div className="flex flex-col gap-4">
-              {GROUPS_CONFIG.slice(0, 4).map((group) => (
+              {GROUPS_CONFIG.slice(0, 2).map((group) => (
                 <GroupCard
                   key={group.key}
                   group={group}
@@ -458,9 +564,9 @@ function MicrosContent() {
               ))}
             </div>
 
-            {/* Right Column: Vitamin, Khoáng chất */}
+            {/* Column 2: Đạm, Chất béo, Tinh bột, Tổng quan */}
             <div className="flex flex-col gap-4">
-              {GROUPS_CONFIG.slice(4).map((group) => (
+              {GROUPS_CONFIG.slice(2).map((group) => (
                 <GroupCard
                   key={group.key}
                   group={group}
@@ -482,42 +588,36 @@ function MicrosContent() {
 }
 
 /**
- * Legend: Thiếu <50% · Trung bình 50–79% · Gần đủ 80–99% · Đạt ≥100%
+ * 4-column equal grid Legend:
+ * Thiếu <50%, Trung bình 50–79%, Gần đủ 80–99%, Đạt ≥100%
  */
 function Legend() {
+  const tiers = [
+    { name: "Thiếu", range: "<50%", colorClass: "bg-level-red" },
+    { name: "Trung bình", range: "50–79%", colorClass: "bg-level-yellow" },
+    { name: "Gần đủ", range: "80–99%", colorClass: "bg-level-green" },
+    { name: "Đạt", range: "≥100%", colorClass: "bg-level-blue" },
+  ];
+
   return (
     <div
       aria-label="Chú thích màu sắc vi chất"
-      className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] text-secondary leading-tight py-1"
+      className="grid grid-cols-4 gap-1.5 sm:gap-2 w-full py-1 px-0.5"
     >
-      <span className="inline-flex items-center gap-1.5">
-        <span
-          aria-hidden="true"
-          className="w-3.5 h-2 rounded-[1px] bg-level-red -skew-x-[14deg] inline-block"
-        />
-        Thiếu (&lt;50%)
-      </span>
-      <span className="inline-flex items-center gap-1.5">
-        <span
-          aria-hidden="true"
-          className="w-3.5 h-2 rounded-[1px] bg-level-yellow -skew-x-[14deg] inline-block"
-        />
-        Trung bình (50–79%)
-      </span>
-      <span className="inline-flex items-center gap-1.5">
-        <span
-          aria-hidden="true"
-          className="w-3.5 h-2 rounded-[1px] bg-level-green -skew-x-[14deg] inline-block"
-        />
-        Gần đủ (80–99%)
-      </span>
-      <span className="inline-flex items-center gap-1.5 font-bold text-blue">
-        <span
-          aria-hidden="true"
-          className="w-3.5 h-2 rounded-[1px] bg-level-blue -skew-x-[14deg] inline-block"
-        />
-        Đạt (≥100%)
-      </span>
+      {tiers.map((t) => (
+        <div key={t.name} className="flex flex-col gap-0.5 min-w-0">
+          <div className="flex items-center gap-1 min-w-0">
+            <span
+              aria-hidden="true"
+              className={`w-3 h-2 rounded-[1px] ${t.colorClass} -skew-x-[14deg] inline-block shrink-0`}
+            />
+            <span className="text-[11px] sm:text-xs font-semibold text-text truncate">{t.name}</span>
+          </div>
+          <span className="text-[10px] sm:text-[11px] text-secondary tabular-nums pl-4 sm:pl-5 truncate">
+            {t.range}
+          </span>
+        </div>
+      ))}
     </div>
   );
 }
@@ -537,7 +637,10 @@ function GroupCard({
   onToggle: () => void;
 }) {
   return (
-    <section className="bg-card border border-card-border rounded-[18px] overflow-hidden flex flex-col">
+    <section
+      id={`group-${group.key}`}
+      className="bg-card border border-card-border rounded-[18px] overflow-hidden flex flex-col scroll-mt-16"
+    >
       {/* Sticky group header */}
       <div className="sticky top-0 z-10 bg-card border-b border-card-border">
         <button
@@ -580,20 +683,32 @@ function GroupCard({
 }
 
 /**
- * Individual nutrient row
+ * Individual nutrient row:
+ * Line 1: name | amount / target · % (bold)
+ * Line 2: slanted bar directly under it (or dashed line for tracked-only)
  */
 function NutrientRow({ row }: { row: NutrientRowData }) {
-  const { definition, consumed, percentage, formattedAmount, targetSource, isProvisional } = row;
+  const { definition, consumed, targetMin, targetMax, percentage, formattedAmount, targetSource, isProvisional } = row;
   const hasTarget = targetSource !== "none";
   const indentPx = definition.depth * 16;
+
+  // Format amount / target (e.g. "331 / 1.200 mg" or "2.900 / 2.751–4.127 mg")
+  let targetDisplay = "";
+  if (hasTarget && targetMin !== null) {
+    if (targetMax && targetMax !== targetMin) {
+      targetDisplay = `${formatNumber(targetMin)}–${formatNumber(targetMax)} ${definition.unit}`;
+    } else {
+      targetDisplay = `${formatNumber(targetMin)} ${definition.unit}`;
+    }
+  }
 
   const content = (
     <div
       style={{ paddingLeft: `${indentPx}px` }}
       className="min-h-[44px] py-2 flex flex-col justify-center gap-1.5 w-full"
     >
-      <div className="flex items-center justify-between text-sm leading-tight gap-3">
-        {/* Name and provisional label */}
+      {/* Line 1: Name (+ tham khảo) | amount / target · % (bold) */}
+      <div className="flex items-baseline justify-between text-sm leading-tight gap-2">
         <div className="flex items-center gap-1.5 min-w-0">
           <span className="font-semibold text-text truncate">
             {definition.nameVi}
@@ -605,29 +720,35 @@ function NutrientRow({ row }: { row: NutrientRowData }) {
           )}
         </div>
 
-        {/* Amount */}
-        <div className="shrink-0 text-right">
-          <span
-            className={`tabular-nums text-xs ${consumed === null ? "text-secondary italic" : "text-secondary font-normal"}`}
-          >
-            {consumed === null ? "chưa có dữ liệu" : formattedAmount}
-          </span>
+        {/* Right side: amount [/ target] [· %] */}
+        <div className="shrink-0 text-right flex items-baseline gap-1.5">
+          {consumed === null ? (
+            <span className="text-secondary italic text-xs">chưa có dữ liệu</span>
+          ) : hasTarget && targetDisplay ? (
+            <>
+              <span className="tabular-nums text-xs text-secondary">
+                {formatNumber(consumed)} / {targetDisplay}
+              </span>
+              <span className="font-bold text-text tabular-nums text-xs">
+                · {percentage !== null ? `${percentage}%` : "—"}
+              </span>
+            </>
+          ) : (
+            <span className="tabular-nums text-xs text-secondary font-medium">
+              {formattedAmount}
+            </span>
+          )}
         </div>
       </div>
 
-      {/* Progress visual: Slanted Bar with right-aligned % for targets, dashed line for tracked-only */}
+      {/* Line 2: Slanted SegmentedBar directly under it, or dashed line for tracked-only */}
       {hasTarget ? (
-        <div className="flex items-center gap-2.5 w-full">
-          <div className="flex-1 min-w-0">
-            <SegmentedBar
-              percentage={percentage ?? 0}
-              aria-label={`${definition.nameVi} ${percentage !== null ? `${percentage}%` : "chưa có dữ liệu"}`}
-              tone="light"
-            />
-          </div>
-          <span className="font-display italic font-black text-sm tabular-nums text-text w-12 text-right shrink-0">
-            {percentage !== null ? `${percentage}%` : "—"}
-          </span>
+        <div className="w-full">
+          <SegmentedBar
+            percentage={percentage ?? 0}
+            aria-label={`${definition.nameVi} ${percentage !== null ? `${percentage}%` : "chưa có dữ liệu"}`}
+            tone="light"
+          />
         </div>
       ) : (
         <div className="w-full py-0.5">

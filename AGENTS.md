@@ -82,3 +82,13 @@ Read each skill's `SKILL.md` before first use.
 - **`verification-before-completion`:** required before every commit and every "done" report. Run the gates and the visual check, and show the evidence (command output, screenshot path). Never claim done without it.
 - **`webapp-testing`** (Playwright): use it for the visual check and for click-through flows at 390×844 and 1440×900, for example Today → Add food → Today, and Micros → Vitamin tab → Nutrient detail. Save screenshots to `apps/web/.screenshots/`, which is gitignored.
   - One-time setup: `pip3 install playwright && python3 -m playwright install chromium`.
+
+## Dev server and ports
+Always use **port 3100** for this app. Never pick a new port.
+1. Before starting a server, check the port: `lsof -nP -iTCP:3100 -sTCP:LISTEN`.
+   - If our own Next.js server (from `apps/web`) is already running there, **reuse it** and don't start another.
+   - If something else is on 3100, or a stale server of ours, stop it: `lsof -tiTCP:3100 -sTCP:LISTEN | xargs kill` (use `kill -9` if it survives). Then start: `npm run dev -- -p 3100`.
+2. For a production check, stop the dev server first, then `npm run build && npx next start -p 3100`.
+3. Never start servers on 3000–3099 or other ports, and don't ask the user to open a new one.
+4. When a task is done, stop any server you started, unless the user asked to keep it running.
+5. Playwright screenshots use `http://localhost:3100`.
