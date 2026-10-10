@@ -171,8 +171,10 @@ npm run typecheck
 npm run build
 ```
 
----
-
 ## 6. License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is proprietary software. All rights reserved. No part of this software, documentation, or design assets may be copied, modified, distributed, or used without explicit prior written authorization.
+
+To request permission or licensing terms, contact:
+dongduong840@gmail.com
+
