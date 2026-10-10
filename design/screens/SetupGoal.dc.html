@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Mục tiêu — H1T MICRO</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Saira:ital,wdth,wght@0,50..125,400..900;1,50..125,400..900&amp;family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1E55F0}a:hover{color:#0A0A0B}
+button,input{font-family:inherit}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #1E55F0;outline-offset:2px}
+a:active,button:active{transform:scale(0.97)}
+a,button{transition:transform 150ms ease-out}
+a,button,label,input{touch-action:manipulation}
+a,button{cursor:pointer}
+@media (prefers-reduced-motion: reduce){a,button{transition:none}a:active,button:active{transform:none}}
+</style>
+</helmet>
+<div style="width: 390px; height: {{h}}px; box-sizing: border-box; overflow: hidden; background: #F5F5F7; color: #1D1D1F; font-family: 'Be Vietnam Pro', sans-serif; display: flex; flex-direction: column;">
+  <div style="background: #0A0A0B; color: #FFFFFF; padding: 16px 20px 22px; border-radius: 0 0 20px 20px; display: flex; flex-direction: column; gap: 14px;">
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+      <a href="SetupProfile.dc.html" aria-label="Quay lại" style="width: 44px; height: 44px; border-radius: 8px; color: #FFFFFF; display: flex; align-items: center; justify-content: center;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+      </a>
+      <div style="font-size: 13px; color: #A3A8B5;">Bước 2 / 2</div>
+    </div>
+    <div aria-hidden="true" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px;"><span style="height: 4px; border-radius: 2px; background: #1E55F0;"></span><span style="height: 4px; border-radius: 2px; background: #1E55F0;"></span></div>
+    <h1 style="margin: 0; font-family: 'Saira', sans-serif; font-style: italic; font-stretch: 118%; font-weight: 800; font-size: 28px;">MỤC TIÊU</h1>
+  </div>
+
+  <div style="flex: 1 1 0; padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 8px;">
+    <div role="radiogroup" aria-label="Mục tiêu" style="display: flex; flex-direction: column; gap: 8px;">
+      <sc-for list="{{goals}}" as="g" hint-placeholder-count="4">
+        <button role="radio" aria-checked="{{g.on}}" style="text-align: left; cursor: pointer; min-height: 60px; border-radius: 12px; border: 2px solid {{g.border}}; background: #FFFFFF; color: #1D1D1F; padding: 10px 14px; display: flex; align-items: center; gap: 12px;">
+          <span aria-hidden="true" style="width: 20px; height: 20px; border-radius: 10px; border: 2px solid {{g.border}}; box-sizing: border-box; display: flex; align-items: center; justify-content: center;"><span style="width: 10px; height: 10px; border-radius: 5px; background: {{g.dot}};"></span></span>
+          <span style="flex: 1 1 0; display: flex; flex-direction: column;">
+            <span style="font-size: 16px; font-weight: 700;">{{g.name}}</span>
+            <span style="font-size: 13px; color: #5B6170;">{{g.note}}</span>
+            <span style="font-size: 13px; color: #5B6170; font-variant-numeric: tabular-nums;">{{g.rule}}</span>
+          </span>
+          <span style="font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums;">{{g.kcal}}</span>
+        </button>
+      </sc-for>
+    </div>
+
+    <div style="background: #FFFFFF; border: 1px solid rgba(0,0,0,0.08); border-radius: 18px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px;">
+      <div style="font-size: 15px; font-weight: 700;">Mục tiêu của bạn mỗi ngày</div>
+      <sc-for list="{{targets}}" as="t" hint-placeholder-count="4">
+        <div style="display: flex; justify-content: space-between; font-size: 14px;"><span style="color: #5B6170;">{{t.l}}</span><span style="font-weight: 600; font-variant-numeric: tabular-nums;">{{t.v}}</span></div>
+      </sc-for>
+      <div style="font-size: 13px; color: #5B6170;">Tính cho 65 kg · Nam</div>
+    </div>
+
+    <a href="EmptyToday.dc.html" style="margin-top: auto; text-decoration: none; height: 52px; border-radius: 9999px; background: #1E55F0; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700;">Bắt đầu ghi bữa ăn</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"h":{"editor":null,"default":844},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const goals = [
+      { name: 'Tăng cơ', note: 'Ăn dư một chút để lên cơ', rule: '35–40 kcal / kg', kcal: '2.275–2.600' },
+      { name: 'Giữ cân', note: 'Duy trì cân nặng hiện tại', rule: '30–35 kcal / kg', kcal: '1.950–2.275', on: true },
+      { name: 'Giảm mỡ', note: 'Thâm hụt vừa phải, giữ cơ', rule: '25–30 kcal / kg', kcal: '1.625–1.950' },
+      { name: 'Giảm mỡ nhanh', note: 'Ngắn hạn — tối đa 4–6 tuần', rule: '20–25 kcal / kg', kcal: '1.300–1.625' }
+    ].map((g) => ({ ...g, on: !!g.on, border: g.on ? '#1E55F0' : '#E3E5E9', dot: g.on ? '#1E55F0' : 'transparent' }));
+    const targets = [
+      { l: 'Năng lượng', v: '1.950–2.275 kcal' },
+      { l: 'Đạm (1,6–2,2 g/kg)', v: '104–143 g' },
+      { l: 'Béo (0,5–1 g/kg)', v: '33–65 g' },
+      { l: 'Kali (80–100 mg/kg)', v: '5.200–6.500 mg' }
+    ];
+    return { h: this.props.h ?? 844, goals, targets };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Ngôn ngữ — H1T MICRO</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Saira:ital,wdth,wght@0,50..125,400..900;1,50..125,400..900&amp;family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1E55F0}a:hover{color:#0A0A0B}
+button,input{font-family:inherit}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #1E55F0;outline-offset:2px}
+a:active,button:active{transform:scale(0.97)}
+a,button{transition:transform 150ms ease-out}
+a,button,label,input{touch-action:manipulation}
+a,button{cursor:pointer}
+@media (prefers-reduced-motion: reduce){a,button{transition:none}a:active,button:active{transform:none}}
+</style>
+</helmet>
+<div style="width: 390px; height: {{h}}px; box-sizing: border-box; overflow: hidden; background: #F5F5F7; color: #1D1D1F; font-family: 'Be Vietnam Pro', sans-serif; display: flex; flex-direction: column;">
+  <div style="flex: none; background: #0A0A0B; color: #FFFFFF; padding: 16px 20px 18px; border-radius: 0 0 20px 20px; display: flex; flex-direction: column; gap: 6px;">
+    <a href="Profile.dc.html" aria-label="Quay lại" style="width: 44px; height: 44px; border-radius: 8px; color: #FFFFFF; display: flex; align-items: center; justify-content: center; margin-left: -12px;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+    </a>
+    <h1 style="margin: 0; font-family: 'Saira', sans-serif; font-style: italic; font-stretch: 118%; font-weight: 800; font-size: 28px;">NGÔN NGỮ</h1>
+  </div>
+  <div style="flex: 1 1 0; min-height: 0; overflow: hidden; padding: 12px 16px; display: flex; flex-direction: column; gap: 10px;">
+    <section style="background: #FFFFFF; border: 1px solid rgba(0,0,0,0.08); border-radius: 18px; padding: 8px 16px 2px;">
+      <h2 id="lg" style="margin: 0 0 2px; font-size: 13px; font-weight: 600; color: #5B6170;">Ngôn ngữ</h2>
+      <div role="radiogroup" aria-labelledby="lg">
+        <sc-for list="{{langs}}" as="r" hint-placeholder-count="2">
+          <button type="button" role="radio" aria-checked="{{r.on}}" style="width: 100%; box-sizing: border-box; text-align: left; border: 0; border-top: 1px solid #EEF0F3; background: transparent; color: #1D1D1F; min-height: 56px; padding: 6px 0; display: flex; align-items: center; gap: 12px; font-size: 16px;">
+            <span style="flex: 1 1 0;">{{r.l}}</span>
+            <span aria-hidden="true" style="flex: none; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{r.check}}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+            </span>
+          </button>
+        </sc-for>
+      </div>
+    </section>
+    <section style="background: #FFFFFF; border: 1px solid rgba(0,0,0,0.08); border-radius: 18px; padding: 8px 16px 2px;">
+      <h2 id="dc" style="margin: 0 0 2px; font-size: 13px; font-weight: 600; color: #5B6170;">Đơn vị · Dấu thập phân</h2>
+      <div role="radiogroup" aria-labelledby="dc">
+        <sc-for list="{{decs}}" as="r" hint-placeholder-count="2">
+          <button type="button" role="radio" aria-checked="{{r.on}}" style="width: 100%; box-sizing: border-box; text-align: left; border: 0; border-top: 1px solid #EEF0F3; background: transparent; color: #1D1D1F; min-height: 56px; padding: 6px 0; display: flex; align-items: center; gap: 12px; font-size: 16px;">
+            <span style="flex: 1 1 0;">{{r.l}}</span>
+            <span aria-hidden="true" style="flex: none; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{r.check}}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+            </span>
+          </button>
+        </sc-for>
+      </div>
+    </section>
+    <section style="background: #FFFFFF; border: 1px solid rgba(0,0,0,0.08); border-radius: 18px; padding: 8px 16px 2px;">
+      <h2 id="en" style="margin: 0 0 2px; font-size: 13px; font-weight: 600; color: #5B6170;">Đơn vị · Năng lượng</h2>
+      <div role="radiogroup" aria-labelledby="en">
+        <sc-for list="{{units}}" as="r" hint-placeholder-count="2">
+          <button type="button" role="radio" aria-checked="{{r.on}}" style="width: 100%; box-sizing: border-box; text-align: left; border: 0; border-top: 1px solid #EEF0F3; background: transparent; color: #1D1D1F; min-height: 56px; padding: 6px 0; display: flex; align-items: center; gap: 12px; font-size: 16px;">
+            <span style="flex: 1 1 0;">{{r.l}}</span>
+            <span aria-hidden="true" style="flex: none; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{r.check}}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+            </span>
+          </button>
+        </sc-for>
+      </div>
+    </section>
+    <div role="status" style="font-size: 13px; color: #5B6170; text-align: center;">Tự động lưu</div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"h":{"editor":null,"default":844},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const mk = (arr) => arr.map((r) => ({ l: r[0], on: !!r[1], check: r[1] ? '#1E55F0' : 'transparent' }));
+    const langs = mk([['Tiếng Việt', 1], ['English', 0]]);
+    const decs = mk([['Dấu phẩy (2,5)', 1], ['Dấu chấm (2.5)', 0]]);
+    const units = mk([['kcal', 1], ['kJ', 0]]);
+    return { h: this.props.h ?? 844, langs, decs, units };
+  }
+}
+</script>
+</body>
+</html>

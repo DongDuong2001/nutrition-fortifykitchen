@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Đã thêm món — H1T MICRO</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Saira:ital,wdth,wght@0,50..125,400..900;1,50..125,400..900&amp;family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1E55F0}a:hover{color:#0A0A0B}
+button,input{font-family:inherit}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #1E55F0;outline-offset:2px}
+a:active,button:active{transform:scale(0.97)}
+a,button{transition:transform 150ms ease-out}
+a,button,label,input{touch-action:manipulation}
+a,button{cursor:pointer}
+@media (prefers-reduced-motion: reduce){a,button{transition:none}a:active,button:active{transform:none}}
+</style>
+</helmet>
+<div style="width: 390px; height: {{h}}px; box-sizing: border-box; overflow: hidden; background: #F5F5F7; color: #1D1D1F; font-family: 'Be Vietnam Pro', sans-serif; display: flex; flex-direction: column; position: relative;">
+  <h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;margin:0;">Hôm nay</h1>
+  <div style="background: #0A0A0B; color: #FFFFFF; padding: 12px 20px 16px; display: flex; flex-direction: column; gap: 10px; border-radius: 0 0 20px 20px;">
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+      <div style="font-family: 'Saira', sans-serif; font-style: italic; font-stretch: 118%; font-weight: 900; font-size: 20px;">H1T <span style="color: #A9D1F7;">MICRO</span></div>
+      <div style="display: flex; align-items: center;">
+        <button aria-label="Ngày trước" style="width: 44px; height: 44px; border: 0; border-radius: 8px; background: transparent; color: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+        </button>
+        <div style="font-size: 14px; font-weight: 600;">Hôm nay, 10/10</div>
+        <button aria-label="Ngày sau" style="width: 44px; height: 44px; border: 0; border-radius: 8px; background: transparent; color: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+        </button>
+      </div>
+    </div>
+    <div style="display: flex; gap: 18px; align-items: center;">
+      <div style="position: relative; width: 100px; height: 100px; flex: none;">
+        <svg width="100" height="100" viewBox="0 0 120 120" role="img" aria-label="Năng lượng 1.041 trên mục tiêu 1.950 đến 2.275 kcal">
+          <circle cx="60" cy="60" r="52" fill="none" stroke="#2B2D33" stroke-width="10"></circle>
+          <circle cx="60" cy="60" r="52" fill="none" stroke="#1E55F0" stroke-width="10" stroke-linecap="round" stroke-dasharray="174.5 326.7" transform="rotate(-90 60 60)"></circle>
+        </svg>
+        <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+          <div style="font-family: 'Saira', sans-serif; font-style: italic; font-stretch: 118%; font-weight: 800; font-size: 24px;">1.041</div>
+          <div style="font-size: 13px; color: #A3A8B5;">kcal</div>
+        </div>
+      </div>
+      <div style="flex: 1 1 0; display: flex; flex-direction: column; gap: 8px; min-width: 0;">
+        <sc-for list="{{macros}}" as="m" hint-placeholder-count="4">
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <div style="display: flex; justify-content: space-between; font-size: 13px;"><span style="font-weight: 600;">{{m.label}}</span><span style="color: #D5D8DF; font-variant-numeric: tabular-nums;">{{m.value}}</span></div>
+            <div style="display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 2px;">
+              <sc-for list="{{m.segs}}" as="s" hint-placeholder-count="10"><div style="height: 6px; border-radius: 2px; background: {{s.bg}};"></div></sc-for>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    <div style="font-size: 13px; color: #C9CDD6;">Mục tiêu <span style="font-weight: 600; color: #FFFFFF; font-variant-numeric: tabular-nums;">1.950–2.275 kcal</span> · còn 909 · Ngày tập 60′</div>
+  </div>
+
+  <div style="flex: 1 1 0; overflow: hidden; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;">
+    <a href="Micros.dc.html" style="text-decoration: none; color: #1D1D1F; background: #FFFFFF; border: 1px solid rgba(0,0,0,0.08); border-radius: 18px; padding: 12px 16px; display: flex; align-items: center; gap: 14px; min-height: 44px; box-sizing: border-box;">
+      <div style="font-family: 'Saira', sans-serif; font-style: italic; font-stretch: 118%; font-weight: 800; font-size: 26px; color: #1E55F0;">8/21</div>
+      <div style="flex: 1 1 0;">
+        <div style="font-size: 15px; font-weight: 600;">Vi chất đã đạt</div>
+        <div style="font-size: 13px; color: #5B6170;">Thiếu nhiều nhất: Vitamin D, Canxi</div>
+      </div>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5B6170" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+    </a>
+
+    <sc-for list="{{meals}}" as="meal" hint-placeholder-count="3">
+      <section style="background: #FFFFFF; border: 1px solid rgba(0,0,0,0.08); border-radius: 18px; padding: 10px 16px 6px; display: flex; flex-direction: column;">
+        <div style="display: flex; align-items: baseline; justify-content: space-between; padding-bottom: 2px;">
+          <h2 style="margin: 0; font-size: 16px; font-weight: 700;">{{meal.name}}</h2>
+          <div style="font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums;">{{meal.kcal}} kcal</div>
+        </div>
+        <sc-for list="{{meal.items}}" as="it" hint-placeholder-count="2">
+          <a href="EditEntry.dc.html" style="text-decoration: none; color: #1D1D1F; display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 14px; min-height: 44px; border-top: 1px solid #EEF0F3;">
+            <span>{{it.name}} <span style="color: #5B6170;">· {{it.qty}}</span></span>
+            <span style="color: #5B6170; font-variant-numeric: tabular-nums;">{{it.kcal}}</span>
+          </a>
+        </sc-for>
+      </section>
+    </sc-for>
+    <div style="display: flex; gap: 8px;">
+      <a href="AddFood.dc.html" style="flex: 1 1 0; text-decoration: none; background: #FFFFFF; border: 1px solid rgba(0,0,0,0.08); border-radius: 18px; padding: 0 16px; min-height: 52px; display: flex; align-items: center; justify-content: space-between; font-size: 15px;">
+        <span style="font-weight: 700; color: #1D1D1F;">Bữa tối</span><span style="font-weight: 600;">+ Thêm</span>
+      </a>
+      <button style="min-height: 52px; padding: 0 14px; border: 0; border-radius: 12px; background: #FFFFFF; color: #1D1D1F; font-size: 14px; font-weight: 600; cursor: pointer;">Chép hôm qua</button>
+    </div>
+  </div>
+
+  <nav aria-label="Điều hướng chính" style="height: 72px; flex: none; background: #0A0A0B; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: center;">
+    <a href="Today.dc.html" aria-current="page" style="text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 56px; color: #FFFFFF; font-size: 12px; font-weight: 600;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"></path></svg>Hôm nay
+    </a>
+    <a href="Micros.dc.html" style="text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 56px; color: #8C92A0; font-size: 12px; font-weight: 600;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20V11M12 20V4M19 20v-6"></path></svg>Vi chất
+    </a>
+    <div style="display: flex; justify-content: center;">
+      <a href="AddFood.dc.html" aria-label="Thêm món" style="width: 52px; height: 52px; border-radius: 14px; background: #1E55F0; color: #FFFFFF; display: flex; align-items: center; justify-content: center;">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+      </a>
+    </div>
+    <a href="Training.dc.html" style="text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 56px; color: #8C92A0; font-size: 12px; font-weight: 600;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"></path></svg>Ngày tập
+    </a>
+    <a href="Profile.dc.html" style="text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 56px; color: #8C92A0; font-size: 12px; font-weight: 600;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"></path></svg>Hồ sơ
+    </a>
+  </nav>
+  <div role="status" style="position: absolute; left: 12px; right: 12px; bottom: 84px; background: #0A0A0B; color: #FFFFFF; border-radius: 14px; padding: 4px 4px 4px 16px; min-height: 56px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 8px; box-shadow: 0 8px 24px rgba(10,10,11,0.35);">
+    <span style="font-size: 15px;">Đã thêm Chà là 30 g vào Trước tập</span>
+    <a href="Today.dc.html" style="flex: none; text-decoration: none; min-height: 44px; padding: 0 14px; border-radius: 10px; display: flex; align-items: center; color: #A9D1F7; font-size: 15px; font-weight: 700;">Xem</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"h":{"editor":null,"default":844},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const tone = (p) => (p >= 100 ? '#5C86F2' : p >= 80 ? '#4ADE80' : p >= 50 ? '#F5C518' : '#FF6B6B');
+    const segs = (p) => { const n = Math.min(10, Math.floor(p / 10)); return Array.from({ length: 10 }, (_, i) => ({ bg: i < n ? tone(p) : '#2B2D33' })); };
+    const macros = [
+      { label: 'Đạm', value: '62 / 104 g', p: 60 },
+      { label: 'Tinh bột', value: '133 / 254 g', p: 52 },
+      { label: 'Béo', value: '21 / 33–65 g', p: 64 },
+      { label: 'Chất xơ', value: '14 / 30 g', p: 47 }
+    ].map((m) => ({ ...m, segs: segs(m.p) }));
+    const meals = [
+      { name: 'Bữa sáng', kcal: '459', items: [
+        { name: 'Yến mạch', qty: '60 g', kcal: '228', coach: false },
+        { name: 'Yogurt kefir', qty: '200 ml', kcal: '126', coach: true },
+        { name: 'Chuối', qty: '1 quả', kcal: '105', coach: true }
+      ] },
+      { name: 'Bữa trưa', kcal: '488', items: [
+        { name: 'Cơm gạo lứt', qty: '150 g', kcal: '168', coach: true },
+        { name: 'Thịt bò nạc', qty: '150 g', kcal: '320', coach: true }
+      ] },
+      { name: 'Trước tập', kcal: '94', items: [
+        { name: 'Chà là', qty: '30 g', kcal: '84', coach: true },
+        { name: 'Bột củ dền', qty: '3 g', kcal: '10', coach: true }
+      ] }
+    ];
+    return { h: this.props.h ?? 844, macros, meals };
+  }
+}
+</script>
+</body>
+</html>

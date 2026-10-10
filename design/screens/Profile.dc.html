@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Hồ sơ — H1T MICRO</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Saira:ital,wdth,wght@0,50..125,400..900;1,50..125,400..900&amp;family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1E55F0}a:hover{color:#0A0A0B}
+button{font-family:inherit}
+a:focus-visible,button:focus-visible{outline:3px solid #1E55F0;outline-offset:2px}
+a:active,button:active{transform:scale(0.97)}
+a,button{transition:transform 150ms ease-out}
+a,button,label,input{touch-action:manipulation}
+a,button{cursor:pointer}
+@media (prefers-reduced-motion: reduce){a,button{transition:none}a:active,button:active{transform:none}}
+</style>
+</helmet>
+<div style="width: 390px; height: {{h}}px; box-sizing: border-box; overflow: hidden; background: #F5F5F7; color: #1D1D1F; font-family: 'Be Vietnam Pro', sans-serif; display: flex; flex-direction: column;">
+  <div style="background: #0A0A0B; color: #FFFFFF; padding: 12px 20px 14px; border-radius: 0 0 20px 20px; display: flex; flex-direction: column; gap: 2px;">
+    <h1 style="margin: 0; font-family: 'Saira', sans-serif; font-style: italic; font-stretch: 118%; font-weight: 800; font-size: 28px;">HỒ SƠ</h1>
+    <div style="font-size: 14px; color: #C9CDD6;">ban@email.com · Gói Miễn phí</div>
+  </div>
+
+  <div style="flex: 1 1 0; overflow: hidden; padding: 10px 16px; display: flex; flex-direction: column; gap: 8px;">
+    <sc-for list="{{groups}}" as="g" hint-placeholder-count="3">
+      <section style="background: #FFFFFF; border: 1px solid rgba(0,0,0,0.08); border-radius: 18px; padding: 8px 16px 2px;">
+        <h2 style="margin: 0 0 2px; font-size: 13px; font-weight: 600; color: #5B6170;">{{g.title}}</h2>
+        <sc-for list="{{g.rows}}" as="r" hint-placeholder-count="3">
+          <sc-if value="{{r.isLink}}" hint-placeholder-val="{{true}}">
+            <a href="SetupProfile.dc.html" style="text-decoration: none; color: #1D1D1F; display: flex; align-items: center; gap: 8px; min-height: 44px; border-top: 1px solid #EEF0F3; font-size: 15px;">
+              <span style="flex: 1 1 0;">{{r.l}}</span>
+              <span style="font-weight: 600; font-variant-numeric: tabular-nums;">{{r.v}}</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B6170" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+            </a>
+          </sc-if>
+          <sc-if value="{{r.isSwitch}}" hint-placeholder-val="{{false}}">
+            <div style="display: flex; align-items: center; gap: 12px; min-height: 52px; border-top: 1px solid #EEF0F3; padding: 4px 0;">
+              <div style="flex: 1 1 0; display: flex; flex-direction: column; gap: 2px;">
+                <span style="font-size: 15px;">{{r.l}}</span>
+                <span style="font-size: 13px; line-height: 1.35; color: #5B6170;">{{r.hint}}</span>
+              </div>
+              <button role="switch" aria-checked="false" aria-label="{{r.l}}" style="flex: none; width: 51px; height: 44px; padding: 0; border: 0; background: transparent; cursor: pointer; display: flex; align-items: center;">
+                <span aria-hidden="true" style="position: relative; display: block; width: 51px; height: 31px; border-radius: 16px; background: #E3E5E9;">
+                  <span style="position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 14px; background: #FFFFFF; box-shadow: 0 1px 3px rgba(0,0,0,0.25);"></span>
+                </span>
+              </button>
+            </div>
+          </sc-if>
+          <sc-if value="{{r.isAction}}" hint-placeholder-val="{{false}}">
+            <button style="width: 100%; box-sizing: border-box; text-align: left; border: 0; border-top: 1px solid #EEF0F3; border-radius: 0; background: transparent; color: #1D1D1F; padding: 4px 0; min-height: 52px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+              <span style="flex: 1 1 0; display: flex; flex-direction: column; gap: 2px;">
+                <span style="font-size: 15px;">{{r.l}}</span>
+                <span style="font-size: 13px; line-height: 1.35; color: #5B6170;">{{r.hint}}</span>
+              </span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B6170" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+            </button>
+          </sc-if>
+        </sc-for>
+      </section>
+    </sc-for>
+
+    <div style="background: #1E55F0; color: #FFFFFF; border-radius: 12px; padding: 10px 16px; display: flex; align-items: center; gap: 12px;">
+      <div style="flex: 1 1 0;">
+        <div style="font-size: 15px; font-weight: 700;">Nâng cấp H1T MICRO Pro</div>
+        <div style="font-size: 13px; line-height: 1.4;">Gợi ý của Coach, xu hướng 30 ngày, món ăn &amp; công thức riêng</div>
+      </div>
+      <button style="height: 44px; padding: 0 14px; border: 0; border-radius: 10px; background: #FFFFFF; color: #1D1D1F; font-size: 14px; font-weight: 700; cursor: pointer;">Xem gói</button>
+    </div>
+
+    <button style="min-height: 44px; border: 0; border-radius: 12px; background: #FFFFFF; color: #D93036; font-size: 15px; font-weight: 700; cursor: pointer;">Đăng xuất</button>
+  </div>
+
+  <nav aria-label="Điều hướng chính" style="height: 72px; flex: none; background: #0A0A0B; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: center;">
+    <a href="Today.dc.html" style="text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 56px; color: #8C92A0; font-size: 12px; font-weight: 600;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"></path></svg>Hôm nay
+    </a>
+    <a href="Micros.dc.html" style="text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 56px; color: #8C92A0; font-size: 12px; font-weight: 600;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20V11M12 20V4M19 20v-6"></path></svg>Vi chất
+    </a>
+    <div style="display: flex; justify-content: center;">
+      <a href="AddFood.dc.html" aria-label="Thêm món" style="width: 52px; height: 52px; border-radius: 14px; background: #1E55F0; color: #FFFFFF; display: flex; align-items: center; justify-content: center;">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+      </a>
+    </div>
+    <a href="Training.dc.html" style="text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 56px; color: #8C92A0; font-size: 12px; font-weight: 600;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"></path></svg>Ngày tập
+    </a>
+    <a href="Profile.dc.html" aria-current="page" style="text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 56px; color: #FFFFFF; font-size: 12px; font-weight: 600;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"></path></svg>Hồ sơ
+    </a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"h":{"editor":null,"default":844},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const groups = [
+      { title: 'Cơ thể', rows: [
+        { l: 'Giới tính', v: 'Nam' },
+        { l: 'Gần/đang trong kỳ', kind: 'switch', hint: 'Chỉ với Nữ · sắt 18 → 28 mg/ngày' },
+        { l: 'Năm sinh', v: '2003' },
+        { l: 'Cân nặng', v: '65 kg' }
+      ] },
+      { title: 'Mục tiêu', rows: [
+        { l: 'Mục tiêu', v: 'Giữ cân' },
+        { l: 'Ngày tập mặc định', v: '60 phút' }
+      ] },
+      { title: 'Ứng dụng', rows: [
+        { l: 'Ngôn ngữ', v: 'Tiếng Việt' },
+        { l: 'Thêm vào màn hình chính', kind: 'action', hint: 'Mở như ứng dụng, không cần cửa hàng' }
+      ] }
+    ];
+    groups.forEach((g) => { g.rows = g.rows.map((r) => ({ v: '', hint: '', ...r, isLink: !r.kind, isSwitch: r.kind === 'switch', isAction: r.kind === 'action' })); });
+    return { h: this.props.h ?? 844, groups };
+  }
+}
+</script>
+</body>
+</html>

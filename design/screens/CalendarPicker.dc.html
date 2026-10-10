@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Chọn ngày — H1T MICRO</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Saira:ital,wdth,wght@0,50..125,400..900;1,50..125,400..900&amp;family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1E55F0}a:hover{color:#0A0A0B}
+button,input{font-family:inherit}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #1E55F0;outline-offset:2px}
+a:active,button:active{transform:scale(0.97)}
+a,button{transition:transform 150ms ease-out}
+a,button,label,input{touch-action:manipulation}
+a,button{cursor:pointer}
+@media (prefers-reduced-motion: reduce){a,button{transition:none}a:active,button:active{transform:none}}
+</style>
+</helmet>
+<div style="width: 390px; height: {{h}}px; box-sizing: border-box; overflow: hidden; background: #F5F5F7; color: #1D1D1F; font-family: 'Be Vietnam Pro', sans-serif; display: flex; flex-direction: column; position: relative;">
+  <h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;margin:0;">Hôm nay</h1>
+  <div aria-hidden="true" style="flex: 1 1 0; min-height: 0; display: flex; flex-direction: column;">
+    <div style="background: #0A0A0B; color: #FFFFFF; padding: 12px 20px 16px; display: flex; flex-direction: column; gap: 10px; border-radius: 0 0 20px 20px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; height: 44px;">
+        <div style="font-family: 'Saira', sans-serif; font-style: italic; font-stretch: 118%; font-weight: 900; font-size: 20px;">H1T <span style="color: #A9D1F7;">MICRO</span></div>
+        <div style="font-size: 14px; font-weight: 600;">Hôm nay, 10/10</div>
+      </div>
+      <div style="display: flex; gap: 18px; align-items: center;">
+        <div style="width: 100px; height: 100px; border-radius: 50%; border: 10px solid #2B2D33; box-sizing: border-box; display: flex; align-items: center; justify-content: center; font-family: 'Saira', sans-serif; font-style: italic; font-weight: 800; font-size: 24px;">1.041</div>
+        <div style="font-size: 13px; color: #C9CDD6;">Mục tiêu 1.950–2.275 kcal · còn 909</div>
+      </div>
+    </div>
+    <div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;">
+      <div style="background: #FFFFFF; border: 1px solid rgba(0,0,0,0.08); border-radius: 18px; padding: 14px 16px; font-size: 15px; font-weight: 600;">Vi chất đã đạt · 8/21</div>
+      <div style="background: #FFFFFF; border: 1px solid rgba(0,0,0,0.08); border-radius: 18px; padding: 14px 16px; font-size: 16px; font-weight: 700;">Bữa sáng · 459 kcal</div>
+      <div style="background: #FFFFFF; border: 1px solid rgba(0,0,0,0.08); border-radius: 18px; padding: 14px 16px; font-size: 16px; font-weight: 700;">Bữa trưa · 488 kcal</div>
+    </div>
+  </div>
+  <div style="position: absolute; inset: 0; background: rgba(10,10,11,0.5);"></div>
+  <div role="dialog" aria-modal="true" aria-labelledby="cal-title" style="position: absolute; left: 0; right: 0; bottom: 0; background: #FFFFFF; border-radius: 20px 20px 0 0; padding: 8px 16px 16px; display: flex; flex-direction: column; gap: 6px; box-sizing: border-box;">
+    <div aria-hidden="true" style="width: 36px; height: 5px; border-radius: 3px; background: #D5D8DF; align-self: center; margin-bottom: 4px;"></div>
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+      <h2 id="cal-title" style="margin: 0; font-size: 18px; font-weight: 700;">Chọn ngày</h2>
+      <a href="Today.dc.html" aria-label="Đóng" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #1D1D1F; text-decoration: none;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></a>
+    </div>
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+      <button aria-label="Tháng trước" style="width: 44px; height: 44px; border: 0; border-radius: 8px; background: #F5F5F7; color: #1D1D1F; display: flex; align-items: center; justify-content: center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button>
+      <div style="font-size: 16px; font-weight: 700;">Tháng 10, 2026</div>
+      <button aria-label="Tháng sau" style="width: 44px; height: 44px; border: 0; border-radius: 8px; background: #F5F5F7; color: #1D1D1F; display: flex; align-items: center; justify-content: center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg></button>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); justify-items: center; row-gap: 0;">
+      <sc-for list="{{weekdays}}" as="w" hint-placeholder-count="7"><div style="height: 28px; display: flex; align-items: center; font-size: 13px; font-weight: 600; color: #5B6170;">{{w.t}}</div></sc-for>
+      <sc-for list="{{blanks}}" as="b" hint-placeholder-count="3"><div aria-hidden="true" style="width: 44px; height: 44px;"></div></sc-for>
+      <sc-for list="{{days}}" as="d" hint-placeholder-count="31">
+        <div style="width: 44px; height: 44px;">
+          <sc-if value="{{d.isLink}}" hint-placeholder-val="{{false}}">
+            <a href="PastDay.dc.html" aria-label="{{d.label}}" style="width: 44px; height: 44px; box-sizing: border-box; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-decoration: none; color: #1D1D1F; font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums;"><span>{{d.n}}</span><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 50%; background: {{d.dot}};"></span></a>
+          </sc-if>
+          <sc-if value="{{d.isBtn}}" hint-placeholder-val="{{true}}">
+            <button aria-label="{{d.label}}" style="width: 44px; height: 44px; box-sizing: border-box; padding: 0; border: 0; border-radius: 50%; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: #1D1D1F; font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums;"><span>{{d.n}}</span><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 50%; background: {{d.dot}};"></span></button>
+          </sc-if>
+          <sc-if value="{{d.isToday}}" hint-placeholder-val="{{false}}">
+            <button aria-label="{{d.label}}" aria-current="date" style="width: 44px; height: 44px; box-sizing: border-box; padding: 0; border: 0; border-radius: 50%; background: #1E55F0; display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums;">{{d.n}}</button>
+          </sc-if>
+          <sc-if value="{{d.isFuture}}" hint-placeholder-val="{{false}}">
+            <button disabled aria-label="{{d.label}}" style="width: 44px; height: 44px; box-sizing: border-box; padding: 0; border: 0; border-radius: 50%; background: transparent; display: flex; align-items: center; justify-content: center; color: #A3A8B5; font-size: 15px; font-weight: 500; font-variant-numeric: tabular-nums; cursor: default;">{{d.n}}</button>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; color: #5B6170; padding-top: 4px;">
+      <span style="display: inline-flex; align-items: center; gap: 6px;"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 50%; background: #1E55F0;"></span>Đạt mục tiêu kcal</span>
+      <span style="display: inline-flex; align-items: center; gap: 6px;"><span aria-hidden="true" style="width: 6px; height: 6px; border-radius: 50%; background: #D93036;"></span>Thiếu</span>
+      <span>Không chấm: chưa ghi</span>
+    </div>
+    <a href="Today.dc.html" style="margin-top: 6px; min-height: 48px; border-radius: 9999px; background: #FFFFFF; border: 1px solid rgba(0,0,0,0.12); color: #1D1D1F; font-size: 16px; font-weight: 600; text-decoration: none; display: flex; align-items: center; justify-content: center;">Hôm nay</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"h":{"editor":null,"default":844},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const names = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy', 'Chủ Nhật'];
+    const blue = ['1', '3', '4', '6', '8', '9'];
+    const amber = ['2', '5', '7'];
+    const days = Array.from({ length: 31 }, (_, i) => {
+      const num = i + 1;
+      const n = String(num);
+      const wd = names[(num + 2) % 7];
+      const isBlue = blue.includes(n);
+      const isAmber = amber.includes(n);
+      const past = num < 10;
+      const isToday = num === 10;
+      const isFuture = num > 10;
+      let status = '';
+      if (isBlue) status = ', đạt mục tiêu';
+      else if (isAmber) status = ', thiếu kcal';
+      else if (past) status = ', chưa ghi';
+      else if (isToday) status = ', hôm nay';
+      else status = ', chưa tới';
+      return {
+        n,
+        label: wd + ' ' + n + ' tháng 10' + status,
+        dot: isBlue ? '#1E55F0' : (isAmber ? '#D93036' : 'transparent'),
+        isLink: num === 8,
+        isBtn: past && num !== 8,
+        isToday,
+        isFuture
+      };
+    });
+    const weekdays = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].map((t) => ({ t }));
+    const blanks = [1, 2, 3].map((x) => ({ x }));
+    return { h: this.props.h ?? 844, weekdays, blanks, days };
+  }
+}
+</script>
+</body>
+</html>

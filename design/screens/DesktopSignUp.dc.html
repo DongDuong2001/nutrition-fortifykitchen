@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Đăng ký (web) — H1T MICRO</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Saira:ital,wdth,wght@0,50..125,400..900;1,50..125,400..900&amp;family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1E55F0}a:hover{color:#0A0A0B}
+button{font-family:inherit}
+a:focus-visible,button:focus-visible{outline:3px solid #1E55F0;outline-offset:2px}
+.nav-link:hover{background:#17181C}
+.row-link:hover{background:#F7F8FA}
+.btn-ghost:hover{background:#E3E5E9}
+.btn-blue:hover{background:#1747CC}
+a:active,button:active{transform:scale(0.97)}
+a,button{transition:transform 150ms ease-out}
+a,button,label,input{touch-action:manipulation}
+a,button{cursor:pointer}
+@media (prefers-reduced-motion: reduce){a,button{transition:none}a:active,button:active{transform:none}}
+</style>
+</helmet>
+<div style="min-height: 980px; display: flex; flex-wrap: wrap; background: #FFFFFF; color: #1D1D1F; font-family: 'Be Vietnam Pro', sans-serif;">
+  <section style="flex: 1 1 480px; min-width: 0; background: #0A0A0B; color: #FFFFFF; padding: 64px 56px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; gap: 40px;">
+    <div role="img" aria-label="H1T MICRO, 1 set là đủ" style="align-self: flex-start; transform: rotate(-6deg); display: flex; flex-direction: column; align-items: flex-start; margin: 16px 0 8px 8px;">
+      <div style="font-family: 'Saira', sans-serif; font-style: italic; font-stretch: 125%; font-weight: 800; font-size: 26px; letter-spacing: 0.06em; margin-left: 40px;">1 SET LÀ ĐỦ</div>
+      <div style="font-family: 'Saira', sans-serif; font-style: italic; font-stretch: 125%; font-weight: 900; font-size: 140px; line-height: 0.86;">H1T</div>
+      <div style="font-family: 'Saira', sans-serif; font-style: italic; font-stretch: 125%; font-weight: 900; font-size: 56px; line-height: 0.95; color: #A9D1F7; margin-left: 80px;">MICRO</div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 20px; max-width: 480px;">
+      <h1 style="margin: 0; font-family: 'Saira', sans-serif; font-style: italic; font-stretch: 118%; font-weight: 800; font-size: 40px; line-height: 1.1;">VI CHẤT PHẢI ĐỦ.</h1>
+      <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 14px;">
+        <sc-for list="{{values}}" as="v" hint-placeholder-count="3">
+          <li style="display: flex; align-items: center; gap: 12px; font-size: 16px; line-height: 1.45; color: #E3E5E9;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#A9D1F7" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none;"><path d="M5 12l5 5 9-10"></path></svg>{{v}}</li>
+        </sc-for>
+      </ul>
+    </div>
+  </section>
+
+  <section style="flex: 1 1 480px; min-width: 0; padding: 48px 24px; box-sizing: border-box; display: flex; align-items: center; justify-content: center;">
+    <div style="width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 16px;">
+      <h2 style="margin: 0 0 8px; font-family: 'Saira', sans-serif; font-style: italic; font-stretch: 118%; font-weight: 800; font-size: 32px;">TẠO TÀI KHOẢN</h2>
+      <button class="btn-ghost" style="height: 52px; border-radius: 9999px; background: #FFFFFF; border: 1px solid rgba(0,0,0,0.12); color: #1D1D1F; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;">
+        <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path></svg>
+        Tiếp tục với Google
+      </button>
+      <div style="display: flex; align-items: center; gap: 10px; color: #5B6170; font-size: 13px;"><span style="flex: 1 1 0; height: 1px; background: #E3E5E9;"></span>hoặc<span style="flex: 1 1 0; height: 1px; background: #E3E5E9;"></span></div>
+      <label style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 600;">
+        Email
+        <input type="email" autocomplete="email" placeholder="ban@email.com" style="height: 52px; box-sizing: border-box; border-radius: 10px; border: 2px solid #D5D8DF; background: #FFFFFF; color: #1D1D1F; padding: 0 14px; font-size: 16px; outline: none;">
+      </label>
+      <a class="btn-blue" href="DesktopSetup.dc.html" style="text-decoration: none; height: 52px; border-radius: 9999px; background: #1E55F0; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700;">Gửi link đăng nhập</a>
+      <div style="font-size: 13px; color: #5B6170; text-align: center;">Chúng tôi gửi link vào email, không cần mật khẩu.</div>
+      <div style="font-size: 15px; color: #5B6170; text-align: center;">Đã có tài khoản? <a href="SignIn.dc.html" style="font-weight: 600; display: inline-flex; align-items: center; min-height: 44px; padding: 0 6px;">Đăng nhập</a></div>
+      <div style="font-size: 12px; color: #5B6170; text-align: center; line-height: 1.5;">Thông tin chỉ mang tính tham khảo, không thay thế tư vấn y tế.</div>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":980}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const values = ['Theo dõi 26 chất dinh dưỡng, không chỉ calo', 'Mục tiêu do Coach Lê Hồng Khánh đặt', 'Ghi bữa ăn trong vài giây, thấy ngay còn thiếu gì'];
+    return { values };
+  }
+}
+</script>
+</body>
+</html>

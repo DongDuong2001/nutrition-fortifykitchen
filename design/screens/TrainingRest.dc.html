@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Ngày tập · Nghỉ — H1T MICRO</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Saira:ital,wdth,wght@0,50..125,400..900;1,50..125,400..900&amp;family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1E55F0}a:hover{color:#0A0A0B}
+button,input{font-family:inherit}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #1E55F0;outline-offset:2px}
+a:active,button:active{transform:scale(0.97)}
+a,button{transition:transform 150ms ease-out}
+a,button,label,input{touch-action:manipulation}
+a,button{cursor:pointer}
+@media (prefers-reduced-motion: reduce){a,button{transition:none}a:active,button:active{transform:none}}
+</style>
+</helmet>
+<div style="width: 390px; height: {{h}}px; box-sizing: border-box; overflow: hidden; background: #F5F5F7; color: #1D1D1F; font-family: 'Be Vietnam Pro', sans-serif; display: flex; flex-direction: column;">
+  <div style="background: #0A0A0B; color: #FFFFFF; padding: 14px 20px 16px; display: flex; flex-direction: column; gap: 10px; border-radius: 0 0 20px 20px;">
+    <div>
+      <div style="font-size: 13px; color: #A3A8B5;">Hôm nay, 10/10</div>
+      <h1 style="margin: 2px 0 0; font-family: 'Saira', sans-serif; font-style: italic; font-stretch: 118%; font-weight: 700; font-size: 28px; letter-spacing: 0.02em;">NGÀY TẬP</h1>
+    </div>
+    <div role="group" aria-label="Thời gian tập" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px;">
+      <sc-for list="{{durations}}" as="d" hint-placeholder-count="5">
+        <div>
+          <sc-if value="{{d.isLink}}" hint-placeholder-val="{{false}}"><a href="Training.dc.html" style="box-sizing: border-box; width: 100%; min-height: 44px; border-radius: 8px; background: {{d.bg}}; color: {{d.color}}; font-size: 14px; font-weight: 700; text-decoration: none; display: flex; align-items: center; justify-content: center;">{{d.label}}</a></sc-if>
+          <sc-if value="{{d.isBtn}}" hint-placeholder-val="{{true}}"><button aria-pressed="{{d.on}}" style="width: 100%; min-height: 44px; border: 0; border-radius: 8px; background: {{d.bg}}; color: {{d.color}}; font-size: 14px; font-weight: 700; cursor: pointer;">{{d.label}}</button></sc-if>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 12px;">
+      <div style="font-size: 13px; color: #A3A8B5; line-height: 1.5;">Muối hôm nay<br>Ngày nghỉ: chỉ cần muối nền, không cộng thêm</div>
+      <div style="font-family: 'Saira', sans-serif; font-style: italic; font-stretch: 118%; font-weight: 700; font-size: 34px; font-variant-numeric: tabular-nums; white-space: nowrap;">4–6<span style="font-size: 18px; color: #A9D1F7;"> g</span></div>
+    </div>
+  </div>
+
+  <div style="flex: 1 1 0; min-height: 0; overflow: hidden; padding: 12px 16px; display: flex; flex-direction: column; gap: 10px;">
+    <section aria-labelledby="rest-title" style="background: #FFFFFF; border: 1px solid rgba(0,0,0,0.08); border-radius: 18px; padding: 14px 16px 6px; display: flex; flex-direction: column;">
+      <div style="display: flex; align-items: center; gap: 12px; padding-bottom: 10px;">
+        <div style="width: 44px; height: 44px; border-radius: 50%; background: #EEF3FE; color: #1E55F0; display: flex; align-items: center; justify-content: center; flex: none;">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path></svg>
+        </div>
+        <h2 id="rest-title" style="margin: 0; font-size: 18px; font-weight: 700;">Hôm nay nghỉ tập</h2>
+      </div>
+      <sc-for list="{{tips}}" as="t" hint-placeholder-count="3">
+        <div style="display: flex; align-items: center; gap: 12px; min-height: 52px; border-top: 1px solid #EEF0F3;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E55F0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none;"><path d="{{t.path}}"></path></svg>
+          <span style="font-size: 15px; font-weight: 600;">{{t.text}}</span>
+        </div>
+      </sc-for>
+    </section>
+    <div style="background: #FFFFFF; border: 1px solid rgba(0,0,0,0.08); border-radius: 18px; padding: 12px 16px; font-size: 14px; line-height: 1.5; display: flex; gap: 10px;">
+      <span style="width: 4px; flex: none; border-radius: 2px; background: #1E55F0;"></span>
+      <span><span style="font-weight: 700;">Mẹo:</span> Ngày nghỉ vẫn ăn đủ đạm để cơ phục hồi.</span>
+    </div>
+  </div>
+
+  <nav aria-label="Điều hướng chính" style="height: 72px; flex: none; background: #0A0A0B; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: center;">
+    <a href="Today.dc.html" style="text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 56px; color: #8C92A0; font-size: 12px; font-weight: 600;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"></path></svg>Hôm nay
+    </a>
+    <a href="Micros.dc.html" style="text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 56px; color: #8C92A0; font-size: 12px; font-weight: 600;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20V11M12 20V4M19 20v-6"></path></svg>Vi chất
+    </a>
+    <div style="display: flex; justify-content: center;">
+      <a href="AddFood.dc.html" aria-label="Thêm món" style="width: 52px; height: 52px; border-radius: 14px; background: #1E55F0; color: #FFFFFF; display: flex; align-items: center; justify-content: center;">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+      </a>
+    </div>
+    <a href="Training.dc.html" aria-current="page" style="text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 56px; color: #FFFFFF; font-size: 12px; font-weight: 600;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"></path></svg>Ngày tập
+    </a>
+    <a href="Profile.dc.html" style="text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 56px; color: #8C92A0; font-size: 12px; font-weight: 600;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"></path></svg>Hồ sơ
+    </a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"h":{"editor":null,"default":844},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const durations = ['Nghỉ', '45 phút', '60 phút', '90 phút', '120 phút'].map((label) => {
+      const on = label === 'Nghỉ';
+      const isLink = label === '60 phút';
+      return { label, on, isLink, isBtn: !isLink, bg: on ? '#1E55F0' : '#17181C', color: on ? '#FFFFFF' : '#D5D8DF' };
+    });
+    const tips = [
+      { text: 'Ngủ đủ 7–9 tiếng', path: 'M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z' },
+      { text: 'Đạm vẫn 104–143 g', path: 'M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12' },
+      { text: 'Năng lượng giữ 1.950–2.275 kcal', path: 'M13 3L5 14h6l-1 7 8-11h-6z' }
+    ];
+    return { h: this.props.h ?? 844, durations, tips };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>H1T MICRO Pro — H1T MICRO</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Saira:ital,wdth,wght@0,50..125,400..900;1,50..125,400..900&amp;family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1E55F0}a:hover{color:#0A0A0B}
+button,input{font-family:inherit}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #1E55F0;outline-offset:2px}
+a:active,button:active{transform:scale(0.97)}
+a,button{transition:transform 150ms ease-out}
+a,button,label,input{touch-action:manipulation}
+a,button{cursor:pointer}
+@media (prefers-reduced-motion: reduce){a,button{transition:none}a:active,button:active{transform:none}}
+</style>
+</helmet>
+<div style="width: 390px; height: {{h}}px; box-sizing: border-box; overflow: hidden; background: #F5F5F7; color: #1D1D1F; font-family: 'Be Vietnam Pro', sans-serif; display: flex; flex-direction: column;">
+  <div style="flex: none; background: #0A0A0B; color: #FFFFFF; padding: 12px 20px 26px; border-radius: 0 0 20px 20px; display: flex; flex-direction: column; gap: 4px;">
+    <a href="Profile.dc.html" aria-label="Quay lại" style="width: 44px; height: 44px; border-radius: 8px; color: #FFFFFF; display: flex; align-items: center; justify-content: center; margin-left: -12px;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+    </a>
+    <div role="img" aria-label="H1T MICRO" style="display: flex; align-items: baseline; gap: 8px; font-family: 'Saira', sans-serif; font-style: italic; font-stretch: 125%; font-weight: 900;">
+      <span style="font-size: 30px;">H1T</span><span style="font-size: 30px; color: #A9D1F7;">MICRO</span>
+    </div>
+    <h1 style="margin: 0; font-family: 'Saira', sans-serif; font-style: italic; font-stretch: 118%; font-weight: 800; font-size: 56px; line-height: 1;">PRO</h1>
+    <div style="font-size: 16px; color: #A9D1F7; font-weight: 600;">Ăn theo Coach, không phải đoán</div>
+  </div>
+  <div style="flex: 1 1 0; min-height: 0; overflow: hidden; padding: 12px 16px; display: flex; flex-direction: column; gap: 10px;">
+    <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px;">
+      <sc-for list="{{benefits}}" as="b" hint-placeholder-count="4">
+        <li style="display: flex; gap: 10px; align-items: flex-start; font-size: 15px; line-height: 1.35;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E55F0" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none;"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg><span>{{b.l}}</span></li>
+      </sc-for>
+    </ul>
+    <div role="radiogroup" aria-label="Chọn gói" style="display: flex; flex-direction: column; gap: 8px;">
+      <sc-for list="{{plans}}" as="p" hint-placeholder-count="2">
+        <button type="button" role="radio" aria-checked="{{p.on}}" style="text-align: left; min-height: 64px; border-radius: 14px; border: 2px solid {{p.border}}; background: #FFFFFF; color: #1D1D1F; padding: 8px 14px; display: flex; align-items: center; gap: 12px;">
+          <span aria-hidden="true" style="flex: none; width: 20px; height: 20px; border-radius: 10px; border: 2px solid {{p.border}}; box-sizing: border-box; display: flex; align-items: center; justify-content: center;"><span style="width: 10px; height: 10px; border-radius: 5px; background: {{p.dot}};"></span></span>
+          <span style="flex: 1 1 0; display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
+            <span style="font-size: 16px; font-weight: 700;">{{p.name}}</span>
+            <sc-if value="{{p.hasChip}}" hint-placeholder-val="{{false}}">
+              <span style="font-size: 13px; font-weight: 700; color: #FFFFFF; background: #1E55F0; border-radius: 9999px; padding: 2px 10px;">{{p.chip}}</span>
+            </sc-if>
+          </span>
+          <span style="font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums;">{{p.price}}</span>
+        </button>
+      </sc-for>
+    </div>
+  </div>
+  <div style="flex: none; padding: 8px 16px 14px; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+    <a href="Profile.dc.html" style="align-self: stretch; text-decoration: none; height: 52px; border-radius: 9999px; background: #1E55F0; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700;">Tiếp tục thanh toán</a>
+    <div style="font-size: 13px; color: #5B6170; text-align: center;">Thanh toán qua [NHÀ CUNG CẤP THANH TOÁN] · huỷ bất cứ lúc nào</div>
+    <button type="button" style="height: 44px; border: 0; background: transparent; color: #1E55F0; font-size: 15px; font-weight: 600; text-decoration: underline;">Khôi phục gói đã mua</button>
+    <div style="font-size: 12px; color: #5B6170; text-align: center;">Gói Miễn phí vẫn ghi đủ 21 vi chất.</div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"h":{"editor":null,"default":844},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const benefits = [
+      { l: 'Gợi ý món theo vi chất còn thiếu' },
+      { l: 'Xu hướng 30 & 90 ngày' },
+      { l: 'Món & công thức riêng của Coach' },
+      { l: 'Xuất dữ liệu CSV' }
+    ];
+    const plans = [
+      { name: 'Tháng', price: '[GIÁ/THÁNG]' },
+      { name: 'Năm', price: '[GIÁ/NĂM]', chip: 'Tiết kiệm [X]%', on: true }
+    ].map((p) => ({ chip: '', ...p, on: !!p.on, hasChip: !!p.chip, border: p.on ? '#1E55F0' : '#E3E5E9', dot: p.on ? '#1E55F0' : 'transparent' }));
+    return { h: this.props.h ?? 844, benefits, plans };
+  }
+}
+</script>
+</body>
+</html>

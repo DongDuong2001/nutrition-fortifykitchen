@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Hồ sơ (web) — H1T MICRO</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Saira:ital,wdth,wght@0,50..125,400..900;1,50..125,400..900&amp;family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1E55F0}a:hover{color:#0A0A0B}
+button{font-family:inherit}
+a:focus-visible,button:focus-visible{outline:3px solid #1E55F0;outline-offset:2px}
+.nav-link:hover{background:#17181C}
+.row-link:hover{background:#F7F8FA}
+.btn-ghost:hover{background:#E3E5E9}
+.btn-blue:hover{background:#1747CC}
+a:active,button:active{transform:scale(0.97)}
+a,button{transition:transform 150ms ease-out}
+a,button,label,input{touch-action:manipulation}
+a,button{cursor:pointer}
+@media (prefers-reduced-motion: reduce){a,button{transition:none}a:active,button:active{transform:none}}
+</style>
+</helmet>
+<div style="min-height: 980px; display: flex; flex-wrap: wrap; background: #F5F5F7; color: #1D1D1F; font-family: 'Be Vietnam Pro', sans-serif;">
+  <aside style="flex: 1 1 240px; max-width: 100%; background: #0A0A0B; color: #FFFFFF; padding: 24px 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 24px;">
+    <div style="padding: 0 8px; font-family: 'Saira', sans-serif; font-style: italic; font-stretch: 118%; font-weight: 900; font-size: 24px;">H1T <span style="color: #A9D1F7;">MICRO</span></div>
+    <nav aria-label="Điều hướng chính" style="display: flex; flex-direction: column; gap: 4px;">
+      <sc-for list="{{nav}}" as="n" hint-placeholder-count="4">
+        <a class="nav-link" href="{{n.href}}" aria-current="{{n.current}}" style="text-decoration: none; display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 12px; border-radius: 10px; font-size: 15px; font-weight: 600; color: {{n.color}}; background: {{n.bg}};">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{n.icon}}"></path></svg>{{n.label}}
+        </a>
+      </sc-for>
+    </nav>
+  </aside>
+
+  <main style="flex: 999 1 560px; min-width: 0; padding: 28px 32px 40px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px; max-width: 1240px;">
+    <header>
+      <h1 style="margin: 0; font-family: 'Saira', sans-serif; font-style: italic; font-stretch: 118%; font-weight: 800; font-size: 34px;">HỒ SƠ</h1>
+      <div style="font-size: 14px; color: #5B6170;">ban@email.com · Gói Miễn phí</div>
+    </header>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start;">
+      <div style="flex: 2 1 440px; min-width: 0; display: flex; flex-direction: column; gap: 16px;">
+      <section style="background: #FFFFFF; border: 1px solid rgba(0,0,0,0.08); border-radius: 18px; padding: 16px 22px 2px;">
+        <h2 style="margin: 0 0 4px; font-size: 13px; font-weight: 700; color: #5B6170; letter-spacing: 0.04em;">CƠ THỂ</h2>
+        <div style="display: flex; align-items: center; gap: 8px; min-height: 56px; border-top: 1px solid #EEF0F3; font-size: 15px;">
+          <span style="flex: 1 1 0;">Giới tính</span>
+          <span style="font-weight: 600; font-variant-numeric: tabular-nums;">Nam</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px; min-height: 56px; border-top: 1px solid #EEF0F3; padding: 4px 0;">
+          <div style="flex: 1 1 0; display: flex; flex-direction: column; gap: 2px;">
+            <span style="font-size: 15px;">Gần/đang trong kỳ</span>
+            <span style="font-size: 13px; line-height: 1.35; color: #5B6170;">Chỉ với Nữ · sắt 18 → 28 mg/ngày</span>
+          </div>
+          <button role="switch" aria-checked="false" aria-label="Gần/đang trong kỳ" style="flex: none; width: 51px; height: 44px; padding: 0; border: 0; background: transparent; cursor: pointer; display: flex; align-items: center;">
+            <span aria-hidden="true" style="position: relative; display: block; width: 51px; height: 31px; border-radius: 16px; background: #E3E5E9;">
+              <span style="position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 14px; background: #FFFFFF; box-shadow: 0 1px 3px rgba(0,0,0,0.25);"></span>
+            </span>
+          </button>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; min-height: 56px; border-top: 1px solid #EEF0F3; font-size: 15px;">
+          <span style="flex: 1 1 0;">Năm sinh</span>
+          <span style="font-weight: 600; font-variant-numeric: tabular-nums;">2003</span>
+        </div>
+        <a class="row-link" href="EditWeight.dc.html" style="text-decoration: none; color: #1D1D1F; display: flex; align-items: center; gap: 8px; min-height: 56px; border-top: 1px solid #EEF0F3; font-size: 15px;">
+          <span style="flex: 1 1 0; display: flex; flex-direction: column;"><span>Cân nặng</span></span>
+          <span style="font-weight: 600; font-variant-numeric: tabular-nums;">65 kg</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B6170" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+        </a>
+      </section>
+      <section style="background: #FFFFFF; border: 1px solid rgba(0,0,0,0.08); border-radius: 18px; padding: 16px 22px 2px;">
+        <h2 style="margin: 0 0 4px; font-size: 13px; font-weight: 700; color: #5B6170; letter-spacing: 0.04em;">MỤC TIÊU</h2>
+        <a class="row-link" href="ChangeGoal.dc.html" style="text-decoration: none; color: #1D1D1F; display: flex; align-items: center; gap: 8px; min-height: 56px; border-top: 1px solid #EEF0F3; font-size: 15px;">
+          <span style="flex: 1 1 0; display: flex; flex-direction: column;"><span>Mục tiêu</span></span>
+          <span style="font-weight: 600; font-variant-numeric: tabular-nums;">Giữ cân</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B6170" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+        </a>
+        <a class="row-link" href="DesktopTraining.dc.html" style="text-decoration: none; color: #1D1D1F; display: flex; align-items: center; gap: 8px; min-height: 56px; border-top: 1px solid #EEF0F3; font-size: 15px;">
+          <span style="flex: 1 1 0; display: flex; flex-direction: column;"><span>Ngày tập mặc định</span></span>
+          <span style="font-weight: 600; font-variant-numeric: tabular-nums;">60 phút</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B6170" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+        </a>
+      </section>
+      <section style="background: #FFFFFF; border: 1px solid rgba(0,0,0,0.08); border-radius: 18px; padding: 16px 22px 2px;">
+        <h2 style="margin: 0 0 4px; font-size: 13px; font-weight: 700; color: #5B6170; letter-spacing: 0.04em;">ỨNG DỤNG</h2>
+        <a class="row-link" href="Language.dc.html" style="text-decoration: none; color: #1D1D1F; display: flex; align-items: center; gap: 8px; min-height: 56px; border-top: 1px solid #EEF0F3; font-size: 15px;">
+          <span style="flex: 1 1 0; display: flex; flex-direction: column;"><span>Ngôn ngữ</span></span>
+          <span style="font-weight: 600; font-variant-numeric: tabular-nums;">Tiếng Việt</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B6170" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+        </a>
+        <a class="row-link" href="Notifications.dc.html" style="text-decoration: none; color: #1D1D1F; display: flex; align-items: center; gap: 8px; min-height: 56px; border-top: 1px solid #EEF0F3; font-size: 15px;">
+          <span style="flex: 1 1 0; display: flex; flex-direction: column;"><span>Nhắc nhở</span></span>
+          <span style="font-weight: 600; font-variant-numeric: tabular-nums;">Đã bật</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B6170" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+        </a>
+        <a class="row-link" href="InstallApp.dc.html" style="text-decoration: none; color: #1D1D1F; display: flex; align-items: center; gap: 8px; min-height: 56px; border-top: 1px solid #EEF0F3; font-size: 15px;">
+          <span style="flex: 1 1 0; display: flex; flex-direction: column;"><span>Cài như ứng dụng</span><span style="font-size: 13px; color: #5B6170;">Mở như ứng dụng, không cần cửa hàng</span></span>
+          <span style="font-weight: 600; font-variant-numeric: tabular-nums;"></span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B6170" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+        </a>
+      </section>
+      </div>
+
+      <div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 16px;">
+        <section style="background: #1E55F0; color: #FFFFFF; border-radius: 18px; padding: 20px 22px; display: flex; flex-direction: column; gap: 14px;">
+          <div>
+            <h2 style="margin: 0; font-size: 18px; font-weight: 700;">Nâng cấp H1T MICRO Pro</h2>
+            <div style="font-size: 14px; line-height: 1.5; margin-top: 4px;">Gợi ý của Coach, xu hướng 30 ngày, món ăn &amp; công thức riêng</div>
+          </div>
+          <a href="Paywall.dc.html" style="text-decoration: none; align-self: flex-start; height: 44px; padding: 0 20px; border-radius: 9999px; background: #FFFFFF; color: #0A0A0B; display: inline-flex; align-items: center; font-size: 15px; font-weight: 700; box-sizing: border-box;">Xem gói</a>
+        </section>
+
+        <section style="background: #FFFFFF; border: 1px solid rgba(0,0,0,0.08); border-radius: 18px; padding: 18px 22px; display: flex; flex-direction: column; gap: 10px;">
+          <h2 style="margin: 0; font-size: 13px; font-weight: 700; color: #5B6170; letter-spacing: 0.04em;">DỮ LIỆU</h2>
+          <div style="font-size: 14px; color: #5B6170; line-height: 1.5;">Tải toàn bộ nhật ký ăn uống của bạn dưới dạng bảng tính.</div>
+          <button class="btn-ghost" style="align-self: flex-start; height: 48px; padding: 0 20px; border-radius: 9999px; background: #FFFFFF; border: 1px solid rgba(0,0,0,0.12); color: #1D1D1F; font-size: 15px; font-weight: 600; cursor: pointer;">Tải dữ liệu CSV</button>
+        </section>
+
+        <section style="background: #FFFFFF; border: 1px solid rgba(0,0,0,0.08); border-radius: 18px; padding: 18px 22px; display: flex; flex-direction: column; gap: 6px;">
+          <h2 style="margin: 0; font-size: 13px; font-weight: 700; color: #D93036; letter-spacing: 0.04em;">VÙNG NGUY HIỂM</h2>
+          <div style="font-size: 14px; color: #5B6170; line-height: 1.5;">Xoá tài khoản sẽ xoá toàn bộ nhật ký và không thể khôi phục.</div>
+          <a href="DeleteAccount.dc.html" style="text-decoration: none; align-self: flex-start; min-height: 52px; display: inline-flex; align-items: center; font-size: 15px; font-weight: 700; color: #D93036;">Xoá tài khoản</a>
+        </section>
+
+        <button class="btn-ghost" style="min-height: 52px; border: 0; border-radius: 12px; background: #FFFFFF; color: #D93036; font-size: 15px; font-weight: 700; cursor: pointer;">Đăng xuất</button>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":980}}'>
+class Component extends DCLogic {
+  renderVals() {
+        const nav = [
+      { label: 'Hôm nay', href: 'DesktopToday.dc.html', icon: 'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z' },
+      { label: 'Vi chất', href: 'DesktopMicros.dc.html', icon: 'M5 20V11M12 20V4M19 20v-6' },
+      { label: 'Ngày tập', href: 'DesktopTraining.dc.html', icon: 'M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12' },
+      { label: 'Hồ sơ', href: 'DesktopProfile.dc.html', icon: 'M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM4 21c1.5-4 4.5-6 8-6s6.5 2 8 6' }
+    ].map((n) => { const on = n.label === 'Hồ sơ'; return { ...n, current: on ? 'page' : 'false', color: on ? '#FFFFFF' : '#A3A8B5', bg: on ? '#17181C' : 'transparent' }; });
+
+    return { nav };
+  }
+}
+</script>
+</body>
+</html>

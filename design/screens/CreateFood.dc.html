@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Tạo món mới — H1T MICRO</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Saira:ital,wdth,wght@0,50..125,400..900;1,50..125,400..900&amp;family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1E55F0}a:hover{color:#0A0A0B}
+button,input{font-family:inherit}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #1E55F0;outline-offset:2px}
+a:active,button:active{transform:scale(0.97)}
+a,button{transition:transform 150ms ease-out}
+a,button,label,input{touch-action:manipulation}
+a,button{cursor:pointer}
+@media (prefers-reduced-motion: reduce){a,button{transition:none}a:active,button:active{transform:none}}
+</style>
+</helmet>
+<div style="width: 390px; height: {{h}}px; box-sizing: border-box; overflow: hidden; background: #F5F5F7; color: #1D1D1F; font-family: 'Be Vietnam Pro', sans-serif; display: flex; flex-direction: column;">
+  <div style="flex: none; background: #0A0A0B; color: #FFFFFF; padding: 12px 20px 18px; border-radius: 0 0 20px 20px; display: flex; flex-direction: column; gap: 6px;">
+    <a href="AddFood.dc.html" aria-label="Quay lại" style="width: 44px; height: 44px; margin-left: -12px; border-radius: 8px; color: #FFFFFF; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></a>
+    <h1 style="margin: 0; font-family: 'Saira', sans-serif; font-style: italic; font-stretch: 118%; font-weight: 800; font-size: 28px;">TẠO MÓN MỚI</h1>
+    
+  </div>
+
+  <form style="flex: 1 1 0; min-height: 0; overflow: hidden; padding: 16px 16px 0; display: flex; flex-direction: column; gap: 14px;">
+      <label for="cf-name" style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 700;">Tên món
+        <input id="cf-name" type="text" value="Bánh tráng trộn"  style="height: 48px; box-sizing: border-box; border-radius: 10px; border: 2px solid #D5D8DF; padding: 0 12px; background: #FFFFFF; color: #1D1D1F; font-size: 16px; font-weight: 400; width: 100%;">
+      </label>
+    <div style="display: flex; align-items: flex-end; gap: 10px;">
+      <label for="cf-size" style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 700; width: 110px; flex: none;">Khẩu phần
+        <input id="cf-size" type="number" inputmode="decimal" value="100" style="height: 48px; box-sizing: border-box; border-radius: 10px; border: 2px solid #D5D8DF; padding: 0 12px; background: #FFFFFF; color: #1D1D1F; font-size: 16px; font-weight: 400; font-variant-numeric: tabular-nums; width: 100%;">
+      </label>
+      <div role="radiogroup" aria-label="Đơn vị" style="display: flex; gap: 8px;">
+        <sc-for list="{{units}}" as="u" hint-placeholder-count="3">
+          <button type="button" role="radio" aria-checked="{{u.on}}" style="height: 44px; min-width: 52px; padding: 0 16px; border: 0; border-radius: 22px; background: {{u.bg}}; color: {{u.color}}; font-size: 15px; font-weight: 600; cursor: pointer;">{{u.label}}</button>
+        </sc-for>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <h2 style="margin: 0; font-size: 16px; font-weight: 700;">Dinh dưỡng mỗi khẩu phần</h2>
+      <p style="margin: 0; font-size: 13px; color: #5B6170; line-height: 1.45;">Lấy số trên nhãn dinh dưỡng của gói. Bỏ trống = chưa biết, không phải 0.</p>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 4px;">
+        <label for="cf-kcal" style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 700;">Năng lượng (kcal)
+          <input id="cf-kcal" type="text" inputmode="decimal" value="320" style="height: 48px; box-sizing: border-box; border-radius: 10px; border: 2px solid #D5D8DF; padding: 0 12px; background: #FFFFFF; color: #1D1D1F; font-size: 16px; font-weight: 400; font-variant-numeric: tabular-nums; width: 100%;">
+        </label>
+        <label for="cf-pro" style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 700;">Đạm (g)
+          <input id="cf-pro" type="text" inputmode="decimal" value="9" style="height: 48px; box-sizing: border-box; border-radius: 10px; border: 2px solid #D5D8DF; padding: 0 12px; background: #FFFFFF; color: #1D1D1F; font-size: 16px; font-weight: 400; font-variant-numeric: tabular-nums; width: 100%;">
+        </label>
+        <label for="cf-carb" style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 700;">Tinh bột (g)
+          <input id="cf-carb" type="text" inputmode="decimal" value="48" style="height: 48px; box-sizing: border-box; border-radius: 10px; border: 2px solid #D5D8DF; padding: 0 12px; background: #FFFFFF; color: #1D1D1F; font-size: 16px; font-weight: 400; font-variant-numeric: tabular-nums; width: 100%;">
+        </label>
+        <label for="cf-fat" style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 700;">Béo (g)
+          <input id="cf-fat" type="text" inputmode="decimal" value="10" style="height: 48px; box-sizing: border-box; border-radius: 10px; border: 2px solid #D5D8DF; padding: 0 12px; background: #FFFFFF; color: #1D1D1F; font-size: 16px; font-weight: 400; font-variant-numeric: tabular-nums; width: 100%;">
+        </label>
+      </div>
+    </div>
+    <button type="button" aria-expanded="false" style="min-height: 48px; border: 1px solid rgba(0,0,0,0.12); border-radius: 12px; background: #FFFFFF; color: #1D1D1F; padding: 0 14px; font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; cursor: pointer; text-align: left;">
+      <span>+ Thêm vi chất (Natri, Canxi, Sắt…)</span>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5B6170" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>
+    </button>
+  </form>
+
+  <div style="flex: none; padding: 10px 16px 18px; background: #F5F5F7;">
+    <a href="TodayAdded.dc.html" style="text-decoration: none; height: 52px; border-radius: 9999px; background: #1E55F0; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700;">Lưu và thêm vào Trước tập</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"h":{"editor":null,"default":844},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const units = ['g', 'ml', 'cái'].map((label) => { const on = label === 'g'; return { label, on, bg: on ? '#0A0A0B' : '#E3E5E9', color: on ? '#FFFFFF' : '#1D1D1F' }; });
+    return { h: this.props.h ?? 844, units };
+  }
+}
+</script>
+</body>
+</html>
