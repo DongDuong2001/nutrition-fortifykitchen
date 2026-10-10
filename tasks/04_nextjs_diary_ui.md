@@ -2,7 +2,7 @@
 
 ## Objectives
 1. Next.js App Router UI Architecture:
-   - Modern culinary aesthetic inspired by Fortify Kitchen (dark slate backgrounds, emerald/sage culinary accents, warm amber highlights).
+   - Visual design: follow `design/` and HANDOFF.md exactly (H1T MICRO: black header/nav, #F5F5F7 page, white cards, blue #1E55F0, Be Vietnam Pro + Saira). The earlier "culinary" direction is replaced.
    - Dedicated pages:
      - `app/(dashboard)/diary/page.tsx`: Daily meal log, slot tabs (Breakfast, Lunch, Dinner, Snack), nutrition progress bars.
      - `app/(dashboard)/foods/page.tsx`: Food catalog & custom food creation.
