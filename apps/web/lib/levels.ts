@@ -30,11 +30,11 @@ export function getLevelColor(lvl: NutrientLevel, tone: SegmentTone = "light"): 
   if (tone === "dark") {
     switch (lvl) {
       case "thieu":
-        return "#FF6B6B";
+        return "#E5484D";
       case "trungbinh":
-        return "#F5C518";
+        return "#E8A400";
       case "ganDu":
-        return "#4ADE80";
+        return "#1FA971";
       case "dat":
         return "#5C86F2";
     }
@@ -43,16 +43,16 @@ export function getLevelColor(lvl: NutrientLevel, tone: SegmentTone = "light"): 
   // Light tone default
   switch (lvl) {
     case "thieu":
-      return "#D93036";
+      return "#D93F44";
     case "trungbinh":
-      return "#D99A00";
+      return "#B07800";
     case "ganDu":
-      return "#16A34A";
+      return "#17945F";
     case "dat":
-      return "#1E55F0";
+      return "#1238D6";
   }
 }
 
 export function getEmptySegmentColor(tone: SegmentTone = "light"): string {
-  return tone === "dark" ? "#2B2D33" : "#E3E5E9";
+  return tone === "dark" ? "#2A2C31" : "#E6E1D7";
 }

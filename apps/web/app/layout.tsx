@@ -1,19 +1,18 @@
 import type { Metadata } from "next";
-import { Be_Vietnam_Pro, Saira } from "next/font/google";
+import { Manrope, Saira_Condensed } from "next/font/google";
 import "./globals.css";
 
-const beVietnamPro = Be_Vietnam_Pro({
+const manrope = Manrope({
   subsets: ["vietnamese", "latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-be-vietnam-pro",
+  weight: ["400", "600", "700"],
+  variable: "--font-manrope-face",
   display: "swap",
 });
 
-const saira = Saira({
+const sairaCondensed = Saira_Condensed({
   subsets: ["vietnamese", "latin"],
-  style: ["italic"],
-  axes: ["wdth"],
-  variable: "--font-saira-face",
+  weight: ["800", "900"],
+  variable: "--font-saira-condensed-face",
   display: "swap",
 });
 
@@ -28,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="vi" className={`${beVietnamPro.variable} ${saira.variable}`}>
+    <html lang="vi" className={`${manrope.variable} ${sairaCondensed.variable}`}>
       <body className="bg-page text-text antialiased min-h-screen flex flex-col font-sans">
         {children}
       </body>

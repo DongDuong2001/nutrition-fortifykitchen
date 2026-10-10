@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 
 interface CalorieDialProps {
   current: number;
@@ -10,6 +12,10 @@ interface CalorieDialProps {
   className?: string;
 }
 
+/**
+ * H1T MICRO Calorie Ring Dial (Cobalt Sign).
+ * On load, ring fills in 600ms ease-out (disabled under prefers-reduced-motion).
+ */
 export function CalorieDial({
   current,
   target,
@@ -19,10 +25,17 @@ export function CalorieDial({
   ariaLabel,
   className = "",
 }: CalorieDialProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const radius = 52;
   const circumference = 2 * Math.PI * radius; // 326.72
   const progress = target > 0 ? Math.min(Math.max(current / target, 0), 1) : 0;
-  const strokeDashoffset = circumference * (1 - progress);
+  const targetOffset = circumference * (1 - progress);
+  const strokeDashoffset = mounted ? targetOffset : circumference;
 
   const defaultLabel = targetMax
     ? `Năng lượng ${current.toLocaleString("vi-VN")} trên mục tiêu ${target.toLocaleString("vi-VN")} đến ${targetMax.toLocaleString("vi-VN")} kcal`
@@ -60,14 +73,15 @@ export function CalorieDial({
             stroke="currentColor"
             strokeWidth={strokeWidth}
             strokeLinecap="round"
-            strokeDasharray={`${(circumference * progress).toFixed(1)} ${circumference.toFixed(1)}`}
+            strokeDasharray={circumference.toFixed(1)}
+            strokeDashoffset={strokeDashoffset}
             transform="rotate(-90 60 60)"
-            className="text-blue"
+            className="text-blue transition-[stroke-dashoffset] duration-[600ms] ease-out motion-reduce:transition-none"
           />
         )}
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center select-none pointer-events-none">
-        <span className="font-saira italic font-extrabold text-2xl text-white leading-tight tracking-tight">
+        <span className="font-display italic font-black text-2xl text-white leading-tight tracking-tight tabular-nums">
           {current.toLocaleString("vi-VN")}
         </span>
         <span className="text-[13px] text-muted-dark leading-none">

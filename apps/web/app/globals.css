@@ -1,39 +1,45 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: var(--font-be-vietnam-pro), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-saira: var(--font-saira-face), sans-serif;
+  --font-sans: var(--font-manrope-face), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: var(--font-saira-condensed-face), sans-serif;
+  --font-saira: var(--font-saira-condensed-face), sans-serif;
 
-  --color-ink: #0A0A0B;
-  --color-page: #F5F5F7;
+  /* Cobalt Sign core tokens */
+  --color-paper: #F3F1EC;
+  --color-page: #F3F1EC;
   --color-card: #FFFFFF;
-  --color-text: #1D1D1F;
-  --color-secondary: #5B6170;
-  --color-blue: #1E55F0;
-  --color-sky: #A9D1F7;
-  --color-red: #D93036;
+  --color-card-border: #E0DACF;
+  --color-ink: #111317;
+  --color-text: #141519;
+  --color-secondary: #6B6A66;
+  --color-cobalt: #1238D6;
+  --color-blue: #1238D6;
+  --color-sky: #9EC3FF;
+  --color-destructive: #D93F44;
+  --color-red: #D93F44;
 
   /* 4 level colours - light background */
-  --color-level-red: #D93036;
-  --color-level-yellow: #D99A00;
-  --color-level-green: #16A34A;
-  --color-level-blue: #1E55F0;
-  --color-level-empty: #E3E5E9;
+  --color-level-red: #D93F44;
+  --color-level-yellow: #B07800;
+  --color-level-green: #17945F;
+  --color-level-blue: #1238D6;
+  --color-level-empty: #E6E1D7;
 
-  /* 4 level colours - dark background */
-  --color-level-red-dark: #FF6B6B;
-  --color-level-yellow-dark: #F5C518;
-  --color-level-green-dark: #4ADE80;
+  /* 4 level colours - dark (ink) background */
+  --color-level-red-dark: #E5484D;
+  --color-level-yellow-dark: #E8A400;
+  --color-level-green-dark: #1FA971;
   --color-level-blue-dark: #5C86F2;
-  --color-level-empty-dark: #2B2D33;
+  --color-level-empty-dark: #2A2C31;
 
-  --color-divider: #EEF0F3;
-  --color-muted-dark: #A3A8B5;
+  --color-divider: #E0DACF;
+  --color-muted-dark: #6B6A66;
   --color-muted-subtitle: #C9CDD6;
   --color-muted-on-dark: #8C92A0;
   --color-grabber: #D5D8DF;
-  --color-scrim: rgba(10, 10, 11, 0.5);
-  --color-surface-dark: #1C1D21;
+  --color-scrim: rgba(17, 19, 23, 0.5);
+  --color-surface-dark: #1A1C22;
   --color-warning-bg: #FFF4E0;
   --color-warning-text: #7A4A00;
 }
@@ -45,8 +51,8 @@
 @layer base {
   body {
     margin: 0;
-    background-color: var(--color-page, #F5F5F7);
-    color: var(--color-text, #1D1D1F);
+    background-color: var(--color-page, #F3F1EC);
+    color: var(--color-text, #141519);
     font-family: var(--font-sans);
     min-height: 100vh;
     overflow-x: hidden;
@@ -54,10 +60,10 @@
 
   /* Global interaction and accessibility rules from design */
   a {
-    color: var(--color-blue, #1E55F0);
+    color: var(--color-blue, #1238D6);
   }
   a:hover {
-    color: var(--color-ink, #0A0A0B);
+    color: var(--color-ink, #111317);
   }
 
   button,
@@ -66,44 +72,44 @@
   textarea {
     font-family: inherit;
   }
-}
 
-a:focus-visible,
-button:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible {
-  outline: 3px solid var(--color-blue, #1E55F0);
-  outline-offset: 2px;
-}
-
-a:active,
-button:active {
-  transform: scale(0.97);
-}
-
-a,
-button {
-  transition: transform 150ms ease-out;
-  cursor: pointer;
-}
-
-a,
-button,
-label,
-input,
-select,
-textarea {
-  touch-action: manipulation;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  a,
-  button {
-    transition: none;
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 3px solid var(--color-blue, #1238D6);
+    outline-offset: 2px;
   }
+
   a:active,
   button:active {
-    transform: none;
+    transform: scale(0.97);
+  }
+
+  a,
+  button {
+    transition: transform 150ms ease-out;
+    cursor: pointer;
+  }
+
+  a,
+  button,
+  label,
+  input,
+  select,
+  textarea {
+    touch-action: manipulation;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    a,
+    button {
+      transition: none;
+    }
+    a:active,
+    button:active {
+      transform: none;
+    }
   }
 }

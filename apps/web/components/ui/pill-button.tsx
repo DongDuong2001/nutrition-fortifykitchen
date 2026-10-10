@@ -11,6 +11,10 @@ export interface PillButtonProps
   children: React.ReactNode;
 }
 
+/**
+ * H1T MICRO Pill Button (Cobalt Sign).
+ * Primary pill pressed state uses skewX(-14deg) motif while keeping text unslanted.
+ */
 export function PillButton({
   variant = "primary",
   href,
@@ -21,16 +25,27 @@ export function PillButton({
   ...props
 }: PillButtonProps) {
   const baseClasses =
-    "inline-flex items-center justify-center rounded-full h-[52px] px-6 text-base font-bold transition-transform duration-150 active:scale-[0.97] disabled:opacity-50 disabled:pointer-events-none select-none box-border no-underline cursor-pointer";
+    "group inline-flex items-center justify-center rounded-full h-[52px] px-6 text-base font-bold transition-transform duration-150 active:scale-[0.97] disabled:opacity-50 disabled:pointer-events-none select-none box-border no-underline cursor-pointer motion-reduce:active:transform-none";
+
+  const isPrimary = variant === "primary";
 
   const variantClasses = {
-    primary: "bg-blue text-white hover:bg-blue/90 border-0 shadow-sm",
+    primary:
+      "bg-blue text-white hover:bg-blue/90 border-0 shadow-sm active:-skew-x-[14deg]",
     secondary:
-      "bg-white text-text border border-black/12 hover:bg-black/[0.02]",
+      "bg-card text-text border border-card-border hover:bg-paper",
     destructive: "bg-red text-white hover:bg-red/90 border-0 shadow-sm",
   }[variant];
 
   const widthClass = fullWidth ? "w-full" : "w-auto";
+
+  const content = isPrimary ? (
+    <span className="inline-flex items-center justify-center group-active:skew-x-[14deg] motion-reduce:group-active:transform-none">
+      {children}
+    </span>
+  ) : (
+    children
+  );
 
   if (href && !disabled) {
     return (
@@ -38,7 +53,7 @@ export function PillButton({
         href={href}
         className={`${baseClasses} ${variantClasses} ${widthClass} ${className}`}
       >
-        {children}
+        {content}
       </Link>
     );
   }
@@ -49,7 +64,7 @@ export function PillButton({
       className={`${baseClasses} ${variantClasses} ${widthClass} ${className}`}
       {...props}
     >
-      {children}
+      {content}
     </button>
   );
 }

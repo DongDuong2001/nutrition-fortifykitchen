@@ -130,3 +130,39 @@ The scaffold was generated before the design was final. When building, **the des
    8. Trends, states (loading, offline, 404, error) and the paywall
 4. Desktop (≥1024 px): a sidebar replaces the bottom nav, and Add food opens as a centred dialog. See the `Desktop*.dc.html` files.
 5. Mock data first, using the sample day in `design/SPEC.md`. Then wire the screens to `lib/api-client.ts` and `hooks/use-diary-log.ts`.
+
+## Visual update 10/10/2026: "Cobalt Sign" (overrides the colours and fonts above)
+
+**Fonts** (all have Vietnamese subsets)
+- Display and numbers: **Saira Condensed**, weights 800–900, italic. Use it for the logo, screen titles, hero numbers (kcal, 8/22) and the numbers in macro rows. Numbers are tabular.
+- Body and UI: **Manrope**, weights 400/600/700. It replaces Be Vietnam Pro.
+
+**Colours**
+
+| Token | Value |
+|---|---|
+| page (paper) | #F3F1EC |
+| card | #FFFFFF |
+| card border | #E0DACF |
+| ink (header, nav, text) | #111317 |
+| text | #141519 |
+| secondary | #6B6A66 |
+| cobalt (primary/action) | #1238D6 (white text on it) |
+| sky (accent on ink only) | #9EC3FF |
+| destructive | #D93F44 |
+
+**Nutrient levels**
+
+| Level | Light surfaces | Dark (ink) surfaces |
+|---|---|---|
+| Thiếu (<50%) | #D93F44 | #E5484D |
+| Trung bình (50–79%) | #B07800 | #E8A400 |
+| Gần đủ (80–99%) | #17945F | #1FA971 |
+| Đạt (≥100%) | #1238D6 | #5C86F2 |
+| empty segment | #E6E1D7 | #2A2C31 |
+
+**Signature motif:** segment bars are slanted parallelograms (`transform: skewX(-14deg)`, radius 1px, gap 3px), echoing the italic "H1T". Use the same slant on the active bottom-nav indicator and the primary pill's pressed state. Do not slant text, cards or inputs.
+
+**Rules**
+- The page background is paper (#F3F1EC) at every width. Cards are white with a 1px #E0DACF border.
+- Respect reduced motion. On load, the calorie ring fills in 600ms (ease-out) and the bars fill left to right with a 20ms stagger.

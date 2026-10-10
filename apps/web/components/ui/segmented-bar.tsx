@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import {
   calculateSegments,
   getLevel,
@@ -19,8 +21,10 @@ export interface SegmentedBarProps {
 }
 
 /**
- * H1T MICRO 10-segment nutrient bar.
+ * H1T MICRO 10-segment nutrient bar (Cobalt Sign motif).
+ * Slanted segments (skewX(-14deg), radius 1px, gap 3px).
  * Automatic level colouring across 4 tiers (thiếu, trung bình, gần đủ, đạt).
+ * Bars fill left to right with a 20ms stagger on load (disabled under prefers-reduced-motion).
  */
 export function SegmentedBar({
   "aria-label": ariaLabel,
@@ -29,8 +33,14 @@ export function SegmentedBar({
   totalSegments = 10,
   tone = "light",
   className = "",
-  gap = 2,
+  gap = 3,
 }: SegmentedBarProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const pct =
     percentage !== undefined
       ? percentage
@@ -59,13 +69,23 @@ export function SegmentedBar({
         alignItems: "center",
       }}
     >
-      {Array.from({ length: 10 }).map((_, idx) => (
-        <div
-          key={idx}
-          className="h-[6px] rounded-[2px] transition-colors duration-150"
-          style={{ backgroundColor: idx < n ? filledColor : emptyColor }}
-        />
-      ))}
+      {Array.from({ length: totalSegments }).map((_, idx) => {
+        const isFilled = idx < n;
+        const bg = mounted ? (isFilled ? filledColor : emptyColor) : emptyColor;
+
+        return (
+          <div
+            key={idx}
+            className="h-[6px] transition-colors duration-200 motion-reduce:transition-none"
+            style={{
+              backgroundColor: bg,
+              transform: "skewX(-14deg)",
+              borderRadius: "1px",
+              transitionDelay: mounted && isFilled ? `${idx * 20}ms` : "0ms",
+            }}
+          />
+        );
+      })}
     </div>
   );
 }

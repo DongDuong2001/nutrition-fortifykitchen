@@ -61,24 +61,24 @@ describe("lib/levels", () => {
 
   describe("getLevelColor", () => {
     it("returns light mode colors", () => {
-      expect(getLevelColor("thieu", "light")).toBe("#D93036");
-      expect(getLevelColor("trungbinh", "light")).toBe("#D99A00");
-      expect(getLevelColor("ganDu", "light")).toBe("#16A34A");
-      expect(getLevelColor("dat", "light")).toBe("#1E55F0");
+      expect(getLevelColor("thieu", "light")).toBe("#D93F44");
+      expect(getLevelColor("trungbinh", "light")).toBe("#B07800");
+      expect(getLevelColor("ganDu", "light")).toBe("#17945F");
+      expect(getLevelColor("dat", "light")).toBe("#1238D6");
     });
 
     it("returns dark mode colors", () => {
-      expect(getLevelColor("thieu", "dark")).toBe("#FF6B6B");
-      expect(getLevelColor("trungbinh", "dark")).toBe("#F5C518");
-      expect(getLevelColor("ganDu", "dark")).toBe("#4ADE80");
+      expect(getLevelColor("thieu", "dark")).toBe("#E5484D");
+      expect(getLevelColor("trungbinh", "dark")).toBe("#E8A400");
+      expect(getLevelColor("ganDu", "dark")).toBe("#1FA971");
       expect(getLevelColor("dat", "dark")).toBe("#5C86F2");
     });
   });
 
   describe("getEmptySegmentColor", () => {
     it("returns correct empty segment color for tone", () => {
-      expect(getEmptySegmentColor("light")).toBe("#E3E5E9");
-      expect(getEmptySegmentColor("dark")).toBe("#2B2D33");
+      expect(getEmptySegmentColor("light")).toBe("#E6E1D7");
+      expect(getEmptySegmentColor("dark")).toBe("#2A2C31");
     });
   });
 });

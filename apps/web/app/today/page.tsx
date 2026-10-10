@@ -73,46 +73,48 @@ function TodayContent() {
         <div className="w-full min-h-screen bg-page flex flex-col relative lg:hidden pb-[88px] overflow-x-hidden">
           <h1 className="sr-only">Hôm nay — Đang tải</h1>
           {/* Header Skeleton */}
-          <div className="bg-ink text-white px-5 pt-3 pb-4 flex flex-col gap-2.5 rounded-b-[20px]">
-            <div className="flex items-center justify-between min-h-[44px]">
-              <div className="font-saira italic font-black text-xl uppercase tracking-tight">
-                H1T <span className="text-sky">MICRO</span>
+          <div className="bg-ink text-white rounded-b-[20px]">
+            <div className="w-full max-w-[560px] mx-auto px-4 pt-3 pb-4 flex flex-col gap-2.5">
+              <div className="flex items-center justify-between min-h-[44px]">
+                <div className="font-display italic font-black text-xl uppercase tracking-tight">
+                  H1T <span className="text-sky">MICRO</span>
+                </div>
+                <div className="w-[110px] h-4 rounded-lg bg-surface-dark animate-pulse" />
               </div>
-              <div className="w-[110px] h-4 rounded-lg bg-surface-dark animate-pulse" />
-            </div>
-            <div className="flex gap-4.5 items-center">
-              <div className="w-[100px] h-[100px] shrink-0 rounded-full border-[10px] border-level-empty-dark animate-pulse" />
-              <div className="flex-1 flex flex-col gap-3 min-w-0">
-                <div className="h-3.5 w-full rounded-md bg-surface-dark animate-pulse" />
-                <div className="h-3.5 w-4/5 rounded-md bg-surface-dark animate-pulse" />
-                <div className="h-3.5 w-[90%] rounded-md bg-surface-dark animate-pulse" />
-                <div className="h-3.5 w-3/5 rounded-md bg-surface-dark animate-pulse" />
+              <div className="flex gap-4.5 items-center">
+                <div className="w-[100px] h-[100px] shrink-0 rounded-full border-[10px] border-level-empty-dark animate-pulse" />
+                <div className="flex-1 flex flex-col gap-3 min-w-0">
+                  <div className="h-3.5 w-full rounded-md bg-surface-dark animate-pulse" />
+                  <div className="h-3.5 w-4/5 rounded-md bg-surface-dark animate-pulse" />
+                  <div className="h-3.5 w-[90%] rounded-md bg-surface-dark animate-pulse" />
+                  <div className="h-3.5 w-3/5 rounded-md bg-surface-dark animate-pulse" />
+                </div>
               </div>
+              <div className="h-3.5 w-[70%] rounded-md bg-surface-dark animate-pulse mt-1" />
             </div>
-            <div className="h-3.5 w-[70%] rounded-md bg-surface-dark animate-pulse mt-1" />
           </div>
 
           {/* Body Skeleton */}
-          <main role="status" aria-busy="true" className="flex-1 p-3.5 flex flex-col gap-2.5">
+          <main role="status" aria-busy="true" className="flex-1 w-full max-w-[560px] mx-auto px-4 pt-3.5 pb-6 flex flex-col gap-2.5">
             <span className="sr-only">Đang tải…</span>
-            <div className="bg-card border border-black/8 rounded-[18px] p-3.5 flex flex-col gap-3 animate-pulse">
+            <div className="bg-card border border-card-border rounded-[18px] p-3.5 flex flex-col gap-3 animate-pulse">
               <div className="h-3 w-2/5 rounded bg-level-empty" />
               <div className="h-3 w-[70%] rounded bg-level-empty" />
               <div className="h-3 w-[55%] rounded bg-level-empty" />
             </div>
-            <div className="bg-card border border-black/8 rounded-[18px] p-3.5 flex flex-col gap-3 animate-pulse">
+            <div className="bg-card border border-card-border rounded-[18px] p-3.5 flex flex-col gap-3 animate-pulse">
               <div className="h-3 w-2/5 rounded bg-level-empty" />
               <div className="h-3 w-[70%] rounded bg-level-empty" />
               <div className="h-3 w-[55%] rounded bg-level-empty" />
             </div>
-            <div className="bg-card border border-black/8 rounded-[18px] p-3.5 flex flex-col gap-3 animate-pulse">
+            <div className="bg-card border border-card-border rounded-[18px] p-3.5 flex flex-col gap-3 animate-pulse">
               <div className="h-3 w-2/5 rounded bg-level-empty" />
               <div className="h-3 w-[70%] rounded bg-level-empty" />
               <div className="h-3 w-[55%] rounded bg-level-empty" />
             </div>
           </main>
 
-          <div className="fixed bottom-0 left-0 right-0 z-40 bg-ink flex justify-center">
+          <div className="fixed bottom-0 left-0 right-0 z-40 bg-ink">
             <BottomNav currentTab="today" />
           </div>
         </div>
@@ -140,53 +142,55 @@ function TodayContent() {
         <div className="w-full min-h-screen bg-page flex flex-col relative pb-[88px] overflow-x-hidden">
           <h1 className="sr-only">Hôm nay — Ngày đầu tiên</h1>
           {/* Header */}
-          <div className="bg-ink text-white px-5 pt-2.5 pb-5 rounded-b-[20px] flex flex-col gap-2">
-            <div className="flex items-center justify-between min-h-[44px]">
-              <div className="font-saira italic font-black text-xl uppercase tracking-tight">
-                H1T <span className="text-sky">MICRO</span>
-              </div>
-              <div className="flex items-center">
-                <button
-                  type="button"
-                  aria-label="Ngày trước"
-                  className="w-11 h-11 rounded-lg bg-transparent border-0 text-white flex items-center justify-center cursor-pointer hover:text-sky transition-colors active:scale-[0.97]"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-                    <path d="M15 5l-7 7 7 7" />
-                  </svg>
-                </button>
-                <div className="text-[15px] font-semibold">Hôm nay, 10/10</div>
-                <button
-                  type="button"
-                  aria-label="Ngày sau"
-                  aria-disabled="true"
-                  className="w-11 h-11 rounded-lg bg-transparent border-0 text-secondary flex items-center justify-center cursor-default"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-                    <path d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            <div className="flex gap-4.5 items-center">
-              <CalorieDial current={0} target={calories.targetMin} targetMax={calories.targetMax} size={104} />
-              <div className="flex-1 flex flex-col gap-1 min-w-0">
-                <div className="text-[13px] text-muted-dark">Mục tiêu hôm nay</div>
-                <div className="text-lg font-bold tabular-nums">
-                  {formatNumber(calories.targetMin)}–{formatNumber(calories.targetMax)} kcal
+          <div className="bg-ink text-white rounded-b-[20px]">
+            <div className="w-full max-w-[560px] mx-auto px-4 pt-2.5 pb-5 flex flex-col gap-2">
+              <div className="flex items-center justify-between min-h-[44px]">
+                <div className="font-display italic font-black text-xl uppercase tracking-tight">
+                  H1T <span className="text-sky">MICRO</span>
                 </div>
-                <div className="text-[13px] text-muted-subtitle">
-                  Đạm 104–143 g · Béo 33–65 g
+                <div className="flex items-center">
+                  <button
+                    type="button"
+                    aria-label="Ngày trước"
+                    className="w-11 h-11 rounded-lg bg-transparent border-0 text-white flex items-center justify-center cursor-pointer hover:text-sky transition-colors active:scale-[0.97]"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                      <path d="M15 5l-7 7 7 7" />
+                    </svg>
+                  </button>
+                  <div className="text-[15px] font-semibold">Hôm nay, 10/10</div>
+                  <button
+                    type="button"
+                    aria-label="Ngày sau"
+                    aria-disabled="true"
+                    className="w-11 h-11 rounded-lg bg-transparent border-0 text-secondary flex items-center justify-center cursor-default"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                      <path d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex gap-4.5 items-center">
+                <CalorieDial current={0} target={calories.targetMin} targetMax={calories.targetMax} size={104} />
+                <div className="flex-1 flex flex-col gap-1 min-w-0">
+                  <div className="text-[13px] text-muted-dark">Mục tiêu hôm nay</div>
+                  <div className="text-lg font-bold tabular-nums">
+                    {formatNumber(calories.targetMin)}–{formatNumber(calories.targetMax)} kcal
+                  </div>
+                  <div className="text-[13px] text-muted-subtitle">
+                    Đạm 104–143 g · Béo 33–65 g
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Empty Body */}
-          <main className="flex-1 p-4 flex flex-col gap-3">
-            <div className="bg-card border border-black/8 rounded-[18px] p-4 flex flex-col gap-2.5">
-              <h2 className="m-0 font-saira italic font-extrabold text-[22px] leading-tight">
+          <main className="flex-1 w-full max-w-[560px] mx-auto px-4 pt-3.5 pb-6 flex flex-col gap-3">
+            <div className="bg-card border border-card-border rounded-[18px] p-4 flex flex-col gap-2.5">
+              <h2 className="m-0 font-display italic font-extrabold text-[22px] leading-tight">
                 CHÀO BẠN!
               </h2>
               <p className="m-0 text-sm leading-relaxed text-secondary">
@@ -204,14 +208,14 @@ function TodayContent() {
               <Link
                 key={m}
                 href={`/add?meal=${encodeURIComponent(m)}`}
-                className="bg-card border border-black/8 rounded-[18px] px-4 min-h-[56px] flex items-center justify-between text-[15px] no-underline active:scale-[0.97] transition-transform"
+                className="bg-card border border-card-border rounded-[18px] px-4 min-h-[56px] flex items-center justify-between text-[15px] no-underline active:scale-[0.97] transition-transform"
               >
                 <span className="font-bold text-text">{m}</span>
                 <span className="font-semibold text-blue">+ Thêm món</span>
               </Link>
             ))}
 
-            <div className="bg-card border border-black/8 rounded-[18px] px-4 py-3 text-[13px] leading-relaxed flex gap-2.5">
+            <div className="bg-card border border-card-border rounded-[18px] px-4 py-3 text-[13px] leading-relaxed flex gap-2.5">
               <span className="w-1 shrink-0 rounded-full bg-blue" aria-hidden="true" />
               <span>
                 <strong className="font-bold">Mẹo:</strong> Ăn rất nhiều, không bỏ bữa. Muối 4–6 g chia theo các bữa.
@@ -219,7 +223,7 @@ function TodayContent() {
             </div>
           </main>
 
-          <div className="fixed bottom-0 left-0 right-0 z-40 bg-ink flex justify-center">
+          <div className="fixed bottom-0 left-0 right-0 z-40 bg-ink">
             <BottomNav currentTab="today" />
           </div>
         </div>
@@ -238,104 +242,108 @@ function TodayContent() {
 
         {/* Offline Banner (TodayStates.dc.html) */}
         {showOfflineBanner && (
-          <div
-            role="status"
-            className="bg-warning-bg text-warning-text text-sm rounded-xl px-3.5 py-2.5 mx-4 mt-3 flex items-center gap-2.5 leading-snug"
-          >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-              className="shrink-0"
+          <div className="w-full max-w-[560px] mx-auto px-4 mt-3">
+            <div
+              role="status"
+              className="bg-warning-bg text-warning-text text-sm rounded-xl px-3.5 py-2.5 flex items-center gap-2.5 leading-snug"
             >
-              <path d="M3 3l18 18" />
-              <path d="M9.5 5.2A6 6 0 0 1 17.7 9.3 4.5 4.5 0 0 1 19.5 17.5" />
-              <path d="M6.5 18A4.5 4.5 0 0 1 5.5 9.4" />
-              <path d="M6.5 18h9" />
-            </svg>
-            <span>Đang ngoại tuyến — món mới sẽ đồng bộ khi có mạng.</span>
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+                className="shrink-0"
+              >
+                <path d="M3 3l18 18" />
+                <path d="M9.5 5.2A6 6 0 0 1 17.7 9.3 4.5 4.5 0 0 1 19.5 17.5" />
+                <path d="M6.5 18A4.5 4.5 0 0 1 5.5 9.4" />
+                <path d="M6.5 18h9" />
+              </svg>
+              <span>Đang ngoại tuyến — món mới sẽ đồng bộ khi có mạng.</span>
+            </div>
           </div>
         )}
 
         {/* Dark Top Hero Header */}
-        <div className="bg-ink text-white px-5 pt-3 pb-4 flex flex-col gap-2.5 rounded-b-[20px]">
-          {/* Header Brand & Date Switcher */}
-          <div className="flex items-center justify-between min-h-[44px]">
-            <div className="font-saira italic font-black text-xl uppercase tracking-tight">
-              H1T <span className="text-sky">MICRO</span>
+        <div className="bg-ink text-white rounded-b-[20px]">
+          <div className="w-full max-w-[560px] mx-auto px-4 pt-3 pb-4 flex flex-col gap-2.5">
+            {/* Header Brand & Date Switcher */}
+            <div className="flex items-center justify-between min-h-[44px]">
+              <div className="font-display italic font-black text-xl uppercase tracking-tight">
+                H1T <span className="text-sky">MICRO</span>
+              </div>
+              <div className="flex items-center">
+                <button
+                  type="button"
+                  aria-label="Ngày trước"
+                  className="w-11 h-11 rounded-lg bg-transparent border-0 text-white flex items-center justify-center cursor-pointer hover:text-sky transition-colors active:scale-[0.97]"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                    <path d="M15 5l-7 7 7 7" />
+                  </svg>
+                </button>
+                <div className="text-sm font-semibold">{currentData.dateLabel}</div>
+                <button
+                  type="button"
+                  aria-label="Ngày sau"
+                  className="w-11 h-11 rounded-lg bg-transparent border-0 text-white flex items-center justify-center cursor-pointer hover:text-sky transition-colors active:scale-[0.97]"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                    <path d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
             </div>
-            <div className="flex items-center">
-              <button
-                type="button"
-                aria-label="Ngày trước"
-                className="w-11 h-11 rounded-lg bg-transparent border-0 text-white flex items-center justify-center cursor-pointer hover:text-sky transition-colors active:scale-[0.97]"
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-                  <path d="M15 5l-7 7 7 7" />
-                </svg>
-              </button>
-              <div className="text-sm font-semibold">{currentData.dateLabel}</div>
-              <button
-                type="button"
-                aria-label="Ngày sau"
-                className="w-11 h-11 rounded-lg bg-transparent border-0 text-white flex items-center justify-center cursor-pointer hover:text-sky transition-colors active:scale-[0.97]"
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-                  <path d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
-          </div>
 
-          {/* Calorie Dial & 4 Macros */}
-          <div className="flex gap-4.5 items-center">
-            <CalorieDial
-              current={calories.consumed}
-              target={calories.targetMin}
-              targetMax={calories.targetMax}
-              size={100}
-            />
-            <div className="flex-1 flex flex-col gap-2 min-w-0">
-              {macros.map((m) => (
-                <div key={m.key} className="flex flex-col gap-1">
-                  <div className="flex justify-between text-[13px] leading-tight">
-                    <span className="font-semibold">{m.label}</span>
-                    <span className="text-grabber tabular-nums">{m.displayValue}</span>
+            {/* Calorie Dial & 4 Macros */}
+            <div className="flex gap-4.5 items-center">
+              <CalorieDial
+                current={calories.consumed}
+                target={calories.targetMin}
+                targetMax={calories.targetMax}
+                size={100}
+              />
+              <div className="flex-1 flex flex-col gap-2 min-w-0">
+                {macros.map((m) => (
+                  <div key={m.key} className="flex flex-col gap-1">
+                    <div className="flex justify-between text-[13px] leading-tight">
+                      <span className="font-semibold">{m.label}</span>
+                      <span className="font-display italic font-black text-grabber tabular-nums text-sm">{m.displayValue}</span>
+                    </div>
+                    <SegmentedBar
+                      aria-label={`Tiến độ ${m.label}`}
+                      percentage={m.percentage ?? 0}
+                      tone="dark"
+                    />
                   </div>
-                  <SegmentedBar
-                    aria-label={`Tiến độ ${m.label}`}
-                    percentage={m.percentage ?? 0}
-                    tone="dark"
-                  />
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
 
-          {/* Subtitle Target Summary */}
-          <div className="text-[13px] text-muted-subtitle leading-tight">
-            Mục tiêu{" "}
-            <span className="font-semibold text-white tabular-nums">
-              {formatNumber(calories.targetMin)}–{formatNumber(calories.targetMax)} kcal
-            </span>{" "}
-            · còn {formatNumber(calories.remaining)} · Ngày tập {currentData.user.trainingMinutes}′
+            {/* Subtitle Target Summary */}
+            <div className="text-[13px] text-muted-subtitle leading-tight">
+              Mục tiêu{" "}
+              <span className="font-semibold text-white tabular-nums">
+                {formatNumber(calories.targetMin)}–{formatNumber(calories.targetMax)} kcal
+              </span>{" "}
+              · còn {formatNumber(calories.remaining)} · Ngày tập {currentData.user.trainingMinutes}′
+            </div>
           </div>
         </div>
 
         {/* Mobile Body Content */}
-        <div className="flex-1 p-3.5 flex flex-col gap-2.5">
+        <div className="flex-1 w-full max-w-[560px] mx-auto px-4 pt-3.5 pb-6 flex flex-col gap-2.5">
           {/* Card: Micros Summary linking to /micros */}
           <Link
             href="/micros"
-            className="no-underline text-text bg-card border border-black/8 rounded-[18px] px-4 py-3 flex items-center gap-3.5 min-h-[44px] box-border active:scale-[0.97] transition-transform"
+            className="no-underline text-text bg-card border border-card-border rounded-[18px] px-4 py-3 flex items-center gap-3.5 min-h-[44px] box-border active:scale-[0.97] transition-transform"
           >
-            <div className="font-saira italic font-extrabold text-[26px] text-blue leading-none shrink-0">
+            <div className="font-display italic font-black text-[26px] text-blue leading-none shrink-0">
               {microsSummary.achieved}/{microsSummary.total}
             </div>
             <div className="flex-1 min-w-0">
@@ -356,7 +364,7 @@ function TodayContent() {
               return (
                 <section
                   key={meal.id}
-                  className="bg-card border border-black/8 rounded-[18px] px-4 pt-2.5 pb-1.5 flex flex-col"
+                  className="bg-card border border-card-border rounded-[18px] px-4 pt-2.5 pb-1.5 flex flex-col"
                 >
                   <div className="flex items-baseline justify-between pb-0.5">
                     <h2 className="m-0 text-base font-bold text-text">{meal.name}</h2>
@@ -387,7 +395,7 @@ function TodayContent() {
               <Link
                 key={meal.id}
                 href={`/add?meal=${meal.slot}`}
-                className="no-underline bg-card border border-black/8 rounded-[18px] px-4 min-h-[52px] flex items-center justify-between text-[15px] active:scale-[0.97] transition-transform"
+                className="no-underline bg-card border border-card-border rounded-[18px] px-4 min-h-[52px] flex items-center justify-between text-[15px] active:scale-[0.97] transition-transform"
               >
                 <span className="font-bold text-text">{meal.name}</span>
                 <span className="font-semibold text-blue">+ Thêm món</span>
@@ -399,14 +407,14 @@ function TodayContent() {
           <button
             type="button"
             onClick={() => setIsCopySheetOpen(true)}
-            className="w-full min-h-[52px] px-4 rounded-[18px] bg-card text-text border border-black/8 text-[15px] font-semibold flex items-center justify-center cursor-pointer active:scale-[0.97] transition-transform"
+            className="w-full min-h-[52px] px-4 rounded-[18px] bg-card text-text border border-card-border text-[15px] font-semibold flex items-center justify-center cursor-pointer active:scale-[0.97] transition-transform"
           >
             Chép hôm qua
           </button>
         </div>
 
         {/* Fixed Mobile Navigation Dock */}
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-ink flex justify-center">
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-ink">
           <BottomNav currentTab="today" />
         </div>
       </div>
@@ -417,7 +425,7 @@ function TodayContent() {
       <div className="hidden lg:flex min-h-[980px] bg-page text-text font-sans">
         {/* Left Sidebar */}
         <aside className="w-60 shrink-0 bg-ink text-white p-6 flex flex-col gap-6 box-border">
-          <div className="px-2 font-saira italic font-black text-2xl">
+          <div className="px-2 font-display italic font-black text-2xl">
             H1T <span className="text-sky">MICRO</span>
           </div>
           <nav aria-label="Điều hướng chính" className="flex flex-col gap-1">
@@ -467,7 +475,7 @@ function TodayContent() {
           {/* Header */}
           <header className="flex flex-wrap items-center gap-3">
             <div className="flex-1 min-w-[260px]">
-              <h1 className="m-0 font-saira italic font-extrabold text-[34px] leading-tight text-text">
+              <h1 className="m-0 font-display italic font-extrabold text-[34px] leading-tight text-text">
                 HÔM NAY
               </h1>
               <div className="text-sm text-secondary">
@@ -477,7 +485,7 @@ function TodayContent() {
             <button
               type="button"
               aria-label="Ngày trước"
-              className="w-11 h-11 border-0 rounded-xl bg-card text-ink cursor-pointer flex items-center justify-center hover:bg-divider transition-colors active:scale-[0.97]"
+              className="w-11 h-11 border border-card-border rounded-xl bg-card text-ink cursor-pointer flex items-center justify-center hover:bg-divider transition-colors active:scale-[0.97]"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                 <path d="M15 5l-7 7 7 7" />
@@ -486,7 +494,7 @@ function TodayContent() {
             <button
               type="button"
               aria-label="Ngày sau"
-              className="w-11 h-11 border-0 rounded-xl bg-card text-ink cursor-pointer flex items-center justify-center hover:bg-divider transition-colors active:scale-[0.97]"
+              className="w-11 h-11 border border-card-border rounded-xl bg-card text-ink cursor-pointer flex items-center justify-center hover:bg-divider transition-colors active:scale-[0.97]"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                 <path d="M9 5l7 7-7 7" />
@@ -495,7 +503,7 @@ function TodayContent() {
             <button
               type="button"
               onClick={() => setIsCopySheetOpen(true)}
-              className="h-11 px-4 border-0 rounded-xl bg-card text-text text-sm font-semibold cursor-pointer hover:bg-divider transition-colors active:scale-[0.97]"
+              className="h-11 px-4 border border-card-border rounded-xl bg-card text-text text-sm font-semibold cursor-pointer hover:bg-divider transition-colors active:scale-[0.97]"
             >
               Chép hôm qua
             </button>
@@ -525,7 +533,7 @@ function TodayContent() {
                   <div key={m.key} className="flex flex-col gap-1">
                     <div className="flex justify-between text-[13px] leading-tight">
                       <span className="font-semibold">{m.label}</span>
-                      <span className="text-grabber tabular-nums">{m.displayValue}</span>
+                      <span className="font-display italic font-black text-grabber tabular-nums text-sm">{m.displayValue}</span>
                     </div>
                     <SegmentedBar
                       aria-label={`Tiến độ ${m.label}`}
@@ -541,7 +549,7 @@ function TodayContent() {
             </div>
 
             {/* Card 2: Training day salt card */}
-            <div className="bg-card border border-black/8 rounded-[18px] p-5 flex flex-col gap-2.5">
+            <div className="bg-card border border-card-border rounded-[18px] p-5 flex flex-col gap-2.5">
               <div className="flex items-baseline justify-between">
                 <h2 className="m-0 text-lg font-bold text-text">Ngày tập · 60 phút</h2>
                 <Link href="/training" className="text-sm font-semibold text-blue no-underline min-h-[44px] flex items-center px-2">
@@ -549,7 +557,7 @@ function TodayContent() {
                 </Link>
               </div>
               <div className="flex items-baseline gap-2">
-                <span className="font-saira italic font-extrabold text-3xl text-text">7–10,5 g</span>
+                <span className="font-display italic font-extrabold text-3xl text-text">7–10,5 g</span>
                 <span className="text-sm text-secondary">muối hôm nay</span>
               </div>
               <div className="flex justify-between text-sm py-1.5 border-t border-divider">
@@ -570,13 +578,13 @@ function TodayContent() {
           {/* Bottom 2 Columns Grid */}
           <section className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
             {/* Column 1: Bữa ăn */}
-            <div className="bg-card border border-black/8 rounded-[18px] p-5 pb-2.5">
+            <div className="bg-card border border-card-border rounded-[18px] p-5 pb-2.5">
               <div className="flex items-baseline justify-between mb-1">
                 <h2 className="m-0 text-lg font-bold text-text">Bữa ăn</h2>
                 <span className="text-[13px] text-secondary">Chọn món để sửa hoặc xoá</span>
               </div>
               {meals.map((meal) => (
-                <div key={meal.id} className="border-t border-level-empty py-2">
+                <div key={meal.id} className="border-t border-divider py-2">
                   <div className="flex justify-between items-baseline">
                     <h3 className="m-0 text-[15px] font-bold text-text">{meal.name}</h3>
                     <span className="text-sm font-bold tabular-nums text-text">
@@ -610,10 +618,10 @@ function TodayContent() {
             </div>
 
             {/* Column 2: Vi chất */}
-            <div className="bg-card border border-black/8 rounded-[18px] p-5 pb-2.5">
+            <div className="bg-card border border-card-border rounded-[18px] p-5 pb-2.5">
               <div className="flex items-baseline justify-between mb-1">
                 <h2 className="m-0 text-lg font-bold text-text">Vi chất</h2>
-                <span className="font-saira italic font-extrabold text-2xl text-blue">
+                <span className="font-display italic font-extrabold text-2xl text-blue">
                   {microsSummary.achieved}/{microsSummary.total}
                 </span>
               </div>

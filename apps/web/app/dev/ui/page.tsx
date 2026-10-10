@@ -20,7 +20,7 @@ export default function DevUiPage() {
   const [sheetInput, setSheetInput] = useState("");
 
   return (
-    <div className="w-full max-w-[390px] min-h-[844px] mx-auto bg-page text-text flex flex-col relative font-sans pb-24">
+    <div className="w-full min-h-screen bg-page text-text flex flex-col relative font-sans pb-24">
       {/* 1. Header (Brand with Date Switcher) */}
       <Header
         showLogo
@@ -29,7 +29,7 @@ export default function DevUiPage() {
         onNextDate={() => {}}
       />
 
-      <div className="flex-1 p-4 flex flex-col gap-6">
+      <div className="flex-1 w-full max-w-[560px] mx-auto px-4 py-4 flex flex-col gap-6">
         {/* Section: Sub-screen Header Preview */}
         <section className="flex flex-col gap-2">
           <div className="text-xs font-bold text-secondary uppercase tracking-wider">
