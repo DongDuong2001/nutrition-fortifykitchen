@@ -42,3 +42,5 @@ Thumbs.db
 # Build cache and archives
 *.tsbuildinfo
 *.tgz
+__pycache__/
+*.pyc
