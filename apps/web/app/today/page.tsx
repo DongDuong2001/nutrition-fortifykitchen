@@ -326,7 +326,7 @@ function TodayContent() {
             </div>
 
             {/* Subtitle Target Summary */}
-            <div className="text-[13px] text-muted-subtitle leading-tight">
+            <div className="text-[13px] text-muted-subtitle leading-tight text-center w-full">
               Mục tiêu{" "}
               <span className="font-semibold text-white tabular-nums">
                 {formatNumber(calories.targetMin)}–{formatNumber(calories.targetMax)} kcal
@@ -521,30 +521,36 @@ function TodayContent() {
           {/* Top 2 Cards Grid */}
           <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Card 1: Calorie ring and macros */}
-            <div className="bg-ink text-white rounded-2xl p-5.5 flex gap-5.5 items-center flex-wrap">
-              <CalorieDial
-                current={calories.consumed}
-                target={calories.targetMin}
-                targetMax={calories.targetMax}
-                size={128}
-              />
-              <div className="flex-1 min-w-[160px] flex flex-col gap-2.5">
-                {macros.map((m) => (
-                  <div key={m.key} className="flex flex-col gap-1">
-                    <div className="flex justify-between text-[13px] leading-tight">
-                      <span className="font-semibold">{m.label}</span>
-                      <span className="font-display italic font-black text-grabber tabular-nums text-sm">{m.displayValue}</span>
+            <div className="bg-ink text-white rounded-2xl p-5.5 flex flex-col justify-between gap-4">
+              <div className="flex gap-5.5 items-center flex-wrap">
+                <CalorieDial
+                  current={calories.consumed}
+                  target={calories.targetMin}
+                  targetMax={calories.targetMax}
+                  size={128}
+                />
+                <div className="flex-1 min-w-[160px] flex flex-col gap-2.5">
+                  {macros.map((m) => (
+                    <div key={m.key} className="flex flex-col gap-1">
+                      <div className="flex justify-between text-[13px] leading-tight">
+                        <span className="font-semibold">{m.label}</span>
+                        <span className="font-display italic font-black text-grabber tabular-nums text-sm">{m.displayValue}</span>
+                      </div>
+                      <SegmentedBar
+                        aria-label={`Tiến độ ${m.label}`}
+                        percentage={m.percentage ?? 0}
+                        tone="dark"
+                      />
                     </div>
-                    <SegmentedBar
-                      aria-label={`Tiến độ ${m.label}`}
-                      percentage={m.percentage ?? 0}
-                      tone="dark"
-                    />
-                  </div>
-                ))}
-                <div className="text-[13px] text-muted-subtitle">
-                  Mục tiêu {formatNumber(calories.targetMin)}–{formatNumber(calories.targetMax)} kcal · còn {formatNumber(calories.remaining)}
+                  ))}
                 </div>
+              </div>
+              <div className="text-[13px] text-muted-subtitle text-center w-full">
+                Mục tiêu{" "}
+                <span className="font-semibold text-white tabular-nums">
+                  {formatNumber(calories.targetMin)}–{formatNumber(calories.targetMax)} kcal
+                </span>{" "}
+                · còn {formatNumber(calories.remaining)} · Ngày tập {currentData.user.trainingMinutes}′
               </div>
             </div>
 

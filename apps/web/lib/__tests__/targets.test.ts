@@ -45,9 +45,9 @@ describe("lib/targets", () => {
       expect(targets.potassium.min).toBe(5200);
       expect(targets.potassium.max).toBe(6500);
 
-      // Sodium 2.751–4.127 mg
-      expect(targets.sodium.min).toBe(2751);
-      expect(targets.sodium.max).toBe(4127);
+      // Sodium 2.750–4.130 mg (rounded to nearest 10 mg)
+      expect(targets.sodium.min).toBe(2750);
+      expect(targets.sodium.max).toBe(4130);
 
       // Calcium 1.200–1.500 mg
       expect(targets.calcium.min).toBe(1200);
@@ -102,14 +102,19 @@ describe("lib/targets", () => {
   });
 
   describe("Training sodium calculation", () => {
-    it("calculates sodium on rest days (0 training min)", () => {
-      // 4-6 g salt * 393 mg = 1572 - 2358 mg
-      expect(calculateSodiumTarget(0)).toEqual({ min: 1572, max: 2358 });
+    it("calculates sodium on rest days (0 training min, rounded to nearest 10 mg)", () => {
+      // 4-6 g salt * 393 mg = 1572 - 2358 mg -> 1570 - 2360 mg
+      expect(calculateSodiumTarget(0)).toEqual({ min: 1570, max: 2360 });
     });
 
-    it("scales salt for 60 min training (3 intervals of 20m -> +3..4.5g salt)", () => {
-      // 7-10.5 g salt * 393 mg = 2751 - 4127 mg
-      expect(calculateSodiumTarget(60)).toEqual({ min: 2751, max: 4127 });
+    it("scales salt for 60 min training (3 intervals of 20m -> 7-10.5g salt, rounded to nearest 10 mg)", () => {
+      // 7-10.5 g salt * 393 mg = 2751 - 4126.5 mg -> 2750 - 4130 mg
+      expect(calculateSodiumTarget(60)).toEqual({ min: 2750, max: 4130 });
+    });
+
+    it("rounds potassium target to nearest 10 mg", () => {
+      expect(calculatePotassiumTarget(65)).toEqual({ min: 5200, max: 6500 });
+      expect(calculatePotassiumTarget(63.3)).toEqual({ min: 5060, max: 6330 });
     });
   });
 

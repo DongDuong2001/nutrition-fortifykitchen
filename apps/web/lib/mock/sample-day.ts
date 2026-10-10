@@ -74,6 +74,7 @@ export interface MockDayData {
     vitaminsTotal: number;
     mostLacking: string[];
   };
+  nutrients?: Record<string, number | null>;
 }
 
 export const SAMPLE_DAY: MockDayData = {
@@ -95,6 +96,52 @@ export const SAMPLE_DAY: MockDayData = {
     targetMax: 2275,
     remaining: 909,
     percentage: Math.round((1041 / 1950) * 100),
+  },
+  nutrients: {
+    // General
+    energy: 1041,
+    water: 1450,
+    alcohol: null,
+    caffeine: null,
+    oxalate: null,
+    phytate: null,
+
+    // Carbohydrates
+    carbs: 135,
+    net_carbs: 121,
+    fiber: 14,
+    insoluble_fiber: 8.5,
+    soluble_fiber: 5.5,
+    starch: 78,
+    sugars: 44,
+    added_sugars: 0,
+
+    // Lipids
+    fat: 28,
+    monounsaturated_fat: 11.2,
+    polyunsaturated_fat: 3.4,
+    omega3: 0.55,
+    ala: 0.45,
+    dha: 0.05,
+    epa: 0.05,
+    omega6: 2.85,
+    saturated_fat: 11.4,
+    trans_fat: 0.4,
+    cholesterol: 115,
+
+    // Protein & Amino Acids
+    protein: 62,
+    cystine: 0.8,
+    histidine: 1.8,
+    isoleucine: 2.8,
+    leucine: 5.1,
+    lysine: 5.2,
+    methionine: 1.6,
+    phenylalanine: 2.6,
+    threonine: 2.5,
+    tryptophan: 0.7,
+    tyrosine: 2.1,
+    valine: 3.2,
   },
   macros: [
     {
@@ -190,10 +237,10 @@ export const SAMPLE_DAY: MockDayData = {
       name: "Natri (muối)",
       group: "mineral",
       consumed: 2900,
-      targetMin: 2751,
-      targetMax: 4127,
+      targetMin: 2750,
+      targetMax: 4130,
       unit: "mg",
-      displayValue: "2.900 / 2.751–4.127 mg",
+      displayValue: "2.900 / 2.750–4.130 mg",
       percentage: 100,
       isCoachRule: true,
     },

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, Suspense } from "react";
+import React, { useState, useEffect, useMemo, useRef, Suspense } from "react";
 import Link from "next/link";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { SegmentedBar } from "@/components/ui/segmented-bar";
@@ -102,6 +102,22 @@ function buildNutrientRows(data: MockDayData | null): Record<NutrientGroup, Nutr
     };
   });
 
+  // 5. Extended nutrients (amino acids, fat breakdown, sugars, water, etc.)
+  if (data.nutrients) {
+    Object.entries(data.nutrients).forEach(([k, v]) => {
+      if (consumedMap[k]) {
+        if (consumedMap[k].consumed === null) {
+          consumedMap[k].consumed = v;
+        }
+      } else {
+        consumedMap[k] = {
+          consumed: v,
+          targetMin: null,
+        };
+      }
+    });
+  }
+
   // Assemble according to catalog order
   for (const def of NUTRIENT_CATALOG) {
     const stat = consumedMap[def.id];
@@ -157,6 +173,13 @@ function MicrosContent() {
     general: true,
   });
 
+  const chipBarRef = useRef<HTMLDivElement>(null);
+  const chipsContainerRef = useRef<HTMLDivElement>(null);
+  const chipRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const [chipBarHeight, setChipBarHeight] = useState(52);
+  const isManualScrolling = useRef(false);
+  const manualTimeout = useRef<NodeJS.Timeout | null>(null);
+
   useEffect(() => {
     let isMounted = true;
     apiClient.getTodayData().then((res) => {
@@ -169,6 +192,71 @@ function MicrosContent() {
       isMounted = false;
     };
   }, []);
+
+  // Measure chip bar height for --chipbar-h CSS variable
+  useEffect(() => {
+    if (chipBarRef.current) {
+      const h = chipBarRef.current.offsetHeight;
+      if (h > 0) setChipBarHeight(h);
+    }
+  }, [isLoading]);
+
+  // Auto-scroll active chip into view horizontally so it always stays visible
+  useEffect(() => {
+    const activeChip = chipRefs.current[activeGroup];
+    const container = chipsContainerRef.current;
+    if (activeChip && container) {
+      const chipLeft = activeChip.offsetLeft;
+      const chipWidth = activeChip.offsetWidth;
+      const containerWidth = container.clientWidth;
+      const targetScroll = chipLeft - (containerWidth - chipWidth) / 2;
+      container.scrollTo({ left: Math.max(0, targetScroll), behavior: "smooth" });
+    }
+  }, [activeGroup]);
+
+  // Scroll-spy using IntersectionObserver on the group cards
+  useEffect(() => {
+    if (isLoading || !data) return;
+
+    const groupKeys: NutrientGroup[] = ["vitamins", "minerals", "protein", "lipids", "carbs", "general"];
+    const elements = groupKeys
+      .map((key) => document.getElementById(`group-${key}`))
+      .filter((el): el is HTMLElement => el !== null);
+
+    if (elements.length === 0) return;
+
+    const chipBarH = chipBarHeight || 52;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (isManualScrolling.current) return;
+
+        const visibleEntries = entries.filter((e) => e.isIntersecting);
+        if (visibleEntries.length > 0) {
+          visibleEntries.sort(
+            (a, b) =>
+              Math.abs(a.boundingClientRect.top - chipBarH) -
+              Math.abs(b.boundingClientRect.top - chipBarH)
+          );
+          const topEntry = visibleEntries[0];
+          const key = topEntry.target.id.replace("group-", "") as NutrientGroup;
+          if (groupKeys.includes(key)) {
+            setActiveGroup(key);
+          }
+        }
+      },
+      {
+        rootMargin: `-${chipBarH}px 0px -55% 0px`,
+        threshold: [0, 0.1, 0.3, 0.6],
+      }
+    );
+
+    elements.forEach((el) => observer.observe(el));
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [isLoading, data, chipBarHeight]);
 
   const toggleGroup = (group: NutrientGroup) => {
     setOpenGroups((prev) => ({
@@ -184,7 +272,14 @@ function MicrosContent() {
       ...prev,
       [group]: true,
     }));
-    const el = document.getElementById(`group-${group}`);
+    isManualScrolling.current = true;
+    if (manualTimeout.current) clearTimeout(manualTimeout.current);
+    manualTimeout.current = setTimeout(() => {
+      isManualScrolling.current = false;
+    }, 800);
+
+    const id = typeof window !== "undefined" && window.innerWidth >= 1024 ? `desktop-group-${group}` : `group-${group}`;
+    const el = document.getElementById(id);
     if (el) {
       el.scrollIntoView({ behavior: "smooth", block: "start" });
     }
@@ -323,7 +418,10 @@ function MicrosContent() {
       {/* ============================================================== */}
       {/* MOBILE / TABLET LAYOUT (<1024px)                               */}
       {/* ============================================================== */}
-      <div className="w-full max-w-full min-w-0 min-h-screen bg-page flex flex-col relative lg:hidden pb-[88px]">
+      <div
+        style={{ "--chipbar-h": `${chipBarHeight}px` } as React.CSSProperties}
+        className="w-full max-w-full min-w-0 min-h-screen bg-page flex flex-col relative lg:hidden pb-[88px]"
+      >
         {/* Header (Ink): date row (44px arrows, centered date) + title & "Thiếu nhiều nhất: …" + right big stat "8/22" (Saira Condensed) with "đã đạt" in sky */}
         <header className="bg-ink text-white rounded-b-[20px] w-full min-w-0">
           <div className="w-full max-w-[560px] mx-auto px-4 pt-2 pb-4 flex flex-col gap-1">
@@ -364,11 +462,11 @@ function MicrosContent() {
               </div>
 
               <div className="text-right shrink-0">
-                <div className="font-display italic font-black text-3xl leading-none tabular-nums text-white">
-                  {achievedMicrosCount.achieved}
-                  <span className="text-muted-subtitle text-2xl font-bold">/{achievedMicrosCount.total}</span>
+                <div className="font-display italic font-black text-[34px] leading-none tabular-nums">
+                  <span className="text-white">{achievedMicrosCount.achieved}</span>
+                  <span className="text-white/55">/{achievedMicrosCount.total}</span>
                 </div>
-                <div className="text-xs text-sky font-semibold mt-0.5">
+                <div className="text-xs text-sky font-semibold mt-1">
                   đã đạt
                 </div>
               </div>
@@ -377,15 +475,25 @@ function MicrosContent() {
         </header>
 
         {/* Sticky Horizontally Scrolling Group Chips */}
-        <div className="sticky top-0 z-30 w-full min-w-0 max-w-full bg-page/95 backdrop-blur-sm border-b border-card-border/60">
-          <div className="w-full max-w-[560px] mx-auto px-4 py-2 overflow-x-auto scrollbar-none flex items-center gap-2">
+        <div
+          ref={chipBarRef}
+          className="sticky top-0 z-30 w-full min-w-0 max-w-full bg-page/95 backdrop-blur-sm border-b border-card-border/60"
+        >
+          <div
+            ref={chipsContainerRef}
+            className="w-full max-w-[560px] mx-auto px-4 py-2 overflow-x-auto scrollbar-none flex items-center gap-2"
+          >
             {GROUPS_CONFIG.map((group) => {
               const isActive = activeGroup === group.key;
               return (
                 <button
                   key={group.key}
+                  ref={(el) => {
+                    chipRefs.current[group.key] = el;
+                  }}
                   type="button"
                   onClick={() => scrollToGroup(group.key)}
+                  aria-pressed={isActive}
                   className={`min-h-[44px] flex items-center shrink-0 cursor-pointer bg-transparent border-0 p-0 active:scale-[0.97] transition-all`}
                 >
                   <span
@@ -423,7 +531,7 @@ function MicrosContent() {
 
           {/* Footnote */}
           <footer className="pt-2 pb-1 text-xs text-secondary leading-relaxed">
-            Mục tiêu theo cân nặng, giới tính và ngày tập · tham khảo khuyến nghị cho người Việt Nam (2016).
+            * Giá trị tham khảo theo khuyến nghị cho người Việt Nam (2016) · Mục tiêu theo cân nặng, giới tính và ngày tập.
           </footer>
         </main>
 
@@ -498,9 +606,10 @@ function MicrosContent() {
             </div>
 
             <div className="flex items-baseline gap-2 mr-2">
-              <span className="font-display italic font-black text-3xl text-blue tabular-nums">
-                {achievedMicrosCount.achieved}/{achievedMicrosCount.total}
-              </span>
+              <div className="font-display italic font-black text-[34px] leading-none tabular-nums">
+                <span className="text-cobalt">{achievedMicrosCount.achieved}</span>
+                <span className="text-secondary">/{achievedMicrosCount.total}</span>
+              </div>
               <span className="text-sm text-secondary font-semibold">vi chất đạt</span>
             </div>
 
@@ -526,60 +635,50 @@ function MicrosContent() {
 
           {/* Desktop Filter Chips */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1">
-            {GROUPS_CONFIG.map((group) => (
-              <button
-                key={group.key}
-                type="button"
-                onClick={() => scrollToGroup(group.key)}
-                className={`min-h-[44px] flex items-center shrink-0 cursor-pointer bg-transparent border-0 p-0 active:scale-[0.97] transition-all`}
-              >
-                <span
-                  className={`h-9 px-4 rounded-full text-xs font-semibold flex items-center justify-center transition-colors ${
-                    activeGroup === group.key
-                      ? "bg-ink text-white shadow-xs"
-                      : "bg-card text-text border border-card-border hover:bg-page"
-                  }`}
+            {GROUPS_CONFIG.map((group) => {
+              const isActive = activeGroup === group.key;
+              return (
+                <button
+                  key={group.key}
+                  type="button"
+                  onClick={() => scrollToGroup(group.key)}
+                  aria-pressed={isActive}
+                  className={`min-h-[44px] flex items-center shrink-0 cursor-pointer bg-transparent border-0 p-0 active:scale-[0.97] transition-all`}
                 >
-                  {chipLabels[group.key]}
-                </span>
-              </button>
-            ))}
+                  <span
+                    className={`h-9 px-4 rounded-full text-xs font-semibold flex items-center justify-center transition-colors ${
+                      isActive
+                        ? "bg-ink text-white shadow-xs"
+                        : "bg-card text-text border border-card-border hover:bg-page"
+                    }`}
+                  >
+                    {chipLabels[group.key]}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
           {/* 4-column Legend */}
           <Legend />
 
-          {/* 2 Columns Layout: Column 1 (Vitamin, Khoáng chất); Column 2 (Đạm, Chất béo, Tinh bột, Tổng quan) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-            {/* Column 1: Vitamin, Khoáng chất */}
-            <div className="flex flex-col gap-4">
-              {GROUPS_CONFIG.slice(0, 2).map((group) => (
+          {/* Balanced Columns-2 Layout: Vitamin, Khoáng chất, Đạm, Chất béo, Tinh bột, Tổng quan */}
+          <div className="columns-2 gap-4 [column-fill:_balance]">
+            {GROUPS_CONFIG.map((group) => (
+              <div key={group.key} className="break-inside-avoid mb-4">
                 <GroupCard
-                  key={group.key}
                   group={group}
                   rows={rowsByGroup[group.key]}
                   isOpen={openGroups[group.key]}
                   onToggle={() => toggleGroup(group.key)}
+                  idPrefix="desktop-group-"
                 />
-              ))}
-            </div>
-
-            {/* Column 2: Đạm, Chất béo, Tinh bột, Tổng quan */}
-            <div className="flex flex-col gap-4">
-              {GROUPS_CONFIG.slice(2).map((group) => (
-                <GroupCard
-                  key={group.key}
-                  group={group}
-                  rows={rowsByGroup[group.key]}
-                  isOpen={openGroups[group.key]}
-                  onToggle={() => toggleGroup(group.key)}
-                />
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
 
           <footer className="pt-2 text-xs text-secondary leading-relaxed">
-            Mục tiêu theo cân nặng, giới tính và ngày tập · tham khảo khuyến nghị cho người Việt Nam (2016).
+            * Giá trị tham khảo theo khuyến nghị cho người Việt Nam (2016) · Mục tiêu theo cân nặng, giới tính và ngày tập.
           </footer>
         </main>
       </div>
@@ -602,18 +701,18 @@ function Legend() {
   return (
     <div
       aria-label="Chú thích màu sắc vi chất"
-      className="grid grid-cols-4 gap-1.5 sm:gap-2 w-full py-1 px-0.5"
+      className="grid grid-cols-4 gap-2 w-full max-w-[560px] mx-auto py-1 px-1"
     >
       {tiers.map((t) => (
-        <div key={t.name} className="flex flex-col gap-0.5 min-w-0">
-          <div className="flex items-center gap-1 min-w-0">
+        <div key={t.name} className="flex flex-col items-center text-center gap-0.5 min-w-0">
+          <div className="flex items-center justify-center gap-1.5 min-w-0">
             <span
               aria-hidden="true"
-              className={`w-3 h-2 rounded-[1px] ${t.colorClass} -skew-x-[14deg] inline-block shrink-0`}
+              className={`w-3.5 h-2 rounded-[1px] ${t.colorClass} -skew-x-[14deg] inline-block shrink-0`}
             />
-            <span className="text-[11px] sm:text-xs font-semibold text-text truncate">{t.name}</span>
+            <span className="text-xs font-semibold text-text truncate">{t.name}</span>
           </div>
-          <span className="text-[10px] sm:text-[11px] text-secondary tabular-nums pl-4 sm:pl-5 truncate">
+          <span className="text-[11px] text-secondary tabular-nums truncate text-center">
             {t.range}
           </span>
         </div>
@@ -630,19 +729,21 @@ function GroupCard({
   rows,
   isOpen,
   onToggle,
+  idPrefix = "group-",
 }: {
   group: GroupConfig;
   rows: NutrientRowData[];
   isOpen: boolean;
   onToggle: () => void;
+  idPrefix?: string;
 }) {
   return (
     <section
-      id={`group-${group.key}`}
-      className="bg-card border border-card-border rounded-[18px] overflow-hidden flex flex-col scroll-mt-16"
+      id={`${idPrefix}${group.key}`}
+      className="bg-card border border-card-border rounded-[18px] overflow-hidden flex flex-col scroll-mt-[calc(var(--chipbar-h,52px)+8px)] lg:scroll-mt-6 break-inside-avoid"
     >
-      {/* Sticky group header */}
-      <div className="sticky top-0 z-10 bg-card border-b border-card-border">
+      {/* Sticky group header: offset by --chipbar-h on mobile, top-0 on desktop */}
+      <div className="sticky top-[var(--chipbar-h,52px)] lg:top-0 z-10 bg-card border-b border-card-border">
         <button
           type="button"
           onClick={onToggle}
@@ -651,7 +752,7 @@ function GroupCard({
         >
           <div className="flex items-center gap-2">
             <span className="font-bold text-base text-text">{group.title}</span>
-            <span className="text-xs text-secondary font-mono">({rows.length})</span>
+            <span className="text-xs text-secondary font-sans tabular-nums">({rows.length})</span>
           </div>
           <svg
             width="18"
@@ -685,14 +786,14 @@ function GroupCard({
 /**
  * Individual nutrient row:
  * Line 1: name | amount / target · % (bold)
- * Line 2: slanted bar directly under it (or dashed line for tracked-only)
+ * Line 2: slanted bar directly under it (only for nutrients with target)
  */
 function NutrientRow({ row }: { row: NutrientRowData }) {
   const { definition, consumed, targetMin, targetMax, percentage, formattedAmount, targetSource, isProvisional } = row;
   const hasTarget = targetSource !== "none";
   const indentPx = definition.depth * 16;
 
-  // Format amount / target (e.g. "331 / 1.200 mg" or "2.900 / 2.751–4.127 mg")
+  // Format amount / target (e.g. "331 / 1.200 mg" or "2.900 / 2.750–4.130 mg")
   let targetDisplay = "";
   if (hasTarget && targetMin !== null) {
     if (targetMax && targetMax !== targetMin) {
@@ -707,23 +808,31 @@ function NutrientRow({ row }: { row: NutrientRowData }) {
       style={{ paddingLeft: `${indentPx}px` }}
       className="min-h-[44px] py-2 flex flex-col justify-center gap-1.5 w-full"
     >
-      {/* Line 1: Name (+ tham khảo) | amount / target · % (bold) */}
+      {/* Line 1: Name (* tham khảo) | amount / target · % (bold) */}
       <div className="flex items-baseline justify-between text-sm leading-tight gap-2">
-        <div className="flex items-center gap-1.5 min-w-0">
+        <div className="flex items-center gap-1 min-w-0">
           <span className="font-semibold text-text truncate">
             {definition.nameVi}
           </span>
           {isProvisional && (
-            <span className="text-xs text-secondary font-normal shrink-0">
-              (tham khảo)
-            </span>
+            <sup
+              aria-label="giá trị tham khảo"
+              className="text-secondary text-[11px] font-bold select-none leading-none shrink-0"
+            >
+              *
+            </sup>
           )}
         </div>
 
         {/* Right side: amount [/ target] [· %] */}
         <div className="shrink-0 text-right flex items-baseline gap-1.5">
           {consumed === null ? (
-            <span className="text-secondary italic text-xs">chưa có dữ liệu</span>
+            <>
+              <span className="sr-only">chưa có dữ liệu</span>
+              <span aria-hidden="true" className="text-secondary/60 tabular-nums text-xs">
+                —
+              </span>
+            </>
           ) : hasTarget && targetDisplay ? (
             <>
               <span className="tabular-nums text-xs text-secondary">
@@ -741,18 +850,14 @@ function NutrientRow({ row }: { row: NutrientRowData }) {
         </div>
       </div>
 
-      {/* Line 2: Slanted SegmentedBar directly under it, or dashed line for tracked-only */}
-      {hasTarget ? (
+      {/* Line 2: Slanted SegmentedBar directly under it for nutrients with target */}
+      {hasTarget && (
         <div className="w-full">
           <SegmentedBar
             percentage={percentage ?? 0}
             aria-label={`${definition.nameVi} ${percentage !== null ? `${percentage}%` : "chưa có dữ liệu"}`}
             tone="light"
           />
-        </div>
-      ) : (
-        <div className="w-full py-0.5">
-          <div className="w-full border-b border-dashed border-card-border" />
         </div>
       )}
     </div>

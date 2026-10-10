@@ -114,22 +114,22 @@ export function calculateCarbTarget(caloriesMin: number, proteinMid: number, fat
 
 export function calculateSodiumTarget(trainingMinutes = 0): TargetRange {
   // Salt: 4–6 g/day + 1–1.5 g per 20 min of training
-  // 1 g salt = 393 mg sodium
+  // 1 g salt = 393 mg sodium, rounded to nearest 10 mg
   const trainingIntervals = trainingMinutes / 20;
   const saltMin = 4 + 1.0 * trainingIntervals;
   const saltMax = 6 + 1.5 * trainingIntervals;
 
   return {
-    min: Math.round(saltMin * 393),
-    max: Math.round(saltMax * 393),
+    min: Math.round((saltMin * 393) / 10) * 10,
+    max: Math.round((saltMax * 393) / 10) * 10,
   };
 }
 
 export function calculatePotassiumTarget(weightKg: number): TargetRange {
-  // 80–100 mg/kg
+  // 80–100 mg/kg, rounded to nearest 10 mg
   return {
-    min: Math.round(weightKg * 80),
-    max: Math.round(weightKg * 100),
+    min: Math.round((weightKg * 80) / 10) * 10,
+    max: Math.round((weightKg * 100) / 10) * 10,
   };
 }
 
