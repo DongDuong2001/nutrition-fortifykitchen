@@ -1,0 +1,16 @@
+{
+  "name": "runeicons",
+  "version": "1.0.0",
+  "description": "Rune icons component library",
+  "main": "./index.js",
+  "module": "./index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js",
+      "require": "./index.js",
+      "default": "./index.js"
+    }
+  }
+}
