@@ -48,7 +48,7 @@ export interface DiaryLog {
   id: string;
   user_id: string;
   food_id: string;
-  meal_slot: "breakfast" | "lunch" | "dinner" | "snack";
+  meal_slot: "breakfast" | "lunch" | "dinner" | "snack" | "preworkout" | "intraworkout" | "postworkout";
   quantity: number;
   serving_size_g: number;
   nutrients_snapshot: NutrientValues;
@@ -67,7 +67,7 @@ export interface DailyProgress {
 export interface LogMealPayload {
   id: string; // Client-generated UUID
   food_id: string;
-  meal_slot: "breakfast" | "lunch" | "dinner" | "snack";
+  meal_slot: "breakfast" | "lunch" | "dinner" | "snack" | "preworkout" | "intraworkout" | "postworkout";
   quantity: number;
   serving_size_g?: number;
   log_date?: string;

@@ -49,7 +49,7 @@ export function useDiaryLog(initialLogs: DiaryLog[] = [], initialProgress?: Dail
   const logMealOptimistic = useCallback(
     async (
       food: Food,
-      mealSlot: "breakfast" | "lunch" | "dinner" | "snack",
+      mealSlot: "breakfast" | "lunch" | "dinner" | "snack" | "preworkout" | "intraworkout" | "postworkout",
       quantity: number,
       servingSizeG = food.serving_size_g || 100,
       logDate?: string

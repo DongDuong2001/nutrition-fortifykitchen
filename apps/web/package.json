@@ -16,7 +16,6 @@
     "next": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "runeicons": "latest",
     "tailwind-merge": "latest"
   },
   "devDependencies": {
