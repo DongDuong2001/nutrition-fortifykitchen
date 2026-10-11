@@ -38,10 +38,12 @@
 - [ ] (cc-04) Edit entry header: the title is now the food name and the subtitle the meal (as design/screens/EditEntry.dc.html), so the "Sửa món" title is gone. Confirm.
 - [x] (cc-04) /add grouped list: rows still crop at the sticky header's bottom edge as they scroll under it. That is how any sticky header works, and it can't be removed while rows scroll. The 12 px side strips are now covered. Decided: keep as is (sticky + divider).
 - [ ] (cc-04) Setup uses AppHeader on phone only; desktop keeps its own heading and footer. Confirm.
-- [ ] (cc-08) Profile: birth year and default training minutes are shown but not editable yet. The brief only asked for sex, goal, weight and the period switch. Confirm whether they should edit inline or on their own screens.
-- [ ] (cc-08) Profile: the design's Ứng dụng group (Ngôn ngữ, Nhắc nhở, Cài như ứng dụng), Nâng cấp Pro, Tải CSV, Xoá tài khoản and Đăng xuất are not built. They are other features.
+- [x] (cc-08, done in cc-09) Profile: birth year and default training minutes are editable now. The brief only asked for sex, goal, weight and the period switch. Confirm whether they should edit inline or on their own screens.
+- [ ] (cc-08, cc-09 built the menu) Profile: the design's Tải CSV button is not built. Ngôn ngữ, Nhắc nhở, Cài như ứng dụng, Pro, Xoá tài khoản and Đăng xuất are linked.
 - [ ] (cc-08) Weight: the design's "Ngày cân" row and "Lần cân trước" history are not built. There is no weight log data yet.
 - [ ] (cc-08) Profile subtitle (email · plan) is not shown: the app has no account data yet.
 - [ ] (cc-08) Browser*.dc.html designs were not read, as AGENTS.md says to skip them. The brief asked for them, so confirm.
 - [ ] (ag-02) Paywall prices and payment provider are placeholders — must be filled before release.
 - [ ] (ag-02) Paywall.dc.html copy states "Gói Miễn phí vẫn ghi đủ 21 vi chất" while Micros tracks 22 (x/22) — confirm whether free tier copy should state 21 or 22.
+- [ ] (cc-09) Đăng xuất only links to /signin and clears nothing yet. Dong: sign-out must clear the session once accounts exist.
+- [ ] (cc-09) Phone Profile names the install row "Thêm vào màn hình chính"; the desktop design says "Cài như ứng dụng". The menu uses the desktop name. Confirm.

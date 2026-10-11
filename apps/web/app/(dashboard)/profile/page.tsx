@@ -3,7 +3,14 @@
 import { AppHeader } from "@/components/ui/app-header";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { DesktopSidebar } from "@/components/ui/desktop-sidebar";
-import { BodyCard, GoalCard, TargetsCard } from "@/components/profile/profile-cards";
+import {
+  AccountCard,
+  AppCard,
+  BodyCard,
+  GoalCard,
+  ProCard,
+  TargetsCard,
+} from "@/components/profile/profile-cards";
 import { useDiary } from "@/lib/diary-store";
 
 export default function ProfilePage() {
@@ -23,9 +30,12 @@ export default function ProfilePage() {
               <div className="flex flex-col gap-3.5 lg:gap-4">
                 <BodyCard alignGroup="profile-header" />
                 <GoalCard />
+                <TargetsCard />
               </div>
               <div className="flex flex-col gap-3.5 lg:gap-4">
-                <TargetsCard />
+                <AppCard />
+                <ProCard />
+                <AccountCard />
               </div>
             </>
           ) : (

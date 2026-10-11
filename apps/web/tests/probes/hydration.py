@@ -26,7 +26,11 @@ def main():
         page.on("pageerror", lambda err: (console_errors.append(err.message), console_issues.append(f"pageerror: {err.message[:300]}")))
 
         viewports = [{"width": 390, "height": 844}, {"width": 1440, "height": 900}]
-        paths = ["/today", "/micros", "/add", "/entry/item-1", "/training", "/profile", "/profile/weight"]
+        paths = [
+            "/today", "/micros", "/add", "/entry/item-1", "/training", "/profile", "/profile/weight",
+            "/settings/language", "/settings/notifications", "/settings/delete-account",
+            "/install", "/paywall", "/this-page-does-not-exist",  # last one: the 404 page
+        ]
         for vp, path in [(v, p) for v in viewports for p in paths]:
             page.set_viewport_size(vp)
             console_errors.clear()
@@ -72,6 +76,9 @@ def main():
             badge = page.evaluate("""() => { const o = []; document.querySelectorAll('nextjs-portal').forEach(h => { const b = h.shadowRoot && h.shadowRoot.querySelector('[data-next-badge]'); if (b) o.push(b.getAttribute('data-error')); }); return o; }""")
             if "true" in badge:
                 console_issues.append("Next dev badge shows an Issue")
+            # The 404 page logs its failed request by design; other console errors on it still fail
+            if path.startswith("/this-page-does-not-exist"):
+                console_issues[:] = [m for m in console_issues if "status of 404" not in m]
             if console_issues:
                 print(f"[FAIL] Console problems on {path} @ {vp['width']}: {console_issues}")
                 total_errors.extend(console_issues)

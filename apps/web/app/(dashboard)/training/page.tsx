@@ -14,6 +14,7 @@ import {
 import { formatDayLabel, formatDesktopDate } from "@/lib/format";
 import { getTodayIsoVN } from "@/lib/date";
 import { DurationSelector } from "@/components/training/duration-selector";
+import { useDiary } from "@/lib/diary-store";
 import { SaltSummaryCard } from "@/components/training/salt-summary-card";
 import { SodiumProgressCard } from "@/components/training/sodium-progress-card";
 import { PhaseChecklist } from "@/components/training/phase-checklist";
@@ -39,6 +40,9 @@ function TrainingContent() {
       : searchParams?.get("duration") || "60";
 
   const [selectedDuration, setSelectedDuration] = useState<string>(initialDuration);
+  // The profile's default training time (Hồ sơ) applies until the URL names a duration
+  const { profile, hydrated } = useDiary();
+  const profileDuration = profile.trainingMinutesDefault === 0 ? "rest" : String(profile.trainingMinutesDefault);
   const [clientNow, setClientNow] = useState<Date | null>(null);
   const [isDesktop, setIsDesktop] = useState(false);
   const todayIso = useMemo(() => getTodayIsoVN(), []);
@@ -53,14 +57,16 @@ function TrainingContent() {
     "intra-carb": false,
   });
 
-  // Sync state if url changes
+  // Sync state if url changes; with no duration in the url, the profile's default once it is read
   useEffect(() => {
     if (searchParams?.get("rest") === "1") {
       setSelectedDuration("rest");
     } else if (searchParams?.get("duration")) {
       setSelectedDuration(searchParams.get("duration")!);
+    } else if (hydrated) {
+      setSelectedDuration(profileDuration);
     }
-  }, [searchParams]);
+  }, [searchParams, hydrated, profileDuration]);
 
   // Load saved checklist ticks after mount to avoid hydration mismatch
   useEffect(() => {
