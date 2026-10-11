@@ -3,6 +3,7 @@
 import React from "react";
 import { formatNumber } from "@/lib/format";
 import type { DailyTrendEntry } from "@/lib/mock/trends";
+import { kcalOnTarget } from "@/lib/trends";
 
 interface KcalChartProps {
   entries: DailyTrendEntry[];
@@ -16,9 +17,8 @@ export function KcalChart({ entries, targetMin, targetMax }: KcalChartProps) {
   // Compute completed days (all except today if today is the last item and marked as isToday)
   const completedEntries = entries.filter((e) => !e.isToday);
   const completedCount = completedEntries.length;
-  const inBandCount = completedEntries.filter(
-    (e) => e.calories >= targetMin && e.calories <= targetMax
-  ).length;
+  // A day above the range is on target (product rule), so only days below the minimum count as off
+  const inBandCount = completedEntries.filter((e) => kcalOnTarget(e.calories, targetMin)).length;
 
   const totalCalories = completedEntries.reduce((sum, e) => sum + e.calories, 0);
   const avgCalories =
@@ -85,7 +85,7 @@ export function KcalChart({ entries, targetMin, targetMax }: KcalChartProps) {
             }`}
           >
             {entries.map((b) => {
-              const inBand = b.calories >= targetMin && b.calories <= targetMax;
+              const inBand = kcalOnTarget(b.calories, targetMin);
               const isToday = !!b.isToday;
               const state = isToday
                 ? "đang ghi"
@@ -208,18 +208,7 @@ export function KcalChart({ entries, targetMin, targetMax }: KcalChartProps) {
             aria-hidden="true"
             className="w-2.5 h-2.5 rounded-xs bg-destructive shrink-0"
           />
-          Thiếu / Vượt
-        </span>
-        <span className="inline-flex items-center gap-1.5">
-          <span
-            aria-hidden="true"
-            style={{
-              backgroundImage:
-                "repeating-linear-gradient(135deg, var(--color-sky) 0px 4px, var(--color-paper) 4px 8px)",
-            }}
-            className="w-2.5 h-2.5 rounded-xs border border-sky shrink-0"
-          />
-          Hôm nay (đang ghi)
+          Thiếu
         </span>
       </div>
     </section>

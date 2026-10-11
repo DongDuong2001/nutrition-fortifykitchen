@@ -25,6 +25,8 @@ ONBOARDING_CHECKS = [
     ("/micros", "mobile (390px)", "micros-header", "lr"),
     ("/today", "desktop (1440px)", "today-header", "lr"),
     ("/micros", "desktop (1440px)", "micros-header", "lr"),
+    ("/trends", "mobile (390px)", "trends-rows", "lr"),
+    ("/trends", "desktop (1440px)", "trends-rows", "lr"),
     ("/entry/item-1", "mobile (390px)", "entry", "lr"),
     ("/entry/item-1", "desktop (1440px)", "entry", "lr"),
     ("/foods/food-cha-la", "mobile (390px)", "food-header", "lr"),

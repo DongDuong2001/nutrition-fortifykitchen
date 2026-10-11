@@ -34,6 +34,8 @@ export interface AppHeaderProps {
   progress?: { current: number; total: number };
   /** Slot for summary panel (kcal/dial, micro counts, etc.) */
   summary?: React.ReactNode;
+  /** Row under the summary on the phone daily header (e.g. a link to a related page) */
+  footer?: React.ReactNode;
   /** Slot for right actions (desktop buttons, sub-screen step indicators, etc.) */
   actions?: React.ReactNode;
   /** Desktop-specific stat element (e.g. "8/22 vi chất đạt") */
@@ -65,6 +67,7 @@ export function AppHeader({
   backLabel = "Quay lại",
   progress,
   summary,
+  footer,
   actions,
   desktopStat,
   alignGroup,
@@ -348,6 +351,7 @@ export function AppHeader({
               {summary}
             </div>
           )}
+          {footer}
         </div>
       </header>
 

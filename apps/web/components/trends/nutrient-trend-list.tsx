@@ -63,6 +63,7 @@ export function NutrientTrendList({
           return (
             <div
               key={item.key}
+              data-align-group="trends-rows"
               className="py-2.5 flex flex-col gap-1.5 justify-center"
             >
               {/* Row 1: Name left, %, level, x/N đạt right */}
@@ -107,10 +108,10 @@ export function NutrientTrendList({
               {/* Row 3: Subtext with average value vs target */}
               <div className="flex items-center justify-between text-xs text-secondary tabular-nums">
                 <span>
-                  TB: {formatAmount(item.averageValue, item.unit)}
+                  TB: {formatAmount(item.averageValue, item.unit)} {item.unit}
                 </span>
                 <span>
-                  Mục tiêu: {formatAmount(item.targetMin, item.unit)}
+                  Mục tiêu: {formatAmount(item.targetMin, item.unit)} {item.unit}
                 </span>
               </div>
             </div>

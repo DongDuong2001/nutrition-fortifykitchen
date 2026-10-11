@@ -22,7 +22,7 @@ export function ProteinTrendCard({ proteinTrend }: ProteinTrendCardProps) {
         <h2 id="t-pro" className="m-0 text-base font-bold text-text">
           Đạm trung bình
         </h2>
-        <div className="text-[15px] font-bold tabular-nums text-text">
+        <div className="font-display text-xl font-bold italic tabular-nums text-text">
           <span className="text-blue">
             {formatNumber(proteinTrend.averageValue)} g
           </span>{" "}

@@ -25,20 +25,6 @@ export interface NutrientTargetDef {
   isCoachRule?: boolean;
 }
 
-export const TREND_TARGETS = {
-  calories: { min: 1950, max: 2275, unit: "kcal", name: "Năng lượng" },
-  protein: { key: "protein", name: "Đạm", unit: "g", targetMin: 104, isCoachRule: true },
-  fat: { key: "fat", name: "Chất béo", unit: "g", targetMin: 55 },
-  carbs: { key: "carbs", name: "Tinh bột", unit: "g", targetMin: 250 },
-  fiber: { key: "fiber", name: "Chất xơ", unit: "g", targetMin: 28 },
-  // 5 key micros:
-  calcium: { key: "calcium", name: "Canxi", unit: "mg", targetMin: 1000, isCoachRule: true },
-  iron: { key: "iron", name: "Sắt", unit: "mg", targetMin: 10 },
-  potassium: { key: "potassium", name: "Kali", unit: "mg", targetMin: 3500 },
-  magnesium: { key: "magnesium", name: "Magie", unit: "mg", targetMin: 350 },
-  vitamin_d: { key: "vitamin_d", name: "Vitamin D", unit: "µg", targetMin: 15 },
-} as const;
-
 /**
  * 7-day mock series matching Trends.dc.html
  * Days 1..6 are completed; Day 7 (today) is partially logged (đang ghi).

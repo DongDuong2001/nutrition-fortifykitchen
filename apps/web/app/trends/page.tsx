@@ -8,36 +8,49 @@ import { KcalChart } from "@/components/trends/kcal-chart";
 import { NutrientTrendList } from "@/components/trends/nutrient-trend-list";
 import { ProteinTrendCard } from "@/components/trends/protein-trend-card";
 import { TrendsEmptyState } from "@/components/trends/trends-empty-state";
+import { useDiary } from "@/lib/diary-store";
+import { MOCK_TRENDS_7_DAYS, MOCK_TRENDS_30_DAYS, type DailyTrendEntry } from "@/lib/mock/trends";
 import {
-  MOCK_TRENDS_7_DAYS,
-  MOCK_TRENDS_30_DAYS,
-  TREND_TARGETS,
-  type DailyTrendEntry,
-} from "@/lib/mock/trends";
-import {
+  anchorTrendDays,
   calculateNutrientTrend,
+  trendTargetsFrom,
+  trendWindowLabel,
   type NutrientTrendResult,
 } from "@/lib/trends";
+
+// Shown until the runtime date is known, so the window never renders on the server's date
+function TrendsLoading() {
+  return (
+    <div aria-busy="true" aria-live="polite" className="w-full min-h-screen bg-page">
+      <h1 className="sr-only">Xu hướng — Đang tải</h1>
+      <div className="w-full max-w-[560px] mx-auto px-4 pt-6 flex flex-col gap-3">
+        <div className="h-[220px] rounded-[18px] bg-level-empty motion-safe:animate-pulse" />
+        <div className="h-[220px] rounded-[18px] bg-level-empty motion-safe:animate-pulse" />
+      </div>
+    </div>
+  );
+}
 
 function TrendsContent() {
   const searchParams = useSearchParams();
   const isEmptyParam = searchParams.get("empty") === "1";
   const [range, setRange] = useState<"7d" | "30d">("7d");
+  const { todayIso, targets } = useDiary();
+  const trendTargets = useMemo(() => trendTargetsFrom(targets), [targets]);
 
-  // Determine active entries
+  // The window ends on today. todayIso is set after mount, so this runs on the client only.
   const rawEntries: DailyTrendEntry[] = useMemo(() => {
-    if (isEmptyParam) return [];
-    return range === "7d" ? MOCK_TRENDS_7_DAYS : MOCK_TRENDS_30_DAYS;
-  }, [isEmptyParam, range]);
+    if (!todayIso || isEmptyParam) return [];
+    return anchorTrendDays(range === "7d" ? MOCK_TRENDS_7_DAYS : MOCK_TRENDS_30_DAYS, todayIso);
+  }, [isEmptyParam, range, todayIso]);
 
   const isEmpty = rawEntries.length < 3;
 
   // Subtitle for header
   const subtitle = useMemo(() => {
     if (isEmpty) return "Chưa đủ dữ liệu";
-    if (range === "7d") return "7 ngày gần nhất · 04–10/10";
-    return "30 ngày gần nhất · 11/09–10/10";
-  }, [isEmpty, range]);
+    return `${range === "7d" ? 7 : 30} ngày gần nhất · ${trendWindowLabel(rawEntries)}`;
+  }, [isEmpty, range, rawEntries]);
 
   // Compute nutrient trends
   const { microTrends, proteinTrend } = useMemo(() => {
@@ -51,15 +64,15 @@ function TrendsContent() {
 
     // Protein
     const proteinVals = entriesToUse.map((e) => e.protein);
-    const pTrend = calculateNutrientTrend(proteinVals, TREND_TARGETS.protein);
+    const pTrend = calculateNutrientTrend(proteinVals, trendTargets.protein);
 
     // Micros
     const microsDefs = [
-      TREND_TARGETS.vitamin_d,
-      TREND_TARGETS.calcium,
-      TREND_TARGETS.magnesium,
-      TREND_TARGETS.potassium,
-      TREND_TARGETS.iron,
+      trendTargets.vitamin_d,
+      trendTargets.calcium,
+      trendTargets.magnesium,
+      trendTargets.potassium,
+      trendTargets.iron,
     ];
 
     const mTrends: NutrientTrendResult[] = microsDefs.map((def) => {
@@ -78,10 +91,12 @@ function TrendsContent() {
     mTrends.sort((a, b) => a.averagePercentage - b.averagePercentage);
 
     return { microTrends: mTrends, proteinTrend: pTrend };
-  }, [rawEntries]);
+  }, [rawEntries, trendTargets]);
+
+  if (!todayIso) return <TrendsLoading />;
 
   return (
-    <div className="w-full min-h-screen bg-page text-text font-sans flex flex-col justify-between">
+    <div className="w-full min-h-screen bg-page text-text flex flex-col justify-between">
       <div className="flex flex-col">
         <AppHeader
           variant="sub"
@@ -127,8 +142,8 @@ function TrendsContent() {
               {/* Kcal Chart */}
               <KcalChart
                 entries={rawEntries}
-                targetMin={TREND_TARGETS.calories.min}
-                targetMax={TREND_TARGETS.calories.max}
+                targetMin={trendTargets.calories.min}
+                targetMax={trendTargets.calories.max}
               />
 
               {/* Micros list */}

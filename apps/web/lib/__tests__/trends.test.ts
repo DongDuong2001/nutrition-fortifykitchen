@@ -11,8 +11,14 @@ import {
 import {
   MOCK_TRENDS_7_DAYS,
   MOCK_TRENDS_30_DAYS,
-  TREND_TARGETS,
 } from "../mock/trends";
+import {
+  anchorTrendDays,
+  kcalOnTarget,
+  trendTargetsFrom,
+  trendWindowLabel,
+} from "../trends";
+import { calculateTargets } from "../targets";
 
 describe("Trends calculation helpers (lib/trends.ts)", () => {
   it("calculates arithmetic average correctly", () => {
@@ -141,11 +147,85 @@ describe("Trends mock data (lib/mock/trends.ts)", () => {
     expect(lastDay.calories).toBeGreaterThan(0);
   });
 
-  it("has targets defined for kcal, macros, and 5 key micros", () => {
-    expect(TREND_TARGETS.calories.min).toBe(1950);
-    expect(TREND_TARGETS.calories.max).toBe(2275);
-    expect(TREND_TARGETS.protein.targetMin).toBe(104);
-    expect(TREND_TARGETS.calcium.targetMin).toBe(1000);
-    expect(TREND_TARGETS.vitamin_d.targetMin).toBe(15);
+});
+
+describe("Trends date window (anchorTrendDays, trendWindowLabel)", () => {
+  it("ends the window on today and labels the last day", () => {
+    const days = anchorTrendDays(MOCK_TRENDS_7_DAYS, "2026-10-11");
+    expect(days).toHaveLength(7);
+    expect(days[0].date).toBe("2026-10-05");
+    expect(days[6].date).toBe("2026-10-11");
+    expect(days[6].dateNumber).toBe("11");
+    expect(days[6].dayLabel).toBe("CN"); // 11/10/2026 is a Sunday
+    expect(days[6].isToday).toBe(true);
+    expect(days.slice(0, 6).some((d) => d.isToday)).toBe(false);
+  });
+
+  it("keeps the mock values in order when it moves the dates", () => {
+    const days = anchorTrendDays(MOCK_TRENDS_7_DAYS, "2026-10-11");
+    expect(days[0].calories).toBe(MOCK_TRENDS_7_DAYS[0].calories);
+    expect(days[5].calories).toBe(MOCK_TRENDS_7_DAYS[5].calories);
+  });
+
+  it("builds the 30-day window back from today across a month boundary", () => {
+    const days = anchorTrendDays(MOCK_TRENDS_30_DAYS, "2026-10-11");
+    expect(days).toHaveLength(30);
+    expect(days[0].date).toBe("2026-09-12");
+    expect(days[29].date).toBe("2026-10-11");
+  });
+
+  it("writes the window range in one month as dd–dd/mm", () => {
+    expect(trendWindowLabel(anchorTrendDays(MOCK_TRENDS_7_DAYS, "2026-10-11"))).toBe("05–11/10");
+  });
+
+  it("writes the window range across two months as dd/mm–dd/mm", () => {
+    expect(trendWindowLabel(anchorTrendDays(MOCK_TRENDS_30_DAYS, "2026-10-11"))).toBe("12/09–11/10");
+  });
+});
+
+describe("Trends kcal rule (kcalOnTarget)", () => {
+  it("counts a day below the range as off target", () => {
+    expect(kcalOnTarget(1890, 1950)).toBe(false);
+  });
+
+  it("counts the bottom of the range as on target", () => {
+    expect(kcalOnTarget(1950, 1950)).toBe(true);
+  });
+
+  it("counts a day above the range as on target, never as an over-limit", () => {
+    expect(kcalOnTarget(2300, 1950)).toBe(true);
+  });
+});
+
+describe("Trends targets come from the profile (trendTargetsFrom)", () => {
+  // Coach values for a 65 kg maintain profile: the same numbers as Today and Micros
+  const male = trendTargetsFrom(
+    calculateTargets({ sex: "male", weightKg: 65, goal: "maintain" })
+  );
+
+  it("uses the kcal range and protein minimum from the profile", () => {
+    expect(male.calories).toEqual({ min: 1950, max: 2275 });
+    expect(male.protein.targetMin).toBe(104);
+  });
+
+  it("uses the calcium and magnesium ranges (1.200–1.500 mg, 600–750 mg)", () => {
+    expect(male.calcium.targetMin).toBe(1200);
+    expect(male.magnesium.targetMin).toBe(600);
+    expect(male.magnesium.targetMax).toBe(750);
+  });
+
+  it("uses potassium from weight (80–100 mg/kg) and vitamin D 15 µg", () => {
+    expect(male.potassium.targetMin).toBe(5200);
+    expect(male.vitamin_d.targetMin).toBe(15);
+  });
+
+  it("uses iron 8 mg for a man, 18 mg for a woman and 28 mg in her period", () => {
+    expect(male.iron.targetMin).toBe(8);
+    const female = trendTargetsFrom(calculateTargets({ sex: "female", weightKg: 65, goal: "maintain" }));
+    expect(female.iron.targetMin).toBe(18);
+    const period = trendTargetsFrom(
+      calculateTargets({ sex: "female", weightKg: 65, goal: "maintain", isPeriod: true })
+    );
+    expect(period.iron.targetMin).toBe(28);
   });
 });

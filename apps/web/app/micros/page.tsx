@@ -451,6 +451,15 @@ function MicrosContent() {
               </div>
             </div>
           }
+          footer={
+            <Link
+              href="/trends"
+              className="min-h-[44px] flex items-center justify-between text-sm font-semibold text-white no-underline active:scale-[0.97] transition-transform"
+            >
+              Xu hướng 7 và 30 ngày
+              <span aria-hidden="true">›</span>
+            </Link>
+          }
         />
 
         {/* Sticky Horizontally Scrolling Group Chips */}
@@ -545,6 +554,9 @@ function MicrosContent() {
                   <span className="text-secondary">/{achievedMicrosCount.total}</span>
                 </div>
                 <span className="text-sm text-secondary font-semibold">vi chất đạt</span>
+                <Link href="/trends" className="ml-2 min-h-[44px] inline-flex items-center text-sm font-semibold text-blue no-underline">
+                  Xu hướng ›
+                </Link>
               </div>
             }
             canGoNext={false}
