@@ -50,6 +50,190 @@ const RECENT_SEARCHES_KEY = "h1t_recent_searches_v1";
 
 const DEFAULT_RECENTS = ["Yến mạch 60 g", "Kefir 200 ml", "Chuối 1 quả"];
 
+/**
+ * Pure aggregation function for daily totals.
+ * In production, Dong's backend API will compute and return real aggregated totals.
+ */
+export function computeCompositeDayData(
+  baseDay: MockDayData,
+  addedEntries: AddedDiaryEntry[]
+): MockDayData {
+  if (addedEntries.length === 0) {
+    return baseDay;
+  }
+
+  // Accumulate nutrient sums from added entries
+  let extraCals = 0;
+  let extraCarbs = 0;
+  let extraProtein = 0;
+  let extraFat = 0;
+  let extraFiber = 0;
+
+  const extraNutrients: Record<string, number> = {};
+
+  for (const entry of addedEntries) {
+    extraCals += entry.calories;
+    extraCarbs += entry.carbs;
+    extraProtein += entry.protein;
+    extraFat += entry.fat;
+    extraFiber += entry.fiber;
+
+    for (const [key, val] of Object.entries(entry.nutrients)) {
+      if (typeof val === "number") {
+        extraNutrients[key] = (extraNutrients[key] ?? 0) + val;
+      }
+    }
+  }
+
+  // 1. Calories
+  const totalConsumedCals = baseDay.calories.consumed + extraCals;
+  const remainingCals = Math.max(0, baseDay.calories.targetMin - totalConsumedCals);
+  const calPercentage = Math.round((totalConsumedCals / baseDay.calories.targetMin) * 100);
+
+  // 2. Macros
+  const updatedMacros = baseDay.macros.map((m) => {
+    let extra = 0;
+    if (m.key === "protein") extra = extraProtein;
+    else if (m.key === "carbs") extra = extraCarbs;
+    else if (m.key === "fat") extra = extraFat;
+    else if (m.key === "fiber") extra = extraFiber;
+
+    const baseConsumed = m.consumed ?? 0;
+    const newConsumed = Math.round(baseConsumed + extra);
+    const targetMin = m.targetMin ?? 0;
+    const percentage = targetMin > 0 ? Math.round((newConsumed / targetMin) * 100) : 0;
+    const displayValue =
+      m.targetMin !== null
+        ? m.targetMax
+          ? `${formatNumber(newConsumed)} / ${formatNumber(m.targetMin)}–${formatNumber(m.targetMax)} ${m.unit}`
+          : `${formatNumber(newConsumed)} / ${formatNumber(m.targetMin)} ${m.unit}`
+        : `${formatNumber(newConsumed)} ${m.unit}`;
+
+    return {
+      ...m,
+      consumed: newConsumed,
+      percentage,
+      displayValue,
+    };
+  });
+
+  // 3. Meals
+  const slotMap: Record<MealSlot, string> = {
+    breakfast: "breakfast",
+    lunch: "lunch",
+    pre_workout: "preworkout",
+    dinner: "dinner",
+    snack: "snack",
+  };
+
+  const updatedMeals = baseDay.meals.map((meal) => {
+    const addedForThisMeal = addedEntries.filter((e) => slotMap[e.mealSlot] === meal.slot);
+    if (addedForThisMeal.length === 0) {
+      return meal;
+    }
+
+    const newItems: MockFoodItem[] = [
+      ...meal.items,
+      ...addedForThisMeal.map((e) => ({
+        id: e.id,
+        name: e.foodName,
+        qty: e.displayQty,
+        kcal: e.calories,
+      })),
+    ];
+
+    const newKcal = newItems.reduce((acc, it) => acc + it.kcal, 0);
+
+    return {
+      ...meal,
+      items: newItems,
+      kcal: newKcal,
+    };
+  });
+
+  // 4. Nutrients record (for Micros page)
+  const compositeNutrients: Record<string, number | null> = { ...(baseDay.nutrients || {}) };
+  for (const [key, extraVal] of Object.entries(extraNutrients)) {
+    const current = compositeNutrients[key];
+    if (current !== null && current !== undefined) {
+      compositeNutrients[key] = current + extraVal;
+    } else if (extraVal > 0) {
+      compositeNutrients[key] = extraVal;
+    }
+  }
+
+  // 5. Update Minerals & Vitamins arrays (e.g. Kali, Vitamin B6)
+  const updatedMinerals = baseDay.minerals.map((m) => {
+    const extra = extraNutrients[m.key] ?? 0;
+    if (extra === 0) return m;
+
+    const baseConsumed = m.consumed ?? 0;
+    const newConsumed = Math.round(baseConsumed + extra);
+    const targetMin = m.targetMin ?? 0;
+    const percentage = targetMin > 0 ? Math.round((newConsumed / targetMin) * 100) : 0;
+    const displayValue =
+      m.targetMin !== null
+        ? m.targetMax
+          ? `${formatNumber(newConsumed)} / ${formatNumber(m.targetMin)}–${formatNumber(m.targetMax)} ${m.unit}`
+          : `${formatNumber(newConsumed)} / ${formatNumber(m.targetMin)} ${m.unit}`
+        : `${formatNumber(newConsumed)} ${m.unit}`;
+
+    return {
+      ...m,
+      consumed: newConsumed,
+      percentage,
+      displayValue,
+    };
+  });
+
+  const updatedVitamins = baseDay.vitamins.map((v) => {
+    const extra = extraNutrients[v.key] ?? 0;
+    if (extra === 0) return v;
+
+    const baseConsumed = v.consumed ?? 0;
+    const newConsumed = Math.round((baseConsumed + extra) * 100) / 100;
+    const targetMin = v.targetMin ?? 0;
+    const percentage = targetMin > 0 ? Math.round((newConsumed / targetMin) * 100) : 0;
+    const displayValue =
+      v.targetMin !== null
+        ? `${formatNumber(newConsumed)} / ${formatNumber(v.targetMin)} ${v.unit}`
+        : `${formatNumber(newConsumed)} ${v.unit}`;
+
+    return {
+      ...v,
+      consumed: newConsumed,
+      percentage,
+      displayValue,
+    };
+  });
+
+  // Count vitamins & minerals reached
+  const vitaminsAchieved = updatedVitamins.filter((m) => (m.percentage ?? 0) >= 100).length;
+  const mineralsAchieved = updatedMinerals.filter((m) => (m.percentage ?? 0) >= 100).length;
+  const achievedMicros = vitaminsAchieved + mineralsAchieved;
+
+  return {
+    ...baseDay,
+    calories: {
+      ...baseDay.calories,
+      consumed: totalConsumedCals,
+      remaining: remainingCals,
+      percentage: calPercentage,
+    },
+    macros: updatedMacros,
+    meals: updatedMeals,
+    minerals: updatedMinerals,
+    vitamins: updatedVitamins,
+    nutrients: compositeNutrients,
+    microsSummary: {
+      ...baseDay.microsSummary,
+      achieved: achievedMicros,
+      vitaminsAchieved,
+      mineralsAchieved,
+    },
+  };
+}
+
 export function DiaryProvider({ children }: { children: React.ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
   const [addedEntries, setAddedEntries] = useState<AddedDiaryEntry[]>([]);
@@ -161,192 +345,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     setToast(null);
   }, []);
 
-  /**
-   * NOTE: This totals calculation is mock-only. In production, Dong's backend API
-   * will compute and return real aggregated totals for the day.
-   */
   const compositeData = useMemo<MockDayData>(() => {
-    if (addedEntries.length === 0) {
-      return SAMPLE_DAY;
-    }
-
-    // Accumulate nutrient sums from added entries
-    let extraCals = 0;
-    let extraCarbs = 0;
-    let extraProtein = 0;
-    let extraFat = 0;
-    let extraFiber = 0;
-
-    const extraNutrients: Record<string, number> = {};
-
-    for (const entry of addedEntries) {
-      extraCals += entry.calories;
-      extraCarbs += entry.carbs;
-      extraProtein += entry.protein;
-      extraFat += entry.fat;
-      extraFiber += entry.fiber;
-
-      for (const [key, val] of Object.entries(entry.nutrients)) {
-        if (typeof val === "number") {
-          extraNutrients[key] = (extraNutrients[key] ?? 0) + val;
-        }
-      }
-    }
-
-    // 1. Calories
-    const totalConsumedCals = SAMPLE_DAY.calories.consumed + extraCals;
-    const remainingCals = Math.max(0, SAMPLE_DAY.calories.targetMin - totalConsumedCals);
-    const calPercentage = Math.round((totalConsumedCals / SAMPLE_DAY.calories.targetMin) * 100);
-
-    // 2. Macros
-    const updatedMacros = SAMPLE_DAY.macros.map((m) => {
-      let extra = 0;
-      if (m.key === "protein") extra = extraProtein;
-      else if (m.key === "carbs") extra = extraCarbs;
-      else if (m.key === "fat") extra = extraFat;
-      else if (m.key === "fiber") extra = extraFiber;
-
-      const baseConsumed = m.consumed ?? 0;
-      const newConsumed = Math.round(baseConsumed + extra);
-      const targetMin = m.targetMin ?? 0;
-      const percentage = targetMin > 0 ? Math.round((newConsumed / targetMin) * 100) : 0;
-      const displayValue =
-        m.targetMin !== null
-          ? m.targetMax
-            ? `${formatNumber(newConsumed)} / ${formatNumber(m.targetMin)}–${formatNumber(m.targetMax)} ${m.unit}`
-            : `${formatNumber(newConsumed)} / ${formatNumber(m.targetMin)} ${m.unit}`
-          : `${formatNumber(newConsumed)} ${m.unit}`;
-
-      return {
-        ...m,
-        consumed: newConsumed,
-        percentage,
-        displayValue,
-      };
-    });
-
-    // 3. Meals
-    // Map internal slots to SAMPLE_DAY slot identifiers
-    // breakfast -> breakfast, lunch -> lunch, pre_workout -> preworkout, dinner -> dinner, snack -> snack
-    const slotMap: Record<MealSlot, string> = {
-      breakfast: "breakfast",
-      lunch: "lunch",
-      pre_workout: "preworkout",
-      dinner: "dinner",
-      snack: "snack",
-    };
-
-    const updatedMeals = SAMPLE_DAY.meals.map((meal) => {
-      const addedForThisMeal = addedEntries.filter((e) => slotMap[e.mealSlot] === meal.slot);
-      if (addedForThisMeal.length === 0) {
-        return meal;
-      }
-
-      const newItems: MockFoodItem[] = [
-        ...meal.items,
-        ...addedForThisMeal.map((e) => ({
-          id: e.id,
-          name: e.foodName,
-          qty: e.displayQty,
-          kcal: e.calories,
-        })),
-      ];
-
-      const newKcal = newItems.reduce((acc, it) => acc + it.kcal, 0);
-
-      return {
-        ...meal,
-        items: newItems,
-        kcal: newKcal,
-      };
-    });
-
-    // 4. Nutrients record (for Micros page)
-    const compositeNutrients: Record<string, number | null> = { ...(SAMPLE_DAY.nutrients || {}) };
-    for (const [key, extraVal] of Object.entries(extraNutrients)) {
-      const current = compositeNutrients[key];
-      if (current !== null && current !== undefined) {
-        compositeNutrients[key] = current + extraVal;
-      } else if (extraVal > 0) {
-        compositeNutrients[key] = extraVal;
-      }
-    }
-
-    // 5. Update Minerals & Vitamins arrays (e.g. Kali)
-    const updatedMinerals = SAMPLE_DAY.minerals.map((m) => {
-      const extra = extraNutrients[m.key] ?? 0;
-      if (extra === 0) return m;
-
-      const baseConsumed = m.consumed ?? 0;
-      const newConsumed = Math.round(baseConsumed + extra);
-      const targetMin = m.targetMin ?? 0;
-      const percentage = targetMin > 0 ? Math.round((newConsumed / targetMin) * 100) : 0;
-      const displayValue =
-        m.targetMin !== null
-          ? m.targetMax
-            ? `${formatNumber(newConsumed)} / ${formatNumber(m.targetMin)}–${formatNumber(m.targetMax)} ${m.unit}`
-            : `${formatNumber(newConsumed)} / ${formatNumber(m.targetMin)} ${m.unit}`
-          : `${formatNumber(newConsumed)} ${m.unit}`;
-
-      return {
-        ...m,
-        consumed: newConsumed,
-        percentage,
-        displayValue,
-      };
-    });
-
-    const updatedVitamins = SAMPLE_DAY.vitamins.map((v) => {
-      let extra = 0;
-      if (v.key === "a") extra = extraNutrients["vitamin_a"] ?? 0;
-      else if (v.key === "c") extra = extraNutrients["vitamin_c"] ?? 0;
-      else if (v.key === "d") extra = extraNutrients["vitamin_d"] ?? 0;
-      else if (v.key === "e") extra = extraNutrients["vitamin_e"] ?? 0;
-      else if (v.key === "k") extra = extraNutrients["vitamin_k"] ?? 0;
-      else if (v.key === "b9") extra = extraNutrients["folate"] ?? 0;
-      else extra = extraNutrients[v.key] ?? 0;
-
-      if (extra === 0) return v;
-
-      const baseConsumed = v.consumed ?? 0;
-      const newConsumed = Math.round((baseConsumed + extra) * 10) / 10;
-      const targetMin = v.targetMin ?? 0;
-      const percentage = targetMin > 0 ? Math.round((newConsumed / targetMin) * 100) : 0;
-      const displayValue =
-        v.targetMin !== null
-          ? `${formatNumber(newConsumed)} / ${formatNumber(v.targetMin)} ${v.unit}`
-          : `${formatNumber(newConsumed)} ${v.unit}`;
-
-      return {
-        ...v,
-        consumed: newConsumed,
-        percentage,
-        displayValue,
-      };
-    });
-
-    // Count vitamins & minerals reached
-    const achievedMicros =
-      [...updatedVitamins, ...updatedMinerals].filter((m) => (m.percentage ?? 0) >= 100).length;
-
-    return {
-      ...SAMPLE_DAY,
-      calories: {
-        ...SAMPLE_DAY.calories,
-        consumed: totalConsumedCals,
-        remaining: remainingCals,
-        percentage: calPercentage,
-      },
-      macros: updatedMacros,
-      meals: updatedMeals,
-      minerals: updatedMinerals,
-      vitamins: updatedVitamins,
-      nutrients: compositeNutrients,
-      microsSummary: {
-        ...SAMPLE_DAY.microsSummary,
-        achievedCount: achievedMicros,
-      },
-    };
+    return computeCompositeDayData(SAMPLE_DAY, addedEntries);
   }, [addedEntries]);
 
   return (

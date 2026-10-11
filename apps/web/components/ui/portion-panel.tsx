@@ -77,13 +77,13 @@ export function PortionPanel({
       vitamin_a: 650,
       vitamin_c: 100,
       vitamin_e: 6.5,
-      vitamin_k: 150,
-      thiamin: 1.2,
-      riboflavin: 1.3,
-      niacin: 16,
-      pyridoxine: 1.3,
+      b1: 1.2,
+      b2: 1.3,
+      b3: 16,
+      b5: 5,
+      b6: 1.3,
       folate: 400,
-      cobalamin: 2.4,
+      b12: 2.4,
     };
 
     const list: { name: string; value: string; pct: number | null }[] = [];
@@ -93,7 +93,7 @@ export function PortionPanel({
       "calcium",
       "iron",
       "copper",
-      "pyridoxine",
+      "b6",
       "zinc",
       "sodium",
     ];
@@ -130,10 +130,13 @@ export function PortionPanel({
     >
       {/* Row 1: Title row */}
       <div
-        data-align-group="portion"
         className="flex items-center justify-between gap-2 min-h-[44px] w-full"
       >
-        <span className={`font-bold truncate ${isDark ? "text-lg text-white" : "text-xl text-text"}`}>
+        <span
+          data-align-group="portion"
+          data-align-edge="left"
+          className={`font-bold truncate ${isDark ? "text-lg text-white" : "text-xl text-text"}`}
+        >
           {food.nameVi}
         </span>
         <Link
@@ -150,6 +153,7 @@ export function PortionPanel({
       {food.tipVi && (
         <div
           data-align-group="portion"
+          data-align-edge="left"
           className={`text-xs font-medium leading-relaxed line-clamp-2 w-full ${
             isDark ? "text-sky" : "text-blue"
           }`}
@@ -159,12 +163,14 @@ export function PortionPanel({
       )}
 
       {/* Row 3: ChipGroup */}
-      <div data-align-group="portion" className="w-full">
+      <div className="w-full">
         <ChipGroup
           columns={columns}
           tone={tone}
           leadingInput={
             <label
+              data-align-group="portion"
+              data-align-edge="left"
               className={`flex items-center justify-center rounded-xl px-2 h-11 w-full cursor-text box-border border-2 ${
                 isDark
                   ? "bg-surface-dark border-sky text-white"
@@ -209,6 +215,7 @@ export function PortionPanel({
       {/* Row 4: StatGroup */}
       <div
         data-align-group="portion"
+        data-align-edge="left"
         className={`w-full pt-1 border-t ${
           isDark ? "border-card-border/20" : "border-card-border"
         }`}
@@ -229,15 +236,16 @@ export function PortionPanel({
       <button
         type="button"
         data-align-group="portion"
+        data-align-edge="left"
         onClick={onAdd}
-        disabled={isSubmitting || parsedGrams <= 0}
+        disabled={isSubmitting || parsedGrams <= 0 || mealSlot === null}
         className={`w-full min-h-[52px] rounded-full text-white font-bold text-base cursor-pointer active:scale-[0.98] transition-all border-0 flex items-center justify-center shadow-md disabled:opacity-50 ${
           isDark
             ? "bg-blue hover:bg-blue/90"
             : "bg-blue hover:bg-blue/90"
         }`}
       >
-        Thêm vào {mealNameVi}
+        Thêm vào {mealSlot ? mealNameVi : "—"}
       </button>
 
       {/* Desktop Micros Breakdown */}

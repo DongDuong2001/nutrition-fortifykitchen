@@ -70,12 +70,12 @@ export const NUTRIENT_CATALOG: NutrientDefinition[] = [
   { id: "valine", nameVi: "Valine", nameEn: "Valine", unit: "g", group: "protein", depth: 1, parentId: "protein", targetSource: "none" },
 
   // 5. Vitamin (12)
-  { id: "b1", nameVi: "B1 (Thiamin)", nameEn: "B1", unit: "mg", group: "vitamins", depth: 0, targetSource: "vn2016" },
-  { id: "b2", nameVi: "B2 (Riboflavin)", nameEn: "B2", unit: "mg", group: "vitamins", depth: 0, targetSource: "vn2016" },
-  { id: "b3", nameVi: "B3 (Niacin)", nameEn: "B3", unit: "mg", group: "vitamins", depth: 0, targetSource: "vn2016" },
-  { id: "b5", nameVi: "B5 (Pantothenic)", nameEn: "B5", unit: "mg", group: "vitamins", depth: 0, targetSource: "vn2016" },
-  { id: "b6", nameVi: "B6 (Pyridoxine)", nameEn: "B6", unit: "mg", group: "vitamins", depth: 0, targetSource: "vn2016" },
-  { id: "b12", nameVi: "B12 (Cobalamin)", nameEn: "B12", unit: "µg", group: "vitamins", depth: 0, targetSource: "vn2016" },
+  { id: "b1", nameVi: "Vitamin B1", nameEn: "B1", unit: "mg", group: "vitamins", depth: 0, targetSource: "vn2016" },
+  { id: "b2", nameVi: "Vitamin B2", nameEn: "B2", unit: "mg", group: "vitamins", depth: 0, targetSource: "vn2016" },
+  { id: "b3", nameVi: "Vitamin B3", nameEn: "B3", unit: "mg", group: "vitamins", depth: 0, targetSource: "vn2016" },
+  { id: "b5", nameVi: "Vitamin B5", nameEn: "B5", unit: "mg", group: "vitamins", depth: 0, targetSource: "vn2016" },
+  { id: "b6", nameVi: "Vitamin B6", nameEn: "B6", unit: "mg", group: "vitamins", depth: 0, targetSource: "vn2016" },
+  { id: "b12", nameVi: "Vitamin B12", nameEn: "B12", unit: "µg", group: "vitamins", depth: 0, targetSource: "vn2016" },
   { id: "folate", nameVi: "Folate (B9)", nameEn: "Folate", unit: "µg", group: "vitamins", depth: 0, targetSource: "vn2016" },
   { id: "vitamin_a", nameVi: "Vitamin A", nameEn: "Vitamin A", unit: "µg", group: "vitamins", depth: 0, targetSource: "vn2016" },
   { id: "vitamin_c", nameVi: "Vitamin C", nameEn: "Vitamin C", unit: "mg", group: "vitamins", depth: 0, targetSource: "vn2016" },
@@ -100,27 +100,8 @@ const CATALOG_BY_ID = new Map<string, NutrientDefinition>(
   NUTRIENT_CATALOG.map((n) => [n.id, n])
 );
 
-export const NUTRIENT_SYNONYMS: Record<string, string> = {
-  thiamin: "b1",
-  riboflavin: "b2",
-  niacin: "b3",
-  pantothenic: "b5",
-  pantothenic_acid: "b5",
-  pyridoxine: "b6",
-  cobalamin: "b12",
-  folate: "folate",
-  folic_acid: "folate",
-  vitamin_b1: "b1",
-  vitamin_b2: "b2",
-  vitamin_b3: "b3",
-  vitamin_b5: "b5",
-  vitamin_b6: "b6",
-  vitamin_b12: "b12",
-};
-
 export function getNutrientDefinition(id: string): NutrientDefinition | undefined {
-  const normalized = NUTRIENT_SYNONYMS[id] ?? id;
-  return CATALOG_BY_ID.get(normalized);
+  return CATALOG_BY_ID.get(id);
 }
 
 /**

@@ -88,13 +88,13 @@ function buildNutrientRows(data: MockDayData | null): Record<NutrientGroup, Nutr
 
   // 4. Vitamins
   data.vitamins.forEach((vit) => {
-    let catId = vit.key;
-    if (vit.key === "a") catId = "vitamin_a";
-    else if (vit.key === "c") catId = "vitamin_c";
-    else if (vit.key === "d") catId = "vitamin_d";
-    else if (vit.key === "e") catId = "vitamin_e";
-    else if (vit.key === "k") catId = "vitamin_k";
-    else if (vit.key === "b9") catId = "folate";
+    const catId = vit.key === "a" ? "vitamin_a"
+      : vit.key === "c" ? "vitamin_c"
+      : vit.key === "d" ? "vitamin_d"
+      : vit.key === "e" ? "vitamin_e"
+      : vit.key === "k" ? "vitamin_k"
+      : vit.key === "b9" ? "folate"
+      : vit.key;
 
     consumedMap[catId] = {
       consumed: vit.consumed,
@@ -754,9 +754,9 @@ function GroupCard({
           aria-expanded={isOpen}
           className="w-full min-h-[48px] px-4 py-2.5 flex items-center justify-between text-left cursor-pointer bg-transparent border-0 active:scale-[0.99] transition-transform"
         >
-          <div data-align-group="micros-card" className="w-full flex items-center justify-between">
+          <div className="w-full flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="font-bold text-base text-text">{group.title}</span>
+              <span data-align-group="micros-card" data-align-edge="left" className="font-bold text-base text-text">{group.title}</span>
               <span className="text-xs text-secondary font-sans tabular-nums">({rows.length})</span>
             </div>
             <svg
@@ -811,14 +811,16 @@ function NutrientRow({ row }: { row: NutrientRowData }) {
 
   const content = (
     <div
-      data-align-group="micros-card"
       style={{ paddingLeft: `${indentPx}px` }}
       className="min-h-[44px] py-2 flex flex-col justify-center gap-1.5 w-full"
     >
       {/* Line 1: Name (* tham khảo) | amount / target · % (bold) */}
       <div className="flex items-baseline justify-between text-sm leading-tight gap-2">
         <div className="flex items-center gap-1 min-w-0">
-          <span className="font-semibold text-text truncate">
+          <span
+            {...(definition.depth === 0 ? { "data-align-group": "micros-card", "data-align-edge": "left" } : {})}
+            className="font-semibold text-text truncate"
+          >
             {definition.nameVi}
           </span>
           {isProvisional && (

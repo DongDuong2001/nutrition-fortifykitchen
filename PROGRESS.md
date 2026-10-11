@@ -16,6 +16,39 @@
 | 11/10/2026 | ui-05 | Add food flow: search with diacritics & fuzzy fallback, food detail, create custom food, meal switcher sheet, desktop add food modal dialog, reactive diary store with sessionStorage, toast alerts, dynamic Today and Micros updates | Next tasks |
 | 11/10/2026 | ui-05-fix | Hydration bug fix, Asia/Ho_Chi_Minh default meal slot, layout primitives (ChipGroup, StatGroup, FormRow), 5-row portion panel alignment & 2-col desktop micros, return focus to opener on modal close, Playwright alignment & hydration tests | Next tasks |
 | 11/10/2026 | ui-05-fix-2 | Meal default fallback & neutral placeholder, sessionStorage hydration visibility assertions, content-based alignment verification & desktop meal fix, adaptive precision & Vietnamese nutrient synonyms, single PortionPanel component, FormRow inputs, npm scripts & AGENTS.md documentation | Next tasks |
+| 11/10/2026 | ui-05-fix-3 | Nutrient catalog keys & Vitamin B* naming, useMealSlot client resolution hook, desktop Today left text alignment (-mx-2), content-based data-align-edge checks, probe scripts (hydration & screenshots) | Next tasks |
+
+## Quality Gate Outputs (ui-05-fix-3)
+- `npx tsc --noEmit`: 0 errors (clean).
+- `npm test`:
+```
+ Test Files  7 passed (7)
+      Tests  53 passed (53)
+   Duration  209ms
+```
+- Invariant tests passed:
+  - All nutrient keys in `MOCK_FOODS` and `SAMPLE_DAY` exist in `NUTRIENT_CATALOG`.
+  - Adding Chà là 30 g increases diary `b6` (1.1 → 1.15 mg, 88%).
+- `npm run build`: 13/13 pages compiled statically, 0 errors.
+- `npm run probe -- tests/probes/hydration.py`:
+  - 0 hydration console errors on `/today` and `/add` with sessionStorage loaded.
+  - Seeded entry 'Chà là hạt dẻ test' visible on `/today`.
+  - Recent search chip 'Hạt điều test' visible on `/add`.
+- Alignment self-check (`npm run test:align`):
+  - Mobile (390px):
+    - Edges: `/today` (`meal-card` 10 elements) pass.
+    - Edges: `/micros` (`micros-card` 38 elements) pass.
+    - Edges: `/add` (`portion` 5 elements) pass.
+    - Edges: `/foods/food-cha-la` (`food-detail` 3 elements) pass.
+  - Desktop (1440px):
+    - Edges: `/today` (`desktop-meal` 15 elements: title `Bữa ăn`, meal headers, meal items, + Thêm món) pass.
+    - Edges: `/micros` (`micros-card` 38 elements) pass.
+    - Edges: `/add` (`portion` 5 elements) pass.
+    - Edges: `/foods/food-cha-la` (`food-detail` 3 elements) pass.
+- Screenshots verified:
+  - `apps/web/.screenshots/today-desktop-1440.png`: card title "Bữa ăn", meal headers ("Bữa sáng", "Bữa trưa", "Trước tập") and food items share exact left text edge.
+  - `apps/web/.screenshots/micros-mobile-b6-increase-390.png`: Vitamin B6 row increased to 1,15 / 1,3 mg · 88% after adding Chà là 30g; Vitamin B* naming consistent.
+
 
 ## Quality Gate Outputs (ui-05)
 - `npx tsc --noEmit`: 0 errors (clean).

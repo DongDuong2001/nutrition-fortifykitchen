@@ -412,7 +412,7 @@ export const SAMPLE_DAY: MockDayData = {
       targetSource: "vn2016",
     },
     {
-      key: "a",
+      key: "vitamin_a",
       name: "Vitamin A",
       group: "vitamin",
       consumed: 520,
@@ -436,7 +436,7 @@ export const SAMPLE_DAY: MockDayData = {
       targetSource: "vn2016",
     },
     {
-      key: "b9",
+      key: "folate",
       name: "Folate (B9)",
       group: "vitamin",
       consumed: 290,
@@ -448,7 +448,7 @@ export const SAMPLE_DAY: MockDayData = {
       targetSource: "vn2016",
     },
     {
-      key: "k",
+      key: "vitamin_k",
       name: "Vitamin K",
       group: "vitamin",
       consumed: 85,
@@ -460,7 +460,7 @@ export const SAMPLE_DAY: MockDayData = {
       targetSource: "vn2016",
     },
     {
-      key: "e",
+      key: "vitamin_e",
       name: "Vitamin E",
       group: "vitamin",
       consumed: 3.2,
@@ -472,7 +472,7 @@ export const SAMPLE_DAY: MockDayData = {
       targetSource: "vn2016",
     },
     {
-      key: "c",
+      key: "vitamin_c",
       name: "Vitamin C",
       group: "vitamin",
       consumed: 48,
@@ -484,7 +484,7 @@ export const SAMPLE_DAY: MockDayData = {
       targetSource: "vn2016",
     },
     {
-      key: "d",
+      key: "vitamin_d",
       name: "Vitamin D",
       group: "vitamin",
       consumed: 2.1,

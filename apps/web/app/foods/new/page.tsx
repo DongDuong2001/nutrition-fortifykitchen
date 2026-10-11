@@ -5,7 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { apiClient } from "@/lib/api-client";
 import { useDiary } from "@/lib/diary-store";
-import { parseMealSlot, getDefaultMealSlot, getMealSlotNameVi, type MealSlot } from "@/lib/meal-slot";
+import { getMealSlotNameVi } from "@/lib/meal-slot";
+import { useMealSlot } from "@/lib/use-meal-slot";
 import { FormRow } from "@/components/ui/form-row";
 
 function CreateFoodInner() {
@@ -13,18 +14,7 @@ function CreateFoodInner() {
   const searchParams = useSearchParams();
   const { addFoodEntry } = useDiary();
 
-  const paramMeal = searchParams.get("meal");
-  const parsedMeal = useMemo(() => parseMealSlot(paramMeal), [paramMeal]);
-  const [mealSlot, setMealSlot] = useState<MealSlot | null>(() => parsedMeal);
-
-  useEffect(() => {
-    if (!parsedMeal) {
-      setMealSlot(getDefaultMealSlot(new Date(), true));
-    } else {
-      setMealSlot(parsedMeal);
-    }
-  }, [parsedMeal]);
-
+  const mealSlot = useMealSlot(searchParams.get("meal"));
   const mealNameVi = mealSlot ? getMealSlotNameVi(mealSlot) : "—";
 
   // Form Fields
@@ -74,6 +64,7 @@ function CreateFoodInner() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (mealSlot === null || isSubmitting) return;
 
     const errName = validateField("nameVi", nameVi);
     const errSize = validateField("servingSize", servingSize);
@@ -117,8 +108,7 @@ function CreateFoodInner() {
       });
 
       // Add to diary and redirect
-      const resolvedSlot = mealSlot || getDefaultMealSlot(new Date(), true);
-      await addFoodEntry(createdFood, parsedSize, resolvedSlot, `${parsedSize} ${servingUnit}`);
+      await addFoodEntry(createdFood, parsedSize, mealSlot, `${parsedSize} ${servingUnit}`);
       router.push("/today");
     } finally {
       setIsSubmitting(false);
@@ -374,7 +364,7 @@ function CreateFoodInner() {
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={isSubmitting}
+            disabled={isSubmitting || mealSlot === null}
             className="w-full min-h-[52px] rounded-full bg-blue text-white font-bold text-base cursor-pointer hover:bg-blue/90 active:scale-[0.98] transition-all border-0 flex items-center justify-center shadow-md disabled:opacity-50"
           >
             Lưu và thêm vào {mealNameVi}

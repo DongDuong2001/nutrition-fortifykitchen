@@ -8,3 +8,4 @@
 - [ ] (Hào) Check the usage rights of the Vietnam Food Composition Table (Viện Dinh dưỡng Quốc gia) for use in a commercial app.
 - [ ] (Later) NCCDB licence quote from NCC (ndsrhelp@umn.edu), once there are paying users.
 - [ ] Vietnamese labels in `docs/nutrient-catalog.md`: review the wording (e.g. "Carb ròng", "Béo chuyển hoá")
+- [ ] Choline: tracked in USDA food data but omitted from Release 1's docs/nutrient-catalog.md. Confirm if choline should be added to the Vitamin/General catalogue group in a future release.

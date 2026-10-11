@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "dev:3100": "next dev --webpack -p 3100",
+    "dev:3101": "next dev --webpack -p 3101",
     "port:free": "node scripts/free-port.js",
     "build": "next build --webpack",
     "start": "next start",

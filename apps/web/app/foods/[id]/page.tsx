@@ -5,7 +5,8 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useDiary } from "@/lib/diary-store";
 import { MOCK_FOODS, type FoodItem } from "@/lib/mock/foods";
-import { parseMealSlot, getDefaultMealSlot, getMealSlotNameVi, type MealSlot } from "@/lib/meal-slot";
+import { getMealSlotNameVi } from "@/lib/meal-slot";
+import { useMealSlot } from "@/lib/use-meal-slot";
 import { parseGramsInput, calculateMacroPreview, scaleNutrients } from "@/lib/portion";
 import { formatNumber } from "@/lib/format";
 import { getNutrientDefinition } from "@/lib/nutrients";
@@ -25,18 +26,7 @@ function FoodDetailInner() {
     return MOCK_FOODS.find((f) => f.id === foodId) || MOCK_FOODS[0];
   }, [foodId]);
 
-  const paramMeal = searchParams.get("meal");
-  const parsedMeal = useMemo(() => parseMealSlot(paramMeal), [paramMeal]);
-  const [mealSlot, setMealSlot] = useState<MealSlot | null>(() => parsedMeal);
-
-  useEffect(() => {
-    if (!parsedMeal) {
-      setMealSlot(getDefaultMealSlot(new Date(), true));
-    } else {
-      setMealSlot(parsedMeal);
-    }
-  }, [parsedMeal]);
-
+  const mealSlot = useMealSlot(searchParams.get("meal"));
   const mealNameVi = mealSlot ? getMealSlotNameVi(mealSlot) : "—";
 
   const [gramsInput, setGramsInput] = useState(() => {
@@ -90,12 +80,13 @@ function FoodDetailInner() {
       vitamin_c: 100,
       vitamin_e: 6.5,
       vitamin_k: 150,
-      thiamin: 1.2,
-      riboflavin: 1.3,
-      niacin: 16,
-      pyridoxine: 1.3,
+      b1: 1.2,
+      b2: 1.3,
+      b3: 16,
+      b5: 5,
+      b6: 1.3,
       folate: 400,
-      cobalamin: 2.4,
+      b12: 2.4,
     };
 
     const items: {
@@ -133,11 +124,10 @@ function FoodDetailInner() {
   }, [food, parsedGrams, dailyTargets]);
 
   const handleAdd = async () => {
-    if (!food || parsedGrams <= 0 || isSubmitting) return;
-    const resolvedSlot = mealSlot || getDefaultMealSlot(new Date(), true);
+    if (!food || parsedGrams <= 0 || isSubmitting || mealSlot === null) return;
     setIsSubmitting(true);
     try {
-      await addFoodEntry(food, parsedGrams, resolvedSlot, selectedServingLabel);
+      await addFoodEntry(food, parsedGrams, mealSlot, selectedServingLabel);
       router.push("/today");
     } finally {
       setIsSubmitting(false);
@@ -284,10 +274,10 @@ function FoodDetailInner() {
           <button
             type="button"
             onClick={handleAdd}
-            disabled={isSubmitting || parsedGrams <= 0}
+            disabled={isSubmitting || parsedGrams <= 0 || mealSlot === null}
             className="w-full min-h-[52px] rounded-full bg-blue text-white font-bold text-base cursor-pointer hover:bg-blue/90 active:scale-[0.98] transition-all border-0 flex items-center justify-center shadow-md disabled:opacity-50"
           >
-            Thêm vào {mealNameVi}
+            Thêm vào {mealSlot ? mealNameVi : "—"}
           </button>
         </div>
       </div>

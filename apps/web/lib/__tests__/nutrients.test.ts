@@ -8,6 +8,9 @@ import {
 } from "../nutrients";
 import { PROVISIONAL_TARGETS, VN2016_TARGETS } from "../targets";
 import { SAMPLE_DAY } from "../mock/sample-day";
+import { MOCK_FOODS } from "../mock/foods";
+import { computeCompositeDayData } from "../diary-store";
+import { scaleNutrients } from "../portion";
 
 describe("Nutrient Catalogue & Null Handling", () => {
   it("contains complete catalogue matching docs/nutrient-catalog.md", () => {
@@ -27,11 +30,10 @@ describe("Nutrient Catalogue & Null Handling", () => {
     expect(ala?.parentId).toBe("omega3");
     expect(ala?.targetSource).toBe("none");
 
-    // Synonyms
-    expect(getNutrientDefinition("pyridoxine")?.id).toBe("b6");
-    expect(getNutrientDefinition("pyridoxine")?.nameVi).toBe("B6 (Pyridoxine)");
-    expect(getNutrientDefinition("thiamin")?.id).toBe("b1");
-    expect(getNutrientDefinition("cobalamin")?.id).toBe("b12");
+    // Vitamin names (Vitamin B style)
+    expect(getNutrientDefinition("b1")?.nameVi).toBe("Vitamin B1");
+    expect(getNutrientDefinition("b6")?.nameVi).toBe("Vitamin B6");
+    expect(getNutrientDefinition("b12")?.nameVi).toBe("Vitamin B12");
   });
 
   it("percentage calculation returns null when consumed or target is null", () => {
@@ -135,6 +137,86 @@ describe("Nutrient Catalogue & Null Handling", () => {
 
     // 5. net carbs = carbs - fibre
     expect(n.net_carbs).toBe((n.carbs ?? 0) - (n.fiber ?? 0));
+  });
+
+  it("invariant: every nutrient key in MOCK_FOODS and SAMPLE_DAY exists in NUTRIENT_CATALOG", () => {
+    const catalogIds = new Set(NUTRIENT_CATALOG.map((item) => item.id));
+
+    // 1. MOCK_FOODS nutrients
+    for (const food of MOCK_FOODS) {
+      for (const key of Object.keys(food.nutrients)) {
+        expect(
+          catalogIds.has(key),
+          `Nutrient key "${key}" in food "${food.id}" does not exist in NUTRIENT_CATALOG`
+        ).toBe(true);
+      }
+    }
+
+    // 2. SAMPLE_DAY nutrients
+    if (SAMPLE_DAY.nutrients) {
+      for (const key of Object.keys(SAMPLE_DAY.nutrients)) {
+        expect(
+          catalogIds.has(key),
+          `Nutrient key "${key}" in SAMPLE_DAY.nutrients does not exist in NUTRIENT_CATALOG`
+        ).toBe(true);
+      }
+    }
+
+    // 3. SAMPLE_DAY minerals
+    for (const mineral of SAMPLE_DAY.minerals) {
+      expect(
+        catalogIds.has(mineral.key),
+        `Mineral key "${mineral.key}" in SAMPLE_DAY.minerals does not exist in NUTRIENT_CATALOG`
+      ).toBe(true);
+    }
+
+    // 4. SAMPLE_DAY vitamins
+    for (const vitamin of SAMPLE_DAY.vitamins) {
+      expect(
+        catalogIds.has(vitamin.key),
+        `Vitamin key "${vitamin.key}" in SAMPLE_DAY.vitamins does not exist in NUTRIENT_CATALOG`
+      ).toBe(true);
+    }
+  });
+
+  it("adding Chà là 30 g increases the b6 total in the diary data", () => {
+    const chaLa = MOCK_FOODS.find((f) => f.id === "food-cha-la");
+    expect(chaLa).toBeDefined();
+    if (!chaLa) return;
+
+    expect(chaLa.nutrients.b6).toBeDefined();
+    expect(chaLa.nutrients.b6).toBeGreaterThan(0);
+
+    const baseB6 = SAMPLE_DAY.vitamins.find((v) => v.key === "b6");
+    expect(baseB6).toBeDefined();
+    expect(baseB6?.consumed).toBe(1.1);
+
+    const grams = 30;
+    const scaled = scaleNutrients(chaLa.nutrients, grams);
+    const addedEntry = {
+      id: "test-entry-chala",
+      foodId: chaLa.id,
+      foodName: chaLa.nameVi,
+      grams,
+      mealSlot: "pre_workout" as const,
+      displayQty: "30 g",
+      calories: Math.round((chaLa.nutrients.energy ?? 0) * (grams / 100)),
+      carbs: Math.round(((chaLa.nutrients.carbs ?? 0) * (grams / 100)) * 10) / 10,
+      protein: Math.round(((chaLa.nutrients.protein ?? 0) * (grams / 100)) * 10) / 10,
+      fat: Math.round(((chaLa.nutrients.fat ?? 0) * (grams / 100)) * 10) / 10,
+      fiber: Math.round(((chaLa.nutrients.fiber ?? 0) * (grams / 100)) * 10) / 10,
+      nutrients: scaled,
+      addedAt: new Date().toISOString(),
+    };
+
+    const composite = computeCompositeDayData(SAMPLE_DAY, [addedEntry]);
+    const updatedB6 = composite.vitamins.find((v) => v.key === "b6");
+    expect(updatedB6).toBeDefined();
+
+    // Base was 1.1 mg. Chà là 30g provides 0.17 * 0.3 = 0.05 mg b6 -> total is 1.15 mg
+    expect(updatedB6!.consumed).toBeGreaterThan(baseB6!.consumed!);
+    expect(updatedB6!.consumed).toBe(1.15);
+    expect(updatedB6!.percentage).toBe(88); // 1.15 / 1.3 = 88%
   });
 });
 

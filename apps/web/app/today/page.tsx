@@ -395,7 +395,7 @@ function TodayContent() {
                 >
                   <div className="flex items-baseline justify-between pb-0.5 w-full">
                     <div className="flex items-center gap-2">
-                      <h2 data-align-group="meal-card" className="m-0 text-base font-bold text-text">{meal.name}</h2>
+                      <h2 data-align-group="meal-card" data-align-edge="left" className="m-0 text-base font-bold text-text">{meal.name}</h2>
                       <Link
                         id={`mobile-add-${meal.slot}`}
                         href={`/add?meal=${meal.slot}`}
@@ -415,7 +415,7 @@ function TodayContent() {
                       href={`/entry/${it.id}`}
                       className="no-underline flex items-center justify-between gap-2 text-sm min-h-[44px] border-t border-divider w-full active:scale-[0.97] transition-transform"
                     >
-                      <span data-align-group="meal-card" className="truncate text-text font-normal">
+                      <span data-align-group="meal-card" data-align-edge="left" className="truncate text-text font-normal">
                         {it.name} <span className="text-secondary">· {it.qty}</span>
                       </span>
                       <span className="text-secondary tabular-nums shrink-0">
@@ -627,9 +627,9 @@ function TodayContent() {
           {/* Bottom 2 Columns Grid */}
           <section className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
             {/* Column 1: Bữa ăn */}
-            <div className="bg-card border border-card-border rounded-[18px] p-5 pb-2.5">
+            <div data-align-container className="bg-card border border-card-border rounded-[18px] p-5 pb-2.5">
               <div className="flex items-baseline justify-between mb-1">
-                <h2 className="m-0 text-lg font-bold text-text">Bữa ăn</h2>
+                <h2 data-align-group="desktop-meal" data-align-edge="left" className="m-0 text-lg font-bold text-text">Bữa ăn</h2>
                 <span className="text-[13px] text-secondary">Chọn món để sửa hoặc xoá</span>
               </div>
               {meals.map((meal) => {
@@ -638,13 +638,13 @@ function TodayContent() {
                   <div
                     key={meal.id}
                     id={`desktop-meal-${meal.slot}`}
-                    className={`border-t border-divider py-2 transition-all duration-300 rounded-lg px-2 ${
+                    className={`border-t border-divider py-2 transition-all duration-300 rounded-lg px-2 -mx-2 ${
                       isHighlighted ? "bg-blue/10 ring-2 ring-blue/80" : ""
                     }`}
                   >
                     <div className="flex justify-between items-baseline w-full">
                       <div className="flex items-center gap-2">
-                        <h3 data-align-group="desktop-meal" className="m-0 text-[15px] font-bold text-text">{meal.name}</h3>
+                        <h3 data-align-group="desktop-meal" data-align-edge="left" className="m-0 text-[15px] font-bold text-text">{meal.name}</h3>
                         <Link
                           id={`desktop-add-${meal.slot}`}
                           href={`/add?meal=${meal.slot}`}
@@ -664,7 +664,7 @@ function TodayContent() {
                         href={`/entry/${it.id}`}
                         className="no-underline flex justify-between items-center min-h-[44px] px-2 -mx-2 rounded-lg text-sm hover:bg-page transition-colors"
                       >
-                        <span data-align-group="desktop-meal" className="truncate text-text font-normal">
+                        <span data-align-group="desktop-meal" data-align-edge="left" className="truncate text-text font-normal">
                           {it.name} <span className="text-secondary">· {it.qty}</span>
                         </span>
                         <span className="text-secondary tabular-nums shrink-0">
@@ -679,7 +679,7 @@ function TodayContent() {
                         onClick={() => handleSaveOpener(`desktop-add-empty-${meal.slot}`)}
                         className="flex items-center min-h-[44px] px-2 -mx-2 rounded-lg text-sm font-semibold text-blue no-underline hover:bg-page transition-colors"
                       >
-                        <span data-align-group="desktop-meal">+ Thêm món</span>
+                        <span data-align-group="desktop-meal" data-align-edge="left">+ Thêm món</span>
                       </Link>
                     )}
                   </div>

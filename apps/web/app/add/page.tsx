@@ -20,24 +20,16 @@ import { formatNumber } from "@/lib/format";
 import { PortionPanel } from "@/components/ui/portion-panel";
 import TodayContent from "../today/page";
 
+import { useMealSlot } from "@/lib/use-meal-slot";
+
 function AddFoodInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data, addFoodEntry, recentSearches, addRecentSearch } = useDiary();
 
-  // Meal slot from query param or default time of day (Asia/Ho_Chi_Minh on client)
-  const paramMeal = searchParams.get("meal");
-  const parsedMeal = useMemo(() => parseMealSlot(paramMeal), [paramMeal]);
-  const [mealSlot, setMealSlot] = useState<MealSlot | null>(() => parsedMeal);
-
-  // Client-only timezone evaluation when ?meal is not provided
-  useEffect(() => {
-    if (!parsedMeal) {
-      setMealSlot(getDefaultMealSlot(new Date(), true));
-    } else {
-      setMealSlot(parsedMeal);
-    }
-  }, [parsedMeal]);
+  const resolvedSlot = useMealSlot(searchParams.get("meal"));
+  const [overrideSlot, setOverrideSlot] = useState<MealSlot | null>(null);
+  const mealSlot = overrideSlot ?? resolvedSlot;
 
   const [switcherOpen, setSwitcherOpen] = useState(false);
   const [filterChip, setFilterChip] = useState<"all" | "favorite">("all");
@@ -124,11 +116,10 @@ function AddFoodInner() {
 
   // Submit action
   const handleAddFood = async () => {
-    if (!selectedFood || parsedGrams <= 0 || isSubmitting) return;
-    const resolvedSlot = mealSlot || getDefaultMealSlot(new Date(), true);
+    if (!selectedFood || parsedGrams <= 0 || isSubmitting || mealSlot === null) return;
     setIsSubmitting(true);
     try {
-      await addFoodEntry(selectedFood, parsedGrams, resolvedSlot, selectedServingLabel);
+      await addFoodEntry(selectedFood, parsedGrams, mealSlot, selectedServingLabel);
       if (query.trim()) {
         addRecentSearch(query);
       }
@@ -646,7 +637,7 @@ function AddFoodInner() {
         open={switcherOpen}
         onClose={() => setSwitcherOpen(false)}
         selectedSlot={mealSlot}
-        onSelectSlot={(slot) => setMealSlot(slot)}
+        onSelectSlot={(slot) => setOverrideSlot(slot)}
         mealCalories={mealCalories}
       />
     </div>
