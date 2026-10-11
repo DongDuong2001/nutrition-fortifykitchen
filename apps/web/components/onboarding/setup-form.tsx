@@ -19,7 +19,6 @@ import { Card } from "@/components/ui/card";
 import { ChipGroup } from "@/components/ui/chip-group";
 import { FormRow } from "@/components/ui/form-row";
 import { PillButton } from "@/components/ui/pill-button";
-import { StatGroup } from "@/components/ui/stat-group";
 import { OnboardingHeader } from "./onboarding-header";
 
 export type SetupStep = "profile" | "goal";
@@ -140,8 +139,9 @@ export function SetupForm({ step }: { step: SetupStep }) {
           >
             <div className="grid gap-6 lg:grid-cols-2 lg:gap-5">
               <div role="group" aria-label="Giới tính">
-                <FormRow label="Giới tính">
+                <FormRow label="Giới tính" data-align-group="setup-row">
                   <ChipGroup
+                    size="lg"
                     items={SEX_OPTIONS.map((option) => ({
                       id: option.value,
                       label: option.label,
@@ -153,7 +153,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <FormRow label="Năm sinh" htmlFor="setup-birth-year" error={errors.birthYear}>
+                <FormRow label="Năm sinh" htmlFor="setup-birth-year" error={errors.birthYear} data-align-group="setup-row">
                   <input
                     id="setup-birth-year"
                     type="text"
@@ -166,7 +166,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
                     }`}
                   />
                 </FormRow>
-                <FormRow label="Cân nặng (kg)" htmlFor="setup-weight" error={errors.weight}>
+                <FormRow label="Cân nặng (kg)" htmlFor="setup-weight" error={errors.weight} data-align-group="setup-row">
                   <input
                     id="setup-weight"
                     type="text"
@@ -229,13 +229,18 @@ export function SetupForm({ step }: { step: SetupStep }) {
               })}
             </div>
 
-            <Card className="flex flex-col gap-3">
+            <Card className="flex flex-col gap-2">
               <h3 className="m-0 text-[15px] font-bold">Mục tiêu của bạn mỗi ngày</h3>
-              <StatGroup
-                columns={2}
-                data-align-group="daily-targets"
-                items={targetRows.map((row) => ({ id: row.label, value: row.value, label: row.label }))}
-              />
+              {targetRows.map((row) => (
+                <div
+                  key={row.label}
+                  data-align-group="daily-targets"
+                  className="flex items-baseline justify-between gap-3 text-sm"
+                >
+                  <span className="text-secondary">{row.label}</span>
+                  <span className="font-semibold tabular-nums">{row.value}</span>
+                </div>
+              ))}
               <p className="m-0 text-[13px] text-secondary">{targetCaption}</p>
             </Card>
           </section>

@@ -21,4 +21,4 @@
 - [ ] (cc-01) `components/onboarding/onboarding-header.tsx` is a local sub-screen header. Swap it for the shared AppHeader in ui-04b.
 - [ ] (cc-01) "Mở ứng dụng Mail" on check-email opens `mailto:`. The mock "Mô phỏng mở link (dev)" link to /setup/profile is shown only outside production. Confirm the mailto choice.
 - [ ] (cc-01) `StatGroup` labels are 11 px (`text-[11px]`), below the 12 px minimum in SPEC. It is a shared primitive, so the fix belongs to whoever owns `components/ui`.
-- [ ] (cc-01) Daily targets now sit in one `StatGroup` container, so `data-align-group="daily-targets"` matches one element and the alignment script compares no pairs there. The 2-column grid keeps the columns aligned by layout.
+- [ ] (cc-01) "Mở ứng dụng Mail" uses `mailto:`, which opens a new email, not the inbox. Keep, or hide it on desktop?

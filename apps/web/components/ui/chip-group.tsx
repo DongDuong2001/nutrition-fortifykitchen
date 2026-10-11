@@ -14,11 +14,13 @@ export interface ChipGroupProps {
   columns?: number;
   className?: string;
   tone?: "light" | "dark";
+  size?: "md" | "lg";
   "data-align-group"?: string;
 }
 
 /**
- * ChipGroup: N equal columns, full width, 44 px items, aria-pressed, optional leading input cell.
+ * ChipGroup: N equal columns, full width, aria-pressed, optional leading input cell.
+ * size "md" (default): 44 px items, text-xs. size "lg": 52 px items, text-base, same height as the inputs.
  */
 export function ChipGroup({
   items = [],
@@ -26,10 +28,14 @@ export function ChipGroup({
   columns,
   className = "",
   tone = "light",
+  size = "md",
   "data-align-group": dataAlignGroup,
 }: ChipGroupProps) {
   const totalCount = (leadingInput ? 1 : 0) + items.length;
   const colCount = columns || (totalCount > 0 ? totalCount : 4);
+
+  const sizeClass =
+    size === "lg" ? "h-[52px] rounded-[10px] text-base" : "min-h-[44px] rounded-xl text-xs";
 
   return (
     <div
@@ -47,11 +53,13 @@ export function ChipGroup({
         const btnClasses =
           tone === "dark"
             ? isActive
-              ? "bg-white text-ink font-bold shadow-xs border-0"
-              : "bg-surface-dark text-white font-medium border-0 hover:bg-surface-dark/80"
+              ? "bg-white text-ink font-bold shadow-xs"
+              : "bg-surface-dark text-white font-medium hover:bg-surface-dark/80"
             : isActive
-            ? "bg-ink text-white font-bold shadow-xs border-0"
+            ? "bg-ink text-white font-bold shadow-xs"
             : "bg-card text-text border border-card-border font-medium hover:bg-page";
+        // md keeps border-0 on every chip, as shipped in ui-05-fix. lg draws the inactive border.
+        const noBorder = size === "md" || isActive || tone === "dark" ? "border-0" : "";
 
         return (
           <button
@@ -60,7 +68,7 @@ export function ChipGroup({
             aria-pressed={isActive}
             aria-label={it.ariaLabel}
             onClick={it.onClick}
-            className={`min-h-[44px] px-2 rounded-xl text-xs flex items-center justify-center text-center cursor-pointer active:scale-[0.97] transition-all ${btnClasses}`}
+            className={`${sizeClass} px-2 flex items-center justify-center text-center cursor-pointer active:scale-[0.97] transition-all ${noBorder} ${btnClasses}`}
           >
             {it.label}
           </button>

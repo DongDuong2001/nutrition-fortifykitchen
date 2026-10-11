@@ -286,9 +286,12 @@ All alignment and hydration tests passed cleanly (<= 1px difference, 0 hydration
 - `npm run typecheck`: exit 0.
 - `npm test`: 8 files, 61 tests passed (`lib/__tests__/onboarding.test.ts`: 12 tests, written first from the coach rules in SPEC.md).
 - `npm run build`: compiled, TypeScript finished. `/signup`, `/signin`, `/signin/check-email`, `/signin/expired`, `/setup/profile`, `/setup/goal` are all static.
-- `npm run test:align` (run as `BASE_URL=http://localhost:3101 python3 tests/alignment.py`): 22 checks pass, 0 hydration errors. The six cc-01 routes compare no pairs, because daily-targets is one StatGroup container.
+- `BASE_URL=http://localhost:3101 npm run test:align` (with `PATH=/usr/bin:$PATH`, since Homebrew python3 has no Playwright): all checks pass, 0 hydration errors. cc-01 pairs compared: `/setup/goal` @ 390 [daily-targets, left/right] 3 pairs; `/setup/goal` @ 1440 [daily-targets, left/right] 3 pairs; `/setup/profile` @ 1440 [setup-row, top/bottom] 2 pairs.
+- `setup-row` top and bottom at 1440: all three rows at y 211.5–285.5. Sex chip height 52 px, same as the inputs.
+- Screenshots: `apps/web/.screenshots/cc01-fix2-setup-goal-390.png`, `cc01-fix2-setup-profile-1440.png`. Chip comparison: `cc01-fix2-{base,border,md}-{add,food}-{390,1440}.png` (base = feat/ui chip, border = committed border fix, md = final).
+- `size="md"` ChipGroup is byte-identical to the feat/ui (ui-05-fix) render of `/add?meal=snack` and `/foods/food-cha-la` at 390 and 1440. The `size="lg"` chips do not affect those screens.
 - Playwright (port 3101), 390×844 and 1440×900: `/signup` copy has no "26 chất"; "Mở ứng dụng Mail" goes to `mailto:`; dev link goes to `/setup/profile`; profile back goes to `/signin/check-email`; a weight error clears on the next valid edit; the iron note shows only for Nữ; on 1440, Enter in the weight field lands on `/today`. No console errors.
 - Full flow passed earlier: signup → check-email → profile → goal → /today.
 - Screenshots: `apps/web/.screenshots/cc01-gate-{signup,setup-profile}-{390,1440}.png`
-- Edges: daily-targets (setup-profile, setup-goal at 390 and 1440) pass, but the group has one element per container, so it compares no pairs.
+- Edges: daily-targets (setup-goal at 390 and 1440) pass, left/right, 3 pairs each. setup-row (setup-profile at 1440) passes, top/bottom, 2 pairs.
 - Edges: signup, signin, check-email, expired have no data-align-group rows (n/a).
