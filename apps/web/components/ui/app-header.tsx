@@ -89,10 +89,12 @@ export function AppHeader({
     if (typeof date === "string" && !/^\d{4}-\d{2}-\d{2}/.test(date)) {
       return date;
     }
-    return "Hôm nay, 10/10";
+    return "";
   }, [date, dateLabelProp, clientNow]);
 
+  const isPrevDisabled = !onPrev;
   const isNextDisabled =
+    !onNext ||
     canGoNext === false ||
     (canGoNext === undefined && resolvedDateLabel.startsWith("Hôm nay"));
 
@@ -264,8 +266,14 @@ export function AppHeader({
               <button
                 type="button"
                 onClick={onPrev}
+                disabled={isPrevDisabled}
                 aria-label="Ngày trước"
-                className="w-11 h-11 rounded-lg bg-transparent border-0 text-white flex items-center justify-center cursor-pointer hover:text-sky transition-colors active:scale-[0.97]"
+                aria-disabled={isPrevDisabled}
+                className={`w-11 h-11 rounded-lg bg-transparent border-0 flex items-center justify-center transition-colors ${
+                  !isPrevDisabled
+                    ? "text-white cursor-pointer hover:text-sky active:scale-[0.97]"
+                    : "text-secondary opacity-50 cursor-default"
+                }`}
               >
                 <svg
                   width="18"
@@ -280,8 +288,10 @@ export function AppHeader({
                   <path d="M15 5l-7 7 7 7" />
                 </svg>
               </button>
-              <span className="text-sm font-semibold tracking-tight">
-                {resolvedDateLabel}
+              <span className="text-sm font-semibold tracking-tight inline-flex items-center justify-center min-w-[104px] text-center">
+                {resolvedDateLabel || (
+                  <span aria-hidden="true" className="inline-block w-[104px] h-5" />
+                )}
               </span>
               <button
                 type="button"
@@ -318,8 +328,12 @@ export function AppHeader({
             </div>
           )}
 
-          {/* Row 2: Page summary slot */}
-          {summary && <div className="w-full">{summary}</div>}
+          {/* Row 2: Page summary slot (Option B inset panel) */}
+          {summary && (
+            <div className="w-full bg-surface-dark rounded-2xl p-3.5 sm:p-4">
+              {summary}
+            </div>
+          )}
         </div>
       </header>
 
@@ -350,8 +364,14 @@ export function AppHeader({
           <button
             type="button"
             onClick={onPrev}
+            disabled={isPrevDisabled}
             aria-label="Ngày trước"
-            className="w-11 h-11 border border-card-border rounded-xl bg-card text-ink cursor-pointer flex items-center justify-center hover:bg-divider transition-colors active:scale-[0.97]"
+            aria-disabled={isPrevDisabled}
+            className={`w-11 h-11 border border-card-border rounded-xl bg-card flex items-center justify-center transition-colors ${
+              !isPrevDisabled
+                ? "text-ink cursor-pointer hover:bg-divider active:scale-[0.97]"
+                : "text-secondary opacity-50 cursor-default"
+            }`}
           >
             <svg
               width="18"

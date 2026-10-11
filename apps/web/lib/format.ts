@@ -52,10 +52,10 @@ export function formatRange(min: number, max: number, options?: FormatNumberOpti
 const formatWhole = new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 0 });
 const formatOneDecimal = new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 1 });
 const formatTwoDecimals = new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 2 });
-const ONE_DECIMAL_UNITS = new Set(["g", "µg"]);
+const ONE_DECIMAL_UNITS = new Set(["g", "mg", "µg"]);
 
 /**
- * An amount with its unit: kcal and mg are whole numbers. g and µg are one decimal under 100, else whole.
+ * An amount with its unit: kcal is whole. g, mg, µg are one decimal under 100, else whole.
  * Any value under 1 keeps up to two decimals. A positive value that would round to 0 shows "<0,01".
  * For plain counts, use formatNumber.
  */
@@ -70,12 +70,12 @@ const TIMEZONE_VN = "Asia/Ho_Chi_Minh";
 
 const WEEKDAY_NAMES_VI: Record<string, string> = {
   Sun: "Chủ nhật",
-  Mon: "Thứ 2",
-  Tue: "Thứ 3",
-  Wed: "Thứ 4",
-  Thu: "Thứ 5",
-  Fri: "Thứ 6",
-  Sat: "Thứ 7",
+  Mon: "Thứ Hai",
+  Tue: "Thứ Ba",
+  Wed: "Thứ Tư",
+  Thu: "Thứ Năm",
+  Fri: "Thứ Sáu",
+  Sat: "Thứ Bảy",
 };
 
 const vnDateFormatter = new Intl.DateTimeFormat("en-US", {
@@ -113,10 +113,20 @@ function parseTargetDate(targetDate: Date | string): Date {
 }
 
 /**
+ * Get Vietnamese weekday name (full name: "Thứ Hai"…"Thứ Bảy", "Chủ nhật").
+ */
+export function getWeekdayName(targetDate: Date | string): string {
+  const target = parseTargetDate(targetDate);
+  if (isNaN(target.getTime())) return "";
+  const parts = getSaigonDateParts(target);
+  return WEEKDAY_NAMES_VI[parts.weekday] || parts.weekday;
+}
+
+/**
  * Format a date for header display relative to `now`:
  * - "Hôm nay, dd/mm" if target is the same day as now in Asia/Ho_Chi_Minh
  * - "Chủ nhật, dd/mm" for Sunday (never "Thứ 1")
- * - "Thứ 2, dd/mm" through "Thứ 7, dd/mm" for Monday through Saturday
+ * - "Thứ Hai, dd/mm" through "Thứ Bảy, dd/mm" for Monday through Saturday
  *
  * `now` is a required parameter so that formatting is pure and hydration-safe (no `new Date()` inside).
  */
@@ -150,7 +160,19 @@ export function formatDayLabel(targetDate: Date | string, now: Date): string {
     return `Hôm qua, ${targetParts.day}/${targetParts.month}`;
   }
 
-  const dayName = WEEKDAY_NAMES_VI[targetParts.weekday] || targetParts.weekday;
+  const dayName = getWeekdayName(target);
   return `${dayName}, ${targetParts.day}/${targetParts.month}`;
+}
+
+/**
+ * Format a date as full Vietnamese desktop date:
+ * e.g. "Thứ Bảy, 10/10/2026"
+ */
+export function formatDesktopDate(targetDate: Date | string): string {
+  const target = parseTargetDate(targetDate);
+  if (isNaN(target.getTime())) return String(targetDate);
+  const parts = getSaigonDateParts(target);
+  const weekday = getWeekdayName(target);
+  return `${weekday}, ${parts.day}/${parts.month}/${parts.year}`;
 }
 

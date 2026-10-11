@@ -10,8 +10,8 @@ import { SegmentedBar } from "@/components/ui/segmented-bar";
 import { Sheet } from "@/components/ui/sheet";
 import { PillButton } from "@/components/ui/pill-button";
 import { apiClient } from "@/lib/api-client";
-import { formatAmount, formatDayLabel } from "@/lib/format";
-import { SAMPLE_DAY, type MockDayData } from "@/lib/mock/sample-day";
+import { formatAmount, formatDayLabel, formatDesktopDate } from "@/lib/format";
+import { SAMPLE_DAY, syncSampleDayToday, type MockDayData } from "@/lib/mock/sample-day";
 import { useDiary } from "@/lib/diary-store";
 
 function subscribeOnline(callback: () => void) {
@@ -54,6 +54,7 @@ function TodayContent() {
   const isOnline = useSyncExternalStore(subscribeOnline, getOnlineSnapshot, getOnlineServerSnapshot);
 
   useEffect(() => {
+    syncSampleDayToday();
     setClientNow(new Date());
   }, []);
 
@@ -94,6 +95,9 @@ function TodayContent() {
   const showOfflineBanner = forceOffline || !isOnline;
   const currentData = (hydrated ? diaryData : null) || data || SAMPLE_DAY;
   const dateLabel = clientNow ? formatDayLabel(currentData.date, clientNow) : currentData.dateLabel;
+  const desktopSubtitle = clientNow
+    ? `${formatDesktopDate(currentData.date)} · Ngày tập ${currentData.user.trainingMinutes}′ · ${currentData.user.goalLabel} · ${currentData.user.weightKg} kg`
+    : currentData.desktopDateLabel;
   const isEmpty = forceEmpty || (!showLoading && currentData.meals.every((m) => m.items.length === 0));
 
   // --- 1. SKELETON LOADING STATE (TodayStates.dc.html) ---
@@ -476,7 +480,7 @@ function TodayContent() {
         </aside>
 
         {/* Main Content Area */}
-        <main className="flex-1 p-8 pb-12 max-w-[1240px] flex flex-col gap-5 box-border">
+        <main data-align-container="today-desktop" className="flex-1 p-8 pb-12 max-w-[1240px] flex flex-col gap-5 box-border">
           {/* Header */}
           <AppHeader
             variant="daily"
@@ -484,7 +488,8 @@ function TodayContent() {
             date={currentData.date}
             dateLabel={dateLabel}
             canGoNext={false}
-            desktopSubtitle={`Thứ Bảy, 10/10/2026 · Ngày tập ${currentData.user.trainingMinutes}′ · ${currentData.user.goalLabel} · ${currentData.user.weightKg} kg`}
+            alignGroup="today-header"
+            desktopSubtitle={desktopSubtitle}
             actions={
               <>
                 <button
@@ -512,7 +517,11 @@ function TodayContent() {
           {/* Top 2 Cards Grid */}
           <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Card 1: Calorie ring and macros */}
-            <div className="bg-ink text-white rounded-2xl p-5.5 flex flex-col justify-between gap-4">
+            <div
+              data-align-group="today-header"
+              data-align-edge="left"
+              className="bg-ink text-white rounded-2xl p-5.5 flex flex-col justify-between gap-4"
+            >
               <div className="flex gap-5.5 items-center flex-wrap">
                 <CalorieDial
                   current={calories.consumed}

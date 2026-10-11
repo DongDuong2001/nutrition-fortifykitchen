@@ -1,4 +1,6 @@
 import type { FoodNutrientValue, TargetSource } from "../nutrients";
+import { getTodayIsoVN } from "../date";
+import { formatDesktopDate } from "../format";
 
 export interface MockFoodItem {
   id: string;
@@ -80,7 +82,7 @@ export interface MockDayData {
 export const SAMPLE_DAY: MockDayData = {
   date: "2026-10-10",
   dateLabel: "Hôm nay, 10/10",
-  desktopDateLabel: "Thứ Bảy, 10/10/2026 · Ngày tập 60' · Giữ cân · 65 kg",
+  desktopDateLabel: "Thứ Bảy, 10/10/2026 · Ngày tập 60′ · Giữ cân · 65 kg",
   user: {
     sex: "male",
     weightKg: 65,
@@ -506,3 +508,13 @@ export const SAMPLE_DAY: MockDayData = {
     mostLacking: ["Vitamin D", "Canxi"],
   },
 };
+
+/**
+ * Synchronizes SAMPLE_DAY to today's date in Asia/Ho_Chi_Minh at runtime on client.
+ */
+export function syncSampleDayToday(): MockDayData {
+  const today = getTodayIsoVN();
+  SAMPLE_DAY.date = today;
+  SAMPLE_DAY.desktopDateLabel = `${formatDesktopDate(today)} · Ngày tập 60′ · Giữ cân · 65 kg`;
+  return SAMPLE_DAY;
+}

@@ -14,8 +14,9 @@ import {
   type NutrientDefinition,
   type TargetSource,
 } from "@/lib/nutrients";
-import { formatAmount, formatDayLabel } from "@/lib/format";
-import type { MockDayData } from "@/lib/mock/sample-day";
+import { formatAmount, formatDayLabel, formatDesktopDate } from "@/lib/format";
+import { getTodayIsoVN } from "@/lib/date";
+import { syncSampleDayToday, type MockDayData } from "@/lib/mock/sample-day";
 import { useDiary } from "@/lib/diary-store";
 
 interface GroupConfig {
@@ -178,6 +179,7 @@ function MicrosContent() {
   const [clientNow, setClientNow] = useState<Date | null>(null);
 
   useEffect(() => {
+    syncSampleDayToday();
     setClientNow(new Date());
   }, []);
 
@@ -198,7 +200,11 @@ function MicrosContent() {
   const dateLabel =
     clientNow && currentData?.date
       ? formatDayLabel(currentData.date, clientNow)
-      : currentData?.dateLabel || "Hôm nay, 10/10";
+      : currentData?.dateLabel || "";
+
+  const desktopSubtitle = clientNow
+    ? `${formatDesktopDate(currentData?.date || getTodayIsoVN())} · Giữ cân · 65 kg · Thiếu nhiều nhất: ${currentData?.microsSummary.mostLacking.join(", ")}`
+    : `${currentData?.desktopDateLabel || "Thứ Bảy, 10/10/2026 · Giữ cân · 65 kg"} · Thiếu nhiều nhất: ${currentData?.microsSummary.mostLacking.join(", ")}`;
 
   // Measure chip bar height for --chipbar-h CSS variable
   useEffect(() => {
@@ -433,7 +439,7 @@ function MicrosContent() {
           title="VI CHẤT"
           alignGroup="micros-header"
           summary={
-            <div className="bg-[#181B20] border border-white/10 rounded-2xl p-4 flex items-center justify-between">
+            <div className="flex items-center justify-between">
               <div>
                 <div className="text-xs text-muted-subtitle font-medium">Thiếu nhiều nhất</div>
                 <div className="text-sm font-semibold text-white mt-0.5">
@@ -456,7 +462,7 @@ function MicrosContent() {
         {/* Sticky Horizontally Scrolling Group Chips */}
         <div
           ref={chipBarRef}
-          className="sticky top-0 z-30 w-full min-w-0 max-w-full bg-page/95 backdrop-blur-sm border-b border-card-border/60"
+          className="sticky top-0 z-30 w-full min-w-0 max-w-full bg-page border-b border-card-border"
         >
           <div
             ref={chipsContainerRef}
@@ -573,12 +579,13 @@ function MicrosContent() {
         </aside>
 
         {/* Main Content Area */}
-        <main className="flex-1 p-8 pb-12 max-w-[1240px] flex flex-col gap-5 box-border">
+        <main data-align-container="micros-desktop" className="flex-1 p-8 pb-12 max-w-[1240px] flex flex-col gap-5 box-border">
           {/* Header */}
           <AppHeader
             variant="daily"
             title="VI CHẤT"
-            desktopSubtitle={`${currentData?.desktopDateLabel || "Thứ Bảy, 10/10/2026 · Giữ cân · 65 kg"} · Thiếu nhiều nhất: ${currentData?.microsSummary.mostLacking.join(", ")}`}
+            alignGroup="micros-header"
+            desktopSubtitle={desktopSubtitle}
             desktopStat={
               <div className="flex items-baseline gap-2 mr-2">
                 <div className="font-display italic font-black text-[34px] leading-none tabular-nums">
@@ -622,7 +629,7 @@ function MicrosContent() {
 
           {/* Balanced Columns-2 Layout: Vitamin, Khoáng chất, Đạm, Chất béo, Tinh bột, Tổng quan */}
           <div className="columns-2 gap-4 [column-fill:_balance]">
-            {GROUPS_CONFIG.map((group) => (
+            {GROUPS_CONFIG.map((group, idx) => (
               <div key={group.key} className="break-inside-avoid mb-4">
                 <GroupCard
                   group={group}
@@ -630,6 +637,7 @@ function MicrosContent() {
                   isOpen={openGroups[group.key]}
                   onToggle={() => toggleGroup(group.key)}
                   idPrefix="desktop-group-"
+                  alignGroup={idx === 0 ? "micros-header" : undefined}
                 />
               </div>
             ))}
@@ -701,6 +709,7 @@ function GroupCard({
     <section
       id={`${idPrefix}${group.key}`}
       data-align-group={alignGroup}
+      data-align-edge={alignGroup && idPrefix.includes("desktop") ? "left" : undefined}
       className="bg-card border border-card-border rounded-[18px] overflow-clip flex flex-col scroll-mt-[calc(var(--chipbar-h,52px)+8px)] lg:scroll-mt-6 break-inside-avoid"
     >
       {/* Sticky group header: offset by --chipbar-h on mobile, top-0 on desktop */}

@@ -6,6 +6,7 @@
 
 | Date | Commit | Built | Next |
 | --- | --- | --- | --- |
+| 11/10/2026 | ui-04b-fix-1 | Client runtime mock day in Asia/Ho_Chi_Minh; full Vietnamese weekday names ("Thứ Hai"…"Thứ Bảy", "Chủ nhật"); desktop subtitle formatter; Option B summary inset panel (surface-dark, 16px radius, no raw hex); formatAmount mg 1 decimal under 100; disabled date nav handlers when missing; desktop header alignment pairs for /today and /micros; opaque sticky chip bar on /micros | Ready for review |
 | 10/10/2026 | ui-01 | Tokens, fonts, pure logic (levels, format, targets) with TDD | Shared UI components, mock data, /dev/ui preview |
 | 10/10/2026 | ui-01 | Shared UI components, typed mock data & api-client, dev preview page | Screens (Today screen ui-02) |
 | 10/10/2026 | ui-01-fix | Review fixes: provisional targets (fiber/fastCarbs), Saira font wdth axis, zero raw hex in components, Sheet focus trap/scroll lock, SegmentedBar a11y & valuenow clamp | Screens (Today screen ui-02) |
@@ -20,8 +21,10 @@
 | 11/10/2026 | ui-05-fix-4 | Put test:hydration into npm run check gates, remove dead vitamin remap in micros page, read targets from calculateTargets in PortionPanel & food detail (incl. vitamin_k %), remove playwright test permission from .claude/settings.json | ui-05 approved |
 | 11/10/2026 | ui-04b | Shared AppHeader (daily, sub, tab variants), adopted in /today, /micros, /micros/[nutrient], /profile, /training, and /dev/ui; formatDayLabel timezone & yesterday support; alignment checks today-header and micros-header | Ready for review |
 
-## Quality Gate Summary (ui-04b)
-- `npm run check`: All 5 gates passed (tsc --noEmit, vitest: 98 passed in 11 files, build: 19/19 routes static/dynamic, test:align: 14 checks passed, test:hydration: 0 errors).
+## Quality Gate Summary (ui-04b-fix-1)
+- `npm run check`: All 5 gates passed (tsc --noEmit, vitest: 107 passed in 12 files, build: 19/19 routes static/dynamic, test:align: 16 checks passed, test:hydration: 0 errors).
+- Edges: today-header (mobile & desktop 1 pair each pass), micros-header (mobile & desktop 1 pair each pass), daily-targets (mobile & desktop), setup-row, add-list (mobile & desktop), meal-card (mobile), micros-card (mobile & desktop), portion (mobile & desktop), food-detail (mobile & desktop), desktop-meal (desktop) all pass.
+- Screenshots: `apps/web/.screenshots/today-header-390.png`, `apps/web/.screenshots/today-header-1440.png`, `apps/web/.screenshots/micros-header-390.png`, `apps/web/.screenshots/micros-stuck-390.png`.
 - Edges: today-header (1 pair pass), micros-header (1 pair pass), daily-targets (mobile & desktop), setup-row, add-list (mobile & desktop), meal-card (mobile), micros-card (mobile & desktop), portion (mobile & desktop), food-detail (mobile & desktop), desktop-meal (desktop) all pass.
 
 

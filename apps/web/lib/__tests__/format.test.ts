@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { formatNumber, formatRange, formatDayLabel } from "../format";
+import { formatNumber, formatRange, formatAmount, getWeekdayName, formatDesktopDate, formatDayLabel } from "../format";
 
 describe("lib/format", () => {
   describe("formatNumber", () => {
@@ -34,6 +34,46 @@ describe("lib/format", () => {
     });
   });
 
+  describe("formatAmount", () => {
+    it("formats mg with 1 decimal below 100 and whole for 100+", () => {
+      expect(formatAmount(1.1, "mg")).toBe("1,1");
+      expect(formatAmount(6.5, "mg")).toBe("6,5");
+      expect(formatAmount(12.4, "mg")).toBe("12,4");
+      expect(formatAmount(3900, "mg")).toBe("3.900");
+      expect(formatAmount(0.05, "mg")).toBe("0,05");
+    });
+
+    it("formats kcal as whole numbers", () => {
+      expect(formatAmount(1041, "kcal")).toBe("1.041");
+    });
+
+    it("formats g and µg with 1 decimal below 100", () => {
+      expect(formatAmount(2.1, "g")).toBe("2,1");
+      expect(formatAmount(380, "µg")).toBe("380");
+      expect(formatAmount(3.1, "µg")).toBe("3,1");
+    });
+  });
+
+  describe("getWeekdayName", () => {
+    it("returns full Vietnamese weekday names", () => {
+      expect(getWeekdayName("2026-10-10")).toBe("Thứ Bảy");
+      expect(getWeekdayName("2026-10-11")).toBe("Chủ nhật");
+      expect(getWeekdayName("2026-10-12")).toBe("Thứ Hai");
+      expect(getWeekdayName("2026-10-13")).toBe("Thứ Ba");
+      expect(getWeekdayName("2026-10-14")).toBe("Thứ Tư");
+      expect(getWeekdayName("2026-10-15")).toBe("Thứ Năm");
+      expect(getWeekdayName("2026-10-16")).toBe("Thứ Sáu");
+    });
+  });
+
+  describe("formatDesktopDate", () => {
+    it("formats full desktop date with weekday and DD/MM/YYYY", () => {
+      expect(formatDesktopDate("2026-10-10")).toBe("Thứ Bảy, 10/10/2026");
+      expect(formatDesktopDate("2026-10-11")).toBe("Chủ nhật, 11/10/2026");
+      expect(formatDesktopDate("2026-10-12")).toBe("Thứ Hai, 12/10/2026");
+    });
+  });
+
   describe("formatDayLabel", () => {
     // Reference now: Saturday 2026-10-10 14:00 in Saigon
     const saigonSaturdayNoon = new Date("2026-10-10T14:00:00+07:00");
@@ -53,15 +93,15 @@ describe("lib/format", () => {
       expect(formatDayLabel(new Date("2026-10-11T10:00:00+07:00"), saigonSaturdayNoon)).toBe("Chủ nhật, 11/10");
     });
 
-    it("returns 'Thứ 2' through 'Thứ 7' for Monday through Saturday when not today or yesterday", () => {
-      expect(formatDayLabel("2026-10-08", saigonSaturdayNoon)).toBe("Thứ 5, 08/10");
-      expect(formatDayLabel("2026-10-12", saigonSaturdayNoon)).toBe("Thứ 2, 12/10");
-      expect(formatDayLabel("2026-10-13", saigonSaturdayNoon)).toBe("Thứ 3, 13/10");
-      expect(formatDayLabel("2026-10-14", saigonSaturdayNoon)).toBe("Thứ 4, 14/10");
-      expect(formatDayLabel("2026-10-15", saigonSaturdayNoon)).toBe("Thứ 5, 15/10");
-      expect(formatDayLabel("2026-10-16", saigonSaturdayNoon)).toBe("Thứ 6, 16/10");
+    it("returns full weekday names 'Thứ Hai' through 'Thứ Bảy' when not today or yesterday", () => {
+      expect(formatDayLabel("2026-10-08", saigonSaturdayNoon)).toBe("Thứ Năm, 08/10");
+      expect(formatDayLabel("2026-10-12", saigonSaturdayNoon)).toBe("Thứ Hai, 12/10");
+      expect(formatDayLabel("2026-10-13", saigonSaturdayNoon)).toBe("Thứ Ba, 13/10");
+      expect(formatDayLabel("2026-10-14", saigonSaturdayNoon)).toBe("Thứ Tư, 14/10");
+      expect(formatDayLabel("2026-10-15", saigonSaturdayNoon)).toBe("Thứ Năm, 15/10");
+      expect(formatDayLabel("2026-10-16", saigonSaturdayNoon)).toBe("Thứ Sáu, 16/10");
       // Different Saturday from now (next week)
-      expect(formatDayLabel("2026-10-17", saigonSaturdayNoon)).toBe("Thứ 7, 17/10");
+      expect(formatDayLabel("2026-10-17", saigonSaturdayNoon)).toBe("Thứ Bảy, 17/10");
     });
 
     it("handles 23:30 Asia/Ho_Chi_Minh boundary correctly", () => {
@@ -71,10 +111,10 @@ describe("lib/format", () => {
       expect(formatDayLabel("2026-10-10", now2330)).toBe("Hôm nay, 10/10");
       expect(formatDayLabel(new Date("2026-10-10T23:30:00+07:00"), now2330)).toBe("Hôm nay, 10/10");
       expect(formatDayLabel("2026-10-09", now2330)).toBe("Hôm qua, 09/10");
-      expect(formatDayLabel("2026-10-08", now2330)).toBe("Thứ 5, 08/10");
+      expect(formatDayLabel("2026-10-08", now2330)).toBe("Thứ Năm, 08/10");
       expect(formatDayLabel("2026-10-11", now2330)).toBe("Chủ nhật, 11/10");
       expect(formatDayLabel(new Date("2026-10-11T00:30:00+07:00"), now2330)).toBe("Chủ nhật, 11/10");
-      expect(formatDayLabel("2026-10-12", now2330)).toBe("Thứ 2, 12/10");
+      expect(formatDayLabel("2026-10-12", now2330)).toBe("Thứ Hai, 12/10");
     });
 
     it("handles 00:30 Asia/Ho_Chi_Minh boundary correctly", () => {
@@ -85,8 +125,8 @@ describe("lib/format", () => {
       expect(formatDayLabel(new Date("2026-10-11T00:30:00+07:00"), now0030)).toBe("Hôm nay, 11/10");
       expect(formatDayLabel("2026-10-10", now0030)).toBe("Hôm qua, 10/10");
       expect(formatDayLabel(new Date("2026-10-10T23:30:00+07:00"), now0030)).toBe("Hôm qua, 10/10");
-      expect(formatDayLabel("2026-10-09", now0030)).toBe("Thứ 6, 09/10");
-      expect(formatDayLabel("2026-10-12", now0030)).toBe("Thứ 2, 12/10");
+      expect(formatDayLabel("2026-10-09", now0030)).toBe("Thứ Sáu, 09/10");
+      expect(formatDayLabel("2026-10-12", now0030)).toBe("Thứ Hai, 12/10");
     });
   });
 });
