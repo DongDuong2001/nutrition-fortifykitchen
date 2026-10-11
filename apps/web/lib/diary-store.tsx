@@ -6,6 +6,7 @@ import { type FoodItem } from "./mock/foods";
 import { type MealSlot, getMealSlotNameVi } from "./meal-slot";
 import { formatAmount } from "./format";
 import { getTodayIsoVN, withRuntimeDate } from "./date";
+import { blankDay, dayEntries, statDisplay } from "./day-history";
 import { DEFAULT_RECENT_FOODS, isRecentFood, pushRecent, type RecentFood } from "./recent-foods";
 import { readFavouriteIds, toggleFavouriteId, writeFavouriteIds } from "./favourites";
 import {
@@ -33,6 +34,7 @@ import {
   findEntry,
   parseAddedEntries,
   parseSampleEdits,
+  removeAddedIn,
   resolveSampleItems,
   SAMPLE_SLOT,
   sampleDelta,
@@ -43,13 +45,17 @@ import {
 
 export type { AddedDiaryEntry, EntryView, EntryPatch } from "./diary-edits";
 
-/** The one toast of the app. "added" offers Xem (jump to the meal), "deleted" offers Hoàn tác. */
+/**
+ * The one toast of the app. "added" offers Xem (jump to the meal), "deleted" offers Hoàn tác,
+ * and "copied" offers Hoàn tác for the entries it added (undoIds).
+ */
 export interface ToastInfo {
   message: string;
-  kind: "added" | "deleted";
+  kind: "added" | "deleted" | "copied";
   mealSlot: MealSlot | null;
-  /** How long it stays. A delete stays 5 s, which is also the undo window. */
+  /** How long it stays. A delete or a copy stays 5 s, which is also the undo window. */
   durationMs: number;
+  undoIds?: string[];
 }
 
 const ADDED_TOAST_MS = 4000;
@@ -76,6 +82,12 @@ interface DiaryContextValue {
   deleteEntry: (id: string) => void;
   /** Puts the last deleted entry back. Only works while the "deleted" toast is shown. */
   undoLastDelete: () => void;
+  /** Adds copied entries to today in one step, with one undo toast. Existing entries are kept. */
+  copyEntries: (entries: AddedDiaryEntry[], message: string) => void;
+  /** Takes out the entries of the last copy. Only works while the "copied" toast is shown. */
+  undoCopy: () => void;
+  /** Today as YYYY-MM-DD (Asia/Ho_Chi_Minh). Null until mounted. */
+  todayIso: string | null;
   hydrated: boolean;
   /** The profile the targets come from. Loaded after mount (see lib/profile.ts). */
   profile: Profile;
@@ -140,12 +152,7 @@ export function computeCompositeDayData(
     const newConsumed = Math.round(baseConsumed + extra);
     const targetMin = m.targetMin ?? 0;
     const percentage = targetMin > 0 ? Math.round((newConsumed / targetMin) * 100) : 0;
-    const displayValue =
-      m.targetMin !== null
-        ? m.targetMax
-          ? `${formatAmount(newConsumed, m.unit)} / ${formatAmount(m.targetMin, m.unit)}–${formatAmount(m.targetMax, m.unit)} ${m.unit}`
-          : `${formatAmount(newConsumed, m.unit)} / ${formatAmount(m.targetMin, m.unit)} ${m.unit}`
-        : `${formatAmount(newConsumed, m.unit)} ${m.unit}`;
+    const displayValue = statDisplay(newConsumed, m);
 
     return {
       ...m,
@@ -198,12 +205,7 @@ export function computeCompositeDayData(
     const newConsumed = Math.round(baseConsumed + extra);
     const targetMin = m.targetMin ?? 0;
     const percentage = targetMin > 0 ? Math.round((newConsumed / targetMin) * 100) : 0;
-    const displayValue =
-      m.targetMin !== null
-        ? m.targetMax
-          ? `${formatAmount(newConsumed, m.unit)} / ${formatAmount(m.targetMin, m.unit)}–${formatAmount(m.targetMax, m.unit)} ${m.unit}`
-          : `${formatAmount(newConsumed, m.unit)} / ${formatAmount(m.targetMin, m.unit)} ${m.unit}`
-        : `${formatAmount(newConsumed, m.unit)} ${m.unit}`;
+    const displayValue = statDisplay(newConsumed, m);
 
     return {
       ...m,
@@ -259,6 +261,15 @@ export function computeCompositeDayData(
       mineralsAchieved,
     },
   };
+}
+
+/**
+ * A past day as the Today screen shows it: nothing logged except the mock entries of that day (see day-history).
+ * Targets follow the profile, the same as today.
+ */
+export function pastDayData(iso: string, todayIso: string, profile: Profile, targets: CompleteTargets): MockDayData {
+  const base = blankDay(applyProfileTargets(SAMPLE_DAY, profile, targets));
+  return { ...computeCompositeDayData(base, dayEntries(iso, todayIso), {}), date: iso };
 }
 
 export function DiaryProvider({ children }: { children: React.ReactNode }) {
@@ -406,6 +417,25 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     setToast(null);
   }, []);
 
+  const copyEntries = useCallback((entries: AddedDiaryEntry[], message: string) => {
+    if (entries.length === 0) return;
+    setEdits((prev) => dismissUndoIn({ ...prev, added: [...prev.added, ...entries] }));
+    setToast({
+      message,
+      kind: "copied",
+      mealSlot: null,
+      durationMs: UNDO_TOAST_MS,
+      undoIds: entries.map((e) => e.id),
+    });
+  }, []);
+
+  const undoCopy = useCallback(() => {
+    const ids = toast?.undoIds;
+    if (!ids) return;
+    setEdits((prev) => removeAddedIn(prev, ids));
+    setToast(null);
+  }, [toast]);
+
   const targets = useMemo(() => targetsFor(profile), [profile]);
 
   const updateProfile = useCallback(
@@ -442,6 +472,9 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         updateEntry,
         deleteEntry,
         undoLastDelete,
+        copyEntries,
+        undoCopy,
+        todayIso,
         hydrated,
         profile,
         targets,

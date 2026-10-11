@@ -1,0 +1,107 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { PillButton } from "@/components/ui/pill-button";
+import { Sheet } from "@/components/ui/sheet";
+import { useDiary } from "@/lib/diary-store";
+import { copyMeals, dayEntries, entriesKcal, shiftIsoDate } from "@/lib/day-history";
+import { formatAmount, getWeekdayName } from "@/lib/format";
+import { MEAL_SLOTS, getMealSlotNameVi, type MealSlot } from "@/lib/meal-slot";
+import type { AddedDiaryEntry } from "@/lib/diary-edits";
+
+/** Meals that start unticked. The snack is left out by default, as in CopyYesterday.dc.html. */
+const UNTICKED_BY_DEFAULT: MealSlot[] = ["snack"];
+
+interface CopyYesterdaySheetProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+/** "Chép bữa hôm qua?": pick the meals from yesterday and copy them into today's diary. */
+export function CopyYesterdaySheet({ open, onClose }: CopyYesterdaySheetProps) {
+  const { todayIso } = useDiary();
+  const yesterday = todayIso ? shiftIsoDate(todayIso, -1) : null;
+  const entries = useMemo(
+    () => (yesterday && todayIso ? dayEntries(yesterday, todayIso) : []),
+    [yesterday, todayIso]
+  );
+
+  if (!yesterday) return null;
+
+  const description = `${getWeekdayName(yesterday)} ${yesterday.slice(8)}/${yesterday.slice(5, 7)} · ${formatAmount(entriesKcal(entries), "kcal")} kcal`;
+
+  return (
+    <Sheet open={open} onClose={onClose} title="Chép bữa hôm qua?" description={description}>
+      <CopyChoices entries={entries} onDone={onClose} />
+    </Sheet>
+  );
+}
+
+// Mounted only while the sheet is open, so every opening starts from the default ticks.
+function CopyChoices({ entries, onDone }: { entries: AddedDiaryEntry[]; onDone: () => void }) {
+  const { copyEntries } = useDiary();
+  const meals = MEAL_SLOTS.map((slot) => ({
+    slot: slot.id,
+    name: getMealSlotNameVi(slot.id),
+    items: entries.filter((e) => e.mealSlot === slot.id),
+  })).filter((meal) => meal.items.length > 0);
+
+  const [ticked, setTicked] = useState<Set<MealSlot>>(
+    () => new Set(meals.map((m) => m.slot).filter((slot) => !UNTICKED_BY_DEFAULT.includes(slot)))
+  );
+
+  function toggle(slot: MealSlot) {
+    setTicked((prev) => {
+      const next = new Set(prev);
+      if (next.has(slot)) next.delete(slot);
+      else next.add(slot);
+      return next;
+    });
+  }
+
+  const chosen = meals.filter((m) => ticked.has(m.slot)).map((m) => m.slot);
+
+  function copy() {
+    const copied = copyMeals(entries, chosen, `copy-${Date.now()}`, new Date().toISOString());
+    copyEntries(copied, `Đã chép ${chosen.length} bữa từ hôm qua`);
+    onDone();
+  }
+
+  if (meals.length === 0) {
+    return <div className="py-2 text-sm text-secondary">Hôm qua chưa ghi bữa nào.</div>;
+  }
+
+  return (
+    <div className="flex flex-col gap-2.5 py-2">
+      <div className="flex flex-col gap-0.5">
+        {meals.map((meal) => {
+          const kcal = entriesKcal(meal.items);
+          return (
+            <label
+              key={meal.slot}
+              className="min-h-[52px] px-3 rounded-[10px] flex items-center gap-3 cursor-pointer"
+            >
+              <input
+                type="checkbox"
+                checked={ticked.has(meal.slot)}
+                onChange={() => toggle(meal.slot)}
+                className="h-6 w-6 m-0 shrink-0 accent-blue"
+              />
+              <span className="flex-1 text-base font-semibold text-text">{meal.name}</span>
+              <span className="text-sm text-secondary tabular-nums">
+                {meal.items.length} món · {formatAmount(kcal, "kcal")} kcal
+              </span>
+            </label>
+          );
+        })}
+      </div>
+      <div className="text-[13px] text-secondary px-1">Món đã có hôm nay sẽ không bị ghi đè.</div>
+      <PillButton variant="primary" onClick={copy} disabled={chosen.length === 0} className="mt-1.5">
+        {chosen.length > 0 ? `Chép ${chosen.length} bữa` : "Chọn bữa để chép"}
+      </PillButton>
+      <PillButton variant="secondary" onClick={onDone}>
+        Huỷ
+      </PillButton>
+    </div>
+  );
+}

@@ -1,19 +1,20 @@
 "use client";
 
-import React, { useState, useEffect, useSyncExternalStore, Suspense } from "react";
+import React, { useState, useEffect, useMemo, useSyncExternalStore, Suspense } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { DesktopSidebar } from "@/components/ui/desktop-sidebar";
 import { AppHeader } from "@/components/ui/app-header";
 import { CalorieDial } from "@/components/ui/calorie-dial";
 import { SegmentedBar } from "@/components/ui/segmented-bar";
-import { Sheet } from "@/components/ui/sheet";
-import { PillButton } from "@/components/ui/pill-button";
+import { CalendarSheet } from "@/components/calendar-sheet";
+import { CopyYesterdaySheet } from "@/components/copy-yesterday-sheet";
 import { apiClient } from "@/lib/api-client";
+import { shiftIsoDate, viewedIsoDate } from "@/lib/day-history";
 import { formatAmount, formatDesktopDate } from "@/lib/format";
-import { SAMPLE_DAY, type MockDayData } from "@/lib/mock/sample-day";
-import { useDiary } from "@/lib/diary-store";
+import { SAMPLE_DAY, type MockDayData, type MockMicroStat } from "@/lib/mock/sample-day";
+import { pastDayData, useDiary } from "@/lib/diary-store";
 
 function subscribeOnline(callback: () => void) {
   window.addEventListener("online", callback);
@@ -32,6 +33,37 @@ function getOnlineServerSnapshot() {
   return true;
 }
 
+/** Vi chất count for the day. Links to /micros on today only, since /micros shows today. */
+function MicrosSummaryCard({ summary, linked }: { summary: MockDayData["microsSummary"]; linked: boolean }) {
+  const className =
+    "no-underline text-text bg-card border border-card-border rounded-[18px] px-4 py-3 flex items-center gap-3.5 min-h-[44px] box-border";
+  const content = (
+    <>
+      <div className="font-display italic font-black text-[26px] text-blue leading-none shrink-0">
+        {summary.achieved}/{summary.total}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="text-[15px] font-semibold leading-snug">Vi chất đã đạt</div>
+        <div className="text-[13px] text-secondary truncate">Thiếu nhiều nhất: {summary.mostLacking.join(", ")}</div>
+      </div>
+      {linked && (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true" className="text-secondary shrink-0">
+          <path d="M9 5l7 7-7 7" />
+        </svg>
+      )}
+    </>
+  );
+  return linked ? (
+    <Link href="/micros" data-align-group="today-header" className={`${className} active:scale-[0.97] transition-transform`}>
+      {content}
+    </Link>
+  ) : (
+    <div data-align-group="today-header" className={className}>
+      {content}
+    </div>
+  );
+}
+
 export default function TodayPage() {
   return (
     <Suspense fallback={<div className="w-full min-h-screen bg-page" />}>
@@ -46,12 +78,26 @@ function TodayContent() {
   const forceLoading = searchParams?.get("loading") === "1";
   const forceOffline = searchParams?.get("offline") === "1";
 
-  const { data: diaryData, highlightedMeal, setHighlightedMeal, hydrated } = useDiary();
+  const { data: diaryData, highlightedMeal, setHighlightedMeal, hydrated, todayIso, profile, targets } = useDiary();
+  const router = useRouter();
 
   const [data, setData] = useState<MockDayData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isCopySheetOpen, setIsCopySheetOpen] = useState(false);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [clientNow, setClientNow] = useState<Date | null>(null);
+
+  // ?date= picks a past day. It is read after mount (todayIso is null before), so the first render matches the server.
+  const pastIso = hydrated && todayIso ? viewedIsoDate(searchParams?.get("date"), todayIso) : null;
+  const isPast = pastIso !== null && pastIso !== todayIso;
+  const pastData = useMemo(
+    () => (isPast && pastIso && todayIso ? pastDayData(pastIso, todayIso, profile, targets) : null),
+    [isPast, pastIso, todayIso, profile, targets]
+  );
+
+  function goToDay(iso: string) {
+    router.push(iso === todayIso ? "/today" : `/today?date=${iso}`);
+  }
   const isOnline = useSyncExternalStore(subscribeOnline, getOnlineSnapshot, getOnlineServerSnapshot);
 
   useEffect(() => {
@@ -93,11 +139,50 @@ function TodayContent() {
 
   const showLoading = forceLoading || (isLoading && !diaryData && !data);
   const showOfflineBanner = forceOffline || !isOnline;
-  const currentData = (hydrated ? diaryData : null) || data || SAMPLE_DAY;
+  const currentData = pastData || (hydrated ? diaryData : null) || data || SAMPLE_DAY;
   const desktopSubtitle = clientNow
     ? `${formatDesktopDate(currentData.date)} · Ngày tập ${currentData.user.trainingMinutes}′ · ${currentData.user.goalLabel} · ${currentData.user.weightKg} kg`
     : currentData.desktopDateLabel;
-  const isEmpty = forceEmpty || (!showLoading && currentData.meals.every((m) => m.items.length === 0));
+  // A past day with nothing logged still shows its meals: the empty-day state is for today only
+  const isEmpty = !isPast && (forceEmpty || (!showLoading && currentData.meals.every((m) => m.items.length === 0)));
+  // Date nav: ‹ goes back one day from the viewed day; › goes forward, and stays off on today
+  const prevDay = pastIso ? () => goToDay(shiftIsoDate(pastIso, -1)) : undefined;
+  const nextDay = pastIso ? () => goToDay(shiftIsoDate(pastIso, 1)) : undefined;
+  // One Vi chất row. Links to its detail on today only, since the detail page shows today.
+  const renderMicroRow = (item: MockMicroStat) => {
+    const content = (
+      <>
+        <div className="flex items-center gap-2 text-sm">
+          <span className="font-semibold flex-1 text-text">{item.name}</span>
+          {(item.percentage ?? 0) >= 100 && <span className="text-[13px] font-bold text-blue">✓ Đạt</span>}
+          <span className="text-secondary text-[13px] tabular-nums">{item.displayValue}</span>
+        </div>
+        <SegmentedBar aria-label={`Tiến độ ${item.name}`} percentage={item.percentage ?? 0} tone="light" />
+      </>
+    );
+    const rowClass = "no-underline flex flex-col gap-1.5 py-2 px-2 -mx-2 rounded-lg border-t border-divider";
+    return isPast ? (
+      <div key={item.key} className={rowClass}>
+        {content}
+      </div>
+    ) : (
+      <Link key={item.key} href={`/micros/${item.key}`} className={`${rowClass} hover:bg-page transition-colors`}>
+        {content}
+      </Link>
+    );
+  };
+
+  const calendarSheet = todayIso ? (
+    <CalendarSheet
+      open={isCalendarOpen}
+      onClose={() => setIsCalendarOpen(false)}
+      selectedIso={pastIso ?? todayIso}
+      onPick={(iso) => {
+        setIsCalendarOpen(false);
+        goToDay(iso);
+      }}
+    />
+  ) : null;
 
   // --- 1. SKELETON LOADING STATE (TodayStates.dc.html) ---
   if (showLoading) {
@@ -178,7 +263,10 @@ function TodayContent() {
           <AppHeader
             variant="daily"
             date={currentData.date}
+            onPrev={prevDay}
+            onNext={nextDay}
             canGoNext={false}
+            onDateTap={() => setIsCalendarOpen(true)}
             alignGroup="today-header"
             summary={
               <div className="flex gap-4.5 items-center">
@@ -236,6 +324,7 @@ function TodayContent() {
             <BottomNav currentTab="today" />
           </div>
         </div>
+        {calendarSheet}
       </div>
     );
   }
@@ -282,7 +371,10 @@ function TodayContent() {
         <AppHeader
           variant="daily"
           date={currentData.date}
-          canGoNext={false}
+          onPrev={prevDay}
+          onNext={nextDay}
+          canGoNext={isPast}
+          onDateTap={() => setIsCalendarOpen(true)}
           alignGroup="today-header"
           summary={
             <>
@@ -325,25 +417,16 @@ function TodayContent() {
 
         {/* Mobile Body Content */}
         <div className="flex-1 w-full max-w-[560px] mx-auto px-4 pt-3.5 pb-6 flex flex-col gap-2.5">
-          {/* Card: Micros Summary linking to /micros */}
-          <Link
-            href="/micros"
-            data-align-group="today-header"
-            className="no-underline text-text bg-card border border-card-border rounded-[18px] px-4 py-3 flex items-center gap-3.5 min-h-[44px] box-border active:scale-[0.97] transition-transform"
-          >
-            <div className="font-display italic font-black text-[26px] text-blue leading-none shrink-0">
-              {microsSummary.achieved}/{microsSummary.total}
+          {isPast && (
+            <div role="status" className="bg-card border border-card-border rounded-[18px] pl-4 pr-1 min-h-[44px] flex items-center justify-between text-[13px] font-semibold">
+              <span>Đang xem ngày cũ</span>
+              <Link href="/today" className="min-h-[44px] px-2.5 flex items-center font-bold text-blue no-underline">
+                Về hôm nay
+              </Link>
             </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-[15px] font-semibold leading-snug">Vi chất đã đạt</div>
-              <div className="text-[13px] text-secondary truncate">
-                Thiếu nhiều nhất: {microsSummary.mostLacking.join(", ")}
-              </div>
-            </div>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true" className="text-secondary shrink-0">
-              <path d="M9 5l7 7-7 7" />
-            </svg>
-          </Link>
+          )}
+
+          <MicrosSummaryCard summary={microsSummary} linked={!isPast} />
 
           {/* All 5 Meal Slots */}
           {meals.map((meal) => {
@@ -361,38 +444,65 @@ function TodayContent() {
                   <div className="flex items-baseline justify-between pb-0.5 w-full">
                     <div className="flex items-center gap-2">
                       <h2 data-align-group="meal-card" data-align-edge="left" className="m-0 text-base font-bold text-text">{meal.name}</h2>
-                      <Link
-                        id={`mobile-add-${meal.slot}`}
-                        href={`/add?meal=${meal.slot}`}
-                        onClick={() => handleSaveOpener(`mobile-add-${meal.slot}`)}
-                        className="text-xs font-semibold text-blue hover:underline min-h-[44px] flex items-center"
-                      >
-                        + Thêm
-                      </Link>
+                      {!isPast && (
+                        <Link
+                          id={`mobile-add-${meal.slot}`}
+                          href={`/add?meal=${meal.slot}`}
+                          onClick={() => handleSaveOpener(`mobile-add-${meal.slot}`)}
+                          className="text-xs font-semibold text-blue hover:underline min-h-[44px] flex items-center"
+                        >
+                          + Thêm
+                        </Link>
+                      )}
                     </div>
                     <div className="text-[15px] font-bold tabular-nums text-text">
                       {formatAmount(meal.kcal, "kcal")} kcal
                     </div>
                   </div>
-                  {meal.items.map((it) => (
-                    <Link
-                      key={it.id}
-                      href={`/entry/${it.id}`}
-                      className="no-underline flex items-center justify-between gap-2 text-sm min-h-[44px] border-t border-divider w-full active:scale-[0.97] transition-transform"
-                    >
-                      <span data-align-group="meal-card" data-align-edge="left" className="truncate text-text font-normal">
-                        {it.name} <span className="text-secondary">· {it.qty}</span>
-                      </span>
-                      <span className="text-secondary tabular-nums shrink-0">
-                        {formatAmount(it.kcal, "kcal")}
-                      </span>
-                    </Link>
-                  ))}
+                  {meal.items.map((it) =>
+                    isPast ? (
+                      <div
+                        key={it.id}
+                        className="flex items-center justify-between gap-2 text-sm min-h-[44px] border-t border-divider w-full"
+                      >
+                        <span data-align-group="meal-card" data-align-edge="left" className="truncate text-text font-normal">
+                          {it.name} <span className="text-secondary">· {it.qty}</span>
+                        </span>
+                        <span className="text-secondary tabular-nums shrink-0">
+                          {formatAmount(it.kcal, "kcal")}
+                        </span>
+                      </div>
+                    ) : (
+                      <Link
+                        key={it.id}
+                        href={`/entry/${it.id}`}
+                        className="no-underline flex items-center justify-between gap-2 text-sm min-h-[44px] border-t border-divider w-full active:scale-[0.97] transition-transform"
+                      >
+                        <span data-align-group="meal-card" data-align-edge="left" className="truncate text-text font-normal">
+                          {it.name} <span className="text-secondary">· {it.qty}</span>
+                        </span>
+                        <span className="text-secondary tabular-nums shrink-0">
+                          {formatAmount(it.kcal, "kcal")}
+                        </span>
+                      </Link>
+                    )
+                  )}
                 </section>
               );
             }
 
-            // Empty slot row with + Thêm món
+            // Empty slot row: + Thêm món on today; "Chưa ghi" on a past day (nothing can be added there yet)
+            if (isPast) {
+              return (
+                <div
+                  key={meal.id}
+                  className="bg-card border border-card-border rounded-[18px] px-4 min-h-[52px] flex items-center justify-between text-[15px]"
+                >
+                  <span className="font-bold text-text">{meal.name}</span>
+                  <span className="text-secondary">Chưa ghi</span>
+                </div>
+              );
+            }
             return (
               <Link
                 key={meal.id}
@@ -409,14 +519,16 @@ function TodayContent() {
             );
           })}
 
-          {/* "Chép hôm qua" button on its own */}
-          <button
-            type="button"
-            onClick={() => setIsCopySheetOpen(true)}
-            className="w-full min-h-[52px] px-4 rounded-[18px] bg-card text-text border border-card-border text-[15px] font-semibold flex items-center justify-center cursor-pointer active:scale-[0.97] transition-transform"
-          >
-            Chép hôm qua
-          </button>
+          {/* "Chép hôm qua" button on its own (today only) */}
+          {!isPast && (
+            <button
+              type="button"
+              onClick={() => setIsCopySheetOpen(true)}
+              className="w-full min-h-[52px] px-4 rounded-[18px] bg-card text-text border border-card-border text-[15px] font-semibold flex items-center justify-center cursor-pointer active:scale-[0.97] transition-transform"
+            >
+              Chép hôm qua
+            </button>
+          )}
         </div>
 
         {/* Fixed Mobile Navigation Dock */}
@@ -439,32 +551,45 @@ function TodayContent() {
             variant="daily"
             title="HÔM NAY"
             date={currentData.date}
-            canGoNext={false}
+            onPrev={prevDay}
+            onNext={nextDay}
+            canGoNext={isPast}
             alignGroup="today-header"
             subtitle={desktopSubtitle}
             actions={
-              <>
-                <button
-                  type="button"
-                  onClick={() => setIsCopySheetOpen(true)}
-                  className="h-11 px-4 border border-card-border rounded-xl bg-card text-text text-sm font-semibold cursor-pointer hover:bg-divider transition-colors active:scale-[0.97]"
-                >
-                  Chép hôm qua
-                </button>
-                <Link
-                  id="desktop-add-btn"
-                  href="/add"
-                  onClick={() => handleSaveOpener("desktop-add-btn")}
-                  className="no-underline h-11 px-5 rounded-full bg-blue text-white flex items-center gap-2 text-[15px] font-bold hover:bg-blue/90 active:scale-[0.97] transition-all"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
-                    <path d="M12 5v14M5 12h14" />
-                  </svg>
-                  Thêm món
-                </Link>
-              </>
+              isPast ? undefined : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setIsCopySheetOpen(true)}
+                    className="h-11 px-4 border border-card-border rounded-xl bg-card text-text text-sm font-semibold cursor-pointer hover:bg-divider transition-colors active:scale-[0.97]"
+                  >
+                    Chép hôm qua
+                  </button>
+                  <Link
+                    id="desktop-add-btn"
+                    href="/add"
+                    onClick={() => handleSaveOpener("desktop-add-btn")}
+                    className="no-underline h-11 px-5 rounded-full bg-blue text-white flex items-center gap-2 text-[15px] font-bold hover:bg-blue/90 active:scale-[0.97] transition-all"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
+                      <path d="M12 5v14M5 12h14" />
+                    </svg>
+                    Thêm món
+                  </Link>
+                </>
+              )
             }
           />
+
+          {isPast && (
+            <div role="status" className="bg-card border border-card-border rounded-[18px] pl-5 pr-1 min-h-[44px] flex items-center justify-between text-sm font-semibold">
+              <span>Đang xem ngày cũ</span>
+              <Link href="/today" className="min-h-[44px] px-2.5 flex items-center font-bold text-blue no-underline">
+                Về hôm nay
+              </Link>
+            </div>
+          )}
 
           {/* Top 2 Cards Grid */}
           <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -554,34 +679,55 @@ function TodayContent() {
                     <div className="flex justify-between items-baseline w-full">
                       <div className="flex items-center gap-2">
                         <h3 data-align-group="desktop-meal" data-align-edge="left" className="m-0 text-[15px] font-bold text-text">{meal.name}</h3>
-                        <Link
-                          id={`desktop-add-${meal.slot}`}
-                          href={`/add?meal=${meal.slot}`}
-                          onClick={() => handleSaveOpener(`desktop-add-${meal.slot}`)}
-                          className="text-xs font-semibold text-blue no-underline hover:underline min-h-[44px] inline-flex items-center"
-                        >
-                          + Thêm
-                        </Link>
+                        {!isPast && (
+                          <Link
+                            id={`desktop-add-${meal.slot}`}
+                            href={`/add?meal=${meal.slot}`}
+                            onClick={() => handleSaveOpener(`desktop-add-${meal.slot}`)}
+                            className="text-xs font-semibold text-blue no-underline hover:underline min-h-[44px] inline-flex items-center"
+                          >
+                            + Thêm
+                          </Link>
+                        )}
                       </div>
                       <span className="text-sm font-bold tabular-nums text-text">
                         {meal.kcal > 0 ? `${formatAmount(meal.kcal, "kcal")} kcal` : "0 kcal"}
                       </span>
                     </div>
-                    {meal.items.map((it) => (
-                      <Link
-                        key={it.id}
-                        href={`/entry/${it.id}`}
-                        className="no-underline flex justify-between items-center min-h-[44px] px-2 -mx-2 rounded-lg text-sm hover:bg-page transition-colors"
-                      >
-                        <span data-align-group="desktop-meal" data-align-edge="left" className="truncate text-text font-normal">
-                          {it.name} <span className="text-secondary">· {it.qty}</span>
-                        </span>
-                        <span className="text-secondary tabular-nums shrink-0">
-                          {formatAmount(it.kcal, "kcal")}
-                        </span>
-                      </Link>
-                    ))}
-                    {meal.items.length === 0 && (
+                    {meal.items.map((it) =>
+                      isPast ? (
+                        <div
+                          key={it.id}
+                          className="flex justify-between items-center min-h-[44px] px-2 -mx-2 text-sm"
+                        >
+                          <span data-align-group="desktop-meal" data-align-edge="left" className="truncate text-text font-normal">
+                            {it.name} <span className="text-secondary">· {it.qty}</span>
+                          </span>
+                          <span className="text-secondary tabular-nums shrink-0">
+                            {formatAmount(it.kcal, "kcal")}
+                          </span>
+                        </div>
+                      ) : (
+                        <Link
+                          key={it.id}
+                          href={`/entry/${it.id}`}
+                          className="no-underline flex justify-between items-center min-h-[44px] px-2 -mx-2 rounded-lg text-sm hover:bg-page transition-colors"
+                        >
+                          <span data-align-group="desktop-meal" data-align-edge="left" className="truncate text-text font-normal">
+                            {it.name} <span className="text-secondary">· {it.qty}</span>
+                          </span>
+                          <span className="text-secondary tabular-nums shrink-0">
+                            {formatAmount(it.kcal, "kcal")}
+                          </span>
+                        </Link>
+                      )
+                    )}
+                    {meal.items.length === 0 && isPast && (
+                      <div className="flex items-center min-h-[44px] px-2 -mx-2 text-sm text-secondary">
+                        <span data-align-group="desktop-meal" data-align-edge="left">Chưa ghi</span>
+                      </div>
+                    )}
+                    {meal.items.length === 0 && !isPast && (
                       <Link
                         id={`desktop-add-empty-${meal.slot}`}
                         href={`/add?meal=${meal.slot}`}
@@ -609,85 +755,21 @@ function TodayContent() {
               <h3 className="my-3 text-[13px] font-bold text-secondary tracking-wider uppercase">
                 KHOÁNG CHẤT · {microsSummary.mineralsAchieved}/{microsSummary.mineralsTotal}
               </h3>
-              {minerals.map((item) => (
-                <Link
-                  key={item.key}
-                  href={`/micros/${item.key}`}
-                  className="no-underline flex flex-col gap-1.5 py-2 px-2 -mx-2 rounded-lg border-t border-divider hover:bg-page transition-colors"
-                >
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className="font-semibold flex-1 text-text">{item.name}</span>
-                    {(item.percentage ?? 0) >= 100 && (
-                      <span className="text-[13px] font-bold text-blue">✓ Đạt</span>
-                    )}
-                    <span className="text-secondary text-[13px] tabular-nums">
-                      {item.displayValue}
-                    </span>
-                  </div>
-                  <SegmentedBar
-                    aria-label={`Tiến độ ${item.name}`}
-                    percentage={item.percentage ?? 0}
-                    tone="light"
-                  />
-                </Link>
-              ))}
+              {minerals.map(renderMicroRow)}
 
               {/* Vitamins list */}
               <h3 className="mt-4 mb-3 text-[13px] font-bold text-secondary tracking-wider uppercase">
                 VITAMIN · {microsSummary.vitaminsAchieved}/{microsSummary.vitaminsTotal}
               </h3>
-              {vitamins.map((item) => (
-                <Link
-                  key={item.key}
-                  href={`/micros/${item.key}`}
-                  className="no-underline flex flex-col gap-1.5 py-2 px-2 -mx-2 rounded-lg border-t border-divider hover:bg-page transition-colors"
-                >
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className="font-semibold flex-1 text-text">{item.name}</span>
-                    {(item.percentage ?? 0) >= 100 && (
-                      <span className="text-[13px] font-bold text-blue">✓ Đạt</span>
-                    )}
-                    <span className="text-secondary text-[13px] tabular-nums">
-                      {item.displayValue}
-                    </span>
-                  </div>
-                  <SegmentedBar
-                    aria-label={`Tiến độ ${item.name}`}
-                    percentage={item.percentage ?? 0}
-                    tone="light"
-                  />
-                </Link>
-              ))}
+              {vitamins.map(renderMicroRow)}
             </div>
           </section>
         </main>
       </div>
 
-      {/* "Chép hôm qua" Bottom Sheet Dialog */}
-      <Sheet
-        open={isCopySheetOpen}
-        onClose={() => setIsCopySheetOpen(false)}
-        title="Chép bữa hôm qua?"
-        description="Thứ Sáu 09/10 · 1.980 kcal"
-      >
-        <div className="flex flex-col gap-2.5 py-2">
-          <div className="text-sm text-secondary">
-            Món đã có hôm nay sẽ không bị ghi đè.
-          </div>
-          <PillButton
-            variant="primary"
-            onClick={() => setIsCopySheetOpen(false)}
-          >
-            Chép 3 bữa
-          </PillButton>
-          <PillButton
-            variant="secondary"
-            onClick={() => setIsCopySheetOpen(false)}
-          >
-            Huỷ
-          </PillButton>
-        </div>
-      </Sheet>
+      {/* "Chép bữa hôm qua?" and the day picker */}
+      <CopyYesterdaySheet open={isCopySheetOpen} onClose={() => setIsCopySheetOpen(false)} />
+      {calendarSheet}
 
     </div>
   );

@@ -36,7 +36,7 @@ describe("sample profile", () => {
     const t = targetsFor(SAMPLE_PROFILE);
     expect(t.calories).toEqual({ min: 1950, max: 2275 });
     expect(t.potassium).toEqual({ min: 5200, max: 6500 });
-    expect(t.iron).toEqual({ min: 8, max: 10 });
+    expect(t.iron).toEqual({ min: 8, max: 8 });
     expect(t.sodium).toEqual({ min: 2750, max: 4130 });
   });
 
@@ -52,7 +52,7 @@ describe("sample profile", () => {
   });
 
   it("ignores the period setting for men", () => {
-    expect(targetsFor({ ...SAMPLE_PROFILE, periodMode: true }).iron).toEqual({ min: 8, max: 10 });
+    expect(targetsFor({ ...SAMPLE_PROFILE, periodMode: true }).iron).toEqual({ min: 8, max: 8 });
   });
 });
 

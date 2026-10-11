@@ -154,8 +154,8 @@ export function calculateIronTarget(sex: SexType, isPeriod = false): TargetRange
     const val = isPeriod ? 28 : 18;
     return { min: val, max: val };
   }
-  // Men: 8–10 mg
-  return { min: 8, max: 10 };
+  // Men: 8 mg (coach rule). Period mode only changes women's target.
+  return { min: 8, max: 8 };
 }
 
 export function calculateZincTarget(sex: SexType): TargetRange {

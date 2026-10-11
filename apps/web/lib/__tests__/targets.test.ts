@@ -57,9 +57,9 @@ describe("lib/targets", () => {
       expect(targets.magnesium.min).toBe(600);
       expect(targets.magnesium.max).toBe(750);
 
-      // Iron: Men 8-10 mg
+      // Iron: Men 8 mg (coach rule, HANDOFF.md and design/SPEC.md)
       expect(targets.iron.min).toBe(8);
-      expect(targets.iron.max).toBe(10);
+      expect(targets.iron.max).toBe(8);
 
       // Zinc: Men 12 mg
       expect(targets.zinc.min).toBe(12);
@@ -83,6 +83,11 @@ describe("lib/targets", () => {
   });
 
   describe("Female-specific targets (Iron & Period)", () => {
+    it("sets iron for male to a single 8 mg value, even in period mode", () => {
+      expect(calculateIronTarget("male", false)).toEqual({ min: 8, max: 8 });
+      expect(calculateIronTarget("male", true)).toEqual({ min: 8, max: 8 });
+    });
+
     it("sets standard iron for female to 18 mg", () => {
       const female: UserProfileForTargets = {
         sex: "female",

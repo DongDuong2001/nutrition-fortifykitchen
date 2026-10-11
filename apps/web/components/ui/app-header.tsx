@@ -22,6 +22,8 @@ export interface AppHeaderProps {
   onNext?: () => void;
   /** Whether going to next date is allowed (disabled on today) */
   canGoNext?: boolean;
+  /** Tapping the date label opens the day picker. Phone daily header only. */
+  onDateTap?: () => void;
   /** Back navigation URL for 'sub' variant */
   backHref?: string;
   /** Back button handler for 'sub' variant */
@@ -57,6 +59,7 @@ export function AppHeader({
   onPrev,
   onNext,
   canGoNext,
+  onDateTap,
   backHref,
   onBack,
   backLabel = "Quay lại",
@@ -287,11 +290,23 @@ export function AppHeader({
                   <path d="M15 5l-7 7 7 7" />
                 </svg>
               </button>
-              <span className="text-sm font-semibold tracking-tight inline-flex items-center justify-center min-w-[104px] text-center">
-                {resolvedDateLabel || (
-                  <span aria-hidden="true" className="inline-block w-[104px] h-5" />
-                )}
-              </span>
+              {onDateTap ? (
+                <button
+                  type="button"
+                  onClick={onDateTap}
+                  aria-haspopup="dialog"
+                  aria-label={`Chọn ngày, ${resolvedDateLabel}`}
+                  className="text-sm font-semibold tracking-tight inline-flex items-center justify-center min-w-[104px] min-h-[44px] px-1 text-center bg-transparent border-0 text-white cursor-pointer rounded-lg hover:text-sky active:scale-[0.97] transition-colors"
+                >
+                  {resolvedDateLabel || <span aria-hidden="true" className="inline-block w-[104px] h-5" />}
+                </button>
+              ) : (
+                <span className="text-sm font-semibold tracking-tight inline-flex items-center justify-center min-w-[104px] text-center">
+                  {resolvedDateLabel || (
+                    <span aria-hidden="true" className="inline-block w-[104px] h-5" />
+                  )}
+                </span>
+              )}
               <button
                 type="button"
                 onClick={onNext}

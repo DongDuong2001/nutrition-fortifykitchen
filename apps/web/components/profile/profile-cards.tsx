@@ -34,8 +34,10 @@ function RowGroup({ children }: { children: ReactNode }) {
 
 // Same rule as setup: a year from 1900 to this year. An invalid year keeps its error on screen.
 // It saves on blur or Enter, so typing "2" on the way to "2003" does not show an error.
+// The row shows the year; tapping it turns into the field.
 function BirthYearField() {
   const { profile, updateProfile } = useDiary();
+  const [editing, setEditing] = useState(false);
   const [typed, setTyped] = useState<string | null>(null);
   const [error, setError] = useState<string | undefined>();
   const shown = typed ?? String(profile.birthYear);
@@ -58,6 +60,15 @@ function BirthYearField() {
     if (message || birthYear === null) return;
     if (birthYear !== profile.birthYear) updateProfile({ birthYear });
     setTyped(null);
+    setEditing(false);
+  }
+
+  if (!editing) {
+    return (
+      <RowGroup>
+        <Row label="Năm sinh" value={String(profile.birthYear)} onClick={() => setEditing(true)} />
+      </RowGroup>
+    );
   }
 
   return (
@@ -67,6 +78,7 @@ function BirthYearField() {
           id="profile-birth-year"
           type="text"
           inputMode="numeric"
+          autoFocus
           value={shown}
           onChange={(e) => change(e.target.value)}
           onBlur={save}

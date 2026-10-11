@@ -82,8 +82,9 @@ def run_phone(browser):
 
     check_menu(pg, "390 menu")
 
-    # Birth year: 1899 is refused with the setup error, nothing saved
+    # Birth year: the row opens the field. 1899 is refused with the setup error, nothing saved
     open_profile(pg)
+    visible(pg, 'button:has-text("Năm sinh")').click()
     field = pg.locator("#profile-birth-year")
     field.wait_for(state="visible")
     field.fill("1899")
@@ -94,17 +95,19 @@ def run_phone(browser):
     check("/profile" in pg.url and "/profile/" not in pg.url, "390 birth year: stays on /profile")
     pg.reload(wait_until="networkidle")
     pg.wait_for_timeout(300)
-    check(pg.locator("#profile-birth-year").input_value() == "2003", "390 birth year: 1899 not saved (still 2003)")
+    check("2003" in visible(pg, 'button:has-text("Năm sinh")').inner_text(), "390 birth year: 1899 not saved (still 2003)")
 
     # A valid year saves and survives a reload
+    visible(pg, 'button:has-text("Năm sinh")').click()
     field = pg.locator("#profile-birth-year")
+    field.wait_for(state="visible")
     field.fill("1990")
     field.press("Enter")
     pg.wait_for_timeout(200)
     check(BIRTH_ERROR not in body(pg), "390 birth year: 1990 clears the error")
     pg.reload(wait_until="networkidle")
     pg.wait_for_timeout(300)
-    check(pg.locator("#profile-birth-year").input_value() == "1990", "390 birth year: 1990 kept after reload")
+    check("1990" in visible(pg, 'button:has-text("Năm sinh")').inner_text(), "390 birth year: 1990 kept after reload")
 
     # Training default 90: the profile chip, then the /training chip
     open_profile(pg)

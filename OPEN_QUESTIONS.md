@@ -47,3 +47,12 @@
 - [ ] (ag-02) Paywall.dc.html copy states "Gói Miễn phí vẫn ghi đủ 21 vi chất" while Micros tracks 22 (x/22) — confirm whether free tier copy should state 21 or 22.
 - [ ] (cc-09) Đăng xuất only links to /signin and clears nothing yet. Dong: sign-out must clear the session once accounts exist.
 - [ ] (cc-09) Phone Profile names the install row "Thêm vào màn hình chính"; the desktop design says "Cài như ứng dụng". The menu uses the desktop name. Confirm.
+- [ ] (cc-10) Iron, men: HANDOFF.md and design/SPEC.md say 8 mg; docs/03-srs.md says 8–10 mg. Code uses 8 mg (cc-10 instruction). Coach to confirm, and fix the SRS line if 8 is right.
+- [ ] (cc-10) Copy sheet numbers: CopyYesterday.dc.html shows Bữa trưa 650, Bữa tối 871, Bữa phụ 120 and the header 1.980 kcal, but those meals add up to 2.100. The mock uses catalog foods (lunch 488, dinner 475, snack 110, total 1.532). Confirm the mock day.
+- [ ] (cc-10) Copy copy with no design source: "Đã chép N bữa từ hôm qua", "Chọn bữa để chép" (no meal ticked), "Hôm qua chưa ghi bữa nào." Confirm wording.
+- [ ] (cc-10) Snack ("Bữa phụ") starts unticked in the copy sheet, as in the design. Confirm that default is intended.
+- [ ] (cc-10) Past days are read-only. The design says "vẫn sửa được" (still editable), but add and edit need a date first. Banner says "Đang xem ngày cũ" only; "+ Thêm" is hidden on past days. Build date-aware add and edit, then restore the wording.
+- [ ] (cc-10) Past day Vi chất card does not link to /micros (that page shows today only), and the design's detail link is dropped.
+- [ ] (cc-10) Desktop has ‹ › date nav but no day picker, because the desktop header shows no date label to tap. Confirm the desktop picker design.
+- [ ] (cc-10) Calendar: a day over the kcal range has no dot (the design only defines Đạt and Thiếu). Confirm a state for "vượt".
+- [ ] (cc-10) Calendar status for past days uses today's kcal targets, not the targets of that day. Fine for Release 1 unless targets change over time.

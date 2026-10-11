@@ -11,6 +11,7 @@ import {
   findEntry,
   parseAddedEntries,
   parseSampleEdits,
+  removeAddedIn,
   resolveSampleItems,
   SAMPLE_ITEMS,
   undoDeleteIn,
@@ -251,5 +252,18 @@ describe("totals follow the edits", () => {
     const added = [addedEntry("entry-1", "food-chuoi", 100, "snack")];
     const day = computeCompositeDayData(SAMPLE_DAY, added, { "item-1": { grams: 90, servingLabel: "90 g" } });
     expect(day.calories.consumed).toBe(1041 + 114 + 105);
+  });
+});
+
+describe("removeAddedIn", () => {
+  it("takes out only the added entries with the given ids, and keeps the rest", () => {
+    const edits: DiaryEdits = {
+      added: [addedEntry("a", "food-chuoi", 100, "snack"), addedEntry("b", "food-chuoi", 100, "lunch"), addedEntry("c", "food-chuoi", 100, "dinner")],
+      sample: {},
+      undo: null,
+    };
+    const next = removeAddedIn(edits, ["a", "c", "missing"]);
+    expect(next.added.map((e) => e.id)).toEqual(["b"]);
+    expect(edits.added).toHaveLength(3);
   });
 });

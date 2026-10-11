@@ -347,3 +347,9 @@ export function undoDeleteIn(edits: DiaryEdits): DiaryEdits {
 export function dismissUndoIn(edits: DiaryEdits): DiaryEdits {
   return edits.undo ? { ...edits, undo: null } : edits;
 }
+
+/** Takes out the added entries with these ids. Used to undo a copy. */
+export function removeAddedIn(edits: DiaryEdits, ids: string[]): DiaryEdits {
+  const drop = new Set(ids);
+  return { ...edits, added: edits.added.filter((e) => !drop.has(e.id)) };
+}
