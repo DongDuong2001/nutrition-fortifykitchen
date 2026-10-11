@@ -112,3 +112,15 @@ Always use **your agent's fixed port**: **3100 for Antigravity, 3101 for Claude 
 - Each agent works in its own checkout. Antigravity uses the main folder on `feat/ui`, and Claude Code uses the worktree `../nutrition-fk-claude` on `feat/ui-cc-*`.
 - **Now working board:** before starting a task, add a row to the "Now working" table at the top of PROGRESS.md (task, owner, files or routes). Remove it when done. Never edit files claimed by the other agent's row; if you must, stop and tell the user.
 - Shared files (`components/ui/*`, `lib/*`, `globals.css`, `AGENTS.md`): change them only when your task needs it, keep the change small, and say so in your report so the other agent can rebase.
+
+## Commands (so they run without permission prompts)
+Run routine work only through these npm scripts in `apps/web`. The user has auto-approved commands that start with `npm run`; anything else may stop and ask.
+| Need | Command |
+|---|---|
+| Free your port (only if held) | `npm run port:free` |
+| Start the dev server | `npm run dev:3100` (Claude Code: `npm run dev:3101`) |
+| All gates (typecheck → test → build → test:align, stop at first failure) | `npm run check` |
+| Single gate | `npm run typecheck` / `npm run test` / `npm run build` / `npm run test:align` |
+- **If any of these scripts is missing, add it to `apps/web/package.json` first** (one small commit, "chore: npm scripts for gates and ports"). `port:free` takes the port from `PORT` (default 3100), frees it only if something is listening, and prints what it did. Use a small Node or shell script in `apps/web/scripts/`, not a pipe in package.json.
+- Don't chain raw shell commands (`lsof … | xargs kill`, `cd … && …`) for routine work. Use the scripts.
+- These always need the user's approval, so don't try to work around them: `git push`, `rm`, `git reset`, `npm install`/`pip install`, anything with `sudo` or `curl`, and anything touching `migrations/`, `apps/api/` or `.env`.
