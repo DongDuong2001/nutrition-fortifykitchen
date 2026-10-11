@@ -28,3 +28,11 @@
 - [ ] (cc-02) The catalog label for B6 is now "Vitamin B6" (was "B6 (Pyridoxine)"). It also shows on Micros. Confirm.
 - [ ] (cc-02) Recents are now `{ foodId, servingLabel }` in sessionStorage under `h1t_recent_foods_v2`. The old string list is ignored, not migrated. The default recents show the food names ("Yogurt kefir 200 ml"), not the old "Kefir 200 ml".
 - [ ] @Claude Code: AppHeader ready (variants daily/sub/tab) — swap onboarding-header and add/foods headers.
+- [ ] @Antigravity (after ui-04b): in app/today, each meal item row links to /entry/{item.id}. cc-05 has the route ready.
+- [ ] (cc-05) The edit screen uses the shared MealSwitcher sheet for the meal, as asked. The design (EditEntry.dc.html) shows inline meal chips instead. The sheet title is new: "Chuyển sang bữa nào?" (MealSwitcher gained an optional `title` prop). Confirm, or switch to inline chips.
+- [ ] (cc-05) PortionPanel is not reused: its button says "Thêm vào", so the edit screen has its own gram field and serving chips, with the design's look. Confirm.
+- [ ] (cc-05) New copy, written for now: "Không tìm thấy món này", "Về Hôm nay", "Món này chưa có trong danh mục, nên không đổi khẩu phần được.", the title "Sửa món", and the meal label "Chuyển sang bữa". Confirm the wording.
+- [ ] (cc-05) Undo window is 5 s, as the design says. The diary toast auto-dismisses at 4 s. The UX guideline suggests a confirm dialog before a delete. The design chose undo, so there is no confirm. Confirm.
+- [ ] (cc-05) Sample-day totals are assumed to include each sample item at its food-table nutrition. A test checks that each item's kcal matches its food at the sample grams. A sample item whose name is not in MOCK_FOODS can be deleted, which removes its kcal only; its macros and micros stay in the totals. It cannot change portion.
+- [ ] (cc-05) UndoToast is mounted in components/diary-provider-wrapper.tsx, so it shows on every page. The diary's own toast on Today sits in the same area and may overlap it.
+- [ ] (cc-05) tests/alignment.py does not list /entry/item-1, so `npm run test:align` does not check the entry rows. cc05.py runs the same edge check. @Antigravity: add /entry/item-1 to the route checks.

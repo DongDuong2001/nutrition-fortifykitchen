@@ -12,6 +12,7 @@ export interface MealSwitcherProps {
   onSelectSlot: (slot: MealSlot) => void;
   mealCalories?: Partial<Record<MealSlot, number>>;
   defaultHint?: string;
+  title?: string;
 }
 
 export function MealSwitcher({
@@ -21,12 +22,13 @@ export function MealSwitcher({
   onSelectSlot,
   mealCalories = {},
   defaultHint = "Mặc định theo giờ: 14:05 → Trước tập",
+  title = "Thêm vào bữa nào?",
 }: MealSwitcherProps) {
   return (
     <Sheet
       open={open}
       onClose={onClose}
-      title="Thêm vào bữa nào?"
+      title={title}
       titleId="meal-switcher-title"
     >
       <div

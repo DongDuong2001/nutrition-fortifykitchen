@@ -164,6 +164,7 @@ All hydration checks passed cleanly (0 hydration errors, sessionStorage entries 
 | 11/10/2026 | cc-02 fix | Search clear: one × (native hidden). /add opens with no food: phone panel after a tap, desktop empty state. Yêu thích hidden until favourites exist. Filter row wraps from 1024 px; phone scrolls with a left fade once scrolled. formatAmount for amounts with units (kcal and mg whole, g and µg one decimal under 100, under 1 up to two decimals). Vitamin B6 label. Sticky header on card with divider. bottom-nav storage guarded | Dong: category column. Favourites store |
 | 11/10/2026 | cc-02 final | Rebased onto feat/ui 42ac9d6 (ui-05-fix-4). Re-applied cc-02 on the useMealSlot add page. Folate label is now "Vitamin B9". Hydration probe moved to h1t_recent_foods_v2. Onboarding and add-list alignment checks re-added with pair counts. BACKLOG: typed vitamins map | Dong: category column. Favourites store |
 | 11/10/2026 | cc-03 | Favourites (Yêu thích): `lib/favourites.ts` stores ids in localStorage under `h1t_favourite_foods_v1` (validated, guarded, loaded after mount through diary-store). Heart on /foods/[id] with the existing Toast. /add: Yêu thích chip after Tất cả, flat favourites list ranked by search, empty state with Bỏ lọc. Grouped rows show a 14 px heart. | Dong: favourites table when accounts exist. Cross-tab sync (storage event) not built |
+| 11/10/2026 | cc-05 | Edit entry and undo, part 1: `/entry/[id]` (portion, meal, Lưu, Xoá món này, unknown id). Sample items get an edit layer in sessionStorage (`h1t_sample_edits_v1`), resolved by name to MOCK_FOODS. Totals, meal kcal and Micros come from the edits. Undo for the last delete, in the toast (5 s). Pure logic in `lib/diary-edits.ts`. | Antigravity: link Today rows to /entry/{item.id} (after ui-04b). Part 2 with Today wiring |
 
 ## Quality Gate Outputs (ui-05)
 - `npx tsc --noEmit`: 0 errors (clean).
@@ -348,3 +349,16 @@ All alignment and hydration tests passed cleanly (<= 1px difference, 0 hydration
 - Review fix: an id for a food that no longer exists no longer shows a blank "Không có “”" in the Yêu thích view.
 - Screenshots: `apps/web/.screenshots/cc03-detail-heart-390.png`, `cc03-add-fav-390.png`, `cc03-add-grouped-heart-390.png`, `cc03-add-fav-empty-1440.png`.
 - Merge: not done. Antigravity's ui-04b is not committed, and `nutrition-fortifykitchen` has uncommitted AGENTS.md and PROGRESS.md changes. Stopped with "ready, waiting for ui-04b".
+
+## Quality Gate Outputs (cc-05)
+- Branch `feat/ui-cc-edit-entry` from `feat/ui-cc-favourites` (07d6b82, includes cc-03). Not pushed, not merged.
+- Tests first: `lib/__tests__/diary-edits.test.ts` (28 tests). Before the code it failed on the missing module. Now it passes.
+- `npm run typecheck`: exit 0. `npm run test`: 13 files, 140 passed.
+- `ALIGN_BASE_URL=http://localhost:3101 npm run check`: passes. Build compiled. `test:align` pairs unchanged for the existing groups. `test:hydration`: 0 hydration errors.
+- `npm run probe -- tests/probes/cc05.py`: no problems at 390 and 1440. Yến mạch 90 g: breakfast 459 → 573 kcal, day 1.041 → 1.155. Moved to Bữa tối: breakfast 231, dinner 342, day 1.155. Delete Yogurt kefir: toast shows, Hoàn tác puts it back in its place. Delete Chuối without undo: gone after reload, and the moved edit and restored item survive. `/entry/no-such-item`: empty state.
+- Edges: `/entry/item-1` @ 390 and 1440 (entry group) pass, 4 pairs each. Checked with the shared helper from `tests/alignment.py`, because that file does not list the route yet (see OPEN_QUESTIONS).
+- cc-02 and cc-03 probes: no problems (regression check after the store change).
+- Screenshots: `apps/web/.screenshots/cc05-entry-390.png`, `cc05-entry-1440.png`, `cc05-undo-toast-390.png`.
+- Design check: the undo toast matches the design (message, Hoàn tác, countdown). The entry card matches the design's fields and preview. The meal control uses the shared sheet instead of inline chips (see OPEN_QUESTIONS).
+- Review fixes: a damaged stored list of added entries now reads as empty. It no longer clears the sample edits or crashes the entry screen (`parseAddedEntries`, with tests). `amountsOfEntry` removed, since `amountsOfNumbers` covers entries.
+- Merge: not done. Ready for review.

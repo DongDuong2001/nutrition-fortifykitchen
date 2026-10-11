@@ -4,26 +4,34 @@ import React, { createContext, useContext, useState, useEffect, useMemo, useCall
 import { SAMPLE_DAY, type MockDayData, type MockFoodItem } from "./mock/sample-day";
 import { type FoodItem } from "./mock/foods";
 import { type MealSlot, getMealSlotNameVi } from "./meal-slot";
-import { scaleNutrients } from "./portion";
 import { formatAmount } from "./format";
 import { DEFAULT_RECENT_FOODS, isRecentFood, pushRecent, type RecentFood } from "./recent-foods";
 import { readFavouriteIds, toggleFavouriteId, writeFavouriteIds } from "./favourites";
+import {
+  type AddedDiaryEntry,
+  type Amounts,
+  type DiaryEdits,
+  type EntryPatch,
+  type EntryView,
+  type SampleEdits,
+  type UndoRecord,
+  addAmounts,
+  amountsOfNumbers,
+  deleteEntryIn,
+  dismissUndoIn,
+  entryNumbers,
+  findEntry,
+  parseAddedEntries,
+  parseSampleEdits,
+  resolveSampleItems,
+  SAMPLE_SLOT,
+  sampleDelta,
+  sampleEffect,
+  undoDeleteIn,
+  updateEntryIn,
+} from "./diary-edits";
 
-export interface AddedDiaryEntry {
-  id: string;
-  foodId: string;
-  foodName: string;
-  grams: number;
-  displayQty: string;
-  mealSlot: MealSlot;
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-  fiber: number;
-  nutrients: Record<string, number | null>;
-  addedAt: string;
-}
+export type { AddedDiaryEntry, EntryView, EntryPatch, UndoRecord } from "./diary-edits";
 
 export interface ToastInfo {
   message: string;
@@ -46,12 +54,23 @@ interface DiaryContextValue {
   favouriteIds: string[];
   isFavourite: (foodId: string) => boolean;
   toggleFavourite: (food: FoodItem) => void;
+  /** An added entry or a sample item, with its edits applied. Null if unknown or deleted. */
+  getEntry: (id: string) => EntryView | null;
+  /** Changes the meal, and the portion when the entry can change portion. */
+  updateEntry: (id: string, patch: EntryPatch) => void;
+  deleteEntry: (id: string) => void;
+  /** The last delete, while its undo toast is shown. */
+  lastDelete: UndoRecord | null;
+  undoLastDelete: () => void;
+  dismissUndo: () => void;
   hydrated: boolean;
 }
 
 const DiaryContext = createContext<DiaryContextValue | null>(null);
 
 const SESSION_STORAGE_KEY = "h1t_added_entries_v1";
+// Edits to sample-day items (portion, meal, deleted), kept next to the added entries
+const SAMPLE_EDITS_KEY = "h1t_sample_edits_v1";
 // v2: recents are { foodId, servingLabel } objects. The v1 string list is ignored.
 const RECENT_FOODS_KEY = "h1t_recent_foods_v2";
 
@@ -61,34 +80,29 @@ const RECENT_FOODS_KEY = "h1t_recent_foods_v2";
  */
 export function computeCompositeDayData(
   baseDay: MockDayData,
-  addedEntries: AddedDiaryEntry[]
+  addedEntries: AddedDiaryEntry[],
+  sampleEdits: SampleEdits = {}
 ): MockDayData {
-  if (addedEntries.length === 0) {
+  const samples = resolveSampleItems(baseDay);
+  const effects = samples.map((info) => ({ info, effect: sampleEffect(info, sampleEdits[info.item.id]) }));
+  if (addedEntries.length === 0 && Object.keys(sampleEdits).length === 0) {
     return baseDay;
   }
 
-  // Accumulate nutrient sums from added entries
-  let extraCals = 0;
-  let extraCarbs = 0;
-  let extraProtein = 0;
-  let extraFat = 0;
-  let extraFiber = 0;
-
-  const extraNutrients: Record<string, number> = {};
-
+  // What the added entries and the edited sample items add on top of the sample day
+  let extra: Amounts = { calories: 0, carbs: 0, protein: 0, fat: 0, fiber: 0, nutrients: {} };
   for (const entry of addedEntries) {
-    extraCals += entry.calories;
-    extraCarbs += entry.carbs;
-    extraProtein += entry.protein;
-    extraFat += entry.fat;
-    extraFiber += entry.fiber;
-
-    for (const [key, val] of Object.entries(entry.nutrients)) {
-      if (typeof val === "number") {
-        extraNutrients[key] = (extraNutrients[key] ?? 0) + val;
-      }
-    }
+    extra = addAmounts(extra, amountsOfNumbers(entry));
   }
+  for (const { info, effect } of effects) {
+    extra = addAmounts(extra, sampleDelta(info, effect));
+  }
+  const extraCals = extra.calories;
+  const extraCarbs = extra.carbs;
+  const extraProtein = extra.protein;
+  const extraFat = extra.fat;
+  const extraFiber = extra.fiber;
+  const extraNutrients = extra.nutrients;
 
   // 1. Calories
   const totalConsumedCals = baseDay.calories.consumed + extraCals;
@@ -122,37 +136,26 @@ export function computeCompositeDayData(
     };
   });
 
-  // 3. Meals
-  const slotMap: Record<MealSlot, string> = {
-    breakfast: "breakfast",
-    lunch: "lunch",
-    pre_workout: "preworkout",
-    dinner: "dinner",
-    snack: "snack",
+  // 3. Meals: sample items that stay (in sample order, with their edited meal, amount and kcal), then added entries
+  const itemsBySlot = new Map<MealSlot, MockFoodItem[]>();
+  const addItem = (slot: MealSlot, item: MockFoodItem) => {
+    itemsBySlot.set(slot, [...(itemsBySlot.get(slot) ?? []), item]);
   };
+  for (const { info, effect } of effects) {
+    if (!effect.deleted) {
+      addItem(effect.mealSlot, { id: info.item.id, name: info.item.name, qty: effect.qty, kcal: effect.kcal });
+    }
+  }
+  for (const e of addedEntries) {
+    addItem(e.mealSlot, { id: e.id, name: e.foodName, qty: e.displayQty, kcal: e.calories });
+  }
 
   const updatedMeals = baseDay.meals.map((meal) => {
-    const addedForThisMeal = addedEntries.filter((e) => slotMap[e.mealSlot] === meal.slot);
-    if (addedForThisMeal.length === 0) {
-      return meal;
-    }
-
-    const newItems: MockFoodItem[] = [
-      ...meal.items,
-      ...addedForThisMeal.map((e) => ({
-        id: e.id,
-        name: e.foodName,
-        qty: e.displayQty,
-        kcal: e.calories,
-      })),
-    ];
-
-    const newKcal = newItems.reduce((acc, it) => acc + it.kcal, 0);
-
+    const items = itemsBySlot.get(SAMPLE_SLOT[meal.slot]) ?? [];
     return {
       ...meal,
-      items: newItems,
-      kcal: newKcal,
+      items,
+      kcal: items.reduce((acc, it) => acc + it.kcal, 0),
     };
   });
 
@@ -241,7 +244,8 @@ export function computeCompositeDayData(
 
 export function DiaryProvider({ children }: { children: React.ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
-  const [addedEntries, setAddedEntries] = useState<AddedDiaryEntry[]>([]);
+  const [edits, setEdits] = useState<DiaryEdits>({ added: [], sample: {}, undo: null });
+  const addedEntries = edits.added;
   const [recentFoods, setRecentFoods] = useState<RecentFood[]>(DEFAULT_RECENT_FOODS);
   const [toast, setToast] = useState<ToastInfo | null>(null);
   const [highlightedMeal, setHighlightedMeal] = useState<MealSlot | null>(null);
@@ -251,9 +255,12 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     try {
       const storedEntries = sessionStorage.getItem(SESSION_STORAGE_KEY);
-      if (storedEntries) {
-        setAddedEntries(JSON.parse(storedEntries));
-      }
+      const storedSample = sessionStorage.getItem(SAMPLE_EDITS_KEY);
+      setEdits((prev) => ({
+        ...prev,
+        added: parseAddedEntries(storedEntries),
+        sample: parseSampleEdits(storedSample),
+      }));
       const storedRecents = sessionStorage.getItem(RECENT_FOODS_KEY);
       if (storedRecents) {
         const parsed: unknown = JSON.parse(storedRecents);
@@ -273,15 +280,16 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     writeFavouriteIds(favouriteIds);
   }, [favouriteIds, hydrated]);
 
-  // Persist addedEntries to sessionStorage only after hydrated
+  // Persist added entries and sample edits to sessionStorage only after hydrated
   useEffect(() => {
     if (!hydrated) return;
     try {
-      sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(addedEntries));
+      sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(edits.added));
+      sessionStorage.setItem(SAMPLE_EDITS_KEY, JSON.stringify(edits.sample));
     } catch {
       // Ignore quota/access errors
     }
-  }, [addedEntries, hydrated]);
+  }, [edits.added, edits.sample, hydrated]);
 
   // Persist recent foods only after hydrated
   useEffect(() => {
@@ -310,13 +318,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   // Add a food entry
   const addFoodEntry = useCallback(
     async (food: FoodItem, grams: number, mealSlot: MealSlot, servingLabel?: string) => {
-      const scaled = scaleNutrients(food.nutrients, grams);
-      const calories = Math.round(scaled.energy ?? 0);
-      const carbs = Math.round((scaled.carbs ?? 0) * 10) / 10;
-      const protein = Math.round((scaled.protein ?? 0) * 10) / 10;
-      const fat = Math.round((scaled.fat ?? 0) * 10) / 10;
-      const fiber = Math.round((scaled.fiber ?? 0) * 10) / 10;
-
+      const numbers = entryNumbers(food, grams);
       const qty = servingLabel || `${formatAmount(grams, "g")} g`;
 
       const newEntry: AddedDiaryEntry = {
@@ -326,16 +328,11 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         grams,
         displayQty: qty,
         mealSlot,
-        calories,
-        protein,
-        carbs,
-        fat,
-        fiber,
-        nutrients: scaled,
+        ...numbers,
         addedAt: new Date().toISOString(),
       };
 
-      setAddedEntries((prev) => [...prev, newEntry]);
+      setEdits((prev) => ({ ...prev, added: [...prev.added, newEntry] }));
 
       const mealNameVi = getMealSlotNameVi(mealSlot);
       setToast({
@@ -360,9 +357,27 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     setFavouriteIds((prev) => toggleFavouriteId(prev, food.id));
   }, []);
 
+  const getEntry = useCallback((id: string) => findEntry(edits, id), [edits]);
+
+  const updateEntry = useCallback((id: string, patch: EntryPatch) => {
+    setEdits((prev) => updateEntryIn(prev, id, patch));
+  }, []);
+
+  const deleteEntry = useCallback((id: string) => {
+    setEdits((prev) => deleteEntryIn(prev, id));
+  }, []);
+
+  const undoLastDelete = useCallback(() => {
+    setEdits((prev) => undoDeleteIn(prev));
+  }, []);
+
+  const dismissUndo = useCallback(() => {
+    setEdits((prev) => dismissUndoIn(prev));
+  }, []);
+
   const compositeData = useMemo<MockDayData>(() => {
-    return computeCompositeDayData(SAMPLE_DAY, addedEntries);
-  }, [addedEntries]);
+    return computeCompositeDayData(SAMPLE_DAY, edits.added, edits.sample);
+  }, [edits.added, edits.sample]);
 
   return (
     <DiaryContext.Provider
@@ -379,6 +394,12 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         favouriteIds,
         isFavourite,
         toggleFavourite,
+        getEntry,
+        updateEntry,
+        deleteEntry,
+        lastDelete: edits.undo,
+        undoLastDelete,
+        dismissUndo,
         hydrated,
       }}
     >
