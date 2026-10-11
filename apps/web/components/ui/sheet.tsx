@@ -10,6 +10,8 @@ export interface SheetProps {
   description?: string;
   children: React.ReactNode;
   className?: string;
+  /** At 1024 px and up, show as a centred dialog instead of a bottom sheet. The phone keeps the sheet. */
+  desktopDialog?: boolean;
 }
 
 const FOCUSABLE_SELECTOR =
@@ -23,6 +25,7 @@ export function Sheet({
   description,
   children,
   className = "",
+  desktopDialog = false,
 }: SheetProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const openerRef = useRef<HTMLElement | null>(null);
@@ -98,7 +101,7 @@ export function Sheet({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col justify-end">
+    <div className={`fixed inset-0 z-50 flex flex-col justify-end ${desktopDialog ? "lg:justify-center lg:items-center" : ""}`}>
       {/* Dim Scrim */}
       <div
         aria-hidden="true"
@@ -113,12 +116,12 @@ export function Sheet({
         tabIndex={-1}
         aria-modal="true"
         aria-labelledby={title ? titleId : undefined}
-        className={`relative z-10 w-full max-w-[390px] mx-auto bg-card rounded-t-[20px] px-4 pt-2.5 pb-6 flex flex-col gap-2 shadow-2xl transition-transform duration-200 outline-none ${className}`}
+        className={`relative z-10 w-full max-w-[390px] mx-auto bg-card rounded-t-[20px] px-4 pt-2.5 pb-6 flex flex-col gap-2 shadow-2xl transition-transform duration-200 outline-none ${desktopDialog ? "lg:w-[420px] lg:max-w-[420px] lg:rounded-[20px] lg:px-6 lg:pt-6" : ""} ${className}`}
       >
         {/* Grabber */}
         <div
           aria-hidden="true"
-          className="w-9 h-[5px] rounded-full bg-grabber self-center shrink-0 mb-1"
+          className={`w-9 h-[5px] rounded-full bg-grabber self-center shrink-0 mb-1 ${desktopDialog ? "lg:hidden" : ""}`}
         />
 
         {/* Optional Header */}

@@ -351,7 +351,7 @@ function TodayContent() {
       {/* MOBILE LAYOUT (390px Viewport) — Matches Today.dc.html exactly */}
       {/* ============================================================== */}
       <div data-align-container="today-page" className="w-full min-h-screen bg-page flex flex-col relative lg:hidden pb-[88px] overflow-x-hidden">
-        <h1 className="sr-only">Hôm nay</h1>
+        <h1 className="sr-only">{showOfflineBanner ? "Hôm nay — Ngoại tuyến" : "Hôm nay"}</h1>
 
         {/* Offline Banner (TodayStates.dc.html) */}
         {showOfflineBanner && (

@@ -163,7 +163,8 @@ function FoodDetailInner() {
       {/* Main Content Area */}
       <main className="flex-1 w-full max-w-[560px] mx-auto p-4 flex flex-col gap-3.5 pb-24">
         {/* Serving and Gram Selection */}
-        <div data-align-group="food-detail" className="w-full">
+        <div data-align-group="food-detail" className="flex w-full flex-col gap-2">
+          <span className="text-[13px] font-semibold text-secondary">Khẩu phần</span>
           <ChipGroup
             columns={food.servings.length + 1}
             tone="light"

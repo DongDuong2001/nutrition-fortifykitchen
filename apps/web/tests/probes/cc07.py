@@ -30,7 +30,7 @@ PHONE_STATE = """(key) => {
     const chipBar = chipsRow.parentElement.getBoundingClientRect();
     const list = wrap.querySelector('.overflow-y-auto');
     const listRect = list.getBoundingClientRect();
-    const summary = [...wrap.querySelectorAll('header div')].find(d => d.childElementCount === 0 && d.textContent.trim() === 'đã đạt');
+    const summary = [...wrap.querySelectorAll('header div')].find(d => d.childElementCount === 0 && d.textContent.trim().startsWith('đã đạt'));
     const sum = summary.getBoundingClientRect();
     const section = document.getElementById('group-' + key);
     const stickyTop = section.firstElementChild.getBoundingClientRect().top;

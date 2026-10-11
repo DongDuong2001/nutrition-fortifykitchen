@@ -446,7 +446,7 @@ function MicrosContent() {
                   <span className="text-white/55">/{achievedMicrosCount.total}</span>
                 </div>
                 <div className="text-xs text-sky font-semibold mt-1">
-                  đã đạt
+                  đã đạt mục tiêu
                 </div>
               </div>
             </div>
@@ -512,7 +512,7 @@ function MicrosContent() {
 
           {/* Footnote */}
           <footer className="pt-2 pb-1 text-xs text-secondary leading-relaxed">
-            * Giá trị tham khảo theo khuyến nghị cho người Việt Nam (2016) · Mục tiêu theo cân nặng, giới tính và ngày tập.
+            * Mục tiêu theo cân nặng, giới tính và ngày tập · tham khảo khuyến nghị cho người Việt Nam (2016).
           </footer>
         </main>
         </div>
@@ -596,7 +596,7 @@ function MicrosContent() {
           </div>
 
           <footer className="pt-2 text-xs text-secondary leading-relaxed">
-            * Giá trị tham khảo theo khuyến nghị cho người Việt Nam (2016) · Mục tiêu theo cân nặng, giới tính và ngày tập.
+            * Mục tiêu theo cân nặng, giới tính và ngày tập · tham khảo khuyến nghị cho người Việt Nam (2016).
           </footer>
         </main>
       </div>

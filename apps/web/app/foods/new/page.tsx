@@ -258,7 +258,7 @@ function CreateFoodInner() {
             onClick={() => setShowMicros(!showMicros)}
             className="w-full min-h-[48px] px-4 rounded-xl border border-card-border bg-card text-text flex items-center justify-between font-semibold text-sm cursor-pointer hover:bg-page transition-colors"
           >
-            <span>+ Thêm vi chất (Natri, Canxi, Sắt, Kali, Vitamin D…)</span>
+            <span>+ Thêm vi chất (Natri, Canxi, Sắt…)</span>
             <svg
               width="18"
               height="18"

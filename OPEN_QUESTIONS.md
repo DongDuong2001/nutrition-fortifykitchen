@@ -56,3 +56,14 @@
 - [ ] (cc-10) Desktop has ‹ › date nav but no day picker, because the desktop header shows no date label to tap. Confirm the desktop picker design.
 - [ ] (cc-10) Calendar: a day over the kcal range has no dot (the design only defines Đạt and Thiếu). Confirm a state for "vượt".
 - [ ] (cc-10) Calendar status for past days uses today's kcal targets, not the targets of that day. Fine for Release 1 unless targets change over time.
+- [ ] (cc-12) NutrientDetail (/micros/[nutrient]) is still a placeholder ("Trang chi tiết vi chất đang được xây dựng theo lộ trình."). The design has the full screen: 28 %, 331 / 1.200 mg, "Gợi ý để bù" and "Đã có từ món ăn hôm nay". Build it as its own task? The suggestions need rules from the coach.
+- [ ] (cc-12) Desktop Micros: the design's "Gợi ý món để bù phần còn thiếu hôm nay" list is not built. It needs food suggestion rules (coach) before it can be built.
+- [ ] (cc-12) Vi chất count: the design counts 21 (vitamins 12, minerals 9, so "8/21" and "Khoáng chất · 5/9"). The code counts 22 (minerals 10: which nutrient is extra?). The paywall and SignUp copy also say 21 or 26 "chất dinh dưỡng". Confirm the count, then fix the copy in one pass.
+- [ ] (cc-12) Offline Today: the design marks unsynced items with "Chờ đồng bộ". There is no sync queue, so the marker is not built. Confirm the behaviour before building it.
+- [ ] (cc-12) Food detail: the design's "Hợp dùng trước tập" use-case tag is not built. Foods have no use-case field (Dong: add it to the food table).
+- [ ] (cc-12) Food detail tip: the design shows "Mẹo: 2–3 quả trước tập 30–45 phút." only. Our tip merges it with the add-list hint "Nên dùng 30 g đầu buổi tập · carb chậm". Should these be two fields?
+- [ ] (cc-12) Setup: the women's iron note ("Với nữ, … 18 lên 28 mg/ngày") shows only when Nữ is picked. The design shows it unconditionally. Confirm.
+- [ ] (cc-12) Calendar dialog at ≥1024 px: no design file exists for it, so it is 420 px wide with the phone grid. Confirm, or send a design.
+- [ ] (cc-12) Date labels: the app writes "Thứ Năm, 08/10" with a comma. The phone design writes "Thứ Năm 08/10" without one. Confirm the style.
+- [ ] (cc-12) Profile "Nhắc nhở" shows "Đã bật" when any reminder is on, and nothing when all are off. The design has no "off" copy. Confirm the wording ("Đã tắt"?).
+- [ ] (cc-12) Desktop sign-up helper: the design says "Chúng tôi gửi link vào email, không cần mật khẩu." (comma). Phone and desktop use the phone wording (em dash). Confirm.

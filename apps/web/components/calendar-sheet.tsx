@@ -26,7 +26,7 @@ interface CalendarSheetProps {
 /** "Chọn ngày": a month grid to pick any past day. Future days cannot be picked. */
 export function CalendarSheet({ open, onClose, selectedIso, onPick }: CalendarSheetProps) {
   return (
-    <Sheet open={open} onClose={onClose} title="Chọn ngày">
+    <Sheet open={open} onClose={onClose} title="Chọn ngày" desktopDialog>
       <CalendarMonth selectedIso={selectedIso} onPick={onPick} />
     </Sheet>
   );

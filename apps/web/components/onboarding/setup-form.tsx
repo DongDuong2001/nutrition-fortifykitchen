@@ -125,6 +125,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
         >
           {/* Desktop heading (≥1024 px) */}
           <div className="hidden flex-col gap-3 lg:flex">
+            <span className="text-[13px] font-semibold text-secondary">Bước 1/2 · Về bạn</span>
             <div className="flex justify-end">
               <span className="font-display text-xl font-black italic uppercase">
                 H1T <span className="text-blue">MICRO</span>
@@ -234,7 +235,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
             </div>
 
             <Card className="flex flex-col gap-2">
-              <h3 className="m-0 text-[15px] font-bold">Mục tiêu của bạn mỗi ngày</h3>
+              <h3 className="m-0 text-[15px] font-bold">Mục tiêu mỗi ngày</h3>
               {targetRows.map((row) => (
                 <div
                   key={row.label}
