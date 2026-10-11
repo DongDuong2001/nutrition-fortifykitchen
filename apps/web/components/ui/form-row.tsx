@@ -7,6 +7,7 @@ export interface FormRowProps {
   error?: React.ReactNode;
   required?: boolean;
   className?: string;
+  htmlFor?: string;
   "data-align-group"?: string;
 }
 
@@ -20,6 +21,7 @@ export function FormRow({
   error,
   required = false,
   className = "",
+  htmlFor,
   "data-align-group": dataAlignGroup,
 }: FormRowProps) {
   return (
@@ -28,7 +30,7 @@ export function FormRow({
       className={`flex flex-col gap-1.5 w-full ${className}`}
     >
       <div className="flex justify-between items-baseline">
-        <label className="text-xs font-bold text-text">
+        <label htmlFor={htmlFor} className="text-xs font-bold text-text">
           {label}
           {required && <span className="text-destructive ml-0.5">*</span>}
         </label>

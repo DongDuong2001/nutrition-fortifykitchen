@@ -19,4 +19,6 @@
 - [ ] (cc-01) Google logo keeps its four brand hex fills in `google-sign-in-button.tsx` (a brand asset, not a UI token).
 - [ ] (cc-01) "Coach Lê Hồng Khánh" stays in the SignUp copy because it is design copy. It is a sentence, not a tag. Confirm against the "No Coach tags" rule.
 - [ ] (cc-01) `components/onboarding/onboarding-header.tsx` is a local sub-screen header. Swap it for the shared AppHeader in ui-04b.
-- [ ] (cc-01) `apps/web/tests/alignment.spec.ts` does not exist yet. The alignment check was a one-off Playwright run on `data-align-group="daily-targets"`.
+- [ ] (cc-01) "Mở ứng dụng Mail" on check-email opens `mailto:`. The mock "Mô phỏng mở link (dev)" link to /setup/profile is shown only outside production. Confirm the mailto choice.
+- [ ] (cc-01) `StatGroup` labels are 11 px (`text-[11px]`), below the 12 px minimum in SPEC. It is a shared primitive, so the fix belongs to whoever owns `components/ui`.
+- [ ] (cc-01) Daily targets now sit in one `StatGroup` container, so `data-align-group="daily-targets"` matches one element and the alignment script compares no pairs there. The 2-column grid keeps the columns aligned by layout.

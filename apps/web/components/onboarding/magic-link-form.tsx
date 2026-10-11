@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { apiClient } from "@/lib/api-client";
 import { isValidEmail, readPendingEmail, writePendingEmail } from "@/lib/onboarding";
 import { PillButton } from "@/components/ui/pill-button";
+import { FormRow } from "@/components/ui/form-row";
 
 /** Email field that sends a magic link (no password). Used by sign-up, sign-in and the expired link screen. */
 export function MagicLinkForm({ submitLabel }: { submitLabel: string }) {
@@ -12,7 +13,6 @@ export function MagicLinkForm({ submitLabel }: { submitLabel: string }) {
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
-  const errorId = useId();
   const inputId = useId();
 
   useEffect(() => {
@@ -41,8 +41,7 @@ export function MagicLinkForm({ submitLabel }: { submitLabel: string }) {
 
   return (
     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-3">
-      <label htmlFor={inputId} className="flex flex-col gap-2 text-[13px] font-semibold text-text">
-        Email
+      <FormRow label="Email" htmlFor={inputId} error={error}>
         <input
           id={inputId}
           type="email"
@@ -52,15 +51,9 @@ export function MagicLinkForm({ submitLabel }: { submitLabel: string }) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           aria-invalid={error ? true : undefined}
-          aria-describedby={error ? errorId : undefined}
-          className="h-12 w-full rounded-[10px] border-2 border-grabber bg-card px-4 text-base text-text placeholder:text-secondary outline-none focus:border-blue"
+          className="h-[52px] w-full rounded-[10px] border-2 border-grabber bg-card px-4 text-base text-text placeholder:text-secondary outline-none focus:border-blue"
         />
-      </label>
-      {error && (
-        <p id={errorId} role="alert" className="m-0 text-[13px] text-destructive">
-          {error}
-        </p>
-      )}
+      </FormRow>
       <PillButton type="submit" disabled={sending}>
         {submitLabel}
       </PillButton>

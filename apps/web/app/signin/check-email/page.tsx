@@ -66,7 +66,7 @@ export default function CheckEmailPage() {
         </>
       }
     >
-      <PillButton href="/setup/profile">Mở ứng dụng Mail</PillButton>
+      <PillButton href="mailto:">Mở ứng dụng Mail</PillButton>
       <PillButton variant="secondary" onClick={handleResend} disabled={secondsLeft > 0 || !email}>
         {resendLabel(secondsLeft)}
       </PillButton>
@@ -76,6 +76,14 @@ export default function CheckEmailPage() {
       >
         Dùng email khác
       </Link>
+      {process.env.NODE_ENV !== "production" && (
+        <Link
+          href="/setup/profile"
+          className="inline-flex min-h-[44px] items-center justify-center px-2 text-[13px] font-semibold text-secondary"
+        >
+          Mô phỏng mở link (dev)
+        </Link>
+      )}
       <p className="m-0 text-center text-[13px] leading-normal text-secondary">
         Không thấy email? Kiểm tra mục Spam hoặc Quảng cáo.
       </p>

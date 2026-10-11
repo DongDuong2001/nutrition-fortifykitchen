@@ -283,10 +283,12 @@ All alignment and hydration tests passed cleanly (<= 1px difference, 0 hydration
 
 
 ## Quality Gate Outputs (cc-01)
-- `npx tsc --noEmit`: exit 0.
-- `npx vitest run`: 8 files, 60 tests passed (new: `lib/__tests__/onboarding.test.ts`, 12 tests, written first from the coach rules in SPEC.md).
-- `npm run build`: compiled, TypeScript finished, 19 pages generated. `/signup`, `/signin`, `/signin/check-email`, `/signin/expired`, `/setup/profile`, `/setup/goal` are all static.
-- Playwright (port 3101): 390×844 and 1440×900 for all six routes. No horizontal scroll, no tap target under 44 px, no console errors. Flow passed: signup → check-email → profile → goal → /today. Validation states passed (bad email, bad weight, 70,5 kg recalculates to 2.115–2.468 kcal).
-- Screenshots: `apps/web/.screenshots/cc01-{signup,signin,check-email,expired,setup-profile,setup-goal}-{390,1440}.png`
-- Edges: daily-targets (setup-profile, setup-goal at 390 and 1440) pass.
+- `npm run typecheck`: exit 0.
+- `npm test`: 8 files, 61 tests passed (`lib/__tests__/onboarding.test.ts`: 12 tests, written first from the coach rules in SPEC.md).
+- `npm run build`: compiled, TypeScript finished. `/signup`, `/signin`, `/signin/check-email`, `/signin/expired`, `/setup/profile`, `/setup/goal` are all static.
+- `npm run test:align` (run as `BASE_URL=http://localhost:3101 python3 tests/alignment.py`): 22 checks pass, 0 hydration errors. The six cc-01 routes compare no pairs, because daily-targets is one StatGroup container.
+- Playwright (port 3101), 390×844 and 1440×900: `/signup` copy has no "26 chất"; "Mở ứng dụng Mail" goes to `mailto:`; dev link goes to `/setup/profile`; profile back goes to `/signin/check-email`; a weight error clears on the next valid edit; the iron note shows only for Nữ; on 1440, Enter in the weight field lands on `/today`. No console errors.
+- Full flow passed earlier: signup → check-email → profile → goal → /today.
+- Screenshots: `apps/web/.screenshots/cc01-gate-{signup,setup-profile}-{390,1440}.png`
+- Edges: daily-targets (setup-profile, setup-goal at 390 and 1440) pass, but the group has one element per container, so it compares no pairs.
 - Edges: signup, signin, check-email, expired have no data-align-group rows (n/a).

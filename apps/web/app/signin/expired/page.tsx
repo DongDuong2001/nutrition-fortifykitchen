@@ -38,7 +38,7 @@ export default function LinkExpiredPage() {
       <MagicLinkForm submitLabel="Gửi link mới" />
       <div className="text-center">
         <Link
-          href="/signup"
+          href="/signin"
           className="inline-flex min-h-[44px] items-center px-2 text-[15px] font-semibold text-blue"
         >
           Quay lại

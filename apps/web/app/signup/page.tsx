@@ -4,7 +4,7 @@ import { GoogleSignInButton } from "@/components/onboarding/google-sign-in-butto
 import { MagicLinkForm } from "@/components/onboarding/magic-link-form";
 
 const DESKTOP_VALUES = [
-  "Theo dõi 26 chất dinh dưỡng, không chỉ calo",
+  "Theo dõi đầy đủ vi chất, không chỉ calo",
   "Mục tiêu do Coach Lê Hồng Khánh đặt",
   "Ghi bữa ăn trong vài giây, thấy ngay còn thiếu gì",
 ];
@@ -30,7 +30,7 @@ export default function SignUpPage() {
               VI CHẤT PHẢI ĐỦ.
             </h1>
             <p className="m-0 text-[15px] leading-normal text-muted-subtitle lg:hidden">
-              Ghi bữa ăn, theo dõi 26 chất dinh dưỡng và làm theo mục tiêu của Coach Lê Hồng Khánh.
+              Ghi bữa ăn, theo dõi vi chất và làm theo mục tiêu của Coach Lê Hồng Khánh.
             </p>
             <ul className="m-0 hidden list-none flex-col gap-4 p-0 lg:flex">
               {DESKTOP_VALUES.map((value) => (

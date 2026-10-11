@@ -16,8 +16,11 @@ import {
 } from "@/lib/onboarding";
 import type { SexType } from "@/lib/targets";
 import { Card } from "@/components/ui/card";
+import { ChipGroup } from "@/components/ui/chip-group";
+import { FormRow } from "@/components/ui/form-row";
 import { PillButton } from "@/components/ui/pill-button";
-import { OnboardingHeader, StepBars } from "./onboarding-header";
+import { StatGroup } from "@/components/ui/stat-group";
+import { OnboardingHeader } from "./onboarding-header";
 
 export type SetupStep = "profile" | "goal";
 
@@ -27,6 +30,7 @@ const SEX_OPTIONS: { value: SexType; label: string }[] = [
 ];
 
 const SKELETON_CLASS = "h-[52px] rounded-[10px] bg-divider animate-pulse motion-reduce:animate-none";
+const DESKTOP_QUERY = "(min-width: 1024px)";
 
 /**
  * Two-step setup. Phone shows one step per route. At ≥1024 px both steps sit on one
@@ -60,12 +64,18 @@ export function SetupForm({ step }: { step: SetupStep }) {
     const next = { ...draft, ...patch };
     setDraft(next);
     writeDraft(next);
+    // Once an error is shown, re-check on every edit so it clears as soon as the field is valid.
+    if (Object.keys(errors).length > 0) setErrors(validateSetupDraft(next, year).errors);
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
-    const finish = step === "goal" || submitter?.value === "finish";
+    // On desktop both steps are on one card, so Enter saves just like the footer button.
+    const finish =
+      step === "goal" ||
+      submitter?.value === "finish" ||
+      window.matchMedia(DESKTOP_QUERY).matches;
 
     const result = validateSetupDraft(draft, year);
     setErrors(result.errors);
@@ -91,7 +101,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
     <div className="flex min-h-dvh flex-col bg-page lg:items-center lg:px-4 lg:py-8">
       <div className="lg:hidden">
         <OnboardingHeader
-          backHref={isProfile ? "/signup" : "/setup/profile"}
+          backHref={isProfile ? "/signin/check-email" : "/setup/profile"}
           stepText={isProfile ? "Bước 1 / 2" : "Bước 2 / 2"}
           progress={{ current: isProfile ? 1 : 2, total: 2 }}
           title={isProfile ? "VỀ BẠN" : "MỤC TIÊU"}
@@ -112,14 +122,12 @@ export function SetupForm({ step }: { step: SetupStep }) {
         >
           {/* Desktop heading (≥1024 px) */}
           <div className="hidden flex-col gap-3 lg:flex">
-            <div className="flex items-center justify-between text-sm">
-              <span className="font-semibold text-secondary">Bước 1/2 · Về bạn</span>
+            <div className="flex justify-end">
               <span className="font-display text-xl font-black italic uppercase">
                 H1T <span className="text-blue">MICRO</span>
               </span>
             </div>
-            <StepBars current={1} total={2} tone="light" />
-            <h1 className="m-0 mt-2 font-display text-[32px] font-black italic uppercase">VỀ BẠN</h1>
+            <h1 className="m-0 font-display text-[32px] font-black italic uppercase">VỀ BẠN</h1>
             <p className="m-0 text-[15px] text-secondary">
               Mục tiêu được tính theo cân nặng và giới tính. Bạn có thể sửa bất cứ lúc nào.
             </p>
@@ -127,56 +135,58 @@ export function SetupForm({ step }: { step: SetupStep }) {
 
           {/* Profile: sex, birth year, weight */}
           <section
-            className={`${isProfile ? "flex" : "hidden"} flex-col gap-6 lg:flex lg:gap-6`}
+            className={`${isProfile ? "flex" : "hidden"} flex-col gap-6 lg:flex`}
             aria-label="Thông tin cơ thể"
           >
             <div className="grid gap-6 lg:grid-cols-2 lg:gap-5">
-              <fieldset className="m-0 flex min-w-0 flex-col border-0 p-0">
-                <legend className="mb-2 p-0 text-[15px] font-bold">Giới tính</legend>
-                <div role="radiogroup" aria-label="Giới tính" className="grid grid-cols-2 gap-2">
-                  {SEX_OPTIONS.map((option) => {
-                    const on = draft.sex === option.value;
-                    return (
-                      <button
-                        key={option.value}
-                        type="button"
-                        role="radio"
-                        aria-checked={on}
-                        onClick={() => update({ sex: option.value })}
-                        className={`h-[52px] rounded-[10px] border-2 text-base ${
-                          on ? "border-ink bg-ink font-bold text-white" : "border-grabber bg-card font-semibold text-text"
-                        }`}
-                      >
-                        {option.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </fieldset>
+              <div role="group" aria-label="Giới tính">
+                <FormRow label="Giới tính">
+                  <ChipGroup
+                    items={SEX_OPTIONS.map((option) => ({
+                      id: option.value,
+                      label: option.label,
+                      active: draft.sex === option.value,
+                      onClick: () => update({ sex: option.value }),
+                    }))}
+                  />
+                </FormRow>
+              </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <Field
-                  id="setup-birth-year"
-                  label="Năm sinh"
-                  inputMode="numeric"
-                  value={draft.birthYear}
-                  onChange={(value) => update({ birthYear: value })}
-                  error={errors.birthYear}
-                />
-                <Field
-                  id="setup-weight"
-                  label="Cân nặng (kg)"
-                  inputMode="decimal"
-                  value={draft.weight}
-                  onChange={(value) => update({ weight: value })}
-                  error={errors.weight}
-                />
+                <FormRow label="Năm sinh" htmlFor="setup-birth-year" error={errors.birthYear}>
+                  <input
+                    id="setup-birth-year"
+                    type="text"
+                    inputMode="numeric"
+                    value={draft.birthYear}
+                    onChange={(e) => update({ birthYear: e.target.value })}
+                    aria-invalid={errors.birthYear ? true : undefined}
+                    className={`h-[52px] w-full rounded-[10px] border-2 bg-card px-4 text-base font-semibold tabular-nums text-text outline-none focus:border-blue ${
+                      errors.birthYear ? "border-destructive" : "border-grabber"
+                    }`}
+                  />
+                </FormRow>
+                <FormRow label="Cân nặng (kg)" htmlFor="setup-weight" error={errors.weight}>
+                  <input
+                    id="setup-weight"
+                    type="text"
+                    inputMode="decimal"
+                    value={draft.weight}
+                    onChange={(e) => update({ weight: e.target.value })}
+                    aria-invalid={errors.weight ? true : undefined}
+                    className={`h-[52px] w-full rounded-[10px] border-2 bg-card px-4 text-base font-semibold tabular-nums text-text outline-none focus:border-blue ${
+                      errors.weight ? "border-destructive" : "border-grabber"
+                    }`}
+                  />
+                </FormRow>
               </div>
             </div>
 
-            <Card className="text-[13px] leading-normal text-secondary lg:hidden">
-              Với nữ, bạn có thể bật “Gần/đang trong kỳ” trên trang Hồ sơ để tăng mục tiêu sắt từ 18 lên 28 mg/ngày.
-            </Card>
+            {draft.sex === "female" && (
+              <Card className="text-[13px] leading-normal text-secondary">
+                Với nữ, bạn có thể bật “Gần/đang trong kỳ” trên trang Hồ sơ để tăng mục tiêu sắt từ 18 lên 28 mg/ngày.
+              </Card>
+            )}
           </section>
 
           {/* Goal: options and daily targets from lib/targets.ts */}
@@ -219,18 +229,13 @@ export function SetupForm({ step }: { step: SetupStep }) {
               })}
             </div>
 
-            <Card className="flex flex-col gap-2">
+            <Card className="flex flex-col gap-3">
               <h3 className="m-0 text-[15px] font-bold">Mục tiêu của bạn mỗi ngày</h3>
-              {targetRows.map((row) => (
-                <div
-                  key={row.label}
-                  data-align-group="daily-targets"
-                  className="flex items-baseline justify-between gap-3 text-sm"
-                >
-                  <span className="text-secondary">{row.label}</span>
-                  <span className="font-semibold tabular-nums">{row.value}</span>
-                </div>
-              ))}
+              <StatGroup
+                columns={2}
+                data-align-group="daily-targets"
+                items={targetRows.map((row) => ({ id: row.label, value: row.value, label: row.label }))}
+              />
               <p className="m-0 text-[13px] text-secondary">{targetCaption}</p>
             </Card>
           </section>
@@ -255,7 +260,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
 
           {/* Desktop footer (≥1024 px) */}
           <div className="hidden flex-wrap items-center justify-between gap-3 border-t border-divider pt-6 lg:flex">
-            <PillButton href="/signup" variant="secondary" fullWidth={false}>
+            <PillButton href="/signin/check-email" variant="secondary" fullWidth={false}>
               Quay lại
             </PillButton>
             <PillButton type="submit" value="finish" fullWidth={false} disabled={saving}>
@@ -263,48 +268,6 @@ export function SetupForm({ step }: { step: SetupStep }) {
             </PillButton>
           </div>
         </form>
-      )}
-    </div>
-  );
-}
-
-function Field({
-  id,
-  label,
-  value,
-  onChange,
-  inputMode,
-  error,
-}: {
-  id: string;
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  inputMode: "numeric" | "decimal";
-  error?: string;
-}) {
-  const errorId = `${id}-error`;
-  return (
-    <div className="flex min-w-0 flex-col gap-2">
-      <label htmlFor={id} className="text-[15px] font-bold">
-        {label}
-      </label>
-      <input
-        id={id}
-        type="text"
-        inputMode={inputMode}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={error ? errorId : undefined}
-        className={`h-[52px] w-full rounded-[10px] border-2 bg-card px-4 text-lg font-semibold tabular-nums text-text outline-none focus:border-blue ${
-          error ? "border-destructive" : "border-grabber"
-        }`}
-      />
-      {error && (
-        <p id={errorId} className="m-0 text-[13px] text-destructive">
-          {error}
-        </p>
       )}
     </div>
   );

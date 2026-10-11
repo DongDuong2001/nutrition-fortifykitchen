@@ -47,10 +47,10 @@ export function ChipGroup({
         const btnClasses =
           tone === "dark"
             ? isActive
-              ? "bg-white text-ink font-bold shadow-xs"
-              : "bg-surface-dark text-white font-medium hover:bg-surface-dark/80"
+              ? "bg-white text-ink font-bold shadow-xs border-0"
+              : "bg-surface-dark text-white font-medium border-0 hover:bg-surface-dark/80"
             : isActive
-            ? "bg-ink text-white font-bold shadow-xs"
+            ? "bg-ink text-white font-bold shadow-xs border-0"
             : "bg-card text-text border border-card-border font-medium hover:bg-page";
 
         return (
@@ -60,7 +60,7 @@ export function ChipGroup({
             aria-pressed={isActive}
             aria-label={it.ariaLabel}
             onClick={it.onClick}
-            className={`min-h-[44px] px-2 rounded-xl text-xs flex items-center justify-center text-center cursor-pointer active:scale-[0.97] transition-all border-0 ${btnClasses}`}
+            className={`min-h-[44px] px-2 rounded-xl text-xs flex items-center justify-center text-center cursor-pointer active:scale-[0.97] transition-all ${btnClasses}`}
           >
             {it.label}
           </button>
