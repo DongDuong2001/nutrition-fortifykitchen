@@ -295,3 +295,4 @@ All alignment and hydration tests passed cleanly (<= 1px difference, 0 hydration
 - Screenshots: `apps/web/.screenshots/cc01-gate-{signup,setup-profile}-{390,1440}.png`
 - Edges: daily-targets (setup-goal at 390 and 1440) pass, left/right, 3 pairs each. setup-row (setup-profile at 1440) passes, top/bottom, 2 pairs.
 - Edges: signup, signin, check-email, expired have no data-align-group rows (n/a).
+- Cleanup: "Mở ứng dụng Mail" is phone only (`lg:hidden`, checked at 390 visible and 1440 hidden). `size="lg"` inactive chip has a 2 px grabber border (52 px, `#D5D8DF`). `size="md"` re-checked byte-identical to feat/ui for /add and /foods/food-cha-la at 390 and 1440.

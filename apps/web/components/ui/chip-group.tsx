@@ -50,6 +50,8 @@ export function ChipGroup({
       )}
       {items.map((it) => {
         const isActive = !!it.active;
+        // lg matches the 52 px inputs: 2 px grabber border. md keeps its shipped 1 px card border.
+        const inactiveBorder = size === "lg" ? "border-2 border-grabber" : "border border-card-border";
         const btnClasses =
           tone === "dark"
             ? isActive
@@ -57,7 +59,7 @@ export function ChipGroup({
               : "bg-surface-dark text-white font-medium hover:bg-surface-dark/80"
             : isActive
             ? "bg-ink text-white font-bold shadow-xs"
-            : "bg-card text-text border border-card-border font-medium hover:bg-page";
+            : `bg-card text-text ${inactiveBorder} font-medium hover:bg-page`;
         // md keeps border-0 on every chip, as shipped in ui-05-fix. lg draws the inactive border.
         const noBorder = size === "md" || isActive || tone === "dark" ? "border-0" : "";
 

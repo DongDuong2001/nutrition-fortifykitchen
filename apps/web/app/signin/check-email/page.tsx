@@ -66,7 +66,9 @@ export default function CheckEmailPage() {
         </>
       }
     >
-      <PillButton href="mailto:">Mở ứng dụng Mail</PillButton>
+      <PillButton href="mailto:" className="lg:hidden">
+        Mở ứng dụng Mail
+      </PillButton>
       <PillButton variant="secondary" onClick={handleResend} disabled={secondsLeft > 0 || !email}>
         {resendLabel(secondsLeft)}
       </PillButton>
