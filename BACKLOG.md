@@ -26,3 +26,6 @@ The core stays free: logging, barcode, the full nutrient report. Pro charges for
 - [ ] **Training checklist ticks aren't saved:** store the ticks per day in the diary.
 - [ ] **Duration chips wrap 3+2:** use an even grid.
 - [ ] **"Carb nhanh" sub-line copy:** check it against design/screens/Training.dc.html.
+
+## Profile and targets (from cc-08)
+- [ ] **"Thiếu nhiều nhất" on Today/Micros is still the sample list:** compute it from the day's nutrients vs profile targets.

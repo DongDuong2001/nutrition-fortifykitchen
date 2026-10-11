@@ -10,7 +10,6 @@ import { useMealSlot } from "@/lib/use-meal-slot";
 import { parseGramsInput, calculateMacroPreview, scaleNutrients } from "@/lib/portion";
 import { formatAmount } from "@/lib/format";
 import { getNutrientDefinition } from "@/lib/nutrients";
-import { calculateTargets } from "@/lib/targets";
 import { SegmentedBar } from "@/components/ui/segmented-bar";
 import { ChipGroup } from "@/components/ui/chip-group";
 import { StatGroup } from "@/components/ui/stat-group";
@@ -21,7 +20,7 @@ function FoodDetailInner() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { addFoodEntry, isFavourite, toggleFavourite } = useDiary();
+  const { addFoodEntry, isFavourite, toggleFavourite, targets: dailyTargets } = useDiary();
 
   const foodId = params?.id as string;
   const food = useMemo(() => {
@@ -67,16 +66,6 @@ function FoodDetailInner() {
     if (!food) return { calories: 0, carbs: 0, protein: 0, fat: 0, fiber: 0 };
     return calculateMacroPreview(food.nutrients, parsedGrams);
   }, [food, parsedGrams]);
-
-  // Daily targets for calculating % of today's target
-  const dailyTargets = useMemo(() => {
-    return calculateTargets({
-      weightKg: 65,
-      goal: "maintain",
-      trainingMinutes: 60,
-      sex: "male",
-    });
-  }, []);
 
   // Scaled nutrients list for "Vi chất trong X g"
   const microsList = useMemo(() => {

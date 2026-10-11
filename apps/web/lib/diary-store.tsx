@@ -9,6 +9,16 @@ import { getTodayIsoVN, withRuntimeDate } from "./date";
 import { DEFAULT_RECENT_FOODS, isRecentFood, pushRecent, type RecentFood } from "./recent-foods";
 import { readFavouriteIds, toggleFavouriteId, writeFavouriteIds } from "./favourites";
 import {
+  SAMPLE_PROFILE,
+  applyProfileTargets,
+  loadProfile,
+  normaliseProfile,
+  targetsFor,
+  writeStoredProfile,
+  type Profile,
+} from "./profile";
+import type { CompleteTargets } from "./targets";
+import {
   type AddedDiaryEntry,
   type Amounts,
   type DiaryEdits,
@@ -67,6 +77,12 @@ interface DiaryContextValue {
   /** Puts the last deleted entry back. Only works while the "deleted" toast is shown. */
   undoLastDelete: () => void;
   hydrated: boolean;
+  /** The profile the targets come from. Loaded after mount (see lib/profile.ts). */
+  profile: Profile;
+  /** Daily targets for the profile. Today, Micros and the portion panels read these. */
+  targets: CompleteTargets;
+  /** Changes part of the profile and saves it. Targets and the day follow. */
+  updateProfile: (patch: Partial<Profile>) => void;
 }
 
 const DiaryContext = createContext<DiaryContextValue | null>(null);
@@ -255,6 +271,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   const [favouriteIds, setFavouriteIds] = useState<string[]>([]);
   // Today's date, read after mount so the server and first client render agree
   const [todayIso, setTodayIso] = useState<string | null>(null);
+  // Same rule for the profile: the sample user until the saved one is read after mount
+  const [profile, setProfile] = useState<Profile>(SAMPLE_PROFILE);
 
   // Load from sessionStorage on mount (client-only)
   useEffect(() => {
@@ -276,6 +294,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setFavouriteIds(readFavouriteIds());
       setTodayIso(getTodayIsoVN());
+      setProfile(loadProfile(new Date().getFullYear()));
       setHydrated(true);
     }
   }, []);
@@ -387,10 +406,22 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     setToast(null);
   }, []);
 
+  const targets = useMemo(() => targetsFor(profile), [profile]);
+
+  const updateProfile = useCallback(
+    (patch: Partial<Profile>) => {
+      const next = normaliseProfile({ ...profile, ...patch });
+      setProfile(next);
+      writeStoredProfile(next);
+    },
+    [profile]
+  );
+
   const compositeData = useMemo<MockDayData>(() => {
-    const day = computeCompositeDayData(SAMPLE_DAY, edits.added, edits.sample);
+    const base = applyProfileTargets(SAMPLE_DAY, profile, targets);
+    const day = computeCompositeDayData(base, edits.added, edits.sample);
     return todayIso ? withRuntimeDate(day, todayIso) : day;
-  }, [edits.added, edits.sample, todayIso]);
+  }, [edits.added, edits.sample, todayIso, profile, targets]);
 
   return (
     <DiaryContext.Provider
@@ -412,6 +443,9 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         deleteEntry,
         undoLastDelete,
         hydrated,
+        profile,
+        targets,
+        updateProfile,
       }}
     >
       {children}

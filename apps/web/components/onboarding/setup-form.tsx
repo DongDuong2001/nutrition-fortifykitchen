@@ -3,6 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { apiClient } from "@/lib/api-client";
+import { useDiary } from "@/lib/diary-store";
 import { formatNumber } from "@/lib/format";
 import {
   DEFAULT_DRAFT,
@@ -37,6 +38,7 @@ const DESKTOP_QUERY = "(min-width: 1024px)";
  */
 export function SetupForm({ step }: { step: SetupStep }) {
   const router = useRouter();
+  const { updateProfile } = useDiary();
   const [draft, setDraft] = useState<SetupDraft>(DEFAULT_DRAFT);
   const [loaded, setLoaded] = useState(false);
   const [errors, setErrors] = useState<SetupErrors>({});
@@ -89,6 +91,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
     setSaveError(null);
     try {
       await apiClient.saveSetup(result.profile);
+      updateProfile(result.profile);
       router.push("/today");
     } catch {
       setSaveError("Chưa lưu được hồ sơ. Thử lại sau ít phút.");

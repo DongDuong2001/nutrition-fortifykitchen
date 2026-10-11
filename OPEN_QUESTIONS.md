@@ -38,3 +38,8 @@
 - [ ] (cc-04) Edit entry header: the title is now the food name and the subtitle the meal (as design/screens/EditEntry.dc.html), so the "Sửa món" title is gone. Confirm.
 - [x] (cc-04) /add grouped list: rows still crop at the sticky header's bottom edge as they scroll under it. That is how any sticky header works, and it can't be removed while rows scroll. The 12 px side strips are now covered. Decided: keep as is (sticky + divider).
 - [ ] (cc-04) Setup uses AppHeader on phone only; desktop keeps its own heading and footer. Confirm.
+- [ ] (cc-08) Profile: birth year and default training minutes are shown but not editable yet. The brief only asked for sex, goal, weight and the period switch. Confirm whether they should edit inline or on their own screens.
+- [ ] (cc-08) Profile: the design's Ứng dụng group (Ngôn ngữ, Nhắc nhở, Cài như ứng dụng), Nâng cấp Pro, Tải CSV, Xoá tài khoản and Đăng xuất are not built. They are other features.
+- [ ] (cc-08) Weight: the design's "Ngày cân" row and "Lần cân trước" history are not built. There is no weight log data yet.
+- [ ] (cc-08) Profile subtitle (email · plan) is not shown: the app has no account data yet.
+- [ ] (cc-08) Browser*.dc.html designs were not read, as AGENTS.md says to skip them. The brief asked for them, so confirm.

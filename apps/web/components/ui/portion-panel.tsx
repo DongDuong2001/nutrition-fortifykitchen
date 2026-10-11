@@ -9,7 +9,7 @@ import { formatAmount } from "@/lib/format";
 import { ChipGroup } from "@/components/ui/chip-group";
 import { StatGroup } from "@/components/ui/stat-group";
 import { getNutrientDefinition } from "@/lib/nutrients";
-import { calculateTargets } from "@/lib/targets";
+import { useDiary } from "@/lib/diary-store";
 
 export interface PortionPanelProps {
   food: FoodItem;
@@ -49,15 +49,8 @@ export function PortionPanel({
     return calculateMacroPreview(food.nutrients, parsedGrams);
   }, [food, parsedGrams]);
 
-  // Daily targets for micronutrients % calculation
-  const dailyTargets = useMemo(() => {
-    return calculateTargets({
-      weightKg: 65,
-      goal: "maintain",
-      trainingMinutes: 60,
-      sex: "male",
-    });
-  }, []);
+  // Daily targets from the profile, for the micronutrient %
+  const { targets: dailyTargets } = useDiary();
 
   // Scaled micros for desktop
   const scaledMicros = useMemo(() => {

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useSyncExternalStore, Suspense } from "reac
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { BottomNav } from "@/components/ui/bottom-nav";
+import { DesktopSidebar } from "@/components/ui/desktop-sidebar";
 import { AppHeader } from "@/components/ui/app-header";
 import { CalorieDial } from "@/components/ui/calorie-dial";
 import { SegmentedBar } from "@/components/ui/segmented-bar";
@@ -429,51 +430,7 @@ function TodayContent() {
       {/* ============================================================== */}
       <div className="hidden lg:flex min-h-[980px] bg-page text-text font-sans">
         {/* Left Sidebar */}
-        <aside className="w-60 shrink-0 bg-ink text-white p-6 flex flex-col gap-6 box-border">
-          <div className="px-2 font-display italic font-black text-2xl">
-            H1T <span className="text-sky">MICRO</span>
-          </div>
-          <nav aria-label="Điều hướng chính" className="flex flex-col gap-1">
-            <Link
-              href="/today"
-              aria-current="page"
-              className="no-underline flex items-center gap-3 min-h-[44px] px-3 rounded-xl text-[15px] font-semibold text-white bg-card/10 transition-colors"
-            >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />
-              </svg>
-              Hôm nay
-            </Link>
-            <Link
-              href="/micros"
-              className="no-underline flex items-center gap-3 min-h-[44px] px-3 rounded-xl text-[15px] font-semibold text-muted-on-dark hover:bg-card/5 hover:text-white transition-colors"
-            >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M5 20V11M12 20V4M19 20v-6" />
-              </svg>
-              Vi chất
-            </Link>
-            <Link
-              href="/training"
-              className="no-underline flex items-center gap-3 min-h-[44px] px-3 rounded-xl text-[15px] font-semibold text-muted-on-dark hover:bg-card/5 hover:text-white transition-colors"
-            >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12" />
-              </svg>
-              Ngày tập
-            </Link>
-            <Link
-              href="/profile"
-              className="no-underline flex items-center gap-3 min-h-[44px] px-3 rounded-xl text-[15px] font-semibold text-muted-on-dark hover:bg-card/5 hover:text-white transition-colors"
-            >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <circle cx="12" cy="8" r="4" />
-                <path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6" />
-              </svg>
-              Hồ sơ
-            </Link>
-          </nav>
-        </aside>
+        <DesktopSidebar currentTab="today" />
 
         {/* Main Content Area */}
         <main data-align-container="today-desktop" className="flex-1 p-8 pb-12 max-w-[1240px] flex flex-col gap-5 box-border">

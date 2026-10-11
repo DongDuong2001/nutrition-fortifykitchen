@@ -28,6 +28,12 @@ ONBOARDING_CHECKS = [
     ("/foods/food-cha-la", "desktop (1440px)", "food-header", "lr"),
     ("/entry/item-1", "mobile (390px)", "entry-header", "lr"),
     ("/entry/item-1", "desktop (1440px)", "entry-header", "lr"),
+    ("/profile", "mobile (390px)", "profile-header", "lr"),
+    ("/profile", "mobile (390px)", "profile-row", "lr"),
+    ("/profile", "desktop (1440px)", "profile-row", "lr"),
+    ("/profile/weight", "mobile (390px)", "weight-header", "lr"),
+    ("/profile/weight", "mobile (390px)", "weight-row", "lr"),
+    ("/profile/weight", "desktop (1440px)", "weight-row", "lr"),
 ]
 
 def check_align_groups(page, group_name=None, edges="lr"):

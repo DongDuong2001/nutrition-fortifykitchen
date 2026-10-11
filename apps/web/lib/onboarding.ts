@@ -41,6 +41,10 @@ const GOAL_COPY: Record<GoalType, { name: string; note: string; rule: string }> 
 
 const GOAL_ORDER: GoalType[] = ["build", "maintain", "cut", "deep_cut"];
 
+export function goalName(goal: GoalType): string {
+  return GOAL_COPY[goal].name;
+}
+
 export function parseWeightKg(text: string): number | null {
   const normalised = text.trim().replace(",", ".");
   if (normalised === "") return null;
@@ -137,7 +141,7 @@ export function resendLabel(secondsLeft: number): string {
     : "Gửi lại link";
 }
 
-const DRAFT_KEY = "h1t-onboarding-draft";
+export const DRAFT_KEY = "h1t-onboarding-draft";
 const EMAIL_KEY = "h1t-pending-email";
 
 // sessionStorage keeps the in-progress setup and the pending sign-in email between

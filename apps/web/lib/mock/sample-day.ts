@@ -1,4 +1,5 @@
 import type { FoodNutrientValue, TargetSource } from "../nutrients";
+import type { GoalType, SexType } from "../targets";
 
 export interface MockFoodItem {
   id: string;
@@ -46,11 +47,11 @@ export interface MockDayData {
   dateLabel: string; // "Hôm nay, 10/10"
   desktopDateLabel?: string; // "Thứ Bảy, 10/10/2026 · Ngày tập 60' · Giữ cân · 65 kg"
   user: {
-    sex: "male";
+    sex: SexType;
     weightKg: number;
     birthYear: number;
     email: string;
-    goal: "maintain";
+    goal: GoalType;
     goalLabel: string;
     trainingMinutes: number;
   };
