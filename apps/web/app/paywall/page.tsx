@@ -61,7 +61,7 @@ export default function PaywallPage() {
                   height="22"
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke="#1E55F0"
+                  stroke="currentColor"
                   strokeWidth="2.4"
                   strokeLinecap="round"
                   strokeLinejoin="round"

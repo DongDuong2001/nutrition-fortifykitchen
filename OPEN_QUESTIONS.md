@@ -43,3 +43,5 @@
 - [ ] (cc-08) Weight: the design's "Ngày cân" row and "Lần cân trước" history are not built. There is no weight log data yet.
 - [ ] (cc-08) Profile subtitle (email · plan) is not shown: the app has no account data yet.
 - [ ] (cc-08) Browser*.dc.html designs were not read, as AGENTS.md says to skip them. The brief asked for them, so confirm.
+- [ ] (ag-02) Paywall prices and payment provider are placeholders — must be filled before release.
+- [ ] (ag-02) Paywall.dc.html copy states "Gói Miễn phí vẫn ghi đủ 21 vi chất" while Micros tracks 22 (x/22) — confirm whether free tier copy should state 21 or 22.

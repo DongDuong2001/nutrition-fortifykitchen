@@ -125,12 +125,12 @@ export default function NotificationsSettingsPage() {
               height="22"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="#5B6170"
+              stroke="currentColor"
               strokeWidth="1.8"
               strokeLinecap="round"
               strokeLinejoin="round"
               aria-hidden="true"
-              className="shrink-0 mt-0.5"
+              className="shrink-0 mt-0.5 text-secondary"
             >
               <path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9z" />
               <path d="M10 20a2 2 0 0 0 4 0" />

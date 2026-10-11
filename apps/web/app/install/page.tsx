@@ -42,7 +42,7 @@ export default function InstallAppPage() {
           <div
             role="tablist"
             aria-label="Thiết bị"
-            className="grid grid-cols-2 gap-1 bg-[#E3E5E9] rounded-full p-1"
+            className="grid grid-cols-2 gap-1 bg-grabber rounded-full p-1"
           >
             <button
               type="button"
@@ -93,13 +93,13 @@ export default function InstallAppPage() {
                     height="20"
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke="#1E55F0"
+                    stroke="currentColor"
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     aria-label="Chia sẻ"
                     role="img"
-                    className="inline -translate-y-0.5 align-middle mx-1"
+                    className="inline -translate-y-0.5 align-middle mx-1 text-blue"
                   >
                     <path d="M12 15V4M8 8l4-4 4 4" />
                     <path d="M6 11H5a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7a1 1 0 0 0-1-1h-1" />

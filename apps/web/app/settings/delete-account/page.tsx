@@ -31,16 +31,10 @@ export default function DeleteAccountPage() {
   };
 
   const handleExportCsv = () => {
-    const csvContent = "ngay,bua_an,ten_mon,so_luong,calo\n";
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", "h1t_du_lieu_dinh_duong.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    setToastMessage("Chưa hỗ trợ tải dữ liệu trong bản thử");
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 3000);
   };
 
   return (
@@ -63,12 +57,12 @@ export default function DeleteAccountPage() {
                 height="28"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="#D93036"
+                stroke="currentColor"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 aria-hidden="true"
-                className="shrink-0 mt-0.5"
+                className="shrink-0 mt-0.5 text-destructive"
               >
                 <path d="M12 3.5 2.5 20h19z" />
                 <path d="M12 10v4.5M12 17.2v.1" />
@@ -102,7 +96,7 @@ export default function DeleteAccountPage() {
               onChange={(e) => setConfirmationText(e.target.value)}
               placeholder="XOÁ"
               autoComplete="off"
-              className="h-[52px] rounded-[10px] border-2 border-[#D5D8DF] bg-white px-3.5 text-lg font-semibold text-ink outline-none focus:border-blue transition-colors"
+              className="h-[52px] rounded-[10px] border-2 border-grabber bg-white px-3.5 text-lg font-semibold text-ink outline-none focus:border-blue transition-colors"
             />
           </label>
         </main>
@@ -123,8 +117,8 @@ export default function DeleteAccountPage() {
           onClick={handleDelete}
           className={`h-[52px] w-full border-0 rounded-full font-bold text-base transition-all select-none ${
             isConfirmed
-              ? "bg-[#D93036] text-white cursor-pointer active:scale-[0.97]"
-              : "bg-[#D93036] text-white opacity-45 cursor-not-allowed"
+              ? "bg-destructive text-white cursor-pointer active:scale-[0.97]"
+              : "bg-destructive text-white opacity-45 cursor-not-allowed"
           }`}
         >
           Xoá tài khoản
