@@ -66,6 +66,10 @@ describe("lib/targets", () => {
 
       // Carbs: ~254 g min target
       expect(targets.carbs.min).toBe(254);
+
+      // VN2016 reference targets included in calculateTargets
+      expect(targets.vitamin_k?.min).toBe(150);
+      expect(targets.b6?.min).toBe(1.3);
     });
   });
 

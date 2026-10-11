@@ -6,7 +6,6 @@
       "Bash(npx vitest:*)",
       "Bash(npx tsc:*)",
       "Bash(npx next:*)",
-      "Bash(npx playwright test:*)",
       "Bash(python3 scripts/*:*)",
       "Bash(lsof -nP -iTCP:3101:*)",
       "Bash(git status:*)",

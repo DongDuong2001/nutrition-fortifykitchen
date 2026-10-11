@@ -17,6 +17,107 @@
 | 11/10/2026 | ui-05-fix | Hydration bug fix, Asia/Ho_Chi_Minh default meal slot, layout primitives (ChipGroup, StatGroup, FormRow), 5-row portion panel alignment & 2-col desktop micros, return focus to opener on modal close, Playwright alignment & hydration tests | Next tasks |
 | 11/10/2026 | ui-05-fix-2 | Meal default fallback & neutral placeholder, sessionStorage hydration visibility assertions, content-based alignment verification & desktop meal fix, adaptive precision & Vietnamese nutrient synonyms, single PortionPanel component, FormRow inputs, npm scripts & AGENTS.md documentation | Next tasks |
 | 11/10/2026 | ui-05-fix-3 | Nutrient catalog keys & Vitamin B* naming, useMealSlot client resolution hook, desktop Today left text alignment (-mx-2), content-based data-align-edge checks, probe scripts (hydration & screenshots) | Next tasks |
+| 11/10/2026 | ui-05-fix-4 | Put test:hydration into npm run check gates, remove dead vitamin remap in micros page, read targets from calculateTargets in PortionPanel & food detail (incl. vitamin_k %), remove playwright test permission from .claude/settings.json | ui-05 approved |
+
+## Quality Gate Outputs (ui-05-fix-4)
+- Raw `npm run check` output:
+```
+> nutrition-web@0.1.0 check
+> npm run typecheck && npm run test && npm run build && npm run test:align && npm run test:hydration
+
+
+> nutrition-web@0.1.0 typecheck
+> tsc --noEmit
+
+
+> nutrition-web@0.1.0 test
+> vitest run
+
+
+ RUN  v5.0.3 /Users/haovu310/Documents/HITMicro/nutrition-fortifykitchen/apps/web
+
+
+ ❯ lib/__tests__/portion.test.ts [queued]
+
+ Test Files 0 passed (7)
+      Tests 0 passed (0)
+   Start at 13:49:55
+   Duration 0ms
+ ✓ lib/__tests__/levels.test.ts (10 tests) 3ms
+ ✓ lib/__tests__/targets.test.ts (9 tests) 3ms
+ ✓ lib/__tests__/format.test.ts (4 tests) 12ms
+ ✓ lib/__tests__/portion.test.ts (5 tests) 2ms
+ ✓ lib/__tests__/meal-slot.test.ts (8 tests) 13ms
+ ✓ lib/__tests__/search.test.ts (7 tests) 3ms
+ ✓ lib/__tests__/nutrients.test.ts (10 tests) 13ms
+
+ Test Files  7 passed (7)
+      Tests  53 passed (53)
+   Start at  13:49:55
+   Duration  169ms (transform 65%, import 17%, tests 13%, worker 5%)
+
+
+> nutrition-web@0.1.0 build
+> next build --webpack
+
+▲ Next.js 16.4.0 (webpack)
+✓ Running next.config took 4ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 1092ms
+  Finished TypeScript in 251ms    ✓ Finished TypeScript in 251ms 
+  Collecting page data using 11 workers in 423ms    ✓ Collecting page data using 11 workers in 423ms 
+✓ Generating static pages using 11 workers (13/13) in 129ms
+  Collecting build traces in 2.4s    ✓ Collecting build traces in 2.4s 
+  Finalizing page optimization in 2.4s    ✓ Finalizing page optimization in 2.4s 
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /add
+├ ○ /admin/review
+├ ○ /dev/ui
+├ ○ /foods
+├ ƒ /foods/[id]
+├ ○ /foods/new
+├ ○ /login
+├ ○ /micros
+├ ƒ /micros/[nutrient]
+├ ○ /profile
+├ ○ /today
+└ ○ /training
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+
+> nutrition-web@0.1.0 test:align
+> python3 tests/alignment.py
+
+=== Starting Alignment and Hydration Tests ===
+[PASS] /today @ mobile (390px) (checked groups: {'meal-card': 10})
+[PASS] /micros @ mobile (390px) (checked groups: {'micros-card': 38})
+[PASS] /add @ mobile (390px) (checked groups: {'portion': 5})
+[PASS] /foods/food-cha-la @ mobile (390px) (checked groups: {'food-detail': 3})
+[PASS] /today @ desktop (1440px) (checked groups: {'desktop-meal': 15})
+[PASS] /micros @ desktop (1440px) (checked groups: {'micros-card': 38})
+[PASS] /add @ desktop (1440px) (checked groups: {'portion': 5})
+[PASS] /foods/food-cha-la @ desktop (1440px) (checked groups: {'food-detail': 3})
+
+All alignment checks passed cleanly (<= 1px difference)!
+
+> nutrition-web@0.1.0 test:hydration
+> python3 tests/probes/hydration.py
+
+=== Running Hydration Reload Check against http://localhost:3100 ===
+[PASS] 0 hydration errors on /today with sessionStorage loaded
+[PASS] Seeded entry 'Chà là hạt dẻ test' is visible on /today
+[PASS] 0 hydration errors on /add with sessionStorage loaded
+[PASS] Recent search chip 'Hạt điều test' is visible on /add
+
+All hydration checks passed cleanly (0 hydration errors, sessionStorage entries rendered)!
+```
 
 ## Quality Gate Outputs (ui-05-fix-3)
 - `npx tsc --noEmit`: 0 errors (clean).

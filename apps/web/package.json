@@ -13,8 +13,9 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:align": "python3 tests/alignment.py",
+    "test:hydration": "python3 tests/probes/hydration.py",
     "probe": "node scripts/probe.mjs",
-    "check": "npm run typecheck && npm run test && npm run build && npm run test:align"
+    "check": "npm run typecheck && npm run test && npm run build && npm run test:align && npm run test:hydration"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",

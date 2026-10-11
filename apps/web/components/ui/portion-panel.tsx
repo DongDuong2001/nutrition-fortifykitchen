@@ -64,47 +64,19 @@ export function PortionPanel({
     if (!showMicros) return [];
     const scaled = scaleNutrients(food.nutrients, parsedGrams);
 
-    const targetMap: Record<string, number> = {
-      potassium: dailyTargets.potassium.min,
-      calcium: dailyTargets.calcium.min,
-      magnesium: dailyTargets.magnesium.min,
-      iron: dailyTargets.iron.min,
-      zinc: dailyTargets.zinc.min,
-      sodium: dailyTargets.sodium.min,
-      copper: 0.9,
-      manganese: 2.3,
-      vitamin_d: 15,
-      vitamin_a: 650,
-      vitamin_c: 100,
-      vitamin_e: 6.5,
-      b1: 1.2,
-      b2: 1.3,
-      b3: 16,
-      b5: 5,
-      b6: 1.3,
-      folate: 400,
-      b12: 2.4,
-    };
-
     const list: { name: string; value: string; pct: number | null }[] = [];
-    const priorityKeys = [
-      "potassium",
-      "magnesium",
-      "calcium",
-      "iron",
-      "copper",
-      "b6",
-      "zinc",
-      "sodium",
-    ];
 
-    for (const key of priorityKeys) {
-      const val = scaled[key];
+    for (const [key, val] of Object.entries(scaled)) {
       if (val !== null && val !== undefined && val > 0) {
+        // Exclude general macros from micros breakdown
+        if (key === "energy" || key === "carbs" || key === "protein" || key === "fat" || key === "fiber" || key === "net_carbs") {
+          continue;
+        }
+
         const def = getNutrientDefinition(key);
         const name = def?.nameVi || key;
         const unit = def?.unit || "mg";
-        const target = targetMap[key] || (def?.id ? targetMap[def.id] : undefined);
+        const target = dailyTargets[key]?.min ?? (def?.id ? dailyTargets[def.id]?.min : undefined);
         const pct = target ? Math.round((val / target) * 100) : null;
 
         list.push({

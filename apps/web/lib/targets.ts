@@ -27,6 +27,7 @@ export interface CompleteTargets {
   iron: TargetRange;
   zinc: TargetRange;
   fastCarbs?: TargetRange;
+  [key: string]: TargetRange | undefined;
 }
 
 /**
@@ -213,6 +214,7 @@ export function calculateTargets(profile: UserProfileForTargets): CompleteTarget
   const fastCarbs = calculateFastCarbsTarget(trainingMinutes);
 
   return {
+    ...VN2016_TARGETS,
     calories,
     protein,
     fat,

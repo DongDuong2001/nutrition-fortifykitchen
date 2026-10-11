@@ -88,15 +88,7 @@ function buildNutrientRows(data: MockDayData | null): Record<NutrientGroup, Nutr
 
   // 4. Vitamins
   data.vitamins.forEach((vit) => {
-    const catId = vit.key === "a" ? "vitamin_a"
-      : vit.key === "c" ? "vitamin_c"
-      : vit.key === "d" ? "vitamin_d"
-      : vit.key === "e" ? "vitamin_e"
-      : vit.key === "k" ? "vitamin_k"
-      : vit.key === "b9" ? "folate"
-      : vit.key;
-
-    consumedMap[catId] = {
+    consumedMap[vit.key] = {
       consumed: vit.consumed,
       targetMin: vit.targetMin,
       targetMax: vit.targetMax,
