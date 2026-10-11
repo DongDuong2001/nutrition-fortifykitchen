@@ -16,6 +16,7 @@ Our edge over Cronometer: coach-rule targets and Vietnamese-first food data. The
 - [ ] **Recipe importer (Pro):** paste a recipe URL and get a dish.
 - [ ] **AI photo logging:** photograph a meal (cơm phần, phở…) to get suggested foods and portions, which the user confirms. Needs reliable Vietnamese dish data first.
 - [ ] **Voice logging:** "thêm 2 quả trứng vào bữa sáng".
+- [ ] **Typed vitamins map:** `CompleteTargets` (lib/targets.ts) has a `[key: string]` index signature. Replace it with a typed vitamins map so misspelled keys fail typecheck.
 
 ## Pricing principle (from Cronometer)
 The core stays free: logging, barcode, the full nutrient report. Pro charges for convenience and coaching: auto-repeat, recipe import, coach suggestions, trends.

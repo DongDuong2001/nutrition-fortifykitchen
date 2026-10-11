@@ -136,6 +136,16 @@ def run():
                 problems.append(f"{name}: console errors {errors[:2]}")
             ctx.close()
 
+        # English B-vitamin keys never reach the UI (Micros lists the Vietnamese catalogue names)
+        ctx = browser.new_context(viewport=DESKTOP)
+        pg = ctx.new_page()
+        pg.goto(BASE + "/micros", wait_until="networkidle")
+        pg.wait_for_timeout(300)
+        micros_text = pg.inner_text("body")
+        english = re.findall(r"pyridoxine|thiamin|riboflavin|niacin|pantothenic|cobalamin|folate", micros_text, re.I)
+        check(not english, f"1440: Micros shows no English B-vitamin keys (found {english[:3]})")
+        ctx.close()
+
         # 6. Today: no decimals on hero or meal kcal
         ctx = browser.new_context(viewport=PHONE)
         pg = ctx.new_page()

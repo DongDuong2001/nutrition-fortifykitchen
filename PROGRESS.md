@@ -3,7 +3,6 @@
 ## Now working
 | Task | Owner | Files / routes |
 |---|---|---|
-| ui-05-fix | Antigravity | app/add, app/foods, app/today, app/micros, lib/diary-store, lib/meal-slot, components/ui |
 
 | Date | Commit | Built | Next |
 | --- | --- | --- | --- |
@@ -154,6 +153,7 @@ All hydration checks passed cleanly (0 hydration errors, sessionStorage entries 
 | 11/10/2026 | cc-01 | Onboarding in Cobalt Sign: /signup (split on desktop), /signin, /signin/check-email, /signin/expired, /setup/profile and /setup/goal (one card on desktop). Mock auth and profile save behind lib/api-client.ts. Goal kcal and daily targets from lib/targets.ts. Local sub-screen header | Swap the local header for AppHeader (ui-04b). Wire Supabase auth and profile save (Dong) |
 | 11/10/2026 | cc-02 | Food categories (10 keys, order and labels in lib/food-categories.ts, web-side mock). /add: one scrolling filter row (Tất cả, Yêu thích, categories with foods) and recents as { foodId, servingLabel }. Tất cả groups by category with sticky headers. Shared FoodList and ChipRow on phone and desktop | Dong: category column on foods (OPEN_QUESTIONS). Favourites store for Yêu thích |
 | 11/10/2026 | cc-02 fix | Search clear: one × (native hidden). /add opens with no food: phone panel after a tap, desktop empty state. Yêu thích hidden until favourites exist. Filter row wraps from 1024 px; phone scrolls with a left fade once scrolled. formatAmount for amounts with units (kcal and mg whole, g and µg one decimal under 100, under 1 up to two decimals). Vitamin B6 label. Sticky header on card with divider. bottom-nav storage guarded | Dong: category column. Favourites store |
+| 11/10/2026 | cc-02 final | Rebased onto feat/ui 42ac9d6 (ui-05-fix-4). Re-applied cc-02 on the useMealSlot add page. Folate label is now "Vitamin B9". Hydration probe moved to h1t_recent_foods_v2. Onboarding and add-list alignment checks re-added with pair counts. BACKLOG: typed vitamins map | Dong: category column. Favourites store |
 
 ## Quality Gate Outputs (ui-05)
 - `npx tsc --noEmit`: 0 errors (clean).
@@ -317,3 +317,12 @@ All alignment and hydration tests passed cleanly (<= 1px difference, 0 hydration
 - `npm run probe -- tests/probes/cc02-final.py`: no problems. One × in the search box at 390 and 1440, native clear hidden. /add opens with no panel at 390 and the empty state at 1440. Chà là 30 g shows 0,3 mg and Vitamin B6 at 1440. All 10 filter chips inside the viewport at 1440, Yêu thích hidden. Recent Yến mạch 60 g opens the panel at 60 g at both widths, search box stays empty. Left fade appears only after scrolling at 390. Today kcal has no decimals. Onboarding flow reaches /today.
 - Screenshots: `apps/web/.screenshots/cc02-final-add-open-390.png`, `cc02-final-add-chala-1440.png`, `cc02-final-today-390.png`.
 - Not re-checked on this branch: the `size="md"` ChipGroup byte-identity. The class string is the same as before, but the add page has changed, so there is no clean baseline.
+
+## Quality Gate Outputs (cc-02 final)
+- Rebased onto `feat/ui` 42ac9d6 (ui-05-fix-4). Conflicts: OPEN_QUESTIONS and PROGRESS (kept both sides), add page (cc-02 re-applied on the `useMealSlot` / `overrideSlot` version), nutrients.ts and its test (Antigravity's taken, B6 change dropped), diary-store (Antigravity's composite logic kept, unit strings switched to formatAmount), alignment.py (Antigravity's taken, onboarding checks re-added).
+- `tests/probes/hydration.py`: seeds `h1t_recent_foods_v2` with `{ foodId: 'food-hat-dieu', servingLabel: '30 g' }` and checks the chip "Hạt điều rang".
+- `vitamin folate`: label changed from "Folate (B9)" to "Vitamin B9", so no English B-vitamin name shows on Micros. The probe checks this.
+- `ALIGN_BASE_URL=http://localhost:3101 npm run check`: passes. Typecheck exit 0. Tests 92 passed (11 files). Build compiled. `test:align` pairs: daily-targets 390 3, daily-targets 1440 3, setup-row 1440 2 (top/bottom), add-list 390 3, add-list 1440 3. `test:hydration`: 0 hydration errors.
+- `npm run probe -- tests/probes/cc02-final.py`: no problems (see the list in the cc-02 gate block above).
+- Ran against the dev server on 3101, which was running while `npm run check` built. Next 16 writes dev and build output to separate folders.
+- Screenshots: `apps/web/.screenshots/cc02-final-add-open-390.png`, `cc02-final-add-chala-1440.png`, `cc02-final-today-390.png`.

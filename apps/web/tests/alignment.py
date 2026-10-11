@@ -8,8 +8,22 @@ VIEWPORTS = [
     {"name": "desktop (1440px)", "width": 1440, "height": 900},
 ]
 
-def check_align_groups(page, group_name=None):
-    return page.evaluate("""(targetGroup) => {
+# (route, viewport, group, edges). Pairs must be compared, or the check fails.
+#   setup-row sits side by side on desktop, so it shares top and bottom edges, not left and right.
+#   Phone stacks those fields, so setup-row is not checked there.
+#   add-list: search, filter row, first header and first row share left edges only.
+ONBOARDING_CHECKS = [
+    ("/setup/goal", "mobile (390px)", "daily-targets", "lr"),
+    ("/setup/goal", "desktop (1440px)", "daily-targets", "lr"),
+    ("/setup/profile", "desktop (1440px)", "setup-row", "tb"),
+    ("/add?meal=snack", "mobile (390px)", "add-list", "lr"),
+    ("/add?meal=snack", "desktop (1440px)", "add-list", "lr"),
+]
+
+def check_align_groups(page, group_name=None, edges="lr"):
+    # edges "lr": members share left and right edges. "tb": members share top and bottom edges.
+    return page.evaluate("""(args) => {
+        const [targetGroup, mode] = args;
         const elements = Array.from(document.querySelectorAll('[data-align-group]'));
         const groups = {};
 
@@ -29,6 +43,7 @@ def check_align_groups(page, group_name=None):
 
         const errors = [];
         const checkedGroups = {};
+        const pairs = {};
 
         for (const [name, list] of Object.entries(groups)) {
             if (list.length < 2) continue;
@@ -47,35 +62,39 @@ def check_align_groups(page, group_name=None):
                 if (bucket.length < 2) continue;
                 const firstRect = bucket[0].getBoundingClientRect();
                 checkedGroups[name] = (checkedGroups[name] || 0) + bucket.length;
+                pairs[name] = (pairs[name] || 0) + bucket.length - 1;
 
                 for (let i = 1; i < bucket.length; i++) {
                     const item = bucket[i];
                     const rect = item.getBoundingClientRect();
-                    const leftDiff = Math.abs(firstRect.left - rect.left);
-                    const rightDiff = Math.abs(firstRect.right - rect.right);
+                    const horiz = mode !== "tb";
+                    const startEdge = horiz ? "left" : "top";
+                    const endEdge = horiz ? "right" : "bottom";
+                    const startDiff = Math.abs(firstRect[startEdge] - rect[startEdge]);
+                    const endDiff = Math.abs(firstRect[endEdge] - rect[endEdge]);
 
                     const isContentGroup =
                         item.getAttribute("data-align-edge") === "left" ||
                         bucket[0].getAttribute("data-align-edge") === "left";
-                    const checkLeft = true;
-                    const checkRight = !isContentGroup;
+                    const checkStart = true;
+                    const checkEnd = !isContentGroup;
 
-                    if (checkLeft && leftDiff > 1.05) {
+                    if (checkStart && startDiff > 1.05) {
                         errors.push(
-                            `Group "${name}" left mismatch: diff ${leftDiff.toFixed(2)}px between <${bucket[0].tagName.toLowerCase()} class="${bucket[0].className}"> (${firstRect.left.toFixed(1)}) and <${item.tagName.toLowerCase()} class="${item.className}"> (${rect.left.toFixed(1)})`
+                            `Group "${name}" ${startEdge} mismatch: diff ${startDiff.toFixed(2)}px between <${bucket[0].tagName.toLowerCase()} class="${bucket[0].className}"> (${firstRect[startEdge].toFixed(1)}) and <${item.tagName.toLowerCase()} class="${item.className}"> (${rect[startEdge].toFixed(1)})`
                         );
                     }
-                    if (checkRight && rightDiff > 1.05) {
+                    if (checkEnd && endDiff > 1.05) {
                         errors.push(
-                            `Group "${name}" right mismatch: diff ${rightDiff.toFixed(2)}px between <${bucket[0].tagName.toLowerCase()} class="${bucket[0].className}"> (${firstRect.right.toFixed(1)}) and <${item.tagName.toLowerCase()} class="${item.className}"> (${rect.right.toFixed(1)})`
+                            `Group "${name}" ${endEdge} mismatch: diff ${endDiff.toFixed(2)}px between <${bucket[0].tagName.toLowerCase()} class="${bucket[0].className}"> (${firstRect[endEdge].toFixed(1)}) and <${item.tagName.toLowerCase()} class="${item.className}"> (${rect[endEdge].toFixed(1)})`
                         );
                     }
                 }
             }
         }
 
-        return { errors, checkedGroups };
-    }""", group_name)
+        return { errors, checkedGroups, pairs };
+    }""", [group_name, edges])
 
 def main():
     total_errors = []
@@ -85,6 +104,25 @@ def main():
         browser = p.chromium.launch()
         context = browser.new_context()
         page = context.new_page()
+
+        # 1b. Onboarding and /add: each named group must compare real pairs, not just exist
+        for path, vp_name, group, edges in ONBOARDING_CHECKS:
+            vp = next(v for v in VIEWPORTS if v["name"] == vp_name)
+            page.set_viewport_size({"width": vp["width"], "height": vp["height"]})
+            page.goto(f"{BASE_URL}{path}", wait_until="networkidle")
+            page.wait_for_timeout(300)
+            res = check_align_groups(page, group, edges)
+            n = res["pairs"].get(group, 0)
+            label = "top/bottom" if edges == "tb" else "left/right"
+            if res["errors"]:
+                print(f"[FAIL] {path} @ {vp_name} [{group}, {label}]: {res['errors']}")
+                total_errors.extend(res["errors"])
+            elif n == 0:
+                msg = f"{path} @ {vp_name} [{group}, {label}]: no pairs compared"
+                print(f"[FAIL] {msg}")
+                total_errors.append(msg)
+            else:
+                print(f"[PASS] {path} @ {vp_name} [{group}, {label}]: {n} pairs compared, edges aligned")
 
         # 1. Alignment checks
         for vp in VIEWPORTS:

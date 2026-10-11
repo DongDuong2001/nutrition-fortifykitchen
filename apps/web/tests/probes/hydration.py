@@ -37,7 +37,7 @@ def main():
                     nutrients: { energy: 85, carbs: 22.5, protein: 0.7, fat: 0.1, potassium: 195, fiber: 2.0 },
                     addedAt: new Date().toISOString()
                 }]));
-                sessionStorage.setItem('h1t_recent_searches_v1', JSON.stringify(['Hạt điều test', 'Chuối sấy']));
+                sessionStorage.setItem('h1t_recent_foods_v2', JSON.stringify([{ foodId: 'food-hat-dieu', servingLabel: '30 g' }]));
             }""")
             page.reload(wait_until="networkidle")
             page.wait_for_timeout(500)
@@ -61,11 +61,11 @@ def main():
                     total_errors.append(err)
             elif path == "/add":
                 try:
-                    chip = page.locator("button:has-text('Hạt điều test') >> visible=true").first
+                    chip = page.locator("button:has-text('Hạt điều rang') >> visible=true").first
                     chip.wait_for(state="visible", timeout=5000)
-                    print("[PASS] Recent search chip 'Hạt điều test' is visible on /add")
+                    print("[PASS] Recent food chip 'Hạt điều rang' is visible on /add")
                 except Exception as e:
-                    err = f"Recent search chip 'Hạt điều test' not visible on /add after reload: {e}"
+                    err = f"Recent food chip 'Hạt điều rang' not visible on /add after reload: {e}"
                     print(f"[FAIL] {err}")
                     total_errors.append(err)
 
