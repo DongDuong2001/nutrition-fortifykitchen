@@ -12,6 +12,8 @@ export interface ChipGroupProps {
   items?: ChipGroupItem[];
   leadingInput?: React.ReactNode;
   columns?: number;
+  /** Columns from 1024 px up. Defaults to `columns`. */
+  columnsLg?: number;
   className?: string;
   tone?: "light" | "dark";
   size?: "md" | "lg";
@@ -26,6 +28,7 @@ export function ChipGroup({
   items = [],
   leadingInput,
   columns,
+  columnsLg,
   className = "",
   tone = "light",
   size = "md",
@@ -33,6 +36,7 @@ export function ChipGroup({
 }: ChipGroupProps) {
   const totalCount = (leadingInput ? 1 : 0) + items.length;
   const colCount = columns || (totalCount > 0 ? totalCount : 4);
+  const colCountLg = columnsLg || colCount;
 
   const sizeClass =
     size === "lg" ? "h-[52px] rounded-[10px] text-base" : "min-h-[44px] rounded-xl text-xs";
@@ -40,8 +44,8 @@ export function ChipGroup({
   return (
     <div
       data-align-group={dataAlignGroup}
-      style={{ gridTemplateColumns: `repeat(${colCount}, minmax(0, 1fr))` }}
-      className={`grid gap-2 w-full ${className}`}
+      style={{ "--chip-cols": colCount, "--chip-cols-lg": colCountLg } as React.CSSProperties}
+      className={`grid grid-cols-[repeat(var(--chip-cols),minmax(0,1fr))] lg:grid-cols-[repeat(var(--chip-cols-lg),minmax(0,1fr))] gap-2 w-full ${className}`}
     >
       {leadingInput && (
         <div className="flex items-center min-h-[44px] w-full">

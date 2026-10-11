@@ -15,6 +15,7 @@ import { SegmentedBar } from "@/components/ui/segmented-bar";
 import { ChipGroup } from "@/components/ui/chip-group";
 import { StatGroup } from "@/components/ui/stat-group";
 import { Toast } from "@/components/ui/toast";
+import { AppHeader } from "@/components/ui/app-header";
 
 function FoodDetailInner() {
   const params = useParams();
@@ -140,41 +141,19 @@ function FoodDetailInner() {
 
   return (
     <div className="min-h-screen bg-page text-text font-sans flex flex-col">
-      {/* Header Banner (Dark Ink) */}
-      <header className="bg-ink text-white rounded-b-[20px] px-5 pt-3 pb-5 flex flex-col gap-2 shrink-0">
-        <div className="w-full max-w-[560px] mx-auto flex flex-col gap-2">
-          <Link
-            href={`/add${mealSlot ? `?meal=${mealSlot}` : ""}`}
-            aria-label="Quay lại"
-            className="w-11 h-11 -ml-3 rounded-lg text-white flex items-center justify-center hover:text-sky active:scale-[0.97] transition-all no-underline"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-              <path d="M15 5l-7 7 7 7" />
-            </svg>
-          </Link>
-
-          <div>
-            <h1 className="m-0 font-display italic font-extrabold text-[28px] leading-tight uppercase tracking-tight">
-              {food.nameVi}
-            </h1>
-            <p className="m-0 text-xs text-muted-subtitle mt-0.5">
-              {food.brand ? `${food.brand} · ` : ""}
-              {food.source}
-            </p>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content Area */}
-      <main className="flex-1 w-full max-w-[560px] mx-auto p-4 flex flex-col gap-3.5 pb-24">
-        {/* Favourite toggle, in the body under the name (the header is set by AppHeader later) */}
-        <div data-align-group="food-detail" className="w-full flex items-center">
+      <AppHeader
+        variant="sub"
+        title={food.nameVi}
+        subtitle={`${food.brand ? `${food.brand} · ` : ""}${food.source}`}
+        backHref={`/add${mealSlot ? `?meal=${mealSlot}` : ""}`}
+        alignGroup="food-header"
+        actions={
           <button
             type="button"
             onClick={handleToggleFavourite}
             aria-pressed={saved}
             aria-label={saved ? "Bỏ yêu thích" : "Thêm vào yêu thích"}
-            className="w-11 h-11 rounded-full bg-card border border-card-border text-blue flex items-center justify-center cursor-pointer active:scale-[0.97] transition-transform"
+            className="w-11 h-11 -mr-2 rounded-lg bg-transparent border-0 text-white flex items-center justify-center cursor-pointer hover:text-sky active:scale-[0.97] transition-colors"
           >
             <svg
               width="22"
@@ -189,8 +168,11 @@ function FoodDetailInner() {
               <path d="M12 21s-7.5-4.6-9.5-9.1C1 8.6 3.1 5.5 6.3 5.5c2 0 3.4 1.1 4.2 2.4.8-1.3 2.2-2.4 4.2-2.4 3.2 0 5.3 3.1 3.8 6.4C19.5 16.4 12 21 12 21z" />
             </svg>
           </button>
-        </div>
+        }
+      />
 
+      {/* Main Content Area */}
+      <main className="flex-1 w-full max-w-[560px] mx-auto p-4 flex flex-col gap-3.5 pb-24">
         {/* Serving and Gram Selection */}
         <div data-align-group="food-detail" className="w-full">
           <ChipGroup

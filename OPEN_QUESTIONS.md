@@ -35,3 +35,6 @@
 - [ ] (cc-05) Sample-day totals are assumed to include each sample item at its food-table nutrition. A test checks that each item's kcal matches its food at the sample grams. A sample item whose name is not in MOCK_FOODS can be deleted, which removes its kcal only; its macros and micros stay in the totals. It cannot change portion.
 - [x] (cc-05) One toast system: the diary toast (components/diary-toast.tsx) shows both Đã thêm and Đã xoá. No overlap (cc-06).
 - [x] (cc-05) tests/alignment.py now checks /entry/item-1 (entry group) at 390 and 1440 (cc-06).
+- [ ] (cc-04) Edit entry header: the title is now the food name and the subtitle the meal (as design/screens/EditEntry.dc.html), so the "Sửa món" title is gone. Confirm.
+- [x] (cc-04) /add grouped list: rows still crop at the sticky header's bottom edge as they scroll under it. That is how any sticky header works, and it can't be removed while rows scroll. The 12 px side strips are now covered. Decided: keep as is (sticky + divider).
+- [ ] (cc-04) Setup uses AppHeader on phone only; desktop keeps its own heading and footer. Confirm.

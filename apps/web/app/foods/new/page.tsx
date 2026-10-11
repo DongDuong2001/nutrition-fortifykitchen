@@ -2,12 +2,12 @@
 
 import React, { useState, useEffect, useMemo, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
 import { apiClient } from "@/lib/api-client";
 import { useDiary } from "@/lib/diary-store";
 import { getMealSlotNameVi } from "@/lib/meal-slot";
 import { useMealSlot } from "@/lib/use-meal-slot";
 import { FormRow } from "@/components/ui/form-row";
+import { AppHeader } from "@/components/ui/app-header";
 
 function CreateFoodInner() {
   const router = useRouter();
@@ -117,26 +117,11 @@ function CreateFoodInner() {
 
   return (
     <div className="min-h-screen bg-page text-text font-sans flex flex-col">
-      {/* Header (Dark Ink) */}
-      <header className="bg-ink text-white rounded-b-[20px] px-5 pt-3 pb-5 flex flex-col gap-2 shrink-0">
-        <div className="w-full max-w-[560px] mx-auto flex flex-col gap-2">
-          <Link
-            href={`/add${mealSlot ? `?meal=${mealSlot}` : ""}`}
-            aria-label="Quay lại"
-            className="w-11 h-11 -ml-3 rounded-lg text-white flex items-center justify-center hover:text-sky active:scale-[0.97] transition-all no-underline"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-              <path d="M15 5l-7 7 7 7" />
-            </svg>
-          </Link>
-
-          <div>
-            <h1 className="m-0 font-display italic font-extrabold text-[28px] leading-tight uppercase tracking-tight">
-              TẠO MÓN MỚI
-            </h1>
-          </div>
-        </div>
-      </header>
+      <AppHeader
+        variant="sub"
+        title="TẠO MÓN MỚI"
+        backHref={`/add${mealSlot ? `?meal=${mealSlot}` : ""}`}
+      />
 
       {/* Form Content */}
       <form onSubmit={handleSubmit} className="flex-1 w-full max-w-[560px] mx-auto p-4 flex flex-col gap-4 pb-28">

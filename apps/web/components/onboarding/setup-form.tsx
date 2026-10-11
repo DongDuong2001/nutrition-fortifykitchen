@@ -19,7 +19,7 @@ import { Card } from "@/components/ui/card";
 import { ChipGroup } from "@/components/ui/chip-group";
 import { FormRow } from "@/components/ui/form-row";
 import { PillButton } from "@/components/ui/pill-button";
-import { OnboardingHeader } from "./onboarding-header";
+import { AppHeader } from "@/components/ui/app-header";
 
 export type SetupStep = "profile" | "goal";
 
@@ -99,9 +99,10 @@ export function SetupForm({ step }: { step: SetupStep }) {
   return (
     <div className="flex min-h-dvh flex-col bg-page lg:items-center lg:px-4 lg:py-8">
       <div className="lg:hidden">
-        <OnboardingHeader
+        <AppHeader
+          variant="sub"
           backHref={isProfile ? "/signin/check-email" : "/setup/profile"}
-          stepText={isProfile ? "Bước 1 / 2" : "Bước 2 / 2"}
+          actions={<span className="text-[13px] text-muted-on-dark">{isProfile ? "Bước 1 / 2" : "Bước 2 / 2"}</span>}
           progress={{ current: isProfile ? 1 : 2, total: 2 }}
           title={isProfile ? "VỀ BẠN" : "MỤC TIÊU"}
           subtitle={isProfile ? "Mục tiêu được tính theo cân nặng và giới tính. Bạn có thể sửa bất cứ lúc nào." : undefined}

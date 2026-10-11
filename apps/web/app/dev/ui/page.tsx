@@ -55,6 +55,19 @@ export default function DevUiPage() {
 
         <section className="flex flex-col gap-2">
           <div className="text-xs font-bold text-secondary uppercase tracking-wider px-4">
+            2b. AppHeader — Variant "sub" with progress (setup step 1 of 2)
+          </div>
+          <AppHeader
+            variant="sub"
+            title="VỀ BẠN"
+            progress={{ current: 1, total: 2 }}
+            actions={<span className="text-[13px] text-muted-on-dark">Bước 1 / 2</span>}
+            backHref="/today"
+          />
+        </section>
+
+        <section className="flex flex-col gap-2">
+          <div className="text-xs font-bold text-secondary uppercase tracking-wider px-4">
             3. AppHeader — Variant "tab" (Hồ sơ / Ngày tập)
           </div>
           <AppHeader

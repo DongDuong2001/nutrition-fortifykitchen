@@ -101,12 +101,14 @@ export function FoodList({
       ) : list.grouped ? (
         list.groups.map((group) => (
           <div key={group.key} role="group" aria-label={group.label} className="flex flex-col gap-1">
-            <div
-              data-align-group={group.key === firstHeaderKey ? "add-list" : undefined}
-              data-align-edge={group.key === firstHeaderKey ? "left" : undefined}
-              className="sticky top-0 z-10 border-b border-divider bg-card py-1.5 text-xs font-bold text-secondary"
-            >
-              {group.label} · {group.foods.length}
+            {/* -mx-3 px-3: the header covers the same 12 px bleed as the rows, so no row shows beside it */}
+            <div className="sticky top-0 z-10 -mx-3 border-b border-divider bg-card px-3 py-1.5 text-xs font-bold text-secondary">
+              <span
+                data-align-group={group.key === firstHeaderKey ? "add-list" : undefined}
+                data-align-edge={group.key === firstHeaderKey ? "left" : undefined}
+              >
+                {group.label} · {group.foods.length}
+              </span>
             </div>
             {group.foods.map((food) => renderRow(food, false))}
           </div>

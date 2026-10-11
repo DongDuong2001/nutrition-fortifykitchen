@@ -8,6 +8,7 @@ Our edge over Cronometer: coach-rule targets and Vietnamese-first food data. The
 - [ ] **Copy and multi-select:** extend "Chép hôm qua" to copy any meal or a whole day to another date or meal. Allow selecting several entries to move, copy or delete.
 - [ ] **Recent and favourites:** "Gần đây" and "Yêu thích" in Add food (already in the design). Star a food from its detail screen.
 - [ ] **Recipes / dishes:** build a dish from ingredients, with servings. Nutrients are calculated from the ingredients. This is also needed for Vietnamese dishes in the food data.
+- [ ] **Micros phone header:** the header takes ~1/3 of the screen; collapse the summary panel on scroll.
 - [ ] **Data trust:** a "Nguồn dữ liệu" page, a source label on food detail (USDA / CNF / VN), and "chưa có dữ liệu" instead of 0.
 
 ## Release 2+

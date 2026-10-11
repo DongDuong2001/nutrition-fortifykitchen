@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { formatDayLabel } from "@/lib/format";
+import { StepBars } from "@/components/ui/step-bars";
 
 export type AppHeaderVariant = "daily" | "sub" | "tab";
 
@@ -27,6 +28,8 @@ export interface AppHeaderProps {
   onBack?: () => void;
   /** Accessible label for back button (default: "Quay lại") */
   backLabel?: string;
+  /** Sub variant: slanted step bars under the title, e.g. setup "Bước 1 / 2" */
+  progress?: { current: number; total: number };
   /** Slot for summary panel (kcal/dial, micro counts, etc.) */
   summary?: React.ReactNode;
   /** Slot for right actions (desktop buttons, sub-screen step indicators, etc.) */
@@ -57,6 +60,7 @@ export function AppHeader({
   backHref,
   onBack,
   backLabel = "Quay lại",
+  progress,
   summary,
   actions,
   desktopStat,
@@ -145,7 +149,7 @@ export function AppHeader({
             {actions}
           </div>
 
-          {/* Title & Subtitle */}
+          {/* Title, step bars and subtitle. Title and subtitle share alignGroup for the alignment check */}
           {title && (
             <h1
               data-align-group={alignGroup}
@@ -155,8 +159,13 @@ export function AppHeader({
               {title}
             </h1>
           )}
+          {progress && <StepBars current={progress.current} total={progress.total} tone="dark" />}
           {subtitle && (
-            <p className="m-0 text-sm text-muted-subtitle leading-relaxed">
+            <p
+              data-align-group={alignGroup}
+              data-align-edge="left"
+              className="m-0 text-sm text-muted-subtitle leading-relaxed"
+            >
               {subtitle}
             </p>
           )}

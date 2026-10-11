@@ -74,7 +74,7 @@ def run():
             pg.wait_for_timeout(300)
             if name == "390":
                 pg.screenshot(path=os.path.join(SHOTS, "cc06-entry-chips-390.png"), animations="disabled")
-            check(pg.locator('[role=radio] >> visible=true').count() == 5, f"{name}: five inline meal chips")
+            check(pg.locator('fieldset button >> visible=true').count() == 5, f"{name}: five inline meal chips")
             pg.locator('input[aria-label="Số gam"] >> visible=true').first.fill("90")
             button(pg, "Lưu thay đổi").click()
             pg.wait_for_url("**/today")

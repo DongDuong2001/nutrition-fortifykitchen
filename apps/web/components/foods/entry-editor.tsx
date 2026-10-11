@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useDiary, type EntryView } from "@/lib/diary-store";
 import { entryNumbers } from "@/lib/diary-edits";
 import { MEAL_SLOTS, type MealSlot, getMealSlotNameVi } from "@/lib/meal-slot";
 import { parseGramsInput } from "@/lib/portion";
 import { formatAmount } from "@/lib/format";
+import { AppHeader } from "@/components/ui/app-header";
+import { ChipGroup } from "@/components/ui/chip-group";
 
 /**
  * Edit one diary entry: portion, meal, save or delete. Shown on the entry route, phone and desktop.
@@ -41,27 +42,16 @@ export function EntryEditor({ view }: { view: EntryView }) {
 
   return (
     <div className="min-h-screen bg-page text-text font-sans">
-      <div className="mx-auto flex w-full max-w-[480px] flex-col gap-4 px-4 pb-8 pt-3 lg:pt-10">
-        {/* Temporary header: back button and title in the body. cc-04 replaces it with AppHeader. */}
-        <div className="flex items-center gap-3">
-          <Link
-            href="/today"
-            aria-label="Quay lại"
-            className="flex h-11 w-11 items-center justify-center rounded-full border border-card-border bg-card text-text no-underline active:scale-[0.97] transition-transform"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-              <path d="M15 5l-7 7 7 7" />
-            </svg>
-          </Link>
-          <h1 className="m-0 text-lg font-bold">Sửa món</h1>
-        </div>
-
+      {/* Title is the food, subtitle the meal, as in design/screens/EditEntry.dc.html */}
+      <AppHeader
+        variant="sub"
+        title={view.name}
+        subtitle={getMealSlotNameVi(view.mealSlot)}
+        backHref="/today"
+        alignGroup="entry-header"
+      />
+      <div className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-8 pt-4">
         <section className="flex flex-col gap-4 rounded-2xl border border-card-border bg-card p-4">
-          <div data-align-group="entry" className="flex w-full flex-col">
-            <div className="text-sm text-secondary">{getMealSlotNameVi(view.mealSlot)}</div>
-            <h2 className="m-0 font-display text-[24px] font-extrabold uppercase italic leading-tight tracking-tight">{view.name}</h2>
-          </div>
-
           {/* Portion: gram field and the food's serving chips */}
           <div data-align-group="entry" className="flex w-full flex-col gap-2">
             <span className="text-sm font-bold">Khối lượng</span>
@@ -111,28 +101,19 @@ export function EntryEditor({ view }: { view: EntryView }) {
             {view.portionNote && <p className="m-0 text-sm text-secondary">{view.portionNote}</p>}
           </div>
 
-          {/* Meal: inline chips, as in the design. The meal changes on Lưu. */}
+          {/* Meal: inline chips, as in the design. The meal changes on Lưu. 3 columns on phone, 5 on desktop. */}
           <fieldset data-align-group="entry" className="m-0 flex w-full min-w-0 flex-col gap-2 border-0 p-0">
             <legend className="mb-2 p-0 text-sm font-bold">Chuyển sang bữa</legend>
-            <div role="radiogroup" className="flex flex-wrap gap-2">
-              {MEAL_SLOTS.map((slot) => {
-                const on = slot.id === mealSlot;
-                return (
-                  <button
-                    key={slot.id}
-                    type="button"
-                    role="radio"
-                    aria-checked={on}
-                    onClick={() => setMealSlot(slot.id)}
-                    className={`min-h-[44px] cursor-pointer rounded-full border-0 px-3.5 text-sm font-semibold transition-transform active:scale-[0.97] ${
-                      on ? "bg-ink text-white" : "bg-page text-text"
-                    }`}
-                  >
-                    {slot.nameVi}
-                  </button>
-                );
-              })}
-            </div>
+            <ChipGroup
+              columns={3}
+              columnsLg={5}
+              items={MEAL_SLOTS.map((slot) => ({
+                id: slot.id,
+                label: slot.nameVi,
+                active: slot.id === mealSlot,
+                onClick: () => setMealSlot(slot.id),
+              }))}
+            />
           </fieldset>
 
           {/* Preview of the portion: kcal, Đạm, Béo, Sắt */}
