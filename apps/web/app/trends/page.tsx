@@ -7,6 +7,7 @@ import { ChipGroup } from "@/components/ui/chip-group";
 import { KcalChart } from "@/components/trends/kcal-chart";
 import { NutrientTrendList } from "@/components/trends/nutrient-trend-list";
 import { ProteinTrendCard } from "@/components/trends/protein-trend-card";
+import { TrendsEmptyState } from "@/components/trends/trends-empty-state";
 import {
   MOCK_TRENDS_7_DAYS,
   MOCK_TRENDS_30_DAYS,
@@ -92,7 +93,9 @@ function TrendsContent() {
         />
 
         <main className="w-full max-w-[560px] mx-auto px-4 pt-3.5 pb-8 flex flex-col gap-3">
-          {isEmpty ? null : (
+          {isEmpty ? (
+            <TrendsEmptyState />
+          ) : (
             <>
               {/* Range toggle */}
               <div
