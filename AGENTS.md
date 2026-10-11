@@ -111,17 +111,17 @@ Always use **your agent's fixed port**: **3100 for Antigravity, 3101 for Claude 
 - Open each screenshot at 390 and 1440 and look specifically at column alignment and right edges. Don't just confirm that the screen renders.
 
 ## Two agents in this repo (Antigravity + Claude Code)
-- Each agent works in its own checkout. Antigravity uses the main folder on `feat/ui`, and Claude Code uses the worktree `../nutrition-fk-claude` on `feat/ui-cc-*`.
+- Claude Code works in the worktree `../nutrition-fk-claude` on `feat/ui-cc-*` and fast-forwards `feat/ui` itself after the gates pass. Antigravity works on `feat/ui-ag-*` branches only.
 - **Now working board:** before starting a task, add a row to the "Now working" table at the top of PROGRESS.md (task, owner, files or routes). Remove it when done. Never edit files claimed by the other agent's row; if you must, stop and tell the user.
 - Who may edit which files: see **File ownership** below.
 
 ## File ownership
-- Antigravity owns: components/ui/*, app/today, app/micros, app/profile, app/training, AppHeader, bottom nav, lib/format, lib/targets, lib/nutrients, lib/levels, lib/meal-slot, lib/use-meal-slot, lib/portion, lib/mock/sample-day, tests/alignment.py, tests/probes/*, scripts/*, package.json scripts, globals.css, app/layout.
-- Claude Code owns: app/add, app/foods/*, components/foods/*, components/meal-switcher, app/signup, app/signin/*, app/setup/*, components/onboarding/*, lib/diary-store, components/diary-provider-wrapper, lib/search, lib/food-categories, lib/recent-foods, lib/onboarding, lib/mock/foods, favourites.
+- Claude Code owns everything under apps/web, and is the only agent that commits to feat/ui. The exception is the files of an active Antigravity side-job branch (feat/ui-ag-<task>) that are listed on the Now working board: those are Antigravity's until the row is cleared.
+- Antigravity works only on its own branch feat/ui-ag-<task>, never commits to feat/ui, and touches only the files its task names. Claude Code merges its branches.
 - Tests follow their file: lib/__tests__/<name>.test.ts belongs to the owner of lib/<name>.
 - Dong's: lib/api-client, lib/supabase-client, apps/api, migrations (UI agents may only read; mock changes go through OPEN_QUESTIONS).
 - Anything not listed: ask in OPEN_QUESTIONS before editing.
-- Need a change in the other agent's file (e.g. a new prop on a components/ui primitive)? Add one line to OPEN_QUESTIONS ("@Antigravity: ChipGroup needs `size` prop for /signup") and continue with a local workaround; never edit it directly.
+- Antigravity needs a change outside its task files? Add one line to OPEN_QUESTIONS and continue without it; never edit directly.
 - Both may append to PROGRESS, OPEN_QUESTIONS and BACKLOG. When the user says stop, no agent edits anything until told to continue.
 
 ## Commands (so they run without permission prompts)

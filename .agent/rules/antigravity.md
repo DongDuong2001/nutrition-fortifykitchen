@@ -2,8 +2,9 @@
 Read AGENTS.md first. These rules add to it and win if anything conflicts.
 
 ## Scope
+- Work only on your own branch `feat/ui-ag-<task>`. Never commit to `feat/ui`, and touch only the files your task names. Claude Code merges your branches.
 - Do only what the task prompt lists. No extra refactors, renames, clean-ups or "while I'm here" changes. Put ideas in BACKLOG.md as one line each.
-- Touch only files in your ownership area (AGENTS.md → File ownership) and the files the prompt names. If you need a change in Claude Code's files, add it to OPEN_QUESTIONS.md and continue without it.
+- Touch only the files the prompt names. If you need a change in any other file, add it to OPEN_QUESTIONS.md and continue without it.
 - Never edit .claude/, CLAUDE.md, apps/api/, migrations/ or .env.
 - Claim the task on the PROGRESS "Now working" board before the first edit; clear the row when done.
 
