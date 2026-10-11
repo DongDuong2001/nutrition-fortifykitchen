@@ -41,6 +41,7 @@ export function FoodList({ list, selectedId, onPick, getMeta, categoryName, empt
       >
         <div
           data-align-group={food.id === firstRowId ? "add-list" : undefined}
+          data-align-edge={food.id === firstRowId ? "left" : undefined}
           className="flex min-w-0 flex-1 flex-col gap-0.5"
         >
           <span className="line-clamp-2 text-[15px] font-bold leading-snug">{food.nameVi}</span>
@@ -75,7 +76,8 @@ export function FoodList({ list, selectedId, onPick, getMeta, categoryName, empt
           <div key={group.key} role="group" aria-label={group.label} className="flex flex-col gap-1">
             <div
               data-align-group={group.key === firstHeaderKey ? "add-list" : undefined}
-              className="sticky top-0 z-10 bg-page py-1.5 text-xs font-bold text-secondary"
+              data-align-edge={group.key === firstHeaderKey ? "left" : undefined}
+              className="sticky top-0 z-10 border-b border-divider bg-card py-1.5 text-xs font-bold text-secondary"
             >
               {group.label} · {group.foods.length}
             </div>

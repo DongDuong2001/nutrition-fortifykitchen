@@ -13,7 +13,7 @@ import {
   type NutrientDefinition,
   type TargetSource,
 } from "@/lib/nutrients";
-import { formatNumber } from "@/lib/format";
+import { formatAmount } from "@/lib/format";
 import type { MockDayData } from "@/lib/mock/sample-day";
 import { useDiary } from "@/lib/diary-store";
 
@@ -125,7 +125,7 @@ function buildNutrientRows(data: MockDayData | null): Record<NutrientGroup, Nutr
 
     let formattedAmount = "—";
     if (consumed !== null) {
-      formattedAmount = `${formatNumber(consumed)} ${def.unit}`;
+      formattedAmount = `${formatAmount(consumed, def.unit)} ${def.unit}`;
     }
 
     const isProvisional = def.targetSource === "coach-provisional" || def.targetSource === "vn2016";
@@ -795,9 +795,9 @@ function NutrientRow({ row }: { row: NutrientRowData }) {
   let targetDisplay = "";
   if (hasTarget && targetMin !== null) {
     if (targetMax && targetMax !== targetMin) {
-      targetDisplay = `${formatNumber(targetMin)}–${formatNumber(targetMax)} ${definition.unit}`;
+      targetDisplay = `${formatAmount(targetMin, definition.unit)}–${formatAmount(targetMax, definition.unit)} ${definition.unit}`;
     } else {
-      targetDisplay = `${formatNumber(targetMin)} ${definition.unit}`;
+      targetDisplay = `${formatAmount(targetMin, definition.unit)} ${definition.unit}`;
     }
   }
 
@@ -837,7 +837,7 @@ function NutrientRow({ row }: { row: NutrientRowData }) {
           ) : hasTarget && targetDisplay ? (
             <>
               <span className="tabular-nums text-xs text-secondary">
-                {formatNumber(consumed)} / {targetDisplay}
+                {formatAmount(consumed, definition.unit)} / {targetDisplay}
               </span>
               <span className="font-bold text-text tabular-nums text-xs">
                 · {percentage !== null ? `${percentage}%` : "—"}

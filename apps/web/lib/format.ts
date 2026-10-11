@@ -48,3 +48,20 @@ export function formatRange(min: number, max: number, options?: FormatNumberOpti
   }
   return `${formatNumber(min, options)}–${formatNumber(max, options)}`;
 }
+
+const formatWhole = new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 0 });
+const formatOneDecimal = new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 1 });
+const formatTwoDecimals = new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 2 });
+const ONE_DECIMAL_UNITS = new Set(["g", "µg"]);
+
+/**
+ * An amount with its unit: kcal and mg are whole numbers. g and µg are one decimal under 100, else whole.
+ * Any value under 1 keeps up to two decimals. A positive value that would round to 0 shows "<0,01".
+ * For plain counts, use formatNumber.
+ */
+export function formatAmount(value: number, unit: string): string {
+  if (value > 0 && value < 0.005) return "<0,01";
+  if (Math.abs(value) < 1) return formatTwoDecimals.format(value);
+  if (ONE_DECIMAL_UNITS.has(unit) && Math.abs(value) < 100) return formatOneDecimal.format(value);
+  return formatWhole.format(value);
+}

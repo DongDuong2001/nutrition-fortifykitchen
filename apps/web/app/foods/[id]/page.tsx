@@ -8,7 +8,7 @@ import { MOCK_FOODS, type FoodItem } from "@/lib/mock/foods";
 import { getMealSlotNameVi } from "@/lib/meal-slot";
 import { useMealSlot } from "@/lib/use-meal-slot";
 import { parseGramsInput, calculateMacroPreview, scaleNutrients } from "@/lib/portion";
-import { formatNumber } from "@/lib/format";
+import { formatAmount } from "@/lib/format";
 import { getNutrientDefinition } from "@/lib/nutrients";
 import { calculateTargets } from "@/lib/targets";
 import { SegmentedBar } from "@/components/ui/segmented-bar";
@@ -192,10 +192,10 @@ function FoodDetailInner() {
             columns={4}
             tone="light"
             items={[
-              { id: "cal", value: formatNumber(macros.calories), label: "kcal" },
-              { id: "carb", value: `${formatNumber(macros.carbs)} g`, label: "Carb" },
-              { id: "protein", value: `${formatNumber(macros.protein)} g`, label: "Đạm" },
-              { id: "fat", value: `${formatNumber(macros.fat)} g`, label: "Béo" },
+              { id: "cal", value: formatAmount(macros.calories, "kcal"), label: "kcal" },
+              { id: "carb", value: `${formatAmount(macros.carbs, "g")} g`, label: "Carb" },
+              { id: "protein", value: `${formatAmount(macros.protein, "g")} g`, label: "Đạm" },
+              { id: "fat", value: `${formatAmount(macros.fat, "g")} g`, label: "Béo" },
             ]}
           />
         </div>
@@ -213,7 +213,7 @@ function FoodDetailInner() {
                   <span className="font-semibold text-text">{m.name}</span>
                   <div className="flex items-center gap-2 tabular-nums">
                     <span className="font-bold text-text">
-                      {formatNumber(m.value)} {m.unit}
+                      {formatAmount(m.value, m.unit)} {m.unit}
                     </span>
                     {m.pct !== null && (
                       <span className="text-xs text-secondary font-semibold min-w-[36px] text-right">

@@ -9,7 +9,7 @@ import { SegmentedBar } from "@/components/ui/segmented-bar";
 import { Sheet } from "@/components/ui/sheet";
 import { PillButton } from "@/components/ui/pill-button";
 import { apiClient } from "@/lib/api-client";
-import { formatNumber } from "@/lib/format";
+import { formatAmount } from "@/lib/format";
 import { SAMPLE_DAY, type MockDayData } from "@/lib/mock/sample-day";
 import { useDiary } from "@/lib/diary-store";
 
@@ -200,7 +200,7 @@ function TodayContent() {
                 <div className="flex-1 flex flex-col gap-1 min-w-0">
                   <div className="text-[13px] text-muted-dark">Mục tiêu hôm nay</div>
                   <div className="text-lg font-bold tabular-nums">
-                    {formatNumber(calories.targetMin)}–{formatNumber(calories.targetMax)} kcal
+                    {formatAmount(calories.targetMin, "kcal")}–{formatAmount(calories.targetMax, "kcal")} kcal
                   </div>
                   <div className="text-[13px] text-muted-subtitle">
                     Đạm 104–143 g · Béo 33–65 g
@@ -352,9 +352,9 @@ function TodayContent() {
             <div className="text-[13px] text-muted-subtitle leading-tight text-center w-full">
               Mục tiêu{" "}
               <span className="font-semibold text-white tabular-nums">
-                {formatNumber(calories.targetMin)}–{formatNumber(calories.targetMax)} kcal
+                {formatAmount(calories.targetMin, "kcal")}–{formatAmount(calories.targetMax, "kcal")} kcal
               </span>{" "}
-              · còn {formatNumber(calories.remaining)} · Ngày tập {currentData.user.trainingMinutes}′
+              · còn {formatAmount(calories.remaining, "kcal")} · Ngày tập {currentData.user.trainingMinutes}′
             </div>
           </div>
         </div>
@@ -406,7 +406,7 @@ function TodayContent() {
                       </Link>
                     </div>
                     <div className="text-[15px] font-bold tabular-nums text-text">
-                      {formatNumber(meal.kcal)} kcal
+                      {formatAmount(meal.kcal, "kcal")} kcal
                     </div>
                   </div>
                   {meal.items.map((it) => (
@@ -419,7 +419,7 @@ function TodayContent() {
                         {it.name} <span className="text-secondary">· {it.qty}</span>
                       </span>
                       <span className="text-secondary tabular-nums shrink-0">
-                        {formatNumber(it.kcal)}
+                        {formatAmount(it.kcal, "kcal")}
                       </span>
                     </Link>
                   ))}
@@ -591,9 +591,9 @@ function TodayContent() {
               <div className="text-[13px] text-muted-subtitle text-center w-full">
                 Mục tiêu{" "}
                 <span className="font-semibold text-white tabular-nums">
-                  {formatNumber(calories.targetMin)}–{formatNumber(calories.targetMax)} kcal
+                  {formatAmount(calories.targetMin, "kcal")}–{formatAmount(calories.targetMax, "kcal")} kcal
                 </span>{" "}
-                · còn {formatNumber(calories.remaining)} · Ngày tập {currentData.user.trainingMinutes}′
+                · còn {formatAmount(calories.remaining, "kcal")} · Ngày tập {currentData.user.trainingMinutes}′
               </div>
             </div>
 
@@ -655,7 +655,7 @@ function TodayContent() {
                         </Link>
                       </div>
                       <span className="text-sm font-bold tabular-nums text-text">
-                        {meal.kcal > 0 ? `${formatNumber(meal.kcal)} kcal` : "0 kcal"}
+                        {meal.kcal > 0 ? `${formatAmount(meal.kcal, "kcal")} kcal` : "0 kcal"}
                       </span>
                     </div>
                     {meal.items.map((it) => (
@@ -668,7 +668,7 @@ function TodayContent() {
                           {it.name} <span className="text-secondary">· {it.qty}</span>
                         </span>
                         <span className="text-secondary tabular-nums shrink-0">
-                          {formatNumber(it.kcal)}
+                          {formatAmount(it.kcal, "kcal")}
                         </span>
                       </Link>
                     ))}

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { type FoodItem } from "@/lib/mock/foods";
 import { type MealSlot, getMealSlotNameVi } from "@/lib/meal-slot";
 import { parseGramsInput, calculateMacroPreview, scaleNutrients } from "@/lib/portion";
-import { formatNumber } from "@/lib/format";
+import { formatAmount } from "@/lib/format";
 import { ChipGroup } from "@/components/ui/chip-group";
 import { StatGroup } from "@/components/ui/stat-group";
 import { getNutrientDefinition } from "@/lib/nutrients";
@@ -81,7 +81,7 @@ export function PortionPanel({
 
         list.push({
           name,
-          value: `${formatNumber(val)} ${unit}`,
+          value: `${formatAmount(val, unit)} ${unit}`,
           pct,
         });
       }
@@ -196,10 +196,10 @@ export function PortionPanel({
           columns={4}
           tone={tone}
           items={[
-            { id: "cal", value: formatNumber(macroPreview.calories), label: "kcal" },
-            { id: "carb", value: `${formatNumber(macroPreview.carbs)} g`, label: "Carb" },
-            { id: "protein", value: `${formatNumber(macroPreview.protein)} g`, label: "Đạm" },
-            { id: "fat", value: `${formatNumber(macroPreview.fat)} g`, label: "Béo" },
+            { id: "cal", value: formatAmount(macroPreview.calories, "kcal"), label: "kcal" },
+            { id: "carb", value: `${formatAmount(macroPreview.carbs, "g")} g`, label: "Carb" },
+            { id: "protein", value: `${formatAmount(macroPreview.protein, "g")} g`, label: "Đạm" },
+            { id: "fat", value: `${formatAmount(macroPreview.fat, "g")} g`, label: "Béo" },
           ]}
         />
       </div>

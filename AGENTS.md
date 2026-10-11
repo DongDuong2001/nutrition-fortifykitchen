@@ -81,8 +81,8 @@ Read each skill's `SKILL.md` before first use.
 - **`systematic-debugging`:** use it for any bug, failing test or build error. Find the root cause before changing code, and never stack guess-fixes.
 - **`verification-before-completion`:** required before every commit and every "done" report. Run the gates and the visual check, and show the evidence (command output, screenshot path). Never claim done without it.
 - **`webapp-testing`** (Playwright): use it for the visual check and for click-through flows at 390×844 and 1440×900, for example Today → Add food → Today, and Micros → Vitamin tab → Nutrient detail. Save screenshots to `apps/web/.screenshots/`, which is gitignored.
-  - Playwright and Chromium are **already installed** on this machine. If setting up a new environment: `pip install playwright`.
-  - For `test:align`, `BASE_URL` defaults to `http://localhost:3100`. Claude Code uses `ALIGN_BASE_URL=http://localhost:3101`.
+  - Playwright and Chromium are **already installed** on this machine.
+  - For `test:align`, `ALIGN_BASE_URL` defaults to `http://localhost:3100`. Claude Code sets `ALIGN_BASE_URL=http://localhost:3101`.
   - Only if `python3 -c "import playwright"` fails, or launching Chromium errors with "Executable doesn't exist", stop and tell the user. Don't install anything yourself.
 
 ## Dev server and ports

@@ -5,7 +5,7 @@ import { SAMPLE_DAY, type MockDayData, type MockFoodItem } from "./mock/sample-d
 import { type FoodItem } from "./mock/foods";
 import { type MealSlot, getMealSlotNameVi } from "./meal-slot";
 import { scaleNutrients } from "./portion";
-import { formatNumber } from "./format";
+import { formatAmount } from "./format";
 import { DEFAULT_RECENT_FOODS, isRecentFood, pushRecent, type RecentFood } from "./recent-foods";
 
 export interface AddedDiaryEntry {
@@ -105,9 +105,9 @@ export function computeCompositeDayData(
     const displayValue =
       m.targetMin !== null
         ? m.targetMax
-          ? `${formatNumber(newConsumed)} / ${formatNumber(m.targetMin)}–${formatNumber(m.targetMax)} ${m.unit}`
-          : `${formatNumber(newConsumed)} / ${formatNumber(m.targetMin)} ${m.unit}`
-        : `${formatNumber(newConsumed)} ${m.unit}`;
+          ? `${formatAmount(newConsumed, m.unit)} / ${formatAmount(m.targetMin, m.unit)}–${formatAmount(m.targetMax, m.unit)} ${m.unit}`
+          : `${formatAmount(newConsumed, m.unit)} / ${formatAmount(m.targetMin, m.unit)} ${m.unit}`
+        : `${formatAmount(newConsumed, m.unit)} ${m.unit}`;
 
     return {
       ...m,
@@ -174,9 +174,9 @@ export function computeCompositeDayData(
     const displayValue =
       m.targetMin !== null
         ? m.targetMax
-          ? `${formatNumber(newConsumed)} / ${formatNumber(m.targetMin)}–${formatNumber(m.targetMax)} ${m.unit}`
-          : `${formatNumber(newConsumed)} / ${formatNumber(m.targetMin)} ${m.unit}`
-        : `${formatNumber(newConsumed)} ${m.unit}`;
+          ? `${formatAmount(newConsumed, m.unit)} / ${formatAmount(m.targetMin, m.unit)}–${formatAmount(m.targetMax, m.unit)} ${m.unit}`
+          : `${formatAmount(newConsumed, m.unit)} / ${formatAmount(m.targetMin, m.unit)} ${m.unit}`
+        : `${formatAmount(newConsumed, m.unit)} ${m.unit}`;
 
     return {
       ...m,
@@ -196,8 +196,8 @@ export function computeCompositeDayData(
     const percentage = targetMin > 0 ? Math.round((newConsumed / targetMin) * 100) : 0;
     const displayValue =
       v.targetMin !== null
-        ? `${formatNumber(newConsumed)} / ${formatNumber(v.targetMin)} ${v.unit}`
-        : `${formatNumber(newConsumed)} ${v.unit}`;
+        ? `${formatAmount(newConsumed, v.unit)} / ${formatAmount(v.targetMin, v.unit)} ${v.unit}`
+        : `${formatAmount(newConsumed, v.unit)} ${v.unit}`;
 
     return {
       ...v,
@@ -304,7 +304,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       const fat = Math.round((scaled.fat ?? 0) * 10) / 10;
       const fiber = Math.round((scaled.fiber ?? 0) * 10) / 10;
 
-      const qty = servingLabel || `${formatNumber(grams)} g`;
+      const qty = servingLabel || `${formatAmount(grams, "g")} g`;
 
       const newEntry: AddedDiaryEntry = {
         id: `entry-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,

@@ -15,6 +15,16 @@ export interface BottomNavProps {
  * Full-bleed on <1024px with inner content centered at max-w-[560px] with 16px side padding.
  * Active state includes a slanted motif indicator (skewX(-14deg)), text remains unslanted.
  */
+/** Remembers which control opened /add, so focus can return to it. Storage may be blocked. */
+function rememberAddOpener(id: string) {
+  if (typeof window === "undefined") return;
+  try {
+    sessionStorage.setItem("last_add_opener_id", id);
+  } catch {
+    // Storage unavailable: focus falls back to the default opener.
+  }
+}
+
 export function BottomNav({ currentTab, onAddClick, className = "" }: BottomNavProps) {
   const pathname = usePathname();
 
@@ -101,9 +111,7 @@ export function BottomNav({ currentTab, onAddClick, className = "" }: BottomNavP
               id="mobile-add-fab"
               type="button"
               onClick={() => {
-                if (typeof window !== "undefined") {
-                  sessionStorage.setItem("last_add_opener_id", "mobile-add-fab");
-                }
+                rememberAddOpener("mobile-add-fab");
                 onAddClick();
               }}
               aria-label="Thêm món"
@@ -127,9 +135,7 @@ export function BottomNav({ currentTab, onAddClick, className = "" }: BottomNavP
               id="mobile-add-fab"
               href="/add"
               onClick={() => {
-                if (typeof window !== "undefined") {
-                  sessionStorage.setItem("last_add_opener_id", "mobile-add-fab");
-                }
+                rememberAddOpener("mobile-add-fab");
               }}
               aria-label="Thêm món"
               className="w-[50px] h-[50px] rounded-[14px] bg-blue text-white flex items-center justify-center no-underline shadow-md active:scale-[0.97] transition-transform"

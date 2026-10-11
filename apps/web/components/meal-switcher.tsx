@@ -3,7 +3,7 @@
 import React from "react";
 import { Sheet } from "@/components/ui/sheet";
 import { MEAL_SLOTS, type MealSlot, getMealSlotNameVi } from "@/lib/meal-slot";
-import { formatNumber } from "@/lib/format";
+import { formatAmount } from "@/lib/format";
 
 export interface MealSwitcherProps {
   open: boolean;
@@ -37,7 +37,7 @@ export function MealSwitcher({
         {MEAL_SLOTS.map((slot) => {
           const isSelected = selectedSlot === slot.id;
           const cals = mealCalories[slot.id];
-          const calsText = cals && cals > 0 ? `${formatNumber(cals)} kcal` : "trống";
+          const calsText = cals && cals > 0 ? `${formatAmount(cals, "kcal")} kcal` : "trống";
 
           return (
             <button

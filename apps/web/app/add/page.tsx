@@ -27,7 +27,7 @@ import {
 } from "@/lib/meal-slot";
 import { parseGramsInput, calculateMacroPreview, scaleNutrients } from "@/lib/portion";
 import { MealSwitcher } from "@/components/meal-switcher";
-import { formatNumber } from "@/lib/format";
+import { formatAmount } from "@/lib/format";
 import { PortionPanel } from "@/components/ui/portion-panel";
 import TodayContent from "../today/page";
 
@@ -45,13 +45,10 @@ function AddFoodInner() {
   const [switcherOpen, setSwitcherOpen] = useState(false);
   const [filter, setFilter] = useState<FoodFilter>("all");
   const [query, setQuery] = useState("");
-  const [selectedFood, setSelectedFood] = useState<FoodItem | null>(() => {
-    // Default select Chà là if present to match design preview
-    return MOCK_FOODS.find((f) => f.id === "food-cha-la") || MOCK_FOODS[0] || null;
-  });
+  const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
 
-  const [gramsInput, setGramsInput] = useState("30");
-  const [selectedServingLabel, setSelectedServingLabel] = useState("30 g");
+  const [gramsInput, setGramsInput] = useState("");
+  const [selectedServingLabel, setSelectedServingLabel] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
 
@@ -110,7 +107,6 @@ function AddFoodInner() {
   // Filter row: Tất cả, Yêu thích, then only the categories that have foods
   const filterItems = [
     { id: "all", label: "Tất cả", active: filter === "all", onClick: () => setFilter("all") },
-    { id: "favorite", label: "Yêu thích", active: filter === "favorite", onClick: () => setFilter("favorite") },
     ...categories.map((c) => ({
       id: c.key,
       label: c.label,
@@ -196,9 +192,9 @@ function AddFoodInner() {
     const carbs = Math.round((scaled.carbs ?? 0) * 10) / 10;
     const kali = scaled.potassium ? Math.round(scaled.potassium) : null;
 
-    const parts = [`${formatNumber(cals)} kcal / ${defaultServing.label}`];
-    if (carbs > 0) parts.push(`${formatNumber(carbs)} g carb`);
-    if (kali) parts.push(`${formatNumber(kali)} mg kali`);
+    const parts = [`${formatAmount(cals, "kcal")} kcal / ${defaultServing.label}`];
+    if (carbs > 0) parts.push(`${formatAmount(carbs, "g")} g carb`);
+    if (kali) parts.push(`${formatAmount(kali, "mg")} mg kali`);
     return parts.join(" · ");
   };
 
@@ -333,7 +329,7 @@ function AddFoodInner() {
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="Tìm món: cơm, trứng, chà là…"
-                    className="flex-1 bg-transparent border-0 outline-none text-text text-base min-h-[44px]"
+                    className="flex-1 bg-transparent border-0 outline-none text-text text-base min-h-[44px] [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
                   />
                   {query && (
                     <button
@@ -350,7 +346,7 @@ function AddFoodInner() {
                 </label>
 
                 {/* Filter row: Tất cả, Yêu thích, then categories with foods */}
-                <ChipRow items={filterItems} ariaLabel="Lọc món theo nhóm" data-align-group="add-list" />
+                <ChipRow items={filterItems} ariaLabel="Lọc món theo nhóm" data-align-group="add-list" data-align-edge="left" />
 
                 {/* Recents: tap to pick that food with that serving */}
                 {!query && recentItems.length > 0 && (
@@ -373,9 +369,9 @@ function AddFoodInner() {
                 />
               </div>
 
-              {/* Right Pane: Selected Food Portion & Macros */}
-              {selectedFood && (
-                <div className="w-[340px] shrink-0">
+              {/* Right Pane: Selected Food Portion & Macros, or an empty state until a food is picked */}
+              <div className="w-[340px] shrink-0 self-stretch">
+                {selectedFood ? (
                   <PortionPanel
                     food={selectedFood}
                     gramsInput={gramsInput}
@@ -388,8 +384,12 @@ function AddFoodInner() {
                     tone="light"
                     showMicros={true}
                   />
-                </div>
-              )}
+                ) : (
+                  <div className="h-full flex items-center justify-center text-center text-sm text-secondary p-4">
+                    Chọn một món để xem khẩu phần
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="text-xs text-secondary pt-1 border-t border-card-border">
@@ -467,7 +467,7 @@ function AddFoodInner() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Tìm món: cơm, trứng, chà là…"
-              className="flex-1 bg-transparent border-0 outline-none text-text text-base min-h-[44px]"
+              className="flex-1 bg-transparent border-0 outline-none text-text text-base min-h-[44px] [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
             />
             {query && (
               <button
@@ -484,7 +484,7 @@ function AddFoodInner() {
           </label>
 
           {/* Filter row: Tất cả, Yêu thích, then categories with foods */}
-          <ChipRow items={filterItems} ariaLabel="Lọc món theo nhóm" data-align-group="add-list" />
+          <ChipRow items={filterItems} ariaLabel="Lọc món theo nhóm" data-align-group="add-list" data-align-edge="left" />
 
           {/* Gần đây (Recents): tap to pick that food with that serving */}
           {!query && recentItems.length > 0 && (
