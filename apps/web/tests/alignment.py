@@ -22,6 +22,8 @@ ONBOARDING_CHECKS = [
     ("/micros", "mobile (390px)", "micros-header", "lr"),
     ("/today", "desktop (1440px)", "today-header", "lr"),
     ("/micros", "desktop (1440px)", "micros-header", "lr"),
+    ("/entry/item-1", "mobile (390px)", "entry", "lr"),
+    ("/entry/item-1", "desktop (1440px)", "entry", "lr"),
 ]
 
 def check_align_groups(page, group_name=None, edges="lr"):

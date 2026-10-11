@@ -1,3 +1,6 @@
+import type { MockDayData } from "./mock/sample-day";
+import { formatDesktopDate } from "./format";
+
 const TIMEZONE_VN = "Asia/Ho_Chi_Minh";
 
 const isoDateFormatter = new Intl.DateTimeFormat("sv-SE", {
@@ -13,4 +16,19 @@ const isoDateFormatter = new Intl.DateTimeFormat("sv-SE", {
  */
 export function getTodayIsoVN(): string {
   return isoDateFormatter.format(new Date());
+}
+
+/**
+ * Returns a copy of the day set to the given date (YYYY-MM-DD): the date, its "Hôm nay" label and the
+ * desktop subtitle. Pure: the day it is given is not changed.
+ */
+export function withRuntimeDate(day: MockDayData, isoDate: string): MockDayData {
+  const [, month, dayOfMonth] = isoDate.split("-");
+  const { trainingMinutes, goalLabel, weightKg } = day.user;
+  return {
+    ...day,
+    date: isoDate,
+    dateLabel: `Hôm nay, ${dayOfMonth}/${month}`,
+    desktopDateLabel: `${formatDesktopDate(isoDate)} · Ngày tập ${trainingMinutes}′ · ${goalLabel} · ${weightKg} kg`,
+  };
 }

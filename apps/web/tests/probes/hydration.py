@@ -13,12 +13,24 @@ def main():
         context = browser.new_context()
         page = context.new_page()
 
+        # React and Next report problems as console errors and warnings. The browser's own
+        # font-preload hint is not one of them.
         console_errors = []
-        page.on("console", lambda msg: console_errors.append(msg.text) if msg.type == "error" else None)
-        page.on("pageerror", lambda err: console_errors.append(err.message))
+        console_issues = []
+        def on_console(msg):
+            if msg.type == "error":
+                console_errors.append(msg.text)
+            if msg.type in ("error", "warning") and "preloaded using link preload" not in msg.text:
+                console_issues.append(f"{msg.type}: {msg.text[:300]}")
+        page.on("console", on_console)
+        page.on("pageerror", lambda err: (console_errors.append(err.message), console_issues.append(f"pageerror: {err.message[:300]}")))
 
-        for path in ["/today", "/add"]:
+        viewports = [{"width": 390, "height": 844}, {"width": 1440, "height": 900}]
+        paths = ["/today", "/micros", "/add", "/entry/item-1"]
+        for vp, path in [(v, p) for v in viewports for p in paths]:
+            page.set_viewport_size(vp)
             console_errors.clear()
+            console_issues.clear()
 
             page.goto(f"{BASE_URL}{path}", wait_until="networkidle")
             page.evaluate("""() => {
@@ -40,7 +52,17 @@ def main():
                 sessionStorage.setItem('h1t_recent_foods_v2', JSON.stringify([{ foodId: 'food-hat-dieu', servingLabel: '30 g' }]));
             }""")
             page.reload(wait_until="networkidle")
-            page.wait_for_timeout(500)
+            page.wait_for_timeout(1500)
+
+            # The Next dev badge turns to "error" when the page has an Issue
+            badge = page.evaluate("""() => { const o = []; document.querySelectorAll('nextjs-portal').forEach(h => { const b = h.shadowRoot && h.shadowRoot.querySelector('[data-next-badge]'); if (b) o.push(b.getAttribute('data-error')); }); return o; }""")
+            if "true" in badge:
+                console_issues.append("Next dev badge shows an Issue")
+            if console_issues:
+                print(f"[FAIL] Console problems on {path} @ {vp['width']}: {console_issues}")
+                total_errors.extend(console_issues)
+            else:
+                print(f"[PASS] No console warnings or Next Issue on {path} @ {vp['width']}")
 
             hydration_errs = [e for e in console_errors if "hydration" in e.lower()]
             if hydration_errs:

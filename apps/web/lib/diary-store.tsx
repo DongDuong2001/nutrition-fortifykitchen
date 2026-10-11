@@ -5,6 +5,7 @@ import { SAMPLE_DAY, type MockDayData, type MockFoodItem } from "./mock/sample-d
 import { type FoodItem } from "./mock/foods";
 import { type MealSlot, getMealSlotNameVi } from "./meal-slot";
 import { formatAmount } from "./format";
+import { getTodayIsoVN, withRuntimeDate } from "./date";
 import { DEFAULT_RECENT_FOODS, isRecentFood, pushRecent, type RecentFood } from "./recent-foods";
 import { readFavouriteIds, toggleFavouriteId, writeFavouriteIds } from "./favourites";
 import {
@@ -14,7 +15,6 @@ import {
   type EntryPatch,
   type EntryView,
   type SampleEdits,
-  type UndoRecord,
   addAmounts,
   amountsOfNumbers,
   deleteEntryIn,
@@ -31,14 +31,19 @@ import {
   updateEntryIn,
 } from "./diary-edits";
 
-export type { AddedDiaryEntry, EntryView, EntryPatch, UndoRecord } from "./diary-edits";
+export type { AddedDiaryEntry, EntryView, EntryPatch } from "./diary-edits";
 
+/** The one toast of the app. "added" offers Xem (jump to the meal), "deleted" offers Hoàn tác. */
 export interface ToastInfo {
   message: string;
-  mealSlot: MealSlot;
-  foodName: string;
-  qty: string;
+  kind: "added" | "deleted";
+  mealSlot: MealSlot | null;
+  /** How long it stays. A delete stays 5 s, which is also the undo window. */
+  durationMs: number;
 }
+
+const ADDED_TOAST_MS = 4000;
+const UNDO_TOAST_MS = 5000;
 
 interface DiaryContextValue {
   data: MockDayData;
@@ -59,10 +64,8 @@ interface DiaryContextValue {
   /** Changes the meal, and the portion when the entry can change portion. */
   updateEntry: (id: string, patch: EntryPatch) => void;
   deleteEntry: (id: string) => void;
-  /** The last delete, while its undo toast is shown. */
-  lastDelete: UndoRecord | null;
+  /** Puts the last deleted entry back. Only works while the "deleted" toast is shown. */
   undoLastDelete: () => void;
-  dismissUndo: () => void;
   hydrated: boolean;
 }
 
@@ -250,6 +253,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   const [toast, setToast] = useState<ToastInfo | null>(null);
   const [highlightedMeal, setHighlightedMeal] = useState<MealSlot | null>(null);
   const [favouriteIds, setFavouriteIds] = useState<string[]>([]);
+  // Today's date, read after mount so the server and first client render agree
+  const [todayIso, setTodayIso] = useState<string | null>(null);
 
   // Load from sessionStorage on mount (client-only)
   useEffect(() => {
@@ -270,6 +275,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       // Ignore sessionStorage access errors
     } finally {
       setFavouriteIds(readFavouriteIds());
+      setTodayIso(getTodayIsoVN());
       setHydrated(true);
     }
   }, []);
@@ -301,12 +307,13 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     }
   }, [recentFoods, hydrated]);
 
-  // Auto-dismiss toast after 4s
+  // Auto-dismiss the toast. When a "deleted" toast goes, the undo goes with it.
   useEffect(() => {
     if (!toast) return;
     const timer = setTimeout(() => {
       setToast(null);
-    }, 4000);
+      setEdits((prev) => dismissUndoIn(prev));
+    }, toast.durationMs);
     return () => clearTimeout(timer);
   }, [toast]);
 
@@ -335,11 +342,12 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       setEdits((prev) => ({ ...prev, added: [...prev.added, newEntry] }));
 
       const mealNameVi = getMealSlotNameVi(mealSlot);
+      setEdits((prev) => dismissUndoIn(prev));
       setToast({
         message: `Đã thêm ${food.nameVi} ${qty} vào ${mealNameVi}`,
+        kind: "added",
         mealSlot,
-        foodName: food.nameVi,
-        qty,
+        durationMs: ADDED_TOAST_MS,
       });
 
       addRecentFood(food, qty);
@@ -349,6 +357,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
 
   const dismissToast = useCallback(() => {
     setToast(null);
+    setEdits((prev) => dismissUndoIn(prev));
   }, []);
 
   const isFavourite = useCallback((foodId: string) => favouriteIds.includes(foodId), [favouriteIds]);
@@ -363,21 +372,25 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     setEdits((prev) => updateEntryIn(prev, id, patch));
   }, []);
 
-  const deleteEntry = useCallback((id: string) => {
-    setEdits((prev) => deleteEntryIn(prev, id));
-  }, []);
+  const deleteEntry = useCallback(
+    (id: string) => {
+      const view = findEntry(edits, id);
+      if (!view) return;
+      setEdits((prev) => deleteEntryIn(prev, id));
+      setToast({ message: `Đã xoá ${view.name}`, kind: "deleted", mealSlot: null, durationMs: UNDO_TOAST_MS });
+    },
+    [edits]
+  );
 
   const undoLastDelete = useCallback(() => {
     setEdits((prev) => undoDeleteIn(prev));
-  }, []);
-
-  const dismissUndo = useCallback(() => {
-    setEdits((prev) => dismissUndoIn(prev));
+    setToast(null);
   }, []);
 
   const compositeData = useMemo<MockDayData>(() => {
-    return computeCompositeDayData(SAMPLE_DAY, edits.added, edits.sample);
-  }, [edits.added, edits.sample]);
+    const day = computeCompositeDayData(SAMPLE_DAY, edits.added, edits.sample);
+    return todayIso ? withRuntimeDate(day, todayIso) : day;
+  }, [edits.added, edits.sample, todayIso]);
 
   return (
     <DiaryContext.Provider
@@ -397,9 +410,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         getEntry,
         updateEntry,
         deleteEntry,
-        lastDelete: edits.undo,
         undoLastDelete,
-        dismissUndo,
         hydrated,
       }}
     >

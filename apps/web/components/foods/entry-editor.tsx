@@ -5,10 +5,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useDiary, type EntryView } from "@/lib/diary-store";
 import { entryNumbers } from "@/lib/diary-edits";
-import { type MealSlot, getMealSlotNameVi } from "@/lib/meal-slot";
+import { MEAL_SLOTS, type MealSlot, getMealSlotNameVi } from "@/lib/meal-slot";
 import { parseGramsInput } from "@/lib/portion";
 import { formatAmount } from "@/lib/format";
-import { MealSwitcher } from "@/components/meal-switcher";
 
 /**
  * Edit one diary entry: portion, meal, save or delete. Shown on the entry route, phone and desktop.
@@ -23,7 +22,6 @@ export function EntryEditor({ view }: { view: EntryView }) {
   const [gramsInput, setGramsInput] = useState(view.grams !== null ? String(view.grams) : "");
   const [servingLabel, setServingLabel] = useState(view.servingLabel);
   const [mealSlot, setMealSlot] = useState<MealSlot>(view.mealSlot);
-  const [switcherOpen, setSwitcherOpen] = useState(false);
 
   const grams = parseGramsInput(gramsInput);
   const canSave = !canPortion || grams > 0;
@@ -113,21 +111,29 @@ export function EntryEditor({ view }: { view: EntryView }) {
             {view.portionNote && <p className="m-0 text-sm text-secondary">{view.portionNote}</p>}
           </div>
 
-          {/* Meal: the shared meal sheet, changes the meal on Lưu */}
-          <div data-align-group="entry" className="flex w-full flex-col gap-1.5">
-            <span className="text-sm font-bold">Chuyển sang bữa</span>
-            <button
-              type="button"
-              onClick={() => setSwitcherOpen(true)}
-              aria-haspopup="listbox"
-              className="flex min-h-[48px] w-full cursor-pointer items-center justify-between rounded-[10px] border-0 bg-page px-3.5 text-left text-[15px] font-semibold text-text active:scale-[0.98] transition-transform"
-            >
-              <span>{getMealSlotNameVi(mealSlot)}</span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M6 9l6 6 6-6" />
-              </svg>
-            </button>
-          </div>
+          {/* Meal: inline chips, as in the design. The meal changes on Lưu. */}
+          <fieldset data-align-group="entry" className="m-0 flex w-full min-w-0 flex-col gap-2 border-0 p-0">
+            <legend className="mb-2 p-0 text-sm font-bold">Chuyển sang bữa</legend>
+            <div role="radiogroup" className="flex flex-wrap gap-2">
+              {MEAL_SLOTS.map((slot) => {
+                const on = slot.id === mealSlot;
+                return (
+                  <button
+                    key={slot.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={on}
+                    onClick={() => setMealSlot(slot.id)}
+                    className={`min-h-[44px] cursor-pointer rounded-full border-0 px-3.5 text-sm font-semibold transition-transform active:scale-[0.97] ${
+                      on ? "bg-ink text-white" : "bg-page text-text"
+                    }`}
+                  >
+                    {slot.nameVi}
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
 
           {/* Preview of the portion: kcal, Đạm, Béo, Sắt */}
           <div data-align-group="entry" className="grid w-full grid-cols-4 gap-2 rounded-xl bg-page p-3">
@@ -162,14 +168,6 @@ export function EntryEditor({ view }: { view: EntryView }) {
         </section>
       </div>
 
-      <MealSwitcher
-        open={switcherOpen}
-        onClose={() => setSwitcherOpen(false)}
-        selectedSlot={mealSlot}
-        onSelectSlot={setMealSlot}
-        title="Chuyển sang bữa nào?"
-        defaultHint=""
-      />
     </div>
   );
 }

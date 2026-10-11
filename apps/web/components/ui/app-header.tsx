@@ -11,12 +11,10 @@ export interface AppHeaderProps {
   variant?: AppHeaderVariant;
   /** Primary title (Saira Condensed italic) */
   title?: string;
-  /** Secondary subtitle / description */
+  /** One line under the title. Daily header: desktop only (the phone shows the date row). Sub and tab: all widths. */
   subtitle?: string;
   /** Date object or YYYY-MM-DD string for 'daily' header */
   date?: string | Date;
-  /** Date label override (if caller pre-formats) */
-  dateLabel?: string;
   /** Previous date handler */
   onPrev?: () => void;
   /** Next date handler */
@@ -33,10 +31,6 @@ export interface AppHeaderProps {
   summary?: React.ReactNode;
   /** Slot for right actions (desktop buttons, sub-screen step indicators, etc.) */
   actions?: React.ReactNode;
-  /** Alternative alias for right-aligned action element */
-  rightAction?: React.ReactNode;
-  /** Desktop-specific subtitle (e.g. "Thứ Bảy, 10/10/2026 · Ngày tập 60′...") */
-  desktopSubtitle?: string;
   /** Desktop-specific stat element (e.g. "8/22 vi chất đạt") */
   desktopStat?: React.ReactNode;
   /** data-align-group attribute for alignment tests */
@@ -57,7 +51,6 @@ export function AppHeader({
   title,
   subtitle,
   date,
-  dateLabel: dateLabelProp,
   onPrev,
   onNext,
   canGoNext,
@@ -66,8 +59,6 @@ export function AppHeader({
   backLabel = "Quay lại",
   summary,
   actions,
-  rightAction,
-  desktopSubtitle,
   desktopStat,
   alignGroup,
   className = "",
@@ -80,7 +71,6 @@ export function AppHeader({
 
   // Compute date label on client after mount to prevent hydration mismatch
   const resolvedDateLabel = useMemo(() => {
-    if (dateLabelProp) return dateLabelProp;
     if (!date) return "";
     if (clientNow) {
       return formatDayLabel(date, clientNow);
@@ -90,7 +80,7 @@ export function AppHeader({
       return date;
     }
     return "";
-  }, [date, dateLabelProp, clientNow]);
+  }, [date, clientNow]);
 
   const isPrevDisabled = !onPrev;
   const isNextDisabled =
@@ -152,7 +142,7 @@ export function AppHeader({
               <div className="w-11 h-11" />
             )}
 
-            {rightAction || actions}
+            {actions}
           </div>
 
           {/* Title & Subtitle */}
@@ -197,8 +187,8 @@ export function AppHeader({
               >
                 H1T <span className="text-sky">MICRO</span>
               </div>
-              {rightAction || actions ? (
-                <div>{rightAction || actions}</div>
+              {actions ? (
+                <div>{actions}</div>
               ) : null}
             </div>
 
@@ -238,7 +228,7 @@ export function AppHeader({
               </div>
             )}
           </div>
-          {rightAction || actions}
+          {actions}
         </header>
       </>
     );
@@ -349,9 +339,9 @@ export function AppHeader({
           >
             {title || "HÔM NAY"}
           </h1>
-          {desktopSubtitle && (
+          {subtitle && (
             <div className="text-sm text-secondary">
-              {desktopSubtitle}
+              {subtitle}
             </div>
           )}
         </div>
@@ -414,7 +404,7 @@ export function AppHeader({
         </div>
 
         {/* Desktop actions slot (e.g. "Chép hôm qua", "+ Thêm món") */}
-        {actions || rightAction}
+        {actions}
       </header>
     </>
   );

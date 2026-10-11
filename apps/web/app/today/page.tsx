@@ -10,8 +10,8 @@ import { SegmentedBar } from "@/components/ui/segmented-bar";
 import { Sheet } from "@/components/ui/sheet";
 import { PillButton } from "@/components/ui/pill-button";
 import { apiClient } from "@/lib/api-client";
-import { formatAmount, formatDayLabel, formatDesktopDate } from "@/lib/format";
-import { SAMPLE_DAY, syncSampleDayToday, type MockDayData } from "@/lib/mock/sample-day";
+import { formatAmount, formatDesktopDate } from "@/lib/format";
+import { SAMPLE_DAY, type MockDayData } from "@/lib/mock/sample-day";
 import { useDiary } from "@/lib/diary-store";
 
 function subscribeOnline(callback: () => void) {
@@ -45,7 +45,7 @@ function TodayContent() {
   const forceLoading = searchParams?.get("loading") === "1";
   const forceOffline = searchParams?.get("offline") === "1";
 
-  const { data: diaryData, toast, highlightedMeal, setHighlightedMeal, hydrated } = useDiary();
+  const { data: diaryData, highlightedMeal, setHighlightedMeal, hydrated } = useDiary();
 
   const [data, setData] = useState<MockDayData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -54,7 +54,6 @@ function TodayContent() {
   const isOnline = useSyncExternalStore(subscribeOnline, getOnlineSnapshot, getOnlineServerSnapshot);
 
   useEffect(() => {
-    syncSampleDayToday();
     setClientNow(new Date());
   }, []);
 
@@ -94,7 +93,6 @@ function TodayContent() {
   const showLoading = forceLoading || (isLoading && !diaryData && !data);
   const showOfflineBanner = forceOffline || !isOnline;
   const currentData = (hydrated ? diaryData : null) || data || SAMPLE_DAY;
-  const dateLabel = clientNow ? formatDayLabel(currentData.date, clientNow) : currentData.dateLabel;
   const desktopSubtitle = clientNow
     ? `${formatDesktopDate(currentData.date)} · Ngày tập ${currentData.user.trainingMinutes}′ · ${currentData.user.goalLabel} · ${currentData.user.weightKg} kg`
     : currentData.desktopDateLabel;
@@ -179,7 +177,6 @@ function TodayContent() {
           <AppHeader
             variant="daily"
             date={currentData.date}
-            dateLabel={dateLabel}
             canGoNext={false}
             alignGroup="today-header"
             summary={
@@ -284,7 +281,6 @@ function TodayContent() {
         <AppHeader
           variant="daily"
           date={currentData.date}
-          dateLabel={dateLabel}
           canGoNext={false}
           alignGroup="today-header"
           summary={
@@ -486,10 +482,9 @@ function TodayContent() {
             variant="daily"
             title="HÔM NAY"
             date={currentData.date}
-            dateLabel={dateLabel}
             canGoNext={false}
             alignGroup="today-header"
-            desktopSubtitle={desktopSubtitle}
+            subtitle={desktopSubtitle}
             actions={
               <>
                 <button
@@ -737,31 +732,6 @@ function TodayContent() {
         </div>
       </Sheet>
 
-      {/* Floating Toast Notification (Responsive for Mobile and Desktop) */}
-      {toast && (
-        <div
-          role="status"
-          className="fixed bottom-20 lg:bottom-8 left-4 right-4 lg:left-auto lg:right-8 lg:w-[400px] max-w-[528px] mx-auto z-50 bg-ink text-white rounded-2xl p-2.5 pl-4 flex items-center justify-between gap-3 shadow-2xl border border-card-border/20"
-        >
-          <span className="text-sm font-medium truncate">{toast.message}</span>
-          <button
-            type="button"
-            onClick={() => {
-              setHighlightedMeal(toast.mealSlot);
-              const el =
-                document.getElementById(`meal-${toast.mealSlot}`) ||
-                document.getElementById(`desktop-meal-${toast.mealSlot}`);
-              if (el) {
-                el.scrollIntoView({ behavior: "smooth", block: "center" });
-              }
-              setTimeout(() => setHighlightedMeal(null), 2500);
-            }}
-            className="shrink-0 min-h-[44px] px-3.5 rounded-xl text-sky font-bold text-sm bg-transparent border-0 cursor-pointer hover:bg-surface-dark active:scale-[0.97]"
-          >
-            Xem
-          </button>
-        </div>
-      )}
     </div>
   );
 }

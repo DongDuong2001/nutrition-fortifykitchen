@@ -30,9 +30,8 @@ export default function DevUiPage() {
           <AppHeader
             variant="daily"
             date="2026-10-10"
-            dateLabel="Hôm nay, 10/10"
             title="HÔM NAY"
-            desktopSubtitle="Thứ Bảy, 10/10/2026 · Ngày tập 60′ · Giữ cân · 65 kg"
+            subtitle="Thứ Bảy, 10/10/2026 · Ngày tập 60′ · Giữ cân · 65 kg"
             canGoNext={false}
             summary={
               <div className="bg-[#181B20] border border-white/10 rounded-2xl p-4 text-white text-sm">

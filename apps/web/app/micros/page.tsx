@@ -14,9 +14,9 @@ import {
   type NutrientDefinition,
   type TargetSource,
 } from "@/lib/nutrients";
-import { formatAmount, formatDayLabel, formatDesktopDate } from "@/lib/format";
+import { formatAmount, formatDesktopDate } from "@/lib/format";
 import { getTodayIsoVN } from "@/lib/date";
-import { syncSampleDayToday, type MockDayData } from "@/lib/mock/sample-day";
+import { type MockDayData } from "@/lib/mock/sample-day";
 import { useDiary } from "@/lib/diary-store";
 
 interface GroupConfig {
@@ -169,17 +169,16 @@ function MicrosContent() {
     general: true,
   });
 
+  const scrollRef = useRef<HTMLDivElement>(null);
   const chipBarRef = useRef<HTMLDivElement>(null);
   const chipsContainerRef = useRef<HTMLDivElement>(null);
   const chipRefs = useRef<Record<string, HTMLButtonElement | null>>({});
-  const [chipBarHeight, setChipBarHeight] = useState(52);
   const isManualScrolling = useRef(false);
   const manualTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const [clientNow, setClientNow] = useState<Date | null>(null);
 
   useEffect(() => {
-    syncSampleDayToday();
     setClientNow(new Date());
   }, []);
 
@@ -197,22 +196,9 @@ function MicrosContent() {
   }, []);
 
   const currentData = (hydrated ? diaryData : null) || data;
-  const dateLabel =
-    clientNow && currentData?.date
-      ? formatDayLabel(currentData.date, clientNow)
-      : currentData?.dateLabel || "";
-
   const desktopSubtitle = clientNow
     ? `${formatDesktopDate(currentData?.date || getTodayIsoVN())} · Giữ cân · 65 kg · Thiếu nhiều nhất: ${currentData?.microsSummary.mostLacking.join(", ")}`
     : `${currentData?.desktopDateLabel || "Thứ Bảy, 10/10/2026 · Giữ cân · 65 kg"} · Thiếu nhiều nhất: ${currentData?.microsSummary.mostLacking.join(", ")}`;
-
-  // Measure chip bar height for --chipbar-h CSS variable
-  useEffect(() => {
-    if (chipBarRef.current) {
-      const h = chipBarRef.current.offsetHeight;
-      if (h > 0) setChipBarHeight(h);
-    }
-  }, [isLoading]);
 
   // Auto-scroll active chip into view horizontally so it always stays visible
   useEffect(() => {
@@ -238,7 +224,9 @@ function MicrosContent() {
 
     if (elements.length === 0) return;
 
-    const chipBarH = chipBarHeight || 52;
+    // On the phone the groups scroll inside the body; on desktop the page scrolls
+    const root = scrollRef.current && scrollRef.current.offsetParent !== null ? scrollRef.current : null;
+    const rootTop = root ? root.getBoundingClientRect().top : 0;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -248,8 +236,8 @@ function MicrosContent() {
         if (visibleEntries.length > 0) {
           visibleEntries.sort(
             (a, b) =>
-              Math.abs(a.boundingClientRect.top - chipBarH) -
-              Math.abs(b.boundingClientRect.top - chipBarH)
+              Math.abs(a.boundingClientRect.top - rootTop) -
+              Math.abs(b.boundingClientRect.top - rootTop)
           );
           const topEntry = visibleEntries[0];
           const key = topEntry.target.id.replace("group-", "") as NutrientGroup;
@@ -259,7 +247,8 @@ function MicrosContent() {
         }
       },
       {
-        rootMargin: `-${chipBarH}px 0px -55% 0px`,
+        root,
+        rootMargin: "0px 0px -55% 0px",
         threshold: [0, 0.1, 0.3, 0.6],
       }
     );
@@ -269,7 +258,7 @@ function MicrosContent() {
     return () => {
       observer.disconnect();
     };
-  }, [isLoading, currentData, chipBarHeight]);
+  }, [isLoading, currentData]);
 
   const toggleGroup = (group: NutrientGroup) => {
     setOpenGroups((prev) => ({
@@ -379,7 +368,6 @@ function MicrosContent() {
           variant="daily"
           title="VI CHẤT"
           date={currentData?.date}
-          dateLabel={dateLabel}
           canGoNext={false}
           alignGroup="micros-header"
           summary={
@@ -426,15 +414,13 @@ function MicrosContent() {
       {/* MOBILE / TABLET LAYOUT (<1024px)                               */}
       {/* ============================================================== */}
       <div
-        style={{ "--chipbar-h": `${chipBarHeight}px` } as React.CSSProperties}
         data-align-container="micros-page"
-        className="w-full max-w-full min-w-0 min-h-screen bg-page flex flex-col relative lg:hidden pb-[88px]"
+        className="w-full max-w-full min-w-0 h-dvh overflow-hidden bg-page flex flex-col relative lg:hidden"
       >
         {/* Header */}
         <AppHeader
           variant="daily"
           date={currentData?.date}
-          dateLabel={dateLabel}
           canGoNext={false}
           title="VI CHẤT"
           alignGroup="micros-header"
@@ -462,7 +448,7 @@ function MicrosContent() {
         {/* Sticky Horizontally Scrolling Group Chips */}
         <div
           ref={chipBarRef}
-          className="sticky top-0 z-30 w-full min-w-0 max-w-full bg-page border-b border-card-border"
+          className="flex-none z-30 w-full min-w-0 max-w-full bg-page border-b border-card-border"
         >
           <div
             ref={chipsContainerRef}
@@ -496,8 +482,9 @@ function MicrosContent() {
           </div>
         </div>
 
-        {/* Main Content Container (max-w-[560px] mx-auto px-4) */}
-        <main className="flex-1 w-full max-w-[560px] mx-auto px-4 pt-3 pb-6 flex flex-col gap-3.5 min-w-0">
+        {/* Only the body scrolls: the header and chip bar stay put (SPEC: header flex none, scrolling body) */}
+        <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto pb-[88px]">
+        <main className="w-full max-w-[560px] mx-auto px-4 pt-3 pb-6 flex flex-col gap-3.5 min-w-0">
           {/* 4-column equal grid Legend */}
           <Legend />
 
@@ -520,6 +507,7 @@ function MicrosContent() {
             * Giá trị tham khảo theo khuyến nghị cho người Việt Nam (2016) · Mục tiêu theo cân nặng, giới tính và ngày tập.
           </footer>
         </main>
+        </div>
 
         {/* Fixed Mobile Dock */}
         <div className="fixed bottom-0 left-0 right-0 z-40 bg-ink">
@@ -585,7 +573,7 @@ function MicrosContent() {
             variant="daily"
             title="VI CHẤT"
             alignGroup="micros-header"
-            desktopSubtitle={desktopSubtitle}
+            subtitle={desktopSubtitle}
             desktopStat={
               <div className="flex items-baseline gap-2 mr-2">
                 <div className="font-display italic font-black text-[34px] leading-none tabular-nums">
@@ -710,10 +698,10 @@ function GroupCard({
       id={`${idPrefix}${group.key}`}
       data-align-group={alignGroup}
       data-align-edge={alignGroup && idPrefix.includes("desktop") ? "left" : undefined}
-      className="bg-card border border-card-border rounded-[18px] overflow-clip flex flex-col scroll-mt-[calc(var(--chipbar-h,52px)+8px)] lg:scroll-mt-6 break-inside-avoid"
+      className="bg-card border border-card-border rounded-[18px] overflow-clip flex flex-col scroll-mt-2 lg:scroll-mt-6 break-inside-avoid"
     >
-      {/* Sticky group header: offset by --chipbar-h on mobile, top-0 on desktop */}
-      <div className="sticky top-[var(--chipbar-h,52px)] lg:top-0 z-10 bg-card border-b border-card-border">
+      {/* Sticky group header: sticks to the top of the scrolling body */}
+      <div className="sticky top-0 z-10 bg-card border-b border-card-border">
         <button
           type="button"
           onClick={onToggle}

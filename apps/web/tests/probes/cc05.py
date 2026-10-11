@@ -60,7 +60,7 @@ def run():
             pg.wait_for_timeout(300)
             check(pg.locator("h2 >> visible=true").filter(has_text="Yến mạch").count() == 1, f"{name}: entry shows Yến mạch")
             check(grams_input(pg).input_value() == "60", f"{name}: entry starts at 60 g (found {grams_input(pg).input_value()})")
-            check(shown(pg, 'button[aria-haspopup="listbox"]:has-text("Bữa sáng")'), f"{name}: entry starts in Bữa sáng")
+            check(shown(pg, '[role=radio][aria-checked=true]:has-text("Bữa sáng")'), f"{name}: entry starts in Bữa sáng")
             res = check_align_groups(pg, "entry")
             check(not res["errors"], f"{name}: entry rows share edges ({res['errors']})")
             check(res["pairs"].get("entry", 0) >= 2, f"{name}: entry group compares pairs ({res['pairs'].get('entry', 0)})")
@@ -92,9 +92,7 @@ def run():
 
             # 4. move Yến mạch to Bữa tối
             pg.goto(BASE + "/entry/item-1", wait_until="networkidle")
-            pg.locator('button[aria-haspopup="listbox"] >> visible=true').first.click()
-            pg.wait_for_timeout(200)
-            pg.locator('[role=option] >> visible=true').filter(has_text="Bữa tối").first.click()
+            pg.locator('[role=radio] >> visible=true').filter(has_text="Bữa tối").first.click()
             pg.wait_for_timeout(200)
             button(pg, "Lưu thay đổi").click()
             pg.wait_for_url("**/today")
