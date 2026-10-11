@@ -7,6 +7,16 @@ export interface AppSettings {
   mealReminders: boolean;
   trainingReminders: boolean;
   weeklySummary: boolean;
+  // Notification toggles & times
+  breakfastReminder: boolean;
+  breakfastTime: string;
+  lunchReminder: boolean;
+  lunchTime: string;
+  dinnerReminder: boolean;
+  dinnerTime: string;
+  workoutSaltReminder: boolean;
+  eveningSummaryReminder: boolean;
+  eveningSummaryTime: string;
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -16,6 +26,15 @@ export const DEFAULT_SETTINGS: AppSettings = {
   mealReminders: true,
   trainingReminders: true,
   weeklySummary: false,
+  breakfastReminder: true,
+  breakfastTime: "07:30",
+  lunchReminder: true,
+  lunchTime: "12:30",
+  dinnerReminder: false,
+  dinnerTime: "19:30",
+  workoutSaltReminder: true,
+  eveningSummaryReminder: false,
+  eveningSummaryTime: "21:00",
 };
 
 export type KeyValueStorage = Pick<Storage, "getItem" | "setItem">;
@@ -52,6 +71,15 @@ export function loadSettings(storage: KeyValueStorage | null = browserStorage())
       mealReminders: typeof parsed.mealReminders === "boolean" ? parsed.mealReminders : DEFAULT_SETTINGS.mealReminders,
       trainingReminders: typeof parsed.trainingReminders === "boolean" ? parsed.trainingReminders : DEFAULT_SETTINGS.trainingReminders,
       weeklySummary: typeof parsed.weeklySummary === "boolean" ? parsed.weeklySummary : DEFAULT_SETTINGS.weeklySummary,
+      breakfastReminder: typeof parsed.breakfastReminder === "boolean" ? parsed.breakfastReminder : DEFAULT_SETTINGS.breakfastReminder,
+      breakfastTime: typeof parsed.breakfastTime === "string" ? parsed.breakfastTime : DEFAULT_SETTINGS.breakfastTime,
+      lunchReminder: typeof parsed.lunchReminder === "boolean" ? parsed.lunchReminder : DEFAULT_SETTINGS.lunchReminder,
+      lunchTime: typeof parsed.lunchTime === "string" ? parsed.lunchTime : DEFAULT_SETTINGS.lunchTime,
+      dinnerReminder: typeof parsed.dinnerReminder === "boolean" ? parsed.dinnerReminder : DEFAULT_SETTINGS.dinnerReminder,
+      dinnerTime: typeof parsed.dinnerTime === "string" ? parsed.dinnerTime : DEFAULT_SETTINGS.dinnerTime,
+      workoutSaltReminder: typeof parsed.workoutSaltReminder === "boolean" ? parsed.workoutSaltReminder : DEFAULT_SETTINGS.workoutSaltReminder,
+      eveningSummaryReminder: typeof parsed.eveningSummaryReminder === "boolean" ? parsed.eveningSummaryReminder : DEFAULT_SETTINGS.eveningSummaryReminder,
+      eveningSummaryTime: typeof parsed.eveningSummaryTime === "string" ? parsed.eveningSummaryTime : DEFAULT_SETTINGS.eveningSummaryTime,
     };
   } catch {
     return { ...DEFAULT_SETTINGS };

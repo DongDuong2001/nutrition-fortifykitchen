@@ -46,11 +46,23 @@ describe("Settings store (lib/settings.ts)", () => {
 
   it("saves and loads notification settings", () => {
     const storage = fakeStorage();
-    saveSettings({ mealReminders: false, weeklySummary: true }, storage);
+    saveSettings(
+      {
+        breakfastReminder: false,
+        dinnerReminder: true,
+        workoutSaltReminder: false,
+        eveningSummaryReminder: true,
+        breakfastTime: "08:00",
+      },
+      storage
+    );
     const loaded = loadSettings(storage);
-    expect(loaded.mealReminders).toBe(false);
-    expect(loaded.weeklySummary).toBe(true);
-    expect(loaded.trainingReminders).toBe(true); // default
+    expect(loaded.breakfastReminder).toBe(false);
+    expect(loaded.lunchReminder).toBe(true); // default
+    expect(loaded.dinnerReminder).toBe(true);
+    expect(loaded.workoutSaltReminder).toBe(false);
+    expect(loaded.eveningSummaryReminder).toBe(true);
+    expect(loaded.breakfastTime).toBe("08:00");
   });
 
   it("handles malformed JSON gracefully", () => {
