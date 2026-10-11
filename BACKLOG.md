@@ -21,3 +21,8 @@ Our edge over Cronometer: coach-rule targets and Vietnamese-first food data. The
 
 ## Pricing principle (from Cronometer)
 The core stays free: logging, barcode, the full nutrient report. Pro charges for convenience and coaching: auto-repeat, recipe import, coach suggestions, trends.
+
+## Training (from ag-01 review)
+- [ ] **Training checklist ticks aren't saved:** store the ticks per day in the diary.
+- [ ] **Duration chips wrap 3+2:** use an even grid.
+- [ ] **"Carb nhanh" sub-line copy:** check it against design/screens/Training.dc.html.

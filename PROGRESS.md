@@ -6,6 +6,7 @@
 
 | Date | Commit | Built | Next |
 | --- | --- | --- | --- |
+| 11/10/2026 | ag-01 | Training screen (Antigravity, rebased onto feat/ui and merged by Claude Code): training page, phase checklist, duration selector, rest-day card, salt and sodium cards, tip banner, lib/training.ts with unit tests; /training added to hydration.py | Training backlog (BACKLOG) |
 | 11/10/2026 | cc-04 | AppHeader sub on food detail, new food, entry and setup (phone) screens; setup step bars via AppHeader `progress` (StepBars moved to components/ui); food favourite heart in the header actions; onboarding-header removed; /add sticky group headers cover the 12 px side bleed; entry meal chips as ChipGroup (3 cols phone, 5 desktop); tests cc04 + header alignment pairs | Micros phone header collapse (BACKLOG); sticky-header crop decision (OPEN_QUESTIONS) |
 | 11/10/2026 | ui-04b-fix-1 | Client runtime mock day in Asia/Ho_Chi_Minh; full Vietnamese weekday names ("Thứ Hai"…"Thứ Bảy", "Chủ nhật"); desktop subtitle formatter; Option B summary inset panel (surface-dark, 16px radius, no raw hex); formatAmount mg 1 decimal under 100; disabled date nav handlers when missing; desktop header alignment pairs for /today and /micros; opaque sticky chip bar on /micros | Ready for review |
 | 10/10/2026 | ui-01 | Tokens, fonts, pure logic (levels, format, targets) with TDD | Shared UI components, mock data, /dev/ui preview |
@@ -21,6 +22,12 @@
 | 11/10/2026 | ui-05-fix-3 | Nutrient catalog keys & Vitamin B* naming, useMealSlot client resolution hook, desktop Today left text alignment (-mx-2), content-based data-align-edge checks, probe scripts (hydration & screenshots) | Next tasks |
 | 11/10/2026 | ui-05-fix-4 | Put test:hydration into npm run check gates, remove dead vitamin remap in micros page, read targets from calculateTargets in PortionPanel & food detail (incl. vitamin_k %), remove playwright test permission from .claude/settings.json | ui-05 approved |
 | 11/10/2026 | ui-04b | Shared AppHeader (daily, sub, tab variants), adopted in /today, /micros, /micros/[nutrient], /profile, /training, and /dev/ui; formatDayLabel timezone & yesterday support; alignment checks today-header and micros-header | Ready for review |
+
+## Quality Gate Summary (ag-01)
+- `ALIGN_BASE_URL=http://localhost:3101 npm run check` on feat/ui with cc-04 and ag-01: all 5 gates passed (tsc --noEmit, vitest: 169 passed in 15 files, build: 19/19 routes, test:align: all pairs aligned, test:hydration: 0 errors incl. /training at 390 and 1440).
+- Probes: cc02-final, cc03, cc04, cc05, cc06: no problems.
+- Edges: training-content (phase-checklist, rest-day-card) and training-summary (salt-summary-card, sodium-progress-card) are not in tests/alignment.py, so not checked by the gate.
+
 
 ## Quality Gate Summary (cc-04)
 - `ALIGN_BASE_URL=http://localhost:3101 npm run check`: all 5 gates passed (tsc --noEmit, vitest: 158 passed in 14 files, build: 19/19 routes, test:align: all pairs aligned incl. food-header and entry-header, test:hydration: 0 errors).
