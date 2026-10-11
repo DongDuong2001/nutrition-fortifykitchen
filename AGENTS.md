@@ -1,6 +1,7 @@
 # Agent rules: H1T MICRO
 
 Read these before any task: `HANDOFF.md`, `design/SPEC.md`, `docs/`, then `tasks/00_task_runner_rules.md`.
+Antigravity: also follow .agent/rules/antigravity.md.
 
 ## Scope (who does what)
 - **Database and backend belong to Dong.** Do NOT touch `migrations/`, `apps/api/`, `docker-compose.yml`, or the database. Do not run migrations.
@@ -113,6 +114,12 @@ Always use **your agent's fixed port**: **3100 for Antigravity, 3101 for Claude 
 - Each agent works in its own checkout. Antigravity uses the main folder on `feat/ui`, and Claude Code uses the worktree `../nutrition-fk-claude` on `feat/ui-cc-*`.
 - **Now working board:** before starting a task, add a row to the "Now working" table at the top of PROGRESS.md (task, owner, files or routes). Remove it when done. Never edit files claimed by the other agent's row; if you must, stop and tell the user.
 - Shared files (`components/ui/*`, `lib/*`, `globals.css`, `AGENTS.md`): change them only when your task needs it, keep the change small, and say so in your report so the other agent can rebase.
+
+## File ownership
+- Antigravity owns: components/ui/*, lib/format, lib/targets, lib/nutrients, lib/levels, lib/meal-slot, tests/alignment.py, tests/probes infrastructure, npm scripts, app/today, app/micros, AppHeader, bottom nav, app/profile, app/training.
+- Claude Code owns: app/add, app/foods/*, components/foods/*, app/signup, app/signin/*, app/setup/*, components/onboarding/*, lib/diary-store, lib/food-categories, lib/recent-foods, lib/onboarding, lib/mock/foods, favourites.
+- Never edit the other agent's files; request changes in OPEN_QUESTIONS. Both may append to PROGRESS, OPEN_QUESTIONS and BACKLOG.
+- When the user says stop, no agent edits anything until told to continue.
 
 ## Commands (so they run without permission prompts)
 Run routine work only through these npm scripts in `apps/web`. The user has auto-approved commands that start with `npm run`; anything else may stop and ask.
