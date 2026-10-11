@@ -166,6 +166,7 @@ All hydration checks passed cleanly (0 hydration errors, sessionStorage entries 
 | 11/10/2026 | cc-03 | Favourites (Yêu thích): `lib/favourites.ts` stores ids in localStorage under `h1t_favourite_foods_v1` (validated, guarded, loaded after mount through diary-store). Heart on /foods/[id] with the existing Toast. /add: Yêu thích chip after Tất cả, flat favourites list ranked by search, empty state with Bỏ lọc. Grouped rows show a 14 px heart. | Dong: favourites table when accounts exist. Cross-tab sync (storage event) not built |
 | 11/10/2026 | cc-05 | Edit entry and undo, part 1: `/entry/[id]` (portion, meal, Lưu, Xoá món này, unknown id). Sample items get an edit layer in sessionStorage (`h1t_sample_edits_v1`), resolved by name to MOCK_FOODS. Totals, meal kcal and Micros come from the edits. Undo for the last delete, in the toast (5 s). Pure logic in `lib/diary-edits.ts`. | Antigravity: link Today rows to /entry/{item.id} (after ui-04b). Part 2 with Today wiring |
 
+| 11/10/2026 | cc-06 | Merge cc-03 and cc-05 onto ui-04b. Ownership update. Review fixes (pure runtime date, AppHeader props, Micros stuck header, inline meal chips, one toast). Today rows open Edit entry. | Part 2 of entry flow done; next task from the user |
 ## Quality Gate Outputs (ui-05)
 - `npx tsc --noEmit`: 0 errors (clean).
 - `npx vitest run`:
@@ -362,3 +363,12 @@ All alignment and hydration tests passed cleanly (<= 1px difference, 0 hydration
 - Design check: the undo toast matches the design (message, Hoàn tác, countdown). The entry card matches the design's fields and preview. The meal control uses the shared sheet instead of inline chips (see OPEN_QUESTIONS).
 - Review fixes: a damaged stored list of added entries now reads as empty. It no longer clears the sample edits or crashes the entry screen (`parseAddedEntries`, with tests). `amountsOfEntry` removed, since `amountsOfNumbers` covers entries.
 - Merge: not done. Ready for review.
+
+## Quality Gate Outputs (cc-06)
+- Rebased `feat/ui-cc-favourites` then `feat/ui-cc-edit-entry` onto `feat/ui` f935803 (only OPEN_QUESTIONS conflicted, both sides kept). Typecheck and tests passed after each.
+- Ownership: Claude Code owns apps/web and merges `feat/ui`; Antigravity works on `feat/ui-ag-*` only (AGENTS.md, .agent/rules/antigravity.md, CLAUDE.md).
+- Fixes: `withRuntimeDate` (pure, tested) replaces the `syncSampleDayToday` mutation, applied in the diary store after mount. AppHeader: `rightAction`, `desktopSubtitle` and `dateLabel` removed (`actions`, `subtitle`, `date`). Micros phone layout: header and chip bar fixed, only the body scrolls. Edit entry: inline meal chips, one toast system (`components/diary-toast.tsx`, 5 s undo), UndoToast and the MealSwitcher `title` prop removed. `/entry/item-1` added to alignment.py.
+- Next dev "1 Issue": not reproduced here (fresh load, client navigation and seeded storage, old and new code, 390 and 1440, no console warnings or badge). `hydration.py` now fails on any React/Next console warning and on the dev badge, on /today, /micros, /add and /entry/item-1 at both widths.
+- `ALIGN_BASE_URL=http://localhost:3101 npm run check`: passes. 14 test files, 158 tests. Pairs: daily-targets 390 3 / 1440 3, setup-row 1440 2, add-list 390 3 / 1440 3, today-header 390 1 / 1440 1, micros-header 390 1 / 1440 1, entry 390 4 / 1440 4. `test:hydration`: 16 checks pass.
+- Probes `cc02-final`, `cc03`, `cc05`, `cc06`: no problems. cc06: Today row → edit 90 g → totals 1.155; delete shows one toast, Hoàn tác restores; no Issue badge; Micros header stays at top, chip bar fixed.
+- Screenshots: `apps/web/.screenshots/cc06-today-390.png`, `cc06-micros-stuck-390.png`, `cc06-entry-chips-390.png`, `cc06-today-1440.png`.
