@@ -1,0 +1,35 @@
+{
+  "model": "haiku",
+  "permissions": {
+    "allow": [
+      "Bash(npm run typecheck:*)",
+      "Bash(npm run test:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npm test:*)",
+      "Bash(npx vitest:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx next:*)",
+      "Bash(npx playwright test:*)",
+      "Bash(python3 scripts/*:*)",
+      "Bash(lsof -nP -iTCP:3101:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git rebase feat/ui:*)"
+    ],
+    "deny": [
+      "Edit(migrations/**)",
+      "Write(migrations/**)",
+      "Edit(apps/api/**)",
+      "Write(apps/api/**)",
+      "Read(.env)",
+      "Read(.env.*)",
+      "Bash(git push --force:*)",
+      "Bash(pip3 install:*)",
+      "Bash(npx playwright install:*)"
+    ]
+  }
+}

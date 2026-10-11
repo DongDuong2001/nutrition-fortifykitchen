@@ -1,5 +1,10 @@
 # Progress
 
+## Now working
+| Task | Owner | Files / routes |
+|---|---|---|
+| ui-05-fix | Antigravity | app/add, app/foods, app/today, app/micros, lib/diary-store, lib/meal-slot, components/ui |
+
 | Date | Commit | Built | Next |
 | --- | --- | --- | --- |
 | 10/10/2026 | ui-01 | Tokens, fonts, pure logic (levels, format, targets) with TDD | Shared UI components, mock data, /dev/ui preview |

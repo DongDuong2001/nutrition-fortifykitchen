@@ -85,7 +85,7 @@ Read each skill's `SKILL.md` before first use.
   - Only if `python3 -c "import playwright"` fails, or launching Chromium errors with "Executable doesn't exist", stop and tell the user. Don't install anything yourself.
 
 ## Dev server and ports
-Always use **port 3100** for this app. Never pick a new port.
+Always use **your agent's fixed port**: **3100 for Antigravity, 3101 for Claude Code**. Never pick any other port. The steps below say 3100; Claude Code reads them as 3101.
 1. Before starting a server, check the port: `lsof -nP -iTCP:3100 -sTCP:LISTEN`.
    - If our own Next.js server (from `apps/web`) is already running there, **reuse it** and don't start another.
    - If something else is on 3100, or a stale server of ours, stop it: `lsof -tiTCP:3100 -sTCP:LISTEN | xargs kill` (use `kill -9` if it survives). Then start: `npm run dev -- -p 3100`.
@@ -107,3 +107,8 @@ Always use **port 3100** for this app. Never pick a new port.
 - Run the Playwright alignment check, `apps/web/tests/alignment.spec.ts`. Every element with `data-align-group="<name>"` must share left and right edges within 1 px with the other members of its group. Put the attribute on the rows of every card, panel and sheet you build.
 - In PROGRESS.md, write one line per screen: "Edges: <groups checked> pass".
 - Open each screenshot at 390 and 1440 and look specifically at column alignment and right edges. Don't just confirm that the screen renders.
+
+## Two agents in this repo (Antigravity + Claude Code)
+- Each agent works in its own checkout. Antigravity uses the main folder on `feat/ui`, and Claude Code uses the worktree `../nutrition-fk-claude` on `feat/ui-cc-*`.
+- **Now working board:** before starting a task, add a row to the "Now working" table at the top of PROGRESS.md (task, owner, files or routes). Remove it when done. Never edit files claimed by the other agent's row; if you must, stop and tell the user.
+- Shared files (`components/ui/*`, `lib/*`, `globals.css`, `AGENTS.md`): change them only when your task needs it, keep the change small, and say so in your report so the other agent can rebase.

@@ -44,3 +44,6 @@ Thumbs.db
 *.tgz
 __pycache__/
 *.pyc
+
+# Claude Code personal settings
+.claude/settings.local.json
