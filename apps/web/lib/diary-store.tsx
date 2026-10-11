@@ -7,6 +7,7 @@ import { type MealSlot, getMealSlotNameVi } from "./meal-slot";
 import { scaleNutrients } from "./portion";
 import { formatAmount } from "./format";
 import { DEFAULT_RECENT_FOODS, isRecentFood, pushRecent, type RecentFood } from "./recent-foods";
+import { readFavouriteIds, toggleFavouriteId, writeFavouriteIds } from "./favourites";
 
 export interface AddedDiaryEntry {
   id: string;
@@ -41,6 +42,10 @@ interface DiaryContextValue {
   dismissToast: () => void;
   highlightedMeal: MealSlot | null;
   setHighlightedMeal: (meal: MealSlot | null) => void;
+  /** Newest favourite first. Loaded after mount from localStorage (see lib/favourites.ts). */
+  favouriteIds: string[];
+  isFavourite: (foodId: string) => boolean;
+  toggleFavourite: (food: FoodItem) => void;
   hydrated: boolean;
 }
 
@@ -240,6 +245,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   const [recentFoods, setRecentFoods] = useState<RecentFood[]>(DEFAULT_RECENT_FOODS);
   const [toast, setToast] = useState<ToastInfo | null>(null);
   const [highlightedMeal, setHighlightedMeal] = useState<MealSlot | null>(null);
+  const [favouriteIds, setFavouriteIds] = useState<string[]>([]);
 
   // Load from sessionStorage on mount (client-only)
   useEffect(() => {
@@ -256,9 +262,16 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     } catch {
       // Ignore sessionStorage access errors
     } finally {
+      setFavouriteIds(readFavouriteIds());
       setHydrated(true);
     }
   }, []);
+
+  // Persist favourites to localStorage only after hydrated
+  useEffect(() => {
+    if (!hydrated) return;
+    writeFavouriteIds(favouriteIds);
+  }, [favouriteIds, hydrated]);
 
   // Persist addedEntries to sessionStorage only after hydrated
   useEffect(() => {
@@ -341,6 +354,12 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     setToast(null);
   }, []);
 
+  const isFavourite = useCallback((foodId: string) => favouriteIds.includes(foodId), [favouriteIds]);
+
+  const toggleFavourite = useCallback((food: FoodItem) => {
+    setFavouriteIds((prev) => toggleFavouriteId(prev, food.id));
+  }, []);
+
   const compositeData = useMemo<MockDayData>(() => {
     return computeCompositeDayData(SAMPLE_DAY, addedEntries);
   }, [addedEntries]);
@@ -357,6 +376,9 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         dismissToast,
         highlightedMeal,
         setHighlightedMeal,
+        favouriteIds,
+        isFavourite,
+        toggleFavourite,
         hydrated,
       }}
     >

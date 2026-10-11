@@ -11,7 +11,6 @@ import {
   categoriesWithFoods,
   categoryLabel,
   categoryOf,
-  isCategoryFilter,
   type FoodFilter,
 } from "@/lib/food-categories";
 import { resolveRecent, type ResolvedRecent } from "@/lib/recent-foods";
@@ -36,7 +35,7 @@ import { useMealSlot } from "@/lib/use-meal-slot";
 function AddFoodInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { data, addFoodEntry, recentFoods } = useDiary();
+  const { data, addFoodEntry, recentFoods, favouriteIds, isFavourite } = useDiary();
 
   const resolvedSlot = useMealSlot(searchParams.get("meal"));
   const [overrideSlot, setOverrideSlot] = useState<MealSlot | null>(null);
@@ -98,15 +97,17 @@ function AddFoodInner() {
     return cals;
   }, [data]);
 
-  // Category filter and search combined. Grouped only for Tất cả with no query.
-  const list = useMemo(() => buildFoodList(MOCK_FOODS, query, filter), [query, filter]);
+  // Filter and search combined. Grouped only for Tất cả with no query.
+  const list = useMemo(() => buildFoodList(MOCK_FOODS, query, filter, favouriteIds), [query, filter, favouriteIds]);
   const searchResults = list.foods;
   const categories = useMemo(() => categoriesWithFoods(MOCK_FOODS), []);
   const categoryName = useCallback((food: FoodItem) => categoryLabel(categoryOf(food)), []);
+  const isFavouriteFood = useCallback((food: FoodItem) => isFavourite(food.id), [isFavourite]);
 
   // Filter row: Tất cả, Yêu thích, then only the categories that have foods
   const filterItems = [
     { id: "all", label: "Tất cả", active: filter === "all", onClick: () => setFilter("all") },
+    { id: "favorite", label: "Yêu thích", active: filter === "favorite", onClick: () => setFilter("favorite") },
     ...categories.map((c) => ({
       id: c.key,
       label: c.label,
@@ -200,7 +201,27 @@ function AddFoodInner() {
 
   // Shared by the phone sheet and the desktop dialog
   const newFoodHref = mealSlot ? `/foods/new?meal=${mealSlot}` : "/foods/new";
-  const emptyState = (
+  const clearFilterButton = (
+    <button
+      type="button"
+      onClick={() => setFilter("all")}
+      className="min-h-[44px] px-5 rounded-full bg-page text-text font-semibold text-sm border-0 cursor-pointer active:scale-[0.97]"
+    >
+      Bỏ lọc
+    </button>
+  );
+
+  // No saved favourite still shows: an id whose food is gone must not show a blank "Không có “”"
+  const noFavourites = filter === "favorite" && !query.trim() && list.foods.length === 0;
+  const favouritesEmptyState = (
+    <div className="flex flex-col items-center text-center py-6 gap-2">
+      <div className="text-base font-bold">Chưa có món yêu thích</div>
+      <div className="text-sm text-secondary">Bấm ♡ ở trang chi tiết món để lưu.</div>
+      {clearFilterButton}
+    </div>
+  );
+
+  const searchEmptyState = (
     <div className="flex flex-col items-center text-center py-6 gap-2">
       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="text-secondary" aria-hidden="true">
         <circle cx="11" cy="11" r="7" />
@@ -208,15 +229,7 @@ function AddFoodInner() {
       </svg>
       <div className="text-base font-bold">Không có “{query}”</div>
       <div className="text-sm text-secondary">Thử từ ngắn hơn, bỏ dấu, hoặc tự tạo món.</div>
-      {isCategoryFilter(filter) && (
-        <button
-          type="button"
-          onClick={() => setFilter("all")}
-          className="min-h-[44px] px-5 rounded-full bg-page text-text font-semibold text-sm border-0 cursor-pointer active:scale-[0.97]"
-        >
-          Bỏ lọc
-        </button>
-      )}
+      {filter !== "all" && clearFilterButton}
       <Link
         href={newFoodHref}
         className="mt-2 min-h-[52px] px-7 rounded-full bg-blue text-white font-bold text-base flex items-center justify-center no-underline active:scale-[0.97]"
@@ -243,6 +256,7 @@ function AddFoodInner() {
       )}
     </div>
   );
+  const emptyState = noFavourites ? favouritesEmptyState : searchEmptyState;
 
   const createFoodLink = (
     <Link
@@ -363,6 +377,7 @@ function AddFoodInner() {
                   onPick={pickFood}
                   getMeta={getFoodMeta}
                   categoryName={categoryName}
+                  isFavourite={isFavouriteFood}
                   empty={emptyState}
                   footer={createFoodLink}
                   className="max-h-[360px] overflow-y-auto pb-1"
@@ -501,6 +516,7 @@ function AddFoodInner() {
             onPick={pickFood}
             getMeta={getFoodMeta}
             categoryName={categoryName}
+            isFavourite={isFavouriteFood}
             empty={emptyState}
             footer={createFoodLink}
             className="min-h-0 flex-1 overflow-y-auto pb-1"

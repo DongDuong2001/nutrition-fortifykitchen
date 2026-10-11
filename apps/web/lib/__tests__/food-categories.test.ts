@@ -103,9 +103,31 @@ describe("buildFoodList", () => {
     expect(ids(buildFoodList(foods, "chuoi", "rau").foods)).toEqual([]);
   });
 
-  it("treats the favourite filter as all foods, because there are no favourites yet", () => {
-    const list = buildFoodList(foods, "", "favorite");
+  it("shows only the saved favourites for the favourite filter, flat and in saved order", () => {
+    const list = buildFoodList(foods, "", "favorite", ["rau", "cha-la"]);
+    expect(list.grouped).toBe(false);
+    expect(ids(list.foods)).toEqual(["rau", "cha-la"]);
+  });
+
+  it("ranks the favourites by the search when there is a query", () => {
+    // "ch" ranks Chuối (shorter) above Chà là, even though Chà là was saved first
+    const list = buildFoodList(foods, "ch", "favorite", ["cha-la", "chuoi"]);
+    expect(ids(list.foods)).toEqual(["chuoi", "cha-la"]);
+  });
+
+  it("shows nothing when no foods are saved", () => {
+    const list = buildFoodList(foods, "", "favorite", []);
+    expect(list.foods).toEqual([]);
+  });
+
+  it("drops favourite ids whose food no longer exists", () => {
+    const list = buildFoodList(foods, "", "favorite", ["gone", "rau"]);
+    expect(ids(list.foods)).toEqual(["rau"]);
+  });
+
+  it("ignores the favourites for Tất cả", () => {
+    const list = buildFoodList(foods, "", "all", ["rau"]);
     expect(list.grouped).toBe(true);
-    expect(list.foods).toHaveLength(4);
+    expect(list.groups.map((g) => g.key)).toEqual(["tinh_bot", "rau", "trai_cay"]);
   });
 });

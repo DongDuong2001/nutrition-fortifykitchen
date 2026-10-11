@@ -163,6 +163,7 @@ All hydration checks passed cleanly (0 hydration errors, sessionStorage entries 
 | 11/10/2026 | cc-02 | Food categories (10 keys, order and labels in lib/food-categories.ts, web-side mock). /add: one scrolling filter row (Tất cả, Yêu thích, categories with foods) and recents as { foodId, servingLabel }. Tất cả groups by category with sticky headers. Shared FoodList and ChipRow on phone and desktop | Dong: category column on foods (OPEN_QUESTIONS). Favourites store for Yêu thích |
 | 11/10/2026 | cc-02 fix | Search clear: one × (native hidden). /add opens with no food: phone panel after a tap, desktop empty state. Yêu thích hidden until favourites exist. Filter row wraps from 1024 px; phone scrolls with a left fade once scrolled. formatAmount for amounts with units (kcal and mg whole, g and µg one decimal under 100, under 1 up to two decimals). Vitamin B6 label. Sticky header on card with divider. bottom-nav storage guarded | Dong: category column. Favourites store |
 | 11/10/2026 | cc-02 final | Rebased onto feat/ui 42ac9d6 (ui-05-fix-4). Re-applied cc-02 on the useMealSlot add page. Folate label is now "Vitamin B9". Hydration probe moved to h1t_recent_foods_v2. Onboarding and add-list alignment checks re-added with pair counts. BACKLOG: typed vitamins map | Dong: category column. Favourites store |
+| 11/10/2026 | cc-03 | Favourites (Yêu thích): `lib/favourites.ts` stores ids in localStorage under `h1t_favourite_foods_v1` (validated, guarded, loaded after mount through diary-store). Heart on /foods/[id] with the existing Toast. /add: Yêu thích chip after Tất cả, flat favourites list ranked by search, empty state with Bỏ lọc. Grouped rows show a 14 px heart. | Dong: favourites table when accounts exist. Cross-tab sync (storage event) not built |
 
 ## Quality Gate Outputs (ui-05)
 - `npx tsc --noEmit`: 0 errors (clean).
@@ -335,3 +336,15 @@ All alignment and hydration tests passed cleanly (<= 1px difference, 0 hydration
 - `npm run probe -- tests/probes/cc02-final.py`: no problems (see the list in the cc-02 gate block above).
 - Ran against the dev server on 3101, which was running while `npm run check` built. Next 16 writes dev and build output to separate folders.
 - Screenshots: `apps/web/.screenshots/cc02-final-add-open-390.png`, `cc02-final-add-chala-1440.png`, `cc02-final-today-390.png`.
+
+## Quality Gate Outputs (cc-03)
+- Branch `feat/ui-cc-favourites` from `feat/ui` d2c3387 (already has cc-02). Not pushed. Not merged: see the merge note below.
+- Tests written first: `lib/__tests__/favourites.test.ts` (16 tests). The favourite-filter test in `food-categories.test.ts` became 5 tests (net +4). It failed before the code and passes now.
+- `npm run typecheck`: exit 0. `npm run test`: 12 files, 112 passed.
+- `ALIGN_BASE_URL=http://localhost:3101 npm run check`: passes. Build compiled. `test:align` pairs: add-list 390 3, add-list 1440 3, food-detail 390 4, food-detail 1440 4 (the new heart row is in the group). `test:hydration`: 0 hydration errors.
+- `npm run probe -- tests/probes/cc03.py`: no problems at 390 and 1440. Heart saves and un-saves, Yêu thích lists Chà là only, empty state and Bỏ lọc, reload keeps the favourite, 14 px aria-hidden heart in the grouped list, one × in the search box.
+- `npm run probe -- tests/probes/cc02-final.py`: no problems after two expectation changes: the Yêu thích chip is now shown, and there are 11 filter chips (was 10).
+- Edges: `/add` @ 390 and 1440 (add-list) pass. `/foods/food-cha-la` @ 390 and 1440 (food-detail) pass.
+- Review fix: an id for a food that no longer exists no longer shows a blank "Không có “”" in the Yêu thích view.
+- Screenshots: `apps/web/.screenshots/cc03-detail-heart-390.png`, `cc03-add-fav-390.png`, `cc03-add-grouped-heart-390.png`, `cc03-add-fav-empty-1440.png`.
+- Merge: not done. Antigravity's ui-04b is not committed, and `nutrition-fortifykitchen` has uncommitted AGENTS.md and PROGRESS.md changes. Stopped with "ready, waiting for ui-04b".

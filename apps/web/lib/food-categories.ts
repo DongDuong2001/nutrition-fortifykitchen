@@ -1,4 +1,5 @@
 import type { FoodItem } from "./mock/foods";
+import { resolveFavourites } from "./favourites";
 import { searchFoods } from "./search";
 
 /** Web-side only for now. Dong adds a `category` column to foods with the same keys (see OPEN_QUESTIONS). */
@@ -33,7 +34,7 @@ export const FOOD_CATEGORIES: FoodCategoryDef[] = [
   { key: "cua_toi", label: "Món của tôi" },
 ];
 
-/** "all" = Tất cả, "favorite" = Yêu thích (no favourites are stored yet, so it lists everything). */
+/** "all" = Tất cả, "favorite" = Yêu thích (the saved favourite ids, see lib/favourites.ts). */
 export type FoodFilter = "all" | "favorite" | FoodCategory;
 
 export interface FoodGroup {
@@ -78,10 +79,14 @@ export function categoriesWithFoods(foods: FoodItem[]): FoodCategoryDef[] {
 }
 
 /**
- * Applies the category filter first, then the search, so both combine.
+ * Applies the filter first, then the search, so both combine.
+ * Favourites are a flat list in saved order, ranked by the search when there is a query.
  * Grouped only for Tất cả with no query.
  */
-export function buildFoodList(foods: FoodItem[], query: string, filter: FoodFilter): FoodList {
+export function buildFoodList(foods: FoodItem[], query: string, filter: FoodFilter, favouriteIds: string[] = []): FoodList {
+  if (filter === "favorite") {
+    return { grouped: false, foods: searchFoods(resolveFavourites(favouriteIds, foods), query), groups: [] };
+  }
   const category = isCategoryFilter(filter) ? filter : null;
   const scope = category ? foods.filter((f) => categoryOf(f) === category) : foods;
   const ranked = searchFoods(scope, query);

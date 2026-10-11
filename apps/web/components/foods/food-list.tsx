@@ -8,6 +8,8 @@ export interface FoodListProps {
   onPick: (food: FoodItem) => void;
   getMeta: (food: FoodItem) => string;
   categoryName: (food: FoodItem) => string;
+  /** Grouped rows show a small heart after the name for saved favourites. */
+  isFavourite?: (food: FoodItem) => boolean;
   /** Shown when the list has no foods. */
   empty: React.ReactNode;
   /** Shown after the foods, for example the create-food link. */
@@ -21,13 +23,24 @@ export interface FoodListProps {
  * so the hover and selected background is full width while the text lines up with the search field.
  * The first header and the first row carry data-align-group="add-list" for the alignment check.
  */
-export function FoodList({ list, selectedId, onPick, getMeta, categoryName, empty, footer, className = "" }: FoodListProps) {
+export function FoodList({
+  list,
+  selectedId,
+  onPick,
+  getMeta,
+  categoryName,
+  isFavourite,
+  empty,
+  footer,
+  className = "",
+}: FoodListProps) {
   const firstHeaderKey = list.grouped ? list.groups[0]?.key : undefined;
   const firstRowId = list.grouped ? list.groups[0]?.foods[0]?.id : list.foods[0]?.id;
 
   const renderRow = (food: FoodItem, withCategory: boolean) => {
     const selected = selectedId === food.id;
     const meta = withCategory ? `${categoryName(food)} · ${getMeta(food)}` : getMeta(food);
+    const showHeart = list.grouped && !!isFavourite?.(food);
     return (
       <button
         key={food.id}
@@ -44,7 +57,21 @@ export function FoodList({ list, selectedId, onPick, getMeta, categoryName, empt
           data-align-edge={food.id === firstRowId ? "left" : undefined}
           className="flex min-w-0 flex-1 flex-col gap-0.5"
         >
-          <span className="line-clamp-2 text-[15px] font-bold leading-snug">{food.nameVi}</span>
+          <span className="line-clamp-2 text-[15px] font-bold leading-snug">
+            {food.nameVi}
+            {showHeart && (
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                className="ml-1.5 inline-block align-[-2px] text-secondary"
+                aria-hidden="true"
+              >
+                <path d="M12 21s-7.5-4.6-9.5-9.1C1 8.6 3.1 5.5 6.3 5.5c2 0 3.4 1.1 4.2 2.4.8-1.3 2.2-2.4 4.2-2.4 3.2 0 5.3 3.1 3.8 6.4C19.5 16.4 12 21 12 21z" />
+              </svg>
+            )}
+          </span>
           <span className="line-clamp-2 text-xs text-secondary">{meta}</span>
         </div>
         {selected && (

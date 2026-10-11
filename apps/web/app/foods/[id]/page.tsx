@@ -14,12 +14,13 @@ import { calculateTargets } from "@/lib/targets";
 import { SegmentedBar } from "@/components/ui/segmented-bar";
 import { ChipGroup } from "@/components/ui/chip-group";
 import { StatGroup } from "@/components/ui/stat-group";
+import { Toast } from "@/components/ui/toast";
 
 function FoodDetailInner() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { addFoodEntry } = useDiary();
+  const { addFoodEntry, isFavourite, toggleFavourite } = useDiary();
 
   const foodId = params?.id as string;
   const food = useMemo(() => {
@@ -36,6 +37,7 @@ function FoodDetailInner() {
     return food?.servings[0]?.label || "100 g";
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [favouriteToast, setFavouriteToast] = useState<{ message: string } | null>(null);
 
   useEffect(() => {
     if (food?.servings[0]) {
@@ -43,6 +45,20 @@ function FoodDetailInner() {
       setSelectedServingLabel(food.servings[0].label);
     }
   }, [food]);
+
+  // Auto-dismiss the favourite toast after 4s, like the diary toast
+  useEffect(() => {
+    if (!favouriteToast) return;
+    const timer = setTimeout(() => setFavouriteToast(null), 4000);
+    return () => clearTimeout(timer);
+  }, [favouriteToast]);
+
+  const saved = food ? isFavourite(food.id) : false;
+  const handleToggleFavourite = () => {
+    if (!food) return;
+    toggleFavourite(food);
+    setFavouriteToast({ message: saved ? "Đã bỏ khỏi Yêu thích" : "Đã lưu vào Yêu thích" });
+  };
 
   const parsedGrams = useMemo(() => parseGramsInput(gramsInput), [gramsInput]);
 
@@ -151,6 +167,30 @@ function FoodDetailInner() {
 
       {/* Main Content Area */}
       <main className="flex-1 w-full max-w-[560px] mx-auto p-4 flex flex-col gap-3.5 pb-24">
+        {/* Favourite toggle, in the body under the name (the header is set by AppHeader later) */}
+        <div data-align-group="food-detail" className="w-full flex items-center">
+          <button
+            type="button"
+            onClick={handleToggleFavourite}
+            aria-pressed={saved}
+            aria-label={saved ? "Bỏ yêu thích" : "Thêm vào yêu thích"}
+            className="w-11 h-11 rounded-full bg-card border border-card-border text-blue flex items-center justify-center cursor-pointer active:scale-[0.97] transition-transform"
+          >
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill={saved ? "currentColor" : "none"}
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M12 21s-7.5-4.6-9.5-9.1C1 8.6 3.1 5.5 6.3 5.5c2 0 3.4 1.1 4.2 2.4.8-1.3 2.2-2.4 4.2-2.4 3.2 0 5.3 3.1 3.8 6.4C19.5 16.4 12 21 12 21z" />
+            </svg>
+          </button>
+        </div>
+
         {/* Serving and Gram Selection */}
         <div data-align-group="food-detail" className="w-full">
           <ChipGroup
@@ -244,6 +284,13 @@ function FoodDetailInner() {
           </div>
         )}
       </main>
+
+      {/* Favourite toast, just above the sticky CTA */}
+      {favouriteToast && (
+        <div className="fixed bottom-24 inset-x-0 px-4 z-40 pointer-events-none">
+          <Toast message={favouriteToast.message} />
+        </div>
+      )}
 
       {/* Sticky Bottom CTA */}
       <div className="fixed bottom-0 inset-x-0 bg-page/95 backdrop-blur-sm border-t border-card-border p-3 z-30">

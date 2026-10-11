@@ -22,7 +22,8 @@
 - [ ] (cc-01) `StatGroup` labels are 11 px (`text-[11px]`), below the 12 px minimum in SPEC. It is a shared primitive, so the fix belongs to whoever owns `components/ui`.
 - [x] (cc-01) "Mở ứng dụng Mail" uses `mailto:`, which opens a new email, not the inbox. Keep, or hide it on desktop? Decided: phone only.
 - [ ] (cc-02) Food category is web-side only. Dong: add a category column to the foods table, using the same keys.
-- [ ] (cc-02) The "Yêu thích" chip is hidden until favourites exist. Needs a favourites store, then show the chip again.
+- [x] (cc-02) The "Yêu thích" chip was hidden until favourites existed. The favourites store now exists (localStorage, local to this browser), so the chip is back.
+- [ ] (cc-03) Favourites live in localStorage per browser. Dong: favourites table when accounts exist.
 - [ ] (cc-02) `formatAmount` treats µg like g (one decimal under 100), so vitamin D shows "2,1 µg". kg and other units are not covered. Plain weights keep `formatNumber`. Confirm.
 - [ ] (cc-02) The catalog label for B6 is now "Vitamin B6" (was "B6 (Pyridoxine)"). It also shows on Micros. Confirm.
 - [ ] (cc-02) Recents are now `{ foodId, servingLabel }` in sessionStorage under `h1t_recent_foods_v2`. The old string list is ignored, not migrated. The default recents show the food names ("Yogurt kefir 200 ml"), not the old "Kefir 200 ml".

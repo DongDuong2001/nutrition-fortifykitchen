@@ -105,15 +105,17 @@ def run():
                 # every filter chip visible and inside the viewport
                 chips = pg.locator('[role=group][aria-label="Lọc món theo nhóm"]:visible button')
                 n = chips.count()
-                check(n == 10, f"1440: 10 filter chips (Tất cả + 9 categories), found {n}")
+                check(n == 11, f"1440: 11 filter chips (Tất cả + Yêu thích + 9 categories), found {n}")
                 off = []
                 for i in range(n):
                     box = chips.nth(i).bounding_box()
                     if box is None or box["x"] < 0 or box["x"] + box["width"] > DESKTOP["width"]:
                         off.append(i)
                 check(not off, f"1440: every filter chip inside the viewport (off: {off})")
-                check(pg.get_by_role("button", name="Yêu thích", exact=True).locator(":visible").count() == 0,
-                      "1440: Yêu thích chip hidden")
+                # cc-03 brought the Yêu thích chip back, right after Tất cả
+                check(pg.locator('[role=group][aria-label="Lọc món theo nhóm"]:visible')
+                      .get_by_role("button", name="Yêu thích", exact=True).count() == 1,
+                      "1440: Yêu thích chip shown")
 
                 # Chà là 30 g: iron 0,3 mg and Vitamin B6 in the micros list
                 pg.locator('input[type="search"]:visible').first.fill("chà là")
