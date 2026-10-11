@@ -18,6 +18,12 @@
 | 11/10/2026 | ui-05-fix-2 | Meal default fallback & neutral placeholder, sessionStorage hydration visibility assertions, content-based alignment verification & desktop meal fix, adaptive precision & Vietnamese nutrient synonyms, single PortionPanel component, FormRow inputs, npm scripts & AGENTS.md documentation | Next tasks |
 | 11/10/2026 | ui-05-fix-3 | Nutrient catalog keys & Vitamin B* naming, useMealSlot client resolution hook, desktop Today left text alignment (-mx-2), content-based data-align-edge checks, probe scripts (hydration & screenshots) | Next tasks |
 | 11/10/2026 | ui-05-fix-4 | Put test:hydration into npm run check gates, remove dead vitamin remap in micros page, read targets from calculateTargets in PortionPanel & food detail (incl. vitamin_k %), remove playwright test permission from .claude/settings.json | ui-05 approved |
+| 11/10/2026 | ui-04b | formatDayLabel with timezone awareness (no new Date() inside, Asia/Ho_Chi_Minh 23:30 and 00:30 boundaries, Sunday "Chủ nhật, dd/mm") and client-mounted date resolution in /today and /micros | Ready for review |
+
+## Quality Gate Summary (ui-04b)
+- `npm run check`: All 5 gates passed (tsc --noEmit, vitest: 97 passed in 11 files, build: 19/19 routes static/dynamic, test:align: 12 checks passed, test:hydration: 0 errors).
+- Edges: daily-targets (mobile & desktop), setup-row, add-list (mobile & desktop), meal-card (mobile), micros-card (mobile & desktop), portion (mobile & desktop), food-detail (mobile & desktop), desktop-meal (desktop) all pass.
+
 
 ## Quality Gate Outputs (ui-05-fix-4)
 - Raw `npm run check` output:

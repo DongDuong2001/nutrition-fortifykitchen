@@ -113,13 +113,16 @@ Always use **your agent's fixed port**: **3100 for Antigravity, 3101 for Claude 
 ## Two agents in this repo (Antigravity + Claude Code)
 - Each agent works in its own checkout. Antigravity uses the main folder on `feat/ui`, and Claude Code uses the worktree `../nutrition-fk-claude` on `feat/ui-cc-*`.
 - **Now working board:** before starting a task, add a row to the "Now working" table at the top of PROGRESS.md (task, owner, files or routes). Remove it when done. Never edit files claimed by the other agent's row; if you must, stop and tell the user.
-- Shared files (`components/ui/*`, `lib/*`, `globals.css`, `AGENTS.md`): change them only when your task needs it, keep the change small, and say so in your report so the other agent can rebase.
+- Who may edit which files: see **File ownership** below.
 
 ## File ownership
-- Antigravity owns: components/ui/*, lib/format, lib/targets, lib/nutrients, lib/levels, lib/meal-slot, tests/alignment.py, tests/probes infrastructure, npm scripts, app/today, app/micros, AppHeader, bottom nav, app/profile, app/training.
-- Claude Code owns: app/add, app/foods/*, components/foods/*, app/signup, app/signin/*, app/setup/*, components/onboarding/*, lib/diary-store, lib/food-categories, lib/recent-foods, lib/onboarding, lib/mock/foods, favourites.
-- Never edit the other agent's files; request changes in OPEN_QUESTIONS. Both may append to PROGRESS, OPEN_QUESTIONS and BACKLOG.
-- When the user says stop, no agent edits anything until told to continue.
+- Antigravity owns: components/ui/*, app/today, app/micros, app/profile, app/training, AppHeader, bottom nav, lib/format, lib/targets, lib/nutrients, lib/levels, lib/meal-slot, lib/use-meal-slot, lib/portion, lib/mock/sample-day, tests/alignment.py, tests/probes/*, scripts/*, package.json scripts, globals.css, app/layout.
+- Claude Code owns: app/add, app/foods/*, components/foods/*, components/meal-switcher, app/signup, app/signin/*, app/setup/*, components/onboarding/*, lib/diary-store, components/diary-provider-wrapper, lib/search, lib/food-categories, lib/recent-foods, lib/onboarding, lib/mock/foods, favourites.
+- Tests follow their file: lib/__tests__/<name>.test.ts belongs to the owner of lib/<name>.
+- Dong's: lib/api-client, lib/supabase-client, apps/api, migrations (UI agents may only read; mock changes go through OPEN_QUESTIONS).
+- Anything not listed: ask in OPEN_QUESTIONS before editing.
+- Need a change in the other agent's file (e.g. a new prop on a components/ui primitive)? Add one line to OPEN_QUESTIONS ("@Antigravity: ChipGroup needs `size` prop for /signup") and continue with a local workaround; never edit it directly.
+- Both may append to PROGRESS, OPEN_QUESTIONS and BACKLOG. When the user says stop, no agent edits anything until told to continue.
 
 ## Commands (so they run without permission prompts)
 Run routine work only through these npm scripts in `apps/web`. The user has auto-approved commands that start with `npm run`; anything else may stop and ask.

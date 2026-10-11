@@ -9,7 +9,7 @@ import { SegmentedBar } from "@/components/ui/segmented-bar";
 import { Sheet } from "@/components/ui/sheet";
 import { PillButton } from "@/components/ui/pill-button";
 import { apiClient } from "@/lib/api-client";
-import { formatAmount } from "@/lib/format";
+import { formatAmount, formatDayLabel } from "@/lib/format";
 import { SAMPLE_DAY, type MockDayData } from "@/lib/mock/sample-day";
 import { useDiary } from "@/lib/diary-store";
 
@@ -49,7 +49,12 @@ function TodayContent() {
   const [data, setData] = useState<MockDayData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isCopySheetOpen, setIsCopySheetOpen] = useState(false);
+  const [clientNow, setClientNow] = useState<Date | null>(null);
   const isOnline = useSyncExternalStore(subscribeOnline, getOnlineSnapshot, getOnlineServerSnapshot);
+
+  useEffect(() => {
+    setClientNow(new Date());
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -87,6 +92,7 @@ function TodayContent() {
   const showLoading = forceLoading || (isLoading && !diaryData && !data);
   const showOfflineBanner = forceOffline || !isOnline;
   const currentData = (hydrated ? diaryData : null) || data || SAMPLE_DAY;
+  const dateLabel = clientNow ? formatDayLabel(currentData.date, clientNow) : currentData.dateLabel;
   const isEmpty = forceEmpty || (!showLoading && currentData.meals.every((m) => m.items.length === 0));
 
   // --- 1. SKELETON LOADING STATE (TodayStates.dc.html) ---
@@ -181,7 +187,7 @@ function TodayContent() {
                       <path d="M15 5l-7 7 7 7" />
                     </svg>
                   </button>
-                  <div className="text-[15px] font-semibold">Hôm nay, 10/10</div>
+                  <div className="text-[15px] font-semibold">{dateLabel}</div>
                   <button
                     type="button"
                     aria-label="Ngày sau"
@@ -310,7 +316,7 @@ function TodayContent() {
                     <path d="M15 5l-7 7 7 7" />
                   </svg>
                 </button>
-                <div className="text-sm font-semibold">{currentData.dateLabel}</div>
+                <div className="text-sm font-semibold">{dateLabel}</div>
                 <button
                   type="button"
                   aria-label="Ngày sau"

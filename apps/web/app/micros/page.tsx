@@ -13,7 +13,7 @@ import {
   type NutrientDefinition,
   type TargetSource,
 } from "@/lib/nutrients";
-import { formatAmount } from "@/lib/format";
+import { formatAmount, formatDayLabel } from "@/lib/format";
 import type { MockDayData } from "@/lib/mock/sample-day";
 import { useDiary } from "@/lib/diary-store";
 
@@ -174,6 +174,12 @@ function MicrosContent() {
   const isManualScrolling = useRef(false);
   const manualTimeout = useRef<NodeJS.Timeout | null>(null);
 
+  const [clientNow, setClientNow] = useState<Date | null>(null);
+
+  useEffect(() => {
+    setClientNow(new Date());
+  }, []);
+
   useEffect(() => {
     let isMounted = true;
     apiClient.getTodayData().then((res) => {
@@ -188,6 +194,10 @@ function MicrosContent() {
   }, []);
 
   const currentData = (hydrated ? diaryData : null) || data;
+  const dateLabel =
+    clientNow && currentData?.date
+      ? formatDayLabel(currentData.date, clientNow)
+      : currentData?.dateLabel || "Hôm nay, 10/10";
 
   // Measure chip bar height for --chipbar-h CSS variable
   useEffect(() => {
@@ -363,7 +373,7 @@ function MicrosContent() {
             <div className="flex items-center justify-between min-h-[44px]">
               <div className="w-11 h-11" />
               <div className="text-[15px] font-semibold text-white">
-                {currentData?.dateLabel || "Hôm nay, 10/10"}
+                {dateLabel}
               </div>
               <div className="w-11 h-11" />
             </div>
@@ -433,7 +443,7 @@ function MicrosContent() {
                 </svg>
               </button>
               <div className="text-[15px] font-semibold text-white tracking-tight">
-                {currentData?.dateLabel}
+                {dateLabel}
               </div>
               <button
                 type="button"
