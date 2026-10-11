@@ -26,7 +26,7 @@ def main():
         page.on("pageerror", lambda err: (console_errors.append(err.message), console_issues.append(f"pageerror: {err.message[:300]}")))
 
         viewports = [{"width": 390, "height": 844}, {"width": 1440, "height": 900}]
-        paths = ["/today", "/micros", "/add", "/entry/item-1"]
+        paths = ["/today", "/micros", "/add", "/entry/item-1", "/training"]
         for vp, path in [(v, p) for v in viewports for p in paths]:
             page.set_viewport_size(vp)
             console_errors.clear()
