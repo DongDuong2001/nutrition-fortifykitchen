@@ -40,6 +40,7 @@ interface DiaryContextValue {
   dismissToast: () => void;
   highlightedMeal: MealSlot | null;
   setHighlightedMeal: (meal: MealSlot | null) => void;
+  hydrated: boolean;
 }
 
 const DiaryContext = createContext<DiaryContextValue | null>(null);
@@ -50,46 +51,49 @@ const RECENT_SEARCHES_KEY = "h1t_recent_searches_v1";
 const DEFAULT_RECENTS = ["Yến mạch 60 g", "Kefir 200 ml", "Chuối 1 quả"];
 
 export function DiaryProvider({ children }: { children: React.ReactNode }) {
-  const [addedEntries, setAddedEntries] = useState<AddedDiaryEntry[]>(() => {
-    if (typeof window === "undefined") return [];
-    try {
-      const stored = sessionStorage.getItem(SESSION_STORAGE_KEY);
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  const [recentSearches, setRecentSearches] = useState<string[]>(() => {
-    if (typeof window === "undefined") return DEFAULT_RECENTS;
-    try {
-      const stored = sessionStorage.getItem(RECENT_SEARCHES_KEY);
-      return stored ? JSON.parse(stored) : DEFAULT_RECENTS;
-    } catch {
-      return DEFAULT_RECENTS;
-    }
-  });
-
+  const [hydrated, setHydrated] = useState(false);
+  const [addedEntries, setAddedEntries] = useState<AddedDiaryEntry[]>([]);
+  const [recentSearches, setRecentSearches] = useState<string[]>(DEFAULT_RECENTS);
   const [toast, setToast] = useState<ToastInfo | null>(null);
   const [highlightedMeal, setHighlightedMeal] = useState<MealSlot | null>(null);
 
-  // Persist addedEntries to sessionStorage
+  // Load from sessionStorage on mount (client-only)
   useEffect(() => {
+    try {
+      const storedEntries = sessionStorage.getItem(SESSION_STORAGE_KEY);
+      if (storedEntries) {
+        setAddedEntries(JSON.parse(storedEntries));
+      }
+      const storedSearches = sessionStorage.getItem(RECENT_SEARCHES_KEY);
+      if (storedSearches) {
+        setRecentSearches(JSON.parse(storedSearches));
+      }
+    } catch {
+      // Ignore sessionStorage access errors
+    } finally {
+      setHydrated(true);
+    }
+  }, []);
+
+  // Persist addedEntries to sessionStorage only after hydrated
+  useEffect(() => {
+    if (!hydrated) return;
     try {
       sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(addedEntries));
     } catch {
       // Ignore quota/access errors
     }
-  }, [addedEntries]);
+  }, [addedEntries, hydrated]);
 
-  // Persist recent searches
+  // Persist recent searches only after hydrated
   useEffect(() => {
+    if (!hydrated) return;
     try {
       sessionStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(recentSearches));
     } catch {
       // Ignore
     }
-  }, [recentSearches]);
+  }, [recentSearches, hydrated]);
 
   // Auto-dismiss toast after 4s
   useEffect(() => {
@@ -357,6 +361,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         dismissToast,
         highlightedMeal,
         setHighlightedMeal,
+        hydrated,
       }}
     >
       {children}

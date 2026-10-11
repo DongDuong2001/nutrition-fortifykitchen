@@ -11,6 +11,8 @@ import { formatNumber } from "@/lib/format";
 import { NUTRIENT_CATALOG } from "@/lib/nutrients";
 import { calculateTargets } from "@/lib/targets";
 import { SegmentedBar } from "@/components/ui/segmented-bar";
+import { ChipGroup } from "@/components/ui/chip-group";
+import { StatGroup } from "@/components/ui/stat-group";
 
 function FoodDetailInner() {
   const params = useParams();
@@ -23,7 +25,7 @@ function FoodDetailInner() {
     return MOCK_FOODS.find((f) => f.id === foodId) || MOCK_FOODS[0];
   }, [foodId]);
 
-  const mealSlot: MealSlot = parseMealSlot(searchParams.get("meal"));
+  const mealSlot: MealSlot = parseMealSlot(searchParams.get("meal")) || "pre_workout";
   const mealNameVi = getMealSlotNameVi(mealSlot);
 
   const [gramsInput, setGramsInput] = useState(() => {
@@ -172,79 +174,56 @@ function FoodDetailInner() {
       {/* Main Content Area */}
       <main className="flex-1 w-full max-w-[560px] mx-auto p-4 flex flex-col gap-3.5 pb-24">
         {/* Serving and Gram Selection */}
-        <div className="flex items-end gap-2 flex-wrap">
-          <label htmlFor="fd-size" className="flex flex-col gap-1.5 text-xs font-bold text-text w-28 shrink-0">
-            Khối lượng
-            <div className="flex items-center h-12 rounded-xl border-2 border-blue bg-white px-3 box-border">
-              <input
-                id="fd-size"
-                type="text"
-                inputMode="decimal"
-                aria-label="Khối lượng theo gam"
-                value={gramsInput}
-                onChange={(e) => {
-                  setGramsInput(e.target.value);
-                  setSelectedServingLabel(`${e.target.value} g`);
-                }}
-                className="w-full border-0 outline-none bg-transparent font-bold text-lg tabular-nums text-text text-right"
-              />
-              <span className="text-secondary text-xs ml-1 font-medium">g</span>
-            </div>
-          </label>
-
-          <div className="flex gap-2 flex-wrap">
-            {food.servings.map((s) => {
-              const isMatch = selectedServingLabel === s.label;
-              return (
-                <button
-                  key={s.label}
-                  type="button"
-                  aria-pressed={isMatch}
-                  onClick={() => {
-                    setGramsInput(s.grams.toString());
-                    setSelectedServingLabel(s.label);
+        <div data-align-group="food-detail" className="w-full">
+          <ChipGroup
+            columns={food.servings.length + 1}
+            tone="light"
+            leadingInput={
+              <label className="flex items-center justify-center bg-white border-2 border-blue rounded-xl px-2 h-11 w-full cursor-text box-border">
+                <span className="sr-only">Khối lượng</span>
+                <input
+                  id="fd-size"
+                  type="text"
+                  inputMode="decimal"
+                  aria-label="Khối lượng theo gam"
+                  value={gramsInput}
+                  onChange={(e) => {
+                    setGramsInput(e.target.value);
+                    setSelectedServingLabel(`${e.target.value} g`);
                   }}
-                  className={`h-12 px-4 rounded-xl text-xs font-bold border-0 cursor-pointer active:scale-[0.97] transition-colors ${
-                    isMatch ? "bg-ink text-white" : "bg-card text-text border border-card-border hover:bg-page"
-                  }`}
-                >
-                  {s.label}
-                </button>
-              );
-            })}
-          </div>
+                  className="w-full border-0 outline-none bg-transparent font-bold text-sm tabular-nums text-text text-right"
+                />
+                <span className="text-secondary text-xs ml-1 font-semibold">g</span>
+              </label>
+            }
+            items={food.servings.map((s) => ({
+              id: s.label,
+              label: s.label,
+              active: selectedServingLabel === s.label,
+              onClick: () => {
+                setGramsInput(s.grams.toString());
+                setSelectedServingLabel(s.label);
+              },
+            }))}
+          />
         </div>
 
         {/* Big Kcal & 3-up Macro Card */}
-        <div className="bg-card border border-card-border rounded-2xl p-4 grid grid-cols-4 gap-2">
-          <div className="flex flex-col">
-            <div className="font-display italic font-black text-2xl tabular-nums text-text">
-              {formatNumber(macros.calories)}
-            </div>
-            <div className="text-xs text-secondary font-medium">kcal</div>
-          </div>
-          <div className="flex flex-col">
-            <div className="font-display italic font-black text-2xl tabular-nums text-text">
-              {formatNumber(macros.carbs)} g
-            </div>
-            <div className="text-xs text-secondary font-medium">Carb</div>
-          </div>
-          <div className="flex flex-col">
-            <div className="font-display italic font-black text-2xl tabular-nums text-text">
-              {formatNumber(macros.protein)} g
-            </div>
-            <div className="text-xs text-secondary font-medium">Đạm</div>
-          </div>
-          <div className="flex flex-col">
-            <div className="font-display italic font-black text-2xl tabular-nums text-text">
-              {formatNumber(macros.fat)} g
-            </div>
-            <div className="text-xs text-secondary font-medium">Béo</div>
-          </div>
+        <div data-align-group="food-detail" className="w-full bg-card border border-card-border rounded-2xl p-4">
+          <StatGroup
+            columns={4}
+            tone="light"
+            items={[
+              { id: "cal", value: formatNumber(macros.calories), label: "kcal" },
+              { id: "carb", value: `${formatNumber(macros.carbs)} g`, label: "Carb" },
+              { id: "protein", value: `${formatNumber(macros.protein)} g`, label: "Đạm" },
+              { id: "fat", value: `${formatNumber(macros.fat)} g`, label: "Béo" },
+            ]}
+          />
         </div>
 
         {/* Micros in Serving Card with slanted SegmentedBar */}
-        <div className="bg-card border border-card-border rounded-2xl p-4 flex flex-col gap-2">
+        <div data-align-group="food-detail" className="w-full bg-card border border-card-border rounded-2xl p-4 flex flex-col gap-2">
           <h2 className="m-0 text-base font-bold text-text">
             Vi chất trong {gramsInput} g
           </h2>

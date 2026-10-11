@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run lib/__tests__",
+    "test:align": "python3 tests/alignment.py"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",

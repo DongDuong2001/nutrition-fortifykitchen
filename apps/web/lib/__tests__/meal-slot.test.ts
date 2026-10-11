@@ -49,4 +49,10 @@ describe("lib/meal-slot", () => {
     expect(getDefaultMealSlot(at2130, true)).toBe("snack");
     expect(getDefaultMealSlot(at0200, false)).toBe("snack");
   });
+
+  it("07:05 UTC (= 14:05 Saigon) on a training day returns pre_workout (Trước tập)", () => {
+    // 2026-10-10T07:05:00.000Z is 14:05 in Asia/Ho_Chi_Minh
+    const utcDate = new Date("2026-10-10T07:05:00.000Z");
+    expect(getDefaultMealSlot(utcDate, true)).toBe("pre_workout");
+  });
 });

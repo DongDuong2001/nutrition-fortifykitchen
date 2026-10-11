@@ -12,7 +12,7 @@ function CreateFoodInner() {
   const searchParams = useSearchParams();
   const { addFoodEntry } = useDiary();
 
-  const mealSlot: MealSlot = parseMealSlot(searchParams.get("meal"));
+  const mealSlot: MealSlot = parseMealSlot(searchParams.get("meal")) || "pre_workout";
   const mealNameVi = getMealSlotNameVi(mealSlot);
 
   // Form Fields

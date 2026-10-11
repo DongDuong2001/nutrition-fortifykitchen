@@ -44,7 +44,7 @@ function TodayContent() {
   const forceLoading = searchParams?.get("loading") === "1";
   const forceOffline = searchParams?.get("offline") === "1";
 
-  const { data: diaryData, toast, highlightedMeal, setHighlightedMeal } = useDiary();
+  const { data: diaryData, toast, highlightedMeal, setHighlightedMeal, hydrated } = useDiary();
 
   const [data, setData] = useState<MockDayData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -64,9 +64,29 @@ function TodayContent() {
     };
   }, []);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const returnId = sessionStorage.getItem("return_focus_id");
+    if (returnId) {
+      sessionStorage.removeItem("return_focus_id");
+      requestAnimationFrame(() => {
+        const el = document.getElementById(returnId);
+        if (el) {
+          el.focus();
+        }
+      });
+    }
+  }, []);
+
+  const handleSaveOpener = (openerId: string) => {
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("last_add_opener_id", openerId);
+    }
+  };
+
   const showLoading = forceLoading || (isLoading && !diaryData && !data);
   const showOfflineBanner = forceOffline || !isOnline;
-  const currentData = diaryData || data || SAMPLE_DAY;
+  const currentData = (hydrated ? diaryData : null) || data || SAMPLE_DAY;
   const isEmpty = forceEmpty || (!showLoading && currentData.meals.every((m) => m.items.length === 0));
 
   // --- 1. SKELETON LOADING STATE (TodayStates.dc.html) ---
@@ -373,7 +393,7 @@ function TodayContent() {
                     isHighlighted ? "ring-2 ring-blue/80 shadow-md" : ""
                   }`}
                 >
-                  <div className="flex items-baseline justify-between pb-0.5">
+                  <div data-align-group="meal-card" className="flex items-baseline justify-between pb-0.5 w-full">
                     <div className="flex items-center gap-2">
                       <h2 className="m-0 text-base font-bold text-text">{meal.name}</h2>
                       <Link
@@ -391,7 +411,8 @@ function TodayContent() {
                     <Link
                       key={it.id}
                       href={`/entry/${it.id}`}
-                      className="no-underline flex items-center justify-between gap-2 text-sm min-h-[44px] border-t border-divider active:scale-[0.97] transition-transform"
+                      data-align-group="meal-card"
+                      className="no-underline flex items-center justify-between gap-2 text-sm min-h-[44px] border-t border-divider w-full active:scale-[0.97] transition-transform"
                     >
                       <span className="truncate text-text font-normal">
                         {it.name} <span className="text-secondary">· {it.qty}</span>
@@ -526,7 +547,9 @@ function TodayContent() {
               Chép hôm qua
             </button>
             <Link
+              id="desktop-add-btn"
               href="/add"
+              onClick={() => handleSaveOpener("desktop-add-btn")}
               className="no-underline h-11 px-5 rounded-full bg-blue text-white flex items-center gap-2 text-[15px] font-bold hover:bg-blue/90 active:scale-[0.97] transition-all"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
@@ -613,15 +636,17 @@ function TodayContent() {
                   <div
                     key={meal.id}
                     id={`desktop-meal-${meal.slot}`}
-                    className={`border-t border-divider py-2 transition-all duration-300 rounded-lg px-2 -mx-2 ${
+                    className={`border-t border-divider py-2 transition-all duration-300 rounded-lg px-2 ${
                       isHighlighted ? "bg-blue/10 ring-2 ring-blue/80" : ""
                     }`}
                   >
-                    <div className="flex justify-between items-baseline">
+                    <div data-align-group="desktop-meal" className="flex justify-between items-baseline w-full">
                       <div className="flex items-center gap-2">
                         <h3 className="m-0 text-[15px] font-bold text-text">{meal.name}</h3>
                         <Link
+                          id={`desktop-add-${meal.slot}`}
                           href={`/add?meal=${meal.slot}`}
+                          onClick={() => handleSaveOpener(`desktop-add-${meal.slot}`)}
                           className="text-xs font-semibold text-blue no-underline hover:underline min-h-[44px] inline-flex items-center"
                         >
                           + Thêm
@@ -635,7 +660,8 @@ function TodayContent() {
                       <Link
                         key={it.id}
                         href={`/entry/${it.id}`}
-                        className="no-underline flex justify-between items-center min-h-[44px] px-2 -mx-2 rounded-lg text-sm hover:bg-page transition-colors"
+                        data-align-group="desktop-meal"
+                        className="no-underline flex justify-between items-center min-h-[44px] px-2 rounded-lg text-sm hover:bg-page transition-colors w-full"
                       >
                         <span className="truncate text-text font-normal">
                           {it.name} <span className="text-secondary">· {it.qty}</span>
@@ -647,8 +673,11 @@ function TodayContent() {
                     ))}
                     {meal.items.length === 0 && (
                       <Link
+                        id={`desktop-add-empty-${meal.slot}`}
                         href={`/add?meal=${meal.slot}`}
-                        className="inline-flex items-center min-h-[44px] text-sm font-semibold text-blue no-underline"
+                        onClick={() => handleSaveOpener(`desktop-add-empty-${meal.slot}`)}
+                        data-align-group="desktop-meal"
+                        className="flex items-center min-h-[44px] px-2 text-sm font-semibold text-blue no-underline w-full"
                       >
                         + Thêm món
                       </Link>
