@@ -30,6 +30,9 @@ export default function TrainingPage() {
 
 function TrainingContent() {
   const searchParams = useSearchParams();
+  if (searchParams?.get("error") === "1") {
+    throw new Error("Simulated server error");
+  }
   const initialDuration =
     searchParams?.get("rest") === "1"
       ? "rest"
