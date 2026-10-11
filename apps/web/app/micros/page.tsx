@@ -280,11 +280,18 @@ function MicrosContent() {
       isManualScrolling.current = false;
     }, 800);
 
-    const id = typeof window !== "undefined" && window.innerWidth >= 1024 ? `desktop-group-${group}` : `group-${group}`;
-    const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const behavior: ScrollBehavior = reduceMotion ? "auto" : "smooth";
+    if (window.innerWidth >= 1024) {
+      document.getElementById(`desktop-group-${group}`)?.scrollIntoView({ behavior, block: "start" });
+      return;
     }
+    // Phone: only the list scrolls. scrollIntoView would also move the header and chip bar.
+    const list = scrollRef.current;
+    const el = document.getElementById(`group-${group}`);
+    if (!list || !el) return;
+    const top = el.getBoundingClientRect().top - list.getBoundingClientRect().top + list.scrollTop;
+    list.scrollTo({ top, behavior });
   };
 
   const rowsByGroup = useMemo(() => buildNutrientRows(currentData), [currentData]);
@@ -415,7 +422,7 @@ function MicrosContent() {
       {/* ============================================================== */}
       <div
         data-align-container="micros-page"
-        className="w-full max-w-full min-w-0 h-dvh overflow-hidden bg-page flex flex-col relative lg:hidden"
+        className="w-full max-w-full min-w-0 h-dvh overflow-clip bg-page flex flex-col relative lg:hidden"
       >
         {/* Header */}
         <AppHeader
@@ -483,7 +490,7 @@ function MicrosContent() {
         </div>
 
         {/* Only the body scrolls: the header and chip bar stay put (SPEC: header flex none, scrolling body) */}
-        <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto pb-[88px]">
+        <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto overscroll-contain pb-[88px]">
         <main className="w-full max-w-[560px] mx-auto px-4 pt-3 pb-6 flex flex-col gap-3.5 min-w-0">
           {/* 4-column equal grid Legend */}
           <Legend />

@@ -54,6 +54,20 @@ def main():
             page.reload(wait_until="networkidle")
             page.wait_for_timeout(1500)
 
+            # cc-07: tapping each Micros group chip scrolls only the list, never the header or page
+            if path == "/micros" and vp["width"] == 390:
+                chips = page.locator('[data-align-container="micros-page"] button[aria-pressed]')
+                for i in range(chips.count()):
+                    chips.nth(i).click()
+                    page.wait_for_timeout(400)
+                moved = page.evaluate("""() => { const w = document.querySelector('[data-align-container="micros-page"]'); return [w.scrollTop, window.scrollY, w.querySelector('header').getBoundingClientRect().top]; }""")
+                if moved[0] or moved[1] or abs(moved[2]) >= 1:
+                    err = f"Tapping group chips moved the page (wrapper {moved[0]}, window {moved[1]}, header top {moved[2]})"
+                    print(f"[FAIL] {err}")
+                    total_errors.append(err)
+                else:
+                    print("[PASS] Tapping every Micros group chip keeps the header and page in place @ 390")
+
             # The Next dev badge turns to "error" when the page has an Issue
             badge = page.evaluate("""() => { const o = []; document.querySelectorAll('nextjs-portal').forEach(h => { const b = h.shadowRoot && h.shadowRoot.querySelector('[data-next-badge]'); if (b) o.push(b.getAttribute('data-error')); }); return o; }""")
             if "true" in badge:
