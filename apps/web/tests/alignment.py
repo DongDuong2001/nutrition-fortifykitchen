@@ -1,8 +1,11 @@
+import datetime
 import os
 import sys
 from playwright.sync_api import sync_playwright
 
 BASE_URL = os.environ.get("ALIGN_BASE_URL", "http://localhost:3100")
+# Yesterday in Asia/Ho_Chi_Minh, the app's day: the one past day with logged meals
+YESTERDAY = (datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=7))).date() - datetime.timedelta(days=1)).isoformat()
 VIEWPORTS = [
     {"name": "mobile (390px)", "width": 390, "height": 844},
     {"name": "desktop (1440px)", "width": 1440, "height": 900},
@@ -34,6 +37,11 @@ ONBOARDING_CHECKS = [
     ("/profile/weight", "mobile (390px)", "weight-header", "lr"),
     ("/profile/weight", "mobile (390px)", "weight-row", "lr"),
     ("/profile/weight", "desktop (1440px)", "weight-row", "lr"),
+    # Past day (read-only): same header and meal rows as today, with no add links
+    (f"/today?date={YESTERDAY}", "mobile (390px)", "today-header", "lr"),
+    (f"/today?date={YESTERDAY}", "mobile (390px)", "meal-card", "lr"),
+    (f"/today?date={YESTERDAY}", "desktop (1440px)", "today-header", "lr"),
+    (f"/today?date={YESTERDAY}", "desktop (1440px)", "desktop-meal", "lr"),
 ]
 
 def check_align_groups(page, group_name=None, edges="lr"):

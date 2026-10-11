@@ -28,7 +28,8 @@ export function CopyYesterdaySheet({ open, onClose }: CopyYesterdaySheetProps) {
 
   if (!yesterday) return null;
 
-  const description = `${getWeekdayName(yesterday)} ${yesterday.slice(8)}/${yesterday.slice(5, 7)} · ${formatAmount(entriesKcal(entries), "kcal")} kcal`;
+  // Same weekday format as the Today header: "Thứ Bảy, 10/10"
+  const description = `${getWeekdayName(yesterday)}, ${yesterday.slice(8)}/${yesterday.slice(5, 7)} · ${formatAmount(entriesKcal(entries), "kcal")} kcal`;
 
   return (
     <Sheet open={open} onClose={onClose} title="Chép bữa hôm qua?" description={description}>

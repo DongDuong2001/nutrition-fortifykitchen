@@ -7,6 +7,7 @@ import { type MealSlot, getMealSlotNameVi } from "./meal-slot";
 import { formatAmount } from "./format";
 import { getTodayIsoVN, withRuntimeDate } from "./date";
 import { blankDay, dayEntries, statDisplay } from "./day-history";
+import { microsSummaryFor } from "./lacking";
 import { DEFAULT_RECENT_FOODS, isRecentFood, pushRecent, type RecentFood } from "./recent-foods";
 import { readFavouriteIds, toggleFavouriteId, writeFavouriteIds } from "./favourites";
 import {
@@ -117,7 +118,7 @@ export function computeCompositeDayData(
   const samples = resolveSampleItems(baseDay);
   const effects = samples.map((info) => ({ info, effect: sampleEffect(info, sampleEdits[info.item.id]) }));
   if (addedEntries.length === 0 && Object.keys(sampleEdits).length === 0) {
-    return baseDay;
+    return { ...baseDay, microsSummary: microsSummaryFor(baseDay) };
   }
 
   // What the added entries and the edited sample items add on top of the sample day
@@ -236,11 +237,6 @@ export function computeCompositeDayData(
     };
   });
 
-  // Count vitamins & minerals reached
-  const vitaminsAchieved = updatedVitamins.filter((m) => (m.percentage ?? 0) >= 100).length;
-  const mineralsAchieved = updatedMinerals.filter((m) => (m.percentage ?? 0) >= 100).length;
-  const achievedMicros = vitaminsAchieved + mineralsAchieved;
-
   return {
     ...baseDay,
     calories: {
@@ -254,12 +250,7 @@ export function computeCompositeDayData(
     minerals: updatedMinerals,
     vitamins: updatedVitamins,
     nutrients: compositeNutrients,
-    microsSummary: {
-      ...baseDay.microsSummary,
-      achieved: achievedMicros,
-      vitaminsAchieved,
-      mineralsAchieved,
-    },
+    microsSummary: microsSummaryFor({ minerals: updatedMinerals, vitamins: updatedVitamins }),
   };
 }
 

@@ -1,18 +1,29 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useDiary } from "@/lib/diary-store";
+import { usePastDayRedirect } from "@/hooks/use-past-day-redirect";
 import { EntryEditor } from "@/components/foods/entry-editor";
 
 export default function EntryPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-page" />}>
+      <EntryContent />
+    </Suspense>
+  );
+}
+
+function EntryContent() {
   const params = useParams();
   const id = params?.id as string;
   const { getEntry, hydrated } = useDiary();
+  // A past day is read-only: this sends ?date= back to that day's Today view
+  const isPastDay = usePastDayRedirect();
 
   // Added entries and edits load after mount, so wait for them before saying the entry is missing
-  if (!hydrated) {
+  if (!hydrated || isPastDay) {
     return (
       <div className="min-h-screen bg-page" aria-busy="true">
         <div aria-hidden="true" className="mx-auto mt-3 flex w-full max-w-[480px] flex-col gap-4 px-4">

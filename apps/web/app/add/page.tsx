@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo, useRef, useCallback, Suspense } fr
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useDiary } from "@/lib/diary-store";
+import { usePastDayRedirect } from "@/hooks/use-past-day-redirect";
 import { MOCK_FOODS, type FoodItem, type FoodServing } from "@/lib/mock/foods";
 import { findSimilarFoods } from "@/lib/search";
 import {
@@ -554,10 +555,17 @@ function AddFoodInner() {
   );
 }
 
+// Past days are read-only, so the add form only opens for today (a past ?date= goes back to that day's Today view)
+function AddFoodGate() {
+  const isPastDay = usePastDayRedirect();
+  if (isPastDay) return <div className="w-full min-h-screen bg-page" />;
+  return <AddFoodInner />;
+}
+
 export default function AddFoodPage() {
   return (
     <Suspense fallback={<div className="w-full min-h-screen bg-page" />}>
-      <AddFoodInner />
+      <AddFoodGate />
     </Suspense>
   );
 }

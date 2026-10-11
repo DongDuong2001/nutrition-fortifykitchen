@@ -13,7 +13,7 @@ export interface AppHeaderProps {
   /** Primary title (Saira Condensed italic) */
   title?: string;
   /** One line under the title. Daily header: desktop only (the phone shows the date row). Sub and tab: all widths. */
-  subtitle?: string;
+  subtitle?: React.ReactNode;
   /** Date object or YYYY-MM-DD string for 'daily' header */
   date?: string | Date;
   /** Previous date handler */

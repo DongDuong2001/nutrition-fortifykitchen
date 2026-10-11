@@ -140,9 +140,24 @@ function TodayContent() {
   const showLoading = forceLoading || (isLoading && !diaryData && !data);
   const showOfflineBanner = forceOffline || !isOnline;
   const currentData = pastData || (hydrated ? diaryData : null) || data || SAMPLE_DAY;
-  const desktopSubtitle = clientNow
-    ? `${formatDesktopDate(currentData.date)} · Ngày tập ${currentData.user.trainingMinutes}′ · ${currentData.user.goalLabel} · ${currentData.user.weightKg} kg`
-    : currentData.desktopDateLabel;
+  // The date part opens the same day picker as the phone's date label. The rest is plain text.
+  const desktopDate = clientNow ? formatDesktopDate(currentData.date) : null;
+  const desktopSubtitle = clientNow ? (
+    <>
+      <button
+        type="button"
+        onClick={() => setIsCalendarOpen(true)}
+        aria-haspopup="dialog"
+        aria-label={`Chọn ngày, ${desktopDate}`}
+        className="inline-flex min-h-[44px] items-center bg-transparent p-0 border-0 text-inherit cursor-pointer underline-offset-4 hover:underline"
+      >
+        {desktopDate}
+      </button>
+      {` · Ngày tập ${currentData.user.trainingMinutes}′ · ${currentData.user.goalLabel} · ${currentData.user.weightKg} kg`}
+    </>
+  ) : (
+    currentData.desktopDateLabel
+  );
   // A past day with nothing logged still shows its meals: the empty-day state is for today only
   const isEmpty = !isPast && (forceEmpty || (!showLoading && currentData.meals.every((m) => m.items.length === 0)));
   // Date nav: ‹ goes back one day from the viewed day; › goes forward, and stays off on today

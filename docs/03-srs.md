@@ -43,7 +43,7 @@ W = body weight in kg, M = today's training minutes (0 on rest days). 1 g salt =
 | Sodium | (4–6 g salt + 1–1.5 g salt × M / 20) × 393 mg | Coach, update 08/10/2026 |
 | Calcium | 1200–1500 mg | Coach |
 | Magnesium | 50% of calcium: 600–750 mg | Coach |
-| Iron | Men 8–10 mg; women 18 mg, 28 mg near or during the period | Coach |
+| Iron | Men 8 mg; women 18 mg, 28 mg near or during the period | Coach |
 | Zinc | Men 12 mg, women 8 mg | Coach |
 | Training fast carbs | 30–45 g × M / 60 | Coach |
 | Vitamins A, C, D, E, K, B1–B12, phosphorus, selenium, copper | Vietnamese RDA by sex and age band, shown as reference | Viện Dinh dưỡng 2016; WHO/IOM for gaps |
