@@ -9,3 +9,14 @@
 - [ ] (Later) NCCDB licence quote from NCC (ndsrhelp@umn.edu), once there are paying users.
 - [ ] Vietnamese labels in `docs/nutrient-catalog.md`: review the wording (e.g. "Carb ròng", "Béo chuyển hoá")
 - [ ] Choline: tracked in USDA food data but omitted from Release 1's docs/nutrient-catalog.md. Confirm if choline should be added to the Vitamin/General catalogue group in a future release.
+- [ ] (cc-01) Auth screens are restyled to Cobalt Sign: ink hero block on top, form on the paper body. The design files are all-ink. Confirm this reading.
+- [ ] (cc-01) Copy with no design source, written for now: "Nhập email hợp lệ, ví dụ ban@email.com", "Nhập năm sinh từ 1900 đến {năm hiện tại}", "Nhập cân nặng từ 30 đến 300 kg", "Nhập cân nặng để xem mục tiêu", "Chưa gửi được link. Thử lại sau ít phút.", "Chưa lưu được hồ sơ. Thử lại sau ít phút." Confirm wording.
+- [ ] (cc-01) Validation ranges (birth year 1900 to this year, weight 30–300 kg) are my choice, not from the coach rules. Confirm.
+- [ ] (cc-01) Expired-link colour: the design uses #F5A524. The Cobalt Sign token `level-yellow-dark` (#E8A400) is used instead. Confirm.
+- [ ] (cc-01) "Tiếp tục với Google" and the magic-link send are mocked in `lib/api-client.ts`. Nothing is sent, and there is no OAuth yet. Wire Supabase and the profile save when Dong's API is ready.
+- [ ] (cc-01) Setup draft is kept in sessionStorage between the two steps (per browser). Only the final `saveSetup` call is the mock save.
+- [ ] (cc-01) At ≥1024 px, /setup/profile and /setup/goal both show the DesktopSetup card (both steps on one page). SignIn, CheckEmail and LinkExpired have no Desktop file, so they stay centred at 420 px.
+- [ ] (cc-01) Google logo keeps its four brand hex fills in `google-sign-in-button.tsx` (a brand asset, not a UI token).
+- [ ] (cc-01) "Coach Lê Hồng Khánh" stays in the SignUp copy because it is design copy. It is a sentence, not a tag. Confirm against the "No Coach tags" rule.
+- [ ] (cc-01) `components/onboarding/onboarding-header.tsx` is a local sub-screen header. Swap it for the shared AppHeader in ui-04b.
+- [ ] (cc-01) `apps/web/tests/alignment.spec.ts` does not exist yet. The alignment check was a one-off Playwright run on `data-align-group="daily-targets"`.

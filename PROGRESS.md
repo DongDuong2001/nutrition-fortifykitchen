@@ -150,6 +150,7 @@ All hydration checks passed cleanly (0 hydration errors, sessionStorage entries 
   - `apps/web/.screenshots/today-desktop-1440.png`: card title "Bữa ăn", meal headers ("Bữa sáng", "Bữa trưa", "Trước tập") and food items share exact left text edge.
   - `apps/web/.screenshots/micros-mobile-b6-increase-390.png`: Vitamin B6 row increased to 1,15 / 1,3 mg · 88% after adding Chà là 30g; Vitamin B* naming consistent.
 
+| 11/10/2026 | cc-01 | Onboarding in Cobalt Sign: /signup (split on desktop), /signin, /signin/check-email, /signin/expired, /setup/profile and /setup/goal (one card on desktop). Mock auth and profile save behind lib/api-client.ts. Goal kcal and daily targets from lib/targets.ts. Local sub-screen header | Swap the local header for AppHeader (ui-04b). Wire Supabase auth and profile save (Dong) |
 
 ## Quality Gate Outputs (ui-05)
 - `npx tsc --noEmit`: 0 errors (clean).
@@ -281,3 +282,11 @@ All alignment and hydration tests passed cleanly (<= 1px difference, 0 hydration
   - `apps/web/.screenshots/today-meals-desktop.png` (1440x900: desktop meal list with item links and + Thêm món aligned to exact same left edge as meal title)
 
 
+## Quality Gate Outputs (cc-01)
+- `npx tsc --noEmit`: exit 0.
+- `npx vitest run`: 8 files, 60 tests passed (new: `lib/__tests__/onboarding.test.ts`, 12 tests, written first from the coach rules in SPEC.md).
+- `npm run build`: compiled, TypeScript finished, 19 pages generated. `/signup`, `/signin`, `/signin/check-email`, `/signin/expired`, `/setup/profile`, `/setup/goal` are all static.
+- Playwright (port 3101): 390×844 and 1440×900 for all six routes. No horizontal scroll, no tap target under 44 px, no console errors. Flow passed: signup → check-email → profile → goal → /today. Validation states passed (bad email, bad weight, 70,5 kg recalculates to 2.115–2.468 kcal).
+- Screenshots: `apps/web/.screenshots/cc01-{signup,signin,check-email,expired,setup-profile,setup-goal}-{390,1440}.png`
+- Edges: daily-targets (setup-profile, setup-goal at 390 and 1440) pass.
+- Edges: signup, signin, check-email, expired have no data-align-group rows (n/a).

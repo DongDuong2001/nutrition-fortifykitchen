@@ -9,6 +9,7 @@ import {
 import { calculateTargets } from "./targets";
 import { MOCK_FOODS, type FoodItem } from "./mock/foods";
 import { searchFoods as searchMockFoods } from "./search";
+import type { SetupProfile } from "./onboarding";
 
 export * from "./nutrients";
 export * from "./mock/foods";
@@ -336,6 +337,22 @@ export const apiClient = {
       // Fallback
     }
     return { success: true, id: `entry-${Date.now()}` };
+  },
+
+  // Mock auth and onboarding. Nothing is sent anywhere yet; swap these bodies for
+  // Supabase magic links and Dong's profile endpoint once the backend is ready.
+  async requestMagicLink(email: string): Promise<{ ok: true }> {
+    void email;
+    return { ok: true };
+  },
+
+  async signInWithGoogle(): Promise<{ ok: true }> {
+    return { ok: true };
+  },
+
+  async saveSetup(profile: SetupProfile): Promise<{ ok: true }> {
+    void profile;
+    return { ok: true };
   },
 };
 
