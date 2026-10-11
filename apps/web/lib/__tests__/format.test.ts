@@ -17,6 +17,8 @@ describe("lib/format", () => {
       expect(formatNumber(1.5, { decimals: 1 })).toBe("1,5");
       expect(formatNumber(2.125, { decimals: 2 })).toBe("2,13");
       expect(formatNumber(1041.5, { decimals: 1 })).toBe("1.041,5");
+      expect(formatNumber(0.6)).toBe("0,6");
+      expect(formatNumber(0.04)).toBe("0,04");
     });
   });
 

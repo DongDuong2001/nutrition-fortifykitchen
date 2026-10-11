@@ -26,21 +26,11 @@ export function StatGroup({
 }: StatGroupProps) {
   const colCount = columns || items.length || 4;
 
-  const gridColsClass =
-    colCount === 4
-      ? "grid-cols-4"
-      : colCount === 3
-      ? "grid-cols-3"
-      : colCount === 2
-      ? "grid-cols-2"
-      : colCount === 5
-      ? "grid-cols-5"
-      : "grid-cols-4";
-
   return (
     <div
       data-align-group={dataAlignGroup}
-      className={`grid ${gridColsClass} gap-2 w-full ${className}`}
+      style={{ gridTemplateColumns: `repeat(${colCount}, minmax(0, 1fr))` }}
+      className={`grid gap-2 w-full ${className}`}
     >
       {items.map((it) => (
         <div key={it.id} className="flex flex-col items-center text-center justify-center">

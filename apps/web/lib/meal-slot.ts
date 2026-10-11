@@ -91,3 +91,14 @@ export function parseMealSlot(val: string | null | undefined): MealSlot | null {
   }
   return null;
 }
+
+export function resolveMealSlot(
+  param?: string | null,
+  date = new Date(),
+  isTrainingDay = true
+): MealSlot {
+  const parsed = parseMealSlot(param);
+  if (parsed) return parsed;
+  return getDefaultMealSlot(date, isTrainingDay);
+}
+

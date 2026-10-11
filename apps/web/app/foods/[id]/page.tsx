@@ -5,10 +5,10 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useDiary } from "@/lib/diary-store";
 import { MOCK_FOODS, type FoodItem } from "@/lib/mock/foods";
-import { parseMealSlot, getMealSlotNameVi, type MealSlot } from "@/lib/meal-slot";
+import { parseMealSlot, getDefaultMealSlot, getMealSlotNameVi, type MealSlot } from "@/lib/meal-slot";
 import { parseGramsInput, calculateMacroPreview, scaleNutrients } from "@/lib/portion";
 import { formatNumber } from "@/lib/format";
-import { NUTRIENT_CATALOG } from "@/lib/nutrients";
+import { getNutrientDefinition } from "@/lib/nutrients";
 import { calculateTargets } from "@/lib/targets";
 import { SegmentedBar } from "@/components/ui/segmented-bar";
 import { ChipGroup } from "@/components/ui/chip-group";
@@ -25,8 +25,19 @@ function FoodDetailInner() {
     return MOCK_FOODS.find((f) => f.id === foodId) || MOCK_FOODS[0];
   }, [foodId]);
 
-  const mealSlot: MealSlot = parseMealSlot(searchParams.get("meal")) || "pre_workout";
-  const mealNameVi = getMealSlotNameVi(mealSlot);
+  const paramMeal = searchParams.get("meal");
+  const parsedMeal = useMemo(() => parseMealSlot(paramMeal), [paramMeal]);
+  const [mealSlot, setMealSlot] = useState<MealSlot | null>(() => parsedMeal);
+
+  useEffect(() => {
+    if (!parsedMeal) {
+      setMealSlot(getDefaultMealSlot(new Date(), true));
+    } else {
+      setMealSlot(parsedMeal);
+    }
+  }, [parsedMeal]);
+
+  const mealNameVi = mealSlot ? getMealSlotNameVi(mealSlot) : "—";
 
   const [gramsInput, setGramsInput] = useState(() => {
     return food?.servings[0]?.grams.toString() || "100";
@@ -65,7 +76,6 @@ function FoodDetailInner() {
     if (!food) return [];
     const scaled = scaleNutrients(food.nutrients, parsedGrams);
 
-    const catalogMap = new Map(NUTRIENT_CATALOG.map((c) => [c.id, c]));
     const targetMap: Record<string, number> = {
       potassium: dailyTargets.potassium.min,
       calcium: dailyTargets.calcium.min,
@@ -103,10 +113,10 @@ function FoodDetailInner() {
           continue;
         }
 
-        const def = catalogMap.get(key);
+        const def = getNutrientDefinition(key);
         const name = def?.nameVi || key;
         const unit = def?.unit || "mg";
-        const target = targetMap[key];
+        const target = targetMap[key] || (def?.id ? targetMap[def.id] : undefined);
         const pct = target ? Math.round((val / target) * 100) : null;
 
         items.push({
@@ -124,9 +134,10 @@ function FoodDetailInner() {
 
   const handleAdd = async () => {
     if (!food || parsedGrams <= 0 || isSubmitting) return;
+    const resolvedSlot = mealSlot || getDefaultMealSlot(new Date(), true);
     setIsSubmitting(true);
     try {
-      await addFoodEntry(food, parsedGrams, mealSlot, selectedServingLabel);
+      await addFoodEntry(food, parsedGrams, resolvedSlot, selectedServingLabel);
       router.push("/today");
     } finally {
       setIsSubmitting(false);
@@ -150,7 +161,7 @@ function FoodDetailInner() {
       <header className="bg-ink text-white rounded-b-[20px] px-5 pt-3 pb-5 flex flex-col gap-2 shrink-0">
         <div className="w-full max-w-[560px] mx-auto flex flex-col gap-2">
           <Link
-            href={`/add?meal=${mealSlot}`}
+            href={`/add${mealSlot ? `?meal=${mealSlot}` : ""}`}
             aria-label="Quay lại"
             className="w-11 h-11 -ml-3 rounded-lg text-white flex items-center justify-center hover:text-sky active:scale-[0.97] transition-all no-underline"
           >

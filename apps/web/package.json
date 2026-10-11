@@ -4,12 +4,16 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:3100": "next dev --webpack -p 3100",
+    "port:free": "node scripts/free-port.js",
     "build": "next build --webpack",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run lib/__tests__",
-    "test:align": "python3 tests/alignment.py"
+    "test": "vitest run",
+    "test:align": "python3 tests/alignment.py",
+    "probe": "node scripts/probe.mjs",
+    "check": "npm run typecheck && npm run test && npm run build && npm run test:align"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",

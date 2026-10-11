@@ -15,16 +15,26 @@ export function formatNumber(value: number, options?: FormatNumberOptions): stri
     return formatter.format(value);
   }
 
-  // If decimal is present, format up to 2 decimal places without trailing zeros
-  if (value % 1 !== 0) {
+  // Check if effectively integer
+  if (Math.abs(Math.round(value) - value) < 1e-6) {
     const formatter = new Intl.NumberFormat("vi-VN", {
+      maximumFractionDigits: 0,
+    });
+    return formatter.format(Math.round(value));
+  }
+
+  // For values < 1 (adaptive precision: e.g. 0.6 -> "0,6", 0.04 -> "0,04")
+  if (Math.abs(value) < 1) {
+    const formatter = new Intl.NumberFormat("vi-VN", {
+      minimumFractionDigits: 0,
       maximumFractionDigits: 2,
     });
     return formatter.format(value);
   }
 
   const formatter = new Intl.NumberFormat("vi-VN", {
-    maximumFractionDigits: 0,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
   });
   return formatter.format(value);
 }

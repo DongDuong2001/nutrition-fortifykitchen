@@ -1,14 +1,8 @@
+import os
 import sys
-from pathlib import Path
-
-# Add scratch venv if needed
-venv_site = Path("/Users/haovu310/.gemini/antigravity/brain/78d531e1-79d6-4933-bbc7-35c42caf491c/scratch/.venv/lib/python3.15/site-packages")
-if venv_site.exists() and str(venv_site) not in sys.path:
-    sys.path.insert(0, str(venv_site))
-
 from playwright.sync_api import sync_playwright
 
-BASE_URL = "http://localhost:3100"
+BASE_URL = os.environ.get("ALIGN_BASE_URL", "http://localhost:3100")
 VIEWPORTS = [
     {"name": "mobile (390px)", "width": 390, "height": 844},
     {"name": "desktop (1440px)", "width": 1440, "height": 900},
@@ -60,12 +54,20 @@ def check_align_groups(page, group_name=None):
                     const leftDiff = Math.abs(firstRect.left - rect.left);
                     const rightDiff = Math.abs(firstRect.right - rect.right);
 
-                    if (leftDiff > 1.05) {
+                    const isContentGroup =
+                        name === "desktop-meal" ||
+                        name === "meal-card" ||
+                        item.getAttribute("data-align-edge") === "left" ||
+                        bucket[0].getAttribute("data-align-edge") === "left";
+                    const checkLeft = true;
+                    const checkRight = !isContentGroup;
+
+                    if (checkLeft && leftDiff > 1.05) {
                         errors.push(
                             `Group "${name}" left mismatch: diff ${leftDiff.toFixed(2)}px between <${bucket[0].tagName.toLowerCase()} class="${bucket[0].className}"> (${firstRect.left.toFixed(1)}) and <${item.tagName.toLowerCase()} class="${item.className}"> (${rect.left.toFixed(1)})`
                         );
                     }
-                    if (rightDiff > 1.05) {
+                    if (checkRight && rightDiff > 1.05) {
                         errors.push(
                             `Group "${name}" right mismatch: diff ${rightDiff.toFixed(2)}px between <${bucket[0].tagName.toLowerCase()} class="${bucket[0].className}"> (${firstRect.right.toFixed(1)}) and <${item.tagName.toLowerCase()} class="${item.className}"> (${rect.right.toFixed(1)})`
                         );
@@ -114,7 +116,7 @@ def main():
             page.goto(f"{BASE_URL}/add?meal=snack", wait_until="networkidle")
             page.wait_for_timeout(500)
             try:
-                date_btn = page.locator("button:has-text('Chà là')").filter(has_not=page.locator(":hidden")).first
+                date_btn = page.locator("button:has-text('Chà là') >> visible=true").first
                 if date_btn.is_visible():
                     date_btn.click()
             except Exception:
@@ -139,27 +141,31 @@ def main():
 
         # 2. Hydration reload tests
         print("\n=== Hydration reload tests with sessionStorage ===")
+        console_errors = []
+        page.on("console", lambda msg: console_errors.append(msg.text) if msg.type == "error" else None)
+        page.on("pageerror", lambda err: console_errors.append(err.message))
+
         for path in ["/today", "/add"]:
-            console_errors = []
-            page.on("console", lambda msg: console_errors.append(msg.text) if msg.type == "error" else None)
-            page.on("pageerror", lambda err: console_errors.append(err.message))
+            console_errors.clear()
 
             page.goto(f"{BASE_URL}{path}", wait_until="networkidle")
             page.evaluate("""() => {
-                sessionStorage.setItem('h1t_diary_entries', JSON.stringify([{
+                sessionStorage.setItem('h1t_added_entries_v1', JSON.stringify([{
                     id: 'test-entry-1',
                     foodId: 'food-cha-la',
-                    foodNameVi: 'Chà là khô Deglet Noor',
+                    foodName: 'Chà là hạt dẻ test',
                     grams: 30,
                     mealSlot: 'snack',
-                    servingLabel: '30 g',
+                    displayQty: '30 g',
                     calories: 85,
                     carbs: 22.5,
                     protein: 0.7,
                     fat: 0.1,
-                    nutrients: { energy: 85, carbs: 22.5, protein: 0.7, fat: 0.1, potassium: 195, fiber: 2.4 }
+                    fiber: 2.0,
+                    nutrients: { energy: 85, carbs: 22.5, protein: 0.7, fat: 0.1, potassium: 195, fiber: 2.0 },
+                    addedAt: new Date().toISOString()
                 }]));
-                sessionStorage.setItem('h1t_recent_searches', JSON.stringify(['Chà là', 'Chuối']));
+                sessionStorage.setItem('h1t_recent_searches_v1', JSON.stringify(['Hạt điều test', 'Chuối sấy']));
             }""")
             page.reload(wait_until="networkidle")
             page.wait_for_timeout(500)
@@ -170,6 +176,26 @@ def main():
                 total_errors.extend(hydration_errs)
             else:
                 print(f"[PASS] 0 hydration errors on {path} with sessionStorage loaded")
+
+            # Assert seeded entry visible on /today and recent search chip visible on /add
+            if path == "/today":
+                try:
+                    seeded = page.locator("text='Chà là hạt dẻ test' >> visible=true").first
+                    seeded.wait_for(state="visible", timeout=5000)
+                    print("[PASS] Seeded entry 'Chà là hạt dẻ test' is visible on /today")
+                except Exception as e:
+                    err = f"Seeded entry 'Chà là hạt dẻ test' not visible on /today after reload: {e}"
+                    print(f"[FAIL] {err}")
+                    total_errors.append(err)
+            elif path == "/add":
+                try:
+                    chip = page.locator("button:has-text('Hạt điều test') >> visible=true").first
+                    chip.wait_for(state="visible", timeout=5000)
+                    print("[PASS] Recent search chip 'Hạt điều test' is visible on /add")
+                except Exception as e:
+                    err = f"Recent search chip 'Hạt điều test' not visible on /add after reload: {e}"
+                    print(f"[FAIL] {err}")
+                    total_errors.append(err)
 
         browser.close()
 

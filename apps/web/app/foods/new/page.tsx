@@ -1,19 +1,31 @@
 "use client";
 
-import React, { useState, Suspense } from "react";
+import React, { useState, useEffect, useMemo, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { apiClient } from "@/lib/api-client";
 import { useDiary } from "@/lib/diary-store";
-import { parseMealSlot, getMealSlotNameVi, type MealSlot } from "@/lib/meal-slot";
+import { parseMealSlot, getDefaultMealSlot, getMealSlotNameVi, type MealSlot } from "@/lib/meal-slot";
+import { FormRow } from "@/components/ui/form-row";
 
 function CreateFoodInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { addFoodEntry } = useDiary();
 
-  const mealSlot: MealSlot = parseMealSlot(searchParams.get("meal")) || "pre_workout";
-  const mealNameVi = getMealSlotNameVi(mealSlot);
+  const paramMeal = searchParams.get("meal");
+  const parsedMeal = useMemo(() => parseMealSlot(paramMeal), [paramMeal]);
+  const [mealSlot, setMealSlot] = useState<MealSlot | null>(() => parsedMeal);
+
+  useEffect(() => {
+    if (!parsedMeal) {
+      setMealSlot(getDefaultMealSlot(new Date(), true));
+    } else {
+      setMealSlot(parsedMeal);
+    }
+  }, [parsedMeal]);
+
+  const mealNameVi = mealSlot ? getMealSlotNameVi(mealSlot) : "—";
 
   // Form Fields
   const [nameVi, setNameVi] = useState("");
@@ -105,7 +117,8 @@ function CreateFoodInner() {
       });
 
       // Add to diary and redirect
-      await addFoodEntry(createdFood, parsedSize, mealSlot, `${parsedSize} ${servingUnit}`);
+      const resolvedSlot = mealSlot || getDefaultMealSlot(new Date(), true);
+      await addFoodEntry(createdFood, parsedSize, resolvedSlot, `${parsedSize} ${servingUnit}`);
       router.push("/today");
     } finally {
       setIsSubmitting(false);
@@ -118,7 +131,7 @@ function CreateFoodInner() {
       <header className="bg-ink text-white rounded-b-[20px] px-5 pt-3 pb-5 flex flex-col gap-2 shrink-0">
         <div className="w-full max-w-[560px] mx-auto flex flex-col gap-2">
           <Link
-            href={`/add?meal=${mealSlot}`}
+            href={`/add${mealSlot ? `?meal=${mealSlot}` : ""}`}
             aria-label="Quay lại"
             className="w-11 h-11 -ml-3 rounded-lg text-white flex items-center justify-center hover:text-sky active:scale-[0.97] transition-all no-underline"
           >
@@ -138,10 +151,11 @@ function CreateFoodInner() {
       {/* Form Content */}
       <form onSubmit={handleSubmit} className="flex-1 w-full max-w-[560px] mx-auto p-4 flex flex-col gap-4 pb-28">
         {/* Name Field */}
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="cf-name" className="text-sm font-bold text-text">
-            Tên món <span className="text-destructive">*</span>
-          </label>
+        <FormRow
+          label="Tên món"
+          required
+          error={touched.nameVi ? errors.nameVi : undefined}
+        >
           <input
             id="cf-name"
             type="text"
@@ -156,19 +170,14 @@ function CreateFoodInner() {
               touched.nameVi && errors.nameVi ? "border-destructive" : "border-card-border focus:border-blue"
             }`}
           />
-          {touched.nameVi && errors.nameVi && (
-            <span role="alert" className="text-xs text-destructive font-semibold">
-              {errors.nameVi}
-            </span>
-          )}
-        </div>
+        </FormRow>
 
         {/* Serving Size & Unit */}
-        <div className="flex items-end gap-3">
-          <div className="flex flex-col gap-1.5 w-32 shrink-0">
-            <label htmlFor="cf-size" className="text-sm font-bold text-text">
-              Khẩu phần
-            </label>
+        <FormRow
+          label="Khẩu phần"
+          error={touched.servingSize ? errors.servingSize : undefined}
+        >
+          <div className="flex items-center gap-3">
             <input
               id="cf-size"
               type="text"
@@ -179,38 +188,32 @@ function CreateFoodInner() {
                 if (touched.servingSize) validateField("servingSize", e.target.value);
               }}
               onBlur={() => handleBlur("servingSize", servingSize)}
-              className={`h-12 px-3.5 rounded-xl border-2 bg-white text-base font-bold tabular-nums text-text outline-none text-right transition-colors ${
+              className={`h-12 px-3.5 rounded-xl border-2 bg-white text-base font-bold tabular-nums text-text outline-none text-right transition-colors w-32 shrink-0 ${
                 touched.servingSize && errors.servingSize ? "border-destructive" : "border-card-border focus:border-blue"
               }`}
             />
+            {/* Unit radio group */}
+            <div role="radiogroup" aria-label="Đơn vị khẩu phần" className="flex gap-2">
+              {(["g", "ml", "cái"] as const).map((u) => {
+                const isChecked = servingUnit === u;
+                return (
+                  <button
+                    key={u}
+                    type="button"
+                    role="radio"
+                    aria-checked={isChecked}
+                    onClick={() => setServingUnit(u)}
+                    className={`min-h-[44px] min-w-[52px] px-4 rounded-full text-sm font-semibold border-0 cursor-pointer active:scale-[0.97] transition-colors ${
+                      isChecked ? "bg-ink text-white" : "bg-card text-text border border-card-border hover:bg-page"
+                    }`}
+                  >
+                    {u}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-
-          {/* Unit radio group */}
-          <div role="radiogroup" aria-label="Đơn vị khẩu phần" className="flex gap-2 pb-0.5">
-            {(["g", "ml", "cái"] as const).map((u) => {
-              const isChecked = servingUnit === u;
-              return (
-                <button
-                  key={u}
-                  type="button"
-                  role="radio"
-                  aria-checked={isChecked}
-                  onClick={() => setServingUnit(u)}
-                  className={`min-h-[44px] min-w-[52px] px-4 rounded-full text-sm font-semibold border-0 cursor-pointer active:scale-[0.97] transition-colors ${
-                    isChecked ? "bg-ink text-white" : "bg-card text-text border border-card-border hover:bg-page"
-                  }`}
-                >
-                  {u}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-        {touched.servingSize && errors.servingSize && (
-          <span role="alert" className="text-xs text-destructive font-semibold -mt-2">
-            {errors.servingSize}
-          </span>
-        )}
+        </FormRow>
 
         {/* Nutrition Info Card */}
         <div className="bg-card border border-card-border rounded-2xl p-4 flex flex-col gap-3">
@@ -222,10 +225,7 @@ function CreateFoodInner() {
           </div>
 
           <div className="grid grid-cols-2 gap-3 pt-1">
-            <div className="flex flex-col gap-1">
-              <label htmlFor="cf-kcal" className="text-xs font-bold text-secondary">
-                Năng lượng (kcal)
-              </label>
+            <FormRow label="Năng lượng (kcal)">
               <input
                 id="cf-kcal"
                 type="text"
@@ -235,12 +235,9 @@ function CreateFoodInner() {
                 placeholder="0"
                 className="h-12 px-3 rounded-xl border-2 border-card-border focus:border-blue bg-white text-base font-bold tabular-nums text-text outline-none text-right"
               />
-            </div>
+            </FormRow>
 
-            <div className="flex flex-col gap-1">
-              <label htmlFor="cf-pro" className="text-xs font-bold text-secondary">
-                Đạm (g)
-              </label>
+            <FormRow label="Đạm (g)">
               <input
                 id="cf-pro"
                 type="text"
@@ -250,12 +247,9 @@ function CreateFoodInner() {
                 placeholder="0"
                 className="h-12 px-3 rounded-xl border-2 border-card-border focus:border-blue bg-white text-base font-bold tabular-nums text-text outline-none text-right"
               />
-            </div>
+            </FormRow>
 
-            <div className="flex flex-col gap-1">
-              <label htmlFor="cf-carb" className="text-xs font-bold text-secondary">
-                Tinh bột (g)
-              </label>
+            <FormRow label="Tinh bột (g)">
               <input
                 id="cf-carb"
                 type="text"
@@ -265,12 +259,9 @@ function CreateFoodInner() {
                 placeholder="0"
                 className="h-12 px-3 rounded-xl border-2 border-card-border focus:border-blue bg-white text-base font-bold tabular-nums text-text outline-none text-right"
               />
-            </div>
+            </FormRow>
 
-            <div className="flex flex-col gap-1">
-              <label htmlFor="cf-fat" className="text-xs font-bold text-secondary">
-                Béo (g)
-              </label>
+            <FormRow label="Béo (g)">
               <input
                 id="cf-fat"
                 type="text"
@@ -280,7 +271,7 @@ function CreateFoodInner() {
                 placeholder="0"
                 className="h-12 px-3 rounded-xl border-2 border-card-border focus:border-blue bg-white text-base font-bold tabular-nums text-text outline-none text-right"
               />
-            </div>
+            </FormRow>
           </div>
         </div>
 
@@ -311,10 +302,7 @@ function CreateFoodInner() {
 
           {showMicros && (
             <div className="bg-card border border-card-border rounded-2xl p-4 grid grid-cols-2 gap-3 animate-in fade-in duration-200">
-              <div className="flex flex-col gap-1">
-                <label htmlFor="cf-na" className="text-xs font-bold text-secondary">
-                  Natri (mg)
-                </label>
+              <FormRow label="Natri (mg)">
                 <input
                   id="cf-na"
                   type="text"
@@ -324,12 +312,9 @@ function CreateFoodInner() {
                   placeholder="—"
                   className="h-11 px-3 rounded-xl border border-card-border focus:border-blue bg-white text-sm font-semibold tabular-nums text-text outline-none text-right"
                 />
-              </div>
+              </FormRow>
 
-              <div className="flex flex-col gap-1">
-                <label htmlFor="cf-k" className="text-xs font-bold text-secondary">
-                  Kali (mg)
-                </label>
+              <FormRow label="Kali (mg)">
                 <input
                   id="cf-k"
                   type="text"
@@ -339,12 +324,9 @@ function CreateFoodInner() {
                   placeholder="—"
                   className="h-11 px-3 rounded-xl border border-card-border focus:border-blue bg-white text-sm font-semibold tabular-nums text-text outline-none text-right"
                 />
-              </div>
+              </FormRow>
 
-              <div className="flex flex-col gap-1">
-                <label htmlFor="cf-ca" className="text-xs font-bold text-secondary">
-                  Canxi (mg)
-                </label>
+              <FormRow label="Canxi (mg)">
                 <input
                   id="cf-ca"
                   type="text"
@@ -354,12 +336,9 @@ function CreateFoodInner() {
                   placeholder="—"
                   className="h-11 px-3 rounded-xl border border-card-border focus:border-blue bg-white text-sm font-semibold tabular-nums text-text outline-none text-right"
                 />
-              </div>
+              </FormRow>
 
-              <div className="flex flex-col gap-1">
-                <label htmlFor="cf-fe" className="text-xs font-bold text-secondary">
-                  Sắt (mg)
-                </label>
+              <FormRow label="Sắt (mg)">
                 <input
                   id="cf-fe"
                   type="text"
@@ -369,21 +348,20 @@ function CreateFoodInner() {
                   placeholder="—"
                   className="h-11 px-3 rounded-xl border border-card-border focus:border-blue bg-white text-sm font-semibold tabular-nums text-text outline-none text-right"
                 />
-              </div>
+              </FormRow>
 
-              <div className="flex flex-col gap-1 col-span-2">
-                <label htmlFor="cf-vitd" className="text-xs font-bold text-secondary">
-                  Vitamin D (µg)
-                </label>
-                <input
-                  id="cf-vitd"
-                  type="text"
-                  inputMode="decimal"
-                  value={vitaminD}
-                  onChange={(e) => setVitaminD(e.target.value)}
-                  placeholder="—"
-                  className="h-11 px-3 rounded-xl border border-card-border focus:border-blue bg-white text-sm font-semibold tabular-nums text-text outline-none text-right"
-                />
+              <div className="col-span-2">
+                <FormRow label="Vitamin D (µg)">
+                  <input
+                    id="cf-vitd"
+                    type="text"
+                    inputMode="decimal"
+                    value={vitaminD}
+                    onChange={(e) => setVitaminD(e.target.value)}
+                    placeholder="—"
+                    className="h-11 px-3 rounded-xl border border-card-border focus:border-blue bg-white text-sm font-semibold tabular-nums text-text outline-none text-right"
+                  />
+                </FormRow>
               </div>
             </div>
           )}

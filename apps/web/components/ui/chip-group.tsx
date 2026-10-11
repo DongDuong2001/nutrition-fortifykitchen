@@ -31,21 +31,11 @@ export function ChipGroup({
   const totalCount = (leadingInput ? 1 : 0) + items.length;
   const colCount = columns || (totalCount > 0 ? totalCount : 4);
 
-  const gridColsClass =
-    colCount === 4
-      ? "grid-cols-4"
-      : colCount === 3
-      ? "grid-cols-3"
-      : colCount === 2
-      ? "grid-cols-2"
-      : colCount === 5
-      ? "grid-cols-5"
-      : "grid-cols-4";
-
   return (
     <div
       data-align-group={dataAlignGroup}
-      className={`grid ${gridColsClass} gap-2 w-full ${className}`}
+      style={{ gridTemplateColumns: `repeat(${colCount}, minmax(0, 1fr))` }}
+      className={`grid gap-2 w-full ${className}`}
     >
       {leadingInput && (
         <div className="flex items-center min-h-[44px] w-full">

@@ -3,7 +3,6 @@
 ## Now working
 | Task | Owner | Files / routes |
 |---|---|---|
-| ui-05-fix | Antigravity | app/add, app/foods, app/today, app/micros, lib/diary-store, lib/meal-slot, components/ui |
 
 | Date | Commit | Built | Next |
 | --- | --- | --- | --- |
@@ -16,6 +15,7 @@
 | 11/10/2026 | ui-04-fix-2 | Sticky group header bug fixed via overflow-clip; sample data totals consistency & invariant tests | TASK ui-05: Add food flow |
 | 11/10/2026 | ui-05 | Add food flow: search with diacritics & fuzzy fallback, food detail, create custom food, meal switcher sheet, desktop add food modal dialog, reactive diary store with sessionStorage, toast alerts, dynamic Today and Micros updates | Next tasks |
 | 11/10/2026 | ui-05-fix | Hydration bug fix, Asia/Ho_Chi_Minh default meal slot, layout primitives (ChipGroup, StatGroup, FormRow), 5-row portion panel alignment & 2-col desktop micros, return focus to opener on modal close, Playwright alignment & hydration tests | Next tasks |
+| 11/10/2026 | ui-05-fix-2 | Meal default fallback & neutral placeholder, sessionStorage hydration visibility assertions, content-based alignment verification & desktop meal fix, adaptive precision & Vietnamese nutrient synonyms, single PortionPanel component, FormRow inputs, npm scripts & AGENTS.md documentation | Next tasks |
 
 ## Quality Gate Outputs (ui-05)
 - `npx tsc --noEmit`: 0 errors (clean).
@@ -93,4 +93,57 @@ All alignment and hydration tests passed cleanly (<= 1px difference, 0 hydration
 - Visual inspection screenshots (Playwright):
   - `apps/web/.screenshots/portion-panel-390.png` (390x844: mobile portion panel dock with 5-row alignment, ChipGroup, StatGroup, full-width CTA)
   - `apps/web/.screenshots/portion-panel-1440.png` (1440x900: desktop right pane portion panel with 5-row alignment and 2-column micros table underneath)
+
+## Quality Gate Outputs (ui-05-fix-2)
+- `npm run typecheck` (`tsc --noEmit`): 0 errors (clean).
+- `npm run test` (`vitest run`):
+```
+ Test Files  7 passed (7)
+      Tests  51 passed (51)
+   Duration  145ms
+```
+- `npm run build` (`next build --webpack`):
+```
+▲ Next.js 16.4.0 (webpack)
+✓ Compiled successfully in 1354ms
+  Finished TypeScript in 224ms
+  Collecting page data using 11 workers in 373ms
+✓ Generating static pages using 11 workers (13/13) in 129ms
+  Collecting build traces in 2.4s
+  Finalizing page optimization in 2.4s
+```
+- Content-based alignment pre-fix failure captured:
+```
+[FAIL] /today @ desktop (1440px): ['Group "desktop-meal" left mismatch: diff 8.00px between <h3 class="m-0 text-[15px] font-bold text-text"> (301.0) and <span class="truncate text-text font-normal"> (309.0)', ...]
+```
+- `npm run test:align` post-fix:
+```
+=== Starting Alignment and Hydration Tests ===
+[PASS] /today @ mobile (390px) (checked groups: {'meal-card': 10})
+[PASS] /micros @ mobile (390px) (checked groups: {'micros-card': 65})
+[PASS] /add @ mobile (390px) (checked groups: {'portion': 5})
+[PASS] /foods/food-cha-la @ mobile (390px) (checked groups: {'food-detail': 3})
+[PASS] /today @ desktop (1440px) (checked groups: {'desktop-meal': 14})
+[PASS] /micros @ desktop (1440px) (checked groups: {'micros-card': 65})
+[PASS] /add @ desktop (1440px) (checked groups: {'portion': 5})
+[PASS] /foods/food-cha-la @ desktop (1440px) (checked groups: {'food-detail': 3})
+
+=== Hydration reload tests with sessionStorage ===
+[PASS] 0 hydration errors on /today with sessionStorage loaded
+[PASS] Seeded entry 'Chà là hạt dẻ test' is visible on /today
+[PASS] 0 hydration errors on /add with sessionStorage loaded
+[PASS] Recent search chip 'Hạt điều test' is visible on /add
+
+All alignment and hydration tests passed cleanly (<= 1px difference, 0 hydration errors)!
+```
+- Alignment Edge Self-Check:
+  - /today: Edges: desktop-meal (14 rows), meal-card (10 rows) pass.
+  - /micros: Edges: micros-card (65 rows) pass.
+  - /add: Edges: portion (5 rows) pass.
+  - /foods/[id]: Edges: food-detail (3 rows) pass.
+- Visual inspection screenshots (Playwright):
+  - `apps/web/.screenshots/add-portion-mobile.png` (390x844: mobile dock with 4 derived serving columns, aligned 4-col macro stats, 0,7g & 0,1g decimal commas)
+  - `apps/web/.screenshots/add-portion-desktop.png` (1440x900: desktop right pane portion panel with 4 columns, B6 (Pyridoxine) synonym, 0,05 mg precision)
+  - `apps/web/.screenshots/today-meals-desktop.png` (1440x900: desktop meal list with item links and + Thêm món aligned to exact same left edge as meal title)
+
 

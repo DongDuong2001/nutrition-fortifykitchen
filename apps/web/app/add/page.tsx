@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useDiary } from "@/lib/diary-store";
 import { MOCK_FOODS, type FoodItem } from "@/lib/mock/foods";
 import { searchFoods, findSimilarFoods } from "@/lib/search";
+
 import {
   parseMealSlot,
   getDefaultMealSlot,
@@ -16,10 +17,7 @@ import {
 import { parseGramsInput, calculateMacroPreview, scaleNutrients } from "@/lib/portion";
 import { MealSwitcher } from "@/components/meal-switcher";
 import { formatNumber } from "@/lib/format";
-import { ChipGroup } from "@/components/ui/chip-group";
-import { StatGroup } from "@/components/ui/stat-group";
-import { NUTRIENT_CATALOG } from "@/lib/nutrients";
-import { calculateTargets } from "@/lib/targets";
+import { PortionPanel } from "@/components/ui/portion-panel";
 import TodayContent from "../today/page";
 
 function AddFoodInner() {
@@ -29,16 +27,17 @@ function AddFoodInner() {
 
   // Meal slot from query param or default time of day (Asia/Ho_Chi_Minh on client)
   const paramMeal = searchParams.get("meal");
-  const [mealSlot, setMealSlot] = useState<MealSlot>(() => {
-    return parseMealSlot(paramMeal) || "pre_workout";
-  });
+  const parsedMeal = useMemo(() => parseMealSlot(paramMeal), [paramMeal]);
+  const [mealSlot, setMealSlot] = useState<MealSlot | null>(() => parsedMeal);
 
   // Client-only timezone evaluation when ?meal is not provided
   useEffect(() => {
-    if (!paramMeal) {
+    if (!parsedMeal) {
       setMealSlot(getDefaultMealSlot(new Date(), true));
+    } else {
+      setMealSlot(parsedMeal);
     }
-  }, [paramMeal]);
+  }, [parsedMeal]);
 
   const [switcherOpen, setSwitcherOpen] = useState(false);
   const [filterChip, setFilterChip] = useState<"all" | "favorite">("all");
@@ -123,77 +122,13 @@ function AddFoodInner() {
     return parseGramsInput(gramsInput);
   }, [gramsInput]);
 
-  // Macro preview for selected food & grams
-  const macroPreview = useMemo(() => {
-    if (!selectedFood) return { calories: 0, carbs: 0, protein: 0, fat: 0, fiber: 0 };
-    return calculateMacroPreview(selectedFood.nutrients, parsedGrams);
-  }, [selectedFood, parsedGrams]);
-
-  // Daily targets for calculating % of today's target in portion panel
-  const dailyTargets = useMemo(() => {
-    return calculateTargets({
-      weightKg: 65,
-      goal: "maintain",
-      trainingMinutes: 60,
-      sex: "male",
-    });
-  }, []);
-
-  // Scaled micros for desktop right pane: amount AND % of today's target
-  const scaledMicros = useMemo(() => {
-    if (!selectedFood) return [];
-    const scaled = scaleNutrients(selectedFood.nutrients, parsedGrams);
-    const targetMap: Record<string, number> = {
-      potassium: dailyTargets.potassium.min,
-      calcium: dailyTargets.calcium.min,
-      magnesium: dailyTargets.magnesium.min,
-      iron: dailyTargets.iron.min,
-      zinc: dailyTargets.zinc.min,
-      sodium: dailyTargets.sodium.min,
-      copper: 0.9,
-      manganese: 2.3,
-      vitamin_d: 15,
-      vitamin_a: 650,
-      vitamin_c: 100,
-      vitamin_e: 6.5,
-      vitamin_k: 150,
-      thiamin: 1.2,
-      riboflavin: 1.3,
-      niacin: 16,
-      pyridoxine: 1.3,
-      folate: 400,
-      cobalamin: 2.4,
-    };
-
-    const catalogMap = new Map(NUTRIENT_CATALOG.map((c) => [c.id, c]));
-    const list: { name: string; value: string; pct: number | null }[] = [];
-
-    // Prioritized display order
-    const priorityKeys = ["potassium", "magnesium", "calcium", "iron", "copper", "pyridoxine", "zinc", "sodium"];
-    for (const key of priorityKeys) {
-      const val = scaled[key];
-      if (val !== null && val !== undefined && val > 0) {
-        const def = catalogMap.get(key);
-        const name = def?.nameVi || key;
-        const unit = def?.unit || "mg";
-        const target = targetMap[key];
-        const pct = target ? Math.round((val / target) * 100) : null;
-        list.push({
-          name,
-          value: `${formatNumber(unit === "mg" || unit === "kcal" ? Math.round(val) : Math.round(val * 10) / 10)} ${unit}`,
-          pct,
-        });
-      }
-    }
-    return list;
-  }, [selectedFood, parsedGrams, dailyTargets]);
-
   // Submit action
   const handleAddFood = async () => {
     if (!selectedFood || parsedGrams <= 0 || isSubmitting) return;
+    const resolvedSlot = mealSlot || getDefaultMealSlot(new Date(), true);
     setIsSubmitting(true);
     try {
-      await addFoodEntry(selectedFood, parsedGrams, mealSlot, selectedServingLabel);
+      await addFoodEntry(selectedFood, parsedGrams, resolvedSlot, selectedServingLabel);
       if (query.trim()) {
         addRecentSearch(query);
       }
@@ -205,7 +140,10 @@ function AddFoodInner() {
 
   const handleClose = useCallback(() => {
     if (typeof window !== "undefined") {
-      const openerId = sessionStorage.getItem("last_add_opener_id") || (mealSlot ? `desktop-add-${mealSlot}` : "desktop-add-btn");
+      const openerId =
+        sessionStorage.getItem("last_add_opener_id") ||
+        (mealSlot ? `desktop-add-${mealSlot}` : "desktop-add-btn");
+      sessionStorage.removeItem("last_add_opener_id");
       sessionStorage.setItem("return_focus_id", openerId);
     }
     router.push("/today");
@@ -228,7 +166,7 @@ function AddFoodInner() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleClose, selectedFood, parsedGrams, handleAddFood]);
 
-  const mealNameVi = getMealSlotNameVi(mealSlot);
+  const mealNameVi = mealSlot ? getMealSlotNameVi(mealSlot) : "—";
 
   // Meta string for food in search list
   const getFoodMeta = (food: FoodItem) => {
@@ -447,7 +385,7 @@ function AddFoodInner() {
 
                   {/* Create new food button at end of list */}
                   <Link
-                    href={`/foods/new?meal=${mealSlot}`}
+                    href={`/foods/new${mealSlot ? `?meal=${mealSlot}` : ""}`}
                     className="no-underline text-left rounded-xl p-3 flex flex-col justify-center min-h-[56px] hover:bg-page transition-colors"
                   >
                     <span className="text-[15px] font-bold text-blue">+ Tạo món mới</span>
@@ -458,114 +396,19 @@ function AddFoodInner() {
 
               {/* Right Pane: Selected Food Portion & Macros */}
               {selectedFood && (
-                <div className="w-[340px] shrink-0 bg-page border border-card-border rounded-xl p-4 flex flex-col gap-3">
-                  {/* Title Row: food name left, "Xem chi tiết →" right (44px tap target) */}
-                  <div
-                    data-align-group="portion"
-                    className="flex items-center justify-between gap-2 min-h-[44px] w-full"
-                  >
-                    <h3 className="m-0 text-xl font-bold text-text truncate">{selectedFood.nameVi}</h3>
-                    <Link
-                      href={`/foods/${selectedFood.id}?meal=${mealSlot}`}
-                      className="text-xs text-blue font-semibold hover:underline shrink-0 min-h-[44px] inline-flex items-center"
-                    >
-                      Xem chi tiết →
-                    </Link>
-                  </div>
-
-                  {/* Tip on its own line below the title, wrapping to 2 lines max, never cut off */}
-                  {selectedFood.tipVi && (
-                    <div
-                      data-align-group="portion"
-                      className="text-xs text-blue font-medium leading-relaxed line-clamp-2 w-full"
-                    >
-                      {selectedFood.tipVi}
-                    </div>
-                  )}
-
-                  {/* Portion row: 4-column ChipGroup [gram input | 30 g | 3 quả | 100 g], full width */}
-                  <div data-align-group="portion" className="w-full">
-                    <ChipGroup
-                      columns={4}
-                      tone="light"
-                      leadingInput={
-                        <label className="flex items-center justify-center bg-white border-2 border-blue rounded-xl px-2 h-11 w-full cursor-text box-border">
-                          <span className="sr-only">Khối lượng</span>
-                          <input
-                            type="text"
-                            inputMode="decimal"
-                            aria-label="Số gam"
-                            value={gramsInput}
-                            onChange={(e) => {
-                              setGramsInput(e.target.value);
-                              setSelectedServingLabel(`${e.target.value} g`);
-                            }}
-                            className="w-full bg-transparent border-0 outline-none font-bold text-sm tabular-nums text-text text-right"
-                          />
-                          <span className="text-xs text-secondary ml-1 font-semibold">g</span>
-                        </label>
-                      }
-                      items={selectedFood.servings.map((s) => ({
-                        id: s.label,
-                        label: s.label,
-                        active: selectedServingLabel === s.label,
-                        onClick: () => {
-                          setGramsInput(s.grams.toString());
-                          setSelectedServingLabel(s.label);
-                        },
-                      }))}
-                    />
-                  </div>
-
-                  {/* Stats row: 4-column StatGroup [kcal | Carb | Đạm | Béo], same columns and gap */}
-                  <div
-                    data-align-group="portion"
-                    className="w-full pt-1 border-t border-card-border"
-                  >
-                    <StatGroup
-                      columns={4}
-                      tone="light"
-                      items={[
-                        { id: "cal", value: formatNumber(macroPreview.calories), label: "kcal" },
-                        { id: "carb", value: `${formatNumber(macroPreview.carbs)} g`, label: "Carb" },
-                        { id: "protein", value: `${formatNumber(macroPreview.protein)} g`, label: "Đạm" },
-                        { id: "fat", value: `${formatNumber(macroPreview.fat)} g`, label: "Béo" },
-                      ]}
-                    />
-                  </div>
-
-                  {/* CTA "Thêm vào <meal>" full width */}
-                  <button
-                    type="button"
-                    data-align-group="portion"
-                    onClick={handleAddFood}
-                    disabled={isSubmitting || parsedGrams <= 0}
-                    className="w-full min-h-[52px] rounded-full bg-blue text-white font-bold text-base cursor-pointer hover:bg-blue/90 active:scale-[0.98] transition-all border-0 flex items-center justify-center shadow-md disabled:opacity-50"
-                  >
-                    Thêm vào {mealNameVi}
-                  </button>
-
-                  {/* Desktop "Vi chất trong <g>" list: show amount AND % of today's target, right-aligned in two columns */}
-                  {scaledMicros.length > 0 && (
-                    <div className="w-full bg-white rounded-xl p-3 border border-card-border flex flex-col gap-1.5">
-                      <div className="text-xs font-semibold text-secondary pb-1 border-b border-card-border">
-                        Vi chất trong {gramsInput} g:
-                      </div>
-                      {scaledMicros.map((m) => (
-                        <div key={m.name} className="flex justify-between items-center text-xs py-0.5">
-                          <span className="font-semibold text-text">{m.name}</span>
-                          <div className="flex items-center gap-2 tabular-nums">
-                            <span className="text-secondary font-medium text-right">{m.value}</span>
-                            {m.pct !== null && (
-                              <span className="font-bold text-text min-w-[36px] text-right">
-                                {m.pct}%
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                <div className="w-[340px] shrink-0">
+                  <PortionPanel
+                    food={selectedFood}
+                    gramsInput={gramsInput}
+                    setGramsInput={setGramsInput}
+                    selectedServingLabel={selectedServingLabel}
+                    setSelectedServingLabel={setSelectedServingLabel}
+                    mealSlot={mealSlot}
+                    onAdd={handleAddFood}
+                    isSubmitting={isSubmitting}
+                    tone="light"
+                    showMicros={true}
+                  />
                 </div>
               )}
             </div>
@@ -770,7 +613,7 @@ function AddFoodInner() {
 
             {/* Create Food Link */}
             <Link
-              href={`/foods/new?meal=${mealSlot}`}
+              href={`/foods/new${mealSlot ? `?meal=${mealSlot}` : ""}`}
               className="no-underline text-left rounded-xl p-3 flex flex-col justify-center min-h-[52px] hover:bg-page transition-colors"
             >
               <span className="text-[15px] font-bold text-blue">+ Tạo món mới</span>
@@ -780,94 +623,19 @@ function AddFoodInner() {
 
           {/* Bottom Selected Food Portion Panel */}
           {selectedFood && (
-            <div
-              className="shrink-0 bg-ink text-white rounded-2xl p-4 flex flex-col gap-3 shadow-lg"
-            >
-              {/* Title row: food name left, "Xem chi tiết →" right (44 px tap target) */}
-              <div
-                data-align-group="portion"
-                className="flex items-center justify-between gap-2 min-h-[44px] w-full"
-              >
-                <div className="text-lg font-bold truncate">{selectedFood.nameVi}</div>
-                <Link
-                  href={`/foods/${selectedFood.id}?meal=${mealSlot}`}
-                  className="text-xs text-sky font-semibold no-underline hover:underline min-h-[44px] inline-flex items-center shrink-0"
-                >
-                  Xem chi tiết →
-                </Link>
-              </div>
-
-              {/* Tip on its own line below the title, wrapping to 2 lines max, never cut off */}
-              {selectedFood.tipVi && (
-                <div
-                  data-align-group="portion"
-                  className="text-xs text-sky font-medium leading-relaxed line-clamp-2 w-full"
-                >
-                  {selectedFood.tipVi}
-                </div>
-              )}
-
-              {/* Portion row: 4-column ChipGroup [gram input | 30 g | 3 quả | 100 g], full width */}
-              <div data-align-group="portion" className="w-full">
-                <ChipGroup
-                  columns={4}
-                  tone="dark"
-                  leadingInput={
-                    <label className="flex items-center justify-center bg-surface-dark border-2 border-sky rounded-xl px-2 h-11 w-full cursor-text box-border">
-                      <span className="sr-only">Khối lượng</span>
-                      <input
-                        type="text"
-                        inputMode="decimal"
-                        aria-label="Số gam"
-                        value={gramsInput}
-                        onChange={(e) => {
-                          setGramsInput(e.target.value);
-                          setSelectedServingLabel(`${e.target.value} g`);
-                        }}
-                        className="w-full bg-transparent border-0 outline-none text-white font-bold text-sm tabular-nums text-right"
-                      />
-                      <span className="text-xs text-muted-on-dark ml-1 font-semibold">g</span>
-                    </label>
-                  }
-                  items={selectedFood.servings.map((s) => ({
-                    id: s.label,
-                    label: s.label,
-                    active: selectedServingLabel === s.label,
-                    onClick: () => {
-                      setGramsInput(s.grams.toString());
-                      setSelectedServingLabel(s.label);
-                    },
-                  }))}
-                />
-              </div>
-
-              {/* Stats row: 4-column StatGroup [kcal | Carb | Đạm | Béo], same columns and gap */}
-              <div
-                data-align-group="portion"
-                className="w-full pt-1 border-t border-card-border/20"
-              >
-                <StatGroup
-                  columns={4}
-                  tone="dark"
-                  items={[
-                    { id: "cal", value: formatNumber(macroPreview.calories), label: "kcal" },
-                    { id: "carb", value: `${formatNumber(macroPreview.carbs)} g`, label: "Carb" },
-                    { id: "protein", value: `${formatNumber(macroPreview.protein)} g`, label: "Đạm" },
-                    { id: "fat", value: `${formatNumber(macroPreview.fat)} g`, label: "Béo" },
-                  ]}
-                />
-              </div>
-
-              {/* CTA "Thêm vào <meal>" full width */}
-              <button
-                type="button"
-                data-align-group="portion"
-                onClick={handleAddFood}
-                disabled={isSubmitting || parsedGrams <= 0}
-                className="w-full min-h-[52px] rounded-full bg-blue text-white font-bold text-base cursor-pointer hover:bg-blue/90 active:scale-[0.97] transition-all border-0 flex items-center justify-center disabled:opacity-50"
-              >
-                Thêm vào {mealNameVi}
-              </button>
+            <div className="shrink-0">
+              <PortionPanel
+                food={selectedFood}
+                gramsInput={gramsInput}
+                setGramsInput={setGramsInput}
+                selectedServingLabel={selectedServingLabel}
+                setSelectedServingLabel={setSelectedServingLabel}
+                mealSlot={mealSlot}
+                onAdd={handleAddFood}
+                isSubmitting={isSubmitting}
+                tone="dark"
+                showMicros={false}
+              />
             </div>
           )}
         </div>

@@ -26,6 +26,12 @@ describe("Nutrient Catalogue & Null Handling", () => {
     expect(ala?.depth).toBe(3);
     expect(ala?.parentId).toBe("omega3");
     expect(ala?.targetSource).toBe("none");
+
+    // Synonyms
+    expect(getNutrientDefinition("pyridoxine")?.id).toBe("b6");
+    expect(getNutrientDefinition("pyridoxine")?.nameVi).toBe("B6 (Pyridoxine)");
+    expect(getNutrientDefinition("thiamin")?.id).toBe("b1");
+    expect(getNutrientDefinition("cobalamin")?.id).toBe("b12");
   });
 
   it("percentage calculation returns null when consumed or target is null", () => {

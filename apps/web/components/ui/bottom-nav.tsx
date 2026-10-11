@@ -98,8 +98,14 @@ export function BottomNav({ currentTab, onAddClick, className = "" }: BottomNavP
         <div className="flex justify-center items-center">
           {onAddClick ? (
             <button
+              id="mobile-add-fab"
               type="button"
-              onClick={onAddClick}
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  sessionStorage.setItem("last_add_opener_id", "mobile-add-fab");
+                }
+                onAddClick();
+              }}
               aria-label="Thêm món"
               className="w-[50px] h-[50px] rounded-[14px] bg-blue text-white flex items-center justify-center border-0 cursor-pointer shadow-md active:scale-[0.97] transition-transform"
             >
@@ -118,7 +124,13 @@ export function BottomNav({ currentTab, onAddClick, className = "" }: BottomNavP
             </button>
           ) : (
             <Link
+              id="mobile-add-fab"
               href="/add"
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  sessionStorage.setItem("last_add_opener_id", "mobile-add-fab");
+                }
+              }}
               aria-label="Thêm món"
               className="w-[50px] h-[50px] rounded-[14px] bg-blue text-white flex items-center justify-center no-underline shadow-md active:scale-[0.97] transition-transform"
             >

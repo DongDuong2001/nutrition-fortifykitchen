@@ -81,7 +81,8 @@ Read each skill's `SKILL.md` before first use.
 - **`systematic-debugging`:** use it for any bug, failing test or build error. Find the root cause before changing code, and never stack guess-fixes.
 - **`verification-before-completion`:** required before every commit and every "done" report. Run the gates and the visual check, and show the evidence (command output, screenshot path). Never claim done without it.
 - **`webapp-testing`** (Playwright): use it for the visual check and for click-through flows at 390×844 and 1440×900, for example Today → Add food → Today, and Micros → Vitamin tab → Nutrient detail. Save screenshots to `apps/web/.screenshots/`, which is gitignored.
-  - Playwright and Chromium are **already installed** on this machine. Do **not** run `pip3 install playwright` or `playwright install` as part of a task.
+  - Playwright and Chromium are **already installed** on this machine. If setting up a new environment: `pip install playwright`.
+  - For `test:align`, `BASE_URL` defaults to `http://localhost:3100`. Claude Code uses `ALIGN_BASE_URL=http://localhost:3101`.
   - Only if `python3 -c "import playwright"` fails, or launching Chromium errors with "Executable doesn't exist", stop and tell the user. Don't install anything yourself.
 
 ## Dev server and ports
@@ -123,4 +124,6 @@ Run routine work only through these npm scripts in `apps/web`. The user has auto
 | Single gate | `npm run typecheck` / `npm run test` / `npm run build` / `npm run test:align` |
 - **If any of these scripts is missing, add it to `apps/web/package.json` first** (one small commit, "chore: npm scripts for gates and ports"). `port:free` takes the port from `PORT` (default 3100), frees it only if something is listening, and prints what it did. Use a small Node or shell script in `apps/web/scripts/`, not a pipe in package.json.
 - Don't chain raw shell commands (`lsof … | xargs kill`, `cd … && …`) for routine work. Use the scripts.
+- **No inline scripts.** Never run `python3 -c "…"`, `node -e "…"` or heredoc scripts. Each one is a new command, so the user has to approve it every time. Put any browser or storage check (Playwright, sessionStorage, page text, screenshots) in a file under `apps/web/tests/probes/<name>.py` and run it with `npm run probe -- tests/probes/<name>.py`. Reuse and edit existing probe files; don't make a new one per run. Read `ALIGN_BASE_URL` for the port (default 3100).
+- **If `probe` is missing**, add `"probe": "node scripts/probe.mjs"` to `apps/web/package.json`. `scripts/probe.mjs` runs `python3 <file>` only when the path is inside `tests/probes/` and ends in `.py`; otherwise it exits 1 with a message.
 - These always need the user's approval, so don't try to work around them: `git push`, `rm`, `git reset`, `npm install`/`pip install`, anything with `sudo` or `curl`, and anything touching `migrations/`, `apps/api/` or `.env`.

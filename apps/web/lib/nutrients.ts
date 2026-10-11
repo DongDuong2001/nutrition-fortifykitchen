@@ -100,8 +100,27 @@ const CATALOG_BY_ID = new Map<string, NutrientDefinition>(
   NUTRIENT_CATALOG.map((n) => [n.id, n])
 );
 
+export const NUTRIENT_SYNONYMS: Record<string, string> = {
+  thiamin: "b1",
+  riboflavin: "b2",
+  niacin: "b3",
+  pantothenic: "b5",
+  pantothenic_acid: "b5",
+  pyridoxine: "b6",
+  cobalamin: "b12",
+  folate: "folate",
+  folic_acid: "folate",
+  vitamin_b1: "b1",
+  vitamin_b2: "b2",
+  vitamin_b3: "b3",
+  vitamin_b5: "b5",
+  vitamin_b6: "b6",
+  vitamin_b12: "b12",
+};
+
 export function getNutrientDefinition(id: string): NutrientDefinition | undefined {
-  return CATALOG_BY_ID.get(id);
+  const normalized = NUTRIENT_SYNONYMS[id] ?? id;
+  return CATALOG_BY_ID.get(normalized);
 }
 
 /**

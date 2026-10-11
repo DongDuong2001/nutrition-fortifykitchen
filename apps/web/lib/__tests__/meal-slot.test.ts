@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getDefaultMealSlot, getMealSlotNameVi, type MealSlot } from "../meal-slot";
+import { getDefaultMealSlot, getMealSlotNameVi, resolveMealSlot, type MealSlot } from "../meal-slot";
 
 describe("lib/meal-slot", () => {
   it("05:00–09:59 returns breakfast (Bữa sáng)", () => {
@@ -54,5 +54,26 @@ describe("lib/meal-slot", () => {
     // 2026-10-10T07:05:00.000Z is 14:05 in Asia/Ho_Chi_Minh
     const utcDate = new Date("2026-10-10T07:05:00.000Z");
     expect(getDefaultMealSlot(utcDate, true)).toBe("pre_workout");
+  });
+
+  describe("resolveMealSlot", () => {
+    it("returns parsed slot when valid param is provided", () => {
+      expect(resolveMealSlot("breakfast")).toBe("breakfast");
+      expect(resolveMealSlot("lunch")).toBe("lunch");
+      expect(resolveMealSlot("dinner")).toBe("dinner");
+      expect(resolveMealSlot("snack")).toBe("snack");
+      expect(resolveMealSlot("pre_workout")).toBe("pre_workout");
+    });
+
+    it("falls back to default slot according to time when param is null/invalid/missing", () => {
+      const at1405 = new Date("2026-10-10T14:05:00");
+      expect(resolveMealSlot(null, at1405, true)).toBe("pre_workout");
+      expect(resolveMealSlot(undefined, at1405, true)).toBe("pre_workout");
+      expect(resolveMealSlot("invalid_slot", at1405, true)).toBe("pre_workout");
+      expect(resolveMealSlot(null, at1405, false)).toBe("snack");
+
+      const at0800 = new Date("2026-10-10T08:00:00");
+      expect(resolveMealSlot(null, at0800, true)).toBe("breakfast");
+    });
   });
 });

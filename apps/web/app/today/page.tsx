@@ -393,11 +393,13 @@ function TodayContent() {
                     isHighlighted ? "ring-2 ring-blue/80 shadow-md" : ""
                   }`}
                 >
-                  <div data-align-group="meal-card" className="flex items-baseline justify-between pb-0.5 w-full">
+                  <div className="flex items-baseline justify-between pb-0.5 w-full">
                     <div className="flex items-center gap-2">
-                      <h2 className="m-0 text-base font-bold text-text">{meal.name}</h2>
+                      <h2 data-align-group="meal-card" className="m-0 text-base font-bold text-text">{meal.name}</h2>
                       <Link
+                        id={`mobile-add-${meal.slot}`}
                         href={`/add?meal=${meal.slot}`}
+                        onClick={() => handleSaveOpener(`mobile-add-${meal.slot}`)}
                         className="text-xs font-semibold text-blue hover:underline min-h-[44px] flex items-center"
                       >
                         + Thêm
@@ -411,10 +413,9 @@ function TodayContent() {
                     <Link
                       key={it.id}
                       href={`/entry/${it.id}`}
-                      data-align-group="meal-card"
                       className="no-underline flex items-center justify-between gap-2 text-sm min-h-[44px] border-t border-divider w-full active:scale-[0.97] transition-transform"
                     >
-                      <span className="truncate text-text font-normal">
+                      <span data-align-group="meal-card" className="truncate text-text font-normal">
                         {it.name} <span className="text-secondary">· {it.qty}</span>
                       </span>
                       <span className="text-secondary tabular-nums shrink-0">
@@ -430,8 +431,9 @@ function TodayContent() {
             return (
               <Link
                 key={meal.id}
-                id={`meal-${meal.slot}`}
+                id={`mobile-add-empty-${meal.slot}`}
                 href={`/add?meal=${meal.slot}`}
+                onClick={() => handleSaveOpener(`mobile-add-empty-${meal.slot}`)}
                 className={`no-underline bg-card border border-card-border rounded-[18px] px-4 min-h-[52px] flex items-center justify-between text-[15px] active:scale-[0.97] transition-all duration-300 ${
                   isHighlighted ? "ring-2 ring-blue/80 shadow-md" : ""
                 }`}
@@ -640,9 +642,9 @@ function TodayContent() {
                       isHighlighted ? "bg-blue/10 ring-2 ring-blue/80" : ""
                     }`}
                   >
-                    <div data-align-group="desktop-meal" className="flex justify-between items-baseline w-full">
+                    <div className="flex justify-between items-baseline w-full">
                       <div className="flex items-center gap-2">
-                        <h3 className="m-0 text-[15px] font-bold text-text">{meal.name}</h3>
+                        <h3 data-align-group="desktop-meal" className="m-0 text-[15px] font-bold text-text">{meal.name}</h3>
                         <Link
                           id={`desktop-add-${meal.slot}`}
                           href={`/add?meal=${meal.slot}`}
@@ -660,10 +662,9 @@ function TodayContent() {
                       <Link
                         key={it.id}
                         href={`/entry/${it.id}`}
-                        data-align-group="desktop-meal"
-                        className="no-underline flex justify-between items-center min-h-[44px] px-2 rounded-lg text-sm hover:bg-page transition-colors w-full"
+                        className="no-underline flex justify-between items-center min-h-[44px] px-2 -mx-2 rounded-lg text-sm hover:bg-page transition-colors"
                       >
-                        <span className="truncate text-text font-normal">
+                        <span data-align-group="desktop-meal" className="truncate text-text font-normal">
                           {it.name} <span className="text-secondary">· {it.qty}</span>
                         </span>
                         <span className="text-secondary tabular-nums shrink-0">
@@ -676,10 +677,9 @@ function TodayContent() {
                         id={`desktop-add-empty-${meal.slot}`}
                         href={`/add?meal=${meal.slot}`}
                         onClick={() => handleSaveOpener(`desktop-add-empty-${meal.slot}`)}
-                        data-align-group="desktop-meal"
-                        className="flex items-center min-h-[44px] px-2 text-sm font-semibold text-blue no-underline w-full"
+                        className="flex items-center min-h-[44px] px-2 -mx-2 rounded-lg text-sm font-semibold text-blue no-underline hover:bg-page transition-colors"
                       >
-                        + Thêm món
+                        <span data-align-group="desktop-meal">+ Thêm món</span>
                       </Link>
                     )}
                   </div>

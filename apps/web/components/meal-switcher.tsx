@@ -8,7 +8,7 @@ import { formatNumber } from "@/lib/format";
 export interface MealSwitcherProps {
   open: boolean;
   onClose: () => void;
-  selectedSlot: MealSlot;
+  selectedSlot: MealSlot | null;
   onSelectSlot: (slot: MealSlot) => void;
   mealCalories?: Partial<Record<MealSlot, number>>;
   defaultHint?: string;
