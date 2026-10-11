@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Header } from "@/components/ui/header";
+import { AppHeader } from "@/components/ui/app-header";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { SegmentedBar } from "@/components/ui/segmented-bar";
 import { PillButton } from "@/components/ui/pill-button";
@@ -21,28 +21,52 @@ export default function DevUiPage() {
 
   return (
     <div className="w-full min-h-screen bg-page text-text flex flex-col relative font-sans pb-24">
-      {/* 1. Header (Brand with Date Switcher) */}
-      <Header
-        showLogo
-        dateText="Hôm nay, 10/10"
-        onPrevDate={() => {}}
-        onNextDate={() => {}}
-      />
-
-      <div className="flex-1 w-full max-w-[560px] mx-auto px-4 py-4 flex flex-col gap-6">
-        {/* Section: Sub-screen Header Preview */}
+      {/* AppHeader Showcases: Daily, Sub, Tab */}
+      <div className="flex flex-col gap-6 w-full mb-6">
         <section className="flex flex-col gap-2">
-          <div className="text-xs font-bold text-secondary uppercase tracking-wider">
-            Header phụ (Sub-screen Header)
+          <div className="text-xs font-bold text-secondary uppercase tracking-wider px-4">
+            1. AppHeader — Variant "daily" (Today / Vi chất)
           </div>
-          <Header
+          <AppHeader
+            variant="daily"
+            date="2026-10-10"
+            dateLabel="Hôm nay, 10/10"
+            title="HÔM NAY"
+            desktopSubtitle="Thứ Bảy, 10/10/2026 · Ngày tập 60′ · Giữ cân · 65 kg"
+            canGoNext={false}
+            summary={
+              <div className="bg-[#181B20] border border-white/10 rounded-2xl p-4 text-white text-sm">
+                Panel tóm tắt (Kcal / Đạm / Béo / Tinh bột)
+              </div>
+            }
+          />
+        </section>
+
+        <section className="flex flex-col gap-2">
+          <div className="text-xs font-bold text-secondary uppercase tracking-wider px-4">
+            2. AppHeader — Variant "sub" (Sub-screens / Chi tiết vi chất)
+          </div>
+          <AppHeader
+            variant="sub"
             title="VỀ BẠN"
             subtitle="Mục tiêu được tính theo cân nặng và giới tính."
             backHref="/today"
-            stepText="Bước 1 / 2"
-            stepProgress={{ current: 1, total: 2 }}
           />
         </section>
+
+        <section className="flex flex-col gap-2">
+          <div className="text-xs font-bold text-secondary uppercase tracking-wider px-4">
+            3. AppHeader — Variant "tab" (Hồ sơ / Ngày tập)
+          </div>
+          <AppHeader
+            variant="tab"
+            title="HỒ SƠ"
+            subtitle="user@example.com · Gói Miễn phí"
+          />
+        </section>
+      </div>
+
+      <div className="flex-1 w-full max-w-[560px] mx-auto px-4 py-4 flex flex-col gap-6">
 
         {/* Section: SegmentedBar */}
         <section className="flex flex-col gap-3">

@@ -26,3 +26,4 @@
 - [ ] (cc-02) `formatAmount` treats µg like g (one decimal under 100), so vitamin D shows "2,1 µg". kg and other units are not covered. Plain weights keep `formatNumber`. Confirm.
 - [ ] (cc-02) The catalog label for B6 is now "Vitamin B6" (was "B6 (Pyridoxine)"). It also shows on Micros. Confirm.
 - [ ] (cc-02) Recents are now `{ foodId, servingLabel }` in sessionStorage under `h1t_recent_foods_v2`. The old string list is ignored, not migrated. The default recents show the food names ("Yogurt kefir 200 ml"), not the old "Kefir 200 ml".
+- [ ] @Claude Code: AppHeader ready (variants daily/sub/tab) — swap onboarding-header and add/foods headers.

@@ -2,7 +2,7 @@
 
 import React, { use } from "react";
 import Link from "next/link";
-import { Header } from "@/components/ui/header";
+import { AppHeader } from "@/components/ui/app-header";
 import { Card } from "@/components/ui/card";
 import { getNutrientDefinition } from "@/lib/nutrients";
 
@@ -16,7 +16,8 @@ export default function NutrientDetailPage({ params }: PageProps) {
 
   return (
     <div className="w-full min-h-screen bg-page text-text font-sans flex flex-col">
-      <Header
+      <AppHeader
+        variant="sub"
         title={def?.nameVi ? def.nameVi.toUpperCase() : "CHI TIẾT VI CHẤT"}
         subtitle="Chi tiết vi chất và nguồn thực phẩm"
         backHref="/micros"

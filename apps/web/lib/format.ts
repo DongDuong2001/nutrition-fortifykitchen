@@ -138,6 +138,18 @@ export function formatDayLabel(targetDate: Date | string, now: Date): string {
     return `Hôm nay, ${targetParts.day}/${targetParts.month}`;
   }
 
+  // Yesterday in Asia/Ho_Chi_Minh (UTC+7 has no DST, exactly 24h before now)
+  const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  const yesterdayParts = getSaigonDateParts(yesterday);
+  const isYesterday =
+    targetParts.year === yesterdayParts.year &&
+    targetParts.month === yesterdayParts.month &&
+    targetParts.day === yesterdayParts.day;
+
+  if (isYesterday) {
+    return `Hôm qua, ${targetParts.day}/${targetParts.month}`;
+  }
+
   const dayName = WEEKDAY_NAMES_VI[targetParts.weekday] || targetParts.weekday;
   return `${dayName}, ${targetParts.day}/${targetParts.month}`;
 }

@@ -18,6 +18,8 @@ ONBOARDING_CHECKS = [
     ("/setup/profile", "desktop (1440px)", "setup-row", "tb"),
     ("/add?meal=snack", "mobile (390px)", "add-list", "lr"),
     ("/add?meal=snack", "desktop (1440px)", "add-list", "lr"),
+    ("/today", "mobile (390px)", "today-header", "lr"),
+    ("/micros", "mobile (390px)", "micros-header", "lr"),
 ]
 
 def check_align_groups(page, group_name=None, edges="lr"):
@@ -52,7 +54,9 @@ def check_align_groups(page, group_name=None, edges="lr"):
             const buckets = new Map();
             for (const el of list) {
                 // Find logical container (section, card container, main, or portion panel container)
-                const container = el.closest('[data-align-container], section, main') || el.parentElement;
+                const container = name.endsWith("-header")
+                    ? (el.closest('[data-align-container]') || document.body)
+                    : (el.closest('[data-align-container], section, main') || el.parentElement);
                 const bucket = buckets.get(container) || [];
                 bucket.push(el);
                 buckets.set(container, bucket);

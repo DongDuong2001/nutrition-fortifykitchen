@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { BottomNav } from "@/components/ui/bottom-nav";
+import { AppHeader } from "@/components/ui/app-header";
 import { CheckIcon } from "@/lib/runeicons";
 
 export default function TrainingPage() {
@@ -27,45 +28,45 @@ export default function TrainingPage() {
 
   return (
     <div className="min-h-screen bg-[#F3F4F6] pb-24 md:pb-12">
-      {/* Top Black Header (Matches Safari _ Ng_y t_p.png) */}
-      <div className="bg-[#0A0A0A] text-white rounded-b-3xl md:rounded-3xl p-5 md:p-8 shadow-md">
-        <div className="text-xs font-semibold text-neutral-400">
-          Hôm nay, 10/10
-        </div>
-        <h1 className="text-3xl md:text-4xl font-black italic uppercase tracking-tighter mt-0.5">
-          NGÀY TẬP
-        </h1>
-
-        {/* Duration Pills Grid */}
-        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mt-5">
-          {durations.map((d) => (
-            <button
-              key={d.id}
-              onClick={() => setSelectedDuration(d.id)}
-              className={`py-3 rounded-2xl text-xs font-black transition-all ${
-                selectedDuration === d.id
-                  ? "bg-[#2563EB] text-white shadow-md"
-                  : "bg-neutral-900 text-neutral-400 hover:text-white"
-              }`}
-            >
-              {d.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Salt Requirement Banner */}
-        <div className="flex items-center justify-between mt-6 pt-4 border-t border-neutral-800">
-          <div>
-            <div className="text-xs font-bold text-neutral-400">Muối cần hôm nay</div>
-            <div className="text-[11px] text-neutral-500 mt-0.5">
-              4–6 g cả ngày + 3–4,5 g khi tập
+      {/* Top Header */}
+      <AppHeader
+        variant="tab"
+        title="NGÀY TẬP"
+        subtitle="Hôm nay, 10/10"
+        summary={
+          <>
+            {/* Duration Pills Grid */}
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mt-4">
+              {durations.map((d) => (
+                <button
+                  key={d.id}
+                  onClick={() => setSelectedDuration(d.id)}
+                  className={`py-3 rounded-2xl text-xs font-black transition-all ${
+                    selectedDuration === d.id
+                      ? "bg-[#2563EB] text-white shadow-md"
+                      : "bg-[#181B20] text-neutral-400 hover:text-white"
+                  }`}
+                >
+                  {d.label}
+                </button>
+              ))}
             </div>
-          </div>
-          <div className="text-2xl sm:text-3xl font-black italic font-mono text-white">
-            7–10,5 <span className="text-sm font-normal not-italic text-neutral-400">g</span>
-          </div>
-        </div>
-      </div>
+
+            {/* Salt Requirement Banner */}
+            <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10">
+              <div>
+                <div className="text-xs font-bold text-neutral-400">Muối cần hôm nay</div>
+                <div className="text-[11px] text-neutral-500 mt-0.5">
+                  4–6 g cả ngày + 3–4,5 g khi tập
+                </div>
+              </div>
+              <div className="text-2xl sm:text-3xl font-black italic font-mono text-white">
+                7–10,5 <span className="text-sm font-normal not-italic text-neutral-400">g</span>
+              </div>
+            </div>
+          </>
+        }
+      />
 
       {/* Main Routine Checklists */}
       <div className="px-4 md:px-0 mt-4 md:mt-6 space-y-4">

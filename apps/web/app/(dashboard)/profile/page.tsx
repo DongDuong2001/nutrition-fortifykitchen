@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { BottomNav } from "@/components/ui/bottom-nav";
+import { AppHeader } from "@/components/ui/app-header";
 import { ChevronRightIcon } from "@/lib/runeicons";
 
 export default function ProfilePage() {
@@ -9,15 +10,12 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-[#F3F4F6] pb-24 md:pb-12">
-      {/* Top Black Header (Matches Safari _ H_ s_.png) */}
-      <div className="bg-[#0A0A0A] text-white rounded-b-3xl md:rounded-3xl p-5 md:p-8 shadow-md">
-        <h1 className="text-3xl md:text-4xl font-black italic uppercase tracking-tighter">
-          HỒ SƠ
-        </h1>
-        <div className="text-xs font-semibold text-neutral-400 mt-1">
-          user@example.com · Gói Miễn phí
-        </div>
-      </div>
+      {/* Top Header */}
+      <AppHeader
+        variant="tab"
+        title="HỒ SƠ"
+        subtitle="user@example.com · Gói Miễn phí"
+      />
 
       <div className="px-4 md:px-0 mt-4 md:mt-6 space-y-4">
         {/* Physical Stats Card */}

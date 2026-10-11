@@ -1,0 +1,401 @@
+"use client";
+
+import React, { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
+import { formatDayLabel } from "@/lib/format";
+
+export type AppHeaderVariant = "daily" | "sub" | "tab";
+
+export interface AppHeaderProps {
+  /** Variant of the header: 'daily' (Today, Vi chất), 'sub' (detail pages, setup), 'tab' (Profile, Training) */
+  variant?: AppHeaderVariant;
+  /** Primary title (Saira Condensed italic) */
+  title?: string;
+  /** Secondary subtitle / description */
+  subtitle?: string;
+  /** Date object or YYYY-MM-DD string for 'daily' header */
+  date?: string | Date;
+  /** Date label override (if caller pre-formats) */
+  dateLabel?: string;
+  /** Previous date handler */
+  onPrev?: () => void;
+  /** Next date handler */
+  onNext?: () => void;
+  /** Whether going to next date is allowed (disabled on today) */
+  canGoNext?: boolean;
+  /** Back navigation URL for 'sub' variant */
+  backHref?: string;
+  /** Back button handler for 'sub' variant */
+  onBack?: () => void;
+  /** Accessible label for back button (default: "Quay lại") */
+  backLabel?: string;
+  /** Slot for summary panel (kcal/dial, micro counts, etc.) */
+  summary?: React.ReactNode;
+  /** Slot for right actions (desktop buttons, sub-screen step indicators, etc.) */
+  actions?: React.ReactNode;
+  /** Alternative alias for right-aligned action element */
+  rightAction?: React.ReactNode;
+  /** Desktop-specific subtitle (e.g. "Thứ Bảy, 10/10/2026 · Ngày tập 60′...") */
+  desktopSubtitle?: string;
+  /** Desktop-specific stat element (e.g. "8/22 vi chất đạt") */
+  desktopStat?: React.ReactNode;
+  /** data-align-group attribute for alignment tests */
+  alignGroup?: string;
+  /** Additional container classes */
+  className?: string;
+}
+
+/**
+ * Shared AppHeader for H1T MICRO (Cobalt Sign design system).
+ * Supports 3 variants:
+ * - "daily": phone ink block with logo + date nav + summary; desktop title + date buttons + actions.
+ * - "sub": sub-screen with 44px back button, title, optional right action.
+ * - "tab": main tabs without date nav (Profile, Training).
+ */
+export function AppHeader({
+  variant = "daily",
+  title,
+  subtitle,
+  date,
+  dateLabel: dateLabelProp,
+  onPrev,
+  onNext,
+  canGoNext,
+  backHref,
+  onBack,
+  backLabel = "Quay lại",
+  summary,
+  actions,
+  rightAction,
+  desktopSubtitle,
+  desktopStat,
+  alignGroup,
+  className = "",
+}: AppHeaderProps) {
+  const [clientNow, setClientNow] = useState<Date | null>(null);
+
+  useEffect(() => {
+    setClientNow(new Date());
+  }, []);
+
+  // Compute date label on client after mount to prevent hydration mismatch
+  const resolvedDateLabel = useMemo(() => {
+    if (dateLabelProp) return dateLabelProp;
+    if (!date) return "";
+    if (clientNow) {
+      return formatDayLabel(date, clientNow);
+    }
+    // Fallback for SSR / initial client render:
+    if (typeof date === "string" && !/^\d{4}-\d{2}-\d{2}/.test(date)) {
+      return date;
+    }
+    return "Hôm nay, 10/10";
+  }, [date, dateLabelProp, clientNow]);
+
+  const isNextDisabled =
+    canGoNext === false ||
+    (canGoNext === undefined && resolvedDateLabel.startsWith("Hôm nay"));
+
+  // =========================================================================
+  // 1. "sub" VARIANT (Detail screens, setup steps)
+  // =========================================================================
+  if (variant === "sub") {
+    return (
+      <header
+        className={`bg-ink text-white rounded-b-[20px] w-full flex-none select-none ${className}`}
+      >
+        <div className="w-full max-w-[560px] mx-auto px-4 pt-3 pb-5 flex flex-col gap-3">
+          {/* Top row: Back button left, optional right action */}
+          <div className="flex items-center justify-between min-h-[44px]">
+            {backHref ? (
+              <Link
+                href={backHref}
+                aria-label={backLabel}
+                className="w-11 h-11 -ml-2 rounded-lg text-white flex items-center justify-center no-underline hover:text-sky transition-colors active:scale-[0.97]"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  aria-hidden="true"
+                >
+                  <path d="M15 5l-7 7 7 7" />
+                </svg>
+              </Link>
+            ) : onBack ? (
+              <button
+                type="button"
+                onClick={onBack}
+                aria-label={backLabel}
+                className="w-11 h-11 -ml-2 rounded-lg bg-transparent border-0 text-white flex items-center justify-center cursor-pointer hover:text-sky transition-colors active:scale-[0.97]"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  aria-hidden="true"
+                >
+                  <path d="M15 5l-7 7 7 7" />
+                </svg>
+              </button>
+            ) : (
+              <div className="w-11 h-11" />
+            )}
+
+            {rightAction || actions}
+          </div>
+
+          {/* Title & Subtitle */}
+          {title && (
+            <h1
+              data-align-group={alignGroup}
+              data-align-edge="left"
+              className="m-0 font-display italic font-extrabold text-[28px] leading-tight text-white uppercase tracking-tight"
+            >
+              {title}
+            </h1>
+          )}
+          {subtitle && (
+            <p className="m-0 text-sm text-muted-subtitle leading-relaxed">
+              {subtitle}
+            </p>
+          )}
+
+          {summary}
+        </div>
+      </header>
+    );
+  }
+
+  // =========================================================================
+  // 2. "tab" VARIANT (Main tabs without a date: Profile, Training)
+  // =========================================================================
+  if (variant === "tab") {
+    return (
+      <>
+        {/* Mobile / Tablet ink block (<1024px) */}
+        <header
+          className={`bg-ink text-white rounded-b-[20px] w-full flex-none lg:hidden select-none ${className}`}
+        >
+          <div className="w-full max-w-[560px] mx-auto px-4 pt-3 pb-5 flex flex-col gap-2.5">
+            {/* Row 1: Logo left, optional right action */}
+            <div className="flex items-center justify-between min-h-[44px]">
+              <div
+                data-align-group={alignGroup}
+                data-align-edge="left"
+                className="font-display italic font-black text-xl uppercase tracking-tight"
+              >
+                H1T <span className="text-sky">MICRO</span>
+              </div>
+              {rightAction || actions ? (
+                <div>{rightAction || actions}</div>
+              ) : null}
+            </div>
+
+            {/* Title & Subtitle */}
+            {title && (
+              <div className="pt-0.5">
+                <h1 className="m-0 font-display italic font-black text-3xl uppercase tracking-tight text-white">
+                  {title}
+                </h1>
+                {subtitle && (
+                  <div className="text-xs font-semibold text-muted-on-dark mt-1">
+                    {subtitle}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {summary}
+          </div>
+        </header>
+
+        {/* Desktop Header (≥1024px) */}
+        <header
+          className={`hidden lg:flex flex-wrap items-center justify-between gap-3 w-full max-w-[1240px] select-none ${className}`}
+        >
+          <div>
+            <h1
+              data-align-group={alignGroup}
+              data-align-edge="left"
+              className="m-0 font-display italic font-extrabold text-[34px] leading-tight text-text uppercase"
+            >
+              {title}
+            </h1>
+            {subtitle && (
+              <div className="text-sm text-secondary mt-0.5">
+                {subtitle}
+              </div>
+            )}
+          </div>
+          {rightAction || actions}
+        </header>
+      </>
+    );
+  }
+
+  // =========================================================================
+  // 3. "daily" VARIANT (Main tabs showing one day: Today, Vi chất)
+  // =========================================================================
+  return (
+    <>
+      {/* Mobile / Tablet ink block (<1024px) */}
+      <header
+        className={`bg-ink text-white rounded-b-[20px] w-full flex-none lg:hidden select-none ${className}`}
+      >
+        <div className="w-full max-w-[560px] mx-auto px-4 pt-3 pb-4 flex flex-col gap-2.5">
+          {/* Row 1: Logo left; Date nav right (44px hit targets) */}
+          <div
+            data-align-group={alignGroup}
+            className="flex items-center justify-between min-h-[44px] w-full"
+          >
+            <div className="font-display italic font-black text-xl uppercase tracking-tight">
+              H1T <span className="text-sky">MICRO</span>
+            </div>
+            <div className="flex items-center">
+              <button
+                type="button"
+                onClick={onPrev}
+                aria-label="Ngày trước"
+                className="w-11 h-11 rounded-lg bg-transparent border-0 text-white flex items-center justify-center cursor-pointer hover:text-sky transition-colors active:scale-[0.97]"
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  aria-hidden="true"
+                >
+                  <path d="M15 5l-7 7 7 7" />
+                </svg>
+              </button>
+              <span className="text-sm font-semibold tracking-tight">
+                {resolvedDateLabel}
+              </span>
+              <button
+                type="button"
+                onClick={onNext}
+                disabled={isNextDisabled}
+                aria-label="Ngày sau"
+                aria-disabled={isNextDisabled}
+                className={`w-11 h-11 rounded-lg bg-transparent border-0 flex items-center justify-center transition-colors ${
+                  !isNextDisabled
+                    ? "text-white cursor-pointer hover:text-sky active:scale-[0.97]"
+                    : "text-secondary opacity-50 cursor-default"
+                }`}
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  aria-hidden="true"
+                >
+                  <path d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          {/* Optional Title (e.g. "VI CHẤT") between Row 1 and Summary */}
+          {title && (
+            <div className="font-display italic font-extrabold text-2xl uppercase tracking-tight text-white">
+              {title}
+            </div>
+          )}
+
+          {/* Row 2: Page summary slot */}
+          {summary && <div className="w-full">{summary}</div>}
+        </div>
+      </header>
+
+      {/* Desktop Header (≥1024px) */}
+      <header
+        className={`hidden lg:flex flex-wrap items-center gap-3 w-full max-w-[1240px] select-none ${className}`}
+      >
+        <div className="flex-1 min-w-[260px]">
+          <h1
+            data-align-group={alignGroup}
+            data-align-edge="left"
+            className="m-0 font-display italic font-extrabold text-[34px] leading-tight text-text uppercase"
+          >
+            {title || "HÔM NAY"}
+          </h1>
+          {desktopSubtitle && (
+            <div className="text-sm text-secondary">
+              {desktopSubtitle}
+            </div>
+          )}
+        </div>
+
+        {/* Optional desktop stat (e.g. Vi chất 8/22) */}
+        {desktopStat}
+
+        {/* Date nav buttons */}
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={onPrev}
+            aria-label="Ngày trước"
+            className="w-11 h-11 border border-card-border rounded-xl bg-card text-ink cursor-pointer flex items-center justify-center hover:bg-divider transition-colors active:scale-[0.97]"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              aria-hidden="true"
+            >
+              <path d="M15 5l-7 7 7 7" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            onClick={onNext}
+            disabled={isNextDisabled}
+            aria-label="Ngày sau"
+            aria-disabled={isNextDisabled}
+            className={`w-11 h-11 border border-card-border rounded-xl bg-card flex items-center justify-center transition-colors ${
+              !isNextDisabled
+                ? "text-ink cursor-pointer hover:bg-divider active:scale-[0.97]"
+                : "text-secondary opacity-50 cursor-default"
+            }`}
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              aria-hidden="true"
+            >
+              <path d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Desktop actions slot (e.g. "Chép hôm qua", "+ Thêm món") */}
+        {actions || rightAction}
+      </header>
+    </>
+  );
+}

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo, useRef, Suspense } from "react";
 import Link from "next/link";
 import { BottomNav } from "@/components/ui/bottom-nav";
+import { AppHeader } from "@/components/ui/app-header";
 import { SegmentedBar } from "@/components/ui/segmented-bar";
 import { apiClient } from "@/lib/api-client";
 import {
@@ -368,23 +369,17 @@ function MicrosContent() {
   if (isEmpty) {
     return (
       <div className="w-full min-h-screen bg-page text-text font-sans flex flex-col pb-[88px] lg:pb-0">
-        <div className="bg-ink text-white rounded-b-[20px]">
-          <div className="w-full max-w-[560px] mx-auto px-4 pt-3 pb-5 flex flex-col gap-2.5">
-            <div className="flex items-center justify-between min-h-[44px]">
-              <div className="w-11 h-11" />
-              <div className="text-[15px] font-semibold text-white">
-                {dateLabel}
-              </div>
-              <div className="w-11 h-11" />
-            </div>
+        <AppHeader
+          variant="daily"
+          title="VI CHẤT"
+          date={currentData?.date}
+          dateLabel={dateLabel}
+          canGoNext={false}
+          alignGroup="micros-header"
+          summary={
             <div className="flex items-end justify-between pt-1">
-              <div>
-                <h1 className="m-0 font-display italic font-black text-2xl uppercase tracking-tight">
-                  VI CHẤT
-                </h1>
-                <div className="text-[13px] text-muted-subtitle mt-0.5">
-                  Bắt đầu ghi món để đo lường
-                </div>
+              <div className="text-[13px] text-muted-subtitle">
+                Bắt đầu ghi món để đo lường
               </div>
               <div className="text-right">
                 <div className="font-display italic font-black text-3xl leading-none tabular-nums text-white">
@@ -393,8 +388,8 @@ function MicrosContent() {
                 <div className="text-xs text-sky font-medium mt-0.5">đã đạt</div>
               </div>
             </div>
-          </div>
-        </div>
+          }
+        />
 
         <main className="flex-1 w-full max-w-[560px] mx-auto px-4 py-6 flex flex-col gap-4">
           <div className="bg-card border border-card-border rounded-[18px] p-6 text-center flex flex-col items-center gap-3">
@@ -426,49 +421,27 @@ function MicrosContent() {
       {/* ============================================================== */}
       <div
         style={{ "--chipbar-h": `${chipBarHeight}px` } as React.CSSProperties}
+        data-align-container="micros-page"
         className="w-full max-w-full min-w-0 min-h-screen bg-page flex flex-col relative lg:hidden pb-[88px]"
       >
-        {/* Header (Ink): date row (44px arrows, centered date) + title & "Thiếu nhiều nhất: …" + right big stat "8/22" (Saira Condensed) with "đã đạt" in sky */}
-        <header className="bg-ink text-white rounded-b-[20px] w-full min-w-0">
-          <div className="w-full max-w-[560px] mx-auto px-4 pt-2 pb-4 flex flex-col gap-1">
-            {/* Row 1: Date row with 44px hit targets and centered text */}
-            <div className="flex items-center justify-between min-h-[44px]">
-              <button
-                type="button"
-                aria-label="Ngày trước"
-                className="w-11 h-11 rounded-lg bg-transparent border-0 text-white flex items-center justify-center cursor-pointer hover:text-sky transition-colors active:scale-[0.97]"
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-                  <path d="M15 5l-7 7 7 7" />
-                </svg>
-              </button>
-              <div className="text-[15px] font-semibold text-white tracking-tight">
-                {dateLabel}
-              </div>
-              <button
-                type="button"
-                aria-label="Ngày sau"
-                className="w-11 h-11 rounded-lg bg-transparent border-0 text-white flex items-center justify-center cursor-pointer hover:text-sky transition-colors active:scale-[0.97]"
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-                  <path d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Row 2: Title + Subtitle on Left, Big Stat on Right */}
-            <div className="flex items-end justify-between pt-1">
+        {/* Header */}
+        <AppHeader
+          variant="daily"
+          date={currentData?.date}
+          dateLabel={dateLabel}
+          canGoNext={false}
+          title="VI CHẤT"
+          alignGroup="micros-header"
+          summary={
+            <div className="bg-[#181B20] border border-white/10 rounded-2xl p-4 flex items-center justify-between">
               <div>
-                <h1 className="m-0 font-display italic font-black text-[28px] uppercase tracking-tight leading-none">
-                  VI CHẤT
-                </h1>
-                <div className="text-[13px] text-muted-subtitle mt-1">
-                  Thiếu nhiều nhất: {currentData?.microsSummary.mostLacking.join(", ")}
+                <div className="text-xs text-muted-subtitle font-medium">Thiếu nhiều nhất</div>
+                <div className="text-sm font-semibold text-white mt-0.5">
+                  {currentData?.microsSummary.mostLacking.join(", ")}
                 </div>
               </div>
-
               <div className="text-right shrink-0">
-                <div className="font-display italic font-black text-[34px] leading-none tabular-nums">
+                <div className="font-display italic font-black text-[28px] leading-none tabular-nums">
                   <span className="text-white">{achievedMicrosCount.achieved}</span>
                   <span className="text-white/55">/{achievedMicrosCount.total}</span>
                 </div>
@@ -477,8 +450,8 @@ function MicrosContent() {
                 </div>
               </div>
             </div>
-          </div>
-        </header>
+          }
+        />
 
         {/* Sticky Horizontally Scrolling Group Chips */}
         <div
@@ -524,13 +497,14 @@ function MicrosContent() {
 
           {/* Groups in required order */}
           <div className="flex flex-col gap-3.5">
-            {GROUPS_CONFIG.map((group) => (
+            {GROUPS_CONFIG.map((group, idx) => (
               <GroupCard
                 key={group.key}
                 group={group}
                 rows={rowsByGroup[group.key]}
                 isOpen={openGroups[group.key]}
                 onToggle={() => toggleGroup(group.key)}
+                alignGroup={idx === 0 ? "micros-header" : undefined}
               />
             ))}
           </div>
@@ -601,43 +575,21 @@ function MicrosContent() {
         {/* Main Content Area */}
         <main className="flex-1 p-8 pb-12 max-w-[1240px] flex flex-col gap-5 box-border">
           {/* Header */}
-          <header className="flex flex-wrap items-center gap-3">
-            <div className="flex-1 min-w-[260px]">
-              <h1 className="m-0 font-display italic font-extrabold text-[34px] leading-tight text-text">
-                VI CHẤT
-              </h1>
-              <div className="text-sm text-secondary">
-                {currentData?.desktopDateLabel || "Thứ Bảy, 10/10/2026 · Giữ cân · 65 kg"} · Thiếu nhiều nhất: {currentData?.microsSummary.mostLacking.join(", ")}
+          <AppHeader
+            variant="daily"
+            title="VI CHẤT"
+            desktopSubtitle={`${currentData?.desktopDateLabel || "Thứ Bảy, 10/10/2026 · Giữ cân · 65 kg"} · Thiếu nhiều nhất: ${currentData?.microsSummary.mostLacking.join(", ")}`}
+            desktopStat={
+              <div className="flex items-baseline gap-2 mr-2">
+                <div className="font-display italic font-black text-[34px] leading-none tabular-nums">
+                  <span className="text-cobalt">{achievedMicrosCount.achieved}</span>
+                  <span className="text-secondary">/{achievedMicrosCount.total}</span>
+                </div>
+                <span className="text-sm text-secondary font-semibold">vi chất đạt</span>
               </div>
-            </div>
-
-            <div className="flex items-baseline gap-2 mr-2">
-              <div className="font-display italic font-black text-[34px] leading-none tabular-nums">
-                <span className="text-cobalt">{achievedMicrosCount.achieved}</span>
-                <span className="text-secondary">/{achievedMicrosCount.total}</span>
-              </div>
-              <span className="text-sm text-secondary font-semibold">vi chất đạt</span>
-            </div>
-
-            <button
-              type="button"
-              aria-label="Ngày trước"
-              className="w-11 h-11 border border-card-border rounded-xl bg-card text-ink cursor-pointer flex items-center justify-center hover:bg-divider transition-colors active:scale-[0.97]"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-                <path d="M15 5l-7 7 7 7" />
-              </svg>
-            </button>
-            <button
-              type="button"
-              aria-label="Ngày sau"
-              className="w-11 h-11 border border-card-border rounded-xl bg-card text-ink cursor-pointer flex items-center justify-center hover:bg-divider transition-colors active:scale-[0.97]"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-                <path d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-          </header>
+            }
+            canGoNext={false}
+          />
 
           {/* Desktop Filter Chips */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1">
@@ -736,16 +688,19 @@ function GroupCard({
   isOpen,
   onToggle,
   idPrefix = "group-",
+  alignGroup,
 }: {
   group: GroupConfig;
   rows: NutrientRowData[];
   isOpen: boolean;
   onToggle: () => void;
   idPrefix?: string;
+  alignGroup?: string;
 }) {
   return (
     <section
       id={`${idPrefix}${group.key}`}
+      data-align-group={alignGroup}
       className="bg-card border border-card-border rounded-[18px] overflow-clip flex flex-col scroll-mt-[calc(var(--chipbar-h,52px)+8px)] lg:scroll-mt-6 break-inside-avoid"
     >
       {/* Sticky group header: offset by --chipbar-h on mobile, top-0 on desktop */}

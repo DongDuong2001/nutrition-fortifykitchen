@@ -43,12 +43,18 @@ describe("lib/format", () => {
       expect(formatDayLabel(new Date("2026-10-10T08:00:00+07:00"), saigonSaturdayNoon)).toBe("Hôm nay, 10/10");
     });
 
+    it("returns 'Hôm qua, dd/mm' when target is yesterday", () => {
+      expect(formatDayLabel("2026-10-09", saigonSaturdayNoon)).toBe("Hôm qua, 09/10");
+      expect(formatDayLabel(new Date("2026-10-09T22:00:00+07:00"), saigonSaturdayNoon)).toBe("Hôm qua, 09/10");
+    });
+
     it("returns 'Chủ nhật, dd/mm' for Sunday, never 'Thứ 1'", () => {
       expect(formatDayLabel("2026-10-11", saigonSaturdayNoon)).toBe("Chủ nhật, 11/10");
       expect(formatDayLabel(new Date("2026-10-11T10:00:00+07:00"), saigonSaturdayNoon)).toBe("Chủ nhật, 11/10");
     });
 
-    it("returns 'Thứ 2' through 'Thứ 7' for Monday through Saturday", () => {
+    it("returns 'Thứ 2' through 'Thứ 7' for Monday through Saturday when not today or yesterday", () => {
+      expect(formatDayLabel("2026-10-08", saigonSaturdayNoon)).toBe("Thứ 5, 08/10");
       expect(formatDayLabel("2026-10-12", saigonSaturdayNoon)).toBe("Thứ 2, 12/10");
       expect(formatDayLabel("2026-10-13", saigonSaturdayNoon)).toBe("Thứ 3, 13/10");
       expect(formatDayLabel("2026-10-14", saigonSaturdayNoon)).toBe("Thứ 4, 14/10");
@@ -64,9 +70,10 @@ describe("lib/format", () => {
 
       expect(formatDayLabel("2026-10-10", now2330)).toBe("Hôm nay, 10/10");
       expect(formatDayLabel(new Date("2026-10-10T23:30:00+07:00"), now2330)).toBe("Hôm nay, 10/10");
+      expect(formatDayLabel("2026-10-09", now2330)).toBe("Hôm qua, 09/10");
+      expect(formatDayLabel("2026-10-08", now2330)).toBe("Thứ 5, 08/10");
       expect(formatDayLabel("2026-10-11", now2330)).toBe("Chủ nhật, 11/10");
       expect(formatDayLabel(new Date("2026-10-11T00:30:00+07:00"), now2330)).toBe("Chủ nhật, 11/10");
-      expect(formatDayLabel("2026-10-09", now2330)).toBe("Thứ 6, 09/10");
       expect(formatDayLabel("2026-10-12", now2330)).toBe("Thứ 2, 12/10");
     });
 
@@ -76,8 +83,9 @@ describe("lib/format", () => {
 
       expect(formatDayLabel("2026-10-11", now0030)).toBe("Hôm nay, 11/10");
       expect(formatDayLabel(new Date("2026-10-11T00:30:00+07:00"), now0030)).toBe("Hôm nay, 11/10");
-      expect(formatDayLabel("2026-10-10", now0030)).toBe("Thứ 7, 10/10");
-      expect(formatDayLabel(new Date("2026-10-10T23:30:00+07:00"), now0030)).toBe("Thứ 7, 10/10");
+      expect(formatDayLabel("2026-10-10", now0030)).toBe("Hôm qua, 10/10");
+      expect(formatDayLabel(new Date("2026-10-10T23:30:00+07:00"), now0030)).toBe("Hôm qua, 10/10");
+      expect(formatDayLabel("2026-10-09", now0030)).toBe("Thứ 6, 09/10");
       expect(formatDayLabel("2026-10-12", now0030)).toBe("Thứ 2, 12/10");
     });
   });

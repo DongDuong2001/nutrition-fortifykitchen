@@ -12,44 +12,48 @@ def main():
     with sync_playwright() as p:
         browser = p.chromium.launch()
 
-        # 1. /today at 1440x900
-        page1 = browser.new_page(viewport={"width": 1440, "height": 900})
-        page1.goto(f"{BASE_URL}/today", wait_until="networkidle")
-        page1.wait_for_timeout(600)
-        today_path = os.path.join(SCREENSHOT_DIR, "today-desktop-1440.png")
-        page1.screenshot(path=today_path)
-        print(f"[SAVED] {today_path}")
+        # 1. today-header-390.png (/today at 390x844)
+        page = browser.new_page(viewport={"width": 390, "height": 844})
+        page.goto(f"{BASE_URL}/today", wait_until="networkidle")
+        page.wait_for_timeout(600)
+        p1 = os.path.join(SCREENSHOT_DIR, "today-header-390.png")
+        page.screenshot(path=p1)
+        print(f"[SAVED] {p1}")
 
-        # 2. Add Chà là 30g and capture /micros at 390x844
-        page2 = browser.new_page(viewport={"width": 390, "height": 844})
-        page2.goto(f"{BASE_URL}/add?meal=snack", wait_until="networkidle")
-        page2.wait_for_timeout(500)
+        # 2. micros-header-390.png (/micros at 390x844, scrolled down ~250px)
+        page.goto(f"{BASE_URL}/micros", wait_until="networkidle")
+        page.wait_for_timeout(600)
+        page.evaluate("window.scrollTo(0, 250)")
+        page.wait_for_timeout(300)
+        p2 = os.path.join(SCREENSHOT_DIR, "micros-header-390.png")
+        page.screenshot(path=p2)
+        print(f"[SAVED] {p2}")
 
-        # Click Chà là button
-        cha_la_btn = page2.locator("button:has-text('Chà là') >> visible=true").first
-        cha_la_btn.wait_for(state="visible", timeout=5000)
-        cha_la_btn.click()
+        # 3. today-header-1440.png (/today at 1440x900)
+        page_desk = browser.new_page(viewport={"width": 1440, "height": 900})
+        page_desk.goto(f"{BASE_URL}/today", wait_until="networkidle")
+        page_desk.wait_for_timeout(600)
+        p3 = os.path.join(SCREENSHOT_DIR, "today-header-1440.png")
+        page_desk.screenshot(path=p3)
+        print(f"[SAVED] {p3}")
 
-        # Wait for portion panel
-        page2.locator('[data-align-group="portion"]:visible').first.wait_for(timeout=5000)
-        submit_btn = page2.locator('button[data-align-group="portion"]:visible').first
-        submit_btn.click()
+        # 4. micros-nutrient-sub-390.png (/micros/b1 at 390x844)
+        page.goto(f"{BASE_URL}/micros/b1", wait_until="networkidle")
+        page.wait_for_timeout(600)
+        p4 = os.path.join(SCREENSHOT_DIR, "micros-nutrient-sub-390.png")
+        page.screenshot(path=p4)
+        print(f"[SAVED] {p4}")
 
-        # Wait for redirect to /today
-        page2.wait_for_url("**/today", timeout=5000)
-        page2.wait_for_timeout(500)
-
-        # Navigate to /micros
-        page2.goto(f"{BASE_URL}/micros", wait_until="networkidle")
-        page2.wait_for_timeout(600)
-
-        micros_path = os.path.join(SCREENSHOT_DIR, "micros-mobile-b6-increase-390.png")
-        page2.screenshot(path=micros_path)
-        print(f"[SAVED] {micros_path}")
+        # 5. dev-ui-headers-1440.png (/dev/ui at 1440x900)
+        page_desk.goto(f"{BASE_URL}/dev/ui", wait_until="networkidle")
+        page_desk.wait_for_timeout(600)
+        p5 = os.path.join(SCREENSHOT_DIR, "dev-ui-headers-1440.png")
+        page_desk.screenshot(path=p5)
+        print(f"[SAVED] {p5}")
 
         browser.close()
 
-    print("Screenshots capture complete.")
+    print("All screenshots captured successfully.")
 
 if __name__ == "__main__":
     main()
