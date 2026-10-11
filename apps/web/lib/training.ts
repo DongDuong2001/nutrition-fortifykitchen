@@ -204,3 +204,61 @@ export function getRestDayTips(): RestDayTip[] {
     },
   ];
 }
+
+export const TRAINING_CHECKS_STORAGE_KEY = "h1t_training_checks_v1";
+
+export type KeyValueStorage = Pick<Storage, "getItem" | "setItem">;
+
+function browserStorage(): KeyValueStorage | null {
+  try {
+    if (typeof window !== "undefined" && window.localStorage) {
+      return window.localStorage;
+    }
+    if (typeof localStorage !== "undefined") {
+      return localStorage;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Load saved checklist ticks for a specific day (keyed by YYYY-MM-DD in Asia/Ho_Chi_Minh).
+ */
+export function loadTrainingChecks(
+  dateKey: string,
+  storage: KeyValueStorage | null = browserStorage()
+): Record<string, boolean> {
+  if (!storage) return {};
+  try {
+    const raw = storage.getItem(TRAINING_CHECKS_STORAGE_KEY);
+    if (!raw) return {};
+    const store = JSON.parse(raw);
+    if (store && typeof store === "object" && store[dateKey]) {
+      return store[dateKey] as Record<string, boolean>;
+    }
+  } catch {
+    // Ignore storage/JSON parse errors
+  }
+  return {};
+}
+
+/**
+ * Save checklist ticks for a specific day (keyed by YYYY-MM-DD in Asia/Ho_Chi_Minh).
+ */
+export function saveTrainingChecks(
+  dateKey: string,
+  checks: Record<string, boolean>,
+  storage: KeyValueStorage | null = browserStorage()
+): void {
+  if (!storage) return;
+  try {
+    const raw = storage.getItem(TRAINING_CHECKS_STORAGE_KEY);
+    const store: Record<string, Record<string, boolean>> = raw ? JSON.parse(raw) : {};
+    store[dateKey] = checks;
+    storage.setItem(TRAINING_CHECKS_STORAGE_KEY, JSON.stringify(store));
+  } catch {
+    // Ignore storage errors (quota, disabled, etc.)
+  }
+}

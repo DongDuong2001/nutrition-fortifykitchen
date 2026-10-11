@@ -8,6 +8,8 @@ import { AppHeader } from "@/components/ui/app-header";
 import {
   calculateSaltTarget,
   getTrainingPhases,
+  loadTrainingChecks,
+  saveTrainingChecks,
 } from "@/lib/training";
 import { formatDayLabel, formatDesktopDate } from "@/lib/format";
 import { getTodayIsoVN } from "@/lib/date";
@@ -36,33 +38,7 @@ function TrainingContent() {
   const [selectedDuration, setSelectedDuration] = useState<string>(initialDuration);
   const [clientNow, setClientNow] = useState<Date | null>(null);
   const [isDesktop, setIsDesktop] = useState(false);
-
-  // Sync state if url changes
-  useEffect(() => {
-    if (searchParams?.get("rest") === "1") {
-      setSelectedDuration("rest");
-    } else if (searchParams?.get("duration")) {
-      setSelectedDuration(searchParams.get("duration")!);
-    }
-  }, [searchParams]);
-
-  useEffect(() => {
-    setClientNow(new Date());
-    const handleResize = () => {
-      setIsDesktop(window.innerWidth >= 1024);
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  const trainingMinutes = useMemo(() => {
-    if (selectedDuration === "rest") return 0;
-    const mins = parseInt(selectedDuration, 10);
-    return isNaN(mins) ? 60 : mins;
-  }, [selectedDuration]);
-
-  const isRestDay = selectedDuration === "rest";
+  const todayIso = useMemo(() => getTodayIsoVN(), []);
 
   // Pre-configured checked states matching design specs
   const [checkedState, setCheckedState] = useState<Record<string, boolean>>({
@@ -74,11 +50,48 @@ function TrainingContent() {
     "intra-carb": false,
   });
 
+  // Sync state if url changes
+  useEffect(() => {
+    if (searchParams?.get("rest") === "1") {
+      setSelectedDuration("rest");
+    } else if (searchParams?.get("duration")) {
+      setSelectedDuration(searchParams.get("duration")!);
+    }
+  }, [searchParams]);
+
+  // Load saved checklist ticks after mount to avoid hydration mismatch
+  useEffect(() => {
+    setClientNow(new Date());
+    const saved = loadTrainingChecks(todayIso);
+    if (Object.keys(saved).length > 0) {
+      setCheckedState((prev) => ({ ...prev, ...saved }));
+    }
+
+    const handleResize = () => {
+      setIsDesktop(window.innerWidth >= 1024);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [todayIso]);
+
+  const trainingMinutes = useMemo(() => {
+    if (selectedDuration === "rest") return 0;
+    const mins = parseInt(selectedDuration, 10);
+    return isNaN(mins) ? 60 : mins;
+  }, [selectedDuration]);
+
+  const isRestDay = selectedDuration === "rest";
+
   const handleToggle = (itemId: string) => {
-    setCheckedState((prev) => ({
-      ...prev,
-      [itemId]: !(prev[itemId] ?? false),
-    }));
+    setCheckedState((prev) => {
+      const next = {
+        ...prev,
+        [itemId]: !(prev[itemId] ?? false),
+      };
+      saveTrainingChecks(todayIso, next);
+      return next;
+    });
   };
 
   const handleSelectDuration = (id: string) => {
@@ -94,8 +107,6 @@ function TrainingContent() {
     () => getTrainingPhases(trainingMinutes),
     [trainingMinutes]
   );
-
-  const todayIso = useMemo(() => getTodayIsoVN(), []);
 
   // Formatted date labels
   const mobileSubtitle = useMemo(() => {
