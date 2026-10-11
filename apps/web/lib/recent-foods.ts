@@ -1,0 +1,56 @@
+import type { FoodItem } from "./mock/foods";
+
+/** A recently logged food, with the serving it was logged with. */
+export interface RecentFood {
+  foodId: string;
+  servingLabel: string;
+}
+
+export interface ResolvedRecent {
+  food: FoodItem;
+  grams: number;
+  label: string;
+}
+
+export const DEFAULT_RECENT_FOODS: RecentFood[] = [
+  { foodId: "food-yen-mach", servingLabel: "60 g" },
+  { foodId: "food-yogurt-kefir", servingLabel: "200 ml" },
+  { foodId: "food-chuoi", servingLabel: "1 quả" },
+];
+
+/** Guards values read back from sessionStorage. */
+export function isRecentFood(value: unknown): value is RecentFood {
+  if (typeof value !== "object" || value === null) return false;
+  const r = value as Record<string, unknown>;
+  return typeof r.foodId === "string" && typeof r.servingLabel === "string";
+}
+
+const MAX_RECENTS = 8;
+const GRAMS_LABEL = /^(\d+(?:[.,]\d+)?)\s*g$/;
+
+/**
+ * Turns a saved recent back into a food and an amount. Returns null if the food no longer exists.
+ * A serving label the food does not list is read as grams ("45 g"), or else falls back to its first serving.
+ */
+export function resolveRecent(recent: RecentFood, foods: FoodItem[]): ResolvedRecent | null {
+  const food = foods.find((f) => f.id === recent.foodId);
+  if (!food) return null;
+
+  const serving = food.servings.find((s) => s.label === recent.servingLabel);
+  if (serving) return { food, grams: serving.grams, label: serving.label };
+
+  const match = GRAMS_LABEL.exec(recent.servingLabel.trim());
+  if (match) {
+    const grams = Number(match[1].replace(",", "."));
+    return { food, grams, label: `${grams} g` };
+  }
+
+  const first = food.servings[0] ?? { label: "100 g", grams: 100 };
+  return { food, grams: first.grams, label: first.label };
+}
+
+/** Newest first. The same food and serving appears once. At most 8 are kept. */
+export function pushRecent(list: RecentFood[], recent: RecentFood): RecentFood[] {
+  const rest = list.filter((r) => !(r.foodId === recent.foodId && r.servingLabel === recent.servingLabel));
+  return [recent, ...rest].slice(0, MAX_RECENTS);
+}

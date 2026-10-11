@@ -295,6 +295,7 @@ export const apiClient = {
     const newFood: FoodItem = {
       id: `custom-${Date.now()}`,
       nameVi: input.nameVi,
+      category: "cua_toi",
       source: "user",
       servings: [
         { label: `${input.servingSize} ${input.servingUnit}`, grams: input.servingSize },

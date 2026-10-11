@@ -4,8 +4,19 @@ import React, { useState, useEffect, useMemo, useRef, useCallback, Suspense } fr
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useDiary } from "@/lib/diary-store";
-import { MOCK_FOODS, type FoodItem } from "@/lib/mock/foods";
-import { searchFoods, findSimilarFoods } from "@/lib/search";
+import { MOCK_FOODS, type FoodItem, type FoodServing } from "@/lib/mock/foods";
+import { findSimilarFoods } from "@/lib/search";
+import {
+  buildFoodList,
+  categoriesWithFoods,
+  categoryLabel,
+  categoryOf,
+  isCategoryFilter,
+  type FoodFilter,
+} from "@/lib/food-categories";
+import { resolveRecent, type ResolvedRecent } from "@/lib/recent-foods";
+import { ChipRow } from "@/components/foods/chip-row";
+import { FoodList } from "@/components/foods/food-list";
 
 import {
   parseMealSlot,
@@ -25,14 +36,14 @@ import { useMealSlot } from "@/lib/use-meal-slot";
 function AddFoodInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { data, addFoodEntry, recentSearches, addRecentSearch } = useDiary();
+  const { data, addFoodEntry, recentFoods } = useDiary();
 
   const resolvedSlot = useMealSlot(searchParams.get("meal"));
   const [overrideSlot, setOverrideSlot] = useState<MealSlot | null>(null);
   const mealSlot = overrideSlot ?? resolvedSlot;
 
   const [switcherOpen, setSwitcherOpen] = useState(false);
-  const [filterChip, setFilterChip] = useState<"all" | "favorite">("all");
+  const [filter, setFilter] = useState<FoodFilter>("all");
   const [query, setQuery] = useState("");
   const [selectedFood, setSelectedFood] = useState<FoodItem | null>(() => {
     // Default select Chà là if present to match design preview
@@ -63,19 +74,13 @@ function AddFoodInner() {
     }
   }, [isDesktop]);
 
-  // Sync grams with selected food default serving
-  useEffect(() => {
-    if (selectedFood) {
-      const firstServing = selectedFood.servings[0];
-      if (firstServing) {
-        setGramsInput(firstServing.grams.toString());
-        setSelectedServingLabel(firstServing.label);
-      } else {
-        setGramsInput("100");
-        setSelectedServingLabel("100 g");
-      }
-    }
-  }, [selectedFood]);
+  // Pick a food with one serving (default: its first). Sets the amount too, so the portion panel shows it.
+  const pickFood = useCallback((food: FoodItem, serving?: FoodServing) => {
+    const s = serving ?? food.servings[0] ?? { label: "100 g", grams: 100 };
+    setSelectedFood(food);
+    setGramsInput(String(s.grams));
+    setSelectedServingLabel(s.label);
+  }, []);
 
   // Current meal calories map for MealSwitcher
   const mealCalories = useMemo(() => {
@@ -96,10 +101,37 @@ function AddFoodInner() {
     return cals;
   }, [data]);
 
-  // Filtered foods
-  const searchResults = useMemo(() => {
-    return searchFoods(MOCK_FOODS, query);
-  }, [query]);
+  // Category filter and search combined. Grouped only for Tất cả with no query.
+  const list = useMemo(() => buildFoodList(MOCK_FOODS, query, filter), [query, filter]);
+  const searchResults = list.foods;
+  const categories = useMemo(() => categoriesWithFoods(MOCK_FOODS), []);
+  const categoryName = useCallback((food: FoodItem) => categoryLabel(categoryOf(food)), []);
+
+  // Filter row: Tất cả, Yêu thích, then only the categories that have foods
+  const filterItems = [
+    { id: "all", label: "Tất cả", active: filter === "all", onClick: () => setFilter("all") },
+    { id: "favorite", label: "Yêu thích", active: filter === "favorite", onClick: () => setFilter("favorite") },
+    ...categories.map((c) => ({
+      id: c.key,
+      label: c.label,
+      active: filter === c.key,
+      onClick: () => setFilter(c.key),
+    })),
+  ];
+
+  // Recents are foods with the serving they were logged with. Tapping one picks it.
+  const recentItems = useMemo(
+    () =>
+      recentFoods
+        .map((r) => resolveRecent(r, MOCK_FOODS))
+        .filter((r): r is ResolvedRecent => r !== null)
+        .map((r) => ({
+          id: `${r.food.id}|${r.label}`,
+          label: `${r.food.nameVi} ${r.label}`,
+          onClick: () => pickFood(r.food, { label: r.label, grams: r.grams }),
+        })),
+    [recentFoods, pickFood]
+  );
 
   // Fuzzy suggestions when results are empty
   const similarFoods = useMemo(() => {
@@ -120,9 +152,6 @@ function AddFoodInner() {
     setIsSubmitting(true);
     try {
       await addFoodEntry(selectedFood, parsedGrams, mealSlot, selectedServingLabel);
-      if (query.trim()) {
-        addRecentSearch(query);
-      }
       router.push("/today");
     } finally {
       setIsSubmitting(false);
@@ -172,6 +201,62 @@ function AddFoodInner() {
     if (kali) parts.push(`${formatNumber(kali)} mg kali`);
     return parts.join(" · ");
   };
+
+  // Shared by the phone sheet and the desktop dialog
+  const newFoodHref = mealSlot ? `/foods/new?meal=${mealSlot}` : "/foods/new";
+  const emptyState = (
+    <div className="flex flex-col items-center text-center py-6 gap-2">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="text-secondary" aria-hidden="true">
+        <circle cx="11" cy="11" r="7" />
+        <path d="M20 20l-3.5-3.5M8 8l6 6M14 8l-6 6" />
+      </svg>
+      <div className="text-base font-bold">Không có “{query}”</div>
+      <div className="text-sm text-secondary">Thử từ ngắn hơn, bỏ dấu, hoặc tự tạo món.</div>
+      {isCategoryFilter(filter) && (
+        <button
+          type="button"
+          onClick={() => setFilter("all")}
+          className="min-h-[44px] px-5 rounded-full bg-page text-text font-semibold text-sm border-0 cursor-pointer active:scale-[0.97]"
+        >
+          Bỏ lọc
+        </button>
+      )}
+      <Link
+        href={newFoodHref}
+        className="mt-2 min-h-[52px] px-7 rounded-full bg-blue text-white font-bold text-base flex items-center justify-center no-underline active:scale-[0.97]"
+      >
+        + Tạo món mới
+      </Link>
+
+      {/* Fuzzy matches */}
+      {similarFoods.length > 0 && (
+        <div className="w-full text-left mt-4 flex flex-col gap-1">
+          <div className="text-xs font-semibold text-secondary">Gợi ý gần giống:</div>
+          {similarFoods.map((s) => (
+            <button
+              key={s.id}
+              type="button"
+              onClick={() => pickFood(s)}
+              className="text-left py-2.5 px-3 rounded-xl hover:bg-page text-sm font-semibold text-text border-0 bg-white cursor-pointer flex justify-between items-center min-h-[48px]"
+            >
+              <span>{s.nameVi}</span>
+              <span className="text-xs text-secondary font-normal">{getFoodMeta(s)}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  const createFoodLink = (
+    <Link
+      href={newFoodHref}
+      className="-mx-3 no-underline text-left rounded-xl p-3 flex flex-col justify-center min-h-[52px] hover:bg-page transition-colors"
+    >
+      <span className="text-[15px] font-bold text-blue">+ Tạo món mới</span>
+      <span className="text-xs text-secondary">Không thấy món? Tự nhập dinh dưỡng</span>
+    </Link>
+  );
 
   return (
     <div className="min-h-screen bg-page text-text font-sans">
@@ -233,9 +318,9 @@ function AddFoodInner() {
             {/* Two Pane Layout */}
             <div className="flex gap-6 items-start">
               {/* Left Pane: Search & Results */}
-              <div className="flex-1 min-w-[340px] flex flex-col gap-3">
+              <div data-align-container="add-list" className="flex-1 min-w-[340px] flex flex-col gap-3">
                 {/* Search Bar */}
-                <label className="flex items-center gap-2.5 bg-page border border-card-border rounded-full px-4 min-h-[48px]">
+                <label data-align-group="add-list" data-align-edge="left" className="flex items-center gap-2.5 bg-page border border-card-border rounded-full px-4 min-h-[48px]">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="text-secondary shrink-0" aria-hidden="true">
                     <circle cx="11" cy="11" r="7" />
                     <path d="M20 20l-3.5-3.5" />
@@ -264,125 +349,28 @@ function AddFoodInner() {
                   )}
                 </label>
 
-                {/* Chips */}
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    aria-pressed={filterChip === "favorite"}
-                    onClick={() => setFilterChip("favorite")}
-                    className={`min-h-[44px] px-4 rounded-full text-xs font-semibold cursor-pointer border-0 transition-colors ${
-                      filterChip === "favorite" ? "bg-ink text-white" : "bg-page text-text hover:bg-divider"
-                    }`}
-                  >
-                    Yêu thích
-                  </button>
-                  <button
-                    type="button"
-                    aria-pressed={filterChip === "all"}
-                    onClick={() => setFilterChip("all")}
-                    className={`min-h-[44px] px-4 rounded-full text-xs font-semibold cursor-pointer border-0 transition-colors ${
-                      filterChip === "all" ? "bg-ink text-white" : "bg-page text-text hover:bg-divider"
-                    }`}
-                  >
-                    Tất cả
-                  </button>
-                </div>
+                {/* Filter row: Tất cả, Yêu thích, then categories with foods */}
+                <ChipRow items={filterItems} ariaLabel="Lọc món theo nhóm" data-align-group="add-list" />
 
-                {/* Recents */}
-                {!query && recentSearches.length > 0 && (
+                {/* Recents: tap to pick that food with that serving */}
+                {!query && recentItems.length > 0 && (
                   <div className="flex flex-col gap-1.5 pt-1">
                     <div className="text-xs font-semibold text-secondary">Gần đây</div>
-                    <div className="flex flex-wrap gap-2">
-                      {recentSearches.slice(0, 4).map((q) => (
-                        <button
-                          key={q}
-                          type="button"
-                          onClick={() => {
-                            const foodName = q.split(" ")[0];
-                            setQuery(foodName);
-                          }}
-                          className="min-h-[44px] px-3.5 rounded-full border border-card-border bg-white text-text text-xs font-semibold cursor-pointer hover:bg-page transition-colors"
-                        >
-                          {q}
-                        </button>
-                      ))}
-                    </div>
+                    <ChipRow items={recentItems} ariaLabel="Món gần đây" />
                   </div>
                 )}
 
-                {/* Results List */}
-                <div role="listbox" aria-label="Kết quả tìm kiếm" className="flex flex-col gap-1 max-h-[360px] overflow-y-auto pr-1">
-                  {searchResults.map((food) => {
-                    const isSelected = selectedFood?.id === food.id;
-                    return (
-                      <button
-                        key={food.id}
-                        role="option"
-                        aria-selected={isSelected}
-                        type="button"
-                        onClick={() => setSelectedFood(food)}
-                        className={`text-left cursor-pointer border-0 rounded-xl p-3 flex items-center gap-3 min-h-[56px] transition-colors ${
-                          isSelected ? "bg-blue/10 text-text font-semibold" : "bg-white hover:bg-page text-text"
-                        }`}
-                      >
-                        <div className="flex-1 min-w-0 flex flex-col gap-0.5">
-                          <div className="text-[15px] font-bold text-text truncate">{food.nameVi}</div>
-                          <div className="text-xs text-secondary truncate">{getFoodMeta(food)}</div>
-                        </div>
-                        {isSelected && (
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" className="text-blue shrink-0" aria-hidden="true">
-                            <path d="M5 12l5 5 9-10" />
-                          </svg>
-                        )}
-                      </button>
-                    );
-                  })}
-
-                  {/* Empty state when searching */}
-                  {searchResults.length === 0 && (
-                    <div className="flex flex-col items-center text-center py-6 gap-2">
-                      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="text-secondary" aria-hidden="true">
-                        <circle cx="11" cy="11" r="7" />
-                        <path d="M20 20l-3.5-3.5M8 8l6 6M14 8l-6 6" />
-                      </svg>
-                      <div className="text-base font-bold">Không có “{query}”</div>
-                      <div className="text-xs text-secondary">Thử từ ngắn hơn, bỏ dấu, hoặc tự tạo món.</div>
-                      <Link
-                        href={`/foods/new?meal=${mealSlot}`}
-                        className="mt-2 min-h-[44px] px-6 rounded-full bg-blue text-white font-bold text-xs flex items-center justify-center no-underline hover:bg-blue/90"
-                      >
-                        + Tạo món mới
-                      </Link>
-
-                      {/* Fuzzy matches */}
-                      {similarFoods.length > 0 && (
-                        <div className="w-full text-left mt-3 flex flex-col gap-1">
-                          <div className="text-xs font-semibold text-secondary">Gợi ý gần giống:</div>
-                          {similarFoods.map((s) => (
-                            <button
-                              key={s.id}
-                              type="button"
-                              onClick={() => setSelectedFood(s)}
-                              className="text-left py-2 px-3 rounded-lg hover:bg-page text-sm font-semibold text-text border-0 bg-transparent cursor-pointer flex justify-between"
-                            >
-                              <span>{s.nameVi}</span>
-                              <span className="text-xs text-secondary font-normal">{getFoodMeta(s)}</span>
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Create new food button at end of list */}
-                  <Link
-                    href={`/foods/new${mealSlot ? `?meal=${mealSlot}` : ""}`}
-                    className="no-underline text-left rounded-xl p-3 flex flex-col justify-center min-h-[56px] hover:bg-page transition-colors"
-                  >
-                    <span className="text-[15px] font-bold text-blue">+ Tạo món mới</span>
-                    <span className="text-xs text-secondary">Không thấy món? Tự nhập dinh dưỡng</span>
-                  </Link>
-                </div>
+                {/* Results: grouped or flat */}
+                <FoodList
+                  list={list}
+                  selectedId={selectedFood?.id}
+                  onPick={pickFood}
+                  getMeta={getFoodMeta}
+                  categoryName={categoryName}
+                  empty={emptyState}
+                  footer={createFoodLink}
+                  className="max-h-[360px] overflow-y-auto pb-1"
+                />
               </div>
 
               {/* Right Pane: Selected Food Portion & Macros */}
@@ -426,6 +414,7 @@ function AddFoodInner() {
         <div
           role="dialog"
           aria-label={`Thêm món vào ${mealNameVi}`}
+          data-align-container="add-list"
           className="absolute inset-x-0 top-14 bottom-0 bg-card rounded-t-[20px] p-4 flex flex-col gap-3.5 shadow-xl min-h-[calc(100vh-56px)]"
         >
           {/* Top Grabber */}
@@ -466,7 +455,7 @@ function AddFoodInner() {
           </div>
 
           {/* Search Input (min 48px, visible label) */}
-          <label className="flex items-center gap-2.5 bg-page border border-card-border rounded-full px-4 min-h-[48px] shrink-0">
+          <label data-align-group="add-list" data-align-edge="left" className="flex items-center gap-2.5 bg-page border border-card-border rounded-full px-4 min-h-[48px] shrink-0">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="text-secondary shrink-0" aria-hidden="true">
               <circle cx="11" cy="11" r="7" />
               <path d="M20 20l-3.5-3.5" />
@@ -494,123 +483,28 @@ function AddFoodInner() {
             )}
           </label>
 
-          {/* Filter Chips */}
-          <div className="flex gap-2 shrink-0">
-            <button
-              type="button"
-              aria-pressed={filterChip === "favorite"}
-              onClick={() => setFilterChip("favorite")}
-              className={`min-h-[44px] px-4 rounded-full text-xs font-semibold cursor-pointer border-0 transition-colors ${
-                filterChip === "favorite" ? "bg-ink text-white" : "bg-page text-text"
-              }`}
-            >
-              Yêu thích
-            </button>
-            <button
-              type="button"
-              aria-pressed={filterChip === "all"}
-              onClick={() => setFilterChip("all")}
-              className={`min-h-[44px] px-4 rounded-full text-xs font-semibold cursor-pointer border-0 transition-colors ${
-                filterChip === "all" ? "bg-ink text-white" : "bg-page text-text"
-              }`}
-            >
-              Tất cả
-            </button>
-          </div>
+          {/* Filter row: Tất cả, Yêu thích, then categories with foods */}
+          <ChipRow items={filterItems} ariaLabel="Lọc món theo nhóm" data-align-group="add-list" />
 
-          {/* Gần đây (Recents) */}
-          {!query && recentSearches.length > 0 && (
+          {/* Gần đây (Recents): tap to pick that food with that serving */}
+          {!query && recentItems.length > 0 && (
             <div className="flex flex-col gap-1.5 shrink-0">
               <div className="text-xs font-semibold text-secondary">Gần đây</div>
-              <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1">
-                {recentSearches.map((q) => (
-                  <button
-                    key={q}
-                    type="button"
-                    onClick={() => {
-                      const foodName = q.split(" ")[0];
-                      setQuery(foodName);
-                    }}
-                    className="shrink-0 min-h-[44px] px-3.5 rounded-full border border-card-border bg-white text-text text-xs font-semibold cursor-pointer active:scale-[0.98]"
-                  >
-                    {q}
-                  </button>
-                ))}
-              </div>
+              <ChipRow items={recentItems} ariaLabel="Món gần đây" />
             </div>
           )}
 
-          {/* Results List */}
-          <div className="flex-1 overflow-y-auto flex flex-col gap-1 pr-0.5">
-            {searchResults.map((food) => {
-              const isSelected = selectedFood?.id === food.id;
-              return (
-                <button
-                  key={food.id}
-                  type="button"
-                  onClick={() => setSelectedFood(food)}
-                  className={`text-left cursor-pointer border-0 rounded-xl p-3 flex items-center gap-3 min-h-[52px] transition-colors ${
-                    isSelected ? "bg-blue/10 text-text" : "bg-white text-text hover:bg-page"
-                  }`}
-                >
-                  <div className="flex-1 min-w-0 flex flex-col gap-0.5">
-                    <div className="text-[15px] font-bold text-text truncate">{food.nameVi}</div>
-                    <div className="text-xs text-secondary truncate">{getFoodMeta(food)}</div>
-                  </div>
-                  {isSelected && (
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" className="text-blue shrink-0" aria-hidden="true">
-                      <path d="M5 12l5 5 9-10" />
-                    </svg>
-                  )}
-                </button>
-              );
-            })}
-
-            {/* Empty Search State */}
-            {searchResults.length === 0 && (
-              <div className="flex flex-col items-center text-center py-6 gap-2">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="text-secondary" aria-hidden="true">
-                  <circle cx="11" cy="11" r="7" />
-                  <path d="M20 20l-3.5-3.5M8 8l6 6M14 8l-6 6" />
-                </svg>
-                <div className="text-lg font-bold">Không có “{query}”</div>
-                <div className="text-sm text-secondary">Thử từ ngắn hơn, bỏ dấu, hoặc tự tạo món.</div>
-                <Link
-                  href={`/foods/new?meal=${mealSlot}`}
-                  className="mt-2 min-h-[52px] px-7 rounded-full bg-blue text-white font-bold text-base flex items-center justify-center no-underline active:scale-[0.97]"
-                >
-                  + Tạo món mới
-                </Link>
-
-                {/* Fuzzy Matches */}
-                {similarFoods.length > 0 && (
-                  <div className="w-full text-left mt-4 flex flex-col gap-1">
-                    <div className="text-xs font-semibold text-secondary">Gợi ý gần giống:</div>
-                    {similarFoods.map((s) => (
-                      <button
-                        key={s.id}
-                        type="button"
-                        onClick={() => setSelectedFood(s)}
-                        className="text-left py-2.5 px-3 rounded-xl hover:bg-page text-sm font-semibold text-text border-0 bg-white cursor-pointer flex justify-between items-center min-h-[48px]"
-                      >
-                        <span>{s.nameVi}</span>
-                        <span className="text-xs text-secondary font-normal">{getFoodMeta(s)}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Create Food Link */}
-            <Link
-              href={`/foods/new${mealSlot ? `?meal=${mealSlot}` : ""}`}
-              className="no-underline text-left rounded-xl p-3 flex flex-col justify-center min-h-[52px] hover:bg-page transition-colors"
-            >
-              <span className="text-[15px] font-bold text-blue">+ Tạo món mới</span>
-              <span className="text-xs text-secondary">Không thấy món? Tự nhập dinh dưỡng</span>
-            </Link>
-          </div>
+          {/* Results: grouped or flat */}
+          <FoodList
+            list={list}
+            selectedId={selectedFood?.id}
+            onPick={pickFood}
+            getMeta={getFoodMeta}
+            categoryName={categoryName}
+            empty={emptyState}
+            footer={createFoodLink}
+            className="min-h-0 flex-1 overflow-y-auto pb-1"
+          />
 
           {/* Bottom Selected Food Portion Panel */}
           {selectedFood && (

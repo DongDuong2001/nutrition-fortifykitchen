@@ -21,3 +21,6 @@
 - [ ] (cc-01) `components/onboarding/onboarding-header.tsx` is a local sub-screen header. Swap it for the shared AppHeader in ui-04b.
 - [ ] (cc-01) `StatGroup` labels are 11 px (`text-[11px]`), below the 12 px minimum in SPEC. It is a shared primitive, so the fix belongs to whoever owns `components/ui`.
 - [x] (cc-01) "Mở ứng dụng Mail" uses `mailto:`, which opens a new email, not the inbox. Keep, or hide it on desktop? Decided: phone only.
+- [ ] (cc-02) Food category is web-side only. Dong: add a category column to the foods table, using the same keys.
+- [ ] (cc-02) "Yêu thích" has no favourites to filter by yet, so it lists every food. Needs a favourites store.
+- [ ] (cc-02) Recents are now `{ foodId, servingLabel }` in sessionStorage under `h1t_recent_foods_v2`. The old string list is ignored, not migrated. The default recents show the food names ("Yogurt kefir 200 ml"), not the old "Kefir 200 ml".

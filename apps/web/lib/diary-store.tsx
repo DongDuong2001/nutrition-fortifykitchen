@@ -6,6 +6,7 @@ import { type FoodItem } from "./mock/foods";
 import { type MealSlot, getMealSlotNameVi } from "./meal-slot";
 import { scaleNutrients } from "./portion";
 import { formatNumber } from "./format";
+import { DEFAULT_RECENT_FOODS, isRecentFood, pushRecent, type RecentFood } from "./recent-foods";
 
 export interface AddedDiaryEntry {
   id: string;
@@ -34,8 +35,8 @@ interface DiaryContextValue {
   data: MockDayData;
   addedEntries: AddedDiaryEntry[];
   addFoodEntry: (food: FoodItem, grams: number, mealSlot: MealSlot, servingLabel?: string) => Promise<void>;
-  recentSearches: string[];
-  addRecentSearch: (query: string) => void;
+  recentFoods: RecentFood[];
+  addRecentFood: (food: FoodItem, servingLabel: string) => void;
   toast: ToastInfo | null;
   dismissToast: () => void;
   highlightedMeal: MealSlot | null;
@@ -46,9 +47,8 @@ interface DiaryContextValue {
 const DiaryContext = createContext<DiaryContextValue | null>(null);
 
 const SESSION_STORAGE_KEY = "h1t_added_entries_v1";
-const RECENT_SEARCHES_KEY = "h1t_recent_searches_v1";
-
-const DEFAULT_RECENTS = ["Yến mạch 60 g", "Kefir 200 ml", "Chuối 1 quả"];
+// v2: recents are { foodId, servingLabel } objects. The v1 string list is ignored.
+const RECENT_FOODS_KEY = "h1t_recent_foods_v2";
 
 /**
  * Pure aggregation function for daily totals.
@@ -237,7 +237,7 @@ export function computeCompositeDayData(
 export function DiaryProvider({ children }: { children: React.ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
   const [addedEntries, setAddedEntries] = useState<AddedDiaryEntry[]>([]);
-  const [recentSearches, setRecentSearches] = useState<string[]>(DEFAULT_RECENTS);
+  const [recentFoods, setRecentFoods] = useState<RecentFood[]>(DEFAULT_RECENT_FOODS);
   const [toast, setToast] = useState<ToastInfo | null>(null);
   const [highlightedMeal, setHighlightedMeal] = useState<MealSlot | null>(null);
 
@@ -248,9 +248,10 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       if (storedEntries) {
         setAddedEntries(JSON.parse(storedEntries));
       }
-      const storedSearches = sessionStorage.getItem(RECENT_SEARCHES_KEY);
-      if (storedSearches) {
-        setRecentSearches(JSON.parse(storedSearches));
+      const storedRecents = sessionStorage.getItem(RECENT_FOODS_KEY);
+      if (storedRecents) {
+        const parsed: unknown = JSON.parse(storedRecents);
+        if (Array.isArray(parsed)) setRecentFoods(parsed.filter(isRecentFood));
       }
     } catch {
       // Ignore sessionStorage access errors
@@ -269,15 +270,15 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     }
   }, [addedEntries, hydrated]);
 
-  // Persist recent searches only after hydrated
+  // Persist recent foods only after hydrated
   useEffect(() => {
     if (!hydrated) return;
     try {
-      sessionStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(recentSearches));
+      sessionStorage.setItem(RECENT_FOODS_KEY, JSON.stringify(recentFoods));
     } catch {
       // Ignore
     }
-  }, [recentSearches, hydrated]);
+  }, [recentFoods, hydrated]);
 
   // Auto-dismiss toast after 4s
   useEffect(() => {
@@ -288,14 +289,9 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     return () => clearTimeout(timer);
   }, [toast]);
 
-  // Add recent search query
-  const addRecentSearch = useCallback((query: string) => {
-    const trimmed = query.trim();
-    if (!trimmed) return;
-    setRecentSearches((prev) => {
-      const filtered = prev.filter((q) => q.toLowerCase() !== trimmed.toLowerCase());
-      return [trimmed, ...filtered].slice(0, 8);
-    });
+  // Remember a food with the serving it was logged with
+  const addRecentFood = useCallback((food: FoodItem, servingLabel: string) => {
+    setRecentFoods((prev) => pushRecent(prev, { foodId: food.id, servingLabel }));
   }, []);
 
   // Add a food entry
@@ -336,9 +332,9 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         qty,
       });
 
-      addRecentSearch(`${food.nameVi} ${qty}`);
+      addRecentFood(food, qty);
     },
-    [addRecentSearch]
+    [addRecentFood]
   );
 
   const dismissToast = useCallback(() => {
@@ -355,8 +351,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         data: compositeData,
         addedEntries,
         addFoodEntry,
-        recentSearches,
-        addRecentSearch,
+        recentFoods,
+        addRecentFood,
         toast,
         dismissToast,
         highlightedMeal,

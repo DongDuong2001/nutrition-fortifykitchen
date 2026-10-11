@@ -1,3 +1,5 @@
+import type { FoodCategory } from "../food-categories";
+
 export interface FoodServing {
   label: string;
   grams: number;
@@ -6,6 +8,7 @@ export interface FoodServing {
 export interface FoodItem {
   id: string;
   nameVi: string;
+  category: FoodCategory;
   brand?: string;
   source: "USDA" | "VN FCT" | "user";
   servings: FoodServing[];
@@ -17,6 +20,7 @@ export const MOCK_FOODS: FoodItem[] = [
   // 1. Chà là (calibrated so 30g gives 84 kcal, 22g carb, 197mg kali, 0.7g protein, 0.1g fat, 2g fiber)
   {
     id: "food-cha-la",
+    category: "trai_cay",
     nameVi: "Chà là",
     source: "USDA",
     servings: [
@@ -48,6 +52,7 @@ export const MOCK_FOODS: FoodItem[] = [
   // 2. Yến mạch (60g = 228 kcal)
   {
     id: "food-yen-mach",
+    category: "tinh_bot",
     nameVi: "Yến mạch",
     source: "USDA",
     servings: [
@@ -75,6 +80,7 @@ export const MOCK_FOODS: FoodItem[] = [
   // 3. Yogurt kefir (200 ml ~ 200g = 126 kcal)
   {
     id: "food-yogurt-kefir",
+    category: "sua",
     nameVi: "Yogurt kefir",
     brand: "Vinamilk",
     source: "USDA",
@@ -100,6 +106,7 @@ export const MOCK_FOODS: FoodItem[] = [
   // 4. Chuối (1 quả ~ 100g = 105 kcal)
   {
     id: "food-chuoi",
+    category: "trai_cay",
     nameVi: "Chuối",
     source: "USDA",
     servings: [
@@ -124,6 +131,7 @@ export const MOCK_FOODS: FoodItem[] = [
   // 5. Cơm gạo lứt (150g = 168 kcal)
   {
     id: "food-com-gao-lut",
+    category: "tinh_bot",
     nameVi: "Cơm gạo lứt",
     source: "VN FCT",
     servings: [
@@ -148,6 +156,7 @@ export const MOCK_FOODS: FoodItem[] = [
   // 6. Thịt bò nạc (150g = 320 kcal)
   {
     id: "food-thit-bo-nac",
+    category: "dam",
     nameVi: "Thịt bò nạc",
     source: "USDA",
     servings: [
@@ -171,6 +180,7 @@ export const MOCK_FOODS: FoodItem[] = [
   // 7. Bột củ dền (3g = 10 kcal)
   {
     id: "food-bot-cu-den",
+    category: "bo_sung",
     nameVi: "Bột củ dền",
     brand: "Dalahouse",
     source: "user",
@@ -195,6 +205,7 @@ export const MOCK_FOODS: FoodItem[] = [
   // 8. Mật mía (20g / 1 muỗng = 58 kcal)
   {
     id: "food-mat-mia",
+    category: "an_vat",
     nameVi: "Mật mía",
     brand: "Golden Barrel",
     source: "USDA",
@@ -220,6 +231,7 @@ export const MOCK_FOODS: FoodItem[] = [
   // 9. Bánh tráng (10g = 33 kcal)
   {
     id: "food-banh-trang",
+    category: "tinh_bot",
     nameVi: "Bánh tráng",
     source: "VN FCT",
     servings: [
@@ -240,6 +252,7 @@ export const MOCK_FOODS: FoodItem[] = [
   // 10. Bánh tráng nướng (50g / 1 cái = 95 kcal)
   {
     id: "food-banh-trang-nuong",
+    category: "an_vat",
     nameVi: "Bánh tráng nướng",
     source: "VN FCT",
     servings: [
@@ -259,6 +272,7 @@ export const MOCK_FOODS: FoodItem[] = [
   // 11. Bún chả Hà Nội (100g = 185 kcal)
   {
     id: "food-bun-cha",
+    category: "mon_viet",
     nameVi: "Bún chả Hà Nội",
     source: "VN FCT",
     servings: [
@@ -279,6 +293,7 @@ export const MOCK_FOODS: FoodItem[] = [
   // 12. Phở bò (1 tô ~ 600g = 450 kcal)
   {
     id: "food-pho-bo",
+    category: "mon_viet",
     nameVi: "Phở bò",
     source: "VN FCT",
     servings: [
@@ -299,6 +314,7 @@ export const MOCK_FOODS: FoodItem[] = [
   // 13. Cơm tấm sườn (1 dĩa ~ 400g = 620 kcal)
   {
     id: "food-com-tam-suon",
+    category: "mon_viet",
     nameVi: "Cơm tấm sườn",
     source: "VN FCT",
     servings: [
@@ -319,6 +335,7 @@ export const MOCK_FOODS: FoodItem[] = [
   // 14. Bánh mì thịt (1 ổ ~ 200g = 420 kcal)
   {
     id: "food-banh-mi-thit",
+    category: "mon_viet",
     nameVi: "Bánh mì thịt",
     source: "VN FCT",
     servings: [
@@ -339,6 +356,7 @@ export const MOCK_FOODS: FoodItem[] = [
   // 15. Bún bò Huế (1 tô ~ 600g = 530 kcal)
   {
     id: "food-bun-bo-hue",
+    category: "mon_viet",
     nameVi: "Bún bò Huế",
     source: "VN FCT",
     servings: [
@@ -359,6 +377,7 @@ export const MOCK_FOODS: FoodItem[] = [
   // 16. Trứng gà (1 quả ~ 55g = 78 kcal)
   {
     id: "food-trung-ga",
+    category: "dam",
     nameVi: "Trứng gà",
     source: "USDA",
     servings: [
@@ -386,6 +405,7 @@ export const MOCK_FOODS: FoodItem[] = [
   // 17. Ức gà (100g = 165 kcal)
   {
     id: "food-uc-ga",
+    category: "dam",
     nameVi: "Ức gà phi lê",
     source: "USDA",
     servings: [
@@ -411,6 +431,7 @@ export const MOCK_FOODS: FoodItem[] = [
   // 18. Cá hồi (100g = 208 kcal)
   {
     id: "food-ca-hoi",
+    category: "dam",
     nameVi: "Cá hồi",
     source: "USDA",
     servings: [
@@ -437,6 +458,7 @@ export const MOCK_FOODS: FoodItem[] = [
   // 19. Đậu hũ (100g = 76 kcal)
   {
     id: "food-dau-hu",
+    category: "dam",
     nameVi: "Đậu hũ trắng",
     source: "VN FCT",
     servings: [
@@ -459,6 +481,7 @@ export const MOCK_FOODS: FoodItem[] = [
   // 20. Rau muống (100g = 19 kcal)
   {
     id: "food-rau-muong",
+    category: "rau",
     nameVi: "Rau muống",
     source: "VN FCT",
     servings: [
@@ -482,6 +505,7 @@ export const MOCK_FOODS: FoodItem[] = [
   // 21. Cải bó xôi (100g = 23 kcal)
   {
     id: "food-cai-bo-xoi",
+    category: "rau",
     nameVi: "Cải bó xôi (Spinach)",
     source: "USDA",
     servings: [
@@ -508,6 +532,7 @@ export const MOCK_FOODS: FoodItem[] = [
   // 22. Sữa tươi không đường (100ml ~ 100g = 62 kcal)
   {
     id: "food-sua-tuoi",
+    category: "sua",
     nameVi: "Sữa tươi không đường",
     brand: "TH True Milk",
     source: "VN FCT",
@@ -532,6 +557,7 @@ export const MOCK_FOODS: FoodItem[] = [
   // 23. Khoai lang (100g = 86 kcal)
   {
     id: "food-khoai-lang",
+    category: "tinh_bot",
     nameVi: "Khoai lang luộc",
     source: "USDA",
     servings: [
@@ -556,6 +582,7 @@ export const MOCK_FOODS: FoodItem[] = [
   // 24. Quả bơ (100g = 160 kcal)
   {
     id: "food-bo",
+    category: "trai_cay",
     nameVi: "Quả bơ",
     source: "USDA",
     servings: [
@@ -584,6 +611,7 @@ export const MOCK_FOODS: FoodItem[] = [
   // 25. Hạt điều (100g = 553 kcal)
   {
     id: "food-hat-dieu",
+    category: "beo",
     nameVi: "Hạt điều rang",
     source: "VN FCT",
     servings: [
@@ -608,6 +636,7 @@ export const MOCK_FOODS: FoodItem[] = [
   // 26. Hạnh nhân (100g = 579 kcal)
   {
     id: "food-hanh-nhan",
+    category: "beo",
     nameVi: "Hạnh nhân",
     source: "USDA",
     servings: [
@@ -631,6 +660,7 @@ export const MOCK_FOODS: FoodItem[] = [
   // 27. Bưởi (100g = 42 kcal)
   {
     id: "food-buoi",
+    category: "trai_cay",
     nameVi: "Bưởi da xanh",
     source: "VN FCT",
     servings: [
@@ -651,6 +681,7 @@ export const MOCK_FOODS: FoodItem[] = [
   // 28. Táo (100g = 52 kcal)
   {
     id: "food-tao",
+    category: "trai_cay",
     nameVi: "Táo Envy",
     source: "USDA",
     servings: [
@@ -672,6 +703,7 @@ export const MOCK_FOODS: FoodItem[] = [
   // 29. Bông cải xanh (Broccoli) (100g = 34 kcal)
   {
     id: "food-bong-cai-xanh",
+    category: "rau",
     nameVi: "Bông cải xanh",
     source: "USDA",
     servings: [
@@ -695,6 +727,7 @@ export const MOCK_FOODS: FoodItem[] = [
   // 30. Whey Protein Isolate (30g = 110 kcal)
   {
     id: "food-whey-protein",
+    category: "bo_sung",
     nameVi: "Whey Protein Isolate",
     brand: "Optimum Nutrition",
     source: "USDA",

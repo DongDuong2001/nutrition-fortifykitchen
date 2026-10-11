@@ -3,6 +3,8 @@
 ## Now working
 | Task | Owner | Files / routes |
 |---|---|---|
+| ui-05-fix | Antigravity | app/add, app/foods, app/today, app/micros, lib/diary-store, lib/meal-slot, components/ui |
+| cc-02 /add categories (Claude Code) | Claude Code | app/add, components/foods, lib/food-categories.ts, lib/recent-foods.ts, lib/mock/foods.ts, lib/diary-store.tsx (recents), lib/api-client.ts (category fallback) |
 
 | Date | Commit | Built | Next |
 | --- | --- | --- | --- |
@@ -151,6 +153,7 @@ All hydration checks passed cleanly (0 hydration errors, sessionStorage entries 
   - `apps/web/.screenshots/micros-mobile-b6-increase-390.png`: Vitamin B6 row increased to 1,15 / 1,3 mg · 88% after adding Chà là 30g; Vitamin B* naming consistent.
 
 | 11/10/2026 | cc-01 | Onboarding in Cobalt Sign: /signup (split on desktop), /signin, /signin/check-email, /signin/expired, /setup/profile and /setup/goal (one card on desktop). Mock auth and profile save behind lib/api-client.ts. Goal kcal and daily targets from lib/targets.ts. Local sub-screen header | Swap the local header for AppHeader (ui-04b). Wire Supabase auth and profile save (Dong) |
+| 11/10/2026 | cc-02 | Food categories (10 keys, order and labels in lib/food-categories.ts, web-side mock). /add: one scrolling filter row (Tất cả, Yêu thích, categories with foods) and recents as { foodId, servingLabel }. Tất cả groups by category with sticky headers. Shared FoodList and ChipRow on phone and desktop | Dong: category column on foods (OPEN_QUESTIONS). Favourites store for Yêu thích |
 
 ## Quality Gate Outputs (ui-05)
 - `npx tsc --noEmit`: 0 errors (clean).
@@ -296,3 +299,12 @@ All alignment and hydration tests passed cleanly (<= 1px difference, 0 hydration
 - Edges: daily-targets (setup-goal at 390 and 1440) pass, left/right, 3 pairs each. setup-row (setup-profile at 1440) passes, top/bottom, 2 pairs.
 - Edges: signup, signin, check-email, expired have no data-align-group rows (n/a).
 - Cleanup: "Mở ứng dụng Mail" is phone only (`lg:hidden`, checked at 390 visible and 1440 hidden). `size="lg"` inactive chip has a 2 px grabber border (52 px, `#D5D8DF`). `size="md"` re-checked byte-identical to feat/ui for /add and /foods/food-cha-la at 390 and 1440.
+
+## Quality Gate Outputs (cc-02)
+- `npm run typecheck`: exit 0.
+- `npm test`: 10 files, 80 tests passed. 19 are new: `lib/__tests__/food-categories.test.ts` (11) and `lib/__tests__/recent-foods.test.ts` (8), written first.
+- `npm run build`: compiled, TypeScript finished.
+- `BASE_URL=http://localhost:3101 npm run test:align` (with `PATH=/usr/bin:$PATH`): add-list pairs compared, left edges aligned: `/add?meal=snack` @ 390, 3 pairs; @ 1440, 3 pairs. 0 hydration errors.
+- Playwright at 390 and 1440: scrolled grouped list, the stuck header is opaque and on top of the rows. Rau củ shows 3 foods. Chuoi with Trái cây shows Chuối, with the category in its meta line. Tapping the recent "Yến mạch 60 g" sets 60 g in the portion panel, and the search box stays empty. Empty category + query shows "Bỏ lọc", which returns to Tất cả. No console errors.
+- `size="md"` ChipGroup is not changed on this branch.
+- Screenshots: `apps/web/.screenshots/cc02-add-{all,category,search}-{390,1440}.png`.
