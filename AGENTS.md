@@ -111,7 +111,7 @@ Always use **your agent's fixed port**: **3100 for Antigravity, 3101 for Claude 
 - Open each screenshot at 390 and 1440 and look specifically at column alignment and right edges. Don't just confirm that the screen renders.
 
 ## Two agents in this repo (Antigravity + Claude Code)
-- Claude Code works in the worktree `../nutrition-fk-claude` on `feat/ui-cc-*` and fast-forwards `feat/ui` itself after the gates pass. Antigravity works on `feat/ui-ag-*` branches only.
+- Each Claude Code works in its own clone of the repo on its `feat/ui-cc-*` (or `feat/ui-cc2-*`) branch and fast-forwards `feat/ui` itself after the gates pass. Antigravity works on `feat/ui-ag-*` branches only.
 - **Now working board:** before starting a task, add a row to the "Now working" table at the top of PROGRESS.md (task, owner, files or routes). Remove it when done. Never edit files claimed by the other agent's row; if you must, stop and tell the user.
 - Who may edit which files: see **File ownership** below.
 
@@ -120,8 +120,8 @@ Always use **your agent's fixed port**: **3100 for Antigravity, 3101 for Claude 
 - Antigravity works only on its own branch feat/ui-ag-<task>, never commits to feat/ui, and touches only the files its task names. Claude Code merges its branches.
 - **Lanes:** three workers, each with its own port (see Dev server and ports).
   - Antigravity: branches feat/ui-ag-<task>, port 3100.
-  - Claude Code (this machine): branches feat/ui-cc-<task>, port 3101.
-  - Claude Code #2 (separate computer): branches feat/ui-cc2-<n>, port 3102.
+  - Claude Code: branches feat/ui-cc-<task>, port 3101, in its own clone.
+  - Claude Code #2: branches feat/ui-cc2-<n>, port 3102, in its own clone.
 - **Every worker:** `git fetch && git rebase origin/feat/ui` before each task. Before merging, rebase again, re-run the gates, then `git merge --ff-only` into feat/ui and push feat/ui only. Never merge commits and never force-push.
 - Claim your files on the **Now working** board before editing. Never edit a file another active task has claimed.
 - Tests follow their file: lib/__tests__/<name>.test.ts belongs to the owner of lib/<name>.
