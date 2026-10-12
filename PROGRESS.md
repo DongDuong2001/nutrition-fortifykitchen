@@ -6,6 +6,7 @@
 
 | Date | Commit | Built | Next |
 | --- | --- | --- | --- |
+| 12/10/2026 | cc2-05 | Profile drives day.user: the desktop label uses goalName and formatNumber (70,5 kg, not 70.5), tests first (90 min / 70,5 kg / Tăng cơ move the label and the salt total); cc2_05.py edits the profile and checks /today and /training at 1440. Dial ring uses --color-track-on-dark #60646E (3.14:1 on ink). ag04_audit_results.json ignored. /admin/review on Cobalt Sign tokens. --color-on-dark and --color-on-accent replace text-white (32 files, no visual change). Decided questions marked. | Dial ring is 2.88:1 on the inset panel (OPEN_QUESTIONS cc2-05) |
 | 12/10/2026 | cc2-04 | Sweep of app and components. bg-white is bg-card (same #FFFFFF) in 16 files. Dial numbers use formatNumber. Profile values are no longer fixed: the training and micros desktop subtitles read the profile's goal and weight (sample: Giữ cân · 65 kg); Today's desktop salt card, the Mẹo line and the salt summary read calculateSaltTarget for the day's minutes; Kali mục tiêu reads targets.potassium. The fallback "Thứ Bảy, 10/10/2026" is gone. Text is unchanged for the sample profile. Probe cc2_04.py (25 checks). Design calls in OPEN_QUESTIONS (cc2-04). | Queue complete. Waiting for Hao's answers in OPEN_QUESTIONS (cc2-04, cc-14b done, cc2-02 /add heading) |
 | 12/10/2026 | cc2-03 | Audit items in docs/audit-ag04.md done (rows marked): Profile "Đăng xuất", "Vùng nguy hiểm" and "Xoá tài khoản" use text-destructive-text; CalorieDial track uses muted-on-dark (already 5.96:1 on ink, so no new token); AppHeader date button is aria-busy="true" until its label resolves. Probe tests/probes/cc2_03.py (14 checks). | Task 4 (cc2-04 sweep) |
 | 12/10/2026 | cc2-02 | ag-06 merged (6 commits rebased onto feat/ui; audit status table and PROGRESS rows kept). One visible h1 per page at 390 and 1440: the Today empty state hides its sr-only h1 at 1024 px and up (the daily header has one there), the Today loading skeleton gets a desktop h1, and the /add phone sheet has a sr-only h1 "Thêm món" (OPEN_QUESTIONS cc2-02). Profile reminders row is empty until mounted, then Đã bật / Đã tắt. ag06.py checks the h1 rule on 15 routes plus the Today states. Remote branches feat/ui-ag-06 and feat/ui-cc-10 deleted after the merge. | Task 3 (cc2-03 audit items) |
@@ -103,6 +104,15 @@ Smoke on prod :3101 (`npm run probe:all`): 35 PASS, 21 FAIL of 56 route × width
 - Probes: cc02-final, cc03, cc04, cc05, cc06: no problems.
 - Edges: training-content (phase-checklist, rest-day-card) and training-summary (salt-summary-card, sodium-progress-card) are not in tests/alignment.py, so not checked by the gate.
 
+
+## Quality Gate Summary (cc2-05)
+- Branch feat/ui-cc2-05 from feat/ui b3fb6bc, one commit per item. Port 3102, prod build. Merged with --ff-only into feat/ui.
+- Gates on prod :3102, each step as its own command: typecheck ok; vitest 270 pass in 23 files (2 new in date.test.ts); build ok; test:align pass; test:hydration 0 errors; probe:all 20 PASS, 2 REPORT, 0 FAIL, 1 SKIP (cc02-final, dev only). Smoke 54 of 54 PASS.
+- cc2_05.py: edits the profile through the UI (70 kg, Tăng cơ, 90 phút); /today at 1440 shows "Ngày tập 90′ · Tăng cơ · 70 kg", the salt card for 90 phút and the 8,5 g total; /training follows.
+- Found by the tests: the desktop label showed the weight with an English decimal (70.5 kg). Now formatNumber.
+- Text-white rename: 18 routes at 390 and 1440 before and after. 33 of 36 files byte-identical; the other 3 differ by 3-48 pixels, and the same page differs from itself by the same amount (render noise).
+- Dial ring: --color-track-on-dark #60646E is 3.14:1 on ink, but 2.88:1 on the surface-dark panel the dial sits on. Kept as decided; #666A75 passes both (OPEN_QUESTIONS cc2-05). cc2_03.py now checks the ring against ink.
+- Screenshots: apps/web/.screenshots/cc2-05-today-390.png, cc2-05-today-1440.png, cc2-05-admin-390.png, cc2-05-admin-1280.png.
 
 ## Quality Gate Summary (cc2-04)
 - Branch feat/ui-cc2-04 from feat/ui 7271002. Port 3102, prod build. Merged with --ff-only into feat/ui.
