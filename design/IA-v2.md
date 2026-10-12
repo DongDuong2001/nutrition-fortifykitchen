@@ -1,6 +1,6 @@
 # H1T MICRO — Information architecture v2
 
-Decided 12/10/2026 (Hao). Replaces the Hôm nay / Vi chất / Ngày tập / Hồ sơ tab layout. All copy Vietnamese, Cobalt Sign tokens and fonts, every rule in AGENTS.md still applies (no over-limit, targets from the profile, past days read-only, null ≠ 0).
+Decided 12/10/2026 (Hao); revised 12/10 19:30 (Tổng quan = trends over a period with sub-tabs; Nhật ký owns the day, incl. its Vi chất and Ngày tập). Replaces the Hôm nay / Vi chất / Ngày tập / Hồ sơ tab layout. All copy Vietnamese, Cobalt Sign tokens and fonts, every rule in AGENTS.md still applies (no over-limit, targets from the profile, past days read-only, null ≠ 0).
 
 ## Why
 - Today mixed dashboard, food log and (on desktop) a 40-row nutrient list; "how am I doing" was not visible at a glance.
@@ -14,50 +14,60 @@ Phone bottom nav (5 slots): **Tổng quan · Nhật ký · [+] · Khám phá · 
 - Desktop: DesktopSidebar with the same four items plus a primary "Thêm món" button.
 - Tab labels and icons stay identical on phone and desktop.
 
+## Headers (decided 12/10 19:35)
+- The H1T MICRO wordmark appears only on Tổng quan (phone header). Every other screen shows its own name as the title: Nhật ký, Khám phá, Cài đặt; pushed screens show back + their name (e.g. "Vi chất", "Hồ sơ").
+- Phone: tab screens use AppHeader `tab` (title in Saira Condensed, optional right action); Nhật ký's title row carries the date nav; pushed screens use AppHeader `sub` (44 px back, title, one subtitle line). The ink band is used only where the screen has an ink hero (Tổng quan, Nhật ký day summary); other screens get a paper header so the page doesn't start with a heavy dark block.
+- Desktop (≥ 1024 px): no full-width ink header band on any screen. The DesktopSidebar carries the wordmark and nav; the content column starts with a plain title row on paper (Saira title, optional subtitle, actions right; back button inline before the title on pushed screens), aligned to the content grid, with the same top padding on every screen. Ink appears only inside cards (hero/summary cards), never as a band stretching to the top of the window. Sheets and dialogs on desktop are centred dialogs (max ~560 px), never full-height panels.
+
 ## Routes
 | Route | Screen | Kind |
 |---|---|---|
-| `/` | Tổng quan (dashboard) | tab, default landing after sign-in/setup |
+| `/` | Tổng quan › Tóm tắt | tab + sub-tab, default landing after sign-in/setup |
+| `/trends` | Tổng quan › Năng lượng | sub-tab |
+| `/trends/micros` | Tổng quan › Vi chất (period averages) | sub-tab |
+| `/trends/body` | Tổng quan › Cơ thể | sub-tab |
 | `/diary` (`?date=`) | Nhật ký | tab |
+| `/micros` (`?date=`) | the day's Vi chất (22 counted, grouped) | pushed from Nhật ký (owner: Nhật ký) |
+| `/micros/[nutrient]` (`?date=`) | nutrient detail | pushed screen (back → /micros) |
+| `/training` (`?date=`) | the day's Ngày tập (minutes, salt, checklist) | pushed from Nhật ký (owner: Nhật ký) |
 | `/explore` | Khám phá | tab |
 | `/explore/[category]` | food category / "giàu <chất>" list | pushed screen |
-| `/foods/[id]` | food detail (reached from Khám phá, add sheet, diary) | pushed screen |
+| `/foods/[id]` | food detail | pushed screen |
 | `/foods/new` | create food | pushed screen |
 | `/settings` | Cài đặt (profile card on top) | tab |
-| `/settings/profile`, `/settings/profile/weight` | Hồ sơ (body, goal, weight) | pushed screens |
+| `/settings/profile`, `/settings/profile/weight` | Hồ sơ (body, goal, training default), weight log | pushed screens |
 | `/settings/targets` | Mục tiêu mỗi ngày (read-only, from the profile) | pushed screen |
 | `/settings/language`, `/settings/notifications`, `/settings/delete-account` | as now | pushed screens |
-| `/micros`, `/micros/[nutrient]` | Vi chất, nutrient detail | pushed screens (no tab) |
-| `/training` | Ngày tập (salt plan + checklist) | pushed screen (no tab) |
-| `/trends` | Xu hướng | pushed screen (no tab) |
 | `/add`, `/entry/[id]` | add sheet, edit entry | sheets (desktop dialog) |
 
 Redirects (permanent): `/today` → `/diary` (keep `?date=`), `/profile` → `/settings/profile`, `/profile/weight` → `/settings/profile/weight`, `/foods` → `/explore`.
-Pushed screens use AppHeader `sub` with a back button that returns to where the user came from (fallback: the owning tab — Vi chất/Xu hướng/Ngày tập → Tổng quan, foods → Khám phá, settings pages → Cài đặt). The bottom nav stays visible on pushed screens and highlights the owning tab.
+Pushed screens use AppHeader `sub` with a back button (router.back, fallback: the owning tab). The bottom nav stays visible and highlights the owning tab. Past dates on `/micros` and `/training` are read-only.
 
-## Tổng quan (dashboard)
-Job: how am I doing today, and what is the next thing to do. Read-only; no food rows.
-1. Hero (ink): kcal dial + four macro bars (as now) + "còn N kcal".
-2. Next action: one primary button for the meal by time of day ("Ghi bữa tối") → add sheet with that meal; if every meal is logged, "Xem nhật ký".
-3. Bữa ăn hôm nay: one compact row per meal (name · kcal or "Chưa ghi") → `/diary` scrolled to that meal.
-4. Vi chất: "8/22 đã đạt" + the two lowest → `/micros`.
-5. Ngày tập: today's minutes + salt range ("60′ · muối 7–10,5 g") → `/training`. Hidden on a rest day except a "Nghỉ" line.
-6. 7 ngày: kcal-on-target strip (same rule as Trends: above range = đạt) → `/trends`.
-7. Insights (facts only until coach rules exist): at most three short lines derived from data, e.g. "Còn 42 g đạm để đạt mục tiêu", "Thiếu nhiều nhất: Canxi (28%)", "Đã ghi 5 ngày liên tiếp". No advice, no food suggestions, no warnings above a range.
-Desktop: two columns (hero + next action + meals left; Vi chất, Ngày tập, 7 ngày, insights right).
+## Tổng quan (dashboard): trends, insights, changes, composition
+Tổng quan is about a period, never about logging. It never lists food and has no per-day controls. Period control shared by all sub-tabs and remembered: heading "Trung bình mỗi ngày · 06–12/10" with ‹ › to step through periods (no future) and a 7 / 30 ngày switch; periods end on today by default. Sub-tab bar under the header (phone: underline tabs, scrollable if needed, 44 px targets, `role="tablist"` of links; desktop: the same tabs in the page header). Switching sub-tabs needs no back button.
 
-## Nhật ký (diary)
-Job: log and fix food for a day.
-- Header: date with ‹ › and calendar (as now); a compact energy bar (kcal + P/C/F) that stays visible while scrolling.
-- Training chip on the day ("Ngày tập 60′" / "Nghỉ") → small sheet to change today's minutes (today only; past days read-only). Changing it updates kcal target and salt everywhere.
-- Meals list as now, with ONE add control per meal header ("+").
-- Per-meal "Chép hôm qua" in the meal's menu (today only); the whole-day copy stays when the day is empty.
-- Footer: Vi chất summary row ("8/22 đã đạt · Thiếu: Vitamin D, Canxi") → `/micros` for that day.
-- Past days: read-only exactly as now.
+1. **Tóm tắt** (`/`):
+   - A slim "Hôm nay" line at the top: "Còn 909 kcal · Ghi bữa tối" → the add sheet for the meal by the clock (if that meal is logged, the next empty one; if all logged, "Xem nhật ký" → `/diary`). This is the only today element.
+   - Period summary: average kcal vs target and "N/7 ngày đạt"; average protein vs target; weight change over the period.
+   - Changes vs the previous period: the biggest moves, facts only (e.g. "Canxi trung bình +18 % so với tuần trước", "Đạm −12 g/ngày").
+   - Insights: at most three facts (protein gap, lowest nutrient over the period, logging streak).
+   - Each block links to its sub-tab.
+2. **Năng lượng** (`/trends`): kcal chart with the target band, average and days on target (above range = đạt, below minimum = level red "Thiếu"); macro composition (share of kcal from đạm / tinh bột / béo per day and on average, vs the coach ranges); protein average.
+3. **Vi chất** (`/trends/micros`): average % of target per counted nutrient over the period, lowest first, with how many days each reached its target (Cronometer's Report). Tap → nutrient detail.
+4. **Cơ thể** (`/trends/body`): weight chart from the weight log, change over the period and since start; body composition later (only if the user logs it; no fields added now).
+Desktop: two-column grid where a sub-tab has two kinds of content.
+
+## Nhật ký (diary): owns the day
+Job: log, fix and read one day (any date).
+- Header: date with ‹ › and calendar (as now). Under it the day summary: kcal dial + four macro bars (the only full breakdown of a day) and "còn N kcal".
+- Two compact rows under the summary, both for the date shown: "8/22 vi chất · Thiếu: Vitamin D, Canxi" → `/micros?date=`; "Ngày tập 60′ · muối 7–10,5 g" → `/training?date=` (today: change the minutes there; past days read-only).
+- When the header scrolls away, a slim sticky bar remains (kcal eaten / target, còn N).
+- Meals with ONE "+" and a "⋯" menu per header ("Chép hôm qua", "Lưu thành Bữa của tôi").
+- Past days: read-only exactly as now; their Vi chất and Ngày tập open read-only.
 
 ## Khám phá (explore) — v1, data only
 Job: find a food and understand it.
-- Search (same index as the add sheet), category chips (the 10 categories), "Gần đây", "Yêu thích", "Món của tôi".
+- Search (same index as the add sheet), category chips (the 10 categories), "Gần đây", "Yêu thích", "Món của tôi", "Bữa của tôi" (saved meals: a named set of foods with portions, logged in one tap; created from a diary meal's "⋯" or from Khám phá).
 - "Giàu…" lists: foods ranked by one nutrient per 100 g / per usual portion (Canxi, Sắt, Kali, Magie, Đạm, Chất xơ, Vitamin D, Vitamin C).
 - Food detail: kcal and macros per portion, the 22 counted nutrients as % of the user's targets for that portion, "Nguồn tốt của: …" (≥ 20% of target per portion), add-to-diary button, favourite toggle.
 - Reserved, empty until coach content: "Nên ăn kèm", pros/cons, recipes, tips. Do not render placeholders to users; keep the slots in code only.
@@ -72,15 +82,18 @@ Job: find a food and understand it.
 ## Faster logging
 - Recents/favourites in the add sheet: tap the row = add with the last used portion (5 s undo toast); the chevron opens the portion panel.
 - One "+" per meal header; no second "+ Thêm món" link.
+- Bữa của tôi in the add sheet: one tap adds every food of the saved meal to the chosen meal (one undo toast).
 - Quick add: "Chỉ ghi kcal" entry (name optional, kcal required, macros optional, micros unknown = null).
 - Target: a repeat meal in 2 taps ([+] → recent).
 
 ## Build order (one task each, Claude Code)
 1. Navigation shell: tabs, sidebar, routes, redirects, back behaviour; existing content moved, no new content.
-2. Split Today into Tổng quan + Nhật ký; training chip.
+2. Nhật ký owns the day (summary, Vi chất and Ngày tập rows, ?date= on /micros and /training) + Tổng quan sub-tabs (Tóm tắt, Năng lượng, Vi chất, Cơ thể).
 3. Cài đặt with Hồ sơ inside; `/settings/targets`.
 4. Khám phá v1.
-5. Faster logging.
+5. Faster logging, including Bữa của tôi.
+
+Not now: water tracking (waits for a coach rule); expenditure/activity ring (no activity data).
 Each task: design the new screens with ui-ux-pro-max in Cobalt Sign first (screenshots at 390 and 1280 in the PR summary), tests first for logic, a probe, smoke stays green.
 
 ## Navigation (design decisions, cc2-07)
