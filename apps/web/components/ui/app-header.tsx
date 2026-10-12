@@ -340,9 +340,9 @@ export function AppHeader({
 
           {/* Optional Title (e.g. "VI CHẤT") between Row 1 and Summary */}
           {title && (
-            <div className="font-display italic font-extrabold text-2xl uppercase tracking-tight text-white">
+            <h1 className="font-display italic font-extrabold text-2xl uppercase tracking-tight text-white m-0">
               {title}
-            </div>
+            </h1>
           )}
 
           {/* Row 2: Page summary slot (Option B inset panel) */}

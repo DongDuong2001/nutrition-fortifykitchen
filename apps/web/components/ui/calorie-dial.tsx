@@ -84,7 +84,7 @@ export function CalorieDial({
         <span className="font-display italic font-black text-2xl text-white leading-tight tracking-tight tabular-nums">
           {current.toLocaleString("vi-VN")}
         </span>
-        <span className="text-[13px] text-muted-dark leading-none">
+        <span className="text-[13px] text-muted-on-dark leading-none">
           kcal
         </span>
       </div>

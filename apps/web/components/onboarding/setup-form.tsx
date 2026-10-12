@@ -199,7 +199,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
             className={`${isProfile ? "hidden" : "flex"} flex-col gap-3 lg:flex lg:gap-4 lg:border-t lg:border-divider lg:pt-6`}
             aria-label="Mục tiêu"
           >
-            <h2 className="m-0 hidden text-xl font-bold lg:block">Mục tiêu</h2>
+            <h2 className="m-0 sr-only text-xl font-bold lg:not-sr-only lg:block">Mục tiêu</h2>
 
             <div role="radiogroup" aria-label="Mục tiêu" className="grid gap-2 lg:grid-cols-2">
               {options.map((option) => {

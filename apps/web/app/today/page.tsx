@@ -464,7 +464,7 @@ function TodayContent() {
                           id={`mobile-add-${meal.slot}`}
                           href={`/add?meal=${meal.slot}`}
                           onClick={() => handleSaveOpener(`mobile-add-${meal.slot}`)}
-                          className="text-xs font-semibold text-blue hover:underline min-h-[44px] flex items-center"
+                          className="text-xs font-semibold text-blue hover:underline min-h-[44px] min-w-[44px] flex items-center justify-center"
                         >
                           + Thêm
                         </Link>
@@ -699,7 +699,7 @@ function TodayContent() {
                             id={`desktop-add-${meal.slot}`}
                             href={`/add?meal=${meal.slot}`}
                             onClick={() => handleSaveOpener(`desktop-add-${meal.slot}`)}
-                            className="text-xs font-semibold text-blue no-underline hover:underline min-h-[44px] inline-flex items-center"
+                            className="text-xs font-semibold text-blue no-underline hover:underline min-h-[44px] min-w-[44px] inline-flex items-center justify-center"
                           >
                             + Thêm
                           </Link>

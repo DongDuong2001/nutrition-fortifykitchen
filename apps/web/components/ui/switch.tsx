@@ -32,8 +32,8 @@ export function Switch({
     >
       <span
         aria-hidden="true"
-        className={`relative block w-[51px] h-[31px] rounded-[16px] transition-colors duration-200 ${
-          checked ? "bg-blue" : "bg-level-empty"
+        className={`relative block w-[51px] h-[31px] rounded-[16px] transition-colors duration-200 box-border ${
+          checked ? "bg-blue border border-transparent" : "bg-level-empty border border-card-border"
         }`}
       >
         <span
