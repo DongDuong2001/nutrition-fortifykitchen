@@ -51,7 +51,7 @@ export function MagicLinkForm({ submitLabel }: { submitLabel: string }) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           aria-invalid={error ? true : undefined}
-          className="h-[52px] w-full rounded-[10px] border-2 border-grabber bg-card px-4 text-base text-text placeholder:text-secondary outline-none focus:border-blue"
+          className="h-[52px] w-full rounded-[10px] border-2 border-grabber bg-card px-4 text-base text-text placeholder:text-secondary outline-none focus:border-blue focus-visible:ring-2 focus-visible:ring-blue"
         />
       </FormRow>
       <PillButton type="submit" disabled={sending}>
