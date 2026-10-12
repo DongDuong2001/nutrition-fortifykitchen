@@ -6,6 +6,7 @@
 
 | Date | Commit | Built | Next |
 | --- | --- | --- | --- |
+| 12/10/2026 | cc-14b | Merged ag-07 (rebased onto feat/ui, 7 commits, PROGRESS rows kept). --color-destructive-text is #C4373C (5.30:1 on #FFFFFF, 4.70:1 on #F3F1EC; CSS comment updated). /foods/[id] label keeps only focus-within:ring-2 focus-within:ring-blue. Smoke header rule decided 12/10 (Hao): no header required on /signin, /signin/check-email, /signin/expired, /signup, the 404 URL, /admin/review, and /add below 1024 px; the DesktopSidebar counts as the header at ≥1024 px. /login skipped in smoke (Dong's link to /diary). Smoke 50 PASS / 4 FAIL of 54. | /foods stays failing until cc2-01 merges; setup at 1280 has no header (OPEN_QUESTIONS cc-14b); /login for Dong |
 | 12/10/2026 | cc-14 | Whole-app smoke probe tests/probes/smoke.py: 27 page.tsx routes plus the 404 URL, at 390×844 and 1280×800 (56 runs). Checks console and hydration errors, horizontal scroll, a visible header, and text overflow (scroll containers and sr-only skipped). /foods is asserted to redirect to /add. Screenshots in apps/web/tests/probes/out/. tests/probes/run_all.py and npm run probe:all run every probe in one table: cc02-final only with PROBE_DEV=1; ag04_audit and screenshots are REPORT (no exit gate). No app code changed. | Found (cc-14) below: 2 real bugs (/foods, /login); 17 header-rule FAILs need a decision (OPEN_QUESTIONS cc-14) |
 | 12/10/2026 | ag-07 | Accessibility fixes (audit-ag04): gram input h-full in 44px label and focus ring in /foods/[id], htmlFor/id linking in /foods/new FormRows, --color-destructive-text token (#C83A3F, >=4.5:1 contrast on white & paper) for required '*', magic-link email input keyboard focus ring, Vietnamese salt comment 1–1,5 g in training.ts, ag07.py verification probe (46/46 checks passed). | Ready for merge |
 | 12/10/2026 | cc-12b | Trends: a day above the max counts as on target (countDaysOnTarget is min-only; max kept for display), tests first (calcium 1.600, magnesium 800 and potassium 7.000 count as đạt). Kcal legend has three items again: Trong mục tiêu, Thiếu, striped Hôm nay (đang ghi), tokens only. Nutrient rows show "Mục tiêu: 1.200–1.500 mg" through targetRangeText (same formatter as /micros), min only when there is no max. The list header reads "Mục tiêu / ngày". Mock: the third day of the 7-day series (2.380 kcal) is above the 2.275 kcal max; the 30-day window reuses those seven days, so it has one over-range day too. cc12a's calcium assertion updated to the range. | Over-range bar in the desktop chart not separately checked; cc-13 audit findings |
@@ -37,8 +38,8 @@
 ## Found (cc-14)
 Smoke on prod :3101 (`npm run probe:all`): 35 PASS, 21 FAIL of 56 route × width runs. Screenshots: `apps/web/tests/probes/out/smoke-<route>-<width>.png`.
 - **/foods, 390 and 1280:** no redirect to /add, though the brief expects one. The page is the old catalog scaffold (0f734dd) with no header. Screenshots smoke-foods-390.png, smoke-foods-1280.png. Real bug: OPEN_QUESTIONS cc-14.
-- **/login, 390 and 1280:** never reaches networkidle within 30 s. A fetch to `/diary?_rsc=…` stays pending. /diary is not a route (curl returns 404 in 9 ms) and no source file links to it. The source of the fetch is not found. Reproduced in two runs. Screenshots smoke-login-390.png, smoke-login-1280.png. Real bug: OPEN_QUESTIONS cc-14.
-- **Header rule, 17 FAILs (not bugs by design):** /signin, /signin/check-email, /signin/expired, /signup and the 404 URL at both widths (no `<header>` in those design files); /add at 390 (sheet, no `<header>` in its design); /admin/review at both widths (no design file); /profile and /profile/weight at 1280 (AppHeader is `lg:hidden`, the sidebar is the desktop chrome); /setup/goal and /setup/profile at 1280 (desktop setup design has no `<header>`). Decision needed: OPEN_QUESTIONS cc-14.
+- **/login, 390 and 1280:** never reaches networkidle within 30 s. A fetch to `/diary?_rsc=…` stays pending. /diary is not a route (curl returns 404 in 9 ms). Cause: `app/(auth)/login/page.tsx:150` links "Đăng ký hoặc dùng thử" to /diary. (The first write-up said no source file linked to it; that was wrong, because the grep was cut off by `head`.) Screenshots smoke-login-390.png, smoke-login-1280.png. Dong's file: OPEN_QUESTIONS cc-14. Smoke skips /login until it is fixed.
+- **Header rule, 17 FAILs (not bugs by design):** /signin, /signin/check-email, /signin/expired, /signup and the 404 URL at both widths (no `<header>` in those design files); /add at 390 (sheet, no `<header>` in its design); /admin/review at both widths (no design file); /profile and /profile/weight at 1280 (AppHeader is `lg:hidden`, the sidebar is the desktop chrome); /setup/goal and /setup/profile at 1280 (desktop setup design has no `<header>`). Decided 12/10 (see cc-14b): the listed screens need no header, and a visible DesktopSidebar counts at ≥1024 px.
 - No console, hydration, horizontal-scroll or text-overflow failures on any route.
 
 ## Gate summary (cc-14)
@@ -48,6 +49,15 @@ Smoke on prod :3101 (`npm run probe:all`): 35 PASS, 21 FAIL of 56 route × width
 - `npm run test:hydration`: 0 hydration errors on all routes.
 - `npm run probe:all` (ALIGN_BASE_URL=http://localhost:3101): 13 PASS, 2 REPORT (ag04_audit, screenshots), 1 FAIL (smoke: 35 PASS / 21 FAIL of 56), 1 SKIP (cc02-final, dev only).
 - Edges: no UI change, so no new edge groups.
+## Gate summary (cc-14b)
+- Branch feat/ui-cc-14b: ag-07 rebased onto feat/ui (80bb6f2), fast-forwarded in, then the cc-14b edits.
+- `npm run typecheck` ok. `npm run test`: 20 files, 248 pass. `npm run build` ok.
+- Prod server on :3101. Gates run as separate commands in `npm run check` order (check's build step rewrites `.next` under a running server).
+- `npm run test:align` (ALIGN_BASE_URL=http://localhost:3101): all pairs pass. `npm run test:hydration`: 0 hydration errors.
+- `npm run probe:all` (ALIGN_BASE_URL=http://localhost:3101): 14 PASS (includes ag07.py), 2 REPORT (ag04_audit, screenshots), 1 FAIL (smoke: 50 PASS / 4 FAIL of 54), 1 SKIP (cc02-final, dev only).
+- Smoke FAILs: /foods at 390 and 1280 (expected until cc2-01 merges). /setup/goal and /setup/profile at 1280: no header and no sidebar. Setup is not on the decided list, so the check stays strict. Brief expected only /foods; this is the difference (OPEN_QUESTIONS cc-14b).
+- Edges: no layout change in this task.
+
 ## Quality Gate Summary (ag-07)
 - Branch: `feat/ui-ag-07` on port 3100 (`ALIGN_BASE_URL=http://localhost:3100`).
 - Gates:

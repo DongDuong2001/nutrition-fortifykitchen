@@ -17,8 +17,8 @@
   --color-blue: #1238D6;
   --color-sky: #9EC3FF;
   --color-destructive: #D93F44;
-  /* Darker shade of #D93F44 for text contrast >= 4.5:1 (5.08:1 on #FFFFFF, 4.50:1 on #F3F1EC) */
-  --color-destructive-text: #C83A3F;
+  /* Darker shade of #D93F44 for text contrast >= 4.5:1 (5.30:1 on #FFFFFF, 4.70:1 on #F3F1EC) */
+  --color-destructive-text: #C4373C;
   --color-red: #D93F44;
 
   /* 4 level colours - light background */

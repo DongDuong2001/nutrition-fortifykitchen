@@ -169,7 +169,7 @@ function FoodDetailInner() {
             columns={food.servings.length + 1}
             tone="light"
             leadingInput={
-              <label className="flex items-center justify-center bg-white border-2 border-blue rounded-xl px-2 h-11 w-full cursor-text box-border focus-within:ring-2 focus-within:ring-blue focus-visible:ring-2 ring-blue">
+              <label className="flex items-center justify-center bg-white border-2 border-blue rounded-xl px-2 h-11 w-full cursor-text box-border focus-within:ring-2 focus-within:ring-blue">
                 <span className="sr-only">Khối lượng</span>
                 <input
                   id="fd-size"
