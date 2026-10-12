@@ -23,6 +23,8 @@ NOT_FOUND_ROUTE = "/this-page-does-not-exist"
 NO_HEADER_ROUTES = {"/signin", "/signin/check-email", "/signin/expired", "/signup", NOT_FOUND_ROUTE, "/admin/review"}
 # /add is a bottom sheet on phones, so it has no header below the desktop width
 NO_HEADER_BELOW_DESKTOP = {"/add"}
+# Setup has step bars on phones, but the desktop card has no header or sidebar (DesktopSetup.dc.html). Decided 12/10 (OPEN_QUESTIONS cc-14b).
+NO_HEADER_AT_DESKTOP = {"/setup/goal", "/setup/profile"}
 DESKTOP_MIN_WIDTH = 1024
 DESKTOP_SIDEBAR = 'nav[aria-label="Điều hướng chính"]:visible'  # the sidebar's nav; the aria-label sits on it, not on the aside
 # /login is skipped: app/(auth)/login/page.tsx:150 links "Đăng ký hoặc dùng thử" to /diary, which is
@@ -107,8 +109,11 @@ def check(browser, route, width, height):
         page.goto(BASE + route, wait_until="networkidle", timeout=30000)
         page.wait_for_timeout(300)
 
+        # The page the header rule applies to. /foods only redirects, so it is judged as the page it lands on (/add).
+        header_route = route
         if route == "/foods":
             landed = urlparse(page.url).path
+            header_route = landed
             if landed != "/add":
                 reasons.append(f"/foods did not redirect to /add (landed on {landed})")
 
@@ -127,7 +132,11 @@ def check(browser, route, width, height):
         has_header = page.locator('header:visible, [role="banner"]:visible').count() > 0
         if width >= DESKTOP_MIN_WIDTH and page.locator(DESKTOP_SIDEBAR).count() > 0:
             has_header = True  # the desktop sidebar is the app chrome at this width
-        exempt = route in NO_HEADER_ROUTES or (route in NO_HEADER_BELOW_DESKTOP and width < DESKTOP_MIN_WIDTH)
+        exempt = (
+            header_route in NO_HEADER_ROUTES
+            or (header_route in NO_HEADER_BELOW_DESKTOP and width < DESKTOP_MIN_WIDTH)
+            or (header_route in NO_HEADER_AT_DESKTOP and width >= DESKTOP_MIN_WIDTH)
+        )
         if not has_header and not exempt:
             reasons.append("no visible header (banner role or AppHeader)")
 
