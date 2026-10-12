@@ -59,7 +59,7 @@ export function ChipGroup({
         const btnClasses =
           tone === "dark"
             ? isActive
-              ? "bg-white text-ink font-bold shadow-xs"
+              ? "bg-card text-ink font-bold shadow-xs"
               : "bg-surface-dark text-white font-medium hover:bg-surface-dark/80"
             : isActive
             ? "bg-ink text-white font-bold shadow-xs"

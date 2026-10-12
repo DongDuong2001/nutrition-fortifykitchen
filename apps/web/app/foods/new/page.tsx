@@ -142,7 +142,7 @@ function CreateFoodInner() {
             }}
             onBlur={() => handleBlur("nameVi", nameVi)}
             placeholder="Ví dụ: Bánh tráng trộn"
-            className={`h-12 px-3.5 rounded-xl border-2 bg-white text-base text-text outline-none transition-colors ${
+            className={`h-12 px-3.5 rounded-xl border-2 bg-card text-base text-text outline-none transition-colors ${
               touched.nameVi && errors.nameVi ? "border-destructive" : "border-card-border focus:border-blue"
             }`}
           />
@@ -165,7 +165,7 @@ function CreateFoodInner() {
                 if (touched.servingSize) validateField("servingSize", e.target.value);
               }}
               onBlur={() => handleBlur("servingSize", servingSize)}
-              className={`h-12 px-3.5 rounded-xl border-2 bg-white text-base font-bold tabular-nums text-text outline-none text-right transition-colors w-32 shrink-0 ${
+              className={`h-12 px-3.5 rounded-xl border-2 bg-card text-base font-bold tabular-nums text-text outline-none text-right transition-colors w-32 shrink-0 ${
                 touched.servingSize && errors.servingSize ? "border-destructive" : "border-card-border focus:border-blue"
               }`}
             />
@@ -210,7 +210,7 @@ function CreateFoodInner() {
                 value={calories}
                 onChange={(e) => setCalories(e.target.value)}
                 placeholder="0"
-                className="h-12 px-3 rounded-xl border-2 border-card-border focus:border-blue bg-white text-base font-bold tabular-nums text-text outline-none text-right"
+                className="h-12 px-3 rounded-xl border-2 border-card-border focus:border-blue bg-card text-base font-bold tabular-nums text-text outline-none text-right"
               />
             </FormRow>
 
@@ -222,7 +222,7 @@ function CreateFoodInner() {
                 value={protein}
                 onChange={(e) => setProtein(e.target.value)}
                 placeholder="0"
-                className="h-12 px-3 rounded-xl border-2 border-card-border focus:border-blue bg-white text-base font-bold tabular-nums text-text outline-none text-right"
+                className="h-12 px-3 rounded-xl border-2 border-card-border focus:border-blue bg-card text-base font-bold tabular-nums text-text outline-none text-right"
               />
             </FormRow>
 
@@ -234,7 +234,7 @@ function CreateFoodInner() {
                 value={carbs}
                 onChange={(e) => setCarbs(e.target.value)}
                 placeholder="0"
-                className="h-12 px-3 rounded-xl border-2 border-card-border focus:border-blue bg-white text-base font-bold tabular-nums text-text outline-none text-right"
+                className="h-12 px-3 rounded-xl border-2 border-card-border focus:border-blue bg-card text-base font-bold tabular-nums text-text outline-none text-right"
               />
             </FormRow>
 
@@ -246,7 +246,7 @@ function CreateFoodInner() {
                 value={fat}
                 onChange={(e) => setFat(e.target.value)}
                 placeholder="0"
-                className="h-12 px-3 rounded-xl border-2 border-card-border focus:border-blue bg-white text-base font-bold tabular-nums text-text outline-none text-right"
+                className="h-12 px-3 rounded-xl border-2 border-card-border focus:border-blue bg-card text-base font-bold tabular-nums text-text outline-none text-right"
               />
             </FormRow>
           </div>
@@ -287,7 +287,7 @@ function CreateFoodInner() {
                   value={sodium}
                   onChange={(e) => setSodium(e.target.value)}
                   placeholder="—"
-                  className="h-11 px-3 rounded-xl border border-card-border focus:border-blue bg-white text-sm font-semibold tabular-nums text-text outline-none text-right"
+                  className="h-11 px-3 rounded-xl border border-card-border focus:border-blue bg-card text-sm font-semibold tabular-nums text-text outline-none text-right"
                 />
               </FormRow>
 
@@ -299,7 +299,7 @@ function CreateFoodInner() {
                   value={potassium}
                   onChange={(e) => setPotassium(e.target.value)}
                   placeholder="—"
-                  className="h-11 px-3 rounded-xl border border-card-border focus:border-blue bg-white text-sm font-semibold tabular-nums text-text outline-none text-right"
+                  className="h-11 px-3 rounded-xl border border-card-border focus:border-blue bg-card text-sm font-semibold tabular-nums text-text outline-none text-right"
                 />
               </FormRow>
 
@@ -311,7 +311,7 @@ function CreateFoodInner() {
                   value={calcium}
                   onChange={(e) => setCalcium(e.target.value)}
                   placeholder="—"
-                  className="h-11 px-3 rounded-xl border border-card-border focus:border-blue bg-white text-sm font-semibold tabular-nums text-text outline-none text-right"
+                  className="h-11 px-3 rounded-xl border border-card-border focus:border-blue bg-card text-sm font-semibold tabular-nums text-text outline-none text-right"
                 />
               </FormRow>
 
@@ -323,7 +323,7 @@ function CreateFoodInner() {
                   value={iron}
                   onChange={(e) => setIron(e.target.value)}
                   placeholder="—"
-                  className="h-11 px-3 rounded-xl border border-card-border focus:border-blue bg-white text-sm font-semibold tabular-nums text-text outline-none text-right"
+                  className="h-11 px-3 rounded-xl border border-card-border focus:border-blue bg-card text-sm font-semibold tabular-nums text-text outline-none text-right"
                 />
               </FormRow>
 
@@ -336,7 +336,7 @@ function CreateFoodInner() {
                     value={vitaminD}
                     onChange={(e) => setVitaminD(e.target.value)}
                     placeholder="—"
-                    className="h-11 px-3 rounded-xl border border-card-border focus:border-blue bg-white text-sm font-semibold tabular-nums text-text outline-none text-right"
+                    className="h-11 px-3 rounded-xl border border-card-border focus:border-blue bg-card text-sm font-semibold tabular-nums text-text outline-none text-right"
                   />
                 </FormRow>
               </div>

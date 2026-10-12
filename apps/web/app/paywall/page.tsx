@@ -90,7 +90,7 @@ export default function PaywallPage() {
                   role="radio"
                   aria-checked={isSelected}
                   onClick={() => setSelectedPlan(plan.id)}
-                  className={`text-left min-h-[64px] rounded-[14px] bg-white text-ink p-2 px-3.5 flex items-center gap-3 transition-all cursor-pointer active:scale-[0.99] ${
+                  className={`text-left min-h-[64px] rounded-[14px] bg-card text-ink p-2 px-3.5 flex items-center gap-3 transition-all cursor-pointer active:scale-[0.99] ${
                     isSelected
                       ? "border-2 border-blue shadow-sm"
                       : "border-2 border-card-border hover:border-divider"

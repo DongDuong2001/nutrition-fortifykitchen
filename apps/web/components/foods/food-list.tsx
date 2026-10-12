@@ -49,7 +49,7 @@ export function FoodList({
         aria-pressed={selected}
         onClick={() => onPick(food)}
         className={`-mx-3 flex min-h-[52px] items-center gap-3 rounded-xl border-0 px-3 py-2.5 text-left text-text cursor-pointer transition-colors ${
-          selected ? "bg-blue/10" : "bg-white hover:bg-page"
+          selected ? "bg-blue/10" : "bg-card hover:bg-page"
         }`}
       >
         <div

@@ -113,7 +113,7 @@ function CalendarMonth({ selectedIso, onPick }: Pick<CalendarSheetProps, "select
               }`}
             >
               <span>{day.day}</span>
-              <span aria-hidden="true" className={`w-1.5 h-1.5 rounded-full ${isSelected ? "bg-white" : dot}`} />
+              <span aria-hidden="true" className={`w-1.5 h-1.5 rounded-full ${isSelected ? "bg-card" : dot}`} />
             </button>
           );
         })}

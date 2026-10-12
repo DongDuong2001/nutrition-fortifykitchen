@@ -253,7 +253,7 @@ export function ProCard() {
       </div>
       <Link
         href="/paywall"
-        className="inline-flex min-h-[44px] items-center self-start rounded-full bg-white px-5 text-[15px] font-bold text-ink transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100"
+        className="inline-flex min-h-[44px] items-center self-start rounded-full bg-card px-5 text-[15px] font-bold text-ink transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100"
       >
         Xem gói
       </Link>

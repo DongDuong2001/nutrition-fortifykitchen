@@ -82,7 +82,7 @@ export default function DeleteAccountPage() {
           <button
             type="button"
             onClick={handleExportCsv}
-            className="w-full h-12 rounded-full border border-black/12 bg-white text-ink text-[15px] font-semibold hover:bg-surface-tint active:scale-[0.97] transition-transform cursor-pointer"
+            className="w-full h-12 rounded-full border border-black/12 bg-card text-ink text-[15px] font-semibold hover:bg-surface-tint active:scale-[0.97] transition-transform cursor-pointer"
           >
             Tải dữ liệu về (CSV)
           </button>
@@ -96,7 +96,7 @@ export default function DeleteAccountPage() {
               onChange={(e) => setConfirmationText(e.target.value)}
               placeholder="XOÁ"
               autoComplete="off"
-              className="h-[52px] rounded-[10px] border-2 border-grabber bg-white px-3.5 text-lg font-semibold text-ink outline-none focus:border-blue transition-colors"
+              className="h-[52px] rounded-[10px] border-2 border-grabber bg-card px-3.5 text-lg font-semibold text-ink outline-none focus:border-blue transition-colors"
             />
           </label>
         </main>

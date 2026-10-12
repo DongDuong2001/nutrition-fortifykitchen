@@ -13,6 +13,8 @@ import { CopyYesterdaySheet } from "@/components/copy-yesterday-sheet";
 import { apiClient } from "@/lib/api-client";
 import { shiftIsoDate, viewedIsoDate } from "@/lib/day-history";
 import { formatAmount, formatDesktopDate } from "@/lib/format";
+import { targetRangeText } from "@/lib/profile";
+import { calculateSaltTarget, formatSaltRange } from "@/lib/training";
 import { SAMPLE_DAY, type MockDayData, type MockMicroStat } from "@/lib/mock/sample-day";
 import { pastDayData, useDiary } from "@/lib/diary-store";
 
@@ -140,6 +142,8 @@ function TodayContent() {
   const showLoading = forceLoading || (isLoading && !diaryData && !data);
   const showOfflineBanner = forceOffline || !isOnline;
   const currentData = pastData || (hydrated ? diaryData : null) || data || SAMPLE_DAY;
+  // Salt for the day's training minutes (base 4–6 g plus 1–1,5 g per 20 min), so the cards match the profile
+  const salt = calculateSaltTarget(currentData.user.trainingMinutes);
   // The date part opens the same day picker as the phone's date label. The rest is plain text.
   const desktopDate = clientNow ? formatDesktopDate(currentData.date) : null;
   const desktopSubtitle = clientNow ? (
@@ -331,7 +335,7 @@ function TodayContent() {
             <div className="bg-card border border-card-border rounded-[18px] px-4 py-3 text-[13px] leading-relaxed flex gap-2.5">
               <span className="w-1 shrink-0 rounded-full bg-blue" aria-hidden="true" />
               <span>
-                <strong className="font-bold">Mẹo:</strong> Ăn rất nhiều, không bỏ bữa. Muối 4–6 g chia theo các bữa.
+                <strong className="font-bold">Mẹo:</strong> Ăn rất nhiều, không bỏ bữa. Muối {formatSaltRange(salt.baseMin, salt.baseMax)} g chia theo các bữa.
               </span>
             </div>
           </main>
@@ -650,26 +654,26 @@ function TodayContent() {
             {/* Card 2: Training day salt card */}
             <div className="bg-card border border-card-border rounded-[18px] p-5 flex flex-col gap-2.5">
               <div className="flex items-baseline justify-between">
-                <h2 className="m-0 text-lg font-bold text-text">Ngày tập · 60 phút</h2>
+                <h2 className="m-0 text-lg font-bold text-text">Ngày tập · {currentData.user.trainingMinutes} phút</h2>
                 <Link href="/training" className="text-sm font-semibold text-blue no-underline min-h-[44px] flex items-center px-2">
                   Mở chi tiết
                 </Link>
               </div>
               <div className="flex items-baseline gap-2">
-                <span className="font-display italic font-extrabold text-3xl text-text">7–10,5 g</span>
+                <span className="font-display italic font-extrabold text-3xl text-text">{salt.formattedTotal} g</span>
                 <span className="text-sm text-secondary">muối hôm nay</span>
               </div>
               <div className="flex justify-between text-sm py-1.5 border-t border-divider">
                 <span className="text-text">Muối nền (sinh hoạt)</span>
-                <span className="font-semibold text-text">4–6 g</span>
+                <span className="font-semibold text-text">{formatSaltRange(salt.baseMin, salt.baseMax)} g</span>
               </div>
               <div className="flex justify-between text-sm py-1.5 border-t border-divider">
-                <span className="text-text">Bù mồ hôi (60′ tập)</span>
-                <span className="font-semibold text-text">3–4,5 g</span>
+                <span className="text-text">Bù mồ hôi ({currentData.user.trainingMinutes}′ tập)</span>
+                <span className="font-semibold text-text">{salt.formattedTopUp} g</span>
               </div>
               <div className="flex justify-between text-sm py-1.5 border-t border-divider">
                 <span className="text-text">Kali mục tiêu</span>
-                <span className="font-semibold text-text">5.200–6.500 mg</span>
+                <span className="font-semibold text-text">{targetRangeText(targets.potassium, "mg")}</span>
               </div>
             </div>
           </section>

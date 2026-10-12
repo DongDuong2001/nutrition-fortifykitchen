@@ -247,7 +247,7 @@ function AddFoodInner() {
               key={s.id}
               type="button"
               onClick={() => pickFood(s)}
-              className="text-left py-2.5 px-3 rounded-xl hover:bg-page text-sm font-semibold text-text border-0 bg-white cursor-pointer flex justify-between items-center min-h-[48px]"
+              className="text-left py-2.5 px-3 rounded-xl hover:bg-page text-sm font-semibold text-text border-0 bg-card cursor-pointer flex justify-between items-center min-h-[48px]"
             >
               <span>{s.nameVi}</span>
               <span className="text-xs text-secondary font-normal">{getFoodMeta(s)}</span>

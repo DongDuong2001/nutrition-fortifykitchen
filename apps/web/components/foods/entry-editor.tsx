@@ -58,7 +58,7 @@ export function EntryEditor({ view }: { view: EntryView }) {
             <div className="flex w-full items-stretch gap-2">
               <span
                 className={`flex h-12 w-[104px] shrink-0 items-center gap-1.5 rounded-[10px] border-2 px-3 focus-within:ring-2 focus-within:ring-blue ${
-                  canPortion ? "border-blue bg-white" : "border-card-border bg-page"
+                  canPortion ? "border-blue bg-card" : "border-card-border bg-page"
                 }`}
               >
                 <input

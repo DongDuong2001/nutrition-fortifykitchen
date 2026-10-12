@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { type SaltTarget } from "@/lib/training";
+import { formatSaltRange, type SaltTarget } from "@/lib/training";
 
 export interface SaltSummaryCardProps {
   saltTarget: SaltTarget;
@@ -34,7 +34,7 @@ export function SaltSummaryCard({
             <>
               Muối cần hôm nay
               <br />
-              4–6 g cả ngày + {saltTarget.formattedTopUp} g khi tập
+              {formatSaltRange(saltTarget.baseMin, saltTarget.baseMax)} g cả ngày + {saltTarget.formattedTopUp} g khi tập
             </>
           )}
         </div>
@@ -64,7 +64,7 @@ export function SaltSummaryCard({
 
       <div className="flex flex-wrap gap-3">
         <div className="flex-1 min-w-[140px] bg-surface-dark rounded-xl p-3">
-          <div className="text-xl font-bold tabular-nums">4–6 g</div>
+          <div className="text-xl font-bold tabular-nums">{formatSaltRange(saltTarget.baseMin, saltTarget.baseMax)} g</div>
           <div className="text-[13px] text-muted-on-dark mt-0.5">nền cả ngày</div>
         </div>
         <div className="flex-1 min-w-[140px] bg-surface-dark rounded-xl p-3">

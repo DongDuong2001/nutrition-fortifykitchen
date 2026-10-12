@@ -139,7 +139,7 @@ export function PortionPanel({
               className={`flex items-center justify-center rounded-xl px-2 h-11 w-full cursor-text box-border border-2 focus-within:ring-2 ${
                 isDark
                   ? "bg-surface-dark border-sky text-white focus-within:ring-sky"
-                  : "bg-white border-blue text-text focus-within:ring-blue"
+                  : "bg-card border-blue text-text focus-within:ring-blue"
               }`}
             >
               <span className="sr-only">Khối lượng</span>
@@ -215,7 +215,7 @@ export function PortionPanel({
 
       {/* Desktop Micros Breakdown */}
       {showMicros && scaledMicros.length > 0 && (
-        <div className="w-full bg-white rounded-xl p-3 border border-card-border flex flex-col gap-1.5 mt-1">
+        <div className="w-full bg-card rounded-xl p-3 border border-card-border flex flex-col gap-1.5 mt-1">
           <div className="text-xs font-semibold text-secondary pb-1 border-b border-card-border">
             Vi chất trong {gramsInput} g:
           </div>

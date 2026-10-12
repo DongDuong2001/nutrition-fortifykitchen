@@ -11,7 +11,8 @@ import {
   loadTrainingChecks,
   saveTrainingChecks,
 } from "@/lib/training";
-import { formatDayLabel, formatDesktopDate } from "@/lib/format";
+import { formatDayLabel, formatDesktopDate, formatNumber } from "@/lib/format";
+import { goalName } from "@/lib/onboarding";
 import { getTodayIsoVN } from "@/lib/date";
 import { DurationSelector } from "@/components/training/duration-selector";
 import { useDiary } from "@/lib/diary-store";
@@ -126,8 +127,8 @@ function TrainingContent() {
 
   const desktopSubtitle = useMemo(() => {
     if (!clientNow) return "";
-    return `${formatDesktopDate(todayIso)} · Giữ cân · 65 kg`;
-  }, [todayIso, clientNow]);
+    return `${formatDesktopDate(todayIso)} · ${goalName(profile.goal)} · ${formatNumber(profile.weightKg)} kg`;
+  }, [todayIso, clientNow, profile.goal, profile.weightKg]);
 
   const headerSubtitle = isDesktop ? desktopSubtitle : mobileSubtitle;
 

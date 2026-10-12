@@ -9,7 +9,8 @@ import { SegmentedBar } from "@/components/ui/segmented-bar";
 import { apiClient } from "@/lib/api-client";
 import { type NutrientGroup } from "@/lib/nutrients";
 import { buildNutrientRows, type NutrientRowData } from "@/lib/nutrient-rows";
-import { formatAmount, formatDesktopDate } from "@/lib/format";
+import { formatAmount, formatDesktopDate, formatNumber } from "@/lib/format";
+import { goalName } from "@/lib/onboarding";
 import { getTodayIsoVN } from "@/lib/date";
 import { type MockDayData } from "@/lib/mock/sample-day";
 import { useDiary } from "@/lib/diary-store";
@@ -38,7 +39,7 @@ export default function MicrosPage() {
 }
 
 function MicrosContent() {
-  const { data: diaryData, hydrated } = useDiary();
+  const { data: diaryData, hydrated, profile } = useDiary();
   const [data, setData] = useState<MockDayData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeGroup, setActiveGroup] = useState<NutrientGroup>("vitamins");
@@ -78,9 +79,10 @@ function MicrosContent() {
   }, []);
 
   const currentData = (hydrated ? diaryData : null) || data;
+  const profileParts = [goalName(profile.goal), `${formatNumber(profile.weightKg)} kg`];
   const desktopSubtitle = clientNow
-    ? `${formatDesktopDate(currentData?.date || getTodayIsoVN())} · Giữ cân · 65 kg · Thiếu nhiều nhất: ${currentData?.microsSummary.mostLacking.join(", ")}`
-    : `${currentData?.desktopDateLabel || "Thứ Bảy, 10/10/2026 · Giữ cân · 65 kg"} · Thiếu nhiều nhất: ${currentData?.microsSummary.mostLacking.join(", ")}`;
+    ? [formatDesktopDate(currentData?.date || getTodayIsoVN()), ...profileParts].join(" · ") + ` · Thiếu nhiều nhất: ${currentData?.microsSummary.mostLacking.join(", ")}`
+    : [currentData?.desktopDateLabel, ...profileParts].filter(Boolean).join(" · ") + ` · Thiếu nhiều nhất: ${currentData?.microsSummary.mostLacking.join(", ")}`;
 
   // Auto-scroll active chip into view horizontally so it always stays visible
   useEffect(() => {
@@ -369,7 +371,7 @@ function MicrosContent() {
                     className={`h-9 px-3.5 rounded-full text-xs font-semibold flex items-center justify-center whitespace-nowrap transition-colors ${
                       isActive
                         ? "bg-ink text-white shadow-xs"
-                        : "bg-white text-text border border-card-border hover:bg-page"
+                        : "bg-card text-text border border-card-border hover:bg-page"
                     }`}
                   >
                     {chipLabels[group.key]}

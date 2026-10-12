@@ -52,7 +52,7 @@ export function MealSwitcher({
               className={`w-full min-h-[52px] px-3.5 rounded-xl flex items-center gap-3 cursor-pointer text-left transition-colors active:scale-[0.98] border-0 ${
                 isSelected
                   ? "bg-blue/10 text-text font-bold"
-                  : "bg-white hover:bg-page text-text font-medium"
+                  : "bg-card hover:bg-page text-text font-medium"
               }`}
             >
               {/* Radio checkmark circle */}
@@ -61,7 +61,7 @@ export function MealSwitcher({
                 className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-colors ${
                   isSelected
                     ? "bg-blue text-white ring-4 ring-sky/40"
-                    : "border-2 border-grabber bg-white"
+                    : "border-2 border-grabber bg-card"
                 }`}
               >
                 {isSelected && (

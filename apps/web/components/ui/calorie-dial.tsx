@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { formatNumber } from "@/lib/format";
 
 interface CalorieDialProps {
   current: number;
@@ -38,8 +39,8 @@ export function CalorieDial({
   const strokeDashoffset = mounted ? targetOffset : circumference;
 
   const defaultLabel = targetMax
-    ? `Năng lượng ${current.toLocaleString("vi-VN")} trên mục tiêu ${target.toLocaleString("vi-VN")} đến ${targetMax.toLocaleString("vi-VN")} kcal`
-    : `Năng lượng ${current.toLocaleString("vi-VN")} trên mục tiêu ${target.toLocaleString("vi-VN")} kcal`;
+    ? `Năng lượng ${formatNumber(current)} trên mục tiêu ${formatNumber(target)} đến ${formatNumber(targetMax)} kcal`
+    : `Năng lượng ${formatNumber(current)} trên mục tiêu ${formatNumber(target)} kcal`;
 
   return (
     <div
@@ -82,7 +83,7 @@ export function CalorieDial({
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center select-none pointer-events-none">
         <span className="font-display italic font-black text-2xl text-white leading-tight tracking-tight tabular-nums">
-          {current.toLocaleString("vi-VN")}
+          {formatNumber(current)}
         </span>
         <span className="text-[13px] text-muted-on-dark leading-none">
           kcal
