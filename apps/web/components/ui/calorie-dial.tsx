@@ -54,7 +54,7 @@ export function CalorieDial({
         role="img"
         aria-label={ariaLabel || defaultLabel}
       >
-        {/* Background Track: muted-on-dark is 5.96:1 on ink (WCAG 1.4.11 needs 3:1); level-empty-dark was 1.33:1 */}
+        {/* Background Track: track-on-dark, 3.14:1 on ink (WCAG 1.4.11 needs 3:1) */}
         <circle
           cx="60"
           cy="60"
@@ -62,7 +62,7 @@ export function CalorieDial({
           fill="none"
           stroke="currentColor"
           strokeWidth={strokeWidth}
-          className="text-muted-on-dark"
+          className="text-track-on-dark"
         />
         {/* Active Progress */}
         {progress > 0 && (

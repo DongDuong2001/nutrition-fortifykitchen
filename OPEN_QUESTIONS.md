@@ -80,3 +80,4 @@
 - [ ] (cc2-04) components/onboarding/google-sign-in-button.tsx keeps the Google logo's brand colours as raw hex in the SVG. Confirm that brand marks are exempt from the token rule.
 - [ ] (cc2-04) text-white is used on ink, blue (CTA) and surface-dark (about 100 places). No on-dark or on-accent token exists, so these stay as Tailwind white (#FFFFFF, the same value as --color-card). Add --color-on-dark and --color-on-accent tokens, or keep text-white?
 - [ ] (cc2-02) /add on a phone has no visible heading. The sheet has a visually hidden h1 "Thêm món" (same words as its aria-label; not in the design). Confirm the copy, or send a visible title.
+- [ ] (cc2-05) Dial track token --color-track-on-dark #60646E is 3.14:1 on ink but 2.88:1 on the surface-dark inset panel the dial actually sits on (as decided 12/10). #666A75 gives 3.44:1 on ink and 3.15:1 on the panel. Switch to it?
