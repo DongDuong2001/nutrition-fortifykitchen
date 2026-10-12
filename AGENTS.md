@@ -118,6 +118,12 @@ Always use **your agent's fixed port**: **3100 for Antigravity, 3101 for Claude 
 ## File ownership
 - Claude Code owns everything under apps/web, and is the only agent that commits to feat/ui. The exception is the files of an active Antigravity side-job branch (feat/ui-ag-<task>) that are listed on the Now working board: those are Antigravity's until the row is cleared.
 - Antigravity works only on its own branch feat/ui-ag-<task>, never commits to feat/ui, and touches only the files its task names. Claude Code merges its branches.
+- **Lanes:** three workers, each with its own port (see Dev server and ports).
+  - Antigravity: branches feat/ui-ag-<task>, port 3100.
+  - Claude Code (this machine): branches feat/ui-cc-<task>, port 3101.
+  - Claude Code #2 (separate computer): branches feat/ui-cc2-<n>, port 3102.
+- **Every worker:** `git fetch && git rebase origin/feat/ui` before each task. Before merging, rebase again, re-run the gates, then `git merge --ff-only` into feat/ui and push feat/ui only. Never merge commits and never force-push.
+- Claim your files on the **Now working** board before editing. Never edit a file another active task has claimed.
 - Tests follow their file: lib/__tests__/<name>.test.ts belongs to the owner of lib/<name>.
 - Dong's: lib/api-client, lib/supabase-client, apps/api, migrations (UI agents may only read; mock changes go through OPEN_QUESTIONS).
 - Anything not listed: ask in OPEN_QUESTIONS before editing.

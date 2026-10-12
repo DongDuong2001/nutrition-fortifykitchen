@@ -3,6 +3,7 @@
 ## Now working
 | Task | Owner | Files / routes |
 |---|---|---|
+| cc2-01 | Claude Code #2 (port 3102, feat/ui-cc2-01) | app/micros/[nutrient]/page.tsx, app/micros/page.tsx (NutrientRow link + buildNutrientRows moved out), lib/nutrient-rows.ts, lib/nutrient-detail.ts, lib/nutrient-sources.ts (+ tests), lib/diary-store.tsx (nutrientSources), lib/format.ts (+ format.test.ts), lib/date.ts, lib/mock/sample-day.ts (dateLabel), app/(dashboard)/training/page.tsx (fallback label), app/(dashboard)/foods/page.tsx (removed), app/foods/page.tsx (redirect to /add), tests/probes/cc2_01.py, tests/probes/cc10.py (date label) |
 
 | Date | Commit | Built | Next |
 | --- | --- | --- | --- |
