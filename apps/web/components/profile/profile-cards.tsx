@@ -216,8 +216,8 @@ export function TargetsCard() {
 export function AppCard() {
   // The saved language is read after mount, so the server and first paint both show Tiếng Việt
   const [language, setLanguage] = useState("Tiếng Việt");
-  // Shows "Đã bật" or "Đã tắt" from its current state (read after mount, like the language)
-  const [reminders, setReminders] = useState<string>("Đã bật");
+  // "Đã bật" or "Đã tắt" from the saved reminders. Empty until mounted, so the first paint never claims "Đã bật"
+  const [reminders, setReminders] = useState<string | null>(null);
   useEffect(() => {
     const saved = loadSettings();
     setLanguage(saved.language === "en" ? "English" : "Tiếng Việt");
@@ -232,7 +232,7 @@ export function AppCard() {
         <Row label="Ngôn ngữ" value={language} href="/settings/language" />
       </RowGroup>
       <RowGroup>
-        <Row label="Nhắc nhở" value={reminders} href="/settings/notifications" />
+        <Row label="Nhắc nhở" value={reminders ?? ""} href="/settings/notifications" />
       </RowGroup>
       <RowGroup>
         <Row label="Cài như ứng dụng" hint="Mở như ứng dụng, không cần cửa hàng" href="/install" />

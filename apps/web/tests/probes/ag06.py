@@ -124,11 +124,15 @@ def test_item_3(browser):
 def test_item_4(browser):
     # /profile: "Nhắc nhở" shows "Đã bật" initially
     ctx = browser.new_context(viewport=PHONE)
+    # Before mount the reminders value is empty: the server HTML never claims "Đã bật" or "Đã tắt"
+    ssr = ctx.request.get(BASE + "/profile").text()
+    check("Đã bật" not in ssr and "Đã tắt" not in ssr,
+          "profile: server HTML has no reminder value (no 'Đã bật' or 'Đã tắt' before mount)")
     pg = ctx.new_page()
     pg.goto(BASE + "/profile", wait_until="networkidle")
     pg.wait_for_timeout(400)
     txt = body_text(pg)
-    check("Nhắc nhở" in txt and "Đã bật" in txt, "profile: Nhắc nhở row shows 'Đã bật' by default")
+    check("Nhắc nhở" in txt and "Đã bật" in txt, "profile: Nhắc nhở row shows 'Đã bật' after mount")
 
     # Set all notification reminders to false in localStorage and verify it updates to "Đã tắt"
     pg.evaluate("""() => {
@@ -148,11 +152,40 @@ def test_item_4(browser):
     ctx.close()
 
 
+
+# Headings that are displayed (a display:none ancestor hides an h1 from the page and from assistive tech)
+VISIBLE_H1_JS = """() => [...document.querySelectorAll('h1')].filter(h => {
+    let el = h;
+    while (el) { if (getComputedStyle(el).display === 'none') return false; el = el.parentElement; }
+    return true;
+}).map(h => h.textContent.trim())"""
+
+ONE_H1_ROUTES = [
+    "/today", "/today?loading=1", "/today?empty=1", "/today?offline=1",
+    "/micros", "/micros/calcium", "/add", "/training", "/profile", "/profile/weight",
+    "/trends", "/entry/item-1", "/foods/food-cha-la", "/setup/goal", "/setup/profile",
+]
+
+
+def test_one_h1(browser):
+    # Every page shows exactly one heading level 1 at 390 and 1440 (the Today states included)
+    for vp_name, vp in (("390", PHONE), ("1440", DESKTOP)):
+        ctx = browser.new_context(viewport=vp)
+        pg = ctx.new_page()
+        for route in ONE_H1_ROUTES:
+            pg.goto(BASE + route, wait_until="networkidle")
+            pg.wait_for_timeout(300)
+            h1s = pg.evaluate(VISIBLE_H1_JS)
+            check(len(h1s) == 1, f"{route} @ {vp_name}: one visible h1 (found {h1s})")
+        ctx.close()
+
+
 def main():
     print(f"=== Running ag-06 probe against {BASE} ===")
     with sync_playwright() as p:
         browser = p.chromium.launch()
         test_item_1_and_2(browser)
+        test_one_h1(browser)
         test_item_3(browser)
         test_item_4(browser)
         browser.close()

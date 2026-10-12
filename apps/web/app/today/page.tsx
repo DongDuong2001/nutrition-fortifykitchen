@@ -255,6 +255,7 @@ function TodayContent() {
 
         {/* Desktop Skeleton Placeholder */}
         <div className="hidden lg:flex min-h-[980px] bg-page animate-pulse p-8">
+          <h1 className="sr-only">Hôm nay — Đang tải</h1>
           <div className="w-60 bg-ink rounded-2xl mr-8" />
           <div className="flex-1 space-y-6">
             <div className="h-10 w-64 bg-level-empty rounded" />
@@ -273,7 +274,7 @@ function TodayContent() {
     return (
       <div className="w-full min-h-screen bg-page text-text font-sans flex flex-col">
         <div className="w-full min-h-screen bg-page flex flex-col relative pb-[88px] overflow-x-hidden">
-          <h1 className="sr-only">Hôm nay — Ngày đầu tiên</h1>
+          <h1 className="sr-only lg:hidden">Hôm nay — Ngày đầu tiên</h1>
           {/* Header */}
           <AppHeader
             variant="daily"

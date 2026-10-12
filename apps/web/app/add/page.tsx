@@ -435,6 +435,8 @@ function AddFoodInner() {
         >
           {/* Top Grabber */}
           <div aria-hidden="true" className="w-10 h-1 rounded-full bg-grabber self-center shrink-0" />
+          {/* The phone sheet's heading: /add has no visible h1 on a phone (the desktop modal sits over Today's header) */}
+          <h1 className="sr-only">Thêm món</h1>
 
           {/* Header Row: Meal Switcher Trigger + Close Button */}
           <div className="flex items-start justify-between gap-2">
