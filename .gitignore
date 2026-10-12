@@ -47,3 +47,4 @@ __pycache__/
 
 # Claude Code personal settings
 .claude/settings.local.json
+apps/web/tests/probes/ag04_audit_results.json
