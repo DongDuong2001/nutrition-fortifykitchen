@@ -136,10 +136,10 @@ export function PortionPanel({
             <label
               data-align-group="portion"
               data-align-edge="left"
-              className={`flex items-center justify-center rounded-xl px-2 h-11 w-full cursor-text box-border border-2 ${
+              className={`flex items-center justify-center rounded-xl px-2 h-11 w-full cursor-text box-border border-2 focus-within:ring-2 ${
                 isDark
-                  ? "bg-surface-dark border-sky text-white"
-                  : "bg-white border-blue text-text"
+                  ? "bg-surface-dark border-sky text-white focus-within:ring-sky"
+                  : "bg-white border-blue text-text focus-within:ring-blue"
               }`}
             >
               <span className="sr-only">Khối lượng</span>
@@ -152,7 +152,7 @@ export function PortionPanel({
                   setGramsInput(e.target.value);
                   setSelectedServingLabel(`${e.target.value} g`);
                 }}
-                className={`w-full bg-transparent border-0 outline-none font-bold text-sm tabular-nums text-right ${
+                className={`w-full bg-transparent border-0 outline-none focus-visible:outline-none font-bold text-sm tabular-nums text-right ${
                   isDark ? "text-white" : "text-text"
                 }`}
               />

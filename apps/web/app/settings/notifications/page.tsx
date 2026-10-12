@@ -190,7 +190,7 @@ export default function NotificationsSettingsPage() {
                         handleTimeChange(row.timeKey!, e.target.value)
                       }
                       aria-label={timeLabel}
-                      className="sr-only"
+                      className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
                     />
                     <span
                       aria-hidden="true"

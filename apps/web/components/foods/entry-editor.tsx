@@ -57,7 +57,7 @@ export function EntryEditor({ view }: { view: EntryView }) {
             <span className="text-sm font-bold">Khối lượng</span>
             <div className="flex w-full items-stretch gap-2">
               <span
-                className={`flex h-12 w-[104px] shrink-0 items-center gap-1.5 rounded-[10px] border-2 px-3 ${
+                className={`flex h-12 w-[104px] shrink-0 items-center gap-1.5 rounded-[10px] border-2 px-3 focus-within:ring-2 focus-within:ring-blue ${
                   canPortion ? "border-blue bg-white" : "border-card-border bg-page"
                 }`}
               >
@@ -71,7 +71,7 @@ export function EntryEditor({ view }: { view: EntryView }) {
                     setGramsInput(e.target.value);
                     setServingLabel(`${e.target.value} g`);
                   }}
-                  className="h-11 min-w-0 flex-1 border-0 bg-transparent text-lg font-semibold tabular-nums outline-none disabled:opacity-60"
+                  className="h-11 min-w-0 flex-1 border-0 bg-transparent text-lg font-semibold tabular-nums outline-none focus-visible:outline-none disabled:opacity-60"
                 />
                 <span className="text-sm font-normal text-secondary">g</span>
               </span>

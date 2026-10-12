@@ -331,7 +331,7 @@ function AddFoodInner() {
               {/* Left Pane: Search & Results */}
               <div data-align-container="add-list" className="flex-1 min-w-[340px] flex flex-col gap-3">
                 {/* Search Bar */}
-                <label data-align-group="add-list" data-align-edge="left" className="flex items-center gap-2.5 bg-page border border-card-border rounded-full px-4 min-h-[48px]">
+                <label data-align-group="add-list" data-align-edge="left" className="flex items-center gap-2.5 bg-page border border-card-border rounded-full px-4 min-h-[48px] focus-within:border-blue focus-within:ring-2 focus-within:ring-blue">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="text-secondary shrink-0" aria-hidden="true">
                     <circle cx="11" cy="11" r="7" />
                     <path d="M20 20l-3.5-3.5" />
@@ -344,7 +344,7 @@ function AddFoodInner() {
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="Tìm món: cơm, trứng, chà là…"
-                    className="flex-1 bg-transparent border-0 outline-none text-text text-base min-h-[44px] [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
+                    className="flex-1 bg-transparent border-0 outline-none focus-visible:ring-2 focus-visible:ring-blue rounded-md text-text text-base min-h-[44px] [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
                   />
                   {query && (
                     <button
@@ -471,7 +471,7 @@ function AddFoodInner() {
           </div>
 
           {/* Search Input (min 48px, visible label) */}
-          <label data-align-group="add-list" data-align-edge="left" className="flex items-center gap-2.5 bg-page border border-card-border rounded-full px-4 min-h-[48px] shrink-0">
+          <label data-align-group="add-list" data-align-edge="left" className="flex items-center gap-2.5 bg-page border border-card-border rounded-full px-4 min-h-[48px] shrink-0 focus-within:border-blue focus-within:ring-2 focus-within:ring-blue">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="text-secondary shrink-0" aria-hidden="true">
               <circle cx="11" cy="11" r="7" />
               <path d="M20 20l-3.5-3.5" />
@@ -483,7 +483,7 @@ function AddFoodInner() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Tìm món: cơm, trứng, chà là…"
-              className="flex-1 bg-transparent border-0 outline-none text-text text-base min-h-[44px] [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
+              className="flex-1 bg-transparent border-0 outline-none focus-visible:ring-2 focus-visible:ring-blue rounded-md text-text text-base min-h-[44px] [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
             />
             {query && (
               <button

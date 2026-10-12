@@ -50,12 +50,15 @@ export function PhaseChecklist({
                       key={it.id}
                       className="flex items-center gap-3.5 min-h-[56px] cursor-pointer border-t border-divider first:border-t-0 hover:bg-black/[0.02] -mx-2 px-2 rounded-lg transition-colors active:scale-[0.99]"
                     >
-                      <input
-                        type="checkbox"
-                        checked={isChecked}
-                        onChange={() => onToggle(it.id)}
-                        className="w-[22px] h-[22px] rounded accent-blue shrink-0 cursor-pointer"
-                      />
+                      <span className="w-11 h-11 -ml-2.5 flex items-center justify-center shrink-0">
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => onToggle(it.id)}
+                          aria-label={it.label}
+                          className="w-[22px] h-[22px] rounded accent-blue shrink-0 cursor-pointer"
+                        />
+                      </span>
                       <span className="flex-1 flex flex-col py-1.5 min-w-0">
                         <span className="text-[15px] font-semibold text-text leading-snug">
                           {it.label}
