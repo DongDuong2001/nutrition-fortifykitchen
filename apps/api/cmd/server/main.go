@@ -20,6 +20,7 @@ import (
 	"nutrition-api/internal/logger"
 	"nutrition-api/internal/nutrition"
 	"nutrition-api/internal/payment"
+	"nutrition-api/internal/profile"
 	"nutrition-api/internal/vault"
 	"nutrition-api/pkg/database"
 	"nutrition-api/pkg/response"
@@ -54,6 +55,10 @@ func main() {
 	logger.Log.Info().Msg("PostgreSQL 17 connection pool established (session mode, search_path: nutrition, public)")
 
 	// 4. Initialize Repositories and Services
+	profileRepo := profile.NewRepository(dbClient.Pool)
+	profileService := profile.NewService(profileRepo)
+	profileHandler := profile.NewHandler(profileService)
+
 	diaryRepo := diary.NewRepository(dbClient.Pool)
 	diaryService := diary.NewService(diaryRepo)
 	diaryHandler := diary.NewHandler(diaryService)
@@ -116,6 +121,15 @@ func main() {
 		// Authenticated Routes
 		r.Group(func(r chi.Router) {
 			r.Use(authMiddleware.Authenticate)
+
+			// Profile & Weight endpoints (Phase 1)
+			r.Route("/me", func(r chi.Router) {
+				r.Get("/", profileHandler.GetMe)
+				r.Put("/profile", profileHandler.UpdateProfile)
+				r.Get("/weight", profileHandler.GetWeightLogs)
+				r.Put("/weight/{date}", profileHandler.UpsertWeight)
+				r.Delete("/", profileHandler.DeleteMe)
+			})
 
 			// Custom food creation
 			r.Post("/foods/custom", nutritionHandler.CreateCustomFood)
