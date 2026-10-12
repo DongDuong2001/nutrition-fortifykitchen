@@ -43,31 +43,33 @@ export default function AdminReviewPage() {
   const filtered = drafts.filter((d) => (filter === "all" ? true : d.status === filter));
 
   return (
-    <div className="space-y-6 sm:space-y-8 max-w-7xl mx-auto">
+    <div className="mx-auto w-full max-w-7xl space-y-6 bg-page px-4 py-6 font-sans text-text sm:space-y-8">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b-2 border-black">
+      <div className="flex flex-col justify-between gap-4 border-b border-card-border pb-4 sm:flex-row sm:items-center">
         <div>
-          <div className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-[3px] bg-[#F59E0B] text-black border-2 border-black font-black text-[10px] uppercase font-mono shadow-[2px_2px_0px_0px_#000] mb-2">
+          <div className="mb-2 inline-flex items-center rounded-full bg-warning-bg px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-warning-text">
             Admin RBAC Guarded
           </div>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-[#F8FAFC] uppercase tracking-tight">
+          <h1 className="m-0 font-display text-3xl font-extrabold uppercase italic tracking-tight text-text">
             Coach Vault Review
           </h1>
-          <p className="text-xs sm:text-sm text-[#94A3B8] font-medium mt-0.5">
+          <p className="mt-1 text-sm text-secondary">
             Review and publish markdown meal plans synchronized from GitHub repository
           </p>
         </div>
 
         {/* Filter Tabs */}
-        <div className="flex items-center gap-1.5 flex-wrap">
+        <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filter drafts">
           {["all", "draft", "published", "rejected"].map((tab) => (
             <button
               key={tab}
+              type="button"
+              aria-pressed={filter === tab}
               onClick={() => setFilter(tab)}
-              className={`neo-btn px-3 py-1.5 text-[11px] font-black uppercase tracking-wider min-h-[34px] ${
+              className={`min-h-[44px] cursor-pointer rounded-full px-4 text-xs font-bold uppercase tracking-wider transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none ${
                 filter === tab
-                  ? "neo-btn-emerald"
-                  : "neo-btn-dark text-[#94A3B8]"
+                  ? "border-0 bg-ink text-white"
+                  : "border border-card-border bg-card text-text hover:bg-page"
               }`}
             >
               {tab}
@@ -81,53 +83,55 @@ export default function AdminReviewPage() {
         {filtered.map((draft) => (
           <div
             key={draft.id}
-            className="neo-card p-4 sm:p-6 flex flex-col md:flex-row justify-between gap-5 sm:gap-6"
+            className="flex flex-col justify-between gap-5 rounded-[18px] border border-card-border bg-card p-4 sm:p-6 md:flex-row sm:gap-6"
           >
-            <div className="flex-1 min-w-0">
-              <div className="flex flex-wrap items-center gap-2.5 mb-3">
-                <span className="font-mono text-xs px-2.5 py-1 rounded-[3px] bg-[#0B0F17] text-[#10B981] border-2 border-black font-bold shadow-[2px_2px_0px_0px_#000] truncate max-w-full">
+            <div className="min-w-0 flex-1">
+              <div className="mb-3 flex flex-wrap items-center gap-2.5">
+                <span className="max-w-full truncate rounded-lg border border-card-border bg-page px-2.5 py-1 text-xs font-semibold text-text" title={draft.file_path}>
                   {draft.file_path}
                 </span>
                 <span
-                  className={`text-[10px] px-2.5 py-0.5 rounded-[3px] uppercase font-black font-mono border-2 border-black shadow-[2px_2px_0px_0px_#000] ${
+                  className={`rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider ${
                     draft.status === "published"
-                      ? "bg-[#10B981] text-black"
+                      ? "bg-blue text-white"
                       : draft.status === "rejected"
-                      ? "bg-[#F43F5E] text-white"
-                      : "bg-[#F59E0B] text-black"
+                      ? "bg-destructive-text text-white"
+                      : "bg-warning-bg text-warning-text"
                   }`}
                 >
                   {draft.status}
                 </span>
-                <span className="text-[11px] text-[#94A3B8] font-mono">
-                  commit: <strong className="text-[#F8FAFC]">{draft.commit_hash}</strong>
+                <span className="text-xs text-secondary tabular-nums">
+                  commit: <strong className="text-text">{draft.commit_hash}</strong>
                 </span>
               </div>
 
-              <pre className="p-3.5 sm:p-4 rounded-[4px] bg-[#0B0F17] text-[#E2E8F0] font-mono text-xs overflow-x-auto whitespace-pre-wrap border-2 border-black shadow-[2px_2px_0px_0px_#000]">
+              <pre className="m-0 overflow-x-auto whitespace-pre-wrap rounded-xl bg-surface-dark p-4 font-sans text-xs leading-relaxed text-muted-subtitle">
                 {draft.markdown_content}
               </pre>
             </div>
 
-            <div className="flex md:flex-col justify-end gap-2.5 min-w-[150px] shrink-0">
+            <div className="flex min-w-[150px] shrink-0 justify-end gap-2.5 md:flex-col">
               {draft.status === "draft" && (
                 <>
                   <button
+                    type="button"
                     onClick={() => handleUpdateStatus(draft.id, "published")}
-                    className="neo-btn neo-btn-emerald px-4 py-2 text-xs font-black w-full min-h-[40px]"
+                    className="min-h-[44px] w-full cursor-pointer rounded-full border-0 bg-blue px-4 text-sm font-bold text-white transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none"
                   >
                     Approve
                   </button>
                   <button
+                    type="button"
                     onClick={() => handleUpdateStatus(draft.id, "rejected")}
-                    className="neo-btn px-4 py-2 text-xs font-black bg-[#F43F5E] text-white hover:bg-rose-600 border-2 border-black w-full min-h-[40px]"
+                    className="min-h-[44px] w-full cursor-pointer rounded-full border border-destructive-text bg-card px-4 text-sm font-bold text-destructive-text transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none"
                   >
                     Reject
                   </button>
                 </>
               )}
               {draft.status !== "draft" && (
-                <div className="text-xs text-[#94A3B8] font-mono uppercase tracking-wider italic self-center md:self-end">
+                <div className="self-center text-xs font-semibold uppercase tracking-wider text-secondary md:self-end">
                   Status: {draft.status}
                 </div>
               )}
