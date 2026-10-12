@@ -1,57 +1,77 @@
 "use client";
 
-import React from "react";
+import React, { useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AppHeader } from "@/components/ui/app-header";
 import { AppShell } from "@/components/ui/app-shell";
+import { Card } from "@/components/ui/card";
 import { ChipRow } from "@/components/foods/chip-row";
-import { FoodEmptyState } from "@/components/foods/food-empty-state";
-import { FoodList } from "@/components/foods/food-list";
+import { FoodListCard } from "@/components/foods/food-list-card";
 import { FoodSearchField } from "@/components/foods/food-search-field";
-import { useFoodBrowse } from "@/hooks/use-food-browse";
-import { foodMeta } from "@/lib/food-meta";
+import { ExploreSections } from "@/components/explore/explore-sections";
+import { MOCK_FOODS } from "@/lib/mock/foods";
+import { searchFoods } from "@/lib/search";
+import { FOOD_CATEGORIES, categoryLabel, categoryOf } from "@/lib/food-categories";
 
-/** Khám phá (v1, step 1 of IA v2): the food search and category list from the add sheet. A food opens its detail. */
+/**
+ * Khám phá (IA v2): find a food and understand it. Search, the 10 category chips, then Gần đây, Yêu thích,
+ * Món của tôi and the "Giàu …" lists. A category or a rich-in list is a pushed screen; a food opens its detail.
+ */
 export default function ExplorePage() {
   const router = useRouter();
-  const { query, setQuery, filter, setFilter, list, filterItems, categoryName, isFavouriteFood, similarFoods, noFavourites } =
-    useFoodBrowse();
-  const openFood = (id: string) => router.push(`/foods/${id}`);
+  const [query, setQuery] = useState("");
+  const searching = query.trim().length > 0;
+  const results = useMemo(() => searchFoods(MOCK_FOODS, query), [query]);
+
+  const chips = [
+    { id: "all", label: "Tất cả", active: true },
+    ...FOOD_CATEGORIES.map((c) => ({
+      id: c.key,
+      label: c.label,
+      onClick: () => router.push(`/explore/${c.key}`),
+    })),
+  ];
 
   return (
     <AppShell alignContainer="add-list">
-        <AppHeader
-          variant="tab"
-          title="KHÁM PHÁ"
-          layout="wide"
-          alignGroup="explore-header"
-          search={<FoodSearchField value={query} onChange={setQuery} className="bg-page lg:max-w-[656px]" />}
-        />
+      <AppHeader
+        variant="tab"
+        title="Khám phá"
+        subtitle="Tìm món, lọc theo nhóm, hoặc xem món giàu vi chất"
+        layout="wide"
+        alignGroup="explore-header"
+        search={<FoodSearchField value={query} onChange={setQuery} className="bg-page lg:max-w-[656px]" />}
+      />
 
-        <main className="mx-auto flex w-full max-w-[560px] flex-col gap-3 px-4 pb-6 pt-4 lg:mx-0 lg:max-w-[720px] lg:px-8">
-          <div className="flex flex-col gap-3">
-            <ChipRow items={filterItems} ariaLabel="Lọc món theo nhóm" data-align-group="add-list" data-align-edge="left" />
-            <FoodList
-              list={list}
-              onPick={(food) => openFood(food.id)}
-              getMeta={foodMeta}
-              categoryName={categoryName}
-              isFavourite={isFavouriteFood}
-              empty={
-                <FoodEmptyState
-                  query={query}
-                  filter={filter}
-                  noFavourites={noFavourites}
-                  similarFoods={similarFoods}
-                  getMeta={foodMeta}
-                  onPickSimilar={(food) => openFood(food.id)}
-                  onClearFilter={() => setFilter("all")}
-                  newFoodHref="/foods/new"
-                />
-              }
-            />
-          </div>
-        </main>
+      <main className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-6 pt-4 lg:mx-0 lg:max-w-[720px] lg:px-8">
+        <ChipRow items={chips} ariaLabel="Lọc món theo nhóm" data-align-group="add-list" data-align-edge="left" />
+        <div data-align-group="add-list" data-align-edge="left" className="flex flex-col gap-4">
+          {searching ? (
+            <>
+              <FoodListCard
+                title={`Kết quả cho “${query.trim()}”`}
+                foods={results.map((food) => ({ food }))}
+                withCategory={(food) => categoryLabel(categoryOf(food))}
+                empty={
+                  <p className="m-0 py-3 text-[13px] leading-snug text-secondary">
+                    Không có món nào khớp. Thử từ ngắn hơn, bỏ dấu, hoặc tạo món mới.
+                  </p>
+                }
+              />
+              {results.length === 0 && (
+                <Card className="text-center">
+                  <Link href="/foods/new" className="inline-flex min-h-[44px] items-center font-bold text-blue no-underline">
+                    Tạo món mới
+                  </Link>
+                </Card>
+              )}
+            </>
+          ) : (
+            <ExploreSections />
+          )}
+        </div>
+      </main>
     </AppShell>
   );
 }

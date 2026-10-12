@@ -280,7 +280,7 @@ function DiaryContent() {
                 href={`/add?meal=${slot}`}
                 onClick={() => rememberAddOpener(`mobile-add-${meal.slot}`)}
                 aria-label={`Thêm vào ${meal.name}`}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-blue text-on-accent no-underline active:scale-[0.97] motion-reduce:active:scale-100"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-card-border bg-transparent text-blue no-underline active:scale-[0.97] motion-reduce:active:scale-100"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
                   <path d="M12 5v14M5 12h14" />
@@ -418,15 +418,6 @@ function DiaryContent() {
 
           <div className="order-2 flex flex-col gap-3 lg:order-1 lg:col-span-7 lg:gap-5">
             {mealCards}
-            {!isPast && !isEmpty && (
-              <button
-                type="button"
-                onClick={() => setIsCopySheetOpen(true)}
-                className="min-h-[52px] w-full cursor-pointer rounded-[18px] border border-card-border bg-card px-4 text-[15px] font-semibold text-text active:scale-[0.97] motion-reduce:active:scale-100"
-              >
-                Chép hôm qua
-              </button>
-            )}
           </div>
         </div>
       </main>

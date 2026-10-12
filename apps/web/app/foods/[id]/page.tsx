@@ -7,10 +7,11 @@ import { useDiary } from "@/lib/diary-store";
 import { MOCK_FOODS, type FoodItem } from "@/lib/mock/foods";
 import { getMealSlotNameVi } from "@/lib/meal-slot";
 import { useMealSlot } from "@/lib/use-meal-slot";
-import { parseGramsInput, calculateMacroPreview, scaleNutrients } from "@/lib/portion";
+import { parseGramsInput, calculateMacroPreview } from "@/lib/portion";
+import { goodSourcesOf, microRowsFor } from "@/lib/food-detail";
+import { categoryLabel, categoryOf } from "@/lib/food-categories";
 import { formatAmount } from "@/lib/format";
-import { getNutrientDefinition } from "@/lib/nutrients";
-import { SegmentedBar } from "@/components/ui/segmented-bar";
+import { FoodMicros, GoodSources } from "@/components/foods/food-micros";
 import { ChipGroup } from "@/components/ui/chip-group";
 import { StatGroup } from "@/components/ui/stat-group";
 import { Toast } from "@/components/ui/toast";
@@ -28,7 +29,7 @@ function FoodDetailInner() {
 
   const foodId = params?.id as string;
   const food = useMemo(() => {
-    return MOCK_FOODS.find((f) => f.id === foodId) || MOCK_FOODS[0];
+    return MOCK_FOODS.find((f) => f.id === foodId);
   }, [foodId]);
 
   const mealSlot = useMealSlot(searchParams.get("meal"));
@@ -71,44 +72,9 @@ function FoodDetailInner() {
     return calculateMacroPreview(food.nutrients, parsedGrams);
   }, [food, parsedGrams]);
 
-  // Scaled nutrients list for "Vi chất trong X g"
-  const microsList = useMemo(() => {
-    if (!food) return [];
-    const scaled = scaleNutrients(food.nutrients, parsedGrams);
-
-    const items: {
-      id: string;
-      name: string;
-      value: number;
-      unit: string;
-      pct: number | null;
-    }[] = [];
-
-    for (const [key, val] of Object.entries(scaled)) {
-      if (val !== null && val > 0) {
-        // Exclude general macros from micros table
-        if (key === "energy" || key === "carbs" || key === "protein" || key === "fat" || key === "fiber" || key === "net_carbs") {
-          continue;
-        }
-
-        const def = getNutrientDefinition(key);
-        const name = def?.nameVi || key;
-        const unit = def?.unit || "mg";
-        const target = dailyTargets[key]?.min ?? (def?.id ? dailyTargets[def.id]?.min : undefined);
-        const pct = target ? Math.round((val / target) * 100) : null;
-
-        items.push({
-          id: key,
-          name,
-          value: val,
-          unit,
-          pct,
-        });
-      }
-    }
-
-    return items;
-  }, [food, parsedGrams, dailyTargets]);
+  // The 22 counted nutrients for the portion, and those that give 20 % of the target or more
+  const micros = useMemo(() => (food ? microRowsFor(food.nutrients, parsedGrams, dailyTargets) : null), [food, parsedGrams, dailyTargets]);
+  const goodSources = useMemo(() => (food ? goodSourcesOf(food.nutrients, parsedGrams, dailyTargets) : []), [food, parsedGrams, dailyTargets]);
 
   const handleAdd = async () => {
     if (!food || parsedGrams <= 0 || isSubmitting || mealSlot === null) return;
@@ -123,12 +89,15 @@ function FoodDetailInner() {
 
   if (!food) {
     return (
-      <div className="min-h-screen bg-page flex items-center justify-center p-4">
-        <div className="text-center">
-          <p className="text-secondary">Không tìm thấy món.</p>
-          <Link href="/add" className="text-blue font-bold">Quay lại tìm món</Link>
-        </div>
-      </div>
+      <AppShell>
+        <AppHeader variant="sub" title="Không tìm thấy món" onBack={goBack} layout="wide" />
+        <main className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pt-4 lg:mx-0 lg:px-8">
+          <p className="m-0 text-[15px] text-secondary">Món này không còn trong danh sách.</p>
+          <Link href="/explore" className="inline-flex min-h-[44px] items-center font-bold text-blue no-underline">
+            Về Khám phá
+          </Link>
+        </main>
+      </AppShell>
     );
   }
 
@@ -148,7 +117,7 @@ function FoodDetailInner() {
       <AppHeader
         variant="sub"
         title={food.nameVi}
-        subtitle={`${food.brand ? `${food.brand} · ` : ""}${food.source}`}
+        subtitle={`${categoryLabel(categoryOf(food))} · ${food.brand ? `${food.brand} · ` : ""}${food.source === "user" ? "Của tôi" : food.source} · ${food.servings[0]?.grams ?? 100} g mỗi khẩu phần`}
         onBack={goBack}
         actions={
           <button
@@ -202,7 +171,7 @@ function FoodDetailInner() {
             }
             items={food.servings.map((s) => ({
               id: s.label,
-              label: s.label,
+              label: s.label === `${s.grams} g` ? s.label : `${s.label} · ${s.grams} g`,
               active: selectedServingLabel === s.label,
               onClick: () => {
                 setGramsInput(s.grams.toString());
@@ -226,49 +195,8 @@ function FoodDetailInner() {
           />
         </div>
 
-        {/* Micros in Serving Card with slanted SegmentedBar */}
-        <div data-align-group="food-detail" className="w-full bg-card border border-card-border rounded-[18px] p-4 flex flex-col gap-2">
-          <h2 className="m-0 text-base font-bold text-text">
-            Vi chất trong {gramsInput} g
-          </h2>
-
-          <div className="divide-y divide-divider flex flex-col">
-            {microsList.map((m) => (
-              <div key={m.id} className="py-3 flex flex-col gap-1 min-h-[44px] justify-center">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="font-semibold text-text">{m.name}</span>
-                  <div className="flex items-center gap-2 tabular-nums">
-                    <span className="font-bold text-text">
-                      {formatAmount(m.value, m.unit)} {m.unit}
-                    </span>
-                    {m.pct !== null && (
-                      <span className="text-xs text-secondary font-semibold min-w-[36px] text-right">
-                        {m.pct}%
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Compact slanted bar for visual context */}
-                {m.pct !== null && (
-                  <SegmentedBar
-                    aria-label={`Tiến độ ${m.name}`}
-                    percentage={m.pct}
-                    tone="light"
-                  />
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Tip Box */}
-        {food.tipVi && (
-          <div className="bg-card border border-card-border border-l-4 border-l-blue rounded-xl p-4 text-sm leading-relaxed">
-            <strong className="text-blue font-bold">Mẹo: </strong>
-            {food.tipVi}
-          </div>
-        )}
+        <GoodSources rows={goodSources} />
+        {micros && <FoodMicros rows={micros.rows} unknown={micros.unknown} portionLabel={`${gramsInput} g`} />}
       </main>
 
       {/* Favourite toast, just above the sticky CTA */}
