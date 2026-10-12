@@ -202,6 +202,7 @@ function TrainingContent() {
           <AppHeader
             variant="tab"
             title="NGÀY TẬP"
+            flush
             subtitle={desktopSubtitle}
             onBack={goBack}
             alignGroup="training-header"

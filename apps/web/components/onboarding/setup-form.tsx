@@ -105,7 +105,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
         <AppHeader
           variant="sub"
           backHref={isProfile ? "/signin/check-email" : "/setup/profile"}
-          actions={<span className="text-[13px] text-muted-on-dark">{isProfile ? "Bước 1 / 2" : "Bước 2 / 2"}</span>}
+          actions={<span className="text-[13px] text-secondary">{isProfile ? "Bước 1 / 2" : "Bước 2 / 2"}</span>}
           progress={{ current: isProfile ? 1 : 2, total: 2 }}
           title={isProfile ? "VỀ BẠN" : "MỤC TIÊU"}
           subtitle={isProfile ? "Mục tiêu được tính theo cân nặng và giới tính. Bạn có thể sửa bất cứ lúc nào." : undefined}

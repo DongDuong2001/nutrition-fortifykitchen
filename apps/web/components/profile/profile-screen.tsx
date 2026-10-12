@@ -21,12 +21,13 @@ export function ProfileScreen({ title, backHref }: { title: string; backHref?: s
 
   return (
     <AppShell alignContainer="profile-page">
-        {backHref ? (
-          <AppHeader variant="sub" title={title.toUpperCase()} backHref={backHref} className="lg:hidden" alignGroup="profile-header" />
-        ) : (
-          <AppHeader variant="tab" title={title.toUpperCase()} className="lg:hidden" alignGroup="profile-header" />
-        )}
-        <h1 className="m-0 hidden px-8 pt-7 font-display text-[34px] font-black italic uppercase lg:block">{title}</h1>
+        <AppHeader
+          variant={backHref ? "sub" : "tab"}
+          title={title.toUpperCase()}
+          backHref={backHref}
+          layout="wide"
+          alignGroup="profile-header"
+        />
 
         <main className="mx-auto grid w-full max-w-[560px] grid-cols-1 items-start gap-3.5 px-4 pb-6 pt-3 lg:mx-0 lg:max-w-[1240px] lg:grid-cols-2 lg:gap-4 lg:px-8 lg:pb-12 lg:pt-5">
           {hydrated ? (

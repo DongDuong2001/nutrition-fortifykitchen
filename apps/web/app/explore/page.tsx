@@ -20,7 +20,7 @@ export default function ExplorePage() {
 
   return (
     <AppShell alignContainer="add-list">
-        <AppHeader variant="tab" title="KHÁM PHÁ" className="lg:px-8 lg:pt-8" alignGroup="explore-header" />
+        <AppHeader variant="tab" title="KHÁM PHÁ" layout="wide" alignGroup="explore-header" />
 
         <main className="mx-auto flex w-full max-w-[560px] flex-col gap-3 px-4 pb-6 pt-3.5 lg:mx-0 lg:max-w-[720px] lg:px-8">
           <div className="flex flex-col gap-3.5 rounded-[18px] border border-card-border bg-card p-4">

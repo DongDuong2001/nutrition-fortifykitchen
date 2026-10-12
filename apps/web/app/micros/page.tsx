@@ -283,7 +283,7 @@ function MicrosContent() {
             }
           />
           <div className="hidden p-8 pb-0 lg:block">
-            <AppHeader variant="daily" title="VI CHẤT" date={currentData?.date} canGoNext={false} onBack={goBack} />
+            <AppHeader variant="daily" title="VI CHẤT" subtitle={desktopSubtitle} flush onBack={goBack} />
           </div>
 
           <main className="flex-1 w-full max-w-[560px] mx-auto px-4 py-6 flex flex-col gap-4">
@@ -347,7 +347,7 @@ function MicrosContent() {
           footer={
             <Link
               href="/trends"
-              className="min-h-[44px] flex items-center justify-between text-sm font-semibold text-on-dark no-underline active:scale-[0.97] transition-transform"
+              className="min-h-[44px] flex items-center justify-between text-sm font-semibold text-blue no-underline active:scale-[0.97] transition-transform"
             >
               Xu hướng 7 và 30 ngày
               <span aria-hidden="true">›</span>
@@ -438,6 +438,7 @@ function MicrosContent() {
           <AppHeader
             variant="daily"
             title="VI CHẤT"
+            flush
             onBack={goBack}
             alignGroup="micros-header"
             subtitle={desktopSubtitle}

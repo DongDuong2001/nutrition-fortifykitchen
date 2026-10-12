@@ -38,16 +38,6 @@ export default function PaywallPage() {
           onBack={goBack}
           backLabel="Quay lại"
           alignGroup="paywall-header"
-          summary={
-            <div
-              role="img"
-              aria-label="H1T MICRO PRO"
-              className="flex items-baseline gap-2 font-display italic font-black text-2xl uppercase tracking-tight -mt-1 text-on-dark"
-            >
-              <span>H1T</span>
-              <span className="text-sky">MICRO</span>
-            </div>
-          }
         />
 
         <main className="w-full max-w-[560px] mx-auto px-4 pt-3 pb-4 flex flex-col gap-3">

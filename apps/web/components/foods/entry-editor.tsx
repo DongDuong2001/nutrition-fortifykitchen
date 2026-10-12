@@ -48,7 +48,6 @@ export function EntryEditor({ view }: { view: EntryView }) {
         title={view.name}
         subtitle={getMealSlotNameVi(view.mealSlot)}
         backHref="/diary"
-        alignGroup="entry-header"
       />
       <div className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-8 pt-4">
         <section className="flex flex-col gap-4 rounded-2xl border border-card-border bg-card p-4">

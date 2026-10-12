@@ -150,14 +150,13 @@ function FoodDetailInner() {
         title={food.nameVi}
         subtitle={`${food.brand ? `${food.brand} · ` : ""}${food.source}`}
         onBack={goBack}
-        alignGroup="food-header"
         actions={
           <button
             type="button"
             onClick={handleToggleFavourite}
             aria-pressed={saved}
             aria-label={saved ? "Bỏ yêu thích" : "Thêm vào yêu thích"}
-            className="w-11 h-11 -mr-2 rounded-lg bg-transparent border-0 text-on-dark flex items-center justify-center cursor-pointer hover:text-sky active:scale-[0.97] transition-colors"
+            className="w-11 h-11 -mr-2 rounded-lg bg-transparent border-0 text-text flex items-center justify-center cursor-pointer hover:text-blue active:scale-[0.97] transition-colors"
           >
             <svg
               width="22"

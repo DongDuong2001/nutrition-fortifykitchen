@@ -94,18 +94,20 @@ function ShortcutRow({ href, title, hint }: { href: string; title: string; hint:
 }
 
 /**
- * The Today content: the day's meals, vi chất and training. Served at / and at /diary (same component) until
- * step 2 of IA v2 splits it into Tổng quan and Nhật ký. Past days (?date=) are read-only.
+ * The Today content: the day's meals, vi chất and training. Served at / (Tổng quan) and at /diary (Nhật ký) from
+ * the same component until step 2 of IA v2 splits them. `screen` picks the title: the H1T MICRO wordmark is only
+ * in the Tổng quan phone header; Nhật ký shows its own name. Past days (?date=) are read-only.
  */
-export function TodayScreen() {
+export function TodayScreen({ screen = "home" }: { screen?: "home" | "diary" }) {
   return (
     <Suspense fallback={<div className="w-full min-h-screen bg-page" />}>
-      <TodayContent />
+      <TodayContent screen={screen} />
     </Suspense>
   );
 }
 
-function TodayContent() {
+function TodayContent({ screen }: { screen: "home" | "diary" }) {
+  const screenTitle = screen === "home" ? "Tổng quan" : "Nhật ký";
   const searchParams = useSearchParams();
   const forceEmpty = searchParams?.get("empty") === "1";
   const forceLoading = searchParams?.get("loading") === "1";
@@ -240,7 +242,7 @@ function TodayContent() {
       <div className="w-full min-h-screen bg-page text-text font-sans flex flex-col">
         {/* Mobile Viewport Container */}
         <div className="w-full min-h-screen bg-page flex flex-col relative lg:hidden pb-[88px] overflow-x-hidden">
-          <h1 className="sr-only">Hôm nay — Đang tải</h1>
+          <h1 className="sr-only">{screenTitle}</h1>
           {/* Header Skeleton */}
           <div className="bg-ink text-on-dark rounded-b-[20px]">
             <div className="w-full max-w-[560px] mx-auto px-4 pt-3 pb-4 flex flex-col gap-2.5">
@@ -290,7 +292,7 @@ function TodayContent() {
 
         {/* Desktop Skeleton Placeholder */}
         <div className="hidden lg:flex min-h-[980px] bg-page animate-pulse p-8">
-          <h1 className="sr-only">Hôm nay — Đang tải</h1>
+          <h1 className="sr-only">{screenTitle}</h1>
           <div className="w-60 bg-ink rounded-2xl mr-8" />
           <div className="flex-1 space-y-6">
             <div className="h-10 w-64 bg-level-empty rounded" />
@@ -309,10 +311,11 @@ function TodayContent() {
     return (
       <div className="w-full min-h-screen bg-page text-text font-sans flex flex-col">
         <div className="w-full min-h-screen bg-page flex flex-col relative pb-[88px] overflow-x-hidden">
-          <h1 className="sr-only lg:hidden">Hôm nay — Ngày đầu tiên</h1>
           {/* Header */}
           <AppHeader
             variant="daily"
+            title={screenTitle}
+            wordmark={screen === "home"}
             date={currentData.date}
             onPrev={prevDay}
             onNext={nextDay}
@@ -394,7 +397,6 @@ function TodayContent() {
       {/* MOBILE LAYOUT (390px Viewport) — Matches Today.dc.html exactly */}
       {/* ============================================================== */}
       <div data-align-container="today-page" className="w-full min-h-screen bg-page flex flex-col relative lg:hidden pb-[88px] overflow-x-hidden">
-        <h1 className="sr-only">{showOfflineBanner ? "Hôm nay — Ngoại tuyến" : "Hôm nay"}</h1>
 
         {/* Offline Banner (TodayStates.dc.html) */}
         {showOfflineBanner && (
@@ -428,6 +430,8 @@ function TodayContent() {
         {/* Dark Top Hero Header */}
         <AppHeader
           variant="daily"
+          title={screenTitle}
+          wordmark={screen === "home"}
           date={currentData.date}
           onPrev={prevDay}
           onNext={nextDay}
@@ -614,7 +618,8 @@ function TodayContent() {
           {/* Header */}
           <AppHeader
             variant="daily"
-            title="HÔM NAY"
+            title={screenTitle}
+            flush
             date={currentData.date}
             onPrev={prevDay}
             onNext={nextDay}

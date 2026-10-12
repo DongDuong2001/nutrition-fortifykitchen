@@ -40,6 +40,12 @@ export interface AppHeaderProps {
   actions?: React.ReactNode;
   /** Desktop-specific stat element (e.g. "8/22 vi chất đạt") */
   desktopStat?: React.ReactNode;
+  /** Daily header, phone only: show the H1T MICRO wordmark in the ink band (Tổng quan, `/`). The title stays as a sr-only h1. */
+  wordmark?: boolean;
+  /** Desktop title row width: "narrow" (560 px column, default) or "wide" (left-aligned at the 32 px gutter). */
+  layout?: "narrow" | "wide";
+  /** Desktop: the page's main already has 32 px padding, so the row adds none. */
+  flush?: boolean;
   /** data-align-group attribute for alignment tests */
   alignGroup?: string;
   /** Additional container classes */
@@ -47,11 +53,12 @@ export interface AppHeaderProps {
 }
 
 /**
- * Shared AppHeader for H1T MICRO (Cobalt Sign design system).
- * Supports 3 variants:
- * - "daily": phone ink block with logo + date nav + summary; desktop title + date buttons + actions.
- * - "sub": sub-screen with 44px back button, title, optional right action.
- * - "tab": main tabs without date nav (Profile, Training).
+ * Shared AppHeader for H1T MICRO (Cobalt Sign design system), IA v2 "Headers" rules.
+ * - "daily": the screens with an ink hero (Tổng quan, Nhật ký). Phone: ink band with the date nav and either the
+ *   wordmark (`wordmark`, Tổng quan only) or the screen's name. Desktop: plain title row on paper with date buttons.
+ * - "sub": pushed screens. Paper title row: 44 px back inline before the title, one subtitle line, actions right.
+ * - "tab": tab screens. Same row without a back button.
+ * `summary` (sub, tab) is an ink card below the row. Desktop never has an ink band.
  */
 export function AppHeader({
   variant = "daily",
@@ -70,6 +77,9 @@ export function AppHeader({
   footer,
   actions,
   desktopStat,
+  wordmark = false,
+  layout = "narrow",
+  flush = false,
   alignGroup,
   className = "",
 }: AppHeaderProps) {
@@ -98,178 +108,60 @@ export function AppHeader({
     canGoNext === false ||
     (canGoNext === undefined && resolvedDateLabel.startsWith("Hôm nay"));
 
-  // Desktop headers (tab and daily): a back row above the title for pushed screens. It sits above, not beside,
-  // the title, so the title keeps the left edge of the cards under it.
-  const desktopBackClass =
-    "-ml-1 mb-1 inline-flex min-h-[44px] items-center gap-1 rounded-lg bg-transparent border-0 pr-3 text-sm font-semibold text-secondary no-underline cursor-pointer hover:text-text transition-colors active:scale-[0.97]";
-  const desktopBackContent = (
-    <>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-        <path d="M15 5l-7 7 7 7" />
-      </svg>
-      {backLabel}
-    </>
+  // Back button, inline before the title (44 px target) on every screen and width.
+  const backClass =
+    "-ml-2 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border-0 bg-transparent text-text no-underline cursor-pointer hover:text-blue transition-colors active:scale-[0.97]";
+  const backIcon = (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+      <path d="M15 5l-7 7 7 7" />
+    </svg>
   );
-  const desktopBack = backHref ? (
-    <Link href={backHref} className={desktopBackClass}>
-      {desktopBackContent}
+  const back = backHref ? (
+    <Link href={backHref} aria-label={backLabel} className={backClass}>
+      {backIcon}
     </Link>
   ) : onBack ? (
-    <button type="button" onClick={onBack} className={desktopBackClass}>
-      {desktopBackContent}
+    <button type="button" onClick={onBack} aria-label={backLabel} className={backClass}>
+      {backIcon}
     </button>
   ) : null;
 
+  // Width of the title row. "narrow" follows the 560 px column (a phone, and centred pages on desktop); "wide"
+  // is left-aligned at the 32 px content gutter of the desktop grid. "flush" is for a page whose main already pads.
+  const rowWidth = layout === "wide" ? "max-w-[560px] mx-auto px-4 lg:max-w-[1240px] lg:mx-0 lg:px-8" : "max-w-[560px] mx-auto px-4";
+  const deskPad = flush ? "lg:max-w-none lg:mx-0 lg:px-0 lg:pt-0" : "lg:pt-8";
+
   // =========================================================================
-  // 1. "sub" VARIANT (Detail screens, setup steps)
+  // 1. "sub" and "tab" VARIANTS: a plain title row on paper, phone and desktop.
+  //    sub: pushed screens (back before the title). tab: a tab screen (no back, unless one is passed).
+  //    The wordmark never appears here; the title is the screen's name. An optional summary is an ink card below.
   // =========================================================================
-  if (variant === "sub") {
+  if (variant === "sub" || variant === "tab") {
     return (
-      <header
-        className={`bg-ink text-on-dark rounded-b-[20px] w-full flex-none select-none ${className}`}
-      >
-        <div className="w-full max-w-[560px] mx-auto px-4 pt-3 pb-5 flex flex-col gap-3">
-          {/* Top row: Back button left, optional right action */}
-          <div className="flex items-center justify-between min-h-[44px]">
-            {backHref ? (
-              <Link
-                href={backHref}
-                aria-label={backLabel}
-                className="w-11 h-11 -ml-2 rounded-lg text-on-dark flex items-center justify-center no-underline hover:text-sky transition-colors active:scale-[0.97]"
-              >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  aria-hidden="true"
+      <header className={`w-full flex-none select-none bg-page text-text ${className}`}>
+        <div className={`w-full pt-3 pb-3 flex flex-col gap-3 ${rowWidth} ${deskPad}`}>
+          {/* The row's left edge is the content edge, so it is the alignment member (the title sits after the back) */}
+          <div data-align-group={alignGroup} data-align-edge="left" className="flex items-center gap-2 min-h-[44px]">
+            {back}
+            <div className="min-w-0 flex-1">
+              {title && (
+                <h1
+                  className="m-0 font-display italic font-extrabold text-2xl lg:text-[32px] leading-tight uppercase tracking-tight text-text line-clamp-2"
                 >
-                  <path d="M15 5l-7 7 7 7" />
-                </svg>
-              </Link>
-            ) : onBack ? (
-              <button
-                type="button"
-                onClick={onBack}
-                aria-label={backLabel}
-                className="w-11 h-11 -ml-2 rounded-lg bg-transparent border-0 text-on-dark flex items-center justify-center cursor-pointer hover:text-sky transition-colors active:scale-[0.97]"
-              >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  aria-hidden="true"
-                >
-                  <path d="M15 5l-7 7 7 7" />
-                </svg>
-              </button>
-            ) : (
-              <div className="w-11 h-11" />
-            )}
-
-            {actions}
+                  {title}
+                </h1>
+              )}
+              {subtitle && (
+                <div className="m-0 mt-0.5 text-[13px] lg:text-sm leading-snug text-secondary">{subtitle}</div>
+              )}
+            </div>
+            {actions ? <div className="flex shrink-0 items-center gap-2">{actions}</div> : null}
           </div>
-
-          {/* Title, step bars and subtitle. Title and subtitle share alignGroup for the alignment check */}
-          {title && (
-            <h1
-              data-align-group={alignGroup}
-              data-align-edge="left"
-              className="m-0 font-display italic font-extrabold text-[28px] leading-tight text-on-dark uppercase tracking-tight"
-            >
-              {title}
-            </h1>
-          )}
-          {progress && <StepBars current={progress.current} total={progress.total} tone="dark" />}
-          {subtitle && (
-            <p
-              data-align-group={alignGroup}
-              data-align-edge="left"
-              className="m-0 text-sm text-muted-subtitle leading-relaxed"
-            >
-              {subtitle}
-            </p>
-          )}
-
-          {summary}
+          {progress && <StepBars current={progress.current} total={progress.total} tone="light" />}
+          {summary && <div className="w-full rounded-2xl bg-ink p-4 text-on-dark">{summary}</div>}
           {footer}
         </div>
       </header>
-    );
-  }
-
-  // =========================================================================
-  // 2. "tab" VARIANT (Main tabs without a date: Profile, Training)
-  // =========================================================================
-  if (variant === "tab") {
-    return (
-      <>
-        {/* Mobile / Tablet ink block (<1024px) */}
-        <header
-          className={`bg-ink text-on-dark rounded-b-[20px] w-full flex-none lg:hidden select-none ${className}`}
-        >
-          <div className="w-full max-w-[560px] mx-auto px-4 pt-3 pb-5 flex flex-col gap-2.5">
-            {/* Row 1: Logo left, optional right action */}
-            <div className="flex items-center justify-between min-h-[44px]">
-              <div
-                data-align-group={alignGroup}
-                data-align-edge="left"
-                className="font-display italic font-black text-xl uppercase tracking-tight"
-              >
-                H1T <span className="text-sky">MICRO</span>
-              </div>
-              {actions ? (
-                <div>{actions}</div>
-              ) : null}
-            </div>
-
-            {/* Title & Subtitle */}
-            {title && (
-              <div className="pt-0.5">
-                <h1 className="m-0 font-display italic font-black text-3xl uppercase tracking-tight text-on-dark">
-                  {title}
-                </h1>
-                {subtitle && (
-                  <div className="text-xs font-semibold text-muted-on-dark mt-1">
-                    {subtitle}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {summary}
-          </div>
-        </header>
-
-        {/* Desktop Header (≥1024px) */}
-        <header
-          className={`hidden lg:flex flex-wrap items-center justify-between gap-3 w-full max-w-[1240px] select-none ${className}`}
-        >
-          <div>
-            {desktopBack}
-            <h1
-              data-align-group={alignGroup}
-              data-align-edge="left"
-              className="m-0 font-display italic font-extrabold text-[34px] leading-tight text-text uppercase"
-            >
-              {title}
-            </h1>
-            {subtitle && (
-              <div className="text-sm text-secondary mt-0.5">
-                {subtitle}
-              </div>
-            )}
-          </div>
-          {actions}
-        </header>
-      </>
     );
   }
 
@@ -288,9 +180,18 @@ export function AppHeader({
             data-align-group={alignGroup}
             className="flex items-center justify-between min-h-[44px] w-full"
           >
-            <div className="font-display italic font-black text-xl uppercase tracking-tight">
-              H1T <span className="text-sky">MICRO</span>
-            </div>
+            {wordmark ? (
+              <>
+                <div aria-hidden="true" className="font-display italic font-black text-xl uppercase tracking-tight">
+                  H1T <span className="text-sky">MICRO</span>
+                </div>
+                {title && <h1 className="sr-only">{title}</h1>}
+              </>
+            ) : (
+              <h1 className="m-0 font-display italic font-extrabold text-2xl leading-tight uppercase tracking-tight text-on-dark">
+                {title}
+              </h1>
+            )}
             <div className="flex items-center">
               <button
                 type="button"
@@ -363,13 +264,6 @@ export function AppHeader({
             </div>
           </div>
 
-          {/* Optional Title (e.g. "VI CHẤT") between Row 1 and Summary */}
-          {title && (
-            <h1 className="font-display italic font-extrabold text-2xl uppercase tracking-tight text-on-dark m-0">
-              {title}
-            </h1>
-          )}
-
           {/* Row 2: Page summary slot (Option B inset panel) */}
           {summary && (
             <div className="w-full bg-surface-dark rounded-2xl p-3.5 sm:p-4">
@@ -382,28 +276,31 @@ export function AppHeader({
 
       {/* Desktop Header (≥1024px) */}
       <header
-        className={`hidden lg:flex flex-wrap items-center gap-3 w-full max-w-[1240px] select-none ${className}`}
+        className={`hidden lg:flex flex-wrap items-center gap-3 w-full max-w-[1240px] select-none bg-page ${
+          flush ? "" : "px-8 pt-8"
+        } ${className}`}
       >
-        <div className="flex-1 min-w-[260px]">
-          {desktopBack}
-          <h1
-            data-align-group={alignGroup}
-            data-align-edge="left"
-            className="m-0 font-display italic font-extrabold text-[34px] leading-tight text-text uppercase"
-          >
-            {title || "HÔM NAY"}
-          </h1>
-          {subtitle && (
-            <div className="text-sm text-secondary">
-              {subtitle}
-            </div>
-          )}
+        <div
+          data-align-group={alignGroup}
+          data-align-edge="left"
+          className="flex flex-1 min-w-[260px] items-center gap-2"
+        >
+          {back}
+          <div className="min-w-0">
+            <h1
+              className="m-0 font-display italic font-extrabold text-[32px] leading-tight text-text uppercase"
+            >
+              {title}
+            </h1>
+            {subtitle && <div className="mt-0.5 text-sm text-secondary">{subtitle}</div>}
+          </div>
         </div>
 
         {/* Optional desktop stat (e.g. Vi chất 8/22) */}
         {desktopStat}
 
-        {/* Date nav buttons */}
+        {/* Date nav buttons (only on screens that move between days) */}
+        {(onPrev || onNext) && (
         <div className="flex items-center gap-1.5">
           <button
             type="button"
@@ -456,6 +353,7 @@ export function AppHeader({
             </svg>
           </button>
         </div>
+        )}
 
         {/* Desktop actions slot (e.g. "Chép hôm qua", "+ Thêm món") */}
         {actions}

@@ -119,3 +119,21 @@ Checked with ui-ux-pro-max (§2 touch: 44 px targets, 8 px gaps; §9 navigation:
 ### Pushed screens (Vi chất, Ngày tập, Xu hướng)
 - Phone: AppHeader `sub` with a 44 px back button (chevron, `aria-label="Quay lại"`), the title and one subtitle line. Desktop: a "‹ Quay lại" text button (44 px tall) above the title in the page header, so the title keeps the left edge of the cards under it.
 - Back returns to the previous in-app page; with no in-app history (direct link, reload) it goes to the owning tab (`/`, or `/micros` for a nutrient detail).
+
+## Headers (design decisions, cc2-08)
+Checked with ui-ux-pro-max (§1 accessibility: one h1, 44 px back with aria-label; §2 touch; §9 navigation: predictable back, title says where you are). Cobalt Sign tokens only.
+
+### Sizes
+| | Phone (< 1024) | Desktop (≥ 1024) |
+|---|---|---|
+| Title | Saira Condensed italic 800, 24 px, uppercase, `leading-tight`, 2 lines max | same face, 32 px |
+| Subtitle | one line, 13 px, `text-secondary` | 14 px |
+| Back | 44 × 44 px chevron, `aria-label="Quay lại"`, inline before the title (`-ml-2` so the glyph sits on the content edge) | same |
+| Row | paper (`bg-page`), `pt-3 pb-3`, 16 px side padding, 560 px column | `pt-8` (32 px) on every screen; 32 px gutter, content column left (wide) or the centred 560 px column (narrow) |
+
+### Rules as built
+- `AppHeader` `daily`: the ink band on a phone, only for `/` and `/diary`. Row 1 is the H1T MICRO wordmark on `/` (the h1 "Tổng quan" is sr-only there) and the title "Nhật ký" on `/diary`, with the date nav on the right. Desktop: plain title row with date buttons.
+- `AppHeader` `sub` (pushed) and `tab` (tab screens): the same paper row at every width. `sub` has the back button before the title; `tab` has none. `actions` sit right. `summary` (Vi chất 8/22, Ngày tập duration and salt, nutrient amount) is an ink card under the row, never a band.
+- No wordmark outside `/` on a phone; the sidebar carries it on desktop. The Pro page no longer shows a wordmark lockup.
+- A screen whose main already has 32 px padding passes `flush`; a left-aligned content grid passes `layout="wide"`.
+- Alignment: `data-align-group` is on the title row (its left edge is the content edge), not the h1, because the back button now sits before the title. `food-header` and `entry-header` groups are gone (they only compared a title with its own subtitle).
