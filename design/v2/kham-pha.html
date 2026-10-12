@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Khám phá · IA v2 mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&family=Saira+Condensed:wght@800;900&display=swap" rel="stylesheet">
+<style>
+/* Tokens copied from apps/web/app/globals.css @theme (Cobalt Sign). Values are identical. */
+:root {
+  --color-page: #F3F1EC;             /* --color-page (same as --color-paper) */
+  --color-card: #FFFFFF;             /* --color-card */
+  --color-card-border: #E0DACF;      /* --color-card-border */
+  --color-ink: #111317;              /* --color-ink */
+  --color-text: #141519;             /* --color-text */
+  --color-secondary: #6B6A66;        /* --color-secondary */
+  --color-blue: #1238D6;             /* --color-blue (same as --color-cobalt): primary action */
+  --color-sky: #9EC3FF;              /* --color-sky */
+  --color-destructive: #D93F44;      /* --color-destructive */
+  --color-destructive-text: #C4373C; /* --color-destructive-text */
+  --color-level-blue: #1238D6;       /* --color-level-blue */
+  --color-level-empty: #E6E1D7;      /* --color-level-empty */
+  --color-level-blue-dark: #5C86F2;  /* --color-level-blue-dark */
+  --color-level-empty-dark: #2A2C31; /* --color-level-empty-dark */
+  --color-divider: #E0DACF;          /* --color-divider */
+  --color-muted-subtitle: #C9CDD6;   /* --color-muted-subtitle */
+  --color-muted-on-dark: #8C92A0;    /* --color-muted-on-dark */
+  --color-on-dark: #FFFFFF;          /* --color-on-dark */
+  --color-grabber: #D5D8DF;          /* --color-grabber */
+  --color-surface-dark: #1A1C22;     /* --color-surface-dark */
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--color-page); color: var(--color-text); font-family: 'Manrope', -apple-system, 'Segoe UI', Roboto, sans-serif; -webkit-font-smoothing: antialiased; }
+button, a, input { font: inherit; color: inherit; text-decoration: none; cursor: pointer; }
+button { background: none; border: 0; padding: 0; margin: 0; }
+:focus-visible { outline: 3px solid var(--color-blue); outline-offset: 2px; }
+svg { display: block; flex: none; }
+ul, ol { margin: 0; padding: 0; list-style: none; }
+h1, h2, h3, h4, p { margin: 0; }
+.display { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-variant-numeric: tabular-nums; }
+
+/* Board chrome (not part of the screen) */
+.board { padding-bottom: 48px; }
+.board-head { padding: 24px 16px 8px; max-width: 960px; }
+.board-head h1 { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-size: 28px; text-transform: uppercase; margin-bottom: 8px; }
+.board-head p { color: var(--color-secondary); font-size: 14px; line-height: 1.5; }
+.state { padding: 24px 0 8px; border-top: 1px solid var(--color-divider); }
+.state h2 { font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--color-secondary); padding: 0 16px; margin-bottom: 12px; }
+.pair { display: flex; flex-wrap: wrap; gap: 40px; align-items: flex-start; }
+.fig { margin: 0; min-width: 0; }
+.fig figcaption { font-size: 13px; font-weight: 600; color: var(--color-secondary); padding: 0 16px 8px; }
+.fig-phone { width: 390px; max-width: 100%; flex: none; }
+.fig-desktop { max-width: 100%; overflow-x: auto; }
+.phone { width: 100%; background: var(--color-page); display: flex; flex-direction: column; box-shadow: 0 0 0 1px var(--color-card-border); }
+.desktop { width: 1280px; min-height: 860px; background: var(--color-page); display: flex; box-shadow: 0 0 0 1px var(--color-card-border); }
+
+/* Phone header (ink block) */
+.hdr { background: var(--color-ink); color: var(--color-on-dark); padding: 16px 16px 20px; border-radius: 0 0 20px 20px; display: flex; flex-direction: column; gap: 12px; }
+.brand { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-size: 22px; line-height: 1; letter-spacing: .02em; }
+.brand span { color: var(--color-sky); }
+.ptitle { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-size: 28px; line-height: 1; text-transform: uppercase; }
+.subhdr { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.ico-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; color: var(--color-on-dark); flex: none; }
+.ico-btn.line { border: 1px solid var(--color-card-border); color: var(--color-text); background: var(--color-card); }
+.hdr-sub { font-size: 14px; color: var(--color-muted-subtitle); }
+
+/* Body and cards */
+.body { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+.card { background: var(--color-card); border: 1px solid var(--color-card-border); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px; color: var(--color-text); }
+.card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; }
+.card-head h4 { font-size: 16px; font-weight: 700; }
+.cap { font-size: 13px; font-weight: 700; color: var(--color-secondary); letter-spacing: .04em; text-transform: uppercase; }
+.sub { font-size: 14px; color: var(--color-secondary); }
+.link { color: var(--color-blue); font-size: 14px; font-weight: 700; min-height: 44px; display: inline-flex; align-items: center; }
+.frow { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 8px 0; border-top: 1px solid var(--color-divider); }
+.card > :first-child.frow, .card > .card-head + .frow { border-top: 0; }
+.frow .main-col { flex: 1; min-width: 0; }
+.frow .t { font-size: 15px; font-weight: 600; }
+.frow .s { font-size: 13px; color: var(--color-secondary); margin-top: 2px; }
+.kcal { font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.add-btn { width: 44px; height: 44px; border-radius: 999px; background: var(--color-blue); color: var(--color-on-dark); display: inline-flex; align-items: center; justify-content: center; flex: none; }
+.chev { color: var(--color-secondary); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: 999px; font-size: 15px; font-weight: 700; white-space: nowrap; }
+.btn-primary { min-height: 52px; background: var(--color-blue); color: var(--color-on-dark); width: 100%; }
+.btn-secondary { background: var(--color-card); border: 1px solid var(--color-card-border); color: var(--color-text); }
+
+/* Search and chips */
+.field { display: flex; flex-direction: column; gap: 8px; }
+.field > label { font-size: 13px; font-weight: 600; color: var(--color-secondary); }
+.search { height: 48px; border-radius: 10px; border: 2px solid var(--color-grabber); background: var(--color-card); display: flex; align-items: center; gap: 8px; padding: 0 12px; }
+.search input { border: 0; outline: 0; flex: 1; min-width: 0; height: 44px; background: transparent; font-size: 16px; color: var(--color-text); padding: 0; }
+.main-col { display: flex; flex-direction: column; justify-content: center; min-height: 44px; }
+.search input::placeholder { color: var(--color-secondary); opacity: 1; }
+.chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; }
+.chips::-webkit-scrollbar { display: none; }
+.chip { min-height: 44px; padding: 0 16px; border-radius: 999px; display: inline-flex; align-items: center; font-size: 15px; font-weight: 700; white-space: nowrap; border: 1px solid var(--color-card-border); background: var(--color-card); color: var(--color-text); flex: none; }
+.chip[aria-pressed="true"] { background: var(--color-ink); color: var(--color-on-dark); border-color: var(--color-ink); }
+
+/* Empty state, facts list, nutrient rows */
+.empty { display: flex; flex-direction: column; gap: 12px; padding: 4px 0 0; }
+.gridtwo { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
+.nut { display: flex; flex-direction: column; gap: 6px; padding: 10px 0; border-top: 1px solid var(--color-divider); }
+.nut-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 14px; }
+.nut-top b { font-weight: 600; }
+.nut-top span { font-variant-numeric: tabular-nums; color: var(--color-secondary); white-space: nowrap; }
+.nut-top span strong { color: var(--color-text); font-weight: 700; }
+.nut-na span { color: var(--color-secondary); }
+.seg { display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; height: 8px; }
+.seg i { display: block; background: var(--color-level-empty); transform: skewX(-14deg); }
+.n0 i { background: var(--color-level-empty); }
+.n1 i:nth-child(-n+1), .n2 i:nth-child(-n+2), .n3 i:nth-child(-n+3), .n4 i:nth-child(-n+4), .n5 i:nth-child(-n+5),
+.n6 i:nth-child(-n+6), .n7 i:nth-child(-n+7), .n8 i:nth-child(-n+8), .n9 i:nth-child(-n+9), .n10 i:nth-child(-n+10) { background: var(--lvl); }
+.macro-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.macro-row div { display: flex; flex-direction: column; gap: 2px; }
+.macro-row b { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-size: 22px; line-height: 1; font-variant-numeric: tabular-nums; }
+.macro-row span { font-size: 13px; color: var(--color-secondary); }
+.fav { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; color: var(--color-on-dark); }
+.src { display: inline-flex; align-items: center; min-height: 28px; padding: 0 10px; border-radius: 999px; background: var(--color-card-border); font-size: 13px; font-weight: 700; color: var(--color-text); }
+
+/* Bottom nav (phone) */
+.nav { background: var(--color-ink); color: var(--color-muted-on-dark); display: grid; grid-template-columns: repeat(5, 1fr); align-items: center; height: 72px; padding: 0 8px; flex: none; }
+.nav a { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 56px; font-size: 12px; font-weight: 600; color: var(--color-muted-on-dark); }
+.nav a[aria-current="page"] { color: var(--color-on-dark); }
+.nav a[aria-current="page"]::before { content: ""; position: absolute; top: 0; width: 22px; height: 3px; background: var(--color-sky); transform: skewX(-14deg); }
+.fab { width: 56px; height: 56px; border-radius: 50%; background: var(--color-blue); color: var(--color-on-dark); display: flex; align-items: center; justify-content: center; justify-self: center; margin-top: -20px; }
+
+/* Desktop */
+.side { width: 240px; flex: none; background: var(--color-ink); color: var(--color-on-dark); padding: 24px; display: flex; flex-direction: column; gap: 24px; }
+.side nav { display: flex; flex-direction: column; gap: 4px; }
+.side nav a { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 12px; border-radius: 12px; font-size: 15px; font-weight: 600; color: var(--color-muted-on-dark); }
+.side nav a[aria-current="page"] { background: var(--color-surface-dark); color: var(--color-on-dark); }
+.main { flex: 1; min-width: 0; padding: 32px 40px; display: flex; flex-direction: column; gap: 20px; }
+.d-title { font-size: 40px; line-height: 1; text-transform: uppercase; }
+.d-sub { font-size: 14px; color: var(--color-secondary); margin-top: 8px; }
+.grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 20px; align-items: start; }
+.s5 { grid-column: span 5; }
+.s7 { grid-column: span 7; }
+.s12 { grid-column: span 12; }
+.desktop .card { padding: 20px; }
+.desktop .frow { min-height: 60px; }
+.desktop .d-col { display: flex; flex-direction: column; gap: 20px; }
+.desktop .search { height: 52px; }
+.desktop .gridtwo { gap: 0 32px; }
+.desktop .card-head h4 { font-size: 18px; }
+</style>
+</head>
+<body>
+<div class="board">
+  <header class="board-head">
+    <h1>Khám phá</h1>
+    <p>IA v2, tab 3 (new; replaces the /add catalog entry and /foods). Search, categories, recents, favourites, my foods, and a nutrient-led list. Food detail shows per-portion macros and all 22 vi chất as a share of the daily target. Values come from lib/mock/foods.ts, scaled to the portion. A nutrient with no mock value shows a dash, not an invented number. Copy is Vietnamese; these notes are English.</p>
+  </header>
+
+  <!-- 1. Khám phá -->
+  <section class="state">
+    <h2>1 · Khám phá (tab)</h2>
+    <div class="pair">
+      <figure class="fig fig-phone">
+        <figcaption>390 px · phone</figcaption>
+        <div class="phone">
+          <header class="hdr">
+            <div class="brand">H1T <span>MICRO</span></div>
+            <h3 class="ptitle">Khám phá</h3>
+          </header>
+
+          <div class="body">
+            <div class="field">
+              <label for="p-q">Tìm món</label>
+              <div class="search">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="color:var(--color-secondary)"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>
+                <input id="p-q" type="search" placeholder="Tìm món: cơm, trứng, chả là…">
+              </div>
+            </div>
+
+            <div class="chips" role="group" aria-label="Lọc theo nhóm">
+              <button class="chip" aria-pressed="true">Tất cả</button>
+              <button class="chip" aria-pressed="false">Yêu thích</button>
+              <button class="chip" aria-pressed="false">Tinh bột</button>
+              <button class="chip" aria-pressed="false">Đạm</button>
+              <button class="chip" aria-pressed="false">Sữa &amp; chế phẩm</button>
+              <button class="chip" aria-pressed="false">Rau củ</button>
+              <button class="chip" aria-pressed="false">Trái cây</button>
+              <button class="chip" aria-pressed="false">Món Việt</button>
+            </div>
+
+            <section class="card" aria-labelledby="p-recent">
+              <div class="card-head"><h4 id="p-recent">Gần đây</h4></div>
+              <ul>
+                <li class="frow"><a class="main-col" href="#"><div class="t">Yến mạch</div><div class="s">60 g · USDA</div></a><span class="kcal">228 kcal</span><button class="add-btn" aria-label="Thêm Yến mạch 60 g"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></li>
+                <li class="frow"><a class="main-col" href="#"><div class="t">Yogurt kefir</div><div class="s">200 ml · VN FCT</div></a><span class="kcal">126 kcal</span><button class="add-btn" aria-label="Thêm Yogurt kefir 200 ml"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></li>
+                <li class="frow"><a class="main-col" href="#"><div class="t">Cơm gạo lứt</div><div class="s">150 g · VN FCT</div></a><span class="kcal">168 kcal</span><button class="add-btn" aria-label="Thêm Cơm gạo lứt 150 g"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></li>
+              </ul>
+            </section>
+
+            <section class="card" aria-labelledby="p-fav">
+              <div class="card-head"><h4 id="p-fav">Yêu thích</h4><a class="link" href="#">Xem tất cả</a></div>
+              <ul>
+                <li class="frow"><a class="main-col" href="#"><div class="t">Thịt bò nạc</div><div class="s">150 g · VN FCT</div></a><span class="kcal">320 kcal</span><button class="add-btn" aria-label="Thêm Thịt bò nạc 150 g"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></li>
+                <li class="frow"><a class="main-col" href="#"><div class="t">Chuối</div><div class="s">1 quả · USDA</div></a><span class="kcal">105 kcal</span><button class="add-btn" aria-label="Thêm Chuối 1 quả"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></li>
+              </ul>
+            </section>
+
+            <section class="card" aria-labelledby="p-mine">
+              <div class="card-head"><h4 id="p-mine">Món của tôi</h4></div>
+              <div class="empty">
+                <p class="sub">Chưa có món nào. Tạo món mới để ghi món tự nấu hoặc món không có trong danh sách.</p>
+                <button class="btn btn-secondary" style="align-self:flex-start">Tạo món mới</button>
+              </div>
+            </section>
+
+            <section class="card" aria-labelledby="p-canxi">
+              <div class="card-head"><h4 id="p-canxi">Giàu Canxi</h4><span class="sub">mg / 100 g</span></div>
+              <ul>
+                <li class="frow"><a class="main-col" href="#"><div class="t">Whey Protein Isolate</div><div class="s">36 % mục tiêu mỗi 100 g</div></a><span class="kcal">433</span></li>
+                <li class="frow"><a class="main-col" href="#"><div class="t">Đậu hũ trắng</div><div class="s">29 % mục tiêu mỗi 100 g</div></a><span class="kcal">350</span></li>
+                <li class="frow"><a class="main-col" href="#"><div class="t">Hạnh nhân</div><div class="s">22 % mục tiêu mỗi 100 g</div></a><span class="kcal">269</span></li>
+                <li class="frow"><a class="main-col" href="#"><div class="t">Mật mía</div><div class="s">17 % mục tiêu mỗi 100 g</div></a><span class="kcal">205</span></li>
+                <li class="frow"><a class="main-col" href="#"><div class="t">Yogurt kefir</div><div class="s">10 % mục tiêu mỗi 100 g</div></a><span class="kcal">120</span></li>
+              </ul>
+            </section>
+          </div>
+
+          <nav class="nav" aria-label="Điều hướng chính">
+            <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
+            <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
+            <button class="fab" aria-label="Thêm món"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+            <a href="#" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
+            <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
+          </nav>
+        </div>
+      </figure>
+
+      <figure class="fig fig-desktop">
+        <figcaption>1280 px · desktop</figcaption>
+        <div class="desktop">
+          <aside class="side">
+            <div class="brand">H1T <span>MICRO</span></div>
+            <nav aria-label="Điều hướng chính">
+              <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
+              <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
+              <a href="#" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
+              <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
+            </nav>
+          </aside>
+          <div class="main">
+            <div>
+              <h3 class="ptitle d-title">Khám phá</h3>
+              <p class="d-sub">Tìm món, lọc theo nhóm, hoặc xem món giàu vi chất</p>
+            </div>
+            <div class="field" style="max-width:640px">
+              <label for="d-q">Tìm món</label>
+              <div class="search">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="color:var(--color-secondary)"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>
+                <input id="d-q" type="search" placeholder="Tìm món: cơm, trứng, chả là…">
+              </div>
+            </div>
+            <div class="chips" role="group" aria-label="Lọc theo nhóm">
+              <button class="chip" aria-pressed="true">Tất cả</button>
+              <button class="chip" aria-pressed="false">Yêu thích</button>
+              <button class="chip" aria-pressed="false">Tinh bột</button>
+              <button class="chip" aria-pressed="false">Đạm</button>
+              <button class="chip" aria-pressed="false">Sữa &amp; chế phẩm</button>
+              <button class="chip" aria-pressed="false">Rau củ</button>
+              <button class="chip" aria-pressed="false">Trái cây</button>
+              <button class="chip" aria-pressed="false">Món Việt</button>
+            </div>
+            <div class="grid">
+              <div class="s7 d-col">
+                <section class="card" aria-labelledby="d-recent">
+                  <div class="card-head"><h4 id="d-recent">Gần đây</h4></div>
+                  <ul>
+                    <li class="frow"><a class="main-col" href="#"><div class="t">Yến mạch</div><div class="s">60 g · USDA</div></a><span class="kcal">228 kcal</span><button class="add-btn" aria-label="Thêm Yến mạch 60 g"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></li>
+                    <li class="frow"><a class="main-col" href="#"><div class="t">Yogurt kefir</div><div class="s">200 ml · VN FCT</div></a><span class="kcal">126 kcal</span><button class="add-btn" aria-label="Thêm Yogurt kefir 200 ml"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></li>
+                    <li class="frow"><a class="main-col" href="#"><div class="t">Cơm gạo lứt</div><div class="s">150 g · VN FCT</div></a><span class="kcal">168 kcal</span><button class="add-btn" aria-label="Thêm Cơm gạo lứt 150 g"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></li>
+                  </ul>
+                </section>
+                <section class="card" aria-labelledby="d-fav">
+                  <div class="card-head"><h4 id="d-fav">Yêu thích</h4><a class="link" href="#">Xem tất cả</a></div>
+                  <ul>
+                    <li class="frow"><a class="main-col" href="#"><div class="t">Thịt bò nạc</div><div class="s">150 g · VN FCT</div></a><span class="kcal">320 kcal</span><button class="add-btn" aria-label="Thêm Thịt bò nạc 150 g"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></li>
+                    <li class="frow"><a class="main-col" href="#"><div class="t">Chuối</div><div class="s">1 quả · USDA</div></a><span class="kcal">105 kcal</span><button class="add-btn" aria-label="Thêm Chuối 1 quả"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></li>
+                  </ul>
+                </section>
+              </div>
+              <div class="s5 d-col">
+                <section class="card" aria-labelledby="d-mine">
+                  <div class="card-head"><h4 id="d-mine">Món của tôi</h4></div>
+                  <div class="empty">
+                    <p class="sub">Chưa có món nào. Tạo món mới để ghi món tự nấu hoặc món không có trong danh sách.</p>
+                    <button class="btn btn-secondary" style="align-self:flex-start">Tạo món mới</button>
+                  </div>
+                </section>
+                <section class="card" aria-labelledby="d-canxi">
+                  <div class="card-head"><h4 id="d-canxi">Giàu Canxi</h4><span class="sub">mg / 100 g</span></div>
+                  <ul>
+                    <li class="frow"><a class="main-col" href="#"><div class="t">Whey Protein Isolate</div><div class="s">36 % mục tiêu mỗi 100 g</div></a><span class="kcal">433</span></li>
+                    <li class="frow"><a class="main-col" href="#"><div class="t">Đậu hũ trắng</div><div class="s">29 % mục tiêu mỗi 100 g</div></a><span class="kcal">350</span></li>
+                    <li class="frow"><a class="main-col" href="#"><div class="t">Hạnh nhân</div><div class="s">22 % mục tiêu mỗi 100 g</div></a><span class="kcal">269</span></li>
+                    <li class="frow"><a class="main-col" href="#"><div class="t">Mật mía</div><div class="s">17 % mục tiêu mỗi 100 g</div></a><span class="kcal">205</span></li>
+                    <li class="frow"><a class="main-col" href="#"><div class="t">Yogurt kefir</div><div class="s">10 % mục tiêu mỗi 100 g</div></a><span class="kcal">120</span></li>
+                  </ul>
+                </section>
+              </div>
+            </div>
+          </div>
+        </div>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 2. Food detail -->
+  <section class="state">
+    <h2>2 · Food detail: Yến mạch</h2>
+    <div class="pair">
+      <figure class="fig fig-phone">
+        <figcaption>390 px · phone</figcaption>
+        <div class="phone">
+          <header class="hdr">
+            <div class="subhdr">
+              <a class="ico-btn" href="#" aria-label="Quay lại"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></a>
+              <button class="fav" aria-pressed="true" aria-label="Bỏ khỏi yêu thích"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></button>
+            </div>
+            <h3 class="ptitle">Yến mạch</h3>
+            <p class="hdr-sub">Tinh bột · USDA · 60 g mỗi khẩu phần</p>
+          </header>
+
+          <div class="body">
+            <div class="chips" role="group" aria-label="Khẩu phần">
+              <button class="chip" aria-pressed="true">60 g</button>
+              <button class="chip" aria-pressed="false">1 chén · 40 g</button>
+              <button class="chip" aria-pressed="false">100 g</button>
+            </div>
+
+            <section class="card" aria-labelledby="f-macro">
+              <div class="card-head"><h4 id="f-macro">Mỗi khẩu phần 60 g</h4><span class="display" style="font-size:28px;color:var(--color-text)">228 kcal</span></div>
+              <div class="macro-row">
+                <div><b>8 g</b><span>Đạm</span></div>
+                <div><b>40 g</b><span>Tinh bột</span></div>
+                <div><b>4 g</b><span>Béo</span></div>
+                <div><b>6 g</b><span>Chất xơ</span></div>
+              </div>
+            </section>
+
+            <section class="card" aria-labelledby="f-src">
+              <div class="card-head"><h4 id="f-src">Nguồn tốt của</h4></div>
+              <div class="chips" style="flex-wrap:wrap;overflow:visible">
+                <span class="src">Phốt pho · 35 %</span>
+                <span class="src">Sắt · 32 %</span>
+                <span class="src">Vitamin B1 · 23 %</span>
+              </div>
+            </section>
+
+            <section class="card" aria-labelledby="f-vc">
+              <div class="card-head"><h4 id="f-vc">Vi chất trong 1 khẩu phần</h4><span class="sub">% mục tiêu</span></div>
+              <div class="cap" style="margin-top:4px">Khoáng chất</div>
+              <div class="nut"><div class="nut-top"><b>Natri</b><span><strong>3,6 mg</strong> · 0,1 %</span></div><div class="seg n0" style="--lvl:var(--color-level-blue)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+              <div class="nut"><div class="nut-top"><b>Sắt</b><span><strong>2,6 mg</strong> · 32 %</span></div><div class="seg n3" style="--lvl:var(--color-level-blue)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+              <div class="nut"><div class="nut-top"><b>Kẽm</b><span><strong>2,2 mg</strong> · 18 %</span></div><div class="seg n1" style="--lvl:var(--color-level-blue)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+              <div class="nut"><div class="nut-top"><b>Phốt pho</b><span><strong>246 mg</strong> · 35 %</span></div><div class="seg n3" style="--lvl:var(--color-level-blue)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+              <div class="nut nut-na"><div class="nut-top"><b>Selen</b><span>—</span></div></div>
+              <div class="nut nut-na"><div class="nut-top"><b>Đồng</b><span>—</span></div></div>
+              <div class="nut"><div class="nut-top"><b>Kali</b><span><strong>210 mg</strong> · 4 %</span></div><div class="seg n0" style="--lvl:var(--color-level-blue)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+              <div class="nut"><div class="nut-top"><b>Magie</b><span><strong>83 mg</strong> · 14 %</span></div><div class="seg n1" style="--lvl:var(--color-level-blue)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+              <div class="nut nut-na"><div class="nut-top"><b>Canxi</b><span>—</span></div></div>
+              <div class="nut nut-na"><div class="nut-top"><b>Mangan</b><span>—</span></div></div>
+              <div class="cap" style="margin-top:8px">Vitamin</div>
+              <div class="nut"><div class="nut-top"><b>Vitamin B1</b><span><strong>0,28 mg</strong> · 23 %</span></div><div class="seg n2" style="--lvl:var(--color-level-blue)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+              <div class="nut nut-na"><div class="nut-top"><b>Vitamin B2, B3, B5, B6, B12</b><span>—</span></div></div>
+              <div class="nut nut-na"><div class="nut-top"><b>Vitamin A, C, D, E, K, Folate</b><span>—</span></div></div>
+              <p class="sub" style="padding-top:8px;border-top:1px solid var(--color-divider)">Chưa có dữ liệu cho 15 trong 22 vi chất.</p>
+            </section>
+
+            <button class="btn btn-primary">Thêm vào Bữa sáng</button>
+          </div>
+
+          <nav class="nav" aria-label="Điều hướng chính">
+            <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
+            <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
+            <button class="fab" aria-label="Thêm món"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+            <a href="#" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
+            <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
+          </nav>
+        </div>
+      </figure>
+
+      <figure class="fig fig-desktop">
+        <figcaption>1280 px · desktop</figcaption>
+        <div class="desktop">
+          <aside class="side">
+            <div class="brand">H1T <span>MICRO</span></div>
+            <nav aria-label="Điều hướng chính">
+              <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
+              <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
+              <a href="#" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
+              <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
+            </nav>
+          </aside>
+          <div class="main">
+            <div class="subhdr" style="gap:12px;justify-content:flex-start">
+              <a class="ico-btn line" href="#" aria-label="Quay lại"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></a>
+              <div>
+                <h3 class="ptitle d-title">Yến mạch</h3>
+                <p class="d-sub">Tinh bột · USDA · 60 g mỗi khẩu phần</p>
+              </div>
+              <button class="fav" aria-pressed="true" aria-label="Bỏ khỏi yêu thích" style="color:var(--color-blue);border:1px solid var(--color-card-border);background:var(--color-card);margin-left:auto"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></button>
+            </div>
+            <div class="grid">
+              <div class="s5 d-col">
+                <div class="chips" role="group" aria-label="Khẩu phần" style="flex-wrap:wrap;overflow:visible">
+                  <button class="chip" aria-pressed="true">60 g</button>
+                  <button class="chip" aria-pressed="false">1 chén · 40 g</button>
+                  <button class="chip" aria-pressed="false">100 g</button>
+                </div>
+                <section class="card" aria-labelledby="df-macro">
+                  <div class="card-head"><h4 id="df-macro">Mỗi khẩu phần 60 g</h4><span class="display" style="font-size:32px">228 kcal</span></div>
+                  <div class="macro-row">
+                    <div><b>8 g</b><span>Đạm</span></div>
+                    <div><b>40 g</b><span>Tinh bột</span></div>
+                    <div><b>4 g</b><span>Béo</span></div>
+                    <div><b>6 g</b><span>Chất xơ</span></div>
+                  </div>
+                </section>
+                <section class="card" aria-labelledby="df-src">
+                  <div class="card-head"><h4 id="df-src">Nguồn tốt của</h4></div>
+                  <div class="chips" style="flex-wrap:wrap;overflow:visible">
+                    <span class="src">Phốt pho · 35 %</span>
+                    <span class="src">Sắt · 32 %</span>
+                    <span class="src">Vitamin B1 · 23 %</span>
+                  </div>
+                </section>
+                <button class="btn btn-primary" style="width:auto;align-self:flex-start;padding:0 28px">Thêm vào Bữa sáng</button>
+              </div>
+              <section class="card s7" aria-labelledby="df-vc">
+                <div class="card-head"><h4 id="df-vc">Vi chất trong 1 khẩu phần</h4><span class="sub">% mục tiêu · Chưa có dữ liệu cho 15 trong 22</span></div>
+                <div class="gridtwo">
+                  <div>
+                    <div class="cap" style="margin-top:4px">Khoáng chất</div>
+                    <div class="nut"><div class="nut-top"><b>Natri</b><span><strong>3,6 mg</strong> · 0,1 %</span></div><div class="seg n0" style="--lvl:var(--color-level-blue)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+                    <div class="nut"><div class="nut-top"><b>Sắt</b><span><strong>2,6 mg</strong> · 32 %</span></div><div class="seg n3" style="--lvl:var(--color-level-blue)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+                    <div class="nut"><div class="nut-top"><b>Kẽm</b><span><strong>2,2 mg</strong> · 18 %</span></div><div class="seg n1" style="--lvl:var(--color-level-blue)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+                    <div class="nut"><div class="nut-top"><b>Phốt pho</b><span><strong>246 mg</strong> · 35 %</span></div><div class="seg n3" style="--lvl:var(--color-level-blue)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+                    <div class="nut nut-na"><div class="nut-top"><b>Selen</b><span>—</span></div></div>
+                    <div class="nut nut-na"><div class="nut-top"><b>Đồng</b><span>—</span></div></div>
+                    <div class="nut"><div class="nut-top"><b>Kali</b><span><strong>210 mg</strong> · 4 %</span></div><div class="seg n0" style="--lvl:var(--color-level-blue)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+                    <div class="nut"><div class="nut-top"><b>Magie</b><span><strong>83 mg</strong> · 14 %</span></div><div class="seg n1" style="--lvl:var(--color-level-blue)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+                    <div class="nut nut-na"><div class="nut-top"><b>Canxi</b><span>—</span></div></div>
+                    <div class="nut nut-na"><div class="nut-top"><b>Mangan</b><span>—</span></div></div>
+                  </div>
+                  <div>
+                    <div class="cap" style="margin-top:4px">Vitamin</div>
+                    <div class="nut"><div class="nut-top"><b>Vitamin B1</b><span><strong>0,28 mg</strong> · 23 %</span></div><div class="seg n2" style="--lvl:var(--color-level-blue)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+                    <div class="nut nut-na"><div class="nut-top"><b>Vitamin B2</b><span>—</span></div></div>
+                    <div class="nut nut-na"><div class="nut-top"><b>Vitamin B3</b><span>—</span></div></div>
+                    <div class="nut nut-na"><div class="nut-top"><b>Vitamin B5</b><span>—</span></div></div>
+                    <div class="nut nut-na"><div class="nut-top"><b>Vitamin B6</b><span>—</span></div></div>
+                    <div class="nut nut-na"><div class="nut-top"><b>Vitamin B12</b><span>—</span></div></div>
+                    <div class="nut nut-na"><div class="nut-top"><b>Vitamin A</b><span>—</span></div></div>
+                    <div class="nut nut-na"><div class="nut-top"><b>Folate (B9)</b><span>—</span></div></div>
+                    <div class="nut nut-na"><div class="nut-top"><b>Vitamin K</b><span>—</span></div></div>
+                    <div class="nut nut-na"><div class="nut-top"><b>Vitamin E</b><span>—</span></div></div>
+                    <div class="nut nut-na"><div class="nut-top"><b>Vitamin C</b><span>—</span></div></div>
+                    <div class="nut nut-na"><div class="nut-top"><b>Vitamin D</b><span>—</span></div></div>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+      </figure>
+    </div>
+  </section>
+</div>
+</body>
+</html>
