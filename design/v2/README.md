@@ -1,92 +1,156 @@
-# IA v2 screen designs (cc-15, revised cc-15b)
+# IA v2 screen designs (cc-15, revised cc-15b, redone cc-15c)
 
-Static HTML mockups for the IA v2 tabs: Tổng quan, Nhật ký, Khám phá and Cài đặt, plus the add sheet and navigation. Design only, no app code. Each file shows the 390 px phone and the 1280 px desktop side by side, one pair per state. Inline CSS copies the Cobalt Sign tokens from `apps/web/app/globals.css`, each with a comment naming the token. Fonts: Manrope and Saira Condensed from Google Fonts. Board notes are in English, UI copy is Vietnamese, numbers use vi-VN format.
+Static HTML mockups for the IA v2 screens: Tổng quan (four sub-tabs), Nhật ký (with the day's Vi chất and Ngày tập), Khám phá, Cài đặt (with Hồ sơ and read-only Mục tiêu), the add sheet and the navigation. Design only, no app code. Each state is a 390 px phone and a 1280 px desktop side by side. Inline CSS copies the Cobalt Sign tokens from `apps/web/app/globals.css`. Fonts: Manrope and Saira Condensed from Google Fonts. Board notes are in English, UI copy is Vietnamese, numbers use vi-VN format.
 
-**Source of truth.** `design/SPEC.md` is superseded by `design/IA-v2.md` and `apps/web/app/globals.css`. `IA-v2.md` is still not on feat/ui, so the decisions in the list below (decided 12/10) stand in for it until it lands.
+**Source of truth.** `design/IA-v2.md` (on feat/ui from cc2-07) and `apps/web/app/globals.css`. `design/SPEC.md` is superseded. The decisions below (12/10 and the 12/10 19:35 IA revision) stand where `IA-v2.md` is silent.
+
+## Files
+
+| Screen | HTML | PNG (390 / 1280) |
+| --- | --- | --- |
+| Tổng quan (four sub-tabs) | `tong-quan.html` | `png/tong-quan-390.png`, `png/tong-quan-1280.png` |
+| Nhật ký, Vi chất and Ngày tập of the day | `nhat-ky.html` | `png/nhat-ky-390.png`, `png/nhat-ky-1280.png` |
+| Cài đặt, Hồ sơ, Mục tiêu mỗi ngày | `cai-dat.html` | `png/cai-dat-390.png`, `png/cai-dat-1280.png` |
+| Khám phá, Bữa của tôi, food detail | `kham-pha.html` | `png/kham-pha-390.png`, `png/kham-pha-1280.png` |
+| Add sheet | `add-sheet.html` | `png/add-sheet-390.png`, `png/add-sheet-1280.png` |
+| Navigation | `nav.html` | `png/nav-390.png`, `png/nav-1280.png` |
+
+Each PNG is a full-page capture of its file. Each file has states; the state headings are the index.
 
 ## Routes
 
 | Route | Screen |
 | --- | --- |
-| `/` | Tổng quan (tab 1) |
-| `/diary` | Nhật ký (tab 2); a past day is `/diary?date=YYYY-MM-DD`, read-only |
-| `/add` | Thêm món sheet, kept as it is |
-| `/explore` | Khám phá (tab 3), beside the `/add` sheet, not replacing it |
-| `/micros` | Vi chất, linked from Tổng quan and the Nhật ký footer |
-| `/training` | Ngày tập breakdown (existing page, not redrawn here) |
+| `/` | Tổng quan · Tóm tắt (tab 1, default) |
+| `/trends` | Tổng quan · Năng lượng |
+| `/trends/micros` | Tổng quan · Vi chất (period, not the day) |
+| `/trends/body` | Tổng quan · Cơ thể |
+| `/diary` (`?date=`) | Nhật ký (tab 2): owns the day, any date; past dates read-only |
+| `/micros?date=` | Vi chất of one day, pushed from Nhật ký (owner tab Nhật ký) |
+| `/training?date=` | Ngày tập of one day, pushed from Nhật ký (owner tab Nhật ký) |
+| `/explore`, `/foods/[id]` | Khám phá (tab 3) and food detail |
 | `/settings` | Cài đặt (tab 4) |
-| `/settings/profile` | Hồ sơ |
-| `/settings/profile/weight` | Cân nặng (not drawn here) |
-| `/settings/targets` | Mục tiêu mỗi ngày |
+| `/settings/profile`, `/settings/profile/weight` | Hồ sơ (pushed) and cân nặng |
+| `/settings/targets` | Mục tiêu mỗi ngày (pushed, read-only) |
+| `/add` | Thêm món sheet (desktop: centred dialog) |
 
-## Screens
+## Headers
 
-| Screen | HTML | PNG (390 / 1280) |
-| --- | --- | --- |
-| Tổng quan | `tong-quan.html` | `png/tong-quan-390.png`, `png/tong-quan-1280.png` |
-| Nhật ký | `nhat-ky.html` | `png/nhat-ky-390.png`, `png/nhat-ky-1280.png` |
-| Cài đặt + /settings/targets | `cai-dat.html` | `png/cai-dat-390.png`, `png/cai-dat-1280.png` |
-| Khám phá + food detail | `kham-pha.html` | `png/kham-pha-390.png`, `png/kham-pha-1280.png` |
-| Add flow | `add-sheet.html` | `png/add-sheet-390.png`, `png/add-sheet-1280.png` |
-| Navigation | `nav.html` | `png/nav-390.png`, `png/nav-1280.png` |
+These rules apply to every frame. A reviewer checks them first.
 
-**Tổng quan (`tong-quan.html`).** The dark hero keeps the existing pattern: a kcal dial on the left, four macro bars with 10 slanted segments on the right, and the footer "Mục tiêu 1.950–2.275 kcal · còn 909 kcal". `còn` is measured against the minimum target, as the app does now. Below the hero: one primary button "Thêm vào Bữa tối", then today's meals as rows (tapping a row opens Nhật ký), a Vi chất card (8/22, linking to /micros), an Ngày tập card, a 7-day strip, and up to three facts. The Ngày tập card is one line: "Ngày tập 60′ · muối 7–10,5 g" with "Đổi". On a rest day it reads "Nghỉ · muối 4–6 g". The breakdown lives only on /training. The strip draws the 1.950 kcal line inside each column, so bar heights and the line can't drift apart. Next meal follows the clock as `useMealSlot` does (sample time 18:00, so Bữa tối): if that meal is logged, the next empty meal; if all are logged, "Xem nhật ký". Insights, in order, facts only: protein left to target ("Còn 42 g đạm…"), lowest nutrient ("Thấp nhất…: Vitamin D, 14 %"), logging streak ("Đã ghi nhật ký 7 trên 7 ngày gần nhất"). States: nothing logged (dial at 0, every meal "Chưa có món", a "Chép hôm qua" secondary button and a guidance line) and rest day.
+- **Wordmark.** The H1T MICRO wordmark appears only on Tổng quan (phone header). Every other screen shows its own name as the title: Nhật ký, Khám phá, Cài đặt. Pushed screens show back and their name, for example "Vi chất" or "Hồ sơ".
+- **Phone, tab screens.** A tab header: the title in Saira Condensed, with an optional right action. Nhật ký's title row carries the date nav.
+- **Phone, pushed screens.** A sub header: a 44 px back button inline before the title, then one subtitle line.
+- **Ink band.** Used only where the screen has an ink hero: the Tổng quan header and the Nhật ký day summary. Other screens get a paper header.
+- **Desktop (≥ 1024 px).** No full-width ink header band on any screen. The sidebar carries the wordmark and the nav. The content column starts with a plain title row on paper (Saira title, optional subtitle, actions on the right), aligned to the content grid, with the same top padding on every screen. The back button sits inline before the title on pushed screens. Ink appears only inside cards.
+- **Dialogs.** Sheets and dialogs on desktop are centred dialogs (about 520 px), never full-height panels.
 
-**Nhật ký (`nhat-ky.html`).** The date header has a training chip ("Ngày tập 60′"), and a sticky energy bar sits under it (1.041 kcal, the target range, "còn 909", one 10-segment bar). Each meal header has one + (add to that meal) and one ⋯ (menu). The ⋯ menu holds "Chép hôm qua" (copy the meal from yesterday) and "Xoá bữa này" in destructive text. Deleting needs a confirm step (not drawn here). The training chip opens a sheet with Nghỉ, 45′, 60′, 90′, 120′ and a fact line ("Ngày tập 60′ · muối 7–10,5 g. Nghỉ · muối 4–6 g."). On desktop it's a centred dialog. Past days are read-only, as cc-11 decided: no +, no ⋯, no training chip, and a "Chỉ xem" pill. Training minutes on a past day show read-only once stored (note only: yesterday's training is not in the mock, so none is drawn). The sample is Thứ Sáu 09/10 from `lib/mock/yesterday.ts` with the foods' catalogue energy, totalling 1.532 kcal. The footer row links to Vi chất. The empty day has a "Chép hôm qua · 4 bữa" CTA and one + per meal.
+## Tổng quan (`tong-quan.html`)
 
-**Cài đặt (`cai-dat.html`).** Profile, Mục tiêu mỗi ngày, Ứng dụng (Ngôn ngữ, Nhắc nhở, Cài như ứng dụng), a Pro card, Tài khoản, and a Vùng nguy hiểm card with Xoá tài khoản. The danger zone doesn't delete on tap: it opens the existing confirm page. The Pro copy is a neutral placeholder ("Xem các gói và quyền lợi của tài khoản") until Hao sends the text. /settings/targets has the goal chips (2×2), the weight field, the default training chips, and the calculated targets with their formulas: 30–35 kcal/kg, 1,6–2,2 g/kg protein, 0,5–1 g/kg fat, fibre 30–40 g, salt, iron 8 mg for men. Carbs show 254 g with no formula, since the mock doesn't have one.
+Tổng quan is about a period, never about logging: no food lists, no per-day controls. It has four sub-tabs, each its own short screen and URL: Tóm tắt (`/`), Năng lượng (`/trends`), Vi chất (`/trends/micros`), Cơ thể (`/trends/body`). Phone: underline tabs under the ink header, `role="tablist"` of links, 44 px targets. Desktop: the same tabs in the title row. No back button between sub-tabs.
 
-**Khám phá (`kham-pha.html`).** Search with a visible label, a horizontally scrolling category row (the chip row scrolls inside itself, so the page doesn't), Gần đây and Yêu thích as rows with a 44 px + to add with the last portion, Món của tôi with an empty state and a "Tạo món mới" button (the mock has no custom foods), and Giàu Canxi, a list of foods by calcium per 100 g with its share of the 1.200 mg target. Food detail (Yến mạch, 60 g): portion chips (60 g, 1 chén · 40 g, 100 g), per-portion macros, "Nguồn tốt của" chips with the rule "≥ 20 % mục tiêu ngày mỗi khẩu phần", all 22 vi chất as values and % of target, a favourite toggle, and "Thêm vào Bữa sáng". Seven nutrients have a value in the mock for this portion; three reach 20 % (Sắt 32 %, Phốt pho 35 %, Vitamin B1 23 %), which are the chips. The other 15 show a dash, with the line "Chưa có dữ liệu cho 15 trong 22", so no value is invented. Per-portion bars are one blue colour, not the level colours, because a single food's share doesn't mean a daily deficit.
+The period control is shared by all four and remembered: the heading "Trung bình mỗi ngày · 06–12/10", ‹ › to step through periods (› is disabled on the current period, so nothing is in the future), and a "7 ngày / 30 ngày" switch. Periods end on today by default. Only the 7-day state is drawn; the 30-day state uses the same layout.
 
-**Add flow (`add-sheet.html`).** Four states. (1) Recents: "Thêm vào: Bữa sáng" opens a meal switcher, and each recent row is two controls: the name and kcal (one tap adds with the last portion) and a 44 px chevron (opens the portion panel). "Chỉ ghi kcal" is at the foot. (2) Undo toast: after a one-tap add, a toast sits above the nav with "Hoàn tác" in sky, `role="status"`, 5 s, matching the copy-yesterday undo. (3) Chỉ ghi kcal: kcal field with `inputmode="numeric"` and "Thêm 350 kcal". It is a quick entry: `kind "quick"`, `food_id` null, `nutrients` null (unknown, never 0), not added to Gần đây. (4) Portion panel: portion chips and five aligned rows (Kcal, Đạm, Tinh bột, Béo, Chất xơ), with one primary action. Desktop uses the centred dialog from `sheet.tsx`.
+Data: `lib/mock/trends.ts`. Its 7-day series (mock dates 04–10/10) is drawn as 06–12/10, so today is Thứ Hai 12/10. Today is partial and is **excluded** from the averages and the day counts until the day is finished. The prior period (29/09–05/10) comes from the generated part of the 30-day mock.
 
-**Navigation (`nav.html`).** Phone bottom nav with five slots: Tổng quan · Nhật ký · + · Khám phá · Cài đặt. Training is no longer a tab. Each tab is shown active. The active tab gets white text and the slanted sky bar, plus `aria-current`. Desktop sidebar from 1024 px: four tabs, and a persistent primary "Thêm món" button under the brand. Thêm món is not in page headers.
+States in the file:
 
-## Decided 12/10
+1. **Tóm tắt, with data.** A slim "Hôm nay" line ("Còn 909 kcal", with "Ghi bữa tối" as the meal by the clock). The period summary: kcal 2.010 vs 1.950–2.275, 4/6 days on target; đạm 109 g vs 104–143 g, 4/6 days; cân nặng 65,0 kg, −0,8 kg in the period. "So với kỳ trước" lists the three biggest changes as facts (Vitamin D −0,5 µg, Canxi −30 mg, Magie −15 mg). Insights, at most three, facts only: protein under 104 g on 2 of 6 days, the lowest nutrient (Vitamin D, 18 %), a 7-day logging streak. Each block links to its sub-tab.
+2. **Tóm tắt, under 3 logged days.** "Chưa đủ dữ liệu" with the count and the Nhật ký link. No chart and no empty 0–10 bars.
+3. **Năng lượng.** A composition ring for the average kcal (đạm 22 %, tinh bột 52 %, béo 25 %), each with its gram range from the coach rules where one exists. No over-limit colours. A kcal chart per day with the target band (1.950–2.275), average, days on target. Above the range counts as đạt, below the minimum is "Thiếu" in level red, the day still in progress is striped. Protein average with its days on target.
+4. **Vi chất.** Average % of target per counted nutrient, lowest first, "N/6 ngày đạt", 10-segment bars, each row links to `/micros/[nutrient]`.
+5. **Cơ thể.** Weight chart labelled as sample data, the change over the period and since 01/10. The mock has no weight history, so the numbers are sample values. A note marks progress photos for later.
 
-Each open question from the first cc-15 pass, with the answer. Items 14 and 15 are notes for other files, not edits in this folder.
+## Nhật ký (`nhat-ky.html`)
 
-1. **IA-v2.md location.** Still not on feat/ui. Decided 12/10: Khám phá sits at `/explore`, beside the `/add` sheet, which stays. Route names follow the list above.
-2. **Next meal.** Decided 12/10: follows the clock, as `useMealSlot` does (17:00–20:59 is Bữa tối). If that meal is logged, the next empty meal; if all are logged, "Xem nhật ký". Sample time 18:00.
-3. **"Nguồn tốt của".** Decided 12/10: a portion counts when it gives ≥ 20 % of a daily target, per portion (not per 100 g).
-4. **Chỉ ghi kcal.** Decided 12/10: a food-less entry is `kind: "quick"` with `food_id` null and `nutrients` null (unknown, never 0), and it is not added to recents. Dong's question is item 7 in `docs/07-api-contract.md` §5.
-5. **Level colours as text.** Decided 12/10: level yellow and level green are never text on light surfaces. Labels stay ink; colour is only on the bars.
-6. **Focus ring on dark.** Decided 12/10: the ring is sky on dark surfaces (ink header, hero, energy bar, Pro card, toast, bottom nav, sidebar) and blue elsewhere. Implemented in each file's CSS.
-7. **Dial arc.** Decided 12/10: `--color-level-blue-dark` (#5C86F2) on ink, not #1238D6. Already the value in every file.
-8. **Rest-day salt.** Decided 12/10: Tổng quan reads "Nghỉ · muối 4–6 g". On /training the copy is "Ngày nghỉ: không cần bù", replacing "Không có: ngày nghỉ".
-9. **Below-minimum colour.** Decided 12/10: a day below 1.950 kcal stays `--color-level-red` with "Thiếu", the same as Trends.
-10. **Insights.** Decided 12/10: three facts, in this order: protein left to target, lowest nutrient, logging streak. Facts only, no advice.
-11. **Past days.** Decided 12/10: a past day shows its training minutes read-only once they are stored. Note only; not drawn.
-12. **Undo duration.** Decided 12/10: 5 s, as in the copy-yesterday toast.
-13. **Pro and account copy.** Waiting for Hao. The Pro card and the Xoá tài khoản sub-copy stay placeholders until Hao sends the text.
-14. **SPEC.md.** Decided 12/10: `design/SPEC.md` is superseded by `design/IA-v2.md` and `globals.css`. Not edited in this change.
-15. **Metadata count.** Decided 12/10: `apps/web/app/layout.tsx` metadata "26 vi chất" must become 22. This is for Claude Code #2's next task; `apps/web` is not edited here.
-16. **Desktop add.** Decided 12/10: Thêm món is a persistent primary button in the `DesktopSidebar`, not in page headers. Implemented in every desktop frame.
+Nhật ký owns the day (any date). It is the only place with a day's full breakdown.
 
-## Existing components this changes
+- **Title row** with the date nav ‹ "Hôm nay 12/10" ›. Past days show a "Chỉ xem" pill.
+- **Ink day summary:** a kcal dial, four macro bars (10 segments), "còn N kcal". On desktop the summary is an ink card.
+- **Two rows for the day:** "8/22 vi chất · Thiếu: Vitamin D, Canxi" → `/micros?date=`, and "Ngày tập 60′ · muối 7–10,5 g" → `/training?date=`.
+- **Meals:** one + (add to that meal) and one ⋯ per meal header. The ⋯ menu holds "Chép hôm qua" and "Lưu thành Bữa của tôi". On desktop the menu is a centred dialog.
+- **Sticky bar:** a slim ink strip (kcal, còn N kcal, 10-segment bar) replaces the summary when it scrolls away. Phone only; desktop keeps the summary card in view.
+- **Past day** (Thứ Sáu 09/10, sample from `lib/mock/yesterday.ts`, 1.532 kcal, below the minimum, so "thiếu 418 kcal"): read-only. No +, no ⋯, rows open read-only screens. The mock has no macro totals for that day, so the bars show "—", not 0.
+- **Empty day:** "Chưa có món hôm nay" with "Chép hôm qua · 4 bữa", every meal "Chưa có món".
 
-- `components/ui/bottom-nav.tsx` and `components/ui/desktop-sidebar.tsx`: tabs change from Hôm nay / Vi chất / + / Ngày tập / Hồ sơ to Tổng quan / Nhật ký / + / Khám phá / Cài đặt. `SidebarTab` changes too. The DesktopSidebar gets the persistent Thêm món primary button (decided 16).
-- `components/ui/calorie-dial.tsx`: the dial arc on dark uses `--color-level-blue-dark` (#5C86F2, 5.4:1 on ink) instead of #1238D6, which is too dark there.
-- `components/ui/toast.tsx`: needs an action button (Hoàn tác), a 5 s timer and `role="status"`.
-- `components/ui/portion-panel.tsx`: reuse for the chevron panel; the five rows must share one grid.
-- `components/ui/sheet.tsx`: reuse for the training sheet, the meal menu, the add flow and Chỉ ghi kcal (phone sheet, desktop dialog).
-- `globals.css`: the focus-visible ring is sky on dark surfaces, blue elsewhere (decided 6).
-- New components: `EnergyBar` (sticky, 10 segments), `TrainingChip` with its sheet, `MealHeader` (one + and one ⋯), `MealMenu` (popover on desktop), `Vi chất` footer row, `DayStrip` (7 days with the target line), `FactsList` (max three, facts only).
-- `/settings/targets` is a new route. It reuses `ChipGroup`, `FormRow` and `StatGroup`.
-- `/foods/[id]` gets the 22-nutrient list (as % of target) and the "Nguồn tốt của" chips.
+Pushed day screens (back → Nhật ký, owner tab Nhật ký):
 
-## Still open
+- **Vi chất của ngày** (`/micros?date=`): "8/22 đã đạt", the two lowest, then the grouped list of the 22 counted nutrients from `lib/mock/sample-day.ts` (the list is generated from that file).
+- **Ngày tập của ngày** (`/training?date=`): minutes chips (Nghỉ, 45′, 60′, 90′, 120′), salt with its breakdown (4–6 g base, plus 1–1,5 g per 20 minutes), the phase checklist. **Rest day:** "Ngày nghỉ: không cần bù", salt 4–6 g, recovery tips. **Past day:** chips disabled and read-only; no minutes are drawn because the mock does not store them for that day.
 
-- Pro card and Xoá tài khoản copy: waiting for Hao (decided 13).
-- The all-logged state ("Xem nhật ký") and the /training page are described here but not drawn.
-- Quick kcal entry schema: Dong, `docs/07-api-contract.md` §5 item 7.
+## Cài đặt (`cai-dat.html`)
+
+- **Cài đặt** (paper header, no wordmark): the profile card "Hồ sơ của bạn" (sub "Nam · sinh 2003 · 65 kg · Giữ cân", avatar, chevron → `/settings/profile`), Mục tiêu mỗi ngày, Ứng dụng (Ngôn ngữ, Nhắc nhở, Cài như ứng dụng), the Pro card, Tài khoản (email row "ban@email.com" above Đăng xuất), Vùng nguy hiểm (Xoá tài khoản, destructive text, opens the confirm page).
+- **Hồ sơ** (pushed, back → Cài đặt): Cơ thể (giới tính chips, năm sinh, cân nặng → `/settings/profile/weight`), Mục tiêu (goal chips 2×2: Tăng cơ, Giữ cân, Giảm mỡ, Giảm mỡ nhanh; default training chips: Nghỉ, 45, 60, 90, 120 phút), and the line "Mục tiêu mỗi ngày tính từ hồ sơ này" → `/settings/targets`. Same fields as today's Hồ sơ, no new fields.
+- **Mục tiêu mỗi ngày** (pushed, read-only): no goal chips, weight field or training chips. The computed targets with their formula lines: kcal per kg by goal (Tăng cơ 35–40, Giữ cân 30–35, Giảm mỡ 25–30, Giảm mỡ nhanh 20–25), đạm 1,6–2,2 g/kg, béo 0,5–1 g/kg, tinh bột as the remainder, xơ 14 g per 1.000 kcal (tạm thời), muối 4–6 g plus 1–1,5 g per 20 minutes, kali 80–100 mg/kg, canxi 1.200–1.500 mg, magie 50 % of canxi, sắt and kẽm by sex, and the VN 2016 vitamins and minerals marked "*". One button, "Sửa trong Hồ sơ".
+
+## Khám phá (`kham-pha.html`)
+
+- Paper header "Khám phá" (no wordmark). Search, category chips, Gần đây, Yêu thích, Món của tôi (empty state, "Tạo món mới").
+- **Bữa của tôi:** one sample saved meal ("Bữa sáng quen": Yến mạch 60 g, Yogurt kefir 200 ml, Chuối 1 quả, 459 kcal, "Thêm cả bữa vào Bữa sáng"). State 1b shows the empty state: "Chưa có bữa nào. Lưu một bữa từ Nhật ký: ⋯ › Lưu thành Bữa của tôi."
+- **Food detail** (Yến mạch): pushed sub header (back inline, title, favourite, one subtitle line), the portion chips, per-portion macros, "Nguồn tốt của" (≥ 20 % of the day's target per portion), all 22 nutrients as % of target, and 15 with no value shown as a dash.
+
+## Add sheet (`add-sheet.html`)
+
+- Four states, as before (recents, undo toast, Chỉ ghi kcal, portion panel) plus a **Bữa của tôi** group above Gần đây. One tap adds every food of the saved meal to the chosen meal, with one undo toast ("Đã thêm 3 món từ Bữa sáng quen vào Bữa sáng · Hoàn tác", 5 s).
+- Background header is the paper Nhật ký title row, not the wordmark.
+- Desktop: centred dialog.
+
+## Navigation (`nav.html`)
+
+- Bottom nav unchanged: Tổng quan · Nhật ký · + · Khám phá · Cài đặt. Desktop sidebar unchanged.
+- The Tổng quan sub-tab bar and the period control at 390 and 1280.
+- One desktop pushed screen (Mục tiêu mỗi ngày) to show there is no ink band at the top.
+
+## Decided 12/10 (first pass, still in force)
+
+1. IA-v2.md: Khám phá at `/explore`, beside the `/add` sheet.
+2. Next meal follows the clock (`useMealSlot`: 17:00–20:59 is Bữa tối). Sample time 18:00.
+3. "Nguồn tốt của": a portion counts at ≥ 20 % of a daily target, per portion (not per 100 g).
+4. Chỉ ghi kcal: `kind: "quick"`, `food_id` null, `nutrients` null (unknown, never 0), not in recents. Dong's question is item 7 in `docs/07-api-contract.md` §5.
+5. Level colours are never text on light surfaces. Level yellow and level green are only on the bars.
+6. Focus ring is sky on dark surfaces and blue elsewhere.
+7. Dial arc on ink: `--color-level-blue-dark` (#5C86F2).
+8. Rest-day salt: Tổng quan reads "Nghỉ · muối 4–6 g"; /training reads "Ngày nghỉ: không cần bù".
+9. Below the minimum stays `--color-level-red` with "Thiếu", as in Trends.
+10. Insights: facts only, at most three.
+11. Past days show training minutes read-only once stored. Not drawn.
+12. Undo: 5 s.
+13. Pro and account copy: placeholders until Hao sends the text.
+14. `design/SPEC.md` superseded by `design/IA-v2.md` and `globals.css`.
+15. `apps/web/app/layout.tsx` metadata "26 vi chất" becomes 22 (Claude Code #2's task).
+16. Desktop Thêm món is a persistent primary button in the sidebar, not in page headers.
+
+## Decided 12/10 19:35 (IA revision, cc-15c)
+
+- Tổng quan is a period view with four sub-tabs; no food lists and no per-day controls.
+- Nhật ký owns the day. Its Vi chất and Ngày tập are pushed screens for that date, owner tab Nhật ký.
+- The header rules above.
+- Hồ sơ lives in Cài đặt as a pushed screen with the same fields. Mục tiêu mỗi ngày is read-only and points to Hồ sơ to edit.
+- Bữa của tôi: saved meals in Khám phá and in the add sheet. The ⋯ menu saves a meal ("Lưu thành Bữa của tôi") and copies one from yesterday ("Chép hôm qua").
+- Averages and day counts exclude today until it is finished.
+
+## Open for Hao
+
+- **Xoá bữa này** is not in the ⋯ menu any more; the brief lists two actions. Say if it should come back (it needs a confirm step).
+- **Sample data across mocks is not in sync.** `lib/mock/trends.ts` has today (12/10) at 1.041 kcal, protein 58 g, fat 32 g, calcium 210 mg. `lib/mock/sample-day.ts` has protein 62 g, fat 21 g, calcium 331 mg. The 09/10 trend point (1.640 kcal) differs from `lib/mock/yesterday.ts` (1.532 kcal). Nhật ký uses the diary sample; Tổng quan uses the trends series and excludes today. The mocks should match before the screens are built.
+- **Weight history** for Cơ thể is sample data (the mock has none).
+- **Vi chất over a period** covers the five nutrients that have a day series in the mock (Vitamin D, Canxi, Magie, Kali, Sắt). The other 17 show when the data exists. The note on the screen says so.
+
+## Not now
+
+- Water tracking (waits for a coach rule).
+- Expenditure, BMR and activity (coach targets are kcal per kg; there is no activity data).
+- Custom charts.
+- Progress photos (need storage from Dong).
+- Body-composition fields.
 
 ## Checks
 
-Re-rendered 12/10 with Playwright (Chromium) at 390×844 and 1280×800, full page, for all six files. Results:
+Re-rendered 12/10 with Playwright (Chromium), full page, at 390×844 and 1280×800, for all six files. Results are in `png/`.
 
-- **Horizontal scroll:** none on the document at 390 px (scrollWidth = clientWidth in all six files).
-- **Tap targets:** 0 of 504 controls under 44×44 px. The sidebar Thêm món button has `min-height: 44px` (it measured 42 px before this pass). Phone bottom-nav items are 56 px.
-- **Text contrast:** 0 of 1.415 text nodes under 4.5:1 (3:1 for large text) against their computed background.
-
-Decorative elements are not covered: the empty bar segments (#E6E1D7 on white, 1.3:1) and the dividers are below 3:1. Each bar's value is printed next to it, so the bar is supplementary.
+- **Horizontal scroll:** none on the page at 390 px in any file. Wide desktop frames scroll inside their own figure.
+- **Tap targets:** 0 controls under 44 × 44 px in any file (links, buttons, tabs, chips, rows, the bottom nav).
+- **Text contrast:** 0 failures among 1.864 text elements per width (4.5:1 for normal text, 3:1 for large text), with colours composited over their real background. Disabled and dimmed text is excluded, as WCAG allows. Decorative bars and dividers are not covered; each bar's value is printed next to it.
+- **Headers:** 0 `.hdr` elements inside any desktop frame, so no ink band at the top of a desktop screen. The wordmark appears only in the Tổng quan phone header.
+- **Copy:** no over-limit wording in the copy (no "vượt", "cảnh báo" or red warnings above a range).
