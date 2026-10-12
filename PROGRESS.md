@@ -3,8 +3,6 @@
 ## Now working
 | Task | Owner | Files / routes |
 |---|---|---|
-| ag-06 (a11y + copy) | Antigravity | docs/audit-ag04.md, apps/web/app/add/page.tsx, apps/web/components/training/phase-checklist.tsx, apps/web/app/settings/notifications/page.tsx, apps/web/components/foods/entry-editor.tsx, apps/web/components/ui/portion-panel.tsx, apps/web/components/ui/calorie-dial.tsx, apps/web/app/today/page.tsx, apps/web/components/ui/app-header.tsx, apps/web/components/ui/switch.tsx, apps/web/app/settings/delete-account/page.tsx, apps/web/components/onboarding/setup-form.tsx, apps/web/app/paywall/page.tsx, apps/web/components/profile/profile-cards.tsx, apps/web/tests/probes/ag06.py |
-
 
 | Date | Commit | Built | Next |
 | --- | --- | --- | --- |
@@ -17,6 +15,7 @@
 | 12/10/2026 | cc2-01 step 3 | Scaffold /foods catalog removed (app/(dashboard)/foods/page.tsx and the unused components/foods/food-card.tsx). app/foods/page.tsx is a permanent redirect to /add (308, checked on :3102). No link to the catalog existed in nav, sidebar or screens. /foods/[id] and /foods/new stay. | Probe cc2_01 checks the redirect |
 | 12/10/2026 | cc2-01 step 2 | Date labels without a comma: formatDayLabel gives "Hôm nay 12/10", "Hôm qua 11/10", "Thứ Hai 05/10", "Chủ nhật 04/10" (tests changed first). Same rule for withRuntimeDate dateLabel, the mock day label and the Training fallback. Desktop long date ("Thứ Bảy, 10/10/2026") unchanged. cc10.py expects the new text. | Phone design uses "Thứ Năm 08/10" too (OPEN_QUESTIONS cc-12 date labels) |
 | 12/10/2026 | cc2-01 step 1 | Nutrient detail (/micros/[nutrient]) from any Vi chất row (all 59 rows link now). Ink header with amount vs target ("1.200–1.500 mg"), 28 % and 10-segment level bar with label, 7-day history (value = share of target, "—" for days with nothing logged), today's top 5 foods for that nutrient. Row builder moved to lib/nutrient-rows.ts; lib/nutrient-detail.ts and lib/nutrient-sources.ts with tests first (266 unit tests pass). Read-only, no "Gợi ý để bù". Visual check in the built-in pane at 390 and 1440 (no screenshot file: Playwright is not installed here). | Step 2 date labels; Playwright install needed for probes and screenshots |
+| 12/10/2026 | ag-06 | Fixed audit Musts (focus rings in /add, checkbox tap area & aria-label in /training, time input overlay in /settings/notifications, focus-within ring in entry-editor and portion-panel) and quick Shoulds (CalorieDial kcal contrast to text-muted-on-dark, + Thêm 44px tap targets on Today mobile & desktop, h1 in daily AppHeader, setup-form h2 sr-only on mobile, switch off-state border). Updated user-facing count from 21 to 22 vi chất in /paywall. Profile reminders row shows 'Đã bật' / 'Đã tắt' based on active state. Added ag06.py probe with 15 assertions passing. | Ready for Claude Code merge |
 | 11/10/2026 | cc-12a | Merged feat/ui-ag-03 (Trends) and feat/ui-ag-04 (docs/audit-ag04.md, tests/probes/ag04_audit.py) with no conflicts. Trends: the 7- and 30-day windows end today (anchorTrendDays, set after mount); targets come from the profile (trendTargetsFrom(calculateTargets)), so calcium 1.200–1.500, magnesium 600–750, potassium from weight, iron 8/18/28; a kcal day above the range is on target, not red (kcalOnTarget); legend Trong mục tiêu / Thiếu; Saira Condensed for the title and the protein number. /micros links to /trends (phone footer row under the summary, desktop link in the stat row). Units added to the Trends rows (TB and Mục tiêu). | Audit findings (cc-13); Trends has no over-range sample day in the mock, so the over case is covered by unit test only |
 | 11/10/2026 | cc-12 | Design parity sweep of the 25 screens (docs/parity-cc12.md, probe cc12.py: copy diff + screenshots + calendar check). Fixed 10: Micros footnote and "đã đạt mục tiêu"; FoodDetail "Khẩu phần" label; CreateFood micro example list; calendar is a centred dialog at ≥1024 px (Esc closes, focus returns to the date; components/ui/sheet.tsx `desktopDialog`); TodayStates offline heading; Profile "Nhắc nhở" shows "Đã bật"; setup desktop "Bước 1/2 · Về bạn" and "Mục tiêu mỗi ngày"; SignUp desktop "TẠO TÀI KHOẢN". 15 left as decided and 12 questions (OPEN_QUESTIONS cc-12). Design files need support.js (not in the repo), so layout was checked from source, not rendered. | NutrientDetail is a placeholder (OPEN_QUESTIONS cc-12); vi chất count 21 vs 22 |
 | 11/10/2026 | cc-11 | Past days are read-only: rows are not links, no + Thêm and no Chép hôm qua; /entry/… and /add with a past ?date= go back to that day's Today (usePastDayRedirect). Desktop: the date in the header subtitle opens the same calendar (no future days). "Thiếu nhiều nhất" and the x/22 count come from the day's own nutrients vs targets (lib/lacking.ts, lowest % first, tests first), so logging a calcium-rich food changes the list. BACKLOG line removed. Copy sheet subtitle "Thứ Bảy, 10/10". docs/03-srs.md iron men 8 mg. Past-day views added to tests/alignment.py. cc11.py. | Past-day Vi chất detail (none, by design); desktop calendar is the phone bottom sheet (no centred dialog yet) |
@@ -80,6 +79,21 @@ Smoke on prod :3101 (`npm run probe:all`): 35 PASS, 21 FAIL of 56 route × width
     - Item 3: `--color-destructive-text` (#C83A3F) for required `*` achieves 5.08:1 on #FFFFFF and 4.50:1 on #F3F1EC (both >= 4.5:1).
     - Item 4 (/signin): magic link email input has visible focus ring on Tab (`focus-visible:ring-2 focus-visible:ring-blue`).
   - Note: `ag06.py` is committed on branch `feat/ui-ag-06` (not yet merged into `feat/ui`, and out of allowed files list for ag-07).
+
+## Quality Gate Summary (ag-06)
+- Gates:
+  - `npm run typecheck` ok (tsc --noEmit: 0 errors).
+  - `npm run test` ok (vitest: 243 passed in 20 files).
+  - `npm run build` ok (26/26 routes generated).
+  - `test:align` ok on port 3100 (<= 1px difference on all pairs: daily-targets, setup-row, add-list, today-header, micros-header, trends-rows, entry, food-header, entry-header, profile-header, profile-row, weight-header, weight-row, meal-card, desktop-meal).
+  - `test:hydration` ok on port 3100 (0 errors, 14 routes tested at 390 and 1440 with sessionStorage).
+- Probes:
+  - `ag06.py`: 15/15 assertions passed on production server (add search focus ring, checklist aria-labels & tap container, notifications time input overlayed tap target, entry grams focus ring, today mobile & desktop + Thêm >= 44x44 px tap targets, micros h1 title, paywall 22 vi chất copy, profile reminder Đã bật / Đã tắt state toggle).
+- Edges:
+  - /today 390 today-header, meal-card (10 pairs) pass; /today 1440 today-header, desktop-meal (15 pairs) pass.
+  - /micros 390 micros-header (1 pair), micros-card (38 items) pass; /micros 1440 micros-header (1 pair), micros-card (38 items) pass.
+  - /profile 390 profile-header (1 pair), profile-row (9 pairs) pass; /profile 1440 profile-row (9 pairs) pass.
+  - /entry/item-1 390 and 1440 entry (3 pairs), entry-header (1 pair) pass.
 
 ## Quality Gate Summary (ag-01)
 - `ALIGN_BASE_URL=http://localhost:3101 npm run check` on feat/ui with cc-04 and ag-01: all 5 gates passed (tsc --noEmit, vitest: 169 passed in 15 files, build: 19/19 routes, test:align: all pairs aligned, test:hydration: 0 errors incl. /training at 390 and 1440).
