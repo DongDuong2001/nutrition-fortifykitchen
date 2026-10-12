@@ -428,3 +428,158 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+
+  /days/{date}/entries:
+    post:
+      summary: Add entry (food or quick kcal) to diary
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: date
+          in: path
+          required: true
+          schema:
+            type: string
+            format: date
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - meal_slot
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                kind:
+                  type: string
+                  enum: [food, quick]
+                  default: food
+                food_id:
+                  type: string
+                  format: uuid
+                meal_slot:
+                  type: string
+                grams:
+                  type: number
+                serving_label:
+                  type: string
+                calories:
+                  type: number
+      responses:
+        '201':
+          description: Entry created
+        '409':
+          description: Past day read only
+
+  /days/{date}/copy-yesterday:
+    post:
+      summary: Copy entries from yesterday
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: date
+          in: path
+          required: true
+          schema:
+            type: string
+            format: date
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                source_date:
+                  type: string
+                  format: date
+                meal_slots:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '201':
+          description: Entries copied
+        '409':
+          description: Past day read only
+
+  /days/{date}/training:
+    put:
+      summary: Set training minutes for the day
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: date
+          in: path
+          required: true
+          schema:
+            type: string
+            format: date
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - training_minutes
+              properties:
+                training_minutes:
+                  type: integer
+      responses:
+        '200':
+          description: Training minutes updated
+        '409':
+          description: Past day read only
+
+  /entries/{id}:
+    patch:
+      summary: Update diary entry portion or meal slot
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                meal_slot:
+                  type: string
+                grams:
+                  type: number
+                serving_label:
+                  type: string
+                calories:
+                  type: number
+      responses:
+        '200':
+          description: Entry updated
+        '409':
+          description: Past day read only
+    delete:
+      summary: Soft delete diary entry
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Entry deleted
+        '409':
+          description: Past day read only
