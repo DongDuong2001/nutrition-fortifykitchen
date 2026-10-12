@@ -58,7 +58,7 @@ All nutritional amounts and physiological measurements are transferred as numeri
 
 ### 2.1. User Profile
 Manages core biometric parameters and nutritional goal configuration.
-- **Used by screens**: `/setup/profile`, `/setup/goal`, `/profile`, `/profile/weight`.
+- **Used by screens**: `/setup/profile`, `/setup/goal`, `/settings/profile`, `/settings/profile/weight`.
 
 #### `GET /api/v1/profile`
 Fetches the authenticated user's profile.
@@ -101,7 +101,7 @@ Updates profile settings.
 
 ### 2.2. Weight Logs
 Tracks body weight history over time.
-- **Used by screens**: `/profile/weight`.
+- **Used by screens**: `/settings/profile/weight`.
 
 #### `GET /api/v1/weight-logs`
 Returns historical weight logs in reverse chronological order.
@@ -141,7 +141,7 @@ Records a weight entry for a specified date.
 
 ### 2.3. Diary Day
 Retrieves all logged meals, food entries, and cumulative daily totals for a calendar date.
-- **Used by screens**: `/today`, `/micros`.
+- **Used by screens**: `/` (Tổng quan), `/diary` (Nhật ký), `/micros` (Vi chất).
 
 #### `GET /api/v1/days/{date}`
 - **Path Parameter**: `date` (`YYYY-MM-DD` in `Asia/Ho_Chi_Minh`).
@@ -224,8 +224,8 @@ Retrieves all logged meals, food entries, and cumulative daily totals for a cale
 ---
 
 ### 2.4. Diary Entry Mutations (Add / Edit / Delete)
-Manages food items logged into specific meals.
-- **Used by screens**: `/add`, `/foods/[id]`, `/entry/[id]`.
+Manages food entries and quick kcal entries logged into specific meals. There is one entry path: create with `POST /api/v1/days/{date}/entries`, edit and delete with `/api/v1/entries/{id}`.
+- **Used by screens**: `/add` (sheet), `/explore` and food detail `/foods/[id]`, `/entry/[id]`.
 
 #### `POST /api/v1/days/{date}/entries`
 Adds a food entry to a meal slot. The client generates a UUID `id` to guarantee idempotency (`ON CONFLICT (id) DO NOTHING`).
@@ -268,8 +268,21 @@ Adds a food entry to a meal slot. The client generates a UUID `id` to guarantee 
 }
 ```
 
-#### `PATCH /api/v1/diary/entries/{id}`
-Edits the portion (grams) or switches the meal slot (`meal_slot`).
+**Quick kcal entry.** Logs an energy total with no food (the "Chỉ ghi kcal" flow on `/add`). Send the same `POST /api/v1/days/{date}/entries` with `kind: "quick"`:
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440003",
+  "kind": "quick",
+  "meal_slot": "snack",
+  "calories": 350
+}
+```
+- `food_id` is `null` and `nutrients` is `null`. `null` means unknown, never 0 (see §1.5).
+- The entry is never added to recents.
+- **Response `201 Created`**: the entry with `"kind": "quick"` and the updated `day_summary`. The day summary adds `calories` only. Null nutrients are skipped in the totals, not counted as 0.
+
+#### `PATCH /api/v1/entries/{id}`
+Edits the portion (grams) or switches the meal slot (`meal_slot`). For `kind: "quick"`, only `calories` and `meal_slot` change.
 - **Request Body**:
 ```json
 {
@@ -280,7 +293,7 @@ Edits the portion (grams) or switches the meal slot (`meal_slot`).
 ```
 - **Response `200 OK`**: Returns the updated entry object and recalculated `day_summary`.
 
-#### `DELETE /api/v1/diary/entries/{id}`
+#### `DELETE /api/v1/entries/{id}`
 Deletes an entry from the diary.
 - **Response `200 OK`**:
 ```json
@@ -294,7 +307,7 @@ Deletes an entry from the diary.
 
 ### 2.5. Copy Yesterday
 Copies entries from yesterday into today, supporting whole-day or meal-by-meal selection.
-- **Used by screens**: Bottom sheet "Chép hôm qua" on `/today`.
+- **Used by screens**: Bottom sheet "Chép hôm qua" from the meal menu ⋯ and the empty-day CTA on `/diary`, and the nothing-logged state on `/`.
 
 #### `POST /api/v1/days/{date}/copy-yesterday`
 - **Request Body**:
@@ -327,8 +340,8 @@ Copies entries from yesterday into today, supporting whole-day or meal-by-meal s
 ---
 
 ### 2.6. Daily Training Minutes
-Updates the day's training duration to calculate additional salt and sodium requirements.
-- **Used by screens**: `/training`, `/today`.
+Sets the day's training minutes. Salt and sodium targets are computed on the client (§3.2), so this endpoint returns minutes only.
+- **Used by screens**: `/training`, `/diary`, `/` (Tổng quan "Đổi").
 
 #### `PUT /api/v1/days/{date}/training`
 - **Request Body**:
@@ -341,12 +354,10 @@ Updates the day's training duration to calculate additional salt and sodium requ
 ```json
 {
   "date": "2026-10-12",
-  "training_minutes": 60,
-  "top_up_salt_g": "3–4,5",
-  "sodium_target_min_mg": 2751,
-  "sodium_target_max_mg": 4127
+  "training_minutes": 60
 }
 ```
+- *Optional, only if Dong chooses server-side targets (§5, question 4)*: the response could also return salt targets. Not part of this contract.
 
 ---
 
@@ -446,7 +457,7 @@ Retrieves foods containing the highest density of a specified nutrient for defic
 
 ### 2.9. Favourites
 Manages user-specific favourite foods.
-- **Used by screens**: Chip "Yêu thích" on `/add`, heart button on `/foods/[id]`.
+- **Used by screens**: Row "Yêu thích" on `/explore` and `/add`, heart button on `/foods/[id]`.
 
 #### `GET /api/v1/favourites`
 - **Response `200 OK`**:
@@ -474,7 +485,7 @@ Manages user-specific favourite foods.
 
 ### 2.10. Recent Foods
 Retrieves recently logged food items with their last-used portion.
-- **Used by screens**: Row "Gần đây" on `/add`.
+- **Used by screens**: Row "Gần đây" on `/explore` and `/add`.
 
 #### `GET /api/v1/recents`
 - **Response `200 OK`**:
@@ -496,7 +507,7 @@ Retrieves recently logged food items with their last-used portion.
 
 ### 2.11. Custom Foods ("Món của tôi")
 Allows users to create and store custom foods with nutritional values.
-- **Used by screens**: `/foods/new`, category "Món của tôi" on `/add`.
+- **Used by screens**: `/foods/new`, category "Món của tôi" on `/explore` and `/add`.
 
 #### `POST /api/v1/foods/custom`
 - **Request Body**:
@@ -526,28 +537,7 @@ Allows users to create and store custom foods with nutritional values.
 
 ---
 
-### 2.12. Quick Kcal Entry
-Quickly logs estimated energy and macronutrients without picking a catalog food item.
-- **Used by screens**: Quick log actions on `/add`.
-
-#### `POST /api/v1/days/{date}/quick-kcal`
-- **Request Body**:
-```json
-{
-  "id": "550e8400-e29b-41d4-a716-446655440003",
-  "meal_slot": "snack",
-  "name_vi": "Ăn vặt nhanh",
-  "calories": 250,
-  "protein": 5.0,
-  "carbs": 30.0,
-  "fat": 12.0
-}
-```
-- **Response `201 Created`**: Returns the created diary entry and updated day summary.
-
----
-
-### 2.13. Trends
+### 2.12. Trends
 Provides aggregated time-series data across 7 or 30 calendar days for energy, macronutrients, and the 5 key coach micronutrients.
 - **Used by screens**: `/trends`.
 
@@ -598,10 +588,10 @@ Provides aggregated time-series data across 7 or 30 calendar days for energy, ma
 
 ### 3.1. Past Days Are Read-Only
 - **Rule**: All calendar dates prior to today (`date < today_VN` evaluated in timezone `Asia/Ho_Chi_Minh`) are immutable.
-- **Frontend Behavior**: Past day views (`/today?date=YYYY-MM-DD`) render a read-only banner (*"Đang xem ngày cũ"*), hide the `+ Thêm` action button and the `Chép hôm qua` bottom sheet, and disable entry editing or deletion.
+- **Frontend Behavior**: Past day views (`/diary?date=YYYY-MM-DD`) render a read-only banner (*"Đang xem ngày cũ"*), hide the `+ Thêm` action button and the `Chép hôm qua` bottom sheet, and disable entry editing or deletion.
 - **Backend Enforcement**: The Go API **must reject** all write operations (`POST`, `PUT`, `PATCH`, `DELETE`) targeting any past date:
-  - Adding food entries (`POST /days/{date}/entries`).
-  - Editing or deleting entries (`PATCH /diary/entries/{id}`, `DELETE /diary/entries/{id}`).
+  - Adding food and quick kcal entries (`POST /days/{date}/entries`).
+  - Editing or deleting entries (`PATCH /entries/{id}`, `DELETE /entries/{id}`).
   - Copying entries (`POST /days/{date}/copy-yesterday`).
   - Changing training minutes (`PUT /days/{date}/training`).
 - **Error Response**:
@@ -610,7 +600,7 @@ Provides aggregated time-series data across 7 or 30 calendar days for energy, ma
   - **Message**: `"Không thể chỉnh sửa dữ liệu của ngày đã qua."`
 
 ### 3.2. Nutritional Targets Computation Boundary
-- **Current Client Architecture**: Nutritional targets (calories, protein, fat, carbohydrates, fiber, sodium, potassium, calcium, magnesium, iron, zinc, and 22 micronutrients) are computed in real time on the client using pure functions in `apps/web/lib/targets.ts` (`calculateTargets`). When a user updates their body weight (`/profile/weight`), goal, or training duration (`/training`), progress bars across `/today` and `/micros` recalculate instantly with zero latency.
+- **Current Client Architecture**: Nutritional targets (calories, protein, fat, carbohydrates, fiber, sodium, potassium, calcium, magnesium, iron, zinc, and 22 micronutrients) are computed in real time on the client using pure functions in `apps/web/lib/targets.ts` (`calculateTargets`). When a user updates their body weight (`/settings/profile/weight`), goal, or training duration (`/training`), progress bars across `/`, `/diary` and `/micros` recalculate instantly with zero latency.
 - **API Boundary**:
   - The API stores the **raw profile parameters** (`sex`, `birth_year`, `weight_kg`, `goal`, `period_mode`, `training_minutes`).
   - The API is not required to persist static target matrices unless desired for server-side reporting.
@@ -618,7 +608,7 @@ Provides aggregated time-series data across 7 or 30 calendar days for energy, ma
 
 ### 3.3. Multi-Tenant User Isolation
 - **Favourites (`favourites`)**: Maintained strictly per `user_id`. One user's favourites are never exposed to others.
-- **Recents (`recents`)**: Stores up to 20 recently logged items per `user_id` along with their last portion size (`last_serving_label`).
+- **Recents (`recents`)**: Stores up to 20 recently logged items per `user_id` along with their last portion size (`last_serving_label`). Quick kcal entries (`kind: "quick"`) are never added.
 - **Custom Foods (`is_custom: true`)**:
   - Created with `created_by = auth.uid()`.
   - Visible only to the creating user in their *"Món của tôi"* category (`cua_toi`) and search results.
@@ -698,3 +688,7 @@ The following checklist identifies technical decisions and schema alignments req
 
 - [ ] **6. Snapshot integrity in `nutrition.diary_logs`**:
   - *Confirmation*: On every entry creation, the Go backend computes `grams = quantity * serving_size_g` and snapshots the resulting nutrient values into `nutrients_snapshot JSONB`. This confirms historical diary logs remain immutable when source food data is updated in the catalog.
+
+- [ ] **7. Quick kcal entries (`kind: "quick"`)**:
+  - *Context*: The "Chỉ ghi kcal" flow on `/add` logs a calorie total with no food (`design/v2/add-sheet.html`). It has no macros and no micronutrients, and it must not count as 0 for any of them.
+  - *Proposal*: One entry path (`POST /api/v1/days/{date}/entries`) with `kind: "quick"`, `food_id` NULL, `nutrients` NULL (unknown, never 0), `calories` required, and no row in recents. Does Dong agree with a nullable `food_id` and a `kind` column on `nutrition.diary_logs`, or would Dong prefer a placeholder food ("Món khác") with no nutrients?
