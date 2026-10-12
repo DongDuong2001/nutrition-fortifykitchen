@@ -14,10 +14,12 @@ Phone bottom nav (5 slots): **Tổng quan · Nhật ký · [+] · Khám phá · 
 - Desktop: DesktopSidebar with the same four items plus a primary "Thêm món" button.
 - Tab labels and icons stay identical on phone and desktop.
 
-## Headers (decided 12/10 19:35)
-- The H1T MICRO wordmark appears only on Tổng quan (phone header). Every other screen shows its own name as the title: Nhật ký, Khám phá, Cài đặt; pushed screens show back + their name (e.g. "Vi chất", "Hồ sơ").
-- Phone: tab screens use AppHeader `tab` (title in Saira Condensed, optional right action); Nhật ký's title row carries the date nav; pushed screens use AppHeader `sub` (44 px back, title, one subtitle line). The ink band is used only where the screen has an ink hero (Tổng quan, Nhật ký day summary); other screens get a paper header so the page doesn't start with a heavy dark block.
-- Desktop (≥ 1024 px): no full-width ink header band on any screen. The DesktopSidebar carries the wordmark and nav; the content column starts with a plain title row on paper (Saira title, optional subtitle, actions right; back button inline before the title on pushed screens), aligned to the content grid, with the same top padding on every screen. Ink appears only inside cards (hero/summary cards), never as a band stretching to the top of the window. Sheets and dialogs on desktop are centred dialogs (max ~560 px), never full-height panels.
+## Headers and UI unity (revised 12/10 23:15 — replaces the 19:35 header rules)
+Reference: Cronometer's header is identical on every screen (same surface, rounded bottom edge, same title style, spacing and layout). H1T MICRO does the same.
+- **Phone, every screen** (tabs and pushed screens): one AppHeader look — `bg-ink` surface, rounded bottom corners (20 px), safe-area top padding, 16 px sides, the same title row height. Title: Saira Condensed, same size and weight on every screen (24 px), on-dark colour. Tổng quan shows the H1T MICRO wordmark in the title position (sr-only h1 "Tổng quan"); every other screen shows its own name. Pushed screens: 44 px back chevron inline before the title. Right side: up to two 44 px icon actions, same style everywhere.
+- **Optional second row inside the same header**, never a separate band: Tổng quan sub-tab bar; Nhật ký date nav + day summary; Khám phá search field; nothing else. Content below the header always starts with the same 16 px gap on paper.
+- **Desktop ≥ 1024 px**: no full-width ink band (unchanged). Every screen starts with the same paper title row (Saira 32 px, subtitle, actions right, back inline on pushed screens) and the same top padding; sub-tabs/date nav/search sit in that row area. Ink only inside cards (hero summaries) with the card radius.
+- **One visual system everywhere** (documented in design/UI-RULES.md): one radius scale (cards 18 px, sheets 20 px top, buttons and chips full pill, inputs 12 px), one spacing scale (4/8/12/16/20/24/32), one type scale (screen title, section title 16 px bold Manrope, row text 15 px, meta 13 px secondary; section labels in sentence case, no all-caps labels), one row pattern (min 48 px, divider token, chevron when it navigates), one chip component, button variants (primary cobalt pill, secondary outline, quiet icon button), icons 22 px stroke 1,8. Every screen uses the shared primitives; no one-off styles.
 
 ## Routes
 | Route | Screen | Kind |
@@ -120,7 +122,7 @@ Checked with ui-ux-pro-max (§2 touch: 44 px targets, 8 px gaps; §9 navigation:
 - Phone: AppHeader `sub` with a 44 px back button (chevron, `aria-label="Quay lại"`), the title and one subtitle line. Desktop: a "‹ Quay lại" text button (44 px tall) above the title in the page header, so the title keeps the left edge of the cards under it.
 - Back returns to the previous in-app page; with no in-app history (direct link, reload) it goes to the owning tab (`/`, or `/micros` for a nutrient detail).
 
-## Headers (design decisions, cc2-08)
+## Headers (design decisions, cc2-08; superseded by "Headers and UI unity" wherever they differ: the phone header is the ink AppHeader on every screen)
 Checked with ui-ux-pro-max (§1 accessibility: one h1, 44 px back with aria-label; §2 touch; §9 navigation: predictable back, title says where you are). Cobalt Sign tokens only.
 
 ### Sizes
