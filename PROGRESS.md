@@ -3,6 +3,7 @@
 ## Now working
 | Task | Owner | Files / routes |
 |---|---|---|
+| cc-15c: redo mockups for IA v2 (Tổng quan sub-tabs, Nhật ký day pushed screens, Cài đặt + Hồ sơ, Khám phá and add sheet Bữa của tôi, nav, PNGs) | Claude Code | design/v2/** (claimed), PROGRESS.md (claimed) |
 
 | Date | Commit | Built | Next |
 | --- | --- | --- | --- |
