@@ -36,7 +36,6 @@
   --color-on-dark: #FFFFFF;          /* --color-on-dark */
   --color-track-on-dark: #666A75;    /* --color-track-on-dark */
   --color-grabber: #D5D8DF;          /* --color-grabber */
-  --color-scrim: rgba(17,19,23,0.5); /* --color-scrim */
   --color-surface-dark: #1A1C22;     /* --color-surface-dark */
 }
 * { box-sizing: border-box; }
@@ -52,6 +51,7 @@ svg { display: block; flex: none; }
 ul, ol { margin: 0; padding: 0; list-style: none; }
 h1, h2, h3, h4, p { margin: 0; }
 .display { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-variant-numeric: tabular-nums; }
+.num { font-variant-numeric: tabular-nums; }
 
 /* Board chrome (not part of the screen) */
 .board { padding-bottom: 48px; }
@@ -65,32 +65,32 @@ h1, h2, h3, h4, p { margin: 0; }
 .fig figcaption { font-size: 13px; font-weight: 600; color: var(--color-secondary); padding: 0 16px 8px; }
 .fig-phone { width: 390px; max-width: 100%; flex: none; }
 .fig-desktop { max-width: 100%; overflow-x: auto; }
-.phone { width: 100%; background: var(--color-page); display: flex; flex-direction: column; position: relative; box-shadow: 0 0 0 1px var(--color-card-border); }
-.phone.fixed { height: 844px; overflow: hidden; }
-.desktop { width: 1280px; min-height: 860px; background: var(--color-page); display: flex; position: relative; box-shadow: 0 0 0 1px var(--color-card-border); }
+.phone { width: 100%; background: var(--color-page); display: flex; flex-direction: column; box-shadow: 0 0 0 1px var(--color-card-border); }
+.desktop { width: 1280px; min-height: 860px; background: var(--color-page); display: flex; box-shadow: 0 0 0 1px var(--color-card-border); }
 
 /* Phone header (ink block) */
-.hdr { background: var(--color-ink); color: var(--color-on-dark); padding: 16px 16px 16px; border-radius: 0 0 20px 20px; display: flex; flex-direction: column; gap: 12px; }
+.hdr { background: var(--color-ink); color: var(--color-on-dark); padding: 16px 16px 20px; border-radius: 0 0 20px 20px; display: flex; flex-direction: column; gap: 12px; }
 .brand { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-size: 22px; line-height: 1; letter-spacing: .02em; }
 .brand span { color: var(--color-sky); }
 .ptitle { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-size: 28px; line-height: 1; text-transform: uppercase; }
 .hdr-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .datenav { display: flex; align-items: center; gap: 4px; }
-.ico-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; color: var(--color-on-dark); flex: none; }
+.ico-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; color: var(--color-on-dark); }
 .ico-btn:disabled { color: var(--color-muted-on-dark); }
 .datelabel { font-size: 15px; font-weight: 700; min-width: 112px; text-align: center; }
-.chiprow { display: flex; gap: 8px; flex-wrap: wrap; }
-.chip { min-height: 44px; padding: 0 16px; border-radius: 999px; display: inline-flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; white-space: nowrap; border: 1px solid var(--color-card-border); background: var(--color-card); color: var(--color-text); }
-.chip.onink { background: var(--color-surface-dark); color: var(--color-on-dark); border-color: var(--color-surface-dark); }
-.chip[aria-pressed="true"] { background: var(--color-ink); color: var(--color-on-dark); border-color: var(--color-ink); }
-.chip.static { cursor: default; }
 
-/* Sticky energy bar */
-.energy { background: var(--color-card); border-bottom: 1px solid var(--color-card-border); padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; }
-.energy-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
-.energy-top b { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-size: 24px; line-height: 1; font-variant-numeric: tabular-nums; color: var(--color-blue); }
-.energy-top span { font-size: 13px; color: var(--color-secondary); }
-.energy-top .rem { font-size: 14px; font-weight: 700; color: var(--color-text); white-space: nowrap; }
+/* Hero: kcal dial + macros, dark inset panel */
+.hero { background: var(--color-surface-dark); color: var(--color-on-dark); border-radius: 16px; padding: 16px; display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; }
+.dial { position: relative; width: 104px; height: 104px; display: grid; place-items: center; }
+.dial svg { position: absolute; inset: 0; }
+.dial-num { position: relative; text-align: center; }
+.dial-num b { display: block; font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-size: 30px; line-height: 1; font-variant-numeric: tabular-nums; }
+.dial-num small { font-size: 13px; color: var(--color-muted-on-dark); }
+.macros { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.mline { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--color-on-dark); font-weight: 600; }
+.mline .display { font-size: 14px; }
+.hero-foot { grid-column: 1 / -1; font-size: 14px; color: var(--color-muted-subtitle); text-align: center; }
+.hero-foot b { color: var(--color-on-dark); font-weight: 700; }
 
 /* 10-segment slanted bar. Set --lvl on the bar; .nN fills the first N segments. */
 .seg { display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; height: 10px; }
@@ -100,69 +100,70 @@ h1, h2, h3, h4, p { margin: 0; }
 .n1 i:nth-child(-n+1), .n2 i:nth-child(-n+2), .n3 i:nth-child(-n+3), .n4 i:nth-child(-n+4), .n5 i:nth-child(-n+5),
 .n6 i:nth-child(-n+6), .n7 i:nth-child(-n+7), .n8 i:nth-child(-n+8), .n9 i:nth-child(-n+9), .n10 i:nth-child(-n+10) { background: var(--lvl); }
 
-/* Body, meal cards and rows */
+/* Body and cards */
 .body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
 .card { background: var(--color-card); border: 1px solid var(--color-card-border); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px; color: var(--color-text); }
-.card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; }
+.card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; }
 .card-head h4 { font-size: 16px; font-weight: 700; }
-.mhead-tools { display: flex; align-items: center; gap: 0; }
-.icon-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; color: var(--color-blue); }
-.icon-btn.muted { color: var(--color-text); }
-.kcal { font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--color-text); }
-.kcal.none { color: var(--color-secondary); font-weight: 600; }
 .sub { font-size: 14px; color: var(--color-secondary); }
 .cap { font-size: 13px; font-weight: 600; color: var(--color-secondary); }
+.link { color: var(--color-blue); font-size: 14px; font-weight: 700; min-height: 44px; display: inline-flex; align-items: center; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: 999px; font-size: 15px; font-weight: 700; white-space: nowrap; }
+.btn-primary { min-height: 52px; width: 100%; background: var(--color-blue); color: var(--color-on-dark); }
+.btn-secondary { background: var(--color-card); border: 1px solid var(--color-card-border); color: var(--color-text); }
 .rows { display: flex; flex-direction: column; }
 .rowi { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 56px; border-top: 1px solid var(--color-divider); padding: 8px 0; }
+.rows > li:first-child .rowi, .rows > li:first-child.rowi { border-top: 0; }
 .rowi .t { font-size: 15px; font-weight: 600; }
 .rowi .s { font-size: 13px; color: var(--color-secondary); margin-top: 2px; }
-.rows > li:first-child .rowi { border-top: 0; }
+.kcal { font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.kcal.none { color: var(--color-secondary); font-weight: 600; }
+.chev { color: var(--color-secondary); }
 .vrow { display: flex; align-items: center; gap: 16px; min-height: 56px; }
 .vnum { font-size: 40px; color: var(--color-blue); line-height: 1; }
-.chev { color: var(--color-secondary); }
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: 999px; font-size: 15px; font-weight: 700; white-space: nowrap; }
-.btn-primary { min-height: 52px; background: var(--color-blue); color: var(--color-on-dark); }
-.btn-secondary { background: var(--color-card); border: 1px solid var(--color-card-border); color: var(--color-text); }
-.btn-danger { background: var(--color-card); border: 1px solid var(--color-card-border); color: var(--color-destructive-text); }
-.notice { font-size: 13px; color: var(--color-secondary); }
-.pill-ro { display: inline-flex; align-items: center; min-height: 28px; padding: 0 12px; border-radius: 999px; background: var(--color-card-border); color: var(--color-text); font-size: 13px; font-weight: 700; }
+.facts { display: flex; flex-direction: column; gap: 10px; }
+.facts li { font-size: 14px; line-height: 1.45; padding-left: 12px; border-left: 3px solid var(--color-blue); }
 
-/* Sheets and menus (phone) */
-.scrim { position: absolute; inset: 0; background: var(--color-scrim); }
-.sheet { position: absolute; left: 0; right: 0; bottom: 0; background: var(--color-card); border-radius: 20px 20px 0 0; padding: 12px 16px 20px; display: flex; flex-direction: column; gap: 16px; }
-.grabber { width: 36px; height: 5px; border-radius: 3px; background: var(--color-grabber); margin: 0 auto; }
-.sheet h3 { font-size: 20px; font-weight: 700; }
-.sheet .sub { font-size: 14px; }
-.chipgrid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
-.chipgrid .chip { justify-content: center; padding: 0 4px; font-size: 15px; }
-.btnrow { display: grid; grid-template-columns: 1fr 2fr; gap: 8px; }
-.menu-item { display: flex; flex-direction: column; justify-content: center; min-height: 56px; padding: 8px 4px; border-top: 1px solid var(--color-divider); }
-.menu-item .t { font-size: 16px; font-weight: 600; }
-.menu-item .s { font-size: 13px; color: var(--color-secondary); margin-top: 2px; }
-.menu-item.danger .t { color: var(--color-destructive-text); }
-.popover { position: absolute; width: 260px; background: var(--color-card); border: 1px solid var(--color-card-border); border-radius: 16px; padding: 8px 16px; box-shadow: 0 8px 24px rgba(17,19,23,0.14); z-index: 2; }
+/* 7-day strip */
+.chart { position: relative; }
+.days { position: relative; display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.day { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.dval { font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; height: 16px; }
+.dbar-wrap { --tgt: 78px; position: relative; height: 96px; width: 100%; display: flex; align-items: flex-end; justify-content: center; }
+/* Target line (1.950 kcal) drawn in each column: --tgt is 1.950 / 2.400 of the bar height */
+.dbar-wrap::after { content: ""; position: absolute; left: -3px; right: -3px; bottom: var(--tgt); border-top: 2px dashed var(--color-ink); }
+.dbar { width: 100%; max-width: 30px; border-radius: 4px 4px 0 0; }
+.dlab { font-size: 12px; font-weight: 600; color: var(--color-secondary); text-align: center; line-height: 1.3; }
+.legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 13px; color: var(--color-secondary); align-items: center; }
+.lg { display: inline-flex; align-items: center; gap: 6px; }
+.lg i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; }
 
 /* Desktop */
 .side { width: 240px; flex: none; background: var(--color-ink); color: var(--color-on-dark); padding: 24px; display: flex; flex-direction: column; gap: 24px; }
 .side nav { display: flex; flex-direction: column; gap: 4px; }
 .side nav a { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 12px; border-radius: 12px; font-size: 15px; font-weight: 600; color: var(--color-muted-on-dark); }
 .side nav a[aria-current="page"] { background: var(--color-surface-dark); color: var(--color-on-dark); }
-.main { flex: 1; min-width: 0; padding: 32px 40px; display: flex; flex-direction: column; gap: 20px; }
+.main { flex: 1; min-width: 0; padding: 32px 40px; display: flex; flex-direction: column; gap: 24px; }
 .d-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; }
-.d-title { font-size: 40px; line-height: 1; text-transform: uppercase; }
+.d-title { font-size: 40px; }
 .d-sub { font-size: 14px; color: var(--color-secondary); margin-top: 8px; }
 .d-actions { display: flex; gap: 8px; align-items: center; }
-.grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 20px; align-items: start; }
+.grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 20px; align-items: stretch; }
 .s5 { grid-column: span 5; }
 .s7 { grid-column: span 7; }
 .s12 { grid-column: span 12; }
-.desktop .energy { border: 1px solid var(--color-card-border); border-radius: 16px; background: var(--color-card); }
-.desktop .energy-top b { font-size: 36px; }
-.desktop .energy-top span, .desktop .energy-top .rem { font-size: 15px; }
+.desktop .hero { grid-column: span 7; grid-template-columns: auto 1fr; padding: 24px; gap: 24px; }
+.desktop .dial { width: 168px; height: 168px; }
+.desktop .dial-num b { font-size: 44px; }
+.desktop .dial-num small { font-size: 14px; }
+.desktop .macros { gap: 14px; }
+.desktop .mline { font-size: 14px; }
+.desktop .big { font-size: 56px; line-height: 1; color: var(--color-text); }
+.desktop .days { gap: 12px; }
+.desktop .dbar-wrap { height: 144px; --tgt: 117px; }
+.desktop .dval { font-size: 13px; }
+.desktop .dlab { font-size: 13px; }
 .desktop .card-head h4 { font-size: 18px; }
-.mini { display: flex; flex-direction: column; gap: 14px; }
-.mini .mline { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; }
-.mini .mline .display { font-size: 15px; }
 
 /* Bottom nav (phone) */
 .nav { background: var(--color-ink); color: var(--color-muted-on-dark); display: grid; grid-template-columns: repeat(5, 1fr); align-items: center; height: 72px; padding: 0 8px; flex: none; }
@@ -170,510 +171,585 @@ h1, h2, h3, h4, p { margin: 0; }
 .nav a[aria-current="page"] { color: var(--color-on-dark); }
 .nav a[aria-current="page"]::before { content: ""; position: absolute; top: 0; width: 22px; height: 3px; background: var(--color-sky); transform: skewX(-14deg); }
 .fab { width: 56px; height: 56px; border-radius: 50%; background: var(--color-blue); color: var(--color-on-dark); display: flex; align-items: center; justify-content: center; justify-self: center; margin-top: -20px; }
+
+/* cc-15c: Nhật ký, pushed day screens, sheets. Tokens only. */
+.phone, .desktop { position: relative; }
+.ptop { padding: 12px 16px 4px; display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--color-page); }
+.ptitle-p { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-size: 28px; line-height: 1; text-transform: uppercase; color: var(--color-text); }
+.datenav-p { display: flex; align-items: center; gap: 0; }
+.datenav-p .ico-btn { color: var(--color-text); }
+.datenav-p .ico-btn:disabled { color: var(--color-secondary); opacity: .45; }
+.datenav-p .datelabel { min-width: 0; font-size: 14px; }
+.pill-ro { display: inline-flex; align-items: center; min-height: 28px; padding: 0 10px; border-radius: 999px; background: var(--color-card-border); color: var(--color-text); font-size: 13px; font-weight: 700; }
+.hdr-nk { padding: 16px 16px 20px; border-radius: 0 0 20px 20px; gap: 0; }
+.hdr-nk .hero { padding: 16px; }
+.hdr-nk .hero-foot { font-size: 14px; }
+.hdr-nk .hero-foot b { color: var(--color-on-dark); }
+.sub-p { padding: 8px 16px 12px; display: flex; flex-direction: column; gap: 4px; background: var(--color-page); }
+.sub-row { display: flex; align-items: center; gap: 4px; }
+.sub-row h3 { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-size: 26px; line-height: 1; text-transform: uppercase; color: var(--color-text); }
+.sub-p .cap { padding-left: 48px; }
+.back-p { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; color: var(--color-text); flex: none; }
+.rowcard { padding: 0; gap: 0; }
+.rowcard .rowi { padding: 12px 16px; min-height: 56px; }
+.rowcard .rowi:first-child { border-top: 0; }
+.rowcard .rowi .t { font-size: 15px; }
+.mealcard { gap: 4px; }
+.meal-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; }
+.meal-h .name { font-size: 16px; font-weight: 700; }
+.meal-h .kc { font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; margin-left: auto; padding-right: 4px; white-space: nowrap; }
+.meal-h .kc.none { color: var(--color-secondary); font-weight: 600; }
+.meal-acts { display: flex; align-items: center; gap: 0; }
+.ico-p { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; color: var(--color-text); flex: none; }
+.ico-p.add { background: var(--color-blue); color: var(--color-on-dark); }
+.ico-p:disabled { opacity: .45; }
+.foods { display: flex; flex-direction: column; }
+.foods li { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 40px; border-top: 1px solid var(--color-divider); font-size: 14px; }
+.foods li span:last-child { font-variant-numeric: tabular-nums; color: var(--color-secondary); white-space: nowrap; }
+.sumbar { position: sticky; top: 0; z-index: 2; background: var(--color-ink); color: var(--color-on-dark); padding: 10px 16px; display: flex; flex-direction: column; gap: 6px; }
+.sumbar-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; font-size: 14px; }
+.sumbar-top b { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-size: 20px; font-variant-numeric: tabular-nums; }
+.sumbar-top span { color: var(--color-muted-subtitle); }
+.scrim { position: absolute; inset: 0; background: rgba(17, 19, 23, .45); z-index: 3; }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 4; background: var(--color-card); border-radius: 20px 20px 0 0; padding: 12px 16px 20px; display: flex; flex-direction: column; gap: 4px; }
+.grab { width: 40px; height: 4px; border-radius: 999px; background: var(--color-grabber); margin: 0 auto 8px; }
+.opt { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; text-align: left; min-height: 56px; padding: 8px 4px; border-top: 1px solid var(--color-divider); }
+.opt:first-of-type { border-top: 0; }
+.opt .t { font-size: 16px; font-weight: 700; color: var(--color-text); }
+.opt .s { font-size: 13px; color: var(--color-secondary); }
+.dialog { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 4; width: 520px; max-width: calc(100% - 48px); background: var(--color-card); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 4px; box-shadow: 0 8px 32px rgba(17, 19, 23, .18); }
+.dialog h4 { font-size: 18px; font-weight: 700; padding-bottom: 8px; }
+.ink-card { background: var(--color-surface-dark); color: var(--color-on-dark); border-color: var(--color-surface-dark); }
+.ink-card .cap, .ink-card .sub { color: var(--color-muted-on-dark); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--color-card-border); background: var(--color-card); display: inline-flex; align-items: center; font-size: 15px; font-weight: 700; color: var(--color-text); }
+.chip[aria-pressed="true"] { background: var(--color-ink); border-color: var(--color-ink); color: var(--color-on-dark); }
+.chip[aria-disabled="true"] { color: var(--color-secondary); background: var(--color-page); }
+.salt { display: flex; flex-direction: column; gap: 4px; }
+.salt .big { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-size: 40px; line-height: 1; font-variant-numeric: tabular-nums; }
+.ck { display: flex; align-items: center; gap: 12px; min-height: 52px; border-top: 1px solid var(--color-divider); }
+.ck:first-child { border-top: 0; }
+.ck .box { width: 24px; height: 24px; border-radius: 6px; border: 2px solid var(--color-secondary); display: inline-flex; align-items: center; justify-content: center; flex: none; }
+.ck .box.on { background: var(--color-blue); border-color: var(--color-blue); color: var(--color-on-dark); }
+.ck .t { font-size: 15px; font-weight: 600; }
+.ck .s { font-size: 13px; color: var(--color-secondary); }
+.phase { font-size: 13px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--color-secondary); padding-top: 4px; }
+.mgroup { display: flex; flex-direction: column; gap: 0; }
+.mghead { font-size: 13px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--color-secondary); padding: 12px 0 4px; }
+.mlist { display: flex; flex-direction: column; }
+.mlist.mgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 32px; }
+.mrow { border-top: 1px solid var(--color-divider); }
+.mrow a { display: flex; flex-direction: column; gap: 6px; min-height: 56px; padding: 8px 0; }
+.mrow .mtop { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.mrow .t { font-size: 15px; font-weight: 600; color: var(--color-text); display: block; }
+.mrow .s { font-size: 13px; color: var(--color-secondary); display: block; }
+.mrow .pct { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-size: 20px; line-height: 1; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.desktop .sumcard { display: grid; grid-template-columns: auto 1fr; gap: 32px; align-items: center; }
+.desktop .sumcard .hero-foot { grid-column: auto; text-align: left; }
+.desktop .sumcard .dial { width: 168px; height: 168px; }
+.desktop .sumcard .dial-num b { font-size: 44px; }
+.desktop .sumcard .macros { gap: 14px; }
+.desktop .mealcard { gap: 4px; }
+.desktop .ptitle-p { display: none; }
+.desktop .rowcard .rowi { padding: 16px 20px; }
+.desktop .sumbar { display: none; }
+.desktop .dialog { width: 520px; }
+.desktop .ptop { display: none; }
+.desktop .d-head .datenav-p .ico-btn { color: var(--color-text); }
+.desktop .d-head { align-items: center; }
+.desktop .sub-row h3 { font-size: 40px; }
+.desktop .chips .chip { min-height: 48px; }
+.dial svg { width: 100%; height: 100%; }
+.macros-wrap { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.desktop .sumcard .hero-foot { text-align: left; grid-column: auto; }
+.desktop .sumcard .macros { gap: 14px; }
+.facts a { display: flex; align-items: center; min-height: 44px; color: var(--color-text); }
+.facts li { padding-top: 0; padding-bottom: 0; }
+.chip { padding: 0 12px; }
 </style>
 </head>
 <body>
 <div class="board">
   <header class="board-head">
     <h1>Nhật ký</h1>
-    <p>IA v2, tab 2 (replaces the Hôm nay meal list). Meals keep one + per header; the ⋯ menu holds Chép hôm qua. Past days are read-only, as in cc-11. Training minutes on a past day would show read-only once stored (note only: yesterday's training is not in the mock, so none is drawn). Data is lib/mock/sample-day.ts (today) and lib/mock/yesterday.ts (yesterday, Thứ Sáu 09/10/2026). Copy is Vietnamese; these notes are English.</p>
+    <p>IA v2, tab 2. Nhật ký owns the day (any date): the only place with a day's full breakdown. Title row with the date nav; the ink day summary (kcal dial, four macro bars, "còn N kcal"); two rows for the day, Vi chất (/micros?date=) and Ngày tập (/training?date=); meals with one + and one ⋯ each. Past days are read-only: no +, no ⋯, rows open read-only screens. Sample data: lib/mock/sample-day.ts (today, Thứ Hai 12/10, 1.041 kcal) and lib/mock/yesterday.ts (past sample, Thứ Sáu 09/10, 1.532 kcal). Copy is Vietnamese; these notes are English.</p>
   </header>
 
-  <!-- 1. Today: food logged, training chip -->
+  <!-- 2a. Today -->
   <section class="state">
-    <h2>1 · Hôm nay: food logged</h2>
+    <h2>2a · Hôm nay, có món</h2>
     <div class="pair">
       <figure class="fig fig-phone">
         <figcaption>390 px · phone</figcaption>
         <div class="phone">
-          <header class="hdr">
-            <div class="brand">H1T <span>MICRO</span></div>
-            <div class="hdr-row">
-              <h3 class="ptitle">Nhật ký</h3>
-              <div class="datenav">
-                <button class="ico-btn" aria-label="Ngày trước"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
-                <span class="datelabel">Hôm nay 10/10</span>
-                <button class="ico-btn" aria-label="Ngày sau" disabled><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+          <div class="ptop">
+            <h3 class="ptitle-p">Nhật ký</h3>
+            <div class="datenav-p"><button class="ico-btn" aria-label="Ngày trước"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg></button><span class="datelabel">Hôm nay 12/10</span><button class="ico-btn" aria-label="Ngày sau" disabled><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></button></div>
+          </div>
+          <header class="hdr hdr-nk">
+            <div class="hero">
+              
+<div class="dial"><svg viewBox="0 0 104 104" aria-hidden="true"><circle cx="52" cy="52" r="44" fill="none" stroke="var(--color-track-on-dark)" stroke-width="9"/><circle cx="52" cy="52" r="44" fill="none" stroke="var(--color-level-blue-dark)" stroke-width="9" stroke-dasharray="276.46" stroke-dashoffset="128.9" transform="rotate(-90 52 52)"/></svg><div class="dial-num"><b>1.041</b><small>kcal</small></div></div>
+              <div class="macros">
+                
+<div><div class="mline"><span>Đạm</span><span class="display">62 / 104–143 g</span></div><div class="seg dark n6" style="--lvl:var(--color-level-yellow-dark)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+<div><div class="mline"><span>Tinh bột</span><span class="display">133 / 254 g</span></div><div class="seg dark n5" style="--lvl:var(--color-level-yellow-dark)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+<div><div class="mline"><span>Béo</span><span class="display">21 / 33–65 g</span></div><div class="seg dark n6" style="--lvl:var(--color-level-yellow-dark)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+<div><div class="mline"><span>Chất xơ</span><span class="display">14 / 30 g</span></div><div class="seg dark n4" style="--lvl:var(--color-level-red-dark)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
               </div>
-            </div>
-            <div class="chiprow">
-              <button class="chip onink" aria-haspopup="dialog"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/></svg>Ngày tập 60′</button>
+              <p class="hero-foot">Mục tiêu <b>1.950–2.275 kcal</b> · còn <b>909 kcal</b></p>
             </div>
           </header>
-
-          <div class="energy" role="status" aria-label="Năng lượng hôm nay">
-            <div class="energy-top"><b>1.041 kcal</b><span>Mục tiêu 1.950–2.275</span><span class="rem">còn 909</span></div>
-            <div class="seg n5" style="--lvl:var(--color-level-yellow)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-          </div>
-
           <div class="body">
-            <section class="card" aria-labelledby="p1-b1">
-              <div class="card-head">
-                <div><h4 id="p1-b1">Bữa sáng</h4><span class="sub">459 kcal</span></div>
-                <div class="mhead-tools">
-                  <button class="icon-btn" aria-label="Thêm món vào Bữa sáng"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
-                  <button class="icon-btn muted" aria-label="Tuỳ chọn Bữa sáng"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button>
-                </div>
-              </div>
+            <section class="card rowcard" aria-label="Chi tiết trong ngày">
               <ul class="rows">
-                <li><button class="rowi" style="width:100%;text-align:left"><div><div class="t">Yến mạch</div><div class="s">60 g</div></div><span class="kcal">228</span></button></li>
-                <li><button class="rowi" style="width:100%;text-align:left"><div><div class="t">Yogurt kefir</div><div class="s">200 ml</div></div><span class="kcal">126</span></button></li>
-                <li><button class="rowi" style="width:100%;text-align:left"><div><div class="t">Chuối</div><div class="s">1 quả</div></div><span class="kcal">105</span></button></li>
+                <li><a class="rowi" href="/micros?date=2026-10-12"><div><div class="t">8/22 vi chất · Thiếu: Vitamin D, Canxi</div></div><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                <li><a class="rowi" href="/training?date=2026-10-12"><div><div class="t">Ngày tập 60′ · muối 7–10,5 g</div></div><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
               </ul>
             </section>
 
-            <section class="card" aria-labelledby="p1-b2">
-              <div class="card-head">
-                <div><h4 id="p1-b2">Bữa trưa</h4><span class="sub">488 kcal</span></div>
-                <div class="mhead-tools">
-                  <button class="icon-btn" aria-label="Thêm món vào Bữa trưa"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
-                  <button class="icon-btn muted" aria-label="Tuỳ chọn Bữa trưa"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button>
-                </div>
-              </div>
-              <ul class="rows">
-                <li><button class="rowi" style="width:100%;text-align:left"><div><div class="t">Cơm gạo lứt</div><div class="s">150 g</div></div><span class="kcal">168</span></button></li>
-                <li><button class="rowi" style="width:100%;text-align:left"><div><div class="t">Thịt bò nạc</div><div class="s">150 g</div></div><span class="kcal">320</span></button></li>
-              </ul>
+            <section class="card mealcard" aria-labelledby="a-m1">
+              <div class="meal-h"><h4 id="a-m1" class="name">Bữa sáng</h4><span class="kc">459 kcal</span><div class="meal-acts"><button class="ico-p add" aria-label="Thêm vào Bữa sáng"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg></button><button class="ico-p" aria-label="Tuỳ chọn Bữa sáng"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg></button></div></div>
+              <ul class="foods"><li><span>Yến mạch 60 g</span><span>228</span></li><li><span>Yogurt kefir 200 ml</span><span>126</span></li><li><span>Chuối 1 quả</span><span>105</span></li></ul>
             </section>
-
-            <section class="card" aria-labelledby="p1-b3">
-              <div class="card-head">
-                <div><h4 id="p1-b3">Trước tập</h4><span class="sub">94 kcal</span></div>
-                <div class="mhead-tools">
-                  <button class="icon-btn" aria-label="Thêm món vào Trước tập"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
-                  <button class="icon-btn muted" aria-label="Tuỳ chọn Trước tập"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button>
-                </div>
-              </div>
-              <ul class="rows">
-                <li><button class="rowi" style="width:100%;text-align:left"><div><div class="t">Chà là</div><div class="s">30 g</div></div><span class="kcal">84</span></button></li>
-                <li><button class="rowi" style="width:100%;text-align:left"><div><div class="t">Bột củ dền</div><div class="s">3 g</div></div><span class="kcal">10</span></button></li>
-              </ul>
+            <section class="card mealcard" aria-labelledby="a-m2">
+              <div class="meal-h"><h4 id="a-m2" class="name">Bữa trưa</h4><span class="kc">488 kcal</span><div class="meal-acts"><button class="ico-p add" aria-label="Thêm vào Bữa trưa"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg></button><button class="ico-p" aria-label="Tuỳ chọn Bữa trưa"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg></button></div></div>
+              <ul class="foods"><li><span>Cơm gạo lứt 150 g</span><span>168</span></li><li><span>Thịt bò nạc 150 g</span><span>320</span></li></ul>
             </section>
-
-            <section class="card" aria-labelledby="p1-b4">
-              <div class="card-head">
-                <div><h4 id="p1-b4">Bữa tối</h4><span class="sub">Chưa có món</span></div>
-                <div class="mhead-tools">
-                  <button class="icon-btn" aria-label="Thêm món vào Bữa tối"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
-                  <button class="icon-btn muted" aria-label="Tuỳ chọn Bữa tối"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button>
-                </div>
-              </div>
+            <section class="card mealcard" aria-labelledby="a-m3">
+              <div class="meal-h"><h4 id="a-m3" class="name">Trước tập</h4><span class="kc">94 kcal</span><div class="meal-acts"><button class="ico-p add" aria-label="Thêm vào Trước tập"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg></button><button class="ico-p" aria-label="Tuỳ chọn Trước tập"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg></button></div></div>
+              <ul class="foods"><li><span>Chà là 30 g</span><span>84</span></li><li><span>Bột củ dền 3 g</span><span>10</span></li></ul>
             </section>
-
-            <section class="card" aria-labelledby="p1-b5">
-              <div class="card-head">
-                <div><h4 id="p1-b5">Bữa phụ</h4><span class="sub">Chưa có món</span></div>
-                <div class="mhead-tools">
-                  <button class="icon-btn" aria-label="Thêm món vào Bữa phụ"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
-                  <button class="icon-btn muted" aria-label="Tuỳ chọn Bữa phụ"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button>
-                </div>
-              </div>
+            <section class="card mealcard" aria-labelledby="a-m4">
+              <div class="meal-h"><h4 id="a-m4" class="name">Bữa tối</h4><span class="kc none">Chưa có món</span><div class="meal-acts"><button class="ico-p add" aria-label="Thêm vào Bữa tối"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg></button><button class="ico-p" aria-label="Tuỳ chọn Bữa tối"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg></button></div></div>
             </section>
-
-            <a class="card" href="#" aria-label="Vi chất đã đạt 8 trên 22. Mở chi tiết">
-              <div class="vrow">
-                <span class="display vnum">8/22</span>
-                <div style="flex:1;min-width:0"><div class="t" style="font-size:15px;font-weight:700">Vi chất đã đạt</div><div class="sub">Thiếu nhiều nhất: Vitamin D, Canxi</div></div>
-                <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
-              </div>
-            </a>
+            <section class="card mealcard" aria-labelledby="a-m5">
+              <div class="meal-h"><h4 id="a-m5" class="name">Bữa phụ</h4><span class="kc none">Chưa có món</span><div class="meal-acts"><button class="ico-p add" aria-label="Thêm vào Bữa phụ"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg></button><button class="ico-p" aria-label="Tuỳ chọn Bữa phụ"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg></button></div></div>
+            </section>
           </div>
-
-          <nav class="nav" aria-label="Điều hướng chính">
-            <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
-            <a href="#" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
-            <button class="fab" aria-label="Thêm món"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
-            <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
-            <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
-          </nav>
+          
+<nav class="nav" aria-label="Điều hướng chính">
+<a href="/"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
+<a href="/diary" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
+<button class="fab" aria-label="Thêm món"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+<a href="/explore"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
+<a href="/settings"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
+</nav>
         </div>
       </figure>
 
       <figure class="fig fig-desktop">
         <figcaption>1280 px · desktop</figcaption>
         <div class="desktop">
-          <aside class="side">
-            <div class="brand">H1T <span>MICRO</span></div>
-            <button class="btn btn-primary side-add" type="button"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Thêm món</button>
-            <nav aria-label="Điều hướng chính">
-              <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
-              <a href="#" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
-              <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
-              <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
-            </nav>
-          </aside>
-          <div class="main">
-            <div class="d-head">
-              <div>
-                <h3 class="ptitle d-title">Nhật ký</h3>
-                <p class="d-sub">Thứ Bảy, 10/10/2026 · Giữ cân · 65 kg</p>
+          
+<aside class="side" aria-label="Điều hướng">
+<div class="brand">H1T <span>MICRO</span></div>
+<a class="btn btn-primary side-add" href="/add"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Thêm món</a>
+<nav aria-label="Điều hướng chính">
+<a href="/"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
+<a href="/diary" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
+<a href="/explore"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
+<a href="/settings"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
+</nav>
+</aside>
+          <main class="main">
+            <div class="d-head"><p class="d-title">Nhật ký</p><div class="datenav-p"><button class="ico-btn" aria-label="Ngày trước"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg></button><span class="datelabel">Hôm nay 12/10</span><button class="ico-btn" aria-label="Ngày sau" disabled><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></button></div></div>
+            <section class="card ink-card sumcard" aria-label="Tóm tắt ngày">
+              
+<div class="dial"><svg viewBox="0 0 104 104" aria-hidden="true"><circle cx="52" cy="52" r="44" fill="none" stroke="var(--color-track-on-dark)" stroke-width="9"/><circle cx="52" cy="52" r="44" fill="none" stroke="var(--color-level-blue-dark)" stroke-width="9" stroke-dasharray="276.46" stroke-dashoffset="128.9" transform="rotate(-90 52 52)"/></svg><div class="dial-num"><b>1.041</b><small>kcal</small></div></div>
+              <div class="macros-wrap">
+                <div class="macros">
+                  
+<div><div class="mline"><span>Đạm</span><span class="display">62 / 104–143 g</span></div><div class="seg dark n6" style="--lvl:var(--color-level-yellow-dark)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+<div><div class="mline"><span>Tinh bột</span><span class="display">133 / 254 g</span></div><div class="seg dark n5" style="--lvl:var(--color-level-yellow-dark)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+<div><div class="mline"><span>Béo</span><span class="display">21 / 33–65 g</span></div><div class="seg dark n6" style="--lvl:var(--color-level-yellow-dark)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+<div><div class="mline"><span>Chất xơ</span><span class="display">14 / 30 g</span></div><div class="seg dark n4" style="--lvl:var(--color-level-red-dark)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+                </div>
+                <p class="hero-foot">Mục tiêu <b>1.950–2.275 kcal</b> · còn <b>909 kcal</b></p>
               </div>
-              <div class="d-actions">
-                <button class="ico-btn" aria-label="Ngày trước" style="color:var(--color-text)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
-                <button class="ico-btn" aria-label="Ngày sau" disabled style="color:var(--color-secondary)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
-              </div>
-            </div>
-            <div class="chiprow"><button class="chip" aria-haspopup="dialog" style="border-color:var(--color-ink)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/></svg>Ngày tập 60′</button></div>
-            <div class="energy">
-              <div class="energy-top"><b>1.041 kcal</b><span>Mục tiêu 1.950–2.275</span><span class="rem">còn 909</span></div>
-              <div class="seg n5" style="--lvl:var(--color-level-yellow)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-            </div>
+            </section>
             <div class="grid">
-              <div class="s7" style="display:flex;flex-direction:column;gap:12px">
-                <section class="card">
-                  <div class="card-head"><div><h4>Bữa sáng</h4><span class="sub">459 kcal</span></div><div class="mhead-tools"><button class="icon-btn" aria-label="Thêm món vào Bữa sáng"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><button class="icon-btn muted" aria-label="Tuỳ chọn Bữa sáng"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button></div></div>
-                  <ul class="rows">
-                    <li><button class="rowi" style="width:100%;text-align:left"><div><div class="t">Yến mạch</div><div class="s">60 g</div></div><span class="kcal">228</span></button></li>
-                    <li><button class="rowi" style="width:100%;text-align:left"><div><div class="t">Yogurt kefir</div><div class="s">200 ml</div></div><span class="kcal">126</span></button></li>
-                    <li><button class="rowi" style="width:100%;text-align:left"><div><div class="t">Chuối</div><div class="s">1 quả</div></div><span class="kcal">105</span></button></li>
-                  </ul>
+              <div class="s7 stack">
+                <section class="card mealcard" aria-labelledby="d-m1">
+                  <div class="meal-h"><h4 id="d-m1" class="name">Bữa sáng</h4><span class="kc">459 kcal</span><div class="meal-acts"><button class="ico-p add" aria-label="Thêm vào Bữa sáng"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg></button><button class="ico-p" aria-label="Tuỳ chọn Bữa sáng"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg></button></div></div>
+                  <ul class="foods"><li><span>Yến mạch 60 g</span><span>228</span></li><li><span>Yogurt kefir 200 ml</span><span>126</span></li><li><span>Chuối 1 quả</span><span>105</span></li></ul>
                 </section>
-                <section class="card">
-                  <div class="card-head"><div><h4>Bữa trưa</h4><span class="sub">488 kcal</span></div><div class="mhead-tools"><button class="icon-btn" aria-label="Thêm món vào Bữa trưa"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><button class="icon-btn muted" aria-label="Tuỳ chọn Bữa trưa"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button></div></div>
-                  <ul class="rows">
-                    <li><button class="rowi" style="width:100%;text-align:left"><div><div class="t">Cơm gạo lứt</div><div class="s">150 g</div></div><span class="kcal">168</span></button></li>
-                    <li><button class="rowi" style="width:100%;text-align:left"><div><div class="t">Thịt bò nạc</div><div class="s">150 g</div></div><span class="kcal">320</span></button></li>
-                  </ul>
+                <section class="card mealcard" aria-labelledby="d-m2">
+                  <div class="meal-h"><h4 id="d-m2" class="name">Bữa trưa</h4><span class="kc">488 kcal</span><div class="meal-acts"><button class="ico-p add" aria-label="Thêm vào Bữa trưa"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg></button><button class="ico-p" aria-label="Tuỳ chọn Bữa trưa"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg></button></div></div>
+                  <ul class="foods"><li><span>Cơm gạo lứt 150 g</span><span>168</span></li><li><span>Thịt bò nạc 150 g</span><span>320</span></li></ul>
                 </section>
-                <section class="card">
-                  <div class="card-head"><div><h4>Trước tập</h4><span class="sub">94 kcal</span></div><div class="mhead-tools"><button class="icon-btn" aria-label="Thêm món vào Trước tập"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><button class="icon-btn muted" aria-label="Tuỳ chọn Trước tập"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button></div></div>
-                  <ul class="rows">
-                    <li><button class="rowi" style="width:100%;text-align:left"><div><div class="t">Chà là</div><div class="s">30 g</div></div><span class="kcal">84</span></button></li>
-                    <li><button class="rowi" style="width:100%;text-align:left"><div><div class="t">Bột củ dền</div><div class="s">3 g</div></div><span class="kcal">10</span></button></li>
-                  </ul>
+                <section class="card mealcard" aria-labelledby="d-m3">
+                  <div class="meal-h"><h4 id="d-m3" class="name">Trước tập</h4><span class="kc">94 kcal</span><div class="meal-acts"><button class="ico-p add" aria-label="Thêm vào Trước tập"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg></button><button class="ico-p" aria-label="Tuỳ chọn Trước tập"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg></button></div></div>
+                  <ul class="foods"><li><span>Chà là 30 g</span><span>84</span></li><li><span>Bột củ dền 3 g</span><span>10</span></li></ul>
                 </section>
-                <section class="card">
-                  <div class="card-head"><div><h4>Bữa tối</h4><span class="sub">Chưa có món</span></div><div class="mhead-tools"><button class="icon-btn" aria-label="Thêm món vào Bữa tối"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><button class="icon-btn muted" aria-label="Tuỳ chọn Bữa tối"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button></div></div>
+                <section class="card mealcard" aria-labelledby="d-m4">
+                  <div class="meal-h"><h4 id="d-m4" class="name">Bữa tối</h4><span class="kc none">Chưa có món</span><div class="meal-acts"><button class="ico-p add" aria-label="Thêm vào Bữa tối"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg></button><button class="ico-p" aria-label="Tuỳ chọn Bữa tối"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg></button></div></div>
                 </section>
-                <section class="card">
-                  <div class="card-head"><div><h4>Bữa phụ</h4><span class="sub">Chưa có món</span></div><div class="mhead-tools"><button class="icon-btn" aria-label="Thêm món vào Bữa phụ"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><button class="icon-btn muted" aria-label="Tuỳ chọn Bữa phụ"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button></div></div>
+                <section class="card mealcard" aria-labelledby="d-m5">
+                  <div class="meal-h"><h4 id="d-m5" class="name">Bữa phụ</h4><span class="kc none">Chưa có món</span><div class="meal-acts"><button class="ico-p add" aria-label="Thêm vào Bữa phụ"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg></button><button class="ico-p" aria-label="Tuỳ chọn Bữa phụ"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg></button></div></div>
                 </section>
               </div>
-              <div class="s5" style="display:flex;flex-direction:column;gap:12px">
-                <section class="card" aria-labelledby="d1-tot">
-                  <div class="card-head"><h4 id="d1-tot">Tổng trong ngày</h4><span class="sub">1.041 kcal</span></div>
-                  <div class="mini">
-                    <div><div class="mline"><span>Đạm</span><span class="display">62 / 104–143 g</span></div><div class="seg n6" style="--lvl:var(--color-level-yellow)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
-                    <div><div class="mline"><span>Tinh bột</span><span class="display">133 / 254 g</span></div><div class="seg n5" style="--lvl:var(--color-level-yellow)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
-                    <div><div class="mline"><span>Béo</span><span class="display">21 / 33–65 g</span></div><div class="seg n6" style="--lvl:var(--color-level-yellow)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
-                    <div><div class="mline"><span>Chất xơ</span><span class="display">14 / 30 g</span></div><div class="seg n4" style="--lvl:var(--color-level-red)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
-                  </div>
+              <div class="s5 stack">
+                <section class="card rowcard" aria-label="Chi tiết trong ngày">
+                  <ul class="rows">
+                    <li><a class="rowi" href="/micros?date=2026-10-12"><div><div class="t">8/22 vi chất · Thiếu: Vitamin D, Canxi</div></div><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                    <li><a class="rowi" href="/training?date=2026-10-12"><div><div class="t">Ngày tập 60′ · muối 7–10,5 g</div></div><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                  </ul>
                 </section>
-                <a class="card" href="#" aria-label="Vi chất đã đạt 8 trên 22. Mở chi tiết">
-                  <div class="card-head"><h4>Vi chất đã đạt</h4><span class="display vnum" style="font-size:44px">8/22</span></div>
-                  <p class="sub">Thiếu nhiều nhất: Vitamin D, Canxi</p>
-                </a>
               </div>
             </div>
-          </div>
+          </main>
         </div>
       </figure>
     </div>
   </section>
 
-  <!-- 2. Training sheet -->
+  <!-- 2b. Scrolled: sticky bar -->
   <section class="state">
-    <h2>2 · Training chip and its sheet</h2>
+    <h2>2b · Cuộn xuống: thanh tóm tắt cố định (phone)</h2>
     <div class="pair">
       <figure class="fig fig-phone">
-        <figcaption>390 px · phone (sheet open)</figcaption>
-        <div class="phone fixed">
-          <header class="hdr">
-            <div class="brand">H1T <span>MICRO</span></div>
-            <div class="hdr-row">
-              <h3 class="ptitle">Nhật ký</h3>
-              <div class="datenav"><span class="datelabel">Hôm nay 10/10</span></div>
-            </div>
-            <div class="chiprow"><button class="chip onink" aria-haspopup="dialog" aria-expanded="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/></svg>Ngày tập 60′</button></div>
-          </header>
-          <div class="energy"><div class="energy-top"><b>1.041 kcal</b><span>Mục tiêu 1.950–2.275</span><span class="rem">còn 909</span></div><div class="seg n5" style="--lvl:var(--color-level-yellow)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+        <figcaption>390 px · phone, cuộn xuống</figcaption>
+        <div class="phone">
+          <div class="sumbar" role="status" aria-label="Tóm tắt ngày">
+            <div class="sumbar-top"><b>1.041 kcal</b><span>còn 909 kcal · Mục tiêu 1.950–2.275</span></div>
+            <div class="seg dark n5" style="--lvl:var(--color-level-blue-dark)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          </div>
           <div class="body">
-            <section class="card"><div class="card-head"><div><h4>Bữa sáng</h4><span class="sub">459 kcal</span></div></div></section>
-            <section class="card"><div class="card-head"><div><h4>Bữa trưa</h4><span class="sub">488 kcal</span></div></div></section>
-            <section class="card"><div class="card-head"><div><h4>Trước tập</h4><span class="sub">94 kcal</span></div></div></section>
+            <section class="card mealcard" aria-labelledby="b-m1">
+              <div class="meal-h"><h4 id="b-m1" class="name">Bữa sáng</h4><span class="kc">459 kcal</span><div class="meal-acts"><button class="ico-p add" aria-label="Thêm vào Bữa sáng"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg></button><button class="ico-p" aria-label="Tuỳ chọn Bữa sáng"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg></button></div></div>
+              <ul class="foods"><li><span>Yến mạch 60 g</span><span>228</span></li><li><span>Yogurt kefir 200 ml</span><span>126</span></li><li><span>Chuối 1 quả</span><span>105</span></li></ul>
+            </section>
+            <section class="card mealcard" aria-labelledby="b-m2">
+              <div class="meal-h"><h4 id="b-m2" class="name">Bữa trưa</h4><span class="kc">488 kcal</span><div class="meal-acts"><button class="ico-p add" aria-label="Thêm vào Bữa trưa"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg></button><button class="ico-p" aria-label="Tuỳ chọn Bữa trưa"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg></button></div></div>
+              <ul class="foods"><li><span>Cơm gạo lứt 150 g</span><span>168</span></li><li><span>Thịt bò nạc 150 g</span><span>320</span></li></ul>
+            </section>
+            <section class="card mealcard" aria-labelledby="b-m4">
+              <div class="meal-h"><h4 id="b-m4" class="name">Bữa tối</h4><span class="kc none">Chưa có món</span><div class="meal-acts"><button class="ico-p add" aria-label="Thêm vào Bữa tối"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg></button><button class="ico-p" aria-label="Tuỳ chọn Bữa tối"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg></button></div></div>
+            </section>
+          </div>
+          
+<nav class="nav" aria-label="Điều hướng chính">
+<a href="/"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
+<a href="/diary" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
+<button class="fab" aria-label="Thêm món"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+<a href="/explore"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
+<a href="/settings"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
+</nav>
+        </div>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 2c. Menu: Chép hôm qua, Lưu thành Bữa của tôi -->
+  <section class="state">
+    <h2>2c · Menu ⋯ của một bữa</h2>
+    <div class="pair">
+      <figure class="fig fig-phone">
+        <figcaption>390 px · phone, bottom sheet</figcaption>
+        <div class="phone">
+          <div class="ptop">
+            <h3 class="ptitle-p">Nhật ký</h3>
+            <div class="datenav-p"><button class="ico-btn" aria-label="Ngày trước"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg></button><span class="datelabel">Hôm nay 12/10</span><button class="ico-btn" aria-label="Ngày sau" disabled><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></button></div>
+          </div>
+          <div class="body">
+            <section class="card mealcard" aria-labelledby="c-m1">
+              <div class="meal-h"><h4 id="c-m1" class="name">Bữa sáng</h4><span class="kc">459 kcal</span><div class="meal-acts"><button class="ico-p add" aria-label="Thêm vào Bữa sáng"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg></button><button class="ico-p" aria-label="Tuỳ chọn Bữa sáng" aria-expanded="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg></button></div></div>
+              <ul class="foods"><li><span>Yến mạch 60 g</span><span>228</span></li><li><span>Yogurt kefir 200 ml</span><span>126</span></li><li><span>Chuối 1 quả</span><span>105</span></li></ul>
+            </section>
           </div>
           <div class="scrim" aria-hidden="true"></div>
-          <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-train">
-            <div class="grabber" aria-hidden="true"></div>
-            <div>
-              <h3 id="sh-train">Ngày tập hôm nay</h3>
-              <p class="sub" style="margin-top:4px">Thời lượng tập để tính muối bù mồ hôi: 1–1,5 g mỗi 20 phút.</p>
-            </div>
-            <div class="chipgrid" role="group" aria-label="Thời lượng tập">
-              <button class="chip" aria-pressed="false">Nghỉ</button>
-              <button class="chip" aria-pressed="false">45′</button>
-              <button class="chip" aria-pressed="true">60′</button>
-              <button class="chip" aria-pressed="false">90′</button>
-              <button class="chip" aria-pressed="false">120′</button>
-            </div>
-            <p class="notice">Ngày tập 60′ · muối 7–10,5 g. Nghỉ · muối 4–6 g.</p>
-            <div class="btnrow">
-              <button class="btn btn-secondary">Huỷ</button>
-              <button class="btn btn-primary">Lưu</button>
-            </div>
+          <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="c-sh">
+            <div class="grab" aria-hidden="true"></div>
+            <h4 id="c-sh" class="dialog-h">Bữa sáng</h4>
+            <button class="opt"><span class="t">Chép hôm qua</span><span class="s">Chép 3 món · 459 kcal từ Thứ Sáu 09/10</span></button>
+            <button class="opt"><span class="t">Lưu thành Bữa của tôi</span><span class="s">Dùng lại trong Khám phá, một chạm để thêm</span></button>
+            <button class="btn btn-secondary" style="width:100%">Đóng</button>
           </div>
+          
+<nav class="nav" aria-label="Điều hướng chính">
+<a href="/"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
+<a href="/diary" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
+<button class="fab" aria-label="Thêm món"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+<a href="/explore"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
+<a href="/settings"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
+</nav>
         </div>
       </figure>
 
       <figure class="fig fig-desktop">
-        <figcaption>1280 px · desktop (dialog open)</figcaption>
+        <figcaption>1280 px · desktop, hộp thoại giữa màn hình</figcaption>
         <div class="desktop">
-          <aside class="side">
-            <div class="brand">H1T <span>MICRO</span></div>
-            <button class="btn btn-primary side-add" type="button"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Thêm món</button>
-            <nav aria-label="Điều hướng chính">
-              <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
-              <a href="#" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
-              <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
-              <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
-            </nav>
-          </aside>
-          <div class="main">
-            <div class="d-head"><div><h3 class="ptitle d-title">Nhật ký</h3><p class="d-sub">Thứ Bảy, 10/10/2026 · Giữ cân · 65 kg</p></div></div>
-            <div class="chiprow"><button class="chip" aria-haspopup="dialog" aria-expanded="true" style="border-color:var(--color-ink)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/></svg>Ngày tập 60′</button></div>
-            <div class="energy" style="border:1px solid var(--color-card-border);border-radius:16px"><div class="energy-top"><b>1.041 kcal</b><span>Mục tiêu 1.950–2.275</span><span class="rem">còn 909</span></div><div class="seg n5" style="--lvl:var(--color-level-yellow)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
-            <section class="card" style="max-width:620px;margin-top:8px">
-              <div class="card-head"><h4>Bữa sáng</h4><span class="sub">459 kcal</span></div>
-              <ul class="rows"><li><div class="rowi"><div><div class="t">Yến mạch</div><div class="s">60 g</div></div><span class="kcal">228</span></div></li></ul>
+          
+<aside class="side" aria-label="Điều hướng">
+<div class="brand">H1T <span>MICRO</span></div>
+<a class="btn btn-primary side-add" href="/add"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Thêm món</a>
+<nav aria-label="Điều hướng chính">
+<a href="/"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
+<a href="/diary" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
+<a href="/explore"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
+<a href="/settings"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
+</nav>
+</aside>
+          <main class="main">
+            <div class="d-head"><p class="d-title">Nhật ký</p><div class="datenav-p"><button class="ico-btn" aria-label="Ngày trước"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg></button><span class="datelabel">Hôm nay 12/10</span><button class="ico-btn" aria-label="Ngày sau" disabled><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></button></div></div>
+            <section class="card mealcard" aria-labelledby="ce-m1">
+              <div class="meal-h"><h4 id="ce-m1" class="name">Bữa sáng</h4><span class="kc">459 kcal</span><div class="meal-acts"><button class="ico-p add" aria-label="Thêm vào Bữa sáng"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg></button><button class="ico-p" aria-label="Tuỳ chọn Bữa sáng" aria-expanded="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg></button></div></div>
+              <ul class="foods"><li><span>Yến mạch 60 g</span><span>228</span></li><li><span>Yogurt kefir 200 ml</span><span>126</span></li><li><span>Chuối 1 quả</span><span>105</span></li></ul>
             </section>
-          </div>
+          </main>
           <div class="scrim" aria-hidden="true"></div>
-          <div role="dialog" aria-modal="true" aria-labelledby="dsh-train" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:440px;background:var(--color-card);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:16px;box-shadow:0 8px 24px rgba(17,19,23,0.14)">
-            <div>
-              <h3 id="dsh-train" style="font-size:20px;font-weight:700">Ngày tập hôm nay</h3>
-              <p class="sub" style="margin-top:4px">Thời lượng tập để tính muối bù mồ hôi: 1–1,5 g mỗi 20 phút.</p>
-            </div>
-            <div class="chipgrid" role="group" aria-label="Thời lượng tập">
-              <button class="chip" aria-pressed="false">Nghỉ</button>
-              <button class="chip" aria-pressed="false">45′</button>
-              <button class="chip" aria-pressed="true">60′</button>
-              <button class="chip" aria-pressed="false">90′</button>
-              <button class="chip" aria-pressed="false">120′</button>
-            </div>
-            <p class="notice">Ngày tập 60′ · muối 7–10,5 g. Nghỉ · muối 4–6 g.</p>
-            <div class="btnrow" style="justify-content:end">
-              <button class="btn btn-secondary">Huỷ</button>
-              <button class="btn btn-primary" style="padding:0 28px">Lưu</button>
-            </div>
+          <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="ce-sh">
+            <h4 id="ce-sh">Bữa sáng</h4>
+            <button class="opt"><span class="t">Chép hôm qua</span><span class="s">Chép 3 món · 459 kcal từ Thứ Sáu 09/10</span></button>
+            <button class="opt"><span class="t">Lưu thành Bữa của tôi</span><span class="s">Dùng lại trong Khám phá, một chạm để thêm</span></button>
+            <button class="btn btn-secondary" style="width:100%;margin-top:8px">Đóng</button>
           </div>
         </div>
       </figure>
     </div>
   </section>
 
-  <!-- 3. Per-meal menu -->
+  <!-- 2d. Past day, read-only -->
   <section class="state">
-    <h2>3 · Per-meal menu (⋯ on Bữa sáng)</h2>
-    <div class="pair">
-      <figure class="fig fig-phone">
-        <figcaption>390 px · phone (menu sheet)</figcaption>
-        <div class="phone fixed">
-          <header class="hdr">
-            <div class="brand">H1T <span>MICRO</span></div>
-            <div class="hdr-row"><h3 class="ptitle">Nhật ký</h3><div class="datenav"><span class="datelabel">Hôm nay 10/10</span></div></div>
-            <div class="chiprow"><button class="chip onink" aria-haspopup="dialog"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/></svg>Ngày tập 60′</button></div>
-          </header>
-          <div class="energy"><div class="energy-top"><b>1.041 kcal</b><span>Mục tiêu 1.950–2.275</span><span class="rem">còn 909</span></div><div class="seg n5" style="--lvl:var(--color-level-yellow)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
-          <div class="body">
-            <section class="card"><div class="card-head"><div><h4>Bữa sáng</h4><span class="sub">459 kcal</span></div><div class="mhead-tools"><button class="icon-btn" aria-label="Thêm món vào Bữa sáng"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><button class="icon-btn muted" aria-label="Tuỳ chọn Bữa sáng" aria-expanded="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button></div></div></section>
-            <section class="card"><div class="card-head"><div><h4>Bữa trưa</h4><span class="sub">488 kcal</span></div></div></section>
-          </div>
-          <div class="scrim" aria-hidden="true"></div>
-          <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="menu-b1" style="gap:8px;padding-top:12px">
-            <div class="grabber" aria-hidden="true"></div>
-            <h3 id="menu-b1" style="padding:0 4px">Bữa sáng</h3>
-            <button class="menu-item" style="text-align:left;width:100%"><span class="t">Chép hôm qua</span><span class="s">Chép 3 món · 459 kcal từ Thứ Sáu 09/10</span></button>
-            <button class="menu-item danger" style="text-align:left;width:100%"><span class="t">Xoá bữa này</span><span class="s">Xoá 3 món khỏi Bữa sáng. Có xác nhận trước khi xoá.</span></button>
-            <button class="btn btn-secondary" style="width:100%;margin-top:4px">Đóng</button>
-          </div>
-        </div>
-      </figure>
-
-      <figure class="fig fig-desktop">
-        <figcaption>1280 px · desktop (popover)</figcaption>
-        <div class="desktop">
-          <aside class="side">
-            <div class="brand">H1T <span>MICRO</span></div>
-            <button class="btn btn-primary side-add" type="button"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Thêm món</button>
-            <nav aria-label="Điều hướng chính">
-              <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
-              <a href="#" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
-              <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
-              <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
-            </nav>
-          </aside>
-          <div class="main">
-            <div class="d-head"><div><h3 class="ptitle d-title">Nhật ký</h3><p class="d-sub">Thứ Bảy, 10/10/2026 · Ngày tập 60′ · Giữ cân · 65 kg</p></div></div>
-            <div class="energy" style="border:1px solid var(--color-card-border);border-radius:16px"><div class="energy-top"><b>1.041 kcal</b><span>Mục tiêu 1.950–2.275</span><span class="rem">còn 909</span></div><div class="seg n5" style="--lvl:var(--color-level-yellow)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
-            <section class="card" style="max-width:620px;position:relative">
-              <div class="card-head"><div><h4>Bữa sáng</h4><span class="sub">459 kcal</span></div><div class="mhead-tools"><button class="icon-btn" aria-label="Thêm món vào Bữa sáng"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><button class="icon-btn muted" aria-label="Tuỳ chọn Bữa sáng" aria-expanded="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button></div></div>
-              <ul class="rows"><li><div class="rowi"><div><div class="t">Yến mạch</div><div class="s">60 g</div></div><span class="kcal">228</span></div></li></ul>
-            </section>
-            <div class="popover" role="menu" aria-label="Tuỳ chọn Bữa sáng" style="right:380px;top:292px">
-              <button role="menuitem" class="menu-item" style="text-align:left;width:100%"><span class="t">Chép hôm qua</span><span class="s">Chép 3 món · 459 kcal</span></button>
-              <button role="menuitem" class="menu-item danger" style="text-align:left;width:100%"><span class="t">Xoá bữa này</span><span class="s">Có xác nhận trước khi xoá</span></button>
-            </div>
-          </div>
-        </div>
-      </figure>
-    </div>
-  </section>
-
-  <!-- 4. Past day: read-only -->
-  <section class="state">
-    <h2>4 · Past day: read-only (Thứ Sáu 09/10)</h2>
+    <h2>2d · Ngày đã qua: chỉ xem</h2>
     <div class="pair">
       <figure class="fig fig-phone">
         <figcaption>390 px · phone</figcaption>
         <div class="phone">
-          <header class="hdr">
-            <div class="brand">H1T <span>MICRO</span></div>
-            <div class="hdr-row">
-              <h3 class="ptitle">Nhật ký</h3>
-              <div class="datenav">
-                <button class="ico-btn" aria-label="Ngày trước"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
-                <span class="datelabel">Hôm qua 09/10</span>
-                <button class="ico-btn" aria-label="Ngày sau"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
-              </div>
-            </div>
-            <div class="chiprow"><span class="pill-ro">Chỉ xem · ngày đã qua</span></div>
-          </header>
-          <div class="energy"><div class="energy-top"><b>1.532 kcal</b><span>Mục tiêu 1.950–2.275</span></div><div class="seg n7" style="--lvl:var(--color-level-yellow)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
-          <div class="body">
-            <section class="card"><div class="card-head"><div><h4>Bữa sáng</h4><span class="sub">459 kcal</span></div></div><ul class="rows"><li><div class="rowi"><div><div class="t">Yến mạch</div><div class="s">60 g</div></div><span class="kcal">228</span></div></li><li><div class="rowi"><div><div class="t">Yogurt kefir</div><div class="s">200 ml</div></div><span class="kcal">126</span></div></li><li><div class="rowi"><div><div class="t">Chuối</div><div class="s">1 quả</div></div><span class="kcal">105</span></div></li></ul></section>
-            <section class="card"><div class="card-head"><div><h4>Bữa trưa</h4><span class="sub">488 kcal</span></div></div><ul class="rows"><li><div class="rowi"><div><div class="t">Cơm gạo lứt</div><div class="s">150 g</div></div><span class="kcal">168</span></div></li><li><div class="rowi"><div><div class="t">Thịt bò nạc</div><div class="s">150 g</div></div><span class="kcal">320</span></div></li></ul></section>
-            <section class="card"><div class="card-head"><div><h4>Bữa tối</h4><span class="sub">475 kcal</span></div></div><ul class="rows"><li><div class="rowi"><div><div class="t">Cá hồi</div><div class="s">150 g</div></div><span class="kcal">312</span></div></li><li><div class="rowi"><div><div class="t">Khoai lang luộc</div><div class="s">1 củ · 150 g</div></div><span class="kcal">129</span></div></li><li><div class="rowi"><div><div class="t">Bông cải xanh</div><div class="s">1 chén hấp · 100 g</div></div><span class="kcal">34</span></div></li></ul></section>
-            <section class="card"><div class="card-head"><div><h4>Bữa phụ</h4><span class="sub">110 kcal</span></div></div><ul class="rows"><li><div class="rowi"><div><div class="t">Whey Protein Isolate</div><div class="s">1 muỗng · 30 g</div></div><span class="kcal">110</span></div></li></ul></section>
-            <a class="card" href="#" aria-label="Xem vi chất ngày 09/10"><div class="vrow"><div style="flex:1;min-width:0"><div class="t" style="font-size:15px;font-weight:700">Vi chất ngày này</div><div class="sub">Xem chi tiết các vi chất của ngày 09/10</div></div><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div></a>
+          <div class="ptop">
+            <h3 class="ptitle-p">Nhật ký</h3>
+            <div class="datenav-p"><button class="ico-btn" aria-label="Ngày trước"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg></button><span class="datelabel">Thứ Sáu 09/10</span><button class="ico-btn" aria-label="Ngày sau"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></button></div>
           </div>
-          <nav class="nav" aria-label="Điều hướng chính">
-            <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
-            <a href="#" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
-            <button class="fab" aria-label="Thêm món" disabled style="background:var(--color-muted-on-dark)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
-            <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
-            <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
-          </nav>
+          <div style="padding:0 16px 8px;background:var(--color-page)"><span class="pill-ro">Chỉ xem</span></div>
+          <header class="hdr hdr-nk">
+            <div class="hero">
+              
+<div class="dial"><svg viewBox="0 0 104 104" aria-hidden="true"><circle cx="52" cy="52" r="44" fill="none" stroke="var(--color-track-on-dark)" stroke-width="9"/><circle cx="52" cy="52" r="44" fill="none" stroke="var(--color-level-blue-dark)" stroke-width="9" stroke-dasharray="276.46" stroke-dashoffset="59.3" transform="rotate(-90 52 52)"/></svg><div class="dial-num"><b>1.532</b><small>kcal</small></div></div>
+              <div class="macros">
+                
+<div><div class="mline"><span>Đạm</span><span class="display">— / 104–143 g</span></div><div class="seg dark n0" style="--lvl:var(--color-level-empty-dark)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+<div><div class="mline"><span>Tinh bột</span><span class="display">— / 254 g</span></div><div class="seg dark n0" style="--lvl:var(--color-level-empty-dark)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+<div><div class="mline"><span>Béo</span><span class="display">— / 33–65 g</span></div><div class="seg dark n0" style="--lvl:var(--color-level-empty-dark)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+<div><div class="mline"><span>Chất xơ</span><span class="display">— / 30 g</span></div><div class="seg dark n0" style="--lvl:var(--color-level-empty-dark)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+              </div>
+              <p class="hero-foot">Mục tiêu <b>1.950–2.275 kcal</b> · thiếu <b>418 kcal</b></p>
+            </div>
+          </header>
+          <div class="body">
+            <section class="card rowcard" aria-label="Chi tiết trong ngày">
+              <ul class="rows">
+                <li><a class="rowi" href="/micros?date=2026-10-09"><div><div class="t">Vi chất · Chỉ xem</div></div><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                <li><a class="rowi" href="/training?date=2026-10-09"><div><div class="t">Ngày tập · Chỉ xem</div></div><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+              </ul>
+            </section>
+            <section class="card mealcard" aria-labelledby="e-m1">
+              <div class="meal-h"><h4 id="e-m1" class="name">Bữa sáng</h4><span class="kc">459 kcal</span></div>
+              <ul class="foods"><li><span>Yến mạch 60 g</span><span>228</span></li><li><span>Yogurt kefir 200 ml</span><span>126</span></li><li><span>Chuối 1 quả</span><span>105</span></li></ul>
+            </section>
+            <section class="card mealcard" aria-labelledby="e-m2">
+              <div class="meal-h"><h4 id="e-m2" class="name">Bữa trưa</h4><span class="kc">488 kcal</span></div>
+              <ul class="foods"><li><span>Cơm gạo lứt 150 g</span><span>168</span></li><li><span>Thịt bò nạc 150 g</span><span>320</span></li></ul>
+            </section>
+            <section class="card mealcard" aria-labelledby="e-m3">
+              <div class="meal-h"><h4 id="e-m3" class="name">Bữa tối</h4><span class="kc">475 kcal</span></div>
+              <ul class="foods"><li><span>Cá hồi 150 g</span><span>312</span></li><li><span>Khoai lang luộc 1 củ · 150 g</span><span>129</span></li><li><span>Bông cải xanh 1 chén hấp · 100 g</span><span>34</span></li></ul>
+            </section>
+            <section class="card mealcard" aria-labelledby="e-m4">
+              <div class="meal-h"><h4 id="e-m4" class="name">Bữa phụ</h4><span class="kc">110 kcal</span></div>
+              <ul class="foods"><li><span>Whey Protein Isolate 1 muỗng · 30 g</span><span>110</span></li></ul>
+            </section>
+            <p class="note">Ngày đã qua chỉ xem được. Macro chưa có trong dữ liệu mẫu, nên hiện «—» thay vì 0.</p>
+          </div>
+          
+<nav class="nav" aria-label="Điều hướng chính">
+<a href="/"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
+<a href="/diary" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
+<button class="fab" aria-label="Thêm món"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+<a href="/explore"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
+<a href="/settings"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
+</nav>
         </div>
       </figure>
 
       <figure class="fig fig-desktop">
         <figcaption>1280 px · desktop</figcaption>
         <div class="desktop">
-          <aside class="side">
-            <div class="brand">H1T <span>MICRO</span></div>
-            <button class="btn btn-primary side-add" type="button"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Thêm món</button>
-            <nav aria-label="Điều hướng chính">
-              <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
-              <a href="#" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
-              <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
-              <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
-            </nav>
-          </aside>
-          <div class="main">
-            <div class="d-head">
-              <div><h3 class="ptitle d-title">Nhật ký</h3><p class="d-sub">Thứ Sáu, 09/10/2026 · Chỉ xem · Mục tiêu 1.950–2.275 kcal</p></div>
-              <div class="d-actions">
-                <button class="ico-btn" aria-label="Ngày trước" style="color:var(--color-text)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
-                <button class="ico-btn" aria-label="Ngày sau" style="color:var(--color-text)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
-                <span class="pill-ro">Chỉ xem</span>
+          
+<aside class="side" aria-label="Điều hướng">
+<div class="brand">H1T <span>MICRO</span></div>
+<a class="btn btn-primary side-add" href="/add"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Thêm món</a>
+<nav aria-label="Điều hướng chính">
+<a href="/"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
+<a href="/diary" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
+<a href="/explore"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
+<a href="/settings"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
+</nav>
+</aside>
+          <main class="main">
+            <div class="d-head"><p class="d-title">Nhật ký</p><div class="datenav-p"><button class="ico-btn" aria-label="Ngày trước"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg></button><span class="datelabel">Thứ Sáu 09/10</span><button class="ico-btn" aria-label="Ngày sau"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></button><span class="pill-ro" style="margin-left:8px">Chỉ xem</span></div></div>
+            <section class="card ink-card sumcard" aria-label="Tóm tắt ngày">
+              
+<div class="dial"><svg viewBox="0 0 104 104" aria-hidden="true"><circle cx="52" cy="52" r="44" fill="none" stroke="var(--color-track-on-dark)" stroke-width="9"/><circle cx="52" cy="52" r="44" fill="none" stroke="var(--color-level-blue-dark)" stroke-width="9" stroke-dasharray="276.46" stroke-dashoffset="59.3" transform="rotate(-90 52 52)"/></svg><div class="dial-num"><b>1.532</b><small>kcal</small></div></div>
+              <div class="macros-wrap">
+                <div class="macros">
+                  
+<div><div class="mline"><span>Đạm</span><span class="display">— / 104–143 g</span></div><div class="seg dark n0" style="--lvl:var(--color-level-empty-dark)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+<div><div class="mline"><span>Tinh bột</span><span class="display">— / 254 g</span></div><div class="seg dark n0" style="--lvl:var(--color-level-empty-dark)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+<div><div class="mline"><span>Béo</span><span class="display">— / 33–65 g</span></div><div class="seg dark n0" style="--lvl:var(--color-level-empty-dark)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+<div><div class="mline"><span>Chất xơ</span><span class="display">— / 30 g</span></div><div class="seg dark n0" style="--lvl:var(--color-level-empty-dark)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+                </div>
+                <p class="hero-foot">Mục tiêu <b>1.950–2.275 kcal</b> · thiếu <b>418 kcal</b></p>
               </div>
-            </div>
-            <div class="energy" style="border:1px solid var(--color-card-border);border-radius:16px"><div class="energy-top"><b>1.532 kcal</b><span>Mục tiêu 1.950–2.275</span></div><div class="seg n7" style="--lvl:var(--color-level-yellow)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+            </section>
             <div class="grid">
-              <div class="s7" style="display:flex;flex-direction:column;gap:12px">
-                <section class="card"><div class="card-head"><div><h4>Bữa sáng</h4><span class="sub">459 kcal</span></div></div><ul class="rows"><li><div class="rowi"><div><div class="t">Yến mạch</div><div class="s">60 g</div></div><span class="kcal">228</span></div></li><li><div class="rowi"><div><div class="t">Yogurt kefir</div><div class="s">200 ml</div></div><span class="kcal">126</span></div></li><li><div class="rowi"><div><div class="t">Chuối</div><div class="s">1 quả</div></div><span class="kcal">105</span></div></li></ul></section>
-                <section class="card"><div class="card-head"><div><h4>Bữa trưa</h4><span class="sub">488 kcal</span></div></div><ul class="rows"><li><div class="rowi"><div><div class="t">Cơm gạo lứt</div><div class="s">150 g</div></div><span class="kcal">168</span></div></li><li><div class="rowi"><div><div class="t">Thịt bò nạc</div><div class="s">150 g</div></div><span class="kcal">320</span></div></li></ul></section>
-                <section class="card"><div class="card-head"><div><h4>Bữa tối</h4><span class="sub">475 kcal</span></div></div><ul class="rows"><li><div class="rowi"><div><div class="t">Cá hồi</div><div class="s">150 g</div></div><span class="kcal">312</span></div></li><li><div class="rowi"><div><div class="t">Khoai lang luộc</div><div class="s">1 củ · 150 g</div></div><span class="kcal">129</span></div></li><li><div class="rowi"><div><div class="t">Bông cải xanh</div><div class="s">1 chén hấp · 100 g</div></div><span class="kcal">34</span></div></li></ul></section>
-                <section class="card"><div class="card-head"><div><h4>Bữa phụ</h4><span class="sub">110 kcal</span></div></div><ul class="rows"><li><div class="rowi"><div><div class="t">Whey Protein Isolate</div><div class="s">1 muỗng · 30 g</div></div><span class="kcal">110</span></div></li></ul></section>
+              <div class="s7 stack">
+                <section class="card mealcard" aria-labelledby="f-m1">
+                  <div class="meal-h"><h4 id="f-m1" class="name">Bữa sáng</h4><span class="kc">459 kcal</span></div>
+                  <ul class="foods"><li><span>Yến mạch 60 g</span><span>228</span></li><li><span>Yogurt kefir 200 ml</span><span>126</span></li><li><span>Chuối 1 quả</span><span>105</span></li></ul>
+                </section>
+                <section class="card mealcard" aria-labelledby="f-m2">
+                  <div class="meal-h"><h4 id="f-m2" class="name">Bữa trưa</h4><span class="kc">488 kcal</span></div>
+                  <ul class="foods"><li><span>Cơm gạo lứt 150 g</span><span>168</span></li><li><span>Thịt bò nạc 150 g</span><span>320</span></li></ul>
+                </section>
+                <section class="card mealcard" aria-labelledby="f-m3">
+                  <div class="meal-h"><h4 id="f-m3" class="name">Bữa tối</h4><span class="kc">475 kcal</span></div>
+                  <ul class="foods"><li><span>Cá hồi 150 g</span><span>312</span></li><li><span>Khoai lang luộc 1 củ · 150 g</span><span>129</span></li><li><span>Bông cải xanh 1 chén hấp · 100 g</span><span>34</span></li></ul>
+                </section>
+                <section class="card mealcard" aria-labelledby="f-m4">
+                  <div class="meal-h"><h4 id="f-m4" class="name">Bữa phụ</h4><span class="kc">110 kcal</span></div>
+                  <ul class="foods"><li><span>Whey Protein Isolate 1 muỗng · 30 g</span><span>110</span></li></ul>
+                </section>
               </div>
-              <div class="s5" style="display:flex;flex-direction:column;gap:12px">
-                <section class="card"><div class="card-head"><h4>Tổng trong ngày</h4><span class="sub">1.532 kcal</span></div><p class="notice">Ngày đã qua chỉ xem. Muốn sửa, mở Nhật ký của hôm nay.</p></section>
-                <a class="card" href="#" aria-label="Xem vi chất ngày 09/10"><div class="card-head"><h4>Vi chất ngày này</h4></div><p class="sub">Xem chi tiết các vi chất của ngày 09/10</p></a>
+              <div class="s5 stack">
+                <section class="card rowcard" aria-label="Chi tiết trong ngày">
+                  <ul class="rows">
+                    <li><a class="rowi" href="/micros?date=2026-10-09"><div><div class="t">Vi chất · Chỉ xem</div></div><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                    <li><a class="rowi" href="/training?date=2026-10-09"><div><div class="t">Ngày tập · Chỉ xem</div></div><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                  </ul>
+                </section>
               </div>
             </div>
-          </div>
+          </main>
         </div>
       </figure>
     </div>
   </section>
 
-  <!-- 5. Empty day -->
+  <!-- 2e. Empty day -->
   <section class="state">
-    <h2>5 · Empty day (nothing logged yet)</h2>
+    <h2>2e · Ngày chưa có món</h2>
     <div class="pair">
       <figure class="fig fig-phone">
         <figcaption>390 px · phone</figcaption>
         <div class="phone">
-          <header class="hdr">
-            <div class="brand">H1T <span>MICRO</span></div>
-            <div class="hdr-row">
-              <h3 class="ptitle">Nhật ký</h3>
-              <div class="datenav">
-                <button class="ico-btn" aria-label="Ngày trước"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
-                <span class="datelabel">Hôm nay 10/10</span>
-                <button class="ico-btn" aria-label="Ngày sau" disabled><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
-              </div>
-            </div>
-            <div class="chiprow"><button class="chip onink" aria-haspopup="dialog"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/></svg>Ngày tập 60′</button></div>
-          </header>
-          <div class="energy"><div class="energy-top"><b>0 kcal</b><span>Mục tiêu 1.950–2.275</span><span class="rem">còn 1.950</span></div><div class="seg n0"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
-          <div class="body">
-            <div><button class="btn btn-secondary" style="width:100%">Chép hôm qua · 4 bữa</button></div>
-            <p class="sub" style="text-align:center">Chưa ghi món nào hôm nay. Thêm món vào một bữa để bắt đầu.</p>
-            <section class="card"><div class="card-head"><div><h4>Bữa sáng</h4><span class="sub">Chưa có món</span></div><div class="mhead-tools"><button class="icon-btn" aria-label="Thêm món vào Bữa sáng"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><button class="icon-btn muted" aria-label="Tuỳ chọn Bữa sáng"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button></div></div></section>
-            <section class="card"><div class="card-head"><div><h4>Bữa trưa</h4><span class="sub">Chưa có món</span></div><div class="mhead-tools"><button class="icon-btn" aria-label="Thêm món vào Bữa trưa"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><button class="icon-btn muted" aria-label="Tuỳ chọn Bữa trưa"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button></div></div></section>
-            <section class="card"><div class="card-head"><div><h4>Trước tập</h4><span class="sub">Chưa có món</span></div><div class="mhead-tools"><button class="icon-btn" aria-label="Thêm món vào Trước tập"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><button class="icon-btn muted" aria-label="Tuỳ chọn Trước tập"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button></div></div></section>
-            <a class="card" href="#" aria-label="Vi chất: 0 trên 22 đạt. Mở chi tiết"><div class="vrow"><span class="display vnum">0/22</span><div style="flex:1;min-width:0"><div class="t" style="font-size:15px;font-weight:700">Vi chất đã đạt</div><div class="sub">Ghi món để xem vi chất hôm nay</div></div><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></div></a>
+          <div class="ptop">
+            <h3 class="ptitle-p">Nhật ký</h3>
+            <div class="datenav-p"><button class="ico-btn" aria-label="Ngày trước"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg></button><span class="datelabel">Hôm nay 12/10</span><button class="ico-btn" aria-label="Ngày sau" disabled><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></button></div>
           </div>
-          <nav class="nav" aria-label="Điều hướng chính">
-            <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
-            <a href="#" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
-            <button class="fab" aria-label="Thêm món"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
-            <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
-            <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
-          </nav>
+          <header class="hdr hdr-nk">
+            <div class="hero">
+              
+<div class="dial"><svg viewBox="0 0 104 104" aria-hidden="true"><circle cx="52" cy="52" r="44" fill="none" stroke="var(--color-track-on-dark)" stroke-width="9"/></svg><div class="dial-num"><b>0</b><small>kcal</small></div></div>
+              <div class="macros">
+                
+<div><div class="mline"><span>Đạm</span><span class="display">0 / 104–143 g</span></div><div class="seg dark n0" style="--lvl:var(--color-level-red-dark)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+<div><div class="mline"><span>Tinh bột</span><span class="display">0 / 254 g</span></div><div class="seg dark n0" style="--lvl:var(--color-level-red-dark)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+<div><div class="mline"><span>Béo</span><span class="display">0 / 33–65 g</span></div><div class="seg dark n0" style="--lvl:var(--color-level-red-dark)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+<div><div class="mline"><span>Chất xơ</span><span class="display">0 / 30 g</span></div><div class="seg dark n0" style="--lvl:var(--color-level-red-dark)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+              </div>
+              <p class="hero-foot">Mục tiêu <b>1.950–2.275 kcal</b> · còn <b>1.950 kcal</b></p>
+            </div>
+          </header>
+          <div class="body">
+            <section class="card" aria-labelledby="g-cta">
+              <h4 id="g-cta">Chưa có món hôm nay</h4>
+              <p class="note">Chép bữa từ hôm qua, hoặc thêm món vào từng bữa bằng +.</p>
+              <button class="btn btn-primary">Chép hôm qua · 4 bữa</button>
+            </section>
+            <section class="card rowcard" aria-label="Chi tiết trong ngày">
+              <ul class="rows">
+                <li><a class="rowi" href="/micros?date=2026-10-12"><div><div class="t">Vi chất · chưa có món</div></div><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                <li><a class="rowi" href="/training?date=2026-10-12"><div><div class="t">Ngày tập 60′ · muối 7–10,5 g</div></div><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+              </ul>
+            </section>
+            <section class="card mealcard" aria-labelledby="g-m1">
+              <div class="meal-h"><h4 id="g-m1" class="name">Bữa sáng</h4><span class="kc none">Chưa có món</span><div class="meal-acts"><button class="ico-p add" aria-label="Thêm vào Bữa sáng"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg></button><button class="ico-p" aria-label="Tuỳ chọn Bữa sáng"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg></button></div></div>
+            </section>
+            <section class="card mealcard" aria-labelledby="g-m2">
+              <div class="meal-h"><h4 id="g-m2" class="name">Bữa trưa</h4><span class="kc none">Chưa có món</span><div class="meal-acts"><button class="ico-p add" aria-label="Thêm vào Bữa trưa"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg></button><button class="ico-p" aria-label="Tuỳ chọn Bữa trưa"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg></button></div></div>
+            </section>
+          </div>
+          
+<nav class="nav" aria-label="Điều hướng chính">
+<a href="/"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
+<a href="/diary" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
+<button class="fab" aria-label="Thêm món"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+<a href="/explore"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
+<a href="/settings"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
+</nav>
         </div>
       </figure>
 
       <figure class="fig fig-desktop">
         <figcaption>1280 px · desktop</figcaption>
         <div class="desktop">
-          <aside class="side">
-            <div class="brand">H1T <span>MICRO</span></div>
-            <button class="btn btn-primary side-add" type="button"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Thêm món</button>
-            <nav aria-label="Điều hướng chính">
-              <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
-              <a href="#" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
-              <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
-              <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
-            </nav>
-          </aside>
-          <div class="main">
-            <div class="d-head">
-              <div><h3 class="ptitle d-title">Nhật ký</h3><p class="d-sub">Thứ Bảy, 10/10/2026 · Ngày tập 60′ · Giữ cân · 65 kg</p></div>
-              <div class="d-actions">
-                <button class="ico-btn" aria-label="Ngày trước" style="color:var(--color-text)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
-                <button class="ico-btn" aria-label="Ngày sau" disabled style="color:var(--color-secondary)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
-                <button class="btn btn-secondary">Chép hôm qua · 4 bữa</button>
+          
+<aside class="side" aria-label="Điều hướng">
+<div class="brand">H1T <span>MICRO</span></div>
+<a class="btn btn-primary side-add" href="/add"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Thêm món</a>
+<nav aria-label="Điều hướng chính">
+<a href="/"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
+<a href="/diary" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
+<a href="/explore"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
+<a href="/settings"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
+</nav>
+</aside>
+          <main class="main">
+            <div class="d-head"><p class="d-title">Nhật ký</p><div class="datenav-p"><button class="ico-btn" aria-label="Ngày trước"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg></button><span class="datelabel">Hôm nay 12/10</span><button class="ico-btn" aria-label="Ngày sau" disabled><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></button></div></div>
+            <section class="card ink-card sumcard" aria-label="Tóm tắt ngày">
+              
+<div class="dial"><svg viewBox="0 0 104 104" aria-hidden="true"><circle cx="52" cy="52" r="44" fill="none" stroke="var(--color-track-on-dark)" stroke-width="9"/></svg><div class="dial-num"><b>0</b><small>kcal</small></div></div>
+              <div class="macros-wrap">
+                <div class="macros">
+                  
+<div><div class="mline"><span>Đạm</span><span class="display">0 / 104–143 g</span></div><div class="seg dark n0" style="--lvl:var(--color-level-red-dark)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+<div><div class="mline"><span>Tinh bột</span><span class="display">0 / 254 g</span></div><div class="seg dark n0" style="--lvl:var(--color-level-red-dark)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+<div><div class="mline"><span>Béo</span><span class="display">0 / 33–65 g</span></div><div class="seg dark n0" style="--lvl:var(--color-level-red-dark)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+<div><div class="mline"><span>Chất xơ</span><span class="display">0 / 30 g</span></div><div class="seg dark n0" style="--lvl:var(--color-level-red-dark)"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+                </div>
+                <p class="hero-foot">Mục tiêu <b>1.950–2.275 kcal</b> · còn <b>1.950 kcal</b></p>
               </div>
-            </div>
-            <div class="chiprow"><button class="chip" aria-haspopup="dialog" style="border-color:var(--color-ink)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/></svg>Ngày tập 60′</button></div>
-            <div class="energy" style="border:1px solid var(--color-card-border);border-radius:16px"><div class="energy-top"><b>0 kcal</b><span>Mục tiêu 1.950–2.275</span><span class="rem">còn 1.950</span></div><div class="seg n0"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+            </section>
             <div class="grid">
-              <div class="s7" style="display:flex;flex-direction:column;gap:12px">
-                <section class="card"><div class="card-head"><div><h4>Bữa sáng</h4><span class="sub">Chưa có món · Thêm món đầu tiên của ngày</span></div><div class="mhead-tools"><button class="icon-btn" aria-label="Thêm món vào Bữa sáng"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><button class="icon-btn muted" aria-label="Tuỳ chọn Bữa sáng"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button></div></div></section>
-                <section class="card"><div class="card-head"><div><h4>Bữa trưa</h4><span class="sub">Chưa có món</span></div><div class="mhead-tools"><button class="icon-btn" aria-label="Thêm món vào Bữa trưa"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><button class="icon-btn muted" aria-label="Tuỳ chọn Bữa trưa"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button></div></div></section>
-                <section class="card"><div class="card-head"><div><h4>Trước tập</h4><span class="sub">Chưa có món</span></div><div class="mhead-tools"><button class="icon-btn" aria-label="Thêm món vào Trước tập"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><button class="icon-btn muted" aria-label="Tuỳ chọn Trước tập"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg></button></div></div></section>
+              <div class="s7 stack">
+                <section class="card" aria-labelledby="dg-cta">
+                  <h4 id="dg-cta">Chưa có món hôm nay</h4>
+                  <p class="note">Chép bữa từ hôm qua, hoặc thêm món vào từng bữa bằng +.</p>
+                  <button class="btn btn-primary" style="width:auto">Chép hôm qua · 4 bữa</button>
+                </section>
+                <section class="card mealcard" aria-labelledby="dg-m1">
+                  <div class="meal-h"><h4 id="dg-m1" class="name">Bữa sáng</h4><span class="kc none">Chưa có món</span><div class="meal-acts"><button class="ico-p add" aria-label="Thêm vào Bữa sáng"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg></button><button class="ico-p" aria-label="Tuỳ chọn Bữa sáng"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg></button></div></div>
+                </section>
+                <section class="card mealcard" aria-labelledby="dg-m2">
+                  <div class="meal-h"><h4 id="dg-m2" class="name">Bữa trưa</h4><span class="kc none">Chưa có món</span><div class="meal-acts"><button class="ico-p add" aria-label="Thêm vào Bữa trưa"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg></button><button class="ico-p" aria-label="Tuỳ chọn Bữa trưa"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.9"/><circle cx="12" cy="12" r="1.9"/><circle cx="19" cy="12" r="1.9"/></svg></button></div></div>
+                </section>
               </div>
-              <div class="s5" style="display:flex;flex-direction:column;gap:12px">
-                <a class="card" href="#" aria-label="Vi chất: 0 trên 22 đạt. Mở chi tiết"><div class="card-head"><h4>Vi chất đã đạt</h4><span class="display vnum" style="font-size:44px">0/22</span></div><p class="sub">Ghi món để xem vi chất hôm nay</p></a>
+              <div class="s5 stack">
+                <section class="card rowcard" aria-label="Chi tiết trong ngày">
+                  <ul class="rows">
+                    <li><a class="rowi" href="/micros?date=2026-10-12"><div><div class="t">Vi chất · chưa có món</div></div><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                    <li><a class="rowi" href="/training?date=2026-10-12"><div><div class="t">Ngày tập 60′ · muối 7–10,5 g</div></div><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                  </ul>
+                </section>
               </div>
             </div>
-          </div>
+          </main>
         </div>
       </figure>
     </div>
   </section>
+
 </div>
 </body>
 </html>
