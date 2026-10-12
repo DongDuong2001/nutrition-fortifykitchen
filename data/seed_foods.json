@@ -1,0 +1,1052 @@
+[
+  {
+    "source": "usda_foundation",
+    "source_id": "food-cha-la",
+    "name": "Chà là",
+    "name_vi": "Chà là",
+    "category": "trai_cay",
+    "brand": null,
+    "tip_vi": "Nên dùng 30 g đầu buổi tập · carb chậm. 2–3 quả trước tập 30–45 phút.",
+    "nutrients": {
+      "energy": 280,
+      "carbs": 73.33,
+      "net_carbs": 66.66,
+      "protein": 2.33,
+      "fat": 0.33,
+      "fiber": 6.67,
+      "potassium": 656.67,
+      "calcium": 63.33,
+      "magnesium": 43.33,
+      "iron": 1,
+      "copper": 0.33,
+      "b6": 0.17,
+      "sodium": 3.33,
+      "sugars": 63,
+      "monounsaturated_fat": 0.03,
+      "polyunsaturated_fat": 0.03,
+      "saturated_fat": 0.03
+    },
+    "portions": [
+      {
+        "label_vi": "30 g",
+        "grams": 30,
+        "sort": 0
+      },
+      {
+        "label_vi": "3 quả",
+        "grams": 30,
+        "sort": 1
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 2
+      }
+    ]
+  },
+  {
+    "source": "usda_foundation",
+    "source_id": "food-yen-mach",
+    "name": "Yến mạch",
+    "name_vi": "Yến mạch",
+    "category": "tinh_bot",
+    "brand": null,
+    "tip_vi": "Carb phức giàu beta-glucan, no lâu.",
+    "nutrients": {
+      "energy": 380,
+      "carbs": 66.67,
+      "net_carbs": 56.67,
+      "protein": 13.33,
+      "fat": 6.67,
+      "fiber": 10,
+      "potassium": 350,
+      "magnesium": 138,
+      "iron": 4.25,
+      "zinc": 3.64,
+      "phosphorus": 410,
+      "b1": 0.46,
+      "sodium": 6
+    },
+    "portions": [
+      {
+        "label_vi": "60 g",
+        "grams": 60,
+        "sort": 0
+      },
+      {
+        "label_vi": "1 chén",
+        "grams": 40,
+        "sort": 1
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 2
+      }
+    ]
+  },
+  {
+    "source": "usda_foundation",
+    "source_id": "food-yogurt-kefir",
+    "name": "Yogurt kefir",
+    "name_vi": "Yogurt kefir",
+    "category": "sua",
+    "brand": "Vinamilk",
+    "tip_vi": "Lợi khuẩn đường ruột, hỗ trợ hấp thu vi chất.",
+    "nutrients": {
+      "energy": 63,
+      "carbs": 4.5,
+      "protein": 3.5,
+      "fat": 3.5,
+      "calcium": 120,
+      "potassium": 150,
+      "sodium": 50,
+      "b12": 0.3,
+      "b2": 0.18,
+      "fiber": 0
+    },
+    "portions": [
+      {
+        "label_vi": "200 ml",
+        "grams": 200,
+        "sort": 0
+      },
+      {
+        "label_vi": "1 hộp",
+        "grams": 100,
+        "sort": 1
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 2
+      }
+    ]
+  },
+  {
+    "source": "usda_foundation",
+    "source_id": "food-chuoi",
+    "name": "Chuối",
+    "name_vi": "Chuối",
+    "category": "trai_cay",
+    "brand": null,
+    "tip_vi": "Nguồn kali và vitamin B6 tự nhiên nhanh.",
+    "nutrients": {
+      "energy": 105,
+      "carbs": 27,
+      "net_carbs": 23.9,
+      "protein": 1.3,
+      "fat": 0.3,
+      "fiber": 3.1,
+      "potassium": 422,
+      "magnesium": 32,
+      "vitamin_c": 10.3,
+      "b6": 0.43,
+      "sodium": 1
+    },
+    "portions": [
+      {
+        "label_vi": "1 quả",
+        "grams": 100,
+        "sort": 0
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 1
+      }
+    ]
+  },
+  {
+    "source": "vn_table",
+    "source_id": "food-com-gao-lut",
+    "name": "Cơm gạo lứt",
+    "name_vi": "Cơm gạo lứt",
+    "category": "tinh_bot",
+    "brand": null,
+    "tip_vi": null,
+    "nutrients": {
+      "energy": 112,
+      "carbs": 23.33,
+      "net_carbs": 21.66,
+      "protein": 2.33,
+      "fat": 0.8,
+      "fiber": 1.67,
+      "magnesium": 43,
+      "potassium": 86,
+      "phosphorus": 115,
+      "manganese": 0.9,
+      "sodium": 2
+    },
+    "portions": [
+      {
+        "label_vi": "150 g",
+        "grams": 150,
+        "sort": 0
+      },
+      {
+        "label_vi": "1 bát",
+        "grams": 150,
+        "sort": 1
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 2
+      }
+    ]
+  },
+  {
+    "source": "usda_foundation",
+    "source_id": "food-thit-bo-nac",
+    "name": "Thịt bò nạc",
+    "name_vi": "Thịt bò nạc",
+    "category": "dam",
+    "brand": null,
+    "tip_vi": "Giàu sắt heme và kẽm sinh khả dụng cao.",
+    "nutrients": {
+      "energy": 213.33,
+      "protein": 26,
+      "fat": 12,
+      "carbs": 0,
+      "fiber": 0,
+      "iron": 2.6,
+      "zinc": 5.47,
+      "b12": 2.1,
+      "potassium": 350,
+      "sodium": 65
+    },
+    "portions": [
+      {
+        "label_vi": "150 g",
+        "grams": 150,
+        "sort": 0
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 1
+      }
+    ]
+  },
+  {
+    "source": "usda_foundation",
+    "source_id": "food-bot-cu-den",
+    "name": "Bột củ dền",
+    "name_vi": "Bột củ dền",
+    "category": "bo_sung",
+    "brand": "Dalahouse",
+    "tip_vi": "Giàu nitrate tự nhiên tăng giãn mạch và sức bền.",
+    "nutrients": {
+      "energy": 333.33,
+      "carbs": 66.67,
+      "protein": 13.33,
+      "fat": 1,
+      "fiber": 20,
+      "potassium": 1200,
+      "folate": 350,
+      "iron": 6.5,
+      "sodium": 180
+    },
+    "portions": [
+      {
+        "label_vi": "3 g",
+        "grams": 3,
+        "sort": 0
+      },
+      {
+        "label_vi": "1 muỗng",
+        "grams": 3,
+        "sort": 1
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 2
+      }
+    ]
+  },
+  {
+    "source": "usda_foundation",
+    "source_id": "food-mat-mia",
+    "name": "Mật mía",
+    "name_vi": "Mật mía",
+    "category": "an_vat",
+    "brand": "Golden Barrel",
+    "tip_vi": "Carb hấp thu nhanh bổ sung trong buổi tập kéo dài.",
+    "nutrients": {
+      "energy": 290,
+      "carbs": 75,
+      "net_carbs": 75,
+      "protein": 0,
+      "fat": 0,
+      "fiber": 0,
+      "potassium": 1464,
+      "calcium": 205,
+      "iron": 4.7,
+      "magnesium": 242,
+      "sodium": 37
+    },
+    "portions": [
+      {
+        "label_vi": "1 muỗng",
+        "grams": 20,
+        "sort": 0
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 1
+      }
+    ]
+  },
+  {
+    "source": "vn_table",
+    "source_id": "food-banh-trang",
+    "name": "Bánh tráng",
+    "name_vi": "Bánh tráng",
+    "category": "tinh_bot",
+    "brand": null,
+    "tip_vi": null,
+    "nutrients": {
+      "energy": 330,
+      "carbs": 78,
+      "protein": 4.2,
+      "fat": 0.5,
+      "fiber": 1.2,
+      "sodium": 310,
+      "potassium": 55
+    },
+    "portions": [
+      {
+        "label_vi": "10 g",
+        "grams": 10,
+        "sort": 0
+      },
+      {
+        "label_vi": "3 cái",
+        "grams": 30,
+        "sort": 1
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 2
+      }
+    ]
+  },
+  {
+    "source": "vn_table",
+    "source_id": "food-banh-trang-nuong",
+    "name": "Bánh tráng nướng",
+    "name_vi": "Bánh tráng nướng",
+    "category": "an_vat",
+    "brand": null,
+    "tip_vi": null,
+    "nutrients": {
+      "energy": 190,
+      "carbs": 26,
+      "protein": 5.5,
+      "fat": 7.2,
+      "fiber": 1,
+      "sodium": 280,
+      "calcium": 45
+    },
+    "portions": [
+      {
+        "label_vi": "1 cái",
+        "grams": 50,
+        "sort": 0
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 1
+      }
+    ]
+  },
+  {
+    "source": "vn_table",
+    "source_id": "food-bun-cha",
+    "name": "Bún chả Hà Nội",
+    "name_vi": "Bún chả Hà Nội",
+    "category": "mon_viet",
+    "brand": null,
+    "tip_vi": null,
+    "nutrients": {
+      "energy": 185,
+      "carbs": 22,
+      "protein": 11.5,
+      "fat": 5.5,
+      "fiber": 1.2,
+      "sodium": 460,
+      "calcium": 38,
+      "iron": 1.6
+    },
+    "portions": [
+      {
+        "label_vi": "1 phần",
+        "grams": 350,
+        "sort": 0
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 1
+      }
+    ]
+  },
+  {
+    "source": "vn_table",
+    "source_id": "food-pho-bo",
+    "name": "Phở bò",
+    "name_vi": "Phở bò",
+    "category": "mon_viet",
+    "brand": null,
+    "tip_vi": null,
+    "nutrients": {
+      "energy": 75,
+      "carbs": 10.5,
+      "protein": 4.8,
+      "fat": 1.8,
+      "sodium": 380,
+      "potassium": 95,
+      "iron": 0.8,
+      "fiber": 0.5
+    },
+    "portions": [
+      {
+        "label_vi": "1 tô",
+        "grams": 600,
+        "sort": 0
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 1
+      }
+    ]
+  },
+  {
+    "source": "vn_table",
+    "source_id": "food-com-tam-suon",
+    "name": "Cơm tấm sườn",
+    "name_vi": "Cơm tấm sườn",
+    "category": "mon_viet",
+    "brand": null,
+    "tip_vi": null,
+    "nutrients": {
+      "energy": 155,
+      "carbs": 21,
+      "protein": 7.5,
+      "fat": 4.8,
+      "sodium": 310,
+      "potassium": 120,
+      "iron": 1.1,
+      "fiber": 0.8
+    },
+    "portions": [
+      {
+        "label_vi": "1 dĩa",
+        "grams": 400,
+        "sort": 0
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 1
+      }
+    ]
+  },
+  {
+    "source": "vn_table",
+    "source_id": "food-banh-mi-thit",
+    "name": "Bánh mì thịt",
+    "name_vi": "Bánh mì thịt",
+    "category": "mon_viet",
+    "brand": null,
+    "tip_vi": null,
+    "nutrients": {
+      "energy": 210,
+      "carbs": 28,
+      "protein": 9.5,
+      "fat": 6.8,
+      "sodium": 450,
+      "potassium": 140,
+      "iron": 1.4,
+      "fiber": 1.8
+    },
+    "portions": [
+      {
+        "label_vi": "1 ổ",
+        "grams": 200,
+        "sort": 0
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 1
+      }
+    ]
+  },
+  {
+    "source": "vn_table",
+    "source_id": "food-bun-bo-hue",
+    "name": "Bún bò Huế",
+    "name_vi": "Bún bò Huế",
+    "category": "mon_viet",
+    "brand": null,
+    "tip_vi": null,
+    "nutrients": {
+      "energy": 88.33,
+      "carbs": 11.2,
+      "protein": 5.6,
+      "fat": 2.5,
+      "sodium": 420,
+      "potassium": 110,
+      "iron": 1,
+      "fiber": 0.6
+    },
+    "portions": [
+      {
+        "label_vi": "1 tô",
+        "grams": 600,
+        "sort": 0
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 1
+      }
+    ]
+  },
+  {
+    "source": "usda_foundation",
+    "source_id": "food-trung-ga",
+    "name": "Trứng gà",
+    "name_vi": "Trứng gà",
+    "category": "dam",
+    "brand": null,
+    "tip_vi": "Protein chuẩn tham chiếu, giàu lutein.",
+    "nutrients": {
+      "energy": 142,
+      "protein": 12.6,
+      "fat": 9.5,
+      "carbs": 0.7,
+      "fiber": 0,
+      "vitamin_a": 160,
+      "vitamin_d": 2,
+      "b12": 0.89,
+      "selenium": 31,
+      "cholesterol": 372,
+      "sodium": 142,
+      "potassium": 138,
+      "iron": 1.75
+    },
+    "portions": [
+      {
+        "label_vi": "1 quả",
+        "grams": 55,
+        "sort": 0
+      },
+      {
+        "label_vi": "2 quả",
+        "grams": 110,
+        "sort": 1
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 2
+      }
+    ]
+  },
+  {
+    "source": "usda_foundation",
+    "source_id": "food-uc-ga",
+    "name": "Ức gà phi lê",
+    "name_vi": "Ức gà phi lê",
+    "category": "dam",
+    "brand": null,
+    "tip_vi": "Đạm tinh khiết, ít mỡ, tối ưu cho phục hồi cơ bắp.",
+    "nutrients": {
+      "energy": 165,
+      "protein": 31,
+      "fat": 3.6,
+      "carbs": 0,
+      "fiber": 0,
+      "b3": 13.7,
+      "b6": 0.88,
+      "phosphorus": 228,
+      "potassium": 256,
+      "sodium": 74,
+      "selenium": 27.6
+    },
+    "portions": [
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 0
+      },
+      {
+        "label_vi": "150 g",
+        "grams": 150,
+        "sort": 1
+      },
+      {
+        "label_vi": "200 g",
+        "grams": 200,
+        "sort": 2
+      }
+    ]
+  },
+  {
+    "source": "usda_foundation",
+    "source_id": "food-ca-hoi",
+    "name": "Cá hồi",
+    "name_vi": "Cá hồi",
+    "category": "dam",
+    "brand": null,
+    "tip_vi": "Giàu Omega-3 tự nhiên (EPA + DHA) và Vitamin D.",
+    "nutrients": {
+      "energy": 208,
+      "protein": 20.4,
+      "fat": 13.4,
+      "carbs": 0,
+      "fiber": 0,
+      "omega3": 2.5,
+      "dha": 1.4,
+      "epa": 0.9,
+      "vitamin_d": 11,
+      "b12": 3.2,
+      "potassium": 363,
+      "selenium": 36.5,
+      "sodium": 59
+    },
+    "portions": [
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 0
+      },
+      {
+        "label_vi": "150 g",
+        "grams": 150,
+        "sort": 1
+      }
+    ]
+  },
+  {
+    "source": "vn_table",
+    "source_id": "food-dau-hu",
+    "name": "Đậu hũ trắng",
+    "name_vi": "Đậu hũ trắng",
+    "category": "dam",
+    "brand": null,
+    "tip_vi": null,
+    "nutrients": {
+      "energy": 76,
+      "protein": 8.1,
+      "fat": 4.8,
+      "carbs": 1.9,
+      "fiber": 0.3,
+      "calcium": 350,
+      "iron": 5.4,
+      "magnesium": 30,
+      "potassium": 121,
+      "sodium": 7
+    },
+    "portions": [
+      {
+        "label_vi": "1 bìa",
+        "grams": 150,
+        "sort": 0
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 1
+      }
+    ]
+  },
+  {
+    "source": "vn_table",
+    "source_id": "food-rau-muong",
+    "name": "Rau muống",
+    "name_vi": "Rau muống",
+    "category": "rau",
+    "brand": null,
+    "tip_vi": null,
+    "nutrients": {
+      "energy": 19,
+      "carbs": 2.1,
+      "protein": 2.6,
+      "fat": 0.2,
+      "fiber": 2.1,
+      "calcium": 100,
+      "iron": 1.4,
+      "vitamin_c": 23,
+      "vitamin_a": 320,
+      "potassium": 312,
+      "sodium": 25
+    },
+    "portions": [
+      {
+        "label_vi": "1 dĩa luộc",
+        "grams": 200,
+        "sort": 0
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 1
+      }
+    ]
+  },
+  {
+    "source": "usda_foundation",
+    "source_id": "food-cai-bo-xoi",
+    "name": "Cải bó xôi (Spinach)",
+    "name_vi": "Cải bó xôi (Spinach)",
+    "category": "rau",
+    "brand": null,
+    "tip_vi": "Giàu folate, vitamin K và magie.",
+    "nutrients": {
+      "energy": 23,
+      "carbs": 3.6,
+      "protein": 2.9,
+      "fat": 0.4,
+      "fiber": 2.2,
+      "folate": 194,
+      "vitamin_k": 483,
+      "vitamin_a": 469,
+      "vitamin_c": 28,
+      "iron": 2.7,
+      "magnesium": 79,
+      "potassium": 558,
+      "sodium": 79
+    },
+    "portions": [
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 0
+      },
+      {
+        "label_vi": "1 chén",
+        "grams": 30,
+        "sort": 1
+      }
+    ]
+  },
+  {
+    "source": "vn_table",
+    "source_id": "food-sua-tuoi",
+    "name": "Sữa tươi không đường",
+    "name_vi": "Sữa tươi không đường",
+    "category": "sua",
+    "brand": "TH True Milk",
+    "tip_vi": null,
+    "nutrients": {
+      "energy": 62,
+      "protein": 3.2,
+      "fat": 3.5,
+      "carbs": 4.5,
+      "fiber": 0,
+      "calcium": 110,
+      "potassium": 150,
+      "phosphorus": 90,
+      "b2": 0.17,
+      "sodium": 44
+    },
+    "portions": [
+      {
+        "label_vi": "1 hộp 180 ml",
+        "grams": 180,
+        "sort": 0
+      },
+      {
+        "label_vi": "1 ly 250 ml",
+        "grams": 250,
+        "sort": 1
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 2
+      }
+    ]
+  },
+  {
+    "source": "usda_foundation",
+    "source_id": "food-khoai-lang",
+    "name": "Khoai lang luộc",
+    "name_vi": "Khoai lang luộc",
+    "category": "tinh_bot",
+    "brand": null,
+    "tip_vi": "Nguồn carb chậm tự nhiên và beta-carotene dồi dào.",
+    "nutrients": {
+      "energy": 86,
+      "carbs": 20.1,
+      "net_carbs": 17.1,
+      "protein": 1.6,
+      "fat": 0.1,
+      "fiber": 3,
+      "potassium": 337,
+      "vitamin_a": 709,
+      "vitamin_c": 2.4,
+      "manganese": 0.26,
+      "sodium": 55
+    },
+    "portions": [
+      {
+        "label_vi": "1 củ",
+        "grams": 150,
+        "sort": 0
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 1
+      }
+    ]
+  },
+  {
+    "source": "usda_foundation",
+    "source_id": "food-bo",
+    "name": "Quả bơ",
+    "name_vi": "Quả bơ",
+    "category": "trai_cay",
+    "brand": null,
+    "tip_vi": "Chất béo đơn không bão hoà lành mạnh và giàu kali.",
+    "nutrients": {
+      "energy": 160,
+      "fat": 14.7,
+      "monounsaturated_fat": 9.8,
+      "polyunsaturated_fat": 1.8,
+      "saturated_fat": 2.1,
+      "carbs": 8.5,
+      "fiber": 6.7,
+      "net_carbs": 1.8,
+      "protein": 2,
+      "potassium": 485,
+      "folate": 81,
+      "vitamin_e": 2.07,
+      "vitamin_k": 21,
+      "magnesium": 29,
+      "sodium": 7
+    },
+    "portions": [
+      {
+        "label_vi": "1/2 quả",
+        "grams": 100,
+        "sort": 0
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 1
+      }
+    ]
+  },
+  {
+    "source": "vn_table",
+    "source_id": "food-hat-dieu",
+    "name": "Hạt điều rang",
+    "name_vi": "Hạt điều rang",
+    "category": "beo",
+    "brand": null,
+    "tip_vi": null,
+    "nutrients": {
+      "energy": 553,
+      "fat": 43.8,
+      "protein": 18.2,
+      "carbs": 30.2,
+      "fiber": 3.3,
+      "magnesium": 292,
+      "copper": 2.2,
+      "iron": 6.7,
+      "zinc": 5.8,
+      "phosphorus": 593,
+      "potassium": 660,
+      "sodium": 12
+    },
+    "portions": [
+      {
+        "label_vi": "1 nắm (~30 g)",
+        "grams": 30,
+        "sort": 0
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 1
+      }
+    ]
+  },
+  {
+    "source": "usda_foundation",
+    "source_id": "food-hanh-nhan",
+    "name": "Hạnh nhân",
+    "name_vi": "Hạnh nhân",
+    "category": "beo",
+    "brand": null,
+    "tip_vi": null,
+    "nutrients": {
+      "energy": 579,
+      "fat": 49.9,
+      "protein": 21.2,
+      "carbs": 21.6,
+      "fiber": 12.5,
+      "vitamin_e": 25.6,
+      "magnesium": 270,
+      "calcium": 269,
+      "b2": 1.14,
+      "potassium": 733,
+      "sodium": 1
+    },
+    "portions": [
+      {
+        "label_vi": "1 nắm (~30 g)",
+        "grams": 30,
+        "sort": 0
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 1
+      }
+    ]
+  },
+  {
+    "source": "vn_table",
+    "source_id": "food-buoi",
+    "name": "Bưởi da xanh",
+    "name_vi": "Bưởi da xanh",
+    "category": "trai_cay",
+    "brand": null,
+    "tip_vi": null,
+    "nutrients": {
+      "energy": 42,
+      "carbs": 10.6,
+      "protein": 0.8,
+      "fat": 0.1,
+      "fiber": 1.6,
+      "vitamin_c": 61,
+      "potassium": 216,
+      "sodium": 2
+    },
+    "portions": [
+      {
+        "label_vi": "3 múi",
+        "grams": 150,
+        "sort": 0
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 1
+      }
+    ]
+  },
+  {
+    "source": "usda_foundation",
+    "source_id": "food-tao",
+    "name": "Táo Envy",
+    "name_vi": "Táo Envy",
+    "category": "trai_cay",
+    "brand": null,
+    "tip_vi": null,
+    "nutrients": {
+      "energy": 52,
+      "carbs": 13.8,
+      "net_carbs": 11.4,
+      "fiber": 2.4,
+      "protein": 0.3,
+      "fat": 0.2,
+      "potassium": 107,
+      "vitamin_c": 4.6,
+      "sodium": 1
+    },
+    "portions": [
+      {
+        "label_vi": "1 quả",
+        "grams": 180,
+        "sort": 0
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 1
+      }
+    ]
+  },
+  {
+    "source": "usda_foundation",
+    "source_id": "food-bong-cai-xanh",
+    "name": "Bông cải xanh",
+    "name_vi": "Bông cải xanh",
+    "category": "rau",
+    "brand": null,
+    "tip_vi": null,
+    "nutrients": {
+      "energy": 34,
+      "carbs": 6.6,
+      "protein": 2.8,
+      "fat": 0.4,
+      "fiber": 2.6,
+      "vitamin_c": 89.2,
+      "vitamin_k": 101.6,
+      "folate": 63,
+      "potassium": 316,
+      "calcium": 47,
+      "sodium": 33
+    },
+    "portions": [
+      {
+        "label_vi": "1 chén hấp",
+        "grams": 100,
+        "sort": 0
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 1
+      }
+    ]
+  },
+  {
+    "source": "usda_foundation",
+    "source_id": "food-whey-protein",
+    "name": "Whey Protein Isolate",
+    "name_vi": "Whey Protein Isolate",
+    "category": "bo_sung",
+    "brand": "Optimum Nutrition",
+    "tip_vi": "Hấp thu cực nhanh sau buổi tập, leucine > 2,5 g.",
+    "nutrients": {
+      "energy": 367,
+      "protein": 80,
+      "fat": 1,
+      "carbs": 3.33,
+      "fiber": 0,
+      "calcium": 433,
+      "potassium": 467,
+      "sodium": 167,
+      "leucine": 8.6,
+      "isoleucine": 4.8,
+      "valine": 4.5
+    },
+    "portions": [
+      {
+        "label_vi": "1 muỗng (30 g)",
+        "grams": 30,
+        "sort": 0
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 1
+      }
+    ]
+  }
+]
