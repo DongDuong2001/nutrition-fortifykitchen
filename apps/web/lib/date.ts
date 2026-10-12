@@ -1,5 +1,6 @@
 import type { MockDayData } from "./mock/sample-day";
-import { formatDesktopDate } from "./format";
+import { formatDesktopDate, formatNumber } from "./format";
+import { goalName } from "./onboarding";
 
 const TIMEZONE_VN = "Asia/Ho_Chi_Minh";
 
@@ -24,11 +25,11 @@ export function getTodayIsoVN(): string {
  */
 export function withRuntimeDate(day: MockDayData, isoDate: string): MockDayData {
   const [, month, dayOfMonth] = isoDate.split("-");
-  const { trainingMinutes, goalLabel, weightKg } = day.user;
+  const { trainingMinutes, goal, weightKg } = day.user;
   return {
     ...day,
     date: isoDate,
     dateLabel: `Hôm nay ${dayOfMonth}/${month}`,
-    desktopDateLabel: `${formatDesktopDate(isoDate)} · Ngày tập ${trainingMinutes}′ · ${goalLabel} · ${weightKg} kg`,
+    desktopDateLabel: `${formatDesktopDate(isoDate)} · Ngày tập ${trainingMinutes}′ · ${goalName(goal)} · ${formatNumber(weightKg)} kg`,
   };
 }

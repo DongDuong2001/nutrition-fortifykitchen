@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { getTodayIsoVN, withRuntimeDate } from "../date";
 import { SAMPLE_DAY } from "../mock/sample-day";
+import { SAMPLE_PROFILE, applyProfileTargets, targetsFor } from "../profile";
+import { calculateSaltTarget } from "../training";
 
 describe("getTodayIsoVN", () => {
   afterEach(() => {
@@ -51,5 +53,25 @@ describe("withRuntimeDate", () => {
     const day = withRuntimeDate(SAMPLE_DAY, "2026-10-12");
     expect(day.meals).toBe(SAMPLE_DAY.meals);
     expect(day.calories).toBe(SAMPLE_DAY.calories);
+  });
+});
+
+describe("the profile drives the day's user fields", () => {
+  const profile = { ...SAMPLE_PROFILE, trainingMinutesDefault: 90, weightKg: 70.5, goal: "build" as const };
+  const day = withRuntimeDate(applyProfileTargets(SAMPLE_DAY, profile, targetsFor(profile)), "2026-10-12");
+
+  it("writes minutes, goal name and weight (vi format) into the desktop label", () => {
+    expect(day.user).toMatchObject({ trainingMinutes: 90, weightKg: 70.5, goalLabel: "Tăng cơ" });
+    expect(day.desktopDateLabel).toBe("Thứ Hai, 12/10/2026 · Ngày tập 90′ · Tăng cơ · 70,5 kg");
+  });
+
+  it("gives the salt total for the profile's minutes", () => {
+    const salt = calculateSaltTarget(day.user.trainingMinutes);
+    expect(salt.baseMin).toBe(4);
+    expect(salt.topUpMin).toBe(4.5); // 90 min = 4.5 x 20 min, 1 g each
+    expect(salt.topUpMax).toBe(6.75);
+    expect(salt.totalMin).toBe(8.5);
+    expect(salt.totalMax).toBe(12.75);
+    expect(salt.totalMin).not.toBe(calculateSaltTarget(60).totalMin);
   });
 });
