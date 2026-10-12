@@ -7,8 +7,10 @@ import {
   type DiaryEdits,
   dismissUndoIn,
   deleteEntryIn,
+  deleteMealIn,
   entryNumbers,
   findEntry,
+  mealEntryIds,
   parseAddedEntries,
   parseSampleEdits,
   removeAddedIn,
@@ -265,5 +267,60 @@ describe("removeAddedIn", () => {
     const next = removeAddedIn(edits, ["a", "c", "missing"]);
     expect(next.added.map((e) => e.id)).toEqual(["b"]);
     expect(edits.added).toHaveLength(3);
+  });
+});
+
+describe("deleteMealIn and undoDeleteIn (Xoá bữa này)", () => {
+  it("lists the entries of a meal: sample items and added entries, not deleted ones", () => {
+    const added = addedEntry("e1", "food-chuoi", 100, "breakfast");
+    const edits: DiaryEdits = { ...EMPTY, added: [added] };
+    expect(mealEntryIds(edits, "breakfast").sort()).toEqual(["e1", "item-1", "item-2", "item-3"]);
+    expect(mealEntryIds(edits, "dinner")).toEqual([]);
+    const withDeleted = deleteEntryIn(edits, "item-2");
+    expect(mealEntryIds(withDeleted, "breakfast").sort()).toEqual(["e1", "item-1", "item-3"]);
+  });
+
+  it("follows an item that was moved to another meal", () => {
+    const moved = updateEntryIn(EMPTY, "item-3", { mealSlot: "dinner" });
+    expect(mealEntryIds(moved, "dinner")).toEqual(["item-3"]);
+    expect(mealEntryIds(moved, "breakfast").sort()).toEqual(["item-1", "item-2"]);
+  });
+
+  it("removes every entry of the meal, and the day total drops by the meal's kcal", () => {
+    const added = addedEntry("e1", "food-chuoi", 100, "breakfast");
+    const edits: DiaryEdits = { ...EMPTY, added: [added] };
+    const before = computeCompositeDayData(SAMPLE_DAY, edits.added, edits.sample);
+    const after = deleteMealIn(edits, "breakfast");
+    const day = computeCompositeDayData(SAMPLE_DAY, after.added, after.sample);
+    expect(mealKcal(day, "breakfast")).toBe(0);
+    expect(day.meals.find((m) => m.slot === "breakfast")!.items).toEqual([]);
+    expect(day.calories.consumed).toBe(before.calories.consumed - mealKcal(before, "breakfast"));
+    // other meals are untouched
+    expect(mealKcal(day, "lunch")).toBe(mealKcal(before, "lunch"));
+  });
+
+  it("keeps one undo for the whole meal, and undo puts everything back in place", () => {
+    const added = addedEntry("e1", "food-chuoi", 100, "breakfast");
+    const edits: DiaryEdits = { ...EMPTY, added: [added] };
+    const deleted = deleteMealIn(edits, "breakfast");
+    expect(deleted.undo).not.toBeNull();
+    expect(deleted.added).toEqual([]);
+    const restored = undoDeleteIn(deleted);
+    expect(restored.undo).toBeNull();
+    expect(restored.added.map((e) => e.id)).toEqual(["e1"]);
+    expect(mealEntryIds(restored, "breakfast").sort()).toEqual(["e1", "item-1", "item-2", "item-3"]);
+    const day = computeCompositeDayData(SAMPLE_DAY, restored.added, restored.sample);
+    const original = computeCompositeDayData(SAMPLE_DAY, edits.added, edits.sample);
+    expect(day.calories.consumed).toBe(original.calories.consumed);
+  });
+
+  it("does nothing for a meal with no entries", () => {
+    expect(deleteMealIn(EMPTY, "dinner")).toBe(EMPTY);
+  });
+
+  it("a later undo is not possible once the toast dismissed it", () => {
+    const deleted = deleteMealIn(EMPTY, "lunch");
+    expect(undoDeleteIn(dismissUndoIn(deleted)).sample).toEqual(dismissUndoIn(deleted).sample);
+    expect(dismissUndoIn(deleted).undo).toBeNull();
   });
 });

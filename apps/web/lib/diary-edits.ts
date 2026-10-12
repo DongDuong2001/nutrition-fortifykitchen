@@ -1,6 +1,6 @@
 import { MOCK_FOODS, type FoodItem } from "./mock/foods";
 import { SAMPLE_DAY, type MockDayData, type MockFoodItem } from "./mock/sample-day";
-import { MEAL_SLOTS, type MealSlot } from "./meal-slot";
+import { MEAL_SLOTS, getMealSlotNameVi, type MealSlot } from "./meal-slot";
 import { scaleNutrients } from "./portion";
 
 /** A diary entry the user added (from /add or the food detail page). */
@@ -233,7 +233,9 @@ export interface DiaryEdits {
 
 export type UndoRecord =
   | { kind: "added"; name: string; entry: AddedDiaryEntry; index: number }
-  | { kind: "sample"; name: string; id: string };
+  | { kind: "sample"; name: string; id: string }
+  /** A whole meal: the added entries with their positions, and the sample items that were flagged deleted. */
+  | { kind: "meal"; name: string; count: number; added: { entry: AddedDiaryEntry; index: number }[]; sampleIds: string[] };
 
 export interface EntryPatch {
   grams?: number;
@@ -322,10 +324,52 @@ export function deleteEntryIn(edits: DiaryEdits, id: string, samples: SampleItem
   };
 }
 
+/** The ids of the entries that are in a meal now (sample items with their edits applied, then added entries). */
+export function mealEntryIds(edits: DiaryEdits, slot: MealSlot, samples: SampleItemInfo[] = SAMPLE_ITEMS): string[] {
+  const fromSamples = samples.flatMap((info) => {
+    const effect = sampleEffect(info, edits.sample[info.item.id]);
+    return !effect.deleted && effect.mealSlot === slot ? [info.item.id] : [];
+  });
+  return [...fromSamples, ...edits.added.filter((e) => e.mealSlot === slot).map((e) => e.id)];
+}
+
+/** Removes every entry of a meal, and keeps them for one undo (a new delete replaces it). Nothing to remove: no change. */
+export function deleteMealIn(edits: DiaryEdits, slot: MealSlot, samples: SampleItemInfo[] = SAMPLE_ITEMS): DiaryEdits {
+  const ids = mealEntryIds(edits, slot, samples);
+  if (ids.length === 0) return edits;
+
+  const added = edits.added.flatMap((entry, index) => (entry.mealSlot === slot ? [{ entry, index }] : []));
+  const addedIds = new Set(added.map((a) => a.entry.id));
+  const sampleIds = ids.filter((id) => !addedIds.has(id));
+  const sample = { ...edits.sample };
+  for (const id of sampleIds) sample[id] = { ...sample[id], deleted: true };
+
+  return {
+    ...edits,
+    added: edits.added.filter((e) => e.mealSlot !== slot),
+    sample,
+    undo: { kind: "meal", name: getMealSlotNameVi(slot), count: ids.length, added, sampleIds },
+  };
+}
+
 /** Puts the last deleted entry back where it was. Does nothing once the undo is gone. */
 export function undoDeleteIn(edits: DiaryEdits): DiaryEdits {
   const undo = edits.undo;
   if (!undo) return edits;
+
+  if (undo.kind === "meal") {
+    // Positions were taken from the list before the delete, so put them back from the front
+    const added = [...edits.added];
+    for (const { entry, index } of undo.added) added.splice(Math.min(index, added.length), 0, entry);
+    const sample = { ...edits.sample };
+    for (const id of undo.sampleIds) {
+      const restored: SampleEdit = { ...sample[id] };
+      delete restored.deleted;
+      if (Object.keys(restored).length > 0) sample[id] = restored;
+      else delete sample[id];
+    }
+    return { ...edits, added, sample, undo: null };
+  }
 
   if (undo.kind === "added") {
     const added = [...edits.added];

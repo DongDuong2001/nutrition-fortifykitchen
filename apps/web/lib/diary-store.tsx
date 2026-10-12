@@ -32,9 +32,11 @@ import {
   addAmounts,
   amountsOfNumbers,
   deleteEntryIn,
+  deleteMealIn,
   dismissUndoIn,
   entryNumbers,
   findEntry,
+  mealEntryIds,
   parseAddedEntries,
   parseSampleEdits,
   removeAddedIn,
@@ -83,6 +85,8 @@ interface DiaryContextValue {
   /** Changes the meal, and the portion when the entry can change portion. */
   updateEntry: (id: string, patch: EntryPatch) => void;
   deleteEntry: (id: string) => void;
+  /** Removes every entry of a meal of today, with one undo toast (Hoàn tác puts the whole meal back). */
+  deleteMeal: (slot: MealSlot) => void;
   /** Puts the last deleted entry back. Only works while the "deleted" toast is shown. */
   undoLastDelete: () => void;
   /** Adds copied entries to today in one step, with one undo toast. Existing entries are kept. */
@@ -420,6 +424,21 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     [edits]
   );
 
+  const deleteMeal = useCallback(
+    (slot: MealSlot) => {
+      const count = mealEntryIds(edits, slot).length;
+      if (count === 0) return;
+      setEdits((prev) => deleteMealIn(prev, slot));
+      setToast({
+        message: `Đã xoá ${getMealSlotNameVi(slot)} · ${count} món`,
+        kind: "deleted",
+        mealSlot: null,
+        durationMs: UNDO_TOAST_MS,
+      });
+    },
+    [edits]
+  );
+
   const undoLastDelete = useCallback(() => {
     setEdits((prev) => undoDeleteIn(prev));
     setToast(null);
@@ -484,6 +503,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         getEntry,
         updateEntry,
         deleteEntry,
+        deleteMeal,
         undoLastDelete,
         copyEntries,
         undoCopy,

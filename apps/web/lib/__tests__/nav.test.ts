@@ -19,10 +19,12 @@ describe("lib/nav tabs", () => {
   });
 
   it("highlights the owning tab on pushed screens", () => {
-    expect(tabForPath("/micros")).toBe("overview");
-    expect(tabForPath("/micros/calcium")).toBe("overview");
-    expect(tabForPath("/training")).toBe("overview");
+    expect(tabForPath("/micros")).toBe("diary");
+    expect(tabForPath("/micros/calcium")).toBe("diary");
+    expect(tabForPath("/training")).toBe("diary");
     expect(tabForPath("/trends")).toBe("overview");
+    expect(tabForPath("/trends/micros")).toBe("overview");
+    expect(tabForPath("/trends/body")).toBe("overview");
     expect(tabForPath("/foods/egg")).toBe("explore");
     expect(tabForPath("/foods/new")).toBe("explore");
     expect(tabForPath("/explore/calcium")).toBe("explore");
@@ -47,9 +49,11 @@ describe("lib/nav tabs", () => {
 
 describe("lib/nav backFallback", () => {
   it("sends Vi chất, Xu hướng and Ngày tập back to Tổng quan", () => {
-    expect(backFallback("/micros")).toBe("/");
+    expect(backFallback("/micros")).toBe("/diary");
     expect(backFallback("/trends")).toBe("/");
-    expect(backFallback("/training")).toBe("/");
+    expect(backFallback("/trends/micros")).toBe("/");
+    expect(backFallback("/trends/body")).toBe("/");
+    expect(backFallback("/training")).toBe("/diary");
   });
 
   it("sends a nutrient detail back to the Vi chất list", () => {

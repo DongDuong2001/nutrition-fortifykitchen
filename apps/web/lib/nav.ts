@@ -20,9 +20,9 @@ const OWNER: Record<string, NavTab> = {
   foods: "explore",
   settings: "settings",
   profile: "settings",
-  micros: "overview",
+  micros: "diary",
   trends: "overview",
-  training: "overview",
+  training: "diary",
 };
 
 function segments(pathname: string): string[] {
@@ -43,6 +43,7 @@ export function backFallback(pathname: string | null | undefined): string {
   const parts = segments(pathname);
   const [first, second, third] = parts;
   if (first === "micros" && second) return "/micros";
+  if (first === "micros" || first === "training") return "/diary";
   if (first === "settings") {
     if (third === "weight") return "/settings/profile";
     return "/settings";
