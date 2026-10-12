@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Điều hướng · IA v2 mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&family=Saira+Condensed:wght@800;900&display=swap" rel="stylesheet">
+<style>
+/* Tokens copied from apps/web/app/globals.css @theme (Cobalt Sign). Values are identical. */
+:root {
+  --color-page: #F3F1EC;             /* --color-page (same as --color-paper) */
+  --color-card: #FFFFFF;             /* --color-card */
+  --color-card-border: #E0DACF;      /* --color-card-border */
+  --color-ink: #111317;              /* --color-ink */
+  --color-text: #141519;             /* --color-text */
+  --color-secondary: #6B6A66;        /* --color-secondary */
+  --color-blue: #1238D6;             /* --color-blue (same as --color-cobalt): primary action */
+  --color-sky: #9EC3FF;              /* --color-sky */
+  --color-on-dark: #FFFFFF;          /* --color-on-dark */
+  --color-muted-on-dark: #8C92A0;    /* --color-muted-on-dark */
+  --color-muted-subtitle: #C9CDD6;   /* --color-muted-subtitle */
+  --color-surface-dark: #1A1C22;     /* --color-surface-dark */
+  --color-divider: #E0DACF;          /* --color-divider */
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--color-page); color: var(--color-text); font-family: 'Manrope', -apple-system, 'Segoe UI', Roboto, sans-serif; -webkit-font-smoothing: antialiased; }
+a, button { font: inherit; color: inherit; text-decoration: none; cursor: pointer; }
+button { background: none; border: 0; padding: 0; margin: 0; }
+:focus-visible { outline: 3px solid var(--color-blue); outline-offset: 2px; }
+svg { display: block; flex: none; }
+h1, h2, h3, h4, p { margin: 0; }
+
+/* Board chrome (not part of the screen) */
+.board { padding-bottom: 48px; }
+.board-head { padding: 24px 16px 8px; max-width: 960px; }
+.board-head h1 { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-size: 28px; text-transform: uppercase; margin-bottom: 8px; }
+.board-head p { color: var(--color-secondary); font-size: 14px; line-height: 1.5; }
+.state { padding: 24px 0 8px; border-top: 1px solid var(--color-divider); }
+.state h2 { font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--color-secondary); padding: 0 16px; margin-bottom: 12px; }
+.cap { font-size: 13px; font-weight: 600; color: var(--color-secondary); padding: 0 16px 8px; }
+.stack { display: flex; flex-direction: column; gap: 20px; padding: 0 0 8px; }
+.phone-nav { width: 390px; max-width: 100%; }
+/* Focus ring on the dark nav uses sky (10.4:1 on ink); the global blue ring is 2.6:1 here. Tab 4 = Khám phá. */
+.phone-nav.focus-demo a:nth-child(4) { outline: 3px solid var(--color-sky); outline-offset: -3px; border-radius: 12px; }
+
+/* Bottom nav (phone), 5 slots: Tổng quan · Nhật ký · + · Khám phá · Cài đặt */
+.nav { background: var(--color-ink); color: var(--color-muted-on-dark); display: grid; grid-template-columns: repeat(5, 1fr); align-items: center; height: 72px; padding: 0 8px; }
+.nav a { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 56px; font-size: 12px; font-weight: 600; color: var(--color-muted-on-dark); }
+.nav a[aria-current="page"] { color: var(--color-on-dark); }
+.nav a[aria-current="page"]::before { content: ""; position: absolute; top: 0; width: 22px; height: 3px; background: var(--color-sky); transform: skewX(-14deg); }
+.fab { width: 56px; height: 56px; border-radius: 50%; background: var(--color-blue); color: var(--color-on-dark); display: flex; align-items: center; justify-content: center; justify-self: center; margin-top: -20px; }
+
+/* Desktop sidebar (from 1024 px), 4 tabs. The Thêm món action lives in the page header. */
+.sidebars { display: flex; flex-wrap: wrap; gap: 24px; padding: 0 16px; }
+.side { width: 240px; height: 520px; background: var(--color-ink); color: var(--color-on-dark); padding: 24px; display: flex; flex-direction: column; gap: 24px; flex: none; }
+.side .brand { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-size: 22px; line-height: 1; }
+.side .brand span { color: var(--color-sky); }
+.side nav { display: flex; flex-direction: column; gap: 4px; }
+.side nav a { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 12px; border-radius: 12px; font-size: 15px; font-weight: 600; color: var(--color-muted-on-dark); }
+.side nav a[aria-current="page"] { background: var(--color-surface-dark); color: var(--color-on-dark); }
+.side-cap { font-size: 13px; font-weight: 600; color: var(--color-secondary); padding: 0 0 8px; }
+</style>
+</head>
+<body>
+<div class="board">
+  <header class="board-head">
+    <h1>Điều hướng</h1>
+    <p>IA v2 navigation. Phone: bottom nav with five slots, Tổng quan · Nhật ký · + · Khám phá · Cài đặt. Training is no longer a tab (it lives in Nhật ký and Tổng quan). Desktop: sidebar with four tabs from 1024 px; Thêm món sits in the page header. The active tab gets aria-current, white text and a slanted sky bar. Copy is Vietnamese; these notes are English.</p>
+  </header>
+
+  <!-- 1. Phone bottom nav, each tab active -->
+  <section class="state">
+    <h2>1 · Phone bottom nav, each tab active (390 px)</h2>
+    <div class="stack">
+      <div>
+        <p class="cap">Tổng quan active</p>
+        <nav class="nav phone-nav" aria-label="Điều hướng chính">
+          <a href="#" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
+          <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
+          <button class="fab" aria-label="Thêm món"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+          <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
+          <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
+        </nav>
+      </div>
+      <div>
+        <p class="cap">Nhật ký active</p>
+        <nav class="nav phone-nav" aria-label="Điều hướng chính">
+          <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
+          <a href="#" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
+          <button class="fab" aria-label="Thêm món"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+          <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
+          <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
+        </nav>
+      </div>
+      <div>
+        <p class="cap">Khám phá active</p>
+        <nav class="nav phone-nav" aria-label="Điều hướng chính">
+          <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
+          <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
+          <button class="fab" aria-label="Thêm món"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+          <a href="#" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
+          <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
+        </nav>
+      </div>
+      <div>
+        <p class="cap">Cài đặt active</p>
+        <nav class="nav phone-nav" aria-label="Điều hướng chính">
+          <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
+          <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
+          <button class="fab" aria-label="Thêm món"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+          <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
+          <a href="#" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
+        </nav>
+      </div>
+      <div>
+        <p class="cap">Keyboard focus on Khám phá (Tab order: Tổng quan → Nhật ký → Thêm món → Khám phá → Cài đặt)</p>
+        <nav class="nav phone-nav focus-demo" aria-label="Điều hướng chính">
+          <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
+          <a href="#" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
+          <button class="fab" aria-label="Thêm món"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+          <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
+          <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
+        </nav>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. Desktop sidebar, each tab active -->
+  <section class="state">
+    <h2>2 · Desktop sidebar, each tab active (from 1024 px)</h2>
+    <div class="sidebars">
+      <div>
+        <p class="side-cap">Tổng quan</p>
+        <aside class="side">
+          <div class="brand">H1T <span>MICRO</span></div>
+          <nav aria-label="Điều hướng chính">
+            <a href="#" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
+            <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
+            <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
+            <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
+          </nav>
+        </aside>
+      </div>
+      <div>
+        <p class="side-cap">Nhật ký</p>
+        <aside class="side">
+          <div class="brand">H1T <span>MICRO</span></div>
+          <nav aria-label="Điều hướng chính">
+            <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
+            <a href="#" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
+            <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
+            <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
+          </nav>
+        </aside>
+      </div>
+      <div>
+        <p class="side-cap">Khám phá</p>
+        <aside class="side">
+          <div class="brand">H1T <span>MICRO</span></div>
+          <nav aria-label="Điều hướng chính">
+            <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
+            <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
+            <a href="#" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
+            <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
+          </nav>
+        </aside>
+      </div>
+      <div>
+        <p class="side-cap">Cài đặt</p>
+        <aside class="side">
+          <div class="brand">H1T <span>MICRO</span></div>
+          <nav aria-label="Điều hướng chính">
+            <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
+            <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
+            <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
+            <a href="#" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
+          </nav>
+        </aside>
+      </div>
+    </div>
+  </section>
+</div>
+</body>
+</html>
