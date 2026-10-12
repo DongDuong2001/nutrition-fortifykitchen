@@ -1,4 +1,4 @@
-.PHONY: dev dev-api dev-web build build-api build-web db-migrate test test-api test-web lint lint-api lint-web clean
+.PHONY: dev dev-api dev-web build build-api build-web db-migrate migrate-up migrate-down test test-api test-web lint lint-api lint-web clean
 
 dev:
 	@echo "Starting development environment..."
@@ -19,9 +19,21 @@ build-api:
 build-web:
 	cd apps/web && npm run build
 
-db-migrate:
+db-migrate: migrate-up
+
+migrate-up:
 	@echo "Applying database migrations..."
-	docker compose exec -T postgres psql -U postgres -d postgres -f /docker-entrypoint-initdb.d/01-init.sql || psql "$$DATABASE_URL" -f migrations/000001_init_nutrition_schema.up.sql
+	@for f in migrations/*_*.up.sql; do \
+		echo "Applying $$f..."; \
+		psql "$$DATABASE_URL" -f "$$f" || true; \
+	done
+
+migrate-down:
+	@echo "Rolling back database migrations..."
+	@for f in $$(ls -r migrations/*_*.down.sql 2>/dev/null); do \
+		echo "Rolling back $$f..."; \
+		psql "$$DATABASE_URL" -f "$$f" || true; \
+	done
 
 test: test-api test-web
 

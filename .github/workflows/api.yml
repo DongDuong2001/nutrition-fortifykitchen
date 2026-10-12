@@ -1,0 +1,77 @@
+name: API CI
+
+on:
+  push:
+    branches: [ main, develop, feat/api, 'feat/api-*' ]
+    paths:
+      - 'apps/api/**'
+      - 'migrations/**'
+      - '.github/workflows/api.yml'
+  pull_request:
+    branches: [ main, develop, feat/api ]
+    paths:
+      - 'apps/api/**'
+      - 'migrations/**'
+      - '.github/workflows/api.yml'
+
+jobs:
+  api:
+    name: Go API (1.24+) Checks & Migrations
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          cache-dependency-path: apps/api/go.sum
+
+      - name: Install dependencies
+        working-directory: apps/api
+        run: go mod download
+
+      - name: Go Vet
+        working-directory: apps/api
+        run: go vet ./...
+
+      - name: Run Tests
+        working-directory: apps/api
+        run: go test -v ./...
+
+      - name: Build Server
+        working-directory: apps/api
+        run: go build -v -o bin/server cmd/server/main.go
+
+      - name: Test Migration Scripts
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres?sslmode=disable
+        run: |
+          for f in migrations/*_*.up.sql; do
+            if [ -f "$f" ]; then
+              echo "Testing $f..."
+              PGPASSWORD=postgres psql -h localhost -U postgres -d postgres -f "$f"
+            fi
+          done
+          for f in $(ls -r migrations/*_*.down.sql 2>/dev/null); do
+            if [ -f "$f" ]; then
+              echo "Testing rollback $f..."
+              PGPASSWORD=postgres psql -h localhost -U postgres -d postgres -f "$f"
+            fi
+          done
