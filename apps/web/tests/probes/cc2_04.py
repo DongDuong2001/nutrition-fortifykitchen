@@ -66,8 +66,15 @@ def test_today_cards(browser):
     pg.goto(BASE + "/diary", wait_until="networkidle")
     pg.wait_for_timeout(400)
     txt = body_text(pg)
-    for expected in ["Ngày tập · 60 phút", "7–10,5 g", "Bù mồ hôi (60′ tập)", "3–4,5 g", "4–6 g", "5.200–6.500 mg"]:
-        check(expected in txt, f"today @ 1440: shows '{expected}'")
+    check("Ngày tập 60′ · muối 7–10,5 g" in txt, "diary @ 1440: the Ngày tập row reads 60′ and salt 7–10,5 g")
+    pg.goto(BASE + "/training", wait_until="networkidle")
+    pg.wait_for_timeout(400)
+    txt = body_text(pg)
+    for expected in ["7–10,5 g", "3–4,5 g", "4–6 g"]:
+        check(expected in txt, f"training @ 1440: shows '{expected}'")
+    pg.goto(BASE + "/micros", wait_until="networkidle")
+    pg.wait_for_timeout(400)
+    check("5.200–6.500 mg" in body_text(pg), "micros @ 1440: potassium target 5.200–6.500 mg")
     ctx.close()
 
     ctx = browser.new_context(viewport=PHONE)

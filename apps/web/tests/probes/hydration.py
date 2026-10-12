@@ -27,7 +27,7 @@ def main():
 
         viewports = [{"width": 390, "height": 844}, {"width": 1440, "height": 900}]
         paths = [
-            "/", "/diary", "/explore", "/settings", "/micros", "/trends", "/add", "/entry/item-1", "/training", "/settings/profile", "/settings/profile/weight",
+            "/", "/diary", "/explore", "/settings", "/micros", "/trends", "/trends/micros", "/trends/body", "/add", "/entry/item-1", "/training", "/settings/profile", "/settings/profile/weight",
             "/settings/language", "/settings/notifications", "/settings/delete-account",
             "/install", "/paywall", "/this-page-does-not-exist",  # last one: the 404 page
         ]

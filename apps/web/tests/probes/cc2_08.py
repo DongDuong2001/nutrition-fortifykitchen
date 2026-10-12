@@ -31,10 +31,12 @@ ROUTES = [
     ("/micros", "Vi chất", "pushed"),
     ("/micros/calcium", "Canxi", "pushed"),
     ("/training", "Ngày tập", "pushed"),
-    ("/trends", "Xu hướng", "pushed"),
+    ("/trends", "Tổng quan", "tab"),
+    ("/trends/micros", "Tổng quan", "tab"),
+    ("/trends/body", "Tổng quan", "tab"),
     ("/foods/new", "Tạo món mới", "pushed"),
 ]
-INK_BAND_PHONE = {"/", "/diary"}
+INK_BAND_PHONE = {"/", "/diary", "/trends", "/trends/micros", "/trends/body"}
 SHOT_NAMES = {"/": "home", "/diary": "diary", "/micros": "micros", "/settings": "settings", "/settings/profile": "profile"}
 problems, notes = [], []
 sys.stdout.reconfigure(encoding="utf-8")
@@ -102,7 +104,7 @@ def main():
 
                 wm = pg.evaluate(WORDMARK)
                 if label == "390":
-                    check(wm == (1 if route == "/" else 0), f"{where}: wordmark in {wm} header(s) (only on /)")
+                    check(wm == (1 if route in ("/", "/trends", "/trends/micros", "/trends/body") else 0), f"{where}: wordmark in {wm} header(s) (only on Tổng quan)")
                 else:
                     check(wm == 0, f"{where}: no wordmark in a header on desktop ({wm})")
 

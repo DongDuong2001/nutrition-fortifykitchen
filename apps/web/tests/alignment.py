@@ -25,8 +25,15 @@ ONBOARDING_CHECKS = [
     ("/micros", "mobile (390px)", "micros-header", "lr"),
     ("/diary", "desktop (1440px)", "today-header", "lr"),
     ("/micros", "desktop (1440px)", "micros-header", "lr"),
-    ("/trends", "mobile (390px)", "trends-rows", "lr"),
-    ("/trends", "desktop (1440px)", "trends-rows", "lr"),
+    ("/", "mobile (390px)", "overview-rows", "lr"),
+    ("/", "desktop (1440px)", "overview-rows", "lr"),
+    ("/trends", "mobile (390px)", "overview-comp", "lr"),
+    ("/trends", "desktop (1440px)", "overview-comp", "lr"),
+    ("/trends/micros", "mobile (390px)", "overview-micro-l", "lr"),
+    ("/trends/micros", "desktop (1440px)", "overview-micro-l", "lr"),
+    ("/trends/micros", "desktop (1440px)", "overview-micro-r", "lr"),
+    ("/trends/body", "mobile (390px)", "overview-stats", "tb"),
+    ("/trends/body", "desktop (1440px)", "overview-stats", "tb"),
     ("/micros/calcium", "mobile (390px)", "nutrient-header", "lr"),
     ("/micros/calcium", "desktop (1440px)", "nutrient-header", "lr"),
     ("/micros/calcium", "mobile (390px)", "nutrient-card", "lr"),
@@ -45,7 +52,7 @@ ONBOARDING_CHECKS = [
     (f"/diary?date={YESTERDAY}", "mobile (390px)", "today-header", "lr"),
     (f"/diary?date={YESTERDAY}", "mobile (390px)", "meal-card", "lr"),
     (f"/diary?date={YESTERDAY}", "desktop (1440px)", "today-header", "lr"),
-    (f"/diary?date={YESTERDAY}", "desktop (1440px)", "desktop-meal", "lr"),
+    (f"/diary?date={YESTERDAY}", "desktop (1440px)", "meal-card", "lr"),
 ]
 
 def check_align_groups(page, group_name=None, edges="lr"):

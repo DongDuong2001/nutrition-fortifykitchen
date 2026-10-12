@@ -92,10 +92,12 @@ def probe_tabs(pg, name):
 
 def probe_owner(pg, name):
     owners = [
-        ("/micros", "Tổng quan"),
-        ("/micros/calcium", "Tổng quan"),
-        ("/training", "Tổng quan"),
+        ("/micros", "Nhật ký"),
+        ("/micros/calcium", "Nhật ký"),
+        ("/training", "Nhật ký"),
         ("/trends", "Tổng quan"),
+        ("/trends/micros", "Tổng quan"),
+        ("/trends/body", "Tổng quan"),
         ("/foods/food-cha-la", "Khám phá"),
         ("/foods/new", "Khám phá"),
         ("/settings/profile", "Cài đặt"),
@@ -160,53 +162,41 @@ def probe_redirects(pg, name):
     )
 
 
-def open_micros_from_home(pg, name):
-    # Phone: the Vi chất summary card. Desktop: "Mở chi tiết" on the Vi chất card.
-    if name == "390":
-        pg.locator('main a[href="/micros"], a[href="/micros"] >> visible=true').first.click()
-    else:
-        pg.locator('a[href="/micros"]:has-text("Mở chi tiết") >> visible=true').first.click()
+def open_micros_from_diary(pg, name):
+    # Nhật ký owns the day: its Vi chất row opens /micros?date=<today>
+    pg.locator('a[href^="/micros?date="] >> visible=true').first.click()
     pg.wait_for_url(lambda u: path_of_url(u) == "/micros", timeout=8000)
     settle(pg)
 
 
 def probe_back(pg, name):
-    for start in ("/", "/diary"):
-        go(pg, start)
-        open_micros_from_home(pg, name)
-        btn = back_button(pg)
-        check(btn.count() == 1, f"{name}: /micros has one back control (found {btn.count()})")
-        if name == "390":
-            pg.screenshot(path=str(SHOTS / "cc2-07-micros-390.png"))
-        btn.first.click()
-        pg.wait_for_url(lambda u, s=start: path_of_url(u) == s, timeout=8000)
-        check(path_of(pg) == start, f"{name}: back from /micros returns to {start} (now {path_of(pg)})")
-
-    # /micros -> /trends -> back -> /micros
-    go(pg, "/")
-    open_micros_from_home(pg, name)
-    pg.locator('a[href="/trends"] >> visible=true').first.click()
-    pg.wait_for_url(lambda u: path_of_url(u) == "/trends", timeout=8000)
-    settle(pg)
+    go(pg, "/diary")
+    open_micros_from_diary(pg, name)
     btn = back_button(pg)
-    check(btn.count() == 1, f"{name}: /trends has one back control (found {btn.count()})")
+    check(btn.count() == 1, f"{name}: /micros has one back control (found {btn.count()})")
+    if name == "390":
+        pg.screenshot(path=str(SHOTS / "cc2-07-micros-390.png"))
     btn.first.click()
-    pg.wait_for_url(lambda u: path_of_url(u) == "/micros", timeout=8000)
-    check(path_of(pg) == "/micros", f"{name}: back from /trends returns to /micros (now {path_of(pg)})")
+    pg.wait_for_url(lambda u: path_of_url(u) == "/diary", timeout=8000)
+    check(path_of(pg) == "/diary", f"{name}: back from /micros returns to /diary (now {path_of(pg)})")
 
-    # / -> /training -> back -> /
-    go(pg, "/")
-    pg.locator('a[href="/training"] >> visible=true').first.click()
+    # /diary -> /training -> back -> /diary
+    go(pg, "/diary")
+    pg.locator('a[href^="/training?date="] >> visible=true').first.click()
     pg.wait_for_url(lambda u: path_of_url(u) == "/training", timeout=8000)
     settle(pg)
     btn = back_button(pg)
     check(btn.count() == 1, f"{name}: /training has one back control (found {btn.count()})")
     btn.first.click()
-    pg.wait_for_url(lambda u: path_of_url(u) == "/", timeout=8000)
-    check(path_of(pg) == "/", f"{name}: back from /training returns to / (now {path_of(pg)})")
+    pg.wait_for_url(lambda u: path_of_url(u) == "/diary", timeout=8000)
+    check(path_of(pg) == "/diary", f"{name}: back from /training returns to /diary (now {path_of(pg)})")
+
+    # Tổng quan sub-tabs are tabs: no back control
+    go(pg, "/trends")
+    check(back_button(pg).count() == 0, f"{name}: /trends is a tab screen with no back control")
 
     # Direct link: no in-app history, so back goes to the owning tab
-    for route, owner in (("/micros", "/"), ("/trends", "/"), ("/training", "/"), ("/micros/calcium", "/micros")):
+    for route, owner in (("/micros", "/diary"), ("/training", "/diary"), ("/micros/calcium", "/micros")):
         go(pg, route)
         btn = back_button(pg)
         if btn.count() != 1:
