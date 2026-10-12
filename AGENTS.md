@@ -25,6 +25,7 @@ Antigravity: also follow .agent/rules/antigravity.md.
 - Out of scope: Redis, Asynq, Meilisearch and gamification.
 
 ## UI
+- **Information architecture v2 is decided: `design/IA-v2.md`** (tabs, routes, redirects, build order). It is the source of truth for navigation and screen jobs.
 - Rebuild the screens in `design/screens/*.dc.html` as React components. Skip the `Browser*` files; they only wrap phone screens in a Safari frame.
 - Mobile first: 390 px phone. At 1024 px and up, use the `Desktop*` layouts.
 - Every tap target is at least 44 px. Use real buttons, links and labels, and add `aria` attributes as in the designs.
