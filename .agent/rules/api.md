@@ -1,0 +1,12 @@
+# API rules (apps/api, migrations, lib/api-client) — read before every task
+- Read docs/08-backend-plan.md and docs/07-api-contract.md first; the plan wins when they differ, and you update docs/07 in the same task.
+- Never edit apps/web (except regenerating lib/api-client and lib/supabase-client), design/, PROGRESS.md rows of other agents.
+- Contract first: change apps/api/openapi.yaml, regenerate the client, then write the handler.
+- handler -> service -> repository; SQL only in repositories; services have table tests.
+- user_id only from the JWT. Never build SQL with string concatenation.
+- Unknown nutrient = NULL / null, never 0. Past-day writes = 409 PAST_DAY_READ_ONLY. Dates YYYY-MM-DD in Asia/Ho_Chi_Minh.
+- Every create accepts a client UUID and is idempotent.
+- Migrations: new numbered file + .down.sql; never edit an applied migration.
+- One commit per item, message "api-p<N>: item <k> - <what>". Author Dong's git identity. No AI names or trailers.
+- Gates before you finish: go vet ./..., go test ./..., migrations up and down on local Supabase, client freshness check, CI green.
+- Stuck after two tries: skip the item, write why in PROGRESS.md under "API", continue.
