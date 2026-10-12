@@ -3,6 +3,8 @@
 ## Now working
 | Task | Owner | Files / routes |
 |---|---|---|
+| ag-06 (a11y + copy) | Antigravity | docs/audit-ag04.md, apps/web/app/add/page.tsx, apps/web/components/training/phase-checklist.tsx, apps/web/app/settings/notifications/page.tsx, apps/web/components/foods/entry-editor.tsx, apps/web/components/ui/portion-panel.tsx, apps/web/components/ui/calorie-dial.tsx, apps/web/app/today/page.tsx, apps/web/components/ui/app-header.tsx, apps/web/components/ui/switch.tsx, apps/web/app/settings/delete-account/page.tsx, apps/web/components/onboarding/setup-form.tsx, apps/web/app/paywall/page.tsx, apps/web/components/profile/profile-cards.tsx, apps/web/tests/probes/ag06.py |
+
 
 | Date | Commit | Built | Next |
 | --- | --- | --- | --- |
