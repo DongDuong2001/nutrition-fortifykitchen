@@ -54,7 +54,7 @@ export function CalorieDial({
         role="img"
         aria-label={ariaLabel || defaultLabel}
       >
-        {/* Background Track: track-on-dark, 3.14:1 on ink (WCAG 1.4.11 needs 3:1) */}
+        {/* Background Track: track-on-dark, 3.44:1 on ink, 3.15:1 on surface-dark (WCAG 1.4.11 needs 3:1) */}
         <circle
           cx="60"
           cy="60"

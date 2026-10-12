@@ -68,7 +68,7 @@ def test_profile_red(browser):
 
 
 def test_calorie_dial_track(browser):
-    # The track circle reaches 3:1 non-text contrast on the ink header (the inset panel is 2.88:1, OPEN_QUESTIONS cc2-05)
+    # The track circle reaches 3:1 non-text contrast on the ink header and on the surface it actually sits on (the inset panel)
     for vp_name, vp in (("390", PHONE), ("1440", DESKTOP)):
         ctx = browser.new_context(viewport=vp)
         pg = ctx.new_page()
@@ -76,15 +76,20 @@ def test_calorie_dial_track(browser):
         pg.wait_for_timeout(600)
         track = pg.evaluate("""() => {
             const dial = [...document.querySelectorAll('svg[role="img"]')].find((s) => s.querySelectorAll('circle').length >= 2);
-            return dial ? getComputedStyle(dial.querySelector('circle')).color : null;
+            if (!dial) return null;
+            // The colour of the surface the ring really sits on: the nearest ancestor with a solid background
+            let el = dial.parentElement, bg = 'rgba(0, 0, 0, 0)';
+            while (el) { bg = getComputedStyle(el).backgroundColor; if (!bg.startsWith('rgba(0, 0, 0, 0') && bg !== 'transparent') break; el = el.parentElement; }
+            return { ring: getComputedStyle(dial.querySelector('circle')).color, bg };
         }""")
         check(track is not None, f"today @ {vp_name}: calorie dial found")
         if track:
-            rgb = parse_rgb(track)
+            rgb = parse_rgb(track["ring"])
+            panel = parse_rgb(track["bg"])
             r_ink = contrast(rgb, INK)
-            r_panel = contrast(rgb, SURFACE_DARK)
-            check(r_ink >= 3.0,
-                  f"today @ {vp_name}: dial track {track} is {r_ink:.2f}:1 on ink, {r_panel:.2f}:1 on the panel (want >= 3:1 on ink)")
+            r_panel = contrast(rgb, panel)
+            check(r_ink >= 3.0 and r_panel >= 3.0,
+                  f"today @ {vp_name}: dial ring {track['ring']} is {r_ink:.2f}:1 on ink, {r_panel:.2f}:1 on its panel {track['bg']} (want >= 3:1 on both)")
         ctx.close()
 
 

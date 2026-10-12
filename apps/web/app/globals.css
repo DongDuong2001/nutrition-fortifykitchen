@@ -43,8 +43,8 @@
   --color-on-dark: #FFFFFF;
   /* Text on accent fills: cobalt/blue and destructive buttons, badges and selected chips. */
   --color-on-accent: #FFFFFF;
-  /* Calorie dial background ring. 3.14:1 on ink #111317 (WCAG 1.4.11 needs 3:1), 2.88:1 on the surface-dark inset panel (see OPEN_QUESTIONS cc2-05). */
-  --color-track-on-dark: #60646E;
+  /* Calorie dial background ring. 3.44:1 on ink #111317 and 3.15:1 on the surface-dark inset panel #1A1C22 (WCAG 1.4.11 needs 3:1). */
+  --color-track-on-dark: #666A75;
   --color-grabber: #D5D8DF;
   --color-scrim: rgba(17, 19, 23, 0.5);
   --color-surface-dark: #1A1C22;
