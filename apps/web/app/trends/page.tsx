@@ -3,6 +3,8 @@
 import React, { useState, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { AppHeader } from "@/components/ui/app-header";
+import { AppShell } from "@/components/ui/app-shell";
+import { useBack } from "@/hooks/use-back";
 import { ChipGroup } from "@/components/ui/chip-group";
 import { KcalChart } from "@/components/trends/kcal-chart";
 import { NutrientTrendList } from "@/components/trends/nutrient-trend-list";
@@ -36,6 +38,7 @@ function TrendsContent() {
   const isEmptyParam = searchParams.get("empty") === "1";
   const [range, setRange] = useState<"7d" | "30d">("7d");
   const { todayIso, targets } = useDiary();
+  const goBack = useBack();
   const trendTargets = useMemo(() => trendTargetsFrom(targets), [targets]);
 
   // The window ends on today. todayIso is set after mount, so this runs on the client only.
@@ -96,14 +99,12 @@ function TrendsContent() {
   if (!todayIso) return <TrendsLoading />;
 
   return (
-    <div className="w-full min-h-screen bg-page text-text flex flex-col justify-between">
-      <div className="flex flex-col">
+    <AppShell>
         <AppHeader
           variant="sub"
           title="XU HƯỚNG"
           subtitle={subtitle}
-          backHref="/micros"
-          backLabel="Quay lại"
+          onBack={goBack}
           alignGroup="trends-header"
         />
 
@@ -158,8 +159,7 @@ function TrendsContent() {
             </>
           )}
         </main>
-      </div>
-    </div>
+    </AppShell>
   );
 }
 

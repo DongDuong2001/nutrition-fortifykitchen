@@ -8,7 +8,8 @@ if (!target) {
 }
 
 const resolved = resolve(process.cwd(), target);
-const rel = relative(process.cwd(), resolved);
+// Forward slashes, so the check below also holds on Windows
+const rel = relative(process.cwd(), resolved).split("\\").join("/");
 
 if (!rel.startsWith("tests/probes/") || !rel.endsWith(".py")) {
   console.error(`Invalid probe file: ${target}. Probe scripts must be located in tests/probes/ and end with .py`);

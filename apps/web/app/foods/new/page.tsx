@@ -8,9 +8,12 @@ import { getMealSlotNameVi } from "@/lib/meal-slot";
 import { useMealSlot } from "@/lib/use-meal-slot";
 import { FormRow } from "@/components/ui/form-row";
 import { AppHeader } from "@/components/ui/app-header";
+import { AppShell } from "@/components/ui/app-shell";
+import { useBack } from "@/hooks/use-back";
 
 function CreateFoodInner() {
   const router = useRouter();
+  const goBack = useBack();
   const searchParams = useSearchParams();
   const { addFoodEntry } = useDiary();
 
@@ -109,22 +112,33 @@ function CreateFoodInner() {
 
       // Add to diary and redirect
       await addFoodEntry(createdFood, parsedSize, mealSlot, `${parsedSize} ${servingUnit}`);
-      router.push("/today");
+      router.push("/diary");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-page text-text font-sans flex flex-col">
+    <AppShell
+      cta={
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={isSubmitting || mealSlot === null}
+          className="w-full min-h-[52px] rounded-full bg-blue text-on-accent font-bold text-base cursor-pointer hover:bg-blue/90 active:scale-[0.98] transition-all border-0 flex items-center justify-center shadow-md disabled:opacity-50"
+        >
+          Lưu và thêm vào {mealNameVi}
+        </button>
+      }
+    >
       <AppHeader
         variant="sub"
         title="TẠO MÓN MỚI"
-        backHref={`/add${mealSlot ? `?meal=${mealSlot}` : ""}`}
+        onBack={goBack}
       />
 
       {/* Form Content */}
-      <form onSubmit={handleSubmit} className="flex-1 w-full max-w-[560px] mx-auto p-4 flex flex-col gap-4 pb-28">
+      <form onSubmit={handleSubmit} className="flex-1 w-full max-w-[560px] mx-auto p-4 flex flex-col gap-4">
         {/* Name Field */}
         <FormRow
           label="Tên món"
@@ -344,21 +358,7 @@ function CreateFoodInner() {
           )}
         </div>
       </form>
-
-      {/* Sticky Bottom CTA */}
-      <div className="fixed bottom-0 inset-x-0 bg-page/95 backdrop-blur-sm border-t border-card-border p-3 z-30">
-        <div className="w-full max-w-[560px] mx-auto">
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={isSubmitting || mealSlot === null}
-            className="w-full min-h-[52px] rounded-full bg-blue text-on-accent font-bold text-base cursor-pointer hover:bg-blue/90 active:scale-[0.98] transition-all border-0 flex items-center justify-center shadow-md disabled:opacity-50"
-          >
-            Lưu và thêm vào {mealNameVi}
-          </button>
-        </div>
-      </div>
-    </div>
+    </AppShell>
   );
 }
 

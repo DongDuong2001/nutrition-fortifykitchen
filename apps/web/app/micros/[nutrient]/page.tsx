@@ -3,6 +3,8 @@
 import React, { use, useMemo } from "react";
 import Link from "next/link";
 import { AppHeader } from "@/components/ui/app-header";
+import { AppShell } from "@/components/ui/app-shell";
+import { useBack } from "@/hooks/use-back";
 import { Card } from "@/components/ui/card";
 import { SegmentedBar } from "@/components/ui/segmented-bar";
 import { ContributingFoods } from "@/components/nutrient-detail/contributing-foods";
@@ -34,6 +36,7 @@ export default function NutrientDetailPage({ params }: PageProps) {
   const { nutrient } = use(params);
   const def = getNutrientDefinition(nutrient);
   const { data, hydrated, todayIso, profile, targets, nutrientSources } = useDiary();
+  const goBack = useBack();
 
   // Today's row. Null until the diary is read after mount, so the server and first client render agree.
   const row = useMemo(() => (def && hydrated ? nutrientOnDay(data, def) : undefined), [def, hydrated, data]);
@@ -89,13 +92,13 @@ export default function NutrientDetailPage({ params }: PageProps) {
   const amountText = amountLabel(row.consumed, def.unit);
 
   return (
-    <div className="w-full min-h-screen bg-page text-text font-sans flex flex-col">
+    <AppShell>
       <AppHeader
         variant="sub"
         title={def.nameVi}
         subtitle="Vi chất · Hôm nay"
-        backHref="/micros"
-        backLabel="Quay lại Vi chất"
+        onBack={goBack}
+        backLabel="Quay lại"
         summary={
           <div className="flex flex-col gap-3">
             <div data-align-group="nutrient-header" className="flex items-end justify-between gap-3">
@@ -139,6 +142,6 @@ export default function NutrientDetailPage({ params }: PageProps) {
           <ContributingFoods sources={sources} unit={def.unit} />
         </Card>
       </main>
-    </div>
+    </AppShell>
   );
 }

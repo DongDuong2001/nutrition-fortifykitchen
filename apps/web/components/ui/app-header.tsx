@@ -98,6 +98,28 @@ export function AppHeader({
     canGoNext === false ||
     (canGoNext === undefined && resolvedDateLabel.startsWith("Hôm nay"));
 
+  // Desktop headers (tab and daily): a back row above the title for pushed screens. It sits above, not beside,
+  // the title, so the title keeps the left edge of the cards under it.
+  const desktopBackClass =
+    "-ml-1 mb-1 inline-flex min-h-[44px] items-center gap-1 rounded-lg bg-transparent border-0 pr-3 text-sm font-semibold text-secondary no-underline cursor-pointer hover:text-text transition-colors active:scale-[0.97]";
+  const desktopBackContent = (
+    <>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+        <path d="M15 5l-7 7 7 7" />
+      </svg>
+      {backLabel}
+    </>
+  );
+  const desktopBack = backHref ? (
+    <Link href={backHref} className={desktopBackClass}>
+      {desktopBackContent}
+    </Link>
+  ) : onBack ? (
+    <button type="button" onClick={onBack} className={desktopBackClass}>
+      {desktopBackContent}
+    </button>
+  ) : null;
+
   // =========================================================================
   // 1. "sub" VARIANT (Detail screens, setup steps)
   // =========================================================================
@@ -177,6 +199,7 @@ export function AppHeader({
           )}
 
           {summary}
+          {footer}
         </div>
       </header>
     );
@@ -230,6 +253,7 @@ export function AppHeader({
           className={`hidden lg:flex flex-wrap items-center justify-between gap-3 w-full max-w-[1240px] select-none ${className}`}
         >
           <div>
+            {desktopBack}
             <h1
               data-align-group={alignGroup}
               data-align-edge="left"
@@ -361,6 +385,7 @@ export function AppHeader({
         className={`hidden lg:flex flex-wrap items-center gap-3 w-full max-w-[1240px] select-none ${className}`}
       >
         <div className="flex-1 min-w-[260px]">
+          {desktopBack}
           <h1
             data-align-group={alignGroup}
             data-align-edge="left"

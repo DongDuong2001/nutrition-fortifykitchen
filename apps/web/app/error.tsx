@@ -52,7 +52,7 @@ export default function ErrorPage({ error, reset }: ErrorProps) {
             Thử lại
           </PillButton>
           <Link
-            href="/today"
+            href="/"
             className="h-[52px] rounded-full bg-card border border-card-border text-text font-semibold text-base flex items-center justify-center no-underline cursor-pointer active:scale-[0.97] transition-all hover:bg-black/[0.02]"
           >
             Về Hôm nay

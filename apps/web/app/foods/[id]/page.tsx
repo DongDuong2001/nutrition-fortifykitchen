@@ -15,10 +15,14 @@ import { ChipGroup } from "@/components/ui/chip-group";
 import { StatGroup } from "@/components/ui/stat-group";
 import { Toast } from "@/components/ui/toast";
 import { AppHeader } from "@/components/ui/app-header";
+import { AppShell } from "@/components/ui/app-shell";
+import { useBack } from "@/hooks/use-back";
 
 function FoodDetailInner() {
   const params = useParams();
   const router = useRouter();
+  // Back goes to where the food was opened from (Khám phá or the add sheet), else to Khám phá
+  const goBack = useBack();
   const searchParams = useSearchParams();
   const { addFoodEntry, isFavourite, toggleFavourite, targets: dailyTargets } = useDiary();
 
@@ -111,7 +115,7 @@ function FoodDetailInner() {
     setIsSubmitting(true);
     try {
       await addFoodEntry(food, parsedGrams, mealSlot, selectedServingLabel);
-      router.push("/today");
+      router.push("/diary");
     } finally {
       setIsSubmitting(false);
     }
@@ -129,12 +133,23 @@ function FoodDetailInner() {
   }
 
   return (
-    <div className="min-h-screen bg-page text-text font-sans flex flex-col">
+    <AppShell
+      cta={
+        <button
+          type="button"
+          onClick={handleAdd}
+          disabled={isSubmitting || parsedGrams <= 0 || mealSlot === null}
+          className="w-full min-h-[52px] rounded-full bg-blue text-on-accent font-bold text-base cursor-pointer hover:bg-blue/90 active:scale-[0.98] transition-all border-0 flex items-center justify-center shadow-md disabled:opacity-50"
+        >
+          Thêm vào {mealSlot ? mealNameVi : "—"}
+        </button>
+      }
+    >
       <AppHeader
         variant="sub"
         title={food.nameVi}
         subtitle={`${food.brand ? `${food.brand} · ` : ""}${food.source}`}
-        backHref={`/add${mealSlot ? `?meal=${mealSlot}` : ""}`}
+        onBack={goBack}
         alignGroup="food-header"
         actions={
           <button
@@ -161,7 +176,7 @@ function FoodDetailInner() {
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 w-full max-w-[560px] mx-auto p-4 flex flex-col gap-3.5 pb-24">
+      <main className="flex-1 w-full max-w-[560px] mx-auto p-4 flex flex-col gap-3.5">
         {/* Serving and Gram Selection */}
         <div data-align-group="food-detail" className="flex w-full flex-col gap-2">
           <span className="text-[13px] font-semibold text-secondary">Khẩu phần</span>
@@ -259,25 +274,11 @@ function FoodDetailInner() {
 
       {/* Favourite toast, just above the sticky CTA */}
       {favouriteToast && (
-        <div className="fixed bottom-24 inset-x-0 px-4 z-40 pointer-events-none">
+        <div className="fixed bottom-[168px] lg:bottom-24 inset-x-0 px-4 z-40 pointer-events-none">
           <Toast message={favouriteToast.message} />
         </div>
       )}
-
-      {/* Sticky Bottom CTA */}
-      <div className="fixed bottom-0 inset-x-0 bg-page/95 backdrop-blur-sm border-t border-card-border p-3 z-30">
-        <div className="w-full max-w-[560px] mx-auto">
-          <button
-            type="button"
-            onClick={handleAdd}
-            disabled={isSubmitting || parsedGrams <= 0 || mealSlot === null}
-            className="w-full min-h-[52px] rounded-full bg-blue text-on-accent font-bold text-base cursor-pointer hover:bg-blue/90 active:scale-[0.98] transition-all border-0 flex items-center justify-center shadow-md disabled:opacity-50"
-          >
-            Thêm vào {mealSlot ? mealNameVi : "—"}
-          </button>
-        </div>
-      </div>
-    </div>
+    </AppShell>
   );
 }
 

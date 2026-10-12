@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { AppHeader } from "@/components/ui/app-header";
 import { Card } from "@/components/ui/card";
-import { DesktopSidebar } from "@/components/ui/desktop-sidebar";
+import { AppShell } from "@/components/ui/app-shell";
 import { FormRow } from "@/components/ui/form-row";
 import { PillButton } from "@/components/ui/pill-button";
 import { useDiary } from "@/lib/diary-store";
@@ -52,7 +52,7 @@ export default function WeightPage() {
     setError(message);
     if (message || weight === null) return;
     updateProfile({ weightKg: weight });
-    router.push("/profile");
+    router.push("/settings/profile");
   }
 
   const form = (
@@ -116,18 +116,14 @@ export default function WeightPage() {
   );
 
   return (
-    <div data-align-container="weight-page" className="flex min-h-dvh flex-col bg-page text-text lg:flex-row">
-      <DesktopSidebar currentTab="profile" />
-
-      <div className="flex min-w-0 flex-1 flex-col">
-        <AppHeader variant="sub" title="CÂN NẶNG" backHref="/profile" className="lg:hidden" alignGroup="weight-header" />
+    <AppShell alignContainer="weight-page">
+        <AppHeader variant="sub" title="CÂN NẶNG" backHref="/settings/profile" className="lg:hidden" alignGroup="weight-header" />
         <h1 className="m-0 hidden px-8 pt-7 font-display text-[34px] font-black italic uppercase lg:block">Cân nặng</h1>
 
         <main className="mx-auto w-full max-w-[560px] px-4 pb-8 pt-4 lg:mx-0 lg:px-8">
           <div data-align-group="weight-header">{form}</div>
         </main>
-      </div>
-    </div>
+    </AppShell>
   );
 }
 

@@ -24,7 +24,7 @@ def run_probe(path, env):
     started = time.time()
     try:
         res = subprocess.run(
-            [sys.executable, str(path)], env=env, capture_output=True, text=True, timeout=TIMEOUT_S
+            [sys.executable, str(path)], env=env, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=TIMEOUT_S
         )
     except subprocess.TimeoutExpired:
         return "FAIL", f"timed out after {TIMEOUT_S} s", ""

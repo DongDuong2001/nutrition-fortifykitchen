@@ -123,7 +123,7 @@ def check_nav(browser):
     link.click()
     pg.wait_for_url(re.compile(r".*/trends$"), timeout=8000)
     check(pg.url.endswith("/trends"), "nav: Xu hướng opens /trends")
-    pg.locator('a[href="/micros"] >> visible=true').first.click()
+    pg.locator('[aria-label="Quay lại"]:visible').first.click()
     pg.wait_for_url(re.compile(r".*/micros$"), timeout=8000)
     check(pg.url.endswith("/micros"), "nav: back returns to /micros")
     context.close()

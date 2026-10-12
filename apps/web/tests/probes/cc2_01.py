@@ -1,6 +1,6 @@
 """cc2-01: nutrient detail, date labels without a comma, and the removed /foods catalog.
 The Vi chất row for Canxi opens /micros/calcium. The detail shows 331 / 1.200–1.500 mg and 28 %. An unknown
-amount shows "—", never "0" (alcohol on the sample day). /foods redirects to /add. The date label has no comma.
+amount shows "—", never "0" (alcohol on the sample day). /foods redirects to /explore. The date label has no comma.
 Screenshots at 390 and 1440 go to apps/web/.screenshots/cc2-01-*.png.
 Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/cc2_01.py
 """
@@ -76,12 +76,12 @@ def probe_null_dash(pg):
 
 def probe_foods_redirect(pg):
     response = pg.goto(BASE + "/foods", wait_until="networkidle")
-    check(pg.url.rstrip("/").endswith("/add"), f"/foods redirects to /add (landed on {pg.url})")
+    check(pg.url.rstrip("/").endswith("/explore"), f"/foods redirects to /explore (landed on {pg.url})")
     check(response is not None and response.status < 400, "/foods does not return an error")
 
 
 def probe_date_label(pg):
-    pg.goto(BASE + "/today", wait_until="networkidle")
+    pg.goto(BASE + "/diary", wait_until="networkidle")
     pg.wait_for_timeout(400)
     body = pg.inner_text("body")
     expected = f"Hôm nay {TODAY.day:02d}/{TODAY.month:02d}"

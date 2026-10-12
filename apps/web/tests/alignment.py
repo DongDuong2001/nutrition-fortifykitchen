@@ -21,9 +21,9 @@ ONBOARDING_CHECKS = [
     ("/setup/profile", "desktop (1440px)", "setup-row", "tb"),
     ("/add?meal=snack", "mobile (390px)", "add-list", "lr"),
     ("/add?meal=snack", "desktop (1440px)", "add-list", "lr"),
-    ("/today", "mobile (390px)", "today-header", "lr"),
+    ("/diary", "mobile (390px)", "today-header", "lr"),
     ("/micros", "mobile (390px)", "micros-header", "lr"),
-    ("/today", "desktop (1440px)", "today-header", "lr"),
+    ("/diary", "desktop (1440px)", "today-header", "lr"),
     ("/micros", "desktop (1440px)", "micros-header", "lr"),
     ("/trends", "mobile (390px)", "trends-rows", "lr"),
     ("/trends", "desktop (1440px)", "trends-rows", "lr"),
@@ -33,21 +33,23 @@ ONBOARDING_CHECKS = [
     ("/micros/calcium", "desktop (1440px)", "nutrient-card", "lr"),
     ("/entry/item-1", "mobile (390px)", "entry", "lr"),
     ("/entry/item-1", "desktop (1440px)", "entry", "lr"),
+    ("/explore", "mobile (390px)", "add-list", "lr"),
+    ("/explore", "desktop (1440px)", "add-list", "lr"),
     ("/foods/food-cha-la", "mobile (390px)", "food-header", "lr"),
     ("/foods/food-cha-la", "desktop (1440px)", "food-header", "lr"),
     ("/entry/item-1", "mobile (390px)", "entry-header", "lr"),
     ("/entry/item-1", "desktop (1440px)", "entry-header", "lr"),
-    ("/profile", "mobile (390px)", "profile-header", "lr"),
-    ("/profile", "mobile (390px)", "profile-row", "lr"),
-    ("/profile", "desktop (1440px)", "profile-row", "lr"),
-    ("/profile/weight", "mobile (390px)", "weight-header", "lr"),
-    ("/profile/weight", "mobile (390px)", "weight-row", "lr"),
-    ("/profile/weight", "desktop (1440px)", "weight-row", "lr"),
+    ("/settings/profile", "mobile (390px)", "profile-header", "lr"),
+    ("/settings/profile", "mobile (390px)", "profile-row", "lr"),
+    ("/settings/profile", "desktop (1440px)", "profile-row", "lr"),
+    ("/settings/profile/weight", "mobile (390px)", "weight-header", "lr"),
+    ("/settings/profile/weight", "mobile (390px)", "weight-row", "lr"),
+    ("/settings/profile/weight", "desktop (1440px)", "weight-row", "lr"),
     # Past day (read-only): same header and meal rows as today, with no add links
-    (f"/today?date={YESTERDAY}", "mobile (390px)", "today-header", "lr"),
-    (f"/today?date={YESTERDAY}", "mobile (390px)", "meal-card", "lr"),
-    (f"/today?date={YESTERDAY}", "desktop (1440px)", "today-header", "lr"),
-    (f"/today?date={YESTERDAY}", "desktop (1440px)", "desktop-meal", "lr"),
+    (f"/diary?date={YESTERDAY}", "mobile (390px)", "today-header", "lr"),
+    (f"/diary?date={YESTERDAY}", "mobile (390px)", "meal-card", "lr"),
+    (f"/diary?date={YESTERDAY}", "desktop (1440px)", "today-header", "lr"),
+    (f"/diary?date={YESTERDAY}", "desktop (1440px)", "desktop-meal", "lr"),
 ]
 
 def check_align_groups(page, group_name=None, edges="lr"):
@@ -160,15 +162,15 @@ def main():
         for vp in VIEWPORTS:
             page.set_viewport_size({"width": vp["width"], "height": vp["height"]})
 
-            # /today
-            page.goto(f"{BASE_URL}/today", wait_until="networkidle")
+            # /diary
+            page.goto(f"{BASE_URL}/diary", wait_until="networkidle")
             page.wait_for_timeout(500)
             res = check_align_groups(page)
             if res["errors"]:
-                print(f"[FAIL] /today @ {vp['name']}: {res['errors']}")
+                print(f"[FAIL] /diary @ {vp['name']}: {res['errors']}")
                 total_errors.extend(res["errors"])
             else:
-                print(f"[PASS] /today @ {vp['name']} (checked groups: {res['checkedGroups']})")
+                print(f"[PASS] /diary @ {vp['name']} (checked groups: {res['checkedGroups']})")
 
             # /micros
             page.goto(f"{BASE_URL}/micros", wait_until="networkidle")

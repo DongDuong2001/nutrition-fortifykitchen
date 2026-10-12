@@ -53,9 +53,9 @@ def run():
         # 1. Back buttons: one AppHeader back control per screen, and each goes to the right place
         ctx = browser.new_context(viewport=PHONE)
         pg = ctx.new_page()
-        go_back_and_check(pg, "/foods/food-cha-la?meal=snack", "/add?meal=snack", "food detail")
-        go_back_and_check(pg, "/foods/new?meal=snack", "/add?meal=snack", "new food")
-        go_back_and_check(pg, "/entry/item-1", "/today", "entry")
+        go_back_and_check(pg, "/foods/food-cha-la?meal=snack", "/explore", "food detail")  # direct link: no in-app history, so the owning tab
+        go_back_and_check(pg, "/foods/new?meal=snack", "/explore", "new food")
+        go_back_and_check(pg, "/entry/item-1", "/diary", "entry")
         go_back_and_check(pg, "/setup/profile", "/signin/check-email", "setup profile")
         go_back_and_check(pg, "/setup/goal", "/setup/profile", "setup goal")
 

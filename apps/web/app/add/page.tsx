@@ -5,18 +5,15 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useDiary } from "@/lib/diary-store";
 import { usePastDayRedirect } from "@/hooks/use-past-day-redirect";
+import { useBack } from "@/hooks/use-back";
 import { MOCK_FOODS, type FoodItem, type FoodServing } from "@/lib/mock/foods";
-import { findSimilarFoods } from "@/lib/search";
-import {
-  buildFoodList,
-  categoriesWithFoods,
-  categoryLabel,
-  categoryOf,
-  type FoodFilter,
-} from "@/lib/food-categories";
+import { useFoodBrowse } from "@/hooks/use-food-browse";
 import { resolveRecent, type ResolvedRecent } from "@/lib/recent-foods";
 import { ChipRow } from "@/components/foods/chip-row";
 import { FoodList } from "@/components/foods/food-list";
+import { FoodEmptyState } from "@/components/foods/food-empty-state";
+import { FoodSearchField } from "@/components/foods/food-search-field";
+import { foodMeta } from "@/lib/food-meta";
 
 import {
   parseMealSlot,
@@ -25,26 +22,25 @@ import {
   type MealSlot,
   MEAL_SLOTS,
 } from "@/lib/meal-slot";
-import { parseGramsInput, calculateMacroPreview, scaleNutrients } from "@/lib/portion";
+import { parseGramsInput } from "@/lib/portion";
 import { MealSwitcher } from "@/components/meal-switcher";
-import { formatAmount } from "@/lib/format";
 import { PortionPanel } from "@/components/ui/portion-panel";
-import TodayContent from "../today/page";
+import { TodayScreen } from "@/components/today/today-screen";
 
 import { useMealSlot } from "@/lib/use-meal-slot";
 
 function AddFoodInner() {
   const router = useRouter();
+  // Closing the sheet returns to the tab it was opened from (the diary when there is no history)
+  const goBack = useBack();
   const searchParams = useSearchParams();
-  const { data, addFoodEntry, recentFoods, favouriteIds, isFavourite } = useDiary();
+  const { data, addFoodEntry, recentFoods } = useDiary();
 
   const resolvedSlot = useMealSlot(searchParams.get("meal"));
   const [overrideSlot, setOverrideSlot] = useState<MealSlot | null>(null);
   const mealSlot = overrideSlot ?? resolvedSlot;
 
   const [switcherOpen, setSwitcherOpen] = useState(false);
-  const [filter, setFilter] = useState<FoodFilter>("all");
-  const [query, setQuery] = useState("");
   const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
 
   const [gramsInput, setGramsInput] = useState("");
@@ -98,24 +94,9 @@ function AddFoodInner() {
     return cals;
   }, [data]);
 
-  // Filter and search combined. Grouped only for Tất cả with no query.
-  const list = useMemo(() => buildFoodList(MOCK_FOODS, query, filter, favouriteIds), [query, filter, favouriteIds]);
-  const searchResults = list.foods;
-  const categories = useMemo(() => categoriesWithFoods(MOCK_FOODS), []);
-  const categoryName = useCallback((food: FoodItem) => categoryLabel(categoryOf(food)), []);
-  const isFavouriteFood = useCallback((food: FoodItem) => isFavourite(food.id), [isFavourite]);
-
-  // Filter row: Tất cả, Yêu thích, then only the categories that have foods
-  const filterItems = [
-    { id: "all", label: "Tất cả", active: filter === "all", onClick: () => setFilter("all") },
-    { id: "favorite", label: "Yêu thích", active: filter === "favorite", onClick: () => setFilter("favorite") },
-    ...categories.map((c) => ({
-      id: c.key,
-      label: c.label,
-      active: filter === c.key,
-      onClick: () => setFilter(c.key),
-    })),
-  ];
+  // Search, filter and list: the same state as Khám phá
+  const { query, setQuery, filter, setFilter, list, filterItems, categoryName, isFavouriteFood, similarFoods, noFavourites } =
+    useFoodBrowse();
 
   // Recents are foods with the serving they were logged with. Tapping one picks it.
   const recentItems = useMemo(
@@ -131,13 +112,6 @@ function AddFoodInner() {
     [recentFoods, pickFood]
   );
 
-  // Fuzzy suggestions when results are empty
-  const similarFoods = useMemo(() => {
-    if (searchResults.length === 0 && query.trim()) {
-      return findSimilarFoods(MOCK_FOODS, query, 4);
-    }
-    return [];
-  }, [searchResults, query]);
 
   // Active grams number
   const parsedGrams = useMemo(() => {
@@ -150,7 +124,7 @@ function AddFoodInner() {
     setIsSubmitting(true);
     try {
       await addFoodEntry(selectedFood, parsedGrams, mealSlot, selectedServingLabel);
-      router.push("/today");
+      router.push("/diary");
     } finally {
       setIsSubmitting(false);
     }
@@ -164,8 +138,8 @@ function AddFoodInner() {
       sessionStorage.removeItem("last_add_opener_id");
       sessionStorage.setItem("return_focus_id", openerId);
     }
-    router.push("/today");
-  }, [mealSlot, router]);
+    goBack();
+  }, [mealSlot, goBack]);
 
   // Keyboard navigation on desktop: Enter adds, Esc closes
   useEffect(() => {
@@ -186,78 +160,23 @@ function AddFoodInner() {
 
   const mealNameVi = mealSlot ? getMealSlotNameVi(mealSlot) : "—";
 
-  // Meta string for food in search list
-  const getFoodMeta = (food: FoodItem) => {
-    const defaultServing = food.servings[0] || { label: "100 g", grams: 100 };
-    const scaled = scaleNutrients(food.nutrients, defaultServing.grams);
-    const cals = Math.round(scaled.energy ?? 0);
-    const carbs = Math.round((scaled.carbs ?? 0) * 10) / 10;
-    const kali = scaled.potassium ? Math.round(scaled.potassium) : null;
-
-    const parts = [`${formatAmount(cals, "kcal")} kcal / ${defaultServing.label}`];
-    if (carbs > 0) parts.push(`${formatAmount(carbs, "g")} g carb`);
-    if (kali) parts.push(`${formatAmount(kali, "mg")} mg kali`);
-    return parts.join(" · ");
-  };
+  // Meta line for a food row in the list
+  const getFoodMeta = foodMeta;
 
   // Shared by the phone sheet and the desktop dialog
   const newFoodHref = mealSlot ? `/foods/new?meal=${mealSlot}` : "/foods/new";
-  const clearFilterButton = (
-    <button
-      type="button"
-      onClick={() => setFilter("all")}
-      className="min-h-[44px] px-5 rounded-full bg-page text-text font-semibold text-sm border-0 cursor-pointer active:scale-[0.97]"
-    >
-      Bỏ lọc
-    </button>
+  const emptyState = (
+    <FoodEmptyState
+      query={query}
+      filter={filter}
+      noFavourites={noFavourites}
+      similarFoods={similarFoods}
+      getMeta={getFoodMeta}
+      onPickSimilar={(food) => pickFood(food)}
+      onClearFilter={() => setFilter("all")}
+      newFoodHref={newFoodHref}
+    />
   );
-
-  // No saved favourite still shows: an id whose food is gone must not show a blank "Không có “”"
-  const noFavourites = filter === "favorite" && !query.trim() && list.foods.length === 0;
-  const favouritesEmptyState = (
-    <div className="flex flex-col items-center text-center py-6 gap-2">
-      <div className="text-base font-bold">Chưa có món yêu thích</div>
-      <div className="text-sm text-secondary">Bấm ♡ ở trang chi tiết món để lưu.</div>
-      {clearFilterButton}
-    </div>
-  );
-
-  const searchEmptyState = (
-    <div className="flex flex-col items-center text-center py-6 gap-2">
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="text-secondary" aria-hidden="true">
-        <circle cx="11" cy="11" r="7" />
-        <path d="M20 20l-3.5-3.5M8 8l6 6M14 8l-6 6" />
-      </svg>
-      <div className="text-base font-bold">Không có “{query}”</div>
-      <div className="text-sm text-secondary">Thử từ ngắn hơn, bỏ dấu, hoặc tự tạo món.</div>
-      {filter !== "all" && clearFilterButton}
-      <Link
-        href={newFoodHref}
-        className="mt-2 min-h-[52px] px-7 rounded-full bg-blue text-on-accent font-bold text-base flex items-center justify-center no-underline active:scale-[0.97]"
-      >
-        + Tạo món mới
-      </Link>
-
-      {/* Fuzzy matches */}
-      {similarFoods.length > 0 && (
-        <div className="w-full text-left mt-4 flex flex-col gap-1">
-          <div className="text-xs font-semibold text-secondary">Gợi ý gần giống:</div>
-          {similarFoods.map((s) => (
-            <button
-              key={s.id}
-              type="button"
-              onClick={() => pickFood(s)}
-              className="text-left py-2.5 px-3 rounded-xl hover:bg-page text-sm font-semibold text-text border-0 bg-card cursor-pointer flex justify-between items-center min-h-[48px]"
-            >
-              <span>{s.nameVi}</span>
-              <span className="text-xs text-secondary font-normal">{getFoodMeta(s)}</span>
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-  const emptyState = noFavourites ? favouritesEmptyState : searchEmptyState;
 
   const createFoodLink = (
     <Link
@@ -277,7 +196,7 @@ function AddFoodInner() {
       <div className="hidden lg:block relative min-h-screen">
         {/* Background Today page (inert while modal is open) */}
         <div aria-hidden="true" className="pointer-events-none select-none opacity-40">
-          <TodayContent />
+          <TodayScreen />
         </div>
 
         {/* Modal Overlay / Scrim */}
@@ -330,35 +249,7 @@ function AddFoodInner() {
             <div className="flex gap-6 items-start">
               {/* Left Pane: Search & Results */}
               <div data-align-container="add-list" className="flex-1 min-w-[340px] flex flex-col gap-3">
-                {/* Search Bar */}
-                <label data-align-group="add-list" data-align-edge="left" className="flex items-center gap-2.5 bg-page border border-card-border rounded-full px-4 min-h-[48px] focus-within:border-blue focus-within:ring-2 focus-within:ring-blue">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="text-secondary shrink-0" aria-hidden="true">
-                    <circle cx="11" cy="11" r="7" />
-                    <path d="M20 20l-3.5-3.5" />
-                  </svg>
-                  <span className="sr-only">Tìm món</span>
-                  <input
-                    ref={desktopSearchInputRef}
-                    type="search"
-                    aria-label="Tìm món"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Tìm món: cơm, trứng, chà là…"
-                    className="flex-1 bg-transparent border-0 outline-none focus-visible:ring-2 focus-visible:ring-blue rounded-md text-text text-base min-h-[44px] [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
-                  />
-                  {query && (
-                    <button
-                      type="button"
-                      aria-label="Xoá tìm kiếm"
-                      onClick={() => setQuery("")}
-                      className="w-11 h-11 -mr-2 rounded-full flex items-center justify-center text-secondary hover:text-text cursor-pointer border-0 bg-transparent shrink-0"
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M18 6L6 18M6 6l12 12" />
-                      </svg>
-                    </button>
-                  )}
-                </label>
+                <FoodSearchField value={query} onChange={setQuery} inputRef={desktopSearchInputRef} />
 
                 {/* Filter row: Tất cả, Yêu thích, then categories with foods */}
                 <ChipRow items={filterItems} ariaLabel="Lọc món theo nhóm" data-align-group="add-list" data-align-edge="left" />
@@ -460,46 +351,19 @@ function AddFoodInner() {
               </div>
             </div>
 
-            <Link
-              href="/today"
+            <button
+              type="button"
               onClick={handleClose}
               aria-label="Đóng"
-              className="w-11 h-11 rounded-full bg-page text-text flex items-center justify-center no-underline active:scale-[0.97]"
+              className="w-11 h-11 rounded-full bg-page text-text flex items-center justify-center border-0 cursor-pointer active:scale-[0.97]"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                 <path d="M6 6l12 12M18 6L6 18" />
               </svg>
-            </Link>
+            </button>
           </div>
 
-          {/* Search Input (min 48px, visible label) */}
-          <label data-align-group="add-list" data-align-edge="left" className="flex items-center gap-2.5 bg-page border border-card-border rounded-full px-4 min-h-[48px] shrink-0 focus-within:border-blue focus-within:ring-2 focus-within:ring-blue">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="text-secondary shrink-0" aria-hidden="true">
-              <circle cx="11" cy="11" r="7" />
-              <path d="M20 20l-3.5-3.5" />
-            </svg>
-            <span className="sr-only">Tìm món</span>
-            <input
-              type="search"
-              aria-label="Tìm món"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Tìm món: cơm, trứng, chà là…"
-              className="flex-1 bg-transparent border-0 outline-none focus-visible:ring-2 focus-visible:ring-blue rounded-md text-text text-base min-h-[44px] [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
-            />
-            {query && (
-              <button
-                type="button"
-                aria-label="Xoá tìm kiếm"
-                onClick={() => setQuery("")}
-                className="w-11 h-11 -mr-2 rounded-full flex items-center justify-center text-secondary hover:text-text cursor-pointer border-0 bg-transparent shrink-0"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M18 6L6 18M6 6l12 12" />
-                </svg>
-              </button>
-            )}
-          </label>
+          <FoodSearchField value={query} onChange={setQuery} className="shrink-0" />
 
           {/* Filter row: Tất cả, Yêu thích, then categories with foods */}
           <ChipRow items={filterItems} ariaLabel="Lọc món theo nhóm" data-align-group="add-list" data-align-edge="left" />

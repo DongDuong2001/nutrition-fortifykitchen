@@ -32,7 +32,7 @@ def visible(pg, selector):
 
 
 def set_weight(pg, value):
-    pg.goto(BASE + "/profile/weight", wait_until="networkidle")
+    pg.goto(BASE + "/settings/profile/weight", wait_until="networkidle")
     pg.wait_for_selector("#weight-input", state="visible")
     pg.wait_for_timeout(300)
     pg.locator("#weight-input").fill(value)
@@ -44,8 +44,8 @@ def run_phone(browser):
     pg = ctx.new_page()
 
     # 1. profile page: rows as in the design, targets from the sample user
-    pg.goto(BASE + "/profile", wait_until="networkidle")
-    visible(pg, 'a[href="/profile/weight"]').wait_for(state="visible")
+    pg.goto(BASE + "/settings/profile", wait_until="networkidle")
+    visible(pg, 'a[href="/settings/profile/weight"]').wait_for(state="visible")
     pg.wait_for_timeout(300)
     pg.screenshot(path=os.path.join(SHOTS, "cc08-profile-390.png"), animations="disabled")
     check("1.950–2.275 kcal" in body(pg), "390 profile: sample targets show 1.950–2.275 kcal")
@@ -54,8 +54,8 @@ def run_phone(browser):
     check(pg.get_by_role("switch", name="Gần/đang trong kỳ").count() == 0, "390 profile: period switch hidden for Nam")
 
     # 2. weight page: opens from the row, shows the saved weight with one decimal
-    visible(pg, 'a[href="/profile/weight"]').click()
-    pg.wait_for_url("**/profile/weight")
+    visible(pg, 'a[href="/settings/profile/weight"]').click()
+    pg.wait_for_url("**/settings/profile/weight")
     pg.wait_for_selector("#weight-input", state="visible")
     pg.wait_for_timeout(300)
     check(pg.locator("#weight-input").input_value() == "65", "390 weight: input shows 65")
@@ -65,17 +65,17 @@ def run_phone(browser):
     set_weight(pg, "29")
     pg.wait_for_timeout(300)
     check(WEIGHT_ERROR in body(pg), "390 weight: invalid weight shows the setup error text")
-    check("/profile/weight" in pg.url, "390 weight: stays on the weight page after an invalid value")
+    check("/settings/profile/weight" in pg.url, "390 weight: stays on the weight page after an invalid value")
 
     # 4. 65 -> 70 kg: Today kcal and Micros potassium follow
     pg.locator("#weight-input").fill("70")
     pg.get_by_role("button", name="Lưu").click()
-    pg.wait_for_url("**/profile")
+    pg.wait_for_url("**/settings/profile")
     pg.wait_for_timeout(400)
     check("70 kg" in body(pg), "390 profile: weight row shows 70 kg after save")
     check("2.100–2.450 kcal" in body(pg), "390 profile: kcal target moves to 2.100–2.450")
 
-    pg.goto(BASE + "/today", wait_until="networkidle")
+    pg.goto(BASE + "/diary", wait_until="networkidle")
     pg.wait_for_timeout(600)
     check("2.100–2.450" in body(pg), "390 today: kcal target reads 2.100–2.450")
 
@@ -84,8 +84,8 @@ def run_phone(browser):
     check("5.600–7.000 mg" in body(pg), "390 micros: potassium target reads 5.600–7.000 mg")
 
     # 5. woman in the period: iron target 28 mg on Micros
-    pg.goto(BASE + "/profile", wait_until="networkidle")
-    visible(pg, 'a[href="/profile/weight"]').wait_for(state="visible")
+    pg.goto(BASE + "/settings/profile", wait_until="networkidle")
+    visible(pg, 'a[href="/settings/profile/weight"]').wait_for(state="visible")
     pg.locator('[aria-labelledby="profile-sex-label"] button:has-text("Nữ") >> visible=true').first.click()
     pg.wait_for_timeout(200)
     switch = pg.get_by_role("switch", name="Gần/đang trong kỳ")
@@ -104,8 +104,8 @@ def run_phone(browser):
     pg.wait_for_timeout(600)
     check("/ 28 mg" in body(pg), "390 micros: iron 28 mg kept after reload")
     check("5.600–7.000 mg" in body(pg), "390 micros: potassium kept after reload")
-    pg.goto(BASE + "/profile", wait_until="networkidle")
-    visible(pg, 'a[href="/profile/weight"]').wait_for(state="visible")
+    pg.goto(BASE + "/settings/profile", wait_until="networkidle")
+    visible(pg, 'a[href="/settings/profile/weight"]').wait_for(state="visible")
     pg.wait_for_timeout(300)
     check("70 kg" in body(pg), "390 profile: 70 kg kept after reload")
     female = pg.locator('[aria-labelledby="profile-sex-label"] button:has-text("Nữ") >> visible=true').first
@@ -118,8 +118,8 @@ def run_phone(browser):
 def run_desktop(browser):
     ctx = browser.new_context(viewport=DESKTOP)
     pg = ctx.new_page()
-    pg.goto(BASE + "/profile", wait_until="networkidle")
-    visible(pg, 'a[href="/profile/weight"]').wait_for(state="visible")
+    pg.goto(BASE + "/settings/profile", wait_until="networkidle")
+    visible(pg, 'a[href="/settings/profile/weight"]').wait_for(state="visible")
     pg.wait_for_timeout(300)
     pg.screenshot(path=os.path.join(SHOTS, "cc08-profile-1440.png"), animations="disabled")
     check("mục tiêu mỗi ngày" in body(pg).lower(), "1440 profile: targets card visible")

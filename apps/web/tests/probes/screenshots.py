@@ -12,9 +12,9 @@ def main():
     with sync_playwright() as p:
         browser = p.chromium.launch()
 
-        # 1. today-header-390.png (/today at 390x844, shows "Hôm nay, <today>" + inset panel)
+        # 1. today-header-390.png (/diary at 390x844, shows "Hôm nay, <today>" + inset panel)
         page = browser.new_page(viewport={"width": 390, "height": 844})
-        page.goto(f"{BASE_URL}/today", wait_until="networkidle")
+        page.goto(f"{BASE_URL}/diary", wait_until="networkidle")
         page.wait_for_timeout(600)
         p1 = os.path.join(SCREENSHOT_DIR, "today-header-390.png")
         page.screenshot(path=p1)
@@ -34,9 +34,9 @@ def main():
         page.screenshot(path=p3)
         print(f"[SAVED] {p3}")
 
-        # 4. today-header-1440.png (/today at 1440x900)
+        # 4. today-header-1440.png (/diary at 1440x900)
         page_desk = browser.new_page(viewport={"width": 1440, "height": 900})
-        page_desk.goto(f"{BASE_URL}/today", wait_until="networkidle")
+        page_desk.goto(f"{BASE_URL}/diary", wait_until="networkidle")
         page_desk.wait_for_timeout(600)
         p4 = os.path.join(SCREENSHOT_DIR, "today-header-1440.png")
         page_desk.screenshot(path=p4)

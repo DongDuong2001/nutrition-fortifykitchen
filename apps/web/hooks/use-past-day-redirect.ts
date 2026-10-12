@@ -18,7 +18,7 @@ export function usePastDayRedirect(): boolean {
   const isPast = day !== null && day !== todayIso;
 
   useEffect(() => {
-    if (isPast && day) router.replace(`/today?date=${day}`);
+    if (isPast && day) router.replace(`/diary?date=${day}`);
   }, [isPast, day, router]);
 
   return isPast;

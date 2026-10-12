@@ -32,12 +32,12 @@ export function EntryEditor({ view }: { view: EntryView }) {
   const handleSave = () => {
     if (!canSave) return;
     updateEntry(view.id, canPortion ? { grams, servingLabel, mealSlot } : { mealSlot });
-    router.push("/today");
+    router.push("/diary");
   };
 
   const handleDelete = () => {
     deleteEntry(view.id);
-    router.push("/today");
+    router.push("/diary");
   };
 
   return (
@@ -47,7 +47,7 @@ export function EntryEditor({ view }: { view: EntryView }) {
         variant="sub"
         title={view.name}
         subtitle={getMealSlotNameVi(view.mealSlot)}
-        backHref="/today"
+        backHref="/diary"
         alignGroup="entry-header"
       />
       <div className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-8 pt-4">

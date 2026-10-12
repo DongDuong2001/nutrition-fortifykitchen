@@ -59,7 +59,7 @@ def test_profile_red(browser):
     for vp_name, vp in (("390", PHONE), ("1440", DESKTOP)):
         ctx = browser.new_context(viewport=vp)
         pg = ctx.new_page()
-        pg.goto(BASE + "/profile", wait_until="networkidle")
+        pg.goto(BASE + "/settings/profile", wait_until="networkidle")
         pg.wait_for_timeout(300)
         for label in PROFILE_RED_LABELS:
             color = pg.get_by_text(label, exact=True).first.evaluate("el => getComputedStyle(el).color")
@@ -72,7 +72,7 @@ def test_calorie_dial_track(browser):
     for vp_name, vp in (("390", PHONE), ("1440", DESKTOP)):
         ctx = browser.new_context(viewport=vp)
         pg = ctx.new_page()
-        pg.goto(BASE + "/today", wait_until="networkidle")
+        pg.goto(BASE + "/diary", wait_until="networkidle")
         pg.wait_for_timeout(600)
         track = pg.evaluate("""() => {
             const dial = [...document.querySelectorAll('svg[role="img"]')].find((s) => s.querySelectorAll('circle').length >= 2);
@@ -99,7 +99,7 @@ def test_date_button_busy(browser):
         ctx = browser.new_context(viewport=vp)
         ctx.add_init_script(BUSY_OBSERVER)
         pg = ctx.new_page()
-        pg.goto(BASE + "/today", wait_until="networkidle")
+        pg.goto(BASE + "/diary", wait_until="networkidle")
         pg.wait_for_timeout(400)
         busy_seen = pg.evaluate("() => window.__dateBusySeen")
         check(busy_seen, f"today @ {vp_name}: date button was aria-busy=\"true\" before its date resolved")

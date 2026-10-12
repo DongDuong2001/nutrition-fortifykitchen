@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AppHeader } from "@/components/ui/app-header";
+import { useBack } from "@/hooks/use-back";
 import { Toast } from "@/components/ui/toast";
 
 const LOST_ITEMS = [
@@ -14,6 +15,7 @@ const LOST_ITEMS = [
 ];
 
 export default function DeleteAccountPage() {
+  const goBack = useBack();
   const router = useRouter();
   const [confirmationText, setConfirmationText] = useState("");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -26,7 +28,7 @@ export default function DeleteAccountPage() {
     if (!isConfirmed) return;
     setToastMessage("Chưa hỗ trợ xoá tài khoản trong bản thử");
     setTimeout(() => {
-      router.push("/profile");
+      router.push("/settings");
     }, 1200);
   };
 
@@ -43,7 +45,7 @@ export default function DeleteAccountPage() {
         <AppHeader
           variant="sub"
           title="XOÁ TÀI KHOẢN"
-          backHref="/profile"
+          onBack={goBack}
           backLabel="Quay lại"
           alignGroup="settings-header"
         />
@@ -125,7 +127,7 @@ export default function DeleteAccountPage() {
         </button>
 
         <Link
-          href="/profile"
+          href="/settings"
           className="no-underline h-11 flex items-center justify-center text-ink text-[15px] font-semibold hover:opacity-80 active:scale-[0.97] transition-all"
         >
           Huỷ

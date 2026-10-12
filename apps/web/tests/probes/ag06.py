@@ -83,10 +83,10 @@ def test_item_1_and_2(browser):
           f"entry: grams input wrapper has focus-within ring ({p_classes})")
     ctx.close()
 
-    # 5. /today: "+ Thêm" tap target size
+    # 5. /diary: "+ Thêm" tap target size
     ctx = browser.new_context(viewport=PHONE)
     pg = ctx.new_page()
-    pg.goto(BASE + "/today", wait_until="networkidle")
+    pg.goto(BASE + "/diary", wait_until="networkidle")
     pg.wait_for_timeout(300)
     add_links = pg.locator('a[id^="mobile-add-"]').all()
     check(len(add_links) > 0, f"today: found {len(add_links)} + Thêm links")
@@ -122,14 +122,14 @@ def test_item_3(browser):
 
 
 def test_item_4(browser):
-    # /profile: "Nhắc nhở" shows "Đã bật" initially
+    # /settings/profile: "Nhắc nhở" shows "Đã bật" initially
     ctx = browser.new_context(viewport=PHONE)
     # Before mount the reminders value is empty: the server HTML never claims "Đã bật" or "Đã tắt"
-    ssr = ctx.request.get(BASE + "/profile").text()
+    ssr = ctx.request.get(BASE + "/settings/profile").text()
     check("Đã bật" not in ssr and "Đã tắt" not in ssr,
           "profile: server HTML has no reminder value (no 'Đã bật' or 'Đã tắt' before mount)")
     pg = ctx.new_page()
-    pg.goto(BASE + "/profile", wait_until="networkidle")
+    pg.goto(BASE + "/settings/profile", wait_until="networkidle")
     pg.wait_for_timeout(400)
     txt = body_text(pg)
     check("Nhắc nhở" in txt and "Đã bật" in txt, "profile: Nhắc nhở row shows 'Đã bật' after mount")
@@ -161,8 +161,8 @@ VISIBLE_H1_JS = """() => [...document.querySelectorAll('h1')].filter(h => {
 }).map(h => h.textContent.trim())"""
 
 ONE_H1_ROUTES = [
-    "/today", "/today?loading=1", "/today?empty=1", "/today?offline=1",
-    "/micros", "/micros/calcium", "/add", "/training", "/profile", "/profile/weight",
+    "/diary", "/diary?loading=1", "/diary?empty=1", "/diary?offline=1",
+    "/micros", "/micros/calcium", "/add", "/training", "/settings/profile", "/settings/profile/weight",
     "/trends", "/entry/item-1", "/foods/food-cha-la", "/setup/goal", "/setup/profile",
 ]
 

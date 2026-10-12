@@ -134,7 +134,7 @@ export function BodyCard({ alignGroup }: { alignGroup?: string }) {
       )}
       <BirthYearField />
       <RowGroup>
-        <Row label="Cân nặng" value={`${formatNumber(profile.weightKg)} kg`} href="/profile/weight" />
+        <Row label="Cân nặng" value={`${formatNumber(profile.weightKg)} kg`} href="/settings/profile/weight" />
       </RowGroup>
     </Card>
   );

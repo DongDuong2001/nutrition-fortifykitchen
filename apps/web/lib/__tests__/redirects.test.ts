@@ -36,7 +36,7 @@ describe("lib/redirects", () => {
   });
 
   it("has no redirect loops: no destination is itself a source", () => {
-    const sources = new Set(PERMANENT_REDIRECTS.map((r) => r.source));
+    const sources = new Set<string>(PERMANENT_REDIRECTS.map((r) => r.source));
     for (const r of PERMANENT_REDIRECTS) expect(sources.has(r.destination)).toBe(false);
   });
 });

@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, Suspense } from "react";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { BottomNav } from "@/components/ui/bottom-nav";
+import { DesktopSidebar } from "@/components/ui/desktop-sidebar";
+import { useBack } from "@/hooks/use-back";
 import { AppHeader } from "@/components/ui/app-header";
 import {
   calculateSaltTarget,
@@ -32,6 +33,7 @@ export default function TrainingPage() {
 
 function TrainingContent() {
   const searchParams = useSearchParams();
+  const goBack = useBack();
   if (searchParams?.get("error") === "1") {
     throw new Error("Simulated server error");
   }
@@ -142,9 +144,10 @@ function TrainingContent() {
         className="w-full min-h-screen bg-page flex flex-col relative lg:hidden pb-[88px] overflow-x-hidden"
       >
         <AppHeader
-          variant="tab"
+          variant="sub"
           title="NGÀY TẬP"
           subtitle={headerSubtitle}
+          onBack={goBack}
           alignGroup="training-header"
           summary={
             <div className="flex flex-col gap-2.5 w-full">
@@ -179,7 +182,7 @@ function TrainingContent() {
         </main>
 
         <div className="fixed bottom-0 left-0 right-0 z-40 bg-ink">
-          <BottomNav currentTab="training" />
+          <BottomNav />
         </div>
       </div>
 
@@ -188,91 +191,7 @@ function TrainingContent() {
       {/* ============================================================== */}
       <div className="hidden lg:flex min-h-[980px] bg-page text-text font-sans">
         {/* Left Sidebar */}
-        <aside className="w-60 shrink-0 bg-ink text-on-dark p-6 flex flex-col gap-6 box-border">
-          <div className="px-2 font-display italic font-black text-2xl">
-            H1T <span className="text-sky">MICRO</span>
-          </div>
-          <nav aria-label="Điều hướng chính" className="flex flex-col gap-1">
-            <Link
-              href="/today"
-              className="no-underline flex items-center gap-3 min-h-[44px] px-3 rounded-xl text-[15px] font-semibold text-muted-on-dark hover:bg-card/5 hover:text-on-dark transition-colors"
-            >
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />
-              </svg>
-              Hôm nay
-            </Link>
-            <Link
-              href="/micros"
-              className="no-underline flex items-center gap-3 min-h-[44px] px-3 rounded-xl text-[15px] font-semibold text-muted-on-dark hover:bg-card/5 hover:text-on-dark transition-colors"
-            >
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M5 20V11M12 20V4M19 20v-6" />
-              </svg>
-              Vi chất
-            </Link>
-            <Link
-              href="/training"
-              aria-current="page"
-              className="no-underline flex items-center gap-3 min-h-[44px] px-3 rounded-xl text-[15px] font-semibold text-on-dark bg-card/10 transition-colors"
-            >
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12" />
-              </svg>
-              Ngày tập
-            </Link>
-            <Link
-              href="/profile"
-              className="no-underline flex items-center gap-3 min-h-[44px] px-3 rounded-xl text-[15px] font-semibold text-muted-on-dark hover:bg-card/5 hover:text-on-dark transition-colors"
-            >
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <circle cx="12" cy="8" r="4" />
-                <path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6" />
-              </svg>
-              Hồ sơ
-            </Link>
-          </nav>
-        </aside>
+        <DesktopSidebar />
 
         {/* Main Content Area */}
         <main
@@ -284,6 +203,7 @@ function TrainingContent() {
             variant="tab"
             title="NGÀY TẬP"
             subtitle={desktopSubtitle}
+            onBack={goBack}
             alignGroup="training-header"
             actions={
               <DurationSelector

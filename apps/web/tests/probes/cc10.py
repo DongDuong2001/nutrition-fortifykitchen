@@ -56,7 +56,7 @@ def energy(pg):
 
 
 def open_day(pg, query=""):
-    pg.goto(BASE + "/today" + query, wait_until="networkidle")
+    pg.goto(BASE + "/diary" + query, wait_until="networkidle")
     vis(pg, '[aria-label^="Năng lượng"]').wait_for(state="visible", timeout=8000)
     pg.wait_for_timeout(200)
 
@@ -132,7 +132,7 @@ def run_phone(browser):
     check("date=" not in pg.url, "390 Về hôm nay returns to today")
 
     # Hồ sơ: Năm sinh is a row; tapping it opens the field
-    pg.goto(BASE + "/profile", wait_until="networkidle")
+    pg.goto(BASE + "/settings/profile", wait_until="networkidle")
     row = vis(pg, 'button:has-text("Năm sinh")')
     row.wait_for(state="visible", timeout=8000)
     check("2003" in row.inner_text(), "390 profile: Năm sinh row shows 2003")
@@ -172,11 +172,11 @@ def run_desktop(browser):
 
 def run_hydration(browser):
     paths = [
-        "/today",
-        f"/today?date={iso(YESTERDAY)}",
-        f"/today?date={iso(FIVE_AGO)}",
-        f"/today?date={iso(FUTURE)}",
-        "/today?date=not-a-date",
+        "/diary",
+        f"/diary?date={iso(YESTERDAY)}",
+        f"/diary?date={iso(FIVE_AGO)}",
+        f"/diary?date={iso(FUTURE)}",
+        "/diary?date=not-a-date",
     ]
     for vp in (PHONE, DESKTOP):
         ctx = browser.new_context(viewport=vp)

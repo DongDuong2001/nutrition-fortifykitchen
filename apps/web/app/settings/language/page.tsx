@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { AppHeader } from "@/components/ui/app-header";
+import { AppShell } from "@/components/ui/app-shell";
+import { useBack } from "@/hooks/use-back";
 import {
   loadSettings,
   saveSettings,
@@ -10,6 +12,7 @@ import {
 } from "@/lib/settings";
 
 export default function LanguageSettingsPage() {
+  const goBack = useBack();
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
 
   useEffect(() => {
@@ -25,11 +28,11 @@ export default function LanguageSettingsPage() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-page text-text font-sans flex flex-col">
+    <AppShell>
       <AppHeader
         variant="sub"
         title="NGÔN NGỮ"
-        backHref="/profile"
+        onBack={goBack}
         backLabel="Quay lại"
         alignGroup="settings-header"
       />
@@ -184,6 +187,6 @@ export default function LanguageSettingsPage() {
           Tự động lưu
         </div>
       </main>
-    </div>
+    </AppShell>
   );
 }

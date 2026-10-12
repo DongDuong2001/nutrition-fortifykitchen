@@ -89,12 +89,13 @@ Checked with ui-ux-pro-max (§2 touch: 44 px targets, 8 px gaps; §9 navigation:
 ### Phone bottom nav (< 1024 px)
 - Bar: `bg-ink`, 72 px tall, content centred at max 560 px with 16 px side padding, five equal columns. The fixed wrapper adds `env(safe-area-inset-bottom)` as bottom padding (0 until the page opts into `viewport-fit=cover`, so no change today).
 - Slots, left to right: **Tổng quan** · **Nhật ký** · **[+]** · **Khám phá** · **Cài đặt**.
-- Icons: 22 px, 24 viewBox, `stroke="currentColor"`, 1.8 stroke width, round caps and joins, no fill. Tổng quan: four rounded squares (dashboard). Nhật ký: page with three text lines. Khám phá: compass. Cài đặt: three sliders. Same icons in the sidebar.
+- Icons: 22 px, 24 viewBox, `stroke="currentColor"`, 1.8 stroke width, round caps and joins, no fill. Tổng quan: four rounded panels (dashboard). Nhật ký: page with three text lines. Khám phá: compass. Cài đặt: three sliders. Same icons in the sidebar.
 - Labels: 11 px, semibold, below the icon (gap 2 px), never hidden. Tab names are identical to the sidebar.
 - States: inactive `text-muted-on-dark`; hover `text-on-dark`; active `text-on-dark` plus the 20 × 3 px slanted bar (skewX −14°, `bg-blue`) under the label and `aria-current="page"`, so the state is not colour alone. Pressed: scale 0.97 over 150 ms (no motion with `prefers-reduced-motion`).
 - Targets: every tab is the full column wide and at least 56 px tall. [+] is a 50 × 50 px `bg-blue` rounded-[14px] button with a white plus, `aria-label="Thêm món"`, in the middle slot; it is a link to `/add` (the meal comes from the time of day).
 - Pushed screens (Vi chất, nutrient detail, Ngày tập, Xu hướng, Hồ sơ pages) keep the bar and highlight their owning tab: Tổng quan for Vi chất, Ngày tập and Xu hướng; Khám phá for foods; Cài đặt for settings and Hồ sơ.
-- Hidden on: sign-in and setup, the `/add` sheet, `/entry/[id]` (as now).
+- Hidden on: sign-in and setup, the `/add` sheet, `/entry/[id]`, `/settings/delete-account` (a confirm flow), `/install` and `/paywall` (as now).
+- Food screens (`/foods/[id]`, `/foods/new`) keep the bar; their sticky add button sits directly above it on a phone and beside the sidebar on desktop.
 
 ### Desktop sidebar (≥ 1024 px)
 - `DesktopSidebar`: 240 px wide `bg-ink` column with the logo, the primary **Thêm món** button, then the same four items in the same order and with the same icons and labels.
@@ -103,5 +104,5 @@ Checked with ui-ux-pro-max (§2 touch: 44 px targets, 8 px gaps; §9 navigation:
 - Pushed screens highlight the owning tab, as on the phone.
 
 ### Pushed screens (Vi chất, Ngày tập, Xu hướng)
-- Phone: AppHeader `sub` with a 44 px back button (chevron, `aria-label="Quay lại"`), the title and one subtitle line. Desktop: the same back button before the title in the page header.
+- Phone: AppHeader `sub` with a 44 px back button (chevron, `aria-label="Quay lại"`), the title and one subtitle line. Desktop: a "‹ Quay lại" text button (44 px tall) above the title in the page header, so the title keeps the left edge of the cards under it.
 - Back returns to the previous in-app page; with no in-app history (direct link, reload) it goes to the owning tab (`/`, or `/micros` for a nutrient detail).

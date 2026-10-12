@@ -151,7 +151,7 @@ def run():
         # 6. Today: no decimals on hero or meal kcal
         ctx = browser.new_context(viewport=PHONE)
         pg = ctx.new_page()
-        pg.goto(BASE + "/today", wait_until="networkidle")
+        pg.goto(BASE + "/diary", wait_until="networkidle")
         pg.wait_for_timeout(400)
         body = pg.inner_text("body")
         decimal_kcal = re.findall(r"\d+,\d+\s*kcal", body)
@@ -161,7 +161,7 @@ def run():
         pg.screenshot(path=os.path.join(SHOTS, "cc02-final-today-390.png"), animations="disabled")
         ctx.close()
 
-        # 7. onboarding flow still reaches /today
+        # 7. onboarding flow still reaches / (Tổng quan)
         ctx = browser.new_context(viewport=PHONE)
         pg = ctx.new_page()
         pg.goto(BASE + "/signup", wait_until="networkidle")
@@ -173,8 +173,8 @@ def run():
         pg.get_by_role("button", name="Tiếp tục").click()
         expect(pg).to_have_url(BASE + "/setup/goal")
         pg.get_by_role("button", name="Bắt đầu ghi bữa ăn").click()
-        expect(pg).to_have_url(BASE + "/today")
-        check(True, "onboarding flow reaches /today")
+        expect(pg).to_have_url(BASE + "/")
+        check(True, "onboarding flow reaches /")
         ctx.close()
 
         browser.close()

@@ -24,16 +24,16 @@ def main():
         pg = ctx.new_page()
 
         # Edit the profile through the UI: weight 70 kg, goal Tăng cơ, training 90 phút
-        pg.goto(BASE + "/profile/weight", wait_until="networkidle")
+        pg.goto(BASE + "/settings/profile/weight", wait_until="networkidle")
         pg.locator("#weight-input").fill("70")
         pg.get_by_role("button", name="Lưu").click()
-        pg.wait_for_url("**/profile")
+        pg.wait_for_url("**/settings/profile")
         pg.wait_for_timeout(300)
         pg.locator('[aria-labelledby="profile-goal-label"] button:has-text("Tăng cơ") >> visible=true').first.click()
         pg.get_by_role("button", name="90 phút").click()
         pg.wait_for_timeout(300)
 
-        pg.goto(BASE + "/today", wait_until="networkidle")
+        pg.goto(BASE + "/diary", wait_until="networkidle")
         pg.wait_for_timeout(600)
         txt = body(pg)
         check("Ngày tập 90′ · Tăng cơ · 70 kg" in txt, "today 1440: desktop label follows the profile (90′ · Tăng cơ · 70 kg)")

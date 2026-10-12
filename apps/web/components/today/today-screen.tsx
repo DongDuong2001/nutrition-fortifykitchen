@@ -66,7 +66,38 @@ function MicrosSummaryCard({ summary, linked }: { summary: MockDayData["microsSu
   );
 }
 
-export default function TodayPage() {
+/** "60 phút" or "Nghỉ" for the training row. */
+function trainingHint(minutes: number): string {
+  return minutes > 0 ? `${minutes} phút` : "Nghỉ";
+}
+
+/**
+ * A link row on the phone to a screen that no longer has a tab (Vi chất, Ngày tập). The same card style as
+ * the vi chất summary. Step 2 of IA v2 replaces these with the Tổng quan cards.
+ */
+function ShortcutRow({ href, title, hint }: { href: string; title: string; hint: string }) {
+  return (
+    <Link
+      href={href}
+      data-align-group="today-header"
+      className="no-underline text-text bg-card border border-card-border rounded-[18px] px-4 py-3 flex items-center gap-3.5 min-h-[44px] box-border active:scale-[0.97] transition-transform"
+    >
+      <div className="flex-1 min-w-0">
+        <div className="text-[15px] font-semibold leading-snug">{title}</div>
+        <div className="text-[13px] text-secondary">{hint}</div>
+      </div>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true" className="text-secondary shrink-0">
+        <path d="M9 5l7 7-7 7" />
+      </svg>
+    </Link>
+  );
+}
+
+/**
+ * The Today content: the day's meals, vi chất and training. Served at / and at /diary (same component) until
+ * step 2 of IA v2 splits it into Tổng quan and Nhật ký. Past days (?date=) are read-only.
+ */
+export function TodayScreen() {
   return (
     <Suspense fallback={<div className="w-full min-h-screen bg-page" />}>
       <TodayContent />
@@ -98,7 +129,7 @@ function TodayContent() {
   );
 
   function goToDay(iso: string) {
-    router.push(iso === todayIso ? "/today" : `/today?date=${iso}`);
+    router.push(iso === todayIso ? "/diary" : `/diary?date=${iso}`);
   }
   const isOnline = useSyncExternalStore(subscribeOnline, getOnlineSnapshot, getOnlineServerSnapshot);
 
@@ -253,7 +284,7 @@ function TodayContent() {
           </main>
 
           <div className="fixed bottom-0 left-0 right-0 z-40 bg-ink">
-            <BottomNav currentTab="today" />
+            <BottomNav />
           </div>
         </div>
 
@@ -332,6 +363,13 @@ function TodayContent() {
               </Link>
             ))}
 
+            <ShortcutRow href="/micros" title="Vi chất" hint="Mức đạt từng vi chất hôm nay" />
+            <ShortcutRow
+              href="/training"
+              title="Ngày tập"
+              hint={`${trainingHint(currentData.user.trainingMinutes)} · muối ${salt.formattedTotal} g`}
+            />
+
             <div className="bg-card border border-card-border rounded-[18px] px-4 py-3 text-[13px] leading-relaxed flex gap-2.5">
               <span className="w-1 shrink-0 rounded-full bg-blue" aria-hidden="true" />
               <span>
@@ -341,7 +379,7 @@ function TodayContent() {
           </main>
 
           <div className="fixed bottom-0 left-0 right-0 z-40 bg-ink">
-            <BottomNav currentTab="today" />
+            <BottomNav />
           </div>
         </div>
         {calendarSheet}
@@ -440,13 +478,20 @@ function TodayContent() {
           {isPast && (
             <div role="status" className="bg-card border border-card-border rounded-[18px] pl-4 pr-1 min-h-[44px] flex items-center justify-between text-[13px] font-semibold">
               <span>Đang xem ngày cũ</span>
-              <Link href="/today" className="min-h-[44px] px-2.5 flex items-center font-bold text-blue no-underline">
+              <Link href="/diary" className="min-h-[44px] px-2.5 flex items-center font-bold text-blue no-underline">
                 Về hôm nay
               </Link>
             </div>
           )}
 
           <MicrosSummaryCard summary={microsSummary} linked={!isPast} />
+          {!isPast && (
+            <ShortcutRow
+              href="/training"
+              title="Ngày tập"
+              hint={`${trainingHint(currentData.user.trainingMinutes)} · muối ${salt.formattedTotal} g`}
+            />
+          )}
 
           {/* All 5 Meal Slots */}
           {meals.map((meal) => {
@@ -553,7 +598,7 @@ function TodayContent() {
 
         {/* Fixed Mobile Navigation Dock */}
         <div className="fixed bottom-0 left-0 right-0 z-40 bg-ink">
-          <BottomNav currentTab="today" />
+          <BottomNav />
         </div>
       </div>
 
@@ -562,7 +607,7 @@ function TodayContent() {
       {/* ============================================================== */}
       <div className="hidden lg:flex min-h-[980px] bg-page text-text font-sans">
         {/* Left Sidebar */}
-        <DesktopSidebar currentTab="today" />
+        <DesktopSidebar />
 
         {/* Main Content Area */}
         <main data-align-container="today-desktop" className="flex-1 p-8 pb-12 max-w-[1240px] flex flex-col gap-5 box-border">
@@ -578,26 +623,13 @@ function TodayContent() {
             subtitle={desktopSubtitle}
             actions={
               isPast ? undefined : (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => setIsCopySheetOpen(true)}
-                    className="h-11 px-4 border border-card-border rounded-xl bg-card text-text text-sm font-semibold cursor-pointer hover:bg-divider transition-colors active:scale-[0.97]"
-                  >
-                    Chép hôm qua
-                  </button>
-                  <Link
-                    id="desktop-add-btn"
-                    href="/add"
-                    onClick={() => handleSaveOpener("desktop-add-btn")}
-                    className="no-underline h-11 px-5 rounded-full bg-blue text-on-accent flex items-center gap-2 text-[15px] font-bold hover:bg-blue/90 active:scale-[0.97] transition-all"
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
-                      <path d="M12 5v14M5 12h14" />
-                    </svg>
-                    Thêm món
-                  </Link>
-                </>
+                <button
+                  type="button"
+                  onClick={() => setIsCopySheetOpen(true)}
+                  className="h-11 px-4 border border-card-border rounded-xl bg-card text-text text-sm font-semibold cursor-pointer hover:bg-divider transition-colors active:scale-[0.97]"
+                >
+                  Chép hôm qua
+                </button>
               )
             }
           />
@@ -605,7 +637,7 @@ function TodayContent() {
           {isPast && (
             <div role="status" className="bg-card border border-card-border rounded-[18px] pl-5 pr-1 min-h-[44px] flex items-center justify-between text-sm font-semibold">
               <span>Đang xem ngày cũ</span>
-              <Link href="/today" className="min-h-[44px] px-2.5 flex items-center font-bold text-blue no-underline">
+              <Link href="/diary" className="min-h-[44px] px-2.5 flex items-center font-bold text-blue no-underline">
                 Về hôm nay
               </Link>
             </div>
@@ -766,9 +798,16 @@ function TodayContent() {
             <div className="bg-card border border-card-border rounded-[18px] p-5 pb-2.5">
               <div className="flex items-baseline justify-between mb-1">
                 <h2 className="m-0 text-lg font-bold text-text">Vi chất</h2>
-                <span className="font-display italic font-extrabold text-2xl text-blue">
-                  {microsSummary.achieved}/{microsSummary.total}
-                </span>
+                <div className="flex items-baseline gap-2">
+                  <span className="font-display italic font-extrabold text-2xl text-blue">
+                    {microsSummary.achieved}/{microsSummary.total}
+                  </span>
+                  {!isPast && (
+                    <Link href="/micros" className="text-sm font-semibold text-blue no-underline min-h-[44px] flex items-center px-2">
+                      Mở chi tiết
+                    </Link>
+                  )}
+                </div>
               </div>
 
               {/* Minerals list */}

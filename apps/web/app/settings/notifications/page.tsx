@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { AppHeader } from "@/components/ui/app-header";
+import { AppShell } from "@/components/ui/app-shell";
+import { useBack } from "@/hooks/use-back";
 import { Switch } from "@/components/ui/switch";
 import {
   loadSettings,
@@ -62,6 +64,7 @@ const NOTIFICATION_ROWS: NotificationRowConfig[] = [
 ];
 
 export default function NotificationsSettingsPage() {
+  const goBack = useBack();
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
   const [permissionStatus, setPermissionStatus] = useState<string | null>(null);
 
@@ -107,11 +110,11 @@ export default function NotificationsSettingsPage() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-page text-text font-sans flex flex-col">
+    <AppShell>
       <AppHeader
         variant="sub"
         title="NHẮC NHỞ"
-        backHref="/profile"
+        onBack={goBack}
         backLabel="Quay lại"
         alignGroup="settings-header"
       />
@@ -215,6 +218,6 @@ export default function NotificationsSettingsPage() {
           Tự động lưu
         </div>
       </main>
-    </div>
+    </AppShell>
   );
 }

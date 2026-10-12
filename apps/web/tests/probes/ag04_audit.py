@@ -7,17 +7,17 @@ from playwright.sync_api import sync_playwright
 BASE_URL = os.environ.get("ALIGN_BASE_URL", "http://localhost:3100")
 
 ROUTES = [
-    "/today",
+    "/diary",
     "/micros",
     "/micros/vitamin-d",
     "/add",
     "/add?meal=breakfast",
     "/entry/item-1",
-    "/foods",
+    "/explore",
     "/foods/food-cha-la",
     "/foods/new",
-    "/profile",
-    "/profile/weight",
+    "/settings/profile",
+    "/settings/profile/weight",
     "/training",
     "/settings/language",
     "/settings/notifications",

@@ -3,8 +3,10 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { AppHeader } from "@/components/ui/app-header";
+import { useBack } from "@/hooks/use-back";
 
 export default function InstallAppPage() {
+  const goBack = useBack();
   const [deviceTab, setDeviceTab] = useState<"ios" | "android">("ios");
 
   return (
@@ -13,7 +15,7 @@ export default function InstallAppPage() {
         <AppHeader
           variant="sub"
           title="THÊM VÀO MÀN HÌNH CHÍNH"
-          backHref="/profile"
+          onBack={goBack}
           backLabel="Quay lại"
           alignGroup="install-header"
         />
@@ -181,7 +183,7 @@ export default function InstallAppPage() {
       {/* Bottom CTA */}
       <footer className="w-full max-w-[560px] mx-auto px-4 pt-3 pb-6">
         <Link
-          href="/today"
+          href="/"
           className="no-underline h-[52px] w-full rounded-full bg-blue text-on-accent flex items-center justify-center text-base font-bold shadow-sm hover:opacity-95 active:scale-[0.97] transition-all"
         >
           Đã hiểu

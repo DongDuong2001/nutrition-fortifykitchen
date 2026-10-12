@@ -92,7 +92,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
     try {
       await apiClient.saveSetup(result.profile);
       updateProfile(result.profile);
-      router.push("/today");
+      router.push("/");
     } catch {
       setSaveError("Chưa lưu được hồ sơ. Thử lại sau ít phút.");
       setSaving(false);

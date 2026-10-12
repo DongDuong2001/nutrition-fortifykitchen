@@ -32,7 +32,7 @@ export default function NotFound() {
       </main>
 
       <footer className="mt-auto pt-8 flex flex-col gap-2.5 w-full">
-        <PillButton variant="primary" href="/today" fullWidth>
+        <PillButton variant="primary" href="/" fullWidth>
           Về Hôm nay
         </PillButton>
         <button

@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { AppHeader } from "@/components/ui/app-header";
+import { useBack } from "@/hooks/use-back";
 
 interface Plan {
   id: "month" | "year";
@@ -24,6 +25,7 @@ const BENEFITS = [
 ];
 
 export default function PaywallPage() {
+  const goBack = useBack();
   const [selectedPlan, setSelectedPlan] = useState<"month" | "year">("year");
 
   return (
@@ -33,7 +35,7 @@ export default function PaywallPage() {
           variant="sub"
           title="PRO"
           subtitle="Ăn theo Coach, không phải đoán"
-          backHref="/profile"
+          onBack={goBack}
           backLabel="Quay lại"
           alignGroup="paywall-header"
           summary={
@@ -134,7 +136,7 @@ export default function PaywallPage() {
       {/* Footer checkout actions */}
       <footer className="w-full max-w-[560px] mx-auto px-4 pt-2 pb-5 flex flex-col items-center gap-1.5">
         <Link
-          href="/profile"
+          href="/settings"
           className="no-underline self-stretch h-[52px] rounded-full bg-blue text-on-accent flex items-center justify-center text-base font-bold shadow-sm hover:opacity-95 active:scale-[0.97] transition-all"
         >
           Tiếp tục thanh toán

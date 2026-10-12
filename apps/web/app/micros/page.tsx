@@ -9,11 +9,12 @@ import { SegmentedBar } from "@/components/ui/segmented-bar";
 import { apiClient } from "@/lib/api-client";
 import { type NutrientGroup } from "@/lib/nutrients";
 import { buildNutrientRows, type NutrientRowData } from "@/lib/nutrient-rows";
-import { formatAmount, formatDesktopDate, formatNumber } from "@/lib/format";
+import { formatAmount, formatDayLabel, formatDesktopDate, formatNumber } from "@/lib/format";
 import { goalName } from "@/lib/onboarding";
 import { getTodayIsoVN } from "@/lib/date";
 import { type MockDayData } from "@/lib/mock/sample-day";
 import { useDiary } from "@/lib/diary-store";
+import { useBack } from "@/hooks/use-back";
 
 interface GroupConfig {
   key: NutrientGroup;
@@ -40,6 +41,7 @@ export default function MicrosPage() {
 
 function MicrosContent() {
   const { data: diaryData, hydrated, profile } = useDiary();
+  const goBack = useBack();
   const [data, setData] = useState<MockDayData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeGroup, setActiveGroup] = useState<NutrientGroup>("vitamins");
@@ -79,6 +81,7 @@ function MicrosContent() {
   }, []);
 
   const currentData = (hydrated ? diaryData : null) || data;
+  const phoneDateLabel = clientNow && currentData?.date ? formatDayLabel(currentData.date, clientNow) : "";
   const profileParts = [goalName(profile.goal), `${formatNumber(profile.weightKg)} kg`];
   const desktopSubtitle = clientNow
     ? [formatDesktopDate(currentData?.date || getTodayIsoVN()), ...profileParts].join(" · ") + ` · Thiếu nhiều nhất: ${currentData?.microsSummary.mostLacking.join(", ")}`
@@ -245,7 +248,7 @@ function MicrosContent() {
         </div>
 
         <div className="fixed bottom-0 left-0 right-0 z-40 bg-ink lg:hidden">
-          <BottomNav currentTab="micros" />
+          <BottomNav />
         </div>
       </div>
     );
@@ -254,50 +257,57 @@ function MicrosContent() {
   // 2. EMPTY STATE ("Chưa ghi món nào hôm nay")
   if (isEmpty) {
     return (
-      <div className="w-full min-h-screen bg-page text-text font-sans flex flex-col pb-[88px] lg:pb-0">
-        <AppHeader
-          variant="daily"
-          title="VI CHẤT"
-          date={currentData?.date}
-          canGoNext={false}
-          alignGroup="micros-header"
-          summary={
-            <div className="flex items-end justify-between pt-1">
-              <div className="text-[13px] text-muted-subtitle">
-                Bắt đầu ghi món để đo lường
-              </div>
-              <div className="text-right">
-                <div className="font-display italic font-black text-3xl leading-none tabular-nums text-on-dark">
-                  0<span className="text-muted-subtitle text-xl">/22</span>
-                </div>
-                <div className="text-xs text-sky font-medium mt-0.5">đã đạt</div>
-              </div>
-            </div>
-          }
-        />
+      <div className="w-full min-h-screen bg-page text-text font-sans flex flex-col lg:flex-row">
+        <DesktopSidebar />
 
-        <main className="flex-1 w-full max-w-[560px] mx-auto px-4 py-6 flex flex-col gap-4">
-          <div className="bg-card border border-card-border rounded-[18px] p-6 text-center flex flex-col items-center gap-3">
-            <h2 className="m-0 font-display italic font-bold text-xl">CHƯA GHI MÓN NÀO HÔM NAY</h2>
-            <p className="m-0 text-sm text-secondary leading-relaxed max-w-[320px]">
-              Bắt đầu ghi nhận món ăn để theo dõi 58 chỉ số vi chất và hoàn thành mục tiêu ngày.
-            </p>
-            <Link
-              href="/today"
-              className="mt-2 h-11 px-6 rounded-full bg-blue text-on-accent flex items-center justify-center text-sm font-bold no-underline active:scale-[0.97] transition-transform"
-            >
-              + Ghi món ngay
-            </Link>
+        <div className="flex min-w-0 flex-1 flex-col pb-[88px] lg:pb-0">
+          <AppHeader
+            variant="sub"
+            title="VI CHẤT"
+            subtitle={phoneDateLabel}
+            onBack={goBack}
+            className="lg:hidden"
+            alignGroup="micros-header"
+            summary={
+              <div className="flex items-end justify-between pt-1">
+                <div className="text-[13px] text-muted-subtitle">
+                  Bắt đầu ghi món để đo lường
+                </div>
+                <div className="text-right">
+                  <div className="font-display italic font-black text-3xl leading-none tabular-nums text-on-dark">
+                    0<span className="text-muted-subtitle text-xl">/22</span>
+                  </div>
+                  <div className="text-xs text-sky font-medium mt-0.5">đã đạt</div>
+                </div>
+              </div>
+            }
+          />
+          <div className="hidden p-8 pb-0 lg:block">
+            <AppHeader variant="daily" title="VI CHẤT" date={currentData?.date} canGoNext={false} onBack={goBack} />
           </div>
-        </main>
+
+          <main className="flex-1 w-full max-w-[560px] mx-auto px-4 py-6 flex flex-col gap-4">
+            <div className="bg-card border border-card-border rounded-[18px] p-6 text-center flex flex-col items-center gap-3">
+              <h2 className="m-0 font-display italic font-bold text-xl">CHƯA GHI MÓN NÀO HÔM NAY</h2>
+              <p className="m-0 text-sm text-secondary leading-relaxed max-w-[320px]">
+                Bắt đầu ghi nhận món ăn để theo dõi 58 chỉ số vi chất và hoàn thành mục tiêu ngày.
+              </p>
+              <Link
+                href="/diary"
+                className="mt-2 h-11 px-6 rounded-full bg-blue text-on-accent flex items-center justify-center text-sm font-bold no-underline active:scale-[0.97] transition-transform"
+              >
+                + Ghi món ngay
+              </Link>
+            </div>
+          </main>
+        </div>
 
         <div className="fixed bottom-0 left-0 right-0 z-40 bg-ink lg:hidden">
-          <BottomNav currentTab="micros" />
+          <BottomNav />
         </div>
       </div>
     );
   }
-
   // 3. ACTIVE REPORT SCREEN (Mobile & Desktop)
   return (
     <div className="w-full min-h-screen bg-page text-text font-sans flex flex-col">
@@ -310,10 +320,10 @@ function MicrosContent() {
       >
         {/* Header */}
         <AppHeader
-          variant="daily"
-          date={currentData?.date}
-          canGoNext={false}
+          variant="sub"
           title="VI CHẤT"
+          subtitle={phoneDateLabel}
+          onBack={goBack}
           alignGroup="micros-header"
           summary={
             <div className="flex items-center justify-between">
@@ -411,7 +421,7 @@ function MicrosContent() {
 
         {/* Fixed Mobile Dock */}
         <div className="fixed bottom-0 left-0 right-0 z-40 bg-ink">
-          <BottomNav currentTab="micros" />
+          <BottomNav />
         </div>
       </div>
 
@@ -420,7 +430,7 @@ function MicrosContent() {
       {/* ============================================================== */}
       <div className="hidden lg:flex min-h-[980px] bg-page text-text font-sans">
         {/* Left Sidebar */}
-        <DesktopSidebar currentTab="micros" />
+        <DesktopSidebar />
 
         {/* Main Content Area */}
         <main data-align-container="micros-desktop" className="flex-1 p-8 pb-12 max-w-[1240px] flex flex-col gap-5 box-border">
@@ -428,6 +438,7 @@ function MicrosContent() {
           <AppHeader
             variant="daily"
             title="VI CHẤT"
+            onBack={goBack}
             alignGroup="micros-header"
             subtitle={desktopSubtitle}
             desktopStat={

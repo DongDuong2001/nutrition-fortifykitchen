@@ -75,7 +75,7 @@ def run():
             check(shown(pg, 'text="Không tìm thấy món này"'), f"{name}: unknown id shows the empty state")
 
             # Baseline on Today before any edit
-            pg.goto(BASE + "/today", wait_until="networkidle")
+            pg.goto(BASE + "/diary", wait_until="networkidle")
             pg.wait_for_timeout(300)
             check("459 kcal" in meal_text(pg, "breakfast"), f"{name}: breakfast starts at 459 kcal")
             check("1.041" in pg.inner_text("body"), f"{name}: day starts at 1.041 kcal")
@@ -84,7 +84,7 @@ def run():
             pg.goto(BASE + "/entry/item-1", wait_until="networkidle")
             grams_input(pg).fill("90")
             button(pg, "Lưu thay đổi").click()
-            pg.wait_for_url("**/today")
+            pg.wait_for_url("**/diary")
             pg.wait_for_timeout(300)
             check("Yến mạch · 90 g" in meal_text(pg, "breakfast"), f"{name}: Yến mạch shows 90 g on Today")
             check("573 kcal" in meal_text(pg, "breakfast"), f"{name}: breakfast total updates to 573 kcal")
@@ -95,7 +95,7 @@ def run():
             pg.locator('fieldset button >> visible=true').filter(has_text="Bữa tối").first.click()
             pg.wait_for_timeout(200)
             button(pg, "Lưu thay đổi").click()
-            pg.wait_for_url("**/today")
+            pg.wait_for_url("**/diary")
             pg.wait_for_timeout(300)
             check("Yến mạch · 90 g" in meal_text(pg, "dinner"), f"{name}: moved entry shows under Bữa tối")
             check("Yến mạch" not in meal_text(pg, "breakfast"), f"{name}: moved entry leaves Bữa sáng")
@@ -105,7 +105,7 @@ def run():
             # 5. delete Yogurt kefir: toast shows, Hoàn tác puts it back in place
             pg.goto(BASE + "/entry/item-2", wait_until="networkidle")
             button(pg, "Xoá món này").click()
-            pg.wait_for_url("**/today")
+            pg.wait_for_url("**/diary")
             pg.wait_for_timeout(300)
             toast = pg.locator('[role=status] >> visible=true').filter(has_text="Đã xoá Yogurt kefir")
             check(toast.count() == 1, f"{name}: delete shows the undo toast")
@@ -123,7 +123,7 @@ def run():
             # 6. delete Chuối without undo: gone after reload, and the earlier edits survive
             pg.goto(BASE + "/entry/item-3", wait_until="networkidle")
             button(pg, "Xoá món này").click()
-            pg.wait_for_url("**/today")
+            pg.wait_for_url("**/diary")
             pg.wait_for_timeout(200)
             pg.reload(wait_until="networkidle")
             pg.wait_for_timeout(300)

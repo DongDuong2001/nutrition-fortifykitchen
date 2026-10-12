@@ -3,219 +3,73 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { NAV_TABS, tabForPath, type NavTab } from "@/lib/nav";
+import { NavIcon, PlusIcon } from "@/components/ui/nav-icons";
+import { rememberAddOpener } from "@/components/ui/add-opener";
 
 export interface BottomNavProps {
-  currentTab?: "today" | "micros" | "add" | "training" | "profile";
-  onAddClick?: () => void;
+  /** Overrides the tab taken from the URL. Pushed screens leave it out: the owning tab is found from the path. */
+  currentTab?: NavTab;
   className?: string;
 }
 
 /**
- * H1T MICRO Bottom Navigation (Cobalt Sign).
- * Full-bleed on <1024px with inner content centered at max-w-[560px] with 16px side padding.
- * Active state includes a slanted motif indicator (skewX(-14deg)), text remains unslanted.
+ * H1T MICRO bottom navigation (Cobalt Sign): Tổng quan · Nhật ký · [+] · Khám phá · Cài đặt.
+ * Full-bleed on <1024px with content centered at max-w-[560px] and 16px side padding.
+ * The active tab gets on-dark text plus a slanted bar (skewX(-14deg)); the text itself stays unslanted.
  */
-/** Remembers which control opened /add, so focus can return to it. Storage may be blocked. */
-function rememberAddOpener(id: string) {
-  if (typeof window === "undefined") return;
-  try {
-    sessionStorage.setItem("last_add_opener_id", id);
-  } catch {
-    // Storage unavailable: focus falls back to the default opener.
-  }
-}
-
-export function BottomNav({ currentTab, onAddClick, className = "" }: BottomNavProps) {
+export function BottomNav({ currentTab, className = "" }: BottomNavProps) {
   const pathname = usePathname();
+  const active = currentTab ?? tabForPath(pathname);
+  const [first, second, third, fourth] = NAV_TABS;
 
-  const isToday = currentTab ? currentTab === "today" : pathname === "/today" || pathname === "/diary" || pathname === "/";
-  const isMicros = currentTab ? currentTab === "micros" : pathname?.startsWith("/micros");
-  const isTraining = currentTab ? currentTab === "training" : pathname?.startsWith("/training");
-  const isProfile = currentTab ? currentTab === "profile" : pathname?.startsWith("/profile");
+  const renderTab = (item: (typeof NAV_TABS)[number]) => {
+    const isActive = item.tab === active;
+    return (
+      <Link
+        key={item.tab}
+        href={item.href}
+        aria-current={isActive ? "page" : undefined}
+        className={`relative flex flex-col items-center justify-center gap-[2px] min-h-[56px] text-xs font-semibold no-underline transition-colors active:scale-[0.97] motion-reduce:active:scale-100 ${
+          isActive ? "text-on-dark" : "text-muted-on-dark hover:text-on-dark"
+        }`}
+      >
+        <NavIcon tab={item.tab} />
+        <span className="text-[11px] leading-tight">{item.label}</span>
+        {isActive && (
+          <span
+            className="absolute bottom-1 w-5 h-[3px] rounded-[1px] bg-blue"
+            style={{ transform: "skewX(-14deg)" }}
+            aria-hidden="true"
+          />
+        )}
+      </Link>
+    );
+  };
 
   return (
     <nav
       aria-label="Điều hướng chính"
-      className={`h-[72px] flex-none bg-ink w-full select-none ${className}`}
+      className={`h-[calc(72px+env(safe-area-inset-bottom))] pb-[env(safe-area-inset-bottom)] flex-none bg-ink w-full select-none box-border ${className}`}
     >
-      <div
-        className="w-full max-w-[560px] mx-auto px-4 h-full items-center"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(5, 1fr)",
-        }}
-      >
-        <Link
-          href="/today"
-          aria-current={isToday ? "page" : undefined}
-          className={`relative flex flex-col items-center justify-center gap-[2px] min-h-[56px] text-xs font-semibold no-underline transition-colors ${
-            isToday ? "text-on-dark" : "text-muted-on-dark hover:text-on-dark"
-          }`}
-        >
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />
-          </svg>
-          <span className="text-[11px] leading-tight">Hôm nay</span>
-          {isToday && (
-            <span
-              className="absolute bottom-1 w-5 h-[3px] rounded-[1px] bg-blue"
-              style={{ transform: "skewX(-14deg)" }}
-              aria-hidden="true"
-            />
-          )}
-        </Link>
-
-        <Link
-          href="/micros"
-          aria-current={isMicros ? "page" : undefined}
-          className={`relative flex flex-col items-center justify-center gap-[2px] min-h-[56px] text-xs font-semibold no-underline transition-colors ${
-            isMicros ? "text-on-dark" : "text-muted-on-dark hover:text-on-dark"
-          }`}
-        >
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M5 20V11M12 20V4M19 20v-6" />
-          </svg>
-          <span className="text-[11px] leading-tight">Vi chất</span>
-          {isMicros && (
-            <span
-              className="absolute bottom-1 w-5 h-[3px] rounded-[1px] bg-blue"
-              style={{ transform: "skewX(-14deg)" }}
-              aria-hidden="true"
-            />
-          )}
-        </Link>
+      <div className="w-full max-w-[560px] mx-auto px-4 h-[72px] grid grid-cols-5 items-center">
+        {renderTab(first)}
+        {renderTab(second)}
 
         <div className="flex justify-center items-center">
-          {onAddClick ? (
-            <button
-              id="mobile-add-fab"
-              type="button"
-              onClick={() => {
-                rememberAddOpener("mobile-add-fab");
-                onAddClick();
-              }}
-              aria-label="Thêm món"
-              className="w-[50px] h-[50px] rounded-[14px] bg-blue text-on-accent flex items-center justify-center border-0 cursor-pointer shadow-md active:scale-[0.97] transition-transform"
-            >
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="white"
-                strokeWidth="2.4"
-                strokeLinecap="round"
-                aria-hidden="true"
-              >
-                <path d="M12 5v14M5 12h14" />
-              </svg>
-            </button>
-          ) : (
-            <Link
-              id="mobile-add-fab"
-              href="/add"
-              onClick={() => {
-                rememberAddOpener("mobile-add-fab");
-              }}
-              aria-label="Thêm món"
-              className="w-[50px] h-[50px] rounded-[14px] bg-blue text-on-accent flex items-center justify-center no-underline shadow-md active:scale-[0.97] transition-transform"
-            >
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="white"
-                strokeWidth="2.4"
-                strokeLinecap="round"
-                aria-hidden="true"
-              >
-                <path d="M12 5v14M5 12h14" />
-              </svg>
-            </Link>
-          )}
+          <Link
+            id="mobile-add-fab"
+            href="/add"
+            onClick={() => rememberAddOpener("mobile-add-fab")}
+            aria-label="Thêm món"
+            className="w-[50px] h-[50px] rounded-[14px] bg-blue text-on-accent flex items-center justify-center no-underline shadow-md active:scale-[0.97] motion-reduce:active:scale-100 transition-transform"
+          >
+            <PlusIcon />
+          </Link>
         </div>
 
-        <Link
-          href="/training"
-          aria-current={isTraining ? "page" : undefined}
-          className={`relative flex flex-col items-center justify-center gap-[2px] min-h-[56px] text-xs font-semibold no-underline transition-colors ${
-            isTraining ? "text-on-dark" : "text-muted-on-dark hover:text-on-dark"
-          }`}
-        >
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12" />
-          </svg>
-          <span className="text-[11px] leading-tight">Ngày tập</span>
-          {isTraining && (
-            <span
-              className="absolute bottom-1 w-5 h-[3px] rounded-[1px] bg-blue"
-              style={{ transform: "skewX(-14deg)" }}
-              aria-hidden="true"
-            />
-          )}
-        </Link>
-
-        <Link
-          href="/profile"
-          aria-current={isProfile ? "page" : undefined}
-          className={`relative flex flex-col items-center justify-center gap-[2px] min-h-[56px] text-xs font-semibold no-underline transition-colors ${
-            isProfile ? "text-on-dark" : "text-muted-on-dark hover:text-on-dark"
-          }`}
-        >
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <circle cx="12" cy="8" r="4" />
-            <path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6" />
-          </svg>
-          <span className="text-[11px] leading-tight">Hồ sơ</span>
-          {isProfile && (
-            <span
-              className="absolute bottom-1 w-5 h-[3px] rounded-[1px] bg-blue"
-              style={{ transform: "skewX(-14deg)" }}
-              aria-hidden="true"
-            />
-          )}
-        </Link>
+        {renderTab(third)}
+        {renderTab(fourth)}
       </div>
     </nav>
   );

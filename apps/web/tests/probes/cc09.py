@@ -1,4 +1,4 @@
-"""cc-09: Hồ sơ menu. Every menu row opens its page and Back returns to /profile (390 and 1440). Birth year 1899
+"""cc-09: Hồ sơ menu. Every menu row opens its page and Back returns to /settings/profile (390 and 1440). Birth year 1899
 shows the setup error and a valid year saves. Training default 90 shows on /training after reload. Goal chips
 stay on one line at 1440.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc09.py
@@ -43,8 +43,8 @@ def visible(pg, selector):
 
 
 def open_profile(pg):
-    pg.goto(BASE + "/profile", wait_until="networkidle")
-    visible(pg, 'a[href="/profile/weight"]').wait_for(state="visible")
+    pg.goto(BASE + "/settings/profile", wait_until="networkidle")
+    visible(pg, 'a[href="/settings/profile/weight"]').wait_for(state="visible")
     pg.wait_for_timeout(300)
 
 
@@ -64,11 +64,11 @@ def check_menu(pg, label):
         check(opened, f"{label}: {href} opens its page (not the 404 page)")
         pg.go_back()
         try:
-            pg.wait_for_url("**/profile", timeout=8000)
+            pg.wait_for_url("**/settings/profile", timeout=8000)
             back = True
         except Exception:
             back = False
-        check(back, f"{label}: Back from {href} returns to /profile")
+        check(back, f"{label}: Back from {href} returns to /settings/profile")
 
 
 def run_phone(browser):
@@ -92,7 +92,7 @@ def run_phone(browser):
     pg.wait_for_timeout(200)
     check(BIRTH_ERROR in body(pg), "390 birth year: 1899 shows the setup error text")
     check(field.get_attribute("aria-invalid") == "true", "390 birth year: field is marked invalid")
-    check("/profile" in pg.url and "/profile/" not in pg.url, "390 birth year: stays on /profile")
+    check("/settings/profile" in pg.url and "/settings/profile/" not in pg.url, "390 birth year: stays on /settings/profile")
     pg.reload(wait_until="networkidle")
     pg.wait_for_timeout(300)
     check("2003" in visible(pg, 'button:has-text("Năm sinh")').inner_text(), "390 birth year: 1899 not saved (still 2003)")

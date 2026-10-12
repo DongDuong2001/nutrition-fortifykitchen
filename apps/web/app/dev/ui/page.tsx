@@ -49,7 +49,7 @@ export default function DevUiPage() {
             variant="sub"
             title="VỀ BẠN"
             subtitle="Mục tiêu được tính theo cân nặng và giới tính."
-            backHref="/today"
+            backHref="/diary"
           />
         </section>
 
@@ -62,7 +62,7 @@ export default function DevUiPage() {
             title="VỀ BẠN"
             progress={{ current: 1, total: 2 }}
             actions={<span className="text-[13px] text-muted-on-dark">Bước 1 / 2</span>}
-            backHref="/today"
+            backHref="/diary"
           />
         </section>
 
@@ -192,12 +192,12 @@ export default function DevUiPage() {
               label="Cân nặng"
               value="65 kg"
               withBorderTop={false}
-              href="/profile/weight"
+              href="/settings/profile/weight"
             />
             <Row
               label="Mục tiêu"
               value="Giữ cân"
-              href="/profile/goal"
+              href="/settings/profile"
             />
             <div className="flex items-center justify-between min-h-[52px] border-t border-divider py-1">
               <div className="flex flex-col">
@@ -277,7 +277,7 @@ export default function DevUiPage() {
           <Toast
             message="Đã thêm Chà là 30 g vào Trước tập"
             actionLabel="Xem"
-            actionHref="/today"
+            actionHref="/diary"
           />
           <Toast
             message="Đã xoá Thịt bò nạc"
@@ -290,7 +290,7 @@ export default function DevUiPage() {
 
       {/* BottomNav */}
       <div className="sticky bottom-0 left-0 right-0 z-40 bg-ink">
-        <BottomNav currentTab="today" />
+        <BottomNav currentTab="overview" />
       </div>
     </div>
   );

@@ -3,13 +3,12 @@
 Per route and width: no console or hydration errors, no horizontal scroll, a visible header
 (banner role or AppHeader), and no text overflowing its box (scroll containers excepted).
 Screenshots go to tests/probes/out/smoke-<route>-<width>.png. Exits 1 if any route fails.
-Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/smoke.py
+Routes are the page.tsx files under app/, so a new route is covered without a change here. The old URLs that\nIA v2 redirects (/today, /profile, /foods) have no page.tsx; tests/probes/cc2_07.py checks them.\nRun with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/smoke.py
 """
 import os
 import re
 import sys
 from pathlib import Path
-from urllib.parse import urlparse
 
 from playwright.sync_api import sync_playwright
 
@@ -20,17 +19,16 @@ OUT_DIR = HERE / "out"
 WIDTHS = [(390, 844), (1280, 800)]
 NOT_FOUND_ROUTE = "/this-page-does-not-exist"
 # Routes with no header by design (decided 12/10). Only the header check is relaxed; all others stay strict.
-NO_HEADER_ROUTES = {"/signin", "/signin/check-email", "/signin/expired", "/signup", NOT_FOUND_ROUTE, "/admin/review"}
+NO_HEADER_ROUTES = {"/signin", "/signin/check-email", "/signin/expired", "/signup", NOT_FOUND_ROUTE, "/admin/review", "/login"}
+# /login is a sign-in screen (Dong's file, no AppHeader), the same kind as /signin; only the header rule is relaxed (cc2-07).
 # /add is a bottom sheet on phones, so it has no header below the desktop width
 NO_HEADER_BELOW_DESKTOP = {"/add"}
 # Setup has step bars on phones, but the desktop card has no header or sidebar (DesktopSetup.dc.html). Decided 12/10 (OPEN_QUESTIONS cc-14b).
 NO_HEADER_AT_DESKTOP = {"/setup/goal", "/setup/profile"}
 DESKTOP_MIN_WIDTH = 1024
 DESKTOP_SIDEBAR = 'nav[aria-label="Điều hướng chính"]:visible'  # the sidebar's nav; the aria-label sits on it, not on the aside
-# /login is skipped: app/(auth)/login/page.tsx:150 links "Đăng ký hoặc dùng thử" to /diary, which is
-# not a route. Its prefetch never finishes, so networkidle is never reached. Dong's file, so not edited
-# here. Remove this entry once /login is removed or redirected to /signin (OPEN_QUESTIONS cc-14b).
-SKIPPED_ROUTES = {"/login"}
+# No route is skipped now: /login links to /diary, which is a route since cc2-07, so it reaches networkidle.
+SKIPPED_ROUTES: set[str] = set()
 # Mock id for each dynamic segment, keyed by the static segment in front of it
 MOCK_IDS = {"entry": "item-1", "foods": "food-cha-la", "micros": "calcium"}
 IGNORED_CONSOLE = ("data-gr-", "Grammarly")
@@ -109,13 +107,7 @@ def check(browser, route, width, height):
         page.goto(BASE + route, wait_until="networkidle", timeout=30000)
         page.wait_for_timeout(300)
 
-        # The page the header rule applies to. /foods only redirects, so it is judged as the page it lands on (/add).
         header_route = route
-        if route == "/foods":
-            landed = urlparse(page.url).path
-            header_route = landed
-            if landed != "/add":
-                reasons.append(f"/foods did not redirect to /add (landed on {landed})")
 
         seen = set()
         for text in console_msgs:
