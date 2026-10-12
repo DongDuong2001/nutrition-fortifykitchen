@@ -299,6 +299,7 @@ export function AppHeader({
                   onClick={onDateTap}
                   aria-haspopup="dialog"
                   aria-label={`Chọn ngày, ${resolvedDateLabel}`}
+                  aria-busy={resolvedDateLabel ? undefined : true}
                   className="text-sm font-semibold tracking-tight inline-flex items-center justify-center min-w-[104px] min-h-[44px] px-1 text-center bg-transparent border-0 text-white cursor-pointer rounded-lg hover:text-sky active:scale-[0.97] transition-colors"
                 >
                   {resolvedDateLabel || <span aria-hidden="true" className="inline-block w-[104px] h-5" />}
