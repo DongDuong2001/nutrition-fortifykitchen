@@ -1,6 +1,11 @@
-import { TodayScreen } from "@/components/today/today-screen";
+import { OverviewFrame } from "@/components/overview/overview-frame";
+import { SummaryTab } from "@/components/overview/summary-tab";
 
-/** Tổng quan. Shows the Today content until step 2 of IA v2 (design/IA-v2.md). */
+/** Tổng quan › Tóm tắt (IA v2): the default landing screen. The day itself lives in Nhật ký (/diary). */
 export default function HomePage() {
-  return <TodayScreen screen="home" />;
+  return (
+    <OverviewFrame active="summary">
+      <SummaryTab />
+    </OverviewFrame>
+  );
 }
