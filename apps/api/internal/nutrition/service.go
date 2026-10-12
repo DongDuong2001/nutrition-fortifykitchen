@@ -2,119 +2,145 @@ package nutrition
 
 import (
 	"context"
-	"encoding/json"
+	"errors"
 	"fmt"
-	"net/http"
-	"os"
-	"time"
+	"math"
 
 	"github.com/google/uuid"
-	"nutrition-api/internal/diary"
 )
 
-type CreateCustomFoodRequest struct {
-	Name             string               `json:"name"`
-	ServingSizeG     float64              `json:"serving_size_g"`
-	Per100gNutrients diary.NutrientValues `json:"per_100g_nutrients"`
-}
+var (
+	ErrFoodNotFound       = errors.New("food not found")
+	ErrInvalidNutrientKey = errors.New("invalid nutrient key")
+)
 
 type Service interface {
-	SearchFoods(ctx context.Context, query string, limit, offset int) ([]diary.Food, error)
-	CreateCustomFood(ctx context.Context, userID uuid.UUID, req CreateCustomFoodRequest) (*diary.Food, error)
-	SyncFortifyMenu(ctx context.Context) (int, error)
+	SearchFoods(ctx context.Context, filter FoodSearchFilter) (*FoodSearchResponse, error)
+	GetFoodByID(ctx context.Context, id uuid.UUID) (*FoodDetail, error)
+	GetFoodsRichIn(ctx context.Context, nutrient string, limit int) (*RichInResponse, error)
+	CreateCustomFood(ctx context.Context, userID uuid.UUID, req CreateCustomFoodRequest) (*FoodDetail, error)
+	DeleteCustomFood(ctx context.Context, userID uuid.UUID, foodID uuid.UUID) error
 }
 
 type nutritionService struct {
-	repo       Repository
-	httpClient *http.Client
+	repo Repository
 }
 
 func NewService(repo Repository) Service {
-	return &nutritionService{
-		repo: repo,
-		httpClient: &http.Client{
-			Timeout: 10 * time.Second,
-		},
-	}
+	return &nutritionService{repo: repo}
 }
 
-func (s *nutritionService) SearchFoods(ctx context.Context, query string, limit, offset int) ([]diary.Food, error) {
-	return s.repo.ListFoods(ctx, query, limit, offset)
+func (s *nutritionService) SearchFoods(ctx context.Context, filter FoodSearchFilter) (*FoodSearchResponse, error) {
+	return s.repo.SearchFoods(ctx, filter)
 }
 
-func (s *nutritionService) CreateCustomFood(ctx context.Context, userID uuid.UUID, req CreateCustomFoodRequest) (*diary.Food, error) {
-	if req.Name == "" {
-		return nil, fmt.Errorf("food name is required")
-	}
-	if req.ServingSizeG <= 0 {
-		req.ServingSizeG = 100
-	}
-
-	food := &diary.Food{
-		ID:               uuid.New(),
-		Name:             req.Name,
-		ServingSizeG:     req.ServingSizeG,
-		Per100gNutrients: req.Per100gNutrients,
-		IsCustom:         true,
-		CreatedBy:        &userID,
-	}
-
-	return s.repo.CreateFood(ctx, food)
-}
-
-// SyncFortifyMenu synchronizes meals from Fortify Kitchen Core API using API Key header
-func (s *nutritionService) SyncFortifyMenu(ctx context.Context) (int, error) {
-	coreURL := os.Getenv("FORTIFY_CORE_API_URL")
-	apiKey := os.Getenv("FORTIFY_CORE_API_KEY")
-	if coreURL == "" || apiKey == "" {
-		return 0, fmt.Errorf("FORTIFY_CORE_API_URL or FORTIFY_CORE_API_KEY is not configured")
-	}
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, coreURL+"/api/v1/menu/items", nil)
+func (s *nutritionService) GetFoodByID(ctx context.Context, id uuid.UUID) (*FoodDetail, error) {
+	food, err := s.repo.GetFoodByID(ctx, id)
 	if err != nil {
-		return 0, fmt.Errorf("failed to create menu sync request: %w", err)
+		return nil, err
+	}
+	if food == nil {
+		return nil, ErrFoodNotFound
+	}
+	return food, nil
+}
+
+func (s *nutritionService) GetFoodsRichIn(ctx context.Context, nutrient string, limit int) (*RichInResponse, error) {
+	// Nutrient units mapping
+	units := map[string]string{
+		"calcium":    "mg",
+		"iron":       "mg",
+		"potassium":  "mg",
+		"magnesium":  "mg",
+		"zinc":       "mg",
+		"vitamin_d":  "µg",
+		"protein":    "g",
+		"fiber":      "g",
+		"vitamin_c":  "mg",
+		"vitamin_a":  "µg",
+		"sodium":     "mg",
+		"folate":     "µg",
+		"b12":        "µg",
 	}
 
-	req.Header.Set("X-API-Key", apiKey)
-	req.Header.Set("Accept", "application/json")
+	unit, ok := units[nutrient]
+	if !ok {
+		unit = "mg"
+	}
 
-	resp, err := s.httpClient.Do(req)
+	items, err := s.repo.GetFoodsRichIn(ctx, nutrient, limit)
 	if err != nil {
-		return 0, fmt.Errorf("fortify kitchen core request failed: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return 0, fmt.Errorf("fortify core api returned status: %d", resp.StatusCode)
+		return nil, err
 	}
 
-	var menuResponse struct {
-		Items []struct {
-			ID           uuid.UUID            `json:"id"`
-			Name         string               `json:"name"`
-			ServingSizeG float64              `json:"serving_size_g"`
-			Nutrients    diary.NutrientValues `json:"per_100g_nutrients"`
-		} `json:"items"`
+	return &RichInResponse{
+		Nutrient: nutrient,
+		Unit:     unit,
+		Items:    items,
+	}, nil
+}
+
+func round(val float64) float64 {
+	return math.Round(val*100) / 100
+}
+
+func (s *nutritionService) CreateCustomFood(ctx context.Context, userID uuid.UUID, req CreateCustomFoodRequest) (*FoodDetail, error) {
+	if req.NameVi == "" {
+		return nil, errors.New("name_vi is required")
+	}
+	if req.ServingSize <= 0 {
+		return nil, errors.New("serving_size must be greater than zero")
+	}
+	if req.Calories < 0 || req.Protein < 0 || req.Carbs < 0 || req.Fat < 0 {
+		return nil, errors.New("macronutrients cannot be negative")
 	}
 
-	if err := json.NewDecoder(resp.Body).Decode(&menuResponse); err != nil {
-		return 0, fmt.Errorf("failed to decode core menu items: %w", err)
-	}
+	// Scale factor to convert user's portion to 100g standard
+	factor := 100.0 / req.ServingSize
 
-	foods := make([]diary.Food, len(menuResponse.Items))
-	for i, item := range menuResponse.Items {
-		foods[i] = diary.Food{
-			ID:               item.ID,
-			Name:             item.Name,
-			ServingSizeG:     item.ServingSizeG,
-			Per100gNutrients: item.Nutrients,
-			IsCustom:         false,
+	per100g := make(map[string]*float64)
+	calVal := round(req.Calories * factor)
+	proVal := round(req.Protein * factor)
+	carbVal := round(req.Carbs * factor)
+	fatVal := round(req.Fat * factor)
+
+	per100g["energy"] = &calVal
+	per100g["calories"] = &calVal
+	per100g["protein"] = &proVal
+	per100g["carbs"] = &carbVal
+	per100g["fat"] = &fatVal
+
+	for k, v := range req.Micros {
+		if v != nil {
+			scaled := round(*v * factor)
+			per100g[k] = &scaled
+		} else {
+			per100g[k] = nil
 		}
 	}
 
-	if err := s.repo.UpsertBatchFoods(ctx, foods); err != nil {
-		return 0, fmt.Errorf("failed to upsert foods: %w", err)
+	servingLabel := fmt.Sprintf("%g %s", req.ServingSize, req.ServingUnit)
+	if req.ServingUnit == "" {
+		servingLabel = fmt.Sprintf("%g g", req.ServingSize)
 	}
 
-	return len(foods), nil
+	portions := []Portion{
+		{LabelVi: servingLabel, Grams: req.ServingSize},
+		{LabelVi: "100 g", Grams: 100},
+	}
+
+	food := &FoodDetail{
+		ID:               uuid.New(),
+		NameVi:           req.NameVi,
+		Category:         "cua_toi",
+		Source:           "custom",
+		IsCustom:         true,
+		Per100gNutrients: per100g,
+	}
+
+	return s.repo.CreateCustomFood(ctx, userID, food, portions)
+}
+
+func (s *nutritionService) DeleteCustomFood(ctx context.Context, userID uuid.UUID, foodID uuid.UUID) error {
+	return s.repo.DeleteCustomFood(ctx, userID, foodID)
 }

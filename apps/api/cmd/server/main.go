@@ -115,8 +115,13 @@ func main() {
 		// Public Webhook: GitHub Vault Ingestion
 		r.Post("/vault/webhook", vaultHandler.HandleWebhook)
 
-		// Food search (public access allowed for catalog browsing)
-		r.Get("/foods", nutritionHandler.SearchFoods)
+		// Food catalog routes (public browsing allowed)
+		r.Route("/foods", func(r chi.Router) {
+			r.Get("/", nutritionHandler.SearchFoods)
+			r.Get("/rich-in", nutritionHandler.GetFoodsRichIn)
+			r.Get("/rich-in/{nutrient}", nutritionHandler.GetFoodsRichIn)
+			r.Get("/{id}", nutritionHandler.GetFoodByID)
+		})
 
 		// Authenticated Routes
 		r.Group(func(r chi.Router) {
@@ -131,8 +136,9 @@ func main() {
 				r.Delete("/", profileHandler.DeleteMe)
 			})
 
-			// Custom food creation
+			// Custom food creation & deletion
 			r.Post("/foods/custom", nutritionHandler.CreateCustomFood)
+			r.Delete("/foods/custom/{id}", nutritionHandler.DeleteCustomFood)
 
 			// Diary logs & daily progress
 			r.Route("/diary", func(r chi.Router) {
@@ -149,7 +155,6 @@ func main() {
 			r.Route("/admin", func(r chi.Router) {
 				r.Get("/drafts", vaultHandler.ListDrafts)
 				r.Patch("/drafts/{id}/status", vaultHandler.UpdateDraftStatus)
-				r.Post("/menu/sync", nutritionHandler.SyncFortifyMenu)
 			})
 		})
 	})

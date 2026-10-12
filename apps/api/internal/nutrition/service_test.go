@@ -1,0 +1,150 @@
+package nutrition
+
+import (
+	"context"
+	"testing"
+
+	"github.com/google/uuid"
+)
+
+type mockNutritionRepo struct {
+	foods      map[uuid.UUID]*FoodDetail
+	customFood *FoodDetail
+}
+
+func (m *mockNutritionRepo) SearchFoods(ctx context.Context, filter FoodSearchFilter) (*FoodSearchResponse, error) {
+	var items []FoodDetail
+	for _, f := range m.foods {
+		items = append(items, *f)
+	}
+	return &FoodSearchResponse{
+		Items: items,
+		Total: len(items),
+		Page:  filter.Page,
+		Limit: filter.Limit,
+	}, nil
+}
+
+func (m *mockNutritionRepo) GetFoodByID(ctx context.Context, id uuid.UUID) (*FoodDetail, error) {
+	if f, ok := m.foods[id]; ok {
+		return f, nil
+	}
+	return nil, nil
+}
+
+func (m *mockNutritionRepo) GetFoodsRichIn(ctx context.Context, nutrient string, limit int) ([]RichInFoodItem, error) {
+	var items []RichInFoodItem
+	for _, f := range m.foods {
+		if val, ok := f.Per100gNutrients[nutrient]; ok && val != nil && *val > 0 {
+			items = append(items, RichInFoodItem{
+				FoodID:        f.ID,
+				NameVi:        f.NameVi,
+				Category:      f.Category,
+				AmountPer100g: *val,
+			})
+		}
+	}
+	return items, nil
+}
+
+func (m *mockNutritionRepo) CreateCustomFood(ctx context.Context, userID uuid.UUID, food *FoodDetail, portions []Portion) (*FoodDetail, error) {
+	food.Servings = portions
+	m.customFood = food
+	return food, nil
+}
+
+func (m *mockNutritionRepo) DeleteCustomFood(ctx context.Context, userID uuid.UUID, foodID uuid.UUID) error {
+	return nil
+}
+
+func TestNutritionService_CreateCustomFood_Scaling(t *testing.T) {
+	repo := &mockNutritionRepo{foods: make(map[uuid.UUID]*FoodDetail)}
+	svc := NewService(repo)
+
+	cal := 150.0
+	ca := 60.0
+	req := CreateCustomFoodRequest{
+		NameVi:      "Bánh mì trứng",
+		ServingSize: 150, // Factor = 100 / 150 = 0.666667
+		ServingUnit: "g",
+		Calories:    cal, // 150 * (100 / 150) = 100 kcal per 100g
+		Protein:     15,  // 15 * 0.666667 = 10 g
+		Carbs:       30,  // 30 * 0.666667 = 20 g
+		Fat:         7.5, // 7.5 * 0.666667 = 5 g
+		Micros: map[string]*float64{
+			"calcium":   &ca, // 60 * 0.666667 = 40 mg
+			"potassium": nil, // unknown must remain nil
+		},
+	}
+
+	userID := uuid.New()
+	res, err := svc.CreateCustomFood(context.Background(), userID, req)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if res.NameVi != "Bánh mì trứng" {
+		t.Errorf("expected name 'Bánh mì trứng', got %s", res.NameVi)
+	}
+
+	// Verify scaling to 100g
+	per100g := res.Per100gNutrients
+	if per100g["calories"] == nil || *per100g["calories"] != 100 {
+		t.Errorf("expected 100 kcal per 100g, got %v", per100g["calories"])
+	}
+	if per100g["protein"] == nil || *per100g["protein"] != 10 {
+		t.Errorf("expected 10 g protein per 100g, got %v", per100g["protein"])
+	}
+	if per100g["calcium"] == nil || *per100g["calcium"] != 40 {
+		t.Errorf("expected 40 mg calcium per 100g, got %v", per100g["calcium"])
+	}
+
+	// Verify null stays null
+	if per100g["potassium"] != nil {
+		t.Errorf("expected potassium to remain nil, got %v", per100g["potassium"])
+	}
+
+	// Verify portions created
+	if len(res.Servings) != 2 {
+		t.Fatalf("expected 2 servings, got %d", len(res.Servings))
+	}
+	if res.Servings[0].LabelVi != "150 g" || res.Servings[0].Grams != 150 {
+		t.Errorf("unexpected first portion: %+v", res.Servings[0])
+	}
+	if res.Servings[1].LabelVi != "100 g" || res.Servings[1].Grams != 100 {
+		t.Errorf("unexpected second portion: %+v", res.Servings[1])
+	}
+}
+
+func TestNutritionService_RichIn_Units(t *testing.T) {
+	foodID := uuid.New()
+	ca := 120.0
+	repo := &mockNutritionRepo{
+		foods: map[uuid.UUID]*FoodDetail{
+			foodID: {
+				ID:       foodID,
+				NameVi:   "Sữa tươi",
+				Category: "sua",
+				Per100gNutrients: map[string]*float64{
+					"calcium": &ca,
+				},
+			},
+		},
+	}
+	svc := NewService(repo)
+
+	res, err := svc.GetFoodsRichIn(context.Background(), "calcium", 10)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if res.Unit != "mg" {
+		t.Errorf("expected unit 'mg' for calcium, got %s", res.Unit)
+	}
+	if len(res.Items) != 1 {
+		t.Fatalf("expected 1 item, got %d", len(res.Items))
+	}
+	if res.Items[0].AmountPer100g != 120 {
+		t.Errorf("expected 120 mg per 100g, got %f", res.Items[0].AmountPer100g)
+	}
+}
