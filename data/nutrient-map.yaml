@@ -1,0 +1,70 @@
+# Mapping from USDA, VN FCT, and CNF nutrient identifiers to our 57 tracked nutrient keys
+# Form: <source_nutrient_id_or_name>: { key: <our_key>, unit: <our_unit>, factor: <multiplier> }
+
+usda:
+  1008: { key: "energy", unit: "kcal", factor: 1.0 }
+  1003: { key: "protein", unit: "g", factor: 1.0 }
+  1005: { key: "carbs", unit: "g", factor: 1.0 }
+  1004: { key: "fat", unit: "g", factor: 1.0 }
+  1079: { key: "fiber", unit: "g", factor: 1.0 }
+  2000: { key: "sugars", unit: "g", factor: 1.0 }
+  1235: { key: "added_sugars", unit: "g", factor: 1.0 }
+  1087: { key: "calcium", unit: "mg", factor: 1.0 }
+  1089: { key: "iron", unit: "mg", factor: 1.0 }
+  1090: { key: "magnesium", unit: "mg", factor: 1.0 }
+  1091: { key: "phosphorus", unit: "mg", factor: 1.0 }
+  1092: { key: "potassium", unit: "mg", factor: 1.0 }
+  1093: { key: "sodium", unit: "mg", factor: 1.0 }
+  1095: { key: "zinc", unit: "mg", factor: 1.0 }
+  1098: { key: "copper", unit: "mg", factor: 1.0 }
+  1101: { key: "manganese", unit: "mg", factor: 1.0 }
+  1103: { key: "selenium", unit: "µg", factor: 1.0 }
+  1106: { key: "vitamin_a", unit: "µg", factor: 1.0 } # RAE
+  1162: { key: "vitamin_c", unit: "mg", factor: 1.0 }
+  1114: { key: "vitamin_d", unit: "µg", factor: 1.0 } # D2 + D3
+  1109: { key: "vitamin_e", unit: "mg", factor: 1.0 } # alpha-tocopherol
+  1185: { key: "vitamin_k", unit: "µg", factor: 1.0 } # phylloquinone
+  1165: { key: "b1", unit: "mg", factor: 1.0 }        # thiamin
+  1166: { key: "b2", unit: "mg", factor: 1.0 }        # riboflavin
+  1167: { key: "b3", unit: "mg", factor: 1.0 }        # niacin
+  1170: { key: "b5", unit: "mg", factor: 1.0 }        # pantothenic acid
+  1175: { key: "b6", unit: "mg", factor: 1.0 }        # pyridoxine
+  1177: { key: "folate", unit: "µg", factor: 1.0 }    # folate total
+  1178: { key: "b12", unit: "µg", factor: 1.0 }       # cobalamin
+  1258: { key: "saturated_fat", unit: "g", factor: 1.0 }
+  1257: { key: "trans_fat", unit: "g", factor: 1.0 }
+  1292: { key: "monounsaturated_fat", unit: "g", factor: 1.0 }
+  1293: { key: "polyunsaturated_fat", unit: "g", factor: 1.0 }
+  1253: { key: "cholesterol", unit: "mg", factor: 1.0 }
+  1051: { key: "water", unit: "g", factor: 1.0 }
+  1018: { key: "alcohol", unit: "g", factor: 1.0 }
+  1057: { key: "caffeine", unit: "mg", factor: 1.0 }
+
+vn_table:
+  calo: { key: "energy", unit: "kcal", factor: 1.0 }
+  dam: { key: "protein", unit: "g", factor: 1.0 }
+  tinh_bot: { key: "carbs", unit: "g", factor: 1.0 }
+  beo: { key: "fat", unit: "g", factor: 1.0 }
+  xo: { key: "fiber", unit: "g", factor: 1.0 }
+  canxi: { key: "calcium", unit: "mg", factor: 1.0 }
+  sat: { key: "iron", unit: "mg", factor: 1.0 }
+  magie: { key: "magnesium", unit: "mg", factor: 1.0 }
+  photpho: { key: "phosphorus", unit: "mg", factor: 1.0 }
+  kali: { key: "potassium", unit: "mg", factor: 1.0 }
+  natri: { key: "sodium", unit: "mg", factor: 1.0 }
+  kem: { key: "zinc", unit: "mg", factor: 1.0 }
+  dong: { key: "copper", unit: "mg", factor: 1.0 }
+  mangan: { key: "manganese", unit: "mg", factor: 1.0 }
+  selen: { key: "selenium", unit: "µg", factor: 1.0 }
+  vit_a: { key: "vitamin_a", unit: "µg", factor: 1.0 }
+  vit_c: { key: "vitamin_c", unit: "mg", factor: 1.0 }
+  vit_d: { key: "vitamin_d", unit: "µg", factor: 1.0 }
+  vit_e: { key: "vitamin_e", unit: "mg", factor: 1.0 }
+  vit_k: { key: "vitamin_k", unit: "µg", factor: 1.0 }
+  vit_b1: { key: "b1", unit: "mg", factor: 1.0 }
+  vit_b2: { key: "b2", unit: "mg", factor: 1.0 }
+  vit_pp: { key: "b3", unit: "mg", factor: 1.0 }
+  vit_b5: { key: "b5", unit: "mg", factor: 1.0 }
+  vit_b6: { key: "b6", unit: "mg", factor: 1.0 }
+  folat: { key: "folate", unit: "µg", factor: 1.0 }
+  vit_b12: { key: "b12", unit: "µg", factor: 1.0 }
