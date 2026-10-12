@@ -3,10 +3,10 @@
 ## Now working
 | Task | Owner | Files / routes |
 |---|---|---|
-| cc2-01 | Claude Code #2 (port 3102, feat/ui-cc2-01) | app/micros/[nutrient]/page.tsx, app/micros/page.tsx (NutrientRow link + buildNutrientRows moved out), lib/nutrient-rows.ts, lib/nutrient-detail.ts, lib/nutrient-sources.ts (+ tests), lib/diary-store.tsx (nutrientSources), lib/format.ts (+ format.test.ts), lib/date.ts, lib/mock/sample-day.ts (dateLabel), app/(dashboard)/training/page.tsx (fallback label), app/(dashboard)/foods/page.tsx (removed), app/foods/page.tsx (redirect to /add), tests/probes/cc2_01.py, tests/probes/cc10.py (date label) |
 
 | Date | Commit | Built | Next |
 | --- | --- | --- | --- |
+| 12/10/2026 | cc2-01 finish | Rebased onto feat/ui 8cf2c92. Nutrient detail uses targetRangeText (targetLabel removed, tests moved). Detail header rows and both cards carry data-align-group (nutrient-header, nutrient-card), with alignment rows at 390 and 1440 for /micros/calcium. Detail skeleton is motion-safe. Training loading subtitle is empty, not 10/10. Lane rules in AGENTS.md and CLAUDE.md: each Claude Code works in its own clone. Smoke: setup goal and profile exempt from the header at 1024 px and up (cc-14b decided 12/10); /foods judged on /add. Gate summary below. | Task 2 (cc2-02, ag-06 merge) |
 | 12/10/2026 | cc-14b | Merged ag-07 (rebased onto feat/ui, 7 commits, PROGRESS rows kept). --color-destructive-text is #C4373C (5.30:1 on #FFFFFF, 4.70:1 on #F3F1EC; CSS comment updated). /foods/[id] label keeps only focus-within:ring-2 focus-within:ring-blue. Smoke header rule decided 12/10 (Hao): no header required on /signin, /signin/check-email, /signin/expired, /signup, the 404 URL, /admin/review, and /add below 1024 px; the DesktopSidebar counts as the header at ≥1024 px. /login skipped in smoke (Dong's link to /diary). Smoke 50 PASS / 4 FAIL of 54. | /foods stays failing until cc2-01 merges; setup at 1280 has no header (OPEN_QUESTIONS cc-14b); /login for Dong |
 | 12/10/2026 | cc-14 | Whole-app smoke probe tests/probes/smoke.py: 27 page.tsx routes plus the 404 URL, at 390×844 and 1280×800 (56 runs). Checks console and hydration errors, horizontal scroll, a visible header, and text overflow (scroll containers and sr-only skipped). /foods is asserted to redirect to /add. Screenshots in apps/web/tests/probes/out/. tests/probes/run_all.py and npm run probe:all run every probe in one table: cc02-final only with PROBE_DEV=1; ag04_audit and screenshots are REPORT (no exit gate). No app code changed. | Found (cc-14) below: 2 real bugs (/foods, /login); 17 header-rule FAILs need a decision (OPEN_QUESTIONS cc-14) |
 | 12/10/2026 | ag-07 | Accessibility fixes (audit-ag04): gram input h-full in 44px label and focus ring in /foods/[id], htmlFor/id linking in /foods/new FormRows, --color-destructive-text token (#C83A3F, >=4.5:1 contrast on white & paper) for required '*', magic-link email input keyboard focus ring, Vietnamese salt comment 1–1,5 g in training.ts, ag07.py verification probe (46/46 checks passed). | Ready for merge |
@@ -84,6 +84,14 @@ Smoke on prod :3101 (`npm run probe:all`): 35 PASS, 21 FAIL of 56 route × width
 - Probes: cc02-final, cc03, cc04, cc05, cc06: no problems.
 - Edges: training-content (phase-checklist, rest-day-card) and training-summary (salt-summary-card, sodium-progress-card) are not in tests/alignment.py, so not checked by the gate.
 
+
+## Quality Gate Summary (cc2-01 finish)
+- Branch feat/ui-cc2-01, rebased onto origin/feat/ui 8cf2c92 (OPEN_QUESTIONS and PROGRESS conflicts kept both sides). Merged with --ff-only into feat/ui. Port 3102, prod build.
+- Playwright and Chromium installed on this machine (approved by Hao): `py -m pip install playwright`, `py -m playwright install chromium`. Nothing committed for it.
+- Gates on prod :3102, each step as its own command (the build ran before the server started): `npm run typecheck` ok; `npm run test` 268 pass in 23 files; `npm run build` ok (26 routes); `npm run test:align` all pairs pass (≤ 1 px); `npm run test:hydration` 0 errors; `npm run probe:all` 16 PASS, 2 REPORT (ag04_audit, screenshots), 0 FAIL, 1 SKIP (cc02-final, dev only by design).
+- Smoke: `tests/probes/smoke.py` 54 of 54 PASS at 390 and 1280. /foods (redirect) passes because the header rule is judged on the page it lands on (/add, bottom sheet below 1024 px). Setup goal and profile have no header at 1024 px and up (decided 12/10, OPEN_QUESTIONS cc-14b).
+- Edges: /micros/calcium 390 nutrient-header (1 pair), nutrient-card (1 pair) pass; /micros/calcium 1440 nutrient-header (1 pair), nutrient-card (1 pair) pass.
+- Environment, not repo: `python3` here is the Microsoft Store stub, so the npm Python scripts ran through a `python3.cmd` shim (`py -3`) kept outside the repo. `PYTHONIOENCODING=utf-8` is needed for hydration.py (the console is cp1252). `npm run probe -- <file>` rejects Windows backslash paths and cannot run `python3` here, so smoke was run with `py -3` directly.
 
 ## Quality Gate Summary (cc2-01)
 - Branch feat/ui-cc2-01 (Claude Code #2, port 3102), rebased onto origin/feat/ui d78342c (cc-12b); PROGRESS conflicts kept both rows. Not merged, not pushed: the Playwright gates could not run (below).
