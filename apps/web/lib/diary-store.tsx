@@ -8,6 +8,7 @@ import { formatAmount } from "./format";
 import { getTodayIsoVN, withRuntimeDate } from "./date";
 import { blankDay, dayEntries, statDisplay } from "./day-history";
 import { microsSummaryFor } from "./lacking";
+import { nutrientSourcesIn, type NutrientSource } from "./nutrient-sources";
 import { DEFAULT_RECENT_FOODS, isRecentFood, pushRecent, type RecentFood } from "./recent-foods";
 import { readFavouriteIds, toggleFavouriteId, writeFavouriteIds } from "./favourites";
 import {
@@ -96,6 +97,8 @@ interface DiaryContextValue {
   targets: CompleteTargets;
   /** Changes part of the profile and saves it. Targets and the day follow. */
   updateProfile: (patch: Partial<Profile>) => void;
+  /** The foods of today that add to one nutrient, largest first. Read by the Vi chất detail. */
+  nutrientSources: (key: string) => NutrientSource[];
 }
 
 const DiaryContext = createContext<DiaryContextValue | null>(null);
@@ -429,6 +432,11 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
 
   const targets = useMemo(() => targetsFor(profile), [profile]);
 
+  const nutrientSources = useCallback(
+    (key: string) => nutrientSourcesIn(edits.added, edits.sample, key),
+    [edits]
+  );
+
   const updateProfile = useCallback(
     (patch: Partial<Profile>) => {
       const next = normaliseProfile({ ...profile, ...patch });
@@ -470,6 +478,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         profile,
         targets,
         updateProfile,
+        nutrientSources,
       }}
     >
       {children}
