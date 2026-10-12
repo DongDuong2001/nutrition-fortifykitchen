@@ -666,3 +666,35 @@ For validation failures with field-level breakdowns, an optional `details` map m
 | `422` | `INVALID_BIRTH_YEAR` | Birth year outside 1900 to current year | Renders error *"Nhập năm sinh từ 1900 đến {năm hiện tại}"* |
 | `429` | `RATE_LIMIT_EXCEEDED` | Request rate limit exceeded | Displays rate limit notification *"Thử lại sau ít phút"* |
 | `500` | `INTERNAL_SERVER_ERROR` | Unexpected backend error | Displays toast *"Chưa lưu được. Thử lại sau ít phút"* or routes to 500 page (`app/error.tsx`) |
+
+
+---
+
+## 5. Open Questions for Dong (Checklist)
+
+The following checklist identifies technical decisions and schema alignments requiring Dong's confirmation:
+
+- [ ] **1. Deprecate or remove legacy `/login` route**:
+  - *Context*: The old scaffold page at `apps/web/app/(auth)/login/page.tsx` uses dark raw hex styling and contains a broken link to `/diary` that hangs Next.js prefetching. The active Cobalt Sign authentication flow uses `/signin` and `/signup` (Supabase Magic Link + Google OAuth).
+  - *Decision needed*: Should `/login` be permanently removed, or should it issue a 308 redirect to `/signin`?
+
+- [ ] **2. Add `category` column to `nutrition.foods`**:
+  - *Context*: The `/add` screen filters foods across 10 standard category keys (`tinh_bot`, `dam`, `beo`, `sua`, `rau`, `trai_cay`, `mon_viet`, `an_vat`, `bo_sung`, `cua_toi`). The `nutrition.foods` table in migration `000001` currently has `id`, `name`, `serving_size_g`, `per_100g_nutrients`, `is_custom`, `created_by`, but no category column.
+  - *Proposal*: Add migration `ALTER TABLE nutrition.foods ADD COLUMN category TEXT;` with an index for filtered queries.
+
+- [ ] **3. Offline sync strategy for diary entries**:
+  - *Context*: The design specification includes an offline indicator with a *"Chờ đồng bộ"* badge for foods logged while disconnected (`design/screens/TodayStates.dc.html`).
+  - *Proposal for Release 1*: The web client buffers pending mutations in local browser storage (`localStorage` / `IndexedDB`). Upon network reconnection (`navigator.onLine`), the client replays standard `POST`/`PATCH`/`DELETE` calls sequentially, relying on client-generated UUIDs (`id`) for idempotent deduplication. Does Dong agree with this client-replay pattern, or would Dong prefer a dedicated batch endpoint `POST /api/v1/diary/sync`?
+
+- [ ] **4. Role of `nutrition.user_targets` vs Client-Side Targets**:
+  - *Context*: The web app currently computes targets in real time client-side from the profile using `apps/web/lib/targets.ts` (pure functions with full unit test coverage).
+  - *Decision needed*: Should the Go API replicate the `calculateTargets` logic and return a precomputed `target_nutrients` object in `GET /days/{date}` summaries, or should the API simply store profile inputs and leave target visualization to the client?
+
+- [ ] **5. Migrations for user favourites and recent foods**:
+  - *Context*: Favourites and Recents are temporarily kept in client storage (`localStorage` and `sessionStorage`). To support multi-device persistence, the backend needs two supporting tables:
+    - `nutrition.user_favourites (user_id UUID, food_id UUID, created_at TIMESTAMPTZ, PRIMARY KEY (user_id, food_id))`
+    - `nutrition.user_recents (user_id UUID, food_id UUID, last_serving_label TEXT, last_grams NUMERIC, updated_at TIMESTAMPTZ, PRIMARY KEY (user_id, food_id))`
+  - *Decision needed*: Can Dong add these tables in the next database migration?
+
+- [ ] **6. Snapshot integrity in `nutrition.diary_logs`**:
+  - *Confirmation*: On every entry creation, the Go backend computes `grams = quantity * serving_size_g` and snapshots the resulting nutrient values into `nutrients_snapshot JSONB`. This confirms historical diary logs remain immutable when source food data is updated in the catalog.
