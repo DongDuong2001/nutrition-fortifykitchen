@@ -149,7 +149,7 @@ export default function PaywallPage() {
           Khôi phục gói đã mua
         </button>
         <div className="text-xs text-secondary text-center">
-          Gói Miễn phí vẫn ghi đủ 21 vi chất.
+          Gói Miễn phí vẫn ghi đủ 22 vi chất.
         </div>
       </footer>
     </div>
