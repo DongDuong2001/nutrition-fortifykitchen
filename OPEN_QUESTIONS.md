@@ -67,3 +67,8 @@
 - [ ] (cc-12) Date labels: the app writes "Thứ Năm, 08/10" with a comma. The phone design writes "Thứ Năm 08/10" without one. Confirm the style.
 - [ ] (cc-12) Profile "Nhắc nhở" shows "Đã bật" when any reminder is on, and nothing when all are off. The design has no "off" copy. Confirm the wording ("Đã tắt"?).
 - [ ] (cc-12) Desktop sign-up helper: the design says "Chúng tôi gửi link vào email, không cần mật khẩu." (comma). Phone and desktop use the phone wording (em dash). Confirm.
+- [ ] (cc-14) /foods at 390 (smoke-foods-390.png): the brief says /foods redirects to /add, but there is no redirect in the code. The page is the old catalog scaffold (commit 0f734dd) with no header. Redirect to /add, or retire the page?
+- [ ] (cc-14) /foods at 1280 (smoke-foods-1280.png): same as the 390 line. One decision covers both.
+- [ ] (cc-14) /login at 390 (smoke-login-390.png): the page never reaches networkidle within 30 s. A fetch to /diary?_rsc=… stays pending. /diary is not a route (curl returns 404 in 9 ms) and no source file links to it. Find the request source and stop it.
+- [ ] (cc-14) /login at 1280 (smoke-login-1280.png): same cause as the 390 line.
+- [ ] (cc-14) Smoke header rule (17 FAILs, not bugs by design): the rule needs a visible banner or AppHeader. The designs have none on /signin, /signup, /signin/check-email, /signin/expired and the 404 page, nor on the phone add sheet (/add 390), nor on /admin/review (no design). At 1280 the desktop layouts for /profile, /profile/weight, /setup/goal and /setup/profile use the sidebar (AppHeader is lg:hidden). Choose: exempt these screens, accept the sidebar as the desktop header, or keep the strict rule.
