@@ -169,7 +169,7 @@ function FoodDetailInner() {
             columns={food.servings.length + 1}
             tone="light"
             leadingInput={
-              <label className="flex items-center justify-center bg-white border-2 border-blue rounded-xl px-2 h-11 w-full cursor-text box-border">
+              <label className="flex items-center justify-center bg-white border-2 border-blue rounded-xl px-2 h-11 w-full cursor-text box-border focus-within:ring-2 focus-within:ring-blue focus-visible:ring-2 ring-blue">
                 <span className="sr-only">Khối lượng</span>
                 <input
                   id="fd-size"
@@ -181,7 +181,7 @@ function FoodDetailInner() {
                     setGramsInput(e.target.value);
                     setSelectedServingLabel(`${e.target.value} g`);
                   }}
-                  className="w-full border-0 outline-none bg-transparent font-bold text-sm tabular-nums text-text text-right"
+                  className="w-full h-full border-0 outline-none focus:outline-none bg-transparent font-bold text-sm tabular-nums text-text text-right"
                 />
                 <span className="text-secondary text-xs ml-1 font-semibold">g</span>
               </label>
