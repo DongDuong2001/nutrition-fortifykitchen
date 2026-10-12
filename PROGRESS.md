@@ -590,3 +590,4 @@ All alignment and hydration tests passed cleanly (<= 1px difference, 0 hydration
 
 ## Night shift
 - 13/10 cc2-unify: unified AppHeader (ink on phone, paper on desktop), design/UI-RULES.md, SectionTitle, radius and spacing sweep, probe cc2_unify.py. Merged (commit in git log: "unify: ...").
+- 13/10 docs08: docs/08-backend-plan.md added, pointers in AGENTS.md and docs/07-api-contract.md. Committed on feat/ui-cc2-docs08 and merged locally; push to origin/feat/ui was blocked by the permission classifier (docs only; typecheck, smoke 62/62).

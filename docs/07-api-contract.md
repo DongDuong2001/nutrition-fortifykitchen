@@ -1,5 +1,7 @@
 # 7. Nutrition API Contract for Backend (Go API & Supabase)
 
+Build plan and decisions: docs/08-backend-plan.md (wins where they differ).
+
 This document defines the formal API Contract between the Web Frontend (`apps/web`) and the Go Backend API developed by Dong on top of Supabase PostgreSQL 17 (`nutrition` schema).
 
 All resource models, endpoints, and business invariants are derived directly from the active H1T MICRO screens (`apps/web`), system architecture specifications (`docs/00`–`06`, `HANDOFF.md`, `design/SPEC.md`), and the database migration schema (`migrations/000001_init_nutrition_schema.up.sql`).

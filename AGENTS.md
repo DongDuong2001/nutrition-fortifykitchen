@@ -127,6 +127,7 @@ Always use **your agent's fixed port**: **3100 for Antigravity, 3101 for Claude 
 - Claim your files on the **Now working** board before editing. Never edit a file another active task has claimed.
 - Tests follow their file: lib/__tests__/<name>.test.ts belongs to the owner of lib/<name>.
 - Dong's: lib/api-client, lib/supabase-client, apps/api, migrations (UI agents may only read; mock changes go through OPEN_QUESTIONS).
+- Dong's backend build plan and decisions: `docs/08-backend-plan.md`.
 - Anything not listed: ask in OPEN_QUESTIONS before editing.
 - Antigravity needs a change outside its task files? Add one line to OPEN_QUESTIONS and continue without it; never edit directly.
 - Both may append to PROGRESS, OPEN_QUESTIONS and BACKLOG. When the user says stop, no agent edits anything until told to continue.
