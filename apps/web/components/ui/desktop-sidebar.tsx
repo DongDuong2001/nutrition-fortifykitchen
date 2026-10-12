@@ -12,7 +12,7 @@ const ITEMS: { tab: SidebarTab; href: string; label: string; icon: string }[] = 
 /** Left column from 1024 px up. Phone uses BottomNav instead. */
 export function DesktopSidebar({ currentTab }: { currentTab: SidebarTab }) {
   return (
-    <aside className="hidden w-60 shrink-0 flex-col gap-6 bg-ink p-6 text-white box-border lg:flex">
+    <aside className="hidden w-60 shrink-0 flex-col gap-6 bg-ink p-6 text-on-dark box-border lg:flex">
       <div className="px-2 font-display italic font-black text-2xl">
         H1T <span className="text-sky">MICRO</span>
       </div>
@@ -25,7 +25,7 @@ export function DesktopSidebar({ currentTab }: { currentTab: SidebarTab }) {
               href={item.href}
               aria-current={active ? "page" : undefined}
               className={`no-underline flex min-h-[44px] items-center gap-3 rounded-xl px-3 text-[15px] font-semibold transition-colors ${
-                active ? "bg-card/10 text-white" : "text-muted-on-dark hover:bg-card/5 hover:text-white"
+                active ? "bg-card/10 text-on-dark" : "text-muted-on-dark hover:bg-card/5 hover:text-on-dark"
               }`}
             >
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

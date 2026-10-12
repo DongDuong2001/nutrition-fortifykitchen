@@ -38,7 +38,7 @@ export function SaltSummaryCard({
             </>
           )}
         </div>
-        <div className="font-display italic font-bold text-[34px] leading-none tabular-nums text-white shrink-0">
+        <div className="font-display italic font-bold text-[34px] leading-none tabular-nums text-on-dark shrink-0">
           {saltTarget.formattedTotal}
           <span className="text-lg not-italic font-normal text-sky"> g</span>
         </div>
@@ -51,13 +51,13 @@ export function SaltSummaryCard({
     <div
       data-align-group="training-summary"
       data-align-edge="left"
-      className={`bg-ink text-white rounded-2xl p-6 flex flex-col justify-between gap-3 ${className}`}
+      className={`bg-ink text-on-dark rounded-2xl p-6 flex flex-col justify-between gap-3 ${className}`}
     >
       <div className="text-sm text-muted-on-dark">
         {isRestDay ? "Muối hôm nay" : "Muối cần hôm nay"}
       </div>
 
-      <div className="font-display italic font-extrabold text-[56px] leading-none tabular-nums text-white">
+      <div className="font-display italic font-extrabold text-[56px] leading-none tabular-nums text-on-dark">
         {saltTarget.formattedTotal}
         <span className="text-[26px] not-italic font-normal text-sky"> g</span>
       </div>

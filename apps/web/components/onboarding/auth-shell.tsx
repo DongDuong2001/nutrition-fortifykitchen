@@ -16,7 +16,7 @@ export function AuthShell({ hero, children, split = false }: AuthShellProps) {
   return (
     <div className={`flex min-h-dvh flex-col ${split ? "lg:flex-row" : ""}`}>
       <section
-        className={`bg-ink text-white rounded-b-[20px] px-6 pt-11 pb-6 ${
+        className={`bg-ink text-on-dark rounded-b-[20px] px-6 pt-11 pb-6 ${
           split ? "lg:flex-1 lg:rounded-none lg:px-8 lg:py-8 lg:flex lg:flex-col lg:justify-center" : ""
         }`}
       >

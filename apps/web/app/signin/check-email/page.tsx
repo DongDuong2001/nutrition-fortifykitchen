@@ -55,7 +55,7 @@ export default function CheckEmailPage() {
             <p className="m-0 text-[15px] leading-normal text-muted-subtitle">
               {email ? (
                 <>
-                  Đã gửi link đăng nhập tới <strong className="text-white">{email}</strong>.
+                  Đã gửi link đăng nhập tới <strong className="text-on-dark">{email}</strong>.
                 </>
               ) : (
                 "Đã gửi link đăng nhập tới email của bạn."

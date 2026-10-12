@@ -104,7 +104,7 @@ export function AppHeader({
   if (variant === "sub") {
     return (
       <header
-        className={`bg-ink text-white rounded-b-[20px] w-full flex-none select-none ${className}`}
+        className={`bg-ink text-on-dark rounded-b-[20px] w-full flex-none select-none ${className}`}
       >
         <div className="w-full max-w-[560px] mx-auto px-4 pt-3 pb-5 flex flex-col gap-3">
           {/* Top row: Back button left, optional right action */}
@@ -113,7 +113,7 @@ export function AppHeader({
               <Link
                 href={backHref}
                 aria-label={backLabel}
-                className="w-11 h-11 -ml-2 rounded-lg text-white flex items-center justify-center no-underline hover:text-sky transition-colors active:scale-[0.97]"
+                className="w-11 h-11 -ml-2 rounded-lg text-on-dark flex items-center justify-center no-underline hover:text-sky transition-colors active:scale-[0.97]"
               >
                 <svg
                   width="20"
@@ -133,7 +133,7 @@ export function AppHeader({
                 type="button"
                 onClick={onBack}
                 aria-label={backLabel}
-                className="w-11 h-11 -ml-2 rounded-lg bg-transparent border-0 text-white flex items-center justify-center cursor-pointer hover:text-sky transition-colors active:scale-[0.97]"
+                className="w-11 h-11 -ml-2 rounded-lg bg-transparent border-0 text-on-dark flex items-center justify-center cursor-pointer hover:text-sky transition-colors active:scale-[0.97]"
               >
                 <svg
                   width="20"
@@ -160,7 +160,7 @@ export function AppHeader({
             <h1
               data-align-group={alignGroup}
               data-align-edge="left"
-              className="m-0 font-display italic font-extrabold text-[28px] leading-tight text-white uppercase tracking-tight"
+              className="m-0 font-display italic font-extrabold text-[28px] leading-tight text-on-dark uppercase tracking-tight"
             >
               {title}
             </h1>
@@ -190,7 +190,7 @@ export function AppHeader({
       <>
         {/* Mobile / Tablet ink block (<1024px) */}
         <header
-          className={`bg-ink text-white rounded-b-[20px] w-full flex-none lg:hidden select-none ${className}`}
+          className={`bg-ink text-on-dark rounded-b-[20px] w-full flex-none lg:hidden select-none ${className}`}
         >
           <div className="w-full max-w-[560px] mx-auto px-4 pt-3 pb-5 flex flex-col gap-2.5">
             {/* Row 1: Logo left, optional right action */}
@@ -210,7 +210,7 @@ export function AppHeader({
             {/* Title & Subtitle */}
             {title && (
               <div className="pt-0.5">
-                <h1 className="m-0 font-display italic font-black text-3xl uppercase tracking-tight text-white">
+                <h1 className="m-0 font-display italic font-black text-3xl uppercase tracking-tight text-on-dark">
                   {title}
                 </h1>
                 {subtitle && (
@@ -256,7 +256,7 @@ export function AppHeader({
     <>
       {/* Mobile / Tablet ink block (<1024px) */}
       <header
-        className={`bg-ink text-white rounded-b-[20px] w-full flex-none lg:hidden select-none ${className}`}
+        className={`bg-ink text-on-dark rounded-b-[20px] w-full flex-none lg:hidden select-none ${className}`}
       >
         <div className="w-full max-w-[560px] mx-auto px-4 pt-3 pb-4 flex flex-col gap-2.5">
           {/* Row 1: Logo left; Date nav right (44px hit targets) */}
@@ -276,7 +276,7 @@ export function AppHeader({
                 aria-disabled={isPrevDisabled}
                 className={`w-11 h-11 rounded-lg bg-transparent border-0 flex items-center justify-center transition-colors ${
                   !isPrevDisabled
-                    ? "text-white cursor-pointer hover:text-sky active:scale-[0.97]"
+                    ? "text-on-dark cursor-pointer hover:text-sky active:scale-[0.97]"
                     : "text-secondary opacity-50 cursor-default"
                 }`}
               >
@@ -300,7 +300,7 @@ export function AppHeader({
                   aria-haspopup="dialog"
                   aria-label={`Chọn ngày, ${resolvedDateLabel}`}
                   aria-busy={resolvedDateLabel ? undefined : true}
-                  className="text-sm font-semibold tracking-tight inline-flex items-center justify-center min-w-[104px] min-h-[44px] px-1 text-center bg-transparent border-0 text-white cursor-pointer rounded-lg hover:text-sky active:scale-[0.97] transition-colors"
+                  className="text-sm font-semibold tracking-tight inline-flex items-center justify-center min-w-[104px] min-h-[44px] px-1 text-center bg-transparent border-0 text-on-dark cursor-pointer rounded-lg hover:text-sky active:scale-[0.97] transition-colors"
                 >
                   {resolvedDateLabel || <span aria-hidden="true" className="inline-block w-[104px] h-5" />}
                 </button>
@@ -319,7 +319,7 @@ export function AppHeader({
                 aria-disabled={isNextDisabled}
                 className={`w-11 h-11 rounded-lg bg-transparent border-0 flex items-center justify-center transition-colors ${
                   !isNextDisabled
-                    ? "text-white cursor-pointer hover:text-sky active:scale-[0.97]"
+                    ? "text-on-dark cursor-pointer hover:text-sky active:scale-[0.97]"
                     : "text-secondary opacity-50 cursor-default"
                 }`}
               >
@@ -341,7 +341,7 @@ export function AppHeader({
 
           {/* Optional Title (e.g. "VI CHẤT") between Row 1 and Summary */}
           {title && (
-            <h1 className="font-display italic font-extrabold text-2xl uppercase tracking-tight text-white m-0">
+            <h1 className="font-display italic font-extrabold text-2xl uppercase tracking-tight text-on-dark m-0">
               {title}
             </h1>
           )}

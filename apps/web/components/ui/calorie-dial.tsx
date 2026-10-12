@@ -82,7 +82,7 @@ export function CalorieDial({
         )}
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center select-none pointer-events-none">
-        <span className="font-display italic font-black text-2xl text-white leading-tight tracking-tight tabular-nums">
+        <span className="font-display italic font-black text-2xl text-on-dark leading-tight tracking-tight tabular-nums">
           {formatNumber(current)}
         </span>
         <span className="text-[13px] text-muted-on-dark leading-none">

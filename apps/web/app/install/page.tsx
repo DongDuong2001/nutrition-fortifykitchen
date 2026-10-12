@@ -25,7 +25,7 @@ export default function InstallAppPage() {
               aria-hidden="true"
               className="w-16 h-16 shrink-0 rounded-2xl bg-ink flex flex-col items-center justify-center gap-1 shadow-sm"
             >
-              <div className="font-display italic font-black text-[22px] text-white leading-none">
+              <div className="font-display italic font-black text-[22px] text-on-dark leading-none">
                 H1T
               </div>
               <div className="w-[26px] h-1 rounded-sm bg-blue" />
@@ -51,7 +51,7 @@ export default function InstallAppPage() {
               onClick={() => setDeviceTab("ios")}
               className={`h-11 border-0 rounded-full text-sm transition-colors cursor-pointer ${
                 deviceTab === "ios"
-                  ? "bg-ink text-white font-bold"
+                  ? "bg-ink text-on-dark font-bold"
                   : "bg-transparent text-text font-semibold hover:text-ink"
               }`}
             >
@@ -64,7 +64,7 @@ export default function InstallAppPage() {
               onClick={() => setDeviceTab("android")}
               className={`h-11 border-0 rounded-full text-sm transition-colors cursor-pointer ${
                 deviceTab === "android"
-                  ? "bg-ink text-white font-bold"
+                  ? "bg-ink text-on-dark font-bold"
                   : "bg-transparent text-text font-semibold hover:text-ink"
               }`}
             >
@@ -82,7 +82,7 @@ export default function InstallAppPage() {
               <li className="bg-card border border-card-border rounded-[18px] p-3.5 md:p-4 flex items-center gap-3.5 min-h-[56px]">
                 <span
                   aria-hidden="true"
-                  className="w-7 h-7 shrink-0 rounded-full bg-blue text-white flex items-center justify-center text-sm font-bold tabular-nums"
+                  className="w-7 h-7 shrink-0 rounded-full bg-blue text-on-accent flex items-center justify-center text-sm font-bold tabular-nums"
                 >
                   1
                 </span>
@@ -111,7 +111,7 @@ export default function InstallAppPage() {
               <li className="bg-card border border-card-border rounded-[18px] p-3.5 md:p-4 flex items-center gap-3.5 min-h-[56px]">
                 <span
                   aria-hidden="true"
-                  className="w-7 h-7 shrink-0 rounded-full bg-blue text-white flex items-center justify-center text-sm font-bold tabular-nums"
+                  className="w-7 h-7 shrink-0 rounded-full bg-blue text-on-accent flex items-center justify-center text-sm font-bold tabular-nums"
                 >
                   2
                 </span>
@@ -123,7 +123,7 @@ export default function InstallAppPage() {
               <li className="bg-card border border-card-border rounded-[18px] p-3.5 md:p-4 flex items-center gap-3.5 min-h-[56px]">
                 <span
                   aria-hidden="true"
-                  className="w-7 h-7 shrink-0 rounded-full bg-blue text-white flex items-center justify-center text-sm font-bold tabular-nums"
+                  className="w-7 h-7 shrink-0 rounded-full bg-blue text-on-accent flex items-center justify-center text-sm font-bold tabular-nums"
                 >
                   3
                 </span>
@@ -141,7 +141,7 @@ export default function InstallAppPage() {
               <li className="bg-card border border-card-border rounded-[18px] p-3.5 md:p-4 flex items-center gap-3.5 min-h-[56px]">
                 <span
                   aria-hidden="true"
-                  className="w-7 h-7 shrink-0 rounded-full bg-blue text-white flex items-center justify-center text-sm font-bold tabular-nums"
+                  className="w-7 h-7 shrink-0 rounded-full bg-blue text-on-accent flex items-center justify-center text-sm font-bold tabular-nums"
                 >
                   1
                 </span>
@@ -153,7 +153,7 @@ export default function InstallAppPage() {
               <li className="bg-card border border-card-border rounded-[18px] p-3.5 md:p-4 flex items-center gap-3.5 min-h-[56px]">
                 <span
                   aria-hidden="true"
-                  className="w-7 h-7 shrink-0 rounded-full bg-blue text-white flex items-center justify-center text-sm font-bold tabular-nums"
+                  className="w-7 h-7 shrink-0 rounded-full bg-blue text-on-accent flex items-center justify-center text-sm font-bold tabular-nums"
                 >
                   2
                 </span>
@@ -165,7 +165,7 @@ export default function InstallAppPage() {
               <li className="bg-card border border-card-border rounded-[18px] p-3.5 md:p-4 flex items-center gap-3.5 min-h-[56px]">
                 <span
                   aria-hidden="true"
-                  className="w-7 h-7 shrink-0 rounded-full bg-blue text-white flex items-center justify-center text-sm font-bold tabular-nums"
+                  className="w-7 h-7 shrink-0 rounded-full bg-blue text-on-accent flex items-center justify-center text-sm font-bold tabular-nums"
                 >
                   3
                 </span>
@@ -182,7 +182,7 @@ export default function InstallAppPage() {
       <footer className="w-full max-w-[560px] mx-auto px-4 pt-3 pb-6">
         <Link
           href="/today"
-          className="no-underline h-[52px] w-full rounded-full bg-blue text-white flex items-center justify-center text-base font-bold shadow-sm hover:opacity-95 active:scale-[0.97] transition-all"
+          className="no-underline h-[52px] w-full rounded-full bg-blue text-on-accent flex items-center justify-center text-base font-bold shadow-sm hover:opacity-95 active:scale-[0.97] transition-all"
         >
           Đã hiểu
         </Link>

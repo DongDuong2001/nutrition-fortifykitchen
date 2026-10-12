@@ -68,7 +68,7 @@ export default function AdminReviewPage() {
               onClick={() => setFilter(tab)}
               className={`min-h-[44px] cursor-pointer rounded-full px-4 text-xs font-bold uppercase tracking-wider transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none ${
                 filter === tab
-                  ? "border-0 bg-ink text-white"
+                  ? "border-0 bg-ink text-on-dark"
                   : "border border-card-border bg-card text-text hover:bg-page"
               }`}
             >
@@ -93,9 +93,9 @@ export default function AdminReviewPage() {
                 <span
                   className={`rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider ${
                     draft.status === "published"
-                      ? "bg-blue text-white"
+                      ? "bg-blue text-on-accent"
                       : draft.status === "rejected"
-                      ? "bg-destructive-text text-white"
+                      ? "bg-destructive-text text-on-accent"
                       : "bg-warning-bg text-warning-text"
                   }`}
                 >
@@ -117,7 +117,7 @@ export default function AdminReviewPage() {
                   <button
                     type="button"
                     onClick={() => handleUpdateStatus(draft.id, "published")}
-                    className="min-h-[44px] w-full cursor-pointer rounded-full border-0 bg-blue px-4 text-sm font-bold text-white transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none"
+                    className="min-h-[44px] w-full cursor-pointer rounded-full border-0 bg-blue px-4 text-sm font-bold text-on-accent transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none"
                   >
                     Approve
                   </button>

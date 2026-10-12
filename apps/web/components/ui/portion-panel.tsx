@@ -89,7 +89,7 @@ export function PortionPanel({
       data-align-container="portion-panel"
       className={`rounded-2xl p-4 flex flex-col gap-3 transition-colors ${
         isDark
-          ? "bg-ink text-white shadow-lg"
+          ? "bg-ink text-on-dark shadow-lg"
           : "bg-page text-text border border-card-border"
       } ${className}`}
     >
@@ -100,7 +100,7 @@ export function PortionPanel({
         <span
           data-align-group="portion"
           data-align-edge="left"
-          className={`font-bold truncate ${isDark ? "text-lg text-white" : "text-xl text-text"}`}
+          className={`font-bold truncate ${isDark ? "text-lg text-on-dark" : "text-xl text-text"}`}
         >
           {food.nameVi}
         </span>
@@ -138,7 +138,7 @@ export function PortionPanel({
               data-align-edge="left"
               className={`flex items-center justify-center rounded-xl px-2 h-11 w-full cursor-text box-border border-2 focus-within:ring-2 ${
                 isDark
-                  ? "bg-surface-dark border-sky text-white focus-within:ring-sky"
+                  ? "bg-surface-dark border-sky text-on-dark focus-within:ring-sky"
                   : "bg-card border-blue text-text focus-within:ring-blue"
               }`}
             >
@@ -153,7 +153,7 @@ export function PortionPanel({
                   setSelectedServingLabel(`${e.target.value} g`);
                 }}
                 className={`w-full bg-transparent border-0 outline-none focus-visible:outline-none font-bold text-sm tabular-nums text-right ${
-                  isDark ? "text-white" : "text-text"
+                  isDark ? "text-on-dark" : "text-text"
                 }`}
               />
               <span
@@ -204,7 +204,7 @@ export function PortionPanel({
         data-align-edge="left"
         onClick={onAdd}
         disabled={isSubmitting || parsedGrams <= 0 || mealSlot === null}
-        className={`w-full min-h-[52px] rounded-full text-white font-bold text-base cursor-pointer active:scale-[0.98] transition-all border-0 flex items-center justify-center shadow-md disabled:opacity-50 ${
+        className={`w-full min-h-[52px] rounded-full text-on-accent font-bold text-base cursor-pointer active:scale-[0.98] transition-all border-0 flex items-center justify-center shadow-md disabled:opacity-50 ${
           isDark
             ? "bg-blue hover:bg-blue/90"
             : "bg-blue hover:bg-blue/90"

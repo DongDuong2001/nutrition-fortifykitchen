@@ -31,10 +31,10 @@ export function PillButton({
 
   const variantClasses = {
     primary:
-      "bg-blue text-white hover:bg-blue/90 border-0 shadow-sm active:-skew-x-[14deg]",
+      "bg-blue text-on-accent hover:bg-blue/90 border-0 shadow-sm active:-skew-x-[14deg]",
     secondary:
       "bg-card text-text border border-card-border hover:bg-paper",
-    destructive: "bg-red text-white hover:bg-red/90 border-0 shadow-sm",
+    destructive: "bg-red text-on-accent hover:bg-red/90 border-0 shadow-sm",
   }[variant];
 
   const widthClass = fullWidth ? "w-full" : "w-auto";

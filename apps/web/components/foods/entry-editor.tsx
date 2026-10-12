@@ -89,7 +89,7 @@ export function EntryEditor({ view }: { view: EntryView }) {
                         setServingLabel(s.label);
                       }}
                       className={`h-12 min-w-0 flex-1 cursor-pointer rounded-[10px] border-0 px-2 text-sm font-semibold transition-transform active:scale-[0.97] disabled:opacity-60 ${
-                        active ? "bg-ink text-white font-bold" : "bg-page text-text"
+                        active ? "bg-ink text-on-dark font-bold" : "bg-page text-text"
                       }`}
                     >
                       {s.label}
@@ -130,7 +130,7 @@ export function EntryEditor({ view }: { view: EntryView }) {
               type="button"
               onClick={handleSave}
               disabled={!canSave}
-              className="flex min-h-[52px] w-full cursor-pointer items-center justify-center rounded-full border-0 bg-blue text-base font-bold text-white transition-transform active:scale-[0.98] disabled:opacity-50"
+              className="flex min-h-[52px] w-full cursor-pointer items-center justify-center rounded-full border-0 bg-blue text-base font-bold text-on-accent transition-transform active:scale-[0.98] disabled:opacity-50"
             >
               Lưu thay đổi
             </button>

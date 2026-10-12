@@ -233,7 +233,7 @@ function AddFoodInner() {
       {filter !== "all" && clearFilterButton}
       <Link
         href={newFoodHref}
-        className="mt-2 min-h-[52px] px-7 rounded-full bg-blue text-white font-bold text-base flex items-center justify-center no-underline active:scale-[0.97]"
+        className="mt-2 min-h-[52px] px-7 rounded-full bg-blue text-on-accent font-bold text-base flex items-center justify-center no-underline active:scale-[0.97]"
       >
         + Tạo món mới
       </Link>
@@ -420,7 +420,7 @@ function AddFoodInner() {
       {/* ============================================================== */}
       <div className="lg:hidden flex flex-col min-h-screen relative bg-page pb-28">
         {/* Background header banner */}
-        <div aria-hidden="true" className="bg-ink h-32 p-4 rounded-b-[20px] text-white">
+        <div aria-hidden="true" className="bg-ink h-32 p-4 rounded-b-[20px] text-on-dark">
           <div className="font-display italic font-black text-xl tracking-wide">
             H1T <span className="text-sky">MICRO</span>
           </div>

@@ -36,7 +36,7 @@ export function StatGroup({
         <div key={it.id} className="flex flex-col items-center text-center justify-center">
           <div
             className={`font-display italic font-black text-xl tabular-nums leading-tight ${
-              tone === "dark" ? "text-white" : "text-text"
+              tone === "dark" ? "text-on-dark" : "text-text"
             }`}
           >
             {it.value}

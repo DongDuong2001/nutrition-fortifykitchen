@@ -117,8 +117,8 @@ export default function DeleteAccountPage() {
           onClick={handleDelete}
           className={`h-[52px] w-full border-0 rounded-full font-bold text-base transition-all select-none ${
             isConfirmed
-              ? "bg-destructive text-white cursor-pointer active:scale-[0.97]"
-              : "bg-destructive text-white opacity-45 cursor-not-allowed"
+              ? "bg-destructive text-on-accent cursor-pointer active:scale-[0.97]"
+              : "bg-destructive text-on-accent opacity-45 cursor-not-allowed"
           }`}
         >
           Xoá tài khoản

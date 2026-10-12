@@ -244,7 +244,7 @@ export function AppCard() {
 // The Pro offer. Its one action goes to the paywall (design: Xem gói).
 export function ProCard() {
   return (
-    <section aria-labelledby="profile-pro-title" className="flex flex-col gap-3 rounded-[18px] bg-blue p-4 text-white">
+    <section aria-labelledby="profile-pro-title" className="flex flex-col gap-3 rounded-[18px] bg-blue p-4 text-on-accent">
       <div className="flex flex-col gap-1">
         <h2 id="profile-pro-title" className="m-0 text-[17px] font-bold">
           Nâng cấp H1T MICRO Pro

@@ -217,7 +217,7 @@ function MicrosContent() {
     return (
       <div className="w-full min-h-screen bg-page text-text font-sans flex flex-col pb-[88px] lg:pb-0">
         <h1 className="sr-only">Vi chất — Đang tải</h1>
-        <div className="bg-ink text-white rounded-b-[20px]">
+        <div className="bg-ink text-on-dark rounded-b-[20px]">
           <div className="w-full max-w-[560px] mx-auto px-4 pt-3 pb-5 flex flex-col gap-3">
             <div className="flex items-center justify-between min-h-[44px]">
               <div className="w-11 h-11 bg-surface-dark rounded-lg animate-pulse" />
@@ -267,7 +267,7 @@ function MicrosContent() {
                 Bắt đầu ghi món để đo lường
               </div>
               <div className="text-right">
-                <div className="font-display italic font-black text-3xl leading-none tabular-nums text-white">
+                <div className="font-display italic font-black text-3xl leading-none tabular-nums text-on-dark">
                   0<span className="text-muted-subtitle text-xl">/22</span>
                 </div>
                 <div className="text-xs text-sky font-medium mt-0.5">đã đạt</div>
@@ -284,7 +284,7 @@ function MicrosContent() {
             </p>
             <Link
               href="/today"
-              className="mt-2 h-11 px-6 rounded-full bg-blue text-white flex items-center justify-center text-sm font-bold no-underline active:scale-[0.97] transition-transform"
+              className="mt-2 h-11 px-6 rounded-full bg-blue text-on-accent flex items-center justify-center text-sm font-bold no-underline active:scale-[0.97] transition-transform"
             >
               + Ghi món ngay
             </Link>
@@ -319,14 +319,14 @@ function MicrosContent() {
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-xs text-muted-subtitle font-medium">Thiếu nhiều nhất</div>
-                <div className="text-sm font-semibold text-white mt-0.5">
+                <div className="text-sm font-semibold text-on-dark mt-0.5">
                   {currentData?.microsSummary.mostLacking.join(", ")}
                 </div>
               </div>
               <div className="text-right shrink-0">
                 <div className="font-display italic font-black text-[28px] leading-none tabular-nums">
-                  <span className="text-white">{achievedMicrosCount.achieved}</span>
-                  <span className="text-white/55">/{achievedMicrosCount.total}</span>
+                  <span className="text-on-dark">{achievedMicrosCount.achieved}</span>
+                  <span className="text-on-dark/55">/{achievedMicrosCount.total}</span>
                 </div>
                 <div className="text-xs text-sky font-semibold mt-1">
                   đã đạt mục tiêu
@@ -337,7 +337,7 @@ function MicrosContent() {
           footer={
             <Link
               href="/trends"
-              className="min-h-[44px] flex items-center justify-between text-sm font-semibold text-white no-underline active:scale-[0.97] transition-transform"
+              className="min-h-[44px] flex items-center justify-between text-sm font-semibold text-on-dark no-underline active:scale-[0.97] transition-transform"
             >
               Xu hướng 7 và 30 ngày
               <span aria-hidden="true">›</span>
@@ -370,7 +370,7 @@ function MicrosContent() {
                   <span
                     className={`h-9 px-3.5 rounded-full text-xs font-semibold flex items-center justify-center whitespace-nowrap transition-colors ${
                       isActive
-                        ? "bg-ink text-white shadow-xs"
+                        ? "bg-ink text-on-dark shadow-xs"
                         : "bg-card text-text border border-card-border hover:bg-page"
                     }`}
                   >
@@ -460,7 +460,7 @@ function MicrosContent() {
                   <span
                     className={`h-9 px-4 rounded-full text-xs font-semibold flex items-center justify-center transition-colors ${
                       isActive
-                        ? "bg-ink text-white shadow-xs"
+                        ? "bg-ink text-on-dark shadow-xs"
                         : "bg-card text-text border border-card-border hover:bg-page"
                     }`}
                   >

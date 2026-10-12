@@ -188,14 +188,14 @@ function TrainingContent() {
       {/* ============================================================== */}
       <div className="hidden lg:flex min-h-[980px] bg-page text-text font-sans">
         {/* Left Sidebar */}
-        <aside className="w-60 shrink-0 bg-ink text-white p-6 flex flex-col gap-6 box-border">
+        <aside className="w-60 shrink-0 bg-ink text-on-dark p-6 flex flex-col gap-6 box-border">
           <div className="px-2 font-display italic font-black text-2xl">
             H1T <span className="text-sky">MICRO</span>
           </div>
           <nav aria-label="Điều hướng chính" className="flex flex-col gap-1">
             <Link
               href="/today"
-              className="no-underline flex items-center gap-3 min-h-[44px] px-3 rounded-xl text-[15px] font-semibold text-muted-on-dark hover:bg-card/5 hover:text-white transition-colors"
+              className="no-underline flex items-center gap-3 min-h-[44px] px-3 rounded-xl text-[15px] font-semibold text-muted-on-dark hover:bg-card/5 hover:text-on-dark transition-colors"
             >
               <svg
                 width="22"
@@ -214,7 +214,7 @@ function TrainingContent() {
             </Link>
             <Link
               href="/micros"
-              className="no-underline flex items-center gap-3 min-h-[44px] px-3 rounded-xl text-[15px] font-semibold text-muted-on-dark hover:bg-card/5 hover:text-white transition-colors"
+              className="no-underline flex items-center gap-3 min-h-[44px] px-3 rounded-xl text-[15px] font-semibold text-muted-on-dark hover:bg-card/5 hover:text-on-dark transition-colors"
             >
               <svg
                 width="22"
@@ -234,7 +234,7 @@ function TrainingContent() {
             <Link
               href="/training"
               aria-current="page"
-              className="no-underline flex items-center gap-3 min-h-[44px] px-3 rounded-xl text-[15px] font-semibold text-white bg-card/10 transition-colors"
+              className="no-underline flex items-center gap-3 min-h-[44px] px-3 rounded-xl text-[15px] font-semibold text-on-dark bg-card/10 transition-colors"
             >
               <svg
                 width="22"
@@ -253,7 +253,7 @@ function TrainingContent() {
             </Link>
             <Link
               href="/profile"
-              className="no-underline flex items-center gap-3 min-h-[44px] px-3 rounded-xl text-[15px] font-semibold text-muted-on-dark hover:bg-card/5 hover:text-white transition-colors"
+              className="no-underline flex items-center gap-3 min-h-[44px] px-3 rounded-xl text-[15px] font-semibold text-muted-on-dark hover:bg-card/5 hover:text-on-dark transition-colors"
             >
               <svg
                 width="22"

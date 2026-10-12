@@ -39,6 +39,10 @@
   --color-muted-dark: #6B6A66;
   --color-muted-subtitle: #C9CDD6;
   --color-muted-on-dark: #8C92A0;
+  /* Text on ink and surface-dark: headers, sidebar, toasts, dark cards, dial number. Same value as --color-card. */
+  --color-on-dark: #FFFFFF;
+  /* Text on accent fills: cobalt/blue and destructive buttons, badges and selected chips. */
+  --color-on-accent: #FFFFFF;
   /* Calorie dial background ring. 3.14:1 on ink #111317 (WCAG 1.4.11 needs 3:1), 2.88:1 on the surface-dark inset panel (see OPEN_QUESTIONS cc2-05). */
   --color-track-on-dark: #60646E;
   --color-grabber: #D5D8DF;

@@ -60,9 +60,9 @@ export function ChipGroup({
           tone === "dark"
             ? isActive
               ? "bg-card text-ink font-bold shadow-xs"
-              : "bg-surface-dark text-white font-medium hover:bg-surface-dark/80"
+              : "bg-surface-dark text-on-dark font-medium hover:bg-surface-dark/80"
             : isActive
-            ? "bg-ink text-white font-bold shadow-xs"
+            ? "bg-ink text-on-dark font-bold shadow-xs"
             : `bg-card text-text ${inactiveBorder} font-medium hover:bg-page`;
         // md keeps border-0 on every chip, as shipped in ui-05-fix. lg draws the inactive border.
         const noBorder = size === "md" || isActive || tone === "dark" ? "border-0" : "";

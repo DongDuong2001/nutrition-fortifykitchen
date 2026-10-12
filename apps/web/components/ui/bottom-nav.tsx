@@ -49,7 +49,7 @@ export function BottomNav({ currentTab, onAddClick, className = "" }: BottomNavP
           href="/today"
           aria-current={isToday ? "page" : undefined}
           className={`relative flex flex-col items-center justify-center gap-[2px] min-h-[56px] text-xs font-semibold no-underline transition-colors ${
-            isToday ? "text-white" : "text-muted-on-dark hover:text-white"
+            isToday ? "text-on-dark" : "text-muted-on-dark hover:text-on-dark"
           }`}
         >
           <svg
@@ -79,7 +79,7 @@ export function BottomNav({ currentTab, onAddClick, className = "" }: BottomNavP
           href="/micros"
           aria-current={isMicros ? "page" : undefined}
           className={`relative flex flex-col items-center justify-center gap-[2px] min-h-[56px] text-xs font-semibold no-underline transition-colors ${
-            isMicros ? "text-white" : "text-muted-on-dark hover:text-white"
+            isMicros ? "text-on-dark" : "text-muted-on-dark hover:text-on-dark"
           }`}
         >
           <svg
@@ -115,7 +115,7 @@ export function BottomNav({ currentTab, onAddClick, className = "" }: BottomNavP
                 onAddClick();
               }}
               aria-label="Thêm món"
-              className="w-[50px] h-[50px] rounded-[14px] bg-blue text-white flex items-center justify-center border-0 cursor-pointer shadow-md active:scale-[0.97] transition-transform"
+              className="w-[50px] h-[50px] rounded-[14px] bg-blue text-on-accent flex items-center justify-center border-0 cursor-pointer shadow-md active:scale-[0.97] transition-transform"
             >
               <svg
                 width="24"
@@ -138,7 +138,7 @@ export function BottomNav({ currentTab, onAddClick, className = "" }: BottomNavP
                 rememberAddOpener("mobile-add-fab");
               }}
               aria-label="Thêm món"
-              className="w-[50px] h-[50px] rounded-[14px] bg-blue text-white flex items-center justify-center no-underline shadow-md active:scale-[0.97] transition-transform"
+              className="w-[50px] h-[50px] rounded-[14px] bg-blue text-on-accent flex items-center justify-center no-underline shadow-md active:scale-[0.97] transition-transform"
             >
               <svg
                 width="24"
@@ -160,7 +160,7 @@ export function BottomNav({ currentTab, onAddClick, className = "" }: BottomNavP
           href="/training"
           aria-current={isTraining ? "page" : undefined}
           className={`relative flex flex-col items-center justify-center gap-[2px] min-h-[56px] text-xs font-semibold no-underline transition-colors ${
-            isTraining ? "text-white" : "text-muted-on-dark hover:text-white"
+            isTraining ? "text-on-dark" : "text-muted-on-dark hover:text-on-dark"
           }`}
         >
           <svg
@@ -190,7 +190,7 @@ export function BottomNav({ currentTab, onAddClick, className = "" }: BottomNavP
           href="/profile"
           aria-current={isProfile ? "page" : undefined}
           className={`relative flex flex-col items-center justify-center gap-[2px] min-h-[56px] text-xs font-semibold no-underline transition-colors ${
-            isProfile ? "text-white" : "text-muted-on-dark hover:text-white"
+            isProfile ? "text-on-dark" : "text-muted-on-dark hover:text-on-dark"
           }`}
         >
           <svg

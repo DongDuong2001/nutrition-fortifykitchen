@@ -211,7 +211,7 @@ function TodayContent() {
         <div className="w-full min-h-screen bg-page flex flex-col relative lg:hidden pb-[88px] overflow-x-hidden">
           <h1 className="sr-only">Hôm nay — Đang tải</h1>
           {/* Header Skeleton */}
-          <div className="bg-ink text-white rounded-b-[20px]">
+          <div className="bg-ink text-on-dark rounded-b-[20px]">
             <div className="w-full max-w-[560px] mx-auto px-4 pt-3 pb-4 flex flex-col gap-2.5">
               <div className="flex items-center justify-between min-h-[44px]">
                 <div className="font-display italic font-black text-xl uppercase tracking-tight">
@@ -315,7 +315,7 @@ function TodayContent() {
               </p>
               <Link
                 href="/add?meal=breakfast"
-                className="h-12 rounded-full bg-blue text-white flex items-center justify-center text-[15px] font-bold no-underline active:scale-[0.97] transition-transform"
+                className="h-12 rounded-full bg-blue text-on-accent flex items-center justify-center text-[15px] font-bold no-underline active:scale-[0.97] transition-transform"
               >
                 + Ghi bữa sáng
               </Link>
@@ -426,7 +426,7 @@ function TodayContent() {
               {/* Subtitle Target Summary */}
               <div className="text-[13px] text-muted-subtitle leading-tight text-center w-full mt-1.5">
                 Mục tiêu{" "}
-                <span className="font-semibold text-white tabular-nums">
+                <span className="font-semibold text-on-dark tabular-nums">
                   {formatAmount(calories.targetMin, "kcal")}–{formatAmount(calories.targetMax, "kcal")} kcal
                 </span>{" "}
                 · còn {formatAmount(calories.remaining, "kcal")} · Ngày tập {currentData.user.trainingMinutes}′
@@ -590,7 +590,7 @@ function TodayContent() {
                     id="desktop-add-btn"
                     href="/add"
                     onClick={() => handleSaveOpener("desktop-add-btn")}
-                    className="no-underline h-11 px-5 rounded-full bg-blue text-white flex items-center gap-2 text-[15px] font-bold hover:bg-blue/90 active:scale-[0.97] transition-all"
+                    className="no-underline h-11 px-5 rounded-full bg-blue text-on-accent flex items-center gap-2 text-[15px] font-bold hover:bg-blue/90 active:scale-[0.97] transition-all"
                   >
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
                       <path d="M12 5v14M5 12h14" />
@@ -617,7 +617,7 @@ function TodayContent() {
             <div
               data-align-group="today-header"
               data-align-edge="left"
-              className="bg-ink text-white rounded-2xl p-5.5 flex flex-col justify-between gap-4"
+              className="bg-ink text-on-dark rounded-2xl p-5.5 flex flex-col justify-between gap-4"
             >
               <div className="flex gap-5.5 items-center flex-wrap">
                 <CalorieDial
@@ -644,7 +644,7 @@ function TodayContent() {
               </div>
               <div className="text-[13px] text-muted-subtitle text-center w-full">
                 Mục tiêu{" "}
-                <span className="font-semibold text-white tabular-nums">
+                <span className="font-semibold text-on-dark tabular-nums">
                   {formatAmount(calories.targetMin, "kcal")}–{formatAmount(calories.targetMax, "kcal")} kcal
                 </span>{" "}
                 · còn {formatAmount(calories.remaining, "kcal")} · Ngày tập {currentData.user.trainingMinutes}′

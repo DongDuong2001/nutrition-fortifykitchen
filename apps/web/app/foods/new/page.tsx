@@ -181,7 +181,7 @@ function CreateFoodInner() {
                     aria-checked={isChecked}
                     onClick={() => setServingUnit(u)}
                     className={`min-h-[44px] min-w-[52px] px-4 rounded-full text-sm font-semibold border-0 cursor-pointer active:scale-[0.97] transition-colors ${
-                      isChecked ? "bg-ink text-white" : "bg-card text-text border border-card-border hover:bg-page"
+                      isChecked ? "bg-ink text-on-dark" : "bg-card text-text border border-card-border hover:bg-page"
                     }`}
                   >
                     {u}
@@ -352,7 +352,7 @@ function CreateFoodInner() {
             type="button"
             onClick={handleSubmit}
             disabled={isSubmitting || mealSlot === null}
-            className="w-full min-h-[52px] rounded-full bg-blue text-white font-bold text-base cursor-pointer hover:bg-blue/90 active:scale-[0.98] transition-all border-0 flex items-center justify-center shadow-md disabled:opacity-50"
+            className="w-full min-h-[52px] rounded-full bg-blue text-on-accent font-bold text-base cursor-pointer hover:bg-blue/90 active:scale-[0.98] transition-all border-0 flex items-center justify-center shadow-md disabled:opacity-50"
           >
             Lưu và thêm vào {mealNameVi}
           </button>

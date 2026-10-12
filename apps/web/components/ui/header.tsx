@@ -38,7 +38,7 @@ export function Header({
 }: HeaderProps) {
   return (
     <header
-      className={`bg-ink text-white rounded-b-[20px] w-full select-none ${className}`}
+      className={`bg-ink text-on-dark rounded-b-[20px] w-full select-none ${className}`}
     >
       <div className="w-full max-w-[560px] mx-auto px-4 py-4 pb-5 flex flex-col gap-2.5">
         {/* Top bar */}
@@ -48,7 +48,7 @@ export function Header({
               <Link
                 href={backHref}
                 aria-label={backLabel}
-                className="w-11 h-11 -ml-3 rounded-lg text-white flex items-center justify-center no-underline hover:text-sky transition-colors active:scale-[0.97]"
+                className="w-11 h-11 -ml-3 rounded-lg text-on-dark flex items-center justify-center no-underline hover:text-sky transition-colors active:scale-[0.97]"
               >
                 <svg
                   width="20"
@@ -68,7 +68,7 @@ export function Header({
                 type="button"
                 onClick={onBack}
                 aria-label={backLabel}
-                className="w-11 h-11 -ml-3 rounded-lg bg-transparent border-0 text-white flex items-center justify-center cursor-pointer hover:text-sky transition-colors active:scale-[0.97]"
+                className="w-11 h-11 -ml-3 rounded-lg bg-transparent border-0 text-on-dark flex items-center justify-center cursor-pointer hover:text-sky transition-colors active:scale-[0.97]"
               >
                 <svg
                   width="20"
@@ -99,7 +99,7 @@ export function Header({
                 type="button"
                 onClick={onPrevDate}
                 aria-label="Ngày trước"
-                className="w-11 h-11 rounded-lg bg-transparent border-0 text-white flex items-center justify-center cursor-pointer hover:text-sky transition-colors active:scale-[0.97]"
+                className="w-11 h-11 rounded-lg bg-transparent border-0 text-on-dark flex items-center justify-center cursor-pointer hover:text-sky transition-colors active:scale-[0.97]"
               >
                 <svg
                   width="18"
@@ -119,7 +119,7 @@ export function Header({
                 type="button"
                 onClick={onNextDate}
                 aria-label="Ngày sau"
-                className="w-11 h-11 rounded-lg bg-transparent border-0 text-white flex items-center justify-center cursor-pointer hover:text-sky transition-colors active:scale-[0.97]"
+                className="w-11 h-11 rounded-lg bg-transparent border-0 text-on-dark flex items-center justify-center cursor-pointer hover:text-sky transition-colors active:scale-[0.97]"
               >
                 <svg
                   width="18"
@@ -162,7 +162,7 @@ export function Header({
 
         {/* Title */}
         {title && (
-          <h1 className="m-0 font-display italic font-black text-[28px] uppercase tracking-tight text-white leading-tight">
+          <h1 className="m-0 font-display italic font-black text-[28px] uppercase tracking-tight text-on-dark leading-tight">
             {title}
           </h1>
         )}

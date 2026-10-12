@@ -109,7 +109,7 @@ function CalendarMonth({ selectedIso, onPick }: Pick<CalendarSheetProps, "select
               aria-current={isSelected ? "date" : undefined}
               onClick={() => onPick(day.iso)}
               className={`w-11 h-11 rounded-full flex flex-col items-center justify-center gap-0.5 text-[15px] font-semibold tabular-nums cursor-pointer active:scale-[0.97] transition-transform disabled:opacity-40 disabled:pointer-events-none ${
-                isSelected ? "bg-blue text-white" : "bg-transparent text-text"
+                isSelected ? "bg-blue text-on-accent" : "bg-transparent text-text"
               }`}
             >
               <span>{day.day}</span>

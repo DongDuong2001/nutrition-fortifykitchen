@@ -142,7 +142,7 @@ function FoodDetailInner() {
             onClick={handleToggleFavourite}
             aria-pressed={saved}
             aria-label={saved ? "Bỏ yêu thích" : "Thêm vào yêu thích"}
-            className="w-11 h-11 -mr-2 rounded-lg bg-transparent border-0 text-white flex items-center justify-center cursor-pointer hover:text-sky active:scale-[0.97] transition-colors"
+            className="w-11 h-11 -mr-2 rounded-lg bg-transparent border-0 text-on-dark flex items-center justify-center cursor-pointer hover:text-sky active:scale-[0.97] transition-colors"
           >
             <svg
               width="22"
@@ -271,7 +271,7 @@ function FoodDetailInner() {
             type="button"
             onClick={handleAdd}
             disabled={isSubmitting || parsedGrams <= 0 || mealSlot === null}
-            className="w-full min-h-[52px] rounded-full bg-blue text-white font-bold text-base cursor-pointer hover:bg-blue/90 active:scale-[0.98] transition-all border-0 flex items-center justify-center shadow-md disabled:opacity-50"
+            className="w-full min-h-[52px] rounded-full bg-blue text-on-accent font-bold text-base cursor-pointer hover:bg-blue/90 active:scale-[0.98] transition-all border-0 flex items-center justify-center shadow-md disabled:opacity-50"
           >
             Thêm vào {mealSlot ? mealNameVi : "—"}
           </button>

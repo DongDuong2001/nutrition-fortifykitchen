@@ -36,7 +36,7 @@ export function TrendsEmptyState() {
 
       <Link
         href="/today"
-        className="no-underline mt-2 h-11 px-6 rounded-full bg-blue text-white text-sm font-semibold flex items-center justify-center shadow-xs hover:opacity-95 active:scale-[0.97] transition-all cursor-pointer"
+        className="no-underline mt-2 h-11 px-6 rounded-full bg-blue text-on-accent text-sm font-semibold flex items-center justify-center shadow-xs hover:opacity-95 active:scale-[0.97] transition-all cursor-pointer"
       >
         Về Hôm nay
       </Link>

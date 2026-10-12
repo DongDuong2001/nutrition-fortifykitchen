@@ -60,7 +60,7 @@ export function MealSwitcher({
                 aria-hidden="true"
                 className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-colors ${
                   isSelected
-                    ? "bg-blue text-white ring-4 ring-sky/40"
+                    ? "bg-blue text-on-accent ring-4 ring-sky/40"
                     : "border-2 border-grabber bg-card"
                 }`}
               >

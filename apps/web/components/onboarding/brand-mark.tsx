@@ -4,7 +4,7 @@ export function BrandMark({ className = "" }: { className?: string }) {
     <div
       role="img"
       aria-label="H1T MICRO"
-      className={`font-display italic font-black text-[28px] leading-none uppercase tracking-tight text-white ${className}`}
+      className={`font-display italic font-black text-[28px] leading-none uppercase tracking-tight text-on-dark ${className}`}
     >
       H1T <span className="text-sky">MICRO</span>
     </div>

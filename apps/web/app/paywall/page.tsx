@@ -40,7 +40,7 @@ export default function PaywallPage() {
             <div
               role="img"
               aria-label="H1T MICRO PRO"
-              className="flex items-baseline gap-2 font-display italic font-black text-2xl uppercase tracking-tight -mt-1 text-white"
+              className="flex items-baseline gap-2 font-display italic font-black text-2xl uppercase tracking-tight -mt-1 text-on-dark"
             >
               <span>H1T</span>
               <span className="text-sky">MICRO</span>
@@ -115,7 +115,7 @@ export default function PaywallPage() {
                       {plan.name}
                     </span>
                     {plan.chip && (
-                      <span className="text-[13px] font-bold text-white bg-blue rounded-full py-0.5 px-2.5 leading-none">
+                      <span className="text-[13px] font-bold text-on-accent bg-blue rounded-full py-0.5 px-2.5 leading-none">
                         {plan.chip}
                       </span>
                     )}
@@ -135,7 +135,7 @@ export default function PaywallPage() {
       <footer className="w-full max-w-[560px] mx-auto px-4 pt-2 pb-5 flex flex-col items-center gap-1.5">
         <Link
           href="/profile"
-          className="no-underline self-stretch h-[52px] rounded-full bg-blue text-white flex items-center justify-center text-base font-bold shadow-sm hover:opacity-95 active:scale-[0.97] transition-all"
+          className="no-underline self-stretch h-[52px] rounded-full bg-blue text-on-accent flex items-center justify-center text-base font-bold shadow-sm hover:opacity-95 active:scale-[0.97] transition-all"
         >
           Tiếp tục thanh toán
         </Link>

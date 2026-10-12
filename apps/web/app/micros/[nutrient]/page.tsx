@@ -102,7 +102,7 @@ export default function NutrientDetailPage({ params }: PageProps) {
               <span className="text-[13px] tabular-nums text-muted-subtitle">
                 {targetText ? `${amountText} / ${targetText}` : amountText}
               </span>
-              <span className="font-display italic font-black text-[30px] leading-none tabular-nums text-white">
+              <span className="font-display italic font-black text-[30px] leading-none tabular-nums text-on-dark">
                 {row.percentage !== null ? `${row.percentage}%` : "—"}
               </span>
             </div>
