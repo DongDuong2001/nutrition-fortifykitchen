@@ -3,6 +3,8 @@
 ## Now working
 | Task | Owner | Files / routes |
 |---|---|---|
+| ag-07 (a11y audit completion) | Antigravity | apps/web/app/foods/[id]/page.tsx, apps/web/app/foods/new/page.tsx, apps/web/components/ui/form-row.tsx, apps/web/components/onboarding/magic-link-form.tsx, apps/web/lib/training.ts, apps/web/app/globals.css, apps/web/tests/probes/ag07.py, docs/audit-ag04.md |
+
 
 | Date | Commit | Built | Next |
 | --- | --- | --- | --- |
