@@ -270,19 +270,19 @@ export function AccountCard() {
         <RowGroup>
           <Link
             href="/signin"
-            className="flex min-h-[44px] items-center justify-center text-[15px] font-bold text-destructive transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100"
+            className="flex min-h-[44px] items-center justify-center text-[15px] font-bold text-destructive-text transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100"
           >
             Đăng xuất
           </Link>
         </RowGroup>
       </Card>
       <Card as="section" aria-labelledby="profile-danger-title" className="flex flex-col gap-1">
-        <h2 id="profile-danger-title" className="m-0 text-xs font-bold uppercase tracking-wider text-destructive">
+        <h2 id="profile-danger-title" className="m-0 text-xs font-bold uppercase tracking-wider text-destructive-text">
           Vùng nguy hiểm
         </h2>
         <RowGroup>
           <Row
-            label={<span className="text-destructive">Xoá tài khoản</span>}
+            label={<span className="text-destructive-text">Xoá tài khoản</span>}
             hint="Xoá tài khoản sẽ xoá toàn bộ nhật ký và không thể khôi phục."
             href="/settings/delete-account"
           />
