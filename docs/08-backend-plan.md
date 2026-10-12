@@ -208,25 +208,25 @@ Seven phases run in order; each ends with green CI, an updated openapi.yaml and 
 
 1. **Phase 0 — Foundations.** Zerolog, config from env with .env.example, error envelope and codes, request validation helper, openapi.yaml skeleton + orval client generation into lib/api-client, Supabase CLI local stack (`supabase start`) with migrations applied, `make test` running go test against a local Postgres, CI (GitHub Actions) for go vet, go test, migration up/down, client freshness. Decide D1 and D5.
     - Done when: `make dev` starts API + local Supabase; /healthz green; CI green on a PR; the generated client compiles in apps/web.
-    - Status: not started
+    - Status: done
 2. **Phase 1 — Auth, profile, weight.** Migration 000002; GET /me, PUT /me/profile, weight endpoints, DELETE /me; profile created at setup; D2 done.
     - Done when: a new user signs in, finishes setup, reloads and keeps the profile; invalid/expired JWT → 401; another user's data is unreachable (test).
-    - Status: not started
+    - Status: done
 3. **Phase 2 — Foods.** Migration 000003, import command, search with unaccent + trigram, detail, portions, rich-in, custom foods; D4 measured.
     - Done when: import acceptance criteria pass; search p95 < 150 ms on the full catalog locally; no NULL counted as 0 anywhere (test).
-    - Status: not started
+    - Status: done
 4. **Phase 3 — Diary.** Migration 000004; /days/{date}, entries create/edit/delete with soft delete and undo, quick kcal, copy day or meal, delete meal, training minutes; past-day guard; idempotent client UUIDs; D3 agreed.
     - Done when: every write to yesterday returns 409; replaying the same POST twice creates one entry; day totals match the web's lib/day-totals for the mock day.
-    - Status: not started
+    - Status: done
 5. **Phase 4 — Library.** Migration 000005; favourites, recents (upserted on each food entry, last portion kept), saved meals with add-from-saved.
     - Done when: one-tap add from a recent uses its last portion; a saved meal adds all its items in one call and one undo.
-    - Status: not started
+    - Status: done
 6. **Phase 5 — Targets and trends.** internal/targets and internal/trends ports; shared vectors pass; targets in /me and /days/{date}; GET /trends.
     - Done when: Go and vitest both pass the same vector files; /trends for the mock history equals the web's lib/period output.
-    - Status: not started
+    - Status: done
 7. **Phase 6 — Hardening and launch.** Migration 000006 (RLS), rate limit (60 writes/min/user), structured logs reviewed, Sentry alerts, Supabase backups confirmed, staging + production deploys, load test (50 users logging a day each), security pass (no user_id from input, no SQL string building).
     - Done when: staging serves the web build end to end; a k6 run shows p95 < 300 ms for /days/{date} and POST entries; Hao signs off the cutover checklist.
-    - Status: not started
+    - Status: done
 
 **Later (Release 2):** PayOS payments and plans, coach vault import and published rules, coach advice in the app, push reminders, a batch sync endpoint if replay proves slow.
 
