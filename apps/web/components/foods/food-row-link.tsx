@@ -21,7 +21,7 @@ export function FoodRowLink({ href, name, meta, value, withBorderTop = true }: F
         withBorderTop ? "border-t border-divider" : ""
       }`}
     >
-      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+      <span className="flex min-w-0 flex-1 flex-col gap-1">
         <span className="line-clamp-2 text-[15px] font-semibold leading-snug">{name}</span>
         <span className="line-clamp-2 text-[13px] leading-tight text-secondary">{meta}</span>
       </span>

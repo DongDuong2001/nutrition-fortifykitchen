@@ -7,7 +7,7 @@ import { AppShell } from "@/components/ui/app-shell";
 import { PillButton } from "@/components/ui/pill-button";
 import { FoodListCard } from "@/components/foods/food-list-card";
 import { MOCK_FOODS } from "@/lib/mock/foods";
-import { FOOD_CATEGORIES, categoryOf } from "@/lib/food-categories";
+import { FOOD_CATEGORIES, categoryOf, isOwnFood } from "@/lib/food-categories";
 import { useBack } from "@/hooks/use-back";
 
 /** One food category, a pushed screen of Khám phá. */
@@ -17,7 +17,7 @@ export default function ExploreCategoryPage() {
   const category = FOOD_CATEGORIES.find((c) => c.key === params?.category);
   if (!category) notFound();
 
-  const foods = MOCK_FOODS.filter((f) => categoryOf(f) === category.key).map((food) => ({ food }));
+  const foods = MOCK_FOODS.filter((f) => (category.key === "cua_toi" ? isOwnFood(f) : categoryOf(f) === category.key)).map((food) => ({ food }));
 
   return (
     <AppShell>

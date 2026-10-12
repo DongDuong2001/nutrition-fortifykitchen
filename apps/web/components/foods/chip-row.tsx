@@ -52,7 +52,8 @@ export function ChipRow({ items, ariaLabel, "data-align-group": dataAlignGroup, 
             key={it.id}
             type="button"
             data-chip-id={it.id}
-            aria-pressed={!!it.active}
+            aria-pressed={it.onClick ? !!it.active : undefined}
+            aria-current={!it.onClick && it.active ? "true" : undefined}
             aria-label={it.ariaLabel}
             onClick={it.onClick}
             className={`min-h-[44px] shrink-0 whitespace-nowrap rounded-full px-4 text-xs font-semibold cursor-pointer border-0 transition-all active:scale-[0.97] ${

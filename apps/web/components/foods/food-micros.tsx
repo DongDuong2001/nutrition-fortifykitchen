@@ -7,6 +7,7 @@ import { SectionTitle } from "@/components/ui/section-title";
 /** Whole percent, with one decimal under 1 % ("0,1 %"). */
 function shareText(row: MicroRow): string {
   if (row.share === null) return "";
+  if (row.share > 0 && row.share < 0.1) return "< 0,1 %";
   return row.share > 0 && row.share < 1 ? `${formatNumber(row.share, { decimals: 1 })} %` : `${row.pct} %`;
 }
 
@@ -16,7 +17,7 @@ function ShareBar({ share, label }: { share: number; label: string }) {
     <div
       role="img"
       aria-label={label}
-      className="h-1.5 w-full overflow-hidden rounded-full bg-level-empty"
+      className="h-2 w-full overflow-hidden rounded-full bg-level-empty"
     >
       <div className="h-full rounded-full bg-blue" style={{ width: `${Math.min(100, Math.max(0, share))}%` }} />
     </div>
@@ -27,7 +28,7 @@ function MicroLine({ row }: { row: MicroRow }) {
   const known = row.value !== null;
   const share = shareText(row);
   return (
-    <li className="flex min-h-[44px] flex-col justify-center gap-1.5 border-t border-divider py-2">
+    <li className="flex min-h-[44px] flex-col justify-center gap-1 border-t border-divider py-2">
       <div className="flex items-baseline justify-between gap-2 text-[15px]">
         <span className="font-semibold text-text">{row.name}</span>
         {known ? (
@@ -78,7 +79,7 @@ export function GoodSources({ rows }: { rows: MicroRow[] }) {
 export function FoodMicros({ rows, unknown, portionLabel }: { rows: MicroRow[]; unknown: number; portionLabel: string }) {
   return (
     <Card as="section" aria-labelledby="food-micros" className="flex flex-col gap-2">
-      <div className="flex flex-col gap-0.5">
+      <div className="flex flex-col gap-1">
         <SectionTitle id="food-micros">Vi chất trong {portionLabel}</SectionTitle>
         <p className="m-0 text-[13px] leading-snug text-secondary">% mục tiêu ngày</p>
       </div>

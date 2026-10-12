@@ -3,6 +3,7 @@
 ## Now working
 | Task | Owner | Files / routes |
 |---|---|---|
+| cc2-11 Nhật ký fixes + Khám phá v1 | Claude Code #2 | components/diary/diary-screen.tsx, app/explore/**, app/foods/[id], components/explore, components/foods, lib/rich-in.ts, lib/food-detail.ts |
 
 | 13/10/2026 | api-p6 | Phase 6 — Hardening & Launch: Migration 000006 (RLS hardening across all tables and custom foods), user write rate limiter middleware (60 writes/minute/user with 429 RATE_LIMIT_EXCEEDED and Retry-After), k6 load testing script scripts/loadtest.js with p95 < 300ms threshold, phase status lines updated to done in docs/08-backend-plan.md. Quality gates: go vet, go test, npm run typecheck in apps/web, vitest 380 tests pass. | Complete (Release 1 done) |
 | 13/10/2026 | api-p5 | Phase 5 — Coach Targets & Trends: Ported targets.ts to Go internal/targets (all coach rules, VN2016 reference values), generated packages/vectors/targets.json via vitest, verified exact equality in Go TestSharedTargetVectors, added targets to /me and /days/{date}, ported period.ts to Go internal/trends, implemented trends repository, service and GET /trends endpoint with days, offset, averages, days on target, macro composition, streak. Quality gates: go vet, go test (shared vector parity pass), vitest 380 tests pass, apps/web typecheck clean. | Phase 6 (api-p6) |

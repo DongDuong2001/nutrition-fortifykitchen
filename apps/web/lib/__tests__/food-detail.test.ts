@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { goodSourcesOf, microRowsFor } from "../food-detail";
+import { displayPercent, goodSourcesOf, microRowsFor } from "../food-detail";
 import type { CompleteTargets } from "../targets";
 
 const targets = { calcium: { min: 1000 }, iron: { min: 10 }, zinc: { min: 10 } } as unknown as CompleteTargets;
@@ -21,6 +21,15 @@ describe("goodSourcesOf", () => {
 
   it("ignores unknown values and nutrients without a target", () => {
     expect(goodSourcesOf({ calcium: null, selenium: 99 }, 100, targets)).toEqual([]);
+  });
+});
+
+describe("displayPercent", () => {
+  it("does not show 20 % for 19,6 % or 100 % for 99,6 %", () => {
+    expect(displayPercent(19.6)).toBe(19);
+    expect(displayPercent(20)).toBe(20);
+    expect(displayPercent(99.6)).toBe(99);
+    expect(displayPercent(34.4)).toBe(34);
   });
 });
 

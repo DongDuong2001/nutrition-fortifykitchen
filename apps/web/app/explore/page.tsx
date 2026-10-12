@@ -1,11 +1,10 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AppHeader } from "@/components/ui/app-header";
 import { AppShell } from "@/components/ui/app-shell";
-import { Card } from "@/components/ui/card";
+import { PillButton } from "@/components/ui/pill-button";
 import { ChipRow } from "@/components/foods/chip-row";
 import { FoodListCard } from "@/components/foods/food-list-card";
 import { FoodSearchField } from "@/components/foods/food-search-field";
@@ -54,18 +53,16 @@ export default function ExplorePage() {
                 foods={results.map((food) => ({ food }))}
                 withCategory={(food) => categoryLabel(categoryOf(food))}
                 empty={
-                  <p className="m-0 py-3 text-[13px] leading-snug text-secondary">
-                    Không có món nào khớp. Thử từ ngắn hơn, bỏ dấu, hoặc tạo món mới.
-                  </p>
+                  <div className="flex flex-col gap-3 py-2">
+                    <p className="m-0 text-[13px] leading-snug text-secondary">
+                      Không có món nào khớp. Thử từ ngắn hơn, bỏ dấu, hoặc tạo món mới.
+                    </p>
+                    <PillButton variant="secondary" href="/foods/new">
+                      Tạo món mới
+                    </PillButton>
+                  </div>
                 }
               />
-              {results.length === 0 && (
-                <Card className="text-center">
-                  <Link href="/foods/new" className="inline-flex min-h-[44px] items-center font-bold text-blue no-underline">
-                    Tạo món mới
-                  </Link>
-                </Card>
-              )}
             </>
           ) : (
             <ExploreSections />

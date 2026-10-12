@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { SectionTitle } from "@/components/ui/section-title";
 import { PillButton } from "@/components/ui/pill-button";
 import { FoodListCard } from "@/components/foods/food-list-card";
+import { isOwnFood } from "@/lib/food-categories";
 import { RICH_NUTRIENT_IDS } from "@/lib/rich-in";
 import { getNutrientDefinition } from "@/lib/nutrients";
 import { FoodRowLink } from "@/components/foods/food-row-link";
@@ -28,7 +29,7 @@ export function ExploreSections() {
     .map(({ food, grams, label }) => ({ food, grams, label }));
 
   const favourites = resolveFavourites(favouriteIds, MOCK_FOODS);
-  const mine = MOCK_FOODS.filter((f) => f.source === "user");
+  const mine = MOCK_FOODS.filter(isOwnFood);
 
   return (
     <>

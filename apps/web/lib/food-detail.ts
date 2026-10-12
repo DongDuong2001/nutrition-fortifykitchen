@@ -23,6 +23,14 @@ const targetMin = (targets: CompleteTargets, id: string): number | null => {
   return typeof min === "number" && min > 0 ? min : null;
 };
 
+/** Whole percent for display. Never rounds up across 20 % or 100 %, so the row agrees with the good-source rule. */
+export function displayPercent(share: number): number {
+  const r = Math.round(share);
+  if (share < GOOD_SOURCE_SHARE && r >= GOOD_SOURCE_SHARE) return GOOD_SOURCE_SHARE - 1;
+  if (share < 100 && r >= 100) return 99;
+  return r;
+}
+
 /** The 22 counted nutrients for a food at `grams`, minerals first (as the Vi chất sheet), and how many are unknown. */
 export function microRowsFor(
   per100: Record<string, number | null>,
@@ -42,7 +50,7 @@ export function microRowsFor(
       group: def?.group === "vitamins" ? "vitamins" : "minerals",
       value,
       share,
-      pct: share === null ? null : Math.round(share),
+      pct: share === null ? null : displayPercent(share),
     };
   });
   const ordered = [...rows.filter((r) => r.group === "minerals"), ...rows.filter((r) => r.group === "vitamins")];

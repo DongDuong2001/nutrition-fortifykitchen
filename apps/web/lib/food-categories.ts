@@ -60,6 +60,11 @@ export function categoryOf(food: FoodItem): FoodCategory {
   return food.category ?? "cua_toi";
 }
 
+/** One definition of Món của tôi: the category, or a food the user made. */
+export function isOwnFood(food: FoodItem): boolean {
+  return categoryOf(food) === "cua_toi" || food.source === "user";
+}
+
 export function isCategoryFilter(filter: FoodFilter): filter is FoodCategory {
   return FOOD_CATEGORIES.some((c) => c.key === filter);
 }

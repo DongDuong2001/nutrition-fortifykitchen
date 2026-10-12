@@ -109,3 +109,8 @@ dd on a phone/ { s/^- [ ]/- [x]/; s/$/ Decided 12/10 (Hao): keep the sr-only h1 
 - [ ] (cc2-unify) Desktop Tổng quan sub-tabs sit in a second row of the header (under the title), not at the right of the title row as in the mockup. Say if they should move.
 - [ ] (cc2-unify) Chips are pills now (UI-RULES says buttons and chips are full pill); the 2×2 goal chips in the profile are pills too.
 - [ ] (cc2-unify) The phone header grows when a screen passes a subtitle (food, paywall, nutrient). Keep, or move subtitles out of the ink header?
+- [ ] (cc2-11) Rich-in lists leave out foods whose value is a known 0 as well as null (a list of 0 mg is noise). Say if known zeros should show at the end.
+- [ ] (cc2-11) Food detail header subtitle reads "Nhóm · Nguồn · N g mỗi khẩu phần" as in the mockup, which makes the phone header taller than a one-row title.
+- [ ] (cc2-11) The old "Mẹo" box (tipVi, mock advice) is not shown on food detail: facts only until coach rules. Reserved slot stays in data.
+- [ ] (cc2-11) Khám phá "Món của tôi" lists foods in the category cua_toi or with source user; in the mock that is Bột củ dền, so the empty state is not visible in the demo data. Gần đây is hidden when there are no recents, Yêu thích shows its empty line.
+- [ ] (cc2-11) Mockup "Yêu thích › Xem tất cả" is not built: the home lists every favourite. Bữa của tôi is left to cc2-12.
