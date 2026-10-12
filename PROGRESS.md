@@ -3,6 +3,7 @@
 ## Now working
 | Task | Owner | Files / routes |
 |---|---|---|
+| cc-15b: design revisions + ag-08 merge | Claude Code | design/v2/**, docs/07-api-contract.md, PROGRESS.md |
 
 | Date | Commit | Built | Next |
 | --- | --- | --- | --- |
