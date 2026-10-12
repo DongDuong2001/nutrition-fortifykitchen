@@ -5,7 +5,6 @@ import {
   historyDays,
   levelFor,
   nutrientOnDay,
-  targetLabel,
   weekdayShortVi,
 } from "../nutrient-detail";
 import { getNutrientDefinition } from "../nutrients";
@@ -20,21 +19,6 @@ describe("amountLabel", () => {
   it("shows the amount with its unit", () => {
     expect(amountLabel(331, "mg")).toBe("331 mg");
     expect(amountLabel(1041, "kcal")).toBe("1.041 kcal");
-  });
-});
-
-describe("targetLabel", () => {
-  it("shows a range when the target has a max", () => {
-    expect(targetLabel(1200, 1500, "mg")).toBe("1.200–1.500 mg");
-  });
-
-  it("shows one value when there is no max or the max equals the min", () => {
-    expect(targetLabel(1200, undefined, "mg")).toBe("1.200 mg");
-    expect(targetLabel(1200, 1200, "mg")).toBe("1.200 mg");
-  });
-
-  it("returns null when there is no target", () => {
-    expect(targetLabel(null, undefined, "mg")).toBeNull();
   });
 });
 

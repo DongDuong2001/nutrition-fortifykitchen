@@ -10,15 +10,6 @@ export function amountLabel(consumed: number | null, unit: string): string {
   return consumed === null ? "—" : `${formatAmount(consumed, unit)} ${unit}`;
 }
 
-/** The target as the detail shows it: "1.200–1.500 mg" when there is a max, else "1.200 mg". Null without a target. */
-export function targetLabel(targetMin: number | null, targetMax: number | undefined, unit: string): string | null {
-  if (targetMin === null) return null;
-  if (targetMax && targetMax !== targetMin) {
-    return `${formatAmount(targetMin, unit)}–${formatAmount(targetMax, unit)} ${unit}`;
-  }
-  return `${formatAmount(targetMin, unit)} ${unit}`;
-}
-
 /** The level band of a percentage (same bands as the bar). Null when there is no percentage. */
 export function levelFor(percentage: number | null): NutrientLevel | null {
   return percentage === null ? null : getLevel(percentage);

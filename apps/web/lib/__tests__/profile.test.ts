@@ -135,6 +135,8 @@ describe("targetRangeText", () => {
   it("shows a range with a dot thousands separator, or one value", () => {
     expect(targetRangeText({ min: 1950, max: 2275 }, "kcal")).toBe("1.950–2.275 kcal");
     expect(targetRangeText({ min: 28, max: 28 }, "mg")).toBe("28 mg");
+    expect(targetRangeText({ min: 1200, max: 1500 }, "mg")).toBe("1.200–1.500 mg");
+    expect(targetRangeText({ min: 1200, max: 1200 }, "mg")).toBe("1.200 mg");
   });
 });
 

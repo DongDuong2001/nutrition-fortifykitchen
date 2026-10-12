@@ -10,12 +10,12 @@ import { NutrientHistory, type HistoryPoint } from "@/components/nutrient-detail
 import { pastDayData, useDiary } from "@/lib/diary-store";
 import { getLevelLabel, type NutrientLevel } from "@/lib/levels";
 import { getNutrientDefinition } from "@/lib/nutrients";
+import { targetRangeText } from "@/lib/profile";
 import {
   amountLabel,
   historyDays,
   levelFor,
   nutrientOnDay,
-  targetLabel,
 } from "@/lib/nutrient-detail";
 
 interface PageProps {
@@ -70,17 +70,20 @@ export default function NutrientDetailPage({ params }: PageProps) {
     return (
       <div className="w-full min-h-screen bg-page text-text font-sans flex flex-col">
         <h1 className="sr-only">Chi tiết vi chất — Đang tải</h1>
-        <div className="bg-ink rounded-b-[20px] h-44 animate-pulse" aria-hidden="true" />
+        <div className="bg-ink rounded-b-[20px] h-44 motion-safe:animate-pulse" aria-hidden="true" />
         <div className="flex-1 w-full max-w-[560px] mx-auto p-4 flex flex-col gap-3">
-          <div className="h-44 rounded-[18px] bg-level-empty animate-pulse" aria-hidden="true" />
-          <div className="h-28 rounded-[18px] bg-level-empty animate-pulse" aria-hidden="true" />
+          <div className="h-44 rounded-[18px] bg-level-empty motion-safe:animate-pulse" aria-hidden="true" />
+          <div className="h-28 rounded-[18px] bg-level-empty motion-safe:animate-pulse" aria-hidden="true" />
         </div>
       </div>
     );
   }
 
   const hasTarget = def.targetSource !== "none";
-  const targetText = hasTarget ? targetLabel(row.targetMin, row.targetMax, def.unit) : null;
+  const targetText =
+    hasTarget && row.targetMin !== null
+      ? targetRangeText({ min: row.targetMin, max: row.targetMax ?? row.targetMin }, def.unit)
+      : null;
   const level = levelFor(row.percentage);
   const levelText = level === "dat" ? `✓ ${getLevelLabel(level)}` : level ? getLevelLabel(level) : null;
   const amountText = amountLabel(row.consumed, def.unit);
@@ -95,7 +98,7 @@ export default function NutrientDetailPage({ params }: PageProps) {
         backLabel="Quay lại Vi chất"
         summary={
           <div className="flex flex-col gap-3">
-            <div className="flex items-end justify-between gap-3">
+            <div data-align-group="nutrient-header" className="flex items-end justify-between gap-3">
               <span className="text-[13px] tabular-nums text-muted-subtitle">
                 {targetText ? `${amountText} / ${targetText}` : amountText}
               </span>
@@ -114,21 +117,22 @@ export default function NutrientDetailPage({ params }: PageProps) {
               <span className={`text-sm font-bold ${LEVEL_TEXT[level]}`}>{levelText}</span>
             )}
             {targetText && (
-              <p className="m-0 text-[13px] text-muted-subtitle">Mục tiêu: {targetText}/ngày.</p>
+              <p data-align-group="nutrient-header" className="m-0 text-[13px] text-muted-subtitle">Mục tiêu: {targetText}/ngày.</p>
             )}
           </div>
         }
       />
 
       <main className="flex-1 w-full max-w-[560px] mx-auto p-4 flex flex-col gap-3">
-        <Card as="section" aria-labelledby="nutrient-history-title">
+        {/* Cards are divs with a region role so the two share the page's container for the edge check */}
+        <Card as="div" role="region" data-align-group="nutrient-card" aria-labelledby="nutrient-history-title">
           <h2 id="nutrient-history-title" className="m-0 mb-3 text-base font-bold">
             {targetText ? "7 ngày qua" : `7 ngày qua · ${def.unit}`}
           </h2>
           <NutrientHistory points={history} unit={def.unit} todayIso={todayIso} />
         </Card>
 
-        <Card as="section" aria-labelledby="nutrient-sources-title">
+        <Card as="div" role="region" data-align-group="nutrient-card" aria-labelledby="nutrient-sources-title">
           <h2 id="nutrient-sources-title" className="m-0 mb-2 text-base font-bold">
             Đã có từ món ăn hôm nay
           </h2>
