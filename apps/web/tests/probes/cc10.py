@@ -98,8 +98,8 @@ def run_phone(browser):
     check(visible_count(pg, 'text=Đang xem ngày cũ') == 1, "390 ‹ opens a past day with the banner")
     check(energy(pg) == "1.532", f"390 yesterday shows its own 1.532 kcal (got {energy(pg)})")
     check(visible_count(pg, 'button:has-text("Chép hôm qua")') == 0, "390 past day hides Chép hôm qua")
-    check(visible_count(pg, f'text=Hôm qua, {YESTERDAY.day:02d}/{YESTERDAY.month:02d}') == 1,
-          "390 header reads Hôm qua, dd/mm for yesterday")
+    check(visible_count(pg, f'text=Hôm qua {YESTERDAY.day:02d}/{YESTERDAY.month:02d}') == 1,
+          "390 header reads Hôm qua dd/mm for yesterday")
     pg.screenshot(path=shot("cc10-past-day-390.png"), animations="disabled")
 
     # › comes back to today; › is off on today

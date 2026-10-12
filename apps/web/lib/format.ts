@@ -124,9 +124,9 @@ export function getWeekdayName(targetDate: Date | string): string {
 
 /**
  * Format a date for header display relative to `now`:
- * - "Hôm nay, dd/mm" if target is the same day as now in Asia/Ho_Chi_Minh
- * - "Chủ nhật, dd/mm" for Sunday (never "Thứ 1")
- * - "Thứ Hai, dd/mm" through "Thứ Bảy, dd/mm" for Monday through Saturday
+ * - "Hôm nay dd/mm" if target is the same day as now in Asia/Ho_Chi_Minh
+ * - "Chủ nhật dd/mm" for Sunday (never "Thứ 1")
+ * - "Thứ Hai dd/mm" through "Thứ Bảy dd/mm" for Monday through Saturday
  *
  * `now` is a required parameter so that formatting is pure and hydration-safe (no `new Date()` inside).
  */
@@ -145,7 +145,7 @@ export function formatDayLabel(targetDate: Date | string, now: Date): string {
     targetParts.day === nowParts.day;
 
   if (isToday) {
-    return `Hôm nay, ${targetParts.day}/${targetParts.month}`;
+    return `Hôm nay ${targetParts.day}/${targetParts.month}`;
   }
 
   // Yesterday in Asia/Ho_Chi_Minh (UTC+7 has no DST, exactly 24h before now)
@@ -157,11 +157,11 @@ export function formatDayLabel(targetDate: Date | string, now: Date): string {
     targetParts.day === yesterdayParts.day;
 
   if (isYesterday) {
-    return `Hôm qua, ${targetParts.day}/${targetParts.month}`;
+    return `Hôm qua ${targetParts.day}/${targetParts.month}`;
   }
 
   const dayName = getWeekdayName(target);
-  return `${dayName}, ${targetParts.day}/${targetParts.month}`;
+  return `${dayName} ${targetParts.day}/${targetParts.month}`;
 }
 
 /**

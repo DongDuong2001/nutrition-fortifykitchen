@@ -37,7 +37,7 @@ describe("withRuntimeDate", () => {
     const day = withRuntimeDate(SAMPLE_DAY, "2026-10-12");
     expect(day).not.toBe(SAMPLE_DAY);
     expect(day.date).toBe("2026-10-12");
-    expect(day.dateLabel).toBe("Hôm nay, 12/10");
+    expect(day.dateLabel).toBe("Hôm nay 12/10");
     expect(day.desktopDateLabel).toBe("Thứ Hai, 12/10/2026 · Ngày tập 60′ · Giữ cân · 65 kg");
   });
 

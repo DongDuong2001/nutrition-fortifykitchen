@@ -44,7 +44,7 @@ export interface MockMicroStat {
 
 export interface MockDayData {
   date: string; // e.g. "2026-10-10"
-  dateLabel: string; // "Hôm nay, 10/10"
+  dateLabel: string; // "Hôm nay 10/10"
   desktopDateLabel?: string; // "Thứ Bảy, 10/10/2026 · Ngày tập 60' · Giữ cân · 65 kg"
   user: {
     sex: SexType;
@@ -80,7 +80,7 @@ export interface MockDayData {
 
 export const SAMPLE_DAY: MockDayData = {
   date: "2026-10-10",
-  dateLabel: "Hôm nay, 10/10",
+  dateLabel: "Hôm nay 10/10",
   desktopDateLabel: "Thứ Bảy, 10/10/2026 · Ngày tập 60′ · Giữ cân · 65 kg",
   user: {
     sex: "male",

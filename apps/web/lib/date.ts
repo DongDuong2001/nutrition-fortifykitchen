@@ -28,7 +28,7 @@ export function withRuntimeDate(day: MockDayData, isoDate: string): MockDayData 
   return {
     ...day,
     date: isoDate,
-    dateLabel: `Hôm nay, ${dayOfMonth}/${month}`,
+    dateLabel: `Hôm nay ${dayOfMonth}/${month}`,
     desktopDateLabel: `${formatDesktopDate(isoDate)} · Ngày tập ${trainingMinutes}′ · ${goalLabel} · ${weightKg} kg`,
   };
 }

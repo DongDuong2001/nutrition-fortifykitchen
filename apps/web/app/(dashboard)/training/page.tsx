@@ -119,7 +119,7 @@ function TrainingContent() {
 
   // Formatted date labels
   const mobileSubtitle = useMemo(() => {
-    if (!clientNow) return "Hôm nay, 10/10";
+    if (!clientNow) return "Hôm nay 10/10";
     return formatDayLabel(todayIso, clientNow);
   }, [todayIso, clientNow]);
 
