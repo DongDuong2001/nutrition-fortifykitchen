@@ -3,6 +3,7 @@
 import React from "react";
 import { formatNumber, formatAmount } from "@/lib/format";
 import { calculateSegments } from "@/lib/levels";
+import { targetRangeText } from "@/lib/profile";
 import type { NutrientTrendResult } from "@/lib/trends";
 
 interface NutrientTrendListProps {
@@ -26,7 +27,7 @@ export function NutrientTrendList({
           {title}
         </h2>
         <span className="text-xs text-secondary font-medium">
-          Mục tiêu tối thiểu / ngày
+          Mục tiêu / ngày
         </span>
       </div>
 
@@ -111,7 +112,7 @@ export function NutrientTrendList({
                   TB: {formatAmount(item.averageValue, item.unit)} {item.unit}
                 </span>
                 <span>
-                  Mục tiêu: {formatAmount(item.targetMin, item.unit)} {item.unit}
+                  Mục tiêu: {targetRangeText({ min: item.targetMin, max: item.targetMax ?? item.targetMin }, item.unit)}
                 </span>
               </div>
             </div>

@@ -14,6 +14,8 @@ export interface NutrientTrendResult {
   totalDays: number;
   level: NutrientLevel;
   targetMin: number;
+  /** Shown as the top of the range; a day above it still counts as on target */
+  targetMax?: number;
   isCoachRule?: boolean;
 }
 
@@ -30,20 +32,11 @@ export function calculateAverage(values: number[], decimals = 0): number {
 }
 
 /**
- * Counts how many values fall within a target definition.
- * If max is provided: min <= value <= max.
- * If only min is provided: value >= min.
+ * Counts the days that reach the minimum. Product rule: a value above the max is on target too,
+ * so there is no over-limit. The max is for display only (see trendTargetsFrom).
  */
-export function countDaysOnTarget(
-  values: number[],
-  target: { min: number; max?: number }
-): number {
-  return values.filter((val) => {
-    if (target.max !== undefined) {
-      return val >= target.min && val <= target.max;
-    }
-    return val >= target.min;
-  }).length;
+export function countDaysOnTarget(values: number[], target: { min: number }): number {
+  return values.filter((val) => val >= target.min).length;
 }
 
 /**
@@ -56,10 +49,7 @@ export function calculateNutrientTrend(
   const averageValue = calculateAverage(values, target.unit === "g" ? 0 : 1);
   const rawPct = (averageValue / target.targetMin) * 100;
   const averagePercentage = Math.round(rawPct);
-  const daysOnTarget = countDaysOnTarget(values, {
-    min: target.targetMin,
-    max: target.targetMax,
-  });
+  const daysOnTarget = countDaysOnTarget(values, { min: target.targetMin });
   const level = getLevel(averagePercentage);
 
   return {
@@ -72,6 +62,7 @@ export function calculateNutrientTrend(
     totalDays: values.length,
     level,
     targetMin: target.targetMin,
+    targetMax: target.targetMax,
     isCoachRule: target.isCoachRule,
   };
 }

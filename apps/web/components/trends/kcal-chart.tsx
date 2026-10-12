@@ -210,6 +210,17 @@ export function KcalChart({ entries, targetMin, targetMax }: KcalChartProps) {
           />
           Thiếu
         </span>
+        <span className="inline-flex items-center gap-1.5">
+          <span
+            aria-hidden="true"
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(135deg, var(--color-sky) 0px 4px, var(--color-paper) 4px 8px)",
+            }}
+            className="w-2.5 h-2.5 rounded-xs border border-sky shrink-0"
+          />
+          Hôm nay (đang ghi)
+        </span>
       </div>
     </section>
   );

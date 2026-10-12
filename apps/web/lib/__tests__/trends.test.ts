@@ -27,12 +27,12 @@ describe("Trends calculation helpers (lib/trends.ts)", () => {
     expect(calculateAverage([])).toBe(0);
   });
 
-  it("counts days on target correctly with min and max bounds", () => {
-    const values = [2050, 1890, 2210, 1640, 2120, 1980];
-    // Target 1950 - 2275:
-    // 2050 (in), 1890 (no), 2210 (in), 1640 (no), 2120 (in), 1980 (in) -> 4 on target
-    const count = countDaysOnTarget(values, { min: 1950, max: 2275 });
-    expect(count).toBe(4);
+  it("counts a day above the max as on target, not over the limit", () => {
+    const values = [2050, 1890, 2210, 1640, 2120, 1980, 2400];
+    // Target 1950 - 2275 (only the minimum counts):
+    // 2050, 2210, 2120, 1980 and 2400 (above 2275) -> 5 on target; 1890 and 1640 are below
+    const count = countDaysOnTarget(values, { min: 1950 });
+    expect(count).toBe(5);
   });
 
   it("counts days on target with min-only target", () => {
@@ -147,6 +147,42 @@ describe("Trends mock data (lib/mock/trends.ts)", () => {
     expect(lastDay.calories).toBeGreaterThan(0);
   });
 
+  it("has one completed day above the default kcal max in each window, so the over case shows", () => {
+    const max = calculateTargets({ sex: "male", weightKg: 65, goal: "maintain" }).calories.max;
+    const over7 = MOCK_TRENDS_7_DAYS.filter((d) => !d.isToday && d.calories > max);
+    const over30 = MOCK_TRENDS_30_DAYS.filter((d) => !d.isToday && d.calories > max);
+    expect(over7).toHaveLength(1);
+    expect(over30).toHaveLength(1);
+  });
+
+});
+
+describe("Trends nutrient ranges: above the max counts as đạt (no over-limit)", () => {
+  // Coach ranges at 65 kg, maintain: calcium 1.200–1.500 mg, magnesium 600–750 mg, potassium 5.200–6.500 mg
+  const targets = trendTargetsFrom(calculateTargets({ sex: "male", weightKg: 65, goal: "maintain" }));
+
+  it("counts calcium 1.600 with a 1.200–1.500 target as on target", () => {
+    const trend = calculateNutrientTrend([1600, 1300, 1100], targets.calcium);
+    expect(trend.daysOnTarget).toBe(2);
+    expect(trend.targetMax).toBe(1500);
+  });
+
+  it("counts magnesium above 750 as on target", () => {
+    const trend = calculateNutrientTrend([800, 700, 500], targets.magnesium);
+    expect(trend.daysOnTarget).toBe(2);
+    expect(trend.targetMax).toBe(750);
+  });
+
+  it("counts potassium above 6.500 as on target", () => {
+    const trend = calculateNutrientTrend([7000, 6000, 5000], targets.potassium);
+    expect(trend.daysOnTarget).toBe(2);
+    expect(trend.targetMax).toBe(6500);
+  });
+
+  it("puts a nutrient above its max in the đạt level", () => {
+    const trend = calculateNutrientTrend([1600, 1600, 1600], targets.calcium);
+    expect(trend.level).toBe("dat");
+  });
 });
 
 describe("Trends date window (anchorTrendDays, trendWindowLabel)", () => {

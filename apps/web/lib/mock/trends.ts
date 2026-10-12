@@ -64,7 +64,7 @@ export const MOCK_TRENDS_7_DAYS: DailyTrendEntry[] = [
     date: "2026-10-06",
     dayLabel: "T3",
     dateNumber: "06",
-    calories: 2210,
+    calories: 2380, // above the default kcal max (2.275): counts as on target, shows the đạt colour
     protein: 118,
     fat: 62,
     carbs: 285,

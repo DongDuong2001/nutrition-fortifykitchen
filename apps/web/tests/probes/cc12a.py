@@ -65,7 +65,7 @@ def check_calcium_target(browser):
     pg = context.new_page()
     open_trends(pg)
     trends_text = body_text(pg)
-    check("Mục tiêu: 1.200 mg" in trends_text, "trends: calcium target reads 1.200 mg")
+    check("Mục tiêu: 1.200–1.500 mg" in trends_text, "trends: calcium target reads 1.200–1.500 mg")
     pg.goto(BASE + "/micros", wait_until="networkidle")
     visible(pg, '[data-align-container="micros-page"]').wait_for(state="visible", timeout=8000)
     micros_text = body_text(pg)
