@@ -583,3 +583,131 @@ paths:
           description: Entry deleted
         '409':
           description: Past day read only
+
+  /favourites:
+    get:
+      summary: Get user favourites
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of favourite foods
+    post:
+      summary: Add a food to favourites
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - food_id
+              properties:
+                food_id:
+                  type: string
+                  format: uuid
+      responses:
+        '201':
+          description: Favourite added
+
+  /favourites/{food_id}:
+    delete:
+      summary: Remove a food from favourites
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: food_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Favourite removed
+
+  /recents:
+    get:
+      summary: Get recently logged foods with last portion
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of recent foods
+
+  /saved-meals:
+    get:
+      summary: Get all saved meals (Bữa của tôi)
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of saved meals
+    post:
+      summary: Create a saved meal
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                items:
+                  type: array
+                  items:
+                    type: object
+      responses:
+        '201':
+          description: Saved meal created
+
+  /saved-meals/{id}:
+    delete:
+      summary: Delete a saved meal
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Saved meal deleted
+
+  /days/{date}/entries/from-saved/{id}:
+    post:
+      summary: Add all items from a saved meal into diary
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: date
+          in: path
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: meal
+          in: query
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Entries added from saved meal
+        '409':
+          description: Past day read only
