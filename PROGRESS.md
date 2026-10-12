@@ -3,6 +3,7 @@
 ## Now working
 | Task | Owner | Files / routes |
 |---|---|---|
+| cc2-09 data and logic | Claude Code #2 | design/IA-v2.md, apps/web/package.json, apps/web/scripts/**, apps/web/tests/probes/run_all.py, lib/mock/{trends,weight-log,yesterday}.ts, lib/{trends,day-history,period,format,diary-store}.ts + their tests |
 
 | Date | Commit | Built | Next |
 | --- | --- | --- | --- |

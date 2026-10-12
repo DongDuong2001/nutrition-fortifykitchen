@@ -62,7 +62,7 @@ Job: log, fix and read one day (any date).
 - Header: date with ‹ › and calendar (as now). Under it the day summary: kcal dial + four macro bars (the only full breakdown of a day) and "còn N kcal".
 - Two compact rows under the summary, both for the date shown: "8/22 vi chất · Thiếu: Vitamin D, Canxi" → `/micros?date=`; "Ngày tập 60′ · muối 7–10,5 g" → `/training?date=` (today: change the minutes there; past days read-only).
 - When the header scrolls away, a slim sticky bar remains (kcal eaten / target, còn N).
-- Meals with ONE "+" and a "⋯" menu per header ("Chép hôm qua", "Lưu thành Bữa của tôi").
+- Meals with ONE "+" and a "⋯" menu per header ("Chép hôm qua", "Lưu thành Bữa của tôi", "Xoá bữa này"). "Chép hôm qua" and "Xoá bữa này" are for today only; "Xoá bữa này" asks for a confirm step first and offers a 5 s undo.
 - Past days: read-only exactly as now; their Vi chất and Ngày tập open read-only.
 
 ## Khám phá (explore) — v1, data only
@@ -137,3 +137,10 @@ Checked with ui-ux-pro-max (§1 accessibility: one h1, 44 px back with aria-labe
 - No wordmark outside `/` on a phone; the sidebar carries it on desktop. The Pro page no longer shows a wordmark lockup.
 - A screen whose main already has 32 px padding passes `flush`; a left-aligned content grid passes `layout="wide"`.
 - Alignment: `data-align-group` is on the title row (its left edge is the content edge), not the h1, because the back button now sits before the title. `food-header` and `entry-header` groups are gone (they only compared a title with its own subtitle).
+
+## Decided 12/10 21:00
+1. Header sizes: Saira Condensed 24 px on a phone and 32 px on desktop (the cc2-08 AppHeader; the mockups' desktop title size does not apply).
+2. Desktop back is the 44 px chevron inline before the title, not a "‹ Quay lại" text button above it.
+3. The Pro page (`/paywall`) has no wordmark; the title is "PRO" on paper.
+4. Setup (`/setup/*`) keeps its H1T MICRO wordmark inside the form card on desktop (no sidebar there).
+5. One mock source: Nhật ký and Tổng quan read the same per-day numbers (the trend series is computed from the day history, today being the sample day), and the weight log sample (`lib/mock/weight-log.ts`) feeds Cơ thể.

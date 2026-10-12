@@ -1,5 +1,5 @@
-import { spawnSync } from "node:child_process";
-import { resolve, relative } from "node:path";
+import { relative, resolve } from "node:path";
+import { runPython } from "./python.mjs";
 
 const target = process.argv[2];
 if (!target) {
@@ -16,13 +16,4 @@ if (!rel.startsWith("tests/probes/") || !rel.endsWith(".py")) {
   process.exit(1);
 }
 
-// python3 on Windows can be the Microsoft Store stub, which prints a message and runs nothing: use `py` then.
-const works = (cmd) => spawnSync(cmd, ["--version"], { encoding: "utf8" }).stdout?.startsWith("Python 3");
-const python = works("python3") ? "python3" : works("py") ? "py" : "python3";
-
-const res = spawnSync(python, [resolved, ...process.argv.slice(3)], {
-  stdio: "inherit",
-  env: process.env,
-});
-
-process.exit(res.status ?? 0);
+process.exit(runPython(resolved, process.argv.slice(3)));

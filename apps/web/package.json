@@ -13,10 +13,10 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:align": "python3 tests/alignment.py",
-    "test:hydration": "python3 tests/probes/hydration.py",
+    "test:align": "node scripts/py.mjs tests/alignment.py",
+    "test:hydration": "node scripts/py.mjs tests/probes/hydration.py",
     "probe": "node scripts/probe.mjs",
-    "probe:all": "python3 tests/probes/run_all.py",
+    "probe:all": "node scripts/py.mjs tests/probes/run_all.py",
     "check": "npm run typecheck && npm run test && npm run build && npm run test:align && npm run test:hydration"
   },
   "dependencies": {
