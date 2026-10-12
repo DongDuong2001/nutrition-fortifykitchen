@@ -7,6 +7,7 @@
 
 | Date | Commit | Built | Next |
 | --- | --- | --- | --- |
+| 12/10/2026 | cc-15 | design/v2/cai-dat.html: Cài đặt tab (profile, Mục tiêu mỗi ngày row, Ứng dụng, Pro card, Tài khoản, Vùng nguy hiểm with Xoá tài khoản) and /settings/targets (goal chips, weight, default training, calculated targets from the coach rules and the mock). PNGs in design/v2/png. | kham-pha, add-sheet, nav, README |
 | 12/10/2026 | cc-15 | design/v2/nhat-ky.html: Nhật ký with five states: today (one + per meal header, ⋯ menu with Chép hôm qua, sticky energy bar, Vi chất row), training sheet (Nghỉ, 45′, 60′, 90′, 120′), per-meal menu (Xoá bữa này in destructive text), past day Thứ Sáu 09/10 read-only (1.532 kcal, from the mock catalogue), empty day with Chép hôm qua. PNGs in design/v2/png. | kham-pha, add-sheet, cai-dat, nav, README |
 | 12/10/2026 | cc-15 | design/v2/tong-quan.html: Tổng quan, phone 390 and desktop 1280 side by side, three states (food logged, nothing logged, rest day). Dial, 10-segment bars and 7-day strip from lib/mock; facts-only insights. PNGs in design/v2/png. Checks: no horizontal scroll at 390, every target ≥44 px, text ≥4.5:1 (render_check, not committed). IA-v2.md was not on disk or on feat/ui. | nhat-ky, cai-dat, kham-pha, add-sheet, nav, README |
 | 12/10/2026 | cc2-06 | --color-track-on-dark is #666A75: 3.44:1 on ink, 3.15:1 on the surface-dark panel (both in the CSS comment). cc2_03.py and cc2_05.py check the ring against the colour of the panel it sits on. cc2-05 dial question marked decided. | None |
