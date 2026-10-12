@@ -22,6 +22,7 @@ import (
 	"nutrition-api/internal/nutrition"
 	"nutrition-api/internal/payment"
 	"nutrition-api/internal/profile"
+	"nutrition-api/internal/ratelimit"
 	"nutrition-api/internal/trends"
 	"nutrition-api/internal/vault"
 	"nutrition-api/pkg/database"
@@ -83,6 +84,8 @@ func main() {
 	trendsService := trends.NewService(trendsRepo)
 	trendsHandler := trends.NewHandler(trendsService)
 
+	userRateLimiter := ratelimit.NewUserRateLimiter(60)
+
 	authMiddleware := auth.NewMiddleware()
 
 	// 5. Setup Chi Router
@@ -136,6 +139,7 @@ func main() {
 		// Authenticated Routes
 		r.Group(func(r chi.Router) {
 			r.Use(authMiddleware.Authenticate)
+			r.Use(userRateLimiter.LimitWrites)
 
 			// Profile & Weight endpoints (Phase 1)
 			r.Route("/me", func(r chi.Router) {
