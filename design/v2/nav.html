@@ -18,6 +18,253 @@
   --color-secondary: #6B6A66;        /* --color-secondary */
   --color-blue: #1238D6;             /* --color-blue (same as --color-cobalt): primary action */
   --color-sky: #9EC3FF;              /* --color-sky */
+  --color-destructive: #D93F44;      /* --color-destructive */
+  --color-destructive-text: #C4373C; /* --color-destructive-text */
+  --color-level-red: #D93F44;        /* --color-level-red */
+  --color-level-yellow: #B07800;     /* --color-level-yellow */
+  --color-level-green: #17945F;      /* --color-level-green */
+  --color-level-blue: #1238D6;       /* --color-level-blue */
+  --color-level-empty: #E6E1D7;      /* --color-level-empty */
+  --color-level-red-dark: #E5484D;   /* --color-level-red-dark */
+  --color-level-yellow-dark: #E8A400;/* --color-level-yellow-dark */
+  --color-level-green-dark: #1FA971; /* --color-level-green-dark */
+  --color-level-blue-dark: #5C86F2;  /* --color-level-blue-dark */
+  --color-level-empty-dark: #2A2C31; /* --color-level-empty-dark */
+  --color-divider: #E0DACF;          /* --color-divider */
+  --color-muted-subtitle: #C9CDD6;   /* --color-muted-subtitle */
+  --color-muted-on-dark: #8C92A0;    /* --color-muted-on-dark */
+  --color-on-dark: #FFFFFF;          /* --color-on-dark */
+  --color-track-on-dark: #666A75;    /* --color-track-on-dark */
+  --color-grabber: #D5D8DF;          /* --color-grabber */
+  --color-surface-dark: #1A1C22;     /* --color-surface-dark */
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--color-page); color: var(--color-text); font-family: 'Manrope', -apple-system, 'Segoe UI', Roboto, sans-serif; -webkit-font-smoothing: antialiased; }
+button, a { font: inherit; color: inherit; text-decoration: none; cursor: pointer; }
+button { background: none; border: 0; padding: 0; margin: 0; }
+button:disabled { cursor: default; }
+:focus-visible { outline: 3px solid var(--color-blue); outline-offset: 2px; }
+/* Sky ring on dark surfaces (ink header, hero, energy bar, Pro card, toast, bottom nav, sidebar), blue elsewhere */
+.hdr :focus-visible, .hero :focus-visible, .energy :focus-visible, .onink:focus-visible, .pro :focus-visible, .toast :focus-visible, .nav :focus-visible, .side :focus-visible { outline-color: var(--color-sky); }
+.side-add { width: 100%; min-height: 44px; justify-content: center; }
+svg { display: block; flex: none; }
+ul, ol { margin: 0; padding: 0; list-style: none; }
+h1, h2, h3, h4, p { margin: 0; }
+.display { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-variant-numeric: tabular-nums; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* Board chrome (not part of the screen) */
+.board { padding-bottom: 48px; }
+.board-head { padding: 24px 16px 8px; max-width: 960px; }
+.board-head h1 { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-size: 28px; text-transform: uppercase; margin-bottom: 8px; }
+.board-head p { color: var(--color-secondary); font-size: 14px; line-height: 1.5; }
+.state { padding: 24px 0 8px; border-top: 1px solid var(--color-divider); }
+.state h2 { font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--color-secondary); padding: 0 16px; margin-bottom: 12px; }
+.pair { display: flex; flex-wrap: wrap; gap: 40px; align-items: flex-start; }
+.fig { margin: 0; min-width: 0; }
+.fig figcaption { font-size: 13px; font-weight: 600; color: var(--color-secondary); padding: 0 16px 8px; }
+.fig-phone { width: 390px; max-width: 100%; flex: none; }
+.fig-desktop { max-width: 100%; overflow-x: auto; }
+.phone { width: 100%; background: var(--color-page); display: flex; flex-direction: column; box-shadow: 0 0 0 1px var(--color-card-border); }
+.desktop { width: 1280px; min-height: 860px; background: var(--color-page); display: flex; box-shadow: 0 0 0 1px var(--color-card-border); }
+
+/* Phone header (ink block) */
+.hdr { background: var(--color-ink); color: var(--color-on-dark); padding: 16px 16px 20px; border-radius: 0 0 20px 20px; display: flex; flex-direction: column; gap: 12px; }
+.brand { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-size: 22px; line-height: 1; letter-spacing: .02em; }
+.brand span { color: var(--color-sky); }
+.ptitle { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-size: 28px; line-height: 1; text-transform: uppercase; }
+.hdr-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.datenav { display: flex; align-items: center; gap: 4px; }
+.ico-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; color: var(--color-on-dark); }
+.ico-btn:disabled { color: var(--color-muted-on-dark); }
+.datelabel { font-size: 15px; font-weight: 700; min-width: 112px; text-align: center; }
+
+/* Hero: kcal dial + macros, dark inset panel */
+.hero { background: var(--color-surface-dark); color: var(--color-on-dark); border-radius: 16px; padding: 16px; display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; }
+.dial { position: relative; width: 104px; height: 104px; display: grid; place-items: center; }
+.dial svg { position: absolute; inset: 0; }
+.dial-num { position: relative; text-align: center; }
+.dial-num b { display: block; font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-size: 30px; line-height: 1; font-variant-numeric: tabular-nums; }
+.dial-num small { font-size: 13px; color: var(--color-muted-on-dark); }
+.macros { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.mline { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--color-on-dark); font-weight: 600; }
+.mline .display { font-size: 14px; }
+.hero-foot { grid-column: 1 / -1; font-size: 14px; color: var(--color-muted-subtitle); text-align: center; }
+.hero-foot b { color: var(--color-on-dark); font-weight: 700; }
+
+/* 10-segment slanted bar. Set --lvl on the bar; .nN fills the first N segments. */
+.seg { display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; height: 10px; }
+.seg i { display: block; background: var(--color-level-empty); transform: skewX(-14deg); }
+.seg.dark i { background: var(--color-level-empty-dark); }
+.n0 i { background: var(--color-level-empty); }
+.n1 i:nth-child(-n+1), .n2 i:nth-child(-n+2), .n3 i:nth-child(-n+3), .n4 i:nth-child(-n+4), .n5 i:nth-child(-n+5),
+.n6 i:nth-child(-n+6), .n7 i:nth-child(-n+7), .n8 i:nth-child(-n+8), .n9 i:nth-child(-n+9), .n10 i:nth-child(-n+10) { background: var(--lvl); }
+
+/* Body and cards */
+.body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.card { background: var(--color-card); border: 1px solid var(--color-card-border); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px; color: var(--color-text); }
+.card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; }
+.card-head h4 { font-size: 16px; font-weight: 700; }
+.sub { font-size: 14px; color: var(--color-secondary); }
+.cap { font-size: 13px; font-weight: 600; color: var(--color-secondary); }
+.link { color: var(--color-blue); font-size: 14px; font-weight: 700; min-height: 44px; display: inline-flex; align-items: center; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: 999px; font-size: 15px; font-weight: 700; white-space: nowrap; }
+.btn-primary { min-height: 52px; width: 100%; background: var(--color-blue); color: var(--color-on-dark); }
+.btn-secondary { background: var(--color-card); border: 1px solid var(--color-card-border); color: var(--color-text); }
+.rows { display: flex; flex-direction: column; }
+.rowi { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 56px; border-top: 1px solid var(--color-divider); padding: 8px 0; }
+.rows > li:first-child .rowi, .rows > li:first-child.rowi { border-top: 0; }
+.rowi .t { font-size: 15px; font-weight: 600; }
+.rowi .s { font-size: 13px; color: var(--color-secondary); margin-top: 2px; }
+.kcal { font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.kcal.none { color: var(--color-secondary); font-weight: 600; }
+.chev { color: var(--color-secondary); }
+.vrow { display: flex; align-items: center; gap: 16px; min-height: 56px; }
+.vnum { font-size: 40px; color: var(--color-blue); line-height: 1; }
+.facts { display: flex; flex-direction: column; gap: 10px; }
+.facts li { font-size: 14px; line-height: 1.45; padding-left: 12px; border-left: 3px solid var(--color-blue); }
+
+/* 7-day strip */
+.chart { position: relative; }
+.days { position: relative; display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.day { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.dval { font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; height: 16px; }
+.dbar-wrap { --tgt: 78px; position: relative; height: 96px; width: 100%; display: flex; align-items: flex-end; justify-content: center; }
+/* Target line (1.950 kcal) drawn in each column: --tgt is 1.950 / 2.400 of the bar height */
+.dbar-wrap::after { content: ""; position: absolute; left: -3px; right: -3px; bottom: var(--tgt); border-top: 2px dashed var(--color-ink); }
+.dbar { width: 100%; max-width: 30px; border-radius: 4px 4px 0 0; }
+.dlab { font-size: 12px; font-weight: 600; color: var(--color-secondary); text-align: center; line-height: 1.3; }
+.legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 13px; color: var(--color-secondary); align-items: center; }
+.lg { display: inline-flex; align-items: center; gap: 6px; }
+.lg i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; }
+
+/* Desktop */
+.side { width: 240px; flex: none; background: var(--color-ink); color: var(--color-on-dark); padding: 24px; display: flex; flex-direction: column; gap: 24px; }
+.side nav { display: flex; flex-direction: column; gap: 4px; }
+.side nav a { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 12px; border-radius: 12px; font-size: 15px; font-weight: 600; color: var(--color-muted-on-dark); }
+.side nav a[aria-current="page"] { background: var(--color-surface-dark); color: var(--color-on-dark); }
+.main { flex: 1; min-width: 0; padding: 32px 40px; display: flex; flex-direction: column; gap: 24px; }
+.d-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; }
+.d-title { font-size: 40px; }
+.d-sub { font-size: 14px; color: var(--color-secondary); margin-top: 8px; }
+.d-actions { display: flex; gap: 8px; align-items: center; }
+.grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 20px; align-items: stretch; }
+.s5 { grid-column: span 5; }
+.s7 { grid-column: span 7; }
+.s12 { grid-column: span 12; }
+.desktop .hero { grid-column: span 7; grid-template-columns: auto 1fr; padding: 24px; gap: 24px; }
+.desktop .dial { width: 168px; height: 168px; }
+.desktop .dial-num b { font-size: 44px; }
+.desktop .dial-num small { font-size: 14px; }
+.desktop .macros { gap: 14px; }
+.desktop .mline { font-size: 14px; }
+.desktop .big { font-size: 56px; line-height: 1; color: var(--color-text); }
+.desktop .days { gap: 12px; }
+.desktop .dbar-wrap { height: 144px; --tgt: 117px; }
+.desktop .dval { font-size: 13px; }
+.desktop .dlab { font-size: 13px; }
+.desktop .card-head h4 { font-size: 18px; }
+
+/* Bottom nav (phone) */
+.nav { background: var(--color-ink); color: var(--color-muted-on-dark); display: grid; grid-template-columns: repeat(5, 1fr); align-items: center; height: 72px; padding: 0 8px; flex: none; }
+.nav a { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 56px; font-size: 12px; font-weight: 600; color: var(--color-muted-on-dark); }
+.nav a[aria-current="page"] { color: var(--color-on-dark); }
+.nav a[aria-current="page"]::before { content: ""; position: absolute; top: 0; width: 22px; height: 3px; background: var(--color-sky); transform: skewX(-14deg); }
+.fab { width: 56px; height: 56px; border-radius: 50%; background: var(--color-blue); color: var(--color-on-dark); display: flex; align-items: center; justify-content: center; justify-self: center; margin-top: -20px; }
+
+
+/* cc-15c: Tổng quan sub-tabs, period control, charts. Tokens only. */
+.hdr-tq { padding: 16px 16px 20px; border-radius: 0; gap: 4px; }
+.hdr-tq .ptitle { font-size: 26px; }
+.tabs { display: flex; border-bottom: 1px solid var(--color-divider); overflow-x: auto; scrollbar-width: none; background: var(--color-page); }
+.tabs::-webkit-scrollbar { display: none; }
+.tabs a { position: relative; flex: 1 0 auto; min-height: 44px; padding: 0 8px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: var(--color-secondary); white-space: nowrap; }
+.tabs a[aria-current="page"] { color: var(--color-text); }
+.tabs a[aria-current="page"]::after { content: ""; position: absolute; left: 8px; right: 8px; bottom: -1px; height: 3px; background: var(--color-blue); }
+.period { display: flex; flex-direction: column; gap: 4px; }
+.period-h { font-size: 15px; font-weight: 700; }
+.period-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.period-nav { display: flex; align-items: center; }
+.period .ico-btn { color: var(--color-text); }
+.period .ico-btn:disabled { color: var(--color-secondary); opacity: .45; }
+.switch { display: inline-flex; padding: 2px; border-radius: 999px; background: var(--color-card); border: 1px solid var(--color-card-border); }
+.switch a { min-height: 44px; padding: 0 14px; display: inline-flex; align-items: center; border-radius: 999px; font-size: 14px; font-weight: 700; color: var(--color-secondary); }
+.switch a[aria-current="true"] { background: var(--color-ink); color: var(--color-on-dark); }
+.today { display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; }
+.today .t { font-size: 15px; font-weight: 700; }
+.today .s { font-size: 13px; color: var(--color-secondary); }
+.btn-sec { min-height: 44px; padding: 0 16px; border-radius: 999px; background: var(--color-card); border: 1px solid var(--color-card-border); color: var(--color-text); font-size: 14px; font-weight: 700; display: inline-flex; align-items: center; white-space: nowrap; }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.stat { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.stat .k { font-size: 13px; font-weight: 600; color: var(--color-secondary); }
+.stat .v { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-size: 26px; line-height: 1; font-variant-numeric: tabular-nums; }
+.stat .c { font-size: 13px; color: var(--color-secondary); }
+.sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; flex: none; }
+.ring { position: relative; width: 120px; height: 120px; flex: none; }
+.ring svg { position: absolute; inset: 0; }
+.comp { display: flex; align-items: center; gap: 16px; }
+.comp .rows { flex: 1; min-width: 0; }
+.comp .rowi { min-height: 52px; }
+.chart-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 13px; color: var(--color-secondary); align-items: center; }
+.lg { display: inline-flex; align-items: center; gap: 6px; }
+.lg i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; }
+.kbars { position: relative; height: 192px; padding-top: 20px; box-sizing: border-box; display: flex; align-items: flex-end; gap: 8px; }
+.kband { position: absolute; left: -4px; right: -4px; bottom: 134px; height: 22px; background: rgba(17, 19, 23, .06); border-top: 2px dashed var(--color-ink); border-bottom: 2px dashed var(--color-ink); pointer-events: none; }
+.kcol { position: relative; flex: 1 1 0; min-width: 0; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 4px; }
+.kbar { display: block; width: 100%; max-width: 30px; border-radius: 4px 4px 0 0; background: var(--color-blue); }
+.kbar.low { background: var(--color-level-red); }
+.kbar.part { background: repeating-linear-gradient(135deg, var(--color-blue) 0 3px, #B9C8F4 3px 6px); }
+.kval { background: var(--color-card); padding: 0 2px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.klabels { display: flex; gap: 8px; margin-top: 4px; }
+.klabels span { flex: 1 1 0; min-width: 0; }
+.klabels span { font-size: 12px; font-weight: 600; color: var(--color-secondary); text-align: center; line-height: 1.3; }
+.seg-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 12px; align-items: center; min-height: 64px; border-top: 1px solid var(--color-divider); padding: 10px 0; }
+.seg-row:first-child { border-top: 0; }
+.seg-row .t { font-size: 15px; font-weight: 600; }
+.seg-row .s { font-size: 13px; color: var(--color-secondary); }
+.seg-row .pct { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-size: 22px; line-height: 1; font-variant-numeric: tabular-nums; text-align: right; }
+.seg-row .seg { grid-column: 1 / -1; }
+.note { font-size: 13px; color: var(--color-secondary); line-height: 1.45; }
+.chip-data { display: inline-flex; align-items: center; min-height: 28px; padding: 0 10px; border-radius: 999px; background: var(--color-page); font-size: 13px; font-weight: 700; color: var(--color-text); }
+.wchart { width: 100%; height: auto; display: block; }
+.wchart text { font-family: 'Manrope', sans-serif; font-size: 12px; font-weight: 600; fill: var(--color-secondary); }
+.desktop .kbars { height: 240px; padding-top: 24px; }
+.desktop .kband { bottom: 168px; height: 28px; }
+.desktop .kbar { max-width: 56px; }
+.desktop .klabels span { font-size: 13px; }
+.desktop .stat .v { font-size: 34px; }
+.desktop .period-h { font-size: 18px; }
+.desktop .side-add { min-height: 48px; }
+.desktop .d-title { font-size: 40px; }
+.desktop .tabs { border-bottom: 0; background: transparent; }
+.desktop .tabs a { min-height: 44px; padding: 0 14px; font-size: 16px; }
+.desktop .tabs a[aria-current="page"]::after { bottom: 0; }
+.desktop .tabs { gap: 4px; }
+.desktop .d-head { align-items: center; }
+.desktop .d-head .switch a { min-height: 44px; }
+.desktop .period-row { justify-content: flex-start; gap: 16px; }
+.desktop .comp { gap: 28px; }
+.desktop .ring { width: 168px; height: 168px; }
+.desktop .comp .rowi { min-height: 60px; }
+.desktop .seg-row { grid-template-columns: minmax(0, 1fr) auto; }
+.stack { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.col-sum { display: flex; flex-direction: column; gap: 6px; }
+.wrapnote { display: grid; gap: 8px; }
+.rt { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; text-align: right; flex: none; }
+.facts a { display: flex; align-items: center; min-height: 44px; color: var(--color-text); }
+.facts li { padding-top: 0; padding-bottom: 0; }
+
+/* Tokens copied from apps/web/app/globals.css @theme (Cobalt Sign). Values are identical. */
+:root {
+  --color-page: #F3F1EC;             /* --color-page (same as --color-paper) */
+  --color-card: #FFFFFF;             /* --color-card */
+  --color-card-border: #E0DACF;      /* --color-card-border */
+  --color-ink: #111317;              /* --color-ink */
+  --color-text: #141519;             /* --color-text */
+  --color-secondary: #6B6A66;        /* --color-secondary */
+  --color-blue: #1238D6;             /* --color-blue (same as --color-cobalt): primary action */
+  --color-sky: #9EC3FF;              /* --color-sky */
   --color-on-dark: #FFFFFF;          /* --color-on-dark */
   --color-muted-on-dark: #8C92A0;    /* --color-muted-on-dark */
   --color-muted-subtitle: #C9CDD6;   /* --color-muted-subtitle */
@@ -64,6 +311,7 @@ h1, h2, h3, h4, p { margin: 0; }
 .side nav a { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 12px; border-radius: 12px; font-size: 15px; font-weight: 600; color: var(--color-muted-on-dark); }
 .side nav a[aria-current="page"] { background: var(--color-surface-dark); color: var(--color-on-dark); }
 .side-cap { font-size: 13px; font-weight: 600; color: var(--color-secondary); padding: 0 0 8px; }
+.wrapd { overflow-x: auto; max-width: 100%; }
 </style>
 </head>
 <body>
@@ -187,6 +435,116 @@ h1, h2, h3, h4, p { margin: 0; }
         </aside>
       </div>
     </div>
+  </section>
+
+  <!-- 3. Tổng quan: sub-tab bar and period control, 390 px -->
+  <section class="state">
+    <h2>3 · Tổng quan: sub-tab bar and period control (390 px)</h2>
+    <div class="stack">
+      <div>
+        <div class="phone" style="width:390px">
+          <header class="hdr hdr-tq">
+            <div class="brand">H1T <span>MICRO</span></div>
+            <h3 class="ptitle">Tổng quan</h3>
+          </header>
+<nav class="tabs" role="tablist" aria-label="Tổng quan">
+  <a role="tab" href="/" aria-current="page" aria-selected="true">Tóm tắt</a>
+  <a role="tab" href="/trends" aria-selected="false">Năng lượng</a>
+  <a role="tab" href="/trends/micros" aria-selected="false">Vi chất</a>
+  <a role="tab" href="/trends/body" aria-selected="false">Cơ thể</a>
+</nav>
+          <div class="body">
+<div class="period">
+  <p class="period-h">Trung bình mỗi ngày · 06–12/10</p>
+  <div class="period-row">
+    <div class="period-nav">
+      <button class="ico-btn" aria-label="Kỳ trước"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
+      <button class="ico-btn" aria-label="Kỳ sau" disabled><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+    </div>
+    <div class="switch" role="group" aria-label="Độ dài kỳ">
+      <a href="/" aria-current="true">7 ngày</a>
+      <a href="/" aria-current="false">30 ngày</a>
+    </div>
+  </div>
+</div>
+            <p class="note">Kỳ này: 6 ngày đã ghi xong. Hôm nay (12/10) đang ghi, không tính vào trung bình.</p>
+          </div>
+<nav class="nav" aria-label="Điều hướng chính">
+<a href="/" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
+<a href="/diary"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
+<button class="fab" aria-label="Thêm món"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+<a href="/explore"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
+<a href="/settings"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
+</nav>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Tổng quan: sub-tab bar and period control, 1280 px -->
+  <section class="state">
+    <h2>4 · Tổng quan: sub-tab bar and period control (1280 px)</h2>
+    <div class="wrapd"><div class="desktop" style="min-height:360px">
+<aside class="side" aria-label="Điều hướng">
+<div class="brand">H1T <span>MICRO</span></div>
+<a class="btn btn-primary side-add" href="/add"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Thêm món</a>
+<nav aria-label="Điều hướng chính">
+<a href="/" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
+<a href="/diary"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
+<a href="/explore"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
+<a href="/settings"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
+</nav>
+</aside>
+      <main class="main">
+        <div class="d-head"><p class="d-title">Tổng quan</p><nav class="tabs" role="tablist" aria-label="Tổng quan">
+          <a role="tab" href="/" aria-current="page" aria-selected="true">Tóm tắt</a>
+          <a role="tab" href="/trends" aria-selected="false">Năng lượng</a>
+          <a role="tab" href="/trends/micros" aria-selected="false">Vi chất</a>
+          <a role="tab" href="/trends/body" aria-selected="false">Cơ thể</a>
+        </nav></div>
+<div class="period">
+  <p class="period-h">Trung bình mỗi ngày · 06–12/10</p>
+  <div class="period-row">
+    <div class="period-nav">
+      <button class="ico-btn" aria-label="Kỳ trước"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
+      <button class="ico-btn" aria-label="Kỳ sau" disabled><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+    </div>
+    <div class="switch" role="group" aria-label="Độ dài kỳ">
+      <a href="/" aria-current="true">7 ngày</a>
+      <a href="/" aria-current="false">30 ngày</a>
+    </div>
+  </div>
+</div>
+        <p class="note">Sub-tab là link: mỗi tab có URL riêng và không có nút quay lại giữa các tab. Không có dải tiêu đề đậm trên cùng.</p>
+      </main>
+    </div></div>
+  </section>
+
+  <!-- 5. Desktop pushed screen: plain title row on paper, no ink band -->
+  <section class="state">
+    <h2>5 · Desktop pushed screen: no ink band (1280 px)</h2>
+    <div class="wrapd"><div class="desktop" style="min-height:360px">
+<aside class="side" aria-label="Điều hướng">
+<div class="brand">H1T <span>MICRO</span></div>
+<a class="btn btn-primary side-add" href="/add"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Thêm món</a>
+<nav aria-label="Điều hướng chính">
+<a href="/"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
+<a href="/diary"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
+<a href="/explore"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
+<a href="/settings" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
+</nav>
+</aside>
+      <main class="main">
+        <div class="d-head"><div class="sub-row" style="display:flex;align-items:center;gap:4px"><a class="back-p" href="/settings" aria-label="Quay lại Cài đặt" style="width:44px;height:44px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;color:var(--color-text)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></a><p class="d-title">Mục tiêu mỗi ngày</p></div><span class="cap">Tính từ hồ sơ · Nam · 65 kg · Giữ cân</span></div>
+        <section class="card" aria-labelledby="nv-t">
+          <h4 id="nv-t">Năng lượng và đa lượng</h4>
+          <ul class="rows">
+            <li class="rowi"><div><div class="t">Kcal</div><div class="s">Giữ cân: 30–35 kcal/kg × 65 kg</div></div><span class="kcal">1.950–2.275</span></li>
+            <li class="rowi"><div><div class="t">Đạm</div><div class="s">1,6–2,2 g/kg × 65 kg</div></div><span class="kcal">104–143 g</span></li>
+          </ul>
+        </section>
+      </main>
+    </div></div>
   </section>
 </div>
 </body>
