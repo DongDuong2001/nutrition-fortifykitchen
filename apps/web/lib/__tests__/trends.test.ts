@@ -8,16 +8,9 @@ import {
   type NutrientTargetDef,
   type NutrientTrendResult,
 } from "../trends";
-import {
-  MOCK_TRENDS_7_DAYS,
-  MOCK_TRENDS_30_DAYS,
-} from "../mock/trends";
-import {
-  anchorTrendDays,
-  kcalOnTarget,
-  trendTargetsFrom,
-  trendWindowLabel,
-} from "../trends";
+import { trendSeries } from "../mock/trends";
+import { COUNTED_NUTRIENT_KEYS, dayTotals } from "../day-totals";
+import { kcalOnTarget, trendTargetsFrom } from "../trends";
 import { calculateTargets } from "../targets";
 
 describe("Trends calculation helpers (lib/trends.ts)", () => {
@@ -124,37 +117,50 @@ describe("Trends calculation helpers (lib/trends.ts)", () => {
   });
 });
 
-describe("Trends mock data (lib/mock/trends.ts)", () => {
-  it("provides 7 days of mock daily totals with 5 key micros and macros", () => {
-    expect(MOCK_TRENDS_7_DAYS).toHaveLength(7);
-    const day = MOCK_TRENDS_7_DAYS[0];
-    expect(day.calories).toBeGreaterThan(1000);
-    expect(day.protein).toBeGreaterThan(0);
-    expect(day.fat).toBeGreaterThan(0);
-    expect(day.carbs).toBeGreaterThan(0);
-    expect(day.fiber).toBeGreaterThan(0);
-    // 5 key micros:
-    expect(day.calcium).toBeGreaterThan(0);
-    expect(day.iron).toBeGreaterThan(0);
-    expect(day.potassium).toBeGreaterThan(0);
-    expect(day.magnesium).toBeGreaterThan(0);
-    expect(day.vitamin_d).toBeGreaterThan(0);
+describe("Trend series (lib/mock/trends.ts) comes from the day history", () => {
+  const TODAY = "2026-10-12";
+
+  it("ends on today and steps back one day each (7 and 30 days)", () => {
+    const week = trendSeries(TODAY, 7);
+    expect(week).toHaveLength(7);
+    expect(week[0].date).toBe("2026-10-06");
+    expect(week[6].date).toBe("2026-10-12");
+    expect(week[6].isToday).toBe(true);
+    expect(week[6].dayLabel).toBe("T2"); // 12/10/2026 is a Monday
+    expect(week[6].dateNumber).toBe("12");
+    expect(week.slice(0, 6).some((d) => d.isToday)).toBe(false);
+    const month = trendSeries(TODAY, 30);
+    expect(month).toHaveLength(30);
+    expect(month[0].date).toBe("2026-09-13");
   });
 
-  it("provides 30 days of mock daily totals", () => {
-    expect(MOCK_TRENDS_30_DAYS).toHaveLength(30);
-    const lastDay = MOCK_TRENDS_30_DAYS[29];
-    expect(lastDay.calories).toBeGreaterThan(0);
+  it("is the same number as the day total for the same day", () => {
+    for (const entry of trendSeries(TODAY, 30)) {
+      const totals = dayTotals(entry.date, TODAY);
+      expect(entry.calories, entry.date).toBe(totals.calories);
+      expect(entry.protein).toBe(totals.protein);
+      expect(entry.nutrients).toEqual(totals.nutrients);
+    }
   });
 
-  it("has one completed day above the default kcal max in each window, so the over case shows", () => {
-    const max = calculateTargets({ sex: "male", weightKg: 65, goal: "maintain" }).calories.max;
-    const over7 = MOCK_TRENDS_7_DAYS.filter((d) => !d.isToday && d.calories > max);
-    const over30 = MOCK_TRENDS_30_DAYS.filter((d) => !d.isToday && d.calories > max);
-    expect(over7).toHaveLength(1);
-    expect(over30).toHaveLength(1);
+  it("uses the live day for today and the history for earlier days", () => {
+    const today = trendSeries(TODAY, 7)[6];
+    expect(today.calories).toBe(1041); // the sample day
+    expect(trendSeries(TODAY, 7)[5].calories).toBe(1532); // yesterday
   });
 
+  it("has a value or null for each of the 22 counted nutrients every day, never 0 for unknown", () => {
+    for (const entry of trendSeries(TODAY, 30)) {
+      expect(Object.keys(entry.nutrients).sort()).toEqual([...COUNTED_NUTRIENT_KEYS].sort());
+      if (!entry.logged) expect(Object.values(entry.nutrients).every((v) => v === null)).toBe(true);
+    }
+  });
+
+  it("has logged days and a gap, so averages and streaks have something to skip", () => {
+    const month = trendSeries(TODAY, 30);
+    expect(month.filter((d) => d.logged).length).toBeGreaterThan(20);
+    expect(month.filter((d) => !d.logged).length).toBeGreaterThan(0);
+  });
 });
 
 describe("Trends nutrient ranges: above the max counts as đạt (no over-limit)", () => {
@@ -182,40 +188,6 @@ describe("Trends nutrient ranges: above the max counts as đạt (no over-limit)
   it("puts a nutrient above its max in the đạt level", () => {
     const trend = calculateNutrientTrend([1600, 1600, 1600], targets.calcium);
     expect(trend.level).toBe("dat");
-  });
-});
-
-describe("Trends date window (anchorTrendDays, trendWindowLabel)", () => {
-  it("ends the window on today and labels the last day", () => {
-    const days = anchorTrendDays(MOCK_TRENDS_7_DAYS, "2026-10-11");
-    expect(days).toHaveLength(7);
-    expect(days[0].date).toBe("2026-10-05");
-    expect(days[6].date).toBe("2026-10-11");
-    expect(days[6].dateNumber).toBe("11");
-    expect(days[6].dayLabel).toBe("CN"); // 11/10/2026 is a Sunday
-    expect(days[6].isToday).toBe(true);
-    expect(days.slice(0, 6).some((d) => d.isToday)).toBe(false);
-  });
-
-  it("keeps the mock values in order when it moves the dates", () => {
-    const days = anchorTrendDays(MOCK_TRENDS_7_DAYS, "2026-10-11");
-    expect(days[0].calories).toBe(MOCK_TRENDS_7_DAYS[0].calories);
-    expect(days[5].calories).toBe(MOCK_TRENDS_7_DAYS[5].calories);
-  });
-
-  it("builds the 30-day window back from today across a month boundary", () => {
-    const days = anchorTrendDays(MOCK_TRENDS_30_DAYS, "2026-10-11");
-    expect(days).toHaveLength(30);
-    expect(days[0].date).toBe("2026-09-12");
-    expect(days[29].date).toBe("2026-10-11");
-  });
-
-  it("writes the window range in one month as dd–dd/mm", () => {
-    expect(trendWindowLabel(anchorTrendDays(MOCK_TRENDS_7_DAYS, "2026-10-11"))).toBe("05–11/10");
-  });
-
-  it("writes the window range across two months as dd/mm–dd/mm", () => {
-    expect(trendWindowLabel(anchorTrendDays(MOCK_TRENDS_30_DAYS, "2026-10-11"))).toBe("12/09–11/10");
   });
 });
 

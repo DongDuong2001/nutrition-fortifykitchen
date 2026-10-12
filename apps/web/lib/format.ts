@@ -176,3 +176,29 @@ export function formatDesktopDate(targetDate: Date | string): string {
   return `${weekday}, ${parts.day}/${parts.month}/${parts.year}`;
 }
 
+
+/**
+ * A change with its sign: "+18", "−12" (a real minus sign, U+2212) and "0" for no change.
+ * Decimals default to 0. A value that rounds to zero carries no sign.
+ */
+export function formatSigned(value: number, options?: FormatNumberOptions): string {
+  const decimals = options?.decimals ?? 0;
+  const factor = Math.pow(10, decimals);
+  const rounded = Math.round(value * factor) / factor;
+  const text = formatNumber(Math.abs(rounded), { decimals });
+  if (rounded === 0) return text;
+  return `${rounded > 0 ? "+" : "−"}${text}`;
+}
+
+/** A whole percent with a space before the sign: "28 %", or "+18 %" / "−12 %" when signed. */
+export function formatPercent(value: number, options?: { signed?: boolean }): string {
+  return `${options?.signed ? formatSigned(value) : formatNumber(Math.round(value))} %`;
+}
+
+/** The dates of a period: "06–12/10" within one month, "13/09–12/10" across two, "12/10" for one day. */
+export function formatPeriodRange(startIso: string, endIso: string): string {
+  const [, startMonth, startDay] = startIso.split("-");
+  const [, endMonth, endDay] = endIso.split("-");
+  if (startIso === endIso) return `${endDay}/${endMonth}`;
+  return startMonth === endMonth ? `${startDay}–${endDay}/${endMonth}` : `${startDay}/${startMonth}–${endDay}/${endMonth}`;
+}

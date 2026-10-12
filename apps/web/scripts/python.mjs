@@ -20,6 +20,10 @@ export function runPython(scriptPath, args = []) {
     console.error("No Python 3 found (tried python3, python, py). Install Python 3 and Playwright.");
     return 1;
   }
-  const res = spawnSync(python, [scriptPath, ...args], { stdio: "inherit", env: process.env });
+  const res = spawnSync(python, [scriptPath, ...args], {
+    stdio: "inherit",
+    // Vietnamese output: Windows consoles default to cp1252 and the probes would crash on print
+    env: { ...process.env, PYTHONUTF8: "1", PYTHONIOENCODING: "utf-8" },
+  });
   return res.status ?? 1;
 }

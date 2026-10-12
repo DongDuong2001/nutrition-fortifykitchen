@@ -11,12 +11,11 @@ import { NutrientTrendList } from "@/components/trends/nutrient-trend-list";
 import { ProteinTrendCard } from "@/components/trends/protein-trend-card";
 import { TrendsEmptyState } from "@/components/trends/trends-empty-state";
 import { useDiary } from "@/lib/diary-store";
-import { MOCK_TRENDS_7_DAYS, MOCK_TRENDS_30_DAYS, type DailyTrendEntry } from "@/lib/mock/trends";
+import { trendSeries, type DailyTrendEntry } from "@/lib/mock/trends";
+import { formatPeriodRange } from "@/lib/format";
 import {
-  anchorTrendDays,
   calculateNutrientTrend,
   trendTargetsFrom,
-  trendWindowLabel,
   type NutrientTrendResult,
 } from "@/lib/trends";
 
@@ -37,22 +36,22 @@ function TrendsContent() {
   const searchParams = useSearchParams();
   const isEmptyParam = searchParams.get("empty") === "1";
   const [range, setRange] = useState<"7d" | "30d">("7d");
-  const { todayIso, targets } = useDiary();
+  const { todayIso, targets, data } = useDiary();
   const goBack = useBack();
   const trendTargets = useMemo(() => trendTargetsFrom(targets), [targets]);
 
   // The window ends on today. todayIso is set after mount, so this runs on the client only.
   const rawEntries: DailyTrendEntry[] = useMemo(() => {
     if (!todayIso || isEmptyParam) return [];
-    return anchorTrendDays(range === "7d" ? MOCK_TRENDS_7_DAYS : MOCK_TRENDS_30_DAYS, todayIso);
-  }, [isEmptyParam, range, todayIso]);
+    return trendSeries(todayIso, range === "7d" ? 7 : 30, data);
+  }, [data, isEmptyParam, range, todayIso]);
 
-  const isEmpty = rawEntries.length < 3;
+  const isEmpty = rawEntries.filter((e) => e.logged).length < 3;
 
   // Subtitle for header
   const subtitle = useMemo(() => {
     if (isEmpty) return "Chưa đủ dữ liệu";
-    return `${range === "7d" ? 7 : 30} ngày gần nhất · ${trendWindowLabel(rawEntries)}`;
+    return `${range === "7d" ? 7 : 30} ngày gần nhất · ${formatPeriodRange(rawEntries[0].date, rawEntries[rawEntries.length - 1].date)}`;
   }, [isEmpty, range, rawEntries]);
 
   // Compute nutrient trends
@@ -62,11 +61,11 @@ function TrendsContent() {
     }
 
     // Use completed entries (or all if all are marked) for averages
-    const calcEntries = rawEntries.filter((e) => !e.isToday);
-    const entriesToUse = calcEntries.length > 0 ? calcEntries : rawEntries;
+    const calcEntries = rawEntries.filter((e) => !e.isToday && e.logged);
+    const entriesToUse = calcEntries.length > 0 ? calcEntries : rawEntries.filter((e) => e.logged);
 
-    // Protein
-    const proteinVals = entriesToUse.map((e) => e.protein);
+    // Protein (unknown days are skipped, never counted as 0)
+    const proteinVals = entriesToUse.flatMap((e) => (e.protein === null ? [] : [e.protein]));
     const pTrend = calculateNutrientTrend(proteinVals, trendTargets.protein);
 
     // Micros
@@ -79,13 +78,9 @@ function TrendsContent() {
     ];
 
     const mTrends: NutrientTrendResult[] = microsDefs.map((def) => {
-      const vals = entriesToUse.map((e) => {
-        if (def.key === "calcium") return e.calcium;
-        if (def.key === "iron") return e.iron;
-        if (def.key === "potassium") return e.potassium;
-        if (def.key === "magnesium") return e.magnesium;
-        if (def.key === "vitamin_d") return e.vitamin_d;
-        return 0;
+      const vals = entriesToUse.flatMap((e) => {
+        const value = e.nutrients[def.key];
+        return typeof value === "number" ? [value] : [];
       });
       return calculateNutrientTrend(vals, def);
     });

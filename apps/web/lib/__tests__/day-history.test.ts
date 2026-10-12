@@ -44,7 +44,7 @@ describe("blankDay and pastDayData", () => {
   });
 
   it("pastDayData for a day with nothing logged reads zero", () => {
-    const day = pastDayData("2026-10-05", TODAY, SAMPLE_PROFILE, targetsFor(SAMPLE_PROFILE));
+    const day = pastDayData("2026-08-05", TODAY, SAMPLE_PROFILE, targetsFor(SAMPLE_PROFILE));
     expect(day.calories.consumed).toBe(0);
     expect(day.meals.every((m) => m.items.length === 0)).toBe(true);
   });
@@ -90,9 +90,27 @@ describe("dayEntries (mock history)", () => {
     expect(entries.every((e) => e.foodName.length > 0)).toBe(true);
   });
 
-  it("gives every other day no entries", () => {
-    expect(dayEntries("2026-10-09", TODAY)).toEqual([]);
+  it("gives the 29 days before today a mock history, with a few days not logged", () => {
+    const perDay = Array.from({ length: 29 }, (_, i) => dayEntries(shiftIsoDate(TODAY, -(i + 1)), TODAY));
+    const loggedDays = perDay.filter((entries) => entries.length > 0);
+    expect(loggedDays.length).toBeGreaterThanOrEqual(24);
+    expect(loggedDays.length).toBeLessThan(29);
+    // every history entry has a food from the catalog and a unique id
+    const all = loggedDays.flat();
+    expect(all.every((e) => e.foodName.length > 0 && e.calories > 0)).toBe(true);
+    expect(new Set(all.map((e) => e.id)).size).toBe(all.length);
+  });
+
+  it("gives today, the future and days older than the history no entries", () => {
     expect(dayEntries(TODAY, TODAY)).toEqual([]);
+    expect(dayEntries("2026-10-12", TODAY)).toEqual([]);
+    expect(dayEntries(shiftIsoDate(TODAY, -30), TODAY)).toEqual([]);
+    expect(dayEntries("2026-01-05", TODAY)).toEqual([]);
+  });
+
+  it("keeps the same entries for the same day (the history is fixed, not random)", () => {
+    const iso = shiftIsoDate(TODAY, -5);
+    expect(dayEntries(iso, TODAY)).toEqual(dayEntries(iso, TODAY));
   });
 });
 

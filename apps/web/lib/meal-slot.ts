@@ -102,3 +102,23 @@ export function resolveMealSlot(
   return getDefaultMealSlot(date, isTrainingDay);
 }
 
+
+/**
+ * The meal to suggest logging next, by the clock: the meal of the time of day if it is still empty,
+ * otherwise the next empty meal after it (then any earlier empty one). Null when every meal is logged.
+ * A meal that is missing from `meals` counts as empty.
+ */
+export function nextMeal(
+  meals: { slot: MealSlot; itemCount: number }[],
+  now: Date,
+  isTrainingDay = true
+): MealSlot | null {
+  const logged = new Set(meals.filter((m) => m.itemCount > 0).map((m) => m.slot));
+  const order = MEAL_SLOTS.map((s) => s.id);
+  const start = order.indexOf(getDefaultMealSlot(now, isTrainingDay));
+  for (let i = 0; i < order.length; i++) {
+    const slot = order[(start + i) % order.length];
+    if (!logged.has(slot)) return slot;
+  }
+  return null;
+}

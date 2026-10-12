@@ -14,8 +14,8 @@ interface KcalChartProps {
 export function KcalChart({ entries, targetMin, targetMax }: KcalChartProps) {
   const is30Days = entries.length > 7;
 
-  // Compute completed days (all except today if today is the last item and marked as isToday)
-  const completedEntries = entries.filter((e) => !e.isToday);
+  // Finished days with entries; a day with nothing logged is unknown, not 0
+  const completedEntries = entries.filter((e): e is DailyTrendEntry & { calories: number } => !e.isToday && e.calories !== null);
   const completedCount = completedEntries.length;
   // A day above the range is on target (product rule), so only days below the minimum count as off
   const inBandCount = completedEntries.filter((e) => kcalOnTarget(e.calories, targetMin)).length;
@@ -25,7 +25,7 @@ export function KcalChart({ entries, targetMin, targetMax }: KcalChartProps) {
     completedCount > 0 ? Math.round(totalCalories / completedCount) : 0;
 
   // Scaling: max kcal in chart ~ 2500
-  const maxScaleKcal = Math.max(2500, ...entries.map((e) => e.calories * 1.08));
+  const maxScaleKcal = Math.max(2500, ...entries.map((e) => (e.calories ?? 0) * 1.08));
   const chartHeightPx = 164;
   const scale = chartHeightPx / maxScaleKcal;
 
@@ -85,21 +85,27 @@ export function KcalChart({ entries, targetMin, targetMax }: KcalChartProps) {
             }`}
           >
             {entries.map((b) => {
-              const inBand = kcalOnTarget(b.calories, targetMin);
+              const kcal = b.calories;
+              const known = kcal !== null;
+              const inBand = kcal !== null && kcalOnTarget(kcal, targetMin);
               const isToday = !!b.isToday;
               const state = isToday
                 ? "đang ghi"
+                : !known
+                ? "chưa ghi"
                 : inBand
                 ? "trong mục tiêu"
                 : "thiếu";
-              const barHeight = Math.max(8, Math.round(b.calories * scale));
+              const barHeight = Math.max(8, Math.round((kcal ?? 0) * scale));
 
               return (
                 <div
                   key={b.date}
-                  aria-label={`${b.dayLabel} ${b.dateNumber}: ${formatNumber(
-                    b.calories
-                  )} kcal, ${state}`}
+                  aria-label={
+                    kcal !== null
+                      ? `${b.dayLabel} ${b.dateNumber}: ${formatNumber(kcal)} kcal, ${state}`
+                      : `${b.dayLabel} ${b.dateNumber}: chưa ghi`
+                  }
                   className="flex-1 flex flex-col items-center justify-end h-full group"
                 >
                   {/* Value on top of bar */}
@@ -110,7 +116,7 @@ export function KcalChart({ entries, targetMin, targetMax }: KcalChartProps) {
                         : "opacity-100"
                     }`}
                   >
-                    {formatNumber(b.calories)}
+                    {kcal !== null ? formatNumber(kcal) : "—"}
                   </div>
 
                   {/* Bar shape */}
@@ -124,6 +130,8 @@ export function KcalChart({ entries, targetMin, targetMax }: KcalChartProps) {
                     className={`w-full max-w-[28px] rounded-t-md rounded-b-xs transition-all ${
                       isToday
                         ? "border border-sky"
+                        : !known
+                        ? "bg-level-empty"
                         : inBand
                         ? "bg-blue"
                         : "bg-destructive"

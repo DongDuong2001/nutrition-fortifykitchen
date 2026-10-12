@@ -18,7 +18,7 @@ DESKTOP = {"width": 1440, "height": 900}
 VN = datetime.timezone(datetime.timedelta(hours=7))
 TODAY = datetime.datetime.now(VN).date()
 YESTERDAY = TODAY - datetime.timedelta(days=1)
-FIVE_AGO = TODAY - datetime.timedelta(days=5)
+EMPTY_DAY = TODAY - datetime.timedelta(days=8)  # a gap in the mock history (lib/mock/history.ts): nothing logged
 FUTURE = TODAY + datetime.timedelta(days=3)
 BIRTH_ERROR = f"Nhập năm sinh từ 1900 đến {TODAY.year}"
 problems = []
@@ -117,13 +117,13 @@ def run_phone(browser):
     check(future.count() > 0 and all(future.nth(i).is_disabled() for i in range(future.count())),
           "390 calendar: days after today cannot be picked")
     pg.screenshot(path=shot("cc10-calendar-390.png"), animations="disabled")
-    if FIVE_AGO.month != TODAY.month:
+    if EMPTY_DAY.month != TODAY.month:
         dialog.get_by_label("Tháng trước").click()
-    dialog.locator("button").filter(has_text=re.compile(rf"^{FIVE_AGO.day}$")).click()
+    dialog.locator("button").filter(has_text=re.compile(rf"^{EMPTY_DAY.day}$")).click()
     pg.wait_for_selector('[role="dialog"]', state="detached")
-    pg.wait_for_url(f"**date={iso(FIVE_AGO)}")
+    pg.wait_for_url(f"**date={iso(EMPTY_DAY)}")
     pg.wait_for_timeout(300)
-    check(visible_count(pg, 'text=Đang xem ngày cũ') == 1, "390 calendar: 5 days ago opens the past view")
+    check(visible_count(pg, 'text=Đang xem ngày cũ') == 1, "390 calendar: a day with no entries opens the past view")
     check(energy(pg) == "0", f"390 a past day with nothing logged reads 0 kcal (got {energy(pg)})")
     check(visible_count(pg, 'text=Chưa ghi') > 0, "390 a past day with nothing logged shows Chưa ghi")
     pg.screenshot(path=shot("cc10-past-empty-390.png"), animations="disabled")
@@ -174,7 +174,7 @@ def run_hydration(browser):
     paths = [
         "/diary",
         f"/diary?date={iso(YESTERDAY)}",
-        f"/diary?date={iso(FIVE_AGO)}",
+        f"/diary?date={iso(EMPTY_DAY)}",
         f"/diary?date={iso(FUTURE)}",
         "/diary?date=not-a-date",
     ]

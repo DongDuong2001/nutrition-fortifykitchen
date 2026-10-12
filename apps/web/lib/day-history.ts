@@ -3,7 +3,7 @@ import { formatAmount } from "./format";
 import type { MealSlot } from "./meal-slot";
 import { MOCK_FOODS } from "./mock/foods";
 import type { MockDayData, MockMacroStat, MockMicroStat } from "./mock/sample-day";
-import { YESTERDAY_ITEMS } from "./mock/yesterday";
+import { historyItems } from "./mock/history";
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -23,10 +23,21 @@ export function viewedIsoDate(param: string | null | undefined, todayIso: string
   return param < todayIso ? param : todayIso;
 }
 
-/** What was logged on a day. Only yesterday has entries (mock); every other day is empty. */
+/** Whole days from `iso` to `todayIso` (positive when `iso` is in the past). Calendar arithmetic in UTC. */
+export function daysBefore(iso: string, todayIso: string): number {
+  const [y1, m1, d1] = iso.split("-").map(Number);
+  const [y2, m2, d2] = todayIso.split("-").map(Number);
+  return Math.round((Date.UTC(y2, m2 - 1, d2) - Date.UTC(y1, m1 - 1, d1)) / 86_400_000);
+}
+
+/**
+ * What was logged on a day (mock history, see lib/mock/history): the 29 days before today have entries
+ * except a few gaps. Today, the future and older days are empty here (today comes from the diary store).
+ */
 export function dayEntries(iso: string, todayIso: string): AddedDiaryEntry[] {
-  if (iso !== shiftIsoDate(todayIso, -1)) return [];
-  return YESTERDAY_ITEMS.flatMap((item, i) => {
+  const items = historyItems(daysBefore(iso, todayIso));
+  if (!items) return [];
+  return items.flatMap((item, i) => {
     const food = MOCK_FOODS.find((f) => f.id === item.foodId);
     if (!food) return [];
     return [

@@ -7,6 +7,7 @@ import { type MealSlot, getMealSlotNameVi } from "./meal-slot";
 import { formatAmount } from "./format";
 import { getTodayIsoVN, withRuntimeDate } from "./date";
 import { blankDay, dayEntries, statDisplay } from "./day-history";
+import { totalsFromEntries } from "./day-totals";
 import { microsSummaryFor } from "./lacking";
 import { nutrientSourcesIn, type NutrientSource } from "./nutrient-sources";
 import { DEFAULT_RECENT_FOODS, isRecentFood, pushRecent, type RecentFood } from "./recent-foods";
@@ -263,7 +264,20 @@ export function computeCompositeDayData(
  */
 export function pastDayData(iso: string, todayIso: string, profile: Profile, targets: CompleteTargets): MockDayData {
   const base = blankDay(applyProfileTargets(SAMPLE_DAY, profile, targets));
-  return { ...computeCompositeDayData(base, dayEntries(iso, todayIso), {}), date: iso };
+  const entries = dayEntries(iso, todayIso);
+  const day = computeCompositeDayData(base, entries, {});
+  // Vitamins and minerals take the day's totals (lib/day-totals), so Nhật ký and Tổng quan show one number per day;
+  // a nutrient no food of the day carries is unknown (null), not 0.
+  const totals = totalsFromEntries(iso, entries);
+  const fromTotals = <S extends MockDayData["minerals"][number]>(stat: S): S => {
+    const consumed = totals.nutrients[stat.key] ?? null;
+    const percentage =
+      consumed !== null && stat.targetMin !== null && stat.targetMin > 0 ? Math.round((consumed / stat.targetMin) * 100) : null;
+    return { ...stat, consumed, percentage, displayValue: consumed === null ? "—" : statDisplay(consumed, stat) };
+  };
+  const minerals = day.minerals.map(fromTotals);
+  const vitamins = day.vitamins.map(fromTotals);
+  return { ...day, minerals, vitamins, microsSummary: microsSummaryFor({ minerals, vitamins }), date: iso };
 }
 
 export function DiaryProvider({ children }: { children: React.ReactNode }) {
