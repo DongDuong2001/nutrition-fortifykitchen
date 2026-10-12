@@ -20,23 +20,29 @@
   --color-sky: #9EC3FF;              /* --color-sky */
   --color-destructive: #D93F44;      /* --color-destructive */
   --color-destructive-text: #C4373C; /* --color-destructive-text */
+  --color-level-red: #D93F44;        /* --color-level-red */
+  --color-level-yellow: #B07800;     /* --color-level-yellow */
+  --color-level-green: #17945F;      /* --color-level-green */
   --color-level-blue: #1238D6;       /* --color-level-blue */
   --color-level-empty: #E6E1D7;      /* --color-level-empty */
+  --color-level-red-dark: #E5484D;   /* --color-level-red-dark */
+  --color-level-yellow-dark: #E8A400;/* --color-level-yellow-dark */
+  --color-level-green-dark: #1FA971; /* --color-level-green-dark */
   --color-level-blue-dark: #5C86F2;  /* --color-level-blue-dark */
   --color-level-empty-dark: #2A2C31; /* --color-level-empty-dark */
   --color-divider: #E0DACF;          /* --color-divider */
   --color-muted-subtitle: #C9CDD6;   /* --color-muted-subtitle */
   --color-muted-on-dark: #8C92A0;    /* --color-muted-on-dark */
   --color-on-dark: #FFFFFF;          /* --color-on-dark */
+  --color-track-on-dark: #666A75;    /* --color-track-on-dark */
   --color-grabber: #D5D8DF;          /* --color-grabber */
   --color-surface-dark: #1A1C22;     /* --color-surface-dark */
-  --color-warning-bg: #FFF4E0;       /* --color-warning-bg */
-  --color-warning-text: #7A4A00;     /* --color-warning-text */
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; background: var(--color-page); color: var(--color-text); font-family: 'Manrope', -apple-system, 'Segoe UI', Roboto, sans-serif; -webkit-font-smoothing: antialiased; }
 button, a { font: inherit; color: inherit; text-decoration: none; cursor: pointer; }
 button { background: none; border: 0; padding: 0; margin: 0; }
+button:disabled { cursor: default; }
 :focus-visible { outline: 3px solid var(--color-blue); outline-offset: 2px; }
 /* Sky ring on dark surfaces (ink header, hero, energy bar, Pro card, toast, bottom nav, sidebar), blue elsewhere */
 .hdr :focus-visible, .hero :focus-visible, .energy :focus-visible, .onink:focus-visible, .pro :focus-visible, .toast :focus-visible, .nav :focus-visible, .side :focus-visible { outline-color: var(--color-sky); }
@@ -45,6 +51,7 @@ svg { display: block; flex: none; }
 ul, ol { margin: 0; padding: 0; list-style: none; }
 h1, h2, h3, h4, p { margin: 0; }
 .display { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-variant-numeric: tabular-nums; }
+.num { font-variant-numeric: tabular-nums; }
 
 /* Board chrome (not part of the screen) */
 .board { padding-bottom: 48px; }
@@ -66,52 +73,97 @@ h1, h2, h3, h4, p { margin: 0; }
 .brand { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-size: 22px; line-height: 1; letter-spacing: .02em; }
 .brand span { color: var(--color-sky); }
 .ptitle { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-size: 28px; line-height: 1; text-transform: uppercase; }
-.subhdr { display: flex; align-items: center; gap: 8px; }
-.ico-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; color: var(--color-on-dark); flex: none; }
+.hdr-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.datenav { display: flex; align-items: center; gap: 4px; }
+.ico-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; color: var(--color-on-dark); }
+.ico-btn:disabled { color: var(--color-muted-on-dark); }
+.datelabel { font-size: 15px; font-weight: 700; min-width: 112px; text-align: center; }
+
+/* Hero: kcal dial + macros, dark inset panel */
+.hero { background: var(--color-surface-dark); color: var(--color-on-dark); border-radius: 16px; padding: 16px; display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; }
+.dial { position: relative; width: 104px; height: 104px; display: grid; place-items: center; }
+.dial svg { position: absolute; inset: 0; }
+.dial-num { position: relative; text-align: center; }
+.dial-num b { display: block; font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-size: 30px; line-height: 1; font-variant-numeric: tabular-nums; }
+.dial-num small { font-size: 13px; color: var(--color-muted-on-dark); }
+.macros { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.mline { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--color-on-dark); font-weight: 600; }
+.mline .display { font-size: 14px; }
+.hero-foot { grid-column: 1 / -1; font-size: 14px; color: var(--color-muted-subtitle); text-align: center; }
+.hero-foot b { color: var(--color-on-dark); font-weight: 700; }
+
+/* 10-segment slanted bar. Set --lvl on the bar; .nN fills the first N segments. */
+.seg { display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; height: 10px; }
+.seg i { display: block; background: var(--color-level-empty); transform: skewX(-14deg); }
+.seg.dark i { background: var(--color-level-empty-dark); }
+.n0 i { background: var(--color-level-empty); }
+.n1 i:nth-child(-n+1), .n2 i:nth-child(-n+2), .n3 i:nth-child(-n+3), .n4 i:nth-child(-n+4), .n5 i:nth-child(-n+5),
+.n6 i:nth-child(-n+6), .n7 i:nth-child(-n+7), .n8 i:nth-child(-n+8), .n9 i:nth-child(-n+9), .n10 i:nth-child(-n+10) { background: var(--lvl); }
 
 /* Body and cards */
-.body { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
-.group-cap { font-size: 13px; font-weight: 700; color: var(--color-secondary); letter-spacing: .04em; text-transform: uppercase; padding: 0 4px 8px; }
-.card { background: var(--color-card); border: 1px solid var(--color-card-border); border-radius: 16px; padding: 4px 16px; display: flex; flex-direction: column; color: var(--color-text); }
-.card.pad { padding: 16px; gap: 12px; }
-.card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; }
+.body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.card { background: var(--color-card); border: 1px solid var(--color-card-border); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px; color: var(--color-text); }
+.card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; }
 .card-head h4 { font-size: 16px; font-weight: 700; }
-.setrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 56px; padding: 8px 0; border-top: 1px solid var(--color-divider); }
-.card > :first-child.setrow { border-top: 0; }
-.setrow .t { font-size: 15px; font-weight: 600; }
-.setrow .s { font-size: 13px; color: var(--color-secondary); margin-top: 2px; }
-.setrow .v { font-size: 14px; color: var(--color-secondary); white-space: nowrap; }
-.chev { color: var(--color-secondary); }
-.avatar { width: 56px; height: 56px; border-radius: 999px; background: var(--color-surface-dark); color: var(--color-on-dark); display: flex; align-items: center; justify-content: center; flex: none; }
-.profile { display: flex; align-items: center; gap: 16px; min-height: 88px; padding: 16px 0; }
 .sub { font-size: 14px; color: var(--color-secondary); }
-.danger-t { color: var(--color-destructive-text); }
+.cap { font-size: 13px; font-weight: 600; color: var(--color-secondary); }
+.link { color: var(--color-blue); font-size: 14px; font-weight: 700; min-height: 44px; display: inline-flex; align-items: center; }
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: 999px; font-size: 15px; font-weight: 700; white-space: nowrap; }
-.btn-primary { min-height: 52px; background: var(--color-blue); color: var(--color-on-dark); width: 100%; }
-.btn-light { background: var(--color-on-dark); color: var(--color-ink); }
+.btn-primary { min-height: 52px; width: 100%; background: var(--color-blue); color: var(--color-on-dark); }
 .btn-secondary { background: var(--color-card); border: 1px solid var(--color-card-border); color: var(--color-text); }
-.btn-danger { background: var(--color-card); border: 1px solid var(--color-card-border); color: var(--color-destructive-text); width: 100%; }
-.pro { background: var(--color-ink); color: var(--color-on-dark); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-.pro .brand { font-size: 20px; }
-.pro p { color: var(--color-muted-subtitle); font-size: 14px; line-height: 1.45; }
+.rows { display: flex; flex-direction: column; }
+.rowi { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 56px; border-top: 1px solid var(--color-divider); padding: 8px 0; }
+.rows > li:first-child .rowi, .rows > li:first-child.rowi { border-top: 0; }
+.rowi .t { font-size: 15px; font-weight: 600; }
+.rowi .s { font-size: 13px; color: var(--color-secondary); margin-top: 2px; }
+.kcal { font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.kcal.none { color: var(--color-secondary); font-weight: 600; }
+.chev { color: var(--color-secondary); }
+.vrow { display: flex; align-items: center; gap: 16px; min-height: 56px; }
+.vnum { font-size: 40px; color: var(--color-blue); line-height: 1; }
+.facts { display: flex; flex-direction: column; gap: 10px; }
+.facts li { font-size: 14px; line-height: 1.45; padding-left: 12px; border-left: 3px solid var(--color-blue); }
 
-/* Chips and form fields (targets page) */
-.chip { min-height: 44px; padding: 0 16px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; white-space: nowrap; border: 1px solid var(--color-card-border); background: var(--color-card); color: var(--color-text); }
-.chip[aria-pressed="true"] { background: var(--color-ink); color: var(--color-on-dark); border-color: var(--color-ink); }
-.chipgrid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.chipgrid5 { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
-.chipgrid5 .chip { padding: 0 4px; }
-.field { display: flex; flex-direction: column; gap: 8px; }
-.field > label, .field > .lbl { font-size: 13px; font-weight: 600; color: var(--color-secondary); }
-.input { height: 48px; border-radius: 10px; border: 2px solid var(--color-grabber); background: var(--color-card); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; font-size: 16px; font-weight: 600; color: var(--color-text); font-variant-numeric: tabular-nums; }
-.input span { color: var(--color-secondary); font-weight: 600; }
-.input.focus { border-color: var(--color-blue); }
-.targets .trow { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; min-height: 52px; padding: 8px 0; border-top: 1px solid var(--color-divider); }
-.targets .trow:first-child { border-top: 0; }
-.targets .t { font-size: 15px; font-weight: 600; }
-.targets .f { font-size: 13px; color: var(--color-secondary); margin-top: 2px; }
-.targets .v { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-size: 20px; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.notice { font-size: 13px; color: var(--color-secondary); line-height: 1.45; }
+/* 7-day strip */
+.chart { position: relative; }
+.days { position: relative; display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.day { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.dval { font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; height: 16px; }
+.dbar-wrap { --tgt: 78px; position: relative; height: 96px; width: 100%; display: flex; align-items: flex-end; justify-content: center; }
+/* Target line (1.950 kcal) drawn in each column: --tgt is 1.950 / 2.400 of the bar height */
+.dbar-wrap::after { content: ""; position: absolute; left: -3px; right: -3px; bottom: var(--tgt); border-top: 2px dashed var(--color-ink); }
+.dbar { width: 100%; max-width: 30px; border-radius: 4px 4px 0 0; }
+.dlab { font-size: 12px; font-weight: 600; color: var(--color-secondary); text-align: center; line-height: 1.3; }
+.legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 13px; color: var(--color-secondary); align-items: center; }
+.lg { display: inline-flex; align-items: center; gap: 6px; }
+.lg i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; }
+
+/* Desktop */
+.side { width: 240px; flex: none; background: var(--color-ink); color: var(--color-on-dark); padding: 24px; display: flex; flex-direction: column; gap: 24px; }
+.side nav { display: flex; flex-direction: column; gap: 4px; }
+.side nav a { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 12px; border-radius: 12px; font-size: 15px; font-weight: 600; color: var(--color-muted-on-dark); }
+.side nav a[aria-current="page"] { background: var(--color-surface-dark); color: var(--color-on-dark); }
+.main { flex: 1; min-width: 0; padding: 32px 40px; display: flex; flex-direction: column; gap: 24px; }
+.d-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; }
+.d-title { font-size: 40px; }
+.d-sub { font-size: 14px; color: var(--color-secondary); margin-top: 8px; }
+.d-actions { display: flex; gap: 8px; align-items: center; }
+.grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 20px; align-items: stretch; }
+.s5 { grid-column: span 5; }
+.s7 { grid-column: span 7; }
+.s12 { grid-column: span 12; }
+.desktop .hero { grid-column: span 7; grid-template-columns: auto 1fr; padding: 24px; gap: 24px; }
+.desktop .dial { width: 168px; height: 168px; }
+.desktop .dial-num b { font-size: 44px; }
+.desktop .dial-num small { font-size: 14px; }
+.desktop .macros { gap: 14px; }
+.desktop .mline { font-size: 14px; }
+.desktop .big { font-size: 56px; line-height: 1; color: var(--color-text); }
+.desktop .days { gap: 12px; }
+.desktop .dbar-wrap { height: 144px; --tgt: 117px; }
+.desktop .dval { font-size: 13px; }
+.desktop .dlab { font-size: 13px; }
+.desktop .card-head h4 { font-size: 18px; }
 
 /* Bottom nav (phone) */
 .nav { background: var(--color-ink); color: var(--color-muted-on-dark); display: grid; grid-template-columns: repeat(5, 1fr); align-items: center; height: 72px; padding: 0 8px; flex: none; }
@@ -120,292 +172,613 @@ h1, h2, h3, h4, p { margin: 0; }
 .nav a[aria-current="page"]::before { content: ""; position: absolute; top: 0; width: 22px; height: 3px; background: var(--color-sky); transform: skewX(-14deg); }
 .fab { width: 56px; height: 56px; border-radius: 50%; background: var(--color-blue); color: var(--color-on-dark); display: flex; align-items: center; justify-content: center; justify-self: center; margin-top: -20px; }
 
-/* Desktop */
-.side { width: 240px; flex: none; background: var(--color-ink); color: var(--color-on-dark); padding: 24px; display: flex; flex-direction: column; gap: 24px; }
-.side nav { display: flex; flex-direction: column; gap: 4px; }
-.side nav a { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 12px; border-radius: 12px; font-size: 15px; font-weight: 600; color: var(--color-muted-on-dark); }
-.side nav a[aria-current="page"] { background: var(--color-surface-dark); color: var(--color-on-dark); }
-.main { flex: 1; min-width: 0; padding: 32px 40px; display: flex; flex-direction: column; gap: 20px; }
-.d-title { font-size: 40px; line-height: 1; text-transform: uppercase; }
-.d-sub { font-size: 14px; color: var(--color-secondary); margin-top: 8px; }
-.grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 20px; align-items: start; }
-.s5 { grid-column: span 5; }
-.s7 { grid-column: span 7; }
-.desktop .card { padding: 4px 20px; }
-.desktop .card.pad { padding: 20px; }
-.desktop .setrow { min-height: 60px; }
-.desktop .d-col { display: flex; flex-direction: column; gap: 20px; }
-.desktop .targets .v { font-size: 24px; }
+/* cc-15c: Nhật ký, pushed day screens, sheets. Tokens only. */
+.phone, .desktop { position: relative; }
+.ptop { padding: 12px 16px 4px; display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--color-page); }
+.ptitle-p { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-size: 28px; line-height: 1; text-transform: uppercase; color: var(--color-text); }
+.datenav-p { display: flex; align-items: center; gap: 0; }
+.datenav-p .ico-btn { color: var(--color-text); }
+.datenav-p .ico-btn:disabled { color: var(--color-secondary); opacity: .45; }
+.datenav-p .datelabel { min-width: 0; font-size: 14px; }
+.pill-ro { display: inline-flex; align-items: center; min-height: 28px; padding: 0 10px; border-radius: 999px; background: var(--color-card-border); color: var(--color-text); font-size: 13px; font-weight: 700; }
+.hdr-nk { padding: 16px 16px 20px; border-radius: 0 0 20px 20px; gap: 0; }
+.hdr-nk .hero { padding: 16px; }
+.hdr-nk .hero-foot { font-size: 14px; }
+.hdr-nk .hero-foot b { color: var(--color-on-dark); }
+.sub-p { padding: 8px 16px 12px; display: flex; flex-direction: column; gap: 4px; background: var(--color-page); }
+.sub-row { display: flex; align-items: center; gap: 4px; }
+.sub-row h3 { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-size: 26px; line-height: 1; text-transform: uppercase; color: var(--color-text); }
+.sub-p .cap { padding-left: 48px; }
+.back-p { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; color: var(--color-text); flex: none; }
+.rowcard { padding: 0; gap: 0; }
+.rowcard .rowi { padding: 12px 16px; min-height: 56px; }
+.rowcard .rowi:first-child { border-top: 0; }
+.rowcard .rowi .t { font-size: 15px; }
+.mealcard { gap: 4px; }
+.meal-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; }
+.meal-h .name { font-size: 16px; font-weight: 700; }
+.meal-h .kc { font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; margin-left: auto; padding-right: 4px; white-space: nowrap; }
+.meal-h .kc.none { color: var(--color-secondary); font-weight: 600; }
+.meal-acts { display: flex; align-items: center; gap: 0; }
+.ico-p { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; color: var(--color-text); flex: none; }
+.ico-p.add { background: var(--color-blue); color: var(--color-on-dark); }
+.ico-p:disabled { opacity: .45; }
+.foods { display: flex; flex-direction: column; }
+.foods li { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 40px; border-top: 1px solid var(--color-divider); font-size: 14px; }
+.foods li span:last-child { font-variant-numeric: tabular-nums; color: var(--color-secondary); white-space: nowrap; }
+.sumbar { position: sticky; top: 0; z-index: 2; background: var(--color-ink); color: var(--color-on-dark); padding: 10px 16px; display: flex; flex-direction: column; gap: 6px; }
+.sumbar-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; font-size: 14px; }
+.sumbar-top b { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-size: 20px; font-variant-numeric: tabular-nums; }
+.sumbar-top span { color: var(--color-muted-subtitle); }
+.scrim { position: absolute; inset: 0; background: rgba(17, 19, 23, .45); z-index: 3; }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 4; background: var(--color-card); border-radius: 20px 20px 0 0; padding: 12px 16px 20px; display: flex; flex-direction: column; gap: 4px; }
+.grab { width: 40px; height: 4px; border-radius: 999px; background: var(--color-grabber); margin: 0 auto 8px; }
+.opt { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; text-align: left; min-height: 56px; padding: 8px 4px; border-top: 1px solid var(--color-divider); }
+.opt:first-of-type { border-top: 0; }
+.opt .t { font-size: 16px; font-weight: 700; color: var(--color-text); }
+.opt .s { font-size: 13px; color: var(--color-secondary); }
+.dialog { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 4; width: 520px; max-width: calc(100% - 48px); background: var(--color-card); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 4px; box-shadow: 0 8px 32px rgba(17, 19, 23, .18); }
+.dialog h4 { font-size: 18px; font-weight: 700; padding-bottom: 8px; }
+.ink-card { background: var(--color-surface-dark); color: var(--color-on-dark); border-color: var(--color-surface-dark); }
+.ink-card .cap, .ink-card .sub { color: var(--color-muted-on-dark); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--color-card-border); background: var(--color-card); display: inline-flex; align-items: center; font-size: 15px; font-weight: 700; color: var(--color-text); }
+.chip[aria-pressed="true"] { background: var(--color-ink); border-color: var(--color-ink); color: var(--color-on-dark); }
+.chip[aria-disabled="true"] { color: var(--color-secondary); background: var(--color-page); }
+.salt { display: flex; flex-direction: column; gap: 4px; }
+.salt .big { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-size: 40px; line-height: 1; font-variant-numeric: tabular-nums; }
+.ck { display: flex; align-items: center; gap: 12px; min-height: 52px; border-top: 1px solid var(--color-divider); }
+.ck:first-child { border-top: 0; }
+.ck .box { width: 24px; height: 24px; border-radius: 6px; border: 2px solid var(--color-secondary); display: inline-flex; align-items: center; justify-content: center; flex: none; }
+.ck .box.on { background: var(--color-blue); border-color: var(--color-blue); color: var(--color-on-dark); }
+.ck .t { font-size: 15px; font-weight: 600; }
+.ck .s { font-size: 13px; color: var(--color-secondary); }
+.phase { font-size: 13px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--color-secondary); padding-top: 4px; }
+.mgroup { display: flex; flex-direction: column; gap: 0; }
+.mghead { font-size: 13px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--color-secondary); padding: 12px 0 4px; }
+.mlist { display: flex; flex-direction: column; }
+.mlist.mgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 32px; }
+.mrow { border-top: 1px solid var(--color-divider); }
+.mrow a { display: flex; flex-direction: column; gap: 6px; min-height: 56px; padding: 8px 0; }
+.mrow .mtop { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.mrow .t { font-size: 15px; font-weight: 600; color: var(--color-text); display: block; }
+.mrow .s { font-size: 13px; color: var(--color-secondary); display: block; }
+.mrow .pct { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-size: 20px; line-height: 1; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.desktop .sumcard { display: grid; grid-template-columns: auto 1fr; gap: 32px; align-items: center; }
+.desktop .sumcard .hero-foot { grid-column: auto; text-align: left; }
+.desktop .sumcard .dial { width: 168px; height: 168px; }
+.desktop .sumcard .dial-num b { font-size: 44px; }
+.desktop .sumcard .macros { gap: 14px; }
+.desktop .mealcard { gap: 4px; }
+.desktop .ptitle-p { display: none; }
+.desktop .rowcard .rowi { padding: 16px 20px; }
+.desktop .sumbar { display: none; }
+.desktop .dialog { width: 520px; }
+.desktop .ptop { display: none; }
+.desktop .d-head .datenav-p .ico-btn { color: var(--color-text); }
+.desktop .d-head { align-items: center; }
+.desktop .sub-row h3 { font-size: 40px; }
+.desktop .chips .chip { min-height: 48px; }
+.dial svg { width: 100%; height: 100%; }
+.macros-wrap { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.desktop .sumcard .hero-foot { text-align: left; grid-column: auto; }
+.desktop .sumcard .macros { gap: 14px; }
+.facts a { display: flex; align-items: center; min-height: 44px; color: var(--color-text); }
+.facts li { padding-top: 0; padding-bottom: 0; }
+.chip { padding: 0 12px; }
+
+/* cc-15c: Tổng quan sub-tabs, period control, charts. Tokens only. */
+.hdr-tq { padding: 16px 16px 20px; border-radius: 0; gap: 4px; }
+.hdr-tq .ptitle { font-size: 26px; }
+.tabs { display: flex; border-bottom: 1px solid var(--color-divider); overflow-x: auto; scrollbar-width: none; background: var(--color-page); }
+.tabs::-webkit-scrollbar { display: none; }
+.tabs a { position: relative; flex: 1 0 auto; min-height: 44px; padding: 0 8px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: var(--color-secondary); white-space: nowrap; }
+.tabs a[aria-current="page"] { color: var(--color-text); }
+.tabs a[aria-current="page"]::after { content: ""; position: absolute; left: 8px; right: 8px; bottom: -1px; height: 3px; background: var(--color-blue); }
+.period { display: flex; flex-direction: column; gap: 4px; }
+.period-h { font-size: 15px; font-weight: 700; }
+.period-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.period-nav { display: flex; align-items: center; }
+.period .ico-btn { color: var(--color-text); }
+.period .ico-btn:disabled { color: var(--color-secondary); opacity: .45; }
+.switch { display: inline-flex; padding: 2px; border-radius: 999px; background: var(--color-card); border: 1px solid var(--color-card-border); }
+.switch a { min-height: 44px; padding: 0 14px; display: inline-flex; align-items: center; border-radius: 999px; font-size: 14px; font-weight: 700; color: var(--color-secondary); }
+.switch a[aria-current="true"] { background: var(--color-ink); color: var(--color-on-dark); }
+.today { display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; }
+.today .t { font-size: 15px; font-weight: 700; }
+.today .s { font-size: 13px; color: var(--color-secondary); }
+.btn-sec { min-height: 44px; padding: 0 16px; border-radius: 999px; background: var(--color-card); border: 1px solid var(--color-card-border); color: var(--color-text); font-size: 14px; font-weight: 700; display: inline-flex; align-items: center; white-space: nowrap; }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.stat { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.stat .k { font-size: 13px; font-weight: 600; color: var(--color-secondary); }
+.stat .v { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-size: 26px; line-height: 1; font-variant-numeric: tabular-nums; }
+.stat .c { font-size: 13px; color: var(--color-secondary); }
+.sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; flex: none; }
+.ring { position: relative; width: 120px; height: 120px; flex: none; }
+.ring svg { position: absolute; inset: 0; }
+.comp { display: flex; align-items: center; gap: 16px; }
+.comp .rows { flex: 1; min-width: 0; }
+.comp .rowi { min-height: 52px; }
+.chart-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 13px; color: var(--color-secondary); align-items: center; }
+.lg { display: inline-flex; align-items: center; gap: 6px; }
+.lg i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; }
+.kbars { position: relative; height: 192px; padding-top: 20px; box-sizing: border-box; display: flex; align-items: flex-end; gap: 8px; }
+.kband { position: absolute; left: -4px; right: -4px; bottom: 134px; height: 22px; background: rgba(17, 19, 23, .06); border-top: 2px dashed var(--color-ink); border-bottom: 2px dashed var(--color-ink); pointer-events: none; }
+.kcol { position: relative; flex: 1 1 0; min-width: 0; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 4px; }
+.kbar { display: block; width: 100%; max-width: 30px; border-radius: 4px 4px 0 0; background: var(--color-blue); }
+.kbar.low { background: var(--color-level-red); }
+.kbar.part { background: repeating-linear-gradient(135deg, var(--color-blue) 0 3px, #B9C8F4 3px 6px); }
+.kval { background: var(--color-card); padding: 0 2px; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.klabels { display: flex; gap: 8px; margin-top: 4px; }
+.klabels span { flex: 1 1 0; min-width: 0; }
+.klabels span { font-size: 12px; font-weight: 600; color: var(--color-secondary); text-align: center; line-height: 1.3; }
+.seg-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 12px; align-items: center; min-height: 64px; border-top: 1px solid var(--color-divider); padding: 10px 0; }
+.seg-row:first-child { border-top: 0; }
+.seg-row .t { font-size: 15px; font-weight: 600; }
+.seg-row .s { font-size: 13px; color: var(--color-secondary); }
+.seg-row .pct { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-size: 22px; line-height: 1; font-variant-numeric: tabular-nums; text-align: right; }
+.seg-row .seg { grid-column: 1 / -1; }
+.note { font-size: 13px; color: var(--color-secondary); line-height: 1.45; }
+.chip-data { display: inline-flex; align-items: center; min-height: 28px; padding: 0 10px; border-radius: 999px; background: var(--color-page); font-size: 13px; font-weight: 700; color: var(--color-text); }
+.wchart { width: 100%; height: auto; display: block; }
+.wchart text { font-family: 'Manrope', sans-serif; font-size: 12px; font-weight: 600; fill: var(--color-secondary); }
+.desktop .kbars { height: 240px; padding-top: 24px; }
+.desktop .kband { bottom: 168px; height: 28px; }
+.desktop .kbar { max-width: 56px; }
+.desktop .klabels span { font-size: 13px; }
+.desktop .stat .v { font-size: 34px; }
+.desktop .period-h { font-size: 18px; }
+.desktop .side-add { min-height: 48px; }
+.desktop .d-title { font-size: 40px; }
+.desktop .tabs { border-bottom: 0; background: transparent; }
+.desktop .tabs a { min-height: 44px; padding: 0 14px; font-size: 16px; }
+.desktop .tabs a[aria-current="page"]::after { bottom: 0; }
+.desktop .tabs { gap: 4px; }
+.desktop .d-head { align-items: center; }
+.desktop .d-head .switch a { min-height: 44px; }
+.desktop .period-row { justify-content: flex-start; gap: 16px; }
+.desktop .comp { gap: 28px; }
+.desktop .ring { width: 168px; height: 168px; }
+.desktop .comp .rowi { min-height: 60px; }
+.desktop .seg-row { grid-template-columns: minmax(0, 1fr) auto; }
+.stack { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.col-sum { display: flex; flex-direction: column; gap: 6px; }
+.wrapnote { display: grid; gap: 8px; }
+.rt { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; text-align: right; flex: none; }
+.facts a { display: flex; align-items: center; min-height: 44px; color: var(--color-text); }
+.facts li { padding-top: 0; padding-bottom: 0; }
+
+/* cc-15c: Cài đặt, Hồ sơ (pushed), Mục tiêu mỗi ngày (read-only). Tokens only. */
+.prof { display: flex; align-items: center; gap: 12px; padding: 16px; }
+.avatar { width: 52px; height: 52px; border-radius: 999px; background: var(--color-page); border: 1px solid var(--color-card-border); display: inline-flex; align-items: center; justify-content: center; color: var(--color-text); flex: none; }
+.prof .tx { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.prof .tx .t { font-size: 17px; font-weight: 700; }
+.prof .tx .s { font-size: 14px; color: var(--color-secondary); }
+.linkrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 56px; }
+.linkrow .t { font-size: 15px; font-weight: 600; }
+.linkrow .s { font-size: 13px; color: var(--color-secondary); margin-top: 2px; }
+.linkrow .v { font-size: 15px; font-weight: 600; color: var(--color-secondary); white-space: nowrap; }
+.rowpad { padding: 0 16px; }
+.rowpad .linkrow { min-height: 56px; }
+.pro { background: var(--color-surface-dark); color: var(--color-on-dark); border-color: var(--color-surface-dark); }
+.pro h4 { color: var(--color-on-dark); }
+.pro .sub { color: var(--color-muted-subtitle); }
+.btn-light { min-height: 44px; padding: 0 16px; border-radius: 999px; background: var(--color-on-dark); color: var(--color-ink); font-size: 15px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+.danger .t { color: var(--color-destructive-text); }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 24px; }
+.grid2 .rowi { border-top: 1px solid var(--color-divider); }
+.fine { font-size: 13px; color: var(--color-secondary); line-height: 1.45; }
+.field-lab { font-size: 14px; font-weight: 700; color: var(--color-secondary); }
+.kv { display: flex; flex-direction: column; gap: 8px; }
+.tgt .rowi { align-items: flex-start; }
+.tgt .rowi .rt { max-width: 46%; }
+.side-add { min-height: 48px; }
+.desktop .prof { padding: 20px; }
+.desktop .prof .tx .t { font-size: 20px; }
+.desktop .avatar { width: 64px; height: 64px; }
+.desktop .chips .chip { min-height: 48px; }
+.desktop .grid2 .rowi { padding: 14px 0; }
+.rt { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; text-align: right; flex: none; }
+.stack { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.prof { flex-direction: row; }
+.prof .avatar { order: 0; }
 </style>
 </head>
 <body>
 <div class="board">
   <header class="board-head">
     <h1>Cài đặt</h1>
-    <p>IA v2, tab 4 (replaces Hồ sơ). Profile, targets, app settings, Pro and account in one list. The danger zone keeps Xoá tài khoản apart, with its own confirm page. Profile is /settings/profile (weight at /settings/profile/weight); /settings/targets is the Mục tiêu mỗi ngày page. Pro and account copy stay placeholders until Hao sends the text. Copy is Vietnamese; these notes are English. Target values come from lib/mock/sample-day.ts and the coach rules in SPEC.md (kcal/kg, protein, fat, salt, iron).</p>
+    <p>IA v2, tab 4. Cài đặt (paper header, no wordmark) keeps the profile card, Mục tiêu mỗi ngày, Ứng dụng, the Pro card and Tài khoản. Hồ sơ is a pushed screen with the same fields as today's Hồ sơ (sex, birth year, weight, goal, default training minutes), no new fields. /settings/targets is read-only: the computed targets with their formula lines, and one button to Hồ sơ. Sample profile: Nam, sinh 2003, 65 kg, Giữ cân. Copy is Vietnamese; these notes are English.</p>
   </header>
 
-  <!-- 1. Cài đặt -->
+  <!-- 4a. Cài đặt tab -->
   <section class="state">
-    <h2>1 · Cài đặt (tab)</h2>
+    <h2>4a · Cài đặt (tab)</h2>
     <div class="pair">
       <figure class="fig fig-phone">
         <figcaption>390 px · phone</figcaption>
         <div class="phone">
-          <header class="hdr">
-            <div class="brand">H1T <span>MICRO</span></div>
-            <h3 class="ptitle">Cài đặt</h3>
-          </header>
-
+          <div class="ptop"><h3 class="ptitle-p">Cài đặt</h3></div>
           <div class="body">
-            <a class="card pad" href="#" aria-label="Hồ sơ: Nam, sinh 2003, 65 kg. Sửa hồ sơ">
-              <div class="profile">
-                <span class="avatar"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></span>
-                <div style="flex:1;min-width:0">
-                  <div style="font-size:16px;font-weight:700">ban@email.com</div>
-                  <div class="sub">Nam · sinh 2003 · 65 kg</div>
-                </div>
-                <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
-              </div>
+            <a class="card prof" href="/settings/profile" aria-label="Hồ sơ của bạn: Nam, sinh 2003, 65 kg, Giữ cân">
+              <span class="avatar" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1.4-3.6 4.2-5.4 7.5-5.4s6.1 1.8 7.5 5.4"/></svg></span>
+              <span class="tx"><span class="t">Hồ sơ của bạn</span><span class="s">Nam · sinh 2003 · 65 kg · Giữ cân</span></span>
+              <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
             </a>
 
-            <div>
-              <p class="group-cap">Mục tiêu</p>
-              <div class="card">
-                <a class="setrow" href="#"><div><div class="t">Mục tiêu mỗi ngày</div><div class="s">Giữ cân · 1.950–2.275 kcal</div></div><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
-              </div>
-            </div>
+            <section class="card rowpad" aria-label="Mục tiêu">
+              <ul class="rows">
+                <li><a class="linkrow" href="/settings/targets"><span><span class="t">Mục tiêu mỗi ngày</span><span class="s" style="display:block">1.950–2.275 kcal · đạm 104–143 g</span></span><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+              </ul>
+            </section>
 
-            <div>
-              <p class="group-cap">Ứng dụng</p>
-              <div class="card">
-                <a class="setrow" href="#"><div class="t">Ngôn ngữ</div><div class="v">Tiếng Việt</div></a>
-                <a class="setrow" href="#"><div class="t">Nhắc nhở</div><div class="v">Đã bật</div></a>
-                <a class="setrow" href="#"><div><div class="t">Cài như ứng dụng</div><div class="s">Thêm H1T MICRO vào màn hình chính</div></div><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
-              </div>
-            </div>
+            <section class="card rowpad" aria-labelledby="s-app">
+              <h4 id="s-app" style="padding-top:16px">Ứng dụng</h4>
+              <ul class="rows">
+                <li><a class="linkrow" href="/settings/language"><span class="t">Ngôn ngữ</span><span style="display:flex;align-items:center;gap:4px"><span class="v">Tiếng Việt</span><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span></a></li>
+                <li><a class="linkrow" href="/settings/notifications"><span class="t">Nhắc nhở</span><span style="display:flex;align-items:center;gap:4px"><span class="v">Đã bật</span><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span></a></li>
+                <li><a class="linkrow" href="/install"><span class="t">Cài như ứng dụng</span><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+              </ul>
+            </section>
 
-            <div class="pro" role="region" aria-label="H1T MICRO Pro">
-              <div class="brand">H1T <span style="color:var(--color-sky)">MICRO</span> Pro</div>
-              <p>Xem các gói và quyền lợi của tài khoản.</p>
-              <a class="btn btn-light" href="#" style="align-self:flex-start">Xem gói</a>
-            </div>
+            <section class="card pro" aria-labelledby="s-pro">
+              <h4 id="s-pro">H1T MICRO Pro</h4>
+              <p class="sub">Xem các gói và quyền lợi của tài khoản</p>
+              <a class="btn-light" href="/paywall" style="align-self:flex-start">Xem gói</a>
+            </section>
 
-            <div>
-              <p class="group-cap">Tài khoản</p>
-              <div class="card">
-                <a class="setrow" href="#"><div class="t">Đăng xuất</div><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
-              </div>
-            </div>
+            <section class="card rowpad" aria-labelledby="s-acc">
+              <h4 id="s-acc" style="padding-top:16px">Tài khoản</h4>
+              <ul class="rows">
+                <li><div class="linkrow"><span class="t">Email</span><span class="v">ban@email.com</span></div></li>
+                <li><a class="linkrow" href="/signin"><span class="t">Đăng xuất</span><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+              </ul>
+            </section>
 
-            <section class="card pad" aria-labelledby="dz-title" style="gap:12px">
-              <h4 id="dz-title" style="font-size:16px;font-weight:700">Vùng nguy hiểm</h4>
-              <p class="sub">Mở trang xoá tài khoản để xem những gì sẽ bị xoá.</p>
-              <a class="btn btn-danger" href="#">Xoá tài khoản</a>
+            <section class="card rowpad" aria-labelledby="s-dz">
+              <h4 id="s-dz" style="padding-top:16px">Vùng nguy hiểm</h4>
+              <ul class="rows">
+                <li><a class="linkrow danger" href="/settings/delete-account"><span><span class="t">Xoá tài khoản</span><span class="s" style="display:block">Có bước xác nhận trước khi xoá</span></span><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+              </ul>
             </section>
           </div>
-
-          <nav class="nav" aria-label="Điều hướng chính">
-            <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
-            <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
-            <button class="fab" aria-label="Thêm món"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
-            <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
-            <a href="#" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
-          </nav>
+          
+<nav class="nav" aria-label="Điều hướng chính">
+<a href="/"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
+<a href="/diary"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
+<button class="fab" aria-label="Thêm món"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+<a href="/explore"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
+<a href="/settings" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
+</nav>
         </div>
       </figure>
 
       <figure class="fig fig-desktop">
         <figcaption>1280 px · desktop</figcaption>
         <div class="desktop">
-          <aside class="side">
-            <div class="brand">H1T <span>MICRO</span></div>
-            <button class="btn btn-primary side-add" type="button"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Thêm món</button>
-            <nav aria-label="Điều hướng chính">
-              <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
-              <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
-              <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
-              <a href="#" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
-            </nav>
-          </aside>
-          <div class="main">
-            <div>
-              <h3 class="ptitle d-title">Cài đặt</h3>
-              <p class="d-sub">ban@email.com · Nam, sinh 2003 · 65 kg · Giữ cân</p>
-            </div>
+          
+<aside class="side" aria-label="Điều hướng">
+<div class="brand">H1T <span>MICRO</span></div>
+<a class="btn btn-primary side-add" href="/add"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Thêm món</a>
+<nav aria-label="Điều hướng chính">
+<a href="/"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
+<a href="/diary"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
+<a href="/explore"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
+<a href="/settings" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
+</nav>
+</aside>
+          <main class="main">
+            <div class="d-head"><p class="d-title">Cài đặt</p></div>
             <div class="grid">
-              <div class="s7 d-col">
-                <a class="card pad" href="#" aria-label="Hồ sơ. Sửa hồ sơ">
-                  <div class="profile" style="min-height:0;padding:0">
-                    <span class="avatar"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></span>
-                    <div style="flex:1;min-width:0"><div style="font-size:18px;font-weight:700">Hồ sơ</div><div class="sub">ban@email.com · Nam · sinh 2003 · 65 kg</div></div>
-                    <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
-                  </div>
+              <div class="s7 stack">
+                <a class="card prof" href="/settings/profile" aria-label="Hồ sơ của bạn: Nam, sinh 2003, 65 kg, Giữ cân">
+                  <span class="avatar" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1.4-3.6 4.2-5.4 7.5-5.4s6.1 1.8 7.5 5.4"/></svg></span>
+                  <span class="tx"><span class="t">Hồ sơ của bạn</span><span class="s">Nam · sinh 2003 · 65 kg · Giữ cân</span></span>
+                  <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
                 </a>
-                <div>
-                  <p class="group-cap">Mục tiêu</p>
-                  <div class="card">
-                    <a class="setrow" href="#"><div><div class="t">Mục tiêu mỗi ngày</div><div class="s">Giữ cân · 1.950–2.275 kcal · Ngày tập 60′</div></div><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
-                  </div>
-                </div>
-                <div>
-                  <p class="group-cap">Ứng dụng</p>
-                  <div class="card">
-                    <a class="setrow" href="#"><div class="t">Ngôn ngữ</div><div class="v">Tiếng Việt</div></a>
-                    <a class="setrow" href="#"><div class="t">Nhắc nhở</div><div class="v">Đã bật</div></a>
-                    <a class="setrow" href="#"><div><div class="t">Cài như ứng dụng</div><div class="s">Thêm H1T MICRO vào màn hình chính</div></div><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
-                  </div>
-                </div>
+                <section class="card rowpad" aria-label="Mục tiêu">
+                  <ul class="rows">
+                    <li><a class="linkrow" href="/settings/targets"><span><span class="t">Mục tiêu mỗi ngày</span><span class="s" style="display:block">1.950–2.275 kcal · đạm 104–143 g</span></span><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                  </ul>
+                </section>
+                <section class="card rowpad" aria-labelledby="ds-app">
+                  <h4 id="ds-app" style="padding-top:16px">Ứng dụng</h4>
+                  <ul class="rows">
+                    <li><a class="linkrow" href="/settings/language"><span class="t">Ngôn ngữ</span><span style="display:flex;align-items:center;gap:4px"><span class="v">Tiếng Việt</span><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span></a></li>
+                    <li><a class="linkrow" href="/settings/notifications"><span class="t">Nhắc nhở</span><span style="display:flex;align-items:center;gap:4px"><span class="v">Đã bật</span><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span></a></li>
+                    <li><a class="linkrow" href="/install"><span class="t">Cài như ứng dụng</span><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                  </ul>
+                </section>
               </div>
-              <div class="s5 d-col">
-                <div class="pro" role="region" aria-label="H1T MICRO Pro">
-                  <div class="brand" style="font-size:24px">H1T <span>MICRO</span> Pro</div>
-                  <p>Xem các gói và quyền lợi của tài khoản.</p>
-                  <a class="btn btn-light" href="#" style="align-self:flex-start">Xem gói</a>
-                </div>
-                <div>
-                  <p class="group-cap">Tài khoản</p>
-                  <div class="card">
-                    <a class="setrow" href="#"><div class="t">Đăng xuất</div><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
-                  </div>
-                </div>
-                <section class="card pad" aria-labelledby="dz2-title" style="gap:12px">
-                  <h4 id="dz2-title" style="font-size:16px;font-weight:700">Vùng nguy hiểm</h4>
-                  <p class="sub">Mở trang xoá tài khoản để xem những gì sẽ bị xoá.</p>
-                  <a class="btn btn-danger" href="#" style="width:auto;align-self:flex-start">Xoá tài khoản</a>
+              <div class="s5 stack">
+                <section class="card pro" aria-labelledby="ds-pro">
+                  <h4 id="ds-pro">H1T MICRO Pro</h4>
+                  <p class="sub">Xem các gói và quyền lợi của tài khoản</p>
+                  <a class="btn-light" href="/paywall" style="align-self:flex-start">Xem gói</a>
+                </section>
+                <section class="card rowpad" aria-labelledby="ds-acc">
+                  <h4 id="ds-acc" style="padding-top:16px">Tài khoản</h4>
+                  <ul class="rows">
+                    <li><div class="linkrow"><span class="t">Email</span><span class="v">ban@email.com</span></div></li>
+                    <li><a class="linkrow" href="/signin"><span class="t">Đăng xuất</span><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                  </ul>
+                </section>
+                <section class="card rowpad" aria-labelledby="ds-dz">
+                  <h4 id="ds-dz" style="padding-top:16px">Vùng nguy hiểm</h4>
+                  <ul class="rows">
+                    <li><a class="linkrow danger" href="/settings/delete-account"><span><span class="t">Xoá tài khoản</span><span class="s" style="display:block">Có bước xác nhận trước khi xoá</span></span><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                  </ul>
                 </section>
               </div>
             </div>
-          </div>
+          </main>
         </div>
       </figure>
     </div>
   </section>
 
-  <!-- 2. /settings/targets -->
+  <!-- 4b. Pushed: Hồ sơ -->
   <section class="state">
-    <h2>2 · /settings/targets · Mục tiêu mỗi ngày</h2>
+    <h2>4b · /settings/profile · Hồ sơ, đẩy vào</h2>
     <div class="pair">
       <figure class="fig fig-phone">
         <figcaption>390 px · phone</figcaption>
         <div class="phone">
-          <header class="hdr">
-            <div class="subhdr">
-              <a class="ico-btn" href="#" aria-label="Quay lại"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></a>
-              <div class="brand" style="font-size:18px">H1T <span>MICRO</span></div>
-            </div>
-            <h3 class="ptitle">Mục tiêu mỗi ngày</h3>
-          </header>
-
-          <div class="body">
-            <div class="field">
-              <span class="lbl" id="goal-lbl">Mục tiêu</span>
-              <div class="chipgrid2" role="group" aria-labelledby="goal-lbl">
-                <button class="chip" type="button" aria-pressed="false">Tăng cơ</button>
-                <button class="chip" type="button" aria-pressed="true">Giữ cân</button>
-                <button class="chip" type="button" aria-pressed="false">Giảm mỡ</button>
-                <button class="chip" type="button" aria-pressed="false">Giảm mỡ nhanh</button>
-              </div>
-            </div>
-
-            <div class="field">
-              <span class="lbl">Cân nặng</span>
-              <div class="input"><span style="color:var(--color-text);font-weight:600">65</span><span>kg</span></div>
-            </div>
-
-            <div class="field">
-              <span class="lbl" id="tr-lbl">Ngày tập mặc định</span>
-              <div class="chipgrid5" role="group" aria-labelledby="tr-lbl">
-                <button class="chip" type="button" aria-pressed="false">Nghỉ</button>
-                <button class="chip" type="button" aria-pressed="false">45′</button>
-                <button class="chip" type="button" aria-pressed="true">60′</button>
-                <button class="chip" type="button" aria-pressed="false">90′</button>
-                <button class="chip" type="button" aria-pressed="false">120′</button>
-              </div>
-            </div>
-
-            <section class="card pad targets" aria-labelledby="t-res">
-              <h4 id="t-res" style="font-size:16px;font-weight:700">Mục tiêu đã tính</h4>
-              <div class="trow"><div><div class="t">Năng lượng</div><div class="f">30–35 kcal/kg × 65 kg</div></div><span class="v">1.950–2.275</span></div>
-              <div class="trow"><div><div class="t">Đạm</div><div class="f">1,6–2,2 g/kg</div></div><span class="v">104–143 g</span></div>
-              <div class="trow"><div><div class="t">Béo</div><div class="f">0,5–1 g/kg</div></div><span class="v">33–65 g</span></div>
-              <div class="trow"><div><div class="t">Tinh bột</div></div><span class="v">254 g</span></div>
-              <div class="trow"><div><div class="t">Chất xơ</div></div><span class="v">30–40 g</span></div>
-              <div class="trow"><div><div class="t">Muối</div><div class="f">4–6 g nền + 1–1,5 g mỗi 20 phút tập</div></div><span class="v">4–6 g</span></div>
-              <div class="trow"><div><div class="t">Sắt</div><div class="f">Nam: 8 mg</div></div><span class="v">8 mg</span></div>
-            </section>
-            <p class="notice">Đổi mục tiêu hoặc cân nặng sẽ cập nhật Tổng quan, Nhật ký và Vi chất.</p>
-
-            <button class="btn btn-primary" type="button">Lưu mục tiêu</button>
+          <div class="sub-p">
+            <div class="sub-row"><a class="back-p" href="/settings" aria-label="Quay lại Cài đặt"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg></a><h3>Hồ sơ</h3></div>
+            <p class="cap">Nam · sinh 2003 · 65 kg · Giữ cân</p>
           </div>
+          <div class="body">
+            <section class="card" aria-labelledby="pf-body">
+              <h4 id="pf-body">Cơ thể</h4>
+              <div class="kv">
+                <span class="field-lab" id="pf-sex">Giới tính</span>
+                <div class="chips" role="group" aria-labelledby="pf-sex">
+                  <button class="chip" aria-pressed="true">Nam</button>
+                  <button class="chip" aria-pressed="false">Nữ</button>
+                </div>
+              </div>
+              <ul class="rows">
+                <li><a class="linkrow" href="/settings/profile"><span class="t">Năm sinh</span><span style="display:flex;align-items:center;gap:4px"><span class="v">2003</span><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span></a></li>
+                <li><a class="linkrow" href="/settings/profile/weight"><span class="t">Cân nặng</span><span style="display:flex;align-items:center;gap:4px"><span class="v">65 kg</span><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span></a></li>
+              </ul>
+            </section>
+
+            <section class="card" aria-labelledby="pf-goal">
+              <h4 id="pf-goal">Mục tiêu</h4>
+              <div class="chips" role="group" aria-label="Mục tiêu" style="display:grid;grid-template-columns:1fr 1fr">
+                <button class="chip" aria-pressed="false" style="justify-content:center">Tăng cơ</button>
+                <button class="chip" aria-pressed="true" style="justify-content:center">Giữ cân</button>
+                <button class="chip" aria-pressed="false" style="justify-content:center">Giảm mỡ</button>
+                <button class="chip" aria-pressed="false" style="justify-content:center">Giảm mỡ nhanh</button>
+              </div>
+              <div class="kv">
+                <span class="field-lab" id="pf-train">Ngày tập mặc định</span>
+                <div class="chips" role="group" aria-labelledby="pf-train">
+                  <button class="chip" aria-pressed="false">Nghỉ</button>
+                  <button class="chip" aria-pressed="false">45 phút</button>
+                  <button class="chip" aria-pressed="true">60 phút</button>
+                  <button class="chip" aria-pressed="false">90 phút</button>
+                  <button class="chip" aria-pressed="false">120 phút</button>
+                </div>
+              </div>
+            </section>
+
+            <section class="card rowpad">
+              <ul class="rows">
+                <li><a class="linkrow" href="/settings/targets"><span><span class="t">Mục tiêu mỗi ngày tính từ hồ sơ này</span></span><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+              </ul>
+            </section>
+          </div>
+          
+<nav class="nav" aria-label="Điều hướng chính">
+<a href="/"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
+<a href="/diary"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
+<button class="fab" aria-label="Thêm món"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+<a href="/explore"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
+<a href="/settings" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
+</nav>
         </div>
       </figure>
 
       <figure class="fig fig-desktop">
         <figcaption>1280 px · desktop</figcaption>
         <div class="desktop">
-          <aside class="side">
-            <div class="brand">H1T <span>MICRO</span></div>
-            <button class="btn btn-primary side-add" type="button"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Thêm món</button>
-            <nav aria-label="Điều hướng chính">
-              <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
-              <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
-              <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
-              <a href="#" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
-            </nav>
-          </aside>
-          <div class="main">
-            <div class="subhdr" style="gap:12px">
-              <a class="ico-btn" href="#" aria-label="Quay lại" style="color:var(--color-text);border:1px solid var(--color-card-border)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></a>
-              <div>
-                <h3 class="ptitle d-title">Mục tiêu mỗi ngày</h3>
-                <p class="d-sub" style="margin-top:6px">Cài đặt · Giữ cân · 65 kg · Ngày tập 60′</p>
-              </div>
-            </div>
+          
+<aside class="side" aria-label="Điều hướng">
+<div class="brand">H1T <span>MICRO</span></div>
+<a class="btn btn-primary side-add" href="/add"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Thêm món</a>
+<nav aria-label="Điều hướng chính">
+<a href="/"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
+<a href="/diary"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
+<a href="/explore"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
+<a href="/settings" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
+</nav>
+</aside>
+          <main class="main">
+            <div class="d-head"><div class="sub-row"><a class="back-p" href="/settings" aria-label="Quay lại Cài đặt"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg></a><p class="d-title">Hồ sơ</p></div><span class="cap">Nam · sinh 2003 · 65 kg · Giữ cân</span></div>
             <div class="grid">
-              <div class="s7 d-col">
-                <section class="card pad" style="gap:16px">
-                  <div class="field">
-                    <span class="lbl" id="d-goal-lbl">Mục tiêu</span>
-                    <div class="chipgrid2" role="group" aria-labelledby="d-goal-lbl">
-                      <button class="chip" type="button" aria-pressed="false">Tăng cơ</button>
-                      <button class="chip" type="button" aria-pressed="true">Giữ cân</button>
-                      <button class="chip" type="button" aria-pressed="false">Giảm mỡ</button>
-                      <button class="chip" type="button" aria-pressed="false">Giảm mỡ nhanh</button>
-                    </div>
+              <section class="card s5" aria-labelledby="dpf-body">
+                <h4 id="dpf-body">Cơ thể</h4>
+                <div class="kv">
+                  <span class="field-lab" id="dpf-sex">Giới tính</span>
+                  <div class="chips" role="group" aria-labelledby="dpf-sex">
+                    <button class="chip" aria-pressed="true">Nam</button>
+                    <button class="chip" aria-pressed="false">Nữ</button>
                   </div>
-                  <div class="field">
-                    <span class="lbl">Cân nặng</span>
-                    <div class="input"><span style="color:var(--color-text);font-weight:600">65</span><span>kg</span></div>
+                </div>
+                <ul class="rows">
+                  <li><a class="linkrow" href="/settings/profile"><span class="t">Năm sinh</span><span style="display:flex;align-items:center;gap:4px"><span class="v">2003</span><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span></a></li>
+                  <li><a class="linkrow" href="/settings/profile/weight"><span class="t">Cân nặng</span><span style="display:flex;align-items:center;gap:4px"><span class="v">65 kg</span><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></span></a></li>
+                </ul>
+              </section>
+              <section class="card s7" aria-labelledby="dpf-goal">
+                <h4 id="dpf-goal">Mục tiêu</h4>
+                <div class="chips" role="group" aria-label="Mục tiêu" style="display:grid;grid-template-columns:1fr 1fr">
+                  <button class="chip" aria-pressed="false" style="justify-content:center">Tăng cơ</button>
+                  <button class="chip" aria-pressed="true" style="justify-content:center">Giữ cân</button>
+                  <button class="chip" aria-pressed="false" style="justify-content:center">Giảm mỡ</button>
+                  <button class="chip" aria-pressed="false" style="justify-content:center">Giảm mỡ nhanh</button>
+                </div>
+                <div class="kv">
+                  <span class="field-lab" id="dpf-train">Ngày tập mặc định</span>
+                  <div class="chips" role="group" aria-labelledby="dpf-train">
+                    <button class="chip" aria-pressed="false">Nghỉ</button>
+                    <button class="chip" aria-pressed="false">45 phút</button>
+                    <button class="chip" aria-pressed="true">60 phút</button>
+                    <button class="chip" aria-pressed="false">90 phút</button>
+                    <button class="chip" aria-pressed="false">120 phút</button>
                   </div>
-                  <div class="field">
-                    <span class="lbl" id="d-tr-lbl">Ngày tập mặc định</span>
-                    <div class="chipgrid5" role="group" aria-labelledby="d-tr-lbl">
-                      <button class="chip" type="button" aria-pressed="false">Nghỉ</button>
-                      <button class="chip" type="button" aria-pressed="false">45′</button>
-                      <button class="chip" type="button" aria-pressed="true">60′</button>
-                      <button class="chip" type="button" aria-pressed="false">90′</button>
-                      <button class="chip" type="button" aria-pressed="false">120′</button>
-                    </div>
-                  </div>
-                </section>
-                <p class="notice">Đổi mục tiêu hoặc cân nặng sẽ cập nhật Tổng quan, Nhật ký và Vi chất.</p>
-              </div>
-              <div class="s5 d-col">
-                <section class="card pad targets" aria-labelledby="d-t-res">
-                  <h4 id="d-t-res" style="font-size:18px;font-weight:700">Mục tiêu đã tính</h4>
-                  <div class="trow"><div><div class="t">Năng lượng</div><div class="f">30–35 kcal/kg × 65 kg</div></div><span class="v">1.950–2.275 kcal</span></div>
-                  <div class="trow"><div><div class="t">Đạm</div><div class="f">1,6–2,2 g/kg</div></div><span class="v">104–143 g</span></div>
-                  <div class="trow"><div><div class="t">Béo</div><div class="f">0,5–1 g/kg</div></div><span class="v">33–65 g</span></div>
-                  <div class="trow"><div><div class="t">Tinh bột</div></div><span class="v">254 g</span></div>
-                  <div class="trow"><div><div class="t">Chất xơ</div></div><span class="v">30–40 g</span></div>
-                  <div class="trow"><div><div class="t">Muối</div><div class="f">4–6 g nền + 1–1,5 g mỗi 20 phút tập</div></div><span class="v">4–6 g</span></div>
-                  <div class="trow"><div><div class="t">Sắt</div><div class="f">Nam: 8 mg</div></div><span class="v">8 mg</span></div>
-                </section>
-                <button class="btn btn-primary" style="width:auto;align-self:flex-end;padding:0 28px">Lưu mục tiêu</button>
-              </div>
+                </div>
+              </section>
+              <section class="card rowpad s12" aria-label="Mục tiêu mỗi ngày">
+                <ul class="rows">
+                  <li><a class="linkrow" href="/settings/targets"><span><span class="t">Mục tiêu mỗi ngày tính từ hồ sơ này</span></span><svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>
+                </ul>
+              </section>
             </div>
+          </main>
+        </div>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 4c. Pushed: Mục tiêu mỗi ngày, read-only -->
+  <section class="state">
+    <h2>4c · /settings/targets · Mục tiêu mỗi ngày, chỉ xem</h2>
+    <div class="pair">
+      <figure class="fig fig-phone">
+        <figcaption>390 px · phone</figcaption>
+        <div class="phone">
+          <div class="sub-p">
+            <div class="sub-row"><a class="back-p" href="/settings" aria-label="Quay lại Cài đặt"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg></a><h3>Mục tiêu mỗi ngày</h3></div>
+            <p class="cap">Tính từ hồ sơ · Nam · 65 kg · Giữ cân</p>
           </div>
+          <div class="body">
+            <section class="card tgt" aria-labelledby="tg-e">
+              <h4 id="tg-e">Năng lượng và đa lượng</h4>
+              <ul class="rows">
+                <li class="rowi"><div><div class="t">Kcal</div><div class="s">Giữ cân: 30–35 kcal/kg × 65 kg</div></div><div class="rt"><span class="kcal">1.950–2.275</span></div></li>
+                <li class="rowi"><div><div class="t">Đạm</div><div class="s">1,6–2,2 g/kg × 65 kg</div></div><div class="rt"><span class="kcal">104–143 g</span></div></li>
+                <li class="rowi"><div><div class="t">Béo</div><div class="s">0,5–1 g/kg × 65 kg</div></div><div class="rt"><span class="kcal">33–65 g</span></div></li>
+                <li class="rowi"><div><div class="t">Tinh bột</div><div class="s">Phần còn lại: (kcal − đạm × 4 − béo × 9) ÷ 4</div></div><div class="rt"><span class="kcal">254 g</span></div></li>
+                <li class="rowi"><div><div class="t">Chất xơ</div><div class="s">14 g mỗi 1.000 kcal, Nam 30–40 g (tạm thời)</div></div><div class="rt"><span class="kcal">30–40 g</span></div></li>
+              </ul>
+            </section>
+
+            <section class="card tgt" aria-labelledby="tg-m">
+              <h4 id="tg-m">Khoáng chất</h4>
+              <ul class="rows">
+                <li class="rowi"><div><div class="t">Muối</div><div class="s">Nền 4–6 g + 1–1,5 g mỗi 20 phút tập</div></div><div class="rt"><span class="kcal">7–10,5 g</span><span class="cap">hôm nay, 60′</span></div></li>
+                <li class="rowi"><div><div class="t">Kali</div><div class="s">80–100 mg/kg × 65 kg</div></div><div class="rt"><span class="kcal">5.200–6.500 mg</span></div></li>
+                <li class="rowi"><div><div class="t">Canxi</div><div class="s">Khoảng mục tiêu theo coach</div></div><div class="rt"><span class="kcal">1.200–1.500 mg</span></div></li>
+                <li class="rowi"><div><div class="t">Magie</div><div class="s">50 % mục tiêu canxi</div></div><div class="rt"><span class="kcal">600–750 mg</span></div></li>
+                <li class="rowi"><div><div class="t">Sắt</div><div class="s">Nam 8 mg · Nữ 18 mg, đang kinh 28 mg</div></div><div class="rt"><span class="kcal">8 mg</span></div></li>
+                <li class="rowi"><div><div class="t">Kẽm</div><div class="s">Nam 12 mg · Nữ 8 mg</div></div><div class="rt"><span class="kcal">12 mg</span></div></li>
+              </ul>
+            </section>
+
+            <section class="card" aria-labelledby="tg-v">
+              <h4 id="tg-v">Vitamin và khoáng khác*</h4>
+              <div class="grid2">
+                <div class="rowi"><span class="t">Vitamin A</span><span class="kcal">650 µg*</span></div>
+                <div class="rowi"><span class="t">Vitamin C</span><span class="kcal">100 mg*</span></div>
+                <div class="rowi"><span class="t">Vitamin D</span><span class="kcal">15 µg*</span></div>
+                <div class="rowi"><span class="t">Vitamin E</span><span class="kcal">6,5 mg*</span></div>
+                <div class="rowi"><span class="t">Vitamin K</span><span class="kcal">150 µg*</span></div>
+                <div class="rowi"><span class="t">Vitamin B1</span><span class="kcal">1,2 mg*</span></div>
+                <div class="rowi"><span class="t">Vitamin B2</span><span class="kcal">1,3 mg*</span></div>
+                <div class="rowi"><span class="t">Vitamin B3</span><span class="kcal">16 mg*</span></div>
+                <div class="rowi"><span class="t">Vitamin B5</span><span class="kcal">5 mg*</span></div>
+                <div class="rowi"><span class="t">Vitamin B6</span><span class="kcal">1,3 mg*</span></div>
+                <div class="rowi"><span class="t">Folate (B9)</span><span class="kcal">400 µg*</span></div>
+                <div class="rowi"><span class="t">Vitamin B12</span><span class="kcal">2,4 µg*</span></div>
+                <div class="rowi"><span class="t">Đồng</span><span class="kcal">0,9 mg*</span></div>
+                <div class="rowi"><span class="t">Mangan</span><span class="kcal">2,3 mg*</span></div>
+                <div class="rowi"><span class="t">Phốt pho</span><span class="kcal">700 mg*</span></div>
+                <div class="rowi"><span class="t">Selen</span><span class="kcal">34 µg*</span></div>
+              </div>
+              <p class="fine">* Khuyến nghị dinh dưỡng Việt Nam 2016 (VN 2016). Đây không phải quy tắc của coach.</p>
+            </section>
+
+            <p class="fine">Chỉ xem ở đây. Cân nặng, mục tiêu và ngày tập mặc định sửa trong Hồ sơ.</p>
+            <a class="btn btn-primary" href="/settings/profile">Sửa trong Hồ sơ</a>
+          </div>
+          
+<nav class="nav" aria-label="Điều hướng chính">
+<a href="/"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
+<a href="/diary"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
+<button class="fab" aria-label="Thêm món"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+<a href="/explore"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
+<a href="/settings" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
+</nav>
+        </div>
+      </figure>
+
+      <figure class="fig fig-desktop">
+        <figcaption>1280 px · desktop</figcaption>
+        <div class="desktop">
+          
+<aside class="side" aria-label="Điều hướng">
+<div class="brand">H1T <span>MICRO</span></div>
+<a class="btn btn-primary side-add" href="/add"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Thêm món</a>
+<nav aria-label="Điều hướng chính">
+<a href="/"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
+<a href="/diary"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
+<a href="/explore"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Khám phá</a>
+<a href="/settings" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Cài đặt</a>
+</nav>
+</aside>
+          <main class="main">
+            <div class="d-head"><div class="sub-row"><a class="back-p" href="/settings" aria-label="Quay lại Cài đặt"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg></a><p class="d-title">Mục tiêu mỗi ngày</p></div><a class="btn btn-primary" href="/settings/profile" style="width:auto">Sửa trong Hồ sơ</a></div>
+            <p class="cap" style="margin-top:-16px">Tính từ hồ sơ · Nam · 65 kg · Giữ cân · chỉ xem</p>
+            <div class="grid">
+              <section class="card tgt s7" aria-labelledby="dtg-e">
+                <h4 id="dtg-e">Năng lượng và đa lượng</h4>
+                <ul class="rows">
+                  <li class="rowi"><div><div class="t">Kcal</div><div class="s">Giữ cân: 30–35 kcal/kg × 65 kg</div></div><div class="rt"><span class="kcal">1.950–2.275</span></div></li>
+                  <li class="rowi"><div><div class="t">Đạm</div><div class="s">1,6–2,2 g/kg × 65 kg</div></div><div class="rt"><span class="kcal">104–143 g</span></div></li>
+                  <li class="rowi"><div><div class="t">Béo</div><div class="s">0,5–1 g/kg × 65 kg</div></div><div class="rt"><span class="kcal">33–65 g</span></div></li>
+                  <li class="rowi"><div><div class="t">Tinh bột</div><div class="s">Phần còn lại: (kcal − đạm × 4 − béo × 9) ÷ 4</div></div><div class="rt"><span class="kcal">254 g</span></div></li>
+                  <li class="rowi"><div><div class="t">Chất xơ</div><div class="s">14 g mỗi 1.000 kcal, Nam 30–40 g (tạm thời)</div></div><div class="rt"><span class="kcal">30–40 g</span></div></li>
+                </ul>
+              </section>
+              <section class="card tgt s5" aria-labelledby="dtg-m">
+                <h4 id="dtg-m">Khoáng chất</h4>
+                <ul class="rows">
+                  <li class="rowi"><div><div class="t">Muối</div><div class="s">Nền 4–6 g + 1–1,5 g mỗi 20 phút tập</div></div><div class="rt"><span class="kcal">7–10,5 g</span><span class="cap">hôm nay, 60′</span></div></li>
+                  <li class="rowi"><div><div class="t">Kali</div><div class="s">80–100 mg/kg × 65 kg</div></div><div class="rt"><span class="kcal">5.200–6.500 mg</span></div></li>
+                  <li class="rowi"><div><div class="t">Canxi</div><div class="s">Khoảng mục tiêu theo coach</div></div><div class="rt"><span class="kcal">1.200–1.500 mg</span></div></li>
+                  <li class="rowi"><div><div class="t">Magie</div><div class="s">50 % mục tiêu canxi</div></div><div class="rt"><span class="kcal">600–750 mg</span></div></li>
+                  <li class="rowi"><div><div class="t">Sắt</div><div class="s">Nam 8 mg · Nữ 18 mg, đang kinh 28 mg</div></div><div class="rt"><span class="kcal">8 mg</span></div></li>
+                  <li class="rowi"><div><div class="t">Kẽm</div><div class="s">Nam 12 mg · Nữ 8 mg</div></div><div class="rt"><span class="kcal">12 mg</span></div></li>
+                </ul>
+              </section>
+              <section class="card s12" aria-labelledby="dtg-v">
+                <h4 id="dtg-v">Vitamin và khoáng khác*</h4>
+                <div class="grid2" style="grid-template-columns:repeat(4,minmax(0,1fr))">
+                  <div class="rowi"><span class="t">Vitamin A</span><span class="kcal">650 µg*</span></div>
+                  <div class="rowi"><span class="t">Vitamin C</span><span class="kcal">100 mg*</span></div>
+                  <div class="rowi"><span class="t">Vitamin D</span><span class="kcal">15 µg*</span></div>
+                  <div class="rowi"><span class="t">Vitamin E</span><span class="kcal">6,5 mg*</span></div>
+                  <div class="rowi"><span class="t">Vitamin K</span><span class="kcal">150 µg*</span></div>
+                  <div class="rowi"><span class="t">Vitamin B1</span><span class="kcal">1,2 mg*</span></div>
+                  <div class="rowi"><span class="t">Vitamin B2</span><span class="kcal">1,3 mg*</span></div>
+                  <div class="rowi"><span class="t">Vitamin B3</span><span class="kcal">16 mg*</span></div>
+                  <div class="rowi"><span class="t">Vitamin B5</span><span class="kcal">5 mg*</span></div>
+                  <div class="rowi"><span class="t">Vitamin B6</span><span class="kcal">1,3 mg*</span></div>
+                  <div class="rowi"><span class="t">Folate (B9)</span><span class="kcal">400 µg*</span></div>
+                  <div class="rowi"><span class="t">Vitamin B12</span><span class="kcal">2,4 µg*</span></div>
+                  <div class="rowi"><span class="t">Đồng</span><span class="kcal">0,9 mg*</span></div>
+                  <div class="rowi"><span class="t">Mangan</span><span class="kcal">2,3 mg*</span></div>
+                  <div class="rowi"><span class="t">Phốt pho</span><span class="kcal">700 mg*</span></div>
+                  <div class="rowi"><span class="t">Selen</span><span class="kcal">34 µg*</span></div>
+                </div>
+                <p class="fine">* Khuyến nghị dinh dưỡng Việt Nam 2016 (VN 2016). Đây không phải quy tắc của coach.</p>
+              </section>
+            </div>
+          </main>
         </div>
       </figure>
     </div>
