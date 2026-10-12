@@ -249,10 +249,11 @@ paths:
           in: query
           schema:
             type: string
-        - name: cursor
+        - name: page
           in: query
           schema:
-            type: string
+            type: integer
+            default: 1
         - name: limit
           in: query
           schema:
@@ -267,9 +268,125 @@ paths:
                 type: object
                 properties:
                   data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Food'
+                    type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Food'
+                      total:
+                        type: integer
+                      page:
+                        type: integer
+                      limit:
+                        type: integer
+
+  /foods/{id}:
+    get:
+      summary: Get food detail by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Full food item detail
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Food'
+        '404':
+          description: Food not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /foods/rich-in/{nutrient}:
+    get:
+      summary: Get foods highest in a specific nutrient
+      parameters:
+        - name: nutrient
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Rich in food rankings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      nutrient:
+                        type: string
+                      unit:
+                        type: string
+                      items:
+                        type: array
+                        items:
+                          type: object
+
+  /foods/custom:
+    post:
+      summary: Create a user custom food item
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name_vi
+                - serving_size
+                - calories
+                - protein
+                - carbs
+                - fat
+              properties:
+                name_vi:
+                  type: string
+                serving_unit:
+                  type: string
+                serving_size:
+                  type: number
+                calories:
+                  type: number
+                protein:
+                  type: number
+                carbs:
+                  type: number
+                fat:
+                  type: number
+                micros:
+                  type: object
+      responses:
+        '201':
+          description: Custom food created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Food'
 
   /days/{date}:
     get:
