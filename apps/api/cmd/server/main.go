@@ -140,10 +140,18 @@ func main() {
 			r.Post("/foods/custom", nutritionHandler.CreateCustomFood)
 			r.Delete("/foods/custom/{id}", nutritionHandler.DeleteCustomFood)
 
-			// Diary logs & daily progress
-			r.Route("/diary", func(r chi.Router) {
-				r.Post("/logs", diaryHandler.LogMeal)
-				r.Get("/daily", diaryHandler.GetDailyProgress)
+			// Diary routes (Phase 3)
+			r.Route("/days/{date}", func(r chi.Router) {
+				r.Get("/", diaryHandler.GetDay)
+				r.Post("/entries", diaryHandler.CreateEntry)
+				r.Post("/copy-yesterday", diaryHandler.CopyYesterday)
+				r.Delete("/meals/{meal}", diaryHandler.DeleteMeal)
+				r.Put("/training", diaryHandler.SetTraining)
+			})
+
+			r.Route("/entries/{id}", func(r chi.Router) {
+				r.Patch("/", diaryHandler.UpdateEntry)
+				r.Delete("/", diaryHandler.DeleteEntry)
 			})
 		})
 

@@ -4,155 +4,357 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
+	"math"
 
 	"github.com/google/uuid"
 )
 
-type LogMealRequest struct {
-	ID           uuid.UUID `json:"id"`
-	FoodID       uuid.UUID `json:"food_id"`
-	MealSlot     string    `json:"meal_slot"`
-	Quantity     float64   `json:"quantity"`
-	ServingSizeG *float64  `json:"serving_size_g,omitempty"`
-	LogDate      time.Time `json:"log_date"`
-}
-
-type DailyProgress struct {
-	LogDate               string             `json:"log_date"`
-	TotalNutrients        NutrientValues     `json:"total_nutrients"`
-	TargetNutrients       *NutrientValues    `json:"target_nutrients,omitempty"`
-	CompletionPercentages map[string]float64 `json:"completion_percentages,omitempty"`
-	LogsCount             int                `json:"logs_count"`
-}
-
-type LogMealResponse struct {
-	Log           DiaryLog      `json:"log"`
-	TodayProgress DailyProgress `json:"today_progress"`
-}
+var (
+	ErrEntryNotFound = errors.New("diary entry not found")
+)
 
 type Service interface {
-	LogMeal(ctx context.Context, userID uuid.UUID, req LogMealRequest) (*LogMealResponse, error)
-	GetDailyProgress(ctx context.Context, userID uuid.UUID, logDate time.Time) (*DailyProgress, []DiaryLog, error)
+	GetDay(ctx context.Context, userID uuid.UUID, date string) (*DaySummaryResponse, error)
+	CreateEntry(ctx context.Context, userID uuid.UUID, date string, req CreateEntryRequest) (*DiaryEntryItem, map[string]*float64, error)
+	UpdateEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID, req UpdateEntryRequest) (*DiaryEntryItem, map[string]*float64, error)
+	DeleteEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) error
+	CopyYesterday(ctx context.Context, userID uuid.UUID, targetDate string, req CopyYesterdayRequest) (*CopyYesterdayResponse, error)
+	DeleteMeal(ctx context.Context, userID uuid.UUID, date string, mealSlot string) error
+	SetTraining(ctx context.Context, userID uuid.UUID, date string, minutes int) (*SetTrainingResponse, error)
 }
 
-type diaryService struct {
+type diaryServiceImpl struct {
 	repo Repository
 }
 
 func NewService(repo Repository) Service {
-	return &diaryService{repo: repo}
+	return &diaryServiceImpl{repo: repo}
 }
 
-func (s *diaryService) LogMeal(ctx context.Context, userID uuid.UUID, req LogMealRequest) (*LogMealResponse, error) {
-	if req.ID == uuid.Nil {
-		return nil, errors.New("client-generated log ID is required for idempotency")
-	}
-	if req.FoodID == uuid.Nil {
-		return nil, errors.New("food_id is required")
-	}
-	if req.MealSlot == "" {
-		req.MealSlot = "breakfast"
-	}
-	if req.Quantity <= 0 {
-		return nil, errors.New("quantity must be greater than zero")
-	}
-	if req.LogDate.IsZero() {
-		req.LogDate = time.Now().UTC().Truncate(24 * time.Hour)
+var mealSlotOrder = []struct {
+	slot   string
+	nameVi string
+}{
+	{"breakfast", "Bữa sáng"},
+	{"lunch", "Bữa trưa"},
+	{"dinner", "Bữa tối"},
+	{"snack", "Bữa phụ"},
+	{"pre_workout", "Trước tập"},
+}
+
+func round2(val float64) float64 {
+	return math.Round(val*100) / 100
+}
+
+func computeDayTotals(entries []DiaryEntryItem) map[string]*float64 {
+	totals := make(map[string]*float64)
+	hasValue := make(map[string]bool)
+
+	for _, entry := range entries {
+		// Energy / calories is always accounted
+		if entry.Calories > 0 {
+			if totals["calories"] == nil {
+				cal := 0.0
+				en := 0.0
+				totals["calories"] = &cal
+				totals["energy"] = &en
+			}
+			*totals["calories"] = round2(*totals["calories"] + entry.Calories)
+			*totals["energy"] = *totals["calories"]
+			hasValue["calories"] = true
+			hasValue["energy"] = true
+		}
+
+		if entry.Nutrients == nil {
+			continue
+		}
+
+		for k, v := range entry.Nutrients {
+			if k == "calories" || k == "energy" {
+				continue // already accounted via entry.Calories
+			}
+			if v != nil {
+				if totals[k] == nil {
+					val := 0.0
+					totals[k] = &val
+				}
+				*totals[k] = round2(*totals[k] + *v)
+				hasValue[k] = true
+			}
+		}
 	}
 
-	// 1. Fetch food item
-	food, err := s.repo.GetFoodByID(ctx, req.FoodID)
+	return totals
+}
+
+func (s *diaryServiceImpl) GetDay(ctx context.Context, userID uuid.UUID, date string) (*DaySummaryResponse, error) {
+	entries, err := s.repo.GetDayEntries(ctx, userID, date)
 	if err != nil {
-		return nil, fmt.Errorf("failed to retrieve food: %w", err)
+		return nil, err
 	}
 
-	// 2. Determine serving size in grams
-	servingSizeG := food.ServingSizeG
-	if req.ServingSizeG != nil && *req.ServingSizeG > 0 {
-		servingSizeG = *req.ServingSizeG
-	}
-	if servingSizeG <= 0 {
-		servingSizeG = 100.0
-	}
-
-	// 3. Calculate 26-nutrient formula:
-	// grams = quantity * serving_size_g
-	// nutrient_value = (per_100g_value * grams) / 100
-	grams := req.Quantity * servingSizeG
-	nutrientsSnapshot := food.Per100gNutrients.Scale(grams)
-
-	// 4. Create diary entry (Idempotent via ON CONFLICT (id) DO NOTHING)
-	entry := &DiaryLog{
-		ID:                req.ID,
-		UserID:            userID,
-		FoodID:            req.FoodID,
-		MealSlot:          req.MealSlot,
-		Quantity:          req.Quantity,
-		ServingSizeG:      servingSizeG,
-		NutrientsSnapshot: nutrientsSnapshot,
-		LogDate:           req.LogDate,
-	}
-
-	savedLog, err := s.repo.CreateLog(ctx, entry)
+	training, err := s.repo.GetDayTraining(ctx, userID, date)
 	if err != nil {
-		return nil, fmt.Errorf("failed to save diary log: %w", err)
+		return nil, err
+	}
+	if training < 0 {
+		training, err = s.repo.GetUserDefaultTraining(ctx, userID)
+		if err != nil {
+			training = 60
+		}
 	}
 
-	// 5. Compute today's total progress
-	progress, _, err := s.GetDailyProgress(ctx, userID, req.LogDate)
-	if err != nil {
-		return nil, fmt.Errorf("failed to compute today's progress: %w", err)
+	isReadOnly := date < GetServerToday()
+
+	// Organize entries by meal slot
+	meals := make([]MealSlotSummary, len(mealSlotOrder))
+	for i, slotDef := range mealSlotOrder {
+		meals[i] = MealSlotSummary{
+			Slot:      slotDef.slot,
+			NameVi:    slotDef.nameVi,
+			TotalKcal: 0,
+			Entries:   []DiaryEntryItem{},
+		}
 	}
 
-	return &LogMealResponse{
-		Log:           *savedLog,
-		TodayProgress: *progress,
+	for _, e := range entries {
+		for i := range meals {
+			if meals[i].Slot == e.MealSlot {
+				meals[i].Entries = append(meals[i].Entries, e)
+				meals[i].TotalKcal = round2(meals[i].TotalKcal + e.Calories)
+				break
+			}
+		}
+	}
+
+	dayTotals := computeDayTotals(entries)
+
+	return &DaySummaryResponse{
+		Date:            date,
+		TrainingMinutes: training,
+		IsReadOnly:      isReadOnly,
+		Summary:         dayTotals,
+		Meals:           meals,
 	}, nil
 }
 
-func (s *diaryService) GetDailyProgress(ctx context.Context, userID uuid.UUID, logDate time.Time) (*DailyProgress, []DiaryLog, error) {
-	logs, err := s.repo.GetLogsByUserAndDate(ctx, userID, logDate)
+func (s *diaryServiceImpl) CreateEntry(ctx context.Context, userID uuid.UUID, date string, req CreateEntryRequest) (*DiaryEntryItem, map[string]*float64, error) {
+	if err := ValidateDateWritable(date); err != nil {
+		return nil, nil, err
+	}
+
+	if req.ID == uuid.Nil {
+		req.ID = uuid.New()
+	}
+
+	if req.MealSlot == "" {
+		req.MealSlot = "breakfast"
+	}
+
+	item := &DiaryEntryItem{
+		ID:           req.ID,
+		Kind:         req.Kind,
+		MealSlot:     req.MealSlot,
+		ServingLabel: req.ServingLabel,
+		Grams:        req.Grams,
+		Calories:     req.Calories,
+	}
+
+	if req.Kind == "quick" {
+		item.FoodID = nil
+		item.FoodName = "Chỉ ghi kcal"
+		item.Nutrients = nil
+	} else {
+		if req.FoodID == nil {
+			return nil, nil, errors.New("food_id is required for food entry")
+		}
+		item.FoodID = req.FoodID
+		if req.Grams <= 0 {
+			req.Grams = 100
+			item.Grams = 100
+		}
+
+		foodName, per100g, err := s.repo.GetFoodNutrients(ctx, *req.FoodID)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to load food nutrients: %w", err)
+		}
+		item.FoodName = foodName
+
+		// Snapshot nutrients scaled to grams: per_100g * grams / 100
+		ratio := req.Grams / 100.0
+		scaledNutrients := make(map[string]*float64)
+		for k, v := range per100g {
+			if v != nil {
+				scaled := round2(*v * ratio)
+				scaledNutrients[k] = &scaled
+			} else {
+				scaledNutrients[k] = nil
+			}
+		}
+		item.Nutrients = scaledNutrients
+
+		if cal, ok := scaledNutrients["calories"]; ok && cal != nil {
+			item.Calories = *cal
+		} else if energy, ok := scaledNutrients["energy"]; ok && energy != nil {
+			item.Calories = *energy
+		}
+	}
+
+	saved, err := s.repo.CreateEntry(ctx, userID, date, item)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to get daily logs: %w", err)
+		return nil, nil, err
 	}
 
-	var totals NutrientValues
-	for _, l := range logs {
-		totals = totals.Add(l.NutrientsSnapshot)
-	}
-
-	targets, err := s.repo.GetUserTarget(ctx, userID, logDate)
+	dayEntries, err := s.repo.GetDayEntries(ctx, userID, date)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to get targets: %w", err)
+		return nil, nil, err
+	}
+	totals := computeDayTotals(dayEntries)
+
+	return saved, totals, nil
+}
+
+func (s *diaryServiceImpl) UpdateEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID, req UpdateEntryRequest) (*DiaryEntryItem, map[string]*float64, error) {
+	existing, date, err := s.repo.GetEntryByID(ctx, userID, entryID)
+	if err != nil {
+		return nil, nil, err
+	}
+	if existing == nil {
+		return nil, nil, ErrEntryNotFound
 	}
 
-	progress := &DailyProgress{
-		LogDate:        logDate.Format("2006-01-02"),
-		TotalNutrients: totals,
-		TargetNutrients: targets,
-		LogsCount:      len(logs),
+	if err := ValidateDateWritable(date); err != nil {
+		return nil, nil, err
 	}
 
-	if targets != nil {
-		percentages := make(map[string]float64)
-		if targets.Calories > 0 {
-			percentages["calories"] = round((totals.Calories / targets.Calories) * 100)
-		}
-		if targets.Protein > 0 {
-			percentages["protein"] = round((totals.Protein / targets.Protein) * 100)
-		}
-		if targets.Carbohydrates > 0 {
-			percentages["carbohydrates"] = round((totals.Carbohydrates / targets.Carbohydrates) * 100)
-		}
-		if targets.Fat > 0 {
-			percentages["fat"] = round((totals.Fat / targets.Fat) * 100)
-		}
-		if targets.Fiber > 0 {
-			percentages["fiber"] = round((totals.Fiber / targets.Fiber) * 100)
-		}
-		progress.CompletionPercentages = percentages
+	if req.MealSlot != nil {
+		existing.MealSlot = *req.MealSlot
+	}
+	if req.ServingLabel != nil {
+		existing.ServingLabel = *req.ServingLabel
 	}
 
-	return progress, logs, nil
+	if existing.Kind == "quick" {
+		if req.Calories != nil {
+			existing.Calories = *req.Calories
+		}
+	} else {
+		if req.Grams != nil && *req.Grams > 0 {
+			existing.Grams = *req.Grams
+			if existing.FoodID != nil {
+				_, per100g, err := s.repo.GetFoodNutrients(ctx, *existing.FoodID)
+				if err == nil {
+					ratio := *req.Grams / 100.0
+					scaledNutrients := make(map[string]*float64)
+					for k, v := range per100g {
+						if v != nil {
+							scaled := round2(*v * ratio)
+							scaledNutrients[k] = &scaled
+						} else {
+							scaledNutrients[k] = nil
+						}
+					}
+					existing.Nutrients = scaledNutrients
+					if cal, ok := scaledNutrients["calories"]; ok && cal != nil {
+						existing.Calories = *cal
+					}
+				}
+			}
+		}
+	}
+
+	updated, _, err := s.repo.UpdateEntry(ctx, userID, entryID, existing)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	dayEntries, err := s.repo.GetDayEntries(ctx, userID, date)
+	if err != nil {
+		return nil, nil, err
+	}
+	totals := computeDayTotals(dayEntries)
+
+	return updated, totals, nil
+}
+
+func (s *diaryServiceImpl) DeleteEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) error {
+	existing, date, err := s.repo.GetEntryByID(ctx, userID, entryID)
+	if err != nil {
+		return err
+	}
+	if existing == nil {
+		return ErrEntryNotFound
+	}
+
+	if err := ValidateDateWritable(date); err != nil {
+		return err
+	}
+
+	return s.repo.SoftDeleteEntry(ctx, userID, entryID)
+}
+
+func (s *diaryServiceImpl) CopyYesterday(ctx context.Context, userID uuid.UUID, targetDate string, req CopyYesterdayRequest) (*CopyYesterdayResponse, error) {
+	if err := ValidateDateWritable(targetDate); err != nil {
+		return nil, err
+	}
+
+	sourceEntries, err := s.repo.GetDayEntries(ctx, userID, req.SourceDate)
+	if err != nil {
+		return nil, err
+	}
+
+	allowedSlots := make(map[string]bool)
+	for _, sl := range req.MealSlots {
+		allowedSlots[sl] = true
+	}
+
+	var copied []DiaryEntryItem
+	for _, src := range sourceEntries {
+		if len(allowedSlots) > 0 && !allowedSlots[src.MealSlot] {
+			continue
+		}
+
+		newEntry := &DiaryEntryItem{
+			ID:           uuid.New(),
+			FoodID:       src.FoodID,
+			FoodName:     src.FoodName,
+			Kind:         src.Kind,
+			MealSlot:     src.MealSlot,
+			ServingLabel: src.ServingLabel,
+			Grams:        src.Grams,
+			Calories:     src.Calories,
+			Nutrients:    src.Nutrients,
+		}
+
+		saved, err := s.repo.CreateEntry(ctx, userID, targetDate, newEntry)
+		if err == nil {
+			copied = append(copied, *saved)
+		}
+	}
+
+	return &CopyYesterdayResponse{
+		CopiedCount: len(copied),
+		Entries:     copied,
+	}, nil
+}
+
+func (s *diaryServiceImpl) DeleteMeal(ctx context.Context, userID uuid.UUID, date string, mealSlot string) error {
+	if err := ValidateDateWritable(date); err != nil {
+		return err
+	}
+	return s.repo.DeleteMealEntries(ctx, userID, date, mealSlot)
+}
+
+func (s *diaryServiceImpl) SetTraining(ctx context.Context, userID uuid.UUID, date string, minutes int) (*SetTrainingResponse, error) {
+	if err := ValidateDateWritable(date); err != nil {
+		return nil, err
+	}
+	err := s.repo.UpsertDayTraining(ctx, userID, date, minutes)
+	if err != nil {
+		return nil, err
+	}
+	return &SetTrainingResponse{
+		Date:            date,
+		TrainingMinutes: minutes,
+	}, nil
 }

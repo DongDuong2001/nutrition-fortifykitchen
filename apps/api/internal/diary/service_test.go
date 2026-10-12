@@ -1,138 +1,175 @@
-package diary_test
+package diary
 
 import (
 	"context"
+	"errors"
 	"testing"
-	"time"
 
 	"github.com/google/uuid"
-	"nutrition-api/internal/diary"
 )
 
-type mockRepository struct {
-	food      *diary.Food
-	savedLogs map[uuid.UUID]*diary.DiaryLog
-	targets   *diary.NutrientValues
+type mockDiaryRepo struct {
+	entries  map[uuid.UUID]*DiaryEntryItem
+	training map[string]int
 }
 
-func (m *mockRepository) GetFoodByID(ctx context.Context, foodID uuid.UUID) (*diary.Food, error) {
-	return m.food, nil
-}
-
-func (m *mockRepository) CreateLog(ctx context.Context, log *diary.DiaryLog) (*diary.DiaryLog, error) {
-	if existing, ok := m.savedLogs[log.ID]; ok {
-		// Idempotent duplicate: return existing without double-adding
-		return existing, nil
+func newMockDiaryRepo() *mockDiaryRepo {
+	return &mockDiaryRepo{
+		entries:  make(map[uuid.UUID]*DiaryEntryItem),
+		training: make(map[string]int),
 	}
-	m.savedLogs[log.ID] = log
-	return log, nil
 }
 
-func (m *mockRepository) GetLogsByUserAndDate(ctx context.Context, userID uuid.UUID, logDate time.Time) ([]diary.DiaryLog, error) {
-	var list []diary.DiaryLog
-	for _, l := range m.savedLogs {
-		if l.UserID == userID {
-			list = append(list, *l)
-		}
+func (m *mockDiaryRepo) GetDayEntries(ctx context.Context, userID uuid.UUID, date string) ([]DiaryEntryItem, error) {
+	var list []DiaryEntryItem
+	for _, e := range m.entries {
+		list = append(list, *e)
 	}
 	return list, nil
 }
 
-func (m *mockRepository) GetUserTarget(ctx context.Context, userID uuid.UUID, targetDate time.Time) (*diary.NutrientValues, error) {
-	return m.targets, nil
+func (m *mockDiaryRepo) GetDayTraining(ctx context.Context, userID uuid.UUID, date string) (int, error) {
+	if val, ok := m.training[date]; ok {
+		return val, nil
+	}
+	return -1, nil
 }
 
-func TestNutrientScalingFormula(t *testing.T) {
-	per100g := diary.NutrientValues{
-		Calories:      165,
-		Protein:       31,
-		Fat:           3.6,
-		Carbohydrates: 0,
-		Fiber:         0,
-		Sodium:        74,
-		Potassium:     256,
-		Calcium:       15,
-		Iron:          1.0,
-		VitaminC:      0,
-	}
-
-	// 200 grams consumed (2.0 quantity * 100g serving size)
-	grams := 200.0
-	scaled := per100g.Scale(grams)
-
-	if scaled.Calories != 330 {
-		t.Errorf("Expected 330 calories, got %f", scaled.Calories)
-	}
-	if scaled.Protein != 62 {
-		t.Errorf("Expected 62g protein, got %f", scaled.Protein)
-	}
-	if scaled.Fat != 7.2 {
-		t.Errorf("Expected 7.2g fat, got %f", scaled.Fat)
-	}
-	if scaled.Sodium != 148 {
-		t.Errorf("Expected 148mg sodium, got %f", scaled.Sodium)
-	}
+func (m *mockDiaryRepo) GetUserDefaultTraining(ctx context.Context, userID uuid.UUID) (int, error) {
+	return 60, nil
 }
 
-func TestDiaryService_LogMeal_Idempotency(t *testing.T) {
-	foodID := uuid.New()
+func (m *mockDiaryRepo) GetFoodNutrients(ctx context.Context, foodID uuid.UUID) (string, map[string]*float64, error) {
+	cal := 380.0
+	pro := 13.0
+	ca := 60.0
+	return "Yến mạch", map[string]*float64{
+		"calories":  &cal,
+		"energy":    &cal,
+		"protein":   &pro,
+		"calcium":   &ca,
+		"potassium": nil, // unknown
+	}, nil
+}
+
+func (m *mockDiaryRepo) CreateEntry(ctx context.Context, userID uuid.UUID, date string, entry *DiaryEntryItem) (*DiaryEntryItem, error) {
+	m.entries[entry.ID] = entry
+	return entry, nil
+}
+
+func (m *mockDiaryRepo) GetEntryByID(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) (*DiaryEntryItem, string, error) {
+	if e, ok := m.entries[entryID]; ok {
+		return e, GetServerToday(), nil
+	}
+	return nil, "", nil
+}
+
+func (m *mockDiaryRepo) UpdateEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID, entry *DiaryEntryItem) (*DiaryEntryItem, string, error) {
+	m.entries[entryID] = entry
+	return entry, GetServerToday(), nil
+}
+
+func (m *mockDiaryRepo) SoftDeleteEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) error {
+	delete(m.entries, entryID)
+	return nil
+}
+
+func (m *mockDiaryRepo) DeleteMealEntries(ctx context.Context, userID uuid.UUID, date string, mealSlot string) error {
+	for id, e := range m.entries {
+		if e.MealSlot == mealSlot {
+			delete(m.entries, id)
+		}
+	}
+	return nil
+}
+
+func (m *mockDiaryRepo) UpsertDayTraining(ctx context.Context, userID uuid.UUID, date string, minutes int) error {
+	m.training[date] = minutes
+	return nil
+}
+
+func TestDiaryService_PastDayReadOnly(t *testing.T) {
+	repo := newMockDiaryRepo()
+	svc := NewService(repo)
+
 	userID := uuid.New()
-	clientID := uuid.New()
+	pastDate := "2020-01-01"
 
-	mockFood := &diary.Food{
-		ID:           foodID,
-		Name:         "Grilled Chicken Breast",
-		ServingSizeG: 100,
-		Per100gNutrients: diary.NutrientValues{
-			Calories: 165,
-			Protein:  31,
-			Fat:      3.6,
-		},
+	_, _, err := svc.CreateEntry(context.Background(), userID, pastDate, CreateEntryRequest{
+		Kind:     "quick",
+		Calories: 200,
+	})
+	if !errors.Is(err, ErrPastDayReadOnly) {
+		t.Fatalf("expected ErrPastDayReadOnly on past date write, got %v", err)
 	}
 
-	repo := &mockRepository{
-		food:      mockFood,
-		savedLogs: make(map[uuid.UUID]*diary.DiaryLog),
-		targets: &diary.NutrientValues{
-			Calories: 2000,
-			Protein:  150,
-		},
+	err = svc.DeleteMeal(context.Background(), userID, pastDate, "breakfast")
+	if !errors.Is(err, ErrPastDayReadOnly) {
+		t.Fatalf("expected ErrPastDayReadOnly on past date delete meal, got %v", err)
 	}
 
-	service := diary.NewService(repo)
-
-	req := diary.LogMealRequest{
-		ID:       clientID,
-		FoodID:   foodID,
-		MealSlot: "lunch",
-		Quantity: 1.5, // 150 grams
-		LogDate:  time.Now(),
+	_, err = svc.SetTraining(context.Background(), userID, pastDate, 90)
+	if !errors.Is(err, ErrPastDayReadOnly) {
+		t.Fatalf("expected ErrPastDayReadOnly on past date set training, got %v", err)
 	}
+}
 
-	// First call
-	res1, err := service.LogMeal(context.Background(), userID, req)
+func TestDiaryService_FoodAndQuickEntries_NullHandling(t *testing.T) {
+	repo := newMockDiaryRepo()
+	svc := NewService(repo)
+
+	userID := uuid.New()
+	today := GetServerToday()
+	foodID := uuid.New()
+
+	// 1. Log 50g of Yến mạch (380 kcal / 100g -> 190 kcal)
+	entry1, totals1, err := svc.CreateEntry(context.Background(), userID, today, CreateEntryRequest{
+		ID:           uuid.New(),
+		Kind:         "food",
+		FoodID:       &foodID,
+		MealSlot:     "breakfast",
+		Grams:        50,
+		ServingLabel: "50 g",
+	})
 	if err != nil {
-		t.Fatalf("First LogMeal call failed: %v", err)
+		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if res1.Log.NutrientsSnapshot.Calories != 247.5 {
-		t.Errorf("Expected 247.5 calories, got %f", res1.Log.NutrientsSnapshot.Calories)
+	if entry1.Calories != 190 {
+		t.Errorf("expected 190 kcal for 50g, got %f", entry1.Calories)
 	}
-	if res1.Log.NutrientsSnapshot.Protein != 46.5 {
-		t.Errorf("Expected 46.5 protein, got %f", res1.Log.NutrientsSnapshot.Protein)
+	if totals1["calories"] == nil || *totals1["calories"] != 190 {
+		t.Errorf("expected 190 kcal total, got %v", totals1["calories"])
+	}
+	// Potassium is nil in source, must remain nil in entry and day summary
+	if entry1.Nutrients["potassium"] != nil {
+		t.Errorf("expected nil potassium in entry, got %v", entry1.Nutrients["potassium"])
+	}
+	if totals1["potassium"] != nil {
+		t.Errorf("expected nil potassium in totals, got %v", totals1["potassium"])
 	}
 
-	// Duplicate call with exact same client-generated UUID
-	res2, err := service.LogMeal(context.Background(), userID, req)
+	// 2. Add quick entry 250 kcal
+	entry2, totals2, err := svc.CreateEntry(context.Background(), userID, today, CreateEntryRequest{
+		ID:       uuid.New(),
+		Kind:     "quick",
+		MealSlot: "snack",
+		Calories: 250,
+	})
 	if err != nil {
-		t.Fatalf("Second LogMeal call failed: %v", err)
+		t.Fatalf("unexpected error: %v", err)
 	}
 
-	// Verify idempotency: total calories and logs count should not be doubled
-	if res2.TodayProgress.LogsCount != 1 {
-		t.Errorf("Expected 1 log entry in today's progress, got %d", res2.TodayProgress.LogsCount)
+	if entry2.Nutrients != nil {
+		t.Errorf("quick entry nutrients should be nil, got %v", entry2.Nutrients)
 	}
-	if res2.TodayProgress.TotalNutrients.Calories != 247.5 {
-		t.Errorf("Expected 247.5 total calories, got %f", res2.TodayProgress.TotalNutrients.Calories)
+
+	// Total calories should now be 190 + 250 = 440
+	if totals2["calories"] == nil || *totals2["calories"] != 440 {
+		t.Errorf("expected 440 total kcal after quick entry, got %v", totals2["calories"])
+	}
+	// Potassium still nil (never coerced to 0)
+	if totals2["potassium"] != nil {
+		t.Errorf("expected nil potassium after quick entry, got %v", totals2["potassium"])
 	}
 }
