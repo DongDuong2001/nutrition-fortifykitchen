@@ -32,7 +32,7 @@ export function FormRow({
       <div className="flex justify-between items-baseline">
         <label htmlFor={htmlFor} className="text-xs font-bold text-text">
           {label}
-          {required && <span className="text-destructive ml-0.5">*</span>}
+          {required && <span className="text-destructive-text ml-0.5">*</span>}
         </label>
         {hint && <span className="text-xs text-secondary">{hint}</span>}
       </div>
