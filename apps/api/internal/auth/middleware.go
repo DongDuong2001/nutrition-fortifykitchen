@@ -52,13 +52,13 @@ func (m *Middleware) Authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
-			response.Error(w, http.StatusUnauthorized, "missing authorization header")
+			response.Error(w, http.StatusUnauthorized, response.CodeUnauthorized, "missing authorization header")
 			return
 		}
 
 		parts := strings.SplitN(authHeader, " ", 2)
 		if len(parts) != 2 || !strings.EqualFold(parts[0], "Bearer") {
-			response.Error(w, http.StatusUnauthorized, "invalid authorization header format, expected 'Bearer <token>'")
+			response.Error(w, http.StatusUnauthorized, response.CodeUnauthorized, "invalid authorization header format, expected 'Bearer <token>'")
 			return
 		}
 
@@ -83,13 +83,13 @@ func (m *Middleware) Authenticate(next http.Handler) http.Handler {
 		}
 
 		if err != nil || token == nil || claims.Sub == "" {
-			response.Error(w, http.StatusUnauthorized, "invalid or expired token")
+			response.Error(w, http.StatusUnauthorized, response.CodeUnauthorized, "invalid or expired token")
 			return
 		}
 
 		parsedUserID, err := uuid.Parse(claims.Sub)
 		if err != nil {
-			response.Error(w, http.StatusUnauthorized, "invalid user id in token claims")
+			response.Error(w, http.StatusUnauthorized, response.CodeUnauthorized, "invalid user id in token claims")
 			return
 		}
 
@@ -111,13 +111,13 @@ func (m *Middleware) RequireAdmin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		claims, ok := r.Context().Value(ClaimsKey).(*SupabaseClaims)
 		if !ok || claims == nil {
-			response.Error(w, http.StatusUnauthorized, "unauthorized")
+			response.Error(w, http.StatusUnauthorized, response.CodeUnauthorized, "unauthorized")
 			return
 		}
 
 		role, hasRole := claims.AppMetadata["role"].(string)
 		if !hasRole || role != "admin" {
-			response.Error(w, http.StatusForbidden, "forbidden: administrator role required (app_metadata.role must be admin)")
+			response.Error(w, http.StatusForbidden, response.CodeForbidden, "forbidden: administrator role required (app_metadata.role must be admin)")
 			return
 		}
 
