@@ -117,14 +117,15 @@ function TrainingContent() {
     [trainingMinutes]
   );
 
-  // Formatted date labels
+  // Formatted date labels. Empty until the clock is read after mount, so no date is shown before the real one
+  // and the server and first client render agree.
   const mobileSubtitle = useMemo(() => {
-    if (!clientNow) return "Hôm nay 10/10";
+    if (!clientNow) return "";
     return formatDayLabel(todayIso, clientNow);
   }, [todayIso, clientNow]);
 
   const desktopSubtitle = useMemo(() => {
-    if (!clientNow) return "Thứ Bảy, 10/10/2026 · Giữ cân · 65 kg";
+    if (!clientNow) return "";
     return `${formatDesktopDate(todayIso)} · Giữ cân · 65 kg`;
   }, [todayIso, clientNow]);
 
