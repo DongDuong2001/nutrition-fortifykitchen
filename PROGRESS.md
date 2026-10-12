@@ -6,6 +6,7 @@
 
 | Date | Commit | Built | Next |
 | --- | --- | --- | --- |
+| 12/10/2026 | cc2-04 | Sweep of app and components. bg-white is bg-card (same #FFFFFF) in 16 files. Dial numbers use formatNumber. Profile values are no longer fixed: the training and micros desktop subtitles read the profile's goal and weight (sample: Giữ cân · 65 kg); Today's desktop salt card, the Mẹo line and the salt summary read calculateSaltTarget for the day's minutes; Kali mục tiêu reads targets.potassium. The fallback "Thứ Bảy, 10/10/2026" is gone. Text is unchanged for the sample profile. Probe cc2_04.py (25 checks). Design calls in OPEN_QUESTIONS (cc2-04). | Queue complete. Waiting for Hao's answers in OPEN_QUESTIONS (cc2-04, cc-14b done, cc2-02 /add heading) |
 | 12/10/2026 | cc2-03 | Audit items in docs/audit-ag04.md done (rows marked): Profile "Đăng xuất", "Vùng nguy hiểm" and "Xoá tài khoản" use text-destructive-text; CalorieDial track uses muted-on-dark (already 5.96:1 on ink, so no new token); AppHeader date button is aria-busy="true" until its label resolves. Probe tests/probes/cc2_03.py (14 checks). | Task 4 (cc2-04 sweep) |
 | 12/10/2026 | cc2-02 | ag-06 merged (6 commits rebased onto feat/ui; audit status table and PROGRESS rows kept). One visible h1 per page at 390 and 1440: the Today empty state hides its sr-only h1 at 1024 px and up (the daily header has one there), the Today loading skeleton gets a desktop h1, and the /add phone sheet has a sr-only h1 "Thêm món" (OPEN_QUESTIONS cc2-02). Profile reminders row is empty until mounted, then Đã bật / Đã tắt. ag06.py checks the h1 rule on 15 routes plus the Today states. Remote branches feat/ui-ag-06 and feat/ui-cc-10 deleted after the merge. | Task 3 (cc2-03 audit items) |
 | 12/10/2026 | cc2-01 finish | Rebased onto feat/ui 8cf2c92. Nutrient detail uses targetRangeText (targetLabel removed, tests moved). Detail header rows and both cards carry data-align-group (nutrient-header, nutrient-card), with alignment rows at 390 and 1440 for /micros/calcium. Detail skeleton is motion-safe. Training loading subtitle is empty, not 10/10. Lane rules in AGENTS.md and CLAUDE.md: each Claude Code works in its own clone. Smoke: setup goal and profile exempt from the header at 1024 px and up (cc-14b decided 12/10); /foods judged on /add. Gate summary below. | Task 2 (cc2-02, ag-06 merge) |
@@ -102,6 +103,13 @@ Smoke on prod :3101 (`npm run probe:all`): 35 PASS, 21 FAIL of 56 route × width
 - Probes: cc02-final, cc03, cc04, cc05, cc06: no problems.
 - Edges: training-content (phase-checklist, rest-day-card) and training-summary (salt-summary-card, sodium-progress-card) are not in tests/alignment.py, so not checked by the gate.
 
+
+## Quality Gate Summary (cc2-04)
+- Branch feat/ui-cc2-04 from feat/ui 7271002. Port 3102, prod build. Merged with --ff-only into feat/ui.
+- Gates on prod :3102, each step as its own command: `npm run typecheck` ok; `npm run test` 268 pass in 23 files; `npm run build` ok; `npm run test:align` all pairs pass (≤ 1 px); `npm run test:hydration` 0 errors; `npm run probe:all` 19 PASS, 2 REPORT (ag04_audit, screenshots), 0 FAIL, 1 SKIP (cc02-final, dev only). Smoke 54 of 54 PASS.
+- cc2_04.py: 25 of 25 checks. No bg-white on /today, /micros, /add, /foods/new, /settings/notifications, /paywall, /profile at 390 and 1440. Training and micros subtitles show Giữ cân · 65 kg from the profile, and no 10/10/2026. Today desktop shows 7–10,5 g, 4–6 g, 3–4,5 g and 5.200–6.500 mg from the calculators, and the dial label reads 1.041 (vi format).
+- Sweep results. Raw hex: none in components except the Google logo colours (brand, kept); in app only admin/review, dev/ui and login (Dong's, not edited). font-mono: only login and admin/review. English number formats in UI copy: none found (the one toLocaleString is vi-VN, now formatNumber). text-white on ink, blue and surface-dark is kept (no on-dark token yet). All of these are in OPEN_QUESTIONS (cc2-04).
+- Note: a few values in the Today and micros desktop copy were fixed numbers that duplicated the calculators. They now come from the calculators and the profile, which gives the same text for the sample user.
 
 ## Quality Gate Summary (cc2-03)
 - Branch feat/ui-cc2-03 from feat/ui 814b3c1. Port 3102, prod build. Merged with --ff-only into feat/ui.
