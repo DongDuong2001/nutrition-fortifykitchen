@@ -210,7 +210,7 @@ function AddFoodInner() {
             aria-modal="true"
             aria-labelledby="dlg-title"
             onClick={(e) => e.stopPropagation()}
-            className="w-[min(900px,100%-32px)] bg-card border border-card-border rounded-2xl p-6 shadow-2xl flex flex-col gap-4 max-h-[92vh] overflow-y-auto"
+            className="w-[min(900px,100%-32px)] bg-card border border-card-border rounded-[18px] p-6 shadow-2xl flex flex-col gap-4 max-h-[92vh] overflow-y-auto"
           >
             {/* Dialog Header */}
             <div className="flex items-start justify-between gap-4">
@@ -322,7 +322,7 @@ function AddFoodInner() {
           role="dialog"
           aria-label={`Thêm món vào ${mealNameVi}`}
           data-align-container="add-list"
-          className="absolute inset-x-0 top-14 bottom-0 bg-card rounded-t-[20px] p-4 flex flex-col gap-3.5 shadow-xl min-h-[calc(100vh-56px)]"
+          className="absolute inset-x-0 top-14 bottom-0 bg-card rounded-t-[20px] p-4 flex flex-col gap-4 shadow-xl min-h-[calc(100vh-56px)]"
         >
           {/* Top Grabber */}
           <div aria-hidden="true" className="w-10 h-1 rounded-full bg-grabber self-center shrink-0" />

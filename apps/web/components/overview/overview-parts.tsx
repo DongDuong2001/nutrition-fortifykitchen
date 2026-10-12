@@ -22,7 +22,7 @@ export function OverviewCard({
   return (
     <section
       aria-labelledby={id}
-      className={`bg-card border border-card-border rounded-2xl p-4 flex flex-col gap-3 text-text ${className}`}
+      className={`bg-card border border-card-border rounded-[18px] p-4 flex flex-col gap-3 text-text ${className}`}
     >
       <div className="flex min-h-[44px] items-center justify-between gap-3">
         <h2 id={id} className="m-0 text-base font-bold lg:text-lg">
@@ -51,7 +51,7 @@ export function NotEnoughData() {
   const { overview } = useOverview();
   const days = overview.averages.loggedDays;
   return (
-    <section aria-labelledby="ov-empty" className="bg-card border border-card-border rounded-2xl p-4 flex flex-col gap-3 text-text">
+    <section aria-labelledby="ov-empty" className="bg-card border border-card-border rounded-[18px] p-4 flex flex-col gap-3 text-text">
       <h2 id="ov-empty" className="m-0 text-base font-bold lg:text-lg">
         Chưa đủ dữ liệu
       </h2>

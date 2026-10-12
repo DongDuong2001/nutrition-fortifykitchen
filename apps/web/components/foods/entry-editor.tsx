@@ -50,13 +50,13 @@ export function EntryEditor({ view }: { view: EntryView }) {
         backHref="/diary"
       />
       <div className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-8 pt-4">
-        <section className="flex flex-col gap-4 rounded-2xl border border-card-border bg-card p-4">
+        <section className="flex flex-col gap-4 rounded-[18px] border border-card-border bg-card p-4">
           {/* Portion: gram field and the food's serving chips */}
           <div data-align-group="entry" className="flex w-full flex-col gap-2">
             <span className="text-sm font-bold">Khối lượng</span>
             <div className="flex w-full items-stretch gap-2">
               <span
-                className={`flex h-12 w-[104px] shrink-0 items-center gap-1.5 rounded-[10px] border-2 px-3 focus-within:ring-2 focus-within:ring-blue ${
+                className={`flex h-12 w-[104px] shrink-0 items-center gap-1.5 rounded-xl border-2 px-3 focus-within:ring-2 focus-within:ring-blue ${
                   canPortion ? "border-blue bg-card" : "border-card-border bg-page"
                 }`}
               >
@@ -87,7 +87,7 @@ export function EntryEditor({ view }: { view: EntryView }) {
                         setGramsInput(String(s.grams));
                         setServingLabel(s.label);
                       }}
-                      className={`h-12 min-w-0 flex-1 cursor-pointer rounded-[10px] border-0 px-2 text-sm font-semibold transition-transform active:scale-[0.97] disabled:opacity-60 ${
+                      className={`h-12 min-w-0 flex-1 cursor-pointer rounded-xl border-0 px-2 text-sm font-semibold transition-transform active:scale-[0.97] disabled:opacity-60 ${
                         active ? "bg-ink text-on-dark font-bold" : "bg-page text-text"
                       }`}
                     >
@@ -124,7 +124,7 @@ export function EntryEditor({ view }: { view: EntryView }) {
           </div>
 
           {/* Actions */}
-          <div data-align-group="entry" className="flex w-full flex-col gap-2.5">
+          <div data-align-group="entry" className="flex w-full flex-col gap-3">
             <button
               type="button"
               onClick={handleSave}
@@ -136,7 +136,7 @@ export function EntryEditor({ view }: { view: EntryView }) {
             <button
               type="button"
               onClick={handleDelete}
-              className="flex min-h-[48px] w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] border-0 bg-transparent text-[15px] font-bold text-red transition-transform active:scale-[0.98]"
+              className="flex min-h-[48px] w-full cursor-pointer items-center justify-center gap-2 rounded-xl border-0 bg-transparent text-[15px] font-bold text-red transition-transform active:scale-[0.98]"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" />

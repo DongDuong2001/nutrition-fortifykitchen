@@ -59,7 +59,7 @@ export function SodiumProgressCard({
           aria-label={`Natri ${currentFormatted} trên mục tiêu ${targetLabel}${
             isAchieved ? ", đã đạt" : ""
           }`}
-          className="grid grid-cols-10 gap-[3px] mt-2.5"
+          className="grid grid-cols-10 gap-[3px] mt-3"
         >
           {Array.from({ length: 10 }).map((_, idx) => (
             <span

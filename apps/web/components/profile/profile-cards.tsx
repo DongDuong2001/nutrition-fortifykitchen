@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { ChipGroup } from "@/components/ui/chip-group";
 import { FormRow } from "@/components/ui/form-row";
 import { Row } from "@/components/ui/row";
+import { SectionTitle } from "@/components/ui/section-title";
 import { Switch } from "@/components/ui/switch";
 import { useDiary } from "@/lib/diary-store";
 import { formatNumber } from "@/lib/format";
@@ -22,10 +23,6 @@ const SEX_OPTIONS: { value: SexType; label: string }[] = [
 
 // The same options as /training. Minutes are what the profile stores; 0 is a rest day.
 const TRAINING_OPTIONS = getTrainingDurations();
-
-function SectionTitle({ children }: { children: ReactNode }) {
-  return <h2 className="m-0 text-xs font-bold uppercase tracking-wider text-secondary">{children}</h2>;
-}
 
 // Each row sits in one card. Rows share left and right edges (see the alignment check).
 function RowGroup({ children }: { children: ReactNode }) {
@@ -86,7 +83,7 @@ function BirthYearField() {
             if (e.key === "Enter") e.currentTarget.blur();
           }}
           aria-invalid={error ? true : undefined}
-          className={`h-[52px] w-full rounded-[10px] border-2 bg-card px-4 text-base font-semibold tabular-nums text-text outline-none focus:border-blue ${
+          className={`h-[52px] w-full rounded-xl border-2 bg-card px-4 text-base font-semibold tabular-nums text-text outline-none focus:border-blue ${
             error ? "border-destructive" : "border-grabber"
           }`}
         />
@@ -200,7 +197,7 @@ export function TargetsCard() {
       <SectionTitle>Mục tiêu mỗi ngày</SectionTitle>
       {rows.map((row) => (
         <RowGroup key={row.label}>
-          <div className="flex items-baseline justify-between gap-3 border-t border-divider py-2.5 text-[15px]">
+          <div className="flex items-baseline justify-between gap-3 border-t border-divider py-3 text-[15px]">
             <span className="text-secondary">{row.label}</span>
             <span className="font-semibold tabular-nums">{row.value}</span>
           </div>
@@ -277,7 +274,7 @@ export function AccountCard() {
         </RowGroup>
       </Card>
       <Card as="section" aria-labelledby="profile-danger-title" className="flex flex-col gap-1">
-        <h2 id="profile-danger-title" className="m-0 text-xs font-bold uppercase tracking-wider text-destructive-text">
+        <h2 id="profile-danger-title" className="m-0 text-base font-bold text-destructive-text">
           Vùng nguy hiểm
         </h2>
         <RowGroup>

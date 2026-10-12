@@ -41,7 +41,7 @@ export function ChipGroup({
   const colCountLg = columnsLg || colCount;
 
   const sizeClass =
-    size === "lg" ? "h-[52px] rounded-[10px] text-base" : "min-h-[44px] rounded-xl text-xs";
+    size === "lg" ? "h-[52px] rounded-full text-base" : "min-h-[44px] rounded-full text-xs";
 
   return (
     <div
@@ -62,12 +62,12 @@ export function ChipGroup({
           tone === "dark"
             ? isActive
               ? "bg-card text-ink font-bold shadow-xs"
-              : "bg-surface-dark text-on-dark font-medium hover:bg-surface-dark/80"
+              : "border border-track-on-dark bg-transparent text-on-dark font-medium hover:bg-surface-dark"
             : isActive
             ? "bg-ink text-on-dark font-bold shadow-xs"
             : `bg-card text-text ${inactiveBorder} font-medium hover:bg-page`;
         // md keeps border-0 on every chip, as shipped in ui-05-fix. lg draws the inactive border.
-        const noBorder = size === "md" || isActive || tone === "dark" ? "border-0" : "";
+        const noBorder = size === "md" || isActive ? "border-0" : "";
 
         return (
           <button

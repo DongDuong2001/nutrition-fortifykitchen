@@ -51,7 +51,7 @@ export function SaltSummaryCard({
     <div
       data-align-group="training-summary"
       data-align-edge="left"
-      className={`bg-ink text-on-dark rounded-2xl p-6 flex flex-col justify-between gap-3 ${className}`}
+      className={`bg-ink text-on-dark rounded-[18px] p-6 flex flex-col justify-between gap-3 ${className}`}
     >
       <div className="text-sm text-muted-on-dark">
         {isRestDay ? "Muối hôm nay" : "Muối cần hôm nay"}

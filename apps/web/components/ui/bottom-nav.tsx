@@ -62,7 +62,7 @@ export function BottomNav({ currentTab, className = "" }: BottomNavProps) {
             href="/add"
             onClick={() => rememberAddOpener("mobile-add-fab")}
             aria-label="Thêm món"
-            className="w-[50px] h-[50px] rounded-[14px] bg-blue text-on-accent flex items-center justify-center no-underline shadow-md active:scale-[0.97] motion-reduce:active:scale-100 transition-transform"
+            className="w-[50px] h-[50px] rounded-full bg-blue text-on-accent flex items-center justify-center no-underline shadow-md active:scale-[0.97] motion-reduce:active:scale-100 transition-transform"
           >
             <PlusIcon />
           </Link>

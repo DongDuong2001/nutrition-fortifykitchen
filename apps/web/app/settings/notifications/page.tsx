@@ -119,10 +119,10 @@ export default function NotificationsSettingsPage() {
         alignGroup="settings-header"
       />
 
-      <main className="flex-1 w-full max-w-[560px] mx-auto px-4 pt-3 pb-8 flex flex-col gap-2.5">
+      <main className="flex-1 w-full max-w-[560px] mx-auto px-4 pt-4 pb-8 flex flex-col gap-3">
         {/* Permission card */}
         <div className="bg-card border border-card-border rounded-[18px] p-3 md:p-4 flex flex-col gap-2">
-          <div className="flex gap-2.5 items-start">
+          <div className="flex gap-3 items-start">
             <svg
               width="22"
               height="22"
@@ -197,7 +197,7 @@ export default function NotificationsSettingsPage() {
                     />
                     <span
                       aria-hidden="true"
-                      className="flex items-center justify-center h-11 min-w-[64px] px-3 rounded-[22px] border border-black/12 bg-card text-ink text-sm font-semibold tabular-nums hover:bg-surface-tint active:scale-[0.97] transition-transform select-none"
+                      className="flex items-center justify-center h-11 min-w-[64px] px-3 rounded-full border border-black/12 bg-card text-ink text-sm font-semibold tabular-nums hover:bg-surface-tint active:scale-[0.97] transition-transform select-none"
                     >
                       {timeVal}
                     </span>

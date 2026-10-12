@@ -87,7 +87,7 @@ export function PortionPanel({
   return (
     <div
       data-align-container="portion-panel"
-      className={`rounded-2xl p-4 flex flex-col gap-3 transition-colors ${
+      className={`rounded-[18px] p-4 flex flex-col gap-3 transition-colors ${
         isDark
           ? "bg-ink text-on-dark shadow-lg"
           : "bg-page text-text border border-card-border"

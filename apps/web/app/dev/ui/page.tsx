@@ -24,7 +24,7 @@ export default function DevUiPage() {
       {/* AppHeader Showcases: Daily, Sub, Tab */}
       <div className="flex flex-col gap-6 w-full mb-6">
         <section className="flex flex-col gap-2">
-          <div className="text-xs font-bold text-secondary uppercase tracking-wider px-4">
+          <div className="text-xs font-bold text-secondary px-4">
             1. AppHeader — Variant "daily" (Today / Vi chất)
           </div>
           <AppHeader
@@ -34,7 +34,7 @@ export default function DevUiPage() {
             subtitle="Thứ Bảy, 10/10/2026 · Ngày tập 60′ · Giữ cân · 65 kg"
             canGoNext={false}
             summary={
-              <div className="bg-[#181B20] border border-white/10 rounded-2xl p-4 text-white text-sm">
+              <div className="bg-[#181B20] border border-white/10 rounded-[18px] p-4 text-white text-sm">
                 Panel tóm tắt (Kcal / Đạm / Béo / Tinh bột)
               </div>
             }
@@ -42,7 +42,7 @@ export default function DevUiPage() {
         </section>
 
         <section className="flex flex-col gap-2">
-          <div className="text-xs font-bold text-secondary uppercase tracking-wider px-4">
+          <div className="text-xs font-bold text-secondary px-4">
             2. AppHeader — Variant "sub" (Sub-screens / Chi tiết vi chất)
           </div>
           <AppHeader
@@ -54,7 +54,7 @@ export default function DevUiPage() {
         </section>
 
         <section className="flex flex-col gap-2">
-          <div className="text-xs font-bold text-secondary uppercase tracking-wider px-4">
+          <div className="text-xs font-bold text-secondary px-4">
             2b. AppHeader — Variant "sub" with progress (setup step 1 of 2)
           </div>
           <AppHeader
@@ -67,7 +67,7 @@ export default function DevUiPage() {
         </section>
 
         <section className="flex flex-col gap-2">
-          <div className="text-xs font-bold text-secondary uppercase tracking-wider px-4">
+          <div className="text-xs font-bold text-secondary px-4">
             3. AppHeader — Variant "tab" (Hồ sơ / Ngày tập)
           </div>
           <AppHeader
@@ -82,7 +82,7 @@ export default function DevUiPage() {
 
         {/* Section: SegmentedBar */}
         <section className="flex flex-col gap-3">
-          <div className="text-xs font-bold text-secondary uppercase tracking-wider">
+          <div className="text-xs font-bold text-secondary">
             SegmentedBar (10 vạch — 4 cấp độ)
           </div>
 
@@ -146,8 +146,8 @@ export default function DevUiPage() {
         </section>
 
         {/* Section: PillButtons (52px) */}
-        <section className="flex flex-col gap-2.5">
-          <div className="text-xs font-bold text-secondary uppercase tracking-wider">
+        <section className="flex flex-col gap-3">
+          <div className="text-xs font-bold text-secondary">
             PillButton (52px CTA)
           </div>
           <PillButton variant="primary">Tiếp tục (Primary)</PillButton>
@@ -157,7 +157,7 @@ export default function DevUiPage() {
 
         {/* Section: Chips (44px) */}
         <section className="flex flex-col gap-2">
-          <div className="text-xs font-bold text-secondary uppercase tracking-wider">
+          <div className="text-xs font-bold text-secondary">
             Chip (44px tap targets)
           </div>
           <div className="flex gap-2 flex-wrap">
@@ -184,7 +184,7 @@ export default function DevUiPage() {
 
         {/* Section: Row & Card & Switch */}
         <section className="flex flex-col gap-2">
-          <div className="text-xs font-bold text-secondary uppercase tracking-wider">
+          <div className="text-xs font-bold text-secondary">
             Card, Row & Switch
           </div>
           <Card className="p-2 px-4">
@@ -227,7 +227,7 @@ export default function DevUiPage() {
 
         {/* Section: Sheet Trigger */}
         <section className="flex flex-col gap-2">
-          <div className="text-xs font-bold text-secondary uppercase tracking-wider">
+          <div className="text-xs font-bold text-secondary">
             Sheet (Bottom Sheet dialog)
           </div>
           <PillButton variant="secondary" onClick={() => setIsSheetOpen(true)}>
@@ -271,7 +271,7 @@ export default function DevUiPage() {
 
         {/* Section: Toasts */}
         <section className="flex flex-col gap-3">
-          <div className="text-xs font-bold text-secondary uppercase tracking-wider">
+          <div className="text-xs font-bold text-secondary">
             Toast (role="status")
           </div>
           <Toast

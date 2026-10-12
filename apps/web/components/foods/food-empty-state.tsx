@@ -73,7 +73,7 @@ export function FoodEmptyState({
               key={s.id}
               type="button"
               onClick={() => onPickSimilar(s)}
-              className="text-left py-2.5 px-3 rounded-xl hover:bg-page text-sm font-semibold text-text border-0 bg-card cursor-pointer flex justify-between items-center min-h-[48px]"
+              className="text-left py-3 px-3 rounded-xl hover:bg-page text-sm font-semibold text-text border-0 bg-card cursor-pointer flex justify-between items-center min-h-[48px]"
             >
               <span>{s.nameVi}</span>
               <span className="text-xs text-secondary font-normal">{getMeta(s)}</span>

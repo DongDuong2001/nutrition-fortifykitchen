@@ -37,7 +37,7 @@ export default function LanguageSettingsPage() {
         alignGroup="settings-header"
       />
 
-      <main className="flex-1 w-full max-w-[560px] mx-auto px-4 pt-3 pb-8 flex flex-col gap-2.5">
+      <main className="flex-1 w-full max-w-[560px] mx-auto px-4 pt-4 pb-8 flex flex-col gap-3">
         {/* Section 1: Ngôn ngữ */}
         <section className="bg-card border border-card-border rounded-[18px] px-4 pt-2 pb-0.5">
           <h2 id="lg-label" className="m-0 mb-0.5 text-[13px] font-semibold text-secondary">

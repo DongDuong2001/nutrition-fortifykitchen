@@ -116,7 +116,7 @@ export function Sheet({
         tabIndex={-1}
         aria-modal="true"
         aria-labelledby={title ? titleId : undefined}
-        className={`relative z-10 w-full max-w-[390px] mx-auto bg-card rounded-t-[20px] px-4 pt-2.5 pb-6 flex flex-col gap-2 shadow-2xl transition-transform duration-200 outline-none ${desktopDialog ? "lg:w-[420px] lg:max-w-[420px] lg:rounded-[20px] lg:px-6 lg:pt-6" : ""} ${className}`}
+        className={`relative z-10 w-full max-w-[390px] mx-auto bg-card rounded-t-[20px] px-4 pt-3 pb-6 flex flex-col gap-2 shadow-2xl transition-transform duration-200 outline-none ${desktopDialog ? "lg:w-[420px] lg:max-w-[420px] lg:rounded-[20px] lg:px-6 lg:pt-6" : ""} ${className}`}
       >
         {/* Grabber */}
         <div

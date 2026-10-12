@@ -28,7 +28,7 @@ function EntryContent() {
       <div className="min-h-screen bg-page" aria-busy="true">
         <div aria-hidden="true" className="mx-auto mt-3 flex w-full max-w-[480px] flex-col gap-4 px-4">
           <div className="h-11 w-11 rounded-full bg-divider" />
-          <div className="h-80 rounded-2xl bg-card" />
+          <div className="h-80 rounded-[18px] bg-card" />
         </div>
       </div>
     );
@@ -41,7 +41,7 @@ function EntryContent() {
         <div className="mx-auto flex w-full max-w-[480px] flex-col items-center gap-3 px-4 pt-16 text-center">
           <p className="m-0 text-base font-bold">Không tìm thấy món này</p>
           <Link href="/diary" className="min-h-[44px] content-center text-base font-bold text-blue no-underline">
-            Về Hôm nay
+            Về Tổng quan
           </Link>
         </div>
       </div>

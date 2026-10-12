@@ -3,6 +3,7 @@
 import React, { Suspense, createContext, useContext, useMemo } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { AppHeader } from "@/components/ui/app-header";
 import { AppShell } from "@/components/ui/app-shell";
 import { useDiary } from "@/lib/diary-store";
 import type { MockDayData } from "@/lib/mock/sample-day";
@@ -51,7 +52,7 @@ function ContentSkeleton() {
     <div role="status" aria-busy="true" className="flex flex-col gap-3">
       <span className="sr-only">Đang tải…</span>
       {[0, 1, 2].map((i) => (
-        <div key={i} className="bg-card border border-card-border rounded-2xl p-4 flex flex-col gap-3 motion-safe:animate-pulse">
+        <div key={i} className="bg-card border border-card-border rounded-[18px] p-4 flex flex-col gap-3 motion-safe:animate-pulse">
           <div className="h-3 w-2/5 rounded bg-level-empty" />
           <div className="h-3 w-[70%] rounded bg-level-empty" />
           <div className="h-3 w-[55%] rounded bg-level-empty" />
@@ -107,46 +108,39 @@ function FrameInner({ active, children }: { active: OverviewTab; children: React
 
   return (
     <AppShell alignContainer="overview-page">
-      {/* Phone: the ink band carries the wordmark; the screen's name is the sr-only h1 (IA v2 Headers) */}
-      <header className="w-full flex-none bg-ink text-on-dark select-none lg:hidden">
-        <div className="mx-auto flex min-h-[44px] w-full max-w-[560px] items-center px-4 pt-3 pb-4 box-border">
-          <div aria-hidden="true" className="font-display italic font-black text-xl uppercase tracking-tight">
-            H1T <span className="text-sky">MICRO</span>
-          </div>
-          <h1 className="sr-only">Tổng quan</h1>
-        </div>
-      </header>
-
-      {/* Title row (desktop) and sub-tab bar. One nav: under the band on a phone, in the title row on desktop. */}
-      <div className="flex w-full flex-col bg-page lg:max-w-[1240px] lg:flex-row lg:items-end lg:justify-between lg:gap-4 lg:px-8 lg:pt-8 box-border">
-        <h1 className="m-0 hidden font-display italic font-extrabold text-[32px] leading-tight uppercase tracking-tight text-text lg:block">
-          Tổng quan
-        </h1>
-        <nav
-          role="tablist"
-          aria-label="Tổng quan"
-          className="mx-auto flex w-full max-w-[560px] overflow-x-auto border-b border-divider [scrollbar-width:none] lg:mx-0 lg:w-auto lg:max-w-none lg:border-b-0"
-        >
-          {TABS.map((tab) => {
-            const isActive = tab.id === active;
-            return (
-              <Link
-                key={tab.id}
-                role="tab"
-                href={`${tab.href}${query}`}
-                aria-selected={isActive}
-                aria-current={isActive ? "page" : undefined}
-                className={`relative inline-flex min-h-[44px] flex-1 shrink-0 items-center justify-center whitespace-nowrap px-2 text-sm font-bold no-underline transition-colors active:scale-[0.97] motion-reduce:active:scale-100 lg:flex-none lg:px-3.5 lg:text-base ${
-                  isActive ? "text-text" : "text-secondary hover:text-text"
-                }`}
-              >
-                {tab.label}
-                {isActive && <span aria-hidden="true" className="absolute inset-x-2 bottom-[-1px] h-[3px] bg-blue lg:bottom-0" />}
-              </Link>
-            );
-          })}
-        </nav>
-      </div>
+      <AppHeader
+        variant="tab"
+        layout="wide"
+        wordmark
+        title="Tổng quan"
+        alignGroup="overview-header"
+        tabs={
+          <nav
+            role="tablist"
+            aria-label="Tổng quan"
+            className="flex w-full overflow-x-auto border-b border-surface-dark [scrollbar-width:none] lg:w-auto lg:self-start lg:border-divider"
+          >
+            {TABS.map((tab) => {
+              const isActive = tab.id === active;
+              return (
+                <Link
+                  key={tab.id}
+                  role="tab"
+                  href={`${tab.href}${query}`}
+                  aria-selected={isActive}
+                  aria-current={isActive ? "page" : undefined}
+                  className={`relative inline-flex min-h-[44px] flex-1 shrink-0 items-center justify-center whitespace-nowrap px-2 text-[15px] font-bold no-underline transition-colors active:scale-[0.97] motion-reduce:active:scale-100 lg:flex-none lg:px-4 focus-visible:outline-sky lg:focus-visible:outline-blue ${
+                    isActive ? "text-on-dark lg:text-text" : "text-muted-on-dark hover:text-on-dark lg:text-secondary lg:hover:text-text"
+                  }`}
+                >
+                  {tab.label}
+                  {isActive && <span aria-hidden="true" className="absolute inset-x-2 bottom-[-1px] h-[3px] rounded-full bg-sky lg:bg-blue" />}
+                </Link>
+              );
+            })}
+          </nav>
+        }
+      />
 
       <main className="mx-auto flex w-full max-w-[560px] flex-col gap-3 px-4 pt-4 pb-6 box-border lg:mx-0 lg:max-w-[1240px] lg:gap-5 lg:px-8 lg:pt-5 lg:pb-12">
         {/* The period control, shared by every sub-tab */}
@@ -185,7 +179,7 @@ function FrameInner({ active, children }: { active: OverviewTab; children: React
                     replace
                     scroll={false}
                     aria-current={isActive ? "true" : "false"}
-                    className={`inline-flex min-h-[44px] items-center rounded-full px-3.5 text-sm font-bold no-underline transition-colors active:scale-[0.97] motion-reduce:active:scale-100 ${
+                    className={`inline-flex min-h-[44px] items-center rounded-full px-4 text-sm font-bold no-underline transition-colors active:scale-[0.97] motion-reduce:active:scale-100 ${
                       isActive ? "bg-ink text-on-dark" : "text-secondary hover:text-text"
                     }`}
                   >

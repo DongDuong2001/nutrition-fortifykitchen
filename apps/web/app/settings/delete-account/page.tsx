@@ -50,9 +50,9 @@ export default function DeleteAccountPage() {
           alignGroup="settings-header"
         />
 
-        <main className="w-full max-w-[560px] mx-auto px-4 pt-3 pb-4 flex flex-col gap-2.5">
+        <main className="w-full max-w-[560px] mx-auto px-4 pt-4 pb-4 flex flex-col gap-3">
           {/* Warning card */}
-          <div className="bg-card border border-card-border rounded-[18px] p-3.5 md:p-4 flex flex-col gap-2">
+          <div className="bg-card border border-card-border rounded-[18px] p-4 md:p-4 flex flex-col gap-2">
             <div className="flex gap-3 items-start">
               <svg
                 width="28"
@@ -98,7 +98,7 @@ export default function DeleteAccountPage() {
               onChange={(e) => setConfirmationText(e.target.value)}
               placeholder="XOÁ"
               autoComplete="off"
-              className="h-[52px] rounded-[10px] border-2 border-grabber bg-card px-3.5 text-lg font-semibold text-ink outline-none focus:border-blue transition-colors"
+              className="h-[52px] rounded-xl border-2 border-grabber bg-card px-4 text-lg font-semibold text-ink outline-none focus:border-blue transition-colors"
             />
           </label>
         </main>

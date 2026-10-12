@@ -40,13 +40,13 @@ export default function PaywallPage() {
           alignGroup="paywall-header"
         />
 
-        <main className="w-full max-w-[560px] mx-auto px-4 pt-3 pb-4 flex flex-col gap-3">
+        <main className="w-full max-w-[560px] mx-auto px-4 pt-4 pb-4 flex flex-col gap-3">
           {/* Benefits list */}
           <ul className="list-none m-0 p-0 flex flex-col gap-2">
             {BENEFITS.map((benefit) => (
               <li
                 key={benefit}
-                className="flex gap-2.5 items-start text-[15px] leading-snug text-text"
+                className="flex gap-3 items-start text-[15px] leading-snug text-text"
               >
                 <svg
                   width="22"
@@ -82,7 +82,7 @@ export default function PaywallPage() {
                   role="radio"
                   aria-checked={isSelected}
                   onClick={() => setSelectedPlan(plan.id)}
-                  className={`text-left min-h-[64px] rounded-[14px] bg-card text-ink p-2 px-3.5 flex items-center gap-3 transition-all cursor-pointer active:scale-[0.99] ${
+                  className={`text-left min-h-[64px] rounded-xl bg-card text-ink p-2 px-4 flex items-center gap-3 transition-all cursor-pointer active:scale-[0.99] ${
                     isSelected
                       ? "border-2 border-blue shadow-sm"
                       : "border-2 border-card-border hover:border-divider"
@@ -107,7 +107,7 @@ export default function PaywallPage() {
                       {plan.name}
                     </span>
                     {plan.chip && (
-                      <span className="text-[13px] font-bold text-on-accent bg-blue rounded-full py-0.5 px-2.5 leading-none">
+                      <span className="text-[13px] font-bold text-on-accent bg-blue rounded-full py-0.5 px-3 leading-none">
                         {plan.chip}
                       </span>
                     )}

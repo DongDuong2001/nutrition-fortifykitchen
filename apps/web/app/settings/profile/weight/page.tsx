@@ -77,7 +77,7 @@ export default function WeightPage() {
                 disabled={!hydrated}
                 onChange={(e) => change(e.target.value)}
                 aria-invalid={error ? true : undefined}
-                className={`h-16 w-[140px] rounded-[10px] border-2 bg-card text-center font-display text-[44px] font-black italic tabular-nums text-text outline-none focus:border-blue ${
+                className={`h-16 w-[140px] rounded-xl border-2 bg-card text-center font-display text-[44px] font-black italic tabular-nums text-text outline-none focus:border-blue ${
                   error ? "border-destructive" : "border-blue"
                 }`}
               />

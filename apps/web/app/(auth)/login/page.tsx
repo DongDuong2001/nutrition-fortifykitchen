@@ -90,7 +90,7 @@ export default function LoginPage() {
         <button
           onClick={handleGoogleSignIn}
           type="button"
-          className="w-full py-3.5 px-4 rounded-full bg-white hover:bg-neutral-100 text-neutral-900 font-bold text-sm flex items-center justify-center gap-3 transition-colors shadow-sm"
+          className="w-full py-4 px-4 rounded-full bg-white hover:bg-neutral-100 text-neutral-900 font-bold text-sm flex items-center justify-center gap-3 transition-colors shadow-sm"
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24">
             <path
@@ -139,7 +139,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3.5 px-4 rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-sm transition-all shadow-md active:scale-98"
+            className="w-full py-4 px-4 rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-sm transition-all shadow-md active:scale-98"
           >
             {loading ? "Đang gửi..." : "Gửi link đăng nhập"}
           </button>

@@ -578,3 +578,6 @@ All alignment and hydration tests passed cleanly (<= 1px difference, 0 hydration
 - `probe:all`: 22 PASS, 2 REPORT (ag04_audit, screenshots), 0 FAIL, 1 SKIP (cc02-final, dev only). smoke: 58 PASS / 0 FAIL of 58. cc2_08: 213 ok, 0 fail.
 - Edges: today-header, micros-header, profile-header, weight-header (title row vs cards), nutrient-header pass at 390 and 1440. food-header and entry-header removed (title vs own subtitle only).
 - Screenshots: apps/web/.screenshots/cc2-08-{home,diary,micros,settings,profile}-{390,1280}.png.
+
+## Night shift
+- 13/10 cc2-unify: unified AppHeader (ink on phone, paper on desktop), design/UI-RULES.md, SectionTitle, radius and spacing sweep, probe cc2_unify.py. Merged (commit in git log: "unify: ...").

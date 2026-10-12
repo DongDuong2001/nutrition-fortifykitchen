@@ -69,10 +69,10 @@ INK_TOP = """
 """
 
 WORDMARK = """
-() => [...document.querySelectorAll('header')].filter(h => {
-  const r = h.getBoundingClientRect();
-  return r.width > 0 && r.height > 0 && getComputedStyle(h).display !== 'none' && /H1T\\s*MICRO/i.test(h.textContent);
-}).length
+() => [...document.querySelectorAll('header')].filter(h => [...h.querySelectorAll('div')].some(el => {
+  const r = el.getBoundingClientRect();
+  return r.width > 0 && r.height > 0 && getComputedStyle(el).display !== 'none' && /^H1T\s*MICRO$/i.test(el.textContent.trim());
+})).length
 """
 
 
@@ -111,10 +111,8 @@ def main():
                 ink = pg.evaluate(INK_TOP)
                 if label == "390":
                     band = [e for e in ink if e[3] >= 380]
-                    if route in INK_BAND_PHONE:
-                        check(len(band) >= 1, f"{where}: ink band present")
-                    else:
-                        check(not band, f"{where}: paper header, no full-width ink band ({band})")
+                    # IA v2 "Headers and UI unity" (12/10 23:15): the ink header is on every screen at 390
+                    check(len(band) >= 1, f"{where}: ink header present")
                 else:
                     content_w = vp["width"] - 240
                     band = [e for e in ink if e[3] >= content_w * 0.9]

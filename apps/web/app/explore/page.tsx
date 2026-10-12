@@ -20,11 +20,16 @@ export default function ExplorePage() {
 
   return (
     <AppShell alignContainer="add-list">
-        <AppHeader variant="tab" title="KHÁM PHÁ" layout="wide" alignGroup="explore-header" />
+        <AppHeader
+          variant="tab"
+          title="KHÁM PHÁ"
+          layout="wide"
+          alignGroup="explore-header"
+          search={<FoodSearchField value={query} onChange={setQuery} className="bg-page lg:max-w-[656px]" />}
+        />
 
-        <main className="mx-auto flex w-full max-w-[560px] flex-col gap-3 px-4 pb-6 pt-3.5 lg:mx-0 lg:max-w-[720px] lg:px-8">
-          <div className="flex flex-col gap-3.5 rounded-[18px] border border-card-border bg-card p-4">
-            <FoodSearchField value={query} onChange={setQuery} />
+        <main className="mx-auto flex w-full max-w-[560px] flex-col gap-3 px-4 pb-6 pt-4 lg:mx-0 lg:max-w-[720px] lg:px-8">
+          <div className="flex flex-col gap-3">
             <ChipRow items={filterItems} ariaLabel="Lọc món theo nhóm" data-align-group="add-list" data-align-edge="left" />
             <FoodList
               list={list}

@@ -86,12 +86,12 @@ export default function AdminReviewPage() {
             className="flex flex-col justify-between gap-5 rounded-[18px] border border-card-border bg-card p-4 sm:p-6 md:flex-row sm:gap-6"
           >
             <div className="min-w-0 flex-1">
-              <div className="mb-3 flex flex-wrap items-center gap-2.5">
-                <span className="max-w-full truncate rounded-lg border border-card-border bg-page px-2.5 py-1 text-xs font-semibold text-text" title={draft.file_path}>
+              <div className="mb-3 flex flex-wrap items-center gap-3">
+                <span className="max-w-full truncate rounded-lg border border-card-border bg-page px-3 py-1 text-xs font-semibold text-text" title={draft.file_path}>
                   {draft.file_path}
                 </span>
                 <span
-                  className={`rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider ${
+                  className={`rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider ${
                     draft.status === "published"
                       ? "bg-blue text-on-accent"
                       : draft.status === "rejected"
@@ -111,7 +111,7 @@ export default function AdminReviewPage() {
               </pre>
             </div>
 
-            <div className="flex min-w-[150px] shrink-0 justify-end gap-2.5 md:flex-col">
+            <div className="flex min-w-[150px] shrink-0 justify-end gap-3 md:flex-col">
               {draft.status === "draft" && (
                 <>
                   <button

@@ -156,7 +156,7 @@ function TrainingContent() {
           backHref={diaryHref}
           alignGroup="training-header"
           summary={
-            <div className="flex flex-col gap-2.5 w-full">
+            <div className="flex flex-col gap-3 w-full">
               <DurationSelector
                 value={isPast ? "" : selectedDuration}
                 onChange={handleSelectDuration}
@@ -180,7 +180,7 @@ function TrainingContent() {
           }
         />
 
-        <main className="flex-1 w-full max-w-[560px] mx-auto px-4 pt-3 pb-6 flex flex-col gap-2.5">
+        <main className="flex-1 w-full max-w-[560px] mx-auto px-4 pt-4 pb-6 flex flex-col gap-3">
           {isPast ? null : isRestDay ? (
             <RestDayCard />
           ) : (

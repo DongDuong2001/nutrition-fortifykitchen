@@ -190,7 +190,7 @@ export function EnergyTab() {
 
       <section
         aria-labelledby="en-kcal"
-        className="bg-card border border-card-border rounded-2xl p-4 flex flex-col gap-3 text-text lg:col-span-7"
+        className="bg-card border border-card-border rounded-[18px] p-4 flex flex-col gap-3 text-text lg:col-span-7"
       >
         <h2 id="en-kcal" className="m-0 text-base font-bold lg:text-lg">
           Kcal mỗi ngày

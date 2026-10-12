@@ -299,7 +299,7 @@ function MicrosContent() {
 
           <main className="flex-1 w-full max-w-[560px] mx-auto px-4 py-6 flex flex-col gap-4">
             <div className="bg-card border border-card-border rounded-[18px] p-6 text-center flex flex-col items-center gap-3">
-              <h2 className="m-0 font-display italic font-bold text-xl">{isPast ? "CHƯA GHI MÓN NÀO NGÀY NÀY" : "CHƯA GHI MÓN NÀO HÔM NAY"}</h2>
+              <h2 className="m-0 text-base font-bold">{isPast ? "Chưa ghi món nào ngày này" : "Chưa ghi món nào hôm nay"}</h2>
               <p className="m-0 text-sm text-secondary leading-relaxed max-w-[320px]">
                 Bắt đầu ghi nhận món ăn để theo dõi 58 chỉ số vi chất và hoàn thành mục tiêu ngày.
               </p>
@@ -358,7 +358,7 @@ function MicrosContent() {
           footer={
             <Link
               href="/trends/micros"
-              className="min-h-[44px] flex items-center justify-between text-sm font-semibold text-blue no-underline active:scale-[0.97] transition-transform"
+              className="min-h-[44px] flex items-center justify-between text-sm font-semibold text-sky no-underline active:scale-[0.97] transition-transform"
             >
               Xu hướng 7 và 30 ngày
               <span aria-hidden="true">›</span>
@@ -389,7 +389,7 @@ function MicrosContent() {
                   className={`min-h-[44px] flex items-center shrink-0 cursor-pointer bg-transparent border-0 p-0 active:scale-[0.97] transition-all`}
                 >
                   <span
-                    className={`h-9 px-3.5 rounded-full text-xs font-semibold flex items-center justify-center whitespace-nowrap transition-colors ${
+                    className={`h-9 px-4 rounded-full text-xs font-semibold flex items-center justify-center whitespace-nowrap transition-colors ${
                       isActive
                         ? "bg-ink text-on-dark shadow-xs"
                         : "bg-card text-text border border-card-border hover:bg-page"
@@ -405,12 +405,12 @@ function MicrosContent() {
 
         {/* Only the body scrolls: the header and chip bar stay put (SPEC: header flex none, scrolling body) */}
         <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto overscroll-contain pb-[88px]">
-        <main className="w-full max-w-[560px] mx-auto px-4 pt-3 pb-6 flex flex-col gap-3.5 min-w-0">
+        <main className="w-full max-w-[560px] mx-auto px-4 pt-4 pb-6 flex flex-col gap-4 min-w-0">
           {/* 4-column equal grid Legend */}
           <Legend />
 
           {/* Groups in required order */}
-          <div className="flex flex-col gap-3.5">
+          <div className="flex flex-col gap-4">
             {GROUPS_CONFIG.map((group, idx) => (
               <GroupCard
                 dateQuery={dateQuery}
@@ -592,7 +592,7 @@ function GroupCard({
           type="button"
           onClick={onToggle}
           aria-expanded={isOpen}
-          className="w-full min-h-[48px] px-4 py-2.5 flex items-center justify-between text-left cursor-pointer bg-transparent border-0 active:scale-[0.99] transition-transform"
+          className="w-full min-h-[48px] px-4 py-3 flex items-center justify-between text-left cursor-pointer bg-transparent border-0 active:scale-[0.99] transition-transform"
         >
           <div className="w-full flex items-center justify-between">
             <div className="flex items-center gap-2">

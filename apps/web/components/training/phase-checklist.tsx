@@ -48,7 +48,7 @@ export function PhaseChecklist({
                   return (
                     <label
                       key={it.id}
-                      className="flex items-center gap-3.5 min-h-[56px] cursor-pointer border-t border-divider first:border-t-0 hover:bg-black/[0.02] -mx-2 px-2 rounded-lg transition-colors active:scale-[0.99]"
+                      className="flex items-center gap-4 min-h-[56px] cursor-pointer border-t border-divider first:border-t-0 hover:bg-black/[0.02] -mx-2 px-2 rounded-lg transition-colors active:scale-[0.99]"
                     >
                       <span className="w-11 h-11 -ml-2.5 flex items-center justify-center shrink-0">
                         <input
@@ -85,7 +85,7 @@ export function PhaseChecklist({
 
   // Mobile layout: each phase in its own rounded card
   return (
-    <div className={`flex flex-col gap-2.5 w-full ${className}`}>
+    <div className={`flex flex-col gap-3 w-full ${className}`}>
       {phases.map((ph) => {
         const completedCount = ph.items.filter(
           (it) => checkedState[it.id] ?? it.defaultDone
@@ -95,7 +95,7 @@ export function PhaseChecklist({
         return (
           <div
             key={ph.id}
-            className="bg-card border border-card-border rounded-[18px] px-4 pt-2.5 pb-1 flex flex-col"
+            className="bg-card border border-card-border rounded-[18px] px-4 pt-3 pb-1 flex flex-col"
           >
             <div className="flex justify-between items-baseline pb-1">
               <h2 className="m-0 text-base font-bold text-text">{ph.name}</h2>

@@ -44,7 +44,7 @@ export function SummaryTab() {
   const todayCard = (
     <div
       data-align-group="overview-rows"
-      className="bg-card border border-card-border rounded-2xl p-4 flex items-center justify-between gap-3 text-text"
+      className="bg-card border border-card-border rounded-[18px] p-4 flex items-center justify-between gap-3 text-text"
     >
       <p className="m-0 text-[15px] font-bold leading-snug">
         {remaining > 0 ? `Còn ${formatNumber(remaining)} kcal` : "Đã đủ kcal tối thiểu"}{" "}

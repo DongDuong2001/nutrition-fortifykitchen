@@ -73,14 +73,14 @@ function CopyChoices({ entries, onDone }: { entries: AddedDiaryEntry[]; onDone: 
   }
 
   return (
-    <div className="flex flex-col gap-2.5 py-2">
+    <div className="flex flex-col gap-3 py-2">
       <div className="flex flex-col gap-0.5">
         {meals.map((meal) => {
           const kcal = entriesKcal(meal.items);
           return (
             <label
               key={meal.slot}
-              className="min-h-[52px] px-3 rounded-[10px] flex items-center gap-3 cursor-pointer"
+              className="min-h-[52px] px-3 rounded-xl flex items-center gap-3 cursor-pointer"
             >
               <input
                 type="checkbox"

@@ -21,7 +21,7 @@ export function Toast({
   return (
     <div
       role="status"
-      className={`bg-ink text-on-dark rounded-[14px] overflow-hidden shadow-[0_8px_24px_rgba(10,10,11,0.35)] min-h-[56px] box-border flex flex-col justify-between w-full max-w-[366px] mx-auto select-none ${className}`}
+      className={`bg-ink text-on-dark rounded-xl overflow-hidden shadow-[0_8px_24px_rgba(10,10,11,0.35)] min-h-[56px] box-border flex flex-col justify-between w-full max-w-[366px] mx-auto select-none ${className}`}
     >
       <div className="py-1 pl-4 pr-1 min-h-[56px] flex items-center justify-between gap-2">
         <span className="text-[15px] font-normal leading-snug">{message}</span>
@@ -30,7 +30,7 @@ export function Toast({
           actionHref ? (
             <Link
               href={actionHref}
-              className="shrink-0 min-h-[44px] px-3.5 rounded-[10px] flex items-center text-sky text-[15px] font-bold no-underline hover:text-on-dark transition-colors active:scale-[0.97]"
+              className="shrink-0 min-h-[44px] px-4 rounded-xl flex items-center text-sky text-[15px] font-bold no-underline hover:text-on-dark transition-colors active:scale-[0.97]"
             >
               {actionLabel}
             </Link>
@@ -38,7 +38,7 @@ export function Toast({
             <button
               type="button"
               onClick={onAction}
-              className="shrink-0 min-h-[44px] px-3.5 rounded-[10px] bg-transparent border-0 flex items-center text-sky text-[15px] font-bold cursor-pointer hover:text-on-dark transition-colors active:scale-[0.97]"
+              className="shrink-0 min-h-[44px] px-4 rounded-xl bg-transparent border-0 flex items-center text-sky text-[15px] font-bold cursor-pointer hover:text-on-dark transition-colors active:scale-[0.97]"
             >
               {actionLabel}
             </button>

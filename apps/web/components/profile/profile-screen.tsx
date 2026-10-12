@@ -29,22 +29,22 @@ export function ProfileScreen({ title, backHref }: { title: string; backHref?: s
           alignGroup="profile-header"
         />
 
-        <main className="mx-auto grid w-full max-w-[560px] grid-cols-1 items-start gap-3.5 px-4 pb-6 pt-3 lg:mx-0 lg:max-w-[1240px] lg:grid-cols-2 lg:gap-4 lg:px-8 lg:pb-12 lg:pt-5">
+        <main className="mx-auto grid w-full max-w-[560px] grid-cols-1 items-start gap-4 px-4 pb-6 pt-4 lg:mx-0 lg:max-w-[1240px] lg:grid-cols-2 lg:gap-4 lg:px-8 lg:pb-12 lg:pt-5">
           {hydrated ? (
             <>
-              <div className="flex flex-col gap-3.5 lg:gap-4">
+              <div className="flex flex-col gap-4 lg:gap-4">
                 <BodyCard alignGroup="profile-header" />
                 <GoalCard />
                 <TargetsCard />
               </div>
-              <div className="flex flex-col gap-3.5 lg:gap-4">
+              <div className="flex flex-col gap-4 lg:gap-4">
                 <AppCard />
                 <ProCard />
                 <AccountCard />
               </div>
             </>
           ) : (
-            <div aria-busy="true" aria-live="polite" className="flex flex-col gap-3.5 lg:col-span-2">
+            <div aria-busy="true" aria-live="polite" className="flex flex-col gap-4 lg:col-span-2">
               <div className="h-[220px] rounded-[18px] bg-divider animate-pulse motion-reduce:animate-none" />
               <div className="h-[160px] rounded-[18px] bg-divider animate-pulse motion-reduce:animate-none" />
             </div>

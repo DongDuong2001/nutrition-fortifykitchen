@@ -47,7 +47,7 @@ export default function ErrorPage({ error, reset }: ErrorProps) {
           Máy chủ đang bận. Dữ liệu bạn đã ghi vẫn an toàn trên máy.
         </p>
 
-        <div className="w-full pt-2 flex flex-col gap-2.5">
+        <div className="w-full pt-2 flex flex-col gap-3">
           <PillButton variant="primary" onClick={() => reset()} fullWidth>
             Thử lại
           </PillButton>
@@ -55,7 +55,7 @@ export default function ErrorPage({ error, reset }: ErrorProps) {
             href="/"
             className="h-[52px] rounded-full bg-card border border-card-border text-text font-semibold text-base flex items-center justify-center no-underline cursor-pointer active:scale-[0.97] transition-all hover:bg-black/[0.02]"
           >
-            Về Hôm nay
+            Về Tổng quan
           </Link>
         </div>
 

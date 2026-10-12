@@ -106,3 +106,6 @@ dd on a phone/ { s/^- [ ]/- [x]/; s/$/ Decided 12/10 (Hao): keep the sr-only h1 
 - [ ] (cc2-10) /micros/[nutrient] also takes ?date= (read-only, history ends on that day) so a past-day Vi chất row does not jump to today. Beyond the brief; revert if unwanted.
 - [ ] (cc2-10) The mock history (lib/mock/history.ts) now gives the 29 days before today entries, with gap days 8, 15 and 22 days ago, so the calendar and every past ?date= show food instead of an empty day. Confirm that is wanted for the demo.
 - [ ] (cc2-10) Vi chất (/trends/micros) lists all 22 counted nutrients; those no food of the period carries a value for (Vitamin B5 in the mock catalogue) show "—" at the end, never 0.
+- [ ] (cc2-unify) Desktop Tổng quan sub-tabs sit in a second row of the header (under the title), not at the right of the title row as in the mockup. Say if they should move.
+- [ ] (cc2-unify) Chips are pills now (UI-RULES says buttons and chips are full pill); the 2×2 goal chips in the profile are pills too.
+- [ ] (cc2-unify) The phone header grows when a screen passes a subtitle (food, paywall, nutrient). Keep, or move subtitles out of the ink header?

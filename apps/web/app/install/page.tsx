@@ -20,12 +20,12 @@ export default function InstallAppPage() {
           alignGroup="install-header"
         />
 
-        <main className="w-full max-w-[560px] mx-auto px-4 pt-4 pb-4 flex flex-col gap-3.5">
+        <main className="w-full max-w-[560px] mx-auto px-4 pt-4 pb-4 flex flex-col gap-4">
           {/* App info card */}
-          <div className="bg-card border border-card-border rounded-[18px] p-4 flex items-center gap-3.5">
+          <div className="bg-card border border-card-border rounded-[18px] p-4 flex items-center gap-4">
             <div
               aria-hidden="true"
-              className="w-16 h-16 shrink-0 rounded-2xl bg-ink flex flex-col items-center justify-center gap-1 shadow-sm"
+              className="w-16 h-16 shrink-0 rounded-[18px] bg-ink flex flex-col items-center justify-center gap-1 shadow-sm"
             >
               <div className="font-display italic font-black text-[22px] text-on-dark leading-none">
                 H1T
@@ -79,9 +79,9 @@ export default function InstallAppPage() {
             <ol
               role="tabpanel"
               aria-label="Các bước cài đặt trên iPhone"
-              className="list-none m-0 p-0 flex flex-col gap-2.5"
+              className="list-none m-0 p-0 flex flex-col gap-3"
             >
-              <li className="bg-card border border-card-border rounded-[18px] p-3.5 md:p-4 flex items-center gap-3.5 min-h-[56px]">
+              <li className="bg-card border border-card-border rounded-[18px] p-4 md:p-4 flex items-center gap-4 min-h-[56px]">
                 <span
                   aria-hidden="true"
                   className="w-7 h-7 shrink-0 rounded-full bg-blue text-on-accent flex items-center justify-center text-sm font-bold tabular-nums"
@@ -110,7 +110,7 @@ export default function InstallAppPage() {
                 </span>
               </li>
 
-              <li className="bg-card border border-card-border rounded-[18px] p-3.5 md:p-4 flex items-center gap-3.5 min-h-[56px]">
+              <li className="bg-card border border-card-border rounded-[18px] p-4 md:p-4 flex items-center gap-4 min-h-[56px]">
                 <span
                   aria-hidden="true"
                   className="w-7 h-7 shrink-0 rounded-full bg-blue text-on-accent flex items-center justify-center text-sm font-bold tabular-nums"
@@ -122,7 +122,7 @@ export default function InstallAppPage() {
                 </span>
               </li>
 
-              <li className="bg-card border border-card-border rounded-[18px] p-3.5 md:p-4 flex items-center gap-3.5 min-h-[56px]">
+              <li className="bg-card border border-card-border rounded-[18px] p-4 md:p-4 flex items-center gap-4 min-h-[56px]">
                 <span
                   aria-hidden="true"
                   className="w-7 h-7 shrink-0 rounded-full bg-blue text-on-accent flex items-center justify-center text-sm font-bold tabular-nums"
@@ -138,9 +138,9 @@ export default function InstallAppPage() {
             <ol
               role="tabpanel"
               aria-label="Các bước cài đặt trên Android"
-              className="list-none m-0 p-0 flex flex-col gap-2.5"
+              className="list-none m-0 p-0 flex flex-col gap-3"
             >
-              <li className="bg-card border border-card-border rounded-[18px] p-3.5 md:p-4 flex items-center gap-3.5 min-h-[56px]">
+              <li className="bg-card border border-card-border rounded-[18px] p-4 md:p-4 flex items-center gap-4 min-h-[56px]">
                 <span
                   aria-hidden="true"
                   className="w-7 h-7 shrink-0 rounded-full bg-blue text-on-accent flex items-center justify-center text-sm font-bold tabular-nums"
@@ -152,7 +152,7 @@ export default function InstallAppPage() {
                 </span>
               </li>
 
-              <li className="bg-card border border-card-border rounded-[18px] p-3.5 md:p-4 flex items-center gap-3.5 min-h-[56px]">
+              <li className="bg-card border border-card-border rounded-[18px] p-4 md:p-4 flex items-center gap-4 min-h-[56px]">
                 <span
                   aria-hidden="true"
                   className="w-7 h-7 shrink-0 rounded-full bg-blue text-on-accent flex items-center justify-center text-sm font-bold tabular-nums"
@@ -164,7 +164,7 @@ export default function InstallAppPage() {
                 </span>
               </li>
 
-              <li className="bg-card border border-card-border rounded-[18px] p-3.5 md:p-4 flex items-center gap-3.5 min-h-[56px]">
+              <li className="bg-card border border-card-border rounded-[18px] p-4 md:p-4 flex items-center gap-4 min-h-[56px]">
                 <span
                   aria-hidden="true"
                   className="w-7 h-7 shrink-0 rounded-full bg-blue text-on-accent flex items-center justify-center text-sm font-bold tabular-nums"

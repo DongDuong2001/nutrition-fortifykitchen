@@ -14,7 +14,7 @@ import { SegmentedBar } from "@/components/ui/segmented-bar";
 import { ChipGroup } from "@/components/ui/chip-group";
 import { StatGroup } from "@/components/ui/stat-group";
 import { Toast } from "@/components/ui/toast";
-import { AppHeader } from "@/components/ui/app-header";
+import { AppHeader, HEADER_ICON_BUTTON } from "@/components/ui/app-header";
 import { AppShell } from "@/components/ui/app-shell";
 import { useBack } from "@/hooks/use-back";
 
@@ -156,7 +156,7 @@ function FoodDetailInner() {
             onClick={handleToggleFavourite}
             aria-pressed={saved}
             aria-label={saved ? "Bỏ yêu thích" : "Thêm vào yêu thích"}
-            className="w-11 h-11 -mr-2 rounded-lg bg-transparent border-0 text-text flex items-center justify-center cursor-pointer hover:text-blue active:scale-[0.97] transition-colors"
+            className={`${HEADER_ICON_BUTTON} -mr-2`}
           >
             <svg
               width="22"
@@ -175,7 +175,7 @@ function FoodDetailInner() {
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 w-full max-w-[560px] mx-auto p-4 flex flex-col gap-3.5">
+      <main className="flex-1 w-full max-w-[560px] mx-auto p-4 flex flex-col gap-4">
         {/* Serving and Gram Selection */}
         <div data-align-group="food-detail" className="flex w-full flex-col gap-2">
           <span className="text-[13px] font-semibold text-secondary">Khẩu phần</span>
@@ -213,7 +213,7 @@ function FoodDetailInner() {
         </div>
 
         {/* Big Kcal & 3-up Macro Card */}
-        <div data-align-group="food-detail" className="w-full bg-card border border-card-border rounded-2xl p-4">
+        <div data-align-group="food-detail" className="w-full bg-card border border-card-border rounded-[18px] p-4">
           <StatGroup
             columns={4}
             tone="light"
@@ -227,14 +227,14 @@ function FoodDetailInner() {
         </div>
 
         {/* Micros in Serving Card with slanted SegmentedBar */}
-        <div data-align-group="food-detail" className="w-full bg-card border border-card-border rounded-2xl p-4 flex flex-col gap-2">
+        <div data-align-group="food-detail" className="w-full bg-card border border-card-border rounded-[18px] p-4 flex flex-col gap-2">
           <h2 className="m-0 text-base font-bold text-text">
             Vi chất trong {gramsInput} g
           </h2>
 
           <div className="divide-y divide-divider flex flex-col">
             {microsList.map((m) => (
-              <div key={m.id} className="py-2.5 flex flex-col gap-1 min-h-[44px] justify-center">
+              <div key={m.id} className="py-3 flex flex-col gap-1 min-h-[44px] justify-center">
                 <div className="flex items-center justify-between text-sm">
                   <span className="font-semibold text-text">{m.name}</span>
                   <div className="flex items-center gap-2 tabular-nums">
@@ -264,7 +264,7 @@ function FoodDetailInner() {
 
         {/* Tip Box */}
         {food.tipVi && (
-          <div className="bg-card border border-card-border border-l-4 border-l-blue rounded-xl p-3.5 text-sm leading-relaxed">
+          <div className="bg-card border border-card-border border-l-4 border-l-blue rounded-xl p-4 text-sm leading-relaxed">
             <strong className="text-blue font-bold">Mẹo: </strong>
             {food.tipVi}
           </div>

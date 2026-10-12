@@ -21,7 +21,7 @@ export function MicrosTab() {
   const withoutAverage = rows.filter((r) => r.average === null).length;
 
   return (
-    <section aria-labelledby="mi-list" className="bg-card border border-card-border rounded-2xl p-4 flex flex-col gap-3 text-text">
+    <section aria-labelledby="mi-list" className="bg-card border border-card-border rounded-[18px] p-4 flex flex-col gap-3 text-text">
       <div className="flex min-h-[44px] items-center justify-between gap-3">
         <h2 id="mi-list" className="m-0 text-base font-bold lg:text-lg">
           Vi chất · % mục tiêu
@@ -41,7 +41,7 @@ export function MicrosTab() {
               <Link
                 href={`/micros/${row.key}`}
                 data-align-group={i % 2 === 0 ? "overview-micro-l" : "overview-micro-r"}
-                className="grid min-h-[64px] grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 py-2.5 text-text no-underline active:scale-[0.99]"
+                className="grid min-h-[64px] grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 py-3 text-text no-underline active:scale-[0.99]"
               >
                 <span className="min-w-0">
                   <span className="block text-[15px] font-semibold">{row.name}</span>

@@ -29,7 +29,7 @@ const SEX_OPTIONS: { value: SexType; label: string }[] = [
   { value: "female", label: "Nữ" },
 ];
 
-const SKELETON_CLASS = "h-[52px] rounded-[10px] bg-divider animate-pulse motion-reduce:animate-none";
+const SKELETON_CLASS = "h-[52px] rounded-xl bg-divider animate-pulse motion-reduce:animate-none";
 const DESKTOP_QUERY = "(min-width: 1024px)";
 
 /**
@@ -105,7 +105,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
         <AppHeader
           variant="sub"
           backHref={isProfile ? "/signin/check-email" : "/setup/profile"}
-          actions={<span className="text-[13px] text-secondary">{isProfile ? "Bước 1 / 2" : "Bước 2 / 2"}</span>}
+          actions={<span className="text-[13px] text-muted-subtitle">{isProfile ? "Bước 1 / 2" : "Bước 2 / 2"}</span>}
           progress={{ current: isProfile ? 1 : 2, total: 2 }}
           title={isProfile ? "VỀ BẠN" : "MỤC TIÊU"}
           subtitle={isProfile ? "Mục tiêu được tính theo cân nặng và giới tính. Bạn có thể sửa bất cứ lúc nào." : undefined}
@@ -166,7 +166,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
                     value={draft.birthYear}
                     onChange={(e) => update({ birthYear: e.target.value })}
                     aria-invalid={errors.birthYear ? true : undefined}
-                    className={`h-[52px] w-full rounded-[10px] border-2 bg-card px-4 text-base font-semibold tabular-nums text-text outline-none focus:border-blue ${
+                    className={`h-[52px] w-full rounded-xl border-2 bg-card px-4 text-base font-semibold tabular-nums text-text outline-none focus:border-blue ${
                       errors.birthYear ? "border-destructive" : "border-grabber"
                     }`}
                   />
@@ -179,7 +179,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
                     value={draft.weight}
                     onChange={(e) => update({ weight: e.target.value })}
                     aria-invalid={errors.weight ? true : undefined}
-                    className={`h-[52px] w-full rounded-[10px] border-2 bg-card px-4 text-base font-semibold tabular-nums text-text outline-none focus:border-blue ${
+                    className={`h-[52px] w-full rounded-xl border-2 bg-card px-4 text-base font-semibold tabular-nums text-text outline-none focus:border-blue ${
                       errors.weight ? "border-destructive" : "border-grabber"
                     }`}
                   />

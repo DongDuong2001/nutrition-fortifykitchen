@@ -72,12 +72,12 @@ export function BodyTab() {
   const { weight, period } = overview;
 
   return (
-    <section aria-labelledby="bd-weight" className="bg-card border border-card-border rounded-2xl p-4 flex flex-col gap-3 text-text lg:max-w-[760px]">
+    <section aria-labelledby="bd-weight" className="bg-card border border-card-border rounded-[18px] p-4 flex flex-col gap-3 text-text lg:max-w-[760px]">
       <div className="flex min-h-[44px] items-center justify-between gap-3">
         <h2 id="bd-weight" className="m-0 text-base font-bold lg:text-lg">
           Cân nặng
         </h2>
-        <span className="inline-flex min-h-[28px] items-center rounded-full bg-page px-2.5 text-[13px] font-bold">Dữ liệu mẫu</span>
+        <span className="inline-flex min-h-[28px] items-center rounded-full bg-page px-3 text-[13px] font-bold">Dữ liệu mẫu</span>
       </div>
 
       {weight.points.length > 0 ? (

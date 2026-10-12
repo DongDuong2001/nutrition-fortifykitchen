@@ -14,7 +14,7 @@ export function FoodSearchField({ value, onChange, inputRef, className = "" }: F
     <label
       data-align-group="add-list"
       data-align-edge="left"
-      className={`flex items-center gap-2.5 bg-page border border-card-border rounded-full px-4 min-h-[48px] focus-within:border-blue focus-within:ring-2 focus-within:ring-blue ${className}`}
+      className={`flex items-center gap-3 bg-page border border-card-border rounded-full px-4 min-h-[48px] focus-within:border-blue focus-within:ring-2 focus-within:ring-blue ${className}`}
     >
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="text-secondary shrink-0" aria-hidden="true">
         <circle cx="11" cy="11" r="7" />
