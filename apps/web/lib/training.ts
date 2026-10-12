@@ -56,7 +56,7 @@ export function formatSaltRange(min: number, max: number): string {
 }
 
 /**
- * Calculate base salt, top-up salt (1–1.5 g per 20 min training), total salt, and sodium.
+ * Calculate base salt, top-up salt (1–1,5 g per 20 min training), total salt, and sodium.
  */
 export function calculateSaltTarget(trainingMinutes = 0): SaltTarget {
   if (trainingMinutes <= 0) {
