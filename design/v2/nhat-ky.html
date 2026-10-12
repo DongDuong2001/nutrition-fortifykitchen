@@ -45,6 +45,9 @@ button, a { font: inherit; color: inherit; text-decoration: none; cursor: pointe
 button { background: none; border: 0; padding: 0; margin: 0; }
 button:disabled { cursor: default; }
 :focus-visible { outline: 3px solid var(--color-blue); outline-offset: 2px; }
+/* Sky ring on dark surfaces (ink header, hero, energy bar, Pro card, toast, bottom nav, sidebar), blue elsewhere */
+.hdr :focus-visible, .hero :focus-visible, .energy :focus-visible, .onink:focus-visible, .pro :focus-visible, .toast :focus-visible, .nav :focus-visible, .side :focus-visible { outline-color: var(--color-sky); }
+.side-add { width: 100%; justify-content: center; }
 svg { display: block; flex: none; }
 ul, ol { margin: 0; padding: 0; list-style: none; }
 h1, h2, h3, h4, p { margin: 0; }
@@ -173,7 +176,7 @@ h1, h2, h3, h4, p { margin: 0; }
 <div class="board">
   <header class="board-head">
     <h1>Nhật ký</h1>
-    <p>IA v2, tab 2 (replaces the Hôm nay meal list). Meals keep one + per header; the ⋯ menu holds Chép hôm qua. Past days are read-only, as in cc-11. Data is lib/mock/sample-day.ts (today) and lib/mock/yesterday.ts (yesterday, Thứ Sáu 09/10/2026). Copy is Vietnamese; these notes are English.</p>
+    <p>IA v2, tab 2 (replaces the Hôm nay meal list). Meals keep one + per header; the ⋯ menu holds Chép hôm qua. Past days are read-only, as in cc-11. Training minutes on a past day would show read-only once stored (note only: yesterday's training is not in the mock, so none is drawn). Data is lib/mock/sample-day.ts (today) and lib/mock/yesterday.ts (yesterday, Thứ Sáu 09/10/2026). Copy is Vietnamese; these notes are English.</p>
   </header>
 
   <!-- 1. Today: food logged, training chip -->
@@ -291,6 +294,7 @@ h1, h2, h3, h4, p { margin: 0; }
         <div class="desktop">
           <aside class="side">
             <div class="brand">H1T <span>MICRO</span></div>
+            <button class="btn btn-primary side-add" type="button"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Thêm món</button>
             <nav aria-label="Điều hướng chính">
               <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
               <a href="#" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
@@ -307,7 +311,6 @@ h1, h2, h3, h4, p { margin: 0; }
               <div class="d-actions">
                 <button class="ico-btn" aria-label="Ngày trước" style="color:var(--color-text)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
                 <button class="ico-btn" aria-label="Ngày sau" disabled style="color:var(--color-secondary)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
-                <button class="btn btn-primary" style="padding:0 20px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Thêm món</button>
               </div>
             </div>
             <div class="chiprow"><button class="chip" aria-haspopup="dialog" style="border-color:var(--color-ink)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/></svg>Ngày tập 60′</button></div>
@@ -403,7 +406,7 @@ h1, h2, h3, h4, p { margin: 0; }
               <button class="chip" aria-pressed="false">90′</button>
               <button class="chip" aria-pressed="false">120′</button>
             </div>
-            <p class="notice">60′ tập: muối bù mồ hôi 3–4,5 g. Chọn Nghỉ thì không cộng thêm muối.</p>
+            <p class="notice">Ngày tập 60′ · muối 7–10,5 g. Nghỉ · muối 4–6 g.</p>
             <div class="btnrow">
               <button class="btn btn-secondary">Huỷ</button>
               <button class="btn btn-primary">Lưu</button>
@@ -417,6 +420,7 @@ h1, h2, h3, h4, p { margin: 0; }
         <div class="desktop">
           <aside class="side">
             <div class="brand">H1T <span>MICRO</span></div>
+            <button class="btn btn-primary side-add" type="button"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Thêm món</button>
             <nav aria-label="Điều hướng chính">
               <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
               <a href="#" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
@@ -446,7 +450,7 @@ h1, h2, h3, h4, p { margin: 0; }
               <button class="chip" aria-pressed="false">90′</button>
               <button class="chip" aria-pressed="false">120′</button>
             </div>
-            <p class="notice">60′ tập: muối bù mồ hôi 3–4,5 g. Chọn Nghỉ thì không cộng thêm muối.</p>
+            <p class="notice">Ngày tập 60′ · muối 7–10,5 g. Nghỉ · muối 4–6 g.</p>
             <div class="btnrow" style="justify-content:end">
               <button class="btn btn-secondary">Huỷ</button>
               <button class="btn btn-primary" style="padding:0 28px">Lưu</button>
@@ -490,6 +494,7 @@ h1, h2, h3, h4, p { margin: 0; }
         <div class="desktop">
           <aside class="side">
             <div class="brand">H1T <span>MICRO</span></div>
+            <button class="btn btn-primary side-add" type="button"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Thêm món</button>
             <nav aria-label="Điều hướng chính">
               <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
               <a href="#" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
@@ -556,6 +561,7 @@ h1, h2, h3, h4, p { margin: 0; }
         <div class="desktop">
           <aside class="side">
             <div class="brand">H1T <span>MICRO</span></div>
+            <button class="btn btn-primary side-add" type="button"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Thêm món</button>
             <nav aria-label="Điều hướng chính">
               <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
               <a href="#" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
@@ -634,6 +640,7 @@ h1, h2, h3, h4, p { margin: 0; }
         <div class="desktop">
           <aside class="side">
             <div class="brand">H1T <span>MICRO</span></div>
+            <button class="btn btn-primary side-add" type="button"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Thêm món</button>
             <nav aria-label="Điều hướng chính">
               <a href="#"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Tổng quan</a>
               <a href="#" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg>Nhật ký</a>
@@ -648,7 +655,6 @@ h1, h2, h3, h4, p { margin: 0; }
                 <button class="ico-btn" aria-label="Ngày trước" style="color:var(--color-text)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
                 <button class="ico-btn" aria-label="Ngày sau" disabled style="color:var(--color-secondary)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
                 <button class="btn btn-secondary">Chép hôm qua · 4 bữa</button>
-                <button class="btn btn-primary" style="padding:0 20px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Thêm món</button>
               </div>
             </div>
             <div class="chiprow"><button class="chip" aria-haspopup="dialog" style="border-color:var(--color-ink)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12"/></svg>Ngày tập 60′</button></div>
