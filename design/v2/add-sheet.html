@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thêm món · IA v2 mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&family=Saira+Condensed:wght@800;900&display=swap" rel="stylesheet">
+<style>
+/* Tokens copied from apps/web/app/globals.css @theme (Cobalt Sign). Values are identical. */
+:root {
+  --color-page: #F3F1EC;             /* --color-page (same as --color-paper) */
+  --color-card: #FFFFFF;             /* --color-card */
+  --color-card-border: #E0DACF;      /* --color-card-border */
+  --color-ink: #111317;              /* --color-ink */
+  --color-text: #141519;             /* --color-text */
+  --color-secondary: #6B6A66;        /* --color-secondary */
+  --color-blue: #1238D6;             /* --color-blue (same as --color-cobalt): primary action */
+  --color-sky: #9EC3FF;              /* --color-sky */
+  --color-destructive: #D93F44;      /* --color-destructive */
+  --color-destructive-text: #C4373C; /* --color-destructive-text */
+  --color-level-blue: #1238D6;       /* --color-level-blue */
+  --color-level-empty: #E6E1D7;      /* --color-level-empty */
+  --color-level-blue-dark: #5C86F2;  /* --color-level-blue-dark */
+  --color-divider: #E0DACF;          /* --color-divider */
+  --color-muted-subtitle: #C9CDD6;   /* --color-muted-subtitle */
+  --color-muted-on-dark: #8C92A0;    /* --color-muted-on-dark */
+  --color-on-dark: #FFFFFF;          /* --color-on-dark */
+  --color-grabber: #D5D8DF;          /* --color-grabber */
+  --color-scrim: rgba(17,19,23,0.5); /* --color-scrim */
+  --color-surface-dark: #1A1C22;     /* --color-surface-dark */
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--color-page); color: var(--color-text); font-family: 'Manrope', -apple-system, 'Segoe UI', Roboto, sans-serif; -webkit-font-smoothing: antialiased; }
+button, a, input { font: inherit; color: inherit; text-decoration: none; cursor: pointer; }
+button { background: none; border: 0; padding: 0; margin: 0; }
+:focus-visible { outline: 3px solid var(--color-blue); outline-offset: 2px; }
+svg { display: block; flex: none; }
+ul, ol { margin: 0; padding: 0; list-style: none; }
+h1, h2, h3, h4, p { margin: 0; }
+.display { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-variant-numeric: tabular-nums; }
+
+/* Board chrome (not part of the screen) */
+.board { padding-bottom: 48px; }
+.board-head { padding: 24px 16px 8px; max-width: 960px; }
+.board-head h1 { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-size: 28px; text-transform: uppercase; margin-bottom: 8px; }
+.board-head p { color: var(--color-secondary); font-size: 14px; line-height: 1.5; }
+.state { padding: 24px 0 8px; border-top: 1px solid var(--color-divider); }
+.state h2 { font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--color-secondary); padding: 0 16px; margin-bottom: 12px; }
+.pair { display: flex; flex-wrap: wrap; gap: 40px; align-items: flex-start; }
+.fig { margin: 0; min-width: 0; }
+.fig figcaption { font-size: 13px; font-weight: 600; color: var(--color-secondary); padding: 0 16px 8px; }
+.fig-phone { width: 390px; max-width: 100%; flex: none; }
+.fig-desktop { max-width: 100%; overflow-x: auto; }
+.phone { width: 100%; height: 844px; background: var(--color-page); display: flex; flex-direction: column; position: relative; overflow: hidden; box-shadow: 0 0 0 1px var(--color-card-border); }
+.desktop { width: 1280px; height: 860px; background: var(--color-page); display: flex; position: relative; overflow: hidden; box-shadow: 0 0 0 1px var(--color-card-border); }
+
+/* Background screen (dimmed behind the sheet) */
+.hdr { background: var(--color-ink); color: var(--color-on-dark); padding: 16px 16px 20px; border-radius: 0 0 20px 20px; display: flex; flex-direction: column; gap: 12px; flex: none; }
+.brand { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-size: 22px; line-height: 1; letter-spacing: .02em; }
+.brand span { color: var(--color-sky); }
+.ptitle { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-size: 28px; line-height: 1; text-transform: uppercase; }
+.bgbody { flex: 1; min-height: 0; overflow: hidden; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.bgcard { background: var(--color-card); border: 1px solid var(--color-card-border); border-radius: 16px; padding: 16px; height: 96px; }
+.bgcard.short { height: 72px; }
+.bgbar { height: 56px; background: var(--color-card); border: 1px solid var(--color-card-border); border-radius: 16px; }
+.scrim { position: absolute; inset: 0; background: var(--color-scrim); }
+.nav { background: var(--color-ink); color: var(--color-muted-on-dark); display: grid; grid-template-columns: repeat(5, 1fr); align-items: center; height: 72px; padding: 0 8px; flex: none; }
+.nav a { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 56px; font-size: 12px; font-weight: 600; color: var(--color-muted-on-dark); }
+.nav a[aria-current="page"] { color: var(--color-on-dark); }
+.nav a[aria-current="page"]::before { content: ""; position: absolute; top: 0; width: 22px; height: 3px; background: var(--color-sky); transform: skewX(-14deg); }
+.fab { width: 56px; height: 56px; border-radius: 50%; background: var(--color-blue); color: var(--color-on-dark); display: flex; align-items: center; justify-content: center; justify-self: center; margin-top: -20px; }
+
+/* Sheet (phone) */
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; background: var(--color-card); border-radius: 20px 20px 0 0; padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 12px; overflow: hidden; }
+.sheet.tall { top: 56px; }
+.grabber { width: 36px; height: 5px; border-radius: 3px; background: var(--color-grabber); margin: 0 auto; flex: none; }
+.shead { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.shead .lead { font-size: 15px; color: var(--color-secondary); font-weight: 600; }
+.mealbtn { min-height: 44px; display: inline-flex; align-items: center; gap: 6px; font-size: 20px; font-weight: 700; padding: 0 4px; }
+.ico-btn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; color: var(--color-text); background: var(--color-page); flex: none; }
+.helper { font-size: 13px; color: var(--color-secondary); }
+.field { display: flex; flex-direction: column; gap: 8px; }
+.field > label, .field > .lbl { font-size: 13px; font-weight: 600; color: var(--color-secondary); }
+.search { height: 48px; border-radius: 10px; border: 2px solid var(--color-grabber); background: var(--color-card); display: flex; align-items: center; gap: 8px; padding: 0 12px; }
+.search input { border: 0; outline: 0; flex: 1; min-width: 0; height: 44px; background: transparent; font-size: 16px; color: var(--color-text); padding: 0; }
+.search input::placeholder { color: var(--color-secondary); opacity: 1; }
+.chips { display: flex; gap: 8px; overflow-x: auto; flex: none; }
+.chips::-webkit-scrollbar { display: none; }
+.chip { min-height: 44px; padding: 0 16px; border-radius: 999px; display: inline-flex; align-items: center; font-size: 15px; font-weight: 700; white-space: nowrap; border: 1px solid var(--color-card-border); background: var(--color-card); color: var(--color-text); flex: none; }
+.chip[aria-pressed="true"] { background: var(--color-ink); color: var(--color-on-dark); border-color: var(--color-ink); }
+.cap { font-size: 13px; font-weight: 700; color: var(--color-secondary); letter-spacing: .04em; text-transform: uppercase; }
+.list { display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+.srow { display: flex; align-items: center; gap: 4px; min-height: 56px; border-top: 1px solid var(--color-divider); }
+.srow:first-child { border-top: 0; }
+.srow .pick { flex: 1; min-width: 0; min-height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left; padding: 6px 0; }
+.srow .t { font-size: 15px; font-weight: 600; }
+.srow .s { font-size: 13px; color: var(--color-secondary); margin-top: 2px; }
+.srow .kcal { font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.srow .chevbtn { width: 44px; height: 44px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; color: var(--color-secondary); flex: none; }
+.qa { display: flex; flex-direction: column; gap: 8px; border: 1px solid var(--color-card-border); border-radius: 16px; padding: 12px 16px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: 999px; font-size: 15px; font-weight: 700; white-space: nowrap; }
+.btn-primary { min-height: 52px; background: var(--color-blue); color: var(--color-on-dark); width: 100%; }
+.btn-secondary { background: var(--color-card); border: 1px solid var(--color-card-border); color: var(--color-text); }
+.qa-row { display: flex; gap: 8px; align-items: stretch; }
+.qa-row .search { flex: 1; }
+.numinput { font-variant-numeric: tabular-nums; }
+.toast { position: absolute; left: 16px; right: 16px; bottom: 88px; background: var(--color-ink); color: var(--color-on-dark); border-radius: 14px; padding: 8px 8px 8px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; box-shadow: 0 8px 24px rgba(17,19,23,0.22); }
+.toast p { font-size: 14px; line-height: 1.4; }
+.toast .undo { min-height: 44px; padding: 0 14px; border-radius: 999px; color: var(--color-sky); font-weight: 700; font-size: 15px; display: inline-flex; align-items: center; flex: none; }
+.toast .tmr { font-size: 12px; color: var(--color-muted-subtitle); }
+.panel-rows { display: flex; flex-direction: column; }
+.panel-rows > div { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; border-top: 1px solid var(--color-divider); font-size: 15px; }
+.panel-rows > div:first-child { border-top: 0; }
+.panel-rows > div > span:last-child { font-weight: 700; font-variant-numeric: tabular-nums; }
+.stepper { display: inline-flex; align-items: center; gap: 8px; }
+
+/* Desktop */
+.side { width: 240px; flex: none; background: var(--color-ink); color: var(--color-on-dark); padding: 24px; display: flex; flex-direction: column; gap: 24px; }
+.side nav { display: flex; flex-direction: column; gap: 4px; }
+.side nav a { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 12px; border-radius: 12px; font-size: 15px; font-weight: 600; color: var(--color-muted-on-dark); }
+.side nav a[aria-current="page"] { background: var(--color-surface-dark); color: var(--color-on-dark); }
+.dmain { flex: 1; min-width: 0; padding: 32px 40px; display: flex; flex-direction: column; gap: 16px; }
+.d-title { font-size: 40px; line-height: 1; text-transform: uppercase; }
+.dbg { background: var(--color-card); border: 1px solid var(--color-card-border); border-radius: 16px; padding: 20px; }
+.dbg h4 { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
+.dbg .srow { min-height: 60px; }
+.dialog { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 560px; background: var(--color-card); border-radius: 20px; padding: 24px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 12px 32px rgba(17,19,23,0.22); }
+.dialog .shead .lead { font-size: 16px; }
+.dtoast { position: absolute; left: 50%; bottom: 32px; transform: translateX(-50%); width: 560px; }
+</style>
+</head>
+<body>
+<div class="board">
+  <header class="board-head">
+    <h1>Thêm món</h1>
+    <p>IA v2, the add flow (replaces /add). One tap on a recent adds it with its last portion and shows an undo toast for 5 s. The chevron opens the portion panel (five aligned rows). Chỉ ghi kcal logs a total without a food. Desktop uses the centred dialog (sheet.tsx desktopDialog). Copy is Vietnamese; these notes are English.</p>
+  </header>
+
+  <!-- 1. Recents: one-tap -->
+  <section class="state">
+    <h2>1 · Recents: one-tap add and chevron for portions</h2>
+    <div class="pair">
+      <figure class="fig fig-phone">
+        <figcaption>390 px · phone</figcaption>
+        <div class="phone">
+          <header class="hdr"><div class="brand">H1T <span>MICRO</span></div><h3 class="ptitle">Nhật ký</h3></header>
+          <div class="bgbody"><div class="bgbar"></div><div class="bgcard"></div><div class="bgcard short"></div><div class="bgcard"></div></div>
+          <nav class="nav" aria-label="Điều hướng chính"><a href="#">Tổng quan</a><a href="#" aria-current="page">Nhật ký</a><button class="fab" aria-label="Thêm món"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><a href="#">Khám phá</a><a href="#">Cài đặt</a></nav>
+          <div class="scrim" aria-hidden="true"></div>
+          <div class="sheet tall" role="dialog" aria-modal="true" aria-labelledby="s1-title">
+            <div class="grabber" aria-hidden="true"></div>
+            <div class="shead">
+              <h3 id="s1-title" class="lead" style="display:flex;align-items:center;gap:6px">Thêm vào: <button class="mealbtn" aria-haspopup="listbox" style="color:var(--color-text)">Bữa sáng <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button></h3>
+              <button class="ico-btn" aria-label="Đóng"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+            </div>
+            <p class="helper">Tự chọn theo giờ trong ngày · chạm để đổi</p>
+            <div class="field">
+              <label for="s1-q">Tìm món</label>
+              <div class="search"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="color:var(--color-secondary)"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg><input id="s1-q" type="search" placeholder="Tìm món: cơm, trứng, chả là…"></div>
+            </div>
+            <div class="chips" role="group" aria-label="Lọc theo nhóm"><button class="chip" aria-pressed="true">Tất cả</button><button class="chip" aria-pressed="false">Yêu thích</button><button class="chip" aria-pressed="false">Tinh bột</button><button class="chip" aria-pressed="false">Đạm</button></div>
+            <p class="cap">Gần đây</p>
+            <ul class="list">
+              <li class="srow"><button class="pick"><div><div class="t">Yến mạch</div><div class="s">60 g</div></div><span class="kcal">228 kcal</span></button><button class="chevbtn" aria-label="Chọn khẩu phần Yến mạch"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></li>
+              <li class="srow"><button class="pick"><div><div class="t">Yogurt kefir</div><div class="s">200 ml</div></div><span class="kcal">126 kcal</span></button><button class="chevbtn" aria-label="Chọn khẩu phần Yogurt kefir"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></li>
+              <li class="srow"><button class="pick"><div><div class="t">Chuối</div><div class="s">1 quả</div></div><span class="kcal">105 kcal</span></button><button class="chevbtn" aria-label="Chọn khẩu phần Chuối"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></li>
+              <li class="srow"><button class="pick"><div><div class="t">Cơm gạo lứt</div><div class="s">150 g</div></div><span class="kcal">168 kcal</span></button><button class="chevbtn" aria-label="Chọn khẩu phần Cơm gạo lứt"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></li>
+              <li class="srow"><button class="pick"><div><div class="t">Thịt bò nạc</div><div class="s">150 g</div></div><span class="kcal">320 kcal</span></button><button class="chevbtn" aria-label="Chọn khẩu phần Thịt bò nạc"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></li>
+              <li class="srow"><button class="pick"><div><div class="t">Chà là</div><div class="s">30 g</div></div><span class="kcal">84 kcal</span></button><button class="chevbtn" aria-label="Chọn khẩu phần Chà là"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></li>
+              <li class="srow"><button class="pick"><div><div class="t">Bột củ dền</div><div class="s">3 g</div></div><span class="kcal">10 kcal</span></button><button class="chevbtn" aria-label="Chọn khẩu phần Bột củ dền"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></li>
+            </ul>
+            <div class="srow" style="border-top:1px solid var(--color-divider)"><button class="pick" style="justify-content:flex-start;color:var(--color-blue);font-weight:700;font-size:15px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Chỉ ghi kcal</button></div>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="fig fig-desktop">
+        <figcaption>1280 px · desktop (dialog)</figcaption>
+        <div class="desktop">
+          <aside class="side">
+            <div class="brand">H1T <span>MICRO</span></div>
+            <nav aria-label="Điều hướng chính">
+              <a href="#">Tổng quan</a><a href="#" aria-current="page">Nhật ký</a><a href="#">Khám phá</a><a href="#">Cài đặt</a>
+            </nav>
+          </aside>
+          <div class="dmain"><h3 class="ptitle d-title">Nhật ký</h3><div class="dbg" style="height:260px"></div><div class="dbg" style="height:120px"></div></div>
+          <div class="scrim" aria-hidden="true"></div>
+          <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="d1-title" style="height:640px">
+            <div class="shead">
+              <h3 id="d1-title" class="lead" style="display:flex;align-items:center;gap:6px">Thêm vào: <button class="mealbtn" aria-haspopup="listbox" style="color:var(--color-text)">Bữa sáng <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button></h3>
+              <button class="ico-btn" aria-label="Đóng"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+            </div>
+            <div class="search"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="color:var(--color-secondary)"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg><input id="d1-q" type="search" placeholder="Tìm món: cơm, trứng, chả là…" aria-label="Tìm món"></div>
+            <p class="cap">Gần đây</p>
+            <ul class="list">
+              <li class="srow"><button class="pick"><div><div class="t">Yến mạch</div><div class="s">60 g</div></div><span class="kcal">228 kcal</span></button><button class="chevbtn" aria-label="Chọn khẩu phần Yến mạch"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></li>
+              <li class="srow"><button class="pick"><div><div class="t">Yogurt kefir</div><div class="s">200 ml</div></div><span class="kcal">126 kcal</span></button><button class="chevbtn" aria-label="Chọn khẩu phần Yogurt kefir"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></li>
+              <li class="srow"><button class="pick"><div><div class="t">Chuối</div><div class="s">1 quả</div></div><span class="kcal">105 kcal</span></button><button class="chevbtn" aria-label="Chọn khẩu phần Chuối"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></li>
+              <li class="srow"><button class="pick"><div><div class="t">Cơm gạo lứt</div><div class="s">150 g</div></div><span class="kcal">168 kcal</span></button><button class="chevbtn" aria-label="Chọn khẩu phần Cơm gạo lứt"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></li>
+            </ul>
+            <div class="srow"><button class="pick" style="justify-content:flex-start;color:var(--color-blue);font-weight:700;font-size:15px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Chỉ ghi kcal</button></div>
+          </div>
+        </div>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 2. Undo toast -->
+  <section class="state">
+    <h2>2 · Undo toast after a one-tap add</h2>
+    <div class="pair">
+      <figure class="fig fig-phone">
+        <figcaption>390 px · phone</figcaption>
+        <div class="phone">
+          <header class="hdr"><div class="brand">H1T <span>MICRO</span></div><h3 class="ptitle">Nhật ký</h3></header>
+          <div class="bgbody"><div class="bgbar"></div><div class="bgcard"></div><div class="bgcard short"></div><div class="bgcard"></div></div>
+          <div class="toast" role="status">
+            <p>Đã thêm Yến mạch 60 g vào Bữa sáng</p>
+            <button class="undo">Hoàn tác</button>
+          </div>
+          <nav class="nav" aria-label="Điều hướng chính"><a href="#">Tổng quan</a><a href="#" aria-current="page">Nhật ký</a><button class="fab" aria-label="Thêm món"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><a href="#">Khám phá</a><a href="#">Cài đặt</a></nav>
+        </div>
+      </figure>
+
+      <figure class="fig fig-desktop">
+        <figcaption>1280 px · desktop</figcaption>
+        <div class="desktop">
+          <aside class="side">
+            <div class="brand">H1T <span>MICRO</span></div>
+            <nav aria-label="Điều hướng chính"><a href="#">Tổng quan</a><a href="#" aria-current="page">Nhật ký</a><a href="#">Khám phá</a><a href="#">Cài đặt</a></nav>
+          </aside>
+          <div class="dmain"><h3 class="ptitle d-title">Nhật ký</h3><div class="dbg" style="height:260px"></div><div class="dbg" style="height:120px"></div></div>
+          <div class="dtoast" role="status">
+            <div class="toast" style="position:static;left:auto;right:auto;bottom:auto;width:100%">
+              <p>Đã thêm Yến mạch 60 g vào Bữa sáng</p>
+              <button class="undo">Hoàn tác</button>
+            </div>
+          </div>
+        </div>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 3. Chỉ ghi kcal -->
+  <section class="state">
+    <h2>3 · Chỉ ghi kcal (quick add without a food)</h2>
+    <div class="pair">
+      <figure class="fig fig-phone">
+        <figcaption>390 px · phone</figcaption>
+        <div class="phone">
+          <header class="hdr"><div class="brand">H1T <span>MICRO</span></div><h3 class="ptitle">Nhật ký</h3></header>
+          <div class="bgbody"><div class="bgbar"></div><div class="bgcard"></div><div class="bgcard short"></div><div class="bgcard"></div></div>
+          <nav class="nav" aria-label="Điều hướng chính"><a href="#">Tổng quan</a><a href="#" aria-current="page">Nhật ký</a><button class="fab" aria-label="Thêm món"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><a href="#">Khám phá</a><a href="#">Cài đặt</a></nav>
+          <div class="scrim" aria-hidden="true"></div>
+          <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="s3-title" style="top:auto">
+            <div class="grabber" aria-hidden="true"></div>
+            <div class="shead">
+              <h3 id="s3-title" class="lead" style="font-size:20px;font-weight:700;color:var(--color-text)">Chỉ ghi kcal</h3>
+              <button class="ico-btn" aria-label="Đóng"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+            </div>
+            <p class="helper">Ghi tổng kcal của Bữa sáng, không cần chọn món. Món sẽ không có trong Vi chất.</p>
+            <div class="field">
+              <label for="s3-kcal">Kcal</label>
+              <div class="search" style="justify-content:space-between"><input id="s3-kcal" class="numinput" type="text" inputmode="numeric" value="350" style="font-size:20px;font-weight:700"><span style="color:var(--color-secondary);font-weight:600">kcal</span></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 2fr;gap:8px">
+              <button class="btn btn-secondary">Huỷ</button>
+              <button class="btn btn-primary" style="width:auto">Thêm 350 kcal</button>
+            </div>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="fig fig-desktop">
+        <figcaption>1280 px · desktop (dialog)</figcaption>
+        <div class="desktop">
+          <aside class="side">
+            <div class="brand">H1T <span>MICRO</span></div>
+            <nav aria-label="Điều hướng chính"><a href="#">Tổng quan</a><a href="#" aria-current="page">Nhật ký</a><a href="#">Khám phá</a><a href="#">Cài đặt</a></nav>
+          </aside>
+          <div class="dmain"><h3 class="ptitle d-title">Nhật ký</h3><div class="dbg" style="height:260px"></div><div class="dbg" style="height:120px"></div></div>
+          <div class="scrim" aria-hidden="true"></div>
+          <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="d3-title" style="width:460px">
+            <div class="shead"><h3 id="d3-title" class="lead" style="font-size:20px;font-weight:700;color:var(--color-text)">Chỉ ghi kcal · Bữa sáng</h3><button class="ico-btn" aria-label="Đóng"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+            <p class="helper">Ghi tổng kcal của Bữa sáng, không cần chọn món. Món sẽ không có trong Vi chất.</p>
+            <div class="field">
+              <label for="d3-kcal">Kcal</label>
+              <div class="search" style="justify-content:space-between"><input id="d3-kcal" class="numinput" type="text" inputmode="numeric" value="350" style="font-size:20px;font-weight:700"><span style="color:var(--color-secondary);font-weight:600">kcal</span></div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:8px">
+              <button class="btn btn-secondary">Huỷ</button>
+              <button class="btn btn-primary" style="width:auto;padding:0 24px">Thêm 350 kcal</button>
+            </div>
+          </div>
+        </div>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 4. Portion panel -->
+  <section class="state">
+    <h2>4 · Portion panel (chevron on Yến mạch)</h2>
+    <div class="pair">
+      <figure class="fig fig-phone">
+        <figcaption>390 px · phone</figcaption>
+        <div class="phone">
+          <header class="hdr"><div class="brand">H1T <span>MICRO</span></div><h3 class="ptitle">Nhật ký</h3></header>
+          <div class="bgbody"><div class="bgbar"></div><div class="bgcard"></div><div class="bgcard short"></div><div class="bgcard"></div></div>
+          <nav class="nav" aria-label="Điều hướng chính"><a href="#">Tổng quan</a><a href="#" aria-current="page">Nhật ký</a><button class="fab" aria-label="Thêm món"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><a href="#">Khám phá</a><a href="#">Cài đặt</a></nav>
+          <div class="scrim" aria-hidden="true"></div>
+          <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="s4-title" style="top:auto">
+            <div class="grabber" aria-hidden="true"></div>
+            <div class="shead">
+              <div><h3 id="s4-title" style="font-size:20px;font-weight:700">Yến mạch</h3><p class="helper">USDA · mỗi khẩu phần</p></div>
+              <button class="ico-btn" aria-label="Đóng"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+            </div>
+            <div class="chips" role="group" aria-label="Khẩu phần" style="flex-wrap:wrap;overflow:visible"><button class="chip" aria-pressed="true">60 g</button><button class="chip" aria-pressed="false">1 chén · 40 g</button><button class="chip" aria-pressed="false">100 g</button></div>
+            <div class="panel-rows">
+              <div><span>Kcal</span><span>228</span></div>
+              <div><span>Đạm</span><span>8 g</span></div>
+              <div><span>Tinh bột</span><span>40 g</span></div>
+              <div><span>Béo</span><span>4 g</span></div>
+              <div><span>Chất xơ</span><span>6 g</span></div>
+            </div>
+            <button class="btn btn-primary">Thêm 228 kcal vào Bữa sáng</button>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="fig fig-desktop">
+        <figcaption>1280 px · desktop (dialog)</figcaption>
+        <div class="desktop">
+          <aside class="side">
+            <div class="brand">H1T <span>MICRO</span></div>
+            <nav aria-label="Điều hướng chính"><a href="#">Tổng quan</a><a href="#" aria-current="page">Nhật ký</a><a href="#">Khám phá</a><a href="#">Cài đặt</a></nav>
+          </aside>
+          <div class="dmain"><h3 class="ptitle d-title">Nhật ký</h3><div class="dbg" style="height:260px"></div><div class="dbg" style="height:120px"></div></div>
+          <div class="scrim" aria-hidden="true"></div>
+          <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="d4-title" style="width:460px">
+            <div class="shead"><div><h3 id="d4-title" style="font-size:20px;font-weight:700">Yến mạch</h3><p class="helper">USDA · mỗi khẩu phần · Bữa sáng</p></div><button class="ico-btn" aria-label="Đóng"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+            <div class="chips" role="group" aria-label="Khẩu phần" style="flex-wrap:wrap;overflow:visible"><button class="chip" aria-pressed="true">60 g</button><button class="chip" aria-pressed="false">1 chén · 40 g</button><button class="chip" aria-pressed="false">100 g</button></div>
+            <div class="panel-rows">
+              <div><span>Kcal</span><span>228</span></div>
+              <div><span>Đạm</span><span>8 g</span></div>
+              <div><span>Tinh bột</span><span>40 g</span></div>
+              <div><span>Béo</span><span>4 g</span></div>
+              <div><span>Chất xơ</span><span>6 g</span></div>
+            </div>
+            <button class="btn btn-primary">Thêm 228 kcal vào Bữa sáng</button>
+          </div>
+        </div>
+      </figure>
+    </div>
+  </section>
+</div>
+</body>
+</html>
