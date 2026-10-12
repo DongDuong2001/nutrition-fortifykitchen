@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -16,7 +15,9 @@ import (
 	"github.com/go-chi/cors"
 
 	"nutrition-api/internal/auth"
+	"nutrition-api/internal/config"
 	"nutrition-api/internal/diary"
+	"nutrition-api/internal/logger"
 	"nutrition-api/internal/nutrition"
 	"nutrition-api/internal/payment"
 	"nutrition-api/internal/vault"
@@ -25,32 +26,34 @@ import (
 )
 
 func main() {
-	// 1. Initialize Sentry if DSN is provided
-	sentryDSN := os.Getenv("SENTRY_DSN")
-	if sentryDSN != "" {
+	// 1. Load centralized configuration
+	cfg := config.Load()
+
+	// 2. Initialize Sentry if DSN is provided
+	if cfg.SentryDSN != "" {
 		err := sentry.Init(sentry.ClientOptions{
-			Dsn:              sentryDSN,
+			Dsn:              cfg.SentryDSN,
 			TracesSampleRate: 1.0,
-			Environment:      os.Getenv("ENVIRONMENT"),
+			Environment:      cfg.Environment,
 		})
 		if err != nil {
-			log.Printf("Sentry initialization failed: %v", err)
+			logger.Log.Error().Err(err).Msg("Sentry initialization failed")
 		} else {
 			defer sentry.Flush(2 * time.Second)
-			log.Println("Sentry initialized successfully")
+			logger.Log.Info().Msg("Sentry initialized successfully")
 		}
 	}
 
-	// 2. Initialize PostgreSQL 17 Connection Pool (Session Mode on port 5432)
+	// 3. Initialize PostgreSQL 17 Connection Pool
 	ctx := context.Background()
 	dbClient, err := database.NewPostgresPool(ctx)
 	if err != nil {
-		log.Fatalf("Database connection initialization failed: %v", err)
+		logger.Log.Fatal().Err(err).Msg("Database connection initialization failed")
 	}
 	defer dbClient.Close()
-	log.Println("PostgreSQL 17 connection pool established (session mode, search_path: nutrition, public)")
+	logger.Log.Info().Msg("PostgreSQL 17 connection pool established (session mode, search_path: nutrition, public)")
 
-	// 3. Initialize Repositories and Services
+	// 4. Initialize Repositories and Services
 	diaryRepo := diary.NewRepository(dbClient.Pool)
 	diaryService := diary.NewService(diaryRepo)
 	diaryHandler := diary.NewHandler(diaryService)
@@ -67,26 +70,26 @@ func main() {
 
 	authMiddleware := auth.NewMiddleware()
 
-	// 4. Setup Chi Router
+	// 5. Setup Chi Router
 	r := chi.NewRouter()
 
 	// Global Middlewares
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
-	r.Use(middleware.Logger)
+	r.Use(logger.RequestLogger)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(30 * time.Second))
 
-	if sentryDSN != "" {
+	if cfg.SentryDSN != "" {
 		sentryMiddleware := sentryhttp.New(sentryhttp.Options{Repanic: true})
 		r.Use(sentryMiddleware.Handle)
 	}
 
 	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001"},
+		AllowedOrigins:   cfg.AllowedOrigins,
 		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token", "X-API-Key"},
-		ExposedHeaders:   []string{"Link"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token", "X-API-Key", "X-Request-ID"},
+		ExposedHeaders:   []string{"Link", "X-Request-ID"},
 		AllowCredentials: true,
 		MaxAge:           300,
 	}))
@@ -137,13 +140,8 @@ func main() {
 		})
 	})
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-
 	server := &http.Server{
-		Addr:         ":" + port,
+		Addr:         ":" + cfg.Port,
 		Handler:      r,
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
@@ -155,21 +153,21 @@ func main() {
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 
 	go func() {
-		log.Printf("Nutrition API server listening on http://localhost:%s", port)
+		logger.Log.Info().Str("port", cfg.Port).Msg("Nutrition API server listening")
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("Server ListenAndServe error: %v", err)
+			logger.Log.Fatal().Err(err).Msg("Server ListenAndServe error")
 		}
 	}()
 
 	<-stop
-	log.Println("Shutting down API server gracefully...")
+	logger.Log.Info().Msg("Shutting down API server gracefully...")
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	if err := server.Shutdown(shutdownCtx); err != nil {
-		log.Fatalf("Server forced to shutdown: %v", err)
+		logger.Log.Fatal().Err(err).Msg("Server forced to shutdown")
 	}
 
-	log.Println("API server stopped.")
+	logger.Log.Info().Msg("API server stopped.")
 }
