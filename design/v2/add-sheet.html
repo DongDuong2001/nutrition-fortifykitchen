@@ -132,6 +132,10 @@ h1, h2, h3, h4, p { margin: 0; }
 .dialog { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 560px; background: var(--color-card); border-radius: 20px; padding: 24px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 12px 32px rgba(17,19,23,0.22); }
 .dialog .shead .lead { font-size: 16px; }
 .dtoast { position: absolute; left: 50%; bottom: 32px; transform: translateX(-50%); width: 560px; }
+
+/* cc-15c: paper header behind the sheet (no wordmark) */
+.ptop { padding: 12px 16px 4px; display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--color-page); }
+.ptitle-p { font-family: 'Saira Condensed', sans-serif; font-style: italic; font-weight: 900; font-size: 28px; line-height: 1; text-transform: uppercase; color: var(--color-text); }
 </style>
 </head>
 <body>
@@ -148,7 +152,7 @@ h1, h2, h3, h4, p { margin: 0; }
       <figure class="fig fig-phone">
         <figcaption>390 px · phone</figcaption>
         <div class="phone">
-          <header class="hdr"><div class="brand">H1T <span>MICRO</span></div><h3 class="ptitle">Nhật ký</h3></header>
+          <div class="ptop"><h3 class="ptitle-p">Nhật ký</h3></div>
           <div class="bgbody"><div class="bgbar"></div><div class="bgcard"></div><div class="bgcard short"></div><div class="bgcard"></div></div>
           <nav class="nav" aria-label="Điều hướng chính"><a href="#">Tổng quan</a><a href="#" aria-current="page">Nhật ký</a><button class="fab" aria-label="Thêm món"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><a href="#">Khám phá</a><a href="#">Cài đặt</a></nav>
           <div class="scrim" aria-hidden="true"></div>
@@ -164,6 +168,10 @@ h1, h2, h3, h4, p { margin: 0; }
               <div class="search"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="color:var(--color-secondary)"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg><input id="s1-q" type="search" placeholder="Tìm món: cơm, trứng, chả là…"></div>
             </div>
             <div class="chips" role="group" aria-label="Lọc theo nhóm"><button class="chip" aria-pressed="true">Tất cả</button><button class="chip" aria-pressed="false">Yêu thích</button><button class="chip" aria-pressed="false">Tinh bột</button><button class="chip" aria-pressed="false">Đạm</button></div>
+            <p class="cap">Bữa của tôi</p>
+            <ul class="list">
+              <li class="srow"><button class="pick" aria-label="Thêm cả Bữa sáng quen vào Bữa sáng, 459 kcal"><div><div class="t">Bữa sáng quen</div><div class="s">3 món · Yến mạch, Yogurt kefir, Chuối</div></div><span class="kcal">459 kcal</span></button><span style="width:44px;flex:none" aria-hidden="true"></span></li>
+            </ul>
             <p class="cap">Gần đây</p>
             <ul class="list">
               <li class="srow"><button class="pick"><div><div class="t">Yến mạch</div><div class="s">60 g</div></div><span class="kcal">228 kcal</span></button><button class="chevbtn" aria-label="Chọn khẩu phần Yến mạch"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></li>
@@ -197,6 +205,10 @@ h1, h2, h3, h4, p { margin: 0; }
               <button class="ico-btn" aria-label="Đóng"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
             </div>
             <div class="search"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="color:var(--color-secondary)"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg><input id="d1-q" type="search" placeholder="Tìm món: cơm, trứng, chả là…" aria-label="Tìm món"></div>
+            <p class="cap">Bữa của tôi</p>
+            <ul class="list">
+              <li class="srow"><button class="pick" aria-label="Thêm cả Bữa sáng quen vào Bữa sáng, 459 kcal"><div><div class="t">Bữa sáng quen</div><div class="s">3 món · Yến mạch, Yogurt kefir, Chuối</div></div><span class="kcal">459 kcal</span></button><span style="width:44px;flex:none" aria-hidden="true"></span></li>
+            </ul>
             <p class="cap">Gần đây</p>
             <ul class="list">
               <li class="srow"><button class="pick"><div><div class="t">Yến mạch</div><div class="s">60 g</div></div><span class="kcal">228 kcal</span></button><button class="chevbtn" aria-label="Chọn khẩu phần Yến mạch"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></li>
@@ -213,15 +225,15 @@ h1, h2, h3, h4, p { margin: 0; }
 
   <!-- 2. Undo toast -->
   <section class="state">
-    <h2>2 · Undo toast after a one-tap add</h2>
+    <h2>2 · Undo toast after a one-tap add (a saved meal adds every food, one toast)</h2>
     <div class="pair">
       <figure class="fig fig-phone">
         <figcaption>390 px · phone</figcaption>
         <div class="phone">
-          <header class="hdr"><div class="brand">H1T <span>MICRO</span></div><h3 class="ptitle">Nhật ký</h3></header>
+          <div class="ptop"><h3 class="ptitle-p">Nhật ký</h3></div>
           <div class="bgbody"><div class="bgbar"></div><div class="bgcard"></div><div class="bgcard short"></div><div class="bgcard"></div></div>
           <div class="toast" role="status">
-            <p>Đã thêm Yến mạch 60 g vào Bữa sáng</p>
+            <p>Đã thêm 3 món từ Bữa sáng quen vào Bữa sáng</p>
             <button class="undo">Hoàn tác</button>
           </div>
           <nav class="nav" aria-label="Điều hướng chính"><a href="#">Tổng quan</a><a href="#" aria-current="page">Nhật ký</a><button class="fab" aria-label="Thêm món"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><a href="#">Khám phá</a><a href="#">Cài đặt</a></nav>
@@ -239,7 +251,7 @@ h1, h2, h3, h4, p { margin: 0; }
           <div class="dmain"><h3 class="ptitle d-title">Nhật ký</h3><div class="dbg" style="height:260px"></div><div class="dbg" style="height:120px"></div></div>
           <div class="dtoast" role="status">
             <div class="toast" style="position:static;left:auto;right:auto;bottom:auto;width:100%">
-              <p>Đã thêm Yến mạch 60 g vào Bữa sáng</p>
+              <p>Đã thêm 3 món từ Bữa sáng quen vào Bữa sáng</p>
               <button class="undo">Hoàn tác</button>
             </div>
           </div>
@@ -255,7 +267,7 @@ h1, h2, h3, h4, p { margin: 0; }
       <figure class="fig fig-phone">
         <figcaption>390 px · phone</figcaption>
         <div class="phone">
-          <header class="hdr"><div class="brand">H1T <span>MICRO</span></div><h3 class="ptitle">Nhật ký</h3></header>
+          <div class="ptop"><h3 class="ptitle-p">Nhật ký</h3></div>
           <div class="bgbody"><div class="bgbar"></div><div class="bgcard"></div><div class="bgcard short"></div><div class="bgcard"></div></div>
           <nav class="nav" aria-label="Điều hướng chính"><a href="#">Tổng quan</a><a href="#" aria-current="page">Nhật ký</a><button class="fab" aria-label="Thêm món"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><a href="#">Khám phá</a><a href="#">Cài đặt</a></nav>
           <div class="scrim" aria-hidden="true"></div>
@@ -312,7 +324,7 @@ h1, h2, h3, h4, p { margin: 0; }
       <figure class="fig fig-phone">
         <figcaption>390 px · phone</figcaption>
         <div class="phone">
-          <header class="hdr"><div class="brand">H1T <span>MICRO</span></div><h3 class="ptitle">Nhật ký</h3></header>
+          <div class="ptop"><h3 class="ptitle-p">Nhật ký</h3></div>
           <div class="bgbody"><div class="bgbar"></div><div class="bgcard"></div><div class="bgcard short"></div><div class="bgcard"></div></div>
           <nav class="nav" aria-label="Điều hướng chính"><a href="#">Tổng quan</a><a href="#" aria-current="page">Nhật ký</a><button class="fab" aria-label="Thêm món"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><a href="#">Khám phá</a><a href="#">Cài đặt</a></nav>
           <div class="scrim" aria-hidden="true"></div>
