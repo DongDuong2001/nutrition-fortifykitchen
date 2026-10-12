@@ -83,6 +83,10 @@ Each open question from the first cc-15 pass, with the answer. Items 14 and 15 a
 
 ## Checks
 
-Checks are recorded with each render (see the PNG commit). The rules are: no horizontal scroll on the document at 390 px; every `a`, `button`, `input` and role=button/switch inside the frames is at least 44×44 px (phone bottom-nav items are 56 px); every text node at ≥ 4.5:1 against its computed background.
+Re-rendered 12/10 with Playwright (Chromium) at 390×844 and 1280×800, full page, for all six files. Results:
+
+- **Horizontal scroll:** none on the document at 390 px (scrollWidth = clientWidth in all six files).
+- **Tap targets:** 0 of 504 controls under 44×44 px. The sidebar Thêm món button has `min-height: 44px` (it measured 42 px before this pass). Phone bottom-nav items are 56 px.
+- **Text contrast:** 0 of 1.415 text nodes under 4.5:1 (3:1 for large text) against their computed background.
 
 Decorative elements are not covered: the empty bar segments (#E6E1D7 on white, 1.3:1) and the dividers are below 3:1. Each bar's value is printed next to it, so the bar is supplementary.
