@@ -20,7 +20,7 @@ const sairaCondensed = Saira_Condensed({
 
 export const metadata: Metadata = {
   title: "H1T MICRO | Dinh dưỡng & Vi chất Chuyên sâu",
-  description: "Theo dõi 26 vi chất và macro dinh dưỡng chuyên sâu cho vận động và tập luyện.",
+  description: "Theo dõi 22 vi chất và macro dinh dưỡng chuyên sâu cho vận động và tập luyện.",
 };
 
 export default function RootLayout({
