@@ -7,6 +7,7 @@ export const PERMANENT_REDIRECTS = [
   { source: "/profile", destination: "/settings/profile", permanent: true },
   { source: "/profile/weight", destination: "/settings/profile/weight", permanent: true },
   { source: "/foods", destination: "/explore", permanent: true },
+  { source: "/login", destination: "/signin", permanent: true },
 ] as const;
 
 /** The URL an old route redirects to (query string kept), or null when the route is not redirected. */

@@ -2,12 +2,13 @@ import { describe, it, expect } from "vitest";
 import { PERMANENT_REDIRECTS, redirectTarget } from "../redirects";
 
 describe("lib/redirects", () => {
-  it("lists the four IA-v2 redirects as permanent", () => {
+  it("lists the five IA-v2 redirects as permanent", () => {
     expect(PERMANENT_REDIRECTS).toEqual([
       { source: "/today", destination: "/diary", permanent: true },
       { source: "/profile", destination: "/settings/profile", permanent: true },
       { source: "/profile/weight", destination: "/settings/profile/weight", permanent: true },
       { source: "/foods", destination: "/explore", permanent: true },
+      { source: "/login", destination: "/signin", permanent: true },
     ]);
   });
 
@@ -16,6 +17,7 @@ describe("lib/redirects", () => {
     expect(redirectTarget("/profile")).toBe("/settings/profile");
     expect(redirectTarget("/profile/weight")).toBe("/settings/profile/weight");
     expect(redirectTarget("/foods")).toBe("/explore");
+    expect(redirectTarget("/login")).toBe("/signin");
   });
 
   it("keeps the query string", () => {
