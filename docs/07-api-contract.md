@@ -623,3 +623,46 @@ Provides aggregated time-series data across 7 or 30 calendar days for energy, ma
   - Created with `created_by = auth.uid()`.
   - Visible only to the creating user in their *"Món của tôi"* category (`cua_toi`) and search results.
   - Standard system catalog foods (`is_custom: false`, `source: "coach"`) are shared read-only across all authenticated users.
+
+
+---
+
+## 4. Error Handling & Standard Error Codes
+
+### 4.1. Unified Error Envelope
+All error responses from the Go API (HTTP status $\ge 400$) **must adhere to a single unified JSON structure**:
+```json
+{
+  "code": "ERROR_CODE_STRING",
+  "message": "Human-readable description of the error."
+}
+```
+
+For validation failures with field-level breakdowns, an optional `details` map may be included:
+```json
+{
+  "code": "VALIDATION_FAILED",
+  "message": "Validation failed for the submitted payload.",
+  "details": {
+    "weight_kg": "Weight must be between 30 and 300 kg.",
+    "birth_year": "Birth year must be between 1900 and the current year."
+  }
+}
+```
+
+### 4.2. Standard Error Codes Handled by the UI
+
+| HTTP Status | Error Code (`code`) | Meaning | UI Handling |
+|---|---|---|---|
+| `401` | `UNAUTHORIZED` | Missing or invalid Bearer JWT token | Redirects user to `/signin` |
+| `401` | `AUTH_TOKEN_EXPIRED` | Supabase auth token expired | Initiates session refresh or redirects to `/signin` |
+| `403` | `FORBIDDEN` | Access denied (e.g. non-owner modifying custom food, or non-admin hitting `/api/v1/admin/*`) | Displays access denied alert and blocks mutation |
+| `404` | `FOOD_NOT_FOUND` | Food item not found by ID | Renders not-found state or displays *"Không tìm thấy món này"* (`apps/web/app/foods/[id]/page.tsx`) |
+| `404` | `ENTRY_NOT_FOUND` | Diary entry not found | Displays notification that entry is no longer available |
+| `409` | `PAST_DAY_READ_ONLY` | Mutation attempted on a date prior to today | Preserves read-only state and displays toast *"Không thể chỉnh sửa dữ liệu của ngày đã qua"* |
+| `409` | `ENTRY_ID_CONFLICT` | Client-generated UUID collision | Server applies idempotent `ON CONFLICT DO NOTHING` and returns current entry |
+| `422` | `VALIDATION_FAILED` | Payload failed structural validation rules | Displays corresponding validation message below target `<FormRow>` |
+| `422` | `INVALID_WEIGHT_RANGE` | Weight outside valid bounds (30–300 kg) | Renders error *"Nhập cân nặng từ 30 đến 300 kg"* on `/profile/weight` |
+| `422` | `INVALID_BIRTH_YEAR` | Birth year outside 1900 to current year | Renders error *"Nhập năm sinh từ 1900 đến {năm hiện tại}"* |
+| `429` | `RATE_LIMIT_EXCEEDED` | Request rate limit exceeded | Displays rate limit notification *"Thử lại sau ít phút"* |
+| `500` | `INTERNAL_SERVER_ERROR` | Unexpected backend error | Displays toast *"Chưa lưu được. Thử lại sau ít phút"* or routes to 500 page (`app/error.tsx`) |
