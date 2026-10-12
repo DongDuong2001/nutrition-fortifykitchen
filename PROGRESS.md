@@ -3,12 +3,11 @@
 ## Now working
 | Task | Owner | Files / routes |
 |---|---|---|
-| ag-07 (a11y audit completion) | Antigravity | apps/web/app/foods/[id]/page.tsx, apps/web/app/foods/new/page.tsx, apps/web/components/ui/form-row.tsx, apps/web/components/onboarding/magic-link-form.tsx, apps/web/lib/training.ts, apps/web/app/globals.css, apps/web/tests/probes/ag07.py, docs/audit-ag04.md |
-
 
 | Date | Commit | Built | Next |
 | --- | --- | --- | --- |
 | 12/10/2026 | cc-14 | Whole-app smoke probe tests/probes/smoke.py: 27 page.tsx routes plus the 404 URL, at 390×844 and 1280×800 (56 runs). Checks console and hydration errors, horizontal scroll, a visible header, and text overflow (scroll containers and sr-only skipped). /foods is asserted to redirect to /add. Screenshots in apps/web/tests/probes/out/. tests/probes/run_all.py and npm run probe:all run every probe in one table: cc02-final only with PROBE_DEV=1; ag04_audit and screenshots are REPORT (no exit gate). No app code changed. | Found (cc-14) below: 2 real bugs (/foods, /login); 17 header-rule FAILs need a decision (OPEN_QUESTIONS cc-14) |
+| 12/10/2026 | ag-07 | Accessibility fixes (audit-ag04): gram input h-full in 44px label and focus ring in /foods/[id], htmlFor/id linking in /foods/new FormRows, --color-destructive-text token (#C83A3F, >=4.5:1 contrast on white & paper) for required '*', magic-link email input keyboard focus ring, Vietnamese salt comment 1–1,5 g in training.ts, ag07.py verification probe (46/46 checks passed). | Ready for merge |
 | 12/10/2026 | cc-12b | Trends: a day above the max counts as on target (countDaysOnTarget is min-only; max kept for display), tests first (calcium 1.600, magnesium 800 and potassium 7.000 count as đạt). Kcal legend has three items again: Trong mục tiêu, Thiếu, striped Hôm nay (đang ghi), tokens only. Nutrient rows show "Mục tiêu: 1.200–1.500 mg" through targetRangeText (same formatter as /micros), min only when there is no max. The list header reads "Mục tiêu / ngày". Mock: the third day of the 7-day series (2.380 kcal) is above the 2.275 kcal max; the 30-day window reuses those seven days, so it has one over-range day too. cc12a's calcium assertion updated to the range. | Over-range bar in the desktop chart not separately checked; cc-13 audit findings |
 | 11/10/2026 | cc-12a | Merged feat/ui-ag-03 (Trends) and feat/ui-ag-04 (docs/audit-ag04.md, tests/probes/ag04_audit.py) with no conflicts. Trends: the 7- and 30-day windows end today (anchorTrendDays, set after mount); targets come from the profile (trendTargetsFrom(calculateTargets)), so calcium 1.200–1.500, magnesium 600–750, potassium from weight, iron 8/18/28; a kcal day above the range is on target, not red (kcalOnTarget); legend Trong mục tiêu / Thiếu; Saira Condensed for the title and the protein number. /micros links to /trends (phone footer row under the summary, desktop link in the stat row). Units added to the Trends rows (TB and Mục tiêu). | Audit findings (cc-13); Trends has no over-range sample day in the mock, so the over case is covered by unit test only |
 | 11/10/2026 | cc-12 | Design parity sweep of the 25 screens (docs/parity-cc12.md, probe cc12.py: copy diff + screenshots + calendar check). Fixed 10: Micros footnote and "đã đạt mục tiêu"; FoodDetail "Khẩu phần" label; CreateFood micro example list; calendar is a centred dialog at ≥1024 px (Esc closes, focus returns to the date; components/ui/sheet.tsx `desktopDialog`); TodayStates offline heading; Profile "Nhắc nhở" shows "Đã bật"; setup desktop "Bước 1/2 · Về bạn" and "Mục tiêu mỗi ngày"; SignUp desktop "TẠO TÀI KHOẢN". 15 left as decided and 12 questions (OPEN_QUESTIONS cc-12). Design files need support.js (not in the repo), so layout was checked from source, not rendered. | NutrientDetail is a placeholder (OPEN_QUESTIONS cc-12); vi chất count 21 vs 22 |
@@ -49,6 +48,21 @@ Smoke on prod :3101 (`npm run probe:all`): 35 PASS, 21 FAIL of 56 route × width
 - `npm run test:hydration`: 0 hydration errors on all routes.
 - `npm run probe:all` (ALIGN_BASE_URL=http://localhost:3101): 13 PASS, 2 REPORT (ag04_audit, screenshots), 1 FAIL (smoke: 35 PASS / 21 FAIL of 56), 1 SKIP (cc02-final, dev only).
 - Edges: no UI change, so no new edge groups.
+## Quality Gate Summary (ag-07)
+- Branch: `feat/ui-ag-07` on port 3100 (`ALIGN_BASE_URL=http://localhost:3100`).
+- Gates:
+  - `npm run typecheck`: clean (`tsc --noEmit` passed, 0 errors).
+  - `npm run test`: 248 tests passed in 20 test files.
+  - `npm run build`: 26 routes compiled cleanly.
+  - `npm run test:align`: all pairs passed (<= 1px difference across 390 and 1440).
+  - `npm run test:hydration`: all 28 route checks passed (0 hydration errors across 390 and 1440 with sessionStorage).
+- Probes:
+  - `ag07.py`: 46/46 checks passed at both 390 mobile and 1440 desktop:
+    - Item 1 (/foods/[id]): `#fd-size` input fills 44px label (`h-full`, height 44px) and shows visible focus ring on wrapper (`focus-visible:ring-2 ring-blue`).
+    - Item 2 (/foods/new): all inputs (`cf-name`, `cf-size`, `cf-kcal`, `cf-pro`, `cf-carbs`, `cf-fat`) linked to labels via `htmlFor`/`id`; clicking labels focuses inputs.
+    - Item 3: `--color-destructive-text` (#C83A3F) for required `*` achieves 5.08:1 on #FFFFFF and 4.50:1 on #F3F1EC (both >= 4.5:1).
+    - Item 4 (/signin): magic link email input has visible focus ring on Tab (`focus-visible:ring-2 focus-visible:ring-blue`).
+  - Note: `ag06.py` is committed on branch `feat/ui-ag-06` (not yet merged into `feat/ui`, and out of allowed files list for ag-07).
 
 ## Quality Gate Summary (ag-01)
 - `ALIGN_BASE_URL=http://localhost:3101 npm run check` on feat/ui with cc-04 and ag-01: all 5 gates passed (tsc --noEmit, vitest: 169 passed in 15 files, build: 19/19 routes, test:align: all pairs aligned, test:hydration: 0 errors incl. /training at 390 and 1440).
