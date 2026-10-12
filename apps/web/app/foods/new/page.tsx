@@ -128,6 +128,7 @@ function CreateFoodInner() {
         {/* Name Field */}
         <FormRow
           label="Tên món"
+          htmlFor="cf-name"
           required
           error={touched.nameVi ? errors.nameVi : undefined}
         >
@@ -150,6 +151,7 @@ function CreateFoodInner() {
         {/* Serving Size & Unit */}
         <FormRow
           label="Khẩu phần"
+          htmlFor="cf-size"
           error={touched.servingSize ? errors.servingSize : undefined}
         >
           <div className="flex items-center gap-3">
@@ -200,7 +202,7 @@ function CreateFoodInner() {
           </div>
 
           <div className="grid grid-cols-2 gap-3 pt-1">
-            <FormRow label="Năng lượng (kcal)">
+            <FormRow label="Năng lượng (kcal)" htmlFor="cf-kcal">
               <input
                 id="cf-kcal"
                 type="text"
@@ -212,7 +214,7 @@ function CreateFoodInner() {
               />
             </FormRow>
 
-            <FormRow label="Đạm (g)">
+            <FormRow label="Đạm (g)" htmlFor="cf-pro">
               <input
                 id="cf-pro"
                 type="text"
@@ -224,9 +226,9 @@ function CreateFoodInner() {
               />
             </FormRow>
 
-            <FormRow label="Tinh bột (g)">
+            <FormRow label="Tinh bột (g)" htmlFor="cf-carbs">
               <input
-                id="cf-carb"
+                id="cf-carbs"
                 type="text"
                 inputMode="decimal"
                 value={carbs}
@@ -236,7 +238,7 @@ function CreateFoodInner() {
               />
             </FormRow>
 
-            <FormRow label="Béo (g)">
+            <FormRow label="Béo (g)" htmlFor="cf-fat">
               <input
                 id="cf-fat"
                 type="text"
@@ -277,7 +279,7 @@ function CreateFoodInner() {
 
           {showMicros && (
             <div className="bg-card border border-card-border rounded-2xl p-4 grid grid-cols-2 gap-3 animate-in fade-in duration-200">
-              <FormRow label="Natri (mg)">
+              <FormRow label="Natri (mg)" htmlFor="cf-na">
                 <input
                   id="cf-na"
                   type="text"
@@ -289,7 +291,7 @@ function CreateFoodInner() {
                 />
               </FormRow>
 
-              <FormRow label="Kali (mg)">
+              <FormRow label="Kali (mg)" htmlFor="cf-k">
                 <input
                   id="cf-k"
                   type="text"
@@ -301,7 +303,7 @@ function CreateFoodInner() {
                 />
               </FormRow>
 
-              <FormRow label="Canxi (mg)">
+              <FormRow label="Canxi (mg)" htmlFor="cf-ca">
                 <input
                   id="cf-ca"
                   type="text"
@@ -313,7 +315,7 @@ function CreateFoodInner() {
                 />
               </FormRow>
 
-              <FormRow label="Sắt (mg)">
+              <FormRow label="Sắt (mg)" htmlFor="cf-fe">
                 <input
                   id="cf-fe"
                   type="text"
@@ -326,7 +328,7 @@ function CreateFoodInner() {
               </FormRow>
 
               <div className="col-span-2">
-                <FormRow label="Vitamin D (µg)">
+                <FormRow label="Vitamin D (µg)" htmlFor="cf-vitd">
                   <input
                     id="cf-vitd"
                     type="text"
