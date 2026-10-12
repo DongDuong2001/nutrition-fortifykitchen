@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
+	"nutrition-api/internal/targets"
 )
 
 var (
@@ -23,7 +24,20 @@ func NewService(repo Repository) *DefaultService {
 }
 
 func (s *DefaultService) GetProfile(ctx context.Context, userID uuid.UUID) (*Profile, error) {
-	return s.repo.GetProfile(ctx, userID)
+	p, err := s.repo.GetProfile(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	if p != nil {
+		p.Targets = targets.CalculateTargets(targets.UserProfileForTargets{
+			Sex:             p.Sex,
+			WeightKg:        p.WeightKg,
+			Goal:            p.Goal,
+			TrainingMinutes: p.TrainingMinutesDefault,
+			IsPeriod:        p.NearPeriod,
+		})
+	}
+	return p, nil
 }
 
 func (s *DefaultService) UpsertProfile(ctx context.Context, userID uuid.UUID, req UpsertProfileRequest) (*Profile, error) {
@@ -70,7 +84,7 @@ func (s *DefaultService) UpsertProfile(ctx context.Context, userID uuid.UUID, re
 		return nil, err
 	}
 
-	return s.repo.GetProfile(ctx, userID)
+	return s.GetProfile(ctx, userID)
 }
 
 func (s *DefaultService) GetWeightLogs(ctx context.Context, userID uuid.UUID, fromDate, toDate string) ([]WeightLog, error) {

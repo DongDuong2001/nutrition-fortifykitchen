@@ -22,6 +22,7 @@ import (
 	"nutrition-api/internal/nutrition"
 	"nutrition-api/internal/payment"
 	"nutrition-api/internal/profile"
+	"nutrition-api/internal/trends"
 	"nutrition-api/internal/vault"
 	"nutrition-api/pkg/database"
 	"nutrition-api/pkg/response"
@@ -77,6 +78,10 @@ func main() {
 	libraryRepo := library.NewRepository(dbClient.Pool)
 	libraryService := library.NewService(libraryRepo, diaryService)
 	libraryHandler := library.NewHandler(libraryService)
+
+	trendsRepo := trends.NewRepository(dbClient.Pool)
+	trendsService := trends.NewService(trendsRepo)
+	trendsHandler := trends.NewHandler(trendsService)
 
 	authMiddleware := auth.NewMiddleware()
 
@@ -174,6 +179,9 @@ func main() {
 				r.Post("/", libraryHandler.CreateSavedMeal)
 				r.Delete("/{id}", libraryHandler.DeleteSavedMeal)
 			})
+
+			// Trends route (Phase 5)
+			r.Get("/trends", trendsHandler.GetTrends)
 		})
 
 		// Admin Protected Routes (Role == "admin")

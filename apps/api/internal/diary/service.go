@@ -7,6 +7,7 @@ import (
 	"math"
 
 	"github.com/google/uuid"
+	"nutrition-api/internal/targets"
 )
 
 var (
@@ -129,11 +130,28 @@ func (s *diaryServiceImpl) GetDay(ctx context.Context, userID uuid.UUID, date st
 
 	dayTotals := computeDayTotals(entries)
 
+	var dayTargets any
+	if sex, weight, goal, defTraining, isPeriod, err := s.repo.GetUserProfile(ctx, userID); err == nil {
+		mins := training
+		if mins < 0 {
+			mins = defTraining
+		}
+		t := targets.CalculateTargets(targets.UserProfileForTargets{
+			Sex:             sex,
+			WeightKg:        weight,
+			Goal:            goal,
+			TrainingMinutes: mins,
+			IsPeriod:        isPeriod,
+		})
+		dayTargets = t
+	}
+
 	return &DaySummaryResponse{
 		Date:            date,
 		TrainingMinutes: training,
 		IsReadOnly:      isReadOnly,
 		Summary:         dayTotals,
+		Targets:         dayTargets,
 		Meals:           meals,
 	}, nil
 }

@@ -17,6 +17,7 @@ type Profile struct {
 	NearPeriod             bool      `json:"near_period"`
 	Language               string    `json:"language"`
 	Reminders              any       `json:"reminders"`
+	Targets                any       `json:"targets,omitempty"`
 	CreatedAt              time.Time `json:"created_at"`
 	UpdatedAt              time.Time `json:"updated_at"`
 }

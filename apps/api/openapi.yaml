@@ -711,3 +711,28 @@ paths:
           description: Entries added from saved meal
         '409':
           description: Past day read only
+
+  /trends:
+    get:
+      summary: Get period nutrition trends and averages
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: days
+          in: query
+          schema:
+            type: integer
+            enum: [7, 30]
+            default: 7
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: Period averages and metrics
+          content:
+            application/json:
+              schema:
+                type: object
