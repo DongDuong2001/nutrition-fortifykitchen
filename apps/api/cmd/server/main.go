@@ -17,6 +17,7 @@ import (
 	"nutrition-api/internal/auth"
 	"nutrition-api/internal/config"
 	"nutrition-api/internal/diary"
+	"nutrition-api/internal/library"
 	"nutrition-api/internal/logger"
 	"nutrition-api/internal/nutrition"
 	"nutrition-api/internal/payment"
@@ -72,6 +73,10 @@ func main() {
 
 	paymentService := payment.NewService(dbClient.Pool)
 	paymentHandler := payment.NewHandler(paymentService)
+
+	libraryRepo := library.NewRepository(dbClient.Pool)
+	libraryService := library.NewService(libraryRepo, diaryService)
+	libraryHandler := library.NewHandler(libraryService)
 
 	authMiddleware := auth.NewMiddleware()
 
@@ -144,6 +149,7 @@ func main() {
 			r.Route("/days/{date}", func(r chi.Router) {
 				r.Get("/", diaryHandler.GetDay)
 				r.Post("/entries", diaryHandler.CreateEntry)
+				r.Post("/entries/from-saved/{id}", libraryHandler.AddFromSaved)
 				r.Post("/copy-yesterday", diaryHandler.CopyYesterday)
 				r.Delete("/meals/{meal}", diaryHandler.DeleteMeal)
 				r.Put("/training", diaryHandler.SetTraining)
@@ -152,6 +158,21 @@ func main() {
 			r.Route("/entries/{id}", func(r chi.Router) {
 				r.Patch("/", diaryHandler.UpdateEntry)
 				r.Delete("/", diaryHandler.DeleteEntry)
+			})
+
+			// Library routes (Phase 4)
+			r.Route("/favourites", func(r chi.Router) {
+				r.Get("/", libraryHandler.GetFavourites)
+				r.Post("/", libraryHandler.AddFavourite)
+				r.Delete("/{food_id}", libraryHandler.RemoveFavourite)
+			})
+
+			r.Get("/recents", libraryHandler.GetRecents)
+
+			r.Route("/saved-meals", func(r chi.Router) {
+				r.Get("/", libraryHandler.GetSavedMeals)
+				r.Post("/", libraryHandler.CreateSavedMeal)
+				r.Delete("/{id}", libraryHandler.DeleteSavedMeal)
 			})
 		})
 
