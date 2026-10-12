@@ -25,7 +25,7 @@ import {
 import { parseGramsInput } from "@/lib/portion";
 import { MealSwitcher } from "@/components/meal-switcher";
 import { PortionPanel } from "@/components/ui/portion-panel";
-import { TodayScreen } from "@/components/today/today-screen";
+import { DiaryScreen } from "@/components/diary/diary-screen";
 
 import { useMealSlot } from "@/lib/use-meal-slot";
 
@@ -196,7 +196,7 @@ function AddFoodInner() {
       <div className="hidden lg:block relative min-h-screen">
         {/* Background Today page (inert while modal is open) */}
         <div aria-hidden="true" className="pointer-events-none select-none opacity-40">
-          <TodayScreen />
+          <DiaryScreen />
         </div>
 
         {/* Modal Overlay / Scrim */}

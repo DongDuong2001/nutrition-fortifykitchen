@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useRef, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { DesktopSidebar } from "@/components/ui/desktop-sidebar";
 import { AppHeader } from "@/components/ui/app-header";
@@ -13,8 +14,8 @@ import { formatAmount, formatDayLabel, formatDesktopDate, formatNumber } from "@
 import { goalName } from "@/lib/onboarding";
 import { getTodayIsoVN } from "@/lib/date";
 import { type MockDayData } from "@/lib/mock/sample-day";
-import { useDiary } from "@/lib/diary-store";
-import { useBack } from "@/hooks/use-back";
+import { pastDayData, useDiary } from "@/lib/diary-store";
+import { viewedIsoDate } from "@/lib/day-history";
 
 interface GroupConfig {
   key: NutrientGroup;
@@ -40,8 +41,17 @@ export default function MicrosPage() {
 }
 
 function MicrosContent() {
-  const { data: diaryData, hydrated, profile } = useDiary();
-  const goBack = useBack();
+  const { data: diaryData, hydrated, profile, targets, todayIso } = useDiary();
+  const searchParams = useSearchParams();
+  // ?date= picks a past day (read-only, as everything about a past day). Read after mount so the first render matches the server.
+  const viewIso = hydrated && todayIso ? viewedIsoDate(searchParams?.get("date"), todayIso) : null;
+  const isPast = viewIso !== null && viewIso !== todayIso;
+  const diaryHref = isPast && viewIso ? `/diary?date=${viewIso}` : "/diary";
+  const dateQuery = isPast && viewIso ? `?date=${viewIso}` : "";
+  const pastData = useMemo(
+    () => (isPast && viewIso && todayIso ? pastDayData(viewIso, todayIso, profile, targets) : null),
+    [isPast, viewIso, todayIso, profile, targets]
+  );
   const [data, setData] = useState<MockDayData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeGroup, setActiveGroup] = useState<NutrientGroup>("vitamins");
@@ -80,11 +90,12 @@ function MicrosContent() {
     };
   }, []);
 
-  const currentData = (hydrated ? diaryData : null) || data;
-  const phoneDateLabel = clientNow && currentData?.date ? formatDayLabel(currentData.date, clientNow) : "";
+  const currentData = pastData || (hydrated ? diaryData : null) || data;
+  const readOnlyNote = isPast ? " · Chỉ xem" : "";
+  const phoneDateLabel = (clientNow && currentData?.date ? formatDayLabel(currentData.date, clientNow) : "") + readOnlyNote;
   const profileParts = [goalName(profile.goal), `${formatNumber(profile.weightKg)} kg`];
   const desktopSubtitle = clientNow
-    ? [formatDesktopDate(currentData?.date || getTodayIsoVN()), ...profileParts].join(" · ") + ` · Thiếu nhiều nhất: ${currentData?.microsSummary.mostLacking.join(", ")}`
+    ? [formatDesktopDate(currentData?.date || getTodayIsoVN()) + readOnlyNote, ...profileParts].join(" · ") + ` · Thiếu nhiều nhất: ${currentData?.microsSummary.mostLacking.join(", ")}`
     : [currentData?.desktopDateLabel, ...profileParts].filter(Boolean).join(" · ") + ` · Thiếu nhiều nhất: ${currentData?.microsSummary.mostLacking.join(", ")}`;
 
   // Auto-scroll active chip into view horizontally so it always stays visible
@@ -265,7 +276,7 @@ function MicrosContent() {
             variant="sub"
             title="VI CHẤT"
             subtitle={phoneDateLabel}
-            onBack={goBack}
+            backHref={diaryHref}
             className="lg:hidden"
             alignGroup="micros-header"
             summary={
@@ -283,20 +294,20 @@ function MicrosContent() {
             }
           />
           <div className="hidden p-8 pb-0 lg:block">
-            <AppHeader variant="daily" title="VI CHẤT" subtitle={desktopSubtitle} flush onBack={goBack} />
+            <AppHeader variant="daily" title="VI CHẤT" subtitle={desktopSubtitle} flush backHref={diaryHref} />
           </div>
 
           <main className="flex-1 w-full max-w-[560px] mx-auto px-4 py-6 flex flex-col gap-4">
             <div className="bg-card border border-card-border rounded-[18px] p-6 text-center flex flex-col items-center gap-3">
-              <h2 className="m-0 font-display italic font-bold text-xl">CHƯA GHI MÓN NÀO HÔM NAY</h2>
+              <h2 className="m-0 font-display italic font-bold text-xl">{isPast ? "CHƯA GHI MÓN NÀO NGÀY NÀY" : "CHƯA GHI MÓN NÀO HÔM NAY"}</h2>
               <p className="m-0 text-sm text-secondary leading-relaxed max-w-[320px]">
                 Bắt đầu ghi nhận món ăn để theo dõi 58 chỉ số vi chất và hoàn thành mục tiêu ngày.
               </p>
               <Link
-                href="/diary"
+                href={diaryHref}
                 className="mt-2 h-11 px-6 rounded-full bg-blue text-on-accent flex items-center justify-center text-sm font-bold no-underline active:scale-[0.97] transition-transform"
               >
-                + Ghi món ngay
+                {isPast ? "Về Nhật ký" : "+ Ghi món ngay"}
               </Link>
             </div>
           </main>
@@ -323,7 +334,7 @@ function MicrosContent() {
           variant="sub"
           title="VI CHẤT"
           subtitle={phoneDateLabel}
-          onBack={goBack}
+          backHref={diaryHref}
           alignGroup="micros-header"
           summary={
             <div className="flex items-center justify-between">
@@ -346,7 +357,7 @@ function MicrosContent() {
           }
           footer={
             <Link
-              href="/trends"
+              href="/trends/micros"
               className="min-h-[44px] flex items-center justify-between text-sm font-semibold text-blue no-underline active:scale-[0.97] transition-transform"
             >
               Xu hướng 7 và 30 ngày
@@ -402,6 +413,7 @@ function MicrosContent() {
           <div className="flex flex-col gap-3.5">
             {GROUPS_CONFIG.map((group, idx) => (
               <GroupCard
+                dateQuery={dateQuery}
                 key={group.key}
                 group={group}
                 rows={rowsByGroup[group.key]}
@@ -439,7 +451,7 @@ function MicrosContent() {
             variant="daily"
             title="VI CHẤT"
             flush
-            onBack={goBack}
+            backHref={diaryHref}
             alignGroup="micros-header"
             subtitle={desktopSubtitle}
             desktopStat={
@@ -449,7 +461,7 @@ function MicrosContent() {
                   <span className="text-secondary">/{achievedMicrosCount.total}</span>
                 </div>
                 <span className="text-sm text-secondary font-semibold">vi chất đạt</span>
-                <Link href="/trends" className="ml-2 min-h-[44px] inline-flex items-center text-sm font-semibold text-blue no-underline">
+                <Link href="/trends/micros" className="ml-2 min-h-[44px] inline-flex items-center text-sm font-semibold text-blue no-underline">
                   Xu hướng ›
                 </Link>
               </div>
@@ -491,6 +503,7 @@ function MicrosContent() {
             {GROUPS_CONFIG.map((group, idx) => (
               <div key={group.key} className="break-inside-avoid mb-4">
                 <GroupCard
+                  dateQuery={dateQuery}
                   group={group}
                   rows={rowsByGroup[group.key]}
                   isOpen={openGroups[group.key]}
@@ -556,6 +569,7 @@ function GroupCard({
   onToggle,
   idPrefix = "group-",
   alignGroup,
+  dateQuery = "",
 }: {
   group: GroupConfig;
   rows: NutrientRowData[];
@@ -563,6 +577,7 @@ function GroupCard({
   onToggle: () => void;
   idPrefix?: string;
   alignGroup?: string;
+  dateQuery?: string;
 }) {
   return (
     <section
@@ -606,7 +621,7 @@ function GroupCard({
       {isOpen && (
         <div className="px-4 py-1 divide-y divide-divider">
           {rows.map((row) => (
-            <NutrientRow key={row.definition.id} row={row} />
+            <NutrientRow key={row.definition.id} row={row} dateQuery={dateQuery} />
           ))}
         </div>
       )}
@@ -619,7 +634,7 @@ function GroupCard({
  * Line 1: name | amount / target · % (bold)
  * Line 2: slanted bar directly under it (only for nutrients with target)
  */
-function NutrientRow({ row }: { row: NutrientRowData }) {
+function NutrientRow({ row, dateQuery = "" }: { row: NutrientRowData; dateQuery?: string }) {
   const { definition, consumed, targetMin, targetMax, percentage, formattedAmount, targetSource, isProvisional } = row;
   const hasTarget = targetSource !== "none";
   const indentPx = definition.depth * 16;
@@ -699,7 +714,7 @@ function NutrientRow({ row }: { row: NutrientRowData }) {
 
   return (
     <Link
-      href={`/micros/${definition.id}`}
+      href={`/micros/${definition.id}${dateQuery}`}
       className="no-underline text-inherit block hover:bg-page/50 active:scale-[0.99] transition-all -mx-2 px-2 rounded-lg"
     >
       {content}

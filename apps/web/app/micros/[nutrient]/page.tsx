@@ -2,6 +2,7 @@
 
 import React, { use, useMemo } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { AppHeader } from "@/components/ui/app-header";
 import { AppShell } from "@/components/ui/app-shell";
 import { useBack } from "@/hooks/use-back";
@@ -10,6 +11,9 @@ import { SegmentedBar } from "@/components/ui/segmented-bar";
 import { ContributingFoods } from "@/components/nutrient-detail/contributing-foods";
 import { NutrientHistory, type HistoryPoint } from "@/components/nutrient-detail/nutrient-history";
 import { pastDayData, useDiary } from "@/lib/diary-store";
+import { dayEntries, viewedIsoDate } from "@/lib/day-history";
+import { formatDayLabel } from "@/lib/format";
+import { nutrientSourcesIn } from "@/lib/nutrient-sources";
 import { getLevelLabel, type NutrientLevel } from "@/lib/levels";
 import { getNutrientDefinition } from "@/lib/nutrients";
 import { targetRangeText } from "@/lib/profile";
@@ -37,24 +41,34 @@ export default function NutrientDetailPage({ params }: PageProps) {
   const def = getNutrientDefinition(nutrient);
   const { data, hydrated, todayIso, profile, targets, nutrientSources } = useDiary();
   const goBack = useBack();
+  const searchParams = useSearchParams();
 
-  // Today's row. Null until the diary is read after mount, so the server and first client render agree.
-  const row = useMemo(() => (def && hydrated ? nutrientOnDay(data, def) : undefined), [def, hydrated, data]);
+  // ?date= picks a past day (read-only). Read after mount, so the first render matches the server.
+  const viewIso = hydrated && todayIso ? viewedIsoDate(searchParams?.get("date"), todayIso) : null;
+  const isPast = viewIso !== null && viewIso !== todayIso;
+  const dayData = useMemo(
+    () => (isPast && viewIso && todayIso ? pastDayData(viewIso, todayIso, profile, targets) : data),
+    [isPast, viewIso, todayIso, profile, targets, data]
+  );
 
-  // Seven days, oldest first. Today is the live day; the days before it come from the past-day data.
+  // The day's row. Null until the diary is read after mount, so the server and first client render agree.
+  const row = useMemo(() => (def && hydrated ? nutrientOnDay(dayData, def) : undefined), [def, hydrated, dayData]);
+
+  // Seven days ending on the viewed day, oldest first. Today is the live day; earlier days come from the past-day data.
   const history = useMemo<HistoryPoint[]>(() => {
-    if (!def || !hydrated || !todayIso) return [];
-    return historyDays(todayIso).map((iso) => {
+    if (!def || !hydrated || !todayIso || !viewIso) return [];
+    return historyDays(viewIso).map((iso) => {
       const day = iso === todayIso ? data : pastDayData(iso, todayIso, profile, targets);
       const dayRow = nutrientOnDay(day, def);
       return { iso, consumed: dayRow?.consumed ?? null, percentage: dayRow?.percentage ?? null };
     });
-  }, [def, hydrated, todayIso, data, profile, targets]);
+  }, [def, hydrated, todayIso, viewIso, data, profile, targets]);
 
-  const sources = useMemo(
-    () => (def && hydrated ? nutrientSources(def.id) : []),
-    [def, hydrated, nutrientSources]
-  );
+  const sources = useMemo(() => {
+    if (!def || !hydrated) return [];
+    if (isPast && viewIso && todayIso) return nutrientSourcesIn(dayEntries(viewIso, todayIso), {}, def.id, []);
+    return nutrientSources(def.id);
+  }, [def, hydrated, isPast, viewIso, todayIso, nutrientSources]);
 
   if (!def) {
     return (
@@ -96,8 +110,8 @@ export default function NutrientDetailPage({ params }: PageProps) {
       <AppHeader
         variant="sub"
         title={def.nameVi}
-        subtitle="Vi chất · Hôm nay"
-        onBack={goBack}
+        subtitle={isPast && viewIso ? `Vi chất · ${formatDayLabel(viewIso, new Date())} · Chỉ xem` : "Vi chất · Hôm nay"}
+        {...(isPast && viewIso ? { backHref: `/micros?date=${viewIso}` } : { onBack: goBack })}
         backLabel="Quay lại"
         summary={
           <div className="flex flex-col gap-3">
@@ -137,7 +151,7 @@ export default function NutrientDetailPage({ params }: PageProps) {
 
         <Card as="div" role="region" data-align-group="nutrient-card" aria-labelledby="nutrient-sources-title">
           <h2 id="nutrient-sources-title" className="m-0 mb-2 text-base font-bold">
-            Đã có từ món ăn hôm nay
+            {isPast ? "Đã có từ món ăn của ngày này" : "Đã có từ món ăn hôm nay"}
           </h2>
           <ContributingFoods sources={sources} unit={def.unit} />
         </Card>

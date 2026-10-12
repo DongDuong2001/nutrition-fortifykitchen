@@ -4,7 +4,6 @@ import React, { useState, useEffect, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { DesktopSidebar } from "@/components/ui/desktop-sidebar";
-import { useBack } from "@/hooks/use-back";
 import { AppHeader } from "@/components/ui/app-header";
 import {
   calculateSaltTarget,
@@ -15,6 +14,7 @@ import {
 import { formatDayLabel, formatDesktopDate, formatNumber } from "@/lib/format";
 import { goalName } from "@/lib/onboarding";
 import { getTodayIsoVN } from "@/lib/date";
+import { viewedIsoDate } from "@/lib/day-history";
 import { DurationSelector } from "@/components/training/duration-selector";
 import { useDiary } from "@/lib/diary-store";
 import { SaltSummaryCard } from "@/components/training/salt-summary-card";
@@ -33,7 +33,6 @@ export default function TrainingPage() {
 
 function TrainingContent() {
   const searchParams = useSearchParams();
-  const goBack = useBack();
   if (searchParams?.get("error") === "1") {
     throw new Error("Simulated server error");
   }
@@ -49,6 +48,11 @@ function TrainingContent() {
   const [clientNow, setClientNow] = useState<Date | null>(null);
   const [isDesktop, setIsDesktop] = useState(false);
   const todayIso = useMemo(() => getTodayIsoVN(), []);
+  // ?date= picks a past day, which is read-only: no minutes change, no ticks, and no minutes are shown because
+  // the mock does not store them for that day.
+  const viewIso = viewedIsoDate(searchParams?.get("date"), todayIso);
+  const isPast = viewIso !== todayIso;
+  const diaryHref = isPast ? `/diary?date=${viewIso}` : "/diary";
 
   // Pre-configured checked states matching design specs
   const [checkedState, setCheckedState] = useState<Record<string, boolean>>({
@@ -96,6 +100,7 @@ function TrainingContent() {
   const isRestDay = selectedDuration === "rest";
 
   const handleToggle = (itemId: string) => {
+    if (isPast) return;
     setCheckedState((prev) => {
       const next = {
         ...prev,
@@ -107,6 +112,7 @@ function TrainingContent() {
   };
 
   const handleSelectDuration = (id: string) => {
+    if (isPast) return;
     setSelectedDuration(id);
   };
 
@@ -124,13 +130,13 @@ function TrainingContent() {
   // and the server and first client render agree.
   const mobileSubtitle = useMemo(() => {
     if (!clientNow) return "";
-    return formatDayLabel(todayIso, clientNow);
-  }, [todayIso, clientNow]);
+    return `${formatDayLabel(viewIso, clientNow)}${isPast ? " · Chỉ xem" : ""}`;
+  }, [viewIso, isPast, clientNow]);
 
   const desktopSubtitle = useMemo(() => {
     if (!clientNow) return "";
-    return `${formatDesktopDate(todayIso)} · ${goalName(profile.goal)} · ${formatNumber(profile.weightKg)} kg`;
-  }, [todayIso, clientNow, profile.goal, profile.weightKg]);
+    return `${formatDesktopDate(viewIso)}${isPast ? " · Chỉ xem" : ` · ${goalName(profile.goal)} · ${formatNumber(profile.weightKg)} kg`}`;
+  }, [viewIso, isPast, clientNow, profile.goal, profile.weightKg]);
 
   const headerSubtitle = isDesktop ? desktopSubtitle : mobileSubtitle;
 
@@ -147,27 +153,35 @@ function TrainingContent() {
           variant="sub"
           title="NGÀY TẬP"
           subtitle={headerSubtitle}
-          onBack={goBack}
+          backHref={diaryHref}
           alignGroup="training-header"
           summary={
             <div className="flex flex-col gap-2.5 w-full">
               <DurationSelector
-                value={selectedDuration}
+                value={isPast ? "" : selectedDuration}
                 onChange={handleSelectDuration}
                 variant="mobile"
+                disabled={isPast}
               />
-              <SaltSummaryCard
-                saltTarget={saltTarget}
-                isRestDay={isRestDay}
-                trainingMinutes={trainingMinutes}
-                variant="mobile-banner"
-              />
+              {isPast ? (
+                <p className="m-0 pt-1 text-[13px] leading-snug text-muted-on-dark">
+                  Muối: —<br />
+                  Ngày này chưa có thời lượng tập đã ghi. Chỉ xem.
+                </p>
+              ) : (
+                <SaltSummaryCard
+                  saltTarget={saltTarget}
+                  isRestDay={isRestDay}
+                  trainingMinutes={trainingMinutes}
+                  variant="mobile-banner"
+                />
+              )}
             </div>
           }
         />
 
         <main className="flex-1 w-full max-w-[560px] mx-auto px-4 pt-3 pb-6 flex flex-col gap-2.5">
-          {isRestDay ? (
+          {isPast ? null : isRestDay ? (
             <RestDayCard />
           ) : (
             <PhaseChecklist
@@ -178,7 +192,7 @@ function TrainingContent() {
             />
           )}
 
-          <TrainingTipBanner isRestDay={isRestDay} />
+          {!isPast && <TrainingTipBanner isRestDay={isRestDay} />}
         </main>
 
         <div className="fixed bottom-0 left-0 right-0 z-40 bg-ink">
@@ -204,18 +218,25 @@ function TrainingContent() {
             title="NGÀY TẬP"
             flush
             subtitle={desktopSubtitle}
-            onBack={goBack}
+            backHref={diaryHref}
             alignGroup="training-header"
             actions={
               <DurationSelector
-                value={selectedDuration}
+                value={isPast ? "" : selectedDuration}
                 onChange={handleSelectDuration}
                 variant="desktop"
+                disabled={isPast}
               />
             }
           />
 
-          {/* Section 1: Salt & Sodium Overview */}
+          {isPast ? (
+            <section aria-labelledby="past-training" className="bg-card border border-card-border rounded-[18px] p-5 flex flex-col gap-2">
+              <h2 id="past-training" className="m-0 text-lg font-bold text-text">Muối</h2>
+              <p className="m-0 font-display italic font-extrabold text-[40px] leading-none text-text">—</p>
+              <p className="m-0 text-sm text-secondary">Ngày này chưa có thời lượng tập đã ghi. Chỉ xem.</p>
+            </section>
+          ) : (
           <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <SaltSummaryCard
               saltTarget={saltTarget}
@@ -228,8 +249,10 @@ function TrainingContent() {
               currentSodiumMg={2900}
             />
           </section>
+          )}
 
           {/* Section 2: Phase Checklist / Rest Tips + Tip Banner */}
+          {!isPast && (
           <section className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
             {isRestDay ? (
               <RestDayCard />
@@ -243,6 +266,7 @@ function TrainingContent() {
             )}
             <TrainingTipBanner isRestDay={isRestDay} />
           </section>
+          )}
         </main>
       </div>
     </div>

@@ -1,6 +1,6 @@
-import { TodayScreen } from "@/components/today/today-screen";
+import { DiaryScreen } from "@/components/diary/diary-screen";
 
-/** Nhật ký. Same component as `/` for now; `?date=` picks a past day (read-only). */
+/** Nhật ký (IA v2): owns the day. `?date=` picks a past day (read-only). */
 export default function DiaryPage() {
-  return <TodayScreen screen="diary" />;
+  return <DiaryScreen />;
 }

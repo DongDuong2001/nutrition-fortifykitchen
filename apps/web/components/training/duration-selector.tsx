@@ -8,6 +8,8 @@ export interface DurationSelectorProps {
   value: string;
   onChange: (id: string, minutes: number) => void;
   variant?: "mobile" | "desktop";
+  /** Read-only (a past day): no chip can be pressed */
+  disabled?: boolean;
   className?: string;
 }
 
@@ -15,6 +17,7 @@ export function DurationSelector({
   value,
   onChange,
   variant = "mobile",
+  disabled = false,
   className = "",
 }: DurationSelectorProps) {
   const durations = getTrainingDurations();
@@ -23,6 +26,7 @@ export function DurationSelector({
     id: d.id,
     label: d.label,
     active: value === d.id,
+    disabled,
     onClick: () => onChange(d.id, d.minutes),
   }));
 

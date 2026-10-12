@@ -6,6 +6,8 @@ export interface ChipGroupItem {
   active?: boolean;
   onClick?: () => void;
   ariaLabel?: string;
+  /** Read-only chip: not pressable, dimmed (a past day) */
+  disabled?: boolean;
 }
 
 export interface ChipGroupProps {
@@ -73,8 +75,9 @@ export function ChipGroup({
             type="button"
             aria-pressed={isActive}
             aria-label={it.ariaLabel}
+            disabled={it.disabled}
             onClick={it.onClick}
-            className={`${sizeClass} px-2 flex items-center justify-center text-center cursor-pointer active:scale-[0.97] transition-all ${noBorder} ${btnClasses}`}
+            className={`${sizeClass} px-2 flex items-center justify-center text-center active:scale-[0.97] transition-all ${noBorder} ${btnClasses} ${it.disabled ? "cursor-default opacity-50 active:scale-100" : "cursor-pointer"}`}
           >
             {it.label}
           </button>
