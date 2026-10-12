@@ -1,0 +1,313 @@
+openapi: 3.1.0
+info:
+  title: H1T MICRO Nutrition API
+  description: High-performance Go modular monolith API for comprehensive 26-nutrient tracking and daily meal logging.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local development server
+  - url: https://api.hitmicro.app/api/v1
+    description: Production server
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Supabase Auth JWT token
+
+  schemas:
+    ErrorDetail:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          example: VALIDATION_FAILED
+        message:
+          type: string
+          example: Validation failed for one or more fields
+        fields:
+          type: object
+          additionalProperties:
+            type: string
+
+    ErrorEnvelope:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+
+    NutrientValues:
+      type: object
+      required:
+        - calories
+        - protein
+        - carbohydrates
+        - fat
+        - fiber
+        - sodium
+      properties:
+        calories:
+          type: number
+        protein:
+          type: number
+        carbohydrates:
+          type: number
+        fat:
+          type: number
+        fiber:
+          type: number
+        sodium:
+          type: number
+        potassium:
+          type: number
+          nullable: true
+        calcium:
+          type: number
+          nullable: true
+        iron:
+          type: number
+          nullable: true
+        magnesium:
+          type: number
+          nullable: true
+        zinc:
+          type: number
+          nullable: true
+        vitamin_a:
+          type: number
+          nullable: true
+        vitamin_c:
+          type: number
+          nullable: true
+        vitamin_d:
+          type: number
+          nullable: true
+        vitamin_e:
+          type: number
+          nullable: true
+
+    Profile:
+      type: object
+      required:
+        - user_id
+        - sex
+        - birth_year
+        - weight_kg
+        - goal
+        - training_minutes_default
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        sex:
+          type: string
+          enum: [male, female]
+        birth_year:
+          type: integer
+        weight_kg:
+          type: number
+        goal:
+          type: string
+          enum: [gain, maintain, cut, cut_fast]
+        training_minutes_default:
+          type: integer
+          enum: [0, 45, 60, 90, 120]
+        near_period:
+          type: boolean
+        language:
+          type: string
+          default: vi
+
+    FoodPortion:
+      type: object
+      required:
+        - label_vi
+        - grams
+      properties:
+        label_vi:
+          type: string
+        grams:
+          type: number
+
+    Food:
+      type: object
+      required:
+        - id
+        - name
+        - serving_size_g
+        - per_100g_nutrients
+        - is_custom
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        serving_size_g:
+          type: number
+        category:
+          type: string
+        per_100g_nutrients:
+          $ref: '#/components/schemas/NutrientValues'
+        portions:
+          type: array
+          items:
+            $ref: '#/components/schemas/FoodPortion'
+        is_custom:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+
+    DiaryLog:
+      type: object
+      required:
+        - id
+        - user_id
+        - meal_slot
+        - quantity
+        - serving_size_g
+        - nutrients_snapshot
+        - log_date
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        food_id:
+          type: string
+          format: uuid
+          nullable: true
+        kind:
+          type: string
+          enum: [food, quick]
+          default: food
+        meal_slot:
+          type: string
+          enum: [sang, trua, toi, truoc_tap, trong_tap, sau_tap, phu, breakfast, lunch, dinner, snack]
+        quantity:
+          type: number
+        serving_size_g:
+          type: number
+        nutrients_snapshot:
+          $ref: '#/components/schemas/NutrientValues'
+        log_date:
+          type: string
+          format: date
+        created_at:
+          type: string
+          format: date-time
+
+paths:
+  /me:
+    get:
+      summary: Get current user profile and computed daily targets
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Profile'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: Profile not yet completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /foods:
+    get:
+      summary: Search and browse food catalog
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: List of matching food items
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Food'
+
+  /days/{date}:
+    get:
+      summary: Get daily meal logs, training minutes, and nutrient totals
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: date
+          in: path
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Daily logs and totals
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      date:
+                        type: string
+                        format: date
+                      training_minutes:
+                        type: integer
+                      entries:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/DiaryLog'
+                      totals:
+                        $ref: '#/components/schemas/NutrientValues'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
