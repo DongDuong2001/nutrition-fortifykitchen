@@ -3,6 +3,7 @@
 ## Now working
 | Task | Owner | Files / routes |
 |---|---|---|
+| cc-15: IA v2 screen designs (design only) | Claude Code (cc-15) | design/v2/**, PROGRESS.md |
 
 | Date | Commit | Built | Next |
 | --- | --- | --- | --- |
