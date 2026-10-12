@@ -590,3 +590,36 @@ Provides aggregated time-series data across 7 or 30 calendar days for energy, ma
   ]
 }
 ```
+
+
+---
+
+## 3. Business Invariants Enforced by API
+
+### 3.1. Past Days Are Read-Only
+- **Rule**: All calendar dates prior to today (`date < today_VN` evaluated in timezone `Asia/Ho_Chi_Minh`) are immutable.
+- **Frontend Behavior**: Past day views (`/today?date=YYYY-MM-DD`) render a read-only banner (*"Đang xem ngày cũ"*), hide the `+ Thêm` action button and the `Chép hôm qua` bottom sheet, and disable entry editing or deletion.
+- **Backend Enforcement**: The Go API **must reject** all write operations (`POST`, `PUT`, `PATCH`, `DELETE`) targeting any past date:
+  - Adding food entries (`POST /days/{date}/entries`).
+  - Editing or deleting entries (`PATCH /diary/entries/{id}`, `DELETE /diary/entries/{id}`).
+  - Copying entries (`POST /days/{date}/copy-yesterday`).
+  - Changing training minutes (`PUT /days/{date}/training`).
+- **Error Response**:
+  - **HTTP Status**: `409 Conflict`.
+  - **Error Code**: `PAST_DAY_READ_ONLY`.
+  - **Message**: `"Không thể chỉnh sửa dữ liệu của ngày đã qua."`
+
+### 3.2. Nutritional Targets Computation Boundary
+- **Current Client Architecture**: Nutritional targets (calories, protein, fat, carbohydrates, fiber, sodium, potassium, calcium, magnesium, iron, zinc, and 22 micronutrients) are computed in real time on the client using pure functions in `apps/web/lib/targets.ts` (`calculateTargets`). When a user updates their body weight (`/profile/weight`), goal, or training duration (`/training`), progress bars across `/today` and `/micros` recalculate instantly with zero latency.
+- **API Boundary**:
+  - The API stores the **raw profile parameters** (`sex`, `birth_year`, `weight_kg`, `goal`, `period_mode`, `training_minutes`).
+  - The API is not required to persist static target matrices unless desired for server-side reporting.
+  - *Note*: If Dong prefers the Go API to compute targets server-side and return them in `GET /days/{date}` summary payloads, the calculation rules in `lib/targets.ts` can be mirrored in Go (see Section 5 question).
+
+### 3.3. Multi-Tenant User Isolation
+- **Favourites (`favourites`)**: Maintained strictly per `user_id`. One user's favourites are never exposed to others.
+- **Recents (`recents`)**: Stores up to 20 recently logged items per `user_id` along with their last portion size (`last_serving_label`).
+- **Custom Foods (`is_custom: true`)**:
+  - Created with `created_by = auth.uid()`.
+  - Visible only to the creating user in their *"Món của tôi"* category (`cua_toi`) and search results.
+  - Standard system catalog foods (`is_custom: false`, `source: "coach"`) are shared read-only across all authenticated users.
