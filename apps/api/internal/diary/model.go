@@ -20,10 +20,11 @@ type DiaryEntryItem struct {
 }
 
 type MealSlotSummary struct {
-	Slot      string           `json:"slot"`
-	NameVi    string           `json:"name_vi"`
-	TotalKcal float64          `json:"total_kcal"`
-	Entries   []DiaryEntryItem `json:"entries"`
+	Slot          string           `json:"slot"`
+	NameVi        string           `json:"name_vi"`
+	TotalKcal     float64          `json:"total_kcal"`
+	TargetMinKcal float64          `json:"target_min_kcal"`
+	Entries       []DiaryEntryItem `json:"entries"`
 }
 
 type DaySummaryResponse struct {
@@ -36,13 +37,13 @@ type DaySummaryResponse struct {
 }
 
 type CreateEntryRequest struct {
-	ID           uuid.UUID `json:"id"`
-	Kind         string    `json:"kind"` // "food" or "quick"
+	ID           uuid.UUID  `json:"id"`
+	Kind         string     `json:"kind"` // "food" or "quick"
 	FoodID       *uuid.UUID `json:"food_id,omitempty"`
-	MealSlot     string    `json:"meal_slot"`
-	Grams        float64   `json:"grams,omitempty"`
-	ServingLabel string    `json:"serving_label,omitempty"`
-	Calories     float64   `json:"calories,omitempty"`
+	MealSlot     string     `json:"meal_slot"`
+	Grams        float64    `json:"grams,omitempty"`
+	ServingLabel string     `json:"serving_label,omitempty"`
+	Calories     float64    `json:"calories,omitempty"`
 }
 
 type UpdateEntryRequest struct {
@@ -50,6 +51,7 @@ type UpdateEntryRequest struct {
 	Grams        *float64 `json:"grams,omitempty"`
 	ServingLabel *string  `json:"serving_label,omitempty"`
 	Calories     *float64 `json:"calories,omitempty"`
+	Restore      *bool    `json:"restore,omitempty"`
 }
 
 type CopyYesterdayRequest struct {

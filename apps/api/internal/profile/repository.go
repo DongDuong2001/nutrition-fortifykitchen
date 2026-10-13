@@ -110,13 +110,17 @@ func (r *PostgresRepository) UpsertWeightLog(ctx context.Context, userID uuid.UU
 		return err
 	}
 
-	// 2. Atomically update latest weight_kg in profile if exists
+	// 2. Atomically update latest weight_kg in profile if exists and logDate is the latest weigh-in
 	profileQuery := `
 		UPDATE nutrition.profiles
 		SET weight_kg = $2, updated_at = now()
 		WHERE user_id = $1
+		  AND NOT EXISTS (
+			  SELECT 1 FROM nutrition.weight_logs
+			  WHERE user_id = $1 AND log_date > $3::date
+		  )
 	`
-	if _, err := tx.Exec(ctx, profileQuery, userID, weightKg); err != nil {
+	if _, err := tx.Exec(ctx, profileQuery, userID, weightKg, logDate); err != nil {
 		return err
 	}
 

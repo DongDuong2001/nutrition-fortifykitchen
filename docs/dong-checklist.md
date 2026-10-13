@@ -41,20 +41,20 @@ Sources: docs/audit-ag10.md, docs/08-backend-plan.md, docs/07-api-contract.md, O
   Done when: `GET /foods?q=pho` and `?q=nuoc mia` return sensible top hits; completeness report shows % of the 22 counted nutrients per food.
 
 ## 5. API gaps from the audit
-- [ ] Recents: `POST /days/{date}/entries` upserts `user_recents` (with the last portion).
-- [ ] Undo: restoring a soft-deleted entry within 10 s (`PATCH /entries/{id}` with `{"restore": true}` or a `POST /entries/{id}/restore`).
-- [ ] Weigh-in on a past date doesn't overwrite `profiles.weight_kg` (only today or the latest date does).
-- [ ] `/trends`: 22-nutrient averages, previous-period comparison, weight summary; shared vectors `packages/vectors/period.json` with a parity test against `apps/web/lib/period.ts`.
+- [x] Recents: `POST /days/{date}/entries` upserts `user_recents` (with the last portion).
+- [x] Undo: restoring a soft-deleted entry within 10 s (`PATCH /entries/{id}` with `{"restore": true}` or a `POST /entries/{id}/restore`).
+- [x] Weigh-in on a past date doesn't overwrite `profiles.weight_kg` (only today or the latest date does).
+- [x] `/trends`: 22-nutrient averages, previous-period comparison, weight summary; shared vectors `packages/vectors/period.json` with a parity test against `apps/web/lib/period.ts`.
 - [x] `lib/__tests__/vectors-gen.test.ts` compares against committed vectors instead of rewriting `packages/vectors/targets.json` on every run.
 
 ## 6. Data the new Tổng quan screens need (from tonight's UI)
 One call per screen is the goal; these can be fields on `/trends` or `/days/{date}`.
-- [ ] Per-day series for the period (7 or 30 days): kcal, đạm, chất béo, tinh bột, chất xơ, and whether the day was a training day.
-- [ ] Days on target per metric (`met`/`of`) and the change vs the previous period.
-- [ ] Today: kcal eaten per meal (sáng, trưa, phụ, tối) and the minimum target.
-- [ ] Per nutrient (22 counted) for the period: average amount, target, % and level (Thiếu <50 / Trung bình 50–79 / Gần đủ 80–99 / Đạt ≥100), sorted lowest first.
-- [ ] Per nutrient: the top 3 logged foods that contributed most in the period.
-- [ ] Weigh-ins in the period (date, kg) and targets that depend on weight (kcal, đạm, kali) before → now when weight changed.
+- [x] Per-day series for the period (7 or 30 days): kcal, đạm, chất béo, tinh bột, chất xơ, and whether the day was a training day.
+- [x] Days on target per metric (`met`/`of`) and the change vs the previous period.
+- [x] Today: kcal eaten per meal (sáng, trưa, phụ, tối) and the minimum target.
+- [x] Per nutrient (22 counted) for the period: average amount, target, % and level (Thiếu <50 / Trung bình 50–79 / Gần đủ 80–99 / Đạt ≥100), sorted lowest first.
+- [x] Per nutrient: the top 3 logged foods that contributed most in the period.
+- [x] Weigh-ins in the period (date, kg) and targets that depend on weight (kcal, đạm, kali) before → now when weight changed.
 
 ## 7. Web client and switch-over
 - [ ] Generate `apps/web/lib/api-client.ts` from `openapi.yaml` (orval in CI), keeping the function names the UI already calls where possible.

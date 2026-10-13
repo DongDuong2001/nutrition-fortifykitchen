@@ -102,6 +102,10 @@ func (d *mockDiaryService) DeleteEntry(ctx context.Context, userID uuid.UUID, en
 	return nil
 }
 
+func (d *mockDiaryService) RestoreEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) (*diary.DiaryEntryItem, map[string]*float64, error) {
+	return nil, nil, nil
+}
+
 func (d *mockDiaryService) CopyYesterday(ctx context.Context, userID uuid.UUID, targetDate string, req diary.CopyYesterdayRequest) (*diary.CopyYesterdayResponse, error) {
 	return nil, nil
 }

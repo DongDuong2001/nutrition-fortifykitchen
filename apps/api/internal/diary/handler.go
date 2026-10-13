@@ -107,7 +107,50 @@ func (h *Handler) UpdateEntry(w http.ResponseWriter, r *http.Request) {
 			response.Error(w, http.StatusNotFound, response.CodeNotFound, "Entry not found")
 			return
 		}
+		if errors.Is(err, ErrRestoreWindowExpired) {
+			response.Error(w, http.StatusGone, response.CodeValidationFailed, "Restore window expired (must be within 10 seconds)")
+			return
+		}
 		response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, err.Error())
+		return
+	}
+
+	response.JSON(w, http.StatusOK, map[string]any{
+		"entry":       entry,
+		"day_summary": daySummary,
+	})
+}
+
+// RestoreEntry handles POST /api/v1/entries/{id}/restore
+func (h *Handler) RestoreEntry(w http.ResponseWriter, r *http.Request) {
+	userID, err := auth.GetUserID(r.Context())
+	if err != nil {
+		response.Error(w, http.StatusUnauthorized, response.CodeUnauthorized, "Sign in required")
+		return
+	}
+
+	idStr := chi.URLParam(r, "id")
+	entryID, err := uuid.Parse(idStr)
+	if err != nil {
+		response.Error(w, http.StatusNotFound, response.CodeNotFound, "Entry not found")
+		return
+	}
+
+	entry, daySummary, err := h.service.RestoreEntry(r.Context(), userID, entryID)
+	if err != nil {
+		if errors.Is(err, ErrPastDayReadOnly) {
+			response.Error(w, http.StatusConflict, response.CodePastDayReadOnly, "Cannot write to past dates")
+			return
+		}
+		if errors.Is(err, ErrEntryNotFound) {
+			response.Error(w, http.StatusNotFound, response.CodeNotFound, "Entry not found")
+			return
+		}
+		if errors.Is(err, ErrRestoreWindowExpired) {
+			response.Error(w, http.StatusGone, response.CodeValidationFailed, "Restore window expired (must be within 10 seconds)")
+			return
+		}
+		response.Error(w, http.StatusInternalServerError, response.CodeInternalServerError, "Failed to restore entry")
 		return
 	}
 

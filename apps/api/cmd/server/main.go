@@ -99,9 +99,14 @@ func SetupRouter(cfg *config.Config, pool *pgxpool.Pool) chi.Router {
 	profileService := profile.NewService(profileRepo)
 	profileHandler := profile.NewHandler(profileService)
 
+	libraryRepo := library.NewRepository(pool)
+
 	diaryRepo := diary.NewRepository(pool)
-	diaryService := diary.NewService(diaryRepo)
+	diaryService := diary.NewService(diaryRepo, libraryRepo)
 	diaryHandler := diary.NewHandler(diaryService)
+
+	libraryService := library.NewService(libraryRepo, diaryService)
+	libraryHandler := library.NewHandler(libraryService)
 
 	nutritionRepo := nutrition.NewRepository(pool)
 	nutritionService := nutrition.NewService(nutritionRepo)
@@ -112,10 +117,6 @@ func SetupRouter(cfg *config.Config, pool *pgxpool.Pool) chi.Router {
 
 	paymentService := payment.NewService(pool)
 	paymentHandler := payment.NewHandler(paymentService)
-
-	libraryRepo := library.NewRepository(pool)
-	libraryService := library.NewService(libraryRepo, diaryService)
-	libraryHandler := library.NewHandler(libraryService)
 
 	trendsRepo := trends.NewRepository(pool)
 	trendsService := trends.NewService(trendsRepo)
@@ -207,6 +208,7 @@ func SetupRouter(cfg *config.Config, pool *pgxpool.Pool) chi.Router {
 
 			r.Route("/entries/{id}", func(r chi.Router) {
 				r.Patch("/", diaryHandler.UpdateEntry)
+				r.Post("/restore", diaryHandler.RestoreEntry)
 				r.Delete("/", diaryHandler.DeleteEntry)
 			})
 

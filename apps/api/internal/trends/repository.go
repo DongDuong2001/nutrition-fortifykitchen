@@ -4,9 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sort"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"nutrition-api/internal/targets"
 )
@@ -20,7 +22,6 @@ func NewRepository(pool *pgxpool.Pool) Repository {
 }
 
 func (r *pgxTrendsRepo) GetHistoryDays(ctx context.Context, userID uuid.UUID, startDate string, endDate string) ([]TrendDayTotals, error) {
-	// Generate date series from startDate to endDate
 	startT, err := time.Parse("2006-01-02", startDate)
 	if err != nil {
 		return nil, err
@@ -79,6 +80,8 @@ func (r *pgxTrendsRepo) GetHistoryDays(ctx context.Context, userID uuid.UUID, st
 
 		dayCal := 0.0
 		var pro, carb, fat, fiber *float64
+		dayNutrients := make(map[string]*float64)
+
 		for _, e := range entries {
 			dayCal += e.cal
 			if e.nutrients != nil {
@@ -110,6 +113,16 @@ func (r *pgxTrendsRepo) GetHistoryDays(ctx context.Context, userID uuid.UUID, st
 					}
 					*fiber += *fi
 				}
+
+				for _, k := range CountedNutrientKeys {
+					if v, ok := e.nutrients[k]; ok && v != nil {
+						if dayNutrients[k] == nil {
+							val := 0.0
+							dayNutrients[k] = &val
+						}
+						*dayNutrients[k] += *v
+					}
+				}
 			}
 		}
 
@@ -121,14 +134,36 @@ func (r *pgxTrendsRepo) GetHistoryDays(ctx context.Context, userID uuid.UUID, st
 			Carbs:     carb,
 			Fat:       fat,
 			Fiber:     fiber,
-			Nutrients: make(map[string]*float64),
+			Nutrients: dayNutrients,
 		})
 	}
 
 	return result, nil
 }
 
-func (r *pgxTrendsRepo) GetUserTargets(ctx context.Context, userID uuid.UUID) (*targets.CompleteTargets, error) {
+func (r *pgxTrendsRepo) GetDayTrainingFlags(ctx context.Context, userID uuid.UUID, startDate string, endDate string) (map[string]bool, error) {
+	flags := make(map[string]bool)
+	query := `
+		SELECT log_date
+		FROM nutrition.day_training
+		WHERE user_id = $1 AND log_date >= $2::date AND log_date <= $3::date AND minutes > 0
+	`
+	rows, err := r.pool.Query(ctx, query, userID, startDate, endDate)
+	if err != nil {
+		return flags, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var t time.Time
+		if err := rows.Scan(&t); err == nil {
+			flags[t.Format("2006-01-02")] = true
+		}
+	}
+	return flags, nil
+}
+
+func (r *pgxTrendsRepo) GetUserTargets(ctx context.Context, userID uuid.UUID) (*targets.CompleteTargets, string, float64, error) {
 	query := `SELECT sex, weight_kg, goal, training_minutes_default, near_period FROM nutrition.profiles WHERE user_id = $1`
 	var sex, goal string
 	var weightKg float64
@@ -137,7 +172,16 @@ func (r *pgxTrendsRepo) GetUserTargets(ctx context.Context, userID uuid.UUID) (*
 
 	err := r.pool.QueryRow(ctx, query, userID).Scan(&sex, &weightKg, &goal, &trainingMinutes, &nearPeriod)
 	if err != nil {
-		return nil, err
+		if err == pgx.ErrNoRows {
+			computed := targets.CalculateTargets(targets.UserProfileForTargets{
+				Sex:             "male",
+				WeightKg:        65,
+				Goal:            "maintain",
+				TrainingMinutes: 60,
+			})
+			return &computed, "maintain", 65, nil
+		}
+		return nil, "", 0, err
 	}
 
 	computed := targets.CalculateTargets(targets.UserProfileForTargets{
@@ -148,5 +192,154 @@ func (r *pgxTrendsRepo) GetUserTargets(ctx context.Context, userID uuid.UUID) (*
 		IsPeriod:        nearPeriod,
 	})
 
-	return &computed, nil
+	return &computed, goal, weightKg, nil
+}
+
+func (r *pgxTrendsRepo) GetWeightLogs(ctx context.Context, userID uuid.UUID, upToDate string) ([]WeightPoint, error) {
+	query := `
+		SELECT log_date, weight_kg
+		FROM nutrition.weight_logs
+		WHERE user_id = $1 AND log_date <= $2::date
+		ORDER BY log_date ASC
+	`
+	rows, err := r.pool.Query(ctx, query, userID, upToDate)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var points []WeightPoint
+	for rows.Next() {
+		var t time.Time
+		var kg float64
+		if err := rows.Scan(&t, &kg); err == nil {
+			points = append(points, WeightPoint{
+				Date: t.Format("2006-01-02"),
+				Kg:   kg,
+			})
+		}
+	}
+	return points, nil
+}
+
+func (r *pgxTrendsRepo) GetTopFoodsForPeriod(ctx context.Context, userID uuid.UUID, startDate string, endDate string) (map[string][]FoodContribution, error) {
+	query := `
+		SELECT food_id, name_snapshot, nutrients_snapshot
+		FROM nutrition.diary_logs
+		WHERE user_id = $1 AND log_date >= $2::date AND log_date <= $3::date AND deleted_at IS NULL AND food_id IS NOT NULL
+	`
+	rows, err := r.pool.Query(ctx, query, userID, startDate, endDate)
+	if err != nil {
+		return make(map[string][]FoodContribution), err
+	}
+	defer rows.Close()
+
+	type foodAccum struct {
+		name   string
+		amount float64
+	}
+
+	nutrientMap := make(map[string]map[uuid.UUID]*foodAccum)
+	for _, k := range CountedNutrientKeys {
+		nutrientMap[k] = make(map[uuid.UUID]*foodAccum)
+	}
+
+	for rows.Next() {
+		var fID *uuid.UUID
+		var nameSnapshot *string
+		var nutrientsJSON []byte
+
+		if err := rows.Scan(&fID, &nameSnapshot, &nutrientsJSON); err == nil && fID != nil {
+			name := "Thực phẩm"
+			if nameSnapshot != nil {
+				name = *nameSnapshot
+			}
+
+			if len(nutrientsJSON) > 0 {
+				var nut map[string]*float64
+				if err := json.Unmarshal(nutrientsJSON, &nut); err == nil {
+					for _, k := range CountedNutrientKeys {
+						if v, ok := nut[k]; ok && v != nil && *v > 0 {
+							accum, exists := nutrientMap[k][*fID]
+							if !exists {
+								accum = &foodAccum{name: name, amount: 0}
+								nutrientMap[k][*fID] = accum
+							}
+							accum.amount += *v
+						}
+					}
+				}
+			}
+		}
+	}
+
+	result := make(map[string][]FoodContribution)
+	for _, k := range CountedNutrientKeys {
+		var list []FoodContribution
+		for fID, acc := range nutrientMap[k] {
+			list = append(list, FoodContribution{
+				FoodID:   fID,
+				FoodName: acc.name,
+				Amount:   acc.amount,
+			})
+		}
+		sort.SliceStable(list, func(i, j int) bool {
+			return list[i].Amount > list[j].Amount
+		})
+		if len(list) > 3 {
+			list = list[:3]
+		}
+		if len(list) > 0 {
+			result[k] = list
+		} else {
+			result[k] = []FoodContribution{}
+		}
+	}
+
+	return result, nil
+}
+
+func (r *pgxTrendsRepo) GetStreak(ctx context.Context, userID uuid.UUID, todayIso string) (int, error) {
+	query := `
+		SELECT DISTINCT log_date::text
+		FROM nutrition.diary_logs
+		WHERE user_id = $1 AND deleted_at IS NULL AND log_date <= $2::date
+		ORDER BY log_date::text DESC
+	`
+	rows, err := r.pool.Query(ctx, query, userID, todayIso)
+	if err != nil {
+		return 0, err
+	}
+	defer rows.Close()
+
+	dates := make(map[string]bool)
+	for rows.Next() {
+		var d string
+		if err := rows.Scan(&d); err == nil {
+			dates[d] = true
+		}
+	}
+
+	todayT, err := time.Parse("2006-01-02", todayIso)
+	if err != nil {
+		return 0, nil
+	}
+
+	cursor := todayT
+	if !dates[todayIso] {
+		cursor = cursor.AddDate(0, 0, -1)
+	}
+
+	streak := 0
+	for streak < 365 {
+		dStr := cursor.Format("2006-01-02")
+		if dates[dStr] {
+			streak++
+			cursor = cursor.AddDate(0, 0, -1)
+		} else {
+			break
+		}
+	}
+
+	return streak, nil
 }

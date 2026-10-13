@@ -740,6 +740,8 @@ paths:
                   type: string
                 calories:
                   type: number
+                restore:
+                  type: boolean
       responses:
         '200':
           description: Entry updated
@@ -758,6 +760,29 @@ paths:
             format: uuid
       responses:
         '200':
+          description: Entry deleted
+
+  /entries/{id}/restore:
+    post:
+      summary: Restore soft-deleted diary entry within 10 seconds
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Entry restored
+        '404':
+          description: Entry not found
+        '409':
+          description: Past day read only
+        '410':
+          description: Restore window expired
           description: Entry deleted
         '409':
           description: Past day read only

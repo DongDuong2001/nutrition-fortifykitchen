@@ -3,6 +3,7 @@ package diary
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
@@ -21,6 +22,7 @@ type Repository interface {
 	GetEntryByID(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) (*DiaryEntryItem, string, error)
 	UpdateEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID, entry *DiaryEntryItem) (*DiaryEntryItem, string, error)
 	SoftDeleteEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) error
+	RestoreEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) (*DiaryEntryItem, string, error)
 	DeleteMealEntries(ctx context.Context, userID uuid.UUID, date string, mealSlot string) error
 	UpsertDayTraining(ctx context.Context, userID uuid.UUID, date string, minutes int) error
 }
@@ -245,6 +247,52 @@ func (r *pgxDiaryRepo) SoftDeleteEntry(ctx context.Context, userID uuid.UUID, en
 		return pgx.ErrNoRows
 	}
 	return nil
+}
+
+func (r *pgxDiaryRepo) RestoreEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) (*DiaryEntryItem, string, error) {
+	query := `
+		UPDATE nutrition.diary_logs
+		SET deleted_at = NULL
+		WHERE id = $1 AND user_id = $2 AND deleted_at IS NOT NULL AND deleted_at >= now() - interval '10 seconds'
+		RETURNING id, food_id, kind, meal_slot, portion_label, grams, calories, name_snapshot, nutrients_snapshot, log_date, created_at
+	`
+	var item DiaryEntryItem
+	var logDate time.Time
+	var portionLabel, nameSnapshot *string
+	var grams *float64
+	var nutrientsJSON []byte
+
+	err := r.pool.QueryRow(ctx, query, entryID, userID).Scan(
+		&item.ID, &item.FoodID, &item.Kind, &item.MealSlot,
+		&portionLabel, &grams, &item.Calories, &nameSnapshot,
+		&nutrientsJSON, &logDate, &item.CreatedAt,
+	)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			var deletedAt *time.Time
+			checkErr := r.pool.QueryRow(ctx, "SELECT deleted_at FROM nutrition.diary_logs WHERE id = $1 AND user_id = $2", entryID, userID).Scan(&deletedAt)
+			if checkErr == nil && deletedAt != nil {
+				return nil, "", ErrRestoreWindowExpired
+			}
+			return nil, "", ErrEntryNotFound
+		}
+		return nil, "", err
+	}
+
+	if portionLabel != nil {
+		item.ServingLabel = *portionLabel
+	}
+	if nameSnapshot != nil {
+		item.FoodName = *nameSnapshot
+	}
+	if grams != nil {
+		item.Grams = *grams
+	}
+	if len(nutrientsJSON) > 0 {
+		_ = json.Unmarshal(nutrientsJSON, &item.Nutrients)
+	}
+
+	return &item, logDate.Format("2006-01-02"), nil
 }
 
 func (r *pgxDiaryRepo) DeleteMealEntries(ctx context.Context, userID uuid.UUID, date string, mealSlot string) error {

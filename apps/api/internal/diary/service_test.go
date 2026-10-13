@@ -9,15 +9,35 @@ import (
 )
 
 type mockDiaryRepo struct {
-	entries  map[uuid.UUID]*DiaryEntryItem
-	training map[string]int
+	entries        map[uuid.UUID]*DiaryEntryItem
+	deletedEntries map[uuid.UUID]*DiaryEntryItem
+	training       map[string]int
+	restoreExpired bool
 }
 
 func newMockDiaryRepo() *mockDiaryRepo {
 	return &mockDiaryRepo{
-		entries:  make(map[uuid.UUID]*DiaryEntryItem),
-		training: make(map[string]int),
+		entries:        make(map[uuid.UUID]*DiaryEntryItem),
+		deletedEntries: make(map[uuid.UUID]*DiaryEntryItem),
+		training:       make(map[string]int),
 	}
+}
+
+type mockRecentsTracker struct {
+	upserted []struct {
+		foodID       uuid.UUID
+		portionLabel string
+		grams        float64
+	}
+}
+
+func (m *mockRecentsTracker) UpsertRecent(ctx context.Context, userID uuid.UUID, foodID uuid.UUID, portionLabel string, grams float64) error {
+	m.upserted = append(m.upserted, struct {
+		foodID       uuid.UUID
+		portionLabel string
+		grams        float64
+	}{foodID: foodID, portionLabel: portionLabel, grams: grams})
+	return nil
 }
 
 func (m *mockDiaryRepo) GetDayEntries(ctx context.Context, userID uuid.UUID, date string) ([]DiaryEntryItem, error) {
@@ -74,8 +94,23 @@ func (m *mockDiaryRepo) UpdateEntry(ctx context.Context, userID uuid.UUID, entry
 }
 
 func (m *mockDiaryRepo) SoftDeleteEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) error {
-	delete(m.entries, entryID)
+	if e, ok := m.entries[entryID]; ok {
+		m.deletedEntries[entryID] = e
+		delete(m.entries, entryID)
+	}
 	return nil
+}
+
+func (m *mockDiaryRepo) RestoreEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) (*DiaryEntryItem, string, error) {
+	if m.restoreExpired {
+		return nil, "", ErrRestoreWindowExpired
+	}
+	if e, ok := m.deletedEntries[entryID]; ok {
+		m.entries[entryID] = e
+		delete(m.deletedEntries, entryID)
+		return e, GetServerToday(), nil
+	}
+	return nil, "", ErrEntryNotFound
 }
 
 func (m *mockDiaryRepo) DeleteMealEntries(ctx context.Context, userID uuid.UUID, date string, mealSlot string) error {
@@ -175,5 +210,115 @@ func TestDiaryService_FoodAndQuickEntries_NullHandling(t *testing.T) {
 	// Potassium still nil (never coerced to 0)
 	if totals2["potassium"] != nil {
 		t.Errorf("expected nil potassium after quick entry, got %v", totals2["potassium"])
+	}
+}
+
+func TestDiaryService_RecentsUpsertedOnFoodEntry(t *testing.T) {
+	repo := newMockDiaryRepo()
+	recents := &mockRecentsTracker{}
+	svc := NewService(repo, recents)
+
+	userID := uuid.New()
+	today := GetServerToday()
+	foodID := uuid.New()
+
+	// 1. Food entry -> must upsert recent
+	_, _, err := svc.CreateEntry(context.Background(), userID, today, CreateEntryRequest{
+		ID:           uuid.New(),
+		Kind:         "food",
+		FoodID:       &foodID,
+		MealSlot:     "lunch",
+		Grams:        150,
+		ServingLabel: "150 g",
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if len(recents.upserted) != 1 {
+		t.Fatalf("expected 1 recent upsert, got %d", len(recents.upserted))
+	}
+	if recents.upserted[0].foodID != foodID || recents.upserted[0].grams != 150 {
+		t.Errorf("unexpected recent item: %+v", recents.upserted[0])
+	}
+
+	// 2. Quick entry -> must NOT upsert recent
+	_, _, err = svc.CreateEntry(context.Background(), userID, today, CreateEntryRequest{
+		ID:       uuid.New(),
+		Kind:     "quick",
+		MealSlot: "snack",
+		Calories: 300,
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if len(recents.upserted) != 1 {
+		t.Errorf("quick entry should not upsert to recents, total is %d", len(recents.upserted))
+	}
+}
+
+func TestDiaryService_RestoreWithin10s(t *testing.T) {
+	repo := newMockDiaryRepo()
+	svc := NewService(repo)
+
+	userID := uuid.New()
+	today := GetServerToday()
+	foodID := uuid.New()
+
+	// Create and then delete entry
+	entryID := uuid.New()
+	_, _, err := svc.CreateEntry(context.Background(), userID, today, CreateEntryRequest{
+		ID:           entryID,
+		Kind:         "food",
+		FoodID:       &foodID,
+		MealSlot:     "breakfast",
+		Grams:        100,
+		ServingLabel: "100 g",
+	})
+	if err != nil {
+		t.Fatalf("failed to create entry: %v", err)
+	}
+
+	if err := svc.DeleteEntry(context.Background(), userID, entryID); err != nil {
+		t.Fatalf("failed to delete entry: %v", err)
+	}
+
+	// Verify it's deleted
+	if _, ok := repo.entries[entryID]; ok {
+		t.Fatalf("entry should be deleted from active entries")
+	}
+
+	// 1. Direct restore
+	restored, totals, err := svc.RestoreEntry(context.Background(), userID, entryID)
+	if err != nil {
+		t.Fatalf("failed to restore entry: %v", err)
+	}
+	if restored.ID != entryID {
+		t.Errorf("expected restored ID %s, got %s", entryID, restored.ID)
+	}
+	if totals["calories"] == nil || *totals["calories"] != 380 {
+		t.Errorf("expected 380 kcal total after restore, got %v", totals["calories"])
+	}
+
+	// 2. Delete again and restore via UpdateEntry with req.Restore = true
+	_ = svc.DeleteEntry(context.Background(), userID, entryID)
+	trueVal := true
+	restored2, _, err := svc.UpdateEntry(context.Background(), userID, entryID, UpdateEntryRequest{
+		Restore: &trueVal,
+	})
+	if err != nil {
+		t.Fatalf("failed to restore via UpdateEntry: %v", err)
+	}
+	if restored2.ID != entryID {
+		t.Errorf("expected restored ID %s, got %s", entryID, restored2.ID)
+	}
+
+	// 3. Expired restore window returns ErrRestoreWindowExpired
+	_ = svc.DeleteEntry(context.Background(), userID, entryID)
+	repo.restoreExpired = true
+	_, _, err = svc.RestoreEntry(context.Background(), userID, entryID)
+	if !errors.Is(err, ErrRestoreWindowExpired) {
+		t.Errorf("expected ErrRestoreWindowExpired, got %v", err)
 	}
 }

@@ -1,0 +1,1035 @@
+{
+  "averages_cases": [
+    {
+      "name": "7 days with 4 logged days and today excluded",
+      "today": "2026-10-14",
+      "days": [
+        {
+          "date": "2026-10-08",
+          "logged": true,
+          "calories": 2000,
+          "protein": 140,
+          "carbs": 220,
+          "fat": 60,
+          "fiber": 25,
+          "nutrients": {
+            "b1": 1.2,
+            "b2": null,
+            "b3": null,
+            "b5": null,
+            "b6": null,
+            "folate": null,
+            "b12": null,
+            "vitamin_a": null,
+            "vitamin_c": null,
+            "vitamin_d": null,
+            "vitamin_e": null,
+            "vitamin_k": null,
+            "calcium": 1000,
+            "copper": null,
+            "iron": null,
+            "magnesium": null,
+            "manganese": null,
+            "phosphorus": null,
+            "potassium": null,
+            "selenium": null,
+            "sodium": null,
+            "zinc": null
+          }
+        },
+        {
+          "date": "2026-10-09",
+          "logged": false,
+          "calories": null,
+          "protein": null,
+          "carbs": null,
+          "fat": null,
+          "fiber": null,
+          "nutrients": {
+            "b1": null,
+            "b2": null,
+            "b3": null,
+            "b5": null,
+            "b6": null,
+            "folate": null,
+            "b12": null,
+            "vitamin_a": null,
+            "vitamin_c": null,
+            "vitamin_d": null,
+            "vitamin_e": null,
+            "vitamin_k": null,
+            "calcium": null,
+            "copper": null,
+            "iron": null,
+            "magnesium": null,
+            "manganese": null,
+            "phosphorus": null,
+            "potassium": null,
+            "selenium": null,
+            "sodium": null,
+            "zinc": null
+          }
+        },
+        {
+          "date": "2026-10-10",
+          "logged": true,
+          "calories": 2100,
+          "protein": 150,
+          "carbs": 230,
+          "fat": 65,
+          "fiber": 28,
+          "nutrients": {
+            "b1": 1.4,
+            "b2": null,
+            "b3": null,
+            "b5": null,
+            "b6": null,
+            "folate": null,
+            "b12": null,
+            "vitamin_a": null,
+            "vitamin_c": null,
+            "vitamin_d": null,
+            "vitamin_e": null,
+            "vitamin_k": null,
+            "calcium": 1100,
+            "copper": null,
+            "iron": null,
+            "magnesium": null,
+            "manganese": null,
+            "phosphorus": null,
+            "potassium": null,
+            "selenium": null,
+            "sodium": null,
+            "zinc": null
+          }
+        },
+        {
+          "date": "2026-10-11",
+          "logged": true,
+          "calories": 1900,
+          "protein": 130,
+          "carbs": 210,
+          "fat": 55,
+          "fiber": 22,
+          "nutrients": {
+            "b1": 1,
+            "b2": null,
+            "b3": null,
+            "b5": null,
+            "b6": null,
+            "folate": null,
+            "b12": null,
+            "vitamin_a": null,
+            "vitamin_c": null,
+            "vitamin_d": null,
+            "vitamin_e": null,
+            "vitamin_k": null,
+            "calcium": 900,
+            "copper": null,
+            "iron": null,
+            "magnesium": null,
+            "manganese": null,
+            "phosphorus": null,
+            "potassium": null,
+            "selenium": null,
+            "sodium": null,
+            "zinc": null
+          }
+        },
+        {
+          "date": "2026-10-12",
+          "logged": false,
+          "calories": null,
+          "protein": null,
+          "carbs": null,
+          "fat": null,
+          "fiber": null,
+          "nutrients": {
+            "b1": null,
+            "b2": null,
+            "b3": null,
+            "b5": null,
+            "b6": null,
+            "folate": null,
+            "b12": null,
+            "vitamin_a": null,
+            "vitamin_c": null,
+            "vitamin_d": null,
+            "vitamin_e": null,
+            "vitamin_k": null,
+            "calcium": null,
+            "copper": null,
+            "iron": null,
+            "magnesium": null,
+            "manganese": null,
+            "phosphorus": null,
+            "potassium": null,
+            "selenium": null,
+            "sodium": null,
+            "zinc": null
+          }
+        },
+        {
+          "date": "2026-10-13",
+          "logged": true,
+          "calories": 2200,
+          "protein": 160,
+          "carbs": 240,
+          "fat": 70,
+          "fiber": 30,
+          "nutrients": {
+            "b1": 1.6,
+            "b2": null,
+            "b3": null,
+            "b5": null,
+            "b6": null,
+            "folate": null,
+            "b12": null,
+            "vitamin_a": null,
+            "vitamin_c": null,
+            "vitamin_d": null,
+            "vitamin_e": null,
+            "vitamin_k": null,
+            "calcium": 1200,
+            "copper": null,
+            "iron": null,
+            "magnesium": null,
+            "manganese": null,
+            "phosphorus": null,
+            "potassium": null,
+            "selenium": null,
+            "sodium": null,
+            "zinc": null
+          }
+        },
+        {
+          "date": "2026-10-14",
+          "logged": true,
+          "calories": 2500,
+          "protein": 180,
+          "carbs": 280,
+          "fat": 80,
+          "fiber": 35,
+          "nutrients": {
+            "b1": 2,
+            "b2": null,
+            "b3": null,
+            "b5": null,
+            "b6": null,
+            "folate": null,
+            "b12": null,
+            "vitamin_a": null,
+            "vitamin_c": null,
+            "vitamin_d": null,
+            "vitamin_e": null,
+            "vitamin_k": null,
+            "calcium": 1500,
+            "copper": null,
+            "iron": null,
+            "magnesium": null,
+            "manganese": null,
+            "phosphorus": null,
+            "potassium": null,
+            "selenium": null,
+            "sodium": null,
+            "zinc": null
+          }
+        }
+      ],
+      "output": {
+        "loggedDays": 4,
+        "calories": 2050,
+        "protein": 145,
+        "carbs": 225,
+        "fat": 62.5,
+        "fiber": 26.25,
+        "nutrients": {
+          "b1": 1.2999999999999998,
+          "b2": null,
+          "b3": null,
+          "b5": null,
+          "b6": null,
+          "folate": null,
+          "b12": null,
+          "vitamin_a": null,
+          "vitamin_c": null,
+          "vitamin_d": null,
+          "vitamin_e": null,
+          "vitamin_k": null,
+          "calcium": 1050,
+          "copper": null,
+          "iron": null,
+          "magnesium": null,
+          "manganese": null,
+          "phosphorus": null,
+          "potassium": null,
+          "selenium": null,
+          "sodium": null,
+          "zinc": null
+        }
+      },
+      "targetDaysOutput": {
+        "calories": {
+          "met": 2,
+          "of": 4
+        },
+        "protein": {
+          "met": 4,
+          "of": 4
+        },
+        "nutrients": {
+          "b1": {
+            "met": 3,
+            "of": 4
+          },
+          "b2": {
+            "met": 0,
+            "of": 0
+          },
+          "b3": {
+            "met": 0,
+            "of": 0
+          },
+          "b5": {
+            "met": 0,
+            "of": 0
+          },
+          "b6": {
+            "met": 0,
+            "of": 0
+          },
+          "folate": {
+            "met": 0,
+            "of": 0
+          },
+          "b12": {
+            "met": 0,
+            "of": 0
+          },
+          "vitamin_a": {
+            "met": 0,
+            "of": 0
+          },
+          "vitamin_c": {
+            "met": 0,
+            "of": 0
+          },
+          "vitamin_d": {
+            "met": 0,
+            "of": 0
+          },
+          "vitamin_e": {
+            "met": 0,
+            "of": 0
+          },
+          "vitamin_k": {
+            "met": 0,
+            "of": 0
+          },
+          "calcium": {
+            "met": 1,
+            "of": 4
+          },
+          "copper": {
+            "met": 0,
+            "of": 0
+          },
+          "iron": {
+            "met": 0,
+            "of": 0
+          },
+          "magnesium": {
+            "met": 0,
+            "of": 0
+          },
+          "manganese": {
+            "met": 0,
+            "of": 0
+          },
+          "phosphorus": {
+            "met": 0,
+            "of": 0
+          },
+          "potassium": {
+            "met": 0,
+            "of": 0
+          },
+          "selenium": {
+            "met": 0,
+            "of": 0
+          },
+          "sodium": {
+            "met": 0,
+            "of": 0
+          },
+          "zinc": {
+            "met": 0,
+            "of": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "Only quick entries with null macros and nutrients",
+      "today": "2026-10-14",
+      "days": [
+        {
+          "date": "2026-10-10",
+          "logged": true,
+          "calories": 1800,
+          "protein": null,
+          "carbs": null,
+          "fat": null,
+          "fiber": null,
+          "nutrients": {
+            "b1": null,
+            "b2": null,
+            "b3": null,
+            "b5": null,
+            "b6": null,
+            "folate": null,
+            "b12": null,
+            "vitamin_a": null,
+            "vitamin_c": null,
+            "vitamin_d": null,
+            "vitamin_e": null,
+            "vitamin_k": null,
+            "calcium": null,
+            "copper": null,
+            "iron": null,
+            "magnesium": null,
+            "manganese": null,
+            "phosphorus": null,
+            "potassium": null,
+            "selenium": null,
+            "sodium": null,
+            "zinc": null
+          }
+        },
+        {
+          "date": "2026-10-11",
+          "logged": true,
+          "calories": 2200,
+          "protein": null,
+          "carbs": null,
+          "fat": null,
+          "fiber": null,
+          "nutrients": {
+            "b1": null,
+            "b2": null,
+            "b3": null,
+            "b5": null,
+            "b6": null,
+            "folate": null,
+            "b12": null,
+            "vitamin_a": null,
+            "vitamin_c": null,
+            "vitamin_d": null,
+            "vitamin_e": null,
+            "vitamin_k": null,
+            "calcium": null,
+            "copper": null,
+            "iron": null,
+            "magnesium": null,
+            "manganese": null,
+            "phosphorus": null,
+            "potassium": null,
+            "selenium": null,
+            "sodium": null,
+            "zinc": null
+          }
+        }
+      ],
+      "output": {
+        "loggedDays": 2,
+        "calories": 2000,
+        "protein": null,
+        "carbs": null,
+        "fat": null,
+        "fiber": null,
+        "nutrients": {
+          "b1": null,
+          "b2": null,
+          "b3": null,
+          "b5": null,
+          "b6": null,
+          "folate": null,
+          "b12": null,
+          "vitamin_a": null,
+          "vitamin_c": null,
+          "vitamin_d": null,
+          "vitamin_e": null,
+          "vitamin_k": null,
+          "calcium": null,
+          "copper": null,
+          "iron": null,
+          "magnesium": null,
+          "manganese": null,
+          "phosphorus": null,
+          "potassium": null,
+          "selenium": null,
+          "sodium": null,
+          "zinc": null
+        }
+      },
+      "targetDaysOutput": {
+        "calories": {
+          "met": 1,
+          "of": 2
+        },
+        "protein": {
+          "met": 0,
+          "of": 0
+        },
+        "nutrients": {
+          "b1": {
+            "met": 0,
+            "of": 0
+          },
+          "b2": {
+            "met": 0,
+            "of": 0
+          },
+          "b3": {
+            "met": 0,
+            "of": 0
+          },
+          "b5": {
+            "met": 0,
+            "of": 0
+          },
+          "b6": {
+            "met": 0,
+            "of": 0
+          },
+          "folate": {
+            "met": 0,
+            "of": 0
+          },
+          "b12": {
+            "met": 0,
+            "of": 0
+          },
+          "vitamin_a": {
+            "met": 0,
+            "of": 0
+          },
+          "vitamin_c": {
+            "met": 0,
+            "of": 0
+          },
+          "vitamin_d": {
+            "met": 0,
+            "of": 0
+          },
+          "vitamin_e": {
+            "met": 0,
+            "of": 0
+          },
+          "vitamin_k": {
+            "met": 0,
+            "of": 0
+          },
+          "calcium": {
+            "met": 0,
+            "of": 0
+          },
+          "copper": {
+            "met": 0,
+            "of": 0
+          },
+          "iron": {
+            "met": 0,
+            "of": 0
+          },
+          "magnesium": {
+            "met": 0,
+            "of": 0
+          },
+          "manganese": {
+            "met": 0,
+            "of": 0
+          },
+          "phosphorus": {
+            "met": 0,
+            "of": 0
+          },
+          "potassium": {
+            "met": 0,
+            "of": 0
+          },
+          "selenium": {
+            "met": 0,
+            "of": 0
+          },
+          "sodium": {
+            "met": 0,
+            "of": 0
+          },
+          "zinc": {
+            "met": 0,
+            "of": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "Empty period with 0 logged days",
+      "today": "2026-10-14",
+      "days": [
+        {
+          "date": "2026-10-10",
+          "logged": false,
+          "calories": null,
+          "protein": null,
+          "carbs": null,
+          "fat": null,
+          "fiber": null,
+          "nutrients": {
+            "b1": null,
+            "b2": null,
+            "b3": null,
+            "b5": null,
+            "b6": null,
+            "folate": null,
+            "b12": null,
+            "vitamin_a": null,
+            "vitamin_c": null,
+            "vitamin_d": null,
+            "vitamin_e": null,
+            "vitamin_k": null,
+            "calcium": null,
+            "copper": null,
+            "iron": null,
+            "magnesium": null,
+            "manganese": null,
+            "phosphorus": null,
+            "potassium": null,
+            "selenium": null,
+            "sodium": null,
+            "zinc": null
+          }
+        },
+        {
+          "date": "2026-10-11",
+          "logged": false,
+          "calories": null,
+          "protein": null,
+          "carbs": null,
+          "fat": null,
+          "fiber": null,
+          "nutrients": {
+            "b1": null,
+            "b2": null,
+            "b3": null,
+            "b5": null,
+            "b6": null,
+            "folate": null,
+            "b12": null,
+            "vitamin_a": null,
+            "vitamin_c": null,
+            "vitamin_d": null,
+            "vitamin_e": null,
+            "vitamin_k": null,
+            "calcium": null,
+            "copper": null,
+            "iron": null,
+            "magnesium": null,
+            "manganese": null,
+            "phosphorus": null,
+            "potassium": null,
+            "selenium": null,
+            "sodium": null,
+            "zinc": null
+          }
+        }
+      ],
+      "output": {
+        "loggedDays": 0,
+        "calories": null,
+        "protein": null,
+        "carbs": null,
+        "fat": null,
+        "fiber": null,
+        "nutrients": {
+          "b1": null,
+          "b2": null,
+          "b3": null,
+          "b5": null,
+          "b6": null,
+          "folate": null,
+          "b12": null,
+          "vitamin_a": null,
+          "vitamin_c": null,
+          "vitamin_d": null,
+          "vitamin_e": null,
+          "vitamin_k": null,
+          "calcium": null,
+          "copper": null,
+          "iron": null,
+          "magnesium": null,
+          "manganese": null,
+          "phosphorus": null,
+          "potassium": null,
+          "selenium": null,
+          "sodium": null,
+          "zinc": null
+        }
+      },
+      "targetDaysOutput": {
+        "calories": {
+          "met": 0,
+          "of": 0
+        },
+        "protein": {
+          "met": 0,
+          "of": 0
+        },
+        "nutrients": {
+          "b1": {
+            "met": 0,
+            "of": 0
+          },
+          "b2": {
+            "met": 0,
+            "of": 0
+          },
+          "b3": {
+            "met": 0,
+            "of": 0
+          },
+          "b5": {
+            "met": 0,
+            "of": 0
+          },
+          "b6": {
+            "met": 0,
+            "of": 0
+          },
+          "folate": {
+            "met": 0,
+            "of": 0
+          },
+          "b12": {
+            "met": 0,
+            "of": 0
+          },
+          "vitamin_a": {
+            "met": 0,
+            "of": 0
+          },
+          "vitamin_c": {
+            "met": 0,
+            "of": 0
+          },
+          "vitamin_d": {
+            "met": 0,
+            "of": 0
+          },
+          "vitamin_e": {
+            "met": 0,
+            "of": 0
+          },
+          "vitamin_k": {
+            "met": 0,
+            "of": 0
+          },
+          "calcium": {
+            "met": 0,
+            "of": 0
+          },
+          "copper": {
+            "met": 0,
+            "of": 0
+          },
+          "iron": {
+            "met": 0,
+            "of": 0
+          },
+          "magnesium": {
+            "met": 0,
+            "of": 0
+          },
+          "manganese": {
+            "met": 0,
+            "of": 0
+          },
+          "phosphorus": {
+            "met": 0,
+            "of": 0
+          },
+          "potassium": {
+            "met": 0,
+            "of": 0
+          },
+          "selenium": {
+            "met": 0,
+            "of": 0
+          },
+          "sodium": {
+            "met": 0,
+            "of": 0
+          },
+          "zinc": {
+            "met": 0,
+            "of": 0
+          }
+        }
+      }
+    }
+  ],
+  "macro_cases": [
+    {
+      "input": {
+        "protein": 120,
+        "carbs": 200,
+        "fat": 60
+      },
+      "output": {
+        "protein": 26,
+        "carbs": 44,
+        "fat": 30
+      }
+    },
+    {
+      "input": {
+        "protein": 85,
+        "carbs": 150,
+        "fat": 45
+      },
+      "output": {
+        "protein": 25,
+        "carbs": 45,
+        "fat": 30
+      }
+    },
+    {
+      "input": {
+        "protein": 100,
+        "carbs": null,
+        "fat": 50
+      },
+      "output": null
+    },
+    {
+      "input": {
+        "protein": 0,
+        "carbs": 0,
+        "fat": 0
+      },
+      "output": null
+    }
+  ],
+  "comparison_cases": [
+    {
+      "name": "Comparing current vs previous 2-day averages",
+      "current": {
+        "loggedDays": 2,
+        "calories": 2100,
+        "protein": 140,
+        "carbs": 230,
+        "fat": 65,
+        "fiber": 28,
+        "nutrients": {
+          "b1": 1.4,
+          "b2": null,
+          "b3": null,
+          "b5": null,
+          "b6": null,
+          "folate": null,
+          "b12": null,
+          "vitamin_a": null,
+          "vitamin_c": null,
+          "vitamin_d": null,
+          "vitamin_e": null,
+          "vitamin_k": null,
+          "calcium": 1100,
+          "copper": null,
+          "iron": null,
+          "magnesium": null,
+          "manganese": null,
+          "phosphorus": null,
+          "potassium": null,
+          "selenium": null,
+          "sodium": null,
+          "zinc": null
+        }
+      },
+      "previous": {
+        "loggedDays": 2,
+        "calories": 1850,
+        "protein": 115,
+        "carbs": 205,
+        "fat": 52.5,
+        "fiber": 21,
+        "nutrients": {
+          "b1": 1.05,
+          "b2": null,
+          "b3": null,
+          "b5": null,
+          "b6": null,
+          "folate": null,
+          "b12": null,
+          "vitamin_a": null,
+          "vitamin_c": null,
+          "vitamin_d": null,
+          "vitamin_e": null,
+          "vitamin_k": null,
+          "calcium": 850,
+          "copper": null,
+          "iron": null,
+          "magnesium": null,
+          "manganese": null,
+          "phosphorus": null,
+          "potassium": null,
+          "selenium": null,
+          "sodium": null,
+          "zinc": null
+        }
+      },
+      "output": [
+        {
+          "key": "b1",
+          "label": "Vitamin B1",
+          "unit": "mg",
+          "current": 1.4,
+          "previous": 1.05,
+          "delta": 0.34999999999999987,
+          "deltaPct": 33.33333333333332
+        },
+        {
+          "key": "calcium",
+          "label": "Canxi",
+          "unit": "mg",
+          "current": 1100,
+          "previous": 850,
+          "delta": 250,
+          "deltaPct": 29.41176470588235
+        },
+        {
+          "key": "fat",
+          "label": "Béo",
+          "unit": "g",
+          "current": 65,
+          "previous": 52.5,
+          "delta": 12.5,
+          "deltaPct": 23.80952380952381
+        },
+        {
+          "key": "protein",
+          "label": "Đạm",
+          "unit": "g",
+          "current": 140,
+          "previous": 115,
+          "delta": 25,
+          "deltaPct": 21.73913043478261
+        },
+        {
+          "key": "calories",
+          "label": "Năng lượng",
+          "unit": "kcal",
+          "current": 2100,
+          "previous": 1850,
+          "delta": 250,
+          "deltaPct": 13.513513513513514
+        },
+        {
+          "key": "carbs",
+          "label": "Tinh bột",
+          "unit": "g",
+          "current": 230,
+          "previous": 205,
+          "delta": 25,
+          "deltaPct": 12.195121951219512
+        }
+      ]
+    }
+  ],
+  "weight_cases": [
+    {
+      "name": "Standard weight series spanning period",
+      "log": [
+        {
+          "date": "2026-09-01",
+          "kg": 72
+        },
+        {
+          "date": "2026-10-05",
+          "kg": 70.8
+        },
+        {
+          "date": "2026-10-08",
+          "kg": 70.4
+        },
+        {
+          "date": "2026-10-12",
+          "kg": 70
+        },
+        {
+          "date": "2026-10-20",
+          "kg": 69.5
+        }
+      ],
+      "period": {
+        "start": "2026-10-07",
+        "end": "2026-10-13"
+      },
+      "output": {
+        "latest": 70,
+        "change": -0.4000000000000057,
+        "sinceStart": -2,
+        "startDate": "2026-09-01",
+        "points": [
+          {
+            "date": "2026-10-08",
+            "kg": 70.4
+          },
+          {
+            "date": "2026-10-12",
+            "kg": 70
+          }
+        ]
+      }
+    },
+    {
+      "name": "Empty log",
+      "log": [],
+      "period": {
+        "start": "2026-10-07",
+        "end": "2026-10-13"
+      },
+      "output": {
+        "latest": null,
+        "change": null,
+        "sinceStart": null,
+        "startDate": null,
+        "points": []
+      }
+    },
+    {
+      "name": "Single point inside period",
+      "log": [
+        {
+          "date": "2026-10-10",
+          "kg": 70.5
+        }
+      ],
+      "period": {
+        "start": "2026-10-07",
+        "end": "2026-10-13"
+      },
+      "output": {
+        "latest": 70.5,
+        "change": null,
+        "sinceStart": null,
+        "startDate": "2026-10-10",
+        "points": [
+          {
+            "date": "2026-10-10",
+            "kg": 70.5
+          }
+        ]
+      }
+    }
+  ]
+}

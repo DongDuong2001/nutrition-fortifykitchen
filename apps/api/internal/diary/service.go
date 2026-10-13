@@ -11,13 +11,19 @@ import (
 )
 
 var (
-	ErrEntryNotFound = errors.New("diary entry not found")
+	ErrEntryNotFound         = errors.New("diary entry not found")
+	ErrRestoreWindowExpired = errors.New("restore window expired (must be within 10 seconds)")
 )
+
+type RecentsTracker interface {
+	UpsertRecent(ctx context.Context, userID uuid.UUID, foodID uuid.UUID, portionLabel string, grams float64) error
+}
 
 type Service interface {
 	GetDay(ctx context.Context, userID uuid.UUID, date string) (*DaySummaryResponse, error)
 	CreateEntry(ctx context.Context, userID uuid.UUID, date string, req CreateEntryRequest) (*DiaryEntryItem, map[string]*float64, error)
 	UpdateEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID, req UpdateEntryRequest) (*DiaryEntryItem, map[string]*float64, error)
+	RestoreEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) (*DiaryEntryItem, map[string]*float64, error)
 	DeleteEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) error
 	CopyYesterday(ctx context.Context, userID uuid.UUID, targetDate string, req CopyYesterdayRequest) (*CopyYesterdayResponse, error)
 	DeleteMeal(ctx context.Context, userID uuid.UUID, date string, mealSlot string) error
@@ -25,11 +31,16 @@ type Service interface {
 }
 
 type diaryServiceImpl struct {
-	repo Repository
+	repo    Repository
+	recents RecentsTracker
 }
 
-func NewService(repo Repository) Service {
-	return &diaryServiceImpl{repo: repo}
+func NewService(repo Repository, recents ...RecentsTracker) Service {
+	var r RecentsTracker
+	if len(recents) > 0 {
+		r = recents[0]
+	}
+	return &diaryServiceImpl{repo: repo, recents: r}
 }
 
 var mealSlotOrder = []struct {
@@ -144,6 +155,19 @@ func (s *diaryServiceImpl) GetDay(ctx context.Context, userID uuid.UUID, date st
 			IsPeriod:        isPeriod,
 		})
 		dayTargets = t
+
+		for i := range meals {
+			switch meals[i].Slot {
+			case "breakfast":
+				meals[i].TargetMinKcal = round2(t.Calories.Min * 0.25)
+			case "lunch":
+				meals[i].TargetMinKcal = round2(t.Calories.Min * 0.35)
+			case "dinner":
+				meals[i].TargetMinKcal = round2(t.Calories.Min * 0.30)
+			case "snack", "pre_workout":
+				meals[i].TargetMinKcal = round2(t.Calories.Min * 0.10)
+			}
+		}
 	}
 
 	return &DaySummaryResponse{
@@ -223,6 +247,10 @@ func (s *diaryServiceImpl) CreateEntry(ctx context.Context, userID uuid.UUID, da
 		return nil, nil, err
 	}
 
+	if s.recents != nil && item.FoodID != nil && req.Kind != "quick" {
+		_ = s.recents.UpsertRecent(ctx, userID, *item.FoodID, item.ServingLabel, item.Grams)
+	}
+
 	dayEntries, err := s.repo.GetDayEntries(ctx, userID, date)
 	if err != nil {
 		return nil, nil, err
@@ -232,7 +260,31 @@ func (s *diaryServiceImpl) CreateEntry(ctx context.Context, userID uuid.UUID, da
 	return saved, totals, nil
 }
 
+func (s *diaryServiceImpl) RestoreEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) (*DiaryEntryItem, map[string]*float64, error) {
+	restored, date, err := s.repo.RestoreEntry(ctx, userID, entryID)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if err := ValidateDateWritable(date); err != nil {
+		_ = s.repo.SoftDeleteEntry(ctx, userID, entryID)
+		return nil, nil, err
+	}
+
+	dayEntries, err := s.repo.GetDayEntries(ctx, userID, date)
+	if err != nil {
+		return nil, nil, err
+	}
+	totals := computeDayTotals(dayEntries)
+
+	return restored, totals, nil
+}
+
 func (s *diaryServiceImpl) UpdateEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID, req UpdateEntryRequest) (*DiaryEntryItem, map[string]*float64, error) {
+	if req.Restore != nil && *req.Restore {
+		return s.RestoreEntry(ctx, userID, entryID)
+	}
+
 	existing, date, err := s.repo.GetEntryByID(ctx, userID, entryID)
 	if err != nil {
 		return nil, nil, err
