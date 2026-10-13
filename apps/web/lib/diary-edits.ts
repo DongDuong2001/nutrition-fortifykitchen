@@ -2,6 +2,7 @@ import { MOCK_FOODS, type FoodItem } from "./mock/foods";
 import { SAMPLE_DAY, type MockDayData, type MockFoodItem } from "./mock/sample-day";
 import { MEAL_SLOTS, getMealSlotNameVi, type MealSlot } from "./meal-slot";
 import { scaleNutrients } from "./portion";
+import { formatAmount } from "./format";
 
 /** A diary entry the user added (from /add or the food detail page). */
 export interface AddedDiaryEntry {
@@ -149,7 +150,7 @@ export function sampleEffect(info: SampleItemInfo, edit: SampleEdit = {}): Sampl
   if (edit.deleted) return { deleted: true, mealSlot, qty: info.item.qty, kcal: 0, numbers: null };
   if (info.food && info.grams !== null && edit.grams !== undefined) {
     const numbers = entryNumbers(info.food, edit.grams);
-    return { deleted: false, mealSlot, qty: edit.servingLabel ?? `${edit.grams} g`, kcal: numbers.calories, numbers };
+    return { deleted: false, mealSlot, qty: edit.servingLabel ?? `${formatAmount(edit.grams, "g")} g`, kcal: numbers.calories, numbers };
   }
   const numbers = info.food && info.grams !== null ? entryNumbers(info.food, info.grams) : null;
   return { deleted: false, mealSlot, qty: info.item.qty, kcal: info.item.kcal, numbers };
@@ -304,7 +305,7 @@ export function updateEntryIn(edits: DiaryEdits, id: string, patch: EntryPatch, 
   if (added) {
     let updated: AddedDiaryEntry =
       grams !== null && view.food
-        ? { ...added, mealSlot, grams, displayQty: patch.servingLabel ?? `${grams} g`, ...entryNumbers(view.food, grams) }
+        ? { ...added, mealSlot, grams, displayQty: patch.servingLabel ?? `${formatAmount(grams, "g")} g`, ...entryNumbers(view.food, grams) }
         : { ...added, mealSlot };
     if (added.kind === "quick" && patch.quick) {
       const { name, calories, protein, carbs, fat } = patch.quick;
@@ -316,7 +317,7 @@ export function updateEntryIn(edits: DiaryEdits, id: string, patch: EntryPatch, 
   const edit: SampleEdit = { ...edits.sample[id], mealSlot };
   if (grams !== null) {
     edit.grams = grams;
-    edit.servingLabel = patch.servingLabel ?? `${grams} g`;
+    edit.servingLabel = patch.servingLabel ?? `${formatAmount(grams, "g")} g`;
   }
   return { ...edits, sample: { ...edits.sample, [id]: edit } };
 }
