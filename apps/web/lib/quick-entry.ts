@@ -33,7 +33,7 @@ function unknownNutrients(): Record<string, number | null> {
 }
 
 /**
- * "Chỉ ghi kcal": kcal above zero is required, the name is optional (Ghi nhanh), the macros are optional
+ * "Chỉ thêm kcal": kcal above zero is required, the name is optional (Thêm nhanh), the macros are optional
  * (a blank one is unknown: null, never 0; a typed 0 stays 0). No food, so no micronutrient value and no fibre.
  */
 export function quickEntryFrom(input: QuickEntryInput, slot: MealSlot, id: string, addedAt: string): QuickEntryResult {
