@@ -610,6 +610,7 @@ All alignment and hydration tests passed cleanly (<= 1px difference, 0 hydration
 - Screenshots: apps/web/.screenshots/cc2-08-{home,diary,micros,settings,profile}-{390,1280}.png.
 
 ## Night shift
+- 13/10 cc2-21: Năng lượng, Vi chất, Cơ thể rebuilt in the Tóm tắt system (components/overview/parts, lib/overview-detail.ts + tests, cc2_21 probe). Gates: 585 tests, build, align, hydration, probe:all 35 PASS 0 FAIL, smoke. Edges: overview-rows, overview-micro, overview-stats pass at 390 and 1440.
 - 13/10 cc2-20: Tổng quan › Tóm tắt direction B (hero, period row, scoreboard, Vi chất card, Cần chú ý), lib/overview-board.ts + tests, UI-RULES §6, requestMagicLink calls apiClient first. Gates: typecheck, 568 tests, build, test:align, hydration, probe:all 34 PASS 0 FAIL, smoke, cc2_20 75 ok. Edges: overview-rows (scoreboard rows) pass at 390 and 1440. pushed: see docs/night-2026-10-13.md.
 - 13/10 cc2-unify: unified AppHeader (ink on phone, paper on desktop), design/UI-RULES.md, SectionTitle, radius and spacing sweep, probe cc2_unify.py. Merged (commit in git log: "unify: ...").
 - 13/10 docs08: docs/08-backend-plan.md added, pointers in AGENTS.md and docs/07-api-contract.md. Committed on feat/ui-cc2-docs08 and merged locally; push to origin/feat/ui was blocked by the permission classifier (docs only; typecheck, smoke 62/62).
