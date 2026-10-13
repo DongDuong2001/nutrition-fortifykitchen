@@ -2,6 +2,7 @@ package nutrition
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -74,6 +75,10 @@ func (h *Handler) GetFoodsRichIn(w http.ResponseWriter, r *http.Request) {
 
 	result, err := h.service.GetFoodsRichIn(r.Context(), nutrient, limit)
 	if err != nil {
+		if errors.Is(err, ErrInvalidNutrient) {
+			response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, "Invalid nutrient key")
+			return
+		}
 		response.Error(w, http.StatusInternalServerError, response.CodeInternalServerError, "Failed to get rich-in foods")
 		return
 	}

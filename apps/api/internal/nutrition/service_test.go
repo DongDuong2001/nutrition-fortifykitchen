@@ -2,6 +2,10 @@ package nutrition
 
 import (
 	"context"
+	"errors"
+	"net/http"
+	"net/http/httptest"
+	"net/url"
 	"testing"
 
 	"github.com/google/uuid"
@@ -146,5 +150,25 @@ func TestNutritionService_RichIn_Units(t *testing.T) {
 	}
 	if res.Items[0].AmountPer100g != 120 {
 		t.Errorf("expected 120 mg per 100g, got %f", res.Items[0].AmountPer100g)
+	}
+}
+
+func TestNutritionService_RichIn_SQLInjectionRejected(t *testing.T) {
+	repo := &mockNutritionRepo{foods: make(map[uuid.UUID]*FoodDetail)}
+	svc := NewService(repo)
+
+	maliciousNutrient := "calcium'; DROP TABLE foods;--"
+	_, err := svc.GetFoodsRichIn(context.Background(), maliciousNutrient, 10)
+	if err == nil || !errors.Is(err, ErrInvalidNutrient) {
+		t.Fatalf("expected ErrInvalidNutrient, got %v", err)
+	}
+
+	handler := NewHandler(svc)
+	req := httptest.NewRequest("GET", "/api/v1/foods/rich-in?nutrient="+url.QueryEscape(maliciousNutrient), nil)
+	rec := httptest.NewRecorder()
+
+	handler.GetFoodsRichIn(rec, req)
+	if rec.Code != http.StatusBadRequest {
+		t.Errorf("expected 400 Bad Request, got %d", rec.Code)
 	}
 }

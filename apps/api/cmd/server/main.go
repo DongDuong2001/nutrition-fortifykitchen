@@ -86,6 +86,10 @@ func main() {
 
 	userRateLimiter := ratelimit.NewUserRateLimiter(60)
 
+	if cfg.SupabaseJWTSecret == "" && os.Getenv("SUPABASE_SERVICE_ROLE_KEY") == "" {
+		logger.Log.Fatal().Msg("SUPABASE_JWT_SECRET (or SUPABASE_SERVICE_ROLE_KEY) is required to start the server")
+	}
+
 	authMiddleware := auth.NewMiddleware()
 
 	// 5. Setup Chi Router

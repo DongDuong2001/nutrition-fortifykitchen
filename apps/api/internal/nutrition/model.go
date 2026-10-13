@@ -1,6 +1,7 @@
 package nutrition
 
 import (
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -68,3 +69,5 @@ type CreateCustomFoodRequest struct {
 	Fat         float64             `json:"fat"`
 	Micros      map[string]*float64 `json:"micros,omitempty"`
 }
+
+var ErrInvalidNutrient = errors.New("invalid nutrient identifier")

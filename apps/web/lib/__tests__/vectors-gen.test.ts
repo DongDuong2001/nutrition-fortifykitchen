@@ -27,8 +27,15 @@ describe("Export shared test vectors for Go API", () => {
     }
 
     const vectorsDir = path.resolve(__dirname, "../../../../packages/vectors");
-    fs.mkdirSync(vectorsDir, { recursive: true });
-    fs.writeFileSync(path.join(vectorsDir, "targets.json"), JSON.stringify(targetCases, null, 2));
+    const targetsFile = path.join(vectorsDir, "targets.json");
+
+    if (process.env.UPDATE_VECTORS === "1" || !fs.existsSync(targetsFile)) {
+      fs.mkdirSync(vectorsDir, { recursive: true });
+      fs.writeFileSync(targetsFile, JSON.stringify(targetCases, null, 2) + "\n");
+    } else {
+      const existing = JSON.parse(fs.readFileSync(targetsFile, "utf-8"));
+      expect(targetCases).toEqual(existing);
+    }
 
     expect(targetCases.length).toBeGreaterThanOrEqual(40);
   });

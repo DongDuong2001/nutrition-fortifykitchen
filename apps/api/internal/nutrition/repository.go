@@ -172,6 +172,10 @@ func (r *pgxRepository) GetFoodByID(ctx context.Context, id uuid.UUID) (*FoodDet
 }
 
 func (r *pgxRepository) GetFoodsRichIn(ctx context.Context, nutrient string, limit int) ([]RichInFoodItem, error) {
+	if _, ok := ValidNutrients[nutrient]; !ok {
+		return nil, ErrInvalidNutrient
+	}
+
 	if limit <= 0 {
 		limit = 10
 	}

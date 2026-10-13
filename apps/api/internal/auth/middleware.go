@@ -47,6 +47,12 @@ func NewMiddleware() *Middleware {
 	}
 }
 
+func NewMiddlewareWithSecret(secret []byte) *Middleware {
+	return &Middleware{
+		jwtSecret: secret,
+	}
+}
+
 // Authenticate extracts and validates Bearer token, then injects user info into request context
 func (m *Middleware) Authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -65,22 +71,18 @@ func (m *Middleware) Authenticate(next http.Handler) http.Handler {
 		tokenStr := strings.TrimSpace(parts[1])
 		claims := &SupabaseClaims{}
 
-		// Parse token
-		var token *jwt.Token
-		var err error
-
-		if len(m.jwtSecret) > 0 {
-			token, err = jwt.ParseWithClaims(tokenStr, claims, func(t *jwt.Token) (interface{}, error) {
-				if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-					return nil, errors.New("unexpected signing method")
-				}
-				return m.jwtSecret, nil
-			})
-		} else {
-			// Dev mode / unverified parsing when secret is not yet configured locally
-			parser := jwt.NewParser()
-			token, _, err = parser.ParseUnverified(tokenStr, claims)
+		// Parse and verify token signature
+		if len(m.jwtSecret) == 0 {
+			response.Error(w, http.StatusUnauthorized, response.CodeUnauthorized, "server authentication secret not configured")
+			return
 		}
+
+		token, err := jwt.ParseWithClaims(tokenStr, claims, func(t *jwt.Token) (interface{}, error) {
+			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, errors.New("unexpected signing method")
+			}
+			return m.jwtSecret, nil
+		})
 
 		if err != nil || token == nil || claims.Sub == "" {
 			response.Error(w, http.StatusUnauthorized, response.CodeUnauthorized, "invalid or expired token")

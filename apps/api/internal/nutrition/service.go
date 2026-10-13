@@ -45,27 +45,35 @@ func (s *nutritionService) GetFoodByID(ctx context.Context, id uuid.UUID) (*Food
 	return food, nil
 }
 
-func (s *nutritionService) GetFoodsRichIn(ctx context.Context, nutrient string, limit int) (*RichInResponse, error) {
-	// Nutrient units mapping
-	units := map[string]string{
-		"calcium":    "mg",
-		"iron":       "mg",
-		"potassium":  "mg",
-		"magnesium":  "mg",
-		"zinc":       "mg",
-		"vitamin_d":  "µg",
-		"protein":    "g",
-		"fiber":      "g",
-		"vitamin_c":  "mg",
-		"vitamin_a":  "µg",
-		"sodium":     "mg",
-		"folate":     "µg",
-		"b12":        "µg",
-	}
+// ValidNutrients defines all 57 tracked nutrient identifiers in the catalog mapped to their default unit
+var ValidNutrients = map[string]string{
+	// general
+	"energy": "kcal", "water": "g", "alcohol": "g", "caffeine": "mg", "oxalate": "mg", "phytate": "mg",
+	// carbs
+	"carbs": "g", "net_carbs": "g", "fiber": "g", "insoluble_fiber": "g", "soluble_fiber": "g",
+	"starch": "g", "sugars": "g", "added_sugars": "g",
+	// lipids
+	"fat": "g", "monounsaturated_fat": "g", "polyunsaturated_fat": "g",
+	"omega3": "g", "ala": "g", "dha": "g", "epa": "g", "omega6": "g",
+	"saturated_fat": "g", "trans_fat": "g", "cholesterol": "mg",
+	// protein
+	"protein": "g", "cystine": "g", "histidine": "g", "isoleucine": "g", "leucine": "g",
+	"lysine": "g", "methionine": "g", "phenylalanine": "g", "threonine": "g",
+	"tryptophan": "g", "tyrosine": "g", "valine": "g",
+	// vitamins
+	"b1": "mg", "b2": "mg", "b3": "mg", "b5": "mg", "b6": "mg", "b12": "µg",
+	"folate": "µg", "vitamin_a": "µg", "vitamin_c": "mg", "vitamin_d": "µg",
+	"vitamin_e": "mg", "vitamin_k": "µg",
+	// minerals
+	"calcium": "mg", "copper": "mg", "iron": "mg", "magnesium": "mg",
+	"manganese": "mg", "phosphorus": "mg", "potassium": "mg", "selenium": "µg",
+	"sodium": "mg", "zinc": "mg",
+}
 
-	unit, ok := units[nutrient]
+func (s *nutritionService) GetFoodsRichIn(ctx context.Context, nutrient string, limit int) (*RichInResponse, error) {
+	unit, ok := ValidNutrients[nutrient]
 	if !ok {
-		unit = "mg"
+		return nil, ErrInvalidNutrient
 	}
 
 	items, err := s.repo.GetFoodsRichIn(ctx, nutrient, limit)

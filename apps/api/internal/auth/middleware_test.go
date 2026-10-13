@@ -36,7 +36,10 @@ func TestAuthMiddleware(t *testing.T) {
 		}
 	})
 
-	t.Run("valid unverified token in dev", func(t *testing.T) {
+	validSecret := []byte("test-super-secret-key-12345")
+	middlewareWithSecret := auth.NewMiddlewareWithSecret(validSecret)
+
+	t.Run("valid signed token accepted", func(t *testing.T) {
 		claims := auth.SupabaseClaims{
 			Sub: testUserID.String(),
 			AppMetadata: map[string]interface{}{
@@ -44,15 +47,64 @@ func TestAuthMiddleware(t *testing.T) {
 			},
 		}
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-		tokenStr, _ := token.SignedString([]byte("dummy-secret"))
+		tokenStr, _ := token.SignedString(validSecret)
 
 		req := httptest.NewRequest("GET", "/api/v1/diary/daily", nil)
 		req.Header.Set("Authorization", "Bearer "+tokenStr)
 		rec := httptest.NewRecorder()
 
-		middleware.Authenticate(testHandler).ServeHTTP(rec, req)
+		middlewareWithSecret.Authenticate(testHandler).ServeHTTP(rec, req)
 		if rec.Code != http.StatusOK {
 			t.Errorf("expected 200 OK, got %d", rec.Code)
+		}
+	})
+
+	t.Run("badly signed token gets 401", func(t *testing.T) {
+		claims := auth.SupabaseClaims{
+			Sub: testUserID.String(),
+			AppMetadata: map[string]interface{}{
+				"role": "authenticated",
+			},
+		}
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		tokenStr, _ := token.SignedString([]byte("wrong-signing-secret"))
+
+		req := httptest.NewRequest("GET", "/api/v1/diary/daily", nil)
+		req.Header.Set("Authorization", "Bearer "+tokenStr)
+		rec := httptest.NewRecorder()
+
+		middlewareWithSecret.Authenticate(testHandler).ServeHTTP(rec, req)
+		if rec.Code != http.StatusUnauthorized {
+			t.Errorf("expected 401 Unauthorized for badly signed token, got %d", rec.Code)
+		}
+	})
+
+	t.Run("unsigned token gets 401", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/api/v1/diary/daily", nil)
+		req.Header.Set("Authorization", "Bearer some-unsigned-malformed-token")
+		rec := httptest.NewRecorder()
+
+		middlewareWithSecret.Authenticate(testHandler).ServeHTTP(rec, req)
+		if rec.Code != http.StatusUnauthorized {
+			t.Errorf("expected 401 Unauthorized for unsigned token, got %d", rec.Code)
+		}
+	})
+
+	t.Run("middleware with empty secret rejects all requests with 401", func(t *testing.T) {
+		emptyMiddleware := auth.NewMiddlewareWithSecret(nil)
+		claims := auth.SupabaseClaims{
+			Sub: testUserID.String(),
+		}
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		tokenStr, _ := token.SignedString(validSecret)
+
+		req := httptest.NewRequest("GET", "/api/v1/diary/daily", nil)
+		req.Header.Set("Authorization", "Bearer "+tokenStr)
+		rec := httptest.NewRecorder()
+
+		emptyMiddleware.Authenticate(testHandler).ServeHTTP(rec, req)
+		if rec.Code != http.StatusUnauthorized {
+			t.Errorf("expected 401 Unauthorized when secret is unconfigured, got %d", rec.Code)
 		}
 	})
 
@@ -64,13 +116,13 @@ func TestAuthMiddleware(t *testing.T) {
 			},
 		}
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-		tokenStr, _ := token.SignedString([]byte("dummy-secret"))
+		tokenStr, _ := token.SignedString(validSecret)
 
 		req := httptest.NewRequest("GET", "/api/v1/admin/drafts", nil)
 		req.Header.Set("Authorization", "Bearer "+tokenStr)
 		rec := httptest.NewRecorder()
 
-		adminHandler := middleware.Authenticate(middleware.RequireAdmin(testHandler))
+		adminHandler := middlewareWithSecret.Authenticate(middlewareWithSecret.RequireAdmin(testHandler))
 		adminHandler.ServeHTTP(rec, req)
 
 		if rec.Code != http.StatusForbidden {
@@ -86,13 +138,13 @@ func TestAuthMiddleware(t *testing.T) {
 			},
 		}
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-		tokenStr, _ := token.SignedString([]byte("dummy-secret"))
+		tokenStr, _ := token.SignedString(validSecret)
 
 		req := httptest.NewRequest("GET", "/api/v1/admin/drafts", nil)
 		req.Header.Set("Authorization", "Bearer "+tokenStr)
 		rec := httptest.NewRecorder()
 
-		adminHandler := middleware.Authenticate(middleware.RequireAdmin(testHandler))
+		adminHandler := middlewareWithSecret.Authenticate(middlewareWithSecret.RequireAdmin(testHandler))
 		adminHandler.ServeHTTP(rec, req)
 
 		if rec.Code != http.StatusOK {
