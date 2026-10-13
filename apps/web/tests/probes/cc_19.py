@@ -6,8 +6,9 @@ Keyboard: Tab from the top of each CC1 screen at 390 and 1280; every stop has a 
 from its idle state) and sits in the viewport; no positive tabindex.
 Cài đặt has a Nguồn dữ liệu row that opens /settings/data-sources; the page is one column on the phone and two
 columns on desktop; the food detail source link is at least 44 x 44 px.
-Sample account: on a production build, outside demo mode, Tài khoản says Chưa đăng nhập (skipped on dev, which always
-runs demo mode).
+Demo mode: the CC1 checks run in demo mode (the sample day and profile, as Hao sees them); outside it /settings sends a new
+visitor to /setup. Sample account: on a production build, outside demo mode, ban@email.com does not sign in (skipped on
+dev, which always runs demo mode).
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_19.py
 """
 import os
@@ -21,6 +22,8 @@ PHONE = {"width": 390, "height": 844}
 DESKTOP = {"width": 1280, "height": 900}
 REFLOW = {"width": 640, "height": 800}
 NARROW = {"width": 320, "height": 800}
+SAMPLE_EMAIL = "ban@email.com"
+DEMO_INIT = "try { localStorage.setItem('h1t_demo_v1', '1'); } catch (e) {}"
 
 REFLOW_PATHS = [
     "/settings",
@@ -52,6 +55,14 @@ def check(cond, msg):
 
 def go(pg, path):
     pg.goto(BASE + path, wait_until="networkidle")
+
+
+def new_demo_context(browser, size):
+    # Demo mode (lib/demo.ts) gives the sample day and profile the CC1 screens are checked with. Outside it a new visitor
+    # is sent to /setup (setup-gate), so the screens would not be tested at all.
+    context = browser.new_context(viewport=size)
+    context.add_init_script(DEMO_INIT)
+    return context
 
 
 def overflow(pg):
@@ -123,7 +134,7 @@ FOCUS_INFO = """() => {
 
 
 def keyboard_pass(browser, label, size):
-    context = browser.new_context(viewport=size)
+    context = new_demo_context(browser, size)
     pg = context.new_page()
     for path in KEYBOARD_PATHS:
         go(pg, path)
@@ -160,7 +171,7 @@ def min_target(locator, label, minimum=44):
 
 def check_settings_row_and_sources(browser):
     for label, size in (("390", PHONE), ("1280", DESKTOP)):
-        context = browser.new_context(viewport=size)
+        context = new_demo_context(browser, size)
         pg = context.new_page()
         go(pg, "/settings")
         pg.wait_for_selector('section[aria-label="Ứng dụng"]', timeout=10000)
@@ -200,7 +211,7 @@ def check_settings_row_and_sources(browser):
 
 def check_source_link(browser):
     for label, size in (("390", PHONE), ("1280", DESKTOP)):
-        context = browser.new_context(viewport=size)
+        context = new_demo_context(browser, size)
         pg = context.new_page()
         go(pg, "/foods/food-cha-la")
         link = pg.locator('a[href="/settings/data-sources"]').first
@@ -211,22 +222,29 @@ def check_source_link(browser):
 
 
 def check_sample_account_outside_demo(browser):
+    # A visitor outside demo mode has no sample account: signing in with ban@email.com gets the one generic message.
+    # The Next.js dev overlay only exists on the dev server, which always runs demo mode: the check is for production builds.
     context = browser.new_context(viewport=PHONE)
     pg = context.new_page()
-    go(pg, "/settings")
-    pg.wait_for_selector('section[aria-label="Tài khoản"]', timeout=10000)
-    hint = pg.locator('section[aria-label="Tài khoản"]').inner_text()
-    # The Next.js dev overlay only exists on the dev server, which always runs demo mode: the check is for production builds
+    go(pg, "/signin")
     if pg.locator("nextjs-portal").count() > 0:
         notes.append("info: dev server always runs demo mode, so the sample-account check is skipped here (run on the prod build)")
     else:
-        check("Chưa đăng nhập" in hint and "ban@email.com" not in hint,
-              "outside demo mode: Tài khoản says Chưa đăng nhập, the sample account is not there")
+        pg.locator('input[type="email"]').fill(SAMPLE_EMAIL)
+        pg.locator('input[type="password"]').first.fill("abcdef12")
+        pg.get_by_role("button", name="Đăng nhập", exact=True).click()
+        message = pg.get_by_text("Email hoặc mật khẩu không đúng", exact=False).first
+        try:
+            message.wait_for(state="visible", timeout=8000)
+            shown = True
+        except Exception:
+            shown = False
+        check(shown, "outside demo mode: the sample account does not sign in (one generic message)")
     context.close()
 
 
 def check_reflow(browser, label, size, gate):
-    context = browser.new_context(viewport=size)
+    context = new_demo_context(browser, size)
     pg = context.new_page()
     for path in REFLOW_PATHS:
         go(pg, path)
