@@ -18,7 +18,7 @@ describe("a quick kcal entry in the day", () => {
     const day = computeCompositeDayData(SAMPLE_DAY, [quick("Bánh mì")]);
     expect(day.calories.consumed).toBe(base.calories.consumed + 400);
     const dinner = day.meals.find((m) => m.slot === "dinner");
-    expect(dinner?.items.at(-1)).toMatchObject({ name: "Bánh mì", qty: "Ghi nhanh", kcal: 400 });
+    expect(dinner?.items.at(-1)).toMatchObject({ name: "Bánh mì", qty: "Thêm nhanh", kcal: 400 });
     const protein = (d: typeof day) => d.macros.find((m) => m.key === "protein")?.consumed ?? 0;
     expect(protein(day)).toBe(protein(base) + 20);
   });
