@@ -190,7 +190,7 @@ export function PortionPanel({
           tone={tone}
           items={[
             { id: "cal", value: formatAmount(macroPreview.calories, "kcal"), label: "kcal" },
-            { id: "carb", value: `${formatAmount(macroPreview.carbs, "g")} g`, label: "Carb" },
+            { id: "carb", value: `${formatAmount(macroPreview.carbs, "g")} g`, label: "Tinh bột" },
             { id: "protein", value: `${formatAmount(macroPreview.protein, "g")} g`, label: "Đạm" },
             { id: "fat", value: `${formatAmount(macroPreview.fat, "g")} g`, label: "Béo" },
           ]}
