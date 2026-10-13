@@ -3,7 +3,7 @@
 ## Now working
 | Task | Owner | Files / routes |
 |---|---|---|
-| cc-16: Cài đặt + Hồ sơ + Mục tiêu (IA v2 step 3) | Claude Code (feat/ui-cc-16, port 3101) | app/settings/**, components/settings/**, tests/probes/cc_16.py |
+| cc-16: Cài đặt + Hồ sơ + Mục tiêu (IA v2 step 3) | Claude Code (feat/ui-cc-16, port 3101) | app/settings/**, components/settings/**, components/profile/** (removed), tests/probes/cc_16.py, tests/probes/cc09.py, tests/probes/cc2_03.py, tests/probes/cc2_07.py, tests/probes/run_all.py |
 
 | 13/10/2026 | cc2-11 | Nhật ký fixes + Khám phá v1 (categories, Giàu lists, food detail), then the 13/10 review fixes: food detail has a Tùy chỉnh chip and shows the gram input only when it is selected (custom portion label "<n> g"); Giàu titles keep the vitamin letter (Giàu vitamin D, Giàu canxi) on the list screen and the /explore index via richName() with a unit test; vitamin order B9 before B12 in the catalog (food detail and /micros agree); probes ag07 follows the chip. Gates (production build on :3102): typecheck, vitest 391, build, test:align, test:hydration pass; probe:all 23 PASS, 2 REPORT, 0 FAIL, 1 SKIP (ag07 fixed in this commit, rerun 48/48); smoke PASS. | cc2-12 faster logging + Bữa của tôi |
 
