@@ -379,7 +379,7 @@ function DiaryContent() {
               {isPast
                 ? "Chỉ xem"
                 : calories.remaining > 0
-                ? `còn ${formatAmount(calories.remaining, "kcal")} kcal · Mục tiêu ${formatAmount(calories.targetMin, "kcal")}–${formatAmount(calories.targetMax, "kcal")}`
+                ? `Còn ${formatAmount(calories.remaining, "kcal")} kcal · mục tiêu ${formatAmount(calories.targetMin, "kcal")}–${formatAmount(calories.targetMax, "kcal")}`
                 : `Mục tiêu ${formatAmount(calories.targetMin, "kcal")}–${formatAmount(calories.targetMax, "kcal")}`}
             </span>
           </div>
