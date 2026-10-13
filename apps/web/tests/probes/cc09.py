@@ -21,7 +21,7 @@ MENU_HREFS = [
     "/install",
     "/paywall",
     "/settings/delete-account",
-    "/signin",
+    "/settings/account",
 ]
 problems = []
 notes = []

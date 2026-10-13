@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { AuthNotice } from "@/components/auth/auth-notice";
 import { AuthShell } from "@/components/onboarding/auth-shell";
 import { BrandMark } from "@/components/onboarding/brand-mark";
 import { GoogleSignInButton } from "@/components/onboarding/google-sign-in-button";
 import { MagicLinkForm } from "@/components/onboarding/magic-link-form";
+import { PasswordSignInForm } from "@/components/onboarding/password-sign-in-form";
 
 export default function SignInPage() {
   return (
@@ -27,6 +29,12 @@ export default function SignInPage() {
         hoặc
         <span className="h-px flex-1 bg-divider" />
       </div>
+      <PasswordSignInForm />
+      <div className="flex items-center gap-3 text-[13px] text-secondary" aria-hidden="true">
+        <span className="h-px flex-1 bg-divider" />
+        hoặc
+        <span className="h-px flex-1 bg-divider" />
+      </div>
       <MagicLinkForm submitLabel="Gửi link đăng nhập" />
       <p className="m-0 text-center text-[15px] text-secondary">
         Chưa có tài khoản?{" "}
@@ -34,6 +42,7 @@ export default function SignInPage() {
           Đăng ký
         </Link>
       </p>
+      <AuthNotice />
     </AuthShell>
   );
 }

@@ -2,10 +2,11 @@ import Link from "next/link";
 import { AuthShell } from "@/components/onboarding/auth-shell";
 import { GoogleSignInButton } from "@/components/onboarding/google-sign-in-button";
 import { MagicLinkForm } from "@/components/onboarding/magic-link-form";
+import { SignUpPasswordForm } from "@/components/onboarding/sign-up-password-form";
 
 const DESKTOP_VALUES = [
   "Theo dõi đầy đủ vi chất, không chỉ calo",
-  "Mục tiêu do Coach Lê Hồng Khánh đặt",
+  "Mục tiêu do huấn luyện viên Lê Hồng Khánh đặt",
   "Ghi bữa ăn trong vài giây, thấy ngay còn thiếu gì",
 ];
 
@@ -30,7 +31,7 @@ export default function SignUpPage() {
               VI CHẤT PHẢI ĐỦ.
             </h1>
             <p className="m-0 text-[15px] leading-normal text-muted-subtitle lg:hidden">
-              Ghi bữa ăn, theo dõi vi chất và làm theo mục tiêu của Coach Lê Hồng Khánh.
+              Ghi bữa ăn, theo dõi vi chất và làm theo mục tiêu của huấn luyện viên Lê Hồng Khánh.
             </p>
             <ul className="m-0 hidden list-none flex-col gap-4 p-0 lg:flex">
               {DESKTOP_VALUES.map((value) => (
@@ -59,6 +60,12 @@ export default function SignUpPage() {
     >
       <p className="m-0 hidden text-[13px] font-semibold text-secondary lg:block">Tạo tài khoản</p>
       <GoogleSignInButton />
+      <div className="flex items-center gap-3 text-[13px] text-secondary" aria-hidden="true">
+        <span className="h-px flex-1 bg-divider" />
+        hoặc
+        <span className="h-px flex-1 bg-divider" />
+      </div>
+      <SignUpPasswordForm />
       <div className="flex items-center gap-3 text-[13px] text-secondary" aria-hidden="true">
         <span className="h-px flex-1 bg-divider" />
         hoặc

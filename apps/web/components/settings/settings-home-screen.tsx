@@ -4,10 +4,10 @@ import { AppHeader } from "@/components/ui/app-header";
 import { AppShell } from "@/components/ui/app-shell";
 import { Card } from "@/components/ui/card";
 import { Row } from "@/components/ui/row";
-import { SectionTitle } from "@/components/ui/section-title";
 import Link from "next/link";
 import { AppCard } from "@/components/settings/profile-cards";
-import { profileSummary } from "@/components/settings/profile-summary";
+import { profileSummary, profileTitle } from "@/components/settings/profile-summary";
+import { useAccount } from "@/components/settings/use-account";
 import { useDiary } from "@/lib/diary-store";
 import { targetRangeText } from "@/lib/profile";
 
@@ -34,6 +34,7 @@ function ProOffer() {
 /** The Cài đặt tab (IA v2): the profile card, the day's targets, app settings, Pro and the account. */
 export function SettingsHomeScreen() {
   const { profile, targets, hydrated } = useDiary();
+  const { account, loaded: accountLoaded } = useAccount();
 
   return (
     <AppShell alignContainer="settings-page">
@@ -45,7 +46,16 @@ export function SettingsHomeScreen() {
             <div className="flex flex-col gap-4">
               <Card as="section" aria-label="Hồ sơ của bạn" className="flex flex-col gap-1">
                 <div data-align-group="settings-row">
-                  <Row label="Hồ sơ của bạn" hint={profileSummary(profile)} href="/settings/profile" />
+                  <Row label={profileTitle(profile)} hint={profileSummary(profile)} href="/settings/profile" />
+                </div>
+              </Card>
+              <Card as="section" aria-label="Tài khoản" className="flex flex-col gap-1">
+                <div data-align-group="settings-row">
+                  <Row
+                    label="Tài khoản"
+                    hint={accountLoaded ? (account?.email ?? "Chưa đăng nhập") : undefined}
+                    href="/settings/account"
+                  />
                 </div>
               </Card>
               <Card as="section" aria-label="Mục tiêu" className="flex flex-col gap-1">
@@ -62,12 +72,6 @@ export function SettingsHomeScreen() {
 
             <div className="flex flex-col gap-4">
               <ProOffer />
-              <Card as="section" aria-labelledby="settings-account-title" className="flex flex-col gap-1">
-                <SectionTitle id="settings-account-title">Tài khoản</SectionTitle>
-                <div data-align-group="settings-row">
-                  <Row label={<span className="text-destructive-text">Đăng xuất</span>} href="/signin" />
-                </div>
-              </Card>
               <Card as="section" aria-labelledby="settings-danger-title" className="flex flex-col gap-1">
                 <h2 id="settings-danger-title" className="m-0 text-base font-bold text-destructive-text">
                   Vùng nguy hiểm

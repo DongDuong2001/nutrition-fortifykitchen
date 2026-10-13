@@ -39,7 +39,12 @@ Reference: Cronometer's header is identical on every screen (same surface, round
 | `/settings` | Cài đặt (profile card on top) | tab |
 | `/settings/profile`, `/settings/profile/weight` | Hồ sơ (body, goal, training default), weight log | pushed screens |
 | `/settings/targets` | Mục tiêu mỗi ngày (read-only, from the profile) | pushed screen |
+| `/settings/account` | Tài khoản: tên hiển thị, email, mật khẩu, Đăng xuất | pushed screen (cc-18) |
+| `/settings/account/password` | Đổi mật khẩu, or Đặt mật khẩu when there is none yet | pushed screen (cc-18) |
 | `/settings/language`, `/settings/notifications`, `/settings/delete-account` | as now | pushed screens |
+| `/signin`, `/signup` | Google, then email + password, then the magic link | auth screens, no header |
+| `/signin/forgot` | Quên mật khẩu: email → "Kiểm tra email để đặt lại mật khẩu" | auth screen, no header (cc-18) |
+| `/reset-password` | new password from the reset link → `/signin` with a toast | auth screen, no header (cc-18) |
 | `/add`, `/entry/[id]` | add sheet, edit entry | sheets (desktop dialog) |
 
 Redirects (permanent): `/today` → `/diary` (keep `?date=`), `/profile` → `/settings/profile`, `/profile/weight` → `/settings/profile/weight`, `/foods` → `/explore`.
@@ -75,11 +80,19 @@ Job: find a food and understand it.
 - Reserved, empty until coach content: "Nên ăn kèm", pros/cons, recipes, tips. Do not render placeholders to users; keep the slots in code only.
 
 ## Cài đặt (settings)
-- Profile card on top (sex, birth year, weight, goal summary) → `/settings/profile`.
+- Profile card on top: title is the name when one is set, "Hồ sơ của bạn" otherwise; summary (sex, birth year, weight, goal) → `/settings/profile`.
+- Tài khoản row under the profile card: hint is the email ("Chưa đăng nhập" when signed out) → `/settings/account`.
 - Mục tiêu mỗi ngày → `/settings/targets`.
 - Ứng dụng: Ngôn ngữ, Nhắc nhở, Cài như ứng dụng.
 - H1T MICRO Pro card.
-- Tài khoản: Đăng xuất, Xoá tài khoản (danger zone).
+- Vùng nguy hiểm: Xoá tài khoản (confirm step).
+
+### Tài khoản (cc-18, 13/10, Hao's decisions)
+- `/settings/account` (pushed, back → Cài đặt): Tên hiển thị (optional, 1–40 characters after trimming; saves on blur or Enter, an empty name means not set), Email (read only), Đặt mật khẩu / Đổi mật khẩu → `/settings/account/password`, Đăng xuất (clears the session, then `/signin`).
+- `/settings/account/password`: current password only when the account has one; new password and confirm; one show/hide button per field (44 px, "Hiện mật khẩu" / "Ẩn mật khẩu"). Saved → back to Tài khoản with the toast "Đã đổi mật khẩu" (or "Đã đặt mật khẩu" when there was none).
+- Sign-in: Google, then email + password ("Quên mật khẩu?" → `/signin/forgot`), then the magic link. Sign-up: Google, then email + password with confirm, then the magic link.
+- Rules: password at least 8 characters with a letter and a digit (the hint says so before typing). Errors sit under their field, never in an alert box. A failed sign-in says only "Email hoặc mật khẩu không đúng". Forgot password says the same whatever the account, "Kiểm tra email để đặt lại mật khẩu".
+- Until Dong's Supabase calls land, `lib/auth-actions.ts` is a MOCK in localStorage (passwords stored only as SHA-256 hashes).
 
 ## Faster logging
 - Recents/favourites in the add sheet: tap the row = add with the last used portion (5 s undo toast); the chevron opens the portion panel.

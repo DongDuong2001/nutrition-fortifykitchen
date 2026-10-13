@@ -12,7 +12,7 @@ DESKTOP = {"width": 1440, "height": 900}
 INK = (0x11, 0x13, 0x17)  # --color-ink
 SURFACE_DARK = (0x1A, 0x1C, 0x22)  # --color-surface-dark (inset summary panel)
 DESTRUCTIVE_TEXT = "rgb(196, 55, 60)"  # --color-destructive-text #C4373C, 5.30:1 on white
-PROFILE_RED_LABELS = ["Đăng xuất", "Vùng nguy hiểm", "Xoá tài khoản"]
+PROFILE_RED_LABELS = ["Vùng nguy hiểm", "Xoá tài khoản"]
 
 problems = []
 notes = []
@@ -64,6 +64,11 @@ def test_profile_red(browser):
         for label in PROFILE_RED_LABELS:
             color = pg.get_by_text(label, exact=True).first.evaluate("el => getComputedStyle(el).color")
             check(color == DESTRUCTIVE_TEXT, f"settings @ {vp_name}: '{label}' is {color}, want {DESTRUCTIVE_TEXT}")
+        # Đăng xuất moved from Cài đặt to Tài khoản (cc-18)
+        pg.goto(BASE + "/settings/account", wait_until="networkidle")
+        pg.wait_for_timeout(300)
+        color = pg.get_by_text("Đăng xuất", exact=True).first.evaluate("el => getComputedStyle(el).color")
+        check(color == DESTRUCTIVE_TEXT, f"account @ {vp_name}: 'Đăng xuất' is {color}, want {DESTRUCTIVE_TEXT}")
         ctx.close()
 
 

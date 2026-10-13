@@ -48,6 +48,8 @@ ONBOARDING_CHECKS = [
     ("/settings/profile/weight", "mobile (390px)", "weight-header", "lr"),
     ("/settings/profile/weight", "mobile (390px)", "weight-row", "lr"),
     ("/settings/profile/weight", "desktop (1440px)", "weight-row", "lr"),
+    ("/settings/account", "mobile (390px)", "account-row", "lr"),
+    ("/settings/account", "desktop (1440px)", "account-row", "lr"),
     # Past day (read-only): same header and meal rows as today, with no add links
     (f"/diary?date={YESTERDAY}", "mobile (390px)", "today-header", "lr"),
     (f"/diary?date={YESTERDAY}", "mobile (390px)", "meal-card", "lr"),

@@ -104,7 +104,7 @@ def main():
             context, pg, errors = open_page(browser, size, "/settings")
             pg.wait_for_selector("h1:has-text('Cài đặt')")
             body = pg.inner_text("main")
-            for text in ["Hồ sơ của bạn", "Mục tiêu mỗi ngày", "Ngôn ngữ", "Nhắc nhở", "Thêm vào màn hình chính", "Tài khoản", "Đăng xuất", "Vùng nguy hiểm", "Xoá tài khoản"]:
+            for text in ["Hồ sơ của bạn", "Mục tiêu mỗi ngày", "Ngôn ngữ", "Nhắc nhở", "Thêm vào màn hình chính", "Tài khoản", "Vùng nguy hiểm", "Xoá tài khoản"]:
                 check(text in body, f"{label} /settings shows {text!r}")
             check("Nam · sinh 2003 · 65 kg · Giữ cân" in body, f"{label} /settings profile sub reads Nam · sinh 2003 · 65 kg · Giữ cân")
             check("1.950–2.275 kcal · đạm 104–143 g" in body, f"{label} /settings targets sub reads kcal and đạm")
