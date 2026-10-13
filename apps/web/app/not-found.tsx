@@ -17,7 +17,7 @@ export default function NotFound() {
           </div>
           <div aria-hidden="true" className="h-2 w-full rounded-full bg-blue" />
         </div>
-        <p className="m-0 text-[15px] leading-relaxed text-secondary">Link có thể đã cũ hoặc bị gõ sai.</p>
+        <p className="m-0 text-[15px] leading-relaxed text-secondary">Đường dẫn có thể đã cũ hoặc bị gõ sai.</p>
       </main>
 
       <footer className="mx-auto flex w-full max-w-[560px] flex-col gap-3 px-4 pb-6 box-border">
