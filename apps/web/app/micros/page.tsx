@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useRef, Suspense } from "react";
+import React, { useState, useEffect, useLayoutEffect, useMemo, useRef, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { BottomNav } from "@/components/ui/bottom-nav";
@@ -65,6 +65,10 @@ function MicrosContent() {
   });
 
   const scrollRef = useRef<HTMLDivElement>(null);
+  // Phone: once the list scrolls past the header, the summary folds into one line. The header's height change
+  // is taken off the list's scroll position, so the list does not move on screen.
+  const [headerCollapsed, setHeaderCollapsed] = useState(false);
+  const collapseFromTop = useRef(0);
   const chipBarRef = useRef<HTMLDivElement>(null);
   const chipsContainerRef = useRef<HTMLDivElement>(null);
   const chipRefs = useRef<Record<string, HTMLButtonElement | null>>({});
@@ -157,6 +161,26 @@ function MicrosContent() {
       observer.disconnect();
     };
   }, [isLoading, currentData]);
+
+  // Folds the phone header when the list scrolls past it (from the list's top edge), and unfolds at the top again.
+  // The fold happens after the list's own scroll has passed the header, so the shift is never clamped at 0.
+  useLayoutEffect(() => {
+    const list = scrollRef.current;
+    if (!headerCollapsed || !list || !collapseFromTop.current) return;
+    list.scrollTop -= collapseFromTop.current - list.offsetTop;
+    collapseFromTop.current = 0;
+  }, [headerCollapsed]);
+
+  const onListScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const list = e.currentTarget;
+    if (!headerCollapsed && list.scrollTop >= list.offsetTop) {
+      // A chip tap is scrolling the list to a group: that group must land at the top, so no shift is taken off
+      collapseFromTop.current = isManualScrolling.current ? 0 : list.offsetTop;
+      setHeaderCollapsed(true);
+    } else if (headerCollapsed && list.scrollTop <= 0) {
+      setHeaderCollapsed(false);
+    }
+  };
 
   const toggleGroup = (group: NutrientGroup) => {
     setOpenGroups((prev) => ({
@@ -337,32 +361,40 @@ function MicrosContent() {
           backHref={diaryHref}
           alignGroup="micros-header"
           summary={
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-xs text-muted-subtitle font-medium">Thiếu nhiều nhất</div>
-                <div className="text-sm font-semibold text-on-dark mt-0.5">
-                  {currentData?.microsSummary.mostLacking.join(", ")}
+            headerCollapsed ? (
+              <div className="text-sm font-semibold text-on-dark tabular-nums">
+                {achievedMicrosCount.achieved}/{achievedMicrosCount.total} vi chất đã đạt
+              </div>
+            ) : (
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-xs text-muted-subtitle font-medium">Thiếu nhiều nhất</div>
+                  <div className="text-sm font-semibold text-on-dark mt-0.5">
+                    {currentData?.microsSummary.mostLacking.join(", ")}
+                  </div>
+                </div>
+                <div className="text-right shrink-0">
+                  <div className="font-display italic font-black text-[28px] leading-none tabular-nums">
+                    <span className="text-on-dark">{achievedMicrosCount.achieved}</span>
+                    <span className="text-on-dark/55">/{achievedMicrosCount.total}</span>
+                  </div>
+                  <div className="text-xs text-sky font-semibold mt-1">
+                    đã đạt mục tiêu
+                  </div>
                 </div>
               </div>
-              <div className="text-right shrink-0">
-                <div className="font-display italic font-black text-[28px] leading-none tabular-nums">
-                  <span className="text-on-dark">{achievedMicrosCount.achieved}</span>
-                  <span className="text-on-dark/55">/{achievedMicrosCount.total}</span>
-                </div>
-                <div className="text-xs text-sky font-semibold mt-1">
-                  đã đạt mục tiêu
-                </div>
-              </div>
-            </div>
+            )
           }
           footer={
-            <Link
-              href="/trends/micros"
-              className="min-h-[44px] flex items-center justify-between text-sm font-semibold text-sky no-underline active:scale-[0.97] transition-transform"
-            >
-              Xu hướng 7 và 30 ngày
-              <span aria-hidden="true">›</span>
-            </Link>
+            headerCollapsed ? null : (
+              <Link
+                href="/trends/micros"
+                className="min-h-[44px] flex items-center justify-between text-sm font-semibold text-sky no-underline active:scale-[0.97] transition-transform"
+              >
+                Xu hướng 7 và 30 ngày
+                <span aria-hidden="true">›</span>
+              </Link>
+            )
           }
         />
 
@@ -404,7 +436,7 @@ function MicrosContent() {
         </div>
 
         {/* Only the body scrolls: the header and chip bar stay put (SPEC: header flex none, scrolling body) */}
-        <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto overscroll-contain pb-[88px]">
+        <div ref={scrollRef} onScroll={onListScroll} className="flex-1 min-h-0 overflow-y-auto overscroll-contain pb-[88px]">
         <main className="w-full max-w-[560px] mx-auto px-4 pt-4 pb-6 flex flex-col gap-4 min-w-0">
           {/* 4-column equal grid Legend */}
           <Legend />
