@@ -23,7 +23,7 @@ const fieldClass = (invalid: boolean) =>
 const numberClass = `${fieldClass(false)} text-right font-bold tabular-nums`;
 
 /**
- * Chỉ ghi kcal: a kcal-only entry. kcal is required (above 0, "2,5" is fine), the name is optional (Ghi nhanh),
+ * Chỉ thêm kcal: a kcal-only entry. kcal is required (above 0, "2,5" is fine), the name is optional (Thêm nhanh),
  * Đạm, Tinh bột and Béo are optional. The foods' micronutrients stay unknown. Sheet on a phone, dialog on desktop.
  */
 export function QuickAddSheet({ open, onClose, mealName, onSubmit }: QuickAddSheetProps) {
