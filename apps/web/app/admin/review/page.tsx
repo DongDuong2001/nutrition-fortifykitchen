@@ -30,9 +30,22 @@ const SAMPLE_DRAFTS: CoachDraft[] = [
   },
 ];
 
+const FILTER_LABELS: Record<"all" | CoachDraft["status"], string> = {
+  all: "Tất cả",
+  draft: "Bản nháp",
+  published: "Đã đăng",
+  rejected: "Từ chối",
+};
+
+const STATUS_LABELS: Record<CoachDraft["status"], string> = {
+  draft: "Bản nháp",
+  published: "Đã đăng",
+  rejected: "Từ chối",
+};
+
 export default function AdminReviewPage() {
   const [drafts, setDrafts] = useState<CoachDraft[]>(SAMPLE_DRAFTS);
-  const [filter, setFilter] = useState<string>("all");
+  const [filter, setFilter] = useState<"all" | CoachDraft["status"]>("all");
 
   const handleUpdateStatus = (id: string, newStatus: "published" | "rejected") => {
     setDrafts((prev) =>
@@ -47,32 +60,32 @@ export default function AdminReviewPage() {
       {/* Page Header */}
       <div className="flex flex-col justify-between gap-4 border-b border-card-border pb-4 sm:flex-row sm:items-center">
         <div>
-          <div className="mb-2 inline-flex items-center rounded-full bg-warning-bg px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-warning-text">
-            Admin RBAC Guarded
+          <div className="mb-2 inline-flex items-center rounded-full bg-warning-bg px-3 py-1 text-[11px] font-bold tracking-wider text-warning-text">
+            Khu vực quản trị
           </div>
-          <h1 className="m-0 font-display text-3xl font-extrabold uppercase italic tracking-tight text-text">
-            Coach Vault Review
+          <h1 className="m-0 font-display text-3xl font-extrabold italic tracking-tight text-text">
+            Duyệt kho nội dung huấn luyện viên
           </h1>
           <p className="mt-1 text-sm text-secondary">
-            Review and publish markdown meal plans synchronized from GitHub repository
+            Xem và duyệt các bản nháp thực đơn đồng bộ từ kho lưu trữ.
           </p>
         </div>
 
         {/* Filter Tabs */}
-        <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filter drafts">
-          {["all", "draft", "published", "rejected"].map((tab) => (
+        <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Lọc bản nháp">
+          {(["all", "draft", "published", "rejected"] as const).map((tab) => (
             <button
               key={tab}
               type="button"
               aria-pressed={filter === tab}
               onClick={() => setFilter(tab)}
-              className={`min-h-[44px] cursor-pointer rounded-full px-4 text-xs font-bold uppercase tracking-wider transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none ${
+              className={`min-h-[44px] cursor-pointer rounded-full px-4 text-xs font-bold tracking-wider transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none ${
                 filter === tab
                   ? "border-0 bg-ink text-on-dark"
                   : "border border-card-border bg-card text-text hover:bg-page"
               }`}
             >
-              {tab}
+              {FILTER_LABELS[tab]}
             </button>
           ))}
         </div>
@@ -91,7 +104,7 @@ export default function AdminReviewPage() {
                   {draft.file_path}
                 </span>
                 <span
-                  className={`rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider ${
+                  className={`rounded-full px-3 py-1 text-[11px] font-bold tracking-wider ${
                     draft.status === "published"
                       ? "bg-blue text-on-accent"
                       : draft.status === "rejected"
@@ -99,10 +112,10 @@ export default function AdminReviewPage() {
                       : "bg-warning-bg text-warning-text"
                   }`}
                 >
-                  {draft.status}
+                  {STATUS_LABELS[draft.status]}
                 </span>
                 <span className="text-xs text-secondary tabular-nums">
-                  commit: <strong className="text-text">{draft.commit_hash}</strong>
+                  Mã bản ghi: <strong className="text-text">{draft.commit_hash}</strong>
                 </span>
               </div>
 
@@ -119,20 +132,20 @@ export default function AdminReviewPage() {
                     onClick={() => handleUpdateStatus(draft.id, "published")}
                     className="min-h-[44px] w-full cursor-pointer rounded-full border-0 bg-blue px-4 text-sm font-bold text-on-accent transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none"
                   >
-                    Approve
+                    Duyệt
                   </button>
                   <button
                     type="button"
                     onClick={() => handleUpdateStatus(draft.id, "rejected")}
                     className="min-h-[44px] w-full cursor-pointer rounded-full border border-destructive-text bg-card px-4 text-sm font-bold text-destructive-text transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none"
                   >
-                    Reject
+                    Từ chối
                   </button>
                 </>
               )}
               {draft.status !== "draft" && (
-                <div className="self-center text-xs font-semibold uppercase tracking-wider text-secondary md:self-end">
-                  Status: {draft.status}
+                <div className="self-center text-xs font-semibold tracking-wider text-secondary md:self-end">
+                  Trạng thái: {STATUS_LABELS[draft.status]}
                 </div>
               )}
             </div>
