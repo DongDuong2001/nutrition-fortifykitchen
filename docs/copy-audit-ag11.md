@@ -339,14 +339,18 @@ The table below lists each concept, its preferred term (or decided term), all va
 
 ## 4. Fix list for the coder
 
-Every confirmed row from Section 2 is grouped by file below so a single coder can apply the fixes in one pass. Rows that depend on a terminology or product decision from Hao are marked **`Hao`**; rows already decided by Hao on 13/10 (`"Bữa ăn của tôi"` and `"50%"`) are marked **`Decided`**.
+Every confirmed row from Section 2 is grouped by file below so a coder can apply the fixes in one pass.
+- Rows that depend on a terminology or product decision from Hao are marked **`Hao`**.
+- Rows already decided by Hao on 13/10 (`"Bữa ăn của tôi"`, `"huấn luyện viên"`, and `"50%"`) are marked **`Decided`**.
+- Rows for `"Bữa của tôi"` being renamed by CC2 in `cc2-12b` are marked **`in progress cc2-12b`**.
+- Files belonging to **CC1's claim** (`app/training/**` / `app/(dashboard)/training/**`, `components/training/**`, `app/micros/**`, `components/micros/**` / `components/nutrient-detail/**`, `components/settings/**`) are marked **`[CC1 claim]`** in their heading so the list can be split cleanly between coders.
 
-### `apps/web/app/(dashboard)/training/page.tsx`
+### `apps/web/app/(dashboard)/training/page.tsx` — **`[CC1 claim]`**
 - [training/page.tsx:154](apps/web/app/(dashboard)/training/page.tsx#L154) & [training/page.tsx:218](apps/web/app/(dashboard)/training/page.tsx#L218) (R2): `title="NGÀY TẬP"` → `title="Ngày tập"`
 
 ### `apps/web/app/admin/review/page.tsx`
 - [admin/review/page.tsx:51](apps/web/app/admin/review/page.tsx#L51) (R1): `Admin RBAC Guarded` → `Khu vực quản trị`
-- [admin/review/page.tsx:54](apps/web/app/admin/review/page.tsx#L54) (R1, R7): `Coach Vault Review` → `Duyệt nội dung thực đơn`
+- [admin/review/page.tsx:54](apps/web/app/admin/review/page.tsx#L54) (R1, R5 — **Decided: huấn luyện viên**): `Coach Vault Review` → `Duyệt kho nội dung huấn luyện viên`
 - [admin/review/page.tsx:57](apps/web/app/admin/review/page.tsx#L57) (R1): `Review and publish markdown meal plans synchronized from GitHub repository` → `Xem và duyệt các bản nháp thực đơn đồng bộ từ kho lưu trữ.`
 - [admin/review/page.tsx:62](apps/web/app/admin/review/page.tsx#L62) & [admin/review/page.tsx:63](apps/web/app/admin/review/page.tsx#L63) (R1): `aria-label="Filter drafts"` + `all` / `draft` / `published` / `rejected` → `aria-label="Lọc bản nháp"` + `Tất cả` / `Bản nháp` / `Đã đăng` / `Từ chối`
 - [admin/review/page.tsx:122](apps/web/app/admin/review/page.tsx#L122), [admin/review/page.tsx:129](apps/web/app/admin/review/page.tsx#L129), [admin/review/page.tsx:135](apps/web/app/admin/review/page.tsx#L135) (R1): `Approve` / `Reject` / `Status: {draft.status}` → `Duyệt` / `Từ chối` / `Trạng thái: {statusVi}`
@@ -357,6 +361,9 @@ Every confirmed row from Section 2 is grouped by file below so a single coder ca
 
 ### `apps/web/app/entry/[id]/page.tsx`
 - [entry/[id]/page.tsx:44](apps/web/app/entry/[id]/page.tsx#L44) (R6, R8): `<Link href="/diary"...>Về Tổng quan</Link>` → `<Link href="/diary"...>Về Nhật ký</Link>`
+
+### `apps/web/app/explore/meals/page.tsx`
+- [explore/meals/page.tsx:14](apps/web/app/explore/meals/page.tsx#L14) (R5 — **Decided: Bữa ăn của tôi · in progress cc2-12b**): `title="Bữa của tôi"` → `title="Bữa ăn của tôi"`
 
 ### `apps/web/app/explore/rich/[nutrient]/page.tsx`
 - [explore/rich/[nutrient]/page.tsx:60](apps/web/app/explore/rich/[nutrient]/page.tsx#L60) (R3 — **Decided: 50%**): `${row.pct} % mục tiêu ngày · ${row.basis}` → `${row.pct}% mục tiêu ngày · ${row.basis}`
@@ -380,13 +387,13 @@ Every confirmed row from Section 2 is grouped by file below so a single coder ca
 ### `apps/web/app/layout.tsx`
 - [layout.tsx:22](apps/web/app/layout.tsx#L22) (R2): `H1T MICRO | Dinh dưỡng & Vi chất Chuyên sâu` → `H1T MICRO | Dinh dưỡng & vi chất chuyên sâu`
 
-### `apps/web/app/micros/page.tsx`
+### `apps/web/app/micros/page.tsx` — **`[CC1 claim]`**
 - [micros/page.tsx:30](apps/web/app/micros/page.tsx#L30) & [micros/page.tsx:221](apps/web/app/micros/page.tsx#L221) (R5 — **Hao**): `Chất béo` → `Béo` (or unify `"Chất béo"` across all macro labels)
 - [micros/page.tsx:277](apps/web/app/micros/page.tsx#L277), [micros/page.tsx:297](apps/web/app/micros/page.tsx#L297), [micros/page.tsx:335](apps/web/app/micros/page.tsx#L335), [micros/page.tsx:452](apps/web/app/micros/page.tsx#L452) (R2): `title="VI CHẤT"` → `title="Vi chất"`
 - [micros/page.tsx:285](apps/web/app/micros/page.tsx#L285), [micros/page.tsx:302](apps/web/app/micros/page.tsx#L302), [micros/page.tsx:310](apps/web/app/micros/page.tsx#L310) (R6 — **Hao**): `Bắt đầu ghi món để đo lường` / `Chưa ghi món nào hôm nay` / `+ Ghi món ngay` → `Thêm món để xem vi chất` / `Chưa có món hôm nay` / `+ Thêm món`
 - [micros/page.tsx:304](apps/web/app/micros/page.tsx#L304) (R8): `Bắt đầu ghi nhận món ăn để theo dõi 58 chỉ số vi chất và hoàn thành mục tiêu ngày.` → `Thêm món vào nhật ký để theo dõi 22 vi chất mỗi ngày.`
 
-### `apps/web/app/micros/[nutrient]/page.tsx`
+### `apps/web/app/micros/[nutrient]/page.tsx` — **`[CC1 claim]`**
 - [micros/[nutrient]/page.tsx:79](apps/web/app/micros/[nutrient]/page.tsx#L79) (R6): `Quay lại Vi chất` → `Về Vi chất`
 
 ### `apps/web/app/not-found.tsx`
@@ -394,8 +401,8 @@ Every confirmed row from Section 2 is grouped by file below so a single coder ca
 
 ### `apps/web/app/paywall/page.tsx`
 - [paywall/page.tsx:16](apps/web/app/paywall/page.tsx#L16), [paywall/page.tsx:17](apps/web/app/paywall/page.tsx#L17), [paywall/page.tsx:135](apps/web/app/paywall/page.tsx#L135) (R8 — **Hao**): `[GIÁ/THÁNG]` / `[GIÁ/NĂM]` / `Tiết kiệm [X]%` / `Thanh toán qua [NHÀ CUNG CẤP THANH TOÁN] · huỷ bất cứ lúc nào` → Replace bracketed placeholders with real values or hide unconfigured billing details
-- [paywall/page.tsx:23](apps/web/app/paywall/page.tsx#L23) (R7): `Món & công thức riêng của Coach` → `Thư viện món Việt & món tự tạo không giới hạn`
-- [paywall/page.tsx:37](apps/web/app/paywall/page.tsx#L37) (R7): `Ăn theo Coach, không phải đoán` → `Theo dõi sát mục tiêu, không phải đoán`
+- [paywall/page.tsx:23](apps/web/app/paywall/page.tsx#L23) (R5 — **Decided: huấn luyện viên**): `Món & công thức riêng của Coach` → `Món & công thức riêng của huấn luyện viên`
+- [paywall/page.tsx:37](apps/web/app/paywall/page.tsx#L37) (R5 — **Decided: huấn luyện viên**): `Ăn theo Coach, không phải đoán` → `Ăn theo huấn luyện viên, không phải đoán`
 - [paywall/page.tsx:144](apps/web/app/paywall/page.tsx#L144) (R2): `Gói Miễn phí vẫn ghi đủ 22 vi chất.` → `Gói miễn phí vẫn ghi đủ 22 vi chất.`
 
 ### `apps/web/app/settings/delete-account/page.tsx`
@@ -424,11 +431,18 @@ Every confirmed row from Section 2 is grouped by file below so a single coder ca
 
 ### `apps/web/app/signup/page.tsx`
 - [signup/page.tsx:7](apps/web/app/signup/page.tsx#L7) (R5 — **Hao**): `Theo dõi đầy đủ vi chất, không chỉ calo` → `Theo dõi đầy đủ vi chất, không chỉ năng lượng (kcal)`
-- [signup/page.tsx:8](apps/web/app/signup/page.tsx#L8) (R7): `Mục tiêu do Coach Lê Hồng Khánh đặt` → `Mục tiêu cá nhân hoá theo ngày tập và ngày nghỉ`
+- [signup/page.tsx:8](apps/web/app/signup/page.tsx#L8) (R5 — **Decided: huấn luyện viên**): `Mục tiêu do Coach Lê Hồng Khánh đặt` → `Mục tiêu do huấn luyện viên Lê Hồng Khánh đặt`
 - [signup/page.tsx:21](apps/web/app/signup/page.tsx#L21) & [signup/page.tsx:23](apps/web/app/signup/page.tsx#L23) (R1, R2): `aria-label="H1T MICRO, 1 set là đủ"` / `1 SET LÀ ĐỦ` → `aria-label="H1T MICRO, một hiệp là đủ"` / `Một hiệp là đủ`
 - [signup/page.tsx:26](apps/web/app/signup/page.tsx#L26) (R2): `VI CHẤT PHẢI ĐỦ.` → `Vi chất phải đủ.`
-- [signup/page.tsx:33](apps/web/app/signup/page.tsx#L33) (R7): `Ghi bữa ăn, theo dõi vi chất và làm theo mục tiêu của Coach Lê Hồng Khánh.` → `Thêm món mỗi bữa, theo dõi 22 vi chất và bám sát mục tiêu mỗi ngày.`
+- [signup/page.tsx:33](apps/web/app/signup/page.tsx#L33) (R5 — **Decided: huấn luyện viên**): `Ghi bữa ăn, theo dõi vi chất và làm theo mục tiêu của Coach Lê Hồng Khánh.` → `Ghi bữa ăn, theo dõi vi chất và làm theo mục tiêu của huấn luyện viên Lê Hồng Khánh.`
 - [signup/page.tsx:53](apps/web/app/signup/page.tsx#L53) & [signup/page.tsx:59](apps/web/app/signup/page.tsx#L59) (R1 — **Hao**): `submitLabel="Gửi link đăng nhập"` / `Chúng tôi gửi link vào email — không cần mật khẩu.` → `submitLabel="Gửi liên kết đăng nhập"` / `Chúng tôi gửi liên kết vào email — không cần mật khẩu.`
+
+### `apps/web/components/add/add-shortcuts.tsx`
+- [add-shortcuts.tsx:68](apps/web/components/add/add-shortcuts.tsx#L68) & [add-shortcuts.tsx:70](apps/web/components/add/add-shortcuts.tsx#L70) (R5 — **Decided: Bữa ăn của tôi · in progress cc2-12b**): `aria-label="Bữa của tôi"` / `Bữa của tôi` → `aria-label="Bữa ăn của tôi"` / `Bữa ăn của tôi`
+- [add-shortcuts.tsx:87](apps/web/components/add/add-shortcuts.tsx#L87) & [add-shortcuts.tsx:89](apps/web/components/add/add-shortcuts.tsx#L89) (R6 — **Hao**): `name="Chỉ ghi kcal"` / `addLabel="Chỉ ghi kcal"` → `name="Chỉ thêm kcal"` / `addLabel="Chỉ thêm kcal"`
+
+### `apps/web/components/add/quick-add-sheet.tsx`
+- [quick-add-sheet.tsx:56](apps/web/components/add/quick-add-sheet.tsx#L56) & [quick-add-sheet.tsx:68](apps/web/components/add/quick-add-sheet.tsx#L68) (R6 — **Hao**): `title="Chỉ ghi kcal"` / `placeholder="Ghi nhanh"` → `title="Chỉ thêm kcal"` / `placeholder="Thêm nhanh"`
 
 ### `apps/web/components/calendar-sheet.tsx`
 - [calendar-sheet.tsx:14](apps/web/components/calendar-sheet.tsx#L14) (R7): `over: "vượt mục tiêu"` → `over: "đạt mục tiêu"`
@@ -441,9 +455,16 @@ Every confirmed row from Section 2 is grouped by file below so a single coder ca
 - [diary-screen.tsx:379](apps/web/components/diary/diary-screen.tsx#L379) (R2): `còn {formatNumber(remaining)} kcal · Mục tiêu {formatRange(targetMin, targetMax)}` → `Còn {formatNumber(remaining)} kcal · mục tiêu {formatRange(targetMin, targetMax)}`
 
 ### `apps/web/components/diary/meal-menu-sheet.tsx`
-- [meal-menu-sheet.tsx:66](apps/web/components/diary/meal-menu-sheet.tsx#L66) & [meal-menu-sheet.tsx:154](apps/web/components/diary/meal-menu-sheet.tsx#L154) (R5 — **Decided: Bữa ăn của tôi**): `Lưu thành Bữa của tôi` → `Lưu thành Bữa ăn của tôi`
+- [meal-menu-sheet.tsx:66](apps/web/components/diary/meal-menu-sheet.tsx#L66) & [meal-menu-sheet.tsx:154](apps/web/components/diary/meal-menu-sheet.tsx#L154) (R5 — **Decided: Bữa ăn của tôi · in progress cc2-12b**): `Lưu thành Bữa của tôi` → `Lưu thành Bữa ăn của tôi`
+
+### `apps/web/components/explore/saved-meal-manage-sheet.tsx`
+- [saved-meal-manage-sheet.tsx:35](apps/web/components/explore/saved-meal-manage-sheet.tsx#L35) & [saved-meal-manage-sheet.tsx:46](apps/web/components/explore/saved-meal-manage-sheet.tsx#L46) (R5 — **Decided: Bữa ăn của tôi · in progress cc2-12b**): `Bữa của tôi này ({itemCount} món) sẽ bị xoá. Các món đã ghi trong Nhật ký không đổi.` / `Xoá Bữa của tôi` → `Bữa ăn của tôi này ({itemCount} món) sẽ bị xoá. Các món đã ghi trong Nhật ký không đổi.` / `Xoá Bữa ăn của tôi`
+
+### `apps/web/components/explore/saved-meals-card.tsx`
+- [saved-meals-card.tsx:56](apps/web/components/explore/saved-meals-card.tsx#L56) & [saved-meals-card.tsx:68](apps/web/components/explore/saved-meals-card.tsx#L68) (R5 — **Decided: Bữa ăn của tôi · in progress cc2-12b**): `Bữa của tôi` / `Chưa có Bữa của tôi. Mở ⋯ ở một bữa trong Nhật ký và chọn Lưu thành Bữa của tôi.` → `Bữa ăn của tôi` / `Chưa có Bữa ăn của tôi. Mở ⋯ ở một bữa trong Nhật ký và chọn Lưu thành Bữa ăn của tôi.`
 
 ### `apps/web/components/foods/entry-editor.tsx`
+- [entry-editor.tsx:122](apps/web/components/foods/entry-editor.tsx#L122) (R6 — **Hao**): `Ghi nhanh: vi chất của món này chưa có dữ liệu.` → `Thêm nhanh: vi chất của món này chưa có dữ liệu.`
 - [entry-editor.tsx:144](apps/web/components/foods/entry-editor.tsx#L144) (R3): `` `${e.target.value} g` `` → `` `${formatAmount(Number(e.target.value) || 0, "g")} g` ``
 
 ### `apps/web/components/foods/food-micros.tsx`
@@ -452,7 +473,7 @@ Every confirmed row from Section 2 is grouped by file below so a single coder ca
 ### `apps/web/components/meal-switcher.tsx`
 - [meal-switcher.tsx:23](apps/web/components/meal-switcher.tsx#L23) (R8): `defaultHint = "Mặc định theo giờ: 14:05 → Trước tập"` → `defaultHint = "Tự chọn theo giờ trong ngày"`
 
-### `apps/web/components/nutrient-detail/contributing-foods.tsx`
+### `apps/web/components/nutrient-detail/contributing-foods.tsx` — **`[CC1 claim]`**
 - [contributing-foods.tsx:15](apps/web/components/nutrient-detail/contributing-foods.tsx#L15) (R8): `Chưa có món nào có chất này hôm nay.` → `Chưa có món nào có chất này.`
 
 ### `apps/web/components/onboarding/magic-link-form.tsx`
@@ -473,19 +494,19 @@ Every confirmed row from Section 2 is grouped by file below so a single coder ca
 ### `apps/web/components/overview/summary-tab.tsx`
 - [summary-tab.tsx:60](apps/web/components/overview/summary-tab.tsx#L60) (R6 — **Hao**): `Ghi {getMealSlotNameVi(next).toLowerCase()}` → `Thêm vào {getMealSlotNameVi(next).toLowerCase()}`
 
-### `apps/web/components/settings/profile-cards.tsx`
+### `apps/web/components/settings/profile-cards.tsx` — **`[CC1 claim]`**
 - [profile-cards.tsx:122](apps/web/components/settings/profile-cards.tsx#L122) (R2): `Chỉ với Nữ · sắt 18 → 28 mg/ngày` → `Chỉ với nữ · sắt 18 → 28 mg/ngày`
 - [profile-cards.tsx:206](apps/web/components/settings/profile-cards.tsx#L206) (R6): `Cài như ứng dụng` → `Thêm vào màn hình chính`
 
-### `apps/web/components/settings/target-rows.ts`
+### `apps/web/components/settings/target-rows.ts` — **`[CC1 claim]`**
 - [target-rows.ts:26](apps/web/components/settings/target-rows.ts#L26) (R5): `Folate (B9)` → `Vitamin B9`
-- [target-rows.ts:86](apps/web/components/settings/target-rows.ts#L86) (R7): `detail: "Khoảng mục tiêu theo coach"` → `detail: "1.200–1.500 mg mỗi ngày"`
+- [target-rows.ts:86](apps/web/components/settings/target-rows.ts#L86) (R5 — **Decided: huấn luyện viên**): `detail: "Khoảng mục tiêu theo coach"` → `detail: "Khoảng mục tiêu theo huấn luyện viên"`
 - [target-rows.ts:87](apps/web/components/settings/target-rows.ts#L87) (R3 — **Decided: 50%**): `detail: "50 % mục tiêu canxi"` → `detail: "50% mục tiêu canxi"`
 
-### `apps/web/components/settings/targets-screen.tsx`
-- [targets-screen.tsx:36](apps/web/components/settings/targets-screen.tsx#L36) & [targets-screen.tsx:37](apps/web/components/settings/targets-screen.tsx#L37) (R7): `* Chất xơ: tạm thời, chưa có quy tắc của coach.` & `* Khuyến nghị dinh dưỡng Việt Nam 2016 (VN 2016). Đây không phải quy tắc của coach.` → `* Chất xơ: mục tiêu tham khảo theo tổng năng lượng.` & `* Theo bảng khuyến nghị dinh dưỡng cho người Việt Nam (2016).`
+### `apps/web/components/settings/targets-screen.tsx` — **`[CC1 claim]`**
+- [targets-screen.tsx:36](apps/web/components/settings/targets-screen.tsx#L36) & [targets-screen.tsx:37](apps/web/components/settings/targets-screen.tsx#L37) (R5 — **Decided: huấn luyện viên**): `* Chất xơ: tạm thời, chưa có quy tắc của coach.` & `* Khuyến nghị dinh dưỡng Việt Nam 2016 (VN 2016). Đây không phải quy tắc của coach.` → `* Chất xơ: tạm thời, chưa có quy tắc của huấn luyện viên.` & `* Khuyến nghị dinh dưỡng Việt Nam 2016 (VN 2016). Đây không phải quy tắc của huấn luyện viên.`
 
-### `apps/web/components/training/training-tip-banner.tsx`
+### `apps/web/components/training/training-tip-banner.tsx` — **`[CC1 claim]`**
 - [training-tip-banner.tsx:16](apps/web/components/training/training-tip-banner.tsx#L16) (R1, R5 — **Hao**): `Nhấp carb nhẹ theo từng set ở ngưỡng nặng. Nặng mới đốt đường.` → `Nhấp tinh bột nhẹ theo từng hiệp ở ngưỡng nặng.`
 
 ### `apps/web/components/ui/portion-panel.tsx`
@@ -494,6 +515,9 @@ Every confirmed row from Section 2 is grouped by file below so a single coder ca
 
 ### `apps/web/lib/diary-edits.ts`
 - [diary-edits.ts:151](apps/web/lib/diary-edits.ts#L151), [diary-edits.ts:303](apps/web/lib/diary-edits.ts#L303), [diary-edits.ts:315](apps/web/lib/diary-edits.ts#L315) (R3): `` `${edit.grams} g` `` / `` `${grams} g` `` → `` `${formatAmount(edit.grams, "g")} g` `` / `` `${formatAmount(grams, "g")} g` ``
+
+### `apps/web/lib/diary-store.tsx`
+- [diary-store.tsx:548](apps/web/lib/diary-store.tsx#L548) (R5 — **Decided: Bữa ăn của tôi · in progress cc2-12b**): `Đã lưu ${meal.name} vào Bữa của tôi · ${meal.items.length} món` → `Đã lưu ${meal.name} vào Bữa ăn của tôi · ${meal.items.length} món`
 
 ### `apps/web/lib/food-meta.ts`
 - [food-meta.ts:14](apps/web/lib/food-meta.ts#L14) (R5 — **Hao**): `${formatAmount(carbs, "g")} g carb` → `${formatAmount(carbs, "g")} g tinh bột`
@@ -512,6 +536,9 @@ Every confirmed row from Section 2 is grouped by file below so a single coder ca
 
 ### `apps/web/lib/onboarding.ts`
 - [onboarding.ts:140](apps/web/lib/onboarding.ts#L140) & [onboarding.ts:141](apps/web/lib/onboarding.ts#L141) (R1 — **Hao**): `Gửi lại link (sau ${formatNumber(secondsLeft)} giây)` / `"Gửi lại link"` → `Gửi lại liên kết (sau ${formatNumber(secondsLeft)} giây)` / `"Gửi lại liên kết"`
+
+### `apps/web/lib/quick-entry.ts`
+- [quick-entry.ts:5](apps/web/lib/quick-entry.ts#L5) (R6 — **Hao**): `QUICK_NAME = "Ghi nhanh"` → `QUICK_NAME = "Thêm nhanh"`
 
 ### `apps/web/lib/training.ts`
 - [training.ts:165](apps/web/lib/training.ts#L165) (R5 — **Hao**): `label: "Carb nhanh"` → `label: "Tinh bột nhanh"`
