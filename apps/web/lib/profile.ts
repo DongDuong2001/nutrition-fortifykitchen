@@ -11,6 +11,8 @@ export interface Profile {
   /** Women only: iron target 28 mg instead of 18 mg. Always false for men (see normaliseProfile). */
   periodMode: boolean;
   trainingMinutesDefault: number;
+  /** Optional name shown on Cài đặt. "" means not set. */
+  displayName: string;
 }
 
 export const PROFILE_KEY = "h1t_profile_v1";
@@ -23,11 +25,23 @@ export const SAMPLE_PROFILE: Profile = {
   goal: "maintain",
   periodMode: false,
   trainingMinutesDefault: 60,
+  displayName: "",
 };
 
 const SEXES: readonly string[] = ["male", "female"];
 const GOALS: readonly string[] = ["build", "maintain", "cut", "deep_cut"];
 const MAX_TRAINING_MINUTES = 240;
+export const DISPLAY_NAME_MAX = 40;
+
+/** The name as it is saved: trimmed. Empty means not set. */
+export function cleanDisplayName(value: string): string {
+  return value.trim();
+}
+
+/** A Vietnamese error when the name is too long, else null. Empty is fine: it means not set. */
+export function displayNameError(value: string): string | null {
+  return [...cleanDisplayName(value)].length > DISPLAY_NAME_MAX ? `Tên hiển thị tối đa ${DISPLAY_NAME_MAX} ký tự` : null;
+}
 
 export function normaliseProfile(profile: Profile): Profile {
   return { ...profile, periodMode: profile.sex === "female" && profile.periodMode };
@@ -76,6 +90,10 @@ export function parseStoredProfile(raw: string | null, currentYear: number): Pro
       typeof minutes === "number" && Number.isInteger(minutes) && minutes >= 0 && minutes <= MAX_TRAINING_MINUTES
         ? minutes
         : SAMPLE_PROFILE.trainingMinutesDefault,
+    displayName:
+      typeof stored.displayName === "string" && displayNameError(stored.displayName) === null
+        ? cleanDisplayName(stored.displayName)
+        : "",
   };
   return profileFromDraft(draft, base, currentYear);
 }

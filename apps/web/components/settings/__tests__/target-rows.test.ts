@@ -10,6 +10,7 @@ const SAMPLE: Profile = {
   goal: "maintain",
   periodMode: false,
   trainingMinutesDefault: 60,
+  displayName: "",
 };
 
 function row(profile: Profile, sectionTitle: string, label: string) {

@@ -2,6 +2,8 @@ import { describe, it, expect } from "vitest";
 import {
   SAMPLE_PROFILE,
   applyProfileTargets,
+  cleanDisplayName,
+  displayNameError,
   normaliseProfile,
   parseStoredProfile,
   profileFromDraft,
@@ -75,6 +77,7 @@ describe("parseStoredProfile", () => {
     goal: "cut",
     periodMode: true,
     trainingMinutesDefault: 45,
+    displayName: "Hao",
   };
 
   it("reads a valid stored profile", () => {
@@ -104,7 +107,41 @@ describe("parseStoredProfile", () => {
       stored({ sex: "male", birthYear: 2003, weightKg: 65, goal: "maintain", trainingMinutesDefault: 9999 }),
       YEAR,
     );
-    expect(parsed).toMatchObject({ periodMode: false, trainingMinutesDefault: 60 });
+    expect(parsed).toMatchObject({ periodMode: false, trainingMinutesDefault: 60, displayName: "" });
+  });
+
+  it("keeps a stored name trimmed, and drops one that is too long", () => {
+    expect(parseStoredProfile(stored({ ...valid, displayName: "  Hao  " }), YEAR)).toMatchObject({ displayName: "Hao" });
+    expect(parseStoredProfile(stored({ ...valid, displayName: "a".repeat(41) }), YEAR)).toMatchObject({ displayName: "" });
+  });
+});
+
+describe("display name", () => {
+  it("is not set by default", () => {
+    expect(SAMPLE_PROFILE.displayName).toBe("");
+  });
+
+  it("is trimmed when saved", () => {
+    expect(cleanDisplayName("  Thảo Nguyên  ")).toBe("Thảo Nguyên");
+  });
+
+  it("is optional: empty or spaces only means not set, and is valid", () => {
+    expect(displayNameError("")).toBeNull();
+    expect(displayNameError("   ")).toBeNull();
+  });
+
+  it("allows up to 40 characters after trimming", () => {
+    expect(displayNameError("a".repeat(40))).toBeNull();
+    expect(displayNameError(`  ${"a".repeat(40)}  `)).toBeNull();
+  });
+
+  it("refuses more than 40 characters, with a Vietnamese message", () => {
+    expect(displayNameError("a".repeat(41))).toBe("Tên hiển thị tối đa 40 ký tự");
+  });
+
+  it("counts Vietnamese letters with tone marks as one character each", () => {
+    expect(displayNameError("ệ".repeat(40))).toBeNull();
+    expect(displayNameError("ệ".repeat(41))).toBe("Tên hiển thị tối đa 40 ký tự");
   });
 });
 

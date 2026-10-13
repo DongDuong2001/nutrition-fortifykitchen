@@ -10,3 +10,8 @@ export function sexLabel(sex: Profile["sex"]): string {
 export function profileSummary(profile: Profile): string {
   return `${sexLabel(profile.sex)} · sinh ${profile.birthYear} · ${formatNumber(profile.weightKg)} kg · ${goalName(profile.goal)}`;
 }
+
+/** The Cài đặt profile card title: the name when one is set. */
+export function profileTitle(profile: Profile): string {
+  return profile.displayName || "Hồ sơ của bạn";
+}
