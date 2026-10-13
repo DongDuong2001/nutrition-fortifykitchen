@@ -69,8 +69,8 @@ This file is the single source for which nutrients the app tracks, how they are 
 | B3 (Niacin) | B3 | mg | 0 | VN2016 |
 | B5 (Pantothenic) | B5 | mg | 0 | VN2016 |
 | B6 (Pyridoxine) | B6 | mg | 0 | VN2016 |
-| B12 (Cobalamin) | B12 | µg | 0 | VN2016 |
 | Folate (B9) | Folate | µg | 0 | VN2016 |
+| B12 (Cobalamin) | B12 | µg | 0 | VN2016 |
 | Vitamin A | Vitamin A | µg | 0 | VN2016 |
 | Vitamin C | Vitamin C | mg | 0 | VN2016 |
 | Vitamin D | Vitamin D | µg | 0 | VN2016 |

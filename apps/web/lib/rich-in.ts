@@ -19,6 +19,11 @@ export function isRichNutrientId(id: string): id is RichNutrientId {
   return (RICH_NUTRIENT_IDS as readonly string[]).includes(id);
 }
 
+/** Vietnamese nutrient name inside a sentence: "Canxi" → "canxi", "Vitamin D" → "vitamin D". */
+export function richName(nameVi: string): string {
+  return nameVi.startsWith("Vitamin") ? nameVi.replace(/^Vitamin/, "vitamin") : nameVi.toLowerCase();
+}
+
 export type RichBasis = "per100" | "portion";
 
 export interface RichInRow {

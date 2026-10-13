@@ -11,7 +11,7 @@ import { useDiary } from "@/lib/diary-store";
 import { MOCK_FOODS } from "@/lib/mock/foods";
 import { getNutrientDefinition } from "@/lib/nutrients";
 import { formatAmount } from "@/lib/format";
-import { isRichNutrientId, richInFoods, type RichBasis } from "@/lib/rich-in";
+import { isRichNutrientId, richInFoods, richName, type RichBasis } from "@/lib/rich-in";
 import { useBack } from "@/hooks/use-back";
 
 /** Foods ranked by one nutrient, per 100 g or per usual portion, with the share of the daily target. */
@@ -28,13 +28,13 @@ export default function RichInPage() {
   const rows = useMemo(() => (valid ? richInFoods(MOCK_FOODS, id, basis, min) : []), [valid, id, basis, min]);
   if (!valid || !definition) notFound();
 
-  const name = definition.nameVi.toLowerCase();
+  const name = richName(definition.nameVi);
 
   return (
     <AppShell>
       <AppHeader
         variant="sub"
-        title={`Giàu ${definition.nameVi}`}
+        title={`Giàu ${name}`}
         subtitle={`${definition.unit} ${basis === "per100" ? "mỗi 100 g" : "mỗi khẩu phần"}`}
         onBack={goBack}
         layout="wide"

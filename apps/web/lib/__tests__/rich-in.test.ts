@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { RICH_NUTRIENT_IDS, richInFoods } from "../rich-in";
+import { RICH_NUTRIENT_IDS, richInFoods, richName } from "../rich-in";
+import { getNutrientDefinition } from "../nutrients";
 import type { FoodItem } from "../mock/foods";
 
 const food = (id: string, calcium: number | null, grams = 100): FoodItem => ({
@@ -32,5 +33,15 @@ describe("richInFoods", () => {
 
   it("lists the eight nutrients of the brief", () => {
     expect(RICH_NUTRIENT_IDS).toEqual(["calcium", "iron", "potassium", "magnesium", "protein", "fiber", "vitamin_d", "vitamin_c"]);
+  });
+});
+
+describe("richName", () => {
+  it("keeps the vitamin letter capital and lowercases the rest", () => {
+    const title = (id: string) => `Giàu ${richName(getNutrientDefinition(id)!.nameVi)}`;
+    expect(title("vitamin_d")).toBe("Giàu vitamin D");
+    expect(title("vitamin_c")).toBe("Giàu vitamin C");
+    expect(title("calcium")).toBe("Giàu canxi");
+    expect(title("iron")).toBe("Giàu sắt");
   });
 });

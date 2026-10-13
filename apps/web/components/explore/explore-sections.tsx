@@ -10,7 +10,7 @@ import { SectionTitle } from "@/components/ui/section-title";
 import { PillButton } from "@/components/ui/pill-button";
 import { FoodListCard } from "@/components/foods/food-list-card";
 import { isOwnFood } from "@/lib/food-categories";
-import { RICH_NUTRIENT_IDS } from "@/lib/rich-in";
+import { RICH_NUTRIENT_IDS, richName } from "@/lib/rich-in";
 import { getNutrientDefinition } from "@/lib/nutrients";
 import { FoodRowLink } from "@/components/foods/food-row-link";
 
@@ -67,7 +67,7 @@ export function ExploreSections() {
           <FoodRowLink
             key={id}
             href={`/explore/rich/${id}`}
-            name={`Giàu ${getNutrientDefinition(id)?.nameVi ?? id}`}
+            name={`Giàu ${richName(getNutrientDefinition(id)?.nameVi ?? id)}`}
             meta="Xếp theo mỗi 100 g hoặc mỗi khẩu phần"
           />
         ))}

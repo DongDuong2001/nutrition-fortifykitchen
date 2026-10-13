@@ -80,7 +80,7 @@ function FoodDetailInner() {
     if (!food || parsedGrams <= 0 || isSubmitting || mealSlot === null) return;
     setIsSubmitting(true);
     try {
-      await addFoodEntry(food, parsedGrams, mealSlot, selectedServingLabel);
+      await addFoodEntry(food, parsedGrams, mealSlot, selectedServingLabel === CUSTOM_PORTION ? `${gramsInput} g` : selectedServingLabel);
       router.push("/diary");
     } finally {
       setIsSubmitting(false);
@@ -149,36 +149,41 @@ function FoodDetailInner() {
         <div data-align-group="food-detail" className="flex w-full flex-col gap-2">
           <span className="text-[13px] font-semibold text-secondary">Khẩu phần</span>
           <ChipGroup
-            columns={food.servings.length + 1}
+            columns={Math.min(food.servings.length + 1, 4)}
             tone="light"
-            leadingInput={
-              <label className="flex items-center justify-center bg-card border-2 border-blue rounded-xl px-2 h-11 w-full cursor-text box-border focus-within:ring-2 focus-within:ring-blue">
-                <span className="sr-only">Khối lượng</span>
-                <input
-                  id="fd-size"
-                  type="text"
-                  inputMode="decimal"
-                  aria-label="Khối lượng theo gam"
-                  value={gramsInput}
-                  onChange={(e) => {
-                    setGramsInput(e.target.value);
-                    setSelectedServingLabel(`${e.target.value} g`);
-                  }}
-                  className="w-full h-full border-0 outline-none focus:outline-none bg-transparent font-bold text-sm tabular-nums text-text text-right"
-                />
-                <span className="text-secondary text-xs ml-1 font-semibold">g</span>
-              </label>
-            }
-            items={food.servings.map((s) => ({
-              id: s.label,
-              label: s.label === `${s.grams} g` ? s.label : `${s.label} · ${s.grams} g`,
-              active: selectedServingLabel === s.label,
-              onClick: () => {
-                setGramsInput(s.grams.toString());
-                setSelectedServingLabel(s.label);
+            items={[
+              ...food.servings.map((s) => ({
+                id: s.label,
+                label: s.label === `${s.grams} g` ? s.label : `${s.label} · ${s.grams} g`,
+                active: selectedServingLabel === s.label,
+                onClick: () => {
+                  setGramsInput(s.grams.toString());
+                  setSelectedServingLabel(s.label);
+                },
+              })),
+              {
+                id: "custom",
+                label: "Tùy chỉnh",
+                active: selectedServingLabel === CUSTOM_PORTION,
+                onClick: () => setSelectedServingLabel(CUSTOM_PORTION),
               },
-            }))}
+            ]}
           />
+          {selectedServingLabel === CUSTOM_PORTION && (
+            <label className="flex h-11 w-full cursor-text items-center justify-end rounded-xl border border-card-border bg-card px-3 focus-within:ring-2 focus-within:ring-blue">
+              <span className="sr-only">Khối lượng theo gam</span>
+              <input
+                id="fd-size"
+                type="text"
+                inputMode="decimal"
+                aria-label="Khối lượng theo gam"
+                value={gramsInput}
+                onChange={(e) => setGramsInput(e.target.value)}
+                className="h-full w-full border-0 bg-transparent text-right text-sm font-bold tabular-nums text-text outline-none"
+              />
+              <span className="ml-1 text-xs font-semibold text-secondary">g</span>
+            </label>
+          )}
         </div>
 
         {/* Big Kcal & 3-up Macro Card */}
@@ -208,6 +213,8 @@ function FoodDetailInner() {
     </AppShell>
   );
 }
+
+const CUSTOM_PORTION = "__custom";
 
 export default function FoodDetailPage() {
   return (
