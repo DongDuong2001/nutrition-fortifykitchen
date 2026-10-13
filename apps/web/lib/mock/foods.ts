@@ -28,7 +28,7 @@ export const MOCK_FOODS: FoodItem[] = [
       { label: "3 quả", grams: 30 },
       { label: "100 g", grams: 100 },
     ],
-    tipVi: "Nên dùng 30 g đầu buổi tập · carb chậm. 2–3 quả trước tập 30–45 phút.",
+    tipVi: "Nên dùng 30 g đầu buổi tập · tinh bột hấp thu chậm. 2–3 quả trước tập 30–45 phút.",
     nutrients: {
       energy: 280, // 280 * 0.3 = 84 kcal
       carbs: 73.33, // 73.33 * 0.3 = 22.0 g
@@ -60,7 +60,7 @@ export const MOCK_FOODS: FoodItem[] = [
       { label: "1 chén", grams: 40 },
       { label: "100 g", grams: 100 },
     ],
-    tipVi: "Carb phức giàu beta-glucan, no lâu.",
+    tipVi: "Tinh bột phức giàu beta-glucan, no lâu.",
     nutrients: {
       energy: 380, // 380 * 0.6 = 228 kcal
       carbs: 66.67, // 40 g / 60g
@@ -213,7 +213,7 @@ export const MOCK_FOODS: FoodItem[] = [
       { label: "1 muỗng", grams: 20 },
       { label: "100 g", grams: 100 },
     ],
-    tipVi: "Carb hấp thu nhanh bổ sung trong buổi tập kéo dài.",
+    tipVi: "Tinh bột hấp thu nhanh bổ sung trong buổi tập kéo dài.",
     nutrients: {
       energy: 290, // 290 * 0.2 = 58 kcal
       carbs: 75.0, // 15 g / 20g
@@ -564,7 +564,7 @@ export const MOCK_FOODS: FoodItem[] = [
       { label: "1 củ", grams: 150 },
       { label: "100 g", grams: 100 },
     ],
-    tipVi: "Nguồn carb chậm tự nhiên và beta-carotene dồi dào.",
+    tipVi: "Nguồn tinh bột hấp thu chậm tự nhiên và beta-carotene dồi dào.",
     nutrients: {
       energy: 86,
       carbs: 20.1,
