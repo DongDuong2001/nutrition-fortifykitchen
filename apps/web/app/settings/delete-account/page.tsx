@@ -91,12 +91,12 @@ export default function DeleteAccountPage() {
 
           {/* Confirmation input */}
           <label className="flex flex-col gap-2 text-[15px] font-bold text-text">
-            Gõ XOÁ để xác nhận
+            Gõ Xoá để xác nhận
             <input
               type="text"
               value={confirmationText}
               onChange={(e) => setConfirmationText(e.target.value)}
-              placeholder="XOÁ"
+              placeholder="Xoá"
               autoComplete="off"
               className="h-[52px] rounded-xl border-2 border-grabber bg-card px-4 text-lg font-semibold text-ink outline-none focus:border-blue transition-colors"
             />
