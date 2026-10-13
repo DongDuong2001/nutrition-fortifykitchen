@@ -7,8 +7,8 @@ import { EmailField } from "@/components/auth/email-field";
 import { NewPasswordFields } from "@/components/auth/new-password-fields";
 import { PasswordField } from "@/components/auth/password-field";
 import { PillButton } from "@/components/ui/pill-button";
-import { apiClient } from "@/lib/api-client";
 import {
+  requestMagicLink,
   signInWithPassword,
   signUpWithPassword,
   validateEmail,
@@ -70,7 +70,12 @@ export function EmailPasswordForm({ variant }: { variant: "signin" | "signup" })
 
     setBusy(true);
     try {
-      await apiClient.requestMagicLink(email.trim());
+      const result = await requestMagicLink(email.trim());
+      if (!result.ok) {
+        setErrors({ email: result.error });
+        setBusy(false);
+        return;
+      }
       writePendingEmail(email.trim());
       router.push("/signin/check-email");
     } catch {

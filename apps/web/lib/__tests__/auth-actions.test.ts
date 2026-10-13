@@ -3,6 +3,7 @@ import {
   SIGN_IN_FAILED,
   currentAccount,
   currentAccountId,
+  requestMagicLink,
   sendPasswordReset,
   signInSampleAccount,
   signInWithPassword,
@@ -190,5 +191,48 @@ describe("mock account flows (MOCK, no network)", () => {
   it("refuses a password change when nobody is signed in", async () => {
     await signOut();
     expect(await updatePassword("abcdef12")).toEqual({ ok: false, error: "Đăng nhập lại để đổi mật khẩu" });
+  });
+});
+
+describe("magic link request (MOCK, signs in at once)", () => {
+  beforeEach(() => {
+    demo.on = true;
+    vi.stubGlobal("localStorage", memoryStorage());
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("a new email gets an account with magic_link and is signed in", async () => {
+    demo.on = false;
+    expect(await requestMagicLink("cc19new@example.com")).toEqual({ ok: true });
+    expect(await currentAccount()).toEqual({ email: "cc19new@example.com", hasPassword: false, providers: ["magic_link"] });
+    expect(currentAccountId()).toBe("cc19new@example.com");
+  });
+
+  it("an existing password account keeps its password, gets magic_link, and keeps its id", async () => {
+    demo.on = false;
+    expect(await signUpWithPassword("cc19old@example.com", "abcdef12")).toEqual({ ok: true });
+    const idBefore = currentAccountId();
+    await signOut();
+    expect(await requestMagicLink("cc19old@example.com")).toEqual({ ok: true });
+    expect(currentAccountId()).toBe(idBefore);
+    expect(await currentAccount()).toEqual({ email: "cc19old@example.com", hasPassword: true, providers: ["password", "magic_link"] });
+    await signOut();
+    expect(await signInWithPassword("cc19old@example.com", "abcdef12")).toEqual({ ok: true });
+  });
+
+  it("does not bring the sample account back outside demo mode", async () => {
+    demo.on = false;
+    expect(await requestMagicLink("cc19other@example.com")).toEqual({ ok: true });
+    await signOut();
+    expect(await signInWithPassword("ban@email.com", "abcdef12")).toEqual({ ok: false, error: SIGN_IN_FAILED });
+    expect(await currentAccount()).toBeNull();
+  });
+
+  it("refuses an email that is not valid, and signs nobody in", async () => {
+    demo.on = false;
+    expect(await requestMagicLink("not-an-email")).toEqual({ ok: false, error: EMAIL_ERROR });
+    expect(await currentAccount()).toBeNull();
   });
 });

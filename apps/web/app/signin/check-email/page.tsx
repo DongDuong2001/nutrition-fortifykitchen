@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AuthShell } from "@/components/onboarding/auth-shell";
 import { BrandMark } from "@/components/onboarding/brand-mark";
-import { apiClient } from "@/lib/api-client";
+import { requestMagicLink } from "@/lib/auth-actions";
+import { firstRunState, readFirstRunFacts } from "@/lib/first-run";
 import { readPendingEmail, resendLabel } from "@/lib/onboarding";
 import { PillButton } from "@/components/ui/pill-button";
 
@@ -13,9 +14,12 @@ const RESEND_WAIT_SECONDS = 45;
 export default function CheckEmailPage() {
   const [email, setEmail] = useState("");
   const [secondsLeft, setSecondsLeft] = useState(RESEND_WAIT_SECONDS);
+  // Where the opened link lands: setup when the account has no profile yet, otherwise the Tổng quan tab
+  const [openTarget, setOpenTarget] = useState("/setup/profile");
 
   useEffect(() => {
     setEmail(readPendingEmail());
+    setOpenTarget(firstRunState(readFirstRunFacts()) === "needs-setup" ? "/setup/profile" : "/");
   }, []);
 
   useEffect(() => {
@@ -26,8 +30,8 @@ export default function CheckEmailPage() {
 
   async function handleResend() {
     if (!email) return;
-    await apiClient.requestMagicLink(email);
-    setSecondsLeft(RESEND_WAIT_SECONDS);
+    const result = await requestMagicLink(email);
+    if (result.ok) setSecondsLeft(RESEND_WAIT_SECONDS);
   }
 
   return (
@@ -80,7 +84,7 @@ export default function CheckEmailPage() {
       </Link>
       {process.env.NODE_ENV !== "production" && (
         <Link
-          href="/setup/profile"
+          href={openTarget}
           className="inline-flex min-h-[44px] items-center justify-center px-2 text-[13px] font-semibold text-secondary"
         >
           Mô phỏng mở liên kết (dev)

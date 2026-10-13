@@ -183,6 +183,27 @@ export async function sendPasswordReset(email: string): Promise<AuthResult> {
   return emailError ? { ok: false, error: emailError } : { ok: true };
 }
 
+// MOCK: real Supabase sign-in happens when the link is opened; replace this block with the session from Dong's client.
+// Until then the request itself signs the email in: a new email gets an account (no password), an existing account
+// keeps its password and id and gets the magic_link provider. Nothing else in the app knows this is a mock.
+/** Requests a magic link for the email and makes that account the signed-in one. */
+export function requestMagicLink(email: string): Promise<AuthResult> {
+  return guarded(async () => {
+    const emailError = validateEmail(email);
+    if (emailError) return { ok: false, error: emailError };
+
+    const address = normaliseEmail(email);
+    const store = readStore();
+    const existing = store.accounts[address];
+    const account: MockAccount = existing
+      ? { ...existing, providers: existing.providers.includes("magic_link") ? existing.providers : [...existing.providers, "magic_link"] }
+      : { hash: null, providers: ["magic_link"] };
+    writeStore({ current: address, accounts: { ...store.accounts, [address]: account } });
+    return { ok: true };
+  });
+}
+// END MOCK magic link
+
 /**
  * Sets the signed-in account's password. The current password is checked only when one is given
  * (the change screen passes it when the account has a password; the reset screen does not).

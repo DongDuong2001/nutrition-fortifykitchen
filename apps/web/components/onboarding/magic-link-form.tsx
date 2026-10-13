@@ -2,9 +2,8 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { apiClient } from "@/lib/api-client";
 import { readPendingEmail, writePendingEmail } from "@/lib/onboarding";
-import { validateEmail } from "@/lib/auth-actions";
+import { requestMagicLink, validateEmail } from "@/lib/auth-actions";
 import { EmailField } from "@/components/auth/email-field";
 import { PillButton } from "@/components/ui/pill-button";
 
@@ -31,7 +30,12 @@ export function MagicLinkForm({ submitLabel }: { submitLabel: string }) {
     setSending(true);
     setError(null);
     try {
-      await apiClient.requestMagicLink(value);
+      const result = await requestMagicLink(value);
+      if (!result.ok) {
+        setError(result.error);
+        setSending(false);
+        return;
+      }
       writePendingEmail(value);
       router.push("/signin/check-email");
     } catch {
