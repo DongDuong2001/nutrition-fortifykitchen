@@ -64,7 +64,7 @@ export default function PaywallPage() {
 
       <footer className="w-full max-w-[560px] mx-auto px-4 pt-2 pb-5 flex flex-col items-center gap-1.5">
         <div className="text-xs text-secondary text-center">
-          Gói Miễn phí vẫn ghi đủ 22 vi chất.
+          Gói miễn phí vẫn ghi đủ 22 vi chất.
         </div>
       </footer>
     </div>
