@@ -165,7 +165,7 @@ def run():
         ctx = browser.new_context(viewport=PHONE)
         pg = ctx.new_page()
         pg.goto(BASE + "/signup", wait_until="networkidle")
-        pg.get_by_label("Email").fill("ban@email.com")
+        pg.locator('input[type="email"]').last.fill("ban@email.com")
         pg.get_by_role("button", name="Gửi link đăng nhập").click()
         expect(pg).to_have_url(BASE + "/signin/check-email")
         pg.get_by_role("link", name="Mô phỏng mở link (dev)").click()
