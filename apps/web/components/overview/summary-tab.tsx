@@ -57,7 +57,7 @@ export function SummaryTab() {
           onClick={() => rememberAddOpener("overview-next-meal")}
           className="inline-flex min-h-[44px] shrink-0 items-center rounded-full border border-card-border bg-card px-4 text-sm font-bold text-text no-underline whitespace-nowrap active:scale-[0.97] motion-reduce:active:scale-100"
         >
-          Ghi {getMealSlotNameVi(meal).toLowerCase()}
+          Thêm vào {getMealSlotNameVi(meal).toLowerCase()}
         </Link>
       ) : (
         <Link

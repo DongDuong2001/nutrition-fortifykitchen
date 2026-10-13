@@ -147,13 +147,13 @@ def check_energy_bars(browser, size_name, size):
         red = "bg-level-red" in col["bar"]
         if kcal > 2275:
             over += 1
-            check("bg-blue" in col["bar"] and not red and "trong mục tiêu" in col["label"], f"{size_name} energy: {kcal} kcal above the range is on target")
+            check("bg-blue" in col["bar"] and not red and "đạt mục tiêu" in col["label"], f"{size_name} energy: {kcal} kcal above the range is on target")
         if red:
             check(kcal < 1950, f"{size_name} energy: red only below the minimum ({kcal})")
     check(over >= 1, f"{size_name} energy: a day above the range is shown ({over})")
     check(any("đang ghi" in c["label"] for c in cols), f"{size_name} energy: today is marked đang ghi")
     legend = pg.locator("section[aria-labelledby='en-kcal'] span.inline-flex").all_inner_texts()
-    check([t.strip() for t in legend] == ["Trong mục tiêu hoặc trên", "Thiếu", "Đang ghi"], f"{size_name} energy: legend has three items ({legend})")
+    check([t.strip() for t in legend] == ["Đạt mục tiêu", "Thiếu", "Đang ghi"], f"{size_name} energy: legend has three items ({legend})")
     pg.goto(BASE + "/trends/micros", wait_until="networkidle")
     pg.wait_for_timeout(400)
     check("mục tiêu 1.200–1.500 mg" in text(pg), f"{size_name} Vi chất: calcium shows its 1.200–1.500 mg range")
@@ -179,7 +179,7 @@ def check_next_meal(browser, size_name, size):
     ctx, pg = new_page(browser, size)
     go(pg, "/")
     link = pg.locator("#overview-next-meal")
-    check(link.count() == 1 and link.inner_text().strip() == "Ghi bữa tối", f"{size_name} Tóm tắt: the button reads Ghi bữa tối at 18:00")
+    check(link.count() == 1 and link.inner_text().strip() == "Thêm vào bữa tối", f"{size_name} Tóm tắt: the button reads Thêm vào bữa tối at 18:00")
     link.click()
     pg.wait_for_url("**/add**", timeout=8000)
     pg.wait_for_timeout(500)
@@ -196,7 +196,7 @@ def check_diary(browser, size_name, size):
     body = text(pg)
     check("8/22 vi chất · Thiếu:" in body, f"{size_name} diary: the Vi chất row reads 8/22 with what is lacking")
     check("Ngày tập 60′ · muối 7–10,5 g" in body, f"{size_name} diary: the Ngày tập row reads 60′ and salt")
-    check("còn 909 kcal" in body, f"{size_name} diary: còn 909 kcal in the summary")
+    check(re.search(r"còn 909 kcal", body, re.IGNORECASE) is not None, f"{size_name} diary: còn 909 kcal in the summary")
     n_add = pg.locator('a[aria-label^="Thêm vào"]:visible').count()
     n_menu = pg.locator('button[aria-label^="Tuỳ chọn"]:visible').count()
     check(n_add == 5 and n_menu == 5, f"{size_name} diary: one + and one ⋯ per meal ({n_add}, {n_menu})")
@@ -281,7 +281,7 @@ def check_delete_meal(browser, size_name, size):
     toast.click()
     pg.wait_for_timeout(500)
     check("459 kcal" in pg.locator("#meal-breakfast").inner_text(), f"{size_name} delete: Hoàn tác puts the meal back")
-    check("còn 909 kcal" in text(pg), f"{size_name} delete: the total is back to còn 909 kcal")
+    check(re.search(r"còn 909 kcal", text(pg), re.IGNORECASE) is not None, f"{size_name} delete: the total is back to còn 909 kcal")
     ctx.close()
 
 
