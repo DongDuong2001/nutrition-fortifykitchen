@@ -44,7 +44,7 @@ export default function DeleteAccountPage() {
       <div className="flex flex-col">
         <AppHeader
           variant="sub"
-          title="XOÁ TÀI KHOẢN"
+          title="Xoá tài khoản"
           onBack={goBack}
           backLabel="Quay lại"
           alignGroup="settings-header"

@@ -113,7 +113,7 @@ export default function NotificationsSettingsPage() {
     <AppShell>
       <AppHeader
         variant="sub"
-        title="NHẮC NHỞ"
+        title="Nhắc nhở"
         onBack={goBack}
         backLabel="Quay lại"
         alignGroup="settings-header"

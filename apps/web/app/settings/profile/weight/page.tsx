@@ -117,7 +117,7 @@ export default function WeightPage() {
 
   return (
     <AppShell alignContainer="weight-page">
-        <AppHeader variant="sub" title="CÂN NẶNG" backHref="/settings/profile" layout="wide" alignGroup="weight-header" />
+        <AppHeader variant="sub" title="Cân nặng" backHref="/settings/profile" layout="wide" alignGroup="weight-header" />
 
         <main className="mx-auto w-full max-w-[560px] px-4 pb-8 pt-4 lg:mx-0 lg:px-8">
           <div data-align-group="weight-header">{form}</div>
