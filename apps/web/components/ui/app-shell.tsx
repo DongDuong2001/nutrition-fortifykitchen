@@ -25,7 +25,7 @@ export function AppShell({
       className="flex min-h-dvh w-full flex-col bg-page text-text font-sans lg:flex-row"
     >
       <DesktopSidebar />
-      <div className={`flex min-w-0 flex-1 flex-col ${cta ? "pb-[168px] lg:pb-24" : "pb-[88px] lg:pb-0"}`}>{children}</div>
+      <div className={`flex min-w-0 flex-1 flex-col ${cta ? "pb-[calc(168px+env(safe-area-inset-bottom))] lg:pb-24" : "pb-[calc(88px+env(safe-area-inset-bottom))] lg:pb-0"}`}>{children}</div>
       {cta && (
         <div className="fixed inset-x-0 bottom-[calc(72px+env(safe-area-inset-bottom))] z-30 border-t border-card-border bg-page/95 p-3 backdrop-blur-sm lg:bottom-0 lg:left-60">
           <div className="mx-auto w-full max-w-[560px]">{cta}</div>

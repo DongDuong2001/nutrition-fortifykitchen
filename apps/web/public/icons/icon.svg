@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="H1T MICRO">
+  <!-- Cobalt Sign app icon: ink field, white H1T, cobalt bar. Letters are paths (no font needed).
+       Full-bleed square so the same file serves "any" and "maskable"; the mark sits inside the 80% safe circle. -->
+  <rect width="512" height="512" fill="#111317"/>
+  <g transform="translate(256 256) scale(0.9) translate(-256 -256) translate(256 256) skewX(-12) translate(-256 -256)">
+    <g fill="#FFFFFF">
+      <!-- H -->
+      <path d="M98 142h38v62h26v-62h40v170h-40v-70h-26v70H98z"/>
+      <!-- 1 -->
+      <path d="M224 172l28-30h36v170h-38V190l-26 12z"/>
+      <!-- T -->
+      <path d="M310 142h104v38h-33v132h-38V180h-33z"/>
+    </g>
+    <rect x="98" y="338" width="316" height="32" fill="#1238D6"/>
+  </g>
+</svg>

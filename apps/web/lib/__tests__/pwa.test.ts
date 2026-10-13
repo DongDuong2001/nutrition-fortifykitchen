@@ -1,0 +1,130 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { runInNewContext } from "node:vm";
+import { describe, expect, it } from "vitest";
+import {
+  INK_COLOR,
+  PAPER_COLOR,
+  PRECACHE_PAGES,
+  installView,
+  isIosDevice,
+  isIosSafari,
+  isNeverCached,
+  routeFor,
+  shouldRegisterServiceWorker,
+} from "../pwa";
+
+describe("routeFor", () => {
+  it("never caches auth routes and the API, for pages and for fetches", () => {
+    for (const p of ["/signin", "/signin/check-email", "/signin/expired", "/signup", "/reset-password", "/api/me", "/api"]) {
+      expect(routeFor(p, "navigate", "GET"), p).toBe("never");
+      expect(routeFor(p, "cors", "GET"), p).toBe("never");
+    }
+  });
+
+  it("matches a prefix on a path boundary only", () => {
+    expect(isNeverCached("/signing")).toBe(false);
+    expect(isNeverCached("/apiary")).toBe(false);
+    expect(routeFor("/signing", "navigate", "GET")).toBe("navigate");
+  });
+
+  it("serves build assets, icons and fonts cache first", () => {
+    for (const p of [
+      "/_next/static/chunks/app-1a2b.js",
+      "/_next/static/css/x.css",
+      "/_next/static/media/saira.woff2",
+      "/icons/icon-192.png",
+      "/fonts/a.ttf",
+    ]) {
+      expect(routeFor(p, "no-cors", "GET"), p).toBe("static");
+    }
+  });
+
+  it("treats page loads as network first, including the app shell", () => {
+    for (const p of [...PRECACHE_PAGES, "/entry/abc", "/foods/oat"]) {
+      expect(routeFor(p, "navigate", "GET"), p).toBe("navigate");
+    }
+  });
+
+  it("leaves everything else to the browser", () => {
+    expect(routeFor("/diary", "cors", "GET")).toBe("pass"); // a client-side fetch, not a page load
+    expect(routeFor("/manifest.webmanifest", "cors", "GET")).toBe("pass");
+    expect(routeFor("/diary", "navigate", "POST")).toBe("pass");
+    expect(routeFor("/_next/static/chunks/a.js", "cors", "POST")).toBe("pass");
+  });
+});
+
+describe("shouldRegisterServiceWorker", () => {
+  it("registers in production only, and only where service workers exist", () => {
+    expect(shouldRegisterServiceWorker("production", true)).toBe(true);
+    expect(shouldRegisterServiceWorker("development", true)).toBe(false);
+    expect(shouldRegisterServiceWorker("test", true)).toBe(false);
+    expect(shouldRegisterServiceWorker("production", false)).toBe(false);
+    expect(shouldRegisterServiceWorker(undefined, true)).toBe(false);
+  });
+});
+
+describe("install state", () => {
+  it("picks the view in order: installed, prompt, ios, manual", () => {
+    expect(installView({ standalone: true, canPrompt: true, ios: true })).toBe("installed");
+    expect(installView({ standalone: false, canPrompt: true, ios: false })).toBe("prompt");
+    expect(installView({ standalone: false, canPrompt: false, ios: true })).toBe("ios");
+    expect(installView({ standalone: false, canPrompt: false, ios: false })).toBe("manual");
+  });
+
+  const SAFARI_IPHONE =
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1";
+  const CHROME_IPHONE =
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/124.0 Mobile/15E148 Safari/604.1";
+  const MAC_SAFARI =
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15";
+  const ANDROID_CHROME =
+    "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Mobile Safari/537.36";
+
+  it("recognises iOS devices, iPadOS included, and Safari among them", () => {
+    expect(isIosDevice(SAFARI_IPHONE)).toBe(true);
+    expect(isIosDevice(MAC_SAFARI, 5)).toBe(true); // iPad asking for the desktop site
+    expect(isIosDevice(MAC_SAFARI, 0)).toBe(false);
+    expect(isIosDevice(ANDROID_CHROME)).toBe(false);
+    expect(isIosSafari(SAFARI_IPHONE)).toBe(true);
+    expect(isIosSafari(CHROME_IPHONE)).toBe(false);
+  });
+});
+
+describe("public/sw.js", () => {
+  const source = readFileSync(join(__dirname, "..", "..", "public", "sw.js"), "utf8");
+  const sandbox = {
+    module: { exports: {} as Record<string, unknown> },
+    self: { addEventListener() {}, location: { origin: "http://x" } },
+  };
+  runInNewContext(source, sandbox);
+  const sw = sandbox.module.exports as { routeFor: typeof routeFor; PAGES: string[]; VERSION: string };
+
+  it("makes the same routing decision as lib/pwa.ts", () => {
+    const paths = [
+      "/", "/diary", "/explore", "/settings", "/offline", "/entry/1", "/signin", "/signin/expired", "/signup",
+      "/reset-password", "/api/x", "/login", "/signing", "/_next/static/a.js", "/icons/icon-512.png", "/m.woff2",
+      "/manifest.webmanifest",
+    ];
+    for (const path of paths) {
+      for (const mode of ["navigate", "cors", "no-cors"]) {
+        for (const method of ["GET", "POST"]) {
+          expect(sw.routeFor(path, mode, method), `${method} ${mode} ${path}`).toBe(routeFor(path, mode, method));
+        }
+      }
+    }
+  });
+
+  it("precaches the same pages and carries a version for the cache name", () => {
+    expect(sw.PAGES).toEqual([...PRECACHE_PAGES]);
+    expect(sw.VERSION).toMatch(/^\d{4}-\d{2}-\d{2}\.\d+$/);
+  });
+});
+
+describe("manifest colours", () => {
+  it("are the paper and ink tokens", () => {
+    const css = readFileSync(join(__dirname, "..", "..", "app", "globals.css"), "utf8").toLowerCase();
+    expect(css).toContain(`--color-paper: ${PAPER_COLOR.toLowerCase()}`);
+    expect(css).toContain(`--color-ink: ${INK_COLOR.toLowerCase()}`);
+  });
+});
