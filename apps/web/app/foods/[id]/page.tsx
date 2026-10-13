@@ -63,7 +63,7 @@ function FoodDetailInner() {
   const handleToggleFavourite = () => {
     if (!food) return;
     toggleFavourite(food);
-    setFavouriteToast({ message: saved ? "Đã bỏ khỏi Yêu thích" : "Đã lưu vào Yêu thích" });
+    setFavouriteToast({ message: saved ? "Đã bỏ khỏi yêu thích" : "Đã thêm vào yêu thích" });
   };
 
   const parsedGrams = useMemo(() => parseGramsInput(gramsInput), [gramsInput]);
@@ -164,7 +164,7 @@ function FoodDetailInner() {
               })),
               {
                 id: "custom",
-                label: "Tùy chỉnh",
+                label: "Tuỳ chỉnh",
                 active: selectedServingLabel === CUSTOM_PORTION,
                 onClick: () => setSelectedServingLabel(CUSTOM_PORTION),
               },
