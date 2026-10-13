@@ -74,3 +74,21 @@ If a primitive is missing, add it to `components/ui` first.
 - Past days are read-only. Unknown is "—", never 0. No red above a range, no over-limit warnings.
 - Vietnamese copy; numbers `1.041` and `2,1`.
 - Same action, same word everywhere (Thêm, Sửa, Xoá, Hoàn tác).
+
+## 6. Visual character
+
+What makes the screens feel like H1T MICRO, not a list of cards (set in cc2-20 with Tổng quan › Tóm tắt):
+
+- **One dark accent card per screen.** `bg-surface-dark`, radius 18, 16 px padding, holding the one number the screen is
+  about. Everything else sits on paper in white cards.
+- **Key numbers in Saira Condensed** (italic 900 for the hero number, bold 24–44 px for row values), tabular numbers,
+  sky on dark and ink on white. The unit and the target sit beside it in 13 px Manrope, `text-secondary`.
+- **Slanted segments** (skewX(−14deg), 12 px tall, 4 px gap) for progress: ten segments, n = min(10, floor(pct / 10)).
+  Sky filled and `level-empty-dark` empty on dark.
+- **Interactive detail on tap.** A row or card opens its detail in place (`aria-expanded`, one open at a time); a bar or
+  square is a real button that names its day or nutrient. Detail is a number, not a paragraph.
+- **Facts in rows, not sentences.** A fact is a title, one short line and a number. No blockquotes and no left-border
+  quotes of prose.
+- **Colour means a level.** Cobalt = met, destructive = under, secondary = in progress or unknown. Never red above a
+  range.
+- **Motion explains a change** (a chevron turning, a bar fading in); nothing moves under `prefers-reduced-motion`.

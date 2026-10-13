@@ -3,6 +3,7 @@
 import React, { Suspense, createContext, useContext, useMemo } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import type { Period } from "@/lib/period";
 import { AppHeader } from "@/components/ui/app-header";
 import { AppShell } from "@/components/ui/app-shell";
 import { useDiary } from "@/lib/diary-store";
@@ -47,6 +48,90 @@ function ChevronIcon({ direction }: { direction: "left" | "right" }) {
   );
 }
 
+/**
+ * The period heading and its controls: ‹ › step the period, 7|30 changes its length. The period is in the URL.
+ * `compact` (Tóm tắt) is one row: ‹ heading › and the 7|30 group.
+ */
+export function PeriodControl({
+  heading,
+  period,
+  length,
+  compact = false,
+}: {
+  heading: string;
+  period: Period | undefined;
+  length: PeriodLength;
+  compact?: boolean;
+}) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const go = (nextLength: PeriodLength, nextOffset: number) =>
+    router.replace(`${pathname}${periodQuery(nextLength, nextOffset)}`, { scroll: false });
+
+  const stepClass =
+    "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-0 bg-transparent text-text cursor-pointer hover:bg-divider active:scale-[0.97] motion-reduce:active:scale-100 disabled:cursor-default disabled:opacity-45";
+  const prev = (
+    <button type="button" aria-label="Kỳ trước" disabled={!period} onClick={() => period && go(length, period.offset + 1)} className={stepClass}>
+      <ChevronIcon direction="left" />
+    </button>
+  );
+  const next = (
+    <button type="button" aria-label="Kỳ sau" disabled={!period || period.isCurrent} onClick={() => period && go(length, period.offset - 1)} className={stepClass}>
+      <ChevronIcon direction="right" />
+    </button>
+  );
+  const lengthGroup = (
+    <div role="group" aria-label="Độ dài kỳ" className="inline-flex shrink-0 rounded-full border border-card-border bg-card p-0.5">
+      {([7, 30] as const).map((n) => {
+        const isActive = n === length;
+        return (
+          <Link
+            key={n}
+            href={`${pathname}${periodQuery(n, 0)}`}
+            replace
+            scroll={false}
+            aria-current={isActive ? "true" : "false"}
+            className={`inline-flex min-h-[44px] items-center justify-center rounded-full text-sm font-bold no-underline transition-colors active:scale-[0.97] motion-reduce:active:scale-100 ${
+              compact ? "min-w-[44px] px-2" : "px-4"
+            } ${isActive ? "bg-ink text-on-dark" : "text-secondary hover:text-text"}`}
+          >
+            {n}
+            <span className={compact ? "sr-only" : undefined}> ngày</span>
+          </Link>
+        );
+      })}
+    </div>
+  );
+
+  if (compact) {
+    return (
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex min-w-0 items-center">
+          {prev}
+          <p id="ov-period" className="m-0 min-w-0 text-center text-[13px] font-semibold leading-snug text-secondary">
+            {heading}
+          </p>
+          {next}
+        </div>
+        {lengthGroup}
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-1">
+      <p className="m-0 text-[15px] font-bold lg:text-lg">{heading}</p>
+      <div className="flex items-center justify-between gap-2 lg:justify-start lg:gap-4">
+        <div className="flex items-center">
+          {prev}
+          {next}
+        </div>
+        {lengthGroup}
+      </div>
+    </div>
+  );
+}
+
 function ContentSkeleton() {
   return (
     <div role="status" aria-busy="true" className="flex flex-col gap-3">
@@ -85,8 +170,6 @@ export function OverviewFrame({ active, children }: { active: OverviewTab; child
 
 function FrameInner({ active, children }: { active: OverviewTab; children: React.ReactNode }) {
   const searchParams = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
   const { todayIso, data, targets } = useDiary();
 
   const { length, offset } = parsePeriodParams(searchParams?.get("p"), searchParams?.get("o"));
@@ -96,9 +179,6 @@ function FrameInner({ active, children }: { active: OverviewTab; children: React
     () => (todayIso ? buildOverview({ todayIso, today: data, targets, length, offset }) : null),
     [todayIso, data, targets, length, offset]
   );
-
-  const go = (nextLength: PeriodLength, nextOffset: number) =>
-    router.replace(`${pathname}${periodQuery(nextLength, nextOffset)}`, { scroll: false });
 
   const ctx: OverviewContextValue | null =
     overview && todayIso
@@ -143,53 +223,14 @@ function FrameInner({ active, children }: { active: OverviewTab; children: React
       />
 
       <main className="mx-auto flex w-full max-w-[560px] flex-col gap-3 px-4 pt-4 pb-6 box-border lg:mx-0 lg:max-w-[1240px] lg:gap-5 lg:px-8 lg:pt-5 lg:pb-12">
-        {/* The period control, shared by every sub-tab */}
-        <div className="flex flex-col gap-1">
-          <p className="m-0 text-[15px] font-bold lg:text-lg">
-            Trung bình mỗi ngày{period ? ` · ${period.label}` : ""}
-          </p>
-          <div className="flex items-center justify-between gap-2 lg:justify-start lg:gap-4">
-            <div className="flex items-center">
-              <button
-                type="button"
-                aria-label="Kỳ trước"
-                disabled={!period}
-                onClick={() => period && go(length, period.offset + 1)}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-full border-0 bg-transparent text-text cursor-pointer hover:bg-divider active:scale-[0.97] motion-reduce:active:scale-100 disabled:cursor-default disabled:opacity-45"
-              >
-                <ChevronIcon direction="left" />
-              </button>
-              <button
-                type="button"
-                aria-label="Kỳ sau"
-                disabled={!period || period.isCurrent}
-                onClick={() => period && go(length, period.offset - 1)}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-full border-0 bg-transparent text-text cursor-pointer hover:bg-divider active:scale-[0.97] motion-reduce:active:scale-100 disabled:cursor-default disabled:opacity-45"
-              >
-                <ChevronIcon direction="right" />
-              </button>
-            </div>
-            <div role="group" aria-label="Độ dài kỳ" className="inline-flex rounded-full border border-card-border bg-card p-0.5">
-              {([7, 30] as const).map((n) => {
-                const isActive = n === length;
-                return (
-                  <Link
-                    key={n}
-                    href={`${pathname}${periodQuery(n, 0)}`}
-                    replace
-                    scroll={false}
-                    aria-current={isActive ? "true" : "false"}
-                    className={`inline-flex min-h-[44px] items-center rounded-full px-4 text-sm font-bold no-underline transition-colors active:scale-[0.97] motion-reduce:active:scale-100 ${
-                      isActive ? "bg-ink text-on-dark" : "text-secondary hover:text-text"
-                    }`}
-                  >
-                    {n} ngày
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        </div>
+        {/* The period control; Tóm tắt draws it itself, between the hero and the scoreboard */}
+        {active !== "summary" && (
+          <PeriodControl
+            heading={`Trung bình mỗi ngày${period ? ` · ${period.label}` : ""}`}
+            period={period}
+            length={length}
+          />
+        )}
 
         {ctx ? <OverviewContext.Provider value={ctx}>{children}</OverviewContext.Provider> : <ContentSkeleton />}
       </main>

@@ -15,6 +15,7 @@ import {
   validatePasswordConfirm,
   validateRequiredPassword,
 } from "../auth-actions";
+import { apiClient } from "../api-client";
 
 // Demo mode decides whether the sample account exists. The flows below run in demo mode unless a test says otherwise.
 const demo = vi.hoisted(() => ({ on: true }));
@@ -234,5 +235,22 @@ describe("magic link request (MOCK, signs in at once)", () => {
     demo.on = false;
     expect(await requestMagicLink("not-an-email")).toEqual({ ok: false, error: EMAIL_ERROR });
     expect(await currentAccount()).toBeNull();
+  });
+
+  it("asks the API client for the link first, then signs the mock account in", async () => {
+    demo.on = false;
+    const calls: string[] = [];
+    const spy = vi.spyOn(apiClient, "requestMagicLink").mockImplementation(async (email: string) => {
+      calls.push(`api:${email}`);
+      expect(await currentAccount()).toBeNull();
+      return { ok: true };
+    });
+    try {
+      expect(await requestMagicLink("cc20@example.com")).toEqual({ ok: true });
+    } finally {
+      spy.mockRestore();
+    }
+    expect(calls).toEqual(["api:cc20@example.com"]);
+    expect((await currentAccount())?.email).toBe("cc20@example.com");
   });
 });

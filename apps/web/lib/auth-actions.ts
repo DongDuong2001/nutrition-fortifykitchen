@@ -1,3 +1,4 @@
+import { apiClient } from "./api-client";
 import { isDemo } from "./demo";
 import { isValidEmail } from "./onboarding";
 
@@ -183,7 +184,8 @@ export async function sendPasswordReset(email: string): Promise<AuthResult> {
   return emailError ? { ok: false, error: emailError } : { ok: true };
 }
 
-// MOCK: real Supabase sign-in happens when the link is opened; replace this block with the session from Dong's client.
+// MOCK: real Supabase sign-in happens when the link is opened. Delete this MOCK block in lib/auth-actions.ts before any
+// deployed build (docs/dong-checklist.md); replace it with the session from Dong's client.
 // Until then the request itself signs the email in: a new email gets an account (no password), an existing account
 // keeps its password and id and gets the magic_link provider. Nothing else in the app knows this is a mock.
 /** Requests a magic link for the email and makes that account the signed-in one. */
@@ -191,6 +193,9 @@ export function requestMagicLink(email: string): Promise<AuthResult> {
   return guarded(async () => {
     const emailError = validateEmail(email);
     if (emailError) return { ok: false, error: emailError };
+
+    // The request goes to the API client first, then the MOCK sign-in below runs
+    await apiClient.requestMagicLink(email);
 
     const address = normaliseEmail(email);
     const store = readStore();

@@ -180,7 +180,7 @@ def check_next_meal(browser, size_name, size):
     ctx, pg = new_page(browser, size)
     go(pg, "/")
     link = pg.locator("#overview-next-meal")
-    check(link.count() == 1 and link.inner_text().strip() == "Thêm vào bữa tối", f"{size_name} Tóm tắt: the button reads Thêm vào bữa tối at 18:00")
+    check(link.count() == 1 and link.inner_text().strip() == "+ Thêm vào bữa tối", f"{size_name} Tóm tắt: the button reads + Thêm vào bữa tối at 18:00")
     link.click()
     pg.wait_for_url("**/add**", timeout=8000)
     pg.wait_for_timeout(500)

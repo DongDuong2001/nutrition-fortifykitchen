@@ -42,6 +42,8 @@ export interface Overview {
   insights: Insight[];
   streak: number;
   weight: WeightSummary;
+  /** The weigh-in log the weight summary came from (for day-to-day changes) */
+  weightLog: WeightPoint[];
 }
 
 export function buildOverview(input: {
@@ -66,6 +68,7 @@ export function buildOverview(input: {
   const targetDays = periodTargetDays(days, todayIso, targets);
   const streak = loggingStreak((iso) => totalsOf(iso).logged, todayIso);
   const enough = hasEnoughData(averages);
+  const weightLog = input.weightLog ?? weightLogSample(todayIso);
 
   return {
     period: current,
@@ -79,7 +82,8 @@ export function buildOverview(input: {
     changes: comparePeriods(averages, previousAverages),
     insights: periodInsights({ averages, targets, proteinDays: targetDays.protein, streak }),
     streak,
-    weight: weightSummary(input.weightLog ?? weightLogSample(todayIso), current),
+    weight: weightSummary(weightLog, current),
+    weightLog,
   };
 }
 
