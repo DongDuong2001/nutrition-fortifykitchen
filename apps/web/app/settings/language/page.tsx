@@ -31,7 +31,7 @@ export default function LanguageSettingsPage() {
     <AppShell>
       <AppHeader
         variant="sub"
-        title="NGÔN NGỮ"
+        title="Ngôn ngữ"
         onBack={goBack}
         backLabel="Quay lại"
         alignGroup="settings-header"
