@@ -118,7 +118,26 @@ function FoodDetailInner() {
       <AppHeader
         variant="sub"
         title={food.nameVi}
-        subtitle={`${categoryLabel(categoryOf(food))} · ${food.brand ? `${food.brand} · ` : ""}${foodSourceLabel(food.source)} · ${food.servings[0]?.grams ?? 100} g mỗi khẩu phần`}
+        subtitle={
+          <span className="inline-flex items-center flex-wrap gap-1">
+            <span>{categoryLabel(categoryOf(food))}</span>
+            <span>·</span>
+            {food.brand && (
+              <>
+                <span>{food.brand}</span>
+                <span>·</span>
+              </>
+            )}
+            <Link
+              href="/settings/data-sources"
+              className="inline-flex items-center min-h-[44px] -my-2.5 px-1 -mx-1 text-inherit underline hover:text-blue transition-colors"
+            >
+              {foodSourceLabel(food.source)}
+            </Link>
+            <span>·</span>
+            <span>{food.servings[0]?.grams ?? 100} g mỗi khẩu phần</span>
+          </span>
+        }
         onBack={goBack}
         actions={
           <button
