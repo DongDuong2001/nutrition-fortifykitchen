@@ -25,17 +25,17 @@ export default function DevUiPage() {
       <div className="flex flex-col gap-6 w-full mb-6">
         <section className="flex flex-col gap-2">
           <div className="text-xs font-bold text-secondary px-4">
-            1. AppHeader — Variant "daily" (Today / Vi chất)
+            1. Đầu trang — Kiểu theo ngày (Nhật ký / Vi chất)
           </div>
           <AppHeader
             variant="daily"
             date="2026-10-10"
-            title="HÔM NAY"
-            subtitle="Thứ Bảy, 10/10/2026 · Ngày tập 60′ · Giữ cân · 65 kg"
+            title="Hôm nay"
+            subtitle="Thứ Bảy 10/10 · Ngày tập 60′ · Giữ cân · 65 kg"
             canGoNext={false}
             summary={
-              <div className="bg-[#181B20] border border-white/10 rounded-[18px] p-4 text-white text-sm">
-                Panel tóm tắt (Kcal / Đạm / Béo / Tinh bột)
+              <div className="bg-surface-dark border border-white/10 rounded-[18px] p-4 text-on-dark text-sm">
+                Bảng tóm tắt (Kcal / Đạm / Béo / Tinh bột)
               </div>
             }
           />
@@ -43,11 +43,11 @@ export default function DevUiPage() {
 
         <section className="flex flex-col gap-2">
           <div className="text-xs font-bold text-secondary px-4">
-            2. AppHeader — Variant "sub" (Sub-screens / Chi tiết vi chất)
+            2. Đầu trang — Kiểu trang con (Chi tiết vi chất)
           </div>
           <AppHeader
             variant="sub"
-            title="VỀ BẠN"
+            title="Về bạn"
             subtitle="Mục tiêu được tính theo cân nặng và giới tính."
             backHref="/diary"
           />
@@ -55,11 +55,11 @@ export default function DevUiPage() {
 
         <section className="flex flex-col gap-2">
           <div className="text-xs font-bold text-secondary px-4">
-            2b. AppHeader — Variant "sub" with progress (setup step 1 of 2)
+            2b. Đầu trang — Kiểu trang con có tiến trình (bước 1 / 2)
           </div>
           <AppHeader
             variant="sub"
-            title="VỀ BẠN"
+            title="Về bạn"
             progress={{ current: 1, total: 2 }}
             actions={<span className="text-[13px] text-muted-on-dark">Bước 1 / 2</span>}
             backHref="/diary"
@@ -68,12 +68,12 @@ export default function DevUiPage() {
 
         <section className="flex flex-col gap-2">
           <div className="text-xs font-bold text-secondary px-4">
-            3. AppHeader — Variant "tab" (Hồ sơ / Ngày tập)
+            3. Đầu trang — Kiểu mục chính (Hồ sơ / Ngày tập)
           </div>
           <AppHeader
             variant="tab"
-            title="HỒ SƠ"
-            subtitle="user@example.com · Gói Miễn phí"
+            title="Hồ sơ"
+            subtitle="user@example.com · Gói miễn phí"
           />
         </section>
       </div>
@@ -83,12 +83,12 @@ export default function DevUiPage() {
         {/* Section: SegmentedBar */}
         <section className="flex flex-col gap-3">
           <div className="text-xs font-bold text-secondary">
-            SegmentedBar (10 vạch — 4 cấp độ)
+            Thanh tiến độ 10 đoạn (4 mức độ)
           </div>
 
           <Card className="flex flex-col gap-3">
             <div className="text-xs font-semibold text-secondary">
-              Nền sáng (Light tone):
+              Nền sáng:
             </div>
             <div className="flex flex-col gap-1">
               <div className="flex justify-between text-xs">
@@ -124,9 +124,9 @@ export default function DevUiPage() {
           </Card>
 
           {/* Dark Header SegmentedBar */}
-          <div className="bg-ink p-4 rounded-[18px] text-white flex flex-col gap-3">
+          <div className="bg-ink p-4 rounded-[18px] text-on-dark flex flex-col gap-3">
             <div className="text-xs font-semibold text-sky">
-              Nền tối (Dark tone trong Header):
+              Nền tối (trong đầu trang):
             </div>
             <div className="flex flex-col gap-1">
               <div className="flex justify-between text-xs">
@@ -148,17 +148,17 @@ export default function DevUiPage() {
         {/* Section: PillButtons (52px) */}
         <section className="flex flex-col gap-3">
           <div className="text-xs font-bold text-secondary">
-            PillButton (52px CTA)
+            Nút bấm chính (cao 52 px)
           </div>
-          <PillButton variant="primary">Tiếp tục (Primary)</PillButton>
-          <PillButton variant="secondary">Chép hôm qua (Secondary)</PillButton>
-          <PillButton variant="destructive">Xoá món (Destructive)</PillButton>
+          <PillButton variant="primary">Tiếp tục (chính)</PillButton>
+          <PillButton variant="secondary">Chép hôm qua (phụ)</PillButton>
+          <PillButton variant="destructive">Xoá món (xoá)</PillButton>
         </section>
 
         {/* Section: Chips (44px) */}
         <section className="flex flex-col gap-2">
           <div className="text-xs font-bold text-secondary">
-            Chip (44px tap targets)
+            Thẻ lọc (vùng chạm 44 px)
           </div>
           <div className="flex gap-2 flex-wrap">
             <Chip
@@ -177,7 +177,7 @@ export default function DevUiPage() {
               selected={selectedChip === "fav"}
               onClick={() => setSelectedChip("fav")}
             >
-              Ưa thích
+              Yêu thích
             </Chip>
           </div>
         </section>
@@ -185,7 +185,7 @@ export default function DevUiPage() {
         {/* Section: Row & Card & Switch */}
         <section className="flex flex-col gap-2">
           <div className="text-xs font-bold text-secondary">
-            Card, Row & Switch
+            Thẻ, dòng mục & công tắc
           </div>
           <Card className="p-2 px-4">
             <Row
@@ -228,10 +228,10 @@ export default function DevUiPage() {
         {/* Section: Sheet Trigger */}
         <section className="flex flex-col gap-2">
           <div className="text-xs font-bold text-secondary">
-            Sheet (Bottom Sheet dialog)
+            Bảng trượt (hộp thoại từ đáy màn hình)
           </div>
           <PillButton variant="secondary" onClick={() => setIsSheetOpen(true)}>
-            Mở Sheet Demo
+            Mở bảng trượt mẫu
           </PillButton>
           <Sheet
             open={isSheetOpen}
@@ -241,7 +241,7 @@ export default function DevUiPage() {
           >
             <div className="flex flex-col gap-3 py-2">
               <label className="text-xs font-semibold text-text flex flex-col gap-1">
-                Kiểm tra gõ phím không mất focus:
+                Kiểm tra gõ phím không mất tiêu điểm:
                 <input
                   type="text"
                   value={sheetInput}
@@ -272,7 +272,7 @@ export default function DevUiPage() {
         {/* Section: Toasts */}
         <section className="flex flex-col gap-3">
           <div className="text-xs font-bold text-secondary">
-            Toast (role="status")
+            Thông báo nhanh
           </div>
           <Toast
             message="Đã thêm Chà là 30 g vào Trước tập"
