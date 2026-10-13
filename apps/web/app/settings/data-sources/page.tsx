@@ -8,9 +8,10 @@ export const metadata: Metadata = {
   title: "Nguồn dữ liệu | H1T MICRO",
 };
 
+/** Nguồn dữ liệu, a pushed screen under Cài đặt. Same widths as Mục tiêu mỗi ngày: one column on the phone, two on desktop. */
 export default function DataSourcesPage() {
   return (
-    <AppShell>
+    <AppShell alignContainer="data-sources-page">
       <AppHeader
         variant="sub"
         title="Nguồn dữ liệu"
@@ -19,9 +20,11 @@ export default function DataSourcesPage() {
         alignGroup="data-sources-header"
       />
 
-      <main className="flex-1 w-full max-w-[560px] mx-auto px-4 pt-4 pb-8 flex flex-col gap-3">
-        <SectionTitle>Các cơ sở dữ liệu dinh dưỡng</SectionTitle>
-        <DataSourceCards />
+      <main className="mx-auto w-full max-w-[560px] px-4 pb-6 pt-4 lg:mx-0 lg:max-w-[1240px] lg:px-8 lg:pb-12 lg:pt-5">
+        <div className="flex flex-col gap-4">
+          <SectionTitle>Các cơ sở dữ liệu dinh dưỡng</SectionTitle>
+          <DataSourceCards />
+        </div>
       </main>
     </AppShell>
   );

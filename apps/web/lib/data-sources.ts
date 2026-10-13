@@ -13,7 +13,7 @@ export const DATA_SOURCES: DataSourceItem[] = [
   {
     id: "usda",
     name: "USDA FoodData Central (Hoa Kỳ)",
-    description: "Bộ Nông nghiệp Hoa Kỳ; nguồn vi chất chuẩn cho thực phẩm quốc tế.",
+    description: "Bộ Nông nghiệp Hoa Kỳ; cơ sở dữ liệu thành phần thực phẩm, có số liệu vi chất.",
   },
   {
     id: "cnf",
