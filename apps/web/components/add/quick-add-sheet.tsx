@@ -53,7 +53,7 @@ export function QuickAddSheet({ open, onClose, mealName, onSubmit }: QuickAddShe
   const errorFor = (field: keyof QuickEntryInput) => (error?.field === field ? error.message : undefined);
 
   return (
-    <Sheet open={open} onClose={onClose} title="Chỉ ghi kcal" titleId="quick-add-title" desktopDialog>
+    <Sheet open={open} onClose={onClose} title="Chỉ thêm kcal" titleId="quick-add-title" desktopDialog>
       <form onSubmit={submit} noValidate className="flex flex-col gap-3">
         <p className="m-0 px-1 text-[13px] leading-snug text-secondary">
           Thêm vào {mealName}. Vi chất của lần ghi này chưa có dữ liệu.
