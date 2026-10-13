@@ -78,7 +78,7 @@ def micros_vitamins(pg):
 
 
 def copy_yesterday(pg):
-    pg.goto(BASE + "/diary", wait_until="networkidle")
+    pg.goto(BASE + "/diary?empty=1", wait_until="networkidle")
     pg.locator('[aria-label^="Năng lượng"] >> visible=true').first.wait_for(state="visible", timeout=8000)
     pg.locator('button:has-text("Chép hôm qua") >> visible=true').first.click(timeout=8000)
     pg.wait_for_timeout(400)

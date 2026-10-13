@@ -67,30 +67,6 @@ def run_phone(browser):
     open_day(pg)
     check(energy(pg) == "1.041", f"390 today starts at 1.041 kcal (got {energy(pg)})")
 
-    # Copy yesterday: four meals, the snack unticked by default
-    vis(pg, 'button:has-text("Chép hôm qua")').click()
-    dialog = pg.get_by_role("dialog")
-    dialog.wait_for(state="visible")
-    boxes = dialog.locator('input[type="checkbox"]')
-    states = [boxes.nth(i).is_checked() for i in range(boxes.count())]
-    check(states == [True, True, True, False], f"390 copy sheet: breakfast, lunch, dinner ticked, snack not ({states})")
-    check(dialog.get_by_role("button", name="Chép 3 bữa").count() == 1, "390 copy sheet button reads Chép 3 bữa")
-    pg.screenshot(path=shot("cc10-copy-sheet-390.png"), animations="disabled")
-
-    # Copy breakfast and lunch only: 459 + 488 kcal on top of 1.041
-    dialog.get_by_label("Bữa tối").uncheck()
-    dialog.get_by_role("button", name="Chép 2 bữa").click()
-    pg.wait_for_selector('[role="dialog"]', state="detached")
-    undo = pg.get_by_role("button", name="Hoàn tác")
-    undo.wait_for(state="visible", timeout=3000)
-    check(visible_count(pg, 'text=Đã chép 2 bữa từ hôm qua') == 1, "390 toast says Đã chép 2 bữa từ hôm qua")
-    check(energy(pg) == "1.988", f"390 copy 2 meals: totals rise to 1.988 (got {energy(pg)})")
-
-    # The one undo toast puts the copied entries back
-    undo.click()
-    pg.wait_for_timeout(200)
-    check(energy(pg) == "1.041", f"390 undo restores 1.041 kcal (got {energy(pg)})")
-
     # ‹ goes to yesterday and shows its own day
     vis(pg, 'button[aria-label="Ngày trước"]').click()
     pg.wait_for_url(f"**date={iso(YESTERDAY)}")
@@ -159,7 +135,6 @@ def run_desktop(browser):
     ctx = browser.new_context(viewport=DESKTOP)
     pg = ctx.new_page()
     open_day(pg)
-    check(visible_count(pg, 'button:has-text("Chép hôm qua")') == 1, "1440 today: Chép hôm qua shows")
     pg.screenshot(path=shot("cc10-today-1440.png"), animations="disabled")
     vis(pg, 'button[aria-label="Ngày trước"]').click()
     pg.wait_for_url(f"**date={iso(YESTERDAY)}")
