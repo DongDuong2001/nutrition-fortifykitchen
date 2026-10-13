@@ -11,6 +11,7 @@ import { parseGramsInput, calculateMacroPreview } from "@/lib/portion";
 import { goodSourcesOf, microRowsFor } from "@/lib/food-detail";
 import { categoryLabel, categoryOf } from "@/lib/food-categories";
 import { formatAmount } from "@/lib/format";
+import { foodSourceLabel } from "@/lib/food-meta";
 import { FoodMicros, GoodSources } from "@/components/foods/food-micros";
 import { ChipGroup } from "@/components/ui/chip-group";
 import { StatGroup } from "@/components/ui/stat-group";
@@ -117,7 +118,7 @@ function FoodDetailInner() {
       <AppHeader
         variant="sub"
         title={food.nameVi}
-        subtitle={`${categoryLabel(categoryOf(food))} · ${food.brand ? `${food.brand} · ` : ""}${food.source === "user" ? "Của tôi" : food.source} · ${food.servings[0]?.grams ?? 100} g mỗi khẩu phần`}
+        subtitle={`${categoryLabel(categoryOf(food))} · ${food.brand ? `${food.brand} · ` : ""}${foodSourceLabel(food.source)} · ${food.servings[0]?.grams ?? 100} g mỗi khẩu phần`}
         onBack={goBack}
         actions={
           <button
@@ -193,7 +194,7 @@ function FoodDetailInner() {
             tone="light"
             items={[
               { id: "cal", value: formatAmount(macros.calories, "kcal"), label: "kcal" },
-              { id: "carb", value: `${formatAmount(macros.carbs, "g")} g`, label: "Carb" },
+              { id: "carb", value: `${formatAmount(macros.carbs, "g")} g`, label: "Tinh bột" },
               { id: "protein", value: `${formatAmount(macros.protein, "g")} g`, label: "Đạm" },
               { id: "fat", value: `${formatAmount(macros.fat, "g")} g`, label: "Béo" },
             ]}
@@ -201,7 +202,7 @@ function FoodDetailInner() {
         </div>
 
         <GoodSources rows={goodSources} />
-        {micros && <FoodMicros rows={micros.rows} unknown={micros.unknown} portionLabel={`${gramsInput} g`} />}
+        {micros && <FoodMicros rows={micros.rows} unknown={micros.unknown} portionLabel={`${formatAmount(parsedGrams, "g")} g`} />}
       </main>
 
       {/* Favourite toast, just above the sticky CTA */}
