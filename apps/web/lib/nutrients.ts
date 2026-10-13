@@ -34,7 +34,7 @@ export const NUTRIENT_CATALOG: NutrientDefinition[] = [
 
   // 2. Carbohydrates (8)
   { id: "carbs", nameVi: "Tinh bột", nameEn: "Carbs", unit: "g", group: "carbs", depth: 0, targetSource: "coach-provisional" },
-  { id: "net_carbs", nameVi: "Tinh bột hấp thu", nameEn: "Net carbs", unit: "g", group: "carbs", depth: 1, parentId: "carbs", targetSource: "none" },
+  { id: "net_carbs", nameVi: "Tinh bột ròng", nameEn: "Net carbs", unit: "g", group: "carbs", depth: 1, parentId: "carbs", targetSource: "none" },
   { id: "fiber", nameVi: "Chất xơ", nameEn: "Fiber", unit: "g", group: "carbs", depth: 1, parentId: "carbs", targetSource: "coach-provisional" },
   { id: "insoluble_fiber", nameVi: "Xơ không tan", nameEn: "Insoluble fiber", unit: "g", group: "carbs", depth: 2, parentId: "fiber", targetSource: "none" },
   { id: "soluble_fiber", nameVi: "Xơ hoà tan", nameEn: "Soluble fiber", unit: "g", group: "carbs", depth: 2, parentId: "fiber", targetSource: "none" },
