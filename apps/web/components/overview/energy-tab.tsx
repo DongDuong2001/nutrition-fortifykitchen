@@ -74,7 +74,7 @@ function KcalDayChart({ days, todayIso, min, max }: { days: DayTotals[]; todayIs
               const kcal = d.calories;
               const known = kcal !== null;
               const onTarget = known && kcalOnTarget(kcal, min);
-              const state = isToday ? "đang ghi" : !known ? "chưa ghi" : onTarget ? "trong mục tiêu hoặc trên" : "thiếu";
+              const state = isToday ? "đang ghi" : !known ? "chưa ghi" : onTarget ? "đạt mục tiêu" : "thiếu";
               const label = `${weekdayShortVi(d.date)} ${d.date.slice(8, 10)}: ${known ? `${formatNumber(kcal)} kcal, ` : ""}${state}`;
               const barClass = isToday ? "border border-sky" : !known ? "bg-level-empty" : onTarget ? "bg-blue" : "bg-level-red";
               return (
@@ -198,7 +198,7 @@ export function EnergyTab() {
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-secondary">
           <span className="inline-flex items-center gap-1.5">
             <i aria-hidden="true" className="inline-block h-3 w-3 rounded-[3px] bg-blue" />
-            Trong mục tiêu hoặc trên
+            Đạt mục tiêu
           </span>
           <span className="inline-flex items-center gap-1.5">
             <i aria-hidden="true" className="inline-block h-3 w-3 rounded-[3px] bg-level-red" />
