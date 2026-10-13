@@ -20,7 +20,7 @@ const SHOWN_MEALS = 3;
 
 /** Gần đây, Yêu thích, Món của tôi and the "Giàu …" index: the Khám phá home when nothing is searched. */
 export function ExploreSections() {
-  const { recentFoods, favouriteIds } = useDiary();
+  const { recentFoods, favouriteIds, demo } = useDiary();
 
   const recents = recentFoods
     .flatMap((r) => {
@@ -31,11 +31,16 @@ export function ExploreSections() {
     .map(({ food, grams, label }) => ({ food, grams, label }));
 
   const favourites = resolveFavourites(favouriteIds, MOCK_FOODS);
-  const mine = MOCK_FOODS.filter(isOwnFood);
+  // The catalogue holds one sample user food (Bột củ dền): a new account owns nothing until it creates a food
+  const mine = demo ? MOCK_FOODS.filter(isOwnFood) : [];
 
   return (
     <>
-      {recents.length > 0 && <FoodListCard title="Gần đây" foods={recents} />}
+      <FoodListCard
+        title="Gần đây"
+        foods={recents}
+        empty={<p className="m-0 py-3 text-[13px] leading-snug text-secondary">Món bạn vừa ghi sẽ hiện ở đây.</p>}
+      />
 
       <FoodListCard
         title="Yêu thích"

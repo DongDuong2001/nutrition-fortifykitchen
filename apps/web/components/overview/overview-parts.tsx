@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { useOverview } from "@/components/overview/overview-frame";
 import { formatPeriodRange } from "@/lib/format";
+import { summaryAddHref } from "@/lib/first-run";
 
 /** A white card with a 16 px heading row. `aside` is a short caption at the right of the heading. */
 export function OverviewCard({
@@ -50,6 +51,7 @@ export function ChevronRight() {
 export function NotEnoughData() {
   const { overview } = useOverview();
   const days = overview.averages.loggedDays;
+  if (!overview.days.some((d) => d.logged)) return <NothingLogged current={overview.period.isCurrent} />;
   return (
     <section aria-labelledby="ov-empty" className="bg-card border border-card-border rounded-[18px] p-4 flex flex-col gap-3 text-text">
       <h2 id="ov-empty" className="m-0 text-base font-bold lg:text-lg">
@@ -64,6 +66,25 @@ export function NotEnoughData() {
       >
         Xem nhật ký
       </Link>
+    </section>
+  );
+}
+
+/** No day of the period is logged: one fact, and for the current period one link to the first meal. */
+function NothingLogged({ current }: { current: boolean }) {
+  return (
+    <section aria-labelledby="ov-empty" className="bg-card border border-card-border rounded-[18px] p-4 flex flex-col gap-3 text-text">
+      <h2 id="ov-empty" className="m-0 text-base font-bold lg:text-lg">
+        Chưa có ngày nào được ghi
+      </h2>
+      {current && (
+        <Link
+          href={summaryAddHref(new Date())}
+          className="inline-flex min-h-[44px] items-center justify-center self-start rounded-full border border-card-border bg-card px-4 text-[15px] font-bold text-blue no-underline active:scale-[0.97] motion-reduce:active:scale-100"
+        >
+          Thêm bữa đầu tiên
+        </Link>
+      )}
     </section>
   );
 }

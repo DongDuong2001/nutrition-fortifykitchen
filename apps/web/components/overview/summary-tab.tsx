@@ -21,7 +21,7 @@ const COUNTED = new Set(COUNTED_NUTRIENT_KEYS);
  */
 export function SummaryTab() {
   const { overview, todayIso, today, targets, hrefWithPeriod } = useOverview();
-  const { profile } = useDiary();
+  const { profile, demo } = useDiary();
   const { averages, targetDays, weight, changes, insights, period, previous } = overview;
 
   // Read on the client only: the overview exists after mount, so the clock never reaches the server render
@@ -103,7 +103,7 @@ export function SummaryTab() {
     {
       key: "weight",
       title: "Cân nặng",
-      sub: `Dữ liệu mẫu · hồ sơ ${formatNumber(profile.weightKg)} kg`,
+      sub: `${demo ? "Dữ liệu mẫu · hồ sơ" : "Hồ sơ"} ${formatNumber(profile.weightKg)} kg`,
       value: weight.latest === null ? "—" : `${formatNumber(weight.latest, { decimals: 1 })} kg`,
       caption: weight.change === null ? "Chưa đủ số cân trong kỳ" : `${formatSigned(weight.change, { decimals: 1 })} kg trong kỳ`,
       href: bodyHref,

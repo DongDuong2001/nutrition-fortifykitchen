@@ -7,6 +7,7 @@ import os
 import sys
 
 from playwright.sync_api import sync_playwright
+import _demo  # noqa: F401  (cc2-15b: demo mode on, see _demo.py)
 
 # Reuse the shared edge check from tests/alignment.py (its main() only runs under __main__)
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))

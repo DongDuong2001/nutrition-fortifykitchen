@@ -3,6 +3,7 @@ import sys
 import re
 import math
 from playwright.sync_api import sync_playwright
+import _demo  # noqa: F401  (cc2-15b: demo mode on, see _demo.py)
 
 BASE_URL = os.environ.get("ALIGN_BASE_URL", "http://localhost:3100")
 

@@ -7,6 +7,7 @@ import { loadProfile } from "@/lib/profile";
 import { AppHeader } from "@/components/ui/app-header";
 import { Card } from "@/components/ui/card";
 import { PillButton } from "@/components/ui/pill-button";
+import { Row } from "@/components/ui/row";
 
 interface Ready {
   summary: Summary;
@@ -42,16 +43,26 @@ export function SetupSummary() {
         <h1 className="m-0 hidden font-display text-[32px] font-black italic uppercase lg:block">{TITLE}</h1>
 
         {ready === null ? (
-          <div aria-busy="true" className="h-[96px] rounded-[18px] bg-divider animate-pulse motion-reduce:animate-none" />
+          <div aria-busy="true" className="min-h-[320px] flex-1 rounded-[18px] bg-divider animate-pulse motion-reduce:animate-none lg:flex-none" />
         ) : (
-          <Card className="flex flex-col gap-2">
-            <p className="m-0 text-[15px] font-bold">
-              Mục tiêu mỗi ngày: <span className="tabular-nums">{ready.summary.energy}</span> ·{" "}
-              <span className="whitespace-nowrap">
-                đạm <span className="tabular-nums">{ready.summary.protein}</span>
-              </span>
-            </p>
-            <p className="m-0 text-[13px] text-secondary">Bạn có thể sửa bất cứ lúc nào trong Cài đặt.</p>
+          <Card as="section" aria-labelledby="setup-targets" className="flex flex-1 flex-col gap-1 lg:flex-none">
+            <h2 id="setup-targets" className="m-0 flex min-h-[44px] items-center text-base font-bold">
+              Mục tiêu mỗi ngày
+            </h2>
+            <div className="flex flex-1 flex-col lg:flex-none">
+              {ready.summary.targets.map((t, i) => (
+                <Row
+                  key={t.key}
+                  label={t.label}
+                  hint={t.hint}
+                  value={t.value}
+                  showChevron={false}
+                  withBorderTop={i > 0}
+                  className="flex-1 lg:flex-none"
+                />
+              ))}
+            </div>
+            <p className="m-0 pt-2 text-[13px] leading-snug text-secondary">Bạn có thể sửa bất cứ lúc nào trong Cài đặt.</p>
           </Card>
         )}
 

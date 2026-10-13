@@ -68,7 +68,7 @@ function WeightChart({ points, days }: { points: WeightPoint[]; days: string[] }
 /** Cơ thể (/trends/body): weight chart from the weight log, the change in the period and since the first entry. */
 export function BodyTab() {
   const { overview } = useOverview();
-  const { profile } = useDiary();
+  const { profile, demo } = useDiary();
   const { weight, period } = overview;
 
   return (
@@ -77,7 +77,9 @@ export function BodyTab() {
         <h2 id="bd-weight" className="m-0 text-base font-bold lg:text-lg">
           Cân nặng
         </h2>
-        <span className="inline-flex min-h-[28px] items-center rounded-full bg-page px-3 text-[13px] font-bold">Dữ liệu mẫu</span>
+        {demo && (
+          <span className="inline-flex min-h-[28px] items-center rounded-full bg-page px-3 text-[13px] font-bold">Dữ liệu mẫu</span>
+        )}
       </div>
 
       {weight.points.length > 0 ? (
@@ -110,9 +112,11 @@ export function BodyTab() {
         </div>
       </div>
 
-      <p className="m-0 text-[13px] leading-snug text-secondary">
-        Số cân là dữ liệu mẫu cho đến khi có nhật ký cân thật.
-      </p>
+      {demo && (
+        <p className="m-0 text-[13px] leading-snug text-secondary">
+          Số cân là dữ liệu mẫu cho đến khi có nhật ký cân thật.
+        </p>
+      )}
     </section>
   );
 }

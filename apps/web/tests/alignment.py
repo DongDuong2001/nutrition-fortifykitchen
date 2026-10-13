@@ -3,6 +3,10 @@ import os
 import sys
 from playwright.sync_api import sync_playwright
 
+# cc2-15b: these checks read the sample day and history, so demo mode is on for every page (probes/_demo.py)
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "probes"))
+import _demo  # noqa: E402,F401
+
 BASE_URL = os.environ.get("ALIGN_BASE_URL", "http://localhost:3100")
 # Yesterday in Asia/Ho_Chi_Minh, the app's day: the one past day with logged meals
 YESTERDAY = (datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=7))).date() - datetime.timedelta(days=1)).isoformat()

@@ -24,7 +24,7 @@ SIZES = [("390", {"width": 390, "height": 844}), ("1280", {"width": 1280, "heigh
 NOW = "2026-10-13T18:00:00+07:00"
 WEIGHT = 70
 # Expected from the coach's rules, not from the code: Giữ cân 30-35 kcal/kg, protein 1,6-2,2 g/kg
-SUMMARY = "Mục tiêu mỗi ngày: 2.100–2.450 kcal · đạm 112–154 g"
+SUMMARY_ROWS = ["Năng lượng 2.100–2.450 kcal", "Đạm 112–154 g"]  # the list rows of /setup/done (cc2-15b)
 problems, notes = [], []
 
 
@@ -166,7 +166,8 @@ def first_run(browser, name, size):
     pg.wait_for_url("**/setup/done")
     pg.wait_for_timeout(500)
     t = text(pg)
-    check(SUMMARY in t, f"{where} summary: {SUMMARY!r} (page: {t[:160]!r})")
+    for row in SUMMARY_ROWS:
+        check(row in t, f"{where} summary: {row!r} (page: {t[:200]!r})")
     cta = pg.get_by_role("link", name="Bắt đầu ghi bữa đầu tiên")
     check(cta.count() == 1 and cta.get_attribute("href") == "/add?meal=dinner",
           f"{where} summary: one button to the add sheet for the meal of the clock (Bữa tối)")

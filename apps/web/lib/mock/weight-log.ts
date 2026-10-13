@@ -1,3 +1,4 @@
+import { demoActive } from "../demo";
 import { shiftIsoDate } from "../day-history";
 
 export interface WeightLogEntry {
@@ -15,7 +16,8 @@ const SAMPLE_KG = [
   65.2, 65.3, 65.0, 65.1, 65.2, 64.9, 65.0, 65.1, 64.9, 65.0, 65.1, 65.0,
 ];
 
-/** The sample weight log for the 30 days ending `todayIso`. */
+/** The sample weight log for the 30 days ending `todayIso`. Empty outside demo mode. */
 export function weightLogSample(todayIso: string): WeightLogEntry[] {
+  if (!demoActive()) return [];
   return SAMPLE_KG.map((kg, i) => ({ date: shiftIsoDate(todayIso, i - (SAMPLE_KG.length - 1)), kg }));
 }

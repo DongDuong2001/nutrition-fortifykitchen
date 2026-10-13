@@ -43,8 +43,8 @@ def main():
 
     rows = []
     for path in sorted(HERE.glob("*.py")):
-        if path.resolve() == SELF:
-            continue
+        if path.resolve() == SELF or path.name.startswith("_"):
+            continue  # _demo.py is a helper, not a probe
         if path.name in DEV_ONLY and not dev:
             rows.append((path, "SKIP", "dev only, set PROBE_DEV=1", ""))
             continue

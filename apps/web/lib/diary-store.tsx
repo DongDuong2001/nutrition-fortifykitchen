@@ -7,6 +7,7 @@ import { type MealSlot, getMealSlotNameVi } from "./meal-slot";
 import { formatAmount } from "./format";
 import { getTodayIsoVN, withRuntimeDate } from "./date";
 import { ADDED_ENTRIES_KEY } from "./first-run";
+import { isDemo, setDemoActive } from "./demo";
 import { blankDay, dayEntries, statDisplay } from "./day-history";
 import { totalsFromEntries } from "./day-totals";
 import { microsSummaryFor } from "./lacking";
@@ -56,6 +57,7 @@ import {
   parseSampleEdits,
   removeAddedIn,
   resolveSampleItems,
+  SAMPLE_ITEMS,
   SAMPLE_SLOT,
   sampleDelta,
   sampleEffect,
@@ -134,6 +136,8 @@ interface DiaryContextValue {
   /** Today as YYYY-MM-DD (Asia/Ho_Chi_Minh). Null until mounted. */
   todayIso: string | null;
   hydrated: boolean;
+  /** Demo mode (see lib/demo): the sample day, history and Gần đây are loaded. Off for a real account. */
+  demo: boolean;
   /** The profile the targets come from. Loaded after mount (see lib/profile.ts). */
   profile: Profile;
   /** Daily targets for the profile. Today, Micros and the portion panels read these. */
@@ -324,9 +328,13 @@ export function pastDayData(iso: string, todayIso: string, profile: Profile, tar
 
 export function DiaryProvider({ children }: { children: React.ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
+  const [demo, setDemo] = useState(false);
   const [edits, setEdits] = useState<DiaryEdits>({ added: [], sample: {}, undo: null });
   const addedEntries = edits.added;
-  const [recentFoods, setRecentFoods] = useState<RecentFood[]>(DEFAULT_RECENT_FOODS);
+  // The sample day exists only in demo mode: without it no sample item can be found, edited or counted
+  const samples = useMemo(() => (demo ? SAMPLE_ITEMS : []), [demo]);
+  // Empty until mount; the sample recents are seeded only in demo mode
+  const [recentFoods, setRecentFoods] = useState<RecentFood[]>([]);
   const [toast, setToast] = useState<ToastInfo | null>(null);
   const [highlightedMeal, setHighlightedMeal] = useState<MealSlot | null>(null);
   const [favouriteIds, setFavouriteIds] = useState<string[]>([]);
@@ -338,6 +346,10 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
 
   // Load from sessionStorage on mount (client-only)
   useEffect(() => {
+    // Before anything that depends on today renders, so history and weights are in place with it
+    const demoNow = isDemo();
+    setDemoActive(demoNow);
+    setDemo(demoNow);
     try {
       const storedEntries = sessionStorage.getItem(SESSION_STORAGE_KEY);
       const storedSample = sessionStorage.getItem(SAMPLE_EDITS_KEY);
@@ -349,7 +361,13 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       const storedRecents = sessionStorage.getItem(RECENT_FOODS_KEY);
       if (storedRecents) {
         const parsed: unknown = JSON.parse(storedRecents);
-        if (Array.isArray(parsed)) setRecentFoods(parsed.filter(isRecentFood));
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setRecentFoods(parsed.filter(isRecentFood));
+        } else if (demoNow) {
+          setRecentFoods(DEFAULT_RECENT_FOODS);
+        }
+      } else if (demoNow) {
+        setRecentFoods(DEFAULT_RECENT_FOODS);
       }
     } catch {
       // Ignore sessionStorage access errors
@@ -388,6 +406,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   // Persist recent foods only after hydrated
   useEffect(() => {
     if (!hydrated) return;
+    // The sample recents are never saved: a real account must not inherit them when demo mode goes off
+    if (recentFoods === DEFAULT_RECENT_FOODS) return;
     try {
       sessionStorage.setItem(RECENT_FOODS_KEY, JSON.stringify(recentFoods));
     } catch {
@@ -464,27 +484,27 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     setFavouriteIds((prev) => toggleFavouriteId(prev, food.id));
   }, []);
 
-  const getEntry = useCallback((id: string) => findEntry(edits, id), [edits]);
+  const getEntry = useCallback((id: string) => findEntry(edits, id, samples), [edits, samples]);
 
   const updateEntry = useCallback((id: string, patch: EntryPatch) => {
-    setEdits((prev) => updateEntryIn(prev, id, patch));
-  }, []);
+    setEdits((prev) => updateEntryIn(prev, id, patch, samples));
+  }, [samples]);
 
   const deleteEntry = useCallback(
     (id: string) => {
-      const view = findEntry(edits, id);
+      const view = findEntry(edits, id, samples);
       if (!view) return;
-      setEdits((prev) => deleteEntryIn(prev, id));
+      setEdits((prev) => deleteEntryIn(prev, id, samples));
       setToast({ message: `Đã xoá ${view.name}`, kind: "deleted", mealSlot: null, durationMs: UNDO_TOAST_MS });
     },
-    [edits]
+    [edits, samples]
   );
 
   const deleteMeal = useCallback(
     (slot: MealSlot) => {
-      const count = mealEntryIds(edits, slot).length;
+      const count = mealEntryIds(edits, slot, samples).length;
       if (count === 0) return;
-      setEdits((prev) => deleteMealIn(prev, slot));
+      setEdits((prev) => deleteMealIn(prev, slot, samples));
       setToast({
         message: `Đã xoá ${getMealSlotNameVi(slot)} · ${count} món`,
         kind: "deleted",
@@ -492,7 +512,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         durationMs: UNDO_TOAST_MS,
       });
     },
-    [edits]
+    [edits, samples]
   );
 
   const undoLastDelete = useCallback(() => {
@@ -524,12 +544,12 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       const today = todayIso ?? getTodayIsoVN();
       const items =
         iso === today
-          ? mealPortions(edits, slot)
+          ? mealPortions(edits, slot, samples)
           : itemsFromEntries(dayEntries(iso, today).filter((e) => e.mealSlot === slot));
       // Only foods the catalogue has: what is saved is what one tap can add back
       return items.filter((item) => MOCK_FOODS.some((f) => f.id === item.foodId));
     },
-    [edits, todayIso]
+    [edits, samples, todayIso]
   );
 
   const saveMealAs = useCallback(
@@ -604,8 +624,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   const targets = useMemo(() => targetsFor(profile), [profile]);
 
   const nutrientSources = useCallback(
-    (key: string) => nutrientSourcesIn(edits.added, edits.sample, key),
-    [edits]
+    (key: string) => nutrientSourcesIn(edits.added, edits.sample, key, samples),
+    [edits, samples]
   );
 
   const updateProfile = useCallback(
@@ -618,10 +638,12 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   );
 
   const compositeData = useMemo<MockDayData>(() => {
-    const base = applyProfileTargets(SAMPLE_DAY, profile, targets);
-    const day = computeCompositeDayData(base, edits.added, edits.sample);
+    // A real account starts from an empty day; only demo mode starts from the sample day
+    const start = demo ? SAMPLE_DAY : blankDay(SAMPLE_DAY);
+    const base = applyProfileTargets(start, profile, targets);
+    const day = computeCompositeDayData(base, edits.added, demo ? edits.sample : {});
     return todayIso ? withRuntimeDate(day, todayIso) : day;
-  }, [edits.added, edits.sample, todayIso, profile, targets]);
+  }, [edits.added, edits.sample, todayIso, profile, targets, demo]);
 
   return (
     <DiaryContext.Provider
@@ -654,6 +676,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         addQuickEntry,
         todayIso,
         hydrated,
+        demo,
         profile,
         targets,
         updateProfile,

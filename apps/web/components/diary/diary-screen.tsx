@@ -17,7 +17,7 @@ import { defaultMealName } from "@/lib/saved-meals";
 import { pastDayData, useDiary } from "@/lib/diary-store";
 import { formatAmount, formatDesktopDate } from "@/lib/format";
 import type { MealSlot } from "@/lib/meal-slot";
-import { SAMPLE_DAY, type MockDayData } from "@/lib/mock/sample-day";
+import { type MockDayData } from "@/lib/mock/sample-day";
 import { calculateSaltTarget } from "@/lib/training";
 
 function subscribeOnline(callback: () => void) {
@@ -173,13 +173,15 @@ function DiaryContent() {
     return () => observer.disconnect();
   }, []);
 
-  const currentData = pastData || (hydrated ? diaryData : null) || SAMPLE_DAY;
+  // Before mount the store holds an empty day, the same on the server and the client
+  const currentData = pastData ?? diaryData;
   const viewIso = currentData.date;
   const goToDay = (iso: string) => router.push(iso === todayIso ? "/diary" : `/diary?date=${iso}`);
   const prevDay = pastIso ? () => goToDay(shiftIsoDate(pastIso, -1)) : undefined;
   const nextDay = pastIso ? () => goToDay(shiftIsoDate(pastIso, 1)) : undefined;
 
-  const showLoading = forceLoading;
+  // The skeleton shows until the store is read, so an empty-state line never flashes for a day that has entries
+  const showLoading = forceLoading || !hydrated;
   const showOfflineBanner = forceOffline || !isOnline;
   const { calories, meals, microsSummary } = currentData;
   const nothingLogged = meals.every((m) => m.items.length === 0);
@@ -216,10 +218,14 @@ function DiaryContent() {
 
   // The ⋯ menu of a meal: what today and yesterday hold for it
   const menuMeal = menuSlot ? meals.find((m) => SAMPLE_SLOT[m.slot] === menuSlot) ?? null : null;
-  const yesterdayMeal = useMemo(() => {
-    if (!menuSlot || !todayIso) return [];
-    return dayEntries(shiftIsoDate(todayIso, -1), todayIso).filter((e) => e.mealSlot === menuSlot);
-  }, [menuSlot, todayIso]);
+  const yesterdayEntries = useMemo(
+    () => (todayIso ? dayEntries(shiftIsoDate(todayIso, -1), todayIso) : []),
+    [todayIso]
+  );
+  const yesterdayMeal = useMemo(
+    () => (menuSlot ? yesterdayEntries.filter((e) => e.mealSlot === menuSlot) : []),
+    [menuSlot, yesterdayEntries]
+  );
 
   function copyMealFromYesterday() {
     if (!menuSlot || !menuMeal || yesterdayMeal.length === 0) return;
@@ -413,15 +419,19 @@ function DiaryContent() {
               Chưa có món hôm nay
             </h2>
             <p className="m-0 text-[13px] leading-snug text-secondary">
-              Chép bữa từ hôm qua, hoặc thêm món vào từng bữa bằng +.
+              {yesterdayEntries.length > 0
+                ? "Chép bữa từ hôm qua, hoặc thêm món vào từng bữa bằng +."
+                : "Thêm món vào từng bữa bằng +."}
             </p>
-            <button
-              type="button"
-              onClick={() => setIsCopySheetOpen(true)}
-              className="min-h-[52px] w-full cursor-pointer rounded-full border-0 bg-blue text-[15px] font-bold text-on-accent active:scale-[0.97] motion-reduce:active:scale-100"
-            >
-              Chép hôm qua
-            </button>
+            {yesterdayEntries.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setIsCopySheetOpen(true)}
+                className="min-h-[52px] w-full cursor-pointer rounded-full border-0 bg-blue text-[15px] font-bold text-on-accent active:scale-[0.97] motion-reduce:active:scale-100"
+              >
+                Chép hôm qua
+              </button>
+            )}
           </section>
         )}
 

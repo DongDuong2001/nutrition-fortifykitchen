@@ -1,3 +1,4 @@
+import { demoActive } from "../demo";
 import type { MealSlot } from "../meal-slot";
 import { YESTERDAY_ITEMS, type MockHistoryItem } from "./yesterday";
 
@@ -71,9 +72,10 @@ const SCALES = [1, 1, 0.95, 1.15, 0.8, 1.05, 1.2, 0.9, 1, 1.1, 0.85, 1, 1.15, 0.
 
 /**
  * What was logged `daysAgo` days before today, as history items; null for a day with nothing logged or older
- * than the history. Yesterday is the original mock "yesterday" (1.532 kcal).
+ * than the history. Yesterday is the original mock "yesterday" (1.532 kcal). Null for every day outside demo mode.
  */
 export function historyItems(daysAgo: number): MockHistoryItem[] | null {
+  if (!demoActive()) return null;
   if (!Number.isInteger(daysAgo) || daysAgo < 1 || daysAgo > HISTORY_DAYS) return null;
   if (UNLOGGED_DAYS_AGO.has(daysAgo)) return null;
   if (daysAgo === 1) return YESTERDAY_ITEMS;

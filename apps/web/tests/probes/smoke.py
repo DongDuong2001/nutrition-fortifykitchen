@@ -11,6 +11,7 @@ import sys
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright
+import _demo  # noqa: F401  (cc2-15b: demo mode on, see _demo.py)
 
 BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3100")
 HERE = Path(__file__).resolve().parent
@@ -156,6 +157,40 @@ def check(browser, route, width, height):
     return reasons, shot.name
 
 
+# cc2-15b: the empty-account pass. A new user has no entries, no history and no sample data.
+EMPTY_ROUTES = ["/", "/trends", "/trends/micros", "/trends/body", "/diary", "/micros", "/training", "/explore", "/explore/meals", "/add", "/settings", "/setup/done"]
+BAD_TEXT = re.compile(r"\bNaN\b|\bundefined\b|\bInfinity\b")
+
+
+def check_empty(browser, route, width, height):
+    context = browser.new_context(viewport={"width": width, "height": height})
+    page = context.new_page()
+    console_msgs = []
+    page.on("console", lambda msg: console_msgs.append(msg.text) if msg.type == "error" else None)
+    page.on("pageerror", lambda err: console_msgs.append(str(err)))
+    reasons = []
+    try:
+        page.goto(BASE + route, wait_until="networkidle", timeout=30000)
+        page.wait_for_timeout(500)
+        body = re.sub(r"\s+", " ", page.inner_text("body"))
+        found = sorted(set(BAD_TEXT.findall(body)))
+        if found:
+            reasons.append(f"text has {found}")
+        if not body.strip():
+            reasons.append("empty page")
+        if page.get_by_text("Dữ liệu mẫu").count() > 0:
+            reasons.append("sample data label shown outside demo mode")
+        for text in console_msgs:
+            if any(s in text for s in IGNORED_CONSOLE):
+                continue
+            label = "hydration error" if HYDRATION_RE.search(text) else "console error"
+            reasons.append(f"{label}: {text[:160]}")
+    except Exception as err:
+        reasons.append(f"load error: {str(err).splitlines()[0][:200]}")
+    context.close()
+    return reasons
+
+
 def main():
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     routes = []
@@ -172,6 +207,19 @@ def main():
             for width, height in WIDTHS:
                 reasons, shot = check(browser, route, width, height)
                 label = f"{route} @{width}x{height} ({shot})"
+                if reasons:
+                    failed += 1
+                    print(f"FAIL {label}: " + " | ".join(reasons))
+                else:
+                    passed += 1
+                    print(f"PASS {label}")
+        # Pass 2: demo off, a fresh context per route (no storage), the main routes
+        _demo.enable(False)
+        print(f"\n=== Empty-account pass: {len(EMPTY_ROUTES)} routes x {len(WIDTHS)} widths, demo mode off ===")
+        for route in EMPTY_ROUTES:
+            for width, height in WIDTHS:
+                reasons = check_empty(browser, route, width, height)
+                label = f"[empty] {route} @{width}x{height}"
                 if reasons:
                     failed += 1
                     print(f"FAIL {label}: " + " | ".join(reasons))

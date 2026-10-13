@@ -1,8 +1,10 @@
 import { getDefaultMealSlot } from "./meal-slot";
 import { PROFILE_KEY, targetRangeText, targetsFor, type Profile } from "./profile";
+import { calculateSaltTarget } from "./training";
 
-// sessionStorage key of the diary store: the entries this user added. (Recents are seeded with sample foods,
-// so they say nothing about whether the user logged anything.)
+// sessionStorage key of the diary store: the entries this user added. Only real entries are counted here:
+// the sample day, the sample history and the seeded Gần đây exist in demo mode only (lib/demo) and are never
+// stored in this key, so demo data never makes a new user look like a returning one.
 export const ADDED_ENTRIES_KEY = "h1t_added_entries_v1";
 
 export interface FirstRunFacts {
@@ -50,10 +52,20 @@ export function readFirstRunFacts(): FirstRunFacts {
   return { profileSaved, entryEverLogged };
 }
 
+/** One line of the day targets on the setup summary. */
+export interface SetupTarget {
+  key: string;
+  label: string;
+  value: string;
+  hint?: string;
+}
+
 export interface SetupSummary {
   energy: string;
   protein: string;
   line: string;
+  /** Năng lượng, Đạm, Chất béo, Tinh bột, Muối: the numbers of Nhật ký for a day of the default training minutes. */
+  targets: SetupTarget[];
 }
 
 /** The daily targets of a new profile, as text. Numbers come from lib/targets through the profile. */
@@ -61,7 +73,16 @@ export function setupSummary(profile: Profile): SetupSummary {
   const targets = targetsFor(profile);
   const energy = targetRangeText(targets.calories, "kcal");
   const protein = targetRangeText(targets.protein, "g");
-  return { energy, protein, line: `Mục tiêu mỗi ngày: ${energy} · đạm ${protein}` };
+  const salt = calculateSaltTarget(profile.trainingMinutesDefault);
+  const minutes = profile.trainingMinutesDefault;
+  const list: SetupTarget[] = [
+    { key: "energy", label: "Năng lượng", value: energy },
+    { key: "protein", label: "Đạm", value: protein },
+    { key: "fat", label: "Chất béo", value: targetRangeText(targets.fat, "g") },
+    { key: "carbs", label: "Tinh bột", value: targetRangeText(targets.carbs, "g") },
+    { key: "salt", label: "Muối", value: `${salt.formattedTotal} g`, hint: minutes > 0 ? `Ngày tập ${minutes}′` : "Ngày nghỉ" },
+  ];
+  return { energy, protein, line: `Mục tiêu mỗi ngày: ${energy} · đạm ${protein}`, targets: list };
 }
 
 /** The add sheet for the meal of the time of day. */

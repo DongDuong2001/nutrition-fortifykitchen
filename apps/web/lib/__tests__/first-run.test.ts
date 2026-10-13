@@ -44,6 +44,26 @@ describe("lib/first-run", () => {
     expect(summary.line).toBe("Mục tiêu mỗi ngày: 1.950–2.275 kcal · đạm 104–143 g");
   });
 
+  // Coach rules (HANDOFF.md) for 65 kg, Giữ cân, 60 min of training: fat 0,5–1 g/kg, carbs = (energy min - protein mid x 4 - fat mid x 9) / 4,
+  // salt 4–6 g + 1–1,5 g per 20 min
+  it("the day targets list: Năng lượng, Đạm, Chất béo, Tinh bột and Muối with the default training minutes", () => {
+    const { targets } = setupSummary(SAMPLE_PROFILE);
+    expect(targets.map((t) => [t.label, t.value])).toEqual([
+      ["Năng lượng", "1.950–2.275 kcal"],
+      ["Đạm", "104–143 g"],
+      ["Chất béo", "33–65 g"],
+      ["Tinh bột", "254 g"],
+      ["Muối", "7–10,5 g"],
+    ]);
+    expect(targets.find((t) => t.label === "Muối")?.hint).toBe("Ngày tập 60′");
+  });
+
+  it("salt follows the default training minutes, and a rest default says Nghỉ", () => {
+    const rest = setupSummary({ ...SAMPLE_PROFILE, trainingMinutesDefault: 0 }).targets.find((t) => t.label === "Muối");
+    expect(rest?.value).toBe("4–6 g");
+    expect(rest?.hint).toBe("Ngày nghỉ");
+  });
+
   it("the first meal opens the add sheet for the meal of the clock", () => {
     expect(summaryAddHref(new Date("2026-10-13T08:00:00+07:00"))).toBe("/add?meal=breakfast");
     expect(summaryAddHref(new Date("2026-10-13T12:00:00+07:00"))).toBe("/add?meal=lunch");

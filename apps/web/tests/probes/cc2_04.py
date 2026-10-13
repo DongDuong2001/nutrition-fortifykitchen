@@ -5,6 +5,7 @@ Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/cc2
 import os
 import sys
 from playwright.sync_api import sync_playwright
+import _demo  # noqa: F401  (cc2-15b: demo mode on, see _demo.py)
 
 BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3102")
 PHONE = {"width": 390, "height": 844}
