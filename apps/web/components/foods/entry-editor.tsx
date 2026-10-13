@@ -126,7 +126,7 @@ export function EntryEditor({ view }: { view: EntryView }) {
                   <input id="entry-quick-fat" placeholder="—" aria-invalid={macroBad(quickFat, quickValues.fat) ? true : undefined} type="text" inputMode="decimal" value={quickFat} onChange={(e) => setQuickFat(e.target.value)} autoComplete="off" className={`${quickFieldClass} text-right font-bold tabular-nums`} />
                 </FormRow>
               </div>
-              <p className="m-0 text-sm text-secondary">Ghi nhanh: vi chất của món này chưa có dữ liệu. Để trống một chất nếu chưa biết: hiện là —.</p>
+              <p className="m-0 text-sm text-secondary">Thêm nhanh: vi chất của món này chưa có dữ liệu. Để trống một chất nếu chưa biết: hiện là —.</p>
             </div>
           )}
 
@@ -148,7 +148,8 @@ export function EntryEditor({ view }: { view: EntryView }) {
                   disabled={!canPortion}
                   onChange={(e) => {
                     setGramsInput(e.target.value);
-                    setServingLabel(`${e.target.value} g`);
+                    const n = Number(e.target.value) || 0;
+                    setServingLabel(`${formatAmount(n, "g")} g`);
                   }}
                   className="h-11 min-w-0 flex-1 border-0 bg-transparent text-lg font-semibold tabular-nums outline-none focus-visible:outline-none disabled:opacity-60"
                 />
