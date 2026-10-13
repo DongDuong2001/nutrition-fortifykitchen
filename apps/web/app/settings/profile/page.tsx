@@ -1,5 +1,5 @@
-import { ProfileScreen } from "@/components/profile/profile-screen";
+import { ProfileEditScreen } from "@/components/settings/profile-edit-screen";
 
 export default function SettingsProfilePage() {
-  return <ProfileScreen title="Hồ sơ" backHref="/settings" />;
+  return <ProfileEditScreen />;
 }
