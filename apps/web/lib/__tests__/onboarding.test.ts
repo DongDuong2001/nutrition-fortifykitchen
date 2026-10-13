@@ -98,7 +98,7 @@ describe("dailyTargetRows", () => {
 
 describe("resendLabel", () => {
   it("counts down before the link can be sent again", () => {
-    expect(resendLabel(45)).toBe("Gửi lại link (sau 45 giây)");
-    expect(resendLabel(0)).toBe("Gửi lại link");
+    expect(resendLabel(45)).toBe("Gửi lại liên kết (sau 45 giây)");
+    expect(resendLabel(0)).toBe("Gửi lại liên kết");
   });
 });
