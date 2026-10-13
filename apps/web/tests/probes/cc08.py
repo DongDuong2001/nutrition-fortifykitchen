@@ -48,7 +48,12 @@ def run_phone(browser):
     visible(pg, 'a[href="/settings/profile/weight"]').wait_for(state="visible")
     pg.wait_for_timeout(300)
     pg.screenshot(path=os.path.join(SHOTS, "cc08-profile-390.png"), animations="disabled")
-    check("1.950–2.275 kcal" in body(pg), "390 profile: sample targets show 1.950–2.275 kcal")
+    # The targets live on /settings/targets (IA v2), read-only, from the profile
+    pg.goto(BASE + "/settings/targets", wait_until="networkidle")
+    pg.wait_for_timeout(300)
+    check("1.950–2.275 kcal" in body(pg), "390 targets: sample targets show 1.950–2.275 kcal")
+    pg.goto(BASE + "/settings/profile", wait_until="networkidle")
+    visible(pg, 'a[href="/settings/profile/weight"]').wait_for(state="visible")
     active_sex = pg.locator('[aria-labelledby="profile-sex-label"] button[aria-pressed="true"] >> visible=true').first
     check(active_sex.inner_text().strip() == "Nam", "390 profile: sex chip shows Nam")
     check(pg.get_by_role("switch", name="Gần/đang trong kỳ").count() == 0, "390 profile: period switch hidden for Nam")
@@ -73,7 +78,9 @@ def run_phone(browser):
     pg.wait_for_url("**/settings/profile")
     pg.wait_for_timeout(400)
     check("70 kg" in body(pg), "390 profile: weight row shows 70 kg after save")
-    check("2.100–2.450 kcal" in body(pg), "390 profile: kcal target moves to 2.100–2.450")
+    pg.goto(BASE + "/settings/targets", wait_until="networkidle")
+    pg.wait_for_timeout(300)
+    check("2.100–2.450 kcal" in body(pg), "390 targets: kcal target moves to 2.100–2.450")
 
     pg.goto(BASE + "/diary", wait_until="networkidle")
     pg.wait_for_timeout(600)

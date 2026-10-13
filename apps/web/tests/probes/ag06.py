@@ -122,14 +122,14 @@ def test_item_3(browser):
 
 
 def test_item_4(browser):
-    # /settings/profile: "Nhắc nhở" shows "Đã bật" initially
+    # /settings (Cài đặt, IA v2): "Nhắc nhở" shows "Đã bật" initially
     ctx = browser.new_context(viewport=PHONE)
     # Before mount the reminders value is empty: the server HTML never claims "Đã bật" or "Đã tắt"
-    ssr = ctx.request.get(BASE + "/settings/profile").text()
+    ssr = ctx.request.get(BASE + "/settings").text()
     check("Đã bật" not in ssr and "Đã tắt" not in ssr,
-          "profile: server HTML has no reminder value (no 'Đã bật' or 'Đã tắt' before mount)")
+          "settings: server HTML has no reminder value (no 'Đã bật' or 'Đã tắt' before mount)")
     pg = ctx.new_page()
-    pg.goto(BASE + "/settings/profile", wait_until="networkidle")
+    pg.goto(BASE + "/settings", wait_until="networkidle")
     pg.wait_for_timeout(400)
     txt = body_text(pg)
     check("Nhắc nhở" in txt and "Đã bật" in txt, "profile: Nhắc nhở row shows 'Đã bật' after mount")

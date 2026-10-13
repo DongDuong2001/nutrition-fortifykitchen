@@ -126,4 +126,3 @@ dd on a phone/ { s/^- [ ]/- [x]/; s/$/ Decided 12/10 (Hao): keep the sr-only h1 
 - [x] (cc-16) Decided 13/10 (Hao): weight stays a weigh-in only; history goes in Tổng quan › Cơ thể. Was: "Weight log": `/settings/profile/weight` is the weigh-in form only. There is no history list, and the design has none. Build a history list, or keep the weigh-in only?
 - [x] (cc-16) Done 13/10: one Pro offer, the dark one, title 16 px bold. Was: the settings Pro offer is dark with the design's copy ("Xem các gói và quyền lợi của tài khoản"). It lives in `components/settings/settings-home-screen.tsx` because the old `ProCard` in components/profile is blue with other copy. Merge them once components/profile is removed.
 - [ ] (cc-16, for Dong) Đăng xuất links to /signin and does not clear a session yet. The app keeps no session to clear until the API has sessions; the sign-out call belongs with auth.
->
