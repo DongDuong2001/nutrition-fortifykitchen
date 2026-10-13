@@ -235,7 +235,7 @@ def check_past_day(browser, size_name, size):
     go(pg, f"/diary?date={YESTERDAY}")
     pg.wait_for_timeout(300)
     check(pg.locator('a[aria-label^="Thêm vào"]:visible').count() == 0, f"{size_name} past diary: no + on a meal")
-    check(pg.locator('button[aria-label^="Tuỳ chọn"]:visible').count() == 0, f"{size_name} past diary: no ⋯ menu")
+    check(pg.locator('button[aria-label^="Tuỳ chọn"]:visible').count() > 0, f"{size_name} past diary: meals with food keep a ⋯ menu (Lưu thành Bữa của tôi, cc2-12)")
     check(pg.locator(f'a[href="/micros?date={YESTERDAY}"]:visible').count() == 1, f"{size_name} past diary: Vi chất row keeps the date")
     check(pg.locator(f'a[href="/training?date={YESTERDAY}"]:visible').count() == 1, f"{size_name} past diary: Ngày tập row keeps the date")
 
@@ -266,7 +266,7 @@ def check_delete_meal(browser, size_name, size):
     pg.wait_for_timeout(300)
     dialog = pg.locator('[role="dialog"]:visible').first
     check("Chép hôm qua" in dialog.inner_text() and "Lưu thành Bữa của tôi" in dialog.inner_text(), f"{size_name} delete: the menu has the three items")
-    check(dialog.locator('button:has-text("Lưu thành Bữa của tôi")').is_disabled(), f"{size_name} delete: Lưu thành Bữa của tôi is disabled for now")
+    check(dialog.locator('button:has-text("Lưu thành Bữa của tôi")').is_enabled(), f"{size_name} delete: Lưu thành Bữa của tôi is enabled for a meal with food")
     dialog.locator('button:has-text("Xoá bữa này")').click()
     pg.wait_for_timeout(200)
     check("Xoá Bữa sáng?" in text(pg), f"{size_name} delete: a confirm step appears")
