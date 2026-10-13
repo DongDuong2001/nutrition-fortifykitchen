@@ -112,7 +112,10 @@ def run():
                 pg.wait_for_timeout(500)
                 after = pg.evaluate(measure)
                 check(abs(after["headerTop"]) < 1, f"390: Micros header stays at the top ({after['headerTop']})")
-                check(abs(after["chipTop"] - before["chipTop"]) < 1, f"390: chip bar stays under the header ({before['chipTop']} → {after['chipTop']})")
+                # The header folds on scroll (cc-17), so the chip bar moves up with it; the gap under the header must stay the same
+                gap_before = before["chipTop"] - before["headerBottom"]
+                gap_after = after["chipTop"] - after["headerBottom"]
+                check(abs(gap_after - gap_before) < 1, f"390: chip bar stays under the header after it folds (gap {gap_before:.1f} → {gap_after:.1f})")
                 pg.screenshot(path=os.path.join(SHOTS, "cc06-micros-stuck-390.png"), animations="disabled")
             ctx.close()
         browser.close()

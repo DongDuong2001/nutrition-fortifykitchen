@@ -30,7 +30,8 @@ PHONE_STATE = """(key) => {
     const chipBar = chipsRow.parentElement.getBoundingClientRect();
     const list = wrap.querySelector('.overflow-y-auto');
     const listRect = list.getBoundingClientRect();
-    const summary = [...wrap.querySelectorAll('header div')].find(d => d.childElementCount === 0 && d.textContent.trim().startsWith('đã đạt'));
+    // The summary is "đã đạt mục tiêu", or "8/22 vi chất đã đạt" once the header folds on scroll (cc-17)
+    const summary = [...wrap.querySelectorAll('header div')].find(d => d.childElementCount === 0 && d.textContent.includes('đã đạt'));
     const sum = summary.getBoundingClientRect();
     const section = document.getElementById('group-' + key);
     const stickyTop = section.firstElementChild.getBoundingClientRect().top;
