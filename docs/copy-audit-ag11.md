@@ -369,10 +369,10 @@ Every confirmed row from Section 2 is grouped by file below so a coder can apply
 - [explore/rich/[nutrient]/page.tsx:60](apps/web/app/explore/rich/[nutrient]/page.tsx#L60) (R3 — **Decided: 50%**): `${row.pct} % mục tiêu ngày · ${row.basis}` → `${row.pct}% mục tiêu ngày · ${row.basis}`
 
 ### `apps/web/app/foods/[id]/page.tsx`
-- [foods/[id]/page.tsx:65](apps/web/app/foods/[id]/page.tsx#L65) (R2, R6): `Đã bỏ khỏi Yêu thích` / `Đã lưu vào Yêu thích` → `Đã bỏ khỏi yêu thích` / `Đã thêm vào yêu thích` *(probe cc03/cc04 requires case-sensitive `Yêu thích`, kept for probe compatibility)*
+- [foods/[id]/page.tsx:65](apps/web/app/foods/[id]/page.tsx#L65) (R2, R6): `Đã bỏ khỏi Yêu thích` / `Đã lưu vào Yêu thích` → `Đã bỏ khỏi yêu thích` / `Đã thêm vào yêu thích` *(fixed in `db6fd9b`)*
 - [foods/[id]/page.tsx:83](apps/web/app/foods/[id]/page.tsx#L83) & [foods/[id]/page.tsx:204](apps/web/app/foods/[id]/page.tsx#L204) (R3): `` `${gramsInput} g` `` → `` `${formatAmount(grams, "g")} g` `` *(fixed in `35d8190`)*
 - [foods/[id]/page.tsx:120](apps/web/app/foods/[id]/page.tsx#L120) (R1, R5 — **Hao**): `${food.source === "user" ? "Của tôi" : food.source} · ${grams} g mỗi khẩu phần` → Map `food.source` using `foodSourceLabel()` *(fixed in `35d8190`)*
-- [foods/[id]/page.tsx:166](apps/web/app/foods/[id]/page.tsx#L166) (R5): `Tùy chỉnh` → `Tuỳ chỉnh` *(probe ag07 requires `Tùy chỉnh`, kept for probe compatibility)*
+- [foods/[id]/page.tsx:166](apps/web/app/foods/[id]/page.tsx#L166) (R5): `Tùy chỉnh` → `Tuỳ chỉnh` *(fixed in `db6fd9b`)*
 - [foods/[id]/page.tsx:196](apps/web/app/foods/[id]/page.tsx#L196) (R5 — **Hao**): `Carb` → `Tinh bột` *(fixed in `35d8190`)*
 
 ### `apps/web/app/foods/new/page.tsx`
@@ -403,7 +403,7 @@ Every confirmed row from Section 2 is grouped by file below so a coder can apply
 - [paywall/page.tsx:16](apps/web/app/paywall/page.tsx#L16), [paywall/page.tsx:17](apps/web/app/paywall/page.tsx#L17), [paywall/page.tsx:135](apps/web/app/paywall/page.tsx#L135) (R8 — **Hao**): `[GIÁ/THÁNG]` / `[GIÁ/NĂM]` / `Tiết kiệm [X]%` / `Thanh toán qua [NHÀ CUNG CẤP THANH TOÁN] · huỷ bất cứ lúc nào` → Replace bracketed placeholders with real values or hide unconfigured billing details *(fixed in `f0b0571`)*
 - [paywall/page.tsx:23](apps/web/app/paywall/page.tsx#L23) (R5 — **Decided: huấn luyện viên**): `Món & công thức riêng của Coach` → `Món & công thức riêng của huấn luyện viên` *(fixed in `f0b0571`)*
 - [paywall/page.tsx:37](apps/web/app/paywall/page.tsx#L37) (R5 — **Decided: huấn luyện viên**): `Ăn theo Coach, không phải đoán` → `Ăn theo huấn luyện viên, không phải đoán` *(fixed in `f0b0571`)*
-- [paywall/page.tsx:144](apps/web/app/paywall/page.tsx#L144) (R2): `Gói Miễn phí vẫn ghi đủ 22 vi chất.` → `Gói miễn phí vẫn ghi đủ 22 vi chất.` *(retained as `"Gói Miễn phí"` for probe compatibility with `ag06.py`)*
+- [paywall/page.tsx:144](apps/web/app/paywall/page.tsx#L144) (R2): `Gói Miễn phí vẫn ghi đủ 22 vi chất.` → `Gói miễn phí vẫn ghi đủ 22 vi chất.` *(fixed in `c5ce691`)*
 
 ### `apps/web/app/settings/delete-account/page.tsx`
 - [settings/delete-account/page.tsx:47](apps/web/app/settings/delete-account/page.tsx#L47) (R2): `title="XOÁ TÀI KHOẢN"` → `title="Xoá tài khoản"`
@@ -439,10 +439,10 @@ Every confirmed row from Section 2 is grouped by file below so a coder can apply
 
 ### `apps/web/components/add/add-shortcuts.tsx`
 - [add-shortcuts.tsx:68](apps/web/components/add/add-shortcuts.tsx#L68) & [add-shortcuts.tsx:70](apps/web/components/add/add-shortcuts.tsx#L70) (R5 — **Decided: Bữa ăn của tôi · in progress cc2-12b**): `aria-label="Bữa của tôi"` / `Bữa của tôi` → `aria-label="Bữa ăn của tôi"` / `Bữa ăn của tôi`
-- [add-shortcuts.tsx:87](apps/web/components/add/add-shortcuts.tsx#L87) & [add-shortcuts.tsx:89](apps/web/components/add/add-shortcuts.tsx#L89) (R6 — **Hao**): `name="Chỉ ghi kcal"` / `addLabel="Chỉ ghi kcal"` → `name="Chỉ thêm kcal"` / `addLabel="Chỉ thêm kcal"`
+- [add-shortcuts.tsx:87](apps/web/components/add/add-shortcuts.tsx#L87) & [add-shortcuts.tsx:89](apps/web/components/add/add-shortcuts.tsx#L89) (R6 — **Hao**): `name="Chỉ ghi kcal"` / `addLabel="Chỉ ghi kcal"` → `name="Chỉ thêm kcal"` / `addLabel="Chỉ thêm kcal"` *(fixed in `12e9e05`)*
 
 ### `apps/web/components/add/quick-add-sheet.tsx`
-- [quick-add-sheet.tsx:56](apps/web/components/add/quick-add-sheet.tsx#L56) & [quick-add-sheet.tsx:68](apps/web/components/add/quick-add-sheet.tsx#L68) (R6 — **Hao**): `title="Chỉ ghi kcal"` / `placeholder="Ghi nhanh"` → `title="Chỉ thêm kcal"` / `placeholder="Thêm nhanh"` *(placeholder fixed in `5a41dce`, title retained for probe cc2_12 compatibility)*
+- [quick-add-sheet.tsx:56](apps/web/components/add/quick-add-sheet.tsx#L56) & [quick-add-sheet.tsx:68](apps/web/components/add/quick-add-sheet.tsx#L68) (R6 — **Hao**): `title="Chỉ ghi kcal"` / `placeholder="Ghi nhanh"` → `title="Chỉ thêm kcal"` / `placeholder="Thêm nhanh"` *(placeholder fixed in `5a41dce`, title fixed in `12e9e05`)*
 
 ### `apps/web/components/calendar-sheet.tsx`
 - [calendar-sheet.tsx:14](apps/web/components/calendar-sheet.tsx#L14) (R7): `over: "vượt mục tiêu"` → `over: "đạt mục tiêu"` *(fixed in `1803108`)*
@@ -452,7 +452,7 @@ Every confirmed row from Section 2 is grouped by file below so a coder can apply
 - [copy-yesterday-sheet.tsx:32](apps/web/components/copy-yesterday-sheet.tsx#L32) (R4): `${getWeekdayName(yesterday.date)}, ${dd}/${mm} · ${formatNumber(yesterday.calories)} kcal` → `${formatDayLabel(yesterday.date, now)} · ${formatNumber(yesterday.calories)} kcal`
 
 ### `apps/web/components/diary/diary-screen.tsx`
-- [diary-screen.tsx:379](apps/web/components/diary/diary-screen.tsx#L379) (R2): `còn {formatNumber(remaining)} kcal · Mục tiêu {formatRange(targetMin, targetMax)}` → `Còn {formatNumber(remaining)} kcal · mục tiêu {formatRange(targetMin, targetMax)}` *(probe cc2_10 asserts lowercase `còn 909 kcal`, kept for probe compatibility)*
+- [diary-screen.tsx:379](apps/web/components/diary/diary-screen.tsx#L379) (R2): `còn {formatNumber(remaining)} kcal · Mục tiêu {formatRange(targetMin, targetMax)}` → `Còn {formatNumber(remaining)} kcal · mục tiêu {formatRange(targetMin, targetMax)}` *(fixed in `3ca7ec9`)*
 
 ### `apps/web/components/diary/meal-menu-sheet.tsx`
 - [meal-menu-sheet.tsx:66](apps/web/components/diary/meal-menu-sheet.tsx#L66) & [meal-menu-sheet.tsx:154](apps/web/components/diary/meal-menu-sheet.tsx#L154) (R5 — **Decided: Bữa ăn của tôi · in progress cc2-12b**): `Lưu thành Bữa của tôi` → `Lưu thành Bữa ăn của tôi` *(fixed in `cc2-12b` & `4dd57a7`)*
@@ -485,14 +485,14 @@ Every confirmed row from Section 2 is grouped by file below so a coder can apply
 
 ### `apps/web/components/overview/energy-tab.tsx`
 - [energy-tab.tsx:27](apps/web/components/overview/energy-tab.tsx#L27), [energy-tab.tsx:182](apps/web/components/overview/energy-tab.tsx#L182), [energy-tab.tsx:250](apps/web/components/overview/energy-tab.tsx#L250) (R3 — **Decided: 50%**): `Đạm ${protein} %, tinh bột ${carbs} %, béo ${fat} % của kcal trung bình` / `{row.share} %` / `Đạm trung bình ${proteinPct} % mục tiêu` → `Đạm ${protein}%, tinh bột ${carbs}%, béo ${fat}% của kcal trung bình` / `{formatNumber(row.share)}%` / `Đạm trung bình ${proteinPct}% mục tiêu`
-- [energy-tab.tsx:77](apps/web/components/overview/energy-tab.tsx#L77) & [energy-tab.tsx:201](apps/web/components/overview/energy-tab.tsx#L201) (R8): `trong mục tiêu hoặc trên` / `Trong mục tiêu hoặc trên` → `đạt mục tiêu` / `Đạt mục tiêu` *(probe cc2_10 asserts `Trong mục tiêu hoặc trên`, kept for probe compatibility)*
+- [energy-tab.tsx:77](apps/web/components/overview/energy-tab.tsx#L77) & [energy-tab.tsx:201](apps/web/components/overview/energy-tab.tsx#L201) (R8): `trong mục tiêu hoặc trên` / `Trong mục tiêu hoặc trên` → `đạt mục tiêu` / `Đạt mục tiêu` *(fixed in `c5123d7`)*
 
 ### `apps/web/components/overview/micros-tab.tsx`
 - [micros-tab.tsx:37](apps/web/components/overview/micros-tab.tsx#L37), [micros-tab.tsx:54](apps/web/components/overview/micros-tab.tsx#L54), [micros-tab.tsx:64](apps/web/components/overview/micros-tab.tsx#L64) (R5): `Chưa có số liệu trong kỳ này` / `chưa có số liệu` → `Chưa có dữ liệu trong kỳ này` / `chưa có dữ liệu` *(fixed in `2db36a0`)*
 - [micros-tab.tsx:51](apps/web/components/overview/micros-tab.tsx#L51), [micros-tab.tsx:54](apps/web/components/overview/micros-tab.tsx#L54), [micros-tab.tsx:63](apps/web/components/overview/micros-tab.tsx#L63) (R3 — **Decided: 50%**): `formatPercent(row.percentage)` / `${row.percentage} % mục tiêu` / `Mỗi thanh có 10 đoạn; đoạn đầy khi đạt 10 % mục tiêu.` → `formatPercent(row.percentage)` (`50%`) / `${row.percentage}% mục tiêu` / `Mỗi thanh có 10 đoạn; đoạn đầy khi đạt 10% mục tiêu.`
 
 ### `apps/web/components/overview/summary-tab.tsx`
-- [summary-tab.tsx:60](apps/web/components/overview/summary-tab.tsx#L60) (R6 — **Hao**): `Ghi {getMealSlotNameVi(next).toLowerCase()}` → `Thêm vào {getMealSlotNameVi(next).toLowerCase()}` *(probe cc2_10 asserts `Ghi bữa tối`, kept for probe compatibility)*
+- [summary-tab.tsx:60](apps/web/components/overview/summary-tab.tsx#L60) (R6 — **Hao**): `Ghi {getMealSlotNameVi(next).toLowerCase()}` → `Thêm vào {getMealSlotNameVi(next).toLowerCase()}` *(fixed in `c5123d7`)*
 
 ### `apps/web/components/settings/profile-cards.tsx` — **`[CC1 claim]`**
 - [profile-cards.tsx:122](apps/web/components/settings/profile-cards.tsx#L122) (R2): `Chỉ với Nữ · sắt 18 → 28 mg/ngày` → `Chỉ với nữ · sắt 18 → 28 mg/ngày`
@@ -531,7 +531,7 @@ Every confirmed row from Section 2 is grouped by file below so a coder can apply
 - [sample-day.ts:238](apps/web/lib/mock/sample-day.ts#L238) & [sample-day.ts:441](apps/web/lib/mock/sample-day.ts#L441) (R5): `Natri (muối)` & `Folate (B9)` → `Natri` & `Vitamin B9`
 
 ### `apps/web/lib/nutrients.ts`
-- [nutrients.ts:36](apps/web/lib/nutrients.ts#L36), [nutrients.ts:37](apps/web/lib/nutrients.ts#L37), [nutrients.ts:41](apps/web/lib/nutrients.ts#L41) (R1, R5 — **Hao**): `Tinh bột tổng` / `Carb ròng` / `Tinh bột (starch)` → `Tinh bột` / `Tinh bột hấp thu` / `Tinh bột phức` *(fixed in `9bf4e3d`)*
+- [nutrients.ts:36](apps/web/lib/nutrients.ts#L36), [nutrients.ts:37](apps/web/lib/nutrients.ts#L37), [nutrients.ts:41](apps/web/lib/nutrients.ts#L41) (R1, R5 — **Hao**): `Tinh bột tổng` / `Carb ròng` / `Tinh bột (starch)` → `Tinh bột` / `Tinh bột ròng` / `Tinh bột phức` *(fixed in `9bf4e3d` and `cfb6d7a`)*
 - [nutrients.ts:46](apps/web/lib/nutrients.ts#L46) (R5 — **Hao**): `Chất béo` → `Béo` (or unify `"Chất béo"` across all macro labels) *(retained as `"Chất béo"` per ag-13 Hao decision)*
 
 ### `apps/web/lib/onboarding.ts`
@@ -546,7 +546,10 @@ Every confirmed row from Section 2 is grouped by file below so a coder can apply
 ---
 
 ## 5. Notes from `ag-12` and `ag-13` implementation
-- **`apps/web/app/paywall/page.tsx` (`Gói Miễn phí vẫn ghi đủ 22 vi chất.`)**: `tests/probes/ag06.py` (line 119) asserts the exact case-sensitive string `"Gói Miễn phí vẫn ghi đủ 22 vi chất." in txt`. Per instructions, the capitalization `"Gói Miễn phí"` was retained so `ag06.py` continues to pass.
-- **`apps/web/app/foods/[id]/page.tsx` (`Tùy chỉnh`, `Yêu thích`)**: `tests/probes/ag07.py` (line 62) looks for button `"Tùy chỉnh"`; `tests/probes/cc03.py` and `cc04.py` assert `"Đã lưu vào Yêu thích"` and `"Đã bỏ khỏi Yêu thích"`. These exact casing/accent placements were kept so probes pass without regression.
-- **`apps/web/components/overview/energy-tab.tsx` & `summary-tab.tsx`**: `tests/probes/cc2_10.py` asserts `"Trong mục tiêu hoặc trên"` in the legend and `"Ghi bữa tối"` at 18:00 on the Overview tab, as well as `"còn 909 kcal"`. Kept for probe compatibility.
+- **`apps/web/app/paywall/page.tsx` (`Gói miễn phí vẫn ghi đủ 22 vi chất.`)**: Updated to sentence case `Gói miễn phí` and aligned `tests/probes/ag06.py` text assert. *(fixed in `c5ce691`)*
+- **`apps/web/app/foods/[id]/page.tsx` (`Tuỳ chỉnh`, `yêu thích`)**: Updated to tone mark `Tuỳ chỉnh` and toast `Đã bỏ khỏi yêu thích` / `Đã thêm vào yêu thích`, aligning text asserts in `tests/probes/ag07.py`, `cc03.py`, and `cc04.py`. *(fixed in `db6fd9b`)*
+- **`apps/web/components/overview/energy-tab.tsx` & `summary-tab.tsx`**: Updated to `Đạt mục tiêu` and `Thêm vào {meal}`, and `diary-screen.tsx` to `Còn ... kcal · mục tiêu`, aligning text asserts in `tests/probes/cc2_10.py`. *(fixed in `c5123d7` and `3ca7ec9`)*
+- **`apps/web/components/add/quick-add-sheet.tsx` & `add-shortcuts.tsx`**: Updated quick add title and labels to `Chỉ thêm kcal`, aligning `tests/probes/cc2_12.py`. *(fixed in `12e9e05`)*
+- **`apps/web/components/foods/entry-editor.tsx`**: Grams `onChange` uses `parseDecimalInput` and keeps previous serving label when invalid, with unit tests in `components/foods/__tests__/entry-editor.test.ts`. *(fixed in `146e20f`)*
+- **`apps/web/lib/nutrients.ts`**: Updated `net_carbs` `nameVi` to `Tinh bột ròng`. *(fixed in `cfb6d7a`)*
 - **`design/v2/*.html` (`add-sheet.html`, `kham-pha.html`, `nhat-ky.html`)**: Renamed all `"Bữa của tôi"` occurrences to `"Bữa ăn của tôi"` *(fixed in `4dd57a7`)*.
