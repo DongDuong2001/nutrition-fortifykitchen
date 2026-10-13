@@ -24,7 +24,7 @@ function MoreIcon() {
 }
 
 /**
- * Bữa của tôi in Khám phá: each saved meal is one tap that adds every food to the meal of the time of day
+ * Bữa ăn của tôi in Khám phá: each saved meal is one tap that adds every food to the meal of the time of day
  * (one undo toast removes them all). The ⋯ renames or deletes it. `limit` shows the newest few with a link to all.
  */
 export function SavedMealsCard({ limit }: { limit?: number }) {
@@ -53,7 +53,7 @@ export function SavedMealsCard({ limit }: { limit?: number }) {
   return (
     <Card as="section" aria-labelledby="explore-saved-meals" className="flex flex-col gap-1">
       <div className="flex min-h-[44px] items-center justify-between gap-2">
-        <SectionTitle id="explore-saved-meals">Bữa của tôi</SectionTitle>
+        <SectionTitle id="explore-saved-meals">Bữa ăn của tôi</SectionTitle>
         {limit && rows.length > limit && (
           <Link href="/explore/meals" className="flex min-h-[44px] items-center text-[13px] font-bold text-blue no-underline">
             Xem tất cả ({rows.length})
@@ -65,7 +65,7 @@ export function SavedMealsCard({ limit }: { limit?: number }) {
         <div aria-hidden="true" className="h-[52px] rounded-xl bg-level-empty motion-safe:animate-pulse" />
       ) : shown.length === 0 ? (
         <p className="m-0 py-2 text-[13px] leading-snug text-secondary">
-          Chưa có Bữa của tôi. Mở ⋯ ở một bữa trong Nhật ký và chọn Lưu thành Bữa của tôi.
+          Chưa có Bữa ăn của tôi. Mở ⋯ ở một bữa trong Nhật ký và chọn Lưu thành Bữa ăn của tôi.
         </p>
       ) : (
         <>

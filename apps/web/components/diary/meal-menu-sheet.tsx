@@ -10,12 +10,12 @@ export interface MealMenuSheetProps {
   open: boolean;
   onClose: () => void;
   mealName: string;
-  /** A past day is read-only: only Lưu thành Bữa của tôi is offered. */
+  /** A past day is read-only: only Lưu thành Bữa ăn của tôi is offered. */
   readOnly?: boolean;
   /** What the meal holds on the day shown */
   itemCount: number;
   kcal: number;
-  /** How many foods Lưu thành Bữa của tôi would keep. 0 disables it. */
+  /** How many foods Lưu thành Bữa ăn của tôi would keep. 0 disables it. */
   savableCount: number;
   /** The name the save step starts with, "<Bữa> <dd/mm>". */
   defaultSaveName: string;
@@ -33,7 +33,7 @@ const optionClass =
 type Step = "menu" | "confirm" | "name";
 
 /**
- * The ⋯ menu of one meal: Chép hôm qua (today), Lưu thành Bữa của tôi (any day, asks for a name) and
+ * The ⋯ menu of one meal: Chép hôm qua (today), Lưu thành Bữa ăn của tôi (any day, asks for a name) and
  * Xoá bữa này (today), which asks for a confirm step first. A bottom sheet on a phone, a centred dialog on desktop.
  */
 export function MealMenuSheet({
@@ -63,7 +63,7 @@ export function MealMenuSheet({
   const canDelete = itemCount > 0;
   const canSave = savableCount > 0;
 
-  const title = step === "confirm" ? `Xoá ${mealName}?` : step === "name" ? "Lưu thành Bữa của tôi" : mealName;
+  const title = step === "confirm" ? `Xoá ${mealName}?` : step === "name" ? "Lưu thành Bữa ăn của tôi" : mealName;
 
   return (
     <Sheet open={open} onClose={onClose} title={title} titleId="meal-menu-title" desktopDialog>
@@ -151,7 +151,7 @@ export function MealMenuSheet({
               }}
               className={optionClass}
             >
-              <span className={`text-base font-bold ${canSave ? "text-text" : "text-secondary"}`}>Lưu thành Bữa của tôi</span>
+              <span className={`text-base font-bold ${canSave ? "text-text" : "text-secondary"}`}>Lưu thành Bữa ăn của tôi</span>
               <span className="text-[13px] text-secondary">
                 {canSave ? `Lưu ${savableCount} món để thêm lại bằng một chạm` : "Bữa này chưa có món để lưu"}
               </span>

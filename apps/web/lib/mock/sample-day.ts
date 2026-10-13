@@ -6,6 +6,8 @@ export interface MockFoodItem {
   name: string;
   qty: string;
   kcal: number;
+  /** Second line of a row, e.g. the macros of a quick kcal entry ("Đạm — · Tinh bột 30 g · Béo —"). */
+  detail?: string;
   nutrients?: Record<string, FoodNutrientValue>;
 }
 

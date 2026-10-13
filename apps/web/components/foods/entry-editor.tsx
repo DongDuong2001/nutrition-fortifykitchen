@@ -33,17 +33,24 @@ export function EntryEditor({ view }: { view: EntryView }) {
   const quick = view.quick;
   const [quickName, setQuickName] = useState(view.name);
   const [quickKcal, setQuickKcal] = useState(quick ? String(view.kcal) : "");
-  const [quickProtein, setQuickProtein] = useState(quick ? String(quick.protein) : "");
-  const [quickCarbs, setQuickCarbs] = useState(quick ? String(quick.carbs) : "");
-  const [quickFat, setQuickFat] = useState(quick ? String(quick.fat) : "");
+  const [quickProtein, setQuickProtein] = useState(quick?.protein != null ? String(quick.protein) : "");
+  const [quickCarbs, setQuickCarbs] = useState(quick?.carbs != null ? String(quick.carbs) : "");
+  const [quickFat, setQuickFat] = useState(quick?.fat != null ? String(quick.fat) : "");
   const quickValues = {
     kcal: parseDecimalInput(quickKcal),
-    protein: quickProtein.trim() ? parseDecimalInput(quickProtein) : 0,
-    carbs: quickCarbs.trim() ? parseDecimalInput(quickCarbs) : 0,
-    fat: quickFat.trim() ? parseDecimalInput(quickFat) : 0,
+    protein: parseDecimalInput(quickProtein),
+    carbs: parseDecimalInput(quickCarbs),
+    fat: parseDecimalInput(quickFat),
   };
+  // A blank macro is unknown (null) and fine; typed text must be a number from 0 up
+  const macroBad = (text: string, value: number | null) => text.trim() !== "" && value === null;
   const quickValid =
-    quickValues.kcal !== null && Math.round(quickValues.kcal) >= 1 && quickValues.protein !== null && quickValues.carbs !== null && quickValues.fat !== null;
+    quickValues.kcal !== null &&
+    Math.round(quickValues.kcal) >= 1 &&
+    !macroBad(quickProtein, quickValues.protein) &&
+    !macroBad(quickCarbs, quickValues.carbs) &&
+    !macroBad(quickFat, quickValues.fat);
+  const round1 = (v: number | null) => (v === null ? null : Math.round(v * 10) / 10);
 
   const grams = parseGramsInput(gramsInput);
   const canSave = quick ? quickValid : !canPortion || grams > 0;
@@ -58,9 +65,9 @@ export function EntryEditor({ view }: { view: EntryView }) {
         quick: {
           name: quickName,
           calories: Math.round(quickValues.kcal ?? 0),
-          protein: Math.round((quickValues.protein ?? 0) * 10) / 10,
-          carbs: Math.round((quickValues.carbs ?? 0) * 10) / 10,
-          fat: Math.round((quickValues.fat ?? 0) * 10) / 10,
+          protein: round1(quickValues.protein),
+          carbs: round1(quickValues.carbs),
+          fat: round1(quickValues.fat),
         },
       });
     } else {
@@ -110,16 +117,16 @@ export function EntryEditor({ view }: { view: EntryView }) {
               </FormRow>
               <div className="grid grid-cols-3 gap-2">
                 <FormRow label="Đạm (g)" htmlFor="entry-quick-protein">
-                  <input id="entry-quick-protein" aria-invalid={quickValues.protein === null ? true : undefined} type="text" inputMode="decimal" value={quickProtein} onChange={(e) => setQuickProtein(e.target.value)} autoComplete="off" className={`${quickFieldClass} text-right font-bold tabular-nums`} />
+                  <input id="entry-quick-protein" placeholder="—" aria-invalid={macroBad(quickProtein, quickValues.protein) ? true : undefined} type="text" inputMode="decimal" value={quickProtein} onChange={(e) => setQuickProtein(e.target.value)} autoComplete="off" className={`${quickFieldClass} text-right font-bold tabular-nums`} />
                 </FormRow>
                 <FormRow label="Tinh bột (g)" htmlFor="entry-quick-carbs">
-                  <input id="entry-quick-carbs" aria-invalid={quickValues.carbs === null ? true : undefined} type="text" inputMode="decimal" value={quickCarbs} onChange={(e) => setQuickCarbs(e.target.value)} autoComplete="off" className={`${quickFieldClass} text-right font-bold tabular-nums`} />
+                  <input id="entry-quick-carbs" placeholder="—" aria-invalid={macroBad(quickCarbs, quickValues.carbs) ? true : undefined} type="text" inputMode="decimal" value={quickCarbs} onChange={(e) => setQuickCarbs(e.target.value)} autoComplete="off" className={`${quickFieldClass} text-right font-bold tabular-nums`} />
                 </FormRow>
                 <FormRow label="Béo (g)" htmlFor="entry-quick-fat">
-                  <input id="entry-quick-fat" aria-invalid={quickValues.fat === null ? true : undefined} type="text" inputMode="decimal" value={quickFat} onChange={(e) => setQuickFat(e.target.value)} autoComplete="off" className={`${quickFieldClass} text-right font-bold tabular-nums`} />
+                  <input id="entry-quick-fat" placeholder="—" aria-invalid={macroBad(quickFat, quickValues.fat) ? true : undefined} type="text" inputMode="decimal" value={quickFat} onChange={(e) => setQuickFat(e.target.value)} autoComplete="off" className={`${quickFieldClass} text-right font-bold tabular-nums`} />
                 </FormRow>
               </div>
-              <p className="m-0 text-sm text-secondary">Ghi nhanh: vi chất của món này chưa có dữ liệu.</p>
+              <p className="m-0 text-sm text-secondary">Ghi nhanh: vi chất của món này chưa có dữ liệu. Để trống một chất nếu chưa biết: hiện là —.</p>
             </div>
           )}
 

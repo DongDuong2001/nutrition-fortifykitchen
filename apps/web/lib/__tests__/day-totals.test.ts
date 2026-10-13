@@ -59,6 +59,23 @@ describe("totalsFromEntries (a past day)", () => {
     expect(totals.nutrients.b5).toBeNull(); // no food in the catalog carries B5
   });
 
+  it("sums known macros only: an unknown macro adds nothing and stays null when nothing knows it", () => {
+    const [first, ...rest] = entries;
+    const quick = { ...first, id: "q", kind: "quick" as const, protein: null, carbs: null, fat: null, fiber: null };
+    const withQuick = totalsFromEntries(YESTERDAY, [...entries, quick]);
+    expect(withQuick.protein).toBe(totals.protein);
+    expect(withQuick.fat).toBe(totals.fat);
+    expect(withQuick.calories).toBe((totals.calories ?? 0) + first.calories);
+
+    const onlyQuick = totalsFromEntries(YESTERDAY, [quick]);
+    expect(onlyQuick.protein).toBeNull();
+    expect(onlyQuick.carbs).toBeNull();
+    expect(onlyQuick.fat).toBeNull();
+    expect(onlyQuick.fiber).toBeNull();
+    expect(onlyQuick.calories).toBe(first.calories);
+    expect(rest.length).toBeGreaterThan(0);
+  });
+
   it("is not logged, with null (not 0) everywhere, for a day with no entries", () => {
     const none = totalsFromEntries("2026-08-01", []);
     expect(none.logged).toBe(false);

@@ -37,6 +37,11 @@ export function totalsFromEntries(iso: string, entries: AddedDiaryEntry[]): DayT
     return { date: iso, logged: false, calories: null, protein: null, carbs: null, fat: null, fiber: null, nutrients: nullNutrients() };
   }
   const sum = (pick: (e: AddedDiaryEntry) => number) => entries.reduce((acc, e) => acc + pick(e), 0);
+  // Known values only: an unknown macro (a quick kcal entry) adds nothing, and stays null when no entry knows it
+  const knownSum = (pick: (e: AddedDiaryEntry) => number | null): number | null => {
+    const known = entries.map(pick).filter((v): v is number => typeof v === "number");
+    return known.length === 0 ? null : Math.round(known.reduce((acc, v) => acc + v, 0));
+  };
   const nutrients = nullNutrients();
   for (const key of COUNTED_NUTRIENT_KEYS) {
     let total: number | null = null;
@@ -50,10 +55,10 @@ export function totalsFromEntries(iso: string, entries: AddedDiaryEntry[]): DayT
     date: iso,
     logged: true,
     calories: sum((e) => e.calories),
-    protein: Math.round(sum((e) => e.protein)),
-    carbs: Math.round(sum((e) => e.carbs)),
-    fat: Math.round(sum((e) => e.fat)),
-    fiber: Math.round(sum((e) => e.fiber)),
+    protein: knownSum((e) => e.protein),
+    carbs: knownSum((e) => e.carbs),
+    fat: knownSum((e) => e.fat),
+    fiber: knownSum((e) => e.fiber),
     nutrients,
   };
 }

@@ -237,7 +237,7 @@ function AddFoodInner() {
     />
   );
 
-  // Chỉ ghi kcal, Gần đây and Bữa của tôi: shared by the phone sheet and the desktop dialog
+  // Chỉ ghi kcal, Gần đây and Bữa ăn của tôi: shared by the phone sheet and the desktop dialog
   const shortcuts = (
     <AddShortcuts
       recents={recentShortcuts}

@@ -37,7 +37,7 @@ export interface AddShortcutsProps {
 
 /**
  * Faster logging in the add sheet, above the food list: Chỉ ghi kcal, Gần đây (tap = add with the last portion,
- * chevron = portion panel) and Bữa của tôi (tap = add every food). Nothing here is shown while searching.
+ * chevron = portion panel) and Bữa ăn của tôi (tap = add every food). Nothing here is shown while searching.
  */
 export function AddShortcuts({ recents, savedMeals, onAddRecent, onOpenRecent, onAddSavedMeal, onQuickKcal }: AddShortcutsProps) {
   return (
@@ -65,9 +65,9 @@ export function AddShortcuts({ recents, savedMeals, onAddRecent, onOpenRecent, o
       )}
 
       {savedMeals.length > 0 && (
-        <section aria-label="Bữa của tôi" className="flex flex-col">
+        <section aria-label="Bữa ăn của tôi" className="flex flex-col">
           <SectionTitle as="h3" className="flex min-h-[44px] items-center">
-            Bữa của tôi
+            Bữa ăn của tôi
           </SectionTitle>
           {savedMeals.map(({ meal, itemCount, kcal }, i) => (
             <QuickAddRow

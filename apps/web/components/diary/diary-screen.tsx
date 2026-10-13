@@ -317,9 +317,12 @@ function DiaryContent() {
         {meal.items.map((it) => {
           const row = (
             <>
-              <span data-align-group="meal-card" data-align-edge="left" className="min-w-0 text-text">
-                {it.name}
-                {it.name !== it.qty && <span className="text-secondary"> · {it.qty}</span>}
+              <span data-align-group="meal-card" data-align-edge="left" className="flex min-w-0 flex-col py-1 text-text">
+                <span>
+                  {it.name}
+                  {it.name !== it.qty && <span className="text-secondary"> · {it.qty}</span>}
+                </span>
+                {it.detail && <span className="text-[13px] leading-tight text-secondary">{it.detail}</span>}
               </span>
               <span className="shrink-0 tabular-nums text-secondary">{formatAmount(it.kcal, "kcal")}</span>
             </>

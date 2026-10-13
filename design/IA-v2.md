@@ -64,12 +64,12 @@ Job: log, fix and read one day (any date).
 - Header: date with ‹ › and calendar (as now). Under it the day summary: kcal dial + four macro bars (the only full breakdown of a day) and "còn N kcal".
 - Two compact rows under the summary, both for the date shown: "8/22 vi chất · Thiếu: Vitamin D, Canxi" → `/micros?date=`; "Ngày tập 60′ · muối 7–10,5 g" → `/training?date=` (today: change the minutes there; past days read-only).
 - When the header scrolls away, a slim sticky bar remains (kcal eaten / target, còn N).
-- Meals with ONE "+" and a "⋯" menu per header ("Chép hôm qua", "Lưu thành Bữa của tôi", "Xoá bữa này"). "Chép hôm qua" and "Xoá bữa này" are for today only; "Xoá bữa này" asks for a confirm step first and offers a 5 s undo.
+- Meals with ONE "+" and a "⋯" menu per header ("Chép hôm qua", "Lưu thành Bữa ăn của tôi", "Xoá bữa này"). "Chép hôm qua" and "Xoá bữa này" are for today only; "Xoá bữa này" asks for a confirm step first and offers a 5 s undo.
 - Past days: read-only exactly as now; their Vi chất and Ngày tập open read-only.
 
 ## Khám phá (explore) — v1, data only
 Job: find a food and understand it.
-- Search (same index as the add sheet), category chips (the 10 categories), "Gần đây", "Yêu thích", "Món của tôi", "Bữa của tôi" (saved meals: a named set of foods with portions, logged in one tap; created from a diary meal's "⋯" or from Khám phá).
+- Search (same index as the add sheet), category chips (the 10 categories), "Gần đây", "Yêu thích", "Món của tôi", "Bữa ăn của tôi" (saved meals: a named set of foods with portions, logged in one tap; created from a diary meal's "⋯" or from Khám phá).
 - "Giàu…" lists: foods ranked by one nutrient per 100 g / per usual portion (Canxi, Sắt, Kali, Magie, Đạm, Chất xơ, Vitamin D, Vitamin C).
 - Food detail: kcal and macros per portion, the 22 counted nutrients as % of the user's targets for that portion, "Nguồn tốt của: …" (≥ 20% of target per portion), add-to-diary button, favourite toggle.
 - Reserved, empty until coach content: "Nên ăn kèm", pros/cons, recipes, tips. Do not render placeholders to users; keep the slots in code only.
@@ -84,7 +84,7 @@ Job: find a food and understand it.
 ## Faster logging
 - Recents/favourites in the add sheet: tap the row = add with the last used portion (5 s undo toast); the chevron opens the portion panel.
 - One "+" per meal header; no second "+ Thêm món" link.
-- Bữa của tôi in the add sheet: one tap adds every food of the saved meal to the chosen meal (one undo toast).
+- Bữa ăn của tôi in the add sheet: one tap adds every food of the saved meal to the chosen meal (one undo toast).
 - Quick add: "Chỉ ghi kcal" entry (name optional, kcal required, macros optional, micros unknown = null).
 - Target: a repeat meal in 2 taps ([+] → recent).
 
@@ -93,7 +93,7 @@ Job: find a food and understand it.
 2. Nhật ký owns the day (summary, Vi chất and Ngày tập rows, ?date= on /micros and /training) + Tổng quan sub-tabs (Tóm tắt, Năng lượng, Vi chất, Cơ thể).
 3. Cài đặt with Hồ sơ inside; `/settings/targets`.
 4. Khám phá v1.
-5. Faster logging, including Bữa của tôi.
+5. Faster logging, including Bữa ăn của tôi.
 
 Not now: water tracking (waits for a coach rule); expenditure/activity ring (no activity data).
 Each task: design the new screens with ui-ux-pro-max in Cobalt Sign first (screenshots at 390 and 1280 in the PR summary), tests first for logic, a probe, smoke stays green.

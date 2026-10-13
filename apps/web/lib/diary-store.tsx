@@ -23,7 +23,7 @@ import {
   writeSavedMeals,
   type SavedMeal,
 } from "./saved-meals";
-import { quickEntryFrom, type QuickEntryInput, type QuickEntryResult } from "./quick-entry";
+import { quickDetail, quickEntryFrom, type QuickEntryInput, type QuickEntryResult } from "./quick-entry";
 import { readFavouriteIds, toggleFavouriteId, writeFavouriteIds } from "./favourites";
 import {
   SAMPLE_PROFILE,
@@ -66,8 +66,8 @@ export type { AddedDiaryEntry, EntryView, EntryPatch } from "./diary-edits";
 
 /**
  * The one toast of the app. "added" offers Xem (jump to the meal), "deleted" offers Hoàn tác,
- * "undoable" offers Hoàn tác for the entries one action added (undoIds: a copy, a recent, a Bữa của tôi),
- * and "saved" offers Xem (Bữa của tôi in Khám phá).
+ * "undoable" offers Hoàn tác for the entries one action added (undoIds: a copy, a recent, a Bữa ăn của tôi),
+ * and "saved" offers Xem (Bữa ăn của tôi in Khám phá).
  */
 export interface ToastInfo {
   message: string;
@@ -115,10 +115,10 @@ interface DiaryContextValue {
   copyEntries: (entries: AddedDiaryEntry[], message: string) => void;
   /** Takes out the entries of the last add or copy. Only works while the "undoable" toast is shown. */
   undoCopy: () => void;
-  /** Bữa của tôi, newest first. Loaded after mount from localStorage (see lib/saved-meals.ts). */
+  /** Bữa ăn của tôi, newest first. Loaded after mount from localStorage (see lib/saved-meals.ts). */
   savedMeals: SavedMeal[];
   /**
-   * Saves the foods of a meal (today or a past day) as a Bữa của tôi. Returns false when the meal holds
+   * Saves the foods of a meal (today or a past day) as a Bữa ăn của tôi. Returns false when the meal holds
    * no food to save (empty, or only quick kcal entries).
    */
   saveMealAs: (slot: MealSlot, iso: string, name: string) => boolean;
@@ -219,7 +219,7 @@ export function computeCompositeDayData(
     }
   }
   for (const e of addedEntries) {
-    addItem(e.mealSlot, { id: e.id, name: e.foodName, qty: e.displayQty, kcal: e.calories });
+    addItem(e.mealSlot, { id: e.id, name: e.foodName, qty: e.displayQty, kcal: e.calories, ...(e.kind === "quick" ? { detail: quickDetail(e) } : {}) });
   }
 
   const updatedMeals = baseDay.meals.map((meal) => {
@@ -545,7 +545,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       setSavedMeals((prev) => [meal, ...prev]);
       setEdits((prev) => dismissUndoIn(prev));
       setToast({
-        message: `Đã lưu ${meal.name} vào Bữa của tôi · ${meal.items.length} món`,
+        message: `Đã lưu ${meal.name} vào Bữa ăn của tôi · ${meal.items.length} món`,
         kind: "saved",
         mealSlot: null,
         durationMs: ADDED_TOAST_MS,

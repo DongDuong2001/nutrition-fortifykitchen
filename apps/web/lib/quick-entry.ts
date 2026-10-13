@@ -1,6 +1,7 @@
 import { COUNTED_NUTRIENT_KEYS } from "./day-totals";
 import type { AddedDiaryEntry } from "./diary-edits";
 import type { MealSlot } from "./meal-slot";
+import { formatAmount } from "./format";
 
 export const QUICK_NAME = "Ghi nhanh";
 
@@ -33,14 +34,14 @@ function unknownNutrients(): Record<string, number | null> {
 
 /**
  * "Chỉ ghi kcal": kcal above zero is required, the name is optional (Ghi nhanh), the macros are optional
- * (blank is 0 g). No food, so no micronutrient value.
+ * (a blank one is unknown: null, never 0; a typed 0 stays 0). No food, so no micronutrient value and no fibre.
  */
 export function quickEntryFrom(input: QuickEntryInput, slot: MealSlot, id: string, addedAt: string): QuickEntryResult {
   const kcal = parseDecimalInput(input.kcal);
   // Stored as whole kcal, so "0,4" would become 0: it must round to at least 1
   if (kcal === null || Math.round(kcal) < 1) return { ok: false, field: "kcal", message: "Nhập kcal lớn hơn 0" };
 
-  const macros: Record<"protein" | "carbs" | "fat", number> = { protein: 0, carbs: 0, fat: 0 };
+  const macros: Record<"protein" | "carbs" | "fat", number | null> = { protein: null, carbs: null, fat: null };
   for (const field of ["protein", "carbs", "fat"] as const) {
     const text = input[field];
     if (!text.trim()) continue;
@@ -64,9 +65,15 @@ export function quickEntryFrom(input: QuickEntryInput, slot: MealSlot, id: strin
       protein: macros.protein,
       carbs: macros.carbs,
       fat: macros.fat,
-      fiber: 0,
+      fiber: null,
       nutrients: unknownNutrients(),
       addedAt,
     },
   };
+}
+
+/** The macros of a quick entry for its row: "Đạm 12,5 g · Tinh bột — · Béo —". Unknown is "—", never 0 g. */
+export function quickDetail(entry: Pick<AddedDiaryEntry, "protein" | "carbs" | "fat">): string {
+  const show = (value: number | null) => (value === null ? "—" : `${formatAmount(value, "g")} g`);
+  return `Đạm ${show(entry.protein)} · Tinh bột ${show(entry.carbs)} · Béo ${show(entry.fat)}`;
 }

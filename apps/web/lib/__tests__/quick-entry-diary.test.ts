@@ -60,7 +60,7 @@ describe("editing a quick entry", () => {
   it("has no portion, and exposes its macros", () => {
     const view = findEntry(withEntry(quick("A")), "q-1");
     expect(view).toMatchObject({ name: "A", canChangePortion: false, portionNote: null, kcal: 400 });
-    expect(view?.quick).toEqual({ protein: 20, carbs: 0, fat: 0 });
+    expect(view?.quick).toEqual({ protein: 20, carbs: null, fat: null });
   });
 
   it("changes name, kcal and macros, and the meal", () => {
@@ -74,5 +74,17 @@ describe("editing a quick entry", () => {
 
   it("is left out of the foods a saved meal takes from a meal", () => {
     expect(mealPortions(withEntry(quick()), "dinner").some((p) => p.foodId === "quick")).toBe(false);
+  });
+});
+
+describe("a quick entry with every macro unknown", () => {
+  it("adds kcal to the day and moves no macro bar", () => {
+    const r = quickEntryFrom({ name: "", kcal: "300", protein: "", carbs: "", fat: "" }, "dinner", "q-2", "2026-10-13T12:00:00.000Z");
+    if (!r.ok) throw new Error("expected ok");
+    const base = computeCompositeDayData(SAMPLE_DAY, []);
+    const day = computeCompositeDayData(SAMPLE_DAY, [r.entry]);
+    expect(day.calories.consumed).toBe(base.calories.consumed + 300);
+    expect(day.macros.map((m) => m.consumed)).toEqual(base.macros.map((m) => m.consumed));
+    expect(day.meals.find((m) => m.slot === "dinner")?.items.at(-1)?.detail).toBe("Đạm — · Tinh bột — · Béo —");
   });
 });

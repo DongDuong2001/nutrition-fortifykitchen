@@ -14,10 +14,11 @@ export interface AddedDiaryEntry {
   displayQty: string;
   mealSlot: MealSlot;
   calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-  fiber: number;
+  /** Macros and fibre are null (unknown) on a quick kcal entry that left them blank. */
+  protein: number | null;
+  carbs: number | null;
+  fat: number | null;
+  fiber: number | null;
   nutrients: Record<string, number | null>;
   addedAt: string;
 }
@@ -174,14 +175,17 @@ function numericNutrients(nutrients: Record<string, number | null>): Record<stri
   return out;
 }
 
-export function amountsOfNumbers(n: EntryNumbers | null): Amounts {
+/** An unknown (null) macro adds nothing to a total: totals sum known values only. */
+export function amountsOfNumbers(
+  n: (Omit<EntryNumbers, "protein" | "carbs" | "fat" | "fiber"> & Record<"protein" | "carbs" | "fat" | "fiber", number | null>) | null
+): Amounts {
   if (!n) return NO_AMOUNTS;
   return {
     calories: n.calories,
-    carbs: n.carbs,
-    protein: n.protein,
-    fat: n.fat,
-    fiber: n.fiber,
+    carbs: n.carbs ?? 0,
+    protein: n.protein ?? 0,
+    fat: n.fat ?? 0,
+    fiber: n.fiber ?? 0,
     nutrients: numericNutrients(n.nutrients),
   };
 }
@@ -225,7 +229,7 @@ export interface EntryView {
   canChangePortion: boolean;
   portionNote: string | null;
   /** A kcal-only entry (Chỉ ghi kcal): its name and numbers are edited directly, there is no portion. */
-  quick: { protein: number; carbs: number; fat: number } | null;
+  quick: { protein: number | null; carbs: number | null; fat: number | null } | null;
 }
 
 export interface DiaryEdits {
@@ -246,7 +250,7 @@ export interface EntryPatch {
   servingLabel?: string;
   mealSlot?: MealSlot;
   /** New name and numbers of a quick entry. Ignored for any other entry. */
-  quick?: { name: string; calories: number; protein: number; carbs: number; fat: number };
+  quick?: { name: string; calories: number; protein: number | null; carbs: number | null; fat: number | null };
 }
 
 export function findEntry(edits: DiaryEdits, id: string, samples: SampleItemInfo[] = SAMPLE_ITEMS): EntryView | null {

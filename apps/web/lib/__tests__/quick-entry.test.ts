@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { COUNTED_NUTRIENT_KEYS } from "../day-totals";
-import { parseDecimalInput, quickEntryFrom } from "../quick-entry";
+import { parseDecimalInput, quickDetail, quickEntryFrom } from "../quick-entry";
 
 const base = { name: "", kcal: "350", protein: "", carbs: "", fat: "" };
 const make = (patch: Partial<typeof base>) => quickEntryFrom({ ...base, ...patch }, "lunch", "quick-1", "2026-10-13T12:00:00.000Z");
@@ -59,9 +59,32 @@ describe("quickEntryFrom", () => {
     expect(Object.values(r.entry.nutrients).every((v) => v === null)).toBe(true);
   });
 
-  it("treats a blank macro as 0 g and a bad macro as an error", () => {
-    const ok = make({ protein: "" });
-    expect(ok.ok && ok.entry.protein).toBe(0);
+  it("stores a blank macro and fibre as null (unknown), never 0", () => {
+    const r = make({});
+    if (!r.ok) throw new Error("expected ok");
+    expect(r.entry.protein).toBeNull();
+    expect(r.entry.carbs).toBeNull();
+    expect(r.entry.fat).toBeNull();
+    expect(r.entry.fiber).toBeNull();
+  });
+
+  it("keeps a typed 0 as 0, and a blank next to a typed value as null", () => {
+    const r = make({ protein: "0", carbs: "12,5", fat: "" });
+    if (!r.ok) throw new Error("expected ok");
+    expect(r.entry.protein).toBe(0);
+    expect(r.entry.carbs).toBe(12.5);
+    expect(r.entry.fat).toBeNull();
+  });
+
+  it("rejects a bad macro", () => {
     expect(make({ protein: "x" }).ok).toBe(false);
+    expect(make({ fat: "-1" }).ok).toBe(false);
+  });
+});
+
+describe("quickDetail", () => {
+  it("shows — for an unknown macro and the value for a known one", () => {
+    expect(quickDetail({ protein: null, carbs: null, fat: null })).toBe("Đạm — · Tinh bột — · Béo —");
+    expect(quickDetail({ protein: 12.5, carbs: 0, fat: null })).toBe("Đạm 12,5 g · Tinh bột 0 g · Béo —");
   });
 });

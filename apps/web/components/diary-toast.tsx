@@ -8,7 +8,7 @@ const TICK_MS = 100;
 
 /**
  * The app's one toast, from the diary store. "Đã thêm …" offers Xem (jump to the meal), "Đã xoá …",
- * "Đã chép …" and the one-tap adds (a recent, a Bữa của tôi, Chỉ ghi kcal) offer Hoàn tác, "Đã lưu …" offers
+ * "Đã chép …" and the one-tap adds (a recent, a Bữa ăn của tôi, Chỉ ghi kcal) offer Hoàn tác, "Đã lưu …" offers
  * Xem (Khám phá). The store ends it after its duration; this draws the countdown.
  */
 export function DiaryToast() {
