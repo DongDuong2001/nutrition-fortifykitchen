@@ -13,6 +13,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	"github.com/jackc/pgx/v5/pgxpool"
 
 	"nutrition-api/internal/auth"
 	"nutrition-api/internal/config"
@@ -57,30 +58,66 @@ func main() {
 	defer dbClient.Close()
 	logger.Log.Info().Msg("PostgreSQL 17 connection pool established (session mode, search_path: nutrition, public)")
 
-	// 4. Initialize Repositories and Services
-	profileRepo := profile.NewRepository(dbClient.Pool)
+	// 4. Build router
+	r := SetupRouter(cfg, dbClient.Pool)
+
+	server := &http.Server{
+		Addr:         ":" + cfg.Port,
+		Handler:      r,
+		ReadTimeout:  15 * time.Second,
+		WriteTimeout: 15 * time.Second,
+		IdleTimeout:  60 * time.Second,
+	}
+
+	// Graceful shutdown
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+
+	go func() {
+		logger.Log.Info().Str("port", cfg.Port).Msg("Nutrition API server listening")
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			logger.Log.Fatal().Err(err).Msg("Server ListenAndServe error")
+		}
+	}()
+
+	<-stop
+	logger.Log.Info().Msg("Shutting down API server gracefully...")
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := server.Shutdown(shutdownCtx); err != nil {
+		logger.Log.Fatal().Err(err).Msg("Server forced to shutdown")
+	}
+
+	logger.Log.Info().Msg("API server stopped.")
+}
+
+func SetupRouter(cfg *config.Config, pool *pgxpool.Pool) chi.Router {
+	// Initialize Repositories and Services
+	profileRepo := profile.NewRepository(pool)
 	profileService := profile.NewService(profileRepo)
 	profileHandler := profile.NewHandler(profileService)
 
-	diaryRepo := diary.NewRepository(dbClient.Pool)
+	diaryRepo := diary.NewRepository(pool)
 	diaryService := diary.NewService(diaryRepo)
 	diaryHandler := diary.NewHandler(diaryService)
 
-	nutritionRepo := nutrition.NewRepository(dbClient.Pool)
+	nutritionRepo := nutrition.NewRepository(pool)
 	nutritionService := nutrition.NewService(nutritionRepo)
 	nutritionHandler := nutrition.NewHandler(nutritionService)
 
-	vaultService := vault.NewService(dbClient.Pool)
+	vaultService := vault.NewService(pool)
 	vaultHandler := vault.NewHandler(vaultService)
 
-	paymentService := payment.NewService(dbClient.Pool)
+	paymentService := payment.NewService(pool)
 	paymentHandler := payment.NewHandler(paymentService)
 
-	libraryRepo := library.NewRepository(dbClient.Pool)
+	libraryRepo := library.NewRepository(pool)
 	libraryService := library.NewService(libraryRepo, diaryService)
 	libraryHandler := library.NewHandler(libraryService)
 
-	trendsRepo := trends.NewRepository(dbClient.Pool)
+	trendsRepo := trends.NewRepository(pool)
 	trendsService := trends.NewService(trendsRepo)
 	trendsHandler := trends.NewHandler(trendsService)
 
@@ -92,7 +129,7 @@ func main() {
 
 	authMiddleware := auth.NewMiddleware()
 
-	// 5. Setup Chi Router
+	// Setup Chi Router
 	r := chi.NewRouter()
 
 	// Global Middlewares
@@ -204,34 +241,6 @@ func main() {
 		})
 	})
 
-	server := &http.Server{
-		Addr:         ":" + cfg.Port,
-		Handler:      r,
-		ReadTimeout:  15 * time.Second,
-		WriteTimeout: 15 * time.Second,
-		IdleTimeout:  60 * time.Second,
-	}
-
-	// Graceful shutdown
-	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
-
-	go func() {
-		logger.Log.Info().Str("port", cfg.Port).Msg("Nutrition API server listening")
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			logger.Log.Fatal().Err(err).Msg("Server ListenAndServe error")
-		}
-	}()
-
-	<-stop
-	logger.Log.Info().Msg("Shutting down API server gracefully...")
-
-	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	if err := server.Shutdown(shutdownCtx); err != nil {
-		logger.Log.Fatal().Err(err).Msg("Server forced to shutdown")
-	}
-
-	logger.Log.Info().Msg("API server stopped.")
+	return r
 }
+

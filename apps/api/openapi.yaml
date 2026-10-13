@@ -116,7 +116,7 @@ components:
           type: number
         goal:
           type: string
-          enum: [gain, maintain, cut, cut_fast]
+          enum: [build, maintain, cut, deep_cut]
         training_minutes_default:
           type: integer
           enum: [0, 45, 60, 90, 120]
@@ -125,6 +125,9 @@ components:
         language:
           type: string
           default: vi
+        display_name:
+          type: string
+          nullable: true
 
     FoodPortion:
       type: object
@@ -220,10 +223,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/Profile'
+                $ref: '#/components/schemas/Profile'
         '401':
           description: Unauthorized
           content:
@@ -232,6 +232,157 @@ paths:
                 $ref: '#/components/schemas/ErrorEnvelope'
         '404':
           description: Profile not yet completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+    delete:
+      summary: Delete user account and all personal data
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Account deleted successfully
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /me/profile:
+    put:
+      summary: Upsert user profile settings
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - sex
+                - birth_year
+                - weight_kg
+                - goal
+              properties:
+                sex:
+                  type: string
+                  enum: [male, female]
+                birth_year:
+                  type: integer
+                weight_kg:
+                  type: number
+                goal:
+                  type: string
+                  enum: [build, maintain, cut, deep_cut]
+                training_minutes_default:
+                  type: integer
+                  enum: [0, 45, 60, 90, 120]
+                near_period:
+                  type: boolean
+                language:
+                  type: string
+                display_name:
+                  type: string
+                  nullable: true
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /me/weight:
+    get:
+      summary: Get historical weigh-in logs
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: List of weight logs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      format: uuid
+                    log_date:
+                      type: string
+                      format: date
+                    weight_kg:
+                      type: number
+                    created_at:
+                      type: string
+                      format: date-time
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /me/weight/{date}:
+    put:
+      summary: Record daily weigh-in
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: date
+          in: path
+          required: true
+          schema:
+            type: string
+            format: date
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - weight_kg
+              properties:
+                weight_kg:
+                  type: number
+      responses:
+        '200':
+          description: Weight logged successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  log_date:
+                    type: string
+                    format: date
+                  weight_kg:
+                    type: number
+        '401':
+          description: Unauthorized
           content:
             application/json:
               schema:
@@ -267,19 +418,16 @@ paths:
               schema:
                 type: object
                 properties:
-                  data:
-                    type: object
-                    properties:
-                      items:
-                        type: array
-                        items:
-                          $ref: '#/components/schemas/Food'
-                      total:
-                        type: integer
-                      page:
-                        type: integer
-                      limit:
-                        type: integer
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Food'
+                  total:
+                    type: integer
+                  page:
+                    type: integer
+                  limit:
+                    type: integer
 
   /foods/{id}:
     get:
@@ -297,10 +445,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/Food'
+                $ref: '#/components/schemas/Food'
         '404':
           description: Food not found
           content:
@@ -330,17 +475,14 @@ paths:
               schema:
                 type: object
                 properties:
-                  data:
-                    type: object
-                    properties:
-                      nutrient:
-                        type: string
-                      unit:
-                        type: string
-                      items:
-                        type: array
-                        items:
-                          type: object
+                  nutrient:
+                    type: string
+                  unit:
+                    type: string
+                  items:
+                    type: array
+                    items:
+                      type: object
 
   /foods/custom:
     post:
@@ -383,10 +525,29 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/Food'
+                $ref: '#/components/schemas/Food'
+
+  /foods/custom/{id}:
+    delete:
+      summary: Delete user custom food
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Custom food deleted successfully
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
 
   /days/{date}:
     get:
@@ -408,20 +569,17 @@ paths:
               schema:
                 type: object
                 properties:
-                  data:
-                    type: object
-                    properties:
-                      date:
-                        type: string
-                        format: date
-                      training_minutes:
-                        type: integer
-                      entries:
-                        type: array
-                        items:
-                          $ref: '#/components/schemas/DiaryLog'
-                      totals:
-                        $ref: '#/components/schemas/NutrientValues'
+                  date:
+                    type: string
+                    format: date
+                  training_minutes:
+                    type: integer
+                  entries:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DiaryLog'
+                  totals:
+                    $ref: '#/components/schemas/NutrientValues'
         '401':
           description: Unauthorized
           content:
@@ -532,6 +690,26 @@ paths:
       responses:
         '200':
           description: Training minutes updated
+  /days/{date}/meals/{meal}:
+    delete:
+      summary: Delete all food entries in a specific meal slot
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: date
+          in: path
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: meal
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Meal entries deleted
         '409':
           description: Past day read only
 

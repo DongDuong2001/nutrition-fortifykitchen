@@ -21,9 +21,9 @@ Sources: docs/audit-ag10.md, docs/08-backend-plan.md, docs/07-api-contract.md, O
   Done when: an unsigned or badly signed token gets 401 in a test.
 
 ## 2. One contract
-- [ ] Make `docs/07-api-contract.md`, `apps/api/openapi.yaml` and the Go handlers agree: routes (`PUT /me/profile`, `GET /me/weight`, `PUT /me/weight/{date}`, `DELETE /me`, `DELETE /foods/custom/{id}`, `DELETE /days/{date}/meals/{meal}`), the response envelope (`{"data": …}` or not — pick one), goal enums (`build`/`deep_cut` vs `gain`/`cut_fast`).
+- [x] Make `docs/07-api-contract.md`, `apps/api/openapi.yaml` and the Go handlers agree: routes (`PUT /me/profile`, `GET /me/weight`, `PUT /me/weight/{date}`, `DELETE /me`, `DELETE /foods/custom/{id}`, `DELETE /days/{date}/meals/{meal}`), the response envelope (`{"data": …}` or not — pick one), goal enums (`build`/`deep_cut` vs `gain`/`cut_fast`).
   Done when: an OpenAPI lint passes and a contract test hits every route in the spec.
-- [ ] Error shape: one envelope with a stable `code` the web can map to Vietnamese messages (`PAST_DAY_READ_ONLY`, `RATE_LIMIT_EXCEEDED`, `VALIDATION`, `NOT_FOUND`, `UNAUTHORIZED`).
+- [x] Error shape: one envelope with a stable `code` the web can map to Vietnamese messages (`PAST_DAY_READ_ONLY`, `RATE_LIMIT_EXCEEDED`, `VALIDATION`, `NOT_FOUND`, `UNAUTHORIZED`).
 
 ## 3. Auth (Supabase)
 - [ ] Supabase project (ask Hao for access or create it and share it): Google, magic link and email + password enabled; reset-password redirect `/reset-password`; site URL and redirect URLs for local (3000), staging and prod.

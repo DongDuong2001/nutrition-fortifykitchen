@@ -62,8 +62,8 @@ All nutritional amounts and physiological measurements are transferred as numeri
 Manages core biometric parameters and nutritional goal configuration.
 - **Used by screens**: `/setup/profile`, `/setup/goal`, `/settings/profile`, `/settings/profile/weight`.
 
-#### `GET /api/v1/profile`
-Fetches the authenticated user's profile.
+#### `GET /api/v1/me`
+Fetches the authenticated user's profile and calculated daily targets.
 - **Headers**: `Authorization: Bearer <token>`
 - **Response `200 OK`**:
 ```json
@@ -74,11 +74,13 @@ Fetches the authenticated user's profile.
   "goal": "maintain",
   "period_mode": false,
   "training_minutes_default": 60,
+  "display_name": "Dong",
+  "targets": { ... },
   "updated_at": "2026-10-12T07:30:00Z"
 }
 ```
 
-#### `PUT /api/v1/profile`
+#### `PUT /api/v1/me/profile`
 Updates profile settings.
 - **Request Body**:
 ```json
@@ -88,16 +90,28 @@ Updates profile settings.
   "weight_kg": 70.5,
   "goal": "build",
   "period_mode": false,
-  "training_minutes_default": 60
+  "training_minutes_default": 60,
+  "display_name": "Dong"
 }
 ```
 - **Field Definitions**:
   - `sex`: `"male"` | `"female"`.
-  - `birth_year`: Integer between `1900` and current calendar year.
-  - `weight_kg`: Decimal number between `30.0` and `300.0`.
+  - `birth_year`: Integer between `1920` and `2015`.
+  - `weight_kg`: Decimal number between `25.0` and `300.0`.
   - `goal`: `"build"` (Tăng cơ), `"maintain"` (Giữ cân), `"cut"` (Giảm mỡ), `"deep_cut"` (Giảm mỡ nhanh).
   - `period_mode`: Boolean. Effective only when `sex === "female"`. If `sex === "male"`, backend normalizes to `false`.
-  - `training_minutes_default`: Integer between `0` and `240` (presets: `0`, `45`, `60`, `90`, `120`).
+  - `training_minutes_default`: Integer between `0` and `120` (presets: `0`, `45`, `60`, `90`, `120`).
+  - `display_name`: Optional string.
+
+#### `DELETE /api/v1/me`
+Permanently deletes the authenticated user's account and cascades all personal records.
+- **Headers**: `Authorization: Bearer <token>`
+- **Response `200 OK`**:
+```json
+{
+  "status": "account deleted"
+}
+```
 
 ---
 
@@ -105,26 +119,40 @@ Updates profile settings.
 Tracks body weight history over time.
 - **Used by screens**: `/settings/profile/weight`.
 
-#### `GET /api/v1/weight-logs`
+#### `GET /api/v1/me/weight`
 Returns historical weight logs in reverse chronological order.
-- **Query Parameters**: `limit` (optional integer, default `30`).
+- **Query Parameters**: `from` (optional date), `to` (optional date).
+- **Response `200 OK`**:
+```json
+[
+  {
+    "id": "e0b5f137-567a-4c28-9fa4-8cf69db4b839",
+    "log_date": "2026-10-12",
+    "weight_kg": 70.5,
+    "created_at": "2026-10-12T06:30:00Z"
+  },
+  {
+    "id": "a1c4d210-432b-4d19-8eb3-7be58da3a728",
+    "log_date": "2026-10-05",
+    "weight_kg": 69.8,
+    "created_at": "2026-10-05T07:00:00Z"
+  }
+]
+```
+
+#### `PUT /api/v1/me/weight/{date}`
+Upserts a weigh-in for the specified date (`YYYY-MM-DD`).
+- **Request Body**:
+```json
+{
+  "weight_kg": 70.5
+}
+```
 - **Response `200 OK`**:
 ```json
 {
-  "items": [
-    {
-      "id": "e0b5f137-567a-4c28-9fa4-8cf69db4b839",
-      "date": "2026-10-12",
-      "weight_kg": 70.5,
-      "created_at": "2026-10-12T06:30:00Z"
-    },
-    {
-      "id": "a1c4d210-432b-4d19-8eb3-7be58da3a728",
-      "date": "2026-10-05",
-      "weight_kg": 69.8,
-      "created_at": "2026-10-05T07:00:00Z"
-    }
-  ]
+  "log_date": "2026-10-12",
+  "weight_kg": 70.5
 }
 ```
 
