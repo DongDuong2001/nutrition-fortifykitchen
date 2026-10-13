@@ -2,6 +2,24 @@ import type { FoodItem } from "./mock/foods";
 import { scaleNutrients } from "./portion";
 import { formatAmount } from "./format";
 
+/** Maps a food source code to a Vietnamese UI label, never returning a raw code. */
+export function foodSourceLabel(source?: string | null): string {
+  const key = (source ?? "").trim().toLowerCase().replace(/[\s_]+/g, "-");
+  switch (key) {
+    case "usda":
+      return "USDA";
+    case "cnf":
+      return "CNF (Canada)";
+    case "vn-fct":
+      return "Bảng TPDD Việt Nam";
+    case "custom":
+    case "user":
+      return "Của tôi";
+    default:
+      return "Khác";
+  }
+}
+
 /** The second line of a food row: kcal per its first serving, then carbs and potassium when known. */
 export function foodMeta(food: FoodItem): string {
   const defaultServing = food.servings[0] || { label: "100 g", grams: 100 };
@@ -11,7 +29,7 @@ export function foodMeta(food: FoodItem): string {
   const kali = scaled.potassium ? Math.round(scaled.potassium) : null;
 
   const parts = [`${formatAmount(cals, "kcal")} kcal / ${defaultServing.label}`];
-  if (carbs > 0) parts.push(`${formatAmount(carbs, "g")} g carb`);
+  if (carbs > 0) parts.push(`${formatAmount(carbs, "g")} g tinh bột`);
   if (kali) parts.push(`${formatAmount(kali, "mg")} mg kali`);
   return parts.join(" · ");
 }
@@ -19,7 +37,7 @@ export function foodMeta(food: FoodItem): string {
 /** The portion and source of a food row: "60 g · USDA" (the portion label given, else the first serving). */
 export function foodRowMeta(food: FoodItem, label?: string): string {
   const portion = label ?? food.servings[0]?.label ?? "100 g";
-  return `${portion} · ${food.source === "user" ? "Của tôi" : food.source}`;
+  return `${portion} · ${foodSourceLabel(food.source)}`;
 }
 
 /** kcal of a food row, "228 kcal", for the given grams or its first serving. Empty when energy is unknown. */
