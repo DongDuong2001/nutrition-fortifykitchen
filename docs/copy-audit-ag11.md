@@ -1,5 +1,37 @@
 # Audit ngôn ngữ & chuỗi giao diện tiếng Việt (`ag-11`)
 
+## Tóm tắt điều hành (Summary)
+
+### Thống kê số lượng vấn đề theo quy tắc (72 mục phát hiện)
+
+| Mã quy tắc | Quy tắc kiểm tra | Số mục vi phạm | Mức độ ảnh hưởng |
+|---|---|---:|---|
+| **R1 (`no-english`)** | Không còn tiếng Anh trên giao diện (trừ `H1T MICRO`, đơn vị đo) | **16** | Cao (cả trang `/admin/review`, mã `food.source` thô, từ `"link"`/`"Spam"`/`"SET"`) |
+| **R2 (`sentence-case`)** | Viết hoa đầu câu; không viết HOA TOÀN BỘ chuỗi gốc hoặc Title Case | **16** | Trung bình – Cao (`layout.tsx`, `diary-screen.tsx`, `profile-cards.tsx`, `AppHeader`) |
+| **R3 (`vn-numbers`)** | Định dạng số tiếng Việt (`1.041`; `2,5`; `50%` viết liền không cách) | **10** | Cao (`formatPercent` dư khoảng trắng `"50 %"`, `gramsInput` không qua `formatNumber`) |
+| **R4 (`vn-dates`)** | Định dạng ngày (`"Hôm nay 12/10"`, `"Hôm qua 11/10"`, `"Thứ Hai 05/10"`) | **3** | Trung bình (`copy-yesterday-sheet.tsx`, `formatDesktopDate`, `calendar-sheet.tsx`) |
+| **R5 (`one-term`)** | Một thuật ngữ cho mỗi khái niệm (`Tinh bột` vs `Carb`, `Bữa ăn của tôi`, `Béo` vs `Chất béo`) | **14** | Cao (trực tiếp trên thẻ món ăn, thực đơn bữa `⋯`, chi tiết món, trang Tổng quan) |
+| **R6 (`same-verb`)** | Cùng một hành động dùng cùng một động từ (`Thêm` vs `Ghi`, `Về Nhật ký`) | **7** | Trung bình – Cao (banner Tổng quan, nút quay lại sai tên trang ở `/entry/[id]`) |
+| **R7 (`facts-only`)** | Chỉ nêu số liệu; không cảnh báo `"vượt"`, không gắn nhãn `"Coach"` trên UI | **6** | Nghiêm trọng (vi phạm quy tắc cốt lõi ở `calendar-sheet.tsx`, `profile-cards.tsx`, `paywall`, `signup`) |
+| **R8 (`natural-vi`)** | Tiếng Việt ngắn gọn, tự nhiên; không còn chuỗi giữ chỗ `[...]` hoặc câu cứng | **6** | Cao (`[GIÁ/THÁNG]` trên `/paywall`, `"58 chỉ số"` mâu thuẫn `"22 vi chất"`, giờ cứng `14:05`) |
+
+*(Lưu ý: Một số dòng vi phạm đồng thời 2 quy tắc được tính vào từng quy tắc tương ứng trong bảng trên).*
+
+### 10 vấn đề dễ thấy nhất trên các màn hình người dùng nhìn thấy đầu tiên
+
+1. **Cảnh báo `"vượt mục tiêu"` trong Lịch chọn ngày** — [calendar-sheet.tsx:14](apps/web/components/calendar-sheet.tsx#L14) (gắn vào `aria-label` mỗi ô ngày ở dòng 99): Vi phạm trực tiếp quy tắc cấm cảnh báo vượt giới hạn hoặc dùng từ `"vượt"`.
+2. **Dư khoảng trắng trước dấu `%` (`"50 %"` thay vì `"50%"`) trên Tổng quan, Khám phá & Chi tiết món** — [format.ts:195](apps/web/lib/format.ts#L195), [energy-tab.tsx:27](apps/web/components/overview/energy-tab.tsx#L27), [micros-tab.tsx:54](apps/web/components/overview/micros-tab.tsx#L54), [food-micros.tsx:70](apps/web/components/foods/food-micros.tsx#L70), [explore/rich/[nutrient]/page.tsx:60](apps/web/app/explore/rich/[nutrient]/page.tsx#L60): Lệch với quy chuẩn `50%` và lệch ngay với các nhãn `≥80%`, `10%` trên cùng màn hình.
+3. **Lẫn lộn `"g carb"` / `"Carb"` với `"Tinh bột"` ngay trên mọi dòng món ăn và màn hình Chi tiết món** — [food-meta.ts:14](apps/web/lib/food-meta.ts#L14), [foods/[id]/page.tsx:196](apps/web/app/foods/[id]/page.tsx#L196), [portion-panel.tsx:193](apps/web/components/ui/portion-panel.tsx#L193): Màn hình `/overview`, `/profile` và `/foods/new` gọi là `"Tinh bột"`, nhưng danh sách món ở `/add`, `/explore` và `/foods/[id]` lại hiện `"carb"` / `"Carb"`.
+4. **Nút `"Lưu thành Bữa của tôi"` trong thực đơn bữa (`⋯`) của Nhật ký** — [meal-menu-sheet.tsx:95](apps/web/components/diary/meal-menu-sheet.tsx#L95): Lệch với thuật ngữ cố định đã chốt là **`"Bữa ăn của tôi"`** (và lệch với chính câu hướng dẫn ở [add/page.tsx:336](apps/web/app/add/page.tsx#L336)).
+5. **Còn chữ `"Coach"` trên Hồ sơ, Paywall và Đăng ký** — [profile-cards.tsx:249](apps/web/components/profile/profile-cards.tsx#L249), [paywall/page.tsx:23](apps/web/app/paywall/page.tsx#L23), [paywall/page.tsx:37](apps/web/app/paywall/page.tsx#L37), [signup/page.tsx:8](apps/web/app/signup/page.tsx#L8), [signup/page.tsx:33](apps/web/app/signup/page.tsx#L33): Vi phạm quy tắc sản phẩm không hiển thị nhãn `"Coach"` trên giao diện.
+6. **Hiển thị mã nguồn dữ liệu thô (`"usda"`, `"vn-fct"`, `"custom"`) trên chip Chi tiết món** — [foods/[id]/page.tsx:120](apps/web/app/foods/[id]/page.tsx#L120) và [food-meta.ts:22](apps/web/lib/food-meta.ts#L22): Chỉ dịch `"user"` sang `"Của tôi"`, còn lại in thẳng chuỗi mã tiếng Anh lên giao diện.
+7. **Lệch động từ `"Ghi"` và `"Thêm"` trên các nút hành động chính** — [summary-tab.tsx:60](apps/web/components/overview/summary-tab.tsx#L60) (`"Ghi bữa tối"`), [micros/page.tsx:310](apps/web/app/micros/page.tsx#L310) (`"+ Ghi món ngay"`), [setup-form.tsx:267](apps/web/components/onboarding/setup-form.tsx#L267) (`"Bắt đầu ghi bữa ăn"`): Trong khi thanh điều hướng và `/add` dùng `"Thêm món"`.
+8. **Nút `"Về Tổng quan"` nhưng lại dẫn sang `/diary` (Nhật ký)** — [entry/[id]/page.tsx:45](apps/web/app/entry/[id]/page.tsx#L45): Nhãn nút và đích điều hướng bị ngược nhau.
+9. **Chuỗi giữ chỗ `[GIÁ/THÁNG]`, `[GIÁ/NĂM]`, `Tiết kiệm [X]%`, `[NHÀ CUNG CẤP THANH TOÁN]` hiện nguyên văn trên màn hình `/paywall`** — [paywall/page.tsx:16](apps/web/app/paywall/page.tsx#L16), [paywall/page.tsx:17](apps/web/app/paywall/page.tsx#L17), [paywall/page.tsx:135](apps/web/app/paywall/page.tsx#L135), đi kèm chữ `"Gói Miễn phí"` viết hoa Title Case ở dòng 144.
+10. **Mâu thuẫn số lượng vi chất (`"58 chỉ số vi chất"` vs `"22 vi chất"`) và thuật ngữ (`"chưa có số liệu"` vs `"chưa có dữ liệu"`)** — [micros/page.tsx:304](apps/web/app/micros/page.tsx#L304) ghi `"58 chỉ số vi chất"` trong khi [layout.tsx:23](apps/web/app/layout.tsx#L23) và [setup-form.tsx:203](apps/web/components/onboarding/setup-form.tsx#L203) ghi `"22 vi chất"`; tab Vi chất của Tổng quan ([micros-tab.tsx:37](apps/web/components/overview/micros-tab.tsx#L37)) dùng `"chưa có số liệu"` còn trang `/micros` ([micros/page.tsx:680](apps/web/app/micros/page.tsx#L680)) dùng `"chưa có dữ liệu"`.
+
+---
+
 ## 1. Inventory chuỗi hiển thị (`apps/web/app` & `apps/web/components`)
 
 Bảng dưới đây thống kê toàn bộ chuỗi hiển thị cho người dùng (nhãn, nút bấm, tiêu đề, gợi ý, thông báo toast, trạng thái rỗng, `aria-label`, `title` trang) trong `apps/web/app`, `apps/web/components` và các hàm định dạng/hằng số chuỗi phụ trợ trong `apps/web/lib` (bỏ qua `apps/web/lib/api-client*`, `apps/web/lib/supabase-client*` và `apps/web/app/(auth)/login` theo phạm vi).
