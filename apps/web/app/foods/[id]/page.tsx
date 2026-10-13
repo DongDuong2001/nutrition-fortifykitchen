@@ -130,7 +130,7 @@ function FoodDetailInner() {
             )}
             <Link
               href="/settings/data-sources"
-              className="inline-flex items-center min-h-[44px] -my-2.5 px-1 -mx-1 text-inherit underline hover:text-blue transition-colors"
+              className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] -my-2.5 px-2 -mx-2 text-inherit underline hover:text-blue transition-colors"
             >
               {foodSourceLabel(food.source)}
             </Link>
