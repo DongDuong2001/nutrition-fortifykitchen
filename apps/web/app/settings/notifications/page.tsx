@@ -193,11 +193,11 @@ export default function NotificationsSettingsPage() {
                         handleTimeChange(row.timeKey!, e.target.value)
                       }
                       aria-label={timeLabel}
-                      className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
+                      className="peer absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
                     />
                     <span
                       aria-hidden="true"
-                      className="flex items-center justify-center h-11 min-w-[64px] px-3 rounded-full border border-black/12 bg-card text-ink text-sm font-semibold tabular-nums hover:bg-surface-tint active:scale-[0.97] transition-transform select-none"
+                      className="flex items-center justify-center h-11 min-w-[64px] px-3 rounded-full border border-black/12 bg-card text-ink text-sm font-semibold tabular-nums hover:bg-surface-tint active:scale-[0.97] transition-transform select-none peer-focus-visible:ring-2 peer-focus-visible:ring-blue peer-focus-visible:ring-offset-2"
                     >
                       {timeVal}
                     </span>
