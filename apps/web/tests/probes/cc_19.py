@@ -164,6 +164,7 @@ def check_settings_row_and_sources(browser):
         pg = context.new_page()
         go(pg, "/settings")
         pg.wait_for_selector('section[aria-label="Ứng dụng"]', timeout=10000)
+        pg.screenshot(path=os.path.join(SHOTS, f"cc-19-settings-{label}.png"), full_page=True)
         rows = pg.locator('section[aria-label="Ứng dụng"] a')
         names = [rows.nth(i).inner_text().split("\n")[0].strip() for i in range(rows.count())]
         check("Nguồn dữ liệu" in names, f"{label} /settings: Ứng dụng card has a Nguồn dữ liệu row ({names})")
@@ -176,6 +177,7 @@ def check_settings_row_and_sources(browser):
 
         go(pg, "/settings/data-sources")
         pg.wait_for_selector("main article", timeout=10000)
+        pg.screenshot(path=os.path.join(SHOTS, f"cc-19-data-sources-{label}.png"), full_page=True)
         check(pg.get_by_role("heading", name="Các cơ sở dữ liệu dinh dưỡng", level=2).count() == 1,
               f"{label} data-sources: the section heading is an h2")
         cards = pg.locator("main article")
