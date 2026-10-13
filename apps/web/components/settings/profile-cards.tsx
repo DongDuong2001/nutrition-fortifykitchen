@@ -203,6 +203,9 @@ export function AppCard() {
         <Row label="Nhắc nhở" value={reminders ?? ""} href="/settings/notifications" />
       </RowGroup>
       <RowGroup>
+        <Row label="Nguồn dữ liệu" href="/settings/data-sources" />
+      </RowGroup>
+      <RowGroup>
         <Row label="Thêm vào màn hình chính" href="/install" />
       </RowGroup>
     </Card>
