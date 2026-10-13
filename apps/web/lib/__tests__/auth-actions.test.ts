@@ -349,7 +349,7 @@ describe("magic link request (does not sign in on request)", () => {
     expect(await currentAccount()).toBeNull();
   });
 
-  it("asks the API client for the link first, then signs the mock account in", async () => {
+  it("asks the API client for the link first, and does not sign in until the link is opened", async () => {
     demo.on = false;
     const calls: string[] = [];
     const spy = vi.spyOn(apiClient, "requestMagicLink").mockImplementation(async (email: string) => {
@@ -363,6 +363,6 @@ describe("magic link request (does not sign in on request)", () => {
       spy.mockRestore();
     }
     expect(calls).toEqual(["api:cc20@example.com"]);
-    expect((await currentAccount())?.email).toBe("cc20@example.com");
+    expect(await currentAccount()).toBeNull();
   });
 });
