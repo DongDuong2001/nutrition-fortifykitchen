@@ -34,7 +34,7 @@ export function MicrosTab() {
           const range = row.targetMin === null ? null : row.targetMax ? formatRange(row.targetMin, row.targetMax) : formatAmount(row.targetMin, row.unit);
           const detail =
             row.average === null
-              ? "Chưa có số liệu trong kỳ này"
+              ? "Chưa có dữ liệu trong kỳ này"
               : `TB ${formatAmount(row.average, row.unit)} ${row.unit}${range ? ` · mục tiêu ${range} ${row.unit}` : ""}${row.of > 0 ? ` · ${row.met}/${row.of} ngày đạt` : ""}`;
           return (
             <li key={row.key} className={i > 0 ? "border-t border-divider lg:[&:nth-child(2)]:border-t-0" : ""}>
@@ -51,7 +51,7 @@ export function MicrosTab() {
                   {row.percentage === null ? "—" : formatPercent(row.percentage)}
                 </span>
                 <span className="col-span-2">
-                  <SegmentedBar aria-label={`${row.name}: ${row.percentage === null ? "chưa có số liệu" : `${row.percentage} % mục tiêu`}`} percentage={row.percentage ?? 0} tone="light" />
+                  <SegmentedBar aria-label={`${row.name}: ${row.percentage === null ? "chưa có dữ liệu" : `${row.percentage} % mục tiêu`}`} percentage={row.percentage ?? 0} tone="light" />
                 </span>
               </Link>
             </li>
@@ -61,7 +61,7 @@ export function MicrosTab() {
 
       <p className="m-0 text-[13px] leading-snug text-secondary">
         Mỗi thanh có 10 đoạn; đoạn đầy khi đạt 10 % mục tiêu. Chạm một chất để mở chi tiết.
-        {withoutAverage > 0 ? ` ${withoutAverage} chất chưa có số liệu trong kỳ này, nên chưa có trung bình.` : ""}
+        {withoutAverage > 0 ? ` ${withoutAverage} chất chưa có dữ liệu trong kỳ này, nên chưa có trung bình.` : ""}
       </p>
     </section>
   );
