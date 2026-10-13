@@ -13,7 +13,7 @@ export function TrainingTipBanner({
 }: TrainingTipBannerProps) {
   const tipText = isRestDay
     ? "Ngày nghỉ vẫn ăn đủ đạm để cơ phục hồi."
-    : "Nhấp carb nhẹ theo từng set ở ngưỡng nặng. Nặng mới đốt đường.";
+    : "Nhấp tinh bột nhẹ theo từng hiệp ở ngưỡng nặng.";
 
   return (
     <div

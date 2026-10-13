@@ -105,7 +105,7 @@ def test_item_1_and_2(browser):
     pg.goto(BASE + "/micros", wait_until="networkidle")
     pg.wait_for_timeout(300)
     h1 = pg.locator("h1").first
-    check(h1.count() > 0 and "VI CHẤT" in h1.inner_text().upper(), "micros: h1 header element present with title VI CHẤT")
+    check(h1.count() > 0 and "VI CHẤT" in h1.inner_text().upper(), "micros: h1 header element present with title Vi chất")
     ctx.close()
 
 

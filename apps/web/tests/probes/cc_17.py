@@ -108,21 +108,21 @@ def check_edges(pg, group, label):
 def check_training(browser, size_name, size):
     label = f"training {size_name}"
 
-    # Today: tick Carb nhanh, then reload and it is still ticked
+    # Today: tick Tinh bột nhanh, then reload and it is still ticked
     context, pg, errors = open_page(browser, size, "/training?duration=60")
-    pg.wait_for_selector("input[aria-label='Carb nhanh']:visible")
+    pg.wait_for_selector("input[aria-label='Tinh bột nhanh']:visible")
     pg.evaluate("(key) => localStorage.removeItem(key)", KEY)
     pg.reload()
-    pg.wait_for_selector("input[aria-label='Carb nhanh']:visible")
-    carb = pg.locator("input[aria-label='Carb nhanh']:visible")
+    pg.wait_for_selector("input[aria-label='Tinh bột nhanh']:visible")
+    carb = pg.locator("input[aria-label='Tinh bột nhanh']:visible")
     check(carb.count() == 1 and not carb.is_checked(), f"{label}: nothing is ticked on a day with no record")
     carb.click()
     check(carb.is_checked(), f"{label}: today's tick is editable and checks")
     saved = read_store(pg)
     check(saved is not None and TODAY_ISO in saved and "intra-carb" in saved, f"{label}: the tick is saved under today's key")
     pg.reload()
-    pg.wait_for_selector("input[aria-label='Carb nhanh']:visible")
-    carb = pg.locator("input[aria-label='Carb nhanh']:visible")
+    pg.wait_for_selector("input[aria-label='Tinh bột nhanh']:visible")
+    carb = pg.locator("input[aria-label='Tinh bột nhanh']:visible")
     check(carb.is_checked(), f"{label}: the tick survives a reload")
     check(not carb.is_disabled(), f"{label}: today's tick stays editable after reload")
 
@@ -156,9 +156,9 @@ def check_training(browser, size_name, size):
     store_day(pg, YESTERDAY_ISO, 60, ["intra-carb", "intra-salt-0-20"])
     pg.goto(BASE + f"/training?date={YESTERDAY_ISO}")
     pg.wait_for_load_state("networkidle")
-    pg.wait_for_selector("input[aria-label='Carb nhanh']:visible")
+    pg.wait_for_selector("input[aria-label='Tinh bột nhanh']:visible")
     past = [c for c in training_checks(pg)]
-    carb = next((c for c in past if c["label"] == "Carb nhanh"), None)
+    carb = next((c for c in past if c["label"] == "Tinh bột nhanh"), None)
     check(carb is not None and carb["checked"], f"{label}: a past day shows its saved tick as checked")
     check(carb is not None and carb["disabled"], f"{label}: a past day's tick is disabled")
     check(all(c["disabled"] for c in past), f"{label}: every tick on a past day is disabled")
@@ -179,7 +179,7 @@ def check_training(browser, size_name, size):
     pg.goto(BASE + f"/training?date={OLD_ISO}")
     pg.wait_for_load_state("networkidle")
     pg.wait_for_timeout(300)
-    check(pg.locator("input[aria-label='Carb nhanh']").count() == 0, f"{label}: a day with no record shows no checklist")
+    check(pg.locator("input[aria-label='Tinh bột nhanh']").count() == 0, f"{label}: a day with no record shows no checklist")
     check(pg.locator("text=chưa có thời lượng tập đã ghi").count() >= 1, f"{label}: a day with no record says no duration was saved")
     check(not any(c["checked"] for c in training_checks(pg)), f"{label}: a day with no record has nothing ticked")
     context.close()
@@ -226,7 +226,7 @@ def check_micros_phone(browser):
     check(folded["height"] <= PHONE["height"] / 3, f"{label}: folded header is under a third of the screen")
     check("vi chất đã đạt" in folded["text"], f"{label}: folded header keeps the 8/22 count")
     check("Xu hướng 7 và 30 ngày" not in folded["text"], f"{label}: folded header hides the trends link")
-    check("VI CHẤT" in folded["text"], f"{label}: folded header keeps the title")
+    check("VI CHẤT" in folded["text"].upper(), f"{label}: folded header keeps the title")
     # 4 px of list scroll moves the card up by 4 px; the fold itself adds no shift
     check(abs((y_after - y_before) + 4) <= 2, f"{label}: the list does not jump when the header folds (card moved {y_after - y_before:+.1f} px, expected -4)")
 

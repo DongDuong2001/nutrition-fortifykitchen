@@ -35,13 +35,13 @@ export function TargetsScreen() {
         {hydrated ? (
           <div className="flex flex-col gap-4">
             <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
-              <TargetCard id="targets-energy" section={sections[0]} note="* Chất xơ: tạm thời, chưa có quy tắc của coach." />
+              <TargetCard id="targets-energy" section={sections[0]} note="* Chất xơ: tạm thời, chưa có quy tắc của huấn luyện viên." />
               <TargetCard id="targets-minerals" section={sections[1]} />
             </div>
             <TargetCard
               id="targets-vitamins"
               section={sections[2]}
-              note="* Khuyến nghị dinh dưỡng Việt Nam 2016 (VN 2016). Đây không phải quy tắc của coach."
+              note="* Khuyến nghị dinh dưỡng Việt Nam 2016 (VN 2016). Đây không phải quy tắc của huấn luyện viên."
             />
             <p className="m-0 text-[13px] text-secondary">Chỉ xem ở đây. Cân nặng, mục tiêu và ngày tập mặc định sửa trong Hồ sơ.</p>
             <PillButton href="/settings/profile">Sửa trong Hồ sơ</PillButton>

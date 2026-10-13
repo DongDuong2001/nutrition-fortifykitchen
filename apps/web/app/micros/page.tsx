@@ -298,7 +298,7 @@ function MicrosContent() {
         <div className="flex min-w-0 flex-1 flex-col pb-[88px] lg:pb-0">
           <AppHeader
             variant="sub"
-            title="VI CHẤT"
+            title="Vi chất"
             subtitle={phoneDateLabel}
             backHref={diaryHref}
             className="lg:hidden"
@@ -306,7 +306,7 @@ function MicrosContent() {
             summary={
               <div className="flex items-end justify-between pt-1">
                 <div className="text-[13px] text-muted-subtitle">
-                  Bắt đầu ghi món để đo lường
+                  Thêm món để xem vi chất
                 </div>
                 <div className="text-right">
                   <div className="font-display italic font-black text-3xl leading-none tabular-nums text-on-dark">
@@ -318,20 +318,20 @@ function MicrosContent() {
             }
           />
           <div className="hidden p-8 pb-0 lg:block">
-            <AppHeader variant="daily" title="VI CHẤT" subtitle={desktopSubtitle} flush backHref={diaryHref} />
+            <AppHeader variant="daily" title="Vi chất" subtitle={desktopSubtitle} flush backHref={diaryHref} />
           </div>
 
           <main className="flex-1 w-full max-w-[560px] mx-auto px-4 py-6 flex flex-col gap-4">
             <div className="bg-card border border-card-border rounded-[18px] p-6 text-center flex flex-col items-center gap-3">
-              <h2 className="m-0 text-base font-bold">{isPast ? "Chưa ghi món nào ngày này" : "Chưa ghi món nào hôm nay"}</h2>
+              <h2 className="m-0 text-base font-bold">{isPast ? "Chưa có món ngày này" : "Chưa có món hôm nay"}</h2>
               <p className="m-0 text-sm text-secondary leading-relaxed max-w-[320px]">
-                Bắt đầu ghi nhận món ăn để theo dõi 58 chỉ số vi chất và hoàn thành mục tiêu ngày.
+                Thêm món vào nhật ký để theo dõi 22 vi chất mỗi ngày.
               </p>
               <Link
                 href={diaryHref}
                 className="mt-2 h-11 px-6 rounded-full bg-blue text-on-accent flex items-center justify-center text-sm font-bold no-underline active:scale-[0.97] transition-transform"
               >
-                {isPast ? "Về Nhật ký" : "+ Ghi món ngay"}
+                {isPast ? "Về Nhật ký" : "+ Thêm món"}
               </Link>
             </div>
           </main>
@@ -356,7 +356,7 @@ function MicrosContent() {
         {/* Header */}
         <AppHeader
           variant="sub"
-          title="VI CHẤT"
+          title="Vi chất"
           subtitle={phoneDateLabel}
           backHref={diaryHref}
           alignGroup="micros-header"
@@ -481,7 +481,7 @@ function MicrosContent() {
           {/* Header */}
           <AppHeader
             variant="daily"
-            title="VI CHẤT"
+            title="Vi chất"
             flush
             backHref={diaryHref}
             alignGroup="micros-header"

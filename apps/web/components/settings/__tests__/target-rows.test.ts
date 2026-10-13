@@ -38,7 +38,7 @@ describe("targetSections", () => {
       detail: "1,6–2,2 g/kg × 65 kg",
       value: "104–143 g",
     });
-    expect(row(SAMPLE, "Năng lượng và đa lượng", "Béo")).toMatchObject({ value: "33–65 g" });
+    expect(row(SAMPLE, "Năng lượng và đa lượng", "Chất béo")).toMatchObject({ value: "33–65 g" });
     expect(row(SAMPLE, "Năng lượng và đa lượng", "Tinh bột")).toMatchObject({ value: "254 g" });
     // Fiber is provisional, not a coach rule: marked "*", and the detail names the rule without repeating the range
     expect(row(SAMPLE, "Năng lượng và đa lượng", "Chất xơ*")).toEqual({

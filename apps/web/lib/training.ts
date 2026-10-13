@@ -158,7 +158,7 @@ export function getTrainingPhases(trainingMinutes: number): TrainingPhase[] {
 
   intraItems.push({
     id: "intra-carb",
-    label: "Carb nhanh",
+    label: "Tinh bột nhanh",
     note: "Redbull · Redbull + mật mía · mật mía Golden Barrel",
     dose: "30–45 g",
   });

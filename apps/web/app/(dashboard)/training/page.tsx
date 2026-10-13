@@ -147,7 +147,7 @@ function TrainingContent() {
       >
         <AppHeader
           variant="sub"
-          title="NGÀY TẬP"
+          title="Ngày tập"
           subtitle={headerSubtitle}
           backHref={diaryHref}
           alignGroup="training-header"
@@ -207,7 +207,7 @@ function TrainingContent() {
           {/* Header */}
           <AppHeader
             variant="tab"
-            title="NGÀY TẬP"
+            title="Ngày tập"
             flush
             subtitle={desktopSubtitle}
             backHref={diaryHref}

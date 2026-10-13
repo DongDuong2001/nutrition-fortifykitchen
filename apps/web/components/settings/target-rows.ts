@@ -28,7 +28,7 @@ const VITAMIN_ROWS: [key: string, label: string, unit: string][] = [
   ["b3", "Vitamin B3", "mg"],
   ["b5", "Vitamin B5", "mg"],
   ["b6", "Vitamin B6", "mg"],
-  ["folate", "Folate (B9)", "µg"],
+  ["folate", "Vitamin B9", "µg"],
   ["b12", "Vitamin B12", "µg"],
   ["copper", "Đồng", "mg"],
   ["manganese", "Mangan", "mg"],
@@ -60,7 +60,7 @@ export function targetSections(profile: Profile): TargetSection[] {
           value: range(t.calories, "kcal"),
         },
         { label: "Đạm", detail: `1,6–2,2 g/kg × ${weight} kg`, value: range(t.protein, "g") },
-        { label: "Béo", detail: `0,5–1 g/kg × ${weight} kg`, value: range(t.fat, "g") },
+        { label: "Chất béo", detail: `0,5–1 g/kg × ${weight} kg`, value: range(t.fat, "g") },
         {
           label: "Tinh bột",
           detail: "Phần còn lại: (kcal − đạm × 4 − béo × 9) ÷ 4",
@@ -83,8 +83,8 @@ export function targetSections(profile: Profile): TargetSection[] {
           value: `${formatSaltRange(salt.totalMin, salt.totalMax)} g`,
         },
         { label: "Kali", detail: `80–100 mg/kg × ${weight} kg`, value: range(t.potassium, "mg") },
-        { label: "Canxi", detail: "Khoảng mục tiêu theo coach", value: range(t.calcium, "mg") },
-        { label: "Magie", detail: "50 % mục tiêu canxi", value: range(t.magnesium, "mg") },
+        { label: "Canxi", detail: "Khoảng mục tiêu theo huấn luyện viên", value: range(t.calcium, "mg") },
+        { label: "Magie", detail: "50% mục tiêu canxi", value: range(t.magnesium, "mg") },
         {
           label: "Sắt",
           detail: "Nam 8 mg · Nữ 18 mg, đang kinh 28 mg",
