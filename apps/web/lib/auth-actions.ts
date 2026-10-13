@@ -1,10 +1,10 @@
 import { apiClient } from "./api-client";
+import { createClient } from "./supabase-client";
 import { isDemo } from "./demo";
 import { isValidEmail } from "./onboarding";
 
-// The one interface the auth screens call. It is a MOCK for now: nothing leaves the browser, and the
-// accounts live in localStorage. Dong swaps the bodies for Supabase (lib/supabase-client.ts) later;
-// the screens and their messages stay the same.
+// The one interface the auth screens call. Backed by Supabase Auth (lib/supabase-client.ts).
+// The screens and their Vietnamese messages stay the same.
 
 export type AuthProvider = "password" | "google" | "magic_link";
 
@@ -41,19 +41,52 @@ export function validatePasswordConfirm(password: string, confirm: string): stri
   return confirm === password ? null : "Mật khẩu nhập lại chưa khớp";
 }
 
-// MOCK store. Missing or unreadable storage starts from the sample account (no password yet) in demo mode only
-// (lib/demo.ts). Outside demo mode a new visitor has no account until they sign up.
-const STORE_KEY = "h1t_mock_auth_v1";
-const SAMPLE_EMAIL = "ban@email.com";
-/** The one message for a failed sign-in: it never says which of email or password was wrong. */
 export const SIGN_IN_FAILED = "Email hoặc mật khẩu không đúng";
 export const WRONG_CURRENT_PASSWORD = "Mật khẩu hiện tại không đúng";
+const RETRY_LATER = "Chưa xử lý được. Thử lại sau ít phút.";
 const NOTICE_KEY = "h1t-auth-notice";
+const CURRENT_USER_KEY = "h1t_auth_current_email";
+const SIGNED_OUT_KEY = "h1t_auth_signed_out";
+const SAMPLE_EMAIL = "ban@email.com";
+
+let inMemoryEmail: string | null | undefined = undefined;
+
+function getStoredEmail(): string | null {
+  if (inMemoryEmail !== undefined) return inMemoryEmail;
+  try {
+    return globalThis.localStorage?.getItem(CURRENT_USER_KEY) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function setStoredEmail(email: string | null): void {
+  inMemoryEmail = email;
+  try {
+    if (email) {
+      globalThis.localStorage?.setItem(CURRENT_USER_KEY, email);
+      globalThis.localStorage?.removeItem(SIGNED_OUT_KEY);
+    } else {
+      globalThis.localStorage?.removeItem(CURRENT_USER_KEY);
+      globalThis.localStorage?.setItem(SIGNED_OUT_KEY, "true");
+    }
+  } catch {
+    // Storage blocked
+  }
+}
+
+function wasExplicitlySignedOut(): boolean {
+  try {
+    return globalThis.localStorage?.getItem(SIGNED_OUT_KEY) === "true";
+  } catch {
+    return false;
+  }
+}
 
 /** A toast message for the next screen (for example "Đã đặt lại mật khẩu" after the reset). */
 export function setAuthNotice(message: string): void {
   try {
-    globalThis.sessionStorage.setItem(NOTICE_KEY, message);
+    globalThis.sessionStorage?.setItem(NOTICE_KEY, message);
   } catch {
     // Storage blocked: the screen opens without the toast.
   }
@@ -62,84 +95,19 @@ export function setAuthNotice(message: string): void {
 /** Reads and clears the notice, so it shows once. */
 export function takeAuthNotice(): string | null {
   try {
-    const message = globalThis.sessionStorage.getItem(NOTICE_KEY);
-    globalThis.sessionStorage.removeItem(NOTICE_KEY);
+    const message = globalThis.sessionStorage?.getItem(NOTICE_KEY);
+    globalThis.sessionStorage?.removeItem(NOTICE_KEY);
     return message;
   } catch {
     return null;
   }
 }
 
-interface MockAccount {
-  /** SHA-256 of the password, null until one is set. The password itself is never stored. */
-  hash: string | null;
-  providers: AuthProvider[];
-}
-
-interface MockStore {
-  /** Signed-in email, or null after Đăng xuất. */
-  current: string | null;
-  accounts: Record<string, MockAccount>;
-}
-
-/** The store before anything is saved: the sample account in demo mode, nobody otherwise. */
-function startStore(): MockStore {
-  if (!isDemo()) return { current: null, accounts: {} };
-  return { current: SAMPLE_EMAIL, accounts: { [SAMPLE_EMAIL]: { hash: null, providers: ["google"] } } };
-}
-
-function readStore(): MockStore {
-  try {
-    const parsed = JSON.parse(globalThis.localStorage.getItem(STORE_KEY) ?? "null") as MockStore | null;
-    if (parsed && typeof parsed === "object" && parsed.accounts && typeof parsed.accounts === "object") return parsed;
-  } catch {
-    // Storage blocked or not JSON: fall through to the start store.
-  }
-  return startStore();
-}
-
-function writeStore(store: MockStore): void {
-  try {
-    globalThis.localStorage.setItem(STORE_KEY, JSON.stringify(store));
-  } catch {
-    // Storage blocked: the mock lasts for this visit only.
-  }
-}
-
-async function hashPassword(password: string): Promise<string> {
-  const digest = await globalThis.crypto.subtle.digest("SHA-256", new TextEncoder().encode(password));
-  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
-}
-
 function normaliseEmail(value: string): string {
   return value.trim().toLowerCase();
 }
 
-function accountInfo(email: string, account: MockAccount): AccountInfo {
-  return { email, hasPassword: account.hash !== null, providers: account.providers };
-}
-
-/** The signed-in account, or null when nobody is signed in. */
-export async function currentAccount(): Promise<AccountInfo | null> {
-  const store = readStore();
-  if (!store.current) return null;
-  const account = store.accounts[store.current];
-  return account ? accountInfo(store.current, account) : null;
-}
-
-/**
- * The id the per-account storage keys use: the signed-in account's email (lower case), or null when nobody is
- * signed in. Synchronous, so a screen can scope its storage on first read. The one place that knows how the
- * current account is found; Dong's real session replaces the body, nothing else changes.
- */
-export function currentAccountId(): string | null {
-  const store = readStore();
-  return store.current && store.accounts[store.current] ? store.current : null;
-}
-
-const RETRY_LATER = "Chưa xử lý được. Thử lại sau ít phút.";
-
-/** An unexpected failure (hashing unavailable, storage broken) becomes a message on the form, never a stuck button. */
+/** An unexpected failure becomes a message on the form, never a stuck button. */
 async function guarded(run: () => Promise<AuthResult>): Promise<AuthResult> {
   try {
     return await run();
@@ -148,15 +116,86 @@ async function guarded(run: () => Promise<AuthResult>): Promise<AuthResult> {
   }
 }
 
+/**
+ * The id the per-account storage keys use: the signed-in account's email (lower case), or null when nobody is
+ * signed in. Synchronous, so a screen can scope its storage on first read.
+ */
+export function currentAccountId(): string | null {
+  const email = getStoredEmail();
+  if (email) return email;
+  if (!wasExplicitlySignedOut() && isDemo()) {
+    return SAMPLE_EMAIL;
+  }
+  return null;
+}
+
+/** The signed-in account, or null when nobody is signed in. */
+export async function currentAccount(): Promise<AccountInfo | null> {
+  try {
+    const supabase = createClient();
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error || !user || !user.email) {
+      if (!wasExplicitlySignedOut() && isDemo()) {
+        return { email: SAMPLE_EMAIL, hasPassword: false, providers: ["google"] };
+      }
+      return null;
+    }
+
+    const email = normaliseEmail(user.email);
+    setStoredEmail(email);
+
+    const providers: AuthProvider[] = [];
+    const appProviders = user.app_metadata?.providers as string[] | undefined;
+    if (Array.isArray(appProviders)) {
+      for (const p of appProviders) {
+        if (p === "email" || p === "password") {
+          if (!providers.includes("password")) providers.push("password");
+        } else if (p === "google") {
+          if (!providers.includes("google")) providers.push("google");
+        } else if (p === "magic_link" || p === "otp") {
+          if (!providers.includes("magic_link")) providers.push("magic_link");
+        }
+      }
+    } else if (user.app_metadata?.provider) {
+      const p = user.app_metadata.provider;
+      if (p === "email") providers.push("password");
+      else if (p === "google") providers.push("google");
+      else if (p === "magic_link" || p === "otp") providers.push("magic_link");
+    }
+
+    if (user.identities && Array.isArray(user.identities)) {
+      for (const id of user.identities) {
+        if (id.provider === "email" && !providers.includes("password")) providers.push("password");
+        if (id.provider === "google" && !providers.includes("google")) providers.push("google");
+      }
+    }
+
+    if (providers.length === 0) {
+      providers.push("password");
+    }
+
+    const hasPassword = providers.includes("password") || Boolean(user.user_metadata?.has_password);
+    return { email, hasPassword, providers };
+  } catch {
+    if (!wasExplicitlySignedOut() && isDemo()) {
+      return { email: SAMPLE_EMAIL, hasPassword: false, providers: ["google"] };
+    }
+    return null;
+  }
+}
+
 export function signInWithPassword(email: string, password: string): Promise<AuthResult> {
   return guarded(async () => {
     const address = normaliseEmail(email);
-    const store = readStore();
-    const account = store.accounts[address];
-    if (!account || account.hash === null || account.hash !== (await hashPassword(password))) {
+    const supabase = createClient();
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: address,
+      password,
+    });
+    if (error || !data.user) {
       return { ok: false, error: SIGN_IN_FAILED };
     }
-    writeStore({ ...store, current: address });
+    setStoredEmail(address);
     return { ok: true };
   });
 }
@@ -169,11 +208,17 @@ export function signUpWithPassword(email: string, password: string): Promise<Aut
     if (passwordError) return { ok: false, error: passwordError };
 
     const address = normaliseEmail(email);
-    const store = readStore();
-    if (store.accounts[address]) return { ok: false, error: "Email này đã có tài khoản. Hãy đăng nhập." };
-
-    const account: MockAccount = { hash: await hashPassword(password), providers: ["password"] };
-    writeStore({ current: address, accounts: { ...store.accounts, [address]: account } });
+    const supabase = createClient();
+    const { data, error } = await supabase.auth.signUp({
+      email: address,
+      password,
+    });
+    if (error) {
+      return { ok: false, error: "Email này đã có tài khoản. Hãy đăng nhập." };
+    }
+    if (data.user) {
+      setStoredEmail(address);
+    }
     return { ok: true };
   });
 }
@@ -181,14 +226,23 @@ export function signUpWithPassword(email: string, password: string): Promise<Aut
 /** Always ok for a valid email, so the screen never reveals whether an account exists. */
 export async function sendPasswordReset(email: string): Promise<AuthResult> {
   const emailError = validateEmail(email);
-  return emailError ? { ok: false, error: emailError } : { ok: true };
+  if (emailError) return { ok: false, error: emailError };
+
+  try {
+    const address = normaliseEmail(email);
+    const supabase = createClient();
+    const redirectTo = typeof window !== "undefined" ? `${window.location.origin}/reset-password` : undefined;
+    await supabase.auth.resetPasswordForEmail(address, { redirectTo });
+  } catch {
+    // Fail silently to avoid disclosing account existence
+  }
+  return { ok: true };
 }
 
-// MOCK: real Supabase sign-in happens when the link is opened. Delete this MOCK block in lib/auth-actions.ts before any
-// deployed build (docs/dong-checklist.md); replace it with the session from Dong's client.
-// Until then the request itself signs the email in: a new email gets an account (no password), an existing account
-// keeps its password and id and gets the magic_link provider. Nothing else in the app knows this is a mock.
-/** Requests a magic link for the email and makes that account the signed-in one. */
+/**
+ * Requests a magic link for the email. Does NOT sign in on request; the user is signed in
+ * when the link is opened.
+ */
 export function requestMagicLink(email: string): Promise<AuthResult> {
   return guarded(async () => {
     const emailError = validateEmail(email);
@@ -198,57 +252,82 @@ export function requestMagicLink(email: string): Promise<AuthResult> {
     await apiClient.requestMagicLink(email);
 
     const address = normaliseEmail(email);
-    const store = readStore();
-    const existing = store.accounts[address];
-    const account: MockAccount = existing
-      ? { ...existing, providers: existing.providers.includes("magic_link") ? existing.providers : [...existing.providers, "magic_link"] }
-      : { hash: null, providers: ["magic_link"] };
-    writeStore({ current: address, accounts: { ...store.accounts, [address]: account } });
+    const supabase = createClient();
+    const redirectTo = typeof window !== "undefined" ? `${window.location.origin}/setup/profile` : undefined;
+    const { error } = await supabase.auth.signInWithOtp({
+      email: address,
+      options: { emailRedirectTo: redirectTo },
+    });
+    if (error) {
+      return { ok: false, error: RETRY_LATER };
+    }
     return { ok: true };
   });
 }
-// END MOCK magic link
+
+/** Initiates Google OAuth sign in flow via Supabase. */
+export async function signInWithGoogle(): Promise<AuthResult> {
+  return guarded(async () => {
+    const supabase = createClient();
+    const redirectTo = typeof window !== "undefined" ? `${window.location.origin}/setup/profile` : undefined;
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo },
+    });
+    if (error) return { ok: false, error: RETRY_LATER };
+    return { ok: true };
+  });
+}
 
 /**
  * Sets the signed-in account's password. The current password is checked only when one is given
  * (the change screen passes it when the account has a password; the reset screen does not).
  */
 export function updatePassword(newPassword: string, currentPassword?: string): Promise<AuthResult> {
-  return guarded(() => changePassword(newPassword, currentPassword));
+  return guarded(async () => {
+    const passwordError = validateNewPassword(newPassword);
+    if (passwordError) return { ok: false, error: passwordError };
+
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    const currentMail = user?.email || getStoredEmail();
+    if (!currentMail) {
+      return { ok: false, error: "Đăng nhập lại để đổi mật khẩu" };
+    }
+
+    if (currentPassword !== undefined) {
+      const { error: verifyErr } = await supabase.auth.signInWithPassword({
+        email: currentMail,
+        password: currentPassword,
+      });
+      if (verifyErr) {
+        return { ok: false, error: WRONG_CURRENT_PASSWORD };
+      }
+    }
+
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) {
+      return { ok: false, error: RETRY_LATER };
+    }
+
+    return { ok: true };
+  });
 }
 
-async function changePassword(newPassword: string, currentPassword?: string): Promise<AuthResult> {
-  const passwordError = validateNewPassword(newPassword);
-  if (passwordError) return { ok: false, error: passwordError };
-
-  const store = readStore();
-  const address = store.current;
-  const account = address ? store.accounts[address] : undefined;
-  if (!address || !account) return { ok: false, error: "Đăng nhập lại để đổi mật khẩu" };
-
-  if (currentPassword !== undefined && account.hash !== null && account.hash !== (await hashPassword(currentPassword))) {
-    return { ok: false, error: WRONG_CURRENT_PASSWORD };
-  }
-
-  const providers = account.providers.includes("password") ? account.providers : [...account.providers, "password" as const];
-  writeStore({ ...store, accounts: { ...store.accounts, [address]: { hash: await hashPassword(newPassword), providers } } });
-  return { ok: true };
-}
-
-/**
- * MOCK Google sign-in: the sample account (ban@email.com) becomes the signed-in one, so the diary of the
- * account that signed out is there again. Dong's real session replaces this with the OAuth result.
- */
+/** Sample account sign-in for demo mode. */
 export async function signInSampleAccount(): Promise<void> {
-  const store = readStore();
-  const account = store.accounts[SAMPLE_EMAIL] ?? { hash: null, providers: ["google" as const] };
-  writeStore({ current: SAMPLE_EMAIL, accounts: { ...store.accounts, [SAMPLE_EMAIL]: account } });
+  setStoredEmail(SAMPLE_EMAIL);
 }
 
 /**
- * Đăng xuất: clears the signed-in account. The accounts stay, so signing in again works, and the diary stays
- * under the account's storage keys (lib/storage-keys), so it is there again when the same account signs in.
+ * Đăng xuất: clears the signed-in session and local tokens.
  */
 export async function signOut(): Promise<void> {
-  writeStore({ ...readStore(), current: null });
+  setStoredEmail(null);
+  try {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+  } catch {
+    // Ignore sign-out transport errors
+  }
 }

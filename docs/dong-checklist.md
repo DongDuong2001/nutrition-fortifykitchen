@@ -27,10 +27,10 @@ Sources: docs/audit-ag10.md, docs/08-backend-plan.md, docs/07-api-contract.md, O
 
 ## 3. Auth (Supabase)
 - [ ] Supabase project (ask Hao for access or create it and share it): Google, magic link and email + password enabled; reset-password redirect `/reset-password`; site URL and redirect URLs for local (3000), staging and prod.
-- [ ] `profiles.display_name` (optional) through `GET /me` and `PUT /me/profile`.
-- [ ] Replace the MOCK bodies in `apps/web/lib/auth-actions.ts` with Supabase calls: `signInWithPassword`, `signUpWithPassword`, `requestMagicLink`, `signInWithGoogle`, `sendPasswordReset`, `updatePassword`, `signOut`, `currentAccount`. The UI calls only this file. Keep its tests (mock the client).
-- [ ] Magic link signs in **when the link is opened**, not when it is requested (the mock does the latter; delete the MOCK block).
-- [ ] `signOut()` ends the Supabase session and clears local tokens.
+- [x] `profiles.display_name` (optional) through `GET /me` and `PUT /me/profile`.
+- [x] Replace the MOCK bodies in `apps/web/lib/auth-actions.ts` with Supabase calls: `signInWithPassword`, `signUpWithPassword`, `requestMagicLink`, `signInWithGoogle`, `sendPasswordReset`, `updatePassword`, `signOut`, `currentAccount`. The UI calls only this file. Keep its tests (mock the client).
+- [x] Magic link signs in **when the link is opened**, not when it is requested (the mock does the latter; delete the MOCK block).
+- [x] `signOut()` ends the Supabase session and clears local tokens.
   Done when: sign up → set up profile → sign out → sign in again works on staging with all three providers.
 
 ## 4. Food data

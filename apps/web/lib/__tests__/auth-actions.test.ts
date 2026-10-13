@@ -21,6 +21,108 @@ import { apiClient } from "../api-client";
 const demo = vi.hoisted(() => ({ on: true }));
 vi.mock("../demo", () => ({ isDemo: () => demo.on }));
 
+interface UserRecord {
+  id: string;
+  email: string;
+  password?: string;
+  providers: string[];
+}
+
+const mockState = vi.hoisted(() => ({
+  users: new Map<string, UserRecord>(),
+  currentUser: null as UserRecord | null,
+  failNextCall: false,
+}));
+
+vi.mock("../supabase-client", () => {
+  return {
+    createClient: () => ({
+      auth: {
+        getUser: vi.fn(async () => {
+          if (mockState.failNextCall) throw new Error("network error");
+          if (!mockState.currentUser) return { data: { user: null }, error: null };
+          return {
+            data: {
+              user: {
+                id: mockState.currentUser.id,
+                email: mockState.currentUser.email,
+                app_metadata: {
+                  provider: mockState.currentUser.providers[0],
+                  providers: mockState.currentUser.providers,
+                },
+                identities: mockState.currentUser.providers.map((p) => ({ provider: p })),
+              },
+            },
+            error: null,
+          };
+        }),
+        signInWithPassword: vi.fn(async ({ email, password }: { email: string; password: string }) => {
+          if (mockState.failNextCall) throw new Error("network error");
+          const user = mockState.users.get(email.toLowerCase().trim());
+          if (!user || user.password !== password) {
+            return { data: { user: null }, error: new Error("invalid_credentials") };
+          }
+          mockState.currentUser = user;
+          return { data: { user }, error: null };
+        }),
+        signUp: vi.fn(async ({ email, password }: { email: string; password: string }) => {
+          if (mockState.failNextCall) throw new Error("network error");
+          const normalised = email.toLowerCase().trim();
+          if (mockState.users.has(normalised)) {
+            return { data: { user: null }, error: new Error("user_already_exists") };
+          }
+          const user: UserRecord = {
+            id: `user-${Date.now()}`,
+            email: normalised,
+            password,
+            providers: ["password"],
+          };
+          mockState.users.set(normalised, user);
+          mockState.currentUser = user;
+          return { data: { user }, error: null };
+        }),
+        signInWithOtp: vi.fn(async ({ email }: { email: string }) => {
+          if (mockState.failNextCall) throw new Error("network error");
+          const normalised = email.toLowerCase().trim();
+          if (!mockState.users.has(normalised)) {
+            mockState.users.set(normalised, {
+              id: `user-${Date.now()}`,
+              email: normalised,
+              providers: ["magic_link"],
+            });
+          }
+          return { data: {}, error: null };
+        }),
+        signInWithOAuth: vi.fn(async () => {
+          if (mockState.failNextCall) throw new Error("network error");
+          return { data: {}, error: null };
+        }),
+        resetPasswordForEmail: vi.fn(async () => {
+          if (mockState.failNextCall) throw new Error("network error");
+          return { data: {}, error: null };
+        }),
+        updateUser: vi.fn(async ({ password }: { password?: string }) => {
+          if (mockState.failNextCall) throw new Error("network error");
+          if (!mockState.currentUser) {
+            return { data: { user: null }, error: new Error("unauthorized") };
+          }
+          if (password) {
+            mockState.currentUser.password = password;
+            if (!mockState.currentUser.providers.includes("password")) {
+              mockState.currentUser.providers.push("password");
+            }
+          }
+          return { data: { user: mockState.currentUser }, error: null };
+        }),
+        signOut: vi.fn(async () => {
+          mockState.currentUser = null;
+          return { error: null };
+        }),
+      },
+    }),
+  };
+});
+
 // Messages are fixed Vietnamese copy (Hao's 13/10 decisions); the tests check the exact text.
 const EMAIL_ERROR = "Nhập email hợp lệ, ví dụ ban@email.com";
 const PASSWORD_SHORT = "Mật khẩu cần ít nhất 8 ký tự";
@@ -92,9 +194,12 @@ function memoryStorage(): Storage {
   } as Storage;
 }
 
-describe("mock account flows (MOCK, no network)", () => {
+describe("Supabase auth flows (mocked client, no network)", () => {
   beforeEach(() => {
     demo.on = true;
+    mockState.users.clear();
+    mockState.currentUser = null;
+    mockState.failNextCall = false;
     vi.stubGlobal("localStorage", memoryStorage());
   });
   afterEach(() => {
@@ -142,12 +247,18 @@ describe("mock account flows (MOCK, no network)", () => {
   });
 
   it("sets a first password on the sample account without a current password", async () => {
+    // In demo mode, sample account is simulated
+    mockState.currentUser = {
+      id: "sample-user",
+      email: "ban@email.com",
+      providers: ["google"],
+    };
     expect(await updatePassword("abcdef12")).toEqual({ ok: true });
     expect(await currentAccount()).toEqual({ email: "ban@email.com", hasPassword: true, providers: ["google", "password"] });
   });
 
   it("changes a password only when the current one is right", async () => {
-    await updatePassword("abcdef12");
+    await signUpWithPassword("ban@email.com", "abcdef12");
     expect(await updatePassword("abcdef34", "wrong1234")).toEqual({ ok: false, error: "Mật khẩu hiện tại không đúng" });
     expect(await updatePassword("abcdef34", "abcdef12")).toEqual({ ok: true });
     await signOut();
@@ -163,10 +274,10 @@ describe("mock account flows (MOCK, no network)", () => {
     expect(await sendPasswordReset("not-an-email")).toEqual({ ok: false, error: EMAIL_ERROR });
   });
 
-  it("answers with a retry message, not a stuck form, when hashing is unavailable", async () => {
+  it("answers with a retry message, not a stuck form, when client transport errors occur", async () => {
     await signUpWithPassword("cc18@example.com", "abcdef12");
     await signOut();
-    vi.stubGlobal("crypto", undefined);
+    mockState.failNextCall = true;
     expect(await signInWithPassword("cc18@example.com", "abcdef12")).toEqual({
       ok: false,
       error: "Chưa xử lý được. Thử lại sau ít phút.",
@@ -195,31 +306,32 @@ describe("mock account flows (MOCK, no network)", () => {
   });
 });
 
-describe("magic link request (MOCK, signs in at once)", () => {
+describe("magic link request (does not sign in on request)", () => {
   beforeEach(() => {
     demo.on = true;
+    mockState.users.clear();
+    mockState.currentUser = null;
+    mockState.failNextCall = false;
     vi.stubGlobal("localStorage", memoryStorage());
   });
   afterEach(() => {
     vi.unstubAllGlobals();
   });
 
-  it("a new email gets an account with magic_link and is signed in", async () => {
+  it("a new email sends magic link successfully but is NOT signed in on request", async () => {
     demo.on = false;
     expect(await requestMagicLink("cc19new@example.com")).toEqual({ ok: true });
-    expect(await currentAccount()).toEqual({ email: "cc19new@example.com", hasPassword: false, providers: ["magic_link"] });
-    expect(currentAccountId()).toBe("cc19new@example.com");
+    expect(await currentAccount()).toBeNull();
+    expect(currentAccountId()).toBeNull();
   });
 
-  it("an existing password account keeps its password, gets magic_link, and keeps its id", async () => {
+  it("an existing password account sends magic link successfully without changing current session", async () => {
     demo.on = false;
     expect(await signUpWithPassword("cc19old@example.com", "abcdef12")).toEqual({ ok: true });
-    const idBefore = currentAccountId();
     await signOut();
     expect(await requestMagicLink("cc19old@example.com")).toEqual({ ok: true });
-    expect(currentAccountId()).toBe(idBefore);
-    expect(await currentAccount()).toEqual({ email: "cc19old@example.com", hasPassword: true, providers: ["password", "magic_link"] });
-    await signOut();
+    expect(currentAccountId()).toBeNull();
+    expect(await currentAccount()).toBeNull();
     expect(await signInWithPassword("cc19old@example.com", "abcdef12")).toEqual({ ok: true });
   });
 

@@ -78,6 +78,7 @@ func (s *DefaultService) UpsertProfile(ctx context.Context, userID uuid.UUID, re
 		TrainingMinutesDefault: trainingMinutes,
 		NearPeriod:             nearPeriod,
 		Language:               lang,
+		DisplayName:            req.DisplayName,
 	}
 
 	if err := s.repo.UpsertProfile(ctx, p); err != nil {

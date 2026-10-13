@@ -16,6 +16,7 @@ type Profile struct {
 	TrainingMinutesDefault int       `json:"training_minutes_default"`
 	NearPeriod             bool      `json:"near_period"`
 	Language               string    `json:"language"`
+	DisplayName            *string   `json:"display_name,omitempty"`
 	Reminders              any       `json:"reminders"`
 	Targets                any       `json:"targets,omitempty"`
 	CreatedAt              time.Time `json:"created_at"`
@@ -37,6 +38,7 @@ type UpsertProfileRequest struct {
 	TrainingMinutesDefault *int     `json:"training_minutes_default,omitempty"`
 	NearPeriod             *bool    `json:"near_period,omitempty"`
 	Language               *string  `json:"language,omitempty"`
+	DisplayName            *string  `json:"display_name,omitempty"`
 }
 
 type UpsertWeightRequest struct {
