@@ -17,6 +17,9 @@ import {
 } from "../auth-actions";
 import { apiClient } from "../api-client";
 
+// The live path: Supabase Auth through a mocked client (the mock mode has its own file, auth-actions-mock.test.ts)
+vi.stubEnv("NEXT_PUBLIC_API_MODE", "live");
+
 // Demo mode decides whether the sample account exists. The flows below run in demo mode unless a test says otherwise.
 const demo = vi.hoisted(() => ({ on: true }));
 vi.mock("../demo", () => ({ isDemo: () => demo.on }));

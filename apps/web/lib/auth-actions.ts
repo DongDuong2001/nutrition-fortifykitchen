@@ -1,10 +1,23 @@
 import { apiClient } from "./api-client";
+import { isLiveMode } from "./api-mode";
+import {
+  mockCurrentAccount,
+  mockCurrentAccountId,
+  mockRequestMagicLink,
+  mockSendPasswordReset,
+  mockSignInSampleAccount,
+  mockSignInWithPassword,
+  mockSignOut,
+  mockSignUpWithPassword,
+  mockUpdatePassword,
+} from "./auth-mock";
 import { createClient } from "./supabase-client";
 import { isDemo } from "./demo";
 import { isValidEmail } from "./onboarding";
 
-// The one interface the auth screens call. Backed by Supabase Auth (lib/supabase-client.ts).
-// The screens and their Vietnamese messages stay the same.
+// The one interface the auth screens call. In live mode (NEXT_PUBLIC_API_MODE=live, lib/api-mode.ts) it is backed by
+// Supabase Auth (lib/supabase-client.ts); otherwise by the local mock in lib/auth-mock.ts, so gates and demos run
+// without a backend. The screens and their Vietnamese messages stay the same.
 
 export type AuthProvider = "password" | "google" | "magic_link";
 
@@ -121,6 +134,7 @@ async function guarded(run: () => Promise<AuthResult>): Promise<AuthResult> {
  * signed in. Synchronous, so a screen can scope its storage on first read.
  */
 export function currentAccountId(): string | null {
+  if (!isLiveMode()) return mockCurrentAccountId();
   const email = getStoredEmail();
   if (email) return email;
   if (!wasExplicitlySignedOut() && isDemo()) {
@@ -131,6 +145,7 @@ export function currentAccountId(): string | null {
 
 /** The signed-in account, or null when nobody is signed in. */
 export async function currentAccount(): Promise<AccountInfo | null> {
+  if (!isLiveMode()) return mockCurrentAccount();
   try {
     const supabase = createClient();
     const { data: { user }, error } = await supabase.auth.getUser();
@@ -185,6 +200,7 @@ export async function currentAccount(): Promise<AccountInfo | null> {
 }
 
 export function signInWithPassword(email: string, password: string): Promise<AuthResult> {
+  if (!isLiveMode()) return mockSignInWithPassword(email, password);
   return guarded(async () => {
     const address = normaliseEmail(email);
     const supabase = createClient();
@@ -201,6 +217,7 @@ export function signInWithPassword(email: string, password: string): Promise<Aut
 }
 
 export function signUpWithPassword(email: string, password: string): Promise<AuthResult> {
+  if (!isLiveMode()) return mockSignUpWithPassword(email, password);
   return guarded(async () => {
     const emailError = validateEmail(email);
     if (emailError) return { ok: false, error: emailError };
@@ -225,6 +242,7 @@ export function signUpWithPassword(email: string, password: string): Promise<Aut
 
 /** Always ok for a valid email, so the screen never reveals whether an account exists. */
 export async function sendPasswordReset(email: string): Promise<AuthResult> {
+  if (!isLiveMode()) return mockSendPasswordReset(email);
   const emailError = validateEmail(email);
   if (emailError) return { ok: false, error: emailError };
 
@@ -244,11 +262,12 @@ export async function sendPasswordReset(email: string): Promise<AuthResult> {
  * when the link is opened.
  */
 export function requestMagicLink(email: string): Promise<AuthResult> {
+  if (!isLiveMode()) return mockRequestMagicLink(email);
   return guarded(async () => {
     const emailError = validateEmail(email);
     if (emailError) return { ok: false, error: emailError };
 
-    // The request goes to the API client first, then the MOCK sign-in below runs
+    // The API client is told first (a no-op until Dong's endpoint exists), then Supabase sends the link
     await apiClient.requestMagicLink(email);
 
     const address = normaliseEmail(email);
@@ -267,6 +286,8 @@ export function requestMagicLink(email: string): Promise<AuthResult> {
 
 /** Initiates Google OAuth sign in flow via Supabase. */
 export async function signInWithGoogle(): Promise<AuthResult> {
+  // Mock mode never reaches Supabase: the sample account stands in for the Google account
+  if (!isLiveMode()) return mockSignInSampleAccount().then(() => ({ ok: true }) as AuthResult);
   return guarded(async () => {
     const supabase = createClient();
     const redirectTo = typeof window !== "undefined" ? `${window.location.origin}/setup/profile` : undefined;
@@ -284,6 +305,7 @@ export async function signInWithGoogle(): Promise<AuthResult> {
  * (the change screen passes it when the account has a password; the reset screen does not).
  */
 export function updatePassword(newPassword: string, currentPassword?: string): Promise<AuthResult> {
+  if (!isLiveMode()) return mockUpdatePassword(newPassword, currentPassword);
   return guarded(async () => {
     const passwordError = validateNewPassword(newPassword);
     if (passwordError) return { ok: false, error: passwordError };
@@ -316,6 +338,7 @@ export function updatePassword(newPassword: string, currentPassword?: string): P
 
 /** Sample account sign-in for demo mode. */
 export async function signInSampleAccount(): Promise<void> {
+  if (!isLiveMode()) return mockSignInSampleAccount();
   setStoredEmail(SAMPLE_EMAIL);
 }
 
@@ -323,6 +346,7 @@ export async function signInSampleAccount(): Promise<void> {
  * Đăng xuất: clears the signed-in session and local tokens.
  */
 export async function signOut(): Promise<void> {
+  if (!isLiveMode()) return mockSignOut();
   setStoredEmail(null);
   try {
     const supabase = createClient();
