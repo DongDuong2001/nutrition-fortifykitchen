@@ -2,15 +2,18 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useDiary, type EntryView } from "@/lib/diary-store";
-import { entryNumbers } from "@/lib/diary-edits";
-import { MEAL_SLOTS, type MealSlot, getMealSlotNameVi } from "@/lib/meal-slot";
-import { parseGramsInput } from "@/lib/portion";
-import { formatAmount } from "@/lib/format";
-import { AppHeader } from "@/components/ui/app-header";
-import { ChipGroup } from "@/components/ui/chip-group";
-import { FormRow } from "@/components/ui/form-row";
-import { parseDecimalInput } from "@/lib/quick-entry";
+import { useDiary, type EntryView } from "../../lib/diary-store";
+import { entryNumbers } from "../../lib/diary-edits";
+import { MEAL_SLOTS, type MealSlot, getMealSlotNameVi } from "../../lib/meal-slot";
+import { parseGramsInput } from "../../lib/portion";
+import { formatAmount } from "../../lib/format";
+import { AppHeader } from "../ui/app-header";
+import { ChipGroup } from "../ui/chip-group";
+import { FormRow } from "../ui/form-row";
+import { parseDecimalInput } from "../../lib/quick-entry";
+
+import { formatGramsServingLabel } from "./serving-label";
+export { formatGramsServingLabel };
 
 const quickFieldClass =
   "h-12 w-full rounded-xl border-2 border-card-border bg-card px-3 text-base text-text outline-none transition-colors focus:border-blue";
@@ -147,9 +150,9 @@ export function EntryEditor({ view }: { view: EntryView }) {
                   value={gramsInput}
                   disabled={!canPortion}
                   onChange={(e) => {
-                    setGramsInput(e.target.value);
-                    const n = Number(e.target.value) || 0;
-                    setServingLabel(`${formatAmount(n, "g")} g`);
+                    const text = e.target.value;
+                    setGramsInput(text);
+                    setServingLabel((prev) => formatGramsServingLabel(text, prev));
                   }}
                   className="h-11 min-w-0 flex-1 border-0 bg-transparent text-lg font-semibold tabular-nums outline-none focus-visible:outline-none disabled:opacity-60"
                 />
