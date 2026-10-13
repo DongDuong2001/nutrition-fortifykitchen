@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card";
 import { ChipGroup } from "@/components/ui/chip-group";
 import { FoodRowLink } from "@/components/foods/food-row-link";
 import { useDiary } from "@/lib/diary-store";
-import { MOCK_FOODS } from "@/lib/mock/foods";
+import { browsableFoods } from "@/lib/mock/foods";
 import { getNutrientDefinition } from "@/lib/nutrients";
 import { formatAmount } from "@/lib/format";
 import { isRichNutrientId, richInFoods, richName, type RichBasis } from "@/lib/rich-in";
@@ -18,14 +18,14 @@ import { useBack } from "@/hooks/use-back";
 export default function RichInPage() {
   const params = useParams<{ nutrient: string }>();
   const goBack = useBack();
-  const { targets } = useDiary();
+  const { targets, demo } = useDiary();
   const [basis, setBasis] = useState<RichBasis>("per100");
 
   const id = params?.nutrient ?? "";
   const valid = isRichNutrientId(id);
   const definition = valid ? getNutrientDefinition(id) : undefined;
   const min = valid ? (targets[id]?.min ?? null) : null;
-  const rows = useMemo(() => (valid ? richInFoods(MOCK_FOODS, id, basis, min) : []), [valid, id, basis, min]);
+  const rows = useMemo(() => (valid ? richInFoods(browsableFoods(), id, basis, min) : []), [valid, id, basis, min, demo]);
   if (!valid || !definition) notFound();
 
   const name = richName(definition.nameVi);

@@ -20,6 +20,8 @@ SHOTS = Path(__file__).resolve().parent.parent.parent / ".screenshots"
 SIZES = [("390", {"width": 390, "height": 844}), ("1280", {"width": 1280, "height": 800})]
 NOW = "2026-10-13T18:00:00+07:00"
 WEIGHT = 70
+# cc2-15c: without a saved profile every tab route goes to /setup/profile, so the empty-state checks start with one
+PROFILE = '{"sex":"male","birthYear":2003,"weightKg":65,"goal":"maintain","periodMode":false,"trainingMinutesDefault":60,"displayName":""}'
 # Expected from the coach's rules, not from the code: 70 kg, Giữ cân 30-35 kcal/kg, protein 1,6-2,2 g/kg, fat 0,5-1 g/kg,
 # carbs = (energy min - protein mid x 4 - fat mid x 9) / 4 = (2.100 - 133 x 4 - 52,5 x 9) / 4, salt 4-6 g + 1-1,5 g per 20 min x 3
 SUMMARY_ROWS = [
@@ -74,6 +76,7 @@ def setup(pg, phone):
 def run(browser, name, size):
     phone = size["width"] < 1024
     ctx = browser.new_context(viewport=size)
+    ctx.add_init_script(f"try {{ if (localStorage.getItem('h1t_profile_v1') === null) localStorage.setItem('h1t_profile_v1', JSON.stringify({PROFILE})); }} catch (e) {{}}")
     pg = ctx.new_page()
     errors = []
     pg.on("pageerror", lambda e: errors.append(str(e)))
@@ -169,7 +172,8 @@ def run(browser, name, size):
     t = text(pg)
     check("Yến mạch" in t and "Chưa có món hôm nay" not in t, f"{where} ?demo=1: the sample day is back")
     go(pg, "/explore")
-    check(food in text(pg), f"{where} ?demo=1: the flag stays on and the real recent ({food}) is kept")
+    t = text(pg)
+    check("Yogurt kefir" in t and food not in t, f"{where} ?demo=1: its own Gần đây (sample foods), not the real recent ({food})")
     go(pg, "/trends/body")
     check("Dữ liệu mẫu" in text(pg), f"{where} ?demo=1: sample weights are back")
     check(pg.evaluate("localStorage.getItem('h1t_demo_v1')") == "1", f"{where} ?demo=1: the flag is saved")
@@ -178,7 +182,9 @@ def run(browser, name, size):
     check(not any(f in t for f in SAMPLE_FOODS), f"{where} ?demo=0: no sample food")
     check(pg.evaluate("localStorage.getItem('h1t_demo_v1')") is None, f"{where} ?demo=0: the flag is cleared")
     go(pg, "/explore")
-    check("Yến mạch" not in text(pg), f"{where} ?demo=0: Gần đây has no sample foods")
+    check("Yến mạch" not in text(pg) and food in text(pg), f"{where} ?demo=0: Gần đây is the real one again, no sample foods")
+    go(pg, "/diary")
+    check(food in text(pg), f"{where} ?demo=0: the real meal ({food}) is still in Nhật ký")
     real = [e for e in errors if "status of 404" not in e]
     check(not real, f"{where}: no console or page errors ({real[:2]})")
     ctx.close()

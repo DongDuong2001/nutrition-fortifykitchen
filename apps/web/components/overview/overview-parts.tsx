@@ -50,8 +50,9 @@ export function ChevronRight() {
  */
 export function NotEnoughData() {
   const { overview } = useOverview();
-  const days = overview.averages.loggedDays;
-  if (!overview.days.some((d) => d.logged)) return <NothingLogged current={overview.period.isCurrent} />;
+  // Today counts here when it has an entry (the averages still leave it out, see periodNote)
+  const days = overview.days.filter((d) => d.logged).length;
+  if (days === 0) return <NothingLogged current={overview.period.isCurrent} />;
   return (
     <section aria-labelledby="ov-empty" className="bg-card border border-card-border rounded-[18px] p-4 flex flex-col gap-3 text-text">
       <h2 id="ov-empty" className="m-0 text-base font-bold lg:text-lg">

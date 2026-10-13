@@ -6,8 +6,18 @@ import { type FoodItem } from "./mock/foods";
 import { type MealSlot, getMealSlotNameVi } from "./meal-slot";
 import { formatAmount } from "./format";
 import { getTodayIsoVN, withRuntimeDate } from "./date";
-import { ADDED_ENTRIES_KEY } from "./first-run";
 import { isDemo, setDemoActive } from "./demo";
+import {
+  ADDED_ENTRIES_KEY,
+  RECENT_FOODS_KEY,
+  SAMPLE_EDITS_KEY,
+  browserLocal,
+  browserSession,
+  keyedStorage,
+  loadMigrated,
+  storageKey,
+  type KeyValueStore,
+} from "./storage-keys";
 import { blankDay, dayEntries, statDisplay } from "./day-history";
 import { totalsFromEntries } from "./day-totals";
 import { microsSummaryFor } from "./lacking";
@@ -150,11 +160,6 @@ interface DiaryContextValue {
 
 const DiaryContext = createContext<DiaryContextValue | null>(null);
 
-const SESSION_STORAGE_KEY = ADDED_ENTRIES_KEY;
-// Edits to sample-day items (portion, meal, deleted), kept next to the added entries
-const SAMPLE_EDITS_KEY = "h1t_sample_edits_v1";
-// v2: recents are { foodId, servingLabel } objects. The v1 string list is ignored.
-const RECENT_FOODS_KEY = "h1t_recent_foods_v2";
 
 /**
  * Pure aggregation function for daily totals.
@@ -344,21 +349,24 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   // Same rule for the profile: the sample user until the saved one is read after mount
   const [profile, setProfile] = useState<Profile>(SAMPLE_PROFILE);
 
-  // Load from sessionStorage on mount (client-only)
+  // Load on mount (client-only). Everything is in localStorage; an old sessionStorage copy moves over once.
   useEffect(() => {
     // Before anything that depends on today renders, so history and weights are in place with it
     const demoNow = isDemo();
     setDemoActive(demoNow);
     setDemo(demoNow);
+    const local = browserLocal();
+    const session = browserSession();
+    const load = (base: string) => loadMigrated(storageKey(base, demoNow), local, session);
     try {
-      const storedEntries = sessionStorage.getItem(SESSION_STORAGE_KEY);
-      const storedSample = sessionStorage.getItem(SAMPLE_EDITS_KEY);
+      const storedEntries = load(ADDED_ENTRIES_KEY);
+      const storedSample = load(SAMPLE_EDITS_KEY);
       setEdits((prev) => ({
         ...prev,
         added: parseAddedEntries(storedEntries),
         sample: parseSampleEdits(storedSample),
       }));
-      const storedRecents = sessionStorage.getItem(RECENT_FOODS_KEY);
+      const storedRecents = load(RECENT_FOODS_KEY);
       if (storedRecents) {
         const parsed: unknown = JSON.parse(storedRecents);
         if (Array.isArray(parsed) && parsed.length > 0) {
@@ -370,38 +378,46 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         setRecentFoods(DEFAULT_RECENT_FOODS);
       }
     } catch {
-      // Ignore sessionStorage access errors
+      // Ignore storage access errors
     } finally {
-      setFavouriteIds(readFavouriteIds());
-      setSavedMeals(readSavedMeals());
+      const own = local ? keyedStorage(local, demoNow) : null;
+      setFavouriteIds(readFavouriteIds(own));
+      setSavedMeals(readSavedMeals(own));
       setTodayIso(getTodayIsoVN());
       setProfile(loadProfile(new Date().getFullYear()));
       setHydrated(true);
     }
   }, []);
 
-  // Persist favourites to localStorage only after hydrated
+  // The storage this mode writes to: the real keys, or the demo twins
+  const ownStorage = useCallback((): KeyValueStore | null => {
+    const local = browserLocal();
+    return local ? keyedStorage(local, demo) : null;
+  }, [demo]);
+
+  // Persist favourites only after hydrated
   useEffect(() => {
     if (!hydrated) return;
-    writeFavouriteIds(favouriteIds);
-  }, [favouriteIds, hydrated]);
+    writeFavouriteIds(favouriteIds, ownStorage());
+  }, [favouriteIds, hydrated, ownStorage]);
 
-  // Persist saved meals to localStorage only after hydrated
+  // Persist saved meals only after hydrated
   useEffect(() => {
     if (!hydrated) return;
-    writeSavedMeals(savedMeals);
-  }, [savedMeals, hydrated]);
+    writeSavedMeals(savedMeals, ownStorage());
+  }, [savedMeals, hydrated, ownStorage]);
 
-  // Persist added entries and sample edits to sessionStorage only after hydrated
+  // Persist added entries and sample edits only after hydrated
   useEffect(() => {
     if (!hydrated) return;
     try {
-      sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(edits.added));
-      sessionStorage.setItem(SAMPLE_EDITS_KEY, JSON.stringify(edits.sample));
+      const own = ownStorage();
+      own?.setItem(ADDED_ENTRIES_KEY, JSON.stringify(edits.added));
+      own?.setItem(SAMPLE_EDITS_KEY, JSON.stringify(edits.sample));
     } catch {
       // Ignore quota/access errors
     }
-  }, [edits.added, edits.sample, hydrated]);
+  }, [edits.added, edits.sample, hydrated, ownStorage]);
 
   // Persist recent foods only after hydrated
   useEffect(() => {
@@ -409,11 +425,11 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     // The sample recents are never saved: a real account must not inherit them when demo mode goes off
     if (recentFoods === DEFAULT_RECENT_FOODS) return;
     try {
-      sessionStorage.setItem(RECENT_FOODS_KEY, JSON.stringify(recentFoods));
+      ownStorage()?.setItem(RECENT_FOODS_KEY, JSON.stringify(recentFoods));
     } catch {
       // Ignore
     }
-  }, [recentFoods, hydrated]);
+  }, [recentFoods, hydrated, ownStorage]);
 
   // Auto-dismiss the toast. When a "deleted" toast goes, the undo goes with it.
   useEffect(() => {

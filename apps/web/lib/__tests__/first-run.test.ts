@@ -3,6 +3,8 @@ import {
   countStoredEntries,
   firstRunState,
   isNewUser,
+  isTabRoute,
+  setupRedirectFor,
   setupSummary,
   summaryAddHref,
 } from "../first-run";
@@ -62,6 +64,25 @@ describe("lib/first-run", () => {
     const rest = setupSummary({ ...SAMPLE_PROFILE, trainingMinutesDefault: 0 }).targets.find((t) => t.label === "Muối");
     expect(rest?.value).toBe("4–6 g");
     expect(rest?.hint).toBe("Ngày nghỉ");
+  });
+
+  it("tab routes are the app screens, not auth, setup, offline or install", () => {
+    for (const path of ["/", "/diary", "/explore", "/explore/meals", "/settings", "/settings/profile", "/add", "/micros", "/micros/calcium", "/training", "/trends/body"]) {
+      expect(isTabRoute(path), path).toBe(true);
+    }
+    for (const path of ["/signin", "/signup", "/reset-password", "/setup/profile", "/setup/done", "/offline", "/install", "/login", "/foods/food-cha-la", "/entry/item-1"]) {
+      expect(isTabRoute(path), path).toBe(false);
+    }
+  });
+
+  it("no profile outside demo mode sends a tab route to /setup/profile, and nothing else", () => {
+    const none = { profileSaved: false, entryEverLogged: false };
+    expect(setupRedirectFor("/", none, false)).toBe("/setup/profile");
+    expect(setupRedirectFor("/diary", none, false)).toBe("/setup/profile");
+    expect(setupRedirectFor("/signin", none, false)).toBeNull();
+    expect(setupRedirectFor("/setup/goal", none, false)).toBeNull();
+    expect(setupRedirectFor("/", none, true)).toBeNull();
+    expect(setupRedirectFor("/", { profileSaved: true, entryEverLogged: false }, false)).toBeNull();
   });
 
   it("the first meal opens the add sheet for the meal of the clock", () => {

@@ -9,7 +9,8 @@ import { ChipRow } from "@/components/foods/chip-row";
 import { FoodListCard } from "@/components/foods/food-list-card";
 import { FoodSearchField } from "@/components/foods/food-search-field";
 import { ExploreSections } from "@/components/explore/explore-sections";
-import { MOCK_FOODS } from "@/lib/mock/foods";
+import { browsableFoods } from "@/lib/mock/foods";
+import { useDiary } from "@/lib/diary-store";
 import { searchFoods } from "@/lib/search";
 import { FOOD_CATEGORIES, categoryLabel, categoryOf } from "@/lib/food-categories";
 
@@ -21,7 +22,8 @@ export default function ExplorePage() {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const searching = query.trim().length > 0;
-  const results = useMemo(() => searchFoods(MOCK_FOODS, query), [query]);
+  const { demo } = useDiary();
+  const results = useMemo(() => searchFoods(browsableFoods(), query), [query, demo]);
 
   const chips = [
     { id: "all", label: "Tất cả", active: true },

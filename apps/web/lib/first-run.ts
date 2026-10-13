@@ -1,11 +1,12 @@
 import { getDefaultMealSlot } from "./meal-slot";
 import { PROFILE_KEY, targetRangeText, targetsFor, type Profile } from "./profile";
 import { calculateSaltTarget } from "./training";
+import { isDemo } from "./demo";
+import { ADDED_ENTRIES_KEY, browserLocal, browserSession, loadMigrated, storageKey } from "./storage-keys";
 
-// sessionStorage key of the diary store: the entries this user added. Only real entries are counted here:
-// the sample day, the sample history and the seeded Gần đây exist in demo mode only (lib/demo) and are never
-// stored in this key, so demo data never makes a new user look like a returning one.
-export const ADDED_ENTRIES_KEY = "h1t_added_entries_v1";
+// The entries this user added live in localStorage (lib/storage-keys). Only real entries count here: the sample
+// day, history and seeded Gần đây exist in demo mode only (lib/demo), and demo entries have their own key.
+export { ADDED_ENTRIES_KEY };
 
 export interface FirstRunFacts {
   profileSaved: boolean;
@@ -18,6 +19,19 @@ export type FirstRunState = "needs-setup" | "needs-first-meal" | "ready";
 export function firstRunState({ profileSaved, entryEverLogged }: FirstRunFacts): FirstRunState {
   if (!profileSaved) return "needs-setup";
   return entryEverLogged ? "ready" : "needs-first-meal";
+}
+
+// The screens a user lands on from the bottom bar or the sidebar. A missing profile sends these to setup.
+const TAB_ROUTES = ["/diary", "/explore", "/settings", "/add", "/micros", "/training", "/trends"];
+
+export function isTabRoute(pathname: string): boolean {
+  return pathname === "/" || TAB_ROUTES.some((route) => pathname === route || pathname.startsWith(route + "/"));
+}
+
+/** Where to send a user who has no profile yet (outside demo mode): setup, from any tab route. Else null. */
+export function setupRedirectFor(pathname: string, facts: FirstRunFacts, demo: boolean): string | null {
+  if (demo || !isTabRoute(pathname)) return null;
+  return firstRunState(facts) === "needs-setup" ? "/setup/profile" : null;
 }
 
 export function isNewUser(facts: FirstRunFacts): boolean {
@@ -35,8 +49,8 @@ export function countStoredEntries(raw: string | null): number {
   }
 }
 
-/** Reads the facts from storage. Blocked storage counts as "nothing saved". Client only. */
-export function readFirstRunFacts(): FirstRunFacts {
+/** Reads the facts from storage (the demo keys in demo mode). Blocked storage counts as "nothing saved". Client only. */
+export function readFirstRunFacts(demo: boolean = isDemo()): FirstRunFacts {
   let profileSaved = false;
   let entryEverLogged = false;
   try {
@@ -45,7 +59,9 @@ export function readFirstRunFacts(): FirstRunFacts {
     // Storage blocked
   }
   try {
-    entryEverLogged = countStoredEntries(window.sessionStorage.getItem(ADDED_ENTRIES_KEY)) > 0;
+    // An old sessionStorage copy is moved to localStorage here, the same as the diary store does on load
+    entryEverLogged =
+      countStoredEntries(loadMigrated(storageKey(ADDED_ENTRIES_KEY, demo), browserLocal(), browserSession())) > 0;
   } catch {
     // Storage blocked
   }

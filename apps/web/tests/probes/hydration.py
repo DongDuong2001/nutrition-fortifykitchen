@@ -39,7 +39,8 @@ def main():
 
             page.goto(f"{BASE_URL}{path}", wait_until="networkidle")
             page.evaluate("""() => {
-                sessionStorage.setItem('h1t_added_entries_v1', JSON.stringify([{
+                // cc2-15c: the diary is in localStorage, and demo mode (on for every probe page) has its own _demo keys
+                localStorage.setItem('h1t_added_entries_v1_demo', JSON.stringify([{
                     id: 'test-entry-1',
                     foodId: 'food-cha-la',
                     foodName: 'Chà là hạt dẻ test',
@@ -54,7 +55,7 @@ def main():
                     nutrients: { energy: 85, carbs: 22.5, protein: 0.7, fat: 0.1, potassium: 195, fiber: 2.0 },
                     addedAt: new Date().toISOString()
                 }]));
-                sessionStorage.setItem('h1t_recent_foods_v2', JSON.stringify([{ foodId: 'food-hat-dieu', servingLabel: '30 g' }]));
+                localStorage.setItem('h1t_recent_foods_v2_demo', JSON.stringify([{ foodId: 'food-hat-dieu', servingLabel: '30 g' }]));
             }""")
             page.reload(wait_until="networkidle")
             page.wait_for_timeout(1500)

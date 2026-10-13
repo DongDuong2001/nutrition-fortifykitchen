@@ -6,21 +6,20 @@ import { AppHeader } from "@/components/ui/app-header";
 import { AppShell } from "@/components/ui/app-shell";
 import { PillButton } from "@/components/ui/pill-button";
 import { FoodListCard } from "@/components/foods/food-list-card";
-import { MOCK_FOODS } from "@/lib/mock/foods";
+import { browsableFoods } from "@/lib/mock/foods";
 import { FOOD_CATEGORIES, categoryOf, isOwnFood } from "@/lib/food-categories";
 import { useBack } from "@/hooks/use-back";
-import { useDiary } from "@/lib/diary-store";
 
 /** One food category, a pushed screen of Khám phá. */
 export default function ExploreCategoryPage() {
   const params = useParams<{ category: string }>();
   const goBack = useBack();
-  const { demo } = useDiary();
   const category = FOOD_CATEGORIES.find((c) => c.key === params?.category);
   if (!category) notFound();
 
-  // Món của tôi holds the sample user food in demo mode only
-  const foods = MOCK_FOODS.filter((f) => (category.key === "cua_toi" ? demo && isOwnFood(f) : categoryOf(f) === category.key)).map((food) => ({ food }));
+  const foods = browsableFoods()
+    .filter((f) => (category.key === "cua_toi" ? isOwnFood(f) : categoryOf(f) === category.key))
+    .map((food) => ({ food }));
 
   return (
     <AppShell>

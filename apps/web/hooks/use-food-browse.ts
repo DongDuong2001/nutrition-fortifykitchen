@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { MOCK_FOODS, type FoodItem } from "@/lib/mock/foods";
+import { browsableFoods, type FoodItem } from "@/lib/mock/foods";
 import { findSimilarFoods } from "@/lib/search";
 import {
   buildFoodList,
@@ -17,13 +17,17 @@ import { useDiary } from "@/lib/diary-store";
  * the same index, the same category chips and the same empty states.
  */
 export function useFoodBrowse() {
-  const { favouriteIds, isFavourite } = useDiary();
+  const { favouriteIds, isFavourite, demo } = useDiary();
   const [filter, setFilter] = useState<FoodFilter>("all");
   const [query, setQuery] = useState("");
 
   // Filter and search combined. Grouped only for Tất cả with no query.
-  const list = useMemo(() => buildFoodList(MOCK_FOODS, query, filter, favouriteIds), [query, filter, favouriteIds]);
-  const categories = useMemo(() => categoriesWithFoods(MOCK_FOODS), []);
+  // `demo` is a dependency because the catalogue read follows demo mode, which is known after mount
+  const list = useMemo(
+    () => buildFoodList(browsableFoods(), query, filter, favouriteIds),
+    [query, filter, favouriteIds, demo]
+  );
+  const categories = useMemo(() => categoriesWithFoods(browsableFoods()), [demo]);
   const categoryName = useCallback((food: FoodItem) => categoryLabel(categoryOf(food)), []);
   const isFavouriteFood = useCallback((food: FoodItem) => isFavourite(food.id), [isFavourite]);
 
@@ -42,7 +46,7 @@ export function useFoodBrowse() {
   // Fuzzy suggestions when results are empty
   const similarFoods = useMemo(() => {
     if (list.foods.length === 0 && query.trim()) {
-      return findSimilarFoods(MOCK_FOODS, query, 4);
+      return findSimilarFoods(browsableFoods(), query, 4);
     }
     return [];
   }, [list.foods, query]);

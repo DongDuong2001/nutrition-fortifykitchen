@@ -1,4 +1,5 @@
 import type { FoodCategory } from "../food-categories";
+import { demoActive } from "../demo";
 
 export interface FoodServing {
   label: string;
@@ -14,6 +15,16 @@ export interface FoodItem {
   servings: FoodServing[];
   tipVi?: string;
   nutrients: Record<string, number | null>; // per 100g
+  /** Sample food of the demo day: found in lists and search only in demo mode (see browsableFoods). */
+  demoOnly?: boolean;
+}
+
+/**
+ * The catalogue as lists and search read it. Foods that only exist for the demo day are left out unless demo mode
+ * is on. Look-ups by id (a saved entry, a recent, a favourite) read MOCK_FOODS directly and still find them.
+ */
+export function browsableFoods(): FoodItem[] {
+  return demoActive() ? MOCK_FOODS : MOCK_FOODS.filter((f) => !f.demoOnly);
 }
 
 export const MOCK_FOODS: FoodItem[] = [
@@ -184,6 +195,7 @@ export const MOCK_FOODS: FoodItem[] = [
     nameVi: "Bột củ dền",
     brand: "Dalahouse",
     source: "user",
+    demoOnly: true,
     servings: [
       { label: "3 g", grams: 3 },
       { label: "1 muỗng", grams: 3 },

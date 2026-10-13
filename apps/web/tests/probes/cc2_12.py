@@ -24,8 +24,9 @@ BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3102")
 SHOTS = Path(__file__).resolve().parent.parent.parent / ".screenshots"
 SIZES = [("390", {"width": 390, "height": 844}), ("1280", {"width": 1280, "height": 800})]
 NOW = "2026-10-12T18:00:00+07:00"  # dinner by the clock
-RECENTS_KEY = "h1t_recent_foods_v2"
-FAVOURITES_KEY = "h1t_favourite_foods_v1"
+# cc2-15c: recents are in localStorage, and demo mode (on through _demo) reads the _demo twins of the keys
+RECENTS_KEY = "h1t_recent_foods_v2_demo"
+FAVOURITES_KEY = "h1t_favourite_foods_v1_demo"
 problems, notes = [], []
 
 
@@ -39,7 +40,7 @@ def new_page(browser, size, recents=None, favourites=None):
     pg.clock.set_fixed_time(NOW)
     if recents is not None:
         pg.add_init_script(
-            f"if (!sessionStorage.getItem('{RECENTS_KEY}')) sessionStorage.setItem('{RECENTS_KEY}', {json.dumps(json.dumps(recents))});"
+            f"if (!localStorage.getItem('{RECENTS_KEY}')) localStorage.setItem('{RECENTS_KEY}', {json.dumps(json.dumps(recents))});"
         )
     if favourites is not None:
         pg.add_init_script(

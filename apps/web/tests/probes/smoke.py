@@ -162,8 +162,13 @@ EMPTY_ROUTES = ["/", "/trends", "/trends/micros", "/trends/body", "/diary", "/mi
 BAD_TEXT = re.compile(r"\bNaN\b|\bundefined\b|\bInfinity\b")
 
 
+# An account that finished setup (the sample profile's values): without one every tab route goes to /setup/profile
+SAVED_PROFILE = '{"sex":"male","birthYear":2003,"weightKg":65,"goal":"maintain","periodMode":false,"trainingMinutesDefault":60,"displayName":""}'
+
+
 def check_empty(browser, route, width, height):
     context = browser.new_context(viewport={"width": width, "height": height})
+    context.add_init_script(f"try {{ localStorage.setItem('h1t_profile_v1', JSON.stringify({SAVED_PROFILE})); }} catch (e) {{}}")
     page = context.new_page()
     console_msgs = []
     page.on("console", lambda msg: console_msgs.append(msg.text) if msg.type == "error" else None)
