@@ -8,11 +8,16 @@ const SHOWN = 5;
 export interface ContributingFoodsProps {
   sources: NutrientSource[];
   unit: string;
+  isToday?: boolean;
 }
 
-export function ContributingFoods({ sources, unit }: ContributingFoodsProps) {
+export function ContributingFoods({ sources, unit, isToday = true }: ContributingFoodsProps) {
   if (sources.length === 0) {
-    return <p className="m-0 text-sm leading-relaxed text-secondary">Chưa có món nào có chất này hôm nay.</p>;
+    return (
+      <p className="m-0 text-sm leading-relaxed text-secondary">
+        {isToday ? "Chưa có món nào có chất này hôm nay." : "Chưa có món nào có chất này."}
+      </p>
+    );
   }
 
   return (

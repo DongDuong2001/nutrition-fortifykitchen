@@ -76,7 +76,7 @@ export default function NutrientDetailPage({ params }: PageProps) {
         <div className="text-center">
           <p className="text-secondary">Không tìm thấy vi chất.</p>
           <Link href="/micros" className="text-blue font-bold">
-            Quay lại Vi chất
+            Về Vi chất
           </Link>
         </div>
       </div>
@@ -153,7 +153,7 @@ export default function NutrientDetailPage({ params }: PageProps) {
           <h2 id="nutrient-sources-title" className="m-0 mb-2 text-base font-bold">
             {isPast ? "Đã có từ món ăn của ngày này" : "Đã có từ món ăn hôm nay"}
           </h2>
-          <ContributingFoods sources={sources} unit={def.unit} />
+          <ContributingFoods sources={sources} unit={def.unit} isToday={!isPast} />
         </Card>
       </main>
     </AppShell>
