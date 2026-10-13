@@ -160,6 +160,17 @@ describe("updateEntryIn", () => {
     expect(next.added[0].calories).toBe(168);
   });
 
+  it("formats decimal grams label using formatAmount in Vietnamese format", () => {
+    const start: DiaryEdits = { ...EMPTY, added: [addedEntry("entry-1", "food-cha-la", 30, "snack")] };
+    const next = updateEntryIn(start, "entry-1", { grams: 2.5 });
+    expect(next.added[0].grams).toBe(2.5);
+    expect(next.added[0].displayQty).toBe("2,5 g");
+
+    const sampleNext = updateEntryIn(EMPTY, "item-1", { grams: 2.5 });
+    const view = findEntry(sampleNext, "item-1");
+    expect(view?.servingLabel).toBe("2,5 g");
+  });
+
   it("ignores a portion change for an item that cannot change portion", () => {
     const next = updateEntryIn(EMPTY, "item-x", { grams: 5, servingLabel: "5 g" }, UNKNOWN_SAMPLES);
     expect(next.sample["item-x"]?.grams).toBeUndefined();
