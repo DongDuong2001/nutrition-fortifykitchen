@@ -1,5 +1,5 @@
-import { ProfileScreen } from "@/components/profile/profile-screen";
+import { SettingsHomeScreen } from "@/components/settings/settings-home-screen";
 
 export default function SettingsPage() {
-  return <ProfileScreen title="Cài đặt" />;
+  return <SettingsHomeScreen />;
 }
