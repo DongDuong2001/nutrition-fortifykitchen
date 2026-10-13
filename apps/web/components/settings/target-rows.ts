@@ -69,7 +69,7 @@ export function targetSections(profile: Profile): TargetSection[] {
         {
           // Provisional, not a coach rule: the "*" note on the card says so
           label: "Chất xơ*",
-          detail: "14 g mỗi 1.000 kcal, kẹp theo giới tính",
+          detail: "14 g mỗi 1.000 kcal, giới hạn theo giới tính",
           value: range(t.fiber, "g"),
         },
       ],

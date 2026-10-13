@@ -43,7 +43,7 @@ describe("targetSections", () => {
     // Fiber is provisional, not a coach rule: marked "*", and the detail names the rule without repeating the range
     expect(row(SAMPLE, "Năng lượng và đa lượng", "Chất xơ*")).toEqual({
       label: "Chất xơ*",
-      detail: "14 g mỗi 1.000 kcal, kẹp theo giới tính",
+      detail: "14 g mỗi 1.000 kcal, giới hạn theo giới tính",
       value: "30–40 g",
     });
   });
