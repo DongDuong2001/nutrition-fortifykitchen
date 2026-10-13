@@ -1,19 +1,33 @@
 "use client";
 
 import { useState } from "react";
-import { Sheet } from "@/components/ui/sheet";
-import { useDiary } from "@/lib/diary-store";
-import { dayEntries, dayStatus, entriesKcal, monthGrid, monthOf, shiftMonth, type DayStatus } from "@/lib/day-history";
-import { getWeekdayName } from "@/lib/format";
+import { Sheet } from "./ui/sheet";
+import { useDiary } from "../lib/diary-store";
+import { dayEntries, dayStatus, entriesKcal, monthGrid, monthOf, shiftMonth, type DayStatus } from "../lib/day-history";
+import { getWeekdayName } from "../lib/format";
 
 const WEEKDAYS = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
 
-const STATUS_TEXT: Record<DayStatus, string> = {
+export const STATUS_TEXT: Record<DayStatus, string> = {
   met: "đạt mục tiêu",
   under: "thiếu kcal",
-  over: "vượt mục tiêu",
+  over: "đạt mục tiêu",
   none: "chưa ghi",
 };
+
+export function calendarDayDot(status: DayStatus): "bg-blue" | "bg-red" | "bg-transparent" {
+  return status === "met" || status === "over" ? "bg-blue" : status === "under" ? "bg-red" : "bg-transparent";
+}
+
+export function calendarDayLabel(iso: string, day: number, monthNumber: number, status: DayStatus, options?: { isToday?: boolean; future?: boolean }): string {
+  return [
+    `${getWeekdayName(iso)} ${day} tháng ${monthNumber}`,
+    options?.isToday ? "hôm nay" : null,
+    options?.future ? "chưa tới" : STATUS_TEXT[status],
+  ]
+    .filter(Boolean)
+    .join(", ");
+}
 
 interface CalendarSheetProps {
   open: boolean;
@@ -50,7 +64,7 @@ function CalendarMonth({ selectedIso, onPick }: Pick<CalendarSheetProps, "select
   };
 
   const [, m] = month.split("-");
-  const monthTitle = `Tháng ${Number(m)}, ${month.slice(0, 4)}`;
+  const monthTitle = `Tháng ${Number(m)}/${month.slice(0, 4)}`;
 
   return (
     <div className="flex flex-col gap-3 py-2">
@@ -92,14 +106,8 @@ function CalendarMonth({ selectedIso, onPick }: Pick<CalendarSheetProps, "select
           const status = day.future ? "none" : statusOf(day.iso);
           const isSelected = day.iso === selectedIso;
           const isToday = day.iso === todayIso;
-          const dot = status === "met" ? "bg-blue" : status === "under" ? "bg-red" : "bg-transparent";
-          const label = [
-            `${getWeekdayName(day.iso)} ${day.day} tháng ${Number(m)}`,
-            isToday ? "hôm nay" : null,
-            day.future ? "chưa tới" : STATUS_TEXT[status],
-          ]
-            .filter(Boolean)
-            .join(", ");
+          const dot = calendarDayDot(status);
+          const label = calendarDayLabel(day.iso, day.day, Number(m), status, { isToday, future: day.future });
           return (
             <button
               key={day.iso}
