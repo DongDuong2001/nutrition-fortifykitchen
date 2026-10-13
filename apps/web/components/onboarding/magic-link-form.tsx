@@ -8,7 +8,7 @@ import { validateEmail } from "@/lib/auth-actions";
 import { EmailField } from "@/components/auth/email-field";
 import { PillButton } from "@/components/ui/pill-button";
 
-/** Email field that sends a magic link (no password). Used by sign-up, sign-in and the expired link screen. */
+/** Email field that sends a magic link (no password). Used by the expired link screen. */
 export function MagicLinkForm({ submitLabel }: { submitLabel: string }) {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -35,7 +35,7 @@ export function MagicLinkForm({ submitLabel }: { submitLabel: string }) {
       writePendingEmail(value);
       router.push("/signin/check-email");
     } catch {
-      setError("Chưa gửi được link. Thử lại sau ít phút.");
+      setError("Chưa gửi được liên kết. Thử lại sau ít phút.");
       setSending(false);
     }
   }

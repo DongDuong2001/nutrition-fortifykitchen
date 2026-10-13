@@ -55,12 +55,12 @@ export default function CheckEmailPage() {
             <p className="m-0 text-[15px] leading-normal text-muted-subtitle">
               {email ? (
                 <>
-                  Đã gửi link đăng nhập tới <strong className="text-on-dark">{email}</strong>.
+                  Đã gửi liên kết đăng nhập tới <strong className="text-on-dark">{email}</strong>.
                 </>
               ) : (
-                "Đã gửi link đăng nhập tới email của bạn."
+                "Đã gửi liên kết đăng nhập tới email của bạn."
               )}{" "}
-              Link có hiệu lực 15 phút.
+              Liên kết có hiệu lực 15 phút.
             </p>
           </div>
         </>
@@ -83,7 +83,7 @@ export default function CheckEmailPage() {
           href="/setup/profile"
           className="inline-flex min-h-[44px] items-center justify-center px-2 text-[13px] font-semibold text-secondary"
         >
-          Mô phỏng mở link (dev)
+          Mô phỏng mở liên kết (dev)
         </Link>
       )}
       <p className="m-0 text-center text-[13px] leading-normal text-secondary">

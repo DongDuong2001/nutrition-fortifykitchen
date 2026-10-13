@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { AuthShell } from "@/components/onboarding/auth-shell";
 import { GoogleSignInButton } from "@/components/onboarding/google-sign-in-button";
-import { MagicLinkForm } from "@/components/onboarding/magic-link-form";
-import { SignUpPasswordForm } from "@/components/onboarding/sign-up-password-form";
+import { EmailPasswordForm } from "@/components/onboarding/email-password-form";
 
 const DESKTOP_VALUES = [
   "Theo dõi đầy đủ vi chất, không chỉ calo",
@@ -65,14 +64,7 @@ export default function SignUpPage() {
         hoặc
         <span className="h-px flex-1 bg-divider" />
       </div>
-      <SignUpPasswordForm />
-      <div className="flex items-center gap-3 text-[13px] text-secondary" aria-hidden="true">
-        <span className="h-px flex-1 bg-divider" />
-        hoặc
-        <span className="h-px flex-1 bg-divider" />
-      </div>
-      <MagicLinkForm submitLabel="Gửi link đăng nhập" />
-      <p className="m-0 text-center text-[13px] text-secondary">Chúng tôi gửi link vào email — không cần mật khẩu.</p>
+      <EmailPasswordForm variant="signup" />
       <p className="m-0 text-center text-[15px] text-secondary">
         Đã có tài khoản?{" "}
         <Link href="/signin" className="inline-flex min-h-[44px] items-center px-2 font-semibold text-blue">

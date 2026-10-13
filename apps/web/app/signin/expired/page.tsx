@@ -26,16 +26,16 @@ export default function LinkExpiredPage() {
               <path d="M12 7v5l3.5 2" />
             </svg>
             <h1 className="m-0 font-display text-[28px] font-black italic uppercase leading-tight text-level-yellow-dark">
-              LINK ĐÃ HẾT HẠN
+              LIÊN KẾT ĐÃ HẾT HẠN
             </h1>
             <p className="m-0 text-[15px] leading-normal text-muted-subtitle">
-              Link đăng nhập chỉ dùng được một lần và trong 15 phút.
+              Liên kết đăng nhập chỉ dùng được một lần và trong 15 phút.
             </p>
           </div>
         </>
       }
     >
-      <MagicLinkForm submitLabel="Gửi link mới" />
+      <MagicLinkForm submitLabel="Gửi liên kết mới" />
       <div className="text-center">
         <Link
           href="/signin"

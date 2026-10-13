@@ -12,7 +12,7 @@ export default function ForgotPasswordPage() {
           <div className="flex flex-col gap-2">
             <h1 className="m-0 font-display text-[26px] font-black italic uppercase leading-tight">QUÊN MẬT KHẨU.</h1>
             <p className="m-0 text-[15px] leading-normal text-muted-subtitle">
-              Nhập email của bạn, chúng tôi gửi link để đặt lại mật khẩu.
+              Nhập email của bạn, chúng tôi gửi liên kết để đặt lại mật khẩu.
             </p>
           </div>
         </>

@@ -141,8 +141,7 @@ def test_item_4(browser, vp_name, vp):
     pg.goto(BASE + "/signin", wait_until="networkidle")
     pg.wait_for_timeout(300)
 
-    # cc-18: /signin has the password form's email above the magic link's; this item is the magic link's (the last one)
-    email_inp = pg.locator('input[type="email"]').last
+    email_inp = pg.locator('input[type="email"]')
     check(email_inp.count() > 0, f"[{vp_name}] signin: email input exists")
 
     inp_classes = email_inp.get_attribute("class") or ""

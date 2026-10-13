@@ -37,7 +37,7 @@ export function ForgotPasswordForm() {
     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-3">
       <EmailField value={email} onChange={setEmail} error={error} />
       <PillButton type="submit" disabled={busy}>
-        Gửi link đặt lại
+        Gửi liên kết đặt lại
       </PillButton>
       {sent && (
         <p role="status" className="m-0 text-center text-[15px] font-semibold text-text">

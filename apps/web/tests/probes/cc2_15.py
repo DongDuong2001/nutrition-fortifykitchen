@@ -83,9 +83,8 @@ def first_run(browser, name, size):
 
     # 1. sign up (the magic link is outside the app: the setup opens from it)
     pg.goto(BASE + "/signup", wait_until="networkidle")
-    # cc-18: /signup has the password form's email above the magic link's; the magic link is the last one
-    pg.locator('input[type="email"]').last.fill("an@example.com")
-    pg.get_by_role("button", name="Gửi link đăng nhập").click()
+    pg.get_by_label("Email").fill("an@example.com")
+    pg.get_by_role("button", name="Gửi liên kết đăng ký qua email").click()
     taps["signup"] += 1
     pg.wait_for_url("**/signin/check-email")
     pg.goto(BASE + "/setup/profile", wait_until="networkidle")

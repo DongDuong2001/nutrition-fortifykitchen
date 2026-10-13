@@ -63,6 +63,35 @@ def go(pg, path):
     pg.goto(BASE + path, wait_until="networkidle")
 
 
+def check_single_form(pg, width, path, primary):
+    # One form per auth screen: one email field, one "hoặc" divider, one primary (blue) button
+    check(pg.locator('input[type="email"]').count() == 1, f"{width} {path}: exactly one email input")
+    check(pg.get_by_text("hoặc", exact=True).count() == 1, f"{width} {path}: exactly one divider hoặc")
+    primaries = pg.locator("button.bg-blue")
+    check(
+        primaries.count() == 1 and primaries.first.inner_text().strip() == primary,
+        f"{width} {path}: one primary button, {primary} ({primaries.count()} found)",
+    )
+
+
+def magic_link_from_signin(browser, width, size):
+    # The quiet button sends the liên kết to the typed email; the password field is ignored, and an empty email is refused
+    context = browser.new_context(viewport=size)
+    pg = context.new_page()
+    go(pg, "/signin")
+    email_input(pg).fill("cc18-magic@example.com")
+    pg.locator('input[autocomplete="current-password"]').fill("x")
+    pg.get_by_role("button", name="Gửi liên kết đăng nhập qua email").click()
+    pg.wait_for_url("**/signin/check-email", timeout=8000)
+    check(text_visible(pg, "Đã gửi liên kết đăng nhập tới", 4000), f"{width} quiet button: check-email says liên kết was sent")
+    check(text_visible(pg, "cc18-magic@example.com", 2000), f"{width} quiet button: sent to the typed email")
+    go(pg, "/signin")
+    email_input(pg).fill("")  # the last email is kept as the pending one, so clear it first
+    pg.get_by_role("button", name="Gửi liên kết đăng nhập qua email").click()
+    check(text_visible(pg, "Nhập email hợp lệ, ví dụ ban@email.com", 2000), f"{width} quiet button: an empty email shows the email message")
+    context.close()
+
+
 def submit(pg, label):
     pg.get_by_role("button", name=label, exact=True).click()
 
@@ -80,8 +109,9 @@ def sign_in_checks(pg, width):
     check(not has_header(pg), f"{width} /signin: no header")
     google_y = pg.get_by_role("button", name="Tiếp tục với Google").bounding_box()["y"]
     email_y = email_input(pg).bounding_box()["y"]
-    magic_y = pg.get_by_role("button", name="Gửi link đăng nhập").bounding_box()["y"]
-    check(google_y < email_y < magic_y, f"{width} /signin: Google above the password form, magic link below it")
+    magic_y = pg.get_by_role("button", name="Gửi liên kết đăng nhập qua email").bounding_box()["y"]
+    check(google_y < email_y < magic_y, f"{width} /signin: Google above the form, the quiet liên kết button below it")
+    check_single_form(pg, width, "/signin", "Đăng nhập")
     check(pg.locator('input[autocomplete="current-password"]').count() == 1, f"{width} /signin: password field has autocomplete current-password")
     check(pg.get_by_role("link", name="Quên mật khẩu?").count() == 1, f"{width} /signin: Quên mật khẩu? link")
     min_target(pg.get_by_role("link", name="Quên mật khẩu?"), f"{width} /signin: Quên mật khẩu? link")
@@ -106,25 +136,26 @@ def sign_in_checks(pg, width):
 def sign_up(pg, width, email):
     go(pg, "/signup")
     check(not has_header(pg), f"{width} /signup: no header")
+    check_single_form(pg, width, "/signup", "Đăng ký")
     passwords = pg.locator('input[autocomplete="new-password"]')
     email_input(pg).fill(email)
     passwords.nth(0).fill("abc")
     passwords.nth(1).fill("abc")
-    submit(pg, "Tạo tài khoản")
+    submit(pg, "Đăng ký")
     check(text_visible(pg, "Mật khẩu cần ít nhất 8 ký tự", 2000), f"{width} /signup: short password message")
     shot(pg, "signup", width)
 
     passwords.nth(0).fill("abcdefgh")
-    submit(pg, "Tạo tài khoản")
+    submit(pg, "Đăng ký")
     check(text_visible(pg, "Mật khẩu cần có ít nhất một chữ và một số", 2000), f"{width} /signup: letter and digit message")
 
     passwords.nth(0).fill(PASSWORD)
     passwords.nth(1).fill("abcdef13")
-    submit(pg, "Tạo tài khoản")
+    submit(pg, "Đăng ký")
     check(text_visible(pg, "Mật khẩu nhập lại chưa khớp", 2000), f"{width} /signup: mismatch message")
 
     passwords.nth(1).fill(PASSWORD)
-    submit(pg, "Tạo tài khoản")
+    submit(pg, "Đăng ký")
     pg.wait_for_url("**/setup/profile", timeout=8000)
     check("/setup/profile" in pg.url, f"{width} /signup: a password sign-up reaches /setup/profile")
 
@@ -182,7 +213,7 @@ def reset_flow(pg, width):
     go(pg, "/signin/forgot")
     check(not has_header(pg), f"{width} /signin/forgot: no header")
     email_input(pg).fill(SAMPLE_EMAIL)
-    submit(pg, "Gửi link đặt lại")
+    submit(pg, "Gửi liên kết đặt lại")
     check(text_visible(pg, "Kiểm tra email để đặt lại mật khẩu", 3000), f"{width} forgot: Kiểm tra email message")
     shot(pg, "forgot", width)
 
@@ -204,6 +235,7 @@ def run_width(browser, width, size):
     pg.on("console", lambda msg: errors.append(msg.text) if msg.type == "error" else None)
     email = f"cc18-{int(time.time() * 1000)}@example.com"
     try:
+        magic_link_from_signin(browser, width, size)
         sign_in_checks(pg, width)
         sign_up(pg, width, email)
         account_checks(pg, width, email)

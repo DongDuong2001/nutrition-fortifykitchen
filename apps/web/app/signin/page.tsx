@@ -3,8 +3,7 @@ import { AuthNotice } from "@/components/auth/auth-notice";
 import { AuthShell } from "@/components/onboarding/auth-shell";
 import { BrandMark } from "@/components/onboarding/brand-mark";
 import { GoogleSignInButton } from "@/components/onboarding/google-sign-in-button";
-import { MagicLinkForm } from "@/components/onboarding/magic-link-form";
-import { PasswordSignInForm } from "@/components/onboarding/password-sign-in-form";
+import { EmailPasswordForm } from "@/components/onboarding/email-password-form";
 
 export default function SignInPage() {
   return (
@@ -29,13 +28,7 @@ export default function SignInPage() {
         hoặc
         <span className="h-px flex-1 bg-divider" />
       </div>
-      <PasswordSignInForm />
-      <div className="flex items-center gap-3 text-[13px] text-secondary" aria-hidden="true">
-        <span className="h-px flex-1 bg-divider" />
-        hoặc
-        <span className="h-px flex-1 bg-divider" />
-      </div>
-      <MagicLinkForm submitLabel="Gửi link đăng nhập" />
+      <EmailPasswordForm variant="signin" />
       <p className="m-0 text-center text-[15px] text-secondary">
         Chưa có tài khoản?{" "}
         <Link href="/signup" className="inline-flex min-h-[44px] items-center px-2 font-semibold text-blue">
