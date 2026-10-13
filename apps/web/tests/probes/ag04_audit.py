@@ -26,6 +26,7 @@ ROUTES = [
     "/paywall",
     "/setup/profile",
     "/setup/goal",
+    "/setup/done",
     "/signin",
     "/signin/check-email",
     "/signin/expired",

@@ -24,7 +24,7 @@ NO_HEADER_ROUTES = {"/signin", "/signin/check-email", "/signin/expired", "/signu
 # /add is a bottom sheet on phones, so it has no header below the desktop width
 NO_HEADER_BELOW_DESKTOP = {"/add"}
 # Setup has step bars on phones, but the desktop card has no header or sidebar (DesktopSetup.dc.html). Decided 12/10 (OPEN_QUESTIONS cc-14b).
-NO_HEADER_AT_DESKTOP = {"/setup/goal", "/setup/profile"}
+NO_HEADER_AT_DESKTOP = {"/setup/goal", "/setup/profile", "/setup/done"}
 DESKTOP_MIN_WIDTH = 1024
 DESKTOP_SIDEBAR = 'nav[aria-label="Điều hướng chính"]:visible'  # the sidebar's nav; the aria-label sits on it, not on the aside
 # No route is skipped now: /login links to /diary, which is a route since cc2-07, so it reaches networkidle.

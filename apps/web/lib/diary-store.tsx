@@ -6,6 +6,7 @@ import { type FoodItem } from "./mock/foods";
 import { type MealSlot, getMealSlotNameVi } from "./meal-slot";
 import { formatAmount } from "./format";
 import { getTodayIsoVN, withRuntimeDate } from "./date";
+import { ADDED_ENTRIES_KEY } from "./first-run";
 import { blankDay, dayEntries, statDisplay } from "./day-history";
 import { totalsFromEntries } from "./day-totals";
 import { microsSummaryFor } from "./lacking";
@@ -145,7 +146,7 @@ interface DiaryContextValue {
 
 const DiaryContext = createContext<DiaryContextValue | null>(null);
 
-const SESSION_STORAGE_KEY = "h1t_added_entries_v1";
+const SESSION_STORAGE_KEY = ADDED_ENTRIES_KEY;
 // Edits to sample-day items (portion, meal, deleted), kept next to the added entries
 const SAMPLE_EDITS_KEY = "h1t_sample_edits_v1";
 // v2: recents are { foodId, servingLabel } objects. The v1 string list is ignored.

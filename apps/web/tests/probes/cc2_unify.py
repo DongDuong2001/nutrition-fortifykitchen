@@ -20,10 +20,10 @@ ROUTES = [
     "/", "/trends", "/trends/micros", "/trends/body", "/diary", "/micros", "/micros/calcium", "/training",
     "/explore", "/foods/food-cha-la", "/foods/new", "/entry/item-1", "/settings", "/settings/profile",
     "/settings/profile/weight", "/settings/language", "/settings/notifications", "/settings/delete-account",
-    "/paywall", "/install", "/setup/profile", "/setup/goal", "/this-page-does-not-exist",
+    "/paywall", "/install", "/setup/profile", "/setup/goal", "/setup/done", "/this-page-does-not-exist",
 ]
 # Setup keeps its own desktop card layout (no header at desktop), see IA-v2 Decided 12/10
-NO_HEADER_DESKTOP = {"/setup/profile", "/setup/goal"}
+NO_HEADER_DESKTOP = {"/setup/profile", "/setup/goal", "/setup/done"}
 SHOT_NAMES = {"/": "overview", "/diary": "diary", "/explore": "explore", "/settings": "settings", "/micros": "micros", "/foods/food-cha-la": "food"}
 problems, notes = [], []
 

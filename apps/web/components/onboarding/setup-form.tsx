@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
 import { apiClient } from "@/lib/api-client";
 import { useDiary } from "@/lib/diary-store";
@@ -44,6 +44,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
   const [errors, setErrors] = useState<SetupErrors>({});
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const weightRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setDraft(readDraft());
@@ -69,6 +70,28 @@ export function SetupForm({ step }: { step: SetupStep }) {
     if (Object.keys(errors).length > 0) setErrors(validateSetupDraft(next, year).errors);
   }
 
+  // Inline validation as soon as a field is left, not only after the first submit
+  function checkField(field: keyof SetupErrors) {
+    const message = validateSetupDraft(draft, year).errors[field];
+    setErrors((prev) => {
+      const next = { ...prev };
+      delete next[field];
+      return message ? { ...next, [field]: message } : next;
+    });
+  }
+
+  // Enter in the birth year moves to the weight; Enter in the weight submits the step
+  function nextFieldOnEnter(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key !== "Enter" || event.nativeEvent.isComposing) return;
+    event.preventDefault();
+    const message = validateSetupDraft(draft, year).errors.birthYear;
+    if (message) {
+      checkField("birthYear");
+      return;
+    }
+    weightRef.current?.focus();
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
@@ -92,7 +115,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
     try {
       await apiClient.saveSetup(result.profile);
       updateProfile(result.profile);
-      router.push("/");
+      router.push("/setup/done");
     } catch {
       setSaveError("Chưa lưu được hồ sơ. Thử lại sau ít phút.");
       setSaving(false);
@@ -163,8 +186,13 @@ export function SetupForm({ step }: { step: SetupStep }) {
                     id="setup-birth-year"
                     type="text"
                     inputMode="numeric"
+                    autoComplete="bday-year"
+                    enterKeyHint="next"
+                    maxLength={4}
                     value={draft.birthYear}
                     onChange={(e) => update({ birthYear: e.target.value })}
+                    onBlur={() => checkField("birthYear")}
+                    onKeyDown={nextFieldOnEnter}
                     aria-invalid={errors.birthYear ? true : undefined}
                     className={`h-[52px] w-full rounded-xl border-2 bg-card px-4 text-base font-semibold tabular-nums text-text outline-none focus:border-blue ${
                       errors.birthYear ? "border-destructive" : "border-grabber"
@@ -175,9 +203,13 @@ export function SetupForm({ step }: { step: SetupStep }) {
                   <input
                     id="setup-weight"
                     type="text"
+                    ref={weightRef}
                     inputMode="decimal"
+                    autoComplete="off"
+                    enterKeyHint={isProfile ? "next" : "done"}
                     value={draft.weight}
                     onChange={(e) => update({ weight: e.target.value })}
+                    onBlur={() => checkField("weight")}
                     aria-invalid={errors.weight ? true : undefined}
                     className={`h-[52px] w-full rounded-xl border-2 bg-card px-4 text-base font-semibold tabular-nums text-text outline-none focus:border-blue ${
                       errors.weight ? "border-destructive" : "border-grabber"
@@ -264,7 +296,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
           </div>
           <div className={`${isProfile ? "hidden" : "flex"} mt-auto lg:hidden`}>
             <PillButton type="submit" value="finish" disabled={saving}>
-              Bắt đầu ghi bữa ăn
+              Hoàn tất
             </PillButton>
           </div>
 
@@ -274,7 +306,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
               Quay lại
             </PillButton>
             <PillButton type="submit" value="finish" fullWidth={false} disabled={saving}>
-              Bắt đầu ghi bữa ăn
+              Hoàn tất
             </PillButton>
           </div>
         </form>
