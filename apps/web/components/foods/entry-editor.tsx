@@ -9,6 +9,11 @@ import { parseGramsInput } from "@/lib/portion";
 import { formatAmount } from "@/lib/format";
 import { AppHeader } from "@/components/ui/app-header";
 import { ChipGroup } from "@/components/ui/chip-group";
+import { FormRow } from "@/components/ui/form-row";
+import { parseDecimalInput } from "@/lib/quick-entry";
+
+const quickFieldClass =
+  "h-12 w-full rounded-xl border-2 border-card-border bg-card px-3 text-base text-text outline-none transition-colors focus:border-blue";
 
 /**
  * Edit one diary entry: portion, meal, save or delete. Shown on the entry route, phone and desktop.
@@ -24,14 +29,43 @@ export function EntryEditor({ view }: { view: EntryView }) {
   const [servingLabel, setServingLabel] = useState(view.servingLabel);
   const [mealSlot, setMealSlot] = useState<MealSlot>(view.mealSlot);
 
+  // A quick kcal entry (Chỉ ghi kcal) edits its name and numbers directly
+  const quick = view.quick;
+  const [quickName, setQuickName] = useState(view.name);
+  const [quickKcal, setQuickKcal] = useState(quick ? String(view.kcal) : "");
+  const [quickProtein, setQuickProtein] = useState(quick ? String(quick.protein) : "");
+  const [quickCarbs, setQuickCarbs] = useState(quick ? String(quick.carbs) : "");
+  const [quickFat, setQuickFat] = useState(quick ? String(quick.fat) : "");
+  const quickValues = {
+    kcal: parseDecimalInput(quickKcal),
+    protein: quickProtein.trim() ? parseDecimalInput(quickProtein) : 0,
+    carbs: quickCarbs.trim() ? parseDecimalInput(quickCarbs) : 0,
+    fat: quickFat.trim() ? parseDecimalInput(quickFat) : 0,
+  };
+  const quickValid =
+    quickValues.kcal !== null && Math.round(quickValues.kcal) >= 1 && quickValues.protein !== null && quickValues.carbs !== null && quickValues.fat !== null;
+
   const grams = parseGramsInput(gramsInput);
-  const canSave = !canPortion || grams > 0;
+  const canSave = quick ? quickValid : !canPortion || grams > 0;
   const preview = food && canPortion && grams > 0 ? entryNumbers(food, grams) : null;
   const iron = preview?.nutrients.iron ?? null;
 
   const handleSave = () => {
     if (!canSave) return;
-    updateEntry(view.id, canPortion ? { grams, servingLabel, mealSlot } : { mealSlot });
+    if (quick) {
+      updateEntry(view.id, {
+        mealSlot,
+        quick: {
+          name: quickName,
+          calories: Math.round(quickValues.kcal ?? 0),
+          protein: Math.round((quickValues.protein ?? 0) * 10) / 10,
+          carbs: Math.round((quickValues.carbs ?? 0) * 10) / 10,
+          fat: Math.round((quickValues.fat ?? 0) * 10) / 10,
+        },
+      });
+    } else {
+      updateEntry(view.id, canPortion ? { grams, servingLabel, mealSlot } : { mealSlot });
+    }
     router.push("/diary");
   };
 
@@ -51,7 +85,46 @@ export function EntryEditor({ view }: { view: EntryView }) {
       />
       <div className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-8 pt-4">
         <section className="flex flex-col gap-4 rounded-[18px] border border-card-border bg-card p-4">
+          {quick && (
+            <div data-align-group="entry" className="flex w-full flex-col gap-3">
+              <FormRow label="Tên" htmlFor="entry-quick-name">
+                <input
+                  id="entry-quick-name"
+                  type="text"
+                  value={quickName}
+                  onChange={(e) => setQuickName(e.target.value)}
+                  autoComplete="off"
+                  className={quickFieldClass}
+                />
+              </FormRow>
+              <FormRow label="Năng lượng (kcal)" htmlFor="entry-quick-kcal" required error={quickValues.kcal === null || Math.round(quickValues.kcal) < 1 ? "Nhập kcal lớn hơn 0" : undefined}>
+                <input
+                  id="entry-quick-kcal"
+                  type="text"
+                  inputMode="decimal"
+                  value={quickKcal}
+                  onChange={(e) => setQuickKcal(e.target.value)}
+                  autoComplete="off"
+                  className={`${quickFieldClass} text-right font-bold tabular-nums`}
+                />
+              </FormRow>
+              <div className="grid grid-cols-3 gap-2">
+                <FormRow label="Đạm (g)" htmlFor="entry-quick-protein">
+                  <input id="entry-quick-protein" aria-invalid={quickValues.protein === null ? true : undefined} type="text" inputMode="decimal" value={quickProtein} onChange={(e) => setQuickProtein(e.target.value)} autoComplete="off" className={`${quickFieldClass} text-right font-bold tabular-nums`} />
+                </FormRow>
+                <FormRow label="Tinh bột (g)" htmlFor="entry-quick-carbs">
+                  <input id="entry-quick-carbs" aria-invalid={quickValues.carbs === null ? true : undefined} type="text" inputMode="decimal" value={quickCarbs} onChange={(e) => setQuickCarbs(e.target.value)} autoComplete="off" className={`${quickFieldClass} text-right font-bold tabular-nums`} />
+                </FormRow>
+                <FormRow label="Béo (g)" htmlFor="entry-quick-fat">
+                  <input id="entry-quick-fat" aria-invalid={quickValues.fat === null ? true : undefined} type="text" inputMode="decimal" value={quickFat} onChange={(e) => setQuickFat(e.target.value)} autoComplete="off" className={`${quickFieldClass} text-right font-bold tabular-nums`} />
+                </FormRow>
+              </div>
+              <p className="m-0 text-sm text-secondary">Ghi nhanh: vi chất của món này chưa có dữ liệu.</p>
+            </div>
+          )}
+
           {/* Portion: gram field and the food's serving chips */}
+          {!quick && (
           <div data-align-group="entry" className="flex w-full flex-col gap-2">
             <span className="text-sm font-bold">Khối lượng</span>
             <div className="flex w-full items-stretch gap-2">
@@ -99,6 +172,7 @@ export function EntryEditor({ view }: { view: EntryView }) {
             </div>
             {view.portionNote && <p className="m-0 text-sm text-secondary">{view.portionNote}</p>}
           </div>
+          )}
 
           {/* Meal: inline chips, as in the design. The meal changes on Lưu. 3 columns on phone, 5 on desktop. */}
           <fieldset data-align-group="entry" className="m-0 flex w-full min-w-0 flex-col gap-2 border-0 p-0">
@@ -115,13 +189,15 @@ export function EntryEditor({ view }: { view: EntryView }) {
             />
           </fieldset>
 
-          {/* Preview of the portion: kcal, Đạm, Béo, Sắt */}
-          <div data-align-group="entry" className="grid w-full grid-cols-4 gap-2 rounded-xl bg-page p-3">
-            <Stat value={preview ? formatAmount(preview.calories, "kcal") : "—"} label="kcal" />
-            <Stat value={preview ? `${formatAmount(preview.protein, "g")} g` : "—"} label="Đạm" />
-            <Stat value={preview ? `${formatAmount(preview.fat, "g")} g` : "—"} label="Béo" />
-            <Stat value={iron !== null ? `${formatAmount(iron, "mg")} mg` : "—"} label="Sắt" />
-          </div>
+          {/* Preview of the portion: kcal, Đạm, Béo, Sắt (a quick entry has its own fields above) */}
+          {!quick && (
+            <div data-align-group="entry" className="grid w-full grid-cols-4 gap-2 rounded-xl bg-page p-3">
+              <Stat value={preview ? formatAmount(preview.calories, "kcal") : "—"} label="kcal" />
+              <Stat value={preview ? `${formatAmount(preview.protein, "g")} g` : "—"} label="Đạm" />
+              <Stat value={preview ? `${formatAmount(preview.fat, "g")} g` : "—"} label="Béo" />
+              <Stat value={iron !== null ? `${formatAmount(iron, "mg")} mg` : "—"} label="Sắt" />
+            </div>
+          )}
 
           {/* Actions */}
           <div data-align-group="entry" className="flex w-full flex-col gap-3">

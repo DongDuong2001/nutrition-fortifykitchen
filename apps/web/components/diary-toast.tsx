@@ -7,8 +7,9 @@ import { useDiary } from "@/lib/diary-store";
 const TICK_MS = 100;
 
 /**
- * The app's one toast, from the diary store. "Đã thêm …" offers Xem (jump to the meal), "Đã xoá …"
- * and "Đã chép …" offer Hoàn tác. The store ends it after its duration; this draws the countdown.
+ * The app's one toast, from the diary store. "Đã thêm …" offers Xem (jump to the meal), "Đã xoá …",
+ * "Đã chép …" and the one-tap adds (a recent, a Bữa của tôi, Chỉ ghi kcal) offer Hoàn tác, "Đã lưu …" offers
+ * Xem (Khám phá). The store ends it after its duration; this draws the countdown.
  */
 export function DiaryToast() {
   const { toast, undoLastDelete, undoCopy, setHighlightedMeal } = useDiary();
@@ -41,8 +42,9 @@ export function DiaryToast() {
       <div className="pointer-events-auto">
         <Toast
           message={toast.message}
-          actionLabel={toast.kind === "added" ? "Xem" : "Hoàn tác"}
-          onAction={toast.kind === "deleted" ? undoLastDelete : toast.kind === "copied" ? undoCopy : showMeal}
+          actionLabel={toast.kind === "added" || toast.kind === "saved" ? "Xem" : "Hoàn tác"}
+          actionHref={toast.kind === "saved" ? "/explore" : undefined}
+          onAction={toast.kind === "deleted" ? undoLastDelete : toast.kind === "undoable" ? undoCopy : showMeal}
           progressPercent={percent}
         />
       </div>

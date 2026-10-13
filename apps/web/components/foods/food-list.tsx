@@ -6,6 +6,8 @@ export interface FoodListProps {
   list: FoodListData;
   selectedId?: string;
   onPick: (food: FoodItem) => void;
+  /** When set, each row also gets a chevron that calls this (the row itself then adds in one tap). */
+  onOpen?: (food: FoodItem) => void;
   getMeta: (food: FoodItem) => string;
   categoryName: (food: FoodItem) => string;
   /** Grouped rows show a small heart after the name for saved favourites. */
@@ -27,6 +29,7 @@ export function FoodList({
   list,
   selectedId,
   onPick,
+  onOpen,
   getMeta,
   categoryName,
   isFavourite,
@@ -41,16 +44,16 @@ export function FoodList({
     const selected = selectedId === food.id;
     const meta = withCategory ? `${categoryName(food)} · ${getMeta(food)}` : getMeta(food);
     const showHeart = list.grouped && !!isFavourite?.(food);
-    return (
+    const rowButton = (
       <button
         key={food.id}
         type="button"
         data-food-row
         aria-pressed={selected}
         onClick={() => onPick(food)}
-        className={`-mx-3 flex min-h-[52px] items-center gap-3 rounded-xl border-0 px-3 py-3 text-left text-text cursor-pointer transition-colors ${
-          selected ? "bg-blue/10" : "bg-card hover:bg-page"
-        }`}
+        className={`flex min-h-[52px] min-w-0 flex-1 items-center gap-3 rounded-xl border-0 py-3 text-left text-text cursor-pointer transition-colors ${
+          onOpen ? "pl-3 pr-1" : "-mx-3 px-3"
+        } ${selected ? "bg-blue/10" : "bg-card hover:bg-page"}`}
       >
         <div
           data-align-group={food.id === firstRowId ? "add-list" : undefined}
@@ -91,6 +94,22 @@ export function FoodList({
           </svg>
         )}
       </button>
+    );
+    if (!onOpen) return rowButton;
+    return (
+      <div key={food.id} className="-mx-3 flex items-center">
+        {rowButton}
+        <button
+          type="button"
+          onClick={() => onOpen(food)}
+          aria-label={`Chọn khẩu phần ${food.nameVi}`}
+          className="inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-secondary hover:bg-divider active:scale-[0.97] motion-reduce:active:scale-100"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+            <path d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
     );
   };
 

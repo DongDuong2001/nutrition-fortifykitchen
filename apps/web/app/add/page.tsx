@@ -8,7 +8,11 @@ import { usePastDayRedirect } from "@/hooks/use-past-day-redirect";
 import { useBack } from "@/hooks/use-back";
 import { MOCK_FOODS, type FoodItem, type FoodServing } from "@/lib/mock/foods";
 import { useFoodBrowse } from "@/hooks/use-food-browse";
-import { resolveRecent, type ResolvedRecent } from "@/lib/recent-foods";
+import { lastPortionOf, resolveRecent, type ResolvedRecent } from "@/lib/recent-foods";
+import { savedMealTotals, type SavedMeal } from "@/lib/saved-meals";
+import type { QuickEntryInput, QuickEntryResult } from "@/lib/quick-entry";
+import { AddShortcuts, type RecentShortcut, type SavedMealShortcut } from "@/components/add/add-shortcuts";
+import { QuickAddSheet } from "@/components/add/quick-add-sheet";
 import { ChipRow } from "@/components/foods/chip-row";
 import { FoodList } from "@/components/foods/food-list";
 import { FoodEmptyState } from "@/components/foods/food-empty-state";
@@ -29,18 +33,23 @@ import { DiaryScreen } from "@/components/diary/diary-screen";
 
 import { useMealSlot } from "@/lib/use-meal-slot";
 
+// The add sheet shows the newest few: Khám phá holds the full lists
+const MAX_SHORTCUT_RECENTS = 3;
+const MAX_SHORTCUT_MEALS = 3;
+
 function AddFoodInner() {
   const router = useRouter();
   // Closing the sheet returns to the tab it was opened from (the diary when there is no history)
   const goBack = useBack();
   const searchParams = useSearchParams();
-  const { data, addFoodEntry, recentFoods } = useDiary();
+  const { data, addFoodEntry, recentFoods, savedMeals, addSavedMeal, addQuickEntry } = useDiary();
 
   const resolvedSlot = useMealSlot(searchParams.get("meal"));
   const [overrideSlot, setOverrideSlot] = useState<MealSlot | null>(null);
   const mealSlot = overrideSlot ?? resolvedSlot;
 
   const [switcherOpen, setSwitcherOpen] = useState(false);
+  const [quickOpen, setQuickOpen] = useState(false);
   const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
 
   const [gramsInput, setGramsInput] = useState("");
@@ -98,19 +107,26 @@ function AddFoodInner() {
   const { query, setQuery, filter, setFilter, list, filterItems, categoryName, isFavouriteFood, similarFoods, noFavourites } =
     useFoodBrowse();
 
-  // Recents are foods with the serving they were logged with. Tapping one picks it.
-  const recentItems = useMemo(
+  // Recents are foods with the serving they were logged with: tap = add with that serving, chevron = portion panel
+  const recentShortcuts = useMemo<RecentShortcut[]>(
     () =>
       recentFoods
         .map((r) => resolveRecent(r, MOCK_FOODS))
         .filter((r): r is ResolvedRecent => r !== null)
-        .map((r) => ({
-          id: `${r.food.id}|${r.label}`,
-          label: `${r.food.nameVi} ${r.label}`,
-          onClick: () => pickFood(r.food, { label: r.label, grams: r.grams }),
-        })),
-    [recentFoods, pickFood]
+        .map((r) => ({ key: `${r.food.id}|${r.label}`, food: r.food, label: r.label, grams: r.grams }))
+        .slice(0, MAX_SHORTCUT_RECENTS),
+    [recentFoods]
   );
+  const savedMealShortcuts = useMemo<SavedMealShortcut[]>(
+    () =>
+      savedMeals
+        .map((meal) => ({ meal, ...savedMealTotals(meal, MOCK_FOODS) }))
+        .filter((s) => s.itemCount > 0)
+        .slice(0, MAX_SHORTCUT_MEALS),
+    [savedMeals]
+  );
+  const showShortcuts = !query.trim() && filter === "all";
+  const favouritesOnly = filter === "favorite" && !query.trim();
 
 
   // Active grams number
@@ -130,6 +146,47 @@ function AddFoodInner() {
     }
   };
 
+  // One tap on a recent (or a favourite with history): add with the last portion, 5 s undo, back to the diary
+  // A ref, not state: two taps in the same frame must not both add (the second would replace the undo of the first)
+  const oneTapLock = useRef(false);
+
+  const addWithPortion = async (food: FoodItem, grams: number, label: string) => {
+    if (oneTapLock.current || isSubmitting || mealSlot === null) return;
+    oneTapLock.current = true;
+    setIsSubmitting(true);
+    try {
+      await addFoodEntry(food, grams, mealSlot, label, { undoable: true });
+      router.push("/diary");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const addSavedMealToMeal = (meal: SavedMeal) => {
+    if (oneTapLock.current || mealSlot === null) return;
+    oneTapLock.current = true;
+    addSavedMeal(meal, mealSlot);
+    router.push("/diary");
+  };
+
+  const submitQuickEntry = (input: QuickEntryInput): QuickEntryResult => {
+    if (oneTapLock.current) return { ok: false, field: "kcal", message: "Đang thêm…" };
+    if (mealSlot === null) return { ok: false, field: "kcal", message: "Chưa chọn bữa" };
+    const result = addQuickEntry(input, mealSlot);
+    if (result.ok) {
+      oneTapLock.current = true;
+      router.push("/diary");
+    }
+    return result;
+  };
+
+  // A favourite with a last portion adds in one tap, like a recent. Without history the portion panel opens.
+  const pickFromList = (food: FoodItem) => {
+    const last = favouritesOnly ? lastPortionOf(food.id, recentFoods, MOCK_FOODS) : null;
+    if (last) void addWithPortion(last.food, last.grams, last.label);
+    else pickFood(food);
+  };
+
   const handleClose = useCallback(() => {
     if (typeof window !== "undefined") {
       const openerId =
@@ -145,18 +202,20 @@ function AddFoodInner() {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
+        // An open sheet (Chỉ ghi kcal, meal switcher) closes itself on Esc; the add screen stays
+        if (quickOpen || switcherOpen) return;
         e.preventDefault();
         handleClose();
       } else if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {
-        // If not typing in input or if adding
-        if (selectedFood && parsedGrams > 0) {
+        // If not typing in input or if adding (the Chỉ ghi kcal form handles its own Enter)
+        if (selectedFood && parsedGrams > 0 && !quickOpen) {
           handleAddFood();
         }
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleClose, selectedFood, parsedGrams, handleAddFood]);
+  }, [handleClose, selectedFood, parsedGrams, handleAddFood, quickOpen, switcherOpen]);
 
   const mealNameVi = mealSlot ? getMealSlotNameVi(mealSlot) : "—";
 
@@ -175,6 +234,18 @@ function AddFoodInner() {
       onPickSimilar={(food) => pickFood(food)}
       onClearFilter={() => setFilter("all")}
       newFoodHref={newFoodHref}
+    />
+  );
+
+  // Chỉ ghi kcal, Gần đây and Bữa của tôi: shared by the phone sheet and the desktop dialog
+  const shortcuts = (
+    <AddShortcuts
+      recents={recentShortcuts}
+      savedMeals={savedMealShortcuts}
+      onAddRecent={(r) => void addWithPortion(r.food, r.grams, r.label)}
+      onOpenRecent={(r) => pickFood(r.food, { label: r.label, grams: r.grams })}
+      onAddSavedMeal={addSavedMealToMeal}
+      onQuickKcal={() => setQuickOpen(true)}
     />
   );
 
@@ -254,19 +325,14 @@ function AddFoodInner() {
                 {/* Filter row: Tất cả, Yêu thích, then categories with foods */}
                 <ChipRow items={filterItems} ariaLabel="Lọc món theo nhóm" data-align-group="add-list" data-align-edge="left" />
 
-                {/* Recents: tap to pick that food with that serving */}
-                {!query && recentItems.length > 0 && (
-                  <div className="flex flex-col gap-1.5 pt-1">
-                    <div className="text-xs font-semibold text-secondary">Gần đây</div>
-                    <ChipRow items={recentItems} ariaLabel="Món gần đây" />
-                  </div>
-                )}
+                {showShortcuts && shortcuts}
 
                 {/* Results: grouped or flat */}
                 <FoodList
                   list={list}
                   selectedId={selectedFood?.id}
-                  onPick={pickFood}
+                  onPick={pickFromList}
+                  onOpen={favouritesOnly ? pickFood : undefined}
                   getMeta={getFoodMeta}
                   categoryName={categoryName}
                   isFavourite={isFavouriteFood}
@@ -368,19 +434,14 @@ function AddFoodInner() {
           {/* Filter row: Tất cả, Yêu thích, then categories with foods */}
           <ChipRow items={filterItems} ariaLabel="Lọc món theo nhóm" data-align-group="add-list" data-align-edge="left" />
 
-          {/* Gần đây (Recents): tap to pick that food with that serving */}
-          {!query && recentItems.length > 0 && (
-            <div className="flex flex-col gap-1.5 shrink-0">
-              <div className="text-xs font-semibold text-secondary">Gần đây</div>
-              <ChipRow items={recentItems} ariaLabel="Món gần đây" />
-            </div>
-          )}
+          {showShortcuts && shortcuts}
 
           {/* Results: grouped or flat */}
           <FoodList
             list={list}
             selectedId={selectedFood?.id}
-            onPick={pickFood}
+            onPick={pickFromList}
+            onOpen={favouritesOnly ? pickFood : undefined}
             getMeta={getFoodMeta}
             categoryName={categoryName}
             isFavourite={isFavouriteFood}
@@ -408,6 +469,8 @@ function AddFoodInner() {
           )}
         </div>
       </div>
+
+      <QuickAddSheet open={quickOpen} onClose={() => setQuickOpen(false)} mealName={mealNameVi} onSubmit={submitQuickEntry} />
 
       {/* Meal Switcher Bottom Sheet */}
       <MealSwitcher

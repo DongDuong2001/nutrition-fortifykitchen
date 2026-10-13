@@ -49,6 +49,15 @@ export function resolveRecent(recent: RecentFood, foods: FoodItem[]): ResolvedRe
   return { food, grams: first.grams, label: first.label };
 }
 
+/**
+ * The portion a food was last logged with, from the recents (newest first). Null when the food has no history
+ * (or no longer exists): the caller then opens the portion panel instead of adding.
+ */
+export function lastPortionOf(foodId: string, recents: RecentFood[], foods: FoodItem[]): ResolvedRecent | null {
+  const last = recents.find((r) => r.foodId === foodId);
+  return last ? resolveRecent(last, foods) : null;
+}
+
 /** Newest first. The same food and serving appears once. At most 8 are kept. */
 export function pushRecent(list: RecentFood[], recent: RecentFood): RecentFood[] {
   const rest = list.filter((r) => !(r.foodId === recent.foodId && r.servingLabel === recent.servingLabel));

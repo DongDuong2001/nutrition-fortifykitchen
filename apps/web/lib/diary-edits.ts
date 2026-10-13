@@ -6,6 +6,8 @@ import { scaleNutrients } from "./portion";
 /** A diary entry the user added (from /add or the food detail page). */
 export interface AddedDiaryEntry {
   id: string;
+  /** "quick": a kcal-only entry (Chỉ ghi kcal) with no food and no micronutrient values. */
+  kind?: "quick";
   foodId: string;
   foodName: string;
   grams: number;
@@ -222,6 +224,8 @@ export interface EntryView {
   kcal: number;
   canChangePortion: boolean;
   portionNote: string | null;
+  /** A kcal-only entry (Chỉ ghi kcal): its name and numbers are edited directly, there is no portion. */
+  quick: { protein: number; carbs: number; fat: number } | null;
 }
 
 export interface DiaryEdits {
@@ -241,22 +245,26 @@ export interface EntryPatch {
   grams?: number;
   servingLabel?: string;
   mealSlot?: MealSlot;
+  /** New name and numbers of a quick entry. Ignored for any other entry. */
+  quick?: { name: string; calories: number; protein: number; carbs: number; fat: number };
 }
 
 export function findEntry(edits: DiaryEdits, id: string, samples: SampleItemInfo[] = SAMPLE_ITEMS): EntryView | null {
   const added = edits.added.find((e) => e.id === id);
   if (added) {
-    const food = MOCK_FOODS.find((f) => f.id === added.foodId) ?? null;
+    const isQuick = added.kind === "quick";
+    const food = isQuick ? null : MOCK_FOODS.find((f) => f.id === added.foodId) ?? null;
     return {
       id,
       name: added.foodName,
       food,
-      grams: added.grams,
+      grams: isQuick ? null : added.grams,
       servingLabel: added.displayQty,
       mealSlot: added.mealSlot,
       kcal: added.calories,
       canChangePortion: food !== null,
-      portionNote: food ? null : NOT_IN_CATALOG,
+      portionNote: isQuick || food ? null : NOT_IN_CATALOG,
+      quick: isQuick ? { protein: added.protein, carbs: added.carbs, fat: added.fat } : null,
     };
   }
 
@@ -276,6 +284,7 @@ export function findEntry(edits: DiaryEdits, id: string, samples: SampleItemInfo
     kcal: effect.kcal,
     canChangePortion,
     portionNote: canChangePortion ? null : NOT_IN_CATALOG,
+    quick: null,
   };
 }
 
@@ -289,10 +298,14 @@ export function updateEntryIn(edits: DiaryEdits, id: string, patch: EntryPatch, 
 
   const added = edits.added.find((e) => e.id === id);
   if (added) {
-    const updated: AddedDiaryEntry =
+    let updated: AddedDiaryEntry =
       grams !== null && view.food
         ? { ...added, mealSlot, grams, displayQty: patch.servingLabel ?? `${grams} g`, ...entryNumbers(view.food, grams) }
         : { ...added, mealSlot };
+    if (added.kind === "quick" && patch.quick) {
+      const { name, calories, protein, carbs, fat } = patch.quick;
+      updated = { ...updated, foodName: name.trim() || added.foodName, calories, protein, carbs, fat };
+    }
     return { ...edits, added: edits.added.map((e) => (e.id === id ? updated : e)) };
   }
 
@@ -396,4 +409,26 @@ export function dismissUndoIn(edits: DiaryEdits): DiaryEdits {
 export function removeAddedIn(edits: DiaryEdits, ids: string[]): DiaryEdits {
   const drop = new Set(ids);
   return { ...edits, added: edits.added.filter((e) => !drop.has(e.id)) };
+}
+
+/** A food of a meal with the portion it holds now. Quick kcal entries and items outside the catalogue have none. */
+export interface MealPortion {
+  foodId: string;
+  servingLabel: string;
+  grams: number;
+}
+
+/** The foods of a meal of today as they stand now (sample items with edits applied, then added entries). */
+export function mealPortions(edits: DiaryEdits, slot: MealSlot, samples: SampleItemInfo[] = SAMPLE_ITEMS): MealPortion[] {
+  const fromSamples = samples.flatMap((info): MealPortion[] => {
+    const edit = edits.sample[info.item.id];
+    const effect = sampleEffect(info, edit);
+    if (effect.deleted || effect.mealSlot !== slot || !info.food) return [];
+    const grams = edit?.grams ?? info.grams;
+    return grams === null ? [] : [{ foodId: info.food.id, servingLabel: effect.qty, grams }];
+  });
+  const fromAdded = edits.added
+    .filter((e) => e.mealSlot === slot && e.kind !== "quick")
+    .map((e) => ({ foodId: e.foodId, servingLabel: e.displayQty, grams: e.grams }));
+  return [...fromSamples, ...fromAdded];
 }

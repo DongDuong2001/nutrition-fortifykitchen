@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { MOCK_FOODS } from "../mock/foods";
-import { DEFAULT_RECENT_FOODS, pushRecent, resolveRecent } from "../recent-foods";
+import { DEFAULT_RECENT_FOODS, lastPortionOf, pushRecent, resolveRecent } from "../recent-foods";
 
 describe("resolveRecent", () => {
   it("uses the grams of a saved serving", () => {
@@ -60,5 +60,28 @@ describe("pushRecent", () => {
     }
     expect(list).toHaveLength(8);
     expect(list[0].foodId).toBe("food-9");
+  });
+});
+
+describe("lastPortionOf", () => {
+  const recents = [
+    { foodId: "food-chuoi", servingLabel: "1 quả" },
+    { foodId: "food-yen-mach", servingLabel: "45 g" },
+    { foodId: "food-yen-mach", servingLabel: "60 g" },
+  ];
+
+  it("gives the newest portion used for the food", () => {
+    const last = lastPortionOf("food-yen-mach", recents, MOCK_FOODS);
+    expect(last?.label).toBe("45 g");
+    expect(last?.grams).toBe(45);
+  });
+
+  it("gives null for a food with no history, so the portion panel opens instead", () => {
+    expect(lastPortionOf("food-cha-la", recents, MOCK_FOODS)).toBeNull();
+    expect(lastPortionOf("food-chuoi", [], MOCK_FOODS)).toBeNull();
+  });
+
+  it("gives null when the food is gone", () => {
+    expect(lastPortionOf("food-gone", [{ foodId: "food-gone", servingLabel: "1" }], MOCK_FOODS)).toBeNull();
   });
 });

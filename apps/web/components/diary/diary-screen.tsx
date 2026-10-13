@@ -13,6 +13,7 @@ import { CopyYesterdaySheet } from "@/components/copy-yesterday-sheet";
 import { MealMenuSheet } from "@/components/diary/meal-menu-sheet";
 import { copyMeals, dayEntries, shiftIsoDate, viewedIsoDate } from "@/lib/day-history";
 import { SAMPLE_SLOT } from "@/lib/diary-edits";
+import { defaultMealName } from "@/lib/saved-meals";
 import { pastDayData, useDiary } from "@/lib/diary-store";
 import { formatAmount, formatDesktopDate } from "@/lib/format";
 import type { MealSlot } from "@/lib/meal-slot";
@@ -114,7 +115,18 @@ function DiaryContent() {
   const forceLoading = searchParams?.get("loading") === "1";
   const forceOffline = searchParams?.get("offline") === "1";
 
-  const { data: diaryData, highlightedMeal, hydrated, todayIso, profile, targets, copyEntries, deleteMeal } = useDiary();
+  const {
+    data: diaryData,
+    highlightedMeal,
+    hydrated,
+    todayIso,
+    profile,
+    targets,
+    copyEntries,
+    deleteMeal,
+    mealFoods,
+    saveMealAs,
+  } = useDiary();
   const router = useRouter();
 
   const [isCopySheetOpen, setIsCopySheetOpen] = useState(false);
@@ -273,19 +285,21 @@ function DiaryContent() {
           <span className={`whitespace-nowrap text-[15px] tabular-nums ${hasItems ? "font-bold text-text" : "font-semibold text-secondary"}`}>
             {hasItems ? `${formatAmount(meal.kcal, "kcal")} kcal` : isPast ? "Chưa ghi" : "Chưa có món"}
           </span>
-          {!isPast && (
+          {(!isPast || hasItems) && (
             <div className="-mr-2 flex items-center">
-              <Link
-                id={`mobile-add-${meal.slot}`}
-                href={`/add?meal=${slot}`}
-                onClick={() => rememberAddOpener(`mobile-add-${meal.slot}`)}
-                aria-label={`Thêm vào ${meal.name}`}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-card-border bg-transparent text-blue no-underline active:scale-[0.97] motion-reduce:active:scale-100"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
-                  <path d="M12 5v14M5 12h14" />
-                </svg>
-              </Link>
+              {!isPast && (
+                <Link
+                  id={`mobile-add-${meal.slot}`}
+                  href={`/add?meal=${slot}`}
+                  onClick={() => rememberAddOpener(`mobile-add-${meal.slot}`)}
+                  aria-label={`Thêm vào ${meal.name}`}
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-card-border bg-transparent text-blue no-underline active:scale-[0.97] motion-reduce:active:scale-100"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+                    <path d="M12 5v14M5 12h14" />
+                  </svg>
+                </Link>
+              )}
               <button
                 type="button"
                 id={`meal-menu-${meal.slot}`}
@@ -304,7 +318,8 @@ function DiaryContent() {
           const row = (
             <>
               <span data-align-group="meal-card" data-align-edge="left" className="min-w-0 text-text">
-                {it.name} <span className="text-secondary">· {it.qty}</span>
+                {it.name}
+                {it.name !== it.qty && <span className="text-secondary"> · {it.qty}</span>}
               </span>
               <span className="shrink-0 tabular-nums text-secondary">{formatAmount(it.kcal, "kcal")}</span>
             </>
@@ -423,11 +438,15 @@ function DiaryContent() {
       </main>
 
       <MealMenuSheet
-        open={menuSlot !== null && !isPast}
+        open={menuSlot !== null}
         onClose={() => setMenuSlot(null)}
         mealName={menuMeal?.name ?? ""}
+        readOnly={isPast}
         itemCount={menuMeal?.items.length ?? 0}
         kcal={menuMeal?.kcal ?? 0}
+        savableCount={menuSlot ? mealFoods(menuSlot, viewIso).length : 0}
+        defaultSaveName={menuSlot ? defaultMealName(menuSlot, viewIso) : ""}
+        onSave={(name) => menuSlot && saveMealAs(menuSlot, viewIso, name)}
         yesterdayItemCount={yesterdayMeal.length}
         yesterdayKcal={yesterdayMeal.reduce((sum, e) => sum + e.calories, 0)}
         onCopyYesterday={copyMealFromYesterday}

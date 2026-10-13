@@ -13,8 +13,10 @@ import { isOwnFood } from "@/lib/food-categories";
 import { RICH_NUTRIENT_IDS, richName } from "@/lib/rich-in";
 import { getNutrientDefinition } from "@/lib/nutrients";
 import { FoodRowLink } from "@/components/foods/food-row-link";
+import { SavedMealsCard } from "@/components/explore/saved-meals-card";
 
 const SHOWN = 3;
+const SHOWN_MEALS = 3;
 
 /** Gần đây, Yêu thích, Món của tôi and the "Giàu …" index: the Khám phá home when nothing is searched. */
 export function ExploreSections() {
@@ -40,6 +42,8 @@ export function ExploreSections() {
         foods={favourites.map((food) => ({ food }))}
         empty={<p className="m-0 py-3 text-[13px] leading-snug text-secondary">Chưa có món yêu thích. Bấm ♡ ở trang chi tiết món để lưu.</p>}
       />
+
+      <SavedMealsCard limit={SHOWN_MEALS} />
 
       <Card as="section" aria-labelledby="explore-mine" className="flex flex-col gap-3">
         <SectionTitle id="explore-mine">Món của tôi</SectionTitle>

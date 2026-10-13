@@ -11,6 +11,19 @@ import { totalsFromEntries } from "./day-totals";
 import { microsSummaryFor } from "./lacking";
 import { nutrientSourcesIn, type NutrientSource } from "./nutrient-sources";
 import { DEFAULT_RECENT_FOODS, isRecentFood, pushRecent, type RecentFood } from "./recent-foods";
+import { MOCK_FOODS } from "./mock/foods";
+import {
+  buildSavedMeal,
+  defaultMealName,
+  itemsFromEntries,
+  readSavedMeals,
+  removeSavedMeal,
+  renameSavedMeal as renameSavedMealIn,
+  savedMealEntries,
+  writeSavedMeals,
+  type SavedMeal,
+} from "./saved-meals";
+import { quickEntryFrom, type QuickEntryInput, type QuickEntryResult } from "./quick-entry";
 import { readFavouriteIds, toggleFavouriteId, writeFavouriteIds } from "./favourites";
 import {
   SAMPLE_PROFILE,
@@ -37,6 +50,7 @@ import {
   entryNumbers,
   findEntry,
   mealEntryIds,
+  mealPortions,
   parseAddedEntries,
   parseSampleEdits,
   removeAddedIn,
@@ -52,11 +66,12 @@ export type { AddedDiaryEntry, EntryView, EntryPatch } from "./diary-edits";
 
 /**
  * The one toast of the app. "added" offers Xem (jump to the meal), "deleted" offers Hoàn tác,
- * and "copied" offers Hoàn tác for the entries it added (undoIds).
+ * "undoable" offers Hoàn tác for the entries one action added (undoIds: a copy, a recent, a Bữa của tôi),
+ * and "saved" offers Xem (Bữa của tôi in Khám phá).
  */
 export interface ToastInfo {
   message: string;
-  kind: "added" | "deleted" | "copied";
+  kind: "added" | "deleted" | "undoable" | "saved";
   mealSlot: MealSlot | null;
   /** How long it stays. A delete or a copy stays 5 s, which is also the undo window. */
   durationMs: number;
@@ -69,7 +84,14 @@ const UNDO_TOAST_MS = 5000;
 interface DiaryContextValue {
   data: MockDayData;
   addedEntries: AddedDiaryEntry[];
-  addFoodEntry: (food: FoodItem, grams: number, mealSlot: MealSlot, servingLabel?: string) => Promise<void>;
+  /** `undoable` is the one-tap add of a recent: the toast offers Hoàn tác for 5 s instead of Xem. */
+  addFoodEntry: (
+    food: FoodItem,
+    grams: number,
+    mealSlot: MealSlot,
+    servingLabel?: string,
+    options?: { undoable?: boolean }
+  ) => Promise<void>;
   recentFoods: RecentFood[];
   addRecentFood: (food: FoodItem, servingLabel: string) => void;
   toast: ToastInfo | null;
@@ -91,8 +113,23 @@ interface DiaryContextValue {
   undoLastDelete: () => void;
   /** Adds copied entries to today in one step, with one undo toast. Existing entries are kept. */
   copyEntries: (entries: AddedDiaryEntry[], message: string) => void;
-  /** Takes out the entries of the last copy. Only works while the "copied" toast is shown. */
+  /** Takes out the entries of the last add or copy. Only works while the "undoable" toast is shown. */
   undoCopy: () => void;
+  /** Bữa của tôi, newest first. Loaded after mount from localStorage (see lib/saved-meals.ts). */
+  savedMeals: SavedMeal[];
+  /**
+   * Saves the foods of a meal (today or a past day) as a Bữa của tôi. Returns false when the meal holds
+   * no food to save (empty, or only quick kcal entries).
+   */
+  saveMealAs: (slot: MealSlot, iso: string, name: string) => boolean;
+  /** The foods a meal of that day would save: none for an empty meal or one of only quick kcal entries. */
+  mealFoods: (slot: MealSlot, iso: string) => { foodId: string; servingLabel: string; grams: number }[];
+  renameSavedMeal: (id: string, name: string) => void;
+  deleteSavedMeal: (id: string) => void;
+  /** One tap: adds every food of the saved meal to a meal of today, with one undo toast for all of them. */
+  addSavedMeal: (meal: SavedMeal, slot: MealSlot) => void;
+  /** Chỉ ghi kcal: adds a quick entry with unknown micronutrients, with an undo toast. */
+  addQuickEntry: (input: QuickEntryInput, slot: MealSlot) => QuickEntryResult;
   /** Today as YYYY-MM-DD (Asia/Ho_Chi_Minh). Null until mounted. */
   todayIso: string | null;
   hydrated: boolean;
@@ -292,6 +329,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   const [toast, setToast] = useState<ToastInfo | null>(null);
   const [highlightedMeal, setHighlightedMeal] = useState<MealSlot | null>(null);
   const [favouriteIds, setFavouriteIds] = useState<string[]>([]);
+  const [savedMeals, setSavedMeals] = useState<SavedMeal[]>([]);
   // Today's date, read after mount so the server and first client render agree
   const [todayIso, setTodayIso] = useState<string | null>(null);
   // Same rule for the profile: the sample user until the saved one is read after mount
@@ -316,6 +354,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       // Ignore sessionStorage access errors
     } finally {
       setFavouriteIds(readFavouriteIds());
+      setSavedMeals(readSavedMeals());
       setTodayIso(getTodayIsoVN());
       setProfile(loadProfile(new Date().getFullYear()));
       setHydrated(true);
@@ -327,6 +366,12 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     if (!hydrated) return;
     writeFavouriteIds(favouriteIds);
   }, [favouriteIds, hydrated]);
+
+  // Persist saved meals to localStorage only after hydrated
+  useEffect(() => {
+    if (!hydrated) return;
+    writeSavedMeals(savedMeals);
+  }, [savedMeals, hydrated]);
 
   // Persist added entries and sample edits to sessionStorage only after hydrated
   useEffect(() => {
@@ -366,7 +411,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
 
   // Add a food entry
   const addFoodEntry = useCallback(
-    async (food: FoodItem, grams: number, mealSlot: MealSlot, servingLabel?: string) => {
+    async (food: FoodItem, grams: number, mealSlot: MealSlot, servingLabel?: string, options?: { undoable?: boolean }) => {
       const numbers = entryNumbers(food, grams);
       const qty = servingLabel || `${formatAmount(grams, "g")} g`;
 
@@ -385,12 +430,22 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
 
       const mealNameVi = getMealSlotNameVi(mealSlot);
       setEdits((prev) => dismissUndoIn(prev));
-      setToast({
-        message: `Đã thêm ${food.nameVi} ${qty} vào ${mealNameVi}`,
-        kind: "added",
-        mealSlot,
-        durationMs: ADDED_TOAST_MS,
-      });
+      setToast(
+        options?.undoable
+          ? {
+              message: `Đã thêm ${food.nameVi} ${qty} vào ${mealNameVi}`,
+              kind: "undoable",
+              mealSlot,
+              durationMs: UNDO_TOAST_MS,
+              undoIds: [newEntry.id],
+            }
+          : {
+              message: `Đã thêm ${food.nameVi} ${qty} vào ${mealNameVi}`,
+              kind: "added",
+              mealSlot,
+              durationMs: ADDED_TOAST_MS,
+            }
+      );
 
       addRecentFood(food, qty);
     },
@@ -449,7 +504,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     setEdits((prev) => dismissUndoIn({ ...prev, added: [...prev.added, ...entries] }));
     setToast({
       message,
-      kind: "copied",
+      kind: "undoable",
       mealSlot: null,
       durationMs: UNDO_TOAST_MS,
       undoIds: entries.map((e) => e.id),
@@ -462,6 +517,88 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     setEdits((prev) => removeAddedIn(prev, ids));
     setToast(null);
   }, [toast]);
+
+  const mealFoods = useCallback(
+    (slot: MealSlot, iso: string) => {
+      const today = todayIso ?? getTodayIsoVN();
+      const items =
+        iso === today
+          ? mealPortions(edits, slot)
+          : itemsFromEntries(dayEntries(iso, today).filter((e) => e.mealSlot === slot));
+      // Only foods the catalogue has: what is saved is what one tap can add back
+      return items.filter((item) => MOCK_FOODS.some((f) => f.id === item.foodId));
+    },
+    [edits, todayIso]
+  );
+
+  const saveMealAs = useCallback(
+    (slot: MealSlot, iso: string, name: string) => {
+      const items = mealFoods(slot, iso);
+      const meal = buildSavedMeal({
+        id: `sm-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        name,
+        fallbackName: defaultMealName(slot, iso),
+        items,
+        createdAt: new Date().toISOString(),
+      });
+      if (!meal) return false;
+      setSavedMeals((prev) => [meal, ...prev]);
+      setEdits((prev) => dismissUndoIn(prev));
+      setToast({
+        message: `Đã lưu ${meal.name} vào Bữa của tôi · ${meal.items.length} món`,
+        kind: "saved",
+        mealSlot: null,
+        durationMs: ADDED_TOAST_MS,
+      });
+      return true;
+    },
+    [mealFoods]
+  );
+
+  const renameSavedMeal = useCallback((id: string, name: string) => {
+    setSavedMeals((prev) => renameSavedMealIn(prev, id, name));
+  }, []);
+
+  const deleteSavedMeal = useCallback((id: string) => {
+    setSavedMeals((prev) => removeSavedMeal(prev, id));
+  }, []);
+
+  const addSavedMeal = useCallback(
+    (meal: SavedMeal, slot: MealSlot) => {
+      const stamp = Date.now();
+      const entries = savedMealEntries(meal, MOCK_FOODS, slot, `sm-${stamp}`, new Date(stamp).toISOString());
+      if (entries.length === 0) return;
+      // The recents remember each food with the portion the meal used
+      setRecentFoods((prev) =>
+        [...entries].reverse().reduce((list, e) => pushRecent(list, { foodId: e.foodId, servingLabel: e.displayQty }), prev)
+      );
+      setEdits((prev) => dismissUndoIn({ ...prev, added: [...prev.added, ...entries] }));
+      setToast({
+        message: `Đã thêm ${meal.name} · ${entries.length} món vào ${getMealSlotNameVi(slot)}`,
+        kind: "undoable",
+        mealSlot: slot,
+        durationMs: UNDO_TOAST_MS,
+        undoIds: entries.map((e) => e.id),
+      });
+    },
+    []
+  );
+
+  const addQuickEntry = useCallback((input: QuickEntryInput, slot: MealSlot): QuickEntryResult => {
+    const now = Date.now();
+    const result = quickEntryFrom(input, slot, `quick-${now}-${Math.random().toString(36).slice(2, 7)}`, new Date(now).toISOString());
+    if (!result.ok) return result;
+    const { entry } = result;
+    setEdits((prev) => dismissUndoIn({ ...prev, added: [...prev.added, entry] }));
+    setToast({
+      message: `Đã thêm ${entry.foodName} · ${formatAmount(entry.calories, "kcal")} kcal vào ${getMealSlotNameVi(slot)}`,
+      kind: "undoable",
+      mealSlot: slot,
+      durationMs: UNDO_TOAST_MS,
+      undoIds: [entry.id],
+    });
+    return result;
+  }, []);
 
   const targets = useMemo(() => targetsFor(profile), [profile]);
 
@@ -507,6 +644,13 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         undoLastDelete,
         copyEntries,
         undoCopy,
+        savedMeals,
+        saveMealAs,
+        mealFoods,
+        renameSavedMeal,
+        deleteSavedMeal,
+        addSavedMeal,
+        addQuickEntry,
         todayIso,
         hydrated,
         profile,
