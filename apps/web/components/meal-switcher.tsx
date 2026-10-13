@@ -20,7 +20,7 @@ export function MealSwitcher({
   selectedSlot,
   onSelectSlot,
   mealCalories = {},
-  defaultHint = "Mặc định theo giờ: 14:05 → Trước tập",
+  defaultHint = "Tự chọn theo giờ trong ngày",
 }: MealSwitcherProps) {
   return (
     <Sheet

@@ -5,7 +5,7 @@ import { PillButton } from "@/components/ui/pill-button";
 import { Sheet } from "@/components/ui/sheet";
 import { useDiary } from "@/lib/diary-store";
 import { copyMeals, dayEntries, entriesKcal, shiftIsoDate } from "@/lib/day-history";
-import { formatAmount, getWeekdayName } from "@/lib/format";
+import { formatAmount, formatDayLabel } from "@/lib/format";
 import { MEAL_SLOTS, getMealSlotNameVi, type MealSlot } from "@/lib/meal-slot";
 import type { AddedDiaryEntry } from "@/lib/diary-edits";
 
@@ -28,8 +28,9 @@ export function CopyYesterdaySheet({ open, onClose }: CopyYesterdaySheetProps) {
 
   if (!yesterday) return null;
 
-  // Same weekday format as the Today header: "Thứ Bảy, 10/10"
-  const description = `${getWeekdayName(yesterday)}, ${yesterday.slice(8)}/${yesterday.slice(5, 7)} · ${formatAmount(entriesKcal(entries), "kcal")} kcal`;
+  // Day label in the app's date style: "Hôm qua 12/10"
+  const dayLabel = formatDayLabel(yesterday, new Date(`${todayIso}T12:00:00+07:00`));
+  const description = `${dayLabel} · ${formatAmount(entriesKcal(entries), "kcal")} kcal`;
 
   return (
     <Sheet open={open} onClose={onClose} title="Chép bữa hôm qua?" description={description}>
