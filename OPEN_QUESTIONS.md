@@ -21,9 +21,9 @@
 - [ ] (cc-01) `components/onboarding/onboarding-header.tsx` is a local sub-screen header. Swap it for the shared AppHeader in ui-04b.
 - [ ] (cc-01) `StatGroup` labels are 11 px (`text-[11px]`), below the 12 px minimum in SPEC. It is a shared primitive, so the fix belongs to whoever owns `components/ui`.
 - [x] (cc-01) "Mở ứng dụng Mail" uses `mailto:`, which opens a new email, not the inbox. Keep, or hide it on desktop? Decided: phone only.
-- [ ] (cc-02) Food category is web-side only. Dong: add a category column to the foods table, using the same keys.
+- [x] (cc-02) Food category is web-side only. Dong: add a category column to the foods table, using the same keys. Decided: added in migration 000003 and seeded.
 - [x] (cc-02) The "Yêu thích" chip was hidden until favourites existed. The favourites store now exists (localStorage, local to this browser), so the chip is back.
-- [ ] (cc-03) Favourites live in localStorage per browser. Dong: favourites table when accounts exist.
+- [x] (cc-03) Favourites live in localStorage per browser. Dong: favourites table when accounts exist. Decided: added user_favourites in migration 000005 with /favourites endpoints.
 - [ ] (cc-02) `formatAmount` treats µg like g (one decimal under 100), so vitamin D shows "2,1 µg". kg and other units are not covered. Plain weights keep `formatNumber`. Confirm.
 - [ ] (cc-02) The catalog label for B6 is now "Vitamin B6" (was "B6 (Pyridoxine)"). It also shows on Micros. Confirm.
 - [ ] (cc-02) Recents are now `{ foodId, servingLabel }` in sessionStorage under `h1t_recent_foods_v2`. The old string list is ignored, not migrated. The default recents show the food names ("Yogurt kefir 200 ml"), not the old "Kefir 200 ml".
@@ -45,7 +45,7 @@
 - [ ] (cc-08) Browser*.dc.html designs were not read, as AGENTS.md says to skip them. The brief asked for them, so confirm.
 - [ ] (ag-02) Paywall prices and payment provider are placeholders — must be filled before release.
 - [ ] (ag-02) Paywall.dc.html copy states "Gói Miễn phí vẫn ghi đủ 21 vi chất" while Micros tracks 22 (x/22) — confirm whether free tier copy should state 21 or 22.
-- [ ] (cc-09) Đăng xuất only links to /signin and clears nothing yet. Dong: sign-out must clear the session once accounts exist.
+- [x] (cc-09) Đăng xuất only links to /signin and clears nothing yet. Dong: sign-out must clear the session once accounts exist. Decided: signOut() in lib/auth-actions.ts now calls supabase.auth.signOut() and clears local tokens and account id.
 - [ ] (cc-09) Phone Profile names the install row "Thêm vào màn hình chính"; the desktop design says "Cài như ứng dụng". The menu uses the desktop name. Confirm.
 - [x] (cc-10) Iron, men: HANDOFF.md and design/SPEC.md say 8 mg; docs/03-srs.md says 8–10 mg. Code uses 8 mg (cc-10 instruction). Coach to confirm, and fix the SRS line if 8 is right. Decided: 8 mg (HANDOFF/SPEC); fix docs/03-srs.md to 8 mg.
 - [ ] (cc-10) Copy sheet numbers: CopyYesterday.dc.html shows Bữa trưa 650, Bữa tối 871, Bữa phụ 120 and the header 1.980 kcal, but those meals add up to 2.100. The mock uses catalog foods (lunch 488, dinner 475, snack 110, total 1.532). Confirm the mock day.

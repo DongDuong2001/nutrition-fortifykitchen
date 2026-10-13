@@ -60,9 +60,13 @@ export interface NutrientValues {
 export interface Food {
   id: string;
   name: string;
+  name_vi?: string;
   serving_size_g: number;
   per_100g_nutrients: NutrientValues;
   is_custom: boolean;
+  category?: string;
+  source?: string;
+  source_id?: string;
   created_by?: string;
   created_at: string;
 }
@@ -71,6 +75,7 @@ export interface DiaryLog {
   id: string;
   user_id: string;
   food_id: string;
+  kind?: "food" | "quick";
   meal_slot: "breakfast" | "lunch" | "dinner" | "snack" | "preworkout" | "intraworkout" | "postworkout";
   quantity: number;
   serving_size_g: number;
@@ -90,13 +95,20 @@ export interface DailyProgress {
 export interface LogMealPayload {
   id: string; // Client-generated UUID
   food_id: string;
+  kind?: "food" | "quick";
   meal_slot: "breakfast" | "lunch" | "dinner" | "snack" | "preworkout" | "intraworkout" | "postworkout";
   quantity: number;
   serving_size_g?: number;
   log_date?: string;
+  calories?: number;
 }
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1";
+
+/** Returns true only when configured to call the live Go backend. Default is mock. */
+export function isLiveMode(): boolean {
+  return process.env.NEXT_PUBLIC_API_MODE === "live";
+}
 
 async function getAuthHeaders(): Promise<HeadersInit> {
   try {
@@ -118,6 +130,64 @@ async function getAuthHeaders(): Promise<HeadersInit> {
   }
 }
 
+// Offline queue for idempotent replay
+const OUTBOX_STORAGE_KEY = "h1t_offline_outbox";
+
+interface OutboxItem {
+  id: string;
+  date: string;
+  payload: Record<string, unknown>;
+  createdAt: number;
+}
+
+export function enqueueOfflineEntry(date: string, payload: Record<string, unknown>): void {
+  try {
+    const current: OutboxItem[] = JSON.parse(globalThis.localStorage?.getItem(OUTBOX_STORAGE_KEY) || "[]");
+    current.push({
+      id: (payload.id as string) || `offline-${Date.now()}`,
+      date,
+      payload,
+      createdAt: Date.now(),
+    });
+    globalThis.localStorage?.setItem(OUTBOX_STORAGE_KEY, JSON.stringify(current));
+  } catch {
+    // Storage unavailable
+  }
+}
+
+export async function syncOfflineOutbox(): Promise<number> {
+  try {
+    const items: OutboxItem[] = JSON.parse(globalThis.localStorage?.getItem(OUTBOX_STORAGE_KEY) || "[]");
+    if (!items.length) return 0;
+
+    const headers = await getAuthHeaders();
+    const remaining: OutboxItem[] = [];
+    let synced = 0;
+
+    for (const item of items) {
+      try {
+        const res = await fetch(`${API_BASE_URL}/days/${item.date}/entries`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify(item.payload),
+        });
+        if (res.ok || res.status === 409) {
+          synced++;
+        } else {
+          remaining.push(item);
+        }
+      } catch {
+        remaining.push(item);
+      }
+    }
+
+    globalThis.localStorage?.setItem(OUTBOX_STORAGE_KEY, JSON.stringify(remaining));
+    return synced;
+  } catch {
+    return 0;
+  }
+}
+
 export const apiClient = {
   /**
    * Get the complete typed day data matching design/SPEC.md
@@ -128,16 +198,18 @@ export const apiClient = {
   },
 
   async getDailyProgress(date?: string): Promise<{ progress: DailyProgress; logs: DiaryLog[] }> {
-    try {
-      const headers = await getAuthHeaders();
-      const query = date ? `?date=${encodeURIComponent(date)}` : "";
-      const res = await fetch(`${API_BASE_URL}/diary/daily${query}`, { headers });
-      if (res.ok) {
-        const json = await res.json();
-        return json.data;
+    if (isLiveMode()) {
+      try {
+        const headers = await getAuthHeaders();
+        const targetDate = date || new Date().toISOString().split("T")[0];
+        const res = await fetch(`${API_BASE_URL}/days/${encodeURIComponent(targetDate)}`, { headers });
+        if (res.ok) {
+          const json = await res.json();
+          return json;
+        }
+      } catch {
+        // Fallback to mock on transport failure
       }
-    } catch {
-      // Fallback to typed mock when backend is unavailable
     }
 
     // Convert SAMPLE_DAY to DailyProgress fallback
@@ -190,19 +262,22 @@ export const apiClient = {
   },
 
   async logMeal(payload: LogMealPayload): Promise<{ log: DiaryLog; today_progress: DailyProgress }> {
-    try {
-      const headers = await getAuthHeaders();
-      const res = await fetch(`${API_BASE_URL}/diary/logs`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(payload),
-      });
-      if (res.ok) {
-        const json = await res.json();
-        return json.data;
+    if (isLiveMode()) {
+      try {
+        const headers = await getAuthHeaders();
+        const date = payload.log_date || new Date().toISOString().split("T")[0];
+        const res = await fetch(`${API_BASE_URL}/days/${date}/entries`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify(payload),
+        });
+        if (res.ok) {
+          const json = await res.json();
+          return json;
+        }
+      } catch {
+        enqueueOfflineEntry(payload.log_date || new Date().toISOString().split("T")[0], payload as unknown as Record<string, unknown>);
       }
-    } catch {
-      // Fallback
     }
 
     const dummyLog: DiaryLog = {
@@ -228,33 +303,41 @@ export const apiClient = {
     return { log: dummyLog, today_progress: progress };
   },
 
-  async searchFoods(query = ""): Promise<FoodItem[]> {
-    try {
-      const headers = await getAuthHeaders();
-      const res = await fetch(`${API_BASE_URL}/foods?q=${encodeURIComponent(query)}`, { headers });
-      if (res.ok) {
-        const json = await res.json();
-        if (json.data && Array.isArray(json.data) && json.data.length > 0) {
-          return json.data;
+  async searchFoods(query = "", category?: string): Promise<FoodItem[]> {
+    if (isLiveMode()) {
+      try {
+        const headers = await getAuthHeaders();
+        const params = new URLSearchParams();
+        if (query) params.set("q", query);
+        if (category) params.set("category", category);
+        const res = await fetch(`${API_BASE_URL}/foods?${params.toString()}`, { headers });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.items && Array.isArray(json.items)) {
+            return json.items;
+          }
         }
+      } catch {
+        // Fallback
       }
-    } catch {
-      // Fallback
     }
 
-    return searchMockFoods(MOCK_FOODS, query);
+    const filtered = category ? MOCK_FOODS.filter((f) => f.category === category) : MOCK_FOODS;
+    return searchMockFoods(filtered, query);
   },
 
   async getFood(id: string): Promise<FoodItem | null> {
-    try {
-      const headers = await getAuthHeaders();
-      const res = await fetch(`${API_BASE_URL}/foods/${encodeURIComponent(id)}`, { headers });
-      if (res.ok) {
-        const json = await res.json();
-        if (json.data) return json.data;
+    if (isLiveMode()) {
+      try {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`${API_BASE_URL}/foods/${encodeURIComponent(id)}`, { headers });
+        if (res.ok) {
+          const json = await res.json();
+          return json;
+        }
+      } catch {
+        // Fallback
       }
-    } catch {
-      // Fallback
     }
 
     return MOCK_FOODS.find((f) => f.id === id) || null;
@@ -276,19 +359,21 @@ export const apiClient = {
       vitamin_d?: number;
     };
   }): Promise<FoodItem> {
-    try {
-      const headers = await getAuthHeaders();
-      const res = await fetch(`${API_BASE_URL}/foods`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(input),
-      });
-      if (res.ok) {
-        const json = await res.json();
-        if (json.data) return json.data;
+    if (isLiveMode()) {
+      try {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`${API_BASE_URL}/foods/custom`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify(input),
+        });
+        if (res.ok) {
+          const json = await res.json();
+          return json;
+        }
+      } catch {
+        // Fallback
       }
-    } catch {
-      // Fallback
     }
 
     const factor = input.servingSize > 0 ? 100 / input.servingSize : 1;
@@ -322,26 +407,292 @@ export const apiClient = {
     grams: number;
     mealSlot: string;
     date?: string;
+    id?: string;
   }): Promise<{ success: boolean; id: string }> {
-    try {
-      const headers = await getAuthHeaders();
-      const res = await fetch(`${API_BASE_URL}/diary/entries`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(payload),
-      });
-      if (res.ok) {
-        const json = await res.json();
-        return json.data || { success: true, id: `entry-${Date.now()}` };
+    const entryId = payload.id || `entry-${Date.now()}`;
+    const date = payload.date || new Date().toISOString().split("T")[0];
+
+    if (isLiveMode()) {
+      try {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`${API_BASE_URL}/days/${date}/entries`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            id: entryId,
+            food_id: payload.foodId,
+            serving_size_g: payload.grams,
+            meal_slot: payload.mealSlot,
+            kind: "food",
+          }),
+        });
+        if (res.ok) {
+          const json = await res.json();
+          return { success: true, id: json.id || entryId };
+        }
+      } catch {
+        enqueueOfflineEntry(date, {
+          id: entryId,
+          food_id: payload.foodId,
+          serving_size_g: payload.grams,
+          meal_slot: payload.mealSlot,
+          kind: "food",
+        });
       }
-    } catch {
-      // Fallback
     }
-    return { success: true, id: `entry-${Date.now()}` };
+
+    return { success: true, id: entryId };
   },
 
-  // Mock auth and onboarding. Nothing is sent anywhere yet; swap these bodies for
-  // Supabase magic links and Dong's profile endpoint once the backend is ready.
+  async getTrends(days = 7, offset = 0): Promise<Record<string, unknown>> {
+    if (isLiveMode()) {
+      try {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`${API_BASE_URL}/trends?days=${days}&offset=${offset}`, { headers });
+        if (res.ok) {
+          return await res.json();
+        }
+      } catch {
+        // Fallback
+      }
+    }
+    return {};
+  },
+
+  async getFavourites(): Promise<FoodItem[]> {
+    if (isLiveMode()) {
+      try {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`${API_BASE_URL}/favourites`, { headers });
+        if (res.ok) {
+          return await res.json();
+        }
+      } catch {
+        // Fallback
+      }
+    }
+    return [];
+  },
+
+  async addFavourite(foodId: string): Promise<boolean> {
+    if (isLiveMode()) {
+      try {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`${API_BASE_URL}/favourites`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ food_id: foodId }),
+        });
+        return res.ok;
+      } catch {
+        return false;
+      }
+    }
+    return true;
+  },
+
+  async removeFavourite(foodId: string): Promise<boolean> {
+    if (isLiveMode()) {
+      try {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`${API_BASE_URL}/favourites/${encodeURIComponent(foodId)}`, {
+          method: "DELETE",
+          headers,
+        });
+        return res.ok;
+      } catch {
+        return false;
+      }
+    }
+    return true;
+  },
+
+  async getRecents(): Promise<FoodItem[]> {
+    if (isLiveMode()) {
+      try {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`${API_BASE_URL}/recents`, { headers });
+        if (res.ok) {
+          return await res.json();
+        }
+      } catch {
+        // Fallback
+      }
+    }
+    return [];
+  },
+
+  async getSavedMeals(): Promise<Array<{ id: string; name: string; items: unknown[] }>> {
+    if (isLiveMode()) {
+      try {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`${API_BASE_URL}/saved-meals`, { headers });
+        if (res.ok) {
+          return await res.json();
+        }
+      } catch {
+        // Fallback
+      }
+    }
+    return [];
+  },
+
+  async createSavedMeal(name: string, items: Array<{ foodId: string; grams: number }>): Promise<{ id: string }> {
+    const id = `saved-meal-${Date.now()}`;
+    if (isLiveMode()) {
+      try {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`${API_BASE_URL}/saved-meals`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            name,
+            items: items.map((it) => ({ food_id: it.foodId, serving_size_g: it.grams })),
+          }),
+        });
+        if (res.ok) {
+          const json = await res.json();
+          return { id: json.id || id };
+        }
+      } catch {
+        // Fallback
+      }
+    }
+    return { id };
+  },
+
+  async deleteSavedMeal(id: string): Promise<boolean> {
+    if (isLiveMode()) {
+      try {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`${API_BASE_URL}/saved-meals/${encodeURIComponent(id)}`, {
+          method: "DELETE",
+          headers,
+        });
+        return res.ok;
+      } catch {
+        return false;
+      }
+    }
+    return true;
+  },
+
+  async logSavedMeal(date: string, savedMealId: string, meal: string): Promise<boolean> {
+    if (isLiveMode()) {
+      try {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`${API_BASE_URL}/days/${date}/entries/from-saved/${encodeURIComponent(savedMealId)}?meal=${encodeURIComponent(meal)}`, {
+          method: "POST",
+          headers,
+        });
+        return res.ok;
+      } catch {
+        return false;
+      }
+    }
+    return true;
+  },
+
+  async updateWeight(date: string, weightKg: number): Promise<boolean> {
+    if (isLiveMode()) {
+      try {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`${API_BASE_URL}/me/weight/${encodeURIComponent(date)}`, {
+          method: "PUT",
+          headers,
+          body: JSON.stringify({ weight_kg: weightKg }),
+        });
+        return res.ok;
+      } catch {
+        return false;
+      }
+    }
+    return true;
+  },
+
+  async getWeightLogs(from?: string, to?: string): Promise<Array<{ log_date: string; weight_kg: number }>> {
+    if (isLiveMode()) {
+      try {
+        const headers = await getAuthHeaders();
+        const params = new URLSearchParams();
+        if (from) params.set("from", from);
+        if (to) params.set("to", to);
+        const res = await fetch(`${API_BASE_URL}/me/weight?${params.toString()}`, { headers });
+        if (res.ok) {
+          return await res.json();
+        }
+      } catch {
+        // Fallback
+      }
+    }
+    return [];
+  },
+
+  async setTraining(date: string, minutes: number): Promise<boolean> {
+    if (isLiveMode()) {
+      try {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`${API_BASE_URL}/days/${encodeURIComponent(date)}/training`, {
+          method: "PUT",
+          headers,
+          body: JSON.stringify({ minutes }),
+        });
+        return res.ok;
+      } catch {
+        return false;
+      }
+    }
+    return true;
+  },
+
+  async copyYesterday(date: string): Promise<boolean> {
+    if (isLiveMode()) {
+      try {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`${API_BASE_URL}/days/${encodeURIComponent(date)}/copy-yesterday`, {
+          method: "POST",
+          headers,
+        });
+        return res.ok;
+      } catch {
+        return false;
+      }
+    }
+    return true;
+  },
+
+  async deleteMeal(date: string, meal: string): Promise<boolean> {
+    if (isLiveMode()) {
+      try {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`${API_BASE_URL}/days/${encodeURIComponent(date)}/meals/${encodeURIComponent(meal)}`, {
+          method: "DELETE",
+          headers,
+        });
+        return res.ok;
+      } catch {
+        return false;
+      }
+    }
+    return true;
+  },
+
+  async restoreEntry(id: string): Promise<boolean> {
+    if (isLiveMode()) {
+      try {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`${API_BASE_URL}/entries/${encodeURIComponent(id)}/restore`, {
+          method: "POST",
+          headers,
+        });
+        return res.ok;
+      } catch {
+        return false;
+      }
+    }
+    return true;
+  },
+
   async requestMagicLink(email: string): Promise<{ ok: true }> {
     void email;
     return { ok: true };
@@ -352,8 +703,23 @@ export const apiClient = {
   },
 
   async saveSetup(profile: SetupProfile): Promise<{ ok: true }> {
-    void profile;
+    if (isLiveMode()) {
+      try {
+        const headers = await getAuthHeaders();
+        await fetch(`${API_BASE_URL}/me/profile`, {
+          method: "PUT",
+          headers,
+          body: JSON.stringify({
+            sex: profile.sex,
+            birth_year: profile.birthYear,
+            weight_kg: profile.weightKg,
+            goal: profile.goal,
+          }),
+        });
+      } catch {
+        // Fallback
+      }
+    }
     return { ok: true };
   },
 };
-

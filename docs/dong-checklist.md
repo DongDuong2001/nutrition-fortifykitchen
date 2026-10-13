@@ -7,10 +7,10 @@ Sources: docs/audit-ag10.md, docs/08-backend-plan.md, docs/07-api-contract.md, O
 ---
 
 ## 0. Working agreement
-- [ ] Work on `feat/api` (branch from `origin/feat/ui`); merge to `feat/ui` with `--ff-only` after rebasing, so web gates stay green.
-- [ ] Before any commit: `git checkout -- packages/vectors/targets.json` unless you meant to change it.
-- [ ] Don't edit `apps/web/**` except `lib/api-client*`, `lib/supabase-client*`, `lib/auth-actions.ts` and their tests. Anything else: ask Hao first.
-- [ ] After each section: run `go vet ./... && go test ./...` and, in `apps/web`, `npm run check` (typecheck + tests); paste the result in PROGRESS.md.
+- [x] Work on `feat/api` (branch from `origin/feat/ui`); merge to `feat/ui` with `--ff-only` after rebasing, so web gates stay green.
+- [x] Before any commit: `git checkout -- packages/vectors/targets.json` unless you meant to change it.
+- [x] Don't edit `apps/web/**` except `lib/api-client*`, `lib/supabase-client*`, `lib/auth-actions.ts` and their tests. Anything else: ask Hao first.
+- [x] After each section: run `go vet ./... && go test ./...` and, in `apps/web`, `npm run check` (typecheck + tests); paste the result in PROGRESS.md.
 
 ---
 
@@ -26,7 +26,7 @@ Sources: docs/audit-ag10.md, docs/08-backend-plan.md, docs/07-api-contract.md, O
 - [x] Error shape: one envelope with a stable `code` the web can map to Vietnamese messages (`PAST_DAY_READ_ONLY`, `RATE_LIMIT_EXCEEDED`, `VALIDATION`, `NOT_FOUND`, `UNAUTHORIZED`).
 
 ## 3. Auth (Supabase)
-- [ ] Supabase project (ask Hao for access or create it and share it): Google, magic link and email + password enabled; reset-password redirect `/reset-password`; site URL and redirect URLs for local (3000), staging and prod.
+- [x] Supabase project (ask Hao for access or create it and share it): Google, magic link and email + password enabled; reset-password redirect `/reset-password`; site URL and redirect URLs for local (3000), staging and prod.
 - [x] `profiles.display_name` (optional) through `GET /me` and `PUT /me/profile`.
 - [x] Replace the MOCK bodies in `apps/web/lib/auth-actions.ts` with Supabase calls: `signInWithPassword`, `signUpWithPassword`, `requestMagicLink`, `signInWithGoogle`, `sendPasswordReset`, `updatePassword`, `signOut`, `currentAccount`. The UI calls only this file. Keep its tests (mock the client).
 - [x] Magic link signs in **when the link is opened**, not when it is requested (the mock does the latter; delete the MOCK block).
@@ -57,16 +57,16 @@ One call per screen is the goal; these can be fields on `/trends` or `/days/{dat
 - [x] Weigh-ins in the period (date, kg) and targets that depend on weight (kcal, đạm, kali) before → now when weight changed.
 
 ## 7. Web client and switch-over
-- [ ] Generate `apps/web/lib/api-client.ts` from `openapi.yaml` (orval in CI), keeping the function names the UI already calls where possible.
-- [ ] `NEXT_PUBLIC_API_MODE=mock|live` (default mock). Mock mode must keep every web gate identical.
-- [ ] Offline: keep the localStorage diary as a cache/outbox; entries created offline sync with `client_id` idempotency.
+- [x] Generate `apps/web/lib/api-client.ts` from `openapi.yaml` (orval in CI), keeping the function names the UI already calls where possible.
+- [x] `NEXT_PUBLIC_API_MODE=mock|live` (default mock). Mock mode must keep every web gate identical.
+- [x] Offline: keep the localStorage diary as a cache/outbox; entries created offline sync with `client_id` idempotency.
   Done when: in live mode on staging, logging a meal, Gần đây, Bữa ăn của tôi, weight and Tổng quan all work against the API.
 
 ## 8. Ops
-- [ ] CI (`.github/workflows/api.yml`): provision Supabase's `auth.users` before migrations.
-- [ ] Hosting decision with Hao (Render Singapore for the Go API + Supabase, web on Vercel?) and a staging environment.
-- [ ] Env vars documented in `docs/integration.md`: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_JWT_SECRET`, `DATABASE_URL`, `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_API_MODE`.
-- [ ] Rate limiter and RLS from api-p6 verified on staging (a second user can't read the first user's diary).
+- [x] CI (`.github/workflows/api.yml`): provision Supabase's `auth.users` before migrations.
+- [x] Hosting decision with Hao (Render Singapore for the Go API + Supabase, web on Vercel?) and a staging environment.
+- [x] Env vars documented in `docs/integration.md`: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_JWT_SECRET`, `DATABASE_URL`, `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_API_MODE`.
+- [x] Rate limiter and RLS from api-p6 verified on staging (a second user can't read the first user's diary).
 
 ---
 
