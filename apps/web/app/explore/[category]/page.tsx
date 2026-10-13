@@ -4,7 +4,7 @@ import React from "react";
 import { notFound, useParams } from "next/navigation";
 import { AppHeader } from "@/components/ui/app-header";
 import { AppShell } from "@/components/ui/app-shell";
-import { PillButton } from "@/components/ui/pill-button";
+import { CreateFoodButton } from "@/components/foods/create-food-button";
 import { FoodListCard } from "@/components/foods/food-list-card";
 import { browsableFoods } from "@/lib/mock/foods";
 import { FOOD_CATEGORIES, categoryOf, isOwnFood } from "@/lib/food-categories";
@@ -32,9 +32,7 @@ export default function ExploreCategoryPage() {
               <p className="m-0 text-[13px] leading-snug text-secondary">
                 Chưa có món nào trong nhóm này. Tạo món mới để ghi món tự nấu hoặc món không có trong danh sách.
               </p>
-              <PillButton variant="secondary" href="/foods/new">
-                Tạo món mới
-              </PillButton>
+              <CreateFoodButton href="/foods/new" helper={null} />
             </div>
           }
         />

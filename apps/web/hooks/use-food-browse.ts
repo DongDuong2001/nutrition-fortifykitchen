@@ -5,7 +5,7 @@ import { browsableFoods, type FoodItem } from "@/lib/mock/foods";
 import { findSimilarFoods } from "@/lib/search";
 import {
   buildFoodList,
-  categoriesWithFoods,
+  chipCategories,
   categoryLabel,
   categoryOf,
   type FoodFilter,
@@ -27,7 +27,7 @@ export function useFoodBrowse() {
     () => buildFoodList(browsableFoods(), query, filter, favouriteIds),
     [query, filter, favouriteIds, demo]
   );
-  const categories = useMemo(() => categoriesWithFoods(browsableFoods()), [demo]);
+  const categories = useMemo(() => chipCategories(browsableFoods()), [demo]);
   const categoryName = useCallback((food: FoodItem) => categoryLabel(categoryOf(food)), []);
   const isFavouriteFood = useCallback((food: FoodItem) => isFavourite(food.id), [isFavourite]);
 

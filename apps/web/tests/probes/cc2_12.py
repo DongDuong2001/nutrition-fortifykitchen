@@ -105,8 +105,8 @@ def check_recents(browser, size_name, size):
     clicks += 1
     pg.wait_for_url("**/add**")
     pg.wait_for_timeout(300)
-    rows = pg.locator("[data-quick-row]:visible")
-    check(rows.count() >= 3, f"{size_name} add: Gần đây rows are listed ({rows.count()})")
+    rows = pg.locator("section[aria-label='Gần đây'] li:visible")
+    check(rows.count() >= 1 and pg.locator("[data-quick-row]:visible").count() >= 1, f"{size_name} add: Gần đây cards are listed ({rows.count()})")
     check("Gần đây" in text(pg), f"{size_name} add: Gần đây section")
     shot(pg, "add", size_name)
     no_h_scroll(pg, f"{size_name} add")

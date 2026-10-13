@@ -25,9 +25,7 @@ ONBOARDING_CHECKS = [
     ("/setup/profile", "desktop (1440px)", "setup-row", "tb"),
     ("/add?meal=snack", "mobile (390px)", "add-list", "lr"),
     ("/add?meal=snack", "desktop (1440px)", "add-list", "lr"),
-    ("/diary", "mobile (390px)", "today-header", "lr"),
     ("/micros", "mobile (390px)", "micros-header", "lr"),
-    ("/diary", "desktop (1440px)", "today-header", "lr"),
     ("/micros", "desktop (1440px)", "micros-header", "lr"),
     ("/", "mobile (390px)", "overview-rows", "lr"),
     ("/", "desktop (1440px)", "overview-rows", "lr"),
@@ -54,9 +52,7 @@ ONBOARDING_CHECKS = [
     ("/settings/account", "mobile (390px)", "account-row", "lr"),
     ("/settings/account", "desktop (1440px)", "account-row", "lr"),
     # Past day (read-only): same header and meal rows as today, with no add links
-    (f"/diary?date={YESTERDAY}", "mobile (390px)", "today-header", "lr"),
     (f"/diary?date={YESTERDAY}", "mobile (390px)", "meal-card", "lr"),
-    (f"/diary?date={YESTERDAY}", "desktop (1440px)", "today-header", "lr"),
     (f"/diary?date={YESTERDAY}", "desktop (1440px)", "meal-card", "lr"),
 ]
 

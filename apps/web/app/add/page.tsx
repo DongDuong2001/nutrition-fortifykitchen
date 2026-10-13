@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useMemo, useRef, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
 import { useDiary } from "@/lib/diary-store";
 import { usePastDayRedirect } from "@/hooks/use-past-day-redirect";
 import { useBack } from "@/hooks/use-back";
@@ -18,6 +17,9 @@ import { FoodList } from "@/components/foods/food-list";
 import { FoodEmptyState } from "@/components/foods/food-empty-state";
 import { FoodSearchField } from "@/components/foods/food-search-field";
 import { foodMeta } from "@/lib/food-meta";
+import { CreateFoodButton } from "@/components/foods/create-food-button";
+import { isCategoryFilter } from "@/lib/food-categories";
+import { resolveFavourites } from "@/lib/favourites";
 
 import {
   parseMealSlot,
@@ -33,16 +35,17 @@ import { DiaryScreen } from "@/components/diary/diary-screen";
 
 import { useMealSlot } from "@/lib/use-meal-slot";
 
-// The add sheet shows the newest few: Khám phá holds the full lists
-const MAX_SHORTCUT_RECENTS = 3;
-const MAX_SHORTCUT_MEALS = 3;
+// The add sheet shows carousels of the newest: Khám phá holds the full lists
+const MAX_SHORTCUT_RECENTS = 8;
+const MAX_SHORTCUT_MEALS = 8;
+const MAX_SHORTCUT_FAVOURITES = 8;
 
 function AddFoodInner() {
   const router = useRouter();
   // Closing the sheet returns to the tab it was opened from (the diary when there is no history)
   const goBack = useBack();
   const searchParams = useSearchParams();
-  const { data, addFoodEntry, recentFoods, savedMeals, addSavedMeal, addQuickEntry } = useDiary();
+  const { data, addFoodEntry, recentFoods, savedMeals, addSavedMeal, addQuickEntry, favouriteIds } = useDiary();
 
   const resolvedSlot = useMealSlot(searchParams.get("meal"));
   const [overrideSlot, setOverrideSlot] = useState<MealSlot | null>(null);
@@ -116,6 +119,20 @@ function AddFoodInner() {
         .map((r) => ({ key: `${r.food.id}|${r.label}`, food: r.food, label: r.label, grams: r.grams }))
         .slice(0, MAX_SHORTCUT_RECENTS),
     [recentFoods]
+  );
+  // Favourites add with the portion they were last logged with, else their first serving
+  // A favourite already in Gần đây is not repeated (two identical buttons confuse screen readers)
+  const favouriteShortcuts = useMemo<RecentShortcut[]>(
+    () =>
+      resolveFavourites(favouriteIds, MOCK_FOODS)
+        .filter((food) => !recentShortcuts.some((r) => r.food.id === food.id))
+        .slice(0, MAX_SHORTCUT_FAVOURITES)
+        .map((food) => {
+          const last = lastPortionOf(food.id, recentFoods, MOCK_FOODS);
+          const serving = last ? { label: last.label, grams: last.grams } : (food.servings[0] ?? { label: "100 g", grams: 100 });
+          return { key: `fav|${food.id}`, food, label: serving.label, grams: serving.grams };
+        }),
+    [favouriteIds, recentFoods, recentShortcuts]
   );
   const savedMealShortcuts = useMemo<SavedMealShortcut[]>(
     () =>
@@ -241,6 +258,7 @@ function AddFoodInner() {
   const shortcuts = (
     <AddShortcuts
       recents={recentShortcuts}
+      favourites={favouriteShortcuts}
       savedMeals={savedMealShortcuts}
       onAddRecent={(r) => void addWithPortion(r.food, r.grams, r.label)}
       onOpenRecent={(r) => pickFood(r.food, { label: r.label, grams: r.grams })}
@@ -249,15 +267,7 @@ function AddFoodInner() {
     />
   );
 
-  const createFoodLink = (
-    <Link
-      href={newFoodHref}
-      className="-mx-3 no-underline text-left rounded-xl p-3 flex flex-col justify-center min-h-[52px] hover:bg-page transition-colors"
-    >
-      <span className="text-[15px] font-bold text-blue">+ Tạo món mới</span>
-      <span className="text-xs text-secondary">Không thấy món? Tự nhập dinh dưỡng</span>
-    </Link>
-  );
+  const createFoodLink = <CreateFoodButton href={newFoodHref} />;
 
   return (
     <div className="min-h-screen bg-page text-text font-sans">
@@ -335,6 +345,7 @@ function AddFoodInner() {
                   onOpen={favouritesOnly ? pickFood : undefined}
                   getMeta={getFoodMeta}
                   categoryName={categoryName}
+                  showCategory={!isCategoryFilter(filter)}
                   isFavourite={isFavouriteFood}
                   empty={emptyState}
                   footer={createFoodLink}
@@ -383,76 +394,77 @@ function AddFoodInner() {
           </div>
         </div>
 
-        {/* Main Sheet Container */}
+        {/* Main Sheet Container: opens tall, the header stays pinned and everything under it scrolls as one */}
         <div
           role="dialog"
           aria-label={`Thêm món vào ${mealNameVi}`}
           data-align-container="add-list"
-          className="absolute inset-x-0 top-14 bottom-0 bg-card rounded-t-[20px] p-4 flex flex-col gap-4 shadow-xl min-h-[calc(100vh-56px)]"
+          className="fixed inset-x-0 bottom-0 top-[8dvh] z-40 flex flex-col rounded-t-[20px] bg-card shadow-xl"
         >
-          {/* Top Grabber */}
-          <div aria-hidden="true" className="w-10 h-1 rounded-full bg-grabber self-center shrink-0" />
-          {/* The phone sheet's heading: /add has no visible h1 on a phone (the desktop modal sits over Today's header) */}
-          <h1 className="sr-only">Thêm món</h1>
+          {/* Pinned header: grabber, meal switcher + close, search, chips */}
+          <div className="flex shrink-0 flex-col gap-3 px-4 pt-3 pb-3">
+            <div aria-hidden="true" className="h-1 w-10 shrink-0 self-center rounded-full bg-grabber" />
+            {/* The phone sheet's heading: /add has no visible h1 on a phone (the desktop modal sits over Today's header) */}
+            <h1 className="sr-only">Thêm món</h1>
 
-          {/* Header Row: Meal Switcher Trigger + Close Button */}
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex flex-col items-start">
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex flex-col items-start">
+                <button
+                  type="button"
+                  onClick={() => setSwitcherOpen(true)}
+                  aria-haspopup="listbox"
+                  aria-label="Đổi bữa"
+                  className="-ml-2 flex min-h-[44px] cursor-pointer items-center gap-2 rounded-lg border-0 bg-transparent px-2 text-lg text-text transition-transform active:scale-[0.98]"
+                >
+                  <span>
+                    Thêm vào: <strong className="font-bold">{mealNameVi}</strong>
+                  </span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M6 9l6 6 6-6" />
+                  </svg>
+                </button>
+                <div className="text-xs font-medium text-secondary">Tự chọn theo giờ trong ngày · chạm để đổi</div>
+              </div>
+
               <button
                 type="button"
-                onClick={() => setSwitcherOpen(true)}
-                aria-haspopup="listbox"
-                aria-label="Đổi bữa"
-                className="min-h-[44px] px-2 -ml-2 rounded-lg bg-transparent border-0 text-text text-lg flex items-center gap-1.5 cursor-pointer active:scale-[0.98] transition-transform"
+                onClick={handleClose}
+                aria-label="Đóng"
+                className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border-0 bg-page text-text active:scale-[0.97]"
               >
-                <span>
-                  Thêm vào: <strong className="font-bold">{mealNameVi}</strong>
-                </span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M6 9l6 6 6-6" />
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                  <path d="M6 6l12 12M18 6L6 18" />
                 </svg>
               </button>
-              <div className="text-xs text-secondary font-medium">
-                Tự chọn theo giờ trong ngày · chạm để đổi
-              </div>
             </div>
 
-            <button
-              type="button"
-              onClick={handleClose}
-              aria-label="Đóng"
-              className="w-11 h-11 rounded-full bg-page text-text flex items-center justify-center border-0 cursor-pointer active:scale-[0.97]"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-                <path d="M6 6l12 12M18 6L6 18" />
-              </svg>
-            </button>
+            <FoodSearchField value={query} onChange={setQuery} className="shrink-0" />
+
+            {/* Filter row: Tất cả, Yêu thích, then categories with foods */}
+            <ChipRow items={filterItems} ariaLabel="Lọc món theo nhóm" data-align-group="add-list" data-align-edge="left" />
           </div>
 
-          <FoodSearchField value={query} onChange={setQuery} className="shrink-0" />
+          {/* One scroll region: carousels, the food list and the create button (the last item stays reachable) */}
+          <div data-add-scroll className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pb-6">
+            {showShortcuts && shortcuts}
 
-          {/* Filter row: Tất cả, Yêu thích, then categories with foods */}
-          <ChipRow items={filterItems} ariaLabel="Lọc món theo nhóm" data-align-group="add-list" data-align-edge="left" />
-
-          {showShortcuts && shortcuts}
-
-          {/* Results: grouped or flat */}
-          <FoodList
-            list={list}
-            selectedId={selectedFood?.id}
-            onPick={pickFromList}
-            onOpen={favouritesOnly ? pickFood : undefined}
-            getMeta={getFoodMeta}
-            categoryName={categoryName}
-            isFavourite={isFavouriteFood}
-            empty={emptyState}
-            footer={createFoodLink}
-            className="min-h-0 flex-1 overflow-y-auto pb-1"
-          />
+            <FoodList
+              list={list}
+              selectedId={selectedFood?.id}
+              onPick={pickFromList}
+              onOpen={favouritesOnly ? pickFood : undefined}
+              getMeta={getFoodMeta}
+              categoryName={categoryName}
+              showCategory={!isCategoryFilter(filter)}
+              isFavourite={isFavouriteFood}
+              empty={emptyState}
+              footer={createFoodLink}
+            />
+          </div>
 
           {/* Bottom Selected Food Portion Panel */}
           {selectedFood && (
-            <div className="shrink-0">
+            <div className="shrink-0 px-4 pb-[max(16px,env(safe-area-inset-bottom))]">
               <PortionPanel
                 food={selectedFood}
                 gramsInput={gramsInput}

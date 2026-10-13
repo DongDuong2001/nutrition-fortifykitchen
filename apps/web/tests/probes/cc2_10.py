@@ -200,13 +200,13 @@ def check_diary(browser, size_name, size):
     check(pg.locator("h1:visible").count() == 1 and pg.locator("h1:visible").first.inner_text().strip().lower() == "nhật ký",
           f"{size_name} diary: one visible h1 Nhật ký")
     body = text(pg)
-    check("8/22 vi chất · Thiếu:" in body, f"{size_name} diary: the Vi chất row reads 8/22 with what is lacking")
-    check("Ngày tập 60′ · muối 7–10,5 g" in body, f"{size_name} diary: the Ngày tập row reads 60′ and salt")
+    check(re.search(r"8/22 vi chất Thiếu:", body) is not None, f"{size_name} diary: the Vi chất tile reads 8/22 with what is lacking")
+    check(re.search(r"60′ Ngày tập muối 7–10,5 g", body) is not None, f"{size_name} diary: the Ngày tập tile reads 60′ and salt")
     check(re.search(r"còn 909 kcal", body, re.IGNORECASE) is not None, f"{size_name} diary: còn 909 kcal in the summary")
     n_add = pg.locator('a[aria-label^="Thêm vào"]:visible').count()
     n_menu = pg.locator('button[aria-label^="Tuỳ chọn"]:visible').count()
     check(n_add == 5 and n_menu == 5, f"{size_name} diary: one + and one ⋯ per meal ({n_add}, {n_menu})")
-    check("+ Thêm món" not in body and "+ Thêm" not in body, f"{size_name} diary: no second add link")
+    check("+ Thêm món" not in body and body.count("+ Thêm") <= 5, f"{size_name} diary: one quiet + Thêm per meal")
     shot(pg, "diary", size_name)
     no_h_scroll(pg, f"{size_name} diary")
 

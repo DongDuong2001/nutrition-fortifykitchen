@@ -114,7 +114,7 @@ def run():
         pg.wait_for_timeout(400)
         result = pg.evaluate("""() => {
             const headers = [...document.querySelectorAll('[role=group] > div.sticky')].filter(e => e.offsetParent);
-            const sc = headers[0].parentElement.parentElement;
+            const sc = (headers[0].closest('[data-add-scroll]') || headers[0].parentElement.parentElement);
             const r = sc.getBoundingClientRect();
             const failures = []; let stuckChecks = 0;
             for (let y = 0; y <= sc.scrollHeight; y += 17) {
@@ -124,7 +124,7 @@ def run():
                     if (hr.top < r.top - 0.5 || hr.top > r.top + 1) continue; // only the header stuck at the top
                     stuckChecks++;
                     const my = hr.top + hr.height / 2;
-                    const xs = [r.left + 1, r.left + 8, hr.left + 4, (hr.left + hr.right) / 2, hr.right - 4, r.right - 8, r.right - 1];
+                    const xs = [hr.left + 1, hr.left + 8, hr.left + 4, (hr.left + hr.right) / 2, hr.right - 4, hr.right - 8, hr.right - 1];
                     for (const x of xs) {
                         const el = document.elementFromPoint(x, my);
                         const hit = el && el.closest('div.sticky');
@@ -137,7 +137,7 @@ def run():
         check(result["stuckChecks"] > 20, f"/add: stuck header checked at many positions ({result['stuckChecks']})")
         check(result["failCount"] == 0, f"/add: sticky header covers the rows at every scroll position ({result['failCount']} misses {result['failures']})")
         pg.evaluate("""() => { const h = [...document.querySelectorAll('[role=group] > div.sticky')].find(e => e.offsetParent);
-            h.parentElement.parentElement.scrollTop = 390; }""")
+            (h.closest('[data-add-scroll]') || h.parentElement.parentElement).scrollTop = 390; }""")
         pg.wait_for_timeout(200)
         pg.screenshot(path=os.path.join(SHOTS, "cc04-add-sticky-390.png"), animations="disabled")
         ctx.close()

@@ -1,7 +1,7 @@
 import React from "react";
-import Link from "next/link";
 import type { FoodItem } from "@/lib/mock/foods";
-import type { FoodFilter } from "@/lib/food-categories";
+import { CreateFoodButton } from "@/components/foods/create-food-button";
+import { categoryLabel, isCategoryFilter, type FoodFilter } from "@/lib/food-categories";
 
 export interface FoodEmptyStateProps {
   query: string;
@@ -48,6 +48,23 @@ export function FoodEmptyState({
     );
   }
 
+  // A category chip with no foods (Đồ uống until a drink has a sourced value): say so and offer to create one
+  if (!query.trim() && isCategoryFilter(filter)) {
+    const drink = filter === "do_uong";
+    return (
+      <div className="flex flex-col items-center gap-3 py-6 text-center">
+        <div className="text-base font-bold">{drink ? "Chưa có đồ uống nào" : `Chưa có món nào trong ${categoryLabel(filter)}`}</div>
+        <div className="text-sm text-secondary">
+          {drink ? "Danh sách đồ uống chỉ có món có số liệu từ nguồn đã dùng. Bạn có thể tự tạo đồ uống." : "Bạn có thể tự tạo món cho nhóm này."}
+        </div>
+        <div className="w-full">
+          <CreateFoodButton href={newFoodHref} helper={null} />
+        </div>
+        {clearFilterButton}
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col items-center text-center py-6 gap-2">
       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="text-secondary" aria-hidden="true">
@@ -57,12 +74,9 @@ export function FoodEmptyState({
       <div className="text-base font-bold">Không có “{query}”</div>
       <div className="text-sm text-secondary">Thử từ ngắn hơn, bỏ dấu, hoặc tự tạo món.</div>
       {filter !== "all" && clearFilterButton}
-      <Link
-        href={newFoodHref}
-        className="mt-2 min-h-[52px] px-7 rounded-full bg-blue text-on-accent font-bold text-base flex items-center justify-center no-underline active:scale-[0.97]"
-      >
-        + Tạo món mới
-      </Link>
+      <div className="mt-2 w-full">
+        <CreateFoodButton href={newFoodHref} helper={null} />
+      </div>
 
       {/* Fuzzy matches */}
       {similarFoods.length > 0 && (

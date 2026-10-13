@@ -8,6 +8,8 @@ export interface MockFoodItem {
   kcal: number;
   /** Second line of a row, e.g. the macros of a quick kcal entry ("Đạm — · Tinh bột 30 g · Béo —"). */
   detail?: string;
+  /** Đạm, tinh bột, béo of the entry in grams; null = unknown (a quick kcal entry that left it blank). */
+  macros?: { protein: number | null; carbs: number | null; fat: number | null };
   nutrients?: Record<string, FoodNutrientValue>;
 }
 

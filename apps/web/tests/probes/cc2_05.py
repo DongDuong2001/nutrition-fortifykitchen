@@ -2,6 +2,7 @@
 Run with: ALIGN_BASE_URL=http://localhost:3102 py -3 tests/probes/cc2_05.py
 """
 import os
+import re
 import sys
 from playwright.sync_api import sync_playwright
 import _demo  # noqa: F401  (cc2-15b: demo mode on, see _demo.py)
@@ -37,7 +38,7 @@ def main():
         pg.goto(BASE + "/diary", wait_until="networkidle")
         pg.wait_for_timeout(600)
         txt = body(pg)
-        check("Ngày tập 90′ · muối 8,5" in txt, "diary 1440: the Ngày tập row follows the profile (90′, salt 8,5…)")
+        check(re.search(r"90′\s+Ngày tập\s+muối 8,5", txt) is not None, "diary 1440: the Ngày tập row follows the profile (90′, salt 8,5…)")
         check("Giữ cân" not in txt and "65 kg" not in txt, "diary 1440: no stale Giữ cân or 65 kg")
 
         pg.goto(BASE + "/training", wait_until="networkidle")

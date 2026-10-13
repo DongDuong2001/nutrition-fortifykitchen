@@ -4,7 +4,7 @@ import React, { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AppHeader } from "@/components/ui/app-header";
 import { AppShell } from "@/components/ui/app-shell";
-import { PillButton } from "@/components/ui/pill-button";
+import { CreateFoodButton } from "@/components/foods/create-food-button";
 import { ChipRow } from "@/components/foods/chip-row";
 import { FoodListCard } from "@/components/foods/food-list-card";
 import { FoodSearchField } from "@/components/foods/food-search-field";
@@ -59,9 +59,7 @@ export default function ExplorePage() {
                     <p className="m-0 text-[13px] leading-snug text-secondary">
                       Không có món nào khớp. Thử từ ngắn hơn, bỏ dấu, hoặc tạo món mới.
                     </p>
-                    <PillButton variant="secondary" href="/foods/new">
-                      Tạo món mới
-                    </PillButton>
+                    <CreateFoodButton href="/foods/new" helper={null} />
                   </div>
                 }
               />

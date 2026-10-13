@@ -46,7 +46,7 @@ def visible_count(pg, selector):
 
 def lacking(pg):
     # Only visible text is in innerText, so this reads the phone's Today card
-    match = re.search(r"vi chất · Thiếu: ([^\n]+)", pg.inner_text("body"))
+    match = re.search(r"vi chất\s+Thiếu: ([^\n]+)", pg.inner_text("body"))
     return match.group(1).strip() if match else None
 
 

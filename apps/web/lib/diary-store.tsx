@@ -174,7 +174,15 @@ export function computeCompositeDayData(
   const samples = resolveSampleItems(baseDay);
   const effects = samples.map((info) => ({ info, effect: sampleEffect(info, sampleEdits[info.item.id]) }));
   if (addedEntries.length === 0 && Object.keys(sampleEdits).length === 0) {
-    return { ...baseDay, microsSummary: microsSummaryFor(baseDay) };
+    // Untouched sample day: its items still carry their macros for the meta line
+    const meals = baseDay.meals.map((meal) => ({
+      ...meal,
+      items: meal.items.map((it) => {
+        const n = effects.find((e) => e.info.item.id === it.id)?.effect.numbers;
+        return n ? { ...it, macros: { protein: n.protein, carbs: n.carbs, fat: n.fat } } : it;
+      }),
+    }));
+    return { ...baseDay, meals, microsSummary: microsSummaryFor(baseDay) };
   }
 
   // What the added entries and the edited sample items add on top of the sample day
@@ -226,11 +234,24 @@ export function computeCompositeDayData(
   };
   for (const { info, effect } of effects) {
     if (!effect.deleted) {
-      addItem(effect.mealSlot, { id: info.item.id, name: info.item.name, qty: effect.qty, kcal: effect.kcal });
+      addItem(effect.mealSlot, {
+        id: info.item.id,
+        name: info.item.name,
+        qty: effect.qty,
+        kcal: effect.kcal,
+        ...(effect.numbers ? { macros: { protein: effect.numbers.protein, carbs: effect.numbers.carbs, fat: effect.numbers.fat } } : {}),
+      });
     }
   }
   for (const e of addedEntries) {
-    addItem(e.mealSlot, { id: e.id, name: e.foodName, qty: e.displayQty, kcal: e.calories, ...(e.kind === "quick" ? { detail: quickDetail(e) } : {}) });
+    addItem(e.mealSlot, {
+      id: e.id,
+      name: e.foodName,
+      qty: e.displayQty,
+      kcal: e.calories,
+      macros: { protein: e.protein, carbs: e.carbs, fat: e.fat },
+      ...(e.kind === "quick" ? { detail: quickDetail(e) } : {}),
+    });
   }
 
   const updatedMeals = baseDay.meals.map((meal) => {

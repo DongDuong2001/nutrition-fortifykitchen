@@ -19,6 +19,7 @@ import { formatAmount, formatDesktopDate } from "@/lib/format";
 import type { MealSlot } from "@/lib/meal-slot";
 import { type MockDayData } from "@/lib/mock/sample-day";
 import { calculateSaltTarget } from "@/lib/training";
+import { macroLine, microsTile, trainingTile, type DayTile } from "@/lib/diary-rows";
 
 function subscribeOnline(callback: () => void) {
   window.addEventListener("online", callback);
@@ -30,14 +31,6 @@ function subscribeOnline(callback: () => void) {
 }
 const getOnlineSnapshot = () => navigator.onLine;
 const getOnlineServerSnapshot = () => true;
-
-function ChevronRight() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true" className="shrink-0 text-secondary">
-      <path d="M9 6l6 6-6 6" />
-    </svg>
-  );
-}
 
 /** The day summary of the ink card: kcal dial, the four macro bars and the target line (còn N kcal / thiếu N kcal). */
 function DaySummary({ day, past, size }: { day: MockDayData; past: boolean; size: number }) {
@@ -72,16 +65,22 @@ function DaySummary({ day, past, size }: { day: MockDayData; past: boolean; size
   );
 }
 
-/** One row under the summary: a short fact and a chevron, opening that screen for the day shown. */
-function DayRow({ href, children }: { href: string; children: React.ReactNode }) {
+/**
+ * One compact tile under the summary: a big Saira number, a short label and one line, opening that screen for
+ * the day shown. The Vi chất tile also carries a slanted mini bar (nutrients reached out of 22).
+ */
+function DayTileLink({ href, tile, bar = false }: { href: string; tile: DayTile & { pct?: number }; bar?: boolean }) {
   return (
     <Link
       href={href}
-      data-align-group="today-header"
-      className="flex min-h-[56px] items-center justify-between gap-3 border-t border-divider px-4 py-2 text-[15px] font-semibold text-text no-underline first:border-t-0 active:scale-[0.99]"
+      className="flex min-h-[112px] min-w-0 flex-col gap-2 rounded-[18px] border border-card-border bg-card p-4 text-text no-underline active:scale-[0.97] motion-reduce:active:scale-100"
     >
-      <span className="min-w-0 leading-snug">{children}</span>
-      <ChevronRight />
+      <span className="flex items-baseline gap-2">
+        <span className="font-display text-[34px] font-bold leading-none tabular-nums">{tile.value}</span>
+        <span className="text-[13px] font-semibold text-secondary">{tile.label}</span>
+      </span>
+      {bar && <SegmentedBar aria-label={`${tile.label}: ${tile.value}`} percentage={tile.pct ?? 0} tone="light" />}
+      <span className="line-clamp-2 text-[13px] leading-snug text-secondary">{tile.line}</span>
     </Link>
   );
 }
@@ -188,16 +187,8 @@ function DiaryContent() {
   const isEmpty = !isPast && (forceEmpty || nothingLogged);
 
   const salt = calculateSaltTarget(currentData.user.trainingMinutes);
-  const microsText = nothingLogged
-    ? "Vi chất · chưa có món"
-    : `${microsSummary.achieved}/${microsSummary.total} vi chất${
-        microsSummary.mostLacking.length > 0 ? ` · Thiếu: ${microsSummary.mostLacking.join(", ")}` : ""
-      }`;
-  const trainingText = isPast
-    ? "Ngày tập · Chỉ xem"
-    : currentData.user.trainingMinutes > 0
-    ? `Ngày tập ${currentData.user.trainingMinutes}′ · muối ${salt.formattedTotal} g`
-    : `Nghỉ · muối ${salt.formattedTotal} g`;
+  const microTile = microsTile(microsSummary, nothingLogged);
+  const trainTile = trainingTile({ minutes: currentData.user.trainingMinutes, saltText: salt.formattedTotal, past: isPast });
 
   const desktopSubtitle = clientNow ? (
     <>
@@ -270,16 +261,41 @@ function DiaryContent() {
     const slot = SAMPLE_SLOT[meal.slot];
     const hasItems = meal.items.length > 0;
     const isHighlighted = highlightedMeal === slot;
+    const addLink = (label: React.ReactNode, className: string) => (
+      <Link
+        id={`mobile-add-${meal.slot}`}
+        href={`/add?meal=${slot}`}
+        onClick={() => rememberAddOpener(`mobile-add-${meal.slot}`)}
+        aria-label={`Thêm vào ${meal.name}`}
+        className={`no-underline active:scale-[0.97] motion-reduce:active:scale-100 ${className}`}
+      >
+        {label}
+      </Link>
+    );
+    const menuButton = (
+      <button
+        type="button"
+        id={`meal-menu-${meal.slot}`}
+        aria-label={`Tuỳ chọn ${meal.name}`}
+        aria-haspopup="dialog"
+        aria-expanded={menuSlot === slot}
+        onClick={() => setMenuSlot(slot)}
+        className="-mr-2 inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-text hover:bg-divider active:scale-[0.97] motion-reduce:active:scale-100"
+      >
+        <MealOptionsIcon />
+      </button>
+    );
     return (
       <section
         key={meal.id}
         id={`meal-${meal.slot}`}
         aria-labelledby={`meal-title-${meal.slot}`}
-        className={`flex flex-col rounded-[18px] border border-card-border bg-card px-4 pt-1 pb-1 transition-all duration-300 ${
+        className={`flex flex-col rounded-[18px] border border-card-border bg-card px-4 transition-all duration-300 ${
           isHighlighted ? "ring-2 ring-blue/80 shadow-md" : ""
         }`}
       >
-        <div className="flex min-h-[48px] items-center gap-2">
+        {/* Header: the meal name, and its kcal in Saira */}
+        <div className="flex min-h-[48px] items-center justify-between gap-3 pt-1">
           <h2
             id={`meal-title-${meal.slot}`}
             data-align-group="meal-card"
@@ -288,62 +304,59 @@ function DiaryContent() {
           >
             {meal.name}
           </h2>
-          <span className={`whitespace-nowrap text-[15px] tabular-nums ${hasItems ? "font-bold text-text" : "font-semibold text-secondary"}`}>
-            {hasItems ? `${formatAmount(meal.kcal, "kcal")} kcal` : isPast ? "Chưa ghi" : "Chưa có món"}
-          </span>
-          {(!isPast || hasItems) && (
-            <div className="-mr-2 flex items-center">
-              {!isPast && (
-                <Link
-                  id={`mobile-add-${meal.slot}`}
-                  href={`/add?meal=${slot}`}
-                  onClick={() => rememberAddOpener(`mobile-add-${meal.slot}`)}
-                  aria-label={`Thêm vào ${meal.name}`}
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-card-border bg-transparent text-blue no-underline active:scale-[0.97] motion-reduce:active:scale-100"
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
-                    <path d="M12 5v14M5 12h14" />
-                  </svg>
-                </Link>
-              )}
-              <button
-                type="button"
-                id={`meal-menu-${meal.slot}`}
-                aria-label={`Tuỳ chọn ${meal.name}`}
-                aria-haspopup="dialog"
-                aria-expanded={menuSlot === slot}
-                onClick={() => setMenuSlot(slot)}
-                className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-text hover:bg-divider active:scale-[0.97] motion-reduce:active:scale-100"
-              >
-                <MealOptionsIcon />
-              </button>
-            </div>
-          )}
+          {hasItems ? (
+            <span className="whitespace-nowrap font-display text-xl font-bold tabular-nums text-text">
+              {formatAmount(meal.kcal, "kcal")} <span className="text-[13px] font-semibold text-secondary">kcal</span>
+            </span>
+          ) : isPast ? (
+            <span className="whitespace-nowrap text-[13px] font-semibold text-secondary">Chưa ghi</span>
+          ) : null}
         </div>
+
         {meal.items.map((it) => {
+          const meta = it.detail ?? (it.macros ? macroLine(it.macros) : null);
           const row = (
             <>
               <span data-align-group="meal-card" data-align-edge="left" className="flex min-w-0 flex-col py-1 text-text">
-                <span>
+                <span className="text-[15px] leading-snug">
                   {it.name}
                   {it.name !== it.qty && <span className="text-secondary"> · {it.qty}</span>}
                 </span>
-                {it.detail && <span className="text-[13px] leading-tight text-secondary">{it.detail}</span>}
+                {meta && <span className="text-[13px] leading-tight text-secondary">{meta}</span>}
               </span>
-              <span className="shrink-0 tabular-nums text-secondary">{formatAmount(it.kcal, "kcal")}</span>
+              <span className="shrink-0 font-display text-lg font-bold tabular-nums text-text">{formatAmount(it.kcal, "kcal")}</span>
             </>
           );
-          const rowClass = "flex min-h-[44px] w-full items-center justify-between gap-3 border-t border-divider text-sm";
+          const rowClass = "flex min-h-[56px] w-full items-center justify-between gap-3 border-t border-divider py-1";
           return isPast ? (
             <div key={it.id} className={rowClass}>
               {row}
             </div>
           ) : (
-            <Link key={it.id} href={`/entry/${it.id}`} className={`${rowClass} no-underline active:scale-[0.99]`}>
+            <Link key={it.id} href={`/entry/${it.id}`} className={`${rowClass} no-underline active:bg-page motion-reduce:active:bg-transparent`}>
               {row}
             </Link>
           );
         })}
+
+        {/* Actions: a quiet + Thêm and the ⋯ menu. An empty meal is one quiet line with the same add link. */}
+        {!isPast && hasItems && (
+          <div className="flex min-h-[48px] items-center justify-between border-t border-divider">
+            {addLink("+ Thêm", "-ml-2 inline-flex min-h-[44px] items-center rounded-full px-2 text-[15px] font-bold text-blue")}
+            {menuButton}
+          </div>
+        )}
+        {!isPast && !hasItems && (
+          <div className="flex min-h-[48px] items-center justify-between gap-3 pb-1">
+            <p className="m-0 text-[13px] text-secondary">
+              Chưa có món ·{" "}
+              {addLink("Thêm", "inline-flex min-h-[44px] items-center px-1 text-[15px] font-bold text-blue")}
+            </p>
+            {menuButton}
+          </div>
+        )}
+        {isPast && hasItems && <div className="flex min-h-[48px] items-center justify-end border-t border-divider">{menuButton}</div>}
+        {isPast && !hasItems && <div className="pb-2" />}
       </section>
     );
   });
@@ -436,12 +449,9 @@ function DiaryContent() {
         )}
 
         <div className="flex flex-col gap-3 lg:grid lg:grid-cols-12 lg:items-start lg:gap-5">
-          <section
-            aria-label="Chi tiết trong ngày"
-            className="order-1 overflow-hidden rounded-[18px] border border-card-border bg-card lg:order-2 lg:col-span-5"
-          >
-            <DayRow href={`/micros?date=${viewIso}`}>{microsText}</DayRow>
-            <DayRow href={`/training?date=${viewIso}`}>{trainingText}</DayRow>
+          <section aria-label="Chi tiết trong ngày" className="order-1 grid grid-cols-2 gap-3 lg:order-2 lg:col-span-5">
+            <DayTileLink href={`/micros?date=${viewIso}`} tile={microTile} bar />
+            <DayTileLink href={`/training?date=${viewIso}`} tile={trainTile} />
           </section>
 
           <div className="order-2 flex flex-col gap-3 lg:order-1 lg:col-span-7 lg:gap-5">

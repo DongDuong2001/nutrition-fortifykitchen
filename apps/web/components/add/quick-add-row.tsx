@@ -38,18 +38,3 @@ export function QuickAddRow({ name, meta, addLabel, onAdd, trailing, withBorderT
   );
 }
 
-/** The 44 px control after a row: a chevron to open the portion panel. */
-export function RowChevronButton({ label, onClick }: { label: string; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={label}
-      className="inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-secondary hover:bg-divider active:scale-[0.97] motion-reduce:active:scale-100"
-    >
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-        <path d="M9 5l7 7-7 7" />
-      </svg>
-    </button>
-  );
-}

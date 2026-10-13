@@ -7,7 +7,7 @@ import { resolveFavourites } from "@/lib/favourites";
 import { resolveRecent } from "@/lib/recent-foods";
 import { Card } from "@/components/ui/card";
 import { SectionTitle } from "@/components/ui/section-title";
-import { PillButton } from "@/components/ui/pill-button";
+import { CreateFoodButton } from "@/components/foods/create-food-button";
 import { FoodListCard } from "@/components/foods/food-list-card";
 import { isOwnFood } from "@/lib/food-categories";
 import { RICH_NUTRIENT_IDS, richName } from "@/lib/rich-in";
@@ -63,9 +63,7 @@ export function ExploreSections() {
             Chưa có món nào. Tạo món mới để ghi món tự nấu hoặc món không có trong danh sách.
           </p>
         )}
-        <PillButton variant="secondary" href="/foods/new">
-          Tạo món mới
-        </PillButton>
+        <CreateFoodButton href="/foods/new" />
       </Card>
 
       <Card as="section" aria-labelledby="explore-rich" className="flex flex-col gap-1">

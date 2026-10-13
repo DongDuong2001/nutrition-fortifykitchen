@@ -10,20 +10,22 @@ export interface FoodListProps {
   onOpen?: (food: FoodItem) => void;
   getMeta: (food: FoodItem) => string;
   categoryName: (food: FoodItem) => string;
+  /** The flat list names each food's category in its meta line, unless a category chip is active. */
+  showCategory?: boolean;
   /** Grouped rows show a small heart after the name for saved favourites. */
   isFavourite?: (food: FoodItem) => boolean;
   /** Shown when the list has no foods. */
   empty: React.ReactNode;
-  /** Shown after the foods, for example the create-food link. */
+  /** Shown after the foods, for example the create-food button. */
   footer?: React.ReactNode;
   className?: string;
 }
 
 /**
- * Food results. Grouped (Tất cả, no query) shows sticky category headers. Flat shows one ranked
- * list with the category name in each row's meta line. Rows bleed 12 px into the padding (-mx-3 px-3),
- * so the hover and selected background is full width while the text lines up with the search field.
- * The first header and the first row carry data-align-group="add-list" for the alignment check.
+ * Food results, one Card per section (UI-RULES row pattern): rows of 56 px or more with 1 px dividers and a
+ * pressed state. Grouped (Tất cả, no query) shows one Card per category with its label as the first line.
+ * Flat shows one ranked list in one Card; the category name is in each row's meta line unless a category chip
+ * is active. The first Card carries data-align-group="add-list" for the alignment check.
  */
 export function FoodList({
   list,
@@ -32,108 +34,107 @@ export function FoodList({
   onOpen,
   getMeta,
   categoryName,
+  showCategory = true,
   isFavourite,
   empty,
   footer,
   className = "",
 }: FoodListProps) {
   const firstHeaderKey = list.grouped ? list.groups[0]?.key : undefined;
-  const firstRowId = list.grouped ? list.groups[0]?.foods[0]?.id : list.foods[0]?.id;
 
   const renderRow = (food: FoodItem, withCategory: boolean) => {
     const selected = selectedId === food.id;
     const meta = withCategory ? `${categoryName(food)} · ${getMeta(food)}` : getMeta(food);
     const showHeart = list.grouped && !!isFavourite?.(food);
-    const rowButton = (
-      <button
-        key={food.id}
-        type="button"
-        data-food-row
-        aria-pressed={selected}
-        onClick={() => onPick(food)}
-        className={`flex min-h-[52px] min-w-0 flex-1 items-center gap-3 rounded-xl border-0 py-3 text-left text-text cursor-pointer transition-colors ${
-          onOpen ? "pl-3 pr-1" : "-mx-3 px-3"
-        } ${selected ? "bg-blue/10" : "bg-card hover:bg-page"}`}
-      >
-        <div
-          data-align-group={food.id === firstRowId ? "add-list" : undefined}
-          data-align-edge={food.id === firstRowId ? "left" : undefined}
-          className="flex min-w-0 flex-1 flex-col gap-0.5"
-        >
-          <span className="line-clamp-2 text-[15px] font-bold leading-snug">
-            {food.nameVi}
-            {showHeart && (
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                className="ml-1.5 inline-block align-[-2px] text-secondary"
-                aria-hidden="true"
-              >
-                <path d="M12 21s-7.5-4.6-9.5-9.1C1 8.6 3.1 5.5 6.3 5.5c2 0 3.4 1.1 4.2 2.4.8-1.3 2.2-2.4 4.2-2.4 3.2 0 5.3 3.1 3.8 6.4C19.5 16.4 12 21 12 21z" />
-              </svg>
-            )}
-          </span>
-          <span className="line-clamp-2 text-xs text-secondary">{meta}</span>
-        </div>
-        {selected && (
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="shrink-0 text-blue"
-            aria-hidden="true"
-          >
-            <path d="M5 12l5 5 9-10" />
-          </svg>
-        )}
-      </button>
-    );
-    if (!onOpen) return rowButton;
     return (
-      <div key={food.id} className="-mx-3 flex items-center">
-        {rowButton}
+      <li key={food.id} className="flex items-center border-t border-divider first:border-t-0">
         <button
           type="button"
-          onClick={() => onOpen(food)}
-          aria-label={`Chọn khẩu phần ${food.nameVi}`}
-          className="inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-secondary hover:bg-divider active:scale-[0.97] motion-reduce:active:scale-100"
+          data-food-row
+          aria-pressed={selected}
+          onClick={() => onPick(food)}
+          className={`flex min-h-[56px] min-w-0 flex-1 cursor-pointer items-center gap-3 border-0 py-2 pl-4 text-left text-text transition-colors active:bg-divider motion-reduce:active:bg-transparent ${
+            onOpen ? "pr-1" : "pr-4"
+          } ${selected ? "bg-blue/10" : "bg-transparent"}`}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-            <path d="M9 5l7 7-7 7" />
-          </svg>
+          <span className="flex min-w-0 flex-1 flex-col gap-1">
+            <span className="line-clamp-2 text-[15px] font-semibold leading-snug">
+              {food.nameVi}
+              {showHeart && (
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="ml-1 inline-block align-[-2px] text-secondary"
+                  aria-hidden="true"
+                >
+                  <path d="M12 21s-7.5-4.6-9.5-9.1C1 8.6 3.1 5.5 6.3 5.5c2 0 3.4 1.1 4.2 2.4.8-1.3 2.2-2.4 4.2-2.4 3.2 0 5.3 3.1 3.8 6.4C19.5 16.4 12 21 12 21z" />
+                </svg>
+              )}
+            </span>
+            <span className="line-clamp-2 text-[13px] leading-tight text-secondary">{meta}</span>
+          </span>
+          {selected && (
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="shrink-0 text-blue"
+              aria-hidden="true"
+            >
+              <path d="M5 12l5 5 9-10" />
+            </svg>
+          )}
         </button>
-      </div>
+        {onOpen && (
+          <button
+            type="button"
+            onClick={() => onOpen(food)}
+            aria-label={`Chọn khẩu phần ${food.nameVi}`}
+            className="mr-1 inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-secondary hover:bg-divider active:scale-[0.97] motion-reduce:active:scale-100"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+              <path d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        )}
+      </li>
     );
   };
 
+  // No overflow-hidden on the grouped Card: it would stop the category label from sticking while the list scrolls
+  const cardClass = "rounded-[18px] border border-card-border bg-card";
+
   return (
-    <div className={`flex flex-col gap-1 -mx-3 px-3 ${className}`}>
+    <div className={`flex flex-col gap-3 ${className}`}>
       {list.foods.length === 0 ? (
         empty
       ) : list.grouped ? (
         list.groups.map((group) => (
-          <div key={group.key} role="group" aria-label={group.label} className="flex flex-col gap-1">
-            {/* -mx-3 px-3: the header covers the same 12 px bleed as the rows, so no row shows beside it */}
-            <div className="sticky top-0 z-10 -mx-3 border-b border-divider bg-card px-3 py-1.5 text-xs font-bold text-secondary">
-              <span
-                data-align-group={group.key === firstHeaderKey ? "add-list" : undefined}
-                data-align-edge={group.key === firstHeaderKey ? "left" : undefined}
-              >
-                {group.label} · {group.foods.length}
-              </span>
+          <section
+            key={group.key}
+            role="group"
+            aria-label={group.label}
+            data-align-group={group.key === firstHeaderKey ? "add-list" : undefined}
+            data-align-edge={group.key === firstHeaderKey ? "left" : undefined}
+            className={cardClass}
+          >
+            <div className="sticky top-0 z-10 rounded-t-[18px] border-b border-divider bg-page px-4 py-2 text-xs font-bold text-secondary">
+              {group.label} · {group.foods.length}
             </div>
-            {group.foods.map((food) => renderRow(food, false))}
-          </div>
+            <ul className="m-0 flex list-none flex-col overflow-hidden rounded-b-[18px] p-0">{group.foods.map((food) => renderRow(food, false))}</ul>
+          </section>
         ))
       ) : (
-        list.foods.map((food) => renderRow(food, true))
+        <ul data-align-group="add-list" data-align-edge="left" className={`m-0 flex list-none flex-col overflow-hidden p-0 ${cardClass}`}>
+          {list.foods.map((food) => renderRow(food, showCategory))}
+        </ul>
       )}
       {footer}
     </div>

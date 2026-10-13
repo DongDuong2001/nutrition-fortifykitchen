@@ -74,7 +74,7 @@ def check_diary(browser, size_name, size):
     border = add.evaluate("e => getComputedStyle(e).borderTopWidth")
     box = add.bounding_box()
     check(bg in ("rgba(0, 0, 0, 0)", "transparent"), f"{size_name} diary: the meal + has no filled disc ({bg})")
-    check(border == "1px", f"{size_name} diary: the meal + has a 1 px border ({border})")
+    check(border == "0px" and "Thêm" in add.inner_text(), f"{size_name} diary: the meal + is a quiet text button, no circle ({border})")
     check(box and box["width"] >= 44 and box["height"] >= 44, f"{size_name} diary: the meal + is 44 px")
     go(pg, "/diary?empty=1")
     check("Chép hôm qua" in text(pg), f"{size_name} diary: an empty day offers Chép hôm qua")
@@ -91,7 +91,7 @@ def check_explore(browser, size_name, size):
     mine = pg.locator("section[aria-labelledby=explore-mine]").inner_text()
     check("Bột củ dền" in mine or "Chưa có món nào. Tạo món mới" in mine, f"{size_name} explore: Món của tôi lists own foods or shows its empty state")
     chips = pg.locator("[role=group][aria-label='Lọc món theo nhóm'] button >> visible=true")
-    check(chips.count() == 11, f"{size_name} explore: Tất cả + 10 category chips ({chips.count()})")
+    check(chips.count() == 12, f"{size_name} explore: Tất cả + 11 category chips, Đồ uống included ({chips.count()})")
     shot(pg, "explore", size_name)
     no_h_scroll(pg, f"{size_name} explore")
 

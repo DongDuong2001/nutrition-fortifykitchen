@@ -3,6 +3,7 @@
 Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/cc2_04.py
 """
 import os
+import re
 import sys
 from playwright.sync_api import sync_playwright
 import _demo  # noqa: F401  (cc2-15b: demo mode on, see _demo.py)
@@ -67,7 +68,7 @@ def test_today_cards(browser):
     pg.goto(BASE + "/diary", wait_until="networkidle")
     pg.wait_for_timeout(400)
     txt = body_text(pg)
-    check("Ngày tập 60′ · muối 7–10,5 g" in txt, "diary @ 1440: the Ngày tập row reads 60′ and salt 7–10,5 g")
+    check(re.search(r"60′\s+Ngày tập\s+muối 7–10,5 g", txt) is not None, "diary @ 1440: the Ngày tập row reads 60′ and salt 7–10,5 g")
     pg.goto(BASE + "/training", wait_until="networkidle")
     pg.wait_for_timeout(400)
     txt = body_text(pg)

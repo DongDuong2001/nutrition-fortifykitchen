@@ -4,6 +4,7 @@ import {
   FOOD_CATEGORIES,
   buildFoodList,
   categoriesWithFoods,
+  chipCategories,
   groupFoodsByCategory,
 } from "../food-categories";
 
@@ -23,6 +24,7 @@ describe("food categories data", () => {
       "Đạm",
       "Chất béo & hạt",
       "Sữa & chế phẩm",
+      "Đồ uống",
       "Rau củ",
       "Trái cây",
       "Món Việt",
@@ -67,6 +69,23 @@ describe("groupFoodsByCategory", () => {
       { id: "b", category: "tinh_bot" },
     ] as FoodItem[];
     expect(categoriesWithFoods(foods).map((c) => c.key)).toEqual(["tinh_bot", "trai_cay"]);
+  });
+});
+
+describe("chipCategories", () => {
+  it("adds Đồ uống to the categories that have foods, in display order", () => {
+    const foods = [
+      { id: "a", category: "trai_cay" },
+      { id: "b", category: "tinh_bot" },
+    ] as FoodItem[];
+    expect(chipCategories(foods).map((c) => c.key)).toEqual(["tinh_bot", "do_uong", "trai_cay"]);
+    expect(chipCategories([]).map((c) => c.key)).toEqual(["do_uong"]);
+  });
+
+  it("Đồ uống filter with no drink: an empty flat list", () => {
+    const list = buildFoodList([{ id: "a", nameVi: "Cơm", category: "tinh_bot" }] as FoodItem[], "", "do_uong");
+    expect(list.foods).toEqual([]);
+    expect(list.grouped).toBe(false);
   });
 });
 

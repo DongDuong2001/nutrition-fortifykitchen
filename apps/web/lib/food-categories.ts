@@ -8,6 +8,7 @@ export type FoodCategory =
   | "dam"
   | "beo"
   | "sua"
+  | "do_uong"
   | "rau"
   | "trai_cay"
   | "mon_viet"
@@ -26,6 +27,7 @@ export const FOOD_CATEGORIES: FoodCategoryDef[] = [
   { key: "dam", label: "Đạm" },
   { key: "beo", label: "Chất béo & hạt" },
   { key: "sua", label: "Sữa & chế phẩm" },
+  { key: "do_uong", label: "Đồ uống" },
   { key: "rau", label: "Rau củ" },
   { key: "trai_cay", label: "Trái cây" },
   { key: "mon_viet", label: "Món Việt" },
@@ -81,6 +83,15 @@ export function groupFoodsByCategory(foods: FoodItem[]): FoodGroup[] {
 /** The filter chips to show: only categories that have foods, in display order. */
 export function categoriesWithFoods(foods: FoodItem[]): FoodCategoryDef[] {
   return groupFoodsByCategory(foods).map(({ key, label }) => ({ key, label }));
+}
+
+/**
+ * The filter chips of the add sheet: the categories that have foods, plus Đồ uống, which always shows. No drink
+ * has a sourced value yet (lib/data-sources), so its list is empty and says how to add one.
+ */
+export function chipCategories(foods: FoodItem[]): FoodCategoryDef[] {
+  const withFoods = new Set(categoriesWithFoods(foods).map((c) => c.key));
+  return FOOD_CATEGORIES.filter((c) => withFoods.has(c.key) || c.key === "do_uong").map(({ key, label }) => ({ key, label }));
 }
 
 /**
