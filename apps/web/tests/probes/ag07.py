@@ -58,8 +58,8 @@ def test_item_1(browser, vp_name, vp):
     pg.goto(BASE + "/foods/food-pho-bo", wait_until="networkidle")
     pg.wait_for_timeout(300)
 
-    check(pg.locator("#fd-size").count() == 0, f"[{vp_name}] foods/[id]: gram input hidden until Tùy chỉnh is selected")
-    pg.get_by_role("button", name="Tùy chỉnh").click()
+    check(pg.locator("#fd-size").count() == 0, f"[{vp_name}] foods/[id]: gram input hidden until Tuỳ chỉnh is selected")
+    pg.get_by_role("button", name="Tuỳ chỉnh").click()
     pg.wait_for_timeout(100)
     inp = pg.locator("#fd-size")
     check(inp.count() > 0, f"[{vp_name}] foods/[id]: #fd-size input exists")
