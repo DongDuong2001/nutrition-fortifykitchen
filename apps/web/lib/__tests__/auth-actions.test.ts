@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
+  SIGN_IN_FAILED,
   currentAccount,
   currentAccountId,
   sendPasswordReset,
@@ -13,6 +14,10 @@ import {
   validatePasswordConfirm,
   validateRequiredPassword,
 } from "../auth-actions";
+
+// Demo mode decides whether the sample account exists. The flows below run in demo mode unless a test says otherwise.
+const demo = vi.hoisted(() => ({ on: true }));
+vi.mock("../demo", () => ({ isDemo: () => demo.on }));
 
 // Messages are fixed Vietnamese copy (Hao's 13/10 decisions); the tests check the exact text.
 const EMAIL_ERROR = "Nhập email hợp lệ, ví dụ ban@email.com";
@@ -87,6 +92,7 @@ function memoryStorage(): Storage {
 
 describe("mock account flows (MOCK, no network)", () => {
   beforeEach(() => {
+    demo.on = true;
     vi.stubGlobal("localStorage", memoryStorage());
   });
   afterEach(() => {
@@ -95,6 +101,18 @@ describe("mock account flows (MOCK, no network)", () => {
 
   it("starts as the sample account, which has no password yet", async () => {
     expect(await currentAccount()).toEqual({ email: "ban@email.com", hasPassword: false, providers: ["google"] });
+  });
+
+  it("starts with nobody signed in outside demo mode, and the sample account does not sign in", async () => {
+    demo.on = false;
+    expect(await currentAccount()).toBeNull();
+    expect(await signInWithPassword("ban@email.com", "abcdef12")).toEqual({ ok: false, error: SIGN_IN_FAILED });
+  });
+
+  it("signs up on an empty store outside demo mode", async () => {
+    demo.on = false;
+    expect(await signUpWithPassword("cc19@example.com", "abcdef12")).toEqual({ ok: true });
+    expect(await currentAccount()).toEqual({ email: "cc19@example.com", hasPassword: true, providers: ["password"] });
   });
 
   it("signs up with a password and then signs in with it", async () => {

@@ -1,3 +1,4 @@
+import { isDemo } from "./demo";
 import { isValidEmail } from "./onboarding";
 
 // The one interface the auth screens call. It is a MOCK for now: nothing leaves the browser, and the
@@ -39,8 +40,8 @@ export function validatePasswordConfirm(password: string, confirm: string): stri
   return confirm === password ? null : "Mật khẩu nhập lại chưa khớp";
 }
 
-// MOCK store. Missing or unreadable storage starts from the sample account (no password yet), which is
-// the same sample user the rest of the app shows.
+// MOCK store. Missing or unreadable storage starts from the sample account (no password yet) in demo mode only
+// (lib/demo.ts). Outside demo mode a new visitor has no account until they sign up.
 const STORE_KEY = "h1t_mock_auth_v1";
 const SAMPLE_EMAIL = "ban@email.com";
 /** The one message for a failed sign-in: it never says which of email or password was wrong. */
@@ -80,7 +81,9 @@ interface MockStore {
   accounts: Record<string, MockAccount>;
 }
 
-function sampleStore(): MockStore {
+/** The store before anything is saved: the sample account in demo mode, nobody otherwise. */
+function startStore(): MockStore {
+  if (!isDemo()) return { current: null, accounts: {} };
   return { current: SAMPLE_EMAIL, accounts: { [SAMPLE_EMAIL]: { hash: null, providers: ["google"] } } };
 }
 
@@ -89,9 +92,9 @@ function readStore(): MockStore {
     const parsed = JSON.parse(globalThis.localStorage.getItem(STORE_KEY) ?? "null") as MockStore | null;
     if (parsed && typeof parsed === "object" && parsed.accounts && typeof parsed.accounts === "object") return parsed;
   } catch {
-    // Storage blocked or not JSON: fall through to the sample account.
+    // Storage blocked or not JSON: fall through to the start store.
   }
-  return sampleStore();
+  return startStore();
 }
 
 function writeStore(store: MockStore): void {

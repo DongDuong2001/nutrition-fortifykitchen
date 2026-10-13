@@ -75,10 +75,17 @@ def check_single_form(pg, width, path, primary):
     )
 
 
+def new_demo_page(browser, size):
+    # Mock accounts start empty outside demo mode (lib/auth-actions.ts). This probe needs the sample account, so every
+    # page in its context starts with the demo flag on (lib/demo.ts, the same key ?demo=1 sets).
+    context = browser.new_context(viewport=size)
+    context.add_init_script("try { localStorage.setItem('h1t_demo_v1', '1'); } catch (e) {}")
+    return context, context.new_page()
+
+
 def magic_link_from_signin(browser, width, size):
     # The quiet button sends the liên kết to the typed email; the password field is ignored, and an empty email is refused
-    context = browser.new_context(viewport=size)
-    pg = context.new_page()
+    context, pg = new_demo_page(browser, size)
     go(pg, "/signin")
     email_input(pg).fill("cc18-magic@example.com")
     pg.locator('input[autocomplete="current-password"]').fill("x")
@@ -230,8 +237,7 @@ def reset_flow(pg, width):
 
 
 def run_width(browser, width, size):
-    context = browser.new_context(viewport=size)
-    pg = context.new_page()
+    context, pg = new_demo_page(browser, size)
     errors = []
     pg.on("console", lambda msg: errors.append(msg.text) if msg.type == "error" else None)
     email = f"cc18-{int(time.time() * 1000)}@example.com"
