@@ -2,6 +2,8 @@ import React from "react";
 import Link from "next/link";
 
 export interface RowProps {
+  /** A 22 px icon before the label (stroke 1,8, currentColor) */
+  icon?: React.ReactNode;
   label: React.ReactNode;
   value?: React.ReactNode;
   hint?: React.ReactNode;
@@ -14,6 +16,7 @@ export interface RowProps {
 }
 
 export function Row({
+  icon,
   label,
   value,
   hint,
@@ -26,6 +29,11 @@ export function Row({
 }: RowProps) {
   const content = (
     <>
+      {icon && (
+        <span aria-hidden="true" className="mr-2 inline-flex h-[22px] w-[22px] shrink-0 items-center justify-center text-secondary">
+          {icon}
+        </span>
+      )}
       <div className="flex-1 flex flex-col gap-0.5 min-w-0">
         <span className="text-[15px] text-text font-normal truncate">{label}</span>
         {hint && <span className="text-[13px] text-secondary leading-tight">{hint}</span>}

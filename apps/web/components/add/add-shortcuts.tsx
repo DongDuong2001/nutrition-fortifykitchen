@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { SectionTitle } from "@/components/ui/section-title";
+import { Carousel } from "@/components/ui/carousel";
 import { QuickAddRow } from "@/components/add/quick-add-row";
 import type { FoodItem } from "@/lib/mock/foods";
 import type { SavedMeal } from "@/lib/saved-meals";
@@ -81,23 +81,6 @@ function ShortcutCard({
         Thêm
       </button>
     </li>
-  );
-}
-
-/** A titled horizontal carousel: scroll-snap, the next card's edge stays visible, real list and buttons. */
-function Carousel({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section aria-label={title} className="flex flex-col">
-      <SectionTitle as="h3" className="flex min-h-[44px] items-center">
-        {title}
-      </SectionTitle>
-      <ul
-        role="list"
-        className="m-0 -mx-4 flex snap-x snap-mandatory list-none gap-3 overflow-x-auto scroll-px-4 px-4 pb-1 [scrollbar-width:none]"
-      >
-        {children}
-      </ul>
-    </section>
   );
 }
 

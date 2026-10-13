@@ -7,6 +7,7 @@ Checks at 390 and 1280; screenshots to .screenshots/cc-16-*.png.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_16.py
 """
 import os
+import re
 import sys
 
 from playwright.sync_api import sync_playwright
@@ -108,7 +109,7 @@ def main():
             for text in ["Hồ sơ của bạn", "Mục tiêu mỗi ngày", "Ngôn ngữ", "Nhắc nhở", "Thêm vào màn hình chính", "Tài khoản", "Vùng nguy hiểm", "Xoá tài khoản"]:
                 check(text in body, f"{label} /settings shows {text!r}")
             check("Nam · sinh 2003 · 65 kg · Giữ cân" in body, f"{label} /settings profile sub reads Nam · sinh 2003 · 65 kg · Giữ cân")
-            check("1.950–2.275 kcal · đạm 104–143 g" in body, f"{label} /settings targets sub reads kcal and đạm")
+            check(re.search(r"1.950–2.275 kcal\s+đạm 104–143 g", body) is not None, f"{label} /settings targets sub reads kcal and đạm")
             check(pg.locator("a[href='/settings/profile']").count() >= 1, f"{label} /settings links to /settings/profile")
             check(pg.locator("a[href='/settings/targets']").count() >= 1, f"{label} /settings links to /settings/targets")
             check(pg.locator("a[href='/settings/delete-account']").count() >= 1, f"{label} /settings links to delete-account")

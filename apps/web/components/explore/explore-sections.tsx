@@ -8,14 +8,15 @@ import { resolveRecent } from "@/lib/recent-foods";
 import { Card } from "@/components/ui/card";
 import { SectionTitle } from "@/components/ui/section-title";
 import { CreateFoodButton } from "@/components/foods/create-food-button";
-import { FoodListCard } from "@/components/foods/food-list-card";
+import { Carousel } from "@/components/ui/carousel";
+import { FoodCardLink } from "@/components/foods/food-card-link";
+import { RichCarousel } from "@/components/explore/rich-carousel";
+import { foodRowKcal, foodRowMeta } from "@/lib/food-meta";
 import { isOwnFood } from "@/lib/food-categories";
-import { RICH_NUTRIENT_IDS, richName } from "@/lib/rich-in";
-import { getNutrientDefinition } from "@/lib/nutrients";
 import { FoodRowLink } from "@/components/foods/food-row-link";
 import { SavedMealsCard } from "@/components/explore/saved-meals-card";
 
-const SHOWN = 3;
+const SHOWN = 8;
 const SHOWN_MEALS = 3;
 
 /** Gần đây, Yêu thích, Món của tôi and the "Giàu …" index: the Khám phá home when nothing is searched. */
@@ -36,17 +37,38 @@ export function ExploreSections() {
 
   return (
     <>
-      <FoodListCard
-        title="Gần đây"
-        foods={recents}
-        empty={<p className="m-0 py-3 text-[13px] leading-snug text-secondary">Món bạn vừa ghi sẽ hiện ở đây.</p>}
-      />
+      <RichCarousel />
 
-      <FoodListCard
-        title="Yêu thích"
-        foods={favourites.map((food) => ({ food }))}
-        empty={<p className="m-0 py-3 text-[13px] leading-snug text-secondary">Chưa có món yêu thích. Bấm ♡ ở trang chi tiết món để lưu.</p>}
-      />
+      {recents.length > 0 ? (
+        <Carousel title="Gần đây">
+          {recents.map(({ food, grams, label }) => (
+            <FoodCardLink
+              key={`${food.id}|${label}`}
+              href={`/foods/${food.id}`}
+              name={food.nameVi}
+              meta={`${label}${foodRowKcal(food, grams) ? ` · ${foodRowKcal(food, grams)}` : ""}`}
+            />
+          ))}
+        </Carousel>
+      ) : (
+        <Card as="section" aria-label="Gần đây" className="flex flex-col gap-1">
+          <SectionTitle>Gần đây</SectionTitle>
+          <p className="m-0 py-1 text-[13px] leading-snug text-secondary">Món bạn vừa ghi sẽ hiện ở đây.</p>
+        </Card>
+      )}
+
+      {favourites.length > 0 ? (
+        <Carousel title="Yêu thích">
+          {favourites.slice(0, SHOWN).map((food) => (
+            <FoodCardLink key={food.id} href={`/foods/${food.id}`} name={food.nameVi} meta={foodRowMeta(food)} />
+          ))}
+        </Carousel>
+      ) : (
+        <Card as="section" aria-label="Yêu thích" className="flex flex-col gap-1">
+          <SectionTitle>Yêu thích</SectionTitle>
+          <p className="m-0 py-1 text-[13px] leading-snug text-secondary">Chưa có món yêu thích. Bấm ♡ ở trang chi tiết món để lưu.</p>
+        </Card>
+      )}
 
       <SavedMealsCard limit={SHOWN_MEALS} />
 
@@ -66,19 +88,6 @@ export function ExploreSections() {
         <CreateFoodButton href="/foods/new" />
       </Card>
 
-      <Card as="section" aria-labelledby="explore-rich" className="flex flex-col gap-1">
-        <SectionTitle id="explore-rich" className="flex min-h-[44px] items-center">
-          Món giàu vi chất
-        </SectionTitle>
-        {RICH_NUTRIENT_IDS.map((id) => (
-          <FoodRowLink
-            key={id}
-            href={`/explore/rich/${id}`}
-            name={`Giàu ${richName(getNutrientDefinition(id)?.nameVi ?? id)}`}
-            meta="Xếp theo mỗi 100 g hoặc mỗi khẩu phần"
-          />
-        ))}
-      </Card>
     </>
   );
 }

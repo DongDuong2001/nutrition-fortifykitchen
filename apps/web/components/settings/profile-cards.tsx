@@ -7,6 +7,7 @@ import { FormRow } from "@/components/ui/form-row";
 import { Row } from "@/components/ui/row";
 import { SectionTitle } from "@/components/ui/section-title";
 import { Switch } from "@/components/ui/switch";
+import { SETTINGS_ICONS } from "@/components/settings/settings-icons";
 import { useDiary } from "@/lib/diary-store";
 import { formatNumber } from "@/lib/format";
 import { goalOptions, parseBirthYear, validateSetupDraft } from "@/lib/onboarding";
@@ -197,16 +198,16 @@ export function AppCard() {
     <Card as="section" aria-label="Ứng dụng" className="flex flex-col gap-1">
       <SectionTitle>Ứng dụng</SectionTitle>
       <RowGroup>
-        <Row label="Ngôn ngữ" value={language} href="/settings/language" />
+        <Row icon={SETTINGS_ICONS.language} label="Ngôn ngữ" value={language} href="/settings/language" />
       </RowGroup>
       <RowGroup>
-        <Row label="Nhắc nhở" value={reminders ?? ""} href="/settings/notifications" />
+        <Row icon={SETTINGS_ICONS.bell} label="Nhắc nhở" value={reminders ?? ""} href="/settings/notifications" />
       </RowGroup>
       <RowGroup>
-        <Row label="Nguồn dữ liệu" href="/settings/data-sources" />
+        <Row icon={SETTINGS_ICONS.database} label="Nguồn dữ liệu" href="/settings/data-sources" />
       </RowGroup>
       <RowGroup>
-        <Row label="Thêm vào màn hình chính" href="/install" />
+        <Row icon={SETTINGS_ICONS.install} label="Thêm vào màn hình chính" href="/install" />
       </RowGroup>
     </Card>
   );
