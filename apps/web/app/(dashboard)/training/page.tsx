@@ -5,12 +5,8 @@ import { useSearchParams } from "next/navigation";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { DesktopSidebar } from "@/components/ui/desktop-sidebar";
 import { AppHeader } from "@/components/ui/app-header";
-import {
-  calculateSaltTarget,
-  getTrainingPhases,
-  loadTrainingChecks,
-  saveTrainingChecks,
-} from "@/lib/training";
+import { calculateSaltTarget, getTrainingPhases } from "@/lib/training";
+import { type DayChecklist, isEditableDay, readDay, toggleTick, writeDay } from "@/lib/training-checklist";
 import { formatDayLabel, formatDesktopDate, formatNumber } from "@/lib/format";
 import { goalName } from "@/lib/onboarding";
 import { getTodayIsoVN } from "@/lib/date";
@@ -48,21 +44,14 @@ function TrainingContent() {
   const [clientNow, setClientNow] = useState<Date | null>(null);
   const [isDesktop, setIsDesktop] = useState(false);
   const todayIso = useMemo(() => getTodayIsoVN(), []);
-  // ?date= picks a past day, which is read-only: no minutes change, no ticks, and no minutes are shown because
-  // the mock does not store them for that day.
+  // ?date= picks a past day, which is read-only: its saved minutes and ticks show, and nothing can change.
   const viewIso = viewedIsoDate(searchParams?.get("date"), todayIso);
-  const isPast = viewIso !== todayIso;
+  const isPast = !isEditableDay(viewIso, todayIso);
   const diaryHref = isPast ? `/diary?date=${viewIso}` : "/diary";
 
-  // Pre-configured checked states matching design specs
-  const [checkedState, setCheckedState] = useState<Record<string, boolean>>({
-    "pre-cha-la": true,
-    "pre-cu-den": true,
-    "intra-salt-0-20": true,
-    "intra-salt-20-40": false,
-    "intra-salt-40-60": false,
-    "intra-carb": false,
-  });
+  // The viewed day's saved record (null when nothing was saved for that date). Read after mount.
+  const [saved, setSaved] = useState<DayChecklist | null>(null);
+  const [ticked, setTicked] = useState<string[]>([]);
 
   // Sync state if url changes; with no duration in the url, the profile's default once it is read
   useEffect(() => {
@@ -75,13 +64,11 @@ function TrainingContent() {
     }
   }, [searchParams, hydrated, profileDuration]);
 
-  // Load saved checklist ticks after mount to avoid hydration mismatch
   useEffect(() => {
     setClientNow(new Date());
-    const saved = loadTrainingChecks(todayIso);
-    if (Object.keys(saved).length > 0) {
-      setCheckedState((prev) => ({ ...prev, ...saved }));
-    }
+    const day = readDay(viewIso);
+    setSaved(day);
+    setTicked(day?.ticked ?? []);
 
     const handleResize = () => {
       setIsDesktop(window.innerWidth >= 1024);
@@ -89,31 +76,34 @@ function TrainingContent() {
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [todayIso]);
+  }, [viewIso]);
+
+  // A past day shows the duration it was saved with; a day with no record shows none.
+  const pastDuration = saved === null ? "" : saved.minutes === 0 ? "rest" : String(saved.minutes);
+  const activeDuration = isPast ? pastDuration : selectedDuration;
 
   const trainingMinutes = useMemo(() => {
-    if (selectedDuration === "rest") return 0;
-    const mins = parseInt(selectedDuration, 10);
+    if (activeDuration === "rest") return 0;
+    const mins = parseInt(activeDuration, 10);
     return isNaN(mins) ? 60 : mins;
-  }, [selectedDuration]);
+  }, [activeDuration]);
 
-  const isRestDay = selectedDuration === "rest";
+  const isRestDay = activeDuration === "rest";
+  // Today always shows its checklist (or the rest card). A past day shows its saved checklist only if it logged minutes.
+  const showChecklist = !isRestDay && (!isPast || saved !== null);
 
+  // Saves the day's minutes and ticks together, so a past view can show them later.
   const handleToggle = (itemId: string) => {
     if (isPast) return;
-    setCheckedState((prev) => {
-      const next = {
-        ...prev,
-        [itemId]: !(prev[itemId] ?? false),
-      };
-      saveTrainingChecks(todayIso, next);
-      return next;
-    });
+    const next = toggleTick(ticked, itemId);
+    setTicked(next);
+    writeDay(todayIso, { minutes: trainingMinutes, ticked: next });
   };
 
-  const handleSelectDuration = (id: string) => {
+  const handleSelectDuration = (id: string, minutes: number) => {
     if (isPast) return;
     setSelectedDuration(id);
+    writeDay(todayIso, { minutes, ticked });
   };
 
   const saltTarget = useMemo(
@@ -140,6 +130,12 @@ function TrainingContent() {
 
   const headerSubtitle = isDesktop ? desktopSubtitle : mobileSubtitle;
 
+  const pastNote = saved
+    ? isRestDay
+      ? "Ngày nghỉ. Chỉ xem."
+      : "Tick đã lưu của ngày này. Chỉ xem."
+    : "Ngày này chưa có thời lượng tập đã ghi. Chỉ xem.";
+
   return (
     <div className="w-full min-h-screen bg-page text-text font-sans flex flex-col">
       {/* ============================================================== */}
@@ -157,16 +153,11 @@ function TrainingContent() {
           alignGroup="training-header"
           summary={
             <div className="flex flex-col gap-3 w-full">
-              <DurationSelector
-                value={isPast ? "" : selectedDuration}
-                onChange={handleSelectDuration}
-                variant="mobile"
-                disabled={isPast}
-              />
+              <DurationSelector value={activeDuration} onChange={handleSelectDuration} variant="mobile" disabled={isPast} />
               {isPast ? (
                 <p className="m-0 pt-1 text-[13px] leading-snug text-muted-on-dark">
                   Muối: —<br />
-                  Ngày này chưa có thời lượng tập đã ghi. Chỉ xem.
+                  {pastNote}
                 </p>
               ) : (
                 <SaltSummaryCard
@@ -181,13 +172,14 @@ function TrainingContent() {
         />
 
         <main className="flex-1 w-full max-w-[560px] mx-auto px-4 pt-4 pb-6 flex flex-col gap-3">
-          {isPast ? null : isRestDay ? (
-            <RestDayCard />
-          ) : (
+          {isRestDay && !isPast && <RestDayCard />}
+
+          {showChecklist && (
             <PhaseChecklist
               phases={phases}
-              checkedState={checkedState}
+              ticked={ticked}
               onToggle={handleToggle}
+              readOnly={isPast}
               variant="mobile"
             />
           )}
@@ -221,12 +213,7 @@ function TrainingContent() {
             backHref={diaryHref}
             alignGroup="training-header"
             actions={
-              <DurationSelector
-                value={isPast ? "" : selectedDuration}
-                onChange={handleSelectDuration}
-                variant="desktop"
-                disabled={isPast}
-              />
+              <DurationSelector value={activeDuration} onChange={handleSelectDuration} variant="desktop" disabled={isPast} />
             }
           />
 
@@ -234,7 +221,7 @@ function TrainingContent() {
             <section aria-labelledby="past-training" className="bg-card border border-card-border rounded-[18px] p-5 flex flex-col gap-2">
               <h2 id="past-training" className="m-0 text-lg font-bold text-text">Muối</h2>
               <p className="m-0 font-display italic font-extrabold text-[40px] leading-none text-text">—</p>
-              <p className="m-0 text-sm text-secondary">Ngày này chưa có thời lượng tập đã ghi. Chỉ xem.</p>
+              <p className="m-0 text-sm text-secondary">{pastNote}</p>
             </section>
           ) : (
           <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -252,19 +239,20 @@ function TrainingContent() {
           )}
 
           {/* Section 2: Phase Checklist / Rest Tips + Tip Banner */}
-          {!isPast && (
+          {(!isPast || showChecklist) && (
           <section className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
             {isRestDay ? (
               <RestDayCard />
             ) : (
               <PhaseChecklist
                 phases={phases}
-                checkedState={checkedState}
+                ticked={ticked}
                 onToggle={handleToggle}
+                readOnly={isPast}
                 variant="desktop"
               />
             )}
-            <TrainingTipBanner isRestDay={isRestDay} />
+            {!isPast && <TrainingTipBanner isRestDay={isRestDay} />}
           </section>
           )}
         </main>

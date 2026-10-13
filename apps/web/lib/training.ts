@@ -29,7 +29,6 @@ export interface TrainingCheckItem {
   label: string;
   note: string;
   dose: string;
-  defaultDone: boolean;
 }
 
 export interface TrainingPhase {
@@ -131,14 +130,12 @@ export function getTrainingPhases(trainingMinutes: number): TrainingPhase[] {
       label: "Chà là",
       note: "✓ Đã ghi vào Trước tập",
       dose: "30 g",
-      defaultDone: true,
     },
     {
       id: "pre-cu-den",
       label: "Bột củ dền (Dalahouse)",
       note: "Tăng lưu chuyển dinh dưỡng",
       dose: "3 g",
-      defaultDone: true,
     },
   ];
 
@@ -156,7 +153,6 @@ export function getTrainingPhases(trainingMinutes: number): TrainingPhase[] {
       label: `Muối · phút ${startMin}–${endMin}`,
       note: isFirst ? "✓ Đã ghi 1 g vào nhật ký · chạm để sửa" : "",
       dose: "1–1,5 g",
-      defaultDone: isFirst,
     });
   }
 
@@ -165,7 +161,6 @@ export function getTrainingPhases(trainingMinutes: number): TrainingPhase[] {
     label: "Carb nhanh",
     note: "Redbull · Redbull + mật mía · mật mía Golden Barrel",
     dose: "30–45 g",
-    defaultDone: false,
   });
 
   return [
@@ -203,62 +198,4 @@ export function getRestDayTips(): RestDayTip[] {
       path: "M13 3L5 14h6l-1 7 8-11h-6z", // Lightning icon
     },
   ];
-}
-
-export const TRAINING_CHECKS_STORAGE_KEY = "h1t_training_checks_v1";
-
-export type KeyValueStorage = Pick<Storage, "getItem" | "setItem">;
-
-function browserStorage(): KeyValueStorage | null {
-  try {
-    if (typeof window !== "undefined" && window.localStorage) {
-      return window.localStorage;
-    }
-    if (typeof localStorage !== "undefined") {
-      return localStorage;
-    }
-    return null;
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Load saved checklist ticks for a specific day (keyed by YYYY-MM-DD in Asia/Ho_Chi_Minh).
- */
-export function loadTrainingChecks(
-  dateKey: string,
-  storage: KeyValueStorage | null = browserStorage()
-): Record<string, boolean> {
-  if (!storage) return {};
-  try {
-    const raw = storage.getItem(TRAINING_CHECKS_STORAGE_KEY);
-    if (!raw) return {};
-    const store = JSON.parse(raw);
-    if (store && typeof store === "object" && store[dateKey]) {
-      return store[dateKey] as Record<string, boolean>;
-    }
-  } catch {
-    // Ignore storage/JSON parse errors
-  }
-  return {};
-}
-
-/**
- * Save checklist ticks for a specific day (keyed by YYYY-MM-DD in Asia/Ho_Chi_Minh).
- */
-export function saveTrainingChecks(
-  dateKey: string,
-  checks: Record<string, boolean>,
-  storage: KeyValueStorage | null = browserStorage()
-): void {
-  if (!storage) return;
-  try {
-    const raw = storage.getItem(TRAINING_CHECKS_STORAGE_KEY);
-    const store: Record<string, Record<string, boolean>> = raw ? JSON.parse(raw) : {};
-    store[dateKey] = checks;
-    storage.setItem(TRAINING_CHECKS_STORAGE_KEY, JSON.stringify(store));
-  } catch {
-    // Ignore storage errors (quota, disabled, etc.)
-  }
 }

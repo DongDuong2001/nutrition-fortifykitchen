@@ -13,6 +13,10 @@ export interface DurationSelectorProps {
   className?: string;
 }
 
+/**
+ * Equal columns. Desktop: five in one row. Phone: three columns (the design's grid), so each label fits on one
+ * line at 390 px; five columns there would wrap "60 phút" and "120 phút" onto two lines.
+ */
 export function DurationSelector({
   value,
   onChange,
@@ -20,9 +24,7 @@ export function DurationSelector({
   disabled = false,
   className = "",
 }: DurationSelectorProps) {
-  const durations = getTrainingDurations();
-
-  const items: ChipGroupItem[] = durations.map((d) => ({
+  const items: ChipGroupItem[] = getTrainingDurations().map((d) => ({
     id: d.id,
     label: d.label,
     active: value === d.id,
@@ -30,28 +32,12 @@ export function DurationSelector({
     onClick: () => onChange(d.id, d.minutes),
   }));
 
-  if (variant === "desktop") {
-    return (
-      <div className={`w-[460px] max-w-full ${className}`}>
-        <ChipGroup
-          items={items}
-          columns={5}
-          columnsLg={5}
-          tone="light"
-          size="md"
-        />
-      </div>
-    );
-  }
-
-  // Mobile layout: 3 columns phone, 5 columns desktop per prompt requirement
   return (
-    <div className={`w-full ${className}`}>
+    <div role="group" aria-label="Thời gian tập" className={`${variant === "desktop" ? "w-[460px] max-w-full" : "w-full"} ${className}`}>
       <ChipGroup
         items={items}
-        columns={3}
-        columnsLg={5}
-        tone="dark"
+        columns={variant === "desktop" ? 5 : 3}
+        tone={variant === "desktop" ? "light" : "dark"}
         size="md"
       />
     </div>

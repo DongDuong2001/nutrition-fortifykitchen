@@ -124,40 +124,4 @@ describe("Training calculations (lib/training.ts)", () => {
     });
   });
 
-  describe("Training checklist persistence (localStorage h1t_training_checks_v1)", () => {
-    function fakeStorage(initial: Record<string, string> = {}) {
-      const data: Record<string, string> = { ...initial };
-      return {
-        data,
-        getItem: (key: string) => (key in data ? data[key] : null),
-        setItem: (key: string, value: string) => {
-          data[key] = value;
-        },
-      };
-    }
-
-    it("saves and loads checks keyed by YYYY-MM-DD", async () => {
-      const { loadTrainingChecks, saveTrainingChecks, TRAINING_CHECKS_STORAGE_KEY } = await import("../training");
-      const storage = fakeStorage();
-      const testDate = "2026-10-11";
-      const checks = { "pre-cha-la": true, "intra-salt-0-20": false };
-
-      saveTrainingChecks(testDate, checks, storage);
-
-      const loaded = loadTrainingChecks(testDate, storage);
-      expect(loaded).toEqual(checks);
-
-      // Verify key in storage
-      const raw = storage.getItem(TRAINING_CHECKS_STORAGE_KEY);
-      expect(raw).not.toBeNull();
-      const parsed = JSON.parse(raw!);
-      expect(parsed[testDate]).toEqual(checks);
-    });
-
-    it("returns empty object when key not found or error", async () => {
-      const { loadTrainingChecks } = await import("../training");
-      const storage = fakeStorage();
-      expect(loadTrainingChecks("2099-01-01", storage)).toEqual({});
-    });
-  });
 });
