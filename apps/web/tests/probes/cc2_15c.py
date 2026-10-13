@@ -7,8 +7,13 @@ Production build, clock fixed at 18:00 Asia/Ho_Chi_Minh (Bữa tối). No _demo 
 - an old sessionStorage diary is moved to localStorage once
 - demo entries never show after ?demo=0, and real entries never show in demo
 - "Bột củ dền" is not found by search outside demo (Khám phá and the add sheet), and is found in demo
+- each account has its own diary: A logs a food and signs out, B signs in and sees an empty diary, A signs back in and
+  the food is there (client navigation, no reload); nobody signed in goes to /signin
+- the first paint of / on a fresh profile is the skeleton (server HTML, no script run), and it does not shimmer
+  under prefers-reduced-motion
 Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/cc2_15c.py
 """
+import hashlib
 import json
 import os
 import re
@@ -89,7 +94,11 @@ def run(browser, name, size):
     check(food != "" and food in text(pg), f"{where} meal added: {food} is in Nhật ký")
     state = ctx.storage_state()
     keys = {k["name"] for o in state["origins"] for k in o["localStorage"]}
-    check("h1t_added_entries_v1" in keys and "h1t_recent_foods_v2" in keys, f"{where} localStorage holds the entries and Gần đây")
+    check(
+        "h1t_added_entries_v1_ban@email.com" in keys and "h1t_recent_foods_v2_ban@email.com" in keys,
+        f"{where} localStorage holds the entries and Gần đây under the account's keys",
+    )
+    check("h1t_added_entries_v1" not in keys, f"{where} no unscoped entries key is left")
     ctx.close()
 
     ctx, pg = new_page(browser, size, state=state)
@@ -145,10 +154,85 @@ def run(browser, name, size):
     go(pg, "/diary")
     check("Chà là hạt dẻ cũ" in text(pg), f"{where} migration: the session entry shows in Nhật ký")
     moved = pg.evaluate(
-        "() => [localStorage.getItem('h1t_added_entries_v1') !== null, sessionStorage.getItem('h1t_added_entries_v1')]"
+        "() => [localStorage.getItem('h1t_added_entries_v1_ban@email.com') !== null, sessionStorage.getItem('h1t_added_entries_v1'),"
+        " localStorage.getItem('h1t_added_entries_v1')]"
     )
-    check(moved[0] is True and moved[1] is None, f"{where} migration: now in localStorage, gone from sessionStorage ({moved})")
+    check(
+        moved[0] is True and moved[1] is None and moved[2] is None,
+        f"{where} migration: now under the account's key in localStorage, gone from sessionStorage and the old key ({moved})",
+    )
     ctx.close()
+
+    # 6. Each account has its own diary
+    password = "Abcdef12"
+    digest = hashlib.sha256(password.encode()).hexdigest()
+    accounts = {e: {"hash": digest, "providers": ["password"]} for e in ("a@example.com", "b@example.com")}
+    store = json.dumps({"current": "a@example.com", "accounts": accounts})
+    ctx, pg = new_page(browser, size)
+    ctx.add_init_script(
+        f"try {{ if (localStorage.getItem('h1t_mock_auth_v1') === null) localStorage.setItem('h1t_mock_auth_v1', {json.dumps(store)}); }} catch (e) {{}}"
+    )
+
+    def sign_in(email):
+        pg.get_by_label("Email").fill(email)
+        pg.get_by_label("Mật khẩu", exact=True).fill(password)
+        pg.get_by_role("button", name="Đăng nhập", exact=True).click()
+        pg.wait_for_url(BASE + "/")
+        pg.wait_for_timeout(500)
+
+    def open_tab(label, url_end):
+        pg.get_by_role("link", name=label).locator("visible=true").first.click()
+        pg.wait_for_url("**" + url_end)
+        pg.wait_for_timeout(500)
+
+    def sign_out():
+        open_tab("Cài đặt", "/settings")
+        pg.get_by_text("Tài khoản", exact=True).locator("visible=true").first.click()
+        pg.wait_for_url("**/settings/account")
+        pg.get_by_text("Đăng xuất", exact=True).locator("visible=true").first.click()
+        pg.wait_for_url("**/signin")
+        pg.wait_for_timeout(300)
+
+    go(pg, "/diary")
+    a_food = add_food(pg, SAMPLE_FOODS)
+    check(a_food != "" and a_food in text(pg), f"{where} accounts: A logs {a_food}")
+    keys = pg.evaluate("() => Object.keys(localStorage)")
+    check("h1t_added_entries_v1_a@example.com" in keys, f"{where} accounts: A's entries are under A's key ({keys})")
+    sign_out()
+    go(pg, "/diary")
+    check(pg.url.endswith("/signin"), f"{where} accounts: nobody signed in, /diary goes to /signin ({pg.url[len(BASE):]})")
+    sign_in("b@example.com")
+    check("Chưa có ngày nào được ghi" in text(pg), f"{where} accounts: B's Tổng quan is empty")
+    open_tab("Nhật ký", "/diary")
+    t = text(pg)
+    check(a_food not in t, f"{where} accounts: B's Nhật ký does not show A's {a_food}")
+    check("Chưa có món hôm nay" in t, f"{where} accounts: B's Nhật ký is empty ('Chưa có món hôm nay')")
+    sign_out()
+    sign_in("a@example.com")
+    open_tab("Nhật ký", "/diary")
+    check(a_food in text(pg), f"{where} accounts: A signs back in and {a_food} is there")
+    ctx.close()
+
+    # 7. First paint of / on a fresh profile is the skeleton, not a blank page
+    for scheme, expect in (("no-preference", "pulse"), ("reduce", "none")):
+        ctx = browser.new_context(viewport=size, reduced_motion=scheme)
+        pg = ctx.new_page()
+        pg.route("**/*", lambda r: r.abort() if r.request.resource_type == "script" else r.continue_())
+        pg.goto(BASE + "/", wait_until="load")
+        busy = pg.locator('[aria-busy="true"]')
+        check(busy.count() == 1 and busy.first.is_visible(), f"{where} first paint of / ({scheme}): the skeleton is on screen")
+        check(len(text(pg).strip()) > 0 and "kcal" not in text(pg), f"{where} first paint ({scheme}): not blank, no sample targets")
+        cards = busy.first.locator("> div")
+        check(cards.count() == 2, f"{where} first paint ({scheme}): two card-shaped blocks ({cards.count()})")
+        header = pg.locator("header").first
+        box = header.bounding_box()
+        check(box is not None and box["height"] > 40 and header.inner_text().strip() == "", f"{where} first paint ({scheme}): header shape, no title text")
+        if name == "390":
+            style = header.evaluate("(h) => [getComputedStyle(h).borderBottomLeftRadius, getComputedStyle(h).backgroundColor]")
+            check(style[0] == "20px" and style[1] != "rgba(0, 0, 0, 0)", f"{where} first paint ({scheme}): ink header, 20 px bottom radius ({style})")
+        anim = cards.first.evaluate("(c) => getComputedStyle(c).animationName")
+        check(expect in anim, f"{where} first paint ({scheme}): card animation is {anim!r} (expect {expect})")
+        ctx.close()
 
 
 def main():

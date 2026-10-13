@@ -1,6 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from "react";
+import { usePathname } from "next/navigation";
+import { currentAccountId } from "./auth-actions";
 import { SAMPLE_DAY, type MockDayData, type MockFoodItem } from "./mock/sample-day";
 import { type FoodItem } from "./mock/foods";
 import { type MealSlot, getMealSlotNameVi } from "./meal-slot";
@@ -11,11 +13,10 @@ import {
   ADDED_ENTRIES_KEY,
   RECENT_FOODS_KEY,
   SAMPLE_EDITS_KEY,
+  adoptLegacyKeys,
   browserLocal,
   browserSession,
   keyedStorage,
-  loadMigrated,
-  storageKey,
   type KeyValueStore,
 } from "./storage-keys";
 import { blankDay, dayEntries, statDisplay } from "./day-history";
@@ -349,51 +350,70 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   // Same rule for the profile: the sample user until the saved one is read after mount
   const [profile, setProfile] = useState<Profile>(SAMPLE_PROFILE);
 
-  // Load on mount (client-only). Everything is in localStorage; an old sessionStorage copy moves over once.
+  // The signed-in account the data below belongs to; null when nobody is signed in (then nothing is read or
+  // written). Demo mode ignores it: demo has its own keys.
+  const [accountId, setAccountId] = useState<string | null>(null);
+  const pathname = usePathname();
+
+  // Reads one account's (or demo's) data into state. Everything is in localStorage under the account's keys; the
+  // old unscoped keys and an old sessionStorage copy move to the first account that loads, once.
+  const loadData = useCallback((account: string | null, demoNow: boolean) => {
+    const local = browserLocal();
+    if (!demoNow && account) adoptLegacyKeys(local, browserSession(), account);
+    const own = local ? keyedStorage(local, demoNow, account) : null;
+    let added: AddedDiaryEntry[] = [];
+    let sample: SampleEdits = {};
+    let recents: RecentFood[] = demoNow ? DEFAULT_RECENT_FOODS : [];
+    try {
+      added = parseAddedEntries(own?.getItem(ADDED_ENTRIES_KEY) ?? null);
+      sample = parseSampleEdits(own?.getItem(SAMPLE_EDITS_KEY) ?? null);
+      const storedRecents = own?.getItem(RECENT_FOODS_KEY) ?? null;
+      if (storedRecents) {
+        const parsed: unknown = JSON.parse(storedRecents);
+        if (Array.isArray(parsed) && parsed.length > 0) recents = parsed.filter(isRecentFood);
+      }
+    } catch {
+      // Ignore storage access errors
+    }
+    setEdits({ added, sample, undo: null });
+    setRecentFoods(recents);
+    setFavouriteIds(readFavouriteIds(own));
+    setSavedMeals(readSavedMeals(own));
+  }, []);
+
+  // Load on mount (client-only)
   useEffect(() => {
     // Before anything that depends on today renders, so history and weights are in place with it
     const demoNow = isDemo();
     setDemoActive(demoNow);
     setDemo(demoNow);
-    const local = browserLocal();
-    const session = browserSession();
-    const load = (base: string) => loadMigrated(storageKey(base, demoNow), local, session);
+    const account = currentAccountId();
+    setAccountId(account);
     try {
-      const storedEntries = load(ADDED_ENTRIES_KEY);
-      const storedSample = load(SAMPLE_EDITS_KEY);
-      setEdits((prev) => ({
-        ...prev,
-        added: parseAddedEntries(storedEntries),
-        sample: parseSampleEdits(storedSample),
-      }));
-      const storedRecents = load(RECENT_FOODS_KEY);
-      if (storedRecents) {
-        const parsed: unknown = JSON.parse(storedRecents);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setRecentFoods(parsed.filter(isRecentFood));
-        } else if (demoNow) {
-          setRecentFoods(DEFAULT_RECENT_FOODS);
-        }
-      } else if (demoNow) {
-        setRecentFoods(DEFAULT_RECENT_FOODS);
-      }
-    } catch {
-      // Ignore storage access errors
+      loadData(account, demoNow);
     } finally {
-      const own = local ? keyedStorage(local, demoNow) : null;
-      setFavouriteIds(readFavouriteIds(own));
-      setSavedMeals(readSavedMeals(own));
       setTodayIso(getTodayIsoVN());
       setProfile(loadProfile(new Date().getFullYear()));
       setHydrated(true);
     }
-  }, []);
+  }, [loadData]);
 
-  // The storage this mode writes to: the real keys, or the demo twins
+  // Another account signed in, or this one signed out (Đăng xuất keeps the data under its account): the
+  // state of the account before is dropped and the new one's is read. The persist effects below then write to
+  // the new keys, never the old data to the new account.
+  useEffect(() => {
+    if (!hydrated || demo) return;
+    const now = currentAccountId();
+    if (now === accountId) return;
+    setAccountId(now);
+    loadData(now, false);
+  }, [pathname, hydrated, demo, accountId, loadData]);
+
+  // The storage this account (or demo) writes to; without an account it reads and writes nothing
   const ownStorage = useCallback((): KeyValueStore | null => {
     const local = browserLocal();
-    return local ? keyedStorage(local, demo) : null;
-  }, [demo]);
+    return local ? keyedStorage(local, demo, accountId) : null;
+  }, [demo, accountId]);
 
   // Persist favourites only after hydrated
   useEffect(() => {

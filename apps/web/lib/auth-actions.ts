@@ -123,6 +123,16 @@ export async function currentAccount(): Promise<AccountInfo | null> {
   return account ? accountInfo(store.current, account) : null;
 }
 
+/**
+ * The id the per-account storage keys use: the signed-in account's email (lower case), or null when nobody is
+ * signed in. Synchronous, so a screen can scope its storage on first read. The one place that knows how the
+ * current account is found; Dong's real session replaces the body, nothing else changes.
+ */
+export function currentAccountId(): string | null {
+  const store = readStore();
+  return store.current && store.accounts[store.current] ? store.current : null;
+}
+
 const RETRY_LATER = "Chưa xử lý được. Thử lại sau ít phút.";
 
 /** An unexpected failure (hashing unavailable, storage broken) becomes a message on the form, never a stuck button. */
@@ -196,7 +206,20 @@ async function changePassword(newPassword: string, currentPassword?: string): Pr
   return { ok: true };
 }
 
-/** Đăng xuất: clears the signed-in account. The accounts stay, so signing in again works. */
+/**
+ * MOCK Google sign-in: the sample account (ban@email.com) becomes the signed-in one, so the diary of the
+ * account that signed out is there again. Dong's real session replaces this with the OAuth result.
+ */
+export async function signInSampleAccount(): Promise<void> {
+  const store = readStore();
+  const account = store.accounts[SAMPLE_EMAIL] ?? { hash: null, providers: ["google" as const] };
+  writeStore({ current: SAMPLE_EMAIL, accounts: { ...store.accounts, [SAMPLE_EMAIL]: account } });
+}
+
+/**
+ * Đăng xuất: clears the signed-in account. The accounts stay, so signing in again works, and the diary stays
+ * under the account's storage keys (lib/storage-keys), so it is there again when the same account signs in.
+ */
 export async function signOut(): Promise<void> {
   writeStore({ ...readStore(), current: null });
 }

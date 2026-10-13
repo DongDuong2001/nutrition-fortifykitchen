@@ -2,10 +2,12 @@ import { getDefaultMealSlot } from "./meal-slot";
 import { PROFILE_KEY, targetRangeText, targetsFor, type Profile } from "./profile";
 import { calculateSaltTarget } from "./training";
 import { isDemo } from "./demo";
-import { ADDED_ENTRIES_KEY, browserLocal, browserSession, loadMigrated, storageKey } from "./storage-keys";
+import { currentAccountId } from "./auth-actions";
+import { ADDED_ENTRIES_KEY, adoptLegacyKeys, browserLocal, browserSession, keyedStorage } from "./storage-keys";
 
-// The entries this user added live in localStorage (lib/storage-keys). Only real entries count here: the sample
-// day, history and seeded Gần đây exist in demo mode only (lib/demo), and demo entries have their own key.
+// The entries this user added live in localStorage under the signed-in account's key (lib/storage-keys). Only
+// real entries count here: the sample day, history and seeded Gần đây exist in demo mode only (lib/demo), and
+// demo entries have their own key.
 export { ADDED_ENTRIES_KEY };
 
 export interface FirstRunFacts {
@@ -59,9 +61,11 @@ export function readFirstRunFacts(demo: boolean = isDemo()): FirstRunFacts {
     // Storage blocked
   }
   try {
-    // An old sessionStorage copy is moved to localStorage here, the same as the diary store does on load
-    entryEverLogged =
-      countStoredEntries(loadMigrated(storageKey(ADDED_ENTRIES_KEY, demo), browserLocal(), browserSession())) > 0;
+    // The old unscoped keys move to the first account here, the same as the diary store does on load
+    const account = currentAccountId();
+    const local = browserLocal();
+    if (!demo && account) adoptLegacyKeys(local, browserSession(), account);
+    entryEverLogged = countStoredEntries((local ? keyedStorage(local, demo, account) : null)?.getItem(ADDED_ENTRIES_KEY) ?? null) > 0;
   } catch {
     // Storage blocked
   }

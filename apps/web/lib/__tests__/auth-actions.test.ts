@@ -1,7 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
   currentAccount,
+  currentAccountId,
   sendPasswordReset,
+  signInSampleAccount,
   signInWithPassword,
   signOut,
   signUpWithPassword,
@@ -149,6 +151,22 @@ describe("mock account flows (MOCK, no network)", () => {
       ok: false,
       error: "Chưa xử lý được. Thử lại sau ít phút.",
     });
+  });
+
+  it("currentAccountId follows the signed-in account and is null after Đăng xuất", async () => {
+    expect(currentAccountId()).toBe("ban@email.com");
+    await signUpWithPassword("B@Example.com", "abcdef12");
+    expect(currentAccountId()).toBe("b@example.com");
+    await signOut();
+    expect(currentAccountId()).toBeNull();
+    expect(await signInWithPassword("b@example.com", "abcdef12")).toEqual({ ok: true });
+    expect(currentAccountId()).toBe("b@example.com");
+  });
+
+  it("Google sign-in (mock) signs the sample account back in after Đăng xuất", async () => {
+    await signOut();
+    await signInSampleAccount();
+    expect(currentAccountId()).toBe("ban@email.com");
   });
 
   it("refuses a password change when nobody is signed in", async () => {

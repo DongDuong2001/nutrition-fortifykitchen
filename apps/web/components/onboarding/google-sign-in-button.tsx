@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { apiClient } from "@/lib/api-client";
+import { signInSampleAccount } from "@/lib/auth-actions";
 import { PillButton } from "@/components/ui/pill-button";
 
 /** Mock Google sign-in: goes straight to profile setup until OAuth is wired. */
@@ -10,6 +11,7 @@ export function GoogleSignInButton() {
 
   async function handleClick() {
     await apiClient.signInWithGoogle();
+    await signInSampleAccount();
     router.push("/setup/profile");
   }
 
