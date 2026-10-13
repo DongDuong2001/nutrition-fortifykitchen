@@ -6,6 +6,7 @@ import { apiClient } from "@/lib/api-client";
 import { useDiary } from "@/lib/diary-store";
 import { getMealSlotNameVi } from "@/lib/meal-slot";
 import { useMealSlot } from "@/lib/use-meal-slot";
+import { formatAmount } from "@/lib/format";
 import { FormRow } from "@/components/ui/form-row";
 import { AppHeader } from "@/components/ui/app-header";
 import { AppShell } from "@/components/ui/app-shell";
@@ -111,7 +112,7 @@ function CreateFoodInner() {
       });
 
       // Add to diary and redirect
-      await addFoodEntry(createdFood, parsedSize, mealSlot, `${parsedSize} ${servingUnit}`);
+      await addFoodEntry(createdFood, parsedSize, mealSlot, `${formatAmount(parsedSize, servingUnit)} ${servingUnit}`);
       router.push("/diary");
     } finally {
       setIsSubmitting(false);
@@ -133,7 +134,7 @@ function CreateFoodInner() {
     >
       <AppHeader
         variant="sub"
-        title="TẠO MÓN MỚI"
+        title="Tạo món mới"
         onBack={goBack}
       />
 
@@ -211,7 +212,7 @@ function CreateFoodInner() {
           <div>
             <h2 className="m-0 text-base font-bold text-text">Dinh dưỡng mỗi khẩu phần</h2>
             <p className="m-0 text-xs text-secondary mt-1 leading-relaxed">
-              Lấy số trên nhãn dinh dưỡng của gói. Bỏ trống = chưa biết, không phải 0.
+              Lấy số trên nhãn dinh dưỡng của gói. Bỏ trống = chưa có dữ liệu, không phải 0.
             </p>
           </div>
 
