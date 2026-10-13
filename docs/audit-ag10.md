@@ -80,3 +80,47 @@ From `git log --stat 16dd8f6..5273ff5 -- apps/web`, five files under `apps/web/`
 | [`apps/web/lib/redirects.ts`](file:///Users/haovu310/Documents/HITMicro/nutrition-fk-ag/apps/web/lib/redirects.ts#L10) | `aae9a6b` (`api-p1: item 5`) | `+1` line | **Yes (File ownership)**: Owned by web (`AGENTS.md` / `docs/08:246`), not listed in Dong's allowed files. | Adds `{ source: "/login", destination: "/signin", permanent: true }` to `PERMANENT_REDIRECTS` (consumed by `next.config.ts`), so `GET /login` issues a `308 Permanent Redirect` to `/signin`. |
 | [`apps/web/lib/__tests__/redirects.test.ts`](file:///Users/haovu310/Documents/HITMicro/nutrition-fk-ag/apps/web/lib/__tests__/redirects.test.ts#L5-L21) | `aae9a6b` (`api-p1: item 5`) | `+3 / -1` lines | **Yes (File ownership)**: Per `AGENTS.md`, `lib/__tests__/<name>.test.ts` belongs to the owner of `lib/<name>.ts` (web). | Updates the unit test expectation from 4 to 5 permanent redirects (`redirectTarget("/login") === "/signin"`). Passes Vitest. |
 | [`apps/web/lib/__tests__/vectors-gen.test.ts`](file:///Users/haovu310/Documents/HITMicro/nutrition-fk-ag/apps/web/lib/__tests__/vectors-gen.test.ts) | `a88a57d` (`api-p5`) | `+35` lines (created) | **Yes (File ownership & code quality)**: 1) `docs/08:186,246` states Hao's side owns `apps/web/` and writes the vector generator, while Vitest should read and guard the vector files. 2) Line 10 uses `const targetCases: any[] = []` (violating `.agent/rules/antigravity.md` "No `any`") and lines 5–6 leave unused imports (`periodAverages`, `PeriodAverages`, `DayTotals`). 3) Running `npm run test` executes `fs.writeFileSync` onto `packages/vectors/targets.json` on every test run instead of asserting parity against the committed JSON, and never writes or checks `packages/vectors/period.json`. | No UI route change, but adds a side-effecting file write into the unit test suite. |
+
+---
+
+## 4. Targets Parity (`packages/vectors/targets.json` vs `apps/web/lib/targets.ts`)
+
+### Vitest Execution Result
+- **Command**: `vitest run apps/web/lib/__tests__/vectors-gen.test.ts`
+- **Result**: **PASS** (`1 passed (1)` in `127ms`), generating 40 vectors into [`packages/vectors/targets.json`](file:///Users/haovu310/Documents/HITMicro/nutrition-fk-ag/packages/vectors/targets.json) with **0 byte differences** (`git diff packages/vectors/targets.json` is empty) against `calculateTargets()` in [`apps/web/lib/targets.ts`](file:///Users/haovu310/Documents/HITMicro/nutrition-fk-ag/apps/web/lib/targets.ts).
+
+### 10 Sample Vectors Comparison (`targets.json` vs `lib/targets.ts` & `internal/targets/targets.go`)
+
+All 10 sample vectors below (plus all 16 static VN2016 vitamin/mineral targets) match `calculateTargets` in `apps/web/lib/targets.ts` and `CalculateTargets` in [`apps/api/internal/targets/targets.go`](file:///Users/haovu310/Documents/HITMicro/nutrition-fk-ag/apps/api/internal/targets/targets.go):
+
+| # | Vector Index | Input (`sex`, `goal`, `weightKg`, `trainingMinutes`, `isPeriod`) | `calories` | `protein` | `fat` | `carbs` | `fiber` | `sodium` | `potassium` | `calcium` / `magnesium` | `iron` / `zinc` | `fastCarbs` | Parity (`targets.json` vs `lib/targets.ts`) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | `#0` | `male`, `build`, `50` kg, `0` min, `false` | `1750–2000` | `80–110` | `25–50` | `258–258` | `30–40` | `1570–2360` | `4000–5000` | `1200–1500` / `600–750` | `8` / `12` | `0–0` | **Pass (exact)** |
+| 2 | `#3` | `male`, `build`, `65` kg, `60` min, `false` | `2275–2600` | `104–143` | `33–65` | `336–336` | `32–40` | `2750–4130` | `5200–6500` | `1200–1500` / `600–750` | `8` / `12` | `30–45` | **Pass (exact)** |
+| 3 | `#4` | `male`, `build`, `70.5` kg, `0` min, `false` | `2468–2820` | `113–155` | `36–71` | `364–364` | `35–40` | `1570–2360` | `5640–7050` | `1200–1500` / `600–750` | `8` / `12` | `0–0` | **Pass (exact)** |
+| 4 | `#7` | `male`, `maintain`, `65` kg, `60` min, `false` | `1950–2275` | `104–143` | `33–65` | `254–254` | `30–40` | `2750–4130` | `5200–6500` | `1200–1500` / `600–750` | `8` / `12` | `30–45` | **Pass (exact)** |
+| 5 | `#9` | `male`, `maintain`, `70.5` kg, `60` min, `false` | `2115–2468` | `113–155` | `36–71` | `276–276` | `30–40` | `2750–4130` | `5640–7050` | `1200–1500` / `600–750` | `8` / `12` | `30–45` | **Pass (exact)** |
+| 6 | `#11` | `male`, `maintain`, `80` kg, `60` min, `false` | `2400–2800` | `128–176` | `40–80` | `313–313` | `34–40` | `2750–4130` | `6400–8000` | `1200–1500` / `600–750` | `8` / `12` | `30–45` | **Pass (exact)** |
+| 7 | `#23` | `female`, `build`, `65` kg, `60` min, `true` | `2275–2600` | `104–143` | `33–65` | `336–336` | `30–30` | `2750–4130` | `5200–6500` | `1200–1500` / `600–750` | `28` / `8` | `30–45` | **Pass (exact)** |
+| 8 | `#31` | `female`, `cut`, `50` kg, `60` min, `true` | `1250–1500` | `80–110` | `25–50` | `133–133` | `20–30` | `2750–4130` | `4000–5000` | `1200–1500` / `600–750` | `28` / `8` | `30–45` | **Pass (exact)** |
+| 9 | `#35` | `female`, `cut`, `70.5` kg, `60` min, `true` | `1763–2115` | `113–155` | `36–71` | `188–188` | `25–30` | `2750–4130` | `5640–7050` | `1200–1500` / `600–750` | `28` / `8` | `30–45` | **Pass (exact)** |
+| 10 | `#39` | `female`, `deep_cut`, `95` kg, `60` min, `true` | `1900–2375` | `152–209` | `48–95` | `134–134` | `27–30` | `2750–4130` | `7600–9500` | `1200–1500` / `600–750` | `28` / `8` | `30–45` | **Pass (exact)** |
+
+### Vector Coverage & Test Gaps Found
+1. **Unchecked female non-period case (`iron = 18` mg)**: [`apps/web/lib/__tests__/vectors-gen.test.ts`](file:///Users/haovu310/Documents/HITMicro/nutrition-fk-ag/apps/web/lib/__tests__/vectors-gen.test.ts#L20) hardcodes `const isPeriod = sex === "female"`, so `sex: "female", isPeriod: false` (`iron: {min: 18, max: 18}`) is absent from `packages/vectors/targets.json`.
+2. **Unchecked training durations (`45`, `90`, `120` min)**: `vectors-gen.test.ts:14` declares `const trainings = [0, 45, 60, 90, 120]`, but line 19 loops `for (const trainingMinutes of [0, 60])`, omitting `45` min (`saltMin = 6.25 -> sodium.min = 2460`), `90` min, and `120` min.
+3. **Partial assertions in Go test**: [`apps/api/internal/targets/targets_test.go`](file:///Users/haovu310/Documents/HITMicro/nutrition-fk-ag/apps/api/internal/targets/targets_test.go#L48-L77) only asserts 10 fields and skips `Fiber`, `FastCarbs`, and all 16 `VN2016` targets.
+4. **Missing `packages/vectors/period.json`**: `vectors-gen.test.ts` imports `periodAverages` from `../period` and its test description says `"generates packages/vectors/targets.json and period.json"`, but `period.json` is never generated or tested in Vitest or Go.
+
+---
+
+## Questions for Dong
+
+1. **Contract vs OpenAPI vs Code Drift**: Will you update `apps/api/openapi.yaml` and `docs/07-api-contract.md` so all three agree on paths (`/me` vs `/profile`, `/me/weight` vs `/weight-logs`, `/favourites` vs `/me/favourites`), missing OpenAPI routes (`PUT /me/profile`, `GET/PUT /me/weight`, `DELETE /me`, `DELETE /foods/custom/{id}`, `DELETE /days/{date}/meals/{meal}`), the `{"data": ...}` response wrapper, and `goal` enums (`build`/`deep_cut` vs OpenAPI's `gain`/`cut_fast`)?
+2. **Generated Client (`lib/api-client.ts`)**: When will `orval` be configured to generate `apps/web/lib/api-client.ts` from `openapi.yaml` (currently still calling legacy `/diary/daily` and `/diary/logs` scaffold routes)?
+3. **SQL Injection & Unverified JWT Fallback**: Can you parameterize or whitelist `nutrient` in `nutrition/repository.go:179` (`fmt.Sprintf` on `per_100g->>'%s'`) and remove the `parser.ParseUnverified` fallback in `auth/middleware.go:82` before staging/production?
+4. **Food Catalog Import (`30` vs `1,000+`)**: `data/seed_foods.json` only has the 30 mock foods and `cmd/importfoods/main.go:109` uses `ON CONFLICT (id)` instead of `ON CONFLICT (source, source_id)`. When will the ≥1,000 foods from the VN table, USDA Foundation/SR Legacy, and CNF be imported?
+5. **Recents Not Upserted on `POST /days/{date}/entries`**: `diaryService.CreateEntry` never calls `libraryRepo.UpsertRecent` (only `AddFromSaved` does). Will you wire `UpsertRecent` into `CreateEntry` for `kind == "food"` so `/recents` populates on normal food logs?
+6. **Diary Meal Slot Key & Soft-Delete Undo**: `diary/service.go:43` uses `"pre_workout"` while `docs/07` and `apps/web` use `"preworkout"`, causing pre-workout entries to be dropped from `GET /days/{date}` `meals`; also `PATCH /entries/{id}` rejects soft-deleted rows (`WHERE deleted_at IS NULL`), preventing 10-second undo. Will you align the slot key and add an undo/restore path?
+7. **Complete `/trends` & `packages/vectors/period.json`**: `internal/trends/trends.go` returns an empty `averages.nutrients` map, checks `days_on_target` for only 3 of 22 nutrients, omits previous-period comparison and weight summary, and has no `packages/vectors/period.json` test. When will full `lib/period.ts` parity land?
+8. **Past-Date Weight Logs & CI Migration Schema**: `UpsertWeightLog` (`profile/repository.go:115`) overwrites `profiles.weight_kg` even when logging a historical date, and `.github/workflows/api.yml` runs migrations against vanilla `postgres:17-alpine` (which lacks `auth.users`, breaking `000002`). Should `profiles.weight_kg` update only from the latest `log_date`, and will CI seed `auth.users` or use Supabase CLI?
