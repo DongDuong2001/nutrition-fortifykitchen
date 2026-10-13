@@ -318,3 +318,184 @@ The table below lists each concept, its preferred term (or decided term), all va
 | **Sign-in magic link** | **`Liên kết đăng nhập`** | • **`link đăng nhập`** / **`link`**: [signin/page.tsx:25](apps/web/app/signin/page.tsx#L25), [signin/check-email/page.tsx:58](apps/web/app/signin/check-email/page.tsx#L58), [signin/expired/page.tsx:29](apps/web/app/signin/expired/page.tsx#L29), [signup/page.tsx:53](apps/web/app/signup/page.tsx#L53), [magic-link-form.tsx:35](apps/web/components/onboarding/magic-link-form.tsx#L35), [onboarding.ts:140](apps/web/lib/onboarding.ts#L140), [not-found.tsx:20](apps/web/app/not-found.tsx#L20) | **Needs Hao's decision:** Replace **`link`** with **`liên kết`** (for email magic links) and **`đường dẫn`** (for page URLs), or keep **`link`** in the sign-in flow? |
 | **Serving vs Weight** | **`Khẩu phần`** *(serving unit)* / **`Khối lượng (g)`** *(grams)* | • **`Khẩu phần`**: [foods/[id]/page.tsx:150](apps/web/app/foods/[id]/page.tsx#L150), [foods/new/page.tsx:166](apps/web/app/foods/new/page.tsx#L166), [entry-editor.tsx:77](apps/web/components/foods/entry-editor.tsx#L77)<br>• **`Khối lượng theo gam`**: [foods/[id]/page.tsx:179](apps/web/app/foods/[id]/page.tsx#L179)<br>• **`Khối lượng`** + `aria-label="Số gam"`: [entry-editor.tsx:56](apps/web/components/foods/entry-editor.tsx#L56), [portion-panel.tsx:145](apps/web/components/ui/portion-panel.tsx#L145) | Unify on **`Khối lượng (g)`** and `aria-label="Khối lượng theo gam"`. |
 | **PWA install** | **`Thêm vào màn hình chính`** | • **`Thêm vào màn hình chính`**: [install/page.tsx:17](apps/web/app/install/page.tsx#L17), [install/page.tsx:163](apps/web/app/install/page.tsx#L163)<br>• **`Thêm vào MH chính`**: [install/page.tsx:106](apps/web/app/install/page.tsx#L106)<br>• **`Cài như ứng dụng`**: [profile-cards.tsx:206](apps/web/components/settings/profile-cards.tsx#L206) | Standardize on **`Thêm vào màn hình chính`** (without `MH` abbreviation). |
+
+---
+
+## 4. Fix list for the coder
+
+Every confirmed row from Section 2 is grouped by file below so a single coder can apply the fixes in one pass. Rows that depend on a terminology or product decision from Hao are marked **`Hao`**; rows already decided by Hao on 13/10 (`"Bữa ăn của tôi"` and `"50%"`) are marked **`Decided`**.
+
+### `apps/web/app/(dashboard)/training/page.tsx`
+- [training/page.tsx:154](apps/web/app/(dashboard)/training/page.tsx#L154) & [training/page.tsx:218](apps/web/app/(dashboard)/training/page.tsx#L218) (R2): `title="NGÀY TẬP"` → `title="Ngày tập"`
+
+### `apps/web/app/admin/review/page.tsx`
+- [admin/review/page.tsx:51](apps/web/app/admin/review/page.tsx#L51) (R1): `Admin RBAC Guarded` → `Khu vực quản trị`
+- [admin/review/page.tsx:54](apps/web/app/admin/review/page.tsx#L54) (R1, R7): `Coach Vault Review` → `Duyệt nội dung thực đơn`
+- [admin/review/page.tsx:57](apps/web/app/admin/review/page.tsx#L57) (R1): `Review and publish markdown meal plans synchronized from GitHub repository` → `Xem và duyệt các bản nháp thực đơn đồng bộ từ kho lưu trữ.`
+- [admin/review/page.tsx:62](apps/web/app/admin/review/page.tsx#L62) & [admin/review/page.tsx:63](apps/web/app/admin/review/page.tsx#L63) (R1): `aria-label="Filter drafts"` + `all` / `draft` / `published` / `rejected` → `aria-label="Lọc bản nháp"` + `Tất cả` / `Bản nháp` / `Đã đăng` / `Từ chối`
+- [admin/review/page.tsx:122](apps/web/app/admin/review/page.tsx#L122), [admin/review/page.tsx:129](apps/web/app/admin/review/page.tsx#L129), [admin/review/page.tsx:135](apps/web/app/admin/review/page.tsx#L135) (R1): `Approve` / `Reject` / `Status: {draft.status}` → `Duyệt` / `Từ chối` / `Trạng thái: {statusVi}`
+
+### `apps/web/app/dev/ui/page.tsx`
+- [dev/ui/page.tsx:48](apps/web/app/dev/ui/page.tsx#L48), [dev/ui/page.tsx:91](apps/web/app/dev/ui/page.tsx#L91), [dev/ui/page.tsx:129](apps/web/app/dev/ui/page.tsx#L129), [dev/ui/page.tsx:153](apps/web/app/dev/ui/page.tsx#L153), [dev/ui/page.tsx:161](apps/web/app/dev/ui/page.tsx#L161), [dev/ui/page.tsx:234](apps/web/app/dev/ui/page.tsx#L234) (R1): `1. AppHeader — Variant "daily" (Today / Vi chất)` / `Light tone` / `Dark tone` / `Primary` · `Secondary` · `Destructive` / `Chip (44px tap targets)` / `Mở Sheet Demo` → Translate showcase labels into Vietnamese
+- [dev/ui/page.tsx:180](apps/web/app/dev/ui/page.tsx#L180) (R5): `Ưa thích` → `Yêu thích`
+
+### `apps/web/app/entry/[id]/page.tsx`
+- [entry/[id]/page.tsx:44](apps/web/app/entry/[id]/page.tsx#L44) (R6, R8): `<Link href="/diary"...>Về Tổng quan</Link>` → `<Link href="/diary"...>Về Nhật ký</Link>`
+
+### `apps/web/app/explore/rich/[nutrient]/page.tsx`
+- [explore/rich/[nutrient]/page.tsx:60](apps/web/app/explore/rich/[nutrient]/page.tsx#L60) (R3 — **Decided: 50%**): `${row.pct} % mục tiêu ngày · ${row.basis}` → `${row.pct}% mục tiêu ngày · ${row.basis}`
+
+### `apps/web/app/foods/[id]/page.tsx`
+- [foods/[id]/page.tsx:65](apps/web/app/foods/[id]/page.tsx#L65) (R2, R6): `Đã bỏ khỏi Yêu thích` / `Đã lưu vào Yêu thích` → `Đã bỏ khỏi yêu thích` / `Đã thêm vào yêu thích`
+- [foods/[id]/page.tsx:83](apps/web/app/foods/[id]/page.tsx#L83) & [foods/[id]/page.tsx:204](apps/web/app/foods/[id]/page.tsx#L204) (R3): `` `${gramsInput} g` `` → `` `${formatAmount(grams, "g")} g` ``
+- [foods/[id]/page.tsx:120](apps/web/app/foods/[id]/page.tsx#L120) (R1, R5 — **Hao**): `${food.source === "user" ? "Của tôi" : food.source} · ${grams} g mỗi khẩu phần` → Map `food.source` to Vietnamese labels (`"Món của tôi"`, `"Viện Dinh dưỡng VN"`, `"USDA"`)
+- [foods/[id]/page.tsx:166](apps/web/app/foods/[id]/page.tsx#L166) (R5): `Tùy chỉnh` → `Tuỳ chỉnh`
+- [foods/[id]/page.tsx:196](apps/web/app/foods/[id]/page.tsx#L196) (R5 — **Hao**): `Carb` → `Tinh bột`
+
+### `apps/web/app/foods/new/page.tsx`
+- [foods/new/page.tsx:114](apps/web/app/foods/new/page.tsx#L114) (R3): `` `${parsedSize} ${servingUnit}` `` → `` `${formatAmount(parsedSize, servingUnit)} ${servingUnit}` ``
+- [foods/new/page.tsx:136](apps/web/app/foods/new/page.tsx#L136) (R2): `title="TẠO MÓN MỚI"` → `title="Tạo món mới"`
+- [foods/new/page.tsx:214](apps/web/app/foods/new/page.tsx#L214) (R5): `Lấy số trên nhãn dinh dưỡng của gói. Bỏ trống = chưa biết, không phải 0.` → `Lấy số trên nhãn dinh dưỡng của gói. Bỏ trống = chưa có dữ liệu, không phải 0.`
+
+### `apps/web/app/install/page.tsx`
+- [install/page.tsx:17](apps/web/app/install/page.tsx#L17) (R2): `title="THÊM VÀO MÀN HÌNH CHÍNH"` → `title="Thêm vào màn hình chính"`
+- [install/page.tsx:92](apps/web/app/install/page.tsx#L92), [install/page.tsx:106](apps/web/app/install/page.tsx#L106), [install/page.tsx:163](apps/web/app/install/page.tsx#L163) (R2, R5): `Chạm nút Chia sẻ` / `Chọn “Thêm vào MH chính”` / `Chọn “Thêm vào Màn hình chính” hoặc “Cài đặt ứng dụng”` → `Chạm nút chia sẻ` / `Chọn “Thêm vào màn hình chính”`
+
+### `apps/web/app/layout.tsx`
+- [layout.tsx:22](apps/web/app/layout.tsx#L22) (R2): `H1T MICRO | Dinh dưỡng & Vi chất Chuyên sâu` → `H1T MICRO | Dinh dưỡng & vi chất chuyên sâu`
+
+### `apps/web/app/micros/page.tsx`
+- [micros/page.tsx:30](apps/web/app/micros/page.tsx#L30) & [micros/page.tsx:221](apps/web/app/micros/page.tsx#L221) (R5 — **Hao**): `Chất béo` → `Béo` (or unify `"Chất béo"` across all macro labels)
+- [micros/page.tsx:277](apps/web/app/micros/page.tsx#L277), [micros/page.tsx:297](apps/web/app/micros/page.tsx#L297), [micros/page.tsx:335](apps/web/app/micros/page.tsx#L335), [micros/page.tsx:452](apps/web/app/micros/page.tsx#L452) (R2): `title="VI CHẤT"` → `title="Vi chất"`
+- [micros/page.tsx:285](apps/web/app/micros/page.tsx#L285), [micros/page.tsx:302](apps/web/app/micros/page.tsx#L302), [micros/page.tsx:310](apps/web/app/micros/page.tsx#L310) (R6 — **Hao**): `Bắt đầu ghi món để đo lường` / `Chưa ghi món nào hôm nay` / `+ Ghi món ngay` → `Thêm món để xem vi chất` / `Chưa có món hôm nay` / `+ Thêm món`
+- [micros/page.tsx:304](apps/web/app/micros/page.tsx#L304) (R8): `Bắt đầu ghi nhận món ăn để theo dõi 58 chỉ số vi chất và hoàn thành mục tiêu ngày.` → `Thêm món vào nhật ký để theo dõi 22 vi chất mỗi ngày.`
+
+### `apps/web/app/micros/[nutrient]/page.tsx`
+- [micros/[nutrient]/page.tsx:79](apps/web/app/micros/[nutrient]/page.tsx#L79) (R6): `Quay lại Vi chất` → `Về Vi chất`
+
+### `apps/web/app/not-found.tsx`
+- [not-found.tsx:20](apps/web/app/not-found.tsx#L20) (R1 — **Hao**): `Link có thể đã cũ hoặc bị gõ sai.` → `Đường dẫn có thể đã cũ hoặc bị gõ sai.`
+
+### `apps/web/app/paywall/page.tsx`
+- [paywall/page.tsx:16](apps/web/app/paywall/page.tsx#L16), [paywall/page.tsx:17](apps/web/app/paywall/page.tsx#L17), [paywall/page.tsx:135](apps/web/app/paywall/page.tsx#L135) (R8 — **Hao**): `[GIÁ/THÁNG]` / `[GIÁ/NĂM]` / `Tiết kiệm [X]%` / `Thanh toán qua [NHÀ CUNG CẤP THANH TOÁN] · huỷ bất cứ lúc nào` → Replace bracketed placeholders with real values or hide unconfigured billing details
+- [paywall/page.tsx:23](apps/web/app/paywall/page.tsx#L23) (R7): `Món & công thức riêng của Coach` → `Thư viện món Việt & món tự tạo không giới hạn`
+- [paywall/page.tsx:37](apps/web/app/paywall/page.tsx#L37) (R7): `Ăn theo Coach, không phải đoán` → `Theo dõi sát mục tiêu, không phải đoán`
+- [paywall/page.tsx:144](apps/web/app/paywall/page.tsx#L144) (R2): `Gói Miễn phí vẫn ghi đủ 22 vi chất.` → `Gói miễn phí vẫn ghi đủ 22 vi chất.`
+
+### `apps/web/app/settings/delete-account/page.tsx`
+- [settings/delete-account/page.tsx:47](apps/web/app/settings/delete-account/page.tsx#L47) (R2): `title="XOÁ TÀI KHOẢN"` → `title="Xoá tài khoản"`
+
+### `apps/web/app/settings/language/page.tsx`
+- [settings/language/page.tsx:34](apps/web/app/settings/language/page.tsx#L34) (R2): `title="NGÔN NGỮ"` → `title="Ngôn ngữ"`
+
+### `apps/web/app/settings/notifications/page.tsx`
+- [settings/notifications/page.tsx:116](apps/web/app/settings/notifications/page.tsx#L116) (R2): `title="NHẮC NHỞ"` → `title="Nhắc nhở"`
+
+### `apps/web/app/settings/profile/weight/page.tsx`
+- [settings/profile/weight/page.tsx:120](apps/web/app/settings/profile/weight/page.tsx#L120) (R2): `title="CÂN NẶNG"` → `title="Cân nặng"`
+
+### `apps/web/app/signin/page.tsx`
+- [signin/page.tsx:15](apps/web/app/signin/page.tsx#L15) (R2): `CHÀO MỪNG TRỞ LẠI.` → `Chào mừng trở lại.`
+- [signin/page.tsx:25](apps/web/app/signin/page.tsx#L25) (R1 — **Hao**): `submitLabel="Gửi link đăng nhập"` → `submitLabel="Gửi liên kết đăng nhập"`
+
+### `apps/web/app/signin/check-email/page.tsx`
+- [signin/check-email/page.tsx:54](apps/web/app/signin/check-email/page.tsx#L54) (R2): `KIỂM TRA EMAIL` → `Kiểm tra email`
+- [signin/check-email/page.tsx:58](apps/web/app/signin/check-email/page.tsx#L58), [signin/check-email/page.tsx:60](apps/web/app/signin/check-email/page.tsx#L60), [signin/check-email/page.tsx:64](apps/web/app/signin/check-email/page.tsx#L64) (R1 — **Hao**): `Đã gửi link đăng nhập tới {email}.` / `Đã gửi link đăng nhập tới email của bạn.` / `Link có hiệu lực 15 phút.` → `Đã gửi liên kết đăng nhập tới {email}.` / `Đã gửi liên kết đăng nhập tới email của bạn.` / `Liên kết có hiệu lực 15 phút.`
+- [signin/check-email/page.tsx:72](apps/web/app/signin/check-email/page.tsx#L72), [signin/check-email/page.tsx:86](apps/web/app/signin/check-email/page.tsx#L86), [signin/check-email/page.tsx:90](apps/web/app/signin/check-email/page.tsx#L90) (R1 — **Hao**): `Mở ứng dụng Mail` / `Mô phỏng mở link (dev)` / `Không thấy email? Kiểm tra mục Spam hoặc Quảng cáo.` → `Mở ứng dụng Thư` / `Mở liên kết thử nghiệm` / `Không thấy email? Kiểm tra mục Thư rác hoặc Quảng cáo.`
+
+### `apps/web/app/signin/expired/page.tsx`
+- [signin/expired/page.tsx:29](apps/web/app/signin/expired/page.tsx#L29), [signin/expired/page.tsx:32](apps/web/app/signin/expired/page.tsx#L32), [signin/expired/page.tsx:38](apps/web/app/signin/expired/page.tsx#L38) (R1, R2 — **Hao**): `LINK ĐÃ HẾT HẠN` / `Link đăng nhập chỉ dùng được một lần và trong 15 phút.` / `Gửi link mới` → `Liên kết đã hết hạn` / `Liên kết đăng nhập chỉ dùng được một lần và trong 15 phút.` / `Gửi liên kết mới`
+
+### `apps/web/app/signup/page.tsx`
+- [signup/page.tsx:7](apps/web/app/signup/page.tsx#L7) (R5 — **Hao**): `Theo dõi đầy đủ vi chất, không chỉ calo` → `Theo dõi đầy đủ vi chất, không chỉ năng lượng (kcal)`
+- [signup/page.tsx:8](apps/web/app/signup/page.tsx#L8) (R7): `Mục tiêu do Coach Lê Hồng Khánh đặt` → `Mục tiêu cá nhân hoá theo ngày tập và ngày nghỉ`
+- [signup/page.tsx:21](apps/web/app/signup/page.tsx#L21) & [signup/page.tsx:23](apps/web/app/signup/page.tsx#L23) (R1, R2): `aria-label="H1T MICRO, 1 set là đủ"` / `1 SET LÀ ĐỦ` → `aria-label="H1T MICRO, một hiệp là đủ"` / `Một hiệp là đủ`
+- [signup/page.tsx:26](apps/web/app/signup/page.tsx#L26) (R2): `VI CHẤT PHẢI ĐỦ.` → `Vi chất phải đủ.`
+- [signup/page.tsx:33](apps/web/app/signup/page.tsx#L33) (R7): `Ghi bữa ăn, theo dõi vi chất và làm theo mục tiêu của Coach Lê Hồng Khánh.` → `Thêm món mỗi bữa, theo dõi 22 vi chất và bám sát mục tiêu mỗi ngày.`
+- [signup/page.tsx:53](apps/web/app/signup/page.tsx#L53) & [signup/page.tsx:59](apps/web/app/signup/page.tsx#L59) (R1 — **Hao**): `submitLabel="Gửi link đăng nhập"` / `Chúng tôi gửi link vào email — không cần mật khẩu.` → `submitLabel="Gửi liên kết đăng nhập"` / `Chúng tôi gửi liên kết vào email — không cần mật khẩu.`
+
+### `apps/web/components/calendar-sheet.tsx`
+- [calendar-sheet.tsx:14](apps/web/components/calendar-sheet.tsx#L14) (R7): `over: "vượt mục tiêu"` → `over: "đạt mục tiêu"`
+- [calendar-sheet.tsx:53](apps/web/components/calendar-sheet.tsx#L53) (R4): `Tháng {Number(m)}, {month.slice(0, 4)}` → `Tháng {Number(m)}/{month.slice(0, 4)}`
+
+### `apps/web/components/copy-yesterday-sheet.tsx`
+- [copy-yesterday-sheet.tsx:32](apps/web/components/copy-yesterday-sheet.tsx#L32) (R4): `${getWeekdayName(yesterday.date)}, ${dd}/${mm} · ${formatNumber(yesterday.calories)} kcal` → `${formatDayLabel(yesterday.date, now)} · ${formatNumber(yesterday.calories)} kcal`
+
+### `apps/web/components/diary/diary-screen.tsx`
+- [diary-screen.tsx:364](apps/web/components/diary/diary-screen.tsx#L364) (R2): `còn {formatNumber(remaining)} kcal · Mục tiêu {formatRange(targetMin, targetMax)}` → `Còn {formatNumber(remaining)} kcal · mục tiêu {formatRange(targetMin, targetMax)}`
+
+### `apps/web/components/diary/meal-menu-sheet.tsx`
+- [meal-menu-sheet.tsx:95](apps/web/components/diary/meal-menu-sheet.tsx#L95) (R5 — **Decided: Bữa ăn của tôi**): `Lưu thành Bữa của tôi` → `Lưu thành Bữa ăn của tôi`
+
+### `apps/web/components/foods/entry-editor.tsx`
+- [entry-editor.tsx:72](apps/web/components/foods/entry-editor.tsx#L72) (R3): `` `${e.target.value} g` `` → `` `${formatAmount(Number(e.target.value) || 0, "g")} g` ``
+
+### `apps/web/components/foods/food-micros.tsx`
+- [food-micros.tsx:10](apps/web/components/foods/food-micros.tsx#L10), [food-micros.tsx:11](apps/web/components/foods/food-micros.tsx#L11), [food-micros.tsx:63](apps/web/components/foods/food-micros.tsx#L63), [food-micros.tsx:70](apps/web/components/foods/food-micros.tsx#L70) (R3 — **Decided: 50%**): `"< 0,1 %"` / `` `${formatNumber(row.share, { decimals: 1 })} %` `` / `` `${row.pct} %` `` / `Từ 20 % mục tiêu ngày mỗi khẩu phần` / `{r.name} · {r.pct} %` → `"<0,1%"` / `` `${formatNumber(row.share, { decimals: 1 })}%` `` / `` `${row.pct}%` `` / `Từ 20% mục tiêu ngày mỗi khẩu phần` / `{r.name} · {r.pct}%`
+
+### `apps/web/components/meal-switcher.tsx`
+- [meal-switcher.tsx:23](apps/web/components/meal-switcher.tsx#L23) (R8): `defaultHint = "Mặc định theo giờ: 14:05 → Trước tập"` → `defaultHint = "Tự chọn theo giờ trong ngày"`
+
+### `apps/web/components/nutrient-detail/contributing-foods.tsx`
+- [contributing-foods.tsx:15](apps/web/components/nutrient-detail/contributing-foods.tsx#L15) (R8): `Chưa có món nào có chất này hôm nay.` → `Chưa có món nào có chất này.`
+
+### `apps/web/components/onboarding/magic-link-form.tsx`
+- [magic-link-form.tsx:35](apps/web/components/onboarding/magic-link-form.tsx#L35) (R1 — **Hao**): `Chưa gửi được link. Thử lại sau ít phút.` → `Chưa gửi được liên kết. Thử lại sau ít phút.`
+
+### `apps/web/components/onboarding/setup-form.tsx`
+- [setup-form.tsx:110](apps/web/components/onboarding/setup-form.tsx#L110) (R2): `title={step === 1 ? "VỀ BẠN" : "MỤC TIÊU"}` → `title={step === 1 ? "Về bạn" : "Mục tiêu"}`
+- [setup-form.tsx:267](apps/web/components/onboarding/setup-form.tsx#L267) & [setup-form.tsx:277](apps/web/components/onboarding/setup-form.tsx#L277) (R6 — **Hao**): `Bắt đầu ghi bữa ăn` → `Bắt đầu thêm món`
+
+### `apps/web/components/overview/energy-tab.tsx`
+- [energy-tab.tsx:27](apps/web/components/overview/energy-tab.tsx#L27), [energy-tab.tsx:182](apps/web/components/overview/energy-tab.tsx#L182), [energy-tab.tsx:250](apps/web/components/overview/energy-tab.tsx#L250) (R3 — **Decided: 50%**): `Đạm ${protein} %, tinh bột ${carbs} %, béo ${fat} % của kcal trung bình` / `{row.share} %` / `Đạm trung bình ${proteinPct} % mục tiêu` → `Đạm ${protein}%, tinh bột ${carbs}%, béo ${fat}% của kcal trung bình` / `{formatNumber(row.share)}%` / `Đạm trung bình ${proteinPct}% mục tiêu`
+- [energy-tab.tsx:77](apps/web/components/overview/energy-tab.tsx#L77) & [energy-tab.tsx:201](apps/web/components/overview/energy-tab.tsx#L201) (R8): `trong mục tiêu hoặc trên` / `Trong mục tiêu hoặc trên` → `đạt mục tiêu` / `Đạt mục tiêu`
+
+### `apps/web/components/overview/micros-tab.tsx`
+- [micros-tab.tsx:37](apps/web/components/overview/micros-tab.tsx#L37), [micros-tab.tsx:54](apps/web/components/overview/micros-tab.tsx#L54), [micros-tab.tsx:64](apps/web/components/overview/micros-tab.tsx#L64) (R5): `Chưa có số liệu trong kỳ này` / `chưa có số liệu` → `Chưa có dữ liệu trong kỳ này` / `chưa có dữ liệu`
+- [micros-tab.tsx:51](apps/web/components/overview/micros-tab.tsx#L51), [micros-tab.tsx:54](apps/web/components/overview/micros-tab.tsx#L54), [micros-tab.tsx:63](apps/web/components/overview/micros-tab.tsx#L63) (R3 — **Decided: 50%**): `formatPercent(row.percentage)` / `${row.percentage} % mục tiêu` / `Mỗi thanh có 10 đoạn; đoạn đầy khi đạt 10 % mục tiêu.` → `formatPercent(row.percentage)` (`50%`) / `${row.percentage}% mục tiêu` / `Mỗi thanh có 10 đoạn; đoạn đầy khi đạt 10% mục tiêu.`
+
+### `apps/web/components/overview/summary-tab.tsx`
+- [summary-tab.tsx:60](apps/web/components/overview/summary-tab.tsx#L60) (R6 — **Hao**): `Ghi {getMealSlotNameVi(next).toLowerCase()}` → `Thêm vào {getMealSlotNameVi(next).toLowerCase()}`
+
+### `apps/web/components/settings/profile-cards.tsx`
+- [profile-cards.tsx:122](apps/web/components/settings/profile-cards.tsx#L122) (R2): `Chỉ với Nữ · sắt 18 → 28 mg/ngày` → `Chỉ với nữ · sắt 18 → 28 mg/ngày`
+- [profile-cards.tsx:206](apps/web/components/settings/profile-cards.tsx#L206) (R6): `Cài như ứng dụng` → `Thêm vào màn hình chính`
+
+### `apps/web/components/settings/target-rows.ts`
+- [target-rows.ts:26](apps/web/components/settings/target-rows.ts#L26) (R5): `Folate (B9)` → `Vitamin B9`
+- [target-rows.ts:86](apps/web/components/settings/target-rows.ts#L86) (R7): `detail: "Khoảng mục tiêu theo coach"` → `detail: "1.200–1.500 mg mỗi ngày"`
+- [target-rows.ts:87](apps/web/components/settings/target-rows.ts#L87) (R3 — **Decided: 50%**): `detail: "50 % mục tiêu canxi"` → `detail: "50% mục tiêu canxi"`
+
+### `apps/web/components/settings/targets-screen.tsx`
+- [targets-screen.tsx:36](apps/web/components/settings/targets-screen.tsx#L36) & [targets-screen.tsx:37](apps/web/components/settings/targets-screen.tsx#L37) (R7): `* Chất xơ: tạm thời, chưa có quy tắc của coach.` & `* Khuyến nghị dinh dưỡng Việt Nam 2016 (VN 2016). Đây không phải quy tắc của coach.` → `* Chất xơ: mục tiêu tham khảo theo tổng năng lượng.` & `* Theo bảng khuyến nghị dinh dưỡng cho người Việt Nam (2016).`
+
+### `apps/web/components/training/training-tip-banner.tsx`
+- [training-tip-banner.tsx:16](apps/web/components/training/training-tip-banner.tsx#L16) (R1, R5 — **Hao**): `Nhấp carb nhẹ theo từng set ở ngưỡng nặng. Nặng mới đốt đường.` → `Nhấp tinh bột nhẹ theo từng hiệp ở ngưỡng nặng.`
+
+### `apps/web/components/ui/portion-panel.tsx`
+- [portion-panel.tsx:153](apps/web/components/ui/portion-panel.tsx#L153) & [portion-panel.tsx:220](apps/web/components/ui/portion-panel.tsx#L220) (R3): `` `${gramsInput} g` `` / `Vi chất trong {gramsInput} g:` → `` `${formatAmount(grams, "g")} g` `` / `Vi chất trong {formatAmount(grams, "g")} g:`
+- [portion-panel.tsx:193](apps/web/components/ui/portion-panel.tsx#L193) (R5 — **Hao**): `Carb` → `Tinh bột`
+
+### `apps/web/lib/diary-edits.ts`
+- [diary-edits.ts:149](apps/web/lib/diary-edits.ts#L149), [diary-edits.ts:294](apps/web/lib/diary-edits.ts#L294), [diary-edits.ts:302](apps/web/lib/diary-edits.ts#L302) (R3): `` `${edit.grams} g` `` / `` `${grams} g` `` → `` `${formatAmount(edit.grams, "g")} g` `` / `` `${formatAmount(grams, "g")} g` ``
+
+### `apps/web/lib/food-meta.ts`
+- [food-meta.ts:14](apps/web/lib/food-meta.ts#L14) (R5 — **Hao**): `${formatAmount(carbs, "g")} g carb` → `${formatAmount(carbs, "g")} g tinh bột`
+- [food-meta.ts:22](apps/web/lib/food-meta.ts#L22) (R1, R5 — **Hao**): `${portion} · ${food.source === "user" ? "Của tôi" : food.source}` → Map `food.source` to Vietnamese labels (`"Món của tôi"`, `"Viện Dinh dưỡng VN"`, `"USDA"`)
+
+### `apps/web/lib/format.ts` & `apps/web/lib/period.ts`
+- [format.ts:176](apps/web/lib/format.ts#L176) (R4): ``return `${weekday}, ${parts.day}/${parts.month}/${parts.year}`;`` → ``return `${weekday} ${parts.day}/${parts.month}`;``
+- [format.ts:195](apps/web/lib/format.ts#L195) & caller [period.ts:258](apps/web/lib/period.ts#L258) (R3 — **Decided: 50%**): ``return `${options?.signed ? formatSigned(value) : formatNumber(Math.round(value))} %`;`` → ``return `${options?.signed ? formatSigned(value) : formatNumber(Math.round(value))}%`;`` (`"50%"`, `"+18%"`, `"−12%"`)
+
+### `apps/web/lib/mock/sample-day.ts`
+- [sample-day.ts:238](apps/web/lib/mock/sample-day.ts#L238) & [sample-day.ts:441](apps/web/lib/mock/sample-day.ts#L441) (R5): `Natri (muối)` & `Folate (B9)` → `Natri` & `Vitamin B9`
+
+### `apps/web/lib/nutrients.ts`
+- [nutrients.ts:36](apps/web/lib/nutrients.ts#L36), [nutrients.ts:37](apps/web/lib/nutrients.ts#L37), [nutrients.ts:41](apps/web/lib/nutrients.ts#L41) (R1, R5 — **Hao**): `Tinh bột tổng` / `Carb ròng` / `Tinh bột (starch)` → `Tinh bột` / `Tinh bột hấp thu` / `Tinh bột phức`
+- [nutrients.ts:46](apps/web/lib/nutrients.ts#L46) (R5 — **Hao**): `Chất béo` → `Béo` (or unify `"Chất béo"` across all macro labels)
+
+### `apps/web/lib/onboarding.ts`
+- [onboarding.ts:140](apps/web/lib/onboarding.ts#L140) & [onboarding.ts:141](apps/web/lib/onboarding.ts#L141) (R1 — **Hao**): `Gửi lại link (sau ${formatNumber(secondsLeft)} giây)` / `"Gửi lại link"` → `Gửi lại liên kết (sau ${formatNumber(secondsLeft)} giây)` / `"Gửi lại liên kết"`
+
+### `apps/web/lib/training.ts`
+- [training.ts:165](apps/web/lib/training.ts#L165) (R5 — **Hao**): `label: "Carb nhanh"` → `label: "Tinh bột nhanh"`
