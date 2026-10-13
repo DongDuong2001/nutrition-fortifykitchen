@@ -252,11 +252,11 @@ Rule codes:
 | [training/page.tsx:154](apps/web/app/(dashboard)/training/page.tsx#L154) | `title="NGÀY TẬP"` (also line 218) | `title="Ngày tập"` | **R2 (`sentence-case`)** — Passes ALL-CAPS source string to `AppHeader` (inconsistent with `"Tổng quan"`, `"Nhật ký"`, `"Cài đặt"`, `"Hồ sơ"`) |
 | [foods/new/page.tsx:136](apps/web/app/foods/new/page.tsx#L136) | `title="TẠO MÓN MỚI"` | `title="Tạo món mới"` | **R2 (`sentence-case`)** — ALL-CAPS source string |
 | [micros/page.tsx:277](apps/web/app/micros/page.tsx#L277) | `title="VI CHẤT"` (also lines 297, 335, 452) | `title="Vi chất"` | **R2 (`sentence-case`)** — ALL-CAPS source string |
-| [settings/profile/weight/page.tsx:120](apps/web/app/settings/profile/weight/page.tsx#L120) | `title="CÂN NẶNG"` | `title="Cân nặng"` | **R2 (`sentence-case`)** — ALL-CAPS source string |
-| [settings/language/page.tsx:34](apps/web/app/settings/language/page.tsx#L34) | `title="NGÔN NGỮ"` | `title="Ngôn ngữ"` | **R2 (`sentence-case`)** — ALL-CAPS source string |
-| [settings/notifications/page.tsx:116](apps/web/app/settings/notifications/page.tsx#L116) | `title="NHẮC NHỞ"` | `title="Nhắc nhở"` | **R2 (`sentence-case`)** — ALL-CAPS source string |
-| [settings/delete-account/page.tsx:47](apps/web/app/settings/delete-account/page.tsx#L47) | `title="XOÁ TÀI KHOẢN"` | `title="Xoá tài khoản"` | **R2 (`sentence-case`)** — ALL-CAPS source string |
-| [install/page.tsx:17](apps/web/app/install/page.tsx#L17) | `title="THÊM VÀO MÀN HÌNH CHÍNH"` | `title="Thêm vào màn hình chính"` | **R2 (`sentence-case`)** — ALL-CAPS source string |
+| [settings/profile/weight/page.tsx:120](apps/web/app/settings/profile/weight/page.tsx#L120) | `title="CÂN NẶNG"` | `title="Cân nặng"` | **R2 (`sentence-case`)** — ALL-CAPS source string *(fixed in `7cad611`)* |
+| [settings/language/page.tsx:34](apps/web/app/settings/language/page.tsx#L34) | `title="NGÔN NGỮ"` | `title="Ngôn ngữ"` | **R2 (`sentence-case`)** — ALL-CAPS source string *(fixed in `7cad611`)* |
+| [settings/notifications/page.tsx:116](apps/web/app/settings/notifications/page.tsx#L116) | `title="NHẮC NHỞ"` | `title="Nhắc nhở"` | **R2 (`sentence-case`)** — ALL-CAPS source string *(fixed in `7cad611`)* |
+| [settings/delete-account/page.tsx:47](apps/web/app/settings/delete-account/page.tsx#L47) | `title="XOÁ TÀI KHOẢN"` | `title="Xoá tài khoản"` | **R2 (`sentence-case`)** — ALL-CAPS source string *(fixed in `7cad611`)* |
+| [install/page.tsx:17](apps/web/app/install/page.tsx#L17) | `title="THÊM VÀO MÀN HÌNH CHÍNH"` | `title="Thêm vào màn hình chính"` | **R2 (`sentence-case`)** — ALL-CAPS source string *(fixed in `fe0fd2b` / `ag-15`)* |
 | [setup-form.tsx:110](apps/web/components/onboarding/setup-form.tsx#L110) | `title={step === 1 ? "VỀ BẠN" : "MỤC TIÊU"}` | `title={step === 1 ? "Về bạn" : "Mục tiêu"}` | **R2 (`sentence-case`)** — ALL-CAPS source string |
 | [signin/page.tsx:15](apps/web/app/signin/page.tsx#L15) | `CHÀO MỪNG TRỞ LẠI.` (along with `KIỂM TRA EMAIL` at [signin/check-email/page.tsx:54](apps/web/app/signin/check-email/page.tsx#L54) and `VI CHẤT PHẢI ĐỦ.` at [signup/page.tsx:26](apps/web/app/signup/page.tsx#L26)) | `Chào mừng trở lại.` / `Kiểm tra email` / `Vi chất phải đủ.` | **R2 (`sentence-case`)** — ALL-CAPS page headings in source strings |
 | [format.ts:195](apps/web/lib/format.ts#L195) | ``return `${options?.signed ? formatSigned(value) : formatNumber(Math.round(value))} %`;`` (and caller at [period.ts:258](apps/web/lib/period.ts#L258)) | ``return `${options?.signed ? formatSigned(value) : formatNumber(Math.round(value))}%`;`` (`"50%"`, `"+18%"`, `"−12%"`) | **R3 (`vn-numbers`)** — **Decided: 50%** (Hao 13/10: percent is written `"50%"` with no space, including signed `"+18%"`, `"−12%"`) |
@@ -270,7 +270,7 @@ Rule codes:
 | [entry-editor.tsx:144](apps/web/components/foods/entry-editor.tsx#L144) | `` `${e.target.value} g` `` | `` `${formatAmount(Number(e.target.value) \|\| 0, "g")} g` `` | **R3 (`vn-numbers`)** — Saved portion label bypasses `formatAmount` |
 | [portion-panel.tsx:153](apps/web/components/ui/portion-panel.tsx#L153) | `` `${gramsInput} g` `` (and line 220 `Vi chất trong {gramsInput} g:`) | `` `${formatAmount(grams, "g")} g` `` / `Vi chất trong {formatAmount(grams, "g")} g:` | **R3 (`vn-numbers`)** — Displays raw `gramsInput` string directly |
 | [diary-edits.ts:151](apps/web/lib/diary-edits.ts#L151) | `` `${edit.grams} g` `` (also lines 303, 315) | `` `${formatAmount(edit.grams, "g")} g` `` | **R3 (`vn-numbers`)** — Interpolates raw `grams` number without `formatAmount` |
-| [copy-yesterday-sheet.tsx:32](apps/web/components/copy-yesterday-sheet.tsx#L32) | `${getWeekdayName(yesterday.date)}, ${dd}/${mm} · ${formatNumber(yesterday.calories)} kcal` (e.g. `"Thứ Bảy, 10/10"`) | `${formatDayLabel(yesterday.date, now)} · ${formatNumber(yesterday.calories)} kcal` (e.g. `"Hôm qua 10/10"` with no comma) | **R4 (`vn-dates`)** — Includes a comma after weekday and does not use `"Hôm qua dd/mm"` |
+| [copy-yesterday-sheet.tsx:32](apps/web/components/copy-yesterday-sheet.tsx#L32) | `${getWeekdayName(yesterday.date)}, ${dd}/${mm} · ${formatNumber(yesterday.calories)} kcal` (e.g. `"Thứ Bảy, 10/10"`) | `${formatDayLabel(yesterday.date, now)} · ${formatNumber(yesterday.calories)} kcal` (e.g. `"Hôm qua 10/10"` with no comma) | **R4 (`vn-dates`)** — Includes a comma after weekday and does not use `"Hôm qua dd/mm"` *(fixed in `373aad9`)* |
 | [format.ts:176](apps/web/lib/format.ts#L176) | ``return `${weekday}, ${parts.day}/${parts.month}/${parts.year}`;`` (e.g. `"Thứ Bảy, 10/10/2026"`) | ``return `${weekday} ${parts.day}/${parts.month}`;`` | **R4 (`vn-dates`)** — `formatDesktopDate` adds a comma and `/yyyy`, diverging from `"Thứ Hai 05/10"` |
 | [calendar-sheet.tsx:53](apps/web/components/calendar-sheet.tsx#L53) | `Tháng {Number(m)}, {month.slice(0, 4)}` (e.g. `"Tháng 10, 2026"`) | `Tháng {Number(m)}/{month.slice(0, 4)}` | **R4 (`vn-dates`)** — Uses English-style comma `"Tháng 10, 2026"` *(fixed in `1803108`)* |
 | [target-rows.ts:86](apps/web/components/settings/target-rows.ts#L86) | `detail: "Khoảng mục tiêu theo coach"` | `detail: "Khoảng mục tiêu theo huấn luyện viên"` | **R5 (`one-term`)** — Fixed term decided by Hao (13/10): `"huấn luyện viên"`, never `"coach"` / `"Coach"` |
@@ -303,13 +303,13 @@ Rule codes:
 | [setup-form.tsx:267](apps/web/components/onboarding/setup-form.tsx#L267) | `Bắt đầu ghi bữa ăn` (also line 277) | `Bắt đầu thêm món` | **R6 (`same-verb`)** — Uses `"ghi bữa ăn"` instead of `"thêm món"` |
 | [add-shortcuts.tsx:87](apps/web/components/add/add-shortcuts.tsx#L87) | `name="Chỉ ghi kcal"` / `addLabel="Chỉ ghi kcal"` (line 89) (along with `title="Chỉ ghi kcal"` at [quick-add-sheet.tsx:56](apps/web/components/add/quick-add-sheet.tsx#L56) and `"Ghi nhanh"` at [quick-add-sheet.tsx:68](apps/web/components/add/quick-add-sheet.tsx#L68), [entry-editor.tsx:122](apps/web/components/foods/entry-editor.tsx#L122), [quick-entry.ts:5](apps/web/lib/quick-entry.ts#L5)) | `Chỉ thêm kcal` / `Thêm nhanh` | **R6 (`same-verb`)** — `/add` and navigation use `"Thêm"`, whereas quick-add uses `"Chỉ ghi kcal"` / `"Ghi nhanh"` |
 | [entry/[id]/page.tsx:44](apps/web/app/entry/[id]/page.tsx#L44) | `<Link href="/diary"...>Về Tổng quan</Link>` | `<Link href="/diary"...>Về Nhật ký</Link>` | **R6 (`same-verb`)** & **R8 (`natural-vi`)** — Button label says `"Về Tổng quan"` while `href="/diary"` navigates to **Diary** *(fixed in `e2361c2`)* |
-| [micros/[nutrient]/page.tsx:79](apps/web/app/micros/[nutrient]/page.tsx#L79) | `Quay lại Vi chất` | `Về Vi chất` | **R6 (`same-verb`)** — All other not-found states (`error.tsx`, `not-found.tsx`, `foods/[id]`, `micros`) use `"Về <Trang>"`, whereas `micros/[nutrient]` uses `"Quay lại Vi chất"` |
+| [micros/[nutrient]/page.tsx:79](apps/web/app/micros/[nutrient]/page.tsx#L79) | `Quay lại Vi chất` | `Về Vi chất` | **R6 (`same-verb`)** — All other not-found states (`error.tsx`, `not-found.tsx`, `foods/[id]`, `micros`) use `"Về <Trang>"`, whereas `micros/[nutrient]` uses `"Quay lại Vi chất"` *(fixed in `fd8dd32`)* |
 | [profile-cards.tsx:206](apps/web/components/settings/profile-cards.tsx#L206) | `Cài như ứng dụng` (opens `/install`, which is titled `"Thêm vào màn hình chính"`) | `Thêm vào màn hình chính` | **R6 (`same-verb`)** — Row label in Profile differs from the destination `/install` screen title |
 | [paywall/page.tsx:16](apps/web/app/paywall/page.tsx#L16) | `[GIÁ/THÁNG]` / `[GIÁ/NĂM]` (line 17) / `Tiết kiệm [X]%` (line 17) / `Thanh toán qua [NHÀ CUNG CẤP THANH TOÁN] · huỷ bất cứ lúc nào` (line 135) | Replace bracketed placeholders with real values or hide unconfigured billing details | **R8 (`natural-vi`)** — Literal `[...]` placeholders removed; benefits shown with `"Sắp ra mắt"` line *(fixed in `f0b0571`)* |
 | [micros/page.tsx:304](apps/web/app/micros/page.tsx#L304) | `Bắt đầu ghi nhận món ăn để theo dõi 58 chỉ số vi chất và hoàn thành mục tiêu ngày.` | `Thêm món vào nhật ký để theo dõi 22 vi chất mỗi ngày.` | **R8 (`natural-vi`)** — Stiff `"ghi nhận món ăn"` phrasing; `"58 chỉ số vi chất"` contradicts `"22 vi chất"` in `layout.tsx:23`, `paywall/page.tsx:144`, and `day-totals.ts` |
 | [energy-tab.tsx:77](apps/web/components/overview/energy-tab.tsx#L77) | `trong mục tiêu hoặc trên` (and line 201 `Trong mục tiêu hoặc trên`) | `đạt mục tiêu` / `Đạt mục tiêu` | **R8 (`natural-vi`)** — Word-for-word calque of `"in target or above"`, unnatural in Vietnamese |
-| [contributing-foods.tsx:15](apps/web/components/nutrient-detail/contributing-foods.tsx#L15) | `Chưa có món nào có chất này hôm nay.` | `Chưa có món nào có chất này.` | **R8 (`natural-vi`)** — When viewing a past date via `?date=`, the heading at `micros/[nutrient]/page.tsx:153` switches to `"Đã có từ món ăn của ngày này"`, but the empty state hardcodes `"hôm nay"` |
-| [meal-switcher.tsx:23](apps/web/components/meal-switcher.tsx#L23) | `defaultHint = "Mặc định theo giờ: 14:05 → Trước tập"` | `defaultHint = "Tự chọn theo giờ trong ngày"` | **R8 (`natural-vi`)** — Hardcoded sample time `"14:05 → Trước tập"` is inaccurate when `MealSwitcher` is rendered without a custom `defaultHint` |
+| [contributing-foods.tsx:15](apps/web/components/nutrient-detail/contributing-foods.tsx#L15) | `Chưa có món nào có chất này hôm nay.` | `Chưa có món nào có chất này.` | **R8 (`natural-vi`)** — When viewing a past date via `?date=`, the heading at `micros/[nutrient]/page.tsx:153` switches to `"Đã có từ món ăn của ngày này"`, but the empty state hardcodes `"hôm nay"` *(fixed in `fd8dd32`)* |
+| [meal-switcher.tsx:23](apps/web/components/meal-switcher.tsx#L23) | `defaultHint = "Mặc định theo giờ: 14:05 → Trước tập"` | `defaultHint = "Tự chọn theo giờ trong ngày"` | **R8 (`natural-vi`)** — Hardcoded sample time `"14:05 → Trước tập"` is inaccurate when `MealSwitcher` is rendered without a custom `defaultHint` *(fixed in `373aad9`)* |
 
 ---
 
@@ -381,8 +381,8 @@ Every confirmed row from Section 2 is grouped by file below so a coder can apply
 - [foods/new/page.tsx:214](apps/web/app/foods/new/page.tsx#L214) (R5): `Lấy số trên nhãn dinh dưỡng của gói. Bỏ trống = chưa biết, không phải 0.` → `Lấy số trên nhãn dinh dưỡng của gói. Bỏ trống = chưa có dữ liệu, không phải 0.` *(fixed in `35d8190`)*
 
 ### `apps/web/app/install/page.tsx`
-- [install/page.tsx:17](apps/web/app/install/page.tsx#L17) (R2): `title="THÊM VÀO MÀN HÌNH CHÍNH"` → `title="Thêm vào màn hình chính"`
-- [install/page.tsx:92](apps/web/app/install/page.tsx#L92), [install/page.tsx:106](apps/web/app/install/page.tsx#L106), [install/page.tsx:163](apps/web/app/install/page.tsx#L163) (R2, R5): `Chạm nút Chia sẻ` / `Chọn “Thêm vào MH chính”` / `Chọn “Thêm vào Màn hình chính” hoặc “Cài đặt ứng dụng”` → `Chạm nút chia sẻ` / `Chọn “Thêm vào màn hình chính”`
+- [install/page.tsx:17](apps/web/app/install/page.tsx#L17) (R2): `title="THÊM VÀO MÀN HÌNH CHÍNH"` → `title="Thêm vào màn hình chính"` *(fixed in `fe0fd2b` / `ag-15`)*
+- [install/page.tsx:92](apps/web/app/install/page.tsx#L92), [install/page.tsx:106](apps/web/app/install/page.tsx#L106), [install/page.tsx:163](apps/web/app/install/page.tsx#L163) (R2, R5): `Chạm nút Chia sẻ` / `Chọn “Thêm vào MH chính”` / `Chọn “Thêm vào Màn hình chính” hoặc “Cài đặt ứng dụng”` → `Chạm nút chia sẻ` / `Chọn “Thêm vào màn hình chính”` *(fixed in `fe0fd2b` / `ag-15`)*
 
 ### `apps/web/app/layout.tsx`
 - [layout.tsx:22](apps/web/app/layout.tsx#L22) (R2): `H1T MICRO | Dinh dưỡng & Vi chất Chuyên sâu` → `H1T MICRO | Dinh dưỡng & vi chất chuyên sâu`
@@ -393,8 +393,8 @@ Every confirmed row from Section 2 is grouped by file below so a coder can apply
 - [micros/page.tsx:285](apps/web/app/micros/page.tsx#L285), [micros/page.tsx:302](apps/web/app/micros/page.tsx#L302), [micros/page.tsx:310](apps/web/app/micros/page.tsx#L310) (R6 — **Hao**): `Bắt đầu ghi món để đo lường` / `Chưa ghi món nào hôm nay` / `+ Ghi món ngay` → `Thêm món để xem vi chất` / `Chưa có món hôm nay` / `+ Thêm món` *(fixed in `c9e9a1d`; the past-day heading reads `Chưa có món ngày này`)*
 - [micros/page.tsx:304](apps/web/app/micros/page.tsx#L304) (R8): `Bắt đầu ghi nhận món ăn để theo dõi 58 chỉ số vi chất và hoàn thành mục tiêu ngày.` → `Thêm món vào nhật ký để theo dõi 22 vi chất mỗi ngày.` *(fixed in `c9e9a1d`)*
 
-### `apps/web/app/micros/[nutrient]/page.tsx` — **`[CC1 claim]`**
-- [micros/[nutrient]/page.tsx:79](apps/web/app/micros/[nutrient]/page.tsx#L79) (R6): `Quay lại Vi chất` → `Về Vi chất` *(not applied in cc-17b: `micros/[nutrient]` is outside the CC1 claim; left for the owner of nutrient detail)*
+### `apps/web/app/micros/[nutrient]/page.tsx`
+- [micros/[nutrient]/page.tsx:79](apps/web/app/micros/[nutrient]/page.tsx#L79) (R6): `Quay lại Vi chất` → `Về Vi chất` *(fixed in `fd8dd32`)*
 
 ### `apps/web/app/not-found.tsx`
 - [not-found.tsx:20](apps/web/app/not-found.tsx#L20) (R1 — **Hao**): `Link có thể đã cũ hoặc bị gõ sai.` → `Đường dẫn có thể đã cũ hoặc bị gõ sai.` *(fixed in `0e75988`)*
@@ -406,16 +406,16 @@ Every confirmed row from Section 2 is grouped by file below so a coder can apply
 - [paywall/page.tsx:144](apps/web/app/paywall/page.tsx#L144) (R2): `Gói Miễn phí vẫn ghi đủ 22 vi chất.` → `Gói miễn phí vẫn ghi đủ 22 vi chất.` *(fixed in `c5ce691`)*
 
 ### `apps/web/app/settings/delete-account/page.tsx`
-- [settings/delete-account/page.tsx:47](apps/web/app/settings/delete-account/page.tsx#L47) (R2): `title="XOÁ TÀI KHOẢN"` → `title="Xoá tài khoản"`
+- [settings/delete-account/page.tsx:47](apps/web/app/settings/delete-account/page.tsx#L47) (R2): `title="XOÁ TÀI KHOẢN"` → `title="Xoá tài khoản"` *(fixed in `7cad611`)*
 
 ### `apps/web/app/settings/language/page.tsx`
-- [settings/language/page.tsx:34](apps/web/app/settings/language/page.tsx#L34) (R2): `title="NGÔN NGỮ"` → `title="Ngôn ngữ"`
+- [settings/language/page.tsx:34](apps/web/app/settings/language/page.tsx#L34) (R2): `title="NGÔN NGỮ"` → `title="Ngôn ngữ"` *(fixed in `7cad611`)*
 
 ### `apps/web/app/settings/notifications/page.tsx`
-- [settings/notifications/page.tsx:116](apps/web/app/settings/notifications/page.tsx#L116) (R2): `title="NHẮC NHỞ"` → `title="Nhắc nhở"`
+- [settings/notifications/page.tsx:116](apps/web/app/settings/notifications/page.tsx#L116) (R2): `title="NHẮC NHỞ"` → `title="Nhắc nhở"` *(fixed in `7cad611`)*
 
 ### `apps/web/app/settings/profile/weight/page.tsx`
-- [settings/profile/weight/page.tsx:120](apps/web/app/settings/profile/weight/page.tsx#L120) (R2): `title="CÂN NẶNG"` → `title="Cân nặng"`
+- [settings/profile/weight/page.tsx:120](apps/web/app/settings/profile/weight/page.tsx#L120) (R2): `title="CÂN NẶNG"` → `title="Cân nặng"` *(fixed in `7cad611`)*
 
 ### `apps/web/app/signin/page.tsx`
 - [signin/page.tsx:15](apps/web/app/signin/page.tsx#L15) (R2): `CHÀO MỪNG TRỞ LẠI.` → `Chào mừng trở lại.`
@@ -449,7 +449,7 @@ Every confirmed row from Section 2 is grouped by file below so a coder can apply
 - [calendar-sheet.tsx:53](apps/web/components/calendar-sheet.tsx#L53) (R4): `Tháng {Number(m)}, {month.slice(0, 4)}` → `Tháng {Number(m)}/{month.slice(0, 4)}` *(fixed in `1803108`)*
 
 ### `apps/web/components/copy-yesterday-sheet.tsx`
-- [copy-yesterday-sheet.tsx:32](apps/web/components/copy-yesterday-sheet.tsx#L32) (R4): `${getWeekdayName(yesterday.date)}, ${dd}/${mm} · ${formatNumber(yesterday.calories)} kcal` → `${formatDayLabel(yesterday.date, now)} · ${formatNumber(yesterday.calories)} kcal`
+- [copy-yesterday-sheet.tsx:32](apps/web/components/copy-yesterday-sheet.tsx#L32) (R4): `${getWeekdayName(yesterday.date)}, ${dd}/${mm} · ${formatNumber(yesterday.calories)} kcal` → `${formatDayLabel(yesterday.date, now)} · ${formatNumber(yesterday.calories)} kcal` *(fixed in `373aad9`)*
 
 ### `apps/web/components/diary/diary-screen.tsx`
 - [diary-screen.tsx:379](apps/web/components/diary/diary-screen.tsx#L379) (R2): `còn {formatNumber(remaining)} kcal · Mục tiêu {formatRange(targetMin, targetMax)}` → `Còn {formatNumber(remaining)} kcal · mục tiêu {formatRange(targetMin, targetMax)}` *(fixed in `3ca7ec9`)*
@@ -471,10 +471,10 @@ Every confirmed row from Section 2 is grouped by file below so a coder can apply
 - [food-micros.tsx:10](apps/web/components/foods/food-micros.tsx#L10), [food-micros.tsx:11](apps/web/components/foods/food-micros.tsx#L11), [food-micros.tsx:63](apps/web/components/foods/food-micros.tsx#L63), [food-micros.tsx:70](apps/web/components/foods/food-micros.tsx#L70) (R3 — **Decided: 50%**): `"< 0,1 %"` / `` `${formatNumber(row.share, { decimals: 1 })} %` `` / `` `${row.pct} %` `` / `Từ 20 % mục tiêu ngày mỗi khẩu phần` / `{r.name} · {r.pct} %` → `"<0,1%"` / `` `${formatNumber(row.share, { decimals: 1 })}%` `` / `` `${row.pct}%` `` / `Từ 20% mục tiêu ngày mỗi khẩu phần` / `{r.name} · {r.pct}%`
 
 ### `apps/web/components/meal-switcher.tsx`
-- [meal-switcher.tsx:23](apps/web/components/meal-switcher.tsx#L23) (R8): `defaultHint = "Mặc định theo giờ: 14:05 → Trước tập"` → `defaultHint = "Tự chọn theo giờ trong ngày"`
+- [meal-switcher.tsx:23](apps/web/components/meal-switcher.tsx#L23) (R8): `defaultHint = "Mặc định theo giờ: 14:05 → Trước tập"` → `defaultHint = "Tự chọn theo giờ trong ngày"` *(fixed in `373aad9`)*
 
-### `apps/web/components/nutrient-detail/contributing-foods.tsx` — **`[CC1 claim]`**
-- [contributing-foods.tsx:15](apps/web/components/nutrient-detail/contributing-foods.tsx#L15) (R8): `Chưa có món nào có chất này hôm nay.` → `Chưa có món nào có chất này.` *(not applied in cc-17b: `components/nutrient-detail` is outside the CC1 claim)*
+### `apps/web/components/nutrient-detail/contributing-foods.tsx`
+- [contributing-foods.tsx:15](apps/web/components/nutrient-detail/contributing-foods.tsx#L15) (R8): `Chưa có món nào có chất này hôm nay.` → `Chưa có món nào có chất này.` *(fixed in `fd8dd32`)*
 
 ### `apps/web/components/onboarding/magic-link-form.tsx`
 - [magic-link-form.tsx:35](apps/web/components/onboarding/magic-link-form.tsx#L35) (R1 — **Hao**): `Chưa gửi được link. Thử lại sau ít phút.` → `Chưa gửi được liên kết. Thử lại sau ít phút.`
@@ -589,7 +589,6 @@ The ledger below lists every confirmed row from Section 2 and Section 4 that is 
 - `components/add/add-shortcuts.tsx:68, 70` (R5): `aria-label="Bữa của tôi"` / `Bữa của tôi` → `aria-label="Bữa ăn của tôi"` / `Bữa ăn của tôi` *(fixed in cc2-12b)*
 - `components/copy-yesterday-sheet.tsx:32` (R4): `${getWeekdayName(yesterday.date)}, ${dd}/${mm} · ${formatNumber(yesterday.calories)} kcal` → `${formatDayLabel(yesterday.date, now)} · ${formatNumber(yesterday.calories)} kcal`
 - `components/foods/food-micros.tsx:10, 11, 63, 70` (R3): `"< 0,1 %"` / `${row.share} %` / `${row.pct} %` / `Từ 20 %...` / `{r.name} · {r.pct} %` → `"<0,1%"` / `${row.share}%` / `${row.pct}%` / `Từ 20%...` / `{r.name} · {r.pct}%`
-- `components/meal-switcher.tsx:23` (R8): `defaultHint = "Mặc định theo giờ: 14:05 → Trước tập"` → `defaultHint = "Tự chọn theo giờ trong ngày"`
 - `components/overview/energy-tab.tsx:27, 182, 250` (R3): `Đạm ${protein} %, tinh bột ${carbs} %, béo ${fat} %...` / `{row.share} %` / `Đạm trung bình ${proteinPct} %...` → `Đạm ${protein}%, tinh bột ${carbs}%, béo ${fat}%...` / `{formatNumber(row.share)}%` / `Đạm trung bình ${proteinPct}%...`
 - `components/overview/micros-tab.tsx:51, 54, 63` (R3): `formatPercent(row.percentage)` / `${row.percentage} % mục tiêu` / `Mỗi thanh có 10 đoạn; đoạn đầy khi đạt 10 % mục tiêu.` → `formatPercent(row.percentage)` (`50%`) / `${row.percentage}% mục tiêu` / `Mỗi thanh có 10 đoạn; đoạn đầy khi đạt 10% mục tiêu.`
 - `components/ui/portion-panel.tsx:153, 220` (R3): `` `${gramsInput} g` `` / `Vi chất trong {gramsInput} g:` → `` `${formatAmount(grams, "g")} g` `` / `Vi chất trong {formatAmount(grams, "g")} g:`
@@ -599,7 +598,5 @@ The ledger below lists every confirmed row from Section 2 and Section 4 that is 
 
 ### Hao / Decisions & Owner of specific feature
 - `app/layout.tsx:22` (R2): `H1T MICRO | Dinh dưỡng & Vi chất Chuyên sâu` → `H1T MICRO | Dinh dưỡng & vi chất chuyên sâu` (decide if branding title keeps Title Case)
-- `app/micros/[nutrient]/page.tsx:79` (R6): `Quay lại Vi chất` → `Về Vi chất` (left for owner of nutrient detail screen)
-- `components/nutrient-detail/contributing-foods.tsx:15` (R8): `Chưa có món nào có chất này hôm nay.` → `Chưa có món nào có chất này.` (left for owner of nutrient detail screen)
 - `lib/mock/sample-day.ts:238, 441` (R5): `Natri (muối)` & `Folate (B9)` → `Natri` & `Vitamin B9` (mock data parity with canonical `lib/nutrients.ts`)
 
