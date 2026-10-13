@@ -116,7 +116,7 @@ def test_item_3(browser):
     pg.goto(BASE + "/paywall", wait_until="networkidle")
     pg.wait_for_timeout(300)
     txt = body_text(pg)
-    check("Gói Miễn phí vẫn ghi đủ 22 vi chất." in txt, "paywall: shows 'Gói Miễn phí vẫn ghi đủ 22 vi chất.'")
+    check("Gói miễn phí vẫn ghi đủ 22 vi chất." in txt, "paywall: shows 'Gói miễn phí vẫn ghi đủ 22 vi chất.'")
     check("21 vi chất" not in txt, "paywall: does not contain '21 vi chất'")
     ctx.close()
 
