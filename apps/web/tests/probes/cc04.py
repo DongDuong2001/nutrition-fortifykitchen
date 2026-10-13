@@ -80,7 +80,7 @@ def run():
             check(box is not None and box["width"] >= 44 and box["height"] >= 44, f"food detail: heart is 44 px ({box})")
             heart.first.click()
             pg.wait_for_timeout(200)
-            check(pg.locator('text="Đã lưu vào Yêu thích" >> visible=true').count() == 1, "food detail: save toast shows")
+            check(pg.locator('text="Đã thêm vào yêu thích" >> visible=true').count() == 1, "food detail: save toast shows")
             check(pg.locator('header button[aria-pressed="true"]').count() == 1, "food detail: heart pressed after save")
         check(pg.locator('[data-align-group="food-detail"]:visible').count() > 0, "food detail: body cards still present")
         pg.screenshot(path=os.path.join(SHOTS, "cc04-food-detail-390.png"), animations="disabled")
