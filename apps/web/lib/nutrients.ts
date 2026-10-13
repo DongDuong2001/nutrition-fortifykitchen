@@ -33,12 +33,12 @@ export const NUTRIENT_CATALOG: NutrientDefinition[] = [
   { id: "phytate", nameVi: "Phytat", nameEn: "Phytate", unit: "mg", group: "general", depth: 0, targetSource: "none" },
 
   // 2. Carbohydrates (8)
-  { id: "carbs", nameVi: "Tinh bột tổng", nameEn: "Carbs", unit: "g", group: "carbs", depth: 0, targetSource: "coach-provisional" },
-  { id: "net_carbs", nameVi: "Carb ròng", nameEn: "Net carbs", unit: "g", group: "carbs", depth: 1, parentId: "carbs", targetSource: "none" },
+  { id: "carbs", nameVi: "Tinh bột", nameEn: "Carbs", unit: "g", group: "carbs", depth: 0, targetSource: "coach-provisional" },
+  { id: "net_carbs", nameVi: "Tinh bột hấp thu", nameEn: "Net carbs", unit: "g", group: "carbs", depth: 1, parentId: "carbs", targetSource: "none" },
   { id: "fiber", nameVi: "Chất xơ", nameEn: "Fiber", unit: "g", group: "carbs", depth: 1, parentId: "carbs", targetSource: "coach-provisional" },
   { id: "insoluble_fiber", nameVi: "Xơ không tan", nameEn: "Insoluble fiber", unit: "g", group: "carbs", depth: 2, parentId: "fiber", targetSource: "none" },
   { id: "soluble_fiber", nameVi: "Xơ hoà tan", nameEn: "Soluble fiber", unit: "g", group: "carbs", depth: 2, parentId: "fiber", targetSource: "none" },
-  { id: "starch", nameVi: "Tinh bột (starch)", nameEn: "Starch", unit: "g", group: "carbs", depth: 1, parentId: "carbs", targetSource: "none" },
+  { id: "starch", nameVi: "Tinh bột phức", nameEn: "Starch", unit: "g", group: "carbs", depth: 1, parentId: "carbs", targetSource: "none" },
   { id: "sugars", nameVi: "Đường", nameEn: "Sugars", unit: "g", group: "carbs", depth: 1, parentId: "carbs", targetSource: "none" },
   { id: "added_sugars", nameVi: "Đường bổ sung", nameEn: "Added sugars", unit: "g", group: "carbs", depth: 1, parentId: "carbs", targetSource: "none" },
 

@@ -137,8 +137,8 @@ export function dailyTargetRows(weightKg: number | null, sex: SexType, goal: Goa
 
 export function resendLabel(secondsLeft: number): string {
   return secondsLeft > 0
-    ? `Gửi lại link (sau ${formatNumber(secondsLeft)} giây)`
-    : "Gửi lại link";
+    ? `Gửi lại liên kết (sau ${formatNumber(secondsLeft)} giây)`
+    : "Gửi lại liên kết";
 }
 
 export const DRAFT_KEY = "h1t-onboarding-draft";
