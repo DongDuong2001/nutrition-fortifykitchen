@@ -84,9 +84,9 @@ export function AddShortcuts({ recents, savedMeals, onAddRecent, onOpenRecent, o
       )}
 
       <QuickAddRow
-        name="Chỉ ghi kcal"
+        name="Chỉ thêm kcal"
         meta="Nhập kcal, không cần chọn món"
-        addLabel="Chỉ ghi kcal"
+        addLabel="Chỉ thêm kcal"
         onAdd={onQuickKcal}
         trailing={TRAILING_SPACER}
         withBorderTop={false}
