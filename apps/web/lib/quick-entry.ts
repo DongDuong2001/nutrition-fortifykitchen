@@ -3,7 +3,7 @@ import type { AddedDiaryEntry } from "./diary-edits";
 import type { MealSlot } from "./meal-slot";
 import { formatAmount } from "./format";
 
-export const QUICK_NAME = "Ghi nhanh";
+export const QUICK_NAME = "Thêm nhanh";
 
 /** A number typed with a Vietnamese comma ("2,5") or a dot. Blank, text and negatives give null; 0 stays 0. */
 export function parseDecimalInput(input: string): number | null {

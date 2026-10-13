@@ -35,10 +35,10 @@ describe("quickEntryFrom", () => {
     expect(make({ kcal: "0,5" }).ok).toBe(true);
   });
 
-  it("names it Ghi nhanh when no name is given", () => {
+  it("names it Thêm nhanh when no name is given", () => {
     const r = make({});
-    expect(r.ok && r.entry.foodName).toBe("Ghi nhanh");
-    expect(r.ok && r.entry.displayQty).toBe("Ghi nhanh");
+    expect(r.ok && r.entry.foodName).toBe("Thêm nhanh");
+    expect(r.ok && r.entry.displayQty).toBe("Thêm nhanh");
     expect(r.ok && r.entry.kind).toBe("quick");
   });
 
