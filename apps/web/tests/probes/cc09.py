@@ -1,4 +1,4 @@
-"""cc-09: Hồ sơ menu. Every menu row opens its page and Back returns to /settings/profile (390 and 1440). Birth year 1899
+"""cc-09: Cài đặt menu. Every menu row opens its page and Back returns to /settings (390 and 1440). Birth year 1899
 shows the setup error and a valid year saves. Training default 90 shows on /training after reload. Goal chips
 stay on one line at 1440.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc09.py
@@ -48,9 +48,16 @@ def open_profile(pg):
     pg.wait_for_timeout(300)
 
 
+def open_settings(pg):
+    # IA v2: the menu rows (language, reminders, install, Pro, account, danger zone) live on the Cài đặt tab
+    pg.goto(BASE + "/settings", wait_until="networkidle")
+    visible(pg, 'a[href="/settings/language"]').wait_for(state="visible")
+    pg.wait_for_timeout(300)
+
+
 def check_menu(pg, label):
     for href in MENU_HREFS:
-        open_profile(pg)
+        open_settings(pg)
         link = visible(pg, f'a[href="{href}"]')
         link.wait_for(state="visible", timeout=8000)
         link.click()
@@ -64,21 +71,21 @@ def check_menu(pg, label):
         check(opened, f"{label}: {href} opens its page (not the 404 page)")
         pg.go_back()
         try:
-            pg.wait_for_url("**/settings/profile", timeout=8000)
+            pg.wait_for_url("**/settings", timeout=8000)
             back = True
         except Exception:
             back = False
-        check(back, f"{label}: Back from {href} returns to /settings/profile")
+        check(back, f"{label}: Back from {href} returns to /settings")
 
 
 def run_phone(browser):
     ctx = browser.new_context(viewport=PHONE)
     pg = ctx.new_page()
 
-    open_profile(pg)
-    pg.screenshot(path=os.path.join(SHOTS, "cc09-profile-menu-390.png"), full_page=True, animations="disabled")
+    open_settings(pg)
+    pg.screenshot(path=os.path.join(SHOTS, "cc09-settings-390.png"), full_page=True, animations="disabled")
     text = body(pg).lower()  # section titles are uppercase on screen
-    check("ứng dụng" in text and "vùng nguy hiểm" in text, "390 profile: app and danger sections visible")
+    check("ứng dụng" in text and "vùng nguy hiểm" in text, "390 settings: app and danger sections visible")
 
     check_menu(pg, "390 menu")
 

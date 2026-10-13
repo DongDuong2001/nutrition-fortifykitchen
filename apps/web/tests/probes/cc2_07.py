@@ -235,7 +235,7 @@ def probe_explore(pg, name):
 def probe_settings(pg, name):
     go(pg, "/settings")
     txt = " ".join(pg.inner_text("body").split())
-    check("Cân nặng" in txt and "Năm sinh" in txt, f"{name}: /settings shows the Hồ sơ content")
+    check("Hồ sơ của bạn" in txt and "Mục tiêu mỗi ngày" in txt, f"{name}: /settings shows the Cài đặt content (IA v2)")
     go(pg, "/settings/profile")
     txt = " ".join(pg.inner_text("body").split())
     check("Cân nặng" in txt and "Năm sinh" in txt, f"{name}: /settings/profile shows the Hồ sơ content")

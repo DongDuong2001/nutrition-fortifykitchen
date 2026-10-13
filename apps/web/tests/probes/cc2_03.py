@@ -55,15 +55,15 @@ def parse_rgb(css):
 
 
 def test_profile_red(browser):
-    # Small red text on Profile uses the text-destructive-text token (4.5:1 or better on the paper and card)
+    # Small red text on Cài đặt (IA v2: the account and danger zone live there) uses the text-destructive-text token (4.5:1 or better on the paper and card)
     for vp_name, vp in (("390", PHONE), ("1440", DESKTOP)):
         ctx = browser.new_context(viewport=vp)
         pg = ctx.new_page()
-        pg.goto(BASE + "/settings/profile", wait_until="networkidle")
+        pg.goto(BASE + "/settings", wait_until="networkidle")
         pg.wait_for_timeout(300)
         for label in PROFILE_RED_LABELS:
             color = pg.get_by_text(label, exact=True).first.evaluate("el => getComputedStyle(el).color")
-            check(color == DESTRUCTIVE_TEXT, f"profile @ {vp_name}: '{label}' is {color}, want {DESTRUCTIVE_TEXT}")
+            check(color == DESTRUCTIVE_TEXT, f"settings @ {vp_name}: '{label}' is {color}, want {DESTRUCTIVE_TEXT}")
         ctx.close()
 
 
