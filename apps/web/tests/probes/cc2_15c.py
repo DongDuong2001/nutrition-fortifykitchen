@@ -43,6 +43,15 @@ def go(pg, route):
     pg.wait_for_timeout(600)
 
 
+def sign_in_magic(pg, email):
+    # cc-19 exception (approved by reviewer 13/10 20:58): outside demo mode the mock store has no account until someone signs
+    # in. The magic-link request signs the email in (lib/auth-actions.ts requestMagicLink), so this is the sign-in the probe needs.
+    go(pg, "/signin")
+    pg.locator('input[type="email"]').fill(email)
+    pg.get_by_role("button", name="Gửi liên kết đăng nhập qua email").click()
+    pg.wait_for_url("**/signin/check-email")
+
+
 def with_profile(ctx):
     ctx.add_init_script(
         f"try {{ if (localStorage.getItem('h1t_profile_v1') === null) localStorage.setItem('h1t_profile_v1', JSON.stringify({PROFILE})); }} catch (e) {{}}"
@@ -88,6 +97,7 @@ def run(browser, name, size):
 
     # 2. A meal survives a closed context
     ctx, pg = new_page(browser, size)
+    sign_in_magic(pg, "ban@email.com")  # the key check below is for ban@email.com's storage keys
     go(pg, "/")
     check("Chưa có ngày nào được ghi" in text(pg), f"{where} empty account with a profile: Tổng quan shows the empty line")
     food = add_food(pg, SAMPLE_FOODS)
@@ -141,6 +151,8 @@ def run(browser, name, size):
 
     # 5. An old sessionStorage diary moves to localStorage once
     ctx, pg = new_page(browser, size)
+    # cc-19 exception: sign in before the old entry is seeded, so the seed runs once, on the diary load (the one migration)
+    sign_in_magic(pg, "ban@email.com")  # the diary belongs to a signed-in account (the key checked below)
     entry = {
         "id": "old-session-1", "foodId": "food-cha-la", "foodName": "Chà là hạt dẻ cũ", "grams": 30, "mealSlot": "snack",
         "displayQty": "30 g", "calories": 85, "carbs": 22.5, "protein": 0.7, "fat": 0.1, "fiber": 2.0,

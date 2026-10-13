@@ -49,6 +49,15 @@ def go(pg, route):
     pg.wait_for_timeout(500)
 
 
+def sign_in_magic(pg, email):
+    # cc-19 exception (approved by reviewer 13/10 20:58): outside demo mode the mock store has no account until someone signs
+    # in. The magic-link request signs the email in (lib/auth-actions.ts requestMagicLink), so this is the sign-in the probe needs.
+    go(pg, "/signin")
+    pg.locator('input[type="email"]').fill(email)
+    pg.get_by_role("button", name="Gửi liên kết đăng nhập qua email").click()
+    pg.wait_for_url("**/signin/check-email")
+
+
 def shot(pg, name, size_name):
     SHOTS.mkdir(exist_ok=True)
     pg.screenshot(path=str(SHOTS / f"cc2-15b-{name}-{size_name}.png"), full_page=False, animations="disabled")
@@ -83,6 +92,7 @@ def run(browser, name, size):
     pg.on("console", lambda m: errors.append(m.text) if m.type == "error" else None)
     pg.clock.set_fixed_time(NOW)
     where = name
+    sign_in_magic(pg, "ban@email.com")  # the empty account below is signed in (cc-19 exception)
 
     # Empty account, before setup
     go(pg, "/diary")
