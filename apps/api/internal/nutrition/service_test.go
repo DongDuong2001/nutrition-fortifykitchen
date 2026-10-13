@@ -172,3 +172,84 @@ func TestNutritionService_RichIn_SQLInjectionRejected(t *testing.T) {
 		t.Errorf("expected 400 Bad Request, got %d", rec.Code)
 	}
 }
+
+func TestNutritionService_SearchFoods_BeveragesAndDishes(t *testing.T) {
+	nuocMiaID := uuid.New()
+	phoID := uuid.New()
+	sourceID := "drink-nuoc-mia"
+	phoSourceID := "food-pho-bo"
+
+	repo := &mockNutritionRepo{
+		foods: map[uuid.UUID]*FoodDetail{
+			nuocMiaID: {
+				ID:       nuocMiaID,
+				NameVi:   "Nước mía",
+				Category: "beverage",
+				Source:   "vn_fct",
+				SourceID: &sourceID,
+				Per100gNutrients: map[string]*float64{
+					"calories": ptrFloat(75),
+					"iron":     ptrFloat(0.5),
+					"selenium": nil, // unknown nutrient must stay nil
+				},
+				Servings: []Portion{
+					{LabelVi: "1 ly vừa (350 ml)", Grams: 350},
+					{LabelVi: "100 g", Grams: 100},
+				},
+			},
+			phoID: {
+				ID:       phoID,
+				NameVi:   "Phở bò tái",
+				Category: "mon_viet",
+				Source:   "vn_fct",
+				SourceID: &phoSourceID,
+				Per100gNutrients: map[string]*float64{
+					"calories": ptrFloat(120),
+					"protein":  ptrFloat(8.5),
+				},
+				Servings: []Portion{
+					{LabelVi: "1 tô vừa (550 g)", Grams: 550},
+					{LabelVi: "100 g", Grams: 100},
+				},
+			},
+		},
+	}
+	svc := NewService(repo)
+
+	// Filter by category beverage
+	res, err := svc.SearchFoods(context.Background(), FoodSearchFilter{Category: "beverage"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(res.Items) == 0 {
+		t.Fatalf("expected items in result, got 0")
+	}
+
+	// Verify beverage fields
+	var foundNuocMia bool
+	for _, item := range res.Items {
+		if item.NameVi == "Nước mía" {
+			foundNuocMia = true
+			if item.Category != "beverage" {
+				t.Errorf("expected category beverage, got %s", item.Category)
+			}
+			if item.SourceID == nil || *item.SourceID != "drink-nuoc-mia" {
+				t.Errorf("expected source_id drink-nuoc-mia, got %v", item.SourceID)
+			}
+			if item.Per100gNutrients["selenium"] != nil {
+				t.Errorf("expected unknown nutrient to be nil, got %v", item.Per100gNutrients["selenium"])
+			}
+			if len(item.Servings) < 2 {
+				t.Errorf("expected at least 2 portions, got %d", len(item.Servings))
+			}
+		}
+	}
+	if !foundNuocMia {
+		t.Errorf("expected to find Nước mía in search results")
+	}
+}
+
+func ptrFloat(v float64) *float64 {
+	return &v
+}
+

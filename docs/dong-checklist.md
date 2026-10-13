@@ -34,10 +34,10 @@ Sources: docs/audit-ag10.md, docs/08-backend-plan.md, docs/07-api-contract.md, O
   Done when: sign up → set up profile → sign out → sign in again works on staging with all three providers.
 
 ## 4. Food data
-- [ ] Real import with `cmd/importfoods`: Vietnam FCT + USDA Foundation/SR Legacy (+ CNF if useful), `ON CONFLICT (source, source_id)`. Target ≥ 1.000 foods, Vietnamese names first.
-- [ ] Unknown nutrient = `null`, never `0`. Every food keeps `source` and `source_id` (the web shows the source on food detail).
-- [ ] **Drinks:** the web is adding an "Đồ uống" category. Import sourced drinks (water, tea, coffee, milk, soy milk, juices, sugarcane juice, coconut water, soft drinks, beer) with category `beverage`.
-- [ ] Portions per food (`food_portions`): at least the common Vietnamese portion (chén, tô, ly, quả) plus 100 g.
+- [x] Real import with `cmd/importfoods`: Vietnam FCT + USDA Foundation/SR Legacy (+ CNF if useful), `ON CONFLICT (source, source_id)`. Target ≥ 1.000 foods, Vietnamese names first.
+- [x] Unknown nutrient = `null`, never `0`. Every food keeps `source` and `source_id` (the web shows the source on food detail).
+- [x] **Drinks:** the web is adding an "Đồ uống" category. Import sourced drinks (water, tea, coffee, milk, soy milk, juices, sugarcane juice, coconut water, soft drinks, beer) with category `beverage`.
+- [x] Portions per food (`food_portions`): at least the common Vietnamese portion (chén, tô, ly, quả) plus 100 g.
   Done when: `GET /foods?q=pho` and `?q=nuoc mia` return sensible top hits; completeness report shows % of the 22 counted nutrients per food.
 
 ## 5. API gaps from the audit

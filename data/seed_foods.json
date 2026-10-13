@@ -1048,5 +1048,525 @@
         "sort": 1
       }
     ]
+  },
+  {
+    "source": "vn_fct",
+    "source_id": "drink-nuoc-mia",
+    "name": "Nước mía",
+    "name_vi": "Nước mía",
+    "category": "beverage",
+    "brand": null,
+    "tip_vi": "Bổ sung năng lượng và khoáng chất tự nhiên nhanh chóng.",
+    "nutrients": {
+      "energy": 75,
+      "carbs": 18.5,
+      "protein": 0.2,
+      "fat": 0.1,
+      "fiber": 0.0,
+      "potassium": 45,
+      "calcium": 18,
+      "magnesium": 8,
+      "iron": 0.5,
+      "sodium": 12,
+      "vitamin_c": 3.0,
+      "phosphorus": 10
+    },
+    "portions": [
+      {
+        "label_vi": "1 ly vừa (350 ml)",
+        "grams": 350,
+        "sort": 0
+      },
+      {
+        "label_vi": "1 ly nhỏ (250 ml)",
+        "grams": 250,
+        "sort": 1
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 2
+      }
+    ]
+  },
+  {
+    "source": "vn_fct",
+    "source_id": "drink-nuoc-mia-tac",
+    "name": "Nước mía tắc",
+    "name_vi": "Nước mía tắc",
+    "category": "beverage",
+    "brand": null,
+    "tip_vi": "Vị chua ngọt thanh mát, giải nhiệt sau vận động.",
+    "nutrients": {
+      "energy": 78,
+      "carbs": 19.2,
+      "protein": 0.2,
+      "fat": 0.1,
+      "fiber": 0.1,
+      "potassium": 50,
+      "calcium": 20,
+      "magnesium": 9,
+      "iron": 0.5,
+      "sodium": 10,
+      "vitamin_c": 8.0,
+      "phosphorus": 12
+    },
+    "portions": [
+      {
+        "label_vi": "1 ly (350 ml)",
+        "grams": 350,
+        "sort": 0
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 1
+      }
+    ]
+  },
+  {
+    "source": "vn_fct",
+    "source_id": "drink-nuoc-dua",
+    "name": "Nước dừa tươi",
+    "name_vi": "Nước dừa tươi",
+    "category": "beverage",
+    "brand": null,
+    "tip_vi": "Nguồn kali và điện giải tự nhiên dồi dào, giải nhiệt sau tập.",
+    "nutrients": {
+      "energy": 19,
+      "carbs": 3.7,
+      "protein": 0.7,
+      "fat": 0.2,
+      "fiber": 1.1,
+      "potassium": 250,
+      "sodium": 105,
+      "calcium": 24,
+      "magnesium": 25,
+      "iron": 0.3,
+      "phosphorus": 20,
+      "vitamin_c": 2.4
+    },
+    "portions": [
+      {
+        "label_vi": "1 quả (300 ml)",
+        "grams": 300,
+        "sort": 0
+      },
+      {
+        "label_vi": "1 ly (250 ml)",
+        "grams": 250,
+        "sort": 1
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 2
+      }
+    ]
+  },
+  {
+    "source": "vn_fct",
+    "source_id": "drink-ca-phe-den-da",
+    "name": "Cà phê đen đá",
+    "name_vi": "Cà phê đen đá",
+    "category": "beverage",
+    "brand": null,
+    "tip_vi": "Chứa caffeine giúp tỉnh táo và tăng chuyển hoá, gần như không có calo.",
+    "nutrients": {
+      "energy": 2,
+      "carbs": 0.2,
+      "protein": 0.3,
+      "fat": 0.0,
+      "fiber": 0.0,
+      "potassium": 49,
+      "sodium": 2,
+      "magnesium": 3,
+      "phosphorus": 3
+    },
+    "portions": [
+      {
+        "label_vi": "1 ly (180 ml)",
+        "grams": 180,
+        "sort": 0
+      },
+      {
+        "label_vi": "1 tách (60 ml)",
+        "grams": 60,
+        "sort": 1
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 2
+      }
+    ]
+  },
+  {
+    "source": "vn_fct",
+    "source_id": "drink-ca-phe-sua-da",
+    "name": "Cà phê sữa đá",
+    "name_vi": "Cà phê sữa đá",
+    "category": "beverage",
+    "brand": null,
+    "tip_vi": "Hương vị đậm đà, bổ sung nhanh năng lượng.",
+    "nutrients": {
+      "energy": 95,
+      "carbs": 13.5,
+      "protein": 2.1,
+      "fat": 3.6,
+      "calcium": 65,
+      "potassium": 90,
+      "sodium": 35,
+      "phosphorus": 50
+    },
+    "portions": [
+      {
+        "label_vi": "1 ly (180 ml)",
+        "grams": 180,
+        "sort": 0
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 1
+      }
+    ]
+  },
+  {
+    "source": "vn_fct",
+    "source_id": "drink-tra-da",
+    "name": "Trà đá",
+    "name_vi": "Trà đá",
+    "category": "beverage",
+    "brand": null,
+    "tip_vi": "Thức uống thanh nhiệt phổ biến, giàu chất chống oxy hóa polyphenol.",
+    "nutrients": {
+      "energy": 1,
+      "carbs": 0.1,
+      "protein": 0.1,
+      "fat": 0.0,
+      "fiber": 0.0,
+      "potassium": 18,
+      "sodium": 1,
+      "magnesium": 2,
+      "calcium": 1
+    },
+    "portions": [
+      {
+        "label_vi": "1 ly lớn (300 ml)",
+        "grams": 300,
+        "sort": 0
+      },
+      {
+        "label_vi": "1 ly (200 ml)",
+        "grams": 200,
+        "sort": 1
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 2
+      }
+    ]
+  },
+  {
+    "source": "usda_foundation",
+    "source_id": "drink-sua-tuoi-khong-duong",
+    "name": "Sữa tươi tiệt trùng không đường",
+    "name_vi": "Sữa tươi tiệt trùng không đường",
+    "category": "beverage",
+    "brand": "Vinamilk",
+    "tip_vi": "Nguồn canxi và đạm sinh học cao, tốt cho xương khớp.",
+    "nutrients": {
+      "energy": 62,
+      "carbs": 4.8,
+      "protein": 3.2,
+      "fat": 3.5,
+      "calcium": 120,
+      "potassium": 150,
+      "phosphorus": 95,
+      "magnesium": 11,
+      "sodium": 45,
+      "vitamin_a": 28,
+      "vitamin_d": 1.1,
+      "vitamin_b2": 0.18,
+      "vitamin_b12": 0.45
+    },
+    "portions": [
+      {
+        "label_vi": "1 hộp (180 ml)",
+        "grams": 185,
+        "sort": 0
+      },
+      {
+        "label_vi": "1 ly (200 ml)",
+        "grams": 206,
+        "sort": 1
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 2
+      }
+    ]
+  },
+  {
+    "source": "vn_fct",
+    "source_id": "drink-sua-dau-nanh",
+    "name": "Sữa đậu nành nguyên chất",
+    "name_vi": "Sữa đậu nành nguyên chất",
+    "category": "beverage",
+    "brand": null,
+    "tip_vi": "Giàu đạm thực vật, isoflavone và không chứa cholesterol.",
+    "nutrients": {
+      "energy": 45,
+      "carbs": 3.2,
+      "protein": 3.5,
+      "fat": 2.0,
+      "fiber": 0.6,
+      "calcium": 30,
+      "iron": 0.6,
+      "magnesium": 19,
+      "potassium": 140,
+      "sodium": 35,
+      "phosphorus": 55
+    },
+    "portions": [
+      {
+        "label_vi": "1 ly (250 ml)",
+        "grams": 250,
+        "sort": 0
+      },
+      {
+        "label_vi": "1 hộp (200 ml)",
+        "grams": 200,
+        "sort": 1
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 2
+      }
+    ]
+  },
+  {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-cam-ep",
+    "name": "Nước cam ép tươi",
+    "name_vi": "Nước cam ép tươi",
+    "category": "beverage",
+    "brand": null,
+    "tip_vi": "Cung cấp lượng lớn vitamin C và folate, tăng cường sức đề kháng.",
+    "nutrients": {
+      "energy": 45,
+      "carbs": 10.4,
+      "protein": 0.7,
+      "fat": 0.2,
+      "fiber": 0.2,
+      "vitamin_c": 50.0,
+      "potassium": 200,
+      "folate": 30,
+      "calcium": 11,
+      "magnesium": 10
+    },
+    "portions": [
+      {
+        "label_vi": "1 ly (250 ml)",
+        "grams": 250,
+        "sort": 0
+      },
+      {
+        "label_vi": "1 ly nhỏ (150 ml)",
+        "grams": 150,
+        "sort": 1
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 2
+      }
+    ]
+  },
+  {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name": "Nước lọc",
+    "name_vi": "Nước lọc",
+    "category": "beverage",
+    "brand": null,
+    "tip_vi": "Cần thiết cho quá trình trao đổi chất, 2–3 lít mỗi ngày.",
+    "nutrients": {
+      "energy": 0,
+      "carbs": 0,
+      "protein": 0,
+      "fat": 0,
+      "fiber": 0,
+      "sodium": 1,
+      "calcium": 2,
+      "magnesium": 1,
+      "potassium": 0
+    },
+    "portions": [
+      {
+        "label_vi": "1 chai (500 ml)",
+        "grams": 500,
+        "sort": 0
+      },
+      {
+        "label_vi": "1 ly (250 ml)",
+        "grams": 250,
+        "sort": 1
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 2
+      }
+    ]
+  },
+  {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-ngot-cola",
+    "name": "Nước ngọt có ga Cola",
+    "name_vi": "Nước ngọt có ga Cola",
+    "category": "beverage",
+    "brand": "Coca-Cola",
+    "tip_vi": "Chứa đường nhanh, hạn chế sử dụng thường xuyên.",
+    "nutrients": {
+      "energy": 42,
+      "carbs": 10.6,
+      "protein": 0,
+      "fat": 0,
+      "fiber": 0,
+      "sodium": 4,
+      "phosphorus": 12
+    },
+    "portions": [
+      {
+        "label_vi": "1 lon (330 ml)",
+        "grams": 330,
+        "sort": 0
+      },
+      {
+        "label_vi": "1 chai (390 ml)",
+        "grams": 390,
+        "sort": 1
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 2
+      }
+    ]
+  },
+  {
+    "source": "usda_foundation",
+    "source_id": "drink-bia-lon",
+    "name": "Bia lon",
+    "name_vi": "Bia",
+    "category": "beverage",
+    "brand": "Heineken",
+    "tip_vi": "Đồ uống có cồn lên men từ lúa mạch.",
+    "nutrients": {
+      "energy": 43,
+      "carbs": 3.6,
+      "protein": 0.5,
+      "fat": 0,
+      "fiber": 0,
+      "potassium": 27,
+      "sodium": 4,
+      "magnesium": 6,
+      "phosphorus": 14
+    },
+    "portions": [
+      {
+        "label_vi": "1 lon (330 ml)",
+        "grams": 330,
+        "sort": 0
+      },
+      {
+        "label_vi": "1 ly (250 ml)",
+        "grams": 250,
+        "sort": 1
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 2
+      }
+    ]
+  },
+  {
+    "source": "vn_fct",
+    "source_id": "food-pho-ga",
+    "name": "Phở gà",
+    "name_vi": "Phở gà",
+    "category": "mon_viet",
+    "brand": null,
+    "tip_vi": "Thịt gà ta ít béo, nước dùng thanh đạm thơm mùi gừng và hoa hồi.",
+    "nutrients": {
+      "energy": 105,
+      "carbs": 13.5,
+      "protein": 7.8,
+      "fat": 2.3,
+      "fiber": 0.4,
+      "sodium": 360,
+      "potassium": 145,
+      "calcium": 18,
+      "iron": 0.9,
+      "phosphorus": 85,
+      "zinc": 0.8
+    },
+    "portions": [
+      {
+        "label_vi": "1 tô vừa (500 g)",
+        "grams": 500,
+        "sort": 0
+      },
+      {
+        "label_vi": "1 tô lớn (650 g)",
+        "grams": 650,
+        "sort": 1
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 2
+      }
+    ]
+  },
+  {
+    "source": "vn_fct",
+    "source_id": "food-bun-cha",
+    "name": "Bún chả Hà Nội",
+    "name_vi": "Bún chả Hà Nội",
+    "category": "mon_viet",
+    "brand": null,
+    "tip_vi": "Thịt nướng than hoa thơm lừng ăn kèm bún tươi và nước chấm đu đủ.",
+    "nutrients": {
+      "energy": 145,
+      "carbs": 17.2,
+      "protein": 8.5,
+      "fat": 4.8,
+      "fiber": 0.8,
+      "sodium": 420,
+      "potassium": 180,
+      "calcium": 25,
+      "iron": 1.2,
+      "phosphorus": 95,
+      "zinc": 1.1
+    },
+    "portions": [
+      {
+        "label_vi": "1 suất vừa (450 g)",
+        "grams": 450,
+        "sort": 0
+      },
+      {
+        "label_vi": "100 g",
+        "grams": 100,
+        "sort": 1
+      }
+    ]
   }
 ]

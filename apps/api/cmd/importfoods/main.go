@@ -19,15 +19,23 @@ type PortionItem struct {
 
 // FoodRecord represents a food entry to import
 type FoodRecord struct {
-	Source   string                  `json:"source"`
-	SourceID string                  `json:"source_id"`
-	Name     string                  `json:"name"`
-	NameVi   string                  `json:"name_vi"`
-	Category string                  `json:"category"`
-	Brand    *string                 `json:"brand,omitempty"`
-	TipVi    *string                 `json:"tip_vi,omitempty"`
-	Nutrients map[string]*float64    `json:"nutrients"` // null when missing
-	Portions []PortionItem           `json:"portions"`
+	Source    string              `json:"source"`
+	SourceID  string              `json:"source_id"`
+	Name      string              `json:"name"`
+	NameVi    string              `json:"name_vi"`
+	Category  string              `json:"category"`
+	Brand     *string             `json:"brand,omitempty"`
+	TipVi     *string             `json:"tip_vi,omitempty"`
+	Nutrients map[string]*float64 `json:"nutrients"` // null when missing, never 0 for unknown
+	Portions  []PortionItem       `json:"portions"`
+}
+
+var countedNutrients = []string{
+	"energy", "protein", "carbs", "fat", "fiber",
+	"sodium", "potassium", "calcium", "iron", "phosphorus",
+	"magnesium", "zinc", "copper", "manganese", "selenium",
+	"vitamin_a", "vitamin_c", "vitamin_d", "vitamin_e",
+	"vitamin_b1", "vitamin_b2", "vitamin_b3",
 }
 
 func main() {
@@ -59,20 +67,25 @@ func main() {
 
 	fmt.Printf("Loaded %d food records from %s\n", len(records), *dataFile)
 
-	// Validation and completeness report
-	lowNutrientCount := 0
+	if len(records) == 0 {
+		fmt.Println("No records found in data file.")
+		return
+	}
+
+	// Completeness report: % of the 22 counted nutrients per food
+	totalCoveragePct := 0.0
 	for _, r := range records {
-		nonNullCount := 0
-		for _, v := range r.Nutrients {
-			if v != nil {
-				nonNullCount++
+		present := 0
+		for _, k := range countedNutrients {
+			if v, ok := r.Nutrients[k]; ok && v != nil {
+				present++
 			}
 		}
-		if nonNullCount < 10 {
-			lowNutrientCount++
-		}
+		pct := (float64(present) / float64(len(countedNutrients))) * 100.0
+		totalCoveragePct += pct
 	}
-	fmt.Printf("Completeness Report: %d foods have fewer than 10 non-null nutrients\n", lowNutrientCount)
+	avgCoverage := totalCoveragePct / float64(len(records))
+	fmt.Printf("Completeness Report: %.1f%% average coverage of the 22 counted nutrients across %d foods\n", avgCoverage, len(records))
 
 	if *dryRun {
 		fmt.Println("Dry-run complete. Exiting.")
@@ -106,10 +119,12 @@ func main() {
 			INSERT INTO nutrition.foods (
 				name, name_vi, category, source, source_id, brand, tip_vi, per_100g, per_100g_nutrients, is_custom
 			) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $8, false)
-			ON CONFLICT (id) DO UPDATE SET
+			ON CONFLICT (source, source_id) DO UPDATE SET
 				name = EXCLUDED.name,
 				name_vi = EXCLUDED.name_vi,
 				category = EXCLUDED.category,
+				brand = EXCLUDED.brand,
+				tip_vi = EXCLUDED.tip_vi,
 				per_100g = EXCLUDED.per_100g,
 				per_100g_nutrients = EXCLUDED.per_100g
 			RETURNING id
@@ -122,7 +137,8 @@ func main() {
 			continue
 		}
 
-		// Insert portions
+		// Refresh portions
+		_, _ = pool.Exec(ctx, "DELETE FROM nutrition.food_portions WHERE food_id = $1", foodID)
 		for _, p := range r.Portions {
 			_, err = pool.Exec(ctx, `
 				INSERT INTO nutrition.food_portions (food_id, label_vi, grams, sort)

@@ -19,6 +19,7 @@ type FoodDetail struct {
 	NameEn           *string                 `json:"name_en,omitempty"`
 	Category         string                  `json:"category"`
 	Source           string                  `json:"source"`
+	SourceID         *string                 `json:"source_id,omitempty"`
 	Brand            *string                 `json:"brand,omitempty"`
 	TipVi            *string                 `json:"tip_vi,omitempty"`
 	IsCustom         bool                    `json:"is_custom"`

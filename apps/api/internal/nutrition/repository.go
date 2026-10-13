@@ -62,13 +62,18 @@ func (r *pgxRepository) SearchFoods(ctx context.Context, filter FoodSearchFilter
 		return nil, fmt.Errorf("failed to count foods: %w", err)
 	}
 
+	orderBy := "is_custom ASC, name_vi ASC"
+	if filter.Query != "" {
+		orderBy = "CASE WHEN name_search ILIKE lower(unaccent($1)) || '%' THEN 1 WHEN name_search ILIKE '%' || lower(unaccent($1)) || '%' THEN 2 ELSE 3 END, similarity(name_search, lower(unaccent($1))) DESC, is_custom ASC, name_vi ASC"
+	}
+
 	querySQL := fmt.Sprintf(`
-		SELECT id, name_vi, category, source, brand, tip_vi, is_custom, per_100g, created_at
+		SELECT id, name_vi, category, source, source_id, brand, tip_vi, is_custom, per_100g, created_at
 		FROM nutrition.foods
 		WHERE %s
-		ORDER BY is_custom ASC, name_vi ASC
+		ORDER BY %s
 		LIMIT $%d OFFSET $%d
-	`, whereSQL, argIdx, argIdx+1)
+	`, whereSQL, orderBy, argIdx, argIdx+1)
 	args = append(args, filter.Limit, offset)
 
 	rows, err := r.pool.Query(ctx, querySQL, args...)
@@ -81,7 +86,7 @@ func (r *pgxRepository) SearchFoods(ctx context.Context, filter FoodSearchFilter
 	for rows.Next() {
 		var f FoodDetail
 		var per100gJSON []byte
-		if err := rows.Scan(&f.ID, &f.NameVi, &f.Category, &f.Source, &f.Brand, &f.TipVi, &f.IsCustom, &per100gJSON, &f.CreatedAt); err != nil {
+		if err := rows.Scan(&f.ID, &f.NameVi, &f.Category, &f.Source, &f.SourceID, &f.Brand, &f.TipVi, &f.IsCustom, &per100gJSON, &f.CreatedAt); err != nil {
 			return nil, fmt.Errorf("failed to scan food item: %w", err)
 		}
 		if len(per100gJSON) > 0 {
@@ -133,14 +138,14 @@ func (r *pgxRepository) SearchFoods(ctx context.Context, filter FoodSearchFilter
 
 func (r *pgxRepository) GetFoodByID(ctx context.Context, id uuid.UUID) (*FoodDetail, error) {
 	query := `
-		SELECT id, name_vi, category, source, brand, tip_vi, is_custom, per_100g, created_at
+		SELECT id, name_vi, category, source, source_id, brand, tip_vi, is_custom, per_100g, created_at
 		FROM nutrition.foods
 		WHERE id = $1
 	`
 	var f FoodDetail
 	var per100gJSON []byte
 	err := r.pool.QueryRow(ctx, query, id).Scan(
-		&f.ID, &f.NameVi, &f.Category, &f.Source, &f.Brand, &f.TipVi, &f.IsCustom, &per100gJSON, &f.CreatedAt,
+		&f.ID, &f.NameVi, &f.Category, &f.Source, &f.SourceID, &f.Brand, &f.TipVi, &f.IsCustom, &per100gJSON, &f.CreatedAt,
 	)
 	if err != nil {
 		if err == pgx.ErrNoRows {
