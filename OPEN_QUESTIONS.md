@@ -152,3 +152,4 @@ dd on a phone/ { s/^- [ ]/- [x]/; s/$/ Decided 12/10 (Hao): keep the sr-only h1 
 - [ ] (cc-18, for Dong) The reset link must redirect to `/reset-password` (the password is set there, then back to `/signin`).
 - [ ] (cc-18, for Dong) Đăng xuất must clear the session (`signOut()`); the screen then goes to `/signin`. The mock only clears its signed-in marker.
 - [ ] (cc-18) The toast after saving a password says "Đã đổi mật khẩu" when the account had one and "Đã đặt mật khẩu" when it had none. Hao's brief gave one text; say if "Đã đổi mật khẩu" should show in both cases.
+- [ ] (ag-15) add a Nguồn dữ liệu row on Cài đặt → /settings/data-sources
