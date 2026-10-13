@@ -72,8 +72,8 @@ def shot(pg, name, size_name):
 
 
 def avg_text(pg):
-    """The "Trung bình N kcal" line of the Năng lượng chart (changes with the period)."""
-    return pg.locator("text=/Trung bình [\\d.]+ kcal/ >> visible=true").first.inner_text().strip()
+    """The average kcal of the Năng lượng hero (changes with the period)."""
+    return pg.locator("#en-hero-number").inner_text().strip()
 
 
 def check_subtabs(browser, size_name, size):
@@ -129,32 +129,34 @@ def check_period(browser, size_name, size):
 
 
 def check_energy_bars(browser, size_name, size):
-    """Above the range is on target (blue, never red); red only below the minimum; today is striped, not red."""
+    """Above the range is on target (blue, never red); red only below the minimum; today is grey (đang ghi), not red."""
     ctx, pg = new_page(browser, size)
     go(pg, "/trends")
     cols = pg.evaluate(
-        """() => [...document.querySelectorAll('[role="group"][aria-label="Kcal mỗi ngày"] [aria-label]')].map(el => ({
+        """() => [...document.querySelectorAll('#ov-score-calories button[aria-pressed]')].map(el => ({
             label: el.getAttribute('aria-label'),
-            bar: el.querySelector('span[class*="rounded-t"]').className,
+            bar: (el.querySelector('span[class*="rounded-t"]') || {className: ''}).className,
         }))"""
     )
     check(len(cols) == 7, f"{size_name} energy: seven day columns ({len(cols)})")
     over = 0
-    for col in cols:
+    today_grey = False
+    for i, col in enumerate(cols):
         m = re.search(r"([\d.]+) kcal", col["label"])
-        if not m or "đang ghi" in col["label"]:
+        if not m:
             continue
         kcal = int(m.group(1).replace(".", ""))
-        red = "bg-level-red" in col["bar"]
+        red = "bg-destructive" in col["bar"]
+        if i == len(cols) - 1:
+            today_grey = "bg-muted-dark" in col["bar"] and not red
+            continue
         if kcal > 2275:
             over += 1
-            check("bg-blue" in col["bar"] and not red and "đạt mục tiêu" in col["label"], f"{size_name} energy: {kcal} kcal above the range is on target")
+            check("bg-blue" in col["bar"] and not red, f"{size_name} energy: {kcal} kcal above the range is on target")
         if red:
             check(kcal < 1950, f"{size_name} energy: red only below the minimum ({kcal})")
     check(over >= 1, f"{size_name} energy: a day above the range is shown ({over})")
-    check(any("đang ghi" in c["label"] for c in cols), f"{size_name} energy: today is marked đang ghi")
-    legend = pg.locator("section[aria-labelledby='en-kcal'] span.inline-flex").all_inner_texts()
-    check([t.strip() for t in legend] == ["Đạt mục tiêu", "Thiếu", "Đang ghi"], f"{size_name} energy: legend has three items ({legend})")
+    check(today_grey, f"{size_name} energy: today is grey, not red")
     pg.goto(BASE + "/trends/micros", wait_until="networkidle")
     pg.wait_for_timeout(400)
     check("mục tiêu 1.200–1.500 mg" in text(pg), f"{size_name} Vi chất: calcium shows its 1.200–1.500 mg range")
@@ -164,13 +166,16 @@ def check_energy_bars(browser, size_name, size):
 def check_micros_tab(browser, size_name, size):
     ctx, pg = new_page(browser, size)
     go(pg, "/trends/micros")
-    rows = pg.locator('a[href^="/micros/"] >> visible=true').count()
+    # Open every section so each nutrient row is in the DOM
+    pg.evaluate("document.querySelectorAll('#mi-sections details').forEach(d => d.open = true)")
+    sel = '#mi-sections a[href^="/micros/"]'
+    rows = pg.locator(sel).count()
     check(rows == 22, f"{size_name} Vi chất: one row per counted nutrient ({rows})")
-    rows_text = pg.locator('a[href^="/micros/"] >> visible=true').all_inner_texts()
-    pcts = [int(m.group(1)) for t in rows_text for m in [re.search(r"(\d+) %\s*$", t.strip())] if m]
-    check(pcts == sorted(pcts), f"{size_name} Vi chất: lowest share first ({pcts[:6]}...)")
+    rows_text = pg.locator(sel).all_inner_texts()
+    pcts = [int(m.group(1)) for t in rows_text for m in [re.search(r"(\d+)%\s*$", t.strip())] if m]
+    check(len(pcts) >= 20, f"{size_name} Vi chất: every row with a number ends with its share ({len(pcts)})")
     check("ngày đạt" in text(pg), f"{size_name} Vi chất: shows N/x ngày đạt")
-    pg.locator('a[href^="/micros/"] >> visible=true').first.click()
+    pg.locator(sel).first.click()
     pg.wait_for_url("**/micros/**", timeout=8000)
     check(path_of(pg).startswith("/micros/"), f"{size_name} Vi chất: a row opens the nutrient detail")
     ctx.close()

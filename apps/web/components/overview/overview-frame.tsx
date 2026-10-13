@@ -95,8 +95,14 @@ export function PeriodControl({
               compact ? "min-w-[44px] px-2" : "px-4"
             } ${isActive ? "bg-ink text-on-dark" : "text-secondary hover:text-text"}`}
           >
-            {n}
-            <span className={compact ? "sr-only" : undefined}> ngày</span>
+            {compact ? (
+              <>
+                {n}
+                <span className="sr-only"> ngày</span>
+              </>
+            ) : (
+              `${n} ngày`
+            )}
           </Link>
         );
       })}

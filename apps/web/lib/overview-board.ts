@@ -101,7 +101,9 @@ export interface BoardDay {
 }
 
 /** The last seven days of a period for kcal or đạm. A day with no entries is null, never 0. */
-export function boardDays(days: DayTotals[], key: "calories" | "protein", min: number, todayIso: string): BoardDay[] {
+export type BoardKey = "calories" | "protein" | "carbs" | "fat" | "fiber";
+
+export function boardDays(days: DayTotals[], key: BoardKey, min: number, todayIso: string): BoardDay[] {
   return days.slice(-7).map((d) => {
     const value = d.logged ? d[key] : null;
     const inProgress = d.date === todayIso;
@@ -212,6 +214,36 @@ export interface AttentionRow {
 }
 
 /**
+ * One "Chưa đạt … vào N ngày" row: the finished logged days of the period below `min` for one metric, their names
+ * (weekdays for 7 days, dd/mm for 30; three at most, then "và n ngày khác") and the biggest shortfall as the number.
+ */
+export function underDaysRow(input: {
+  days: DayTotals[];
+  key: BoardKey;
+  min: number;
+  /** "Chưa đạt mục tiêu Đạm"; the day count is appended */
+  title: string;
+  unit: string;
+  todayIso: string;
+  length: 7 | 30;
+}): AttentionRow | null {
+  const { days, key, min, title, unit, todayIso, length } = input;
+  const under = days.filter((d) => d.logged && d.date < todayIso && d[key] !== null && (d[key] as number) < min);
+  if (under.length === 0) return null;
+  const names = under.map((d) => (length === 7 ? getWeekdayName(d.date) : dm(d.date)));
+  const rest = names.length - 3;
+  const shown = names.slice(0, 3).join(", ");
+  const gap = Math.max(...under.map((d) => min - (d[key] as number)));
+  return {
+    kind: "protein",
+    title: `${title} vào ${under.length} ngày`,
+    line: rest > 0 ? `${shown} và ${rest} ngày khác` : shown,
+    number: `−${formatAmount(gap, unit)} ${unit}`,
+    gap: true,
+  };
+}
+
+/**
  * "Cần chú ý": up to three facts. Protein days under the minimum (finished logged days of the period),
  * then the lowest counted nutrients under their target. Nothing under target → no rows.
  */
@@ -226,20 +258,8 @@ export function attentionRows(input: {
   const out: AttentionRow[] = [];
 
   if (proteinMin !== null) {
-    const under = days.filter((d) => d.logged && d.date < todayIso && d.protein !== null && d.protein < proteinMin);
-    if (under.length > 0) {
-      const names = under.map((d) => (length === 7 ? getWeekdayName(d.date) : dm(d.date)));
-      const shown = names.slice(0, 3).join(", ");
-      const rest = names.length - 3;
-      const gap = Math.max(...under.map((d) => proteinMin - (d.protein as number)));
-      out.push({
-        kind: "protein",
-        title: `Chưa đạt mục tiêu Đạm vào ${under.length} ngày`,
-        line: rest > 0 ? `${shown} và ${rest} ngày khác` : shown,
-        number: `−${formatAmount(gap, "g")} g`,
-        gap: true,
-      });
-    }
+    const row = underDaysRow({ days, key: "protein", min: proteinMin, title: "Chưa đạt mục tiêu Đạm", unit: "g", todayIso, length });
+    if (row) out.push(row);
   }
 
   const low = micro
