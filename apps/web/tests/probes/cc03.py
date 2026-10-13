@@ -72,7 +72,7 @@ def run():
             check(heart(pg, False).get_attribute("aria-pressed") == "false", f"{name}: heart starts unpressed")
             heart(pg, False).click()
             pg.wait_for_timeout(200)
-            check(shown(pg, 'text="Đã lưu vào Yêu thích"'), f"{name}: save toast shows")
+            check(shown(pg, 'text="Đã thêm vào yêu thích"'), f"{name}: save toast shows")
             check(heart(pg, True).get_attribute("aria-pressed") == "true", f"{name}: heart is pressed after save")
             if name == "390":
                 pg.screenshot(path=os.path.join(SHOTS, "cc03-detail-heart-390.png"), animations="disabled")
@@ -93,7 +93,7 @@ def run():
             pg.wait_for_timeout(300)
             heart(pg, True).click()
             pg.wait_for_timeout(200)
-            check(shown(pg, 'text="Đã bỏ khỏi Yêu thích"'), f"{name}: remove toast shows")
+            check(shown(pg, 'text="Đã bỏ khỏi yêu thích"'), f"{name}: remove toast shows")
             check(heart(pg, False).count() == 1, f"{name}: un-heart returns the outline label")
             pg.goto(ADD, wait_until="networkidle")
             pg.wait_for_timeout(300)
