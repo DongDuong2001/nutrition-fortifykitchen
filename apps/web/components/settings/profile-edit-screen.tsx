@@ -4,7 +4,7 @@ import { AppHeader } from "@/components/ui/app-header";
 import { AppShell } from "@/components/ui/app-shell";
 import { Card } from "@/components/ui/card";
 import { Row } from "@/components/ui/row";
-import { BodyCard, GoalCard } from "@/components/profile/profile-cards";
+import { BodyCard, GoalCard } from "@/components/settings/profile-cards";
 import { profileSummary } from "@/components/settings/profile-summary";
 import { useDiary } from "@/lib/diary-store";
 

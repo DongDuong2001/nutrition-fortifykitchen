@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Row } from "@/components/ui/row";
 import { SectionTitle } from "@/components/ui/section-title";
 import Link from "next/link";
-import { AppCard } from "@/components/profile/profile-cards";
+import { AppCard } from "@/components/settings/profile-cards";
 import { profileSummary } from "@/components/settings/profile-summary";
 import { useDiary } from "@/lib/diary-store";
 import { targetRangeText } from "@/lib/profile";
@@ -16,7 +16,7 @@ function ProOffer() {
   return (
     <section aria-labelledby="settings-pro-title" className="flex flex-col gap-3 rounded-[18px] bg-surface-dark p-4 text-on-dark">
       <div className="flex flex-col gap-1">
-        <h2 id="settings-pro-title" className="m-0 text-[17px] font-bold">
+        <h2 id="settings-pro-title" className="m-0 text-base font-bold">
           H1T MICRO Pro
         </h2>
         <p className="m-0 text-[13px] leading-snug text-muted-subtitle">Xem các gói và quyền lợi của tài khoản</p>
@@ -65,7 +65,7 @@ export function SettingsHomeScreen() {
               <Card as="section" aria-labelledby="settings-account-title" className="flex flex-col gap-1">
                 <SectionTitle id="settings-account-title">Tài khoản</SectionTitle>
                 <div data-align-group="settings-row">
-                  <Row label="Đăng xuất" href="/signin" />
+                  <Row label={<span className="text-destructive-text">Đăng xuất</span>} href="/signin" />
                 </div>
               </Card>
               <Card as="section" aria-labelledby="settings-danger-title" className="flex flex-col gap-1">

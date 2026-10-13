@@ -3,7 +3,6 @@ import { formatAmount, formatNumber, formatRange } from "../../lib/format";
 import { goalName } from "../../lib/onboarding";
 import { calculateEnergyTarget, type TargetRange } from "../../lib/targets";
 import { targetsFor, type Profile } from "../../lib/profile";
-import { sexLabel } from "./profile-summary";
 
 export interface TargetRowData {
   label: string;
@@ -68,8 +67,9 @@ export function targetSections(profile: Profile): TargetSection[] {
           value: `${formatNumber(t.carbs.min)} g`,
         },
         {
-          label: "Chất xơ",
-          detail: `14 g mỗi 1.000 kcal, ${sexLabel(profile.sex)} ${formatRange(t.fiber.min, t.fiber.max)} g (tạm thời)`,
+          // Provisional, not a coach rule: the "*" note on the card says so
+          label: "Chất xơ*",
+          detail: "14 g mỗi 1.000 kcal, kẹp theo giới tính",
           value: range(t.fiber, "g"),
         },
       ],

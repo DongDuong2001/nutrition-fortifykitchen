@@ -35,10 +35,14 @@ export function TargetsScreen() {
         {hydrated ? (
           <div className="flex flex-col gap-4">
             <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
-              <TargetCard id="targets-energy" section={sections[0]} />
+              <TargetCard id="targets-energy" section={sections[0]} note="* Chất xơ: tạm thời, chưa có quy tắc của coach." />
               <TargetCard id="targets-minerals" section={sections[1]} />
             </div>
-            <TargetCard id="targets-vitamins" section={sections[2]} footnote />
+            <TargetCard
+              id="targets-vitamins"
+              section={sections[2]}
+              note="* Khuyến nghị dinh dưỡng Việt Nam 2016 (VN 2016). Đây không phải quy tắc của coach."
+            />
             <p className="m-0 text-[13px] text-secondary">Chỉ xem ở đây. Cân nặng, mục tiêu và ngày tập mặc định sửa trong Hồ sơ.</p>
             <PillButton href="/settings/profile">Sửa trong Hồ sơ</PillButton>
           </div>
@@ -53,7 +57,7 @@ export function TargetsScreen() {
   );
 }
 
-function TargetCard({ id, section, footnote = false }: { id: string; section: TargetSection; footnote?: boolean }) {
+function TargetCard({ id, section, note }: { id: string; section: TargetSection; note?: string }) {
   const titleId = `${id}-title`;
   return (
     <Card as="section" id={id} aria-labelledby={titleId} className="flex flex-col gap-1">
@@ -71,11 +75,7 @@ function TargetCard({ id, section, footnote = false }: { id: string; section: Ta
           <span className="shrink-0 text-right text-[15px] font-semibold tabular-nums">{row.value}</span>
         </div>
       ))}
-      {footnote && (
-        <p className="m-0 border-t border-divider pt-3 text-[13px] text-secondary">
-          * Khuyến nghị dinh dưỡng Việt Nam 2016 (VN 2016). Đây không phải quy tắc của coach.
-        </p>
-      )}
+      {note && <p className="m-0 border-t border-divider pt-3 text-[13px] text-secondary">{note}</p>}
     </Card>
   );
 }

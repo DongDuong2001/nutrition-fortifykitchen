@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
 import { Card } from "@/components/ui/card";
 import { ChipGroup } from "@/components/ui/chip-group";
@@ -10,8 +9,8 @@ import { SectionTitle } from "@/components/ui/section-title";
 import { Switch } from "@/components/ui/switch";
 import { useDiary } from "@/lib/diary-store";
 import { formatNumber } from "@/lib/format";
-import { goalName, goalOptions, parseBirthYear, validateSetupDraft } from "@/lib/onboarding";
-import { profileToDraft, targetRangeText } from "@/lib/profile";
+import { goalOptions, parseBirthYear, validateSetupDraft } from "@/lib/onboarding";
+import { profileToDraft } from "@/lib/profile";
 import { loadSettings } from "@/lib/settings";
 import { getTrainingDurations } from "@/lib/training";
 import type { SexType } from "@/lib/targets";
@@ -182,34 +181,6 @@ export function GoalCard() {
   );
 }
 
-export function TargetsCard() {
-  const { profile, targets } = useDiary();
-  const rows = [
-    { label: "Năng lượng", value: targetRangeText(targets.calories, "kcal") },
-    { label: "Đạm", value: targetRangeText(targets.protein, "g") },
-    { label: "Béo", value: targetRangeText(targets.fat, "g") },
-    { label: "Kali", value: targetRangeText(targets.potassium, "mg") },
-    { label: "Sắt", value: targetRangeText(targets.iron, "mg") },
-  ];
-  const sex = profile.sex === "male" ? "Nam" : "Nữ";
-  return (
-    <Card as="section" aria-label="Mục tiêu mỗi ngày" className="flex flex-col gap-1">
-      <SectionTitle>Mục tiêu mỗi ngày</SectionTitle>
-      {rows.map((row) => (
-        <RowGroup key={row.label}>
-          <div className="flex items-baseline justify-between gap-3 border-t border-divider py-3 text-[15px]">
-            <span className="text-secondary">{row.label}</span>
-            <span className="font-semibold tabular-nums">{row.value}</span>
-          </div>
-        </RowGroup>
-      ))}
-      <p className="m-0 pt-2 text-[13px] text-secondary">
-        Tính cho {formatNumber(profile.weightKg)} kg · {sex} · {goalName(profile.goal)}
-      </p>
-    </Card>
-  );
-}
-
 export function AppCard() {
   // The saved language is read after mount, so the server and first paint both show Tiếng Việt
   const [language, setLanguage] = useState("Tiếng Việt");
@@ -232,59 +203,8 @@ export function AppCard() {
         <Row label="Nhắc nhở" value={reminders ?? ""} href="/settings/notifications" />
       </RowGroup>
       <RowGroup>
-        <Row label="Cài như ứng dụng" hint="Mở như ứng dụng, không cần cửa hàng" href="/install" />
+        <Row label="Cài như ứng dụng" href="/install" />
       </RowGroup>
     </Card>
-  );
-}
-
-// The Pro offer. Its one action goes to the paywall (design: Xem gói).
-export function ProCard() {
-  return (
-    <section aria-labelledby="profile-pro-title" className="flex flex-col gap-3 rounded-[18px] bg-blue p-4 text-on-accent">
-      <div className="flex flex-col gap-1">
-        <h2 id="profile-pro-title" className="m-0 text-[17px] font-bold">
-          Nâng cấp H1T MICRO Pro
-        </h2>
-        <p className="m-0 text-[13px] leading-snug">Gợi ý của Coach, xu hướng 30 ngày, món ăn &amp; công thức riêng</p>
-      </div>
-      <Link
-        href="/paywall"
-        className="inline-flex min-h-[44px] items-center self-start rounded-full bg-card px-5 text-[15px] font-bold text-ink transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100"
-      >
-        Xem gói
-      </Link>
-    </section>
-  );
-}
-
-// Log out is a navigation for now: nothing is cleared until the API has sessions (see OPEN_QUESTIONS).
-// Delete account sits apart in its own red-titled card, as in the design's danger zone.
-export function AccountCard() {
-  return (
-    <>
-      <Card className="flex flex-col">
-        <RowGroup>
-          <Link
-            href="/signin"
-            className="flex min-h-[44px] items-center justify-center text-[15px] font-bold text-destructive-text transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100"
-          >
-            Đăng xuất
-          </Link>
-        </RowGroup>
-      </Card>
-      <Card as="section" aria-labelledby="profile-danger-title" className="flex flex-col gap-1">
-        <h2 id="profile-danger-title" className="m-0 text-base font-bold text-destructive-text">
-          Vùng nguy hiểm
-        </h2>
-        <RowGroup>
-          <Row
-            label={<span className="text-destructive-text">Xoá tài khoản</span>}
-            hint="Xoá tài khoản sẽ xoá toàn bộ nhật ký và không thể khôi phục."
-            href="/settings/delete-account"
-          />
-        </RowGroup>
-      </Card>
-    </>
   );
 }
