@@ -293,7 +293,7 @@ def check_quick(browser, size_name, size):
     pg.wait_for_url("**/diary")
     pg.wait_for_timeout(400)
     dinner = re.sub(r"\s+", " ", pg.locator("#meal-dinner").inner_text())
-    check("Bánh mì" in dinner and "Ghi nhanh" in dinner and "420" in dinner, f"{size_name} quick add: listed with the Ghi nhanh label ({dinner!r})")
+    check("Bánh mì" in dinner and "Thêm nhanh" in dinner and "420" in dinner, f"{size_name} quick add: listed with the Thêm nhanh label ({dinner!r})")
     micros_after = pg.locator("a[href^='/micros']:visible").first.inner_text()
     check(micros_after == micros_before, f"{size_name} quick add: Vi chất row unchanged ({micros_before!r} -> {micros_after!r})")
     check("Hoàn tác" in toast_text(pg) or pg.locator("button:has-text('Hoàn tác'):visible").count() == 1, f"{size_name} quick add: the toast offers Hoàn tác")
