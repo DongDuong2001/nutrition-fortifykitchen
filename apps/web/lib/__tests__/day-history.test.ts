@@ -26,12 +26,12 @@ describe("statDisplay", () => {
 });
 
 describe("blankDay and pastDayData", () => {
-  it("blankDay has nothing eaten: intakes, meals and micros all at zero", () => {
+  it("blankDay has nothing eaten: energy and meals at zero, macros and micros unknown (null)", () => {
     const blank = blankDay(SAMPLE_DAY);
     expect(blank.calories.consumed).toBe(0);
     expect(blank.meals.every((m) => m.items.length === 0 && m.kcal === 0)).toBe(true);
-    expect(blank.macros.every((m) => m.consumed === 0)).toBe(true);
-    expect(blank.minerals.every((m) => m.consumed === 0 && m.percentage === 0)).toBe(true);
+    expect(blank.macros.every((m) => m.consumed === null && m.percentage === null)).toBe(true);
+    expect(blank.minerals.every((m) => m.consumed === null && m.percentage === null)).toBe(true);
     expect(blank.microsSummary.achieved).toBe(0);
   });
 

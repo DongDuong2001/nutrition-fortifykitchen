@@ -133,19 +133,20 @@ export function statDisplay(consumed: number, stat: Pick<MockMacroStat, "unit" |
  */
 export function blankDay(day: MockDayData): MockDayData {
   const nutrients = Object.fromEntries(Object.keys(day.nutrients ?? {}).map((key) => [key, null]));
-  const zeroStat = <S extends MockMacroStat | MockMicroStat>(stat: S): S => ({
+  // Unknown, not zero: nothing is logged yet, so a macro or a Vi chất has no value (null, shown as a dash)
+  const unknownStat = <S extends MockMacroStat | MockMicroStat>(stat: S): S => ({
     ...stat,
-    consumed: 0,
-    percentage: 0,
-    displayValue: statDisplay(0, stat),
+    consumed: null,
+    percentage: null,
+    displayValue: statDisplay(0, stat).replace(/^0/, "—"),
   });
   return {
     ...day,
     meals: day.meals.map((meal) => ({ ...meal, items: [], kcal: 0 })),
     calories: { ...day.calories, consumed: 0, remaining: day.calories.targetMin, percentage: 0 },
-    macros: day.macros.map(zeroStat),
-    minerals: day.minerals.map(zeroStat),
-    vitamins: day.vitamins.map(zeroStat),
+    macros: day.macros.map(unknownStat),
+    minerals: day.minerals.map(unknownStat),
+    vitamins: day.vitamins.map(unknownStat),
     microsSummary: { ...day.microsSummary, achieved: 0, vitaminsAchieved: 0, mineralsAchieved: 0 },
     nutrients,
   };

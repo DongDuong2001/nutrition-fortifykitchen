@@ -11,6 +11,8 @@ import { formatDayLabel, formatDesktopDate, formatNumber } from "@/lib/format";
 import { goalName } from "@/lib/onboarding";
 import { getTodayIsoVN } from "@/lib/date";
 import { viewedIsoDate } from "@/lib/day-history";
+import { dayTotals } from "@/lib/day-totals";
+import { targetsFor } from "@/lib/profile";
 import { DurationSelector } from "@/components/training/duration-selector";
 import { useDiary } from "@/lib/diary-store";
 import { SaltSummaryCard } from "@/components/training/salt-summary-card";
@@ -39,7 +41,7 @@ function TrainingContent() {
 
   const [selectedDuration, setSelectedDuration] = useState<string>(initialDuration);
   // The profile's default training time (Hồ sơ) applies until the URL names a duration
-  const { profile, hydrated } = useDiary();
+  const { profile, hydrated, data: diaryData } = useDiary();
   const profileDuration = profile.trainingMinutesDefault === 0 ? "rest" : String(profile.trainingMinutesDefault);
   const [clientNow, setClientNow] = useState<Date | null>(null);
   const [isDesktop, setIsDesktop] = useState(false);
@@ -47,6 +49,8 @@ function TrainingContent() {
   // ?date= picks a past day, which is read-only: its saved minutes and ticks show, and nothing can change.
   const viewIso = viewedIsoDate(searchParams?.get("date"), todayIso);
   const isPast = !isEditableDay(viewIso, todayIso);
+  // Sodium logged on the viewed day (today's diary, or a past day's entries); nothing logged reads as 0
+  const sodiumMg = useMemo(() => dayTotals(viewIso, todayIso, diaryData).nutrients.sodium ?? 0, [viewIso, todayIso, diaryData]);
   const diaryHref = isPast ? `/diary?date=${viewIso}` : "/diary";
 
   // The viewed day's saved record (null when nothing was saved for that date). Read after mount.
@@ -112,9 +116,11 @@ function TrainingContent() {
   );
 
   const phases = useMemo(
-    () => getTrainingPhases(trainingMinutes),
-    [trainingMinutes]
+    () => getTrainingPhases(trainingMinutes, ticked),
+    [trainingMinutes, ticked]
   );
+  // The rest-day tips quote this user's protein and energy targets (from Hồ sơ), not a sample profile's
+  const restTargets = useMemo(() => targetsFor(profile), [profile]);
 
   // Formatted date labels. Empty until the clock is read after mount, so no date is shown before the real one
   // and the server and first client render agree.
@@ -172,7 +178,7 @@ function TrainingContent() {
         />
 
         <main className="flex-1 w-full max-w-[560px] mx-auto px-4 pt-4 pb-6 flex flex-col gap-3">
-          {isRestDay && !isPast && <RestDayCard />}
+          {isRestDay && !isPast && <RestDayCard targets={restTargets} />}
 
           {showChecklist && (
             <PhaseChecklist
@@ -233,7 +239,7 @@ function TrainingContent() {
             />
             <SodiumProgressCard
               saltTarget={saltTarget}
-              currentSodiumMg={2900}
+              currentSodiumMg={sodiumMg}
             />
           </section>
           )}
@@ -242,7 +248,7 @@ function TrainingContent() {
           {(!isPast || showChecklist) && (
           <section className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
             {isRestDay ? (
-              <RestDayCard />
+              <RestDayCard targets={restTargets} />
             ) : (
               <PhaseChecklist
                 phases={phases}

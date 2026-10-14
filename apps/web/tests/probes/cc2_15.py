@@ -92,7 +92,7 @@ def first_run(browser, name, size):
 
     # 2. profile step
     t = text(pg)
-    check("Bước 1 / 2" in t if phone else "Bước 1/2" in t, f"{where} profile: step indicator")
+    check("Bước 1 / 2" in t, f"{where} profile: step indicator")
     check(visible_submit(pg) == 1, f"{where} profile: one primary button ({visible_submit(pg)})")
     check(visible_h1(pg) == 1, f"{where} profile: one h1")
     year = pg.locator("#setup-birth-year")

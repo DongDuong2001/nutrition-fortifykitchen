@@ -6,6 +6,7 @@ import { type FoodItem } from "@/lib/mock/foods";
 import { type MealSlot, getMealSlotNameVi } from "@/lib/meal-slot";
 import { parseGramsInput, calculateMacroPreview, scaleNutrients } from "@/lib/portion";
 import { formatAmount } from "@/lib/format";
+import { formatGramsServingLabel } from "@/components/foods/serving-label";
 import { ChipGroup } from "@/components/ui/chip-group";
 import { StatGroup } from "@/components/ui/stat-group";
 import { getNutrientDefinition } from "@/lib/nutrients";
@@ -151,7 +152,7 @@ export function PortionPanel({
                 value={gramsInput}
                 onChange={(e) => {
                   setGramsInput(e.target.value);
-                  setSelectedServingLabel(`${e.target.value} g`);
+                  setSelectedServingLabel(formatGramsServingLabel(e.target.value, `${e.target.value} g`));
                 }}
                 className={`w-full bg-transparent border-0 outline-none focus-visible:outline-none font-bold text-sm tabular-nums text-right ${
                   isDark ? "text-on-dark" : "text-text"
@@ -218,7 +219,7 @@ export function PortionPanel({
       {showMicros && scaledMicros.length > 0 && (
         <div className="w-full bg-card rounded-xl p-3 border border-card-border flex flex-col gap-1.5 mt-1">
           <div className="text-xs font-semibold text-secondary pb-1 border-b border-card-border">
-            Vi chất trong {gramsInput} g:
+            Vi chất trong {formatGramsServingLabel(gramsInput, `${gramsInput} g`)}:
           </div>
           {scaledMicros.map((m) => (
             <div key={m.name} className="flex justify-between items-center text-xs py-0.5">

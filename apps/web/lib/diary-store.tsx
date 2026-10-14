@@ -215,6 +215,8 @@ export function computeCompositeDayData(
     else if (m.key === "carbs") extra = extraCarbs;
     else if (m.key === "fat") extra = extraFat;
     else if (m.key === "fiber") extra = extraFiber;
+    // Unknown stays unknown until an entry carries a value for it (a kcal-only entry adds no protein)
+    if (m.consumed === null && extra === 0) return m;
 
     const baseConsumed = m.consumed ?? 0;
     const newConsumed = Math.round(baseConsumed + extra);

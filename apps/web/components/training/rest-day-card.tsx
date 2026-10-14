@@ -2,13 +2,15 @@
 
 import React from "react";
 import { getRestDayTips } from "@/lib/training";
+import type { CompleteTargets } from "@/lib/targets";
 
 export interface RestDayCardProps {
+  targets: Pick<CompleteTargets, "calories" | "protein">;
   className?: string;
 }
 
-export function RestDayCard({ className = "" }: RestDayCardProps) {
-  const tips = getRestDayTips();
+export function RestDayCard({ targets, className = "" }: RestDayCardProps) {
+  const tips = getRestDayTips(targets);
 
   return (
     <section

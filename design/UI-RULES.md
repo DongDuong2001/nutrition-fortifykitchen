@@ -79,8 +79,9 @@ If a primitive is missing, add it to `components/ui` first.
 
 What makes the screens feel like H1T MICRO, not a list of cards (set in cc2-20 with Tổng quan › Tóm tắt):
 
-- **One dark accent card per screen.** `bg-surface-dark`, radius 18, 16 px padding, holding the one number the screen is
-  about. Everything else sits on paper in white cards.
+- **One dark hero card per screen.** `bg-surface-dark`, radius 18, 16 px padding, holding the one number the screen is
+  about. Everything else sits on paper in white cards. Tổng quan › Tóm tắt also keeps its Vi chất card dark (decided
+  with Hao's direction B, cc2-25): that is the second and last dark card on that screen.
 - **Key numbers in Saira Condensed** (italic 900 for the hero number, bold 24–44 px for row values), tabular numbers,
   sky on dark and ink on white. The unit and the target sit beside it in 13 px Manrope, `text-secondary`.
 - **Slanted segments** (skewX(−14deg), 12 px tall, 4 px gap) for progress: ten segments, n = min(10, floor(pct / 10)).

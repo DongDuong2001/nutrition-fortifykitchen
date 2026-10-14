@@ -148,7 +148,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
         >
           {/* Desktop heading (≥1024 px) */}
           <div className="hidden flex-col gap-3 lg:flex">
-            <span className="text-[13px] font-semibold text-secondary">Bước 1/2 · Về bạn</span>
+            <span className="text-[13px] font-semibold text-secondary">{isProfile ? "Bước 1 / 2 · Về bạn" : "Bước 2 / 2 · Mục tiêu"}</span>
             <div className="flex justify-end">
               <span className="font-display text-xl font-black italic uppercase">
                 H1T <span className="text-blue">MICRO</span>

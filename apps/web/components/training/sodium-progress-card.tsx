@@ -5,13 +5,13 @@ import { type SaltTarget } from "@/lib/training";
 import { formatAmount } from "@/lib/format";
 
 export interface SodiumProgressCardProps {
-  currentSodiumMg?: number;
+  currentSodiumMg: number;
   saltTarget: SaltTarget;
   className?: string;
 }
 
 export function SodiumProgressCard({
-  currentSodiumMg = 2900,
+  currentSodiumMg,
   saltTarget,
   className = "",
 }: SodiumProgressCardProps) {
@@ -73,7 +73,9 @@ export function SodiumProgressCard({
       </div>
 
       <div className="text-[13px] text-secondary leading-relaxed">
-        Đã đạt mức tối thiểu. Mỗi lần ghi muối trong tập sẽ cộng vào đây.
+        {isAchieved
+          ? "Đã đạt mức tối thiểu. Mỗi lần ghi muối trong tập sẽ cộng vào đây."
+          : `Còn thiếu ${formatAmount(saltTarget.sodiumMin - currentSodiumMg, "mg")} mg để đạt mức tối thiểu.`}
       </div>
     </div>
   );

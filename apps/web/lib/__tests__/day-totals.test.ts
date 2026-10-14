@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { COUNTED_NUTRIENT_KEYS, dayTotals, totalsFromDay, totalsFromEntries } from "../day-totals";
-import { dayEntries, shiftIsoDate } from "../day-history";
-import { pastDayData } from "../diary-store";
+import { blankDay, dayEntries, shiftIsoDate } from "../day-history";
+import { computeCompositeDayData, pastDayData } from "../diary-store";
+import { quickEntryFrom } from "../quick-entry";
 import { SAMPLE_PROFILE, targetsFor } from "../profile";
 import { SAMPLE_DAY } from "../mock/sample-day";
 
@@ -135,5 +136,36 @@ describe("one source: Nhật ký and Tổng quan show the same numbers for the s
     const iso = shiftIsoDate(TODAY, -60);
     const day = pastDayData(iso, TODAY, SAMPLE_PROFILE, targets);
     expect([...day.minerals, ...day.vitamins].every((s) => s.consumed === null)).toBe(true);
+  });
+});
+
+describe("a blank day in a real account (?demo=0): nothing logged, so nothing is 0", () => {
+  const blank = blankDay(SAMPLE_DAY);
+  const kcalOnly = quickEntryFrom({ name: "Cơm", kcal: "300", protein: "", carbs: "", fat: "" }, "lunch", "q-2", "2026-10-13T12:00:00.000Z");
+  const proteinOnly = quickEntryFrom({ name: "Trứng", kcal: "150", protein: "12", carbs: "", fat: "" }, "lunch", "q-3", "2026-10-13T12:00:00.000Z");
+  if (!kcalOnly.ok || !proteinOnly.ok) throw new Error("expected ok");
+
+  it("starts with every macro, mineral and vitamin unknown (null, shown as a dash)", () => {
+    expect([...blank.macros, ...blank.minerals, ...blank.vitamins].every((s) => s.consumed === null && s.percentage === null)).toBe(true);
+    expect(blank.minerals[0].displayValue.startsWith("—")).toBe(true);
+    expect(totalsFromDay(blank).logged).toBe(false);
+  });
+
+  it("a kcal-only entry keeps every Vi chất and every macro it does not carry unknown", () => {
+    const day = computeCompositeDayData(blank, [kcalOnly.entry]);
+    const totals = totalsFromDay(day);
+    expect(totals.logged).toBe(true);
+    expect(totals.calories).toBe(300);
+    expect(totals.protein).toBeNull();
+    expect(totals.fat).toBeNull();
+    expect(Object.values(totals.nutrients).every((v) => v === null)).toBe(true);
+    expect([...day.minerals, ...day.vitamins].every((s) => s.consumed === null)).toBe(true);
+  });
+
+  it("a logged protein counts, and the carbs and fat it leaves out stay unknown", () => {
+    const totals = totalsFromDay(computeCompositeDayData(blank, [proteinOnly.entry]));
+    expect(totals.protein).toBe(12);
+    expect(totals.carbs).toBeNull();
+    expect(totals.fat).toBeNull();
   });
 });

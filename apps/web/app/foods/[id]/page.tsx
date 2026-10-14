@@ -11,6 +11,7 @@ import { parseGramsInput, calculateMacroPreview } from "@/lib/portion";
 import { goodSourcesOf, microRowsFor } from "@/lib/food-detail";
 import { categoryLabel, categoryOf } from "@/lib/food-categories";
 import { formatAmount } from "@/lib/format";
+import { formatGramsServingLabel } from "@/components/foods/serving-label";
 import { foodSourceLabel } from "@/lib/food-meta";
 import { FoodMicros, GoodSources } from "@/components/foods/food-micros";
 import { ChipGroup } from "@/components/ui/chip-group";
@@ -81,7 +82,7 @@ function FoodDetailInner() {
     if (!food || parsedGrams <= 0 || isSubmitting || mealSlot === null) return;
     setIsSubmitting(true);
     try {
-      await addFoodEntry(food, parsedGrams, mealSlot, selectedServingLabel === CUSTOM_PORTION ? `${gramsInput} g` : selectedServingLabel);
+      await addFoodEntry(food, parsedGrams, mealSlot, selectedServingLabel === CUSTOM_PORTION ? formatGramsServingLabel(gramsInput, `${gramsInput} g`) : selectedServingLabel);
       router.push("/diary");
     } finally {
       setIsSubmitting(false);

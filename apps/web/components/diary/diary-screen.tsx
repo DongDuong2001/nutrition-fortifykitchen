@@ -46,7 +46,7 @@ function DaySummary({ day, past, size }: { day: MockDayData; past: boolean; size
               <div className="flex justify-between text-[13px] leading-tight">
                 <span className="font-semibold">{m.label}</span>
                 <span className="font-display italic font-black text-grabber tabular-nums text-sm">
-                  {past && m.consumed === 0 ? `— / ${m.displayValue.split(" / ")[1] ?? ""}` : m.displayValue}
+                  {m.displayValue}
                 </span>
               </div>
               <SegmentedBar aria-label={`Tiến độ ${m.label}`} percentage={m.percentage ?? 0} tone="dark" />

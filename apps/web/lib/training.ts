@@ -1,4 +1,6 @@
 import { formatAmount } from "./format";
+import { targetRangeText } from "./profile";
+import type { CompleteTargets } from "./targets";
 
 export const BASE_SALT_MIN = 4;
 export const BASE_SALT_MAX = 6;
@@ -119,16 +121,18 @@ export function getTrainingDurations(): TrainingDurationOption[] {
 /**
  * Generate checklist phases for a given training duration.
  */
-export function getTrainingPhases(trainingMinutes: number): TrainingPhase[] {
+export function getTrainingPhases(trainingMinutes: number, ticked: readonly string[] = []): TrainingPhase[] {
   if (trainingMinutes <= 0) {
     return [];
   }
+  // A "✓ Đã ghi" note only for an item the user ticked that day; an untouched day shows none
+  const loggedNote = (id: string, note: string) => (ticked.includes(id) ? note : "");
 
   const preItems: TrainingCheckItem[] = [
     {
       id: "pre-cha-la",
       label: "Chà là",
-      note: "✓ Đã ghi vào Trước tập",
+      note: loggedNote("pre-cha-la", "✓ Đã đánh dấu"),
       dose: "30 g",
     },
     {
@@ -146,12 +150,12 @@ export function getTrainingPhases(trainingMinutes: number): TrainingPhase[] {
   for (let i = 0; i < numSaltIntervals; i++) {
     const startMin = i * 20;
     const endMin = (i + 1) * 20;
-    const isFirst = i === 0;
+    const id = `intra-salt-${startMin}-${endMin}`;
 
     intraItems.push({
-      id: `intra-salt-${startMin}-${endMin}`,
+      id,
       label: `Muối · phút ${startMin}–${endMin}`,
-      note: isFirst ? "✓ Đã ghi 1 g vào nhật ký · chạm để sửa" : "",
+      note: loggedNote(id, "✓ Đã đánh dấu"),
       dose: "1–1,5 g",
     });
   }
@@ -178,9 +182,9 @@ export function getTrainingPhases(trainingMinutes: number): TrainingPhase[] {
 }
 
 /**
- * Recovery tips for Rest day (from TrainingRest.dc.html).
+ * Recovery tips for Rest day (from TrainingRest.dc.html). The protein and energy ranges are the user's own targets.
  */
-export function getRestDayTips(): RestDayTip[] {
+export function getRestDayTips(targets: Pick<CompleteTargets, "calories" | "protein">): RestDayTip[] {
   return [
     {
       id: "sleep",
@@ -189,12 +193,12 @@ export function getRestDayTips(): RestDayTip[] {
     },
     {
       id: "protein",
-      text: "Đạm vẫn 104–143 g",
+      text: `Đạm vẫn ${targetRangeText(targets.protein, "g")}`,
       path: "M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12", // Dumbbell icon
     },
     {
       id: "energy",
-      text: "Năng lượng giữ 1.950–2.275 kcal",
+      text: `Năng lượng giữ ${targetRangeText(targets.calories, "kcal")}`,
       path: "M13 3L5 14h6l-1 7 8-11h-6z", // Lightning icon
     },
   ];

@@ -7,13 +7,11 @@ import { BottomNav } from "@/components/ui/bottom-nav";
 import { DesktopSidebar } from "@/components/ui/desktop-sidebar";
 import { AppHeader } from "@/components/ui/app-header";
 import { SegmentedBar } from "@/components/ui/segmented-bar";
-import { apiClient } from "@/lib/api-client";
 import { type NutrientGroup } from "@/lib/nutrients";
 import { buildNutrientRows, type NutrientRowData } from "@/lib/nutrient-rows";
 import { formatAmount, formatDayLabel, formatDesktopDate, formatNumber } from "@/lib/format";
 import { goalName } from "@/lib/onboarding";
 import { getTodayIsoVN } from "@/lib/date";
-import { type MockDayData } from "@/lib/mock/sample-day";
 import { pastDayData, useDiary } from "@/lib/diary-store";
 import { viewedIsoDate } from "@/lib/day-history";
 
@@ -52,8 +50,6 @@ function MicrosContent() {
     () => (isPast && viewIso && todayIso ? pastDayData(viewIso, todayIso, profile, targets) : null),
     [isPast, viewIso, todayIso, profile, targets]
   );
-  const [data, setData] = useState<MockDayData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [activeGroup, setActiveGroup] = useState<NutrientGroup>("vitamins");
   const [openGroups, setOpenGroups] = useState<Record<NutrientGroup, boolean>>({
     vitamins: true,
@@ -81,20 +77,9 @@ function MicrosContent() {
     setClientNow(new Date());
   }, []);
 
-  useEffect(() => {
-    let isMounted = true;
-    apiClient.getTodayData().then((res) => {
-      if (isMounted) {
-        setData(res);
-        setIsLoading(false);
-      }
-    });
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  const currentData = pastData || (hydrated ? diaryData : null) || data;
+  // Today comes from the diary store, like the nutrient screen; no separate fetch (it could show the sample day)
+  const isLoading = !hydrated;
+  const currentData = pastData || (hydrated ? diaryData : null);
   const readOnlyNote = isPast ? " · Chỉ xem" : "";
   const phoneDateLabel = (clientNow && currentData?.date ? formatDayLabel(currentData.date, clientNow) : "") + readOnlyNote;
   const profileParts = [goalName(profile.goal), `${formatNumber(profile.weightKg)} kg`];

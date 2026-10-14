@@ -610,6 +610,7 @@ All alignment and hydration tests passed cleanly (<= 1px difference, 0 hydration
 - Screenshots: apps/web/.screenshots/cc2-08-{home,diary,micros,settings,profile}-{390,1280}.png.
 
 ## Night shift
+- 14/10 cc2-25: verified Must and Should bugs from docs/audit-ag16.md: blank day unknown not 0 (B-01), sodium card from the diary (B-03/B-04), ✓ notes only when ticked and profile targets for rest tips (B-05), B-06–B-10, S-01 amended in UI-RULES §6. B-02 stuck: needs Dong (lib/api-client createFood). Probe cc2_25 (23 ok), cc2_15 step label updated. Gates in docs/night-2026-10-13.md. Pushed: see the run summary.
 - 14/10 cc2-23: Khám phá (rich-in tile carousel, Gần đây/Yêu thích carousels) and Cài đặt (dark profile card with Saira targets, icons, light Pro, danger zone), docs/ux-audit-cc2-23.md, probe cc2_23. Gates: 625 tests, build, align, hydration, probe:all 0 FAIL, smoke. Edges: settings-row passes at 390 and 1440.
 - 14/10 i-2a: sign-in mock/live switch (NEXT_PUBLIC_API_MODE, default mock; lib/api-mode.ts, lib/auth-mock.ts, dispatch in lib/auth-actions.ts) because Dong's Supabase-only auth broke 4 probes on feat/ui. Gates: 625 tests, build, align, probe:all 36 PASS 0 FAIL, smoke. docs/integration-next.md.
 - 13/10 cc2-22: Nhật ký tiles + meal cards, add sheet (tall, one scroll, carousels, 56 px rows, Đồ uống chip, Tạo món mới button), probe cc2_22; older probes updated for the new structure. Gates: 596 tests, build, align, hydration, probe:all 0 FAIL after fixes, smoke. Edges: add-list, meal-card pass at 390 and 1440.

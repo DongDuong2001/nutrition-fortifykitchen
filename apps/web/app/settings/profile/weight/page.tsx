@@ -99,7 +99,7 @@ export default function WeightPage() {
         <h2 className="m-0 text-[15px] font-bold">Mục tiêu sẽ cập nhật</h2>
         {preview ? (
           <>
-            <TargetLine label="Năng lượng" value={`${targetRangeText(preview.calories, "kcal")} · giữ nguyên`} />
+            <TargetLine label="Năng lượng" value={targetRangeText(preview.calories, "kcal")} />
             <TargetLine label="Đạm" value={targetRangeText(preview.protein, "g")} />
             <TargetLine label="Kali" value={targetRangeText(preview.potassium, "mg")} />
           </>
