@@ -35,7 +35,12 @@ export async function GET(request: Request) {
           setAll(cookiesToSet) {
             try {
               cookiesToSet.forEach(({ name, value, options }) =>
-                cookieStore.set(name, value, options)
+                cookieStore.set(name, value, {
+                  ...options,
+                  secure: process.env.NODE_ENV === "production",
+                  sameSite: "lax",
+                  path: "/",
+                })
               );
             } catch {
               // Ignore in context where cookies cannot be set
@@ -44,8 +49,17 @@ export async function GET(request: Request) {
         },
       });
 
-      const { error } = await supabase.auth.exchangeCodeForSession(code);
+      const { data, error } = await supabase.auth.exchangeCodeForSession(code);
       if (!error) {
+        if (data?.session?.access_token) {
+          cookieStore.set("sb-access-token", data.session.access_token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            path: "/",
+            maxAge: data.session.expires_in ?? 60 * 60 * 24 * 7,
+          });
+        }
         return NextResponse.redirect(`${baseOrigin}${next}`);
       }
     }

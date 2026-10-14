@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"testing"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -236,4 +237,55 @@ func TestAuthMiddleware(t *testing.T) {
 			t.Errorf("expected 401 Unauthorized for unknown ES256 key, got %d", rec.Code)
 		}
 	})
+
+	t.Run("valid signed token accepted via sb-access-token cookie", func(t *testing.T) {
+		claims := auth.SupabaseClaims{
+			Sub: testUserID.String(),
+			AppMetadata: map[string]interface{}{
+				"role": "authenticated",
+			},
+		}
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		tokenStr, _ := token.SignedString(validSecret)
+
+		req := httptest.NewRequest("GET", "/api/v1/diary/daily", nil)
+		req.AddCookie(&http.Cookie{
+			Name:  "sb-access-token",
+			Value: tokenStr,
+		})
+		rec := httptest.NewRecorder()
+
+		middlewareWithSecret.Authenticate(testHandler).ServeHTTP(rec, req)
+		if rec.Code != http.StatusOK {
+			t.Errorf("expected 200 OK for cookie auth, got %d", rec.Code)
+		}
+	})
+
+	t.Run("valid signed token accepted via Supabase SSR JSON cookie", func(t *testing.T) {
+		claims := auth.SupabaseClaims{
+			Sub: testUserID.String(),
+			AppMetadata: map[string]interface{}{
+				"role": "authenticated",
+			},
+		}
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		tokenStr, _ := token.SignedString(validSecret)
+
+		cookieJSON, _ := json.Marshal(map[string]string{
+			"access_token": tokenStr,
+		})
+
+		req := httptest.NewRequest("GET", "/api/v1/diary/daily", nil)
+		req.AddCookie(&http.Cookie{
+			Name:  "sb-xyzproject-auth-token",
+			Value: url.QueryEscape(string(cookieJSON)),
+		})
+		rec := httptest.NewRecorder()
+
+		middlewareWithSecret.Authenticate(testHandler).ServeHTTP(rec, req)
+		if rec.Code != http.StatusOK {
+			t.Errorf("expected 200 OK for Supabase SSR JSON cookie auth, got %d", rec.Code)
+		}
+	})
 }
+

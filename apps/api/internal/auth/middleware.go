@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 
@@ -80,22 +81,73 @@ func NewMiddlewareWithOptions(secret string, jwksURL string) *Middleware {
 	}
 }
 
-// Authenticate extracts and validates Bearer token, then injects user info into request context
+// extractToken retrieves the JWT string from Authorization Bearer header or HTTPOnly session cookies
+func extractToken(r *http.Request) string {
+	authHeader := r.Header.Get("Authorization")
+	if authHeader != "" {
+		parts := strings.SplitN(authHeader, " ", 2)
+		if len(parts) == 2 && strings.EqualFold(parts[0], "Bearer") {
+			return strings.TrimSpace(parts[1])
+		}
+	}
+
+	// Fallback to HTTPOnly session cookies for web applications
+	cookieNames := []string{"sb-access-token", "access_token", "sb_token"}
+	for _, name := range cookieNames {
+		if cookie, err := r.Cookie(name); err == nil && strings.TrimSpace(cookie.Value) != "" {
+			return strings.TrimSpace(cookie.Value)
+		}
+	}
+
+	// Check Supabase SSR session cookies (e.g. sb-<project-ref>-auth-token)
+	for _, cookie := range r.Cookies() {
+		if strings.HasPrefix(cookie.Name, "sb-") && strings.HasSuffix(cookie.Name, "-auth-token") {
+			rawVal := strings.TrimSpace(cookie.Value)
+			if rawVal == "" {
+				continue
+			}
+
+			val := rawVal
+			if unescaped, err := url.QueryUnescape(rawVal); err == nil {
+				val = unescaped
+			}
+			if strings.HasPrefix(val, "base64-") {
+				b64Str := strings.TrimPrefix(val, "base64-")
+				if decoded, err := base64.StdEncoding.DecodeString(b64Str); err == nil {
+					val = string(decoded)
+				} else if decoded, err := base64.RawStdEncoding.DecodeString(b64Str); err == nil {
+					val = string(decoded)
+				}
+			}
+
+			var obj struct {
+				AccessToken string `json:"access_token"`
+			}
+			if err := json.Unmarshal([]byte(val), &obj); err == nil && obj.AccessToken != "" {
+				return obj.AccessToken
+			}
+			var arr []string
+			if err := json.Unmarshal([]byte(val), &arr); err == nil && len(arr) > 0 && arr[0] != "" {
+				return arr[0]
+			}
+			if strings.Count(val, ".") == 2 {
+				return val
+			}
+		}
+	}
+
+	return ""
+}
+
+// Authenticate extracts and validates Bearer token or session cookie, then injects user info into request context
 func (m *Middleware) Authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		authHeader := r.Header.Get("Authorization")
-		if authHeader == "" {
-			response.Error(w, http.StatusUnauthorized, response.CodeUnauthorized, "missing authorization header")
+		tokenStr := extractToken(r)
+		if tokenStr == "" {
+			response.Error(w, http.StatusUnauthorized, response.CodeUnauthorized, "missing authorization header or session cookie")
 			return
 		}
 
-		parts := strings.SplitN(authHeader, " ", 2)
-		if len(parts) != 2 || !strings.EqualFold(parts[0], "Bearer") {
-			response.Error(w, http.StatusUnauthorized, response.CodeUnauthorized, "invalid authorization header format, expected 'Bearer <token>'")
-			return
-		}
-
-		tokenStr := strings.TrimSpace(parts[1])
 		claims := &SupabaseClaims{}
 
 		// Parse and verify token signature (supports both ECDSA P-256 via JWKS and HMAC)

@@ -104,7 +104,16 @@ export interface LogMealPayload {
   calories?: number;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1";
+export function getApiBaseUrl(): string {
+  const url = process.env.NEXT_PUBLIC_API_URL;
+  if (url) return url;
+  if (process.env.NODE_ENV === "production" && isLiveMode()) {
+    console.warn("NEXT_PUBLIC_API_URL is unset in production live mode, falling back to localhost:8080");
+  }
+  return "http://localhost:8080/api/v1";
+}
+
+const API_BASE_URL = getApiBaseUrl();
 
 /** Returns true only when configured to call the live Go backend. Default is mock. */
 export function isLiveMode(): boolean {
@@ -129,6 +138,26 @@ async function getAuthHeaders(): Promise<HeadersInit> {
   } catch {
     return { "Content-Type": "application/json" };
   }
+}
+
+/**
+ * apiFetch executes authenticated requests against the Go backend API.
+ * Automatically transmits HTTPOnly session cookies via credentials: "include"
+ * and attaches Bearer authorization headers when available.
+ */
+export async function apiFetch(path: string, init: RequestInit = {}): Promise<Response> {
+  const baseUrl = getApiBaseUrl();
+  const authHeaders = await getAuthHeaders();
+  const mergedHeaders: Record<string, string> = {
+    ...(authHeaders as Record<string, string>),
+    ...((init.headers as Record<string, string>) || {}),
+  };
+
+  return fetch(`${baseUrl}${path}`, {
+    ...init,
+    headers: mergedHeaders,
+    credentials: "include",
+  });
 }
 
 // Offline queue for idempotent replay
@@ -165,15 +194,13 @@ export async function syncOfflineOutbox(): Promise<number> {
     const items: OutboxItem[] = JSON.parse(storage.getItem(OUTBOX_STORAGE_KEY) || "[]");
     if (!items.length) return 0;
 
-    const headers = await getAuthHeaders();
     const remaining: OutboxItem[] = [];
     let synced = 0;
 
     for (const item of items) {
       try {
-        const res = await fetch(`${API_BASE_URL}/days/${item.date}/entries`, {
+        const res = await apiFetch(`/days/${item.date}/entries`, {
           method: "POST",
-          headers,
           body: JSON.stringify(item.payload),
         });
         if (res.ok || res.status === 409) {
@@ -205,9 +232,8 @@ export const apiClient = {
   async getDailyProgress(date?: string): Promise<{ progress: DailyProgress; logs: DiaryLog[] }> {
     if (isLiveMode()) {
       try {
-        const headers = await getAuthHeaders();
         const targetDate = date || new Date().toISOString().split("T")[0];
-        const res = await fetch(`${API_BASE_URL}/days/${encodeURIComponent(targetDate)}`, { headers });
+        const res = await apiFetch(`/days/${encodeURIComponent(targetDate)}`);
         if (res.ok) {
           const json = await res.json();
           return json;
@@ -269,11 +295,9 @@ export const apiClient = {
   async logMeal(payload: LogMealPayload): Promise<{ log: DiaryLog; today_progress: DailyProgress }> {
     if (isLiveMode()) {
       try {
-        const headers = await getAuthHeaders();
         const date = payload.log_date || new Date().toISOString().split("T")[0];
-        const res = await fetch(`${API_BASE_URL}/days/${date}/entries`, {
+        const res = await apiFetch(`/days/${date}/entries`, {
           method: "POST",
-          headers,
           body: JSON.stringify(payload),
         });
         if (res.ok) {
@@ -311,11 +335,10 @@ export const apiClient = {
   async searchFoods(query = "", category?: string): Promise<FoodItem[]> {
     if (isLiveMode()) {
       try {
-        const headers = await getAuthHeaders();
         const params = new URLSearchParams();
         if (query) params.set("q", query);
         if (category) params.set("category", category);
-        const res = await fetch(`${API_BASE_URL}/foods?${params.toString()}`, { headers });
+        const res = await apiFetch(`/foods?${params.toString()}`);
         if (res.ok) {
           const json = await res.json();
           if (json.items && Array.isArray(json.items)) {
@@ -334,8 +357,7 @@ export const apiClient = {
   async getFood(id: string): Promise<FoodItem | null> {
     if (isLiveMode()) {
       try {
-        const headers = await getAuthHeaders();
-        const res = await fetch(`${API_BASE_URL}/foods/${encodeURIComponent(id)}`, { headers });
+        const res = await apiFetch(`/foods/${encodeURIComponent(id)}`);
         if (res.ok) {
           const json = await res.json();
           return json;
@@ -366,10 +388,8 @@ export const apiClient = {
   }): Promise<FoodItem> {
     if (isLiveMode()) {
       try {
-        const headers = await getAuthHeaders();
-        const res = await fetch(`${API_BASE_URL}/foods/custom`, {
+        const res = await apiFetch(`/foods/custom`, {
           method: "POST",
-          headers,
           body: JSON.stringify(input),
         });
         if (res.ok) {
@@ -419,10 +439,8 @@ export const apiClient = {
 
     if (isLiveMode()) {
       try {
-        const headers = await getAuthHeaders();
-        const res = await fetch(`${API_BASE_URL}/days/${date}/entries`, {
+        const res = await apiFetch(`/days/${date}/entries`, {
           method: "POST",
-          headers,
           body: JSON.stringify({
             id: entryId,
             food_id: payload.foodId,
@@ -452,8 +470,7 @@ export const apiClient = {
   async getTrends(days = 7, offset = 0): Promise<Record<string, unknown>> {
     if (isLiveMode()) {
       try {
-        const headers = await getAuthHeaders();
-        const res = await fetch(`${API_BASE_URL}/trends?days=${days}&offset=${offset}`, { headers });
+        const res = await apiFetch(`/trends?days=${days}&offset=${offset}`);
         if (res.ok) {
           return await res.json();
         }
@@ -467,8 +484,7 @@ export const apiClient = {
   async getFavourites(): Promise<FoodItem[]> {
     if (isLiveMode()) {
       try {
-        const headers = await getAuthHeaders();
-        const res = await fetch(`${API_BASE_URL}/favourites`, { headers });
+        const res = await apiFetch(`/favourites`);
         if (res.ok) {
           return await res.json();
         }
@@ -482,10 +498,8 @@ export const apiClient = {
   async addFavourite(foodId: string): Promise<boolean> {
     if (isLiveMode()) {
       try {
-        const headers = await getAuthHeaders();
-        const res = await fetch(`${API_BASE_URL}/favourites`, {
+        const res = await apiFetch(`/favourites`, {
           method: "POST",
-          headers,
           body: JSON.stringify({ food_id: foodId }),
         });
         return res.ok;
@@ -499,10 +513,8 @@ export const apiClient = {
   async removeFavourite(foodId: string): Promise<boolean> {
     if (isLiveMode()) {
       try {
-        const headers = await getAuthHeaders();
-        const res = await fetch(`${API_BASE_URL}/favourites/${encodeURIComponent(foodId)}`, {
+        const res = await apiFetch(`/favourites/${encodeURIComponent(foodId)}`, {
           method: "DELETE",
-          headers,
         });
         return res.ok;
       } catch {
@@ -515,8 +527,7 @@ export const apiClient = {
   async getRecents(): Promise<FoodItem[]> {
     if (isLiveMode()) {
       try {
-        const headers = await getAuthHeaders();
-        const res = await fetch(`${API_BASE_URL}/recents`, { headers });
+        const res = await apiFetch(`/recents`);
         if (res.ok) {
           return await res.json();
         }
@@ -530,8 +541,7 @@ export const apiClient = {
   async getSavedMeals(): Promise<Array<{ id: string; name: string; items: unknown[] }>> {
     if (isLiveMode()) {
       try {
-        const headers = await getAuthHeaders();
-        const res = await fetch(`${API_BASE_URL}/saved-meals`, { headers });
+        const res = await apiFetch(`/saved-meals`);
         if (res.ok) {
           return await res.json();
         }
@@ -546,10 +556,8 @@ export const apiClient = {
     const id = `saved-meal-${Date.now()}`;
     if (isLiveMode()) {
       try {
-        const headers = await getAuthHeaders();
-        const res = await fetch(`${API_BASE_URL}/saved-meals`, {
+        const res = await apiFetch(`/saved-meals`, {
           method: "POST",
-          headers,
           body: JSON.stringify({
             name,
             items: items.map((it) => ({ food_id: it.foodId, serving_size_g: it.grams })),
@@ -569,10 +577,8 @@ export const apiClient = {
   async deleteSavedMeal(id: string): Promise<boolean> {
     if (isLiveMode()) {
       try {
-        const headers = await getAuthHeaders();
-        const res = await fetch(`${API_BASE_URL}/saved-meals/${encodeURIComponent(id)}`, {
+        const res = await apiFetch(`/saved-meals/${encodeURIComponent(id)}`, {
           method: "DELETE",
-          headers,
         });
         return res.ok;
       } catch {
@@ -585,10 +591,8 @@ export const apiClient = {
   async logSavedMeal(date: string, savedMealId: string, meal: string): Promise<boolean> {
     if (isLiveMode()) {
       try {
-        const headers = await getAuthHeaders();
-        const res = await fetch(`${API_BASE_URL}/days/${date}/entries/from-saved/${encodeURIComponent(savedMealId)}?meal=${encodeURIComponent(meal)}`, {
+        const res = await apiFetch(`/days/${date}/entries/from-saved/${encodeURIComponent(savedMealId)}?meal=${encodeURIComponent(meal)}`, {
           method: "POST",
-          headers,
         });
         return res.ok;
       } catch {
@@ -601,10 +605,8 @@ export const apiClient = {
   async updateWeight(date: string, weightKg: number): Promise<boolean> {
     if (isLiveMode()) {
       try {
-        const headers = await getAuthHeaders();
-        const res = await fetch(`${API_BASE_URL}/me/weight/${encodeURIComponent(date)}`, {
+        const res = await apiFetch(`/me/weight/${encodeURIComponent(date)}`, {
           method: "PUT",
-          headers,
           body: JSON.stringify({ weight_kg: weightKg }),
         });
         return res.ok;
@@ -618,11 +620,10 @@ export const apiClient = {
   async getWeightLogs(from?: string, to?: string): Promise<Array<{ log_date: string; weight_kg: number }>> {
     if (isLiveMode()) {
       try {
-        const headers = await getAuthHeaders();
         const params = new URLSearchParams();
         if (from) params.set("from", from);
         if (to) params.set("to", to);
-        const res = await fetch(`${API_BASE_URL}/me/weight?${params.toString()}`, { headers });
+        const res = await apiFetch(`/me/weight?${params.toString()}`);
         if (res.ok) {
           return await res.json();
         }
@@ -636,10 +637,8 @@ export const apiClient = {
   async setTraining(date: string, minutes: number): Promise<boolean> {
     if (isLiveMode()) {
       try {
-        const headers = await getAuthHeaders();
-        const res = await fetch(`${API_BASE_URL}/days/${encodeURIComponent(date)}/training`, {
+        const res = await apiFetch(`/days/${encodeURIComponent(date)}/training`, {
           method: "PUT",
-          headers,
           body: JSON.stringify({ minutes }),
         });
         return res.ok;
@@ -653,10 +652,8 @@ export const apiClient = {
   async copyYesterday(date: string): Promise<boolean> {
     if (isLiveMode()) {
       try {
-        const headers = await getAuthHeaders();
-        const res = await fetch(`${API_BASE_URL}/days/${encodeURIComponent(date)}/copy-yesterday`, {
+        const res = await apiFetch(`/days/${encodeURIComponent(date)}/copy-yesterday`, {
           method: "POST",
-          headers,
         });
         return res.ok;
       } catch {
@@ -669,10 +666,8 @@ export const apiClient = {
   async deleteMeal(date: string, meal: string): Promise<boolean> {
     if (isLiveMode()) {
       try {
-        const headers = await getAuthHeaders();
-        const res = await fetch(`${API_BASE_URL}/days/${encodeURIComponent(date)}/meals/${encodeURIComponent(meal)}`, {
+        const res = await apiFetch(`/days/${encodeURIComponent(date)}/meals/${encodeURIComponent(meal)}`, {
           method: "DELETE",
-          headers,
         });
         return res.ok;
       } catch {
@@ -685,10 +680,8 @@ export const apiClient = {
   async restoreEntry(id: string): Promise<boolean> {
     if (isLiveMode()) {
       try {
-        const headers = await getAuthHeaders();
-        const res = await fetch(`${API_BASE_URL}/entries/${encodeURIComponent(id)}/restore`, {
+        const res = await apiFetch(`/entries/${encodeURIComponent(id)}/restore`, {
           method: "POST",
-          headers,
         });
         return res.ok;
       } catch {
@@ -710,10 +703,8 @@ export const apiClient = {
   async saveSetup(profile: SetupProfile): Promise<{ ok: true }> {
     if (isLiveMode()) {
       try {
-        const headers = await getAuthHeaders();
-        await fetch(`${API_BASE_URL}/me/profile`, {
+        await apiFetch(`/me/profile`, {
           method: "PUT",
-          headers,
           body: JSON.stringify({
             sex: profile.sex,
             birth_year: profile.birthYear,
