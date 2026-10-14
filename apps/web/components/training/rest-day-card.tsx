@@ -1,5 +1,3 @@
-"use client";
-
 import React from "react";
 import { getRestDayTips } from "@/lib/training";
 import type { CompleteTargets } from "@/lib/targets";

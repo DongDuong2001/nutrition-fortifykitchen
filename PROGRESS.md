@@ -621,3 +621,4 @@ All alignment and hydration tests passed cleanly (<= 1px difference, 0 hydration
 - 13/10 cc2-11: built, reviewed, probes cc10/cc12 fixed; stuck: unexpected uncommitted edits in app/foods/[id]/page.tsx and app/explore/rich/[nutrient]/page.tsx (not from this run), so not merged. pushed: no.
 - 14/10 cc2-16: edge cases (midnight rollover with a per-day archive, long names clamped with full name in title, unknown nutrients as a dash, offline asserted), probe cc2_16.py 19 ok; pushed: no.
 - 14/10 cc2-24: one PeriodControl on all four Tổng quan tabs, days-met counts finished days only, docs/STATUS.md; probe:all 0 FAIL; pushed: no.
+- 14/10 cc2-17 (shrunk to what CC1 does not cover): diary context memoised (P-01), "use client" removed from five pure components (P-02), Esc and focus return verified on every sheet (probe cc2_17 24 ok); bundle change ~0.1 kB per route; cc2-18 and cc2-19 not started; probe:all 40 PASS 0 FAIL; pushed: see below.

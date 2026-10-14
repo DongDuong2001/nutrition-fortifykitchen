@@ -6,6 +6,7 @@ Newest first. Updated with every web merge. Do not edit apps/api, migrations or 
 
 | Task | Commit | Date | What |
 |---|---|---|---|
+| cc2-17 | see git log (cc2-17) | 14/10 | Esc returns focus on every sheet (probe), diary context memoised, five pure components no longer client; bundle change negligible |
 | cc2-24 | see git log (cc2-24) | 14/10 | One period control on all four Tổng quan tabs; one days-met rule (finished days only, "3/6 ngày đạt"); this file |
 | cc2-16 | fa7bead | 14/10 | Midnight rollover (entries of earlier days filed by date), long names, unknown nutrients as "—", offline notice asserted |
 | cc2-23 | e61bcb2 | 14/10 | Khám phá carousels, Cài đặt profile card and groups |

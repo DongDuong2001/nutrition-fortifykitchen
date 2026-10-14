@@ -1,5 +1,3 @@
-"use client";
-
 import React from "react";
 import { type SaltTarget } from "@/lib/training";
 import { formatAmount } from "@/lib/format";
