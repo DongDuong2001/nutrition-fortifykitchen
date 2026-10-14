@@ -5,7 +5,21 @@ import { cookies } from "next/headers";
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/";
+
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  const host = forwardedHost ?? request.headers.get("host");
+  const proto = request.headers.get("x-forwarded-proto") ?? (process.env.NODE_ENV === "development" ? "http" : "https");
+  const baseOrigin = host ? `${proto}://${host}` : origin;
+
+  // Sanitize next target to prevent open redirect vulnerabilities
+  const rawNext = searchParams.get("next") ?? "/";
+  const next = rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/";
+
+  // Handle OAuth cancellation or errors from identity provider
+  const oauthError = searchParams.get("error_description") || searchParams.get("error");
+  if (oauthError) {
+    return NextResponse.redirect(`${baseOrigin}/signin?error=${encodeURIComponent(oauthError)}`);
+  }
 
   if (code) {
     const cookieStore = await cookies();
@@ -32,11 +46,11 @@ export async function GET(request: Request) {
 
       const { error } = await supabase.auth.exchangeCodeForSession(code);
       if (!error) {
-        return NextResponse.redirect(`${origin}${next}`);
+        return NextResponse.redirect(`${baseOrigin}${next}`);
       }
     }
   }
 
   // Fallback to signin with error indicator
-  return NextResponse.redirect(`${origin}/signin?error=auth_callback_failed`);
+  return NextResponse.redirect(`${baseOrigin}/signin?error=auth_callback_failed`);
 }

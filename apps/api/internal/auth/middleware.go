@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -34,6 +35,17 @@ type SupabaseClaims struct {
 // Middleware handles JWT authentication and user context injection
 type Middleware struct {
 	jwtSecret []byte
+	jwksCache *JWKSCache
+}
+
+func parseSecretBytes(secret string) []byte {
+	if secret == "" {
+		return nil
+	}
+	if decoded, err := base64.StdEncoding.DecodeString(secret); err == nil && len(decoded) >= 32 {
+		return decoded
+	}
+	return []byte(secret)
 }
 
 func NewMiddleware() *Middleware {
@@ -42,14 +54,29 @@ func NewMiddleware() *Middleware {
 		// Fallback to service role key if JWT secret is not explicitly set
 		secret = os.Getenv("SUPABASE_SERVICE_ROLE_KEY")
 	}
-	return &Middleware{
-		jwtSecret: []byte(secret),
+
+	jwksURL := os.Getenv("SUPABASE_JWKS_URL")
+	if jwksURL == "" && os.Getenv("SUPABASE_URL") != "" {
+		jwksURL = strings.TrimRight(os.Getenv("SUPABASE_URL"), "/") + "/auth/v1/.well-known/jwks.json"
 	}
+
+	return NewMiddlewareWithOptions(secret, jwksURL)
 }
 
 func NewMiddlewareWithSecret(secret []byte) *Middleware {
 	return &Middleware{
 		jwtSecret: secret,
+	}
+}
+
+func NewMiddlewareWithOptions(secret string, jwksURL string) *Middleware {
+	var cache *JWKSCache
+	if jwksURL != "" {
+		cache = NewJWKSCache(jwksURL)
+	}
+	return &Middleware{
+		jwtSecret: parseSecretBytes(secret),
+		jwksCache: cache,
 	}
 }
 
@@ -71,17 +98,32 @@ func (m *Middleware) Authenticate(next http.Handler) http.Handler {
 		tokenStr := strings.TrimSpace(parts[1])
 		claims := &SupabaseClaims{}
 
-		// Parse and verify token signature
-		if len(m.jwtSecret) == 0 {
-			response.Error(w, http.StatusUnauthorized, response.CodeUnauthorized, "server authentication secret not configured")
-			return
-		}
-
+		// Parse and verify token signature (supports both ECDSA P-256 via JWKS and HMAC)
 		token, err := jwt.ParseWithClaims(tokenStr, claims, func(t *jwt.Token) (interface{}, error) {
-			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, errors.New("unexpected signing method")
+			switch t.Method.(type) {
+			case *jwt.SigningMethodECDSA:
+				if m.jwksCache == nil {
+					return nil, errors.New("jwks verification not configured for ecdsa tokens")
+				}
+				kid, _ := t.Header["kid"].(string)
+				return m.jwksCache.GetKey(r.Context(), kid)
+
+			case *jwt.SigningMethodRSA:
+				if m.jwksCache == nil {
+					return nil, errors.New("jwks verification not configured for rsa tokens")
+				}
+				kid, _ := t.Header["kid"].(string)
+				return m.jwksCache.GetKey(r.Context(), kid)
+
+			case *jwt.SigningMethodHMAC:
+				if len(m.jwtSecret) == 0 {
+					return nil, errors.New("hmac secret not configured")
+				}
+				return m.jwtSecret, nil
+
+			default:
+				return nil, errors.New("unexpected signing method: " + t.Method.Alg())
 			}
-			return m.jwtSecret, nil
 		})
 
 		if err != nil || token == nil || claims.Sub == "" {

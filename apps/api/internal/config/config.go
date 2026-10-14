@@ -11,6 +11,7 @@ type Config struct {
 	SupabaseURL       string
 	SupabaseAnonKey   string
 	SupabaseJWTSecret string
+	SupabaseJWKSURL   string
 	HCaptchaSecretKey string
 	HCaptchaSiteKey   string
 	SentryDSN         string
@@ -42,12 +43,19 @@ func Load() *Config {
 		origins = []string{"http://localhost:3000", "http://localhost:3100", "http://localhost:3101", "http://localhost:3102"}
 	}
 
+	supabaseURL := os.Getenv("SUPABASE_URL")
+	jwksURL := os.Getenv("SUPABASE_JWKS_URL")
+	if jwksURL == "" && supabaseURL != "" {
+		jwksURL = strings.TrimRight(supabaseURL, "/") + "/auth/v1/.well-known/jwks.json"
+	}
+
 	return &Config{
 		Port:              port,
 		DatabaseURL:       dbURL,
-		SupabaseURL:       os.Getenv("SUPABASE_URL"),
+		SupabaseURL:       supabaseURL,
 		SupabaseAnonKey:   os.Getenv("SUPABASE_ANON_KEY"),
 		SupabaseJWTSecret: os.Getenv("SUPABASE_JWT_SECRET"),
+		SupabaseJWKSURL:   jwksURL,
 		HCaptchaSecretKey: os.Getenv("HCAPTCHA_SECRET_KEY"),
 		HCaptchaSiteKey:   os.Getenv("HCAPTCHA_SITE_KEY"),
 		SentryDSN:         os.Getenv("SENTRY_DSN"),

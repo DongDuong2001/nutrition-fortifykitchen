@@ -9,7 +9,7 @@ if (process.platform === "win32") {
     const pids = new Set();
     for (const line of lines) {
       const parts = line.trim().split(/\s+/);
-      if (parts.length >= 5 && parts[1] && parts[1].endsWith(`:${port}`) && parts[3] === "LISTENING") {
+      if (parts.length >= 5 && parts[1] && (parts[1].endsWith(`:${port}`) || parts[1].endsWith(`]:${port}`)) && parts[3] === "LISTENING") {
         const pid = parts[parts.length - 1];
         if (pid && pid !== "0" && pid !== String(process.pid)) {
           pids.add(pid);
@@ -20,9 +20,9 @@ if (process.platform === "win32") {
       console.log(`Port ${port} held by PID(s): ${Array.from(pids).join(", ")}. Killing...`);
       for (const pid of pids) {
         try {
-          execSync(`taskkill /PID ${pid} /F`);
-        } catch (e) {
-          // ignore
+          execSync(`taskkill /PID ${pid} /F`, { stdio: "ignore" });
+        } catch {
+          // ignore already exited process
         }
       }
       console.log(`Freed port ${port}.`);
