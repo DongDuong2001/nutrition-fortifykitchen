@@ -26,33 +26,34 @@ export function getLevelLabel(lvl: NutrientLevel): string {
   }
 }
 
+// The colours are the level tokens in app/globals.css (@theme), so no hex lives here
 export function getLevelColor(lvl: NutrientLevel, tone: SegmentTone = "light"): string {
   if (tone === "dark") {
     switch (lvl) {
       case "thieu":
-        return "#E5484D";
+        return "var(--color-level-red-dark)";
       case "trungbinh":
-        return "#E8A400";
+        return "var(--color-level-yellow-dark)";
       case "ganDu":
-        return "#1FA971";
+        return "var(--color-level-green-dark)";
       case "dat":
-        return "#5C86F2";
+        return "var(--color-level-blue-dark)";
     }
   }
 
   // Light tone default
   switch (lvl) {
     case "thieu":
-      return "#D93F44";
+      return "var(--color-level-red)";
     case "trungbinh":
-      return "#B07800";
+      return "var(--color-level-yellow)";
     case "ganDu":
-      return "#17945F";
+      return "var(--color-level-green)";
     case "dat":
-      return "#1238D6";
+      return "var(--color-level-blue)";
   }
 }
 
 export function getEmptySegmentColor(tone: SegmentTone = "light"): string {
-  return tone === "dark" ? "#2A2C31" : "#E6E1D7";
+  return tone === "dark" ? "var(--color-level-empty-dark)" : "var(--color-level-empty)";
 }

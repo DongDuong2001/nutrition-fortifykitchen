@@ -59,26 +59,27 @@ describe("lib/levels", () => {
     });
   });
 
+  // Colours are the @theme tokens in app/globals.css (no raw hex here), so light and dark follow the theme
   describe("getLevelColor", () => {
-    it("returns light mode colors", () => {
-      expect(getLevelColor("thieu", "light")).toBe("#D93F44");
-      expect(getLevelColor("trungbinh", "light")).toBe("#B07800");
-      expect(getLevelColor("ganDu", "light")).toBe("#17945F");
-      expect(getLevelColor("dat", "light")).toBe("#1238D6");
+    it("returns light mode token variables", () => {
+      expect(getLevelColor("thieu", "light")).toBe("var(--color-level-red)");
+      expect(getLevelColor("trungbinh", "light")).toBe("var(--color-level-yellow)");
+      expect(getLevelColor("ganDu", "light")).toBe("var(--color-level-green)");
+      expect(getLevelColor("dat", "light")).toBe("var(--color-level-blue)");
     });
 
-    it("returns dark mode colors", () => {
-      expect(getLevelColor("thieu", "dark")).toBe("#E5484D");
-      expect(getLevelColor("trungbinh", "dark")).toBe("#E8A400");
-      expect(getLevelColor("ganDu", "dark")).toBe("#1FA971");
-      expect(getLevelColor("dat", "dark")).toBe("#5C86F2");
+    it("returns dark mode token variables", () => {
+      expect(getLevelColor("thieu", "dark")).toBe("var(--color-level-red-dark)");
+      expect(getLevelColor("trungbinh", "dark")).toBe("var(--color-level-yellow-dark)");
+      expect(getLevelColor("ganDu", "dark")).toBe("var(--color-level-green-dark)");
+      expect(getLevelColor("dat", "dark")).toBe("var(--color-level-blue-dark)");
     });
   });
 
   describe("getEmptySegmentColor", () => {
-    it("returns correct empty segment color for tone", () => {
-      expect(getEmptySegmentColor("light")).toBe("#E6E1D7");
-      expect(getEmptySegmentColor("dark")).toBe("#2A2C31");
+    it("returns correct empty segment token for tone", () => {
+      expect(getEmptySegmentColor("light")).toBe("var(--color-level-empty)");
+      expect(getEmptySegmentColor("dark")).toBe("var(--color-level-empty-dark)");
     });
   });
 });

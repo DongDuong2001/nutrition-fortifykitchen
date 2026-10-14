@@ -146,7 +146,7 @@ export default function NotificationsSettingsPage() {
             <button
               type="button"
               onClick={requestPermission}
-              className="self-start h-11 px-4.5 rounded-full border border-black/12 bg-card text-ink text-sm font-semibold hover:bg-surface-tint active:scale-[0.97] transition-transform cursor-pointer"
+              className="self-start h-11 px-4.5 rounded-full border border-card-border bg-card text-ink text-sm font-semibold hover:bg-page active:scale-[0.97] transition-transform cursor-pointer"
             >
               Bật quyền thông báo
             </button>
@@ -197,7 +197,7 @@ export default function NotificationsSettingsPage() {
                     />
                     <span
                       aria-hidden="true"
-                      className="flex items-center justify-center h-11 min-w-[64px] px-3 rounded-full border border-black/12 bg-card text-ink text-sm font-semibold tabular-nums hover:bg-surface-tint active:scale-[0.97] transition-transform select-none peer-focus-visible:ring-2 peer-focus-visible:ring-blue peer-focus-visible:ring-offset-2"
+                      className="flex items-center justify-center h-11 min-w-[64px] px-3 rounded-full border border-card-border bg-card text-ink text-sm font-semibold tabular-nums hover:bg-page active:scale-[0.97] transition-transform select-none peer-focus-visible:ring-2 peer-focus-visible:ring-blue peer-focus-visible:ring-offset-2"
                     >
                       {timeVal}
                     </span>

@@ -84,7 +84,7 @@ export default function DeleteAccountPage() {
           <button
             type="button"
             onClick={handleExportCsv}
-            className="w-full h-12 rounded-full border border-black/12 bg-card text-ink text-[15px] font-semibold hover:bg-surface-tint active:scale-[0.97] transition-transform cursor-pointer"
+            className="w-full h-12 rounded-full border border-card-border bg-card text-ink text-[15px] font-semibold hover:bg-page active:scale-[0.97] transition-transform cursor-pointer"
           >
             Tải dữ liệu về (CSV)
           </button>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { cloneElement, isValidElement } from "react";
 
 export interface FormRowProps {
   label: React.ReactNode;
@@ -12,7 +12,8 @@ export interface FormRowProps {
 }
 
 /**
- * FormRow: Accessible, consistent form field wrapper.
+ * FormRow: Accessible, consistent form field wrapper. The error has the id `<htmlFor>-error`; a direct `<input>`
+ * child is described by it (aria-describedby). A wrapper around the input must set aria-describedby itself.
  */
 export function FormRow({
   label,
@@ -24,6 +25,12 @@ export function FormRow({
   htmlFor,
   "data-align-group": dataAlignGroup,
 }: FormRowProps) {
+  const errorId = htmlFor && error ? `${htmlFor}-error` : undefined;
+  const described = (child: React.ReactElement<{ "aria-describedby"?: string }>) => {
+    const own = child.props["aria-describedby"];
+    return [own, errorId].filter(Boolean).join(" ") || undefined;
+  };
+
   return (
     <div
       data-align-group={dataAlignGroup}
@@ -37,10 +44,12 @@ export function FormRow({
         {hint && <span className="text-xs text-secondary">{hint}</span>}
       </div>
 
-      {children}
+      {isValidElement<{ "aria-describedby"?: string }>(children) && children.type === "input"
+        ? cloneElement(children, { "aria-describedby": described(children) })
+        : children}
 
       {error && (
-        <span role="alert" className="text-xs font-semibold text-destructive">
+        <span id={errorId} role="alert" className="text-xs font-semibold text-destructive">
           {error}
         </span>
       )}
