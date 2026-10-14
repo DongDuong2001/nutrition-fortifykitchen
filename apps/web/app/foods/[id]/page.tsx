@@ -185,7 +185,7 @@ function FoodDetailInner() {
               })),
               {
                 id: "custom",
-                label: "Tuỳ chỉnh",
+                label: "Tùy chỉnh",
                 active: selectedServingLabel === CUSTOM_PORTION,
                 onClick: () => setSelectedServingLabel(CUSTOM_PORTION),
               },
@@ -217,7 +217,7 @@ function FoodDetailInner() {
               { id: "cal", value: formatAmount(macros.calories, "kcal"), label: "kcal" },
               { id: "carb", value: `${formatAmount(macros.carbs, "g")} g`, label: "Tinh bột" },
               { id: "protein", value: `${formatAmount(macros.protein, "g")} g`, label: "Đạm" },
-              { id: "fat", value: `${formatAmount(macros.fat, "g")} g`, label: "Béo" },
+              { id: "fat", value: `${formatAmount(macros.fat, "g")} g`, label: "Chất béo" },
             ]}
           />
         </div>

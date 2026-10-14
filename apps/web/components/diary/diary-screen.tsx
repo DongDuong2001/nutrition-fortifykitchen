@@ -278,7 +278,7 @@ function DiaryContent() {
       <button
         type="button"
         id={`meal-menu-${meal.slot}`}
-        aria-label={`Tuỳ chọn ${meal.name}`}
+        aria-label={`Tùy chọn ${meal.name}`}
         aria-haspopup="dialog"
         aria-expanded={menuSlot === slot}
         onClick={() => setMenuSlot(slot)}

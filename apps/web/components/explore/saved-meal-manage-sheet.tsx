@@ -28,11 +28,11 @@ export function SavedMealManageSheet({ open, onClose, name, itemCount, onRename,
   }, [open, name]);
 
   return (
-    <Sheet open={open} onClose={onClose} title={confirming ? `Xoá ${name}?` : name} titleId="saved-meal-title" desktopDialog>
+    <Sheet open={open} onClose={onClose} title={confirming ? `Xóa ${name}?` : name} titleId="saved-meal-title" desktopDialog>
       {confirming ? (
         <>
           <p className="m-0 px-1 text-sm leading-snug text-secondary">
-            Bữa ăn của tôi này ({itemCount} món) sẽ bị xoá. Các món đã ghi trong Nhật ký không đổi.
+            Bữa ăn của tôi này ({itemCount} món) sẽ bị xóa. Các món đã ghi trong Nhật ký không đổi.
           </p>
           <PillButton
             type="button"
@@ -43,10 +43,10 @@ export function SavedMealManageSheet({ open, onClose, name, itemCount, onRename,
               onClose();
             }}
           >
-            Xoá Bữa ăn của tôi
+            Xóa Bữa ăn của tôi
           </PillButton>
           <PillButton type="button" variant="secondary" onClick={() => setConfirming(false)}>
-            Huỷ
+            Hủy
           </PillButton>
         </>
       ) : (
@@ -73,7 +73,7 @@ export function SavedMealManageSheet({ open, onClose, name, itemCount, onRename,
             Lưu tên
           </PillButton>
           <PillButton type="button" variant="secondary" className="border-destructive text-destructive-text" onClick={() => setConfirming(true)}>
-            Xoá
+            Xóa
           </PillButton>
           <PillButton type="button" variant="secondary" onClick={onClose}>
             Đóng

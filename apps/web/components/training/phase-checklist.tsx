@@ -33,7 +33,7 @@ export function PhaseChecklist({
         key={it.id}
         className={`flex items-center border-t border-divider first:border-t-0 transition-transform ${
           readOnly ? "cursor-default" : "cursor-pointer active:scale-[0.99]"
-        } ${isDesktop ? "gap-4 min-h-[56px] -mx-2 px-2 rounded-lg hover:bg-black/[0.02]" : "gap-3 min-h-[48px]"}`}
+        } ${isDesktop ? "gap-4 min-h-[56px] -mx-2 px-2 rounded-lg hover:bg-hover" : "gap-3 min-h-[48px]"}`}
       >
         <span className="w-11 h-11 -ml-2.5 flex items-center justify-center shrink-0">
           <input

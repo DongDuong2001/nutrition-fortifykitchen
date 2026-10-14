@@ -73,7 +73,7 @@ def no_h_scroll(pg, where):
 
 
 def toast_text(pg):
-    t = pg.locator("[role=status]").filter(has_text=re.compile("Đã (thêm|lưu|xoá|chép)"))
+    t = pg.locator("[role=status]").filter(has_text=re.compile("Đã (thêm|lưu|xóa|chép)"))
     return re.sub(r"\s+", " ", t.first.inner_text()) if t.count() else ""
 
 
@@ -182,7 +182,7 @@ def check_diary_plus(browser, size_name, size):
     pg.wait_for_timeout(300)
     dialog = re.sub(r"\s+", " ", pg.locator("[role=dialog]").first.inner_text())
     check("Lưu thành Bữa ăn của tôi" in dialog, f"{size_name} past day ⋯: Lưu thành Bữa ăn của tôi is offered")
-    check("Xoá bữa này" not in dialog and "Chép hôm qua" not in dialog, f"{size_name} past day ⋯: no Xoá bữa này or Chép hôm qua")
+    check("Xóa bữa này" not in dialog and "Chép hôm qua" not in dialog, f"{size_name} past day ⋯: no Xóa bữa này or Chép hôm qua")
     ctx.close()
 
 
@@ -252,18 +252,18 @@ def check_saved_meals(browser, size_name, size):
 
     # rename, then delete with a confirm step
     go(pg, "/explore")
-    pg.locator("button[aria-label='Tuỳ chọn Sáng của tôi']:visible").first.click()
+    pg.locator("button[aria-label='Tùy chọn Sáng của tôi']:visible").first.click()
     pg.wait_for_timeout(300)
     pg.locator("#saved-meal-name").fill("Sáng nhanh")
     pg.get_by_role("button", name="Lưu tên").click()
     pg.wait_for_timeout(300)
     check("Sáng nhanh" in text(pg) and "Sáng của tôi" not in text(pg), f"{size_name} rename: the new name shows")
-    pg.locator("button[aria-label='Tuỳ chọn Sáng nhanh']:visible").first.click()
+    pg.locator("button[aria-label='Tùy chọn Sáng nhanh']:visible").first.click()
     pg.wait_for_timeout(300)
-    pg.get_by_role("button", name="Xoá", exact=True).click()
+    pg.get_by_role("button", name="Xóa", exact=True).click()
     pg.wait_for_timeout(200)
-    check("sẽ bị xoá" in text(pg), f"{size_name} delete: asks for a confirm step first")
-    pg.get_by_role("button", name="Xoá Bữa ăn của tôi").click()
+    check("sẽ bị xóa" in text(pg), f"{size_name} delete: asks for a confirm step first")
+    pg.get_by_role("button", name="Xóa Bữa ăn của tôi").click()
     pg.wait_for_timeout(300)
     check("Sáng nhanh" not in text(pg) and "Chưa có Bữa ăn của tôi" in text(pg), f"{size_name} delete: gone, empty state shown")
     ctx.close()

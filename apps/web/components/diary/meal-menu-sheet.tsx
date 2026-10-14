@@ -34,7 +34,7 @@ type Step = "menu" | "confirm" | "name";
 
 /**
  * The ⋯ menu of one meal: Chép hôm qua (today), Lưu thành Bữa ăn của tôi (any day, asks for a name) and
- * Xoá bữa này (today), which asks for a confirm step first. A bottom sheet on a phone, a centred dialog on desktop.
+ * Xóa bữa này (today), which asks for a confirm step first. A bottom sheet on a phone, a centred dialog on desktop.
  */
 export function MealMenuSheet({
   open,
@@ -63,14 +63,14 @@ export function MealMenuSheet({
   const canDelete = itemCount > 0;
   const canSave = savableCount > 0;
 
-  const title = step === "confirm" ? `Xoá ${mealName}?` : step === "name" ? "Lưu thành Bữa ăn của tôi" : mealName;
+  const title = step === "confirm" ? `Xóa ${mealName}?` : step === "name" ? "Lưu thành Bữa ăn của tôi" : mealName;
 
   return (
     <Sheet open={open} onClose={onClose} title={title} titleId="meal-menu-title" desktopDialog>
       {step === "confirm" ? (
         <>
           <p className="m-0 px-1 text-sm leading-snug text-secondary">
-            {itemCount} món · {formatAmount(kcal, "kcal")} kcal sẽ bị xoá khỏi {mealName}. Bạn có 5 giây để hoàn tác.
+            {itemCount} món · {formatAmount(kcal, "kcal")} kcal sẽ bị xóa khỏi {mealName}. Bạn có 5 giây để hoàn tác.
           </p>
           <button
             type="button"
@@ -80,14 +80,14 @@ export function MealMenuSheet({
             }}
             className="mt-2 min-h-[52px] w-full cursor-pointer rounded-full border border-destructive bg-card text-[15px] font-bold text-destructive-text active:scale-[0.97] motion-reduce:active:scale-100"
           >
-            Xoá bữa này
+            Xóa bữa này
           </button>
           <button
             type="button"
             onClick={() => setStep("menu")}
             className="min-h-[52px] w-full cursor-pointer rounded-full border border-card-border bg-card text-[15px] font-bold text-text active:scale-[0.97] motion-reduce:active:scale-100"
           >
-            Huỷ
+            Hủy
           </button>
         </>
       ) : step === "name" ? (
@@ -118,7 +118,7 @@ export function MealMenuSheet({
             Lưu
           </PillButton>
           <PillButton type="button" variant="secondary" onClick={() => setStep("menu")}>
-            Huỷ
+            Hủy
           </PillButton>
         </form>
       ) : (
@@ -158,9 +158,9 @@ export function MealMenuSheet({
             </button>
             {!readOnly && (
               <button type="button" disabled={!canDelete} onClick={() => setStep("confirm")} className={optionClass}>
-                <span className={`text-base font-bold ${canDelete ? "text-destructive-text" : "text-secondary"}`}>Xoá bữa này</span>
+                <span className={`text-base font-bold ${canDelete ? "text-destructive-text" : "text-secondary"}`}>Xóa bữa này</span>
                 <span className="text-[13px] text-secondary">
-                  {canDelete ? `Xoá ${itemCount} món, có thể hoàn tác` : "Bữa này chưa có món"}
+                  {canDelete ? `Xóa ${itemCount} món, có thể hoàn tác` : "Bữa này chưa có món"}
                 </span>
               </button>
             )}

@@ -116,7 +116,7 @@ def custom_grams(browser, size_name, size):
         return
     link.click()
     pg.wait_for_timeout(600)
-    custom = pg.get_by_role("button", name="Tuỳ chỉnh")
+    custom = pg.get_by_role("button", name="Tùy chỉnh")
     if custom.count():
         custom.first.click()
         pg.wait_for_timeout(300)

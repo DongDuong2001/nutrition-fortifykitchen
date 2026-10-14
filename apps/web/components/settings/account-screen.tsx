@@ -33,7 +33,7 @@ function DisplayNameRow() {
     <FormRow
       label="Tên hiển thị"
       htmlFor="account-display-name"
-      hint="Tuỳ chọn"
+      hint="Tùy chọn"
       error={error}
       data-align-group="account-row"
       className="py-3"

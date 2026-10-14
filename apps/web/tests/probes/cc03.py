@@ -145,7 +145,7 @@ def run():
             search = pg.locator('input[type="search"] >> visible=true').first
             search.fill("chà là")
             pg.wait_for_timeout(150)
-            ours = pg.locator('button[aria-label="Xoá tìm kiếm"] >> visible=true').count()
+            ours = pg.locator('button[aria-label="Xóa tìm kiếm"] >> visible=true').count()
             check(ours == 1, f"{name}: exactly one × in the search box (found {ours})")
             search.fill("")
 

@@ -81,7 +81,7 @@ export function SavedMealsCard({ limit }: { limit?: number }) {
               trailing={
                 <button
                   type="button"
-                  aria-label={`Tuỳ chọn ${meal.name}`}
+                  aria-label={`Tùy chọn ${meal.name}`}
                   aria-haspopup="dialog"
                   onClick={() => setManagedId(meal.id)}
                   className="inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-text hover:bg-divider active:scale-[0.97] motion-reduce:active:scale-100"

@@ -63,7 +63,7 @@ def run():
             # one × in the search box: our button only, native cancel hidden
             search_box(pg).fill("chuoi")
             pg.wait_for_timeout(150)
-            ours = pg.locator('button[aria-label="Xoá tìm kiếm"]:visible').count()
+            ours = pg.locator('button[aria-label="Xóa tìm kiếm"]:visible').count()
             check(ours == 1, f"{name}: exactly one × in the search box (found {ours})")
             # the browser's cancel button is hidden by a stylesheet rule on the search input's class
             hidden_rule = pg.evaluate(

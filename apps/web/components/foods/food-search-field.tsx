@@ -33,7 +33,7 @@ export function FoodSearchField({ value, onChange, inputRef, className = "" }: F
       {value && (
         <button
           type="button"
-          aria-label="Xoá tìm kiếm"
+          aria-label="Xóa tìm kiếm"
           onClick={() => onChange("")}
           className="w-11 h-11 -mr-2 rounded-full flex items-center justify-center text-secondary hover:text-text cursor-pointer border-0 bg-transparent shrink-0"
         >

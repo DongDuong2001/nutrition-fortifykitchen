@@ -105,10 +105,10 @@ def run():
 
             # 5. delete Yogurt kefir: toast shows, Hoàn tác puts it back in place
             pg.goto(BASE + "/entry/item-2", wait_until="networkidle")
-            button(pg, "Xoá món này").click()
+            button(pg, "Xóa món này").click()
             pg.wait_for_url("**/diary")
             pg.wait_for_timeout(300)
-            toast = pg.locator('[role=status] >> visible=true').filter(has_text="Đã xoá Yogurt kefir")
+            toast = pg.locator('[role=status] >> visible=true').filter(has_text="Đã xóa Yogurt kefir")
             check(toast.count() == 1, f"{name}: delete shows the undo toast")
             check("Yogurt kefir" not in meal_text(pg, "breakfast"), f"{name}: deleted item leaves Bữa sáng")
             if name == "390":
@@ -118,12 +118,12 @@ def run():
             breakfast = meal_text(pg, "breakfast")
             check("Yogurt kefir · 200 ml" in breakfast, f"{name}: Hoàn tác restores Yogurt kefir")
             check(breakfast.index("Yogurt kefir") < breakfast.index("Chuối"), f"{name}: restored item is back in its place")
-            check(pg.locator('[role=status] >> visible=true').filter(has_text="Đã xoá").count() == 0,
+            check(pg.locator('[role=status] >> visible=true').filter(has_text="Đã xóa").count() == 0,
                   f"{name}: toast goes after Hoàn tác")
 
             # 6. delete Chuối without undo: gone after reload, and the earlier edits survive
             pg.goto(BASE + "/entry/item-3", wait_until="networkidle")
-            button(pg, "Xoá món này").click()
+            button(pg, "Xóa món này").click()
             pg.wait_for_url("**/diary")
             pg.wait_for_timeout(200)
             pg.reload(wait_until="networkidle")

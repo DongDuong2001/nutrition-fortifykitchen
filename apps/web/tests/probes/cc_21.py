@@ -159,7 +159,7 @@ def run(browser, name, size):
     # Grams: the diary keeps the label in Vietnamese format
     for grams, label in [("2.5", "2,5 g"), ("1000", "1.000 g")]:
         go(pg, "/foods/food-cha-la")
-        pg.get_by_role("button", name="Tuỳ chỉnh", exact=True).locator("visible=true").first.click()
+        pg.get_by_role("button", name="Tùy chỉnh", exact=True).locator("visible=true").first.click()
         pg.locator("#fd-size").fill(grams)
         pg.wait_for_timeout(200)
         pg.get_by_role("button", name=re.compile("^Thêm vào Bữa")).locator("visible=true").first.click()

@@ -193,7 +193,7 @@ export function PortionPanel({
             { id: "cal", value: formatAmount(macroPreview.calories, "kcal"), label: "kcal" },
             { id: "carb", value: `${formatAmount(macroPreview.carbs, "g")} g`, label: "Tinh bột" },
             { id: "protein", value: `${formatAmount(macroPreview.protein, "g")} g`, label: "Đạm" },
-            { id: "fat", value: `${formatAmount(macroPreview.fat, "g")} g`, label: "Béo" },
+            { id: "fat", value: `${formatAmount(macroPreview.fat, "g")} g`, label: "Chất béo" },
           ]}
         />
       </div>

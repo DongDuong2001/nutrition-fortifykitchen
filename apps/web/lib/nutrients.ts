@@ -37,22 +37,22 @@ export const NUTRIENT_CATALOG: NutrientDefinition[] = [
   { id: "net_carbs", nameVi: "Tinh bột ròng", nameEn: "Net carbs", unit: "g", group: "carbs", depth: 1, parentId: "carbs", targetSource: "none" },
   { id: "fiber", nameVi: "Chất xơ", nameEn: "Fiber", unit: "g", group: "carbs", depth: 1, parentId: "carbs", targetSource: "coach-provisional" },
   { id: "insoluble_fiber", nameVi: "Xơ không tan", nameEn: "Insoluble fiber", unit: "g", group: "carbs", depth: 2, parentId: "fiber", targetSource: "none" },
-  { id: "soluble_fiber", nameVi: "Xơ hoà tan", nameEn: "Soluble fiber", unit: "g", group: "carbs", depth: 2, parentId: "fiber", targetSource: "none" },
+  { id: "soluble_fiber", nameVi: "Xơ hòa tan", nameEn: "Soluble fiber", unit: "g", group: "carbs", depth: 2, parentId: "fiber", targetSource: "none" },
   { id: "starch", nameVi: "Tinh bột phức", nameEn: "Starch", unit: "g", group: "carbs", depth: 1, parentId: "carbs", targetSource: "none" },
   { id: "sugars", nameVi: "Đường", nameEn: "Sugars", unit: "g", group: "carbs", depth: 1, parentId: "carbs", targetSource: "none" },
   { id: "added_sugars", nameVi: "Đường bổ sung", nameEn: "Added sugars", unit: "g", group: "carbs", depth: 1, parentId: "carbs", targetSource: "none" },
 
   // 3. Lipids (11)
   { id: "fat", nameVi: "Chất béo", nameEn: "Fat", unit: "g", group: "lipids", depth: 0, targetSource: "coach" },
-  { id: "monounsaturated_fat", nameVi: "Béo không bão hoà đơn", nameEn: "Monounsaturated", unit: "g", group: "lipids", depth: 1, parentId: "fat", targetSource: "none" },
-  { id: "polyunsaturated_fat", nameVi: "Béo không bão hoà đa", nameEn: "Polyunsaturated", unit: "g", group: "lipids", depth: 1, parentId: "fat", targetSource: "none" },
+  { id: "monounsaturated_fat", nameVi: "Béo không bão hòa đơn", nameEn: "Monounsaturated", unit: "g", group: "lipids", depth: 1, parentId: "fat", targetSource: "none" },
+  { id: "polyunsaturated_fat", nameVi: "Béo không bão hòa đa", nameEn: "Polyunsaturated", unit: "g", group: "lipids", depth: 1, parentId: "fat", targetSource: "none" },
   { id: "omega3", nameVi: "Omega-3", nameEn: "Omega-3", unit: "g", group: "lipids", depth: 2, parentId: "polyunsaturated_fat", targetSource: "none" },
   { id: "ala", nameVi: "ALA", nameEn: "ALA", unit: "g", group: "lipids", depth: 3, parentId: "omega3", targetSource: "none" },
   { id: "dha", nameVi: "DHA", nameEn: "DHA", unit: "g", group: "lipids", depth: 3, parentId: "omega3", targetSource: "none" },
   { id: "epa", nameVi: "EPA", nameEn: "EPA", unit: "g", group: "lipids", depth: 3, parentId: "omega3", targetSource: "none" },
   { id: "omega6", nameVi: "Omega-6", nameEn: "Omega-6", unit: "g", group: "lipids", depth: 2, parentId: "polyunsaturated_fat", targetSource: "none" },
-  { id: "saturated_fat", nameVi: "Béo bão hoà", nameEn: "Saturated", unit: "g", group: "lipids", depth: 1, parentId: "fat", targetSource: "none" },
-  { id: "trans_fat", nameVi: "Béo chuyển hoá", nameEn: "Trans fat", unit: "g", group: "lipids", depth: 1, parentId: "fat", targetSource: "none" },
+  { id: "saturated_fat", nameVi: "Béo bão hòa", nameEn: "Saturated", unit: "g", group: "lipids", depth: 1, parentId: "fat", targetSource: "none" },
+  { id: "trans_fat", nameVi: "Béo chuyển hóa", nameEn: "Trans fat", unit: "g", group: "lipids", depth: 1, parentId: "fat", targetSource: "none" },
   { id: "cholesterol", nameVi: "Cholesterol", nameEn: "Cholesterol", unit: "mg", group: "lipids", depth: 0, targetSource: "none" },
 
   // 4. Protein (12)

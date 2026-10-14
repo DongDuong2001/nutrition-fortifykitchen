@@ -281,7 +281,7 @@ describe("removeAddedIn", () => {
   });
 });
 
-describe("deleteMealIn and undoDeleteIn (Xoá bữa này)", () => {
+describe("deleteMealIn and undoDeleteIn (Xóa bữa này)", () => {
   it("lists the entries of a meal: sample items and added entries, not deleted ones", () => {
     const added = addedEntry("e1", "food-chuoi", 100, "breakfast");
     const edits: DiaryEdits = { ...EMPTY, added: [added] };

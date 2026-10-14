@@ -106,8 +106,8 @@ export function SettingsHomeScreen() {
                 <div data-align-group="settings-row">
                   <Row
                     icon={<span className="text-destructive-text">{SETTINGS_ICONS.trash}</span>}
-                    label={<span className="text-destructive-text">Xoá tài khoản</span>}
-                    hint="Có bước xác nhận trước khi xoá"
+                    label={<span className="text-destructive-text">Xóa tài khoản</span>}
+                    hint="Có bước xác nhận trước khi xóa"
                     href="/settings/delete-account"
                   />
                 </div>

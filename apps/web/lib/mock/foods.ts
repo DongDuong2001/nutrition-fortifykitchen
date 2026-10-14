@@ -601,7 +601,7 @@ export const MOCK_FOODS: FoodItem[] = [
       { label: "1/2 quả", grams: 100 },
       { label: "100 g", grams: 100 },
     ],
-    tipVi: "Chất béo đơn không bão hoà lành mạnh và giàu kali.",
+    tipVi: "Chất béo đơn không bão hòa lành mạnh và giàu kali.",
     nutrients: {
       energy: 160,
       fat: 14.7,

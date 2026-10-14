@@ -29,21 +29,21 @@ interface NotificationRowConfig {
 const NOTIFICATION_ROWS: NotificationRowConfig[] = [
   {
     id: "breakfast",
-    label: "Nhắc ghi bữa sáng",
+    label: "Nhắc thêm bữa sáng",
     hasTime: true,
     timeKey: "breakfastTime",
     toggleKey: "breakfastReminder",
   },
   {
     id: "lunch",
-    label: "Nhắc ghi bữa trưa",
+    label: "Nhắc thêm bữa trưa",
     hasTime: true,
     timeKey: "lunchTime",
     toggleKey: "lunchReminder",
   },
   {
     id: "dinner",
-    label: "Nhắc ghi bữa tối",
+    label: "Nhắc thêm bữa tối",
     hasTime: true,
     timeKey: "dinnerTime",
     toggleKey: "dinnerReminder",
@@ -99,7 +99,7 @@ export default function NotificationsSettingsPage() {
         if (res === "granted") {
           setPermissionStatus("Đã bật quyền thông báo");
         } else {
-          setPermissionStatus("Trình duyệt từ chối quyền thông báo");
+          setPermissionStatus("Trình duyệt đang chặn thông báo. Bạn mở cài đặt trình duyệt để cấp quyền nhé.");
         }
       } catch {
         setPermissionStatus("Đã bật quyền thông báo");

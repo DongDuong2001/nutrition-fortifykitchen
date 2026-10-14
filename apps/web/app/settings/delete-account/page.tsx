@@ -26,14 +26,14 @@ export default function DeleteAccountPage() {
 
   const handleDelete = () => {
     if (!isConfirmed) return;
-    setToastMessage("Chưa hỗ trợ xoá tài khoản trong bản thử");
+    setToastMessage("Bản thử chưa hỗ trợ xóa tài khoản. Dữ liệu hiện chỉ lưu trên thiết bị của bạn.");
     setTimeout(() => {
       router.push("/settings");
     }, 1200);
   };
 
   const handleExportCsv = () => {
-    setToastMessage("Chưa hỗ trợ tải dữ liệu trong bản thử");
+    setToastMessage("Tính năng tải CSV sẽ mở khi kết nối máy chủ.");
     setTimeout(() => {
       setToastMessage(null);
     }, 3000);
@@ -44,7 +44,7 @@ export default function DeleteAccountPage() {
       <div className="flex flex-col">
         <AppHeader
           variant="sub"
-          title="Xoá tài khoản"
+          title="Xóa tài khoản"
           onBack={goBack}
           backLabel="Quay lại"
           alignGroup="settings-header"
@@ -70,7 +70,7 @@ export default function DeleteAccountPage() {
                 <path d="M12 10v4.5M12 17.2v.1" />
               </svg>
               <div className="text-[15px] font-bold leading-[1.4] text-text">
-                Xoá vĩnh viễn nhật ký, món tự tạo và hồ sơ. Không thể khôi phục.
+                Xóa vĩnh viễn nhật ký, món tự tạo và hồ sơ. Không thể khôi phục.
               </div>
             </div>
             <ul className="m-0 pl-5 flex flex-col gap-0.5 text-sm text-secondary list-disc">
@@ -91,12 +91,12 @@ export default function DeleteAccountPage() {
 
           {/* Confirmation input */}
           <label className="flex flex-col gap-2 text-[15px] font-bold text-text">
-            Gõ Xoá để xác nhận
+            Gõ Xóa để xác nhận
             <input
               type="text"
               value={confirmationText}
               onChange={(e) => setConfirmationText(e.target.value)}
-              placeholder="Xoá"
+              placeholder="Xóa"
               autoComplete="off"
               className="h-[52px] rounded-xl border-2 border-grabber bg-card px-4 text-lg font-semibold text-ink outline-none focus:border-blue transition-colors"
             />
@@ -123,14 +123,14 @@ export default function DeleteAccountPage() {
               : "bg-destructive text-on-accent opacity-45 cursor-not-allowed"
           }`}
         >
-          Xoá tài khoản
+          Xóa tài khoản
         </button>
 
         <Link
           href="/settings"
           className="no-underline h-11 flex items-center justify-center text-ink text-[15px] font-semibold hover:opacity-80 active:scale-[0.97] transition-all"
         >
-          Huỷ
+          Hủy
         </Link>
       </footer>
     </div>

@@ -107,7 +107,7 @@ def settings(browser, size_name, size):
     )
     check(dark == 1, f"{w}: one dark accent card ({dark})")
     body = squash(pg.inner_text("body"))
-    for label in ["Mục tiêu mỗi ngày", "Tài khoản", "Ngôn ngữ", "Nhắc nhở", "Nguồn dữ liệu", "Thêm vào màn hình chính", "Vùng nguy hiểm", "Xoá tài khoản", "H1T MICRO Pro"]:
+    for label in ["Mục tiêu mỗi ngày", "Tài khoản", "Ngôn ngữ", "Nhắc nhở", "Nguồn dữ liệu", "Thêm vào màn hình chính", "Vùng nguy hiểm", "Xóa tài khoản", "H1T MICRO Pro"]:
         check(label in body, f"{w}: shows {label}")
     icons = pg.locator("main a svg[aria-hidden='true']").count()
     check(icons >= 6, f"{w}: rows carry icons ({icons})")

@@ -73,7 +73,7 @@ def source_scan():
         files = [base] if base.is_file() else [p for p in base.rglob("*") if p.suffix in (".ts", ".tsx")]
         for f in files:
             text = f.read_text(encoding="utf8")
-            for bad in ["Bữa " + "của tôi", "số " + "liệu"]:
+            for bad in ["Bữa " + "của tôi", "số " + "liệu", "Xoá", "xoá", "Tuỳ", "tuỳ", "Huỷ", "huỷ"]:
                 if bad in text:
                     hits.append(f"{f.relative_to(ROOT)}: {bad}")
     check(not hits, f"source: no old meal-list name or 'số liệu' in the voice-pass files ({hits})")

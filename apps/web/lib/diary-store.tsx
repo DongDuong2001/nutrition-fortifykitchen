@@ -439,6 +439,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     if (now === accountId) return;
     setAccountId(now);
     loadData(now, false, todayIso ?? getTodayIsoVN());
+    // The profile is per account too: without this, account B would keep A's targets until a reload
     setProfile(loadProfile(new Date().getFullYear()));
   }, [pathname, hydrated, demo, accountId, loadData, todayIso]);
 
@@ -627,7 +628,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       const view = findEntry(edits, id, samples);
       if (!view) return;
       setEdits((prev) => deleteEntryIn(prev, id, samples));
-      setToast({ message: `Đã xoá ${view.name}`, kind: "deleted", mealSlot: null, durationMs: UNDO_TOAST_MS });
+      setToast({ message: `Đã xóa ${view.name}`, kind: "deleted", mealSlot: null, durationMs: UNDO_TOAST_MS });
     },
     [edits, samples]
   );
@@ -638,7 +639,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       if (count === 0) return;
       setEdits((prev) => deleteMealIn(prev, slot, samples));
       setToast({
-        message: `Đã xoá ${getMealSlotNameVi(slot)} · ${count} món`,
+        message: `Đã xóa ${getMealSlotNameVi(slot)} · ${count} món`,
         kind: "deleted",
         mealSlot: null,
         durationMs: UNDO_TOAST_MS,

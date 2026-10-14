@@ -80,7 +80,7 @@ Pushed day screens (back → Nhật ký, owner tab Nhật ký):
 
 ## Cài đặt (`cai-dat.html`)
 
-- **Cài đặt** (paper header, no wordmark): the profile card "Hồ sơ của bạn" (sub "Nam · sinh 2003 · 65 kg · Giữ cân", avatar, chevron → `/settings/profile`), Mục tiêu mỗi ngày, Ứng dụng (Ngôn ngữ, Nhắc nhở, Cài như ứng dụng), the Pro card, Tài khoản (email row "ban@email.com" above Đăng xuất), Vùng nguy hiểm (Xoá tài khoản, destructive text, opens the confirm page).
+- **Cài đặt** (paper header, no wordmark): the profile card "Hồ sơ của bạn" (sub "Nam · sinh 2003 · 65 kg · Giữ cân", avatar, chevron → `/settings/profile`), Mục tiêu mỗi ngày, Ứng dụng (Ngôn ngữ, Nhắc nhở, Cài như ứng dụng), the Pro card, Tài khoản (email row "ban@email.com" above Đăng xuất), Vùng nguy hiểm (Xóa tài khoản, destructive text, opens the confirm page).
 - **Hồ sơ** (pushed, back → Cài đặt): Cơ thể (giới tính chips, năm sinh, cân nặng → `/settings/profile/weight`), Mục tiêu (goal chips 2×2: Tăng cơ, Giữ cân, Giảm mỡ, Giảm mỡ nhanh; default training chips: Nghỉ, 45, 60, 90, 120 phút), and the line "Mục tiêu mỗi ngày tính từ hồ sơ này" → `/settings/targets`. Same fields as today's Hồ sơ, no new fields.
 - **Mục tiêu mỗi ngày** (pushed, read-only): no goal chips, weight field or training chips. The computed targets with their formula lines: kcal per kg by goal (Tăng cơ 35–40, Giữ cân 30–35, Giảm mỡ 25–30, Giảm mỡ nhanh 20–25), đạm 1,6–2,2 g/kg, béo 0,5–1 g/kg, tinh bột as the remainder, xơ 14 g per 1.000 kcal (tạm thời), muối 4–6 g plus 1–1,5 g per 20 minutes, kali 80–100 mg/kg, canxi 1.200–1.500 mg, magie 50 % of canxi, sắt and kẽm by sex, and the VN 2016 vitamins and minerals marked "*". One button, "Sửa trong Hồ sơ".
 
@@ -132,7 +132,7 @@ Pushed day screens (back → Nhật ký, owner tab Nhật ký):
 
 ## Open for Hao
 
-- **Xoá bữa này** is not in the ⋯ menu any more; the brief lists two actions. Say if it should come back (it needs a confirm step).
+- **Xóa bữa này** is not in the ⋯ menu any more; the brief lists two actions. Say if it should come back (it needs a confirm step).
 - **Sample data across mocks is not in sync.** `lib/mock/trends.ts` has today (12/10) at 1.041 kcal, protein 58 g, fat 32 g, calcium 210 mg. `lib/mock/sample-day.ts` has protein 62 g, fat 21 g, calcium 331 mg. The 09/10 trend point (1.640 kcal) differs from `lib/mock/yesterday.ts` (1.532 kcal). Nhật ký uses the diary sample; Tổng quan uses the trends series and excludes today. The mocks should match before the screens are built.
 - **Weight history** for Cơ thể is sample data (the mock has none).
 - **Vi chất over a period** covers the five nutrients that have a day series in the mock (Vitamin D, Canxi, Magie, Kali, Sắt). The other 17 show when the data exists. The note on the screen says so.

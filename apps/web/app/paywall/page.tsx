@@ -51,7 +51,7 @@ export default function PaywallPage() {
             </ul>
 
             <p className="m-0 pt-2 border-t border-divider text-sm text-secondary">
-              Sắp ra mắt
+              Sắp ra mắt — bạn sẽ được thông báo khi mở đăng ký.
             </p>
           </Card>
         </main>
@@ -59,7 +59,7 @@ export default function PaywallPage() {
 
       <footer className="w-full max-w-[560px] mx-auto px-4 pt-2 pb-5 flex flex-col items-center gap-1.5">
         <div className="text-xs text-secondary text-center">
-          Gói miễn phí vẫn ghi đủ 22 vi chất.
+          Gói miễn phí vẫn theo dõi đủ 22 vi chất.
         </div>
       </footer>
     </div>

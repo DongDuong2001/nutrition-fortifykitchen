@@ -164,3 +164,5 @@ dd on a phone/ { s/^- [ ]/- [x]/; s/$/ Decided 12/10 (Hao): keep the sr-only h1 
 - [x] (cc-21, for Dong: lib/api-client.ts:134) The offline outbox is scoped through `accountStorage()` from lib/storage-keys.ts (SP-01), isolating queued writes per account.
 - [x] (cc-21, for Dong: lib/auth-actions.ts `signOut`) `signOut()` and `mockSignOut()` call `clearOnboardingStorage()` to remove `h1t-onboarding-draft` and `h1t-pending-email` from sessionStorage on sign-out, preventing draft inheritance across accounts.
 - [x] (cc-21, for CC2: lib/diary-store.tsx) `diary-store.tsx` calls `setProfile(loadProfile(new Date().getFullYear()))` on account change in useEffect, keeping profile state synchronized when accounts switch.
+- [x] cc2-18 (14/10): copy spelling, closed 14/10 20:08 (Hao): kiểu cũ "Xóa", "Tùy", "Hủy", "hòa", "khỏe" everywhere in apps/web and design/v2; cc2_18 checks it.
+- [ ] (cc2-18, for Dong: packages/vectors/period.json) The shared period vector has the trends macro label "Béo" (`lib/period.ts` fat row). The voice rule wants "Chất béo". CC2 kept "Béo" in lib/period.ts so the Go parity test passes; change the vector label and then lib/period.ts together.

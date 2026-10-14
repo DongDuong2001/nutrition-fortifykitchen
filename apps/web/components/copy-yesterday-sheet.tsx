@@ -102,7 +102,7 @@ function CopyChoices({ entries, onDone }: { entries: AddedDiaryEntry[]; onDone: 
         {chosen.length > 0 ? `Chép ${chosen.length} bữa` : "Chọn bữa để chép"}
       </PillButton>
       <PillButton variant="secondary" onClick={onDone}>
-        Huỷ
+        Hủy
       </PillButton>
     </div>
   );

@@ -87,7 +87,7 @@ def run():
             # 3. delete: exactly one toast, Hoàn tác restores
             pg.locator('a[href="/entry/item-2"] >> visible=true').first.click()
             pg.wait_for_url("**/entry/item-2")
-            button(pg, "Xoá món này").click()
+            button(pg, "Xóa món này").click()
             pg.wait_for_url("**/diary")
             pg.wait_for_timeout(300)
             toasts = pg.locator('[role=status] >> visible=true')

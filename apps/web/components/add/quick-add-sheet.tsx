@@ -101,7 +101,7 @@ export function QuickAddSheet({ open, onClose, mealName, onSubmit }: QuickAddShe
           Thêm vào {mealName}
         </PillButton>
         <PillButton type="button" variant="secondary" onClick={onClose}>
-          Huỷ
+          Hủy
         </PillButton>
       </form>
     </Sheet>

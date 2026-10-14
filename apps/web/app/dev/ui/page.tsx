@@ -152,7 +152,7 @@ export default function DevUiPage() {
           </div>
           <PillButton variant="primary">Tiếp tục (chính)</PillButton>
           <PillButton variant="secondary">Chép hôm qua (phụ)</PillButton>
-          <PillButton variant="destructive">Xoá món (xoá)</PillButton>
+          <PillButton variant="destructive">Xóa món (xóa)</PillButton>
         </section>
 
         {/* Section: Chips (44px) */}
@@ -263,7 +263,7 @@ export default function DevUiPage() {
                 variant="secondary"
                 onClick={() => setIsSheetOpen(false)}
               >
-                Huỷ
+                Hủy
               </PillButton>
             </div>
           </Sheet>
@@ -280,7 +280,7 @@ export default function DevUiPage() {
             actionHref="/diary"
           />
           <Toast
-            message="Đã xoá Thịt bò nạc"
+            message="Đã xóa Thịt bò nạc"
             actionLabel="Hoàn tác"
             onAction={() => {}}
             progressPercent={60}

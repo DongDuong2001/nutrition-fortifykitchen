@@ -13,7 +13,7 @@ DESKTOP = {"width": 1440, "height": 900}
 INK = (0x11, 0x13, 0x17)  # --color-ink
 SURFACE_DARK = (0x1A, 0x1C, 0x22)  # --color-surface-dark (inset summary panel)
 DESTRUCTIVE_TEXT = "rgb(196, 55, 60)"  # --color-destructive-text #C4373C, 5.30:1 on white
-PROFILE_RED_LABELS = ["Vùng nguy hiểm", "Xoá tài khoản"]
+PROFILE_RED_LABELS = ["Vùng nguy hiểm", "Xóa tài khoản"]
 
 problems = []
 notes = []

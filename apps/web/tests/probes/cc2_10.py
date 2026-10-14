@@ -4,7 +4,7 @@
 - the period control: ‹ › and 7/30 change the numbers, › is disabled on the current period, the period stays across sub-tabs
 - Tóm tắt "Ghi bữa tối" (clock fixed at 18:00 Asia/Ho_Chi_Minh) opens the add sheet for that meal
 - Nhật ký rows open /micros and /training with the date shown; past-day screens are read-only
-- Xoá bữa này asks for a confirm step and Hoàn tác puts the meal back
+- Xóa bữa này asks for a confirm step and Hoàn tác puts the meal back
 - no ink band at the top of the window on desktop
 Screenshots: .screenshots/cc2-10-*.png
 Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/cc2_10.py
@@ -204,7 +204,7 @@ def check_diary(browser, size_name, size):
     check(re.search(r"60′ Ngày tập muối 7–10,5 g", body) is not None, f"{size_name} diary: the Ngày tập tile reads 60′ and salt")
     check(re.search(r"còn 909 kcal", body, re.IGNORECASE) is not None, f"{size_name} diary: còn 909 kcal in the summary")
     n_add = pg.locator('a[aria-label^="Thêm vào"]:visible').count()
-    n_menu = pg.locator('button[aria-label^="Tuỳ chọn"]:visible').count()
+    n_menu = pg.locator('button[aria-label^="Tùy chọn"]:visible').count()
     check(n_add == 5 and n_menu == 5, f"{size_name} diary: one + and one ⋯ per meal ({n_add}, {n_menu})")
     check("+ Thêm món" not in body and body.count("+ Thêm") <= 5, f"{size_name} diary: one quiet + Thêm per meal")
     shot(pg, "diary", size_name)
@@ -241,7 +241,7 @@ def check_past_day(browser, size_name, size):
     go(pg, f"/diary?date={YESTERDAY}")
     pg.wait_for_timeout(300)
     check(pg.locator('a[aria-label^="Thêm vào"]:visible').count() == 0, f"{size_name} past diary: no + on a meal")
-    check(pg.locator('button[aria-label^="Tuỳ chọn"]:visible').count() > 0, f"{size_name} past diary: meals with food keep a ⋯ menu (Lưu thành Bữa ăn của tôi, cc2-12)")
+    check(pg.locator('button[aria-label^="Tùy chọn"]:visible').count() > 0, f"{size_name} past diary: meals with food keep a ⋯ menu (Lưu thành Bữa ăn của tôi, cc2-12)")
     check(pg.locator(f'a[href="/micros?date={YESTERDAY}"]:visible').count() == 1, f"{size_name} past diary: Vi chất row keeps the date")
     check(pg.locator(f'a[href="/training?date={YESTERDAY}"]:visible').count() == 1, f"{size_name} past diary: Ngày tập row keeps the date")
 
@@ -273,11 +273,11 @@ def check_delete_meal(browser, size_name, size):
     dialog = pg.locator('[role="dialog"]:visible').first
     check("Chép hôm qua" in dialog.inner_text() and "Lưu thành Bữa ăn của tôi" in dialog.inner_text(), f"{size_name} delete: the menu has the three items")
     check(dialog.locator('button:has-text("Lưu thành Bữa ăn của tôi")').is_enabled(), f"{size_name} delete: Lưu thành Bữa ăn của tôi is enabled for a meal with food")
-    dialog.locator('button:has-text("Xoá bữa này")').click()
+    dialog.locator('button:has-text("Xóa bữa này")').click()
     pg.wait_for_timeout(200)
-    check("Xoá Bữa sáng?" in text(pg), f"{size_name} delete: a confirm step appears")
+    check("Xóa Bữa sáng?" in text(pg), f"{size_name} delete: a confirm step appears")
     check("Chưa có món" not in pg.locator("#meal-breakfast").inner_text(), f"{size_name} delete: nothing is removed before confirming")
-    pg.locator('[role="dialog"] button:has-text("Xoá bữa này")').first.click()
+    pg.locator('[role="dialog"] button:has-text("Xóa bữa này")').first.click()
     pg.wait_for_timeout(500)
     meal = pg.locator("#meal-breakfast").inner_text()
     check("Chưa có món" in meal, f"{size_name} delete: breakfast is empty after confirming")
