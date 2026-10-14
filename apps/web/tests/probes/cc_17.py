@@ -12,13 +12,14 @@ import sys
 from datetime import datetime, timedelta, timezone
 
 from playwright.sync_api import sync_playwright
+import _demo  # noqa: F401  (cc-21: demo mode on, so the ticks use the demo key; see _demo.py)
 import _demo  # noqa: F401  (cc2-15b: demo mode on, see _demo.py)
 
 BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3101")
 SHOTS = os.path.join(os.path.dirname(__file__), "..", "..", ".screenshots")
 PHONE = {"width": 390, "height": 844}
 DESKTOP = {"width": 1280, "height": 900}
-KEY = "h1t_training_checklist_v1"
+KEY = "h1t_training_checklist_v1_demo"  # cc-21: ticks are per account; demo (import _demo) has its own key
 VN = timezone(timedelta(hours=7))
 TODAY = datetime.now(VN).date()
 TODAY_ISO = TODAY.isoformat()

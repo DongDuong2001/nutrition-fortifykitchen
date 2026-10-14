@@ -1,4 +1,6 @@
-export const SETTINGS_STORAGE_KEY = "h1t_settings_v1";
+import { SETTINGS_STORAGE_KEY, accountStorage } from "./storage-keys";
+
+export { SETTINGS_STORAGE_KEY };
 
 export interface AppSettings {
   language: "vi" | "en";
@@ -39,24 +41,10 @@ export const DEFAULT_SETTINGS: AppSettings = {
 
 export type KeyValueStorage = Pick<Storage, "getItem" | "setItem">;
 
-function browserStorage(): KeyValueStorage | null {
-  try {
-    if (typeof window !== "undefined" && window.localStorage) {
-      return window.localStorage;
-    }
-    if (typeof localStorage !== "undefined") {
-      return localStorage;
-    }
-    return null;
-  } catch {
-    return null;
-  }
-}
-
 /**
- * Load user settings from localStorage (guarded, fallback to DEFAULT_SETTINGS).
+ * Load the signed-in account's settings from localStorage (guarded, fallback to DEFAULT_SETTINGS).
  */
-export function loadSettings(storage: KeyValueStorage | null = browserStorage()): AppSettings {
+export function loadSettings(storage: KeyValueStorage | null = accountStorage()): AppSettings {
   if (!storage) return { ...DEFAULT_SETTINGS };
   try {
     const raw = storage.getItem(SETTINGS_STORAGE_KEY);
@@ -87,11 +75,11 @@ export function loadSettings(storage: KeyValueStorage | null = browserStorage())
 }
 
 /**
- * Update user settings in localStorage (guarded).
+ * Update the signed-in account's settings in localStorage (guarded).
  */
 export function saveSettings(
   partial: Partial<AppSettings>,
-  storage: KeyValueStorage | null = browserStorage()
+  storage: KeyValueStorage | null = accountStorage()
 ): AppSettings {
   const current = loadSettings(storage);
   const next: AppSettings = {

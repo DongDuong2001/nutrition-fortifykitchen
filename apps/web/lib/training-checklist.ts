@@ -4,7 +4,9 @@
  * A day with no record has nothing ticked and no duration.
  */
 
-export const TRAINING_CHECKLIST_KEY = "h1t_training_checklist_v1";
+import { TRAINING_CHECKLIST_KEY, accountStorage } from "./storage-keys";
+
+export { TRAINING_CHECKLIST_KEY };
 
 export interface DayChecklist {
   /** Training minutes for the day; 0 is a rest day. */
@@ -14,14 +16,6 @@ export interface DayChecklist {
 }
 
 export type KeyValueStorage = Pick<Storage, "getItem" | "setItem">;
-
-function browserStorage(): KeyValueStorage | null {
-  try {
-    return typeof window !== "undefined" && window.localStorage ? window.localStorage : null;
-  } catch {
-    return null;
-  }
-}
 
 type Store = Record<string, DayChecklist>;
 
@@ -37,7 +31,7 @@ function readStore(storage: KeyValueStorage | null): Store {
 }
 
 /** The saved day, or null when nothing was saved for that date. */
-export function readDay(dateKey: string, storage: KeyValueStorage | null = browserStorage()): DayChecklist | null {
+export function readDay(dateKey: string, storage: KeyValueStorage | null = accountStorage()): DayChecklist | null {
   const day = readStore(storage)[dateKey];
   if (!day || typeof day.minutes !== "number" || !Array.isArray(day.ticked)) return null;
   return { minutes: day.minutes, ticked: day.ticked.filter((id): id is string => typeof id === "string") };
@@ -47,7 +41,7 @@ export function readDay(dateKey: string, storage: KeyValueStorage | null = brows
 export function writeDay(
   dateKey: string,
   day: DayChecklist,
-  storage: KeyValueStorage | null = browserStorage()
+  storage: KeyValueStorage | null = accountStorage()
 ): void {
   if (!storage) return;
   try {

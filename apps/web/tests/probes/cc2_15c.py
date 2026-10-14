@@ -87,6 +87,11 @@ def run(browser, name, size):
 
     # 1. No profile: tab routes go to setup
     ctx, pg = new_page(browser, size, profile=False)
+    # cc-21: nobody signed in goes to /signin first (no account can have a profile yet); setup applies once someone is in
+    for route in ("/", "/diary", "/explore", "/settings", "/add", "/micros", "/training"):
+        go(pg, route)
+        check(pg.url.endswith("/signin"), f"{where} nobody signed in: {route} goes to /signin ({pg.url[len(BASE):]})")
+    sign_in_magic(pg, "ban@email.com")  # an account with no profile
     for route in ("/", "/diary", "/explore", "/settings", "/add", "/micros", "/training"):
         go(pg, route)
         check(pg.url.endswith("/setup/profile"), f"{where} no profile: {route} lands on /setup/profile ({pg.url[len(BASE):]})")
@@ -186,9 +191,10 @@ def run(browser, name, size):
     )
 
     def sign_in(email):
-        pg.get_by_label("Email").fill(email)
-        pg.get_by_label("Mật khẩu", exact=True).fill(password)
-        pg.get_by_role("button", name="Đăng nhập", exact=True).click()
+        # cc-21: the email field has a placeholder, not a label (cc2_15c's old label lookup no longer finds it)
+        pg.locator('input[type="email"]').fill(email)
+        pg.locator('input[type="password"]').first.fill(password)
+        pg.locator('button[type="submit"]').first.click()
         pg.wait_for_url(BASE + "/")
         pg.wait_for_timeout(500)
 

@@ -85,6 +85,13 @@ describe("lib/first-run", () => {
     expect(setupRedirectFor("/", { profileSaved: true, entryEverLogged: false }, false)).toBeNull();
   });
 
+  it("nobody signed in outside demo mode is not a setup question: the sign-in gate decides (no profile can be read)", () => {
+    const signedOut = { profileSaved: false, entryEverLogged: false, signedIn: false };
+    expect(setupRedirectFor("/diary", signedOut, false)).toBeNull();
+    expect(setupRedirectFor("/diary", { ...signedOut, signedIn: true }, false)).toBe("/setup/profile");
+    expect(setupRedirectFor("/diary", signedOut, true)).toBeNull();
+  });
+
   it("the first meal opens the add sheet for the meal of the clock", () => {
     expect(summaryAddHref(new Date("2026-10-13T08:00:00+07:00"))).toBe("/add?meal=breakfast");
     expect(summaryAddHref(new Date("2026-10-13T12:00:00+07:00"))).toBe("/add?meal=lunch");

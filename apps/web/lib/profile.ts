@@ -2,6 +2,9 @@ import { calculateTargets, type CompleteTargets, type GoalType, type SexType, ty
 import { DRAFT_KEY, goalName, readDraft, validateSetupDraft, type SetupDraft } from "./onboarding";
 import { formatAmount } from "./format";
 import type { MockDayData, MockMacroStat, MockMicroStat } from "./mock/sample-day";
+import { PROFILE_KEY, accountStorage } from "./storage-keys";
+
+export { PROFILE_KEY };
 
 export interface Profile {
   sex: SexType;
@@ -14,8 +17,6 @@ export interface Profile {
   /** Optional name shown on Cài đặt. "" means not set. */
   displayName: string;
 }
-
-export const PROFILE_KEY = "h1t_profile_v1";
 
 // The sample-day user. Used when nothing is saved and no setup has started.
 export const SAMPLE_PROFILE: Profile = {
@@ -100,7 +101,7 @@ export function parseStoredProfile(raw: string | null, currentYear: number): Pro
 
 export function readStoredProfile(currentYear: number): Profile | null {
   try {
-    return parseStoredProfile(window.localStorage.getItem(PROFILE_KEY), currentYear);
+    return parseStoredProfile(accountStorage()?.getItem(PROFILE_KEY) ?? null, currentYear);
   } catch {
     return null;
   }
@@ -108,7 +109,7 @@ export function readStoredProfile(currentYear: number): Profile | null {
 
 export function writeStoredProfile(profile: Profile): void {
   try {
-    window.localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+    accountStorage()?.setItem(PROFILE_KEY, JSON.stringify(profile));
   } catch {
     // Storage blocked: the profile still lasts for this visit.
   }

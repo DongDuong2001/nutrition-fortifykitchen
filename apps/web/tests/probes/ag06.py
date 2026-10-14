@@ -137,7 +137,7 @@ def test_item_4(browser):
 
     # Set all notification reminders to false in localStorage and verify it updates to "Đã tắt"
     pg.evaluate("""() => {
-        const key = 'h1t_settings_v1';
+        const key = 'h1t_settings_v1_demo';  // cc-21: settings are per account; demo has its own key
         const cur = JSON.parse(localStorage.getItem(key) || '{}');
         cur.breakfastReminder = false;
         cur.lunchReminder = false;

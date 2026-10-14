@@ -1,9 +1,13 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   ADDED_ENTRIES_KEY,
+  PROFILE_KEY,
   RECENT_FOODS_KEY,
   SAMPLE_EDITS_KEY,
+  SETTINGS_STORAGE_KEY,
+  TRAINING_CHECKLIST_KEY,
   adoptLegacyKeys,
+  adoptLegacyPersonal,
   keyedStorage,
   loadMigrated,
   storageKey,
@@ -11,6 +15,14 @@ import {
 } from "../storage-keys";
 import { FAVOURITES_KEY } from "../favourites";
 import { SAVED_MEALS_KEY } from "../saved-meals";
+import { SAMPLE_PROFILE, loadProfile, readStoredProfile, writeStoredProfile } from "../profile";
+import { DEFAULT_SETTINGS, loadSettings, saveSettings } from "../settings";
+import { readDay, writeDay } from "../training-checklist";
+import { signInWithPassword, signOut, signUpWithPassword } from "../auth-actions";
+
+// The account scenarios below run in account mode (not demo). Demo has its own keys and is checked elsewhere.
+const demo = vi.hoisted(() => ({ on: false }));
+vi.mock("../demo", () => ({ isDemo: () => demo.on }));
 
 function memory(initial: Record<string, string> = {}): KeyValueStore & { data: Record<string, string> } {
   const data = { ...initial };
@@ -193,5 +205,104 @@ describe("loadMigrated (session values move to local storage once)", () => {
     expect(loadMigrated(KEY, blocked, blocked)).toBeNull();
     expect(loadMigrated(KEY, null, null)).toBeNull();
     expect(loadMigrated(KEY, null, memory({ k: "S" }))).toBe("S");
+  });
+});
+
+describe("adoptLegacyPersonal (the old profile, settings and training ticks move to the first account, once)", () => {
+  it("moves each old global value to the first account and removes the old key", () => {
+    const local = memory({ [PROFILE_KEY]: '{"sex":"male"}', [SETTINGS_STORAGE_KEY]: '{"language":"en"}' });
+    adoptLegacyPersonal(local, "a@x.vn");
+    expect(local.getItem(`${PROFILE_KEY}_a@x.vn`)).toBe('{"sex":"male"}');
+    expect(local.getItem(`${SETTINGS_STORAGE_KEY}_a@x.vn`)).toBe('{"language":"en"}');
+    expect(local.getItem(PROFILE_KEY)).toBeNull();
+    expect(local.getItem(SETTINGS_STORAGE_KEY)).toBeNull();
+  });
+
+  it("a later account finds nothing left to take", () => {
+    const local = memory({ [TRAINING_CHECKLIST_KEY]: '{"2026-10-11":{"minutes":60,"ticked":[]}}' });
+    adoptLegacyPersonal(local, "a@x.vn");
+    adoptLegacyPersonal(local, "b@x.vn");
+    expect(local.getItem(`${TRAINING_CHECKLIST_KEY}_b@x.vn`)).toBeNull();
+    expect(local.getItem(`${TRAINING_CHECKLIST_KEY}_a@x.vn`)).toBe('{"2026-10-11":{"minutes":60,"ticked":[]}}');
+  });
+
+  it("keeps an account's own value, and the old key still goes", () => {
+    const local = memory({ [PROFILE_KEY]: "old", [`${PROFILE_KEY}_a@x.vn`]: "own" });
+    adoptLegacyPersonal(local, "a@x.vn");
+    expect(local.getItem(`${PROFILE_KEY}_a@x.vn`)).toBe("own");
+    expect(local.getItem(PROFILE_KEY)).toBeNull();
+  });
+
+  it("does nothing without storage or without an old value", () => {
+    expect(() => adoptLegacyPersonal(null, "a@x.vn")).not.toThrow();
+    const local = memory();
+    adoptLegacyPersonal(local, "a@x.vn");
+    expect(local.data).toEqual({});
+  });
+});
+
+describe("account data stays with its account (profile, reminders and training ticks)", () => {
+  let local: KeyValueStore & { data: Record<string, string> };
+
+  beforeEach(() => {
+    demo.on = false;
+    local = memory();
+    vi.stubGlobal("localStorage", local);
+    vi.stubGlobal("window", { localStorage: local, sessionStorage: memory() });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("A's data never shows for B, and comes back for A after signing in again", async () => {
+    await signUpWithPassword("a@example.com", "abcdef12");
+    writeStoredProfile({
+      ...SAMPLE_PROFILE,
+      sex: "female",
+      birthYear: 1995,
+      weightKg: 58,
+      goal: "cut",
+      periodMode: true,
+      displayName: "An",
+    });
+    saveSettings({ breakfastTime: "06:45", dinnerReminder: true });
+    writeDay("2026-10-11", { minutes: 60, ticked: ["intra-carb"] });
+
+    const aProfile = {
+      sex: "female",
+      birthYear: 1995,
+      weightKg: 58,
+      goal: "cut",
+      periodMode: true,
+      trainingMinutesDefault: 60,
+      displayName: "An",
+    };
+    expect(loadProfile(2026)).toEqual(expect.objectContaining(aProfile));
+
+    await signOut();
+    await signUpWithPassword("b@example.com", "abcdef12");
+    expect(readStoredProfile(2026)).toBeNull();
+    expect(loadProfile(2026)).toEqual(SAMPLE_PROFILE);
+    expect(loadSettings()).toEqual(DEFAULT_SETTINGS);
+    expect(readDay("2026-10-11")).toBeNull();
+
+    writeStoredProfile({ ...SAMPLE_PROFILE, weightKg: 80 });
+    await signOut();
+    expect(await signInWithPassword("a@example.com", "abcdef12")).toEqual({ ok: true });
+    expect(loadProfile(2026)).toEqual(expect.objectContaining(aProfile));
+    expect(loadSettings()).toEqual({ ...DEFAULT_SETTINGS, breakfastTime: "06:45", dinnerReminder: true });
+    expect(readDay("2026-10-11")).toEqual({ minutes: 60, ticked: ["intra-carb"] });
+  });
+
+  it("the old global values are kept for the first account only", async () => {
+    local.setItem(PROFILE_KEY, JSON.stringify({ ...SAMPLE_PROFILE, displayName: "Cũ" }));
+    await signUpWithPassword("a@example.com", "abcdef12");
+    expect(loadProfile(2026).displayName).toBe("Cũ");
+    expect(local.getItem(PROFILE_KEY)).toBeNull();
+
+    await signOut();
+    await signUpWithPassword("b@example.com", "abcdef12");
+    expect(loadProfile(2026)).toEqual(SAMPLE_PROFILE);
   });
 });

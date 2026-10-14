@@ -3,9 +3,18 @@
 // account (`<base>_<accountId>`). Demo mode (lib/demo) uses its own keys (a "_demo" suffix), so what is made
 // there never shows up outside it, and the reverse. Đăng xuất leaves the data where it is.
 
+import { currentAccountId } from "./auth-actions";
+import { isDemo } from "./demo";
 import { FAVOURITES_KEY } from "./favourites";
 import { SAVED_MEALS_KEY } from "./saved-meals";
 import { DAY_ARCHIVE_KEY } from "./day-archive";
+
+// One value per account: the profile (sex, birth year, weight, goal, period mode, name), the reminder settings and
+// the training ticks. Each is kept under the account's key too, so a second account on this browser never sees them.
+export const PROFILE_KEY = "h1t_profile_v1";
+export const SETTINGS_STORAGE_KEY = "h1t_settings_v1";
+export const TRAINING_CHECKLIST_KEY = "h1t_training_checklist_v1";
+export const PERSONAL_KEYS: readonly string[] = [PROFILE_KEY, SETTINGS_STORAGE_KEY, TRAINING_CHECKLIST_KEY];
 
 export const ADDED_ENTRIES_KEY = "h1t_added_entries_v1";
 // Edits to sample-day items (portion, meal, deleted), kept next to the added entries
@@ -110,9 +119,41 @@ export function adoptLegacyKeys(local: KeyValueStore | null, session: KeyValueSt
   }, undefined);
 }
 
+/**
+ * The one-time move of the old global profile, settings and training ticks to an account. The first account
+ * that loads takes a value only when it has none of its own; the old key goes either way, so no later account can
+ * pick it up. Demo keys are never touched (the caller skips demo).
+ */
+export function adoptLegacyPersonal(local: KeyValueStore | null, accountId: string): void {
+  if (!local) return;
+  attempt(() => {
+    for (const base of PERSONAL_KEYS) {
+      const legacy = local.getItem(base);
+      if (legacy === null) continue;
+      const own = `${base}_${accountId}`;
+      if (local.getItem(own) === null) local.setItem(own, legacy);
+      local.removeItem(base);
+    }
+  }, undefined);
+}
+
 /** The browser's localStorage, or null when it is missing or blocked. */
 export function browserLocal(): KeyValueStore | null {
   return attempt(() => (typeof window === "undefined" ? null : window.localStorage), null);
+}
+
+/**
+ * The storage the signed-in account (or demo) reads and writes its own values through. Null when there is no
+ * browser storage; without an account it reads and writes nothing. The first read of the account also moves the
+ * old global profile, settings and ticks to it (adoptLegacyPersonal).
+ */
+export function accountStorage(): KeyValueStore | null {
+  const local = browserLocal();
+  if (!local) return null;
+  const demo = isDemo();
+  const account = currentAccountId();
+  if (!demo && account) adoptLegacyPersonal(local, account);
+  return keyedStorage(local, demo, account);
 }
 
 /** The browser's sessionStorage, or null when it is missing or blocked. */

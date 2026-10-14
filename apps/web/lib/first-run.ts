@@ -3,7 +3,7 @@ import { PROFILE_KEY, targetRangeText, targetsFor, type Profile } from "./profil
 import { calculateSaltTarget } from "./training";
 import { isDemo } from "./demo";
 import { currentAccountId } from "./auth-actions";
-import { ADDED_ENTRIES_KEY, adoptLegacyKeys, browserLocal, browserSession, keyedStorage } from "./storage-keys";
+import { ADDED_ENTRIES_KEY, adoptLegacyKeys, adoptLegacyPersonal, browserLocal, browserSession, keyedStorage } from "./storage-keys";
 
 // The entries this user added live in localStorage under the signed-in account's key (lib/storage-keys). Only
 // real entries count here: the sample day, history and seeded Gần đây exist in demo mode only (lib/demo), and
@@ -13,6 +13,8 @@ export { ADDED_ENTRIES_KEY };
 export interface FirstRunFacts {
   profileSaved: boolean;
   entryEverLogged: boolean;
+  /** False when nobody is signed in: the profile then cannot be read, so the sign-in gate decides, not setup. */
+  signedIn?: boolean;
 }
 
 export type FirstRunState = "needs-setup" | "needs-first-meal" | "ready";
@@ -32,7 +34,7 @@ export function isTabRoute(pathname: string): boolean {
 
 /** Where to send a user who has no profile yet (outside demo mode): setup, from any tab route. Else null. */
 export function setupRedirectFor(pathname: string, facts: FirstRunFacts, demo: boolean): string | null {
-  if (demo || !isTabRoute(pathname)) return null;
+  if (demo || !isTabRoute(pathname) || facts.signedIn === false) return null;
   return firstRunState(facts) === "needs-setup" ? "/setup/profile" : null;
 }
 
@@ -55,21 +57,23 @@ export function countStoredEntries(raw: string | null): number {
 export function readFirstRunFacts(demo: boolean = isDemo()): FirstRunFacts {
   let profileSaved = false;
   let entryEverLogged = false;
-  try {
-    profileSaved = window.localStorage.getItem(PROFILE_KEY) !== null;
-  } catch {
-    // Storage blocked
-  }
+  let signedIn = false;
   try {
     // The old unscoped keys move to the first account here, the same as the diary store does on load
     const account = currentAccountId();
     const local = browserLocal();
-    if (!demo && account) adoptLegacyKeys(local, browserSession(), account);
-    entryEverLogged = countStoredEntries((local ? keyedStorage(local, demo, account) : null)?.getItem(ADDED_ENTRIES_KEY) ?? null) > 0;
+    if (!demo && account) {
+      adoptLegacyKeys(local, browserSession(), account);
+      adoptLegacyPersonal(local, account);
+    }
+    const own = local ? keyedStorage(local, demo, account) : null;
+    profileSaved = own?.getItem(PROFILE_KEY) != null;
+    entryEverLogged = countStoredEntries(own?.getItem(ADDED_ENTRIES_KEY) ?? null) > 0;
+    signedIn = account !== null;
   } catch {
     // Storage blocked
   }
-  return { profileSaved, entryEverLogged };
+  return { profileSaved, entryEverLogged, signedIn };
 }
 
 /** One line of the day targets on the setup summary. */
