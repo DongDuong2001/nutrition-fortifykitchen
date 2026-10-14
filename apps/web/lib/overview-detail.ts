@@ -76,7 +76,7 @@ export function macroScoreRow(input: {
     days,
     unit: info.unit,
     target: { min: range.min, max: range.max },
-    caption: `${days.filter((d) => d.met === true).length}/${days.length} ngày đạt`,
+    caption: `${days.filter((d) => d.met === true).length}/${days.filter((d) => !d.inProgress).length} ngày đạt`,
     decimals: 0,
   };
 }

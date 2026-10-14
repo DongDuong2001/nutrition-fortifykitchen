@@ -9,6 +9,7 @@ import { AppShell } from "@/components/ui/app-shell";
 import { useDiary } from "@/lib/diary-store";
 import type { MockDayData } from "@/lib/mock/sample-day";
 import { buildOverview, type Overview } from "@/lib/overview";
+import { periodHeading } from "@/lib/overview-board";
 import { parsePeriodParams, periodQuery, type PeriodLength } from "@/lib/period";
 import type { CompleteTargets } from "@/lib/targets";
 
@@ -231,11 +232,7 @@ function FrameInner({ active, children }: { active: OverviewTab; children: React
       <main className="mx-auto flex w-full max-w-[560px] flex-col gap-3 px-4 pt-4 pb-6 box-border lg:mx-0 lg:max-w-[1240px] lg:gap-5 lg:px-8 lg:pt-5 lg:pb-12">
         {/* The period control; Tóm tắt draws it itself, between the hero and the scoreboard */}
         {active !== "summary" && (
-          <PeriodControl
-            heading={`Trung bình mỗi ngày${period ? ` · ${period.label}` : ""}`}
-            period={period}
-            length={length}
-          />
+          <PeriodControl compact heading={period ? periodHeading(period) : ""} period={period} length={length} />
         )}
 
         {ctx ? <OverviewContext.Provider value={ctx}>{children}</OverviewContext.Provider> : <ContentSkeleton />}

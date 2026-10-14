@@ -83,7 +83,7 @@ def run(browser, size_name, size):
     check(rows.count() == 3, f"{size_name} scoreboard: three rows ({rows.count()})")
     titles = [re.sub(r"\s+", " ", rows.nth(i).inner_text()) for i in range(rows.count())]
     check(titles[0].startswith("Kcal") and titles[1].startswith("Đạm") and titles[2].startswith("Cân nặng"), f"{size_name} scoreboard: Kcal, Đạm, Cân nặng")
-    check("ngày đạt" in titles[0] and "so với 7 ngày trước" in titles[0], f"{size_name} scoreboard: kcal change in words and n/7 ngày đạt ({titles[0][:90]})")
+    check("ngày đạt" in titles[0] and "so với 7 ngày trước" in titles[0], f"{size_name} scoreboard: kcal change in words and n/6 ngày đạt ({titles[0][:90]})")
     check("Hồ sơ 65,0 kg" in titles[2] or "hồ sơ 65,0 kg" in titles[2], f"{size_name} scoreboard: weight row shows the profile weight ({titles[2][:90]})")
     expanded = lambda: pg.locator("section[aria-label='Bảng điểm'] button[aria-expanded='true']").count()
     check(expanded() == 1 and rows.nth(0).get_attribute("aria-expanded") == "true", f"{size_name} scoreboard: Kcal open by default")

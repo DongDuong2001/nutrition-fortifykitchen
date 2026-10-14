@@ -54,7 +54,7 @@ def text(pg):
 
 
 def heading(pg):
-    return pg.locator("p:has-text('Trung bình mỗi ngày') >> visible=true").first.inner_text().strip()
+    return pg.locator("#ov-period >> visible=true").first.inner_text().strip()
 
 
 def tab(pg, label):
@@ -100,13 +100,13 @@ def check_subtabs(browser, size_name, size):
 def check_period(browser, size_name, size):
     ctx, pg = new_page(browser, size)
     go(pg, "/trends")
-    check(heading(pg) == "Trung bình mỗi ngày · 06–12/10", f"{size_name} period heading is 06–12/10 ({heading(pg)})")
+    check(heading(pg) == "7 ngày qua · 06/10 – 12/10", f"{size_name} period heading is 06–12/10 ({heading(pg)})")
     check(pg.locator('button[aria-label="Kỳ sau"]:visible').is_disabled(), f"{size_name} › is disabled on the current period")
     before = avg_text(pg)
 
     pg.locator('button[aria-label="Kỳ trước"]:visible').click()
     pg.wait_for_timeout(500)
-    check(heading(pg).endswith("29/09–05/10"), f"{size_name} ‹ steps to 29/09–05/10 ({heading(pg)})")
+    check(heading(pg).endswith("29/09 – 05/10"), f"{size_name} ‹ steps to 29/09–05/10 ({heading(pg)})")
     check(avg_text(pg) != before, f"{size_name} ‹ changes the average ({before} -> {avg_text(pg)})")
     check(pg.locator('button[aria-label="Kỳ sau"]:visible').is_enabled(), f"{size_name} › is enabled after ‹")
 
@@ -116,14 +116,14 @@ def check_period(browser, size_name, size):
 
     pg.locator('a:has-text("30 ngày") >> visible=true').first.click()
     pg.wait_for_timeout(600)
-    check(heading(pg).endswith("13/09–12/10"), f"{size_name} 30 ngày is 13/09–12/10 ({heading(pg)})")
+    check(heading(pg).endswith("13/09 – 12/10"), f"{size_name} 30 ngày is 13/09–12/10 ({heading(pg)})")
     check(avg_text(pg) != before, f"{size_name} 30 ngày changes the average ({avg_text(pg)})")
 
     # The period is remembered across sub-tabs
     tab(pg, "Vi chất").click()
     pg.wait_for_url("**/trends/micros**", timeout=8000)
     pg.wait_for_timeout(500)
-    check(heading(pg).endswith("13/09–12/10"), f"{size_name} the 30-day period stays on Vi chất ({heading(pg)})")
+    check(heading(pg).endswith("13/09 – 12/10"), f"{size_name} the 30-day period stays on Vi chất ({heading(pg)})")
     check("p=30" in pg.url, f"{size_name} the period is in the URL ({pg.url})")
     ctx.close()
 

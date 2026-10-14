@@ -35,13 +35,13 @@ const day = (date: string, calories: number | null, protein: number | null = nul
 
 describe("macroScoreRow", () => {
   const o = build();
-  it("kcal: average, target range, change in words, seven days, n/7 caption", () => {
+  it("kcal: average, target range, change in words, seven days, n/6 caption (finished days only)", () => {
     const row = macroScoreRow({ key: "calories", overview: o, targets: TARGETS, todayIso: TODAY });
     expect(row.title).toBe("Kcal");
     expect(row.days).toHaveLength(7);
     expect(row.unit).toBe("kcal");
     expect(row.sub.startsWith("kcal / ")).toBe(true);
-    expect(row.caption).toMatch(/^\d\/7 ngày đạt$/);
+    expect(row.caption).toMatch(/^\d\/6 ngày đạt$/);
     expect(row.target).toEqual({ min: TARGETS.calories.min, max: TARGETS.calories.max });
   });
   it("carbs and fat show their share of kcal in the sub line", () => {

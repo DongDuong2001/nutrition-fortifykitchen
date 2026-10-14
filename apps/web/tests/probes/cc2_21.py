@@ -4,7 +4,7 @@
   the kcal split, training vs rest days, best and worst day, Cần chú ý
 - Vi chất: x/22 hero with 22 squares (a square names the nutrient and links to its detail), four collapsible
   sections, Cần chú ý with the lowest three and the foods that gave the most
-- Cơ thể: latest weight hero, the weight line (a point and the stepper update the line), weigh-ins n/7, targets
+- Cơ thể: latest weight hero, the weight line (a point and the stepper update the line), weigh-ins n/6, targets
   before -> now
 Screenshots: .screenshots/cc2-21-*.png
 Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/cc2_21.py
@@ -67,7 +67,7 @@ def energy(browser, size_name, size):
     check(full[0].startswith("Kcal") and full[1].startswith("Đạm") and full[2].startswith("Chất béo") and full[3].startswith("Tinh bột") and full[4].startswith("Chất xơ*"),
           f"{w}: Kcal, Đạm, Chất béo, Tinh bột, Chất xơ* ({[f[:14] for f in full]})")
     check(re.search(r"% kcal", full[2]) is not None and re.search(r"% kcal", full[3]) is not None, f"{w}: béo and tinh bột show their share of kcal")
-    check("so với 7 ngày trước" in full[0] and "ngày đạt" in full[0], f"{w}: change in words and n/7")
+    check("so với 7 ngày trước" in full[0] and "ngày đạt" in full[0], f"{w}: change in words and n/6")
     opened = lambda: pg.locator("section[aria-label='Năng lượng và chất sinh năng lượng'] button[aria-expanded='true']").count()
     check(opened() == 1 and rows.nth(0).get_attribute("aria-expanded") == "true", f"{w}: Kcal open by default")
     rows.nth(3).click()
@@ -149,7 +149,7 @@ def body(browser, size_name, size):
     pg.wait_for_timeout(150)
     check(points.nth(2).get_attribute("aria-pressed") == "true", f"{w}: the stepper moves to the next weigh-in")
     t = text(pg)
-    check(re.search(r"Số lần cân \d+/7", t) is not None, f"{w}: weigh-ins n/7")
+    check(re.search(r"Số lần cân \d+/7", t) is not None, f"{w}: weigh-ins n/6")
     check("So với kỳ trước" in t and "Mục tiêu theo cân nặng" in t, f"{w}: change vs previous and targets that follow weight")
     shift = squash(pg.locator("section[aria-labelledby='bd-shift']").inner_text())
     check(all(k in shift for k in ("Kcal", "Đạm", "Kali")), f"{w}: kcal, đạm and kali ({shift[:120]!r})")
