@@ -178,3 +178,12 @@ export function writePendingEmail(email: string): void {
     // Storage unavailable: the email is not remembered between screens.
   }
 }
+
+export function clearOnboardingStorage(): void {
+  try {
+    window.sessionStorage.removeItem(DRAFT_KEY);
+    window.sessionStorage.removeItem(EMAIL_KEY);
+  } catch {
+    // Storage unavailable
+  }
+}

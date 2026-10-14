@@ -13,7 +13,7 @@ import {
 } from "./auth-mock";
 import { createClient } from "./supabase-client";
 import { isDemo } from "./demo";
-import { isValidEmail } from "./onboarding";
+import { clearOnboardingStorage, isValidEmail } from "./onboarding";
 
 // The one interface the auth screens call. In live mode (NEXT_PUBLIC_API_MODE=live, lib/api-mode.ts) it is backed by
 // Supabase Auth (lib/supabase-client.ts); otherwise by the local mock in lib/auth-mock.ts, so gates and demos run
@@ -348,6 +348,7 @@ export async function signInSampleAccount(): Promise<void> {
  * Đăng xuất: clears the signed-in session and local tokens.
  */
 export async function signOut(): Promise<void> {
+  clearOnboardingStorage();
   if (!isLiveMode()) return mockSignOut();
   setStoredEmail(null);
   try {

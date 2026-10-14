@@ -10,6 +10,7 @@ import { calculateTargets } from "./targets";
 import { MOCK_FOODS, type FoodItem } from "./mock/foods";
 import { searchFoods as searchMockFoods } from "./search";
 import type { SetupProfile } from "./onboarding";
+import { accountStorage } from "./storage-keys";
 
 export * from "./nutrients";
 export * from "./mock/foods";
@@ -141,23 +142,27 @@ interface OutboxItem {
 }
 
 export function enqueueOfflineEntry(date: string, payload: Record<string, unknown>): void {
+  const storage = accountStorage();
+  if (!storage) return;
   try {
-    const current: OutboxItem[] = JSON.parse(globalThis.localStorage?.getItem(OUTBOX_STORAGE_KEY) || "[]");
+    const current: OutboxItem[] = JSON.parse(storage.getItem(OUTBOX_STORAGE_KEY) || "[]");
     current.push({
       id: (payload.id as string) || `offline-${Date.now()}`,
       date,
       payload,
       createdAt: Date.now(),
     });
-    globalThis.localStorage?.setItem(OUTBOX_STORAGE_KEY, JSON.stringify(current));
+    storage.setItem(OUTBOX_STORAGE_KEY, JSON.stringify(current));
   } catch {
     // Storage unavailable
   }
 }
 
 export async function syncOfflineOutbox(): Promise<number> {
+  const storage = accountStorage();
+  if (!storage) return 0;
   try {
-    const items: OutboxItem[] = JSON.parse(globalThis.localStorage?.getItem(OUTBOX_STORAGE_KEY) || "[]");
+    const items: OutboxItem[] = JSON.parse(storage.getItem(OUTBOX_STORAGE_KEY) || "[]");
     if (!items.length) return 0;
 
     const headers = await getAuthHeaders();
@@ -181,7 +186,7 @@ export async function syncOfflineOutbox(): Promise<number> {
       }
     }
 
-    globalThis.localStorage?.setItem(OUTBOX_STORAGE_KEY, JSON.stringify(remaining));
+    storage.setItem(OUTBOX_STORAGE_KEY, JSON.stringify(remaining));
     return synced;
   } catch {
     return 0;

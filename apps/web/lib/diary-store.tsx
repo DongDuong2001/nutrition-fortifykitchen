@@ -439,6 +439,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     if (now === accountId) return;
     setAccountId(now);
     loadData(now, false, todayIso ?? getTodayIsoVN());
+    setProfile(loadProfile(new Date().getFullYear()));
   }, [pathname, hydrated, demo, accountId, loadData, todayIso]);
 
   // The storage this account (or demo) writes to; without an account it reads and writes nothing

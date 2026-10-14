@@ -1,5 +1,6 @@
 import { apiClient } from "./api-client";
 import { isDemo } from "./demo";
+import { clearOnboardingStorage } from "./onboarding";
 import {
   SIGN_IN_FAILED,
   WRONG_CURRENT_PASSWORD,
@@ -196,5 +197,6 @@ export async function mockSignInSampleAccount(): Promise<void> {
  * under the account's storage keys (lib/storage-keys), so it is there again when the same account signs in.
  */
 export async function mockSignOut(): Promise<void> {
+  clearOnboardingStorage();
   writeStore({ ...readStore(), current: null });
 }
