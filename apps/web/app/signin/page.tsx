@@ -15,7 +15,7 @@ export default function SignInPage() {
             <h1 className="m-0 font-display text-[26px] font-black italic uppercase leading-tight">
               CHÀO MỪNG TRỞ LẠI.
             </h1>
-            <p className="m-0 text-[15px] leading-normal text-muted-subtitle">
+            <p className="m-0 text-balance text-[15px] leading-normal text-muted-subtitle">
               Đăng nhập để xem tiếp nhật ký và vi chất của bạn.
             </p>
           </div>

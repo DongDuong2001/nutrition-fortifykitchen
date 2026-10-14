@@ -6,6 +6,7 @@ Newest first. Updated with every web merge. Do not edit apps/api, migrations or 
 
 | Task | Commit | Date | What |
 |---|---|---|---|
+| cc2-19b | see git log (cc2-19b) | 15/10 | UX journeys a, f, g walked (probe cc2_19b, 22 ok); save-meal name field selects the default on focus; sign-in lead text-balance |
 | cc2-18 | see git log (cc2-18) | 14/10 | Voice pass (verified audit rows), percent without a space, Ngày tập tile bar, add-sheet cards with a 44 px add, design/v2 copy |
 | cc2-17 | see git log (cc2-17) | 14/10 | Esc returns focus on every sheet (probe), diary context memoised, five pure components no longer client; bundle change negligible |
 | cc-21 | see git log (cc-21) | 14/10 | audit-ag16 fixes: profile, reminders and training ticks per account, Google button through signInWithGoogle, form error announced, theme tokens, dead code removed, paywall backHref, grams label in Vietnamese format |
@@ -32,3 +33,10 @@ All from docs/dong-checklist.md §6 (data the new Tổng quan screens need):
 - Food import has 44 foods, not ≥ 1.000, but the checklist box is ticked.
 - The 12 drinks have made-up source_ids ("drink-nuoc-mia") and tip_vi advice text, which breaks the sourced-data and facts-only rules.
 - feat/api was merged into feat/ui with a merge commit instead of a rebase + ff.
+- /healthz returns err.Error() when the DB is down (leaks the host); return "down" and log the detail.
+- Auth callback builds the redirect from x-forwarded-host / Host; use NEXT_PUBLIC_SITE_URL.
+- hCaptcha site key fallback is hard-coded in components/auth/hcaptcha.tsx; env only.
+- Migration 000008 partial unique index breaks importfoods ON CONFLICT; use a plain unique (source, source_id).
+- Add `extensions` to search_path in pkg/database/postgres.go.
+- Portion IDs come back as zero UUIDs.
+- Duplicate "Bún chả Hà Nội" in the seed.

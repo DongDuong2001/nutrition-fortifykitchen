@@ -8,26 +8,26 @@ Scope of this pass: the nine journeys from the reviewer's 23:20 note. Coverage i
 
 | # | Journey | Taps (observed) | Result | Problems found | What changed |
 |---|---|---|---|---|---|
-| a | Fresh install → setup → first breakfast | — | **Not walked.** Signed-out `/diary` redirects to `/signin` (correct). Sign-up, setup and first entry were not walked end to end. | None confirmed | Nothing |
+| a | Fresh install → setup → first breakfast | — | **Partly walked (cc2-19b).** Signed-out `/diary` redirects to `/signin`; `/setup/profile` opens on a new account with the weight field. Sign-up and the three setup steps were not walked to the end, and the first breakfast entry was not logged on a new account. | None confirmed | Nothing; cc2_19b asserts the redirect and the setup step |
 | b | Log a repeat lunch in ≤ 2 taps | "+" on Bữa trưa (1), a Gần đây card's "+" (2) | Reachable in 2 taps on the add sheet. Not timed on a real repeat. | None confirmed | Nothing |
 | c | Today's Vi chất → lowest nutrient | Vi chất tab (1), Vitamin B1 square (2), "Xem chi tiết Vitamin B1" (3) | Lowest nutrient first, link to /micros/b1 present. Reached in 3 taps. | None confirmed | Nothing; probe asserts it |
 | d | This week vs last week | Tóm tắt (already open), "Kỳ trước" (1) | Change line "Giảm 333 so với 7 ngày trước" and the period control are on the first screen. Period label broke at the dash: "09/10 – / 15/10" | **Period label split across two lines at 390** | Dates now joined with a non-breaking dash in `PeriodControl` (`overview-frame.tsx`); `cc2_10` heading helper now collapses whitespace |
 | e | Find a calcium-rich food and add it | Khám phá (1), "Giàu canxi" (2), first row (3), add (4, not measured) | List shows each food with % of the daily target. Reached in 3 taps. | None confirmed | Nothing |
-| f | Save a meal as Bữa ăn của tôi and reuse it | — | **Not walked.** | — | — |
-| g | Change goal or weight and see targets update | — | **Not walked.** | — | — |
+| f | Save a meal as Bữa ăn của tôi and reuse it | ⋯ on Bữa sáng (1), Lưu thành Bữa ăn của tôi (2), name, Lưu (3); Khám phá shows it (0 extra) | Saved and listed with "3 món · 459 kcal". | **Typing the name appended to the default ("Bữa sáng 15/10Sáng nhanh")**: the field starts with the default name and nothing was selected | The field selects its text on focus (`components/diary/meal-menu-sheet.tsx`); cc2_19b asserts typing replaces the default |
+| g | Change goal or weight and see targets update | Hồ sơ › Cân nặng, "+0,1 kg" × 10, Lưu (1 + 10 + 1) | Kcal range moves 1.950–2.275 → 1.980–2.310 before saving, and Mục tiêu shows the new range after saving. | None confirmed | Nothing; cc2_19b asserts both |
 | h | Open yesterday, confirm read-only | Nhật ký (1), ‹ (2) | "Đang xem ngày cũ · Về hôm nay" banner, no add link on past meals, "Chưa ghi" on empty meals. | None confirmed | Nothing; probe asserts it |
 | i | Food detail from Khám phá, back button and tab bar | Khám phá → row → back | Back returns to Khám phá; bottom tab bar present on both screens. | None confirmed | Nothing; probe asserts back |
 
 ## Other things seen and not changed
 
-- **Sign-in lead text (`/signin`, 390):** "Đăng nhập để xem tiếp nhật ký và vi chất của bạn." leaves "bạn." alone on the last line. Should be `text-balance`. Not changed in this pass (cosmetic, and the copy file is shared with the voice audit).
+- **Sign-in lead text (`/signin`, 390):** "Đăng nhập để xem tiếp nhật ký và vi chất của bạn." left "bạn." alone on the last line. Fixed in cc2-19b with `text-balance`; copy unchanged.
 - **Tóm tắt at 390:** the period control is compact and reads well; no change.
 - **Khám phá:** the Gần đây carousel shows the next card's edge (intended scroll hint). Fine.
 - `/overview` is not a route (404 with "Về Tổng quan"). The tab is `/`. No link points to `/overview`, so nothing to fix.
 
 ## Open for Hao's decision
 
-- None raised by this pass. The 9-journey walk is not complete (a, f, g not walked; b and e not timed). A second pass on those three is the next step.
+- None raised by this pass. Journey a is only partly walked (sign-up and setup steps 2–3 need a full setup flow; left for a later pass). b and e are still not timed.
 
 ## Gates and evidence
 
