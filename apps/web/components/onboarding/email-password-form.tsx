@@ -16,6 +16,8 @@ import {
   validatePasswordConfirm,
   validateRequiredPassword,
 } from "@/lib/auth-actions";
+import { isLiveMode } from "@/lib/api-mode";
+import { HCaptcha } from "@/components/auth/hcaptcha";
 import { readPendingEmail, writePendingEmail } from "@/lib/onboarding";
 
 type Errors = { email?: string; password?: string; confirm?: string };
@@ -37,6 +39,7 @@ export function EmailPasswordForm({ variant }: { variant: "signin" | "signup" })
   const [confirm, setConfirm] = useState("");
   const [errors, setErrors] = useState<Errors>({});
   const [busy, setBusy] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     setEmail(readPendingEmail());
@@ -53,7 +56,9 @@ export function EmailPasswordForm({ variant }: { variant: "signin" | "signup" })
     if (next.email || next.password || next.confirm) return;
 
     setBusy(true);
-    const result = signup ? await signUpWithPassword(email, password) : await signInWithPassword(email, password);
+    const result = signup
+      ? await signUpWithPassword(email, password, captchaToken)
+      : await signInWithPassword(email, password, captchaToken);
     if (result.ok) {
       router.push(COPY[variant].next);
       return;
@@ -70,7 +75,7 @@ export function EmailPasswordForm({ variant }: { variant: "signin" | "signup" })
 
     setBusy(true);
     try {
-      const result = await requestMagicLink(email.trim());
+      const result = await requestMagicLink(email.trim(), captchaToken);
       if (!result.ok) {
         setErrors({ email: result.error });
         setBusy(false);
@@ -109,6 +114,12 @@ export function EmailPasswordForm({ variant }: { variant: "signin" | "signup" })
             Quên mật khẩu?
           </Link>
         </>
+      )}
+      {isLiveMode() && (
+        <HCaptcha
+          onVerify={setCaptchaToken}
+          onExpire={() => setCaptchaToken(undefined)}
+        />
       )}
       <PillButton type="submit" disabled={busy}>
         {COPY[variant].primary}

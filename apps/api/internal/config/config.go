@@ -11,6 +11,8 @@ type Config struct {
 	SupabaseURL       string
 	SupabaseAnonKey   string
 	SupabaseJWTSecret string
+	HCaptchaSecretKey string
+	HCaptchaSiteKey   string
 	SentryDSN         string
 	Environment       string
 	AllowedOrigins    []string
@@ -46,6 +48,8 @@ func Load() *Config {
 		SupabaseURL:       os.Getenv("SUPABASE_URL"),
 		SupabaseAnonKey:   os.Getenv("SUPABASE_ANON_KEY"),
 		SupabaseJWTSecret: os.Getenv("SUPABASE_JWT_SECRET"),
+		HCaptchaSecretKey: os.Getenv("HCAPTCHA_SECRET_KEY"),
+		HCaptchaSiteKey:   os.Getenv("HCAPTCHA_SITE_KEY"),
 		SentryDSN:         os.Getenv("SENTRY_DSN"),
 		Environment:       env,
 		AllowedOrigins:    origins,

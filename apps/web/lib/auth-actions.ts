@@ -199,7 +199,7 @@ export async function currentAccount(): Promise<AccountInfo | null> {
   }
 }
 
-export function signInWithPassword(email: string, password: string): Promise<AuthResult> {
+export function signInWithPassword(email: string, password: string, captchaToken?: string): Promise<AuthResult> {
   if (!isLiveMode()) return mockSignInWithPassword(email, password);
   return guarded(async () => {
     const address = normaliseEmail(email);
@@ -207,6 +207,7 @@ export function signInWithPassword(email: string, password: string): Promise<Aut
     const { data, error } = await supabase.auth.signInWithPassword({
       email: address,
       password,
+      options: captchaToken ? { captchaToken } : undefined,
     });
     if (error || !data.user) {
       return { ok: false, error: SIGN_IN_FAILED };
@@ -216,7 +217,7 @@ export function signInWithPassword(email: string, password: string): Promise<Aut
   });
 }
 
-export function signUpWithPassword(email: string, password: string): Promise<AuthResult> {
+export function signUpWithPassword(email: string, password: string, captchaToken?: string): Promise<AuthResult> {
   if (!isLiveMode()) return mockSignUpWithPassword(email, password);
   return guarded(async () => {
     const emailError = validateEmail(email);
@@ -229,6 +230,7 @@ export function signUpWithPassword(email: string, password: string): Promise<Aut
     const { data, error } = await supabase.auth.signUp({
       email: address,
       password,
+      options: captchaToken ? { captchaToken } : undefined,
     });
     if (error) {
       return { ok: false, error: "Email này đã có tài khoản. Hãy đăng nhập." };
@@ -261,7 +263,7 @@ export async function sendPasswordReset(email: string): Promise<AuthResult> {
  * Requests a magic link for the email. Does NOT sign in on request; the user is signed in
  * when the link is opened.
  */
-export function requestMagicLink(email: string): Promise<AuthResult> {
+export function requestMagicLink(email: string, captchaToken?: string): Promise<AuthResult> {
   if (!isLiveMode()) return mockRequestMagicLink(email);
   return guarded(async () => {
     const emailError = validateEmail(email);
@@ -275,7 +277,7 @@ export function requestMagicLink(email: string): Promise<AuthResult> {
     const redirectTo = typeof window !== "undefined" ? `${window.location.origin}/auth/callback?next=/setup/profile` : undefined;
     const { error } = await supabase.auth.signInWithOtp({
       email: address,
-      options: { emailRedirectTo: redirectTo },
+      options: { emailRedirectTo: redirectTo, captchaToken },
     });
     if (error) {
       return { ok: false, error: RETRY_LATER };
