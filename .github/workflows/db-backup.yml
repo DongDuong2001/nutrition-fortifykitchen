@@ -1,0 +1,86 @@
+name: Database Backup & Offsite Archive
+
+on:
+  schedule:
+    # Runs daily at 19:00 UTC (02:00 AM Asia/Ho_Chi_Minh)
+    - cron: '0 19 * * *'
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for triggering manual backup'
+        required: false
+        default: 'Manual on-demand snapshot'
+
+jobs:
+  backup:
+    name: PostgreSQL Logical Backup
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install PostgreSQL 17 Client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install --no-install-recommends -y postgresql-client-17 || sudo apt-get install --no-install-recommends -y postgresql-client
+
+      - name: Create Database Snapshot
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "Error: PRODUCTION_DATABASE_URL secret is not configured." >&2
+            exit 1
+          fi
+
+          mkdir -p backups
+          TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+          BACKUP_FILE="backups/nutrition_backup_${TIMESTAMP}.sql.gz"
+
+          echo "Exporting nutrition schema to $BACKUP_FILE..."
+          pg_dump "$DATABASE_URL" \
+            --schema=nutrition \
+            --no-owner \
+            --no-acl \
+            --clean \
+            --if-exists \
+            | gzip -9 > "$BACKUP_FILE"
+
+          if [ ! -s "$BACKUP_FILE" ]; then
+            echo "Error: Generated backup file is empty." >&2
+            exit 1
+          fi
+
+          FILE_SIZE=$(ls -lh "$BACKUP_FILE" | awk '{print $5}')
+          SHA256=$(sha256sum "$BACKUP_FILE" | awk '{print $1}')
+          echo "Backup created successfully."
+          echo "Size: $FILE_SIZE"
+          echo "SHA256: $SHA256"
+          echo "BACKUP_FILE=$BACKUP_FILE" >> $GITHUB_ENV
+          echo "BACKUP_NAME=$(basename $BACKUP_FILE)" >> $GITHUB_ENV
+
+      - name: Upload to S3 / Cloudflare R2 Cold Storage
+        if: env.BACKUP_FILE != '' && env.AWS_ACCESS_KEY_ID != ''
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.BACKUP_STORAGE_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.BACKUP_STORAGE_SECRET_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.BACKUP_STORAGE_REGION || 'ap-southeast-1' }}
+          BACKUP_BUCKET: ${{ secrets.BACKUP_STORAGE_BUCKET }}
+          S3_ENDPOINT_URL: ${{ secrets.BACKUP_STORAGE_ENDPOINT }}
+        run: |
+          EXTRA_ARGS=""
+          if [ -n "$S3_ENDPOINT_URL" ]; then
+            EXTRA_ARGS="--endpoint-url $S3_ENDPOINT_URL"
+          fi
+          echo "Uploading $BACKUP_FILE to s3://$BACKUP_BUCKET/backups/$BACKUP_NAME..."
+          aws s3 cp "$BACKUP_FILE" "s3://$BACKUP_BUCKET/backups/$BACKUP_NAME" $EXTRA_ARGS
+
+      - name: Archive Workflow Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.BACKUP_NAME }}
+          path: ${{ env.BACKUP_FILE }}
+          retention-days: 7
+          if-no-files-found: error

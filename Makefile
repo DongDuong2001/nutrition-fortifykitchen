@@ -1,4 +1,4 @@
-.PHONY: dev dev-api dev-web build build-api build-web db-migrate migrate-up migrate-down test test-api test-web lint lint-api lint-web clean
+.PHONY: dev dev-api dev-web build build-api build-web db-migrate migrate-up migrate-down db-backup db-restore test test-api test-web lint lint-api lint-web clean
 
 dev:
 	@echo "Starting development environment..."
@@ -34,6 +34,12 @@ migrate-down:
 		echo "Rolling back $$f..."; \
 		psql "$$DATABASE_URL" -f "$$f" || true; \
 	done
+
+db-backup:
+	@bash scripts/db-backup.sh
+
+db-restore:
+	@bash scripts/db-restore.sh $(FILE)
 
 test: test-api test-web
 

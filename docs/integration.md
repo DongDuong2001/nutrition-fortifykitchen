@@ -33,6 +33,7 @@
 2. **Database**:
    - Supabase PostgreSQL, Singapore region (`ap-southeast-1`).
    - Connection pool: pgx connection pool with max 25 connections in Go monolith.
+   - Backup strategy: 3-pillar model (Supabase PITR, daily offsite GitHub Actions backup to S3/R2 at 02:00 VN, and pre-migration `make db-backup`). Complete runbook in `docs/09-disaster-recovery.md`.
 
 3. **Frontend**:
    - Vercel (Edge Network + Serverless SSR Next.js 16).

@@ -21,6 +21,11 @@ bin/
 .env.test.local
 .env.production.local
 
+# Database backups
+backups/
+*.dump
+*.sql.gz
+
 # Logs
 *.log
 npm-debug.log*
