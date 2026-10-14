@@ -124,8 +124,8 @@ func SetupRouter(cfg *config.Config, pool *pgxpool.Pool) chi.Router {
 
 	userRateLimiter := ratelimit.NewUserRateLimiter(60)
 
-	if cfg.SupabaseJWTSecret == "" && os.Getenv("SUPABASE_SERVICE_ROLE_KEY") == "" {
-		logger.Log.Fatal().Msg("SUPABASE_JWT_SECRET (or SUPABASE_SERVICE_ROLE_KEY) is required to start the server")
+	if cfg.SupabaseJWTSecret == "" && os.Getenv("SUPABASE_SERVICE_ROLE_KEY") == "" && cfg.SupabaseJWKSURL == "" && cfg.SupabaseURL == "" {
+		logger.Log.Fatal().Msg("Authentication configuration missing: SUPABASE_JWT_SECRET (or SUPABASE_SERVICE_ROLE_KEY) or SUPABASE_JWKS_URL (or SUPABASE_URL) is required to start the server")
 	}
 
 	authMiddleware := auth.NewMiddleware()
@@ -156,9 +156,28 @@ func SetupRouter(cfg *config.Config, pool *pgxpool.Pool) chi.Router {
 
 	// Health Check
 	r.Get("/healthz", func(w http.ResponseWriter, r *http.Request) {
+		dbStatus := "disabled"
+		if pool != nil {
+			ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
+			defer cancel()
+
+			if err := pool.Ping(ctx); err != nil {
+				logger.Log.Error().Err(err).Msg("Health check database ping failed")
+				response.JSON(w, http.StatusServiceUnavailable, map[string]string{
+					"status":   "unhealthy",
+					"database": "down",
+					"error":    err.Error(),
+					"time":     time.Now().UTC().Format(time.RFC3339),
+				})
+				return
+			}
+			dbStatus = "healthy"
+		}
+
 		response.JSON(w, http.StatusOK, map[string]string{
-			"status": "healthy",
-			"time":   time.Now().UTC().Format(time.RFC3339),
+			"status":   "healthy",
+			"database": dbStatus,
+			"time":     time.Now().UTC().Format(time.RFC3339),
 		})
 	})
 

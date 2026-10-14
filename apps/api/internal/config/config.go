@@ -36,9 +36,16 @@ func Load() *Config {
 	}
 
 	originsStr := os.Getenv("CORS_ORIGINS")
+	if originsStr == "" {
+		originsStr = os.Getenv("CORS_ALLOWED_ORIGINS")
+	}
 	var origins []string
 	if originsStr != "" {
-		origins = strings.Split(originsStr, ",")
+		for _, o := range strings.Split(originsStr, ",") {
+			if trimmed := strings.TrimSpace(o); trimmed != "" {
+				origins = append(origins, trimmed)
+			}
+		}
 	} else {
 		origins = []string{"http://localhost:3000", "http://localhost:3100", "http://localhost:3101", "http://localhost:3102"}
 	}

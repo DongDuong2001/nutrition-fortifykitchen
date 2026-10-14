@@ -50,6 +50,9 @@ func NewService(pool *pgxpool.Pool) Service {
 func (s *paymentService) VerifySignature(payload PayOSWebhookPayload) bool {
 	checksumKey := os.Getenv("PAYOS_CHECKSUM_KEY")
 	if checksumKey == "" {
+		if strings.EqualFold(os.Getenv("ENVIRONMENT"), "production") {
+			return false
+		}
 		return true // Allow development without checksum key
 	}
 

@@ -66,6 +66,9 @@ func NewService(pool *pgxpool.Pool) Service {
 func (s *vaultService) VerifyGitHubSignature(signatureHeader string, body []byte) bool {
 	secret := os.Getenv("GITHUB_VAULT_WEBHOOK_SECRET")
 	if secret == "" {
+		if strings.EqualFold(os.Getenv("ENVIRONMENT"), "production") {
+			return false
+		}
 		return true // Allow in dev if not set
 	}
 	if !strings.HasPrefix(signatureHeader, "sha256=") {
