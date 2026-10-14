@@ -90,7 +90,17 @@ export function EntryEditor({ view }: { view: EntryView }) {
       <AppHeader
         variant="sub"
         title={view.name}
-        subtitle={getMealSlotNameVi(view.mealSlot)}
+        // The title keeps two lines; a longer name is shown in full above the meal
+        subtitle={
+          view.name.length > 40 ? (
+            <>
+              <span className="block break-words font-semibold">{view.name}</span>
+              {getMealSlotNameVi(view.mealSlot)}
+            </>
+          ) : (
+            getMealSlotNameVi(view.mealSlot)
+          )
+        }
         backHref="/diary"
       />
       <div className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-8 pt-4">

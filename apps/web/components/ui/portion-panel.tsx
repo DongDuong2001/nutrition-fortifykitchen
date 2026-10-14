@@ -100,7 +100,8 @@ export function PortionPanel({
         <span
           data-align-group="portion"
           data-align-edge="left"
-          className={`font-bold truncate ${isDark ? "text-lg text-on-dark" : "text-xl text-text"}`}
+          title={food.nameVi}
+          className={`min-w-0 break-words line-clamp-2 font-bold ${isDark ? "text-lg text-on-dark" : "text-xl text-text"}`}
         >
           {food.nameVi}
         </span>

@@ -120,6 +120,8 @@ function FoodDetailInner() {
         title={food.nameVi}
         subtitle={
           <span className="inline-flex items-center flex-wrap gap-1">
+            {/* The title above keeps two lines; a longer name is shown in full here */}
+            {food.nameVi.length > 40 && <span className="basis-full break-words font-semibold">{food.nameVi}</span>}
             <span>{categoryLabel(categoryOf(food))}</span>
             <span>·</span>
             {food.brand && (

@@ -51,7 +51,9 @@ function ShortcutCard({
 }) {
   const body = (
     <>
-      <span className="line-clamp-2 text-[15px] font-semibold leading-snug">{name}</span>
+      <span title={name} className="line-clamp-2 break-words text-[15px] font-semibold leading-snug">
+        {name}
+      </span>
       <span className="line-clamp-2 text-[13px] leading-tight text-secondary">{meta}</span>
     </>
   );

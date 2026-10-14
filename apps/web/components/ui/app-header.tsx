@@ -100,9 +100,10 @@ export function AppHeader({
   className = "",
 }: AppHeaderProps) {
   const [clientNow, setClientNow] = useState<Date | null>(null);
+  // Read again when the date shown changes, so a day that rolls over at midnight is labelled against the new now
   useEffect(() => {
     setClientNow(new Date());
-  }, []);
+  }, [date]);
 
   // The label is computed after mount so the server and first client render agree.
   const dateLabel = useMemo(() => {
@@ -162,7 +163,7 @@ export function AppHeader({
               </>
             ) : (
               title && (
-                <h1 className="m-0 font-display italic font-extrabold text-2xl lg:text-[32px] leading-tight uppercase tracking-tight line-clamp-2">
+                <h1 title={typeof title === "string" ? title : undefined} className="m-0 break-words font-display italic font-extrabold text-2xl lg:text-[32px] leading-tight uppercase tracking-tight line-clamp-2">
                   {title}
                 </h1>
               )

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from "react";
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { currentAccountId } from "./auth-actions";
 import { SAMPLE_DAY, type MockDayData, type MockFoodItem } from "./mock/sample-day";
@@ -8,6 +8,7 @@ import { type FoodItem } from "./mock/foods";
 import { type MealSlot, getMealSlotNameVi } from "./meal-slot";
 import { formatAmount } from "./format";
 import { getTodayIsoVN, withRuntimeDate } from "./date";
+import { DAY_ARCHIVE_KEY, mergeArchive, msUntilNextDay, parseArchive, splitByDay, type DayArchive } from "./day-archive";
 import { isDemo, setDemoActive } from "./demo";
 import {
   ADDED_ENTRIES_KEY,
@@ -19,7 +20,7 @@ import {
   keyedStorage,
   type KeyValueStore,
 } from "./storage-keys";
-import { blankDay, dayEntries, statDisplay } from "./day-history";
+import { blankDay, dayEntries, setDayArchive, statDisplay } from "./day-history";
 import { totalsFromEntries } from "./day-totals";
 import { microsSummaryFor } from "./lacking";
 import { nutrientSourcesIn, type NutrientSource } from "./nutrient-sources";
@@ -146,6 +147,8 @@ interface DiaryContextValue {
   addQuickEntry: (input: QuickEntryInput, slot: MealSlot) => QuickEntryResult;
   /** Today as YYYY-MM-DD (Asia/Ho_Chi_Minh). Null until mounted. */
   todayIso: string | null;
+  /** Earlier days the user logged, by date; memo dependency for anything that calls dayEntries. */
+  dayArchive: DayArchive;
   hydrated: boolean;
   /** Demo mode (see lib/demo): the sample day, history and Gần đây are loaded. Off for a real account. */
   demo: boolean;
@@ -368,6 +371,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   const [savedMeals, setSavedMeals] = useState<SavedMeal[]>([]);
   // Today's date, read after mount so the server and first client render agree
   const [todayIso, setTodayIso] = useState<string | null>(null);
+  // Earlier days the user logged, filed by date (lib/day-archive); read by dayEntries for the history and Tổng quan
+  const [archive, setArchive] = useState<DayArchive>({});
   // Same rule for the profile: the sample user until the saved one is read after mount
   const [profile, setProfile] = useState<Profile>(SAMPLE_PROFILE);
 
@@ -378,7 +383,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
 
   // Reads one account's (or demo's) data into state. Everything is in localStorage under the account's keys; the
   // old unscoped keys and an old sessionStorage copy move to the first account that loads, once.
-  const loadData = useCallback((account: string | null, demoNow: boolean) => {
+  const loadData = useCallback((account: string | null, demoNow: boolean, iso: string) => {
     const local = browserLocal();
     if (!demoNow && account) adoptLegacyKeys(local, browserSession(), account);
     const own = local ? keyedStorage(local, demoNow, account) : null;
@@ -396,7 +401,10 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     } catch {
       // Ignore storage access errors
     }
-    setEdits({ added, sample, undo: null });
+    // Entries of earlier days are filed by date in the same step, so today starts with today's entries only
+    const split = splitByDay(added, iso);
+    setEdits({ added: split.today, sample, undo: null });
+    setArchive(mergeArchive(parseArchive(own?.getItem(DAY_ARCHIVE_KEY) ?? null), split.past));
     setRecentFoods(recents);
     setFavouriteIds(readFavouriteIds(own));
     setSavedMeals(readSavedMeals(own));
@@ -410,10 +418,11 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     setDemo(demoNow);
     const account = currentAccountId();
     setAccountId(account);
+    const iso = getTodayIsoVN();
     try {
-      loadData(account, demoNow);
+      loadData(account, demoNow, iso);
     } finally {
-      setTodayIso(getTodayIsoVN());
+      setTodayIso(iso);
       setProfile(loadProfile(new Date().getFullYear()));
       setHydrated(true);
     }
@@ -427,8 +436,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     const now = currentAccountId();
     if (now === accountId) return;
     setAccountId(now);
-    loadData(now, false);
-  }, [pathname, hydrated, demo, accountId, loadData]);
+    loadData(now, false, todayIso ?? getTodayIsoVN());
+  }, [pathname, hydrated, demo, accountId, loadData, todayIso]);
 
   // The storage this account (or demo) writes to; without an account it reads and writes nothing
   const ownStorage = useCallback((): KeyValueStore | null => {
@@ -459,6 +468,69 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       // Ignore quota/access errors
     }
   }, [edits.added, edits.sample, hydrated, ownStorage]);
+
+  // The latest list and date, for the midnight timer (it must not restart on every added entry)
+  const addedRef = useRef(edits.added);
+  const todayIsoRef = useRef(todayIso);
+  useEffect(() => {
+    addedRef.current = edits.added;
+    todayIsoRef.current = todayIso;
+  }, [edits.added, todayIso]);
+
+  // The date moved on (the app was open at midnight, or closed overnight): yesterday's entries leave today's list
+  // and are filed by date, so the new day starts empty and the old one shows in the history
+  useEffect(() => {
+    if (!hydrated || !todayIso) return;
+    const { today, past } = splitByDay(edits.added, todayIso);
+    if (today === edits.added) return;
+    setEdits((prev) => ({ ...prev, added: splitByDay(prev.added, todayIso).today }));
+    setArchive((prev) => mergeArchive(prev, past));
+  }, [hydrated, todayIso, edits.added]);
+
+  // Persist the archive only after hydrated
+  useEffect(() => {
+    if (!hydrated) return;
+    try {
+      ownStorage()?.setItem(DAY_ARCHIVE_KEY, JSON.stringify(archive));
+    } catch {
+      // Ignore quota/access errors
+    }
+  }, [archive, hydrated, ownStorage]);
+
+  // The clock reaches midnight while the app is open, or the tab comes back to the foreground on another day
+  useEffect(() => {
+    if (!hydrated) return;
+    // Filing the earlier days and moving the date are one batch, so no screen sees the new date with old entries
+    const refresh = () => {
+      const now = getTodayIsoVN();
+      if (now === todayIsoRef.current) return;
+      const { today, past } = splitByDay(addedRef.current, now);
+      if (today !== addedRef.current) {
+        setEdits((prev) => ({ ...prev, added: splitByDay(prev.added, now).today }));
+        setArchive((prev) => mergeArchive(prev, past));
+      }
+      setTodayIso(now);
+    };
+    let timer: ReturnType<typeof setTimeout>;
+    const schedule = () => {
+      // One second after midnight, then again for the next one
+      timer = setTimeout(() => {
+        refresh();
+        schedule();
+      }, msUntilNextDay(new Date()) + 1000);
+    };
+    schedule();
+    const onVisible = () => {
+      if (document.visibilityState === "visible") refresh();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", refresh);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", refresh);
+    };
+  }, [hydrated]);
 
   // Persist recent foods only after hydrated
   useEffect(() => {
@@ -606,7 +678,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       // Only foods the catalogue has: what is saved is what one tap can add back
       return items.filter((item) => MOCK_FOODS.some((f) => f.id === item.foodId));
     },
-    [edits, samples, todayIso]
+    [edits, samples, todayIso, archive]
   );
 
   const saveMealAs = useCallback(
@@ -679,6 +751,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const targets = useMemo(() => targetsFor(profile), [profile]);
+  useMemo(() => setDayArchive(archive), [archive]);
 
   const nutrientSources = useCallback(
     (key: string) => nutrientSourcesIn(edits.added, edits.sample, key, samples),
@@ -732,6 +805,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         addSavedMeal,
         addQuickEntry,
         todayIso,
+        dayArchive: archive,
         hydrated,
         demo,
         profile,

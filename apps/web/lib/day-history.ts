@@ -30,11 +30,21 @@ export function daysBefore(iso: string, todayIso: string): number {
   return Math.round((Date.UTC(y2, m2 - 1, d2) - Date.UTC(y1, m1 - 1, d1)) / 86_400_000);
 }
 
+let dayArchive: Record<string, AddedDiaryEntry[]> = {};
+
+/** The diary store hands over the earlier days the user logged (lib/day-archive). Module state, like the demo flag. */
+export function setDayArchive(archive: Record<string, AddedDiaryEntry[]>): void {
+  dayArchive = archive;
+}
+
 /**
  * What was logged on a day (mock history, see lib/mock/history): the 29 days before today have entries
  * except a few gaps. Today, the future and older days are empty here (today comes from the diary store).
  */
 export function dayEntries(iso: string, todayIso: string): AddedDiaryEntry[] {
+  // A day the user logged in this app (filed by lib/day-archive when the date moved on) wins over the sample history
+  const archived = dayArchive[iso];
+  if (archived && archived.length > 0) return archived;
   const items = historyItems(daysBefore(iso, todayIso));
   if (!items) return [];
   return items.flatMap((item, i) => {

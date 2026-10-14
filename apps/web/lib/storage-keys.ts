@@ -5,6 +5,7 @@
 
 import { FAVOURITES_KEY } from "./favourites";
 import { SAVED_MEALS_KEY } from "./saved-meals";
+import { DAY_ARCHIVE_KEY } from "./day-archive";
 
 export const ADDED_ENTRIES_KEY = "h1t_added_entries_v1";
 // Edits to sample-day items (portion, meal, deleted), kept next to the added entries
@@ -14,6 +15,9 @@ export const RECENT_FOODS_KEY = "h1t_recent_foods_v2";
 
 export const DEMO_SUFFIX = "_demo";
 
+// Earlier days of the added entries, filed by date when the date moves on (lib/day-archive)
+export { DAY_ARCHIVE_KEY };
+
 /** The same shape as Storage, for the parts of it the app uses. */
 export interface KeyValueStore {
   getItem(key: string): string | null;
@@ -22,7 +26,7 @@ export interface KeyValueStore {
 }
 
 /** Every key that belongs to an account: the diary, sample edits, Gần đây, favourites and Bữa ăn của tôi. */
-export const ACCOUNT_KEYS = [ADDED_ENTRIES_KEY, SAMPLE_EDITS_KEY, RECENT_FOODS_KEY, FAVOURITES_KEY, SAVED_MEALS_KEY];
+export const ACCOUNT_KEYS = [ADDED_ENTRIES_KEY, SAMPLE_EDITS_KEY, RECENT_FOODS_KEY, FAVOURITES_KEY, SAVED_MEALS_KEY, DAY_ARCHIVE_KEY];
 
 /**
  * The key a store uses: `<base>_<accountId>` for the signed-in account, or the `_demo` twin in demo mode (demo

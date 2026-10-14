@@ -19,11 +19,11 @@ interface CopyYesterdaySheetProps {
 
 /** "Chép bữa hôm qua?": pick the meals from yesterday and copy them into today's diary. */
 export function CopyYesterdaySheet({ open, onClose }: CopyYesterdaySheetProps) {
-  const { todayIso } = useDiary();
+  const { todayIso, dayArchive } = useDiary();
   const yesterday = todayIso ? shiftIsoDate(todayIso, -1) : null;
   const entries = useMemo(
     () => (yesterday && todayIso ? dayEntries(yesterday, todayIso) : []),
-    [yesterday, todayIso]
+    [yesterday, todayIso, dayArchive]
   );
 
   if (!yesterday) return null;

@@ -119,6 +119,7 @@ function DiaryContent() {
     highlightedMeal,
     hydrated,
     todayIso,
+    dayArchive,
     profile,
     targets,
     copyEntries,
@@ -144,9 +145,10 @@ function DiaryContent() {
     [isPast, pastIso, todayIso, profile, targets]
   );
 
+  // The label (Hôm nay / Thứ …) follows the date: it is read again when the day moves on at midnight
   useEffect(() => {
     setClientNow(new Date());
-  }, []);
+  }, [todayIso]);
 
   // Return focus to the control that opened /add (same contract as before)
   useEffect(() => {
@@ -318,7 +320,7 @@ function DiaryContent() {
           const row = (
             <>
               <span data-align-group="meal-card" data-align-edge="left" className="flex min-w-0 flex-col py-1 text-text">
-                <span className="text-[15px] leading-snug">
+                <span title={it.name === it.qty ? it.name : `${it.name} · ${it.qty}`} className="line-clamp-2 break-words text-[15px] leading-snug">
                   {it.name}
                   {it.name !== it.qty && <span className="text-secondary"> · {it.qty}</span>}
                 </span>

@@ -618,3 +618,4 @@ All alignment and hydration tests passed cleanly (<= 1px difference, 0 hydration
 - 13/10 cc2-unify: unified AppHeader (ink on phone, paper on desktop), design/UI-RULES.md, SectionTitle, radius and spacing sweep, probe cc2_unify.py. Merged (commit in git log: "unify: ...").
 - 13/10 docs08: docs/08-backend-plan.md added, pointers in AGENTS.md and docs/07-api-contract.md. Committed on feat/ui-cc2-docs08 and merged locally; push to origin/feat/ui was blocked by the permission classifier (docs only; typecheck, smoke 62/62).
 - 13/10 cc2-11: built, reviewed, probes cc10/cc12 fixed; stuck: unexpected uncommitted edits in app/foods/[id]/page.tsx and app/explore/rich/[nutrient]/page.tsx (not from this run), so not merged. pushed: no.
+- 14/10 cc2-16: edge cases (midnight rollover with a per-day archive, long names clamped with full name in title, unknown nutrients as a dash, offline asserted), probe cc2_16.py 19 ok; pushed: no.

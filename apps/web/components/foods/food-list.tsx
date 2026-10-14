@@ -58,7 +58,7 @@ export function FoodList({
           } ${selected ? "bg-blue/10" : "bg-transparent"}`}
         >
           <span className="flex min-w-0 flex-1 flex-col gap-1">
-            <span className="line-clamp-2 text-[15px] font-semibold leading-snug">
+            <span title={food.nameVi} className="line-clamp-2 break-words text-[15px] font-semibold leading-snug">
               {food.nameVi}
               {showHeart && (
                 <svg
