@@ -140,7 +140,7 @@ function TrainingContent() {
     ? isRestDay
       ? "Ngày nghỉ. Chỉ xem."
       : "Tick đã lưu của ngày này. Chỉ xem."
-    : "Ngày này chưa có thời lượng tập đã ghi. Chỉ xem.";
+    : "Ngày này chưa lưu thời lượng tập · Chỉ xem";
 
   return (
     <div className="w-full min-h-screen bg-page text-text font-sans flex flex-col">

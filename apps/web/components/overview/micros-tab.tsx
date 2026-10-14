@@ -93,7 +93,7 @@ export function MicrosTab() {
               <p className="m-0">
                 {changeText ?? "Chưa có kỳ trước"}
                 <br />
-                {board.unknown > 0 ? `${board.unknown} chất chưa có số liệu` : "Đủ số liệu cả 22 chất"}
+                {board.unknown > 0 ? `${board.unknown} chất chưa có dữ liệu` : "Đủ dữ liệu cả 22 chất"}
               </p>
             }
           />
@@ -172,7 +172,7 @@ export function MicrosTab() {
             <summary className="flex min-h-[56px] cursor-pointer list-none items-center justify-between gap-3 p-4 [&::-webkit-details-marker]:hidden">
               <span className="flex items-center gap-3">
                 <span aria-hidden="true" className="inline-block h-3 w-3 shrink-0 rounded-[3px] bg-level-empty" />
-                <SectionTitle as="p">Chưa có số liệu</SectionTitle>
+                <SectionTitle as="p">Chưa có dữ liệu</SectionTitle>
               </span>
               <span className="flex items-center gap-3">
                 <span className="font-display text-xl font-bold tabular-nums">{board.unknown}</span>
@@ -190,7 +190,7 @@ export function MicrosTab() {
                     >
                       <span className="min-w-0">
                         <span className="block text-[15px] font-semibold">{s.name}</span>
-                        <span className="block text-[13px] leading-snug text-secondary">Chưa có món nào có số liệu trong kỳ này</span>
+                        <span className="block text-[13px] leading-snug text-secondary">Chưa có món nào có dữ liệu chất này trong kỳ</span>
                       </span>
                       <span className="font-display text-[26px] font-bold leading-none text-secondary">—</span>
                     </Link>

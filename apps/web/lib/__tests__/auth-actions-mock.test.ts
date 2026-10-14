@@ -171,7 +171,7 @@ describe("mock account flows (MOCK, no network)", () => {
     vi.stubGlobal("crypto", undefined);
     expect(await signInWithPassword("cc18@example.com", "abcdef12")).toEqual({
       ok: false,
-      error: "Chưa xử lý được. Thử lại sau ít phút.",
+      error: "Chưa kết nối được máy chủ. Bạn thử lại sau ít phút nhé.",
     });
   });
 

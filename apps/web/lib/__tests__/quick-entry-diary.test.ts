@@ -85,6 +85,6 @@ describe("a quick entry with every macro unknown", () => {
     const day = computeCompositeDayData(SAMPLE_DAY, [r.entry]);
     expect(day.calories.consumed).toBe(base.calories.consumed + 300);
     expect(day.macros.map((m) => m.consumed)).toEqual(base.macros.map((m) => m.consumed));
-    expect(day.meals.find((m) => m.slot === "dinner")?.items.at(-1)?.detail).toBe("Đạm — · Tinh bột — · Béo —");
+    expect(day.meals.find((m) => m.slot === "dinner")?.items.at(-1)?.detail).toBe("Đạm — · Tinh bột — · Chất béo —");
   });
 });

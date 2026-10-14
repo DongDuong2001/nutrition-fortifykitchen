@@ -4,9 +4,9 @@ import { GoogleSignInButton } from "@/components/onboarding/google-sign-in-butto
 import { EmailPasswordForm } from "@/components/onboarding/email-password-form";
 
 const DESKTOP_VALUES = [
-  "Theo dõi đầy đủ vi chất, không chỉ calo",
+  "Theo dõi đủ 22 vi chất, không chỉ kcal",
   "Mục tiêu do huấn luyện viên Lê Hồng Khánh đặt",
-  "Ghi bữa ăn trong vài giây, thấy ngay còn thiếu gì",
+  "Thêm bữa ăn trong vài giây, thấy ngay còn thiếu gì",
 ];
 
 export default function SignUpPage() {
@@ -30,7 +30,7 @@ export default function SignUpPage() {
               VI CHẤT PHẢI ĐỦ.
             </h1>
             <p className="m-0 text-[15px] leading-normal text-muted-subtitle lg:hidden">
-              Ghi bữa ăn, theo dõi vi chất và làm theo mục tiêu của huấn luyện viên Lê Hồng Khánh.
+              Thêm bữa ăn, theo dõi vi chất và bám sát mục tiêu của huấn luyện viên Lê Hồng Khánh.
             </p>
             <ul className="m-0 hidden list-none flex-col gap-4 p-0 lg:flex">
               {DESKTOP_VALUES.map((value) => (

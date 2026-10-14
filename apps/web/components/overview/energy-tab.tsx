@@ -20,7 +20,7 @@ const dm = (iso: string) => `${iso.slice(8, 10)}/${iso.slice(5, 7)}`;
 function MacroSplit({ protein, fat, carbs }: { protein: number; fat: number; carbs: number }) {
   const parts = [
     { key: "protein", label: "Đạm", share: protein, bg: "bg-blue" },
-    { key: "fat", label: "Béo", share: fat, bg: "bg-ink" },
+    { key: "fat", label: "Chất béo", share: fat, bg: "bg-ink" },
     { key: "carbs", label: "Tinh bột", share: carbs, bg: "bg-sky" },
   ];
   return (
@@ -28,7 +28,7 @@ function MacroSplit({ protein, fat, carbs }: { protein: number; fat: number; car
       <SectionTitle id="en-split">Chia kcal</SectionTitle>
       <div
         role="img"
-        aria-label={`Đạm ${protein}%, béo ${fat}%, tinh bột ${carbs}% của kcal trung bình`}
+        aria-label={`Đạm ${protein}%, chất béo ${fat}%, tinh bột ${carbs}% của kcal trung bình`}
         className="flex h-4 gap-1"
       >
         {parts.map((p) => (
@@ -154,7 +154,7 @@ export function EnergyTab() {
         </HeroCard>
 
         <Scoreboard key={`${length}-${period.offset}`} rows={rows} label="Năng lượng và chất sinh năng lượng" />
-        <p className="m-0 text-[13px] leading-snug text-secondary">* Chất xơ chỉ tính các món có số liệu chất xơ.</p>
+        <p className="m-0 text-[13px] leading-snug text-secondary">* Chất xơ chỉ tính từ các món đã có dữ liệu chất xơ.</p>
       </div>
 
       <div className="flex flex-col gap-3 lg:col-span-5 lg:gap-5">

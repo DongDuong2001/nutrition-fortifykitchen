@@ -72,7 +72,7 @@ export function SodiumProgressCard({
 
       <div className="text-[13px] text-secondary leading-relaxed">
         {isAchieved
-          ? "Đã đạt mức tối thiểu. Mỗi lần ghi muối trong tập sẽ cộng vào đây."
+          ? "Đã đạt mức tối thiểu. Natri từ các bữa ăn hôm nay được cộng tự động vào đây."
           : `Còn thiếu ${formatAmount(saltTarget.sodiumMin - currentSodiumMg, "mg")} mg để đạt mức tối thiểu.`}
       </div>
     </div>

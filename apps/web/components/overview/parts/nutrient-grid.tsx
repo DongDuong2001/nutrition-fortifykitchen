@@ -44,7 +44,7 @@ export function NutrientGrid({
       <ul className="m-0 grid list-none grid-cols-6 gap-1 p-0 lg:grid-cols-8">
         {squares.map((s, i) => {
           const isSel = i === selected;
-          const level = s.level ? getLevelLabel(s.level) : "chưa có số liệu";
+          const level = s.level ? getLevelLabel(s.level) : "chưa có dữ liệu";
           return (
             <li key={s.key}>
               <button
@@ -71,7 +71,7 @@ export function NutrientGrid({
               <span className="ml-2 text-xs font-bold text-muted-subtitle">{getLevelLabel(square.level)}</span>
             </>
           ) : (
-            <span className="text-xs font-bold text-muted-subtitle">Chưa có số liệu</span>
+            <span className="text-xs font-bold text-muted-subtitle">Chưa có dữ liệu</span>
           )}
         </span>
       </p>

@@ -23,13 +23,13 @@ describe("formatSigned", () => {
 
 describe("formatPercent", () => {
   it("writes a whole percent with a space before %", () => {
-    expect(formatPercent(28)).toBe("28 %");
-    expect(formatPercent(27.6)).toBe("28 %");
+    expect(formatPercent(28)).toBe("28%");
+    expect(formatPercent(27.6)).toBe("28%");
   });
 
   it("can carry a sign", () => {
-    expect(formatPercent(18, { signed: true })).toBe("+18 %");
-    expect(formatPercent(-12, { signed: true })).toBe("−12 %");
+    expect(formatPercent(18, { signed: true })).toBe("+18%");
+    expect(formatPercent(-12, { signed: true })).toBe("−12%");
   });
 });
 

@@ -169,7 +169,7 @@ def run():
         pg.get_by_label("Email").fill("ban@email.com")
         pg.get_by_role("button", name="Gửi liên kết đăng ký qua email").click()
         expect(pg).to_have_url(BASE + "/signin/check-email")
-        pg.get_by_role("link", name="Mô phỏng mở liên kết (dev)").click()
+        pg.get_by_role("link", name="Mở thẳng liên kết đăng nhập (bản thử)").click()
         expect(pg).to_have_url(BASE + "/setup/profile")
         pg.get_by_role("button", name="Tiếp tục").click()
         expect(pg).to_have_url(BASE + "/setup/goal")

@@ -134,11 +134,11 @@ export function EntryEditor({ view }: { view: EntryView }) {
                 <FormRow label="Tinh bột (g)" htmlFor="entry-quick-carbs">
                   <input id="entry-quick-carbs" placeholder="—" aria-invalid={macroBad(quickCarbs, quickValues.carbs) ? true : undefined} type="text" inputMode="decimal" value={quickCarbs} onChange={(e) => setQuickCarbs(e.target.value)} autoComplete="off" className={`${quickFieldClass} text-right font-bold tabular-nums`} />
                 </FormRow>
-                <FormRow label="Béo (g)" htmlFor="entry-quick-fat">
+                <FormRow label="Chất béo (g)" htmlFor="entry-quick-fat">
                   <input id="entry-quick-fat" placeholder="—" aria-invalid={macroBad(quickFat, quickValues.fat) ? true : undefined} type="text" inputMode="decimal" value={quickFat} onChange={(e) => setQuickFat(e.target.value)} autoComplete="off" className={`${quickFieldClass} text-right font-bold tabular-nums`} />
                 </FormRow>
               </div>
-              <p className="m-0 text-sm text-secondary">Thêm nhanh: vi chất của món này chưa có dữ liệu. Để trống một chất nếu chưa biết: hiện là —.</p>
+              <p className="m-0 text-sm text-secondary">Món thêm nhanh không tính vào 22 vi chất. Ô bỏ trống sẽ hiện là — (chưa có dữ liệu), không tính là 0.</p>
             </div>
           )}
 
@@ -214,7 +214,7 @@ export function EntryEditor({ view }: { view: EntryView }) {
             <div data-align-group="entry" className="grid w-full grid-cols-4 gap-2 rounded-xl bg-page p-3">
               <Stat value={preview ? formatAmount(preview.calories, "kcal") : "—"} label="kcal" />
               <Stat value={preview ? `${formatAmount(preview.protein, "g")} g` : "—"} label="Đạm" />
-              <Stat value={preview ? `${formatAmount(preview.fat, "g")} g` : "—"} label="Béo" />
+              <Stat value={preview ? `${formatAmount(preview.fat, "g")} g` : "—"} label="Chất béo" />
               <Stat value={iron !== null ? `${formatAmount(iron, "mg")} mg` : "—"} label="Sắt" />
             </div>
           )}

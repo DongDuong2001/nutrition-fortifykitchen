@@ -182,7 +182,7 @@ def check_training(browser, size_name, size):
     pg.wait_for_load_state("networkidle")
     pg.wait_for_timeout(300)
     check(pg.locator("input[aria-label='Tinh bột nhanh']").count() == 0, f"{label}: a day with no record shows no checklist")
-    check(pg.locator("text=chưa có thời lượng tập đã ghi").count() >= 1, f"{label}: a day with no record says no duration was saved")
+    check(pg.locator("text=chưa lưu thời lượng tập").count() >= 1, f"{label}: a day with no record says no duration was saved")
     check(not any(c["checked"] for c in training_checks(pg)), f"{label}: a day with no record has nothing ticked")
     context.close()
 

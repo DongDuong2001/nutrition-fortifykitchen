@@ -317,7 +317,7 @@ def check_quick(browser, size_name, size):
     pg.wait_for_timeout(300)
     check(dinner_items(pg) == 2, f"{size_name} quick add: a second entry with the default name ({dinner_items(pg)})")
     dinner_text = re.sub(r"s+", " ", pg.locator("#meal-dinner").inner_text())
-    check("Đạm — · Tinh bột — · Béo —" in dinner_text, f"{size_name} quick add: unknown macros show — ({dinner_text!r})")
+    check("Đạm — · Tinh bột — · Chất béo —" in dinner_text, f"{size_name} quick add: unknown macros show — ({dinner_text!r})")
     check("Đạm 0 g" not in dinner_text, f"{size_name} quick add: no unknown macro is shown as 0 g")
     check(protein_total() == protein_before, f"{size_name} quick add: the day's Đạm total did not move ({protein_before} -> {protein_total()})")
     check(pg.locator("a[href^='/micros']:visible").first.inner_text() == micros_mid, f"{size_name} quick add: Vi chất count did not move")

@@ -29,7 +29,7 @@ export function SetupSummary() {
     setReady({
       summary: setupSummary(loadProfile(now.getFullYear())),
       href: first ? summaryAddHref(now) : "/",
-      label: first ? "Bắt đầu ghi bữa đầu tiên" : "Xem tổng quan",
+      label: first ? "Thêm bữa đầu tiên" : "Xem tổng quan",
     });
   }, []);
 
@@ -68,7 +68,7 @@ export function SetupSummary() {
 
         <div className="mt-auto flex flex-col gap-2 lg:mt-0">
           <PillButton href={ready?.href ?? "/"} disabled={ready === null}>
-            {ready?.label ?? "Bắt đầu ghi bữa đầu tiên"}
+            {ready?.label ?? "Thêm bữa đầu tiên"}
           </PillButton>
           {ready?.href !== "/" && (
             <Link

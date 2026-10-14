@@ -166,7 +166,7 @@ describe("topFoodSources and nutrientAttention", () => {
   });
   it("says so when no logged food carries the nutrient", () => {
     const rows = nutrientAttention({ micro, entries: [], loggedDays: 2 });
-    expect(rows[0].foods).toBe("Chưa có món nào trong nhật ký có số liệu chất này");
+    expect(rows[0].foods).toBe("Chưa có món nào trong kỳ có dữ liệu về chất này");
   });
 });
 

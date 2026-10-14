@@ -141,7 +141,7 @@ def run(browser, name, size):
         ok = f"{label} {value}" in t or (label == "Muối" and f"{label} Ngày tập 60′ {value}" in t)
         check(ok, f"{where} summary: {label} {value}")
     check("Ngày tập 60′" in t, f"{where} summary: salt names the default training minutes")
-    cta = pg.get_by_role("link", name="Bắt đầu ghi bữa đầu tiên")
+    cta = pg.get_by_role("link", name="Thêm bữa đầu tiên")
     check(cta.count() == 1 and cta.get_attribute("href") == "/add?meal=dinner", f"{where} summary: one primary button to Bữa tối")
     check(pg.get_by_role("link", name="Để sau").count() == 1, f"{where} summary: Để sau stays")
     card = pg.locator("section[aria-labelledby=setup-targets]").bounding_box()

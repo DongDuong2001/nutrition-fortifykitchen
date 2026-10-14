@@ -125,7 +125,7 @@ export function dailyTargetRows(weightKg: number | null, sex: SexType, goal: Goa
       value: `${formatRange(targets.protein.min, targets.protein.max)} g`,
     },
     {
-      label: "Béo (0,5–1 g/kg)",
+      label: "Chất béo (0,5–1 g/kg)",
       value: `${formatRange(targets.fat.min, targets.fat.max)} g`,
     },
     {

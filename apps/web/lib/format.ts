@@ -190,9 +190,9 @@ export function formatSigned(value: number, options?: FormatNumberOptions): stri
   return `${rounded > 0 ? "+" : "−"}${text}`;
 }
 
-/** A whole percent with a space before the sign: "28 %", or "+18 %" / "−12 %" when signed. */
+/** A whole percent with no space before the sign: "28%", or "+18%" / "−12%" when signed. */
 export function formatPercent(value: number, options?: { signed?: boolean }): string {
-  return `${options?.signed ? formatSigned(value) : formatNumber(Math.round(value))} %`;
+  return `${options?.signed ? formatSigned(value) : formatNumber(Math.round(value))}%`;
 }
 
 /** The dates of a period: "06–12/10" within one month, "13/09–12/10" across two, "12/10" for one day. */

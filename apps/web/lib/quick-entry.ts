@@ -72,8 +72,8 @@ export function quickEntryFrom(input: QuickEntryInput, slot: MealSlot, id: strin
   };
 }
 
-/** The macros of a quick entry for its row: "Đạm 12,5 g · Tinh bột — · Béo —". Unknown is "—", never 0 g. */
+/** The macros of a quick entry for its row: "Đạm 12,5 g · Tinh bột — · Chất béo —". Unknown is "—", never 0 g. */
 export function quickDetail(entry: Pick<AddedDiaryEntry, "protein" | "carbs" | "fat">): string {
   const show = (value: number | null) => (value === null ? "—" : `${formatAmount(value, "g")} g`);
-  return `Đạm ${show(entry.protein)} · Tinh bột ${show(entry.carbs)} · Béo ${show(entry.fat)}`;
+  return `Đạm ${show(entry.protein)} · Tinh bột ${show(entry.carbs)} · Chất béo ${show(entry.fat)}`;
 }

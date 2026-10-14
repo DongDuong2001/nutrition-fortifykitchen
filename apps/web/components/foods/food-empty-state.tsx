@@ -55,7 +55,7 @@ export function FoodEmptyState({
       <div className="flex flex-col items-center gap-3 py-6 text-center">
         <div className="text-base font-bold">{drink ? "Chưa có đồ uống nào" : `Chưa có món nào trong ${categoryLabel(filter)}`}</div>
         <div className="text-sm text-secondary">
-          {drink ? "Danh sách đồ uống chỉ có món có số liệu từ nguồn đã dùng. Bạn có thể tự tạo đồ uống." : "Bạn có thể tự tạo món cho nhóm này."}
+          {drink ? "Chưa có đồ uống có sẵn dữ liệu phân tích. Bạn có thể tự tạo đồ uống từ nhãn bao bì." : "Bạn có thể tự tạo món cho nhóm này."}
         </div>
         <div className="w-full">
           <CreateFoodButton href={newFoodHref} helper={null} />

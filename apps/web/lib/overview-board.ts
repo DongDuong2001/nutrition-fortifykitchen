@@ -66,7 +66,7 @@ export function periodHeading(p: Pick<Period, "length" | "start" | "end" | "isCu
 
 /** "Giảm 85 so với 7 ngày trước". Whole numbers, compared after rounding. */
 export function changeLine(current: number | null, previous: number | null, unit: string, length: number): string {
-  if (current === null) return "Chưa đủ số liệu trong kỳ";
+  if (current === null) return "Chưa có dữ liệu trong kỳ này";
   if (previous === null) return `Chưa có ${length} ngày trước để so sánh`;
   const delta = Math.round(current) - Math.round(previous);
   const suffix = unit === "kcal" ? "" : ` ${unit}`;

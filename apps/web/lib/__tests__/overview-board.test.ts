@@ -88,7 +88,7 @@ describe("changeLine", () => {
   });
   it("missing numbers say so", () => {
     expect(changeLine(2289, null, "kcal", 7)).toBe("Chưa có 7 ngày trước để so sánh");
-    expect(changeLine(null, 2000, "kcal", 7)).toBe("Chưa đủ số liệu trong kỳ");
+    expect(changeLine(null, 2000, "kcal", 7)).toBe("Chưa có dữ liệu trong kỳ này");
   });
 });
 

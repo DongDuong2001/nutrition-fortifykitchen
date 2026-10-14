@@ -132,7 +132,7 @@ export function getTrainingPhases(trainingMinutes: number, ticked: readonly stri
     {
       id: "pre-cha-la",
       label: "Chà là",
-      note: loggedNote("pre-cha-la", "✓ Đã đánh dấu"),
+      note: loggedNote("pre-cha-la", "✓ Đã dùng"),
       dose: "30 g",
     },
     {
@@ -155,7 +155,7 @@ export function getTrainingPhases(trainingMinutes: number, ticked: readonly stri
     intraItems.push({
       id,
       label: `Muối · phút ${startMin}–${endMin}`,
-      note: loggedNote(id, "✓ Đã đánh dấu"),
+      note: loggedNote(id, "✓ Đã dùng"),
       dose: "1–1,5 g",
     });
   }
@@ -193,7 +193,7 @@ export function getRestDayTips(targets: Pick<CompleteTargets, "calories" | "prot
     },
     {
       id: "protein",
-      text: `Đạm vẫn ${targetRangeText(targets.protein, "g")}`,
+      text: `Giữ mức đạm ${targetRangeText(targets.protein, "g")}`,
       path: "M6 7v10M3 9.5v5M18 7v10M21 9.5v5M6 12h12", // Dumbbell icon
     },
     {

@@ -168,7 +168,7 @@ def first_run(browser, name, size):
     t = text(pg)
     for row in SUMMARY_ROWS:
         check(row in t, f"{where} summary: {row!r} (page: {t[:200]!r})")
-    cta = pg.get_by_role("link", name="Bắt đầu ghi bữa đầu tiên")
+    cta = pg.get_by_role("link", name="Thêm bữa đầu tiên")
     check(cta.count() == 1 and cta.get_attribute("href") == "/add?meal=dinner",
           f"{where} summary: one button to the add sheet for the meal of the clock (Bữa tối)")
     check(visible_h1(pg) == 1, f"{where} summary: one h1")

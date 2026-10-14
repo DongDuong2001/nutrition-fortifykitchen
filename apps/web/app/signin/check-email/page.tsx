@@ -71,7 +71,7 @@ export default function CheckEmailPage() {
       }
     >
       <PillButton href="mailto:" className="lg:hidden">
-        Mở ứng dụng Mail
+        Mở ứng dụng Email
       </PillButton>
       <PillButton variant="secondary" onClick={handleResend} disabled={secondsLeft > 0 || !email}>
         {resendLabel(secondsLeft)}
@@ -87,11 +87,11 @@ export default function CheckEmailPage() {
           href={openTarget}
           className="inline-flex min-h-[44px] items-center justify-center px-2 text-[13px] font-semibold text-secondary"
         >
-          Mô phỏng mở liên kết (dev)
+          Mở thẳng liên kết đăng nhập (bản thử)
         </Link>
       )}
       <p className="m-0 text-center text-[13px] leading-normal text-secondary">
-        Không thấy email? Kiểm tra mục Spam hoặc Quảng cáo.
+        Chưa thấy email? Bạn kiểm tra thêm hộp thư Rác (Spam) hoặc Quảng cáo nhé.
       </p>
     </AuthShell>
   );

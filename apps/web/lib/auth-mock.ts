@@ -87,7 +87,7 @@ export function mockCurrentAccountId(): string | null {
   return store.current && store.accounts[store.current] ? store.current : null;
 }
 
-const RETRY_LATER = "Chưa xử lý được. Thử lại sau ít phút.";
+const RETRY_LATER = "Chưa kết nối được máy chủ. Bạn thử lại sau ít phút nhé.";
 
 /** An unexpected failure (hashing unavailable, storage broken) becomes a message on the form, never a stuck button. */
 async function guarded(run: () => Promise<AuthResult>): Promise<AuthResult> {

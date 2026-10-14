@@ -84,7 +84,7 @@ describe("quickEntryFrom", () => {
 
 describe("quickDetail", () => {
   it("shows — for an unknown macro and the value for a known one", () => {
-    expect(quickDetail({ protein: null, carbs: null, fat: null })).toBe("Đạm — · Tinh bột — · Béo —");
-    expect(quickDetail({ protein: 12.5, carbs: 0, fat: null })).toBe("Đạm 12,5 g · Tinh bột 0 g · Béo —");
+    expect(quickDetail({ protein: null, carbs: null, fat: null })).toBe("Đạm — · Tinh bột — · Chất béo —");
+    expect(quickDetail({ protein: 12.5, carbs: 0, fat: null })).toBe("Đạm 12,5 g · Tinh bột 0 g · Chất béo —");
   });
 });

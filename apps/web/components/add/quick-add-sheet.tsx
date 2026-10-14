@@ -92,7 +92,7 @@ export function QuickAddSheet({ open, onClose, mealName, onSubmit }: QuickAddShe
           <FormRow label="Tinh bột (g)" htmlFor="quick-carbs" error={errorFor("carbs")}>
             <input id="quick-carbs" aria-invalid={errorFor("carbs") ? true : undefined} type="text" inputMode="decimal" value={input.carbs} onChange={set("carbs")} placeholder="—" autoComplete="off" className={numberClass} />
           </FormRow>
-          <FormRow label="Béo (g)" htmlFor="quick-fat" error={errorFor("fat")}>
+          <FormRow label="Chất béo (g)" htmlFor="quick-fat" error={errorFor("fat")}>
             <input id="quick-fat" aria-invalid={errorFor("fat") ? true : undefined} type="text" inputMode="decimal" value={input.fat} onChange={set("fat")} placeholder="—" autoComplete="off" className={numberClass} />
           </FormRow>
         </div>

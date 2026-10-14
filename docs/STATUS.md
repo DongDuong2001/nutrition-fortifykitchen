@@ -6,6 +6,7 @@ Newest first. Updated with every web merge. Do not edit apps/api, migrations or 
 
 | Task | Commit | Date | What |
 |---|---|---|---|
+| cc2-18 | see git log (cc2-18) | 14/10 | Voice pass (verified audit rows), percent without a space, Ngày tập tile bar, add-sheet cards with a 44 px add, design/v2 copy |
 | cc2-17 | see git log (cc2-17) | 14/10 | Esc returns focus on every sheet (probe), diary context memoised, five pure components no longer client; bundle change negligible |
 | cc-21 | see git log (cc-21) | 14/10 | audit-ag16 fixes: profile, reminders and training ticks per account, Google button through signInWithGoogle, form error announced, theme tokens, dead code removed, paywall backHref, grams label in Vietnamese format |
 | cc2-24 | see git log (cc2-24) | 14/10 | One period control on all four Tổng quan tabs; one days-met rule (finished days only, "3/6 ngày đạt"); this file |

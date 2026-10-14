@@ -453,7 +453,7 @@ function DiaryContent() {
         <div className="flex flex-col gap-3 lg:grid lg:grid-cols-12 lg:items-start lg:gap-5">
           <section aria-label="Chi tiết trong ngày" className="order-1 grid grid-cols-2 gap-3 lg:order-2 lg:col-span-5">
             <DayTileLink href={`/micros?date=${viewIso}`} tile={microTile} bar />
-            <DayTileLink href={`/training?date=${viewIso}`} tile={trainTile} />
+            <DayTileLink href={`/training?date=${viewIso}`} tile={trainTile} bar />
           </section>
 
           <div className="order-2 flex flex-col gap-3 lg:order-1 lg:col-span-7 lg:gap-5">

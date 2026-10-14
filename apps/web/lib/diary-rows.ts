@@ -1,11 +1,11 @@
 import { formatAmount } from "./format";
 
-/** One meta line for an entry: "Đạm 12 g · Tinh bột 30 g · Béo 5 g". An unknown macro is a dash, never 0. */
+/** One meta line for an entry: "Đạm 12 g · Tinh bột 30 g · Chất béo 5 g". An unknown macro is a dash, never 0. */
 export function macroLine(macros: { protein: number | null; carbs: number | null; fat: number | null }): string | null {
   const { protein, carbs, fat } = macros;
   if (protein === null && carbs === null && fat === null) return null;
   const part = (label: string, v: number | null) => `${label} ${v === null ? "—" : `${formatAmount(v, "g")} g`}`;
-  return `${part("Đạm", protein)} · ${part("Tinh bột", carbs)} · ${part("Béo", fat)}`;
+  return `${part("Đạm", protein)} · ${part("Tinh bột", carbs)} · ${part("Chất béo", fat)}`;
 }
 
 export interface DayTile {
@@ -29,12 +29,16 @@ export function microsTile(
   };
 }
 
-/** The Ngày tập tile of Nhật ký: minutes (or "Nghỉ") and the salt range. A past day is view only. */
-export function trainingTile(input: { minutes: number; saltText: string; past: boolean }): DayTile {
+/**
+ * The Ngày tập tile of Nhật ký: minutes (or "Nghỉ") and the salt range. A past day is view only.
+ * The slanted bar is full on a training day and empty on a rest day (no scale is invented for minutes).
+ */
+export function trainingTile(input: { minutes: number; saltText: string; past: boolean }): DayTile & { pct: number } {
   const { minutes, saltText, past } = input;
   return {
     value: minutes > 0 ? `${minutes}′` : "Nghỉ",
     label: "Ngày tập",
     line: past ? "Chỉ xem" : `muối ${saltText} g`,
+    pct: minutes > 0 ? 100 : 0,
   };
 }

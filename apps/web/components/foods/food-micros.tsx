@@ -4,11 +4,11 @@ import { formatAmount, formatNumber } from "@/lib/format";
 import { Card } from "@/components/ui/card";
 import { SectionTitle } from "@/components/ui/section-title";
 
-/** Whole percent, with one decimal under 1 % ("0,1 %"). */
+/** Whole percent, with one decimal under 1 % ("0,1%"). */
 function shareText(row: MicroRow): string {
   if (row.share === null) return "";
-  if (row.share > 0 && row.share < 0.1) return "< 0,1 %";
-  return row.share > 0 && row.share < 1 ? `${formatNumber(row.share, { decimals: 1 })} %` : `${row.pct} %`;
+  if (row.share > 0 && row.share < 0.1) return "< 0,1%";
+  return row.share > 0 && row.share < 1 ? `${formatNumber(row.share, { decimals: 1 })}%` : `${row.pct}%`;
 }
 
 /** Single-colour blue bar: the share of the daily target, capped at the full width. */
@@ -60,14 +60,14 @@ export function GoodSources({ rows }: { rows: MicroRow[] }) {
   return (
     <Card as="section" aria-labelledby="good-sources" className="flex flex-col gap-2">
       <SectionTitle id="good-sources">Nguồn tốt của</SectionTitle>
-      <p className="m-0 text-[13px] leading-snug text-secondary">Từ 20 % mục tiêu ngày mỗi khẩu phần</p>
+      <p className="m-0 text-[13px] leading-snug text-secondary">Từ 20% mục tiêu ngày mỗi khẩu phần</p>
       <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
         {rows.map((r) => (
           <li
             key={r.id}
             className="inline-flex min-h-[32px] items-center rounded-full bg-page px-3 text-[13px] font-bold text-text"
           >
-            {r.name} · {r.pct} %
+            {r.name} · {r.pct}%
           </li>
         ))}
       </ul>

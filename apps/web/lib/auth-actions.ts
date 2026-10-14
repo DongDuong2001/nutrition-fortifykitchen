@@ -56,7 +56,7 @@ export function validatePasswordConfirm(password: string, confirm: string): stri
 
 export const SIGN_IN_FAILED = "Email hoặc mật khẩu không đúng";
 export const WRONG_CURRENT_PASSWORD = "Mật khẩu hiện tại không đúng";
-const RETRY_LATER = "Chưa xử lý được. Thử lại sau ít phút.";
+const RETRY_LATER = "Chưa kết nối được máy chủ. Bạn thử lại sau ít phút nhé.";
 const NOTICE_KEY = "h1t-auth-notice";
 const CURRENT_USER_KEY = "h1t_auth_current_email";
 const SIGNED_OUT_KEY = "h1t_auth_signed_out";

@@ -47,14 +47,14 @@ function CreateFoodInner() {
   const validateField = (field: string, val: string) => {
     let err = "";
     if (field === "nameVi") {
-      if (!val.trim()) err = "Vui lòng nhập tên món ăn.";
+      if (!val.trim()) err = "Nhập tên món ăn";
     } else if (field === "servingSize") {
       const num = parseFloat(val.replace(",", "."));
       if (isNaN(num) || num <= 0) err = "Khẩu phần phải lớn hơn 0.";
     } else if (field === "calories") {
       if (val.trim() !== "") {
         const num = parseFloat(val.replace(",", "."));
-        if (isNaN(num) || num < 0) err = "Năng lượng không hợp lệ.";
+        if (isNaN(num) || num < 0) err = "Nhập số năng lượng từ 0 trở lên";
       }
     }
     setErrors((prev) => ({ ...prev, [field]: err }));
@@ -259,7 +259,7 @@ function CreateFoodInner() {
               />
             </FormRow>
 
-            <FormRow label="Béo (g)" htmlFor="cf-fat">
+            <FormRow label="Chất béo (g)" htmlFor="cf-fat">
               <input
                 id="cf-fat"
                 type="text"

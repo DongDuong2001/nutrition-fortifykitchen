@@ -157,7 +157,7 @@ def check_food(browser, size_name, size):
     check(re.search(r"Thêm vào (Bữa|Trước|Sau|Tối|Sáng|Trưa|Ăn)", body) is not None or "Thêm vào" in body, f"{size_name} food: Thêm vào <bữa>")
     # good-source threshold: every chip is >= 20 %
     chips = pg.locator("#good-sources ~ ul li").all_inner_texts()
-    shares = [int(re.search(r"(\d+) %", c).group(1)) for c in chips if re.search(r"(\d+) %", c)]
+    shares = [int(re.search(r"(\d+)\s*%", c).group(1)) for c in chips if re.search(r"(\d+)\s*%", c)]
     check(shares and all(s >= 20 for s in shares), f"{size_name} food: every Nguồn tốt của chip is >= 20 % ({shares})")
     # a bigger portion changes the numbers
     before = text(pg)

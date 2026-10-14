@@ -6,7 +6,7 @@ export interface MockFoodItem {
   name: string;
   qty: string;
   kcal: number;
-  /** Second line of a row, e.g. the macros of a quick kcal entry ("Đạm — · Tinh bột 30 g · Béo —"). */
+  /** Second line of a row, e.g. the macros of a quick kcal entry ("Đạm — · Tinh bột 30 g · Chất béo —"). */
   detail?: string;
   /** Đạm, tinh bột, béo of the entry in grams; null = unknown (a quick kcal entry that left it blank). */
   macros?: { protein: number | null; carbs: number | null; fat: number | null };
@@ -170,7 +170,7 @@ export const SAMPLE_DAY: MockDayData = {
     },
     {
       key: "fat",
-      label: "Béo",
+      label: "Chất béo",
       consumed: 21,
       targetMin: 33,
       targetMax: 65,

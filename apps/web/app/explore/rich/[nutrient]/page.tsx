@@ -50,14 +50,14 @@ export default function RichInPage() {
         />
         <Card as="section" aria-label={`Món giàu ${name}`} className="flex flex-col">
           {rows.length === 0 ? (
-            <p className="m-0 py-3 text-[13px] leading-snug text-secondary">Chưa có món nào có dữ liệu về {name}.</p>
+            <p className="m-0 py-3 text-[13px] leading-snug text-secondary">Chưa có món nào có dữ liệu {name}. Bạn có thể tự tạo món mới từ nhãn bao bì.</p>
           ) : (
             rows.map((row, i) => (
               <FoodRowLink
                 key={row.food.id}
                 href={`/foods/${row.food.id}`}
                 name={row.food.nameVi}
-                meta={row.pct === null ? row.basis : `${row.pct} % mục tiêu ngày · ${row.basis}`}
+                meta={row.pct === null ? row.basis : `${row.pct}% mục tiêu ngày · ${row.basis}`}
                 value={`${formatAmount(row.amount, row.unit)} ${row.unit}`}
                 withBorderTop={i > 0}
               />

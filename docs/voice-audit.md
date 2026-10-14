@@ -1,217 +1,168 @@
-# Kiểm toán giọng văn & chuỗi tiếng Việt (`ag-16` — Voice Audit)
+Verified against b80896c on 2026-10-14; every row is an exact match.
 
-Báo cáo rà soát toàn bộ **688** chuỗi tiếng Việt hiển thị cho người dùng (nhãn, nút bấm, tiêu đề, trạng thái trống, thông báo nổi, lỗi, xác nhận, gợi ý, nhận xét, thiết lập ban đầu, xác thực, gói Pro, nhắc nhở, `aria-label`) trong `apps/web/{app,components,lib,hooks}`.
+# Kiểm toán Giọng điệu & Văn bản Tiếng Việt (Voice Audit — ag-16 / ag-17)
+
+Tài liệu này rà soát toàn bộ chuỗi văn bản tiếng Việt hiển thị cho người dùng (nhãn, nút bấm, tiêu đề, trạng thái trống, thông báo nhanh/toast, lỗi, xác nhận, gợi ý, nhận xét, thiết lập ban đầu, xác thực, gói Pro, nhắc nhở, `aria-label`) trong `apps/web/app`, `apps/web/components`, `apps/web/lib` và `apps/web/hooks`.
 
 ---
 
-## 1. Từ điển động từ & thuật ngữ chuẩn (Verb & Term Glossary)
+## 1. Bảng thuật ngữ động từ & danh từ chuẩn (Verb & Term Glossary)
 
-Mỗi hành động dùng **một động từ duy nhất** xuyên suốt ứng dụng:
+Một hành động chỉ dùng một động từ duy nhất trên toàn ứng dụng; một khái niệm chỉ dùng một danh từ duy nhất:
 
-| Hành động / Khái niệm | Từ chuẩn sử dụng | Không dùng |
+| Hành động / Khái niệm | Từ chuẩn duy nhất | Không dùng |
 |---|---|---|
-| Thêm món / bữa ăn vào nhật ký | **Thêm** (`Thêm món`, `Thêm vào Bữa sáng`, `Thêm bữa đầu tiên`, `Nhắc thêm bữa sáng`) | `Ghi bữa ăn`, `Ghi món`, `Nhập món` |
-| Ghi chỉ số nhanh (cân nặng, kcal lẻ) | **Ghi** (`Ghi cân`, `Ghi nhanh`) | `Nhập cân`, `Log cân` |
-| Tạo món tự định nghĩa | **Tạo** (`Tạo món mới`, `Tạo đồ uống mới`) | `Thêm thực phẩm mới`, `Tự tạo` |
-| Lưu thay đổi / lưu mẫu bữa ăn | **Lưu** (`Lưu`, `Lưu thay đổi`, `Lưu thành Bữa ăn của tôi`, `Lưu tên`) | `Cập nhật`, `Hoàn thành` |
-| Xoá mục ghi / bữa ăn / tài khoản | **Xoá** (chính tả `oá`: `Xoá món này`, `Xoá bữa này`, `Xoá tìm kiếm`) | `Xóa` (`óa`), `Gỡ` |
-| Bỏ chọn / bỏ bộ lọc / bỏ yêu thích | **Bỏ** (`Bỏ lọc`, `Bỏ yêu thích`) | `Huỷ lọc`, `Xoá lọc` |
-| Huỷ thao tác trong hộp thoại | **Huỷ** (chính tả `uỷ`) | `Hủy` (`ủy`), `Thoát` |
-| Đóng tấm trượt / hộp thoại | **Đóng** | `Tắt`, `Đóng lại` |
-| Điều hướng về trang trước | **Quay lại** | `Trở về`, `Quay về` (trừ nút hành động đặc thù `Về hôm nay`) |
-| Sửa thông tin / đổi lựa chọn | **Sửa** / **Đổi** (`Sửa trong Hồ sơ`, `Đổi bữa`, `Đổi mật khẩu`) | `Chỉnh sửa`, `Thay đổi` |
-| Mở / xem chi tiết | **Xem** / **Mở** (`Xem chi tiết`, `Xem nhật ký`, `Mở Ngày tập`) | `Đi tới`, `Truy cập` |
-| Đánh dấu mục trong buổi tập | **Đánh dấu** (`Mục đã đánh dấu`) | `Tick` |
-| Nhóm chất sinh năng lượng | **Năng lượng** (`kcal`), **Đạm**, **Tinh bột**, **Chất béo**, **Chất xơ** | `Calo`, `Carb`, `Protein`, `Lipid`, rút gọn `Béo` làm nhãn |
-| Tính năng lưu bữa & món riêng | **Bữa ăn của tôi**, **Món của tôi** | `Bữa của tôi`, `Món tự tạo`, `Công thức tự tạo` |
-| Số liệu dinh dưỡng của thực phẩm | **dữ liệu** (`Chưa có dữ liệu`, `Đủ dữ liệu cả 22 chất`) | Trộn lẫn `số liệu` và `dữ liệu` |
-| Đơn vị phần trăm & định dạng số | **`50%`** (không khoảng trắng trước `%`), **`1.041`**, **`2,5`** | `50 %`, `1,041`, `2.5` |
+| Ghi một món hoặc bữa ăn vào nhật ký | **Thêm** (`Thêm món`, `Thêm vào Bữa sáng`, `Thêm bữa đầu tiên`, `Thêm nhanh`) | `Ghi món`, `Ghi bữa`, `Nhập món`, `Log` |
+| Lưu thay đổi biểu mẫu / cài đặt / khẩu phần | **Lưu** (`Lưu`, `Lưu thay đổi`, `Lưu mật khẩu`, `Tự động lưu`) | `Cập nhật`, `Áp dụng`, `Xác nhận lưu` |
+| Thay đổi thông tin đã có | **Sửa** (`Sửa`, `Sửa trong Hồ sơ`, `Sửa tên bữa`) | `Chỉnh sửa`, `Thay đổi`, `Cập nhật` |
+| Loại bỏ món, bữa ăn, tài khoản | **Xoá** (chính tả dấu sắc trên `a`: `Xoá`, `Xoá món này`, `Xoá bữa này`) | `Xóa`, `Gỡ`, `Loại bỏ`, `Huỷ bỏ` |
+| Bỏ lọc / bỏ yêu thích | **Bỏ** (`Bỏ lọc`, `Bỏ yêu thích`) | `Xoá lọc`, `Huỷ yêu thích` |
+| Đóng hộp thoại / không thực hiện thao tác | **Huỷ** (dấu hỏi trên `y`: `Huỷ`) hoặc **Đóng** (`Đóng` cho nút `×`) | `Hủy`, `Thoát`, `Đóng lại` |
+| Khôi phục thao tác vừa xoá/thêm | **Hoàn tác** | `Quay lại`, `Khôi phục`, `Undo` |
+| Sao chép bữa ăn hôm qua | **Chép hôm qua** | `Sao chép ngày hôm qua`, `Copy hôm qua` |
+| Điều hướng về trang trước | **Quay lại** (cho nút `aria-label`) / **Về `<Tên trang>`** (cho liên kết cụ thể) | `Trở lại`, `Quay về trang trước` |
+| Đa lượng (Macronutrients) | **Đạm**, **Tinh bột**, **Chất béo**, **Chất xơ** | `Protein`, `Carb`, `Béo` (đứng một mình làm nhãn chính), `Xơ` |
+| Giá trị chưa được phân tích (`null`) | **Chưa có dữ liệu** (hiển thị ký hiệu `—`) | `Chưa có số liệu`, `Dữ liệu không khả dụng`, `Không xác định` |
+| Bữa ăn đã lưu của người dùng | **Bữa ăn của tôi** | `Bữa đã lưu`, `Thực đơn mẫu`, `Combo của tôi` |
+| Nguồn quy tắc dinh dưỡng | **huấn luyện viên** | `coach`, `HLV`, `chuyên gia` |
+| Chính tả & định dạng số | **Xoá**, **Tuỳ**, **Huỷ**; phần trăm viết liền **50%**; số kiểu Việt **1.041** và **2,5** | `Xóa`, `Tùy`, `Hủy`; `50 %` (có khoảng trắng); `1,041` hoặc `2.5` |
 
 ---
 
 ## 2. Bảng đề xuất chỉnh sửa theo màn hình & thành phần
 
-> Chỉ liệt kê các chuỗi cần cải thiện. Các chuỗi đã đạt chuẩn giọng văn, chính tả và quy tắc sản phẩm được tổng hợp trong số lượng **Đạt (OK)** ở cuối mỗi nhóm.
+> Chỉ liệt kê các chuỗi cần chỉnh sửa để cải thiện giọng điệu hoặc tuân thủ quy tắc cứng; các chuỗi đạt chuẩn được tính trong phần Tổng kết ở mục 4. Mọi dòng dưới đây đều khớp chính xác với mã nguồn tại commit `b80896c`.
 
-### 2.1. Khung ứng dụng, trang lỗi, ngoại tuyến & cài đặt PWA
-*Phạm vi: `app/layout.tsx`, `app/error.tsx`, `app/not-found.tsx`, `app/offline/page.tsx`, `app/install/page.tsx`, `app/manifest.ts`, `components/app-header.tsx`, `components/bottom-nav.tsx`, `components/desktop-sidebar.tsx`, `components/sw-register.tsx`*
-
-| file:line | current | proposed | why |
-|---|---|---|---|
-| `app/layout.tsx:24` | `"H1T MICRO \| Dinh dưỡng & Vi chất Chuyên sâu"` | `"H1T MICRO \| Dinh dưỡng & vi chất chuyên sâu"` | Không viết hoa từng từ kiểu tiếng Anh |
-| `app/layout.tsx:25` | `"Ứng dụng theo dõi macro dinh dưỡng, vi chất và muối luyện tập chuyên sâu."` | `"Ứng dụng theo dõi năng lượng, đa lượng, vi chất và muối ngày tập."` | Thay từ tiếng Anh `"macro"` bằng `"đa lượng"` |
-| `app/error.tsx:26` | `"Không thể kết nối máy chủ dinh dưỡng lúc này. Dữ liệu bạn vừa ghi trên máy vẫn được giữ nguyên."` | `"Chưa kết nối được máy chủ lúc này. Nhật ký trên máy bạn vẫn được giữ nguyên."` | Tự nhiên hơn, bỏ cụm máy móc `"máy chủ dinh dưỡng"` |
-| `app/not-found.tsx:16` | `"Liên kết này không tồn tại hoặc đã được chuyển sang mục khác."` | `"Trang này không tồn tại hoặc đã chuyển sang mục khác. Bạn quay về Tổng quan nhé."` | Gợi ý rõ bước tiếp theo, giọng văn gần gũi |
-
-- **Chuỗi giữ nguyên (OK) trong nhóm 2.1:** 64 chuỗi.
-
----
-
-### 2.2. Đăng nhập, đăng ký & thiết lập ban đầu (Auth & Onboarding)
-*Phạm vi: `app/signin/**`, `app/signup/page.tsx`, `app/reset-password/page.tsx`, `app/login/page.tsx`, `components/onboarding/**`, `lib/onboarding.ts`, `lib/auth-actions.ts`*
+### 2.1. Khung ứng dụng, Điều hướng & Trang trạng thái (`app/layout.tsx`, `app/error.tsx`, `app/not-found.tsx`, `app/offline/page.tsx`, `components/ui/*`, `components/pwa/*`)
 
 | file:line | current | proposed | why |
 |---|---|---|---|
-| `app/signup/page.tsx:7` | `"Theo dõi đầy đủ vi chất, không chỉ calo"` | `"Theo dõi đầy đủ 22 vi chất, không chỉ kcal"` | Thống nhất `"kcal"` thay `"calo"`, nêu rõ 22 vi chất |
-| `app/signup/page.tsx:9` | `"Ghi bữa ăn, xem đủ 22 vitamin và khoáng chất, và nhận mục tiêu tính theo cơ thể bạn."` | `"Thêm bữa ăn, xem đủ 22 vitamin và khoáng chất cùng mục tiêu tính theo cơ thể bạn."` | Đồng nhất động từ `"Thêm bữa ăn"` |
-| `app/signup/page.tsx:20` | `label="1 set là đủ"` | `label="Một hiệp là đủ"` | Thay từ tiếng Anh `"set"` bằng `"hiệp"` |
-| `app/signup/page.tsx:23` | `"1 SET LÀ ĐỦ"` | `"MỘT HIỆP LÀ ĐỦ"` | Thay từ tiếng Anh `"SET"` bằng `"HIỆP"` |
-| `app/signup/page.tsx:33` | `"Bắt đầu ghi bữa ăn"` | `"Bắt đầu thêm bữa ăn"` | Đồng nhất động từ `"thêm bữa ăn"` |
-| `app/signin/check-email/page.tsx:74` | `"Mở ứng dụng Mail"` | `"Mở ứng dụng email"` | `"email"` tự nhiên trên mọi thiết bị |
-| `app/signin/check-email/page.tsx:90` | `"Mô phỏng mở liên kết (dev)"` | `"Mở liên kết mẫu (bản thử)"` | Bỏ từ `"Mô phỏng"` và `"dev"` (xem mục §4) |
-| `app/signin/check-email/page.tsx:94` | `"Không thấy email? Kiểm tra mục Spam hoặc Quảng cáo."` | `"Chưa thấy email? Kiểm tra hộp thư rác (Spam) hoặc mục Quảng cáo."` | Việt hoá `"hộp thư rác"` dễ hiểu hơn |
-| `app/login/page.tsx:16` | `"Chế độ phát triển (Mock Auth)"` | `"Bản thử nghiệm (đăng nhập mẫu)"` | Không lộ thuật ngữ kỹ thuật `"Mock Auth"` |
-| `app/login/page.tsx:36` | `"Vào thẳng ứng dụng (Mock User)"` | `"Vào thẳng ứng dụng (tài khoản mẫu)"` | Không lộ thuật ngữ kỹ thuật `"Mock User"` |
-| `components/onboarding/setup-form.tsx:151` | `"Bước 1/2 · Về bạn"` | `"Bước 1 / 2 · Về bạn"` | Đồng nhất khoảng trắng `"Bước 1 / 2"` với dòng 114 |
-| `components/onboarding/setup-summary.tsx:32` | `"Bắt đầu ghi bữa đầu tiên"` | `"Thêm bữa đầu tiên"` | Đồng nhất với `overview-parts.tsx:85` (xem mục §4) |
-| `components/onboarding/setup-summary.tsx:71` | `"Bắt đầu ghi bữa đầu tiên"` | `"Thêm bữa đầu tiên"` | Đồng nhất với dòng 32 và bảng động từ |
-| `lib/onboarding.ts:128` | `label: "Béo (0,5–1 g/kg)"` | `label: "Chất béo (0,5–1 g/kg)"` | Đồng nhất `"Chất béo"` với bảng mục tiêu |
-| `lib/auth-actions.ts:192` | `"Bạn đang ngoại tuyến"` | `"Bạn đang ngoại tuyến. Kiểm tra kết nối mạng rồi thử lại nhé."` | Lỗi hành động cần hướng dẫn bước tiếp theo |
-| `lib/auth-actions.ts:194` | `"Chưa gửi được yêu cầu, thử lại sau"` | `"Chưa kết nối được máy chủ. Bạn thử lại sau ít phút nhé."` | Tự nhiên, xưng `"bạn"` rõ ràng |
+| `app/layout.tsx:24` | `"H1T MICRO \| Dinh dưỡng & Vi chất Chuyên sâu"` | `"H1T MICRO \| Theo dõi vi chất & dinh dưỡng mỗi ngày"` | Tự nhiên, cụ thể lợi ích cho bạn và bỏ viết hoa tuỳ tiện giữa câu. |
+| `app/layout.tsx:25` | `"Theo dõi 22 vi chất và macro dinh dưỡng chuyên sâu cho vận động và tập luyện."` | `"Theo dõi 22 vi chất, năng lượng và đa lượng chuyên sâu cho vận động và tập luyện."` | Thay từ tiếng Anh `"macro"` bằng thuật ngữ tiếng Việt tự nhiên. |
 
-- **Chuỗi giữ nguyên (OK) trong nhóm 2.2:** 92 chuỗi.
-
----
-
-### 2.3. Tổng quan: Tóm tắt, Năng lượng, Vi chất, Cơ thể (`/`, `/trends/**`)
-*Phạm vi: `app/(dashboard)/page.tsx`, `app/trends/**`, `components/overview/**`, `lib/overview.ts`, `lib/overview-board.ts`, `lib/overview-detail.ts`, `lib/period.ts`, `lib/weight-log.ts`, `lib/format.ts`*
+### 2.2. Xác thực (Auth) & Thiết lập ban đầu (Onboarding / Setup) (`app/signin/*`, `app/signup/*`, `app/reset-password/*`, `app/setup/*`, `components/auth/*`, `components/onboarding/*`, `lib/onboarding.ts`, `lib/auth-actions.ts`)
 
 | file:line | current | proposed | why |
 |---|---|---|---|
-| `components/overview/energy-tab.tsx:23` | `{ key: "fat", label: "Béo", pct: fat, className: "bg-amber" }` | `{ key: "fat", label: "Chất béo", pct: fat, className: "bg-amber" }` | Đồng nhất `"Chất béo"` với bảng điểm ngay phía trên |
-| `components/overview/energy-tab.tsx:30` | `` `Đạm ${protein}%, tinh bột ${carbs}%, béo ${fat}%` `` | `` `Đạm ${protein}%, tinh bột ${carbs}%, chất béo ${fat}%` `` | Đồng nhất `"chất béo"` trong `aria-label` |
-| `components/overview/energy-tab.tsx:157` | `"* Chất xơ chỉ tính các món có số liệu chất xơ."` | `"* Chất xơ chỉ tính từ các món có dữ liệu chất xơ."` | Thống nhất `"dữ liệu"` thay `"số liệu"` |
-| `components/overview/micro-card.tsx:38` | `"Chưa có số liệu vi chất trong kỳ"` | `"Chưa có dữ liệu vi chất trong kỳ"` | Thống nhất `"dữ liệu"` thay `"số liệu"` |
-| `components/overview/micros-tab.tsx:96` | `` `${board.unknown} chất chưa có số liệu` : "Đủ số liệu cả 22 chất" `` | `` `${board.unknown} chất chưa có dữ liệu` : "Đủ dữ liệu cả 22 chất" `` | Thống nhất `"dữ liệu"` (dòng 154 cùng file đã dùng `"dữ liệu"`) |
-| `components/overview/micros-tab.tsx:175` | `label: "Chưa có số liệu"` | `label: "Chưa có dữ liệu"` | Thống nhất `"dữ liệu"` |
-| `components/overview/micros-tab.tsx:193` | `"Chưa có món nào có số liệu trong kỳ này"` | `"Chưa có món nào có dữ liệu trong kỳ này"` | Thống nhất `"dữ liệu"` |
-| `components/overview/parts/nutrient-grid.tsx:47` | `` `${s.name}: chưa có số liệu` `` | `` `${s.name}: chưa có dữ liệu` `` | Thống nhất `"dữ liệu"` trong `aria-label` |
-| `components/overview/parts/nutrient-grid.tsx:74` | `"Chưa có số liệu"` | `"Chưa có dữ liệu"` | Thống nhất `"dữ liệu"` |
-| `components/overview/body-tab.tsx:184` | `sub="Không đổi theo cân"` | `sub="Cố định theo giới tính và độ tuổi"` | Giải thích rõ vì sao mục tiêu giữ nguyên |
-| `lib/overview-board.ts:69` | `"Chưa đủ số liệu trong kỳ"` | `"Chưa đủ dữ liệu trong kỳ"` | Thống nhất `"dữ liệu"` (xem mục §4) |
-| `lib/overview-detail.ts:265` | `"Chưa có món nào trong nhật ký có số liệu chất này"` | `"Chưa có món nào trong nhật ký có dữ liệu chất này"` | Thống nhất `"dữ liệu"` (xem mục §4) |
-| `lib/period.ts:171` | `{ key: "fat", label: "Béo", unit: "g" }` | `{ key: "fat", label: "Chất béo", unit: "g" }` | Đồng nhất `"Chất béo"` (xem mục §4) |
-| `lib/format.ts:195` | `` `${options?.signed ? formatSigned(value) : formatNumber(Math.round(value))} %` `` | `` `${options?.signed ? formatSigned(value) : formatNumber(Math.round(value))}%` `` | Quy tắc cứng `50%` không có khoảng trắng trước `%` |
+| `app/signup/page.tsx:7` | `"Theo dõi đầy đủ vi chất, không chỉ calo"` | `"Theo dõi đủ 22 vi chất, không chỉ kcal"` | Ngắn gọn, cụ thể con số 22 vi chất và đồng nhất đơn vị `kcal`. |
+| `app/signup/page.tsx:9` | `"Ghi bữa ăn trong vài giây, thấy ngay còn thiếu gì"` | `"Thêm bữa ăn trong vài giây, thấy ngay còn thiếu gì"` | Đồng nhất động từ `"Thêm bữa ăn"` theo bảng thuật ngữ. |
+| `app/signup/page.tsx:33` | `"Ghi bữa ăn, theo dõi vi chất và làm theo mục tiêu của huấn luyện viên Lê Hồng Khánh."` | `"Thêm bữa ăn, theo dõi vi chất và bám sát mục tiêu của huấn luyện viên Lê Hồng Khánh."` | Đồng nhất động từ `"Thêm bữa ăn"` theo bảng thuật ngữ. |
+| `app/signin/check-email/page.tsx:74` | `"Mở ứng dụng Mail"` | `"Mở ứng dụng Email"` | Tự nhiên trên cả điện thoại Android, iOS và máy tính (không chỉ Apple Mail). |
+| `app/signin/check-email/page.tsx:90` | `"Mô phỏng mở liên kết (dev)"` | `"Mở thẳng liên kết đăng nhập (bản thử)"` | Việt hoá `"Mô phỏng ... (dev)"` cho rõ hành động và đồng nhất từ `"bản thử"`. |
+| `app/signin/check-email/page.tsx:94` | `"Không thấy email? Kiểm tra mục Spam hoặc Quảng cáo."` | `"Chưa thấy email? Bạn kiểm tra thêm hộp thư Rác (Spam) hoặc Quảng cáo nhé."` | Giọng điệu ấm áp, xưng `"bạn"` tự nhiên và hướng dẫn cụ thể. |
+| `components/onboarding/setup-summary.tsx:32` | `"Bắt đầu ghi bữa đầu tiên"` | `"Thêm bữa đầu tiên"` | Đồng nhất động từ `"Thêm"` với nút `"Thêm bữa đầu tiên"` ở Tổng quan. |
+| `components/onboarding/setup-summary.tsx:71` | `"Bắt đầu ghi bữa đầu tiên"` | `"Thêm bữa đầu tiên"` | Đồng nhất động từ `"Thêm"` giữa bản điện thoại và máy tính. |
+| `lib/onboarding.ts:128` | `label: "Béo (0,5–1 g/kg)"` | `label: "Chất béo (0,5–1 g/kg)"` | Đồng nhất danh từ `"Chất béo"` thay vì `"Béo"` đứng một mình. |
+| `lib/auth-actions.ts:59` | `const RETRY_LATER = "Chưa xử lý được. Thử lại sau ít phút.";` | `const RETRY_LATER = "Chưa kết nối được máy chủ. Bạn thử lại sau ít phút nhé.";` | Nêu rõ nguyên nhân và xưng `"bạn"` tự nhiên. |
 
-- **Chuỗi giữ nguyên (OK) trong nhóm 2.3:** 118 chuỗi.
-
----
-
-### 2.4. Nhật ký, Vi chất trong ngày & Ngày tập (`/diary`, `/micros/**`, `/training`)
-*Phạm vi: `app/diary/page.tsx`, `app/micros/**`, `app/(dashboard)/training/page.tsx`, `components/diary/**`, `components/today/**`, `components/micros/**`, `components/training/**`, `components/calendar-picker.tsx`, `lib/diary-rows.ts`, `lib/quick-entry.ts`, `lib/training.ts`, `lib/nutrient-detail.ts`, `lib/mock/sample-day.ts`*
+### 2.3. Tổng quan (`/` · `/trends` · `/trends/micros` · `/trends/body`, `components/overview/*`, `lib/overview-*.ts`, `lib/period.ts`, `lib/format.ts`)
 
 | file:line | current | proposed | why |
 |---|---|---|---|
-| `components/diary/diary-screen.tsx:252` | `{ key: "fat", label: "Béo", color: "bg-amber" }` | `{ key: "fat", label: "Chất béo", color: "bg-amber" }` | Đồng nhất `"Chất béo"` trên thẻ tổng hợp Nhật ký |
-| `lib/mock/sample-day.ts:173` | `label: "Béo"` | `label: "Chất béo"` | Đồng nhất `"Chất béo"` trong dữ liệu mẫu |
-| `lib/mock/sample-day.ts:445` | `name: "Folate (B9)"` | `name: "Vitamin B9"` | Khớp tên chuẩn `"Vitamin B9"` trong `docs/nutrient-catalog.md` |
-| `lib/diary-rows.ts:8` | `part("Béo", fat)` | `part("Chất béo", fat)` | Đồng nhất `"Chất béo"` ở dòng phụ món ăn (xem mục §4) |
-| `lib/quick-entry.ts:78` | `Béo ${show(entry.fat)}` | `Chất béo ${show(entry.fat)}` | Đồng nhất `"Chất béo"` cho mục thêm nhanh (xem mục §4) |
-| `app/(dashboard)/training/page.tsx:136` | `"Tick đã lưu của ngày này. Chỉ xem."` | `"Mục đã đánh dấu của ngày này · Chỉ xem."` | Thay từ tiếng Anh `"Tick"` bằng tiếng Việt (xem mục §4) |
-| `components/training/sodium-progress-card.tsx:76` | `"Đã đạt mức tối thiểu. Mỗi lần ghi muối trong tập sẽ cộng vào đây."` | `"Mỗi lần đánh dấu muối trong buổi tập sẽ cộng vào đây."` | Tránh báo sai khi chưa đạt và khớp hành động đánh dấu |
-| `lib/training.ts:163` | `"Không dồn vào cuối buổi · quá ~1 g một lần dễ gây khó chịu bụng"` | `"Chia đều theo từng chặng 20 phút, không dồn vào cuối buổi"` | Bỏ lời khuyên sức khoẻ ngoài quy tắc huấn luyện viên |
-| `lib/training.ts:183` | `"Cần định lượng chính xác để tính phần còn lại trong ngày"` | `"Cân hoặc đong rõ lượng muối để tính đúng phần còn lại trong ngày"` | Cụ thể hành động thay vì văn phong hành chính |
+| `components/overview/energy-tab.tsx:23` | `{ key: "fat", label: "Béo", share: fat, bg: "bg-ink" }` | `{ key: "fat", label: "Chất béo", share: fat, bg: "bg-ink" }` | Đồng nhất nhãn `"Chất béo"` với bảng điểm ngay phía trên. |
+| `components/overview/energy-tab.tsx:31` | ``aria-label={`Đạm ${protein}%, béo ${fat}%, tinh bột ${carbs}% của kcal trung bình`}`` | ``aria-label={`Đạm ${protein}%, chất béo ${fat}%, tinh bột ${carbs}% của kcal trung bình`}`` | Đồng nhất thuật ngữ `"chất béo"` trong nhãn trợ năng. |
+| `components/overview/energy-tab.tsx:157` | `"* Chất xơ chỉ tính các món có số liệu chất xơ."` | `"* Chất xơ chỉ tính từ các món đã có dữ liệu chất xơ."` | Đồng nhất thuật ngữ `"dữ liệu"` thay cho `"số liệu"`. |
+| `components/overview/micro-card.tsx:38` | `"Chưa có số liệu vi chất trong kỳ"` | `"Chưa có dữ liệu vi chất trong kỳ này"` | Đồng nhất `"Chưa có dữ liệu"` trên toàn ứng dụng. |
+| `components/overview/micros-tab.tsx:96` | `` `${board.unknown} chất chưa có số liệu` : "Đủ số liệu cả 22 chất" `` | `` `${board.unknown} chất chưa có dữ liệu` : "Đủ dữ liệu cả 22 chất" `` | Đồng nhất thuật ngữ `"dữ liệu"` thay cho `"số liệu"`. |
+| `components/overview/micros-tab.tsx:175` | `<SectionTitle as="p">Chưa có số liệu</SectionTitle>` | `<SectionTitle as="p">Chưa có dữ liệu</SectionTitle>` | Đồng nhất thuật ngữ `"Chưa có dữ liệu"` cho giá trị `null`. |
+| `components/overview/micros-tab.tsx:193` | `"Chưa có món nào có số liệu trong kỳ này"` | `"Chưa có món nào có dữ liệu chất này trong kỳ"` | Đồng nhất `"dữ liệu"` và nói rõ phạm vi của vi chất đang xem. |
+| `components/overview/parts/nutrient-grid.tsx:47` | `const level = s.level ? getLevelLabel(s.level) : "chưa có số liệu";` | `const level = s.level ? getLevelLabel(s.level) : "chưa có dữ liệu";` | Đồng nhất thuật ngữ `"chưa có dữ liệu"` trong `aria-label`. |
+| `components/overview/parts/nutrient-grid.tsx:74` | `"Chưa có số liệu"` | `"Chưa có dữ liệu"` | Đồng nhất thuật ngữ `"Chưa có dữ liệu"` khi chạm ô vi chất. |
+| `lib/overview-board.ts:69` | `"Chưa đủ số liệu trong kỳ"` | `"Chưa có dữ liệu trong kỳ này"` | Đồng nhất `"Chưa có dữ liệu"` và tránh hiểu nhầm với trạng thái `< 3 ngày`. |
+| `lib/overview-detail.ts:265` | `"Chưa có món nào trong nhật ký có số liệu chất này"` | `"Chưa có món nào trong kỳ có dữ liệu về chất này"` | Đồng nhất `"dữ liệu"` và khớp với phạm vi kỳ đang chọn. |
+| `lib/period.ts:171` | `{ key: "fat", label: "Béo", unit: "g" }` | `{ key: "fat", label: "Chất béo", unit: "g" }` | Đồng nhất danh từ `"Chất béo"` trong chuỗi xu hướng. |
+| `lib/format.ts:195` | `` `${options?.signed ? formatSigned(value) : formatNumber(Math.round(value))} %` `` | `` `${options?.signed ? formatSigned(value) : formatNumber(Math.round(value))}%` `` | Quy tắc cứng: viết liền dấu phần trăm (`50%`, không có khoảng trắng). |
 
-- **Chuỗi giữ nguyên (OK) trong nhóm 2.4:** 134 chuỗi.
-
----
-
-### 2.5. Thêm món, Khám phá, Chi tiết món & Sửa mục ghi (`/add`, `/explore/**`, `/foods/**`, `/entry/[id]`)
-*Phạm vi: `app/add/page.tsx`, `app/explore/**`, `app/foods/**`, `app/entry/[id]/page.tsx`, `components/explore/**`, `components/foods/**`, `components/meal-switcher.tsx`, `components/ui/portion-panel.tsx`*
-
-| file:line | current | proposed | why |
-|---|---|---|---|
-| `app/explore/rich/[nutrient]/page.tsx:60` | `` `${row.pct} % mục tiêu ngày · ${row.basis}` `` | `` `${row.pct}% mục tiêu ngày · ${row.basis}` `` | Quy tắc cứng `50%` không có khoảng trắng trước `%` |
-| `components/foods/food-micros.tsx:10` | `if (row.share < 0.1) return "< 0,1 %";` | `if (row.share < 0.1) return "<0,1%";` | Quy tắc cứng không khoảng trắng trước `%` (xem mục §4) |
-| `components/foods/food-micros.tsx:11` | `` `${formatNumber(row.share, { decimals: 1 })} %` : `${row.pct} %` `` | `` `${formatNumber(row.share, { decimals: 1 })}%` : `${row.pct}%` `` | Quy tắc cứng `50%` không có khoảng trắng trước `%` |
-| `components/foods/food-micros.tsx:63` | `"Từ 20 % mục tiêu ngày mỗi khẩu phần"` | `"Từ 20% mục tiêu ngày mỗi khẩu phần"` | Quy tắc cứng `20%` không có khoảng trắng trước `%` |
-| `components/foods/food-micros.tsx:70` | `{r.name} · {r.pct} %` | `{r.name} · {r.pct}%` | Quy tắc cứng `50%` không khoảng trắng trước `%` (xem mục §4) |
-| `components/foods/food-empty-state.tsx:58` | `"Danh sách đồ uống chỉ có món có số liệu từ nguồn đã dùng. Bạn có thể tự tạo đồ uống."` | `"Danh sách đồ uống chỉ hiện món có dữ liệu từ nguồn đã kiểm chứng. Bạn có thể tạo đồ uống mới."` | Thay `"số liệu"` bằng `"dữ liệu"`, câu tự nhiên |
-| `components/foods/entry-editor.tsx:132` | `"Thêm nhanh: vi chất của món này chưa có dữ liệu. Để trống một chất nếu chưa biết: hiện là —."` | `"Mục thêm nhanh chưa có dữ liệu vi chất. Để trống chất bạn chưa biết (sẽ hiện —)."` | Bỏ hai dấu hai chấm liên tiếp, ngắn gọn hơn |
-| `components/foods/entry-editor.tsx:149` | `aria-label="Số gam"` | `aria-label="Khối lượng theo gam"` | Đồng nhất với `app/foods/[id]/page.tsx:199` (xem mục §4) |
-| `components/ui/portion-panel.tsx:149` | `aria-label="Số gam"` | `aria-label="Khối lượng theo gam"` | Đồng nhất với `app/foods/[id]/page.tsx:199` |
-| `components/ui/portion-panel.tsx:195` | `{ label: "Béo", val: scaled.fat, unit: "g" }` | `{ label: "Chất béo", val: scaled.fat, unit: "g" }` | Đồng nhất `"Chất béo"` |
-| `app/foods/[id]/page.tsx:227` | `{ label: "Béo", val: scaled.fat, unit: "g" }` | `{ label: "Chất béo", val: scaled.fat, unit: "g" }` | Đồng nhất `"Chất béo"` |
-| `app/foods/new/page.tsx:50` | `"Vui lòng nhập tên món ăn."` | `"Nhập tên món ăn"` | Bỏ `"Vui lòng"`, đồng nhất kiểu lỗi ngắn gọn |
-| `app/foods/new/page.tsx:53` | `"Khẩu phần phải lớn hơn 0."` | `"Nhập khối lượng khẩu phần lớn hơn 0"` | Nói rõ hành động tiếp theo cho người dùng |
-| `app/foods/new/page.tsx:57` | `"Năng lượng không hợp lệ."` | `"Nhập số kcal từ 0 trở lên"` | Cụ thể điều kiện hợp lệ thay vì báo chung chung |
-| `app/foods/new/page.tsx:168` | `label="Lượng mỗi khẩu phần"` | `label="Khối lượng khẩu phần"` | Tự nhiên, rõ nghĩa hơn `"Lượng mỗi khẩu phần"` |
-
-- **Chuỗi giữ nguyên (OK) trong nhóm 2.5:** 109 chuỗi.
-
----
-
-### 2.6. Cài đặt, Hồ sơ, Nguồn dữ liệu, Gói Pro & Duyệt món (`/settings/**`, `/paywall`, `/admin/review`)
-*Phạm vi: `app/settings/**`, `app/paywall/page.tsx`, `app/admin/review/page.tsx`, `components/settings/**`, `components/data-sources/**`, `lib/data-sources.ts`, `lib/target-rows.ts`*
+### 2.4. Nhật ký (`/diary`), Vi chất (`/micros`) & Ngày tập (`/training`) (`components/diary/*`, `components/micros/*`, `components/training/*`, `lib/diary-*.ts`, `lib/quick-entry.ts`, `lib/training.ts`)
 
 | file:line | current | proposed | why |
 |---|---|---|---|
-| `app/settings/notifications/page.tsx:32` | `label: "Nhắc ghi bữa sáng"` | `label: "Nhắc thêm bữa sáng"` | Đồng nhất động từ `"thêm bữa"` |
-| `app/settings/notifications/page.tsx:39` | `label: "Nhắc ghi bữa trưa"` | `label: "Nhắc thêm bữa trưa"` | Đồng nhất động từ `"thêm bữa"` |
-| `app/settings/notifications/page.tsx:46` | `label: "Nhắc ghi bữa tối"` | `label: "Nhắc thêm bữa tối"` | Đồng nhất động từ `"thêm bữa"` |
-| `app/settings/notifications/page.tsx:53` | `subtitle: "15 phút trước giờ tập để chuẩn bị muối & tinh bột"` | `subtitle: "15 phút trước giờ tập để chuẩn bị muối và tinh bột"` | Dùng `"và"` thay ký hiệu `"&"` |
-| `app/settings/delete-account/page.tsx:12` | `"Món và công thức bạn tự tạo"` | `"Món của tôi và Bữa ăn của tôi"` | Dùng đúng tên tính năng trong ứng dụng |
-| `app/settings/delete-account/page.tsx:29` | `"Chưa hỗ trợ xoá tài khoản trong bản thử"` | `"Bản thử chưa hỗ trợ xoá tài khoản. Bạn có thể đăng xuất trong mục Tài khoản."` | Thêm hướng dẫn bước tiếp theo |
-| `app/settings/delete-account/page.tsx:36` | `"Chưa hỗ trợ tải dữ liệu trong bản thử"` | `"Bản thử chưa hỗ trợ tải dữ liệu về máy."` | Câu chủ động, tự nhiên hơn |
-| `app/settings/delete-account/page.tsx:73` | `"Bạn có thể tải nhật ký và món tự tạo về máy trước khi xoá."` | `"Bạn có thể tải nhật ký và Món của tôi về máy trước khi xoá."` | Đồng nhất thuật ngữ `"Món của tôi"` |
-| `app/paywall/page.tsx:26` | `"Sắp mở thanh toán — dùng thử miễn phí trong lúc chờ"` | `"Cổng thanh toán sắp mở — bạn đang được dùng miễn phí đầy đủ tính năng"` | Ấm áp, rõ quyền lợi của người dùng |
-| `lib/data-sources.ts:16` | `"Nguồn chính cho thực phẩm nguyên bản, thịt cá, trứng, sữa, hạt và rau củ phổ biến. Đầy đủ số liệu cho cả 22 vi chất."` | `"Nguồn chính cho thực phẩm nguyên bản, thịt cá, trứng, sữa, hạt và rau củ phổ biến. Đầy đủ dữ liệu cho cả 22 vi chất."` | Thống nhất `"dữ liệu"` thay `"số liệu"` |
-| `lib/data-sources.ts:26` | `"Dùng cho món ăn, nguyên liệu và thực phẩm chế biến đặc thù tại Việt Nam. Một số vi chất vi lượng (như Selen, Vitamin K) chưa có số liệu trong bảng gốc."` | `"Dùng cho món ăn, nguyên liệu và thực phẩm chế biến đặc thù tại Việt Nam. Một số vi chất (như Selen, Vitamin K) chưa có dữ liệu trong bảng gốc."` | Thống nhất `"dữ liệu"`, bỏ lặp `"vi chất vi lượng"` |
-| `lib/data-sources.ts:36` | `"Năng lượng và đa lượng lấy theo nhãn sản phẩm; vi chất chỉ hiển thị các chất nhà sản xuất công bố trên bao bì, các chất còn lại để trống (chưa có số liệu)."` | `"Năng lượng và đa lượng lấy theo nhãn sản phẩm; vi chất chỉ hiện các chất được công bố trên bao bì, các chất còn lại để trống (chưa có dữ liệu)."` | Thống nhất `"dữ liệu"`, câu gọn hơn |
-| `app/admin/review/page.tsx:100` | `"Chưa chọn dữ liệu"` | `"Chưa chọn món cần duyệt"` | Cụ thể ngữ cảnh thay vì `"dữ liệu"` chung chung |
-| `app/admin/review/page.tsx:102` | `"Hãy chọn một mục bên danh sách chờ để kiểm tra chi tiết."` | `"Chọn một món ở danh sách bên trái để kiểm tra chi tiết."` | Bỏ `"Hãy"`, chỉ dẫn trực tiếp |
-| `app/admin/review/page.tsx:146` | `"Tất cả thực phẩm người dùng đóng góp đã được xử lý."` | `"Tất cả món chờ duyệt đã được xử lý."` | Ngắn gọn, bỏ câu bị động dài |
+| `lib/mock/sample-day.ts:172` | `label: "Béo"` | `label: "Chất béo"` | Đồng nhất nhãn `"Chất béo"` trên dữ liệu mẫu Nhật ký. |
+| `lib/diary-rows.ts:8` | ``return `${part("Đạm", protein)} · ${part("Tinh bột", carbs)} · ${part("Béo", fat)}`;`` | ``return `${part("Đạm", protein)} · ${part("Tinh bột", carbs)} · ${part("Chất béo", fat)}`;`` | Đồng nhất `"Chất béo"` ở dòng phụ của món ăn trong Nhật ký. |
+| `lib/quick-entry.ts:78` | ``return `Đạm ${show(entry.protein)} · Tinh bột ${show(entry.carbs)} · Béo ${show(entry.fat)}`;`` | ``return `Đạm ${show(entry.protein)} · Tinh bột ${show(entry.carbs)} · Chất béo ${show(entry.fat)}`;`` | Đồng nhất `"Chất béo"` ở dòng phụ của món thêm nhanh. |
+| `app/(dashboard)/training/page.tsx:143` | `"Ngày này chưa có thời lượng tập đã ghi. Chỉ xem."` | `"Ngày này chưa lưu thời lượng tập · Chỉ xem"` | Tự nhiên, ngắn gọn hơn cấu trúc bị động `"thời lượng tập đã ghi"`. |
+| `components/training/sodium-progress-card.tsx:77` | `"Đã đạt mức tối thiểu. Mỗi lần ghi muối trong tập sẽ cộng vào đây."` | `"Đã đạt mức tối thiểu. Natri từ các bữa ăn hôm nay được cộng tự động vào đây."` | Đúng thực tế hoạt động của ứng dụng (Natri lấy từ bữa ăn, không cộng từ nút tick). |
+| `lib/training.ts:135` | `loggedNote("pre-cha-la", "✓ Đã đánh dấu")` | `loggedNote("pre-cha-la", "✓ Đã dùng")` | Gần gũi, tự nhiên với người tập thay vì từ kỹ thuật `"Đã đánh dấu"`. |
+| `lib/training.ts:158` | `loggedNote(id, "✓ Đã đánh dấu")` | `loggedNote(id, "✓ Đã dùng")` | Đồng nhất `"✓ Đã dùng"` cho các cữ muối trong buổi tập. |
+| `lib/training.ts:196` | ``text: `Đạm vẫn ${targetRangeText(targets.protein, "g")}` `` | ``text: `Giữ mức đạm ${targetRangeText(targets.protein, "g")}` `` | Rõ hành động cần làm trong ngày nghỉ, song hành với `"Năng lượng giữ..."`. |
 
-- **Chuỗi giữ nguyên (OK) trong nhóm 2.6:** 98 chuỗi.
+### 2.5. Khám phá (`/explore`), Thêm món (`/add`), Sửa món (`/entry/[id]`), Chi tiết & Tạo món (`/foods/*`, `components/add/*`, `components/foods/*`, `components/ui/portion-panel.tsx`)
+
+| file:line | current | proposed | why |
+|---|---|---|---|
+| `app/explore/rich/[nutrient]/page.tsx:53` | `Chưa có món nào có dữ liệu về {name}.` | `Chưa có món nào có dữ liệu {name}. Bạn có thể tự tạo món mới từ nhãn bao bì.` | Hướng dẫn bước tiếp theo khi danh sách trống. |
+| `app/explore/rich/[nutrient]/page.tsx:60` | ``meta={row.pct === null ? row.basis : `${row.pct} % mục tiêu ngày · ${row.basis}`}`` | ``meta={row.pct === null ? row.basis : `${row.pct}% mục tiêu ngày · ${row.basis}`}`` | Quy tắc cứng: viết liền dấu phần trăm (`50%`, không có khoảng trắng). |
+| `components/foods/food-micros.tsx:10` | `if (row.share > 0 && row.share < 0.1) return "< 0,1 %";` | `if (row.share > 0 && row.share < 0.1) return "< 0,1%";` | Quy tắc cứng: viết liền dấu phần trăm (`< 0,1%`). |
+| `components/foods/food-micros.tsx:11` | ``return row.share > 0 && row.share < 1 ? `${formatNumber(row.share, { decimals: 1 })} %` : `${row.pct} %`;`` | ``return row.share > 0 && row.share < 1 ? `${formatNumber(row.share, { decimals: 1 })}%` : `${row.pct}%`;`` | Quy tắc cứng: viết liền dấu phần trăm (`50%`). |
+| `components/foods/food-micros.tsx:63` | `"Từ 20 % mục tiêu ngày mỗi khẩu phần"` | `"Từ 20% mục tiêu ngày mỗi khẩu phần"` | Quy tắc cứng: viết liền dấu phần trăm (`20%`). |
+| `components/foods/food-micros.tsx:70` | `{r.name} · {r.pct} %` | `{r.name} · {r.pct}%` | Quy tắc cứng: viết liền dấu phần trăm (`50%`). |
+| `components/foods/food-empty-state.tsx:58` | `"Danh sách đồ uống chỉ có món có số liệu từ nguồn đã dùng. Bạn có thể tự tạo đồ uống."` | `"Chưa có đồ uống có sẵn dữ liệu phân tích. Bạn có thể tự tạo đồ uống từ nhãn bao bì."` | Thay cụm dịch máy `"từ nguồn đã dùng"` bằng câu tiếng Việt tự nhiên, cụ thể. |
+| `components/foods/entry-editor.tsx:138` | `<FormRow label="Béo (g)" htmlFor="entry-quick-fat">` | `<FormRow label="Chất béo (g)" htmlFor="entry-quick-fat">` | Đồng nhất nhãn `"Chất béo (g)"`. |
+| `components/foods/entry-editor.tsx:142` | `"Thêm nhanh: vi chất của món này chưa có dữ liệu. Để trống một chất nếu chưa biết: hiện là —."` | `"Món thêm nhanh không tính vào 22 vi chất. Ô bỏ trống sẽ hiện là — (chưa có dữ liệu), không tính là 0."` | Giải thích tự nhiên, mạch lạc thay cho câu ghép hai dấu hai chấm. |
+| `components/foods/entry-editor.tsx:218` | ``<Stat value={preview ? `${formatAmount(preview.fat, "g")} g` : "—"} label="Béo" />`` | ``<Stat value={preview ? `${formatAmount(preview.fat, "g")} g` : "—"} label="Chất béo" />`` | Đồng nhất nhãn `"Chất béo"`. |
+| `components/ui/portion-panel.tsx:197` | ``{ id: "fat", value: `${formatAmount(macroPreview.fat, "g")} g`, label: "Béo" }`` | ``{ id: "fat", value: `${formatAmount(macroPreview.fat, "g")} g`, label: "Chất béo" }`` | Đồng nhất nhãn `"Chất béo"` trong bảng chọn khẩu phần. |
+| `app/foods/[id]/page.tsx:221` | ``{ id: "fat", value: `${formatAmount(macros.fat, "g")} g`, label: "Béo" }`` | ``{ id: "fat", value: `${formatAmount(macros.fat, "g")} g`, label: "Chất béo" }`` | Đồng nhất nhãn `"Chất béo"` trên trang chi tiết món. |
+| `app/foods/new/page.tsx:50` | `if (!val.trim()) err = "Vui lòng nhập tên món ăn.";` | `if (!val.trim()) err = "Nhập tên món ăn";` | Bỏ `"Vui lòng"`, đồng nhất kiểu câu ngắn gọn với các thông báo lỗi khác (`"Nhập mật khẩu"`, `"Nhập kcal lớn hơn 0"`). |
+| `app/foods/new/page.tsx:57` | `if (isNaN(num) || num < 0) err = "Năng lượng không hợp lệ.";` | `if (isNaN(num) || num < 0) err = "Nhập số năng lượng từ 0 trở lên";` | Cho biết rõ cách sửa thay vì chỉ báo `"không hợp lệ"`. |
+| `app/foods/new/page.tsx:256` | `<FormRow label="Béo (g)" htmlFor="cf-fat">` | `<FormRow label="Chất béo (g)" htmlFor="cf-fat">` | Đồng nhất nhãn `"Chất béo (g)"`. |
+
+### 2.6. Cài đặt (`/settings/*`), Paywall (`/paywall`), PWA (`/install`) & Quản trị (`/admin/review`)
+
+| file:line | current | proposed | why |
+|---|---|---|---|
+| `app/settings/notifications/page.tsx:32` | `label: "Nhắc ghi bữa sáng"` | `label: "Nhắc thêm bữa sáng"` | Đồng nhất động từ `"thêm bữa"` theo bảng thuật ngữ. |
+| `app/settings/notifications/page.tsx:39` | `label: "Nhắc ghi bữa trưa"` | `label: "Nhắc thêm bữa trưa"` | Đồng nhất động từ `"thêm bữa"` theo bảng thuật ngữ. |
+| `app/settings/notifications/page.tsx:46` | `label: "Nhắc ghi bữa tối"` | `label: "Nhắc thêm bữa tối"` | Đồng nhất động từ `"thêm bữa"` theo bảng thuật ngữ. |
+| `app/settings/notifications/page.tsx:102` | `setPermissionStatus("Trình duyệt từ chối quyền thông báo");` | `setPermissionStatus("Trình duyệt đang chặn thông báo. Bạn mở cài đặt trình duyệt để cấp quyền nhé.");` | Hướng dẫn bước tiếp theo khi quyền thông báo bị từ chối. |
+| `app/settings/delete-account/page.tsx:29` | `setToastMessage("Chưa hỗ trợ xoá tài khoản trong bản thử");` | `setToastMessage("Bản thử chưa hỗ trợ xoá tài khoản. Dữ liệu hiện chỉ lưu trên thiết bị của bạn.");` | Giải thích rõ ràng và trấn an bạn về dữ liệu trên máy. |
+| `app/settings/delete-account/page.tsx:36` | `setToastMessage("Chưa hỗ trợ tải dữ liệu trong bản thử");` | `setToastMessage("Tính năng tải CSV sẽ mở khi kết nối máy chủ.");` | Giải thích cụ thể khi nào tính năng khả dụng. |
+| `app/paywall/page.tsx:59` | `"Sắp ra mắt"` | `"Sắp ra mắt — bạn sẽ được thông báo khi mở đăng ký."` | Thêm bước tiếp theo rõ ràng thay vì câu cụt. |
+| `app/paywall/page.tsx:67` | `"Gói miễn phí vẫn ghi đủ 22 vi chất."` | `"Gói miễn phí vẫn theo dõi đủ 22 vi chất."` | Vi chất là chỉ số được theo dõi tự động từ món ăn, dùng `"theo dõi"` tự nhiên hơn `"ghi"`. |
+| `lib/data-sources.ts:16` | `"Bộ Nông nghiệp Hoa Kỳ; cơ sở dữ liệu thành phần thực phẩm, có số liệu vi chất."` | `"Bộ Nông nghiệp Hoa Kỳ; cơ sở dữ liệu thành phần thực phẩm có đầy đủ dữ liệu vi chất."` | Câu văn tự nhiên và đồng nhất từ `"dữ liệu"`. |
+| `lib/data-sources.ts:26` | `"Viện Dinh dưỡng Quốc gia Việt Nam; số liệu dinh dưỡng cho các món ăn và nguyên liệu địa phương."` | `"Viện Dinh dưỡng Quốc gia Việt Nam; dữ liệu dinh dưỡng cho các món ăn và nguyên liệu Việt Nam."` | Tự nhiên hơn cụm `"nguyên liệu địa phương"` (dịch sát từ `"local ingredients"`). |
+| `app/admin/review/page.tsx:64` | `"Khu vực quản trị"` | `"Quản trị nội dung"` | Ngắn gọn, đúng chức năng trang thay vì dùng từ hành chính `"Khu vực"`. |
+| `app/admin/review/page.tsx:70` | `"Xem và duyệt các bản nháp thực đơn đồng bộ từ kho lưu trữ."` | `"Xem và duyệt các bản nháp thực đơn gửi từ kho nội dung."` | Tự nhiên, bớt mùi kỹ thuật máy móc (`"đồng bộ từ kho lưu trữ"`). |
 
 ---
 
-## 3. Tổng kết số lượng (Totals)
+## 3. Các chuỗi đang được kiểm tra trong `tests/probes/*.py` (cần cập nhật cùng lúc khi sửa code)
 
-| Nhóm màn hình / thành phần | Tổng số chuỗi tìm thấy | Đề xuất sửa (Changed) | Giữ nguyên (Unchanged / OK) |
-|---|---:|---:|---:|
-| 2.1. Khung ứng dụng, trang lỗi, ngoại tuyến & PWA | 68 | 4 | 64 |
-| 2.2. Đăng nhập, đăng ký & thiết lập ban đầu | 108 | 16 | 92 |
-| 2.3. Tổng quan (`/`, `/trends/**`) | 132 | 14 | 118 |
-| 2.4. Nhật ký, Vi chất & Ngày tập (`/diary`, `/micros/**`, `/training`) | 143 | 9 | 134 |
-| 2.5. Thêm món, Khám phá, Chi tiết món & Sửa mục ghi | 124 | 15 | 109 |
-| 2.6. Cài đặt, Hồ sơ, Nguồn dữ liệu, Gói Pro & Duyệt món | 113 | 15 | 98 |
-| **Tổng cộng** | **688** | **73** | **615** |
+Khi lập trình viên áp dụng các thay đổi trong bảng trên, cần cập nhật đồng thời các bài kiểm tra tự động sau trong `apps/web/tests/probes/*.py`:
+
+1. **`tests/probes/cc2_15.py:171` & `tests/probes/cc2_15b.py:144`**:
+   - Đang kiểm tra `pg.get_by_role("link", name="Bắt đầu ghi bữa đầu tiên")` → cập nhật thành `"Thêm bữa đầu tiên"` (khớp với `components/onboarding/setup-summary.tsx:32,71`).
+2. **`tests/probes/cc2_11.py:160`**:
+   - Đang tách phần trăm bằng biểu thức chính quy có khoảng trắng `re.search(r"(\d+) %", c)` trên các thẻ `Nguồn tốt của` (`components/foods/food-micros.tsx:70`) → cập nhật thành `re.search(r"(\d+)\s*%", c)` để khớp với `"50%"` không khoảng trắng.
+   - Lưu ý thêm tại `tests/probes/cc2_11.py:135`: phép kiểm tra `"% mục tiêu ngày" in first` vẫn khớp với `"${row.pct}% mục tiêu ngày"`, không bị gãy.
+3. **`tests/probes/ag06.py:120`**:
+   - Đang kiểm tra `"Gói miễn phí vẫn ghi đủ 22 vi chất." in txt` → cập nhật thành `"Gói miễn phí vẫn theo dõi đủ 22 vi chất."` (khớp với `app/paywall/page.tsx:67`).
+4. **`tests/probes/cc12.py:197`**:
+   - Đối chiếu văn bản hiển thị trên trang với văn bản tĩnh trong `design/screens/*.dc.html` và ghi các dòng khác biệt ra `.screenshots/cc12-copy-report.txt` (không làm fail probe, nhưng nếu đổi `"Béo"` → `"Chất béo"` trên màn hình Nhật ký / Chi tiết món / Sửa món / Tạo món mới thì báo cáo parity sẽ ghi nhận sự khác biệt so với file thiết kế `.dc.html`).
 
 ---
 
-## 4. Chuỗi đang được kiểm tra trong `tests/probes/*.py` & `lib/__tests__/*.test.ts`
+## 4. Tổng kết số lượng chuỗi (Totals)
 
-Khi cập nhật các chuỗi tiếng Việt ở trên, lập trình viên cần cập nhật đồng bộ các tệp probe và unit test dưới đây để không làm gãy cổng kiểm tra:
+- **Tổng số chuỗi tiếng Việt hiển thị cho người dùng đã rà soát**: **542** chuỗi (trên 101 tệp nguồn trong `apps/web/app`, `apps/web/components`, `apps/web/lib`, `apps/web/hooks`).
+- **Số chuỗi đề xuất chỉnh sửa (Changed)**: **60** chuỗi (48 dòng giữ nguyên từ `ag-16` vì khớp chính xác; 12 dòng cập nhật số dòng hoặc văn bản thực tế trong mã nguồn).
+- **Số chuỗi đạt chuẩn giữ nguyên (Unchanged / OK)**: **482** chuỗi (88,9% đã tuân thủ đúng giọng điệu ấm áp, ngắn gọn, xưng `"bạn"`, dùng `"Tinh bột"`, `"huấn luyện viên"`, `"Bữa ăn của tôi"`, `"Xoá"`, `"Tuỳ"` và định dạng số `vi-VN`).
 
-### 4.1. Các đề xuất sửa ở Mục 2 có liên kết trực tiếp với Probe / Unit Test
+---
 
-| Chuỗi hiện tại trong mã nguồn | Đề xuất mới | Probe / Unit test đang kiểm tra chuỗi này |
-|---|---|---|
-| `"Mô phỏng mở liên kết (dev)"` (`app/signin/check-email/page.tsx:90`) | `"Mở liên kết mẫu (bản thử)"` | `tests/probes/cc02-final.py:172` |
-| `"Bắt đầu ghi bữa đầu tiên"` (`components/onboarding/setup-summary.tsx:32, 71`) | `"Thêm bữa đầu tiên"` | `tests/probes/cc2_15.py:171`, `tests/probes/cc2_15b.py:144` |
-| `aria-label="Số gam"` (`components/foods/entry-editor.tsx:149`) | `aria-label="Khối lượng theo gam"` | `tests/probes/ag06.py:79`, `tests/probes/cc05.py:45`, `tests/probes/cc06.py:79` |
-| `"Đạm — · Tinh bột — · Béo —"` (`lib/diary-rows.ts:8`, `lib/quick-entry.ts:78`) | `"Đạm — · Tinh bột — · Chất béo —"` | `tests/probes/cc2_12.py:320`, `lib/__tests__/diary-rows.test.ts`, `lib/__tests__/quick-entry.test.ts` |
-| `"Tick đã lưu của ngày này. Chỉ xem."` (`app/(dashboard)/training/page.tsx:136`) | `"Mục đã đánh dấu của ngày này · Chỉ xem."` | `tests/probes/cc_17.py:172` |
-| `{r.name} · {r.pct} %` (`components/foods/food-micros.tsx:10, 11, 70`) | `{r.name} · {r.pct}%` | `tests/probes/cc2_11.py:160` (regex `r"(\d+) %"`), `lib/__tests__/food-detail.test.ts` |
-| `"Chưa đủ số liệu trong kỳ"` / `"Chưa có món nào trong nhật ký có số liệu chất này"` / `label: "Béo"` / `formatPercent` (`lib/overview-board.ts:69`, `lib/overview-detail.ts:265`, `lib/period.ts:171`, `lib/format.ts:195`) | Đổi `"số liệu"` → `"dữ liệu"`, `"Béo"` → `"Chất béo"`, bỏ khoảng trắng trước `%` | `lib/__tests__/overview-board.test.ts`, `lib/__tests__/overview-detail.test.ts`, `lib/__tests__/period.test.ts`, `lib/__tests__/format-period.test.ts` |
+## 5. Removed (not found)
 
-### 4.2. Danh mục chuỗi cố định đang được các Probe (`tests/probes/*.py`) kiểm tra (giữ nguyên)
+Các dòng dưới đây từ bảng `ag-16` đã được gỡ khỏi bảng đề xuất chỉnh sửa (11 dòng không tồn tại hoặc đã được sửa trong mã nguồn tại commit `b80896c`, và 2 dòng khẩu hiệu thương hiệu HIT 1 SET giữ nguyên theo quy tắc #3):
 
-| Tệp Probe | Các chuỗi tiếng Việt đang được assert |
-|---|---|
-| `ag06.py` | `"Tìm món"`, `"Số gam"`, `"VI CHẤT"`, `"Gói miễn phí vẫn ghi đủ 22 vi chất."`, `"Nhắc nhở"`, `"Đã bật"`, `"Đã tắt"` |
-| `ag07.py` | `"Tuỳ chỉnh"`, `"Món mẫu"` |
-| `cc02-final.py` | `"Chọn một món để xem khẩu phần"`, `"Xoá tìm kiếm"`, `"Món gần đây"`, `"Lọc món theo nhóm"`, `"Yêu thích"`, `"Gửi liên kết đăng ký qua email"`, `"Mô phỏng mở liên kết (dev)"`, `"Tiếp tục"`, `"Hoàn tất"`, `"Để sau"` |
-| `cc03.py` | `"Bỏ yêu thích"`, `"Thêm vào yêu thích"`, `"Đã thêm vào yêu thích"`, `"Đã bỏ khỏi yêu thích"`, `"Chưa có món yêu thích"`, `"Bấm ♡ ở trang chi tiết món để lưu."`, `"Bỏ lọc"`, `"Tất cả"` |
-| `cc04.py` | `"Quay lại"`, `"Bước 1 / 2"`, `"Bước 2 / 2"`, `"Thêm vào yêu thích"`, `"Đã thêm vào yêu thích"` |
-| `cc05.py`, `cc06.py` | `"Không tìm thấy món này"`, `"Lưu thay đổi"`, `"Xoá món này"`, `"Đã xoá"`, `"Hoàn tác"`, `"Khoáng chất"` |
-| `cc08.py`, `cc09.py` | `"Nhập cân nặng từ 30 đến 300 kg"`, `"Nhập năm sinh từ 1900 đến ..."`, `"Lưu"`, `"Nam"`, `"Nữ"`, `"Gần/đang trong kỳ"`, `"Mục tiêu mỗi ngày"`, `"Ứng dụng"`, `"Vùng nguy hiểm"`, `"Năm sinh"` |
-| `cc10.py`, `cc11.py` | `"Ngày trước"`, `"Ngày sau"`, `"Đang xem ngày cũ"`, `"Chép hôm qua"`, `"Hôm qua"`, `"Hôm nay"`, `"Chọn ngày"`, `"Tháng trước"`, `"chưa tới"`, `"Chưa ghi"`, `"Về hôm nay"`, `"Thiếu:"` |
-| `cc2_07.py`, `cc2_08.py` | `"Điều hướng chính"`, `"Tổng quan"`, `"Nhật ký"`, `"Khám phá"`, `"Cài đặt"`, `"Thêm vào:"`, `"Đóng"`, `"Hồ sơ"`, `"Cân nặng"`, `"Ngôn ngữ"`, `"Nhắc nhở"`, `"Vi chất"`, `"Ngày tập"`, `"Tạo món mới"` |
-| `cc2_10.py` | `"Tóm tắt"`, `"Năng lượng"`, `"Vi chất"`, `"Cơ thể"`, `"Trung bình mỗi ngày"`, `"Kỳ trước"`, `"Kỳ sau"`, `"30 ngày"`, `"+ Thêm vào bữa tối"`, `"Tuỳ chọn"`, `"Lưu thành Bữa ăn của tôi"`, `"Xoá bữa này"`, `"Chưa có món"`, `"Hoàn tác"` |
-| `cc2_11.py`, `cc2_12.py` | `"Gần đây"`, `"Yêu thích"`, `"Món của tôi"`, `"Bữa ăn của tôi"`, `"Tạo món mới"`, `"Món giàu vi chất"`, `"Không có món nào khớp"`, `"Mỗi khẩu phần"`, `"Nguồn tốt của"`, `"Chưa có dữ liệu cho ... trong 22 vi chất"`, `"Chọn khẩu phần"`, `"Lưu tên"`, `"Xoá Bữa ăn của tôi"`, `"Chưa có Bữa ăn của tôi"`, `"Chỉ thêm kcal"`, `"Nhập kcal lớn hơn 0"`, `"Thêm nhanh"` |
-| `cc2_14.py` | `"Thêm món"`, `"Nhật ký"`, `"Bạn đang ngoại tuyến"`, `"Nhật ký trên máy này vẫn dùng được."`, `"Thử lại"`, `"Cài ứng dụng"`, `"Trình duyệt này chưa cho cài ứng dụng"`, `"Các bước cài trên iPhone"`, `"Chia sẻ"`, `"Thêm vào MH chính"`, `"Đã cài trên máy này"` |
-| `cc2_15.py`, `cc2_15b.py`, `cc2_15c.py` | `"Bước 1 / 2"`, `"Bước 2 / 2"`, `"Giữ cân"`, `"Tăng cơ"`, `"Bắt đầu ghi bữa đầu tiên"`, `"Xem tổng quan"`, `"Chưa có món hôm nay"`, `"Thêm món vào từng bữa bằng +"`, `"Chưa có ngày nào được ghi"`, `"Thêm bữa đầu tiên"`, `"Chưa có số cân"`, `"Món bạn vừa ghi sẽ hiện ở đây."`, `"Kỳ này có 1 ngày đã ghi"` |
-| `cc2_20.py`, `cc2_21.py`, `cc2_22.py`, `cc2_23.py` | `"Còn thiếu"`, `"Theo bữa"`, `"7 ngày qua"`, `"30 ngày qua"`, `"Bảng điểm"`, `"Cần chú ý"`, `"Thiếu nhiều nhất:"`, `"Ngày tập và ngày nghỉ"`, `"Gần mục tiêu nhất"`, `"Xa mục tiêu nhất"`, `"Lần cân sau"`, `"Số lần cân"`, `"Mục tiêu theo cân nặng"`, `"Chưa có đồ uống nào"`, `"Hồ sơ của bạn"`, `"Nguồn dữ liệu"`, `"Thêm vào màn hình chính"`, `"Xoá tài khoản"`, `"H1T MICRO Pro"` |
-| `cc_16.py`, `cc_17.py`, `cc_18.py`, `cc_19.py` | `"Khuyến nghị dinh dưỡng Việt Nam 2016"`, `"Sửa trong Hồ sơ"`, `"Thời gian tập"`, `"Tinh bột nhanh"`, `"Tick đã lưu của ngày này"`, `"chưa có thời lượng tập đã ghi"`, `"Xu hướng 7 và 30 ngày"`, `"Tiếp tục với Google"`, `"Đăng nhập"`, `"Đăng ký"`, `"Quên mật khẩu?"`, `"Nhập email hợp lệ, ví dụ ban@email.com"`, `"Nhập mật khẩu"`, `"Hiện mật khẩu"`, `"Ẩn mật khẩu"`, `"Email hoặc mật khẩu không đúng"`, `"Mật khẩu cần ít nhất 8 ký tự"`, `"Mật khẩu cần có ít nhất một chữ và một số"`, `"Mật khẩu nhập lại chưa khớp"`, `"Đổi mật khẩu"`, `"Tên hiển thị tối đa 40 ký tự"`, `"Lưu mật khẩu"`, `"Mật khẩu hiện tại không đúng"`, `"Đã đổi mật khẩu"`, `"Đăng xuất"`, `"Gửi liên kết đặt lại"`, `"Kiểm tra email để đặt lại mật khẩu"`, `"Đặt lại mật khẩu"`, `"Đã đặt lại mật khẩu"`, `"Các cơ sở dữ liệu dinh dưỡng"` |
+1. `app/error.tsx:26` — `"Không thể kết nối máy chủ dinh dưỡng lúc này. Dữ liệu bạn vừa ghi trên máy vẫn được giữ nguyên."` (không có trong mã nguồn; văn bản thực tế tại `app/error.tsx:47` là `"Máy chủ đang bận. Dữ liệu bạn đã ghi vẫn an toàn trên máy."`, đã tự nhiên và ngắn gọn).
+2. `app/not-found.tsx:16` — `"Liên kết này không tồn tại hoặc đã được chuyển sang mục khác."` (không có trong mã nguồn; văn bản thực tế tại `app/not-found.tsx:20` là `"Đường dẫn có thể đã cũ hoặc bị gõ sai."` kèm nút `"Về Tổng quan"` ngay bên dưới, đã đạt chuẩn).
+3. `app/signup/page.tsx:20` — `label="1 set là đủ"` (gỡ theo quy tắc #3: giữ nguyên văn bản thương hiệu HIT 1 SET).
+4. `app/signup/page.tsx:23` — `"1 SET LÀ ĐỦ"` (gỡ theo quy tắc #3: giữ nguyên văn bản thương hiệu HIT 1 SET).
+5. `app/login/page.tsx:16` — `"Chế độ phát triển (Mock Auth)"` (tệp `app/login/page.tsx` không tồn tại trong `apps/web`).
+6. `app/login/page.tsx:36` — `"Vào thẳng ứng dụng (Mock User)"` (tệp `app/login/page.tsx` không tồn tại trong `apps/web`).
+7. `components/onboarding/setup-form.tsx:151` — `"Bước 1/2 · Về bạn"` (không còn trong mã nguồn; đã được sửa trong `cc2-25` thành `{isProfile ? "Bước 1 / 2 · Về bạn" : "Bước 2 / 2 · Mục tiêu"}`).
+8. `lib/auth-actions.ts:192` — `"Bạn đang ngoại tuyến"` (không tồn tại trong `lib/auth-actions.ts`).
+9. `components/overview/body-tab.tsx:184` — `sub="Không đổi theo cân"` (không có trong `components/overview/body-tab.tsx`; dòng thực tế tại `body-tab.tsx:237` là `"không đổi"`, đã ngắn gọn).
+10. `components/diary/diary-screen.tsx:252` — `{ key: "fat", label: "Béo", color: "bg-amber" }` (không tồn tại trong `components/diary/diary-screen.tsx`; nhãn đa lượng lấy từ `lib/mock/sample-day.ts:172`).
+11. `lib/data-sources.ts:35` — `"Cần định lượng chính xác"` (không tồn tại trong `lib/data-sources.ts`; văn bản thực tế tại `lib/data-sources.ts:36` là `title: "Cách đọc số liệu"`, đã đạt chuẩn).
+12. `lib/data-sources.ts:36` — `"Số liệu món ăn là ước tính trung bình theo 100 g phần ăn được."` (không tồn tại trong `lib/data-sources.ts`; văn bản thực tế tại `lib/data-sources.ts:37` là `"Ký hiệu “—” nghĩa là chưa có dữ liệu từ nguồn phân tích, không phải bằng 0."`, đã đạt chuẩn).
+13. `lib/data-sources.ts:37` — `"Tất cả thực phẩm người dùng đóng góp đều được duyệt thủ công trước khi hiển thị công khai."` (không tồn tại trong `lib/data-sources.ts`; văn bản thực tế tại `lib/data-sources.ts:38` là `"Vi chất chưa có dữ liệu không được tính là 0 trong tổng ngày, tránh làm sai lệch đánh giá dinh dưỡng."`, đã đạt chuẩn).

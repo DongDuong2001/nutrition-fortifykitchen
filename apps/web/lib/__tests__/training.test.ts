@@ -117,9 +117,9 @@ describe("Training calculations (lib/training.ts)", () => {
     it("shows no ✓ note until the item is ticked (nothing logged is never reported as logged)", () => {
       const notes = (ticked: string[]) => getTrainingPhases(60, ticked).flatMap((p) => p.items.map((i) => i.note));
       expect(notes([]).every((n) => !n.startsWith("✓"))).toBe(true);
-      expect(getTrainingPhases(60, ["pre-cha-la"])[0].items[0].note).toBe("✓ Đã đánh dấu");
+      expect(getTrainingPhases(60, ["pre-cha-la"])[0].items[0].note).toBe("✓ Đã dùng");
       expect(getTrainingPhases(60, [])[0].items[0].note).toBe("");
-      expect(getTrainingPhases(60, ["intra-salt-0-20"])[1].items[0].note).toBe("✓ Đã đánh dấu");
+      expect(getTrainingPhases(60, ["intra-salt-0-20"])[1].items[0].note).toBe("✓ Đã dùng");
       expect(getTrainingPhases(60, [])[1].items[0].note).toBe("");
     });
   });
@@ -129,13 +129,13 @@ describe("Training calculations (lib/training.ts)", () => {
       const tips = getRestDayTips(targetsFor(SAMPLE_PROFILE));
       expect(tips).toHaveLength(3);
       expect(tips[0].text).toBe("Ngủ đủ 7–9 tiếng");
-      expect(tips[1].text).toBe("Đạm vẫn 104–143 g");
+      expect(tips[1].text).toBe("Giữ mức đạm 104–143 g");
       expect(tips[2].text).toBe("Năng lượng giữ 1.950–2.275 kcal");
     });
 
     it("uses the profile's own targets, not the 65 kg sample", () => {
       const heavier = getRestDayTips(targetsFor({ ...SAMPLE_PROFILE, weightKg: 80 }));
-      expect(heavier[1].text).not.toBe("Đạm vẫn 104–143 g");
+      expect(heavier[1].text).not.toBe("Giữ mức đạm 104–143 g");
       expect(heavier[2].text).not.toBe("Năng lượng giữ 1.950–2.275 kcal");
     });
   });

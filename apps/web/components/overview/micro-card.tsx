@@ -35,7 +35,7 @@ export function MicroCard({ board }: { board: MicroBoard }) {
     board.lowest.length > 0
       ? `Thiếu nhiều nhất: ${board.lowest.map((l) => l.name).join(", ")}`
       : board.unknown === board.total
-        ? "Chưa có số liệu vi chất trong kỳ"
+        ? "Chưa có dữ liệu vi chất trong kỳ này"
         : "Không có vi chất nào dưới mục tiêu";
   const change = board.change;
 

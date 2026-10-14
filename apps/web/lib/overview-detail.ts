@@ -262,7 +262,7 @@ export function nutrientAttention(input: {
         gap: false,
         foods:
           sources.length === 0
-            ? "Chưa có món nào trong nhật ký có số liệu chất này"
+            ? "Chưa có món nào trong kỳ có dữ liệu về chất này"
             : `Nhiều nhất từ: ${sources.map((s) => `${s.name} ${formatAmount(s.perDay, r.unit)} ${r.unit}`).join(", ")} mỗi ngày`,
       };
     });

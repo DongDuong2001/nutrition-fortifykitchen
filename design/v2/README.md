@@ -11,7 +11,7 @@ Static HTML mockups for the IA v2 screens: Tổng quan (four sub-tabs), Nhật k
 | Tổng quan (four sub-tabs) | `tong-quan.html` | `png/tong-quan-390.png`, `png/tong-quan-1280.png` |
 | Nhật ký, Vi chất and Ngày tập of the day | `nhat-ky.html` | `png/nhat-ky-390.png`, `png/nhat-ky-1280.png` |
 | Cài đặt, Hồ sơ, Mục tiêu mỗi ngày | `cai-dat.html` | `png/cai-dat-390.png`, `png/cai-dat-1280.png` |
-| Khám phá, Bữa của tôi, food detail | `kham-pha.html` | `png/kham-pha-390.png`, `png/kham-pha-1280.png` |
+| Khám phá, Bữa ăn của tôi, food detail | `kham-pha.html` | `png/kham-pha-390.png`, `png/kham-pha-1280.png` |
 | Add sheet | `add-sheet.html` | `png/add-sheet-390.png`, `png/add-sheet-1280.png` |
 | Navigation | `nav.html` | `png/nav-390.png`, `png/nav-1280.png` |
 
@@ -68,7 +68,7 @@ Nhật ký owns the day (any date). It is the only place with a day's full break
 - **Title row** with the date nav ‹ "Hôm nay 12/10" ›. Past days show a "Chỉ xem" pill.
 - **Ink day summary:** a kcal dial, four macro bars (10 segments), "còn N kcal". On desktop the summary is an ink card.
 - **Two rows for the day:** "8/22 vi chất · Thiếu: Vitamin D, Canxi" → `/micros?date=`, and "Ngày tập 60′ · muối 7–10,5 g" → `/training?date=`.
-- **Meals:** one + (add to that meal) and one ⋯ per meal header. The ⋯ menu holds "Chép hôm qua" and "Lưu thành Bữa của tôi". On desktop the menu is a centred dialog.
+- **Meals:** one + (add to that meal) and one ⋯ per meal header. The ⋯ menu holds "Chép hôm qua" and "Lưu thành Bữa ăn của tôi". On desktop the menu is a centred dialog.
 - **Sticky bar:** a slim ink strip (kcal, còn N kcal, 10-segment bar) replaces the summary when it scrolls away. Phone only; desktop keeps the summary card in view.
 - **Past day** (Thứ Sáu 09/10, sample from `lib/mock/yesterday.ts`, 1.532 kcal, below the minimum, so "thiếu 418 kcal"): read-only. No +, no ⋯, rows open read-only screens. The mock has no macro totals for that day, so the bars show "—", not 0.
 - **Empty day:** "Chưa có món hôm nay" with "Chép hôm qua · 4 bữa", every meal "Chưa có món".
@@ -87,12 +87,12 @@ Pushed day screens (back → Nhật ký, owner tab Nhật ký):
 ## Khám phá (`kham-pha.html`)
 
 - Paper header "Khám phá" (no wordmark). Search, category chips, Gần đây, Yêu thích, Món của tôi (empty state, "Tạo món mới").
-- **Bữa của tôi:** one sample saved meal ("Bữa sáng quen": Yến mạch 60 g, Yogurt kefir 200 ml, Chuối 1 quả, 459 kcal, "Thêm cả bữa vào Bữa sáng"). State 1b shows the empty state: "Chưa có bữa nào. Lưu một bữa từ Nhật ký: ⋯ › Lưu thành Bữa của tôi."
+- **Bữa ăn của tôi:** one sample saved meal ("Bữa sáng quen": Yến mạch 60 g, Yogurt kefir 200 ml, Chuối 1 quả, 459 kcal, "Thêm cả bữa vào Bữa sáng"). State 1b shows the empty state: "Chưa có bữa nào. Lưu một bữa từ Nhật ký: ⋯ › Lưu thành Bữa ăn của tôi."
 - **Food detail** (Yến mạch): pushed sub header (back inline, title, favourite, one subtitle line), the portion chips, per-portion macros, "Nguồn tốt của" (≥ 20 % of the day's target per portion), all 22 nutrients as % of target, and 15 with no value shown as a dash.
 
 ## Add sheet (`add-sheet.html`)
 
-- Four states, as before (recents, undo toast, Chỉ ghi kcal, portion panel) plus a **Bữa của tôi** group above Gần đây. One tap adds every food of the saved meal to the chosen meal, with one undo toast ("Đã thêm 3 món từ Bữa sáng quen vào Bữa sáng · Hoàn tác", 5 s).
+- Four states, as before (recents, undo toast, Chỉ ghi kcal, portion panel) plus a **Bữa ăn của tôi** group above Gần đây. One tap adds every food of the saved meal to the chosen meal, with one undo toast ("Đã thêm 3 món từ Bữa sáng quen vào Bữa sáng · Hoàn tác", 5 s).
 - Background header is the paper Nhật ký title row, not the wordmark.
 - Desktop: centred dialog.
 
@@ -127,7 +127,7 @@ Pushed day screens (back → Nhật ký, owner tab Nhật ký):
 - Nhật ký owns the day. Its Vi chất and Ngày tập are pushed screens for that date, owner tab Nhật ký.
 - The header rules above.
 - Hồ sơ lives in Cài đặt as a pushed screen with the same fields. Mục tiêu mỗi ngày is read-only and points to Hồ sơ to edit.
-- Bữa của tôi: saved meals in Khám phá and in the add sheet. The ⋯ menu saves a meal ("Lưu thành Bữa của tôi") and copies one from yesterday ("Chép hôm qua").
+- Bữa ăn của tôi: saved meals in Khám phá and in the add sheet. The ⋯ menu saves a meal ("Lưu thành Bữa ăn của tôi") and copies one from yesterday ("Chép hôm qua").
 - Averages and day counts exclude today until it is finished.
 
 ## Open for Hao
