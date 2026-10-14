@@ -66,6 +66,8 @@ export function PeriodControl({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  // Keep "dd/mm – dd/mm" on one line at 390 px (no break at the dash).
+  const label = heading.replace(" – ", " – ");
   const go = (nextLength: PeriodLength, nextOffset: number) =>
     router.replace(`${pathname}${periodQuery(nextLength, nextOffset)}`, { scroll: false });
 
@@ -116,7 +118,7 @@ export function PeriodControl({
         <div className="flex min-w-0 items-center">
           {prev}
           <p id="ov-period" className="m-0 min-w-0 text-center text-[13px] font-semibold leading-snug text-secondary">
-            {heading}
+            {label}
           </p>
           {next}
         </div>
@@ -127,7 +129,7 @@ export function PeriodControl({
 
   return (
     <div className="flex flex-col gap-1">
-      <p className="m-0 text-[15px] font-bold lg:text-lg">{heading}</p>
+      <p className="m-0 text-[15px] font-bold lg:text-lg">{label}</p>
       <div className="flex items-center justify-between gap-2 lg:justify-start lg:gap-4">
         <div className="flex items-center">
           {prev}

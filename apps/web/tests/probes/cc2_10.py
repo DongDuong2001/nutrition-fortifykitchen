@@ -54,7 +54,7 @@ def text(pg):
 
 
 def heading(pg):
-    return pg.locator("#ov-period >> visible=true").first.inner_text().strip()
+    return re.sub(r"\s+", " ", pg.locator("#ov-period >> visible=true").first.inner_text()).strip()
 
 
 def tab(pg, label):
