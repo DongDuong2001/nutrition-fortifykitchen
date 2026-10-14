@@ -73,7 +73,7 @@ If a primitive is missing, add it to `components/ui` first.
 - Loading is a skeleton, empty tells the next step, error says what failed and offers a retry.
 - Past days are read-only. Unknown is "—", never 0. No red above a range, no over-limit warnings.
 - Vietnamese copy; numbers `1.041` and `2,1`.
-- Same action, same word everywhere (Thêm, Sửa, Xoá, Hoàn tác).
+- Same action, same word everywhere (Thêm, Sửa, Xóa, Hoàn tác).
 
 ## 6. Visual character
 

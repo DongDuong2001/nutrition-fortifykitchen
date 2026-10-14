@@ -69,7 +69,7 @@ Job: log, fix and read one day (any date).
 - Header: date with ‹ › and calendar (as now). Under it the day summary: kcal dial + four macro bars (the only full breakdown of a day) and "còn N kcal".
 - Two compact rows under the summary, both for the date shown: "8/22 vi chất · Thiếu: Vitamin D, Canxi" → `/micros?date=`; "Ngày tập 60′ · muối 7–10,5 g" → `/training?date=` (today: change the minutes there; past days read-only).
 - When the header scrolls away, a slim sticky bar remains (kcal eaten / target, còn N).
-- Meals with ONE "+" and a "⋯" menu per header ("Chép hôm qua", "Lưu thành Bữa ăn của tôi", "Xoá bữa này"). "Chép hôm qua" and "Xoá bữa này" are for today only; "Xoá bữa này" asks for a confirm step first and offers a 5 s undo.
+- Meals with ONE "+" and a "⋯" menu per header ("Chép hôm qua", "Lưu thành Bữa ăn của tôi", "Xóa bữa này"). "Chép hôm qua" and "Xóa bữa này" are for today only; "Xóa bữa này" asks for a confirm step first and offers a 5 s undo.
 - Past days: read-only exactly as now; their Vi chất and Ngày tập open read-only.
 
 ## Khám phá (explore) — v1, data only
@@ -85,7 +85,7 @@ Job: find a food and understand it.
 - Mục tiêu mỗi ngày → `/settings/targets`.
 - Ứng dụng: Ngôn ngữ, Nhắc nhở, Cài như ứng dụng.
 - H1T MICRO Pro card.
-- Vùng nguy hiểm: Xoá tài khoản (confirm step).
+- Vùng nguy hiểm: Xóa tài khoản (confirm step).
 
 ### Tài khoản (cc-18, 13/10, Hao's decisions)
 - `/settings/account` (pushed, back → Cài đặt): Tên hiển thị (optional, 1–40 characters after trimming; saves on blur or Enter, an empty name means not set), Email (read only), Đặt mật khẩu / Đổi mật khẩu → `/settings/account/password`, Đăng xuất (clears the session, then `/signin`).

@@ -15,17 +15,17 @@ Một hành động chỉ dùng một động từ duy nhất trên toàn ứng 
 | Ghi một món hoặc bữa ăn vào nhật ký | **Thêm** (`Thêm món`, `Thêm vào Bữa sáng`, `Thêm bữa đầu tiên`, `Thêm nhanh`) | `Ghi món`, `Ghi bữa`, `Nhập món`, `Log` |
 | Lưu thay đổi biểu mẫu / cài đặt / khẩu phần | **Lưu** (`Lưu`, `Lưu thay đổi`, `Lưu mật khẩu`, `Tự động lưu`) | `Cập nhật`, `Áp dụng`, `Xác nhận lưu` |
 | Thay đổi thông tin đã có | **Sửa** (`Sửa`, `Sửa trong Hồ sơ`, `Sửa tên bữa`) | `Chỉnh sửa`, `Thay đổi`, `Cập nhật` |
-| Loại bỏ món, bữa ăn, tài khoản | **Xoá** (chính tả dấu sắc trên `a`: `Xoá`, `Xoá món này`, `Xoá bữa này`) | `Xóa`, `Gỡ`, `Loại bỏ`, `Huỷ bỏ` |
-| Bỏ lọc / bỏ yêu thích | **Bỏ** (`Bỏ lọc`, `Bỏ yêu thích`) | `Xoá lọc`, `Huỷ yêu thích` |
-| Đóng hộp thoại / không thực hiện thao tác | **Huỷ** (dấu hỏi trên `y`: `Huỷ`) hoặc **Đóng** (`Đóng` cho nút `×`) | `Hủy`, `Thoát`, `Đóng lại` |
-| Khôi phục thao tác vừa xoá/thêm | **Hoàn tác** | `Quay lại`, `Khôi phục`, `Undo` |
+| Loại bỏ món, bữa ăn, tài khoản | **Xóa** (chính tả dấu sắc trên `o`: `Xóa`, `Xóa món này`, `Xóa bữa này`) | `Xóa`, `Gỡ`, `Loại bỏ`, `Hủy bỏ` |
+| Bỏ lọc / bỏ yêu thích | **Bỏ** (`Bỏ lọc`, `Bỏ yêu thích`) | `Xóa lọc`, `Hủy yêu thích` |
+| Đóng hộp thoại / không thực hiện thao tác | **Hủy** (dấu hỏi trên `y`: `Hủy`) hoặc **Đóng** (`Đóng` cho nút `×`) | `Hủy`, `Thoát`, `Đóng lại` |
+| Khôi phục thao tác vừa xóa/thêm | **Hoàn tác** | `Quay lại`, `Khôi phục`, `Undo` |
 | Sao chép bữa ăn hôm qua | **Chép hôm qua** | `Sao chép ngày hôm qua`, `Copy hôm qua` |
 | Điều hướng về trang trước | **Quay lại** (cho nút `aria-label`) / **Về `<Tên trang>`** (cho liên kết cụ thể) | `Trở lại`, `Quay về trang trước` |
 | Đa lượng (Macronutrients) | **Đạm**, **Tinh bột**, **Chất béo**, **Chất xơ** | `Protein`, `Carb`, `Béo` (đứng một mình làm nhãn chính), `Xơ` |
 | Giá trị chưa được phân tích (`null`) | **Chưa có dữ liệu** (hiển thị ký hiệu `—`) | `Chưa có số liệu`, `Dữ liệu không khả dụng`, `Không xác định` |
 | Bữa ăn đã lưu của người dùng | **Bữa ăn của tôi** | `Bữa đã lưu`, `Thực đơn mẫu`, `Combo của tôi` |
 | Nguồn quy tắc dinh dưỡng | **huấn luyện viên** | `coach`, `HLV`, `chuyên gia` |
-| Chính tả & định dạng số | **Xoá**, **Tuỳ**, **Huỷ**; phần trăm viết liền **50%**; số kiểu Việt **1.041** và **2,5** | `Xóa`, `Tùy`, `Hủy`; `50 %` (có khoảng trắng); `1,041` hoặc `2.5` |
+| Chính tả & định dạng số | **Xóa**, **Tùy**, **Hủy**; phần trăm viết liền **50%**; số kiểu Việt **1.041** và **2,5** | `Xóa`, `Tùy`, `Hủy`; `50 %` (có khoảng trắng); `1,041` hoặc `2.5` |
 
 ---
 
@@ -37,7 +37,7 @@ Một hành động chỉ dùng một động từ duy nhất trên toàn ứng 
 
 | file:line | current | proposed | why |
 |---|---|---|---|
-| `app/layout.tsx:24` | `"H1T MICRO \| Dinh dưỡng & Vi chất Chuyên sâu"` | `"H1T MICRO \| Theo dõi vi chất & dinh dưỡng mỗi ngày"` | Tự nhiên, cụ thể lợi ích cho bạn và bỏ viết hoa tuỳ tiện giữa câu. |
+| `app/layout.tsx:24` | `"H1T MICRO \| Dinh dưỡng & Vi chất Chuyên sâu"` | `"H1T MICRO \| Theo dõi vi chất & dinh dưỡng mỗi ngày"` | Tự nhiên, cụ thể lợi ích cho bạn và bỏ viết hoa tùy tiện giữa câu. |
 | `app/layout.tsx:25` | `"Theo dõi 22 vi chất và macro dinh dưỡng chuyên sâu cho vận động và tập luyện."` | `"Theo dõi 22 vi chất, năng lượng và đa lượng chuyên sâu cho vận động và tập luyện."` | Thay từ tiếng Anh `"macro"` bằng thuật ngữ tiếng Việt tự nhiên. |
 
 ### 2.2. Xác thực (Auth) & Thiết lập ban đầu (Onboarding / Setup) (`app/signin/*`, `app/signup/*`, `app/reset-password/*`, `app/setup/*`, `components/auth/*`, `components/onboarding/*`, `lib/onboarding.ts`, `lib/auth-actions.ts`)
@@ -114,7 +114,7 @@ Một hành động chỉ dùng một động từ duy nhất trên toàn ứng 
 | `app/settings/notifications/page.tsx:39` | `label: "Nhắc ghi bữa trưa"` | `label: "Nhắc thêm bữa trưa"` | Đồng nhất động từ `"thêm bữa"` theo bảng thuật ngữ. |
 | `app/settings/notifications/page.tsx:46` | `label: "Nhắc ghi bữa tối"` | `label: "Nhắc thêm bữa tối"` | Đồng nhất động từ `"thêm bữa"` theo bảng thuật ngữ. |
 | `app/settings/notifications/page.tsx:102` | `setPermissionStatus("Trình duyệt từ chối quyền thông báo");` | `setPermissionStatus("Trình duyệt đang chặn thông báo. Bạn mở cài đặt trình duyệt để cấp quyền nhé.");` | Hướng dẫn bước tiếp theo khi quyền thông báo bị từ chối. |
-| `app/settings/delete-account/page.tsx:29` | `setToastMessage("Chưa hỗ trợ xoá tài khoản trong bản thử");` | `setToastMessage("Bản thử chưa hỗ trợ xoá tài khoản. Dữ liệu hiện chỉ lưu trên thiết bị của bạn.");` | Giải thích rõ ràng và trấn an bạn về dữ liệu trên máy. |
+| `app/settings/delete-account/page.tsx:29` | `setToastMessage("Chưa hỗ trợ xóa tài khoản trong bản thử");` | `setToastMessage("Bản thử chưa hỗ trợ xóa tài khoản. Dữ liệu hiện chỉ lưu trên thiết bị của bạn.");` | Giải thích rõ ràng và trấn an bạn về dữ liệu trên máy. |
 | `app/settings/delete-account/page.tsx:36` | `setToastMessage("Chưa hỗ trợ tải dữ liệu trong bản thử");` | `setToastMessage("Tính năng tải CSV sẽ mở khi kết nối máy chủ.");` | Giải thích cụ thể khi nào tính năng khả dụng. |
 | `app/paywall/page.tsx:59` | `"Sắp ra mắt"` | `"Sắp ra mắt — bạn sẽ được thông báo khi mở đăng ký."` | Thêm bước tiếp theo rõ ràng thay vì câu cụt. |
 | `app/paywall/page.tsx:67` | `"Gói miễn phí vẫn ghi đủ 22 vi chất."` | `"Gói miễn phí vẫn theo dõi đủ 22 vi chất."` | Vi chất là chỉ số được theo dõi tự động từ món ăn, dùng `"theo dõi"` tự nhiên hơn `"ghi"`. |
@@ -145,7 +145,7 @@ Khi lập trình viên áp dụng các thay đổi trong bảng trên, cần c�
 
 - **Tổng số chuỗi tiếng Việt hiển thị cho người dùng đã rà soát**: **542** chuỗi (trên 101 tệp nguồn trong `apps/web/app`, `apps/web/components`, `apps/web/lib`, `apps/web/hooks`).
 - **Số chuỗi đề xuất chỉnh sửa (Changed)**: **60** chuỗi (48 dòng giữ nguyên từ `ag-16` vì khớp chính xác; 12 dòng cập nhật số dòng hoặc văn bản thực tế trong mã nguồn).
-- **Số chuỗi đạt chuẩn giữ nguyên (Unchanged / OK)**: **482** chuỗi (88,9% đã tuân thủ đúng giọng điệu ấm áp, ngắn gọn, xưng `"bạn"`, dùng `"Tinh bột"`, `"huấn luyện viên"`, `"Bữa ăn của tôi"`, `"Xoá"`, `"Tuỳ"` và định dạng số `vi-VN`).
+- **Số chuỗi đạt chuẩn giữ nguyên (Unchanged / OK)**: **482** chuỗi (88,9% đã tuân thủ đúng giọng điệu ấm áp, ngắn gọn, xưng `"bạn"`, dùng `"Tinh bột"`, `"huấn luyện viên"`, `"Bữa ăn của tôi"`, `"Xóa"`, `"Tùy"` và định dạng số `vi-VN`).
 
 ---
 
