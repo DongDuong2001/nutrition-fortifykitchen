@@ -1,4 +1,17 @@
-import { formatNumber } from "./format";
+import { formatAmount, formatNumber } from "./format";
+import { parseDecimalInput } from "./quick-entry";
+
+/** A gram amount as shown: "2,5 g", "1.000 g". */
+export function gramsServingLabel(grams: number): string {
+  return `${formatAmount(grams, "g")} g`;
+}
+
+/** The serving label for grams typed in: "2,5" or "2.5" becomes "2,5 g". If the input is empty or invalid, returns fallback. */
+export function formatGramsServingLabel(raw: string, fallback: string): string {
+  const n = parseDecimalInput(raw);
+  if (n === null) return fallback;
+  return gramsServingLabel(n);
+}
 
 /**
  * Parses user-entered grams supporting Vietnamese decimal comma ("2,5") or standard dot ("2.5").

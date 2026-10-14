@@ -1,9 +1,6 @@
-"use client";
-
 import React from "react";
 import { AppHeader } from "@/components/ui/app-header";
 import { Card } from "@/components/ui/card";
-import { useBack } from "@/hooks/use-back";
 
 const BENEFITS = [
   "Gợi ý món theo vi chất còn thiếu",
@@ -13,8 +10,6 @@ const BENEFITS = [
 ];
 
 export default function PaywallPage() {
-  const goBack = useBack();
-
   return (
     <div className="w-full min-h-screen bg-page text-text font-sans flex flex-col justify-between">
       <div className="flex flex-col">
@@ -22,7 +17,7 @@ export default function PaywallPage() {
           variant="sub"
           title="Pro"
           subtitle="Ăn theo huấn luyện viên, không phải đoán"
-          onBack={goBack}
+          backHref="/settings"
           backLabel="Quay lại"
           alignGroup="paywall-header"
         />

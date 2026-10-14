@@ -1,6 +1,33 @@
 import { describe, it, expect } from "vitest";
-import { scaleNutrients, parseGramsInput, calculateMacroPreview } from "../portion";
+import { scaleNutrients, parseGramsInput, calculateMacroPreview, formatGramsServingLabel, gramsServingLabel } from "../portion";
 import { MOCK_FOODS } from "../mock/foods";
+
+// Grams as Vietnamese text: comma for decimals, dot for thousands (2,5 g; 1.000 g)
+describe("gramsServingLabel", () => {
+  it("writes grams in the Vietnamese number format", () => {
+    expect(gramsServingLabel(2.5)).toBe("2,5 g");
+    expect(gramsServingLabel(100)).toBe("100 g");
+    expect(gramsServingLabel(1000)).toBe("1.000 g");
+  });
+});
+
+describe("formatGramsServingLabel", () => {
+  it("formats decimal grams with comma in Vietnamese format", () => {
+    expect(formatGramsServingLabel("2,5", "100 g")).toBe("2,5 g");
+    expect(formatGramsServingLabel("2.5", "100 g")).toBe("2,5 g");
+  });
+
+  it("formats integer grams, with the dot for thousands", () => {
+    expect(formatGramsServingLabel("100", "50 g")).toBe("100 g");
+    expect(formatGramsServingLabel("1000", "50 g")).toBe("1.000 g");
+  });
+
+  it("keeps the fallback when the input is empty or invalid", () => {
+    expect(formatGramsServingLabel("", "100 g")).toBe("100 g");
+    expect(formatGramsServingLabel("   ", "100 g")).toBe("100 g");
+    expect(formatGramsServingLabel("abc", "100 g")).toBe("100 g");
+  });
+});
 
 describe("lib/portion", () => {
   const chaLa = MOCK_FOODS.find((f) => f.id === "food-cha-la")!;

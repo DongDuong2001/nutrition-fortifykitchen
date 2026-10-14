@@ -4,9 +4,8 @@ import React, { useMemo } from "react";
 import Link from "next/link";
 import { type FoodItem } from "@/lib/mock/foods";
 import { type MealSlot, getMealSlotNameVi } from "@/lib/meal-slot";
-import { parseGramsInput, calculateMacroPreview, scaleNutrients } from "@/lib/portion";
+import { parseGramsInput, calculateMacroPreview, scaleNutrients, formatGramsServingLabel, gramsServingLabel } from "@/lib/portion";
 import { formatAmount } from "@/lib/format";
-import { formatGramsServingLabel } from "@/components/foods/serving-label";
 import { ChipGroup } from "@/components/ui/chip-group";
 import { StatGroup } from "@/components/ui/stat-group";
 import { getNutrientDefinition } from "@/lib/nutrients";
@@ -219,7 +218,7 @@ export function PortionPanel({
       {showMicros && scaledMicros.length > 0 && (
         <div className="w-full bg-card rounded-xl p-3 border border-card-border flex flex-col gap-1.5 mt-1">
           <div className="text-xs font-semibold text-secondary pb-1 border-b border-card-border">
-            Vi chất trong {formatGramsServingLabel(gramsInput, `${gramsInput} g`)}:
+            Vi chất trong {gramsServingLabel(parsedGrams)}:
           </div>
           {scaledMicros.map((m) => (
             <div key={m.name} className="flex justify-between items-center text-xs py-0.5">

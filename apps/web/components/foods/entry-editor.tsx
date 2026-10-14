@@ -12,8 +12,7 @@ import { ChipGroup } from "../ui/chip-group";
 import { FormRow } from "../ui/form-row";
 import { parseDecimalInput } from "../../lib/quick-entry";
 
-import { formatGramsServingLabel } from "./serving-label";
-export { formatGramsServingLabel };
+import { formatGramsServingLabel } from "../../lib/portion";
 
 const quickFieldClass =
   "h-12 w-full rounded-xl border-2 border-card-border bg-card px-3 text-base text-text outline-none transition-colors focus:border-blue";
