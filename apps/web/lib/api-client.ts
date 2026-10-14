@@ -348,15 +348,15 @@ export const apiClient = {
     servingUnit: string;
     servingSize: number;
     calories: number;
-    protein: number;
-    carbs: number;
-    fat: number;
+    protein?: number | null;
+    carbs?: number | null;
+    fat?: number | null;
     micros?: {
-      sodium?: number;
-      calcium?: number;
-      iron?: number;
-      potassium?: number;
-      vitamin_d?: number;
+      sodium?: number | null;
+      calcium?: number | null;
+      iron?: number | null;
+      potassium?: number | null;
+      vitamin_d?: number | null;
     };
   }): Promise<FoodItem> {
     if (isLiveMode()) {
@@ -388,14 +388,14 @@ export const apiClient = {
       ],
       nutrients: {
         energy: Math.round(input.calories * factor),
-        protein: Math.round(input.protein * factor * 10) / 10,
-        carbs: Math.round(input.carbs * factor * 10) / 10,
-        fat: Math.round(input.fat * factor * 10) / 10,
-        sodium: input.micros?.sodium ? Math.round(input.micros.sodium * factor) : null,
-        calcium: input.micros?.calcium ? Math.round(input.micros.calcium * factor) : null,
-        iron: input.micros?.iron ? Math.round(input.micros.iron * factor * 10) / 10 : null,
-        potassium: input.micros?.potassium ? Math.round(input.micros.potassium * factor) : null,
-        vitamin_d: input.micros?.vitamin_d ? Math.round(input.micros.vitamin_d * factor * 10) / 10 : null,
+        protein: input.protein != null ? Math.round(input.protein * factor * 10) / 10 : null,
+        carbs: input.carbs != null ? Math.round(input.carbs * factor * 10) / 10 : null,
+        fat: input.fat != null ? Math.round(input.fat * factor * 10) / 10 : null,
+        sodium: input.micros?.sodium != null ? Math.round(input.micros.sodium * factor) : null,
+        calcium: input.micros?.calcium != null ? Math.round(input.micros.calcium * factor) : null,
+        iron: input.micros?.iron != null ? Math.round(input.micros.iron * factor * 10) / 10 : null,
+        potassium: input.micros?.potassium != null ? Math.round(input.micros.potassium * factor) : null,
+        vitamin_d: input.micros?.vitamin_d != null ? Math.round(input.micros.vitamin_d * factor * 10) / 10 : null,
       },
     };
     MOCK_FOODS.unshift(newFood);

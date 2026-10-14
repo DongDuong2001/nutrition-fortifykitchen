@@ -90,9 +90,15 @@ function CreateFoodInner() {
     try {
       const parsedSize = parseFloat(servingSize.replace(",", ".")) || 100;
       const parsedCals = parseFloat(calories.replace(",", ".")) || 0;
-      const parsedPro = parseFloat(protein.replace(",", ".")) || 0;
-      const parsedCarbs = parseFloat(carbs.replace(",", ".")) || 0;
-      const parsedFat = parseFloat(fat.replace(",", ".")) || 0;
+      const parseMacro = (val: string): number | null => {
+        const trimmed = val.trim();
+        if (trimmed === "") return null;
+        const num = parseFloat(trimmed.replace(",", "."));
+        return isNaN(num) ? null : Math.max(0, num);
+      };
+      const parsedPro = parseMacro(protein);
+      const parsedCarbs = parseMacro(carbs);
+      const parsedFat = parseMacro(fat);
 
       const createdFood = await apiClient.createFood({
         nameVi: nameVi.trim(),

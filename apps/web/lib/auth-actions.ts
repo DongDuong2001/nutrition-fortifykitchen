@@ -272,7 +272,7 @@ export function requestMagicLink(email: string): Promise<AuthResult> {
 
     const address = normaliseEmail(email);
     const supabase = createClient();
-    const redirectTo = typeof window !== "undefined" ? `${window.location.origin}/setup/profile` : undefined;
+    const redirectTo = typeof window !== "undefined" ? `${window.location.origin}/auth/callback?next=/setup/profile` : undefined;
     const { error } = await supabase.auth.signInWithOtp({
       email: address,
       options: { emailRedirectTo: redirectTo },
@@ -290,7 +290,7 @@ export async function signInWithGoogle(): Promise<AuthResult> {
   if (!isLiveMode()) return mockSignInSampleAccount().then(() => ({ ok: true }) as AuthResult);
   return guarded(async () => {
     const supabase = createClient();
-    const redirectTo = typeof window !== "undefined" ? `${window.location.origin}/setup/profile` : undefined;
+    const redirectTo = typeof window !== "undefined" ? `${window.location.origin}/auth/callback?next=/` : undefined;
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: { redirectTo },
