@@ -213,65 +213,6 @@ export function loggingStreak(isLogged: (iso: string) => boolean, todayIso: stri
   return streak;
 }
 
-export interface Insight {
-  kind: "protein_gap" | "lowest_nutrient" | "streak";
-  text: string;
-  /** For lowest_nutrient: the nutrient to open */
-  nutrientKey?: string;
-}
-
-/**
- * At most three facts, in this order: protein under its minimum on how many days of the period, the lowest
- * nutrient over the period, the logging streak. Each one appears only when it has something to say.
- * Copy as in design/v2/tong-quan.html.
- */
-export function periodInsights(input: {
-  averages: PeriodAverages;
-  targets: CompleteTargets;
-  /** Days on target for protein over the period (from periodTargetDays) */
-  proteinDays: TargetCount;
-  streak: number;
-}): Insight[] {
-  const { averages, targets, proteinDays, streak } = input;
-  const out: Insight[] = [];
-
-  const proteinMin = targetMinFor("protein", targets);
-  const underDays = proteinDays.of - proteinDays.met;
-  if (averages.protein !== null && proteinMin !== null && underDays > 0) {
-    out.push({
-      kind: "protein_gap",
-      text: `Đạm dưới ${formatNumber(proteinMin)} g ở ${underDays} trên ${proteinDays.of} ngày. Trung bình ${formatNumber(Math.round(averages.protein))} g.`,
-    });
-  }
-
-  let lowest: { key: string; label: string; share: number } | null = null;
-  for (const key of COUNTED_NUTRIENT_KEYS) {
-    const avg = averages.nutrients[key];
-    const min = targetMinFor(key, targets);
-    if (avg === null || avg === undefined || min === null) continue;
-    const share = avg / min;
-    if (lowest === null || share < lowest.share) lowest = { key, label: NUTRIENT_INFO.get(key)?.label ?? key, share };
-  }
-  if (lowest !== null && lowest.share < 1) {
-    out.push({
-      kind: "lowest_nutrient",
-      text: `Thấp nhất kỳ này: ${lowest.label}, ${formatPercent(lowest.share * 100)} mục tiêu.`,
-      nutrientKey: lowest.key,
-    });
-  }
-
-  if (streak >= 2) out.push({ kind: "streak", text: `Đã ghi nhật ký ${streak} ngày liên tiếp.` });
-
-  return out.slice(0, 3);
-}
-
-/** One change as a fact: "Vitamin D trung bình 2,7 µg, kỳ trước 3,2 µg (−0,5 µg)." */
-export function changeText(change: PeriodChange): string {
-  const { label, unit, current, previous, delta } = change;
-  const decimals = unit !== "kcal" && Math.max(Math.abs(current), Math.abs(previous)) < 100 ? 1 : 0;
-  const amount = (v: number) => `${formatAmount(v, unit)} ${unit}`;
-  return `${label} trung bình ${amount(current)}, kỳ trước ${amount(previous)} (${formatSigned(delta, { decimals })} ${unit}).`;
-}
 
 /** Enough logged days for the averages to mean something. Under this, Tóm tắt shows "Chưa đủ dữ liệu". */
 export const MIN_LOGGED_DAYS = 3;

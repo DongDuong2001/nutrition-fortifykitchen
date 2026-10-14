@@ -1,17 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
-  changeText,
   comparePeriods,
   loggingStreak,
   macroComposition,
   parsePeriodParams,
   period,
   periodAverages,
-  periodInsights,
   periodQuery,
   periodTargetDays,
   weightSummary,
-  type PeriodChange,
 } from "../period";
 import { calculateTargets } from "../targets";
 import type { DayTotals } from "../day-totals";
@@ -230,83 +227,6 @@ describe("loggingStreak", () => {
 
   it("is 0 when neither today nor yesterday has entries", () => {
     expect(loggingStreak(logged(["2026-10-10"]), TODAY)).toBe(0);
-  });
-});
-
-describe("periodInsights: at most three, in order (copy as in design/v2/tong-quan.html)", () => {
-  // Two finished days: protein 90 g and 130 g (one under the 104 g minimum), vitamin D 3 µg of 15
-  const days = [
-    day("2026-10-09", { calories: 2000, protein: 90, carbs: 250, fat: 60, nutrients: { vitamin_d: 3, calcium: 1300 } }),
-    day("2026-10-10", { calories: 2000, protein: 130, carbs: 250, fat: 60, nutrients: { vitamin_d: 3, calcium: 1100 } }),
-  ];
-  const averages = periodAverages(days, TODAY);
-  const proteinDays = periodTargetDays(days, TODAY, TARGETS).protein;
-
-  it("gives the protein days under the minimum, the lowest nutrient and the streak in that order", () => {
-    const out = periodInsights({ averages, targets: TARGETS, proteinDays, streak: 7 });
-    expect(out.map((i) => i.kind)).toEqual(["protein_gap", "lowest_nutrient", "streak"]);
-    expect(out).toHaveLength(3);
-  });
-
-  it("states how many days protein was under the minimum, and the average", () => {
-    const [gap] = periodInsights({ averages, targets: TARGETS, proteinDays, streak: 0 });
-    expect(gap.kind).toBe("protein_gap");
-    expect(gap.text).toBe("Đạm dưới 104 g ở 1 trên 2 ngày. Trung bình 110 g.");
-  });
-
-  it("names the lowest nutrient by share of its target (Vitamin D 3 of 15 µg = 20 %)", () => {
-    const out = periodInsights({ averages, targets: TARGETS, proteinDays, streak: 0 });
-    const lowest = out.find((i) => i.kind === "lowest_nutrient")!;
-    expect(lowest.text).toBe("Thấp nhất kỳ này: Vitamin D, 20 % mục tiêu.");
-    expect(lowest.nutrientKey).toBe("vitamin_d");
-  });
-
-  it("skips the protein line when no day was under, the lowest line at 100 % or more, and a streak under 2 days", () => {
-    const fine = [day("2026-10-09", { calories: 2000, protein: 110, carbs: 250, fat: 60, nutrients: { vitamin_d: 20 } })];
-    const out = periodInsights({
-      averages: periodAverages(fine, TODAY),
-      targets: TARGETS,
-      proteinDays: periodTargetDays(fine, TODAY, TARGETS).protein,
-      streak: 1,
-    });
-    expect(out).toEqual([]);
-  });
-
-  it("is empty with no logged days", () => {
-    const none = periodTargetDays([], TODAY, TARGETS).protein;
-    expect(periodInsights({ averages: periodAverages([], TODAY), targets: TARGETS, proteinDays: none, streak: 0 })).toEqual([]);
-  });
-
-  it("writes the streak as a fact", () => {
-    const none = periodTargetDays([], TODAY, TARGETS).protein;
-    const out = periodInsights({ averages: periodAverages([], TODAY), targets: TARGETS, proteinDays: none, streak: 7 });
-    expect(out).toEqual([{ kind: "streak", text: "Đã ghi nhật ký 7 ngày liên tiếp." }]);
-  });
-});
-
-describe("changeText (a fact about one change)", () => {
-  const change = (over: Partial<PeriodChange>): PeriodChange => ({
-    key: "vitamin_d",
-    label: "Vitamin D",
-    unit: "µg",
-    current: 2.7,
-    previous: 3.2,
-    delta: -0.5,
-    deltaPct: -15.6,
-    ...over,
-  });
-
-  it("names both averages and the change, with a real minus sign", () => {
-    expect(changeText(change({}))).toBe("Vitamin D trung bình 2,7 µg, kỳ trước 3,2 µg (−0,5 µg).");
-  });
-
-  it("uses whole numbers for large amounts and kcal", () => {
-    expect(changeText(change({ key: "calcium", label: "Canxi", unit: "mg", current: 410, previous: 440, delta: -30 }))).toBe(
-      "Canxi trung bình 410 mg, kỳ trước 440 mg (−30 mg)."
-    );
-    expect(changeText(change({ key: "calories", label: "Năng lượng", unit: "kcal", current: 2010, previous: 1900, delta: 110 }))).toBe(
-      "Năng lượng trung bình 2.010 kcal, kỳ trước 1.900 kcal (+110 kcal)."
-    );
   });
 });
 

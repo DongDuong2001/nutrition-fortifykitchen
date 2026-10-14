@@ -5,20 +5,16 @@ import type { MockDayData } from "./mock/sample-day";
 import { weightLogSample } from "./mock/weight-log";
 import { NUTRIENT_CATALOG } from "./nutrients";
 import {
-  comparePeriods,
   hasEnoughData,
   loggingStreak,
   macroComposition,
   period,
   periodAverages,
-  periodInsights,
   periodTargetDays,
   targetMinFor,
   weightSummary,
-  type Insight,
   type Period,
   type PeriodAverages,
-  type PeriodChange,
   type PeriodLength,
   type TargetCount,
   type WeightPoint,
@@ -37,9 +33,6 @@ export interface Overview {
   /** At least 3 finished logged days. Under that Tóm tắt shows "Chưa đủ dữ liệu". */
   enough: boolean;
   composition: { protein: number; carbs: number; fat: number } | null;
-  /** All changes, biggest first. Screens show the first three. */
-  changes: PeriodChange[];
-  insights: Insight[];
   streak: number;
   weight: WeightSummary;
   /** The weigh-in log the weight summary came from (for day-to-day changes) */
@@ -79,8 +72,6 @@ export function buildOverview(input: {
     targetDays,
     enough,
     composition: macroComposition({ protein: averages.protein, carbs: averages.carbs, fat: averages.fat }),
-    changes: comparePeriods(averages, previousAverages),
-    insights: periodInsights({ averages, targets, proteinDays: targetDays.protein, streak }),
     streak,
     weight: weightSummary(weightLog, current),
     weightLog,

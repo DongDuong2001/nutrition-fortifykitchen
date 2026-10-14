@@ -37,8 +37,6 @@ describe("buildOverview (the data behind the four Tổng quan sub-tabs)", () => 
     expect(o.averages.loggedDays).toBe(0);
     expect(o.enough).toBe(false);
     expect(o.composition).toBeNull();
-    expect(o.changes).toEqual([]);
-    expect(o.insights.filter((i) => i.kind !== "streak")).toEqual([]);
   });
 
   it("composition adds up to 100 and comes from the averages", () => {
@@ -56,10 +54,6 @@ describe("buildOverview (the data behind the four Tổng quan sub-tabs)", () => 
 
   it("the streak runs from today back to the gap (8 days: today and daysAgo 1 to 7)", () => {
     expect(build(7).streak).toBe(8);
-  });
-
-  it("insights are at most three", () => {
-    expect(build(30).insights.length).toBeLessThanOrEqual(3);
   });
 
   it("weight comes from the weight log sample: 65 kg now", () => {
