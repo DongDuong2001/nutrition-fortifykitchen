@@ -12,7 +12,7 @@ export function LeaderboardBanner() {
         </span>
         <div className="flex flex-col min-w-0">
           <span className="truncate text-sm font-bold text-text">Bảng xếp hạng kỷ luật</span>
-          <span className="truncate text-xs text-secondary">
+          <span className="text-xs text-secondary">
             Vinh danh người dùng duy trì vi chất & mục tiêu cao nhất
           </span>
         </div>

@@ -7,6 +7,7 @@ import datetime
 import os
 import re
 import sys
+from urllib.parse import urlparse
 
 from playwright.sync_api import sync_playwright
 import _demo  # noqa: F401  (cc2-15b: demo mode on, see _demo.py)
@@ -72,6 +73,7 @@ def run_phone(browser):
     pg.wait_for_url(f"**date={iso(YESTERDAY)}")
     pg.wait_for_timeout(300)
     check(is_past(pg), "390 ‹ opens a past day (› is enabled)")
+    check(visible_count(pg, 'a:has-text("Về hôm nay")') == 1, "390 a past day has Về hôm nay in the header")
     check(energy(pg) == "1.532", f"390 yesterday shows its own 1.532 kcal (got {energy(pg)})")
     check(visible_count(pg, 'button:has-text("Chép hôm qua")') == 0, "390 past day hides Chép hôm qua")
     check(visible_count(pg, f'text=Hôm qua {YESTERDAY.day:02d}/{YESTERDAY.month:02d}') == 1,
@@ -84,6 +86,7 @@ def run_phone(browser):
     check("date=" not in pg.url, "390 › comes back to today (no date in URL)")
     check(energy(pg) == "1.041", f"390 back on today: 1.041 kcal (got {energy(pg)})")
     check(vis(pg, 'button[aria-label="Ngày sau"]').is_disabled(), "390 › is disabled on today")
+    check(visible_count(pg, 'a:has-text("Về hôm nay")') == 0, "390 today has no Về hôm nay")
 
     # Calendar: tap the date label, pick a day 5 days ago
     vis(pg, 'button[aria-label^="Chọn ngày"]').click()
@@ -104,6 +107,11 @@ def run_phone(browser):
     check(visible_count(pg, 'text=Chưa ăn') > 0, "390 a past day with nothing logged shows Chưa ăn")
     check(visible_count(pg, 'text=Chưa có món nào ngày này') == 1, "390 a past day with nothing logged says so")
     pg.screenshot(path=shot("cc10-past-empty-390.png"), animations="disabled")
+    vis(pg, 'a:has-text("Về hôm nay")').click()
+    pg.wait_for_url(re.compile(r".*/$"), timeout=8000)
+    pg.wait_for_timeout(300)
+    check(urlparse(pg.url).path == "/" and "date=" not in pg.url, f"390 Về hôm nay lands on / ({pg.url})")
+    check(not is_past(pg) and visible_count(pg, 'a:has-text("Về hôm nay")') == 0, "390 after Về hôm nay the day is today")
 
     # Hồ sơ: Năm sinh is a row; tapping it opens the field
     pg.goto(BASE + "/settings/profile", wait_until="networkidle")
@@ -138,6 +146,7 @@ def run_desktop(browser):
     pg.wait_for_url(f"**date={iso(YESTERDAY)}")
     pg.wait_for_timeout(300)
     check(is_past(pg), "1440 ‹ opens yesterday (› is enabled)")
+    check(visible_count(pg, 'a:has-text("Về hôm nay")') == 0, "1440 the desktop keeps its subtitle, no Về hôm nay in the header")
     check(visible_count(pg, 'text=Chỉ xem') >= 1, "1440 a past day says Chỉ xem")
     check(visible_count(pg, 'button:has-text("Chép hôm qua")') == 0, "1440 past day hides Chép hôm qua")
     check(visible_count(pg, 'button:has-text("Thêm món")') == 0, "1440 past day hides Thêm món")

@@ -120,7 +120,7 @@ def run():
             button(pg, "Hoàn tác").click()
             pg.wait_for_timeout(300)
             breakfast = meal_text(pg, "breakfast")
-            check("Yogurt kefir 200 g" in breakfast, f"{name}: Hoàn tác restores Yogurt kefir")
+            check("Yogurt kefir 200 ml" in breakfast, f"{name}: Hoàn tác restores Yogurt kefir")
             check(breakfast.index("Yogurt kefir") < breakfast.index("Chuối"), f"{name}: restored item is back in its place")
             check(pg.locator('[role=status] >> visible=true').filter(has_text="Đã xóa").count() == 0,
                   f"{name}: toast goes after Hoàn tác")
@@ -134,7 +134,7 @@ def run():
             pg.wait_for_timeout(300)
             check("Chuối" not in meal_text(pg, "breakfast"), f"{name}: deleted Chuối stays gone after reload")
             check("Yến mạch 90 g" in meal_text(pg, "dinner"), f"{name}: moved edit survives reload")
-            check("Yogurt kefir 200 g" in meal_text(pg, "breakfast"), f"{name}: restored item survives reload")
+            check("Yogurt kefir 200 ml" in meal_text(pg, "breakfast"), f"{name}: restored item survives reload")
 
             if errors:
                 problems.append(f"{name}: console errors: {errors[:3]}")

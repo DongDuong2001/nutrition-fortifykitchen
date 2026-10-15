@@ -7,7 +7,7 @@ export function CoachesCarousel() {
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-bold uppercase tracking-wider text-secondary">
+        <span className="text-base font-bold leading-snug text-text">
           Huấn luyện viên tiêu biểu
         </span>
         <Link

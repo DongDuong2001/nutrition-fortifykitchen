@@ -102,7 +102,7 @@ def run():
             check("Yogurt kefir" not in meal_text(pg, "breakfast"), f"{name}: deleted row gone")
             button(pg, "Hoàn tác").click()
             pg.wait_for_timeout(300)
-            check("Yogurt kefir 200 g" in meal_text(pg, "breakfast"), f"{name}: Hoàn tác restores")
+            check("Yogurt kefir 200 ml" in meal_text(pg, "breakfast"), f"{name}: Hoàn tác restores")
             check(pg.locator('[role=status] >> visible=true').count() == 0, f"{name}: toast gone after Hoàn tác")
 
             # 4. Micros: header and chip bar stay put while the body scrolls (phone)

@@ -13,6 +13,7 @@ import {
   valuesFromDay,
   targetOf,
   pctLabel,
+  portionLabel,
   type HomeEntry,
   type HomeMode,
 } from "../home";
@@ -23,6 +24,7 @@ import { MOCK_FOODS } from "../mock/foods";
 import { entryNumbers } from "../diary-edits";
 import { blankDay } from "../day-history";
 import { computeCompositeDayData } from "../diary-store";
+import { SAMPLE_ITEMS, type SampleEdits } from "../diary-edits";
 
 const full = (): Record<string, number | null> => Object.fromEntries(COUNTED_NUTRIENT_KEYS.map((k) => [k, 1]));
 
@@ -211,5 +213,85 @@ describe("the day the store builds equals the sum of its entries", () => {
     for (const key of COUNTED_NUTRIENT_KEYS) {
       expect(fromDay.nutrients[key] ?? null, key).toEqual(fromEntries.nutrients[key] === null ? null : expect.closeTo(fromEntries.nutrients[key] as number, 0));
     }
+  });
+});
+
+describe("portionLabel: a food logged in ml or l keeps its portion as logged (cc2-32)", () => {
+  it("shows ml and l as logged, even when the entry also carries grams", () => {
+    expect(portionLabel({ qty: "200 ml", grams: 200 })).toBe("200 ml");
+    expect(portionLabel({ qty: "1,5 l", grams: 1500 })).toBe("1,5 l");
+    expect(portionLabel({ qty: "330 ML", grams: 330 })).toBe("330 ML");
+  });
+
+  it("keeps grams for everything else, and the typed portion when there are no grams", () => {
+    expect(portionLabel({ qty: "1 quả", grams: 60 })).toBe("60 g");
+    expect(portionLabel({ qty: "150 g", grams: 150 })).toBe("150 g");
+    expect(portionLabel({ qty: "1 chén", grams: null })).toBe("1 chén");
+    expect(portionLabel({ qty: "1.200 g", grams: 1200 })).toBe("1.200 g");
+  });
+
+  it("does not take a unit that only ends in l or ml for a volume", () => {
+    expect(portionLabel({ qty: "1 lon", grams: 330 })).toBe("330 g");
+    expect(portionLabel({ qty: "2 muỗng canh", grams: 30 })).toBe("30 g");
+  });
+
+  it("is what the food-mode hero label shows", () => {
+    const kefir = entry({ id: "k", name: "Yogurt kefir", qty: "200 ml", grams: 200 });
+    expect(heroLabel({ kind: "food", id: "k" }, [kefir], groupMeals([kefir]))).toBe("YOGURT KEFIR · 200 ML");
+  });
+});
+
+describe("a day edited down never goes below 0 (cc2-32)", () => {
+  const everyStat = (day: ReturnType<typeof computeCompositeDayData>) => [...day.macros, ...day.minerals, ...day.vitamins];
+  const deleteAll: SampleEdits = Object.fromEntries(SAMPLE_ITEMS.map((i) => [i.item.id, { deleted: true }]));
+
+  it("with every sample item deleted nothing is negative, and no nutrient without a source reads 0", () => {
+    const day = computeCompositeDayData(SAMPLE_DAY, [], deleteAll);
+    expect(day.calories.consumed).toBe(0);
+    for (const stat of everyStat(day)) {
+      expect(stat.consumed === null || stat.consumed >= 0, `${stat.key} consumed`).toBe(true);
+      expect(stat.percentage === null || stat.percentage >= 0, `${stat.key} percentage`).toBe(true);
+      expect(stat.displayValue.includes("-"), `${stat.key} displayValue ${stat.displayValue}`).toBe(false);
+    }
+    // nothing remains to carry a value: unknown, not 0
+    for (const stat of everyStat(day)) expect(stat.consumed, stat.key).toBeNull();
+    for (const key of Object.keys(day.nutrients ?? {})) expect(day.nutrients?.[key] ?? null, key).toBeNull();
+    const values = valuesFromDay(day);
+    expect(values.kcal).toBe(0);
+    for (const v of [values.protein, values.carbs, values.fat, values.fiber, ...Object.values(values.nutrients)]) {
+      expect(v === null || v >= 0).toBe(true);
+    }
+  });
+
+  it("deleting any one sample item never makes an amount negative", () => {
+    for (const info of SAMPLE_ITEMS) {
+      const day = computeCompositeDayData(SAMPLE_DAY, [], { [info.item.id]: { deleted: true } });
+      for (const stat of everyStat(day)) {
+        expect(stat.consumed === null || stat.consumed >= 0, `${info.item.id} → ${stat.key}`).toBe(true);
+        expect(stat.percentage === null || stat.percentage >= 0, `${info.item.id} → ${stat.key} %`).toBe(true);
+      }
+    }
+  });
+
+  it("a kcal-only entry on an emptied day carries kcal and nothing else", () => {
+    const quick: AddedDiaryEntry = {
+      id: "q1",
+      kind: "quick",
+      foodId: "quick",
+      foodName: "Phở",
+      grams: 0,
+      displayQty: "1 tô",
+      mealSlot: "lunch",
+      addedAt: "2026-10-15T01:00:00.000Z",
+      calories: 450,
+      protein: null,
+      carbs: null,
+      fat: null,
+      fiber: null,
+      nutrients: {},
+    } as unknown as AddedDiaryEntry;
+    const day = computeCompositeDayData(SAMPLE_DAY, [quick], deleteAll);
+    expect(day.calories.consumed).toBe(450);
+    for (const stat of everyStat(day)) expect(stat.consumed, stat.key).toBeNull();
   });
 });

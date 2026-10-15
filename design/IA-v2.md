@@ -75,6 +75,7 @@ Job: log, fix and read one day (any date).
 
 ## Khám phá (explore) — v1, data only
 Job: find a food and understand it.
+- Order on the page (Hao 15/10): search, category chips, the leaderboard banner (Bảng xếp hạng kỷ luật), "Huấn luyện viên tiêu biểu", **"Món giàu vi chất"**, then "Gần đây", "Yêu thích", "Bữa ăn của tôi", "Món của tôi".
 - Search (same index as the add sheet), category chips (the 10 categories), "Gần đây", "Yêu thích", "Món của tôi", "Bữa ăn của tôi" (saved meals: a named set of foods with portions, logged in one tap; created from a diary meal's "⋯" or from Khám phá).
 - "Giàu…" lists: foods ranked by one nutrient per 100 g / per usual portion (Canxi, Sắt, Kali, Magie, Đạm, Chất xơ, Vitamin D, Vitamin C).
 - Food detail: kcal and macros per portion, the 22 counted nutrients as % of the user's targets for that portion, "Nguồn tốt của: …" (≥ 20% of target per portion), add-to-diary button, favourite toggle.

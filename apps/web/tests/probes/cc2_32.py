@@ -168,13 +168,64 @@ def copy_yesterday_sheet(browser, name, size):
     ctx.close()
 
 
+def home_details(browser, name, size):
+    """cc2-32 round 3: a food logged in ml keeps its portion; an emptied day has no negative amounts; Về hôm nay."""
+    ctx = browser.new_context(viewport=size)
+    pg = ctx.new_page()
+    go(pg, "/")
+    settle(pg)
+    row = pg.locator("button[aria-label^='Yogurt kefir,']:visible").first
+    label = row.get_attribute("aria-label") or ""
+    check("200 ml" in label and "200 g" not in label, f"{name}: the Yogurt kefir row says 200 ml ({label!r})")
+    check("200 ml" in row.inner_text(), f"{name}: the Yogurt kefir row shows 200 ml ({row.inner_text()!r})")
+    if name == "390":
+        pg.screenshot(path=str(SHOTS / "cc2-32-home-ml-390.png"))
+    row.click()
+    pg.wait_for_timeout(300)
+    hero = pg.locator("section[aria-label='Tổng kcal và dinh dưỡng đa lượng']:visible").first.inner_text()
+    check("YOGURT KEFIR · 200 ML" in hero, f"{name}: the food-mode hero label reads 200 ML ({hero.splitlines()[0]!r})")
+    ctx.close()
+
+    # Về hôm nay: phone only, past days only, goes to /
+    ctx = browser.new_context(viewport=size)
+    pg = ctx.new_page()
+    go(pg, f"/?date={YESTERDAY}")
+    settle(pg)
+    link = pg.locator("a:has-text('Về hôm nay'):visible")
+    if name == "390":
+        check(link.count() == 1, f"{name}: Về hôm nay on a past day")
+        if link.count() == 1:
+            box = link.first.bounding_box()
+            nav = pg.locator("button[aria-label='Ngày sau']:visible").first.bounding_box()
+            check(box["height"] >= 44 and box["x"] + box["width"] <= nav["x"], f"{name}: Về hôm nay is 44 px and clear of the date nav ({box}, {nav})")
+            wide = pg.evaluate("document.documentElement.scrollWidth > window.innerWidth")
+            check(not wide, f"{name}: the past-day header does not scroll sideways")
+            pg.screenshot(path=str(SHOTS / "cc2-32-home-past-day-390.png"))
+    else:
+        check(link.count() == 0, f"{name}: the desktop keeps its subtitle, no Về hôm nay")
+    ctx.close()
+
+    # An emptied day (demo, every sample item deleted): nothing below 0, unknown amounts are dashes
+    ctx = browser.new_context(viewport=size)
+    deleted = json.dumps({f"item-{i}": {"deleted": True} for i in range(1, 13)})
+    ctx.add_init_script(f"try {{ localStorage.setItem('h1t_sample_edits_v1_demo', {json.dumps(deleted)}); }} catch (e) {{}}")
+    pg = ctx.new_page()
+    go(pg, "/")
+    settle(pg)
+    body = pg.inner_text("body")
+    negatives = re.findall(r"(?:^|[\s(])-\d[\d.,]*", body)
+    check(not negatives, f"{name}: an emptied day shows no negative amount ({negatives[:3]})")
+    check(re.search(r"-\d+\s*%", body) is None, f"{name}: an emptied day shows no negative percent")
+    ctx.close()
+
+
 def main():
     SHOTS.mkdir(parents=True, exist_ok=True)
     with sync_playwright() as p:
         browser = p.chromium.launch()
         redirects(browser)
         for name, size in SIZES:
-            for probe in (no_diary_links, back_fallback, home_sheets, copy_yesterday_sheet):
+            for probe in (no_diary_links, back_fallback, home_sheets, copy_yesterday_sheet, home_details):
                 try:
                     probe(browser, name, size)
                 except Exception as err:  # a missing control must show up as a failed check, not a crash

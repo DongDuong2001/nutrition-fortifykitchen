@@ -54,9 +54,11 @@ def explore(browser, size_name, size):
     w = f"{size_name} Khám phá"
     rich = pg.locator("section#explore-rich")
     check(rich.count() == 1, f"{w}: Món giàu vi chất section")
-    # It is the first section under the chips
-    first = pg.evaluate("() => { const s = [...document.querySelectorAll('main section')]; return s.length ? s[0].id : null; }")
-    check(first == "explore-rich", f"{w}: Món giàu vi chất comes first ({first})")
+    # Order under the chips (Hao 15/10, keeps Dong's order): leaderboard banner, coaches, Món giàu vi chất, Gần đây
+    body = pg.inner_text("body")
+    order = [body.find(t) for t in ("Bảng xếp hạng kỷ luật", "Huấn luyện viên tiêu biểu", "Món giàu vi chất", "Gần đây")]
+    check(all(i >= 0 for i in order) and order == sorted(order),
+          f"{w}: leaderboard, coaches, Món giàu vi chất, Gần đây in that order ({order})")
     tiles = rich.locator("ul[role='list'] > li a")
     check(tiles.count() == 8, f"{w}: eight tiles ({tiles.count()})")
     hrefs = [tiles.nth(i).get_attribute("href") for i in range(tiles.count())]

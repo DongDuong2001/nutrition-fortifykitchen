@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { rememberAddOpener } from "@/components/ui/add-opener";
 import { formatAmount } from "@/lib/format";
-import { missingMicros, type HomeEntry, type HomeMeal, type HomeMode } from "@/lib/home";
+import { missingMicros, portionLabel, type HomeEntry, type HomeMeal, type HomeMode } from "@/lib/home";
 
 const LONG_PRESS_MS = 500;
 const MOVE_LIMIT_PX = 10;
@@ -24,7 +24,7 @@ function FoodRow({ entry, selected, editable, onSelect }: { entry: HomeEntry; se
     origin.current = null;
   };
 
-  const quantity = entry.grams !== null ? `${formatAmount(entry.grams, "g")} g` : entry.qty;
+  const quantity = portionLabel(entry);
   const missing = missingMicros(entry);
 
   return (

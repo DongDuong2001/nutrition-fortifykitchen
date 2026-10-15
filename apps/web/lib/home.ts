@@ -123,13 +123,26 @@ export function modeEntries(mode: HomeMode, entries: HomeEntry[]): HomeEntry[] {
   return entries;
 }
 
-/** First line of the hero card: "CẢ NGÀY · 16 MÓN", "CÁ HỒI NƯỚNG · 120 G", "BỮA TRƯA · 3 MÓN". */
+const VOLUME_QTY = /^\d+(?:[.,]\d+)?\s*(?:ml|l)$/i;
+
+/**
+ * The portion a home row shows: a food logged in ml or l keeps "200 ml" as logged; everything else shows its grams
+ * ("60 g" for "1 quả"), or the typed portion when there are no grams.
+ */
+export function portionLabel(entry: Pick<HomeEntry, "qty" | "grams">): string {
+  if (VOLUME_QTY.test(entry.qty.trim())) return entry.qty.trim();
+  return entry.grams !== null ? `${formatAmount(entry.grams, "g")} g` : entry.qty;
+}
+
+/** First line of the hero card: "CẢ NGÀY · 16 MÓN", "CÁ HỒI NƯỚNG · 120 G", "YOGURT KEFIR · 200 ML", "BỮA TRƯA · 3 MÓN". */
 export function heroLabel(mode: HomeMode, entries: HomeEntry[], meals: HomeMeal[]): string {
   if (mode.kind === "food") {
     const e = entries.find((x) => x.id === mode.id);
     if (!e) return `CẢ NGÀY · ${entries.length} MÓN`;
     const name = e.name.toLocaleUpperCase("vi-VN");
-    return e.grams === null ? name : `${name} · ${formatAmount(e.grams, "g")} G`;
+    // No grams and no volume: the name alone (a typed "1 chén" is not a measure the hero repeats)
+    if (e.grams === null && !VOLUME_QTY.test(e.qty.trim())) return name;
+    return `${name} · ${portionLabel(e).toLocaleUpperCase("vi-VN")}`;
   }
   if (mode.kind === "meal") {
     const meal = meals.find((m) => m.slot === mode.slot);

@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AppShell } from "@/components/ui/app-shell";
 import { AppHeader } from "@/components/ui/app-header";
@@ -223,6 +224,16 @@ function HomeContent() {
           onDateTap={() => setIsCalendarOpen(true)}
           alignGroup="home-header"
           subtitle={desktopSubtitle}
+          phoneStart={
+            isPast ? (
+              <Link
+                href="/"
+                className="-ml-2 inline-flex min-h-11 items-center whitespace-nowrap rounded-full px-2 text-[13px] font-bold text-sky no-underline hover:underline active:scale-[0.97] motion-reduce:active:scale-100 focus-visible:outline-sky"
+              >
+                Về hôm nay
+              </Link>
+            ) : undefined
+          }
         />
         {showOffline && (
           <div role="status" className="mx-3 mt-2 rounded-xl bg-warning-bg px-3 py-2 text-[13px] leading-snug text-warning-text">

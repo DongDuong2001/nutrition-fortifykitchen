@@ -44,6 +44,8 @@ export interface AppHeaderProps {
   desktopStat?: React.ReactNode;
   /** Phone: the H1T MICRO wordmark in the title position; the title stays as a sr-only h1 (Tổng quan). */
   wordmark?: boolean;
+  /** Phone, with `wordmark`: takes the wordmark's place (the home screen's "Về hôm nay" on a past day). */
+  phoneStart?: React.ReactNode;
   /** Desktop width: "narrow" (560 px column) or "wide" (left-aligned at the 32 px gutter). Daily defaults to wide. */
   layout?: "narrow" | "wide";
   /** Desktop: the page's main already has 32 px padding, so the header adds none. */
@@ -96,6 +98,7 @@ export function AppHeader({
   actions,
   desktopStat,
   wordmark = false,
+  phoneStart,
   layout,
   flush = false,
   compact = false,
@@ -156,9 +159,13 @@ export function AppHeader({
           <div className="min-w-0 flex-1">
             {wordmark ? (
               <>
-                <div aria-hidden="true" className={`font-display italic font-black ${compact ? "text-[21px]" : "text-xl"} uppercase tracking-tight lg:hidden`}>
-                  H1T <span className="text-sky">MICRO</span>
-                </div>
+                {phoneStart ? (
+                  <div className="lg:hidden">{phoneStart}</div>
+                ) : (
+                  <div aria-hidden="true" className={`font-display italic font-black ${compact ? "text-[21px]" : "text-xl"} uppercase tracking-tight lg:hidden`}>
+                    H1T <span className="text-sky">MICRO</span>
+                  </div>
+                )}
                 {title && (
                   <h1 className="sr-only lg:not-sr-only m-0 font-display italic font-extrabold text-2xl lg:text-[32px] leading-tight uppercase tracking-tight">
                     {title}

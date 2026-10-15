@@ -193,9 +193,14 @@ export function computeCompositeDayData(
   for (const entry of addedEntries) {
     extra = addAmounts(extra, amountsOfNumbers(entry));
   }
+  const addedOnly = extra;
   for (const { info, effect } of effects) {
     extra = addAmounts(extra, sampleDelta(info, effect));
   }
+  // Every sample item deleted: the hand-set sample totals no longer stand for anything, so macros and nutrients
+  // are the added entries alone (kcal stays base minus what the deleted items held, as before).
+  const sampleGone = effects.length > 0 && effects.every((e) => e.effect.deleted);
+  if (sampleGone) extra = { ...addedOnly, calories: extra.calories };
   const extraCals = extra.calories;
   const extraCarbs = extra.carbs;
   const extraProtein = extra.protein;
@@ -203,8 +208,26 @@ export function computeCompositeDayData(
   const extraFiber = extra.fiber;
   const extraNutrients = extra.nutrients;
 
+  // The sample day's totals are hand-set, not the sum of its items, so subtracting an item can overshoot. Two rules
+  // keep every amount honest: nothing goes below 0, and once no sample item is left, a macro or nutrient that no
+  // added entry carries is unknown (null, shown as a dash), not 0 and not a leftover of the hand-set total.
+  const remaining = [
+    ...effects.filter((e) => !e.effect.deleted).map((e) => e.effect.numbers),
+    ...addedEntries,
+  ];
+  const hasMacro = (key: "protein" | "carbs" | "fat" | "fiber") =>
+    !sampleGone || remaining.some((n) => n !== null && typeof n[key] === "number");
+  const hasNutrient = (key: string) =>
+    !sampleGone || remaining.some((n) => n !== null && typeof n.nutrients[key] === "number");
+  const unknown = <S extends MockDayData["macros"][number] | MockDayData["minerals"][number]>(stat: S): S => ({
+    ...stat,
+    consumed: null,
+    percentage: null,
+    displayValue: statDisplay(0, stat).replace(/^0/, "—"),
+  });
+
   // 1. Calories
-  const totalConsumedCals = baseDay.calories.consumed + extraCals;
+  const totalConsumedCals = Math.max(0, baseDay.calories.consumed + extraCals);
   const remainingCals = Math.max(0, baseDay.calories.targetMin - totalConsumedCals);
   const calPercentage = Math.round((totalConsumedCals / baseDay.calories.targetMin) * 100);
 
@@ -217,9 +240,12 @@ export function computeCompositeDayData(
     else if (m.key === "fiber") extra = extraFiber;
     // Unknown stays unknown until an entry carries a value for it (a kcal-only entry adds no protein)
     if (m.consumed === null && extra === 0) return m;
+    if (m.key === "protein" || m.key === "carbs" || m.key === "fat" || m.key === "fiber") {
+      if (!hasMacro(m.key)) return unknown(m);
+    }
 
-    const baseConsumed = m.consumed ?? 0;
-    const newConsumed = Math.round(baseConsumed + extra);
+    const baseConsumed = sampleGone ? 0 : m.consumed ?? 0;
+    const newConsumed = Math.max(0, Math.round(baseConsumed + extra));
     const targetMin = m.targetMin ?? 0;
     const percentage = targetMin > 0 ? Math.round((newConsumed / targetMin) * 100) : 0;
     const displayValue = statDisplay(newConsumed, m);
@@ -275,22 +301,27 @@ export function computeCompositeDayData(
 
   // 4. Nutrients record (for Micros page)
   const compositeNutrients: Record<string, number | null> = { ...(baseDay.nutrients || {}) };
+  if (sampleGone) for (const key of Object.keys(compositeNutrients)) compositeNutrients[key] = null;
   for (const [key, extraVal] of Object.entries(extraNutrients)) {
     const current = compositeNutrients[key];
     if (current !== null && current !== undefined) {
-      compositeNutrients[key] = current + extraVal;
+      compositeNutrients[key] = Math.max(0, current + extraVal);
     } else if (extraVal > 0) {
       compositeNutrients[key] = extraVal;
     }
   }
+  for (const key of Object.keys(compositeNutrients)) {
+    if (!hasNutrient(key)) compositeNutrients[key] = null;
+  }
 
   // 5. Update Minerals & Vitamins arrays (e.g. Kali, Vitamin B6)
   const updatedMinerals = baseDay.minerals.map((m) => {
+    if (!hasNutrient(m.key)) return m.consumed === null ? m : unknown(m);
     const extra = extraNutrients[m.key] ?? 0;
     if (extra === 0) return m;
 
-    const baseConsumed = m.consumed ?? 0;
-    const newConsumed = Math.round(baseConsumed + extra);
+    const baseConsumed = sampleGone ? 0 : m.consumed ?? 0;
+    const newConsumed = Math.max(0, Math.round(baseConsumed + extra));
     const targetMin = m.targetMin ?? 0;
     const percentage = targetMin > 0 ? Math.round((newConsumed / targetMin) * 100) : 0;
     const displayValue = statDisplay(newConsumed, m);
@@ -304,11 +335,12 @@ export function computeCompositeDayData(
   });
 
   const updatedVitamins = baseDay.vitamins.map((v) => {
+    if (!hasNutrient(v.key)) return v.consumed === null ? v : unknown(v);
     const extra = extraNutrients[v.key] ?? 0;
     if (extra === 0) return v;
 
-    const baseConsumed = v.consumed ?? 0;
-    const newConsumed = Math.round((baseConsumed + extra) * 100) / 100;
+    const baseConsumed = sampleGone ? 0 : v.consumed ?? 0;
+    const newConsumed = Math.max(0, Math.round((baseConsumed + extra) * 100) / 100);
     const targetMin = v.targetMin ?? 0;
     const percentage = targetMin > 0 ? Math.round((newConsumed / targetMin) * 100) : 0;
     const displayValue =
