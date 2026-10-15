@@ -45,4 +45,5 @@ All from docs/dong-checklist.md §6 (data the new Tổng quan screens need):
 - [x] The 12 drinks tip_vi advice text: fixed in `data/seed_foods.json`, advice removed in favor of pure factual ingredient descriptions.
 - [x] Macro label parity: unified "Chất béo" across `apps/web/lib/period.ts`, `apps/api/internal/trends/trends.go`, and `packages/vectors/period.json`.
 - [x] Profile display_name validation: enforced 40-character maximum and whitespace trimming in `apps/api/internal/profile/service.go`.
+- [x] (cc-24) /admin/review authorization & coach application endpoints: Migration 000010 added role to nutrition.profiles and coach_applications table with RLS; RequireRole and RequireAdmin middlewares active in Go API; coaching package implemented in apps/api/internal/coaching with POST /coaches/apply, GET /coaches/my-application, and admin review routes.
 - Note: `cmd/importfoods` supports batch import for >= 1.000 foods; `data/seed_foods.json` contains the verified 44 foundational foods for tests and dev DB.
