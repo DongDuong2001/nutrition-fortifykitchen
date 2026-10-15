@@ -93,3 +93,15 @@ What makes the screens feel like H1T MICRO, not a list of cards (set in cc2-20 w
 - **Colour means a level.** Cobalt = met, destructive = under, secondary = in progress or unknown. Never red above a
   range.
 - **Motion explains a change** (a chevron turning, a bar fading in); nothing moves under `prefers-reduced-motion`.
+
+## Hôm nay (home, cc-22)
+- **Two-tone bars, home only.** While the day is open (today) a bar is the secondary colour (on ink: muted-on-dark)
+  under 100% and level blue from 100%. A finished day (before today) uses the four levels. Segments: floor(pct / 10),
+  but 1 when 0 < pct < 10 (`homeSegments`, `homeBarTone` in lib/levels.ts). Other screens keep the four levels.
+- **Cobalt = selected, ink = filter.** A selected food or meal row, the nutrient column's top edge and its caption
+  turn cobalt; the hero card's border turns sky. Ink is the filter surface (the hero card), never a selection.
+- **Dense-list exception (WCAG 2.2 AA target size 24 px is met).** Home food rows are 28 px and meal headers 24 px
+  on a phone (44 px at 1024 px and up). The hero pills are 24 px tall with a 44 × 44 px hit area (an invisible
+  pseudo-element). Everything else on the screen keeps 44 px.
+- **Single-line food names.** On home a food name is one line; only the name truncates (ellipsis, full name in
+  `title` and `aria-label`), the grams never do.

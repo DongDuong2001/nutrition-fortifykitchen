@@ -48,6 +48,8 @@ export interface AppHeaderProps {
   layout?: "narrow" | "wide";
   /** Desktop: the page's main already has 32 px padding, so the header adds none. */
   flush?: boolean;
+  /** Phone: a 52 px band (4 px above and below the 44 px row) and a 21 px wordmark. The home screen. */
+  compact?: boolean;
   /** data-align-group attribute for alignment tests */
   alignGroup?: string;
   className?: string;
@@ -96,6 +98,7 @@ export function AppHeader({
   wordmark = false,
   layout,
   flush = false,
+  compact = false,
   alignGroup,
   className = "",
 }: AppHeaderProps) {
@@ -135,13 +138,14 @@ export function AppHeader({
       ? "max-w-[560px] mx-auto px-4 lg:max-w-[1240px] lg:mx-0 lg:px-8 lg:pt-8"
       : "max-w-[560px] mx-auto px-4 lg:pt-8";
   const deskPad = "lg:pb-0";
+  const phonePad = compact ? "pt-[max(4px,env(safe-area-inset-top))] pb-1" : "pt-[max(12px,env(safe-area-inset-top))] pb-4";
 
   return (
     <header
       className={`w-full flex-none select-none bg-ink text-on-dark rounded-b-[20px] lg:rounded-none lg:bg-page lg:text-text ${className}`}
     >
       <div
-        className={`flex w-full flex-col gap-3 pt-[max(12px,env(safe-area-inset-top))] pb-4 box-border ${column} ${deskPad}`}
+        className={`flex w-full flex-col gap-3 ${phonePad} box-border ${column} ${deskPad}`}
       >
         <div
           data-align-group={alignGroup}
@@ -152,7 +156,7 @@ export function AppHeader({
           <div className="min-w-0 flex-1">
             {wordmark ? (
               <>
-                <div aria-hidden="true" className="font-display italic font-black text-xl uppercase tracking-tight lg:hidden">
+                <div aria-hidden="true" className={`font-display italic font-black ${compact ? "text-[21px]" : "text-xl"} uppercase tracking-tight lg:hidden`}>
                   H1T <span className="text-sky">MICRO</span>
                 </div>
                 {title && (

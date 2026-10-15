@@ -9,6 +9,8 @@
   --color-paper: #F3F1EC;
   --color-page: #F3F1EC;
   --color-card: #FFFFFF;
+  /* Meal headers of the home food list: one step darker than paper. */
+  --color-paper-dark: #EAE6DE;
   --color-card-border: #E0DACF;
   --color-ink: #111317;
   --color-text: #141519;

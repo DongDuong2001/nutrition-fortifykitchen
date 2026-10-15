@@ -1,11 +1,6 @@
-import { OverviewFrame } from "@/components/overview/overview-frame";
-import { SummaryTab } from "@/components/overview/summary-tab";
+import { HomeScreen } from "@/components/home/home-screen";
 
-/** Tổng quan › Tóm tắt (IA v2): the default landing screen. The day itself lives in Nhật ký (/diary). */
+/** Hôm nay (IA v2): the day at a glance, food by food. Nhật ký is folded in; ?date= shows a past day. */
 export default function HomePage() {
-  return (
-    <OverviewFrame active="summary">
-      <SummaryTab />
-    </OverviewFrame>
-  );
+  return <HomeScreen />;
 }
