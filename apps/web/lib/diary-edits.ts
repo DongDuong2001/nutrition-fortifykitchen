@@ -370,6 +370,35 @@ export function deleteMealIn(edits: DiaryEdits, slot: MealSlot, samples: SampleI
   };
 }
 
+/**
+ * Removes the chosen entries (unknown or already deleted ids are skipped) and keeps them for ONE undo, which puts
+ * them all back where they were. Nothing to remove: no change.
+ */
+export function deleteEntriesIn(edits: DiaryEdits, ids: readonly string[], samples: SampleItemInfo[] = SAMPLE_ITEMS): DiaryEdits {
+  const wanted = new Set(ids);
+  const live = [...wanted].filter((id) => findEntry(edits, id, samples) !== null);
+  if (live.length === 0) return edits;
+  const liveSet = new Set(live);
+
+  const added = edits.added.flatMap((entry, index) => (liveSet.has(entry.id) ? [{ entry, index }] : []));
+  const addedIds = new Set(added.map((a) => a.entry.id));
+  const sampleIds = live.filter((id) => !addedIds.has(id));
+  const sample = { ...edits.sample };
+  for (const id of sampleIds) sample[id] = { ...sample[id], deleted: true };
+
+  return {
+    ...edits,
+    added: edits.added.filter((e) => !liveSet.has(e.id)),
+    sample,
+    undo: { kind: "meal", name: "Các món đã chọn", count: live.length, added, sampleIds },
+  };
+}
+
+/** Moves the chosen entries to another meal of the day. Ids that are unknown are skipped. */
+export function moveEntriesIn(edits: DiaryEdits, ids: readonly string[], slot: MealSlot, samples: SampleItemInfo[] = SAMPLE_ITEMS): DiaryEdits {
+  return ids.reduce((acc, id) => updateEntryIn(acc, id, { mealSlot: slot }, samples), edits);
+}
+
 /** Puts the last deleted entry back where it was. Does nothing once the undo is gone. */
 export function undoDeleteIn(edits: DiaryEdits): DiaryEdits {
   const undo = edits.undo;

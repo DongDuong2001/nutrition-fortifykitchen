@@ -286,6 +286,35 @@ def main():
             else:
                 print(f"[PASS] /foods/new recipe @ {vp['name']} [recipe-row] ({pairs} pairs)")
 
+        # cc-27a: select mode on Hôm nay (the action bar's rows, the target sheet's radios); real pairs
+        for vp in VIEWPORTS:
+            page.set_viewport_size({"width": vp["width"], "height": vp["height"]})
+            page.goto(f"{BASE_URL}/", wait_until="networkidle")
+            page.wait_for_timeout(500)
+            page.get_by_role("button", name="Tùy chọn ngày").click()
+            page.get_by_role("dialog").get_by_role("button", name="Chọn nhiều món").click()
+            page.wait_for_timeout(300)
+            page.locator("[role=checkbox]").first.click()
+            page.get_by_role("button", name="Chép sang", exact=True).click()
+            page.locator('[data-align-group="select-target"]:visible').nth(1).wait_for(timeout=5000)
+            for group, label in [("select-target", "target sheet radios")]:
+                res = check_align_groups(page, group)
+                pairs = res["pairs"].get(group, 0)
+                if res["errors"] or pairs < 1:
+                    print(f"[FAIL] / select @ {vp['name']} [{group}]: pairs {pairs} {res['errors']}")
+                    total_errors.extend(res["errors"] or [f"{group}: {pairs} pairs"])
+                else:
+                    print(f"[PASS] / select @ {vp['name']} [{group}] ({pairs} pairs)")
+            page.keyboard.press("Escape")
+            page.wait_for_timeout(200)
+            res = check_align_groups(page, "select-bar")
+            pairs = res["pairs"].get("select-bar", 0)
+            if res["errors"] or pairs < 1:
+                print(f"[FAIL] / select @ {vp['name']} [select-bar]: pairs {pairs} {res['errors']}")
+                total_errors.extend(res["errors"] or [f"select-bar: {pairs} pairs"])
+            else:
+                print(f"[PASS] / select @ {vp['name']} [select-bar] ({pairs} pairs)")
+
         browser.close()
 
     if total_errors:

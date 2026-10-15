@@ -99,7 +99,7 @@ def run(browser, size, tag):
     check(pg.locator("button[aria-label$=', thiếu dữ liệu vi chất']").count() >= 1, f"{tag} dot for a food with a missing micronutrient")
     check(pg.get_by_role("link", name=re.compile("Ngày tập")).get_attribute("href") == f"/training?date=2026-10-15", f"{tag} training link carries the date")
     check(pg.get_by_role("link", name=re.compile("Đủ 22 vi chất")).get_attribute("href") == "/micros?date=2026-10-15", f"{tag} micros link carries the date")
-    check(pg.get_by_role("link", name="Sửa món này").count() == 0 and pg.get_by_role("button", name=re.compile("^Tùy chọn")).count() == 0, f"{tag} no Sửa or ⋯ in day mode")
+    check(pg.get_by_role("link", name="Sửa món này").count() == 0 and pg.get_by_role("button", name=re.compile("^Tùy chọn Bữa")).count() == 0, f"{tag} no Sửa or meal ⋯ in day mode (cc-27a: the day has its own ⋯)")
     # today: two-tone bars
     kcal = fills(pg, "Kcal so với mục tiêu ngày")
     levels = {"rgb(229, 72, 77)", "rgb(232, 164, 0)", "rgb(31, 169, 113)"}

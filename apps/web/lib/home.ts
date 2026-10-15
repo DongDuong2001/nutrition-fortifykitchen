@@ -7,6 +7,8 @@ import type { MockDayData } from "./mock/sample-day";
 /** One food of the day as the home list shows it: its numbers, whichever way the day was built. */
 export interface HomeEntry {
   id: string;
+  /** The catalogue food behind the entry, when it has one (a copy keeps it). */
+  foodId?: string;
   name: string;
   /** The portion as typed or picked ("1 chén"), shown when there are no grams. */
   qty: string;
@@ -160,6 +162,7 @@ export function homeEntryFromAdded(e: AddedDiaryEntry): HomeEntry {
   const quick = e.kind === "quick";
   return {
     id: e.id,
+    foodId: e.foodId,
     name: e.foodName,
     qty: e.displayQty,
     grams: quick ? null : e.grams,
@@ -201,6 +204,7 @@ export function entriesFromDay(
       const grams = view?.grams ?? (spoken ? Number(spoken[1].replace(",", ".")) : null);
       return {
         id: item.id,
+        foodId: view?.food?.id,
         name: item.name,
         qty: item.qty,
         grams,

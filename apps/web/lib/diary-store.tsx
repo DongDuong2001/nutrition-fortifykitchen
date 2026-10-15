@@ -61,6 +61,8 @@ import {
   amountsOfNumbers,
   deleteEntryIn,
   deleteMealIn,
+  deleteEntriesIn,
+  moveEntriesIn,
   dismissUndoIn,
   entryNumbers,
   findEntry,
@@ -125,6 +127,10 @@ interface DiaryContextValue {
   deleteEntry: (id: string) => void;
   /** Removes every entry of a meal of today, with one undo toast (Hoàn tác puts the whole meal back). */
   deleteMeal: (slot: MealSlot) => void;
+  /** Removes the chosen entries of today with ONE undo toast (Hoàn tác puts them all back). */
+  deleteEntries: (ids: string[]) => void;
+  /** Moves the chosen entries of today to a meal of today. */
+  moveEntries: (ids: string[], slot: MealSlot) => void;
   /** Puts the last deleted entry back. Only works while the "deleted" toast is shown. */
   undoLastDelete: () => void;
   /** Adds copied entries to today in one step, with one undo toast. Existing entries are kept. */
@@ -688,6 +694,31 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     [edits, samples]
   );
 
+  const deleteEntries = useCallback(
+    (ids: string[]) => {
+      const count = ids.filter((id) => findEntry(edits, id, samples) !== null).length;
+      if (count === 0) return;
+      setEdits((prev) => deleteEntriesIn(prev, ids, samples));
+      setToast({ message: `Đã xóa ${count} món`, kind: "deleted", mealSlot: null, durationMs: UNDO_TOAST_MS });
+    },
+    [edits, samples]
+  );
+
+  const moveEntries = useCallback(
+    (ids: string[], slot: MealSlot) => {
+      const count = ids.filter((id) => findEntry(edits, id, samples) !== null).length;
+      if (count === 0) return;
+      setEdits((prev) => dismissUndoIn(moveEntriesIn(prev, ids, slot, samples)));
+      setToast({
+        message: `Đã chuyển ${count} món sang ${getMealSlotNameVi(slot)}`,
+        kind: "added",
+        mealSlot: slot,
+        durationMs: ADDED_TOAST_MS,
+      });
+    },
+    [edits, samples]
+  );
+
   const undoLastDelete = useCallback(() => {
     setEdits((prev) => undoDeleteIn(prev));
     setToast(null);
@@ -838,6 +869,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       updateEntry,
       deleteEntry,
       deleteMeal,
+      deleteEntries,
+      moveEntries,
       undoLastDelete,
       copyEntries,
       undoCopy,
@@ -874,6 +907,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       updateEntry,
       deleteEntry,
       deleteMeal,
+      deleteEntries,
+      moveEntries,
       undoLastDelete,
       copyEntries,
       undoCopy,
