@@ -57,3 +57,26 @@ export function getLevelColor(lvl: NutrientLevel, tone: SegmentTone = "light"): 
 export function getEmptySegmentColor(tone: SegmentTone = "light"): string {
   return tone === "dark" ? "var(--color-level-empty-dark)" : "var(--color-level-empty)";
 }
+
+/** Segments of a home bar: like calculateSegments, but any value above 0 lights at least one segment. */
+export function homeSegments(pct: number): number {
+  if (pct <= 0) return 0;
+  return Math.max(1, Math.min(10, Math.floor(pct / 10)));
+}
+
+export type HomeBarTone = NutrientLevel | "neutral";
+
+/**
+ * The home bars are two-tone while the day is still open: neutral under 100%, blue once reached.
+ * A finished day (before today) uses the four levels.
+ */
+export function homeBarTone(pct: number, finished: boolean): HomeBarTone {
+  if (finished) return getLevel(pct);
+  return pct >= 100 ? "dat" : "neutral";
+}
+
+/** The fill colour of a home bar; neutral is the secondary text colour (muted-on-dark on ink). */
+export function homeBarColor(tone: HomeBarTone, surface: SegmentTone = "light"): string {
+  if (tone === "neutral") return surface === "dark" ? "var(--color-muted-on-dark)" : "var(--color-secondary)";
+  return getLevelColor(tone, surface);
+}

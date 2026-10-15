@@ -1,0 +1,227 @@
+import { COUNTED_NUTRIENT_KEYS } from "./day-totals";
+import { SAMPLE_SLOT, entryNumbers, type AddedDiaryEntry, type EntryView } from "./diary-edits";
+import { formatAmount } from "./format";
+import { MEAL_SLOTS, type MealSlot } from "./meal-slot";
+import type { MockDayData } from "./mock/sample-day";
+
+/** One food of the day as the home list shows it: its numbers, whichever way the day was built. */
+export interface HomeEntry {
+  id: string;
+  name: string;
+  /** The portion as typed or picked ("1 chén"), shown when there are no grams. */
+  qty: string;
+  grams: number | null;
+  slot: MealSlot;
+  kcal: number;
+  protein: number | null;
+  carbs: number | null;
+  fat: number | null;
+  fiber: number | null;
+  nutrients: Record<string, number | null>;
+  /** A kcal-only entry (Chỉ ghi kcal). */
+  quick: boolean;
+}
+
+export interface HomeMeal {
+  slot: MealSlot;
+  /** The short header label: Sáng, Trưa, Bữa phụ, Tối. */
+  label: string;
+  /** Bữa sáng, Bữa trưa … */
+  fullName: string;
+  entries: HomeEntry[];
+  kcal: number;
+}
+
+export interface HomeValues {
+  kcal: number;
+  protein: number | null;
+  carbs: number | null;
+  fat: number | null;
+  fiber: number | null;
+  nutrients: Record<string, number | null>;
+}
+
+export type HomeMode = { kind: "day" } | { kind: "food"; id: string } | { kind: "meal"; slot: MealSlot };
+
+export const DAY_MODE: HomeMode = { kind: "day" };
+
+/** The nutrient column: groups and the catalogue ids each lists, in order. */
+export const HOME_NUTRIENT_GROUPS: { title: string; ids: string[] }[] = [
+  { title: "KHOÁNG CHẤT", ids: ["sodium", "potassium", "calcium", "magnesium", "iron", "zinc"] },
+  { title: "VITAMIN", ids: ["vitamin_a", "vitamin_c", "vitamin_d", "vitamin_e", "vitamin_k", "b6", "folate", "b12"] },
+];
+
+const SLOT_LABEL: Record<MealSlot, string> = {
+  breakfast: "Sáng",
+  lunch: "Trưa",
+  pre_workout: "Trước tập",
+  snack: "Bữa phụ",
+  dinner: "Tối",
+};
+
+const FIXED_SLOTS: MealSlot[] = ["breakfast", "lunch", "snack", "dinner"];
+
+const fullName = (slot: MealSlot) => MEAL_SLOTS.find((s) => s.id === slot)?.nameVi ?? SLOT_LABEL[slot];
+
+/**
+ * The meals of the list: Sáng, Trưa, Bữa phụ, Tối always; Trước tập (a slot the app still has) only when it
+ * holds a food, right after Trưa.
+ */
+export function groupMeals(entries: HomeEntry[]): HomeMeal[] {
+  const hasPre = entries.some((e) => e.slot === "pre_workout");
+  const slots: MealSlot[] = hasPre ? ["breakfast", "lunch", "pre_workout", "snack", "dinner"] : FIXED_SLOTS;
+  return slots.map((slot) => {
+    const own = entries.filter((e) => e.slot === slot);
+    return { slot, label: SLOT_LABEL[slot], fullName: fullName(slot), entries: own, kcal: own.reduce((s, e) => s + e.kcal, 0) };
+  });
+}
+
+/** Known values only: an unknown stays unknown (null) until some entry carries a number. Never 0. */
+function knownSum(values: (number | null | undefined)[]): number | null {
+  const known = values.filter((v): v is number => typeof v === "number");
+  return known.length === 0 ? null : known.reduce((a, b) => a + b, 0);
+}
+
+export function sumEntries(entries: HomeEntry[]): HomeValues {
+  const nutrients: Record<string, number | null> = {};
+  for (const key of COUNTED_NUTRIENT_KEYS) {
+    const total = knownSum(entries.map((e) => e.nutrients[key]));
+    nutrients[key] = total === null ? null : Math.round(total * 100) / 100;
+  }
+  const macro = (pick: (e: HomeEntry) => number | null) => {
+    const total = knownSum(entries.map(pick));
+    return total === null ? null : Math.round(total * 10) / 10;
+  };
+  return {
+    kcal: entries.reduce((s, e) => s + e.kcal, 0),
+    protein: macro((e) => e.protein),
+    carbs: macro((e) => e.carbs),
+    fat: macro((e) => e.fat),
+    fiber: macro((e) => e.fiber),
+    nutrients,
+  };
+}
+
+/** True when any of the 22 counted micronutrients has no value for this food. */
+export function missingMicros(entry: HomeEntry): boolean {
+  return COUNTED_NUTRIENT_KEYS.some((key) => typeof entry.nutrients[key] !== "number");
+}
+
+/** Tap a food: it shows alone; tap it again and the day is back. A meal gives way to the food. */
+export function toggleFood(mode: HomeMode, id: string): HomeMode {
+  return mode.kind === "food" && mode.id === id ? DAY_MODE : { kind: "food", id };
+}
+
+export function toggleMeal(mode: HomeMode, slot: MealSlot): HomeMode {
+  return mode.kind === "meal" && mode.slot === slot ? DAY_MODE : { kind: "meal", slot };
+}
+
+/** The entries whose sum the hero and the nutrient column show. */
+export function modeEntries(mode: HomeMode, entries: HomeEntry[]): HomeEntry[] {
+  if (mode.kind === "food") return entries.filter((e) => e.id === mode.id);
+  if (mode.kind === "meal") return entries.filter((e) => e.slot === mode.slot);
+  return entries;
+}
+
+/** First line of the hero card: "CẢ NGÀY · 16 MÓN", "CÁ HỒI NƯỚNG · 120 G", "BỮA TRƯA · 3 MÓN". */
+export function heroLabel(mode: HomeMode, entries: HomeEntry[], meals: HomeMeal[]): string {
+  if (mode.kind === "food") {
+    const e = entries.find((x) => x.id === mode.id);
+    if (!e) return `CẢ NGÀY · ${entries.length} MÓN`;
+    const name = e.name.toLocaleUpperCase("vi-VN");
+    return e.grams === null ? name : `${name} · ${formatAmount(e.grams, "g")} G`;
+  }
+  if (mode.kind === "meal") {
+    const meal = meals.find((m) => m.slot === mode.slot);
+    return `${(meal?.fullName ?? "").toLocaleUpperCase("vi-VN")} · ${meal?.entries.length ?? 0} MÓN`;
+  }
+  return `CẢ NGÀY · ${entries.length} MÓN`;
+}
+
+/** Percent of a target, rounded; null when the value or the target is unknown. */
+export function pctOf(value: number | null, target: number | null): number | null {
+  if (value === null || target === null || target <= 0) return null;
+  return Math.round((value / target) * 100);
+}
+
+export function homeEntryFromAdded(e: AddedDiaryEntry): HomeEntry {
+  const quick = e.kind === "quick";
+  return {
+    id: e.id,
+    name: e.foodName,
+    qty: e.displayQty,
+    grams: quick ? null : e.grams,
+    slot: e.mealSlot,
+    kcal: e.calories,
+    protein: e.protein,
+    carbs: e.carbs,
+    fat: e.fat,
+    fiber: e.fiber,
+    nutrients: e.nutrients,
+    quick,
+  };
+}
+
+export function entriesFromAdded(entries: AddedDiaryEntry[]): HomeEntry[] {
+  return entries.map(homeEntryFromAdded);
+}
+
+const SPOKEN_GRAMS = /^(\d+(?:[.,]\d+)?)\s*g$/;
+
+/**
+ * Today's entries from the diary store's day (its meal items, with the user's edits applied).
+ * Numbers come from the food and grams of `getEntry`, or from the added quick entry; an item the catalogue
+ * does not know keeps its macros and has no micronutrient values.
+ */
+export function entriesFromDay(
+  day: MockDayData,
+  getEntry: (id: string) => EntryView | null,
+  added: AddedDiaryEntry[]
+): HomeEntry[] {
+  return day.meals.flatMap((meal) =>
+    meal.items.map((item): HomeEntry => {
+      const slot = SAMPLE_SLOT[meal.slot];
+      const addedEntry = added.find((a) => a.id === item.id);
+      if (addedEntry) return { ...homeEntryFromAdded(addedEntry), name: item.name, qty: item.qty, kcal: item.kcal, slot };
+      const view = getEntry(item.id);
+      const numbers = view?.food && view.grams !== null ? entryNumbers(view.food, view.grams) : null;
+      const spoken = SPOKEN_GRAMS.exec(item.qty);
+      const grams = view?.grams ?? (spoken ? Number(spoken[1].replace(",", ".")) : null);
+      return {
+        id: item.id,
+        name: item.name,
+        qty: item.qty,
+        grams,
+        slot: view?.mealSlot ?? slot,
+        kcal: item.kcal,
+        protein: numbers ? numbers.protein : item.macros?.protein ?? null,
+        carbs: numbers ? numbers.carbs : item.macros?.carbs ?? null,
+        fat: numbers ? numbers.fat : item.macros?.fat ?? null,
+        fiber: numbers ? numbers.fiber : null,
+        nutrients: numbers ? numbers.nutrients : {},
+        quick: false,
+      };
+    })
+  );
+}
+
+/** The day as the store holds it (today with the user's edits, or a past day), in the same shape as a sum of entries. */
+export function valuesFromDay(day: MockDayData): HomeValues {
+  const macro = (key: string) => day.macros.find((m) => m.key === key)?.consumed ?? null;
+  const nutrients: Record<string, number | null> = {};
+  for (const stat of [...day.minerals, ...day.vitamins]) nutrients[stat.key] = stat.consumed;
+  return {
+    kcal: day.calories.consumed,
+    protein: macro("protein"),
+    carbs: macro("carbs"),
+    fat: macro("fat"),
+    fiber: macro("fiber"),
+    nutrients,
+  };
+}
+
+/** The daily target (low end) of a macro or a counted nutrient; null when the profile gives none. */
+export function targetOf(day: MockDayData, key: string): number | null {
+  const stat = [...day.macros, ...day.minerals, ...day.vitamins].find((s) => s.key === key);
+  return stat?.targetMin ?? null;
+}

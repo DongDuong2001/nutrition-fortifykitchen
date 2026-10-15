@@ -5,6 +5,8 @@ import {
   getLevelLabel,
   getLevelColor,
   getEmptySegmentColor,
+  homeSegments,
+  homeBarTone,
   type NutrientLevel,
 } from "../levels";
 
@@ -80,6 +82,35 @@ describe("lib/levels", () => {
     it("returns correct empty segment token for tone", () => {
       expect(getEmptySegmentColor("light")).toBe("var(--color-level-empty)");
       expect(getEmptySegmentColor("dark")).toBe("var(--color-level-empty-dark)");
+    });
+  });
+  describe("homeSegments", () => {
+    it("is floor(pct/10) capped at 10, but 1 when 0 < pct < 10", () => {
+      expect(homeSegments(0)).toBe(0);
+      expect(homeSegments(-5)).toBe(0);
+      expect(homeSegments(0.4)).toBe(1);
+      expect(homeSegments(9)).toBe(1);
+      expect(homeSegments(10)).toBe(1);
+      expect(homeSegments(47)).toBe(4);
+      expect(homeSegments(99)).toBe(9);
+      expect(homeSegments(100)).toBe(10);
+      expect(homeSegments(250)).toBe(10);
+    });
+  });
+
+  describe("homeBarTone", () => {
+    it("today: neutral under 100, blue from 100", () => {
+      expect(homeBarTone(0, false)).toBe("neutral");
+      expect(homeBarTone(60, false)).toBe("neutral");
+      expect(homeBarTone(99, false)).toBe("neutral");
+      expect(homeBarTone(100, false)).toBe("dat");
+      expect(homeBarTone(180, false)).toBe("dat");
+    });
+    it("a finished day uses the four levels", () => {
+      expect(homeBarTone(30, true)).toBe("thieu");
+      expect(homeBarTone(60, true)).toBe("trungbinh");
+      expect(homeBarTone(90, true)).toBe("ganDu");
+      expect(homeBarTone(100, true)).toBe("dat");
     });
   });
 });
