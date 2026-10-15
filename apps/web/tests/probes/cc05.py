@@ -4,6 +4,7 @@ undo gone after reload with edits kept, unknown id, and the entry rows share edg
 Run with: ALIGN_BASE_URL=http://localhost:3101 PATH=/usr/bin:$PATH npm run probe -- tests/probes/cc05.py
 """
 import os
+import re
 import sys
 
 from playwright.sync_api import sync_playwright
@@ -32,9 +33,12 @@ def shown(pg, selector):
     return pg.locator(selector + " >> visible=true").count() > 0
 
 
+MEAL_NAME = {"breakfast": "Bữa sáng", "lunch": "Bữa trưa", "snack": "Bữa phụ", "dinner": "Bữa tối"}
+
+
 def meal_text(pg, slot):
-    # Today marks each meal with id meal-<slot> (phone) or desktop-meal-<slot> (desktop)
-    return pg.locator(f'[id$="meal-{slot}"] >> visible=true').first.inner_text()
+    # Hôm nay: one section per meal, a header with the kcal and one row per food ("Yến mạch 90 g")
+    return re.sub(r"\s+", " ", pg.locator(f"section[aria-label='{MEAL_NAME[slot]}'] >> visible=true").first.inner_text())
 
 
 def button(pg, label):
@@ -87,7 +91,7 @@ def run():
             button(pg, "Lưu thay đổi").click()
             pg.wait_for_url(re.compile(r".*/(\?.*)?$"))
             pg.wait_for_timeout(300)
-            check("Yến mạch · 90 g" in meal_text(pg, "breakfast"), f"{name}: Yến mạch shows 90 g on Today")
+            check("Yến mạch 90 g" in meal_text(pg, "breakfast"), f"{name}: Yến mạch shows 90 g on Today")
             check("573 kcal" in meal_text(pg, "breakfast"), f"{name}: breakfast total updates to 573 kcal")
             check("1.155" in pg.inner_text("body"), f"{name}: day total updates to 1.155 kcal")
 
@@ -98,7 +102,7 @@ def run():
             button(pg, "Lưu thay đổi").click()
             pg.wait_for_url(re.compile(r".*/(\?.*)?$"))
             pg.wait_for_timeout(300)
-            check("Yến mạch · 90 g" in meal_text(pg, "dinner"), f"{name}: moved entry shows under Bữa tối")
+            check("Yến mạch 90 g" in meal_text(pg, "dinner"), f"{name}: moved entry shows under Bữa tối")
             check("Yến mạch" not in meal_text(pg, "breakfast"), f"{name}: moved entry leaves Bữa sáng")
             check("231 kcal" in meal_text(pg, "breakfast"), f"{name}: Bữa sáng drops to 231 kcal")
             check("1.155" in pg.inner_text("body"), f"{name}: moving keeps the day total at 1.155")
@@ -116,7 +120,7 @@ def run():
             button(pg, "Hoàn tác").click()
             pg.wait_for_timeout(300)
             breakfast = meal_text(pg, "breakfast")
-            check("Yogurt kefir · 200 ml" in breakfast, f"{name}: Hoàn tác restores Yogurt kefir")
+            check("Yogurt kefir 200 g" in breakfast, f"{name}: Hoàn tác restores Yogurt kefir")
             check(breakfast.index("Yogurt kefir") < breakfast.index("Chuối"), f"{name}: restored item is back in its place")
             check(pg.locator('[role=status] >> visible=true').filter(has_text="Đã xóa").count() == 0,
                   f"{name}: toast goes after Hoàn tác")
@@ -129,8 +133,8 @@ def run():
             pg.reload(wait_until="networkidle")
             pg.wait_for_timeout(300)
             check("Chuối" not in meal_text(pg, "breakfast"), f"{name}: deleted Chuối stays gone after reload")
-            check("Yến mạch · 90 g" in meal_text(pg, "dinner"), f"{name}: moved edit survives reload")
-            check("Yogurt kefir · 200 ml" in meal_text(pg, "breakfast"), f"{name}: restored item survives reload")
+            check("Yến mạch 90 g" in meal_text(pg, "dinner"), f"{name}: moved edit survives reload")
+            check("Yogurt kefir 200 g" in meal_text(pg, "breakfast"), f"{name}: restored item survives reload")
 
             if errors:
                 problems.append(f"{name}: console errors: {errors[:3]}")

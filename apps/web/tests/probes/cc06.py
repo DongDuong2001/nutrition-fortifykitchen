@@ -1,7 +1,8 @@
-"""cc-06: Today rows open Edit entry, one toast with Hoàn tác, no Next dev Issue badge, Micros header stays put.
+"""cc-06: Hôm nay: a food row then Sửa opens Edit entry, one toast with Hoàn tác, no Next dev Issue badge, Micros header stays put.
 Run with: ALIGN_BASE_URL=http://localhost:3101 PATH=/usr/bin:$PATH npm run probe -- tests/probes/cc06.py
 """
 import os
+import re
 import sys
 
 from playwright.sync_api import sync_playwright
@@ -22,8 +23,19 @@ def check(cond, msg):
         problems.append(msg)
 
 
+MEAL_NAME = {"breakfast": "Bữa sáng", "lunch": "Bữa trưa", "snack": "Bữa phụ", "dinner": "Bữa tối"}
+
+
 def meal_text(pg, slot):
-    return pg.locator(f'[id$="meal-{slot}"] >> visible=true').first.inner_text()
+    return re.sub(r"\s+", " ", pg.locator(f"section[aria-label='{MEAL_NAME[slot]}'] >> visible=true").first.inner_text())
+
+
+def edit_food(pg, label_start, entry_id):
+    """Hôm nay: tap the food row (food mode), then the Sửa pill opens /entry/<id>."""
+    pg.locator(f'button[aria-label^="{label_start},"] >> visible=true').first.click()
+    pg.wait_for_timeout(200)
+    pg.locator('a[aria-label="Sửa món này"] >> visible=true').first.click()
+    pg.wait_for_url(f"**/entry/{entry_id}")
 
 
 def button(pg, label):
@@ -67,11 +79,7 @@ def run():
                 pg.screenshot(path=os.path.join(SHOTS, "cc06-today-390.png"), animations="disabled")
             else:
                 pg.screenshot(path=os.path.join(SHOTS, "cc06-today-1440.png"), animations="disabled")
-            row = pg.locator('a[href="/entry/item-1"] >> visible=true').first
-            box = row.bounding_box()
-            check(box is not None and box["height"] >= 44, f"{name}: Yến mạch row is at least 44 px ({box and box['height']})")
-            row.click()
-            pg.wait_for_url("**/entry/item-1")
+            edit_food(pg, "Yến mạch", "item-1")
             pg.wait_for_timeout(300)
             if name == "390":
                 pg.screenshot(path=os.path.join(SHOTS, "cc06-entry-chips-390.png"), animations="disabled")
@@ -80,13 +88,12 @@ def run():
             button(pg, "Lưu thay đổi").click()
             pg.wait_for_url(re.compile(r".*/(\?.*)?$"))
             pg.wait_for_timeout(400)
-            check("Yến mạch · 90 g" in meal_text(pg, "breakfast"), f"{name}: row shows 90 g")
+            check("Yến mạch 90 g" in meal_text(pg, "breakfast"), f"{name}: row shows 90 g")
             check("573 kcal" in meal_text(pg, "breakfast"), f"{name}: breakfast 573 kcal")
             check("1.155" in pg.inner_text("body"), f"{name}: day total 1.155")
 
             # 3. delete: exactly one toast, Hoàn tác restores
-            pg.locator('a[href="/entry/item-2"] >> visible=true').first.click()
-            pg.wait_for_url("**/entry/item-2")
+            edit_food(pg, "Yogurt kefir", "item-2")
             button(pg, "Xóa món này").click()
             pg.wait_for_url(re.compile(r".*/(\?.*)?$"))
             pg.wait_for_timeout(300)
@@ -95,7 +102,7 @@ def run():
             check("Yogurt kefir" not in meal_text(pg, "breakfast"), f"{name}: deleted row gone")
             button(pg, "Hoàn tác").click()
             pg.wait_for_timeout(300)
-            check("Yogurt kefir · 200 ml" in meal_text(pg, "breakfast"), f"{name}: Hoàn tác restores")
+            check("Yogurt kefir 200 g" in meal_text(pg, "breakfast"), f"{name}: Hoàn tác restores")
             check(pg.locator('[role=status] >> visible=true').count() == 0, f"{name}: toast gone after Hoàn tác")
 
             # 4. Micros: header and chip bar stay put while the body scrolls (phone)

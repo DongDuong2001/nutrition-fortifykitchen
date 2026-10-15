@@ -1,7 +1,7 @@
-"""cc2-11: Nhật ký fixes + Khám phá v1, at 390 and 1280.
+"""cc2-11: Hôm nay copy-yesterday + Khám phá v1, at 390 and 1280.
 
-- Nhật ký: the per-meal + is a quiet bordered icon button (no filled disc); "Chép hôm qua" at day level shows
-  only when the day is empty
+- Hôm nay: "Chép hôm qua" at day level shows only when the day is empty (cc2-32: the per-meal + button check went
+  with the diary screen)
 - Khám phá: search, the 10 category chips, Gần đây, Yêu thích, Món của tôi (empty + "Tạo món mới")
 - /explore/[category], /explore/rich/[nutrient] (all 8, per 100 g and per portion, unknown excluded)
 - /foods/[id]: portion chips, Nguồn tốt của, 22 nutrients, unknown "—" with the count, favourite toggle,
@@ -9,6 +9,7 @@
 Screenshots: .screenshots/cc2-11-*.png
 Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/cc2_11.py
 """
+import json
 import os
 import re
 import sys
@@ -22,6 +23,7 @@ BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3102")
 SHOTS = Path(__file__).resolve().parent.parent.parent / ".screenshots"
 SIZES = [("390", {"width": 390, "height": 844}), ("1280", {"width": 1280, "height": 800})]
 NOW = "2026-10-12T18:00:00+07:00"
+SAMPLE_EDITS_EMPTY = {f"item-{i}": {"deleted": True} for i in range(1, 13)}
 RICH = ["calcium", "iron", "potassium", "magnesium", "protein", "fiber", "vitamin_d", "vitamin_c"]
 CATEGORIES = [
     "Tinh bột", "Đạm", "Chất béo & hạt", "Sữa & chế phẩm", "Rau củ",
@@ -64,20 +66,18 @@ def shot(pg, name, size_name):
     pg.screenshot(path=str(SHOTS / f"cc2-11-{name}-{size_name}.png"), full_page=True, animations="disabled")
 
 
-def check_diary(browser, size_name, size):
+def check_home(browser, size_name, size):
+    """Hôm nay: Chép hôm qua only shows when the day is empty and yesterday has entries (the sample day deleted)."""
     ctx, pg = new_page(browser, size)
     go(pg, "/")
-    body = text(pg)
-    check("Chép hôm qua" not in body, f"{size_name} diary: no day-level Chép hôm qua when the day has entries")
-    add = pg.locator("a[id^='mobile-add-'] >> visible=true").first
-    bg = add.evaluate("e => getComputedStyle(e).backgroundColor")
-    border = add.evaluate("e => getComputedStyle(e).borderTopWidth")
-    box = add.bounding_box()
-    check(bg in ("rgba(0, 0, 0, 0)", "transparent"), f"{size_name} diary: the meal + has no filled disc ({bg})")
-    check(border == "0px" and "Thêm" in add.inner_text(), f"{size_name} diary: the meal + is a quiet text button, no circle ({border})")
-    check(box and box["width"] >= 44 and box["height"] >= 44, f"{size_name} diary: the meal + is 44 px")
-    go(pg, "/?empty=1")
-    check("Chép hôm qua" in text(pg), f"{size_name} diary: an empty day offers Chép hôm qua")
+    check("Chép hôm qua" not in text(pg), f"{size_name} home: no day-level Chép hôm qua when the day has entries")
+    ctx.close()
+    ctx, pg = new_page(browser, size)
+    pg.add_init_script(f"try {{ localStorage.setItem('h1t_sample_edits_v1_demo', {json.dumps(json.dumps(SAMPLE_EDITS_EMPTY))}); }} catch (e) {{}}")
+    go(pg, "/")
+    check("Chép hôm qua" in text(pg), f"{size_name} home: an empty day offers Chép hôm qua")
+    add = pg.locator("a[aria-label^='Thêm vào'] >> visible=true")
+    check(add.count() == 4, f"{size_name} home: an empty day has one Thêm vào link per meal ({add.count()})")
     ctx.close()
 
 
@@ -90,8 +90,10 @@ def check_explore(browser, size_name, size):
         check(label in body, f"{size_name} explore: shows {label}")
     mine = pg.locator("section[aria-labelledby=explore-mine]").inner_text()
     check("Bột củ dền" in mine or "Chưa có món nào. Tạo món mới" in mine, f"{size_name} explore: Món của tôi lists own foods or shows its empty state")
-    chips = pg.locator("[role=group][aria-label='Lọc món theo nhóm'] button >> visible=true")
-    check(chips.count() == 12, f"{size_name} explore: Tất cả + 11 category chips, Đồ uống included ({chips.count()})")
+    chip_names = [t.strip() for t in pg.locator("[role=group][aria-label='Lọc món theo nhóm'] button >> visible=true").all_inner_texts()]
+    # Huấn luyện viên and Bảng xếp hạng are Dong's chips (task-04); the food categories are the rest
+    category_chips = [t for t in chip_names if t not in ("Huấn luyện viên", "Bảng xếp hạng")]
+    check(len(category_chips) == 12, f"{size_name} explore: Tất cả + 11 category chips, Đồ uống included ({len(category_chips)})")
     shot(pg, "explore", size_name)
     no_h_scroll(pg, f"{size_name} explore")
 
@@ -187,7 +189,7 @@ def main():
     with sync_playwright() as p:
         browser = p.chromium.launch()
         for size_name, size in SIZES:
-            check_diary(browser, size_name, size)
+            check_home(browser, size_name, size)
             check_explore(browser, size_name, size)
             check_rich(browser, size_name, size)
             check_food(browser, size_name, size)

@@ -1,6 +1,6 @@
 """cc2-19b: the two journeys cc2-19 did not walk, at 390 and 1280.
 
-- (f) Diary › ⋯ on a meal › Lưu thành Bữa ăn của tôi: the name field opens with the default name selected, so a typed name replaces it; the saved meal appears in Khám phá › Bữa ăn của tôi with its foods, and one tap adds it to the current meal.
+- (f) Hôm nay › a meal header › ⋯ › Lưu thành Bữa ăn của tôi: the name field opens with the default name selected, so a typed name replaces it; the saved meal appears in Khám phá › Bữa ăn của tôi with its foods, and one tap adds it to the current meal.
 - (g) Hồ sơ › Cân nặng: the kcal and protein ranges change as the weight changes (before Lưu), and the new ranges are the ones Mục tiêu shows after saving.
 Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/cc2_19b.py
 """
@@ -64,7 +64,9 @@ def run(browser, size_name, size):
     # (f): save a meal, reuse it
     go("/")
     w = f"{size_name} Lưu bữa"
-    pg.locator("#meal-menu-breakfast").click()
+    pg.locator("button[aria-label='Xem riêng bữa sáng']:visible").first.click()
+    pg.wait_for_timeout(200)
+    pg.locator("button[aria-label='Tùy chọn Bữa sáng']:visible").first.click()
     pg.wait_for_timeout(300)
     pg.get_by_role("button", name=re.compile("Lưu thành Bữa ăn của tôi")).click()
     pg.wait_for_timeout(200)
@@ -110,7 +112,7 @@ def fresh(browser, size_name, size):
     pg.clock.set_fixed_time(NOW)
     pg.goto(BASE + "/", wait_until="networkidle")
     w = f"{size_name} Tài khoản mới"
-    check(pg.url.endswith("/signin"), f"{w}: signed-out /diary goes to /signin")
+    check(pg.url.endswith("/signin"), f"{w}: signed-out / goes to /signin")
     pg.goto(BASE + "/setup/profile", wait_until="networkidle")
     pg.wait_for_timeout(300)
     check(pg.locator("#setup-weight").count() == 1, f"{w}: setup profile step has the weight field")

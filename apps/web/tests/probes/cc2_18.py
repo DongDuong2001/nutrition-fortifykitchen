@@ -1,9 +1,8 @@
 """cc2-18: polish and voice pass, at 390 and 1280.
 
 - Voice: the verified copy from docs/voice-audit.md is on screen ("Thêm bữa đầu tiên" on /signup, the new app title,
-  "Chất béo" in the Nhật ký meta lines, percents with no space, "Chưa có dữ liệu"); no "Béo" label and no "số liệu"
+  "Chất béo" on Hôm nay, percents with no space, "Chưa có dữ liệu"); no "Béo" label and no "số liệu"
   on the screens this pass touched; no old meal-list name anywhere in the app source
-- Nhật ký: the Ngày tập tile has the same slanted bar as the Vi chất tile (both weigh the same)
 - Add sheet: each shortcut card is about 88 px tall with a 44 px add button in its corner; the add is labelled
   "Thêm <món> <khẩu phần>" for screen readers; no horizontal scroll
 
@@ -93,19 +92,13 @@ def voice(browser, size_name, size):
         check("Theo dõi đủ 22 vi chất, không chỉ kcal" in body, f"{w}: sign-up value line")
     ctx.close()
 
-    ctx, pg = new_page(browser, size, "/diary")
+    ctx, pg = new_page(browser, size, "/")
     body = squash(pg.inner_text("body"))
-    check(re.search(r"·\s*Béo\b", body) is None, f"{w}: no 'Béo' macro label on Nhật ký")
-    check("Chất béo" in body, f"{w}: Nhật ký meta says Chất béo")
+    check(re.search(r"·\s*Béo\b", body) is None, f"{w}: no 'Béo' macro label on Hôm nay")
+    check("Chất béo" in body, f"{w}: Hôm nay says Chất béo")
     check(not re.search(r"\d \%", body), f"{w}: percents have no space before %")
-    check(pg.locator("[aria-label^='Ngày tập:']").count() == 1, f"{w}: the Ngày tập tile has its bar")
-    tiles = pg.locator("section[aria-label='Chi tiết trong ngày'] a")
-    check(tiles.count() == 2, f"{w}: two day tiles ({tiles.count()})")
-    if tiles.count() == 2:
-        hs = [tiles.nth(i).bounding_box()["height"] for i in range(2)]
-        check(abs(hs[0] - hs[1]) < 2, f"{w}: both tiles are the same height ({hs})")
-    no_h_scroll(pg, w + " Nhật ký")
-    shot(pg, "diary", size_name)
+    no_h_scroll(pg, w + " Hôm nay")
+    shot(pg, "home", size_name)
     ctx.close()
 
     ctx, pg = new_page(browser, size, "/add")

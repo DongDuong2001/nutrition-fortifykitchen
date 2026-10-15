@@ -1,4 +1,4 @@
-"""cc-10: Today flows. Copy yesterday (copies, totals rise, undo restores). Past days (‹ goes to yesterday,
+"""cc-10: Hôm nay flows. Copy yesterday (copies, totals rise, undo restores). Past days (‹ goes to yesterday,
 › comes back, › is off on today, a past day shows its own data). The day picker (5 days ago, no future days).
 Hồ sơ birth year as a row that opens the field (1899 shows the error, 1990 saves). No hydration errors on any date.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc10.py
@@ -10,6 +10,7 @@ import sys
 
 from playwright.sync_api import sync_playwright
 import _demo  # noqa: F401  (cc2-15b: demo mode on, see _demo.py)
+from _home import hero_kcal, is_past, wait_home
 
 BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3100")
 SHOTS = os.path.join(os.path.dirname(__file__), "..", "..", ".screenshots")
@@ -51,15 +52,13 @@ def visible_count(pg, selector):
 
 
 def energy(pg):
-    # The dial's label reads "Năng lượng 1.041 trên mục tiêu …"
-    label = vis(pg, '[aria-label^="Năng lượng"]').get_attribute("aria-label")
-    return label.split(" trên")[0].replace("Năng lượng ", "")
+    # The eaten kcal in the Hôm nay hero card
+    return hero_kcal(pg)
 
 
 def open_day(pg, query=""):
     pg.goto(BASE + "/" + query, wait_until="networkidle")
-    vis(pg, '[aria-label^="Năng lượng"]').wait_for(state="visible", timeout=8000)
-    pg.wait_for_timeout(200)
+    wait_home(pg)
 
 
 def run_phone(browser):
@@ -72,7 +71,7 @@ def run_phone(browser):
     vis(pg, 'button[aria-label="Ngày trước"]').click()
     pg.wait_for_url(f"**date={iso(YESTERDAY)}")
     pg.wait_for_timeout(300)
-    check(visible_count(pg, 'text=Đang xem ngày cũ') == 1, "390 ‹ opens a past day with the banner")
+    check(is_past(pg), "390 ‹ opens a past day (› is enabled)")
     check(energy(pg) == "1.532", f"390 yesterday shows its own 1.532 kcal (got {energy(pg)})")
     check(visible_count(pg, 'button:has-text("Chép hôm qua")') == 0, "390 past day hides Chép hôm qua")
     check(visible_count(pg, f'text=Hôm qua {YESTERDAY.day:02d}/{YESTERDAY.month:02d}') == 1,
@@ -100,13 +99,11 @@ def run_phone(browser):
     pg.wait_for_selector('[role="dialog"]', state="detached")
     pg.wait_for_url(f"**date={iso(EMPTY_DAY)}")
     pg.wait_for_timeout(300)
-    check(visible_count(pg, 'text=Đang xem ngày cũ') == 1, "390 calendar: a day with no entries opens the past view")
+    check(is_past(pg), "390 calendar: a day with no entries opens the past view")
     check(energy(pg) == "0", f"390 a past day with nothing logged reads 0 kcal (got {energy(pg)})")
-    check(visible_count(pg, 'text=Chưa ghi') > 0, "390 a past day with nothing logged shows Chưa ghi")
+    check(visible_count(pg, 'text=Chưa ăn') > 0, "390 a past day with nothing logged shows Chưa ăn")
+    check(visible_count(pg, 'text=Chưa có món nào ngày này') == 1, "390 a past day with nothing logged says so")
     pg.screenshot(path=shot("cc10-past-empty-390.png"), animations="disabled")
-    vis(pg, 'a:has-text("Về hôm nay")').click()
-    pg.wait_for_timeout(300)
-    check("date=" not in pg.url, "390 Về hôm nay returns to today")
 
     # Hồ sơ: Năm sinh is a row; tapping it opens the field
     pg.goto(BASE + "/settings/profile", wait_until="networkidle")
@@ -140,7 +137,8 @@ def run_desktop(browser):
     vis(pg, 'button[aria-label="Ngày trước"]').click()
     pg.wait_for_url(f"**date={iso(YESTERDAY)}")
     pg.wait_for_timeout(300)
-    check(visible_count(pg, 'text=Đang xem ngày cũ') == 1, "1440 ‹ opens yesterday with the banner")
+    check(is_past(pg), "1440 ‹ opens yesterday (› is enabled)")
+    check(visible_count(pg, 'text=Chỉ xem') >= 1, "1440 a past day says Chỉ xem")
     check(visible_count(pg, 'button:has-text("Chép hôm qua")') == 0, "1440 past day hides Chép hôm qua")
     check(visible_count(pg, 'button:has-text("Thêm món")') == 0, "1440 past day hides Thêm món")
     ctx.close()
@@ -172,7 +170,7 @@ def run_hydration(browser):
     ctx = browser.new_context(viewport=PHONE)
     pg = ctx.new_page()
     open_day(pg, f"?date={iso(FUTURE)}")
-    check(visible_count(pg, 'text=Đang xem ngày cũ') == 0, "390 future ?date= shows today (no banner)")
+    check(not is_past(pg), "390 future ?date= shows today (› is off)")
     ctx.close()
 
 

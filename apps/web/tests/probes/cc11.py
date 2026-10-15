@@ -11,6 +11,7 @@ import sys
 
 from playwright.sync_api import sync_playwright
 import _demo  # noqa: F401  (cc2-15b: demo mode on, see _demo.py)
+from _home import is_past, wait_home
 
 BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3100")
 SHOTS = os.path.join(os.path.dirname(__file__), "..", "..", ".screenshots")
@@ -44,16 +45,17 @@ def visible_count(pg, selector):
     return pg.locator(selector + " >> visible=true").count()
 
 
-def lacking(pg):
-    # Only visible text is in innerText, so this reads the phone's Today card
-    match = re.search(r"vi chất\s+Thiếu: ([^\n]+)", pg.inner_text("body"))
+def lacking(pg, query=""):
+    # "Thiếu nhiều nhất" is the Vi chất header (Hôm nay itself shows percentages, not the list)
+    pg.goto(BASE + "/micros" + query, wait_until="networkidle")
+    pg.wait_for_timeout(500)
+    match = re.search(r"Thiếu nhiều nhất\s+([^\n]+)", pg.inner_text("body"))
     return match.group(1).strip() if match else None
 
 
 def open_today(pg, query=""):
     pg.goto(BASE + "/" + query, wait_until="networkidle")
-    vis(pg, '[aria-label^="Năng lượng"]').wait_for(state="visible", timeout=8000)
-    pg.wait_for_timeout(200)
+    wait_home(pg)
 
 
 def log_tofu_today(pg):
@@ -91,9 +93,10 @@ def run_phone(browser):
     check(visible_count(pg, 'text="+ Thêm"') == 0, "390 past day: no + Thêm")
     check(visible_count(pg, 'text="+ Thêm món"') == 0, "390 past day: no + Thêm món")
     check(visible_count(pg, 'button:has-text("Chép hôm qua")') == 0, "390 past day: no Chép hôm qua")
-    check(visible_count(pg, 'text=Đang xem ngày cũ') == 1, "390 past day: banner says Đang xem ngày cũ")
+    check(visible_count(pg, 'a[aria-label^="Thêm vào"]') == 0, "390 past day: no Thêm vào link on a meal")
+    check(is_past(pg), "390 past day: › is enabled")
     pg.screenshot(path=shot("cc11-past-locked-390.png"), animations="disabled")
-    lacking_past = lacking(pg)
+    lacking_past = lacking(pg, f"?date={iso(YESTERDAY)}")
     check(lacking_past is not None and len(lacking_past.split(", ")) == 2,
           f"390 past day: lacking list shows two nutrients ({lacking_past})")
 
@@ -124,7 +127,7 @@ def run_desktop(browser):
     pg.wait_for_selector('[role="dialog"]', state="detached")
     pg.wait_for_url(f"**date={iso(YESTERDAY)}")
     pg.wait_for_timeout(300)
-    check(visible_count(pg, 'text=Đang xem ngày cũ') == 1, "1440 picking yesterday from the subtitle opens the past view")
+    check(is_past(pg), "1440 picking yesterday from the subtitle opens the past view")
     ctx.close()
 
 

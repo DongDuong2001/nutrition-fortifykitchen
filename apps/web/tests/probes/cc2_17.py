@@ -1,6 +1,6 @@
 """cc2-17: Esc closes every sheet and returns focus to the control that opened it; no horizontal scroll.
 
-Covers the Sheet component (components/ui/sheet.tsx) and the two overlays on /diary and /add that are not Sheet:
+Covers the Sheet component (components/ui/sheet.tsx) and the two overlays on / (Hôm nay) and /add that are not Sheet:
 the /add screen itself closes on Esc unless a sheet is open (Esc there closes only the sheet, first).
 Also reads the diary provider's memoised value (P-01): a toast opens and closes without breaking the day view.
 Screenshots: .screenshots/cc2-17-*.png
@@ -58,16 +58,20 @@ def esc_returns_focus(pg, opener, where, dialog_sel='[role="dialog"][aria-modal=
 
 def diary(browser, size_name, size):
     ctx, pg = new_page(browser, size, "/")
-    w = f"{size_name} /diary"
+    w = f"{size_name} home"
     no_h_scroll(pg, w)
-    if pg.locator('button[id^="meal-menu-"]:visible').count() == 0:
+    # The meal menu (⋯) shows in meal mode: tap a meal header first
+    pg.locator("button[aria-label^='Xem riêng']:visible").first.click()
+    pg.wait_for_timeout(250)
+    menu = pg.locator("button[aria-label^='Tùy chọn']:visible")
+    if menu.count() == 0:
         problems.append(f"{w}: no meal menu at {pg.url} ({pg.inner_text('body')[:160]!r})")
         ctx.close()
         return
-    # The meal menu (⋯) is a Sheet on the phone and a dialog on desktop
-    esc_returns_focus(pg, pg.locator('button[id^="meal-menu-"]:visible').first, f"{w} meal menu")
+    # The meal menu is a Sheet on the phone and a dialog on desktop
+    esc_returns_focus(pg, menu.first, f"{w} meal menu")
     # The calendar sheet opens from the date control (the phone and desktop copies are both in the DOM)
-    esc_returns_focus(pg, pg.locator('button[aria-haspopup="dialog"]:visible').first, f"{w} calendar sheet")
+    esc_returns_focus(pg, pg.locator('button[aria-label^="Chọn ngày"]:visible').first, f"{w} calendar sheet")
     shot(pg, "diary", size_name)
     ctx.close()
 
@@ -82,7 +86,7 @@ def add(browser, size_name, size):
         esc_returns_focus(pg, opener, f"{w} quick-add sheet", '[role="dialog"][aria-modal="true"]:has(h2:text-is("Chỉ thêm kcal"))')
     except Exception:
         problems.append(f"{w}: no 'Chỉ thêm kcal' control at {pg.url}")
-    # Esc with no sheet open closes the add screen (back to the diary), as before
+    # Esc with no sheet open closes the add screen (back to Hôm nay), as before
     pg.keyboard.press("Escape")
     pg.wait_for_timeout(400)
     check("/add" not in pg.url, f"{w}: Esc with no sheet open leaves /add ({pg.url})")

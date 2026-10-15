@@ -1,9 +1,9 @@
 """cc2-15b: a new account starts empty, the sample data lives behind demo mode.
 
 Production build, cleared storage, clock fixed at 18:00 Asia/Ho_Chi_Minh (Bữa tối). No _demo helper: this probe drives the switch itself.
-- empty account: Nhật ký, Tổng quan (3 tabs), Khám phá, the add sheet show no sample data, each empty state shows its one line
+- empty account: Hôm nay, Tổng quan (3 tabs), Khám phá, the add sheet show no sample data, each empty state shows its one line
 - setup -> /setup/done: the list rows match the coach's rules (HANDOFF.md) for 70 kg, Giữ cân, 60 min of training
-- first meal logged -> Nhật ký shows it, Tổng quan is in the under-3-days state, no longer the empty one
+- first meal logged -> Hôm nay shows it, Tổng quan is in the under-3-days state, no longer the empty one
 - ?demo=1 brings the sample day, history and Gần đây back (and stays on), ?demo=0 removes them again
 Screenshots: .screenshots/cc2-15b-{diary,overview,explore,summary}-{390,1280}.png
 Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/cc2_15b.py
@@ -97,11 +97,10 @@ def run(browser, name, size):
     # Empty account, before setup
     go(pg, "/")
     t = text(pg)
-    check("Chưa có món hôm nay" in t, f"{where} diary: 'Chưa có món hôm nay'")
-    check("Thêm món vào từng bữa bằng +" in t, f"{where} diary: one line, the + buttons")
+    check("Chưa có món nào hôm nay" in t, f"{where} home: 'Chưa có món nào hôm nay'")
     check(pg.get_by_role("button", name="Chép hôm qua").count() == 0, f"{where} diary: no Chép hôm qua without a yesterday")
     plus = pg.locator('a[aria-label^="Thêm vào"]:visible')
-    check(plus.count() == 5, f"{where} diary: five meal + buttons ({plus.count()})")
+    check(plus.count() == 4, f"{where} home: one Thêm vào link per meal ({plus.count()})")
     clean(pg, f"{where} diary")
     shot(pg, "diary", name)
 
@@ -170,7 +169,7 @@ def run(browser, name, size):
     pg.wait_for_timeout(500)
     t = text(pg)
     check(food in t, f"{where} diary: the first meal ({food}) is listed")
-    check("Chưa có món hôm nay" not in t, f"{where} diary: the empty line is gone")
+    check("Chưa có món nào hôm nay" not in t, f"{where} home: the empty line is gone")
     go(pg, "/trends")
     t = text(pg)
     check("Chưa đủ dữ liệu" in t and "Chưa có ngày nào được ghi" not in t,
@@ -180,7 +179,7 @@ def run(browser, name, size):
     # Demo mode
     go(pg, "/?demo=1")
     t = text(pg)
-    check("Yến mạch" in t and "Chưa có món hôm nay" not in t, f"{where} ?demo=1: the sample day is back")
+    check("Yến mạch" in t and "Chưa có món nào hôm nay" not in t, f"{where} ?demo=1: the sample day is back")
     go(pg, "/explore")
     t = text(pg)
     check("Yogurt kefir" in t and food not in t, f"{where} ?demo=1: its own Gần đây (sample foods), not the real recent ({food})")
@@ -194,7 +193,7 @@ def run(browser, name, size):
     go(pg, "/explore")
     check("Yến mạch" not in text(pg) and food in text(pg), f"{where} ?demo=0: Gần đây is the real one again, no sample foods")
     go(pg, "/")
-    check(food in text(pg), f"{where} ?demo=0: the real meal ({food}) is still in Nhật ký")
+    check(food in text(pg), f"{where} ?demo=0: the real meal ({food}) is still in Hôm nay")
     real = [e for e in errors if "status of 404" not in e]
     check(not real, f"{where}: no console or page errors ({real[:2]})")
     ctx.close()

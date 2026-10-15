@@ -302,7 +302,7 @@ def check_offline_page(browser):
         h1_count(pg, f"offline {size_name}")
         body = text(pg)
         check("Bạn đang ngoại tuyến" in body, f"offline page {size_name}: Bạn đang ngoại tuyến")
-        check("Nhật ký trên máy này vẫn dùng được." in body, f"offline page {size_name}: the diary still works line")
+        check("Dữ liệu đã ghi trên máy này vẫn dùng được." in body, f"offline page {size_name}: the saved-data line")
         check(pg.get_by_role("button", name="Thử lại").count() == 1, f"offline page {size_name}: Thử lại button")
         check(pg.locator("header").count() == 1, f"offline page {size_name}: shared header")
         no_h_scroll(pg, f"offline page {size_name}")

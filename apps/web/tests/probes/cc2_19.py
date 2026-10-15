@@ -3,7 +3,7 @@
 - (c) Tổng quan › Vi chất: the lowest nutrient is first in the list and its detail link is one tap away
 - (d) Tổng quan: the period label keeps "dd/mm – dd/mm" on one line (no break at the dash)
 - (e) Khám phá › Giàu canxi: the rich-in list opens and lists foods with the % of target
-- (h) Nhật ký on yesterday: read-only (no "+ Thêm" on a past day, "Chỉ xem" on the training tile)
+- (h) Hôm nay on yesterday: read-only (no "Thêm vào" link on a past day)
 - (i) Khám phá › food detail › back returns to Khám phá
 - no horizontal scroll on the walked screens
 Screenshots: .screenshots/cc2-19-*.png
@@ -16,6 +16,7 @@ from pathlib import Path
 
 from playwright.sync_api import sync_playwright
 import _demo  # noqa: F401  (demo mode on, see _demo.py)
+from _home import is_past
 
 BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3102")
 SHOTS = Path(__file__).resolve().parent.parent.parent / ".screenshots"
@@ -77,8 +78,9 @@ def run(browser, size_name, size):
 
     # (h): yesterday is read-only
     ctx, pg = new_page(browser, size, f"/?date={YESTERDAY}")
-    w = f"{size_name} Nhật ký hôm qua"
-    check("Đang xem ngày cũ" in text(pg), f"{w}: read-only banner shown")
+    w = f"{size_name} Hôm nay, hôm qua"
+    check(is_past(pg) and "14/10" in text(pg), f"{w}: the past day is shown (› is enabled, date 14/10)")
+    check(pg.locator("a[aria-label^='Thêm vào']").count() == 0, f"{w}: no + Thêm vào on a past meal")
     check(pg.locator("a[href='/add?meal=breakfast']").count() == 0, f"{w}: no add link on a past meal")
     no_h_scroll(pg, w)
     shot(pg, "yesterday", size_name)

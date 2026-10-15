@@ -26,8 +26,6 @@ export default function robots(): MetadataRoute.Robots {
           "/auth/*",
           "/settings",
           "/settings/*",
-          "/diary",
-          "/diary/*",
           "/entry",
           "/entry/*",
           "/add",

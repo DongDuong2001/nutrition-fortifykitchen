@@ -51,15 +51,24 @@ def go(path):
     return run
 
 
+def empty_today(pg):
+    """The sample day deleted (as cc_22 does); the demo history keeps yesterday."""
+    pg.add_init_script(
+        f"try {{ localStorage.setItem('h1t_sample_edits_v1_demo', {SAMPLE_EDITS_EMPTY!r}); }} catch (e) {{}}"
+    )
+
+
 def go_empty_today(pg):
-    pg.goto(BASE + "/?empty=1", wait_until="networkidle")
+    empty_today(pg)
+    pg.goto(BASE + "/", wait_until="networkidle")
     pg.wait_for_timeout(400)
 
 
 def add_chà_là_then_today(pg):
     # Design TodayAdded: toast "Đã thêm Chà là 30 g vào Trước tập" on Today
     pg.goto(BASE + "/add?meal=pre_workout", wait_until="networkidle")
-    pg.locator('button:has-text("Chà là") >> visible=true').first.click()
+    # the add sheet's result row (the home rows under it are buttons too): the one with kcal in it
+    pg.locator('button:has-text("Chà là"):has-text("kcal") >> visible=true').first.click()
     pg.locator('button:has-text("Thêm vào Trước tập") >> visible=true').first.click()
     pg.wait_for_url(re.compile(r".*/(\?.*)?$"), timeout=8000)
     pg.wait_for_timeout(400)
@@ -79,8 +88,9 @@ def micros_vitamins(pg):
 
 
 def copy_yesterday(pg):
-    pg.goto(BASE + "/?empty=1", wait_until="networkidle")
-    pg.locator('[aria-label^="Năng lượng"] >> visible=true').first.wait_for(state="visible", timeout=8000)
+    empty_today(pg)
+    pg.goto(BASE + "/", wait_until="networkidle")
+    pg.locator("section[aria-label='Tổng kcal và dinh dưỡng đa lượng'] >> visible=true").first.wait_for(state="visible", timeout=8000)
     pg.locator('button:has-text("Chép hôm qua") >> visible=true').first.click(timeout=8000)
     pg.wait_for_timeout(400)
 

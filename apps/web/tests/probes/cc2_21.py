@@ -56,7 +56,7 @@ def no_h_scroll(pg, where):
 
 
 def energy(browser, size_name, size):
-    ctx, pg = new_page(browser, size, "/trends")
+    ctx, pg = new_page(browser, size, "/trends/energy")
     w = f"{size_name} Năng lượng"
     num = pg.locator("#en-hero-number")
     check(num.count() == 1 and re.fullmatch(r"[\d.]+", num.inner_text().strip()) is not None, f"{w}: hero number is the average kcal ({num.inner_text() if num.count() else None})")

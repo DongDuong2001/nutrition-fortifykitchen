@@ -106,7 +106,7 @@ def run(browser, name, size):
     go(pg, "/trends")
     check("Chưa có ngày nào được ghi" in text(pg), f"{where} empty account with a profile: Tổng quan shows the empty line")
     food = add_food(pg, SAMPLE_FOODS)
-    check(food != "" and food in text(pg), f"{where} meal added: {food} is in Nhật ký")
+    check(food != "" and food in text(pg), f"{where} meal added: {food} is in Hôm nay")
     state = ctx.storage_state()
     keys = {k["name"] for o in state["origins"] for k in o["localStorage"]}
     check(
@@ -118,7 +118,7 @@ def run(browser, name, size):
 
     ctx, pg = new_page(browser, size, state=state)
     go(pg, "/")
-    check(food in text(pg) and "Chưa có món hôm nay" not in text(pg), f"{where} new context: the meal ({food}) is still in Nhật ký")
+    check(food in text(pg) and "Chưa có món nào hôm nay" not in text(pg), f"{where} new context: the meal ({food}) is still in Hôm nay")
     go(pg, "/explore")
     check(food in text(pg), f"{where} new context: Gần đây still lists {food}")
     go(pg, "/trends")
@@ -169,7 +169,7 @@ def run(browser, name, size):
         f"sessionStorage.setItem('h1t_added_entries_v1', JSON.stringify([{json.dumps(entry)}])); }} catch (e) {{}}"
     )
     go(pg, "/")
-    check("Chà là hạt dẻ cũ" in text(pg), f"{where} migration: the session entry shows in Nhật ký")
+    check("Chà là hạt dẻ cũ" in text(pg), f"{where} migration: the session entry shows in Hôm nay")
     moved = pg.evaluate(
         "() => [localStorage.getItem('h1t_added_entries_v1_ban@email.com') !== null, sessionStorage.getItem('h1t_added_entries_v1'),"
         " localStorage.getItem('h1t_added_entries_v1')]"
@@ -222,13 +222,13 @@ def run(browser, name, size):
     sign_in("b@example.com")
     go(pg, "/trends")  # cc2-31b: Tổng quan is /trends (sign-in lands on the home screen)
     check("Chưa có ngày nào được ghi" in text(pg), f"{where} accounts: B's Tổng quan is empty")
-    go(pg, "/")  # Nhật ký is no longer a nav tab (cc2-31a), so load it directly
+    go(pg, "/")  # Hôm nay is no longer a nav tab (cc2-31a), so load it directly
     t = text(pg)
-    check(a_food not in t, f"{where} accounts: B's Nhật ký does not show A's {a_food}")
-    check("Chưa có món hôm nay" in t, f"{where} accounts: B's Nhật ký is empty ('Chưa có món hôm nay')")
+    check(a_food not in t, f"{where} accounts: B's Hôm nay does not show A's {a_food}")
+    check("Chưa có món nào hôm nay" in t, f"{where} accounts: B's Hôm nay is empty ('Chưa có món hôm nay')")
     sign_out()
     sign_in("a@example.com")
-    go(pg, "/")  # Nhật ký is no longer a nav tab (cc2-31a), so load it directly
+    go(pg, "/")  # Hôm nay is no longer a nav tab (cc2-31a), so load it directly
     check(a_food in text(pg), f"{where} accounts: A signs back in and {a_food} is there")
     ctx.close()
 

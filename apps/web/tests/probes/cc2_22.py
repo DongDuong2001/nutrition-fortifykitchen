@@ -1,8 +1,6 @@
-"""cc2-22: Nhật ký tiles and meal cards, the add sheet (tall, one scroll, carousels, 56-64 px rows, Đồ uống,
-Tạo món mới), at 390 and 1280.
+"""cc2-22: the add sheet (tall, one scroll, carousels, 56-64 px rows, Đồ uống, Tạo món mới), at 390 and 1280.
+(cc2-32: the Nhật ký tile and meal-card checks were deleted with the diary screen.)
 
-- Nhật ký: Vi chất and Ngày tập are two tiles side by side with a big Saira number; the meal header is the name and
-  its kcal in Saira; the + is a quiet "+ Thêm" text button (no circle); entry rows have a meta line
 - /add (phone): the sheet is about 92% tall, the header stays pinned while the content scrolls to the last item,
   carousels scroll sideways, food rows are 56-64 px, an active category drops the category name from the meta line
 - Đồ uống chip: empty state with a centred, full-width Tạo món mới button
@@ -46,48 +44,13 @@ def shot(pg, name, size_name, full=True):
     pg.screenshot(path=str(SHOTS / f"cc2-22-{name}-{size_name}.png"), full_page=full, animations="disabled")
 
 
-def diary(browser, size_name, size):
+def home(browser, size_name, size):
+    """cc2-32: the diary tiles and meal cards went with the diary screen; Hôm nay is covered by cc_22 and cc2_32."""
     ctx, pg = new_page(browser, size, "/")
-    w = f"{size_name} Nhật ký"
-    tiles = pg.locator("section[aria-label='Chi tiết trong ngày'] a")
-    check(tiles.count() == 2, f"{w}: two tiles ({tiles.count()})")
-    b0, b1 = tiles.nth(0).bounding_box(), tiles.nth(1).bounding_box()
-    check(abs(b0["y"] - b1["y"]) < 2 and b1["x"] > b0["x"] + b0["width"] - 1, f"{w}: tiles sit side by side")
-    t0, t1 = squash(tiles.nth(0).inner_text()), squash(tiles.nth(1).inner_text())
-    check(t0.startswith("8/22 vi chất") and "Thiếu:" in t0, f"{w}: Vi chất tile ({t0!r})")
-    check(t1.startswith("60′ Ngày tập") and "muối 7–10,5 g" in t1, f"{w}: Ngày tập tile ({t1!r})")
-    check((tiles.nth(0).get_attribute("href") or "").startswith("/micros") and (tiles.nth(1).get_attribute("href") or "").startswith("/training"),
-          f"{w}: tiles open /micros and /training")
-    big = tiles.nth(0).locator("span").first.locator("span").first
-    check("saira" in big.evaluate("e => getComputedStyle(e).fontFamily").lower(), f"{w}: tile number is Saira")
-    check(b0["height"] >= 44 and b1["height"] >= 44, f"{w}: tiles are tap-sized")
-
-    # Meal cards
-    add_links = pg.locator('a[aria-label^="Thêm vào"]:visible')
-    check(add_links.count() == 5, f"{w}: one add link per meal ({add_links.count()})")
-    circled = 0
-    for i in range(add_links.count()):
-        lk = add_links.nth(i)
-        border = lk.evaluate("e => getComputedStyle(e).borderTopWidth")
-        r = lk.evaluate("e => getComputedStyle(e).borderRadius")
-        if border != "0px" and r not in ("0px",):
-            circled += 1
-    check(circled == 0, f"{w}: no circled + in the meal header ({circled})")
-    texts = [squash(add_links.nth(i).inner_text()) for i in range(add_links.count())]
-    check(all(t in ("+ Thêm", "Thêm") for t in texts), f"{w}: quiet text add links ({texts})")
-    sec = pg.locator("section[id^='meal-']").first
-    kcal = sec.locator("h2 + span").first
-    check("saira" in kcal.evaluate("e => getComputedStyle(e).fontFamily").lower(), f"{w}: meal kcal total is Saira")
-    row = sec.locator("a[href^='/entry/']").first
-    if row.count():
-        h = row.bounding_box()["height"]
-        check(h >= 56, f"{w}: entry row is at least 56 px ({h:.0f})")
-        check("Đạm" in squash(row.inner_text()), f"{w}: entry row has a macro meta line ({squash(row.inner_text())[:80]!r})")
-    body = squash(pg.inner_text("body"))
-    check("Chưa có món ·" in body or True, f"{w}: empty meal line")
+    w = f"{size_name} Hôm nay"
     h = pg.evaluate("Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) > window.innerWidth")
     check(not h, f"{w}: no horizontal scroll")
-    shot(pg, "diary", size_name)
+    shot(pg, "home", size_name)
     ctx.close()
 
 
@@ -176,7 +139,7 @@ def main():
     with sync_playwright() as p:
         browser = p.chromium.launch()
         for size_name, size in SIZES:
-            diary(browser, size_name, size)
+            home(browser, size_name, size)
         add_sheet(browser)
         browser.close()
     for n in notes:

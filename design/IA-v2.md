@@ -65,7 +65,7 @@ Tổng quan is about a period, never about logging. It never lists food and has 
 4. **Cơ thể** (`/trends/body`): weight chart from the weight log, change over the period and since start; body composition later (only if the user logs it; no fields added now).
 Desktop: two-column grid where a sub-tab has two kinds of content.
 
-## Nhật ký (diary): owns the day
+## Nhật ký (diary): owns the day (folded into Hôm nay at `/`, cc2-32; the layout below is the pre-cc-22 diary, kept as the record of the job)
 Job: log, fix and read one day (any date).
 - Header: date with ‹ › and calendar (as now). Under it the day summary: kcal dial + four macro bars (the only full breakdown of a day) and "còn N kcal".
 - Two compact rows under the summary, both for the date shown: "8/22 vi chất · Thiếu: Vitamin D, Canxi" → `/micros?date=`; "Ngày tập 60′ · muối 7–10,5 g" → `/training?date=` (today: change the minutes there; past days read-only).
@@ -148,7 +148,7 @@ Checked with ui-ux-pro-max (§1 accessibility: one h1, 44 px back with aria-labe
 | Row | paper (`bg-page`), `pt-3 pb-3`, 16 px side padding, 560 px column | `pt-8` (32 px) on every screen; 32 px gutter, content column left (wide) or the centred 560 px column (narrow) |
 
 ### Rules as built
-- `AppHeader` `daily`: the ink band on a phone, only for `/` and `/diary`. Row 1 is the H1T MICRO wordmark on `/` (the h1 "Tổng quan" is sr-only there) and the title "Nhật ký" on `/diary`, with the date nav on the right. Desktop: plain title row with date buttons.
+- `AppHeader` `daily`: the ink band on a phone, only for `/` (Hôm nay; `/diary` was folded in, cc2-32). Row 1 is the H1T MICRO wordmark with the date nav on the right. Desktop: plain title row with date buttons.
 - `AppHeader` `sub` (pushed) and `tab` (tab screens): the same paper row at every width. `sub` has the back button before the title; `tab` has none. `actions` sit right. `summary` (Vi chất 8/22, Ngày tập duration and salt, nutrient amount) is an ink card under the row, never a band.
 - No wordmark outside `/` on a phone; the sidebar carries it on desktop. The Pro page no longer shows a wordmark lockup.
 - A screen whose main already has 32 px padding passes `flush`; a left-aligned content grid passes `layout="wide"`.

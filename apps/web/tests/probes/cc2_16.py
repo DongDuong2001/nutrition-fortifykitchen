@@ -71,7 +71,7 @@ def midnight(browser):
     pg.wait_for_timeout(600)
     t = squash(pg.inner_text("body"))
     check("Hôm nay 13/10" in t, "midnight: the date label moves to 13/10 without a reload")
-    check("Cơm trưa hôm qua" not in t and "Chưa có món hôm nay" in t, f"midnight: yesterday's entry left today ({t[:160]!r})")
+    check("Cơm trưa hôm qua" not in t and "Chưa có món nào hôm nay" in t, f"midnight: yesterday's entry left today ({t[:160]!r})")
     pg.goto(BASE + "/?date=2026-10-12", wait_until="networkidle")
     pg.wait_for_timeout(500)
     t = squash(pg.inner_text("body"))
@@ -96,17 +96,18 @@ def long_name(browser, size_name, size):
     pg.wait_for_url("**/", timeout=8000)
     pg.wait_for_timeout(600)
     w = f"{size_name} long name"
-    row = pg.locator("a[href^='/entry/']").first
+    row = pg.locator(f"button[aria-label^='{LONG_NAME[:24]}']").first
     span = row.locator("span[title]").first
-    check(LONG_NAME in (span.get_attribute("title") or ""), f"{w}: the diary row keeps the full name in title")
+    check(LONG_NAME in (span.get_attribute("title") or ""), f"{w}: the home row keeps the full name in title")
     h = row.bounding_box()["height"]
-    check(h <= 100, f"{w}: the diary row stays compact ({h:.0f} px)")
+    check(h <= 100, f"{w}: the home row stays compact ({h:.0f} px)")
     over = pg.evaluate("document.documentElement.scrollWidth > window.innerWidth")
-    check(not over, f"{w}: no horizontal scroll in Nhật ký")
+    check(not over, f"{w}: no horizontal scroll on Hôm nay")
     SHOTS.mkdir(parents=True, exist_ok=True)
     pg.screenshot(path=str(SHOTS / f"cc2-16-longname-diary-{size_name}.png"), full_page=True)
 
     row.click()
+    pg.locator('a[aria-label="Sửa món này"] >> visible=true').first.click()
     pg.wait_for_url("**/entry/**", timeout=8000)
     pg.wait_for_timeout(500)
     t = squash(pg.inner_text("body"))
