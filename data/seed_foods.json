@@ -1258,8 +1258,8 @@
       "sodium": 45,
       "vitamin_a": 28,
       "vitamin_d": 1.1,
-      "vitamin_b2": 0.18,
-      "vitamin_b12": 0.45
+      "b2": 0.18,
+      "b12": 0.45
     },
     "portions": [
       {

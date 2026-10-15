@@ -61,14 +61,17 @@ type RichInResponse struct {
 }
 
 type CreateCustomFoodRequest struct {
-	NameVi      string              `json:"name_vi"`
-	ServingUnit string              `json:"serving_unit"`
-	ServingSize float64             `json:"serving_size"`
-	Calories    float64             `json:"calories"`
-	Protein     float64             `json:"protein"`
-	Carbs       float64             `json:"carbs"`
-	Fat         float64             `json:"fat"`
-	Micros      map[string]*float64 `json:"micros,omitempty"`
+	NameVi         string              `json:"name_vi"`
+	NameViAlt      string              `json:"nameVi,omitempty"`
+	ServingUnit    string              `json:"serving_unit"`
+	ServingUnitAlt string              `json:"servingUnit,omitempty"`
+	ServingSize    float64             `json:"serving_size"`
+	ServingSizeAlt float64             `json:"servingSize,omitempty"`
+	Calories       float64             `json:"calories"`
+	Protein        float64             `json:"protein"`
+	Carbs          float64             `json:"carbs"`
+	Fat            float64             `json:"fat"`
+	Micros         map[string]*float64 `json:"micros,omitempty"`
 }
 
 var ErrInvalidNutrient = errors.New("invalid nutrient identifier")

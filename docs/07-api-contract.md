@@ -242,7 +242,7 @@ Retrieves all logged meals, food entries, and cumulative daily totals for a cale
       "entries": []
     },
     {
-      "slot": "preworkout",
+      "slot": "pre_workout",
       "name_vi": "Trước tập",
       "total_kcal": 0,
       "entries": []
@@ -250,6 +250,7 @@ Retrieves all logged meals, food entries, and cumulative daily totals for a cale
   ]
 }
 ```
+*Note*: `pre_workout` is the canonical slot identifier in the API and database; `preworkout` is accepted as an alias by the API endpoints.
 
 ---
 

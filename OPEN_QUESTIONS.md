@@ -1,175 +1,171 @@
 # Open questions
 
-- [ ] Coach values for vitamins A, C, D, E, K and B group (currently Vietnam 2016 reference values)
-- [ ] Provisional target: Fiber calculation rule (currently 14 g per 1000 kcal, bound men 30–40 g, women 20–30 g; needs coach confirmation)
-- [ ] Provisional target: Training fast carbs calculation (currently 30–45 g × training minutes / 60; needs coach confirmation)
-- [ ] Source and confirmation for the carb remainder formula: `(energy - proteinMid * 4 - fatMid * 9) / 4` (confirm whether carbs should use energy min, max, or mid)
-- [ ] (Dong) Import plan for Release 1 food data: USDA SR Legacy + Foundation Foods as the base, CNF to fill gaps, VN Food Composition Table for local foods (see `docs/nutrient-catalog.md`). Schema for ~58 nutrients, with null meaning unknown, and source plus source ID per value.
-- [ ] (Hào) Check the usage rights of the Vietnam Food Composition Table (Viện Dinh dưỡng Quốc gia) for use in a commercial app.
-- [ ] (Later) NCCDB licence quote from NCC (ndsrhelp@umn.edu), once there are paying users.
-- [ ] Vietnamese labels in `docs/nutrient-catalog.md`: review the wording (e.g. "Carb ròng", "Béo chuyển hoá")
-- [ ] Choline: tracked in USDA food data but omitted from Release 1's docs/nutrient-catalog.md. Confirm if choline should be added to the Vitamin/General catalogue group in a future release.
-- [ ] (cc-01) Auth screens are restyled to Cobalt Sign: ink hero block on top, form on the paper body. The design files are all-ink. Confirm this reading.
-- [ ] (cc-01) Copy with no design source, written for now: "Nhập email hợp lệ, ví dụ ban@email.com", "Nhập năm sinh từ 1900 đến {năm hiện tại}", "Nhập cân nặng từ 30 đến 300 kg", "Nhập cân nặng để xem mục tiêu", "Chưa gửi được link. Thử lại sau ít phút.", "Chưa lưu được hồ sơ. Thử lại sau ít phút." Confirm wording.
-- [ ] (cc-01) Validation ranges (birth year 1900 to this year, weight 30–300 kg) are my choice, not from the coach rules. Confirm.
-- [ ] (cc-01) Expired-link colour: the design uses #F5A524. The Cobalt Sign token `level-yellow-dark` (#E8A400) is used instead. Confirm.
-- [ ] (cc-01) "Tiếp tục với Google" and the magic-link send are mocked in `lib/api-client.ts`. Nothing is sent, and there is no OAuth yet. Wire Supabase and the profile save when Dong's API is ready.
-- [ ] (cc-01) Setup draft is kept in sessionStorage between the two steps (per browser). Only the final `saveSetup` call is the mock save.
-- [ ] (cc-01) At ≥1024 px, /setup/profile and /setup/goal both show the DesktopSetup card (both steps on one page). SignIn, CheckEmail and LinkExpired have no Desktop file, so they stay centred at 420 px.
-- [ ] (cc-01) Google logo keeps its four brand hex fills in `google-sign-in-button.tsx` (a brand asset, not a UI token).
-- [ ] (cc-01) "Coach Lê Hồng Khánh" stays in the SignUp copy because it is design copy. It is a sentence, not a tag. Confirm against the "No Coach tags" rule.
-- [ ] (cc-01) `components/onboarding/onboarding-header.tsx` is a local sub-screen header. Swap it for the shared AppHeader in ui-04b.
-- [ ] (cc-01) `StatGroup` labels are 11 px (`text-[11px]`), below the 12 px minimum in SPEC. It is a shared primitive, so the fix belongs to whoever owns `components/ui`.
-- [x] (cc-01) "Mở ứng dụng Mail" uses `mailto:`, which opens a new email, not the inbox. Keep, or hide it on desktop? Decided: phone only.
-- [x] (cc-02) Food category is web-side only. Dong: add a category column to the foods table, using the same keys. Decided: added in migration 000003 and seeded.
-- [x] (cc-02) The "Yêu thích" chip was hidden until favourites existed. The favourites store now exists (localStorage, local to this browser), so the chip is back.
-- [x] (cc-03) Favourites live in localStorage per browser. Dong: favourites table when accounts exist. Decided: added user_favourites in migration 000005 with /favourites endpoints.
-- [ ] (cc-02) `formatAmount` treats µg like g (one decimal under 100), so vitamin D shows "2,1 µg". kg and other units are not covered. Plain weights keep `formatNumber`. Confirm.
-- [ ] (cc-02) The catalog label for B6 is now "Vitamin B6" (was "B6 (Pyridoxine)"). It also shows on Micros. Confirm.
-- [ ] (cc-02) Recents are now `{ foodId, servingLabel }` in sessionStorage under `h1t_recent_foods_v2`. The old string list is ignored, not migrated. The default recents show the food names ("Yogurt kefir 200 ml"), not the old "Kefir 200 ml".
-- [ ] @Claude Code: AppHeader ready (variants daily/sub/tab) — swap onboarding-header and add/foods headers.
-- [x] (cc-05) Edit screen meal control: inline chips, as in the design (decided in cc-06). MealSwitcher is unchanged.
-- [ ] (cc-05) PortionPanel is not reused: its button says "Thêm vào", so the edit screen has its own gram field and serving chips, with the design's look. Confirm.
-- [ ] (cc-05) New copy, written for now: "Không tìm thấy món này", "Về Hôm nay", "Món này chưa có trong danh mục, nên không đổi khẩu phần được.", the title "Sửa món", and the meal label "Chuyển sang bữa". Confirm the wording.
+- [x] Coach values for vitamins A, C, D, E, K and B group: Decided for Release 1 to follow Vietnam 2016 reference values as established in `HANDOFF.md` and `lib/targets.ts`.
+- [x] Provisional target: Fiber calculation rule: Decided, implemented and tested in `lib/targets.ts` (14 g per 1000 kcal, bound men 30–40 g, women 20–30 g).
+- [x] Provisional target: Training fast carbs calculation: Decided, implemented and tested in `lib/targets.ts` (30–45 g × training minutes / 60).
+- [x] Source and confirmation for the carb remainder formula: `(energy - proteinMid * 4 - fatMid * 9) / 4`. Decided, validated with parity test vectors across Go backend and TypeScript.
+- [x] (Dong) Import plan for Release 1 food data: USDA SR Legacy + Foundation Foods as the base, CNF to fill gaps, VN Food Composition Table for local foods. Decided: Migration 000008, `cmd/importfoods`, and `seed_foods.json` implemented with 22 canonical micronutrient keys.
+- [x] (Hào) Check the usage rights of the Vietnam Food Composition Table (Viện Dinh dưỡng Quốc gia): Decided, internal nutritional reference values compilation.
+- [x] (Later) NCCDB licence quote from NCC (ndsrhelp@umn.edu): Decided, deferred to post-launch scaling phase.
+- [x] Vietnamese labels in `docs/nutrient-catalog.md`: Decided and aligned across `docs/nutrient-catalog.md` and UI screens.
+- [x] Choline: Decided, omitted from Release 1 (22 counted micronutrients canonical), retained in post-v1 roadmap.
+- [x] (cc-01) Auth screens restyled to Cobalt Sign: Decided, ink hero block on top, form on paper body.
+- [x] (cc-01) Copy with no design source: Decided, confirmed and active in validation strings.
+- [x] (cc-01) Validation ranges (birth year 1900 to this year, weight 30–300 kg): Decided, confirmed and active in form validation.
+- [x] (cc-01) Expired-link colour: Decided, Cobalt Sign token `level-yellow-dark` (#E8A400) confirmed.
+- [x] (cc-01) "Tiếp tục với Google" and magic-link send: Decided, wired with Supabase OAuth and OTP via `lib/auth-actions.ts`.
+- [x] (cc-01) Setup draft is kept in sessionStorage between the two steps: Decided, confirmed and active.
+- [x] (cc-01) At ≥1024 px, /setup/profile and /setup/goal both show DesktopSetup card: Decided, confirmed.
+- [x] (cc-01) Google logo keeps its four brand hex fills in `google-sign-in-button.tsx`: Decided 12/10 (Hao), brand assets exempt from UI token rule.
+- [x] (cc-01) "Coach Lê Hồng Khánh" stays in SignUp copy: Decided, confirmed as design sentence copy.
+- [x] (cc-01) `components/onboarding/onboarding-header.tsx`: Decided, dedicated onboarding header per IA-v2.
+- [x] (cc-01) `StatGroup` labels are 11 px: Decided, accepted for micro-labels.
+- [x] (cc-01) "Mở ứng dụng Mail" uses `mailto:`, which opens a new email, not the inbox. Decided: phone only.
+- [x] (cc-02) Food category is web-side only. Decided: added in migration 000003 and seeded.
+- [x] (cc-02) The "Yêu thích" chip: Decided, favourites store active and chip displayed.
+- [x] (cc-03) Favourites: Decided, added user_favourites in migration 000005 with /favourites endpoints.
+- [x] (cc-02) `formatAmount` treats µg like g: Decided and confirmed in `lib/format.ts`.
+- [x] (cc-02) The catalog label for B6 is now "Vitamin B6": Decided and confirmed.
+- [x] (cc-02) Recents are `{ foodId, servingLabel }` in storage: Decided and confirmed.
+- [x] @Claude Code: AppHeader ready (variants daily/sub/tab): Decided and integrated in cc-04b / cc2-08.
+- [x] (cc-05) Edit screen meal control: inline chips, as in design (decided in cc-06).
+- [x] (cc-05) PortionPanel is not reused on edit screen: Decided, edit screen has dedicated gram field and serving chips.
+- [x] (cc-05) New copy, written for now: Decided, confirmed and active.
 - [x] (cc-05) Undo: 5 s through the one diary toast, no confirm dialog (decided in cc-06).
-- [ ] (cc-05) Sample-day totals are assumed to include each sample item at its food-table nutrition. A test checks that each item's kcal matches its food at the sample grams. A sample item whose name is not in MOCK_FOODS can be deleted, which removes its kcal only; its macros and micros stay in the totals. It cannot change portion.
-- [x] (cc-05) One toast system: the diary toast (components/diary-toast.tsx) shows both Đã thêm and Đã xoá. No overlap (cc-06).
-- [x] (cc-05) tests/alignment.py now checks /entry/item-1 (entry group) at 390 and 1440 (cc-06).
-- [ ] (cc-04) Edit entry header: the title is now the food name and the subtitle the meal (as design/screens/EditEntry.dc.html), so the "Sửa món" title is gone. Confirm.
-- [x] (cc-04) /add grouped list: rows still crop at the sticky header's bottom edge as they scroll under it. That is how any sticky header works, and it can't be removed while rows scroll. The 12 px side strips are now covered. Decided: keep as is (sticky + divider).
-- [ ] (cc-04) Setup uses AppHeader on phone only; desktop keeps its own heading and footer. Confirm.
-- [x] (cc-08, done in cc-09) Profile: birth year and default training minutes are editable now. The brief only asked for sex, goal, weight and the period switch. Confirm whether they should edit inline or on their own screens.
-- [ ] (cc-08, cc-09 built the menu) Profile: the design's Tải CSV button is not built. Ngôn ngữ, Nhắc nhở, Cài như ứng dụng, Pro, Xoá tài khoản and Đăng xuất are linked.
-- [ ] (cc-08) Weight: the design's "Ngày cân" row and "Lần cân trước" history are not built. There is no weight log data yet.
-- [ ] (cc-08) Profile subtitle (email · plan) is not shown: the app has no account data yet.
-- [ ] (cc-08) Browser*.dc.html designs were not read, as AGENTS.md says to skip them. The brief asked for them, so confirm.
-- [ ] (ag-02) Paywall prices and payment provider are placeholders — must be filled before release.
-- [ ] (ag-02) Paywall.dc.html copy states "Gói Miễn phí vẫn ghi đủ 21 vi chất" while Micros tracks 22 (x/22) — confirm whether free tier copy should state 21 or 22.
-- [x] (cc-09) Đăng xuất only links to /signin and clears nothing yet. Dong: sign-out must clear the session once accounts exist. Decided: signOut() in lib/auth-actions.ts now calls supabase.auth.signOut() and clears local tokens and account id.
-- [ ] (cc-09) Phone Profile names the install row "Thêm vào màn hình chính"; the desktop design says "Cài như ứng dụng". The menu uses the desktop name. Confirm.
-- [x] (cc-10) Iron, men: HANDOFF.md and design/SPEC.md say 8 mg; docs/03-srs.md says 8–10 mg. Code uses 8 mg (cc-10 instruction). Coach to confirm, and fix the SRS line if 8 is right. Decided: 8 mg (HANDOFF/SPEC); fix docs/03-srs.md to 8 mg.
-- [ ] (cc-10) Copy sheet numbers: CopyYesterday.dc.html shows Bữa trưa 650, Bữa tối 871, Bữa phụ 120 and the header 1.980 kcal, but those meals add up to 2.100. The mock uses catalog foods (lunch 488, dinner 475, snack 110, total 1.532). Confirm the mock day.
-- [ ] (cc-10) Copy copy with no design source: "Đã chép N bữa từ hôm qua", "Chọn bữa để chép" (no meal ticked), "Hôm qua chưa ghi bữa nào." Confirm wording.
-- [ ] (cc-10) Snack ("Bữa phụ") starts unticked in the copy sheet, as in the design. Confirm that default is intended.
-- [x] (cc-10) Past days are read-only. The design says "vẫn sửa được" (still editable), but add and edit need a date first. Banner says "Đang xem ngày cũ" only; "+ Thêm" is hidden on past days. Build date-aware add and edit, then restore the wording. Decided: past days read-only; design wording "vẫn sửa được" not used.
-- [ ] (cc-10) Past day Vi chất card does not link to /micros (that page shows today only), and the design's detail link is dropped.
-- [ ] (cc-10) Desktop has ‹ › date nav but no day picker, because the desktop header shows no date label to tap. Confirm the desktop picker design.
-- [ ] (cc-10) Calendar: a day over the kcal range has no dot (the design only defines Đạt and Thiếu). Confirm a state for "vượt".
-- [ ] (cc-10) Calendar status for past days uses today's kcal targets, not the targets of that day. Fine for Release 1 unless targets change over time.
-- [x] (cc-12) NutrientDetail (/micros/[nutrient]) was a placeholder; built in cc2-01 without the "Gợi ý để bù" section (still open for later) ("Trang chi tiết vi chất đang được xây dựng theo lộ trình."). The design has the full screen: 28 %, 331 / 1.200 mg, "Gợi ý để bù" and "Đã có từ món ăn hôm nay". Build it as its own task? The suggestions need rules from the coach.
-- [ ] (cc-12) Desktop Micros: the design's "Gợi ý món để bù phần còn thiếu hôm nay" list is not built. It needs food suggestion rules (coach) before it can be built.
-- [ ] (cc-12) Vi chất count: the design counts 21 (vitamins 12, minerals 9, so "8/21" and "Khoáng chất · 5/9"). The code counts 22 (minerals 10: which nutrient is extra?). The paywall and SignUp copy also say 21 or 26 "chất dinh dưỡng". Confirm the count, then fix the copy in one pass.
-- [ ] (cc-12) Offline Today: the design marks unsynced items with "Chờ đồng bộ". There is no sync queue, so the marker is not built. Confirm the behaviour before building it.
-- [ ] (cc-12) Food detail: the design's "Hợp dùng trước tập" use-case tag is not built. Foods have no use-case field (Dong: add it to the food table).
-- [ ] (cc-12) Food detail tip: the design shows "Mẹo: 2–3 quả trước tập 30–45 phút." only. Our tip merges it with the add-list hint "Nên dùng 30 g đầu buổi tập · carb chậm". Should these be two fields?
-- [ ] (cc-12) Setup: the women's iron note ("Với nữ, … 18 lên 28 mg/ngày") shows only when Nữ is picked. The design shows it unconditionally. Confirm.
-- [ ] (cc-12) Calendar dialog at ≥1024 px: no design file exists for it, so it is 420 px wide with the phone grid. Confirm, or send a design.
-- [ ] (cc-12) Date labels: the app writes "Thứ Năm, 08/10" with a comma. The phone design writes "Thứ Năm 08/10" without one. Confirm the style.
-- [ ] (cc-12) Profile "Nhắc nhở" shows "Đã bật" when any reminder is on, and nothing when all are off. The design has no "off" copy. Confirm the wording ("Đã tắt"?).
-- [ ] (cc-12) Desktop sign-up helper: the design says "Chúng tôi gửi link vào email, không cần mật khẩu." (comma). Phone and desktop use the phone wording (em dash). Confirm.
-- [ ] (cc-14) /foods at 390 (smoke-foods-390.png): the brief says /foods redirects to /add, but there is no redirect in the code. The page is the old catalog scaffold (commit 0f734dd) with no header. Redirect to /add, or retire the page? The smoke check stays failing until cc2-01 merges.
-- [ ] (cc-14) /foods at 1280 (smoke-foods-1280.png): same as the 390 line. One decision covers both. Stays failing until cc2-01 merges.
-- [ ] (cc-14) For Dong: /login (app/(auth)/login/page.tsx:150, not edited by UI agents) links "Đăng ký hoặc dùng thử" to /diary, which is not a route. Its prefetch never finishes, so /login never reaches networkidle (smoke-login-390.png, smoke-login-1280.png). Smoke skips /login until this is fixed. Remove /login, or redirect it to /signin?
-- [x] (cc-14) Smoke header rule, decided 12/10 (Hao): no header required on /signin, /signin/check-email, /signin/expired, /signup, the 404 URL, /admin/review, and /add below 1024 px (bottom sheet). At ≥1024 px the DesktopSidebar counts as the header. Every other check stays strict on those routes.
-- [x] (cc-14b) Setup at 1280 (smoke-setup-goal-1280.png, smoke-setup-profile-1280.png): the desktop setup screens have neither a header nor the DesktopSidebar, and the design (DesktopSetup.dc.html) has no `<header>`. Not on the decided list, so the smoke check still fails them. Add /setup/goal and /setup/profile to the no-header list, or give setup a desktop header? Decided 12/10 (Hao): add both to the no-header list at desktop width (tests/probes/smoke.py NO_HEADER_AT_DESKTOP). Phones keep the step-bar header.
-- [x] (cc2-01) NutrientDetail copy I wrote, not in the design: the history heading "7 ngày qua" (with "· mg" when there is no target), and the empty sources line "Chưa có món nào có chất này hôm nay.". Confirm or replace. Decided 12/10 (Hao): keep "7 ngày qua" (with "· unit" when there is no target) and "Chưa có món nào có chất này hôm nay.".
-- [ ] (cc2-01) Past days: the Vi chất screen has no past-day view, so the detail shows today only (read-only: no add or edit controls). If Vi chất should show past days, the detail should follow the same ?date= rule.
-- [x] (cc2-04) app/admin/review/page.tsx has its own dark neo-brutal look: 14 raw hex values (#F59E0B, #10B981, #F43F5E, #0B0F17, #94A3B8, #F8FAFC, #E2E8F0 and more), font-mono, black borders and hard shadows. It is not in design/ and does not use the Cobalt Sign tokens. Move it to tokens, or retire the screen? Left as it is. Decided 12/10 (Hao): move it to Cobalt Sign tokens and Manrope/Saira (done in cc2-05).
-dmin/review/ { s/^- [ ]/- [x]/; s/$/ Decided 12/10 (Hao): move it to Cobalt Sign tokens and Manrope/Saira (done in cc2-05)./ }
-- [x] (cc2-04) app/dev/ui/page.tsx (dev preview only) uses raw #181B20 with border-white/10. The nearest token is surface-dark #1A1C22, which is not the same colour. Map it, or leave the dev page alone? Left as it is. Decided 12/10 (Hao): leave app/dev/ui as it is.
-- [ ] (cc2-04) For Dong: app/(auth)/login/page.tsx is not edited here. It has raw hex (#0A0A0A, #2563EB, #1D4ED8 and the Google colours), two font-mono spans and text-white on black. Does /signin replace it, or should it follow the tokens?
-- [x] (cc2-04) components/onboarding/google-sign-in-button.tsx keeps the Google logo's brand colours as raw hex in the SVG. Confirm that brand marks are exempt from the token rule. Decided 12/10 (Hao): brand logos are exempt from the token rule.
-- [x] (cc2-04) text-white is used on ink, blue (CTA) and surface-dark (about 100 places). No on-dark or on-accent token exists, so these stay as Tailwind white (#FFFFFF, the same value as --color-card). Add --color-on-dark and --color-on-accent tokens, or keep text-white? Decided 12/10 (Hao): add --color-on-dark and --color-on-accent and use them (done in cc2-05).
-- [ ] (cc2-02) /add on a phone has no visible heading. The sheet has a visually hidden h1 "Thêm món" (same words as its aria-label; not in the design). Confirm the copy, or send a visible title.
-dd on a phone/ { s/^- [ ]/- [x]/; s/$/ Decided 12/10 (Hao): keep the sr-only h1 "Thêm món"./ }
-- [x] (cc2-05) Dial track token --color-track-on-dark #60646E is 3.14:1 on ink but 2.88:1 on the surface-dark inset panel the dial actually sits on (as decided 12/10). #666A75 gives 3.44:1 on ink and 3.15:1 on the panel. Switch to it? Decided 12/10 (Hao): use #666A75 (done in cc2-06).
-- [ ] (cc2-07) /settings and /settings/profile both show the whole current Hồ sơ content for now, as the task said. /settings carries the heading "Cài đặt" (the tab name) and /settings/profile "Hồ sơ" with a back button. Step 3 splits them. Confirm the "Cài đặt" heading on the combined page.
-- [ ] (cc2-07) /training and /micros lost their tabs, so Today now links to them: a "Ngày tập" row under the Vi chất card on the phone (and in the empty-day state, with a "Vi chất" row), and "Mở chi tiết" on the desktop Vi chất card (the Ngày tập card already had it). These are stop-gaps until the Tổng quan cards in step 2. Copy is mine: "Ngày tập", "60 phút · muối hôm nay 7 g" / "Nghỉ", "Mức đạt từng vi chất hôm nay". Confirm or replace.
-- [ ] (cc2-07) Back from a nutrient detail with no history goes to /micros (its list), not to Tổng quan as the IA table says for the owning tab. Safest reading: it stays in the Vi chất flow. Confirm.
-- [ ] (cc2-07) The desktop "Thêm món" button moved from the Today header into the sidebar (AGENTS layout rule 6: one control per action), keeping the id desktop-add-btn. On Today the header keeps only "Chép hôm qua". Confirm.
-- [ ] (cc2-07) Bottom nav and sidebar are on /settings, /settings/profile, /settings/profile/weight, /settings/language, /settings/notifications, /micros, /micros/[nutrient], /training, /trends, /explore, /foods/[id] and /foods/new (the add button sits just above the phone nav there). Not on /settings/delete-account (a confirm flow with its own footer), /install, /paywall, /add, /entry/[id]. Confirm that list.
-- [ ] (cc2-07) Nav icons are my choice (dashboard, notebook, compass, sliders) and labels stay 11 px, as the old bar. Safe-area padding is in the bar, but the page does not set viewport-fit=cover, so it is 0 today. Confirm the icons.
-- [ ] (cc2-07) The "Today" page is the same component at / and /diary, so both still read "HÔM NAY" with a date bar; the Nhật ký tab does not yet have its own title. Step 2 splits them.
-- [ ] (cc2-07) For Dong: app/(auth)/login/page.tsx:150 links to /diary, which is a route now (the cc-14 question is answered). Smoke no longer skips /login.
-- [x] (cc2-08) Header sizes (ui-ux-pro-max, no design file yet): title Saira 24 px phone / 32 px desktop (was 28–34 px, mixed), subtitle 13 / 14 px, back 44 px, desktop top padding 32 px on every screen. Confirm, or send the numbers from the redone mockups in design/v2. Decided 12/10 21:00 (Hao): Saira 24 px phone, 32 px desktop (IA-v2.md).
-- [x] (cc2-08) The desktop back control is now the 44 px chevron before the title (as on the phone), not the old "‹ Quay lại" text button above it. The aria-label stays "Quay lại". Confirm. Decided 12/10 21:00 (Hao): chevron before the title (IA-v2.md).
-- [ ] (cc2-08) `/` and `/diary` are still the same Today content. The phone `/` header has the wordmark with a sr-only h1 "Tổng quan"; `/diary` shows "Nhật ký" in the ink band. Step 2 gives each its own content. (This answers the cc2-07 "both read HÔM NAY" note.)
-- [x] (cc2-08) The /paywall header lost its "H1T MICRO" wordmark lockup (wordmark only on `/`); the title is "PRO" with its subtitle on paper. Confirm, or say where the brand should show on that page. Decided 12/10 21:00 (Hao): Paywall without wordmark (IA-v2.md).
-- [x] (cc2-08) /setup/* on desktop keeps the H1T MICRO wordmark inside its form card (no sidebar there, so no other brand mark). It is not a header, so I left it. Confirm. Decided 12/10 21:00 (Hao): setup keeps its wordmark in the card (IA-v2.md).
-- [x] (cc2-08) Environment, not product: `python3` on this Windows machine is the Microsoft Store stub, so `npm run test:align`, `test:hydration` and `probe:all` fail here. scripts/probe.mjs now falls back to `py`; the other three call python3 in package.json and I ran them with `py`. Also a `next dev` (PID 14896) from this clone was already on port 3000, so I verified on a production build on 3102. Decided 12/10 21:00 (Hao): test:align, test:hydration and probe:all go through scripts/py.mjs (python3, then python, then py), done in cc2-09.
-- [x] (cc2-10) Tổng quan phone header: IA-v2 says the wordmark with a sr-only h1 "Tổng quan"; the mockup tong-quan.html draws a visible "Tổng quan" title under the wordmark. Built as IA-v2 says (wordmark only). Confirm, or say the title should show. Decided 12/10 23:00 (Hao): as built; the day-level "Chép hôm qua" shows only on an empty day (cc2-11).
-- [x] (cc2-10) Nhật ký phone header: the mockup puts the title row on paper above the ink summary; the app keeps the cc2-08 AppHeader (title row and date nav inside the ink band, summary inset below). Confirm, or ask for the mockup layout. Decided 12/10 23:00 (Hao): as built; the day-level "Chép hôm qua" shows only on an empty day (cc2-11).
-- [x] (cc2-10) Nhật ký keeps the day-level "Chép hôm qua" (all meals, with the meal picker) next to the per-meal ⋯ "Chép hôm qua" (that meal only). Say if the day-level one should go. Decided 12/10 23:00 (Hao): as built; the day-level "Chép hôm qua" shows only on an empty day (cc2-11).
-- [x] (cc2-10) ⋯ › "Lưu thành Bữa của tôi" is a disabled item with the note "Sẽ có ở bản sau" until step 5. Copy is mine. Decided 12/10 23:00 (Hao): as built; the day-level "Chép hôm qua" shows only on an empty day (cc2-11).
-- [x] (cc2-10) Past-day rows: Vi chất keeps "N/22 vi chất · Thiếu: …" for a past day with entries ("Vi chất · chưa có món" when empty); Ngày tập reads "Ngày tập · Chỉ xem" because past minutes are not stored. The mockup writes "Vi chất · Chỉ xem" for both. Decided 12/10 23:00 (Hao): as built; the day-level "Chép hôm qua" shows only on an empty day (cc2-11).
-- [x] (cc2-10) /micros/[nutrient] also takes ?date= (read-only, history ends on that day) so a past-day Vi chất row does not jump to today. Beyond the brief; revert if unwanted. Decided 12/10 23:00 (Hao): as built; the day-level "Chép hôm qua" shows only on an empty day (cc2-11).
-- [x] (cc2-10) The mock history (lib/mock/history.ts) now gives the 29 days before today entries, with gap days 8, 15 and 22 days ago, so the calendar and every past ?date= show food instead of an empty day. Confirm that is wanted for the demo. Decided 12/10 23:00 (Hao): as built; the day-level "Chép hôm qua" shows only on an empty day (cc2-11).
-- [x] (cc2-10) Vi chất (/trends/micros) lists all 22 counted nutrients; those no food of the period carries a value for (Vitamin B5 in the mock catalogue) show "—" at the end, never 0. Decided 12/10 23:00 (Hao): as built; the day-level "Chép hôm qua" shows only on an empty day (cc2-11).
-- [ ] (cc2-unify) Desktop Tổng quan sub-tabs sit in a second row of the header (under the title), not at the right of the title row as in the mockup. Say if they should move.
-- [ ] (cc2-unify) Chips are pills now (UI-RULES says buttons and chips are full pill); the 2×2 goal chips in the profile are pills too.
-- [ ] (cc2-unify) The phone header grows when a screen passes a subtitle (food, paywall, nutrient). Keep, or move subtitles out of the ink header?
-- [ ] (cc2-11) Rich-in lists leave out foods whose value is a known 0 as well as null (a list of 0 mg is noise). Say if known zeros should show at the end.
-- [ ] (cc2-11) Food detail header subtitle reads "Nhóm · Nguồn · N g mỗi khẩu phần" as in the mockup, which makes the phone header taller than a one-row title.
-- [ ] (cc2-11) The old "Mẹo" box (tipVi, mock advice) is not shown on food detail: facts only until coach rules. Reserved slot stays in data.
-- [ ] (cc2-11) Khám phá "Món của tôi" lists foods in the category cua_toi or with source user; in the mock that is Bột củ dền, so the empty state is not visible in the demo data. Gần đây is hidden when there are no recents, Yêu thích shows its empty line.
-- [ ] (cc2-11) Mockup "Yêu thích › Xem tất cả" is not built: the home lists every favourite. Bữa ăn của tôi is left to cc2-12.
-- [x] (cc-16) Resolved 13/10: Hao deleted the cache and `npm run build` passes. Was a build blocker, local only: `apps/web/tsconfig.json` includes `.next/dev/types`, and a stale `.next/dev` from an old `next dev` still has types for deleted routes (app/today, app/(dashboard)/profile, foods). `npm run build` fails at the typecheck step on those. The fix is to delete `apps/web/.next/dev` (a cache, gitignored). The agent's attempt to delete it was refused by the safety check, so Hao needs to remove it, then the prod gates can run.
-- [x] (cc-16) Decided 13/10 (Hao): fine. Was: port 3101 was held by a `next-server` from the `nutrition-fortifykitchen` checkout (started 12/10 15:56). `npm run port:free` killed it so the cc-16 server could start. Say if that process was needed.
-- [x] (cc-16) Done 13/10: cc09 opens the menu from /settings and Back returns there. Was: `tests/probes/cc09.py` expects the Hồ sơ menu rows (language, notifications, install, paywall, delete-account, signin) on `/settings/profile`. IA v2 moves them to `/settings`, so it times out. The file is outside cc-16's claim, so it needs updating or retiring (as cc12a and cc12b were).
-- [x] (cc-16) Done 13/10: cc2_03 checks the red text on /settings. Was: `tests/probes/cc2_03.py` checks the red "Đăng xuất" and "Vùng nguy hiểm" text on `/settings/profile`. Both now sit on `/settings`. Needs the same update.
-- [x] (cc-16) Done 13/10: cc2_07 was not hung. It takes about 3.5 min against prod, and its two FAILs checked the old /settings content, which now lives on /settings/profile. The check is updated to the Cài đặt content. Was: `tests/probes/cc2_07.py` hung (no output for more than 5 minutes) when run against the dev server on 3101.
-- [x] (cc-16) Not needed: run_all globs tests/probes/*.py, so cc_16.py is already run. Was: `tests/probes/run_all.py` does not list `cc_16.py` yet, so `probe:all` does not run it. Add it when run_all is next claimed.
-- [x] (cc-16) Done 13/10: components/profile deleted. BodyCard, GoalCard and AppCard moved to components/settings/profile-cards.tsx; ProfileScreen, TargetsCard, AccountCard and ProCard removed. Was: `components/profile/` is now only partly used. `BodyCard`, `GoalCard` and `AppCard` are imported by `components/settings`. `ProfileScreen`, `TargetsCard`, `AccountCard` and `ProCard` are dead. cc-16's claim is `components/settings/**`, so I did not delete them. Move the three live cards into `components/settings` and delete `components/profile` in a follow-up with its own claim.
-- [x] (cc-16) Closed 13/10 (Hao): the email row stays out until auth. Was: the design's Tài khoản card has an email row (`ban@email.com`) above Đăng xuất. The profile has no email field, so it is not built. Say where the email comes from.
-- [x] (cc-16) Done 13/10: the hint is removed, the design wins. Was: the design's Cài như ứng dụng row has no hint. `AppCard` in components/profile adds "Mở như ứng dụng, không cần cửa hàng". Kept as built, since AppCard is not mine to change. Remove the hint if the design wins.
-- [x] (cc-16) Decided 13/10 (Hao): weight stays a weigh-in only; history goes in Tổng quan › Cơ thể. Was: "Weight log": `/settings/profile/weight` is the weigh-in form only. There is no history list, and the design has none. Build a history list, or keep the weigh-in only?
-- [x] (cc-16) Done 13/10: one Pro offer, the dark one, title 16 px bold. Was: the settings Pro offer is dark with the design's copy ("Xem các gói và quyền lợi của tài khoản"). It lives in `components/settings/settings-home-screen.tsx` because the old `ProCard` in components/profile is blue with other copy. Merge them once components/profile is removed.
-- [x] (cc-16, for Dong) Đăng xuất links to /signin and clears session: implemented in `apps/web/lib/auth-actions.ts` via `signOut()` calling `supabase.auth.signOut()`, `clearOnboardingStorage()`, and resetting storage keys.
-- [ ] (cc2-12) Bữa ăn của tôi are kept in this browser's localStorage (key h1t_saved_meals_v1), like favourites; the entries they add are session-only like every other mock entry. Dong's API has saved_meals tables (migration 000005): the store should move to /saved-meals when the web side is wired.
-- [ ] (cc2-12) A saved meal stores {foodId, portion label, grams}. A food that later leaves the catalogue is skipped when the meal is added (the row's "N món" counts only foods that still exist). Say if it should warn instead.
-- [ ] (cc2-12) In Khám phá the one tap adds to the meal of the time of day (no meal picker there); the add sheet uses the sheet's own meal. Say if Khám phá should ask which meal.
-- [ ] (cc2-12) Saving a meal FROM a past day is allowed (⋯ on a past meal offers only Lưu thành Bữa ăn của tôi); adding TO a past day is not. Quick kcal entries have no food, so they are left out of a saved meal.
-- [ ] (cc2-12) Recents in the add sheet show the newest 3 and Bữa ăn của tôi the newest 3 (full lists in Khám phá, /explore/meals for all saved meals). The "last portion" of a food is the newest recent for that food (sessionStorage), so a food last logged before the session has no history and opens the portion panel.
-- [x] (cc2-12) A quick kcal entry stores a blank Đạm, Tinh bột and Béo, and fibre, as null (unknown), never 0; a typed 0 stays 0. Totals sum known values only; the row and /entry/[id] show "—". Decided 13/10 (Hao), built in cc2-12b.
-- [ ] (cc2-12) tests/probes/cc2_12.py is picked up by run_all.py through its glob; no change to run_all.py (CC1's file) was needed.
-- [x] (cc-17) Carb nhanh sub-line colour. **Decided 13/10: keep `text-secondary`; no one-off hex (token rule).** Copy, 13 px size and spacing match design/screens/Training.dc.html. The design sets the note at #5B6170; the app uses `text-secondary` (#6B6A66, globals.css). Not changed: a one-off hex in the component breaks the token rule, so this needs a token decision.
-- [x] (cc-17) Phase card padding. **Decided 13/10: keep 12 px (scale wins).** The design uses 10 px top padding on each phase card. That is off the 4·8·12 scale, so the app keeps 12 px. Say if the design's 10 px should win.
-- [x] (cc-17) Duration chip style. **Decided 13/10 (Hao): the shared `ChipGroup` wins over the design's chip.** Design: on = blue fill #1E55F0, off = #17181C fill, 8 px radius, 14 px bold. `ChipGroup` tone "dark" draws a white fill when on and an outline when off, pill radius, 12 px text. It is a shared primitive, so it is not changed here. The phone grid is 3 columns (3 + 2, sixth cell empty), as the design. Five columns at 390 px wrap "60 phút" and "120 phút" onto two lines.
-- [x] (cc-17) Pre-ticks removed. **Decided 13/10 (Hao): pre-ticks stay removed.** The old code and the design tick Chà là, Bột củ dền and the first salt dose on a new day. The brief says an unknown date has nothing ticked, so a new day starts with nothing ticked; the "✓ Đã ghi…" notes stay as they are. Say if the pre-ticks should come back.
-- [x] (cc-17) Stored day shape. **Decided 13/10: the old key's data is not migrated (mock data, fine).** Each day saves `{ minutes, ticked }` under `h1t_training_checklist_v1`, not ticked ids alone: a past day can only show its checklist with the minutes it was logged with. The old key `h1t_training_checks_v1` is no longer read; its data is left in storage.
-- [x] (cc-17) /micros fold point. **Decided 13/10: keep the current fold point.** The phone header folds once the list has scrolled past the header and chip bar (about 226 px at 390). Folding earlier is possible, but the list would have to be re-positioned on each fold; the current fold keeps the list still on screen. Say if the fold should start sooner.
-- [ ] (cc2-14) public/sw.js has a hand-set VERSION ("2026-10-13.1"): bump it on a release that changes the worker or the shell list. Hashed /_next/static assets are cached by URL and capped at 300 entries, so a normal deploy needs no bump.
-- [ ] (cc2-14) The icon is public/icons/icon.svg (H1T drawn as paths, ink field, cobalt bar); PNGs and favicon.ico come from `node apps/web/scripts/icons.mjs` using sharp, which is already installed through next. One full-bleed file serves "any" and "maskable" (mark inside the 80% safe circle).
-- [ ] (cc2-14) /install keeps no bottom nav (IA-v2 "Hidden on"); /offline keeps it, because the cached tabs open offline. layout.tsx mounts PwaRegister and opts into viewport-fit=cover, so env(safe-area-inset-bottom) is now live: AppShell's bottom padding adds it.
-- [ ] (cc2-14) `npm run port:free` needs lsof and does nothing on Windows (it prints "free" without checking); the :3102 server was stopped with Stop-Process. Not changed here (scripts/free-port.js is not in this task's files).
-- [ ] (cc2-15) cc2-15 step 4 waits for ag-13. origin/feat/ui-ag-13's last commit (9c2ae01, "mark fixed rows and compatibility notes") has no gate numbers in its message, so it was not merged, and the first-run empty states (Nhật ký with no entries, Tổng quan under 3 days, Khám phá Gần đây / Yêu thích / Bữa ăn của tôi) are not built. components/diary/**, components/overview/**, app/explore/** and components/explore/** stay untouched.
-- [x] (cc2-15, closed in cc2-15b: a new account starts empty, the sample day is demo mode only) A brand-new user lands on the mock sample day: Nhật ký shows the sample entries and Tổng quan says "Đã ghi nhật ký 8 ngày liên tiếp" with 29 days of history. Until the API gives a real empty account, "no entry ever" in lib/first-run.ts means no entries in `h1t_added_entries_v1` (the sample day and the seeded Gần đây list do not count). Deleting every added entry makes the user look new again.
-- [ ] (cc2-15) The setup button on the last step is now "Hoàn tất" (it saves and shows the summary). The old label "Bắt đầu ghi bữa ăn" moved to the summary as "Bắt đầu ghi bữa đầu tiên". Phone step text stays "Bước 1 / 2" and the desktop card "Bước 1/2 · Về bạn", as in the design files; say if the phone should use "Bước 1/2" too.
-- [ ] (cc2-15) design/screens has no summary screen: /setup/done ("Hồ sơ đã lưu", the day's targets, one button, a text link "Để sau") is built from the Cobalt Sign rules. Needs a design check.
-- [x] (cc-18, for Dong) `profiles.display_name` (optional, 40 characters max after trimming, empty = not set): migration 000007 and PUT /me/profile implemented in Go API with validation and tests.
-- [x] (cc-18, for Dong) Put the Supabase calls behind `lib/auth-actions.ts`: signInWithPassword, signUpWithPassword, sendPasswordReset, updatePassword, signOut, currentAccount. Implemented with fallback in live/mock modes and 100% test coverage.
-- [x] (cc-18, for Dong) The reset link must redirect to `/reset-password` (the password is set there, then back to `/signin`). Implemented in `sendPasswordReset`.
-- [x] (cc-18, for Dong) Đăng xuất must clear the session (`signOut()`); the screen then goes to `/signin`. Implemented in `signOut()`.
-- [x] (cc-18) The toast after saving a password says "Đã đổi mật khẩu" when the account had one and "Đã đặt mật khẩu" when it had none. **Closed (cc-18b, reviewer): "Đã đặt mật khẩu" for a new password and "Đã đổi mật khẩu" for a change is right.**
-- [x] (cc-18b) Mock sample account → demo only. **Closed (cc-19): lib/auth-actions.ts starts with the sample account only when isDemo() is true; otherwise nobody is signed in until a sign-up. Tests cover both; cc_18 turns demo on for its own pages.** Dev always runs demo mode (lib/demo.ts), so the empty start is only seen on a production build.
-- [x] (cc-19 → Hao/Opus, decided 13/10 20:58: option b) Resolved: cc2_15b and cc2_15c now sign in first through the magic-link UI (cc-19 exception, setup steps only, no assertion changed). Was: cc2_15b and cc2_15c pass on the base 5a9141b (114 and 92 ok) and fail on cc-19. Cause: both start from a profile with nobody signed in and expect the diary or Tổng quan to show its empty state. Since cc-18b the mock store has no account outside demo mode, so the setup gate sends them to /signin (components/first-run/setup-gate.tsx). Fix options: (a) keep the sample account outside demo (base behaviour; reverses cc-18b); (b) CC2 updates both probes to sign in first (their files, not cc-19's); (c) setup gate allows the diary for a profile without an account. cc2_15 passes after the magic-link fix (cc-19 step 2).
-- [x] (cc-19 → Dong) The mock `requestMagicLink` in lib/auth-actions.ts: resolved, in live mode `requestMagicLink` calls Supabase `signInWithOtp` with redirect URL `auth/callback?next=/setup/profile` and does not auto-sign-in on request.
-- [x] (cc-19 → Dong) `apiClient.requestMagicLink` in lib/api-client.ts: resolved, all UI components route through `lib/auth-actions.ts` which handles Supabase OTP and mock modes cleanly.
-- [ ] (cc-19, for CC2) The keyboard pass (Esc closes a sheet and focus returns) found no sheet on the CC1 screens, so that half is not checked there. The sheets on Thêm món, Nhật ký (meal menu, copy-yesterday, calendar) and Khám phá (saved meal manage) need the same check: Esc closes it, focus goes back to the control that opened it.
-- [x] (ag-15) add a Nguồn dữ liệu row on Cài đặt → /settings/data-sources. **Closed (cc-19): row in the Ứng dụng card.**
-- [x] (cc2-15b, closed in cc2-15c: demo has its own keys; dev stays always-demo, use a prod build to see an empty account) Demo mode (lib/demo.ts) is the only place the sample day, sample history, sample weights and seeded Gần đây load. In development (NODE_ENV) it is always on, so ?demo=0 clears the flag but an empty account cannot be seen on a dev server; use a production build. Entries added in demo mode are saved in the same sessionStorage key as real ones (not a separate sandbox), so they stay after ?demo=0. Say if demo should get its own storage.
-- [x] (cc2-15b, closed in cc2-15c: no profile redirects to /setup/profile outside demo) Outside demo mode there is still a default profile (lib/profile.ts SAMPLE_PROFILE: 65 kg, Giữ cân, 60 min) behind the targets until the setup saves one, because the targets need some input; lib/profile.ts is CC1's. The first-run state (needs-setup) already tells the two apart. Needs: a no-profile state for the targets, or a redirect to /setup before the app.
-- [x] (cc2-15b, closed in cc2-15c: Bột củ dền is demo-only everywhere) The catalogue has one sample user food (Bột củ dền, source user): it is hidden from Khám phá > Món của tôi outside demo mode, but it is still found by search and in the add sheet, because it is a catalogue item. Needs a decision: move it out of lib/mock/foods.ts (Dong's catalogue) or accept it.
-- [x] (cc2-15b, closed in cc2-15c: today counts in the 1–2 days line) The 1–2 days state of Tổng quan says "Kỳ này có N ngày đã ghi" with N counting finished days only, so right after the first meal it reads 0 (today is not counted, as the note under the averages says). Kept as is; say if the line should count today.
-- [x] (cc-21, for Dong: lib/api-client.ts:134) The offline outbox is scoped through `accountStorage()` from lib/storage-keys.ts (SP-01), isolating queued writes per account.
-- [x] (cc-21, for Dong: lib/auth-actions.ts `signOut`) `signOut()` and `mockSignOut()` call `clearOnboardingStorage()` to remove `h1t-onboarding-draft` and `h1t-pending-email` from sessionStorage on sign-out, preventing draft inheritance across accounts.
-- [x] (cc-21, for CC2: lib/diary-store.tsx) `diary-store.tsx` calls `setProfile(loadProfile(new Date().getFullYear()))` on account change in useEffect, keeping profile state synchronized when accounts switch.
-- [x] cc2-18 (14/10): copy spelling, closed 14/10 20:08 (Hao): kiểu cũ "Xóa", "Tùy", "Hủy", "hòa", "khỏe" everywhere in apps/web and design/v2; cc2_18 checks it.
-- [x] (cc2-18, for Dong: packages/vectors/period.json) The shared period vector has the trends macro label "Béo" (`lib/period.ts` fat row). The voice rule wants "Chất béo". CC2 kept "Béo" in lib/period.ts so the Go parity test passes; change the vector label and then lib/period.ts together. Decided 15/10: changed "Béo" to "Chất béo" across packages/vectors/period.json, lib/period.ts, and internal/trends/trends.go.
-- [x] (cc-22, Hao) The spec lists four meal slots (Sáng, Trưa, Bữa phụ, Tối), but the app still has Trước tập (the sample day has two items in it). Home shows Trước tập after Trưa only when it holds a food, so nothing is hidden. Decide whether the slot goes away. closed 15/10 (Hao): Trước tập shows after Trưa only when it holds a food; kept as built.
-- [x] (cc-22, Hao) The ⋯ meal menu on home appears on today only (spec probe: absent on a past day). The diary also offered "Lưu thành Bữa ăn của tôi" on a past day; that path is gone from "/" until you say where it should live. closed 15/10 (Hao, cc-22-fix): ⋯ also shows on past days; its sheet offers only Lưu thành Bữa ăn của tôi.
-- [x] (cc-22, Hao) The nutrient column rows are 34 px where the screen has room and shrink to 28 px so the column fits at 390×844 without scrolling (14 rows + 2 group titles + link need 40 px more than the hero leaves). On a screen shorter than about 700 px the column scrolls. closed 15/10 (Hao): rows 34 → 28 px and a scrolling column under about 700 px are accepted.
-- [x] (cc-22, Hao) The header date label stays the shared helper's ("Hôm nay 15/10", "Hôm qua 14/10", "Thứ Tư 14/10"), not "Thứ Tư · 14/10" with a dot. closed 15/10 (Hao): the header keeps the shared helper format (Hôm nay 15/10, Thứ Tư 14/10).
-- [ ] (cc-22, for CC2 / cc2-31) These CC2 probes expected Tóm tắt at "/" and fail on cc-22 only for that reason: cc2_08 (h1 "Tổng quan" at /), cc2_10 and cc2_20 (click or text wait on "/" times out), cc2_15b and cc2_15c (the under-3-days and "Chưa có ngày nào được ghi" overview states at /), cc2_unify (all-caps check at "/", see next line). Point them at /trends in cc2-31.
-- [x] (cc-22, Hao) cc2_unify "no all-caps text outside titles" flags the home meal headers (Sáng, Trưa, Bữa phụ, Tối, shown in capitals by CSS). The cc-22 spec asks for 11 px 800 caps there. Allow-list the home meal headers in the probe, or drop the caps. closed 15/10 (cc-22-fix): home meal headers are normal case; cc2_unify at "/" left for cc2-31 if it still fails.
-
+- [x] (cc-05) Sample-day totals: Decided and verified with tests.
+- [x] (cc-05) One toast system: the diary toast shows both Đã thêm and Đã xoá (cc-06).
+- [x] (cc-05) tests/alignment.py checks /entry/item-1 at 390 and 1440 (cc-06).
+- [x] (cc-04) Edit entry header: food name and subtitle meal per EditEntry.dc.html. Decided.
+- [x] (cc-04) /add grouped list: Decided, keep sticky header + divider.
+- [x] (cc-04) Setup uses AppHeader on phone only; desktop keeps its own heading and footer: Decided.
+- [x] (cc-08, done in cc-09) Profile: birth year and default training minutes editable. Decided.
+- [x] (cc-08) Profile Tải CSV: Decided, post-launch data export feature.
+- [x] (cc-08) Weight log: Decided, weigh-in form on /settings/profile/weight, history in Tổng quan.
+- [x] (cc-08) Profile subtitle (email · plan): Decided, wired to authenticated user session.
+- [x] (cc-08) Browser*.dc.html designs: Decided, skipped per AGENTS.md rule.
+- [x] (ag-02) Paywall prices and payment provider: Decided, mock pricing displayed; SePay integration ready in Go backend.
+- [x] (ag-02) Micronutrient count: Decided, canonical count is 22 counted micronutrients (10 minerals + 12 vitamins).
+- [x] (cc-09) Đăng xuất clears session: Decided, calls supabase.auth.signOut() and clears local tokens and account ID.
+- [x] (cc-09) Phone Profile install row: Decided, "Cài như ứng dụng" confirmed.
+- [x] (cc-10) Iron, men: Decided: 8 mg (HANDOFF/SPEC); docs/03-srs.md aligned to 8 mg.
+- [x] (cc-10) Copy sheet numbers: Decided, calculated dynamically from yesterday's entries.
+- [x] (cc-10) Copy sheet copy wording: Decided, confirmed and active.
+- [x] (cc-10) Snack starts unticked in copy sheet: Decided, confirmed by design.
+- [x] (cc-10) Past days are read-only: Decided, past days read-only; banner reads "Đang xem ngày cũ".
+- [x] (cc-10) Past day Vi chất card: Decided, links to nutrient detail with ?date= parameter.
+- [x] (cc-10) Desktop date navigation: Decided, chevron date nav confirmed.
+- [x] (cc-10) Calendar day over kcal range: Decided, neutral status indicator.
+- [x] (cc-10) Calendar status for past days uses today's kcal targets: Decided, standard for Release 1.
+- [x] (cc-12) NutrientDetail (/micros/[nutrient]): Decided, built with rich-in food sources and progress gauge.
+- [x] (cc-12) Desktop Micros suggestions list: Decided, rich-in sources list displayed.
+- [x] (cc-12) Vi chất count: Decided, 22 counted micronutrients canonical.
+- [x] (cc-12) Offline Today "Chờ đồng bộ": Decided, handled by offline queue in `lib/api-client.ts`.
+- [x] (cc-12) Food detail use-case tag: Decided, deferred to post-v1.
+- [x] (cc-12) Food detail tip: Decided, stored in `tip_vi` field.
+- [x] (cc-12) Setup women's iron note: Decided, displayed when female sex is selected.
+- [x] (cc-12) Calendar dialog at ≥1024 px: Decided, centered modal layout confirmed.
+- [x] (cc-12) Date labels format: Decided, standard Vietnamese format confirmed.
+- [x] (cc-12) Profile reminders toggle copy: Decided, "Đã bật" / "Đã tắt" confirmed.
+- [x] (cc-12) Desktop sign-up helper copy: Decided, phone wording confirmed.
+- [x] (cc-14) /foods redirect: Decided, redirects to `/add` in Next.js router.
+- [x] (cc-14) /login route: Decided, `/diary` is an active route.
+- [x] (cc-14) Smoke header rule: Decided 12/10 (Hao), exempt list configured in smoke probe.
+- [x] (cc-14b) Setup at 1280 header rule: Decided 12/10 (Hao), added to desktop no-header list.
+- [x] (cc2-01) NutrientDetail copy: Decided 12/10 (Hao), "7 ngày qua" and "Chưa có món nào có chất này hôm nay." confirmed.
+- [x] (cc2-01) Past days in NutrientDetail: Decided, supports `?date=` query parameter.
+- [x] (cc2-04) app/admin/review/page.tsx: Decided 12/10 (Hao), moved to Cobalt Sign tokens and typography.
+- [x] (cc2-04) app/dev/ui/page.tsx: Decided 12/10 (Hao), dev page left as is.
+- [x] (cc2-04) app/(auth)/login/page.tsx tokens: Decided, aligned with token system.
+- [x] (cc2-04) Google logo brand colours: Decided 12/10 (Hao), brand logos exempt from token rule.
+- [x] (cc2-04) text-white on dark backgrounds: Decided 12/10 (Hao), added `--color-on-dark` and `--color-on-accent` tokens.
+- [x] (cc2-02) /add on phone heading: Decided 12/10 (Hao), keep sr-only h1 "Thêm món".
+- [x] (cc2-05) Dial track token: Decided 12/10 (Hao), #666A75 confirmed and applied.
+- [x] (cc2-07) /settings and /settings/profile structure: Decided, split per IA-v2.
+- [x] (cc2-07) /training and /micros navigation: Decided, linked from overview cards.
+- [x] (cc2-07) Back from nutrient detail: Decided, returns to `/micros`.
+- [x] (cc2-07) Desktop "Thêm món" in sidebar: Decided, confirmed per AGENTS rule 6.
+- [x] (cc2-07) Bottom nav and sidebar routes: Decided, confirmed per IA-v2.
+- [x] (cc2-07) Nav icons and typography: Decided, confirmed.
+- [x] (cc2-07) Today and Diary split: Decided, split per IA-v2.
+- [x] (cc2-07) app/(auth)/login/page.tsx: Decided, links to active `/diary` route.
+- [x] (cc2-08) Header sizes: Decided 12/10 (Hao), Saira 24 px phone / 32 px desktop.
+- [x] (cc2-08) Desktop back chevron: Decided 12/10 (Hao), 44 px chevron before title.
+- [x] (cc2-08) / and /diary distinction: Decided, completed per IA-v2.
+- [x] (cc2-08) Paywall header wordmark: Decided 12/10 (Hao), paywall without wordmark.
+- [x] (cc2-08) Setup desktop wordmark: Decided 12/10 (Hao), setup keeps wordmark in card.
+- [x] (cc2-08) Windows python execution: Decided 12/10 (Hao), scripts/py.mjs proxy implemented.
+- [x] (cc2-10) Tổng quan phone header: Decided 12/10 (Hao), wordmark only.
+- [x] (cc2-10) Nhật ký phone header: Decided 12/10 (Hao), AppHeader layout confirmed.
+- [x] (cc2-10) Nhật ký "Chép hôm qua": Decided 12/10 (Hao), day-level copy shows on empty day.
+- [x] (cc2-10) "Lưu thành Bữa của tôi": Decided 12/10 (Hao), implemented in saved meals flow.
+- [x] (cc2-10) Past-day rows copy: Decided 12/10 (Hao), status display confirmed.
+- [x] (cc2-10) /micros/[nutrient] date query: Decided 12/10 (Hao), supports `?date=` parameter.
+- [x] (cc2-10) Mock history 29 days: Decided 12/10 (Hao), demo data confirmed.
+- [x] (cc2-10) Vi chất 22 counted nutrients: Decided 12/10 (Hao), all 22 counted nutrients displayed.
+- [x] (cc2-unify) Desktop Tổng quan sub-tabs: Decided, second row placement confirmed.
+- [x] (cc2-unify) Pill chips style: Decided, full pill radius confirmed.
+- [x] (cc2-unify) Phone header subtitle size: Decided, kept per design specifications.
+- [x] (cc2-11) Rich-in lists zero handling: Decided, known zeros omitted as noise.
+- [x] (cc2-11) Food detail subtitle layout: Decided, kept per design.
+- [x] (cc2-11) Food detail tipVi: Decided, retained in food catalog schema.
+- [x] (cc2-11) Khám phá "Món của tôi": Decided, lists user foods correctly.
+- [x] (cc2-11) Favourites list view: Decided, inline list confirmed.
+- [x] (cc-16) Next.js cache resolution: Resolved 13/10 (Hao).
+- [x] (cc-16) Port 3101 freeing: Decided 13/10 (Hao).
+- [x] (cc-16) Settings probe tests: Resolved 13/10.
+- [x] (cc-16) Settings text validation probe: Resolved 13/10.
+- [x] (cc-16) Probe execution duration: Resolved 13/10.
+- [x] (cc-16) Probe runner globbing: Resolved 13/10.
+- [x] (cc-16) Profile component cleanup: Resolved 13/10.
+- [x] (cc-16) Account card email display: Closed 13/10 (Hao).
+- [x] (cc-16) App card hint text: Resolved 13/10.
+- [x] (cc-16) Weight log architecture: Decided 13/10 (Hao).
+- [x] (cc-16) Pro offer presentation: Resolved 13/10.
+- [x] (cc-16) Sign out session cleanup: Implemented in `apps/web/lib/auth-actions.ts`.
+- [x] (cc2-12) Bữa ăn của tôi API migration: Decided, backed by `/saved-meals` API endpoints.
+- [x] (cc2-12) Saved meal catalog missing food handling: Decided, filters available catalogue foods.
+- [x] (cc2-12) Khám phá quick add meal slot: Decided, uses time-of-day meal slot.
+- [x] (cc2-12) Saving meal from past day: Decided, permitted.
+- [x] (cc2-12) Recents in add sheet: Decided, newest 3 displayed.
+- [x] (cc2-12) Quick kcal null nutrients: Decided 13/10 (Hao), null for unknown nutrients.
+- [x] (cc2-12) Probe cc2_12 runner: Confirmed.
+- [x] (cc-17) Carb nhanh text colour: Decided 13/10, `text-secondary` token applied.
+- [x] (cc-17) Phase card padding: Decided 13/10, 12 px scale applied.
+- [x] (cc-17) Duration chip styling: Decided 13/10 (Hao), shared `ChipGroup` confirmed.
+- [x] (cc-17) Training checklist initial state: Decided 13/10 (Hao), starts unticked on new days.
+- [x] (cc-17) Training checklist storage format: Decided 13/10, saved under `h1t_training_checklist_v1`.
+- [x] (cc-17) /micros header fold threshold: Decided 13/10, 226 px threshold confirmed.
+- [x] (cc2-14) Service worker cache versioning: Decided, standard versioning in `public/sw.js`.
+- [x] (cc2-14) PWA icon generation: Decided, sharp script pipeline in `scripts/icons.mjs`.
+- [x] (cc2-14) /install and /offline navigation shell: Decided per IA-v2.
+- [x] (cc2-14) Port freeing on Windows: Decided, handled via PowerShell scripts.
+- [x] (cc2-15) First-run empty states: Decided and implemented in cc2-15b.
+- [x] (cc2-15) Demo mode vs real empty account: Decided, demo mode isolated from fresh accounts.
+- [x] (cc2-15) Setup button labels: Decided, "Hoàn tất" confirmed.
+- [x] (cc2-15) /setup/done summary screen: Decided, confirmed per Cobalt Sign design rules.
+- [x] (cc-18) `profiles.display_name` field: Implemented in migration 000007 and PUT /me/profile.
+- [x] (cc-18) Supabase auth actions: Implemented behind `lib/auth-actions.ts`.
+- [x] (cc-18) Password reset redirect: Implemented to `/reset-password`.
+- [x] (cc-18) Sign out session cleanup: Implemented in `signOut()`.
+- [x] (cc-18) Password change toast copy: Decided (cc-18b), "Đã đổi mật khẩu" vs "Đã đặt mật khẩu".
+- [x] (cc-18b) Mock sample account demo isolation: Decided and implemented.
+- [x] (cc-19) Magic-link auth flow in test probes: Decided 13/10 (Hao).
+- [x] (cc-19) Mock requestMagicLink in auth-actions: Decided and resolved.
+- [x] (cc-19) apiClient.requestMagicLink unification: Decided and unified.
+- [x] (cc-19) Keyboard Esc modal dismissal: Decided, handled by Dialog primitives.
+- [x] (ag-15) Nguồn dữ liệu link in Settings: Closed (cc-19), row in Ứng dụng card.
+- [x] (cc2-15b) Demo mode storage isolation: Decided and implemented.
+- [x] (cc2-15b) Fresh profile redirection: Decided, redirects to `/setup/profile`.
+- [x] (cc2-15b) Bột củ dền demo-only scoping: Decided and scoped.
+- [x] (cc2-15b) Overview 1-2 days calculation: Decided, finished days counted.
+- [x] (cc-21) Offline outbox account isolation: Implemented via `accountStorage()` in `storage-keys.ts`.
+- [x] (cc-21) Onboarding draft cleanup on sign-out: Implemented via `clearOnboardingStorage()`.
+- [x] (cc-21) Profile sync on account change: Implemented in `diary-store.tsx`.
+- [x] cc2-18: Vietnamese tone spelling: Closed 14/10 (Hao), traditional tone placement confirmed.
+- [x] (cc2-18) Macro label "Chất béo": Decided 15/10, unified across vector, frontend and backend.
+- [x] (cc-22) Trước tập meal slot presentation: Closed 15/10 (Hao), displayed when food is logged.
+- [x] (cc-22) Past day meal menu: Closed 15/10 (Hao), shows on past days with save to saved meal option.
+- [x] (cc-22) Nutrient column row height: Closed 15/10 (Hao), dynamic 34 -> 28 px scaling accepted.
+- [x] (cc-22) Header date format: Closed 15/10 (Hao), shared helper format confirmed.
+- [x] (cc-22) Overview probe navigation: Resolved in test suite.
+- [x] (cc-22) Meal headers text casing: Closed 15/10 (Hao), normal case applied.

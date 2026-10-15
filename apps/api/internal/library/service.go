@@ -78,6 +78,14 @@ func (s *libraryServiceImpl) CreateSavedMeal(ctx context.Context, userID uuid.UU
 	if req.Name == "" {
 		return nil, errors.New("saved meal name is required")
 	}
+	for i := range req.Items {
+		if req.Items[i].Grams <= 0 && req.Items[i].ServingSizeG > 0 {
+			req.Items[i].Grams = req.Items[i].ServingSizeG
+		}
+		if req.Items[i].PortionLabel == "" {
+			req.Items[i].PortionLabel = "Khẩu phần"
+		}
+	}
 	meal := &SavedMeal{
 		Name:  req.Name,
 		Items: req.Items,

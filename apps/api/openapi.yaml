@@ -211,6 +211,97 @@ components:
           type: string
           format: date-time
 
+    DiaryEntryItem:
+      type: object
+      required:
+        - id
+        - kind
+        - meal_slot
+        - grams
+        - calories
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        food_id:
+          type: string
+          format: uuid
+          nullable: true
+        food_name:
+          type: string
+        kind:
+          type: string
+          enum: [food, quick]
+        meal_slot:
+          type: string
+        serving_label:
+          type: string
+        grams:
+          type: number
+        serving_size_g:
+          type: number
+        calories:
+          type: number
+        nutrients:
+          type: object
+          additionalProperties:
+            type: number
+            nullable: true
+        created_at:
+          type: string
+          format: date-time
+
+    MealSlotSummary:
+      type: object
+      required:
+        - slot
+        - name_vi
+        - total_kcal
+        - entries
+      properties:
+        slot:
+          type: string
+          enum: [breakfast, lunch, dinner, snack, pre_workout]
+        name_vi:
+          type: string
+        total_kcal:
+          type: number
+        target_min_kcal:
+          type: number
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiaryEntryItem'
+
+    DaySummary:
+      type: object
+      required:
+        - date
+        - training_minutes
+        - is_read_only
+        - summary
+        - meals
+      properties:
+        date:
+          type: string
+          format: date
+        training_minutes:
+          type: integer
+        is_read_only:
+          type: boolean
+        summary:
+          type: object
+          additionalProperties:
+            type: number
+            nullable: true
+        targets:
+          type: object
+        meals:
+          type: array
+          items:
+            $ref: '#/components/schemas/MealSlotSummary'
+
 paths:
   /me:
     get:
@@ -563,23 +654,11 @@ paths:
             format: date
       responses:
         '200':
-          description: Daily logs and totals
+          description: Daily meal logs, training minutes, targets, and nutrient totals
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  date:
-                    type: string
-                    format: date
-                  training_minutes:
-                    type: integer
-                  entries:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/DiaryLog'
-                  totals:
-                    $ref: '#/components/schemas/NutrientValues'
+                $ref: '#/components/schemas/DaySummary'
         '401':
           description: Unauthorized
           content:
@@ -622,6 +701,9 @@ paths:
                   type: string
                 grams:
                   type: number
+                serving_size_g:
+                  type: number
+                  description: Optional alias for grams
                 serving_label:
                   type: string
                 calories:

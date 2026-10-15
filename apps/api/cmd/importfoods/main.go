@@ -31,11 +31,12 @@ type FoodRecord struct {
 }
 
 var countedNutrients = []string{
-	"energy", "protein", "carbs", "fat", "fiber",
-	"sodium", "potassium", "calcium", "iron", "phosphorus",
-	"magnesium", "zinc", "copper", "manganese", "selenium",
-	"vitamin_a", "vitamin_c", "vitamin_d", "vitamin_e",
-	"vitamin_b1", "vitamin_b2", "vitamin_b3",
+	// 10 minerals
+	"calcium", "copper", "iron", "magnesium", "manganese",
+	"phosphorus", "potassium", "selenium", "sodium", "zinc",
+	// 12 vitamins
+	"vitamin_a", "vitamin_c", "vitamin_d", "vitamin_e", "vitamin_k",
+	"b1", "b2", "b3", "b5", "b6", "folate", "b12",
 }
 
 func main() {

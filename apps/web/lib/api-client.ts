@@ -72,12 +72,42 @@ export interface Food {
   created_at: string;
 }
 
+export interface MealSlotEntry {
+  id: string;
+  food_id: string | null;
+  food_name: string;
+  kind: string;
+  meal_slot: string;
+  serving_label: string;
+  grams: number;
+  calories: number;
+  nutrients: Record<string, number | null>;
+  created_at: string;
+}
+
+export interface MealSlotSummary {
+  slot: string;
+  name_vi: string;
+  total_kcal: number;
+  target_min_kcal: number;
+  entries: MealSlotEntry[];
+}
+
+export interface DaySummaryResponse {
+  date: string;
+  training_minutes: number;
+  is_read_only: boolean;
+  summary: Record<string, number | null>;
+  targets?: unknown;
+  meals: MealSlotSummary[];
+}
+
 export interface DiaryLog {
   id: string;
   user_id: string;
   food_id: string;
   kind?: "food" | "quick";
-  meal_slot: "breakfast" | "lunch" | "dinner" | "snack" | "preworkout" | "intraworkout" | "postworkout";
+  meal_slot: "breakfast" | "lunch" | "dinner" | "snack" | "pre_workout" | "preworkout" | "intraworkout" | "postworkout";
   quantity: number;
   serving_size_g: number;
   nutrients_snapshot: NutrientValues;
@@ -97,7 +127,7 @@ export interface LogMealPayload {
   id: string; // Client-generated UUID
   food_id: string;
   kind?: "food" | "quick";
-  meal_slot: "breakfast" | "lunch" | "dinner" | "snack" | "preworkout" | "intraworkout" | "postworkout";
+  meal_slot: "breakfast" | "lunch" | "dinner" | "snack" | "pre_workout" | "preworkout" | "intraworkout" | "postworkout";
   quantity: number;
   serving_size_g?: number;
   log_date?: string;
@@ -226,6 +256,32 @@ export const apiClient = {
     return Promise.resolve(SAMPLE_DAY);
   },
 
+  async getDay(date?: string): Promise<DaySummaryResponse> {
+    const targetDate = date || new Date().toISOString().split("T")[0];
+    if (isLiveMode()) {
+      try {
+        const res = await apiFetch(`/days/${encodeURIComponent(targetDate)}`);
+        if (res.ok) {
+          return await res.json();
+        }
+      } catch {
+        // Fallback below
+      }
+    }
+    return {
+      date: targetDate,
+      training_minutes: 60,
+      is_read_only: false,
+      summary: {
+        calories: SAMPLE_DAY.calories.consumed,
+        protein: SAMPLE_DAY.macros.find((m) => m.key === "protein")?.consumed || 62,
+        carbs: SAMPLE_DAY.macros.find((m) => m.key === "carbs")?.consumed || 133,
+        fat: SAMPLE_DAY.macros.find((m) => m.key === "fat")?.consumed || 21,
+      },
+      meals: [],
+    };
+  },
+
   async getDailyProgress(date?: string): Promise<{ progress: DailyProgress; logs: DiaryLog[] }> {
     if (isLiveMode()) {
       try {
@@ -233,6 +289,43 @@ export const apiClient = {
         const res = await apiFetch(`/days/${encodeURIComponent(targetDate)}`);
         if (res.ok) {
           const json = await res.json();
+          if (json.meals && json.summary) {
+            const logs: DiaryLog[] = [];
+            for (const m of json.meals) {
+              for (const e of m.entries || []) {
+                logs.push({
+                  id: e.id,
+                  user_id: "",
+                  food_id: e.food_id || "",
+                  kind: e.kind,
+                  meal_slot: e.meal_slot,
+                  quantity: 1,
+                  serving_size_g: e.grams,
+                  nutrients_snapshot: e.nutrients || {},
+                  log_date: json.date,
+                  created_at: e.created_at,
+                });
+              }
+            }
+            const progress: DailyProgress = {
+              log_date: json.date,
+              total_nutrients: {
+                calories: json.summary.calories || json.summary.energy || 0,
+                protein: json.summary.protein || 0,
+                carbohydrates: json.summary.carbs || 0,
+                fat: json.summary.fat || 0,
+                fiber: json.summary.fiber || 0,
+                sodium: json.summary.sodium || 0,
+                potassium: json.summary.potassium || 0,
+                calcium: json.summary.calcium || 0,
+                magnesium: json.summary.magnesium || 0,
+                iron: json.summary.iron || 0,
+                zinc: json.summary.zinc || 0,
+              },
+              logs_count: logs.length,
+            };
+            return { progress, logs };
+          }
           return json;
         }
       } catch {
@@ -385,9 +478,22 @@ export const apiClient = {
   }): Promise<FoodItem> {
     if (isLiveMode()) {
       try {
+        const payload = {
+          name_vi: input.nameVi,
+          nameVi: input.nameVi,
+          serving_unit: input.servingUnit,
+          servingUnit: input.servingUnit,
+          serving_size: input.servingSize,
+          servingSize: input.servingSize,
+          calories: input.calories,
+          protein: input.protein,
+          carbs: input.carbs,
+          fat: input.fat,
+          micros: input.micros,
+        };
         const res = await apiFetch(`/foods/custom`, {
           method: "POST",
-          body: JSON.stringify(input),
+          body: JSON.stringify(payload),
         });
         if (res.ok) {
           const json = await res.json();
@@ -434,6 +540,7 @@ export const apiClient = {
     const entryId = payload.id || `entry-${Date.now()}`;
     const date = payload.date || new Date().toISOString().split("T")[0];
 
+    const slot = payload.mealSlot === "preworkout" ? "pre_workout" : payload.mealSlot;
     if (isLiveMode()) {
       try {
         const res = await apiFetch(`/days/${date}/entries`, {
@@ -441,8 +548,9 @@ export const apiClient = {
           body: JSON.stringify({
             id: entryId,
             food_id: payload.foodId,
+            grams: payload.grams,
             serving_size_g: payload.grams,
-            meal_slot: payload.mealSlot,
+            meal_slot: slot,
             kind: "food",
           }),
         });
@@ -454,8 +562,9 @@ export const apiClient = {
         enqueueOfflineEntry(date, {
           id: entryId,
           food_id: payload.foodId,
+          grams: payload.grams,
           serving_size_g: payload.grams,
-          meal_slot: payload.mealSlot,
+          meal_slot: slot,
           kind: "food",
         });
       }
@@ -557,7 +666,13 @@ export const apiClient = {
           method: "POST",
           body: JSON.stringify({
             name,
-            items: items.map((it) => ({ food_id: it.foodId, serving_size_g: it.grams })),
+            items: items.map((it, idx) => ({
+              food_id: it.foodId,
+              grams: it.grams,
+              serving_size_g: it.grams,
+              portion_label: "Khẩu phần",
+              sort: idx,
+            })),
           }),
         });
         if (res.ok) {

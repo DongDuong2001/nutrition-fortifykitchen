@@ -130,8 +130,12 @@ func (s *diaryServiceImpl) GetDay(ctx context.Context, userID uuid.UUID, date st
 	}
 
 	for _, e := range entries {
+		slot := e.MealSlot
+		if slot == "preworkout" {
+			slot = "pre_workout"
+		}
 		for i := range meals {
-			if meals[i].Slot == e.MealSlot {
+			if meals[i].Slot == slot {
 				meals[i].Entries = append(meals[i].Entries, e)
 				meals[i].TotalKcal = round2(meals[i].TotalKcal + e.Calories)
 				break
@@ -191,6 +195,12 @@ func (s *diaryServiceImpl) CreateEntry(ctx context.Context, userID uuid.UUID, da
 
 	if req.MealSlot == "" {
 		req.MealSlot = "breakfast"
+	} else if req.MealSlot == "preworkout" {
+		req.MealSlot = "pre_workout"
+	}
+
+	if req.Grams <= 0 && req.ServingSizeG > 0 {
+		req.Grams = req.ServingSizeG
 	}
 
 	item := &DiaryEntryItem{
@@ -298,10 +308,19 @@ func (s *diaryServiceImpl) UpdateEntry(ctx context.Context, userID uuid.UUID, en
 	}
 
 	if req.MealSlot != nil {
-		existing.MealSlot = *req.MealSlot
+		slot := *req.MealSlot
+		if slot == "preworkout" {
+			slot = "pre_workout"
+		}
+		existing.MealSlot = slot
 	}
 	if req.ServingLabel != nil {
 		existing.ServingLabel = *req.ServingLabel
+	}
+
+	gramsVal := req.Grams
+	if (gramsVal == nil || *gramsVal <= 0) && req.ServingSizeG != nil && *req.ServingSizeG > 0 {
+		gramsVal = req.ServingSizeG
 	}
 
 	if existing.Kind == "quick" {
@@ -309,12 +328,12 @@ func (s *diaryServiceImpl) UpdateEntry(ctx context.Context, userID uuid.UUID, en
 			existing.Calories = *req.Calories
 		}
 	} else {
-		if req.Grams != nil && *req.Grams > 0 {
-			existing.Grams = *req.Grams
+		if gramsVal != nil && *gramsVal > 0 {
+			existing.Grams = *gramsVal
 			if existing.FoodID != nil {
 				_, per100g, err := s.repo.GetFoodNutrients(ctx, *existing.FoodID)
 				if err == nil {
-					ratio := *req.Grams / 100.0
+					ratio := *gramsVal / 100.0
 					scaledNutrients := make(map[string]*float64)
 					for k, v := range per100g {
 						if v != nil {
@@ -375,12 +394,19 @@ func (s *diaryServiceImpl) CopyYesterday(ctx context.Context, userID uuid.UUID, 
 
 	allowedSlots := make(map[string]bool)
 	for _, sl := range req.MealSlots {
+		if sl == "preworkout" {
+			sl = "pre_workout"
+		}
 		allowedSlots[sl] = true
 	}
 
 	var copied []DiaryEntryItem
 	for _, src := range sourceEntries {
-		if len(allowedSlots) > 0 && !allowedSlots[src.MealSlot] {
+		slot := src.MealSlot
+		if slot == "preworkout" {
+			slot = "pre_workout"
+		}
+		if len(allowedSlots) > 0 && !allowedSlots[slot] {
 			continue
 		}
 
@@ -389,7 +415,7 @@ func (s *diaryServiceImpl) CopyYesterday(ctx context.Context, userID uuid.UUID, 
 			FoodID:       src.FoodID,
 			FoodName:     src.FoodName,
 			Kind:         src.Kind,
-			MealSlot:     src.MealSlot,
+			MealSlot:     slot,
 			ServingLabel: src.ServingLabel,
 			Grams:        src.Grams,
 			Calories:     src.Calories,
@@ -411,6 +437,9 @@ func (s *diaryServiceImpl) CopyYesterday(ctx context.Context, userID uuid.UUID, 
 func (s *diaryServiceImpl) DeleteMeal(ctx context.Context, userID uuid.UUID, date string, mealSlot string) error {
 	if err := ValidateDateWritable(date); err != nil {
 		return err
+	}
+	if mealSlot == "preworkout" {
+		mealSlot = "pre_workout"
 	}
 	return s.repo.DeleteMealEntries(ctx, userID, date, mealSlot)
 }

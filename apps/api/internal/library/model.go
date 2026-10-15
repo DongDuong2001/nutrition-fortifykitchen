@@ -27,6 +27,7 @@ type SavedMealItem struct {
 	FoodName     string    `json:"food_name,omitempty"`
 	PortionLabel string    `json:"portion_label"`
 	Grams        float64   `json:"grams"`
+	ServingSizeG float64   `json:"serving_size_g,omitempty"`
 	Sort         int       `json:"sort"`
 }
 

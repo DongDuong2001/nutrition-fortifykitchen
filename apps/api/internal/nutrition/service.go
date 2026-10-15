@@ -93,6 +93,16 @@ func round(val float64) float64 {
 }
 
 func (s *nutritionService) CreateCustomFood(ctx context.Context, userID uuid.UUID, req CreateCustomFoodRequest) (*FoodDetail, error) {
+	if req.NameVi == "" && req.NameViAlt != "" {
+		req.NameVi = req.NameViAlt
+	}
+	if req.ServingUnit == "" && req.ServingUnitAlt != "" {
+		req.ServingUnit = req.ServingUnitAlt
+	}
+	if req.ServingSize <= 0 && req.ServingSizeAlt > 0 {
+		req.ServingSize = req.ServingSizeAlt
+	}
+
 	if req.NameVi == "" {
 		return nil, errors.New("name_vi is required")
 	}
