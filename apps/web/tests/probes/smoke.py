@@ -82,12 +82,17 @@ def discover_routes():
             else:
                 parts.append(seg)
         routes.append("/" + "/".join(parts))
+    routes.extend(EXTRA_ROUTES)
     routes.append(NOT_FOUND_ROUTE)
     return routes
 
 
+# cc-23: discovery opens /foods/compare with no ids (the empty state); this opens it with three foods too
+EXTRA_ROUTES = ["/foods/compare?ids=food-cha-la,food-yen-mach,food-chuoi"]
+
+
 def slug(route):
-    return "home" if route == "/" else route.strip("/").replace("/", "-")
+    return "home" if route == "/" else re.sub(r"[^A-Za-z0-9-]+", "-", route.strip("/").replace("/", "-")).strip("-")
 
 
 def check(browser, route, width, height):
@@ -158,7 +163,7 @@ def check(browser, route, width, height):
 
 
 # cc2-15b: the empty-account pass. A new user has no entries, no history and no sample data.
-EMPTY_ROUTES = ["/", "/trends", "/trends/micros", "/trends/body", "/", "/micros", "/training", "/explore", "/explore/meals", "/explore/leaderboard", "/explore/coaches", "/privacy", "/terms", "/add", "/settings", "/setup/done"]
+EMPTY_ROUTES = ["/", "/trends", "/trends/micros", "/trends/body", "/", "/micros", "/training", "/explore", "/explore/meals", "/explore/leaderboard", "/explore/coaches", "/privacy", "/terms", "/add", "/settings", "/setup/done", "/foods/compare?ids=food-cha-la,food-yen-mach,food-chuoi"]
 BAD_TEXT = re.compile(r"\bNaN\b|\bundefined\b|\bInfinity\b")
 
 
