@@ -191,3 +191,4 @@
 - [ ] (cc-30, for Hao) Production CSP `connect-src` in `apps/web/next.config.ts` still allows `http://localhost:*` and `ws://localhost:*`. Left as is (Dong's file); drop them for production if you agree.
 - [ ] (cc-30, for Hao) `docs/10-vps-hardening.md` and `docs/11-go-live-checklist.md` still name h1tmicro.vn; `docs/deploy.md` is the runbook for lehongkhanh.vn and Caddy there proxies by compose service name, not 127.0.0.1.
 - [ ] (cc-30, for Hao) The first deploy has not been run; the images build, but nothing was started on a VPS. Needs: DNS A records, `deploy/.env.prod` on the server, a read-only GitHub deploy key, Supabase Auth URLs (see `docs/deploy.md`).
+- [ ] (cc-31, for Dong) Add a read-only GitHub deploy key for the VPS so `deploy/deploy.sh` can `git pull`. Until then the server holds a copy of the tagged release in /opt/h1t (copied with `git archive`, no `.git`), and `deploy.sh` cannot run there.
