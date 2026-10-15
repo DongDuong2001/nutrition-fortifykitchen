@@ -22,7 +22,6 @@ SIZES = [("390", {"width": 390, "height": 844}), ("1280", {"width": 1280, "heigh
 # route, h1 (case-insensitive), kind: home | tab | pushed
 ROUTES = [
     ("/", "Hôm nay", "tab"),
-    ("/", "Nhật ký", "tab"),
     ("/explore", "Khám phá", "tab"),
     ("/settings", "Cài đặt", "tab"),
     ("/settings/profile", "Hồ sơ", "pushed"),
@@ -38,7 +37,7 @@ ROUTES = [
     ("/foods/new", "Tạo món mới", "pushed"),
 ]
 INK_BAND_PHONE = {"/", "/", "/trends", "/trends/micros", "/trends/body"}
-SHOT_NAMES = {"/": "home", "/": "diary", "/micros": "micros", "/settings": "settings", "/settings/profile": "profile"}
+SHOT_NAMES = {"/": "home", "/micros": "micros", "/settings": "settings", "/settings/profile": "profile"}
 problems, notes = [], []
 sys.stdout.reconfigure(encoding="utf-8")
 

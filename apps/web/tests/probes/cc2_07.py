@@ -153,7 +153,11 @@ def probe_redirects(pg, name):
         check(status == 308, f"{name}: {src} is a permanent redirect (status {status})")
     # A past day stays read-only on /diary
     go(pg, f"/?date={YESTERDAY}")
-    check("Đang xem ngày cũ" in pg.inner_text("body"), f"{name}: /diary?date= shows the read-only past day")
+    # cc2-32: Hôm nay marks a past day read-only with "Chỉ xem" in its header (the diary's "Đang xem ngày cũ" is gone)
+    if name == "1280":
+        check("Chỉ xem" in pg.inner_text("body"), f"{name}: /?date=<past> shows the read-only past day (Chỉ xem)")
+    else:  # the phone header has no "Chỉ xem"; read-only shows as no add links on the past day
+        check(pg.locator("a[aria-label^='Thêm vào']").count() == 0, f"{name}: /?date=<past> has no add links (read-only)")
     # A past ?date= on /add goes to that day's diary
     pg.goto(BASE + f"/add?date={YESTERDAY}", wait_until="networkidle")
     pg.wait_for_timeout(500)

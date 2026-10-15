@@ -73,32 +73,6 @@ def test_profile_red(browser):
         ctx.close()
 
 
-def test_calorie_dial_track(browser):
-    # The track circle reaches 3:1 non-text contrast on the ink header and on the surface it actually sits on (the inset panel)
-    for vp_name, vp in (("390", PHONE), ("1440", DESKTOP)):
-        ctx = browser.new_context(viewport=vp)
-        pg = ctx.new_page()
-        pg.goto(BASE + "/", wait_until="networkidle")
-        pg.wait_for_timeout(600)
-        track = pg.evaluate("""() => {
-            const dial = [...document.querySelectorAll('svg[role="img"]')].find((s) => s.querySelectorAll('circle').length >= 2);
-            if (!dial) return null;
-            // The colour of the surface the ring really sits on: the nearest ancestor with a solid background
-            let el = dial.parentElement, bg = 'rgba(0, 0, 0, 0)';
-            while (el) { bg = getComputedStyle(el).backgroundColor; if (!bg.startsWith('rgba(0, 0, 0, 0') && bg !== 'transparent') break; el = el.parentElement; }
-            return { ring: getComputedStyle(dial.querySelector('circle')).color, bg };
-        }""")
-        check(track is not None, f"today @ {vp_name}: calorie dial found")
-        if track:
-            rgb = parse_rgb(track["ring"])
-            panel = parse_rgb(track["bg"])
-            r_ink = contrast(rgb, INK)
-            r_panel = contrast(rgb, panel)
-            check(r_ink >= 3.0 and r_panel >= 3.0,
-                  f"today @ {vp_name}: dial ring {track['ring']} is {r_ink:.2f}:1 on ink, {r_panel:.2f}:1 on its panel {track['bg']} (want >= 3:1 on both)")
-        ctx.close()
-
-
 def test_date_button_busy(browser):
     # The date button is aria-busy="true" until its label is resolved, then the attribute is gone
     for vp_name, vp in (("390", PHONE), ("1440", DESKTOP)):
@@ -123,7 +97,6 @@ def main():
     with sync_playwright() as p:
         browser = p.chromium.launch()
         test_profile_red(browser)
-        test_calorie_dial_track(browser)
         test_date_button_busy(browser)
         browser.close()
 

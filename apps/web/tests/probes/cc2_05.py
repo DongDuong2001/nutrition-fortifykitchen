@@ -38,7 +38,8 @@ def main():
         pg.goto(BASE + "/", wait_until="networkidle")
         pg.wait_for_timeout(600)
         txt = body(pg)
-        check(re.search(r"90′\s+Ngày tập\s+muối 8,5", txt) is not None, "diary 1440: the Ngày tập row follows the profile (90′, salt 8,5…)")
+        # cc2-32: Hôm nay's Ngày tập pill follows the profile; the salt total is checked on /training below
+        check(re.search(r"Ngày tập 90′", txt) is not None, "home 1440: the Ngày tập pill follows the profile (90′)")
         check("Giữ cân" not in txt and "65 kg" not in txt, "diary 1440: no stale Giữ cân or 65 kg")
 
         pg.goto(BASE + "/training", wait_until="networkidle")

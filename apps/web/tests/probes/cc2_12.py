@@ -78,7 +78,23 @@ def toast_text(pg):
 
 
 def dinner_items(pg):
-    return pg.locator("#meal-dinner a[href^='/entry/']").count()
+    return home_dinner_items(pg)
+
+
+def meal_kcal(pg, meal_name):
+    """The kcal total in a meal's header on Hôm nay (None when the meal has no food)."""
+    txt = pg.locator(f"section[aria-label='{meal_name}'] > button").first.inner_text()
+    m = re.search(r"([\d.]+)\s*kcal", txt)
+    return int(m.group(1).replace(".", "")) if m else None
+
+
+def meal_food_count(pg, meal_name):
+    """Food rows in one meal section of Hôm nay (the header button "Xem riêng …" is not a food)."""
+    return pg.evaluate(
+        """(name) => [...document.querySelectorAll(`section[aria-label="${name}"] button[aria-label]`)]
+            .filter((b) => !b.getAttribute('aria-label').startsWith('Xem riêng')).length""",
+        meal_name,
+    )
 
 
 def home_dinner_items(pg):
@@ -109,7 +125,7 @@ def check_recents(browser, size_name, size):
     before = dinner_items(pg)
     clicks = 0
 
-    pg.locator("#mobile-add-dinner").click()
+    pg.locator("#home-add-dinner").click()
     clicks += 1
     pg.wait_for_url("**/add**")
     pg.wait_for_timeout(300)
@@ -122,7 +138,7 @@ def check_recents(browser, size_name, size):
 
     pg.locator("button[aria-label^='Thêm Yến mạch']:visible").first.click()
     clicks += 1
-    pg.wait_for_url(re.compile(r".*/(?.*)?$"))
+    pg.wait_for_url(re.compile(r".*/(\?.*)?$"))
     pg.wait_for_timeout(400)
     msg = toast_text(pg)
     check("Yến mạch 45 g" in msg and "Bữa tối" in msg, f"{size_name} recent tap: toast names the last portion and the meal by the clock ({msg!r})")
@@ -163,30 +179,37 @@ def check_favourites(browser, size_name, size):
     check(pg.locator("button:has-text('Thêm vào'):visible").count() > 0, f"{size_name} favourite with no history: opens the portion panel")
 
     pg.locator("[data-food-row]:visible:has-text('Chuối')").first.click()
-    pg.wait_for_url(re.compile(r".*/(?.*)?$"))
+    pg.wait_for_url(re.compile(r".*/(\?.*)?$"))
     pg.wait_for_timeout(300)
     check("Chuối 1 quả" in toast_text(pg), f"{size_name} favourite with history: adds with its last portion ({toast_text(pg)!r})")
     ctx.close()
 
 
 # 3. One + per meal header, no "+ Thêm món"; past days have no add affordance
-def check_diary_plus(browser, size_name, size):
+def open_meal_menu(pg, meal_name):
+    """cc2-32: the meal ⋯ sheet on Hôm nay: tap the meal's header (meal mode), then its ⋯ pill."""
+    pg.locator(f"button[aria-label='Xem riêng {meal_name.lower()}']:visible").first.click()
+    pg.wait_for_timeout(300)
+    pg.locator(f"button[aria-label='Tùy chọn {meal_name}']:visible").first.click()
+    pg.wait_for_timeout(300)
+
+
+def check_home_meals(browser, size_name, size):
+    """cc2-32: the per-meal add and ⋯ of the removed diary screen, as Hôm nay shows them (header tap, then the ⋯ pill)."""
     ctx, pg = new_page(browser, size)
     go(pg, "/")
-    meals = pg.locator("section[id^='meal-']")
-    n = meals.count()
-    check(n == 5, f"{size_name} diary: five meals ({n})")
-    for i in range(n):
-        links = meals.nth(i).locator("a[href^='/add']").count()
-        check(links == 1, f"{size_name} diary: meal {i + 1} has one + ({links})")
-    check("+ Thêm món" not in text(pg), f"{size_name} diary: no '+ Thêm món' link")
+    n = pg.locator("button[aria-label^='Xem riêng']:visible").count()
+    check(n == 5, f"{size_name} home: five meal headers ({n})")
+    check("+ Thêm món" not in text(pg), f"{size_name} home: no '+ Thêm món' link")
 
     go(pg, "/?date=2026-10-11")
-    check(pg.locator("section[id^='meal-'] a[href^='/add']").count() == 0, f"{size_name} past day: no + on any meal")
-    check(pg.locator("#add-first, a:has-text('Thêm món'):not(#desktop-add-btn):not(#mobile-add-fab):visible").count() == 0, f"{size_name} past day: no add link in the content")
-    menus = pg.locator("button[id^='meal-menu-']")
-    check(menus.count() >= 1, f"{size_name} past day: meals with food keep their ⋯ for Lưu thành Bữa ăn của tôi ({menus.count()})")
-    menus.first.click()
+    check(pg.locator("a[aria-label^='Thêm vào']:visible").count() == 0, f"{size_name} past day: no add link on any meal")
+    check(pg.locator("a:has-text('Thêm món'):not(#desktop-add-btn):not(#mobile-add-fab):visible").count() == 0, f"{size_name} past day: no add link in the content")
+    pg.locator("button[aria-label^='Xem riêng']:visible").first.click()
+    pg.wait_for_timeout(300)
+    pill = pg.locator("button[aria-label^='Tùy chọn']:visible")
+    check(pill.count() >= 1, f"{size_name} past day: a meal with food offers its ⋯ (Lưu thành Bữa ăn của tôi)")
+    pill.first.click()
     pg.wait_for_timeout(300)
     dialog = re.sub(r"\s+", " ", pg.locator("[role=dialog]").first.inner_text())
     check("Lưu thành Bữa ăn của tôi" in dialog, f"{size_name} past day ⋯: Lưu thành Bữa ăn của tôi is offered")
@@ -198,7 +221,7 @@ def check_diary_plus(browser, size_name, size):
 def check_saved_meals(browser, size_name, size):
     ctx, pg = new_page(browser, size)
     go(pg, "/")
-    pg.locator("#meal-menu-breakfast").click()
+    open_meal_menu(pg, "Bữa sáng")
     pg.wait_for_timeout(300)
     pg.get_by_role("button", name=re.compile("Lưu thành Bữa ăn của tôi")).click()
     pg.wait_for_timeout(200)
@@ -211,7 +234,7 @@ def check_saved_meals(browser, size_name, size):
     check("Đã lưu Sáng của tôi vào Bữa ăn của tôi" in toast_text(pg), f"{size_name} save: toast confirms ({toast_text(pg)!r})")
 
     # an empty meal cannot be saved
-    pg.locator("#meal-menu-dinner").click()
+    open_meal_menu(pg, "Bữa tối")
     pg.wait_for_timeout(300)
     save_btn = pg.get_by_role("button", name=re.compile("Lưu thành Bữa ăn của tôi"))
     check(save_btn.is_disabled(), f"{size_name} save: an empty meal's item is disabled")
@@ -251,13 +274,13 @@ def check_saved_meals(browser, size_name, size):
     go(pg, "/add?meal=lunch")
     check("Bữa ăn của tôi" in text(pg) and "Sáng của tôi" in text(pg), f"{size_name} add: Bữa ăn của tôi section lists it")
     pg.locator("button[aria-label^='Thêm Sáng của tôi']:visible").first.click()
-    pg.wait_for_url(re.compile(r".*/(?.*)?$"))
+    pg.wait_for_url(re.compile(r".*/(\?.*)?$"))
     pg.wait_for_timeout(300)
-    lunch = pg.locator("#meal-lunch a[href^='/entry/']").count()
+    lunch = meal_food_count(pg, "Bữa trưa")
     check(lunch == 2 + 3, f"{size_name} add sheet: one tap adds the three foods to the chosen meal ({lunch})")
     pg.locator("button:has-text('Hoàn tác'):visible").first.click()
     pg.wait_for_timeout(300)
-    check(pg.locator("#meal-lunch a[href^='/entry/']").count() == 2, f"{size_name} add sheet: one undo removes them")
+    check(meal_food_count(pg, "Bữa trưa") == 2, f"{size_name} add sheet: one undo removes them")
 
     # rename, then delete with a confirm step
     go(pg, "/explore")
@@ -301,17 +324,17 @@ def check_quick(browser, size_name, size):
     pg.fill("#quick-kcal", "420,4")
     pg.fill("#quick-protein", "12,5")
     submit.click()
-    pg.wait_for_url(re.compile(r".*/(?.*)?$"))
+    pg.wait_for_url(re.compile(r".*/(\?.*)?$"))
     pg.wait_for_timeout(400)
-    dinner = re.sub(r"\s+", " ", pg.locator("#meal-dinner").inner_text())
-    check("Bánh mì" in dinner and "Thêm nhanh" in dinner and "420" in dinner, f"{size_name} quick add: listed with the Thêm nhanh label ({dinner!r})")
+    dinner = re.sub(r"\s+", " ", pg.locator("section[aria-label='Bữa tối']").inner_text())
+    check("Bánh mì" in dinner and "420" in dinner, f"{size_name} quick add: Bánh mì with 420 kcal is listed in Bữa tối ({dinner!r})")
     micros_after = pg.locator("a[href^='/micros']:visible").first.inner_text()
     check(micros_after == micros_before, f"{size_name} quick add: Vi chất row unchanged ({micros_before!r} -> {micros_after!r})")
     check("Hoàn tác" in toast_text(pg) or pg.locator("button:has-text('Hoàn tác'):visible").count() == 1, f"{size_name} quick add: the toast offers Hoàn tác")
 
     # no name, only kcal = Ghi nhanh with every macro unknown: "—", and no total moves except kcal
     def protein_total():
-        m = re.search(r"Đạm (\d+) / ", text(pg))
+        m = re.search(r"Đạm\s*(\d+)\s*g", text(pg))  # the nutrient column on Hôm nay: "Đạm 62 g"
         return m.group(1) if m else None
 
     go(pg, "/")
@@ -322,25 +345,25 @@ def check_quick(browser, size_name, size):
     pg.locator("button[aria-label='Chỉ thêm kcal']:visible").first.click()
     pg.fill("#quick-kcal", "150")
     pg.get_by_role("button", name=re.compile("^Thêm vào Bữa tối")).click()
-    pg.wait_for_url(re.compile(r".*/(?.*)?$"))
+    pg.wait_for_url(re.compile(r".*/(\?.*)?$"))
     pg.wait_for_timeout(300)
     check(dinner_items(pg) == 2, f"{size_name} quick add: a second entry with the default name ({dinner_items(pg)})")
-    dinner_text = re.sub(r"s+", " ", pg.locator("#meal-dinner").inner_text())
-    check("Đạm — · Tinh bột — · Chất béo —" in dinner_text, f"{size_name} quick add: unknown macros show — ({dinner_text!r})")
-    check("Đạm 0 g" not in dinner_text, f"{size_name} quick add: no unknown macro is shown as 0 g")
+    # cc2-32: Hôm nay's food rows show name and portion only; the diary's macro line ("Đạm — · …") is gone with the diary screen
     check(protein_total() == protein_before, f"{size_name} quick add: the day's Đạm total did not move ({protein_before} -> {protein_total()})")
     check(pg.locator("a[href^='/micros']:visible").first.inner_text() == micros_mid, f"{size_name} quick add: Vi chất count did not move")
 
     # editable on /entry/[id]
-    pg.locator("#meal-dinner a[href^='/entry/']:has-text('Bánh mì')").click()
+    kcal_before = meal_kcal(pg, "Bữa tối")
+    pg.locator("section[aria-label='Bữa tối'] button[aria-label^='Bánh mì']:visible").first.click()
+    pg.locator("a[aria-label='Sửa món này']:visible").first.click()
     pg.wait_for_url("**/entry/**")
     pg.wait_for_timeout(300)
     check(pg.locator("#entry-quick-kcal").input_value() == "420", f"{size_name} entry: kcal field holds 420")
     pg.fill("#entry-quick-kcal", "500")
     pg.get_by_role("button", name="Lưu thay đổi").click()
-    pg.wait_for_url(re.compile(r".*/(?.*)?$"))
+    pg.wait_for_url(re.compile(r".*/(\?.*)?$"))
     pg.wait_for_timeout(300)
-    check("500" in pg.locator("#meal-dinner").inner_text(), f"{size_name} entry: the edited kcal shows in the meal")
+    check(meal_kcal(pg, "Bữa tối") == (kcal_before or 0) + 80, f"{size_name} entry: the edited kcal (420 to 500) moves the meal total by 80 ({kcal_before} -> {meal_kcal(pg, 'Bữa tối')})")
     ctx.close()
 
 
@@ -371,7 +394,7 @@ def main():
         for size_name, size in SIZES:
             check_recents(browser, size_name, size)
             check_favourites(browser, size_name, size)
-            check_diary_plus(browser, size_name, size)
+            check_home_meals(browser, size_name, size)
             check_saved_meals(browser, size_name, size)
             check_quick(browser, size_name, size)
         browser.close()

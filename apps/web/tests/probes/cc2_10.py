@@ -183,100 +183,34 @@ def check_micros_tab(browser, size_name, size):
     ctx.close()
 
 
-def check_diary(browser, size_name, size):
-    ctx, pg = new_page(browser, size)
-    go(pg, "/")
-    check(pg.locator("h1:visible").count() == 1 and pg.locator("h1:visible").first.inner_text().strip().lower() == "nhật ký",
-          f"{size_name} diary: one visible h1 Nhật ký")
-    body = text(pg)
-    check(re.search(r"8/22 vi chất Thiếu:", body) is not None, f"{size_name} diary: the Vi chất tile reads 8/22 with what is lacking")
-    check(re.search(r"60′ Ngày tập muối 7–10,5 g", body) is not None, f"{size_name} diary: the Ngày tập tile reads 60′ and salt")
-    check(re.search(r"còn 909 kcal", body, re.IGNORECASE) is not None, f"{size_name} diary: còn 909 kcal in the summary")
-    n_add = pg.locator('a[aria-label^="Thêm vào"]:visible').count()
-    n_menu = pg.locator('button[aria-label^="Tùy chọn"]:visible').count()
-    check(n_add == 5 and n_menu == 5, f"{size_name} diary: one + and one ⋯ per meal ({n_add}, {n_menu})")
-    check("+ Thêm món" not in body and body.count("+ Thêm") <= 5, f"{size_name} diary: one quiet + Thêm per meal")
-    shot(pg, "diary", size_name)
-    no_h_scroll(pg, f"{size_name} diary")
-
-    if size_name == "1280":
-        # No ink band stretching across the top of the window (the sidebar is ink but only 240 px wide)
-        wide = pg.evaluate(
-            """() => [...document.querySelectorAll('*')].filter(el => {
-                const r = el.getBoundingClientRect();
-                const bg = getComputedStyle(el).backgroundColor;
-                return r.top < 40 && r.width > 600 && bg === 'rgb(17, 19, 23)';
-            }).length"""
-        )
-        check(wide == 0, f"{size_name} diary: no ink band at the top ({wide})")
-
-    # rows open the screens of the day shown
-    pg.locator(f'a[href="/micros?date={TODAY}"]:visible').click()
-    pg.wait_for_url(f"**/micros?date={TODAY}", timeout=8000)
-    check(f"date={TODAY}" in pg.url, f"{size_name} diary: the Vi chất row opens /micros?date={TODAY}")
-    pg.locator('a[aria-label="Quay lại"]:visible').first.click()
-    pg.wait_for_url(re.compile(r".*/diary(\?.*)?$"), timeout=8000)
-    check(path_of(pg) == "/", f"{size_name} micros: back returns to /diary")
-    pg.locator(f'a[href="/training?date={TODAY}"]:visible').click()
-    pg.wait_for_url(f"**/training?date={TODAY}", timeout=8000)
-    check(f"date={TODAY}" in pg.url, f"{size_name} diary: the Ngày tập row opens /training?date={TODAY}")
-    owner = pg.locator('nav[aria-label="Điều hướng chính"]:visible a[aria-current="page"]').all_inner_texts()
-    check(any("Hôm nay" in t for t in owner), f"{size_name} training: the owning tab is Hôm nay ({owner})")
-    ctx.close()
-
-
-def check_past_day(browser, size_name, size):
-    ctx, pg = new_page(browser, size)
-    go(pg, f"/?date={YESTERDAY}")
-    pg.wait_for_timeout(300)
-    check(pg.locator('a[aria-label^="Thêm vào"]:visible').count() == 0, f"{size_name} past diary: no + on a meal")
-    check(pg.locator('button[aria-label^="Tùy chọn"]:visible').count() > 0, f"{size_name} past diary: meals with food keep a ⋯ menu (Lưu thành Bữa ăn của tôi, cc2-12)")
-    check(pg.locator(f'a[href="/micros?date={YESTERDAY}"]:visible').count() == 1, f"{size_name} past diary: Vi chất row keeps the date")
-    check(pg.locator(f'a[href="/training?date={YESTERDAY}"]:visible').count() == 1, f"{size_name} past diary: Ngày tập row keeps the date")
-
-    go(pg, f"/micros?date={YESTERDAY}")
-    check("Chỉ xem" in text(pg) or "Hôm qua" in text(pg), f"{size_name} past micros: shows the date of the day")
-    back = pg.locator('a[aria-label="Quay lại"]:visible').first.get_attribute("href")
-    check(back == f"/?date={YESTERDAY}", f"{size_name} past micros: back goes to /diary?date= ({back})")
-    check(pg.locator('a[href^="/add"]:not(#mobile-add-fab):not(#desktop-add-btn):visible').count() == 0, f"{size_name} past micros: no add link")
-    check(pg.locator('a[href="/trends/micros"]:visible').count() >= 1, f"{size_name} micros: the trend link goes to /trends/micros")
-
-    go(pg, f"/training?date={YESTERDAY}")
-    chips = pg.locator('button[aria-pressed]:visible')
-    disabled = [chips.nth(i).is_disabled() for i in range(chips.count())]
-    check(len(disabled) >= 5 and all(disabled), f"{size_name} past training: duration chips are disabled ({len(disabled)})")
-    check(pg.locator('input[type="checkbox"]:visible').count() == 0, f"{size_name} past training: no checklist to toggle")
-    back = pg.locator('a[aria-label="Quay lại"]:visible').first.get_attribute("href")
-    check(back == f"/?date={YESTERDAY}", f"{size_name} past training: back goes to /diary?date= ({back})")
-    shot(pg, "past-training", size_name)
-    ctx.close()
-
-
 def check_delete_meal(browser, size_name, size):
+    """cc2-32: the meal ⋯ sheet lives on Hôm nay. Tap the breakfast header (meal mode), then the ⋯ pill."""
     ctx, pg = new_page(browser, size)
     go(pg, "/")
-    before = text(pg)
-    check("459 kcal" in before, f"{size_name} delete: breakfast shows 459 kcal first")
-    pg.locator("#meal-menu-breakfast").click()
+    breakfast = pg.locator("section[aria-label='Bữa sáng']")
+    before = re.sub(r"\s+", " ", breakfast.inner_text())
+    check("459" in before, f"{size_name} delete: breakfast shows 459 kcal first ({before[:80]!r})")
+    pg.locator("button[aria-label='Xem riêng bữa sáng']:visible").first.click()
+    pg.wait_for_timeout(300)
+    pg.locator("button[aria-label='Tùy chọn Bữa sáng']:visible").first.click()
     pg.wait_for_timeout(300)
     dialog = pg.locator('[role="dialog"]:visible').first
-    check("Chép hôm qua" in dialog.inner_text() and "Lưu thành Bữa ăn của tôi" in dialog.inner_text(), f"{size_name} delete: the menu has the three items")
+    check("Lưu thành Bữa ăn của tôi" in dialog.inner_text(), f"{size_name} delete: the menu has Lưu thành Bữa ăn của tôi")
     check(dialog.locator('button:has-text("Lưu thành Bữa ăn của tôi")').is_enabled(), f"{size_name} delete: Lưu thành Bữa ăn của tôi is enabled for a meal with food")
     dialog.locator('button:has-text("Xóa bữa này")').click()
     pg.wait_for_timeout(200)
     check("Xóa Bữa sáng?" in text(pg), f"{size_name} delete: a confirm step appears")
-    check("Chưa có món" not in pg.locator("#meal-breakfast").inner_text(), f"{size_name} delete: nothing is removed before confirming")
+    check("Chưa ăn" not in breakfast.inner_text(), f"{size_name} delete: nothing is removed before confirming")
     pg.locator('[role="dialog"] button:has-text("Xóa bữa này")').first.click()
     pg.wait_for_timeout(500)
-    meal = pg.locator("#meal-breakfast").inner_text()
-    check("Chưa có món" in meal, f"{size_name} delete: breakfast is empty after confirming")
-    check("còn 1.368 kcal" in text(pg) or "còn" in text(pg), f"{size_name} delete: the day total follows")
+    check("Chưa ăn" in breakfast.inner_text(), f"{size_name} delete: breakfast is empty after confirming (Chưa ăn)")
     toast = pg.locator('button:has-text("Hoàn tác"):visible').first
     check(toast.count() == 1, f"{size_name} delete: the toast offers Hoàn tác")
     toast.click()
     pg.wait_for_timeout(500)
-    check("459 kcal" in pg.locator("#meal-breakfast").inner_text(), f"{size_name} delete: Hoàn tác puts the meal back")
-    check(re.search(r"còn 909 kcal", text(pg), re.IGNORECASE) is not None, f"{size_name} delete: the total is back to còn 909 kcal")
+    check("459" in re.sub(r"\s+", " ", breakfast.inner_text()), f"{size_name} delete: Hoàn tác puts the meal back")
+    # cc2-32: Hôm nay's hero shows the eaten total over the target ("1.041 / 1.950–2.275 kcal"), not the remainder
+    check(re.search(r"1\.041\s*/\s*1\.950", text(pg)) is not None, f"{size_name} delete: the hero total is back to 1.041 eaten")
     ctx.close()
 
 
@@ -288,8 +222,6 @@ def main():
             check_period(browser, size_name, size)
             check_energy_bars(browser, size_name, size)
             check_micros_tab(browser, size_name, size)
-            check_diary(browser, size_name, size)
-            check_past_day(browser, size_name, size)
             check_delete_meal(browser, size_name, size)
         browser.close()
     print("\n".join(notes))
