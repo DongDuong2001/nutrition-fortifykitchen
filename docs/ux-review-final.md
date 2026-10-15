@@ -8,7 +8,7 @@ Scope of this pass: the nine journeys from the reviewer's 23:20 note. Coverage i
 
 | # | Journey | Taps (observed) | Result | Problems found | What changed |
 |---|---|---|---|---|---|
-| a | Fresh install → setup → first breakfast | — | **Partly walked (cc2-19b).** Signed-out `/diary` redirects to `/signin`; `/setup/profile` opens on a new account with the weight field. Sign-up and the three setup steps were not walked to the end, and the first breakfast entry was not logged on a new account. | None confirmed | Nothing; cc2_19b asserts the redirect and the setup step |
+| a | Fresh install → setup → first breakfast | "Thêm bữa đầu tiên" (1), Yến mạch "+" (2); setup: Tiếp tục (3), Hoàn tất (4) | **Walked end to end (cc2-19b, mock mode, 15/10 night).** Setup is two steps (Về bạn → Mục tiêu) and then `/setup/done` ("Mục tiêu mỗi ngày", "Thêm bữa đầu tiên" / "Để sau"). The first breakfast was logged from the add sheet and the diary updated (687 kcal). Sign-up itself was not walked: the mock session was already signed in. | **The account opened with a sample day already logged** (Bữa sáng 459 kcal and others), so the "new user, empty diary" state was not reached. Setup also prefilled from an earlier draft (65 kg, 2003, Nam). Both are mock-data effects, not confirmed as bugs. Step 1 on a 390 px screen leaves a large empty gap above the button (the cc2-30 layout target). | Nothing in code. cc2-30 rebuilds setup (name, height, a third "Sẵn sàng" step) and must fix the gap |
 | b | Log a repeat lunch in ≤ 2 taps | "+" on Bữa trưa (1), a Gần đây card's "+" (2) | Reachable in 2 taps on the add sheet. Not timed on a real repeat. | None confirmed | Nothing |
 | c | Today's Vi chất → lowest nutrient | Vi chất tab (1), Vitamin B1 square (2), "Xem chi tiết Vitamin B1" (3) | Lowest nutrient first, link to /micros/b1 present. Reached in 3 taps. | None confirmed | Nothing; probe asserts it |
 | d | This week vs last week | Tóm tắt (already open), "Kỳ trước" (1) | Change line "Giảm 333 so với 7 ngày trước" and the period control are on the first screen. Period label broke at the dash: "09/10 – / 15/10" | **Period label split across two lines at 390** | Dates now joined with a non-breaking dash in `PeriodControl` (`overview-frame.tsx`); `cc2_10` heading helper now collapses whitespace |
@@ -27,7 +27,8 @@ Scope of this pass: the nine journeys from the reviewer's 23:20 note. Coverage i
 
 ## Open for Hao's decision
 
-- None raised by this pass. Journey a is only partly walked (sign-up and setup steps 2–3 need a full setup flow; left for a later pass). b and e are still not timed.
+- None raised by this pass. Journey a is walked from setup to the first logged meal; sign-up is not walked (mock session already signed in). b and e are still not timed.
+- Hao to decide: should a brand-new mock account start with an empty diary? Today it shows the sample day, so an empty first-run state cannot be checked in mock mode.
 
 ## Gates and evidence
 
