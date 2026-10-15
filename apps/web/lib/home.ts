@@ -47,12 +47,6 @@ export type HomeMode = { kind: "day" } | { kind: "food"; id: string } | { kind: 
 
 export const DAY_MODE: HomeMode = { kind: "day" };
 
-/** The nutrient column: groups and the catalogue ids each lists, in order. */
-export const HOME_NUTRIENT_GROUPS: { title: string; ids: string[] }[] = [
-  { title: "Khoáng chất", ids: ["sodium", "potassium", "calcium", "magnesium", "iron", "zinc"] },
-  { title: "Vitamin", ids: ["vitamin_a", "vitamin_c", "vitamin_d", "vitamin_e", "vitamin_k", "b6", "folate", "b12"] },
-];
-
 const SLOT_LABEL: Record<MealSlot, string> = {
   breakfast: "Sáng",
   lunch: "Trưa",

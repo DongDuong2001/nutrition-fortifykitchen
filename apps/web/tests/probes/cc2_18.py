@@ -72,8 +72,10 @@ def source_scan():
         files = [base] if base.is_file() else [p for p in base.rglob("*") if p.suffix in (".ts", ".tsx")]
         for f in files:
             text = f.read_text(encoding="utf8")
+            # cc-27d: the Nguồn số liệu sheet uses the copy of the brief (Hao 16/10): "Nguồn số liệu", "Có số liệu"
+            skip_so_lieu = f.name == "source-sheet.tsx"
             for bad in ["Bữa " + "của tôi", "số " + "liệu", "Xoá", "xoá", "Tuỳ", "tuỳ", "Huỷ", "huỷ"]:
-                if bad in text:
+                if bad in text and not (skip_so_lieu and bad == "số " + "liệu"):
                     hits.append(f"{f.relative_to(ROOT)}: {bad}")
     check(not hits, f"source: no old meal-list name or 'số liệu' in the voice-pass files ({hits})")
     app_hits = [str(p.relative_to(ROOT)) for p in (ROOT / "app").rglob("*.tsx") if "Bữa " + "của tôi" in p.read_text(encoding="utf8")]
