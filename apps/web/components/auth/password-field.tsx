@@ -2,6 +2,7 @@
 
 import { useId, useState } from "react";
 import { FormRow } from "@/components/ui/form-row";
+import { IconEye, IconEyeOff } from "@/components/ui/icons";
 
 export interface PasswordFieldProps {
   label: string;
@@ -11,16 +12,6 @@ export interface PasswordFieldProps {
   autoComplete: "current-password" | "new-password";
   hint?: string;
   id?: string;
-}
-
-function EyeIcon({ hidden }: { hidden: boolean }) {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M2.5 12s3.5-6.5 9.5-6.5S21.5 12 21.5 12s-3.5 6.5-9.5 6.5S2.5 12 2.5 12z" />
-      <circle cx="12" cy="12" r="3" />
-      {hidden && <path d="M4 4l16 16" />}
-    </svg>
-  );
 }
 
 /**
@@ -55,7 +46,7 @@ export function PasswordField({ label, value, onChange, error, autoComplete, hin
           aria-controls={inputId}
           className="absolute right-1 top-1/2 flex h-11 w-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-secondary transition-transform duration-150 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-blue motion-reduce:transition-none motion-reduce:active:scale-100"
         >
-          <EyeIcon hidden={visible} />
+          {visible ? <IconEyeOff size={22} /> : <IconEye size={22} />}
         </button>
       </div>
     </FormRow>

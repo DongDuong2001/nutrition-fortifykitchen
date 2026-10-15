@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { PillButton } from "@/components/ui/pill-button";
 import type { CoachProfile } from "@/lib/coaches";
+import { IconBadge, IconCheck, IconSparkles, IconLink } from "@/components/ui/icons";
 
 export function CoachDetailCard({ coach }: { coach: CoachProfile }) {
   const initials = coach.name
@@ -24,8 +25,9 @@ export function CoachDetailCard({ coach }: { coach: CoachProfile }) {
             <div className="flex items-center gap-2">
               <h1 className="m-0 text-xl font-extrabold text-text">{coach.name}</h1>
               {coach.featured && (
-                <span className="shrink-0 rounded-full bg-blue px-2 py-0.5 text-[11px] font-bold text-on-accent">
-                  Tiêu biểu
+                <span className="shrink-0 flex items-center gap-1 rounded-full bg-blue px-2.5 py-0.5 text-[11px] font-bold text-on-accent">
+                  <IconBadge size={12} />
+                  <span>Tiêu biểu</span>
                 </span>
               )}
             </div>
@@ -59,9 +61,12 @@ export function CoachDetailCard({ coach }: { coach: CoachProfile }) {
         {/* Credentials */}
         <div className="flex flex-col gap-2">
           <h2 className="m-0 text-xs font-bold uppercase tracking-wider text-secondary">Bằng cấp & Chứng nhận</h2>
-          <ul className="m-0 flex flex-col gap-1.5 pl-4 text-xs font-medium text-secondary">
+          <ul className="m-0 flex flex-col gap-1.5 p-0 list-none text-xs font-medium text-secondary">
             {coach.credentials.map((c) => (
-              <li key={c}>{c}</li>
+              <li key={c} className="flex items-center gap-2">
+                <IconCheck size={14} className="text-blue shrink-0" />
+                <span>{c}</span>
+              </li>
             ))}
           </ul>
         </div>
@@ -70,7 +75,10 @@ export function CoachDetailCard({ coach }: { coach: CoachProfile }) {
       {/* Recommended Foods */}
       {coach.recommendedFoods.length > 0 && (
         <Card as="section" className="flex flex-col gap-3 p-5">
-          <h2 className="m-0 text-sm font-bold text-text">Món ăn khuyên dùng bởi HLV</h2>
+          <div className="flex items-center gap-1.5">
+            <IconSparkles size={16} className="text-blue" />
+            <h2 className="m-0 text-sm font-bold text-text">Món ăn khuyên dùng bởi HLV</h2>
+          </div>
           <div className="grid grid-cols-2 gap-2">
             {coach.recommendedFoods.map((f) => (
               <div
