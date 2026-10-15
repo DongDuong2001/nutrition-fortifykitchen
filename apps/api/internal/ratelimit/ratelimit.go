@@ -1,6 +1,7 @@
 package ratelimit
 
 import (
+	"net"
 	"net/http"
 	"sync"
 	"time"
@@ -57,6 +58,9 @@ func (rl *UserRateLimiter) LimitWrites(next http.Handler) http.Handler {
 		}
 
 		key := r.RemoteAddr
+		if host, _, err := net.SplitHostPort(r.RemoteAddr); err == nil && host != "" {
+			key = host
+		}
 		if uid, err := auth.GetUserID(r.Context()); err == nil {
 			key = uid.String()
 		}
@@ -84,6 +88,7 @@ func (rl *UserRateLimiter) LimitWrites(next http.Handler) http.Handler {
 
 		if b.tokens <= 0 {
 			rl.mu.Unlock()
+			w.Header().Set("Retry-After", "60")
 			response.Error(w, http.StatusTooManyRequests, "RATE_LIMIT_EXCEEDED", "Rate limit exceeded. Maximum 60 writes per minute.")
 			return
 		}

@@ -154,27 +154,40 @@ func (r *pgxLibraryRepo) GetSavedMeals(ctx context.Context, userID uuid.UUID) ([
 		}
 		meals = append(meals, m)
 	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating saved meals: %w", err)
+	}
 
-	// Load items for each meal
-	for i := range meals {
+	// Batch load items for all meals in one query
+	if len(meals) > 0 {
+		mealIDs := make([]uuid.UUID, len(meals))
+		mealIndex := make(map[uuid.UUID]int, len(meals))
+		for i, m := range meals {
+			mealIDs[i] = m.ID
+			mealIndex[m.ID] = i
+		}
+
 		itemsSQL := `
-			SELECT smi.id, smi.food_id, f.name_vi, smi.portion_label, smi.grams, smi.sort
+			SELECT smi.saved_meal_id, smi.id, smi.food_id, f.name_vi, smi.portion_label, smi.grams, smi.sort
 			FROM nutrition.saved_meal_items smi
 			JOIN nutrition.foods f ON f.id = smi.food_id
-			WHERE smi.saved_meal_id = $1
+			WHERE smi.saved_meal_id = ANY($1)
 			ORDER BY smi.sort ASC
 		`
-		iRows, err := r.pool.Query(ctx, itemsSQL, meals[i].ID)
+		iRows, err := r.pool.Query(ctx, itemsSQL, mealIDs)
 		if err == nil {
 			defer iRows.Close()
 			for iRows.Next() {
+				var savedMealID uuid.UUID
 				var it SavedMealItem
 				var pLabel *string
-				if err := iRows.Scan(&it.ID, &it.FoodID, &it.FoodName, &pLabel, &it.Grams, &it.Sort); err == nil {
+				if err := iRows.Scan(&savedMealID, &it.ID, &it.FoodID, &it.FoodName, &pLabel, &it.Grams, &it.Sort); err == nil {
 					if pLabel != nil {
 						it.PortionLabel = *pLabel
 					}
-					meals[i].Items = append(meals[i].Items, it)
+					if idx, exists := mealIndex[savedMealID]; exists {
+						meals[idx].Items = append(meals[idx].Items, it)
+					}
 				}
 			}
 		}

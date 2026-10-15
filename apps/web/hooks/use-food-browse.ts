@@ -32,16 +32,19 @@ export function useFoodBrowse() {
   const isFavouriteFood = useCallback((food: FoodItem) => isFavourite(food.id), [isFavourite]);
 
   // Filter row: Tất cả, Yêu thích, then only the categories that have foods
-  const filterItems = [
-    { id: "all", label: "Tất cả", active: filter === "all", onClick: () => setFilter("all") },
-    { id: "favorite", label: "Yêu thích", active: filter === "favorite", onClick: () => setFilter("favorite") },
-    ...categories.map((c) => ({
-      id: c.key,
-      label: c.label,
-      active: filter === c.key,
-      onClick: () => setFilter(c.key),
-    })),
-  ];
+  const filterItems = useMemo(
+    () => [
+      { id: "all", label: "Tất cả", active: filter === "all", onClick: () => setFilter("all") },
+      { id: "favorite", label: "Yêu thích", active: filter === "favorite", onClick: () => setFilter("favorite") },
+      ...categories.map((c) => ({
+        id: c.key,
+        label: c.label,
+        active: filter === c.key,
+        onClick: () => setFilter(c.key),
+      })),
+    ],
+    [filter, categories]
+  );
 
   // Fuzzy suggestions when results are empty
   const similarFoods = useMemo(() => {

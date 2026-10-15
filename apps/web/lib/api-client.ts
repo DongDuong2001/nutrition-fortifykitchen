@@ -1,4 +1,5 @@
 import { createClient } from "./supabase-client";
+import { getTodayIsoVN } from "./date";
 import {
   SAMPLE_DAY,
   type MockDayData,
@@ -209,6 +210,7 @@ interface OutboxItem {
   date: string;
   payload: Record<string, unknown>;
   createdAt: number;
+  retries?: number;
 }
 
 export function enqueueOfflineEntry(date: string, payload: Record<string, unknown>): void {
@@ -221,6 +223,7 @@ export function enqueueOfflineEntry(date: string, payload: Record<string, unknow
       date,
       payload,
       createdAt: Date.now(),
+      retries: 0,
     });
     storage.setItem(OUTBOX_STORAGE_KEY, JSON.stringify(current));
   } catch {
@@ -239,6 +242,7 @@ export async function syncOfflineOutbox(): Promise<number> {
     let synced = 0;
 
     for (const item of items) {
+      const attempts = (item.retries ?? 0) + 1;
       try {
         const res = await apiFetch(`/days/${item.date}/entries`, {
           method: "POST",
@@ -246,11 +250,16 @@ export async function syncOfflineOutbox(): Promise<number> {
         });
         if (res.ok || res.status === 409) {
           synced++;
-        } else {
-          remaining.push(item);
+        } else if (res.status >= 400 && res.status < 500 && res.status !== 429) {
+          // Drop non-recoverable 4xx client errors (400, 422) to avoid permanent queue blockage
+          continue;
+        } else if (attempts < 5) {
+          remaining.push({ ...item, retries: attempts });
         }
       } catch {
-        remaining.push(item);
+        if (attempts < 5) {
+          remaining.push({ ...item, retries: attempts });
+        }
       }
     }
 
@@ -271,7 +280,7 @@ export const apiClient = {
   },
 
   async getDay(date?: string): Promise<DaySummaryResponse> {
-    const targetDate = date || new Date().toISOString().split("T")[0];
+    const targetDate = date || getTodayIsoVN();
     if (isLiveMode()) {
       try {
         const res = await apiFetch(`/days/${encodeURIComponent(targetDate)}`);
@@ -299,7 +308,7 @@ export const apiClient = {
   async getDailyProgress(date?: string): Promise<{ progress: DailyProgress; logs: DiaryLog[] }> {
     if (isLiveMode()) {
       try {
-        const targetDate = date || new Date().toISOString().split("T")[0];
+        const targetDate = date || getTodayIsoVN();
         const res = await apiFetch(`/days/${encodeURIComponent(targetDate)}`);
         if (res.ok) {
           const json = await res.json();
@@ -399,7 +408,7 @@ export const apiClient = {
   async logMeal(payload: LogMealPayload): Promise<{ log: DiaryLog; today_progress: DailyProgress }> {
     if (isLiveMode()) {
       try {
-        const date = payload.log_date || new Date().toISOString().split("T")[0];
+        const date = payload.log_date || getTodayIsoVN();
         const res = await apiFetch(`/days/${date}/entries`, {
           method: "POST",
           body: JSON.stringify(payload),
@@ -409,7 +418,7 @@ export const apiClient = {
           return json;
         }
       } catch {
-        enqueueOfflineEntry(payload.log_date || new Date().toISOString().split("T")[0], payload as unknown as Record<string, unknown>);
+        enqueueOfflineEntry(payload.log_date || getTodayIsoVN(), payload as unknown as Record<string, unknown>);
       }
     }
 
@@ -552,7 +561,7 @@ export const apiClient = {
     id?: string;
   }): Promise<{ success: boolean; id: string }> {
     const entryId = payload.id || `entry-${Date.now()}`;
-    const date = payload.date || new Date().toISOString().split("T")[0];
+    const date = payload.date || getTodayIsoVN();
 
     const slot = payload.mealSlot === "preworkout" ? "pre_workout" : payload.mealSlot;
     if (isLiveMode()) {

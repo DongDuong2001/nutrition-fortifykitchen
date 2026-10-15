@@ -148,7 +148,7 @@ const EMAIL_KEY = "h1t-pending-email";
 // screens. Storage can be blocked (private mode), so every access is guarded.
 export function readDraft(): SetupDraft {
   try {
-    const raw = window.sessionStorage.getItem(DRAFT_KEY);
+    const raw = typeof window !== "undefined" ? window.sessionStorage?.getItem(DRAFT_KEY) : null;
     return raw ? { ...DEFAULT_DRAFT, ...(JSON.parse(raw) as Partial<SetupDraft>) } : DEFAULT_DRAFT;
   } catch {
     return DEFAULT_DRAFT;
@@ -157,7 +157,9 @@ export function readDraft(): SetupDraft {
 
 export function writeDraft(draft: SetupDraft): void {
   try {
-    window.sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+    if (typeof window !== "undefined") {
+      window.sessionStorage?.setItem(DRAFT_KEY, JSON.stringify(draft));
+    }
   } catch {
     // Storage unavailable: the draft lives only in component state.
   }
@@ -165,7 +167,7 @@ export function writeDraft(draft: SetupDraft): void {
 
 export function readPendingEmail(): string {
   try {
-    return window.sessionStorage.getItem(EMAIL_KEY) ?? "";
+    return (typeof window !== "undefined" ? window.sessionStorage?.getItem(EMAIL_KEY) : null) ?? "";
   } catch {
     return "";
   }
@@ -173,7 +175,9 @@ export function readPendingEmail(): string {
 
 export function writePendingEmail(email: string): void {
   try {
-    window.sessionStorage.setItem(EMAIL_KEY, email);
+    if (typeof window !== "undefined") {
+      window.sessionStorage?.setItem(EMAIL_KEY, email);
+    }
   } catch {
     // Storage unavailable: the email is not remembered between screens.
   }
@@ -181,8 +185,10 @@ export function writePendingEmail(email: string): void {
 
 export function clearOnboardingStorage(): void {
   try {
-    window.sessionStorage.removeItem(DRAFT_KEY);
-    window.sessionStorage.removeItem(EMAIL_KEY);
+    if (typeof window !== "undefined") {
+      window.sessionStorage?.removeItem(DRAFT_KEY);
+      window.sessionStorage?.removeItem(EMAIL_KEY);
+    }
   } catch {
     // Storage unavailable
   }

@@ -235,7 +235,12 @@ export function computeCompositeDayData(
   // 3. Meals: sample items that stay (in sample order, with their edited meal, amount and kcal), then added entries
   const itemsBySlot = new Map<MealSlot, MockFoodItem[]>();
   const addItem = (slot: MealSlot, item: MockFoodItem) => {
-    itemsBySlot.set(slot, [...(itemsBySlot.get(slot) ?? []), item]);
+    const list = itemsBySlot.get(slot);
+    if (list) {
+      list.push(item);
+    } else {
+      itemsBySlot.set(slot, [item]);
+    }
   };
   for (const { info, effect } of effects) {
     if (!effect.deleted) {

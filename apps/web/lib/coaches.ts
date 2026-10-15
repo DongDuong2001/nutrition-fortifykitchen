@@ -156,8 +156,13 @@ export function getCoachApplications(): CoachApplication[] {
       memoryApplications = [...INITIAL_COACH_APPLICATIONS];
       return memoryApplications;
     }
-    memoryApplications = JSON.parse(raw);
-    return memoryApplications!;
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+      memoryApplications = [...INITIAL_COACH_APPLICATIONS];
+      return memoryApplications;
+    }
+    memoryApplications = parsed;
+    return memoryApplications;
   } catch {
     return INITIAL_COACH_APPLICATIONS;
   }
