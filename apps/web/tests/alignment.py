@@ -55,6 +55,14 @@ ONBOARDING_CHECKS = [
     ("/settings/account", "desktop (1440px)", "account-row", "lr"),
 ]
 
+# cc-24: Dong's screens. (route, group, minimum pairs): the rows and cards of one list share left and right edges.
+DONG_SCREEN_CHECKS = [
+    ("/explore/leaderboard", "leaderboard-row", 1),
+    ("/explore/coaches", "coach-card", 2),
+    ("/admin/review", "admin-card", 1),
+]
+
+
 def check_align_groups(page, group_name=None, edges="lr"):
     # edges "lr": members share left and right edges. "tb": members share top and bottom edges.
     return page.evaluate("""(args) => {
@@ -213,6 +221,18 @@ def main():
                 total_errors.extend(res["errors"])
             else:
                 print(f"[PASS] /foods/food-cha-la @ {vp['name']} (checked groups: {res['checkedGroups']})")
+
+            # cc-24: leaderboard, coaches and the admin queue; the pairs must really be compared
+            for route, group, min_pairs in DONG_SCREEN_CHECKS:
+                page.goto(f"{BASE_URL}{route}", wait_until="networkidle")
+                page.wait_for_timeout(700)
+                res = check_align_groups(page, group)
+                pairs = res["pairs"].get(group, 0)
+                if res["errors"] or pairs < min_pairs:
+                    print(f"[FAIL] {route} @ {vp['name']} [{group}]: pairs {pairs} (need {min_pairs}) {res['errors']}")
+                    total_errors.extend(res["errors"] or [f"{route} {group}: {pairs} pairs"])
+                else:
+                    print(f"[PASS] {route} @ {vp['name']} [{group}] ({pairs} pairs)")
 
         browser.close()
 
