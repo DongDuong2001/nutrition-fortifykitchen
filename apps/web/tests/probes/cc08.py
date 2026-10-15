@@ -83,7 +83,7 @@ def run_phone(browser):
     pg.wait_for_timeout(300)
     check("2.100–2.450 kcal" in body(pg), "390 targets: kcal target moves to 2.100–2.450")
 
-    pg.goto(BASE + "/diary", wait_until="networkidle")
+    pg.goto(BASE + "/", wait_until="networkidle")
     pg.wait_for_timeout(600)
     check("2.100–2.450" in body(pg), "390 today: kcal target reads 2.100–2.450")
 

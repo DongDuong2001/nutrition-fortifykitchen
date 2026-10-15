@@ -47,9 +47,9 @@ describe("routeFor", () => {
   });
 
   it("leaves everything else to the browser", () => {
-    expect(routeFor("/diary", "cors", "GET")).toBe("pass"); // a client-side fetch, not a page load
+    expect(routeFor("/", "cors", "GET")).toBe("pass"); // a client-side fetch, not a page load
     expect(routeFor("/manifest.webmanifest", "cors", "GET")).toBe("pass");
-    expect(routeFor("/diary", "navigate", "POST")).toBe("pass");
+    expect(routeFor("/", "navigate", "POST")).toBe("pass");
     expect(routeFor("/_next/static/chunks/a.js", "cors", "POST")).toBe("pass");
   });
 });
@@ -102,7 +102,7 @@ describe("public/sw.js", () => {
 
   it("makes the same routing decision as lib/pwa.ts", () => {
     const paths = [
-      "/", "/diary", "/explore", "/settings", "/offline", "/entry/1", "/signin", "/signin/expired", "/signup",
+      "/", "/explore", "/settings", "/offline", "/entry/1", "/signin", "/signin/expired", "/signup",
       "/reset-password", "/api/x", "/login", "/signing", "/_next/static/a.js", "/icons/icon-512.png", "/m.woff2",
       "/manifest.webmanifest",
     ];

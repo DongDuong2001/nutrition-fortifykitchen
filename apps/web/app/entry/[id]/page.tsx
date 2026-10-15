@@ -40,8 +40,8 @@ function EntryContent() {
       <div className="min-h-screen bg-page text-text font-sans">
         <div className="mx-auto flex w-full max-w-[480px] flex-col items-center gap-3 px-4 pt-16 text-center">
           <p className="m-0 text-base font-bold">Không tìm thấy món này</p>
-          <Link href="/diary" className="min-h-[44px] content-center text-base font-bold text-blue no-underline">
-            Về Nhật ký
+          <Link href="/" className="min-h-[44px] content-center text-base font-bold text-blue no-underline">
+            Về Hôm nay
           </Link>
         </div>
       </div>

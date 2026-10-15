@@ -53,9 +53,6 @@ ONBOARDING_CHECKS = [
     ("/settings/profile/weight", "desktop (1440px)", "weight-row", "lr"),
     ("/settings/account", "mobile (390px)", "account-row", "lr"),
     ("/settings/account", "desktop (1440px)", "account-row", "lr"),
-    # Past day (read-only): same header and meal rows as today, with no add links
-    (f"/diary?date={YESTERDAY}", "mobile (390px)", "meal-card", "lr"),
-    (f"/diary?date={YESTERDAY}", "desktop (1440px)", "meal-card", "lr"),
 ]
 
 def check_align_groups(page, group_name=None, edges="lr"):
@@ -192,7 +189,9 @@ def main():
             page.goto(f"{BASE_URL}/add?meal=snack", wait_until="networkidle")
             page.wait_for_timeout(500)
             try:
-                date_btn = page.locator("button:has-text('Chà là') >> visible=true").first
+                # Desktop: the add sheet is a dialog over Hôm nay, which also lists Chà là, so pick the one in the dialog
+                dialog_btn = page.locator("[role=dialog] button:has-text('Chà là') >> visible=true")
+                date_btn = (dialog_btn if dialog_btn.count() else page.locator("button:has-text('Chà là') >> visible=true")).first
                 if date_btn.is_visible():
                     date_btn.click()
             except Exception:

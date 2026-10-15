@@ -62,10 +62,10 @@ export function NotEnoughData() {
         Kỳ này có {days} ngày đã ghi. Cần ít nhất 3 ngày để xem trung bình, số ngày đạt và xu hướng.
       </p>
       <Link
-        href="/diary"
+        href="/"
         className="inline-flex min-h-[44px] items-center justify-center self-start rounded-full border border-card-border bg-card px-4 text-[15px] font-bold text-text no-underline active:scale-[0.97] motion-reduce:active:scale-100"
       >
-        Xem nhật ký
+        Xem hôm nay
       </Link>
     </section>
   );

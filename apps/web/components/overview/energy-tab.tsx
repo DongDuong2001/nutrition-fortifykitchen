@@ -123,7 +123,7 @@ export function EnergyTab() {
   });
   const items: AttentionItem[] = attention.map((row) => ({
     id: row.title,
-    href: "/diary",
+    href: "/",
     title: row.title,
     line: row.line,
     number: row.number,

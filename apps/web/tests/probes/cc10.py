@@ -57,7 +57,7 @@ def energy(pg):
 
 
 def open_day(pg, query=""):
-    pg.goto(BASE + "/diary" + query, wait_until="networkidle")
+    pg.goto(BASE + "/" + query, wait_until="networkidle")
     vis(pg, '[aria-label^="Năng lượng"]').wait_for(state="visible", timeout=8000)
     pg.wait_for_timeout(200)
 
@@ -148,11 +148,11 @@ def run_desktop(browser):
 
 def run_hydration(browser):
     paths = [
-        "/diary",
-        f"/diary?date={iso(YESTERDAY)}",
-        f"/diary?date={iso(EMPTY_DAY)}",
-        f"/diary?date={iso(FUTURE)}",
-        "/diary?date=not-a-date",
+        "/",
+        f"/?date={iso(YESTERDAY)}",
+        f"/?date={iso(EMPTY_DAY)}",
+        f"/?date={iso(FUTURE)}",
+        "/?date=not-a-date",
     ]
     for vp in (PHONE, DESKTOP):
         ctx = browser.new_context(viewport=vp)

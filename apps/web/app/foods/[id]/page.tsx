@@ -82,7 +82,7 @@ function FoodDetailInner() {
     setIsSubmitting(true);
     try {
       await addFoodEntry(food, parsedGrams, mealSlot, selectedServingLabel === CUSTOM_PORTION ? gramsServingLabel(parsedGrams) : selectedServingLabel);
-      router.push("/diary");
+      router.push("/");
     } finally {
       setIsSubmitting(false);
     }

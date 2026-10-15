@@ -31,7 +31,7 @@ import {
 import { parseGramsInput } from "@/lib/portion";
 import { MealSwitcher } from "@/components/meal-switcher";
 import { PortionPanel } from "@/components/ui/portion-panel";
-import { DiaryScreen } from "@/components/diary/diary-screen";
+import { HomeScreen } from "@/components/home/home-screen";
 
 import { useMealSlot } from "@/lib/use-meal-slot";
 
@@ -157,7 +157,7 @@ function AddFoodInner() {
     setIsSubmitting(true);
     try {
       await addFoodEntry(selectedFood, parsedGrams, mealSlot, selectedServingLabel);
-      router.push("/diary");
+      router.push("/");
     } finally {
       setIsSubmitting(false);
     }
@@ -173,7 +173,7 @@ function AddFoodInner() {
     setIsSubmitting(true);
     try {
       await addFoodEntry(food, grams, mealSlot, label, { undoable: true });
-      router.push("/diary");
+      router.push("/");
     } finally {
       setIsSubmitting(false);
     }
@@ -183,7 +183,7 @@ function AddFoodInner() {
     if (oneTapLock.current || mealSlot === null) return;
     oneTapLock.current = true;
     addSavedMeal(meal, mealSlot);
-    router.push("/diary");
+    router.push("/");
   };
 
   const submitQuickEntry = (input: QuickEntryInput): QuickEntryResult => {
@@ -192,7 +192,7 @@ function AddFoodInner() {
     const result = addQuickEntry(input, mealSlot);
     if (result.ok) {
       oneTapLock.current = true;
-      router.push("/diary");
+      router.push("/");
     }
     return result;
   };
@@ -277,7 +277,7 @@ function AddFoodInner() {
       <div className="hidden lg:block relative min-h-screen">
         {/* Background Today page (inert while modal is open) */}
         <div aria-hidden="true" className="pointer-events-none select-none opacity-40">
-          <DiaryScreen />
+          <HomeScreen />
         </div>
 
         {/* Modal Overlay / Scrim */}

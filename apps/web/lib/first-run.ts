@@ -26,7 +26,7 @@ export function firstRunState({ profileSaved, entryEverLogged }: FirstRunFacts):
 }
 
 // The screens a user lands on from the bottom bar or the sidebar. A missing profile sends these to setup.
-const TAB_ROUTES = ["/diary", "/explore", "/settings", "/add", "/micros", "/training", "/trends"];
+const TAB_ROUTES = ["/explore", "/settings", "/add", "/micros", "/training", "/trends"];
 
 export function isTabRoute(pathname: string): boolean {
   return pathname === "/" || TAB_ROUTES.some((route) => pathname === route || pathname.startsWith(route + "/"));

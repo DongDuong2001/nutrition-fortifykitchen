@@ -28,7 +28,7 @@ def main():
 
         viewports = [{"width": 390, "height": 844}, {"width": 1440, "height": 900}]
         paths = [
-            "/", "/diary", "/explore", "/settings", "/micros", "/trends", "/trends/micros", "/trends/body", "/add", "/entry/item-1", "/training", "/settings/profile", "/settings/profile/weight",
+            "/", "/", "/explore", "/settings", "/micros", "/trends", "/trends/micros", "/trends/body", "/add", "/entry/item-1", "/training", "/settings/profile", "/settings/profile/weight",
             "/settings/language", "/settings/notifications", "/settings/delete-account",
             "/install", "/paywall", "/this-page-does-not-exist",  # last one: the 404 page
         ]
@@ -95,7 +95,7 @@ def main():
                 print(f"[PASS] 0 hydration errors on {path} with sessionStorage loaded")
 
             # Assert seeded entry visible on /diary and recent search chip visible on /add
-            if path == "/diary":
+            if path == "/":
                 try:
                     seeded = page.locator("text='Chà là hạt dẻ test' >> visible=true").first
                     seeded.wait_for(state="visible", timeout=5000)

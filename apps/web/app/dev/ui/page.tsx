@@ -49,7 +49,7 @@ export default function DevUiPage() {
             variant="sub"
             title="Về bạn"
             subtitle="Mục tiêu được tính theo cân nặng và giới tính."
-            backHref="/diary"
+            backHref="/"
           />
         </section>
 
@@ -62,7 +62,7 @@ export default function DevUiPage() {
             title="Về bạn"
             progress={{ current: 1, total: 2 }}
             actions={<span className="text-[13px] text-muted-on-dark">Bước 1 / 2</span>}
-            backHref="/diary"
+            backHref="/"
           />
         </section>
 
@@ -277,7 +277,7 @@ export default function DevUiPage() {
           <Toast
             message="Đã thêm Chà là 30 g vào Trước tập"
             actionLabel="Xem"
-            actionHref="/diary"
+            actionHref="/"
           />
           <Toast
             message="Đã xóa Thịt bò nạc"

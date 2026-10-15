@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildOverview, microRows, summaryMeals } from "../overview";
+import { buildOverview, microRows } from "../overview";
 import { SAMPLE_DAY } from "../mock/sample-day";
 import { calculateTargets } from "../targets";
 import { COUNTED_NUTRIENT_KEYS } from "../day-totals";
@@ -88,18 +88,5 @@ describe("microRows (Vi chất sub-tab): lowest share of target first", () => {
     const vitaminD = rows.find((r) => r.key === "vitamin_d")!;
     expect(vitaminD.of).toBeGreaterThanOrEqual(0);
     expect(vitaminD.met).toBeLessThanOrEqual(vitaminD.of);
-  });
-});
-
-describe("summaryMeals (what nextMeal needs)", () => {
-  it("maps the sample day's meals to slots with item counts", () => {
-    const meals = summaryMeals(SAMPLE_DAY);
-    expect(meals).toEqual([
-      { slot: "breakfast", itemCount: 3 },
-      { slot: "lunch", itemCount: 2 },
-      { slot: "pre_workout", itemCount: 2 },
-      { slot: "dinner", itemCount: 0 },
-      { slot: "snack", itemCount: 0 },
-    ]);
   });
 });

@@ -185,7 +185,7 @@ def check_micros_tab(browser, size_name, size):
 
 def check_diary(browser, size_name, size):
     ctx, pg = new_page(browser, size)
-    go(pg, "/diary")
+    go(pg, "/")
     check(pg.locator("h1:visible").count() == 1 and pg.locator("h1:visible").first.inner_text().strip().lower() == "nhật ký",
           f"{size_name} diary: one visible h1 Nhật ký")
     body = text(pg)
@@ -216,7 +216,7 @@ def check_diary(browser, size_name, size):
     check(f"date={TODAY}" in pg.url, f"{size_name} diary: the Vi chất row opens /micros?date={TODAY}")
     pg.locator('a[aria-label="Quay lại"]:visible').first.click()
     pg.wait_for_url(re.compile(r".*/diary(\?.*)?$"), timeout=8000)
-    check(path_of(pg) == "/diary", f"{size_name} micros: back returns to /diary")
+    check(path_of(pg) == "/", f"{size_name} micros: back returns to /diary")
     pg.locator(f'a[href="/training?date={TODAY}"]:visible').click()
     pg.wait_for_url(f"**/training?date={TODAY}", timeout=8000)
     check(f"date={TODAY}" in pg.url, f"{size_name} diary: the Ngày tập row opens /training?date={TODAY}")
@@ -227,7 +227,7 @@ def check_diary(browser, size_name, size):
 
 def check_past_day(browser, size_name, size):
     ctx, pg = new_page(browser, size)
-    go(pg, f"/diary?date={YESTERDAY}")
+    go(pg, f"/?date={YESTERDAY}")
     pg.wait_for_timeout(300)
     check(pg.locator('a[aria-label^="Thêm vào"]:visible').count() == 0, f"{size_name} past diary: no + on a meal")
     check(pg.locator('button[aria-label^="Tùy chọn"]:visible').count() > 0, f"{size_name} past diary: meals with food keep a ⋯ menu (Lưu thành Bữa ăn của tôi, cc2-12)")
@@ -237,7 +237,7 @@ def check_past_day(browser, size_name, size):
     go(pg, f"/micros?date={YESTERDAY}")
     check("Chỉ xem" in text(pg) or "Hôm qua" in text(pg), f"{size_name} past micros: shows the date of the day")
     back = pg.locator('a[aria-label="Quay lại"]:visible').first.get_attribute("href")
-    check(back == f"/diary?date={YESTERDAY}", f"{size_name} past micros: back goes to /diary?date= ({back})")
+    check(back == f"/?date={YESTERDAY}", f"{size_name} past micros: back goes to /diary?date= ({back})")
     check(pg.locator('a[href^="/add"]:not(#mobile-add-fab):not(#desktop-add-btn):visible').count() == 0, f"{size_name} past micros: no add link")
     check(pg.locator('a[href="/trends/micros"]:visible').count() >= 1, f"{size_name} micros: the trend link goes to /trends/micros")
 
@@ -247,14 +247,14 @@ def check_past_day(browser, size_name, size):
     check(len(disabled) >= 5 and all(disabled), f"{size_name} past training: duration chips are disabled ({len(disabled)})")
     check(pg.locator('input[type="checkbox"]:visible').count() == 0, f"{size_name} past training: no checklist to toggle")
     back = pg.locator('a[aria-label="Quay lại"]:visible').first.get_attribute("href")
-    check(back == f"/diary?date={YESTERDAY}", f"{size_name} past training: back goes to /diary?date= ({back})")
+    check(back == f"/?date={YESTERDAY}", f"{size_name} past training: back goes to /diary?date= ({back})")
     shot(pg, "past-training", size_name)
     ctx.close()
 
 
 def check_delete_meal(browser, size_name, size):
     ctx, pg = new_page(browser, size)
-    go(pg, "/diary")
+    go(pg, "/")
     before = text(pg)
     check("459 kcal" in before, f"{size_name} delete: breakfast shows 459 kcal first")
     pg.locator("#meal-menu-breakfast").click()

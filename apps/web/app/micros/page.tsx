@@ -44,7 +44,7 @@ function MicrosContent() {
   // ?date= picks a past day (read-only, as everything about a past day). Read after mount so the first render matches the server.
   const viewIso = hydrated && todayIso ? viewedIsoDate(searchParams?.get("date"), todayIso) : null;
   const isPast = viewIso !== null && viewIso !== todayIso;
-  const diaryHref = isPast && viewIso ? `/diary?date=${viewIso}` : "/diary";
+  const diaryHref = isPast && viewIso ? `/?date=${viewIso}` : "/";
   const dateQuery = isPast && viewIso ? `?date=${viewIso}` : "";
   const pastData = useMemo(
     () => (isPast && viewIso && todayIso ? pastDayData(viewIso, todayIso, profile, targets) : null),
@@ -316,7 +316,7 @@ function MicrosContent() {
                 href={diaryHref}
                 className="mt-2 h-11 px-6 rounded-full bg-blue text-on-accent flex items-center justify-center text-sm font-bold no-underline active:scale-[0.97] transition-transform"
               >
-                {isPast ? "Về Nhật ký" : "+ Thêm món"}
+                {isPast ? "Về Hôm nay" : "+ Thêm món"}
               </Link>
             </div>
           </main>

@@ -51,7 +51,7 @@ function TrainingContent() {
   const isPast = !isEditableDay(viewIso, todayIso);
   // Sodium logged on the viewed day (today's diary, or a past day's entries); nothing logged reads as 0
   const sodiumMg = useMemo(() => dayTotals(viewIso, todayIso, diaryData).nutrients.sodium ?? 0, [viewIso, todayIso, diaryData]);
-  const diaryHref = isPast ? `/diary?date=${viewIso}` : "/diary";
+  const diaryHref = isPast ? `/?date=${viewIso}` : "/";
 
   // The viewed day's saved record (null when nothing was saved for that date). Read after mount.
   const [saved, setSaved] = useState<DayChecklist | null>(null);

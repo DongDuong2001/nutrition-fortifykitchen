@@ -123,8 +123,3 @@ export function microRows(averages: PeriodAverages, targetDays: Overview["target
     return a.percentage - b.percentage;
   });
 }
-
-/** The day's meals as `nextMeal` wants them: a slot and how many items it holds. */
-export function summaryMeals(day: Pick<MockDayData, "meals">): { slot: MealSlot; itemCount: number }[] {
-  return day.meals.map((m) => ({ slot: SAMPLE_SLOT[m.slot], itemCount: m.items.length }));
-}

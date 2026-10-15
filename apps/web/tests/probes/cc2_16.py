@@ -63,7 +63,7 @@ def midnight(browser):
     ctx = account_context(browser, SIZES[0][1], [entry("e1", "Cơm trưa hôm qua", "2026-10-12T05:00:00.000Z", 520)])
     pg = ctx.new_page()
     pg.clock.install(time="2026-10-12T23:59:20+07:00")
-    pg.goto(BASE + "/diary", wait_until="networkidle")
+    pg.goto(BASE + "/", wait_until="networkidle")
     pg.wait_for_timeout(500)
     t = squash(pg.inner_text("body"))
     check("Hôm nay 12/10" in t and "Cơm trưa hôm qua" in t, f"midnight: before 00:00 the entry is today ({t[:120]!r})")
@@ -72,7 +72,7 @@ def midnight(browser):
     t = squash(pg.inner_text("body"))
     check("Hôm nay 13/10" in t, "midnight: the date label moves to 13/10 without a reload")
     check("Cơm trưa hôm qua" not in t and "Chưa có món hôm nay" in t, f"midnight: yesterday's entry left today ({t[:160]!r})")
-    pg.goto(BASE + "/diary?date=2026-10-12", wait_until="networkidle")
+    pg.goto(BASE + "/?date=2026-10-12", wait_until="networkidle")
     pg.wait_for_timeout(500)
     t = squash(pg.inner_text("body"))
     check("Cơm trưa hôm qua" in t, "midnight: the entry shows under 12/10")
@@ -93,7 +93,7 @@ def long_name(browser, size_name, size):
     pg.fill("#cf-carbs", "40")
     pg.fill("#cf-fat", "8")
     pg.get_by_role("button", name=re.compile("Lưu và thêm")).click()
-    pg.wait_for_url("**/diary", timeout=8000)
+    pg.wait_for_url("**/", timeout=8000)
     pg.wait_for_timeout(600)
     w = f"{size_name} long name"
     row = pg.locator("a[href^='/entry/']").first
@@ -132,7 +132,7 @@ def unknown_is_dash(browser):
 def offline(browser):
     ctx = browser.new_context(viewport=SIZES[0][1])
     pg = ctx.new_page()
-    pg.goto(BASE + "/diary", wait_until="networkidle")
+    pg.goto(BASE + "/", wait_until="networkidle")
     pg.wait_for_timeout(500)
     ctx.set_offline(True)
     pg.evaluate("window.dispatchEvent(new Event('offline'))")

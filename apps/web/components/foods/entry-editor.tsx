@@ -75,12 +75,12 @@ export function EntryEditor({ view }: { view: EntryView }) {
     } else {
       updateEntry(view.id, canPortion ? { grams, servingLabel, mealSlot } : { mealSlot });
     }
-    router.push("/diary");
+    router.push("/");
   };
 
   const handleDelete = () => {
     deleteEntry(view.id);
-    router.push("/diary");
+    router.push("/");
   };
 
   return (
@@ -100,7 +100,7 @@ export function EntryEditor({ view }: { view: EntryView }) {
             getMealSlotNameVi(view.mealSlot)
           )
         }
-        backHref="/diary"
+        backHref="/"
       />
       <div className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-8 pt-4">
         <section className="flex flex-col gap-4 rounded-[18px] border border-card-border bg-card p-4">

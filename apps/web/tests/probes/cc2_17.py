@@ -57,7 +57,7 @@ def esc_returns_focus(pg, opener, where, dialog_sel='[role="dialog"][aria-modal=
 
 
 def diary(browser, size_name, size):
-    ctx, pg = new_page(browser, size, "/diary")
+    ctx, pg = new_page(browser, size, "/")
     w = f"{size_name} /diary"
     no_h_scroll(pg, w)
     if pg.locator('button[id^="meal-menu-"]:visible').count() == 0:

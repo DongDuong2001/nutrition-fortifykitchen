@@ -191,7 +191,7 @@ def first_run(browser, name, size):
     shot(pg, "first-meal", name)
     add.locator("visible=true").first.click()
     taps["first_meal"] += 1
-    pg.wait_for_url("**/diary")
+    pg.wait_for_url(re.compile(r".*/(?.*)?$"))
     check(taps["first_meal"] <= 3, f"{where} first meal taps after setup: {taps['first_meal']} (target <= 3)")
     # state after the first meal: the summary is done, the user reads as a returning one
     pg.goto(BASE + "/setup/done", wait_until="networkidle")

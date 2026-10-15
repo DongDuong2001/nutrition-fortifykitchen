@@ -95,7 +95,7 @@ def run(browser, name, size):
     sign_in_magic(pg, "ban@email.com")  # the empty account below is signed in (cc-19 exception)
 
     # Empty account, before setup
-    go(pg, "/diary")
+    go(pg, "/")
     t = text(pg)
     check("Chưa có món hôm nay" in t, f"{where} diary: 'Chưa có món hôm nay'")
     check("Thêm món vào từng bữa bằng +" in t, f"{where} diary: one line, the + buttons")
@@ -166,7 +166,7 @@ def run(browser, name, size):
     check(row is not None, f"{where} add: a food that is not in the sample day")
     row.click()
     pg.get_by_role("button", name=re.compile("^Thêm vào Bữa tối")).locator("visible=true").first.click()
-    pg.wait_for_url("**/diary")
+    pg.wait_for_url(re.compile(r".*/(?.*)?$"))
     pg.wait_for_timeout(500)
     t = text(pg)
     check(food in t, f"{where} diary: the first meal ({food}) is listed")
@@ -178,7 +178,7 @@ def run(browser, name, size):
     clean(pg, f"{where} overview after a meal")
 
     # Demo mode
-    go(pg, "/diary?demo=1")
+    go(pg, "/?demo=1")
     t = text(pg)
     check("Yến mạch" in t and "Chưa có món hôm nay" not in t, f"{where} ?demo=1: the sample day is back")
     go(pg, "/explore")
@@ -187,13 +187,13 @@ def run(browser, name, size):
     go(pg, "/trends/body")
     check("Dữ liệu mẫu" in text(pg), f"{where} ?demo=1: sample weights are back")
     check(pg.evaluate("localStorage.getItem('h1t_demo_v1')") == "1", f"{where} ?demo=1: the flag is saved")
-    go(pg, "/diary?demo=0")
+    go(pg, "/?demo=0")
     t = text(pg)
     check(not any(f in t for f in SAMPLE_FOODS), f"{where} ?demo=0: no sample food")
     check(pg.evaluate("localStorage.getItem('h1t_demo_v1')") is None, f"{where} ?demo=0: the flag is cleared")
     go(pg, "/explore")
     check("Yến mạch" not in text(pg) and food in text(pg), f"{where} ?demo=0: Gần đây is the real one again, no sample foods")
-    go(pg, "/diary")
+    go(pg, "/")
     check(food in text(pg), f"{where} ?demo=0: the real meal ({food}) is still in Nhật ký")
     real = [e for e in errors if "status of 404" not in e]
     check(not real, f"{where}: no console or page errors ({real[:2]})")
