@@ -5,6 +5,10 @@ import type { FoodList as FoodListData } from "@/lib/food-categories";
 export interface FoodListProps {
   list: FoodListData;
   selectedId?: string;
+  /** Several selected rows (the compare picker): each shows the check, and the row is aria-pressed. */
+  selectedIds?: readonly string[];
+  /** Rows that cannot be picked (a food already in the comparison, or the limit reached). */
+  disabledIds?: readonly string[];
   onPick: (food: FoodItem) => void;
   /** When set, each row also gets a chevron that calls this (the row itself then adds in one tap). */
   onOpen?: (food: FoodItem) => void;
@@ -30,6 +34,8 @@ export interface FoodListProps {
 export function FoodList({
   list,
   selectedId,
+  selectedIds,
+  disabledIds,
   onPick,
   onOpen,
   getMeta,
@@ -43,7 +49,8 @@ export function FoodList({
   const firstHeaderKey = list.grouped ? list.groups[0]?.key : undefined;
 
   const renderRow = (food: FoodItem, withCategory: boolean) => {
-    const selected = selectedId === food.id;
+    const selected = selectedId === food.id || !!selectedIds?.includes(food.id);
+    const disabled = !!disabledIds?.includes(food.id);
     const meta = withCategory ? `${categoryName(food)} · ${getMeta(food)}` : getMeta(food);
     const showHeart = list.grouped && !!isFavourite?.(food);
     return (
@@ -52,10 +59,11 @@ export function FoodList({
           type="button"
           data-food-row
           aria-pressed={selected}
+          disabled={disabled}
           onClick={() => onPick(food)}
-          className={`flex min-h-[56px] min-w-0 flex-1 cursor-pointer items-center gap-3 border-0 py-2 pl-4 text-left text-text transition-colors active:bg-divider motion-reduce:active:bg-transparent ${
+          className={`flex min-h-[56px] min-w-0 flex-1 items-center gap-3 border-0 py-2 pl-4 text-left text-text transition-colors active:bg-divider motion-reduce:active:bg-transparent disabled:active:bg-transparent ${
             onOpen ? "pr-1" : "pr-4"
-          } ${selected ? "bg-blue/10" : "bg-transparent"}`}
+          } ${selected ? "bg-blue/10" : "bg-transparent"} ${disabled ? "cursor-default opacity-50" : "cursor-pointer"}`}
         >
           <span className="flex min-w-0 flex-1 flex-col gap-1">
             <span title={food.nameVi} className="line-clamp-2 break-words text-[15px] font-semibold leading-snug">
