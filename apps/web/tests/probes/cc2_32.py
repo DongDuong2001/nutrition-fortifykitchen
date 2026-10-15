@@ -183,7 +183,7 @@ def home_details(browser, name, size):
     row.click()
     pg.wait_for_timeout(300)
     hero = pg.locator("section[aria-label='Tổng kcal và dinh dưỡng đa lượng']:visible").first.inner_text()
-    check("YOGURT KEFIR · 200 ML" in hero, f"{name}: the food-mode hero label reads 200 ML ({hero.splitlines()[0]!r})")
+    check("Yogurt kefir · 200 ml" in hero, f"{name}: the food-mode hero label reads 200 ml ({hero.splitlines()[0]!r})")
     ctx.close()
 
     # Về hôm nay: phone only, past days only, goes to /

@@ -212,31 +212,20 @@ def check_micros_phone(browser):
     check("Thiếu nhiều nhất" in rest["text"], f"{label}: header at rest shows the summary")
     check("Xu hướng 7 và 30 ngày" in rest["text"], f"{label}: header at rest shows the trends link")
 
-    # Put a list card on screen and remember where it is; the fold must not move it
-    anchor = "#group-minerals"
-    pg.evaluate(
-        """(top) => { const l = document.querySelector('[data-align-container="micros-page"] .overflow-y-auto'); l.scrollTop = top - 4; }""",
-        rest["listTop"],
-    )
-    pg.wait_for_timeout(250)
-    y_before = pg.evaluate("(sel) => document.querySelector(sel).getBoundingClientRect().top", anchor)
-    pg.evaluate("(top) => { const l = document.querySelector('[data-align-container=\"micros-page\"] .overflow-y-auto'); l.scrollTop = top; }", rest["listTop"])
+    # cc-27c: the header no longer folds in place; a compact 60 px bar takes over once the summary has scrolled
+    # away (full coverage in cc_27c.py). Here: it appears with the count and the title, and goes at the top.
+    sel = '[data-align-container="micros-page"] .overflow-y-auto'
+    pg.evaluate("(sel) => { document.querySelector(sel).scrollTop = 700; }", sel)
     pg.wait_for_timeout(400)
-    folded = header_box(pg)
-    y_after = pg.evaluate("(sel) => document.querySelector(sel).getBoundingClientRect().top", anchor)
-    check(folded["height"] < rest["height"] - 60, f"{label}: header folds once the list scrolls past it ({rest['height']:.0f} → {folded['height']:.0f} px)")
-    check(folded["height"] <= PHONE["height"] / 3, f"{label}: folded header is under a third of the screen")
-    check("vi chất đã đạt" in folded["text"], f"{label}: folded header keeps the 8/22 count")
-    check("Xu hướng 7 và 30 ngày" not in folded["text"], f"{label}: folded header hides the trends link")
-    check("VI CHẤT" in folded["text"].upper(), f"{label}: folded header keeps the title")
-    # 4 px of list scroll moves the card up by 4 px; the fold itself adds no shift
-    check(abs((y_after - y_before) + 4) <= 2, f"{label}: the list does not jump when the header folds (card moved {y_after - y_before:+.1f} px, expected -4)")
-
+    bar = pg.evaluate("() => { const b = document.querySelector('[data-micros-compact=shown]'); return b ? { h: b.getBoundingClientRect().height, text: b.innerText } : null; }")
+    check(bar is not None and bar["h"] <= 64, f"{label}: a compact bar shows once the list scrolls past the header ({bar})")
+    check(bar is not None and "đã đạt" in bar["text"] and "/22" in bar["text"], f"{label}: compact bar keeps the 8/22 count")
+    check(bar is not None and "VI CHẤT" in bar["text"].upper(), f"{label}: compact bar keeps the title")
     pg.screenshot(path=os.path.join(SHOTS, "cc-17-micros-scrolled-390.png"), animations="disabled")
-    pg.evaluate("(top) => { const l = document.querySelector('[data-align-container=\"micros-page\"] .overflow-y-auto'); l.scrollTop = 0; }", rest["listTop"])
+    pg.evaluate("(sel) => { document.querySelector(sel).scrollTop = 0; }", sel)
     pg.wait_for_timeout(400)
     back = header_box(pg)
-    check(abs(back["height"] - rest["height"]) <= 2, f"{label}: header unfolds at the top of the list ({back['height']:.0f} px)")
+    check(abs(back["height"] - rest["height"]) <= 2, f"{label}: the full header is back at the top of the list ({back['height']:.0f} px)")
 
     pg.screenshot(path=os.path.join(SHOTS, "cc-17-micros-top-390.png"), animations="disabled")
     no_horizontal_scroll(pg, label)

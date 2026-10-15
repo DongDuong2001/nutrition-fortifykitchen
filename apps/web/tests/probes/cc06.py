@@ -110,7 +110,7 @@ def run():
                 pg.goto(BASE + "/micros", wait_until="networkidle")
                 pg.wait_for_timeout(600)
                 measure = """() => {
-                    const h = document.querySelector('[data-align-container="micros-page"] header');
+                    const h = document.querySelector('[data-align-container="micros-page"] [data-micros-compact]');
                     const chip = [...document.querySelectorAll('[data-align-container="micros-page"] button')].find(b => b.textContent.includes('Khoáng chất'));
                     return { headerTop: h.getBoundingClientRect().top, headerBottom: h.getBoundingClientRect().bottom,
                              chipTop: chip.getBoundingClientRect().top };
@@ -119,11 +119,10 @@ def run():
                 pg.evaluate("() => { document.querySelector('[data-align-container=\"micros-page\"] .overflow-y-auto').scrollTop = 700; }")
                 pg.wait_for_timeout(500)
                 after = pg.evaluate(measure)
-                check(abs(after["headerTop"]) < 1, f"390: Micros header stays at the top ({after['headerTop']})")
-                # The header folds on scroll (cc-17), so the chip bar moves up with it; the gap under the header must stay the same
-                gap_before = before["chipTop"] - before["headerBottom"]
+                # cc-27c: the full header scrolls away and the 60 px compact bar is at the top; the chips stick under it
+                check(abs(after["headerTop"]) < 1, f"390: Micros compact bar is at the top ({after['headerTop']})")
                 gap_after = after["chipTop"] - after["headerBottom"]
-                check(abs(gap_after - gap_before) < 1, f"390: chip bar stays under the header after it folds (gap {gap_before:.1f} → {gap_after:.1f})")
+                check(abs(gap_after) < 1 + 8, f"390: chip bar stays under the compact bar (gap {gap_after:.1f})")
                 pg.screenshot(path=os.path.join(SHOTS, "cc06-micros-stuck-390.png"), animations="disabled")
             ctx.close()
         browser.close()

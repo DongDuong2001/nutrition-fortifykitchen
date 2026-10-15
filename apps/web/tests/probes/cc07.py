@@ -38,7 +38,11 @@ PHONE_STATE = """(key) => {
     const stickyTop = section.firstElementChild.getBoundingClientRect().top;
     const lastRow = document.querySelector('#group-general .divide-y > :last-child');
     const dock = wrap.querySelector('.fixed.bottom-0').getBoundingClientRect();
+    // cc-27c: once the full header has scrolled away a compact 60 px bar is at the top and the chips stick under it
+    const bar = wrap.querySelector('[data-micros-compact]');
+    const barRect = bar.getBoundingClientRect();
     return {
+        barShown: bar.dataset.microsCompact === 'shown', barTop: barRect.top, barBottom: barRect.bottom, chipBarHeight: chipBar.height,
         headerTop: header.top, headerBottom: header.bottom,
         chipBarTop: chipBar.top, chipBarBottom: chipBar.bottom,
         summaryTop: sum.top, summaryBottom: sum.bottom,
@@ -84,12 +88,12 @@ def run_phone(browser):
         pg.wait_for_timeout(1200)
         s = pg.evaluate(PHONE_STATE, key)
         tag = f"390 tap {key}"
-        check(abs(s["headerTop"]) < 1, f"{tag}: header top is 0 ({s['headerTop']:.1f})")
-        check(abs(s["chipBarTop"] - s["headerBottom"]) < 1, f"{tag}: chip bar sits right under header ({s['chipBarTop']:.1f} vs {s['headerBottom']:.1f})")
+        check(s["barShown"] and abs(s["barTop"]) < 1, f"{tag}: compact bar is at the top of the screen ({s['barTop']:.1f})")
+        check(abs(s["chipBarTop"] - s["barBottom"]) < 1, f"{tag}: chip bar sits right under the compact bar ({s['chipBarTop']:.1f} vs {s['barBottom']:.1f})")
         check(s["wrapScroll"] == 0, f"{tag}: wrapper scrollTop is 0 ({s['wrapScroll']})")
         check(s["winScroll"] == 0, f"{tag}: window.scrollY is 0 ({s['winScroll']})")
-        check(abs(s["stickyTop"] - s["listTop"]) < 2 or s["listScroll"] >= s["listMax"] - 2,
-              f"{tag}: group header at top of list ({s['stickyTop']:.1f} vs list {s['listTop']:.1f})")
+        check(-1 <= s["stickyTop"] - s["chipBarBottom"] <= 10 or s["listScroll"] >= s["listMax"] - 2,
+              f"{tag}: group header right under the chip bar ({s['stickyTop']:.1f} vs {s['chipBarBottom']:.1f})")
         check(s["pressed"][i] == "true" and s["pressed"].count("true") == 1, f"{tag}: only the tapped chip is active ({s['pressed']})")
         if key == "minerals":
             pg.screenshot(path=os.path.join(SHOTS, "cc07-after-tap-khoang-chat-390.png"), animations="disabled")

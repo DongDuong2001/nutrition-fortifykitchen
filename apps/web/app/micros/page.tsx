@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useLayoutEffect, useMemo, useRef, Suspense } from "react";
+import React, { useState, useEffect, useMemo, useRef, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { BottomNav } from "@/components/ui/bottom-nav";
@@ -29,6 +29,52 @@ const GROUPS_CONFIG: GroupConfig[] = [
   { key: "carbs", title: "Tinh bột" },
   { key: "general", title: "Tổng quan" },
 ];
+
+/** The compact header bar, in px (design: 60). The chip bar sticks right under it. */
+const COMPACT_BAR_HEIGHT = 60;
+
+/**
+ * The 60 px ink bar that replaces the full header once its summary has scrolled away: back, the screen name with
+ * the date, and the live x/22 count. It hides (visibility) while the full header is showing, so it takes no
+ * space and nothing moves; the full header is inert while the bar is shown, so there is one h1.
+ */
+function CompactBar({ show, backHref, date, achieved, total, className = "" }: { show: boolean; backHref: string; date: string; achieved: number; total: number; className?: string }) {
+  return (
+    <div className={`pointer-events-none sticky top-0 z-40 h-0 ${className}`}>
+      <div
+        data-micros-compact={show ? "shown" : "hidden"}
+        aria-hidden={show ? undefined : true}
+        className={`pointer-events-auto absolute inset-x-0 top-0 box-border flex h-[60px] items-center gap-2 rounded-b-[20px] bg-ink px-4 text-on-dark ${show ? "visible" : "invisible"}`}
+      >
+        <Link
+          href={backHref}
+          aria-label="Quay lại"
+          tabIndex={show ? 0 : -1}
+          className="-ml-2 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-on-dark no-underline hover:text-sky active:scale-[0.97] motion-reduce:active:scale-100 focus-visible:outline-sky"
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M15 5l-7 7 7 7" />
+          </svg>
+        </Link>
+        <div className="min-w-0 flex-1">
+          {show ? (
+            <h1 className="m-0 font-display text-[22px] font-extrabold uppercase italic leading-none tracking-tight">Vi chất</h1>
+          ) : (
+            <p className="m-0 font-display text-[22px] font-extrabold uppercase italic leading-none tracking-tight">Vi chất</p>
+          )}
+          <p className="m-0 mt-0.5 break-words text-[13px] leading-none text-muted-subtitle">{date}</p>
+        </div>
+        <div className="shrink-0 text-right">
+          <div className="font-display text-[22px] font-black italic leading-none tabular-nums">
+            {achieved}
+            <span className="text-on-dark/55">/{total}</span>
+          </div>
+          <div className="mt-0.5 text-[11px] font-semibold leading-none text-sky">đã đạt</div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function MicrosPage() {
   return (
@@ -61,10 +107,12 @@ function MicrosContent() {
   });
 
   const scrollRef = useRef<HTMLDivElement>(null);
-  // Phone: once the list scrolls past the header, the summary folds into one line. The header's height change
-  // is taken off the list's scroll position, so the list does not move on screen.
-  const [headerCollapsed, setHeaderCollapsed] = useState(false);
-  const collapseFromTop = useRef(0);
+  // When the summary block scrolls out of view a compact 60 px bar takes its place (IntersectionObserver on a sentinel
+  // at the bottom of the header, so the page never shifts). One flag per layout: the other layout is not displayed.
+  const [compactPhone, setCompactPhone] = useState(false);
+  const [compactDesktop, setCompactDesktop] = useState(false);
+  const phoneSentinelRef = useRef<HTMLDivElement>(null);
+  const desktopSentinelRef = useRef<HTMLDivElement>(null);
   const chipBarRef = useRef<HTMLDivElement>(null);
   const chipsContainerRef = useRef<HTMLDivElement>(null);
   const chipRefs = useRef<Record<string, HTMLButtonElement | null>>({});
@@ -113,7 +161,9 @@ function MicrosContent() {
 
     // On the phone the groups scroll inside the body; on desktop the page scrolls
     const root = scrollRef.current && scrollRef.current.offsetParent !== null ? scrollRef.current : null;
-    const rootTop = root ? root.getBoundingClientRect().top : 0;
+    // The compact bar and the chip bar cover the top of the list; a group under them is not the one in view
+    const covered = root ? COMPACT_BAR_HEIGHT + (chipBarRef.current?.offsetHeight ?? 0) : 0;
+    const rootTop = (root ? root.getBoundingClientRect().top : 0) + covered;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -135,7 +185,7 @@ function MicrosContent() {
       },
       {
         root,
-        rootMargin: "0px 0px -55% 0px",
+        rootMargin: `-${covered}px 0px -55% 0px`,
         threshold: [0, 0.1, 0.3, 0.6],
       }
     );
@@ -147,25 +197,25 @@ function MicrosContent() {
     };
   }, [isLoading, currentData]);
 
-  // Folds the phone header when the list scrolls past it (from the list's top edge), and unfolds at the top again.
-  // The fold happens after the list's own scroll has passed the header, so the shift is never clamped at 0.
-  useLayoutEffect(() => {
-    const list = scrollRef.current;
-    if (!headerCollapsed || !list || !collapseFromTop.current) return;
-    list.scrollTop -= collapseFromTop.current - list.offsetTop;
-    collapseFromTop.current = 0;
-  }, [headerCollapsed]);
-
-  const onListScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    const list = e.currentTarget;
-    if (!headerCollapsed && list.scrollTop >= list.offsetTop) {
-      // A chip tap is scrolling the list to a group: that group must land at the top, so no shift is taken off
-      collapseFromTop.current = isManualScrolling.current ? 0 : list.offsetTop;
-      setHeaderCollapsed(true);
-    } else if (headerCollapsed && list.scrollTop <= 0) {
-      setHeaderCollapsed(false);
-    }
-  };
+  // Compact bar: shows when the bottom of the full header passes under the bar's own 60 px
+  useEffect(() => {
+    if (isLoading || !currentData) return;
+    const watch = (el: HTMLElement | null, root: Element | null, set: (v: boolean) => void) => {
+      if (!el) return null;
+      const io = new IntersectionObserver(
+        ([entry]) => set(!entry.isIntersecting && entry.boundingClientRect.top < COMPACT_BAR_HEIGHT),
+        { root, rootMargin: `-${COMPACT_BAR_HEIGHT}px 0px 0px 0px`, threshold: 0 }
+      );
+      io.observe(el);
+      return io;
+    };
+    const phone = watch(phoneSentinelRef.current, scrollRef.current, setCompactPhone);
+    const desktop = watch(desktopSentinelRef.current, null, setCompactDesktop);
+    return () => {
+      phone?.disconnect();
+      desktop?.disconnect();
+    };
+  }, [isLoading, currentData]);
 
   const toggleGroup = (group: NutrientGroup) => {
     setOpenGroups((prev) => ({
@@ -197,7 +247,8 @@ function MicrosContent() {
     const list = scrollRef.current;
     const el = document.getElementById(`group-${group}`);
     if (!list || !el) return;
-    const top = el.getBoundingClientRect().top - list.getBoundingClientRect().top + list.scrollTop;
+    const covered = COMPACT_BAR_HEIGHT + (chipBarRef.current?.offsetHeight ?? 0);
+    const top = el.getBoundingClientRect().top - list.getBoundingClientRect().top + list.scrollTop - covered - 8;
     list.scrollTo({ top, behavior });
   };
 
@@ -338,114 +389,116 @@ function MicrosContent() {
         data-align-container="micros-page"
         className="w-full max-w-full min-w-0 h-dvh overflow-clip bg-page flex flex-col relative lg:hidden"
       >
-        {/* Header */}
-        <AppHeader
-          variant="sub"
-          title="Vi chất"
-          subtitle={phoneDateLabel}
-          backHref={diaryHref}
-          alignGroup="micros-header"
-          summary={
-            headerCollapsed ? (
-              <div className="text-sm font-semibold text-on-dark tabular-nums">
-                {achievedMicrosCount.achieved}/{achievedMicrosCount.total} vi chất đã đạt
-              </div>
-            ) : (
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-xs text-muted-subtitle font-medium">Thiếu nhiều nhất</div>
-                  <div className="text-sm font-semibold text-on-dark mt-0.5">
-                    {currentData?.microsSummary.mostLacking.join(", ")}
-                  </div>
-                </div>
-                <div className="text-right shrink-0">
-                  <div className="font-display italic font-black text-[28px] leading-none tabular-nums">
-                    <span className="text-on-dark">{achievedMicrosCount.achieved}</span>
-                    <span className="text-on-dark/55">/{achievedMicrosCount.total}</span>
-                  </div>
-                  <div className="text-xs text-sky font-semibold mt-1">
-                    đã đạt mục tiêu
-                  </div>
-                </div>
-              </div>
-            )
-          }
-          footer={
-            headerCollapsed ? null : (
-              <Link
-                href="/trends/micros"
-                className="min-h-[44px] flex items-center justify-between text-sm font-semibold text-sky no-underline active:scale-[0.97] transition-transform"
-              >
-                Xu hướng 7 và 30 ngày
-                <span aria-hidden="true">›</span>
-              </Link>
-            )
-          }
-        />
-
-        {/* Sticky Horizontally Scrolling Group Chips */}
+        {/* One scrolling body: the full header scrolls away, the compact bar and the chips stay at the top */}
         <div
-          ref={chipBarRef}
-          className="flex-none z-30 w-full min-w-0 max-w-full bg-page border-b border-card-border"
+          ref={scrollRef}
+          className="flex-1 min-h-0 overflow-y-auto overscroll-contain pb-[88px] [--micros-sticky:121px]"
         >
-          <div
-            ref={chipsContainerRef}
-            className="w-full max-w-[560px] mx-auto px-4 py-2 overflow-x-auto scrollbar-none flex items-center gap-2"
-          >
-            {GROUPS_CONFIG.map((group) => {
-              const isActive = activeGroup === group.key;
-              return (
-                <button
-                  key={group.key}
-                  ref={(el) => {
-                    chipRefs.current[group.key] = el;
-                  }}
-                  type="button"
-                  onClick={() => scrollToGroup(group.key)}
-                  aria-pressed={isActive}
-                  className={`min-h-[44px] flex items-center shrink-0 cursor-pointer bg-transparent border-0 p-0 active:scale-[0.97] transition-all`}
+          <CompactBar
+            show={compactPhone}
+            backHref={diaryHref}
+            date={phoneDateLabel}
+            achieved={achievedMicrosCount.achieved}
+            total={achievedMicrosCount.total}
+          />
+          <div inert={compactPhone || undefined} aria-hidden={compactPhone || undefined}>
+            <AppHeader
+              variant="sub"
+              title="Vi chất"
+              subtitle={phoneDateLabel}
+              backHref={diaryHref}
+              alignGroup="micros-header"
+              summary={
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-xs text-muted-subtitle font-medium">Thiếu nhiều nhất</div>
+                    <div className="text-sm font-semibold text-on-dark mt-0.5">
+                      {currentData?.microsSummary.mostLacking.join(", ")}
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <div className="font-display italic font-black text-[28px] leading-none tabular-nums">
+                      <span className="text-on-dark">{achievedMicrosCount.achieved}</span>
+                      <span className="text-on-dark/55">/{achievedMicrosCount.total}</span>
+                    </div>
+                    <div className="text-xs text-sky font-semibold mt-1">đã đạt mục tiêu</div>
+                  </div>
+                </div>
+              }
+              footer={
+                <Link
+                  href="/trends/micros"
+                  className="min-h-[44px] flex items-center justify-between text-sm font-semibold text-sky no-underline active:scale-[0.97] transition-transform"
                 >
-                  <span
-                    className={`h-9 px-4 rounded-full text-xs font-semibold flex items-center justify-center whitespace-nowrap transition-colors ${
-                      isActive
-                        ? "bg-ink text-on-dark shadow-xs"
-                        : "bg-card text-text border border-card-border hover:bg-page"
-                    }`}
+                  Xu hướng 7 và 30 ngày
+                  <span aria-hidden="true">›</span>
+                </Link>
+              }
+            />
+          </div>
+          <div ref={phoneSentinelRef} aria-hidden="true" className="h-0" />
+
+          {/* Sticky Horizontally Scrolling Group Chips, right under the compact bar */}
+          <div
+            ref={chipBarRef}
+            className="sticky top-[60px] z-30 w-full min-w-0 max-w-full bg-page border-b border-card-border"
+          >
+            <div
+              ref={chipsContainerRef}
+              className="w-full max-w-[560px] mx-auto px-4 py-2 overflow-x-auto scrollbar-none flex items-center gap-2"
+            >
+              {GROUPS_CONFIG.map((group) => {
+                const isActive = activeGroup === group.key;
+                return (
+                  <button
+                    key={group.key}
+                    ref={(el) => {
+                      chipRefs.current[group.key] = el;
+                    }}
+                    type="button"
+                    onClick={() => scrollToGroup(group.key)}
+                    aria-pressed={isActive}
+                    className={`min-h-[44px] flex items-center shrink-0 cursor-pointer bg-transparent border-0 p-0 active:scale-[0.97] transition-all`}
                   >
-                    {chipLabels[group.key]}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Only the body scrolls: the header and chip bar stay put (SPEC: header flex none, scrolling body) */}
-        <div ref={scrollRef} onScroll={onListScroll} className="flex-1 min-h-0 overflow-y-auto overscroll-contain pb-[88px]">
-        <main className="w-full max-w-[560px] mx-auto px-4 pt-4 pb-6 flex flex-col gap-4 min-w-0">
-          {/* 4-column equal grid Legend */}
-          <Legend />
-
-          {/* Groups in required order */}
-          <div className="flex flex-col gap-4">
-            {GROUPS_CONFIG.map((group, idx) => (
-              <GroupCard
-                dateQuery={dateQuery}
-                key={group.key}
-                group={group}
-                rows={rowsByGroup[group.key]}
-                isOpen={openGroups[group.key]}
-                onToggle={() => toggleGroup(group.key)}
-                alignGroup={idx === 0 ? "micros-header" : undefined}
-              />
-            ))}
+                    <span
+                      className={`h-9 px-4 rounded-full text-xs font-semibold flex items-center justify-center whitespace-nowrap transition-colors ${
+                        isActive
+                          ? "bg-ink text-on-dark shadow-xs"
+                          : "bg-card text-text border border-card-border hover:bg-page"
+                      }`}
+                    >
+                      {chipLabels[group.key]}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          {/* Footnote */}
-          <footer className="pt-2 pb-1 text-xs text-secondary leading-relaxed">
-            * Mục tiêu theo cân nặng, giới tính và ngày tập · tham khảo khuyến nghị cho người Việt Nam (2016).
-          </footer>
-        </main>
+          <main className="w-full max-w-[560px] mx-auto px-4 pt-4 pb-6 flex flex-col gap-4 min-w-0">
+            {/* 4-column equal grid Legend */}
+            <Legend />
+
+            {/* Groups in required order */}
+            <div className="flex flex-col gap-4">
+              {GROUPS_CONFIG.map((group, idx) => (
+                <GroupCard
+                  dateQuery={dateQuery}
+                  key={group.key}
+                  group={group}
+                  rows={rowsByGroup[group.key]}
+                  isOpen={openGroups[group.key]}
+                  onToggle={() => toggleGroup(group.key)}
+                  alignGroup={idx === 0 ? "micros-header" : undefined}
+                />
+              ))}
+            </div>
+
+            {/* Footnote */}
+            <footer className="pt-2 pb-1 text-xs text-secondary leading-relaxed">
+              * Mục tiêu theo cân nặng, giới tính và ngày tập · tham khảo khuyến nghị cho người Việt Nam (2016).
+            </footer>
+          </main>
         </div>
 
         {/* Fixed Mobile Dock */}
@@ -462,8 +515,18 @@ function MicrosContent() {
         <DesktopSidebar />
 
         {/* Main Content Area */}
-        <main data-align-container="micros-desktop" className="flex-1 p-8 pb-12 max-w-[1240px] flex flex-col gap-5 box-border">
+        <main data-align-container="micros-desktop" className="relative flex-1 p-8 pb-12 max-w-[1240px] flex flex-col gap-5 box-border [--micros-sticky:108px]">
+          {/* The compact bar spans the column (the 32 px padding either side) and takes no room */}
+          <CompactBar
+            className="-mx-8 -mb-5"
+            show={compactDesktop}
+            backHref={diaryHref}
+            date={phoneDateLabel}
+            achieved={achievedMicrosCount.achieved}
+            total={achievedMicrosCount.total}
+          />
           {/* Header */}
+          <div inert={compactDesktop || undefined} aria-hidden={compactDesktop || undefined}>
           <AppHeader
             variant="daily"
             title="Vi chất"
@@ -485,9 +548,11 @@ function MicrosContent() {
             }
             canGoNext={false}
           />
+          </div>
+          <div ref={desktopSentinelRef} aria-hidden="true" className="-mt-5 h-0" />
 
           {/* Desktop Filter Chips */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1">
+          <div className="sticky top-[60px] z-30 flex items-center gap-2 overflow-x-auto bg-page pb-1">
             {GROUPS_CONFIG.map((group) => {
               const isActive = activeGroup === group.key;
               return (
@@ -604,7 +669,7 @@ function GroupCard({
       className="bg-card border border-card-border rounded-[18px] overflow-clip flex flex-col scroll-mt-2 lg:scroll-mt-6 break-inside-avoid"
     >
       {/* Sticky group header: sticks to the top of the scrolling body */}
-      <div className="sticky top-0 z-10 bg-card border-b border-card-border">
+      <div className="sticky top-[var(--micros-sticky,0px)] z-10 bg-card border-b border-card-border">
         <button
           type="button"
           onClick={onToggle}

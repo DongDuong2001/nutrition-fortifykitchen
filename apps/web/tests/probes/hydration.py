@@ -66,8 +66,9 @@ def main():
                 for i in range(chips.count()):
                     chips.nth(i).click()
                     page.wait_for_timeout(400)
-                moved = page.evaluate("""() => { const w = document.querySelector('[data-align-container="micros-page"]'); return [w.scrollTop, window.scrollY, w.querySelector('header').getBoundingClientRect().top]; }""")
-                if moved[0] or moved[1] or abs(moved[2]) >= 1:
+                # cc-27c: the full header scrolls inside the list (a compact bar replaces it), so only the wrapper and the window must stay still
+                moved = page.evaluate("""() => { const w = document.querySelector('[data-align-container="micros-page"]'); return [w.scrollTop, window.scrollY, 0]; }""")
+                if moved[0] or moved[1]:
                     err = f"Tapping group chips moved the page (wrapper {moved[0]}, window {moved[1]}, header top {moved[2]})"
                     print(f"[FAIL] {err}")
                     total_errors.append(err)
