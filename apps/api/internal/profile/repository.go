@@ -23,14 +23,14 @@ func NewRepository(pool *pgxpool.Pool) *PostgresRepository {
 func (r *PostgresRepository) GetProfile(ctx context.Context, userID uuid.UUID) (*Profile, error) {
 	query := `
 		SELECT user_id, sex, birth_year, weight_kg, goal, training_minutes_default,
-		       near_period, language, reminders, display_name, created_at, updated_at
+		       near_period, language, reminders, display_name, COALESCE(role, 'user'), created_at, updated_at
 		FROM nutrition.profiles
 		WHERE user_id = $1
 	`
 	var p Profile
 	err := r.pool.QueryRow(ctx, query, userID).Scan(
 		&p.UserID, &p.Sex, &p.BirthYear, &p.WeightKg, &p.Goal, &p.TrainingMinutesDefault,
-		&p.NearPeriod, &p.Language, &p.Reminders, &p.DisplayName, &p.CreatedAt, &p.UpdatedAt,
+		&p.NearPeriod, &p.Language, &p.Reminders, &p.DisplayName, &p.Role, &p.CreatedAt, &p.UpdatedAt,
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {

@@ -31,6 +31,9 @@ func (s *DefaultService) GetProfile(ctx context.Context, userID uuid.UUID) (*Pro
 		return nil, err
 	}
 	if p != nil {
+		if p.Role == "" {
+			p.Role = "user"
+		}
 		p.Targets = targets.CalculateTargets(targets.UserProfileForTargets{
 			Sex:             p.Sex,
 			WeightKg:        p.WeightKg,
