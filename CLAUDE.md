@@ -23,4 +23,5 @@ The shared rules above apply to every agent. Everything below applies only to Cl
 - Use subagents for broad searches ("where is X used") so file dumps stay out of the main context.
 - Read files in ranges. Never paste whole design files or lockfiles into the conversation.
 - Run `/clear` between tasks, and `/compact` when a task runs long.
+- Don't run the full `npm run probe:all` on every task: it takes 25 to 35 minutes. Per task, run the core gates, smoke and the task's own probe; run `probe:all` nightly or before a release (see AGENTS.md, "Which gates run when").
 - Keep replies short: what changed, the gate output and the screenshot paths. No recaps.
