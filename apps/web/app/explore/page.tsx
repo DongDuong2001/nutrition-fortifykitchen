@@ -27,6 +27,8 @@ export default function ExplorePage() {
 
   const chips = [
     { id: "all", label: "Tất cả", active: true },
+    { id: "coaches", label: "Huấn luyện viên", onClick: () => router.push("/explore/coaches") },
+    { id: "leaderboard", label: "Bảng xếp hạng", onClick: () => router.push("/explore/leaderboard") },
     ...FOOD_CATEGORIES.map((c) => ({
       id: c.key,
       label: c.label,

@@ -1,0 +1,104 @@
+export interface CoachSocialLinks {
+  zaloGroup?: string;
+  facebookCommunity?: string;
+  bookingUrl?: string;
+}
+
+export interface CoachProfile {
+  id: string;
+  name: string;
+  title: string;
+  avatarUrl?: string;
+  bio: string;
+  specialties: string[];
+  credentials: string[];
+  experienceYears: number;
+  clientsHelped: number;
+  social: CoachSocialLinks;
+  recommendedFoods: string[];
+  featured: boolean;
+}
+
+export const COACH_SPECIALTIES = [
+  "Tất cả",
+  "Tăng cơ",
+  "Giảm mỡ bền vững",
+  "Dinh dưỡng nữ giới",
+  "Dinh dưỡng thể thao",
+  "Sức bền & Marathon",
+];
+
+export const FEATURED_COACHES: CoachProfile[] = [
+  {
+    id: "coach-khanh",
+    name: "Lê Hồng Khánh",
+    title: "Trưởng ban Chuyên môn H1T",
+    bio: "Nhà sáng lập phương pháp dinh dưỡng vi chất H1T MICRO. Hơn 8 năm kinh nghiệm huấn luyện dinh dưỡng thể thao, tăng cơ và tối ưu chuyển hóa cho vận động viên và người tập luyện phong trào.",
+    specialties: ["Tăng cơ", "Dinh dưỡng thể thao", "Tối ưu vi chất", "Giảm mỡ bền vững"],
+    credentials: [
+      "Chứng chỉ Dinh dưỡng Thể thao CISSN",
+      "Huấn luyện viên Thể hình Cấp 1",
+      "Tác giả giáo trình H1T System",
+    ],
+    experienceYears: 8,
+    clientsHelped: 1250,
+    social: {
+      zaloGroup: "https://zalo.me/g/h1t-community",
+      facebookCommunity: "https://facebook.com/groups/h1t.nutrition",
+      bookingUrl: "https://h1t.vn/tu-van-khanh",
+    },
+    recommendedFoods: ["Ức gà áp chảo", "Yến mạch ngâm qua đêm", "Trứng gà luộc", "Súp lơ xanh"],
+    featured: true,
+  },
+  {
+    id: "coach-ha",
+    name: "Nguyễn Thu Hà",
+    title: "Chuyên gia Dinh dưỡng Nữ & Chu kỳ",
+    bio: "Chuyên sâu về cân bằng hormone, điều chỉnh dinh dưỡng theo từng pha chu kỳ kinh nguyệt và giảm mỡ bền vững cho phụ nữ hiện đại.",
+    specialties: ["Dinh dưỡng nữ giới", "Chu kỳ kinh nguyệt", "Giảm mỡ bền vững"],
+    credentials: [
+      "Cử nhân Dinh dưỡng & Khoa học Thực phẩm",
+      "Chứng chỉ Female Athlete Health & Performance",
+    ],
+    experienceYears: 6,
+    clientsHelped: 840,
+    social: {
+      zaloGroup: "https://zalo.me/g/h1t-women",
+      facebookCommunity: "https://facebook.com/groups/h1t.women",
+      bookingUrl: "https://h1t.vn/tu-van-ha",
+    },
+    recommendedFoods: ["Cá hồi nướng", "Hạt chia", "Rau chân vịt", "Hạt bí ngô"],
+    featured: true,
+  },
+  {
+    id: "coach-duc",
+    name: "Trần Minh Đức",
+    title: "Huấn luyện viên Hiệu suất & Sức bền",
+    bio: "Chuyên gia lập kế hoạch dinh dưỡng trong thi đấu sức bền (Marathon, Triathlon) và phục hồi cơ bắp cường độ cao.",
+    specialties: ["Sức bền & Marathon", "Dinh dưỡng thể thao", "Tăng cơ"],
+    credentials: [
+      "Chứng chỉ Strength & Conditioning Coach (CSCS)",
+      "Ironman Finisher & Sport Nutritionist",
+    ],
+    experienceYears: 5,
+    clientsHelped: 620,
+    social: {
+      zaloGroup: "https://zalo.me/g/h1t-endurance",
+      facebookCommunity: "https://facebook.com/groups/h1t.endurance",
+      bookingUrl: "https://h1t.vn/tu-van-duc",
+    },
+    recommendedFoods: ["Chuối tiêu", "Bột củ dền", "Nước dừa tươi", "Khoai lang luộc"],
+    featured: true,
+  },
+];
+
+export function getCoachById(id: string): CoachProfile | null {
+  return FEATURED_COACHES.find((c) => c.id === id) || null;
+}
+
+export function filterCoachesBySpecialty(specialty: string): CoachProfile[] {
+  if (!specialty || specialty === "Tất cả") {
+    return FEATURED_COACHES;
+  }
+  return FEATURED_COACHES.filter((c) => c.specialties.includes(specialty));
+}

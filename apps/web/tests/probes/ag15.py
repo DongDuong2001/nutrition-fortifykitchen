@@ -26,7 +26,7 @@ HERE = Path(__file__).resolve().parent
 APP_DIR = HERE.parent.parent / "app"
 WIDTHS = [(390, 844), (1280, 800)]
 NOT_FOUND_ROUTE = "/this-page-does-not-exist"
-MOCK_IDS = {"entry": "item-1", "foods": "food-cha-la", "micros": "calcium", "explore": "tinh_bot", "rich": "calcium"}
+MOCK_IDS = {"entry": "item-1", "foods": "food-cha-la", "micros": "calcium", "explore": "tinh_bot", "rich": "calcium", "coaches": "coach-khanh"}
 
 def discover_routes():
     routes = []

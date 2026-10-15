@@ -11,9 +11,15 @@ import { MOCK_FOODS, type FoodItem } from "./mock/foods";
 import { searchFoods as searchMockFoods } from "./search";
 import type { SetupProfile } from "./onboarding";
 import { accountStorage } from "./storage-keys";
+import { type CoachProfile, filterCoachesBySpecialty, getCoachById } from "./coaches";
+import { type LeaderboardPeriod, type LeaderboardResponse, getMockLeaderboard, setLeaderboardOptIn as setLeaderboardOptInState } from "./leaderboard";
+import { type MasteryLevelInfo, calculateMasteryLevel } from "./mastery-levels";
 
 export * from "./nutrients";
 export * from "./mock/foods";
+export * from "./coaches";
+export * from "./leaderboard";
+export * from "./mastery-levels";
 export type { MockDayData, MockMeal, MockMacroStat, MockMicroStat };
 
 export interface NutrientValues {
@@ -829,5 +835,69 @@ export const apiClient = {
       }
     }
     return { ok: true };
+  },
+
+  async getCoaches(specialty?: string): Promise<CoachProfile[]> {
+    if (isLiveMode()) {
+      try {
+        const query = specialty && specialty !== "Tất cả" ? `?specialty=${encodeURIComponent(specialty)}` : "";
+        const res = await apiFetch(`/coaches${query}`);
+        if (res.ok) {
+          const json = await res.json();
+          if (Array.isArray(json)) return json;
+        }
+      } catch {
+        // Fallback
+      }
+    }
+    return filterCoachesBySpecialty(specialty || "Tất cả");
+  },
+
+  async getCoach(id: string): Promise<CoachProfile | null> {
+    if (isLiveMode()) {
+      try {
+        const res = await apiFetch(`/coaches/${encodeURIComponent(id)}`);
+        if (res.ok) {
+          return await res.json();
+        }
+      } catch {
+        // Fallback
+      }
+    }
+    return getCoachById(id);
+  },
+
+  async getLeaderboard(period: LeaderboardPeriod = "weekly"): Promise<LeaderboardResponse> {
+    if (isLiveMode()) {
+      try {
+        const res = await apiFetch(`/leaderboard?period=${period}`);
+        if (res.ok) {
+          return await res.json();
+        }
+      } catch {
+        // Fallback
+      }
+    }
+    return getMockLeaderboard(period);
+  },
+
+  async setLeaderboardOptIn(optIn: boolean): Promise<boolean> {
+    setLeaderboardOptInState(optIn);
+    if (isLiveMode()) {
+      try {
+        const res = await apiFetch(`/me/leaderboard-opt-in`, {
+          method: "PUT",
+          body: JSON.stringify({ opt_in: optIn }),
+        });
+        return res.ok;
+      } catch {
+        return false;
+      }
+    }
+    return true;
+  },
+
+  getMasteryLevel(streakDays = 0, avgMicrosAchieved = 0): MasteryLevelInfo {
+    return calculateMasteryLevel(streakDays, avgMicrosAchieved);
   },
 };

@@ -31,7 +31,7 @@ DESKTOP_SIDEBAR = 'nav[aria-label="Điều hướng chính"]:visible'  # the sid
 # No route is skipped now: /login links to /diary, which is a route since cc2-07, so it reaches networkidle.
 SKIPPED_ROUTES: set[str] = set()
 # Mock id for each dynamic segment, keyed by the static segment in front of it
-MOCK_IDS = {"entry": "item-1", "foods": "food-cha-la", "micros": "calcium", "explore": "tinh_bot", "rich": "calcium"}
+MOCK_IDS = {"entry": "item-1", "foods": "food-cha-la", "micros": "calcium", "explore": "tinh_bot", "rich": "calcium", "coaches": "coach-khanh"}
 IGNORED_CONSOLE = ("data-gr-", "Grammarly")
 # Production builds report hydration failures as minified React errors (#418, #419, #423, #425)
 HYDRATION_RE = re.compile(r"hydrat|React error #(418|419|423|425)", re.IGNORECASE)

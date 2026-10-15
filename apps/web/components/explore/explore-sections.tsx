@@ -15,6 +15,8 @@ import { foodRowKcal, foodRowMeta } from "@/lib/food-meta";
 import { isOwnFood } from "@/lib/food-categories";
 import { FoodRowLink } from "@/components/foods/food-row-link";
 import { SavedMealsCard } from "@/components/explore/saved-meals-card";
+import { CoachesCarousel } from "@/components/coaching/coaches-carousel";
+import { LeaderboardBanner } from "@/components/leaderboard/leaderboard-banner";
 
 const SHOWN = 8;
 const SHOWN_MEALS = 3;
@@ -37,6 +39,10 @@ export function ExploreSections() {
 
   return (
     <>
+      <LeaderboardBanner />
+
+      <CoachesCarousel />
+
       <RichCarousel />
 
       {recents.length > 0 ? (
