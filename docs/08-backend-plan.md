@@ -22,7 +22,7 @@ The API scaffold runs but serves only food search, custom food, one diary log an
 | Area | What exists | Gap for Release 1 |
 | --- | --- | --- |
 | Go API (apps/api) | Go 1.24, chi, pgx pool, Sentry, CORS, /healthz; modules diary, nutrition, payment, vault | No profile, weight, entries edit/delete, favourites, recents, saved meals, trends; no Zerolog; no OpenAPI |
-| Auth | Supabase JWT middleware; admin = app_metadata.role "admin" | Profile row on first sign-in; tests for expired/invalid tokens |
+| Auth | Supabase JWT middleware; admin = profiles.role "admin" (looked up per request) | Profile row on first sign-in; tests for expired/invalid tokens |
 | Routes | GET /foods, POST /foods/custom, POST /diary/logs, GET /diary/daily, admin drafts, payment and vault webhooks | Rebuild on the docs/07 paths (/days/{date}/entries, /entries/{id}, …) |
 | Database | migration 000001: nutrition.foods, diary_logs (nutrients_snapshot), user_targets, coach_drafts | Profiles, weight, training per day, favourites, recents, saved meals, food categories and portions, entry kind |
 | Food data | Table only | Import USDA SR Legacy + Foundation, CNF, VN food table into the 22 counted nutrients (+ catalog) |

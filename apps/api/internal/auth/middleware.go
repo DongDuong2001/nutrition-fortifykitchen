@@ -12,6 +12,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"nutrition-api/internal/logger"
 	"nutrition-api/pkg/response"
 )
 
@@ -33,11 +34,21 @@ type SupabaseClaims struct {
 	jwt.RegisteredClaims
 }
 
+// ErrNoProfile is returned by a RoleLookup when the user has no profile row.
+var ErrNoProfile = errors.New("profile not found")
+
+// RoleLookup resolves a user's role from the single source of truth,
+// nutrition.profiles.role. The JWT app_metadata.role claim is never used.
+type RoleLookup interface {
+	GetRole(ctx context.Context, userID uuid.UUID) (string, error)
+}
+
 // Middleware handles JWT authentication and user context injection
 type Middleware struct {
 	jwtSecret      []byte
 	jwksCache      *JWKSCache
 	allowedOrigins []string
+	roles          RoleLookup
 }
 
 func defaultAllowedOrigins() []string {
@@ -109,6 +120,13 @@ func NewMiddlewareWithOptions(secret string, jwksURL string) *Middleware {
 // WithAllowedOrigins overrides the allowed origins for cookie-authenticated CSRF validation
 func (m *Middleware) WithAllowedOrigins(origins []string) *Middleware {
 	m.allowedOrigins = origins
+	return m
+}
+
+// WithRoleLookup sets the profile-backed role source used by RequireRole and RequireAdmin.
+// Without one, both deny every request with 500 (fail closed).
+func (m *Middleware) WithRoleLookup(l RoleLookup) *Middleware {
+	m.roles = l
 	return m
 }
 
@@ -276,53 +294,47 @@ func (m *Middleware) Authenticate(next http.Handler) http.Handler {
 		ctx := context.WithValue(r.Context(), UserIDKey, parsedUserID)
 		ctx = context.WithValue(ctx, ClaimsKey, claims)
 
-		// Check app_metadata.role
-		if roleVal, ok := claims.AppMetadata["role"].(string); ok {
-			ctx = context.WithValue(ctx, RoleKey, roleVal)
-		}
-
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
-// RequireAdmin verifies that the authenticated user possesses the admin role in app_metadata
+// RequireAdmin verifies that the authenticated user's profile role is admin
 func (m *Middleware) RequireAdmin(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		claims, ok := r.Context().Value(ClaimsKey).(*SupabaseClaims)
-		if !ok || claims == nil {
-			response.Error(w, http.StatusUnauthorized, response.CodeUnauthorized, "unauthorized")
-			return
-		}
-
-		role, hasRole := claims.AppMetadata["role"].(string)
-		if !hasRole || role != "admin" {
-			response.Error(w, http.StatusForbidden, response.CodeForbidden, "forbidden: administrator role required (app_metadata.role must be admin)")
-			return
-		}
-
-		next.ServeHTTP(w, r)
-	})
+	return m.RequireRole("admin")(next)
 }
 
-// RequireRole verifies that the authenticated user possesses one of the specified roles in app_metadata
+// RequireRole verifies that the authenticated user's profile role (nutrition.profiles.role)
+// is one of the allowed roles. The JWT app_metadata.role claim is ignored.
 func (m *Middleware) RequireRole(allowedRoles ...string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			claims, ok := r.Context().Value(ClaimsKey).(*SupabaseClaims)
-			if !ok || claims == nil {
+			userID, err := GetUserID(r.Context())
+			if err != nil {
 				response.Error(w, http.StatusUnauthorized, response.CodeUnauthorized, "unauthorized")
 				return
 			}
 
-			role, hasRole := claims.AppMetadata["role"].(string)
-			if !hasRole || role == "" {
-				response.Error(w, http.StatusForbidden, response.CodeForbidden, "forbidden: user lacks required permissions")
+			if m.roles == nil {
+				logger.Log.Error().Msg("role lookup is not configured")
+				response.Error(w, http.StatusInternalServerError, response.CodeInternalServerError, "internal server error")
+				return
+			}
+
+			role, err := m.roles.GetRole(r.Context(), userID)
+			if err != nil {
+				if errors.Is(err, ErrNoProfile) {
+					response.Error(w, http.StatusForbidden, response.CodeForbidden, "forbidden: insufficient role privileges")
+					return
+				}
+				logger.Log.Error().Err(err).Msg("role lookup failed")
+				response.Error(w, http.StatusInternalServerError, response.CodeInternalServerError, "internal server error")
 				return
 			}
 
 			for _, allowed := range allowedRoles {
-				if role == allowed {
-					next.ServeHTTP(w, r)
+				if role != "" && role == allowed {
+					ctx := context.WithValue(r.Context(), RoleKey, role)
+					next.ServeHTTP(w, r.WithContext(ctx))
 					return
 				}
 			}
@@ -347,13 +359,9 @@ func GetClaims(ctx context.Context) (*SupabaseClaims, bool) {
 	return claims, ok
 }
 
-// IsAdmin checks if current context user has admin role
+// IsAdmin reports whether the role resolved by RequireRole/RequireAdmin for this request is admin
 func IsAdmin(ctx context.Context) bool {
-	claims, ok := GetClaims(ctx)
-	if !ok || claims == nil {
-		return false
-	}
-	role, ok := claims.AppMetadata["role"].(string)
+	role, ok := ctx.Value(RoleKey).(string)
 	return ok && role == "admin"
 }
 

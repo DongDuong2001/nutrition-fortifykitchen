@@ -33,7 +33,7 @@ Maintainers will acknowledge receipt of your report within 48 hours and provide 
 ### Supabase Auth JWT Verification
 - All authenticated API routes under `/api/v1/diary/*`, `/api/v1/foods/*`, and `/api/v1/admin/*` require a valid Bearer token in the `Authorization` header.
 - The backend verifies the token and extracts the `user_id` into the request context.
-- Admin endpoints strictly enforce Role-Based Access Control (RBAC). Access is restricted to tokens containing `app_metadata.role == "admin"`. Requests failing this condition receive HTTP 403 Forbidden.
+- Admin endpoints strictly enforce Role-Based Access Control (RBAC). Access is restricted to users whose `nutrition.profiles.role` is `admin` (looked up by the authenticated user id; the JWT `app_metadata.role` claim is ignored). Requests failing this condition receive HTTP 403 Forbidden.
 
 ### Webhook Signature Verification
 - **PayOS VietQR Gateway (`/api/v1/payments/webhook`)**:

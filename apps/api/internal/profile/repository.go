@@ -8,6 +8,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/google/uuid"
+	"nutrition-api/internal/auth"
 )
 
 var ErrProfileNotFound = errors.New("profile not found")
@@ -39,6 +40,22 @@ func (r *PostgresRepository) GetProfile(ctx context.Context, userID uuid.UUID) (
 		return nil, err
 	}
 	return &p, nil
+}
+
+// GetRole returns nutrition.profiles.role for the user, the single source of roles.
+// It returns auth.ErrNoProfile when the user has no profile row.
+func (r *PostgresRepository) GetRole(ctx context.Context, userID uuid.UUID) (string, error) {
+	var role string
+	err := r.pool.QueryRow(ctx,
+		`SELECT COALESCE(role, 'user') FROM nutrition.profiles WHERE user_id = $1`, userID,
+	).Scan(&role)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return "", auth.ErrNoProfile
+		}
+		return "", err
+	}
+	return role, nil
 }
 
 func (r *PostgresRepository) UpsertProfile(ctx context.Context, p *Profile) error {

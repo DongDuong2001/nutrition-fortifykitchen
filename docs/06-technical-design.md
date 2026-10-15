@@ -155,7 +155,7 @@ Dong's scaffold (`nutrition-fortifykitchen/`) is now the baseline. Where it diff
 | Frontend | Next.js 16 App Router, React 19, TypeScript, Tailwind v4, `@supabase/ssr` | Visuals follow the design canvas, not task 04's "culinary" look |
 | Backend | Go 1.24 modular monolith: chi, pgx (pgxpool, session mode, port 5432), golang-jwt | Matches the stack review |
 | Database | PostgreSQL 17, schema `nutrition`: `foods`, `diary_logs`, `user_targets`, `coach_drafts` | More tables needed, see SRS |
-| Auth | Supabase JWT verified in Go; admin = `app_metadata.role == "admin"` | Matches the review |
+| Auth | Supabase JWT verified in Go; admin = `nutrition.profiles.role == "admin"` (looked up per request, JWT `app_metadata.role` ignored) | Matches the review |
 | Diary writes | Client-generated UUID + `ON CONFLICT (id) DO NOTHING` (idempotent) | Outbox pattern moves to Release 2 |
 | Payments | PayOS (VietQR) with HMAC-SHA256 webhook check | Current choice; can change later |
 | Coach knowledge | GitHub Vault: markdown from a private repo via webhook + fine-grained PAT, held in `coach_drafts` until admin review | New, was not in this doc |
