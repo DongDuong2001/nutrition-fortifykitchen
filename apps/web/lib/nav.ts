@@ -39,10 +39,17 @@ export function tabForPath(pathname: string | null | undefined): NavTab | null {
 }
 
 /** Where back goes when there is no in-app history: the screen's parent, or its owning tab. */
-export function backFallback(pathname: string | null | undefined): string {
+export function backFallback(pathname: string | null | undefined, search?: string | null): string {
   if (!pathname) return "/";
-  const parts = segments(pathname);
-  const [first, second, third] = parts;
+  const [first, second, third] = segments(pathname);
+  const target = backTarget(first, second, third);
+  // Day screens keep the day being viewed, so back from a past day lands on that day, not on today.
+  const date = new URLSearchParams(search ?? "").get("date");
+  const isDayScreen = first === "micros" || first === "training" || first === "add" || first === "entry";
+  return isDayScreen && date && /^\d{4}-\d{2}-\d{2}$/.test(date) ? `${target}?date=${date}` : target;
+}
+
+function backTarget(first: string | undefined, second: string | undefined, third: string | undefined): string {
   if (first === "micros" && second) return "/micros";
   if (first === "micros" || first === "training") return "/";
   if (first === "trends" && second) return "/trends";

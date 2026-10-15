@@ -76,6 +76,21 @@ describe("lib/nav backFallback", () => {
     expect(backFallback("/settings/delete-account")).toBe("/settings");
   });
 
+  it("keeps a past day's ?date= when the parent is a day screen", () => {
+    expect(backFallback("/micros", "?date=2026-10-14")).toBe("/?date=2026-10-14");
+    expect(backFallback("/training", "?date=2026-10-14")).toBe("/?date=2026-10-14");
+    expect(backFallback("/micros/calcium", "?date=2026-10-14")).toBe("/micros?date=2026-10-14");
+    expect(backFallback("/add", "?date=2026-10-14&meal=lunch")).toBe("/?date=2026-10-14");
+  });
+
+  it("ignores a missing or malformed date and dates on screens that are not day screens", () => {
+    expect(backFallback("/micros", "")).toBe("/");
+    expect(backFallback("/micros", null)).toBe("/");
+    expect(backFallback("/micros", "?date=hôm-qua")).toBe("/");
+    expect(backFallback("/trends/micros", "?date=2026-10-14")).toBe("/trends");
+    expect(backFallback("/foods/egg", "?date=2026-10-14")).toBe("/explore");
+  });
+
   it("falls back to the owning tab for the add sheet and entry, and to the root otherwise", () => {
     expect(backFallback("/add")).toBe("/");
     expect(backFallback("/entry/item-1")).toBe("/");

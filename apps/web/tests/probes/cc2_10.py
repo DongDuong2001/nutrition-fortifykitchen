@@ -1,9 +1,9 @@
-"""cc2-10: IA v2 step 2, Tổng quan sub-tabs and Nhật ký owns the day, at 390 and 1280.
+"""cc2-10: IA v2 step 2, Tổng quan sub-tabs and Hôm nay owns the day, at 390 and 1280.
 
 - every Tổng quan sub-tab is reachable from the tab bar and is the only active one
 - the period control: ‹ › and 7/30 change the numbers, › is disabled on the current period, the period stays across sub-tabs
 - Năng lượng: the energy bars and the period control (cc2-31b: Tóm tắt is /trends, Năng lượng is /trends/energy)
-- Nhật ký rows open /micros and /training with the date shown; past-day screens are read-only
+- Hôm nay (/) opens /micros and /training with the date shown; back returns to /; past-day screens keep the date and are read-only
 - Xóa bữa này asks for a confirm step and Hoàn tác puts the meal back
 - no ink band at the top of the window on desktop
 Screenshots: .screenshots/cc2-10-*.png
@@ -183,6 +183,76 @@ def check_micros_tab(browser, size_name, size):
     ctx.close()
 
 
+def check_home_rows(browser, size_name, size):
+    """The Vi chất and Ngày tập links on Hôm nay open the day shown, and back returns to /."""
+    ctx, pg = new_page(browser, size)
+    go(pg, "/")
+    check(pg.locator("h1:visible").count() >= 1, f"{size_name} home: a visible h1")
+    shot(pg, "home", size_name)
+    no_h_scroll(pg, f"{size_name} home")
+    if size_name == "1280":
+        # No ink band stretching across the top of the window (the sidebar is ink but only 240 px wide)
+        wide = pg.evaluate(
+            """() => [...document.querySelectorAll('*')].filter(el => {
+                const r = el.getBoundingClientRect();
+                const bg = getComputedStyle(el).backgroundColor;
+                return r.top < 40 && r.width > 600 && bg === 'rgb(17, 19, 23)';
+            }).length"""
+        )
+        check(wide == 0, f"{size_name} home: no ink band at the top ({wide})")
+
+    pg.locator('a:has-text("Đủ 22 vi chất"):visible').first.click()
+    pg.wait_for_url(f"**/micros?date={TODAY}", timeout=8000)
+    check(f"date={TODAY}" in pg.url, f"{size_name} home: Đủ 22 vi chất › opens /micros?date={TODAY}")
+    pg.locator('a[aria-label="Quay lại"]:visible').first.click()
+    pg.wait_for_url(re.compile(r".*/(\?.*)?$"), timeout=8000)
+    check(path_of(pg) == "/", f"{size_name} micros: back returns to / (now {path_of(pg)})")
+    pg.locator(f'a[href="/training?date={TODAY}"]:visible').first.click()
+    pg.wait_for_url(f"**/training?date={TODAY}", timeout=8000)
+    check(f"date={TODAY}" in pg.url, f"{size_name} home: the Ngày tập pill opens /training?date={TODAY}")
+    owner = pg.locator('nav[aria-label="Điều hướng chính"]:visible a[aria-current="page"]').all_inner_texts()
+    check(any("Hôm nay" in t for t in owner), f"{size_name} training: the owning tab is Hôm nay ({owner})")
+    ctx.close()
+
+
+def check_past_day(browser, size_name, size):
+    ctx, pg = new_page(browser, size)
+    go(pg, f"/?date={YESTERDAY}")
+    pg.wait_for_timeout(300)
+    add = 'a[href^="/add"]:not(#mobile-add-fab):not(#desktop-add-btn):visible'
+    check(pg.locator(add).count() == 0, f"{size_name} past home: no add link on a meal")
+    check(pg.locator('a[aria-label^="Thêm vào"]:visible').count() == 0, f"{size_name} past home: no + on a meal")
+    # ⋯ lives in meal mode: tap the header of a meal with food, then look for the pill
+    with_food = pg.locator("button[aria-label^='Xem riêng']:visible", has_text="kcal")
+    check(with_food.count() > 0, f"{size_name} past home: a meal with food is listed ({with_food.count()})")
+    if with_food.count():
+        with_food.first.click()
+        pg.wait_for_timeout(300)
+        check(pg.locator('button[aria-label^="Tùy chọn"]:visible').count() == 1,
+              f"{size_name} past home: a meal with food keeps a ⋯ menu (Lưu thành Bữa ăn của tôi, cc2-12)")
+    check(pg.locator(f'a[href="/micros?date={YESTERDAY}"]:visible').count() >= 1, f"{size_name} past home: Vi chất link keeps the date")
+    pg.locator('button:has-text("Xem cả ngày"):visible').first.click()
+    pg.wait_for_timeout(300)
+    check(pg.locator(f'a[href="/training?date={YESTERDAY}"]:visible').count() == 1, f"{size_name} past home: Ngày tập link keeps the date")
+
+    go(pg, f"/micros?date={YESTERDAY}")
+    check("Chỉ xem" in text(pg) or "Hôm qua" in text(pg), f"{size_name} past micros: shows the date of the day")
+    back = pg.locator('a[aria-label="Quay lại"]:visible').first.get_attribute("href")
+    check(back == f"/?date={YESTERDAY}", f"{size_name} past micros: back goes to /?date= ({back})")
+    check(pg.locator(add).count() == 0, f"{size_name} past micros: no add link")
+    check(pg.locator('a[href="/trends/micros"]:visible').count() >= 1, f"{size_name} micros: the trend link goes to /trends/micros")
+
+    go(pg, f"/training?date={YESTERDAY}")
+    chips = pg.locator('button[aria-pressed]:visible')
+    disabled = [chips.nth(i).is_disabled() for i in range(chips.count())]
+    check(len(disabled) >= 5 and all(disabled), f"{size_name} past training: duration chips are disabled ({len(disabled)})")
+    check(pg.locator('input[type="checkbox"]:visible').count() == 0, f"{size_name} past training: no checklist to toggle")
+    back = pg.locator('a[aria-label="Quay lại"]:visible').first.get_attribute("href")
+    check(back == f"/?date={YESTERDAY}", f"{size_name} past training: back goes to /?date= ({back})")
+    shot(pg, "past-training", size_name)
+    ctx.close()
+
+
 def check_delete_meal(browser, size_name, size):
     """cc2-32: the meal ⋯ sheet lives on Hôm nay. Tap the breakfast header (meal mode), then the ⋯ pill."""
     ctx, pg = new_page(browser, size)
@@ -222,6 +292,8 @@ def main():
             check_period(browser, size_name, size)
             check_energy_bars(browser, size_name, size)
             check_micros_tab(browser, size_name, size)
+            check_home_rows(browser, size_name, size)
+            check_past_day(browser, size_name, size)
             check_delete_meal(browser, size_name, size)
         browser.close()
     print("\n".join(notes))

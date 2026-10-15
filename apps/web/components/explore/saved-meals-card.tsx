@@ -65,7 +65,7 @@ export function SavedMealsCard({ limit }: { limit?: number }) {
         <div aria-hidden="true" className="h-[52px] rounded-xl bg-level-empty motion-safe:animate-pulse" />
       ) : shown.length === 0 ? (
         <p className="m-0 py-2 text-[13px] leading-snug text-secondary">
-          Chưa có Bữa ăn của tôi. Mở ⋯ ở một bữa trong Nhật ký và chọn Lưu thành Bữa ăn của tôi.
+          Chưa có Bữa ăn của tôi. Mở ⋯ ở một bữa trên Hôm nay và chọn Lưu thành Bữa ăn của tôi.
         </p>
       ) : (
         <>

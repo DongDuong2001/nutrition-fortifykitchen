@@ -2,11 +2,12 @@
 
 - /diary and /diary?date=<yesterday> land on / and /?date=<yesterday>; /today lands on /
 - no in-app link to /diary on any route (every a[href] scanned)
-- back from /micros and /training with no history goes to /
-- the home sheets (meal menu, calendar, copy yesterday) close with Esc and return focus to the control that opened them
+- back from /micros and /training with no history goes to / (a past day keeps ?date=, also from a nutrient detail)
+- the home sheets (meal menu, calendar, copy yesterday, seeded) close with Esc and return focus to the control that opened them
 Screenshots: .screenshots/cc2-32-redirect-390.png, .screenshots/cc2-32-home-from-diary-390.png
-Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/cc2_32.py
+Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc2_32.py
 """
+import json
 import os
 import re
 import sys
@@ -17,7 +18,7 @@ from urllib.parse import urlparse, parse_qs
 from playwright.sync_api import sync_playwright
 import _demo  # noqa: F401  (cc2-15b: demo mode on, see _demo.py)
 
-BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3102")
+BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3101")
 SHOTS = Path(__file__).resolve().parent.parent.parent / ".screenshots"
 SIZES = [("390", {"width": 390, "height": 844}), ("1280", {"width": 1280, "height": 800})]
 YESTERDAY = (date.today() - timedelta(days=1)).isoformat()
@@ -79,9 +80,17 @@ def no_diary_links(browser, name, size):
 
 
 def back_fallback(browser, name, size):
+    """Back with no history: today lands on /, a past day on /?date=<d> (also from a nutrient detail, via /micros)."""
     ctx = browser.new_context(viewport=size)
     pg = ctx.new_page()
-    for route in ("/micros", "/training"):
+    cases = [
+        ("/micros", "/"),
+        ("/training", "/"),
+        (f"/micros?date={YESTERDAY}", ("/", YESTERDAY)),
+        (f"/training?date={YESTERDAY}", ("/", YESTERDAY)),
+        (f"/micros/calcium?date={YESTERDAY}", ("/micros", YESTERDAY)),
+    ]
+    for route, want in cases:
         go(pg, route)
         back = pg.locator('[aria-label="Quay lại"]:visible, button:has-text("Quay lại"):visible').first
         if back.count() == 0:
@@ -89,7 +98,10 @@ def back_fallback(browser, name, size):
             continue
         back.click()
         settle(pg)
-        check(path_of(pg) == "/", f"{name} {route}: back with no history goes to / (now {path_of(pg)})")
+        want_path, want_date = (want, None) if isinstance(want, str) else want
+        got_date = parse_qs(urlparse(pg.url).query).get("date", [None])[0]
+        check(path_of(pg) == want_path and got_date == want_date,
+              f"{name} {route}: back with no history goes to {want_path} date={want_date} (now {pg.url.replace(BASE, '')})")
     ctx.close()
 
 
@@ -129,13 +141,30 @@ def home_sheets(browser, name, size):
     settle(pg)
     sheet_closes_with_focus(pg, name, "meal menu", lambda: meal_menu_opener(pg))
     sheet_closes_with_focus(pg, name, "calendar", lambda: pg.locator("button[aria-label^='Chọn ngày']:visible"))
-    # "Chép hôm qua" only shows on a day with nothing logged while yesterday has entries; the demo day always has
-    # entries, so the copy sheet cannot be opened on this data. Reported as a note, not a pass.
-    copy_btn = pg.get_by_role("button", name=re.compile("^Chép hôm qua")).locator("visible=true")
-    if copy_btn.count():
-        sheet_closes_with_focus(pg, name, "copy yesterday", lambda: copy_btn)
-    else:
-        notes.append(f"NOTE {name}: CopyYesterdaySheet focus not checked (no empty day with yesterday logged in demo data)")
+    ctx.close()
+
+
+def copy_yesterday_sheet(browser, name, size):
+    """An empty today with yesterday logged (the sample day deleted, as cc_22 does; demo history keeps yesterday)."""
+    ctx = browser.new_context(viewport=size)
+    deleted = json.dumps({f"item-{i}": {"deleted": True} for i in range(1, 8)})
+    ctx.add_init_script(f"try {{ localStorage.setItem('h1t_sample_edits_v1_demo', {json.dumps(deleted)}); }} catch (e) {{}}")
+    pg = ctx.new_page()
+    go(pg, "/")
+    settle(pg)
+    button = pg.get_by_role("button", name="Chép hôm qua").locator("visible=true")
+    check(button.count() == 1, f"{name}: Chép hôm qua is on an empty today with yesterday logged ({button.count()})")
+    if button.count() == 1:
+        button.first.click()
+        pg.wait_for_timeout(400)
+        check(pg.locator("[role=dialog]:visible").count() == 1, f"{name}: Chép hôm qua opens the CopyYesterdaySheet")
+        inside = pg.evaluate("() => { const d = document.querySelector('[role=dialog]'); return !!d && d.contains(document.activeElement); }")
+        check(inside, f"{name}: focus is inside the CopyYesterdaySheet")
+        pg.keyboard.press("Escape")
+        pg.wait_for_timeout(400)
+        check(pg.locator("[role=dialog]:visible").count() == 0, f"{name}: Esc closes the CopyYesterdaySheet")
+        label = pg.evaluate("() => (document.activeElement && document.activeElement.textContent || '').trim()")
+        check(label.startswith("Chép hôm qua"), f"{name}: focus returns to the Chép hôm qua button ({label[:40]!r})")
     ctx.close()
 
 
@@ -145,7 +174,7 @@ def main():
         browser = p.chromium.launch()
         redirects(browser)
         for name, size in SIZES:
-            for probe in (no_diary_links, back_fallback, home_sheets):
+            for probe in (no_diary_links, back_fallback, home_sheets, copy_yesterday_sheet):
                 try:
                     probe(browser, name, size)
                 except Exception as err:  # a missing control must show up as a failed check, not a crash

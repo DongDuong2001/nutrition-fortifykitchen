@@ -24,6 +24,6 @@ export function useBack(): () => void {
   const pathname = usePathname();
   return useCallback(() => {
     if (canGoBack(history)) router.back();
-    else router.replace(backFallback(pathname));
+    else router.replace(backFallback(pathname, window.location.search));
   }, [router, pathname]);
 }
