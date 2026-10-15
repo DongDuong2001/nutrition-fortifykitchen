@@ -158,6 +158,50 @@ func TestAuthMiddleware(t *testing.T) {
 		}
 	})
 
+	t.Run("require role - coach accepted for coach or admin", func(t *testing.T) {
+		claims := auth.SupabaseClaims{
+			Sub: testUserID.String(),
+			AppMetadata: map[string]interface{}{
+				"role": "coach",
+			},
+		}
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		tokenStr, _ := token.SignedString(validSecret)
+
+		req := httptest.NewRequest("GET", "/api/v1/coach/trainees", nil)
+		req.Header.Set("Authorization", "Bearer "+tokenStr)
+		rec := httptest.NewRecorder()
+
+		coachHandler := middlewareWithSecret.Authenticate(middlewareWithSecret.RequireRole("coach", "admin")(testHandler))
+		coachHandler.ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusOK {
+			t.Errorf("expected 200 OK, got %d", rec.Code)
+		}
+	})
+
+	t.Run("require role - regular user rejected", func(t *testing.T) {
+		claims := auth.SupabaseClaims{
+			Sub: testUserID.String(),
+			AppMetadata: map[string]interface{}{
+				"role": "user",
+			},
+		}
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		tokenStr, _ := token.SignedString(validSecret)
+
+		req := httptest.NewRequest("GET", "/api/v1/coach/trainees", nil)
+		req.Header.Set("Authorization", "Bearer "+tokenStr)
+		rec := httptest.NewRecorder()
+
+		coachHandler := middlewareWithSecret.Authenticate(middlewareWithSecret.RequireRole("coach", "admin")(testHandler))
+		coachHandler.ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusForbidden {
+			t.Errorf("expected 403 Forbidden, got %d", rec.Code)
+		}
+	})
+
 	t.Run("valid ES256 token verified via JWKS", func(t *testing.T) {
 		privKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 		if err != nil {

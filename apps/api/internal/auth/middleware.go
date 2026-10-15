@@ -304,6 +304,34 @@ func (m *Middleware) RequireAdmin(next http.Handler) http.Handler {
 	})
 }
 
+// RequireRole verifies that the authenticated user possesses one of the specified roles in app_metadata
+func (m *Middleware) RequireRole(allowedRoles ...string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			claims, ok := r.Context().Value(ClaimsKey).(*SupabaseClaims)
+			if !ok || claims == nil {
+				response.Error(w, http.StatusUnauthorized, response.CodeUnauthorized, "unauthorized")
+				return
+			}
+
+			role, hasRole := claims.AppMetadata["role"].(string)
+			if !hasRole || role == "" {
+				response.Error(w, http.StatusForbidden, response.CodeForbidden, "forbidden: user lacks required permissions")
+				return
+			}
+
+			for _, allowed := range allowedRoles {
+				if role == allowed {
+					next.ServeHTTP(w, r)
+					return
+				}
+			}
+
+			response.Error(w, http.StatusForbidden, response.CodeForbidden, "forbidden: insufficient role privileges")
+		})
+	}
+}
+
 // GetUserID retrieves the authenticated UUID from request context
 func GetUserID(ctx context.Context) (uuid.UUID, error) {
 	val := ctx.Value(UserIDKey)
