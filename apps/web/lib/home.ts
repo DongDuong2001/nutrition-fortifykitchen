@@ -225,3 +225,11 @@ export function targetOf(day: MockDayData, key: string): number | null {
   const stat = [...day.macros, ...day.minerals, ...day.vitamins].find((s) => s.key === key);
   return stat?.targetMin ?? null;
 }
+
+/** The percent text: a dash when unknown, "<1%" for a value above 0 that rounds to 0%, else the rounded percent. */
+export function pctLabel(value: number | null, target: number | null): string {
+  const pct = pctOf(value, target);
+  if (pct === null) return "—";
+  if (pct === 0 && value !== null && value > 0) return "<1%";
+  return `${pct}%`;
+}

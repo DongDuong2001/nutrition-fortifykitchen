@@ -27,7 +27,8 @@ export function HomeBar({
     <div
       role="progressbar"
       aria-label={label}
-      aria-valuenow={Math.min(100, Math.max(0, Math.round(value)))}
+      aria-valuenow={pct === null ? undefined : Math.min(100, Math.max(0, Math.round(value)))}
+      aria-valuetext={pct === null ? "Chưa có dữ liệu" : undefined}
       aria-valuemin={0}
       aria-valuemax={100}
       className="grid w-full grid-cols-10 items-center"

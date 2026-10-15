@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { formatAmount } from "@/lib/format";
-import { pctOf, type HomeValues } from "@/lib/home";
+import { pctLabel, pctOf, type HomeValues } from "@/lib/home";
 import { HomeBar } from "./home-bar";
 
 // The 24 px pill sits inside a 44 px hit area: padding that the negative margin takes back
@@ -80,7 +80,7 @@ export function HomeHero({
             / {formatAmount(kcalTarget.min, "kcal")}–{formatAmount(kcalTarget.max, "kcal")} kcal
           </span>
         </div>
-        <span className="font-display text-lg font-bold leading-none tabular-nums">{kcalPct}%</span>
+        <span className="font-display text-lg font-bold leading-none tabular-nums">{pctLabel(values.kcal, kcalTarget.min)}</span>
       </div>
 
       <div data-align-group="home-hero">
@@ -98,7 +98,7 @@ export function HomeHero({
                 <span className="text-xs leading-tight text-muted-on-dark tabular-nums">
                   {value === null ? "—" : `${formatAmount(value, "g")} g`}
                 </span>
-                <span className="font-display text-[15px] font-bold leading-none tabular-nums">{pct === null ? "—" : `${pct}%`}</span>
+                <span className="font-display text-[15px] font-bold leading-none tabular-nums">{pctLabel(value, macroTargets[m.key])}</span>
               </div>
               <HomeBar label={`${m.label} so với mục tiêu ngày`} pct={pct} finished={finished} surface="dark" heightClass="h-[5px]" />
             </div>

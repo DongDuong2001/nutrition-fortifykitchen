@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { formatAmount } from "@/lib/format";
-import { HOME_NUTRIENT_GROUPS, pctOf, type HomeValues } from "@/lib/home";
+import { HOME_NUTRIENT_GROUPS, pctLabel, pctOf, type HomeValues } from "@/lib/home";
 import { getNutrientDefinition } from "@/lib/nutrients";
 import { HomeBar } from "./home-bar";
 
@@ -52,7 +52,7 @@ export function NutrientColumn({
                       </span>
                     </span>
                     <span className="font-display text-base font-bold leading-none text-text tabular-nums">
-                      {pct === null ? "—" : `${pct}%`}
+                      {pctLabel(value, targets[id] ?? null)}
                     </span>
                   </div>
                   <HomeBar label={`${def.nameVi} so với mục tiêu ngày`} pct={pct} finished={finished} />

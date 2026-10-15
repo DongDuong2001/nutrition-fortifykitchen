@@ -12,12 +12,17 @@ import {
   toggleMeal,
   valuesFromDay,
   targetOf,
+  pctLabel,
   type HomeEntry,
   type HomeMode,
 } from "../home";
 import { COUNTED_NUTRIENT_KEYS } from "../day-totals";
 import type { AddedDiaryEntry } from "../diary-edits";
 import { SAMPLE_DAY } from "../mock/sample-day";
+import { MOCK_FOODS } from "../mock/foods";
+import { entryNumbers } from "../diary-edits";
+import { blankDay } from "../day-history";
+import { computeCompositeDayData } from "../diary-store";
 
 const full = (): Record<string, number | null> => Object.fromEntries(COUNTED_NUTRIENT_KEYS.map((k) => [k, 1]));
 
@@ -171,5 +176,40 @@ describe("valuesFromDay and targetOf", () => {
     expect(v.nutrients.sodium).toBe(SAMPLE_DAY.minerals.find((m) => m.key === "sodium")?.consumed ?? null);
     expect(targetOf(SAMPLE_DAY, "protein")).toBe(SAMPLE_DAY.macros.find((m) => m.key === "protein")?.targetMin);
     expect(targetOf(SAMPLE_DAY, "nope")).toBeNull();
+  });
+});
+
+describe("pctLabel", () => {
+  it("shows a dash for unknown, <1% for a value above 0 that rounds to 0, else the rounded percent", () => {
+    expect(pctLabel(null, 2000)).toBe("—");
+    expect(pctLabel(10, null)).toBe("—");
+    expect(pctLabel(0, 2000)).toBe("0%");
+    expect(pctLabel(3, 2000)).toBe("<1%");
+    expect(pctLabel(10, 2000)).toBe("1%");
+    expect(pctLabel(1041, 2000)).toBe("52%");
+  });
+});
+
+describe("the day the store builds equals the sum of its entries", () => {
+  const foods = MOCK_FOODS.slice(0, 5);
+  const added: AddedDiaryEntry[] = foods.map((f, i) => ({
+    id: `t-${i}`,
+    foodId: f.id,
+    foodName: f.nameVi,
+    grams: 80 + i * 20,
+    displayQty: `${80 + i * 20} g`,
+    mealSlot: (["breakfast", "lunch", "snack", "dinner", "lunch"] as const)[i],
+    addedAt: "2026-10-15T01:00:00.000Z",
+    ...entryNumbers(f, 80 + i * 20),
+  }));
+  it("kcal, macros and the 22 counted nutrients match", () => {
+    const day = computeCompositeDayData(blankDay(SAMPLE_DAY), added, {});
+    const fromDay = valuesFromDay(day);
+    const fromEntries = sumEntries(entriesFromAdded(added));
+    expect(fromDay.kcal).toBe(fromEntries.kcal);
+    for (const key of ["protein", "carbs", "fat", "fiber"] as const) expect(fromDay[key]).toBeCloseTo(fromEntries[key] ?? 0, 0);
+    for (const key of COUNTED_NUTRIENT_KEYS) {
+      expect(fromDay.nutrients[key] ?? null, key).toEqual(fromEntries.nutrients[key] === null ? null : expect.closeTo(fromEntries.nutrients[key] as number, 0));
+    }
   });
 });

@@ -31,7 +31,7 @@ function FoodRow({ entry, selected, editable, onSelect }: { entry: HomeEntry; se
     <button
       type="button"
       aria-pressed={selected}
-      aria-label={`${entry.name}, ${quantity}`}
+      aria-label={`${entry.name}, ${quantity}${missing ? ", thiếu dữ liệu vi chất" : ""}`}
       onClick={() => {
         if (suppressClick.current) {
           suppressClick.current = false;
@@ -67,8 +67,7 @@ function FoodRow({ entry, selected, editable, onSelect }: { entry: HomeEntry; se
         </span>
         {missing && (
           <span
-            role="img"
-            aria-label="Thiếu dữ liệu vi chất"
+            aria-hidden="true"
             className={`h-1.5 w-1.5 shrink-0 rounded-full ${selected ? "bg-sky" : "bg-muted-dark"}`}
           />
         )}
@@ -133,7 +132,7 @@ export function FoodList({
                 mealSelected ? "bg-cobalt text-on-accent" : "bg-paper-dark text-text"
               }`}
             >
-              <span className="text-[11px] font-extrabold uppercase leading-none tracking-[0.04em]">{meal.label}</span>
+              <span className="text-[11px] font-extrabold leading-none">{meal.label}</span>
               <span className="font-display text-[13px] font-bold leading-none tabular-nums">
                 {meal.entries.length > 0 ? `${formatAmount(meal.kcal, "kcal")} kcal` : ""}
               </span>

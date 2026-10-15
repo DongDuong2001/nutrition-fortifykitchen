@@ -169,7 +169,7 @@ function HomeContent() {
     pills.push({ key: "training", label: `Ngày tập ${trainingValue} ›`, href: `/training?date=${viewIso}` });
   } else {
     if (!isPast && mode.kind === "food") pills.push({ key: "edit", label: "Sửa", href: `/entry/${mode.id}`, ariaLabel: "Sửa món này" });
-    if (!isPast && mode.kind === "meal") {
+    if (mode.kind === "meal") {
       const meal = meals.find((m) => m.slot === mode.slot);
       pills.push({
         key: "menu",
