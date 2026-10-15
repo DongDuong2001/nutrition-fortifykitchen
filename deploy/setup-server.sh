@@ -11,6 +11,22 @@ DEPLOY_USER="${DEPLOY_USER:-deploy}"
 SWAP_SIZE_GB=2
 SSHD_DROPIN="/etc/ssh/sshd_config.d/00-hardening.conf"
 
+# --- sshd helpers ---------------------------------------------------------------
+ssh_listening() { ss -ltnH 'sport = :22' | grep -q .; }
+
+# Ubuntu 24.04 starts sshd through ssh.socket; make sure something listens on 22.
+ensure_sshd() {
+
+  ssh_listening && return 0
+  systemctl restart ssh.socket 2>/dev/null || true
+  systemctl restart ssh 2>/dev/null || true
+  for _ in 1 2 3 4 5 6 7 8 9 10; do
+    ssh_listening && return 0
+    sleep 1
+  done
+  return 1
+}
+
 SUMMARY=()
 log()  { printf '==> %s\n' "$*"; }
 done_() { SUMMARY+=("$1"); }
@@ -28,6 +44,8 @@ if [ "${ID:-}" != "ubuntu" ] || [ "${VERSION_ID:-}" != "24.04" ]; then
 fi
 
 export DEBIAN_FRONTEND=noninteractive
+# keep needrestart from restarting services (sshd) in the middle of the run
+export NEEDRESTART_SUSPEND=1
 
 log "Updating apt and base packages"
 apt-get update -qq
@@ -66,24 +84,6 @@ chown "$DEPLOY_USER:$DEPLOY_USER" "$AUTH_KEYS"
 chmod 600 "$AUTH_KEYS"
 KEY_COUNT="$(grep -cE '^(ssh-|ecdsa-|sk-)' "$AUTH_KEYS" || true)"
 done_ "SSH keys for $DEPLOY_USER: $KEY_COUNT (copied from root authorized_keys)"
-
-# --- SSH hardening (only when the deploy user can actually log in) -------------
-if [ "$KEY_COUNT" -gt 0 ]; then
-  log "Disabling root and password SSH login"
-  cat > "$SSHD_DROPIN" <<SSHD
-PermitRootLogin no
-PasswordAuthentication no
-KbdInteractiveAuthentication no
-PubkeyAuthentication yes
-SSHD
-  # 00- prefix: sshd uses the first value it reads, so this wins over cloud-init drop-ins.
-  sshd -t
-  systemctl reload ssh 2>/dev/null || systemctl restart ssh
-  done_ "ssh: root login and password login disabled ($SSHD_DROPIN)"
-else
-  log "SKIPPED SSH hardening: no SSH key found for $DEPLOY_USER (would lock you out)"
-  done_ "ssh: NOT hardened, add a key to /root/.ssh/authorized_keys and re-run"
-fi
 
 # --- firewall ------------------------------------------------------------------
 log "Configuring ufw"
@@ -155,6 +155,39 @@ fi
 systemctl enable --now docker >/dev/null 2>&1
 usermod -aG docker "$DEPLOY_USER"
 done_ "$DEPLOY_USER added to the docker group (takes effect on next login)"
+
+# --- SSH hardening (last, only when the deploy user can actually log in) ------
+# Done after everything else so no later apt run can restart sshd under us.
+if [ "$KEY_COUNT" -gt 0 ]; then
+  log "Disabling root and password SSH login"
+  cat > "$SSHD_DROPIN" <<SSHD
+PermitRootLogin no
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+PubkeyAuthentication yes
+SSHD
+  # 00- prefix: sshd uses the first value it reads, so this wins over cloud-init drop-ins.
+  if ! sshd -t; then
+    rm -f "$SSHD_DROPIN"
+    echo "sshd config test failed, hardening removed" >&2
+    exit 1
+  fi
+  # HUP reload keeps the listener; only fall back to a restart when sshd is not running.
+  if systemctl is-active --quiet ssh; then
+    systemctl reload ssh
+  fi
+  if ! ensure_sshd; then
+    rm -f "$SSHD_DROPIN"
+    ensure_sshd || true
+    echo "sshd is not listening on 22 after hardening; hardening removed" >&2
+    exit 1
+  fi
+  done_ "ssh: root login and password login disabled ($SSHD_DROPIN), sshd listening on 22"
+else
+  log "SKIPPED SSH hardening: no SSH key found for $DEPLOY_USER (would lock you out)"
+  ensure_sshd || true
+  done_ "ssh: NOT hardened, add a key to /root/.ssh/authorized_keys and re-run"
+fi
 
 echo
 echo "Server setup finished. What was done:"
