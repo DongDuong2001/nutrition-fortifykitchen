@@ -1,11 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { getFontEmbedCSS, toBlob } from "html-to-image";
 import { Sheet } from "@/components/ui/sheet";
 import { PillButton } from "@/components/ui/pill-button";
+import type { HomeEntry, HomeMeal } from "@/lib/home";
 import type { MockDayData } from "@/lib/mock/sample-day";
-import { buildShareCard, shareCardAlt } from "@/lib/share-card";
-import { renderShareCard } from "./share-card-canvas";
+import { SHARE_CSS_WIDTH, SHARE_SCALE, SHARE_WIDTH, buildShareModel, shareImageHeight, type ShareModel } from "@/lib/share-card";
+import { ShareDay, SHARE_NUTRIENT_IDS } from "./share-day";
 
 type Failure = "generate" | "share" | "save";
 
@@ -13,6 +16,7 @@ interface Ready {
   file: File;
   url: string;
   alt: string;
+  height: number;
   /** Files can be handed to the share sheet of this device (iOS, Android); desktop browsers mostly cannot. */
   canShare: boolean;
 }
@@ -23,48 +27,133 @@ const FAILURE_TEXT: Record<Failure, string> = {
   save: "Không lưu được ảnh.",
 };
 
+const nextFrame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+
 /**
- * Chia sẻ ngày này: draws the day-summary card as a 1080×1920 PNG when it opens (client side, no network) and
- * keeps the file ready, so Chia sẻ calls navigator.share inside the tap. Without file sharing, Lưu ảnh is the
- * primary button. A cancelled share sheet (AbortError) is not an error.
+ * Draws the page (a ShareDay in an off-screen portal) into a 1080-px-wide PNG and hands the file up. The page is
+ * mounted only while the picture is made, so it never lingers in the DOM next to the real screen.
  */
-export function ShareSheet({ open, onClose, day, finished }: { open: boolean; onClose: () => void; day: MockDayData; finished: boolean }) {
+function ShareCapture({ model, badge, onDone, onError }: { model: ShareModel; badge?: React.ReactNode; onDone: (file: File, height: number) => void; onError: () => void }) {
+  const hostRef = useRef<HTMLDivElement>(null);
+  const callbacks = useRef({ onDone, onError });
+  callbacks.current = { onDone, onError };
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const node = hostRef.current?.querySelector<HTMLElement>("[data-share-root]");
+      if (!node) throw new Error("no share root");
+      // Fonts first: a size measured before they load would be wrong, and the image would use the fallback face
+      await document.fonts.ready;
+      await nextFrame();
+      await nextFrame();
+      const cssHeight = node.getBoundingClientRect().height;
+      const height = shareImageHeight(cssHeight);
+      const fontEmbedCSS = await getFontEmbedCSS(node);
+      // The page is scaled by layout (transform on the clone), so text stays vector-sharp at 1080 px
+      const blob = await toBlob(node, {
+        width: SHARE_WIDTH,
+        height,
+        pixelRatio: 1,
+        fontEmbedCSS,
+        // A page height that is not a whole number of image rows must not leave a see-through last row
+        backgroundColor: getComputedStyle(node).backgroundColor,
+        style: {
+          transform: `scale(${SHARE_SCALE})`,
+          transformOrigin: "top left",
+          width: `${SHARE_CSS_WIDTH}px`,
+          height: `${height / SHARE_SCALE}px`,
+          minHeight: `${height / SHARE_SCALE}px`,
+        },
+      });
+      if (!blob) throw new Error("no image");
+      if (!cancelled) callbacks.current.onDone(new File([blob], model.filename, { type: "image/png" }), height);
+    })().catch(() => {
+      if (!cancelled) callbacks.current.onError();
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [model]);
+
+  return createPortal(
+    <div ref={hostRef} aria-hidden="true" inert style={{ position: "fixed", top: 0, left: -10000, width: SHARE_CSS_WIDTH, pointerEvents: "none" }}>
+      <ShareDay model={model} badge={badge} />
+    </div>,
+    document.body
+  );
+}
+
+/**
+ * Chia sẻ ngày này: draws the Hôm nay screen (without the header and tab bar) as a 1080-px-wide PNG when it opens
+ * (client side, no network) and keeps the file ready, so Chia sẻ calls navigator.share inside the tap. Without file
+ * sharing, Lưu ảnh is the primary button. A cancelled share sheet (AbortError) is not an error.
+ */
+export function ShareSheet({
+  open,
+  onClose,
+  day,
+  entries,
+  meals,
+  finished,
+  displayName,
+  badge,
+}: {
+  open: boolean;
+  onClose: () => void;
+  day: MockDayData;
+  entries: HomeEntry[];
+  meals: HomeMeal[];
+  finished: boolean;
+  displayName: string;
+  /** The Level badge for the name row (28b). */
+  badge?: React.ReactNode;
+}) {
   const [ready, setReady] = useState<Ready | null>(null);
   const [failure, setFailure] = useState<Failure | null>(null);
   const [attempt, setAttempt] = useState(0);
-  // The latest day, read when the card is drawn; a change to it while the sheet is open does not redraw it
-  const dayRef = useRef({ day, finished });
-  dayRef.current = { day, finished };
+  const [job, setJob] = useState<ShareModel | null>(null);
+  // The latest day, read when the page is drawn; a change to it while the sheet is open does not redraw it
+  const latest = useRef({ day, entries, meals, finished, displayName });
+  latest.current = { day, entries, meals, finished, displayName };
 
   useEffect(() => {
     if (!open) return;
-    let cancelled = false;
-    let url: string | null = null;
     setReady(null);
     setFailure(null);
-    const model = buildShareCard({ ...dayRef.current, now: new Date() });
-    renderShareCard(model)
-      .then((file) => {
-        if (cancelled) return;
-        url = URL.createObjectURL(file);
-        let canShare = false;
-        try {
-          canShare = typeof navigator.canShare === "function" && typeof navigator.share === "function" && navigator.canShare({ files: [file] });
-        } catch {
-          // Some browsers throw for a file type they do not know: no file sharing, Lưu ảnh stays
-        }
-        setReady({ file, url, alt: shareCardAlt(model), canShare });
-      })
-      .catch(() => {
-        if (!cancelled) setFailure("generate");
-      });
+    setJob(buildShareModel({ ...latest.current, now: new Date(), nutrientIds: SHARE_NUTRIENT_IDS }));
     return () => {
-      cancelled = true;
-      if (url) URL.revokeObjectURL(url);
+      setJob(null);
       // The revoked URL must not show for a frame when the sheet opens again
       setReady(null);
     };
   }, [open, attempt]);
+
+  const urlRef = useRef<string | null>(null);
+  useEffect(
+    () => () => {
+      if (urlRef.current) URL.revokeObjectURL(urlRef.current);
+    },
+    []
+  );
+
+  const onDone = useCallback(
+    (file: File, height: number) => {
+      if (urlRef.current) URL.revokeObjectURL(urlRef.current);
+      const url = URL.createObjectURL(file);
+      urlRef.current = url;
+      let canShare = false;
+      try {
+        canShare = typeof navigator.canShare === "function" && typeof navigator.share === "function" && navigator.canShare({ files: [file] });
+      } catch {
+        // Some browsers throw for a file type they do not know: no file sharing, Lưu ảnh stays
+      }
+      const alt = job?.alt ?? "";
+      setJob(null);
+      setReady({ file, url, alt, height, canShare });
+    },
+    [job]
+  );
 
   // No await before navigator.share: iOS drops the share when the tap has finished
   const share = useCallback(() => {
@@ -107,7 +196,13 @@ export function ShareSheet({ open, onClose, day, finished }: { open: boolean; on
       <div className="mx-auto flex h-[min(50dvh,440px)] w-full items-center justify-center">
         {ready ? (
           // eslint-disable-next-line @next/next/no-img-element -- a blob URL made in the page, not a file to optimise
-          <img src={ready.url} alt={ready.alt} className="aspect-[9/16] h-full rounded-xl border border-card-border" />
+          <img
+            src={ready.url}
+            alt={ready.alt}
+            width={SHARE_WIDTH}
+            height={ready.height}
+            className="h-auto max-h-full w-auto max-w-full rounded-xl border border-card-border object-contain"
+          />
         ) : failure === "generate" ? (
           <div className="aspect-[9/16] h-full rounded-xl border border-card-border bg-page" />
         ) : (
@@ -146,6 +241,19 @@ export function ShareSheet({ open, onClose, day, finished }: { open: boolean; on
           </PillButton>
         )}
       </div>
+
+      {open && job && (
+        <ShareCapture
+          key={attempt}
+          model={job}
+          badge={badge}
+          onDone={onDone}
+          onError={() => {
+            setJob(null);
+            setFailure("generate");
+          }}
+        />
+      )}
     </Sheet>
   );
 }

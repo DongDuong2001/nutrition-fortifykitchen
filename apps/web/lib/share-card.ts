@@ -1,102 +1,133 @@
 import { formatAmount, formatDayLabel, formatRange } from "./format";
-import { pctLabel, pctOf, targetOf, valuesFromDay } from "./home";
-import { lowestMicros, microsSummaryFor } from "./lacking";
-import { getLevel, getLevelLabel, homeBarTone, homeSegments, type HomeBarTone } from "./levels";
+import { DAY_MODE, heroLabel, pctLabel, targetOf, valuesFromDay, type HomeEntry, type HomeMeal, type HomeValues } from "./home";
+import { microsSummaryFor } from "./lacking";
+import { getLevelColor, homeBarColor } from "./levels";
 import type { MockDayData } from "./mock/sample-day";
 
-/** Everything the share image says, as strings and numbers: the canvas only draws this. */
-export interface ShareBar {
-  label: string;
-  /** "62 g", or a dash when the amount is unknown. */
-  amount: string;
-  pct: number | null;
-  pctText: string;
-  /** The level in words, so colour never stands alone ("Chưa có số liệu" when unknown). */
-  level: string;
-  segments: number;
-  tone: HomeBarTone;
+/**
+ * The share image is the Hôm nay screen itself, drawn at 390 px wide and rasterised at 1080/390 (components/home/
+ * share-day.tsx). The model here is what that picture needs, as plain values; the size rules are pure.
+ */
+export const SHARE_CSS_WIDTH = 390;
+export const SHARE_WIDTH = 1080;
+export const SHARE_MIN_HEIGHT = 1920;
+export const SHARE_SCALE = SHARE_WIDTH / SHARE_CSS_WIDTH;
+/** The shortest the drawn page may be, in CSS px: it fills 1080×1920 and the footer sits at its bottom. */
+export const SHARE_MIN_CSS_HEIGHT = SHARE_MIN_HEIGHT / SHARE_SCALE;
+
+/** The PNG height for a drawn page of this CSS height: never under 1920, never shorter than the content. */
+export function shareImageHeight(cssHeight: number): number {
+  if (!Number.isFinite(cssHeight) || cssHeight <= 0) return SHARE_MIN_HEIGHT;
+  // 1e-6: a content height that lands exactly on a whole pixel must not gain a row to rounding noise
+  return Math.max(SHARE_MIN_HEIGHT, Math.ceil(cssHeight * SHARE_SCALE - 1e-6));
 }
-
-export interface ShareCardModel {
-  dateLabel: string;
-  kcal: { value: string; target: string; pctText: string; level: string; segments: number; tone: HomeBarTone };
-  bars: ShareBar[];
-  micros: { reached: number; total: number; text: string };
-  lacking: { name: string; pctText: string }[];
-  filename: string;
-}
-
-/** Same macros as the Hôm nay hero, in the order of the share card. */
-const BARS: { key: "protein" | "carbs" | "fat" | "fiber"; label: string }[] = [
-  { key: "protein", label: "Đạm" },
-  { key: "carbs", label: "Tinh bột" },
-  { key: "fat", label: "Chất béo" },
-  { key: "fiber", label: "Chất xơ" },
-];
-
-const LOWEST_COUNT = 3;
-const UNKNOWN_LEVEL = "Chưa có số liệu";
 
 export function shareFilename(isoDate: string): string {
   return `h1t-micro-${isoDate}.png`;
 }
 
-const levelWord = (pct: number | null) => (pct === null ? UNKNOWN_LEVEL : getLevelLabel(getLevel(pct)));
-
-/**
- * The share image of one day, from the day Hôm nay shows (`finished` is a past day: four levels instead of two
- * tones). Numbers and rules are Hôm nay's (lib/home, lib/levels, lib/lacking). It holds no name, weight, email or meal.
- */
-export function buildShareCard({ day, finished, now }: { day: MockDayData; finished: boolean; now: Date }): ShareCardModel {
-  const values = valuesFromDay(day);
-  const kcalPct = pctOf(values.kcal, day.calories.targetMin);
-  const kcalValue = kcalPct ?? 0;
-
-  const bars = BARS.map(({ key, label }): ShareBar => {
-    const value = values[key];
-    const target = targetOf(day, key);
-    const pct = pctOf(value, target);
-    return {
-      label,
-      amount: value === null ? "—" : `${formatAmount(value, "g")} g`,
-      pct,
-      pctText: pctLabel(value, target),
-      level: levelWord(pct),
-      segments: pct === null ? 0 : homeSegments(pct),
-      tone: homeBarTone(pct ?? 0, finished),
-    };
-  });
-
-  const summary = microsSummaryFor(day);
-
-  return {
-    dateLabel: formatDayLabel(day.date, now),
-    kcal: {
-      value: formatAmount(values.kcal, "kcal"),
-      target: `${formatRange(day.calories.targetMin, day.calories.targetMax)} kcal`,
-      pctText: pctLabel(values.kcal, day.calories.targetMin),
-      level: levelWord(kcalPct),
-      segments: homeSegments(kcalValue),
-      tone: homeBarTone(kcalValue, finished),
-    },
-    bars,
-    micros: { reached: summary.achieved, total: summary.total, text: `Vi chất đạt ${summary.achieved}/${summary.total}` },
-    lacking: lowestMicros(day, LOWEST_COUNT).map((s) => ({ name: s.name, pctText: pctLabel(s.consumed, s.targetMin) })),
-    filename: shareFilename(day.date),
-  };
+export interface ShareKeyItem {
+  label: string;
+  /** A colour token as `var(--color-x)`. */
+  color: string;
 }
 
-/** What a screen reader hears for the image: the same numbers the card draws, in one sentence per block. */
-export function shareCardAlt(model: ShareCardModel): string {
-  const bars = model.bars.map((b) => `${b.label} ${b.amount}, ${b.pctText}, ${b.level}`).join("; ");
-  const lacking = model.lacking.map((l) => `${l.name} ${l.pctText}`).join(", ");
+/** The colour key under the nutrient column: one entry today (two-tone bars), four on a past day. */
+export function shareKey(finished: boolean): ShareKeyItem[] {
+  if (!finished) return [{ label: "Xanh: đạt mục tiêu", color: homeBarColor("dat") }];
   return [
-    `Ảnh tóm tắt ${model.dateLabel}`,
-    `${model.kcal.value} / ${model.kcal.target}, ${model.kcal.pctText}, ${model.kcal.level}`,
-    bars,
-    model.micros.text,
-    lacking ? `Thiếu nhiều nhất: ${lacking}` : "",
-  ]
-    .filter(Boolean)
-    .join(". ");
+    { label: "Thiếu <50%", color: getLevelColor("thieu") },
+    { label: "Trung bình", color: getLevelColor("trungbinh") },
+    { label: "Gần đủ", color: getLevelColor("ganDu") },
+    { label: "Đạt ≥100%", color: getLevelColor("dat") },
+  ];
+}
+
+/** Meals with no food are not drawn on the image. */
+export function shareMeals(meals: HomeMeal[]): HomeMeal[] {
+  return meals.filter((m) => m.entries.length > 0);
+}
+
+/** The name as the image shows it: trimmed; null when none is set (then only the date is drawn). */
+export function shareName(displayName: string | null | undefined): string | null {
+  const name = (displayName ?? "").trim();
+  return name === "" ? null : name;
+}
+
+export interface ShareModel {
+  name: string | null;
+  dateLabel: string;
+  finished: boolean;
+  /** "Cả ngày · 7 món" */
+  heroLabel: string;
+  values: HomeValues;
+  kcalTarget: { min: number; max: number };
+  macroTargets: Record<"carbs" | "protein" | "fat" | "fiber", number | null>;
+  /** Percent targets of the nutrient column, by catalogue id. */
+  nutrientTargets: Record<string, number | null>;
+  meals: HomeMeal[];
+  key: ShareKeyItem[];
+  filename: string;
+  /** What a screen reader hears for the image. */
+  alt: string;
+}
+
+/**
+ * The share image of one day, from the day Hôm nay shows. Numbers and rules are Hôm nay's. It holds the display
+ * name, the date and the numbers of the day, never weight, email or profile numbers.
+ */
+export function buildShareModel({
+  day,
+  entries,
+  meals,
+  finished,
+  now,
+  displayName,
+  nutrientIds,
+}: {
+  day: MockDayData;
+  entries: HomeEntry[];
+  meals: HomeMeal[];
+  finished: boolean;
+  now: Date;
+  displayName?: string | null;
+  nutrientIds: readonly string[];
+}): ShareModel {
+  const values = valuesFromDay(day);
+  const name = shareName(displayName);
+  const dateLabel = formatDayLabel(day.date, now);
+  const kcalTarget = { min: day.calories.targetMin, max: day.calories.targetMax };
+  const macroTargets = {
+    carbs: targetOf(day, "carbs"),
+    protein: targetOf(day, "protein"),
+    fat: targetOf(day, "fat"),
+    fiber: targetOf(day, "fiber"),
+  };
+  const nutrientTargets = Object.fromEntries(nutrientIds.map((id) => [id, targetOf(day, id)]));
+  const summary = microsSummaryFor(day);
+  const macro = (label: string, key: keyof typeof macroTargets) => {
+    const v = values[key];
+    return `${label} ${v === null ? "—" : `${formatAmount(v, "g")} g`}, ${pctLabel(v, macroTargets[key])}`;
+  };
+  const alt = [
+    `Ảnh tóm tắt ${dateLabel}${name ? ` của ${name}` : ""}`,
+    `${formatAmount(values.kcal, "kcal")} / ${formatRange(kcalTarget.min, kcalTarget.max)} kcal, ${pctLabel(values.kcal, kcalTarget.min)}`,
+    [macro("Tinh bột", "carbs"), macro("Đạm", "protein"), macro("Chất béo", "fat"), macro("Chất xơ", "fiber")].join("; "),
+    `Vi chất đạt ${summary.achieved}/${summary.total}`,
+  ].join(". ");
+
+  return {
+    name,
+    dateLabel,
+    finished,
+    heroLabel: heroLabel(DAY_MODE, entries, meals),
+    values,
+    kcalTarget,
+    macroTargets,
+    nutrientTargets,
+    meals: shareMeals(meals),
+    key: shareKey(finished),
+    filename: shareFilename(day.date),
+    alt,
+  };
 }

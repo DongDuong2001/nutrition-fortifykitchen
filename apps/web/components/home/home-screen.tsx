@@ -312,7 +312,15 @@ function HomeContent() {
         }}
       />
       <CopyYesterdaySheet open={isCopySheetOpen} onClose={() => setIsCopySheetOpen(false)} />
-      <ShareSheet open={isShareOpen} onClose={() => setIsShareOpen(false)} day={day} finished={isPast} />
+      <ShareSheet
+        open={isShareOpen}
+        onClose={() => setIsShareOpen(false)}
+        day={day}
+        entries={entries}
+        meals={meals}
+        finished={isPast}
+        displayName={profile.displayName}
+      />
       {todayIso && (
         <CalendarSheet
           open={isCalendarOpen}

@@ -12,6 +12,16 @@ const MOVE_LIMIT_PX = 10;
 
 const noSelect: React.CSSProperties = { WebkitUserSelect: "none", userSelect: "none", WebkitTouchCallout: "none" };
 
+/** The share image's row: the same row without the button, long press or dot. A long name wraps. */
+function ShareFoodRow({ entry }: { entry: HomeEntry }) {
+  return (
+    <div className="flex min-h-7 w-full items-center justify-between gap-2 border-b border-b-divider px-3 py-1 text-text">
+      <span className="min-w-0 break-words text-[13px] font-semibold leading-snug">{entry.name}</span>
+      <span className="shrink-0 font-display text-[15px] font-medium leading-none tabular-nums text-secondary">{portionLabel(entry)}</span>
+    </div>
+  );
+}
+
 function FoodRow({ entry, selected, editable, onSelect }: { entry: HomeEntry; selected: boolean; editable: boolean; onSelect: () => void }) {
   const router = useRouter();
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -92,6 +102,7 @@ export function FoodList({
   onFood,
   onMeal,
   onCopyYesterday,
+  share = false,
 }: {
   meals: HomeMeal[];
   mode: HomeMode;
@@ -101,7 +112,28 @@ export function FoodList({
   onFood: (id: string) => void;
   onMeal: (slot: HomeMeal["slot"]) => void;
   onCopyYesterday: () => void;
+  /** The share image: meals with no food are left out, nothing is a control, no legend. */
+  share?: boolean;
 }) {
+  if (share) {
+    return (
+      <div className="min-w-0 flex-1 bg-paper pb-3">
+        {meals
+          .filter((meal) => meal.entries.length > 0)
+          .map((meal) => (
+            <section key={meal.slot} aria-label={meal.fullName}>
+              <div className="flex h-[22px] w-full items-center justify-between gap-2 bg-paper-dark px-3 text-text">
+                <span className="text-[11px] font-extrabold leading-none">{meal.label}</span>
+                <span className="font-display text-[13px] font-bold leading-none tabular-nums">{`${formatAmount(meal.kcal, "kcal")} kcal`}</span>
+              </div>
+              {meal.entries.map((entry) => (
+                <ShareFoodRow key={entry.id} entry={entry} />
+              ))}
+            </section>
+          ))}
+      </div>
+    );
+  }
   return (
     <div className="min-h-0 min-w-0 flex-1 overflow-y-auto bg-paper pb-3">
       {isEmpty && (

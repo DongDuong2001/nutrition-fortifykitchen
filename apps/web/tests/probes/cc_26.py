@@ -1,18 +1,23 @@
-"""cc-26: share image of Hôm nay.
+"""cc-26 / cc-27g: share image = the Hôm nay screen.
 
-Production build, clock fixed at 2026-10-15 10:00 Asia/Ho_Chi_Minh, sizes 390x844 and 1280x800.
+Production build, clock fixed at 2026-10-15 10:00 Asia/Ho_Chi_Minh, sizes 390x844 and 1440x900.
 - Empty day: the share icon is disabled and the reason "Chưa có món nào để chia sẻ" is visible.
 - Today (demo): the sheet opens with a skeleton, then a preview; Lưu ảnh downloads h1t-micro-2026-10-15.png,
-  1080x1920 and not blank; no weight, email or food names in the preview text.
+  1080 wide, at least 1920 high, paper at every edge (nothing clipped), not blank; no weight or email.
+- The page behind the PNG (read while it is drawn): name on top when set, the date under it; no header, tab bar,
+  Thêm, ⋯, dots, "Đủ 22 vi chất"; meals with no food absent; key "Xanh: đạt mục tiêu" today, four levels on a
+  past day; footer wordmark and line, pinned to the bottom (gap 0, within 12 px).
+- A long day (12+ foods) is taller than 1920 with the footer fully inside; the height follows the content.
 - Past day: the PNG uses level colours (4 levels), today's PNG is two-tone (none in the bar rows).
 - Without file sharing, Lưu ảnh is the only (primary) button. With it, Chia sẻ calls navigator.share with one
   PNG file inside the tap; a cancelled share shows nothing; a failure shows a message and Thử lại.
 - Esc closes and focus returns to the icon.
-PNGs are saved to .screenshots/cc-26-*.png.
-Run with: ALIGN_BASE_URL=http://localhost:3103 npm run probe -- tests/probes/cc_26.py
+PNGs are saved to .screenshots/cc-27g-*.png.
+Run with: ALIGN_BASE_URL=http://localhost:3104 npm run probe -- tests/probes/cc_26.py
 """
 import base64
 import json
+import math
 import os
 import re
 import sys
@@ -21,11 +26,12 @@ import _demo  # noqa: F401  (demo mode on; the empty-account check switches it o
 from playwright.sync_api import sync_playwright
 from _home import wait_home
 
-BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3103")
+BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3104")
 NOW = "2026-10-15T10:00:00+07:00"
 TODAY, PAST = "2026-10-15", "2026-10-14"
 SHOTS = os.path.join(os.path.dirname(__file__), "..", "..", ".screenshots")
 BUTTON = "[aria-label='Chia sẻ ngày này']"
+SCALE = 1080 / 390
 problems, notes = [], []
 
 STUB_SHARE = """
@@ -40,6 +46,31 @@ navigator.share = (data) => {
 """
 NO_SHARE = "Object.defineProperty(navigator, 'canShare', { value: undefined }); Object.defineProperty(navigator, 'share', { value: undefined });"
 
+# Reads the page the PNG is drawn from while it is in the DOM (it is removed once the picture is made)
+WATCH = """
+window.__shareSnaps = [];
+(() => {
+  let seen = false;
+  setInterval(() => {
+    const r = document.querySelector('[data-share-root]');
+    if (!r) { seen = false; return; }
+    if (seen) return;
+    seen = true;
+    const f = r.querySelector('[data-share-footer]');
+    if (!f) { seen = false; return; }
+    const rr = r.getBoundingClientRect(), fr = f.getBoundingClientRect();
+    window.__shareSnaps.push({
+      text: r.innerText.replace(/\\s+/g, ' '),
+      top: r.firstElementChild ? r.firstElementChild.innerText.replace(/\\s+/g, ' ') : '',
+      rootW: rr.width, rootH: rr.height, footerGap: rr.bottom - fr.bottom, footerH: fr.height,
+      controls: r.querySelectorAll('button, a, input, select, textarea').length,
+      sections: [...r.querySelectorAll('section[aria-label]')].map(s => s.getAttribute('aria-label')).filter(n => n.startsWith('Bữa')),
+      header: !!r.querySelector('header, nav'),
+    });
+  }, 5);
+})();
+"""
+
 ANALYSE = """async (b64) => {
   const img = new Image();
   img.src = 'data:image/png;base64,' + b64;
@@ -48,20 +79,29 @@ ANALYSE = """async (b64) => {
   c.width = img.naturalWidth; c.height = img.naturalHeight;
   const x = c.getContext('2d');
   x.drawImage(img, 0, 0);
-  const at = (px, py) => Array.from(x.getImageData(px, py, 1, 1).data.slice(0, 3)).join(',');
-  const data = x.getImageData(120, 804, 840, 432).data;
+  const W = c.width, H = c.height;
+  const all = x.getImageData(0, 0, W, H).data;
+  const px = (ix, iy) => { const o = (iy * W + ix) * 4; return all[o] + ',' + all[o + 1] + ',' + all[o + 2]; };
+  const PAPER = '243,241,236';
+  const near = (k) => k.split(',').every((v, i) => Math.abs(Number(v) - [243, 241, 236][i]) <= 2);
+  let edgeBad = 0; const badAt = []; const mark = (ix, iy) => { edgeBad++; if (badAt.length < 4) badAt.push([ix, iy, px(ix, iy)]); };
+  // Hôm nay runs edge to edge in its body (the two columns), so the side edges are checked above the body and
+  // in the footer; the top and bottom rows are paper everywhere.
+  const bodyTop = Math.round(H * 0), headRows = 330;
+  for (let i = bodyTop; i < Math.min(H, headRows); i++) { if (!near(px(0, i))) mark(0, i); if (!near(px(W - 1, i))) mark(W - 1, i); }
+  for (let i = H - 100; i < H; i++) { if (!near(px(0, i))) mark(0, i); if (!near(px(W - 1, i))) mark(W - 1, i); }
+  for (let i = 0; i < W; i++) { if (!near(px(i, 0))) mark(i, 0); if (!near(px(i, H - 1))) mark(i, H - 1); }
+  let lastInk = -1;
+  for (let y = H - 1; y >= 0 && lastInk < 0; y--) for (let ix = 0; ix < W; ix += 2) if (px(ix, y) !== PAPER) { lastInk = y; break; }
   const levels = { red: '217,63,68', yellow: '176,120,0', green: '23,148,95', blue: '18,56,214' };
   const found = { red: 0, yellow: 0, green: 0, blue: 0 };
-  const seen = new Set();
-  for (let i = 0; i < data.length; i += 4) {
-    const key = data[i] + ',' + data[i + 1] + ',' + data[i + 2];
-    seen.add(key);
-    for (const [name, rgb] of Object.entries(levels)) if (key === rgb) found[name]++;
-  }
-  const all = x.getImageData(0, 0, c.width, c.height).data;
   const whole = new Set();
-  for (let i = 0; i < all.length; i += 4 * 97) whole.add(all[i] + ',' + all[i + 1] + ',' + all[i + 2]);
-  return { w: c.width, h: c.height, corner: at(4, 4), topBand: at(540, 100), found, colours: whole.size, barColours: seen.size };
+  for (let i = 0; i < all.length; i += 4) {
+    const key = all[i] + ',' + all[i + 1] + ',' + all[i + 2];
+    for (const [name, rgb] of Object.entries(levels)) if (key === rgb) found[name]++;
+    if (i % (4 * 97) === 0) whole.add(key);
+  }
+  return { w: W, h: H, corner: px(4, 4), edgeBad, badAt, lastInk, found, colours: whole.size };
 }"""
 
 
@@ -69,10 +109,34 @@ def check(cond, msg):
     (notes if cond else problems).append(("ok: " if cond else "") + msg)
 
 
-def page(browser, size, init=None):
+def entry(i, slot, name):
+    return {
+        "id": f"seed-{i}", "foodId": "food-seed", "foodName": name, "grams": 100 + i, "displayQty": f"{100 + i} g",
+        "mealSlot": slot, "calories": 50 + i, "protein": 2, "carbs": 8, "fat": 1, "fiber": 1,
+        "nutrients": {}, "addedAt": "2026-10-15T01:00:00.000Z",
+    }
+
+
+def seeded(slots):
+    return json.dumps([entry(i, s, f"Món thử {i}") for i, s in enumerate(slots)])
+
+
+NO_SAMPLE = json.dumps({f"item-{i}": {"deleted": True} for i in range(1, 8)})
+
+
+def init(*parts):
+    return "\n".join(["try {"] + list(parts) + ["} catch (e) {}"])
+
+
+def local(key, value):
+    return f"localStorage.setItem({json.dumps(key)}, {json.dumps(value)});"
+
+
+def page(browser, size, init_script=None):
     ctx = browser.new_context(viewport=size, accept_downloads=True)
-    if init:
-        ctx.add_init_script(init)
+    ctx.add_init_script(WATCH)
+    if init_script:
+        ctx.add_init_script(init_script)
     pg = ctx.new_page()
     pg.on("pageerror", lambda e: problems.append(f"page error: {e}"))
     pg.on("console", lambda m: problems.append(f"console error: {m.text}") if m.type == "error" else None)
@@ -99,7 +163,7 @@ def open_sheet(pg):
 
 
 def wait_preview(pg):
-    pg.get_by_role("dialog").get_by_role("img").wait_for(state="visible", timeout=10000)
+    pg.get_by_role("dialog").get_by_role("img").wait_for(state="visible", timeout=15000)
 
 
 def download(pg, name):
@@ -115,11 +179,28 @@ def analyse(pg, path):
         return pg.evaluate(ANALYSE, base64.b64encode(f.read()).decode())
 
 
+def snap(pg):
+    snaps = pg.evaluate("window.__shareSnaps")
+    return snaps[-1] if snaps else None
+
+
+def check_png(info, snapshot, tag, label):
+    check(info["w"] == 1080 and info["h"] >= 1920, f"{tag} {label}: PNG is {info['w']}x{info['h']} (1080 wide, 1920 high at least)")
+    check(info["edgeBad"] == 0, f"{tag} {label}: paper at every edge, nothing clipped ({info['edgeBad']} off-paper edge pixels {info['badAt']})")
+    check(info["colours"] >= 8, f"{tag} {label}: not blank ({info['colours']} colours)")
+    if snapshot:
+        want = max(1920, math.ceil(snapshot["rootH"] * SCALE - 1e-6))
+        check(abs(info["h"] - want) <= 1, f"{tag} {label}: height follows the content ({info['h']} vs {want} from {snapshot['rootH']:.1f} px)")
+        check(snapshot["footerGap"] <= 12 and snapshot["footerGap"] >= -0.5, f"{tag} {label}: footer is at the bottom edge (gap {snapshot['footerGap']:.1f} px)")
+        # the lowest ink of the image is inside the footer: no more than its 24 px line + 12 px padding above the edge
+        low = info["h"] - 1 - info["lastInk"]
+        check(low <= (12 + 24) * SCALE, f"{tag} {label}: the footer ink ends near the bottom ({low} px from the edge)")
+
+
 def run(browser, size, tag):
     w = size["width"]
     # an empty day: every sample item deleted (demo history keeps yesterday)
-    deleted = json.dumps({f"item-{i}": {"deleted": True} for i in range(1, 8)})
-    ctx, pg = page(browser, size, f"try {{ localStorage.setItem('h1t_sample_edits_v1_demo', {json.dumps(deleted)}); }} catch (e) {{}}")
+    ctx, pg = page(browser, size, init(local("h1t_sample_edits_v1_demo", NO_SAMPLE)))
     go(pg, "/")
     btn = vis(pg, BUTTON)
     check(btn.is_disabled(), f"{tag} empty day: share icon is disabled")
@@ -128,14 +209,14 @@ def run(browser, size, tag):
     check(box["width"] >= 44 and box["height"] >= 44, f"{tag} icon is 44 px ({box['width']}x{box['height']})")
     ctx.close()
 
-    # today, no file sharing: Lưu ảnh is the primary button
-    ctx, pg = page(browser, size, NO_SHARE)
+    # today with a name, no file sharing: Lưu ảnh is the primary button
+    profile = {"sex": "male", "birthYear": 2003, "weightKg": 65.4, "goal": "maintain", "periodMode": False, "trainingMinutesDefault": 60, "displayName": "Nguyễn Thị Hồng Ánh"}
+    ctx, pg = page(browser, size, init(NO_SHARE, local("h1t_profile_v1_demo", json.dumps(profile))))
     go(pg, "/")
     btn = vis(pg, BUTTON)
     check(btn.is_enabled(), f"{tag} today: share icon enabled")
     btn.click()
     pg.get_by_role("dialog").wait_for(state="visible")
-    skeleton = pg.get_by_role("dialog").get_by_role("status").count()
     wait_preview(pg)
     dialog = pg.get_by_role("dialog")
     check(dialog.get_by_role("button", name="Chia sẻ", exact=True).count() == 0, f"{tag} no Chia sẻ without file sharing")
@@ -143,19 +224,65 @@ def run(browser, size, tag):
     alt = dialog.get_by_role("img").get_attribute("alt") or ""
     check("Hôm nay 15/10" in alt and "Vi chất đạt" in alt, f"{tag} preview alt: {alt[:90]}")
     check("kg" not in alt and "@" not in alt, f"{tag} preview text has no weight or email")
-    pg.screenshot(path=os.path.join(SHOTS, f"cc-26-sheet-{w}.png"))
-    name, path = download(pg, f"cc-26-today-{w}.png")
+    check(pg.locator("[data-share-root]").count() == 0, f"{tag} the drawn page is removed from the DOM once the PNG exists")
+    pg.screenshot(path=os.path.join(SHOTS, f"cc-27g-sheet-{w}.png"))
+    name, path = download(pg, f"cc-27g-today-{w}.png")
     check(name == f"h1t-micro-{TODAY}.png", f"{tag} filename {name}")
     info = analyse(pg, path)
-    check(info["w"] == 1080 and info["h"] == 1920, f"{tag} PNG is {info['w']}x{info['h']}")
+    s = snap(pg)
+    check(s is not None, f"{tag} the drawn page was read")
+    check_png(info, s, tag, "today")
     check(info["corner"] == "243,241,236", f"{tag} paper background {info['corner']}")
-    check(info["colours"] >= 8, f"{tag} PNG is not blank ({info['colours']} colours)")
     lv = info["found"]
-    check(lv["red"] + lv["yellow"] + lv["green"] == 0, f"{tag} today is two-tone: no red/yellow/green in the bar rows {lv}")
+    check(lv["red"] + lv["yellow"] + lv["green"] == 0, f"{tag} today is two-tone: no red/yellow/green in the image {lv}")
+    if s:
+        t = s["text"]
+        check(s["top"].startswith("Nguyễn Thị Hồng Ánh") and "Hôm nay 15/10" in s["top"], f"{tag} name then the date on top ({s['top']!r})")
+        check("Cả ngày · 7 món" in t, f"{tag} the summary card is in the image")
+        for banned in ["Thêm", "Chia sẻ", "Đủ 22 vi chất", "Chưa ăn", "●", "⋯", "Tổng quan", "Khám phá", "Cài đặt", "Về hôm nay", "Ngày tập"]:
+            check(banned not in t, f"{tag} no {banned!r} in the image")
+        check(s["controls"] == 0 and not s["header"], f"{tag} nothing interactive, no header or nav ({s['controls']})")
+        check("Xanh: đạt mục tiêu" in t and "Thiếu <50%" not in t, f"{tag} today's key")
+        check("H1T MICRO" in t.replace("H1T MICRO", "H1T MICRO") and "Theo dõi vi chất mỗi ngày" in t, f"{tag} footer wordmark and line")
+        check(s["footerH"] >= 48 - 0.5, f"{tag} footer is 24 px line + 12 px above and below ({s['footerH']})")
+        check("Khoáng chất" in t and "Vitamin" in t, f"{tag} nutrient column groups are in the image")
+        check(abs(s["rootW"] - 390) <= 0.5, f"{tag} drawn at 390 px ({s['rootW']})")
     pg.keyboard.press("Escape")
     pg.wait_for_timeout(200)
     check(pg.get_by_role("dialog").count() == 0, f"{tag} Esc closes the sheet")
     check(pg.evaluate("document.activeElement?.getAttribute('aria-label')") == "Chia sẻ ngày này", f"{tag} focus returns to the icon")
+    ctx.close()
+
+    # today without a name: only the date on top
+    ctx, pg = page(browser, size, NO_SHARE)
+    go(pg, "/")
+    open_sheet(pg)
+    wait_preview(pg)
+    s = snap(pg)
+    check(s is not None and s["top"].strip() == "Hôm nay 15/10", f"{tag} no name: only the date on top ({s['top'] if s else None!r})")
+    ctx.close()
+
+    # a day with two meals only: the empty meals are absent
+    ctx, pg = page(browser, size, init(NO_SHARE, local("h1t_sample_edits_v1_demo", NO_SAMPLE), local("h1t_added_entries_v1_demo", seeded(["breakfast", "breakfast", "lunch"]))))
+    go(pg, "/")
+    open_sheet(pg)
+    wait_preview(pg)
+    s = snap(pg)
+    check(s is not None and s["sections"] == ["Bữa sáng", "Bữa trưa"], f"{tag} meals with no food are absent ({s['sections'] if s else None})")
+    name, path = download(pg, f"cc-27g-short-{w}.png")
+    check_png(analyse(pg, path), s, tag, "two meals")
+    ctx.close()
+
+    # a long day: taller than 1920, footer inside
+    ctx, pg = page(browser, size, init(NO_SHARE, local("h1t_added_entries_v1_demo", seeded(["breakfast", "lunch", "snack", "dinner"] * 6))))
+    go(pg, "/")
+    open_sheet(pg)
+    wait_preview(pg)
+    s = snap(pg)
+    name, path = download(pg, f"cc-27g-long-{w}.png")
+    info = analyse(pg, path)
+    check_png(info, s, tag, "long day")
+    check(info["h"] > 2300, f"{tag} long day: the image grew ({info['h']})")
     ctx.close()
 
     # past day
@@ -164,12 +291,16 @@ def run(browser, size, tag):
     check(vis(pg, BUTTON).is_enabled(), f"{tag} past day: share icon enabled")
     open_sheet(pg)
     wait_preview(pg)
-    name, path = download(pg, f"cc-26-past-{w}.png")
+    name, path = download(pg, f"cc-27g-past-{w}.png")
     check(name == f"h1t-micro-{PAST}.png", f"{tag} past filename {name}")
     info = analyse(pg, path)
+    s = snap(pg)
     lv = info["found"]
-    check(info["w"] == 1080 and info["h"] == 1920, f"{tag} past PNG is {info['w']}x{info['h']}")
+    check_png(info, s, tag, "past day")
     check(lv["red"] + lv["yellow"] + lv["green"] + lv["blue"] > 0, f"{tag} past day uses the four levels {lv}")
+    if s:
+        check(all(x in s["text"] for x in ["Thiếu <50%", "Trung bình", "Gần đủ", "Đạt ≥100%"]) and "Xanh: đạt mục tiêu" not in s["text"], f"{tag} past day's 4-level key")
+        check("Hôm qua 14/10" in s["top"], f"{tag} past date label ({s['top']!r})")
     alt = pg.get_by_role("dialog").get_by_role("img").get_attribute("alt") or ""
     check(alt.startswith("Ảnh tóm tắt Hôm qua 14/10"), f"{tag} past alt: {alt[:60]}")
     ctx.close()
@@ -207,7 +338,7 @@ def main():
     os.makedirs(SHOTS, exist_ok=True)
     with sync_playwright() as p:
         browser = p.chromium.launch()
-        for size, tag in [({"width": 390, "height": 844}, "390"), ({"width": 1280, "height": 800}, "1280")]:
+        for size, tag in [({"width": 390, "height": 844}, "390"), ({"width": 1440, "height": 900}, "1440")]:
             try:
                 run(browser, size, tag)
             except Exception as e:  # keep the page errors collected so far in the report
