@@ -4,7 +4,8 @@ import { Suspense, useEffect, useMemo, useState, useSyncExternalStore } from "re
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AppShell } from "@/components/ui/app-shell";
-import { AppHeader } from "@/components/ui/app-header";
+import { AppHeader, HEADER_ICON_BUTTON } from "@/components/ui/app-header";
+import { IconShare } from "@/components/ui/icons";
 import { CalendarSheet } from "@/components/calendar-sheet";
 import { CopyYesterdaySheet } from "@/components/copy-yesterday-sheet";
 import { MealMenuSheet } from "@/components/diary/meal-menu-sheet";
@@ -33,6 +34,7 @@ import type { MealSlot } from "@/lib/meal-slot";
 import { FoodList } from "./food-list";
 import { HomeHero, type HeroPill } from "./home-hero";
 import { NutrientColumn } from "./nutrient-column";
+import { ShareSheet } from "./share-sheet";
 
 function subscribeOnline(callback: () => void) {
   window.addEventListener("online", callback);
@@ -71,6 +73,7 @@ function HomeContent() {
 
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isCopySheetOpen, setIsCopySheetOpen] = useState(false);
+  const [isShareOpen, setIsShareOpen] = useState(false);
   const [menuSlot, setMenuSlot] = useState<MealSlot | null>(null);
   const [picked, setPicked] = useState<{ iso: string; mode: HomeMode }>({ iso: "", mode: DAY_MODE });
   const [clientNow, setClientNow] = useState(false);
@@ -224,6 +227,19 @@ function HomeContent() {
           onDateTap={() => setIsCalendarOpen(true)}
           alignGroup="home-header"
           subtitle={desktopSubtitle}
+          actions={
+            <button
+              type="button"
+              onClick={() => setIsShareOpen(true)}
+              disabled={nothingLogged}
+              aria-label="Chia sẻ ngày này"
+              aria-haspopup="dialog"
+              aria-describedby={nothingLogged ? "share-reason" : undefined}
+              className={`${HEADER_ICON_BUTTON} disabled:cursor-default disabled:opacity-50`}
+            >
+              <IconShare />
+            </button>
+          }
           phoneStart={
             isPast ? (
               <Link
@@ -235,6 +251,11 @@ function HomeContent() {
             ) : undefined
           }
         />
+        {nothingLogged && (
+          <p id="share-reason" className="m-0 mx-3 mt-2 text-[13px] leading-snug text-secondary lg:mx-8">
+            Chưa có món nào để chia sẻ
+          </p>
+        )}
         {showOffline && (
           <div role="status" className="mx-3 mt-2 rounded-xl bg-warning-bg px-3 py-2 text-[13px] leading-snug text-warning-text">
             Đang ngoại tuyến — món mới sẽ đồng bộ khi có mạng.
@@ -293,6 +314,7 @@ function HomeContent() {
         }}
       />
       <CopyYesterdaySheet open={isCopySheetOpen} onClose={() => setIsCopySheetOpen(false)} />
+      <ShareSheet open={isShareOpen} onClose={() => setIsShareOpen(false)} day={day} finished={isPast} />
       {todayIso && (
         <CalendarSheet
           open={isCalendarOpen}

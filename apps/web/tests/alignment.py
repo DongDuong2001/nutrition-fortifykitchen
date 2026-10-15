@@ -187,6 +187,18 @@ def main():
             else:
                 print(f"[PASS] / @ {vp['name']} (checked groups: {res['checkedGroups']})")
 
+            # cc-26: the share sheet's two buttons share edges (file sharing faked, so both show)
+            page.evaluate("navigator.canShare = () => true; navigator.share = () => Promise.resolve();")
+            page.locator("[aria-label='Chia sẻ ngày này']:visible").first.click()
+            page.locator('[data-align-group="share-actions"]:visible').nth(1).wait_for(timeout=10000)
+            res = check_align_groups(page, "share-actions")
+            pairs = res["pairs"].get("share-actions", 0)
+            if res["errors"] or pairs < 1:
+                print(f"[FAIL] / share sheet @ {vp['name']} [share-actions]: pairs {pairs} {res['errors']}")
+                total_errors.extend(res["errors"] or [f"share sheet: {pairs} pairs"])
+            else:
+                print(f"[PASS] / share sheet @ {vp['name']} [share-actions] ({pairs} pairs)")
+
             # /micros
             page.goto(f"{BASE_URL}/micros", wait_until="networkidle")
             page.wait_for_timeout(500)

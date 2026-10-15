@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildShareCard, shareFilename } from "../share-card";
+import { buildShareCard, shareCardAlt, shareFilename } from "../share-card";
 import { SAMPLE_DAY, type MockDayData } from "../mock/sample-day";
 
 const NOW = new Date("2026-10-15T10:00:00+07:00");
@@ -91,5 +91,13 @@ describe("share card model", () => {
   it("names the file h1t-micro-YYYY-MM-DD.png", () => {
     expect(shareFilename("2026-10-15")).toBe("h1t-micro-2026-10-15.png");
     expect(buildShareCard({ day: TODAY, finished: false, now: NOW }).filename).toBe("h1t-micro-2026-10-15.png");
+  });
+
+  it("describes the image for a screen reader with the same numbers", () => {
+    const alt = shareCardAlt(buildShareCard({ day: TODAY, finished: false, now: NOW }));
+    expect(alt).toContain("Ảnh tóm tắt Hôm nay 15/10");
+    expect(alt).toContain("1.041 / 1.950–2.275 kcal, 53%, Trung bình");
+    expect(alt).toContain("Vi chất đạt 8/22");
+    expect(alt).toContain("Thiếu nhiều nhất: Vitamin D");
   });
 });

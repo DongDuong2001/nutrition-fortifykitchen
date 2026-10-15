@@ -85,3 +85,18 @@ export function buildShareCard({ day, finished, now }: { day: MockDayData; finis
     filename: shareFilename(day.date),
   };
 }
+
+/** What a screen reader hears for the image: the same numbers the card draws, in one sentence per block. */
+export function shareCardAlt(model: ShareCardModel): string {
+  const bars = model.bars.map((b) => `${b.label} ${b.amount}, ${b.pctText}, ${b.level}`).join("; ");
+  const lacking = model.lacking.map((l) => `${l.name} ${l.pctText}`).join(", ");
+  return [
+    `Ảnh tóm tắt ${model.dateLabel}`,
+    `${model.kcal.value} / ${model.kcal.target}, ${model.kcal.pctText}, ${model.kcal.level}`,
+    bars,
+    model.micros.text,
+    lacking ? `Thiếu nhiều nhất: ${lacking}` : "",
+  ]
+    .filter(Boolean)
+    .join(". ");
+}
