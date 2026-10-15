@@ -1,6 +1,7 @@
 import { formatAmount, formatDayLabel, formatRange } from "./format";
 import { DAY_MODE, heroLabel, pctLabel, targetOf, valuesFromDay, type HomeEntry, type HomeMeal, type HomeValues } from "./home";
-import { microsSummaryFor } from "./lacking";
+import type { Level } from "./coaching-link";
+import { columnGroups, countedForLevel, levelSummary, sumExtras, type ColumnGroup } from "./level-nutrients";
 import { getLevelColor, homeBarColor } from "./levels";
 import type { MockDayData } from "./mock/sample-day";
 
@@ -66,6 +67,12 @@ export interface ShareModel {
   /** Percent targets of the nutrient column, by catalogue id. */
   nutrientTargets: Record<string, number | null>;
   meals: HomeMeal[];
+  /** The Level badge and the column's lists (lib/level-nutrients). */
+  level: Level;
+  groups: ColumnGroup[];
+  extras: Record<string, number | null>;
+  /** "x/N đạt" over the Level's own micros. */
+  summary: { reached: number; total: number; lacking: string[] };
   key: ShareKeyItem[];
   filename: string;
   /** What a screen reader hears for the image. */
@@ -83,6 +90,7 @@ export function buildShareModel({
   finished,
   now,
   displayName,
+  level,
   nutrientIds,
 }: {
   day: MockDayData;
@@ -91,6 +99,8 @@ export function buildShareModel({
   finished: boolean;
   now: Date;
   displayName?: string | null;
+  level: Level;
+  /** The Level's counted micros (countedForLevel); the targets are read for these. */
   nutrientIds: readonly string[];
 }): ShareModel {
   const values = valuesFromDay(day);
@@ -104,7 +114,7 @@ export function buildShareModel({
     fiber: targetOf(day, "fiber"),
   };
   const nutrientTargets = Object.fromEntries(nutrientIds.map((id) => [id, targetOf(day, id)]));
-  const summary = microsSummaryFor(day);
+  const summary = levelSummary(values.nutrients, nutrientTargets, countedForLevel(level));
   const macro = (label: string, key: keyof typeof macroTargets) => {
     const v = values[key];
     return `${label} ${v === null ? "—" : `${formatAmount(v, "g")} g`}, ${pctLabel(v, macroTargets[key])}`;
@@ -113,7 +123,7 @@ export function buildShareModel({
     `Ảnh tóm tắt ${dateLabel}${name ? ` của ${name}` : ""}`,
     `${formatAmount(values.kcal, "kcal")} / ${formatRange(kcalTarget.min, kcalTarget.max)} kcal, ${pctLabel(values.kcal, kcalTarget.min)}`,
     [macro("Tinh bột", "carbs"), macro("Đạm", "protein"), macro("Chất béo", "fat"), macro("Chất xơ", "fiber")].join("; "),
-    `Vi chất đạt ${summary.achieved}/${summary.total}`,
+    `Vi chất đạt ${summary.reached}/${summary.total}`,
   ].join(". ");
 
   return {
@@ -126,6 +136,10 @@ export function buildShareModel({
     macroTargets,
     nutrientTargets,
     meals: shareMeals(meals),
+    level,
+    groups: columnGroups(level),
+    extras: sumExtras(entries),
+    summary,
     key: shareKey(finished),
     filename: shareFilename(day.date),
     alt,

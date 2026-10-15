@@ -8,7 +8,9 @@ import { PillButton } from "@/components/ui/pill-button";
 import type { HomeEntry, HomeMeal } from "@/lib/home";
 import type { MockDayData } from "@/lib/mock/sample-day";
 import { SHARE_CSS_WIDTH, SHARE_SCALE, SHARE_WIDTH, buildShareModel, shareImageHeight, type ShareModel } from "@/lib/share-card";
-import { ShareDay, SHARE_NUTRIENT_IDS } from "./share-day";
+import { ShareDay } from "./share-day";
+import { countedForLevel } from "@/lib/level-nutrients";
+import type { Level } from "@/lib/coaching-link";
 
 type Failure = "generate" | "share" | "save";
 
@@ -33,7 +35,7 @@ const nextFrame = () => new Promise<void>((resolve) => requestAnimationFrame(() 
  * Draws the page (a ShareDay in an off-screen portal) into a 1080-px-wide PNG and hands the file up. The page is
  * mounted only while the picture is made, so it never lingers in the DOM next to the real screen.
  */
-function ShareCapture({ model, badge, onDone, onError }: { model: ShareModel; badge?: React.ReactNode; onDone: (file: File, height: number) => void; onError: () => void }) {
+function ShareCapture({ model, onDone, onError }: { model: ShareModel; onDone: (file: File, height: number) => void; onError: () => void }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const callbacks = useRef({ onDone, onError });
   callbacks.current = { onDone, onError };
@@ -78,7 +80,7 @@ function ShareCapture({ model, badge, onDone, onError }: { model: ShareModel; ba
 
   return createPortal(
     <div ref={hostRef} aria-hidden="true" inert style={{ position: "fixed", top: 0, left: -10000, width: SHARE_CSS_WIDTH, pointerEvents: "none" }}>
-      <ShareDay model={model} badge={badge} />
+      <ShareDay model={model} />
     </div>,
     document.body
   );
@@ -97,7 +99,7 @@ export function ShareSheet({
   meals,
   finished,
   displayName,
-  badge,
+  level,
 }: {
   open: boolean;
   onClose: () => void;
@@ -106,22 +108,23 @@ export function ShareSheet({
   meals: HomeMeal[];
   finished: boolean;
   displayName: string;
-  /** The Level badge for the name row (28b). */
-  badge?: React.ReactNode;
+  /** The Level badge on the name row and the list of nutrients in the column. */
+  level: Level;
 }) {
   const [ready, setReady] = useState<Ready | null>(null);
   const [failure, setFailure] = useState<Failure | null>(null);
   const [attempt, setAttempt] = useState(0);
   const [job, setJob] = useState<ShareModel | null>(null);
   // The latest day, read when the page is drawn; a change to it while the sheet is open does not redraw it
-  const latest = useRef({ day, entries, meals, finished, displayName });
-  latest.current = { day, entries, meals, finished, displayName };
+  const latest = useRef({ day, entries, meals, finished, displayName, level });
+  latest.current = { day, entries, meals, finished, displayName, level };
 
   useEffect(() => {
     if (!open) return;
     setReady(null);
     setFailure(null);
-    setJob(buildShareModel({ ...latest.current, now: new Date(), nutrientIds: SHARE_NUTRIENT_IDS }));
+    const { level: current, ...rest } = latest.current;
+    setJob(buildShareModel({ ...rest, level: current, now: new Date(), nutrientIds: countedForLevel(current) }));
     return () => {
       setJob(null);
       // The revoked URL must not show for a frame when the sheet opens again
@@ -246,7 +249,6 @@ export function ShareSheet({
         <ShareCapture
           key={attempt}
           model={job}
-          badge={badge}
           onDone={onDone}
           onError={() => {
             setJob(null);

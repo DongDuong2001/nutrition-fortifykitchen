@@ -66,7 +66,7 @@ def hero_label(pg):
 
 def captions(pg):
     """cc-27f: the nutrient column has no caption line any more."""
-    return pg.locator("aside[aria-label='Vi chất'] > p").count()
+    return pg.locator("aside[aria-label='Vi chất'] > p:not([data-level-summary])").count()
 
 
 def fills(pg, label):

@@ -1,5 +1,4 @@
-import type { ReactNode } from "react";
-import { HOME_NUTRIENT_GROUPS } from "@/lib/home";
+import { LevelBadge } from "@/components/profile/level-badge";
 import { SHARE_CSS_WIDTH, SHARE_MIN_CSS_HEIGHT, type ShareModel } from "@/lib/share-card";
 import { FoodList } from "./food-list";
 import { HomeHero } from "./home-hero";
@@ -12,7 +11,7 @@ const noop = () => {};
  * It is drawn 390 px wide whatever the screen is (no media queries inside), is never shorter than 1080×1920
  * when scaled, and its footer is pinned to the bottom edge. `data-share-root` is what the rasteriser reads.
  */
-export function ShareDay({ model, badge }: { model: ShareModel; badge?: ReactNode }) {
+export function ShareDay({ model }: { model: ShareModel }) {
   return (
     <div
       data-share-root
@@ -26,7 +25,7 @@ export function ShareDay({ model, badge }: { model: ShareModel; badge?: ReactNod
             {model.dateLabel}
           </p>
         </div>
-        {badge && <div className="flex-none">{badge}</div>}
+        <LevelBadge level={model.level} size="share" />
       </div>
 
       <div className="flex flex-1 flex-col">
@@ -53,6 +52,9 @@ export function ShareDay({ model, badge }: { model: ShareModel; badge?: ReactNod
           />
           <NutrientColumn
             values={model.values}
+            extras={model.extras}
+            groups={model.groups}
+            summary={model.summary}
             targets={model.nutrientTargets}
             selected={false}
             finished={model.finished}
@@ -72,6 +74,3 @@ export function ShareDay({ model, badge }: { model: ShareModel; badge?: ReactNod
     </div>
   );
 }
-
-/** The ids the share image's nutrient column lists (the same list as Hôm nay's column). */
-export const SHARE_NUTRIENT_IDS = HOME_NUTRIENT_GROUPS.flatMap((g) => g.ids);

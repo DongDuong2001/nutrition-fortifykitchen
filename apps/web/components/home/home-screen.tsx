@@ -17,7 +17,6 @@ import { trainingTile } from "@/lib/diary-rows";
 import { calculateSaltTarget } from "@/lib/training";
 import {
   DAY_MODE,
-  HOME_NUTRIENT_GROUPS,
   entriesFromAdded,
   entriesFromDay,
   groupMeals,
@@ -32,6 +31,8 @@ import {
 } from "@/lib/home";
 import type { MealSlot } from "@/lib/meal-slot";
 import { FoodList } from "./food-list";
+import { useCoaching } from "@/hooks/use-coaching";
+import { columnGroups, countedForLevel, levelSummary, sumExtras } from "@/lib/level-nutrients";
 import { DayMenuSheet, MealTargetSheet, SelectActionBar, SelectHeader } from "./select-mode";
 import {
   chosenEntries,
@@ -63,7 +64,6 @@ function subscribeOnline(callback: () => void) {
 const getOnlineSnapshot = () => navigator.onLine;
 const getOnlineServerSnapshot = () => true;
 
-const NUTRIENT_IDS = HOME_NUTRIENT_GROUPS.flatMap((g) => g.ids);
 
 /**
  * Hôm nay (/): the day at a glance. The ink card holds the day's kcal and macros, the food list on the left
@@ -100,6 +100,11 @@ function HomeContent() {
     mealFoods,
     saveMealAs,
   } = useDiary();
+
+  // The Level decides which nutrients the column lists (lib/level-nutrients)
+  const { level } = useCoaching();
+  const groups = useMemo(() => columnGroups(level), [level]);
+  const countedIds = useMemo(() => countedForLevel(level), [level]);
 
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isCopySheetOpen, setIsCopySheetOpen] = useState(false);
@@ -246,7 +251,9 @@ function HomeContent() {
     pills.push({ key: "clear", label: "Xem cả ngày ×", onClick: () => setMode(DAY_MODE) });
   }
 
-  const nutrientTargets = Object.fromEntries(NUTRIENT_IDS.map((id) => [id, targetOf(day, id)]));
+  const nutrientTargets = Object.fromEntries(countedIds.map((id) => [id, targetOf(day, id)]));
+  const extras = sumExtras(modeEntries(mode, entries));
+  const levelCounts = mode.kind === "day" ? levelSummary(shown.nutrients, nutrientTargets, countedIds) : undefined;
   const macroTargets = {
     carbs: targetOf(day, "carbs"),
     protein: targetOf(day, "protein"),
@@ -415,6 +422,9 @@ function HomeContent() {
             {!selecting && (
               <NutrientColumn
                 values={shown}
+                extras={extras}
+                groups={groups}
+                summary={levelCounts}
                 targets={nutrientTargets}
                 selected={selected}
                 finished={isPast}
@@ -491,6 +501,7 @@ function HomeContent() {
         meals={meals}
         finished={isPast}
         displayName={profile.displayName}
+        level={level}
       />
       {todayIso && (
         <CalendarSheet

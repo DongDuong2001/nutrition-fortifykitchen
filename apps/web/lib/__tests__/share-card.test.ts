@@ -13,11 +13,11 @@ import {
   shareName,
 } from "../share-card";
 import { entriesFromAdded, groupMeals, type HomeEntry } from "../home";
+import { countedForLevel } from "../level-nutrients";
 import { SAMPLE_DAY } from "../mock/sample-day";
 
 const NOW = new Date("2026-10-15T10:00:00+07:00");
 const TODAY = { ...SAMPLE_DAY, date: "2026-10-15" };
-const IDS = ["sodium", "potassium", "calcium"];
 
 function entry(id: string, slot: HomeEntry["slot"], name: string): HomeEntry {
   return { id, name, qty: "100 g", grams: 100, slot, kcal: 100, protein: 1, carbs: 1, fat: 1, fiber: 1, nutrients: {}, quick: false };
@@ -25,7 +25,17 @@ function entry(id: string, slot: HomeEntry["slot"], name: string): HomeEntry {
 
 function model(over: Partial<Parameters<typeof buildShareModel>[0]> = {}) {
   const entries = [entry("a", "breakfast", "Yến mạch"), entry("b", "dinner", "Cá hồi")];
-  return buildShareModel({ day: TODAY, entries, meals: groupMeals(entries), finished: false, now: NOW, displayName: "", nutrientIds: IDS, ...over });
+  return buildShareModel({
+    day: TODAY,
+    entries,
+    meals: groupMeals(entries),
+    finished: false,
+    now: NOW,
+    displayName: "",
+    level: 2,
+    nutrientIds: countedForLevel(over.level ?? 2),
+    ...over,
+  });
 }
 
 describe("share image size", () => {
@@ -79,7 +89,7 @@ describe("share model", () => {
     expect(m.values.kcal).toBe(1041);
     expect(m.kcalTarget).toEqual({ min: 1950, max: 2275 });
     expect(m.macroTargets.protein).not.toBeNull();
-    expect(Object.keys(m.nutrientTargets)).toEqual(IDS);
+    expect(Object.keys(m.nutrientTargets)).toEqual(countedForLevel(2));
   });
 
   it("leaves out meals with no food", () => {
@@ -98,7 +108,7 @@ describe("share model", () => {
     const alt = model({ displayName: "Linh" }).alt;
     expect(alt).toContain("Ảnh tóm tắt Hôm nay 15/10 của Linh");
     expect(alt).toContain("1.041 / 1.950–2.275 kcal, 53%");
-    expect(alt).toContain("Vi chất đạt 8/22");
+    expect(alt).toMatch(/Vi chất đạt \d+\/14/);
   });
 
   it("holds nothing private: no email, weight or profile numbers", () => {
@@ -106,6 +116,16 @@ describe("share model", () => {
     expect(text).not.toContain(TODAY.user.email);
     expect(text).not.toMatch(/\bkg\b/);
     expect(text).not.toMatch(/birthYear|weightKg|trainingMinutes/);
+  });
+
+  it("carries the Level for the badge and its own lists and counts", () => {
+    expect(model({ level: 0 }).level).toBe(0);
+    expect(model({ level: 0 }).summary.total).toBe(8);
+    expect(model({ level: 2 }).summary.total).toBe(14);
+    expect(model({ level: 3 }).summary.total).toBe(18);
+    expect(model({ level: 5 }).summary.total).toBe(22);
+    expect(model({ level: 1 }).groups.map((g) => g.title)).toEqual(["Khoáng chất", "Vitamin"]);
+    expect(model({ level: 3 }).groups.map((g) => g.title)).toEqual(["Chi tiết béo & xơ", "Khoáng chất", "Vitamin"]);
   });
 
   it("works from added entries too (a past day)", () => {

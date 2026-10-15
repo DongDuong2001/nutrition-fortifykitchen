@@ -53,6 +53,8 @@
   --color-surface-dark: #1A1C22;
   --color-warning-bg: #FFF4E0;
   --color-warning-text: #7A4A00;
+  /* Level badge (cc-28): provisional, the coach may change them. Gold is for Level 4 and 5 only. */
+  --color-gold: #E0B54A;
 }
 
 :root {

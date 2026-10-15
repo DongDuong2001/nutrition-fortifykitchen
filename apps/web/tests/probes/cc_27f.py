@@ -96,7 +96,7 @@ def run(browser, size, tag):
 
         # nutrient column: no caption, bands like the meal headers
         aside = pg.locator("aside[aria-label='Vi chất'] >> visible=true").first
-        check(aside.locator("> p").count() == 0, f"{t}: no caption over the nutrient column")
+        check(aside.locator("> p:not([data-level-summary])").count() == 0, f"{t}: no caption over the nutrient column")
         titles = aside.locator("h3").all_inner_texts()
         check(titles == ["Khoáng chất", "Vitamin"], f"{t}: group bands in normal case {titles}")
         band = pg.evaluate(

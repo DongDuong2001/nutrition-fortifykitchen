@@ -1,29 +1,38 @@
 import Link from "next/link";
 import { formatAmount } from "@/lib/format";
-import type { ShareKeyItem } from "@/lib/share-card";
-import { HOME_NUTRIENT_GROUPS, pctLabel, pctOf, type HomeValues } from "@/lib/home";
+import { pctLabel, pctOf, type HomeValues } from "@/lib/home";
+import { isExtra, type ColumnGroup } from "@/lib/level-nutrients";
 import { getNutrientDefinition } from "@/lib/nutrients";
+import type { ShareKeyItem } from "@/lib/share-card";
 import { HomeBar } from "./home-bar";
 
 /**
- * The right column of the home body: the 14 nutrients the coach watches most, against the day's targets.
- * The group labels are bands like the meal headers on the left, so the first band sits level with the first
- * meal band. A food or a meal picked on the left shows as a cobalt line on top. An unknown value is a dash and
- * an empty bar, never 0.
+ * The right column of the home body: the nutrients of the user's Level against the day's targets (lib/level-
+ * nutrients). The group labels are bands like the meal headers on the left, so the first band sits level with the
+ * first meal band. The extras (Level 3 and up) show an amount only: no bar, no percent. A food or a meal picked on
+ * the left shows as a cobalt line on top. An unknown value is a dash and an empty bar, never 0.
  */
 export function NutrientColumn({
   values,
+  extras,
+  groups,
   targets,
   selected,
   finished,
   microsHref,
+  summary,
   shareKey,
 }: {
   values: HomeValues;
+  /** Amounts of the extras by id (null = unknown). */
+  extras: Record<string, number | null>;
+  groups: ColumnGroup[];
   targets: Record<string, number | null>;
   selected: boolean;
   finished: boolean;
   microsHref: string;
+  /** "x/N đạt" and the lowest micros of the Level; left out when a food or a meal is picked. */
+  summary?: { reached: number; total: number; lacking: string[] };
   /** The share image: rows have fixed heights (no media queries: the image is drawn at 390 px on any screen), no link, a colour key. */
   shareKey?: ShareKeyItem[];
 }) {
@@ -35,16 +44,32 @@ export function NutrientColumn({
         selected ? "before:absolute before:inset-x-0 before:top-0 before:z-20 before:h-[3px] before:bg-cobalt before:content-['']" : ""
       }`}
     >
-      {/* Rows are 34 px where there is room and shrink (to 28 px) so the column fits a short screen without scrolling */}
+      {/* Rows are 34 px where there is room and shrink (to 28 px) so the column fits a short screen; it scrolls when it cannot */}
       <div className={share ? "flex flex-col" : "flex min-h-0 flex-1 flex-col overflow-y-auto"}>
-        {HOME_NUTRIENT_GROUPS.map((group) => (
-          <section key={group.title} aria-label={group.title} className="flex min-h-0 flex-col" style={share ? undefined : { flex: group.ids.length }}>
+        {groups.map((group) => (
+          <section key={group.title} aria-label={group.title} className="flex flex-col" style={share ? undefined : { flex: `${group.ids.length} 0 auto` }}>
             <h3 className={`m-0 flex h-[22px] flex-none items-center bg-paper-dark px-3 text-[11px] font-extrabold leading-none text-text ${share ? "" : "lg:h-11"}`}>
               {group.title}
             </h3>
             {group.ids.map((id) => {
               const def = getNutrientDefinition(id);
               if (!def) return null;
+              if (isExtra(id)) {
+                const amount = extras[id] ?? null;
+                return (
+                  <div
+                    key={id}
+                    data-align-group="home-nutrient"
+                    data-extra
+                    className="flex min-h-7 items-center justify-between gap-2 px-3 py-1"
+                  >
+                    <span className="min-w-0 break-words text-[13px] font-semibold leading-snug text-text">{def.nameVi}</span>
+                    <span className="shrink-0 text-[13px] leading-tight text-secondary tabular-nums">
+                      {amount === null ? "—" : `${formatAmount(amount, def.unit)} ${def.unit}`}
+                    </span>
+                  </div>
+                );
+              }
               const value = values.nutrients[id] ?? null;
               const pct = pctOf(value, targets[id] ?? null);
               return (
@@ -67,6 +92,14 @@ export function NutrientColumn({
           </section>
         ))}
       </div>
+      {summary && (
+        <p data-level-summary className="m-0 flex flex-none flex-col gap-0.5 px-3 pt-2 text-[13px] leading-snug text-secondary">
+          <span className="font-bold tabular-nums text-text">
+            {summary.reached}/{summary.total} đạt
+          </span>
+          {summary.lacking.length > 0 && <span>Thiếu nhiều nhất: {summary.lacking.join(", ")}</span>}
+        </p>
+      )}
       {share ? (
         <ul className="m-0 mt-auto flex list-none flex-col gap-1 px-3 pt-3 text-[11px] leading-snug text-secondary">
           {shareKey.map((item) => (

@@ -259,7 +259,7 @@ def run(browser, size, tag):
     open_sheet(pg)
     wait_preview(pg)
     s = snap(pg)
-    check(s is not None and s["top"].strip() == "Hôm nay 15/10", f"{tag} no name: only the date on top ({s['top'] if s else None!r})")
+    check(s is not None and s["top"].strip().startswith("Hôm nay 15/10") and "Nguyễn" not in s["top"], f"{tag} no name: only the date on top, with the Level badge ({s['top'] if s else None!r})")
     ctx.close()
 
     # a day with two meals only: the empty meals are absent
