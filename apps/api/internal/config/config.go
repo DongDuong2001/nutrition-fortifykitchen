@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"strings"
 )
@@ -17,6 +18,25 @@ type Config struct {
 	SentryDSN         string
 	Environment       string
 	AllowedOrigins    []string
+}
+
+// Validate checks for critical security misconfigurations in production environments
+func (c *Config) Validate() error {
+	if strings.ToLower(c.Environment) == "production" {
+		if c.DatabaseURL == "" {
+			return fmt.Errorf("DATABASE_URL is required in production")
+		}
+		if strings.Contains(c.DatabaseURL, "postgres:postgres") {
+			return fmt.Errorf("DATABASE_URL must not use default credentials (postgres:postgres) in production")
+		}
+		if strings.Contains(c.DatabaseURL, "sslmode=disable") {
+			return fmt.Errorf("DATABASE_URL must not disable SSL (sslmode=disable) in production")
+		}
+		if c.SupabaseJWTSecret == "" && c.SupabaseJWKSURL == "" {
+			return fmt.Errorf("either SUPABASE_JWT_SECRET or SUPABASE_JWKS_URL must be configured in production")
+		}
+	}
+	return nil
 }
 
 func Load() *Config {

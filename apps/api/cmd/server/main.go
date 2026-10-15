@@ -33,6 +33,9 @@ import (
 func main() {
 	// 1. Load centralized configuration
 	cfg := config.Load()
+	if err := cfg.Validate(); err != nil {
+		logger.Log.Fatal().Err(err).Msg("Configuration validation failed")
+	}
 
 	// 2. Initialize Sentry if DSN is provided
 	if cfg.SentryDSN != "" {
@@ -51,7 +54,7 @@ func main() {
 
 	// 3. Initialize PostgreSQL 17 Connection Pool
 	ctx := context.Background()
-	dbClient, err := database.NewPostgresPool(ctx)
+	dbClient, err := database.NewPostgresPool(ctx, cfg.DatabaseURL)
 	if err != nil {
 		logger.Log.Fatal().Err(err).Msg("Database connection initialization failed")
 	}

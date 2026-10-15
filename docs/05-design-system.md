@@ -72,7 +72,7 @@ Both fonts load with the Vietnamese subset. Numbers use the reader's language fo
 
 ## Icons
 
-`reicon-react`, as in Fortify Kitchen. In use: `ArrowLeft2`, `ArrowRight2`, `Add`, `Trash`, `CloseCircle`, `SearchNormal`, `Edit2`, `Copy`, `LampCharge`, `Dumbbell`, `ChartPie`. Sizes 14, 16, 20 px; icons never carry meaning alone.
+`@mynaui/icons-react`, accessed through the centralized adapter `components/ui/icons.tsx`. In use: chevron navigation, add, trash, search, edit, close, eye/eye-slash toggles, trophy, and star badges. Sizes 14, 16, 20 px; icons never carry meaning alone.
 
 ## Data display rules
 

@@ -52,7 +52,7 @@ The current tracker code in `apps/customer-web/src/features/nutrition/` is the s
 
 | Layer | Choice | Why |
 | --- | --- | --- |
-| Web | Next.js 15, React 19, Tailwind 4, TanStack Query, `reicon-react` | Same as customer-web; shared `@fortifykitchen/ui` |
+| Web | Next.js 15, React 19, Tailwind 4, TanStack Query, `@mynaui/icons-react` | Unified modern icon system via centralized adapter |
 | API | NestJS module `nutrition` in `apps/api`, DDD-lite folders like other modules | Reuses auth guard, rate limits, response format |
 | Database | PostgreSQL via Prisma (`packages/database`) | Same database; 5 new tables in Release 1, 3 more in Release 2 |
 | Shared logic | `packages/nutrition`: coach rule set, target calculation, nutrient list, food seed data | One source of truth, unit-tested |

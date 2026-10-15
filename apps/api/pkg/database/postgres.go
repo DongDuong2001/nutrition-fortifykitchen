@@ -17,13 +17,18 @@ type PostgresClient struct {
 
 // NewPostgresPool initializes a PostgreSQL 17 connection pool using session mode on port 5432.
 // Prepared statements are fully supported in session mode.
-func NewPostgresPool(ctx context.Context) (*PostgresClient, error) {
-	connStr := os.Getenv("DATABASE_URL")
-	if connStr == "" {
-		connStr = "postgresql://postgres:postgres@localhost:5432/postgres?sslmode=disable"
+func NewPostgresPool(ctx context.Context, connStr ...string) (*PostgresClient, error) {
+	var targetConnStr string
+	if len(connStr) > 0 && connStr[0] != "" {
+		targetConnStr = connStr[0]
+	} else {
+		targetConnStr = os.Getenv("DATABASE_URL")
+		if targetConnStr == "" {
+			targetConnStr = "postgresql://postgres:postgres@localhost:5432/postgres?sslmode=disable"
+		}
 	}
 
-	config, err := pgxpool.ParseConfig(connStr)
+	config, err := pgxpool.ParseConfig(targetConnStr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse DATABASE_URL: %w", err)
 	}

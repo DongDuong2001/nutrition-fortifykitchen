@@ -1,4 +1,4 @@
-# Task 04: Next.js Diary UI, Optimistic Updates & Runeicons
+# Task 04: Next.js Diary UI, Optimistic Updates & Mynaui Icons
 
 ## Objectives
 1. Next.js App Router UI Architecture:
@@ -15,7 +15,7 @@
    - Hook `hooks/use-nutrient-progress.ts` compares consumed nutrients against daily target goals across all 26 nutrients.
    - Visual breakdown for Calories, Macros, and key Micronutrients.
 4. Icons:
-   - Use `runeicons` for clean UI icons (meal slots, nutrient badges, status tags, action buttons).
+   - Use `@mynaui/icons-react` (via `components/ui/icons.tsx`) for clean UI icons (meal slots, nutrient badges, status tags, action buttons).
 
 ## Verification
 - Run `npm run build` with zero TypeScript errors.
