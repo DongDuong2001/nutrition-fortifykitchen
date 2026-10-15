@@ -7,7 +7,7 @@ export const PAPER_COLOR = "#F3F1EC";
 export const INK_COLOR = "#111317";
 
 /** The app shell, precached when the service worker installs. */
-export const PRECACHE_PAGES = ["/", "/diary", "/explore", "/settings", "/offline"] as const;
+export const PRECACHE_PAGES = ["/", "/diary", "/trends", "/explore", "/settings", "/offline"] as const;
 
 /** Sign-in and account routes plus the API: never read from or written to a cache. */
 export const NEVER_CACHED = ["/signin", "/signup", "/reset-password", "/login", "/api"] as const;

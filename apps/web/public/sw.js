@@ -5,10 +5,10 @@
  *  - auth routes and the API: never cached (always the network)
  *  - an update waits until the page asks for it (SKIP_WAITING); it never takes over mid-edit.
  * Bump VERSION on a release that changes this file or the shell list. lib/pwa.ts holds the tested copy of routeFor. */
-const VERSION = "2026-10-13.1";
+const VERSION = "2026-10-15.1";
 const SHELL_CACHE = "h1t-shell-" + VERSION;
 const STATIC_CACHE = "h1t-static-" + VERSION;
-const PAGES = ["/", "/diary", "/explore", "/settings", "/offline"];
+const PAGES = ["/", "/diary", "/trends", "/explore", "/settings", "/offline"];
 const ICONS = ["/icons/icon-192.png", "/icons/icon-512.png", "/icons/apple-touch-icon.png", "/icons/favicon.ico"];
 const NEVER = ["/signin", "/signup", "/reset-password", "/login", "/api"];
 const FONT_FILE = /\.(?:woff2?|ttf|otf)$/i;

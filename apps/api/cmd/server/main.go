@@ -140,6 +140,7 @@ func SetupRouter(cfg *config.Config, pool *pgxpool.Pool) chi.Router {
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(logger.RequestLogger)
+	r.Use(MaxBodySize(2 * 1024 * 1024)) // 2 MB maximum payload size to prevent memory exhaustion DoS
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(30 * time.Second))
 
@@ -265,5 +266,15 @@ func SetupRouter(cfg *config.Config, pool *pgxpool.Pool) chi.Router {
 	})
 
 	return r
+}
+
+// MaxBodySize limits incoming request body size to mitigate memory exhaustion DoS attacks
+func MaxBodySize(limitBytes int64) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			r.Body = http.MaxBytesReader(w, r.Body, limitBytes)
+			next.ServeHTTP(w, r)
+		})
+	}
 }
 
