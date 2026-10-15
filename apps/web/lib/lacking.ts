@@ -7,20 +7,27 @@ function reachedCount(stats: MockMicroStat[]): number {
   return stats.filter((s) => (s.percentage ?? 0) >= 100).length;
 }
 
+type KnownMicro = MockMicroStat & { consumed: number; targetMin: number };
+
+/**
+ * The nutrients with the lowest share of their target, lowest first. Only nutrients with a target and a known
+ * amount count: an unknown value is never ranked as 0.
+ */
+export function lowestMicros(day: Pick<MockDayData, "minerals" | "vitamins">, count: number): KnownMicro[] {
+  return [...day.minerals, ...day.vitamins]
+    .filter((s): s is KnownMicro => s.consumed !== null && s.targetMin !== null && s.targetMin > 0)
+    .sort((a, b) => a.consumed / a.targetMin - b.consumed / b.targetMin)
+    .slice(0, count);
+}
+
 /**
  * The micros counts for a day, from its own vitamins and minerals. "Thiếu nhiều nhất" is the two
- * nutrients with the lowest share of their target. Only nutrients with a target and a known amount count.
+ * nutrients with the lowest share of their target (the share card lists three).
  */
 export function microsSummaryFor(day: Pick<MockDayData, "minerals" | "vitamins">): MicrosSummary {
   const { minerals, vitamins } = day;
   const mineralsAchieved = reachedCount(minerals);
   const vitaminsAchieved = reachedCount(vitamins);
-
-  const lacking = [...minerals, ...vitamins]
-    .filter((s): s is MockMicroStat & { consumed: number; targetMin: number } =>
-      s.consumed !== null && s.targetMin !== null && s.targetMin > 0
-    )
-    .sort((a, b) => a.consumed / a.targetMin - b.consumed / b.targetMin);
 
   return {
     achieved: mineralsAchieved + vitaminsAchieved,
@@ -29,6 +36,6 @@ export function microsSummaryFor(day: Pick<MockDayData, "minerals" | "vitamins">
     mineralsTotal: minerals.length,
     vitaminsAchieved,
     vitaminsTotal: vitamins.length,
-    mostLacking: lacking.slice(0, 2).map((s) => s.name),
+    mostLacking: lowestMicros(day, 2).map((s) => s.name),
   };
 }
