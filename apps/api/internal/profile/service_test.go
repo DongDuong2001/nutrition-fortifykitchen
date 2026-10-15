@@ -133,4 +133,53 @@ func TestProfileService(t *testing.T) {
 			t.Fatalf("expected profile weight updated to 64.5, got %v", p.WeightKg)
 		}
 	})
+
+	t.Run("upsert profile with display name over 40 characters fails", func(t *testing.T) {
+		tooLong := "This display name is definitely longer than 40 characters long"
+		req := profile.UpsertProfileRequest{
+			Sex:         "male",
+			BirthYear:   2000,
+			WeightKg:    70.0,
+			Goal:        "maintain",
+			DisplayName: &tooLong,
+		}
+		_, err := svc.UpsertProfile(ctx, userID, req)
+		if err != profile.ErrInvalidDisplayName {
+			t.Fatalf("expected ErrInvalidDisplayName, got %v", err)
+		}
+	})
+
+	t.Run("upsert profile trims display name and converts blank to nil", func(t *testing.T) {
+		name := "  Phu Dong  "
+		req := profile.UpsertProfileRequest{
+			Sex:         "male",
+			BirthYear:   2000,
+			WeightKg:    70.0,
+			Goal:        "maintain",
+			DisplayName: &name,
+		}
+		p, err := svc.UpsertProfile(ctx, userID, req)
+		if err != nil {
+			t.Fatalf("expected nil error, got %v", err)
+		}
+		if p.DisplayName == nil || *p.DisplayName != "Phu Dong" {
+			t.Fatalf("expected trimmed display name 'Phu Dong', got %v", p.DisplayName)
+		}
+
+		blank := "   "
+		reqBlank := profile.UpsertProfileRequest{
+			Sex:         "male",
+			BirthYear:   2000,
+			WeightKg:    70.0,
+			Goal:        "maintain",
+			DisplayName: &blank,
+		}
+		pBlank, err := svc.UpsertProfile(ctx, userID, reqBlank)
+		if err != nil {
+			t.Fatalf("expected nil error, got %v", err)
+		}
+		if pBlank.DisplayName != nil {
+			t.Fatalf("expected nil for blank display name, got %v", *pBlank.DisplayName)
+		}
+	})
 }

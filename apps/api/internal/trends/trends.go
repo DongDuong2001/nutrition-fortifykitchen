@@ -467,7 +467,7 @@ func ComputeComparePeriods(current PeriodAverages, previous PeriodAverages) []Pe
 		{key: "calories", label: "Năng lượng", unit: "kcal", now: current.Calories, before: previous.Calories},
 		{key: "protein", label: "Đạm", unit: "g", now: current.Protein, before: previous.Protein},
 		{key: "carbs", label: "Tinh bột", unit: "g", now: current.Carbs, before: previous.Carbs},
-		{key: "fat", label: "Béo", unit: "g", now: current.Fat, before: previous.Fat},
+		{key: "fat", label: "Chất béo", unit: "g", now: current.Fat, before: previous.Fat},
 	}
 
 	for _, key := range CountedNutrientKeys {

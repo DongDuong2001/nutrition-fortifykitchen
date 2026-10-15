@@ -3,16 +3,18 @@ package profile
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/google/uuid"
 	"nutrition-api/internal/targets"
 )
 
 var (
-	ErrInvalidSex      = errors.New("invalid sex: must be 'male' or 'female'")
-	ErrInvalidGoal     = errors.New("invalid goal: must be 'build', 'maintain', 'cut', or 'deep_cut'")
-	ErrInvalidWeight   = errors.New("invalid weight: must be between 25 and 300 kg")
-	ErrInvalidBirthYear = errors.New("invalid birth year: must be between 1920 and 2015")
+	ErrInvalidSex         = errors.New("invalid sex: must be 'male' or 'female'")
+	ErrInvalidGoal        = errors.New("invalid goal: must be 'build', 'maintain', 'cut', or 'deep_cut'")
+	ErrInvalidWeight      = errors.New("invalid weight: must be between 25 and 300 kg")
+	ErrInvalidBirthYear   = errors.New("invalid birth year: must be between 1920 and 2015")
+	ErrInvalidDisplayName = errors.New("display_name must not exceed 40 characters")
 )
 
 type DefaultService struct {
@@ -69,6 +71,17 @@ func (s *DefaultService) UpsertProfile(ctx context.Context, userID uuid.UUID, re
 		lang = *req.Language
 	}
 
+	var displayName *string
+	if req.DisplayName != nil {
+		trimmed := strings.TrimSpace(*req.DisplayName)
+		if len([]rune(trimmed)) > 40 {
+			return nil, ErrInvalidDisplayName
+		}
+		if trimmed != "" {
+			displayName = &trimmed
+		}
+	}
+
 	p := &Profile{
 		UserID:                 userID,
 		Sex:                    req.Sex,
@@ -78,7 +91,7 @@ func (s *DefaultService) UpsertProfile(ctx context.Context, userID uuid.UUID, re
 		TrainingMinutesDefault: trainingMinutes,
 		NearPeriod:             nearPeriod,
 		Language:               lang,
-		DisplayName:            req.DisplayName,
+		DisplayName:            displayName,
 	}
 
 	if err := s.repo.UpsertProfile(ctx, p); err != nil {

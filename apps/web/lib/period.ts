@@ -168,7 +168,7 @@ const MACRO_METRICS: { key: "calories" | "protein" | "carbs" | "fat"; label: str
   { key: "calories", label: "Năng lượng", unit: "kcal" },
   { key: "protein", label: "Đạm", unit: "g" },
   { key: "carbs", label: "Tinh bột", unit: "g" },
-  { key: "fat", label: "Béo", unit: "g" },
+  { key: "fat", label: "Chất béo", unit: "g" },
 ];
 
 const NUTRIENT_INFO = new Map(NUTRIENT_CATALOG.map((n) => [n.id, { label: n.nameVi, unit: n.unit as string }]));

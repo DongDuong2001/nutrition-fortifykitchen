@@ -1025,7 +1025,7 @@
     "name_vi": "Nước mía",
     "category": "beverage",
     "brand": null,
-    "tip_vi": "Bổ sung năng lượng và khoáng chất tự nhiên nhanh chóng.",
+    "tip_vi": "Nước ép từ thân cây mía tươi.",
     "nutrients": {
       "energy": 75,
       "carbs": 18.5,
@@ -1065,7 +1065,7 @@
     "name_vi": "Nước mía tắc",
     "category": "beverage",
     "brand": null,
-    "tip_vi": "Vị chua ngọt thanh mát, giải nhiệt sau vận động.",
+    "tip_vi": "Nước mía tươi kết hợp nước quả tắc (quất).",
     "nutrients": {
       "energy": 78,
       "carbs": 19.2,
@@ -1100,7 +1100,7 @@
     "name_vi": "Nước dừa tươi",
     "category": "beverage",
     "brand": null,
-    "tip_vi": "Nguồn kali và điện giải tự nhiên dồi dào, giải nhiệt sau tập.",
+    "tip_vi": "Nước tự nhiên bên trong quả dừa tươi.",
     "nutrients": {
       "energy": 19,
       "carbs": 3.7,
@@ -1140,7 +1140,7 @@
     "name_vi": "Cà phê đen đá",
     "category": "beverage",
     "brand": null,
-    "tip_vi": "Chứa caffeine giúp tỉnh táo và tăng chuyển hoá, gần như không có calo.",
+    "tip_vi": "Cà phê đen nguyên chất pha phin uống với đá.",
     "nutrients": {
       "energy": 2,
       "carbs": 0.2,
@@ -1177,7 +1177,7 @@
     "name_vi": "Cà phê sữa đá",
     "category": "beverage",
     "brand": null,
-    "tip_vi": "Hương vị đậm đà, bổ sung nhanh năng lượng.",
+    "tip_vi": "Cà phê pha phin pha cùng sữa đặc có đường và đá.",
     "nutrients": {
       "energy": 95,
       "carbs": 13.5,
@@ -1208,7 +1208,7 @@
     "name_vi": "Trà đá",
     "category": "beverage",
     "brand": null,
-    "tip_vi": "Thức uống thanh nhiệt phổ biến, giàu chất chống oxy hóa polyphenol.",
+    "tip_vi": "Nước trà xanh hãm loãng ướp lạnh cùng đá.",
     "nutrients": {
       "energy": 1,
       "carbs": 0.1,
@@ -1245,7 +1245,7 @@
     "name_vi": "Sữa tươi tiệt trùng không đường",
     "category": "beverage",
     "brand": "Vinamilk",
-    "tip_vi": "Nguồn canxi và đạm sinh học cao, tốt cho xương khớp.",
+    "tip_vi": "Sữa bò tươi tiệt trùng nguyên chất không thêm đường.",
     "nutrients": {
       "energy": 62,
       "carbs": 4.8,
@@ -1286,7 +1286,7 @@
     "name_vi": "Sữa đậu nành nguyên chất",
     "category": "beverage",
     "brand": null,
-    "tip_vi": "Giàu đạm thực vật, isoflavone và không chứa cholesterol.",
+    "tip_vi": "Sữa nấu từ hạt đậu nành nguyên chất.",
     "nutrients": {
       "energy": 45,
       "carbs": 3.2,
@@ -1325,7 +1325,7 @@
     "name_vi": "Nước cam ép tươi",
     "category": "beverage",
     "brand": null,
-    "tip_vi": "Cung cấp lượng lớn vitamin C và folate, tăng cường sức đề kháng.",
+    "tip_vi": "Nước ép từ quả cam tươi nguyên chất.",
     "nutrients": {
       "energy": 45,
       "carbs": 10.4,
@@ -1363,7 +1363,7 @@
     "name_vi": "Nước lọc",
     "category": "beverage",
     "brand": null,
-    "tip_vi": "Cần thiết cho quá trình trao đổi chất, 2–3 lít mỗi ngày.",
+    "tip_vi": "Nước lọc tinh khiết không chứa calo hay đa lượng.",
     "nutrients": {
       "energy": 0,
       "carbs": 0,
@@ -1400,7 +1400,7 @@
     "name_vi": "Nước ngọt có ga Cola",
     "category": "beverage",
     "brand": "Coca-Cola",
-    "tip_vi": "Chứa đường nhanh, hạn chế sử dụng thường xuyên.",
+    "tip_vi": "Nước giải khát có ga chứa đường tạo ngọt.",
     "nutrients": {
       "energy": 42,
       "carbs": 10.6,

@@ -107,9 +107,6 @@ export interface LogMealPayload {
 export function getApiBaseUrl(): string {
   const url = process.env.NEXT_PUBLIC_API_URL;
   if (url) return url;
-  if (process.env.NODE_ENV === "production" && isLiveMode()) {
-    console.warn("NEXT_PUBLIC_API_URL is unset in production live mode, falling back to localhost:8080");
-  }
   return "http://localhost:8080/api/v1";
 }
 

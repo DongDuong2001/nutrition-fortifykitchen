@@ -166,7 +166,6 @@ func SetupRouter(cfg *config.Config, pool *pgxpool.Pool) chi.Router {
 				response.JSON(w, http.StatusServiceUnavailable, map[string]string{
 					"status":   "unhealthy",
 					"database": "down",
-					"error":    err.Error(),
 					"time":     time.Now().UTC().Format(time.RFC3339),
 				})
 				return

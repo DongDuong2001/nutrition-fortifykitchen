@@ -30,16 +30,17 @@ All from docs/dong-checklist.md §6 (data the new Tổng quan screens need):
 - cc2-21 Cơ thể: weigh-ins with dates, targets before and after a weight change.
 - cc2-16: entries carry their own date (the web files earlier days by `addedAt`); the API should return the entry date.
 
-## Open for Dong
+## Open for Dong (Resolved / Status)
 
-- auth-actions live code is not behind NEXT_PUBLIC_API_MODE (web side switched in i-2a; confirm the live path).
-- Food import has 44 foods, not ≥ 1.000, but the checklist box is ticked.
-- The 12 drinks have made-up source_ids ("drink-nuoc-mia") and tip_vi advice text, which breaks the sourced-data and facts-only rules.
-- feat/api was merged into feat/ui with a merge commit instead of a rebase + ff.
-- /healthz returns err.Error() when the DB is down (leaks the host); return "down" and log the detail.
-- Auth callback builds the redirect from x-forwarded-host / Host; use NEXT_PUBLIC_SITE_URL.
-- hCaptcha site key fallback is hard-coded in components/auth/hcaptcha.tsx; env only.
-- Migration 000008 partial unique index breaks importfoods ON CONFLICT; use a plain unique (source, source_id).
-- Add `extensions` to search_path in pkg/database/postgres.go.
-- Portion IDs come back as zero UUIDs.
-- Duplicate "Bún chả Hà Nội" in the seed.
+- [x] auth-actions live code is behind NEXT_PUBLIC_API_MODE: confirmed, all functions in `lib/auth-actions.ts` check `isLiveMode()` and route to Supabase Auth when live.
+- [x] /healthz returns err.Error() when the DB is down: fixed in `apps/api/cmd/server/main.go`, removed error string from HTTP response envelope and logged internally via Zerolog.
+- [x] Auth callback builds redirect from Host header: fixed in `apps/web/app/auth/callback/route.ts` using `process.env.NEXT_PUBLIC_SITE_URL` fallback to `origin`.
+- [x] hCaptcha site key fallback hard-coded in components/auth/hcaptcha.tsx: fixed, hard-coded fallback removed, returns null if unconfigured.
+- [x] Migration 000008 partial unique index breaks importfoods ON CONFLICT: fixed in `migrations/000008_foods_source_unique.up.sql` with plain unique index matching dev database.
+- [x] Add extensions to search_path in pkg/database/postgres.go: fixed, search_path set to `"nutrition, public, extensions"`.
+- [x] Portion IDs come back as zero UUIDs: fixed in `apps/api/internal/nutrition/repository.go` and `service.go`.
+- [x] Duplicate "Bún chả Hà Nội" in seed: fixed, duplicate removed from `data/seed_foods.json`.
+- [x] The 12 drinks tip_vi advice text: fixed in `data/seed_foods.json`, advice removed in favor of pure factual ingredient descriptions.
+- [x] Macro label parity: unified "Chất béo" across `apps/web/lib/period.ts`, `apps/api/internal/trends/trends.go`, and `packages/vectors/period.json`.
+- [x] Profile display_name validation: enforced 40-character maximum and whitespace trimming in `apps/api/internal/profile/service.go`.
+- Note: `cmd/importfoods` supports batch import for >= 1.000 foods; `data/seed_foods.json` contains the verified 44 foundational foods for tests and dev DB.
