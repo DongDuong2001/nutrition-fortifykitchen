@@ -4,8 +4,6 @@ import {
   boardDays,
   changeLine,
   dayNote,
-  heroState,
-  mealBars,
   microBoard,
   periodHeading,
   weekdayShort,
@@ -30,42 +28,6 @@ const day = (date: string, calories: number | null, protein: number | null): Day
   fat: null,
   fiber: null,
   nutrients: {},
-});
-
-describe("heroState", () => {
-  it("remaining kcal and n = min(10, floor(eaten / min × 10)) segments", () => {
-    expect(heroState(1460, 2100)).toEqual({ eaten: 1460, min: 2100, remaining: 640, done: false, segments: 6 });
-  });
-  it("at or over the minimum: done, no negative remaining, 10 segments", () => {
-    expect(heroState(2100, 2100)).toMatchObject({ remaining: 0, done: true, segments: 10 });
-    expect(heroState(2500, 2100)).toMatchObject({ remaining: 0, done: true, segments: 10 });
-  });
-  it("nothing eaten: 0 segments", () => {
-    expect(heroState(0, 2100)).toMatchObject({ remaining: 2100, done: false, segments: 0 });
-  });
-});
-
-describe("mealBars", () => {
-  type Slot = "breakfast" | "lunch" | "preworkout" | "dinner" | "snack";
-  const meal = (slot: Slot, kcal: number, items = 1) => ({
-    id: slot,
-    slot,
-    name: slot,
-    kcal,
-    items: Array.from({ length: items }, (_, i) => ({ id: `${slot}${i}`, name: "x", qty: "1", kcal })),
-  });
-  it("Sáng, Trưa, Phụ (trước tập + phụ), Tối in that order; empty meal is flagged", () => {
-    const bars = mealBars([meal("breakfast", 420), meal("lunch", 680), meal("preworkout", 200), meal("snack", 160), meal("dinner", 0, 0)]);
-    expect(bars.map((b) => b.label)).toEqual(["Sáng", "Trưa", "Phụ", "Tối"]);
-    expect(bars.map((b) => b.kcal)).toEqual([420, 680, 360, 0]);
-    expect(bars.map((b) => b.empty)).toEqual([false, false, false, true]);
-    expect(bars[1].share).toBe(1);
-    expect(bars[3].share).toBe(0);
-  });
-  it("a meal that is missing counts as empty", () => {
-    const bars = mealBars([meal("breakfast", 300)]);
-    expect(bars.map((b) => b.empty)).toEqual([false, true, true, true]);
-  });
 });
 
 describe("periodHeading", () => {

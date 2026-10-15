@@ -51,7 +51,7 @@ def lacking(pg):
 
 
 def open_today(pg, query=""):
-    pg.goto(BASE + "/diary" + query, wait_until="networkidle")
+    pg.goto(BASE + "/" + query, wait_until="networkidle")
     vis(pg, '[aria-label^="Năng lượng"]').wait_for(state="visible", timeout=8000)
     pg.wait_for_timeout(200)
 
@@ -99,11 +99,11 @@ def run_phone(browser):
 
     # Entry and add pages with a past day go back to that day's Today view
     pg.goto(BASE + f"/entry/item-1?date={iso(YESTERDAY)}", wait_until="networkidle")
-    pg.wait_for_url(f"**/diary?date={iso(YESTERDAY)}", timeout=8000)
-    check(f"/diary?date={iso(YESTERDAY)}" in pg.url, "390 /entry/item-1 with a past date redirects to that day's Today")
+    pg.wait_for_url(f"**/?date={iso(YESTERDAY)}", timeout=8000)
+    check(f"/?date={iso(YESTERDAY)}" in pg.url, "390 /entry/item-1 with a past date redirects to that day's Today")
     pg.goto(BASE + f"/add?meal=dinner&date={iso(YESTERDAY)}", wait_until="networkidle")
-    pg.wait_for_url(f"**/diary?date={iso(YESTERDAY)}", timeout=8000)
-    check(f"/diary?date={iso(YESTERDAY)}" in pg.url, "390 /add with a past date redirects to that day's Today")
+    pg.wait_for_url(f"**/?date={iso(YESTERDAY)}", timeout=8000)
+    check(f"/?date={iso(YESTERDAY)}" in pg.url, "390 /add with a past date redirects to that day's Today")
     ctx.close()
 
 

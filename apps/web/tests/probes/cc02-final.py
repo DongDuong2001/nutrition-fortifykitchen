@@ -152,7 +152,7 @@ def run():
         # 6. Today: no decimals on hero or meal kcal
         ctx = browser.new_context(viewport=PHONE)
         pg = ctx.new_page()
-        pg.goto(BASE + "/diary", wait_until="networkidle")
+        pg.goto(BASE + "/", wait_until="networkidle")
         pg.wait_for_timeout(400)
         body = pg.inner_text("body")
         decimal_kcal = re.findall(r"\d+,\d+\s*kcal", body)

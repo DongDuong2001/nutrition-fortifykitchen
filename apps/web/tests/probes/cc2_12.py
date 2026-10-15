@@ -81,6 +81,14 @@ def dinner_items(pg):
     return pg.locator("#meal-dinner a[href^='/entry/']").count()
 
 
+def home_dinner_items(pg):
+    """Food rows in Bữa tối on Hôm nay. The meal header button ("Xem riêng …") is not a food."""
+    return pg.evaluate(
+        """() => [...document.querySelectorAll("section[aria-label='Bữa tối'] button[aria-label]")]
+            .filter((b) => !b.getAttribute('aria-label').startsWith('Xem riêng')).length"""
+    )
+
+
 def tap_targets_ok(pg, selector, where):
     boxes = pg.locator(selector).evaluate_all(
         "els => els.filter(e => e.offsetParent !== null).map(e => { const r = e.getBoundingClientRect(); return [r.width, r.height]; })"
@@ -97,7 +105,7 @@ def check_recents(browser, size_name, size):
         {"foodId": "food-cha-la", "servingLabel": "30 g"},
     ]
     ctx, pg = new_page(browser, size, recents=recents)
-    go(pg, "/diary")
+    go(pg, "/")
     before = dinner_items(pg)
     clicks = 0
 
@@ -114,7 +122,7 @@ def check_recents(browser, size_name, size):
 
     pg.locator("button[aria-label^='Thêm Yến mạch']:visible").first.click()
     clicks += 1
-    pg.wait_for_url("**/diary")
+    pg.wait_for_url(re.compile(r".*/(?.*)?$"))
     pg.wait_for_timeout(400)
     msg = toast_text(pg)
     check("Yến mạch 45 g" in msg and "Bữa tối" in msg, f"{size_name} recent tap: toast names the last portion and the meal by the clock ({msg!r})")
@@ -134,7 +142,7 @@ def check_recents(browser, size_name, size):
     pg.wait_for_timeout(300)
     check(path_of(pg) == "/add", f"{size_name} chevron: stays on the add sheet")
     check(pg.locator("button:has-text('Thêm vào'):visible").count() > 0, f"{size_name} chevron: the portion panel with its add button is open")
-    go(pg, "/diary")
+    go(pg, "/")
     check(dinner_items(pg) == before, f"{size_name} chevron: nothing was added")
     ctx.close()
 
@@ -155,7 +163,7 @@ def check_favourites(browser, size_name, size):
     check(pg.locator("button:has-text('Thêm vào'):visible").count() > 0, f"{size_name} favourite with no history: opens the portion panel")
 
     pg.locator("[data-food-row]:visible:has-text('Chuối')").first.click()
-    pg.wait_for_url("**/diary")
+    pg.wait_for_url(re.compile(r".*/(?.*)?$"))
     pg.wait_for_timeout(300)
     check("Chuối 1 quả" in toast_text(pg), f"{size_name} favourite with history: adds with its last portion ({toast_text(pg)!r})")
     ctx.close()
@@ -164,7 +172,7 @@ def check_favourites(browser, size_name, size):
 # 3. One + per meal header, no "+ Thêm món"; past days have no add affordance
 def check_diary_plus(browser, size_name, size):
     ctx, pg = new_page(browser, size)
-    go(pg, "/diary")
+    go(pg, "/")
     meals = pg.locator("section[id^='meal-']")
     n = meals.count()
     check(n == 5, f"{size_name} diary: five meals ({n})")
@@ -173,7 +181,7 @@ def check_diary_plus(browser, size_name, size):
         check(links == 1, f"{size_name} diary: meal {i + 1} has one + ({links})")
     check("+ Thêm món" not in text(pg), f"{size_name} diary: no '+ Thêm món' link")
 
-    go(pg, "/diary?date=2026-10-11")
+    go(pg, "/?date=2026-10-11")
     check(pg.locator("section[id^='meal-'] a[href^='/add']").count() == 0, f"{size_name} past day: no + on any meal")
     check(pg.locator("#add-first, a:has-text('Thêm món'):not(#desktop-add-btn):not(#mobile-add-fab):visible").count() == 0, f"{size_name} past day: no add link in the content")
     menus = pg.locator("button[id^='meal-menu-']")
@@ -189,7 +197,7 @@ def check_diary_plus(browser, size_name, size):
 # 4. Bữa ăn của tôi: save, list, one tap adds all, one undo, rename, delete
 def check_saved_meals(browser, size_name, size):
     ctx, pg = new_page(browser, size)
-    go(pg, "/diary")
+    go(pg, "/")
     pg.locator("#meal-menu-breakfast").click()
     pg.wait_for_timeout(300)
     pg.get_by_role("button", name=re.compile("Lưu thành Bữa ăn của tôi")).click()
@@ -229,18 +237,21 @@ def check_saved_meals(browser, size_name, size):
     pg.wait_for_timeout(400)
     msg = toast_text(pg)
     check("Sáng của tôi · 3 món vào Bữa tối" in msg, f"{size_name} saved meal tap: one toast for all foods ({msg!r})")
-    # The toast is in memory, so undo it here, on the page that shows it. Nhật ký is no longer a nav tab (cc2-31a),
-    # so the diary is loaded directly afterwards, and it must hold no foods.
+    # Client navigation to Hôm nay keeps the in-memory toast. The three foods must be on Hôm nay before the undo,
+    # so this fails if the add never happened (cc2-32: Nhật ký is folded into Hôm nay).
+    pg.locator("nav[aria-label='Điều hướng chính']:visible a[href='/']").first.click()
+    pg.wait_for_url(re.compile(r".*/(\?.*)?$"))
+    pg.wait_for_timeout(400)
+    check(home_dinner_items(pg) == 3, f"{size_name} saved meal tap: three foods in Bữa tối on Hôm nay ({home_dinner_items(pg)})")
     pg.locator("button:has-text('Hoàn tác'):visible").first.click()
     pg.wait_for_timeout(300)
-    go(pg, "/diary")
-    check(dinner_items(pg) == 0, f"{size_name} saved meal undo: one Hoàn tác removes all ({dinner_items(pg)})")
+    check(home_dinner_items(pg) == 0, f"{size_name} saved meal undo: one Hoàn tác removes all ({home_dinner_items(pg)})")
 
     # in the add sheet, with the chosen meal
     go(pg, "/add?meal=lunch")
     check("Bữa ăn của tôi" in text(pg) and "Sáng của tôi" in text(pg), f"{size_name} add: Bữa ăn của tôi section lists it")
     pg.locator("button[aria-label^='Thêm Sáng của tôi']:visible").first.click()
-    pg.wait_for_url("**/diary")
+    pg.wait_for_url(re.compile(r".*/(?.*)?$"))
     pg.wait_for_timeout(300)
     lunch = pg.locator("#meal-lunch a[href^='/entry/']").count()
     check(lunch == 2 + 3, f"{size_name} add sheet: one tap adds the three foods to the chosen meal ({lunch})")
@@ -270,7 +281,7 @@ def check_saved_meals(browser, size_name, size):
 # 5. Chỉ ghi kcal
 def check_quick(browser, size_name, size):
     ctx, pg = new_page(browser, size)
-    go(pg, "/diary")
+    go(pg, "/")
     micros_before = pg.locator("a[href^='/micros']:visible").first.inner_text()
     go(pg, "/add?meal=dinner")
     pg.locator("button[aria-label='Chỉ thêm kcal']:visible").first.click()
@@ -290,7 +301,7 @@ def check_quick(browser, size_name, size):
     pg.fill("#quick-kcal", "420,4")
     pg.fill("#quick-protein", "12,5")
     submit.click()
-    pg.wait_for_url("**/diary")
+    pg.wait_for_url(re.compile(r".*/(?.*)?$"))
     pg.wait_for_timeout(400)
     dinner = re.sub(r"\s+", " ", pg.locator("#meal-dinner").inner_text())
     check("Bánh mì" in dinner and "Thêm nhanh" in dinner and "420" in dinner, f"{size_name} quick add: listed with the Thêm nhanh label ({dinner!r})")
@@ -303,7 +314,7 @@ def check_quick(browser, size_name, size):
         m = re.search(r"Đạm (\d+) / ", text(pg))
         return m.group(1) if m else None
 
-    go(pg, "/diary")
+    go(pg, "/")
     protein_before = protein_total()
     micros_mid = pg.locator("a[href^='/micros']:visible").first.inner_text()
     check(protein_before is not None, f"{size_name} quick add: the day shows an Đạm total ({protein_before})")
@@ -311,7 +322,7 @@ def check_quick(browser, size_name, size):
     pg.locator("button[aria-label='Chỉ thêm kcal']:visible").first.click()
     pg.fill("#quick-kcal", "150")
     pg.get_by_role("button", name=re.compile("^Thêm vào Bữa tối")).click()
-    pg.wait_for_url("**/diary")
+    pg.wait_for_url(re.compile(r".*/(?.*)?$"))
     pg.wait_for_timeout(300)
     check(dinner_items(pg) == 2, f"{size_name} quick add: a second entry with the default name ({dinner_items(pg)})")
     dinner_text = re.sub(r"s+", " ", pg.locator("#meal-dinner").inner_text())
@@ -327,7 +338,7 @@ def check_quick(browser, size_name, size):
     check(pg.locator("#entry-quick-kcal").input_value() == "420", f"{size_name} entry: kcal field holds 420")
     pg.fill("#entry-quick-kcal", "500")
     pg.get_by_role("button", name="Lưu thay đổi").click()
-    pg.wait_for_url("**/diary")
+    pg.wait_for_url(re.compile(r".*/(?.*)?$"))
     pg.wait_for_timeout(300)
     check("500" in pg.locator("#meal-dinner").inner_text(), f"{size_name} entry: the edited kcal shows in the meal")
     ctx.close()

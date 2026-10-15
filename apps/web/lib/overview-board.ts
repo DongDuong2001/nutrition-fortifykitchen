@@ -6,56 +6,6 @@ import type { MockMeal } from "./mock/sample-day";
 import type { MicroRow } from "./overview";
 import type { Period, WeightPoint } from "./period";
 
-/** Tóm tắt, direction B: everything the hero, scoreboard, Vi chất card and "Cần chú ý" show. Pure. */
-
-export interface HeroState {
-  eaten: number;
-  min: number;
-  remaining: number;
-  done: boolean;
-  /** n = min(10, floor(eaten / min × 10)) */
-  segments: number;
-}
-
-export function heroState(eaten: number, min: number): HeroState {
-  const remaining = Math.max(0, min - eaten);
-  return {
-    eaten,
-    min,
-    remaining,
-    done: min > 0 && eaten >= min,
-    segments: min > 0 ? calculateSegments((eaten / min) * 100) : 0,
-  };
-}
-
-export interface MealBar {
-  key: "breakfast" | "lunch" | "extra" | "dinner";
-  label: string;
-  kcal: number;
-  /** Share of the biggest meal, 0..1 */
-  share: number;
-  empty: boolean;
-}
-
-const BAR_GROUPS: { key: MealBar["key"]; label: string; slots: MockMeal["slot"][] }[] = [
-  { key: "breakfast", label: "Sáng", slots: ["breakfast"] },
-  { key: "lunch", label: "Trưa", slots: ["lunch"] },
-  { key: "extra", label: "Phụ", slots: ["preworkout", "snack"] },
-  { key: "dinner", label: "Tối", slots: ["dinner"] },
-];
-
-/** Today's kcal per meal for the hero's "Theo bữa" view. Trước tập and Bữa phụ share the Phụ bar. */
-export function mealBars(meals: MockMeal[]): MealBar[] {
-  const raw = BAR_GROUPS.map((g) => {
-    const inGroup = meals.filter((m) => g.slots.includes(m.slot));
-    const items = inGroup.reduce((sum, m) => sum + m.items.length, 0);
-    const kcal = inGroup.reduce((sum, m) => sum + m.kcal, 0);
-    return { key: g.key, label: g.label, kcal: items > 0 ? kcal : 0, empty: items === 0 };
-  });
-  const top = Math.max(1, ...raw.map((r) => r.kcal));
-  return raw.map((r) => ({ ...r, share: r.empty ? 0 : r.kcal / top }));
-}
-
 const dm = (iso: string) => `${iso.slice(8, 10)}/${iso.slice(5, 7)}`;
 
 /** "7 ngày qua · 06/10 – 12/10" (30: "30 ngày qua · …"); a past period shows its dates only. */

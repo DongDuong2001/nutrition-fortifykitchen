@@ -54,14 +54,14 @@ def run():
             )
 
             # 1. no Issue badge and no console problems on four pages
-            for route in ("/diary", "/micros", "/add?meal=snack", "/entry/item-1"):
+            for route in ("/", "/micros", "/add?meal=snack", "/entry/item-1"):
                 pg.goto(BASE + route, wait_until="networkidle")
                 pg.wait_for_timeout(1200)
                 check("true" not in issue_badge(pg), f"{name}: no Next Issue badge on {route}")
             check(not problems_console, f"{name}: no console warnings or errors ({problems_console[:2]})")
 
             # 2. tap the Yến mạch row on Today, edit to 90 g, save, totals updated
-            pg.goto(BASE + "/diary", wait_until="networkidle")
+            pg.goto(BASE + "/", wait_until="networkidle")
             pg.wait_for_timeout(500)
             if name == "390":
                 pg.screenshot(path=os.path.join(SHOTS, "cc06-today-390.png"), animations="disabled")
@@ -78,7 +78,7 @@ def run():
             check(pg.locator('fieldset button >> visible=true').count() == 5, f"{name}: five inline meal chips")
             pg.locator('input[aria-label="Số gam"] >> visible=true').first.fill("90")
             button(pg, "Lưu thay đổi").click()
-            pg.wait_for_url("**/diary")
+            pg.wait_for_url(re.compile(r".*/(?.*)?$"))
             pg.wait_for_timeout(400)
             check("Yến mạch · 90 g" in meal_text(pg, "breakfast"), f"{name}: row shows 90 g")
             check("573 kcal" in meal_text(pg, "breakfast"), f"{name}: breakfast 573 kcal")
@@ -88,7 +88,7 @@ def run():
             pg.locator('a[href="/entry/item-2"] >> visible=true').first.click()
             pg.wait_for_url("**/entry/item-2")
             button(pg, "Xóa món này").click()
-            pg.wait_for_url("**/diary")
+            pg.wait_for_url(re.compile(r".*/(?.*)?$"))
             pg.wait_for_timeout(300)
             toasts = pg.locator('[role=status] >> visible=true')
             check(toasts.count() == 1, f"{name}: one toast after delete ({toasts.count()})")

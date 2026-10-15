@@ -119,7 +119,7 @@ function CreateFoodInner() {
 
       // Add to diary and redirect
       await addFoodEntry(createdFood, parsedSize, mealSlot, `${formatAmount(parsedSize, servingUnit)} ${servingUnit}`);
-      router.push("/diary");
+      router.push("/");
     } finally {
       setIsSubmitting(false);
     }

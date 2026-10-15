@@ -8,7 +8,7 @@
 const VERSION = "2026-10-15.1";
 const SHELL_CACHE = "h1t-shell-" + VERSION;
 const STATIC_CACHE = "h1t-static-" + VERSION;
-const PAGES = ["/", "/diary", "/trends", "/explore", "/settings", "/offline"];
+const PAGES = ["/", "/trends", "/explore", "/settings", "/offline"];
 const ICONS = ["/icons/icon-192.png", "/icons/icon-512.png", "/icons/apple-touch-icon.png", "/icons/favicon.ico"];
 const NEVER = ["/signin", "/signup", "/reset-password", "/login", "/api"];
 const FONT_FILE = /\.(?:woff2?|ttf|otf)$/i;

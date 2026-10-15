@@ -129,7 +129,7 @@ def custom_grams(browser, size_name, size):
     pg.wait_for_timeout(300)
     pg.get_by_role("button", name=re.compile("^Thêm vào Bữa")).first.click()
     pg.wait_for_timeout(800)
-    pg.goto(BASE + "/diary", wait_until="networkidle")
+    pg.goto(BASE + "/", wait_until="networkidle")
     pg.wait_for_timeout(600)
     body = pg.inner_text("body")
     check("2,5 g" in body, f"{w}: the added entry reads 2,5 g in Vietnamese format")

@@ -35,7 +35,7 @@ def main():
         pg.get_by_role("button", name="90 phút").click()
         pg.wait_for_timeout(300)
 
-        pg.goto(BASE + "/diary", wait_until="networkidle")
+        pg.goto(BASE + "/", wait_until="networkidle")
         pg.wait_for_timeout(600)
         txt = body(pg)
         check(re.search(r"90′\s+Ngày tập\s+muối 8,5", txt) is not None, "diary 1440: the Ngày tập row follows the profile (90′, salt 8,5…)")

@@ -66,7 +66,7 @@ def shot(pg, name, size_name):
 
 def check_diary(browser, size_name, size):
     ctx, pg = new_page(browser, size)
-    go(pg, "/diary")
+    go(pg, "/")
     body = text(pg)
     check("Chép hôm qua" not in body, f"{size_name} diary: no day-level Chép hôm qua when the day has entries")
     add = pg.locator("a[id^='mobile-add-'] >> visible=true").first
@@ -76,7 +76,7 @@ def check_diary(browser, size_name, size):
     check(bg in ("rgba(0, 0, 0, 0)", "transparent"), f"{size_name} diary: the meal + has no filled disc ({bg})")
     check(border == "0px" and "Thêm" in add.inner_text(), f"{size_name} diary: the meal + is a quiet text button, no circle ({border})")
     check(box and box["width"] >= 44 and box["height"] >= 44, f"{size_name} diary: the meal + is 44 px")
-    go(pg, "/diary?empty=1")
+    go(pg, "/?empty=1")
     check("Chép hôm qua" in text(pg), f"{size_name} diary: an empty day offers Chép hôm qua")
     ctx.close()
 

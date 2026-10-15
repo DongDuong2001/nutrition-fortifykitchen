@@ -3,7 +3,7 @@
 - /manifest.webmanifest: name, short_name, lang, start_url, scope, display, colours, icons 192/512/maskable, shortcuts
 - the icons load and have the size the manifest says; the apple-touch-icon and favicon links are in the head
 - the service worker registers, and controls the page after a reload
-- offline (context.set_offline): /diary and /explore render from the cache, an uncached route shows /offline
+- offline (context.set_offline): / (Hôm nay, which holds the diary) and /explore render from the cache, an uncached route shows /offline
 - auth routes and /api are never in any cache, and never served from one while offline
 - a new service worker waits (no skipWaiting on install); the update toast is not shown on the first install
 - /install shows the right state at 390 and 1280: manual note, install button, iOS steps, installed
@@ -98,7 +98,7 @@ def check_manifest(browser):
 
     shortcuts = {s["name"]: s["url"] for s in m.get("shortcuts", [])}
     check(shortcuts.get("Thêm món") == "/add", f"manifest: shortcut Thêm món -> /add ({shortcuts})")
-    check(shortcuts.get("Nhật ký") == "/diary", "manifest: shortcut Nhật ký -> /diary")
+    check(shortcuts.get("Hôm nay") == "/", "manifest: shortcut Hôm nay -> /")
 
     for path in ("/icons/icon.svg", "/icons/apple-touch-icon.png", "/icons/favicon.ico"):
         r = ctx.request.get(BASE + path)
@@ -155,7 +155,7 @@ def cache_paths(pg):
 def check_service_worker(browser):
     ctx = browser.new_context(viewport=SIZES[0][1])
     pg = ctx.new_page()
-    pg.goto(BASE + "/diary", wait_until="networkidle")
+    pg.goto(BASE + "/", wait_until="networkidle")
     reg = pg.evaluate("() => navigator.serviceWorker.getRegistration().then(r => Boolean(r))")
     check(True, f"sw: registration found right after load ({reg})")
     check(wait_controlled(pg), "sw: registered, and controls the page after a reload")
@@ -164,7 +164,7 @@ def check_service_worker(browser):
     check("Có bản mới" not in text(pg), "sw: no update toast on the first install")
 
     paths = cache_paths(pg)
-    for page in ("/", "/diary", "/explore", "/settings", "/offline"):
+    for page in ("/", "/explore", "/settings", "/offline"):
         check(page in paths, f"sw: {page} is precached")
     check(any(p.startswith("/_next/static/") and p.endswith(".js") for p in paths), "sw: build scripts are cached")
     check(any(p.endswith(".woff2") for p in paths), "sw: fonts are cached")
@@ -179,7 +179,7 @@ def check_service_worker(browser):
 
     # offline
     ctx.set_offline(True)
-    for route, marker in (("/diary", "Nhật ký"), ("/explore", "Khám phá")):
+    for route, marker in (("/", "Hôm nay"), ("/explore", "Khám phá")):
         pg.goto(BASE + route, wait_until="load")
         pg.wait_for_timeout(500)
         body = text(pg)

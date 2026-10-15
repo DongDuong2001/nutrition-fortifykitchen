@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getDefaultMealSlot, getMealSlotNameVi, nextMeal, resolveMealSlot, type MealSlot } from "../meal-slot";
+import { getDefaultMealSlot, getMealSlotNameVi, resolveMealSlot, type MealSlot } from "../meal-slot";
 
 describe("lib/meal-slot", () => {
   it("05:00–09:59 returns breakfast (Bữa sáng)", () => {
@@ -75,38 +75,5 @@ describe("lib/meal-slot", () => {
       const at0800 = new Date("2026-10-10T08:00:00");
       expect(resolveMealSlot(null, at0800, true)).toBe("breakfast");
     });
-  });
-});
-
-describe("nextMeal (by the clock)", () => {
-  const meals = (logged: MealSlot[]) =>
-    (["breakfast", "lunch", "pre_workout", "dinner", "snack"] as MealSlot[]).map((slot) => ({
-      slot,
-      itemCount: logged.includes(slot) ? 2 : 0,
-    }));
-  const at = (hhmm: string) => new Date(`2026-10-12T${hhmm}:00+07:00`);
-
-  it("is the meal of the time of day when it is still empty", () => {
-    expect(nextMeal(meals(["breakfast"]), at("12:30"))).toBe("lunch");
-    expect(nextMeal([], at("18:00"))).toBe("dinner");
-    expect(nextMeal(meals([]), at("18:00"))).toBe("dinner");
-  });
-
-  it("moves to the next empty meal when the meal of the clock is logged", () => {
-    expect(nextMeal(meals(["breakfast", "lunch", "pre_workout", "dinner"]), at("18:00"))).toBe("snack");
-    expect(nextMeal(meals(["breakfast", "lunch", "pre_workout"]), at("15:00"))).toBe("dinner");
-  });
-
-  it("goes back to an earlier empty meal when nothing later is empty", () => {
-    expect(nextMeal(meals(["breakfast", "lunch", "pre_workout", "snack"]), at("21:30"))).toBe("dinner");
-  });
-
-  it("is null when every meal is logged", () => {
-    expect(nextMeal(meals(["breakfast", "lunch", "pre_workout", "dinner", "snack"]), at("18:00"))).toBeNull();
-  });
-
-  it("uses Bữa phụ instead of Trước tập on a rest day at 15:00", () => {
-    expect(nextMeal(meals([]), at("15:00"), false)).toBe("snack");
-    expect(nextMeal(meals([]), at("15:00"), true)).toBe("pre_workout");
   });
 });

@@ -158,7 +158,7 @@ def check(browser, route, width, height):
 
 
 # cc2-15b: the empty-account pass. A new user has no entries, no history and no sample data.
-EMPTY_ROUTES = ["/", "/trends", "/trends/micros", "/trends/body", "/diary", "/micros", "/training", "/explore", "/explore/meals", "/add", "/settings", "/setup/done"]
+EMPTY_ROUTES = ["/", "/trends", "/trends/micros", "/trends/body", "/", "/micros", "/training", "/explore", "/explore/meals", "/add", "/settings", "/setup/done"]
 BAD_TEXT = re.compile(r"\bNaN\b|\bundefined\b|\bInfinity\b")
 
 

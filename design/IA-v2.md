@@ -30,10 +30,10 @@ Reference: Cronometer's header is identical on every screen (same surface, round
 | `/trends/energy` | Tổng quan › Năng lượng | sub-tab (cc2-31b) |
 | `/trends/micros` | Tổng quan › Vi chất (period averages) | sub-tab |
 | `/trends/body` | Tổng quan › Cơ thể | sub-tab |
-| `/diary` (`?date=`) | Nhật ký | tab |
-| `/micros` (`?date=`) | the day's Vi chất (22 counted, grouped) | pushed from Nhật ký (owner: Nhật ký) |
+| ~~`/diary`~~ | removed (cc2-32): Nhật ký is folded into Hôm nay at `/`; `/diary` and `/today` redirect to `/` (keep `?date=`) | — |
+| `/micros` (`?date=`) | the day's Vi chất (22 counted, grouped) | pushed from Hôm nay (owner: Hôm nay) |
 | `/micros/[nutrient]` (`?date=`) | nutrient detail | pushed screen (back → /micros) |
-| `/training` (`?date=`) | the day's Ngày tập (minutes, salt, checklist) | pushed from Nhật ký (owner: Nhật ký) |
+| `/training` (`?date=`) | the day's Ngày tập (minutes, salt, checklist) | pushed from Hôm nay (owner: Hôm nay) |
 | `/explore` | Khám phá | tab |
 | `/explore/[category]` | food category / "giàu <chất>" list | pushed screen |
 | `/foods/[id]` | food detail | pushed screen |
@@ -49,7 +49,7 @@ Reference: Cronometer's header is identical on every screen (same surface, round
 | `/reset-password` | new password from the reset link → `/signin` with a toast | auth screen, no header (cc-18) |
 | `/add`, `/entry/[id]` | add sheet, edit entry | sheets (desktop dialog) |
 
-Redirects (permanent): `/today` → `/diary` (keep `?date=`), `/profile` → `/settings/profile`, `/profile/weight` → `/settings/profile/weight`, `/foods` → `/explore`.
+Redirects (permanent): `/today` and `/diary` → `/` (keep `?date=`), `/profile` → `/settings/profile`, `/profile/weight` → `/settings/profile/weight`, `/foods` → `/explore`.
 Pushed screens use AppHeader `sub` with a back button (router.back, fallback: the owning tab). The bottom nav stays visible and highlights the owning tab. Past dates on `/micros` and `/training` are read-only.
 
 ## Tổng quan (dashboard): trends, insights, changes, composition

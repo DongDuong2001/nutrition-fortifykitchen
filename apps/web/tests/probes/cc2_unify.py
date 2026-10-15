@@ -18,14 +18,14 @@ BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3102")
 SHOTS = Path(__file__).resolve().parent.parent.parent / ".screenshots"
 SIZES = [("390", {"width": 390, "height": 844}), ("1280", {"width": 1280, "height": 800})]
 ROUTES = [
-    "/", "/trends", "/trends/micros", "/trends/body", "/diary", "/micros", "/micros/calcium", "/training",
+    "/", "/trends", "/trends/micros", "/trends/body", "/", "/micros", "/micros/calcium", "/training",
     "/explore", "/foods/food-cha-la", "/foods/new", "/entry/item-1", "/settings", "/settings/profile",
     "/settings/profile/weight", "/settings/language", "/settings/notifications", "/settings/delete-account",
     "/paywall", "/install", "/setup/profile", "/setup/goal", "/setup/done", "/this-page-does-not-exist",
 ]
 # Setup keeps its own desktop card layout (no header at desktop), see IA-v2 Decided 12/10
 NO_HEADER_DESKTOP = {"/setup/profile", "/setup/goal", "/setup/done"}
-SHOT_NAMES = {"/": "overview", "/diary": "diary", "/explore": "explore", "/settings": "settings", "/micros": "micros", "/foods/food-cha-la": "food"}
+SHOT_NAMES = {"/": "overview", "/": "diary", "/explore": "explore", "/settings": "settings", "/micros": "micros", "/foods/food-cha-la": "food"}
 problems, notes = [], []
 
 HEADER_JS = """() => {

@@ -47,7 +47,7 @@ def shot(pg, name, size_name, full=True):
 
 
 def diary(browser, size_name, size):
-    ctx, pg = new_page(browser, size, "/diary")
+    ctx, pg = new_page(browser, size, "/")
     w = f"{size_name} Nhật ký"
     tiles = pg.locator("section[aria-label='Chi tiết trong ngày'] a")
     check(tiles.count() == 2, f"{w}: two tiles ({tiles.count()})")

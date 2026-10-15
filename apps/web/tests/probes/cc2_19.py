@@ -76,7 +76,7 @@ def run(browser, size_name, size):
     ctx.close()
 
     # (h): yesterday is read-only
-    ctx, pg = new_page(browser, size, f"/diary?date={YESTERDAY}")
+    ctx, pg = new_page(browser, size, f"/?date={YESTERDAY}")
     w = f"{size_name} Nhật ký hôm qua"
     check("Đang xem ngày cũ" in text(pg), f"{w}: read-only banner shown")
     check(pg.locator("a[href='/add?meal=breakfast']").count() == 0, f"{w}: no add link on a past meal")

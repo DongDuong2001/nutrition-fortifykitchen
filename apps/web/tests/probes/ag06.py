@@ -87,7 +87,7 @@ def test_item_1_and_2(browser):
     # 5. /diary: "+ Thêm" tap target size
     ctx = browser.new_context(viewport=PHONE)
     pg = ctx.new_page()
-    pg.goto(BASE + "/diary", wait_until="networkidle")
+    pg.goto(BASE + "/", wait_until="networkidle")
     pg.wait_for_timeout(300)
     add_links = pg.locator('a[id^="mobile-add-"]').all()
     check(len(add_links) > 0, f"today: found {len(add_links)} + Thêm links")
@@ -162,7 +162,7 @@ VISIBLE_H1_JS = """() => [...document.querySelectorAll('h1')].filter(h => {
 }).map(h => h.textContent.trim())"""
 
 ONE_H1_ROUTES = [
-    "/diary", "/diary?loading=1", "/diary?empty=1", "/diary?offline=1",
+    "/", "/?loading=1", "/?empty=1", "/?offline=1",
     "/micros", "/micros/calcium", "/add", "/training", "/settings/profile", "/settings/profile/weight",
     "/trends", "/entry/item-1", "/foods/food-cha-la", "/setup/goal", "/setup/profile",
 ]

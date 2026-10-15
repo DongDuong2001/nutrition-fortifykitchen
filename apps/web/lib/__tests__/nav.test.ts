@@ -55,8 +55,8 @@ describe("lib/nav tabs", () => {
 
 describe("lib/nav backFallback", () => {
   it("sends Vi chất and Ngày tập back to the day log, and Tổng quan's sub-screens back to Tổng quan", () => {
-    expect(backFallback("/micros")).toBe("/diary");
-    expect(backFallback("/training")).toBe("/diary");
+    expect(backFallback("/micros")).toBe("/");
+    expect(backFallback("/training")).toBe("/");
     expect(backFallback("/trends")).toBe("/");
     expect(backFallback("/trends/micros")).toBe("/trends");
     expect(backFallback("/trends/body")).toBe("/trends");
@@ -77,8 +77,8 @@ describe("lib/nav backFallback", () => {
   });
 
   it("falls back to the owning tab for the add sheet and entry, and to the root otherwise", () => {
-    expect(backFallback("/add")).toBe("/diary");
-    expect(backFallback("/entry/item-1")).toBe("/diary");
+    expect(backFallback("/add")).toBe("/");
+    expect(backFallback("/entry/item-1")).toBe("/");
     expect(backFallback("/anything-else")).toBe("/");
     expect(backFallback(null)).toBe("/");
   });

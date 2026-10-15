@@ -62,7 +62,7 @@ def run(browser, size_name, size):
         pg.wait_for_timeout(500)
 
     # (f): save a meal, reuse it
-    go("/diary")
+    go("/")
     w = f"{size_name} Lưu bữa"
     pg.locator("#meal-menu-breakfast").click()
     pg.wait_for_timeout(300)
@@ -108,7 +108,7 @@ def fresh(browser, size_name, size):
     ctx = browser.new_context(viewport=size)
     pg = ctx.new_page()
     pg.clock.set_fixed_time(NOW)
-    pg.goto(BASE + "/diary", wait_until="networkidle")
+    pg.goto(BASE + "/", wait_until="networkidle")
     w = f"{size_name} Tài khoản mới"
     check(pg.url.endswith("/signin"), f"{w}: signed-out /diary goes to /signin")
     pg.goto(BASE + "/setup/profile", wait_until="networkidle")

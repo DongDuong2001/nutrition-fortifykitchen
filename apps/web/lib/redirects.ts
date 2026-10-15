@@ -3,7 +3,8 @@
  * so the table and the tests cannot drift apart. The query string is carried over.
  */
 export const PERMANENT_REDIRECTS = [
-  { source: "/today", destination: "/diary", permanent: true },
+  { source: "/today", destination: "/", permanent: true },
+  { source: "/diary", destination: "/", permanent: true },
   { source: "/profile", destination: "/settings/profile", permanent: true },
   { source: "/profile/weight", destination: "/settings/profile/weight", permanent: true },
   { source: "/foods", destination: "/explore", permanent: true },

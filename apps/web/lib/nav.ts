@@ -44,14 +44,14 @@ export function backFallback(pathname: string | null | undefined): string {
   const parts = segments(pathname);
   const [first, second, third] = parts;
   if (first === "micros" && second) return "/micros";
-  if (first === "micros" || first === "training") return "/diary";
+  if (first === "micros" || first === "training") return "/";
   if (first === "trends" && second) return "/trends";
   if (first === "settings") {
     if (third === "weight") return "/settings/profile";
     return "/settings";
   }
   if (first === "explore" || first === "foods") return "/explore";
-  if (first === "add" || first === "entry") return "/diary";
+  if (first === "add" || first === "entry") return "/";
   return "/";
 }
 
