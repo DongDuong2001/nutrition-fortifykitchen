@@ -103,7 +103,7 @@ def run(browser, name, size):
     # 2. A meal survives a closed context
     ctx, pg = new_page(browser, size)
     sign_in_magic(pg, "ban@email.com")  # the key check below is for ban@email.com's storage keys
-    go(pg, "/")
+    go(pg, "/trends")
     check("Chưa có ngày nào được ghi" in text(pg), f"{where} empty account with a profile: Tổng quan shows the empty line")
     food = add_food(pg, SAMPLE_FOODS)
     check(food != "" and food in text(pg), f"{where} meal added: {food} is in Nhật ký")
@@ -121,7 +121,7 @@ def run(browser, name, size):
     check(food in text(pg) and "Chưa có món hôm nay" not in text(pg), f"{where} new context: the meal ({food}) is still in Nhật ký")
     go(pg, "/explore")
     check(food in text(pg), f"{where} new context: Gần đây still lists {food}")
-    go(pg, "/")
+    go(pg, "/trends")
     t = text(pg)
     check("Kỳ này có 1 ngày đã ghi" in t, f"{where} Tổng quan: 'Kỳ này có 1 ngày đã ghi' (page: {t[:240]!r})")
 
@@ -220,6 +220,7 @@ def run(browser, name, size):
     go(pg, "/diary")
     check(pg.url.endswith("/signin"), f"{where} accounts: nobody signed in, /diary goes to /signin ({pg.url[len(BASE):]})")
     sign_in("b@example.com")
+    go(pg, "/trends")  # cc2-31b: Tổng quan is /trends (sign-in lands on the home screen)
     check("Chưa có ngày nào được ghi" in text(pg), f"{where} accounts: B's Tổng quan is empty")
     go(pg, "/diary")  # Nhật ký is no longer a nav tab (cc2-31a), so load it directly
     t = text(pg)

@@ -3,9 +3,10 @@
 - the nav lists Hôm nay (/) · Tổng quan (/trends) · Khám phá (/explore) · Cài đặt (/settings), in that order; Nhật ký is no longer a tab
 - phone: [+] (#mobile-add-fab) sits between Tổng quan and Khám phá; sidebar: "Thêm món" is present
 - each link goes to its href and is the only active item afterwards
-- the active tab: / and /micros → Hôm nay, /trends → Tổng quan, /explore → Khám phá, /settings → Cài đặt
-- every checked route answers 200 and has no horizontal scroll
-Screenshots: .screenshots/cc2-31-nav-390.png, .screenshots/cc2-31-sidebar-1280.png
+- the active tab: / and /micros → Hôm nay, /trends and its sub-tabs → Tổng quan, /explore → Khám phá, /settings → Cài đặt
+- Tổng quan sub-tabs (cc2-31b): /trends = Tóm tắt, /trends/energy = Năng lượng, /trends/micros = Vi chất, /trends/body = Cơ thể
+- every checked route answers 200 (no 404) and has no horizontal scroll
+Screenshots: .screenshots/cc2-31-nav-390.png, cc2-31-sidebar-1280.png, cc2-31-trends-390.png
 Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/cc2_31.py
 """
 import os
@@ -25,8 +26,18 @@ ACTIVE = [
     ("/", "Hôm nay"),
     ("/micros", "Hôm nay"),
     ("/trends", "Tổng quan"),
+    ("/trends/energy", "Tổng quan"),
+    ("/trends/micros", "Tổng quan"),
+    ("/trends/body", "Tổng quan"),
     ("/explore", "Khám phá"),
     ("/settings", "Cài đặt"),
+]
+# Tổng quan sub-tabs: the route → the one sub-tab that must be current there (cc2-31b: Tóm tắt is /trends)
+SUBTABS = [
+    ("/trends", "Tóm tắt"),
+    ("/trends/energy", "Năng lượng"),
+    ("/trends/micros", "Vi chất"),
+    ("/trends/body", "Cơ thể"),
 ]
 NAV = 'nav[aria-label="Điều hướng chính"]:visible'
 problems, notes = [], []
@@ -93,6 +104,16 @@ def probe_active(pg, name):
         no_h_scroll(pg, f"{name} {route}")
 
 
+def probe_subtabs(pg, name):
+    for route, label in SUBTABS:
+        status = go(pg, route)
+        check(status == 200, f"{name}: {route} answers 200, not 404 (got {status})")
+        current = pg.locator('a[role="tab"][aria-current="page"]:visible').all_inner_texts()
+        check(current == [label], f"{name}: {route} has '{label}' as the only Tổng quan sub-tab current (got {current})")
+        if route == "/trends" and name == "390":
+            pg.screenshot(path=str(SHOTS / "cc2-31-trends-390.png"))
+
+
 def probe_click(pg, name):
     for label, route in TABS:
         go(pg, "/micros")
@@ -112,7 +133,7 @@ def main():
             pg = ctx.new_page()
             errors = []
             pg.on("pageerror", lambda e: errors.append(str(e)))
-            for probe in (probe_nav, probe_active, probe_click):
+            for probe in (probe_nav, probe_active, probe_subtabs, probe_click):
                 try:
                     probe(pg, name)
                 except Exception as err:  # a missing control must show up as a failed check, not a crash

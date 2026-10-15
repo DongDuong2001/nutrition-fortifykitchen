@@ -16,8 +16,8 @@ import type { CompleteTargets } from "@/lib/targets";
 export type OverviewTab = "summary" | "energy" | "micros" | "body";
 
 const TABS: { id: OverviewTab; href: string; label: string }[] = [
-  { id: "summary", href: "/", label: "Tóm tắt" },
-  { id: "energy", href: "/trends", label: "Năng lượng" },
+  { id: "summary", href: "/trends", label: "Tóm tắt" },
+  { id: "energy", href: "/trends/energy", label: "Năng lượng" },
   { id: "micros", href: "/trends/micros", label: "Vi chất" },
   { id: "body", href: "/trends/body", label: "Cơ thể" },
 ];

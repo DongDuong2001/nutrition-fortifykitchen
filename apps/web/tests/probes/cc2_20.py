@@ -1,7 +1,5 @@
 """cc2-20: Tổng quan > Tóm tắt, direction B, at 390 and 1280.
 
-- hero: the number is today's missing kcal, the button reads "+ Thêm vào bữa tối" at 18:00 and opens the add sheet
-- the hero toggle (aria-pressed) switches between "Còn thiếu" and "Theo bữa"
 - the period row reads "7 ngày qua · 06/10 – 12/10" ("30 ngày qua · ..." for 30)
 - scoreboard: Kcal, Đạm, Cân nặng; one row open at a time; a bar tap updates the day line
 - the Vi chất card opens 22 squares; a square names its nutrient
@@ -32,7 +30,7 @@ def text(pg):
     return re.sub(r"\s+", " ", pg.inner_text("body"))
 
 
-def new_page(browser, size, route="/"):
+def new_page(browser, size, route="/trends"):  # cc2-31b: Tóm tắt is /trends (/ is the home screen)
     ctx = browser.new_context(viewport=size)
     pg = ctx.new_page()
     pg.clock.set_fixed_time(NOW)
@@ -49,31 +47,6 @@ def shot(pg, name, size_name):
 def run(browser, size_name, size):
     ctx, pg = new_page(browser, size)
     t = text(pg)
-
-    # Hero
-    num = pg.locator("#ov-hero-number")
-    check(num.count() == 1 and num.inner_text().strip() == "909", f"{size_name} hero: number is the missing kcal ({num.inner_text() if num.count() else None})")
-    check("hôm nay còn thiếu" in pg.locator("#ov-hero-label").inner_text().lower(), f"{size_name} hero: label")
-    check("Đã ăn 1.041" in t and "Tối thiểu 1.950" in t, f"{size_name} hero: Đã ăn and Tối thiểu")
-    btn = pg.locator("#overview-next-meal")
-    check(btn.count() == 1 and btn.inner_text().strip() == "+ Thêm vào bữa tối", f"{size_name} hero: button reads + Thêm vào bữa tối")
-    bb = btn.bounding_box()
-    check(bb is not None and bb["height"] >= 44, f"{size_name} hero: button is at least 44 px tall")
-
-    # Toggle
-    left = pg.get_by_role("button", name="Còn thiếu")
-    meals = pg.get_by_role("button", name="Theo bữa")
-    check(left.get_attribute("aria-pressed") == "true" and meals.get_attribute("aria-pressed") == "false", f"{size_name} toggle: Còn thiếu is pressed first")
-    meals.click()
-    pg.wait_for_timeout(150)
-    t2 = text(pg)
-    check(meals.get_attribute("aria-pressed") == "true" and left.get_attribute("aria-pressed") == "false", f"{size_name} toggle: Theo bữa pressed")
-    check("hôm nay theo bữa" in t2.lower() and "Sáng" in t2 and "Trưa" in t2 and "Phụ" in t2 and "Tối" in t2, f"{size_name} toggle: four meals shown")
-    check(pg.locator("#ov-hero-number").count() == 0, f"{size_name} toggle: big number hidden in Theo bữa")
-    shot(pg, "hero-meals", size_name)
-    left.click()
-    pg.wait_for_timeout(150)
-    check(pg.locator("#ov-hero-number").count() == 1, f"{size_name} toggle: back to Còn thiếu")
 
     # Period row
     check("7 ngày qua · 06/10 – 12/10" in text(pg), f"{size_name} period row reads 7 ngày qua · 06/10 – 12/10")
@@ -158,12 +131,6 @@ def main():
         browser = p.chromium.launch()
         for size_name, size in SIZES:
             run(browser, size_name, size)
-        # Next meal opens the add sheet for dinner
-        ctx, pg = new_page(browser, SIZES[0][1])
-        pg.locator("#overview-next-meal").click()
-        pg.wait_for_url("**/add**", timeout=8000)
-        check("meal=dinner" in pg.url, f"hero button opens the add sheet for dinner ({pg.url})")
-        ctx.close()
         # Shot with the full page for the review
         ctx, pg = new_page(browser, SIZES[0][1])
         shot(pg, "overview", "390")

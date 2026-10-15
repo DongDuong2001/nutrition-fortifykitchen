@@ -2,7 +2,7 @@
 
 - every Tổng quan sub-tab is reachable from the tab bar and is the only active one
 - the period control: ‹ › and 7/30 change the numbers, › is disabled on the current period, the period stays across sub-tabs
-- Tóm tắt "Ghi bữa tối" (clock fixed at 18:00 Asia/Ho_Chi_Minh) opens the add sheet for that meal
+- Năng lượng: the energy bars and the period control (cc2-31b: Tóm tắt is /trends, Năng lượng is /trends/energy)
 - Nhật ký rows open /micros and /training with the date shown; past-day screens are read-only
 - Xóa bữa này asks for a confirm step and Hoàn tác puts the meal back
 - no ink band at the top of the window on desktop
@@ -24,8 +24,8 @@ SIZES = [("390", {"width": 390, "height": 844}), ("1280", {"width": 1280, "heigh
 NOW = "2026-10-12T18:00:00+07:00"
 TODAY = "2026-10-12"
 YESTERDAY = "2026-10-11"
-SUBTABS = [("Tóm tắt", "/"), ("Năng lượng", "/trends"), ("Vi chất", "/trends/micros"), ("Cơ thể", "/trends/body")]
-SLUGS = {"/": "overview", "/trends": "energy", "/trends/micros": "micros", "/trends/body": "body"}
+SUBTABS = [("Tóm tắt", "/trends"), ("Năng lượng", "/trends/energy"), ("Vi chất", "/trends/micros"), ("Cơ thể", "/trends/body")]
+SLUGS = {"/trends": "summary", "/trends/energy": "energy", "/trends/micros": "micros", "/trends/body": "body"}
 problems, notes = [], []
 
 
@@ -78,7 +78,7 @@ def avg_text(pg):
 
 def check_subtabs(browser, size_name, size):
     ctx, pg = new_page(browser, size)
-    go(pg, "/")
+    go(pg, "/trends")
     check(pg.locator('nav[role="tablist"][aria-label="Tổng quan"]:visible').count() == 1, f"{size_name} overview: tab bar is visible")
     for label, route in SUBTABS:
         tab(pg, label).click()
@@ -88,8 +88,7 @@ def check_subtabs(browser, size_name, size):
         current = pg.locator('a[role="tab"][aria-current="page"]:visible').all_inner_texts()
         check(current == [label], f"{size_name} {label}: it is the only active sub-tab ({current})")
         nav = pg.locator('nav[aria-label="Điều hướng chính"]:visible a[aria-current="page"]').all_inner_texts()
-        tab_label = "Hôm nay" if route == "/" else "Tổng quan"
-        check(any(tab_label in t for t in nav), f"{size_name} {label}: {tab_label} is the active tab ({nav})")
+        check(any("Tổng quan" in t for t in nav), f"{size_name} {label}: Tổng quan is the active tab ({nav})")
         no_h_scroll(pg, f"{size_name} {label}")
         shot(pg, SLUGS[route], size_name)
         # the bottom nav and sidebar now carry the "Hôm nay" tab label on every screen, so leave them out
@@ -102,7 +101,7 @@ def check_subtabs(browser, size_name, size):
 
 def check_period(browser, size_name, size):
     ctx, pg = new_page(browser, size)
-    go(pg, "/trends")
+    go(pg, "/trends/energy")
     check(heading(pg) == "7 ngày qua · 06/10 – 12/10", f"{size_name} period heading is 06–12/10 ({heading(pg)})")
     check(pg.locator('button[aria-label="Kỳ sau"]:visible').is_disabled(), f"{size_name} › is disabled on the current period")
     before = avg_text(pg)
@@ -134,7 +133,7 @@ def check_period(browser, size_name, size):
 def check_energy_bars(browser, size_name, size):
     """Above the range is on target (blue, never red); red only below the minimum; today is grey (đang ghi), not red."""
     ctx, pg = new_page(browser, size)
-    go(pg, "/trends")
+    go(pg, "/trends/energy")
     cols = pg.evaluate(
         """() => [...document.querySelectorAll('#ov-score-calories button[aria-pressed]')].map(el => ({
             label: el.getAttribute('aria-label'),
@@ -181,19 +180,6 @@ def check_micros_tab(browser, size_name, size):
     pg.locator(sel).first.click()
     pg.wait_for_url("**/micros/**", timeout=8000)
     check(path_of(pg).startswith("/micros/"), f"{size_name} Vi chất: a row opens the nutrient detail")
-    ctx.close()
-
-
-def check_next_meal(browser, size_name, size):
-    ctx, pg = new_page(browser, size)
-    go(pg, "/")
-    link = pg.locator("#overview-next-meal")
-    check(link.count() == 1 and link.inner_text().strip() == "+ Thêm vào bữa tối", f"{size_name} Tóm tắt: the button reads + Thêm vào bữa tối at 18:00")
-    link.click()
-    pg.wait_for_url("**/add**", timeout=8000)
-    pg.wait_for_timeout(500)
-    check("meal=dinner" in pg.url, f"{size_name} Tóm tắt: opens the add sheet for dinner ({pg.url})")
-    check("Bữa tối" in text(pg), f"{size_name} Tóm tắt: the add sheet shows Bữa tối")
     ctx.close()
 
 
@@ -302,7 +288,6 @@ def main():
             check_period(browser, size_name, size)
             check_energy_bars(browser, size_name, size)
             check_micros_tab(browser, size_name, size)
-            check_next_meal(browser, size_name, size)
             check_diary(browser, size_name, size)
             check_past_day(browser, size_name, size)
             check_delete_meal(browser, size_name, size)

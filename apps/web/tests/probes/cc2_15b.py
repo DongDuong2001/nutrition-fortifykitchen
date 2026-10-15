@@ -105,7 +105,7 @@ def run(browser, name, size):
     clean(pg, f"{where} diary")
     shot(pg, "diary", name)
 
-    for route in ("/", "/trends", "/trends/micros"):
+    for route in ("/trends", "/trends/micros"):  # cc2-31b: Tóm tắt is /trends
         go(pg, route)
         t = text(pg)
         check("Chưa có ngày nào được ghi" in t, f"{where} {route}: 'Chưa có ngày nào được ghi'")
@@ -114,7 +114,7 @@ def run(browser, name, size):
               f"{where} {route}: one link Thêm bữa đầu tiên to the add sheet for Bữa tối")
         check("Chưa đủ dữ liệu" not in t, f"{where} {route}: not the under-3-days state")
         clean(pg, f"{where} {route}")
-        if route == "/":
+        if route == "/trends":
             shot(pg, "overview", name)
     go(pg, "/trends/body")
     t = text(pg)
@@ -171,7 +171,7 @@ def run(browser, name, size):
     t = text(pg)
     check(food in t, f"{where} diary: the first meal ({food}) is listed")
     check("Chưa có món hôm nay" not in t, f"{where} diary: the empty line is gone")
-    go(pg, "/")
+    go(pg, "/trends")
     t = text(pg)
     check("Chưa đủ dữ liệu" in t and "Chưa có ngày nào được ghi" not in t,
           f"{where} overview: the under-3-days state with one logged day")

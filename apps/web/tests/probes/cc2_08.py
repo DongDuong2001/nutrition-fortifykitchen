@@ -21,7 +21,7 @@ SHOTS = Path(__file__).resolve().parent.parent.parent / ".screenshots"
 SIZES = [("390", {"width": 390, "height": 844}), ("1280", {"width": 1280, "height": 800})]
 # route, h1 (case-insensitive), kind: home | tab | pushed
 ROUTES = [
-    ("/", "Tổng quan", "tab"),
+    ("/", "Hôm nay", "tab"),
     ("/diary", "Nhật ký", "tab"),
     ("/explore", "Khám phá", "tab"),
     ("/settings", "Cài đặt", "tab"),
