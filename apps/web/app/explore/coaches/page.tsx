@@ -33,10 +33,17 @@ export default function CoachesPage() {
         <ChipRow items={chips} ariaLabel="Lọc huấn luyện viên theo chuyên môn" />
 
         <div className="flex flex-col gap-4 pt-1">
-          {coaches.map((c) => (
-            <CoachCard key={c.id} coach={c} />
-          ))}
+          {coaches.length === 0 ? (
+            <div className="rounded-[18px] border border-card-border bg-card p-8 text-center text-secondary text-sm">
+              Chưa có huấn luyện viên nào trong chuyên môn này.
+            </div>
+          ) : (
+            coaches.map((c) => (
+              <CoachCard key={c.id} coach={c} />
+            ))
+          )}
         </div>
+
       </main>
     </AppShell>
   );

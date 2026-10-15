@@ -11,8 +11,8 @@ export function LeaderboardBanner() {
           <IconRibbon size={20} />
         </span>
         <div className="flex flex-col min-w-0">
-          <span className="truncate text-sm font-bold text-text">Bảng xếp hạng kỷ luật</span>
-          <span className="text-xs text-secondary">
+          <span className="text-sm font-bold text-text leading-tight">Bảng xếp hạng kỷ luật</span>
+          <span className="text-xs text-secondary leading-snug">
             Vinh danh người dùng duy trì vi chất & mục tiêu cao nhất
           </span>
         </div>
@@ -20,11 +20,12 @@ export function LeaderboardBanner() {
 
       <Link
         href="/explore/leaderboard"
-        className="shrink-0 flex h-9 items-center gap-1 justify-center rounded-full bg-blue px-3.5 text-xs font-bold text-on-accent no-underline shadow-xs hover:bg-blue/90 transition-colors"
+        className="shrink-0 flex min-h-[44px] min-w-[44px] items-center gap-1 justify-center rounded-full bg-blue px-4 text-xs font-bold text-on-accent no-underline shadow-xs hover:bg-blue/90 transition-transform duration-150 active:scale-[0.97]"
       >
         <span>Xem BXH</span>
-        <IconChevronRight size={14} />
+        <IconChevronRight size={16} />
       </Link>
     </Card>
+
   );
 }

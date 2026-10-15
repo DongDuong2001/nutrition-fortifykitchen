@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { COACH_SPECIALTIES, submitCoachApplication } from "@/lib/coaches";
 
 interface CoachApplicationSheetProps {
@@ -18,6 +18,35 @@ export function CoachApplicationSheet({ isOpen, onClose, onSubmitted }: CoachApp
   const [message, setMessage] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState("");
+
+  const previousActiveElement = useRef<HTMLElement | null>(null);
+
+  const handleResetAndClose = () => {
+    setIsSuccess(false);
+    setName("");
+    setEmail("");
+    setMessage("");
+    setSocialLink("");
+    setError("");
+    onClose();
+  };
+
+  useEffect(() => {
+    if (!isOpen) return;
+    previousActiveElement.current = (document.activeElement as HTMLElement) || null;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        handleResetAndClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      previousActiveElement.current?.focus?.();
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -52,24 +81,14 @@ export function CoachApplicationSheet({ isOpen, onClose, onSubmitted }: CoachApp
     }
   };
 
-  const handleResetAndClose = () => {
-    setIsSuccess(false);
-    setName("");
-    setEmail("");
-    setMessage("");
-    setSocialLink("");
-    setError("");
-    onClose();
-  };
-
   return (
     <div
       role="dialog"
       aria-modal="true"
       aria-labelledby="coach-apply-title"
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-0 sm:items-center sm:p-4 backdrop-blur-xs"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-scrim p-0 sm:items-center sm:p-4 backdrop-blur-xs"
     >
-      <div className="w-full max-w-[520px] rounded-t-[24px] sm:rounded-[24px] bg-card p-6 shadow-xl border border-card-border max-h-[90vh] overflow-y-auto">
+      <div className="w-full max-w-[520px] rounded-t-[20px] sm:rounded-[18px] bg-card p-6 shadow-xl border border-card-border max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between pb-4 border-b border-card-border">
           <div>
             <h2 id="coach-apply-title" className="m-0 text-lg font-black text-text">
@@ -103,7 +122,7 @@ export function CoachApplicationSheet({ isOpen, onClose, onSubmitted }: CoachApp
             <button
               type="button"
               onClick={handleResetAndClose}
-              className="mt-2 min-h-[44px] rounded-full bg-blue px-6 text-sm font-bold text-on-accent border-0 cursor-pointer transition-transform duration-150 active:scale-[0.97]"
+              className="mt-2 min-h-[44px] min-w-[44px] rounded-full bg-blue px-6 text-sm font-bold text-on-accent border-0 cursor-pointer transition-transform duration-150 active:scale-[0.97]"
             >
               Hoàn tất
             </button>
@@ -111,12 +130,12 @@ export function CoachApplicationSheet({ isOpen, onClose, onSubmitted }: CoachApp
         ) : (
           <form onSubmit={handleSubmit} className="flex flex-col gap-4 pt-4">
             {error && (
-              <div className="rounded-[12px] bg-destructive/10 p-3 text-xs font-semibold text-destructive">
+              <div className="rounded-[12px] bg-destructive/10 p-3 text-xs font-semibold text-destructive-text">
                 {error}
               </div>
             )}
 
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-2">
               <label htmlFor="coach-name" className="text-xs font-bold text-text">
                 Họ và tên <span className="text-destructive">*</span>
               </label>
@@ -131,7 +150,7 @@ export function CoachApplicationSheet({ isOpen, onClose, onSubmitted }: CoachApp
               />
             </div>
 
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-2">
               <label htmlFor="coach-email" className="text-xs font-bold text-text">
                 Email liên hệ <span className="text-destructive">*</span>
               </label>
@@ -147,7 +166,7 @@ export function CoachApplicationSheet({ isOpen, onClose, onSubmitted }: CoachApp
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-2">
                 <label htmlFor="coach-specialty" className="text-xs font-bold text-text">
                   Chuyên môn chính
                 </label>
@@ -165,7 +184,7 @@ export function CoachApplicationSheet({ isOpen, onClose, onSubmitted }: CoachApp
                 </select>
               </div>
 
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-2">
                 <label htmlFor="coach-experience" className="text-xs font-bold text-text">
                   Số năm kinh nghiệm
                 </label>
@@ -181,7 +200,7 @@ export function CoachApplicationSheet({ isOpen, onClose, onSubmitted }: CoachApp
               </div>
             </div>
 
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-2">
               <label htmlFor="coach-social" className="text-xs font-bold text-text">
                 Link nhóm Zalo hoặc Facebook cộng đồng
               </label>
@@ -195,7 +214,7 @@ export function CoachApplicationSheet({ isOpen, onClose, onSubmitted }: CoachApp
               />
             </div>
 
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-2">
               <label htmlFor="coach-message" className="text-xs font-bold text-text">
                 Chứng chỉ và định hướng hỗ trợ thành viên <span className="text-destructive">*</span>
               </label>
@@ -214,13 +233,13 @@ export function CoachApplicationSheet({ isOpen, onClose, onSubmitted }: CoachApp
               <button
                 type="button"
                 onClick={handleResetAndClose}
-                className="min-h-[44px] rounded-full border border-card-border bg-card px-5 text-xs font-bold text-secondary cursor-pointer hover:text-text transition-colors"
+                className="min-h-[44px] min-w-[44px] rounded-full border border-card-border bg-card px-5 text-xs font-bold text-secondary cursor-pointer hover:text-text transition-colors"
               >
                 Hủy
               </button>
               <button
                 type="submit"
-                className="min-h-[44px] rounded-full bg-blue px-6 text-xs font-bold text-on-accent border-0 cursor-pointer transition-transform duration-150 active:scale-[0.97]"
+                className="min-h-[44px] min-w-[44px] rounded-full bg-blue px-6 text-xs font-bold text-on-accent border-0 cursor-pointer transition-transform duration-150 active:scale-[0.97]"
               >
                 Nộp hồ sơ xét duyệt
               </button>
@@ -231,3 +250,4 @@ export function CoachApplicationSheet({ isOpen, onClose, onSubmitted }: CoachApp
     </div>
   );
 }
+

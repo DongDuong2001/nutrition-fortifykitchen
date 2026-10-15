@@ -8,7 +8,10 @@ import {
   IconHome,
   IconTarget,
   IconSparkles,
+  IconGlobe,
+  IconShield,
 } from "../icons";
+
 
 describe("MynaUI Icon Adapter", () => {
   it("renders IconEye with default attributes", () => {
@@ -37,8 +40,17 @@ describe("MynaUI Icon Adapter", () => {
     expect(sparklesHtml).toContain("<svg");
   });
 
+  it("renders settings and utility icons with default attributes", () => {
+    const globeHtml = renderToString(<IconGlobe />);
+    const shieldHtml = renderToString(<IconShield />);
+    expect(globeHtml).toContain("<svg");
+    expect(globeHtml).toContain('aria-hidden="true"');
+    expect(shieldHtml).toContain('stroke-width="1.8"');
+  });
+
   it("supports custom aria-label for accessible icon-only controls", () => {
     const html = renderToString(<IconCheck aria-hidden="false" aria-label="Đã hoàn tất" />);
     expect(html).toContain('aria-label="Đã hoàn tất"');
   });
 });
+

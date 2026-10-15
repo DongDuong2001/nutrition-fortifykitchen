@@ -6,7 +6,9 @@ Newest first. Updated with every web merge. Do not edit apps/api, migrations or 
 
 | Task | Commit | Date | What |
 |---|---|---|---|
+| cc-24 | pending | 15/10 | UI-rules pass over Dong's new screens: tokens only (no raw hex or palette colors), tap targets >= 44x44, body text >= 13px, captions >= 11px, spacing scale, SectionTitle sentence-case headings, AppShell and AppHeader on admin review, MynaUI icons standardized, Esc closes coach application sheet and returns focus, probe cc_24 and alignment tests |
 | cc2-32 | see git log (cc2-32) | 15/10 | Nhật ký is folded into Hôm nay at "/": /diary and /today redirect to / (keep ?date=); the diary screen is deleted; every link, back fallback (a past day keeps ?date=) and the PWA shortcut point at Hôm nay; cache version 2026-10-15.2; a food logged in ml keeps its portion on Hôm nay; an emptied sample day has no negative amounts (nothing below 0, no source = dash); Về hôm nay on past days (phone); Khám phá: banner line wraps, coaches heading in normal case; shared probes walk /; cc2_32 probe |
+
 | cc2-31 | see git log (cc2-31a, cc2-31b) | 15/10 | Bottom nav and sidebar: Hôm nay · Tổng quan · [+] · Khám phá · Cài đặt (Nhật ký leaves the bar); Tổng quan sub-tabs: Tóm tắt at /trends, Năng lượng at /trends/energy; Tóm tắt drops its today hero (home owns today); probes and alignment follow |
 | cc-22-fix | see git log (cc-22-fix) | 15/10 | Home review fixes: ⋯ on past days (only Lưu thành), dot in the food row label, bar without value says Chưa có dữ liệu, "<1%", meal headers in normal case |
 | cc-22 | see git log (cc-22) | 15/10 | Hôm nay at "/": ink hero card (kcal, macros), food list with meal headers, nutrient column; tap a food or meal to see it alone; two-tone bars today; Nhật ký day view folded in |
@@ -44,4 +46,6 @@ All from docs/dong-checklist.md §6 (data the new Tổng quan screens need):
 - [x] The 12 drinks tip_vi advice text: fixed in `data/seed_foods.json`, advice removed in favor of pure factual ingredient descriptions.
 - [x] Macro label parity: unified "Chất béo" across `apps/web/lib/period.ts`, `apps/api/internal/trends/trends.go`, and `packages/vectors/period.json`.
 - [x] Profile display_name validation: enforced 40-character maximum and whitespace trimming in `apps/api/internal/profile/service.go`.
+- [ ] (cc-24) /admin/review authorization: route is client-side only and not linked from user-facing screens; Dong's Go backend must enforce role/permission check on review endpoints.
 - Note: `cmd/importfoods` supports batch import for >= 1.000 foods; `data/seed_foods.json` contains the verified 44 foundational foods for tests and dev DB.
+

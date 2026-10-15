@@ -29,14 +29,14 @@ export default function PrivacyPage() {
             </p>
           </header>
 
-          <section className="flex flex-col gap-2.5">
+          <section className="flex flex-col gap-3">
             <h2 className="m-0 text-base font-bold text-text">1. Nguyên tắc cốt lõi</h2>
             <p className="m-0 text-sm leading-relaxed text-secondary">
               H1T MICRO là ứng dụng chuyên sâu theo dõi dinh dưỡng và 22 vi chất thiết yếu. Chúng tôi hoạt động trên nguyên tắc thu thập tối thiểu dữ liệu cần thiết, minh bạch mục đích sử dụng và đặt quyền kiểm soát dữ liệu hoàn toàn vào tay người dùng. Chúng tôi không kinh doanh dữ liệu cá nhân hay cung cấp thói quen ăn uống của bạn cho các mạng lưới quảng cáo.
             </p>
           </section>
 
-          <section className="flex flex-col gap-2.5">
+          <section className="flex flex-col gap-3">
             <h2 className="m-0 text-base font-bold text-text">2. Dữ liệu chúng tôi thu thập</h2>
             <ul className="m-0 flex flex-col gap-2 pl-5 text-sm leading-relaxed text-secondary">
               <li>
@@ -51,12 +51,12 @@ export default function PrivacyPage() {
             </ul>
           </section>
 
-          <section className="flex flex-col gap-2.5">
+          <section className="flex flex-col gap-3">
             <h2 className="m-0 text-base font-bold text-text">3. Mục đích xử lý dữ liệu</h2>
             <p className="m-0 text-sm leading-relaxed text-secondary">
               Dữ liệu của bạn được sử dụng độc quyền cho các tính năng vận hành ứng dụng:
             </p>
-            <ul className="m-0 flex flex-col gap-1.5 pl-5 text-sm leading-relaxed text-secondary">
+            <ul className="m-0 flex flex-col gap-2 pl-5 text-sm leading-relaxed text-secondary">
               <li>Hiển thị tiến độ hoàn thành vi chất và đa lượng trong ngày.</li>
               <li>Phân tích xu hướng dinh dưỡng theo tuần và tháng tại mục Tổng quan.</li>
               <li>Đồng bộ hóa dữ liệu trên các thiết bị đăng nhập cùng một tài khoản.</li>
@@ -64,7 +64,7 @@ export default function PrivacyPage() {
             </ul>
           </section>
 
-          <section className="flex flex-col gap-2.5">
+          <section className="flex flex-col gap-3">
             <h2 className="m-0 text-base font-bold text-text">4. Cơ chế lưu trữ và bảo vệ dữ liệu</h2>
             <ul className="m-0 flex flex-col gap-2 pl-5 text-sm leading-relaxed text-secondary">
               <li>
@@ -79,12 +79,12 @@ export default function PrivacyPage() {
             </ul>
           </section>
 
-          <section className="flex flex-col gap-2.5">
+          <section className="flex flex-col gap-3">
             <h2 className="m-0 text-base font-bold text-text">5. Quyền kiểm soát và xóa dữ liệu</h2>
             <p className="m-0 text-sm leading-relaxed text-secondary">
               Bạn có toàn quyền kiểm soát thông tin cá nhân của mình tại H1T MICRO:
             </p>
-            <ul className="m-0 flex flex-col gap-1.5 pl-5 text-sm leading-relaxed text-secondary">
+            <ul className="m-0 flex flex-col gap-2 pl-5 text-sm leading-relaxed text-secondary">
               <li>Chỉnh sửa hồ sơ hoặc nhật ký món ăn bất kỳ thời điểm nào.</li>
               <li>Tùy chọn tham gia hoặc ẩn danh khỏi Bảng xếp hạng cộng đồng (mặc định luôn bảo vệ quyền riêng tư, nhật ký ăn uống không bao giờ công khai).</li>
               <li>
@@ -93,7 +93,7 @@ export default function PrivacyPage() {
             </ul>
           </section>
 
-          <section className="flex flex-col gap-2.5 border-t border-divider pt-4">
+          <section className="flex flex-col gap-3 border-t border-divider pt-4">
             <h2 className="m-0 text-base font-bold text-text">6. Thông tin liên hệ</h2>
             <p className="m-0 text-sm leading-relaxed text-secondary">
               Nếu bạn có bất kỳ câu hỏi hoặc yêu cầu liên quan đến chính sách bảo vệ dữ liệu cá nhân, vui lòng liên hệ đội ngũ quản trị tại: <code className="rounded bg-divider px-1.5 py-0.5 text-xs text-text">privacy@h1tmicro.vn</code>.
@@ -103,4 +103,5 @@ export default function PrivacyPage() {
       </main>
     </AppShell>
   );
+
 }

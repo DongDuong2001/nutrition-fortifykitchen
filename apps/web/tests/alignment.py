@@ -53,7 +53,12 @@ ONBOARDING_CHECKS = [
     ("/settings/profile/weight", "desktop (1440px)", "weight-row", "lr"),
     ("/settings/account", "mobile (390px)", "account-row", "lr"),
     ("/settings/account", "desktop (1440px)", "account-row", "lr"),
+    ("/explore/leaderboard", "mobile (390px)", "leaderboard-row", "lr"),
+    ("/explore/leaderboard", "desktop (1440px)", "leaderboard-row", "lr"),
+    ("/explore/coaches", "mobile (390px)", "coaches-card", "lr"),
+    ("/explore/coaches", "desktop (1440px)", "coaches-card", "lr"),
 ]
+
 
 def check_align_groups(page, group_name=None, edges="lr"):
     # edges "lr": members share left and right edges. "tb": members share top and bottom edges.
