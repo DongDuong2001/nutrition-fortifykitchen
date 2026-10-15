@@ -16,6 +16,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"nutrition-api/internal/auth"
+	"nutrition-api/internal/coaching"
 	"nutrition-api/internal/config"
 	"nutrition-api/internal/diary"
 	"nutrition-api/internal/library"
@@ -124,6 +125,10 @@ func SetupRouter(cfg *config.Config, pool *pgxpool.Pool) chi.Router {
 	trendsRepo := trends.NewRepository(pool)
 	trendsService := trends.NewService(trendsRepo)
 	trendsHandler := trends.NewHandler(trendsService)
+
+	coachingRepo := coaching.NewRepository(pool)
+	coachingService := coaching.NewService(coachingRepo)
+	coachingHandler := coaching.NewHandler(coachingService)
 
 	userRateLimiter := ratelimit.NewUserRateLimiter(60)
 
@@ -251,6 +256,12 @@ func SetupRouter(cfg *config.Config, pool *pgxpool.Pool) chi.Router {
 
 			// Trends route (Phase 5)
 			r.Get("/trends", trendsHandler.GetTrends)
+
+			// Coaching routes (Level 4 application & status)
+			r.Route("/coaches", func(r chi.Router) {
+				r.Post("/apply", coachingHandler.Apply)
+				r.Get("/my-application", coachingHandler.GetMyApplication)
+			})
 		})
 
 		// Admin Protected Routes (Role == "admin")
@@ -261,6 +272,8 @@ func SetupRouter(cfg *config.Config, pool *pgxpool.Pool) chi.Router {
 			r.Route("/admin", func(r chi.Router) {
 				r.Get("/drafts", vaultHandler.ListDrafts)
 				r.Patch("/drafts/{id}/status", vaultHandler.UpdateDraftStatus)
+				r.Get("/coach-applications", coachingHandler.ListApplications)
+				r.Patch("/coach-applications/{id}/status", coachingHandler.UpdateStatus)
 			})
 		})
 	})
