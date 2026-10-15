@@ -13,6 +13,8 @@ export interface MasteryLevelInfo extends MasteryLevelConfig {
   nextLevel: MasteryLevelConfig | null;
   progressPct: number; // 0 to 100 towards next level
   nextRequirementText?: string;
+  isCoach?: boolean;
+  canApplyForCoach?: boolean;
 }
 
 export const MASTERY_LEVELS: MasteryLevelConfig[] = [
@@ -50,9 +52,9 @@ export const MASTERY_LEVELS: MasteryLevelConfig[] = [
   },
   {
     level: 5,
-    title: "Bậc thầy H1T",
-    shortLabel: "Cấp 5 · Tinh hoa",
-    description: "Đỉnh cao kỷ luật dinh dưỡng thể thao và vi chất toàn diện.",
+    title: "Bậc thầy H1T · Huấn luyện viên",
+    shortLabel: "Cấp 5 · HLV",
+    description: "Đỉnh cao kỷ luật dinh dưỡng thể thao và vi chất toàn diện, được bảo chứng bởi Ban Chuyên môn H1T.",
     minStreakDays: 60,
     minAvgMicros: 20,
   },
@@ -62,12 +64,30 @@ export function getMasteryLevelDetails(level: MasteryLevelId): MasteryLevelConfi
   return MASTERY_LEVELS.find((l) => l.level === level) || MASTERY_LEVELS[0];
 }
 
-export function calculateMasteryLevel(streakDays: number, avgMicrosAchieved: number): MasteryLevelInfo {
+export function calculateMasteryLevel(
+  streakDays: number,
+  avgMicrosAchieved: number,
+  isCoach: boolean = false
+): MasteryLevelInfo {
   const safeStreak = Math.max(0, streakDays);
   const safeMicros = Math.max(0, avgMicrosAchieved);
 
+  // If certified as coach, user is granted Level 5 directly
+  if (isCoach) {
+    const tier5 = MASTERY_LEVELS[4];
+    return {
+      ...tier5,
+      nextLevel: null,
+      progressPct: 100,
+      isCoach: true,
+      canApplyForCoach: false,
+    };
+  }
+
+  // Automatic progression for regular members caps at Level 4 (Index 3)
+  // Level 5 requires Admin / Coaching review
   let currentIdx = 0;
-  for (let i = MASTERY_LEVELS.length - 1; i >= 0; i--) {
+  for (let i = 3; i >= 0; i--) {
     const tier = MASTERY_LEVELS[i];
     if (safeStreak >= tier.minStreakDays && safeMicros >= tier.minAvgMicros) {
       currentIdx = i;
@@ -78,25 +98,44 @@ export function calculateMasteryLevel(streakDays: number, avgMicrosAchieved: num
   const current = MASTERY_LEVELS[currentIdx];
   const next = currentIdx < MASTERY_LEVELS.length - 1 ? MASTERY_LEVELS[currentIdx + 1] : null;
 
-  if (!next) {
+  // If user has reached Level 4
+  if (current.level === 4) {
+    const tier5 = MASTERY_LEVELS[4];
+    const streakNeeded = Math.max(0, tier5.minStreakDays - safeStreak);
+    const microsNeeded = Math.max(0, Math.ceil(tier5.minAvgMicros - safeMicros));
+
+    let nextRequirementText = "";
+    if (streakNeeded > 0 || microsNeeded > 0) {
+      nextRequirementText = `Cần ${tier5.minStreakDays} ngày và ${tier5.minAvgMicros}/22 vi chất trước khi ứng tuyển Huấn luyện viên`;
+    } else {
+      nextRequirementText = "Đã đủ điều kiện dữ liệu. Đăng ký xét duyệt với Ban Chuyên môn để kích hoạt Cấp 5 (Huấn luyện viên)";
+    }
+
+    const streakProgress = Math.min(1, safeStreak / tier5.minStreakDays);
+    const microsProgress = Math.min(1, safeMicros / tier5.minAvgMicros);
+    const progressPct = Math.round(((streakProgress + microsProgress) / 2) * 100);
+
     return {
       ...current,
-      nextLevel: null,
-      progressPct: 100,
+      nextLevel: tier5,
+      progressPct,
+      nextRequirementText,
+      isCoach: false,
+      canApplyForCoach: true,
     };
   }
 
-  // Calculate percentage toward next tier based on streak and micros
-  const streakRange = next.minStreakDays - current.minStreakDays;
-  const microsRange = next.minAvgMicros - current.minAvgMicros;
+  // Normal progression for Levels 1 to 3
+  const streakRange = next!.minStreakDays - current.minStreakDays;
+  const microsRange = next!.minAvgMicros - current.minAvgMicros;
 
   const streakProgress = streakRange > 0 ? Math.min(1, Math.max(0, (safeStreak - current.minStreakDays) / streakRange)) : 1;
   const microsProgress = microsRange > 0 ? Math.min(1, Math.max(0, (safeMicros - current.minAvgMicros) / microsRange)) : 1;
 
   const progressPct = Math.round(((streakProgress + microsProgress) / 2) * 100);
 
-  const streakNeeded = Math.max(0, next.minStreakDays - safeStreak);
-  const microsNeeded = Math.max(0, Math.ceil(next.minAvgMicros - safeMicros));
+  const streakNeeded = Math.max(0, next!.minStreakDays - safeStreak);
+  const microsNeeded = Math.max(0, Math.ceil(next!.minAvgMicros - safeMicros));
 
   let nextRequirementText = "";
   if (streakNeeded > 0 && microsNeeded > 0) {
@@ -112,8 +151,9 @@ export function calculateMasteryLevel(streakDays: number, avgMicrosAchieved: num
     nextLevel: next,
     progressPct,
     nextRequirementText,
+    isCoach: false,
+    canApplyForCoach: false,
   };
 }
 
 export const getMasteryLevel = calculateMasteryLevel;
-

@@ -102,3 +102,95 @@ export function filterCoachesBySpecialty(specialty: string): CoachProfile[] {
   }
   return FEATURED_COACHES.filter((c) => c.specialties.includes(specialty));
 }
+
+export interface CoachApplication {
+  id: string;
+  name: string;
+  email: string;
+  specialty: string;
+  experienceYears: number;
+  socialLink: string;
+  message: string;
+  status: "pending" | "approved" | "rejected";
+  createdAt: string;
+}
+
+export const COACH_APPLICATIONS_STORAGE_KEY = "h1t_coach_applications_v1";
+
+export const INITIAL_COACH_APPLICATIONS: CoachApplication[] = [
+  {
+    id: "app-vu-nguyen",
+    name: "Vũ Minh Tuấn",
+    email: "tuan.vu@example.com",
+    specialty: "Tăng cơ",
+    experienceYears: 4,
+    socialLink: "https://zalo.me/g/tuanvu-nutrition",
+    message: "Tôi đã đạt 45 ngày ghi chép liên tiếp và 20 vi chất. Muốn đồng hành hướng dẫn người mới trong nhóm.",
+    status: "pending",
+    createdAt: "2026-10-14T09:30:00.000Z",
+  },
+  {
+    id: "app-mai-anh",
+    name: "Hoàng Mai Anh",
+    email: "maianh.fit@example.com",
+    specialty: "Dinh dưỡng nữ giới",
+    experienceYears: 3,
+    socialLink: "https://facebook.com/groups/maianh.healthy",
+    message: "Chứng chỉ sơ cấp Precision Nutrition, mong muốn chia sẻ thực đơn vi chất nữ.",
+    status: "pending",
+    createdAt: "2026-10-15T08:15:00.000Z",
+  },
+];
+
+let memoryApplications: CoachApplication[] | null = null;
+
+export function getCoachApplications(): CoachApplication[] {
+  if (memoryApplications !== null) {
+    return memoryApplications;
+  }
+  try {
+    const storage = typeof window !== "undefined" ? window.localStorage : globalThis.localStorage;
+    const raw = storage?.getItem(COACH_APPLICATIONS_STORAGE_KEY);
+    if (!raw) {
+      storage?.setItem(COACH_APPLICATIONS_STORAGE_KEY, JSON.stringify(INITIAL_COACH_APPLICATIONS));
+      memoryApplications = [...INITIAL_COACH_APPLICATIONS];
+      return memoryApplications;
+    }
+    memoryApplications = JSON.parse(raw);
+    return memoryApplications!;
+  } catch {
+    return INITIAL_COACH_APPLICATIONS;
+  }
+}
+
+export function submitCoachApplication(data: Omit<CoachApplication, "id" | "status" | "createdAt">): CoachApplication {
+  const newApp: CoachApplication = {
+    ...data,
+    id: `app-${Date.now()}`,
+    status: "pending",
+    createdAt: new Date().toISOString(),
+  };
+  const current = getCoachApplications();
+  const updated = [newApp, ...current];
+  memoryApplications = updated;
+  try {
+    const storage = typeof window !== "undefined" ? window.localStorage : globalThis.localStorage;
+    storage?.setItem(COACH_APPLICATIONS_STORAGE_KEY, JSON.stringify(updated));
+  } catch {
+    // fallback
+  }
+  return newApp;
+}
+
+export function updateCoachApplicationStatus(id: string, status: "approved" | "rejected"): void {
+  const current = getCoachApplications();
+  const updated = current.map((a) => (a.id === id ? { ...a, status } : a));
+  memoryApplications = updated;
+  try {
+    const storage = typeof window !== "undefined" ? window.localStorage : globalThis.localStorage;
+    storage?.setItem(COACH_APPLICATIONS_STORAGE_KEY, JSON.stringify(updated));
+  } catch {
+    // fallback
+  }
+}
+

@@ -13,12 +13,14 @@ describe("mastery-levels", () => {
     expect(res.level).toBe(1);
     expect(res.title).toBe("Người mới bắt đầu");
     expect(res.nextLevel?.level).toBe(2);
+    expect(res.canApplyForCoach).toBe(false);
   });
 
   it("calculates level 2 when streak is at least 7 days and micros at least 10", () => {
     const res = calculateMasteryLevel(7, 10);
     expect(res.level).toBe(2);
     expect(res.title).toBe("Kỷ luật cơ bản");
+    expect(res.canApplyForCoach).toBe(false);
   });
 
   it("keeps level 1 if streak is 10 days but micros under 10", () => {
@@ -30,18 +32,30 @@ describe("mastery-levels", () => {
     const res = calculateMasteryLevel(14, 15);
     expect(res.level).toBe(3);
     expect(res.title).toBe("Cân bằng vi chất");
+    expect(res.canApplyForCoach).toBe(false);
   });
 
-  it("calculates level 4 when streak is 30 days and micros at least 18", () => {
+  it("calculates level 4 when streak is 30 days and micros at least 18, unlocking coach application", () => {
     const res = calculateMasteryLevel(35, 18.5);
     expect(res.level).toBe(4);
     expect(res.title).toBe("Dinh dưỡng tối ưu");
+    expect(res.canApplyForCoach).toBe(true);
+    expect(res.nextLevel?.level).toBe(5);
   });
 
-  it("calculates level 5 for high streak and high micronutrient coverage", () => {
-    const res = calculateMasteryLevel(65, 21);
+  it("keeps level 4 for regular users with 65 days streak until verified as coach", () => {
+    const res = calculateMasteryLevel(65, 21, false);
+    expect(res.level).toBe(4);
+    expect(res.title).toBe("Dinh dưỡng tối ưu");
+    expect(res.canApplyForCoach).toBe(true);
+    expect(res.nextRequirementText).toContain("Đăng ký xét duyệt");
+  });
+
+  it("calculates level 5 directly when user is certified as coach (isCoach = true)", () => {
+    const res = calculateMasteryLevel(65, 21, true);
     expect(res.level).toBe(5);
-    expect(res.title).toBe("Bậc thầy H1T");
+    expect(res.title).toContain("Huấn luyện viên");
+    expect(res.isCoach).toBe(true);
     expect(res.nextLevel).toBeNull();
     expect(res.progressPct).toBe(100);
   });

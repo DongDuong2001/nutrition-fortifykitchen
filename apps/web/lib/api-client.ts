@@ -11,7 +11,15 @@ import { MOCK_FOODS, type FoodItem } from "./mock/foods";
 import { searchFoods as searchMockFoods } from "./search";
 import type { SetupProfile } from "./onboarding";
 import { accountStorage } from "./storage-keys";
-import { type CoachProfile, filterCoachesBySpecialty, getCoachById } from "./coaches";
+import {
+  type CoachProfile,
+  type CoachApplication,
+  filterCoachesBySpecialty,
+  getCoachById,
+  getCoachApplications,
+  submitCoachApplication,
+  updateCoachApplicationStatus,
+} from "./coaches";
 import { type LeaderboardPeriod, type LeaderboardResponse, getMockLeaderboard, setLeaderboardOptIn as setLeaderboardOptInState } from "./leaderboard";
 import { type MasteryLevelInfo, calculateMasteryLevel } from "./mastery-levels";
 
@@ -897,7 +905,20 @@ export const apiClient = {
     return true;
   },
 
-  getMasteryLevel(streakDays = 0, avgMicrosAchieved = 0): MasteryLevelInfo {
-    return calculateMasteryLevel(streakDays, avgMicrosAchieved);
+  getMasteryLevel(streakDays = 0, avgMicrosAchieved = 0, isCoach = false): MasteryLevelInfo {
+    return calculateMasteryLevel(streakDays, avgMicrosAchieved, isCoach);
+  },
+
+  async getCoachApplications(): Promise<CoachApplication[]> {
+    return getCoachApplications();
+  },
+
+  async submitCoachApplication(data: Omit<CoachApplication, "id" | "status" | "createdAt">): Promise<CoachApplication> {
+    return submitCoachApplication(data);
+  },
+
+  async updateCoachApplicationStatus(id: string, status: "approved" | "rejected"): Promise<void> {
+    updateCoachApplicationStatus(id, status);
   },
 };
+

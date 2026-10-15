@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { FEATURED_COACHES, getCoachById, filterCoachesBySpecialty, COACH_SPECIALTIES } from "../coaches";
+import {
+  FEATURED_COACHES,
+  getCoachById,
+  filterCoachesBySpecialty,
+  COACH_SPECIALTIES,
+  getCoachApplications,
+  submitCoachApplication,
+  updateCoachApplicationStatus,
+} from "../coaches";
 
 describe("coaches", () => {
   it("provides active featured coaches list", () => {
@@ -34,5 +42,28 @@ describe("coaches", () => {
     expect(COACH_SPECIALTIES).toContain("Tất cả");
     expect(COACH_SPECIALTIES).toContain("Tăng cơ");
     expect(COACH_SPECIALTIES).toContain("Giảm mỡ bền vững");
+  });
+
+  it("loads default coach applications and submits a new application", () => {
+    const apps = getCoachApplications();
+    expect(apps.length).toBeGreaterThanOrEqual(2);
+
+    const submitted = submitCoachApplication({
+      name: "Trần Văn Bình",
+      email: "binh.tran@example.com",
+      specialty: "Sức bền & Marathon",
+      experienceYears: 5,
+      socialLink: "https://zalo.me/g/binhtran",
+      message: "HLV chạy bộ phong trào muốn hỗ trợ thành viên tối ưu carb và điện giải.",
+    });
+
+    expect(submitted.id).toBeDefined();
+    expect(submitted.status).toBe("pending");
+    expect(submitted.name).toBe("Trần Văn Bình");
+
+    updateCoachApplicationStatus(submitted.id, "approved");
+    const updatedApps = getCoachApplications();
+    const found = updatedApps.find((a) => a.id === submitted.id);
+    expect(found?.status).toBe("approved");
   });
 });
