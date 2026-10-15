@@ -1,0 +1,11 @@
+node_modules
+.next
+.screenshots
+tests/probes/out
+*.log
+*.tsbuildinfo
+.env
+.env.*
+.DS_Store
+Dockerfile
+.dockerignore

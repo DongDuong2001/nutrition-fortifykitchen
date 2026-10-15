@@ -1,0 +1,35 @@
+# Automatic HTTPS (Let's Encrypt) for every site below. DNS A records for the apex,
+# www and api hosts must point at this VPS before the first start.
+#
+# The web app sets its own HSTS, CSP, X-Frame-Options, Referrer-Policy and
+# Permissions-Policy from next.config.ts, so Caddy adds none of those for the web site.
+
+(compress) {
+	encode zstd gzip
+}
+
+lehongkhanh.vn {
+	import compress
+	header -Server
+	header -X-Powered-By
+	reverse_proxy web:3000
+}
+
+www.lehongkhanh.vn {
+	redir https://lehongkhanh.vn{uri} permanent
+}
+
+api.lehongkhanh.vn {
+	import compress
+	header {
+		-Server
+		Strict-Transport-Security "max-age=63072000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "no-referrer"
+		Content-Security-Policy "default-src 'none'; frame-ancestors 'none'"
+	}
+	reverse_proxy api:8080 {
+		header_up X-Real-IP {remote_host}
+	}
+}
