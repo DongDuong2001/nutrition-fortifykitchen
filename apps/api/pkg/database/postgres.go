@@ -35,9 +35,9 @@ func NewPostgresPool(ctx context.Context) (*PostgresClient, error) {
 	config.MaxConnIdleTime = 15 * time.Minute
 	config.HealthCheckPeriod = 30 * time.Second
 
-	// Set search_path to prioritize the nutrition schema
+	// Set search_path to prioritize the nutrition schema and include extensions
 	config.ConnConfig.RuntimeParams = map[string]string{
-		"search_path": "nutrition, public",
+		"search_path": "nutrition, public, extensions",
 	}
 
 	pool, err := pgxpool.NewWithConfig(ctx, config)

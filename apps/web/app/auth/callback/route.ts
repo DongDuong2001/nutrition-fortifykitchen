@@ -6,10 +6,8 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
 
-  const forwardedHost = request.headers.get("x-forwarded-host");
-  const host = forwardedHost ?? request.headers.get("host");
-  const proto = request.headers.get("x-forwarded-proto") ?? (process.env.NODE_ENV === "development" ? "http" : "https");
-  const baseOrigin = host ? `${proto}://${host}` : origin;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/+$/, "");
+  const baseOrigin = siteUrl || origin;
 
   // Sanitize next target to prevent open redirect vulnerabilities
   const rawNext = searchParams.get("next") ?? "/";

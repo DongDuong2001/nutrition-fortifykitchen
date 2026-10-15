@@ -287,5 +287,120 @@ func TestAuthMiddleware(t *testing.T) {
 			t.Errorf("expected 200 OK for Supabase SSR JSON cookie auth, got %d", rec.Code)
 		}
 	})
+
+	t.Run("cookie auth on POST with matching Origin header succeeds", func(t *testing.T) {
+		claims := auth.SupabaseClaims{
+			Sub: testUserID.String(),
+			AppMetadata: map[string]interface{}{
+				"role": "authenticated",
+			},
+		}
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		tokenStr, _ := token.SignedString(validSecret)
+
+		req := httptest.NewRequest("POST", "/api/v1/diary/entry", nil)
+		req.Header.Set("Origin", "http://localhost:3000")
+		req.AddCookie(&http.Cookie{
+			Name:  "sb-access-token",
+			Value: tokenStr,
+		})
+		rec := httptest.NewRecorder()
+
+		middlewareWithSecret.Authenticate(testHandler).ServeHTTP(rec, req)
+		if rec.Code != http.StatusOK {
+			t.Errorf("expected 200 OK for cookie write with allowed Origin, got %d", rec.Code)
+		}
+	})
+
+	t.Run("cookie auth on POST with matching Referer header succeeds", func(t *testing.T) {
+		claims := auth.SupabaseClaims{
+			Sub: testUserID.String(),
+			AppMetadata: map[string]interface{}{
+				"role": "authenticated",
+			},
+		}
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		tokenStr, _ := token.SignedString(validSecret)
+
+		req := httptest.NewRequest("POST", "/api/v1/diary/entry", nil)
+		req.Header.Set("Referer", "http://localhost:3000/diary")
+		req.AddCookie(&http.Cookie{
+			Name:  "sb-access-token",
+			Value: tokenStr,
+		})
+		rec := httptest.NewRecorder()
+
+		middlewareWithSecret.Authenticate(testHandler).ServeHTTP(rec, req)
+		if rec.Code != http.StatusOK {
+			t.Errorf("expected 200 OK for cookie write with allowed Referer, got %d", rec.Code)
+		}
+	})
+
+	t.Run("cookie auth on POST with mismatched Origin header returns 403 Forbidden", func(t *testing.T) {
+		claims := auth.SupabaseClaims{
+			Sub: testUserID.String(),
+			AppMetadata: map[string]interface{}{
+				"role": "authenticated",
+			},
+		}
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		tokenStr, _ := token.SignedString(validSecret)
+
+		req := httptest.NewRequest("POST", "/api/v1/diary/entry", nil)
+		req.Header.Set("Origin", "https://evil.attacker.com")
+		req.AddCookie(&http.Cookie{
+			Name:  "sb-access-token",
+			Value: tokenStr,
+		})
+		rec := httptest.NewRecorder()
+
+		middlewareWithSecret.Authenticate(testHandler).ServeHTTP(rec, req)
+		if rec.Code != http.StatusForbidden {
+			t.Errorf("expected 403 Forbidden for cookie write with disallowed Origin, got %d", rec.Code)
+		}
+	})
+
+	t.Run("cookie auth on POST without Origin/Referer returns 403 Forbidden", func(t *testing.T) {
+		claims := auth.SupabaseClaims{
+			Sub: testUserID.String(),
+			AppMetadata: map[string]interface{}{
+				"role": "authenticated",
+			},
+		}
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		tokenStr, _ := token.SignedString(validSecret)
+
+		req := httptest.NewRequest("POST", "/api/v1/diary/entry", nil)
+		req.AddCookie(&http.Cookie{
+			Name:  "sb-access-token",
+			Value: tokenStr,
+		})
+		rec := httptest.NewRecorder()
+
+		middlewareWithSecret.Authenticate(testHandler).ServeHTTP(rec, req)
+		if rec.Code != http.StatusForbidden {
+			t.Errorf("expected 403 Forbidden for cookie write without Origin/Referer, got %d", rec.Code)
+		}
+	})
+
+	t.Run("Bearer auth on POST without Origin header succeeds (exempt from CSRF check)", func(t *testing.T) {
+		claims := auth.SupabaseClaims{
+			Sub: testUserID.String(),
+			AppMetadata: map[string]interface{}{
+				"role": "authenticated",
+			},
+		}
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		tokenStr, _ := token.SignedString(validSecret)
+
+		req := httptest.NewRequest("POST", "/api/v1/diary/entry", nil)
+		req.Header.Set("Authorization", "Bearer "+tokenStr)
+		rec := httptest.NewRecorder()
+
+		middlewareWithSecret.Authenticate(testHandler).ServeHTTP(rec, req)
+		if rec.Code != http.StatusOK {
+			t.Errorf("expected 200 OK for Bearer token POST without Origin header, got %d", rec.Code)
+		}
+	})
 }
 

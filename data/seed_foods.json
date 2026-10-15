@@ -158,7 +158,7 @@
     ]
   },
   {
-    "source": "vn_table",
+    "source": "vn_fct",
     "source_id": "food-com-gao-lut",
     "name": "Cơm gạo lứt",
     "name_vi": "Cơm gạo lứt",
@@ -301,7 +301,7 @@
     ]
   },
   {
-    "source": "vn_table",
+    "source": "vn_fct",
     "source_id": "food-banh-trang",
     "name": "Bánh tráng",
     "name_vi": "Bánh tráng",
@@ -336,7 +336,7 @@
     ]
   },
   {
-    "source": "vn_table",
+    "source": "vn_fct",
     "source_id": "food-banh-trang-nuong",
     "name": "Bánh tráng nướng",
     "name_vi": "Bánh tráng nướng",
@@ -366,38 +366,7 @@
     ]
   },
   {
-    "source": "vn_table",
-    "source_id": "food-bun-cha",
-    "name": "Bún chả Hà Nội",
-    "name_vi": "Bún chả Hà Nội",
-    "category": "mon_viet",
-    "brand": null,
-    "tip_vi": null,
-    "nutrients": {
-      "energy": 185,
-      "carbs": 22,
-      "protein": 11.5,
-      "fat": 5.5,
-      "fiber": 1.2,
-      "sodium": 460,
-      "calcium": 38,
-      "iron": 1.6
-    },
-    "portions": [
-      {
-        "label_vi": "1 phần",
-        "grams": 350,
-        "sort": 0
-      },
-      {
-        "label_vi": "100 g",
-        "grams": 100,
-        "sort": 1
-      }
-    ]
-  },
-  {
-    "source": "vn_table",
+    "source": "vn_fct",
     "source_id": "food-pho-bo",
     "name": "Phở bò",
     "name_vi": "Phở bò",
@@ -428,7 +397,7 @@
     ]
   },
   {
-    "source": "vn_table",
+    "source": "vn_fct",
     "source_id": "food-com-tam-suon",
     "name": "Cơm tấm sườn",
     "name_vi": "Cơm tấm sườn",
@@ -459,7 +428,7 @@
     ]
   },
   {
-    "source": "vn_table",
+    "source": "vn_fct",
     "source_id": "food-banh-mi-thit",
     "name": "Bánh mì thịt",
     "name_vi": "Bánh mì thịt",
@@ -490,7 +459,7 @@
     ]
   },
   {
-    "source": "vn_table",
+    "source": "vn_fct",
     "source_id": "food-bun-bo-hue",
     "name": "Bún bò Huế",
     "name_vi": "Bún bò Huế",
@@ -637,7 +606,7 @@
     ]
   },
   {
-    "source": "vn_table",
+    "source": "vn_fct",
     "source_id": "food-dau-hu",
     "name": "Đậu hũ trắng",
     "name_vi": "Đậu hũ trắng",
@@ -670,7 +639,7 @@
     ]
   },
   {
-    "source": "vn_table",
+    "source": "vn_fct",
     "source_id": "food-rau-muong",
     "name": "Rau muống",
     "name_vi": "Rau muống",
@@ -740,7 +709,7 @@
     ]
   },
   {
-    "source": "vn_table",
+    "source": "vn_fct",
     "source_id": "food-sua-tuoi",
     "name": "Sữa tươi không đường",
     "name_vi": "Sữa tươi không đường",
@@ -850,7 +819,7 @@
     ]
   },
   {
-    "source": "vn_table",
+    "source": "vn_fct",
     "source_id": "food-hat-dieu",
     "name": "Hạt điều rang",
     "name_vi": "Hạt điều rang",
@@ -919,7 +888,7 @@
     ]
   },
   {
-    "source": "vn_table",
+    "source": "vn_fct",
     "source_id": "food-buoi",
     "name": "Bưởi da xanh",
     "name_vi": "Bưởi da xanh",

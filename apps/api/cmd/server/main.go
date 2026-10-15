@@ -56,7 +56,7 @@ func main() {
 		logger.Log.Fatal().Err(err).Msg("Database connection initialization failed")
 	}
 	defer dbClient.Close()
-	logger.Log.Info().Msg("PostgreSQL 17 connection pool established (session mode, search_path: nutrition, public)")
+	logger.Log.Info().Msg("PostgreSQL 17 connection pool established (session mode, search_path: nutrition, public, extensions)")
 
 	// 4. Build router
 	r := SetupRouter(cfg, dbClient.Pool)
@@ -128,7 +128,7 @@ func SetupRouter(cfg *config.Config, pool *pgxpool.Pool) chi.Router {
 		logger.Log.Fatal().Msg("Authentication configuration missing: SUPABASE_JWT_SECRET (or SUPABASE_SERVICE_ROLE_KEY) or SUPABASE_JWKS_URL (or SUPABASE_URL) is required to start the server")
 	}
 
-	authMiddleware := auth.NewMiddleware()
+	authMiddleware := auth.NewMiddleware().WithAllowedOrigins(cfg.AllowedOrigins)
 
 	// Setup Chi Router
 	r := chi.NewRouter()

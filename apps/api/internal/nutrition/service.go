@@ -133,8 +133,8 @@ func (s *nutritionService) CreateCustomFood(ctx context.Context, userID uuid.UUI
 	}
 
 	portions := []Portion{
-		{LabelVi: servingLabel, Grams: req.ServingSize},
-		{LabelVi: "100 g", Grams: 100},
+		{ID: uuid.New(), LabelVi: servingLabel, Grams: req.ServingSize},
+		{ID: uuid.New(), LabelVi: "100 g", Grams: 100},
 	}
 
 	food := &FoodDetail{

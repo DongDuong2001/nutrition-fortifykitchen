@@ -29,10 +29,10 @@ declare global {
 export function HCaptcha({ onVerify, onExpire, className = "" }: HCaptchaProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
-  const siteKey =
-    process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY || "f8f8c540-49f6-437c-9864-d518bc94b0a6";
+  const siteKey = process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY || "";
 
   useEffect(() => {
+    if (!siteKey) return;
     let mounted = true;
 
     function renderWidget() {
@@ -88,6 +88,10 @@ export function HCaptcha({ onVerify, onExpire, className = "" }: HCaptchaProps) 
       }
     };
   }, [siteKey, onVerify, onExpire]);
+
+  if (!siteKey) {
+    return null;
+  }
 
   return (
     <div className={`flex justify-center my-2 ${className}`}>

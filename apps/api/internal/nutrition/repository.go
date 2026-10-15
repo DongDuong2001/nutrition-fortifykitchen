@@ -103,7 +103,7 @@ func (r *pgxRepository) SearchFoods(ctx context.Context, filter FoodSearchFilter
 		}
 
 		portionsSQL := `
-			SELECT food_id, label_vi, grams
+			SELECT food_id, id, label_vi, grams
 			FROM nutrition.food_portions
 			WHERE food_id = ANY($1)
 			ORDER BY sort ASC
@@ -115,7 +115,7 @@ func (r *pgxRepository) SearchFoods(ctx context.Context, filter FoodSearchFilter
 			for pRows.Next() {
 				var fid uuid.UUID
 				var p Portion
-				if err := pRows.Scan(&fid, &p.LabelVi, &p.Grams); err == nil {
+				if err := pRows.Scan(&fid, &p.ID, &p.LabelVi, &p.Grams); err == nil {
 					portionMap[fid] = append(portionMap[fid], p)
 				}
 			}
@@ -273,11 +273,19 @@ func (r *pgxRepository) CreateCustomFood(ctx context.Context, userID uuid.UUID, 
 		return nil, fmt.Errorf("failed to insert custom food: %w", err)
 	}
 
-	for idx, p := range portions {
-		_, err = tx.Exec(ctx, `
-			INSERT INTO nutrition.food_portions (food_id, label_vi, grams, sort)
-			VALUES ($1, $2, $3, $4)
-		`, food.ID, p.LabelVi, p.Grams, idx)
+	for idx := range portions {
+		if portions[idx].ID != uuid.Nil {
+			_, err = tx.Exec(ctx, `
+				INSERT INTO nutrition.food_portions (id, food_id, label_vi, grams, sort)
+				VALUES ($1, $2, $3, $4, $5)
+			`, portions[idx].ID, food.ID, portions[idx].LabelVi, portions[idx].Grams, idx)
+		} else {
+			err = tx.QueryRow(ctx, `
+				INSERT INTO nutrition.food_portions (food_id, label_vi, grams, sort)
+				VALUES ($1, $2, $3, $4)
+				RETURNING id
+			`, food.ID, portions[idx].LabelVi, portions[idx].Grams, idx).Scan(&portions[idx].ID)
+		}
 		if err != nil {
 			return nil, fmt.Errorf("failed to insert portion: %w", err)
 		}

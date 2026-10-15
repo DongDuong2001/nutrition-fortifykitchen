@@ -10,6 +10,7 @@ export function foodSourceLabel(source?: string | null): string {
       return "USDA";
     case "cnf":
       return "CNF (Canada)";
+    case "vn-table":
     case "vn-fct":
       return "Bảng TPDD Việt Nam";
     case "custom":

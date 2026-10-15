@@ -35,8 +35,31 @@ type SupabaseClaims struct {
 
 // Middleware handles JWT authentication and user context injection
 type Middleware struct {
-	jwtSecret []byte
-	jwksCache *JWKSCache
+	jwtSecret      []byte
+	jwksCache      *JWKSCache
+	allowedOrigins []string
+}
+
+func defaultAllowedOrigins() []string {
+	originsStr := os.Getenv("CORS_ORIGINS")
+	if originsStr == "" {
+		originsStr = os.Getenv("CORS_ALLOWED_ORIGINS")
+	}
+	if originsStr != "" {
+		var list []string
+		for _, o := range strings.Split(originsStr, ",") {
+			if trimmed := strings.TrimSpace(o); trimmed != "" {
+				list = append(list, strings.ToLower(trimmed))
+			}
+		}
+		return list
+	}
+	return []string{
+		"http://localhost:3000",
+		"http://localhost:3100",
+		"http://localhost:3101",
+		"http://localhost:3102",
+	}
 }
 
 func parseSecretBytes(secret string) []byte {
@@ -66,7 +89,8 @@ func NewMiddleware() *Middleware {
 
 func NewMiddlewareWithSecret(secret []byte) *Middleware {
 	return &Middleware{
-		jwtSecret: secret,
+		jwtSecret:      secret,
+		allowedOrigins: defaultAllowedOrigins(),
 	}
 }
 
@@ -76,18 +100,69 @@ func NewMiddlewareWithOptions(secret string, jwksURL string) *Middleware {
 		cache = NewJWKSCache(jwksURL)
 	}
 	return &Middleware{
-		jwtSecret: parseSecretBytes(secret),
-		jwksCache: cache,
+		jwtSecret:      parseSecretBytes(secret),
+		jwksCache:      cache,
+		allowedOrigins: defaultAllowedOrigins(),
 	}
 }
 
+// WithAllowedOrigins overrides the allowed origins for cookie-authenticated CSRF validation
+func (m *Middleware) WithAllowedOrigins(origins []string) *Middleware {
+	m.allowedOrigins = origins
+	return m
+}
+
+func isWriteMethod(method string) bool {
+	switch method {
+	case http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete:
+		return true
+	default:
+		return false
+	}
+}
+
+func (m *Middleware) validateOrigin(r *http.Request) bool {
+	origin := r.Header.Get("Origin")
+	if origin == "" {
+		ref := r.Header.Get("Referer")
+		if ref != "" {
+			if u, err := url.Parse(ref); err == nil && u.Scheme != "" && u.Host != "" {
+				origin = u.Scheme + "://" + u.Host
+			}
+		}
+	}
+
+	if origin == "" {
+		return false
+	}
+
+	normOrigin := strings.ToLower(strings.TrimRight(origin, "/"))
+
+	// Allow same-origin requests where origin host matches request host
+	if u, err := url.Parse(origin); err == nil {
+		if strings.EqualFold(u.Host, r.Host) {
+			return true
+		}
+	}
+
+	for _, allowed := range m.allowedOrigins {
+		normAllowed := strings.ToLower(strings.TrimRight(allowed, "/"))
+		if normAllowed == "*" || normAllowed == normOrigin {
+			return true
+		}
+	}
+
+	return false
+}
+
 // extractToken retrieves the JWT string from Authorization Bearer header or HTTPOnly session cookies
-func extractToken(r *http.Request) string {
+// and returns whether the token was retrieved from cookie authentication.
+func extractToken(r *http.Request) (string, bool) {
 	authHeader := r.Header.Get("Authorization")
 	if authHeader != "" {
 		parts := strings.SplitN(authHeader, " ", 2)
 		if len(parts) == 2 && strings.EqualFold(parts[0], "Bearer") {
-			return strings.TrimSpace(parts[1])
+			return strings.TrimSpace(parts[1]), false
 		}
 	}
 
@@ -95,7 +170,7 @@ func extractToken(r *http.Request) string {
 	cookieNames := []string{"sb-access-token", "access_token", "sb_token"}
 	for _, name := range cookieNames {
 		if cookie, err := r.Cookie(name); err == nil && strings.TrimSpace(cookie.Value) != "" {
-			return strings.TrimSpace(cookie.Value)
+			return strings.TrimSpace(cookie.Value), true
 		}
 	}
 
@@ -124,28 +199,36 @@ func extractToken(r *http.Request) string {
 				AccessToken string `json:"access_token"`
 			}
 			if err := json.Unmarshal([]byte(val), &obj); err == nil && obj.AccessToken != "" {
-				return obj.AccessToken
+				return obj.AccessToken, true
 			}
 			var arr []string
 			if err := json.Unmarshal([]byte(val), &arr); err == nil && len(arr) > 0 && arr[0] != "" {
-				return arr[0]
+				return arr[0], true
 			}
 			if strings.Count(val, ".") == 2 {
-				return val
+				return val, true
 			}
 		}
 	}
 
-	return ""
+	return "", false
 }
 
 // Authenticate extracts and validates Bearer token or session cookie, then injects user info into request context
 func (m *Middleware) Authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		tokenStr := extractToken(r)
+		tokenStr, isCookieAuth := extractToken(r)
 		if tokenStr == "" {
 			response.Error(w, http.StatusUnauthorized, response.CodeUnauthorized, "missing authorization header or session cookie")
 			return
+		}
+
+		// Protect cookie-authenticated mutating requests against CSRF
+		if isCookieAuth && isWriteMethod(r.Method) {
+			if !m.validateOrigin(r) {
+				response.Error(w, http.StatusForbidden, response.CodeForbidden, "cross-origin write not allowed for cookie authentication")
+				return
+			}
 		}
 
 		claims := &SupabaseClaims{}

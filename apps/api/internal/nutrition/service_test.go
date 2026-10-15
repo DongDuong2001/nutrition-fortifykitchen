@@ -115,8 +115,14 @@ func TestNutritionService_CreateCustomFood_Scaling(t *testing.T) {
 	if res.Servings[0].LabelVi != "150 g" || res.Servings[0].Grams != 150 {
 		t.Errorf("unexpected first portion: %+v", res.Servings[0])
 	}
+	if res.Servings[0].ID == uuid.Nil {
+		t.Errorf("expected non-zero UUID for first portion, got %v", res.Servings[0].ID)
+	}
 	if res.Servings[1].LabelVi != "100 g" || res.Servings[1].Grams != 100 {
 		t.Errorf("unexpected second portion: %+v", res.Servings[1])
+	}
+	if res.Servings[1].ID == uuid.Nil {
+		t.Errorf("expected non-zero UUID for second portion, got %v", res.Servings[1].ID)
 	}
 }
 
