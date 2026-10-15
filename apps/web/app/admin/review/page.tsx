@@ -1,8 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { AppHeader } from "@/components/ui/app-header";
-import { AppShell } from "@/components/ui/app-shell";
 import {
   type CoachApplication,
   getCoachApplications,
@@ -82,19 +80,23 @@ export default function AdminReviewPage() {
   const filteredApps = applications.filter((a) => (appFilter === "all" ? true : a.status === appFilter));
 
   return (
-    <AppShell alignContainer="admin-review-page">
-      <AppHeader
-        variant="sub"
-        title="Quản trị & Kiểm duyệt"
-        subtitle="Xét duyệt hồ sơ HLV Cấp 5 và bản nháp thực đơn"
-        backHref="/explore"
-        layout="wide"
-        alignGroup="admin-header"
-      />
+    <div className="mx-auto w-full max-w-7xl space-y-6 bg-page px-4 py-6 font-sans text-text sm:space-y-8">
+      {/* Page Header */}
+      <div className="flex flex-col justify-between gap-4 border-b border-card-border pb-4 sm:flex-row sm:items-center">
+        <div>
+          <div className="mb-2 inline-flex items-center rounded-full bg-warning-bg px-3 py-1 text-[11px] font-bold tracking-wider text-warning-text">
+            Khu vực quản trị
+          </div>
+          <h1 className="m-0 font-display text-3xl font-extrabold italic tracking-tight text-text">
+            Quản trị & Kiểm duyệt
+          </h1>
+          <p className="mt-1 text-sm text-secondary">
+            Xét duyệt hồ sơ ứng tuyển Huấn luyện viên (Cấp 5) và các bản nháp thực đơn chuyên môn.
+          </p>
+        </div>
 
-      <main className="mx-auto w-full max-w-[1240px] space-y-6 px-4 py-6 font-sans text-text sm:space-y-8 lg:px-8">
-        {/* Section Navigation Tabs */}
-        <div className="flex items-center gap-2 rounded-full bg-page p-1 border border-card-border" role="group" aria-label="Phần kiểm duyệt">
+        {/* Section Navigation */}
+        <div className="flex items-center gap-2 rounded-full bg-page p-1 border border-card-border">
           <button
             type="button"
             onClick={() => setActiveTab("coaches")}
@@ -114,30 +116,30 @@ export default function AdminReviewPage() {
             Duyệt thực đơn ({drafts.filter((d) => d.status === "draft").length})
           </button>
         </div>
+      </div>
 
-        {/* Coach Applications Tab */}
-        {activeTab === "coaches" && (
-          <div className="space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="m-0 text-base font-bold text-text">Hồ sơ ứng tuyển Cấp 5 (Huấn luyện viên)</h2>
-              <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Lọc hồ sơ">
-                {(["all", "pending", "approved", "rejected"] as const).map((tab) => (
-                  <button
-                    key={tab}
-                    type="button"
-                    onClick={() => setAppFilter(tab)}
-                    className={`min-h-[44px] cursor-pointer rounded-full px-4 text-xs font-bold transition-transform duration-150 active:scale-[0.97] ${
-                      appFilter === tab
-                        ? "border-0 bg-ink text-on-dark"
-                        : "border border-card-border bg-card text-text hover:bg-page"
-                    }`}
-                  >
-                    {tab === "all" ? "Tất cả" : APP_STATUS_LABELS[tab]}
-                  </button>
-                ))}
-              </div>
+      {/* Coach Applications Tab */}
+      {activeTab === "coaches" && (
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="m-0 text-base font-bold text-text">Hồ sơ ứng tuyển Cấp 5 (Huấn luyện viên)</h2>
+            <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Lọc hồ sơ">
+              {(["all", "pending", "approved", "rejected"] as const).map((tab) => (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => setAppFilter(tab)}
+                  className={`min-h-[40px] cursor-pointer rounded-full px-4 text-xs font-bold transition-transform duration-150 active:scale-[0.97] ${
+                    appFilter === tab
+                      ? "border-0 bg-ink text-on-dark"
+                      : "border border-card-border bg-card text-text hover:bg-page"
+                  }`}
+                >
+                  {tab === "all" ? "Tất cả" : APP_STATUS_LABELS[tab]}
+                </button>
+              ))}
             </div>
-
+          </div>
 
           <div className="space-y-4 sm:space-y-6">
             {filteredApps.length === 0 ? (
@@ -179,7 +181,7 @@ export default function AdminReviewPage() {
                           href={app.socialLink}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex min-h-[44px] items-center rounded-lg border border-card-border bg-page px-3 py-1.5 text-xs font-medium text-blue hover:underline"
+                          className="rounded-lg bg-page px-2.5 py-1 border border-card-border text-blue hover:underline"
                         >
                           Xem nhóm cộng đồng
                         </a>
@@ -236,7 +238,7 @@ export default function AdminReviewPage() {
                   type="button"
                   aria-pressed={draftFilter === tab}
                   onClick={() => setDraftFilter(tab)}
-                  className={`min-h-[44px] cursor-pointer rounded-full px-4 text-xs font-bold tracking-wider transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none ${
+                  className={`min-h-[40px] cursor-pointer rounded-full px-4 text-xs font-bold tracking-wider transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none ${
                     draftFilter === tab
                       ? "border-0 bg-ink text-on-dark"
                       : "border border-card-border bg-card text-text hover:bg-page"
@@ -310,8 +312,6 @@ export default function AdminReviewPage() {
           </div>
         </div>
       )}
-      </main>
-    </AppShell>
+    </div>
   );
 }
-

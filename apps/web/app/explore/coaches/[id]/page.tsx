@@ -53,30 +53,10 @@ function CoachDetailInner() {
   );
 }
 
-function CoachDetailSkeleton() {
-  return (
-    <AppShell alignContainer="coach-detail">
-      <AppHeader
-        variant="sub"
-        title="Huấn luyện viên"
-        backHref="/explore/coaches"
-        layout="wide"
-      />
-      <main className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-8 pt-4 lg:mx-0 lg:max-w-[720px] lg:px-8">
-        <div aria-busy="true" aria-live="polite" className="flex flex-col gap-4">
-          <div className="h-[240px] rounded-[18px] bg-divider animate-pulse motion-reduce:animate-none" />
-          <div className="h-[140px] rounded-[18px] bg-divider animate-pulse motion-reduce:animate-none" />
-        </div>
-      </main>
-    </AppShell>
-  );
-}
-
 export default function CoachDetailPage() {
   return (
-    <Suspense fallback={<CoachDetailSkeleton />}>
+    <Suspense fallback={null}>
       <CoachDetailInner />
     </Suspense>
   );
 }
-

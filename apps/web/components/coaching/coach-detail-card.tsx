@@ -39,13 +39,13 @@ export function CoachDetailCard({ coach }: { coach: CoachProfile }) {
         </div>
 
         <div className="flex flex-col gap-2 pt-2 border-t border-card-border/60">
-          <h2 className="m-0 text-sm font-bold text-text">Giới thiệu</h2>
+          <h2 className="m-0 text-xs font-bold uppercase tracking-wider text-secondary">Giới thiệu</h2>
           <p className="m-0 text-sm leading-relaxed text-text">{coach.bio}</p>
         </div>
 
         {/* Specialties */}
         <div className="flex flex-col gap-2">
-          <h2 className="m-0 text-sm font-bold text-text">Lĩnh vực chuyên môn</h2>
+          <h2 className="m-0 text-xs font-bold uppercase tracking-wider text-secondary">Lĩnh vực chuyên môn</h2>
           <div className="flex flex-wrap gap-2">
             {coach.specialties.map((s) => (
               <span
@@ -60,11 +60,11 @@ export function CoachDetailCard({ coach }: { coach: CoachProfile }) {
 
         {/* Credentials */}
         <div className="flex flex-col gap-2">
-          <h2 className="m-0 text-sm font-bold text-text">Bằng cấp & Chứng nhận</h2>
-          <ul className="m-0 flex flex-col gap-2 p-0 list-none text-xs font-medium text-secondary">
+          <h2 className="m-0 text-xs font-bold uppercase tracking-wider text-secondary">Bằng cấp & Chứng nhận</h2>
+          <ul className="m-0 flex flex-col gap-1.5 p-0 list-none text-xs font-medium text-secondary">
             {coach.credentials.map((c) => (
               <li key={c} className="flex items-center gap-2">
-                <IconCheck size={14} className="text-blue shrink-0" aria-hidden="true" />
+                <IconCheck size={14} className="text-blue shrink-0" />
                 <span>{c}</span>
               </li>
             ))}
@@ -75,15 +75,15 @@ export function CoachDetailCard({ coach }: { coach: CoachProfile }) {
       {/* Recommended Foods */}
       {coach.recommendedFoods.length > 0 && (
         <Card as="section" className="flex flex-col gap-3 p-5">
-          <div className="flex items-center gap-2">
-            <IconSparkles size={16} className="text-blue" aria-hidden="true" />
+          <div className="flex items-center gap-1.5">
+            <IconSparkles size={16} className="text-blue" />
             <h2 className="m-0 text-sm font-bold text-text">Món ăn khuyên dùng bởi HLV</h2>
           </div>
           <div className="grid grid-cols-2 gap-2">
             {coach.recommendedFoods.map((f) => (
               <div
                 key={f}
-                className="flex items-center gap-2 rounded-[12px] bg-page p-3 border border-card-border/80"
+                className="flex items-center gap-2 rounded-xl bg-page p-3 border border-card-border/80"
               >
                 <span className="text-xs font-semibold text-text">{f}</span>
               </div>
@@ -91,7 +91,6 @@ export function CoachDetailCard({ coach }: { coach: CoachProfile }) {
           </div>
         </Card>
       )}
-
 
       {/* Direct Contact & Group Join CTAs */}
       <Card as="section" className="flex flex-col gap-3 p-5 bg-card">

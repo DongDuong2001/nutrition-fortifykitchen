@@ -12,11 +12,7 @@ export function CoachCard({ coach }: { coach: CoachProfile }) {
     .toUpperCase();
 
   return (
-    <Card
-      as="article"
-      data-align-group="coaches-card"
-      className="flex flex-col justify-between gap-3 p-4 transition-transform duration-150 active:scale-[0.98] motion-reduce:active:scale-100"
-    >
+    <Card as="article" className="flex flex-col justify-between gap-3 p-4 transition-transform duration-150 active:scale-[0.98] motion-reduce:active:scale-100">
       <div className="flex items-start gap-3">
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue/10 text-base font-extrabold text-blue border border-blue/20">
           {initials}
@@ -36,7 +32,7 @@ export function CoachCard({ coach }: { coach: CoachProfile }) {
 
       <p className="m-0 line-clamp-2 text-[13px] leading-relaxed text-secondary">{coach.bio}</p>
 
-      <div className="flex flex-wrap gap-2 pt-1">
+      <div className="flex flex-wrap gap-1.5 pt-1">
         {coach.specialties.slice(0, 2).map((s) => (
           <span
             key={s}
@@ -46,7 +42,7 @@ export function CoachCard({ coach }: { coach: CoachProfile }) {
           </span>
         ))}
         {coach.specialties.length > 2 && (
-          <span className="rounded-full bg-page px-2.5 py-1 text-[11px] font-medium text-secondary border border-card-border">
+          <span className="rounded-full bg-page px-2 py-1 text-[11px] font-medium text-secondary">
             +{coach.specialties.length - 2}
           </span>
         )}
@@ -62,5 +58,4 @@ export function CoachCard({ coach }: { coach: CoachProfile }) {
       </div>
     </Card>
   );
-
 }

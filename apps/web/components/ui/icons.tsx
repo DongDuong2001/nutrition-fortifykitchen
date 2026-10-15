@@ -61,12 +61,6 @@ export const IconSearch = createH1TIcon(Myna.Search);
 export const IconTrash = createH1TIcon(Myna.Trash);
 export const IconShare = createH1TIcon(Myna.Share);
 export const IconLink = createH1TIcon(Myna.Link);
-export const IconGlobe = createH1TIcon(Myna.Globe);
-export const IconDatabase = createH1TIcon(Myna.Database);
-export const IconMobile = createH1TIcon(Myna.Mobile);
-export const IconDownload = createH1TIcon(Myna.Download);
-export const IconFileText = createH1TIcon(Myna.FileText);
-export const IconShield = createH1TIcon(Myna.Shield);
 
 // Domain & Feature Icons
 export const IconTarget = createH1TIcon(Myna.Target);
@@ -82,4 +76,3 @@ export const IconDiamond = createH1TIcon(Myna.Diamond);
 
 // Re-export raw package for specialized access
 export * from "@mynaui/icons-react";
-
