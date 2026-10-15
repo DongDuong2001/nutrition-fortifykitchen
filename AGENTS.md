@@ -146,8 +146,7 @@ Run routine work only through these npm scripts in `apps/web`. The user has auto
 - Don't chain raw shell commands (`lsof … | xargs kill`, `cd … && …`) for routine work. Use the scripts.
 - **No inline scripts.** Never run `python3 -c "…"`, `node -e "…"` or heredoc scripts. Each one is a new command, so the user has to approve it every time. Put any browser or storage check (Playwright, sessionStorage, page text, screenshots) in a file under `apps/web/tests/probes/<name>.py` and run it with `npm run probe -- tests/probes/<name>.py`. Reuse and edit existing probe files; don't make a new one per run. Read `ALIGN_BASE_URL` for the port (default 3100).
 - **If `probe` is missing**, add `"probe": "node scripts/probe.mjs"` to `apps/web/package.json`. `scripts/probe.mjs` runs `python3 <file>` only when the path is inside `tests/probes/` and ends in `.py`; otherwise it exits 1 with a message.
-- **Which gates run when** (`probe:all` is slow: about 25 to 35 minutes for the 50 files in `tests/probes/`, so it is not run on every task):
-  - **Every merge to feat/ui:** `npm run typecheck`, `npm run test`, `npm run build`, `npm run test:align`, `npm run test:hydration`, `npm run probe -- tests/probes/smoke.py` (390 and 1280), and the probe for the task you changed (`tests/probes/<task>.py`).
-  - **Full `npm run probe:all`:** nightly, before a release, or when a change touches shared code (`lib/`, `components/ui/`, `app/layout.tsx`). It must show 0 FAIL when it runs.
-  - A probe that tests a feature you removed or renamed is updated or deleted in the same commit, never left failing.
+- **Gates per merge (Hao 15/10):** `npm run check` (typecheck, test, build, test:align, test:hydration on a prod server), smoke at 390 and 1280, the task's own probe, and every existing probe that visits a route or covers a file the task changed (grep `tests/probes` for the routes).
+- **Full `npm run probe:all`:** nightly and before a release, recorded in PROGRESS.md. It takes 25 to 35 minutes, so it is not run on every task.
+- A probe that tests a feature you removed or renamed is updated or deleted in the same commit, never left failing.
 - These always need the user's approval, so don't try to work around them: `git push`, `rm`, `git reset`, `npm install`/`pip install`, anything with `sudo` or `curl`, and anything touching `migrations/`, `apps/api/` or `.env`.

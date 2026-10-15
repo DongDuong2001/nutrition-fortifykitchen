@@ -9,7 +9,8 @@ Decided 12/10/2026 (Hao); revised 12/10 19:30 (Tổng quan = trends over a perio
 - Logging had friction: two add buttons per meal, recents still needed a portion step.
 
 ## Navigation
-Phone bottom nav (5 slots): **Tổng quan · Nhật ký · [+] · Khám phá · Cài đặt**
+Phone bottom nav (5 slots, cc2-31): **Hôm nay · Tổng quan · [+] · Khám phá · Cài đặt**. Nhật ký is no longer a tab; it folds into Hôm nay (cc-22, cc2-32).
+- Hôm nay is `/` (the day, coach home). Tổng quan is `/trends` (Tóm tắt, Năng lượng, Vi chất, Cơ thể sub-tabs).
 - [+] opens the add sheet from every tab; the meal is picked from the time of day (as today).
 - Desktop: DesktopSidebar with the same four items plus a primary "Thêm món" button.
 - Tab labels and icons stay identical on phone and desktop.
@@ -24,8 +25,9 @@ Reference: Cronometer's header is identical on every screen (same surface, round
 ## Routes
 | Route | Screen | Kind |
 |---|---|---|
-| `/` | Tổng quan › Tóm tắt | tab + sub-tab, default landing after sign-in/setup |
-| `/trends` | Tổng quan › Năng lượng | sub-tab |
+| `/` | Hôm nay (home, cc-22) | tab, default landing after sign-in/setup |
+| `/trends` | Tổng quan › Tóm tắt | tab + sub-tab (cc2-31b) |
+| `/trends/energy` | Tổng quan › Năng lượng | sub-tab (cc2-31b) |
 | `/trends/micros` | Tổng quan › Vi chất (period averages) | sub-tab |
 | `/trends/body` | Tổng quan › Cơ thể | sub-tab |
 | `/diary` (`?date=`) | Nhật ký | tab |
@@ -53,13 +55,12 @@ Pushed screens use AppHeader `sub` with a back button (router.back, fallback: th
 ## Tổng quan (dashboard): trends, insights, changes, composition
 Tổng quan is about a period, never about logging. It never lists food and has no per-day controls. Period control shared by all sub-tabs and remembered: heading "Trung bình mỗi ngày · 06–12/10" with ‹ › to step through periods (no future) and a 7 / 30 ngày switch; periods end on today by default. Sub-tab bar under the header (phone: underline tabs, scrollable if needed, 44 px targets, `role="tablist"` of links; desktop: the same tabs in the page header). Switching sub-tabs needs no back button.
 
-1. **Tóm tắt** (`/`):
-   - A slim "Hôm nay" line at the top: "Còn 909 kcal · Ghi bữa tối" → the add sheet for the meal by the clock (if that meal is logged, the next empty one; if all logged, "Xem nhật ký" → `/diary`). This is the only today element.
+1. **Tóm tắt** (`/trends`, cc2-31b; today has its own screen at `/`, so no today line here):
    - Period summary: average kcal vs target and "N/7 ngày đạt"; average protein vs target; weight change over the period.
    - Changes vs the previous period: the biggest moves, facts only (e.g. "Canxi trung bình +18 % so với tuần trước", "Đạm −12 g/ngày").
    - Insights: at most three facts (protein gap, lowest nutrient over the period, logging streak).
    - Each block links to its sub-tab.
-2. **Năng lượng** (`/trends`): kcal chart with the target band, average and days on target (above range = đạt, below minimum = level red "Thiếu"); macro composition (share of kcal from đạm / tinh bột / béo per day and on average, vs the coach ranges); protein average.
+2. **Năng lượng** (`/trends/energy`): kcal chart with the target band, average and days on target (above range = đạt, below minimum = level red "Thiếu"); macro composition (share of kcal from đạm / tinh bột / béo per day and on average, vs the coach ranges); protein average.
 3. **Vi chất** (`/trends/micros`): average % of target per counted nutrient over the period, lowest first, with how many days each reached its target (Cronometer's Report). Tap → nutrient detail.
 4. **Cơ thể** (`/trends/body`): weight chart from the weight log, change over the period and since start; body composition later (only if the user logs it; no fields added now).
 Desktop: two-column grid where a sub-tab has two kinds of content.
@@ -116,7 +117,7 @@ Checked with ui-ux-pro-max (§2 touch: 44 px targets, 8 px gaps; §9 navigation:
 
 ### Phone bottom nav (< 1024 px)
 - Bar: `bg-ink`, 72 px tall, content centred at max 560 px with 16 px side padding, five equal columns. The fixed wrapper adds `env(safe-area-inset-bottom)` as bottom padding (0 until the page opts into `viewport-fit=cover`, so no change today).
-- Slots, left to right: **Tổng quan** · **Nhật ký** · **[+]** · **Khám phá** · **Cài đặt**.
+- Slots, left to right (cc2-31): **Hôm nay** · **Tổng quan** · **[+]** · **Khám phá** · **Cài đặt**.
 - Icons: 22 px, 24 viewBox, `stroke="currentColor"`, 1.8 stroke width, round caps and joins, no fill. Tổng quan: four rounded panels (dashboard). Nhật ký: page with three text lines. Khám phá: compass. Cài đặt: three sliders. Same icons in the sidebar.
 - Labels: 11 px, semibold, below the icon (gap 2 px), never hidden. Tab names are identical to the sidebar.
 - States: inactive `text-muted-on-dark`; hover `text-on-dark`; active `text-on-dark` plus the 20 × 3 px slanted bar (skewX −14°, `bg-blue`) under the label and `aria-current="page"`, so the state is not colour alone. Pressed: scale 0.97 over 150 ms (no motion with `prefers-reduced-motion`).

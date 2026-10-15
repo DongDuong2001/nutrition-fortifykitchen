@@ -6,6 +6,7 @@ Newest first. Updated with every web merge. Do not edit apps/api, migrations or 
 
 | Task | Commit | Date | What |
 |---|---|---|---|
+| cc2-31 | see git log (cc2-31a, cc2-31b) | 15/10 | Bottom nav and sidebar: Hôm nay · Tổng quan · [+] · Khám phá · Cài đặt (Nhật ký leaves the bar); Tổng quan sub-tabs: Tóm tắt at /trends, Năng lượng at /trends/energy; Tóm tắt drops its today hero (home owns today); probes and alignment follow |
 | cc-22-fix | see git log (cc-22-fix) | 15/10 | Home review fixes: ⋯ on past days (only Lưu thành), dot in the food row label, bar without value says Chưa có dữ liệu, "<1%", meal headers in normal case |
 | cc-22 | see git log (cc-22) | 15/10 | Hôm nay at "/": ink hero card (kcal, macros), food list with meal headers, nutrient column; tap a food or meal to see it alone; two-tone bars today; Nhật ký day view folded in |
 | cc2-19b | see git log (cc2-19b) | 15/10 | UX journeys a, f, g walked (probe cc2_19b, 22 ok); save-meal name field selects the default on focus; sign-in lead text-balance |
