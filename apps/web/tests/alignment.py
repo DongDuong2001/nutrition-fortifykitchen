@@ -165,15 +165,15 @@ def main():
         for vp in VIEWPORTS:
             page.set_viewport_size({"width": vp["width"], "height": vp["height"]})
 
-            # /diary
-            page.goto(f"{BASE_URL}/diary", wait_until="networkidle")
+            # / (Hôm nay)
+            page.goto(f"{BASE_URL}/", wait_until="networkidle")
             page.wait_for_timeout(500)
             res = check_align_groups(page)
             if res["errors"]:
-                print(f"[FAIL] /diary @ {vp['name']}: {res['errors']}")
+                print(f"[FAIL] / @ {vp['name']}: {res['errors']}")
                 total_errors.extend(res["errors"])
             else:
-                print(f"[PASS] /diary @ {vp['name']} (checked groups: {res['checkedGroups']})")
+                print(f"[PASS] / @ {vp['name']} (checked groups: {res['checkedGroups']})")
 
             # /micros
             page.goto(f"{BASE_URL}/micros", wait_until="networkidle")
