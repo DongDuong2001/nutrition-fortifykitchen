@@ -20,6 +20,8 @@ import { foodMeta } from "@/lib/food-meta";
 import { CreateFoodButton } from "@/components/foods/create-food-button";
 import { isCategoryFilter } from "@/lib/food-categories";
 import { resolveFavourites } from "@/lib/favourites";
+import { CompareBar } from "@/components/foods/compare-bar";
+import { MAX_COMPARE_FOODS, compareHref } from "@/lib/food-compare";
 
 import {
   parseMealSlot,
@@ -54,6 +56,9 @@ function AddFoodInner() {
   const [switcherOpen, setSwitcherOpen] = useState(false);
   const [quickOpen, setQuickOpen] = useState(false);
   const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
+  // So sánh mode: the rows become selectable (up to 3) and a bar offers "So sánh (n)"
+  const [compareMode, setCompareMode] = useState(false);
+  const [compareIds, setCompareIds] = useState<string[]>([]);
 
   const [gramsInput, setGramsInput] = useState("");
   const [selectedServingLabel, setSelectedServingLabel] = useState("");
@@ -142,7 +147,7 @@ function AddFoodInner() {
         .slice(0, MAX_SHORTCUT_MEALS),
     [savedMeals]
   );
-  const showShortcuts = !query.trim() && filter === "all";
+  const showShortcuts = !query.trim() && filter === "all" && !compareMode;
   const favouritesOnly = filter === "favorite" && !query.trim();
 
 
@@ -197,6 +202,19 @@ function AddFoodInner() {
     return result;
   };
 
+  const toggleCompare = (food: FoodItem) => {
+    setCompareIds((prev) =>
+      prev.includes(food.id) ? prev.filter((id) => id !== food.id) : prev.length >= MAX_COMPARE_FOODS ? prev : [...prev, food.id]
+    );
+  };
+  const compareFull = compareIds.length >= MAX_COMPARE_FOODS;
+  const compareDisabledIds = useMemo(
+    () => (compareMode && compareFull ? list.foods.map((f) => f.id).filter((id) => !compareIds.includes(id)) : undefined),
+    [compareMode, compareFull, list.foods, compareIds]
+  );
+  const compareNames = compareIds.map((id) => MOCK_FOODS.find((f) => f.id === id)?.nameVi ?? id);
+  const openCompare = () => router.push(compareHref(compareIds));
+
   // A favourite with a last portion adds in one tap, like a recent. Without history the portion panel opens.
   const pickFromList = (food: FoodItem) => {
     const last = favouritesOnly ? lastPortionOf(food.id, recentFoods, MOCK_FOODS) : null;
@@ -225,14 +243,14 @@ function AddFoodInner() {
         handleClose();
       } else if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {
         // If not typing in input or if adding (the Chỉ ghi kcal form handles its own Enter)
-        if (selectedFood && parsedGrams > 0 && !quickOpen) {
+        if (selectedFood && parsedGrams > 0 && !quickOpen && !compareMode) {
           handleAddFood();
         }
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleClose, selectedFood, parsedGrams, handleAddFood, quickOpen, switcherOpen]);
+  }, [handleClose, selectedFood, parsedGrams, handleAddFood, quickOpen, switcherOpen, compareMode]);
 
   const mealNameVi = mealSlot ? getMealSlotNameVi(mealSlot) : "—";
 
@@ -268,6 +286,28 @@ function AddFoodInner() {
   );
 
   const createFoodLink = <CreateFoodButton href={newFoodHref} />;
+
+  // "So sánh" in the header: turns the rows into selectable items. Pressing it again leaves the mode.
+  const compareToggle = (
+    <button
+      type="button"
+      aria-pressed={compareMode}
+      onClick={() => {
+        setCompareMode((on) => !on);
+        setCompareIds([]);
+      }}
+      className={`min-h-[44px] cursor-pointer rounded-full px-4 text-sm font-bold active:scale-[0.97] motion-reduce:active:scale-100 ${
+        compareMode ? "border-0 bg-ink text-on-dark" : "border border-card-border bg-card text-text hover:bg-page"
+      }`}
+    >
+      So sánh
+    </button>
+  );
+
+  // The list's selection props: one tapped row for the portion panel, or the ticked rows in So sánh mode
+  const listPick = compareMode
+    ? { selectedId: undefined, selectedIds: compareIds, disabledIds: compareDisabledIds, onPick: toggleCompare, onOpen: undefined }
+    : { selectedId: selectedFood?.id, selectedIds: undefined, disabledIds: undefined, onPick: pickFromList, onOpen: favouritesOnly ? pickFood : undefined };
 
   return (
     <div className="min-h-screen bg-page text-text font-sans">
@@ -314,16 +354,19 @@ function AddFoodInner() {
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={handleClose}
-                aria-label="Đóng"
-                className="w-11 h-11 rounded-full bg-page text-text flex items-center justify-center border-0 cursor-pointer hover:bg-divider transition-colors active:scale-[0.97]"
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-                  <path d="M6 6l12 12M18 6L6 18" />
-                </svg>
-              </button>
+              <div className="flex shrink-0 items-center gap-2">
+                {compareToggle}
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  aria-label="Đóng"
+                  className="w-11 h-11 rounded-full bg-page text-text flex items-center justify-center border-0 cursor-pointer hover:bg-divider transition-colors active:scale-[0.97]"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                    <path d="M6 6l12 12M18 6L6 18" />
+                  </svg>
+                </button>
+              </div>
             </div>
 
             {/* Two Pane Layout */}
@@ -340,9 +383,7 @@ function AddFoodInner() {
                 {/* Results: grouped or flat */}
                 <FoodList
                   list={list}
-                  selectedId={selectedFood?.id}
-                  onPick={pickFromList}
-                  onOpen={favouritesOnly ? pickFood : undefined}
+                  {...listPick}
                   getMeta={getFoodMeta}
                   categoryName={categoryName}
                   showCategory={!isCategoryFilter(filter)}
@@ -355,7 +396,9 @@ function AddFoodInner() {
 
               {/* Right Pane: Selected Food Portion & Macros, or an empty state until a food is picked */}
               <div className="w-[340px] shrink-0 self-stretch">
-                {selectedFood ? (
+                {compareMode ? (
+                  <CompareBar names={compareNames} onSubmit={openCompare} className="p-4" />
+                ) : selectedFood ? (
                   <PortionPanel
                     food={selectedFood}
                     gramsInput={gramsInput}
@@ -426,16 +469,19 @@ function AddFoodInner() {
                 <div className="text-xs font-medium text-secondary">Tự chọn theo giờ trong ngày · chạm để đổi</div>
               </div>
 
-              <button
-                type="button"
-                onClick={handleClose}
-                aria-label="Đóng"
-                className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border-0 bg-page text-text active:scale-[0.97]"
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-                  <path d="M6 6l12 12M18 6L6 18" />
-                </svg>
-              </button>
+              <div className="flex shrink-0 items-center gap-2">
+                {compareToggle}
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  aria-label="Đóng"
+                  className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border-0 bg-page text-text active:scale-[0.97]"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                    <path d="M6 6l12 12M18 6L6 18" />
+                  </svg>
+                </button>
+              </div>
             </div>
 
             <FoodSearchField value={query} onChange={setQuery} className="shrink-0" />
@@ -450,9 +496,7 @@ function AddFoodInner() {
 
             <FoodList
               list={list}
-              selectedId={selectedFood?.id}
-              onPick={pickFromList}
-              onOpen={favouritesOnly ? pickFood : undefined}
+              {...listPick}
               getMeta={getFoodMeta}
               categoryName={categoryName}
               showCategory={!isCategoryFilter(filter)}
@@ -463,7 +507,12 @@ function AddFoodInner() {
           </div>
 
           {/* Bottom Selected Food Portion Panel */}
-          {selectedFood && (
+          {compareMode && (
+            <div className="shrink-0 border-t border-divider px-4 pt-3 pb-[max(16px,env(safe-area-inset-bottom))]">
+              <CompareBar names={compareNames} onSubmit={openCompare} />
+            </div>
+          )}
+          {!compareMode && selectedFood && (
             <div className="shrink-0 px-4 pb-[max(16px,env(safe-area-inset-bottom))]">
               <PortionPanel
                 food={selectedFood}

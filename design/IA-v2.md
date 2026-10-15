@@ -38,6 +38,7 @@ Reference: Cronometer's header is identical on every screen (same surface, round
 | `/explore/[category]` | food category / "giàu <chất>" list | pushed screen |
 | `/foods/[id]` | food detail | pushed screen |
 | `/foods/new` | create food | pushed screen |
+| `/foods/compare?ids=a,b,c` | compare 2 or 3 foods side by side (100 g or each food's serving; highest known value marked; unknown is "—"). Opened from the So sánh button on `/foods/[id]` (picker sheet) or the So sánh mode of `/add`. Back: the first food, else `/add` | pushed screen |
 | `/settings` | Cài đặt (profile card on top) | tab |
 | `/settings/profile`, `/settings/profile/weight` | Hồ sơ (body, goal, training default), weight log | pushed screens |
 | `/settings/targets` | Mục tiêu mỗi ngày (read-only, from the profile) | pushed screen |

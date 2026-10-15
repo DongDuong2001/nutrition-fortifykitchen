@@ -62,6 +62,10 @@ DONG_SCREEN_CHECKS = [
     ("/admin/review", "admin-card", 1),
 ]
 
+# cc-23: compare foods, 3 columns. Each column's header and its 27 value cells share left and right edges.
+COMPARE_ROUTE = "/foods/compare?ids=food-cha-la,food-yen-mach,food-chuoi"
+COMPARE_CHECKS = [("compare-col-0", 27), ("compare-col-1", 27), ("compare-col-2", 27)]
+
 
 def check_align_groups(page, group_name=None, edges="lr"):
     # edges "lr": members share left and right edges. "tb": members share top and bottom edges.
@@ -233,6 +237,20 @@ def main():
                     total_errors.extend(res["errors"] or [f"{route} {group}: {pairs} pairs"])
                 else:
                     print(f"[PASS] {route} @ {vp['name']} [{group}] ({pairs} pairs)")
+
+        # cc-23: compare foods at both widths, real pairs
+        for vp in VIEWPORTS:
+            page.set_viewport_size({"width": vp["width"], "height": vp["height"]})
+            page.goto(f"{BASE_URL}{COMPARE_ROUTE}", wait_until="networkidle")
+            page.wait_for_timeout(700)
+            for group, min_pairs in COMPARE_CHECKS:
+                res = check_align_groups(page, group)
+                pairs = res["pairs"].get(group, 0)
+                if res["errors"] or pairs < min_pairs:
+                    print(f"[FAIL] /foods/compare @ {vp['name']} [{group}]: pairs {pairs} (need {min_pairs}) {res['errors']}")
+                    total_errors.extend(res["errors"] or [f"compare {group}: {pairs} pairs"])
+                else:
+                    print(f"[PASS] /foods/compare @ {vp['name']} [{group}] ({pairs} pairs)")
 
         browser.close()
 
