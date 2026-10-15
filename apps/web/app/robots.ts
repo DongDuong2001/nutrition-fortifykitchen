@@ -16,6 +16,8 @@ export default function robots(): MetadataRoute.Robots {
           "/foods",
           "/signin",
           "/signup",
+          "/terms",
+          "/privacy",
         ],
         disallow: [
           "/admin",

@@ -35,6 +35,13 @@ export default function SignInPage() {
           Đăng ký
         </Link>
       </p>
+      <p className="m-0 text-center text-[12px] leading-relaxed text-secondary">
+        Bằng việc tiếp tục, bạn đồng ý với{" "}
+        <Link href="/terms" className="underline hover:text-text">Điều khoản dịch vụ</Link>
+        {" "}và{" "}
+        <Link href="/privacy" className="underline hover:text-text">Chính sách bảo mật</Link>
+        {" "}của H1T MICRO.
+      </p>
       <AuthNotice />
     </AuthShell>
   );

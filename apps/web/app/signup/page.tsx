@@ -71,8 +71,12 @@ export default function SignUpPage() {
           Đăng nhập
         </Link>
       </p>
-      <p className="m-0 text-center text-xs leading-normal text-secondary">
-        Thông tin chỉ mang tính tham khảo, không thay thế tư vấn y tế.
+      <p className="m-0 text-center text-xs leading-relaxed text-secondary">
+        Bằng việc tạo tài khoản, bạn đồng ý với{" "}
+        <Link href="/terms" className="underline hover:text-text">Điều khoản dịch vụ</Link>
+        {" "}và{" "}
+        <Link href="/privacy" className="underline hover:text-text">Chính sách bảo mật</Link>
+        . Thông tin chỉ mang tính tham khảo, không thay thế tư vấn y tế.
       </p>
     </AuthShell>
   );

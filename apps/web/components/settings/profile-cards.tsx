@@ -209,6 +209,12 @@ export function AppCard() {
       <RowGroup>
         <Row icon={SETTINGS_ICONS.install} label="Thêm vào màn hình chính" href="/install" />
       </RowGroup>
+      <RowGroup>
+        <Row icon={SETTINGS_ICONS.document} label="Điều khoản dịch vụ" href="/terms" />
+      </RowGroup>
+      <RowGroup>
+        <Row icon={SETTINGS_ICONS.shield} label="Chính sách bảo mật" href="/privacy" />
+      </RowGroup>
     </Card>
   );
 }
