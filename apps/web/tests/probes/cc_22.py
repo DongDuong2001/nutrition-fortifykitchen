@@ -5,6 +5,7 @@ Production build, clock fixed at 2026-10-15 10:00 Asia/Ho_Chi_Minh, demo mode, s
 - Tap a food: hero label and caption change, Sửa shows; tap again: back. Tap a meal header: meal mode and ⋯.
 - A food with a missing micronutrient has the grey dot; an empty slot reads "Chưa ăn · Thêm" and links to /add.
 - 20+ foods: only the list scrolls, meal headers stick.
+- Past day: ⋯ in meal mode opens a sheet with only Lưu thành.
 - Today: two-tone bars (no level colours), long press opens /entry. Past day: four levels, no Sửa, no ⋯, no long press.
 - Links /micros?date= and /training?date=.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_22.py
@@ -94,7 +95,7 @@ def run(browser, size, tag):
         check(box[0] <= box[1] + 1, f"{tag} all foods visible without scrolling the list ({box})")
         col = pg.evaluate("(() => { const a = document.querySelector('aside[aria-label=\"Vi chất\"] > div'); return [a.scrollHeight, a.clientHeight]; })()")
         check(col[0] <= col[1] + 1, f"{tag} nutrient column fits ({col})")
-    check(pg.locator("[role=img][aria-label='Thiếu dữ liệu vi chất']").count() >= 1, f"{tag} dot for a food with a missing micronutrient")
+    check(pg.locator("button[aria-label$=', thiếu dữ liệu vi chất']").count() >= 1, f"{tag} dot for a food with a missing micronutrient")
     check(pg.get_by_role("link", name=re.compile("Ngày tập")).get_attribute("href") == f"/training?date=2026-10-15", f"{tag} training link carries the date")
     check(pg.get_by_role("link", name=re.compile("Đủ 22 vi chất")).get_attribute("href") == "/micros?date=2026-10-15", f"{tag} micros link carries the date")
     check(pg.get_by_role("link", name="Sửa món này").count() == 0 and pg.get_by_role("button", name=re.compile("^Tùy chọn")).count() == 0, f"{tag} no Sửa or ⋯ in day mode")
@@ -103,10 +104,12 @@ def run(browser, size, tag):
     levels = {"rgb(229, 72, 77)", "rgb(232, 164, 0)", "rgb(31, 169, 113)"}
     check(not (set(kcal) & levels), f"{tag} today kcal bar has no red/yellow/green")
     pg.screenshot(path=os.path.join(SHOTS, f"cc-22-home-{w}.png"))
+    if w == 390:
+        pg.screenshot(path=os.path.join(SHOTS, "cc-22-fix-home-390.png"))
 
     # food mode
     first = foods.first
-    name = first.get_attribute("aria-label").rsplit(", ", 1)[0]
+    name = first.get_attribute("aria-label").split(", ")[0]
     first.click()
     pg.wait_for_timeout(200)
     check(name.upper() in hero_label(pg) and hero_label(pg).endswith(" G"), f"{tag} food mode label: {hero_label(pg)}")
@@ -153,7 +156,17 @@ def run(browser, size, tag):
     pg.get_by_role("button", name="Xem cả ngày ×").click()
     pg.get_by_role("button", name="Xem riêng bữa trưa").click()
     pg.wait_for_timeout(200)
-    check(pg.get_by_role("button", name=re.compile("^Tùy chọn")).count() == 0, f"{tag} no ⋯ on a past day")
+    menu = pg.get_by_role("button", name=re.compile("^Tùy chọn Bữa trưa"))
+    check(menu.count() == 1, f"{tag} ⋯ on a past day in meal mode")
+    check(pg.get_by_role("link", name="Sửa món này").count() == 0, f"{tag} still no Sửa on a past day in meal mode")
+    menu.click()
+    pg.wait_for_timeout(300)
+    sheet = pg.get_by_role("dialog").inner_text()
+    check("Lưu thành" in sheet and "Chép hôm qua" not in sheet and "Xóa bữa này" not in sheet, f"{tag} past-day sheet offers only Lưu thành")
+    if w == 390:
+        pg.screenshot(path=os.path.join(SHOTS, "cc-22-fix-meal-past-390.png"))
+    pg.keyboard.press("Escape")
+    pg.wait_for_timeout(200)
     pg.get_by_role("button", name="Xem cả ngày ×").click()
     box = foods.first.bounding_box()
     pg.mouse.move(box["x"] + 20, box["y"] + 10)

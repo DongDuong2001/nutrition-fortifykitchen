@@ -105,3 +105,5 @@ What makes the screens feel like H1T MICRO, not a list of cards (set in cc2-20 w
   pseudo-element). Everything else on the screen keeps 44 px.
 - **Single-line food names.** On home a food name is one line; only the name truncates (ellipsis, full name in
   `title` and `aria-label`), the grams never do.
+- **Meal headers in normal case.** Sáng, Trưa, Trước tập, Bữa phụ, Tối: 11 px 800, no uppercase (the all-caps
+  rule applies; only the hero's mode label and the nutrient group titles are set in capitals as data labels).
