@@ -59,7 +59,11 @@ describe("lib/nav, Dong's screens (cc-24)", () => {
     expect(tabForPath("/explore/coaches/coach-ha")).toBe("explore");
     expect(tabForPath("/privacy")).toBe("settings");
     expect(tabForPath("/terms")).toBe("settings");
-    expect(tabForPath("/admin/review")).toBeNull();
+  });
+
+  it("keeps the review queue under Cài đặt, like the other sub-pages (cc-23)", () => {
+    expect(tabForPath("/admin/review")).toBe("settings");
+    expect(backFallback("/admin/review")).toBe("/settings");
   });
 
   it("sends a coach profile back to the directory, the legal pages back to Cài đặt", () => {
@@ -68,6 +72,28 @@ describe("lib/nav, Dong's screens (cc-24)", () => {
     expect(backFallback("/explore/leaderboard")).toBe("/explore");
     expect(backFallback("/privacy")).toBe("/settings");
     expect(backFallback("/terms")).toBe("/settings");
+  });
+});
+
+describe("lib/nav, compare foods (cc-23)", () => {
+  it("keeps the compare page under Khám phá, like a food", () => {
+    expect(tabForPath("/foods/compare")).toBe("explore");
+  });
+
+  it("sends compare back to the first food of the list, else to the add sheet", () => {
+    expect(backFallback("/foods/compare", "?ids=food-cha-la,food-yen-mach")).toBe("/foods/food-cha-la");
+    expect(backFallback("/foods/compare", "?ids=food-cha-la")).toBe("/foods/food-cha-la");
+    expect(backFallback("/foods/compare", "?ids=,food-yen-mach")).toBe("/foods/food-yen-mach");
+    expect(backFallback("/foods/compare", "")).toBe("/add");
+    expect(backFallback("/foods/compare", null)).toBe("/add");
+    expect(backFallback("/foods/compare", "?ids=")).toBe("/add");
+    expect(backFallback("/foods/compare")).toBe("/add");
+  });
+
+  it("does not build a path from an id with odd characters", () => {
+    expect(backFallback("/foods/compare", "?ids=../settings")).toBe("/add");
+    // the odd one is skipped, the first clean id is used
+    expect(backFallback("/foods/compare", "?ids=a/b,c")).toBe("/foods/c");
   });
 });
 
