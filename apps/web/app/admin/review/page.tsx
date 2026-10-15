@@ -1,6 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { AppHeader } from "@/components/ui/app-header";
+import { AppShell } from "@/components/ui/app-shell";
+import { Card } from "@/components/ui/card";
+import { ChipGroup } from "@/components/ui/chip-group";
+import { SectionTitle } from "@/components/ui/section-title";
+import { useBack } from "@/hooks/use-back";
 import {
   type CoachApplication,
   getCoachApplications,
@@ -50,25 +56,39 @@ const DRAFT_STATUS_LABELS: Record<CoachDraft["status"], string> = {
 
 const APP_STATUS_LABELS: Record<CoachApplication["status"], string> = {
   pending: "Chờ duyệt",
-  approved: "Đã duyệt (Cấp 5)",
+  approved: "Đã duyệt Cấp 5",
   rejected: "Đã từ chối",
 };
 
+const PILL = {
+  good: "bg-blue text-on-accent",
+  bad: "bg-destructive-text text-on-accent",
+  wait: "bg-warning-bg text-warning-text",
+} as const;
+
+const ACTION = "flex min-h-11 w-full cursor-pointer items-center justify-center rounded-full px-4 text-[13px] font-bold active:scale-[0.97] motion-reduce:active:scale-100";
+
+/**
+ * Kiểm duyệt: Level 5 coach applications and meal-plan drafts. Not linked from any screen; the page itself has no
+ * role check yet (OPEN_QUESTIONS, for Dong: the API must enforce it).
+ */
 export default function AdminReviewPage() {
+  const goBack = useBack();
   const [activeTab, setActiveTab] = useState<"coaches" | "drafts">("coaches");
 
   // Drafts state
   const [drafts, setDrafts] = useState<CoachDraft[]>(SAMPLE_DRAFTS);
   const [draftFilter, setDraftFilter] = useState<"all" | CoachDraft["status"]>("all");
 
-  // Coach applications state
-  const [applications, setApplications] = useState<CoachApplication[]>(() => getCoachApplications());
+  // Coach applications live in localStorage: read after mount, so the server and the first client render agree
+  const [applications, setApplications] = useState<CoachApplication[] | null>(null);
+  useEffect(() => {
+    setApplications(getCoachApplications());
+  }, []);
   const [appFilter, setAppFilter] = useState<"all" | CoachApplication["status"]>("all");
 
   const handleUpdateDraftStatus = (id: string, newStatus: "published" | "rejected") => {
-    setDrafts((prev) =>
-      prev.map((d) => (d.id === id ? { ...d, status: newStatus } : d))
-    );
+    setDrafts((prev) => prev.map((d) => (d.id === id ? { ...d, status: newStatus } : d)));
   };
 
   const handleUpdateAppStatus = (id: string, newStatus: "approved" | "rejected") => {
@@ -77,241 +97,200 @@ export default function AdminReviewPage() {
   };
 
   const filteredDrafts = drafts.filter((d) => (draftFilter === "all" ? true : d.status === draftFilter));
-  const filteredApps = applications.filter((a) => (appFilter === "all" ? true : a.status === appFilter));
+  const loaded = applications !== null;
+  const apps = applications ?? [];
+  const filteredApps = apps.filter((a) => (appFilter === "all" ? true : a.status === appFilter));
+  const pendingApps = apps.filter((a) => a.status === "pending").length;
+  const pendingDrafts = drafts.filter((d) => d.status === "draft").length;
 
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-6 bg-page px-4 py-6 font-sans text-text sm:space-y-8">
-      {/* Page Header */}
-      <div className="flex flex-col justify-between gap-4 border-b border-card-border pb-4 sm:flex-row sm:items-center">
-        <div>
-          <div className="mb-2 inline-flex items-center rounded-full bg-warning-bg px-3 py-1 text-[11px] font-bold tracking-wider text-warning-text">
-            Khu vực quản trị
-          </div>
-          <h1 className="m-0 font-display text-3xl font-extrabold italic tracking-tight text-text">
-            Quản trị & Kiểm duyệt
-          </h1>
-          <p className="mt-1 text-sm text-secondary">
-            Xét duyệt hồ sơ ứng tuyển Huấn luyện viên (Cấp 5) và các bản nháp thực đơn chuyên môn.
-          </p>
-        </div>
+    <AppShell alignContainer="admin-page">
+      <AppHeader
+        variant="sub"
+        title="Kiểm duyệt"
+        subtitle="Xét duyệt hồ sơ ứng tuyển huấn luyện viên (Cấp 5) và bản nháp thực đơn chuyên môn"
+        onBack={goBack}
+        layout="wide"
+        alignGroup="admin-header"
+      />
 
-        {/* Section Navigation */}
-        <div className="flex items-center gap-2 rounded-full bg-page p-1 border border-card-border">
-          <button
-            type="button"
-            onClick={() => setActiveTab("coaches")}
-            className={`min-h-[44px] cursor-pointer rounded-full px-5 text-xs font-bold transition-colors border-0 ${
-              activeTab === "coaches" ? "bg-ink text-on-dark shadow-xs" : "bg-transparent text-secondary hover:text-text"
-            }`}
-          >
-            Duyệt Huấn luyện viên ({applications.filter((a) => a.status === "pending").length})
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("drafts")}
-            className={`min-h-[44px] cursor-pointer rounded-full px-5 text-xs font-bold transition-colors border-0 ${
-              activeTab === "drafts" ? "bg-ink text-on-dark shadow-xs" : "bg-transparent text-secondary hover:text-text"
-            }`}
-          >
-            Duyệt thực đơn ({drafts.filter((d) => d.status === "draft").length})
-          </button>
-        </div>
-      </div>
+      <main className="mx-auto flex w-full max-w-[720px] flex-col gap-4 px-4 pb-6 pt-4 lg:mx-0 lg:px-8">
+        <ChipGroup
+          columns={2}
+          data-align-group="admin-tabs"
+          items={[
+            {
+              id: "coaches",
+              label: `Hồ sơ huấn luyện viên (${loaded ? pendingApps : "–"})`,
+              active: activeTab === "coaches",
+              onClick: () => setActiveTab("coaches"),
+            },
+            {
+              id: "drafts",
+              label: `Bản nháp thực đơn (${pendingDrafts})`,
+              active: activeTab === "drafts",
+              onClick: () => setActiveTab("drafts"),
+            },
+          ]}
+        />
 
-      {/* Coach Applications Tab */}
-      {activeTab === "coaches" && (
-        <div className="space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="m-0 text-base font-bold text-text">Hồ sơ ứng tuyển Cấp 5 (Huấn luyện viên)</h2>
-            <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Lọc hồ sơ">
-              {(["all", "pending", "approved", "rejected"] as const).map((tab) => (
-                <button
-                  key={tab}
-                  type="button"
-                  onClick={() => setAppFilter(tab)}
-                  className={`min-h-[40px] cursor-pointer rounded-full px-4 text-xs font-bold transition-transform duration-150 active:scale-[0.97] ${
-                    appFilter === tab
-                      ? "border-0 bg-ink text-on-dark"
-                      : "border border-card-border bg-card text-text hover:bg-page"
-                  }`}
-                >
-                  {tab === "all" ? "Tất cả" : APP_STATUS_LABELS[tab]}
-                </button>
-              ))}
-            </div>
-          </div>
+        {activeTab === "coaches" && (
+          <section aria-labelledby="admin-apps" className="flex flex-col gap-3">
+            <SectionTitle as="h2" id="admin-apps">
+              Hồ sơ ứng tuyển Cấp 5
+            </SectionTitle>
+            <ChipGroup
+              columns={2}
+              columnsLg={4}
+              data-align-group="admin-filter"
+              items={(["all", "pending", "approved", "rejected"] as const).map((tab) => ({
+                id: tab,
+                label: tab === "all" ? "Tất cả" : APP_STATUS_LABELS[tab],
+                active: appFilter === tab,
+                onClick: () => setAppFilter(tab),
+              }))}
+            />
 
-          <div className="space-y-4 sm:space-y-6">
-            {filteredApps.length === 0 ? (
-              <div className="rounded-[18px] border border-card-border bg-card p-8 text-center text-secondary">
-                Không có hồ sơ nào trong mục này.
+            {!loaded ? (
+              <div aria-busy="true" className="flex flex-col gap-3">
+                <div className="h-40 rounded-[18px] bg-level-empty motion-safe:animate-pulse" />
+                <div className="h-40 rounded-[18px] bg-level-empty motion-safe:animate-pulse" />
               </div>
+            ) : filteredApps.length === 0 ? (
+              <Card as="section" aria-label="Không có hồ sơ" className="text-[13px] leading-snug text-secondary">
+                Không có hồ sơ nào trong mục này.
+              </Card>
             ) : (
-              filteredApps.map((app) => (
-                <div
-                  key={app.id}
-                  className="flex flex-col justify-between gap-5 rounded-[18px] border border-card-border bg-card p-4 sm:p-6 md:flex-row sm:gap-6"
-                >
-                  <div className="min-w-0 flex-1 space-y-3">
-                    <div className="flex flex-wrap items-center gap-3">
-                      <h3 className="m-0 text-base font-bold text-text">{app.name}</h3>
-                      <span className="text-xs text-secondary">{app.email}</span>
-                      <span
-                        className={`rounded-full px-3 py-1 text-[11px] font-bold tracking-wider ${
-                          app.status === "approved"
-                            ? "bg-blue text-on-accent"
-                            : app.status === "rejected"
-                            ? "bg-destructive-text text-on-accent"
-                            : "bg-warning-bg text-warning-text"
-                        }`}
-                      >
-                        {APP_STATUS_LABELS[app.status]}
-                      </span>
-                    </div>
+              <ul role="list" className="m-0 flex list-none flex-col gap-3 p-0">
+                {filteredApps.map((app) => (
+                  <li key={app.id}>
+                    <Card as="article" aria-label={`Hồ sơ của ${app.name}`} data-align-group="admin-card" className="flex flex-col gap-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="m-0 text-base font-bold leading-snug text-text">{app.name}</h3>
+                        <span className={`rounded-full px-3 py-1 text-[11px] font-bold ${PILL[app.status === "approved" ? "good" : app.status === "rejected" ? "bad" : "wait"]}`}>
+                          {APP_STATUS_LABELS[app.status]}
+                        </span>
+                      </div>
+                      <p className="m-0 break-all text-[13px] text-secondary">{app.email}</p>
 
-                    <div className="flex flex-wrap gap-2 text-xs font-medium text-secondary">
-                      <span className="rounded-lg bg-page px-2.5 py-1 border border-card-border">
-                        Chuyên môn: <strong className="text-text">{app.specialty}</strong>
-                      </span>
-                      <span className="rounded-lg bg-page px-2.5 py-1 border border-card-border">
-                        Kinh nghiệm: <strong className="text-text">{app.experienceYears} năm</strong>
-                      </span>
+                      <ul role="list" className="m-0 flex list-none flex-wrap gap-2 p-0 text-[13px] text-secondary">
+                        <li className="rounded-xl border border-card-border bg-page px-3 py-1">
+                          Chuyên môn: <strong className="text-text">{app.specialty}</strong>
+                        </li>
+                        <li className="rounded-xl border border-card-border bg-page px-3 py-1">
+                          Kinh nghiệm: <strong className="text-text">{app.experienceYears} năm</strong>
+                        </li>
+                      </ul>
                       {app.socialLink && (
                         <a
                           href={app.socialLink}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="rounded-lg bg-page px-2.5 py-1 border border-card-border text-blue hover:underline"
+                          className="flex min-h-11 items-center text-[13px] font-bold text-blue"
                         >
                           Xem nhóm cộng đồng
                         </a>
                       )}
-                    </div>
 
-                    <div className="rounded-xl bg-page p-3.5 text-xs text-secondary leading-relaxed border border-card-border">
-                      <strong className="text-text block mb-1">Giới thiệu & Chứng chỉ:</strong>
-                      {app.message}
-                    </div>
-                  </div>
-
-                  <div className="flex min-w-[170px] shrink-0 justify-end gap-3 md:flex-col self-end md:self-center">
-                    {app.status === "pending" && (
-                      <>
-                        <button
-                          type="button"
-                          onClick={() => handleUpdateAppStatus(app.id, "approved")}
-                          className="min-h-[44px] w-full cursor-pointer rounded-full border-0 bg-blue px-4 text-xs font-bold text-on-accent transition-transform duration-150 active:scale-[0.97]"
-                        >
-                          Duyệt Cấp 5 (HLV)
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleUpdateAppStatus(app.id, "rejected")}
-                          className="min-h-[44px] w-full cursor-pointer rounded-full border border-destructive-text bg-card px-4 text-xs font-bold text-destructive-text transition-transform duration-150 active:scale-[0.97]"
-                        >
-                          Từ chối
-                        </button>
-                      </>
-                    )}
-                    {app.status !== "pending" && (
-                      <div className="self-center text-xs font-semibold tracking-wider text-secondary md:self-end">
-                        {APP_STATUS_LABELS[app.status]}
+                      <div className="rounded-xl border border-card-border bg-page p-3 text-[13px] leading-snug text-secondary">
+                        <strong className="mb-1 block text-text">Giới thiệu và chứng chỉ</strong>
+                        {app.message}
                       </div>
-                    )}
-                  </div>
-                </div>
-              ))
+
+                      {app.status === "pending" && (
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleUpdateAppStatus(app.id, "approved")}
+                            className={`${ACTION} border-0 bg-blue text-on-accent`}
+                          >
+                            Duyệt Cấp 5
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleUpdateAppStatus(app.id, "rejected")}
+                            className={`${ACTION} border border-destructive-text bg-card text-destructive-text`}
+                          >
+                            Từ chối
+                          </button>
+                        </div>
+                      )}
+                    </Card>
+                  </li>
+                ))}
+              </ul>
             )}
-          </div>
-        </div>
-      )}
+          </section>
+        )}
 
-      {/* Meal Plan Drafts Tab */}
-      {activeTab === "drafts" && (
-        <div className="space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="m-0 text-base font-bold text-text">Bản nháp thực đơn chuyên môn</h2>
-            <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Lọc bản nháp">
-              {(["all", "draft", "published", "rejected"] as const).map((tab) => (
-                <button
-                  key={tab}
-                  type="button"
-                  aria-pressed={draftFilter === tab}
-                  onClick={() => setDraftFilter(tab)}
-                  className={`min-h-[40px] cursor-pointer rounded-full px-4 text-xs font-bold tracking-wider transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none ${
-                    draftFilter === tab
-                      ? "border-0 bg-ink text-on-dark"
-                      : "border border-card-border bg-card text-text hover:bg-page"
-                  }`}
-                >
-                  {DRAFT_FILTER_LABELS[tab]}
-                </button>
-              ))}
-            </div>
-          </div>
+        {activeTab === "drafts" && (
+          <section aria-labelledby="admin-drafts" className="flex flex-col gap-3">
+            <SectionTitle as="h2" id="admin-drafts">
+              Bản nháp thực đơn chuyên môn
+            </SectionTitle>
+            <ChipGroup
+              columns={2}
+              columnsLg={4}
+              data-align-group="admin-filter"
+              items={(["all", "draft", "published", "rejected"] as const).map((tab) => ({
+                id: tab,
+                label: DRAFT_FILTER_LABELS[tab],
+                active: draftFilter === tab,
+                onClick: () => setDraftFilter(tab),
+              }))}
+            />
 
-          <div className="space-y-4 sm:space-y-6">
-            {filteredDrafts.map((draft) => (
-              <div
-                key={draft.id}
-                className="flex flex-col justify-between gap-5 rounded-[18px] border border-card-border bg-card p-4 sm:p-6 md:flex-row sm:gap-6"
-              >
-                <div className="min-w-0 flex-1">
-                  <div className="mb-3 flex flex-wrap items-center gap-3">
-                    <span className="max-w-full truncate rounded-lg border border-card-border bg-page px-3 py-1 text-xs font-semibold text-text" title={draft.file_path}>
-                      {draft.file_path}
-                    </span>
-                    <span
-                      className={`rounded-full px-3 py-1 text-[11px] font-bold tracking-wider ${
-                        draft.status === "published"
-                          ? "bg-blue text-on-accent"
-                          : draft.status === "rejected"
-                          ? "bg-destructive-text text-on-accent"
-                          : "bg-warning-bg text-warning-text"
-                      }`}
-                    >
-                      {DRAFT_STATUS_LABELS[draft.status]}
-                    </span>
-                    <span className="text-xs text-secondary tabular-nums">
-                      Mã bản ghi: <strong className="text-text">{draft.commit_hash}</strong>
-                    </span>
-                  </div>
+            {filteredDrafts.length === 0 ? (
+              <Card as="section" aria-label="Không có bản nháp" className="text-[13px] leading-snug text-secondary">
+                Không có bản nháp nào trong mục này.
+              </Card>
+            ) : (
+              <ul role="list" className="m-0 flex list-none flex-col gap-3 p-0">
+                {filteredDrafts.map((draft) => (
+                  <li key={draft.id}>
+                    <Card as="article" aria-label={`Bản nháp ${draft.file_path}`} data-align-group="admin-card" className="flex flex-col gap-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className={`rounded-full px-3 py-1 text-[11px] font-bold ${PILL[draft.status === "published" ? "good" : draft.status === "rejected" ? "bad" : "wait"]}`}>
+                          {DRAFT_STATUS_LABELS[draft.status]}
+                        </span>
+                        <span className="text-[13px] tabular-nums text-secondary">
+                          Mã bản ghi: <strong className="text-text">{draft.commit_hash}</strong>
+                        </span>
+                      </div>
+                      <p className="m-0 break-all rounded-xl border border-card-border bg-page px-3 py-2 text-[13px] font-semibold text-text">
+                        {draft.file_path}
+                      </p>
 
-                  <pre className="m-0 overflow-x-auto whitespace-pre-wrap rounded-xl bg-surface-dark p-4 font-sans text-xs leading-relaxed text-muted-subtitle">
-                    {draft.markdown_content}
-                  </pre>
-                </div>
+                      <pre className="m-0 overflow-x-auto whitespace-pre-wrap rounded-xl bg-surface-dark p-4 font-sans text-[13px] leading-relaxed text-muted-subtitle">
+                        {draft.markdown_content}
+                      </pre>
 
-                <div className="flex min-w-[150px] shrink-0 justify-end gap-3 md:flex-col">
-                  {draft.status === "draft" && (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() => handleUpdateDraftStatus(draft.id, "published")}
-                        className="min-h-[44px] w-full cursor-pointer rounded-full border-0 bg-blue px-4 text-sm font-bold text-on-accent transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none"
-                      >
-                        Duyệt
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleUpdateDraftStatus(draft.id, "rejected")}
-                        className="min-h-[44px] w-full cursor-pointer rounded-full border border-destructive-text bg-card px-4 text-sm font-bold text-destructive-text transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none"
-                      >
-                        Từ chối
-                      </button>
-                    </>
-                  )}
-                  {draft.status !== "draft" && (
-                    <div className="self-center text-xs font-semibold tracking-wider text-secondary md:self-end">
-                      Trạng thái: {DRAFT_STATUS_LABELS[draft.status]}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
+                      {draft.status === "draft" && (
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleUpdateDraftStatus(draft.id, "published")}
+                            className={`${ACTION} border-0 bg-blue text-on-accent`}
+                          >
+                            Duyệt
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleUpdateDraftStatus(draft.id, "rejected")}
+                            className={`${ACTION} border border-destructive-text bg-card text-destructive-text`}
+                          >
+                            Từ chối
+                          </button>
+                        </div>
+                      )}
+                    </Card>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        )}
+      </main>
+    </AppShell>
   );
 }

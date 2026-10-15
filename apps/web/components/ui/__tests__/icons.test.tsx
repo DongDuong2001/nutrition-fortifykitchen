@@ -40,5 +40,21 @@ describe("MynaUI Icon Adapter", () => {
   it("supports custom aria-label for accessible icon-only controls", () => {
     const html = renderToString(<IconCheck aria-hidden="false" aria-label="Đã hoàn tất" />);
     expect(html).toContain('aria-label="Đã hoàn tất"');
+    expect(html).toContain('role="img"');
+    expect(html).not.toContain('aria-hidden="true"><svg');
+  });
+
+  it("stays decorative (hidden from assistive technology) without a label", () => {
+    const html = renderToString(<IconCheck />);
+    expect(html).toContain('aria-hidden="true"');
+    expect(html).not.toContain("role=");
+  });
+
+  it("is the same size and stroke as the navigation icons: 22 px, 1,8", () => {
+    for (const Icon of [IconHome, IconTarget, IconSparkles, IconCheck]) {
+      const html = renderToString(<Icon />);
+      expect(html).toContain('width="22"');
+      expect(html).toContain('stroke-width="1.8"');
+    }
   });
 });

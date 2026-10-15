@@ -21,6 +21,8 @@ const OWNER: Record<string, NavTab> = {
   foods: "explore",
   settings: "settings",
   profile: "settings",
+  privacy: "settings",
+  terms: "settings",
   micros: "today",
   trends: "overview",
   training: "today",
@@ -57,7 +59,9 @@ function backTarget(first: string | undefined, second: string | undefined, third
     if (third === "weight") return "/settings/profile";
     return "/settings";
   }
+  if (first === "explore" && second === "coaches" && third) return "/explore/coaches";
   if (first === "explore" || first === "foods") return "/explore";
+  if (first === "privacy" || first === "terms") return "/settings";
   if (first === "add" || first === "entry") return "/";
   return "/";
 }

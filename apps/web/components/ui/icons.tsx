@@ -17,7 +17,7 @@ export interface IconProps extends Omit<React.SVGProps<SVGSVGElement>, "stroke">
  * - stroke: 1.8 (matching SPEC.md and design tokens)
  * - color: "currentColor"
  * - size: 22 px default
- * - aria-hidden: true by default
+ * - decorative (aria-hidden) unless given an aria-label, then an image with that name
  */
 export function createH1TIcon(MynaComponent: React.ComponentType<Myna.MynaIconsProps>) {
   return function H1TIconWrapper({
@@ -29,12 +29,15 @@ export function createH1TIcon(MynaComponent: React.ComponentType<Myna.MynaIconsP
     "aria-label": ariaLabel,
     ...rest
   }: IconProps) {
+    // Decorative unless it carries a label: a labelled icon is an image with that name (an icon alone in a button)
+    const decorative = ariaLabel === undefined || ariaHidden === true || ariaHidden === "true";
     return (
       <span
         className={className}
         style={{ display: "inline-flex", alignItems: "center", justifyContent: "center" }}
-        aria-hidden={ariaHidden}
-        aria-label={ariaLabel}
+        aria-hidden={decorative ? true : undefined}
+        role={decorative ? undefined : "img"}
+        aria-label={decorative ? undefined : ariaLabel}
       >
         <MynaComponent size={size} color={color} stroke={stroke} {...rest} />
       </span>
@@ -73,6 +76,3 @@ export const IconSparkles = createH1TIcon(Myna.Sparkles);
 export const IconBadge = createH1TIcon(Myna.Badge);
 export const IconRibbon = createH1TIcon(Myna.Ribbon);
 export const IconDiamond = createH1TIcon(Myna.Diamond);
-
-// Re-export raw package for specialized access
-export * from "@mynaui/icons-react";

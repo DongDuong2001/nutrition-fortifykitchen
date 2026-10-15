@@ -1,29 +1,32 @@
 import React from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
-import { IconRibbon, IconChevronRight } from "@/components/ui/icons";
+import { SectionTitle } from "@/components/ui/section-title";
+import { IconRibbon } from "@/components/ui/icons";
 
+/** Khám phá: the way into the leaderboard. One card, one link (the button), the text wraps. */
 export function LeaderboardBanner() {
   return (
-    <Card as="section" className="flex items-center justify-between gap-3 p-4 bg-gradient-to-r from-blue/5 via-card to-card border border-blue/20">
-      <div className="flex items-center gap-3 min-w-0">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue text-on-accent shadow-xs">
-          <IconRibbon size={20} />
-        </span>
-        <div className="flex flex-col min-w-0">
-          <span className="truncate text-sm font-bold text-text">Bảng xếp hạng kỷ luật</span>
-          <span className="text-xs text-secondary">
-            Vinh danh người dùng duy trì vi chất & mục tiêu cao nhất
-          </span>
-        </div>
+    <Card as="section" aria-labelledby="explore-leaderboard" className="flex items-center gap-3">
+      <span
+        aria-hidden="true"
+        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-blue text-on-accent"
+      >
+        <IconRibbon />
+      </span>
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <SectionTitle as="h2" id="explore-leaderboard">
+          Bảng xếp hạng kỷ luật
+        </SectionTitle>
+        <p className="m-0 text-[13px] leading-snug text-secondary">
+          Vinh danh người dùng duy trì vi chất và mục tiêu cao nhất
+        </p>
       </div>
-
       <Link
         href="/explore/leaderboard"
-        className="shrink-0 flex h-9 items-center gap-1 justify-center rounded-full bg-blue px-3.5 text-xs font-bold text-on-accent no-underline shadow-xs hover:bg-blue/90 transition-colors"
+        className="flex min-h-11 shrink-0 items-center whitespace-nowrap rounded-full bg-blue px-4 text-[13px] font-bold text-on-accent no-underline hover:text-on-accent active:scale-[0.97] motion-reduce:active:scale-100"
       >
-        <span>Xem BXH</span>
-        <IconChevronRight size={14} />
+        Xem bảng
       </Link>
     </Card>
   );

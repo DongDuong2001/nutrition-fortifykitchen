@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AppHeader } from "@/components/ui/app-header";
+import { LegalHeader } from "@/components/legal/legal-header";
 import { AppShell } from "@/components/ui/app-shell";
 
 export const metadata: Metadata = {
@@ -10,38 +10,32 @@ export const metadata: Metadata = {
 export default function TermsPage() {
   return (
     <AppShell alignContainer="terms-page">
-      <AppHeader
-        variant="sub"
-        title="Điều khoản dịch vụ"
-        backHref="/settings"
-        layout="wide"
-        alignGroup="terms-header"
-      />
+      <LegalHeader title="Điều khoản dịch vụ" alignGroup="terms-header" />
 
-      <main className="mx-auto w-full max-w-[760px] px-4 pb-12 pt-4 lg:px-8 lg:pb-16 lg:pt-6">
-        <article className="flex flex-col gap-6 rounded-[18px] border border-card-border bg-card p-5 text-text sm:p-8">
+      <main className="mx-auto w-full max-w-[760px] px-4 pb-6 pt-4 lg:mx-0 lg:px-8">
+        <article className="flex flex-col gap-6 rounded-[18px] border border-card-border bg-card p-5 text-text lg:p-8">
           <header className="flex flex-col gap-2 border-b border-divider pb-4">
-            <h1 className="m-0 text-xl font-bold tracking-tight text-text sm:text-2xl">
+            <h2 className="m-0 text-xl font-bold leading-snug text-text">
               Điều khoản sử dụng dịch vụ H1T MICRO
-            </h1>
+            </h2>
             <p className="m-0 text-[13px] text-secondary">
               Hiệu lực từ: Ngày 15 tháng 10 năm 2026 · Vui lòng đọc kỹ trước khi đăng ký hoặc sử dụng dịch vụ
             </p>
           </header>
 
           <section className="flex flex-col gap-2.5">
-            <h2 className="m-0 text-base font-bold text-text">1. Giới thiệu dịch vụ</h2>
+            <h3 className="m-0 text-base font-bold text-text">1. Giới thiệu dịch vụ</h3>
             <p className="m-0 text-sm leading-relaxed text-secondary">
               H1T MICRO là nền tảng theo dõi dinh dưỡng và vi chất chuyên sâu, hỗ trợ người dùng ghi nhận khẩu phần ăn, đối chiếu với 22 mục tiêu vi chất thiết yếu và theo dõi xu hướng năng lượng theo thời gian. Bằng việc truy cập, tạo tài khoản hoặc sử dụng ứng dụng, bạn đồng ý tuân thủ các điều khoản dịch vụ này.
             </p>
           </section>
 
-          <section className="flex flex-col gap-2.5 rounded-xl border border-divider bg-surface-dark/5 p-4 sm:p-5">
-            <h2 className="m-0 text-base font-bold text-text">
+          <section className="flex flex-col gap-2.5 rounded-xl border border-divider bg-page p-4">
+            <h3 className="m-0 text-base font-bold text-text">
               2. Tuyên bố từ chối trách nhiệm y tế (Quan trọng)
-            </h2>
+            </h3>
             <p className="m-0 text-sm leading-relaxed text-secondary">
-              <strong className="text-text">H1T MICRO là công cụ hỗ trợ theo dõi thói quen dinh dưỡng và giáo dục vi chất, KHÔNG PHẢI là dịch vụ khám chữa bệnh hoặc cung cấp lời khuyên y tế.</strong>
+              <strong className="text-text">H1T MICRO là công cụ hỗ trợ theo dõi thói quen dinh dưỡng và giáo dục vi chất, không phải là dịch vụ khám chữa bệnh hoặc cung cấp lời khuyên y tế.</strong>
             </p>
             <ul className="m-0 flex flex-col gap-1.5 pl-5 text-sm leading-relaxed text-secondary">
               <li>Mọi công thức tính toán nhu cầu năng lượng (TDEE), tỷ lệ hấp thụ và khuyến nghị vi chất được đối chiếu từ dữ liệu nghiên cứu công khai (Bảng thành phần thực phẩm Việt Nam, Viện Dinh dưỡng Quốc gia, USDA).</li>
@@ -51,7 +45,7 @@ export default function TermsPage() {
           </section>
 
           <section className="flex flex-col gap-2.5">
-            <h2 className="m-0 text-base font-bold text-text">3. Trách nhiệm người sử dụng</h2>
+            <h3 className="m-0 text-base font-bold text-text">3. Trách nhiệm người sử dụng</h3>
             <ul className="m-0 flex flex-col gap-2 pl-5 text-sm leading-relaxed text-secondary">
               <li>
                 <strong className="text-text">Tính xác thực của thông tin:</strong> Bạn chịu trách nhiệm về tính chính xác của các chỉ số thể trạng (năm sinh, cân nặng, nhật ký ăn uống) nhập vào hệ thống để đảm bảo kết quả đối chiếu mục tiêu có giá trị tham khảo đúng đắn.
@@ -66,7 +60,7 @@ export default function TermsPage() {
           </section>
 
           <section className="flex flex-col gap-2.5">
-            <h2 className="m-0 text-base font-bold text-text">4. Nguồn dữ liệu thực phẩm &amp; Bản quyền</h2>
+            <h3 className="m-0 text-base font-bold text-text">4. Nguồn dữ liệu thực phẩm &amp; Bản quyền</h3>
             <p className="m-0 text-sm leading-relaxed text-secondary">
               Dữ liệu thành phần dinh dưỡng trên H1T MICRO được chuẩn hóa từ các nguồn chính thống:
             </p>
@@ -81,23 +75,23 @@ export default function TermsPage() {
           </section>
 
           <section className="flex flex-col gap-2.5">
-            <h2 className="m-0 text-base font-bold text-text">5. Gói dịch vụ và Thanh toán</h2>
+            <h3 className="m-0 text-base font-bold text-text">5. Gói dịch vụ và Thanh toán</h3>
             <p className="m-0 text-sm leading-relaxed text-secondary">
               H1T MICRO cung cấp các tính năng nhật ký cơ bản miễn phí. Người dùng có thể nâng cấp gói H1T MICRO Pro để sử dụng các tính năng nâng cao (báo cáo vi chất chuyên sâu, phân tích chu kỳ). Chi phí và thời hạn sử dụng được thông báo minh bạch trước khi người dùng thực hiện giao dịch thanh toán qua cổng hợp pháp (PayOS).
             </p>
           </section>
 
           <section className="flex flex-col gap-2.5">
-            <h2 className="m-0 text-base font-bold text-text">6. Ngừng cung cấp dịch vụ</h2>
+            <h3 className="m-0 text-base font-bold text-text">6. Ngừng cung cấp dịch vụ</h3>
             <p className="m-0 text-sm leading-relaxed text-secondary">
               Bạn có thể ngừng sử dụng dịch vụ bất kỳ lúc nào bằng cách xóa tài khoản tại mục Cài đặt. H1T MICRO có quyền tạm ngưng hoặc chấm dứt quyền truy cập đối với các tài khoản vi phạm điều khoản bảo mật hoặc gây ảnh hưởng đến an ninh hệ thống.
             </p>
           </section>
 
           <section className="flex flex-col gap-2.5 border-t border-divider pt-4">
-            <h2 className="m-0 text-base font-bold text-text">7. Luật áp dụng và Khiếu nại</h2>
+            <h3 className="m-0 text-base font-bold text-text">7. Luật áp dụng và Khiếu nại</h3>
             <p className="m-0 text-sm leading-relaxed text-secondary">
-              Các điều khoản này chịu sự điều chỉnh của pháp luật Nước Cộng hòa Xã hội Chủ nghĩa Việt Nam. Mọi thắc mắc hoặc phản hồi vui lòng gửi đến: <code className="rounded bg-divider px-1.5 py-0.5 text-xs text-text">support@h1tmicro.vn</code>.
+              Các điều khoản này chịu sự điều chỉnh của pháp luật Nước Cộng hòa Xã hội Chủ nghĩa Việt Nam. Mọi thắc mắc hoặc phản hồi vui lòng gửi đến: <code className="rounded bg-divider px-2 py-0.5 text-[13px] text-text">support@h1tmicro.vn</code>.
             </p>
           </section>
         </article>

@@ -53,6 +53,24 @@ describe("lib/nav tabs", () => {
   });
 });
 
+describe("lib/nav, Dong's screens (cc-24)", () => {
+  it("keeps the leaderboard and the coaches under Khám phá, the legal pages under Cài đặt", () => {
+    expect(tabForPath("/explore/leaderboard")).toBe("explore");
+    expect(tabForPath("/explore/coaches/coach-ha")).toBe("explore");
+    expect(tabForPath("/privacy")).toBe("settings");
+    expect(tabForPath("/terms")).toBe("settings");
+    expect(tabForPath("/admin/review")).toBeNull();
+  });
+
+  it("sends a coach profile back to the directory, the legal pages back to Cài đặt", () => {
+    expect(backFallback("/explore/coaches/coach-ha")).toBe("/explore/coaches");
+    expect(backFallback("/explore/coaches")).toBe("/explore");
+    expect(backFallback("/explore/leaderboard")).toBe("/explore");
+    expect(backFallback("/privacy")).toBe("/settings");
+    expect(backFallback("/terms")).toBe("/settings");
+  });
+});
+
 describe("lib/nav backFallback", () => {
   it("sends Vi chất and Ngày tập back to the day log, and Tổng quan's sub-screens back to Tổng quan", () => {
     expect(backFallback("/micros")).toBe("/");

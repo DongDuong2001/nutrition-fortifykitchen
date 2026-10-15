@@ -2,9 +2,12 @@
 
 import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
+import { PillButton } from "@/components/ui/pill-button";
+import { SectionTitle } from "@/components/ui/section-title";
 import type { MasteryLevelInfo } from "@/lib/mastery-levels";
 import { CoachApplicationSheet } from "@/components/coaching/coach-application-sheet";
 
+/** The user's mastery level (Cấp 1 to 5): the level, what it asks for, the way to the next one. */
 export function MasteryBadge({ info }: { info: MasteryLevelInfo }) {
   const [sheetOpen, setSheetOpen] = useState(false);
 
@@ -12,67 +15,68 @@ export function MasteryBadge({ info }: { info: MasteryLevelInfo }) {
 
   return (
     <>
-      <Card as="section" className="flex flex-col gap-3 p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
+      <Card as="section" aria-label={`Cấp độ vi chất: ${info.title}`} className="flex flex-col gap-3">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
             <span
-              className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-black shadow-xs ${
-                isLevel5 ? "bg-amber text-on-dark" : "bg-blue text-on-accent"
+              aria-hidden="true"
+              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full font-display text-2xl font-extrabold italic ${
+                isLevel5 ? "bg-level-yellow text-on-accent" : "bg-blue text-on-accent"
               }`}
             >
               {info.level}
             </span>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <h3 className="m-0 text-sm font-extrabold text-text">{info.title}</h3>
+            <div className="flex min-w-0 flex-col">
+              <span className="flex flex-wrap items-center gap-2">
+                <SectionTitle as="h3">{info.title}</SectionTitle>
                 {isLevel5 && (
-                  <span className="rounded-full bg-amber/15 px-1.5 py-0.2 text-[10px] font-bold text-amber">
+                  <span className="rounded-full bg-warning-bg px-2 py-0.5 text-[11px] font-bold text-warning-text">
                     Chứng nhận
                   </span>
                 )}
-              </div>
-              <span className="text-xs font-medium text-secondary">{info.shortLabel}</span>
+              </span>
+              <span className="text-[13px] text-secondary">{info.shortLabel}</span>
             </div>
           </div>
           {info.nextLevel ? (
-            <span className="text-xs font-bold text-blue">{info.progressPct}%</span>
+            <span className="shrink-0 font-display text-2xl font-extrabold italic tabular-nums text-blue">
+              {info.progressPct}%
+            </span>
           ) : (
-            <span className="rounded-full bg-blue/10 px-2 py-0.5 text-xs font-bold text-blue">
-              {isLevel5 ? "HLV Tiêu biểu" : "Tối đa"}
+            <span className="shrink-0 rounded-full bg-page px-3 py-1 text-[13px] font-bold text-blue">
+              {isLevel5 ? "Huấn luyện viên tiêu biểu" : "Cấp cao nhất"}
             </span>
           )}
         </div>
 
-        <p className="m-0 text-xs text-secondary leading-relaxed">{info.description}</p>
+        <p className="m-0 text-[13px] leading-snug text-secondary">{info.description}</p>
 
         {info.nextLevel && (
-          <div className="flex flex-col gap-1.5 pt-1">
-            <div className="h-2 w-full overflow-hidden rounded-full bg-page border border-card-border">
-              <div
-                className="h-full bg-blue transition-all duration-300 rounded-full"
-                style={{ width: `${info.progressPct}%` }}
-              />
+          <div className="flex flex-col gap-2">
+            <div
+              role="progressbar"
+              aria-label="Tiến độ lên cấp tiếp theo"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={info.progressPct}
+              className="h-2 w-full overflow-hidden rounded-full bg-level-empty"
+            >
+              <div className="h-full rounded-full bg-blue" style={{ width: `${info.progressPct}%` }} />
             </div>
             {info.nextRequirementText && (
-              <span className="text-[11px] font-medium text-secondary">
-                {info.nextRequirementText}
-              </span>
+              <span className="text-[13px] leading-snug text-secondary">{info.nextRequirementText}</span>
             )}
           </div>
         )}
 
         {info.canApplyForCoach && (
-          <div className="pt-2 border-t border-card-border/60 flex items-center justify-between gap-3">
-            <span className="text-xs font-semibold text-text">
-              Bạn đủ điều kiện ứng tuyển HLV cộng đồng
+          <div className="flex flex-col gap-3 border-t border-divider pt-3">
+            <span className="text-[13px] font-semibold leading-snug text-text">
+              Bạn đủ điều kiện ứng tuyển huấn luyện viên cộng đồng
             </span>
-            <button
-              type="button"
-              onClick={() => setSheetOpen(true)}
-              className="min-h-[44px] shrink-0 rounded-full bg-blue px-4 text-xs font-bold text-on-accent border-0 cursor-pointer transition-transform duration-150 active:scale-[0.97]"
-            >
+            <PillButton type="button" onClick={() => setSheetOpen(true)}>
               Nộp đơn ứng tuyển
-            </button>
+            </PillButton>
           </div>
         )}
       </Card>
