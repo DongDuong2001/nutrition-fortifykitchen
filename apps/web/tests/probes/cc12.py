@@ -61,7 +61,7 @@ def add_chà_là_then_today(pg):
     pg.goto(BASE + "/add?meal=pre_workout", wait_until="networkidle")
     pg.locator('button:has-text("Chà là") >> visible=true').first.click()
     pg.locator('button:has-text("Thêm vào Trước tập") >> visible=true').first.click()
-    pg.wait_for_url(re.compile(r".*/(?.*)?$"), timeout=8000)
+    pg.wait_for_url(re.compile(r".*/(\?.*)?$"), timeout=8000)
     pg.wait_for_timeout(400)
 
 

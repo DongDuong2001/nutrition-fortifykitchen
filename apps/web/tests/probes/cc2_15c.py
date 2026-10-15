@@ -76,7 +76,7 @@ def add_food(pg, avoid):
         if name and name not in avoid:
             rows.nth(i).click()
             pg.get_by_role("button", name=re.compile("^Thêm vào Bữa tối")).locator("visible=true").first.click()
-            pg.wait_for_url(re.compile(r".*/(?.*)?$"))
+            pg.wait_for_url(re.compile(r".*/(\?.*)?$"))
             pg.wait_for_timeout(500)
             return name
     return ""

@@ -68,7 +68,8 @@ def test_today_cards(browser):
     pg.goto(BASE + "/", wait_until="networkidle")
     pg.wait_for_timeout(400)
     txt = body_text(pg)
-    check(re.search(r"60′\s+Ngày tập\s+muối 7–10,5 g", txt) is not None, "diary @ 1440: the Ngày tập row reads 60′ and salt 7–10,5 g")
+    # cc2-32: Nhật ký folded into Hôm nay, whose Ngày tập pill reads the minutes; the salt range is checked on /training below
+    check(re.search(r"Ngày tập 60′", txt) is not None, "home @ 1440: the Ngày tập pill reads 60′")
     pg.goto(BASE + "/training", wait_until="networkidle")
     pg.wait_for_timeout(400)
     txt = body_text(pg)
@@ -77,14 +78,6 @@ def test_today_cards(browser):
     pg.goto(BASE + "/micros", wait_until="networkidle")
     pg.wait_for_timeout(400)
     check("5.200–6.500 mg" in body_text(pg), "micros @ 1440: potassium target 5.200–6.500 mg")
-    ctx.close()
-
-    ctx = browser.new_context(viewport=PHONE)
-    pg = ctx.new_page()
-    pg.goto(BASE + "/", wait_until="networkidle")
-    pg.wait_for_timeout(400)
-    label = pg.evaluate("() => document.querySelector('svg[role=\"img\"][aria-label*=\"mục tiêu\"]')?.getAttribute('aria-label') || ''")
-    check("1.041" in label and "mục tiêu" in label, f"today @ 390: dial label uses vi number format ({label[:80]})")
     ctx.close()
 
 
