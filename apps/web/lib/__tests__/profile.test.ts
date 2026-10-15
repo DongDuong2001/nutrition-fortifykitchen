@@ -81,7 +81,18 @@ describe("parseStoredProfile", () => {
   };
 
   it("reads a valid stored profile", () => {
-    expect(parseStoredProfile(stored(valid), YEAR)).toEqual(valid);
+    // An old profile has no role, Level or coach: it loads as user, Level 0, no coach
+    expect(parseStoredProfile(stored(valid), YEAR)).toEqual({ ...valid, role: "user", level: 0, coach: null, levelSeen: 0, hintSeen: false });
+  });
+
+  it("reads the role, Level and coach when they are stored", () => {
+    const coach = { id: "coach-khanh", name: "HLV Khánh" };
+    const profile = parseStoredProfile(stored({ ...valid, role: "coach", level: 3, coach, levelSeen: 2, hintSeen: true }), YEAR);
+    expect(profile).toMatchObject({ role: "coach", level: 3, coach, levelSeen: 2, hintSeen: true });
+  });
+
+  it("repairs a Level with no coach to Level 0", () => {
+    expect(parseStoredProfile(stored({ ...valid, level: 4 }), YEAR)).toMatchObject({ level: 0, coach: null });
   });
 
   it("returns null when nothing is stored or the text is not JSON", () => {

@@ -25,7 +25,7 @@ SCREENS = [
     ("coaches", "/explore/coaches"),
     ("coach", "/explore/coaches/coach-khanh"),
     ("coach-missing", "/explore/coaches/khong-co"),
-    ("admin", "/admin/review"),
+    ("admin", "/admin/review?as=admin"),
     ("privacy", "/privacy"),
     ("terms", "/terms"),
 ]

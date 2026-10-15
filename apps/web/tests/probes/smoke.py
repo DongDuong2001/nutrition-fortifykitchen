@@ -31,7 +31,7 @@ DESKTOP_SIDEBAR = 'nav[aria-label="Điều hướng chính"]:visible'  # the sid
 # No route is skipped now: /login links to /diary, which is a route since cc2-07, so it reaches networkidle.
 SKIPPED_ROUTES: set[str] = set()
 # Mock id for each dynamic segment, keyed by the static segment in front of it
-MOCK_IDS = {"entry": "item-1", "foods": "food-cha-la", "micros": "calcium", "explore": "tinh_bot", "rich": "calcium", "coaches": "coach-khanh"}
+MOCK_IDS = {"entry": "item-1", "foods": "food-cha-la", "micros": "calcium", "explore": "tinh_bot", "rich": "calcium", "coaches": "coach-khanh", "clients": "client-1", "join": "H1T-KHANH"}
 IGNORED_CONSOLE = ("data-gr-", "Grammarly")
 # Production builds report hydration failures as minified React errors (#418, #419, #423, #425)
 HYDRATION_RE = re.compile(r"hydrat|React error #(418|419|423|425)", re.IGNORECASE)
@@ -95,6 +95,15 @@ def slug(route):
     return "home" if route == "/" else re.sub(r"[^A-Za-z0-9-]+", "-", route.strip("/").replace("/", "-")).strip("-")
 
 
+def gated(route):
+    """cc-28a: /admin/** is for admins and /coach/** for coaches (404 otherwise); demo mode picks the mock account."""
+    if route.startswith("/admin"):
+        return route + ("&" if "?" in route else "?") + "as=admin"
+    if route.startswith("/coach"):
+        return route + ("&" if "?" in route else "?") + "as=coach"
+    return route
+
+
 def check(browser, route, width, height):
     context = browser.new_context(viewport={"width": width, "height": height})
     page = context.new_page()
@@ -110,7 +119,7 @@ def check(browser, route, width, height):
     shot = OUT_DIR / f"smoke-{slug(route)}-{width}.png"
 
     try:
-        page.goto(BASE + route, wait_until="networkidle", timeout=30000)
+        page.goto(BASE + gated(route), wait_until="networkidle", timeout=30000)
         page.wait_for_timeout(300)
 
         header_route = route

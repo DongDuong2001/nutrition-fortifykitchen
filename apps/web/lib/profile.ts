@@ -3,10 +3,11 @@ import { DRAFT_KEY, goalName, readDraft, validateSetupDraft, type SetupDraft } f
 import { formatAmount } from "./format";
 import type { MockDayData, MockMacroStat, MockMicroStat } from "./mock/sample-day";
 import { PROFILE_KEY, accountStorage } from "./storage-keys";
+import { NO_COACHING, normaliseCoaching, type CoachingState } from "./coaching-link";
 
 export { PROFILE_KEY };
 
-export interface Profile {
+export interface Profile extends CoachingState {
   sex: SexType;
   birthYear: number;
   weightKg: number;
@@ -27,6 +28,7 @@ export const SAMPLE_PROFILE: Profile = {
   periodMode: false,
   trainingMinutesDefault: 60,
   displayName: "",
+  ...NO_COACHING,
 };
 
 const SEXES: readonly string[] = ["male", "female"];
@@ -95,6 +97,8 @@ export function parseStoredProfile(raw: string | null, currentYear: number): Pro
       typeof stored.displayName === "string" && displayNameError(stored.displayName) === null
         ? cleanDisplayName(stored.displayName)
         : "",
+    // Role, Level, coach: a profile saved before they existed loads as user, Level 0, no coach
+    ...normaliseCoaching(stored),
   };
   return profileFromDraft(draft, base, currentYear);
 }

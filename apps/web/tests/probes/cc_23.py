@@ -354,7 +354,7 @@ def address_and_back(browser, size, size_name):
 
 def admin_tab(browser):
     ctx, pg, _ = new_page(browser, PHONE)
-    pg.goto(f"{BASE}/admin/review", wait_until="networkidle")
+    pg.goto(f"{BASE}/admin/review?as=admin", wait_until="networkidle")
     pg.wait_for_timeout(400)
     current = pg.locator('nav[aria-label="Điều hướng chính"]:visible [aria-current="page"]')
     check(current.count() == 1 and "Cài đặt" in current.inner_text(), f"390 /admin/review: Cài đặt is active in the bottom nav ({current.count()})")

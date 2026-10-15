@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { targetSections } from "../target-rows";
 import type { Profile } from "../../../lib/profile";
+import { NO_COACHING } from "../../../lib/coaching-link";
 
 // The sample user: Nam, 65 kg, Giữ cân, 60 phút. Expected values are the design's copy (design/v2/cai-dat.html).
 const SAMPLE: Profile = {
@@ -11,6 +12,7 @@ const SAMPLE: Profile = {
   periodMode: false,
   trainingMinutesDefault: 60,
   displayName: "",
+  ...NO_COACHING,
 };
 
 function row(profile: Profile, sectionTitle: string, label: string) {

@@ -59,7 +59,7 @@ ONBOARDING_CHECKS = [
 DONG_SCREEN_CHECKS = [
     ("/explore/leaderboard", "leaderboard-row", 1),
     ("/explore/coaches", "coach-card", 2),
-    ("/admin/review", "admin-card", 1),
+    ("/admin/review?as=admin", "admin-card", 1),
 ]
 
 # cc-23: compare foods, 3 columns. Each column's header and its value cells share left and right edges.

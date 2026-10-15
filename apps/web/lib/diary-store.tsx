@@ -27,6 +27,7 @@ import { nutrientSourcesIn, type NutrientSource } from "./nutrient-sources";
 import { DEFAULT_RECENT_FOODS, isRecentFood, pushRecent, type RecentFood } from "./recent-foods";
 import { MOCK_FOODS } from "./mock/foods";
 import { syncRecipeFoods } from "./recipe-store";
+import { personaPatch } from "./demo-persona";
 import {
   buildSavedMeal,
   defaultMealName,
@@ -471,7 +472,13 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       loadData(account, demoNow, iso);
     } finally {
       setTodayIso(iso);
-      setProfile(loadProfile(new Date().getFullYear()));
+      const loaded = loadProfile(new Date().getFullYear());
+      // Demo mode only: ?as= and ?level= pick a mock account (lib/demo-persona). Applied before anything renders
+      // from the role, so a gated page never flashes its 404 for the wrong account.
+      const persona = demoNow ? personaPatch(window.location.search) : null;
+      const seeded = persona ? { ...loaded, ...persona } : loaded;
+      if (persona) writeStoredProfile(seeded);
+      setProfile(seeded);
       setHydrated(true);
     }
   }, [loadData]);
