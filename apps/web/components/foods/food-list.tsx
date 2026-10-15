@@ -1,6 +1,20 @@
 import React from "react";
 import type { FoodItem } from "@/lib/mock/foods";
 import type { FoodList as FoodListData } from "@/lib/food-categories";
+import { searchTag } from "@/lib/food-source";
+
+function SourceTag({ food }: { food: FoodItem }) {
+  const tag = searchTag(food);
+  return (
+    <span
+      className={`inline-flex h-6 shrink-0 items-center rounded-full px-2 text-xs font-bold ${
+        tag.warning ? "bg-warning-bg text-warning-text" : "border border-card-border bg-page text-secondary"
+      }`}
+    >
+      {tag.label}
+    </span>
+  );
+}
 
 export interface FoodListProps {
   list: FoodListData;
@@ -18,6 +32,8 @@ export interface FoodListProps {
   showCategory?: boolean;
   /** Grouped rows show a small heart after the name for saved favourites. */
   isFavourite?: (food: FoodItem) => boolean;
+  /** Search results: a small tag on each row says where the numbers come from (USDA, VN, Ước tính, Của tôi). */
+  showSourceTag?: boolean;
   /** Shown when the list has no foods. */
   empty: React.ReactNode;
   /** Shown after the foods, for example the create-food button. */
@@ -42,6 +58,7 @@ export function FoodList({
   categoryName,
   showCategory = true,
   isFavourite,
+  showSourceTag = false,
   empty,
   footer,
   className = "",
@@ -83,6 +100,7 @@ export function FoodList({
             </span>
             <span className="line-clamp-2 text-[13px] leading-tight text-secondary">{meta}</span>
           </span>
+          {showSourceTag && <SourceTag food={food} />}
           {selected && (
             <svg
               width="20"

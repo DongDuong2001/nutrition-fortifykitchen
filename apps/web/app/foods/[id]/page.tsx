@@ -12,6 +12,8 @@ import { goodSourcesOf, microRowsFor } from "@/lib/food-detail";
 import { categoryLabel, categoryOf } from "@/lib/food-categories";
 import { formatAmount } from "@/lib/format";
 import { foodSourceLabel } from "@/lib/food-meta";
+import { isProxy } from "@/lib/food-source";
+import { SourceSheet } from "@/components/foods/source-sheet";
 import { FoodMicros, GoodSources } from "@/components/foods/food-micros";
 import { ComparePicker } from "@/components/foods/compare-picker";
 import { PillButton } from "@/components/ui/pill-button";
@@ -47,6 +49,7 @@ function FoodDetailInner() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [compareOpen, setCompareOpen] = useState(false);
+  const [sourceOpen, setSourceOpen] = useState(false);
   const [favouriteToast, setFavouriteToast] = useState<{ message: string } | null>(null);
 
   useEffect(() => {
@@ -134,12 +137,17 @@ function FoodDetailInner() {
                 <span>·</span>
               </>
             )}
-            <Link
-              href="/settings/data-sources"
-              className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] -my-2.5 px-2 -mx-2 text-inherit underline hover:text-blue transition-colors"
+            <button
+              type="button"
+              onClick={() => setSourceOpen(true)}
+              aria-haspopup="dialog"
+              className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] -my-2.5 px-2 -mx-2 cursor-pointer border-0 bg-transparent text-inherit underline hover:text-blue transition-colors"
             >
               {foodSourceLabel(food.source)}
-            </Link>
+            </button>
+            {isProxy(food) && (
+              <span className="inline-flex h-6 items-center rounded-full bg-warning-bg px-2 text-xs font-bold text-warning-text">Ước tính</span>
+            )}
             <span>·</span>
             <span>{food.servings[0]?.grams ?? 100} g mỗi khẩu phần</span>
           </span>
@@ -233,6 +241,8 @@ function FoodDetailInner() {
         <GoodSources rows={goodSources} />
         {micros && <FoodMicros rows={micros.rows} unknown={micros.unknown} portionLabel={`${formatAmount(parsedGrams, "g")} g`} />}
       </main>
+
+      <SourceSheet food={food} open={sourceOpen} onClose={() => setSourceOpen(false)} />
 
       <ComparePicker
         open={compareOpen}

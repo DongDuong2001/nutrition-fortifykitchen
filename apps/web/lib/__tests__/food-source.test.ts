@@ -1,0 +1,55 @@
+import { describe, expect, it } from "vitest";
+import { MATCH_LABEL, coverageText, isProxy, matchOf, microCoverage, searchTag } from "../food-source";
+import { MOCK_FOODS } from "../mock/foods";
+import { COUNTED_NUTRIENT_KEYS } from "../day-totals";
+
+describe("food source helpers", () => {
+  it("a food with no match is exact", () => {
+    expect(matchOf({})).toBe("exact");
+    expect(matchOf({ match: "close" })).toBe("close");
+    expect(isProxy({ match: "proxy" })).toBe(true);
+    expect(isProxy({})).toBe(false);
+  });
+
+  it("names the three match levels", () => {
+    expect(MATCH_LABEL.exact.detail).toBe("đúng món");
+    expect(MATCH_LABEL.close.detail).toBe("cùng món, khác cách chế biến");
+    expect(MATCH_LABEL.proxy.detail).toBe("món tương tự");
+  });
+
+  it("tags a search result by database, with Ước tính in amber for a proxy", () => {
+    expect(searchTag({ source: "USDA" })).toEqual({ label: "USDA", warning: false });
+    expect(searchTag({ source: "VN FCT" })).toEqual({ label: "VN", warning: false });
+    expect(searchTag({ source: "user" })).toEqual({ label: "Của tôi", warning: false });
+    expect(searchTag({ source: "VN FCT", match: "proxy" })).toEqual({ label: "Ước tính", warning: true });
+    expect(searchTag({ source: "USDA", match: "close" })).toEqual({ label: "USDA", warning: false });
+  });
+
+  it("counts only the counted micros with a number (0 counts, null and missing do not)", () => {
+    const n: Record<string, number | null> = { energy: 100, protein: 3, calcium: 0, iron: null, b12: 1.2 };
+    expect(microCoverage({ nutrients: n })).toEqual({ known: 2, total: 22 });
+    expect(microCoverage({ nutrients: {} }).known).toBe(0);
+    const all = Object.fromEntries(COUNTED_NUTRIENT_KEYS.map((k) => [k, 1]));
+    expect(microCoverage({ nutrients: all })).toEqual({ known: 22, total: 22 });
+  });
+
+  it("writes the coverage row with the dash note unless everything is known", () => {
+    expect(coverageText({ nutrients: { calcium: 5 } })).toBe("1/22 vi chất · các chất còn lại hiện “—”");
+    const all = Object.fromEntries(COUNTED_NUTRIENT_KEYS.map((k) => [k, 1]));
+    expect(coverageText({ nutrients: all })).toBe("22/22 vi chất");
+  });
+});
+
+describe("mock catalogue sources", () => {
+  it("has at least two proxy foods", () => {
+    expect(MOCK_FOODS.filter((f) => f.match === "proxy").length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("gives USDA foods a source reference that links to FoodData Central", () => {
+    const withRef = MOCK_FOODS.filter((f) => f.source === "USDA" && f.sourceRef);
+    expect(withRef.length).toBeGreaterThanOrEqual(10);
+    const dates = MOCK_FOODS.find((f) => f.id === "food-cha-la");
+    expect(dates?.sourceRef).toEqual({ db: "SR Legacy", id: "FDC 171413", url: "https://fdc.nal.usda.gov/food-details/171413/nutrients" });
+    for (const f of withRef) expect(f.sourceRef?.url).toMatch(/^https:\/\/fdc\.nal\.usda\.gov\/food-details\/\d+\/nutrients$/);
+  });
+});

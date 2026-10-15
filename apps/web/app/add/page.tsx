@@ -388,6 +388,7 @@ function AddFoodInner() {
                   categoryName={categoryName}
                   showCategory={!isCategoryFilter(filter)}
                   isFavourite={isFavouriteFood}
+                  showSourceTag={query.trim() !== ""}
                   empty={emptyState}
                   footer={createFoodLink}
                   className="max-h-[360px] overflow-y-auto pb-1"
@@ -501,6 +502,7 @@ function AddFoodInner() {
               categoryName={categoryName}
               showCategory={!isCategoryFilter(filter)}
               isFavourite={isFavouriteFood}
+              showSourceTag={query.trim() !== ""}
               empty={emptyState}
               footer={createFoodLink}
             />
