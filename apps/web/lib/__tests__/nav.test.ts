@@ -2,27 +2,27 @@ import { describe, it, expect } from "vitest";
 import { NAV_TABS, backFallback, canGoBack, nextHistory, tabForPath } from "../nav";
 
 describe("lib/nav tabs", () => {
-  it("lists the four tabs in IA-v2 order with their routes", () => {
+  it("lists the four tabs in order (Hôm nay, Tổng quan, Khám phá, Cài đặt) with their routes", () => {
     expect(NAV_TABS.map((t) => [t.tab, t.href, t.label])).toEqual([
-      ["overview", "/", "Tổng quan"],
-      ["diary", "/diary", "Nhật ký"],
+      ["today", "/", "Hôm nay"],
+      ["overview", "/trends", "Tổng quan"],
       ["explore", "/explore", "Khám phá"],
       ["settings", "/settings", "Cài đặt"],
     ]);
   });
 
   it("maps each tab route to itself", () => {
-    expect(tabForPath("/")).toBe("overview");
-    expect(tabForPath("/diary")).toBe("diary");
+    expect(tabForPath("/")).toBe("today");
+    expect(tabForPath("/trends")).toBe("overview");
     expect(tabForPath("/explore")).toBe("explore");
     expect(tabForPath("/settings")).toBe("settings");
   });
 
   it("highlights the owning tab on pushed screens", () => {
-    expect(tabForPath("/micros")).toBe("diary");
-    expect(tabForPath("/micros/calcium")).toBe("diary");
-    expect(tabForPath("/training")).toBe("diary");
-    expect(tabForPath("/trends")).toBe("overview");
+    expect(tabForPath("/micros")).toBe("today");
+    expect(tabForPath("/micros/calcium")).toBe("today");
+    expect(tabForPath("/training")).toBe("today");
+    expect(tabForPath("/entry/item-1")).toBe("today");
     expect(tabForPath("/trends/micros")).toBe("overview");
     expect(tabForPath("/trends/body")).toBe("overview");
     expect(tabForPath("/foods/egg")).toBe("explore");
@@ -33,9 +33,15 @@ describe("lib/nav tabs", () => {
     expect(tabForPath("/settings/language")).toBe("settings");
   });
 
-  it("puts the add sheet and entry editor under the diary and ignores other routes", () => {
-    expect(tabForPath("/add")).toBe("diary");
-    expect(tabForPath("/entry/item-1")).toBe("diary");
+  it("keeps the day log and the add sheet under Hôm nay, since Nhật ký is no longer a tab", () => {
+    expect(tabForPath("/diary")).toBe("today");
+    expect(tabForPath("/add")).toBe("today");
+  });
+
+  it("ignores routes without the nav", () => {
+    expect(tabForPath("/signin")).toBeNull();
+    expect(tabForPath("/paywall")).toBeNull();
+    expect(tabForPath(null)).toBeNull();
     expect(tabForPath("/signin")).toBeNull();
     expect(tabForPath("/paywall")).toBeNull();
     expect(tabForPath(null)).toBeNull();
@@ -48,12 +54,12 @@ describe("lib/nav tabs", () => {
 });
 
 describe("lib/nav backFallback", () => {
-  it("sends Vi chất, Xu hướng and Ngày tập back to Tổng quan", () => {
+  it("sends Vi chất and Ngày tập back to the day log, and Tổng quan's sub-screens back to Tổng quan", () => {
     expect(backFallback("/micros")).toBe("/diary");
-    expect(backFallback("/trends")).toBe("/");
-    expect(backFallback("/trends/micros")).toBe("/");
-    expect(backFallback("/trends/body")).toBe("/");
     expect(backFallback("/training")).toBe("/diary");
+    expect(backFallback("/trends")).toBe("/");
+    expect(backFallback("/trends/micros")).toBe("/trends");
+    expect(backFallback("/trends/body")).toBe("/trends");
   });
 
   it("sends a nutrient detail back to the Vi chất list", () => {

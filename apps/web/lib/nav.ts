@@ -1,28 +1,29 @@
 /**
- * Navigation map for IA v2 (design/IA-v2.md): the four tabs, which tab owns each route, where "back" goes
- * when there is no in-app history, and the in-app history stack. Pure functions, no React.
+ * Navigation map for the bottom nav and the desktop sidebar: the four tabs, which tab owns each route, where
+ * "back" goes when there is no in-app history, and the in-app history stack. Pure functions, no React.
+ * Hôm nay is "/" (the coach home), Tổng quan is /trends, Nhật ký is no longer a tab (it lives under Hôm nay).
  */
-export type NavTab = "overview" | "diary" | "explore" | "settings";
+export type NavTab = "today" | "overview" | "explore" | "settings";
 
 export const NAV_TABS: { tab: NavTab; href: string; label: string }[] = [
-  { tab: "overview", href: "/", label: "Tổng quan" },
-  { tab: "diary", href: "/diary", label: "Nhật ký" },
+  { tab: "today", href: "/", label: "Hôm nay" },
+  { tab: "overview", href: "/trends", label: "Tổng quan" },
   { tab: "explore", href: "/explore", label: "Khám phá" },
   { tab: "settings", href: "/settings", label: "Cài đặt" },
 ];
 
 /** The tab that owns each first path segment. Pushed screens highlight their owner. */
 const OWNER: Record<string, NavTab> = {
-  diary: "diary",
-  add: "diary",
-  entry: "diary",
+  diary: "today",
+  add: "today",
+  entry: "today",
   explore: "explore",
   foods: "explore",
   settings: "settings",
   profile: "settings",
-  micros: "diary",
+  micros: "today",
   trends: "overview",
-  training: "diary",
+  training: "today",
 };
 
 function segments(pathname: string): string[] {
@@ -33,7 +34,7 @@ function segments(pathname: string): string[] {
 export function tabForPath(pathname: string | null | undefined): NavTab | null {
   if (!pathname) return null;
   const [first] = segments(pathname);
-  if (first === undefined) return "overview";
+  if (first === undefined) return "today";
   return OWNER[first] ?? null;
 }
 
@@ -44,6 +45,7 @@ export function backFallback(pathname: string | null | undefined): string {
   const [first, second, third] = parts;
   if (first === "micros" && second) return "/micros";
   if (first === "micros" || first === "training") return "/diary";
+  if (first === "trends" && second) return "/trends";
   if (first === "settings") {
     if (third === "weight") return "/settings/profile";
     return "/settings";

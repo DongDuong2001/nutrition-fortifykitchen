@@ -88,10 +88,13 @@ def check_subtabs(browser, size_name, size):
         current = pg.locator('a[role="tab"][aria-current="page"]:visible').all_inner_texts()
         check(current == [label], f"{size_name} {label}: it is the only active sub-tab ({current})")
         nav = pg.locator('nav[aria-label="Điều hướng chính"]:visible a[aria-current="page"]').all_inner_texts()
-        check(any("Tổng quan" in t for t in nav), f"{size_name} {label}: Tổng quan is the active tab ({nav})")
+        tab_label = "Hôm nay" if route == "/" else "Tổng quan"
+        check(any(tab_label in t for t in nav), f"{size_name} {label}: {tab_label} is the active tab ({nav})")
         no_h_scroll(pg, f"{size_name} {label}")
         shot(pg, SLUGS[route], size_name)
-        body = text(pg)
+        # the bottom nav and sidebar now carry the "Hôm nay" tab label on every screen, so leave them out
+        nav_text = " ".join(pg.locator('nav[aria-label="Điều hướng chính"]:visible').first.inner_text().split())
+        body = " ".join(text(pg).split()).replace(nav_text, "")
         check("Hôm nay" not in body or route == "/", f"{size_name} {label}: no day lists or day controls")
         check("vượt" not in body.lower() and "quá mức" not in body.lower(), f"{size_name} {label}: no over-limit wording")
     ctx.close()
@@ -232,7 +235,7 @@ def check_diary(browser, size_name, size):
     pg.wait_for_url(f"**/training?date={TODAY}", timeout=8000)
     check(f"date={TODAY}" in pg.url, f"{size_name} diary: the Ngày tập row opens /training?date={TODAY}")
     owner = pg.locator('nav[aria-label="Điều hướng chính"]:visible a[aria-current="page"]').all_inner_texts()
-    check(any("Nhật ký" in t for t in owner), f"{size_name} training: the owning tab is Nhật ký ({owner})")
+    check(any("Hôm nay" in t for t in owner), f"{size_name} training: the owning tab is Hôm nay ({owner})")
     ctx.close()
 
 

@@ -3,18 +3,18 @@ import type { NavTab } from "@/lib/nav";
 
 /** One icon per tab, shared by the phone bottom nav and the desktop sidebar. 24 viewBox, 1.8 stroke. */
 const ICONS: Record<NavTab, React.ReactNode> = {
+  today: (
+    <>
+      <path d="M3.5 11L12 4l8.5 7" />
+      <path d="M6 9.5V19a1 1 0 0 0 1 1h3.5v-5.5h3V20H17a1 1 0 0 0 1-1V9.5" />
+    </>
+  ),
   overview: (
     <>
       <rect x="3" y="3" width="7.5" height="9" rx="1.5" />
       <rect x="13.5" y="3" width="7.5" height="5" rx="1.5" />
       <rect x="13.5" y="11" width="7.5" height="10" rx="1.5" />
       <rect x="3" y="15" width="7.5" height="6" rx="1.5" />
-    </>
-  ),
-  diary: (
-    <>
-      <path d="M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" />
-      <path d="M9 8h6M9 12h6M9 16h4" />
     </>
   ),
   explore: (

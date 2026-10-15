@@ -183,7 +183,8 @@ def check_service_worker(browser):
         pg.goto(BASE + route, wait_until="load")
         pg.wait_for_timeout(500)
         body = text(pg)
-        check(marker in body and "Bạn đang ngoại tuyến" not in body, f"offline: {route} renders from the cache")
+        # case-insensitive: the page heading is uppercase on screen, and "Nhật ký" is no longer a nav label to match
+        check(marker.lower() in body.lower() and "Bạn đang ngoại tuyến" not in body, f"offline: {route} renders from the cache")
         check(pg.locator("nav[aria-label='Điều hướng chính']").count() >= 1, f"offline: {route} has the main navigation")
     pg.goto(BASE + "/paywall", wait_until="load")
     pg.wait_for_timeout(400)

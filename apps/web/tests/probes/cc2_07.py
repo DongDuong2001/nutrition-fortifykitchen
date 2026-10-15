@@ -1,6 +1,6 @@
 """cc2-07: IA v2 navigation shell, at 390 and 1280.
 
-- each tab (Tổng quan, Nhật ký, Khám phá, Cài đặt) is reachable from the nav and is the only active item
+- each tab (Hôm nay, Tổng quan, Khám phá, Cài đặt) is reachable from the nav and is the only active item
 - pushed screens (/micros, /micros/calcium, /training, /trends, /foods/[id], /settings/profile) highlight their owning tab
 - [+] (phone) / "Thêm món" (sidebar) opens the add sheet from every tab and closing returns to that tab
 - old URLs redirect permanently and keep the query string
@@ -21,8 +21,8 @@ import _demo  # noqa: F401  (cc2-15b: demo mode on, see _demo.py)
 BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3102")
 SHOTS = Path(__file__).resolve().parent.parent.parent / ".screenshots"
 SIZES = [("390", {"width": 390, "height": 844}), ("1280", {"width": 1280, "height": 800})]
-TABS = [("Tổng quan", "/"), ("Nhật ký", "/diary"), ("Khám phá", "/explore"), ("Cài đặt", "/settings")]
-SLUGS = {"Tổng quan": "overview", "Nhật ký": "diary", "Khám phá": "explore", "Cài đặt": "settings"}
+TABS = [("Hôm nay", "/"), ("Tổng quan", "/trends"), ("Khám phá", "/explore"), ("Cài đặt", "/settings")]
+SLUGS = {"Hôm nay": "today", "Tổng quan": "overview", "Khám phá": "explore", "Cài đặt": "settings"}
 NAV = 'nav[aria-label="Điều hướng chính"]:visible'
 YESTERDAY = (date.today() - timedelta(days=1)).isoformat()
 problems, notes = [], []
@@ -93,9 +93,9 @@ def probe_tabs(pg, name):
 
 def probe_owner(pg, name):
     owners = [
-        ("/micros", "Nhật ký"),
-        ("/micros/calcium", "Nhật ký"),
-        ("/training", "Nhật ký"),
+        ("/micros", "Hôm nay"),
+        ("/micros/calcium", "Hôm nay"),
+        ("/training", "Hôm nay"),
         ("/trends", "Tổng quan"),
         ("/trends/micros", "Tổng quan"),
         ("/trends/body", "Tổng quan"),

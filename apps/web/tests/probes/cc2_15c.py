@@ -221,13 +221,13 @@ def run(browser, name, size):
     check(pg.url.endswith("/signin"), f"{where} accounts: nobody signed in, /diary goes to /signin ({pg.url[len(BASE):]})")
     sign_in("b@example.com")
     check("Chưa có ngày nào được ghi" in text(pg), f"{where} accounts: B's Tổng quan is empty")
-    open_tab("Nhật ký", "/diary")
+    go(pg, "/diary")  # Nhật ký is no longer a nav tab (cc2-31a), so load it directly
     t = text(pg)
     check(a_food not in t, f"{where} accounts: B's Nhật ký does not show A's {a_food}")
     check("Chưa có món hôm nay" in t, f"{where} accounts: B's Nhật ký is empty ('Chưa có món hôm nay')")
     sign_out()
     sign_in("a@example.com")
-    open_tab("Nhật ký", "/diary")
+    go(pg, "/diary")  # Nhật ký is no longer a nav tab (cc2-31a), so load it directly
     check(a_food in text(pg), f"{where} accounts: A signs back in and {a_food} is there")
     ctx.close()
 

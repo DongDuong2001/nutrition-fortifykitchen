@@ -229,13 +229,11 @@ def check_saved_meals(browser, size_name, size):
     pg.wait_for_timeout(400)
     msg = toast_text(pg)
     check("Sáng của tôi · 3 món vào Bữa tối" in msg, f"{size_name} saved meal tap: one toast for all foods ({msg!r})")
-    # Go to Nhật ký inside the app (a full page load would drop the toast, which is in-memory state)
-    pg.locator("a[href='/diary']:visible").first.click()
-    pg.wait_for_url("**/diary")
-    pg.wait_for_timeout(300)
-    check(dinner_items(pg) == 3, f"{size_name} saved meal tap: three foods in Bữa tối ({dinner_items(pg)})")
+    # The toast is in memory, so undo it here, on the page that shows it. Nhật ký is no longer a nav tab (cc2-31a),
+    # so the diary is loaded directly afterwards, and it must hold no foods.
     pg.locator("button:has-text('Hoàn tác'):visible").first.click()
     pg.wait_for_timeout(300)
+    go(pg, "/diary")
     check(dinner_items(pg) == 0, f"{size_name} saved meal undo: one Hoàn tác removes all ({dinner_items(pg)})")
 
     # in the add sheet, with the chosen meal

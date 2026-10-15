@@ -14,7 +14,7 @@ export interface BottomNavProps {
 }
 
 /**
- * H1T MICRO bottom navigation (Cobalt Sign): Tổng quan · Nhật ký · [+] · Khám phá · Cài đặt.
+ * H1T MICRO bottom navigation (Cobalt Sign): Hôm nay · Tổng quan · [+] · Khám phá · Cài đặt.
  * Full-bleed on <1024px with content centered at max-w-[560px] and 16px side padding.
  * The active tab gets on-dark text plus a slanted bar (skewX(-14deg)); the text itself stays unslanted.
  */
