@@ -186,7 +186,6 @@ function HomeContent() {
     pills.push({ key: "clear", label: "Xem cả ngày ×", onClick: () => setMode(DAY_MODE) });
   }
 
-  const caption = mode.kind === "food" ? "Món này · % mục tiêu ngày" : mode.kind === "meal" ? "Bữa này · % mục tiêu ngày" : "Cả ngày · % mục tiêu";
   const nutrientTargets = Object.fromEntries(NUTRIENT_IDS.map((id) => [id, targetOf(day, id)]));
   const macroTargets = {
     carbs: targetOf(day, "carbs"),
@@ -285,7 +284,6 @@ function HomeContent() {
             <NutrientColumn
               values={shown}
               targets={nutrientTargets}
-              caption={caption}
               selected={selected}
               finished={isPast}
               microsHref={`/micros?date=${viewIso}`}

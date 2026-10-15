@@ -84,7 +84,7 @@ export function CompareTable({ columns, sections, onRemove }: CompareTableProps)
                 <SectionTitle as="h3">{section.title}</SectionTitle>
               </div>
             </div>
-            {section.rows.map((row) => (
+            {section.rows.length > 0 && section.rows.map((row) => (
               <div key={row.id} role="row" style={vars} className={`${ROW_GRID} gap-y-1 border-t border-divider py-2`}>
                 <div role="rowheader" className="col-span-full text-[13px] font-semibold text-secondary lg:col-span-1 lg:text-[15px] lg:text-text">
                   {row.name}
@@ -96,6 +96,11 @@ export function CompareTable({ columns, sections, onRemove }: CompareTableProps)
                 ))}
               </div>
             ))}
+            {section.missing.length > 0 && (
+              <p className="m-0 border-t border-divider pt-2 text-[13px] leading-snug text-secondary">
+                Chưa có dữ liệu: {section.missing.join(", ")}
+              </p>
+            )}
           </div>
         ))}
       </div>

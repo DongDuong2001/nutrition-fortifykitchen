@@ -47,8 +47,8 @@ export const DAY_MODE: HomeMode = { kind: "day" };
 
 /** The nutrient column: groups and the catalogue ids each lists, in order. */
 export const HOME_NUTRIENT_GROUPS: { title: string; ids: string[] }[] = [
-  { title: "KHOÁNG CHẤT", ids: ["sodium", "potassium", "calcium", "magnesium", "iron", "zinc"] },
-  { title: "VITAMIN", ids: ["vitamin_a", "vitamin_c", "vitamin_d", "vitamin_e", "vitamin_k", "b6", "folate", "b12"] },
+  { title: "Khoáng chất", ids: ["sodium", "potassium", "calcium", "magnesium", "iron", "zinc"] },
+  { title: "Vitamin", ids: ["vitamin_a", "vitamin_c", "vitamin_d", "vitamin_e", "vitamin_k", "b6", "folate", "b12"] },
 ];
 
 const SLOT_LABEL: Record<MealSlot, string> = {
@@ -134,21 +134,20 @@ export function portionLabel(entry: Pick<HomeEntry, "qty" | "grams">): string {
   return entry.grams !== null ? `${formatAmount(entry.grams, "g")} g` : entry.qty;
 }
 
-/** First line of the hero card: "CẢ NGÀY · 16 MÓN", "CÁ HỒI NƯỚNG · 120 G", "YOGURT KEFIR · 200 ML", "BỮA TRƯA · 3 MÓN". */
+/** First line of the hero card, in sentence case: "Cả ngày · 16 món", "Cá hồi nướng · 120 g", "Yogurt kefir · 200 ml", "Bữa trưa · 3 món". */
 export function heroLabel(mode: HomeMode, entries: HomeEntry[], meals: HomeMeal[]): string {
   if (mode.kind === "food") {
     const e = entries.find((x) => x.id === mode.id);
-    if (!e) return `CẢ NGÀY · ${entries.length} MÓN`;
-    const name = e.name.toLocaleUpperCase("vi-VN");
+    if (!e) return `Cả ngày · ${entries.length} món`;
     // No grams and no volume: the name alone (a typed "1 chén" is not a measure the hero repeats)
-    if (e.grams === null && !VOLUME_QTY.test(e.qty.trim())) return name;
-    return `${name} · ${portionLabel(e).toLocaleUpperCase("vi-VN")}`;
+    if (e.grams === null && !VOLUME_QTY.test(e.qty.trim())) return e.name;
+    return `${e.name} · ${portionLabel(e)}`;
   }
   if (mode.kind === "meal") {
     const meal = meals.find((m) => m.slot === mode.slot);
-    return `${(meal?.fullName ?? "").toLocaleUpperCase("vi-VN")} · ${meal?.entries.length ?? 0} MÓN`;
+    return `${meal?.fullName ?? ""} · ${meal?.entries.length ?? 0} món`;
   }
-  return `CẢ NGÀY · ${entries.length} MÓN`;
+  return `Cả ngày · ${entries.length} món`;
 }
 
 /** Percent of a target, rounded; null when the value or the target is unknown. */

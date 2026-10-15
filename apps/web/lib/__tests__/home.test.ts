@@ -116,18 +116,18 @@ describe("heroLabel", () => {
   const all = [entry({ id: "a", name: "Cá hồi nướng", grams: 120 }), entry({ id: "b", slot: "dinner" })];
   const meals = groupMeals(all);
   it("day: count of foods", () => {
-    expect(heroLabel(NONE, all, meals)).toBe("CẢ NGÀY · 2 MÓN");
+    expect(heroLabel(NONE, all, meals)).toBe("Cả ngày · 2 món");
   });
-  it("food: name and grams in capitals", () => {
-    expect(heroLabel({ kind: "food", id: "a" }, all, meals)).toBe("CÁ HỒI NƯỚNG · 120 G");
+  it("food: name and grams as typed", () => {
+    expect(heroLabel({ kind: "food", id: "a" }, all, meals)).toBe("Cá hồi nướng · 120 g");
   });
   it("food without grams: the name alone", () => {
     const quick = [entry({ id: "q", name: "Phở", grams: null })];
-    expect(heroLabel({ kind: "food", id: "q" }, quick, groupMeals(quick))).toBe("PHỞ");
+    expect(heroLabel({ kind: "food", id: "q" }, quick, groupMeals(quick))).toBe("Phở");
   });
   it("meal: full meal name and count", () => {
-    expect(heroLabel({ kind: "meal", slot: "lunch" }, all, meals)).toBe("BỮA TRƯA · 1 MÓN");
-    expect(heroLabel({ kind: "meal", slot: "dinner" }, all, meals)).toBe("BỮA TỐI · 1 MÓN");
+    expect(heroLabel({ kind: "meal", slot: "lunch" }, all, meals)).toBe("Bữa trưa · 1 món");
+    expect(heroLabel({ kind: "meal", slot: "dinner" }, all, meals)).toBe("Bữa tối · 1 món");
   });
 });
 
@@ -237,7 +237,7 @@ describe("portionLabel: a food logged in ml or l keeps its portion as logged (cc
 
   it("is what the food-mode hero label shows", () => {
     const kefir = entry({ id: "k", name: "Yogurt kefir", qty: "200 ml", grams: 200 });
-    expect(heroLabel({ kind: "food", id: "k" }, [kefir], groupMeals([kefir]))).toBe("YOGURT KEFIR · 200 ML");
+    expect(heroLabel({ kind: "food", id: "k" }, [kefir], groupMeals([kefir]))).toBe("Yogurt kefir · 200 ml");
   });
 });
 

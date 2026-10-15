@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { formatAmount } from "@/lib/format";
 import { pctLabel, pctOf, type HomeValues } from "@/lib/home";
+import { getLevel, getLevelLabel } from "@/lib/levels";
 import { HomeBar } from "./home-bar";
 
 // The 24 px pill sits inside a 44 px hit area: padding that the negative margin takes back
@@ -46,7 +47,8 @@ export function HomeHero({
   /** Food or meal mode: the border turns sky. */
   selected: boolean;
 }) {
-  const kcalPct = pctOf(values.kcal, kcalTarget.min) ?? 0;
+  const kcalKnown = pctOf(values.kcal, kcalTarget.min);
+  const kcalPct = kcalKnown ?? 0;
   return (
     <section
       aria-label="Tổng kcal và dinh dưỡng đa lượng"
@@ -55,7 +57,7 @@ export function HomeHero({
       }`}
     >
       <div data-align-group="home-hero" className="flex min-h-[22px] items-center justify-between gap-2">
-        <h2 aria-live="polite" className="m-0 min-w-0 truncate text-[11px] font-extrabold tracking-[0.08em] text-sky" title={label}>
+        <h2 aria-live="polite" className="m-0 min-w-0 break-words text-xs font-bold leading-snug text-sky">
           {label}
         </h2>
         <div className="flex shrink-0 items-center gap-2">
@@ -73,14 +75,13 @@ export function HomeHero({
         </div>
       </div>
 
-      <div data-align-group="home-hero" className="flex items-baseline justify-between gap-2">
-        <div className="flex min-w-0 items-baseline gap-1.5">
-          <span className="font-display text-[32px] font-extrabold leading-none tabular-nums">{formatAmount(values.kcal, "kcal")}</span>
-          <span className="text-[13px] text-muted-on-dark">
-            / {formatAmount(kcalTarget.min, "kcal")}–{formatAmount(kcalTarget.max, "kcal")} kcal
-          </span>
-        </div>
-        <span className="font-display text-lg font-bold leading-none tabular-nums">{pctLabel(values.kcal, kcalTarget.min)}</span>
+      <div data-align-group="home-hero" className="flex flex-wrap items-baseline gap-x-1.5">
+        <span className="font-display text-[32px] font-extrabold leading-none tabular-nums">{formatAmount(values.kcal, "kcal")}</span>
+        <span className="text-[13px] text-muted-on-dark">
+          / {formatAmount(kcalTarget.min, "kcal")}–{formatAmount(kcalTarget.max, "kcal")} kcal
+        </span>
+        <span className="font-display text-[26px] font-extrabold italic leading-none tabular-nums">{pctLabel(values.kcal, kcalTarget.min)}</span>
+        {finished && kcalKnown !== null && <span className="text-[13px] font-bold text-sky">{getLevelLabel(getLevel(kcalKnown))}</span>}
       </div>
 
       <div data-align-group="home-hero">
@@ -94,7 +95,7 @@ export function HomeHero({
           return (
             <div key={m.key} className="flex min-w-0 flex-col gap-1">
               <span className="text-xs font-bold leading-tight">{m.label}</span>
-              <div className="flex items-baseline justify-between gap-1">
+              <div className="flex items-baseline gap-1.5">
                 <span className="text-xs leading-tight text-muted-on-dark tabular-nums">
                   {value === null ? "—" : `${formatAmount(value, "g")} g`}
                 </span>

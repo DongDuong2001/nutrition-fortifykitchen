@@ -126,17 +126,46 @@ describe("buildCompare", () => {
     expect(sections[0].rows.map((r) => r.unit)).toEqual(["kcal", "g", "g", "g", "g"]);
   });
 
-  it("then the 22 micros: Vitamin, then Khoáng chất", () => {
+  it("then the micros: Vitamin, then Khoáng chất, only the rows some column has", () => {
     const { sections } = buildCompare([dates, oats], "per100");
     expect(sections.map((s) => s.key)).toEqual(["macros", "vitamins", "minerals"]);
-    expect(sections[1].rows).toHaveLength(12);
-    expect(sections[2].rows).toHaveLength(10);
-    expect(sections[1].rows[0].id).toBe("b1");
-    expect(sections[2].rows[0].id).toBe("calcium");
+    expect(sections[1].rows.map((r) => r.id)).toEqual(["vitamin_c"]);
+    expect(sections[2].rows.map((r) => r.id)).toEqual(["calcium", "iron"]);
+  });
+
+  it("names the rows nobody has data for, in catalogue order, per group", () => {
+    const { sections } = buildCompare([dates, oats], "per100");
+    expect(sections[0].missing).toEqual([]);
+    expect(sections[1].missing).toHaveLength(11);
+    expect(sections[1].missing.slice(0, 3)).toEqual(["Vitamin B1", "Vitamin B2", "Vitamin B3"]);
+    expect(sections[1].missing).not.toContain("Vitamin C");
+    expect(sections[2].missing).toHaveLength(8);
+    expect(sections[2].missing[0]).toBe("Đồng");
+    // every counted micro is either a row or in the missing line
+    expect(sections[1].rows.length + sections[1].missing.length).toBe(12);
+    expect(sections[2].rows.length + sections[2].missing.length).toBe(10);
+  });
+
+  it("a group nobody has data for has no rows, only the missing line", () => {
+    const bare = food("bare", { energy: 10, protein: 1, fat: 1, carbs: 1, fiber: 1 });
+    const other = food("other", { energy: 20, protein: 2, fat: 2, carbs: 2, fiber: 2 });
+    const { sections } = buildCompare([bare, other], "per100");
+    expect(sections[1].rows).toEqual([]);
+    expect(sections[1].missing).toHaveLength(12);
+    expect(sections[2].rows).toEqual([]);
+    expect(sections[2].missing).toHaveLength(10);
+    expect(sections[0].rows).toHaveLength(5);
+  });
+
+  it("a known 0 keeps its row (0 is data, unknown is not)", () => {
+    const zero = food("zero", { energy: 1, vitamin_c: 0 });
+    const none = food("none", { energy: 2 });
+    const { sections } = buildCompare([zero, none], "per100");
+    expect(sections[1].rows.map((r) => r.id)).toEqual(["vitamin_c"]);
   });
 
   it("per 100 g reads the stored values", () => {
-    const { rows } = { rows: buildCompare([dates, oats], "per100").sections[0].rows };
+    const rows = buildCompare([dates, oats], "per100").sections[0].rows;
     expect(rows[0].values).toEqual([280, 380]);
     expect(rows[1].values).toEqual([2.4, 13]);
   });

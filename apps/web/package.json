@@ -8,6 +8,8 @@
     "dev:3101": "next dev --webpack -p 3101",
     "dev:3102": "next dev --webpack -p 3102",
     "dev:3103": "next dev --webpack -p 3103",
+    "dev:3104": "next dev --webpack -p 3104",
+    "start:3104": "next start -p 3104",
     "port:free": "node scripts/free-port.js",
     "build": "next build --webpack",
     "start": "next start",

@@ -76,7 +76,10 @@ export interface CompareRow {
 export interface CompareSection {
   key: "macros" | "vitamins" | "minerals";
   title: string;
+  /** Only the rows where at least one column has a value. */
   rows: CompareRow[];
+  /** Names of the nutrients no column has data for, in catalogue order: "Chưa có dữ liệu: …" under the group. */
+  missing: string[];
 }
 
 /** Kcal, đạm, chất béo, tinh bột, chất xơ: the order of the rows on top. */
@@ -90,6 +93,13 @@ function rowFor(id: string, foods: readonly FoodItem[], grams: readonly number[]
     return per100 === null || per100 === undefined ? null : (per100 * grams[i]) / 100;
   });
   return { id, name: def?.nameVi ?? id, unit, values, highest: markHighest(values, unit) };
+}
+
+/** Rows where every column is unknown are not drawn; their names go to `missing`. */
+function sectionOf(key: CompareSection["key"], title: string, rows: CompareRow[]): CompareSection {
+  const known = rows.filter((r) => r.values.some((v) => v !== null));
+  const missing = rows.filter((r) => r.values.every((v) => v === null)).map((r) => r.name);
+  return { key, title, rows: known, missing };
 }
 
 /** The columns and the rows to show: macros, then the 22 counted micros as on Vi chất (Vitamin, Khoáng chất). */
@@ -110,9 +120,9 @@ export function buildCompare(
   return {
     columns,
     sections: [
-      { key: "macros", title: "Năng lượng và đa lượng", rows: MACRO_KEYS.map((id) => rowFor(id, foods, grams)) },
-      { key: "vitamins", title: "Vitamin", rows: microsOf("vitamins") },
-      { key: "minerals", title: "Khoáng chất", rows: microsOf("minerals") },
+      sectionOf("macros", "Năng lượng và đa lượng", MACRO_KEYS.map((id) => rowFor(id, foods, grams))),
+      sectionOf("vitamins", "Vitamin", microsOf("vitamins")),
+      sectionOf("minerals", "Khoáng chất", microsOf("minerals")),
     ],
   };
 }

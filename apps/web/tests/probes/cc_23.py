@@ -189,12 +189,21 @@ def compare_page(browser, size, size_name):
     check(heads.count() == 2, f"{w}: 2 column headers ({heads.count()})")
     names = [re.sub(r"\s+", " ", heads.nth(i).inner_text()) for i in range(heads.count())]
     check("Chà là" in names[0] and "Yến mạch" in names[1], f"{w}: headers name the foods in order {names}")
-    check(pg.locator('[role="row"]:has([role="cell"])').count() == 27, f"{w}: 27 rows (5 macros + 12 vitamins + 10 minerals)")
+    check(pg.locator('[role="row"]:has([role="cell"])').count() == 15, f"{w}: 15 rows (5 macros + 2 vitamins + 8 minerals; rows with no data are not drawn)")
+    # cc-27f: one line under each group names the nutrients nobody has data for, in catalogue order
+    miss = [re.sub(r"\s+", " ", t).strip() for t in pg.locator("p", has_text="Chưa có dữ liệu:").all_inner_texts()]
+    check(
+        miss == [
+            "Chưa có dữ liệu: Vitamin B2, Vitamin B3, Vitamin B5, Vitamin B9, Vitamin B12, Vitamin A, Vitamin C, Vitamin D, Vitamin E, Vitamin K",
+            "Chưa có dữ liệu: Mangan, Selen",
+        ],
+        f"{w}: missing-data lines {miss}",
+    )
 
     # row order: macros, then Vitamin, then Khoáng chất
     order = pg.locator('[role="rowheader"]').all_inner_texts()
     check(order[:5] == ["Năng lượng", "Đạm", "Chất béo", "Tinh bột", "Chất xơ"], f"{w}: macro rows in order {order[:5]}")
-    check(order[5] == "Vitamin B1" and order[17] == "Canxi", f"{w}: Vitamin before Khoáng chất ({order[5]}, {order[17]})")
+    check(order[5] == "Vitamin B1" and order[7] == "Canxi", f"{w}: Vitamin before Khoáng chất ({order[5]}, {order[7]})")
     titles = pg.locator('[role="rowgroup"] h3').all_inner_texts()
     check(titles == ["Năng lượng và đa lượng", "Vitamin", "Khoáng chất"], f"{w}: section titles {titles}")
 
@@ -225,7 +234,7 @@ def compare_page(browser, size, size_name):
           return {{ n: els.length, left: Math.max(...r.map(x => x.left)) - Math.min(...r.map(x => x.left)),
                     right: Math.max(...r.map(x => x.right)) - Math.min(...r.map(x => x.right)) }};
         }}""")
-        check(edges["n"] == 28 and edges["left"] <= 1 and edges["right"] <= 1, f"{w}: column {col + 1} edges aligned ({edges})")
+        check(edges["n"] == 16 and edges["left"] <= 1 and edges["right"] <= 1, f"{w}: column {col + 1} edges aligned ({edges})")
 
     # layout: phone = the name on its own line above the values; desktop = a name column and a sticky header
     first_row = pg.locator('[role="row"]:has([role="cell"])').first
@@ -236,12 +245,16 @@ def compare_page(browser, size, size_name):
         check(abs(name_box["width"] - (cell_box["width"] * 2 + 8)) < 3, f"{w}: the name line spans the full width")
     else:
         check(abs(cell_box["y"] + cell_box["height"] / 2 - (name_box["y"] + name_box["height"] / 2)) < 3, f"{w}: name and values share a line")
+        # cc-27f: rows with no data are gone, so the page is shorter; a low window makes it scroll again
+        pg.set_viewport_size({"width": size["width"], "height": 420})
+        pg.wait_for_timeout(200)
         head_top = pg.locator('[role="columnheader"]').first.bounding_box()["y"]
         pg.mouse.wheel(0, 700)
         pg.wait_for_timeout(300)
         stuck = pg.locator('[role="rowgroup"]').first.bounding_box()
         check(stuck["y"] <= 1 and head_top > 1, f"{w}: the header row sticks at the top ({stuck['y']:.0f})")
         pg.mouse.wheel(0, -700)
+        pg.set_viewport_size(size)
         pg.wait_for_timeout(200)
     audit_page(pg, w, size)
     SHOTS.mkdir(parents=True, exist_ok=True)
@@ -277,7 +290,7 @@ def compare_page(browser, size, size_name):
     pg.wait_for_timeout(400)
     check(heads.count() == 3, f"{w}: 3 columns")
     check(pg.get_by_role("button", name="Thêm món", exact=True).count() == 0, f"{w}: no Thêm món at 3 foods")
-    check(pg.locator('[role="rowheader"]').count() == 27, f"{w}: still 27 rows")
+    check(pg.locator('[role="rowheader"]').count() == 16, f"{w}: 16 rows with Chuối (3 vitamins, no data rows dropped)")
     audit_page(pg, f"{w} (3 foods)", size)
     if size_name == "390":
         pg.screenshot(path=str(SHOTS / "cc-23-compare-3-390.png"), full_page=True, animations="disabled")

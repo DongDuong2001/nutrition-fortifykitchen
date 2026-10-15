@@ -62,9 +62,10 @@ DONG_SCREEN_CHECKS = [
     ("/admin/review", "admin-card", 1),
 ]
 
-# cc-23: compare foods, 3 columns. Each column's header and its 27 value cells share left and right edges.
+# cc-23: compare foods, 3 columns. Each column's header and its value cells share left and right edges.
+# cc-27f: rows where no column has data are not drawn: 5 macros + 3 vitamins + 8 minerals = 16 rows, 16 pairs.
 COMPARE_ROUTE = "/foods/compare?ids=food-cha-la,food-yen-mach,food-chuoi"
-COMPARE_CHECKS = [("compare-col-0", 27), ("compare-col-1", 27), ("compare-col-2", 27)]
+COMPARE_CHECKS = [("compare-col-0", 16), ("compare-col-1", 16), ("compare-col-2", 16)]
 
 
 def check_align_groups(page, group_name=None, edges="lr"):

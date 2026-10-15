@@ -64,8 +64,9 @@ def hero_label(pg):
     return pg.locator("section[aria-label='Tổng kcal và dinh dưỡng đa lượng'] h2").inner_text()
 
 
-def caption(pg):
-    return pg.locator("aside[aria-label='Vi chất'] > p").inner_text()
+def captions(pg):
+    """cc-27f: the nutrient column has no caption line any more."""
+    return pg.locator("aside[aria-label='Vi chất'] > p").count()
 
 
 def fills(pg, label):
@@ -81,7 +82,7 @@ def run(browser, size, tag):
     ctx, pg = page(browser, size)
     go(pg, "/")
     check(pg.url.rstrip("/") == BASE, f"{tag} / stays at /")
-    check("CẢ NGÀY" in hero_label(pg), f"{tag} day mode label: {hero_label(pg)}")
+    check(hero_label(pg).startswith("Cả ngày · "), f"{tag} day mode label: {hero_label(pg)}")
     if phone:
         scroll = pg.evaluate("document.documentElement.scrollHeight - window.innerHeight")
         check(scroll <= 0, f"{tag} no page scroll ({scroll})")
@@ -112,19 +113,19 @@ def run(browser, size, tag):
     name = first.get_attribute("aria-label").split(", ")[0]
     first.click()
     pg.wait_for_timeout(200)
-    check(name.upper() in hero_label(pg) and hero_label(pg).endswith(" G"), f"{tag} food mode label: {hero_label(pg)}")
-    check("Món này" in caption(pg), f"{tag} food caption: {caption(pg)}")
+    check(name in hero_label(pg) and hero_label(pg).endswith(" g"), f"{tag} food mode label: {hero_label(pg)}")
+    check(captions(pg) == 0, f"{tag} no caption over the nutrient column")
     check(pg.get_by_role("link", name="Sửa món này").count() == 1, f"{tag} Sửa pill on today")
     check(pg.get_by_role("button", name="Xem cả ngày ×").count() == 1, f"{tag} Xem cả ngày × pill")
     pg.screenshot(path=os.path.join(SHOTS, f"cc-22-food-{w}.png"))
     first.click()
     pg.wait_for_timeout(200)
-    check("CẢ NGÀY" in hero_label(pg) and "Cả ngày" in caption(pg), f"{tag} tap again returns to the day")
+    check(hero_label(pg).startswith("Cả ngày · "), f"{tag} tap again returns to the day")
     # meal mode
     pg.get_by_role("button", name="Xem riêng bữa trưa").click()
     pg.wait_for_timeout(200)
-    check(hero_label(pg).startswith("BỮA TRƯA · "), f"{tag} meal mode label: {hero_label(pg)}")
-    check("Bữa này" in caption(pg), f"{tag} meal caption")
+    check(hero_label(pg).startswith("Bữa trưa · "), f"{tag} meal mode label: {hero_label(pg)}")
+    check(captions(pg) == 0, f"{tag} no meal caption")
     check(pg.get_by_role("button", name=re.compile("^Tùy chọn Bữa trưa")).count() == 1, f"{tag} ⋯ pill in meal mode on today")
     pg.get_by_role("button", name=re.compile("^Tùy chọn Bữa trưa")).click()
     pg.wait_for_timeout(300)
@@ -132,7 +133,7 @@ def run(browser, size, tag):
     pg.keyboard.press("Escape")
     pg.wait_for_timeout(200)
     pg.get_by_role("button", name="Xem cả ngày ×").click()
-    check("CẢ NGÀY" in hero_label(pg), f"{tag} Xem cả ngày × clears the mode")
+    check(hero_label(pg).startswith("Cả ngày · "), f"{tag} Xem cả ngày × clears the mode")
     # long press on today opens the entry
     foods.first.hover()
     box = foods.first.bounding_box()
@@ -151,7 +152,7 @@ def run(browser, size, tag):
     check(foods.count() >= 1, f"{tag} past day lists foods ({foods.count()})")
     foods.first.click()
     pg.wait_for_timeout(200)
-    check("G" in hero_label(pg), f"{tag} past day selection works: {hero_label(pg)}")
+    check(" · " in hero_label(pg) and hero_label(pg).endswith(" g"), f"{tag} past day selection works: {hero_label(pg)}")
     check(pg.get_by_role("link", name="Sửa món này").count() == 0, f"{tag} no Sửa on a past day")
     pg.get_by_role("button", name="Xem cả ngày ×").click()
     pg.get_by_role("button", name="Xem riêng bữa trưa").click()

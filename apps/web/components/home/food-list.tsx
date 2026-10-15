@@ -128,7 +128,7 @@ export function FoodList({
               aria-label={`Xem riêng ${meal.fullName.toLocaleLowerCase("vi-VN")}`}
               onClick={() => onMeal(meal.slot)}
               style={noSelect}
-              className={`sticky top-0 z-10 flex h-6 w-full cursor-pointer items-center justify-between gap-2 border-0 px-3 lg:h-11 ${
+              className={`sticky top-0 z-10 flex h-[22px] w-full cursor-pointer items-center justify-between gap-2 border-0 px-3 lg:h-11 ${
                 mealSelected ? "bg-cobalt text-on-accent" : "bg-paper-dark text-text"
               }`}
             >
