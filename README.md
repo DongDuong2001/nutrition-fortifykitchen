@@ -76,7 +76,7 @@ The platform follows a clean separation between an authenticated Go API service 
 |       |-- components/            # UI components (atoms, cards, sheets, headers, navigation)
 |       |-- hooks/                 # Custom React hooks (food browse, navigation history, PWA)
 |       `-- lib/                   # API client, targets calculation, levels, formatting, PWA helpers
-|-- migrations/                    # Sequential SQL schema migrations (000001 to 000008)
+|-- migrations/                    # Sequential SQL schema migrations (000001 to 000009)
 |-- docs/                          # Comprehensive architectural and operational documentation
 |-- scripts/                       # Database backup, restore, port management, and test runners
 |-- packages/
@@ -154,7 +154,7 @@ docker compose up -d
 
 ### Step 3: Run Database Migrations
 
-Apply the 8 sequential migrations to provision schemas, extensions, tables, and RLS policies:
+Apply the 9 sequential migrations to provision schemas, extensions, tables, and RLS policies:
 
 ```bash
 # Option A: Using psql
@@ -166,6 +166,7 @@ psql "postgresql://postgres:postgres@localhost:5432/postgres?sslmode=disable" -f
 psql "postgresql://postgres:postgres@localhost:5432/postgres?sslmode=disable" -f migrations/000006_rls_hardening.up.sql
 psql "postgresql://postgres:postgres@localhost:5432/postgres?sslmode=disable" -f migrations/000007_profiles_display_name.up.sql
 psql "postgresql://postgres:postgres@localhost:5432/postgres?sslmode=disable" -f migrations/000008_foods_source_unique.up.sql
+psql "postgresql://postgres:postgres@localhost:5432/postgres?sslmode=disable" -f migrations/000009_foods_plain_unique_index.up.sql
 
 # Option B: Using golang-migrate CLI
 migrate -path migrations -database "postgresql://postgres:postgres@localhost:5432/postgres?sslmode=disable" up

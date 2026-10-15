@@ -82,7 +82,7 @@ NEXT_PUBLIC_HCAPTCHA_SITE_KEY=<prod_hcaptcha_site_key>
 ## 4. Database Pre-Launch Verification
 
 1. **Migrations Status**:
-   - Confirm all 8 schema migrations are applied on production:
+   - Confirm all 9 schema migrations are applied on production:
      - `000001_init_nutrition_schema`
      - `000002_profiles_and_weight`
      - `000003_foods_catalog` (with pg_trgm and unaccent extensions)
@@ -91,6 +91,7 @@ NEXT_PUBLIC_HCAPTCHA_SITE_KEY=<prod_hcaptcha_site_key>
      - `000006_rls_hardening`
      - `000007_profiles_display_name`
      - `000008_foods_source_unique`
+     - `000009_foods_plain_unique_index`
 2. **Catalog Seed**:
    - Verify 22 counted nutrients are seeded in `nutrition.nutrients`.
    - Verify standard food items and beverages are imported via `importfoods`.

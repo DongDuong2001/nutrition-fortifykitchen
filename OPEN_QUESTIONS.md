@@ -4,7 +4,7 @@
 - [x] Provisional target: Fiber calculation rule: Decided, implemented and tested in `lib/targets.ts` (14 g per 1000 kcal, bound men 30–40 g, women 20–30 g).
 - [x] Provisional target: Training fast carbs calculation: Decided, implemented and tested in `lib/targets.ts` (30–45 g × training minutes / 60).
 - [x] Source and confirmation for the carb remainder formula: `(energy - proteinMid * 4 - fatMid * 9) / 4`. Decided, validated with parity test vectors across Go backend and TypeScript.
-- [x] (Dong) Import plan for Release 1 food data: USDA SR Legacy + Foundation Foods as the base, CNF to fill gaps, VN Food Composition Table for local foods. Decided: Migration 000008, `cmd/importfoods`, and `seed_foods.json` implemented with 22 canonical micronutrient keys.
+- [x] (Dong) Import plan for Release 1 food data: USDA SR Legacy + Foundation Foods as the base, CNF to fill gaps, VN Food Composition Table for local foods. Decided: Migration 000008 & 000009, `cmd/importfoods`, and `seed_foods.json` implemented with 22 canonical micronutrient keys.
 - [x] (Hào) Check the usage rights of the Vietnam Food Composition Table (Viện Dinh dưỡng Quốc gia): Decided, internal nutritional reference values compilation.
 - [x] (Later) NCCDB licence quote from NCC (ndsrhelp@umn.edu): Decided, deferred to post-launch scaling phase.
 - [x] Vietnamese labels in `docs/nutrient-catalog.md`: Decided and aligned across `docs/nutrient-catalog.md` and UI screens.
