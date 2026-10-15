@@ -4,6 +4,8 @@ import { demoActive } from "../demo";
 export interface FoodServing {
   label: string;
   grams: number;
+  /** The chip text when it should not be built from label and grams ("½ phần"). */
+  display?: string;
 }
 
 export interface FoodItem {

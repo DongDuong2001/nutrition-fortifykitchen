@@ -10,6 +10,10 @@ import { formatAmount } from "@/lib/format";
 import { FormRow } from "@/components/ui/form-row";
 import { AppHeader } from "@/components/ui/app-header";
 import { AppShell } from "@/components/ui/app-shell";
+import { ChipGroup } from "@/components/ui/chip-group";
+import { RecipeBuilder, useRecipeDraft } from "@/components/foods/recipe-builder";
+import { draftToRecipe, recipeToDraft, RECIPE_ID_PREFIX } from "@/lib/recipe";
+import { getRecipe, saveRecipe } from "@/lib/recipe-store";
 import { useBack } from "@/hooks/use-back";
 
 function CreateFoodInner() {
@@ -20,6 +24,28 @@ function CreateFoodInner() {
 
   const mealSlot = useMealSlot(searchParams.get("meal"));
   const mealNameVi = mealSlot ? getMealSlotNameVi(mealSlot) : "—";
+
+  // Nhập dinh dưỡng (from a label) or Từ nguyên liệu (a recipe). ?recipe=<id> edits a saved recipe.
+  const editId = searchParams.get("recipe");
+  const [mode, setMode] = useState<"nutrition" | "recipe">(editId ? "recipe" : searchParams.get("mode") === "recipe" ? "recipe" : "nutrition");
+  const recipeState = useRecipeDraft();
+  const [recipeMissing, setRecipeMissing] = useState(false);
+  const { setDraft: setRecipeDraft } = recipeState;
+  useEffect(() => {
+    if (!editId) return;
+    const stored = getRecipe(editId);
+    if (stored) setRecipeDraft(recipeToDraft(stored));
+    else setRecipeMissing(true);
+  }, [editId, setRecipeDraft]);
+
+  const saveRecipeDraft = () => {
+    if (!recipeState.validateAll()) return;
+    const id = editId ?? `${RECIPE_ID_PREFIX}${Date.now()}`;
+    const existing = editId ? getRecipe(editId) : null;
+    saveRecipe(draftToRecipe(recipeState.draft, id, existing?.createdAt ?? new Date().toISOString()));
+    const meal = searchParams.get("meal");
+    router.push(`/foods/${id}${meal ? `?meal=${meal}` : ""}`);
+  };
 
   // Form Fields
   const [nameVi, setNameVi] = useState("");
@@ -68,6 +94,10 @@ function CreateFoodInner() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (mode === "recipe") {
+      saveRecipeDraft();
+      return;
+    }
     if (mealSlot === null || isSubmitting) return;
 
     const errName = validateField("nameVi", nameVi);
@@ -131,21 +161,40 @@ function CreateFoodInner() {
         <button
           type="button"
           onClick={handleSubmit}
-          disabled={isSubmitting || mealSlot === null}
+          disabled={mode === "recipe" ? recipeMissing : isSubmitting || mealSlot === null}
           className="w-full min-h-[52px] rounded-full bg-blue text-on-accent font-bold text-base cursor-pointer hover:bg-blue/90 active:scale-[0.98] transition-all border-0 flex items-center justify-center shadow-md disabled:opacity-50"
         >
-          Lưu và thêm vào {mealNameVi}
+          {mode === "recipe" ? "Lưu món" : `Lưu và thêm vào ${mealNameVi}`}
         </button>
       }
     >
       <AppHeader
         variant="sub"
-        title="Tạo món mới"
+        title={editId ? "Sửa món" : "Tạo món mới"}
         onBack={goBack}
       />
 
       {/* Form Content */}
       <form onSubmit={handleSubmit} className="flex-1 w-full max-w-[560px] mx-auto p-4 flex flex-col gap-4">
+        {!editId && (
+          <ChipGroup
+            columns={2}
+            tone="light"
+            data-align-group="create-mode"
+            items={[
+              { id: "nutrition", label: "Nhập dinh dưỡng", active: mode === "nutrition", onClick: () => setMode("nutrition") },
+              { id: "recipe", label: "Từ nguyên liệu", active: mode === "recipe", onClick: () => setMode("recipe") },
+            ]}
+          />
+        )}
+        {mode === "recipe" ? (
+          recipeMissing ? (
+            <p className="m-0 text-[15px] text-secondary">Món này không còn trong danh sách.</p>
+          ) : (
+            <RecipeBuilder state={recipeState} excludeId={editId ?? undefined} />
+          )
+        ) : (
+        <>
         {/* Name Field */}
         <FormRow
           label="Tên món"
@@ -364,6 +413,8 @@ function CreateFoodInner() {
             </div>
           )}
         </div>
+        </>
+        )}
       </form>
     </AppShell>
   );

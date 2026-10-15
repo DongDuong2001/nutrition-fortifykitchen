@@ -26,6 +26,7 @@ import { microsSummaryFor } from "./lacking";
 import { nutrientSourcesIn, type NutrientSource } from "./nutrient-sources";
 import { DEFAULT_RECENT_FOODS, isRecentFood, pushRecent, type RecentFood } from "./recent-foods";
 import { MOCK_FOODS } from "./mock/foods";
+import { syncRecipeFoods } from "./recipe-store";
 import {
   buildSavedMeal,
   defaultMealName,
@@ -447,6 +448,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     setRecentFoods(recents);
     setFavouriteIds(readFavouriteIds(own));
     setSavedMeals(readSavedMeals(own));
+    // This account's recipes (cc-27b) become foods of the catalogue, so search and entries find them
+    syncRecipeFoods();
   }, []);
 
   // Load on mount (client-only)

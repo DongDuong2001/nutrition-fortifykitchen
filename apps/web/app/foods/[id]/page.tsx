@@ -24,6 +24,9 @@ import { Toast } from "@/components/ui/toast";
 import { AppHeader, HEADER_ICON_BUTTON } from "@/components/ui/app-header";
 import { AppShell } from "@/components/ui/app-shell";
 import { useBack } from "@/hooks/use-back";
+import { Card } from "@/components/ui/card";
+import { ingredientPerServing, isRecipeId } from "@/lib/recipe";
+import { getRecipe, syncRecipeFoods } from "@/lib/recipe-store";
 
 function FoodDetailInner() {
   const params = useParams();
@@ -34,9 +37,20 @@ function FoodDetailInner() {
   const { addFoodEntry, isFavourite, toggleFavourite, targets: dailyTargets } = useDiary();
 
   const foodId = params?.id as string;
+  // A recipe lives in this account's storage: read after mount (the server and the first render agree on a skeleton)
+  const isRecipe = isRecipeId(foodId);
+  const [recipesReady, setRecipesReady] = useState(false);
+  useEffect(() => {
+    if (!isRecipeId(foodId)) return;
+    syncRecipeFoods();
+    setRecipesReady(true);
+  }, [foodId]);
   const food = useMemo(() => {
     return MOCK_FOODS.find((f) => f.id === foodId);
-  }, [foodId]);
+    // recipesReady: the stored recipes are put into the catalogue by then
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [foodId, recipesReady]);
+  const recipe = useMemo(() => (isRecipe && recipesReady ? getRecipe(foodId) : null), [isRecipe, recipesReady, foodId]);
 
   const mealSlot = useMealSlot(searchParams.get("meal"));
   const mealNameVi = mealSlot ? getMealSlotNameVi(mealSlot) : "—";
@@ -95,6 +109,15 @@ function FoodDetailInner() {
     }
   };
 
+  if (isRecipe && !recipesReady) {
+    return (
+      <AppShell>
+        <h1 className="sr-only">Món của tôi</h1>
+        <div role="status" aria-busy="true" className="mx-auto h-40 w-full max-w-[560px] rounded-2xl bg-level-empty motion-safe:animate-pulse lg:mx-0" />
+      </AppShell>
+    );
+  }
+
   if (!food) {
     return (
       <AppShell>
@@ -126,6 +149,11 @@ function FoodDetailInner() {
         variant="sub"
         title={food.nameVi}
         subtitle={
+          recipe ? (
+            <span>
+              Món của tôi · {recipe.servings} phần · {recipe.ingredients.length} nguyên liệu
+            </span>
+          ) : (
           <span className="inline-flex items-center flex-wrap gap-1">
             {/* The title above keeps two lines; a longer name is shown in full here */}
             {food.nameVi.length > 40 && <span className="basis-full break-words font-semibold">{food.nameVi}</span>}
@@ -151,6 +179,7 @@ function FoodDetailInner() {
             <span>·</span>
             <span>{food.servings[0]?.grams ?? 100} g mỗi khẩu phần</span>
           </span>
+          )
         }
         onBack={goBack}
         actions={
@@ -188,7 +217,7 @@ function FoodDetailInner() {
             items={[
               ...food.servings.map((s) => ({
                 id: s.label,
-                label: s.label === `${s.grams} g` ? s.label : `${s.label} · ${s.grams} g`,
+                label: s.display ?? (s.label === `${s.grams} g` ? s.label : `${s.label} · ${s.grams} g`),
                 active: selectedServingLabel === s.label,
                 onClick: () => {
                   setGramsInput(s.grams.toString());
@@ -233,6 +262,30 @@ function FoodDetailInner() {
             ]}
           />
         </div>
+
+        {recipe && (
+          <Card as="section" aria-label="Trong 1 phần" data-align-group="food-detail" className="flex flex-col gap-1 p-4">
+            <div className="flex min-h-[44px] items-center justify-between gap-2">
+              <h2 className="m-0 text-base font-bold text-text">Trong 1 phần</h2>
+              <Link
+                href={`/foods/new?recipe=${recipe.id}${searchParams.get("meal") ? `&meal=${searchParams.get("meal")}` : ""}`}
+                className="inline-flex min-h-[44px] items-center px-2 text-sm font-bold text-blue no-underline"
+              >
+                Sửa
+              </Link>
+            </div>
+            <ul className="m-0 flex list-none flex-col p-0">
+              {recipe.ingredients.map((ingredient, index) => (
+                <li key={`${ingredient.foodId}-${index}`} className="flex items-baseline justify-between gap-3 border-t border-divider py-2">
+                  <span className="min-w-0 break-words text-[15px] leading-snug text-text">{ingredient.name}</span>
+                  <span className="shrink-0 text-[15px] font-semibold tabular-nums text-text">
+                    {formatAmount(ingredientPerServing(ingredient, recipe.servings), ingredient.unit)} {ingredient.unit}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </Card>
+        )}
 
         <PillButton variant="secondary" onClick={() => setCompareOpen(true)} aria-haspopup="dialog">
           So sánh

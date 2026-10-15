@@ -265,6 +265,27 @@ def main():
                 else:
                     print(f"[PASS] /foods/compare @ {vp['name']} [{group}] ({pairs} pairs)")
 
+        # cc-27b: the recipe builder's ingredient rows (add two, the pairs must really be compared)
+        for vp in VIEWPORTS:
+            page.set_viewport_size({"width": vp["width"], "height": vp["height"]})
+            page.goto(f"{BASE_URL}/foods/new?mode=recipe", wait_until="networkidle")
+            page.wait_for_timeout(500)
+            for term, name in [("gạo lứt", "Cơm gạo lứt"), ("trứng", "Trứng gà")]:
+                page.get_by_role("button", name="+ Thêm nguyên liệu").click()
+                dialog = page.get_by_role("dialog", name="Thêm nguyên liệu")
+                dialog.wait_for(state="visible", timeout=4000)
+                dialog.get_by_label("Tìm món").fill(term)
+                page.wait_for_timeout(400)
+                dialog.locator("[data-food-row]").filter(has_text=name).first.click()
+                page.wait_for_timeout(200)
+            res = check_align_groups(page, "recipe-row")
+            pairs = res["pairs"].get("recipe-row", 0)
+            if res["errors"] or pairs < 1:
+                print(f"[FAIL] /foods/new recipe @ {vp['name']} [recipe-row]: pairs {pairs} {res['errors']}")
+                total_errors.extend(res["errors"] or [f"recipe-row: {pairs} pairs"])
+            else:
+                print(f"[PASS] /foods/new recipe @ {vp['name']} [recipe-row] ({pairs} pairs)")
+
         browser.close()
 
     if total_errors:
