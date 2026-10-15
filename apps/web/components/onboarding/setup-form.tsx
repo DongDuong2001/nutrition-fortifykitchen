@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 
 import { useRouter } from "next/navigation";
 import { apiClient } from "@/lib/api-client";
 import { useDiary } from "@/lib/diary-store";
+import { readPendingCoachCode, writePendingCoachCode } from "@/lib/pending-coach";
 import { formatNumber } from "@/lib/format";
 import {
   DEFAULT_DRAFT,
@@ -44,10 +45,13 @@ export function SetupForm({ step }: { step: SetupStep }) {
   const [errors, setErrors] = useState<SetupErrors>({});
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  // Optional code of a coach (UI only here: the code waits in the session and is used when setup is done)
+  const [coachCode, setCoachCode] = useState("");
   const weightRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setDraft(readDraft());
+    setCoachCode(readPendingCoachCode());
     setLoaded(true);
   }, []);
 
@@ -218,6 +222,24 @@ export function SetupForm({ step }: { step: SetupStep }) {
                 </FormRow>
               </div>
             </div>
+
+            <FormRow label="Mã huấn luyện viên (nếu có)" htmlFor="setup-coach-code">
+              <input
+                id="setup-coach-code"
+                type="text"
+                autoComplete="off"
+                autoCapitalize="characters"
+                spellCheck={false}
+                enterKeyHint="done"
+                value={coachCode}
+                onChange={(e) => {
+                  setCoachCode(e.target.value);
+                  writePendingCoachCode(e.target.value);
+                }}
+                placeholder="H1T-…"
+                className="h-[52px] w-full rounded-xl border-2 border-grabber bg-card px-4 text-base font-semibold uppercase text-text outline-none focus:border-blue"
+              />
+            </FormRow>
 
             {draft.sex === "female" && (
               <Card className="text-[13px] leading-normal text-secondary">

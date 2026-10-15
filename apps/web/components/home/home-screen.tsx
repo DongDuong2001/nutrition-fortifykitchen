@@ -32,6 +32,9 @@ import {
 import type { MealSlot } from "@/lib/meal-slot";
 import { FoodList } from "./food-list";
 import { useCoaching } from "@/hooks/use-coaching";
+import { LevelExplainerSheet } from "@/components/coaching/level-explainer-sheet";
+import { LevelNoticeCard } from "@/components/coaching/level-notice-card";
+import { ZERO_HINT_TEXT, levelLabel, noticeText } from "@/lib/level-copy";
 import { columnGroups, countedForLevel, levelSummary, sumExtras } from "@/lib/level-nutrients";
 import { DayMenuSheet, MealTargetSheet, SelectActionBar, SelectHeader } from "./select-mode";
 import {
@@ -102,7 +105,8 @@ function HomeContent() {
   } = useDiary();
 
   // The Level decides which nutrients the column lists (lib/level-nutrients)
-  const { level } = useCoaching();
+  const { level, coach, notice, showHint, dismissNotice, dismissHint } = useCoaching();
+  const [explainerOpen, setExplainerOpen] = useState(false);
   const groups = useMemo(() => columnGroups(level), [level]);
   const countedIds = useMemo(() => countedForLevel(level), [level]);
 
@@ -381,6 +385,16 @@ function HomeContent() {
             Chưa có món nào để chia sẻ
           </p>
         )}
+        {!selecting && coach && notice && (
+          <LevelNoticeCard
+            text={noticeText(coach.name, notice)}
+            action={notice.kind === "raised" ? { label: "Xem", onClick: () => setExplainerOpen(true) } : undefined}
+            onClose={dismissNotice}
+          />
+        )}
+        {!selecting && !coach && showHint && (
+          <LevelNoticeCard text={ZERO_HINT_TEXT} action={{ label: "Nhập mã", href: "/settings/coach" }} onClose={dismissHint} />
+        )}
         {showOffline && (
           <div role="status" className="mx-3 mt-2 rounded-xl bg-warning-bg px-3 py-2 text-[13px] leading-snug text-warning-text">
             Đang ngoại tuyến — món mới sẽ đồng bộ khi có mạng.
@@ -396,7 +410,20 @@ function HomeContent() {
             finished={isPast}
             selected={selected}
           />
-          <div className="mt-2 flex min-h-0 flex-1 border-t border-t-card-border">
+          {coach && !selecting && (
+            <div className="mt-2 flex min-h-11 flex-none items-center justify-end border-t border-t-card-border px-3 lg:px-0">
+              <button
+                type="button"
+                onClick={() => setExplainerOpen(true)}
+                aria-haspopup="dialog"
+                className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border-0 bg-transparent px-1 text-[13px] font-bold text-blue active:scale-[0.97] motion-reduce:active:scale-100"
+              >
+                <span>{levelLabel(level, coach.name)}</span>
+                <span aria-hidden="true">›</span>
+              </button>
+            </div>
+          )}
+          <div className={`flex min-h-0 flex-1 border-t border-t-card-border ${coach && !selecting ? "" : "mt-2"}`}>
             <FoodList
               meals={meals}
               mode={mode}
@@ -454,6 +481,7 @@ function HomeContent() {
           setMode(DAY_MODE);
         }}
       />
+      <LevelExplainerSheet open={explainerOpen} onClose={() => setExplainerOpen(false)} level={level} />
       <CopyYesterdaySheet open={isCopySheetOpen} onClose={() => setIsCopySheetOpen(false)} />
       <DayMenuSheet
         open={dayMenuOpen}

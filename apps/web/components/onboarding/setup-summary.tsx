@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { isNewUser, readFirstRunFacts, setupSummary, summaryAddHref, type SetupSummary as Summary } from "@/lib/first-run";
 import { loadProfile } from "@/lib/profile";
+import { useCoaching } from "@/hooks/use-coaching";
+import { readPendingCoachCode, clearPendingCoachCode } from "@/lib/pending-coach";
 import { AppHeader } from "@/components/ui/app-header";
 import { Card } from "@/components/ui/card";
 import { PillButton } from "@/components/ui/pill-button";
@@ -21,6 +23,22 @@ const TITLE = "Hồ sơ đã lưu";
 /** Last step of setup: the daily targets as facts, then one button to the first meal. */
 export function SetupSummary() {
   const [ready, setReady] = useState<Ready | null>(null);
+  const { hydrated, joinByCode } = useCoaching();
+  // A coach code typed in setup or kept from /join/<code>: used once, here, when the profile is saved
+  const [coachNote, setCoachNote] = useState<string | null>(null);
+  useEffect(() => {
+    if (!hydrated) return;
+    const code = readPendingCoachCode();
+    if (!code) return;
+    const coach = joinByCode(code);
+    if (coach) setCoachNote(`Bạn đang được ${coach.name} theo dõi · Level 1`);
+    else {
+      clearPendingCoachCode();
+      setCoachNote("Mã huấn luyện viên chưa đúng. Bạn có thể nhập lại trong Cài đặt › Huấn luyện viên.");
+    }
+    // joinByCode changes with the profile; the code is read and cleared once
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated]);
 
   // Profile and clock are client-only: nothing renders from them before mount (no hydration mismatch).
   useEffect(() => {
@@ -64,6 +82,12 @@ export function SetupSummary() {
             </div>
             <p className="m-0 pt-2 text-[13px] leading-snug text-secondary">Bạn có thể sửa bất cứ lúc nào trong Cài đặt.</p>
           </Card>
+        )}
+
+        {coachNote && (
+          <p role="status" className="m-0 rounded-xl bg-card px-4 py-3 text-[13px] leading-snug text-text border border-card-border">
+            {coachNote}
+          </p>
         )}
 
         <div className="mt-auto flex flex-col gap-2 lg:mt-0">

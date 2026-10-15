@@ -315,6 +315,21 @@ def main():
             else:
                 print(f"[PASS] / select @ {vp['name']} [select-bar] ({pairs} pairs)")
 
+        # cc-28c: the Level explainer's rows (a user at Level 2 opens it from the label above the column)
+        for vp in VIEWPORTS:
+            page.set_viewport_size({"width": vp["width"], "height": vp["height"]})
+            page.goto(f"{BASE_URL}/?level=2", wait_until="networkidle")
+            page.wait_for_timeout(600)
+            page.get_by_role("button", name="Level 2 · HLV Khánh").click()
+            page.get_by_role("dialog", name="Level là gì?").wait_for(state="visible", timeout=5000)
+            res = check_align_groups(page, "level-row")
+            pairs = res["pairs"].get("level-row", 0)
+            if res["errors"] or pairs < 5:
+                print(f"[FAIL] / Level explainer @ {vp['name']} [level-row]: pairs {pairs} (need 5) {res['errors']}")
+                total_errors.extend(res["errors"] or [f"level-row: {pairs} pairs"])
+            else:
+                print(f"[PASS] / Level explainer @ {vp['name']} [level-row] ({pairs} pairs)")
+
         browser.close()
 
     if total_errors:
