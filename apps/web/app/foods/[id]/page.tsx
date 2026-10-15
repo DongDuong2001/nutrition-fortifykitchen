@@ -13,6 +13,9 @@ import { categoryLabel, categoryOf } from "@/lib/food-categories";
 import { formatAmount } from "@/lib/format";
 import { foodSourceLabel } from "@/lib/food-meta";
 import { FoodMicros, GoodSources } from "@/components/foods/food-micros";
+import { ComparePicker } from "@/components/foods/compare-picker";
+import { PillButton } from "@/components/ui/pill-button";
+import { compareHref } from "@/lib/food-compare";
 import { ChipGroup } from "@/components/ui/chip-group";
 import { StatGroup } from "@/components/ui/stat-group";
 import { Toast } from "@/components/ui/toast";
@@ -43,6 +46,7 @@ function FoodDetailInner() {
     return food?.servings[0]?.label || "100 g";
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [compareOpen, setCompareOpen] = useState(false);
   const [favouriteToast, setFavouriteToast] = useState<{ message: string } | null>(null);
 
   useEffect(() => {
@@ -222,9 +226,23 @@ function FoodDetailInner() {
           />
         </div>
 
+        <PillButton variant="secondary" onClick={() => setCompareOpen(true)} aria-haspopup="dialog">
+          So sánh
+        </PillButton>
+
         <GoodSources rows={goodSources} />
         {micros && <FoodMicros rows={micros.rows} unknown={micros.unknown} portionLabel={`${formatAmount(parsedGrams, "g")} g`} />}
       </main>
+
+      <ComparePicker
+        open={compareOpen}
+        onClose={() => setCompareOpen(false)}
+        lockedIds={[food.id]}
+        onConfirm={(ids) => {
+          setCompareOpen(false);
+          router.push(compareHref(ids));
+        }}
+      />
 
       {/* Favourite toast, just above the sticky CTA */}
       {favouriteToast && (
