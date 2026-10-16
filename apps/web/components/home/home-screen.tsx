@@ -56,6 +56,7 @@ import { getMealSlotNameVi } from "@/lib/meal-slot";
 import { HomeHero, type HeroPill } from "./home-hero";
 import { NutrientColumn } from "./nutrient-column";
 import { ShareSheet } from "./share-sheet";
+import { DesktopIntroBanner } from "./desktop-intro";
 
 function subscribeOnline(callback: () => void) {
   window.addEventListener("online", callback);
@@ -405,6 +406,7 @@ function HomeContent() {
           </div>
         )}
         <div className="mx-auto flex min-h-0 w-full max-w-[560px] flex-1 flex-col lg:mx-0 lg:max-w-[1100px] lg:px-8">
+          {!selecting && !isPast && <DesktopIntroBanner />}
           <HomeHero
             label={heroLabel(mode, entries, meals)}
             pills={selecting ? [] : pills}
