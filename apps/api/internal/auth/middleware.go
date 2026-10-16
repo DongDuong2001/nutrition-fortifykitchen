@@ -65,6 +65,12 @@ func defaultAllowedOrigins() []string {
 		}
 		return list
 	}
+	if strings.EqualFold(os.Getenv("ENVIRONMENT"), "production") {
+		return []string{
+			"https://lehongkhanh.vn",
+			"https://www.lehongkhanh.vn",
+		}
+	}
 	return []string{
 		"http://localhost:3000",
 		"http://localhost:3100",
