@@ -7,9 +7,15 @@ import { SetupGate } from "@/components/first-run/setup-gate";
 
 export function DiaryProviderWrapper({ children }: { children: React.ReactNode }) {
   return (
-    <DiaryProvider>
-      <SetupGate>{children}</SetupGate>
-      <DiaryToast />
-    </DiaryProvider>
+    <SetupGate
+      wrap={(content) => (
+        <DiaryProvider>
+          {content}
+          <DiaryToast />
+        </DiaryProvider>
+      )}
+    >
+      {children}
+    </SetupGate>
   );
 }

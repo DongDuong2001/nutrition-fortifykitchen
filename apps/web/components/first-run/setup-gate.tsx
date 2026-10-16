@@ -1,12 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { AppShell } from "@/components/ui/app-shell";
 import { AppHeader } from "@/components/ui/app-header";
-import { currentAccountId } from "@/lib/auth-actions";
-import { isDemo } from "@/lib/demo";
-import { isTabRoute, readFirstRunFacts, setupRedirectFor } from "@/lib/first-run";
+import { gateRedirect, isTabRoute } from "@/lib/first-run";
 
 /**
  * While the check runs, a tab route shows the page frame as a skeleton: the paper page, the phone header shape
@@ -42,26 +40,49 @@ function GateSkeleton() {
 /**
  * Outside demo mode, a user with no profile goes to /setup/profile from every tab route, and a user with a
  * profile but nobody signed in goes to /signin (the diary belongs to an account, so there is nothing to show).
- * The check runs after mount, so it needs the browser's storage; until it has run, a tab route shows the
- * skeleton, so no sample targets flash before the redirect. Auth routes, /setup/**, /offline and /install pass
+ * The check (lib/first-run gateRedirect) runs after mount, so it needs the browser's storage, and in live mode it may
+ * ask Supabase for a session the OAuth callback just set; until it has run, a tab route shows the skeleton, so no
+ * sample targets flash before the redirect. The diary provider (the `wrap` prop, from components/diary-provider-
+ * wrapper) is not mounted while the gate waits on a first load of a tab route, so it mounts only once the account is
+ * known and reads that account's storage; once mounted it stays. Auth routes, /setup/**, /offline and /install pass
  * straight through.
  */
-export function SetupGate({ children }: { children: React.ReactNode }) {
+export function SetupGate({ children, wrap }: { children: React.ReactNode; wrap?: (content: React.ReactNode) => React.ReactNode }) {
   const pathname = usePathname() ?? "/";
   const router = useRouter();
   // True once a check has let the user through
   const [cleared, setCleared] = useState(false);
   const guarded = isTabRoute(pathname);
+  const providerMounted = useRef(false);
+  const waiting = guarded && !cleared;
+  const withProvider = !waiting || providerMounted.current;
+  useEffect(() => {
+    if (withProvider) providerMounted.current = true;
+  }, [withProvider]);
 
   useEffect(() => {
     if (!guarded) return;
-    const demo = isDemo();
-    const to =
-      setupRedirectFor(pathname, readFirstRunFacts(demo), demo) ?? (!demo && currentAccountId() === null ? "/signin" : null);
-    if (to) router.replace(to);
-    else setCleared(true);
+    // The check can wait for Supabase: an effect that was cleaned up (another route, or a Strict Mode re-run) must
+    // neither redirect nor clear, or two runs would redirect twice
+    let cancelled = false;
+    gateRedirect(pathname).then(
+      (to) => {
+        if (cancelled) return;
+        if (to) router.replace(to);
+        else setCleared(true);
+      },
+      () => {
+        if (!cancelled) router.replace("/signin");
+      }
+    );
+    return () => {
+      cancelled = true;
+    };
   }, [guarded, pathname, router]);
 
-  if (guarded && !cleared) return <GateSkeleton />;
-  return <>{children}</>;
+  // The provider (wrap) is mounted once the gate has let the user through, or already was on an earlier route: it is never
+  // unmounted by a later route change, or a toast and its undo (a delete on /entry, then back to Hôm nay) would be lost
+  if (!withProvider) return <GateSkeleton />;
+  const content = waiting ? <GateSkeleton /> : children;
+  return <>{wrap ? wrap(content) : content}</>;
 }

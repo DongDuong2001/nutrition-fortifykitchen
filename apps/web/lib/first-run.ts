@@ -2,7 +2,8 @@ import { getDefaultMealSlot } from "./meal-slot";
 import { PROFILE_KEY, targetRangeText, targetsFor, type Profile } from "./profile";
 import { calculateSaltTarget } from "./training";
 import { isDemo } from "./demo";
-import { currentAccountId } from "./auth-actions";
+import { currentAccount, currentAccountId, wasExplicitlySignedOut } from "./auth-actions";
+import { isLiveMode } from "./api-mode";
 import { ADDED_ENTRIES_KEY, adoptLegacyKeys, adoptLegacyPersonal, browserLocal, browserSession, keyedStorage } from "./storage-keys";
 
 // The entries this user added live in localStorage under the signed-in account's key (lib/storage-keys). Only
@@ -74,6 +75,29 @@ export function readFirstRunFacts(demo: boolean = isDemo()): FirstRunFacts {
     // Storage blocked
   }
   return { profileSaved, entryEverLogged, signedIn };
+}
+
+/**
+ * Where SetupGate sends the user from a tab route: a path, or null to let them through. Outside demo mode a user with
+ * no profile goes to setup and nobody signed in goes to /signin. A session that exists only in Supabase's cookies (the
+ * OAuth callback sets those and sends the user to "/") has no email in this browser's storage yet. So when no account
+ * id is known the account is resolved FIRST (currentAccount asks Supabase, stores the email and clears the signed-out
+ * flag), and only then is the setup redirect decided, from that account's own storage keys: a first-time Google user
+ * lands on /setup/profile with the profile saved under their email, never under unscoped keys. With no session at all
+ * the old rule stands: the setup redirect if there is one, else /signin.
+ */
+export async function gateRedirect(pathname: string, demo: boolean = isDemo()): Promise<string | null> {
+  // After Đăng xuất a session that survived (a failed sign-out) is not adopted until the next explicit sign-in
+  if (!demo && currentAccountId() === null && (wasExplicitlySignedOut() || (await currentAccount()) === null)) {
+    return setupRedirectFor(pathname, readFirstRunFacts(demo), demo) ?? "/signin";
+  }
+  return setupRedirectFor(pathname, readFirstRunFacts(demo), demo);
+}
+
+/** "/" when a live session already exists (the sign-in form has nothing to do), else null. Live mode only. */
+export async function homeIfSignedIn(): Promise<string | null> {
+  if (!isLiveMode() || isDemo() || wasExplicitlySignedOut()) return null;
+  return (await currentAccount()) === null ? null : "/";
 }
 
 /** One line of the day targets on the setup summary. */

@@ -88,11 +88,21 @@ function setStoredEmail(email: string | null): void {
   }
 }
 
-function wasExplicitlySignedOut(): boolean {
+/** True after Đăng xuất until the next explicit sign-in: a Supabase session that survives is then not adopted. */
+export function wasExplicitlySignedOut(): boolean {
   try {
     return globalThis.localStorage?.getItem(SIGNED_OUT_KEY) === "true";
   } catch {
     return false;
+  }
+}
+
+/** An explicit sign-in (Google, a magic link) starts: its session may be adopted again, so the signed-out flag goes. */
+function clearSignedOutFlag(): void {
+  try {
+    globalThis.localStorage?.removeItem(SIGNED_OUT_KEY);
+  } catch {
+    // Storage blocked
   }
 }
 
@@ -146,6 +156,8 @@ export function currentAccountId(): string | null {
 /** The signed-in account, or null when nobody is signed in. */
 export async function currentAccount(): Promise<AccountInfo | null> {
   if (!isLiveMode()) return mockCurrentAccount();
+  // After Đăng xuất a session that survived a failed sign-out is not adopted (no email stored, no flag cleared)
+  if (wasExplicitlySignedOut()) return null;
   try {
     const supabase = createClient();
     const { data: { user }, error } = await supabase.auth.getUser();
@@ -248,6 +260,8 @@ export async function sendPasswordReset(email: string): Promise<AuthResult> {
   const emailError = validateEmail(email);
   if (emailError) return { ok: false, error: emailError };
 
+  // The recovery link signs the user in on /reset-password: that is an explicit sign-in too
+  clearSignedOutFlag();
   try {
     const address = normaliseEmail(email);
     const supabase = createClient();
@@ -271,6 +285,7 @@ export function requestMagicLink(email: string, captchaToken?: string): Promise<
 
     // The API client is told first (a no-op until Dong's endpoint exists), then Supabase sends the link
     await apiClient.requestMagicLink(email);
+    clearSignedOutFlag();
 
     const address = normaliseEmail(email);
     const supabase = createClient();
@@ -291,6 +306,7 @@ export async function signInWithGoogle(): Promise<AuthResult> {
   // Mock mode never reaches Supabase: the sample account stands in for the Google account
   if (!isLiveMode()) return mockSignInSampleAccount().then(() => ({ ok: true }) as AuthResult);
   return guarded(async () => {
+    clearSignedOutFlag();
     const supabase = createClient();
     const redirectTo = typeof window !== "undefined" ? `${window.location.origin}/auth/callback?next=/` : undefined;
     const { error } = await supabase.auth.signInWithOAuth({
@@ -351,10 +367,23 @@ export async function signOut(): Promise<void> {
   clearOnboardingStorage();
   if (!isLiveMode()) return mockSignOut();
   setStoredEmail(null);
+  // The server call (global scope) can fail on the network. The cookie must go anyway, or the sign-in page and the
+  // gate would find the session again: fall back to a local sign-out, which only clears this browser's session.
+  let supabase: ReturnType<typeof createClient>;
   try {
-    const supabase = createClient();
-    await supabase.auth.signOut();
+    supabase = createClient();
   } catch {
-    // Ignore sign-out transport errors
+    return;
+  }
+  try {
+    const { error } = await supabase.auth.signOut();
+    if (!error) return;
+  } catch {
+    // Fall through to the local sign-out
+  }
+  try {
+    await supabase.auth.signOut({ scope: "local" });
+  } catch {
+    // Nothing more can be done; the signed-out flag still keeps this browser from adopting the session
   }
 }

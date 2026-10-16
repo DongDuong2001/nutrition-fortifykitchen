@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AuthNotice } from "@/components/auth/auth-notice";
+import { SessionRedirect } from "@/components/auth/session-redirect";
 import { AuthShell } from "@/components/onboarding/auth-shell";
 import { BrandMark } from "@/components/onboarding/brand-mark";
 import { GoogleSignInButton } from "@/components/onboarding/google-sign-in-button";
@@ -22,6 +23,7 @@ export default function SignInPage() {
         </>
       }
     >
+      <SessionRedirect />
       <GoogleSignInButton />
       <div className="flex items-center gap-3 text-[13px] text-secondary" aria-hidden="true">
         <span className="h-px flex-1 bg-divider" />
