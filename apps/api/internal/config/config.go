@@ -66,6 +66,11 @@ func Load() *Config {
 				origins = append(origins, trimmed)
 			}
 		}
+	} else if strings.EqualFold(env, "production") {
+		origins = []string{
+			"https://lehongkhanh.vn",
+			"https://www.lehongkhanh.vn",
+		}
 	} else {
 		origins = []string{
 			"http://localhost:3000",
