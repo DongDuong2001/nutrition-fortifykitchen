@@ -306,7 +306,7 @@ function HomeContent() {
   function confirmMove(target: CopyTarget) {
     // A past day is read-only: nothing moves there
     if (target === "keep" || isPast) return;
-    moveEntries([...liveSelected], target);
+    moveEntries([...liveSelected], target, viewIso);
     exitSelect();
   }
 
@@ -323,7 +323,7 @@ function HomeContent() {
             onMove={() => setTargetSheet("move")}
             onDelete={() => {
               if (isPast) return;
-              deleteEntries([...liveSelected]);
+              deleteEntries([...liveSelected], viewIso);
               exitSelect();
             }}
             onCopyToToday={() => setTargetSheet("past")}
@@ -534,7 +534,7 @@ function HomeContent() {
         finished={isPast}
         displayName={profile.displayName}
         level={level}
-        onSaveName={(name) => void saveName(name)}
+        onSaveName={saveName}
       />
       {todayIso && (
         <CalendarSheet

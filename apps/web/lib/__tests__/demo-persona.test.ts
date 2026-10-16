@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { personaPatch } from "../demo-persona";
 
 describe("personaPatch", () => {
@@ -47,5 +47,18 @@ describe("personaPatch", () => {
     expect(personaPatch("?as=admin", true)).toBeNull();
     expect(personaPatch("?as=coach&level=4", true)).toBeNull();
     expect(personaPatch("?level=3", true)).toBeNull();
+  });
+
+  it("does nothing in a production build without DEMO_BUILD=1", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("NEXT_PUBLIC_DEMO_BUILD", "");
+    try {
+      expect(personaPatch("?as=admin")).toBeNull();
+      expect(personaPatch("?level=4")).toBeNull();
+      vi.stubEnv("NEXT_PUBLIC_DEMO_BUILD", "1");
+      expect(personaPatch("?as=admin")).toMatchObject({ role: "admin" });
+    } finally {
+      vi.unstubAllEnvs();
+    }
   });
 });

@@ -31,6 +31,8 @@ def squash(t):
 
 def page(browser, size, init=None):
     ctx = browser.new_context(viewport=size, permissions=["clipboard-read", "clipboard-write"])
+    # The invite code is random per browser (v0.2.1): the probe fixes it
+    ctx.add_init_script("try { localStorage.setItem('h1t_mock_coach_codes_v1', JSON.stringify({ 'coach-khanh': 'TESTCODE23' })); } catch (e) {}")
     if init:
         ctx.add_init_script(init)
     pg = ctx.new_page()
@@ -47,21 +49,21 @@ def run(browser, size, tag):
     pg.goto(BASE + "/coach?as=coach", wait_until="networkidle")
     pg.wait_for_timeout(800)
     t = squash(pg.inner_text("body"))
-    check("H1T-KHANH" in t, f"{tag}: the invite code")
+    check("TESTCODE23" in t, f"{tag}: the invite code")
     for name in ["Sao chép mã", "Sao chép liên kết", "Chia sẻ"]:
         b = pg.get_by_role("button", name=name, exact=True)
         check(b.count() == 1 and b.bounding_box()["height"] >= 43.5, f"{tag}: {name} (44 px)")
     pg.get_by_role("button", name="Sao chép mã", exact=True).click()
     pg.wait_for_timeout(300)
-    check(pg.evaluate("navigator.clipboard.readText()") == "H1T-KHANH", f"{tag}: the code is on the clipboard")
+    check(pg.evaluate("navigator.clipboard.readText()") == "TESTCODE23", f"{tag}: the code is on the clipboard")
     check("Đã sao chép mã" in squash(pg.inner_text("body")), f"{tag}: the copy is confirmed")
     pg.get_by_role("button", name="Sao chép liên kết", exact=True).click()
     pg.wait_for_timeout(300)
-    check(pg.evaluate("navigator.clipboard.readText()") == BASE + "/join/H1T-KHANH", f"{tag}: the link is on the clipboard")
+    check(pg.evaluate("navigator.clipboard.readText()") == BASE + "/join/TESTCODE23", f"{tag}: the link is on the clipboard")
     pg.get_by_role("button", name="Chia sẻ", exact=True).click()
     pg.wait_for_timeout(200)
     shared = pg.evaluate("window.__shared")
-    check(shared and shared["url"].endswith("/join/H1T-KHANH"), f"{tag}: native share gets the link ({shared})")
+    check(shared and shared["url"].endswith("/join/TESTCODE23"), f"{tag}: native share gets the link ({shared})")
 
     rows = pg.locator("[data-align-group=client-row]")
     check(rows.count() == 4, f"{tag}: four clients ({rows.count()})")

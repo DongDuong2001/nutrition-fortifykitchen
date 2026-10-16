@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDiary, type EntryView } from "../../lib/diary-store";
-import { entryNumbers } from "../../lib/diary-edits";
+import { NO_ENERGY_MESSAGE, entryNumbers, hasEnergy } from "../../lib/diary-edits";
 import { MEAL_SLOTS, type MealSlot, getMealSlotNameVi } from "../../lib/meal-slot";
 import { parseGramsInput } from "../../lib/portion";
 import { formatAmount } from "../../lib/format";
@@ -25,7 +25,9 @@ export function EntryEditor({ view }: { view: EntryView }) {
   const router = useRouter();
   const { updateEntry, deleteEntry } = useDiary();
   const food = view.food;
-  const canPortion = view.canChangePortion && food !== null;
+  // A food whose energy is unknown cannot take a new portion: its kcal would be written as 0 (NO_ENERGY_MESSAGE says so)
+  const energyUnknown = food !== null && !hasEnergy(food);
+  const canPortion = view.canChangePortion && food !== null && !energyUnknown;
 
   const [gramsInput, setGramsInput] = useState(view.grams !== null ? String(view.grams) : "");
   const [servingLabel, setServingLabel] = useState(view.servingLabel);
@@ -190,7 +192,11 @@ export function EntryEditor({ view }: { view: EntryView }) {
                 })}
               </div>
             </div>
-            {view.portionNote && <p className="m-0 text-sm text-secondary">{view.portionNote}</p>}
+            {energyUnknown && view.canChangePortion ? (
+              <p role="note" className="m-0 text-sm text-secondary">{NO_ENERGY_MESSAGE}</p>
+            ) : (
+              view.portionNote && <p className="m-0 text-sm text-secondary">{view.portionNote}</p>
+            )}
           </div>
           )}
 

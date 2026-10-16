@@ -64,7 +64,7 @@ export default function CoachPage() {
             Mã mời của bạn
           </h2>
           <p data-align-group="coach-invite" className="m-0 font-display text-[32px] font-extrabold italic leading-none tabular-nums text-text">
-            {code || "…"}
+            {code || "Chưa tạo được mã"}
           </p>
           <div data-align-group="coach-invite" className="flex flex-wrap gap-2">
             <button type="button" onClick={() => copy("code")} className={BUTTON}>

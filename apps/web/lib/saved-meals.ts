@@ -138,10 +138,18 @@ export function savedMealEntries(
   });
 }
 
-/** How many foods a tap adds and their kcal, for the row meta. */
+/** How many foods of the meal are in the catalogue but have no known energy: a tap leaves them out and says so. */
+export function savedMealSkipped(meal: SavedMeal, foods: FoodItem[]): number {
+  return meal.items.filter((item) => {
+    const food = foods.find((f) => f.id === item.foodId);
+    return food !== undefined && !hasEnergy(food);
+  }).length;
+}
+
+/** How many foods a tap adds and their kcal, for the row meta. A meal of only unknown-energy foods still counts as one row. */
 export function savedMealTotals(meal: SavedMeal, foods: FoodItem[]): { itemCount: number; kcal: number } {
   const entries = savedMealEntries(meal, foods, "breakfast", "t", "");
-  return { itemCount: entries.length, kcal: entries.reduce((sum, e) => sum + e.calories, 0) };
+  return { itemCount: entries.length + savedMealSkipped(meal, foods), kcal: entries.reduce((sum, e) => sum + e.calories, 0) };
 }
 
 /** The foods of a diary meal as saved-meal items. A quick kcal entry has no food and is left out. */

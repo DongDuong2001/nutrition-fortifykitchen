@@ -36,8 +36,8 @@ export function CoachesCarousel() {
               </span>
               <span className="line-clamp-2 text-[13px] leading-snug text-secondary">{c.bio}</span>
               <span className="flex items-center justify-between gap-2 border-t border-divider pt-3 text-[13px]">
-                <span className="text-secondary">{c.experienceYears} năm kinh nghiệm</span>
-                <span className="font-bold text-blue">Xem hồ sơ ›</span>
+                {c.experienceYears ? <span className="text-secondary">{c.experienceYears} năm kinh nghiệm</span> : null}
+                <span className="ml-auto font-bold text-blue">Xem hồ sơ ›</span>
               </span>
             </Link>
           </li>

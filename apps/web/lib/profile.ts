@@ -4,9 +4,9 @@ import { formatAmount } from "./format";
 import type { MockDayData, MockMacroStat, MockMicroStat } from "./mock/sample-day";
 import { PROFILE_KEY, accountStorage } from "./storage-keys";
 import { NO_COACHING, normaliseCoaching, type CoachingState } from "./coaching-link";
-import { DISPLAY_NAME_MAX, cleanDisplayName, validateDisplayName } from "./display-name";
+import { cleanDisplayName, validateDisplayName } from "./display-name";
 
-export { PROFILE_KEY, DISPLAY_NAME_MAX, cleanDisplayName };
+export { PROFILE_KEY, cleanDisplayName };
 
 export interface Profile extends CoachingState {
   sex: SexType;
@@ -35,11 +35,6 @@ export const SAMPLE_PROFILE: Profile = {
 const SEXES: readonly string[] = ["male", "female"];
 const GOALS: readonly string[] = ["build", "maintain", "cut", "deep_cut"];
 const MAX_TRAINING_MINUTES = 240;
-
-/** A Vietnamese error when a stored name is too long or empty of letters; empty is fine here (not set yet). */
-export function displayNameError(value: string): string | null {
-  return cleanDisplayName(value) === "" ? null : validateDisplayName(value);
-}
 
 export function normaliseProfile(profile: Profile): Profile {
   return { ...profile, periodMode: profile.sex === "female" && profile.periodMode };

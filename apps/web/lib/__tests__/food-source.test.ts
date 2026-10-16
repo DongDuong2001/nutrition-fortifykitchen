@@ -50,6 +50,13 @@ describe("mock catalogue sources", () => {
     }
   });
 
+  it("marks every food with a real source id and link as not verified until someone has checked it", () => {
+    const linked = MOCK_FOODS.filter((f) => f.sourceRef?.url);
+    expect(linked.length).toBeGreaterThanOrEqual(10);
+    for (const f of linked) expect(f.sourceRef?.verified, f.id).toBe(false);
+    for (const f of MOCK_FOODS) expect(f.sourceRef?.verified, f.id).toBe(false);
+  });
+
   it("claims no exact match or verified source until someone has checked", () => {
     expect(MOCK_FOODS.filter((f) => f.match === "exact" || f.sourceRef?.verified)).toEqual([]);
   });
@@ -62,7 +69,7 @@ describe("mock catalogue sources", () => {
     const withRef = MOCK_FOODS.filter((f) => f.source === "USDA" && f.sourceRef?.url);
     expect(withRef.length).toBeGreaterThanOrEqual(10);
     const dates = MOCK_FOODS.find((f) => f.id === "food-cha-la");
-    expect(dates?.sourceRef).toEqual({ db: "SR Legacy", id: "FDC 168191", url: "https://fdc.nal.usda.gov/food-details/168191/nutrients" });
+    expect(dates?.sourceRef).toEqual({ db: "SR Legacy", id: "FDC 168191", url: "https://fdc.nal.usda.gov/food-details/168191/nutrients", verified: false });
     for (const f of withRef) expect(f.sourceRef?.url).toMatch(/^https:\/\/fdc\.nal\.usda\.gov\/food-details\/\d+\/nutrients$/);
   });
 });

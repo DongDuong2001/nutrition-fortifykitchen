@@ -3,7 +3,6 @@ import {
   SAMPLE_PROFILE,
   applyProfileTargets,
   cleanDisplayName,
-  displayNameError,
   normaliseProfile,
   parseStoredProfile,
   profileFromDraft,
@@ -134,25 +133,6 @@ describe("display name", () => {
 
   it("is trimmed when saved", () => {
     expect(cleanDisplayName("  Thảo Nguyên  ")).toBe("Thảo Nguyên");
-  });
-
-  it("is optional: empty or spaces only means not set, and is valid", () => {
-    expect(displayNameError("")).toBeNull();
-    expect(displayNameError("   ")).toBeNull();
-  });
-
-  it("allows up to 40 characters after trimming", () => {
-    expect(displayNameError("a".repeat(40))).toBeNull();
-    expect(displayNameError(`  ${"a".repeat(40)}  `)).toBeNull();
-  });
-
-  it("refuses more than 40 characters, with a Vietnamese message", () => {
-    expect(displayNameError("a".repeat(41))).toBe("Tên hiển thị tối đa 40 ký tự");
-  });
-
-  it("counts Vietnamese letters with tone marks as one character each", () => {
-    expect(displayNameError("ệ".repeat(40))).toBeNull();
-    expect(displayNameError("ệ".repeat(41))).toBe("Tên hiển thị tối đa 40 ký tự");
   });
 });
 

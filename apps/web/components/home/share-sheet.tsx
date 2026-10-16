@@ -134,8 +134,8 @@ export function ShareSheet({
   displayName: string;
   /** The Level badge on the name row and the list of nutrients in the column. */
   level: Level;
-  /** Saves the name typed in the name step (profile.displayName). */
-  onSaveName: (name: string) => void;
+  /** Saves the name typed in the name step (profile.displayName). Resolves false when the API did not take it. */
+  onSaveName: (name: string) => Promise<boolean>;
 }) {
   const [ready, setReady] = useState<Ready | null>(null);
   const [failure, setFailure] = useState<Failure | null>(null);
@@ -149,6 +149,8 @@ export function ShareSheet({
   const needsName = shareNeedsName(displayName);
   const [nameDraft, setNameDraft] = useState("");
   const [nameError, setNameError] = useState<string | null>(null);
+  // The name is kept on this device either way; true when the API could not take it
+  const [nameSyncFailed, setNameSyncFailed] = useState(false);
 
   useEffect(() => {
     if (!open || needsName) return;
@@ -228,7 +230,10 @@ export function ShareSheet({
 
   // Never draw an image without a name: ask for it first
   if (needsName) {
-    const valid = validateSetupName(nameDraft) === null;
+    const draftError = validateSetupName(nameDraft);
+    const valid = draftError === null;
+    // Tiếp tục is off while the name cannot be used: say why as soon as something is typed (blank needs no message yet)
+    const shownError = nameError ?? (nameDraft.trim() === "" ? null : draftError);
     return (
       <Sheet open={open} onClose={onClose} title="Chia sẻ ngày này" titleId="share-sheet-title" desktopDialog>
         <form
@@ -237,11 +242,11 @@ export function ShareSheet({
             e.preventDefault();
             const message = validateSetupName(nameDraft);
             setNameError(message);
-            if (!message) onSaveName(cleanDisplayName(nameDraft));
+            if (!message) void onSaveName(cleanDisplayName(nameDraft)).then((ok) => setNameSyncFailed(!ok));
           }}
           className="flex flex-col gap-3"
         >
-          <FormRow label="Tên hiện trên ảnh" htmlFor="share-name" error={nameError ?? undefined}>
+          <FormRow label="Tên hiện trên ảnh" htmlFor="share-name" error={shownError ?? undefined}>
             <input
               id="share-name"
               type="text"
@@ -287,6 +292,12 @@ export function ShareSheet({
           </div>
         )}
       </div>
+
+      {nameSyncFailed && (
+        <p role="alert" className="m-0 px-1 text-[13px] leading-snug text-destructive-text">
+          Đã lưu tên trên máy này, chưa gửi lên máy chủ được.
+        </p>
+      )}
 
       {failure && (
         <div role="alert" className="flex items-center justify-between gap-3 px-1">

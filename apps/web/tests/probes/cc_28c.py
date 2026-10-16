@@ -52,6 +52,8 @@ NAMED = '{"sex":"male","birthYear":2003,"weightKg":65,"goal":"maintain","periodM
 def new_page(browser, size):
     ctx = browser.new_context(viewport=size, accept_downloads=True)
     ctx.add_init_script(WATCH)
+    # The invite code is random per browser (v0.2.1): the probe fixes it
+    ctx.add_init_script("try { localStorage.setItem('h1t_mock_coach_codes_v1', JSON.stringify({ 'coach-khanh': 'TESTCODE23' })); } catch (e) {}")
     # a named account that has not dismissed the Level 0 hint (the share image never draws without a name)
     ctx.add_init_script("try { if (localStorage.getItem('h1t_profile_v1_demo') === null) localStorage.setItem('h1t_profile_v1_demo', JSON.stringify(%s)); } catch (e) {}" % NAMED)
     pg = ctx.new_page()
@@ -78,7 +80,9 @@ def set_server_level(pg, level):
           const key = 'h1t_mock_coach_clients_v1';
           const list = JSON.parse(localStorage.getItem(key) || 'null');
           if (!list) throw new Error('no clients stored');
-          const me = list.find(c => c.id === 'ban@email.com');
+          // The client id is opaque (v0.2.1): the one for this account is in the id map, never the email
+          const ids = JSON.parse(localStorage.getItem('h1t_mock_client_ids_v1') || '{}');
+          const me = list.find(c => c.id === ids['ban@email.com']);
           if (!me) throw new Error('not a client: ' + JSON.stringify(list.map(c => c.id)));
           me.level = level;
           localStorage.setItem(key, JSON.stringify(list));
@@ -125,7 +129,7 @@ def run(browser, size, tag):
     pg.wait_for_timeout(200)
     check("Mã không đúng. Kiểm tra lại với HLV của bạn." in body(pg), f"{tag} coach: H1T-NOPE is wrong")
     pg.screenshot(path=os.path.join(SHOTS, f"cc-28c-coach-none-{w}.png"))
-    field.fill("h1t-khanh")
+    field.fill("testcode23")
     pg.get_by_role("button", name="Tham gia", exact=True).click()
     pg.wait_for_timeout(400)
     t = body(pg)
@@ -207,7 +211,7 @@ def run(browser, size, tag):
 
     # /join/<code>, signed in
     ctx, pg, errors = new_page(browser, size)
-    pg.goto(BASE + "/join/H1T-KHANH", wait_until="networkidle")
+    pg.goto(BASE + "/join/TESTCODE23", wait_until="networkidle")
     dlg = pg.get_by_role("dialog", name="Tham gia theo dõi với HLV Khánh?")
     dlg.wait_for(state="visible", timeout=6000)
     pg.screenshot(path=os.path.join(SHOTS, f"cc-28c-join-{w}.png"))
@@ -224,10 +228,10 @@ def run(browser, size, tag):
     # /join/<code>, signed out: the code is kept and sign-up opens
     ctx, pg, errors = new_page(browser, size)
     ctx.add_init_script("try { localStorage.setItem('h1t_mock_auth_v1', JSON.stringify({ current: null, accounts: {} })); } catch (e) {}")
-    pg.goto(BASE + "/join/H1T-KHANH", wait_until="networkidle")
+    pg.goto(BASE + "/join/TESTCODE23", wait_until="networkidle")
     pg.wait_for_timeout(800)
     check("/signup" in pg.url, f"{tag} join signed out: goes to sign-up ({pg.url})")
-    check(pg.evaluate("sessionStorage.getItem('h1t-pending-coach-code')") == "H1T-KHANH", f"{tag} join signed out: the code is kept")
+    check(pg.evaluate("sessionStorage.getItem('h1t-pending-coach-code')") == "TESTCODE23", f"{tag} join signed out: the code is kept")
     ctx.close()
 
     # Setup field
@@ -238,7 +242,7 @@ def run(browser, size, tag):
     check(field.count() == 1 and field.bounding_box()["height"] >= 43.5, f"{tag} setup: the optional coach code field")
     pg.locator("#setup-display-name").fill("Học viên A")
     pg.screenshot(path=os.path.join(SHOTS, f"cc-28c-setup-{w}.png"))
-    field.fill("h1t-khanh")
+    field.fill("testcode23")
     finish = pg.get_by_role("button", name=re.compile("^(Tiếp tục|Hoàn tất)$")).locator("visible=true").first
     finish.click()
     pg.wait_for_timeout(500)

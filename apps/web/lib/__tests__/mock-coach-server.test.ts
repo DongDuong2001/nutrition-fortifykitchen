@@ -1,6 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   CODE_LENGTH,
+  randomBytes,
   MOCK_COACH_BASE,
   SEED_CLIENTS,
   clientById,
@@ -22,7 +23,7 @@ describe("coach directory", () => {
   it("has HLV Khánh, whose code is not made from the name", () => {
     expect(COACHES).toEqual([{ id: "coach-khanh", name: "HLV Khánh", code: "QWERTY2345" }]);
     const made = withCodes(MOCK_COACH_BASE, {});
-    expect(made[0].code).toMatch(/^[A-Z2-9]{10}$/);
+    expect(made[0].code).toMatch(/^[A-HJ-NP-Z2-9]{10}$/);
     expect(made[0].code.toUpperCase()).not.toContain("KHANH");
   });
 
@@ -33,15 +34,32 @@ describe("coach directory", () => {
     expect(withCodes(MOCK_COACH_BASE, stored)[0].code).toBe(first);
     // A damaged stored value is replaced, not trusted
     const bad = { "coach-khanh": "h1t-khanh" };
-    expect(withCodes(MOCK_COACH_BASE, bad)[0].code).toMatch(/^[A-Z2-9]{10}$/);
+    expect(withCodes(MOCK_COACH_BASE, bad)[0].code).toMatch(/^[A-HJ-NP-Z2-9]{10}$/);
     expect(new Set(Array.from({ length: 20 }, randomCode)).size).toBeGreaterThan(18);
     expect(randomCode()).toHaveLength(CODE_LENGTH);
   });
 
-  it("turns bytes into symbols without 0, O, 1, I or L", () => {
+  it("turns bytes into symbols without 0, O, 1 or I, and every byte value maps evenly (32 symbols)", () => {
     const code = codeFromBytes(Array.from({ length: 10 }, (_, i) => i * 25));
     expect(code).toHaveLength(10);
-    expect(code).not.toMatch(/[01OIL]/);
+    expect(code).not.toMatch(/[01OI]/);
+    const counts = new Map<string, number>();
+    for (let b = 0; b < 256; b++) {
+      const symbol = codeFromBytes(Array(10).fill(b))[0];
+      counts.set(symbol, (counts.get(symbol) ?? 0) + 1);
+    }
+    expect(counts.size).toBe(32);
+    expect(new Set(counts.values())).toEqual(new Set([8]));
+  });
+
+  it("throws, not falls back to Math.random, without crypto.getRandomValues", () => {
+    vi.stubGlobal("crypto", undefined);
+    try {
+      expect(() => randomBytes(10)).toThrow();
+      expect(() => randomCode()).toThrow();
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 
   it("finds a coach by code in any case, with spaces ignored", () => {
@@ -58,7 +76,7 @@ describe("opaque client ids", () => {
   it("gives each account a random id that is not its email, and keeps it", () => {
     const stored: Record<string, string> = {};
     const a = opaqueIdFor("an@example.com", stored);
-    expect(a).toMatch(/^c-[a-z2-9]{10}$/);
+    expect(a).toMatch(/^c-[a-hj-np-z2-9]{10}$/);
     expect(a).not.toContain("example");
     expect(opaqueIdFor("an@example.com", stored)).toBe(a);
     expect(opaqueIdFor("binh@example.com", stored)).not.toBe(a);

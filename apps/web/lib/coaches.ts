@@ -40,7 +40,7 @@ export const FEATURED_COACHES: CoachProfile[] = [
     name: "Lê Hồng Khánh",
     title: "Huấn luyện viên H1T",
     bio: "Giới thiệu đang được cập nhật.",
-    specialties: ["Tăng cơ", "Dinh dưỡng thể thao", "Tối ưu vi chất", "Giảm mỡ bền vững"],
+    specialties: [],
     credentials: [],
     social: {},
     recommendedFoods: [],

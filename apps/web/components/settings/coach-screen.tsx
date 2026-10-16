@@ -62,7 +62,7 @@ export function CoachScreen() {
                     setCode(e.target.value);
                     if (error) setError(null);
                   }}
-                  placeholder="H1T-…"
+                  placeholder="Mã gồm 10 ký tự"
                   aria-invalid={error ? true : undefined}
                   className={`h-[52px] w-full rounded-xl border-2 bg-card px-4 text-base font-semibold uppercase text-text outline-none focus:border-blue ${
                     error ? "border-destructive" : "border-card-border"

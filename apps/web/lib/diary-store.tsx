@@ -37,6 +37,7 @@ import {
   removeSavedMeal,
   renameSavedMeal as renameSavedMealIn,
   savedMealEntries,
+  savedMealSkipped,
   writeSavedMeals,
   type SavedMeal,
 } from "./saved-meals";
@@ -71,6 +72,7 @@ import {
   dismissUndoIn,
   entryNumbers,
   hasEnergy,
+  NO_ENERGY_MESSAGE,
   findEntry,
   mealEntryIds,
   mealPortions,
@@ -95,7 +97,7 @@ export type { AddedDiaryEntry, EntryView, EntryPatch } from "./diary-edits";
  */
 export interface ToastInfo {
   message: string;
-  kind: "added" | "deleted" | "undoable" | "saved" | "moved";
+  kind: "added" | "deleted" | "undoable" | "saved" | "moved" | "notice";
   mealSlot: MealSlot | null;
   /** How long it stays. A delete or a copy stays 5 s, which is also the undo window. */
   durationMs: number;
@@ -104,8 +106,15 @@ export interface ToastInfo {
   undoMoves?: SlotMove[];
 }
 
+/** A "deleted" toast kept on screen under a newer one, until `expiresAt` (ms since epoch). */
+export interface ParkedToast {
+  toast: ToastInfo;
+  expiresAt: number;
+}
+
 const ADDED_TOAST_MS = 4000;
 const UNDO_TOAST_MS = 5000;
+const NOTICE_TOAST_MS = 6000;
 
 interface DiaryContextValue {
   data: MockDayData;
@@ -135,14 +144,21 @@ interface DiaryContextValue {
   deleteEntry: (id: string) => void;
   /** Removes every entry of a meal of today, with one undo toast (Hoàn tác puts the whole meal back). */
   deleteMeal: (slot: MealSlot) => void;
-  /** Removes the chosen entries of today with ONE undo toast (Hoàn tác puts them all back). */
-  deleteEntries: (ids: string[]) => void;
-  /** Moves the chosen entries of today to a meal of today. */
-  moveEntries: (ids: string[], slot: MealSlot) => void;
+  /**
+   * Removes the chosen entries of today with ONE undo toast (Hoàn tác puts them all back). `dayIso` is the day the ids
+   * were picked on: anything but today is a read-only past day and nothing is removed.
+   */
+  deleteEntries: (ids: string[], dayIso: string) => void;
+  /** Moves the chosen entries of today to a meal of today. Like deleteEntries, a past `dayIso` does nothing. */
+  moveEntries: (ids: string[], slot: MealSlot, dayIso: string) => void;
   /** Puts the entries of the last Chuyển bữa back. Only works while the "moved" toast is shown. */
   undoMove: () => void;
   /** Puts the last deleted entry back. Only works while the "deleted" toast is shown. */
   undoLastDelete: () => void;
+  /** A delete's toast that a Chuyển bữa toast pushed aside: still shown under it with its own time left. */
+  parkedDelete: ParkedToast | null;
+  /** Hoàn tác of the parked delete. Leaves the toast on top alone. */
+  undoParkedDelete: () => void;
   /** Adds copied entries to today in one step, with one undo toast. Existing entries are kept. */
   copyEntries: (entries: AddedDiaryEntry[], message: string) => void;
   /** Takes out the entries of the last add or copy. Only works while the "undoable" toast is shown. */
@@ -422,6 +438,9 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   // Empty until mount; the sample recents are seeded only in demo mode
   const [recentFoods, setRecentFoods] = useState<RecentFood[]>([]);
   const [toast, setToast] = useState<ToastInfo | null>(null);
+  const [parkedDelete, setParkedDelete] = useState<ParkedToast | null>(null);
+  // When the toast on screen was set, so a delete's toast can keep its remaining time when it is parked
+  const toastStartedAt = useRef(0);
   const [highlightedMeal, setHighlightedMeal] = useState<MealSlot | null>(null);
   const [favouriteIds, setFavouriteIds] = useState<string[]>([]);
   const [savedMeals, setSavedMeals] = useState<SavedMeal[]>([]);
@@ -610,6 +629,24 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     }
   }, [recentFoods, hydrated, ownStorage]);
 
+  useEffect(() => {
+    toastStartedAt.current = Date.now();
+  }, [toast]);
+
+  // A parked delete lives until its time is up, or until its undo record is gone (another action dismissed it)
+  useEffect(() => {
+    if (!parkedDelete) return;
+    if (!edits.undo) {
+      setParkedDelete(null);
+      return;
+    }
+    const timer = setTimeout(() => {
+      setParkedDelete(null);
+      setEdits((prev) => dismissUndoIn(prev));
+    }, Math.max(0, parkedDelete.expiresAt - Date.now()));
+    return () => clearTimeout(timer);
+  }, [parkedDelete, edits.undo]);
+
   // Auto-dismiss the toast. When a "deleted" toast goes, the undo goes with it; a "moved" toast has its own undo
   // (in the toast) and leaves a delete's record alone.
   useEffect(() => {
@@ -694,6 +731,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       const view = findEntry(edits, id, samples);
       if (!view) return;
       setEdits((prev) => deleteEntryIn(prev, id, samples));
+      setParkedDelete(null);
       setToast({ message: `Đã xóa ${view.name}`, kind: "deleted", mealSlot: null, durationMs: UNDO_TOAST_MS });
     },
     [edits, samples]
@@ -704,6 +742,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       const count = mealEntryIds(edits, slot, samples).length;
       if (count === 0) return;
       setEdits((prev) => deleteMealIn(prev, slot, samples));
+      setParkedDelete(null);
       setToast({
         message: `Đã xóa ${getMealSlotNameVi(slot)} · ${count} món`,
         kind: "deleted",
@@ -715,21 +754,30 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   );
 
   const deleteEntries = useCallback(
-    (ids: string[]) => {
+    (ids: string[], dayIso: string) => {
+      // A past day is read-only: its entries are not in the edits, and nothing here may touch today's
+      if (!todayIso || dayIso !== todayIso) return;
       const count = ids.filter((id) => findEntry(edits, id, samples) !== null).length;
       if (count === 0) return;
       setEdits((prev) => deleteEntriesIn(prev, ids, samples));
+      setParkedDelete(null);
       setToast({ message: `Đã xóa ${count} món`, kind: "deleted", mealSlot: null, durationMs: UNDO_TOAST_MS });
     },
-    [edits, samples]
+    [edits, samples, todayIso]
   );
 
   const moveEntries = useCallback(
-    (ids: string[], slot: MealSlot) => {
+    (ids: string[], slot: MealSlot, dayIso: string) => {
+      if (!todayIso || dayIso !== todayIso) return;
       const count = ids.filter((id) => findEntry(edits, id, samples) !== null).length;
       if (count === 0) return;
-      // A move has its own undo (the toast carries it) and leaves a pending delete's undo alone
+      // A move has its own undo (the toast carries it). A delete's toast it replaces is parked under it, so both
+      // Hoàn tác stay reachable.
       const undoMoves = slotsBeforeMove(edits, ids, slot, samples);
+      if (toast?.kind === "deleted" && edits.undo) {
+        const expiresAt = toastStartedAt.current + toast.durationMs;
+        if (expiresAt > Date.now()) setParkedDelete({ toast, expiresAt });
+      }
       setEdits((prev) => moveEntriesIn(prev, ids, slot, samples));
       setToast({
         message: `Đã chuyển ${count} món sang ${getMealSlotNameVi(slot)}`,
@@ -739,7 +787,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         undoMoves,
       });
     },
-    [edits, samples]
+    [edits, samples, todayIso, toast]
   );
 
   const undoMove = useCallback(() => {
@@ -752,6 +800,11 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   const undoLastDelete = useCallback(() => {
     setEdits((prev) => undoDeleteIn(prev));
     setToast(null);
+  }, []);
+
+  const undoParkedDelete = useCallback(() => {
+    setEdits((prev) => undoDeleteIn(prev));
+    setParkedDelete(null);
   }, []);
 
   const copyEntries = useCallback((entries: AddedDiaryEntry[], message: string) => {
@@ -822,14 +875,21 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     (meal: SavedMeal, slot: MealSlot) => {
       const stamp = Date.now();
       const entries = savedMealEntries(meal, MOCK_FOODS, slot, `sm-${stamp}`, new Date(stamp).toISOString());
-      if (entries.length === 0) return;
+      const skipped = savedMealSkipped(meal, MOCK_FOODS);
+      if (entries.length === 0) {
+        // Nothing can be added: say why instead of doing nothing
+        if (skipped > 0) setToast({ message: NO_ENERGY_MESSAGE, kind: "notice", mealSlot: null, durationMs: NOTICE_TOAST_MS });
+        return;
+      }
       // The recents remember each food with the portion the meal used
       setRecentFoods((prev) =>
         [...entries].reverse().reduce((list, e) => pushRecent(list, { foodId: e.foodId, servingLabel: e.displayQty }), prev)
       );
       setEdits((prev) => dismissUndoIn({ ...prev, added: [...prev.added, ...entries] }));
       setToast({
-        message: `Đã thêm ${meal.name} · ${entries.length} món vào ${getMealSlotNameVi(slot)}`,
+        message: `Đã thêm ${meal.name} · ${entries.length} món vào ${getMealSlotNameVi(slot)}${
+          skipped > 0 ? `. ${skipped} món chưa có kcal nên chưa thêm` : ""
+        }`,
         kind: "undoable",
         mealSlot: slot,
         durationMs: UNDO_TOAST_MS,
@@ -903,6 +963,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       moveEntries,
       undoMove,
       undoLastDelete,
+      parkedDelete,
+      undoParkedDelete,
       copyEntries,
       undoCopy,
       savedMeals,
@@ -942,6 +1004,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       moveEntries,
       undoMove,
       undoLastDelete,
+      parkedDelete,
+      undoParkedDelete,
       copyEntries,
       undoCopy,
       savedMeals,

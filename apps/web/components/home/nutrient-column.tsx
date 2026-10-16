@@ -4,7 +4,13 @@ import { pctLabel, pctOf, type HomeValues } from "@/lib/home";
 import { isExtra, type ColumnGroup } from "@/lib/level-nutrients";
 import { getNutrientDefinition } from "@/lib/nutrients";
 import type { ShareKeyItem } from "@/lib/share-card";
+import { ColumnScroll } from "./column-scroll";
 import { HomeBar } from "./home-bar";
+
+/** The share image draws every row (no scrolling); the screen scrolls, with a fade while rows wait below. */
+function Scroll({ share, children }: { share: boolean; children: React.ReactNode }) {
+  return share ? <div className="flex flex-col">{children}</div> : <ColumnScroll>{children}</ColumnScroll>;
+}
 
 /**
  * The right column of the home body: the nutrients of the user's Level against the day's targets (lib/level-
@@ -45,7 +51,7 @@ export function NutrientColumn({
       }`}
     >
       {/* Rows are 34 px where there is room and shrink (to 28 px) so the column fits a short screen; it scrolls when it cannot */}
-      <div className={share ? "flex flex-col" : "flex min-h-0 flex-1 flex-col overflow-y-auto"}>
+      <Scroll share={share}>
         {groups.map((group) => (
           <section key={group.title} aria-label={group.title} className="flex flex-col" style={share ? undefined : { flex: `${group.ids.length} 0 auto` }}>
             <h3 className={`m-0 flex h-[22px] flex-none items-center bg-paper-dark px-3 text-[11px] font-extrabold leading-none text-text ${share ? "" : "lg:h-11"}`}>
@@ -91,7 +97,7 @@ export function NutrientColumn({
             })}
           </section>
         ))}
-      </div>
+      </Scroll>
       {summary && (
         <p data-level-summary className="m-0 flex flex-none flex-col gap-0.5 px-3 pt-2 text-[13px] leading-snug text-secondary">
           <span className="font-bold tabular-nums text-text">

@@ -35,14 +35,14 @@ export interface FoodSourceRef {
   db: string;
   id: string;
   url?: string;
-  /** True once someone has opened the source and confirmed it is this food. Missing means not verified. */
+  /** True only once someone has opened the source and confirmed it is this food. Every ref starts false. */
   verified?: boolean;
 }
 
 /** The database is known from the food's source; the id of the original food is not. */
-const unlisted = (db: string): FoodSourceRef => ({ db, id: "chưa rõ" });
+const unlisted = (db: string): FoodSourceRef => ({ db, id: "chưa rõ", verified: false });
 
-const fdc = (id: number): FoodSourceRef => ({ db: "SR Legacy", id: `FDC ${id}`, url: `https://fdc.nal.usda.gov/food-details/${id}/nutrients` });
+const fdc = (id: number): FoodSourceRef => ({ db: "SR Legacy", id: `FDC ${id}`, url: `https://fdc.nal.usda.gov/food-details/${id}/nutrients`, verified: false });
 
 /**
  * The catalogue as lists and search read it. Foods that only exist for the demo day are left out unless demo mode

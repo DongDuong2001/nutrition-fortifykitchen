@@ -22,6 +22,8 @@ describe("coaches", () => {
       expect(c.clientsHelped, c.id).toBeUndefined();
       expect(c.social, c.id).toEqual({});
     }
+    // Khánh's specialties wait for the real ones too
+    expect(getCoachById("coach-khanh")?.specialties).toEqual([]);
   });
 
   it("names the sample coaches as placeholders, not as people", () => {
@@ -42,7 +44,9 @@ describe("coaches", () => {
 
   it("filters coaches by specialty", () => {
     const muscleCoaches = filterCoachesBySpecialty("Tăng cơ");
-    expect(muscleCoaches.some((c) => c.name === "Lê Hồng Khánh")).toBe(true);
+    expect(muscleCoaches.some((c) => c.id === "coach-duc")).toBe(true);
+    expect(muscleCoaches.some((c) => c.id === "coach-khanh")).toBe(false);
+    expect(filterCoachesBySpecialty("Tất cả").some((c) => c.id === "coach-khanh")).toBe(true);
 
     const womenCoaches = filterCoachesBySpecialty("Dinh dưỡng nữ giới");
     expect(womenCoaches.some((c) => c.id === "coach-ha")).toBe(true);

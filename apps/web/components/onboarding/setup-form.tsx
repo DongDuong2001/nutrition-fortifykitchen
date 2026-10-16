@@ -276,7 +276,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
                   setCoachCode(e.target.value);
                   writePendingCoachCode(e.target.value);
                 }}
-                placeholder="H1T-…"
+                placeholder="Mã gồm 10 ký tự"
                 className="h-[52px] w-full rounded-xl border-2 border-grabber bg-card px-4 text-base font-semibold uppercase text-text outline-none focus:border-blue"
               />
             </FormRow>

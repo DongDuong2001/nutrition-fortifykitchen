@@ -140,7 +140,7 @@ export function canReview(role: Role): boolean {
   return role === "admin";
 }
 
-/** Whether a coach code is well formed: "H1T-" and letters or digits, any case. */
+/** A coach code as compared: upper case, spaces removed ("ab3d 5fgh" and "AB3D5FGH" are the same code). */
 export function normaliseCode(input: string): string {
   return input.trim().toUpperCase().replace(/\s+/g, "");
 }

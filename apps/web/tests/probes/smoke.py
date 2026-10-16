@@ -29,9 +29,10 @@ NO_HEADER_AT_DESKTOP = {"/setup/goal", "/setup/profile", "/setup/done"}
 DESKTOP_MIN_WIDTH = 1024
 DESKTOP_SIDEBAR = 'nav[aria-label="Điều hướng chính"]:visible'  # the sidebar's nav; the aria-label sits on it, not on the aside
 # No route is skipped now: /login links to /diary, which is a route since cc2-07, so it reaches networkidle.
-SKIPPED_ROUTES: set[str] = set()
+# /dev/ui is the component showcase: a production build answers 404 for /dev (v0.2.1), so smoke skips it.
+SKIPPED_ROUTES: set[str] = {"/dev/ui"}
 # Mock id for each dynamic segment, keyed by the static segment in front of it
-MOCK_IDS = {"entry": "item-1", "foods": "food-cha-la", "micros": "calcium", "explore": "tinh_bot", "rich": "calcium", "coaches": "coach-khanh", "clients": "client-1", "join": "H1T-KHANH"}
+MOCK_IDS = {"entry": "item-1", "foods": "food-cha-la", "micros": "calcium", "explore": "tinh_bot", "rich": "calcium", "coaches": "coach-khanh", "clients": "client-1", "join": "ABCDEFGH23"}
 IGNORED_CONSOLE = ("data-gr-", "Grammarly")
 # Production builds report hydration failures as minified React errors (#418, #419, #423, #425)
 HYDRATION_RE = re.compile(r"hydrat|React error #(418|419|423|425)", re.IGNORECASE)

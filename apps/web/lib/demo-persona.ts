@@ -1,3 +1,4 @@
+import { demoBuildAllowed } from "./demo";
 import { NO_COACHING, toLevel, type CoachRef, type CoachingState, type Level, type Role } from "./coaching-link";
 
 /**
@@ -43,8 +44,8 @@ const state = (role: Role, level: Level): CoachingState => ({
  * sets the Level (0 = no coach). A Level override is marked seen, so no one-time card covers the screen.
  */
 export function personaPatch(search: string, live = false): PersonaPatch | null {
-  // Live mode: the role and Level come from the API only, never from the URL
-  if (live) return null;
+  // Live mode and a production build without DEMO_BUILD=1: the role and Level come from the API only, never from the URL
+  if (live || !demoBuildAllowed(process.env.NODE_ENV, process.env.NEXT_PUBLIC_DEMO_BUILD)) return null;
   const params = new URLSearchParams(search);
   const persona = personaOf(params.get("as"));
   const level = levelOf(params.get("level"));

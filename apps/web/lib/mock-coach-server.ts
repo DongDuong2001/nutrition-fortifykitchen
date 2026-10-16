@@ -36,19 +36,18 @@ export const CODES_KEY = "h1t_mock_coach_codes_v1";
 export const CLIENT_IDS_KEY = "h1t_mock_client_ids_v1";
 
 export const CODE_LENGTH = 10;
-// No 0, O, 1, I or L: a code read aloud or copied by hand stays unambiguous.
-const CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+// 32 symbols, so one random byte maps to one symbol with no bias (256 / 32). No 0, O, 1 or I: a code read aloud or copied by hand stays unambiguous.
+const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
 /** A code of CODE_LENGTH symbols from random bytes (one byte each). Pure; `randomBytes` supplies the bytes. */
 export function codeFromBytes(bytes: ArrayLike<number>): string {
   return Array.from({ length: CODE_LENGTH }, (_, i) => CODE_ALPHABET[bytes[i] % CODE_ALPHABET.length]).join("");
 }
 
+/** Secure random bytes. Throws without crypto.getRandomValues: a guessable code or id is worse than none. */
 export function randomBytes(n: number): Uint8Array {
-  const out = new Uint8Array(n);
-  if (typeof crypto !== "undefined" && typeof crypto.getRandomValues === "function") crypto.getRandomValues(out);
-  else for (let i = 0; i < n; i++) out[i] = Math.floor(Math.random() * 256);
-  return out;
+  if (typeof crypto === "undefined" || typeof crypto.getRandomValues !== "function") throw new Error("no secure random source");
+  return crypto.getRandomValues(new Uint8Array(n));
 }
 
 export const randomCode = (): string => codeFromBytes(randomBytes(CODE_LENGTH));
@@ -87,13 +86,17 @@ function writeMap(key: string, map: Record<string, string>): void {
   }
 }
 
-/** The mock coaches with their codes, made on first use and kept. Client only. */
+/** The mock coaches with their codes, made on first use and kept. Without a secure random source the code is "" (none). Client only. */
 export function readCoaches(): MockCoach[] {
   const stored = readMap(CODES_KEY);
   const before = JSON.stringify(stored);
-  const coaches = withCodes(MOCK_COACH_BASE, stored);
-  if (JSON.stringify(stored) !== before) writeMap(CODES_KEY, stored);
-  return coaches;
+  try {
+    const coaches = withCodes(MOCK_COACH_BASE, stored);
+    if (JSON.stringify(stored) !== before) writeMap(CODES_KEY, stored);
+    return coaches;
+  } catch {
+    return MOCK_COACH_BASE.map((c) => ({ ...c, code: "" }));
+  }
 }
 
 /** This account's id on the mock server: random and opaque, so the email never reaches a URL. Client only. */
@@ -101,9 +104,14 @@ export function clientIdFor(account: string | null): string {
   const stored = readMap(CLIENT_IDS_KEY);
   const key = account ?? "me";
   const had = key in stored;
-  const id = opaqueIdFor(key, stored);
-  if (!had) writeMap(CLIENT_IDS_KEY, stored);
-  return id;
+  try {
+    const id = opaqueIdFor(key, stored);
+    if (!had) writeMap(CLIENT_IDS_KEY, stored);
+    return id;
+  } catch {
+    // No secure random source: one shared placeholder id, never the email
+    return "c-local";
+  }
 }
 
 /** The coach whose code this is (any case, spaces ignored), or null. */

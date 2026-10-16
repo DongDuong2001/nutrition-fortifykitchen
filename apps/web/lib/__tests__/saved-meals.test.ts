@@ -9,6 +9,7 @@ import {
   removeSavedMeal,
   renameSavedMeal,
   savedMealEntries,
+  savedMealSkipped,
   savedMealTotals,
   type SavedMeal,
 } from "../saved-meals";
@@ -85,6 +86,19 @@ describe("savedMealEntries with a food of unknown energy", () => {
     const withUnknown: SavedMeal = { ...meal("u"), items: [...items, { foodId: "recipe-unknown", servingLabel: "100 g", grams: 100 }] };
     const entries = savedMealEntries(withUnknown, foods, "dinner", "sm", "2026-10-13T12:00:00.000Z");
     expect(entries.map((e) => e.foodId)).toEqual(["food-yen-mach", "food-chuoi"]);
+  });
+});
+
+describe("savedMealSkipped", () => {
+  it("counts the foods in the catalogue whose energy is unknown, so the tap can say so", () => {
+    const unknown = { ...MOCK_FOODS[0], id: "recipe-unknown", nutrients: { ...MOCK_FOODS[0].nutrients, energy: null } };
+    const foods = [...MOCK_FOODS, unknown];
+    const m: SavedMeal = { ...meal("u"), items: [...items, { foodId: "recipe-unknown", servingLabel: "100 g", grams: 100 }, { foodId: "gone", servingLabel: "x", grams: 1 }] };
+    expect(savedMealSkipped(m, foods)).toBe(1);
+    expect(savedMealSkipped(meal("a"), foods)).toBe(0);
+    // A meal of only such foods still shows as a row (itemCount 1), with 0 kcal
+    const only: SavedMeal = { ...meal("o"), items: [{ foodId: "recipe-unknown", servingLabel: "100 g", grams: 100 }] };
+    expect(savedMealTotals(only, foods)).toEqual({ itemCount: 1, kcal: 0 });
   });
 });
 

@@ -43,16 +43,18 @@ export function CoachDetailCard({ coach }: { coach: CoachProfile }) {
           <p className="m-0 text-[15px] leading-relaxed text-text">{coach.bio}</p>
         </div>
 
-        <div className="flex flex-col gap-2">
-          <SectionTitle as="h2">Lĩnh vực chuyên môn</SectionTitle>
-          <ul role="list" className="m-0 flex list-none flex-wrap gap-2 p-0">
-            {coach.specialties.map((s) => (
-              <li key={s} className="rounded-full border border-card-border bg-page px-3 py-1 text-[13px] font-semibold text-text">
-                {s}
-              </li>
-            ))}
-          </ul>
-        </div>
+        {coach.specialties.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <SectionTitle as="h2">Lĩnh vực chuyên môn</SectionTitle>
+            <ul role="list" className="m-0 flex list-none flex-wrap gap-2 p-0">
+              {coach.specialties.map((s) => (
+                <li key={s} className="rounded-full border border-card-border bg-page px-3 py-1 text-[13px] font-semibold text-text">
+                  {s}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {coach.credentials.length > 0 && (
           <div className="flex flex-col gap-2">
