@@ -35,8 +35,12 @@ def test_item_1_and_2(browser):
     search_input = pg.locator('input[type="search"][aria-label="Tìm món"]').first
     check(search_input.count() > 0, "add: search input present")
     inp_classes = search_input.get_attribute("class") or ""
-    check("focus-visible:ring-blue" in inp_classes or "focus-visible:ring-2" in inp_classes,
-          f"add: search input has focus ring class ({inp_classes})")
+    # One focus indicator: the wrapper label's focus-within ring; the input itself has no ring or outline of its own
+    wrapper_classes = search_input.evaluate("el => el.closest('label').className") or ""
+    check("focus-within:ring-blue" in wrapper_classes and "focus-within:ring-2" in wrapper_classes,
+          f"add: the search wrapper has the focus-within ring ({wrapper_classes})")
+    check("focus-visible:ring" not in inp_classes and "focus-visible:outline-none" in inp_classes,
+          f"add: the search input has no ring of its own ({inp_classes})")
     ctx.close()
 
     # 2. /training: Checkbox aria-label and tap target
