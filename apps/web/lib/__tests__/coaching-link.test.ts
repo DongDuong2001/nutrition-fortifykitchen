@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   NO_COACHING,
   canManageClients,
+  coachingAvailable,
+  effectiveCoaching,
   canReview,
   dismissLevelNotice,
   dismissLevelZeroHint,
@@ -135,5 +137,34 @@ describe("roles and codes", () => {
   it("codes are compared trimmed and in capitals", () => {
     expect(normaliseCode("  h1t-khanh ")).toBe("H1T-KHANH");
     expect(normaliseCode("h1t - khanh")).toBe("H1T-KHANH");
+  });
+});
+
+describe("live-mode guard", () => {
+  const coached: CoachingState = { role: "user", level: 3, coach: KHANH, levelSeen: 2, hintSeen: false };
+
+  it("coaching exists in mock and demo mode only", () => {
+    expect(coachingAvailable(false)).toBe(true);
+    expect(coachingAvailable(true)).toBe(false);
+  });
+
+  it("mock mode: the state is read as it is", () => {
+    expect(effectiveCoaching(coached, false)).toBe(coached);
+  });
+
+  it("live mode: no coach and Level 0 whatever was stored, so the invariant holds", () => {
+    const live = effectiveCoaching(coached, true);
+    expect(live).toMatchObject({ level: 0, coach: null, levelSeen: 0 });
+    expect(isConsistent(live)).toBe(true);
+    expect(levelNotice(live)).toBeNull();
+  });
+
+  it("live mode keeps the role", () => {
+    expect(effectiveCoaching({ ...coached, role: "admin" }, true).role).toBe("admin");
+  });
+
+  it("the guard does not touch the stored state", () => {
+    effectiveCoaching(coached, true);
+    expect(coached.level).toBe(3);
   });
 });

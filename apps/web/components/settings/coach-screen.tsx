@@ -9,6 +9,7 @@ import { PillButton } from "@/components/ui/pill-button";
 import { Sheet } from "@/components/ui/sheet";
 import { LevelBadge } from "@/components/profile/level-badge";
 import { LevelExplainerSheet } from "@/components/coaching/level-explainer-sheet";
+import { notFound } from "next/navigation";
 import { useCoaching } from "@/hooks/use-coaching";
 import { useBack } from "@/hooks/use-back";
 import { LEVELS } from "@/lib/coaching-link";
@@ -17,11 +18,14 @@ import { NO_COACH_TEXT, WRONG_CODE, leaveConfirm, levelSourceText } from "@/lib/
 /** Cài đặt › Huấn luyện viên: join with a code, or see the coach and the Level, learn what Level is, or leave. */
 export function CoachScreen() {
   const goBack = useBack();
-  const { hydrated, coach, level, joinByCode, leave } = useCoaching();
+  const { hydrated, coach, level, joinByCode, leave, available } = useCoaching();
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [explainerOpen, setExplainerOpen] = useState(false);
   const [leaveOpen, setLeaveOpen] = useState(false);
+
+  // Live mode has no coaching yet: the app's 404, nothing else rendered
+  if (!available) notFound();
 
   function join(event: React.FormEvent) {
     event.preventDefault();

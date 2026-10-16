@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { notFound, useParams, useRouter } from "next/navigation";
 import { AppHeader } from "@/components/ui/app-header";
 import { AppShell } from "@/components/ui/app-shell";
 import { Card } from "@/components/ui/card";
@@ -22,7 +22,7 @@ export default function JoinPage() {
   const params = useParams();
   const router = useRouter();
   const raw = decodeURIComponent(String(params?.code ?? ""));
-  const { hydrated, coach: linked, joinByCode } = useCoaching();
+  const { hydrated, coach: linked, joinByCode, available } = useCoaching();
   const target = findCoachByCode(raw);
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const [open, setOpen] = useState(true);
@@ -38,6 +38,9 @@ export default function JoinPage() {
       router.replace("/signup");
     }
   }, [signedIn, target, raw, router]);
+
+  // Live mode has no coaching yet: the app's 404
+  if (!available) notFound();
 
   const ready = hydrated && signedIn === true;
 

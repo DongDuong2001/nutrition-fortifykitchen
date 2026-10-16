@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { apiClient } from "@/lib/api-client";
 import { useDiary } from "@/lib/diary-store";
 import { readPendingCoachCode, writePendingCoachCode } from "@/lib/pending-coach";
+import { coachingAvailable } from "@/lib/coaching-link";
+import { isLiveMode } from "@/lib/api-mode";
 import { formatNumber } from "@/lib/format";
 import {
   DEFAULT_DRAFT,
@@ -223,6 +225,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
               </div>
             </div>
 
+            {coachingAvailable(isLiveMode()) && (
             <FormRow label="Mã huấn luyện viên (nếu có)" htmlFor="setup-coach-code">
               <input
                 id="setup-coach-code"
@@ -240,6 +243,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
                 className="h-[52px] w-full rounded-xl border-2 border-grabber bg-card px-4 text-base font-semibold uppercase text-text outline-none focus:border-blue"
               />
             </FormRow>
+            )}
 
             {draft.sex === "female" && (
               <Card className="text-[13px] leading-normal text-secondary">

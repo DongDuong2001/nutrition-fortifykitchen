@@ -72,7 +72,7 @@ function ProOffer() {
 export function SettingsHomeScreen() {
   const { hydrated } = useDiary();
   const { account, loaded: accountLoaded } = useAccount();
-  const { coach, level, role } = useCoaching();
+  const { coach, level, role, available } = useCoaching();
 
   return (
     <AppShell alignContainer="settings-page">
@@ -88,15 +88,17 @@ export function SettingsHomeScreen() {
                 <div data-align-group="settings-row">
                   <Row icon={SETTINGS_ICONS.target} label="Mục tiêu mỗi ngày" href="/settings/targets" />
                 </div>
-                <div data-align-group="settings-row">
-                  <Row
-                    icon={SETTINGS_ICONS.account}
-                    label="Huấn luyện viên"
-                    hint={coach ? `${coach.name} · Level ${level}` : "Nhập mã để HLV theo dõi bạn"}
-                    href="/settings/coach"
-                  />
-                </div>
-                {canManageClients(role) && (
+                {available && (
+                  <div data-align-group="settings-row">
+                    <Row
+                      icon={SETTINGS_ICONS.account}
+                      label="Huấn luyện viên"
+                      hint={coach ? `${coach.name} · Level ${level}` : "Nhập mã để HLV theo dõi bạn"}
+                      href="/settings/coach"
+                    />
+                  </div>
+                )}
+                {available && canManageClients(role) && (
                   <div data-align-group="settings-row">
                     <Row icon={SETTINGS_ICONS.account} label="Học viên" hint="Level và nhật ký của học viên" href="/coach" />
                   </div>

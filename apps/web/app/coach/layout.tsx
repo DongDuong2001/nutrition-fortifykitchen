@@ -5,5 +5,5 @@ import { RoleGate } from "@/components/auth/role-gate";
 export const metadata: Metadata = { title: "Học viên", robots: { index: false, follow: false } };
 
 export default function CoachLayout({ children }: { children: React.ReactNode }) {
-  return <RoleGate allow={["coach", "admin"]}>{children}</RoleGate>;
+  return <RoleGate allow={["coach", "admin"]} coachingOnly>{children}</RoleGate>;
 }

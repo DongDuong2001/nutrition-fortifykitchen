@@ -2,10 +2,13 @@
 
 import { useCallback, useEffect, useMemo } from "react";
 import { currentAccountId } from "@/lib/auth-actions";
+import { isLiveMode } from "@/lib/api-mode";
 import { useDiary } from "@/lib/diary-store";
 import {
   dismissLevelNotice,
+  coachingAvailable,
   dismissLevelZeroHint,
+  effectiveCoaching,
   leaveCoach,
   levelNotice,
   linkCoach,
@@ -27,6 +30,8 @@ export interface Coaching {
   coach: CoachRef | null;
   notice: LevelNotice | null;
   showHint: boolean;
+  /** False in live mode: there is no coaching API yet, so its screens are hidden and Level is 0. */
+  available: boolean;
   /** Joins the coach with this code (any case). Null when the code is not one. Level becomes 1. */
   joinByCode: (code: string) => MockCoach | null;
   leave: () => void;
@@ -42,19 +47,25 @@ function serverId(): string {
 /** The signed-in user's role, Level and coach (from the profile), and the actions that change them. */
 export function useCoaching(): Coaching {
   const { profile, hydrated, updateProfile } = useDiary();
+  const live = isLiveMode();
+  const available = coachingAvailable(live);
   const state: CoachingState = useMemo(
-    () => ({ role: profile.role, level: profile.level, coach: profile.coach, levelSeen: profile.levelSeen, hintSeen: profile.hintSeen }),
-    [profile.role, profile.level, profile.coach, profile.levelSeen, profile.hintSeen]
+    () =>
+      effectiveCoaching(
+        { role: profile.role, level: profile.level, coach: profile.coach, levelSeen: profile.levelSeen, hintSeen: profile.hintSeen },
+        live
+      ),
+    [profile.role, profile.level, profile.coach, profile.levelSeen, profile.hintSeen, live]
   );
   const apply = useCallback((next: CoachingState) => updateProfile(next), [updateProfile]);
 
   // The coach sets the Level on the (mock) server; this user reads it back when they have a coach and a row there.
   // A different Level then raises or lowers the one-time card (levelSeen stays).
   useEffect(() => {
-    if (!hydrated || !state.coach) return;
+    if (!available || !hydrated || !state.coach) return;
     const row = clientById(readClients(), serverId());
     if (row && row.level !== state.level) updateProfile({ level: row.level });
-  }, [hydrated, state.coach, state.level, updateProfile]);
+  }, [available, hydrated, state.coach, state.level, updateProfile]);
 
   return {
     hydrated,
@@ -62,8 +73,10 @@ export function useCoaching(): Coaching {
     level: state.level,
     coach: state.coach,
     notice: levelNotice(state),
-    showHint: showLevelZeroHint(state),
+    showHint: available && showLevelZeroHint(state),
+    available,
     joinByCode: (code) => {
+      if (!available) return null;
       const coach = findCoachByCode(code);
       if (!coach) return null;
       writeClients(withJoined(readClients(), { id: serverId(), name: profile.displayName.trim() || "Bạn" }));
@@ -72,10 +85,11 @@ export function useCoaching(): Coaching {
       return coach;
     },
     leave: () => {
+      if (!available) return;
       writeClients(withoutClient(readClients(), serverId()));
       apply(leaveCoach(state));
     },
-    dismissNotice: () => apply(dismissLevelNotice(state)),
-    dismissHint: () => apply(dismissLevelZeroHint(state)),
+    dismissNotice: () => available && apply(dismissLevelNotice(state)),
+    dismissHint: () => available && apply(dismissLevelZeroHint(state)),
   };
 }

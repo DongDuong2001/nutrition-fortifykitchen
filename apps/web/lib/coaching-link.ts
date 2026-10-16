@@ -113,6 +113,20 @@ export function dismissLevelZeroHint(state: CoachingState): CoachingState {
   return { ...state, hintSeen: true };
 }
 
+/**
+ * Live mode (NEXT_PUBLIC_API_MODE=live) has no coaching API yet: every coaching screen is hidden and the Level is 0.
+ * The mock coach server is for mock and demo mode only.
+ */
+export function coachingAvailable(live: boolean): boolean {
+  return !live;
+}
+
+/** What the screens read: in live mode no coach and Level 0 whatever the profile holds; the role is kept. */
+export function effectiveCoaching(state: CoachingState, live: boolean): CoachingState {
+  if (coachingAvailable(live)) return state;
+  return { ...state, level: 0, coach: null, levelSeen: 0 };
+}
+
 /** Coach and admin see the client list. */
 export function canManageClients(role: Role): boolean {
   return role === "coach" || role === "admin";

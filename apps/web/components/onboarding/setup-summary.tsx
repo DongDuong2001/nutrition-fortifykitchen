@@ -23,11 +23,11 @@ const TITLE = "Hồ sơ đã lưu";
 /** Last step of setup: the daily targets as facts, then one button to the first meal. */
 export function SetupSummary() {
   const [ready, setReady] = useState<Ready | null>(null);
-  const { hydrated, joinByCode } = useCoaching();
+  const { hydrated, joinByCode, available } = useCoaching();
   // A coach code typed in setup or kept from /join/<code>: used once, here, when the profile is saved
   const [coachNote, setCoachNote] = useState<string | null>(null);
   useEffect(() => {
-    if (!hydrated) return;
+    if (!hydrated || !available) return;
     const code = readPendingCoachCode();
     if (!code) return;
     const coach = joinByCode(code);
@@ -38,7 +38,7 @@ export function SetupSummary() {
     }
     // joinByCode changes with the profile; the code is read and cleared once
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hydrated]);
+  }, [hydrated, available]);
 
   // Profile and clock are client-only: nothing renders from them before mount (no hydration mismatch).
   useEffect(() => {
