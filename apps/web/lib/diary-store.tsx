@@ -587,6 +587,14 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     loadData(now, false, todayIso ?? getTodayIsoVN());
     // The profile is per account too: without this, account B would keep A's targets until a reload
     setProfile(loadProfile(new Date().getFullYear()));
+    if (isLiveMode() && now) {
+      apiClient.getProfile().then((serverProfile) => {
+        if (serverProfile) {
+          writeStoredProfile(serverProfile);
+          setProfile(serverProfile);
+        }
+      }).catch(() => {});
+    }
   }, [pathname, hydrated, demo, accountId, loadData, todayIso]);
 
   // The storage this account (or demo) writes to; without an account it reads and writes nothing
