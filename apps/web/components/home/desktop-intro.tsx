@@ -11,7 +11,6 @@ const STORAGE_KEY = "h1t_desktop_intro_collapsed";
  */
 export function DesktopIntroBanner() {
   const [collapsed, setCollapsed] = useState(false);
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     try {
@@ -22,7 +21,6 @@ export function DesktopIntroBanner() {
     } catch {
       // Storage unavailable
     }
-    setMounted(true);
   }, []);
 
   const toggleCollapsed = () => {
@@ -34,8 +32,6 @@ export function DesktopIntroBanner() {
       // Storage unavailable
     }
   };
-
-  if (!mounted) return null;
 
   return (
     <section
@@ -126,12 +122,20 @@ export function DesktopIntroBanner() {
                 Khám phá 22 vi chất
               </Link>
             </div>
-            <Link
-              href="/settings/targets"
-              className="min-h-[44px] px-2 text-xs font-semibold text-secondary hover:text-text inline-flex items-center"
-            >
-              Xem mục tiêu dinh dưỡng cá nhân →
-            </Link>
+            <div className="flex items-center gap-4">
+              <Link
+                href="/landing"
+                className="min-h-[44px] px-2 text-xs font-semibold text-blue hover:underline inline-flex items-center"
+              >
+                Trang giới thiệu đầy đủ →
+              </Link>
+              <Link
+                href="/settings/targets"
+                className="min-h-[44px] px-2 text-xs font-semibold text-secondary hover:text-text inline-flex items-center"
+              >
+                Mục tiêu dinh dưỡng cá nhân →
+              </Link>
+            </div>
           </div>
         </div>
       )}
