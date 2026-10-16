@@ -52,6 +52,26 @@ export function browsableFoods(): FoodItem[] {
   return demoActive() ? MOCK_FOODS : MOCK_FOODS.filter((f) => !f.demoOnly);
 }
 
+/**
+ * Sets or merges database foods into the catalog for live mode.
+ */
+export function setCatalogFoods(foods: FoodItem[]): void {
+  if (!foods || foods.length === 0) return;
+  const existingCustom = MOCK_FOODS.filter((f) => f.source === "user" || f.category === "cua_toi");
+  const seenIds = new Set<string>();
+  const combined: FoodItem[] = [];
+
+  for (const f of [...existingCustom, ...foods]) {
+    if (!seenIds.has(f.id)) {
+      seenIds.add(f.id);
+      combined.push(f);
+    }
+  }
+
+  MOCK_FOODS.length = 0;
+  MOCK_FOODS.push(...combined);
+}
+
 export const MOCK_FOODS: FoodItem[] = [
   // 1. Chà là (calibrated so 30g gives 84 kcal, 22g carb, 197mg kali, 0.7g protein, 0.1g fat, 2g fiber)
   {
