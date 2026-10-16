@@ -66,15 +66,18 @@ func TestNutritionService_CreateCustomFood_Scaling(t *testing.T) {
 	svc := NewService(repo)
 
 	cal := 150.0
+	pro := 15.0
+	carb := 30.0
+	fat := 7.5
 	ca := 60.0
 	req := CreateCustomFoodRequest{
 		NameVi:      "Bánh mì trứng",
 		ServingSize: 150, // Factor = 100 / 150 = 0.666667
 		ServingUnit: "g",
-		Calories:    cal, // 150 * (100 / 150) = 100 kcal per 100g
-		Protein:     15,  // 15 * 0.666667 = 10 g
-		Carbs:       30,  // 30 * 0.666667 = 20 g
-		Fat:         7.5, // 7.5 * 0.666667 = 5 g
+		Calories:    &cal,  // 150 * (100 / 150) = 100 kcal per 100g
+		Protein:     &pro,  // 15 * 0.666667 = 10 g
+		Carbs:       &carb, // 30 * 0.666667 = 20 g
+		Fat:         &fat,  // 7.5 * 0.666667 = 5 g
 		Micros: map[string]*float64{
 			"calcium":   &ca, // 60 * 0.666667 = 40 mg
 			"potassium": nil, // unknown must remain nil
@@ -123,6 +126,45 @@ func TestNutritionService_CreateCustomFood_Scaling(t *testing.T) {
 	}
 	if res.Servings[1].ID == uuid.Nil {
 		t.Errorf("expected non-zero UUID for second portion, got %v", res.Servings[1].ID)
+	}
+}
+
+func TestNutritionService_CreateCustomFood_NullNutrientsNotCoercedToZero(t *testing.T) {
+	repo := &mockNutritionRepo{foods: make(map[uuid.UUID]*FoodDetail)}
+	svc := NewService(repo)
+
+	// Custom food created without specifying calories or macros
+	req := CreateCustomFoodRequest{
+		NameVi:      "Món thử nghiệm không rõ calo",
+		ServingSize: 100,
+		ServingUnit: "g",
+		Calories:    nil,
+		Protein:     nil,
+		Carbs:       nil,
+		Fat:         nil,
+	}
+
+	userID := uuid.New()
+	res, err := svc.CreateCustomFood(context.Background(), userID, req)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	per100g := res.Per100gNutrients
+	if per100g["calories"] != nil {
+		t.Errorf("expected calories to be nil, got %v", *per100g["calories"])
+	}
+	if per100g["energy"] != nil {
+		t.Errorf("expected energy to be nil, got %v", *per100g["energy"])
+	}
+	if per100g["protein"] != nil {
+		t.Errorf("expected protein to be nil, got %v", *per100g["protein"])
+	}
+	if per100g["carbs"] != nil {
+		t.Errorf("expected carbs to be nil, got %v", *per100g["carbs"])
+	}
+	if per100g["fat"] != nil {
+		t.Errorf("expected fat to be nil, got %v", *per100g["fat"])
 	}
 }
 

@@ -109,7 +109,10 @@ func (s *nutritionService) CreateCustomFood(ctx context.Context, userID uuid.UUI
 	if req.ServingSize <= 0 {
 		return nil, errors.New("serving_size must be greater than zero")
 	}
-	if req.Calories < 0 || req.Protein < 0 || req.Carbs < 0 || req.Fat < 0 {
+	if (req.Calories != nil && *req.Calories < 0) ||
+		(req.Protein != nil && *req.Protein < 0) ||
+		(req.Carbs != nil && *req.Carbs < 0) ||
+		(req.Fat != nil && *req.Fat < 0) {
 		return nil, errors.New("macronutrients cannot be negative")
 	}
 
@@ -117,16 +120,32 @@ func (s *nutritionService) CreateCustomFood(ctx context.Context, userID uuid.UUI
 	factor := 100.0 / req.ServingSize
 
 	per100g := make(map[string]*float64)
-	calVal := round(req.Calories * factor)
-	proVal := round(req.Protein * factor)
-	carbVal := round(req.Carbs * factor)
-	fatVal := round(req.Fat * factor)
-
-	per100g["energy"] = &calVal
-	per100g["calories"] = &calVal
-	per100g["protein"] = &proVal
-	per100g["carbs"] = &carbVal
-	per100g["fat"] = &fatVal
+	if req.Calories != nil {
+		calVal := round(*req.Calories * factor)
+		per100g["energy"] = &calVal
+		per100g["calories"] = &calVal
+	} else {
+		per100g["energy"] = nil
+		per100g["calories"] = nil
+	}
+	if req.Protein != nil {
+		proVal := round(*req.Protein * factor)
+		per100g["protein"] = &proVal
+	} else {
+		per100g["protein"] = nil
+	}
+	if req.Carbs != nil {
+		carbVal := round(*req.Carbs * factor)
+		per100g["carbs"] = &carbVal
+	} else {
+		per100g["carbs"] = nil
+	}
+	if req.Fat != nil {
+		fatVal := round(*req.Fat * factor)
+		per100g["fat"] = &fatVal
+	} else {
+		per100g["fat"] = nil
+	}
 
 	for k, v := range req.Micros {
 		if v != nil {
