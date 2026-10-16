@@ -79,8 +79,8 @@ export function validateSetupDraft(
   const errors: SetupErrors = {};
 
   const birthYear = parseBirthYear(draft.birthYear);
-  if (birthYear === null || birthYear < 1900 || birthYear > currentYear) {
-    errors.birthYear = `Nhập năm sinh từ 1900 đến ${currentYear}`;
+  if (birthYear === null || birthYear < 1920 || birthYear > 2015) {
+    errors.birthYear = "Nhập năm sinh từ 1920 đến 2015";
   }
 
   const weightKg = parseWeightKg(draft.weight);
