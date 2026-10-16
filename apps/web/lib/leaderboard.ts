@@ -19,6 +19,8 @@ export interface LeaderboardResponse {
   optedIn: boolean;
 }
 
+import { accountStorage } from "./storage-keys";
+
 export const LEADERBOARD_STORAGE_KEY = "h1t_leaderboard_opt_in";
 
 let memoryOptIn: boolean | null = null;
@@ -26,6 +28,11 @@ let memoryOptIn: boolean | null = null;
 export function isLeaderboardOptedIn(): boolean {
   if (memoryOptIn !== null) return memoryOptIn;
   try {
+    const acc = accountStorage();
+    if (acc) {
+      const val = acc.getItem(LEADERBOARD_STORAGE_KEY);
+      if (val !== null) return val === "true";
+    }
     const storage = typeof window !== "undefined" ? window.localStorage : globalThis.localStorage;
     return storage?.getItem(LEADERBOARD_STORAGE_KEY) === "true";
   } catch {
@@ -36,6 +43,11 @@ export function isLeaderboardOptedIn(): boolean {
 export function setLeaderboardOptIn(optIn: boolean): void {
   memoryOptIn = optIn;
   try {
+    const acc = accountStorage();
+    if (acc) {
+      acc.setItem(LEADERBOARD_STORAGE_KEY, optIn ? "true" : "false");
+      return;
+    }
     const storage = typeof window !== "undefined" ? window.localStorage : globalThis.localStorage;
     storage?.setItem(LEADERBOARD_STORAGE_KEY, optIn ? "true" : "false");
   } catch {

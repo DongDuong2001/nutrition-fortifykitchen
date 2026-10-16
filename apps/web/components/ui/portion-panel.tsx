@@ -20,6 +20,7 @@ export interface PortionPanelProps {
   setSelectedServingLabel: (val: string) => void;
   mealSlot: MealSlot | null;
   onAdd: () => void;
+  onAddAndContinue?: () => void;
   isSubmitting?: boolean;
   tone?: "light" | "dark";
   showMicros?: boolean;
@@ -34,6 +35,7 @@ export function PortionPanel({
   setSelectedServingLabel,
   mealSlot,
   onAdd,
+  onAddAndContinue,
   isSubmitting = false,
   tone = "light",
   showMicros = false,
@@ -206,20 +208,36 @@ export function PortionPanel({
           {NO_ENERGY_MESSAGE}
         </p>
       )}
-      <button
-        type="button"
+      <div
         data-align-group="portion"
         data-align-edge="left"
-        onClick={onAdd}
-        disabled={isSubmitting || parsedGrams <= 0 || mealSlot === null || !canLog}
-        className={`w-full min-h-[52px] rounded-full text-on-accent font-bold text-base cursor-pointer active:scale-[0.98] transition-all border-0 flex items-center justify-center shadow-md disabled:opacity-50 ${
-          isDark
-            ? "bg-blue hover:bg-blue/90"
-            : "bg-blue hover:bg-blue/90"
-        }`}
+        className="flex items-center gap-2 w-full"
       >
-        Thêm vào {mealSlot ? mealNameVi : "—"}
-      </button>
+        {onAddAndContinue && (
+          <button
+            type="button"
+            onClick={onAddAndContinue}
+            disabled={isSubmitting || parsedGrams <= 0 || mealSlot === null || !canLog}
+            className={`flex-1 min-h-[48px] rounded-full font-bold text-sm cursor-pointer active:scale-[0.98] motion-reduce:active:scale-100 transition-all flex items-center justify-center border disabled:opacity-50 ${
+              isDark
+                ? "border-card-border bg-card/20 text-on-dark hover:bg-card/40"
+                : "border-card-border bg-card text-text hover:bg-divider"
+            }`}
+          >
+            Lưu &amp; chọn tiếp
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={onAdd}
+          disabled={isSubmitting || parsedGrams <= 0 || mealSlot === null || !canLog}
+          className={`${
+            onAddAndContinue ? "flex-1" : "w-full"
+          } min-h-[48px] rounded-full text-on-accent font-bold text-sm cursor-pointer active:scale-[0.98] motion-reduce:active:scale-100 transition-all border-0 flex items-center justify-center shadow-md disabled:opacity-50 bg-blue hover:bg-blue/90`}
+        >
+          {onAddAndContinue ? `Thêm vào ${mealSlot ? mealNameVi : "bữa"}` : `Thêm vào ${mealSlot ? mealNameVi : "—"}`}
+        </button>
+      </div>
 
       {/* Desktop Micros Breakdown */}
       {showMicros && scaledMicros.length > 0 && (

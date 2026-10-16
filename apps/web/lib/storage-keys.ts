@@ -14,7 +14,8 @@ import { DAY_ARCHIVE_KEY } from "./day-archive";
 export const PROFILE_KEY = "h1t_profile_v1";
 export const SETTINGS_STORAGE_KEY = "h1t_settings_v1";
 export const TRAINING_CHECKLIST_KEY = "h1t_training_checklist_v1";
-export const PERSONAL_KEYS: readonly string[] = [PROFILE_KEY, SETTINGS_STORAGE_KEY, TRAINING_CHECKLIST_KEY];
+export const LEADERBOARD_STORAGE_KEY = "h1t_leaderboard_opt_in";
+export const PERSONAL_KEYS: readonly string[] = [PROFILE_KEY, SETTINGS_STORAGE_KEY, TRAINING_CHECKLIST_KEY, LEADERBOARD_STORAGE_KEY];
 
 export const ADDED_ENTRIES_KEY = "h1t_added_entries_v1";
 // Edits to sample-day items (portion, meal, deleted), kept next to the added entries

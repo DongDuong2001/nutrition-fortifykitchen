@@ -99,10 +99,14 @@ func (c *JWKSCache) refresh(ctx context.Context) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	// Rate limit fetches to at most once per 10 seconds unless empty
-	if len(c.keys) > 0 && time.Since(c.lastFetched) < 10*time.Second {
+	minInterval := 5 * time.Second
+	if len(c.keys) > 0 {
+		minInterval = 10 * time.Second
+	}
+	if time.Since(c.lastFetched) < minInterval {
 		return nil
 	}
+	c.lastFetched = time.Now()
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.jwksURL, nil)
 	if err != nil {

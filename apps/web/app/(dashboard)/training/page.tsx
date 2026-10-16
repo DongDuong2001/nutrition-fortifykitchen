@@ -15,6 +15,8 @@ import { dayTotals } from "@/lib/day-totals";
 import { targetsFor } from "@/lib/profile";
 import { DurationSelector } from "@/components/training/duration-selector";
 import { useDiary } from "@/lib/diary-store";
+import { isLiveMode } from "@/lib/api-mode";
+import { apiClient } from "@/lib/api-client";
 import { SaltSummaryCard } from "@/components/training/salt-summary-card";
 import { SodiumProgressCard } from "@/components/training/sodium-progress-card";
 import { PhaseChecklist } from "@/components/training/phase-checklist";
@@ -108,6 +110,9 @@ function TrainingContent() {
     if (isPast) return;
     setSelectedDuration(id);
     writeDay(todayIso, { minutes, ticked });
+    if (isLiveMode() && todayIso) {
+      apiClient.setTraining(todayIso, minutes).catch(() => {});
+    }
   };
 
   const saltTarget = useMemo(

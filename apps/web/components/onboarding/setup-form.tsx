@@ -128,8 +128,9 @@ export function SetupForm({ step }: { step: SetupStep }) {
       await apiClient.saveSetup({ ...result.profile, displayName });
       updateProfile({ ...result.profile, displayName });
       router.push("/setup/done");
-    } catch {
-      setSaveError("Chưa lưu được hồ sơ. Thử lại sau ít phút.");
+    } catch (err) {
+      const msg = err instanceof Error && err.message ? err.message : "Chưa lưu được hồ sơ. Thử lại sau ít phút.";
+      setSaveError(msg);
       setSaving(false);
     }
   }
@@ -139,7 +140,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
       <div className="lg:hidden">
         <AppHeader
           variant="sub"
-          backHref={isProfile ? "/signin/check-email" : "/setup/profile"}
+          backHref={isProfile ? "/signin" : "/setup/profile"}
           actions={<span className="text-[13px] text-muted-subtitle">{isProfile ? "Bước 1 / 2" : "Bước 2 / 2"}</span>}
           progress={{ current: isProfile ? 1 : 2, total: 2 }}
           title={isProfile ? "VỀ BẠN" : "MỤC TIÊU"}
@@ -365,7 +366,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
 
           {/* Desktop footer (≥1024 px) */}
           <div className="hidden flex-wrap items-center justify-between gap-3 border-t border-divider pt-6 lg:flex">
-            <PillButton href="/signin/check-email" variant="secondary" fullWidth={false}>
+            <PillButton href={isProfile ? "/signin" : "/setup/profile"} variant="secondary" fullWidth={false}>
               Quay lại
             </PillButton>
             <PillButton type="submit" value="finish" fullWidth={false} disabled={saving || !nameReady}>

@@ -12,7 +12,18 @@ lehongkhanh.vn {
 	import compress
 	header -Server
 	header -X-Powered-By
-	reverse_proxy web:3000
+
+	handle /healthz {
+		reverse_proxy api:8080
+	}
+	handle /api/* {
+		reverse_proxy api:8080 {
+			header_up X-Real-IP {remote_host}
+		}
+	}
+	handle {
+		reverse_proxy web:3000
+	}
 }
 
 www.lehongkhanh.vn {
@@ -31,26 +42,5 @@ api.lehongkhanh.vn {
 	}
 	reverse_proxy api:8080 {
 		header_up X-Real-IP {remote_host}
-	}
-}
-
-# TEMPORARY: plain-HTTP test site for the bare server IP, used while DNS for the
-# domain is not live. Remove this block (and redeploy) once the domain works.
-# Not served over TLS; do not use it for real sign-in.
-http://14.225.210.185, :80 {
-	import compress
-	header -Server
-	header -X-Powered-By
-
-	handle /healthz {
-		reverse_proxy api:8080
-	}
-	handle /api/* {
-		reverse_proxy api:8080 {
-			header_up X-Real-IP {remote_host}
-		}
-	}
-	handle {
-		reverse_proxy web:3000
 	}
 }

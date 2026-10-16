@@ -67,10 +67,10 @@ type CreateCustomFoodRequest struct {
 	ServingUnitAlt string              `json:"servingUnit,omitempty"`
 	ServingSize    float64             `json:"serving_size"`
 	ServingSizeAlt float64             `json:"servingSize,omitempty"`
-	Calories       float64             `json:"calories"`
-	Protein        float64             `json:"protein"`
-	Carbs          float64             `json:"carbs"`
-	Fat            float64             `json:"fat"`
+	Calories       *float64            `json:"calories,omitempty"`
+	Protein        *float64            `json:"protein,omitempty"`
+	Carbs          *float64            `json:"carbs,omitempty"`
+	Fat            *float64            `json:"fat,omitempty"`
 	Micros         map[string]*float64 `json:"micros,omitempty"`
 }
 

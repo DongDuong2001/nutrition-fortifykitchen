@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { browsableFoods, type FoodItem } from "@/lib/mock/foods";
 import { findSimilarFoods } from "@/lib/search";
 import {
@@ -11,6 +11,8 @@ import {
   type FoodFilter,
 } from "@/lib/food-categories";
 import { useDiary } from "@/lib/diary-store";
+import { isLiveMode } from "@/lib/api-mode";
+import { apiClient } from "@/lib/api-client";
 
 /**
  * Search, filter and list state for browsing foods. Shared by the add sheet and Khám phá, so both use
@@ -20,14 +22,23 @@ export function useFoodBrowse() {
   const { favouriteIds, isFavourite, demo } = useDiary();
   const [filter, setFilter] = useState<FoodFilter>("all");
   const [query, setQuery] = useState("");
+  const [catalogLoaded, setCatalogLoaded] = useState(false);
+
+  useEffect(() => {
+    if (isLiveMode() && !catalogLoaded) {
+      apiClient.searchFoods("").then(() => {
+        setCatalogLoaded(true);
+      }).catch(() => {});
+    }
+  }, [catalogLoaded]);
 
   // Filter and search combined. Grouped only for Tất cả with no query.
   // `demo` is a dependency because the catalogue read follows demo mode, which is known after mount
   const list = useMemo(
     () => buildFoodList(browsableFoods(), query, filter, favouriteIds),
-    [query, filter, favouriteIds, demo]
+    [query, filter, favouriteIds, demo, catalogLoaded]
   );
-  const categories = useMemo(() => chipCategories(browsableFoods()), [demo]);
+  const categories = useMemo(() => chipCategories(browsableFoods()), [demo, catalogLoaded]);
   const categoryName = useCallback((food: FoodItem) => categoryLabel(categoryOf(food)), []);
   const isFavouriteFood = useCallback((food: FoodItem) => isFavourite(food.id), [isFavourite]);
 

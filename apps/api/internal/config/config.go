@@ -66,8 +66,20 @@ func Load() *Config {
 				origins = append(origins, trimmed)
 			}
 		}
+	} else if strings.EqualFold(env, "production") {
+		origins = []string{
+			"https://lehongkhanh.vn",
+			"https://www.lehongkhanh.vn",
+		}
 	} else {
-		origins = []string{"http://localhost:3000", "http://localhost:3100", "http://localhost:3101", "http://localhost:3102"}
+		origins = []string{
+			"http://localhost:3000",
+			"http://localhost:3100",
+			"http://localhost:3101",
+			"http://localhost:3102",
+			"https://lehongkhanh.vn",
+			"https://www.lehongkhanh.vn",
+		}
 	}
 
 	supabaseURL := os.Getenv("SUPABASE_URL")

@@ -29,6 +29,8 @@ import { MOCK_FOODS } from "./mock/foods";
 import { syncRecipeFoods } from "./recipe-store";
 import { personaPatch } from "./demo-persona";
 import { isLiveMode } from "./api-mode";
+import { apiClient } from "./api-client";
+import { generateUuid, isUuid } from "./uuid";
 import {
   buildSavedMeal,
   defaultMealName,
@@ -485,6 +487,61 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     setSavedMeals(readSavedMeals(own));
     // This account's recipes (cc-27b) become foods of the catalogue, so search and entries find them
     syncRecipeFoods();
+
+    if (isLiveMode() && account && !demoNow) {
+      apiClient.getDay(iso).then((daySummary) => {
+        if (daySummary && Array.isArray(daySummary.meals)) {
+          const serverEntries: AddedDiaryEntry[] = [];
+          for (const meal of daySummary.meals) {
+            for (const e of meal.entries || []) {
+              serverEntries.push({
+                id: e.id,
+                foodId: e.food_id || "",
+                foodName: e.food_name || "Món ăn",
+                grams: e.grams,
+                displayQty: e.serving_label || `${e.grams} g`,
+                mealSlot: (e.meal_slot === "preworkout" ? "pre_workout" : e.meal_slot) as MealSlot,
+                calories: e.calories,
+                protein: (e.nutrients?.protein as number | null) ?? null,
+                carbs: (e.nutrients?.carbs as number | null) ?? null,
+                fat: (e.nutrients?.fat as number | null) ?? null,
+                fiber: (e.nutrients?.fiber as number | null) ?? null,
+                nutrients: (e.nutrients as Record<string, number | null>) ?? {},
+                addedAt: e.created_at || new Date().toISOString(),
+              });
+            }
+          }
+          if (serverEntries.length > 0) {
+            setEdits((prev) => {
+              const existingIds = new Set(prev.added.map((it) => it.id));
+              const toAdd = serverEntries.filter((se) => !existingIds.has(se.id));
+              if (toAdd.length === 0) return prev;
+              return {
+                ...prev,
+                added: [...prev.added, ...toAdd],
+              };
+            });
+          }
+        }
+      }).catch(() => {});
+
+      apiClient.getFavourites().then((favs) => {
+        if (Array.isArray(favs) && favs.length > 0) {
+          setFavouriteIds(favs.map((f: any) => (typeof f === "string" ? f : f.food_id || f.id)));
+        }
+      }).catch(() => {});
+
+      apiClient.getRecents().then((rcnts) => {
+        if (Array.isArray(rcnts) && rcnts.length > 0) {
+          setRecentFoods(rcnts.map((f: any) => ({
+            foodId: f.foodId || f.food_id || f.id,
+            servingLabel: f.servingLabel || f.serving_label || f.servings?.[0]?.label || "100 g",
+          })));
+        }
+      }).catch(() => {});
+
+      apiClient.searchFoods("").catch(() => {});
+    }
   }, []);
 
   // Load on mount (client-only)
@@ -507,6 +564,14 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       const seeded = persona ? { ...loaded, ...persona } : loaded;
       if (persona) writeStoredProfile(seeded);
       setProfile(seeded);
+      if (isLiveMode() && account && !demoNow) {
+        apiClient.getProfile().then((serverProfile) => {
+          if (serverProfile) {
+            writeStoredProfile(serverProfile);
+            setProfile(serverProfile);
+          }
+        }).catch(() => {});
+      }
       setHydrated(true);
     }
   }, [loadData]);
@@ -522,6 +587,14 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     loadData(now, false, todayIso ?? getTodayIsoVN());
     // The profile is per account too: without this, account B would keep A's targets until a reload
     setProfile(loadProfile(new Date().getFullYear()));
+    if (isLiveMode() && now) {
+      apiClient.getProfile().then((serverProfile) => {
+        if (serverProfile) {
+          writeStoredProfile(serverProfile);
+          setProfile(serverProfile);
+        }
+      }).catch(() => {});
+    }
   }, [pathname, hydrated, demo, accountId, loadData, todayIso]);
 
   // The storage this account (or demo) writes to; without an account it reads and writes nothing
@@ -672,7 +745,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       const qty = servingLabel || `${formatAmount(grams, "g")} g`;
 
       const newEntry: AddedDiaryEntry = {
-        id: `entry-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        id: generateUuid(),
         foodId: food.id,
         foodName: food.nameVi,
         grams,
@@ -704,9 +777,20 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       );
 
       addRecentFood(food, qty);
+
+      if (isLiveMode()) {
+        apiClient.addEntry({
+          id: newEntry.id,
+          foodId: food.id,
+          grams,
+          mealSlot,
+          date: todayIso || getTodayIsoVN(),
+        }).catch(() => {});
+      }
+
       return true;
     },
-    [addRecentFood]
+    [addRecentFood, todayIso]
   );
 
   const dismissToast = useCallback(() => {
@@ -717,13 +801,30 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   const isFavourite = useCallback((foodId: string) => favouriteIds.includes(foodId), [favouriteIds]);
 
   const toggleFavourite = useCallback((food: FoodItem) => {
+    const willBeFavourite = !favouriteIds.includes(food.id);
     setFavouriteIds((prev) => toggleFavouriteId(prev, food.id));
-  }, []);
+    if (isLiveMode()) {
+      if (willBeFavourite) {
+        apiClient.addFavourite(food.id).catch(() => {});
+      } else {
+        apiClient.removeFavourite(food.id).catch(() => {});
+      }
+    }
+  }, [favouriteIds]);
 
   const getEntry = useCallback((id: string) => findEntry(edits, id, samples), [edits, samples]);
 
   const updateEntry = useCallback((id: string, patch: EntryPatch) => {
     setEdits((prev) => updateEntryIn(prev, id, patch, samples));
+    if (isLiveMode()) {
+      apiClient.updateEntry(id, {
+        meal_slot: patch.mealSlot,
+        grams: patch.grams,
+        serving_size_g: patch.grams,
+        serving_label: patch.servingLabel,
+        calories: patch.quick?.calories,
+      }).catch(() => {});
+    }
   }, [samples]);
 
   const deleteEntry = useCallback(
@@ -733,6 +834,9 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       setEdits((prev) => deleteEntryIn(prev, id, samples));
       setParkedDelete(null);
       setToast({ message: `Đã xóa ${view.name}`, kind: "deleted", mealSlot: null, durationMs: UNDO_TOAST_MS });
+      if (isLiveMode()) {
+        apiClient.deleteEntry(id).catch(() => {});
+      }
     },
     [edits, samples]
   );
@@ -749,8 +853,11 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         mealSlot: null,
         durationMs: UNDO_TOAST_MS,
       });
+      if (isLiveMode()) {
+        apiClient.deleteMeal(todayIso || getTodayIsoVN(), slot).catch(() => {});
+      }
     },
-    [edits, samples]
+    [edits, samples, todayIso]
   );
 
   const deleteEntries = useCallback(
@@ -762,6 +869,11 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       setEdits((prev) => deleteEntriesIn(prev, ids, samples));
       setParkedDelete(null);
       setToast({ message: `Đã xóa ${count} món`, kind: "deleted", mealSlot: null, durationMs: UNDO_TOAST_MS });
+      if (isLiveMode()) {
+        for (const id of ids) {
+          apiClient.deleteEntry(id).catch(() => {});
+        }
+      }
     },
     [edits, samples, todayIso]
   );
@@ -786,6 +898,11 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         durationMs: UNDO_TOAST_MS,
         undoMoves,
       });
+      if (isLiveMode()) {
+        for (const id of ids) {
+          apiClient.updateEntry(id, { meal_slot: slot }).catch(() => {});
+        }
+      }
     },
     [edits, samples, todayIso, toast]
   );
@@ -794,13 +911,26 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     const moves = toast?.undoMoves;
     if (!moves) return;
     setEdits((prev) => restoreSlotsIn(prev, moves, samples));
+    if (isLiveMode()) {
+      for (const m of moves) {
+        apiClient.updateEntry(m.id, { meal_slot: m.slot }).catch(() => {});
+      }
+    }
     setToast(null);
   }, [toast, samples]);
 
   const undoLastDelete = useCallback(() => {
+    const lastUndo = edits.undo;
     setEdits((prev) => undoDeleteIn(prev));
+    if (isLiveMode() && lastUndo) {
+      if (lastUndo.kind === "added") {
+        apiClient.restoreEntry(lastUndo.entry.id).catch(() => {});
+      } else if (lastUndo.kind === "sample") {
+        apiClient.restoreEntry(lastUndo.id).catch(() => {});
+      }
+    }
     setToast(null);
-  }, []);
+  }, [edits.undo]);
 
   const undoParkedDelete = useCallback(() => {
     setEdits((prev) => undoDeleteIn(prev));
@@ -899,21 +1029,36 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     []
   );
 
-  const addQuickEntry = useCallback((input: QuickEntryInput, slot: MealSlot): QuickEntryResult => {
-    const now = Date.now();
-    const result = quickEntryFrom(input, slot, `quick-${now}-${Math.random().toString(36).slice(2, 7)}`, new Date(now).toISOString());
-    if (!result.ok) return result;
-    const { entry } = result;
-    setEdits((prev) => dismissUndoIn({ ...prev, added: [...prev.added, entry] }));
-    setToast({
-      message: `Đã thêm ${entry.foodName} · ${formatAmount(entry.calories, "kcal")} kcal vào ${getMealSlotNameVi(slot)}`,
-      kind: "undoable",
-      mealSlot: slot,
-      durationMs: UNDO_TOAST_MS,
-      undoIds: [entry.id],
-    });
-    return result;
-  }, []);
+  const addQuickEntry = useCallback(
+    (input: QuickEntryInput, slot: MealSlot): QuickEntryResult => {
+      const now = Date.now();
+      const entryId = generateUuid();
+      const result = quickEntryFrom(input, slot, entryId, new Date(now).toISOString());
+      if (!result.ok) return result;
+      const { entry } = result;
+      setEdits((prev) => dismissUndoIn({ ...prev, added: [...prev.added, entry] }));
+      setToast({
+        message: `Đã thêm ${entry.foodName} · ${formatAmount(entry.calories, "kcal")} kcal vào ${getMealSlotNameVi(slot)}`,
+        kind: "undoable",
+        mealSlot: slot,
+        durationMs: UNDO_TOAST_MS,
+        undoIds: [entry.id],
+      });
+      if (isLiveMode()) {
+        apiClient
+          .addEntry({
+            id: entry.id,
+            kind: "quick",
+            calories: entry.calories,
+            mealSlot: slot,
+            date: todayIso || getTodayIsoVN(),
+          })
+          .catch(() => {});
+      }
+      return result;
+    },
+    [todayIso]
+  );
 
   const targets = useMemo(() => targetsFor(profile), [profile]);
   useMemo(() => setDayArchive(archive), [archive]);
@@ -928,8 +1073,24 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       const next = normaliseProfile({ ...profile, ...patch });
       setProfile(next);
       writeStoredProfile(next);
+      if (isLiveMode()) {
+        apiClient
+          .saveSetup({
+            sex: next.sex,
+            birthYear: next.birthYear,
+            weightKg: next.weightKg,
+            goal: next.goal,
+            periodMode: next.periodMode,
+            trainingMinutesDefault: next.trainingMinutesDefault,
+            displayName: next.displayName,
+          })
+          .catch(() => {});
+        if (patch.weightKg !== undefined) {
+          apiClient.updateWeight(todayIso || getTodayIsoVN(), patch.weightKg).catch(() => {});
+        }
+      }
     },
-    [profile]
+    [profile, todayIso]
   );
 
   const compositeData = useMemo<MockDayData>(() => {

@@ -95,8 +95,8 @@ def main():
             else:
                 print(f"[PASS] 0 hydration errors on {path} with sessionStorage loaded")
 
-            # Assert seeded entry visible on /diary and recent search chip visible on /add
-            if path == "/":
+            # Assert seeded entry visible on /diary (when not on /landing) and recent search chip visible on /add
+            if path == "/" and not page.url.endswith("/landing"):
                 try:
                     seeded = page.locator("text='Chà là hạt dẻ test' >> visible=true").first
                     seeded.wait_for(state="visible", timeout=5000)

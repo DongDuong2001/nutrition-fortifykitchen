@@ -14,7 +14,7 @@ type DiaryEntryItem struct {
 	MealSlot     string              `json:"meal_slot"`
 	ServingLabel string              `json:"serving_label"`
 	Grams        float64             `json:"grams"`
-	Calories     float64             `json:"calories"`
+	Calories     *float64            `json:"calories"`
 	Nutrients    map[string]*float64 `json:"nutrients"`
 	CreatedAt    time.Time           `json:"created_at"`
 }
@@ -44,7 +44,7 @@ type CreateEntryRequest struct {
 	Grams        float64    `json:"grams,omitempty"`
 	ServingSizeG float64    `json:"serving_size_g,omitempty"`
 	ServingLabel string     `json:"serving_label,omitempty"`
-	Calories     float64    `json:"calories,omitempty"`
+	Calories     *float64   `json:"calories,omitempty"`
 }
 
 type UpdateEntryRequest struct {
