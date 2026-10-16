@@ -24,7 +24,6 @@ export function NutrientColumn({
   groups,
   targets,
   selected,
-  finished,
   microsHref,
   summary,
   shareKey,
@@ -35,7 +34,6 @@ export function NutrientColumn({
   groups: ColumnGroup[];
   targets: Record<string, number | null>;
   selected: boolean;
-  finished: boolean;
   microsHref: string;
   /** "x/N đạt" and the lowest micros of the Level; left out when a food or a meal is picked. */
   summary?: { reached: number; total: number; lacking: string[] };
@@ -91,7 +89,7 @@ export function NutrientColumn({
                       {pctLabel(value, targets[id] ?? null)}
                     </span>
                   </div>
-                  <HomeBar label={`${def.nameVi} so với mục tiêu ngày`} pct={pct} finished={finished} />
+                  <HomeBar label={`${def.nameVi} so với mục tiêu ngày`} pct={pct} />
                 </div>
               );
             })}

@@ -137,22 +137,15 @@ describe("share model", () => {
 });
 
 describe("share colour key", () => {
-  it("today: one entry, cobalt for reached", () => {
-    const key = shareKey(false);
-    expect(key).toHaveLength(1);
-    expect(key[0].label).toBe("Xanh: đạt mục tiêu");
-    expect(key[0].color).toContain("var(--color-");
-  });
-
-  it("past day: the four levels with their thresholds", () => {
-    const key = shareKey(true);
+  it("is the four levels with their thresholds, today and past days alike", () => {
+    const key = shareKey();
     expect(key.map((k) => k.label)).toEqual(["Thiếu <50%", "Trung bình", "Gần đủ", "Đạt ≥100%"]);
     expect(new Set(key.map((k) => k.color)).size).toBe(4);
   });
 
-  it("model picks the key by day state", () => {
-    expect(model({ finished: false }).key).toHaveLength(1);
-    expect(model({ finished: true }).key).toHaveLength(4);
+  it("the model carries the same key whether the day is open or finished", () => {
+    expect(model({ finished: false }).key).toHaveLength(4);
+    expect(model({ finished: true }).key).toEqual(model({ finished: false }).key);
   });
 });
 

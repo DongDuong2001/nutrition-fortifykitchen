@@ -1,27 +1,25 @@
 import { getEmptySegmentColor, homeBarColor, homeBarTone, homeSegments, type SegmentTone } from "@/lib/levels";
 
 /**
- * The slanted 10-segment bar of the home screen. Two-tone while the day is open, the four levels once it is
- * finished (lib/levels homeBarTone). An unknown value (null) is an empty bar.
+ * The slanted 10-segment bar of the home screen, in the four level colours on every day (lib/levels homeBarTone).
+ * An unknown value (null) is an empty bar, never coloured.
  */
 export function HomeBar({
   label,
   pct,
-  finished,
   surface = "light",
   heightClass = "h-[6px]",
   gap = 3,
 }: {
   label: string;
   pct: number | null;
-  finished: boolean;
   surface?: SegmentTone;
   heightClass?: string;
   gap?: number;
 }) {
   const value = pct ?? 0;
   const n = homeSegments(value);
-  const fill = homeBarColor(homeBarTone(value, finished), surface);
+  const fill = homeBarColor(homeBarTone(value), surface);
   const empty = getEmptySegmentColor(surface);
   return (
     <div

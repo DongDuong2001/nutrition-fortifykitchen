@@ -64,19 +64,15 @@ export function homeSegments(pct: number): number {
   return Math.max(1, Math.min(10, Math.floor(pct / 10)));
 }
 
-export type HomeBarTone = NutrientLevel | "neutral";
-
 /**
- * The home bars are two-tone while the day is still open: neutral under 100%, blue once reached.
- * A finished day (before today) uses the four levels.
+ * The home bars use the four levels everywhere, today included (Hao, 16/10): red under 50%, yellow 50 to 79%, green
+ * 80 to 99%, blue from 100%. An unknown value is an empty bar and never gets a colour (HomeBar).
  */
-export function homeBarTone(pct: number, finished: boolean): HomeBarTone {
-  if (finished) return getLevel(pct);
-  return pct >= 100 ? "dat" : "neutral";
+export function homeBarTone(pct: number): NutrientLevel {
+  return getLevel(pct);
 }
 
-/** The fill colour of a home bar; neutral is the secondary text colour (muted-on-dark on ink). */
-export function homeBarColor(tone: HomeBarTone, surface: SegmentTone = "light"): string {
-  if (tone === "neutral") return surface === "dark" ? "var(--color-muted-on-dark)" : "var(--color-secondary)";
+/** The fill colour of a home bar. */
+export function homeBarColor(tone: NutrientLevel, surface: SegmentTone = "light"): string {
   return getLevelColor(tone, surface);
 }

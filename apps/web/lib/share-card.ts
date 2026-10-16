@@ -3,7 +3,7 @@ import { cleanDisplayName, validateDisplayName } from "./display-name";
 import { DAY_MODE, heroLabel, pctLabel, targetOf, valuesFromDay, type HomeEntry, type HomeMeal, type HomeValues } from "./home";
 import type { Level } from "./coaching-link";
 import { columnGroups, countedForLevel, levelSummary, sumExtras, type ColumnGroup } from "./level-nutrients";
-import { getLevelColor, homeBarColor } from "./levels";
+import { getLevelColor } from "./levels";
 import type { MockDayData } from "./mock/sample-day";
 
 /**
@@ -52,9 +52,8 @@ export interface ShareKeyItem {
   color: string;
 }
 
-/** The colour key under the nutrient column: one entry today (two-tone bars), four on a past day. */
-export function shareKey(finished: boolean): ShareKeyItem[] {
-  if (!finished) return [{ label: "Xanh: đạt mục tiêu", color: homeBarColor("dat") }];
+/** The colour key under the nutrient column: the four levels, today and past days alike. */
+export function shareKey(): ShareKeyItem[] {
   return [
     { label: "Thiếu <50%", color: getLevelColor("thieu") },
     { label: "Trung bình", color: getLevelColor("trungbinh") },
@@ -166,7 +165,7 @@ export function buildShareModel({
     groups: columnGroups(level),
     extras: sumExtras(entries),
     summary,
-    key: shareKey(finished),
+    key: shareKey(),
     filename: shareFilename(day.date),
     alt,
   };

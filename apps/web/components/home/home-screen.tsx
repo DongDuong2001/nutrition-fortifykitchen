@@ -458,7 +458,6 @@ function HomeContent() {
                 summary={levelCounts}
                 targets={nutrientTargets}
                 selected={selected}
-                finished={isPast}
                 microsHref={`/micros?date=${viewIso}`}
               />
             )}

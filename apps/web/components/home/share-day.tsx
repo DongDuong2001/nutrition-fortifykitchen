@@ -56,7 +56,6 @@ export function ShareDay({ model }: { model: ShareModel }) {
             summary={model.summary}
             targets={model.nutrientTargets}
             selected={false}
-            finished={model.finished}
             microsHref="/micros"
             shareKey={model.key}
           />

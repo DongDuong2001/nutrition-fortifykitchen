@@ -5,10 +5,10 @@ Production build, clock fixed at 2026-10-15 10:00 Asia/Ho_Chi_Minh, sizes 390x84
 - Today (demo): the sheet opens with a skeleton, then a preview; Lưu ảnh downloads h1t-micro-2026-10-15.png,
   1080 wide, at least 1920 high, paper at every edge (nothing clipped), not blank; no weight or email.
 - The page behind the PNG (read while it is drawn): name on top when set, the date under it; no header, tab bar,
-  Thêm, ⋯, dots, "Đủ 22 vi chất"; meals with no food absent; key "Xanh: đạt mục tiêu" today, four levels on a
+  Thêm, ⋯, dots, "Đủ 22 vi chất"; meals with no food absent; the four-level key today and on a
   past day; footer wordmark and line, pinned to the bottom (gap 0, within 12 px).
 - A long day (12+ foods) is taller than 1920 with the footer fully inside; the height follows the content.
-- Past day: the PNG uses level colours (4 levels), today's PNG is two-tone (none in the bar rows).
+- Past day: the PNG uses level colours (4 levels), today's PNG uses them too (Hao, 16/10).
 - Without file sharing, Lưu ảnh is the only (primary) button. With it, Chia sẻ calls navigator.share with one
   PNG file inside the tap; a cancelled share shows nothing; a failure shows a message and Thử lại.
 - Esc closes and focus returns to the icon.
@@ -255,7 +255,7 @@ def run(browser, size, tag):
     check_png(info, s, tag, "today")
     check(info["corner"] == "243,241,236", f"{tag} paper background {info['corner']}")
     lv = info["found"]
-    check(lv["red"] + lv["yellow"] + lv["green"] == 0, f"{tag} today is two-tone: no red/yellow/green in the image {lv}")
+    check(lv["red"] + lv["yellow"] + lv["green"] + lv["blue"] > 0, f"{tag} today uses the level colours in the image {lv}")
     if s:
         t = s["text"]
         check(s["top"].startswith("Học viên Có Tên Khá Dài Mẫu") and "Hôm nay 15/10" in s["top"], f"{tag} name then the date on top ({s['top']!r})")
@@ -264,7 +264,7 @@ def run(browser, size, tag):
         for banned in ["Thêm", "Chia sẻ", "Đủ 22 vi chất", "Chưa ăn", "●", "⋯", "Tổng quan", "Khám phá", "Cài đặt", "Về hôm nay", "Ngày tập"]:
             check(banned not in t, f"{tag} no {banned!r} in the image")
         check(s["controls"] == 0 and not s["header"], f"{tag} nothing interactive, no header or nav ({s['controls']})")
-        check("Xanh: đạt mục tiêu" in t and "Thiếu <50%" not in t, f"{tag} today's key")
+        check(all(x in t for x in ["Thiếu <50%", "Trung bình", "Gần đủ", "Đạt ≥100%"]) and "Xanh: đạt mục tiêu" not in t, f"{tag} today's key is the four levels")
         check("H1T MICRO" in t.replace("H1T MICRO", "H1T MICRO") and "Theo dõi vi chất mỗi ngày" in t, f"{tag} footer wordmark and line")
         check(s["footerH"] >= 48 - 0.5, f"{tag} footer is 24 px line + 12 px above and below ({s['footerH']})")
         check("Khoáng chất" in t and "Vitamin" in t, f"{tag} nutrient column groups are in the image")

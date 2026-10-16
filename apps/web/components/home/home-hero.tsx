@@ -85,7 +85,7 @@ export function HomeHero({
       </div>
 
       <div data-align-group="home-hero">
-        <HomeBar label="Kcal so với mục tiêu ngày" pct={kcalPct} finished={finished} surface="dark" heightClass="h-2" />
+        <HomeBar label="Kcal so với mục tiêu ngày" pct={kcalPct} surface="dark" heightClass="h-2" />
       </div>
 
       <div data-align-group="home-hero" className="mt-1 grid grid-cols-4 gap-2.5">
@@ -101,7 +101,7 @@ export function HomeHero({
                 </span>
                 <span className="font-display text-[15px] font-bold leading-none tabular-nums">{pctLabel(value, macroTargets[m.key])}</span>
               </div>
-              <HomeBar label={`${m.label} so với mục tiêu ngày`} pct={pct} finished={finished} surface="dark" heightClass="h-[5px]" />
+              <HomeBar label={`${m.label} so với mục tiêu ngày`} pct={pct} surface="dark" heightClass="h-[5px]" />
             </div>
           );
         })}

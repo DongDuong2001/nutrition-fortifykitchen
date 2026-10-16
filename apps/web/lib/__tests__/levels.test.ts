@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, it, expect } from "vitest";
 import {
   calculateSegments,
@@ -6,6 +8,7 @@ import {
   getLevelColor,
   getEmptySegmentColor,
   homeSegments,
+  homeBarColor,
   homeBarTone,
   type NutrientLevel,
 } from "../levels";
@@ -99,18 +102,42 @@ describe("lib/levels", () => {
   });
 
   describe("homeBarTone", () => {
-    it("today: neutral under 100, blue from 100", () => {
-      expect(homeBarTone(0, false)).toBe("neutral");
-      expect(homeBarTone(60, false)).toBe("neutral");
-      expect(homeBarTone(99, false)).toBe("neutral");
-      expect(homeBarTone(100, false)).toBe("dat");
-      expect(homeBarTone(180, false)).toBe("dat");
+    it("uses the four levels on every day, today included (Hao, 16/10): red under 50, yellow 50 to 79, green 80 to 99, blue from 100", () => {
+      expect(homeBarTone(0)).toBe("thieu");
+      expect(homeBarTone(49)).toBe("thieu");
+      expect(homeBarTone(50)).toBe("trungbinh");
+      expect(homeBarTone(79)).toBe("trungbinh");
+      expect(homeBarTone(80)).toBe("ganDu");
+      expect(homeBarTone(99)).toBe("ganDu");
+      expect(homeBarTone(100)).toBe("dat");
+      expect(homeBarTone(180)).toBe("dat");
     });
-    it("a finished day uses the four levels", () => {
-      expect(homeBarTone(30, true)).toBe("thieu");
-      expect(homeBarTone(60, true)).toBe("trungbinh");
-      expect(homeBarTone(90, true)).toBe("ganDu");
-      expect(homeBarTone(100, true)).toBe("dat");
+    it("has no grey tone: every tone maps to a level colour on both surfaces", () => {
+      for (const pct of [0, 30, 60, 90, 120]) {
+        for (const surface of ["light", "dark"] as const) {
+          expect(homeBarColor(homeBarTone(pct), surface)).toMatch(/^var\(--color-level-(red|yellow|green|blue)/);
+        }
+      }
+    });
+  });
+
+  describe("bars on the ink hero card", () => {
+    // Non-text contrast (WCAG 1.4.11): a lit segment must stand out from an empty one by at least 3:1
+    const css = readFileSync(join(__dirname, "../../app/globals.css"), "utf8");
+    const token = (name: string) => css.match(new RegExp(`--color-${name}:\\s*(#[0-9A-Fa-f]{6})`))?.[1] ?? "";
+    const luminance = (hex: string) => {
+      const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+    const ratio = (a: string, b: string) => {
+      const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+      return (hi + 0.05) / (lo + 0.05);
+    };
+    it.each(["red", "yellow", "green", "blue"])("%s is at least 3:1 against the empty segment and the card", (name) => {
+      const lit = token(`level-${name}-dark`);
+      expect(lit).not.toBe("");
+      expect(ratio(lit, token("level-empty-dark"))).toBeGreaterThanOrEqual(3);
+      expect(ratio(lit, token("surface-dark"))).toBeGreaterThanOrEqual(3);
     });
   });
 });

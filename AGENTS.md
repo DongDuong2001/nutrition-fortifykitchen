@@ -138,7 +138,8 @@ Run routine work only through these npm scripts in `apps/web`. The user has auto
 |---|---|
 | Free your port (only if held) | `npm run port:free` |
 | Start the dev server | `npm run dev:3100` (Claude Code: `npm run dev:3101`) |
-| Core gates (typecheck → test → build → test:align → test:hydration, stop at first failure; needs a prod server on ALIGN_BASE_URL) | `npm run check` |
+| Core gates (typecheck → test → build:demo → test:align → test:hydration, stop at first failure; needs a prod server on ALIGN_BASE_URL) | `npm run check` |
+| Demo build for the gates and probes (a plain `npm run build` has no ?demo, ?as or ?level) | `npm run build:demo` |
 | Single gate | `npm run typecheck` / `npm run test` / `npm run build` / `npm run test:align` / `npm run test:hydration` |
 | Smoke, every route at 390 and 1280 | `npm run probe -- tests/probes/smoke.py` |
 | Full probe suite (slow, see below) | `npm run probe:all` |

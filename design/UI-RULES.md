@@ -95,9 +95,11 @@ What makes the screens feel like H1T MICRO, not a list of cards (set in cc2-20 w
 - **Motion explains a change** (a chevron turning, a bar fading in); nothing moves under `prefers-reduced-motion`.
 
 ## Hôm nay (home, cc-22)
-- **Two-tone bars, home only.** While the day is open (today) a bar is the secondary colour (on ink: muted-on-dark)
-  under 100% and level blue from 100%. A finished day (before today) uses the four levels. Segments: floor(pct / 10),
-  but 1 when 0 < pct < 10 (`homeSegments`, `homeBarTone` in lib/levels.ts). Other screens keep the four levels.
+- **Four level colours everywhere, today included (Hao, 16/10).** A bar is red under 50%, yellow from 50 to 79%,
+  green from 80 to 99% and blue from 100% (Đạt), on today and on past days, in the nutrient column and in the hero's
+  kcal and macro bars, and in the share image (its key lists the four levels). An unknown value is an empty bar, never
+  coloured. Segments: floor(pct / 10), but 1 when 0 < pct < 10 (`homeSegments`, `homeBarTone` in lib/levels.ts). On the
+  ink hero the dark tones are used; each is at least 3:1 against an empty segment and the card (tested in levels.test).
 - **Cobalt = selected, ink = filter.** A selected food or meal row, the nutrient column's top edge and its caption
   turn cobalt; the hero card's border turns sky. Ink is the filter surface (the hero card), never a selection.
 - **Dense-list exception (WCAG 2.2 AA target size 24 px is met).** Home food rows are 28 px and meal headers 24 px
