@@ -102,9 +102,9 @@ def run(browser, size, tag):
         band = pg.evaluate(
             """() => {
               const h3 = document.querySelector("aside[aria-label='Vi chất'] h3");
-              const meal = document.querySelector("section[aria-label='Bữa sáng'] > button");
+              const meal = document.querySelector("section[aria-label='Bữa sáng'] > div");
               const a = h3.getBoundingClientRect(), b = meal.getBoundingClientRect();
-              const cs = getComputedStyle(h3), ms = getComputedStyle(meal.children[0]), mp = getComputedStyle(meal);
+              const cs = getComputedStyle(h3), ms = getComputedStyle(meal.querySelector('button span')), mp = getComputedStyle(meal);
               return { aTop: a.top, bTop: b.top, aH: a.height, bH: b.height, bg: [cs.backgroundColor, mp.backgroundColor], fw: [cs.fontWeight, ms.fontWeight], fs: [cs.fontSize, ms.fontSize], pl: [cs.paddingLeft, mp.paddingLeft] };
             }"""
         )

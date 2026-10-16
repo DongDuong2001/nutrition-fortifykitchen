@@ -104,7 +104,7 @@ def run_phone(browser):
     pg.wait_for_timeout(300)
     check(is_past(pg), "390 calendar: a day with no entries opens the past view")
     check(energy(pg) == "0", f"390 a past day with nothing logged reads 0 kcal (got {energy(pg)})")
-    check(visible_count(pg, 'text=Chưa ăn') > 0, "390 a past day with nothing logged shows Chưa ăn")
+    check(visible_count(pg, 'text=Không có món') > 0, "390 a past day with nothing logged shows Không có món (cc-42: the past-day board)")
     check(visible_count(pg, 'text=Chưa có món nào ngày này') == 1, "390 a past day with nothing logged says so")
     pg.screenshot(path=shot("cc10-past-empty-390.png"), animations="disabled")
     vis(pg, 'a:has-text("Về hôm nay")').click()

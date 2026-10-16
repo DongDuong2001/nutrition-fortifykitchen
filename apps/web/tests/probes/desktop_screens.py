@@ -102,9 +102,11 @@ def main():
             page.wait_for_timeout(600)
 
             # Verify multi-add status banner appeared
-            status_banner = page.locator('text=Đã thêm 1 món vào Bữa trưa').first
-            assert status_banner.is_visible(), "Multi-add status banner should appear after adding"
-            print("[PASS] Multi-add status banner displayed: 'Đã thêm 1 món vào Bữa trưa'")
+            # cc-42: Lưu & chọn tiếp puts the food in the tray; the bar says how many and what they add up to
+            tray_bar = page.locator('[data-tray-bar]:visible').first
+            assert tray_bar.is_visible(), "The tray bar should appear after Lưu & chọn tiếp"
+            assert (tray_bar.get_attribute("aria-label") or "").startswith("1 món"), "The tray bar counts 1 món"
+            print("[PASS] Tray bar displayed after Lưu & chọn tiếp: 1 món")
 
             shot_multi = SCREENSHOT_DIR / "desktop-add-multi-1440.png"
             page.screenshot(path=str(shot_multi))

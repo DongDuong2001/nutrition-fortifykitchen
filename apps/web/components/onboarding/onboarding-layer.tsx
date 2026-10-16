@@ -64,7 +64,7 @@ function TourCard({ index, onNext, onSkip }: { index: number; onNext: () => void
   const last = index === TOUR_STEPS.length - 1;
   return (
     <>
-      <p className="m-0 text-xs font-bold uppercase tracking-wide text-blue">
+      <p className="m-0 text-xs font-bold text-blue">
         Bước {index + 1}/{TOUR_STEPS.length}
       </p>
       <h2 id="tour-title" className="m-0 text-lg font-bold leading-snug">
@@ -102,7 +102,7 @@ function TourCard({ index, onNext, onSkip }: { index: number; onNext: () => void
 function TipCard({ tip, onGotIt, onTurnOff }: { tip: Tip; onGotIt: () => void; onTurnOff: () => void }) {
   return (
     <>
-      <p className="m-0 text-xs font-bold uppercase tracking-wide text-blue">Mẹo · lần đầu</p>
+      <p className="m-0 text-xs font-bold text-blue">Mẹo · lần đầu</p>
       <h2 id="tip-title" className="m-0 text-lg font-bold leading-snug">
         {tip.title}
       </h2>
@@ -137,15 +137,16 @@ export function OnboardingLayer() {
   const visit = useRef({ path: "", tipShown: false });
   const foodsToday = data.meals.reduce((n, m) => n + m.items.length, 0);
 
-  // Apply a route change to a running tour, and close a finished or abandoned one
-  const sync = useCallback(() => {
+  // Read the running tour. On a route change (applyRoute) the route also moves it on or ends it (lib/tour tourStepFor);
+  // when only the tour changed (a button, an action, Thêm bữa đầu tiên) the screen is left alone.
+  const sync = useCallback((applyRoute: boolean) => {
     if (onboardingDisabled()) {
       if (readTour().status !== "off") writeTour(OFF);
       setTour(OFF);
       return;
     }
     const current = readTour();
-    const next = tourStepFor(current, window.location.pathname);
+    const next = applyRoute ? tourStepFor(current, window.location.pathname) : current;
     if (next.status === "done") {
       if (next.reason !== "left") finishTour();
       writeTour(OFF);
@@ -160,7 +161,7 @@ export function OnboardingLayer() {
     setMounted(true);
     setFlags(loadFlags());
     const offFlags = subscribeFlags(() => setFlags(loadFlags()));
-    const offTour = subscribeTour(sync);
+    const offTour = subscribeTour(() => sync(false));
     const offSignal = subscribeSignal((signal) => {
       if (signal === "select-mode") {
         visit.current.tipShown = false;
@@ -175,7 +176,7 @@ export function OnboardingLayer() {
   }, [sync]);
 
   useEffect(() => {
-    sync();
+    sync(true);
     // A new screen is a new visit
     visit.current = { path: pathname, tipShown: false };
     setTipId(null);
@@ -204,6 +205,8 @@ export function OnboardingLayer() {
 
   if (!mounted) return null;
 
+  // The tour is drawn only on the screen of its step: Thêm bữa đầu tiên starts it one screen early
+  if (tour.status === "step" && pathname !== TOUR_STEPS[tour.index].path) return null;
   if (tour.status === "step") {
     const step = TOUR_STEPS[tour.index];
     const act = (event: Parameters<typeof tourReduce>[1]) => {

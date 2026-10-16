@@ -84,7 +84,7 @@ def midnight(browser):
 def long_name(browser, size_name, size):
     ctx = account_context(browser, size, [])
     pg = ctx.new_page()
-    pg.goto(BASE + "/foods/new?meal=lunch", wait_until="networkidle")
+    pg.goto(BASE + "/foods/new?meal=lunch&mode=nutrition", wait_until="networkidle")  # cc-42: Tự nhập is the second mode
     pg.wait_for_timeout(500)
     pg.fill("#cf-name", LONG_NAME)
     pg.fill("#cf-size", "100")

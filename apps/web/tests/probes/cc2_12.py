@@ -83,7 +83,7 @@ def dinner_items(pg):
 
 def meal_kcal(pg, meal_name):
     """The kcal total in a meal's header on Hôm nay (None when the meal has no food)."""
-    txt = pg.locator(f"section[aria-label='{meal_name}'] > button").first.inner_text()
+    txt = pg.locator(f"section[aria-label='{meal_name}'] button[aria-label^='Xem riêng']").first.inner_text()
     m = re.search(r"([\d.]+)\s*kcal", txt)
     return int(m.group(1).replace(".", "")) if m else None
 

@@ -120,15 +120,16 @@ export function Spotlight({ target, labelledBy, interactive = false, onEscape, o
     return () => observer.disconnect();
   }, [box !== null]);
 
-  // Focus goes into the card, and back to where it was afterwards
+  // Focus goes into the card once it is on screen, and back to where it was afterwards
+  const cardShown = box !== null;
   useEffect(() => {
+    if (!cardShown) return;
     const before = document.activeElement as HTMLElement | null;
-    const timer = setTimeout(() => cardRef.current?.focus(), 0);
+    cardRef.current?.focus();
     return () => {
-      clearTimeout(timer);
       before?.focus?.();
     };
-  }, []);
+  }, [cardShown]);
 
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {

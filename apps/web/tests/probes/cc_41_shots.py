@@ -45,7 +45,7 @@ def small_targets(pg):
             .filter(e => { const r = e.getBoundingClientRect(); const s = getComputedStyle(e);
               return r.width > 0 && r.height > 0 && s.visibility !== 'hidden' && s.display !== 'none' && e.type !== 'hidden' && e.type !== 'checkbox' && e.type !== 'radio'; })
             // Hôm nay's phone list is a design decision (28 px food rows, 22 px meal headers, 44 px from lg): see cc-22
-            .filter(e => !(e.classList.contains('h-7') || e.classList.contains('h-[22px]')) && hit(e) < 43.5)
+            .filter(e => !(e.classList.contains('h-7') || e.classList.contains('h-[22px]') || (e.parentElement && e.parentElement.classList.contains('h-[22px]'))) && hit(e) < 43.5)
             .map(e => (e.getAttribute('aria-label') || e.textContent || e.tagName).trim().slice(0, 40) + ' ' + Math.round(hit(e)));
         }"""
     )

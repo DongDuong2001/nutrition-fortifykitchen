@@ -128,48 +128,14 @@ def from_food_page(browser, size, size_name):
 
 
 def from_add(browser, size, size_name):
+    # cc-42: So sánh is no longer on /add; compare starts from the food detail page
     ctx, pg, errors = new_page(browser, size)
     w = f"{size_name} /add"
     pg.goto(f"{BASE}/add?meal=snack", wait_until="networkidle")
     pg.wait_for_timeout(500)
-    phone = size["width"] < 1024
-    root = pg.locator('[role="dialog"]:visible').first if phone else pg.locator('[role="dialog"]:visible').first
-    toggle = root.get_by_role("button", name="So sánh", exact=True)
-    check(toggle.count() == 1 and toggle.get_attribute("aria-pressed") == "false", f"{w}: So sánh toggle in the header, off")
-    box = toggle.bounding_box()
-    check(box is not None and box["height"] >= 43.5, f"{w}: the toggle is 44 px")
-    toggle.click()
-    check(toggle.get_attribute("aria-pressed") == "true", f"{w}: the toggle turns on")
-    bar = root.locator("[data-compare-bar]")
-    check(bar.count() == 1, f"{w}: the compare bar shows")
-    submit = bar.get_by_role("button", name=re.compile(r"^So sánh \(\d\)$"))
-    check(submit.is_disabled() and "So sánh (0)" in submit.inner_text(), f"{w}: So sánh (0) is disabled")
-    rows = root.locator("[data-food-row]")
-    check(rows.count() > 3, f"{w}: food rows listed")
-    h = rows.first.bounding_box()["height"]
-    check(h >= 43.5, f"{w}: rows are at least 44 px ({h:.0f})")
-    rows.nth(0).click()
-    check(rows.nth(0).get_attribute("aria-pressed") == "true", f"{w}: a tapped row is ticked")
-    check(submit.is_disabled() and "So sánh (1)" in submit.inner_text(), f"{w}: still disabled at 1")
-    # no add happened: still on /add
-    check("/add" in pg.url, f"{w}: tapping a row in So sánh mode does not add it")
-    rows.nth(1).click()
-    check(submit.is_enabled() and "So sánh (2)" in submit.inner_text(), f"{w}: So sánh (2) enabled at 2")
-    rows.nth(2).click()
-    check("So sánh (3)" in submit.inner_text(), f"{w}: three foods ticked")
-    check(rows.nth(3).is_disabled(), f"{w}: a fourth row is disabled at 3")
-    if phone:
-        SHOTS.mkdir(parents=True, exist_ok=True)
-        pg.screenshot(path=str(SHOTS / "cc-23-add-compare-390.png"), animations="disabled")
-    # untick one then confirm with 2
-    rows.nth(2).click()
-    check("So sánh (2)" in submit.inner_text() and rows.nth(3).is_enabled(), f"{w}: unticking frees a place")
-    submit.click()
-    pg.wait_for_url(re.compile(r".*/foods/compare\?ids=[^,]+,[^,]+$"), timeout=8000)
-    check(True, f"{w}: So sánh (2) opens the compare page with 2 ids")
-    # leaving the mode clears it
-    pg.go_back()
-    pg.wait_for_timeout(500)
+    root = pg.locator('[role="dialog"]:visible').first
+    check(root.get_by_role("button", name="So sánh", exact=True).count() == 0, f"{w}: no So sánh toggle in the header")
+    check(root.locator("[data-compare-bar]").count() == 0, f"{w}: no compare bar")
     ctx.close()
 
 

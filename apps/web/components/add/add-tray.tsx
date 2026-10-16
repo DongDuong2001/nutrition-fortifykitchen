@@ -26,7 +26,7 @@ export function TrayBar({ totals, mealName, canAdd, submitting = false, onReview
   return (
     <div
       role="region"
-      aria-label="Khay chọn món"
+      aria-label={`${totals.count} món · ${kcalText(totals.kcal)} kcal`}
       data-tray-bar
       data-tour="tray-bar"
       className={`flex items-center gap-2 rounded-[18px] bg-ink px-3 py-2 text-on-dark shadow-lg ${className}`}
@@ -34,8 +34,8 @@ export function TrayBar({ totals, mealName, canAdd, submitting = false, onReview
       <span aria-hidden="true" className="flex h-7 min-w-7 shrink-0 items-center justify-center rounded-full bg-blue px-2 text-sm font-bold text-on-accent tabular-nums">
         {totals.count}
       </span>
-      <span aria-live="polite" className="min-w-0 flex-1 text-[13px] font-semibold leading-tight">
-        {totals.count} món · {kcalText(totals.kcal)} kcal
+      <span aria-hidden="true" className="min-w-0 flex-1 whitespace-nowrap text-[13px] font-semibold leading-tight">
+        món · {kcalText(totals.kcal)} kcal
       </span>
       <button
         type="button"

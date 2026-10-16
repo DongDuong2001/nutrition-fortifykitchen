@@ -116,7 +116,8 @@ def run(browser, size, tag):
     pg.wait_for_timeout(500)
     row = root.locator("[data-food-row]").filter(has_text="Bột củ dền").first
     if row.count():
-        check(row.get_by_text("Của tôi", exact=True).count() == 1, f"{tag} /add: own food says Của tôi")
+        # cc-42: a food typed in by hand says Tự nhập; a recipe says Của tôi
+        check(row.get_by_text("Của tôi", exact=True).count() + row.get_by_text("Tự nhập", exact=True).count() == 1, f"{tag} /add: own food says Của tôi or Tự nhập")
     check(not [e for e in errors if "preloaded using link preload" not in e], f"{tag}: no console errors {errors[:1]}")
     sc = pg.evaluate("document.documentElement.scrollWidth - window.innerWidth")
     check(sc <= 0, f"{tag}: no horizontal scroll ({sc})")

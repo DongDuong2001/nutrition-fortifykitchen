@@ -90,7 +90,7 @@ def test_item_2(browser, vp_name, vp):
     """Item 2: /foods/new every input is linked to its label (clicking label focuses input)"""
     ctx = browser.new_context(viewport=vp)
     pg = ctx.new_page()
-    pg.goto(BASE + "/foods/new", wait_until="networkidle")
+    pg.goto(BASE + "/foods/new?mode=nutrition", wait_until="networkidle")  # cc-42: Tự nhập is the second mode
     pg.wait_for_timeout(300)
 
     # Pre-fill name so validation error does not trigger layout shift on blur
@@ -114,7 +114,7 @@ def test_item_3(browser, vp_name, vp):
     """Item 3: FormRow required '*' has contrast >= 4.5:1 on #FFFFFF and #F3F1EC"""
     ctx = browser.new_context(viewport=vp)
     pg = ctx.new_page()
-    pg.goto(BASE + "/foods/new", wait_until="networkidle")
+    pg.goto(BASE + "/foods/new?mode=nutrition", wait_until="networkidle")  # cc-42: Tự nhập is the second mode
     pg.wait_for_timeout(300)
 
     asterisk = pg.locator('label[for="cf-name"] span:has-text("*")')

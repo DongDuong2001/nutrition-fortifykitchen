@@ -555,7 +555,7 @@ function MicrosContent() {
           <div ref={desktopSentinelRef} aria-hidden="true" className="-mt-5 h-0" />
 
           {/* Desktop Filter Chips */}
-          <div className="sticky top-[60px] z-30 flex items-center gap-2 overflow-x-auto bg-page pb-1">
+          <div data-tour="micros-groups" className="sticky top-[60px] z-30 flex items-center gap-2 overflow-x-auto bg-page pb-1">
             {GROUPS_CONFIG.map((group) => {
               const isActive = activeGroup === group.key;
               return (

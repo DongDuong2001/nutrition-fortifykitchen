@@ -178,11 +178,10 @@ def first_run(browser, name, size):
     pg.wait_for_url("**/setup/done")
     pg.wait_for_timeout(500)
     t = text(pg)
-    for row in SUMMARY_ROWS:
-        check(row in t, f"{where} summary: {row!r} (page: {t[:200]!r})")
-    cta = pg.get_by_role("link", name="Thêm bữa đầu tiên")
-    check(cta.count() == 1 and cta.get_attribute("href") == "/add?meal=dinner",
-          f"{where} summary: one button to the add sheet for the meal of the clock (Bữa tối)")
+    # cc-42: the board shows the energy target in one sentence (the other rows are in Cài đặt)
+    check("Mục tiêu của bạn: 2.100–2.450 kcal mỗi ngày" in t, f"{where} summary: the energy target (page: {t[:200]!r})")
+    cta = pg.get_by_role("button", name="Thêm bữa đầu tiên")
+    check(cta.count() == 1, f"{where} summary: one button Thêm bữa đầu tiên (tour off in probes: it opens the add sheet)")
     check(visible_h1(pg) == 1, f"{where} summary: one h1")
     check(pg.locator("nav[aria-label='Điều hướng chính']:visible").count() == 0, f"{where} summary: no navigation bar")
     shot(pg, "summary", name)
