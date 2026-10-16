@@ -64,6 +64,7 @@ function AddFoodInner() {
   const [gramsInput, setGramsInput] = useState("");
   const [selectedServingLabel, setSelectedServingLabel] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [addedCount, setAddedCount] = useState(0);
   const [isDesktop, setIsDesktop] = useState(false);
 
   const desktopSearchInputRef = useRef<HTMLInputElement>(null);
@@ -148,9 +149,9 @@ function AddFoodInner() {
         .slice(0, MAX_SHORTCUT_MEALS),
     [savedMeals]
   );
+
   const showShortcuts = !query.trim() && filter === "all" && !compareMode;
   const favouritesOnly = filter === "favorite" && !query.trim();
-
 
   // Active grams number
   const parsedGrams = useMemo(() => {
@@ -163,6 +164,23 @@ function AddFoodInner() {
     setIsSubmitting(true);
     try {
       if (await addFoodEntry(selectedFood, parsedGrams, mealSlot, selectedServingLabel)) router.push("/");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Submit and stay to add more foods to the same meal slot
+  const handleAddAndContinue = async () => {
+    if (!selectedFood || parsedGrams <= 0 || isSubmitting || mealSlot === null) return;
+    setIsSubmitting(true);
+    try {
+      const ok = await addFoodEntry(selectedFood, parsedGrams, mealSlot, selectedServingLabel);
+      if (ok) {
+        setAddedCount((c) => c + 1);
+        setSelectedFood(null);
+        setGramsInput("");
+        setSelectedServingLabel("");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -378,6 +396,23 @@ function AddFoodInner() {
             <div className="flex gap-6 items-start">
               {/* Left Pane: Search & Results */}
               <div data-align-container="add-list" className="flex-1 min-w-[340px] flex flex-col gap-3">
+                {addedCount > 0 && (
+                  <div
+                    role="status"
+                    className="flex items-center justify-between rounded-xl bg-blue/10 border border-blue/20 px-3 py-2 text-xs"
+                  >
+                    <span className="font-semibold text-text">
+                      Đã thêm {addedCount} món vào {mealNameVi}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => router.push("/")}
+                      className="min-h-[36px] px-3 rounded-full bg-blue text-on-accent font-bold cursor-pointer active:scale-[0.97] motion-reduce:active:scale-100 transition-all border-0"
+                    >
+                      Hoàn tất
+                    </button>
+                  </div>
+                )}
                 <FoodSearchField value={query} onChange={setQuery} inputRef={desktopSearchInputRef} />
 
                 {/* Filter row: Tất cả, Yêu thích, then categories with foods */}
@@ -413,10 +448,30 @@ function AddFoodInner() {
                     setSelectedServingLabel={setSelectedServingLabel}
                     mealSlot={mealSlot}
                     onAdd={handleAddFood}
+                    onAddAndContinue={handleAddAndContinue}
                     isSubmitting={isSubmitting}
                     tone="light"
                     showMicros={true}
                   />
+                ) : addedCount > 0 ? (
+                  <div className="h-full flex flex-col items-center justify-center text-center p-6 bg-card border border-card-border rounded-[18px] gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue/10 text-blue font-bold text-base">
+                      {addedCount}
+                    </div>
+                    <div className="font-bold text-text text-base">
+                      Đã thêm {addedCount} món vào {mealNameVi}
+                    </div>
+                    <p className="text-xs text-secondary leading-relaxed m-0">
+                      Chọn tiếp món khác trong danh sách hoặc bấm hoàn tất để trở về nhật ký.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => router.push("/")}
+                      className="min-h-[44px] px-6 rounded-full bg-blue text-on-accent font-bold text-sm cursor-pointer hover:bg-blue/90 active:scale-[0.97] motion-reduce:active:scale-100 transition-all border-0 shadow-sm"
+                    >
+                      Hoàn tất bữa ăn
+                    </button>
+                  </div>
                 ) : (
                   <div className="h-full flex items-center justify-center text-center text-sm text-secondary p-4">
                     Chọn một món để xem khẩu phần
@@ -490,6 +545,24 @@ function AddFoodInner() {
               </div>
             </div>
 
+            {addedCount > 0 && (
+              <div
+                role="status"
+                className="flex items-center justify-between rounded-xl bg-blue/10 border border-blue/20 px-3 py-2 text-xs"
+              >
+                <span className="font-semibold text-text">
+                  Đã thêm {addedCount} món vào {mealNameVi}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => router.push("/")}
+                  className="min-h-[36px] px-3 rounded-full bg-blue text-on-accent font-bold cursor-pointer active:scale-[0.97] motion-reduce:active:scale-100 transition-all border-0"
+                >
+                  Hoàn tất
+                </button>
+              </div>
+            )}
+
             <FoodSearchField value={query} onChange={setQuery} className="shrink-0" />
 
             {/* Filter row: Tất cả, Yêu thích, then categories with foods */}
@@ -529,6 +602,7 @@ function AddFoodInner() {
                 setSelectedServingLabel={setSelectedServingLabel}
                 mealSlot={mealSlot}
                 onAdd={handleAddFood}
+                onAddAndContinue={handleAddAndContinue}
                 isSubmitting={isSubmitting}
                 tone="dark"
                 showMicros={false}
