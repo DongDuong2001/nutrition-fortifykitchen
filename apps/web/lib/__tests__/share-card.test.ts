@@ -8,6 +8,8 @@ import {
   buildShareModel,
   shareFilename,
   shareImageHeight,
+  shareImageSize,
+  SHARE_MAX_HEIGHT,
   shareKey,
   shareMeals,
   shareName,
@@ -170,5 +172,21 @@ describe("the share image always has a name", () => {
   it("the model of a named profile carries the name (the no-name branch is only a fallback)", () => {
     expect(model({ displayName: "Học viên A" }).name).toBe("Học viên A");
     expect(model({ displayName: "" }).name).toBeNull();
+  });
+});
+
+describe("share image size cap", () => {
+  it("is 1080 wide and as tall as the page up to 12,000 px", () => {
+    expect(shareImageSize(2000)).toEqual({ scale: SHARE_SCALE, width: 1080, height: Math.ceil(2000 * SHARE_SCALE - 1e-6) });
+    expect(shareImageSize(100).height).toBe(1920);
+    expect(SHARE_MAX_HEIGHT).toBe(12000);
+  });
+
+  it("draws a taller page smaller so the height stops at the cap", () => {
+    const size = shareImageSize(8000);
+    expect(size.height).toBe(12000);
+    expect(size.scale).toBeCloseTo(1.5, 5);
+    expect(size.width).toBeLessThan(1080);
+    expect(size.width).toBe(Math.floor(390 * size.scale));
   });
 });

@@ -32,6 +32,7 @@ import {
 import type { MealSlot } from "@/lib/meal-slot";
 import { FoodList } from "./food-list";
 import { useCoaching } from "@/hooks/use-coaching";
+import { useSaveDisplayName } from "@/hooks/use-save-display-name";
 import { LevelExplainerSheet } from "@/components/coaching/level-explainer-sheet";
 import { LevelNoticeCard } from "@/components/coaching/level-notice-card";
 import { ZERO_HINT_TEXT, levelLabel, noticeText } from "@/lib/level-copy";
@@ -102,8 +103,8 @@ function HomeContent() {
     moveEntries,
     mealFoods,
     saveMealAs,
-    updateProfile,
   } = useDiary();
+  const saveName = useSaveDisplayName();
 
   // The Level decides which nutrients the column lists (lib/level-nutrients)
   const { level, coach, notice, showHint, dismissNotice, dismissHint } = useCoaching();
@@ -533,7 +534,7 @@ function HomeContent() {
         finished={isPast}
         displayName={profile.displayName}
         level={level}
-        onSaveName={(name) => updateProfile({ displayName: name })}
+        onSaveName={(name) => void saveName(name)}
       />
       {todayIso && (
         <CalendarSheet

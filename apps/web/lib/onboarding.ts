@@ -1,3 +1,4 @@
+import { DISPLAY_NAME_MAX, validateDisplayName } from "./display-name";
 import {
   calculateEnergyTarget,
   calculateTargets,
@@ -30,14 +31,11 @@ export interface SetupErrors {
   displayName?: string;
 }
 
-export const SETUP_NAME_MAX = 40;
+export const SETUP_NAME_MAX = DISPLAY_NAME_MAX;
 
-/** The name field of setup and of the share sheet: required, trimmed, at most 40 characters. Null when valid. */
+/** The name field of setup and of the share sheet (lib/display-name): required. Null when valid. */
 export function validateSetupName(value: string | undefined): string | null {
-  const name = (value ?? "").trim();
-  if (name === "") return "Nhập tên hiển thị";
-  if ([...name].length > SETUP_NAME_MAX) return `Tên hiển thị tối đa ${SETUP_NAME_MAX} ký tự`;
-  return null;
+  return validateDisplayName(value);
 }
 
 export const DEFAULT_DRAFT: SetupDraft = {

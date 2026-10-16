@@ -1,4 +1,5 @@
 import { formatAmount, formatDayLabel, formatRange } from "./format";
+import { cleanDisplayName, validateDisplayName } from "./display-name";
 import { DAY_MODE, heroLabel, pctLabel, targetOf, valuesFromDay, type HomeEntry, type HomeMeal, type HomeValues } from "./home";
 import type { Level } from "./coaching-link";
 import { columnGroups, countedForLevel, levelSummary, sumExtras, type ColumnGroup } from "./level-nutrients";
@@ -21,6 +22,24 @@ export function shareImageHeight(cssHeight: number): number {
   if (!Number.isFinite(cssHeight) || cssHeight <= 0) return SHARE_MIN_HEIGHT;
   // 1e-6: a content height that lands exactly on a whole pixel must not gain a row to rounding noise
   return Math.max(SHARE_MIN_HEIGHT, Math.ceil(cssHeight * SHARE_SCALE - 1e-6));
+}
+
+/** The tallest the PNG may be: a long day (many foods) is drawn smaller instead of failing in canvas limits. */
+export const SHARE_MAX_HEIGHT = 12000;
+
+export interface ShareImageSize {
+  /** CSS px to image px. SHARE_SCALE normally; lower for a page too tall for SHARE_MAX_HEIGHT. */
+  scale: number;
+  width: number;
+  height: number;
+}
+
+/** The PNG size for a drawn page of this CSS height: 1080 wide, up to SHARE_MAX_HEIGHT tall, then smaller overall. */
+export function shareImageSize(cssHeight: number): ShareImageSize {
+  const height = shareImageHeight(cssHeight);
+  if (height <= SHARE_MAX_HEIGHT) return { scale: SHARE_SCALE, width: SHARE_WIDTH, height };
+  const scale = SHARE_MAX_HEIGHT / cssHeight;
+  return { scale, width: Math.floor(SHARE_CSS_WIDTH * scale), height: SHARE_MAX_HEIGHT };
 }
 
 export function shareFilename(isoDate: string): string {
@@ -49,10 +68,9 @@ export function shareMeals(meals: HomeMeal[]): HomeMeal[] {
   return meals.filter((m) => m.entries.length > 0);
 }
 
-/** The name as the image shows it: trimmed; null when none is set (then only the date is drawn). */
+/** The name as the image shows it: cleaned (lib/display-name); null when it is not a usable name (then it is asked for). */
 export function shareName(displayName: string | null | undefined): string | null {
-  const name = (displayName ?? "").trim();
-  return name === "" ? null : name;
+  return validateDisplayName(displayName) === null ? cleanDisplayName(displayName) : null;
 }
 
 /**

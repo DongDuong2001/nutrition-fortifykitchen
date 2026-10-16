@@ -825,23 +825,21 @@ export const apiClient = {
     return { ok: true };
   },
 
+  /** Saves the profile (setup, and later name changes). Live mode throws when the API cannot be reached or says no. */
   async saveSetup(profile: SetupProfile): Promise<{ ok: true }> {
     if (isLiveMode()) {
-      try {
-        await apiFetch(`/me/profile`, {
-          method: "PUT",
-          body: JSON.stringify({
-            sex: profile.sex,
-            birth_year: profile.birthYear,
-            weight_kg: profile.weightKg,
-            goal: profile.goal,
-            // cc-27 fix: the display name (required in setup) travels with the profile save
-            ...(profile.displayName ? { display_name: profile.displayName } : {}),
-          }),
-        });
-      } catch {
-        // Fallback
-      }
+      const res = await apiFetch(`/me/profile`, {
+        method: "PUT",
+        body: JSON.stringify({
+          sex: profile.sex,
+          birth_year: profile.birthYear,
+          weight_kg: profile.weightKg,
+          goal: profile.goal,
+          // The display name travels with the profile save
+          ...(profile.displayName ? { display_name: profile.displayName } : {}),
+        }),
+      });
+      if (!res.ok) throw new Error(`profile save failed (${res.status})`);
     }
     return { ok: true };
   },

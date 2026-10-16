@@ -12,28 +12,31 @@ import { FormRow } from "@/components/ui/form-row";
 import { Row } from "@/components/ui/row";
 import { useDiary } from "@/lib/diary-store";
 import { signOut } from "@/lib/auth-actions";
-import { cleanDisplayName, displayNameError } from "@/lib/profile";
+import { useSaveDisplayName } from "@/hooks/use-save-display-name";
+import { cleanDisplayName, validateDisplayName } from "@/lib/display-name";
 
-/** Tên hiển thị. It saves on blur or Enter. Empty means not set; a name over 40 characters stays on screen with its error. */
+/** Tên hiển thị. It saves on blur or Enter. A name is required (it is on the share image): a blank or unusable one stays on screen with its error. */
 function DisplayNameRow() {
-  const { profile, updateProfile } = useDiary();
+  const { profile } = useDiary();
+  const saveName = useSaveDisplayName();
   const [value, setValue] = useState(profile.displayName);
   const [error, setError] = useState<string | undefined>();
 
-  function save() {
-    const message = displayNameError(value);
+  async function save() {
+    const message = validateDisplayName(value);
     setError(message ?? undefined);
     if (message) return;
     const name = cleanDisplayName(value);
     setValue(name);
-    if (name !== profile.displayName) updateProfile({ displayName: name });
+    if (name === profile.displayName) return;
+    if (!(await saveName(name))) setError("Đã lưu trên máy này, chưa gửi lên máy chủ được. Thử lại sau.");
   }
 
   return (
     <FormRow
       label="Tên hiển thị"
       htmlFor="account-display-name"
-      hint="Tùy chọn"
+      hint="Hiện trên ảnh chia sẻ"
       error={error}
       data-align-group="account-row"
       className="py-3"
@@ -45,9 +48,9 @@ function DisplayNameRow() {
         value={value}
         onChange={(e) => {
           setValue(e.target.value);
-          if (error) setError(displayNameError(e.target.value) ?? undefined);
+          if (error) setError(validateDisplayName(e.target.value) ?? undefined);
         }}
-        onBlur={save}
+        onBlur={() => void save()}
         onKeyDown={(e) => {
           if (e.key === "Enter") e.currentTarget.blur();
         }}

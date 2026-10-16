@@ -8,6 +8,7 @@ import { readPendingCoachCode, writePendingCoachCode } from "@/lib/pending-coach
 import { coachingAvailable } from "@/lib/coaching-link";
 import { isLiveMode } from "@/lib/api-mode";
 import { formatNumber } from "@/lib/format";
+import { cleanDisplayName } from "@/lib/display-name";
 import {
   DEFAULT_DRAFT,
   dailyTargetRows,
@@ -114,7 +115,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
     const nameError = validateSetupName(draft.displayName);
     setErrors(nameError ? { ...result.errors, displayName: nameError } : result.errors);
     if (!result.profile || nameError) return;
-    const displayName = (draft.displayName ?? "").trim();
+    const displayName = cleanDisplayName(draft.displayName);
 
     if (!finish) {
       router.push("/setup/goal");

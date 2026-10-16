@@ -8,7 +8,8 @@ import { FormRow } from "@/components/ui/form-row";
 import { PillButton } from "@/components/ui/pill-button";
 import type { HomeEntry, HomeMeal } from "@/lib/home";
 import type { MockDayData } from "@/lib/mock/sample-day";
-import { SHARE_CSS_WIDTH, SHARE_SCALE, SHARE_WIDTH, buildShareModel, shareImageHeight, shareNeedsName, type ShareModel } from "@/lib/share-card";
+import { SHARE_CSS_WIDTH, buildShareModel, shareImageSize, shareNeedsName, type ShareModel } from "@/lib/share-card";
+import { cleanDisplayName } from "@/lib/display-name";
 import { validateSetupName } from "@/lib/onboarding";
 import { ShareDay } from "./share-day";
 import { countedForLevel } from "@/lib/level-nutrients";
@@ -20,6 +21,7 @@ interface Ready {
   file: File;
   url: string;
   alt: string;
+  width: number;
   height: number;
   /** Files can be handed to the share sheet of this device (iOS, Android); desktop browsers mostly cannot. */
   canShare: boolean;
@@ -33,11 +35,30 @@ const FAILURE_TEXT: Record<Failure, string> = {
 
 const nextFrame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 
+const FONT_WAIT_MS = 4000;
+
+/**
+ * Loads every face the page uses (Manrope, Saira Condensed, at each weight and style it draws) for the very text it
+ * holds, so a glyph of a Vietnamese name or a rare weight is not drawn in the fallback face. Waits at most
+ * FONT_WAIT_MS: a font that cannot load must not stop the picture.
+ */
+async function loadShareFonts(node: HTMLElement): Promise<void> {
+  const text = node.textContent ?? "";
+  const faces = new Set<string>();
+  node.querySelectorAll<HTMLElement>("*").forEach((el) => {
+    if (![...el.childNodes].some((n) => n.nodeType === Node.TEXT_NODE && n.textContent?.trim())) return;
+    const style = getComputedStyle(el);
+    faces.add(`${style.fontStyle} ${style.fontWeight} 16px ${style.fontFamily}`);
+  });
+  const loading = Promise.all([...faces].map((face) => document.fonts.load(face, text))).then(() => document.fonts.ready);
+  await Promise.race([loading, new Promise((resolve) => setTimeout(resolve, FONT_WAIT_MS))]);
+}
+
 /**
  * Draws the page (a ShareDay in an off-screen portal) into a 1080-px-wide PNG and hands the file up. The page is
  * mounted only while the picture is made, so it never lingers in the DOM next to the real screen.
  */
-function ShareCapture({ model, onDone, onError }: { model: ShareModel; onDone: (file: File, height: number) => void; onError: () => void }) {
+function ShareCapture({ model, onDone, onError }: { model: ShareModel; onDone: (file: File, width: number, height: number) => void; onError: () => void }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const callbacks = useRef({ onDone, onError });
   callbacks.current = { onDone, onError };
@@ -48,30 +69,30 @@ function ShareCapture({ model, onDone, onError }: { model: ShareModel; onDone: (
       const node = hostRef.current?.querySelector<HTMLElement>("[data-share-root]");
       if (!node) throw new Error("no share root");
       // Fonts first: a size measured before they load would be wrong, and the image would use the fallback face
-      await document.fonts.ready;
+      await loadShareFonts(node);
       await nextFrame();
       await nextFrame();
       const cssHeight = node.getBoundingClientRect().height;
-      const height = shareImageHeight(cssHeight);
+      const { scale, width, height } = shareImageSize(cssHeight);
       const fontEmbedCSS = await getFontEmbedCSS(node);
       // The page is scaled by layout (transform on the clone), so text stays vector-sharp at 1080 px
       const blob = await toBlob(node, {
-        width: SHARE_WIDTH,
+        width,
         height,
         pixelRatio: 1,
         fontEmbedCSS,
         // A page height that is not a whole number of image rows must not leave a see-through last row
         backgroundColor: getComputedStyle(node).backgroundColor,
         style: {
-          transform: `scale(${SHARE_SCALE})`,
+          transform: `scale(${scale})`,
           transformOrigin: "top left",
           width: `${SHARE_CSS_WIDTH}px`,
-          height: `${height / SHARE_SCALE}px`,
-          minHeight: `${height / SHARE_SCALE}px`,
+          height: `${height / scale}px`,
+          minHeight: `${height / scale}px`,
         },
       });
       if (!blob) throw new Error("no image");
-      if (!cancelled) callbacks.current.onDone(new File([blob], model.filename, { type: "image/png" }), height);
+      if (!cancelled) callbacks.current.onDone(new File([blob], model.filename, { type: "image/png" }), width, height);
     })().catch(() => {
       if (!cancelled) callbacks.current.onError();
     });
@@ -124,6 +145,7 @@ export function ShareSheet({
   const latest = useRef({ day, entries, meals, finished, displayName, level });
   latest.current = { day, entries, meals, finished, displayName, level };
 
+  const urlRef = useRef<string | null>(null);
   const needsName = shareNeedsName(displayName);
   const [nameDraft, setNameDraft] = useState("");
   const [nameError, setNameError] = useState<string | null>(null);
@@ -138,10 +160,11 @@ export function ShareSheet({
       setJob(null);
       // The revoked URL must not show for a frame when the sheet opens again
       setReady(null);
+      // The picture lives only while the sheet is open
+      if (urlRef.current) URL.revokeObjectURL(urlRef.current);
+      urlRef.current = null;
     };
   }, [open, attempt, needsName]);
-
-  const urlRef = useRef<string | null>(null);
   useEffect(
     () => () => {
       if (urlRef.current) URL.revokeObjectURL(urlRef.current);
@@ -150,7 +173,7 @@ export function ShareSheet({
   );
 
   const onDone = useCallback(
-    (file: File, height: number) => {
+    (file: File, width: number, height: number) => {
       if (urlRef.current) URL.revokeObjectURL(urlRef.current);
       const url = URL.createObjectURL(file);
       urlRef.current = url;
@@ -162,7 +185,7 @@ export function ShareSheet({
       }
       const alt = job?.alt ?? "";
       setJob(null);
-      setReady({ file, url, alt, height, canShare });
+      setReady({ file, url, alt, width, height, canShare });
     },
     [job]
   );
@@ -214,7 +237,7 @@ export function ShareSheet({
             e.preventDefault();
             const message = validateSetupName(nameDraft);
             setNameError(message);
-            if (!message) onSaveName(nameDraft.trim());
+            if (!message) onSaveName(cleanDisplayName(nameDraft));
           }}
           className="flex flex-col gap-3"
         >
@@ -252,7 +275,7 @@ export function ShareSheet({
           <img
             src={ready.url}
             alt={ready.alt}
-            width={SHARE_WIDTH}
+            width={ready.width}
             height={ready.height}
             className="h-auto max-h-full w-auto max-w-full rounded-xl border border-card-border object-contain"
           />
