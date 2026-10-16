@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import { AppHeader } from "@/components/ui/app-header";
 import { AppShell } from "@/components/ui/app-shell";
 import { Card } from "@/components/ui/card";
@@ -16,8 +17,9 @@ import {
   isLeaderboardOptedIn,
   setLeaderboardOptIn,
 } from "@/lib/leaderboard";
-import { MasteryBadge } from "@/components/profile/mastery-badge";
-import { getMasteryLevel } from "@/lib/mastery-levels";
+import { LevelBadge } from "@/components/profile/level-badge";
+import { useCoaching } from "@/hooks/use-coaching";
+import { levelSourceText } from "@/lib/level-copy";
 
 const PERIODS: { id: LeaderboardPeriod; label: string }[] = [
   { id: "weekly", label: "Tuần này" },
@@ -38,7 +40,8 @@ export default function LeaderboardPage() {
   }, []);
 
   const data = getMockLeaderboard(period);
-  const userMastery = getMasteryLevel(12, 85);
+  // Level is the coach-set Level (0 with no coach); the earned Cấp is gone from the UI
+  const { level, coach, available } = useCoaching();
   const topThree = data.ranks.slice(0, 3);
   const rest = data.ranks.slice(3);
 
@@ -94,9 +97,19 @@ export default function LeaderboardPage() {
 
         <section aria-labelledby="lb-level" className="flex flex-col gap-2">
           <SectionTitle as="h2" id="lb-level">
-            Cấp độ vi chất của bạn
+            Level của bạn
           </SectionTitle>
-          <MasteryBadge info={userMastery} />
+          <Card className="flex items-center justify-between gap-3">
+            <p className="m-0 min-w-0 text-[15px] leading-snug text-text">
+              {coach ? `${coach.name} · ${levelSourceText(level)}` : "Chưa có huấn luyện viên"}
+            </p>
+            <LevelBadge level={level} />
+          </Card>
+          {available && !coach && (
+            <Link href="/settings/coach" className="inline-flex min-h-[44px] items-center px-1 text-[15px] font-bold text-blue no-underline">
+              Nhập mã huấn luyện viên
+            </Link>
+          )}
         </section>
 
         {optedIn && data.currentUserRank && (

@@ -107,3 +107,9 @@ What makes the screens feel like H1T MICRO, not a list of cards (set in cc2-20 w
   `title` and `aria-label`), the grams never do.
 - **Meal headers in normal case.** Sáng, Trưa, Trước tập, Bữa phụ, Tối: 11 px 800, no uppercase (the all-caps
   rule applies; only the hero's mode label and the nutrient group titles are set in capitals as data labels).
+
+## Level (cc-27 fix, Hao 16/10)
+
+- The app shows one level only: **Level** 0 to 5, set by the user's coach (0 = no coach). The earned "Cấp" of the leaderboard is gone from the UI; never write "Cấp" for a level, never "Mức".
+- Wherever a level is shown, use the shared `LevelBadge` (list size in rows and cards, share size in the share image). A user with no coach shows Level 0.
+- Live mode has no coaching yet: the coaching screens are hidden and Level is 0 (`coachingAvailable`).

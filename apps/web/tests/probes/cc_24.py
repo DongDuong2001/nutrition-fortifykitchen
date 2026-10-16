@@ -138,7 +138,7 @@ def leaderboard_behaviour(browser, size_name, size):
     # Hao 15/10: a place shows the display name and the discipline score, nothing else (the opt-in promise)
     extra = pg.evaluate("""() => [...document.querySelectorAll('main li')]
         .map(li => li.innerText.replace(/\\s+/g, ' ').trim())
-        .filter(t => /Cấp|ngày ghi|vi chất|%/.test(t))""")
+        .filter(t => /Cấp|Level|ngày ghi|vi chất|%/.test(t))""")
     check(not extra, f"{w}: rows and podium show only name and score ({extra[:2]})")
     rows = pg.evaluate("document.querySelectorAll('main ol li, main section ul li').length")
     check(rows >= 8, f"{w}: the ranking lists its places ({rows})")
@@ -149,7 +149,7 @@ def leaderboard_behaviour(browser, size_name, size):
 
 
 def application_sheet(browser, size_name, size):
-    """The Cấp 5 application sheet. No real user reaches it yet (the mock level is 3), so it opens from /dev/ui."""
+    """The coach application sheet. No real user reaches it yet (the mock level is 3), so it opens from /dev/ui."""
     ctx = browser.new_context(viewport=size)
     pg = ctx.new_page()
     pg.goto(BASE + "/dev/ui", wait_until="networkidle")

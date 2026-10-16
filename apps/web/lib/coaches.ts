@@ -37,7 +37,7 @@ export const FEATURED_COACHES: CoachProfile[] = [
     specialties: ["Tăng cơ", "Dinh dưỡng thể thao", "Tối ưu vi chất", "Giảm mỡ bền vững"],
     credentials: [
       "Chứng chỉ Dinh dưỡng Thể thao CISSN",
-      "Huấn luyện viên Thể hình Cấp 1",
+      "Huấn luyện viên Thể hình (chứng chỉ bậc 1)",
       "Tác giả giáo trình H1T System",
     ],
     experienceYears: 8,

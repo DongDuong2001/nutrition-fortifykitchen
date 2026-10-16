@@ -56,7 +56,7 @@ const DRAFT_STATUS_LABELS: Record<CoachDraft["status"], string> = {
 
 const APP_STATUS_LABELS: Record<CoachApplication["status"], string> = {
   pending: "Chờ duyệt",
-  approved: "Đã duyệt Cấp 5",
+  approved: "Đã duyệt làm huấn luyện viên",
   rejected: "Đã từ chối",
 };
 
@@ -108,7 +108,7 @@ export default function AdminReviewPage() {
       <AppHeader
         variant="sub"
         title="Kiểm duyệt"
-        subtitle="Xét duyệt hồ sơ ứng tuyển huấn luyện viên (Cấp 5) và bản nháp thực đơn chuyên môn"
+        subtitle="Xét duyệt hồ sơ ứng tuyển huấn luyện viên và bản nháp thực đơn chuyên môn"
         onBack={goBack}
         layout="wide"
         alignGroup="admin-header"
@@ -137,7 +137,7 @@ export default function AdminReviewPage() {
         {activeTab === "coaches" && (
           <section aria-labelledby="admin-apps" className="flex flex-col gap-3">
             <SectionTitle as="h2" id="admin-apps">
-              Hồ sơ ứng tuyển Cấp 5
+              Hồ sơ ứng tuyển huấn luyện viên
             </SectionTitle>
             <ChipGroup
               columns={2}
@@ -204,7 +204,7 @@ export default function AdminReviewPage() {
                             onClick={() => handleUpdateAppStatus(app.id, "approved")}
                             className={`${ACTION} border-0 bg-blue text-on-accent`}
                           >
-                            Duyệt Cấp 5
+                            Duyệt làm huấn luyện viên
                           </button>
                           <button
                             type="button"

@@ -15,7 +15,7 @@ interface CoachApplicationSheetProps {
 const FIELD =
   "h-12 w-full rounded-xl border-2 border-card-border bg-card px-4 text-base text-text outline-none transition-colors focus:border-blue";
 
-/** The Cấp 5 application: a Sheet (Esc closes, focus returns to the button that opened it). */
+/** The coach application: a Sheet (Esc closes, focus returns to the button that opened it). */
 export function CoachApplicationSheet({ isOpen, onClose, onSubmitted }: CoachApplicationSheetProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -73,7 +73,7 @@ export function CoachApplicationSheet({ isOpen, onClose, onSubmitted }: CoachApp
       onClose={handleResetAndClose}
       title="Ứng tuyển huấn luyện viên"
       titleId="coach-apply-title"
-      description="Xét duyệt danh hiệu Cấp 5 và bảo chứng chuyên môn"
+      description="Xét duyệt danh hiệu huấn luyện viên và bảo chứng chuyên môn"
       desktopDialog
       className="max-h-[90dvh] overflow-y-auto"
     >
