@@ -56,7 +56,19 @@ export function mapApiFoodToFoodItem(raw: any): FoodItem {
     nutrients,
     match: raw.match,
     sourceRef: raw.sourceRef,
+    recipe: mapApiRecipe(raw.recipe),
   };
+}
+
+/** The API's `recipe` ({ ingredients: [{ food_id, name_vi, grams }], cooked_g }); anything else is no recipe. */
+function mapApiRecipe(raw: any): FoodItem["recipe"] {
+  if (!raw || !Array.isArray(raw.ingredients)) return undefined;
+  const ingredients = raw.ingredients
+    .filter((i: any) => i && (i.food_id || i.foodId) && Number(i.grams) > 0)
+    .map((i: any) => ({ foodId: String(i.food_id ?? i.foodId), name: String(i.name_vi ?? i.name ?? ""), grams: Number(i.grams) }));
+  if (ingredients.length === 0) return undefined;
+  const cooked = Number(raw.cooked_g ?? raw.cookedGrams);
+  return { ingredients, cookedGrams: cooked > 0 ? cooked : null };
 }
 
 export function mapApiProfileToProfile(raw: any): Profile {

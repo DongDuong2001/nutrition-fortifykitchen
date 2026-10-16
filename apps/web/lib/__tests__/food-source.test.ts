@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MATCH_LABEL, coverageText, isProxy, matchOf, microCoverage, searchTag } from "../food-source";
+import { MATCH_LABEL, coverageText, isProxy, matchOf, microCoverage, searchTag, isManualFood } from "../food-source";
 import { MOCK_FOODS } from "../mock/foods";
 import { COUNTED_NUTRIENT_KEYS } from "../day-totals";
 
@@ -40,6 +40,16 @@ describe("food source helpers", () => {
     for (const source of ["recipe_calc", "recipe-calc", "Recipe Calc"]) {
       expect(searchTag({ source })).toEqual({ label: "Ước tính", warning: true });
     }
+  });
+
+  it("a user's food typed in by hand says Tự nhập; a recipe or a food with no id says Của tôi", () => {
+    expect(searchTag({ source: "user", id: "custom-1760000000000" })).toEqual({ label: "Tự nhập", warning: false });
+    expect(searchTag({ source: "user", id: "3f1c0f0e-0000-4000-8000-000000000000" })).toEqual({ label: "Tự nhập", warning: false });
+    expect(searchTag({ source: "user", id: "recipe-1760000000000" })).toEqual({ label: "Của tôi", warning: false });
+    expect(searchTag({ source: "user" })).toEqual({ label: "Của tôi", warning: false });
+    expect(isManualFood({ source: "user", id: "custom-1" })).toBe(true);
+    expect(isManualFood({ source: "user", id: "recipe-1" })).toBe(false);
+    expect(isManualFood({ source: "USDA", id: "food-1" })).toBe(false);
   });
 
   it("says Chưa rõ for a source it does not know, or none", () => {

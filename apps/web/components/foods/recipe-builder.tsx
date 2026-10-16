@@ -45,10 +45,10 @@ export function useRecipeDraft(initial: RecipeDraft = EMPTY_DRAFT) {
 
   const update = useCallback((patch: Partial<RecipeDraft>) => setDraft((d) => ({ ...d, ...patch })), []);
   const setServings = useCallback((n: number) => setDraft((d) => ({ ...d, servings: clampServings(n) })), []);
-  const addIngredient = useCallback((food: FoodItem) => {
+  const addIngredients = useCallback((foods: FoodItem[]) => {
     setDraft((d) => ({
       ...d,
-      ingredients: [...d.ingredients, { foodId: food.id, name: food.nameVi, amount: "", unit: defaultUnit(food) }],
+      ingredients: [...d.ingredients, ...foods.map((food) => ({ foodId: food.id, name: food.nameVi, amount: "", unit: defaultUnit(food) }))],
     }));
   }, []);
   const setAmount = useCallback((index: number, amount: string) => {
@@ -77,7 +77,7 @@ export function useRecipeDraft(initial: RecipeDraft = EMPTY_DRAFT) {
     return !hasErrors(e);
   }, [draft]);
 
-  return { draft, setDraft, update, setServings, addIngredient, setAmount, toggleUnit, removeIngredient, errors, shown, setShown, validateAll };
+  return { draft, setDraft, update, setServings, addIngredients, setAmount, toggleUnit, removeIngredient, errors, shown, setShown, validateAll };
 }
 
 export type RecipeDraftState = ReturnType<typeof useRecipeDraft>;
@@ -116,7 +116,7 @@ function StepButton({ label, onClick, disabled, children }: { label: string; onC
 
 /** Từ nguyên liệu: name, servings, ingredients with grams, the cooked weight, and the live "Mỗi phần" card. */
 export function RecipeBuilder({ state, excludeId }: { state: RecipeDraftState; excludeId?: string }) {
-  const { draft, update, setServings, addIngredient, setAmount, toggleUnit, removeIngredient, errors, shown, setShown } = state;
+  const { draft, update, setServings, addIngredients, setAmount, toggleUnit, removeIngredient, errors, shown, setShown } = state;
   const [pickerOpen, setPickerOpen] = useState(false);
   const recipe = useMemo(() => previewRecipe(draft), [draft]);
   const nutrients = useMemo(() => perServingNutrients(recipe, catalogueLookup), [recipe]);
@@ -289,7 +289,7 @@ export function RecipeBuilder({ state, excludeId }: { state: RecipeDraftState; e
           ))}
         </div>
         <p className="m-0 border-t border-muted-on-dark/30 pt-2 text-[13px] leading-snug text-muted-on-dark">
-          {hasWeight ? `Có dữ liệu ${known}/${COUNTED_NUTRIENT_KEYS.length} vi chất` : "Thêm nguyên liệu để xem dinh dưỡng"}
+          {hasWeight ? `Đủ dữ liệu ${known}/${COUNTED_NUTRIENT_KEYS.length} vi chất` : "Thêm nguyên liệu để xem dinh dưỡng"}
         </p>
       </section>
 
@@ -297,8 +297,8 @@ export function RecipeBuilder({ state, excludeId }: { state: RecipeDraftState; e
         open={pickerOpen}
         onClose={() => setPickerOpen(false)}
         disabledIds={excludeId ? [excludeId] : []}
-        onPick={(food) => {
-          addIngredient(food);
+        onConfirm={(foods) => {
+          addIngredients(foods);
           setPickerOpen(false);
         }}
       />

@@ -238,6 +238,23 @@ export function recipeToDraft(recipe: Recipe): RecipeDraft {
   };
 }
 
+/**
+ * The draft of "Tùy chỉnh thành món của tôi": a catalogue dish with a `recipe` becomes an editable recipe of the
+ * user's own (named "<tên món> (của tôi)", one serving, its ingredients in grams, the cooked weight). Null when the
+ * food has no recipe.
+ */
+export function recipeDraftFromFood(food: FoodItem): RecipeDraft | null {
+  const recipe = food.recipe;
+  if (!recipe || recipe.ingredients.length === 0) return null;
+  const text = (n: number) => String(n).replace(".", ",");
+  return {
+    name: `${food.nameVi} (của tôi)`,
+    servings: 1,
+    ingredients: recipe.ingredients.map((i) => ({ foodId: i.foodId, name: i.name, amount: text(i.grams), unit: "g" as const })),
+    cooked: recipe.cookedGrams === null ? "" : text(recipe.cookedGrams),
+  };
+}
+
 /** What one ingredient adds to a serving, in grams of the ingredient. */
 export function ingredientPerServing(ingredient: Pick<RecipeIngredient, "grams">, servings: number): number {
   return round(ingredient.grams / clampServings(servings), 1);

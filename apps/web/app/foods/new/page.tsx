@@ -12,7 +12,7 @@ import { AppHeader } from "@/components/ui/app-header";
 import { AppShell } from "@/components/ui/app-shell";
 import { ChipGroup } from "@/components/ui/chip-group";
 import { RecipeBuilder, useRecipeDraft } from "@/components/foods/recipe-builder";
-import { draftToRecipe, recipeToDraft, RECIPE_ID_PREFIX } from "@/lib/recipe";
+import { draftToRecipe, recipeDraftFromFood, recipeToDraft, RECIPE_ID_PREFIX } from "@/lib/recipe";
 import { getRecipe, saveRecipe } from "@/lib/recipe-store";
 import { useBack } from "@/hooks/use-back";
 
@@ -25,9 +25,14 @@ function CreateFoodInner() {
   const mealSlot = useMealSlot(searchParams.get("meal"));
   const mealNameVi = mealSlot ? getMealSlotNameVi(mealSlot) : "—";
 
-  // Nhập dinh dưỡng (from a label) or Từ nguyên liệu (a recipe). ?recipe=<id> edits a saved recipe.
+  // Tính từ nguyên liệu (a recipe, the default) or Tự nhập (typed from a label). ?recipe=<id> edits a saved recipe;
+  // ?from=<food id> starts a recipe from a catalogue dish that has one (Tùy chỉnh thành món của tôi).
   const editId = searchParams.get("recipe");
-  const [mode, setMode] = useState<"nutrition" | "recipe">(editId ? "recipe" : searchParams.get("mode") === "recipe" ? "recipe" : "nutrition");
+  const fromId = searchParams.get("from");
+  const requestedMode = searchParams.get("mode");
+  const [mode, setMode] = useState<"nutrition" | "recipe">(
+    editId || fromId ? "recipe" : requestedMode === "nutrition" || requestedMode === "manual" ? "nutrition" : "recipe"
+  );
   const recipeState = useRecipeDraft();
   const [recipeMissing, setRecipeMissing] = useState(false);
   const { setDraft: setRecipeDraft } = recipeState;
@@ -37,6 +42,19 @@ function CreateFoodInner() {
     if (stored) setRecipeDraft(recipeToDraft(stored));
     else setRecipeMissing(true);
   }, [editId, setRecipeDraft]);
+  useEffect(() => {
+    if (!fromId || editId) return;
+    let cancelled = false;
+    apiClient.getFood(fromId).then((food) => {
+      const draft = food ? recipeDraftFromFood(food) : null;
+      if (cancelled) return;
+      if (draft) setRecipeDraft(draft);
+      else setRecipeMissing(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [fromId, editId, setRecipeDraft]);
 
   // A ref, not state: two taps in the same frame must save once (a second id would make a second recipe)
   const recipeSaving = useRef(false);
@@ -187,15 +205,24 @@ function CreateFoodInner() {
       {/* Form Content */}
       <form onSubmit={handleSubmit} className="flex-1 w-full max-w-[560px] mx-auto p-4 flex flex-col gap-4">
         {!editId && (
-          <ChipGroup
-            columns={2}
-            tone="light"
-            data-align-group="create-mode"
-            items={[
-              { id: "nutrition", label: "Nhập dinh dưỡng", active: mode === "nutrition", onClick: () => setMode("nutrition") },
-              { id: "recipe", label: "Từ nguyên liệu", active: mode === "recipe", onClick: () => setMode("recipe") },
-            ]}
-          />
+          <div role="group" aria-label="Cách tạo món" data-tour="create-mode" className="flex flex-col gap-2">
+            <ChipGroup
+              columns={2}
+              tone="light"
+              data-align-group="create-mode"
+              items={[
+                { id: "recipe", label: "Tính từ nguyên liệu", active: mode === "recipe", onClick: () => setMode("recipe") },
+                { id: "nutrition", label: "Tự nhập", active: mode === "nutrition", onClick: () => setMode("nutrition") },
+              ]}
+            />
+            {mode === "recipe" ? (
+              <p className="m-0 text-[13px] leading-snug text-secondary">Kcal và 22 vi chất tự tính từ dữ liệu trong app</p>
+            ) : (
+              <p role="note" className="m-0 rounded-xl bg-warning-bg px-3 py-2 text-[13px] leading-snug text-warning-text">
+                Tự nhập chỉ có kcal và chất đa lượng. Vi chất để trống nếu bạn không nhập. Món sẽ có nhãn Tự nhập.
+              </p>
+            )}
+          </div>
         )}
         {mode === "recipe" ? (
           recipeMissing ? (

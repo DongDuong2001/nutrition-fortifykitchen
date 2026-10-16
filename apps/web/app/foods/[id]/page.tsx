@@ -13,7 +13,7 @@ import { goodSourcesOf, microRowsFor } from "@/lib/food-detail";
 import { categoryLabel, categoryOf } from "@/lib/food-categories";
 import { formatAmount } from "@/lib/format";
 import { foodSourceLabel } from "@/lib/food-meta";
-import { isProxy } from "@/lib/food-source";
+import { isManualFood, isProxy } from "@/lib/food-source";
 import { SourceSheet } from "@/components/foods/source-sheet";
 import { FoodMicros, GoodSources } from "@/components/foods/food-micros";
 import { ComparePicker } from "@/components/foods/compare-picker";
@@ -177,6 +177,9 @@ function FoodDetailInner() {
             {isProxy(food) && (
               <span className="inline-flex h-6 items-center rounded-full bg-warning-bg px-2 text-xs font-bold text-warning-text">Ước tính</span>
             )}
+            {isManualFood(food) && (
+              <span className="inline-flex h-6 items-center rounded-full border border-card-border bg-page px-2 text-xs font-bold text-secondary">Tự nhập</span>
+            )}
             <span>·</span>
             <span>{food.servings[0]?.grams ?? 100} g mỗi khẩu phần</span>
           </span>
@@ -293,9 +296,18 @@ function FoodDetailInner() {
           </Card>
         )}
 
-        <PillButton variant="secondary" onClick={() => setCompareOpen(true)} aria-haspopup="dialog">
+        <PillButton variant="secondary" onClick={() => setCompareOpen(true)} aria-haspopup="dialog" data-tour="food-compare">
           So sánh
         </PillButton>
+
+        {food.recipe && (
+          <PillButton
+            variant="secondary"
+            href={`/foods/new?from=${encodeURIComponent(food.id)}${searchParams.get("meal") ? `&meal=${searchParams.get("meal")}` : ""}`}
+          >
+            Tùy chỉnh thành món của tôi
+          </PillButton>
+        )}
 
         <GoodSources rows={goodSources} />
         {micros && <FoodMicros rows={micros.rows} unknown={micros.unknown} portionLabel={`${formatAmount(parsedGrams, "g")} g`} />}

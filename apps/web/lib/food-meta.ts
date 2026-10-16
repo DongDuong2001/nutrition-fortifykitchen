@@ -10,6 +10,7 @@ export function foodSourceLabel(source?: string | null): string {
     case "label":
       return "Nhãn";
     case "community":
+    case "recipe-calc":
       return "Ước tính";
     case "cnf":
       return "CNF (Canada)";

@@ -13,6 +13,7 @@ import {
   per100Nutrients,
   perServingNutrients,
   rawTotalGrams,
+  recipeDraftFromFood,
   recipeToDraft,
   recipeToFood,
   servingGrams,
@@ -240,5 +241,51 @@ describe("storage", () => {
     const b = recipe({ id: "recipe-2", name: "B" });
     expect(upsertRecipe([a], b).map((r) => r.id)).toEqual(["recipe-2", "recipe-1"]);
     expect(upsertRecipe([a, b], { ...a, name: "A2" }).map((r) => r.name)).toEqual(["A2", "B"]);
+  });
+});
+
+describe("recipeDraftFromFood (Tùy chỉnh thành món của tôi)", () => {
+  const dish = {
+    id: "food-com-dau-do",
+    nameVi: "Cơm đậu đỏ",
+    category: "tinh_bot",
+    source: "USDA",
+    servings: [{ label: "100 g", grams: 100 }],
+    nutrients: { energy: 130 },
+    recipe: {
+      ingredients: [
+        { foodId: "ing-gao", name: "Gạo trắng (sống)", grams: 100 },
+        { foodId: "ing-dau-do", name: "Đậu đỏ (hạt khô)", grams: 40 },
+      ],
+      cookedGrams: 380,
+    },
+  } as unknown as import("../mock/foods").FoodItem;
+
+  it("fills the name with (của tôi), one serving, each ingredient in grams, and the cooked weight", () => {
+    expect(recipeDraftFromFood(dish)).toEqual({
+      name: "Cơm đậu đỏ (của tôi)",
+      servings: 1,
+      ingredients: [
+        { foodId: "ing-gao", name: "Gạo trắng (sống)", amount: "100", unit: "g" },
+        { foodId: "ing-dau-do", name: "Đậu đỏ (hạt khô)", amount: "40", unit: "g" },
+      ],
+      cooked: "380",
+    });
+  });
+
+  it("an unknown cooked weight leaves the field empty, a decimal amount uses the comma", () => {
+    const draft = recipeDraftFromFood({ ...dish, recipe: { ingredients: [{ foodId: "a", name: "A", grams: 7.5 }], cookedGrams: null } });
+    expect(draft?.cooked).toBe("");
+    expect(draft?.ingredients[0].amount).toBe("7,5");
+  });
+
+  it("a food with no recipe, or no ingredients, gives no draft", () => {
+    expect(recipeDraftFromFood({ ...dish, recipe: undefined })).toBeNull();
+    expect(recipeDraftFromFood({ ...dish, recipe: { ingredients: [], cookedGrams: 100 } })).toBeNull();
+  });
+
+  it("the draft passes the recipe checks as it is", () => {
+    const draft = recipeDraftFromFood(dish)!;
+    expect(hasErrors(validateDraft(draft))).toBe(false);
   });
 });

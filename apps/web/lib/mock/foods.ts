@@ -1,5 +1,6 @@
 import type { FoodCategory } from "../food-categories";
 import { demoActive } from "../demo";
+import { RECIPE_DISH_FOODS, RECIPE_INGREDIENT_FOODS } from "./recipe-dishes";
 
 export interface FoodServing {
   label: string;
@@ -23,6 +24,14 @@ export interface FoodItem {
   match?: FoodMatch;
   /** Where the numbers come from: the database, the id of the original food there and a link to it. */
   sourceRef?: FoodSourceRef;
+  /** A dish made from ingredients (grams of each, the cooked weight): its food page offers "Tùy chỉnh thành món của tôi". */
+  recipe?: FoodRecipe;
+}
+
+export interface FoodRecipe {
+  ingredients: Array<{ foodId: string; name: string; grams: number }>;
+  /** Weight of the whole pot after cooking, when known */
+  cookedGrams: number | null;
 }
 
 /**
@@ -866,5 +875,7 @@ export const MOCK_FOODS: FoodItem[] = [
     },
   },
 ];
+
+MOCK_FOODS.push(...RECIPE_INGREDIENT_FOODS, ...RECIPE_DISH_FOODS);
 
 if (process.env.NEXT_PUBLIC_API_MODE === "live") dropMockCatalog();
