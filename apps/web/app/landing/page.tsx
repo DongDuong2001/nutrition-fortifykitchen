@@ -3,6 +3,7 @@ import Link from "next/link";
 import { IconCheck } from "@/components/ui/icons";
 import { StackingAudiences } from "@/components/landing/stacking-audiences";
 import { KilnWordmarkFooter } from "@/components/landing/kiln-wordmark-footer";
+import { FloatingPhone } from "@/components/landing/floating-phone";
 
 export const metadata = {
   title: "H1T MICRO — Hệ thống theo dõi 22 vi chất và năng lượng chuẩn khoa học",
@@ -77,112 +78,60 @@ export default function LandingPage() {
       {/* ============================================================== */}
       {/* 2. HERO SECTION                                               */}
       {/* ============================================================== */}
-      <section className="relative overflow-hidden pt-12 pb-20 lg:pt-20 lg:pb-28">
+      <section className="relative overflow-hidden pt-10 pb-16 lg:pt-16 lg:pb-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col items-center text-center max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-card border border-card-border text-xs font-bold text-blue mb-6 shadow-2xs">
-              <span className="h-1.5 w-1.5 rounded-full bg-blue" aria-hidden="true" />
-              KHOA HỌC DINH DƯỠNG &amp; 22 VI CHẤT THIẾT YẾU
-            </div>
-
-            <h1 className="m-0 text-4xl sm:text-5xl lg:text-6xl font-black font-display italic tracking-tight text-ink leading-[1.08]">
-              CÂN BẰNG 22 VI CHẤT &amp; KIỂM SOÁT NĂNG LƯỢNG
-            </h1>
-
-            <p className="mt-6 text-base sm:text-lg text-secondary leading-relaxed max-w-2xl font-normal">
-              Không chỉ dừng lại ở calories. H1T MICRO cung cấp hệ thống định lượng minh bạch 10 khoáng chất
-              và 12 vitamin theo tiêu chuẩn khuyến nghị RNI/RDA của Viện Dinh Dưỡng Quốc Gia và Bộ Nông Nghiệp Hoa Kỳ (USDA).
-            </p>
-
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-              <Link
-                href="/signup"
-                className="min-h-[50px] px-8 rounded-full bg-blue text-on-accent text-base font-bold inline-flex items-center justify-center no-underline hover:bg-blue/90 active:scale-[0.97] motion-reduce:active:scale-100 transition-all shadow-md"
-              >
-                Tạo tài khoản miễn phí
-              </Link>
-              <Link
-                href="/signin"
-                className="min-h-[50px] px-7 rounded-full bg-card border border-card-border text-text text-base font-bold inline-flex items-center justify-center no-underline hover:bg-divider active:scale-[0.97] motion-reduce:active:scale-100 transition-all"
-              >
-                Đăng nhập tài khoản
-              </Link>
-            </div>
-
-            {/* Trust points */}
-            <div className="mt-10 flex flex-wrap items-center justify-center gap-6 text-xs sm:text-sm font-semibold text-secondary">
-              <div className="flex items-center gap-2">
-                <span className="text-blue font-bold">✓</span>
-                <span>22 vi chất thiết yếu</span>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
+            {/* Left Column: Value proposition, headline and CTAs */}
+            <div className="lg:col-span-7 flex flex-col items-start text-left">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-card border border-card-border text-xs font-bold text-blue mb-6 shadow-2xs">
+                <span className="h-1.5 w-1.5 rounded-full bg-blue" aria-hidden="true" />
+                KHOA HỌC DINH DƯỠNG &amp; 22 VI CHẤT THIẾT YẾU
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-blue font-bold">✓</span>
-                <span>Bảng thành phần thực phẩm minh bạch</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-blue font-bold">✓</span>
-                <span>Tối ưu điện giải theo vận động</span>
-              </div>
-            </div>
-          </div>
 
-          {/* Product Interface Preview Mockup */}
-          <div className="mt-16 mx-auto max-w-5xl rounded-2xl border border-card-border bg-card p-4 sm:p-6 shadow-xl">
-            <div className="rounded-xl border border-card-border bg-surface-dark p-6 text-on-dark flex flex-col gap-6">
-              <div className="flex flex-wrap items-baseline justify-between gap-4 border-b border-card-border/30 pb-4">
-                <div>
-                  <div className="text-xs font-bold uppercase tracking-wider text-sky">
-                    H1T MICRO DASHBOARD · NGÀY MẪU CHUẨN
-                  </div>
-                  <div className="text-2xl font-black font-display italic mt-1">
-                    1.041 <span className="text-sm font-normal text-muted-on-dark font-sans">/ 1.950–2.275 kcal (53%)</span>
-                  </div>
+              <h1 className="m-0 text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black font-display italic tracking-tight text-ink leading-[1.08]">
+                CÂN BẰNG 22 VI CHẤT &amp; KIỂM SOÁT NĂNG LƯỢNG
+              </h1>
+
+              <p className="mt-6 text-base sm:text-lg text-secondary leading-relaxed max-w-2xl font-normal">
+                Không chỉ dừng lại ở calories. H1T MICRO cung cấp hệ thống định lượng minh bạch 10 khoáng chất
+                và 12 vitamin theo tiêu chuẩn khuyến nghị RNI/RDA của Viện Dinh Dưỡng Quốc Gia và Bộ Nông Nghiệp Hoa Kỳ (USDA).
+              </p>
+
+              <div className="mt-8 flex flex-wrap items-center gap-4">
+                <Link
+                  href="/signup"
+                  className="min-h-[50px] px-8 rounded-full bg-blue text-on-accent text-base font-bold inline-flex items-center justify-center no-underline hover:bg-blue/90 active:scale-[0.97] motion-reduce:active:scale-100 transition-all shadow-md"
+                >
+                  Tạo tài khoản miễn phí
+                </Link>
+                <Link
+                  href="/signin"
+                  className="min-h-[50px] px-7 rounded-full bg-card border border-card-border text-text text-base font-bold inline-flex items-center justify-center no-underline hover:bg-divider active:scale-[0.97] motion-reduce:active:scale-100 transition-all"
+                >
+                  Đăng nhập tài khoản
+                </Link>
+              </div>
+
+              {/* Trust points */}
+              <div className="mt-10 flex flex-wrap items-center gap-6 text-xs sm:text-sm font-semibold text-secondary">
+                <div className="flex items-center gap-2">
+                  <span className="text-blue font-bold">✓</span>
+                  <span>22 vi chất thiết yếu</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="px-3 py-1 rounded-full bg-card/20 text-xs font-bold text-on-dark border border-card-border/40">
-                    Ngày tập 60 phút
-                  </span>
-                  <span className="px-3 py-1 rounded-full bg-blue/30 text-xs font-bold text-sky border border-blue/40">
-                    Muối khuyến nghị: 7–10,5 g
-                  </span>
+                  <span className="text-blue font-bold">✓</span>
+                  <span>Bảng thành phần thực phẩm minh bạch</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-blue font-bold">✓</span>
+                  <span>Tối ưu điện giải theo vận động</span>
                 </div>
               </div>
+            </div>
 
-              {/* Grid 4 macros */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div className="p-3 rounded-lg bg-card/10">
-                  <div className="text-xs font-bold text-muted-on-dark">Tinh bột</div>
-                  <div className="text-base font-extrabold mt-0.5">133 g <span className="text-xs text-sky font-normal">(52%)</span></div>
-                </div>
-                <div className="p-3 rounded-lg bg-card/10">
-                  <div className="text-xs font-bold text-muted-on-dark">Đạm</div>
-                  <div className="text-base font-extrabold mt-0.5">62 g <span className="text-xs text-sky font-normal">(60%)</span></div>
-                </div>
-                <div className="p-3 rounded-lg bg-card/10">
-                  <div className="text-xs font-bold text-muted-on-dark">Chất béo</div>
-                  <div className="text-base font-extrabold mt-0.5">21 g <span className="text-xs text-sky font-normal">(64%)</span></div>
-                </div>
-                <div className="p-3 rounded-lg bg-card/10">
-                  <div className="text-xs font-bold text-muted-on-dark">Chất xơ</div>
-                  <div className="text-base font-extrabold mt-0.5">14 g <span className="text-xs text-sky font-normal">(47%)</span></div>
-                </div>
-              </div>
-
-              {/* Sample micro highlights */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-card-border/30 text-xs">
-                <div className="flex justify-between items-center bg-card/5 px-3 py-2 rounded-md">
-                  <span className="text-muted-on-dark font-medium">Natri (Điện giải)</span>
-                  <span className="font-bold text-on-dark">2.900 mg · 105%</span>
-                </div>
-                <div className="flex justify-between items-center bg-card/5 px-3 py-2 rounded-md">
-                  <span className="text-muted-on-dark font-medium">Kali</span>
-                  <span className="font-bold text-on-dark">3.900 mg · 75%</span>
-                </div>
-                <div className="flex justify-between items-center bg-card/5 px-3 py-2 rounded-md">
-                  <span className="text-muted-on-dark font-medium">Canxi</span>
-                  <span className="font-bold text-warning-text">331 mg · 28%</span>
-                </div>
-              </div>
+            {/* Right Column: Floating Phone displaying H1T MICRO mobile dashboard */}
+            <div className="lg:col-span-5 flex justify-center lg:justify-end">
+              <FloatingPhone />
             </div>
           </div>
         </div>
