@@ -69,6 +69,14 @@ func (rl *UserRateLimiter) LimitWrites(next http.Handler) http.Handler {
 		b, exists := rl.buckets[key]
 		now := time.Now()
 		if !exists {
+			if len(rl.buckets) >= 10000 {
+				cutoff := now.Add(-5 * time.Minute)
+				for k, oldB := range rl.buckets {
+					if oldB.lastRefill.Before(cutoff) {
+						delete(rl.buckets, k)
+					}
+				}
+			}
 			b = &clientBucket{
 				tokens:     rl.maxWrites - 1,
 				lastRefill: now,
