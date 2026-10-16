@@ -51,7 +51,7 @@ export const MOCK_FOODS: FoodItem[] = [
     category: "trai_cay",
     nameVi: "Chà là",
     source: "USDA",
-    sourceRef: fdc(171413),
+    sourceRef: fdc(168191),
     servings: [
       { label: "30 g", grams: 30 },
       { label: "3 quả", grams: 30 },

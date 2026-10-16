@@ -49,7 +49,7 @@ describe("mock catalogue sources", () => {
     const withRef = MOCK_FOODS.filter((f) => f.source === "USDA" && f.sourceRef);
     expect(withRef.length).toBeGreaterThanOrEqual(10);
     const dates = MOCK_FOODS.find((f) => f.id === "food-cha-la");
-    expect(dates?.sourceRef).toEqual({ db: "SR Legacy", id: "FDC 171413", url: "https://fdc.nal.usda.gov/food-details/171413/nutrients" });
+    expect(dates?.sourceRef).toEqual({ db: "SR Legacy", id: "FDC 168191", url: "https://fdc.nal.usda.gov/food-details/168191/nutrients" });
     for (const f of withRef) expect(f.sourceRef?.url).toMatch(/^https:\/\/fdc\.nal\.usda\.gov\/food-details\/\d+\/nutrients$/);
   });
 });
