@@ -65,6 +65,14 @@ export function EmailPasswordForm({ variant }: { variant: "signin" | "signup" })
     }
     // Sign-up's only server error is an email already in use; sign-in's is the one generic message.
     setErrors(signup ? { email: result.error } : { password: result.error });
+    setCaptchaToken(undefined);
+    if (typeof window !== "undefined" && window.hcaptcha) {
+      try {
+        window.hcaptcha.reset();
+      } catch {
+        // ignore
+      }
+    }
     setBusy(false);
   }
 
@@ -78,6 +86,14 @@ export function EmailPasswordForm({ variant }: { variant: "signin" | "signup" })
       const result = await requestMagicLink(email.trim(), captchaToken);
       if (!result.ok) {
         setErrors({ email: result.error });
+        setCaptchaToken(undefined);
+        if (typeof window !== "undefined" && window.hcaptcha) {
+          try {
+            window.hcaptcha.reset();
+          } catch {
+            // ignore
+          }
+        }
         setBusy(false);
         return;
       }
@@ -85,6 +101,14 @@ export function EmailPasswordForm({ variant }: { variant: "signin" | "signup" })
       router.push("/signin/check-email");
     } catch {
       setErrors({ email: "Chưa gửi được liên kết. Thử lại sau ít phút." });
+      setCaptchaToken(undefined);
+      if (typeof window !== "undefined" && window.hcaptcha) {
+        try {
+          window.hcaptcha.reset();
+        } catch {
+          // ignore
+        }
+      }
       setBusy(false);
     }
   }
