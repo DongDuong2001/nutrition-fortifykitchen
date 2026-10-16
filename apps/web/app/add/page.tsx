@@ -21,8 +21,8 @@ import { foodMeta } from "@/lib/food-meta";
 import { CreateFoodButton } from "@/components/foods/create-food-button";
 import { isCategoryFilter } from "@/lib/food-categories";
 import { resolveFavourites } from "@/lib/favourites";
-import { CompareBar } from "@/components/foods/compare-bar";
-import { MAX_COMPARE_FOODS, compareHref } from "@/lib/food-compare";
+import { TrayBar, TrayReviewSheet } from "@/components/add/add-tray";
+import { canAddTray, putInTray, removeFromTray, setTrayPortion, toggleTray, trayTotals, type TrayItem } from "@/lib/tray";
 
 import {
   parseMealSlot,
@@ -48,7 +48,7 @@ function AddFoodInner() {
   // Closing the sheet returns to the tab it was opened from (the diary when there is no history)
   const goBack = useBack();
   const searchParams = useSearchParams();
-  const { data, addFoodEntry, recentFoods, savedMeals, addSavedMeal, addQuickEntry, favouriteIds } = useDiary();
+  const { data, addFoodEntry, addFoodEntries, recentFoods, savedMeals, addSavedMeal, addQuickEntry, favouriteIds } = useDiary();
 
   const resolvedSlot = useMealSlot(searchParams.get("meal"));
   const [overrideSlot, setOverrideSlot] = useState<MealSlot | null>(null);
@@ -57,14 +57,15 @@ function AddFoodInner() {
   const [switcherOpen, setSwitcherOpen] = useState(false);
   const [quickOpen, setQuickOpen] = useState(false);
   const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
-  // So sánh mode: the rows become selectable (up to 3) and a bar offers "So sánh (n)"
-  const [compareMode, setCompareMode] = useState(false);
-  const [compareIds, setCompareIds] = useState<string[]>([]);
+  // The tray: foods ticked with the + circle (or put in by Lưu & chọn tiếp), added together. It survives query and
+  // filter changes and goes when the foods are added or the sheet is closed.
+  const [tray, setTray] = useState<TrayItem[]>([]);
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const reopenReview = useRef(false);
 
   const [gramsInput, setGramsInput] = useState("");
   const [selectedServingLabel, setSelectedServingLabel] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [addedCount, setAddedCount] = useState(0);
   const [isDesktop, setIsDesktop] = useState(false);
 
   const desktopSearchInputRef = useRef<HTMLInputElement>(null);
@@ -150,7 +151,7 @@ function AddFoodInner() {
     [savedMeals]
   );
 
-  const showShortcuts = !query.trim() && filter === "all" && !compareMode;
+  const showShortcuts = !query.trim() && filter === "all";
   const favouritesOnly = filter === "favorite" && !query.trim();
 
   // Active grams number
@@ -169,19 +170,24 @@ function AddFoodInner() {
     }
   };
 
-  // Submit and stay to add more foods to the same meal slot
-  const handleAddAndContinue = async () => {
-    if (!selectedFood || parsedGrams <= 0 || isSubmitting || mealSlot === null) return;
+  // Lưu & chọn tiếp: the food with the chosen portion goes in the tray and the search stays as it was
+  const handleAddAndContinue = () => {
+    if (!selectedFood || parsedGrams <= 0 || mealSlot === null) return;
+    setTray((t) => putInTray(t, selectedFood, parsedGrams, selectedServingLabel));
+    setSelectedFood(null);
+    setGramsInput("");
+    setSelectedServingLabel("");
+  };
+
+  const trayTotalsNow = useMemo(() => trayTotals(tray), [tray]);
+  const trayAddable = canAddTray(tray);
+  const handleAddTray = () => {
+    if (!trayAddable || mealSlot === null || isSubmitting) return;
     setIsSubmitting(true);
-    try {
-      const ok = await addFoodEntry(selectedFood, parsedGrams, mealSlot, selectedServingLabel);
-      if (ok) {
-        setAddedCount((c) => c + 1);
-        setSelectedFood(null);
-        setGramsInput("");
-        setSelectedServingLabel("");
-      }
-    } finally {
+    if (addFoodEntries(tray, mealSlot)) {
+      setTray([]);
+      router.push("/");
+    } else {
       setIsSubmitting(false);
     }
   };
@@ -225,19 +231,6 @@ function AddFoodInner() {
     return result;
   };
 
-  const toggleCompare = (food: FoodItem) => {
-    setCompareIds((prev) =>
-      prev.includes(food.id) ? prev.filter((id) => id !== food.id) : prev.length >= MAX_COMPARE_FOODS ? prev : [...prev, food.id]
-    );
-  };
-  const compareFull = compareIds.length >= MAX_COMPARE_FOODS;
-  const compareDisabledIds = useMemo(
-    () => (compareMode && compareFull ? list.foods.map((f) => f.id).filter((id) => !compareIds.includes(id)) : undefined),
-    [compareMode, compareFull, list.foods, compareIds]
-  );
-  const compareNames = compareIds.map((id) => MOCK_FOODS.find((f) => f.id === id)?.nameVi ?? id);
-  const openCompare = () => router.push(compareHref(compareIds));
-
   // A favourite with a last portion adds in one tap, like a recent. Without history the portion panel opens.
   const pickFromList = (food: FoodItem) => {
     const last = favouritesOnly ? lastPortionOf(food.id, recentFoods, MOCK_FOODS) : null;
@@ -261,19 +254,19 @@ function AddFoodInner() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         // An open sheet (Chỉ ghi kcal, meal switcher) closes itself on Esc; the add screen stays
-        if (quickOpen || switcherOpen) return;
+        if (quickOpen || switcherOpen || reviewOpen) return;
         e.preventDefault();
         handleClose();
       } else if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {
         // If not typing in input or if adding (the Chỉ ghi kcal form handles its own Enter)
-        if (selectedFood && parsedGrams > 0 && !quickOpen && !compareMode) {
+        if (selectedFood && parsedGrams > 0 && !quickOpen) {
           handleAddFood();
         }
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleClose, selectedFood, parsedGrams, handleAddFood, quickOpen, switcherOpen, compareMode]);
+  }, [handleClose, selectedFood, parsedGrams, handleAddFood, quickOpen, switcherOpen, reviewOpen]);
 
   const mealNameVi = mealSlot ? getMealSlotNameVi(mealSlot) : "—";
 
@@ -312,27 +305,13 @@ function AddFoodInner() {
 
   const createFoodLink = <CreateFoodButton href={newFoodHref} />;
 
-  // "So sánh" in the header: turns the rows into selectable items. Pressing it again leaves the mode.
-  const compareToggle = (
-    <button
-      type="button"
-      aria-pressed={compareMode}
-      onClick={() => {
-        setCompareMode((on) => !on);
-        setCompareIds([]);
-      }}
-      className={`min-h-[44px] cursor-pointer rounded-full px-4 text-sm font-bold active:scale-[0.97] motion-reduce:active:scale-100 ${
-        compareMode ? "border-0 bg-ink text-on-dark" : "border border-card-border bg-card text-text hover:bg-page"
-      }`}
-    >
-      So sánh
-    </button>
-  );
-
-  // The list's selection props: one tapped row for the portion panel, or the ticked rows in So sánh mode
-  const listPick = compareMode
-    ? { selectedId: undefined, selectedIds: compareIds, disabledIds: compareDisabledIds, onPick: toggleCompare, onOpen: undefined }
-    : { selectedId: selectedFood?.id, selectedIds: undefined, disabledIds: undefined, onPick: pickFromList, onOpen: favouritesOnly ? pickFood : undefined };
+  // The list's selection props: one tapped row for the portion panel; the + circle of each row is the tray
+  const listPick = {
+    selectedId: selectedFood?.id,
+    onPick: pickFromList,
+    onOpen: favouritesOnly ? pickFood : undefined,
+    tray: { ids: tray.map((t) => t.food.id), onToggle: (food: FoodItem) => setTray((t) => toggleTray(t, food)) },
+  };
 
   return (
     <div className="min-h-screen bg-page text-text font-sans">
@@ -380,7 +359,6 @@ function AddFoodInner() {
               </div>
 
               <div className="flex shrink-0 items-center gap-2">
-                {compareToggle}
                 <button
                   type="button"
                   onClick={handleClose}
@@ -398,23 +376,6 @@ function AddFoodInner() {
             <div className="flex gap-6 items-start">
               {/* Left Pane: Search & Results */}
               <div data-align-container="add-list" className="flex-1 min-w-[340px] flex flex-col gap-3">
-                {addedCount > 0 && (
-                  <div
-                    role="status"
-                    className="flex items-center justify-between rounded-xl bg-blue/10 border border-blue/20 px-3 py-2 text-xs"
-                  >
-                    <span className="font-semibold text-text">
-                      Đã thêm {addedCount} món vào {mealNameVi}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => router.push("/")}
-                      className="min-h-[36px] px-3 rounded-full bg-blue text-on-accent font-bold cursor-pointer active:scale-[0.97] motion-reduce:active:scale-100 transition-all border-0"
-                    >
-                      Hoàn tất
-                    </button>
-                  </div>
-                )}
                 <FoodSearchField value={query} onChange={setQuery} inputRef={desktopSearchInputRef} />
 
                 {/* Filter row: Tất cả, Yêu thích, then categories with foods */}
@@ -435,13 +396,21 @@ function AddFoodInner() {
                   footer={createFoodLink}
                   className="max-h-[360px] overflow-y-auto pb-1"
                 />
+                {tray.length > 0 && (
+                  <TrayBar
+                    totals={trayTotalsNow}
+                    mealName={mealNameVi}
+                    canAdd={trayAddable}
+                    submitting={isSubmitting}
+                    onReview={() => setReviewOpen(true)}
+                    onAdd={handleAddTray}
+                  />
+                )}
               </div>
 
               {/* Right Pane: Selected Food Portion & Macros, or an empty state until a food is picked */}
               <div className="w-[340px] shrink-0 self-stretch">
-                {compareMode ? (
-                  <CompareBar names={compareNames} onSubmit={openCompare} className="p-4" />
-                ) : selectedFood ? (
+                {selectedFood ? (
                   <PortionPanel
                     food={selectedFood}
                     gramsInput={gramsInput}
@@ -455,25 +424,6 @@ function AddFoodInner() {
                     tone="light"
                     showMicros={true}
                   />
-                ) : addedCount > 0 ? (
-                  <div className="h-full flex flex-col items-center justify-center text-center p-6 bg-card border border-card-border rounded-[18px] gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue/10 text-blue font-bold text-base">
-                      {addedCount}
-                    </div>
-                    <div className="font-bold text-text text-base">
-                      Đã thêm {addedCount} món vào {mealNameVi}
-                    </div>
-                    <p className="text-xs text-secondary leading-relaxed m-0">
-                      Chọn tiếp món khác trong danh sách hoặc bấm hoàn tất để trở về nhật ký.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => router.push("/")}
-                      className="min-h-[44px] px-6 rounded-full bg-blue text-on-accent font-bold text-sm cursor-pointer hover:bg-blue/90 active:scale-[0.97] motion-reduce:active:scale-100 transition-all border-0 shadow-sm"
-                    >
-                      Hoàn tất bữa ăn
-                    </button>
-                  </div>
                 ) : (
                   <div className="h-full flex items-center justify-center text-center text-sm text-secondary p-4">
                     Chọn một món để xem khẩu phần
@@ -533,7 +483,6 @@ function AddFoodInner() {
               </div>
 
               <div className="flex shrink-0 items-center gap-2">
-                {compareToggle}
                 <button
                   type="button"
                   onClick={handleClose}
@@ -546,24 +495,6 @@ function AddFoodInner() {
                 </button>
               </div>
             </div>
-
-            {addedCount > 0 && (
-              <div
-                role="status"
-                className="flex items-center justify-between rounded-xl bg-blue/10 border border-blue/20 px-3 py-2 text-xs"
-              >
-                <span className="font-semibold text-text">
-                  Đã thêm {addedCount} món vào {mealNameVi}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => router.push("/")}
-                  className="min-h-[36px] px-3 rounded-full bg-blue text-on-accent font-bold cursor-pointer active:scale-[0.97] motion-reduce:active:scale-100 transition-all border-0"
-                >
-                  Hoàn tất
-                </button>
-              </div>
-            )}
 
             <FoodSearchField value={query} onChange={setQuery} className="shrink-0" />
 
@@ -589,12 +520,19 @@ function AddFoodInner() {
           </div>
 
           {/* Bottom Selected Food Portion Panel */}
-          {compareMode && (
-            <div className="shrink-0 border-t border-divider px-4 pt-3 pb-[max(16px,env(safe-area-inset-bottom))]">
-              <CompareBar names={compareNames} onSubmit={openCompare} />
+          {tray.length > 0 && (
+            <div className="shrink-0 px-4 pb-2">
+              <TrayBar
+                totals={trayTotalsNow}
+                mealName={mealNameVi}
+                canAdd={trayAddable}
+                submitting={isSubmitting}
+                onReview={() => setReviewOpen(true)}
+                onAdd={handleAddTray}
+              />
             </div>
           )}
-          {!compareMode && selectedFood && (
+          {selectedFood && (
             <div className="shrink-0 px-4 pb-[max(16px,env(safe-area-inset-bottom))]">
               <PortionPanel
                 food={selectedFood}
@@ -614,12 +552,40 @@ function AddFoodInner() {
         </div>
       </div>
 
+      <TrayReviewSheet
+        open={reviewOpen}
+        onClose={() => setReviewOpen(false)}
+        items={tray}
+        totals={trayTotalsNow}
+        mealName={mealNameVi}
+        canAdd={trayAddable}
+        submitting={isSubmitting}
+        onRemove={(id) => {
+          const next = removeFromTray(tray, id);
+          setTray(next);
+          if (next.length === 0) setReviewOpen(false);
+        }}
+        onSetPortion={(id, grams, label) => setTray((t) => setTrayPortion(t, id, grams, label))}
+        onChangeMeal={() => {
+          reopenReview.current = true;
+          setReviewOpen(false);
+          setSwitcherOpen(true);
+        }}
+        onAdd={handleAddTray}
+      />
+
       <QuickAddSheet open={quickOpen} onClose={() => setQuickOpen(false)} mealName={mealNameVi} onSubmit={submitQuickEntry} />
 
       {/* Meal Switcher Bottom Sheet */}
       <MealSwitcher
         open={switcherOpen}
-        onClose={() => setSwitcherOpen(false)}
+        onClose={() => {
+          setSwitcherOpen(false);
+          if (reopenReview.current) {
+            reopenReview.current = false;
+            setReviewOpen(true);
+          }
+        }}
         selectedSlot={mealSlot}
         onSelectSlot={(slot) => setOverrideSlot(slot)}
         mealCalories={mealCalories}

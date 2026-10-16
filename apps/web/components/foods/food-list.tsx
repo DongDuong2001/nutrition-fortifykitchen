@@ -34,6 +34,11 @@ export interface FoodListProps {
   isFavourite?: (food: FoodItem) => boolean;
   /** Search results: a small tag on each row says where the numbers come from (USDA, Nhãn, VN, Ước tính, Của tôi, Chưa rõ). */
   showSourceTag?: boolean;
+  /**
+   * The add tray: each row also gets a + circle (44 px target) that puts the food in at its default portion and a
+   * filled check circle once it is in. The row itself still opens the portion panel (onPick).
+   */
+  tray?: { ids: readonly string[]; onToggle: (food: FoodItem) => void };
   /** Shown when the list has no foods. */
   empty: React.ReactNode;
   /** Shown after the foods, for example the create-food button. */
@@ -59,6 +64,7 @@ export function FoodList({
   showCategory = true,
   isFavourite,
   showSourceTag = false,
+  tray,
   empty,
   footer,
   className = "",
@@ -70,8 +76,9 @@ export function FoodList({
     const disabled = !!disabledIds?.includes(food.id);
     const meta = withCategory ? `${categoryName(food)} · ${getMeta(food)}` : getMeta(food);
     const showHeart = list.grouped && !!isFavourite?.(food);
+    const carried = !!tray?.ids.includes(food.id);
     return (
-      <li key={food.id} className="flex items-center border-t border-divider first:border-t-0">
+      <li key={food.id} className={`flex items-center border-t border-divider first:border-t-0 ${carried ? "bg-blue/10" : ""}`}>
         <button
           type="button"
           data-food-row
@@ -79,8 +86,8 @@ export function FoodList({
           disabled={disabled}
           onClick={() => onPick(food)}
           className={`flex min-h-[56px] min-w-0 flex-1 items-center gap-3 border-0 py-2 pl-4 text-left text-text transition-colors active:bg-divider motion-reduce:active:bg-transparent disabled:active:bg-transparent ${
-            onOpen ? "pr-1" : "pr-4"
-          } ${selected ? "bg-blue/10" : "bg-transparent"} ${disabled ? "cursor-default opacity-50" : "cursor-pointer"}`}
+            onOpen || tray ? "pr-1" : "pr-4"
+          } ${selected && !carried ? "bg-blue/10" : "bg-transparent"} ${disabled ? "cursor-default opacity-50" : "cursor-pointer"}`}
         >
           <span className="flex min-w-0 flex-1 flex-col gap-1">
             <span title={food.nameVi} className="line-clamp-2 break-words text-[15px] font-semibold leading-snug">
@@ -118,6 +125,26 @@ export function FoodList({
             </svg>
           )}
         </button>
+        {tray && (
+          <button
+            type="button"
+            role="checkbox"
+            aria-checked={carried}
+            aria-label={`${carried ? "Bỏ khỏi khay" : "Thêm vào khay"}: ${food.nameVi}`}
+            data-tray-toggle
+            data-tour="tray-toggle"
+            onClick={() => tray.onToggle(food)}
+            className="mr-2 inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent p-0 active:scale-[0.97] motion-reduce:active:scale-100"
+          >
+            <span
+              className={`flex h-9 w-9 items-center justify-center rounded-full ${carried ? "bg-blue text-on-accent" : "bg-blue/10 text-blue"}`}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                {carried ? <path d="m5 12.5 4.5 4.5L19 7.5" /> : <path d="M12 5v14M5 12h14" />}
+              </svg>
+            </span>
+          </button>
+        )}
         {onOpen && (
           <button
             type="button"

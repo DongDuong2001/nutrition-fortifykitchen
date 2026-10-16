@@ -130,6 +130,8 @@ interface DiaryContextValue {
     servingLabel?: string,
     options?: { undoable?: boolean }
   ) => Promise<boolean>;
+  /** The add tray: every item in one diary update and one toast whose Hoàn tác removes them all. False when an item has no energy figure. */
+  addFoodEntries: (items: Array<{ food: FoodItem; grams: number; label: string }>, mealSlot: MealSlot) => boolean;
   recentFoods: RecentFood[];
   addRecentFood: (food: FoodItem, servingLabel: string) => void;
   toast: ToastInfo | null;
@@ -807,6 +809,39 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     [addRecentFood, todayIso]
   );
 
+  const addFoodEntries = useCallback(
+    (items: Array<{ food: FoodItem; grams: number; label: string }>, mealSlot: MealSlot) => {
+      if (items.length === 0 || !items.every((i) => hasEnergy(i.food))) return false;
+      const addedAt = new Date().toISOString();
+      const entries: AddedDiaryEntry[] = items.map(({ food, grams, label }) => ({
+        id: generateUuid(),
+        foodId: food.id,
+        foodName: food.nameVi,
+        grams,
+        displayQty: label || `${formatAmount(grams, "g")} g`,
+        mealSlot,
+        ...entryNumbers(food, grams),
+        addedAt,
+      }));
+      setEdits((prev) => dismissUndoIn({ ...prev, added: [...prev.added, ...entries] }));
+      setToast({
+        message: `Đã thêm ${entries.length} món vào ${getMealSlotNameVi(mealSlot)}`,
+        kind: "undoable",
+        mealSlot,
+        durationMs: UNDO_TOAST_MS,
+        undoIds: entries.map((e) => e.id),
+      });
+      items.forEach(({ food, label }) => addRecentFood(food, label));
+      if (isLiveMode()) {
+        entries.forEach((e, i) => {
+          apiClient.addEntry({ id: e.id, foodId: items[i].food.id, grams: items[i].grams, mealSlot, date: todayIso || getTodayIsoVN() }).catch(() => {});
+        });
+      }
+      return true;
+    },
+    [addRecentFood, todayIso]
+  );
+
   const dismissToast = useCallback(() => {
     setToast(null);
     setEdits((prev) => dismissUndoIn(prev));
@@ -1128,6 +1163,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       data: compositeData,
       addedEntries,
       addFoodEntry,
+      addFoodEntries,
       recentFoods,
       addRecentFood,
       toast,
@@ -1169,6 +1205,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       compositeData,
       addedEntries,
       addFoodEntry,
+      addFoodEntries,
       recentFoods,
       addRecentFood,
       toast,
