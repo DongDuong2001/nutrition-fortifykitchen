@@ -14,16 +14,21 @@ def main():
     with sync_playwright() as p:
         browser = p.chromium.launch()
 
-        # 1. Test Desktop Homepage at 1440x900
+        # 1. Test Desktop Root at 1440x900 redirects unauthenticated visitor to /landing
         page = browser.new_page(viewport={"width": 1440, "height": 900})
         page.goto(f"{BASE_URL}/", wait_until="networkidle")
         page.wait_for_timeout(600)
 
-        # Verify DesktopIntroBanner is visible
-        page.wait_for_selector('section[aria-label="Giới thiệu về H1T MICRO"]', timeout=10000)
+        # Verify unauthenticated desktop visit at "/" redirects to /landing
+        assert "/landing" in page.url, f"Expected desktop root to redirect to /landing, but URL is {page.url}"
+        print("[PASS] Desktop root correctly redirects unauthenticated visitor to /landing")
+
+        # 1a. Test Desktop Dashboard with ?demo=1 (clean without intro banner)
+        page.goto(f"{BASE_URL}/?demo=1", wait_until="networkidle")
+        page.wait_for_timeout(600)
         intro = page.locator('section[aria-label="Giới thiệu về H1T MICRO"]')
-        assert intro.is_visible(), "DesktopIntroBanner should be visible on desktop"
-        print("[PASS] DesktopIntroBanner is visible on Desktop (1440x900)")
+        assert not intro.is_visible(), "Dashboard should be clean without intro banner"
+        print("[PASS] Dashboard is clean without intro banner")
 
         shot_home = SCREENSHOT_DIR / "desktop-home-1440.png"
         page.screenshot(path=str(shot_home))
