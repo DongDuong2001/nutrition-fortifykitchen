@@ -36,7 +36,7 @@ export default function LandingPage() {
       {/* ============================================================== */}
       <header className="sticky top-0 z-40 w-full border-b border-card-border/80 bg-page/90 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <Link href="/" className="flex items-center gap-2 no-underline text-text">
+          <Link href="/landing" className="flex items-center gap-2 no-underline text-text">
             <span className="font-display italic font-black text-2xl tracking-wide text-ink">
               H1T <span className="text-blue">MICRO</span>
             </span>
@@ -102,10 +102,10 @@ export default function LandingPage() {
                 Tạo tài khoản miễn phí
               </Link>
               <Link
-                href="/"
+                href="/signin"
                 className="min-h-[50px] px-7 rounded-full bg-card border border-card-border text-text text-base font-bold inline-flex items-center justify-center no-underline hover:bg-divider active:scale-[0.97] motion-reduce:active:scale-100 transition-all"
               >
-                Trải nghiệm bản xem trước
+                Đăng nhập tài khoản
               </Link>
             </div>
 
