@@ -15,6 +15,7 @@ def main():
         browser = p.chromium.launch()
 
         # 1. Test Desktop Root at 1440x900 redirects unauthenticated visitor to /landing
+        _demo.enable(False)
         page = browser.new_page(viewport={"width": 1440, "height": 900})
         page.goto(f"{BASE_URL}/", wait_until="networkidle")
         page.wait_for_timeout(600)
@@ -24,6 +25,7 @@ def main():
         print("[PASS] Desktop root correctly redirects unauthenticated visitor to /landing")
 
         # 1a. Test Desktop Dashboard with ?demo=1 (clean without intro banner)
+        _demo.enable(True)
         page.goto(f"{BASE_URL}/?demo=1", wait_until="networkidle")
         page.wait_for_timeout(600)
         intro = page.locator('section[aria-label="Giới thiệu về H1T MICRO"]')
@@ -38,6 +40,11 @@ def main():
         page.goto(f"{BASE_URL}/landing", wait_until="networkidle")
         page.wait_for_timeout(600)
         
+        # Verify 3D Floating Phone in Hero section
+        floating_phone = page.locator(".floating-phone-wrap")
+        assert floating_phone.is_visible(), "FloatingPhone should be visible on desktop landing page"
+        print("[PASS] 3D FloatingPhone is visible in Hero section")
+
         # Verify StackingAudiences cards
         cards = page.locator("[data-stack-card]")
         assert cards.count() == 3, f"Expected 3 audience cards, found {cards.count()}"
