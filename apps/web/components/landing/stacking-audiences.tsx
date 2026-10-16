@@ -26,8 +26,8 @@ const AUDIENCES_DATA: AudienceCardData[] = [
       "Theo dõi 4 thành phần đại lượng: Tinh bột, Đạm, Béo, Chất xơ",
       "Hỗ trợ ghi nhận nhanh nhiều món liên tiếp vào từng bữa ăn",
     ],
-    ctaText: "Xem mục tiêu tập luyện",
-    ctaHref: "/settings/targets",
+    ctaText: "Đăng ký trải nghiệm",
+    ctaHref: "/signup",
     theme: "dark",
     stats: [
       { label: "Mục tiêu đạm", value: "120–160 g", hint: "2.0 g/kg thể trọng" },
@@ -45,8 +45,8 @@ const AUDIENCES_DATA: AudienceCardData[] = [
       "Biểu đồ 10 mức trực quan hiển thị mức độ đáp ứng từng vi chất",
       "Cảnh báo ngưỡng an toàn phòng tránh dư thừa hoặc mất cân đối",
     ],
-    ctaText: "Khám phá 22 vi chất",
-    ctaHref: "/micros",
+    ctaText: "Tạo tài khoản theo dõi vi chất",
+    ctaHref: "/signup",
     theme: "light",
     stats: [
       { label: "Khoáng chất", value: "10 / 10", hint: "Canxi, Sắt, Kẽm, Magie..." },
@@ -64,8 +64,8 @@ const AUDIENCES_DATA: AudienceCardData[] = [
       "Điều chỉnh khuyến nghị điện giải linh hoạt theo giáo án vận động",
       "Dữ liệu dinh dưỡng chuẩn mực, không phụ thuộc vào bảng tính thủ công",
     ],
-    ctaText: "Mạng lưới huấn luyện viên",
-    ctaHref: "/explore/coaches",
+    ctaText: "Bắt đầu cùng H1T MICRO",
+    ctaHref: "/signup",
     theme: "cobalt",
     stats: [
       { label: "Học viên", value: "Theo dõi 1-1", hint: "Báo cáo tuân thủ ngày" },
