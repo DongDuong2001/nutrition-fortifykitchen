@@ -12,7 +12,7 @@ Production build, clock fixed at 2026-10-15 10:00 Asia/Ho_Chi_Minh, sizes 390x84
 - Without file sharing, Lưu ảnh is the only (primary) button. With it, Chia sẻ calls navigator.share with one
   PNG file inside the tap; a cancelled share shows nothing; a failure shows a message and Thử lại.
 - Esc closes and focus returns to the icon.
-PNGs are saved to .screenshots/cc-27g-*.png.
+PNGs are saved to .screenshots/cc-27g-*.png (short, long and past days use the account "Vũ Minh Hào").
 Run with: ALIGN_BASE_URL=http://localhost:3104 npm run probe -- tests/probes/cc_26.py
 """
 import base64
@@ -64,6 +64,9 @@ window.__shareSnaps = [];
       top: r.firstElementChild ? r.firstElementChild.innerText.replace(/\\s+/g, ' ') : '',
       rootW: rr.width, rootH: rr.height, footerGap: rr.bottom - fr.bottom, footerH: fr.height,
       controls: r.querySelectorAll('button, a, input, select, textarea').length,
+      head: (() => { const h = r.querySelector('[data-share-header]'); if (!h) return null; const ps = [...h.querySelectorAll('p')]; const b = h.querySelector('[data-level-badge]');
+        const c = (e) => { const q = e.getBoundingClientRect(); return { top: q.top, bottom: q.bottom, mid: (q.top + q.bottom) / 2, left: q.left, right: q.right }; };
+        return { first: c(ps[0]), date: ps.length > 1 ? c(ps[1]) : null, badge: b ? c(b) : null, firstFs: parseFloat(getComputedStyle(ps[0]).fontSize), dateFs: ps.length > 1 ? parseFloat(getComputedStyle(ps[1]).fontSize) : null }; })(),
       sections: [...r.querySelectorAll('section[aria-label]')].map(s => s.getAttribute('aria-label')).filter(n => n.startsWith('Bữa')),
       header: !!r.querySelector('header, nav'),
     });
@@ -120,6 +123,9 @@ def entry(i, slot, name):
 def seeded(slots):
     return json.dumps([entry(i, s, f"Món thử {i}") for i, s in enumerate(slots)])
 
+
+NAMED = {"sex": "male", "birthYear": 2003, "weightKg": 65.4, "goal": "maintain", "periodMode": False, "trainingMinutesDefault": 60, "displayName": "Vũ Minh Hào", "hintSeen": True}
+NAMED_INIT = f"try {{ localStorage.setItem('h1t_profile_v1_demo', {json.dumps(json.dumps(NAMED))}); }} catch (e) {{}}"
 
 NO_SAMPLE = json.dumps({f"item-{i}": {"deleted": True} for i in range(1, 8)})
 
@@ -184,6 +190,21 @@ def snap(pg):
     return snaps[-1] if snaps else None
 
 
+def check_head(s, tag, label, named):
+    """cc-27 fix: name and badge in one row, centred on each other; the date under the name (or in row 1 with no name)."""
+    h = s and s.get("head")
+    if not h:
+        check(False, f"{tag} {label}: header geometry was not read")
+        return
+    check(h["badge"] is not None and abs(h["first"]["mid"] - h["badge"]["mid"]) <= 1.5, f"{tag} {label}: first row is centred with the badge ({h['first']['mid']:.1f} vs {h['badge']['mid']:.1f})")
+    check(h["firstFs"] >= 18.5, f"{tag} {label}: first row is 19 px ({h['firstFs']})")
+    if named:
+        check(h["date"] is not None and h["date"]["top"] >= h["first"]["bottom"] - 1 and abs(h["dateFs"] - 13) < 0.5, f"{tag} {label}: the date is under the name at 13 px ({h['dateFs']})")
+        check(abs(h["date"]["left"] - h["first"]["left"]) <= 1, f"{tag} {label}: date and name share a left edge")
+    else:
+        check(h["date"] is None, f"{tag} {label}: no second row without a name")
+
+
 def check_png(info, snapshot, tag, label):
     check(info["w"] == 1080 and info["h"] >= 1920, f"{tag} {label}: PNG is {info['w']}x{info['h']} (1080 wide, 1920 high at least)")
     check(info["edgeBad"] == 0, f"{tag} {label}: paper at every edge, nothing clipped ({info['edgeBad']} off-paper edge pixels {info['badAt']})")
@@ -238,6 +259,7 @@ def run(browser, size, tag):
     if s:
         t = s["text"]
         check(s["top"].startswith("Nguyễn Thị Hồng Ánh") and "Hôm nay 15/10" in s["top"], f"{tag} name then the date on top ({s['top']!r})")
+        check_head(s, tag, "today", named=True)
         check("Cả ngày · 7 món" in t, f"{tag} the summary card is in the image")
         for banned in ["Thêm", "Chia sẻ", "Đủ 22 vi chất", "Chưa ăn", "●", "⋯", "Tổng quan", "Khám phá", "Cài đặt", "Về hôm nay", "Ngày tập"]:
             check(banned not in t, f"{tag} no {banned!r} in the image")
@@ -260,21 +282,24 @@ def run(browser, size, tag):
     wait_preview(pg)
     s = snap(pg)
     check(s is not None and s["top"].strip().startswith("Hôm nay 15/10") and "Nguyễn" not in s["top"], f"{tag} no name: only the date on top, with the Level badge ({s['top'] if s else None!r})")
+    check_head(s, tag, "no name", named=False)
     ctx.close()
 
     # a day with two meals only: the empty meals are absent
-    ctx, pg = page(browser, size, init(NO_SHARE, local("h1t_sample_edits_v1_demo", NO_SAMPLE), local("h1t_added_entries_v1_demo", seeded(["breakfast", "breakfast", "lunch"]))))
+    ctx, pg = page(browser, size, init(NO_SHARE, NAMED_INIT, local("h1t_sample_edits_v1_demo", NO_SAMPLE), local("h1t_added_entries_v1_demo", seeded(["breakfast", "breakfast", "lunch"]))))
     go(pg, "/")
     open_sheet(pg)
     wait_preview(pg)
     s = snap(pg)
     check(s is not None and s["sections"] == ["Bữa sáng", "Bữa trưa"], f"{tag} meals with no food are absent ({s['sections'] if s else None})")
+    check(s is not None and s["top"].startswith("Vũ Minh Hào"), f"{tag} short day: the name is on top ({s['top'] if s else None!r})")
+    check_head(s, tag, "short day", named=True)
     name, path = download(pg, f"cc-27g-short-{w}.png")
     check_png(analyse(pg, path), s, tag, "two meals")
     ctx.close()
 
     # a long day: taller than 1920, footer inside
-    ctx, pg = page(browser, size, init(NO_SHARE, local("h1t_added_entries_v1_demo", seeded(["breakfast", "lunch", "snack", "dinner"] * 6))))
+    ctx, pg = page(browser, size, init(NO_SHARE, NAMED_INIT, local("h1t_added_entries_v1_demo", seeded(["breakfast", "lunch", "snack", "dinner"] * 6))))
     go(pg, "/")
     open_sheet(pg)
     wait_preview(pg)
@@ -282,11 +307,12 @@ def run(browser, size, tag):
     name, path = download(pg, f"cc-27g-long-{w}.png")
     info = analyse(pg, path)
     check_png(info, s, tag, "long day")
+    check_head(s, tag, "long day", named=True)
     check(info["h"] > 2300, f"{tag} long day: the image grew ({info['h']})")
     ctx.close()
 
     # past day
-    ctx, pg = page(browser, size, NO_SHARE)
+    ctx, pg = page(browser, size, init(NO_SHARE, NAMED_INIT))
     go(pg, f"/?date={PAST}")
     check(vis(pg, BUTTON).is_enabled(), f"{tag} past day: share icon enabled")
     open_sheet(pg)
@@ -300,7 +326,8 @@ def run(browser, size, tag):
     check(lv["red"] + lv["yellow"] + lv["green"] + lv["blue"] > 0, f"{tag} past day uses the four levels {lv}")
     if s:
         check(all(x in s["text"] for x in ["Thiếu <50%", "Trung bình", "Gần đủ", "Đạt ≥100%"]) and "Xanh: đạt mục tiêu" not in s["text"], f"{tag} past day's 4-level key")
-        check("Hôm qua 14/10" in s["top"], f"{tag} past date label ({s['top']!r})")
+        check("Hôm qua 14/10" in s["top"] and s["top"].startswith("Vũ Minh Hào"), f"{tag} past: name and date label ({s['top']!r})")
+        check_head(s, tag, "past day", named=True)
     alt = pg.get_by_role("dialog").get_by_role("img").get_attribute("alt") or ""
     check(alt.startswith("Ảnh tóm tắt Hôm qua 14/10"), f"{tag} past alt: {alt[:60]}")
     ctx.close()
