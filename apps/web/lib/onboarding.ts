@@ -23,6 +23,9 @@ export interface SetupProfile {
   goal: GoalType;
   /** Sent with the profile save as display_name. */
   displayName?: string;
+  nearPeriod?: boolean;
+  periodMode?: boolean;
+  trainingMinutesDefault?: number;
 }
 
 export interface SetupErrors {
