@@ -2,7 +2,7 @@ import { getDefaultMealSlot } from "./meal-slot";
 import { PROFILE_KEY, targetRangeText, targetsFor, writeStoredProfile, type Profile } from "./profile";
 import { calculateSaltTarget } from "./training";
 import { isDemo } from "./demo";
-import { currentAccount, currentAccountId, wasExplicitlySignedOut } from "./auth-actions";
+import { currentAccount, currentAccountId, getStoredEmail, wasExplicitlySignedOut } from "./auth-actions";
 import { isLiveMode } from "./api-mode";
 import { ADDED_ENTRIES_KEY, adoptLegacyKeys, adoptLegacyPersonal, browserLocal, browserSession, keyedStorage } from "./storage-keys";
 import { apiClient } from "./api-client";
@@ -88,9 +88,16 @@ export function readFirstRunFacts(demo: boolean = isDemo()): FirstRunFacts {
  * the old rule stands: the setup redirect if there is one, else /signin.
  */
 export async function gateRedirect(pathname: string, demo: boolean = isDemo()): Promise<string | null> {
+  const isDesktop = typeof window !== "undefined" && typeof window.innerWidth === "number" && window.innerWidth >= 1024;
+  const isExplicitDemo = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("demo") === "1";
+
+  // Desktop unauthenticated root visitor must see the Landing page first, not the dashboard
+  if (isDesktop && pathname === "/" && !getStoredEmail() && !isExplicitDemo) {
+    return "/landing";
+  }
+
   // After Đăng xuất a session that survived (a failed sign-out) is not adopted until the next explicit sign-in
   if (!demo && currentAccountId() === null && (wasExplicitlySignedOut() || (await currentAccount()) === null)) {
-    const isDesktop = typeof window !== "undefined" && typeof window.innerWidth === "number" && window.innerWidth >= 1024;
     const fallback = isDesktop && pathname === "/" ? "/landing" : "/signin";
     return setupRedirectFor(pathname, readFirstRunFacts(demo), demo) ?? fallback;
   }
