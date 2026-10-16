@@ -64,7 +64,7 @@ const SAMPLE_EMAIL = "ban@email.com";
 
 let inMemoryEmail: string | null | undefined = undefined;
 
-function getStoredEmail(): string | null {
+export function getStoredEmail(): string | null {
   if (inMemoryEmail !== undefined) return inMemoryEmail;
   try {
     return globalThis.localStorage?.getItem(CURRENT_USER_KEY) ?? null;
