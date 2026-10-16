@@ -116,12 +116,6 @@ export function StackingAudiences() {
       {AUDIENCES_DATA.map((aud, i) => {
         const scale = scales[i] ?? 1;
 
-        // Custom card styling per theme matching website design tokens
-        const cardStyle: React.CSSProperties = {
-          transform: `scale(${scale})`,
-          transition: "transform 0.1s ease-out",
-        };
-
         const themeClasses =
           aud.theme === "dark"
             ? "bg-surface-dark border-card-border/60 text-on-dark"
@@ -143,10 +137,10 @@ export function StackingAudiences() {
           <div
             key={aud.title}
             data-stack-card
-            className={`sticky rounded-2xl lg:rounded-3xl border p-6 sm:p-8 lg:p-10 shadow-xl origin-top transition-shadow ${themeClasses}`}
+            className={`sticky rounded-2xl lg:rounded-3xl border p-6 sm:p-8 lg:p-10 shadow-xl origin-top transition-shadow transition-transform duration-100 ease-out ${themeClasses}`}
             style={{
-              ...cardStyle,
-              top: typeof window !== "undefined" && window.innerWidth >= 1024 ? `calc(5.5rem + ${i * 24}px)` : undefined,
+              top: `calc(5.5rem + ${i * 24}px)`,
+              ...(scale !== 1 ? { transform: `scale(${scale})` } : {}),
             }}
           >
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
