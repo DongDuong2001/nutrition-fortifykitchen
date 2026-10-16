@@ -32,7 +32,8 @@ describe("KilnWordmarkFooter pure geometry and maths", () => {
     expect(leaned.cy).toBeGreaterThan(tile.cy);
   });
 
-  it("supported correctly validates alphabet glyphs including digit 1", () => {
+  it("supported correctly validates alphabet glyphs including digit 1 and uppercase", () => {
+    expect(supported("H1T MICRO")).toBe(true);
     expect(supported("h1t micro")).toBe(true);
     expect(supported("nutrition")).toBe(true);
     expect(supported("vietnam-1")).toBe(true);
@@ -40,13 +41,13 @@ describe("KilnWordmarkFooter pure geometry and maths", () => {
   });
 
   it("layoutWord lays out letters with positive width", () => {
-    const { letters, width } = layoutWord("h1t micro");
+    const { letters, width } = layoutWord("H1T MICRO");
     expect(letters.length).toBe(9);
     expect(width).toBeGreaterThan(0);
   });
 
   it("glyphPath generates non-empty SVG path data for valid glyph", () => {
-    const path = glyphPath("h", 1);
+    const path = glyphPath("H", 1);
     expect(path).toContain("M");
     expect(path).toContain("Z");
   });
@@ -57,7 +58,7 @@ describe("KilnWordmarkFooter component rendering", () => {
     const html = renderToString(
       <KilnWordmarkFooter
         brand="H1T MICRO"
-        wordmark="h1t micro"
+        wordmark="H1T MICRO"
         motto={["22 VI CHẤT", "CHUẨN KHOA HỌC"]}
       />,
     );
