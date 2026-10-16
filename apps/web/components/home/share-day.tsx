@@ -18,14 +18,13 @@ export function ShareDay({ model }: { model: ShareModel }) {
       style={{ width: SHARE_CSS_WIDTH, minHeight: SHARE_MIN_CSS_HEIGHT }}
       className="flex flex-col bg-paper font-sans text-text"
     >
-      <div className="flex flex-none items-start justify-between gap-3 px-3 pt-4 pb-1">
-        <div className="min-w-0">
-          {model.name && <p className="m-0 break-words text-[19px] font-bold leading-tight text-text">{model.name}</p>}
-          <p className={`m-0 leading-snug ${model.name ? "mt-0.5 text-[13px] text-secondary" : "text-[15px] font-semibold text-text"}`}>
-            {model.dateLabel}
-          </p>
+      {/* Row 1: the name (or, with no name, the date) and the Level badge, centred on one line. Row 2: the date. */}
+      <div data-share-header className="flex flex-none flex-col gap-0.5 px-3 pt-4 pb-1">
+        <div className="flex items-center justify-between gap-3">
+          <p className="m-0 min-w-0 break-words text-[19px] font-bold leading-tight text-text">{model.name ?? model.dateLabel}</p>
+          <LevelBadge level={model.level} size="share" />
         </div>
-        <LevelBadge level={model.level} size="share" />
+        {model.name && <p className="m-0 text-[13px] leading-snug text-secondary">{model.dateLabel}</p>}
       </div>
 
       <div className="flex flex-1 flex-col">
