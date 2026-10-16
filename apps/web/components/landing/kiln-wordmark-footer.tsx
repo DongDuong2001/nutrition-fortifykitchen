@@ -193,8 +193,50 @@ export const GLYPHS: Record<string, [number, GlyphFn]> = {
     },
   ],
   z: [98, (V, h) => [rect(0, 0, 98, h), rect(0, XH - h, 98, XH), diag(98 - V * 1.15, h * 0.5, 0, XH - h * 0.5, V * 1.15)]],
-  // Added digit 1 for H1T MICRO brand wordmark
-  "1": [52, (V) => [rect(26 - V / 2, 0, 26 + V / 2, XH), diag(8, 26, 26, 0, V)]],
+  // Uppercase alphabet for H1T MICRO brand wordmark
+  A: [100, (V, h) => [diag(0, XH, 50 - V / 2, 0, V), diag(100 - V, XH, 50 - V / 2, 0, V), rect(24, XH * 0.62 - h / 2, 76, XH * 0.62 + h / 2)]],
+  B: [96, (V, h) => [rect(0, 0, V, XH), ...keep(ring(0, 0, 96, XH * 0.54, V, h), [0, 96, 1]), ...keep(ring(0, XH * 0.46, 96, XH, V, h), [0, 96, 1])]],
+  C: [96, (V, h) => keep(ring(0, 0, 114, XH, V, h), [0, 80, 1])],
+  D: [100, (V, h) => [rect(0, 0, V, XH), ...keep(ring(0, 0, 100, XH, V, h), [0, 100, 1])]],
+  E: [90, (V, h) => [rect(0, 0, V, XH), rect(0, 0, 90, h), rect(0, XH / 2 - h / 2, 74, XH / 2 + h / 2), rect(0, XH - h, 90, XH)]],
+  F: [88, (V, h) => [rect(0, 0, V, XH), rect(0, 0, 88, h), rect(0, XH / 2 - h / 2, 72, XH / 2 + h / 2)]],
+  G: [100, (V, h) => [...keep(ring(0, 0, 100, XH, V, h), [0, 82, 1]), rect(50, XH / 2, 100, XH / 2 + h), rect(100 - V, XH / 2, 100, XH)]],
+  H: [96, (V, h) => [rect(0, 0, V, XH), rect(96 - V, 0, 96, XH), rect(0, XH / 2 - h / 2, 96, XH / 2 + h / 2)]],
+  I: [38, (V, h) => [rect(0, 0, 38, h), rect(19 - V / 2, 0, 19 + V / 2, XH), rect(0, XH - h, 38, XH)]],
+  J: [72, (V, h) => [rect(72 - V, 0, 72, XH * 0.7), ...keep(ring(0, XH * 0.3, 72, XH, V, h), [1, XH * 0.7, -1], [0, 14, -1])]],
+  K: [94, (V) => [rect(0, 0, V, XH), diag(V * 0.7, 56, 94 - V * 1.1, 0, V * 1.1), diag(34, 44, 94 - V, XH, V)]],
+  L: [82, (V, h) => [rect(0, 0, V, XH), rect(0, XH - h, 82, XH)]],
+  M: [
+    116,
+    (V) => [
+      rect(0, 0, V, XH),
+      rect(116 - V, 0, 116, XH),
+      diag(V * 0.8, 0, 58 - V * 0.4, XH * 0.8, V * 0.7),
+      diag(116 - V * 1.5, 0, 58 - V * 0.4, XH * 0.8, V * 0.7),
+    ],
+  ],
+  N: [100, (V) => [rect(0, 0, V, XH), rect(100 - V, 0, 100, XH), diag(0, 0, 100 - V, XH, V)]],
+  O: [100, (V, h) => ring(0, 0, 100, XH, V, h)],
+  P: [92, (V, h) => [rect(0, 0, V, XH), ...keep(ring(0, 0, 92, XH * 0.58, V, h), [0, 92, 1])]],
+  Q: [100, (V, h) => [...ring(0, 0, 100, XH, V, h), diag(62, 62, 100, XH + 10, V)]],
+  R: [96, (V, h) => [rect(0, 0, V, XH), ...keep(ring(0, 0, 96, XH * 0.56, V, h), [0, 96, 1]), diag(30, XH * 0.5, 96 - V, XH, V)]],
+  S: [96, (V, h) => GLYPHS.s[1](V, h)],
+  T: [86, (V, h) => [rect(0, 0, 86, h), rect(43 - V / 2, 0, 43 + V / 2, XH)]],
+  U: [100, (V, h) => [rect(0, 0, V, XH * 0.65), rect(100 - V, 0, 100, XH * 0.65), ...keep(ring(0, XH * 0.3, 100, XH, V, h), [1, XH * 0.65, -1])]],
+  V: [100, (V) => [diag(0, 0, 50 - V / 2, XH, V), diag(100 - V, 0, 50 - V / 2, XH, V)]],
+  W: [154, (V) => [diag(0, 0, 38.5 - V / 2, XH, V), diag(77 - V / 2, 0, 38.5 - V / 2, XH, V), diag(77 - V / 2, 0, 115.5 - V / 2, XH, V), diag(154 - V, 0, 115.5 - V / 2, XH, V)]],
+  X: [96, (V) => [diag(0, 0, 96 - V, XH, V), diag(96 - V, 0, 0, XH, V)]],
+  Y: [96, (V) => [diag(0, 0, 48 - V / 2, XH * 0.55, V), diag(96 - V, 0, 48 - V / 2, XH * 0.55, V), rect(48 - V / 2, XH * 0.55, 48 + V / 2, XH)]],
+  Z: [92, (V, h) => [rect(0, 0, 92, h), rect(0, XH - h, 92, XH), diag(92 - V * 1.15, h * 0.5, 0, XH - h * 0.5, V * 1.15)]],
+  // Digit 1 with distinctive top angled flag and solid baseline foot so it is never confused with letter i
+  "1": [
+    52,
+    (V, h) => [
+      rect(26 - V / 2, 0, 26 + V / 2, XH),
+      diag(5, 24, 26, 0, V),
+      rect(5, XH - h, 47, XH),
+    ],
+  ],
   "-": [60, (_V, h) => [rect(0, XH / 2 - h / 2, 60, XH / 2 + h / 2)]],
   ".": [30, (V) => [rect(15 - V / 2, XH - V, 15 + V / 2, XH)]],
   " ": [46, () => []],
@@ -399,7 +441,7 @@ function LinkItem({ link }: { link: KilnLink }) {
 
 export function KilnWordmarkFooter({
   brand = "H1T MICRO",
-  wordmark = "h1t micro",
+  wordmark = "H1T MICRO",
   motto = ["22 VI CHẤT", "CHUẨN KHOA HỌC"],
   address = [
     "Hệ thống theo dõi dinh dưỡng và vi chất",
@@ -424,7 +466,7 @@ export function KilnWordmarkFooter({
   onTileChange,
   className = "",
 }: KilnWordmarkFooterProps) {
-  const word = (wordmark ?? brand).toLowerCase();
+  const word = wordmark ?? brand;
   const drawn = supported(word);
   const lay = useMemo(() => layoutWord(drawn ? word : ""), [word, drawn]);
   const centres = useMemo(() => lay.letters.map((l) => l.x + l.w / 2), [lay]);
