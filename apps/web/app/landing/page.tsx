@@ -1,45 +1,14 @@
 import React from "react";
 import Link from "next/link";
 import { IconCheck } from "@/components/ui/icons";
+import { StackingAudiences } from "@/components/landing/stacking-audiences";
+import { KilnWordmarkFooter } from "@/components/landing/kiln-wordmark-footer";
 
 export const metadata = {
   title: "H1T MICRO — Hệ thống theo dõi 22 vi chất và năng lượng chuẩn khoa học",
   description:
     "Nền tảng kiểm soát dinh dưỡng toàn diện: định lượng chính xác 22 vi chất thiết yếu và cân bằng năng lượng theo tiêu chuẩn khuyến nghị RNI/RDA của Viện Dinh Dưỡng Quốc Gia và USDA.",
 };
-
-const AUDIENCES = [
-  {
-    tag: "TẬP LUYỆN & THỂ HÌNH",
-    title: "Người tập gym & Vận động viên",
-    desc: "Kiểm soát chính xác năng lượng thâm hụt hoặc thặng dư, tối ưu lượng đạm và tự động điều chỉnh nhu cầu muối khoáng theo thời lượng tập luyện thực tế.",
-    points: [
-      "Tính toán muối khoáng bù đắp cho ngày tập luyện 60–90 phút",
-      "Theo dõi 4 thành phần dinh dưỡng đa lượng: Tinh bột, Đạm, Béo, Chất xơ",
-      "Hỗ trợ ghi nhận nhanh nhiều món liên tiếp vào từng bữa ăn",
-    ],
-  },
-  {
-    tag: "SỨC KHỎE BỀN VỮNG",
-    title: "Người chú trọng vi chất & Chuyển hóa",
-    desc: "Phát hiện sớm tình trạng thiếu hụt 10 khoáng chất và 12 vitamin thiết yếu mà các ứng dụng đếm calo thông thường bỏ qua.",
-    points: [
-      "Đối chiếu trực tiếp với ngưỡng nhu cầu khuyến nghị (RNI) của Viện Dinh Dưỡng",
-      "Biểu đồ 10 mức trực quan hiển thị mức độ đáp ứng từng vi chất",
-      "Cảnh báo ngưỡng an toàn để phòng tránh dư thừa hoặc mất cân bằng",
-    ],
-  },
-  {
-    tag: "CHUYÊN NGHIỆP",
-    title: "Huấn luyện viên & Chuyên gia dinh dưỡng",
-    desc: "Thiết lập mục tiêu dinh dưỡng chuyên sâu cho từng học viên, kiểm soát mức độ tuân thủ thực tế một cách minh bạch và khoa học.",
-    points: [
-      "Theo dõi nhật ký và tỷ lệ đạt mục tiêu của học viên theo thời gian thực",
-      "Điều chỉnh khuyến nghị điện giải linh hoạt theo giáo án vận động",
-      "Dữ liệu dinh dưỡng chuẩn mực, không phụ thuộc vào bảng tính thủ công",
-    ],
-  },
-];
 
 const STEPS = [
   {
@@ -236,31 +205,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {AUDIENCES.map((aud) => (
-              <div
-                key={aud.title}
-                className="flex flex-col justify-between rounded-2xl border border-card-border bg-card p-6 shadow-2xs hover:shadow-md transition-shadow"
-              >
-                <div>
-                  <span className="inline-block text-[11px] font-extrabold text-blue uppercase tracking-wider mb-2">
-                    {aud.tag}
-                  </span>
-                  <h4 className="m-0 text-xl font-bold text-text mb-3">{aud.title}</h4>
-                  <p className="m-0 text-sm text-secondary leading-relaxed mb-6">{aud.desc}</p>
-                </div>
-
-                <ul className="m-0 list-none p-0 flex flex-col gap-2.5 pt-4 border-t border-card-border">
-                  {aud.points.map((pt) => (
-                    <li key={pt} className="flex items-start gap-2.5 text-xs text-text leading-snug">
-                      <span className="text-blue font-bold shrink-0 mt-0.5">✓</span>
-                      <span>{pt}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
+          <StackingAudiences />
         </div>
       </section>
 
@@ -364,31 +309,9 @@ export default function LandingPage() {
       </section>
 
       {/* ============================================================== */}
-      {/* 7. FOOTER                                                     */}
+      {/* 7. FOOTER (KILN WORDMARK FOOTER)                               */}
       {/* ============================================================== */}
-      <footer className="border-t border-card-border bg-page py-10">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-6 text-xs text-secondary">
-          <div className="flex items-center gap-2">
-            <span className="font-display italic font-black text-sm text-ink">H1T MICRO</span>
-            <span>· Hệ thống quản lý dinh dưỡng và 22 vi chất chuẩn khoa học</span>
-          </div>
-
-          <div className="flex items-center gap-6">
-            <Link href="/terms" className="hover:text-text underline">
-              Điều khoản dịch vụ
-            </Link>
-            <Link href="/privacy" className="hover:text-text underline">
-              Chính sách bảo mật
-            </Link>
-            <Link href="/signin" className="hover:text-text underline">
-              Đăng nhập
-            </Link>
-            <Link href="/signup" className="hover:text-text underline">
-              Đăng ký
-            </Link>
-          </div>
-        </div>
-      </footer>
+      <KilnWordmarkFooter />
     </div>
   );
 }
