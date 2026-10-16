@@ -52,10 +52,16 @@ def main():
 
         # Verify KilnWordmarkFooter
         footer = page.locator("footer.kwf")
+        footer.scroll_into_view_if_needed()
+        page.wait_for_timeout(700)
         assert footer.is_visible(), "KilnWordmarkFooter should be visible"
         wordmark = page.locator("svg.kwf-word")
         assert wordmark.is_visible(), "Procedural wordmark should be visible in footer"
         print("[PASS] KilnWordmarkFooter and procedural wordmark are visible")
+
+        shot_footer = SCREENSHOT_DIR / "desktop-landing-footer-1440.png"
+        footer.screenshot(path=str(shot_footer))
+        print(f"[SAVED] {shot_footer}")
 
         shot_landing = SCREENSHOT_DIR / "desktop-landing-1440.png"
         page.screenshot(path=str(shot_landing))
