@@ -1,4 +1,3 @@
-import { createClient } from "./supabase-client";
 import { getTodayIsoVN } from "./date";
 import {
   SAMPLE_DAY,
@@ -11,7 +10,7 @@ import { calculateTargets } from "./targets";
 import { MOCK_FOODS, setCatalogFoods, type FoodItem } from "./mock/foods";
 import { searchFoods as searchMockFoods } from "./search";
 import type { SetupProfile } from "./onboarding";
-import { accountStorage } from "./storage-keys";
+import { OFFLINE_OUTBOX_KEY, accountStorage } from "./storage-keys";
 import { type CoachProfile, filterCoachesBySpecialty, getCoachById } from "./coaches";
 import { type LeaderboardPeriod, type LeaderboardResponse, getMockLeaderboard, setLeaderboardOptIn as setLeaderboardOptInState } from "./leaderboard";
 import { readStoredProfile, type Profile } from "./profile";
@@ -194,6 +193,9 @@ export interface LogMealPayload {
   calories?: number;
 }
 
+/** Thrown by searchFoods in live mode when /foods did not answer. */
+export const FOODS_UNAVAILABLE = "foods_unavailable";
+
 export function getApiBaseUrl(): string {
   const url = process.env.NEXT_PUBLIC_API_URL;
   if (url) return url;
@@ -207,45 +209,18 @@ export function isLiveMode(): boolean {
   return process.env.NEXT_PUBLIC_API_MODE === "live";
 }
 
-async function getAuthHeaders(): Promise<HeadersInit> {
-  try {
-    const supabase = createClient();
-    const { data } = await supabase.auth.getSession();
-    let token = data.session?.access_token;
-
-    if (!token && typeof window !== "undefined") {
-      try {
-        const { data: refreshData } = await supabase.auth.refreshSession();
-        token = refreshData.session?.access_token;
-      } catch {
-        // Refresh failed
-      }
-    }
-
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-    };
-
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
-
-    return headers;
-  } catch {
-    return { "Content-Type": "application/json" };
-  }
-}
+// The API reads the session from the httpOnly sb-access-token cookie that middleware.ts and the auth callback set
+// (credentials: "include" below sends it). No script in the browser reads or forwards the access token.
+const JSON_HEADERS: Record<string, string> = { "Content-Type": "application/json" };
 
 /**
  * apiFetch executes authenticated requests against the Go backend API.
- * Automatically transmits HTTPOnly session cookies via credentials: "include"
- * and attaches Bearer authorization headers when available.
+ * Sends the httpOnly session cookie via credentials: "include"; there is no Authorization header.
  */
 export async function apiFetch(path: string, init: RequestInit = {}): Promise<Response> {
   const baseUrl = getApiBaseUrl();
-  const authHeaders = await getAuthHeaders();
   const mergedHeaders: Record<string, string> = {
-    ...(authHeaders as Record<string, string>),
+    ...JSON_HEADERS,
     ...((init.headers as Record<string, string>) || {}),
   };
 
@@ -257,7 +232,7 @@ export async function apiFetch(path: string, init: RequestInit = {}): Promise<Re
 }
 
 // Offline queue for idempotent replay
-const OUTBOX_STORAGE_KEY = "h1t_offline_outbox";
+const OUTBOX_STORAGE_KEY = OFFLINE_OUTBOX_KEY;
 
 interface OutboxItem {
   id: string;
@@ -280,6 +255,19 @@ export function enqueueOfflineEntry(date: string, payload: Record<string, unknow
       retries: 0,
     });
     storage.setItem(OUTBOX_STORAGE_KEY, JSON.stringify(current));
+  } catch {
+    // Storage unavailable
+  }
+}
+
+/** Removes a queued entry that was undone before it reached the server. */
+export function dropOfflineEntry(id: string): void {
+  const storage = accountStorage();
+  if (!storage) return;
+  try {
+    const items: OutboxItem[] = JSON.parse(storage.getItem(OUTBOX_STORAGE_KEY) || "[]");
+    const kept = items.filter((item) => item.id !== id);
+    if (kept.length !== items.length) storage.setItem(OUTBOX_STORAGE_KEY, JSON.stringify(kept));
   } catch {
     // Storage unavailable
   }
@@ -547,16 +535,15 @@ export const apiClient = {
           const items = payload.items ?? (Array.isArray(payload) ? payload : []);
           if (Array.isArray(items)) {
             const mapped = items.map(mapApiFoodToFoodItem);
-            if (mapped.length > 0) {
-              setCatalogFoods(mapped);
-            }
+            setCatalogFoods(mapped);
             return mapped;
           }
         }
       } catch {
-        // Fallback
+        // Falls through to the error below
       }
-      return [];
+      // Live mode never answers with the sample foods: the caller shows an error with Thử lại
+      throw new Error(FOODS_UNAVAILABLE);
     }
 
     const filtered = category ? MOCK_FOODS.filter((f) => f.category === category) : MOCK_FOODS;
@@ -687,7 +674,8 @@ export const apiClient = {
         meal_slot: slot,
       };
       if (isQuick) {
-        body.calories = payload.calories ?? 0;
+        // A quick entry is kcal only; an unknown value is left out so the server stores NULL (migration 000011), never 0
+        if (typeof payload.calories === "number") body.calories = payload.calories;
       } else {
         if (payload.foodId && isUuid(payload.foodId)) {
           body.food_id = payload.foodId;

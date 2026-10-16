@@ -36,6 +36,10 @@ describe("food source helpers", () => {
     expect(searchTag({ source: "vn_table" })).toEqual({ label: "VN", warning: false });
     expect(searchTag({ source: "community" })).toEqual({ label: "Ước tính", warning: true });
     expect(searchTag({ source: "user" })).toEqual({ label: "Của tôi", warning: false });
+    // A dish worked out from a recipe is an estimate, whatever its match
+    for (const source of ["recipe_calc", "recipe-calc", "Recipe Calc"]) {
+      expect(searchTag({ source })).toEqual({ label: "Ước tính", warning: true });
+    }
   });
 
   it("says Chưa rõ for a source it does not know, or none", () => {

@@ -23,14 +23,32 @@ export function useFoodBrowse() {
   const [filter, setFilter] = useState<FoodFilter>("all");
   const [query, setQuery] = useState("");
   const [catalogLoaded, setCatalogLoaded] = useState(false);
+  // Live mode only: /foods did not answer. The list stays empty (never the sample foods) and Thử lại asks again.
+  const [catalogError, setCatalogError] = useState(false);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
-    if (isLiveMode() && !catalogLoaded) {
-      apiClient.searchFoods("").then(() => {
+    if (!isLiveMode() || catalogLoaded) return;
+    let cancelled = false;
+    apiClient
+      .searchFoods("")
+      .then(() => {
+        if (cancelled) return;
+        setCatalogError(false);
         setCatalogLoaded(true);
-      }).catch(() => {});
-    }
-  }, [catalogLoaded]);
+      })
+      .catch(() => {
+        if (!cancelled) setCatalogError(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [catalogLoaded, attempt]);
+
+  const retryCatalog = useCallback(() => {
+    setCatalogError(false);
+    setAttempt((n) => n + 1);
+  }, []);
 
   // Filter and search combined. Grouped only for Tất cả with no query.
   // `demo` is a dependency because the catalogue read follows demo mode, which is known after mount
@@ -79,5 +97,7 @@ export function useFoodBrowse() {
     isFavouriteFood,
     similarFoods,
     noFavourites,
+    catalogError,
+    retryCatalog,
   };
 }

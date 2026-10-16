@@ -59,7 +59,7 @@ export async function GET(request: Request) {
       if (!error && data?.session) {
         if (data.session.access_token) {
           forwardResponse.cookies.set("sb-access-token", data.session.access_token, {
-            httpOnly: false,
+            httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "lax",
             path: "/",

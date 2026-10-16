@@ -14,6 +14,9 @@ export interface FoodEmptyStateProps {
   onPickSimilar: (food: FoodItem) => void;
   onClearFilter: () => void;
   newFoodHref: string;
+  /** Live mode: the food list could not be loaded. Shown instead of "Không có …", with Thử lại. */
+  catalogError?: boolean;
+  onRetryCatalog?: () => void;
 }
 
 /** Empty results for the food list: no favourites yet, or a search with no match (with fuzzy suggestions). */
@@ -26,7 +29,25 @@ export function FoodEmptyState({
   onPickSimilar,
   onClearFilter,
   newFoodHref,
+  catalogError = false,
+  onRetryCatalog,
 }: FoodEmptyStateProps) {
+  if (catalogError) {
+    return (
+      <div role="alert" className="flex flex-col items-center gap-2 py-6 text-center">
+        <div className="text-base font-bold">Chưa tải được danh sách món</div>
+        <div className="text-sm text-secondary">Kiểm tra kết nối rồi thử lại.</div>
+        <button
+          type="button"
+          onClick={onRetryCatalog}
+          className="min-h-[44px] px-5 rounded-full bg-ink text-on-dark font-semibold text-sm border-0 cursor-pointer active:scale-[0.97] motion-reduce:active:scale-100"
+        >
+          Thử lại
+        </button>
+      </div>
+    );
+  }
+
   const clearFilterButton = (
     <button
       type="button"

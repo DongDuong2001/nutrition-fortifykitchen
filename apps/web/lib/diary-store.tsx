@@ -29,7 +29,8 @@ import { MOCK_FOODS } from "./mock/foods";
 import { syncRecipeFoods } from "./recipe-store";
 import { personaPatch } from "./demo-persona";
 import { isLiveMode } from "./api-mode";
-import { apiClient } from "./api-client";
+import { apiClient, dropOfflineEntry, syncOfflineOutbox } from "./api-client";
+import { syncServerSession } from "./server-session";
 import { generateUuid, isUuid } from "./uuid";
 import {
   buildSavedMeal,
@@ -489,6 +490,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     syncRecipeFoods();
 
     if (isLiveMode() && account && !demoNow) {
+      // Entries saved while offline go up now (and again whenever the connection returns, see the online listener)
+      syncOfflineOutbox().catch(() => {});
       apiClient.getDay(iso).then((daySummary) => {
         if (daySummary && Array.isArray(daySummary.meals)) {
           const serverEntries: AddedDiaryEntry[] = [];
@@ -501,7 +504,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
                 grams: e.grams,
                 displayQty: e.serving_label || `${e.grams} g`,
                 mealSlot: (e.meal_slot === "preworkout" ? "pre_workout" : e.meal_slot) as MealSlot,
-                calories: e.calories,
+                // A NULL kcal (unknown, migration 000011) adds nothing to a total; it is not shown as a measured 0
+                calories: typeof e.calories === "number" ? e.calories : 0,
                 protein: (e.nutrients?.protein as number | null) ?? null,
                 carbs: (e.nutrients?.carbs as number | null) ?? null,
                 fat: (e.nutrients?.fat as number | null) ?? null,
@@ -575,6 +579,16 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       setHydrated(true);
     }
   }, [loadData]);
+
+  // The connection came back: the entries queued offline go to the server
+  useEffect(() => {
+    if (!isLiveMode() || demo) return;
+    const onOnline = () => {
+      syncServerSession().then(() => syncOfflineOutbox()).catch(() => {});
+    };
+    window.addEventListener("online", onOnline);
+    return () => window.removeEventListener("online", onOnline);
+  }, [demo]);
 
   // Another account signed in, or this one signed out (Đăng xuất keeps the data under its account): the
   // state of the account before is dropped and the new one's is read. The persist effects below then write to
@@ -954,6 +968,13 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     if (!ids) return;
     setEdits((prev) => removeAddedIn(prev, ids));
     setToast(null);
+    // The entries were already sent: undo removes them on the server too, or they come back on the next load
+    if (isLiveMode()) {
+      for (const id of ids) {
+        dropOfflineEntry(id);
+        apiClient.deleteEntry(id).catch(() => {});
+      }
+    }
   }, [toast]);
 
   const mealFoods = useCallback(

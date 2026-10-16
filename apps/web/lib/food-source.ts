@@ -32,7 +32,7 @@ export type SearchTagLabel = "USDA" | "Nhãn" | "VN" | "Ước tính" | "Của t
 /**
  * The small tag of an /add search result. A proxy says Ước tính whatever its database. Otherwise the source decides:
  * usda* is USDA, label is Nhãn, the Vietnamese table is VN, community (numbers from a shared database, not checked
- * against the pack) is Ước tính, user is Của tôi. A source it does not know, or none, says Chưa rõ.
+ * against the pack) and recipe_calc (worked out from a recipe) are Ước tính, user is Của tôi. A source it does not know, or none, says Chưa rõ.
  */
 export function searchTag(food: Pick<FoodItem, "match"> & { source?: string | null }): { label: SearchTagLabel; warning: boolean } {
   if (isProxy(food)) return { label: "Ước tính", warning: true };
@@ -40,7 +40,7 @@ export function searchTag(food: Pick<FoodItem, "match"> & { source?: string | nu
   if (source.startsWith("usda")) return { label: "USDA", warning: false };
   if (source === "label") return { label: "Nhãn", warning: false };
   if (source === "vn-fct" || source === "vn-table") return { label: "VN", warning: false };
-  if (source === "community") return { label: "Ước tính", warning: true };
+  if (source === "community" || source === "recipe-calc") return { label: "Ước tính", warning: true };
   if (source === "user") return { label: "Của tôi", warning: false };
   return { label: "Chưa rõ", warning: false };
 }

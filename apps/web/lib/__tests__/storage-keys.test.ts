@@ -7,6 +7,7 @@ import {
   SETTINGS_STORAGE_KEY,
   TRAINING_CHECKLIST_KEY,
   adoptLegacyKeys,
+  OFFLINE_OUTBOX_KEY,
   adoptLegacyPersonal,
   keyedStorage,
   loadMigrated,
@@ -216,6 +217,13 @@ describe("adoptLegacyPersonal (the old profile, settings and training ticks move
     expect(local.getItem(`${SETTINGS_STORAGE_KEY}_a@x.vn`)).toBe('{"language":"en"}');
     expect(local.getItem(PROFILE_KEY)).toBeNull();
     expect(local.getItem(SETTINGS_STORAGE_KEY)).toBeNull();
+  });
+
+  it("the old unscoped offline outbox is adopted by the first account, not left orphaned", () => {
+    const local = memory({ [OFFLINE_OUTBOX_KEY]: '[{"id":"e1"}]' });
+    adoptLegacyPersonal(local, "a@x.vn");
+    expect(local.getItem(`${OFFLINE_OUTBOX_KEY}_a@x.vn`)).toBe('[{"id":"e1"}]');
+    expect(local.getItem(OFFLINE_OUTBOX_KEY)).toBeNull();
   });
 
   it("a later account finds nothing left to take", () => {

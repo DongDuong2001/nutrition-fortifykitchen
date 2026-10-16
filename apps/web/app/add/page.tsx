@@ -114,7 +114,7 @@ function AddFoodInner() {
   }, [data]);
 
   // Search, filter and list: the same state as Khám phá
-  const { query, setQuery, filter, setFilter, list, filterItems, categoryName, isFavouriteFood, similarFoods, noFavourites } =
+  const { query, setQuery, filter, setFilter, list, filterItems, categoryName, isFavouriteFood, similarFoods, noFavourites, catalogError, retryCatalog } =
     useFoodBrowse();
 
   // Recents are foods with the serving they were logged with: tap = add with that serving, chevron = portion panel
@@ -288,6 +288,8 @@ function AddFoodInner() {
       filter={filter}
       noFavourites={noFavourites}
       similarFoods={similarFoods}
+      catalogError={catalogError}
+      onRetryCatalog={retryCatalog}
       getMeta={getFoodMeta}
       onPickSimilar={(food) => pickFood(food)}
       onClearFilter={() => setFilter("all")}

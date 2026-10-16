@@ -52,24 +52,22 @@ export function browsableFoods(): FoodItem[] {
   return demoActive() ? MOCK_FOODS : MOCK_FOODS.filter((f) => !f.demoOnly);
 }
 
-/**
- * Sets or merges database foods into the catalog for live mode.
- */
+const isOwnFood = (f: FoodItem) => f.source === "user" || f.category === "cua_toi";
+
+/** Merges foods from the database into the catalogue: a food with the same id is replaced, every other food stays. */
 export function setCatalogFoods(foods: FoodItem[]): void {
   if (!foods || foods.length === 0) return;
-  const existingCustom = MOCK_FOODS.filter((f) => f.source === "user" || f.category === "cua_toi");
-  const seenIds = new Set<string>();
-  const combined: FoodItem[] = [];
-
-  for (const f of [...existingCustom, ...foods]) {
-    if (!seenIds.has(f.id)) {
-      seenIds.add(f.id);
-      combined.push(f);
-    }
-  }
-
+  const byId = new Map(MOCK_FOODS.map((f) => [f.id, f]));
+  for (const f of foods) byId.set(f.id, f);
   MOCK_FOODS.length = 0;
-  MOCK_FOODS.push(...combined);
+  MOCK_FOODS.push(...byId.values());
+}
+
+/** Live mode: the built-in sample foods are not real foods, so only the user's own stay until /foods answers. */
+export function dropMockCatalog(): void {
+  const own = MOCK_FOODS.filter(isOwnFood);
+  MOCK_FOODS.length = 0;
+  MOCK_FOODS.push(...own);
 }
 
 export const MOCK_FOODS: FoodItem[] = [
@@ -868,3 +866,5 @@ export const MOCK_FOODS: FoodItem[] = [
     },
   },
 ];
+
+if (process.env.NEXT_PUBLIC_API_MODE === "live") dropMockCatalog();
