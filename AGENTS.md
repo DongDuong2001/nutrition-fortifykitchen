@@ -112,7 +112,8 @@ Always use **your agent's fixed port**: **3100 for Antigravity, 3101 for Claude 
 - Open each screenshot at 390 and 1440 and look specifically at column alignment and right edges. Don't just confirm that the screen renders.
 
 ## Two agents in this repo (Antigravity + Claude Code)
-- Each Claude Code works in its own clone of the repo on its `feat/ui-cc-*` (or `feat/ui-cc2-*`) branch and fast-forwards `feat/ui` itself after the gates pass. Antigravity works on `feat/ui-ag-*` branches only.
+- **Review first (Hao, 16/10).** Every change, a one-line fix included, goes on a `feat/ui-cc-*` (or `feat/ui-cc2-*`, `feat/ui-ag-*`) branch, is pushed as that branch, and is merged into `feat/ui` and `main` only after Hao has reviewed it. Nobody commits straight to `feat/ui` or `main`, and a tag follows the merge, not the branch.
+- Each Claude Code works in its own clone of the repo on its `feat/ui-cc-*` (or `feat/ui-cc2-*`) branch. Antigravity works on `feat/ui-ag-*` branches only.
 - **Now working board:** before starting a task, add a row to the "Now working" table at the top of PROGRESS.md (task, owner, files or routes). Remove it when done. Never edit files claimed by the other agent's row; if you must, stop and tell the user.
 - Who may edit which files: see **File ownership** below.
 

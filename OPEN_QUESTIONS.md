@@ -229,3 +229,5 @@
 - [x] (cc-41) Email sign-up with confirmation on: Supabase returns a user without a session, so the web does not store the email or treat the user as signed in; it goes to /signin/check-email (its resend button sends a magic link). Decided alone.
 - [x] (cc-41) `/setup/**` is checked by SetupGate only in live mode (mock and demo keep the old behaviour, so the gates and probes are unchanged). Decided alone.
 - [x] (cc-41) The two unpushed v021 source-label commits (search tag, food-meta) were cherry-picked onto feat/ui-cc-41 because the brief asks for the same behaviour; `recipe_calc` is now also Ước tính. Decided alone.
+
+- [ ] (v0.2.1, for Dong) v0.2.1 changed web files Dong wrote: app/admin/review/page.tsx (application review removed, only food review left), lib/coaches.ts (sample coaches kept for mock only, live returns the API list or empty), coach-application-sheet.tsx and lib/mastery-levels.ts deleted (Hao: no apply flow; Cấp merged into Level). API endpoints for applications are untouched; the web no longer calls them.

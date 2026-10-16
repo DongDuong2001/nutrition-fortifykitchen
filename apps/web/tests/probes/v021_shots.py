@@ -1,7 +1,6 @@
 """v0.2.1 review fixes: screenshots at 390 and a few behaviour checks, production build, demo mode.
 
-- Hôm nay at Level 3: the extras band shows "—" (a day with one unknown entry is unknown), and the nutrient column
-  fades where rows wait below instead of ending on a half-cut row.
+- Hôm nay at Level 3: the extras band shows "—" (a day with one unknown entry is unknown); the column ends on a whole row (v022: tests/probes/v022_column.py).
 - The source sheet of a food with no verified match: "Chưa rõ nguồn", the link reads "(chưa kiểm chứng)".
 - The share sheet's name step: a name with no letter or digit is refused.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/v021_shots.py
@@ -39,13 +38,10 @@ def main():
         pg.wait_for_timeout(600)
         extras = pg.evaluate("[...document.querySelectorAll('[data-extra]')].map(e => e.innerText.replace(/\\s+/g, ' ').trim())")
         check(len(extras) == 6 and all(t.endswith("—") for t in extras), f"Level 3: every extra is — when an entry lacks it ({extras})")
-        scroller = pg.locator("aside[aria-label='Vi chất'] >> [data-fade], aside[aria-label='Vi chất'] > div").first
         pg.screenshot(path=os.path.join(SHOTS, "v021-home-L3-390.png"))
-        fade = pg.evaluate("document.querySelectorAll('aside[aria-label=\"Vi chất\"] [data-fade]').length")
-        print(f"note: column fade present at the top of the scroll: {fade}")
+        scroller = pg.locator("aside[aria-label='Vi chất'] > div").first
         scroller.evaluate("el => { el.scrollTop = el.scrollHeight; }")
         pg.wait_for_timeout(300)
-        check(pg.evaluate("document.querySelectorAll('aside[aria-label=\"Vi chất\"] [data-fade]').length") == 0, "column: no fade once scrolled to the end")
         pg.screenshot(path=os.path.join(SHOTS, "v021-home-L3-end-390.png"))
         ctx.close()
 

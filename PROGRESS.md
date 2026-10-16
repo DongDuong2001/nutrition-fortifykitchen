@@ -139,6 +139,13 @@
 - Gates: typecheck ok; vitest 878 pass (also TZ=UTC); build:demo and live-mode build ok; test:align pass; test:hydration 0 errors; smoke 136 of 136; probes for auth and the gate (new policy, no full probe:all for a hotfix): cc2_15 74, cc2_15b 102, cc2_15c 106, cc_18 86, cc_19 106, cc05 all ok, 0 FAIL; live build probe v022c_live_gate: no session ends on /signin at 390 and 1280.
 - Probe policy (Hao 16/10): hotfix or small fix = typecheck, vitest, build, smoke and the probes for the changed area; feature merge = those plus every probe for the touched screens; full probe:all once before a version tag or nightly.
 
+## Quality Gate Summary (v0.2.2)
+- Branch feat/ui-cc-v022 from main a9a3cf6, not merged (Hao reviews first). Port 3101, DEMO_BUILD prod build. Claim released.
+- Hôm nay nutrient column: no fade, no overlay. The scroll area is cut to the bottom of the last whole row (at the top of the list); "x/N đạt · Thiếu nhiều nhất" and "Đủ 22 vi chất" sit below it, with any leftover space above them; scrolling snaps to row tops. Bars keep their exact level colours at full opacity. components/home/column-scroll.tsx, nutrient-column.tsx.
+- Process: AGENTS.md "Review first" (every change on a feat/ui-cc-* branch, merged only after Hao's review); CLAUDE.md follows. OPEN_QUESTIONS: the v0.2.1 changes to Dong's web files.
+- Gates on prod :3101: typecheck ok; vitest 864 pass (also TZ=UTC); build:demo ok; test:align pass; test:hydration 0 errors; smoke 136 of 136; probes cc_22 75 ok, cc_28b 114 ok, cc_26 206 ok, v021_shots ok; new v022_column: at 390 (Levels 2 and 5) and 1440 (Level 5) no mask, bars at opacity 1 with level colours only, block and link below the area, no row cut at the top, last row whole at the end.
+- Screenshots: apps/web/.screenshots/v022-home-L2-390.png, v022-home-L5-390.png, and the scrolled-to-end twins (v022-home-L2-end-390.png, v022-home-L5-end-390.png).
+
 ## Quality Gate Summary (v0.2.1)
 - Branch feat/ui-cc-v021 from feat/ui (v0.2.0), review fixes. Port 3101, DEMO_BUILD prod build (`npm run build:demo`). Claim released.
 - Gates, each on its own: typecheck ok; vitest 864 pass in 69 files (also with TZ=UTC); build:demo ok; plain `npm run build` ok; live-mode build (NEXT_PUBLIC_API_MODE=live) ok (/explore/coaches, /explore/leaderboard, /dev/ui serve the 404 page, no coaches or leaderboard in robots.txt or the sitemap); test:align all pairs pass; test:hydration 0 errors; smoke 136 of 136 PASS; probe:all 61 PASS, 2 REPORT (ag04_audit, screenshots), 0 FAIL, 1 SKIP (cc02-final, dev only).
