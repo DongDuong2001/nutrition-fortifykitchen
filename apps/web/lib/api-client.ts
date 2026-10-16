@@ -15,6 +15,8 @@ import { accountStorage } from "./storage-keys";
 import { type CoachProfile, filterCoachesBySpecialty, getCoachById } from "./coaches";
 import { type LeaderboardPeriod, type LeaderboardResponse, getMockLeaderboard, setLeaderboardOptIn as setLeaderboardOptInState } from "./leaderboard";
 import { readStoredProfile, type Profile } from "./profile";
+import { shiftIsoDate } from "./day-history";
+import { generateUuid, isUuid } from "./uuid";
 import { normaliseCoaching } from "./coaching-link";
 import type { GoalType, SexType } from "./targets";
 
@@ -583,7 +585,9 @@ export const apiClient = {
         if (res.ok) {
           const json = await res.json();
           const raw = json.data ?? json;
-          return mapApiFoodToFoodItem(raw);
+          const mapped = mapApiFoodToFoodItem(raw);
+          MOCK_FOODS.unshift(mapped);
+          return mapped;
         }
       } catch {
         // Fallback
@@ -617,42 +621,47 @@ export const apiClient = {
   },
 
   async addEntry(payload: {
-    foodId: string;
-    grams: number;
+    foodId?: string;
+    grams?: number;
     mealSlot: string;
     date?: string;
     id?: string;
+    kind?: "food" | "quick";
+    calories?: number;
   }): Promise<{ success: boolean; id: string }> {
-    const entryId = payload.id || `entry-${Date.now()}`;
+    const entryId = isUuid(payload.id) ? payload.id! : generateUuid();
     const date = payload.date || getTodayIsoVN();
-
+    const kind = payload.kind || "food";
     const slot = payload.mealSlot === "preworkout" ? "pre_workout" : payload.mealSlot;
+
     if (isLiveMode()) {
+      const isQuick = kind === "quick";
+      const body: Record<string, unknown> = {
+        id: entryId,
+        kind,
+        meal_slot: slot,
+      };
+      if (isQuick) {
+        body.calories = payload.calories ?? 0;
+      } else {
+        if (payload.foodId && isUuid(payload.foodId)) {
+          body.food_id = payload.foodId;
+        }
+        body.grams = payload.grams ?? 100;
+        body.serving_size_g = payload.grams ?? 100;
+      }
+
       try {
         const res = await apiFetch(`/days/${date}/entries`, {
           method: "POST",
-          body: JSON.stringify({
-            id: entryId,
-            food_id: payload.foodId,
-            grams: payload.grams,
-            serving_size_g: payload.grams,
-            meal_slot: slot,
-            kind: "food",
-          }),
+          body: JSON.stringify(body),
         });
         if (res.ok) {
           const json = await res.json();
           return { success: true, id: json.id || entryId };
         }
       } catch {
-        enqueueOfflineEntry(date, {
-          id: entryId,
-          food_id: payload.foodId,
-          grams: payload.grams,
-          serving_size_g: payload.grams,
-          meal_slot: slot,
-          kind: "food",
-        });
+        enqueueOfflineEntry(date, body);
       }
     }
 
@@ -849,7 +858,7 @@ export const apiClient = {
       try {
         const res = await apiFetch(`/days/${encodeURIComponent(date)}/training`, {
           method: "PUT",
-          body: JSON.stringify({ minutes }),
+          body: JSON.stringify({ training_minutes: minutes }),
         });
         return res.ok;
       } catch {
@@ -859,11 +868,16 @@ export const apiClient = {
     return true;
   },
 
-  async copyYesterday(date: string): Promise<boolean> {
+  async copyYesterday(date: string, mealSlots?: string[]): Promise<boolean> {
     if (isLiveMode()) {
       try {
+        const sourceDate = shiftIsoDate(date, -1);
         const res = await apiFetch(`/days/${encodeURIComponent(date)}/copy-yesterday`, {
           method: "POST",
+          body: JSON.stringify({
+            source_date: sourceDate,
+            meal_slots: mealSlots || [],
+          }),
         });
         return res.ok;
       } catch {
@@ -887,8 +901,41 @@ export const apiClient = {
     return true;
   },
 
+  async updateEntry(
+    id: string,
+    patch: {
+      meal_slot?: string;
+      grams?: number;
+      serving_size_g?: number;
+      serving_label?: string;
+      calories?: number;
+    }
+  ): Promise<boolean> {
+    if (isLiveMode()) {
+      if (!isUuid(id)) return true;
+      try {
+        const slot = patch.meal_slot === "preworkout" ? "pre_workout" : patch.meal_slot;
+        const res = await apiFetch(`/entries/${encodeURIComponent(id)}`, {
+          method: "PATCH",
+          body: JSON.stringify({
+            meal_slot: slot,
+            grams: patch.grams,
+            serving_size_g: patch.serving_size_g ?? patch.grams,
+            serving_label: patch.serving_label,
+            calories: patch.calories,
+          }),
+        });
+        return res.ok;
+      } catch {
+        return false;
+      }
+    }
+    return true;
+  },
+
   async restoreEntry(id: string): Promise<boolean> {
     if (isLiveMode()) {
+      if (!isUuid(id)) return true;
       try {
         const res = await apiFetch(`/entries/${encodeURIComponent(id)}/restore`, {
           method: "POST",
@@ -903,6 +950,7 @@ export const apiClient = {
 
   async deleteEntry(id: string): Promise<boolean> {
     if (isLiveMode()) {
+      if (!isUuid(id)) return true;
       try {
         const res = await apiFetch(`/entries/${encodeURIComponent(id)}`, {
           method: "DELETE",
@@ -954,6 +1002,12 @@ export const apiClient = {
           birth_year: profile.birthYear,
           weight_kg: profile.weightKg,
           goal: profile.goal,
+          ...(profile.nearPeriod !== undefined || profile.periodMode !== undefined
+            ? { near_period: Boolean(profile.nearPeriod ?? profile.periodMode) }
+            : {}),
+          ...(profile.trainingMinutesDefault !== undefined
+            ? { training_minutes_default: profile.trainingMinutesDefault }
+            : {}),
           // The display name travels with the profile save
           ...(profile.displayName ? { display_name: profile.displayName } : {}),
         }),
