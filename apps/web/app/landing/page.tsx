@@ -14,18 +14,116 @@ export const metadata = {
 const STEPS = [
   {
     num: "01",
+    stepLabel: "BƯỚC 1",
     title: "Ghi nhận khẩu phần chính xác",
-    desc: "Tra cứu từ cơ sở dữ liệu thực phẩm chuẩn hóa (Viện Dinh Dưỡng Việt Nam và USDA). Hỗ trợ thêm nhiều món cùng lúc vào một bữa với khối lượng gam linh hoạt.",
+    desc: "Tra cứu từ danh mục thực phẩm chuẩn hoá (Viện Dinh Dưỡng & USDA). Ghi nhanh nhiều món liên tiếp vào từng bữa ăn với khối lượng gam thực tế.",
+    microUi: (
+      <div className="p-3.5 rounded-2xl bg-page/80 border border-card-border/70 flex items-center justify-between">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-7 h-7 rounded-lg bg-blue/10 text-blue font-bold flex items-center justify-center shrink-0 text-xs">
+            +
+          </div>
+          <div className="min-w-0">
+            <div className="text-xs font-bold text-text truncate">Ức gà áp chảo</div>
+            <div className="text-[11px] text-secondary">Bữa trưa · 150g</div>
+          </div>
+        </div>
+        <span className="shrink-0 text-[11px] font-extrabold text-blue bg-card px-2.5 py-1 rounded-lg border border-card-border/80 shadow-2xs">
+          247 kcal
+        </span>
+      </div>
+    ),
   },
   {
     num: "02",
+    stepLabel: "BƯỚC 2",
     title: "Phân tích 22 vi chất thời gian thực",
-    desc: "Hệ thống tự động tính toán tỷ lệ đạt chuẩn của từng vitamin và khoáng chất, hiển thị trực quan qua biểu đồ 10 phân đoạn chuẩn mực.",
+    desc: "Tự động đối chiếu từng vitamin và khoáng chất với nhu cầu khuyến nghị RNI chuẩn Việt Nam qua biểu đồ 10 mức phân đoạn trực quan.",
+    microUi: (
+      <div className="p-3.5 rounded-2xl bg-page/80 border border-card-border/70 flex flex-col gap-2">
+        <div className="flex items-center justify-between text-[11px]">
+          <span className="font-semibold text-secondary">Canxi (Ca)</span>
+          <span className="font-extrabold text-level-green">85% chuẩn RNI</span>
+        </div>
+        <div className="h-1.5 w-full bg-card-border/50 rounded-full overflow-hidden">
+          <div className="h-full bg-level-green rounded-full" style={{ width: "85%" }} />
+        </div>
+        <div className="flex items-center justify-between text-[11px]">
+          <span className="font-semibold text-secondary">Kẽm (Zn)</span>
+          <span className="font-extrabold text-blue">100% Đạt</span>
+        </div>
+        <div className="h-1.5 w-full bg-card-border/50 rounded-full overflow-hidden">
+          <div className="h-full bg-blue rounded-full" style={{ width: "100%" }} />
+        </div>
+      </div>
+    ),
   },
   {
     num: "03",
+    stepLabel: "BƯỚC 3",
     title: "Tối ưu hóa theo cường độ vận động",
-    desc: "Tự động điều chỉnh nhu cầu muối khoáng và nước dựa trên thời lượng tập luyện thực tế, đồng bộ cùng mục tiêu của huấn luyện viên.",
+    desc: "Hệ thống tự động tính toán nhu cầu bù muối điện giải và nước theo thời lượng tập luyện thực tế mỗi ngày, đồng bộ giáo án cùng huấn luyện viên.",
+    microUi: (
+      <div className="p-3.5 rounded-2xl bg-page/80 border border-card-border/70 flex items-center justify-between">
+        <div>
+          <div className="text-xs font-bold text-text">Tập gym 60 phút</div>
+          <div className="text-[11px] text-secondary">Cường độ vận động cao</div>
+        </div>
+        <span className="shrink-0 text-[11px] font-extrabold text-warning-text bg-warning-bg px-2.5 py-1 rounded-full border border-level-yellow/30 flex items-center gap-1">
+          +1.200 mg bù muối
+        </span>
+      </div>
+    ),
+  },
+];
+
+const TRANSPARENCY_PRINCIPLES = [
+  {
+    tag: "ĐỘ CHÍNH XÁC KHOA HỌC",
+    title: "Không làm tròn số sai lệch",
+    desc: "Dữ liệu vi chất được tính toán theo tỷ lệ khối lượng thực tế từng gam, định dạng chuẩn mực Việt Nam (1.041 kcal và 2,1 mg sắt), bảo đảm tính chuẩn xác khoa học.",
+    badge: "Chuẩn xác đến từng gam",
+    icon: (
+      <svg className="w-5 h-5 text-blue" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+        <path d="M12 3v18M3 12h18M6 8l6-5 6 5M6 16l6 5 6-5" />
+      </svg>
+    ),
+  },
+  {
+    tag: "TRUNG THỰC DỮ LIỆU",
+    title: "Không quy đổi giá trị thiếu thành 0",
+    desc: "Nếu một thực phẩm chưa có dữ liệu phân tích của vi chất nhất định, hệ thống thể hiện dấu gạch ngang (—), tuyệt đối không tự ý gán bằng 0 gây hiểu lầm thiếu hụt.",
+    badge: "Chuẩn minh bạch: — (chưa rõ)",
+    icon: (
+      <svg className="w-5 h-5 text-blue" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" />
+        <line x1="8" y1="12" x2="16" y2="12" />
+      </svg>
+    ),
+  },
+  {
+    tag: "NGUỒN GỐC MINH BẠCH",
+    title: "Gắn nhãn rõ ràng nguồn thực phẩm",
+    desc: "Mọi món ăn hiển thị rõ ràng nguồn gốc dữ liệu: Bảng thành phần dinh dưỡng Việt Nam, cơ sở dữ liệu USDA hoặc món do người dùng tự tạo, phân định rạch ròi.",
+    badge: "100% kiểm chứng nguồn gốc",
+    icon: (
+      <svg className="w-5 h-5 text-level-green" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+        <path d="M9 12l2 2 4-4" />
+        <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z" />
+      </svg>
+    ),
+  },
+  {
+    tag: "BẢO MẬT & QUYỀN RIÊNG TƯ",
+    title: "Tự chủ dữ liệu cá nhân hoàn toàn",
+    desc: "Bạn có toàn quyền xuất báo cáo, sao lưu hoặc xoá vĩnh viễn nhật ký dinh dưỡng và dữ liệu cơ thể của mình bất kỳ lúc nào mà không bị ràng buộc.",
+    badge: "Quyền riêng tư tuyệt đối",
+    icon: (
+      <svg className="w-5 h-5 text-blue" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+      </svg>
+    ),
   },
 ];
 
@@ -161,23 +259,47 @@ export default function LandingPage() {
       {/* ============================================================== */}
       {/* 4. HOW IT WORKS (3 STEPS)                                     */}
       {/* ============================================================== */}
-      <section id="how-it-works" className="py-20 border-t border-card-border">
+      <section id="how-it-works" className="py-24 border-t border-card-border bg-card/20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2 className="text-xs font-extrabold uppercase tracking-wider text-blue mb-2">
+            <span className="text-xs font-extrabold uppercase tracking-wider text-blue">
               QUY TRÌNH HOẠT ĐỘNG
-            </h2>
-            <h3 className="m-0 text-3xl sm:text-4xl font-extrabold text-ink">
+            </span>
+            <h3 className="m-0 text-3xl sm:text-4xl font-extrabold text-ink mt-2">
               3 bước kiểm soát dinh dưỡng toàn diện
             </h3>
+            <p className="mt-3 text-secondary text-sm sm:text-base leading-relaxed">
+              Quy trình khép kín giúp bạn dễ dàng chuyển hoá thói quen ăn uống thành dữ liệu định lượng khoa học.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
             {STEPS.map((step) => (
-              <div key={step.num} className="flex flex-col gap-3 p-6 rounded-2xl border border-card-border bg-card">
-                <span className="font-display font-black italic text-3xl text-blue">{step.num}</span>
-                <h4 className="m-0 text-lg font-bold text-text">{step.title}</h4>
-                <p className="m-0 text-sm text-secondary leading-relaxed">{step.desc}</p>
+              <div
+                key={step.num}
+                className="relative flex flex-col justify-between p-6 sm:p-8 rounded-3xl border border-card-border/90 bg-card shadow-sm hover:shadow-lg hover:border-blue/50 transition-all duration-300 group"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="font-display font-black text-3xl sm:text-4xl text-blue tracking-tight">
+                      {step.num}
+                    </span>
+                    <span className="text-[11px] font-extrabold tracking-wider uppercase px-2.5 py-1 rounded-full bg-blue/10 text-blue border border-blue/20">
+                      {step.stepLabel}
+                    </span>
+                  </div>
+
+                  <h4 className="m-0 text-lg sm:text-xl font-bold text-ink group-hover:text-blue transition-colors mb-2">
+                    {step.title}
+                  </h4>
+                  <p className="m-0 text-sm text-secondary leading-relaxed mb-6">
+                    {step.desc}
+                  </p>
+                </div>
+
+                <div className="mt-auto pt-4 border-t border-card-border/60">
+                  {step.microUi}
+                </div>
               </div>
             ))}
           </div>
@@ -187,43 +309,68 @@ export default function LandingPage() {
       {/* ============================================================== */}
       {/* 5. TRANSPARENCY & SCIENTIFIC PRINCIPLES                       */}
       {/* ============================================================== */}
-      <section id="transparency" className="py-20 border-t border-card-border bg-card/30">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-          <div className="rounded-2xl border border-card-border bg-card p-8 sm:p-10 flex flex-col gap-6">
-            <div>
-              <span className="text-xs font-extrabold uppercase tracking-wider text-blue">
-                CAM KẾT CHUẨN MỰC
-              </span>
-              <h3 className="m-0 text-2xl sm:text-3xl font-extrabold text-ink mt-1">
-                Minh bạch số liệu là ưu tiên hàng đầu
-              </h3>
-            </div>
+      <section id="transparency" className="py-24 border-t border-card-border bg-page">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <span className="text-xs font-extrabold uppercase tracking-wider text-blue">
+              CAM KẾT CHUẨN MỰC
+            </span>
+            <h3 className="m-0 text-3xl sm:text-4xl font-extrabold text-ink mt-2">
+              Minh bạch số liệu là ưu tiên hàng đầu
+            </h3>
+            <p className="mt-3 text-secondary text-sm sm:text-base leading-relaxed">
+              H1T MICRO tuân thủ các nguyên tắc khoa học khắt khe nhất để bạn và huấn luyện viên an tâm đưa ra quyết định dinh dưỡng.
+            </p>
+          </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm text-secondary leading-relaxed">
-              <div className="flex flex-col gap-2">
-                <div className="font-bold text-text">Không làm tròn số sai lệch</div>
-                <p className="m-0">
-                  Dữ liệu vi chất được tính toán theo tỷ lệ khối lượng thực tế, định dạng số chuẩn xác theo quy chuẩn Việt Nam, bảo toàn tính khoa học.
-                </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+            {TRANSPARENCY_PRINCIPLES.map((item) => (
+              <div
+                key={item.title}
+                className="rounded-3xl border border-card-border/85 bg-card p-7 sm:p-8 shadow-sm hover:shadow-md hover:border-blue/40 transition-all duration-300 flex flex-col justify-between group"
+              >
+                <div>
+                  <div className="flex items-center justify-between gap-4 mb-4">
+                    <div className="w-11 h-11 rounded-2xl bg-page border border-card-border/80 flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+                      {item.icon}
+                    </div>
+                    <span className="text-[11px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full bg-blue/5 text-blue border border-blue/15">
+                      {item.tag}
+                    </span>
+                  </div>
+
+                  <h4 className="m-0 text-xl font-bold text-ink group-hover:text-blue transition-colors">
+                    {item.title}
+                  </h4>
+                  <p className="mt-2.5 mb-0 text-sm text-secondary leading-relaxed">
+                    {item.desc}
+                  </p>
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-card-border/50 flex items-center justify-between text-xs font-semibold text-secondary">
+                  <span className="text-blue font-bold flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue" />
+                    {item.badge}
+                  </span>
+                  <span className="text-[11px] uppercase tracking-wider text-secondary/80">Tiêu chuẩn chuẩn hoá</span>
+                </div>
               </div>
-              <div className="flex flex-col gap-2">
-                <div className="font-bold text-text">Không quy đổi giá trị thiếu thành 0</div>
-                <p className="m-0">
-                  Nếu một thực phẩm chưa có dữ liệu phân tích của vi chất nhất định, hệ thống thể hiện dấu gạch ngang (chưa rõ), tuyệt đối không gán bằng 0 gây hiểu lầm.
-                </p>
-              </div>
-              <div className="flex flex-col gap-2">
-                <div className="font-bold text-text">Gắn nhãn nguồn gốc thực phẩm</div>
-                <p className="m-0">
-                  Mỗi món ăn hiển thị minh bạch nguồn gốc dữ liệu: Bảng thành phần dinh dưỡng Việt Nam, cơ sở dữ liệu USDA hoặc món do người dùng tự tạo.
-                </p>
-              </div>
-              <div className="flex flex-col gap-2">
-                <div className="font-bold text-text">Tự chủ dữ liệu cá nhân</div>
-                <p className="m-0">
-                  Bạn toàn quyền quản lý, sao lưu hoặc xóa nhật ký dinh dưỡng và dữ liệu cơ thể của mình bất kỳ lúc nào mà không bị ràng buộc.
-                </p>
-              </div>
+            ))}
+          </div>
+
+          {/* Bottom Trust Verification Strip */}
+          <div className="mt-12 rounded-2xl border border-card-border/80 bg-card/60 p-4 sm:p-5 flex flex-wrap items-center justify-between gap-4 text-xs font-semibold text-secondary">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-level-green" />
+              <span>Tiêu chuẩn khuyến nghị RNI Viện Dinh Dưỡng Quốc Gia</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-blue" />
+              <span>Định danh thực phẩm USDA FoodData Central</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-ink" />
+              <span>Bảo mật dữ liệu cá nhân theo tiêu chuẩn y tế</span>
             </div>
           </div>
         </div>
