@@ -125,6 +125,10 @@
 | 11/10/2026 | ui-05-fix-4 | Put test:hydration into npm run check gates, remove dead vitamin remap in micros page, read targets from calculateTargets in PortionPanel & food detail (incl. vitamin_k %), remove playwright test permission from .claude/settings.json | ui-05 approved |
 | 11/10/2026 | ui-04b | Shared AppHeader (daily, sub, tab variants), adopted in /today, /micros, /micros/[nutrient], /profile, /training, and /dev/ui; formatDayLabel timezone & yesterday support; alignment checks today-header and micros-header | Ready for review |
 
+## Quality Gate Summary (parallel probe:all)
+- Branch feat/ui-cc-probe-parallel from feat/ui (383665f). tests/probes/run_all.py: `PROBE_WORKERS=3` runs three probes at once against the one server on 3101 (each probe has its own browser contexts and screenshot names); a probe that fails under load is rerun alone and counts as failed only if it fails alone too. Default stays 1 worker.
+- Time saved: serial full run about 33.5 min of probe time (sum of the 63 per-probe times in the v0.2.1 run); with 3 workers the whole suite took 721 s (12 min), 63 PASS, 2 REPORT, 0 FAIL, 1 SKIP, no reruns needed: about 21 minutes (63%) saved. Use: `PROBE_WORKERS=3 ALIGN_BASE_URL=http://localhost:3101 npm run probe:all`.
+
 ## Quality Gate Summary (search field focus ring)
 - Branch feat/ui-cc-search-ring from feat/ui (after the OAuth hotfix). components/foods/food-search-field.tsx: the wrapper label's focus-within ring (border-blue, ring-2) is the only focus indicator; the input has `outline-none focus-visible:outline-none`. The gram input of app/foods/[id]/page.tsx got the same `focus-visible:outline-none`; portion-panel and entry-editor already had it.
 - Gates (small-fix policy): typecheck ok; vitest 878 pass; build:demo ok; test:align pass; smoke 136 of 136; probes for the area: v022b_search_ring (Tab and tap, /add and /explore, 390 and 1280: no outline or ring on the input, ring on the wrapper; it failed before the fix), ag06 47 ok (its focus-ring check now reads the wrapper), cc11, cc2_15b 102, cc2_15c 106. Screenshots: apps/web/tests/probes/out/search-ring-*.png.

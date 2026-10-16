@@ -142,7 +142,7 @@ Run routine work only through these npm scripts in `apps/web`. The user has auto
 | Demo build for the gates and probes (a plain `npm run build` has no ?demo, ?as or ?level) | `npm run build:demo` |
 | Single gate | `npm run typecheck` / `npm run test` / `npm run build` / `npm run test:align` / `npm run test:hydration` |
 | Smoke, every route at 390 and 1280 | `npm run probe -- tests/probes/smoke.py` |
-| Full probe suite (slow, see below) | `npm run probe:all` |
+| Full probe suite (slow, see below; `PROBE_WORKERS=3` runs three at once, about 12 min instead of 33) | `npm run probe:all` |
 - **If any of these scripts is missing, add it to `apps/web/package.json` first** (one small commit, "chore: npm scripts for gates and ports"). `port:free` takes the port from `PORT` (default 3100), frees it only if something is listening, and prints what it did. Use a small Node or shell script in `apps/web/scripts/`, not a pipe in package.json.
 - Don't chain raw shell commands (`lsof … | xargs kill`, `cd … && …`) for routine work. Use the scripts.
 - **No inline scripts.** Never run `python3 -c "…"`, `node -e "…"` or heredoc scripts. Each one is a new command, so the user has to approve it every time. Put any browser or storage check (Playwright, sessionStorage, page text, screenshots) in a file under `apps/web/tests/probes/<name>.py` and run it with `npm run probe -- tests/probes/<name>.py`. Reuse and edit existing probe files; don't make a new one per run. Read `ALIGN_BASE_URL` for the port (default 3100).
