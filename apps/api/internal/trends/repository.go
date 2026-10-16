@@ -44,13 +44,13 @@ func (r *pgxTrendsRepo) GetHistoryDays(ctx context.Context, userID uuid.UUID, st
 	defer rows.Close()
 
 	dayDataMap := make(map[string][]struct {
-		cal       float64
+		cal       *float64
 		nutrients map[string]*float64
 	})
 
 	for rows.Next() {
 		var logDate time.Time
-		var cal float64
+		var cal *float64
 		var nutrientsJSON []byte
 		if err := rows.Scan(&logDate, &cal, &nutrientsJSON); err == nil {
 			dStr := logDate.Format("2006-01-02")
@@ -59,7 +59,7 @@ func (r *pgxTrendsRepo) GetHistoryDays(ctx context.Context, userID uuid.UUID, st
 				_ = json.Unmarshal(nutrientsJSON, &nut)
 			}
 			dayDataMap[dStr] = append(dayDataMap[dStr], struct {
-				cal       float64
+				cal       *float64
 				nutrients map[string]*float64
 			}{cal: cal, nutrients: nut})
 		}
@@ -78,12 +78,18 @@ func (r *pgxTrendsRepo) GetHistoryDays(ctx context.Context, userID uuid.UUID, st
 			continue
 		}
 
-		dayCal := 0.0
+		var dayCal *float64
 		var pro, carb, fat, fiber *float64
 		dayNutrients := make(map[string]*float64)
 
 		for _, e := range entries {
-			dayCal += e.cal
+			if e.cal != nil && *e.cal > 0 {
+				if dayCal == nil {
+					val := 0.0
+					dayCal = &val
+				}
+				*dayCal += *e.cal
+			}
 			if e.nutrients != nil {
 				if p, ok := e.nutrients["protein"]; ok && p != nil {
 					if pro == nil {
@@ -129,7 +135,7 @@ func (r *pgxTrendsRepo) GetHistoryDays(ctx context.Context, userID uuid.UUID, st
 		result = append(result, TrendDayTotals{
 			Date:      dStr,
 			Logged:    true,
-			Calories:  &dayCal,
+			Calories:  dayCal,
 			Protein:   pro,
 			Carbs:     carb,
 			Fat:       fat,
