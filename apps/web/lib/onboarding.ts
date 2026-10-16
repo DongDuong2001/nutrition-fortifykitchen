@@ -11,6 +11,8 @@ export interface SetupDraft {
   birthYear: string;
   weight: string;
   goal: GoalType;
+  /** Shown on the share image. Required in setup (1 to 40 characters, trimmed); saved to profile.displayName. */
+  displayName?: string;
 }
 
 export interface SetupProfile {
@@ -18,11 +20,24 @@ export interface SetupProfile {
   birthYear: number;
   weightKg: number;
   goal: GoalType;
+  /** Sent with the profile save as display_name. */
+  displayName?: string;
 }
 
 export interface SetupErrors {
   birthYear?: string;
   weight?: string;
+  displayName?: string;
+}
+
+export const SETUP_NAME_MAX = 40;
+
+/** The name field of setup and of the share sheet: required, trimmed, at most 40 characters. Null when valid. */
+export function validateSetupName(value: string | undefined): string | null {
+  const name = (value ?? "").trim();
+  if (name === "") return "Nhập tên hiển thị";
+  if ([...name].length > SETUP_NAME_MAX) return `Tên hiển thị tối đa ${SETUP_NAME_MAX} ký tự`;
+  return null;
 }
 
 export const DEFAULT_DRAFT: SetupDraft = {
@@ -30,6 +45,7 @@ export const DEFAULT_DRAFT: SetupDraft = {
   birthYear: "2003",
   weight: "65",
   goal: "maintain",
+  displayName: "",
 };
 
 const GOAL_COPY: Record<GoalType, { name: string; note: string; rule: string }> = {

@@ -3,6 +3,7 @@ import {
   parseWeightKg,
   parseBirthYear,
   validateSetupDraft,
+  validateSetupName,
   isValidEmail,
   goalOptions,
   dailyTargetRows,
@@ -100,5 +101,25 @@ describe("resendLabel", () => {
   it("counts down before the link can be sent again", () => {
     expect(resendLabel(45)).toBe("Gửi lại liên kết (sau 45 giây)");
     expect(resendLabel(0)).toBe("Gửi lại liên kết");
+  });
+});
+
+describe("validateSetupName", () => {
+  it("is required: a blank or spaces-only name is an error", () => {
+    expect(validateSetupName("")).toBe("Nhập tên hiển thị");
+    expect(validateSetupName("   ")).toBe("Nhập tên hiển thị");
+    expect(validateSetupName(undefined)).toBe("Nhập tên hiển thị");
+  });
+
+  it("accepts 1 to 40 characters after trimming", () => {
+    expect(validateSetupName("A")).toBeNull();
+    expect(validateSetupName("  Vũ Minh Hào  ")).toBeNull();
+    expect(validateSetupName("a".repeat(40))).toBeNull();
+    expect(validateSetupName(`  ${"a".repeat(40)}  `)).toBeNull();
+  });
+
+  it("rejects 41 characters, counting letters with accents once", () => {
+    expect(validateSetupName("a".repeat(41))).toBe("Tên hiển thị tối đa 40 ký tự");
+    expect(validateSetupName("ế".repeat(40))).toBeNull();
   });
 });

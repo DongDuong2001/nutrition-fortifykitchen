@@ -15,6 +15,17 @@ describe("personaPatch", () => {
     expect(personaPatch("?as=admin")).toMatchObject({ role: "admin" });
   });
 
+  it("each mock account has a name for the share image", () => {
+    expect(personaPatch("?as=user0")?.displayName).toBe("Thanh Trúc");
+    expect(personaPatch("?as=user2")?.displayName).toBe("Minh Hào");
+    expect(personaPatch("?as=coach")?.displayName).toBe("HLV Khánh");
+    expect(personaPatch("?as=admin")?.displayName).toBe("Admin");
+  });
+
+  it("?level= alone leaves the name of the profile alone", () => {
+    expect(personaPatch("?level=3")).not.toHaveProperty("displayName");
+  });
+
   it("?level= sets the Level, with the coach, and marks it seen", () => {
     expect(personaPatch("?level=3")).toMatchObject({ role: "user", level: 3, levelSeen: 3, coach: { name: "HLV Khánh" } });
     expect(personaPatch("?level=0")).toMatchObject({ level: 0, coach: null });

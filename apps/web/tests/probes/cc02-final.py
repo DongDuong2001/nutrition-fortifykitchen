@@ -171,6 +171,7 @@ def run():
         expect(pg).to_have_url(BASE + "/signin/check-email")
         pg.get_by_role("link", name="Mở thẳng liên kết đăng nhập (bản thử)").click()
         expect(pg).to_have_url(BASE + "/setup/profile")
+        pg.locator("#setup-display-name").fill("Vũ Minh Hào")
         pg.get_by_role("button", name="Tiếp tục").click()
         expect(pg).to_have_url(BASE + "/setup/goal")
         pg.get_by_role("button", name="Hoàn tất").click()

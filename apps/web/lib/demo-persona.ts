@@ -25,6 +25,11 @@ function levelOf(value: string | null): Level | null {
   return toLevel(Number(value));
 }
 
+/** What a mock account carries beyond the coaching state: the name the share image shows. */
+export type PersonaPatch = CoachingState & { displayName?: string };
+
+const NAMES: Record<Persona, string> = { user0: "Thanh Trúc", user2: "Minh Hào", coach: "HLV Khánh", admin: "Admin" };
+
 const state = (role: Role, level: Level): CoachingState => ({
   role,
   level,
@@ -37,7 +42,7 @@ const state = (role: Role, level: Level): CoachingState => ({
  * The coaching fields a URL asks for, or null when it asks for nothing. `as` sets the whole state; `level` then
  * sets the Level (0 = no coach). A Level override is marked seen, so no one-time card covers the screen.
  */
-export function personaPatch(search: string): CoachingState | null {
+export function personaPatch(search: string): PersonaPatch | null {
   const params = new URLSearchParams(search);
   const persona = personaOf(params.get("as"));
   const level = levelOf(params.get("level"));
@@ -47,5 +52,6 @@ export function personaPatch(search: string): CoachingState | null {
   else if (persona === "coach") next = state("coach", 0);
   else if (persona === "admin") next = state("admin", 0);
   if (level !== null) next = { ...state(next.role, level), role: next.role };
-  return next;
+  // ?as= gives the account its name; ?level= alone keeps whatever name the profile has
+  return persona === null ? next : { ...next, displayName: NAMES[persona] };
 }

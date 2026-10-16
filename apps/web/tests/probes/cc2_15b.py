@@ -73,6 +73,7 @@ def clean(pg, where):
 def setup(pg, phone):
     go(pg, "/setup/profile")
     pg.locator("#setup-weight").fill(str(WEIGHT))
+    pg.locator("#setup-display-name").fill("Vũ Minh Hào")
     if phone:
         pg.get_by_role("button", name="Tiếp tục").click()
         pg.wait_for_url("**/setup/goal")

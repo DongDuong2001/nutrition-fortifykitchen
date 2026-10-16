@@ -102,6 +102,7 @@ function HomeContent() {
     moveEntries,
     mealFoods,
     saveMealAs,
+    updateProfile,
   } = useDiary();
 
   // The Level decides which nutrients the column lists (lib/level-nutrients)
@@ -530,6 +531,7 @@ function HomeContent() {
         finished={isPast}
         displayName={profile.displayName}
         level={level}
+        onSaveName={(name) => updateProfile({ displayName: name })}
       />
       {todayIso && (
         <CalendarSheet

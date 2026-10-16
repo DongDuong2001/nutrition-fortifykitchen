@@ -103,6 +103,15 @@ def first_run(browser, name, size):
     check(year.input_value() == "2003" and weight.input_value() == "65", f"{where} profile: defaults 2003 and 65")
     check(pg.get_by_role("radio", name=re.compile("^Giữ cân")).first.get_attribute("aria-checked") == "true"
           if not phone else True, f"{where} profile: default goal Giữ cân")
+    # cc-27 fix: Tên hiển thị is required; the step cannot continue until it is filled
+    name_field = pg.locator("#setup-display-name")
+    check(name_field.count() == 1 and name_field.get_attribute("placeholder") == "Tên của bạn", f"{where} profile: Tên hiển thị field with its placeholder")
+    check("Hiện trên ảnh chia sẻ" in t, f"{where} profile: the helper says where the name shows")
+    check(name_field.input_value() == "", f"{where} profile: the name starts blank")
+    advance = pg.get_by_role("button", name="Tiếp tục") if phone else pg.get_by_role("button", name="Hoàn tất").locator("visible=true").first
+    check(advance.is_disabled(), f"{where} profile: the button is disabled while the name is blank")
+    name_field.fill("   ")
+    check(advance.is_disabled(), f"{where} profile: spaces alone do not count")
     shot(pg, "profile", name)
     no_h_scroll(pg, f"{where} profile")
     small_targets(pg, f"{where} profile")
@@ -124,6 +133,8 @@ def first_run(browser, name, size):
     check(pg.evaluate("document.activeElement && document.activeElement.id") == "setup-weight",
           f"{where} Enter: birth year moves focus to the weight")
     weight.fill(str(WEIGHT))
+    name_field.fill("Vũ Minh Hào")
+    check(advance.is_enabled(), f"{where} profile: the button enables once the name is there")
 
     # 3. to the goal step, and back keeps the values
     if phone:

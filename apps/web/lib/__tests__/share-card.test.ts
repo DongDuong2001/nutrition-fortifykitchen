@@ -11,6 +11,7 @@ import {
   shareKey,
   shareMeals,
   shareName,
+  shareNeedsName,
 } from "../share-card";
 import { entriesFromAdded, groupMeals, type HomeEntry } from "../home";
 import { countedForLevel } from "../level-nutrients";
@@ -150,5 +151,24 @@ describe("share colour key", () => {
   it("model picks the key by day state", () => {
     expect(model({ finished: false }).key).toHaveLength(1);
     expect(model({ finished: true }).key).toHaveLength(4);
+  });
+});
+
+describe("the share image always has a name", () => {
+  it("the sheet blocks drawing while the display name is blank", () => {
+    expect(shareNeedsName("")).toBe(true);
+    expect(shareNeedsName("   ")).toBe(true);
+    expect(shareNeedsName(null)).toBe(true);
+    expect(shareNeedsName(undefined)).toBe(true);
+  });
+
+  it("a name lets it draw", () => {
+    expect(shareNeedsName("Vũ Minh Hào")).toBe(false);
+    expect(shareNeedsName("  A ")).toBe(false);
+  });
+
+  it("the model of a named profile carries the name (the no-name branch is only a fallback)", () => {
+    expect(model({ displayName: "Vũ Minh Hào" }).name).toBe("Vũ Minh Hào");
+    expect(model({ displayName: "" }).name).toBeNull();
   });
 });

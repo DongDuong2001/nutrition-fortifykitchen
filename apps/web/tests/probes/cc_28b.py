@@ -86,11 +86,12 @@ def squash(t):
 NAMED = '{"sex":"male","birthYear":2003,"weightKg":65.4,"goal":"maintain","periodMode":false,"trainingMinutesDefault":60,"displayName":"Vũ Minh Hào","hintSeen":true}'
 
 
-def new_page(browser, size):
+def new_page(browser, size, named=True):
     ctx = browser.new_context(viewport=size, accept_downloads=True)
     ctx.add_init_script(WATCH)
-    # a demo account with a display name: the share image shows it beside the Level badge
-    ctx.add_init_script("try { localStorage.setItem('h1t_profile_v1_demo', JSON.stringify(%s)); } catch (e) {}" % NAMED)
+    # a demo account with a display name: the share image shows it beside the Level badge (named=False: a blank name)
+    if named:
+        ctx.add_init_script("try { localStorage.setItem('h1t_profile_v1_demo', JSON.stringify(%s)); } catch (e) {}" % NAMED)
     ctx.add_init_script("Object.defineProperty(navigator, 'canShare', { value: undefined }); Object.defineProperty(navigator, 'share', { value: undefined });")
     pg = ctx.new_page()
     pg.clock.set_fixed_time(NOW)
@@ -153,10 +154,16 @@ def level_run(browser, size, tag, level):
 
 def share_run(browser, size, tag):
     w = size["width"]
-    # Level 2, today
-    ctx, pg = new_page(browser, size)
+    # Level 2, today, from a BLANK name: the sheet asks for the name first, then the image carries it
+    ctx, pg = new_page(browser, size, named=False)
     go(pg, "/?level=2")
     pg.get_by_role("button", name="Chia sẻ ngày này").click()
+    dlg = pg.get_by_role("dialog")
+    dlg.get_by_label("Tên hiện trên ảnh").wait_for(state="visible", timeout=5000)
+    check(dlg.get_by_role("button", name="Tiếp tục", exact=True).is_disabled(), f"{tag} blank name: Tiếp tục is disabled")
+    check(pg.evaluate("window.__shareSnaps.length") == 0, f"{tag} blank name: nothing is drawn before the name")
+    dlg.get_by_label("Tên hiện trên ảnh").fill("Vũ Minh Hào")
+    dlg.get_by_role("button", name="Tiếp tục", exact=True).click()
     pg.get_by_role("dialog").get_by_role("img").wait_for(state="visible", timeout=20000)
     s = pg.evaluate("window.__shareSnaps[window.__shareSnaps.length - 1]")
     check(s and s["badge"] == "2" and "LEVEL 2" in s["badgeText"].upper(), f"{tag} share L2: badge ({s and s['badgeText']!r})")

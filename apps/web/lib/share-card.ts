@@ -55,6 +55,14 @@ export function shareName(displayName: string | null | undefined): string | null
   return name === "" ? null : name;
 }
 
+/**
+ * The share image always has a name. While the display name is blank the sheet shows a name step and draws
+ * nothing; shareName()'s no-name branch (the date on row 1) is only a safety fallback.
+ */
+export function shareNeedsName(displayName: string | null | undefined): boolean {
+  return shareName(displayName) === null;
+}
+
 export interface ShareModel {
   name: string | null;
   dateLabel: string;

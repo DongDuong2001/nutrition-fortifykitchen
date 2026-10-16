@@ -275,14 +275,34 @@ def run(browser, size, tag):
     check(pg.evaluate("document.activeElement?.getAttribute('aria-label')") == "Chia sẻ ngày này", f"{tag} focus returns to the icon")
     ctx.close()
 
-    # today without a name: only the date on top
+    # cc-27 fix: no display name -> the sheet asks for it first and draws nothing until it has one
     ctx, pg = page(browser, size, NO_SHARE)
     go(pg, "/")
     open_sheet(pg)
+    dlg = pg.get_by_role("dialog")
+    field = dlg.get_by_label("Tên hiện trên ảnh")
+    check(field.count() == 1, f"{tag} no name: the sheet opens on the name step")
+    go_on = dlg.get_by_role("button", name="Tiếp tục", exact=True)
+    check(go_on.is_disabled(), f"{tag} no name: Tiếp tục is disabled while the field is empty")
+    check(dlg.get_by_role("button", name="Lưu ảnh").count() == 0 and dlg.get_by_role("img").count() == 0, f"{tag} no name: no image and no Lưu ảnh yet")
+    field.fill("   ")
+    check(go_on.is_disabled(), f"{tag} no name: spaces alone do not count")
+    pg.wait_for_timeout(800)
+    check(pg.evaluate("window.__shareSnaps.length") == 0, f"{tag} no name: nothing was drawn")
+    pg.screenshot(path=os.path.join(SHOTS, f"cc-27g-name-step-{w}.png"))
+    field.fill("Thanh Trúc")
+    check(go_on.is_enabled() and go_on.bounding_box()["height"] >= 43.5, f"{tag} no name: Tiếp tục enables with a name (44 px)")
+    go_on.click()
     wait_preview(pg)
     s = snap(pg)
-    check(s is not None and s["top"].strip().startswith("Hôm nay 15/10") and "Nguyễn" not in s["top"], f"{tag} no name: only the date on top, with the Level badge ({s['top'] if s else None!r})")
-    check_head(s, tag, "no name", named=False)
+    check(s is not None and s["top"].startswith("Thanh Trúc"), f"{tag} no name: the image has the name ({s['top'] if s else None!r})")
+    check_head(s, tag, "name step", named=True)
+    pg.keyboard.press("Escape")
+    pg.reload(wait_until="networkidle")
+    wait_home(pg)
+    open_sheet(pg)
+    wait_preview(pg)
+    check(dlg.get_by_label("Tên hiện trên ảnh").count() == 0, f"{tag} no name: the name is saved, the next share goes straight to the image")
     ctx.close()
 
     # a day with two meals only: the empty meals are absent
@@ -333,7 +353,7 @@ def run(browser, size, tag):
     ctx.close()
 
     # with file sharing
-    ctx, pg = page(browser, size, STUB_SHARE)
+    ctx, pg = page(browser, size, init(STUB_SHARE, NAMED_INIT))
     go(pg, "/")
     open_sheet(pg)
     wait_preview(pg)

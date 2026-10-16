@@ -4,10 +4,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { getFontEmbedCSS, toBlob } from "html-to-image";
 import { Sheet } from "@/components/ui/sheet";
+import { FormRow } from "@/components/ui/form-row";
 import { PillButton } from "@/components/ui/pill-button";
 import type { HomeEntry, HomeMeal } from "@/lib/home";
 import type { MockDayData } from "@/lib/mock/sample-day";
-import { SHARE_CSS_WIDTH, SHARE_SCALE, SHARE_WIDTH, buildShareModel, shareImageHeight, type ShareModel } from "@/lib/share-card";
+import { SHARE_CSS_WIDTH, SHARE_SCALE, SHARE_WIDTH, buildShareModel, shareImageHeight, shareNeedsName, type ShareModel } from "@/lib/share-card";
+import { validateSetupName } from "@/lib/onboarding";
 import { ShareDay } from "./share-day";
 import { countedForLevel } from "@/lib/level-nutrients";
 import type { Level } from "@/lib/coaching-link";
@@ -100,6 +102,7 @@ export function ShareSheet({
   finished,
   displayName,
   level,
+  onSaveName,
 }: {
   open: boolean;
   onClose: () => void;
@@ -110,6 +113,8 @@ export function ShareSheet({
   displayName: string;
   /** The Level badge on the name row and the list of nutrients in the column. */
   level: Level;
+  /** Saves the name typed in the name step (profile.displayName). */
+  onSaveName: (name: string) => void;
 }) {
   const [ready, setReady] = useState<Ready | null>(null);
   const [failure, setFailure] = useState<Failure | null>(null);
@@ -119,8 +124,12 @@ export function ShareSheet({
   const latest = useRef({ day, entries, meals, finished, displayName, level });
   latest.current = { day, entries, meals, finished, displayName, level };
 
+  const needsName = shareNeedsName(displayName);
+  const [nameDraft, setNameDraft] = useState("");
+  const [nameError, setNameError] = useState<string | null>(null);
+
   useEffect(() => {
-    if (!open) return;
+    if (!open || needsName) return;
     setReady(null);
     setFailure(null);
     const { level: current, ...rest } = latest.current;
@@ -130,7 +139,7 @@ export function ShareSheet({
       // The revoked URL must not show for a frame when the sheet opens again
       setReady(null);
     };
-  }, [open, attempt]);
+  }, [open, attempt, needsName]);
 
   const urlRef = useRef<string | null>(null);
   useEffect(
@@ -193,6 +202,47 @@ export function ShareSheet({
     else if (failure === "save") save();
     else setAttempt((n) => n + 1);
   };
+
+  // Never draw an image without a name: ask for it first
+  if (needsName) {
+    const valid = validateSetupName(nameDraft) === null;
+    return (
+      <Sheet open={open} onClose={onClose} title="Chia sẻ ngày này" titleId="share-sheet-title" desktopDialog>
+        <form
+          noValidate
+          onSubmit={(e) => {
+            e.preventDefault();
+            const message = validateSetupName(nameDraft);
+            setNameError(message);
+            if (!message) onSaveName(nameDraft.trim());
+          }}
+          className="flex flex-col gap-3"
+        >
+          <FormRow label="Tên hiện trên ảnh" htmlFor="share-name" error={nameError ?? undefined}>
+            <input
+              id="share-name"
+              type="text"
+              autoComplete="nickname"
+              maxLength={40}
+              value={nameDraft}
+              onChange={(e) => {
+                setNameDraft(e.target.value);
+                if (nameError) setNameError(null);
+              }}
+              placeholder="Tên của bạn"
+              aria-invalid={nameError ? true : undefined}
+              className={`h-[52px] w-full rounded-xl border-2 bg-card px-4 text-base font-semibold text-text outline-none focus:border-blue ${
+                nameError ? "border-destructive" : "border-card-border"
+              }`}
+            />
+          </FormRow>
+          <PillButton type="submit" variant="primary" disabled={!valid} data-align-group="share-actions">
+            Tiếp tục
+          </PillButton>
+        </form>
+      </Sheet>
+    );
+  }
 
   return (
     <Sheet open={open} onClose={onClose} title="Chia sẻ ngày này" titleId="share-sheet-title" desktopDialog>

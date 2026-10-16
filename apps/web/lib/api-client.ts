@@ -845,6 +845,8 @@ export const apiClient = {
             birth_year: profile.birthYear,
             weight_kg: profile.weightKg,
             goal: profile.goal,
+            // cc-27 fix: the display name (required in setup) travels with the profile save
+            ...(profile.displayName ? { display_name: profile.displayName } : {}),
           }),
         });
       } catch {

@@ -46,9 +46,14 @@ def squash(t):
     return re.sub(r"\s+", " ", t).strip()
 
 
+NAMED = '{"sex":"male","birthYear":2003,"weightKg":65,"goal":"maintain","periodMode":false,"trainingMinutesDefault":60,"displayName":"Vũ Minh Hào"}'
+
+
 def new_page(browser, size):
     ctx = browser.new_context(viewport=size, accept_downloads=True)
     ctx.add_init_script(WATCH)
+    # a named account that has not dismissed the Level 0 hint (the share image never draws without a name)
+    ctx.add_init_script("try { if (localStorage.getItem('h1t_profile_v1_demo') === null) localStorage.setItem('h1t_profile_v1_demo', JSON.stringify(%s)); } catch (e) {}" % NAMED)
     pg = ctx.new_page()
     errors = []
     pg.on("console", lambda m: errors.append(m.text) if m.type == "error" else None)
@@ -231,6 +236,7 @@ def run(browser, size, tag):
     pg.wait_for_timeout(500)
     field = pg.get_by_label("Mã huấn luyện viên (nếu có)")
     check(field.count() == 1 and field.bounding_box()["height"] >= 43.5, f"{tag} setup: the optional coach code field")
+    pg.locator("#setup-display-name").fill("Vũ Minh Hào")
     pg.screenshot(path=os.path.join(SHOTS, f"cc-28c-setup-{w}.png"))
     field.fill("h1t-khanh")
     finish = pg.get_by_role("button", name=re.compile("^(Tiếp tục|Hoàn tất)$")).locator("visible=true").first

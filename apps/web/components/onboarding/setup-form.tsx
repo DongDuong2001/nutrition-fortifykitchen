@@ -14,6 +14,7 @@ import {
   goalOptions,
   readDraft,
   validateSetupDraft,
+  validateSetupName,
   writeDraft,
   type SetupDraft,
   type SetupErrors,
@@ -60,6 +61,8 @@ export function SetupForm({ step }: { step: SetupStep }) {
   const isProfile = step === "profile";
   const year = new Date().getFullYear();
   const profile = validateSetupDraft(draft, year).profile;
+  // Tiếp tục and Hoàn tất wait for a name: it is what the share image shows
+  const nameReady = validateSetupName(draft.displayName) === null;
   const targetWeight = profile?.weightKg ?? null;
   const options = goalOptions(targetWeight);
   const targetRows = dailyTargetRows(targetWeight, draft.sex, draft.goal);
@@ -108,8 +111,10 @@ export function SetupForm({ step }: { step: SetupStep }) {
       window.matchMedia(DESKTOP_QUERY).matches;
 
     const result = validateSetupDraft(draft, year);
-    setErrors(result.errors);
-    if (!result.profile) return;
+    const nameError = validateSetupName(draft.displayName);
+    setErrors(nameError ? { ...result.errors, displayName: nameError } : result.errors);
+    if (!result.profile || nameError) return;
+    const displayName = (draft.displayName ?? "").trim();
 
     if (!finish) {
       router.push("/setup/goal");
@@ -119,8 +124,8 @@ export function SetupForm({ step }: { step: SetupStep }) {
     setSaving(true);
     setSaveError(null);
     try {
-      await apiClient.saveSetup(result.profile);
-      updateProfile(result.profile);
+      await apiClient.saveSetup({ ...result.profile, displayName });
+      updateProfile({ ...result.profile, displayName });
       router.push("/setup/done");
     } catch {
       setSaveError("Chưa lưu được hồ sơ. Thử lại sau ít phút.");
@@ -171,6 +176,37 @@ export function SetupForm({ step }: { step: SetupStep }) {
             className={`${isProfile ? "flex" : "hidden"} flex-col gap-6 lg:flex`}
             aria-label="Thông tin cơ thể"
           >
+            <FormRow
+              label="Tên hiển thị"
+              htmlFor="setup-display-name"
+              required
+              hint="Hiện trên ảnh chia sẻ"
+              error={errors.displayName}
+            >
+              <input
+                id="setup-display-name"
+                type="text"
+                autoComplete="nickname"
+                enterKeyHint="next"
+                maxLength={40}
+                value={draft.displayName ?? ""}
+                onChange={(e) => update({ displayName: e.target.value })}
+                onBlur={() => {
+                  const message = validateSetupName(draft.displayName);
+                  setErrors((prev) => {
+                    const next = { ...prev };
+                    delete next.displayName;
+                    return message ? { ...next, displayName: message } : next;
+                  });
+                }}
+                placeholder="Tên của bạn"
+                aria-invalid={errors.displayName ? true : undefined}
+                className={`h-[52px] w-full rounded-xl border-2 bg-card px-4 text-base font-semibold text-text outline-none focus:border-blue ${
+                  errors.displayName ? "border-destructive" : "border-grabber"
+                }`}
+              />
+            </FormRow>
+
             <div className="grid gap-6 lg:grid-cols-2 lg:gap-5">
               <div role="group" aria-label="Giới tính">
                 <FormRow label="Giới tính" data-align-group="setup-row">
@@ -316,12 +352,12 @@ export function SetupForm({ step }: { step: SetupStep }) {
 
           {/* Phone: one CTA per step */}
           <div className={`${isProfile ? "flex" : "hidden"} mt-auto lg:hidden`}>
-            <PillButton type="submit" value="next" disabled={saving}>
+            <PillButton type="submit" value="next" disabled={saving || !nameReady}>
               Tiếp tục
             </PillButton>
           </div>
           <div className={`${isProfile ? "hidden" : "flex"} mt-auto lg:hidden`}>
-            <PillButton type="submit" value="finish" disabled={saving}>
+            <PillButton type="submit" value="finish" disabled={saving || !nameReady}>
               Hoàn tất
             </PillButton>
           </div>
@@ -331,7 +367,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
             <PillButton href="/signin/check-email" variant="secondary" fullWidth={false}>
               Quay lại
             </PillButton>
-            <PillButton type="submit" value="finish" fullWidth={false} disabled={saving}>
+            <PillButton type="submit" value="finish" fullWidth={false} disabled={saving || !nameReady}>
               Hoàn tất
             </PillButton>
           </div>

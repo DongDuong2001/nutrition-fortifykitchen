@@ -190,6 +190,10 @@ def main():
             else:
                 print(f"[PASS] / @ {vp['name']} (checked groups: {res['checkedGroups']})")
 
+            # cc-27 fix: the share image always has a name, so the sheet opens straight on the image only for a named profile
+            page.evaluate("localStorage.setItem('h1t_profile_v1_demo', JSON.stringify({sex:'male',birthYear:2003,weightKg:65,goal:'maintain',periodMode:false,trainingMinutesDefault:60,displayName:'Vũ Minh Hào',hintSeen:true}))")
+            page.reload(wait_until="networkidle")
+            page.wait_for_timeout(500)
             # cc-26: the share sheet's two buttons share edges (file sharing faked, so both show)
             page.evaluate("navigator.canShare = () => true; navigator.share = () => Promise.resolve();")
             page.locator("[aria-label='Chia sẻ ngày này']:visible").first.click()

@@ -252,6 +252,7 @@ def probe_setup(browser):
     ctx = browser.new_context(viewport={"width": 390, "height": 844})
     pg = ctx.new_page()
     go(pg, "/setup/profile")
+    pg.locator("#setup-display-name").fill("Vũ Minh Hào")
     pg.get_by_role("button", name="Tiếp tục").click()
     pg.wait_for_url("**/setup/goal", timeout=8000)
     pg.get_by_role("button", name="Hoàn tất").click()
