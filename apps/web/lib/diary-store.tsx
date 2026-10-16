@@ -527,15 +527,15 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
 
       apiClient.getFavourites().then((favs) => {
         if (Array.isArray(favs) && favs.length > 0) {
-          setFavouriteIds(favs.map((f) => f.id));
+          setFavouriteIds(favs.map((f: any) => (typeof f === "string" ? f : f.food_id || f.id)));
         }
       }).catch(() => {});
 
       apiClient.getRecents().then((rcnts) => {
         if (Array.isArray(rcnts) && rcnts.length > 0) {
-          setRecentFoods(rcnts.map((f) => ({
-            foodId: f.id,
-            servingLabel: f.servings[0]?.label || "100 g",
+          setRecentFoods(rcnts.map((f: any) => ({
+            foodId: f.foodId || f.food_id || f.id,
+            servingLabel: f.servingLabel || f.serving_label || f.servings?.[0]?.label || "100 g",
           })));
         }
       }).catch(() => {});
