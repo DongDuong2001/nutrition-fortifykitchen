@@ -63,15 +63,15 @@ func computeDayTotals(entries []DiaryEntryItem) map[string]*float64 {
 	hasValue := make(map[string]bool)
 
 	for _, entry := range entries {
-		// Energy / calories is always accounted
-		if entry.Calories > 0 {
+		// Energy / calories is accounted when known
+		if entry.Calories != nil && *entry.Calories > 0 {
 			if totals["calories"] == nil {
 				cal := 0.0
 				en := 0.0
 				totals["calories"] = &cal
 				totals["energy"] = &en
 			}
-			*totals["calories"] = round2(*totals["calories"] + entry.Calories)
+			*totals["calories"] = round2(*totals["calories"] + *entry.Calories)
 			*totals["energy"] = *totals["calories"]
 			hasValue["calories"] = true
 			hasValue["energy"] = true
@@ -137,7 +137,9 @@ func (s *diaryServiceImpl) GetDay(ctx context.Context, userID uuid.UUID, date st
 		for i := range meals {
 			if meals[i].Slot == slot {
 				meals[i].Entries = append(meals[i].Entries, e)
-				meals[i].TotalKcal = round2(meals[i].TotalKcal + e.Calories)
+				if e.Calories != nil {
+					meals[i].TotalKcal = round2(meals[i].TotalKcal + *e.Calories)
+				}
 				break
 			}
 		}
@@ -246,9 +248,11 @@ func (s *diaryServiceImpl) CreateEntry(ctx context.Context, userID uuid.UUID, da
 		item.Nutrients = scaledNutrients
 
 		if cal, ok := scaledNutrients["calories"]; ok && cal != nil {
-			item.Calories = *cal
+			item.Calories = cal
 		} else if energy, ok := scaledNutrients["energy"]; ok && energy != nil {
-			item.Calories = *energy
+			item.Calories = energy
+		} else {
+			item.Calories = nil
 		}
 	}
 
@@ -325,7 +329,7 @@ func (s *diaryServiceImpl) UpdateEntry(ctx context.Context, userID uuid.UUID, en
 
 	if existing.Kind == "quick" {
 		if req.Calories != nil {
-			existing.Calories = *req.Calories
+			existing.Calories = req.Calories
 		}
 	} else {
 		if gramsVal != nil && *gramsVal > 0 {
@@ -345,7 +349,11 @@ func (s *diaryServiceImpl) UpdateEntry(ctx context.Context, userID uuid.UUID, en
 					}
 					existing.Nutrients = scaledNutrients
 					if cal, ok := scaledNutrients["calories"]; ok && cal != nil {
-						existing.Calories = *cal
+						existing.Calories = cal
+					} else if energy, ok := scaledNutrients["energy"]; ok && energy != nil {
+						existing.Calories = energy
+					} else {
+						existing.Calories = nil
 					}
 				}
 			}

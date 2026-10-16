@@ -134,9 +134,10 @@ func TestDiaryService_PastDayReadOnly(t *testing.T) {
 	userID := uuid.New()
 	pastDate := "2020-01-01"
 
+	calVal := 200.0
 	_, _, err := svc.CreateEntry(context.Background(), userID, pastDate, CreateEntryRequest{
 		Kind:     "quick",
-		Calories: 200,
+		Calories: &calVal,
 	})
 	if !errors.Is(err, ErrPastDayReadOnly) {
 		t.Fatalf("expected ErrPastDayReadOnly on past date write, got %v", err)
@@ -174,8 +175,8 @@ func TestDiaryService_FoodAndQuickEntries_NullHandling(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if entry1.Calories != 190 {
-		t.Errorf("expected 190 kcal for 50g, got %f", entry1.Calories)
+	if entry1.Calories == nil || *entry1.Calories != 190 {
+		t.Errorf("expected 190 kcal for 50g, got %v", entry1.Calories)
 	}
 	if totals1["calories"] == nil || *totals1["calories"] != 190 {
 		t.Errorf("expected 190 kcal total, got %v", totals1["calories"])
@@ -189,11 +190,12 @@ func TestDiaryService_FoodAndQuickEntries_NullHandling(t *testing.T) {
 	}
 
 	// 2. Add quick entry 250 kcal
+	quickCal := 250.0
 	entry2, totals2, err := svc.CreateEntry(context.Background(), userID, today, CreateEntryRequest{
 		ID:       uuid.New(),
 		Kind:     "quick",
 		MealSlot: "snack",
-		Calories: 250,
+		Calories: &quickCal,
 	})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -242,12 +244,12 @@ func TestDiaryService_RecentsUpsertedOnFoodEntry(t *testing.T) {
 		t.Errorf("unexpected recent item: %+v", recents.upserted[0])
 	}
 
-	// 2. Quick entry -> must NOT upsert recent
+	quickCal := 300.0
 	_, _, err = svc.CreateEntry(context.Background(), userID, today, CreateEntryRequest{
 		ID:       uuid.New(),
 		Kind:     "quick",
 		MealSlot: "snack",
-		Calories: 300,
+		Calories: &quickCal,
 	})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
