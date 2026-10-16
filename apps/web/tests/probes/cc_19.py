@@ -214,7 +214,7 @@ def check_source_link(browser):
         context = new_demo_context(browser, size)
         pg = context.new_page()
         go(pg, "/foods/food-cha-la")
-        # cc-27d: the source in the header opens the Nguồn số liệu sheet, which links to all sources
+        # cc-27d: the source in the header opens the Nguồn dữ liệu sheet, which links to all sources
         src = pg.locator("header").first.get_by_role("button", name="USDA")
         src.wait_for(state="visible", timeout=10000)
         min_target(src, f"{label} food detail: source button")

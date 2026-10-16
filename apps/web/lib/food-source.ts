@@ -12,7 +12,7 @@ export const MATCH_LABEL: Record<FoodMatch, { name: string; detail: string }> = 
 };
 
 export const PROXY_NOTICE =
-  "Ước tính. Chưa có số liệu riêng của món này, nên đang dùng số của món tương tự. Số thật có thể khác một chút.";
+  "Ước tính. Chưa có dữ liệu riêng của món này, nên đang dùng số của món tương tự. Số thật có thể khác một chút.";
 
 /** A food with no `match` is exact. */
 export function matchOf(food: Pick<FoodItem, "match">): FoodMatch {
@@ -37,7 +37,7 @@ export function microCoverage(food: Pick<FoodItem, "nutrients">): { known: numbe
   return { known, total: COUNTED_NUTRIENT_KEYS.length };
 }
 
-/** The "Có số liệu" row: "14/22 vi chất · các chất còn lại hiện “—”" (nothing about the rest when all are known). */
+/** The "Có dữ liệu" row: "14/22 vi chất · các chất còn lại hiện “—”" (nothing about the rest when all are known). */
 export function coverageText(food: Pick<FoodItem, "nutrients">): string {
   const { known, total } = microCoverage(food);
   return known === total ? `${known}/${total} vi chất` : `${known}/${total} vi chất · các chất còn lại hiện “—”`;

@@ -17,14 +17,14 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 }
 
 /**
- * Nguồn số liệu: where a food's numbers come from, how much of the 22 micros they cover and how close the match
+ * Nguồn dữ liệu: where a food's numbers come from, how much of the 22 micros they cover and how close the match
  * is. A proxy food (a similar food stands in for it) says so in an amber notice.
  */
 export function SourceSheet({ food, open, onClose }: { food: FoodItem; open: boolean; onClose: () => void }) {
   const match = matchOf(food);
   const ref = food.sourceRef;
   return (
-    <Sheet open={open} onClose={onClose} title="Nguồn số liệu" titleId="source-sheet-title" desktopDialog>
+    <Sheet open={open} onClose={onClose} title="Nguồn dữ liệu" titleId="source-sheet-title" desktopDialog>
       {isProxy(food) && (
         <p role="note" className="m-0 rounded-xl bg-warning-bg px-3 py-2 text-[13px] leading-snug text-warning-text">
           {PROXY_NOTICE}
@@ -47,7 +47,7 @@ export function SourceSheet({ food, open, onClose }: { food: FoodItem; open: boo
             "—"
           )}
         </Row>
-        <Row label="Có số liệu">{coverageText(food)}</Row>
+        <Row label="Có dữ liệu">{coverageText(food)}</Row>
         <Row label="Độ khớp">
           <span className="font-semibold">
             {MATCH_LABEL[match].name} · {MATCH_LABEL[match].detail}

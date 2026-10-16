@@ -81,7 +81,7 @@ export default function JoinPage() {
           desktopDialog
         >
           <p className="m-0 px-1 text-[13px] leading-snug text-secondary">
-            {target.name} sẽ xem được số liệu ăn uống của bạn và đặt Level để mở thêm chỉ số trong Hôm nay.
+            {target.name} sẽ xem được dữ liệu ăn uống của bạn và đặt Level để mở thêm chỉ số trong Hôm nay.
           </p>
           <PillButton
             type="button"

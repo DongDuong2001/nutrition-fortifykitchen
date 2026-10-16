@@ -1,8 +1,8 @@
 """cc-27d: data sources on foods.
 
 Production build, demo mode, 390x844 and 1440x900.
-- /foods/[id] of a proxy food: amber "Ước tính" tag in the header; the source opens the "Nguồn số liệu" sheet with
-  the amber notice and the rows Nguồn, Mã món gốc, Có số liệu, Độ khớp; "Xem tất cả nguồn dữ liệu" links to
+- /foods/[id] of a proxy food: amber "Ước tính" tag in the header; the source opens the "Nguồn dữ liệu" sheet with
+  the amber notice and the rows Nguồn, Mã món gốc, Có dữ liệu, Độ khớp; "Xem tất cả nguồn dữ liệu" links to
   /settings/data-sources; Đóng and Esc close and focus returns to the source button.
 - A USDA food: no tag, no notice; Mã món gốc is a link to FoodData Central in a new tab (rel noopener).
 - /add: the tag per row (USDA, VN, Ước tính, Của tôi) shows on search results only.
@@ -18,7 +18,7 @@ from playwright.sync_api import sync_playwright
 BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3104")
 SHOTS = os.path.join(os.path.dirname(__file__), "..", "..", ".screenshots")
 problems, notes = [], []
-NOTICE = "Ước tính. Chưa có số liệu riêng của món này, nên đang dùng số của món tương tự. Số thật có thể khác một chút."
+NOTICE = "Ước tính. Chưa có dữ liệu riêng của món này, nên đang dùng số của món tương tự. Số thật có thể khác một chút."
 
 
 def check(cond, msg):
@@ -44,13 +44,13 @@ def run(browser, size, tag):
     box = src.bounding_box()
     check(box["height"] >= 43.5, f"{tag} proxy: the source is a 44 px control ({box['height']:.0f})")
     src.click()
-    dlg = pg.get_by_role("dialog", name="Nguồn số liệu")
+    dlg = pg.get_by_role("dialog", name="Nguồn dữ liệu")
     dlg.wait_for(state="visible", timeout=4000)
     text = re.sub(r"\s+", " ", dlg.inner_text())
     check(NOTICE in text, f"{tag} proxy: the amber notice")
     notice_bg = dlg.get_by_role("note").evaluate("e => getComputedStyle(e).backgroundColor")
     check(notice_bg == "rgb(255, 244, 224)", f"{tag} proxy: notice is amber {notice_bg}")
-    for label in ["Nguồn", "Mã món gốc", "Có số liệu", "Độ khớp"]:
+    for label in ["Nguồn", "Mã món gốc", "Có dữ liệu", "Độ khớp"]:
         check(dlg.locator("dt", has_text=re.compile(rf"^{label}$")).count() == 1, f"{tag} proxy: row {label}")
     check(re.search(r"\d+/22 vi chất · các chất còn lại hiện “—”", text) is not None, f"{tag} proxy: coverage row ({text[:200]})")
     check("Ước tính · món tương tự" in text and "Chính xác đúng món" in text and "Gần đúng cùng món, khác cách chế biến" in text, f"{tag} proxy: match row and its three levels")
@@ -69,7 +69,7 @@ def run(browser, size, tag):
     check(pg.get_by_role("dialog").count() == 0, f"{tag} proxy: Đóng closes")
     check(pg.evaluate("document.activeElement?.textContent?.trim()") == "Bảng TPDD Việt Nam", f"{tag} proxy: focus returns to the source")
     src.click()
-    pg.get_by_role("dialog", name="Nguồn số liệu").wait_for(state="visible")
+    pg.get_by_role("dialog", name="Nguồn dữ liệu").wait_for(state="visible")
     pg.keyboard.press("Escape")
     pg.wait_for_timeout(300)
     check(pg.get_by_role("dialog").count() == 0, f"{tag} proxy: Esc closes")
@@ -80,7 +80,7 @@ def run(browser, size, tag):
     pg.wait_for_timeout(400)
     check(pg.locator("header").first.get_by_text("Ước tính", exact=True).count() == 0, f"{tag} USDA: no Ước tính tag")
     pg.locator("header").first.get_by_role("button", name="USDA").click()
-    dlg = pg.get_by_role("dialog", name="Nguồn số liệu")
+    dlg = pg.get_by_role("dialog", name="Nguồn dữ liệu")
     dlg.wait_for(state="visible")
     check(dlg.get_by_role("note").count() == 0, f"{tag} USDA: no amber notice")
     id_link = dlg.get_by_role("link", name="FDC 171413")
