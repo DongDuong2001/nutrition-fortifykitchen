@@ -8,18 +8,71 @@ import {
   type MockMicroStat,
 } from "./mock/sample-day";
 import { calculateTargets } from "./targets";
-import { MOCK_FOODS, type FoodItem } from "./mock/foods";
+import { MOCK_FOODS, setCatalogFoods, type FoodItem } from "./mock/foods";
 import { searchFoods as searchMockFoods } from "./search";
 import type { SetupProfile } from "./onboarding";
 import { accountStorage } from "./storage-keys";
 import { type CoachProfile, filterCoachesBySpecialty, getCoachById } from "./coaches";
 import { type LeaderboardPeriod, type LeaderboardResponse, getMockLeaderboard, setLeaderboardOptIn as setLeaderboardOptInState } from "./leaderboard";
+import { readStoredProfile, type Profile } from "./profile";
+import { normaliseCoaching } from "./coaching-link";
+import type { GoalType, SexType } from "./targets";
 
 export * from "./nutrients";
 export * from "./mock/foods";
 export * from "./coaches";
 export * from "./leaderboard";
 export type { MockDayData, MockMeal, MockMacroStat, MockMicroStat };
+
+export function mapApiFoodToFoodItem(raw: any): FoodItem {
+  if (!raw) return raw;
+  const nameVi = raw.nameVi || raw.name_vi || raw.name || "Món ăn";
+  const servings = Array.isArray(raw.servings) && raw.servings.length > 0
+    ? raw.servings.map((s: any) => ({
+        label: s.label || s.label_vi || `${s.grams || 100} g`,
+        grams: Number(s.grams) || 100,
+        display: s.display,
+      }))
+    : [{ label: "100 g", grams: 100 }];
+
+  const rawNutrients = raw.nutrients || raw.per_100g_nutrients || {};
+  const nutrients: Record<string, number | null> = {};
+  for (const [k, v] of Object.entries(rawNutrients)) {
+    nutrients[k] = v != null ? Number(v) : null;
+  }
+  if (nutrients.energy == null && nutrients.calories != null) {
+    nutrients.energy = nutrients.calories;
+  }
+
+  return {
+    id: String(raw.id),
+    nameVi,
+    category: raw.category || "khac",
+    brand: raw.brand,
+    source: raw.source || "user",
+    servings,
+    tipVi: raw.tipVi || raw.tip_vi,
+    nutrients,
+    match: raw.match,
+    sourceRef: raw.sourceRef,
+  };
+}
+
+export function mapApiProfileToProfile(raw: any): Profile {
+  const data = raw.data ?? raw;
+  const sex: SexType = data.sex === "female" ? "female" : "male";
+  const goal: GoalType = ["build", "maintain", "cut", "deep_cut"].includes(data.goal) ? data.goal : "maintain";
+  return {
+    sex,
+    birthYear: Number(data.birth_year ?? data.birthYear) || 2000,
+    weightKg: Number(data.weight_kg ?? data.weightKg) || 60,
+    goal,
+    periodMode: Boolean(data.near_period ?? data.nearPeriod ?? data.periodMode),
+    trainingMinutesDefault: Number(data.training_minutes_default ?? data.trainingMinutesDefault) || 60,
+    displayName: data.display_name ?? data.displayName ?? "",
+    ...normaliseCoaching(data),
+  };
+}
 
 export interface NutrientValues {
   // Macros (11)
@@ -156,7 +209,16 @@ async function getAuthHeaders(): Promise<HeadersInit> {
   try {
     const supabase = createClient();
     const { data } = await supabase.auth.getSession();
-    const token = data.session?.access_token;
+    let token = data.session?.access_token;
+
+    if (!token && typeof window !== "undefined") {
+      try {
+        const { data: refreshData } = await supabase.auth.refreshSession();
+        token = refreshData.session?.access_token;
+      } catch {
+        // Refresh failed
+      }
+    }
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -275,7 +337,8 @@ export const apiClient = {
       try {
         const res = await apiFetch(`/days/${encodeURIComponent(targetDate)}`);
         if (res.ok) {
-          return await res.json();
+          const json = await res.json();
+          return json.data ?? json;
         }
       } catch {
         // Fallback below
@@ -302,9 +365,10 @@ export const apiClient = {
         const res = await apiFetch(`/days/${encodeURIComponent(targetDate)}`);
         if (res.ok) {
           const json = await res.json();
-          if (json.meals && json.summary) {
+          const dayData = json.data ?? json;
+          if (dayData.meals && dayData.summary) {
             const logs: DiaryLog[] = [];
-            for (const m of json.meals) {
+            for (const m of dayData.meals) {
               for (const e of m.entries || []) {
                 logs.push({
                   id: e.id,
@@ -315,31 +379,31 @@ export const apiClient = {
                   quantity: 1,
                   serving_size_g: e.grams,
                   nutrients_snapshot: e.nutrients || {},
-                  log_date: json.date,
+                  log_date: dayData.date,
                   created_at: e.created_at,
                 });
               }
             }
             const progress: DailyProgress = {
-              log_date: json.date,
+              log_date: dayData.date,
               total_nutrients: {
-                calories: json.summary.calories || json.summary.energy || 0,
-                protein: json.summary.protein || 0,
-                carbohydrates: json.summary.carbs || 0,
-                fat: json.summary.fat || 0,
-                fiber: json.summary.fiber || 0,
-                sodium: json.summary.sodium || 0,
-                potassium: json.summary.potassium || 0,
-                calcium: json.summary.calcium || 0,
-                magnesium: json.summary.magnesium || 0,
-                iron: json.summary.iron || 0,
-                zinc: json.summary.zinc || 0,
+                calories: dayData.summary.calories || dayData.summary.energy || 0,
+                protein: dayData.summary.protein || 0,
+                carbohydrates: dayData.summary.carbs || 0,
+                fat: dayData.summary.fat || 0,
+                fiber: dayData.summary.fiber || 0,
+                sodium: dayData.summary.sodium || 0,
+                potassium: dayData.summary.potassium || 0,
+                calcium: dayData.summary.calcium || 0,
+                magnesium: dayData.summary.magnesium || 0,
+                iron: dayData.summary.iron || 0,
+                zinc: dayData.summary.zinc || 0,
               },
               logs_count: logs.length,
             };
             return { progress, logs };
           }
-          return json;
+          return dayData;
         }
       } catch {
         // Fallback to mock on transport failure
@@ -405,7 +469,7 @@ export const apiClient = {
         });
         if (res.ok) {
           const json = await res.json();
-          return json;
+          return json.data ?? json;
         }
       } catch {
         enqueueOfflineEntry(payload.log_date || getTodayIsoVN(), payload as unknown as Record<string, unknown>);
@@ -435,17 +499,22 @@ export const apiClient = {
     return { log: dummyLog, today_progress: progress };
   },
 
-  async searchFoods(query = "", category?: string): Promise<FoodItem[]> {
+  async searchFoods(query = "", category?: string, limit = 500): Promise<FoodItem[]> {
     if (isLiveMode()) {
       try {
         const params = new URLSearchParams();
         if (query) params.set("q", query);
         if (category) params.set("category", category);
+        if (limit) params.set("limit", String(limit));
         const res = await apiFetch(`/foods?${params.toString()}`);
         if (res.ok) {
           const json = await res.json();
-          if (json.items && Array.isArray(json.items)) {
-            return json.items;
+          const payload = json.data ?? json;
+          const items = payload.items ?? (Array.isArray(payload) ? payload : []);
+          if (Array.isArray(items) && items.length > 0) {
+            const mapped = items.map(mapApiFoodToFoodItem);
+            setCatalogFoods(mapped);
+            return mapped;
           }
         }
       } catch {
@@ -463,7 +532,10 @@ export const apiClient = {
         const res = await apiFetch(`/foods/${encodeURIComponent(id)}`);
         if (res.ok) {
           const json = await res.json();
-          return json;
+          const raw = json.data ?? json;
+          if (raw && (raw.name_vi || raw.nameVi)) {
+            return mapApiFoodToFoodItem(raw);
+          }
         }
       } catch {
         // Fallback
@@ -662,7 +734,9 @@ export const apiClient = {
       try {
         const res = await apiFetch(`/saved-meals`);
         if (res.ok) {
-          return await res.json();
+          const json = await res.json();
+          const payload = json.data ?? json;
+          return Array.isArray(payload) ? payload : (payload.items || []);
         }
       } catch {
         // Fallback
@@ -750,7 +824,9 @@ export const apiClient = {
         if (to) params.set("to", to);
         const res = await apiFetch(`/me/weight?${params.toString()}`);
         if (res.ok) {
-          return await res.json();
+          const json = await res.json();
+          const payload = json.data ?? json;
+          return Array.isArray(payload) ? payload : (payload.logs || []);
         }
       } catch {
         // Fallback
@@ -816,6 +892,20 @@ export const apiClient = {
     return true;
   },
 
+  async deleteEntry(id: string): Promise<boolean> {
+    if (isLiveMode()) {
+      try {
+        const res = await apiFetch(`/entries/${encodeURIComponent(id)}`, {
+          method: "DELETE",
+        });
+        return res.ok;
+      } catch {
+        return false;
+      }
+    }
+    return true;
+  },
+
   async requestMagicLink(email: string): Promise<{ ok: true }> {
     void email;
     return { ok: true };
@@ -823,6 +913,26 @@ export const apiClient = {
 
   async signInWithGoogle(): Promise<{ ok: true }> {
     return { ok: true };
+  },
+
+  /** Fetches user profile from backend database. Returns null if not completed or unauthorized. */
+  async getProfile(): Promise<Profile | null> {
+    if (isLiveMode()) {
+      try {
+        const res = await apiFetch(`/me`);
+        if (res.ok) {
+          const json = await res.json();
+          const raw = json.data ?? json;
+          if (raw && (raw.sex || raw.birth_year || raw.birthYear)) {
+            return mapApiProfileToProfile(raw);
+          }
+        }
+      } catch {
+        // Fallback or unauthenticated
+      }
+      return null;
+    }
+    return readStoredProfile(new Date().getFullYear());
   },
 
   /** Saves the profile (setup, and later name changes). Live mode throws when the API cannot be reached or says no. */
@@ -839,7 +949,16 @@ export const apiClient = {
           ...(profile.displayName ? { display_name: profile.displayName } : {}),
         }),
       });
-      if (!res.ok) throw new Error(`profile save failed (${res.status})`);
+      if (!res.ok) {
+        let msg = `profile save failed (${res.status})`;
+        try {
+          const errJson = await res.json();
+          if (errJson?.error?.message) msg = errJson.error.message;
+        } catch {
+          // ignore
+        }
+        throw new Error(msg);
+      }
     }
     return { ok: true };
   },
@@ -851,7 +970,9 @@ export const apiClient = {
         const res = await apiFetch(`/coaches${query}`);
         if (res.ok) {
           const json = await res.json();
-          if (Array.isArray(json)) return json;
+          const payload = json.data ?? json;
+          if (Array.isArray(payload)) return payload;
+          if (Array.isArray(payload.items)) return payload.items;
         }
       } catch {
         // No answer
@@ -867,7 +988,8 @@ export const apiClient = {
       try {
         const res = await apiFetch(`/coaches/${encodeURIComponent(id)}`);
         if (res.ok) {
-          return await res.json();
+          const json = await res.json();
+          return json.data ?? json;
         }
       } catch {
         // No answer
@@ -882,7 +1004,8 @@ export const apiClient = {
       try {
         const res = await apiFetch(`/leaderboard?period=${period}`);
         if (res.ok) {
-          return await res.json();
+          const json = await res.json();
+          return json.data ?? json;
         }
       } catch {
         // No answer
