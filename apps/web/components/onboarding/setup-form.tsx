@@ -128,8 +128,9 @@ export function SetupForm({ step }: { step: SetupStep }) {
       await apiClient.saveSetup({ ...result.profile, displayName });
       updateProfile({ ...result.profile, displayName });
       router.push("/setup/done");
-    } catch {
-      setSaveError("Chưa lưu được hồ sơ. Thử lại sau ít phút.");
+    } catch (err) {
+      const msg = err instanceof Error && err.message ? err.message : "Chưa lưu được hồ sơ. Thử lại sau ít phút.";
+      setSaveError(msg);
       setSaving(false);
     }
   }
