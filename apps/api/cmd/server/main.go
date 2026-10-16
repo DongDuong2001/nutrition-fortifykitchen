@@ -213,6 +213,7 @@ func SetupRouter(cfg *config.Config, pool *pgxpool.Pool) chi.Router {
 			// Profile & Weight endpoints (Phase 1)
 			r.Route("/me", func(r chi.Router) {
 				r.Get("/", profileHandler.GetMe)
+				r.Get("/profile", profileHandler.GetMe)
 				r.Put("/profile", profileHandler.UpdateProfile)
 				r.Get("/weight", profileHandler.GetWeightLogs)
 				r.Put("/weight/{date}", profileHandler.UpsertWeight)
