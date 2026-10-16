@@ -115,6 +115,30 @@ export function countedKnown(nutrients: Record<string, number | null>): number {
   return COUNTED_NUTRIENT_KEYS.filter((k) => typeof nutrients[k] === "number").length;
 }
 
+/**
+ * The recipe with every ingredient that is itself a recipe replaced by that recipe's base ingredients, so a saved
+ * recipe never depends on another one still being around. `grams` of a recipe ingredient is that share of the
+ * inner recipe's weight (its cooked weight when given), so the nutrients stay the same. Weight stays what the user
+ * typed: when a recipe is flattened and no cooked weight was given, the typed raw total becomes the cooked weight.
+ * An inner recipe that is missing, or that loops back to this one, is left as it is (its nutrients show as unknown).
+ */
+export function flattenRecipe(recipe: Recipe, all: readonly Recipe[], seen: readonly string[] = []): Recipe {
+  const path = [...seen, recipe.id];
+  let flattened = false;
+  const ingredients = recipe.ingredients.flatMap((ingredient): RecipeIngredient[] => {
+    const inner = isRecipeId(ingredient.foodId) ? all.find((r) => r.id === ingredient.foodId) : undefined;
+    if (!inner || path.includes(inner.id)) return [ingredient];
+    const flat = flattenRecipe(inner, all, path);
+    const base = baseGrams(flat);
+    if (base <= 0) return [ingredient];
+    flattened = true;
+    const factor = ingredient.grams / base;
+    return flat.ingredients.map((x) => ({ ...x, grams: round(x.grams * factor, 3) }));
+  });
+  if (!flattened) return recipe;
+  return { ...recipe, ingredients, cookedGrams: recipe.cookedGrams ?? rawTotalGrams(recipe.ingredients) };
+}
+
 /** The recipe as a food of the catalogue (per 100 g), so search, the food page and the diary treat it like any food. */
 export function recipeToFood(recipe: Recipe, lookup: IngredientLookup): FoodItem {
   const grams = servingGrams(recipe);
@@ -141,12 +165,34 @@ export interface RecipeDraft {
 
 export type RecipeErrors = Partial<Record<"name" | "ingredients" | "cooked", string>> & { amounts: Record<number, string> };
 
-/** Vietnamese decimal text ("1,5" or "1.5") to a number; null when it is not one. */
+/**
+ * Vietnamese number text to a number; null when it is not one. The comma is the decimal mark ("1,5"), a dot between
+ * groups of three is the thousands mark ("1.200" = 1200, "1.200,5" = 1200,5), and any other dot is a decimal
+ * point ("1.5", "0.500" = 0,5).
+ */
 export function parseAmount(text: string): number | null {
-  const trimmed = text.trim().replace(",", ".");
-  if (trimmed === "" || !/^\d*\.?\d+$|^\d+\.$/.test(trimmed)) return null;
-  const n = Number(trimmed);
+  const trimmed = text.trim();
+  if (trimmed === "") return null;
+  const grouped = /^[1-9]\d{0,2}(\.\d{3})+(,\d+)?$/.test(trimmed);
+  const plain = grouped ? trimmed.replace(/\./g, "").replace(",", ".") : trimmed.replace(",", ".");
+  if (!/^\d*\.?\d+$|^\d+\.$/.test(plain)) return null;
+  const n = Number(plain);
   return Number.isFinite(n) ? n : null;
+}
+
+/** A cooked weight under this share of the raw total, or over the larger one, is probably a typo (still allowed). */
+export const COOKED_RATIO_MIN = 0.2;
+export const COOKED_RATIO_MAX = 3;
+
+/** The warning for a cooked weight far from the raw total (water cooks in, water cooks out, but not that much). Null when fine. */
+export function cookedWarning(draft: Pick<RecipeDraft, "ingredients" | "cooked">): string | null {
+  const cooked = draft.cooked.trim() === "" ? null : parseAmount(draft.cooked);
+  if (cooked === null || cooked <= 0) return null;
+  const raw = rawTotalGrams(draft.ingredients.map((i) => ({ grams: parseAmount(i.amount) ?? 0 })));
+  if (raw <= 0) return null;
+  const ratio = cooked / raw;
+  if (ratio >= COOKED_RATIO_MIN && ratio <= COOKED_RATIO_MAX) return null;
+  return "Khối lượng sau khi nấu khác nhiều so với tổng nguyên liệu. Kiểm tra lại trước khi lưu.";
 }
 
 /** The errors of a draft, each under its own field. `amounts` is keyed by the ingredient row. */

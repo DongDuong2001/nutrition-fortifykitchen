@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo, Suspense } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useDiary } from "@/lib/diary-store";
+import { NO_ENERGY_MESSAGE, hasEnergy } from "@/lib/diary-edits";
 import { MOCK_FOODS, type FoodItem } from "@/lib/mock/foods";
 import { getMealSlotNameVi } from "@/lib/meal-slot";
 import { useMealSlot } from "@/lib/use-meal-slot";
@@ -102,8 +103,8 @@ function FoodDetailInner() {
     if (!food || parsedGrams <= 0 || isSubmitting || mealSlot === null) return;
     setIsSubmitting(true);
     try {
-      await addFoodEntry(food, parsedGrams, mealSlot, selectedServingLabel === CUSTOM_PORTION ? gramsServingLabel(parsedGrams) : selectedServingLabel);
-      router.push("/");
+      const added = await addFoodEntry(food, parsedGrams, mealSlot, selectedServingLabel === CUSTOM_PORTION ? gramsServingLabel(parsedGrams) : selectedServingLabel);
+      if (added) router.push("/");
     } finally {
       setIsSubmitting(false);
     }
@@ -138,7 +139,7 @@ function FoodDetailInner() {
         <button
           type="button"
           onClick={handleAdd}
-          disabled={isSubmitting || parsedGrams <= 0 || mealSlot === null}
+          disabled={isSubmitting || parsedGrams <= 0 || mealSlot === null || !hasEnergy(food)}
           className="w-full min-h-[52px] rounded-full bg-blue text-on-accent font-bold text-base cursor-pointer hover:bg-blue/90 active:scale-[0.98] transition-all border-0 flex items-center justify-center shadow-md disabled:opacity-50"
         >
           Thêm vào {mealSlot ? mealNameVi : "—"}
@@ -208,6 +209,11 @@ function FoodDetailInner() {
 
       {/* Main Content Area */}
       <main className="flex-1 w-full max-w-[560px] mx-auto p-4 flex flex-col gap-4">
+        {!hasEnergy(food) && (
+          <p role="alert" data-align-group="food-detail" className="m-0 rounded-xl bg-warning-bg px-3 py-2 text-[13px] leading-snug text-warning-text">
+            {NO_ENERGY_MESSAGE}
+          </p>
+        )}
         {/* Serving and Gram Selection */}
         <div data-align-group="food-detail" className="flex w-full flex-col gap-2">
           <span className="text-[13px] font-semibold text-secondary">Khẩu phần</span>

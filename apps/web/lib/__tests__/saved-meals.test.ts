@@ -78,6 +78,16 @@ describe("parseSavedMeals", () => {
   });
 });
 
+describe("savedMealEntries with a food of unknown energy", () => {
+  it("leaves it out instead of logging 0 kcal", () => {
+    const unknown = { ...MOCK_FOODS[0], id: "recipe-unknown", nutrients: { ...MOCK_FOODS[0].nutrients, energy: null } };
+    const foods = [...MOCK_FOODS, unknown];
+    const withUnknown: SavedMeal = { ...meal("u"), items: [...items, { foodId: "recipe-unknown", servingLabel: "100 g", grams: 100 }] };
+    const entries = savedMealEntries(withUnknown, foods, "dinner", "sm", "2026-10-13T12:00:00.000Z");
+    expect(entries.map((e) => e.foodId)).toEqual(["food-yen-mach", "food-chuoi"]);
+  });
+});
+
 describe("savedMealEntries", () => {
   it("makes one entry per food, in the chosen meal, with the saved portion", () => {
     const entries = savedMealEntries(meal("a"), MOCK_FOODS, "dinner", "sm-add-1", "2026-10-13T12:00:00.000Z");

@@ -10,6 +10,7 @@ import {
   deleteMealIn,
   entryNumbers,
   findEntry,
+  hasEnergy,
   mealEntryIds,
   parseAddedEntries,
   parseSampleEdits,
@@ -333,5 +334,14 @@ describe("deleteMealIn and undoDeleteIn (Xóa bữa này)", () => {
     const deleted = deleteMealIn(EMPTY, "lunch");
     expect(undoDeleteIn(dismissUndoIn(deleted)).sample).toEqual(dismissUndoIn(deleted).sample);
     expect(dismissUndoIn(deleted).undo).toBeNull();
+  });
+});
+
+describe("hasEnergy", () => {
+  it("is true only when the energy is a number, 0 included", () => {
+    expect(hasEnergy({ nutrients: { energy: 120 } })).toBe(true);
+    expect(hasEnergy({ nutrients: { energy: 0 } })).toBe(true);
+    expect(hasEnergy({ nutrients: { energy: null } })).toBe(false);
+    expect(hasEnergy({ nutrients: {} })).toBe(false);
   });
 });

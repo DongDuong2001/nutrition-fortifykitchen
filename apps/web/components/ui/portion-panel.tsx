@@ -10,6 +10,7 @@ import { ChipGroup } from "@/components/ui/chip-group";
 import { StatGroup } from "@/components/ui/stat-group";
 import { getNutrientDefinition } from "@/lib/nutrients";
 import { useDiary } from "@/lib/diary-store";
+import { NO_ENERGY_MESSAGE, hasEnergy } from "@/lib/diary-edits";
 
 export interface PortionPanelProps {
   food: FoodItem;
@@ -38,6 +39,7 @@ export function PortionPanel({
   showMicros = false,
   className = "",
 }: PortionPanelProps) {
+  const canLog = hasEnergy(food);
   const isDark = tone === "dark";
   const parsedGrams = useMemo(() => parseGramsInput(gramsInput), [gramsInput]);
 
@@ -198,13 +200,18 @@ export function PortionPanel({
         />
       </div>
 
-      {/* Row 5: CTA button */}
+      {/* Row 5: CTA button. A food with unknown energy cannot be logged: it would read 0 kcal. */}
+      {!canLog && (
+        <p role="alert" className="m-0 rounded-xl bg-warning-bg px-3 py-2 text-[13px] leading-snug text-warning-text">
+          {NO_ENERGY_MESSAGE}
+        </p>
+      )}
       <button
         type="button"
         data-align-group="portion"
         data-align-edge="left"
         onClick={onAdd}
-        disabled={isSubmitting || parsedGrams <= 0 || mealSlot === null}
+        disabled={isSubmitting || parsedGrams <= 0 || mealSlot === null || !canLog}
         className={`w-full min-h-[52px] rounded-full text-on-accent font-bold text-base cursor-pointer active:scale-[0.98] transition-all border-0 flex items-center justify-center shadow-md disabled:opacity-50 ${
           isDark
             ? "bg-blue hover:bg-blue/90"

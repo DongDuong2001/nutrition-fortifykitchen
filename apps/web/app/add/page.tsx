@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useDiary } from "@/lib/diary-store";
+import { hasEnergy } from "@/lib/diary-edits";
 import { usePastDayRedirect } from "@/hooks/use-past-day-redirect";
 import { useBack } from "@/hooks/use-back";
 import { MOCK_FOODS, type FoodItem, type FoodServing } from "@/lib/mock/foods";
@@ -161,8 +162,7 @@ function AddFoodInner() {
     if (!selectedFood || parsedGrams <= 0 || isSubmitting || mealSlot === null) return;
     setIsSubmitting(true);
     try {
-      await addFoodEntry(selectedFood, parsedGrams, mealSlot, selectedServingLabel);
-      router.push("/");
+      if (await addFoodEntry(selectedFood, parsedGrams, mealSlot, selectedServingLabel)) router.push("/");
     } finally {
       setIsSubmitting(false);
     }
@@ -174,6 +174,11 @@ function AddFoodInner() {
 
   const addWithPortion = async (food: FoodItem, grams: number, label: string) => {
     if (oneTapLock.current || isSubmitting || mealSlot === null) return;
+    // Unknown energy cannot be logged in one tap: open the portion panel, which says why
+    if (!hasEnergy(food)) {
+      pickFood(food, { label, grams });
+      return;
+    }
     oneTapLock.current = true;
     setIsSubmitting(true);
     try {

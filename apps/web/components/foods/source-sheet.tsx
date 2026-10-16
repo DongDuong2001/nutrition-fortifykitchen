@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Sheet } from "@/components/ui/sheet";
 import { PillButton } from "@/components/ui/pill-button";
-import { MATCH_LABEL, MATCH_ORDER, PROXY_NOTICE, coverageText, isProxy, matchOf } from "@/lib/food-source";
+import { MATCH_LABEL, MATCH_ORDER, PROXY_NOTICE, UNVERIFIED_TEXT, coverageText, isProxy, matchOf } from "@/lib/food-source";
 import { foodSourceLabel } from "@/lib/food-meta";
 import type { FoodItem } from "@/lib/mock/foods";
 
@@ -37,9 +37,12 @@ export function SourceSheet({ food, open, onClose }: { food: FoodItem; open: boo
         <Row label="Mã món gốc">
           {ref ? (
             ref.url ? (
-              <a href={ref.url} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-[44px] items-center font-semibold text-blue">
-                {ref.id}
-              </a>
+              <span className="flex flex-wrap items-center gap-x-2">
+                <a href={ref.url} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-[44px] items-center font-semibold text-blue">
+                  {ref.id}
+                </a>
+                {!ref.verified && <span className="text-[13px] text-secondary">({UNVERIFIED_TEXT})</span>}
+              </span>
             ) : (
               ref.id
             )

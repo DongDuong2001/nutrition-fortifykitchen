@@ -5,6 +5,7 @@ import {
   clampServings,
   countedKnown,
   draftToRecipe,
+  cookedWarning,
   hasErrors,
   ingredientPerServing,
   parseAmount,
@@ -168,6 +169,31 @@ describe("draft", () => {
     expect(parseAmount("")).toBeNull();
     expect(parseAmount("abc")).toBeNull();
     expect(parseAmount("-3")).toBeNull();
+  });
+
+  it("reads a dot between groups of three as the thousands mark", () => {
+    expect(parseAmount("1.200")).toBe(1200);
+    expect(parseAmount("1.200,5")).toBe(1200.5);
+    expect(parseAmount("12.500")).toBe(12500);
+    expect(parseAmount("1.200.000")).toBe(1200000);
+    // Not a thousands group: a decimal point
+    expect(parseAmount("1.5")).toBe(1.5);
+    expect(parseAmount("0.500")).toBe(0.5);
+    expect(parseAmount("12.50")).toBe(12.5);
+    expect(parseAmount("1,200")).toBe(1.2);
+    expect(parseAmount("1.2.3")).toBeNull();
+  });
+
+  it("warns when the cooked weight is under 20 % or over 300 % of the raw total, but still allows it", () => {
+    const d = (cooked: string) => ({ ...draft(), cooked });
+    const raw = rawTotalGrams(draft().ingredients.map((i) => ({ grams: parseAmount(i.amount) ?? 0 })));
+    expect(cookedWarning(d(String(raw)))).toBeNull();
+    expect(cookedWarning(d(""))).toBeNull();
+    expect(cookedWarning(d(String(Math.floor(raw * 0.19))))).not.toBeNull();
+    expect(cookedWarning(d(String(raw * 0.2)))).toBeNull();
+    expect(cookedWarning(d(String(raw * 3)))).toBeNull();
+    expect(cookedWarning(d(String(raw * 3 + 1)))).not.toBeNull();
+    expect(hasErrors(validateDraft(d(String(raw * 5))))).toBe(false);
   });
 
   it("is valid with a name, an ingredient with grams, and an empty cooked weight", () => {

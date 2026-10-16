@@ -9,14 +9,18 @@ export const MATCH_LABEL: Record<FoodMatch, { name: string; detail: string }> = 
   exact: { name: "Chính xác", detail: "đúng món" },
   close: { name: "Gần đúng", detail: "cùng món, khác cách chế biến" },
   proxy: { name: "Ước tính", detail: "món tương tự" },
+  unknown: { name: "Chưa rõ nguồn", detail: "chưa ai đối chiếu với món gốc" },
 };
+
+/** What the source link says until someone has opened it and confirmed it is this food. */
+export const UNVERIFIED_TEXT = "chưa kiểm chứng";
 
 export const PROXY_NOTICE =
   "Ước tính. Chưa có dữ liệu riêng của món này, nên đang dùng số của món tương tự. Số thật có thể khác một chút.";
 
-/** A food with no `match` is exact. */
+/** A food with no `match` is unknown: nothing says it is exact. */
 export function matchOf(food: Pick<FoodItem, "match">): FoodMatch {
-  return food.match ?? "exact";
+  return food.match ?? "unknown";
 }
 
 export function isProxy(food: Pick<FoodItem, "match">): boolean {

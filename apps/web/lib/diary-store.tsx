@@ -66,6 +66,7 @@ import {
   moveEntriesIn,
   dismissUndoIn,
   entryNumbers,
+  hasEnergy,
   findEntry,
   mealEntryIds,
   mealPortions,
@@ -110,7 +111,7 @@ interface DiaryContextValue {
     mealSlot: MealSlot,
     servingLabel?: string,
     options?: { undoable?: boolean }
-  ) => Promise<void>;
+  ) => Promise<boolean>;
   recentFoods: RecentFood[];
   addRecentFood: (food: FoodItem, servingLabel: string) => void;
   toast: ToastInfo | null;
@@ -619,6 +620,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   // Add a food entry
   const addFoodEntry = useCallback(
     async (food: FoodItem, grams: number, mealSlot: MealSlot, servingLabel?: string, options?: { undoable?: boolean }) => {
+      // Unknown energy is not 0: nothing is logged, and the caller shows NO_ENERGY_MESSAGE
+      if (!hasEnergy(food)) return false;
       const numbers = entryNumbers(food, grams);
       const qty = servingLabel || `${formatAmount(grams, "g")} g`;
 
@@ -655,6 +658,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       );
 
       addRecentFood(food, qty);
+      return true;
     },
     [addRecentFood]
   );

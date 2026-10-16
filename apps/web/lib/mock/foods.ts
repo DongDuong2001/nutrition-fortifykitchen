@@ -19,20 +19,28 @@ export interface FoodItem {
   nutrients: Record<string, number | null>; // per 100g
   /** Sample food of the demo day: found in lists and search only in demo mode (see browsableFoods). */
   demoOnly?: boolean;
-  /** How close the numbers are to this very food. Missing means exact. */
+  /** How close the numbers are to this very food. Missing, like "unknown", reads as Chưa rõ nguồn: never as exact. */
   match?: FoodMatch;
   /** Where the numbers come from: the database, the id of the original food there and a link to it. */
   sourceRef?: FoodSourceRef;
 }
 
-/** exact: this food. close: the same food, cooked or made another way. proxy: a similar food stands in for it. */
-export type FoodMatch = "exact" | "close" | "proxy";
+/**
+ * exact: this food. close: the same food, cooked or made another way. proxy: a similar food stands in for it.
+ * unknown: nobody has checked yet, so no claim is made.
+ */
+export type FoodMatch = "exact" | "close" | "proxy" | "unknown";
 
 export interface FoodSourceRef {
   db: string;
   id: string;
   url?: string;
+  /** True once someone has opened the source and confirmed it is this food. Missing means not verified. */
+  verified?: boolean;
 }
+
+/** The database is known from the food's source; the id of the original food is not. */
+const unlisted = (db: string): FoodSourceRef => ({ db, id: "chưa rõ" });
 
 const fdc = (id: number): FoodSourceRef => ({ db: "SR Legacy", id: `FDC ${id}`, url: `https://fdc.nal.usda.gov/food-details/${id}/nutrients` });
 
@@ -51,6 +59,7 @@ export const MOCK_FOODS: FoodItem[] = [
     category: "trai_cay",
     nameVi: "Chà là",
     source: "USDA",
+    match: "unknown",
     sourceRef: fdc(168191),
     servings: [
       { label: "30 g", grams: 30 },
@@ -84,6 +93,7 @@ export const MOCK_FOODS: FoodItem[] = [
     category: "tinh_bot",
     nameVi: "Yến mạch",
     source: "USDA",
+    match: "unknown",
     sourceRef: fdc(173904),
     servings: [
       { label: "60 g", grams: 60 },
@@ -114,6 +124,7 @@ export const MOCK_FOODS: FoodItem[] = [
     nameVi: "Yogurt kefir",
     brand: "Vinamilk",
     source: "USDA",
+    match: "unknown",
     sourceRef: fdc(171284),
     servings: [
       { label: "200 ml", grams: 200 },
@@ -140,6 +151,7 @@ export const MOCK_FOODS: FoodItem[] = [
     category: "trai_cay",
     nameVi: "Chuối",
     source: "USDA",
+    match: "unknown",
     sourceRef: fdc(173944),
     servings: [
       { label: "1 quả", grams: 100 },
@@ -166,6 +178,8 @@ export const MOCK_FOODS: FoodItem[] = [
     category: "tinh_bot",
     nameVi: "Cơm gạo lứt",
     source: "VN FCT",
+    match: "unknown",
+    sourceRef: unlisted("VN FCT"),
     servings: [
       { label: "150 g", grams: 150 },
       { label: "1 bát", grams: 150 },
@@ -191,6 +205,7 @@ export const MOCK_FOODS: FoodItem[] = [
     category: "dam",
     nameVi: "Thịt bò nạc",
     source: "USDA",
+    sourceRef: unlisted("USDA"),
     match: "close",
     servings: [
       { label: "150 g", grams: 150 },
@@ -217,6 +232,8 @@ export const MOCK_FOODS: FoodItem[] = [
     nameVi: "Bột củ dền",
     brand: "Dalahouse",
     source: "user",
+    match: "unknown",
+    sourceRef: unlisted("Nhãn bao bì"),
     demoOnly: true,
     servings: [
       { label: "3 g", grams: 3 },
@@ -243,6 +260,7 @@ export const MOCK_FOODS: FoodItem[] = [
     nameVi: "Mật mía",
     brand: "Golden Barrel",
     source: "USDA",
+    match: "unknown",
     sourceRef: fdc(168820),
     servings: [
       { label: "1 muỗng", grams: 20 },
@@ -269,6 +287,8 @@ export const MOCK_FOODS: FoodItem[] = [
     category: "tinh_bot",
     nameVi: "Bánh tráng",
     source: "VN FCT",
+    match: "unknown",
+    sourceRef: unlisted("VN FCT"),
     servings: [
       { label: "10 g", grams: 10 },
       { label: "3 cái", grams: 30 },
@@ -290,6 +310,8 @@ export const MOCK_FOODS: FoodItem[] = [
     category: "an_vat",
     nameVi: "Bánh tráng nướng",
     source: "VN FCT",
+    match: "unknown",
+    sourceRef: unlisted("VN FCT"),
     servings: [
       { label: "1 cái", grams: 50 },
       { label: "100 g", grams: 100 },
@@ -310,6 +332,8 @@ export const MOCK_FOODS: FoodItem[] = [
     category: "mon_viet",
     nameVi: "Bún chả Hà Nội",
     source: "VN FCT",
+    match: "unknown",
+    sourceRef: unlisted("VN FCT"),
     servings: [
       { label: "1 phần", grams: 350 },
       { label: "100 g", grams: 100 },
@@ -331,6 +355,8 @@ export const MOCK_FOODS: FoodItem[] = [
     category: "mon_viet",
     nameVi: "Phở bò",
     source: "VN FCT",
+    match: "unknown",
+    sourceRef: unlisted("VN FCT"),
     servings: [
       { label: "1 tô", grams: 600 },
       { label: "100 g", grams: 100 },
@@ -352,6 +378,7 @@ export const MOCK_FOODS: FoodItem[] = [
     category: "mon_viet",
     nameVi: "Cơm tấm sườn",
     source: "VN FCT",
+    sourceRef: unlisted("VN FCT"),
     match: "proxy",
     servings: [
       { label: "1 dĩa", grams: 400 },
@@ -374,6 +401,7 @@ export const MOCK_FOODS: FoodItem[] = [
     category: "mon_viet",
     nameVi: "Bánh mì thịt",
     source: "VN FCT",
+    sourceRef: unlisted("VN FCT"),
     match: "close",
     servings: [
       { label: "1 ổ", grams: 200 },
@@ -396,6 +424,7 @@ export const MOCK_FOODS: FoodItem[] = [
     category: "mon_viet",
     nameVi: "Bún bò Huế",
     source: "VN FCT",
+    sourceRef: unlisted("VN FCT"),
     match: "proxy",
     servings: [
       { label: "1 tô", grams: 600 },
@@ -418,6 +447,7 @@ export const MOCK_FOODS: FoodItem[] = [
     category: "dam",
     nameVi: "Trứng gà",
     source: "USDA",
+    match: "unknown",
     sourceRef: fdc(171287),
     servings: [
       { label: "1 quả", grams: 55 },
@@ -447,6 +477,7 @@ export const MOCK_FOODS: FoodItem[] = [
     category: "dam",
     nameVi: "Ức gà phi lê",
     source: "USDA",
+    match: "unknown",
     sourceRef: fdc(171077),
     servings: [
       { label: "100 g", grams: 100 },
@@ -474,6 +505,7 @@ export const MOCK_FOODS: FoodItem[] = [
     category: "dam",
     nameVi: "Cá hồi",
     source: "USDA",
+    match: "unknown",
     sourceRef: fdc(175167),
     servings: [
       { label: "100 g", grams: 100 },
@@ -502,6 +534,8 @@ export const MOCK_FOODS: FoodItem[] = [
     category: "dam",
     nameVi: "Đậu hũ trắng",
     source: "VN FCT",
+    match: "unknown",
+    sourceRef: unlisted("VN FCT"),
     servings: [
       { label: "1 bìa", grams: 150 },
       { label: "100 g", grams: 100 },
@@ -525,6 +559,8 @@ export const MOCK_FOODS: FoodItem[] = [
     category: "rau",
     nameVi: "Rau muống",
     source: "VN FCT",
+    match: "unknown",
+    sourceRef: unlisted("VN FCT"),
     servings: [
       { label: "1 dĩa luộc", grams: 200 },
       { label: "100 g", grams: 100 },
@@ -549,6 +585,7 @@ export const MOCK_FOODS: FoodItem[] = [
     category: "rau",
     nameVi: "Cải bó xôi (Spinach)",
     source: "USDA",
+    match: "unknown",
     sourceRef: fdc(168462),
     servings: [
       { label: "100 g", grams: 100 },
@@ -578,6 +615,8 @@ export const MOCK_FOODS: FoodItem[] = [
     nameVi: "Sữa tươi không đường",
     brand: "TH True Milk",
     source: "VN FCT",
+    match: "unknown",
+    sourceRef: unlisted("VN FCT"),
     servings: [
       { label: "1 hộp 180 ml", grams: 180 },
       { label: "1 ly 250 ml", grams: 250 },
@@ -602,6 +641,7 @@ export const MOCK_FOODS: FoodItem[] = [
     category: "tinh_bot",
     nameVi: "Khoai lang luộc",
     source: "USDA",
+    match: "unknown",
     sourceRef: fdc(168482),
     servings: [
       { label: "1 củ", grams: 150 },
@@ -628,6 +668,7 @@ export const MOCK_FOODS: FoodItem[] = [
     category: "trai_cay",
     nameVi: "Quả bơ",
     source: "USDA",
+    match: "unknown",
     sourceRef: fdc(171705),
     servings: [
       { label: "1/2 quả", grams: 100 },
@@ -658,6 +699,8 @@ export const MOCK_FOODS: FoodItem[] = [
     category: "beo",
     nameVi: "Hạt điều rang",
     source: "VN FCT",
+    match: "unknown",
+    sourceRef: unlisted("VN FCT"),
     servings: [
       { label: "1 nắm (~30 g)", grams: 30 },
       { label: "100 g", grams: 100 },
@@ -683,6 +726,7 @@ export const MOCK_FOODS: FoodItem[] = [
     category: "beo",
     nameVi: "Hạnh nhân",
     source: "USDA",
+    match: "unknown",
     sourceRef: fdc(170567),
     servings: [
       { label: "1 nắm (~30 g)", grams: 30 },
@@ -708,6 +752,8 @@ export const MOCK_FOODS: FoodItem[] = [
     category: "trai_cay",
     nameVi: "Bưởi da xanh",
     source: "VN FCT",
+    match: "unknown",
+    sourceRef: unlisted("VN FCT"),
     servings: [
       { label: "3 múi", grams: 150 },
       { label: "100 g", grams: 100 },
@@ -729,6 +775,7 @@ export const MOCK_FOODS: FoodItem[] = [
     category: "trai_cay",
     nameVi: "Táo Envy",
     source: "USDA",
+    match: "unknown",
     sourceRef: fdc(171688),
     servings: [
       { label: "1 quả", grams: 180 },
@@ -752,6 +799,7 @@ export const MOCK_FOODS: FoodItem[] = [
     category: "rau",
     nameVi: "Bông cải xanh",
     source: "USDA",
+    match: "unknown",
     sourceRef: fdc(170379),
     servings: [
       { label: "1 chén hấp", grams: 100 },
@@ -778,6 +826,8 @@ export const MOCK_FOODS: FoodItem[] = [
     nameVi: "Whey Protein Isolate",
     brand: "Optimum Nutrition",
     source: "USDA",
+    match: "unknown",
+    sourceRef: unlisted("USDA"),
     servings: [
       { label: "1 muỗng (30 g)", grams: 30 },
       { label: "100 g", grams: 100 },

@@ -4,8 +4,9 @@ import { MOCK_FOODS } from "../mock/foods";
 import { COUNTED_NUTRIENT_KEYS } from "../day-totals";
 
 describe("food source helpers", () => {
-  it("a food with no match is exact", () => {
-    expect(matchOf({})).toBe("exact");
+  it("a food with no match is unknown, never exact", () => {
+    expect(matchOf({})).toBe("unknown");
+    expect(MATCH_LABEL.unknown.name).toBe("Chưa rõ nguồn");
     expect(matchOf({ match: "close" })).toBe("close");
     expect(isProxy({ match: "proxy" })).toBe(true);
     expect(isProxy({})).toBe(false);
@@ -41,12 +42,24 @@ describe("food source helpers", () => {
 });
 
 describe("mock catalogue sources", () => {
+  it("gives every food an explicit match and a source reference", () => {
+    for (const f of MOCK_FOODS) {
+      expect(f.match, f.id).toBeDefined();
+      expect(f.sourceRef?.db, f.id).toBeTruthy();
+      expect(f.sourceRef?.id, f.id).toBeTruthy();
+    }
+  });
+
+  it("claims no exact match or verified source until someone has checked", () => {
+    expect(MOCK_FOODS.filter((f) => f.match === "exact" || f.sourceRef?.verified)).toEqual([]);
+  });
+
   it("has at least two proxy foods", () => {
     expect(MOCK_FOODS.filter((f) => f.match === "proxy").length).toBeGreaterThanOrEqual(2);
   });
 
   it("gives USDA foods a source reference that links to FoodData Central", () => {
-    const withRef = MOCK_FOODS.filter((f) => f.source === "USDA" && f.sourceRef);
+    const withRef = MOCK_FOODS.filter((f) => f.source === "USDA" && f.sourceRef?.url);
     expect(withRef.length).toBeGreaterThanOrEqual(10);
     const dates = MOCK_FOODS.find((f) => f.id === "food-cha-la");
     expect(dates?.sourceRef).toEqual({ db: "SR Legacy", id: "FDC 168191", url: "https://fdc.nal.usda.gov/food-details/168191/nutrients" });

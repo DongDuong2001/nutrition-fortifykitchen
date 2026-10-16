@@ -34,6 +34,14 @@ export interface EntryNumbers {
   nutrients: Record<string, number | null>;
 }
 
+/** Shown when a food with unknown energy is about to be logged: its kcal would read 0, which is not true. */
+export const NO_ENERGY_MESSAGE = "Món này chưa có số kcal (một nguyên liệu chưa có dữ liệu năng lượng), nên chưa thể ghi vào nhật ký.";
+
+/** Whether a food can be logged: its energy is a number. Unknown (null or missing) is never read as 0. */
+export function hasEnergy(food: Pick<FoodItem, "nutrients">): boolean {
+  return typeof food.nutrients.energy === "number";
+}
+
 export function entryNumbers(food: FoodItem, grams: number): EntryNumbers {
   const scaled = scaleNutrients(food.nutrients, grams);
   return {
@@ -304,7 +312,7 @@ export function updateEntryIn(edits: DiaryEdits, id: string, patch: EntryPatch, 
   const added = edits.added.find((e) => e.id === id);
   if (added) {
     let updated: AddedDiaryEntry =
-      grams !== null && view.food
+      grams !== null && view.food && hasEnergy(view.food)
         ? { ...added, mealSlot, grams, displayQty: patch.servingLabel ?? `${formatAmount(grams, "g")} g`, ...entryNumbers(view.food, grams) }
         : { ...added, mealSlot };
     if (added.kind === "quick" && patch.quick) {

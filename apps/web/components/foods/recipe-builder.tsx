@@ -8,6 +8,7 @@ import {
   MAX_SERVINGS,
   MIN_SERVINGS,
   clampServings,
+  cookedWarning,
   countedKnown,
   hasErrors,
   parseAmount,
@@ -122,6 +123,7 @@ export function RecipeBuilder({ state, excludeId }: { state: RecipeDraftState; e
   const grams = servingGrams(recipe);
   const known = countedKnown(nutrients);
   const hasWeight = recipe.ingredients.some((i) => i.grams > 0);
+  const cookedNote = useMemo(() => cookedWarning(draft), [draft]);
 
   const showName = shown.name && errors.name;
   const showList = shown.ingredients && errors.ingredients;
@@ -262,6 +264,11 @@ export function RecipeBuilder({ state, excludeId }: { state: RecipeDraftState; e
         <p className="m-0 text-xs leading-snug text-secondary">
           Cân cả nồi sau khi nấu để ghi theo gram cho đúng. Bỏ trống thì mỗi phần tính theo tổng nguyên liệu.
         </p>
+        {cookedNote && (
+          <p role="note" className="m-0 rounded-xl bg-warning-bg px-3 py-2 text-xs leading-snug text-warning-text">
+            {cookedNote}
+          </p>
+        )}
         </div>
       </FormRow>
 

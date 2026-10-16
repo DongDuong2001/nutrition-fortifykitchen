@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, Suspense } from "react";
+import React, { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { apiClient } from "@/lib/api-client";
 import { useDiary } from "@/lib/diary-store";
@@ -38,11 +38,20 @@ function CreateFoodInner() {
     else setRecipeMissing(true);
   }, [editId, setRecipeDraft]);
 
+  // A ref, not state: two taps in the same frame must save once (a second id would make a second recipe)
+  const recipeSaving = useRef(false);
+  const [recipeSaveError, setRecipeSaveError] = useState<string | null>(null);
   const saveRecipeDraft = () => {
-    if (!recipeState.validateAll()) return;
+    if (recipeSaving.current || !recipeState.validateAll()) return;
+    recipeSaving.current = true;
+    setRecipeSaveError(null);
     const id = editId ?? `${RECIPE_ID_PREFIX}${Date.now()}`;
     const existing = editId ? getRecipe(editId) : null;
-    saveRecipe(draftToRecipe(recipeState.draft, id, existing?.createdAt ?? new Date().toISOString()));
+    if (!saveRecipe(draftToRecipe(recipeState.draft, id, existing?.createdAt ?? new Date().toISOString()))) {
+      recipeSaving.current = false;
+      setRecipeSaveError("Không lưu được món vào máy này. Bộ nhớ đầy hoặc đang bị chặn. Thử lại sau khi giải phóng dung lượng.");
+      return;
+    }
     const meal = searchParams.get("meal");
     router.push(`/foods/${id}${meal ? `?meal=${meal}` : ""}`);
   };
@@ -78,10 +87,10 @@ function CreateFoodInner() {
       const num = parseFloat(val.replace(",", "."));
       if (isNaN(num) || num <= 0) err = "Khẩu phần phải lớn hơn 0.";
     } else if (field === "calories") {
-      if (val.trim() !== "") {
-        const num = parseFloat(val.replace(",", "."));
-        if (isNaN(num) || num < 0) err = "Nhập số năng lượng từ 0 trở lên";
-      }
+      // Blank is unknown, and an unknown energy is never logged as 0 kcal
+      const num = parseFloat(val.replace(",", "."));
+      if (val.trim() === "") err = "Nhập năng lượng (kcal) để ghi vào nhật ký";
+      else if (isNaN(num) || num < 0) err = "Nhập số năng lượng từ 0 trở lên";
     }
     setErrors((prev) => ({ ...prev, [field]: err }));
     return err;
@@ -102,6 +111,7 @@ function CreateFoodInner() {
 
     const errName = validateField("nameVi", nameVi);
     const errSize = validateField("servingSize", servingSize);
+    const errCals = validateField("calories", calories);
 
     setTouched({
       nameVi: true,
@@ -112,14 +122,14 @@ function CreateFoodInner() {
       fat: true,
     });
 
-    if (errName || errSize) {
+    if (errName || errSize || errCals) {
       return;
     }
 
     setIsSubmitting(true);
     try {
       const parsedSize = parseFloat(servingSize.replace(",", ".")) || 100;
-      const parsedCals = parseFloat(calories.replace(",", ".")) || 0;
+      const parsedCals = parseFloat(calories.replace(",", "."));
       const parseMacro = (val: string): number | null => {
         const trimmed = val.trim();
         if (trimmed === "") return null;
@@ -191,7 +201,15 @@ function CreateFoodInner() {
           recipeMissing ? (
             <p className="m-0 text-[15px] text-secondary">Món này không còn trong danh sách.</p>
           ) : (
-            <RecipeBuilder state={recipeState} excludeId={editId ?? undefined} />
+            <>
+              <RecipeBuilder state={recipeState} excludeId={editId ?? undefined} />
+              {recipeSaveError && (
+                <p role="alert" className="m-0 text-[13px] font-medium leading-snug text-destructive-text">
+                  {recipeSaveError}
+                </p>
+              )}
+              <p className="m-0 text-xs leading-snug text-secondary">Món tự tạo chỉ lưu trên máy này.</p>
+            </>
           )
         ) : (
         <>
@@ -272,15 +290,21 @@ function CreateFoodInner() {
           </div>
 
           <div className="grid grid-cols-2 gap-3 pt-1">
-            <FormRow label="Năng lượng (kcal)" htmlFor="cf-kcal">
+            <FormRow label="Năng lượng (kcal)" htmlFor="cf-kcal" required error={touched.calories ? errors.calories : undefined}>
               <input
                 id="cf-kcal"
                 type="text"
                 inputMode="decimal"
                 value={calories}
-                onChange={(e) => setCalories(e.target.value)}
+                onChange={(e) => {
+                  setCalories(e.target.value);
+                  if (touched.calories) validateField("calories", e.target.value);
+                }}
+                onBlur={() => handleBlur("calories", calories)}
                 placeholder="0"
-                className="h-12 px-3 rounded-xl border-2 border-card-border focus:border-blue bg-card text-base font-bold tabular-nums text-text outline-none text-right"
+                className={`h-12 px-3 rounded-xl border-2 bg-card text-base font-bold tabular-nums text-text outline-none text-right ${
+                  touched.calories && errors.calories ? "border-destructive" : "border-card-border focus:border-blue"
+                }`}
               />
             </FormRow>
 
