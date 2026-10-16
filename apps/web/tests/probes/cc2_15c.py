@@ -90,7 +90,9 @@ def run(browser, name, size):
     # cc-21: nobody signed in goes to /signin first (no account can have a profile yet); setup applies once someone is in
     for route in ("/", "/", "/explore", "/settings", "/add", "/micros", "/training"):
         go(pg, route)
-        check(pg.url.endswith("/signin"), f"{where} nobody signed in: {route} goes to /signin ({pg.url[len(BASE):]})")
+        # cc-41: signed out, the root of a desktop window is the landing page; everything else goes to /signin
+        want = "/landing" if route == "/" and size["width"] >= 1024 else "/signin"
+        check(pg.url.endswith(want), f"{where} nobody signed in: {route} goes to {want} ({pg.url[len(BASE):]})")
     sign_in_magic(pg, "ban@email.com")  # an account with no profile
     for route in ("/", "/", "/explore", "/settings", "/add", "/micros", "/training"):
         go(pg, route)
@@ -218,7 +220,9 @@ def run(browser, name, size):
     check("h1t_added_entries_v1_a@example.com" in keys, f"{where} accounts: A's entries are under A's key ({keys})")
     sign_out()
     go(pg, "/")
-    check(pg.url.endswith("/signin"), f"{where} accounts: nobody signed in, /diary goes to /signin ({pg.url[len(BASE):]})")
+    want = "/landing" if size["width"] >= 1024 else "/signin"
+    check(pg.url.endswith(want), f"{where} accounts: nobody signed in, /diary goes to {want} ({pg.url[len(BASE):]})")
+    go(pg, "/signin")
     sign_in("b@example.com")
     go(pg, "/trends")  # cc2-31b: Tổng quan is /trends (sign-in lands on the home screen)
     check("Chưa có ngày nào được ghi" in text(pg), f"{where} accounts: B's Tổng quan is empty")

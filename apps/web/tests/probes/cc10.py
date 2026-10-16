@@ -23,7 +23,7 @@ TODAY = datetime.datetime.now(VN).date()
 YESTERDAY = TODAY - datetime.timedelta(days=1)
 EMPTY_DAY = TODAY - datetime.timedelta(days=8)  # a gap in the mock history (lib/mock/history.ts): nothing logged
 FUTURE = TODAY + datetime.timedelta(days=3)
-BIRTH_ERROR = f"Nhập năm sinh từ 1900 đến {TODAY.year}"
+BIRTH_ERROR = "Nhập năm sinh từ 1920 đến 2015"  # Dong (main): the range is 1920 to 2015
 problems = []
 notes = []
 os.makedirs(SHOTS, exist_ok=True)

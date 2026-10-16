@@ -57,7 +57,7 @@ def run():
         go_back_and_check(pg, "/foods/food-cha-la?meal=snack", "/explore", "food detail")  # direct link: no in-app history, so the owning tab
         go_back_and_check(pg, "/foods/new?meal=snack", "/explore", "new food")
         go_back_and_check(pg, "/entry/item-1", "/", "entry")
-        go_back_and_check(pg, "/setup/profile", "/signin/check-email", "setup profile")
+        go_back_and_check(pg, "/setup/profile", "/signin", "setup profile")  # Dong (main): back from setup goes to /signin
         go_back_and_check(pg, "/setup/goal", "/setup/profile", "setup goal")
 
         # 2. Setup step bars: Bước 1 / 2 on profile (1 bar done), Bước 2 / 2 on goal (2 bars done)

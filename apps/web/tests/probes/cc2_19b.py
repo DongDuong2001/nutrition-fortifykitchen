@@ -112,7 +112,8 @@ def fresh(browser, size_name, size):
     pg.clock.set_fixed_time(NOW)
     pg.goto(BASE + "/", wait_until="networkidle")
     w = f"{size_name} Tài khoản mới"
-    check(pg.url.endswith("/signin"), f"{w}: signed-out / goes to /signin")
+    # cc-41: signed out, "/" is the landing page on a desktop window and /signin on a phone
+    check(pg.url.endswith("/landing" if size["width"] >= 1024 else "/signin"), f"{w}: signed-out / goes to the landing (desktop) or /signin (phone)")
     pg.goto(BASE + "/setup/profile", wait_until="networkidle")
     pg.wait_for_timeout(300)
     check(pg.locator("#setup-weight").count() == 1, f"{w}: setup profile step has the weight field")

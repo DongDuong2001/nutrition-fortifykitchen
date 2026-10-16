@@ -14,7 +14,7 @@ BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3100")
 SHOTS = os.path.join(os.path.dirname(__file__), "..", "..", ".screenshots")
 PHONE = {"width": 390, "height": 844}
 DESKTOP = {"width": 1440, "height": 900}
-BIRTH_ERROR = f"Nhập năm sinh từ 1900 đến {datetime.date.today().year}"
+BIRTH_ERROR = "Nhập năm sinh từ 1920 đến 2015"  # Dong (main): the range is 1920 to 2015
 NOT_FOUND = "KHÔNG TÌM THẤY TRANG"
 MENU_HREFS = [
     "/settings/language",

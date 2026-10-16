@@ -119,7 +119,7 @@ def first_run(browser, name, size):
     # inline validation on blur, no submit needed
     year.fill("1899")
     year.press("Tab")
-    check("1900" in text(pg), f"{where} validation: birth year error shows on blur")
+    check("1920" in text(pg), f"{where} validation: birth year error shows on blur")
     year.fill("2003")
     check("Nhập năm sinh" not in text(pg), f"{where} validation: error clears when the year is valid")
     weight.fill("20")
