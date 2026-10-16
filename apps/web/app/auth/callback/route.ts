@@ -7,7 +7,7 @@ export async function GET(request: Request) {
   const code = searchParams.get("code");
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/+$/, "");
-  const baseOrigin = siteUrl || origin;
+  const baseOrigin = process.env.NODE_ENV === "production" && siteUrl ? siteUrl : origin;
 
   // Sanitize next target to prevent open redirect vulnerabilities
   const rawNext = searchParams.get("next") ?? "/";
