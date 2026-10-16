@@ -5,9 +5,12 @@ import { formatAmount } from "./format";
 /** Maps a food source code to a Vietnamese UI label, never returning a raw code. */
 export function foodSourceLabel(source?: string | null): string {
   const key = (source ?? "").trim().toLowerCase().replace(/[\s_]+/g, "-");
+  if (key.startsWith("usda")) return "USDA"; // usda, usda_sr_legacy, usda_foundation, usda_fndds
   switch (key) {
-    case "usda":
-      return "USDA";
+    case "label":
+      return "Nhãn";
+    case "community":
+      return "Ước tính";
     case "cnf":
       return "CNF (Canada)";
     case "vn-table":
