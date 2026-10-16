@@ -18,10 +18,11 @@ describe("LandingPage", () => {
     expect(html).toContain("Huấn luyện viên &amp; Chuyên gia dinh dưỡng");
   });
 
-  it("renders CTA buttons to sign up and view app", () => {
+  it("renders CTA buttons to sign up and sign in", () => {
     const html = renderToString(<LandingPage />);
     expect(html).toContain('href="/signup"');
     expect(html).toContain("Tạo tài khoản miễn phí");
-    expect(html).toContain('href="/"');
+    expect(html).toContain('href="/signin"');
+    expect(html).toContain("Đăng nhập tài khoản");
   });
 });
