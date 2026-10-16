@@ -14,6 +14,7 @@ import {
 import { createClient } from "./supabase-client";
 import { isDemo } from "./demo";
 import { clearOnboardingStorage, isValidEmail } from "./onboarding";
+import { syncServerSession } from "./server-session";
 
 // The one interface the auth screens call. In live mode (NEXT_PUBLIC_API_MODE=live, lib/api-mode.ts) it is backed by
 // Supabase Auth (lib/supabase-client.ts); otherwise by the local mock in lib/auth-mock.ts, so gates and demos run
@@ -27,7 +28,8 @@ export interface AccountInfo {
   providers: AuthProvider[];
 }
 
-export type AuthResult = { ok: true } | { ok: false; error: string };
+/** needsConfirmation: the account was created but email confirmation is on, so there is no session until the link is opened. */
+export type AuthResult = { ok: true; needsConfirmation?: true } | { ok: false; error: string };
 
 export const PASSWORD_MIN_LENGTH = 8;
 
@@ -62,9 +64,29 @@ const CURRENT_USER_KEY = "h1t_auth_current_email";
 const SIGNED_OUT_KEY = "h1t_auth_signed_out";
 const SAMPLE_EMAIL = "ban@email.com";
 
+const ALREADY_REGISTERED = "Email này đã có tài khoản. Hãy đăng nhập.";
+const EMAIL_NOT_CONFIRMED = "Bạn chưa xác nhận email. Mở liên kết trong email rồi đăng nhập.";
+
+interface SupabaseErrorLike {
+  code?: string;
+  status?: number;
+  message?: string;
+}
+
+/** The Vietnamese message for a Supabase sign-up error. Server text is English, so only the code and status are read. */
+function signUpErrorMessage(error: SupabaseErrorLike): string {
+  const code = error.code ?? error.message ?? "";
+  if (code === "user_already_exists" || code === "email_exists") return ALREADY_REGISTERED;
+  if (error.status === 429 || /rate_limit/.test(code)) return "Bạn thử quá nhiều lần. Chờ ít phút rồi thử lại.";
+  if (code === "weak_password") return "Mật khẩu quá yếu. Dùng mật khẩu dài hơn, có cả chữ và số.";
+  if (code === "captcha_failed") return "Chưa xác minh được captcha. Thử lại nhé.";
+  if (code === "email_address_invalid" || code === "validation_failed") return "Nhập email hợp lệ, ví dụ ban@email.com";
+  return RETRY_LATER;
+}
+
 let inMemoryEmail: string | null | undefined = undefined;
 
-export function getStoredEmail(): string | null {
+function getStoredEmail(): string | null {
   if (inMemoryEmail !== undefined) return inMemoryEmail;
   try {
     return globalThis.localStorage?.getItem(CURRENT_USER_KEY) ?? null;
@@ -221,10 +243,12 @@ export function signInWithPassword(email: string, password: string, captchaToken
       password,
       options: captchaToken ? { captchaToken } : undefined,
     });
+    if (error?.code === "email_not_confirmed") return { ok: false, error: EMAIL_NOT_CONFIRMED };
     if (error || !data.user) {
       return { ok: false, error: SIGN_IN_FAILED };
     }
     setStoredEmail(address);
+    await syncServerSession();
     return { ok: true };
   });
 }
@@ -244,12 +268,13 @@ export function signUpWithPassword(email: string, password: string, captchaToken
       password,
       options: captchaToken ? { captchaToken } : undefined,
     });
-    if (error) {
-      return { ok: false, error: "Email này đã có tài khoản. Hãy đăng nhập." };
-    }
-    if (data.user) {
-      setStoredEmail(address);
-    }
+    if (error) return { ok: false, error: signUpErrorMessage(error) };
+    // With email confirmation on, Supabase answers a repeat sign-up with a user that has no identities
+    if (data.user && data.user.identities?.length === 0) return { ok: false, error: ALREADY_REGISTERED };
+    // A user without a session is not signed in: no email is stored until the confirmation link is opened
+    if (!data.session) return { ok: true, needsConfirmation: true };
+    setStoredEmail(address);
+    await syncServerSession();
     return { ok: true };
   });
 }

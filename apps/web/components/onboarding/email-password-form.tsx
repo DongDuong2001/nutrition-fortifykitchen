@@ -60,6 +60,12 @@ export function EmailPasswordForm({ variant }: { variant: "signin" | "signup" })
       ? await signUpWithPassword(email, password, captchaToken)
       : await signInWithPassword(email, password, captchaToken);
     if (result.ok) {
+      // Email confirmation is on: the account exists but nobody is signed in until the link is opened
+      if (result.needsConfirmation) {
+        writePendingEmail(email.trim());
+        router.push("/signin/check-email");
+        return;
+      }
       router.push(COPY[variant].next);
       return;
     }

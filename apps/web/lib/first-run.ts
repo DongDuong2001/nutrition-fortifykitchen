@@ -2,7 +2,7 @@ import { getDefaultMealSlot } from "./meal-slot";
 import { PROFILE_KEY, targetRangeText, targetsFor, writeStoredProfile, type Profile } from "./profile";
 import { calculateSaltTarget } from "./training";
 import { isDemo } from "./demo";
-import { currentAccount, currentAccountId, getStoredEmail, wasExplicitlySignedOut } from "./auth-actions";
+import { currentAccount, currentAccountId, wasExplicitlySignedOut } from "./auth-actions";
 import { isLiveMode } from "./api-mode";
 import { ADDED_ENTRIES_KEY, adoptLegacyKeys, adoptLegacyPersonal, browserLocal, browserSession, keyedStorage } from "./storage-keys";
 import { apiClient } from "./api-client";
@@ -38,6 +38,18 @@ export function isTabRoute(pathname: string): boolean {
 export function setupRedirectFor(pathname: string, facts: FirstRunFacts, demo: boolean): string | null {
   if (demo || !isTabRoute(pathname) || facts.signedIn === false) return null;
   return firstRunState(facts) === "needs-setup" ? "/setup/profile" : null;
+}
+
+export function isSetupRoute(pathname: string): boolean {
+  return pathname === "/setup" || pathname.startsWith("/setup/");
+}
+
+/**
+ * True on a desktop-width window (1024 px and up), asked of matchMedia. The gate asks once per navigation and keeps
+ * the answer, so resizing the window afterwards never moves the user to another route.
+ */
+export function isDesktopViewport(): boolean {
+  return typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia("(min-width: 1024px)").matches;
 }
 
 export function isNewUser(facts: FirstRunFacts): boolean {
@@ -87,19 +99,19 @@ export function readFirstRunFacts(demo: boolean = isDemo()): FirstRunFacts {
  * lands on /setup/profile with the profile saved under their email, never under unscoped keys. With no session at all
  * the old rule stands: the setup redirect if there is one, else /signin.
  */
-export async function gateRedirect(pathname: string, demo: boolean = isDemo()): Promise<string | null> {
-  const isDesktop = typeof window !== "undefined" && typeof window.innerWidth === "number" && window.innerWidth >= 1024;
-  const isExplicitDemo = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("demo") === "1";
-
-  // Desktop unauthenticated root visitor must see the Landing page first, not the dashboard
-  if (isDesktop && pathname === "/" && !getStoredEmail() && !isExplicitDemo) {
-    return "/landing";
+export async function gateRedirect(pathname: string, demo: boolean = isDemo(), desktop: boolean = isDesktopViewport()): Promise<string | null> {
+  // The account is resolved FIRST. A visitor with no session and no account is the only one the landing is for: a
+  // signed-in user (an OAuth return with empty storage included) never lands there, whatever the window size
+  const hasSession = () => currentAccountId() !== null || (!wasExplicitlySignedOut() && currentAccount().then((a) => a !== null));
+  if (isSetupRoute(pathname)) {
+    // Setup needs an account to save the profile under: in live mode it never opens without a session
+    if (demo || !isLiveMode()) return null;
+    return (await hasSession()) ? null : "/signin";
   }
 
   // After Đăng xuất a session that survived (a failed sign-out) is not adopted until the next explicit sign-in
-  if (!demo && currentAccountId() === null && (wasExplicitlySignedOut() || (await currentAccount()) === null)) {
-    const fallback = isDesktop && pathname === "/" ? "/landing" : "/signin";
-    return setupRedirectFor(pathname, readFirstRunFacts(demo), demo) ?? fallback;
+  if (!demo && !(await hasSession())) {
+    return pathname === "/" && desktop ? "/landing" : "/signin";
   }
   const facts = readFirstRunFacts(demo);
   if (!demo && isLiveMode() && !facts.profileSaved && currentAccountId()) {

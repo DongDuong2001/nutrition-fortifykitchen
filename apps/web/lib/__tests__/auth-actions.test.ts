@@ -35,6 +35,10 @@ const mockState = vi.hoisted(() => ({
   users: new Map<string, UserRecord>(),
   currentUser: null as UserRecord | null,
   failNextCall: false,
+  // Email confirmation on: sign-up returns a user but no session
+  confirmEmail: false,
+  signUpError: null as (Error & { code?: string; status?: number }) | null,
+  signInError: null as (Error & { code?: string; status?: number }) | null,
 }));
 
 vi.mock("../supabase-client", () => {
@@ -62,6 +66,7 @@ vi.mock("../supabase-client", () => {
         signInWithPassword: vi.fn(async ({ email, password }: { email: string; password: string }) => {
           if (mockState.failNextCall) throw new Error("network error");
           const user = mockState.users.get(email.toLowerCase().trim());
+          if (mockState.signInError) return { data: { user: null }, error: mockState.signInError };
           if (!user || user.password !== password) {
             return { data: { user: null }, error: new Error("invalid_credentials") };
           }
@@ -71,6 +76,7 @@ vi.mock("../supabase-client", () => {
         signUp: vi.fn(async ({ email, password }: { email: string; password: string }) => {
           if (mockState.failNextCall) throw new Error("network error");
           const normalised = email.toLowerCase().trim();
+          if (mockState.signUpError) return { data: { user: null, session: null }, error: mockState.signUpError };
           if (mockState.users.has(normalised)) {
             return { data: { user: null }, error: new Error("user_already_exists") };
           }
@@ -81,8 +87,9 @@ vi.mock("../supabase-client", () => {
             providers: ["password"],
           };
           mockState.users.set(normalised, user);
+          if (mockState.confirmEmail) return { data: { user, session: null }, error: null };
           mockState.currentUser = user;
-          return { data: { user }, error: null };
+          return { data: { user, session: { access_token: "t" } }, error: null };
         }),
         signInWithOtp: vi.fn(async ({ email }: { email: string }) => {
           if (mockState.failNextCall) throw new Error("network error");
@@ -203,10 +210,44 @@ describe("Supabase auth flows (mocked client, no network)", () => {
     mockState.users.clear();
     mockState.currentUser = null;
     mockState.failNextCall = false;
+    mockState.confirmEmail = false;
+    mockState.signUpError = null;
+    mockState.signInError = null;
     vi.stubGlobal("localStorage", memoryStorage());
   });
   afterEach(() => {
     vi.unstubAllGlobals();
+  });
+
+  it("email sign-up with confirmation on stores no email and signs nobody in", async () => {
+    demo.on = false;
+    mockState.confirmEmail = true;
+    expect(await signUpWithPassword("new@example.com", "abcdef12")).toEqual({ ok: true, needsConfirmation: true });
+    expect(currentAccountId()).toBeNull();
+    expect(await currentAccount()).toBeNull();
+  });
+
+  it("shows a Vietnamese message for each Supabase sign-up error", async () => {
+    const withCode = (code: string, status?: number) => Object.assign(new Error("English text from the server"), { code, status });
+    const cases: Array<[Error, string]> = [
+      [withCode("over_email_send_rate_limit", 429), "Bạn thử quá nhiều lần. Chờ ít phút rồi thử lại."],
+      [withCode("weak_password", 422), "Mật khẩu quá yếu. Dùng mật khẩu dài hơn, có cả chữ và số."],
+      [withCode("captcha_failed", 400), "Chưa xác minh được captcha. Thử lại nhé."],
+      [withCode("email_exists", 422), "Email này đã có tài khoản. Hãy đăng nhập."],
+      [withCode("unexpected_failure", 500), "Chưa kết nối được máy chủ. Bạn thử lại sau ít phút nhé."],
+    ];
+    for (const [error, message] of cases) {
+      mockState.signUpError = error;
+      expect(await signUpWithPassword("x@example.com", "abcdef12")).toEqual({ ok: false, error: message });
+    }
+  });
+
+  it("sign-in says the email is not confirmed yet instead of a wrong password", async () => {
+    mockState.signInError = Object.assign(new Error("Email not confirmed"), { code: "email_not_confirmed", status: 400 });
+    expect(await signInWithPassword("x@example.com", "abcdef12")).toEqual({
+      ok: false,
+      error: "Bạn chưa xác nhận email. Mở liên kết trong email rồi đăng nhập.",
+    });
   });
 
   it("starts as the sample account, which has no password yet", async () => {

@@ -32,6 +32,18 @@ function memory() {
 const EMAIL = "new.user@example.com";
 const user = { email: "New.User@Example.com", app_metadata: { provider: "google", providers: ["google"] }, user_metadata: {}, identities: [{ provider: "google" }] };
 
+let desktopNow = false;
+// matchMedia answers the viewport once per call: it reads desktopNow when the gate asks, so a later change is a resize
+function setViewport(desktop: boolean, local = memory()) {
+  desktopNow = desktop;
+  vi.stubGlobal("window", {
+    localStorage: local,
+    sessionStorage: memory(),
+    location: { search: "" },
+    matchMedia: (query: string) => ({ matches: query === "(min-width: 1024px)" && desktopNow }),
+  });
+}
+
 describe("the sign-in gate with a session that only Supabase knows", () => {
   let local: ReturnType<typeof memory>;
   let gate: typeof import("../first-run");
@@ -45,7 +57,7 @@ describe("the sign-in gate with a session that only Supabase knows", () => {
     local = memory();
     vi.stubEnv("NEXT_PUBLIC_API_MODE", "live");
     vi.stubGlobal("localStorage", local);
-    vi.stubGlobal("window", { localStorage: local, sessionStorage: memory(), location: { search: "" } });
+    setViewport(false, local);
     gate = await import("../first-run");
   });
 
@@ -67,6 +79,44 @@ describe("the sign-in gate with a session that only Supabase knows", () => {
     getUser.mockResolvedValue({ data: { user: null }, error: null });
     expect(await gate.gateRedirect("/", false)).toBe("/signin");
     expect(local.getItem("h1t_auth_current_email")).toBeNull();
+  });
+
+  it("(b3) a desktop Google-OAuth return with empty localStorage stays on / (the landing never takes a live session)", async () => {
+    setViewport(true, local);
+    getUser.mockResolvedValue({ data: { user }, error: null });
+    withProfile();
+    expect(await gate.gateRedirect("/", false)).toBeNull();
+    expect(local.getItem("h1t_auth_current_email")).toBe(EMAIL);
+  });
+
+  it("(b4) a signed-out desktop visitor goes to /landing, a signed-out phone to /signin", async () => {
+    getUser.mockResolvedValue({ data: { user: null }, error: null });
+    setViewport(true, local);
+    expect(await gate.gateRedirect("/", false)).toBe("/landing");
+    setViewport(false, local);
+    expect(await gate.gateRedirect("/", false)).toBe("/signin");
+  });
+
+  it("(b5) only the root goes to /landing: another tab route on desktop is /signin", async () => {
+    getUser.mockResolvedValue({ data: { user: null }, error: null });
+    setViewport(true, local);
+    expect(await gate.gateRedirect("/explore", false)).toBe("/signin");
+  });
+
+  it("(b6) the viewport is read once per call, so a resize after the check never changes the route", async () => {
+    getUser.mockResolvedValue({ data: { user: null }, error: null });
+    setViewport(true, local);
+    const pending = gate.gateRedirect("/", false);
+    setViewport(false, local); // the window shrinks while Supabase is answering
+    expect(await pending).toBe("/landing");
+  });
+
+  it("(b7) /setup never opens without a session in live mode, and does with one", async () => {
+    getUser.mockResolvedValue({ data: { user: null }, error: null });
+    expect(await gate.gateRedirect("/setup/profile", false)).toBe("/signin");
+    getUser.mockResolvedValue({ data: { user }, error: null });
+    expect(await gate.gateRedirect("/setup/profile", false)).toBeNull();
+    expect(await gate.gateRedirect("/setup/done", true)).toBeNull();
   });
 
   it("(b2) Supabase failing to answer is /signin, not a stuck gate", async () => {

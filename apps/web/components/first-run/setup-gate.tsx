@@ -4,7 +4,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { AppShell } from "@/components/ui/app-shell";
 import { AppHeader } from "@/components/ui/app-header";
-import { gateRedirect, isTabRoute } from "@/lib/first-run";
+import { gateRedirect, isSetupRoute, isTabRoute } from "@/lib/first-run";
+import { isLiveMode } from "@/lib/api-mode";
 
 /**
  * While the check runs, a tab route shows the page frame as a skeleton: the paper page, the phone header shape
@@ -52,7 +53,8 @@ export function SetupGate({ children, wrap }: { children: React.ReactNode; wrap?
   const router = useRouter();
   // True once a check has let the user through
   const [cleared, setCleared] = useState(false);
-  const guarded = isTabRoute(pathname);
+  // /setup/** is checked only in live mode, where it must not open without a session
+  const guarded = isTabRoute(pathname) || (isSetupRoute(pathname) && isLiveMode());
   const providerMounted = useRef(false);
   const waiting = guarded && !cleared;
   const withProvider = !waiting || providerMounted.current;
