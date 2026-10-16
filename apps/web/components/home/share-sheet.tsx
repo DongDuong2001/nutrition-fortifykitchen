@@ -43,15 +43,24 @@ const FONT_WAIT_MS = 4000;
  * FONT_WAIT_MS: a font that cannot load must not stop the picture.
  */
 async function loadShareFonts(node: HTMLElement): Promise<void> {
-  const text = node.textContent ?? "";
-  const faces = new Set<string>();
-  node.querySelectorAll<HTMLElement>("*").forEach((el) => {
-    if (![...el.childNodes].some((n) => n.nodeType === Node.TEXT_NODE && n.textContent?.trim())) return;
-    const style = getComputedStyle(el);
-    faces.add(`${style.fontStyle} ${style.fontWeight} 16px ${style.fontFamily}`);
-  });
-  const loading = Promise.all([...faces].map((face) => document.fonts.load(face, text))).then(() => document.fonts.ready);
-  await Promise.race([loading, new Promise((resolve) => setTimeout(resolve, FONT_WAIT_MS))]);
+  try {
+    if (typeof document === "undefined" || !document.fonts?.load) return;
+    const text = node.textContent ?? "";
+    const faces = new Set<string>();
+    node.querySelectorAll<HTMLElement>("*").forEach((el) => {
+      if (![...el.childNodes].some((n) => n.nodeType === Node.TEXT_NODE && n.textContent?.trim())) return;
+      const style = getComputedStyle(el);
+      if (style.fontFamily) {
+        faces.add(`${style.fontStyle || "normal"} ${style.fontWeight || "400"} 16px ${style.fontFamily}`);
+      }
+    });
+    const loading = Promise.all(
+      [...faces].map((face) => document.fonts.load(face, text).catch(() => [] as FontFace[]))
+    ).then(() => document.fonts?.ready);
+    await Promise.race([loading, new Promise((resolve) => setTimeout(resolve, FONT_WAIT_MS))]);
+  } catch {
+    // A font that cannot load must not stop the picture
+  }
 }
 
 /**
@@ -74,7 +83,7 @@ function ShareCapture({ model, onDone, onError }: { model: ShareModel; onDone: (
       await nextFrame();
       const cssHeight = node.getBoundingClientRect().height;
       const { scale, width, height } = shareImageSize(cssHeight);
-      const fontEmbedCSS = await getFontEmbedCSS(node);
+      const fontEmbedCSS = await getFontEmbedCSS(node).catch(() => undefined);
       // The page is scaled by layout (transform on the clone), so text stays vector-sharp at 1080 px
       const blob = await toBlob(node, {
         width,
@@ -82,7 +91,7 @@ function ShareCapture({ model, onDone, onError }: { model: ShareModel; onDone: (
         pixelRatio: 1,
         fontEmbedCSS,
         // A page height that is not a whole number of image rows must not leave a see-through last row
-        backgroundColor: getComputedStyle(node).backgroundColor,
+        backgroundColor: getComputedStyle(node).backgroundColor || "#F3F1EC",
         style: {
           transform: `scale(${scale})`,
           transformOrigin: "top left",
@@ -151,6 +160,7 @@ export function ShareSheet({
   const [nameError, setNameError] = useState<string | null>(null);
   // The name is kept on this device either way; true when the API could not take it
   const [nameSyncFailed, setNameSyncFailed] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (!open || needsName) return;
@@ -238,11 +248,20 @@ export function ShareSheet({
       <Sheet open={open} onClose={onClose} title="Chia sẻ ngày này" titleId="share-sheet-title" desktopDialog>
         <form
           noValidate
-          onSubmit={(e) => {
+          onSubmit={async (e) => {
             e.preventDefault();
+            if (isSaving) return;
             const message = validateSetupName(nameDraft);
             setNameError(message);
-            if (!message) void onSaveName(cleanDisplayName(nameDraft)).then((ok) => setNameSyncFailed(!ok));
+            if (!message) {
+              setIsSaving(true);
+              try {
+                const ok = await onSaveName(cleanDisplayName(nameDraft));
+                setNameSyncFailed(!ok);
+              } finally {
+                setIsSaving(false);
+              }
+            }
           }}
           className="flex flex-col gap-3"
         >
@@ -264,8 +283,8 @@ export function ShareSheet({
               }`}
             />
           </FormRow>
-          <PillButton type="submit" variant="primary" disabled={!valid} data-align-group="share-actions">
-            Tiếp tục
+          <PillButton type="submit" variant="primary" disabled={!valid || isSaving} data-align-group="share-actions">
+            {isSaving ? "Đang lưu…" : "Tiếp tục"}
           </PillButton>
         </form>
       </Sheet>
