@@ -43,7 +43,7 @@ export function DesktopIntroBanner() {
           <div className="flex items-center gap-3 text-sm">
             <span className="font-display italic font-black text-blue">H1T MICRO</span>
             <span className="text-secondary font-medium">
-              Hệ thống theo dõi 22 vi chất và năng lượng theo tiêu chuẩn khoa học RNI/RDA.
+              Theo dõi 22 vi chất và năng lượng mỗi ngày.
             </span>
           </div>
           <button
@@ -64,14 +64,14 @@ export function DesktopIntroBanner() {
                   Khoa học dinh dưỡng &amp; Vi chất
                 </span>
                 <span className="text-xs text-secondary">·</span>
-                <span className="text-xs text-secondary font-medium">Bảng thành phần Viện Dinh Dưỡng &amp; USDA</span>
+                <span className="text-xs text-secondary font-medium">Dữ liệu từ USDA FoodData Central</span>
               </div>
               <h2 className="m-0 text-xl font-bold text-text">
                 Kiểm soát năng lượng và cân bằng 22 vi chất thiết yếu
               </h2>
               <p className="m-0 text-sm text-secondary leading-relaxed max-w-[850px]">
                 Nền tảng định lượng minh bạch: theo dõi chi tiết 10 khoáng chất và 12 vitamin mỗi ngày,
-                tự động đối chiếu với ngưỡng nhu cầu khuyến nghị (RNI) và giới hạn an toàn để duy trì sức khỏe bền vững.
+                tự động đối chiếu với mục tiêu tính theo hồ sơ của bạn.
               </p>
             </div>
             <button
@@ -102,7 +102,7 @@ export function DesktopIntroBanner() {
             <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-page border border-card-border/60">
               <div className="text-xs font-bold text-text">3. Điều chỉnh theo vận động</div>
               <p className="m-0 text-xs text-secondary leading-relaxed">
-                Tự động tối ưu hóa lượng muối khoáng và nước theo cường độ tập luyện, đồng bộ tiến độ cùng chuyên viên hướng dẫn.
+                Tự động tối ưu hóa lượng muối khoáng và nước theo cường độ tập luyện.
               </p>
             </div>
           </div>

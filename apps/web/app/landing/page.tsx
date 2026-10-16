@@ -6,9 +6,9 @@ import { KilnWordmarkFooter } from "@/components/landing/kiln-wordmark-footer";
 import { FloatingPhone } from "@/components/landing/floating-phone";
 
 export const metadata = {
-  title: "H1T MICRO — Hệ thống theo dõi 22 vi chất và năng lượng chuẩn khoa học",
+  title: "H1T MICRO — Hệ thống theo dõi 22 vi chất và năng lượng",
   description:
-    "Nền tảng kiểm soát dinh dưỡng toàn diện: định lượng chính xác 22 vi chất thiết yếu và cân bằng năng lượng theo tiêu chuẩn khuyến nghị RNI/RDA của Viện Dinh Dưỡng Quốc Gia và USDA.",
+    "Theo dõi 22 vi chất và năng lượng mỗi ngày. Mục tiêu tính theo hồ sơ của bạn, dữ liệu món ăn từ USDA FoodData Central.",
 };
 
 const STEPS = [
@@ -16,7 +16,7 @@ const STEPS = [
     num: "01",
     stepLabel: "BƯỚC 1",
     title: "Ghi nhận khẩu phần chính xác",
-    desc: "Tra cứu từ danh mục thực phẩm chuẩn hoá (Viện Dinh Dưỡng & USDA). Ghi nhanh nhiều món liên tiếp vào từng bữa ăn với khối lượng gam thực tế.",
+    desc: "Tra cứu từ dữ liệu USDA FoodData Central. Ghi nhanh nhiều món liên tiếp vào từng bữa ăn với khối lượng gam thực tế.",
     microUi: (
       <div className="p-3.5 rounded-2xl bg-page/80 border border-card-border/70 flex items-center justify-between">
         <div className="flex items-center gap-2.5 min-w-0">
@@ -38,12 +38,12 @@ const STEPS = [
     num: "02",
     stepLabel: "BƯỚC 2",
     title: "Phân tích 22 vi chất thời gian thực",
-    desc: "Tự động đối chiếu từng vitamin và khoáng chất với nhu cầu khuyến nghị RNI chuẩn Việt Nam qua biểu đồ 10 mức phân đoạn trực quan.",
+    desc: "Tự động đối chiếu từng vitamin và khoáng chất với mục tiêu tính theo hồ sơ của bạn qua biểu đồ 10 mức phân đoạn trực quan.",
     microUi: (
       <div className="p-3.5 rounded-2xl bg-page/80 border border-card-border/70 flex flex-col gap-2">
         <div className="flex items-center justify-between text-[11px]">
           <span className="font-semibold text-secondary">Canxi (Ca)</span>
-          <span className="font-extrabold text-level-green">85% chuẩn RNI</span>
+          <span className="font-extrabold text-level-green">85% mục tiêu</span>
         </div>
         <div className="h-1.5 w-full bg-card-border/50 rounded-full overflow-hidden">
           <div className="h-full bg-level-green rounded-full" style={{ width: "85%" }} />
@@ -62,7 +62,7 @@ const STEPS = [
     num: "03",
     stepLabel: "BƯỚC 3",
     title: "Tối ưu hóa theo cường độ vận động",
-    desc: "Hệ thống tự động tính toán nhu cầu bù muối điện giải và nước theo thời lượng tập luyện thực tế mỗi ngày, đồng bộ giáo án cùng huấn luyện viên.",
+    desc: "Hệ thống tự động tính toán nhu cầu bù muối điện giải và nước theo thời lượng tập luyện thực tế mỗi ngày.",
     microUi: (
       <div className="p-3.5 rounded-2xl bg-page/80 border border-card-border/70 flex items-center justify-between">
         <div>
@@ -104,8 +104,8 @@ const TRANSPARENCY_PRINCIPLES = [
   {
     tag: "NGUỒN GỐC MINH BẠCH",
     title: "Gắn nhãn rõ ràng nguồn thực phẩm",
-    desc: "Mọi món ăn hiển thị rõ ràng nguồn gốc dữ liệu: Bảng thành phần dinh dưỡng Việt Nam, cơ sở dữ liệu USDA hoặc món do người dùng tự tạo, phân định rạch ròi.",
-    badge: "100% kiểm chứng nguồn gốc",
+    desc: "Mỗi món có nhãn nguồn: USDA, bảng thành phần Việt Nam, nhãn bao bì, món ước tính hoặc món do bạn tự tạo.",
+    badge: "Mỗi món có nhãn nguồn",
     icon: (
       <svg className="w-5 h-5 text-level-green" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
         <path d="M9 12l2 2 4-4" />
@@ -115,9 +115,9 @@ const TRANSPARENCY_PRINCIPLES = [
   },
   {
     tag: "BẢO MẬT & QUYỀN RIÊNG TƯ",
-    title: "Tự chủ dữ liệu cá nhân hoàn toàn",
-    desc: "Bạn có toàn quyền xuất báo cáo, sao lưu hoặc xoá vĩnh viễn nhật ký dinh dưỡng và dữ liệu cơ thể của mình bất kỳ lúc nào mà không bị ràng buộc.",
-    badge: "Quyền riêng tư tuyệt đối",
+    title: "Dữ liệu gắn với tài khoản của bạn",
+    desc: "Nhật ký và hồ sơ của bạn gắn với tài khoản của bạn. Chính sách quyền riêng tư nêu rõ dữ liệu nào được lưu và lưu ở đâu.",
+    badge: "Có chính sách quyền riêng tư",
     icon: (
       <svg className="w-5 h-5 text-blue" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
         <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
@@ -191,8 +191,8 @@ export default function LandingPage() {
               </h1>
 
               <p className="mt-6 text-base sm:text-lg text-secondary leading-relaxed max-w-2xl font-normal">
-                Không chỉ dừng lại ở calories. H1T MICRO cung cấp hệ thống định lượng minh bạch 10 khoáng chất
-                và 12 vitamin theo tiêu chuẩn khuyến nghị RNI/RDA của Viện Dinh Dưỡng Quốc Gia và Bộ Nông Nghiệp Hoa Kỳ (USDA).
+                Không chỉ dừng lại ở calories. H1T MICRO cung cấp hệ thống theo dõi 10 khoáng chất
+                và 12 vitamin, với mục tiêu tính theo hồ sơ của bạn và dữ liệu từ USDA FoodData Central.
               </p>
 
               <div className="mt-8 flex flex-wrap items-center gap-4">
@@ -319,7 +319,7 @@ export default function LandingPage() {
               Minh bạch số liệu là ưu tiên hàng đầu
             </h3>
             <p className="mt-3 text-secondary text-sm sm:text-base leading-relaxed">
-              H1T MICRO tuân thủ các nguyên tắc khoa học khắt khe nhất để bạn và huấn luyện viên an tâm đưa ra quyết định dinh dưỡng.
+              Số liệu hiển thị rõ nguồn, và chỗ chưa có dữ liệu thì để trống thay vì tự điền.
             </p>
           </div>
 
@@ -362,7 +362,7 @@ export default function LandingPage() {
           <div className="mt-12 rounded-2xl border border-card-border/80 bg-card/60 p-4 sm:p-5 flex flex-wrap items-center justify-between gap-4 text-xs font-semibold text-secondary">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-level-green" />
-              <span>Tiêu chuẩn khuyến nghị RNI Viện Dinh Dưỡng Quốc Gia</span>
+              <span>Mục tiêu tính theo hồ sơ của bạn</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-blue" />
@@ -370,7 +370,7 @@ export default function LandingPage() {
             </div>
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-ink" />
-              <span>Bảo mật dữ liệu cá nhân theo tiêu chuẩn y tế</span>
+              <span>Chính sách quyền riêng tư công khai</span>
             </div>
           </div>
         </div>

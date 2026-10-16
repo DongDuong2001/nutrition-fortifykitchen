@@ -445,7 +445,7 @@ export function KilnWordmarkFooter({
   motto = ["22 VI CHẤT", "CHUẨN KHOA HỌC"],
   address = [
     "Hệ thống theo dõi dinh dưỡng và vi chất",
-    "↳ Dữ liệu Viện Dinh Dưỡng & USDA",
+    "↳ Dữ liệu từ USDA FoodData Central",
     "Hà Nội — Việt Nam",
   ],
   navigationTitle = "Tính năng",
@@ -453,7 +453,7 @@ export function KilnWordmarkFooter({
   followTitle = "Tài khoản & Kết nối",
   socials = DEFAULT_SOCIALS,
   year = 2026,
-  registry = "Hệ thống chuẩn hóa 22 vi chất và kiểm soát năng lượng theo khuyến nghị RNI/RDA",
+  registry = "Hệ thống chuẩn hóa 22 vi chất và kiểm soát năng lượng theo mục tiêu tính từ hồ sơ của bạn",
   legal = DEFAULT_LEGAL,
   surface = "#1238D6", // Cobalt Blue
   deep = "#111317", // Ink Black

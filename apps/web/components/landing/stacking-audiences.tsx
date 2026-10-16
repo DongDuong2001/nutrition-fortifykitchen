@@ -39,9 +39,9 @@ const AUDIENCES_DATA: AudienceCardData[] = [
     tag: "SỨC KHỎE BỀN VỮNG",
     title: "Người chú trọng vi chất & Chuyển hóa",
     subtitle: "Phát hiện sớm tình trạng thiếu hụt 10 khoáng chất & 12 vitamin",
-    desc: "Vượt qua giới hạn của việc chỉ đếm calo thông thường. Hệ thống đối chiếu dữ liệu từng món ăn với khuyến nghị chuẩn mực RNI của Viện Dinh Dưỡng Quốc Gia để bảo đảm cân bằng chuyển hóa lâu dài.",
+    desc: "Vượt qua giới hạn của việc chỉ đếm calo thông thường. Hệ thống đối chiếu dữ liệu từng món ăn với mục tiêu tính theo hồ sơ của bạn.",
     points: [
-      "Đối chiếu trực tiếp với ngưỡng nhu cầu khuyến nghị (RNI) chuẩn Việt Nam",
+      "Đối chiếu với mục tiêu tính theo hồ sơ của bạn",
       "Biểu đồ 10 mức trực quan hiển thị mức độ đáp ứng từng vi chất",
       "Cảnh báo ngưỡng an toàn phòng tránh dư thừa hoặc mất cân đối",
     ],
@@ -51,7 +51,7 @@ const AUDIENCES_DATA: AudienceCardData[] = [
     stats: [
       { label: "Khoáng chất", value: "10 / 10", hint: "Canxi, Sắt, Kẽm, Magie..." },
       { label: "Vitamin", value: "12 / 12", hint: "A, C, D, E, Nhóm B..." },
-      { label: "Thang đo", value: "10 mức", hint: "Trực quan, chuẩn y khoa" },
+      { label: "Thang đo", value: "10 mức", hint: "Trực quan" },
     ],
   },
   {
@@ -61,7 +61,7 @@ const AUDIENCES_DATA: AudienceCardData[] = [
     desc: "Thiết lập kế hoạch dinh dưỡng cá nhân hóa cho học viên, theo dõi nhật ký thực tế minh bạch theo thời gian thực và loại bỏ hoàn toàn việc ước tính thủ công cảm tính.",
     points: [
       "Theo dõi nhật ký và tỷ lệ đạt mục tiêu của học viên theo thời gian thực",
-      "Điều chỉnh khuyến nghị điện giải linh hoạt theo giáo án vận động",
+      "Điều chỉnh khuyến nghị muối theo số phút tập mỗi ngày",
       "Dữ liệu dinh dưỡng chuẩn mực, không phụ thuộc vào bảng tính thủ công",
     ],
     ctaText: "Bắt đầu cùng H1T MICRO",
@@ -69,7 +69,7 @@ const AUDIENCES_DATA: AudienceCardData[] = [
     theme: "cobalt",
     stats: [
       { label: "Học viên", value: "Theo dõi 1-1", hint: "Báo cáo tuân thủ ngày" },
-      { label: "Dữ liệu nguồn", value: "Viện Dinh Dưỡng", hint: "Minh bạch 100%" },
+      { label: "Dữ liệu nguồn", value: "USDA", hint: "FoodData Central" },
       { label: "Độ chính xác", value: "Đến từng gam", hint: "Không làm tròn lệch" },
     ],
   },
