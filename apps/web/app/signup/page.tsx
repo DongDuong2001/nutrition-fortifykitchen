@@ -53,6 +53,11 @@ export default function SignUpPage() {
                 </li>
               ))}
             </ul>
+            <div className="hidden lg:block pt-3">
+              <Link href="/landing" className="text-xs font-semibold text-sky hover:underline no-underline">
+                Tìm hiểu thêm về H1T MICRO →
+              </Link>
+            </div>
           </div>
         </>
       }
