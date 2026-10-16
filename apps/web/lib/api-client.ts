@@ -345,6 +345,18 @@ export const apiClient = {
       } catch {
         // Fallback below
       }
+      return {
+        date: targetDate,
+        training_minutes: 0,
+        is_read_only: false,
+        summary: {
+          calories: 0,
+          protein: 0,
+          carbs: 0,
+          fat: 0,
+        },
+        meals: [],
+      };
     }
     return {
       date: targetDate,
@@ -410,6 +422,26 @@ export const apiClient = {
       } catch {
         // Fallback to mock on transport failure
       }
+      return {
+        progress: {
+          log_date: date || getTodayIsoVN(),
+          total_nutrients: {
+            calories: 0,
+            protein: 0,
+            carbohydrates: 0,
+            fat: 0,
+            fiber: 0,
+            sodium: 0,
+            potassium: 0,
+            calcium: 0,
+            magnesium: 0,
+            iron: 0,
+            zinc: 0,
+          },
+          logs_count: 0,
+        },
+        logs: [],
+      };
     }
 
     // Convert SAMPLE_DAY to DailyProgress fallback
@@ -513,15 +545,18 @@ export const apiClient = {
           const json = await res.json();
           const payload = json.data ?? json;
           const items = payload.items ?? (Array.isArray(payload) ? payload : []);
-          if (Array.isArray(items) && items.length > 0) {
+          if (Array.isArray(items)) {
             const mapped = items.map(mapApiFoodToFoodItem);
-            setCatalogFoods(mapped);
+            if (mapped.length > 0) {
+              setCatalogFoods(mapped);
+            }
             return mapped;
           }
         }
       } catch {
         // Fallback
       }
+      return [];
     }
 
     const filtered = category ? MOCK_FOODS.filter((f) => f.category === category) : MOCK_FOODS;
@@ -542,6 +577,7 @@ export const apiClient = {
       } catch {
         // Fallback
       }
+      return null;
     }
 
     return MOCK_FOODS.find((f) => f.id === id) || null;
@@ -586,11 +622,20 @@ export const apiClient = {
           const json = await res.json();
           const raw = json.data ?? json;
           const mapped = mapApiFoodToFoodItem(raw);
-          MOCK_FOODS.unshift(mapped);
+          setCatalogFoods([mapped]);
           return mapped;
         }
-      } catch {
-        // Fallback
+        let msg = `Không thể tạo món (${res.status})`;
+        try {
+          const errJson = await res.json();
+          if (errJson?.error?.message) msg = errJson.error.message;
+        } catch {}
+        throw new Error(msg);
+      } catch (err) {
+        if (err instanceof Error && err.message.startsWith("Không thể tạo món")) {
+          throw err;
+        }
+        throw new Error("Lỗi kết nối khi tạo món. Vui lòng thử lại.");
       }
     }
 
