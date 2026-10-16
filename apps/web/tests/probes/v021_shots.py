@@ -79,6 +79,31 @@ def main():
         check("ít nhất một chữ cái hoặc chữ số" in dlg.inner_text(), "share name step: a name with no letter or digit is refused")
         pg.screenshot(path=os.path.join(SHOTS, "v021-share-name-390.png"))
         ctx.close()
+
+        # Hôm nay today at Level 2, and its share image: the four level colours (Hao, 16/10)
+        named = '{"sex":"male","birthYear":2003,"weightKg":65.4,"goal":"maintain","periodMode":false,"trainingMinutesDefault":60,"displayName":"Học viên A","hintSeen":true}'
+        ctx = browser.new_context(viewport=size, accept_downloads=True)
+        ctx.add_init_script("try { localStorage.setItem('h1t_profile_v1_demo', JSON.stringify(%s)); } catch (e) {}" % named)
+        ctx.add_init_script("Object.defineProperty(navigator, 'canShare', { value: undefined }); Object.defineProperty(navigator, 'share', { value: undefined });")
+        pg = ctx.new_page()
+        pg.clock.set_fixed_time(NOW)
+        pg.goto(BASE + "/?level=2", wait_until="networkidle")
+        pg.locator(HERO + " >> visible=true").first.wait_for(state="visible", timeout=8000)
+        pg.wait_for_timeout(600)
+        pg.screenshot(path=os.path.join(SHOTS, "v021-home-today-L2-390.png"))
+        fills = pg.evaluate(
+            """() => [...document.querySelectorAll('[role=progressbar]')].filter(b => b.getBoundingClientRect().width > 0).flatMap(b => [...b.children].map(c => getComputedStyle(c).backgroundColor))"""
+        )
+        lit = {c for c in fills if c not in ("rgb(42, 44, 49)", "rgb(230, 225, 215)")}
+        check(len(lit) >= 2 and not any(c in lit for c in ("rgb(154, 160, 166)",)), f"today uses several level colours ({sorted(lit)})")
+        pg.get_by_role("button", name="Chia sẻ ngày này").click()
+        dlg = pg.get_by_role("dialog")
+        dlg.get_by_role("img").wait_for(state="visible", timeout=20000)
+        with pg.expect_download() as info:
+            dlg.get_by_role("button", name="Lưu ảnh").click()
+        info.value.save_as(os.path.join(SHOTS, "v021-share-image-today-L2.png"))
+        pg.screenshot(path=os.path.join(SHOTS, "v021-share-sheet-390.png"))
+        ctx.close()
         browser.close()
     if problems:
         print(f"\n{len(problems)} FAIL")

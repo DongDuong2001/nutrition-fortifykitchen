@@ -83,7 +83,7 @@ def run(browser, size, tag):
     pg.wait_for_url(re.compile(r".*/coach/clients/client-2$"), timeout=8000)
     pg.wait_for_timeout(500)
     body = squash(pg.inner_text("body"))
-    check("Level hiện tại" in body and "Level 1" in body and "TRẦN QUỐC BẢO" in pg.inner_text("body").upper(), f"{tag}: name and current Level")
+    check("Level hiện tại" in body and "Level 1" in body and "HỌC VIÊN B" in pg.inner_text("body").upper(), f"{tag}: name and current Level")
     save = pg.get_by_role("button", name="Lưu", exact=True)
     check(save.is_disabled(), f"{tag}: Lưu is disabled until changed")
     picks = pg.get_by_role("button", name=re.compile(r"^Level [1-5]$"))

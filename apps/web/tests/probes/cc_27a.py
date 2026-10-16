@@ -167,33 +167,49 @@ def today_flow(browser, size, tag):
     pg.wait_for_timeout(400)
     check(hero_count(pg) == 7, f"{tag} delete: one Hoàn tác restores all three ({hero_count(pg)})")
 
-    # v0.2.1: a move keeps a pending delete's Hoàn tác reachable (two toasts stacked) and has its own Hoàn tác
-    start_select(pg)
-    pg.locator("[role=checkbox]").nth(0).click()
-    pg.get_by_role("button", name="Xóa", exact=True).click()
-    pg.wait_for_timeout(300)
-    check(hero_count(pg) == 6, f"{tag} stack: one food deleted ({hero_count(pg)})")
+    check([e for e in errors if "preloaded using link preload" not in e] == [], f"{tag}: no console errors {errors[:1]}")
+    ctx.close()
+
+
+# The move after a delete has to happen inside the delete's 5 s toast, and Playwright's own waits cost about 0.7 s a
+# click, so the steps run in the page (a click and a short poll for the next control each).
+MOVE_IN_PAGE = """async () => {
+  const until = async (fn, what) => { for (let i = 0; i < 150; i++) { const v = fn(); if (v) return v; await new Promise(r => setTimeout(r, 20)); } throw new Error('not found: ' + what); };
+  const btn = (root, test) => [...root.querySelectorAll('button, [role=radio]')].find(test);
+  const label = (b) => (b.getAttribute('aria-label') || b.textContent || '').trim();
+  (await until(() => btn(document, b => label(b) === 'Tùy chọn ngày'), 'day options')).click();
+  (await until(() => btn(document, b => label(b).startsWith('Chọn nhiều món')), 'choose many')).click();
+  (await until(() => document.querySelector('[role=checkbox]'), 'checkbox')).click();
+  (await until(() => btn(document, b => label(b) === 'Chuyển bữa' && !b.disabled), 'move button')).click();
+  const dlg = await until(() => document.querySelector('[role=dialog]'), 'dialog');
+  (await until(() => btn(dlg, b => label(b).toLowerCase().includes('phụ')), 'radio')).click();
+  (await until(() => btn(dlg, b => label(b) === 'Chuyển'), 'confirm')).click();
+}"""
+
+
+def stack_flow(browser, size, tag):
+    """v0.2.1: a move keeps a pending delete's Hoàn tác reachable (two toasts stacked) and has its own Hoàn tác."""
+    w = size["width"]
+    ctx, pg, errors = new_page(browser, size)
+    go(pg, "/")
     snack_before = squash(pg.locator("section[aria-label='Bữa phụ']").inner_text())
     start_select(pg)
     pg.locator("[role=checkbox]").nth(0).click()
-    pg.get_by_role("button", name="Chuyển bữa", exact=True).click()
-    dlg = pg.get_by_role("dialog", name=re.compile("^Chuyển 1 món sang"))
-    dlg.wait_for(state="visible", timeout=4000)
-    dlg.get_by_role("radio", name="Phụ").click()
-    dlg.get_by_role("button", name="Chuyển", exact=True).click()
-    pg.wait_for_timeout(400)
+    pg.get_by_role("button", name="Xóa", exact=True).click()
+    pg.evaluate(MOVE_IN_PAGE)
+    check(hero_count(pg) == 6, f"{tag} stack: one food deleted ({hero_count(pg)})")
     toasts = [squash(t) for t in pg.locator("[role=status] >> visible=true").all_inner_texts()]
     check(len(toasts) == 2 and "Đã xóa" in toasts[0] and "Đã chuyển 1 món sang Bữa phụ" in toasts[1], f"{tag} stack: both toasts are on screen ({toasts})")
     check(pg.get_by_role("button", name="Hoàn tác").count() == 2, f"{tag} stack: two Hoàn tác buttons")
     pg.screenshot(path=os.path.join(SHOTS, f"cc-27a-stacked-toasts-{w}.png"))
-    pg.get_by_role("button", name="Hoàn tác").first.click()
-    pg.wait_for_timeout(400)
+    pg.get_by_role("button", name="Hoàn tác").first.click(force=True)
+    pg.wait_for_timeout(300)
     check(hero_count(pg) == 7, f"{tag} stack: the delete's Hoàn tác still works after a move ({hero_count(pg)})")
     check(pg.get_by_role("button", name="Hoàn tác").count() == 1, f"{tag} stack: the move's Hoàn tác stays")
-    pg.get_by_role("button", name="Hoàn tác").click()
-    pg.wait_for_timeout(400)
+    pg.get_by_role("button", name="Hoàn tác").click(force=True)
+    pg.wait_for_timeout(300)
     check(squash(pg.locator("section[aria-label='Bữa phụ']").inner_text()) == snack_before, f"{tag} stack: the move is put back")
-    check([e for e in errors if "preloaded using link preload" not in e] == [], f"{tag}: no console errors {errors[:1]}")
+    check([e for e in errors if "preloaded using link preload" not in e] == [], f"{tag} stack: no console errors {errors[:1]}")
     ctx.close()
 
 
@@ -244,6 +260,7 @@ with sync_playwright() as p:
     browser = p.chromium.launch()
     for size, tag in [({"width": 390, "height": 844}, "390"), ({"width": 1440, "height": 900}, "1440")]:
         today_flow(browser, size, tag)
+        stack_flow(browser, size, tag)
         past_flow(browser, size, tag)
     browser.close()
 

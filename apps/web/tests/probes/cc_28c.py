@@ -114,7 +114,7 @@ def run(browser, size, tag):
     pg.wait_for_timeout(500)
     row = pg.get_by_role("link", name=re.compile("^Huấn luyện viên"))
     check(row.count() == 1 and row.get_attribute("href") == "/settings/coach", f"{tag} Cài đặt: Huấn luyện viên row")
-    check("HỌC VIÊN" not in pg.inner_text("body").upper().replace("HỌC VIÊN CỦA", ""), f"{tag} Cài đặt: no Học viên row for a user")
+    check(pg.locator('a[href="/coach"]').count() == 0, f"{tag} Cài đặt: no Học viên row (link to /coach) for a user")
     row.click()
     pg.wait_for_url(re.compile(r".*/settings/coach$"), timeout=8000)
     pg.wait_for_timeout(400)
