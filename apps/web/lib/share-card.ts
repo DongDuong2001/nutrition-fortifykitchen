@@ -170,3 +170,8 @@ export function buildShareModel({
     alt,
   };
 }
+
+/** html-to-image `filter`: a node marked data-export="hide" (the + Thêm buttons) is left out of the share image. */
+export function keepInShareImage(node: { dataset?: { export?: string } } | null | undefined): boolean {
+  return node?.dataset?.export !== "hide";
+}

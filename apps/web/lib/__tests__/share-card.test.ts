@@ -14,6 +14,7 @@ import {
   shareMeals,
   shareName,
   shareNeedsName,
+  keepInShareImage,
 } from "../share-card";
 import { entriesFromAdded, groupMeals, type HomeEntry } from "../home";
 import { countedForLevel } from "../level-nutrients";
@@ -181,5 +182,14 @@ describe("share image size cap", () => {
     expect(size.scale).toBeCloseTo(1.5, 5);
     expect(size.width).toBeLessThan(1080);
     expect(size.width).toBe(Math.floor(390 * size.scale));
+  });
+});
+
+describe("keepInShareImage", () => {
+  it("drops a node marked data-export=hide and keeps every other node, text nodes included", () => {
+    expect(keepInShareImage({ dataset: { export: "hide" } })).toBe(false);
+    expect(keepInShareImage({ dataset: {} })).toBe(true);
+    expect(keepInShareImage({})).toBe(true);
+    expect(keepInShareImage(null)).toBe(true);
   });
 });

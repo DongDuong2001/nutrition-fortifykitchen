@@ -8,7 +8,7 @@ import { FormRow } from "@/components/ui/form-row";
 import { PillButton } from "@/components/ui/pill-button";
 import type { HomeEntry, HomeMeal } from "@/lib/home";
 import type { MockDayData } from "@/lib/mock/sample-day";
-import { SHARE_CSS_WIDTH, buildShareModel, shareImageSize, shareNeedsName, type ShareModel } from "@/lib/share-card";
+import { SHARE_CSS_WIDTH, buildShareModel, keepInShareImage, shareImageSize, shareNeedsName, type ShareModel } from "@/lib/share-card";
 import { cleanDisplayName } from "@/lib/display-name";
 import { validateSetupName } from "@/lib/onboarding";
 import { ShareDay } from "./share-day";
@@ -86,6 +86,8 @@ function ShareCapture({ model, onDone, onError }: { model: ShareModel; onDone: (
       const fontEmbedCSS = await getFontEmbedCSS(node).catch(() => undefined);
       // The page is scaled by layout (transform on the clone), so text stays vector-sharp at 1080 px
       const blob = await toBlob(node, {
+        // Buttons marked data-export="hide" (the + Thêm pills) never reach the image
+        filter: keepInShareImage,
         width,
         height,
         pixelRatio: 1,

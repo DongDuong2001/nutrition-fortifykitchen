@@ -227,21 +227,40 @@ export function FoodList({
         const mealSelected = mode.kind === "meal" && mode.slot === meal.slot;
         return (
           <section key={meal.slot} aria-label={meal.fullName}>
-            <button
-              type="button"
-              aria-pressed={mealSelected}
-              aria-label={`Xem riêng ${meal.fullName.toLocaleLowerCase("vi-VN")}`}
-              onClick={() => onMeal(meal.slot)}
-              style={noSelect}
-              className={`sticky top-0 z-10 flex h-[22px] w-full cursor-pointer items-center justify-between gap-2 border-0 px-3 lg:h-11 ${
+            <div
+              className={`sticky top-0 z-10 flex h-[22px] w-full items-center gap-4 px-3 lg:h-11 ${
                 mealSelected ? "bg-cobalt text-on-accent" : "bg-paper-dark text-text"
               }`}
             >
-              <span className="text-[11px] font-extrabold leading-none">{meal.label}</span>
-              <span className="font-display text-[13px] font-bold leading-none tabular-nums">
-                {meal.entries.length > 0 ? `${formatAmount(meal.kcal, "kcal")} kcal` : ""}
-              </span>
-            </button>
+              <button
+                type="button"
+                aria-pressed={mealSelected}
+                aria-label={`Xem riêng ${meal.fullName.toLocaleLowerCase("vi-VN")}`}
+                onClick={() => onMeal(meal.slot)}
+                style={noSelect}
+                className="flex h-full min-w-0 flex-1 cursor-pointer items-center justify-between gap-2 border-0 bg-transparent p-0 text-inherit"
+              >
+                <span className="text-[11px] font-extrabold leading-none">{meal.label}</span>
+                <span className="font-display text-[13px] font-bold leading-none tabular-nums">
+                  {meal.entries.length > 0 ? `${formatAmount(meal.kcal, "kcal")} kcal` : ""}
+                </span>
+              </button>
+              {!readOnly && (
+                <Link
+                  id={`home-add-${meal.slot}`}
+                  href={`/add?meal=${meal.slot}`}
+                  onClick={() => rememberAddOpener(`home-add-${meal.slot}`)}
+                  aria-label={`Thêm vào ${meal.fullName}`}
+                  data-export="hide"
+                  data-tour={`meal-add-${meal.slot}`}
+                  className={`relative flex h-[22px] shrink-0 items-center rounded-full px-2 text-xs font-bold leading-none no-underline before:absolute before:-inset-y-[11px] before:-inset-x-1 before:content-[''] ${
+                    mealSelected ? "bg-on-accent text-cobalt" : "bg-card text-blue"
+                  }`}
+                >
+                  + Thêm
+                </Link>
+              )}
+            </div>
             {meal.entries.map((entry) => (
               <FoodRow
                 key={entry.id}
@@ -251,20 +270,11 @@ export function FoodList({
                 onSelect={() => onFood(entry.id)}
               />
             ))}
-            {meal.entries.length === 0 &&
-              (readOnly ? (
-                <p className="m-0 flex h-7 items-center border-b border-b-divider px-3 text-[13px] text-secondary lg:h-11">Chưa ăn</p>
-              ) : (
-                <Link
-                  id={`home-add-${meal.slot}`}
-                  href={`/add?meal=${meal.slot}`}
-                  onClick={() => rememberAddOpener(`home-add-${meal.slot}`)}
-                  aria-label={`Thêm vào ${meal.fullName}`}
-                  className="relative flex h-7 items-center border-b border-b-divider px-3 text-[13px] text-secondary no-underline before:absolute before:inset-x-0 before:-inset-y-2 before:content-[''] lg:h-11"
-                >
-                  Chưa ăn · <span className="ml-1 font-bold text-blue">Thêm</span>
-                </Link>
-              ))}
+            {meal.entries.length === 0 && (
+              <p className="m-0 flex h-7 items-center border-b border-b-divider px-3 text-[13px] text-secondary lg:h-11">
+                {readOnly ? "Không có món" : "Chưa ăn"}
+              </p>
+            )}
           </section>
         );
       })}
