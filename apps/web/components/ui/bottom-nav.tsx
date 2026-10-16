@@ -59,6 +59,7 @@ export function BottomNav({ currentTab, className = "" }: BottomNavProps) {
         <div className="flex justify-center items-center">
           <Link
             id="mobile-add-fab"
+            data-tour="nav-add"
             href="/add"
             onClick={() => rememberAddOpener("mobile-add-fab")}
             aria-label="Thêm món"

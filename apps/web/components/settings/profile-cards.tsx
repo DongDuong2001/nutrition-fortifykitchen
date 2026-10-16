@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { ChipGroup } from "@/components/ui/chip-group";
 import { FormRow } from "@/components/ui/form-row";
@@ -13,6 +14,9 @@ import { formatNumber } from "@/lib/format";
 import { goalOptions, parseBirthYear, validateSetupDraft } from "@/lib/onboarding";
 import { profileToDraft } from "@/lib/profile";
 import { loadSettings } from "@/lib/settings";
+import type { OnboardingFlags } from "@/lib/onboarding-flags";
+import { loadFlags, openReplay, setTipsOff, subscribeFlags } from "@/lib/onboarding-store";
+import { startTour } from "@/lib/tour-bus";
 import { getTrainingDurations } from "@/lib/training";
 import type { SexType } from "@/lib/targets";
 
@@ -187,6 +191,18 @@ export function AppCard() {
   const [language, setLanguage] = useState("Tiếng Việt");
   // "Đã bật" or "Đã tắt" from the saved reminders. Empty until mounted, so the first paint never claims "Đã bật"
   const [reminders, setReminders] = useState<string | null>(null);
+  // The tour and tips (cc-42): read after mount for the same reason
+  const router = useRouter();
+  const [flags, setFlags] = useState<OnboardingFlags | null>(null);
+  useEffect(() => {
+    setFlags(loadFlags());
+    return subscribeFlags(() => setFlags(loadFlags()));
+  }, []);
+  const replay = () => {
+    openReplay();
+    startTour();
+    router.push("/");
+  };
   useEffect(() => {
     const saved = loadSettings();
     setLanguage(saved.language === "en" ? "English" : "Tiếng Việt");
@@ -197,6 +213,30 @@ export function AppCard() {
   return (
     <Card as="section" aria-label="Ứng dụng" className="flex flex-col gap-1">
       <SectionTitle>Ứng dụng</SectionTitle>
+      <RowGroup>
+        <Row
+          icon={SETTINGS_ICONS.replay}
+          label="Xem lại hướng dẫn"
+          hint="Ghi bữa ăn đầu tiên · 1 phút"
+          onClick={replay}
+          withBorderTop={false}
+          className="min-h-[56px]"
+        >
+          {flags && !flags.replayOpened && (
+            <span className="inline-flex h-6 shrink-0 items-center rounded-full bg-blue px-2 text-xs font-bold text-on-accent">Mới</span>
+          )}
+        </Row>
+      </RowGroup>
+      <RowGroup>
+        <Row icon={SETTINGS_ICONS.tips} label="Mẹo trên từng màn hình" hint="Bật lại để xem mẹo lần đầu" showChevron={false} className="min-h-[56px]">
+          <Switch
+            checked={flags ? !flags.tipsOff : true}
+            disabled={flags === null}
+            onCheckedChange={(on) => setTipsOff(!on)}
+            aria-label="Mẹo trên từng màn hình"
+          />
+        </Row>
+      </RowGroup>
       <RowGroup>
         <Row icon={SETTINGS_ICONS.language} label="Ngôn ngữ" value={language} href="/settings/language" />
       </RowGroup>

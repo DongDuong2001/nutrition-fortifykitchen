@@ -7,6 +7,7 @@ import { rememberAddOpener } from "@/components/ui/add-opener";
 import { formatAmount } from "@/lib/format";
 import { missingMicros, portionLabel, type HomeEntry, type HomeMeal, type HomeMode } from "@/lib/home";
 import { mealFullySelected } from "@/lib/multi-select";
+import { markUsed } from "@/lib/onboarding-store";
 
 const LONG_PRESS_MS = 500;
 const MOVE_LIMIT_PX = 10;
@@ -23,7 +24,19 @@ function ShareFoodRow({ entry }: { entry: HomeEntry }) {
   );
 }
 
-function FoodRow({ entry, selected, editable, onSelect }: { entry: HomeEntry; selected: boolean; editable: boolean; onSelect: () => void }) {
+function FoodRow({
+  entry,
+  selected,
+  editable,
+  onSelect,
+  tourTarget,
+}: {
+  entry: HomeEntry;
+  selected: boolean;
+  editable: boolean;
+  onSelect: () => void;
+  tourTarget?: string;
+}) {
   const router = useRouter();
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const origin = useRef<{ x: number; y: number } | null>(null);
@@ -42,6 +55,7 @@ function FoodRow({ entry, selected, editable, onSelect }: { entry: HomeEntry; se
     <button
       type="button"
       aria-pressed={selected}
+      data-tour={tourTarget}
       aria-label={`${entry.name}, ${quantity}${missing ? ", thiếu dữ liệu vi chất" : ""}`}
       onClick={() => {
         if (suppressClick.current) {
@@ -56,6 +70,7 @@ function FoodRow({ entry, selected, editable, onSelect }: { entry: HomeEntry; se
         timer.current = setTimeout(() => {
           timer.current = null;
           suppressClick.current = true;
+          markUsed("long-press-edit");
           router.push(`/entry/${entry.id}`);
         }, LONG_PRESS_MS);
       }}
@@ -224,6 +239,7 @@ export function FoodList({
         </div>
       )}
       {meals.map((meal) => {
+        const firstEntryId = meals.find((m) => m.entries.length > 0)?.entries[0].id;
         const mealSelected = mode.kind === "meal" && mode.slot === meal.slot;
         return (
           <section key={meal.slot} aria-label={meal.fullName}>
@@ -249,10 +265,13 @@ export function FoodList({
                 <Link
                   id={`home-add-${meal.slot}`}
                   href={`/add?meal=${meal.slot}`}
-                  onClick={() => rememberAddOpener(`home-add-${meal.slot}`)}
+                  onClick={() => {
+                    markUsed("meal-add");
+                    rememberAddOpener(`home-add-${meal.slot}`);
+                  }}
                   aria-label={`Thêm vào ${meal.fullName}`}
                   data-export="hide"
-                  data-tour={`meal-add-${meal.slot}`}
+                  data-tour="meal-add"
                   className={`relative flex h-[22px] shrink-0 items-center rounded-full px-2 text-xs font-bold leading-none no-underline before:absolute before:-inset-y-[11px] before:-inset-x-1 before:content-[''] ${
                     mealSelected ? "bg-on-accent text-cobalt" : "bg-card text-blue"
                   }`}
@@ -267,6 +286,7 @@ export function FoodList({
                 entry={entry}
                 selected={mode.kind === "food" && mode.id === entry.id}
                 editable={!readOnly}
+                tourTarget={entry.id === firstEntryId ? "home-food-list" : undefined}
                 onSelect={() => onFood(entry.id)}
               />
             ))}

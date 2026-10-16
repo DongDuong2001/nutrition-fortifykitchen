@@ -1,3 +1,4 @@
+import { markUsed } from "@/lib/onboarding-store";
 import React from "react";
 import Link from "next/link";
 import { Carousel } from "@/components/ui/carousel";
@@ -26,6 +27,7 @@ export function RichCarousel() {
           <li key={id} className="w-[9.5rem] shrink-0 snap-start">
             <Link
               href={`/explore/rich/${id}`}
+              onClick={() => markUsed("rich-in")}
               className={`flex min-h-[112px] flex-col justify-between gap-3 rounded-[18px] p-4 no-underline active:scale-[0.97] motion-reduce:active:scale-100 ${tone}`}
             >
               <span className="font-display text-[26px] font-black italic leading-none">

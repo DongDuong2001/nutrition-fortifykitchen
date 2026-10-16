@@ -10,6 +10,8 @@ import os
 
 from playwright.sync_api import Browser
 
+import _seed  # noqa: F401  (cc-42: tour done, tips off in every context)
+
 # cc-28c: the Level 0 hint card ("Có huấn luyện viên? …") is a one-time card on Hôm nay. Probes written before it
 # existed start with it dismissed (the sample profile with hintSeen); cc_28c.py turns that off with `_demo.hint(False)`.
 _PROFILE = '{"sex":"male","birthYear":2003,"weightKg":65,"goal":"maintain","periodMode":false,"trainingMinutesDefault":60,"displayName":"","hintSeen":true}'

@@ -1,0 +1,51 @@
+import { loadSettings, saveSettings } from "./settings";
+import {
+  markSeenIn,
+  markUsedIn,
+  setTipsOffIn,
+  type OnboardingFlags,
+} from "./onboarding-flags";
+
+/**
+ * The tour and tip flags of the signed-in account, in its settings (lib/settings, h1t_settings_v1). Per account and
+ * per device for now: Dong to sync them through the API later (OPEN_QUESTIONS). Client only.
+ */
+
+/** A device-level switch (the probes' seed): "1" means no tour and no tips on this browser, whatever the account says. */
+export const ONBOARDING_OFF_KEY = "h1t_onboarding_off";
+
+export function onboardingDisabled(): boolean {
+  try {
+    return globalThis.localStorage?.getItem(ONBOARDING_OFF_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function loadFlags(): OnboardingFlags {
+  return loadSettings().onboarding;
+}
+
+type Listener = () => void;
+const listeners = new Set<Listener>();
+/** Called after every change of the flags (the overlay and Cài đặt re-read). Returns the unsubscribe. */
+export function subscribeFlags(listener: Listener): () => void {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
+function update(change: (flags: OnboardingFlags) => OnboardingFlags): OnboardingFlags {
+  const current = loadFlags();
+  const next = change(current);
+  if (JSON.stringify(next) === JSON.stringify(current)) return current;
+  saveSettings({ onboarding: next });
+  listeners.forEach((l) => l());
+  return next;
+}
+
+export const markTipSeen = (id: string) => update((f) => markSeenIn(f, id));
+/** A feature was used (long-press edit, meal + Thêm, tray add, compare, create food, 7/30 toggle …): its tip stops. */
+export const markUsed = (event: string) => update((f) => markUsedIn(f, event));
+export const setTipsOff = (off: boolean) => update((f) => setTipsOffIn(f, off));
+export const finishTour = () => update((f) => ({ ...f, tourDone: true }));
+export const openReplay = () => update((f) => ({ ...f, replayOpened: true }));

@@ -31,6 +31,8 @@ import {
 } from "@/lib/home";
 import type { MealSlot } from "@/lib/meal-slot";
 import { FoodList } from "./food-list";
+import { markUsed } from "@/lib/onboarding-store";
+import { emitSignal } from "@/lib/tour-bus";
 import { useCoaching } from "@/hooks/use-coaching";
 import { useSaveDisplayName } from "@/hooks/use-save-display-name";
 import { LevelExplainerSheet } from "@/components/coaching/level-explainer-sheet";
@@ -186,6 +188,7 @@ function HomeContent() {
     setMode(DAY_MODE);
     setSelectedIds(new Set());
     setSelecting(true);
+    emitSignal("select-mode");
   };
 
   const yesterdayEntries = useMemo(() => (todayIso ? dayEntries(shiftIsoDate(todayIso, -1), todayIso) : []), [todayIso, dayArchive]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -292,6 +295,7 @@ function HomeContent() {
   function confirmCopy(target: CopyTarget) {
     if (target === "keep" && !isPast) return;
     const copies = copyHomeEntries(chosen, target, `copy-${Date.now()}`, new Date().toISOString());
+    markUsed(isPast ? "copy-to-today" : "multi-select-action");
     if (isPast) {
       copyEntries(copies, pastCopyToast(copies.length));
       exitSelect();
@@ -307,6 +311,7 @@ function HomeContent() {
     // A past day is read-only: nothing moves there
     if (target === "keep" || isPast) return;
     moveEntries([...liveSelected], target, viewIso);
+    markUsed("multi-select-action");
     exitSelect();
   }
 
@@ -324,6 +329,7 @@ function HomeContent() {
             onDelete={() => {
               if (isPast) return;
               deleteEntries([...liveSelected], viewIso);
+              markUsed("multi-select-action");
               exitSelect();
             }}
             onCopyToToday={() => setTargetSheet("past")}

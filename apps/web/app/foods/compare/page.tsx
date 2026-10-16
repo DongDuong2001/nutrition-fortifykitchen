@@ -20,6 +20,7 @@ import {
   type CompareBasis,
 } from "@/lib/food-compare";
 import { MOCK_FOODS, type FoodItem } from "@/lib/mock/foods";
+import { markUsed } from "@/lib/onboarding-store";
 
 const isKnownFood = (id: string) => MOCK_FOODS.some((f) => f.id === id);
 
@@ -73,8 +74,8 @@ function CompareInner() {
                 columns={2}
                 tone="light"
                 items={[
-                  { id: "per100", label: "100 g", active: basis === "per100", onClick: () => setBasis("per100") },
-                  { id: "serving", label: "Khẩu phần", active: basis === "serving", onClick: () => setBasis("serving") },
+                  { id: "per100", label: "100 g", active: basis === "per100", onClick: () => { markUsed("compare-basis"); setBasis("per100"); } },
+                  { id: "serving", label: "Khẩu phần", active: basis === "serving", onClick: () => { markUsed("compare-basis"); setBasis("serving"); } },
                 ]}
               />
             </div>
@@ -84,11 +85,13 @@ function CompareInner() {
                 Thêm món
               </PillButton>
             )}
+            <div data-tour="compare-table">
             <CompareTable
               columns={compare.columns}
               sections={compare.sections}
               onRemove={(id) => setIds(ids.filter((x) => x !== id))}
             />
+            </div>
           </>
         ) : (
           <Card as="section" aria-labelledby="compare-empty" className="flex flex-col items-center gap-3 py-8 text-center">

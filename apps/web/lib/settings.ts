@@ -1,3 +1,4 @@
+import { DEFAULT_FLAGS, parseFlags, type OnboardingFlags } from "./onboarding-flags";
 import { SETTINGS_STORAGE_KEY, accountStorage } from "./storage-keys";
 
 export { SETTINGS_STORAGE_KEY };
@@ -19,6 +20,8 @@ export interface AppSettings {
   workoutSaltReminder: boolean;
   eveningSummaryReminder: boolean;
   eveningSummaryTime: string;
+  /** The tour and tips (cc-42): per account, kept here like levelSeen */
+  onboarding: OnboardingFlags;
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -37,6 +40,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   workoutSaltReminder: true,
   eveningSummaryReminder: false,
   eveningSummaryTime: "21:00",
+  onboarding: DEFAULT_FLAGS,
 };
 
 export type KeyValueStorage = Pick<Storage, "getItem" | "setItem">;
@@ -68,6 +72,7 @@ export function loadSettings(storage: KeyValueStorage | null = accountStorage())
       workoutSaltReminder: typeof parsed.workoutSaltReminder === "boolean" ? parsed.workoutSaltReminder : DEFAULT_SETTINGS.workoutSaltReminder,
       eveningSummaryReminder: typeof parsed.eveningSummaryReminder === "boolean" ? parsed.eveningSummaryReminder : DEFAULT_SETTINGS.eveningSummaryReminder,
       eveningSummaryTime: typeof parsed.eveningSummaryTime === "string" ? parsed.eveningSummaryTime : DEFAULT_SETTINGS.eveningSummaryTime,
+      onboarding: parseFlags(parsed.onboarding),
     };
   } catch {
     return { ...DEFAULT_SETTINGS };

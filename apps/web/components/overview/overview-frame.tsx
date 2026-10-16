@@ -4,6 +4,7 @@ import React, { Suspense, createContext, useContext, useMemo } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { Period } from "@/lib/period";
+import { markUsed } from "@/lib/onboarding-store";
 import { AppHeader } from "@/components/ui/app-header";
 import { AppShell } from "@/components/ui/app-shell";
 import { useDiary } from "@/lib/diary-store";
@@ -84,7 +85,7 @@ export function PeriodControl({
     </button>
   );
   const lengthGroup = (
-    <div role="group" aria-label="Độ dài kỳ" className="inline-flex shrink-0 rounded-full border border-card-border bg-card p-0.5">
+    <div role="group" aria-label="Độ dài kỳ" data-tour="trends-range" className="inline-flex shrink-0 rounded-full border border-card-border bg-card p-0.5">
       {([7, 30] as const).map((n) => {
         const isActive = n === length;
         return (
@@ -93,6 +94,7 @@ export function PeriodControl({
             href={`${pathname}${periodQuery(n, 0)}`}
             replace
             scroll={false}
+            onClick={() => markUsed("range-toggle")}
             aria-current={isActive ? "true" : "false"}
             className={`inline-flex min-h-[44px] items-center justify-center rounded-full text-sm font-bold no-underline transition-colors active:scale-[0.97] motion-reduce:active:scale-100 ${
               compact ? "min-w-[44px] px-2" : "px-4"

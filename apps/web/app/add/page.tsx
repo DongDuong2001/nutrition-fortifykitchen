@@ -22,6 +22,9 @@ import { CreateFoodButton } from "@/components/foods/create-food-button";
 import { isCategoryFilter } from "@/lib/food-categories";
 import { resolveFavourites } from "@/lib/favourites";
 import { TrayBar, TrayReviewSheet } from "@/components/add/add-tray";
+import { markUsed } from "@/lib/onboarding-store";
+import { TOUR_STEPS } from "@/lib/tour";
+import { readTour, subscribeTour, tourAction } from "@/lib/tour-bus";
 import { canAddTray, putInTray, removeFromTray, setTrayPortion, toggleTray, trayTotals, type TrayItem } from "@/lib/tray";
 
 import {
@@ -93,6 +96,7 @@ function AddFoodInner() {
     setSelectedFood(food);
     setGramsInput(String(s.grams));
     setSelectedServingLabel(s.label);
+    tourAction("food-picked");
   }, []);
 
   // Current meal calories map for MealSwitcher
@@ -117,6 +121,16 @@ function AddFoodInner() {
   // Search, filter and list: the same state as Khám phá
   const { query, setQuery, filter, setFilter, list, filterItems, categoryName, isFavouriteFood, similarFoods, noFavourites, catalogError, retryCatalog } =
     useFoodBrowse();
+
+  // The tour's search step starts with "phở" typed, so the results are already there to tap
+  useEffect(() => {
+    const apply = () => {
+      const tour = readTour();
+      if (tour.status === "step" && TOUR_STEPS[tour.index].id === "search") setQuery("phở");
+    };
+    apply();
+    return subscribeTour(apply);
+  }, [setQuery]);
 
   // Recents are foods with the serving they were logged with: tap = add with that serving, chevron = portion panel
   const recentShortcuts = useMemo<RecentShortcut[]>(
@@ -164,7 +178,10 @@ function AddFoodInner() {
     if (!selectedFood || parsedGrams <= 0 || isSubmitting || mealSlot === null) return;
     setIsSubmitting(true);
     try {
-      if (await addFoodEntry(selectedFood, parsedGrams, mealSlot, selectedServingLabel)) router.push("/");
+      if (await addFoodEntry(selectedFood, parsedGrams, mealSlot, selectedServingLabel)) {
+        tourAction("portion-confirmed");
+        router.push("/");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -173,6 +190,7 @@ function AddFoodInner() {
   // Lưu & chọn tiếp: the food with the chosen portion goes in the tray and the search stays as it was
   const handleAddAndContinue = () => {
     if (!selectedFood || parsedGrams <= 0 || mealSlot === null) return;
+    markUsed("tray-add");
     setTray((t) => putInTray(t, selectedFood, parsedGrams, selectedServingLabel));
     setSelectedFood(null);
     setGramsInput("");
@@ -310,7 +328,13 @@ function AddFoodInner() {
     selectedId: selectedFood?.id,
     onPick: pickFromList,
     onOpen: favouritesOnly ? pickFood : undefined,
-    tray: { ids: tray.map((t) => t.food.id), onToggle: (food: FoodItem) => setTray((t) => toggleTray(t, food)) },
+    tray: {
+      ids: tray.map((t) => t.food.id),
+      onToggle: (food: FoodItem) => {
+        markUsed("tray-add");
+        setTray((t) => toggleTray(t, food));
+      },
+    },
   };
 
   return (
@@ -385,6 +409,7 @@ function AddFoodInner() {
 
                 {/* Results: grouped or flat */}
                 <FoodList
+                  dataTour="add-results"
                   list={list}
                   {...listPick}
                   getMeta={getFoodMeta}
@@ -507,6 +532,7 @@ function AddFoodInner() {
             {showShortcuts && shortcuts}
 
             <FoodList
+              dataTour="add-results"
               list={list}
               {...listPick}
               getMeta={getFoodMeta}

@@ -50,8 +50,8 @@ export function NutrientColumn({
     >
       {/* Rows are 34 px where there is room and shrink (to 28 px) so the column fits a short screen; it scrolls when it cannot */}
       <Scroll share={share}>
-        {groups.map((group) => (
-          <section key={group.title} aria-label={group.title} className="flex flex-col" style={share ? undefined : { flex: `${group.ids.length} 0 auto` }}>
+        {groups.map((group, groupIndex) => (
+          <section key={group.title} aria-label={group.title} data-tour={groupIndex === 0 ? "nutrient-column" : undefined} className="flex flex-col" style={share ? undefined : { flex: `${group.ids.length} 0 auto` }}>
             <h3 data-snap-row className={`m-0 flex h-[22px] flex-none snap-start items-center bg-paper-dark px-3 text-[11px] font-extrabold leading-none text-text ${share ? "" : "lg:h-11"}`}>
               {group.title}
             </h3>

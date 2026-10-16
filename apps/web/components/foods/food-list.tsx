@@ -44,6 +44,8 @@ export interface FoodListProps {
   /** Shown after the foods, for example the create-food button. */
   footer?: React.ReactNode;
   className?: string;
+  /** data-tour value of the list, for the tour and tips. */
+  dataTour?: string;
 }
 
 /**
@@ -68,6 +70,7 @@ export function FoodList({
   empty,
   footer,
   className = "",
+  dataTour,
 }: FoodListProps) {
   const firstHeaderKey = list.grouped ? list.groups[0]?.key : undefined;
 
@@ -165,7 +168,7 @@ export function FoodList({
   const cardClass = "rounded-[18px] border border-card-border bg-card";
 
   return (
-    <div className={`flex flex-col gap-3 ${className}`}>
+    <div data-tour={dataTour} className={`flex flex-col gap-3 ${className}`}>
       {list.foods.length === 0 ? (
         empty
       ) : list.grouped ? (

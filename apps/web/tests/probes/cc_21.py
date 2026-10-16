@@ -17,6 +17,7 @@ import re
 import sys
 
 from playwright.sync_api import sync_playwright
+import _seed  # noqa: F401  (cc-42: tour done, tips off)
 
 BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3101")
 SIZES = [("390", {"width": 390, "height": 844}), ("1280", {"width": 1280, "height": 800})]

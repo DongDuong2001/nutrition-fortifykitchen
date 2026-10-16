@@ -97,7 +97,7 @@ export function MicrosTab() {
               </p>
             }
           />
-          <div role="img" aria-label={`${board.achieved} trên ${board.total} vi chất đạt mục tiêu`}>
+          <div data-tour="trends-summary" role="img" aria-label={`${board.achieved} trên ${board.total} vi chất đạt mục tiêu`}>
             <Segments filled={board.segments} />
           </div>
           <NutrientGrid id="mi-grid" squares={board.squares} selected={selected} onSelect={(i) => setSelectedKey(board.squares[i]?.key ?? null)} detailLink />

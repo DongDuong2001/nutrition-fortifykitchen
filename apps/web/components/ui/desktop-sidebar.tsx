@@ -21,6 +21,7 @@ export function DesktopSidebar({ currentTab }: { currentTab?: NavTab }) {
       </div>
       <Link
         id="desktop-add-btn"
+        data-tour="nav-add"
         href="/add"
         onClick={() => rememberAddOpener("desktop-add-btn")}
         className="no-underline flex h-12 items-center justify-center gap-2 rounded-full bg-blue text-on-accent text-[15px] font-bold hover:bg-blue/90 active:scale-[0.97] motion-reduce:active:scale-100 transition-all"

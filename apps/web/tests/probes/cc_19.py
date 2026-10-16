@@ -15,6 +15,7 @@ import os
 import sys
 
 from playwright.sync_api import sync_playwright
+import _seed  # noqa: F401  (cc-42: tour done, tips off)
 
 BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3101")
 SHOTS = os.path.join(os.path.dirname(__file__), "..", "..", ".screenshots")

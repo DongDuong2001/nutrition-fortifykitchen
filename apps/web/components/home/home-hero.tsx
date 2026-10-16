@@ -52,6 +52,7 @@ export function HomeHero({
   return (
     <section
       aria-label="Tổng kcal và dinh dưỡng đa lượng"
+      data-tour="home-hero"
       className={`mx-3 mt-2 flex flex-none flex-col gap-1 rounded-2xl border-2 bg-surface-dark px-3.5 pt-2 pb-2.5 text-on-dark ${
         selected ? "border-sky" : "border-surface-dark"
       }`}

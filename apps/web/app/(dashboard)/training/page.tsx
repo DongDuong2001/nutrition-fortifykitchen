@@ -22,6 +22,7 @@ import { SodiumProgressCard } from "@/components/training/sodium-progress-card";
 import { PhaseChecklist } from "@/components/training/phase-checklist";
 import { RestDayCard } from "@/components/training/rest-day-card";
 import { TrainingTipBanner } from "@/components/training/training-tip-banner";
+import { markUsed } from "@/lib/onboarding-store";
 
 export default function TrainingPage() {
   return (
@@ -107,6 +108,7 @@ function TrainingContent() {
   };
 
   const handleSelectDuration = (id: string, minutes: number) => {
+    markUsed("training-minutes");
     if (isPast) return;
     setSelectedDuration(id);
     writeDay(todayIso, { minutes, ticked });

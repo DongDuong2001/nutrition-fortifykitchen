@@ -10,6 +10,19 @@ function Svg({ children }: { children: React.ReactNode }) {
 }
 
 export const SETTINGS_ICONS = {
+  replay: (
+    <Svg>
+      <path d="M4 12a8 8 0 1 0 2.6-5.9" />
+      <path d="M4 4v4.5h4.5" />
+      <path d="M10.5 9.5v5l4-2.5z" />
+    </Svg>
+  ),
+  tips: (
+    <Svg>
+      <path d="M9 18h6M10 21h4" />
+      <path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z" />
+    </Svg>
+  ),
   target: (
     <Svg>
       <circle cx="12" cy="12" r="9" />

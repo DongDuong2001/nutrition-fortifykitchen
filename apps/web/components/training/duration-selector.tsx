@@ -33,7 +33,7 @@ export function DurationSelector({
   }));
 
   return (
-    <div role="group" aria-label="Thời gian tập" className={`${variant === "desktop" ? "w-[460px] max-w-full" : "w-full"} ${className}`}>
+    <div role="group" aria-label="Thời gian tập" data-tour="training-minutes" className={`${variant === "desktop" ? "w-[460px] max-w-full" : "w-full"} ${className}`}>
       <ChipGroup
         items={items}
         columns={variant === "desktop" ? 5 : 3}

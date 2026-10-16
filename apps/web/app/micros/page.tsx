@@ -14,6 +14,7 @@ import { goalName } from "@/lib/onboarding";
 import { getTodayIsoVN } from "@/lib/date";
 import { pastDayData, useDiary } from "@/lib/diary-store";
 import { viewedIsoDate } from "@/lib/day-history";
+import { markUsed } from "@/lib/onboarding-store";
 
 interface GroupConfig {
   key: NutrientGroup;
@@ -225,6 +226,7 @@ function MicrosContent() {
   };
 
   const scrollToGroup = (group: NutrientGroup) => {
+    markUsed("micros-filter");
     setActiveGroup(group);
     // Ensure the group is opened when jumped to
     setOpenGroups((prev) => ({
@@ -445,6 +447,7 @@ function MicrosContent() {
           >
             <div
               ref={chipsContainerRef}
+              data-tour="micros-groups"
               className="w-full max-w-[560px] mx-auto px-4 py-2 overflow-x-auto scrollbar-none flex items-center gap-2"
             >
               {GROUPS_CONFIG.map((group) => {

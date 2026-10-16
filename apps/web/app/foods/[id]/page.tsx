@@ -14,6 +14,7 @@ import { categoryLabel, categoryOf } from "@/lib/food-categories";
 import { formatAmount } from "@/lib/format";
 import { foodSourceLabel } from "@/lib/food-meta";
 import { isManualFood, isProxy } from "@/lib/food-source";
+import { markUsed } from "@/lib/onboarding-store";
 import { SourceSheet } from "@/components/foods/source-sheet";
 import { FoodMicros, GoodSources } from "@/components/foods/food-micros";
 import { ComparePicker } from "@/components/foods/compare-picker";
@@ -84,6 +85,7 @@ function FoodDetailInner() {
   const saved = food ? isFavourite(food.id) : false;
   const handleToggleFavourite = () => {
     if (!food) return;
+    markUsed("favourite");
     toggleFavourite(food);
     setFavouriteToast({ message: saved ? "Đã bỏ khỏi yêu thích" : "Đã thêm vào yêu thích" });
   };
@@ -190,6 +192,7 @@ function FoodDetailInner() {
           <button
             type="button"
             onClick={handleToggleFavourite}
+            data-tour="food-favourite"
             aria-pressed={saved}
             aria-label={saved ? "Bỏ yêu thích" : "Thêm vào yêu thích"}
             className={`${HEADER_ICON_BUTTON} -mr-2`}

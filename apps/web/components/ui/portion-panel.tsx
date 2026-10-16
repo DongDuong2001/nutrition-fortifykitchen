@@ -91,6 +91,7 @@ export function PortionPanel({
   return (
     <div
       data-align-container="portion-panel"
+      data-tour="portion-panel"
       className={`rounded-[18px] p-4 flex flex-col gap-3 transition-colors ${
         isDark
           ? "bg-ink text-on-dark shadow-lg"
@@ -230,6 +231,7 @@ export function PortionPanel({
         <button
           type="button"
           onClick={onAdd}
+          data-tour="portion-add"
           disabled={isSubmitting || parsedGrams <= 0 || mealSlot === null || !canLog}
           className={`${
             onAddAndContinue ? "flex-1" : "w-full"

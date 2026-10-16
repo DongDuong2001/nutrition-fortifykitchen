@@ -1,5 +1,6 @@
 "use client";
 
+import { markUsed } from "@/lib/onboarding-store";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { AppHeader } from "@/components/ui/app-header";
@@ -46,6 +47,7 @@ export default function LeaderboardPage() {
   const rest = data.ranks.slice(3);
 
   const handleToggleOptIn = (checked: boolean) => {
+    markUsed("leaderboard-optin");
     setLeaderboardOptIn(checked);
     setOptedIn(checked);
   };
@@ -74,7 +76,7 @@ export default function LeaderboardPage() {
         />
 
         <Card as="section" aria-labelledby="lb-optin" className="flex flex-col gap-2">
-          <div className="flex min-h-11 items-center justify-between gap-3">
+          <div data-tour="leaderboard-join" className="flex min-h-11 items-center justify-between gap-3">
             <div className="flex min-w-0 flex-col">
               <SectionTitle as="h2" id="lb-optin">
                 Tham gia Bảng xếp hạng
