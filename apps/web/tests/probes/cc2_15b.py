@@ -142,7 +142,7 @@ def run(browser, name, size):
     # The other rows (đạm, chất béo, tinh bột, muối) are in Cài đặt › Mục tiêu mỗi ngày (cc_16 checks them).
     energy = dict(SUMMARY_ROWS)["Năng lượng"]
     check(f"Mục tiêu của bạn: {energy} mỗi ngày" in t, f"{where} summary: the energy target {energy}")
-    check("Thiết lập xong" in t and "Thêm món và chọn khẩu phần" in t and "Biết chất nào còn thiếu" in t, f"{where} summary: the board and its three steps")
+    check("thiết lập xong" in t.lower() and "thêm món và chọn khẩu phần" in t.lower() and "biết chất nào còn thiếu" in t.lower(), f"{where} summary: the board and its three steps")
     cta = pg.get_by_role("button", name="Thêm bữa đầu tiên")
     check(cta.count() == 1, f"{where} summary: one primary button Thêm bữa đầu tiên")
     check(pg.get_by_role("link", name="Để sau").count() == 1, f"{where} summary: Để sau stays")

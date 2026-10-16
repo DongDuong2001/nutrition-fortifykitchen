@@ -29,11 +29,13 @@ def squash(t):
 
 def add_ingredient(pg, search, name):
     pg.get_by_role("button", name="+ Thêm nguyên liệu").click()
-    dlg = pg.get_by_role("dialog", name="Thêm nguyên liệu")
+    dlg = pg.get_by_role("dialog", name="Chọn nguyên liệu")  # cc-42: a multi-select picker
     dlg.wait_for(state="visible", timeout=4000)
     dlg.get_by_label("Tìm món").fill(search)
     pg.wait_for_timeout(400)
     dlg.locator("[data-food-row]").filter(has_text=re.compile(rf"^{re.escape(name)}")).first.click()
+    pg.wait_for_timeout(200)
+    dlg.get_by_role("button", name="Thêm vào món").click()  # the row ticks it; the bar adds it to the dish
     pg.wait_for_timeout(200)
 
 
@@ -99,7 +101,7 @@ def run(browser, size, tag):
     card = pg.locator("[data-recipe-card]")
     t = squash(card.inner_text())
     check("Mỗi phần · 150 g" in t, f"{tag}: card shows the serving weight from the raw total ({t[:60]})")
-    check(re.search(r"Có dữ liệu \d+/22 vi chất", t) is not None, f"{tag}: card shows the micros coverage")
+    check(re.search(r"Đủ dữ liệu \d+/22 vi chất", t) is not None, f"{tag}: card shows the micros coverage")
     check(re.search(r"\d[\d.]*\s*kcal", t) is not None and "Đạm" in t and "Tinh bột" in t and "Chất béo" in t, f"{tag}: card shows kcal and the three macros ({t})")
     pg.locator("#rb-cooked").fill("240")
     pg.wait_for_timeout(200)

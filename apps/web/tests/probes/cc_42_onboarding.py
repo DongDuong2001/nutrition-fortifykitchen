@@ -76,6 +76,18 @@ def shot(pg, name):
     pg.screenshot(path=str(SHOTS / f"cc-42-{name}.png"))
 
 
+def targets_ok(pg, selector, label):
+    """Every button and link inside `selector` is at least 44 px high (the + circle's 36 px disc sits in a 44 px button)."""
+    small = pg.evaluate(
+        """(sel) => [...document.querySelectorAll(sel + ' button, ' + sel + ' a, ' + sel + ' input')]
+          .filter(e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; })
+          .filter(e => { const l = e.closest('label'); const h = Math.max(e.getBoundingClientRect().height, l ? l.getBoundingClientRect().height : 0); return h < 43.5; })
+          .map(e => (e.getAttribute('aria-label') || e.textContent || e.tagName).trim().slice(0, 30))""",
+        selector,
+    )
+    check(not small, f"{label}: every target is 44 px or more ({small})")
+
+
 def overlap_free(pg, label):
     """The card never overlaps the highlighted hole, and the arrow side matches."""
     box = pg.evaluate(
@@ -106,6 +118,8 @@ def tour_phone(browser):
     check(card(pg).get_attribute("aria-modal") == "true" and card(pg).get_attribute("role") == "dialog", "step 1: role dialog, aria-modal")
     check(pg.evaluate("() => document.activeElement && document.activeElement.hasAttribute('data-onboarding-card')"), "step 1: focus is on the card")
     overlap_free(pg, "step 1")
+    targets_ok(pg, "[data-onboarding-card]", "step 1 card")
+    check(pg.locator("h1:visible").count() == 1, "Hôm nay with the tour has one h1")
     shot(pg, "tour-1-390")
     # The scrim blocks taps outside the hole: a tap on the nav Cài đặt does nothing
     pg.mouse.click(350, 810)
@@ -337,6 +351,7 @@ def tray(browser):
     pg.wait_for_timeout(200)
     check(pg.locator("[data-tray-bar]:visible").count() == 1, "tray: survives a query")
     field.fill("")
+    targets_ok(pg, "[data-tray-bar]", "tray bar")
     shot(pg, "tray-390")
     pg.get_by_role("button", name="Xem lại").click()
     pg.wait_for_timeout(300)
@@ -346,6 +361,7 @@ def tray(browser):
     check(sheet.get_by_text("Tổng bữa ăn").count() == 1 and "đạm" in sheet.inner_text() and "tinh bột" in sheet.inner_text() and "chất béo" in sheet.inner_text(), "review: totals")
     check(pg.get_by_role("button", name="Thêm 3 món vào Bữa trưa").count() == 1 and pg.get_by_role("button", name="Chọn thêm món").count() == 1, "review: Thêm 3 món vào Bữa trưa and Chọn thêm món")
     check(pg.get_by_role("button", name="Thêm vào Bữa trưa, đổi bữa").count() == 1, "review: the meal chip")
+    targets_ok(pg, "[data-tray-review]", "tray review")
     shot(pg, "tray-review-390")
     sheet.get_by_role("button", name="Bỏ khỏi khay").first.click()
     pg.wait_for_timeout(200)

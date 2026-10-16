@@ -278,11 +278,13 @@ def main():
             page.wait_for_timeout(500)
             for term, name in [("gạo lứt", "Cơm gạo lứt"), ("trứng", "Trứng gà")]:
                 page.get_by_role("button", name="+ Thêm nguyên liệu").click()
-                dialog = page.get_by_role("dialog", name="Thêm nguyên liệu")
+                dialog = page.get_by_role("dialog", name="Chọn nguyên liệu")  # cc-42: multi-select picker
                 dialog.wait_for(state="visible", timeout=4000)
                 dialog.get_by_label("Tìm món").fill(term)
                 page.wait_for_timeout(400)
                 dialog.locator("[data-food-row]").filter(has_text=name).first.click()
+                page.wait_for_timeout(200)
+                dialog.get_by_role("button", name="Thêm vào món").click()
                 page.wait_for_timeout(200)
             res = check_align_groups(page, "recipe-row")
             pairs = res["pairs"].get("recipe-row", 0)
@@ -291,6 +293,23 @@ def main():
                 total_errors.extend(res["errors"] or [f"recipe-row: {pairs} pairs"])
             else:
                 print(f"[PASS] /foods/new recipe @ {vp['name']} [recipe-row] ({pairs} pairs)")
+
+        # cc-42: the tray review sheet on /add (the total, the macro line, the meal row and the buttons share edges)
+        for vp in VIEWPORTS:
+            page.set_viewport_size({"width": vp["width"], "height": vp["height"]})
+            page.goto(f"{BASE_URL}/add?meal=lunch", wait_until="networkidle")
+            page.wait_for_timeout(500)
+            for i in range(3):
+                page.locator("[data-tray-toggle]:visible").nth(i).click()
+            page.get_by_role("button", name="Xem lại").locator("visible=true").first.click()
+            page.locator('[data-align-group="tray-review"]:visible').nth(1).wait_for(timeout=5000)
+            res = check_align_groups(page, "tray-review")
+            pairs = res["pairs"].get("tray-review", 0)
+            if res["errors"] or pairs < 1:
+                print(f"[FAIL] /add tray review @ {vp['name']} [tray-review]: pairs {pairs} {res['errors']}")
+                total_errors.extend(res["errors"] or [f"tray-review: {pairs} pairs"])
+            else:
+                print(f"[PASS] /add tray review @ {vp['name']} [tray-review] ({pairs} pairs)")
 
         # cc-27a: select mode on Hôm nay (the action bar's rows, the target sheet's radios); real pairs
         for vp in VIEWPORTS:
