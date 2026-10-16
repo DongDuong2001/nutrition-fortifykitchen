@@ -30,7 +30,7 @@ SCREENS = [
     ("terms", "/terms"),
 ]
 HYDRATION = re.compile(r"hydrat|React error #(418|419|423|425)|did not match", re.I)
-BRAND_CAPS = {"H1T", "H1T MICRO", "H1T SYSTEM"}
+BRAND_CAPS = {"H1T", "H1T MICRO", "H1T SYSTEM", "LEVEL"}  # LEVEL: the word on the Level badge (the one allowed all-caps word)
 problems, notes = [], []
 
 
@@ -79,7 +79,8 @@ AUDIT_JS = """() => {
       const inHeading = !!el.closest('h1, h2, h3');
       const letters = own.replace(/[^A-Za-zÀ-ỹ]/g, '');
       const caps = (s.textTransform === 'uppercase') || (letters.length >= 4 && own === own.toLocaleUpperCase('vi-VN') && own !== own.toLocaleLowerCase('vi-VN'));
-      if (caps && !inHeading && !el.closest('code')) out.caps.push(label(el));
+      // the word LEVEL on the Level badge is the one allowed all-caps word outside headings
+      if (caps && !inHeading && !el.closest('code') && !el.closest('[data-level-badge]')) out.caps.push(label(el));
       if (s.textOverflow === 'ellipsis' && el.scrollWidth > el.clientWidth + 1) out.ellipsis.push(label(el));
     }
     if (el.matches('a[href], button, select, input:not([type=hidden]), textarea, [role=button], [role=switch]')) {
