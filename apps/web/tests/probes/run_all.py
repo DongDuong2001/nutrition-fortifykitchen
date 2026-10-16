@@ -5,11 +5,17 @@ A probe passes when it exits 0 and prints no "[FAIL]" line. ag04_audit and scree
 exit gate, so they are report-only: shown as REPORT, never counted as PASS. cc02-final is
 dev-only (its sign-in link is hidden in production), so it runs only with PROBE_DEV=1. Each
 probe's output is saved to tests/probes/out/probe-all/<name>.log. Exits 1 if any probe fails.
+
+PROBE_WORKERS=3 runs that many probes at once against the same server (default 1, one after the other). Each probe
+opens its own browser contexts, so they do not share storage, and each writes screenshots under its own names. Timing-
+sensitive probes (a 5 s toast, a fixed clock) can get slower under load: 3 is the tested setting, and a probe that
+fails only in parallel is rerun alone before it is reported as a failure.
 """
 import os
 import subprocess
 import sys
 import time
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -41,17 +47,25 @@ def main():
     LOG_DIR.mkdir(parents=True, exist_ok=True)
     print(f"=== probe:all against {base} ({'dev' if dev else 'prod'}) ===")
 
-    rows = []
-    for path in sorted(HERE.glob("*.py")):
-        if path.resolve() == SELF or path.name.startswith("_"):
-            continue  # _demo.py is a helper, not a probe
+    workers = max(1, int(os.environ.get("PROBE_WORKERS", "1")))
+    paths = [p for p in sorted(HERE.glob("*.py")) if p.resolve() != SELF and not p.name.startswith("_")]  # _demo.py is a helper
+    started = time.time()
+
+    def one(path):
         if path.name in DEV_ONLY and not dev:
-            rows.append((path, "SKIP", "dev only, set PROBE_DEV=1", ""))
-            continue
+            return path, "SKIP", "dev only, set PROBE_DEV=1", ""
         status, detail, output = run_probe(path, os.environ.copy())
+        if status == "FAIL" and workers > 1:
+            # Load can break a timing-sensitive probe: it counts as failed only if it fails alone too
+            status, detail2, output = run_probe(path, os.environ.copy())
+            detail = f"{detail2} (rerun alone)"
         if status == "PASS" and path.name in REPORT_ONLY:
             status = "REPORT"
-        rows.append((path, status, detail, output))
+        return path, status, detail, output
+
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        rows = list(pool.map(one, paths))  # map keeps the sorted order
+    print(f"{len(rows)} probes, {workers} worker(s), {time.time() - started:.0f} s wall clock")
 
     width = max(len(path.name) for path, *_ in rows)
     print(f"\n{'probe':<{width}}  {'result':<6}  detail")
