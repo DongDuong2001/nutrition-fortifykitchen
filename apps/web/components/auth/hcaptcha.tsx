@@ -29,6 +29,11 @@ declare global {
 export function HCaptcha({ onVerify, onExpire, className = "" }: HCaptchaProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
+  const onVerifyRef = useRef(onVerify);
+  const onExpireRef = useRef(onExpire);
+  onVerifyRef.current = onVerify;
+  onExpireRef.current = onExpire;
+
   const siteKey = process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY || "";
 
   useEffect(() => {
@@ -41,10 +46,10 @@ export function HCaptcha({ onVerify, onExpire, className = "" }: HCaptchaProps) 
         const id = window.hcaptcha.render(containerRef.current, {
           sitekey: siteKey,
           callback: (token: string) => {
-            if (mounted) onVerify(token);
+            if (mounted) onVerifyRef.current(token);
           },
           "expired-callback": () => {
-            if (mounted && onExpire) onExpire();
+            if (mounted && onExpireRef.current) onExpireRef.current();
           },
         });
         widgetIdRef.current = id;
@@ -87,7 +92,7 @@ export function HCaptcha({ onVerify, onExpire, className = "" }: HCaptchaProps) 
         widgetIdRef.current = null;
       }
     };
-  }, [siteKey, onVerify, onExpire]);
+  }, [siteKey]);
 
   if (!siteKey) {
     return null;
