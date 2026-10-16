@@ -5,7 +5,7 @@ Production build, demo mode, 390x844 and 1440x900.
   the amber notice and the rows Nguồn, Mã món gốc, Có dữ liệu, Độ khớp; "Xem tất cả nguồn dữ liệu" links to
   /settings/data-sources; Đóng and Esc close and focus returns to the source button.
 - A USDA food: no tag, no notice; Mã món gốc is a link to FoodData Central in a new tab (rel noopener).
-- /add: the tag per row (USDA, VN, Ước tính, Của tôi) shows on search results only.
+- /add: the tag per row (USDA, Nhãn, VN, Ước tính, Của tôi, Chưa rõ) shows on search results only.
 Run with: ALIGN_BASE_URL=http://localhost:3104 npm run probe -- tests/probes/cc_27d.py
 """
 import os
@@ -95,7 +95,7 @@ def run(browser, size, tag):
     pg.goto(BASE + "/add?meal=snack", wait_until="networkidle")
     pg.wait_for_timeout(500)
     root = pg.locator('[role="dialog"]:visible').first
-    tags_before = root.locator("[data-food-row] >> text=/^(USDA|VN|Ước tính|Của tôi)$/").count()
+    tags_before = root.locator("[data-food-row] >> text=/^(USDA|Nhãn|VN|Ước tính|Của tôi|Chưa rõ)$/").count()
     check(tags_before == 0, f"{tag} /add: no tags on the grouped list ({tags_before})")
     field = root.get_by_label("Tìm món")
     field.fill("bún bò")

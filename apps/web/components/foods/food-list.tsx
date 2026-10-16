@@ -32,7 +32,7 @@ export interface FoodListProps {
   showCategory?: boolean;
   /** Grouped rows show a small heart after the name for saved favourites. */
   isFavourite?: (food: FoodItem) => boolean;
-  /** Search results: a small tag on each row says where the numbers come from (USDA, VN, Ước tính, Của tôi). */
+  /** Search results: a small tag on each row says where the numbers come from (USDA, Nhãn, VN, Ước tính, Của tôi, Chưa rõ). */
   showSourceTag?: boolean;
   /** Shown when the list has no foods. */
   empty: React.ReactNode;

@@ -26,6 +26,33 @@ describe("food source helpers", () => {
     expect(searchTag({ source: "USDA", match: "close" })).toEqual({ label: "USDA", warning: false });
   });
 
+  it("reads every database code the catalogue can carry", () => {
+    // usda*: any USDA database (usda_sr_legacy, usda_foundation, usda_fndds, the mock "USDA")
+    for (const source of ["USDA", "usda", "usda_sr_legacy", "usda_foundation", "usda_fndds"]) {
+      expect(searchTag({ source })).toEqual({ label: "USDA", warning: false });
+    }
+    expect(searchTag({ source: "label" })).toEqual({ label: "Nhãn", warning: false });
+    expect(searchTag({ source: "VN FCT" })).toEqual({ label: "VN", warning: false });
+    expect(searchTag({ source: "vn_table" })).toEqual({ label: "VN", warning: false });
+    expect(searchTag({ source: "community" })).toEqual({ label: "Ước tính", warning: true });
+    expect(searchTag({ source: "user" })).toEqual({ label: "Của tôi", warning: false });
+  });
+
+  it("says Chưa rõ for a source it does not know, or none", () => {
+    expect(searchTag({ source: "literature" })).toEqual({ label: "Chưa rõ", warning: false });
+    expect(searchTag({ source: "asean" })).toEqual({ label: "Chưa rõ", warning: false });
+    expect(searchTag({ source: "" })).toEqual({ label: "Chưa rõ", warning: false });
+    expect(searchTag({})).toEqual({ label: "Chưa rõ", warning: false });
+  });
+
+  it("a proxy says Ước tính whatever its source, and match decides before the source", () => {
+    for (const source of ["usda_sr_legacy", "label", "VN FCT", "community", "user", "literature", undefined]) {
+      expect(searchTag({ source, match: "proxy" })).toEqual({ label: "Ước tính", warning: true });
+    }
+    expect(searchTag({ source: "label", match: "close" })).toEqual({ label: "Nhãn", warning: false });
+    expect(searchTag({ source: "community", match: "exact" })).toEqual({ label: "Ước tính", warning: true });
+  });
+
   it("counts only the counted micros with a number (0 counts, null and missing do not)", () => {
     const n: Record<string, number | null> = { energy: 100, protein: 3, calcium: 0, iron: null, b12: 1.2 };
     expect(microCoverage({ nutrients: n })).toEqual({ known: 2, total: 22 });

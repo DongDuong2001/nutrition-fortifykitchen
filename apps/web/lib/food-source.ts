@@ -27,12 +27,22 @@ export function isProxy(food: Pick<FoodItem, "match">): boolean {
   return matchOf(food) === "proxy";
 }
 
-/** The small tag of an /add search result: a proxy says Ước tính whatever its database. */
-export function searchTag(food: Pick<FoodItem, "match" | "source">): { label: "USDA" | "VN" | "Ước tính" | "Của tôi"; warning: boolean } {
+export type SearchTagLabel = "USDA" | "Nhãn" | "VN" | "Ước tính" | "Của tôi" | "Chưa rõ";
+
+/**
+ * The small tag of an /add search result. A proxy says Ước tính whatever its database. Otherwise the source decides:
+ * usda* is USDA, label is Nhãn, the Vietnamese table is VN, community (numbers from a shared database, not checked
+ * against the pack) is Ước tính, user is Của tôi. A source it does not know, or none, says Chưa rõ.
+ */
+export function searchTag(food: Pick<FoodItem, "match"> & { source?: string | null }): { label: SearchTagLabel; warning: boolean } {
   if (isProxy(food)) return { label: "Ước tính", warning: true };
-  if (food.source === "user") return { label: "Của tôi", warning: false };
-  if (food.source === "VN FCT") return { label: "VN", warning: false };
-  return { label: "USDA", warning: false };
+  const source = (food.source ?? "").trim().toLowerCase().replace(/[\s_]+/g, "-");
+  if (source.startsWith("usda")) return { label: "USDA", warning: false };
+  if (source === "label") return { label: "Nhãn", warning: false };
+  if (source === "vn-fct" || source === "vn-table") return { label: "VN", warning: false };
+  if (source === "community") return { label: "Ước tính", warning: true };
+  if (source === "user") return { label: "Của tôi", warning: false };
+  return { label: "Chưa rõ", warning: false };
 }
 
 /** How many of the 22 counted micros the food has a value for. An unknown (null or missing) is not counted. */
