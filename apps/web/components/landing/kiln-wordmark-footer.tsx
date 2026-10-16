@@ -302,25 +302,25 @@ export type KilnWordmarkFooterProps = {
 
 const DEFAULT_NAV: KilnLink[][] = [
   [
-    { label: "Hôm nay", href: "/" },
-    { label: "22 Vi chất", href: "/micros" },
-    { label: "Tổng quan", href: "/trends" },
+    { label: "Tính năng cốt lõi", href: "#features" },
+    { label: "Đối tượng phù hợp", href: "#audiences" },
+    { label: "Quy trình 3 bước", href: "#how-it-works" },
   ],
   [
-    { label: "Mục tiêu", href: "/settings/targets" },
-    { label: "So sánh món", href: "/foods/compare" },
-    { label: "Nguồn dữ liệu", href: "/settings/data-sources" },
+    { label: "Minh bạch số liệu", href: "#transparency" },
+    { label: "Đăng ký tài khoản", href: "/signup" },
+    { label: "Đăng nhập", href: "/signin" },
   ],
 ];
 
 const DEFAULT_SOCIALS: KilnLink[][] = [
   [
-    { label: "Đăng nhập", href: "/signin" },
-    { label: "Đăng ký miễn phí", href: "/signup" },
+    { label: "Tạo tài khoản mới", href: "/signup" },
+    { label: "Đăng nhập hệ thống", href: "/signin" },
   ],
   [
-    { label: "Bảng xếp hạng", href: "/explore/leaderboard" },
-    { label: "Huấn luyện viên", href: "/explore/coaches" },
+    { label: "Điều khoản dịch vụ", href: "/terms" },
+    { label: "Chính sách bảo mật", href: "/privacy" },
   ],
 ];
 
