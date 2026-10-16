@@ -1,10 +1,11 @@
 import { getDefaultMealSlot } from "./meal-slot";
-import { PROFILE_KEY, targetRangeText, targetsFor, type Profile } from "./profile";
+import { PROFILE_KEY, targetRangeText, targetsFor, writeStoredProfile, type Profile } from "./profile";
 import { calculateSaltTarget } from "./training";
 import { isDemo } from "./demo";
 import { currentAccount, currentAccountId, wasExplicitlySignedOut } from "./auth-actions";
 import { isLiveMode } from "./api-mode";
 import { ADDED_ENTRIES_KEY, adoptLegacyKeys, adoptLegacyPersonal, browserLocal, browserSession, keyedStorage } from "./storage-keys";
+import { apiClient } from "./api-client";
 
 // The entries this user added live in localStorage under the signed-in account's key (lib/storage-keys). Only
 // real entries count here: the sample day, history and seeded Gần đây exist in demo mode only (lib/demo), and
@@ -91,7 +92,19 @@ export async function gateRedirect(pathname: string, demo: boolean = isDemo()): 
   if (!demo && currentAccountId() === null && (wasExplicitlySignedOut() || (await currentAccount()) === null)) {
     return setupRedirectFor(pathname, readFirstRunFacts(demo), demo) ?? "/signin";
   }
-  return setupRedirectFor(pathname, readFirstRunFacts(demo), demo);
+  const facts = readFirstRunFacts(demo);
+  if (!demo && isLiveMode() && !facts.profileSaved && currentAccountId()) {
+    try {
+      const profile = await apiClient.getProfile();
+      if (profile) {
+        writeStoredProfile(profile);
+        facts.profileSaved = true;
+      }
+    } catch {
+      // Ignore network errors
+    }
+  }
+  return setupRedirectFor(pathname, facts, demo);
 }
 
 /** "/" when a live session already exists (the sign-in form has nothing to do), else null. Live mode only. */
