@@ -90,7 +90,9 @@ export function readFirstRunFacts(demo: boolean = isDemo()): FirstRunFacts {
 export async function gateRedirect(pathname: string, demo: boolean = isDemo()): Promise<string | null> {
   // After Đăng xuất a session that survived (a failed sign-out) is not adopted until the next explicit sign-in
   if (!demo && currentAccountId() === null && (wasExplicitlySignedOut() || (await currentAccount()) === null)) {
-    return setupRedirectFor(pathname, readFirstRunFacts(demo), demo) ?? "/signin";
+    const isDesktop = typeof window !== "undefined" && typeof window.innerWidth === "number" && window.innerWidth >= 1024;
+    const fallback = isDesktop && pathname === "/" ? "/landing" : "/signin";
+    return setupRedirectFor(pathname, readFirstRunFacts(demo), demo) ?? fallback;
   }
   const facts = readFirstRunFacts(demo);
   if (!demo && isLiveMode() && !facts.profileSaved && currentAccountId()) {
