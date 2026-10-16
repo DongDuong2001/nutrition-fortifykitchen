@@ -29,6 +29,7 @@ import { MOCK_FOODS } from "./mock/foods";
 import { syncRecipeFoods } from "./recipe-store";
 import { personaPatch } from "./demo-persona";
 import { isLiveMode } from "./api-mode";
+import { apiClient } from "./api-client";
 import {
   buildSavedMeal,
   defaultMealName,
@@ -485,6 +486,44 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     setSavedMeals(readSavedMeals(own));
     // This account's recipes (cc-27b) become foods of the catalogue, so search and entries find them
     syncRecipeFoods();
+
+    if (isLiveMode() && account && !demoNow) {
+      apiClient.getDay(iso).then((daySummary) => {
+        if (daySummary && Array.isArray(daySummary.meals)) {
+          const serverEntries: AddedDiaryEntry[] = [];
+          for (const meal of daySummary.meals) {
+            for (const e of meal.entries || []) {
+              serverEntries.push({
+                id: e.id,
+                foodId: e.food_id || "",
+                foodName: e.food_name || "Món ăn",
+                grams: e.grams,
+                displayQty: e.serving_label || `${e.grams} g`,
+                mealSlot: e.meal_slot as MealSlot,
+                calories: e.calories,
+                protein: (e.nutrients?.protein as number | null) ?? null,
+                carbs: (e.nutrients?.carbs as number | null) ?? null,
+                fat: (e.nutrients?.fat as number | null) ?? null,
+                fiber: (e.nutrients?.fiber as number | null) ?? null,
+                nutrients: (e.nutrients as Record<string, number | null>) ?? {},
+                addedAt: e.created_at || new Date().toISOString(),
+              });
+            }
+          }
+          if (serverEntries.length > 0) {
+            setEdits((prev) => {
+              const existingIds = new Set(prev.added.map((it) => it.id));
+              const toAdd = serverEntries.filter((se) => !existingIds.has(se.id));
+              if (toAdd.length === 0) return prev;
+              return {
+                ...prev,
+                added: [...prev.added, ...toAdd],
+              };
+            });
+          }
+        }
+      }).catch(() => {});
+    }
   }, []);
 
   // Load on mount (client-only)
@@ -704,9 +743,20 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       );
 
       addRecentFood(food, qty);
+
+      if (isLiveMode()) {
+        apiClient.addEntry({
+          id: newEntry.id,
+          foodId: food.id,
+          grams,
+          mealSlot,
+          date: todayIso || getTodayIsoVN(),
+        }).catch(() => {});
+      }
+
       return true;
     },
-    [addRecentFood]
+    [addRecentFood, todayIso]
   );
 
   const dismissToast = useCallback(() => {
@@ -733,6 +783,9 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       setEdits((prev) => deleteEntryIn(prev, id, samples));
       setParkedDelete(null);
       setToast({ message: `Đã xóa ${view.name}`, kind: "deleted", mealSlot: null, durationMs: UNDO_TOAST_MS });
+      if (isLiveMode()) {
+        apiClient.deleteEntry(id).catch(() => {});
+      }
     },
     [edits, samples]
   );
@@ -749,8 +802,11 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         mealSlot: null,
         durationMs: UNDO_TOAST_MS,
       });
+      if (isLiveMode()) {
+        apiClient.deleteMeal(todayIso || getTodayIsoVN(), slot).catch(() => {});
+      }
     },
-    [edits, samples]
+    [edits, samples, todayIso]
   );
 
   const deleteEntries = useCallback(
