@@ -4,8 +4,11 @@ import { renderToString } from "react-dom/server";
 import { DesktopIntroBanner } from "../desktop-intro";
 
 describe("DesktopIntroBanner", () => {
-  it("renders null on initial server render (client mounted)", () => {
+  it("renders the headline and 3 pillars on initial server render", () => {
     const html = renderToString(<DesktopIntroBanner />);
-    expect(html).toBe("");
+    expect(html).toContain("Kiểm soát năng lượng và cân bằng 22 vi chất thiết yếu");
+    expect(html).toContain("1. Ghi nhận khẩu phần chính xác");
+    expect(html).toContain("2. Phân tích 22 vi chất tức thì");
+    expect(html).toContain("3. Điều chỉnh theo vận động");
   });
 });
