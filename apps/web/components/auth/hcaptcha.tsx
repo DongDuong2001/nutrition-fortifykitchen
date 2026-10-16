@@ -17,6 +17,8 @@ declare global {
           sitekey: string;
           callback: (token: string) => void;
           "expired-callback"?: () => void;
+          "error-callback"?: () => void;
+          "chalexpired-callback"?: () => void;
           theme?: "light" | "dark";
         }
       ) => string;
@@ -51,6 +53,12 @@ export function HCaptcha({ onVerify, onExpire, className = "" }: HCaptchaProps) 
           "expired-callback": () => {
             if (mounted && onExpireRef.current) onExpireRef.current();
           },
+          "error-callback": () => {
+            if (mounted && onExpireRef.current) onExpireRef.current();
+          },
+          "chalexpired-callback": () => {
+            if (mounted && onExpireRef.current) onExpireRef.current();
+          },
         });
         widgetIdRef.current = id;
       } catch {
@@ -59,6 +67,15 @@ export function HCaptcha({ onVerify, onExpire, className = "" }: HCaptchaProps) 
     }
 
     if (typeof window !== "undefined") {
+      const waitAndRender = () => {
+        if (!mounted) return;
+        if (window.hcaptcha) {
+          renderWidget();
+        } else {
+          setTimeout(waitAndRender, 50);
+        }
+      };
+
       if (window.hcaptcha) {
         renderWidget();
       } else {
@@ -69,14 +86,10 @@ export function HCaptcha({ onVerify, onExpire, className = "" }: HCaptchaProps) 
           script.src = "https://js.hcaptcha.com/1/api.js?render=explicit";
           script.async = true;
           script.defer = true;
-          script.onload = () => {
-            if (mounted) renderWidget();
-          };
+          script.onload = waitAndRender;
           document.head.appendChild(script);
         } else {
-          existingScript.addEventListener("load", () => {
-            if (mounted) renderWidget();
-          });
+          waitAndRender();
         }
       }
     }
@@ -100,7 +113,7 @@ export function HCaptcha({ onVerify, onExpire, className = "" }: HCaptchaProps) 
 
   return (
     <div className={`flex justify-center my-2 ${className}`}>
-      <div ref={containerRef} className="h-captcha min-h-[78px]" data-sitekey={siteKey} />
+      <div ref={containerRef} className="min-h-[78px]" />
     </div>
   );
 }
