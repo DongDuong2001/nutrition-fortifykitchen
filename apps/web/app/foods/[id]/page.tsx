@@ -248,7 +248,7 @@ function FoodDetailInner() {
                 aria-label="Khối lượng theo gam"
                 value={gramsInput}
                 onChange={(e) => setGramsInput(e.target.value)}
-                className="h-full w-full border-0 bg-transparent text-right text-sm font-bold tabular-nums text-text outline-none"
+                className="h-full w-full border-0 bg-transparent text-right text-sm font-bold tabular-nums text-text outline-none focus-visible:outline-none"
               />
               <span className="ml-1 text-xs font-semibold text-secondary">g</span>
             </label>

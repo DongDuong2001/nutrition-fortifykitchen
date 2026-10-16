@@ -28,7 +28,7 @@ export function FoodSearchField({ value, onChange, inputRef, className = "" }: F
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Tìm món: cơm, trứng, chà là…"
-        className="flex-1 bg-transparent border-0 outline-none focus-visible:ring-2 focus-visible:ring-blue rounded-md text-text text-base min-h-[44px] [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
+        className="flex-1 bg-transparent border-0 outline-none focus-visible:outline-none text-text text-base min-h-[44px] [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
       />
       {value && (
         <button
