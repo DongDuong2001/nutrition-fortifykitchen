@@ -231,8 +231,9 @@ export async function apiFetch(path: string, init: RequestInit = {}): Promise<Re
   });
 }
 
-// Offline queue for idempotent replay
-const OUTBOX_STORAGE_KEY = OFFLINE_OUTBOX_KEY;
+// Offline queue for idempotent replay. OFFLINE_OUTBOX_KEY is read inside the functions only: api-client, storage-keys and
+// auth-actions import each other, so a module-level read of it can run before storage-keys has finished loading
+// ("Cannot access 'x' before initialization", depending on which page loads first).
 
 interface OutboxItem {
   id: string;
@@ -246,7 +247,7 @@ export function enqueueOfflineEntry(date: string, payload: Record<string, unknow
   const storage = accountStorage();
   if (!storage) return;
   try {
-    const current: OutboxItem[] = JSON.parse(storage.getItem(OUTBOX_STORAGE_KEY) || "[]");
+    const current: OutboxItem[] = JSON.parse(storage.getItem(OFFLINE_OUTBOX_KEY) || "[]");
     current.push({
       id: (payload.id as string) || `offline-${Date.now()}`,
       date,
@@ -254,7 +255,7 @@ export function enqueueOfflineEntry(date: string, payload: Record<string, unknow
       createdAt: Date.now(),
       retries: 0,
     });
-    storage.setItem(OUTBOX_STORAGE_KEY, JSON.stringify(current));
+    storage.setItem(OFFLINE_OUTBOX_KEY, JSON.stringify(current));
   } catch {
     // Storage unavailable
   }
@@ -265,9 +266,9 @@ export function dropOfflineEntry(id: string): void {
   const storage = accountStorage();
   if (!storage) return;
   try {
-    const items: OutboxItem[] = JSON.parse(storage.getItem(OUTBOX_STORAGE_KEY) || "[]");
+    const items: OutboxItem[] = JSON.parse(storage.getItem(OFFLINE_OUTBOX_KEY) || "[]");
     const kept = items.filter((item) => item.id !== id);
-    if (kept.length !== items.length) storage.setItem(OUTBOX_STORAGE_KEY, JSON.stringify(kept));
+    if (kept.length !== items.length) storage.setItem(OFFLINE_OUTBOX_KEY, JSON.stringify(kept));
   } catch {
     // Storage unavailable
   }
@@ -277,7 +278,7 @@ export async function syncOfflineOutbox(): Promise<number> {
   const storage = accountStorage();
   if (!storage) return 0;
   try {
-    const items: OutboxItem[] = JSON.parse(storage.getItem(OUTBOX_STORAGE_KEY) || "[]");
+    const items: OutboxItem[] = JSON.parse(storage.getItem(OFFLINE_OUTBOX_KEY) || "[]");
     if (!items.length) return 0;
 
     const remaining: OutboxItem[] = [];
@@ -305,7 +306,7 @@ export async function syncOfflineOutbox(): Promise<number> {
       }
     }
 
-    storage.setItem(OUTBOX_STORAGE_KEY, JSON.stringify(remaining));
+    storage.setItem(OFFLINE_OUTBOX_KEY, JSON.stringify(remaining));
     return synced;
   } catch {
     return 0;
