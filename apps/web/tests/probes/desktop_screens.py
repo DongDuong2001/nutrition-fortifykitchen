@@ -20,6 +20,7 @@ def main():
         page.wait_for_timeout(600)
 
         # Verify DesktopIntroBanner is visible
+        page.wait_for_selector('section[aria-label="Giới thiệu về H1T MICRO"]', timeout=10000)
         intro = page.locator('section[aria-label="Giới thiệu về H1T MICRO"]')
         assert intro.is_visible(), "DesktopIntroBanner should be visible on desktop"
         print("[PASS] DesktopIntroBanner is visible on Desktop (1440x900)")
@@ -27,6 +28,13 @@ def main():
         shot_home = SCREENSHOT_DIR / "desktop-home-1440.png"
         page.screenshot(path=str(shot_home))
         print(f"[SAVED] {shot_home}")
+
+        # 1b. Test Desktop Landing Page at 1440x900
+        page.goto(f"{BASE_URL}/landing", wait_until="networkidle")
+        page.wait_for_timeout(600)
+        shot_landing = SCREENSHOT_DIR / "desktop-landing-1440.png"
+        page.screenshot(path=str(shot_landing))
+        print(f"[SAVED] {shot_landing}")
 
         # 2. Test Desktop Sign In at 1440x900 (Split layout with marketing points)
         page.goto(f"{BASE_URL}/signin", wait_until="networkidle")
