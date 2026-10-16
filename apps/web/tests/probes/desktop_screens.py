@@ -32,9 +32,26 @@ def main():
         # 1b. Test Desktop Landing Page at 1440x900
         page.goto(f"{BASE_URL}/landing", wait_until="networkidle")
         page.wait_for_timeout(600)
+        
+        # Verify StackingAudiences cards
+        cards = page.locator("[data-stack-card]")
+        assert cards.count() == 3, f"Expected 3 audience cards, found {cards.count()}"
+        print(f"[PASS] StackingAudiences cards count: {cards.count()}")
+
+        # Verify KilnWordmarkFooter
+        footer = page.locator("footer.kwf")
+        assert footer.is_visible(), "KilnWordmarkFooter should be visible"
+        wordmark = page.locator("svg.kwf-word")
+        assert wordmark.is_visible(), "Procedural wordmark should be visible in footer"
+        print("[PASS] KilnWordmarkFooter and procedural wordmark are visible")
+
         shot_landing = SCREENSHOT_DIR / "desktop-landing-1440.png"
         page.screenshot(path=str(shot_landing))
         print(f"[SAVED] {shot_landing}")
+
+        shot_landing_full = SCREENSHOT_DIR / "desktop-landing-full-1440.png"
+        page.screenshot(path=str(shot_landing_full), full_page=True)
+        print(f"[SAVED] {shot_landing_full}")
 
         # 2. Test Desktop Sign In at 1440x900 (Split layout with marketing points)
         page.goto(f"{BASE_URL}/signin", wait_until="networkidle")
