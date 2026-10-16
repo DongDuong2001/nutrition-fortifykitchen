@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { signInWithGoogle } from "@/lib/auth-actions";
+import { isLiveMode } from "@/lib/api-mode";
 import { PillButton } from "@/components/ui/pill-button";
 
 /** Google sign-in: OAuth in live mode, the sample account in mock mode (both in lib/auth-actions). */
@@ -10,7 +11,7 @@ export function GoogleSignInButton() {
 
   async function handleClick() {
     const res = await signInWithGoogle();
-    if (res.ok) router.push("/setup/profile");
+    if (res.ok && !isLiveMode()) router.push("/setup/profile");
   }
 
   return (
