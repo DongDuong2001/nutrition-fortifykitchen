@@ -582,7 +582,8 @@ export const apiClient = {
         });
         if (res.ok) {
           const json = await res.json();
-          return json;
+          const raw = json.data ?? json;
+          return mapApiFoodToFoodItem(raw);
         }
       } catch {
         // Fallback
@@ -663,7 +664,8 @@ export const apiClient = {
       try {
         const res = await apiFetch(`/trends?days=${days}&offset=${offset}`);
         if (res.ok) {
-          return await res.json();
+          const json = await res.json();
+          return (json.data ?? json) as Record<string, unknown>;
         }
       } catch {
         // Fallback
@@ -677,7 +679,10 @@ export const apiClient = {
       try {
         const res = await apiFetch(`/favourites`);
         if (res.ok) {
-          return await res.json();
+          const json = await res.json();
+          const payload = json.data ?? json;
+          const items = payload.items ?? (Array.isArray(payload) ? payload : []);
+          return items.map(mapApiFoodToFoodItem);
         }
       } catch {
         // Fallback
@@ -720,7 +725,10 @@ export const apiClient = {
       try {
         const res = await apiFetch(`/recents`);
         if (res.ok) {
-          return await res.json();
+          const json = await res.json();
+          const payload = json.data ?? json;
+          const items = payload.items ?? (Array.isArray(payload) ? payload : []);
+          return items.map(mapApiFoodToFoodItem);
         }
       } catch {
         // Fallback
@@ -764,7 +772,8 @@ export const apiClient = {
         });
         if (res.ok) {
           const json = await res.json();
-          return { id: json.id || id };
+          const data = json.data ?? json;
+          return { id: data.id || id };
         }
       } catch {
         // Fallback
