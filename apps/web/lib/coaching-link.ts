@@ -121,10 +121,13 @@ export function coachingAvailable(live: boolean): boolean {
   return !live;
 }
 
-/** What the screens read: in live mode no coach and Level 0 whatever the profile holds; the role is kept. */
+/**
+ * What the screens read. In live mode the role can only come from the API, which does not return it yet, so it is
+ * "user" whatever the browser's stored profile holds (that is editable by the user), with no coach and Level 0.
+ */
 export function effectiveCoaching(state: CoachingState, live: boolean): CoachingState {
   if (coachingAvailable(live)) return state;
-  return { ...state, level: 0, coach: null, levelSeen: 0 };
+  return { ...state, role: "user", level: 0, coach: null, levelSeen: 0 };
 }
 
 /** Coach and admin see the client list. */
@@ -140,4 +143,13 @@ export function canReview(role: Role): boolean {
 /** Whether a coach code is well formed: "H1T-" and letters or digits, any case. */
 export function normaliseCode(input: string): string {
   return input.trim().toUpperCase().replace(/\s+/g, "");
+}
+
+/** A route parameter decoded; "" when it is not valid percent-encoding (a stray "%"), so a bad link is a not-found, not a crash. */
+export function safeDecode(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return "";
+  }
 }

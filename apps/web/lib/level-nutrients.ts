@@ -101,14 +101,16 @@ export function addedNames(from: Level, to: Level): string[] {
 }
 
 /**
- * The extras of a set of entries: the sum of the amounts that are known, unknown (null) when no entry has a value.
- * An entry with no value for an extra adds nothing and never counts as 0.
+ * The extras of a set of entries: the sum of the amounts, or unknown (null, shown "—") when ANY entry lacks the
+ * value or there is no entry. One unknown makes the day unknown, as in a recipe: a partial sum would read as a
+ * complete one, and an unknown is never 0.
  */
 export function sumExtras(entries: readonly Pick<HomeEntry, "nutrients">[]): Record<string, number | null> {
   const out: Record<string, number | null> = {};
   for (const id of EXTRA_NUTRIENT_IDS) {
-    const known = entries.map((e) => e.nutrients[id]).filter((v): v is number => typeof v === "number");
-    out[id] = known.length === 0 ? null : Math.round(known.reduce((a, b) => a + b, 0) * 100) / 100;
+    const values = entries.map((e) => e.nutrients[id]);
+    const complete = values.length > 0 && values.every((v): v is number => typeof v === "number");
+    out[id] = complete ? Math.round(values.reduce((a, b) => a + b, 0) * 100) / 100 : null;
   }
   return out;
 }

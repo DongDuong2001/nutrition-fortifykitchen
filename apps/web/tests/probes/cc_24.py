@@ -1,7 +1,7 @@
 """cc-24: Dong's new screens follow the UI rules, at 390 and 1280.
 
 Screens: /explore (leaderboard banner, coaches carousel), /explore/leaderboard, /explore/coaches,
-/explore/coaches/[id] (found and not found), /admin/review, /privacy, /terms, and the coach application sheet.
+/explore/coaches/[id] (found and not found), /admin/review, /privacy, /terms.
 Per screen and width: no console or hydration errors, no horizontal scroll, one h1, colours from the tokens
 (spot check of text, background and border colours), every button and link in the page at least 44 px, no text under
 11 px, no all caps outside headings, no ellipsis truncation. The sheet closes with Esc and returns focus. No normal
@@ -149,39 +149,6 @@ def leaderboard_behaviour(browser, size_name, size):
     ctx.close()
 
 
-def application_sheet(browser, size_name, size):
-    """The coach application sheet. No real user reaches it yet (the mock level is 3), so it opens from /dev/ui."""
-    ctx = browser.new_context(viewport=size)
-    pg = ctx.new_page()
-    pg.goto(BASE + "/dev/ui", wait_until="networkidle")
-    pg.wait_for_timeout(500)
-    w = f"{size_name} application sheet"
-    opener = pg.get_by_role("button", name="Mở đơn ứng tuyển huấn luyện viên")
-    check(opener.count() == 1, f"{w}: the showcase has the opener")
-    opener.scroll_into_view_if_needed()
-    opener.click()
-    pg.wait_for_timeout(400)
-    check(pg.locator("[role=dialog]").count() == 1, f"{w}: opens a dialog")
-    inside = pg.evaluate("() => { const d = document.querySelector('[role=dialog]'); return !!d && d.contains(document.activeElement); }")
-    check(inside, f"{w}: focus is inside")
-    small = pg.evaluate("""() => [...document.querySelectorAll('[role=dialog] button, [role=dialog] input, [role=dialog] select, [role=dialog] textarea')]
-        .map(e => e.getBoundingClientRect()).filter(r => r.width > 0 && Math.min(r.width, r.height) < 43.5).length""")
-    check(small == 0, f"{w}: every control is 44 px ({small} too small)")
-    fonts = pg.evaluate("""() => [...document.querySelectorAll('[role=dialog] *')].filter(e => [...e.childNodes].some(n => n.nodeType === 3 && n.textContent.trim()))
-        .map(e => parseFloat(getComputedStyle(e).fontSize)).filter(f => f < 12)""")
-    check(not fonts, f"{w}: no text under 12 px in the form ({fonts[:3]})")
-    # a validation message comes through
-    pg.get_by_role("button", name="Nộp hồ sơ xét duyệt").click()
-    pg.wait_for_timeout(200)
-    check(pg.locator("[role=dialog] [role=alert]").count() == 1, f"{w}: an empty form says what is missing")
-    pg.keyboard.press("Escape")
-    pg.wait_for_timeout(300)
-    check(pg.locator("[role=dialog]").count() == 0, f"{w}: Esc closes the sheet")
-    focused = pg.evaluate("() => document.activeElement && (document.activeElement.textContent || '').trim()")
-    check(focused == "Mở đơn ứng tuyển huấn luyện viên", f"{w}: focus returns to the button ({focused!r})")
-    ctx.close()
-
-
 def back_and_links(browser, size_name, size):
     ctx = browser.new_context(viewport=size)
     pg = ctx.new_page()
@@ -229,7 +196,7 @@ def main():
                     audit(browser, size_name, size, name, route)
                 except Exception as err:
                     check(False, f"{size_name} {route}: stopped: {str(err).splitlines()[0][:160]}")
-            for fn in (leaderboard_behaviour, application_sheet, back_and_links):
+            for fn in (leaderboard_behaviour, back_and_links):
                 try:
                     fn(browser, size_name, size)
                 except Exception as err:

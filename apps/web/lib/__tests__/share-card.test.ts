@@ -73,7 +73,7 @@ describe("share model", () => {
   });
 
   it("carries the name trimmed, or null when none is set", () => {
-    expect(shareName("  Hào  ")).toBe("Hào");
+    expect(shareName("  Học viên A  ")).toBe("Học viên A");
     expect(shareName("")).toBeNull();
     expect(shareName("   ")).toBeNull();
     expect(shareName(undefined)).toBeNull();
@@ -163,12 +163,12 @@ describe("the share image always has a name", () => {
   });
 
   it("a name lets it draw", () => {
-    expect(shareNeedsName("Vũ Minh Hào")).toBe(false);
+    expect(shareNeedsName("Học viên A")).toBe(false);
     expect(shareNeedsName("  A ")).toBe(false);
   });
 
   it("the model of a named profile carries the name (the no-name branch is only a fallback)", () => {
-    expect(model({ displayName: "Vũ Minh Hào" }).name).toBe("Vũ Minh Hào");
+    expect(model({ displayName: "Học viên A" }).name).toBe("Học viên A");
     expect(model({ displayName: "" }).name).toBeNull();
   });
 });

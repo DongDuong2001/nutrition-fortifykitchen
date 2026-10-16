@@ -17,6 +17,8 @@ import { FoodRowLink } from "@/components/foods/food-row-link";
 import { SavedMealsCard } from "@/components/explore/saved-meals-card";
 import { CoachesCarousel } from "@/components/coaching/coaches-carousel";
 import { LeaderboardBanner } from "@/components/leaderboard/leaderboard-banner";
+import { coachingAvailable } from "@/lib/coaching-link";
+import { isLiveMode } from "@/lib/api-mode";
 
 const SHOWN = 8;
 const SHOWN_MEALS = 3;
@@ -39,9 +41,14 @@ export function ExploreSections() {
 
   return (
     <>
-      <LeaderboardBanner />
+      {/* Sample ranking and coaches: mock and demo mode only, never in live mode */}
+      {coachingAvailable(isLiveMode()) && (
+        <>
+          <LeaderboardBanner />
 
-      <CoachesCarousel />
+          <CoachesCarousel />
+        </>
+      )}
 
       <RichCarousel />
 

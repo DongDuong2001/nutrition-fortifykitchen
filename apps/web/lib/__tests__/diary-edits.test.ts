@@ -14,8 +14,11 @@ import {
   mealEntryIds,
   parseAddedEntries,
   parseSampleEdits,
+  moveEntriesIn,
   removeAddedIn,
   resolveSampleItems,
+  restoreSlotsIn,
+  slotsBeforeMove,
   SAMPLE_ITEMS,
   undoDeleteIn,
   updateEntryIn,
@@ -343,5 +346,35 @@ describe("hasEnergy", () => {
     expect(hasEnergy({ nutrients: { energy: 0 } })).toBe(true);
     expect(hasEnergy({ nutrients: { energy: null } })).toBe(false);
     expect(hasEnergy({ nutrients: {} })).toBe(false);
+  });
+});
+
+describe("Chuyển bữa undo", () => {
+  const base = (): DiaryEdits => ({
+    added: [addedEntry("a", "food-chuoi", 100, "breakfast"), addedEntry("b", "food-chuoi", 50, "lunch")],
+    sample: {},
+    undo: null,
+  });
+
+  it("remembers the meal each moved entry came from, skipping those already there", () => {
+    expect(slotsBeforeMove(base(), ["a", "b", "nope"], "lunch", [])).toEqual([{ id: "a", slot: "breakfast" }]);
+    expect(slotsBeforeMove(base(), ["a", "a"], "dinner", [])).toEqual([{ id: "a", slot: "breakfast" }]);
+  });
+
+  it("puts the entries back, and leaves a pending delete undo alone", () => {
+    const deleted = deleteEntryIn(base(), "b", []);
+    const moves = slotsBeforeMove(deleted, ["a"], "snack", []);
+    const moved = moveEntriesIn(deleted, ["a"], "snack", []);
+    expect(moved.undo).toBe(deleted.undo);
+    expect(moved.added[0].mealSlot).toBe("snack");
+    const back = restoreSlotsIn(moved, moves, []);
+    expect(back.added[0].mealSlot).toBe("breakfast");
+    expect(back.undo).toBe(deleted.undo);
+  });
+
+  it("skips an entry deleted since", () => {
+    const moves = slotsBeforeMove(base(), ["a"], "snack", []);
+    const gone = removeAddedIn(moveEntriesIn(base(), ["a"], "snack", []), ["a"]);
+    expect(restoreSlotsIn(gone, moves, []).added.map((e) => e.id)).toEqual(["b"]);
   });
 });

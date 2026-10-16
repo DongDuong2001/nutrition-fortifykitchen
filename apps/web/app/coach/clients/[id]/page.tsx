@@ -10,7 +10,7 @@ import { PillButton } from "@/components/ui/pill-button";
 import { Toast } from "@/components/ui/toast";
 import { LevelBadge } from "@/components/profile/level-badge";
 import { useBack } from "@/hooks/use-back";
-import { toLevel } from "@/lib/coaching-link";
+import { safeDecode, toLevel } from "@/lib/coaching-link";
 import { levelChangedToast, previewForLevel, previewHasChanges } from "@/lib/coach-preview";
 import { clientById, readClients, withClientLevel, writeClients, type MockClient } from "@/lib/mock-coach-server";
 
@@ -20,7 +20,7 @@ const LEVEL_CHOICES = [1, 2, 3, 4, 5] as const;
 export default function CoachClientPage() {
   const goBack = useBack();
   const params = useParams();
-  const id = decodeURIComponent(String(params?.id ?? ""));
+  const id = safeDecode(String(params?.id ?? ""));
   const [client, setClient] = useState<MockClient | null | undefined>(undefined);
   const [draft, setDraft] = useState<number>(1);
   const [toast, setToast] = useState<string | null>(null);

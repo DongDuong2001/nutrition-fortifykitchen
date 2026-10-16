@@ -127,15 +127,15 @@ describe("what a Level adds", () => {
 });
 
 describe("sumExtras", () => {
-  it("sums the known amounts and leaves an unknown one null, never 0", () => {
+  it("sums when every entry has the value; one entry without it makes the whole day unknown, never 0", () => {
     const sums = sumExtras([
-      { nutrients: { omega3: 0.5, monounsaturated_fat: 2 } },
-      { nutrients: { omega3: 0.25, omega6: null } },
-      { nutrients: {} },
+      { nutrients: { omega3: 0.5, monounsaturated_fat: 2, omega6: 1 } },
+      { nutrients: { omega3: 0.25, monounsaturated_fat: null, omega6: 1 } },
+      { nutrients: { omega3: 0.25, omega6: 1 } },
     ]);
-    expect(sums.omega3).toBe(0.75);
-    expect(sums.monounsaturated_fat).toBe(2);
-    expect(sums.omega6).toBeNull();
+    expect(sums.omega3).toBe(1);
+    expect(sums.omega6).toBe(3);
+    expect(sums.monounsaturated_fat).toBeNull();
     expect(sums.soluble_fiber).toBeNull();
     expect(Object.keys(sums)).toEqual(EXTRA_NUTRIENT_IDS);
   });

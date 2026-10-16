@@ -10,6 +10,7 @@ import { PillButton } from "@/components/ui/pill-button";
 import { Sheet } from "@/components/ui/sheet";
 import { useCoaching } from "@/hooks/use-coaching";
 import { currentAccountId } from "@/lib/auth-actions";
+import { safeDecode } from "@/lib/coaching-link";
 import { WRONG_CODE, joinPrompt } from "@/lib/level-copy";
 import { findCoachByCode } from "@/lib/mock-coach-server";
 import { writePendingCoachCode } from "@/lib/pending-coach";
@@ -21,7 +22,7 @@ import { writePendingCoachCode } from "@/lib/pending-coach";
 export default function JoinPage() {
   const params = useParams();
   const router = useRouter();
-  const raw = decodeURIComponent(String(params?.code ?? ""));
+  const raw = safeDecode(String(params?.code ?? ""));
   const { hydrated, coach: linked, joinByCode, available } = useCoaching();
   const target = findCoachByCode(raw);
   const [signedIn, setSignedIn] = useState<boolean | null>(null);

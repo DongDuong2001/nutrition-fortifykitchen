@@ -11,6 +11,12 @@ const LINK_BUTTON =
 
 /** A coach's profile: who, what they know, what they recommend, how to reach them. The page's h1 is the name. */
 export function CoachDetailCard({ coach }: { coach: CoachProfile }) {
+  const statsLine = [
+    coach.experienceYears ? `${coach.experienceYears} năm kinh nghiệm` : null,
+    coach.clientsHelped ? `Đã hỗ trợ ${formatNumber(coach.clientsHelped)}+ học viên` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
   return (
     <div className="flex flex-col gap-4">
       <Card as="section" aria-label="Hồ sơ huấn luyện viên" className="flex flex-col gap-4">
@@ -28,9 +34,7 @@ export function CoachDetailCard({ coach }: { coach: CoachProfile }) {
               </span>
             )}
             <p className="m-0 text-[15px] font-bold leading-snug text-blue">{coach.title}</p>
-            <p className="m-0 text-[13px] leading-snug text-secondary">
-              {coach.experienceYears} năm kinh nghiệm · Đã hỗ trợ {formatNumber(coach.clientsHelped)}+ học viên
-            </p>
+            {statsLine && <p className="m-0 text-[13px] leading-snug text-secondary">{statsLine}</p>}
           </div>
         </div>
 
@@ -50,17 +54,19 @@ export function CoachDetailCard({ coach }: { coach: CoachProfile }) {
           </ul>
         </div>
 
-        <div className="flex flex-col gap-2">
-          <SectionTitle as="h2">Bằng cấp và chứng nhận</SectionTitle>
-          <ul role="list" className="m-0 flex list-none flex-col gap-2 p-0 text-[13px] text-secondary">
-            {coach.credentials.map((c) => (
-              <li key={c} className="flex items-start gap-2">
-                <IconCheck className="shrink-0 text-blue" />
-                <span className="leading-snug">{c}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+        {coach.credentials.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <SectionTitle as="h2">Bằng cấp và chứng nhận</SectionTitle>
+            <ul role="list" className="m-0 flex list-none flex-col gap-2 p-0 text-[13px] text-secondary">
+              {coach.credentials.map((c) => (
+                <li key={c} className="flex items-start gap-2">
+                  <IconCheck className="shrink-0 text-blue" />
+                  <span className="leading-snug">{c}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </Card>
 
       {coach.recommendedFoods.length > 0 && (
@@ -81,6 +87,7 @@ export function CoachDetailCard({ coach }: { coach: CoachProfile }) {
         </Card>
       )}
 
+      {Object.values(coach.social).some(Boolean) && (
       <Card as="section" aria-labelledby="coach-contact" className="flex flex-col gap-3">
         <SectionTitle as="h2" id="coach-contact">
           Kết nối với huấn luyện viên
@@ -111,6 +118,7 @@ export function CoachDetailCard({ coach }: { coach: CoachProfile }) {
           )}
         </div>
       </Card>
+      )}
     </div>
   );
 }

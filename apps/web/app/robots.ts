@@ -1,4 +1,6 @@
 import type { MetadataRoute } from "next";
+import { coachingAvailable } from "@/lib/coaching-link";
+import { isLiveMode } from "@/lib/api-mode";
 
 export default function robots(): MetadataRoute.Robots {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://h1tmicro.vn";
@@ -10,8 +12,8 @@ export default function robots(): MetadataRoute.Robots {
         allow: [
           "/",
           "/explore",
-          "/explore/coaches",
-          "/explore/leaderboard",
+          // Live mode has no coaches or ranking yet: those pages answer 404
+          ...(coachingAvailable(isLiveMode()) ? ["/explore/coaches", "/explore/leaderboard"] : []),
           "/explore/meals",
           "/foods",
           "/signin",
@@ -22,6 +24,10 @@ export default function robots(): MetadataRoute.Robots {
         disallow: [
           "/admin",
           "/admin/*",
+          "/coach",
+          "/coach/*",
+          "/join",
+          "/join/*",
           "/auth",
           "/auth/*",
           "/settings",

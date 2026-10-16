@@ -1,15 +1,21 @@
 // Demo mode: the sample day, sample history, sample weights and seeded Gần đây exist only here.
 // A new account starts empty. Turn it on with ?demo=1 (saved in localStorage), off with ?demo=0.
 
+import { isLiveMode } from "./api-mode";
+
 export const DEMO_KEY = "h1t_demo_v1";
 
 export type DemoFlagAction = "set" | "clear" | "keep";
 
-/** Pure rule. NODE_ENV development is always demo; otherwise the saved flag or ?demo= decides. */
-export function resolveDemo(input: { nodeEnv: string | undefined; stored: string | null; search: string }): {
+/**
+ * Pure rule. NODE_ENV development is always demo; otherwise the saved flag or ?demo= decides. Live mode (a real
+ * backend) has no demo at all: no ?demo, no saved flag, no development default.
+ */
+export function resolveDemo(input: { nodeEnv: string | undefined; stored: string | null; search: string; live?: boolean }): {
   demo: boolean;
   flag: DemoFlagAction;
 } {
+  if (input.live) return { demo: false, flag: "keep" };
   const param = new URLSearchParams(input.search).get("demo");
   const dev = input.nodeEnv === "development";
   if (param === "1") return { demo: true, flag: "set" };
@@ -19,14 +25,14 @@ export function resolveDemo(input: { nodeEnv: string | undefined; stored: string
 
 /** Reads the switch from the browser and applies ?demo=. Client only; on the server it is the NODE_ENV rule. */
 export function isDemo(): boolean {
-  if (typeof window === "undefined") return resolveDemo({ nodeEnv: process.env.NODE_ENV, stored: null, search: "" }).demo;
+  if (typeof window === "undefined") return resolveDemo({ nodeEnv: process.env.NODE_ENV, stored: null, search: "", live: isLiveMode() }).demo;
   let stored: string | null = null;
   try {
     stored = window.localStorage.getItem(DEMO_KEY);
   } catch {
     // Storage blocked: only the URL and NODE_ENV count
   }
-  const { demo, flag } = resolveDemo({ nodeEnv: process.env.NODE_ENV, stored, search: window.location.search });
+  const { demo, flag } = resolveDemo({ nodeEnv: process.env.NODE_ENV, stored, search: window.location.search, live: isLiveMode() });
   try {
     if (flag === "set") window.localStorage.setItem(DEMO_KEY, "1");
     if (flag === "clear") window.localStorage.removeItem(DEMO_KEY);

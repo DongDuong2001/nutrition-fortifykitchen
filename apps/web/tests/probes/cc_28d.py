@@ -66,7 +66,7 @@ def run(browser, size, tag):
     rows = pg.locator("[data-align-group=client-row]")
     check(rows.count() == 4, f"{tag}: four clients ({rows.count()})")
     texts = [squash(rows.nth(i).inner_text()) for i in range(rows.count())]
-    check("Nguyễn Minh Anh" in texts[0] and "Hôm nay" in texts[0] and "Chưa ghi hôm nay" not in texts[0], f"{tag}: logged today ({texts[0]!r})")
+    check("Học viên A" in texts[0] and "Hôm nay" in texts[0] and "Chưa ghi hôm nay" not in texts[0], f"{tag}: logged today ({texts[0]!r})")
     check("Chưa ghi hôm nay" in texts[1] and "Hôm qua" in texts[1], f"{tag}: logged yesterday ({texts[1]!r})")
     check("Chưa ghi món nào" in texts[3] and "Chưa ghi hôm nay" in texts[3], f"{tag}: never logged ({texts[3]!r})")
     badges = [b.get_attribute("data-level-badge") for b in pg.locator("[data-level-badge]").all()]
@@ -101,13 +101,13 @@ def run(browser, size, tag):
     save.click()
     pg.wait_for_timeout(400)
     toast = squash(pg.locator("[role=status] >> visible=true").first.inner_text())
-    check("Đã đổi Level của Trần Quốc Bảo thành 3" in toast, f"{tag}: toast ({toast!r})")
+    check("Đã đổi Level của Học viên B thành 3" in toast, f"{tag}: toast ({toast!r})")
     check(save.is_disabled(), f"{tag}: Lưu is disabled again after saving")
 
     pg.goto(BASE + "/coach", wait_until="networkidle")
     pg.wait_for_timeout(500)
     badges = [b.get_attribute("data-level-badge") for b in pg.locator("[data-level-badge]").all()]
-    check(badges[1] == "3", f"{tag}: the list shows Level 3 for Trần Quốc Bảo ({badges})")
+    check(badges[1] == "3", f"{tag}: the list shows Level 3 for Học viên B ({badges})")
     check(not [e for e in errors if "preloaded using link preload" not in e], f"{tag}: no console errors {errors[:1]}")
     ctx.close()
 

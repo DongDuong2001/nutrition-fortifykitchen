@@ -3,6 +3,15 @@ import { DEMO_KEY, demoActive, resolveDemo, setDemoActive } from "../demo";
 import { dayEntries } from "../day-history";
 import { weightLogSample } from "../mock/weight-log";
 
+describe("lib/demo resolveDemo in live mode", () => {
+  it("has no demo whatever the environment, the saved flag or the URL says", () => {
+    const keep = { demo: false, flag: "keep" };
+    expect(resolveDemo({ nodeEnv: "development", stored: null, search: "", live: true })).toEqual(keep);
+    expect(resolveDemo({ nodeEnv: "production", stored: "1", search: "", live: true })).toEqual(keep);
+    expect(resolveDemo({ nodeEnv: "production", stored: null, search: "?demo=1", live: true })).toEqual(keep);
+  });
+});
+
 describe("lib/demo resolveDemo", () => {
   it("is on in development, off in production and test", () => {
     expect(resolveDemo({ nodeEnv: "development", stored: null, search: "" }).demo).toBe(true);

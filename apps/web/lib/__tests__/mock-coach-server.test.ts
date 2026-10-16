@@ -1,18 +1,67 @@
 import { describe, expect, it } from "vitest";
-import { MOCK_COACHES, SEED_CLIENTS, clientById, findCoach, findCoachByCode, parseClients, withClientLevel, withJoined, withoutClient } from "../mock-coach-server";
+import {
+  CODE_LENGTH,
+  MOCK_COACH_BASE,
+  SEED_CLIENTS,
+  clientById,
+  codeFromBytes,
+  findCoach,
+  findCoachByCode,
+  opaqueIdFor,
+  parseClients,
+  randomCode,
+  withClientLevel,
+  withCodes,
+  withJoined,
+  withoutClient,
+} from "../mock-coach-server";
+
+const COACHES = withCodes(MOCK_COACH_BASE, { "coach-khanh": "QWERTY2345" });
 
 describe("coach directory", () => {
-  it("has HLV Khánh with the code H1T-KHANH", () => {
-    expect(MOCK_COACHES).toEqual([{ id: "coach-khanh", name: "HLV Khánh", code: "H1T-KHANH" }]);
+  it("has HLV Khánh, whose code is not made from the name", () => {
+    expect(COACHES).toEqual([{ id: "coach-khanh", name: "HLV Khánh", code: "QWERTY2345" }]);
+    const made = withCodes(MOCK_COACH_BASE, {});
+    expect(made[0].code).toMatch(/^[A-Z2-9]{10}$/);
+    expect(made[0].code.toUpperCase()).not.toContain("KHANH");
+  });
+
+  it("makes a random 10-character code once and keeps the stored one", () => {
+    const stored: Record<string, string> = {};
+    const first = withCodes(MOCK_COACH_BASE, stored)[0].code;
+    expect(stored["coach-khanh"]).toBe(first);
+    expect(withCodes(MOCK_COACH_BASE, stored)[0].code).toBe(first);
+    // A damaged stored value is replaced, not trusted
+    const bad = { "coach-khanh": "h1t-khanh" };
+    expect(withCodes(MOCK_COACH_BASE, bad)[0].code).toMatch(/^[A-Z2-9]{10}$/);
+    expect(new Set(Array.from({ length: 20 }, randomCode)).size).toBeGreaterThan(18);
+    expect(randomCode()).toHaveLength(CODE_LENGTH);
+  });
+
+  it("turns bytes into symbols without 0, O, 1, I or L", () => {
+    const code = codeFromBytes(Array.from({ length: 10 }, (_, i) => i * 25));
+    expect(code).toHaveLength(10);
+    expect(code).not.toMatch(/[01OIL]/);
   });
 
   it("finds a coach by code in any case, with spaces ignored", () => {
-    expect(findCoachByCode("h1t-khanh")?.id).toBe("coach-khanh");
-    expect(findCoachByCode("  H1T- KHANH ")?.id).toBe("coach-khanh");
-    expect(findCoachByCode("H1T-NOPE")).toBeNull();
-    expect(findCoachByCode("")).toBeNull();
-    expect(findCoach("coach-khanh")?.name).toBe("HLV Khánh");
-    expect(findCoach("x")).toBeNull();
+    expect(findCoachByCode("qwerty2345", COACHES)?.id).toBe("coach-khanh");
+    expect(findCoachByCode("  QWERT Y2345 ", COACHES)?.id).toBe("coach-khanh");
+    expect(findCoachByCode("H1T-KHANH", COACHES)).toBeNull();
+    expect(findCoachByCode("", COACHES)).toBeNull();
+    expect(findCoach("coach-khanh", COACHES)?.name).toBe("HLV Khánh");
+    expect(findCoach("x", COACHES)).toBeNull();
+  });
+});
+
+describe("opaque client ids", () => {
+  it("gives each account a random id that is not its email, and keeps it", () => {
+    const stored: Record<string, string> = {};
+    const a = opaqueIdFor("an@example.com", stored);
+    expect(a).toMatch(/^c-[a-z2-9]{10}$/);
+    expect(a).not.toContain("example");
+    expect(opaqueIdFor("an@example.com", stored)).toBe(a);
+    expect(opaqueIdFor("binh@example.com", stored)).not.toBe(a);
   });
 });
 
@@ -44,14 +93,14 @@ describe("clients", () => {
   });
 
   it("a user who joins is added at Level 1, once", () => {
-    const once = withJoined(SEED_CLIENTS, { id: "me", name: "Hào" });
-    expect(clientById(once, "me")).toMatchObject({ level: 1, name: "Hào" });
-    expect(withJoined(withClientLevel(once, "me", 3), { id: "me", name: "Hào" }).filter((c) => c.id === "me")).toHaveLength(1);
-    expect(clientById(withJoined(withClientLevel(once, "me", 3), { id: "me", name: "Hào" }), "me")?.level).toBe(3);
+    const once = withJoined(SEED_CLIENTS, { id: "me", name: "Học viên A" });
+    expect(clientById(once, "me")).toMatchObject({ level: 1, name: "Học viên A" });
+    expect(withJoined(withClientLevel(once, "me", 3), { id: "me", name: "Học viên A" }).filter((c) => c.id === "me")).toHaveLength(1);
+    expect(clientById(withJoined(withClientLevel(once, "me", 3), { id: "me", name: "Học viên A" }), "me")?.level).toBe(3);
   });
 
   it("removes a client who leaves", () => {
-    const once = withJoined(SEED_CLIENTS, { id: "me", name: "Hào" });
+    const once = withJoined(SEED_CLIENTS, { id: "me", name: "Học viên A" });
     expect(clientById(withoutClient(once, "me"), "me")).toBeNull();
   });
 });

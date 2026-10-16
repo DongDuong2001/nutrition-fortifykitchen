@@ -11,14 +11,12 @@ import { Row } from "@/components/ui/row";
 import { Switch } from "@/components/ui/switch";
 import { Sheet } from "@/components/ui/sheet";
 import { Toast } from "@/components/ui/toast";
-import { CoachApplicationSheet } from "@/components/coaching/coach-application-sheet";
 
 export default function DevUiPage() {
   const [switch1, setSwitch1] = useState(true);
   const [switch2, setSwitch2] = useState(false);
   const [selectedChip, setSelectedChip] = useState("all");
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [isCoachSheetOpen, setIsCoachSheetOpen] = useState(false);
   const [sheetInput, setSheetInput] = useState("");
 
   return (
@@ -269,10 +267,6 @@ export default function DevUiPage() {
               </PillButton>
             </div>
           </Sheet>
-          <PillButton variant="secondary" onClick={() => setIsCoachSheetOpen(true)}>
-            Mở đơn ứng tuyển huấn luyện viên
-          </PillButton>
-          <CoachApplicationSheet isOpen={isCoachSheetOpen} onClose={() => setIsCoachSheetOpen(false)} />
         </section>
 
         {/* Section: Toasts */}

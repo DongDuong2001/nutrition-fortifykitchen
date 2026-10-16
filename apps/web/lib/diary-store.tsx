@@ -28,6 +28,7 @@ import { DEFAULT_RECENT_FOODS, isRecentFood, pushRecent, type RecentFood } from 
 import { MOCK_FOODS } from "./mock/foods";
 import { syncRecipeFoods } from "./recipe-store";
 import { personaPatch } from "./demo-persona";
+import { isLiveMode } from "./api-mode";
 import {
   buildSavedMeal,
   defaultMealName,
@@ -64,6 +65,9 @@ import {
   deleteMealIn,
   deleteEntriesIn,
   moveEntriesIn,
+  restoreSlotsIn,
+  slotsBeforeMove,
+  type SlotMove,
   dismissUndoIn,
   entryNumbers,
   hasEnergy,
@@ -91,11 +95,13 @@ export type { AddedDiaryEntry, EntryView, EntryPatch } from "./diary-edits";
  */
 export interface ToastInfo {
   message: string;
-  kind: "added" | "deleted" | "undoable" | "saved";
+  kind: "added" | "deleted" | "undoable" | "saved" | "moved";
   mealSlot: MealSlot | null;
   /** How long it stays. A delete or a copy stays 5 s, which is also the undo window. */
   durationMs: number;
   undoIds?: string[];
+  /** "moved": where each moved entry was, for Hoàn tác. */
+  undoMoves?: SlotMove[];
 }
 
 const ADDED_TOAST_MS = 4000;
@@ -133,6 +139,8 @@ interface DiaryContextValue {
   deleteEntries: (ids: string[]) => void;
   /** Moves the chosen entries of today to a meal of today. */
   moveEntries: (ids: string[], slot: MealSlot) => void;
+  /** Puts the entries of the last Chuyển bữa back. Only works while the "moved" toast is shown. */
+  undoMove: () => void;
   /** Puts the last deleted entry back. Only works while the "deleted" toast is shown. */
   undoLastDelete: () => void;
   /** Adds copied entries to today in one step, with one undo toast. Existing entries are kept. */
@@ -476,7 +484,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       const loaded = loadProfile(new Date().getFullYear());
       // Demo mode only: ?as= and ?level= pick a mock account (lib/demo-persona). Applied before anything renders
       // from the role, so a gated page never flashes its 404 for the wrong account.
-      const persona = demoNow ? personaPatch(window.location.search) : null;
+      const persona = demoNow ? personaPatch(window.location.search, isLiveMode()) : null;
       const seeded = persona ? { ...loaded, ...persona } : loaded;
       if (persona) writeStoredProfile(seeded);
       setProfile(seeded);
@@ -602,12 +610,13 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     }
   }, [recentFoods, hydrated, ownStorage]);
 
-  // Auto-dismiss the toast. When a "deleted" toast goes, the undo goes with it.
+  // Auto-dismiss the toast. When a "deleted" toast goes, the undo goes with it; a "moved" toast has its own undo
+  // (in the toast) and leaves a delete's record alone.
   useEffect(() => {
     if (!toast) return;
     const timer = setTimeout(() => {
       setToast(null);
-      setEdits((prev) => dismissUndoIn(prev));
+      if (toast.kind !== "moved") setEdits((prev) => dismissUndoIn(prev));
     }, toast.durationMs);
     return () => clearTimeout(timer);
   }, [toast]);
@@ -719,16 +728,26 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     (ids: string[], slot: MealSlot) => {
       const count = ids.filter((id) => findEntry(edits, id, samples) !== null).length;
       if (count === 0) return;
-      setEdits((prev) => dismissUndoIn(moveEntriesIn(prev, ids, slot, samples)));
+      // A move has its own undo (the toast carries it) and leaves a pending delete's undo alone
+      const undoMoves = slotsBeforeMove(edits, ids, slot, samples);
+      setEdits((prev) => moveEntriesIn(prev, ids, slot, samples));
       setToast({
         message: `Đã chuyển ${count} món sang ${getMealSlotNameVi(slot)}`,
-        kind: "added",
+        kind: undoMoves.length > 0 ? "moved" : "added",
         mealSlot: slot,
-        durationMs: ADDED_TOAST_MS,
+        durationMs: UNDO_TOAST_MS,
+        undoMoves,
       });
     },
     [edits, samples]
   );
+
+  const undoMove = useCallback(() => {
+    const moves = toast?.undoMoves;
+    if (!moves) return;
+    setEdits((prev) => restoreSlotsIn(prev, moves, samples));
+    setToast(null);
+  }, [toast, samples]);
 
   const undoLastDelete = useCallback(() => {
     setEdits((prev) => undoDeleteIn(prev));
@@ -882,6 +901,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       deleteMeal,
       deleteEntries,
       moveEntries,
+      undoMove,
       undoLastDelete,
       copyEntries,
       undoCopy,
@@ -920,6 +940,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       deleteMeal,
       deleteEntries,
       moveEntries,
+      undoMove,
       undoLastDelete,
       copyEntries,
       undoCopy,

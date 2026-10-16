@@ -21,24 +21,99 @@ export interface MockClient {
   lastLoggedDaysAgo: number | null;
 }
 
-export const MOCK_COACHES: MockCoach[] = [{ id: "coach-khanh", name: "HLV Khánh", code: "H1T-KHANH" }];
+/** The mock coaches without their codes: a code is made once per browser (readCoaches), never derived from the name. */
+export const MOCK_COACH_BASE: ReadonlyArray<Omit<MockCoach, "code">> = [{ id: "coach-khanh", name: "HLV Khánh" }];
 
 export const SEED_CLIENTS: MockClient[] = [
-  { id: "client-1", name: "Nguyễn Minh Anh", level: 2, lastLoggedDaysAgo: 0 },
-  { id: "client-2", name: "Trần Quốc Bảo", level: 1, lastLoggedDaysAgo: 1 },
-  { id: "client-3", name: "Lê Thu Hà", level: 4, lastLoggedDaysAgo: 0 },
-  { id: "client-4", name: "Phạm Gia Huy", level: 3, lastLoggedDaysAgo: null },
+  { id: "client-1", name: "Học viên A", level: 2, lastLoggedDaysAgo: 0 },
+  { id: "client-2", name: "Học viên B", level: 1, lastLoggedDaysAgo: 1 },
+  { id: "client-3", name: "Học viên C", level: 4, lastLoggedDaysAgo: 0 },
+  { id: "client-4", name: "Học viên D", level: 3, lastLoggedDaysAgo: null },
 ];
 
 export const CLIENTS_KEY = "h1t_mock_coach_clients_v1";
+export const CODES_KEY = "h1t_mock_coach_codes_v1";
+export const CLIENT_IDS_KEY = "h1t_mock_client_ids_v1";
+
+export const CODE_LENGTH = 10;
+// No 0, O, 1, I or L: a code read aloud or copied by hand stays unambiguous.
+const CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+
+/** A code of CODE_LENGTH symbols from random bytes (one byte each). Pure; `randomBytes` supplies the bytes. */
+export function codeFromBytes(bytes: ArrayLike<number>): string {
+  return Array.from({ length: CODE_LENGTH }, (_, i) => CODE_ALPHABET[bytes[i] % CODE_ALPHABET.length]).join("");
+}
+
+export function randomBytes(n: number): Uint8Array {
+  const out = new Uint8Array(n);
+  if (typeof crypto !== "undefined" && typeof crypto.getRandomValues === "function") crypto.getRandomValues(out);
+  else for (let i = 0; i < n; i++) out[i] = Math.floor(Math.random() * 256);
+  return out;
+}
+
+export const randomCode = (): string => codeFromBytes(randomBytes(CODE_LENGTH));
+
+/** The coaches with a code each: the stored code, or a new random one (written back in `stored`) when missing. */
+export function withCodes(
+  base: ReadonlyArray<Omit<MockCoach, "code">>,
+  stored: Record<string, string>,
+  make: () => string = randomCode
+): MockCoach[] {
+  return base.map((c) => {
+    const code = stored[c.id] && /^[A-Z0-9]{10}$/.test(stored[c.id]) ? stored[c.id] : (stored[c.id] = make());
+    return { ...c, code };
+  });
+}
+
+/** An opaque id for a user on this server: new random one when the key has none. Never built from an email. */
+export function opaqueIdFor(key: string, stored: Record<string, string>, make: () => string = () => `c-${randomCode().toLowerCase()}`): string {
+  return (stored[key] ??= make());
+}
+
+function readMap(key: string): Record<string, string> {
+  try {
+    const parsed: unknown = JSON.parse(serverStorage().getItem(key) ?? "{}");
+    return typeof parsed === "object" && parsed !== null && !Array.isArray(parsed) ? (parsed as Record<string, string>) : {};
+  } catch {
+    return {};
+  }
+}
+
+function writeMap(key: string, map: Record<string, string>): void {
+  try {
+    serverStorage().setItem(key, JSON.stringify(map));
+  } catch {
+    // Storage blocked: the code lasts for this page view only
+  }
+}
+
+/** The mock coaches with their codes, made on first use and kept. Client only. */
+export function readCoaches(): MockCoach[] {
+  const stored = readMap(CODES_KEY);
+  const before = JSON.stringify(stored);
+  const coaches = withCodes(MOCK_COACH_BASE, stored);
+  if (JSON.stringify(stored) !== before) writeMap(CODES_KEY, stored);
+  return coaches;
+}
+
+/** This account's id on the mock server: random and opaque, so the email never reaches a URL. Client only. */
+export function clientIdFor(account: string | null): string {
+  const stored = readMap(CLIENT_IDS_KEY);
+  const key = account ?? "me";
+  const had = key in stored;
+  const id = opaqueIdFor(key, stored);
+  if (!had) writeMap(CLIENT_IDS_KEY, stored);
+  return id;
+}
 
 /** The coach whose code this is (any case, spaces ignored), or null. */
-export function findCoachByCode(code: string, coaches: readonly MockCoach[] = MOCK_COACHES): MockCoach | null {
+export function findCoachByCode(code: string, coaches: readonly MockCoach[] = readCoaches()): MockCoach | null {
   const wanted = code.trim().toUpperCase().replace(/\s+/g, "");
+  if (wanted === "") return null;
   return coaches.find((c) => c.code === wanted) ?? null;
 }
 
-export function findCoach(id: string, coaches: readonly MockCoach[] = MOCK_COACHES): MockCoach | null {
+export function findCoach(id: string, coaches: readonly MockCoach[] = readCoaches()): MockCoach | null {
   return coaches.find((c) => c.id === id) ?? null;
 }
 

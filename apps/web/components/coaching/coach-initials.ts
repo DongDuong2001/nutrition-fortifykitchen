@@ -1,4 +1,4 @@
-/** The last two initials of a name ("Nguyễn Thu Hà" gives "TH"), upper case, for the avatar circle. */
+/** The last two initials of a name ("Học viên A" gives "VA"), upper case, for the avatar circle. */
 export function initialsOf(name: string): string {
   return name
     .split(" ")

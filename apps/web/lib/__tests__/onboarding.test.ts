@@ -113,7 +113,7 @@ describe("validateSetupName", () => {
 
   it("accepts 1 to 40 characters after trimming", () => {
     expect(validateSetupName("A")).toBeNull();
-    expect(validateSetupName("  Vũ Minh Hào  ")).toBeNull();
+    expect(validateSetupName("  Học viên A  ")).toBeNull();
     expect(validateSetupName("a".repeat(40))).toBeNull();
     expect(validateSetupName(`  ${"a".repeat(40)}  `)).toBeNull();
   });

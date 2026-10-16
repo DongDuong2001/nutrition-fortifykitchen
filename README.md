@@ -97,17 +97,14 @@ The platform follows a clean separation between an authenticated Go API service 
   - Vi chat (`/trends/micros`): 22-micronutrient completion rates and deficit rankings.
   - Co the (`/trends/body`): Body weight history and tracking.
 - **Ghi nhanh (`/add`)**: Fast food logging, 1-tap re-logging from recent foods, and saved meal insertion.
-- **Kham pha (`/explore`)**: Food catalog search, 10 food categories, "Giau..." micronutrient food lists, featured coaches directory (`/explore/coaches`), and community leaderboard (`/explore/leaderboard`).
+- **Kham pha (`/explore`)**: Food catalog search, 10 food categories, "Giau..." micronutrient food lists, and, in mock and demo mode only, a sample coaches directory (`/explore/coaches`) and leaderboard (`/explore/leaderboard`).
 - **Cai dat (`/settings`)**: Profile body data, daily targets, account management, notification reminders, data sources, Terms of Service (`/terms`), and Privacy Policy (`/privacy`).
 
-### Progressive Coaching & Level System
-- **Nutritional Mastery Tiers (Level 1 to 5)**:
-  - Level 1: Nguoi moi bat dau (1-day streak)
-  - Level 2: Ky luat co ban (3-day streak, 12 vi chat dat chuan)
-  - Level 3: Can bang vi chat (7-day streak, 16 vi chat dat chuan)
-  - Level 4: Dinh duong toi uu (14-day streak, 20 vi chat dat chuan)
-  - Level 5: Bac thay H1T (Certified Coach level)
-- **Coach Application & Verification**: Automatic advancement caps at Level 4. Level 4 users unlock the Coach Application workflow. Level 5 promotion requires administrative verification via the Admin Review portal (`/admin/review`).
+### Coaching & Level System
+- **Level is set by the coach, not earned.** Level 0 means no coach. Joining a coach (invite code or `/join/<code>`) starts Level 1; only the coach changes it afterwards, between 1 and 5. The Level decides which nutrients Hôm nay lists (`lib/level-nutrients.ts`).
+- **Roles** (user, coach, admin) come only from the API (`nutrition.profiles.role`). Until the API returns the role the app treats everyone as a user.
+- **No coach application flow.** Nobody applies to become a coach in the app; the admin review queue (`/admin/review`) holds meal-plan drafts only.
+- **Live mode (`NEXT_PUBLIC_API_MODE=live`) shows no sample data:** the coaching screens, the coach directory (`/explore/coaches`), the leaderboard (`/explore/leaderboard`) and the coach carousel are hidden until the API provides them, and `?demo`, `?as` and `?level` do nothing. They exist in mock and demo mode for walking the flows.
 
 ### SEO & Legal Compliance
 - **Robots.txt & Sitemap**: Native Next.js metadata routes (`/robots.txt` and `/sitemap.xml`) exposing public exploration routes while blocking private user data from search indexing.

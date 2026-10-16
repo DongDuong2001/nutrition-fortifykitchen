@@ -402,6 +402,25 @@ export function deleteEntriesIn(edits: DiaryEdits, ids: readonly string[], sampl
   };
 }
 
+/** Where the entries that a move would change are now: one record per entry, so a move can be put back. */
+export interface SlotMove {
+  id: string;
+  slot: MealSlot;
+}
+
+/** The current meal of each chosen entry that is not in `target` yet (unknown ids are skipped). */
+export function slotsBeforeMove(edits: DiaryEdits, ids: readonly string[], target: MealSlot, samples: SampleItemInfo[] = SAMPLE_ITEMS): SlotMove[] {
+  return [...new Set(ids)].flatMap((id) => {
+    const view = findEntry(edits, id, samples);
+    return view && view.mealSlot !== target ? [{ id, slot: view.mealSlot }] : [];
+  });
+}
+
+/** Puts each entry back in the meal it came from. Entries that have since been deleted are skipped. */
+export function restoreSlotsIn(edits: DiaryEdits, moves: readonly SlotMove[], samples: SampleItemInfo[] = SAMPLE_ITEMS): DiaryEdits {
+  return moves.reduce((acc, m) => updateEntryIn(acc, m.id, { mealSlot: m.slot }, samples), edits);
+}
+
 /** Moves the chosen entries to another meal of the day. Ids that are unknown are skipped. */
 export function moveEntriesIn(edits: DiaryEdits, ids: readonly string[], slot: MealSlot, samples: SampleItemInfo[] = SAMPLE_ITEMS): DiaryEdits {
   return ids.reduce((acc, id) => updateEntryIn(acc, id, { mealSlot: slot }, samples), edits);

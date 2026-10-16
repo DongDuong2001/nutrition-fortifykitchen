@@ -11,7 +11,7 @@ import { useDiary } from "@/lib/diary-store";
 import { formatDayLabel } from "@/lib/format";
 import { shiftIsoDate } from "@/lib/day-history";
 import { NOT_LOGGED_TODAY, lastLoggedText, loggedToday } from "@/lib/coach-preview";
-import { MOCK_COACHES, readClients, type MockClient } from "@/lib/mock-coach-server";
+import { readClients, readCoaches, type MockClient, type MockCoach } from "@/lib/mock-coach-server";
 
 const BUTTON =
   "inline-flex min-h-[44px] flex-1 cursor-pointer items-center justify-center rounded-full border border-card-border bg-card px-4 text-[15px] font-bold text-text active:scale-[0.97] motion-reduce:active:scale-100";
@@ -20,20 +20,23 @@ const BUTTON =
 export default function CoachPage() {
   const goBack = useBack();
   const { todayIso } = useDiary();
-  const coach = MOCK_COACHES[0];
+  // The code is made in this browser on first use, so it is read after mount
+  const [coach, setCoach] = useState<MockCoach | null>(null);
   const [clients, setClients] = useState<MockClient[] | null>(null);
   const [copied, setCopied] = useState<"code" | "link" | null>(null);
   const [canShare, setCanShare] = useState(false);
 
   useEffect(() => {
+    setCoach(readCoaches()[0] ?? null);
     setClients(readClients());
     setCanShare(typeof navigator !== "undefined" && typeof navigator.share === "function");
   }, []);
 
-  const link = typeof window === "undefined" ? `/join/${coach.code}` : `${window.location.origin}/join/${coach.code}`;
+  const code = coach?.code ?? "";
+  const link = typeof window === "undefined" ? `/join/${code}` : `${window.location.origin}/join/${code}`;
 
   async function copy(kind: "code" | "link") {
-    const text = kind === "code" ? coach.code : link;
+    const text = kind === "code" ? code : link;
     try {
       await navigator.clipboard.writeText(text);
     } catch {
@@ -46,7 +49,7 @@ export default function CoachPage() {
   }
 
   function share() {
-    navigator.share({ title: "H1T MICRO", text: `Tham gia theo dõi với ${coach.name}`, url: link }).catch(() => {});
+    navigator.share({ title: "H1T MICRO", text: `Tham gia theo dõi với ${coach?.name ?? "huấn luyện viên"}`, url: link }).catch(() => {});
   }
 
   const dayLabel = (daysAgo: number | null) =>
@@ -61,7 +64,7 @@ export default function CoachPage() {
             Mã mời của bạn
           </h2>
           <p data-align-group="coach-invite" className="m-0 font-display text-[32px] font-extrabold italic leading-none tabular-nums text-text">
-            {coach.code}
+            {code || "…"}
           </p>
           <div data-align-group="coach-invite" className="flex flex-wrap gap-2">
             <button type="button" onClick={() => copy("code")} className={BUTTON}>
@@ -77,7 +80,7 @@ export default function CoachPage() {
             )}
           </div>
           <p role="status" className="m-0 min-h-[20px] text-[13px] leading-snug text-secondary">
-            {copied === "code" ? "Đã sao chép mã" : copied === "link" ? "Đã sao chép liên kết" : `Liên kết: /join/${coach.code}`}
+            {copied === "code" ? "Đã sao chép mã" : copied === "link" ? "Đã sao chép liên kết" : `Liên kết: /join/${code}`}
           </p>
         </Card>
 

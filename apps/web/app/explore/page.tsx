@@ -13,6 +13,8 @@ import { browsableFoods } from "@/lib/mock/foods";
 import { useDiary } from "@/lib/diary-store";
 import { searchFoods } from "@/lib/search";
 import { FOOD_CATEGORIES, categoryLabel, categoryOf } from "@/lib/food-categories";
+import { coachingAvailable } from "@/lib/coaching-link";
+import { isLiveMode } from "@/lib/api-mode";
 
 /**
  * Khám phá (IA v2): find a food and understand it. Search, the 10 category chips, then Gần đây, Yêu thích,
@@ -27,8 +29,13 @@ export default function ExplorePage() {
 
   const chips = [
     { id: "all", label: "Tất cả", active: true },
-    { id: "coaches", label: "Huấn luyện viên", onClick: () => router.push("/explore/coaches") },
-    { id: "leaderboard", label: "Bảng xếp hạng", onClick: () => router.push("/explore/leaderboard") },
+    // Sample coaches and ranking exist in mock and demo mode only (no mock data in live mode)
+    ...(coachingAvailable(isLiveMode())
+      ? [
+          { id: "coaches", label: "Huấn luyện viên", onClick: () => router.push("/explore/coaches") },
+          { id: "leaderboard", label: "Bảng xếp hạng", onClick: () => router.push("/explore/leaderboard") },
+        ]
+      : []),
     ...FOOD_CATEGORIES.map((c) => ({
       id: c.key,
       label: c.label,

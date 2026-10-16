@@ -303,7 +303,8 @@ function HomeContent() {
   }
 
   function confirmMove(target: CopyTarget) {
-    if (target === "keep") return;
+    // A past day is read-only: nothing moves there
+    if (target === "keep" || isPast) return;
     moveEntries([...liveSelected], target);
     exitSelect();
   }
@@ -320,6 +321,7 @@ function HomeContent() {
             onCopy={() => setTargetSheet("copy")}
             onMove={() => setTargetSheet("move")}
             onDelete={() => {
+              if (isPast) return;
               deleteEntries([...liveSelected]);
               exitSelect();
             }}

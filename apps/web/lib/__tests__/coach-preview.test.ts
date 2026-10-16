@@ -42,7 +42,7 @@ describe("previewForLevel", () => {
 
 describe("texts", () => {
   it("the save toast", () => {
-    expect(levelChangedToast("Nguyễn Minh Anh", 3)).toBe("Đã đổi Level của Nguyễn Minh Anh thành 3");
+    expect(levelChangedToast("Học viên A", 3)).toBe("Đã đổi Level của Học viên A thành 3");
   });
 
   it("last logged", () => {

@@ -4,7 +4,6 @@ export interface LeaderboardRankItem {
   rank: number;
   userId: string;
   displayName: string;
-  masteryLevel: number;
   daysLogged: number;
   microsCompletionPct: number;
   totalScore: number;
@@ -53,17 +52,18 @@ export function calculateDisciplineScore(daysLogged: number, avgMicrosPct: numbe
   return Math.min(1000, Math.round(raw));
 }
 
-const MOCK_COMMUNITY_USERS: Array<{ id: string; name: string; level: number; days: number; micros: number; hits: number }> = [
-  { id: "u-1", name: "Minh Quân", level: 5, days: 7, micros: 95.4, hits: 7 },
-  { id: "u-2", name: "Thanh Trúc", level: 4, days: 7, micros: 91.2, hits: 6 },
-  { id: "u-3", name: "Hoàng Long", level: 4, days: 6, micros: 88.5, hits: 6 },
-  { id: "u-4", name: "Phương Anh", level: 3, days: 6, micros: 82.0, hits: 5 },
-  { id: "u-5", name: "Đức Huy", level: 3, days: 5, micros: 79.4, hits: 4 },
-  { id: "u-6", name: "Thùy Dung", level: 2, days: 5, micros: 75.2, hits: 4 },
-  { id: "u-7", name: "Bảo Nam", level: 2, days: 4, micros: 71.0, hits: 3 },
-  { id: "u-8", name: "Khánh Linh", level: 2, days: 4, micros: 68.5, hits: 3 },
-  { id: "u-9", name: "Anh Tuấn", level: 1, days: 3, micros: 64.0, hits: 2 },
-  { id: "u-10", name: "Ngọc Mai", level: 1, days: 3, micros: 58.2, hits: 2 },
+// Sample ranking of mock and demo mode only (live mode shows none). Neutral names: no real-looking people.
+const MOCK_COMMUNITY_USERS: Array<{ id: string; name: string; days: number; micros: number; hits: number }> = [
+  { id: "u-1", name: "Học viên A", days: 7, micros: 95.4, hits: 7 },
+  { id: "u-2", name: "Học viên B", days: 7, micros: 91.2, hits: 6 },
+  { id: "u-3", name: "Học viên C", days: 6, micros: 88.5, hits: 6 },
+  { id: "u-4", name: "Học viên D", days: 6, micros: 82.0, hits: 5 },
+  { id: "u-5", name: "Học viên E", days: 5, micros: 79.4, hits: 4 },
+  { id: "u-6", name: "Học viên F", days: 5, micros: 75.2, hits: 4 },
+  { id: "u-7", name: "Học viên G", days: 4, micros: 71.0, hits: 3 },
+  { id: "u-8", name: "Học viên H", days: 4, micros: 68.5, hits: 3 },
+  { id: "u-9", name: "Học viên I", days: 3, micros: 64.0, hits: 2 },
+  { id: "u-10", name: "Học viên K", days: 3, micros: 58.2, hits: 2 },
 ];
 
 export function getMockLeaderboard(period: LeaderboardPeriod, currentUserId = "user-me"): LeaderboardResponse {
@@ -79,7 +79,6 @@ export function getMockLeaderboard(period: LeaderboardPeriod, currentUserId = "u
       rank: idx + 1,
       userId: u.id,
       displayName: u.name,
-      masteryLevel: u.level,
       daysLogged: days,
       microsCompletionPct: u.micros,
       totalScore: score,
@@ -99,7 +98,6 @@ export function getMockLeaderboard(period: LeaderboardPeriod, currentUserId = "u
       rank: 5,
       userId: currentUserId,
       displayName: "Bạn",
-      masteryLevel: 3,
       daysLogged: myDays,
       microsCompletionPct: myMicros,
       totalScore: myScore,

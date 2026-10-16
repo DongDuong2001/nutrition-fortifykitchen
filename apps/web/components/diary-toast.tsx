@@ -8,11 +8,11 @@ const TICK_MS = 100;
 
 /**
  * The app's one toast, from the diary store. "Đã thêm …" offers Xem (jump to the meal), "Đã xóa …",
- * "Đã chép …" and the one-tap adds (a recent, a Bữa ăn của tôi, Chỉ ghi kcal) offer Hoàn tác, "Đã lưu …" offers
+ * "Đã chép …", "Đã chuyển …" and the one-tap adds (a recent, a Bữa ăn của tôi, Chỉ ghi kcal) offer Hoàn tác, "Đã lưu …" offers
  * Xem (Khám phá). The store ends it after its duration; this draws the countdown.
  */
 export function DiaryToast() {
-  const { toast, undoLastDelete, undoCopy, setHighlightedMeal } = useDiary();
+  const { toast, undoLastDelete, undoCopy, undoMove, setHighlightedMeal } = useDiary();
   const [percent, setPercent] = useState(100);
 
   useEffect(() => {
@@ -44,7 +44,7 @@ export function DiaryToast() {
           message={toast.message}
           actionLabel={toast.kind === "added" || toast.kind === "saved" ? "Xem" : "Hoàn tác"}
           actionHref={toast.kind === "saved" ? "/explore" : undefined}
-          onAction={toast.kind === "deleted" ? undoLastDelete : toast.kind === "undoable" ? undoCopy : showMeal}
+          onAction={toast.kind === "deleted" ? undoLastDelete : toast.kind === "undoable" ? undoCopy : toast.kind === "moved" ? undoMove : showMeal}
           progressPercent={percent}
         />
       </div>

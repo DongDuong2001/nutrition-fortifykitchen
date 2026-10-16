@@ -12,23 +12,13 @@ import { MOCK_FOODS, type FoodItem } from "./mock/foods";
 import { searchFoods as searchMockFoods } from "./search";
 import type { SetupProfile } from "./onboarding";
 import { accountStorage } from "./storage-keys";
-import {
-  type CoachProfile,
-  type CoachApplication,
-  filterCoachesBySpecialty,
-  getCoachById,
-  getCoachApplications,
-  submitCoachApplication,
-  updateCoachApplicationStatus,
-} from "./coaches";
+import { type CoachProfile, filterCoachesBySpecialty, getCoachById } from "./coaches";
 import { type LeaderboardPeriod, type LeaderboardResponse, getMockLeaderboard, setLeaderboardOptIn as setLeaderboardOptInState } from "./leaderboard";
-import { type MasteryLevelInfo, calculateMasteryLevel } from "./mastery-levels";
 
 export * from "./nutrients";
 export * from "./mock/foods";
 export * from "./coaches";
 export * from "./leaderboard";
-export * from "./mastery-levels";
 export type { MockDayData, MockMeal, MockMacroStat, MockMicroStat };
 
 export interface NutrientValues {
@@ -866,8 +856,10 @@ export const apiClient = {
           if (Array.isArray(json)) return json;
         }
       } catch {
-        // Fallback
+        // No answer
       }
+      // Live mode never shows the sample coaches
+      return [];
     }
     return filterCoachesBySpecialty(specialty || "Tất cả");
   },
@@ -880,8 +872,9 @@ export const apiClient = {
           return await res.json();
         }
       } catch {
-        // Fallback
+        // No answer
       }
+      return null;
     }
     return getCoachById(id);
   },
@@ -894,8 +887,10 @@ export const apiClient = {
           return await res.json();
         }
       } catch {
-        // Fallback
+        // No answer
       }
+      // Live mode never shows the sample ranking
+      return { period, periodLabel: "", cycleEndDate: "", ranks: [], currentUserRank: null, optedIn: false };
     }
     return getMockLeaderboard(period);
   },
@@ -914,22 +909,6 @@ export const apiClient = {
       }
     }
     return true;
-  },
-
-  getMasteryLevel(streakDays = 0, avgMicrosAchieved = 0, isCoach = false): MasteryLevelInfo {
-    return calculateMasteryLevel(streakDays, avgMicrosAchieved, isCoach);
-  },
-
-  async getCoachApplications(): Promise<CoachApplication[]> {
-    return getCoachApplications();
-  },
-
-  async submitCoachApplication(data: Omit<CoachApplication, "id" | "status" | "createdAt">): Promise<CoachApplication> {
-    return submitCoachApplication(data);
-  },
-
-  async updateCoachApplicationStatus(id: string, status: "approved" | "rejected"): Promise<void> {
-    updateCoachApplicationStatus(id, status);
   },
 };
 

@@ -12,7 +12,7 @@ Production build, clock fixed at 2026-10-15 10:00 Asia/Ho_Chi_Minh, sizes 390x84
 - Without file sharing, Lưu ảnh is the only (primary) button. With it, Chia sẻ calls navigator.share with one
   PNG file inside the tap; a cancelled share shows nothing; a failure shows a message and Thử lại.
 - Esc closes and focus returns to the icon.
-PNGs are saved to .screenshots/cc-27g-*.png (short, long and past days use the account "Vũ Minh Hào").
+PNGs are saved to .screenshots/cc-27g-*.png (short, long and past days use the account "Học viên A").
 Run with: ALIGN_BASE_URL=http://localhost:3104 npm run probe -- tests/probes/cc_26.py
 """
 import base64
@@ -124,7 +124,7 @@ def seeded(slots):
     return json.dumps([entry(i, s, f"Món thử {i}") for i, s in enumerate(slots)])
 
 
-NAMED = {"sex": "male", "birthYear": 2003, "weightKg": 65.4, "goal": "maintain", "periodMode": False, "trainingMinutesDefault": 60, "displayName": "Vũ Minh Hào", "hintSeen": True}
+NAMED = {"sex": "male", "birthYear": 2003, "weightKg": 65.4, "goal": "maintain", "periodMode": False, "trainingMinutesDefault": 60, "displayName": "Học viên A", "hintSeen": True}
 NAMED_INIT = f"try {{ localStorage.setItem('h1t_profile_v1_demo', {json.dumps(json.dumps(NAMED))}); }} catch (e) {{}}"
 
 NO_SAMPLE = json.dumps({f"item-{i}": {"deleted": True} for i in range(1, 8)})
@@ -231,7 +231,7 @@ def run(browser, size, tag):
     ctx.close()
 
     # today with a name, no file sharing: Lưu ảnh is the primary button
-    profile = {"sex": "male", "birthYear": 2003, "weightKg": 65.4, "goal": "maintain", "periodMode": False, "trainingMinutesDefault": 60, "displayName": "Nguyễn Thị Hồng Ánh"}
+    profile = {"sex": "male", "birthYear": 2003, "weightKg": 65.4, "goal": "maintain", "periodMode": False, "trainingMinutesDefault": 60, "displayName": "Học viên Có Tên Khá Dài Mẫu"}
     ctx, pg = page(browser, size, init(NO_SHARE, local("h1t_profile_v1_demo", json.dumps(profile))))
     go(pg, "/")
     btn = vis(pg, BUTTON)
@@ -258,7 +258,7 @@ def run(browser, size, tag):
     check(lv["red"] + lv["yellow"] + lv["green"] == 0, f"{tag} today is two-tone: no red/yellow/green in the image {lv}")
     if s:
         t = s["text"]
-        check(s["top"].startswith("Nguyễn Thị Hồng Ánh") and "Hôm nay 15/10" in s["top"], f"{tag} name then the date on top ({s['top']!r})")
+        check(s["top"].startswith("Học viên Có Tên Khá Dài Mẫu") and "Hôm nay 15/10" in s["top"], f"{tag} name then the date on top ({s['top']!r})")
         check_head(s, tag, "today", named=True)
         check("Cả ngày · 7 món" in t, f"{tag} the summary card is in the image")
         for banned in ["Thêm", "Chia sẻ", "Đủ 22 vi chất", "Chưa ăn", "●", "⋯", "Tổng quan", "Khám phá", "Cài đặt", "Về hôm nay", "Ngày tập"]:
@@ -290,12 +290,12 @@ def run(browser, size, tag):
     pg.wait_for_timeout(800)
     check(pg.evaluate("window.__shareSnaps.length") == 0, f"{tag} no name: nothing was drawn")
     pg.screenshot(path=os.path.join(SHOTS, f"cc-27g-name-step-{w}.png"))
-    field.fill("Thanh Trúc")
+    field.fill("Học viên C")
     check(go_on.is_enabled() and go_on.bounding_box()["height"] >= 43.5, f"{tag} no name: Tiếp tục enables with a name (44 px)")
     go_on.click()
     wait_preview(pg)
     s = snap(pg)
-    check(s is not None and s["top"].startswith("Thanh Trúc"), f"{tag} no name: the image has the name ({s['top'] if s else None!r})")
+    check(s is not None and s["top"].startswith("Học viên C"), f"{tag} no name: the image has the name ({s['top'] if s else None!r})")
     check_head(s, tag, "name step", named=True)
     pg.keyboard.press("Escape")
     pg.reload(wait_until="networkidle")
@@ -312,7 +312,7 @@ def run(browser, size, tag):
     wait_preview(pg)
     s = snap(pg)
     check(s is not None and s["sections"] == ["Bữa sáng", "Bữa trưa"], f"{tag} meals with no food are absent ({s['sections'] if s else None})")
-    check(s is not None and s["top"].startswith("Vũ Minh Hào"), f"{tag} short day: the name is on top ({s['top'] if s else None!r})")
+    check(s is not None and s["top"].startswith("Học viên A"), f"{tag} short day: the name is on top ({s['top'] if s else None!r})")
     check_head(s, tag, "short day", named=True)
     name, path = download(pg, f"cc-27g-short-{w}.png")
     check_png(analyse(pg, path), s, tag, "two meals")
@@ -346,7 +346,7 @@ def run(browser, size, tag):
     check(lv["red"] + lv["yellow"] + lv["green"] + lv["blue"] > 0, f"{tag} past day uses the four levels {lv}")
     if s:
         check(all(x in s["text"] for x in ["Thiếu <50%", "Trung bình", "Gần đủ", "Đạt ≥100%"]) and "Xanh: đạt mục tiêu" not in s["text"], f"{tag} past day's 4-level key")
-        check("Hôm qua 14/10" in s["top"] and s["top"].startswith("Vũ Minh Hào"), f"{tag} past: name and date label ({s['top']!r})")
+        check("Hôm qua 14/10" in s["top"] and s["top"].startswith("Học viên A"), f"{tag} past: name and date label ({s['top']!r})")
         check_head(s, tag, "past day", named=True)
     alt = pg.get_by_role("dialog").get_by_role("img").get_attribute("alt") or ""
     check(alt.startswith("Ảnh tóm tắt Hôm qua 14/10"), f"{tag} past alt: {alt[:60]}")

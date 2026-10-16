@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  safeDecode,
   NO_COACHING,
   canManageClients,
   coachingAvailable,
@@ -135,8 +136,8 @@ describe("roles and codes", () => {
   });
 
   it("codes are compared trimmed and in capitals", () => {
-    expect(normaliseCode("  h1t-khanh ")).toBe("H1T-KHANH");
-    expect(normaliseCode("h1t - khanh")).toBe("H1T-KHANH");
+    expect(normaliseCode("  ab3d-5fgh ")).toBe("AB3D-5FGH");
+    expect(normaliseCode("ab3d - 5fgh")).toBe("AB3D-5FGH");
   });
 });
 
@@ -159,12 +160,22 @@ describe("live-mode guard", () => {
     expect(levelNotice(live)).toBeNull();
   });
 
-  it("live mode keeps the role", () => {
-    expect(effectiveCoaching({ ...coached, role: "admin" }, true).role).toBe("admin");
+  it("live mode forces the role to user until the API returns it, whatever the stored profile says", () => {
+    for (const role of ["coach", "admin"] as const) expect(effectiveCoaching({ ...coached, role }, true).role).toBe("user");
+    expect(effectiveCoaching({ ...coached, role: "admin" }, false).role).toBe("admin");
   });
 
   it("the guard does not touch the stored state", () => {
     effectiveCoaching(coached, true);
     expect(coached.level).toBe(3);
+  });
+});
+
+describe("safeDecode", () => {
+  it("decodes a route parameter, and gives an empty string for a bad one", () => {
+    expect(safeDecode("H1T%20AB")).toBe("H1T AB");
+    expect(safeDecode("abc")).toBe("abc");
+    expect(safeDecode("%E0%A4%A")).toBe("");
+    expect(safeDecode("100%")).toBe("");
   });
 });

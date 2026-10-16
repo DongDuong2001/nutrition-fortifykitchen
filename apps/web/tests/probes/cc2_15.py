@@ -133,7 +133,7 @@ def first_run(browser, name, size):
     check(pg.evaluate("document.activeElement && document.activeElement.id") == "setup-weight",
           f"{where} Enter: birth year moves focus to the weight")
     weight.fill(str(WEIGHT))
-    name_field.fill("Vũ Minh Hào")
+    name_field.fill("Học viên A")
     check(advance.is_enabled(), f"{where} profile: the button enables once the name is there")
 
     # 3. to the goal step, and back keeps the values

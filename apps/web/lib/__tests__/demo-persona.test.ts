@@ -16,10 +16,10 @@ describe("personaPatch", () => {
   });
 
   it("each mock account has a name for the share image", () => {
-    expect(personaPatch("?as=user0")?.displayName).toBe("Thanh Trúc");
-    expect(personaPatch("?as=user2")?.displayName).toBe("Minh Hào");
-    expect(personaPatch("?as=coach")?.displayName).toBe("HLV Khánh");
-    expect(personaPatch("?as=admin")?.displayName).toBe("Admin");
+    expect(personaPatch("?as=user0")?.displayName).toBe("Học viên A");
+    expect(personaPatch("?as=user2")?.displayName).toBe("Học viên B");
+    expect(personaPatch("?as=coach")?.displayName).toBe("HLV Demo");
+    expect(personaPatch("?as=admin")?.displayName).toBe("Admin Demo");
   });
 
   it("?level= alone leaves the name of the profile alone", () => {
@@ -41,5 +41,11 @@ describe("personaPatch", () => {
       const s = personaPatch(q)!;
       expect(s.level === 0).toBe(s.coach === null);
     }
+  });
+
+  it("does nothing in live mode: no ?as, no ?level", () => {
+    expect(personaPatch("?as=admin", true)).toBeNull();
+    expect(personaPatch("?as=coach&level=4", true)).toBeNull();
+    expect(personaPatch("?level=3", true)).toBeNull();
   });
 });

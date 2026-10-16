@@ -46,7 +46,7 @@ def squash(t):
     return re.sub(r"\s+", " ", t).strip()
 
 
-NAMED = '{"sex":"male","birthYear":2003,"weightKg":65,"goal":"maintain","periodMode":false,"trainingMinutesDefault":60,"displayName":"Vũ Minh Hào"}'
+NAMED = '{"sex":"male","birthYear":2003,"weightKg":65,"goal":"maintain","periodMode":false,"trainingMinutesDefault":60,"displayName":"Học viên A"}'
 
 
 def new_page(browser, size):
@@ -236,7 +236,7 @@ def run(browser, size, tag):
     pg.wait_for_timeout(500)
     field = pg.get_by_label("Mã huấn luyện viên (nếu có)")
     check(field.count() == 1 and field.bounding_box()["height"] >= 43.5, f"{tag} setup: the optional coach code field")
-    pg.locator("#setup-display-name").fill("Vũ Minh Hào")
+    pg.locator("#setup-display-name").fill("Học viên A")
     pg.screenshot(path=os.path.join(SHOTS, f"cc-28c-setup-{w}.png"))
     field.fill("h1t-khanh")
     finish = pg.get_by_role("button", name=re.compile("^(Tiếp tục|Hoàn tất)$")).locator("visible=true").first

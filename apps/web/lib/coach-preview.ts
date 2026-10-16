@@ -43,7 +43,7 @@ export function previewHasChanges(groups: PreviewGroup[]): boolean {
   return groups.some((g) => g.items.some((i) => i.status !== "same"));
 }
 
-/** "Đã đổi Level của Nguyễn Minh Anh thành 3" */
+/** "Đã đổi Level của Học viên A thành 3" */
 export function levelChangedToast(name: string, level: number): string {
   return `Đã đổi Level của ${name} thành ${level}`;
 }

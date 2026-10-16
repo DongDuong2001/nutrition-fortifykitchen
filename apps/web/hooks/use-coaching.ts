@@ -19,7 +19,7 @@ import {
   type LevelNotice,
   type Role,
 } from "@/lib/coaching-link";
-import { clientById, findCoachByCode, readClients, withJoined, withoutClient, writeClients, type MockCoach } from "@/lib/mock-coach-server";
+import { clientById, clientIdFor, findCoachByCode, readClients, withJoined, withoutClient, writeClients, type MockCoach } from "@/lib/mock-coach-server";
 import { clearPendingCoachCode } from "@/lib/pending-coach";
 
 export interface Coaching {
@@ -39,9 +39,9 @@ export interface Coaching {
   dismissHint: () => void;
 }
 
-/** The id this user has on the mock coach server: their account, or "me" when there is none. */
+/** The id this user has on the mock coach server: a random one per account, never the email. */
 function serverId(): string {
-  return currentAccountId() ?? "me";
+  return clientIdFor(currentAccountId());
 }
 
 /** The signed-in user's role, Level and coach (from the profile), and the actions that change them. */
