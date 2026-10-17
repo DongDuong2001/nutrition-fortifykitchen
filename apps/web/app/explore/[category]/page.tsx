@@ -28,7 +28,7 @@ export default function ExploreCategoryPage() {
   return (
     <AppShell>
       <AppHeader variant="sub" title={category.label} subtitle={waiting ? (failed ? "Chưa tải được món" : "Đang tải món…") : `${foods.length} món`} onBack={goBack} layout="wide" />
-      <main className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-6 pt-4 lg:mx-0 lg:max-w-[720px] lg:px-8">
+      <main className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-6 pt-4 lg:mx-0 lg:max-w-[1240px] lg:px-8">
         {pending && foods.length > 0 && <CatalogNote />}
         <FoodListCard
           foods={foods}

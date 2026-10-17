@@ -29,6 +29,7 @@ ONBOARDING_CHECKS = [
     ("/micros", "desktop (1440px)", "micros-header", "lr"),
     ("/", "mobile (390px)", "home-hero", "lr"),
     ("/", "desktop (1440px)", "home-hero", "lr"),
+    ("/", "desktop (1440px)", "home-page", "lr"),  # cc-44: the h1 row and the body share one container
     ("/", "mobile (390px)", "home-nutrient", "lr"),
     ("/", "desktop (1440px)", "home-nutrient", "lr"),
     ("/trends", "mobile (390px)", "overview-rows", "lr"),
@@ -86,6 +87,8 @@ def check_align_groups(page, group_name=None, edges="lr"):
 
             const name = el.getAttribute('data-align-group');
             if (!name) continue;
+            // cc-44: data-align-from="lg" members are checked from 1024 px only (the phone layout differs on purpose)
+            if (el.getAttribute('data-align-from') === 'lg' && window.innerWidth < 1024) continue;
             if (targetGroup && name !== targetGroup) continue;
             if (!groups[name]) groups[name] = [];
             groups[name].push(el);

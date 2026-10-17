@@ -115,9 +115,10 @@ export function SettingsHomeScreen() {
               <AppCard />
             </div>
 
-            <div className="flex flex-col gap-4">
+            {/* Desktop: the danger zone ends the right column, level with the end of the left one */}
+            <div className="flex flex-col gap-4 lg:self-stretch">
               <ProOffer />
-              <Card as="section" aria-labelledby="settings-danger-title" className="flex flex-col gap-1">
+              <Card as="section" aria-labelledby="settings-danger-title" className="flex flex-col gap-1 lg:mt-auto">
                 <h2 id="settings-danger-title" className="m-0 text-base font-bold text-destructive-text">
                   Vùng nguy hiểm
                 </h2>

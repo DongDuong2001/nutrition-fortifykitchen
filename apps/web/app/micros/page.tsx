@@ -610,7 +610,7 @@ function MicrosContent() {
 }
 
 /**
- * 4-column equal grid Legend:
+ * Legend: a 4-column equal grid on the phone, start-aligned like the chips above it from 1024 px:
  * Thiếu <50%, Trung bình 50–79%, Gần đủ 80–99%, Đạt ≥100%
  */
 function Legend() {
@@ -624,10 +624,10 @@ function Legend() {
   return (
     <div
       aria-label="Chú thích màu sắc vi chất"
-      className="grid grid-cols-4 gap-2 w-full max-w-[560px] mx-auto py-1 px-1"
+      className="grid grid-cols-4 gap-2 w-full max-w-[560px] mx-auto py-1 px-1 lg:flex lg:gap-6 lg:max-w-none lg:mx-0 lg:px-0"
     >
       {tiers.map((t) => (
-        <div key={t.name} className="flex flex-col items-center text-center gap-0.5 min-w-0">
+        <div key={t.name} className="flex flex-col items-center text-center gap-0.5 min-w-0 lg:items-start lg:text-left">
           <div className="flex items-center justify-center gap-1.5 min-w-0">
             <span
               aria-hidden="true"
@@ -635,7 +635,7 @@ function Legend() {
             />
             <span className="text-xs font-semibold text-text truncate">{t.name}</span>
           </div>
-          <span className="text-[11px] text-secondary tabular-nums truncate text-center">
+          <span className="text-[11px] text-secondary tabular-nums truncate text-center lg:text-left">
             {t.range}
           </span>
         </div>

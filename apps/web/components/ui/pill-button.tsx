@@ -39,8 +39,9 @@ export function PillButton({
 
   const widthClass = fullWidth ? "w-full" : "w-auto";
 
+  // gap-[inherit]: a gap set on the button (icon + label) reaches the label row inside the skew span
   const content = isPrimary ? (
-    <span className="inline-flex items-center justify-center group-active:skew-x-[14deg] motion-reduce:group-active:transform-none">
+    <span className="inline-flex items-center justify-center gap-[inherit] group-active:skew-x-[14deg] motion-reduce:group-active:transform-none">
       {children}
     </span>
   ) : (

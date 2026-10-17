@@ -55,7 +55,7 @@ export default function ExplorePage() {
         search={<FoodSearchField value={query} onChange={setQuery} className="bg-surface lg:max-w-[656px]" />}
       />
 
-      <main className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-6 pt-4 lg:mx-0 lg:max-w-[720px] lg:px-8">
+      <main className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-6 pt-4 lg:mx-0 lg:max-w-[1240px] lg:px-8">
         <ChipRow items={chips} ariaLabel="Lọc món theo nhóm" data-align-group="add-list" data-align-edge="left" />
         <div data-align-group="add-list" data-align-edge="left" className="flex flex-col gap-4">
           {searching ? (

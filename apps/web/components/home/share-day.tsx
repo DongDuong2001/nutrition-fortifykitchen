@@ -39,6 +39,7 @@ export function ShareDay({ model }: { model: ShareModel }) {
           macroTargets={model.macroTargets}
           finished={model.finished}
           selected={false}
+          share
         />
         <div className="mt-2 flex flex-1 border-t border-t-divider">
           <FoodList

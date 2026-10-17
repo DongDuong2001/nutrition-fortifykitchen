@@ -39,6 +39,7 @@ export function HomeHero({
   finished,
   selected,
   kcalNote,
+  share = false,
 }: {
   label: string;
   pills: HeroPill[];
@@ -50,6 +51,8 @@ export function HomeHero({
   selected: boolean;
   /** "2 món chưa rõ kcal": under the card when some of the shown foods have no energy value. */
   kcalNote?: string | null;
+  /** The share image: drawn at 390 px on any screen, so no desktop classes. */
+  share?: boolean;
 }) {
   const kcalKnown = pctOf(values.kcal, kcalTarget.min);
   const kcalPct = kcalKnown ?? 0;
@@ -58,7 +61,7 @@ export function HomeHero({
       <section
         aria-label="Tổng kcal và dinh dưỡng đa lượng"
         data-tour="home-hero"
-        className={`mx-3 mt-2 flex flex-none flex-col gap-1 rounded-2xl border-2 bg-surface-dark px-3.5 pt-2 pb-2.5 text-on-dark ${
+        className={`mx-3 mt-2 flex flex-none flex-col gap-1 rounded-2xl border-2 ${share ? "" : "lg:mx-0"} bg-surface-dark px-3.5 pt-2 pb-2.5 text-on-dark ${
           selected ? "border-sky" : "border-surface-dark"
         }`}
       >
@@ -113,7 +116,7 @@ export function HomeHero({
           })}
         </div>
       </section>
-      {kcalNote && <p className="m-0 mx-3 mt-1 flex-none text-[13px] leading-snug text-secondary">{kcalNote}</p>}
+      {kcalNote && <p className="m-0 mx-3 mt-1 lg:mx-0 flex-none text-[13px] leading-snug text-secondary">{kcalNote}</p>}
     </>
   );
 }

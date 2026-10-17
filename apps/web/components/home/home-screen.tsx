@@ -215,7 +215,7 @@ function HomeContent() {
       <AppShell>
         <h1 className="sr-only">Hôm nay</h1>
         <div className="h-[52px] rounded-b-[20px] bg-ink lg:hidden" />
-        <main role="status" aria-busy="true" className="mx-auto flex w-full max-w-[560px] flex-col gap-3 px-3 pt-2 lg:mx-0 lg:max-w-[1100px] lg:px-8 lg:pt-8">
+        <main role="status" aria-busy="true" className="mx-auto flex w-full max-w-[560px] flex-col gap-3 px-3 pt-2 lg:mx-0 lg:max-w-[1240px] lg:px-8 lg:pt-8">
           <span className="sr-only">Đang tải…</span>
           <div className="h-[152px] rounded-2xl bg-surface-dark motion-safe:animate-pulse" />
           <div className="flex gap-0 motion-safe:animate-pulse">
@@ -373,7 +373,8 @@ function HomeContent() {
           onNext={isPast ? () => goToDay(shiftIsoDate(viewIso, 1)) : undefined}
           canGoNext={isPast}
           onDateTap={() => setIsCalendarOpen(true)}
-          alignGroup="home-header"
+          alignGroup="home-page"
+          alignMode="page"
           subtitle={desktopSubtitle}
           actions={
             <button
@@ -421,7 +422,7 @@ function HomeContent() {
             Đang ngoại tuyến — món mới sẽ đồng bộ khi có mạng.
           </div>
         )}
-        <div className="mx-auto flex min-h-0 w-full max-w-[560px] flex-1 flex-col lg:mx-0 lg:max-w-[1100px] lg:px-8">
+        <div className="mx-auto flex min-h-0 w-full max-w-[560px] flex-1 flex-col lg:mx-0 lg:max-w-[1240px] lg:px-8">
           <HomeHero
             label={heroLabel(mode, entries, meals)}
             pills={selecting ? [] : pills}
@@ -445,7 +446,7 @@ function HomeContent() {
               </button>
             </div>
           )}
-          <div className={`flex min-h-0 flex-1 border-t border-t-divider lg:gap-4 lg:border-t-0 lg:pb-8 ${coach && !selecting ? "lg:mt-2" : "mt-2 lg:mt-4"}`}>
+          <div data-align-group="home-page" data-align-from="lg" className={`flex min-h-0 flex-1 border-t border-t-divider lg:gap-4 lg:border-t-0 lg:pb-8 ${coach && !selecting ? "lg:mt-2" : "mt-2 lg:mt-4"}`}>
             <FoodList
               meals={meals}
               mode={mode}

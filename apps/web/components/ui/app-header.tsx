@@ -54,6 +54,8 @@ export interface AppHeaderProps {
   compact?: boolean;
   /** data-align-group attribute for alignment tests */
   alignGroup?: string;
+  /** "page": the row shares both edges with the page body, checked from 1024 px (data-align-from="lg"); default: left edge only. */
+  alignMode?: "left" | "page";
   className?: string;
 }
 
@@ -103,6 +105,7 @@ export function AppHeader({
   flush = false,
   compact = false,
   alignGroup,
+  alignMode = "left",
   className = "",
 }: AppHeaderProps) {
   const [clientNow, setClientNow] = useState<Date | null>(null);
@@ -152,7 +155,8 @@ export function AppHeader({
       >
         <div
           data-align-group={alignGroup}
-          data-align-edge="left"
+          data-align-edge={alignMode === "left" ? "left" : undefined}
+          data-align-from={alignMode === "page" ? "lg" : undefined}
           className="flex min-h-[44px] items-center gap-2"
         >
           {back}

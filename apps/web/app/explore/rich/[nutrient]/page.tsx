@@ -41,7 +41,7 @@ export default function RichInPage() {
         onBack={goBack}
         layout="wide"
       />
-      <main className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-6 pt-4 lg:mx-0 lg:max-w-[720px] lg:px-8">
+      <main className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-6 pt-4 lg:mx-0 lg:max-w-[1240px] lg:px-8">
         <ChipGroup
           columns={2}
           tone="light"
