@@ -4,7 +4,7 @@ Tests:
 1. HomeHero renders macro targets alongside consumed grams (e.g. '— / 143 g' or '100 / 143 g').
 2. Long-press on a food item on Hôm nay enters select mode with that item selected.
 3. Multi-select deletion: tapping Delete removes selected items at once.
-4. Macro & Energy Targets screen (/settings/targets/macros) loads and saves custom ratios.
+4. Mục tiêu đa lượng screen (/settings/targets/macros) loads and saves custom ratios; at 390 its copy is Vietnamese only and the title fits one line.
 """
 import os
 import re
@@ -16,6 +16,7 @@ from playwright.sync_api import sync_playwright
 BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3100")
 NOW = "2026-10-15T10:00:00+07:00"
 SHOTS = os.path.join(os.path.dirname(__file__), "..", "..", ".screenshots")
+HOME_ROUTE = "/app"  # lib/nav.ts HOME_ROUTE
 HERO = "section[aria-label='Tổng kcal và dinh dưỡng đa lượng']"
 problems, notes = [], []
 
@@ -36,7 +37,7 @@ def new_page(browser, size):
 
 def test_home_and_select(browser):
     ctx, pg, errors = new_page(browser, {"width": 390, "height": 844})
-    pg.goto(BASE + "/", wait_until="networkidle")
+    pg.goto(BASE + HOME_ROUTE, wait_until="networkidle")
     pg.locator(HERO).wait_for(state="visible", timeout=8000)
     pg.wait_for_timeout(300)
 
@@ -77,15 +78,15 @@ def test_macro_screen(browser):
     pg.wait_for_timeout(500)
 
     # Verify screen loaded
-    h1 = pg.locator("h1:has-text('Mục tiêu Macro & Năng lượng')")
-    check(h1.count() > 0, "Macro & Energy Targets page renders with correct H1")
+    h1 = pg.locator("h1:has-text('Mục tiêu đa lượng')")
+    check(h1.count() > 0, "Mục tiêu đa lượng page renders with correct H1")
 
     # Check segmented control tabs
     tabs = pg.locator("[role='tablist'] [role='tab']")
     check(tabs.count() == 3, "Has 3 macro tabs: Tỉ lệ, Cố định, Keto")
 
     # Check 3 macro rows
-    rows = pg.locator("main span:has-text('Đạm (Protein)')")
+    rows = pg.locator("main span:text-is('Đạm')")
     check(rows.count() > 0, "Renders Đạm row with color dot")
 
     # Click a preset chip (e.g. Cân bằng or Tăng cơ cao đạm)
@@ -105,12 +106,33 @@ def test_macro_screen(browser):
     ctx.close()
 
 
+def test_macro_copy_390(browser):
+    """Vietnamese only (Hao 17/10): no English glosses, carbs read Tinh bột, the title fits one line at 390."""
+    ctx, pg, errors = new_page(browser, {"width": 390, "height": 844})
+    pg.goto(BASE + "/settings/targets/macros", wait_until="networkidle")
+    h1 = pg.locator("h1:has-text('Mục tiêu đa lượng')").first
+    h1.wait_for(state="visible", timeout=8000)
+    lines = h1.evaluate("e => Math.round(e.getBoundingClientRect().height / parseFloat(getComputedStyle(e).lineHeight))")
+    check(lines == 1, f"390: title on one line ({lines})")
+    text = pg.locator("main").inner_text()
+    glosses = [g for g in ("Macro Targets", "Ratios", "Fixed", "Protein", "Net Carbs", "(Fat)", "Macro &") if g in text]
+    check(not glosses, f"390: no English glosses ({glosses})")
+    check(pg.locator("main span:text-is('Tinh bột')").count() == 1, "390: carbs row reads Tinh bột")
+    check(not errors, f"390: no console errors {errors[:2]}")
+    # The whole page in one shot with the fixed nav at the bottom (a full_page shot leaves it mid-page)
+    pg.set_viewport_size({"width": 390, "height": pg.evaluate("document.documentElement.scrollHeight")})
+    pg.wait_for_timeout(200)
+    pg.screenshot(path=os.path.join(SHOTS, "cc-45-macros-390.png"))
+    ctx.close()
+
+
 def main():
     os.makedirs(SHOTS, exist_ok=True)
     with sync_playwright() as p:
         browser = p.chromium.launch()
         test_home_and_select(browser)
         test_macro_screen(browser)
+        test_macro_copy_390(browser)
         browser.close()
 
     for n in notes:

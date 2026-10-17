@@ -121,7 +121,7 @@ export function MacroTargetsScreen() {
   if (!hydrated) {
     return (
       <AppShell alignContainer="macro-targets-page">
-        <AppHeader variant="sub" title="Mục tiêu Macro & Năng lượng" backHref="/settings/targets" layout="wide" />
+        <AppHeader variant="sub" title="Mục tiêu đa lượng" backHref="/settings/targets" layout="wide" />
         <main className="mx-auto w-full max-w-[560px] p-4 lg:mx-0 lg:max-w-[1240px] lg:p-8">
           <div className="h-64 rounded-2xl bg-divider animate-pulse motion-reduce:animate-none" />
         </main>
@@ -133,7 +133,7 @@ export function MacroTargetsScreen() {
     <AppShell alignContainer="macro-targets-page">
       <AppHeader
         variant="sub"
-        title="Mục tiêu Macro & Năng lượng"
+        title="Mục tiêu đa lượng"
         subtitle="Chia tỉ lệ đạm, tinh bột và chất béo theo mục tiêu của bạn"
         backHref="/settings/targets"
         layout="wide"
@@ -167,12 +167,12 @@ export function MacroTargetsScreen() {
         {/* Thẻ chỉnh Macro Targets */}
         <Card as="section" aria-labelledby="macro-settings-title" className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <SectionTitle id="macro-settings-title">Chia theo đa lượng (Macro Targets)</SectionTitle>
+            <SectionTitle id="macro-settings-title">Chia theo đa lượng</SectionTitle>
             <span className="text-[13px] text-secondary">Chọn phương pháp phân bổ dinh dưỡng đa lượng</span>
           </div>
 
           {/* Segmented control: Tỉ lệ | Cố định | Keto */}
-          <div role="tablist" aria-label="Cách tính macro" className="grid grid-cols-3 gap-1 rounded-xl bg-page p-1 border border-card-border">
+          <div role="tablist" aria-label="Cách chia đa lượng" className="grid grid-cols-3 gap-1 rounded-xl bg-page p-1 border border-card-border">
             <button
               type="button"
               role="tab"
@@ -182,7 +182,7 @@ export function MacroTargetsScreen() {
                 mode === "ratios" ? "bg-card text-text shadow-sm" : "bg-transparent text-secondary hover:text-text"
               }`}
             >
-              Tỉ lệ (Ratios)
+              Tỉ lệ
             </button>
             <button
               type="button"
@@ -193,7 +193,7 @@ export function MacroTargetsScreen() {
                 mode === "fixed" ? "bg-card text-text shadow-sm" : "bg-transparent text-secondary hover:text-text"
               }`}
             >
-              Cố định (Fixed)
+              Cố định
             </button>
             <button
               type="button"
@@ -224,7 +224,7 @@ export function MacroTargetsScreen() {
               <div className="flex items-center gap-2.5 min-w-0">
                 <span className="h-3 w-3 shrink-0 rounded-full bg-emerald-500" aria-hidden="true" />
                 <div className="flex flex-col">
-                  <span className="text-[15px] font-bold text-text">Đạm (Protein)</span>
+                  <span className="text-[15px] font-bold text-text">Đạm</span>
                   <span className="text-[13px] tabular-nums text-secondary">
                     {mode === "fixed" ? `${formatNumber(fixedCalc.proteinKcal)} kcal` : `${formatNumber(ratioCalc.proteinKcal)} kcal`}
                   </span>
@@ -281,7 +281,7 @@ export function MacroTargetsScreen() {
               <div className="flex items-center gap-2.5 min-w-0">
                 <span className="h-3 w-3 shrink-0 rounded-full bg-sky" aria-hidden="true" />
                 <div className="flex flex-col">
-                  <span className="text-[15px] font-bold text-text">Tinh bột (Net Carbs)</span>
+                  <span className="text-[15px] font-bold text-text">Tinh bột</span>
                   <span className="text-[13px] tabular-nums text-secondary">
                     {mode === "fixed" ? `${formatNumber(fixedCalc.carbsKcal)} kcal` : `${formatNumber(ratioCalc.carbsKcal)} kcal`}
                   </span>
@@ -338,7 +338,7 @@ export function MacroTargetsScreen() {
               <div className="flex items-center gap-2.5 min-w-0">
                 <span className="h-3 w-3 shrink-0 rounded-full bg-amber-500" aria-hidden="true" />
                 <div className="flex flex-col">
-                  <span className="text-[15px] font-bold text-text">Chất béo (Fat)</span>
+                  <span className="text-[15px] font-bold text-text">Chất béo</span>
                   <span className="text-[13px] tabular-nums text-secondary">
                     {mode === "fixed" ? `${formatNumber(fixedCalc.fatKcal)} kcal` : `${formatNumber(ratioCalc.fatKcal)} kcal`}
                   </span>
