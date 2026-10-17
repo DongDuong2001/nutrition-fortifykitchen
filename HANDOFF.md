@@ -79,6 +79,7 @@ Treat the design files as the **visual source of truth**. Rebuild them as real c
 
 - **Calories:** 35–40 kcal/kg (Tăng cơ), 30–35 (Giữ cân), 25–30 (Giảm mỡ), 20–25 (Giảm mỡ nhanh).
 - **Macros:** protein 1.6–2.2 g/kg; fat 0.5–1 g/kg.
+- **Macro presets:** Cân bằng 25/55/20, Tăng cơ cao đạm 30/45/25, Giảm mỡ 35/35/30, Keto 20/5/75: approved by the coach (17/10).
 - **Salt:** 4–6 g/day, plus 1–1.5 g per 20 min of training. Sodium mg = salt g × 393.
 - **Minerals:**
   - Calcium 1,200–1,500 mg; magnesium 50% of calcium.
