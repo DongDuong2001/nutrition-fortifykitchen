@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { apiClient } from "../api-client";
 import { MOCK_FOODS, browsableFoods } from "../mock/foods";
+import * as cache from "../catalog-cache";
 
 const SAMPLE_COUNT = MOCK_FOODS.length;
 const SAMPLE = MOCK_FOODS.slice();
@@ -116,5 +117,54 @@ describe("apiClient.loadAllFoods", () => {
     foodsServer(389, () => true);
     await expect(apiClient.loadAllFoods()).rejects.toThrow();
     expect(browsableFoods().some((f) => SAMPLE.some((s) => s.id === f.id))).toBe(false);
+  });
+});
+
+// cc-50: the device's copy of the catalogue (lib/catalog-cache), stubbed: IndexedDB does not exist under node
+describe("apiClient.loadAllFoods with the device's copy", () => {
+  const saved = (ageMs: number) => ({ at: Date.now() - ageMs, foods: [row(900), row(901)].map((r) => ({ id: r.id, nameVi: r.name_vi, category: "khac", source: "USDA", servings: [{ label: "100 g", grams: 100 }], nutrients: r.nutrients })) });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("fresh (under 10 min): the copy is the catalogue, no request", async () => {
+    vi.spyOn(cache, "readCatalogCache").mockResolvedValue(saved(60_000) as never);
+    const { calls } = foodsServer(389);
+    const foods = await apiClient.loadAllFoods();
+    expect(foods.map((f) => f.id)).toEqual(["db-900", "db-901"]);
+    expect(calls).toEqual([]);
+  });
+
+  it("stale (over 10 min): the copy shows at once, every page loads in the background and replaces it", async () => {
+    vi.spyOn(cache, "readCatalogCache").mockResolvedValue(saved(11 * 60_000) as never);
+    const written = vi.spyOn(cache, "writeCatalogCache").mockResolvedValue();
+    const { calls } = foodsServer(60, undefined, 500);
+    const foods = await apiClient.loadAllFoods();
+    expect(foods.map((f) => f.id)).toEqual(["db-900", "db-901"]);
+    await vi.waitFor(() => expect(written).toHaveBeenCalled());
+    expect(calls).toHaveLength(1);
+    expect(browsableFoods().some((f) => f.id === "db-59")).toBe(true);
+    expect(written.mock.calls[0][1]).toHaveLength(60);
+  });
+
+  it("expired (over 24 h): loads first, then saves the new copy", async () => {
+    vi.spyOn(cache, "readCatalogCache").mockResolvedValue(saved(25 * 3600_000) as never);
+    const written = vi.spyOn(cache, "writeCatalogCache").mockResolvedValue();
+    foodsServer(60, undefined, 500);
+    const foods = await apiClient.loadAllFoods();
+    expect(foods).toHaveLength(60);
+    expect(written).toHaveBeenCalledTimes(1);
+  });
+
+  it("a failed background refresh keeps the copy on screen", async () => {
+    vi.spyOn(cache, "readCatalogCache").mockResolvedValue(saved(11 * 60_000) as never);
+    const written = vi.spyOn(cache, "writeCatalogCache").mockResolvedValue();
+    foodsServer(60, () => true);
+    const foods = await apiClient.loadAllFoods();
+    await new Promise((r) => setTimeout(r, 0));
+    expect(foods.map((f) => f.id)).toEqual(["db-900", "db-901"]);
+    expect(written).not.toHaveBeenCalled();
+    expect(browsableFoods().some((f) => f.id === "db-900")).toBe(true);
   });
 });

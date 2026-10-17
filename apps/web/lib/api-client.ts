@@ -11,7 +11,7 @@ import { MOCK_FOODS, addCatalogFood, catalogChanged, setCatalogFoods, setCatalog
 import { searchFoods as searchMockFoods } from "./search";
 import type { SetupProfile } from "./onboarding";
 import { currentAccountId } from "./auth-actions";
-import { OFFLINE_OUTBOX_KEY, accountStorage, browserLocal, browserSession, keyedStorage, type KeyValueStore } from "./storage-keys";
+import { OFFLINE_OUTBOX_KEY, accountStorage, browserLocal, keyedStorage, type KeyValueStore } from "./storage-keys";
 import { isDemo } from "./demo";
 import { type CoachProfile, filterCoachesBySpecialty, getCoachById } from "./coaches";
 import { type LeaderboardPeriod, type LeaderboardResponse, getMockLeaderboard, setLeaderboardOptIn as setLeaderboardOptInState } from "./leaderboard";
@@ -20,6 +20,7 @@ import { shiftIsoDate } from "./day-history";
 import { generateUuid, isUuid } from "./uuid";
 import { refreshServerSession } from "./server-session";
 import { reportClientError } from "./client-errors";
+import { catalogCacheState, readCatalogCache, writeCatalogCache } from "./catalog-cache";
 import { normaliseCoaching } from "./coaching-link";
 import type { GoalType, SexType } from "./targets";
 
@@ -215,44 +216,28 @@ export const FOODS_UNAVAILABLE = "foods_unavailable";
 // The whole catalogue, kept for a while so a repeat visit does not page /foods again
 const FOODS_PAGE_LIMIT = 500;
 const FOODS_MAX_PAGES = 30;
-const FOODS_CACHE_KEY = "h1t_foods_cache_v1";
-const FOODS_CACHE_MS = 10 * 60 * 1000;
-
-function foodsCache(): KeyValueStore | null {
-  const session = browserSession();
-  return session ? keyedStorage(session, false, currentAccountId()) : null;
-}
-
-function readFoodsCache(cache: KeyValueStore | null): FoodItem[] | null {
-  try {
-    const parsed = JSON.parse(cache?.getItem(FOODS_CACHE_KEY) ?? "null");
-    if (parsed && Date.now() - parsed.at < FOODS_CACHE_MS && Array.isArray(parsed.foods) && parsed.foods.length > 0) return parsed.foods;
-  } catch {
-    // Unreadable: load again
-  }
-  return null;
-}
-
-function writeFoodsCache(cache: KeyValueStore | null, foods: FoodItem[]): void {
-  try {
-    cache?.setItem(FOODS_CACHE_KEY, JSON.stringify({ at: Date.now(), foods }));
-  } catch {
-    // Storage full or blocked: the next visit loads again
-  }
-}
-
 let foodsInFlight: Promise<FoodItem[]> | null = null;
 
+/**
+ * The catalogue: the device's copy when there is one (lib/catalog-cache: fresh 10 min, then shown and refreshed in the
+ * background up to 24 h), else every page of /foods.
+ */
 async function fetchAllFoods(): Promise<FoodItem[]> {
-  const cache = foodsCache();
-  const cached = readFoodsCache(cache);
-  if (cached) {
-    setCatalogFoods(cached);
+  const account = currentAccountId();
+  const saved = await readCatalogCache(account);
+  const state = catalogCacheState(saved?.at ?? null, Date.now());
+  if (saved && (state === "fresh" || state === "stale")) {
+    setCatalogFoods(saved.foods);
     setCatalogStatus("ready");
-    return cached;
+    if (state === "stale") void downloadCatalog(account, true).catch(() => {});
+    return saved.foods;
   }
+  return downloadCatalog(account, false);
+}
 
-  setCatalogStatus("loading");
+/** Every page of /foods. A background refresh changes nothing on screen until it has the whole list. */
+async function downloadCatalog(account: string | null, background: boolean): Promise<FoodItem[]> {
+  if (!background) setCatalogStatus("loading");
   const collected = new Map<string, FoodItem>();
   let complete = false;
   try {
@@ -279,13 +264,15 @@ async function fetchAllFoods(): Promise<FoodItem[]> {
   }
 
   const foods = Array.from(collected.values());
-  if (foods.length === 0) {
+  if (background) {
+    if (!complete) throw new Error("Catalogue refresh incomplete");
+  } else if (foods.length === 0) {
     setCatalogStatus("failed");
     throw new Error("Chưa tải được danh mục món ăn");
   }
   setCatalogFoods(foods);
   setCatalogStatus("ready");
-  if (complete) writeFoodsCache(cache, foods);
+  if (complete) void writeCatalogCache(account, foods);
   return foods;
 }
 
