@@ -44,7 +44,7 @@ export const TIPS: readonly Tip[] = [
     id: "home-logged",
     target: "home-food-list",
     title: "Sửa nhanh",
-    body: "Giữ một món để sửa khẩu phần, đổi bữa hoặc xóa. Chạm tên bữa để xem riêng bữa đó.",
+    body: "Chạm một món để sửa. Giữ một món để chọn nhiều món, rồi đổi bữa hoặc xóa.",
     used: ["long-press-edit"],
     when: today,
   },

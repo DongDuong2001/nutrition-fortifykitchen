@@ -91,10 +91,10 @@ function FoodRow({
               // Ignore vibration failure
             }
           }
+          markUsed("long-press-edit");
           if (onLongPress) {
             onLongPress(entry.id);
           } else {
-            markUsed("long-press-edit");
             router.push(`/entry/${entry.id}`);
           }
         }, LONG_PRESS_MS);
