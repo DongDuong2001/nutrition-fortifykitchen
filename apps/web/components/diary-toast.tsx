@@ -9,10 +9,10 @@ const TICK_MS = 100;
 /**
  * The app's one toast, from the diary store. "Đã thêm …" offers Xem (jump to the meal), "Đã xóa …",
  * "Đã chép …", "Đã chuyển …" and the one-tap adds (a recent, a Bữa ăn của tôi, Chỉ ghi kcal) offer Hoàn tác, "Đã lưu …" offers
- * Xem (Khám phá). The store ends it after its duration; this draws the countdown.
+ * Xem (Khám phá), "Chưa lưu được món" offers Thử lại. The store ends it after its duration; this draws the countdown.
  */
 export function DiaryToast() {
-  const { toast, parkedDelete, undoParkedDelete, undoLastDelete, undoCopy, undoMove, setHighlightedMeal } = useDiary();
+  const { toast, parkedDelete, undoParkedDelete, undoLastDelete, undoCopy, undoMove, retryUnsaved, setHighlightedMeal } = useDiary();
   const [percent, setPercent] = useState(100);
   // A delete's toast parked under a newer one counts down on its own clock
   const [now, setNow] = useState(() => Date.now());
@@ -61,9 +61,27 @@ export function DiaryToast() {
         <div className="pointer-events-auto">
           <Toast
             message={toast.message}
-            actionLabel={toast.kind === "notice" ? undefined : toast.kind === "added" || toast.kind === "saved" ? "Xem" : "Hoàn tác"}
+            actionLabel={
+              toast.kind === "notice"
+                ? undefined
+                : toast.kind === "unsaved"
+                  ? "Thử lại"
+                  : toast.kind === "added" || toast.kind === "saved"
+                    ? "Xem"
+                    : "Hoàn tác"
+            }
             actionHref={toast.kind === "saved" ? "/explore" : undefined}
-            onAction={toast.kind === "deleted" ? undoLastDelete : toast.kind === "undoable" ? undoCopy : toast.kind === "moved" ? undoMove : showMeal}
+            onAction={
+              toast.kind === "deleted"
+                ? undoLastDelete
+                : toast.kind === "undoable"
+                  ? undoCopy
+                  : toast.kind === "moved"
+                    ? undoMove
+                    : toast.kind === "unsaved"
+                      ? retryUnsaved
+                      : showMeal
+            }
             progressPercent={percent}
           />
         </div>

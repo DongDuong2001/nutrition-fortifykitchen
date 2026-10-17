@@ -189,7 +189,7 @@ function TipCard({ tip, onGotIt, onTry, onTurnOff }: { tip: Tip; onGotIt: () => 
  */
 export function OnboardingLayer() {
   const pathname = usePathname() ?? "/";
-  const { data } = useDiary();
+  const { data, unsavedIds } = useDiary();
   const [mounted, setMounted] = useState(false);
   const [tour, setTour] = useState<TourState>(OFF);
   const [flags, setFlags] = useState<OnboardingFlags>(DEFAULT_FLAGS);
@@ -274,11 +274,11 @@ export function OnboardingLayer() {
     if (tourActive || wnActive || wnSheet || onboardingDisabled() || visit.current.tipShown) return null;
     const date = new URLSearchParams(window.location.search).get("date");
     return pickTip({
-      ctx: { pathname, pastDay: date !== null && date < getTodayIsoVN(), foodsToday, selectMode },
+      ctx: { pathname, pastDay: date !== null && date < getTodayIsoVN(), foodsToday, selectMode, unsaved: unsavedIds.size },
       flags,
       tourActive,
     });
-  }, [tourActive, wnActive, wnSheet, pathname, foodsToday, selectMode, flags]);
+  }, [tourActive, wnActive, wnSheet, pathname, foodsToday, selectMode, flags, unsavedIds]);
 
   // The tip of this visit, once the screen has settled
   useEffect(() => {

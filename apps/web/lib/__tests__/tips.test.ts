@@ -7,9 +7,9 @@ const flags = (over: Partial<OnboardingFlags> = {}): OnboardingFlags => ({ ...DE
 const ids = (c: TipContext, f = flags()) => pickTip({ ctx: c, flags: f, tourActive: false })?.id ?? null;
 
 describe("the tips table", () => {
-  it("has the 15 tips of the design boards, each with the card copy", () => {
+  it("has the 15 tips of the design boards and cc-49's Chưa lưu, each with the card copy", () => {
     expect(TIPS.map((t) => t.id)).toEqual([
-      "home-logged", "meal-add", "home-share", "past-day", "multi-select", "add-tray", "food-detail", "compare",
+      "unsaved", "home-logged", "meal-add", "home-share", "past-day", "multi-select", "add-tray", "food-detail", "compare",
       "food-new", "training", "micros", "trends-micros", "explore", "overview", "leaderboard",
     ]);
     for (const t of TIPS) {
@@ -22,6 +22,20 @@ describe("the tips table", () => {
 
   it("every id is unique", () => {
     expect(new Set(TIPS.map((t) => t.id)).size).toBe(TIPS.length);
+  });
+});
+
+describe("pickTip: Chưa lưu (cc-49)", () => {
+  it("shows first on Hôm nay when an entry of today is not saved yet", () => {
+    expect(ids(ctx({ unsaved: 1 }))).toBe("unsaved");
+  });
+  it("not without an unsaved entry, not on a past day, not in select mode", () => {
+    expect(ids(ctx({ unsaved: 0 }))).toBe("home-logged");
+    expect(ids(ctx({ unsaved: 1, pastDay: true }))).toBe("past-day");
+    expect(ids(ctx({ unsaved: 1, selectMode: true }))).toBe("multi-select");
+  });
+  it("not once the user tapped Thử lại", () => {
+    expect(ids(ctx({ unsaved: 1 }), flags({ used: ["retry-unsaved"] }))).toBe("home-logged");
   });
 });
 

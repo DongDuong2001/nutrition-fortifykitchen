@@ -8,8 +8,6 @@ import { copyMeals, dayEntries, entriesKcal, shiftIsoDate } from "@/lib/day-hist
 import { formatDayLabel } from "@/lib/format";
 import { kcalLabel } from "@/lib/kcal";
 import { MEAL_SLOTS, getMealSlotNameVi, type MealSlot } from "@/lib/meal-slot";
-import { isLiveMode } from "@/lib/api-mode";
-import { apiClient } from "@/lib/api-client";
 import type { AddedDiaryEntry } from "@/lib/diary-edits";
 
 /** Meals that start unticked. The snack is left out by default, as in CopyYesterday.dc.html. */
@@ -44,7 +42,7 @@ export function CopyYesterdaySheet({ open, onClose }: CopyYesterdaySheetProps) {
 
 // Mounted only while the sheet is open, so every opening starts from the default ticks.
 function CopyChoices({ entries, onDone }: { entries: AddedDiaryEntry[]; onDone: () => void }) {
-  const { copyEntries, todayIso } = useDiary();
+  const { copyEntries } = useDiary();
   const meals = MEAL_SLOTS.map((slot) => ({
     slot: slot.id,
     name: getMealSlotNameVi(slot.id),
@@ -68,10 +66,8 @@ function CopyChoices({ entries, onDone }: { entries: AddedDiaryEntry[]; onDone: 
 
   function copy() {
     const copied = copyMeals(entries, chosen, `copy-${Date.now()}`, new Date().toISOString());
+    // Each copy is sent as its own entry (copyEntries), so the device and the server share its id
     copyEntries(copied, `Đã chép ${chosen.length} bữa từ hôm qua`);
-    if (isLiveMode() && todayIso) {
-      apiClient.copyYesterday(todayIso, chosen).catch(() => {});
-    }
     onDone();
   }
 

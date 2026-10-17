@@ -8,6 +8,7 @@ import { kcalLabel } from "@/lib/kcal";
 import { missingMicros, portionLabel, type HomeEntry, type HomeMeal, type HomeMode } from "@/lib/home";
 import { mealFullySelected } from "@/lib/multi-select";
 import { markUsed } from "@/lib/onboarding-store";
+import { useDiary } from "@/lib/diary-store";
 import { inkPill } from "./ink-pill";
 
 const LONG_PRESS_MS = 500;
@@ -54,6 +55,8 @@ function FoodRow({
 
   const quantity = portionLabel(entry);
   const missing = missingMicros(entry);
+  // The server has not saved it yet (live mode): it stays on the device and is sent again
+  const unsaved = useDiary().unsavedIds.has(entry.id);
 
   return (
     <button
@@ -70,7 +73,7 @@ function FoodRow({
       }}
       aria-pressed={selected}
       data-tour={tourTarget}
-      aria-label={`${entry.name}, ${quantity}${missing ? ", thiếu dữ liệu vi chất" : ""}`}
+      aria-label={`${entry.name}, ${quantity}${missing ? ", thiếu dữ liệu vi chất" : ""}${unsaved ? ", chưa lưu" : ""}`}
       onClick={() => {
         if (suppressClick.current) {
           suppressClick.current = false;
@@ -123,6 +126,16 @@ function FoodRow({
             aria-hidden="true"
             className={`h-1.5 w-1.5 shrink-0 rounded-full ${selected ? "bg-sky" : "bg-muted-dark"}`}
           />
+        )}
+        {unsaved && (
+          <span
+            aria-hidden="true"
+            data-unsaved
+            data-tour="unsaved-marker"
+            className={`shrink-0 whitespace-nowrap text-[11px] font-semibold leading-none ${selected ? "text-sky" : "text-secondary"}`}
+          >
+            Chưa lưu
+          </span>
         )}
       </span>
       <span className={`shrink-0 font-display text-[15px] font-bold leading-none tabular-nums lg:text-[18px] ${selected ? "text-sky" : "text-text"}`}>

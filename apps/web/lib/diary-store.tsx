@@ -30,8 +30,19 @@ import { MOCK_FOODS } from "./mock/foods";
 import { syncRecipeFoods } from "./recipe-store";
 import { personaPatch } from "./demo-persona";
 import { isLiveMode } from "./api-mode";
-import { apiClient, dropOfflineEntry, syncOfflineOutbox, getPendingOfflineEntryIds } from "./api-client";
-import { syncServerSession } from "./server-session";
+import {
+  apiClient,
+  getPendingOfflineEntryIds,
+  pendingWriteIds,
+  syncOfflineOutbox,
+  writesInFlight,
+  writtenSince,
+  type SyncResult,
+  type WriteResult,
+} from "./api-client";
+import { refreshServerSession } from "./server-session";
+import { markUsed } from "./onboarding-store";
+import { HOME_ROUTE } from "./nav";
 import { generateUuid, isUuid } from "./uuid";
 import {
   buildSavedMeal,
@@ -98,11 +109,11 @@ export type { AddedDiaryEntry, EntryView, EntryPatch } from "./diary-edits";
 /**
  * The one toast of the app. "added" offers Xem (jump to the meal), "deleted" offers Hoàn tác,
  * "undoable" offers Hoàn tác for the entries one action added (undoIds: a copy, a recent, a Bữa ăn của tôi),
- * and "saved" offers Xem (Bữa ăn của tôi in Khám phá).
+ * "saved" offers Xem (Bữa ăn của tôi in Khám phá), and "unsaved" offers Thử lại (the server refused a write).
  */
 export interface ToastInfo {
   message: string;
-  kind: "added" | "deleted" | "undoable" | "saved" | "moved" | "notice";
+  kind: "added" | "deleted" | "undoable" | "saved" | "moved" | "notice" | "unsaved";
   mealSlot: MealSlot | null;
   /** How long it stays. A delete or a copy stays 5 s, which is also the undo window. */
   durationMs: number;
@@ -185,6 +196,10 @@ interface DiaryContextValue {
   addSavedMeal: (meal: SavedMeal, slot: MealSlot) => void;
   /** Chỉ ghi kcal: adds a quick entry with unknown micronutrients, with an undo toast. */
   addQuickEntry: (input: QuickEntryInput, slot: MealSlot) => QuickEntryResult;
+  /** Live mode: today's entries the server has not saved yet. Each row shows Chưa lưu. */
+  unsavedIds: ReadonlySet<string>;
+  /** Thử lại of the "unsaved" toast: the writes the server refused are sent again. */
+  retryUnsaved: () => void;
   /** Today as YYYY-MM-DD (Asia/Ho_Chi_Minh). Null until mounted. */
   todayIso: string | null;
   /** Earlier days the user logged, by date; memo dependency for anything that calls dayEntries. */
@@ -439,15 +454,30 @@ export function pastDayData(iso: string, todayIso: string, profile: Profile, tar
   return { ...day, minerals, vitamins, microsSummary: microsSummaryFor({ minerals, vitamins }), date: iso };
 }
 
-/** Entry ids whose POST has not answered yet: a refetch on focus keeps them (mergeServerDay). */
-const postingEntryIds = new Set<string>();
+/** Hôm nay refetches the day this often while in front and online, so a food added on another device shows up. */
+const DAY_POLL_MS = 60 * 1000;
+/** The session cookie lives about 1 h; it is renewed this often while the app is in front. */
+const SESSION_REFRESH_MS = 10 * 60 * 1000;
+/** A refetch running longer than this (diary requests time out at 20 s) no longer blocks the next one. */
+const REFRESH_STALE_MS = 45 * 1000;
 
-function postEntry(input: Parameters<typeof apiClient.addEntry>[0] & { id: string }): void {
-  postingEntryIds.add(input.id);
-  apiClient
-    .addEntry(input)
-    .catch(() => {})
-    .finally(() => postingEntryIds.delete(input.id));
+/** What addEntry sends for an entry of the diary. */
+function addPayload(entry: AddedDiaryEntry, date: string): Parameters<typeof apiClient.addEntry>[0] {
+  return entry.kind === "quick"
+    ? { id: entry.id, kind: "quick", calories: entry.calories ?? undefined, mealSlot: entry.mealSlot, date }
+    : { id: entry.id, foodId: entry.foodId, grams: entry.grams, mealSlot: entry.mealSlot, date };
+}
+
+/** Copied entries get new uuids: the server keys an entry by its id, and a copy is a new entry. */
+function withNewIds(entries: AddedDiaryEntry[]): AddedDiaryEntry[] {
+  return entries.map((e) => ({ ...e, id: generateUuid(), synced: undefined }));
+}
+
+/** The "unsaved" toast. The server's answer is in it, so a refused save is never silent. */
+export function unsavedMessage(status?: number, message?: string): string {
+  const text = (message ?? "").trim();
+  const detail = text ? `: ${text.length > 90 ? `${text.slice(0, 89)}…` : text}` : "";
+  return status ? `Chưa lưu được món (lỗi ${status}${detail})` : "Chưa lưu được món";
 }
 
 export function DiaryProvider({ children }: { children: React.ReactNode }) {
@@ -477,17 +507,75 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   // written). Demo mode ignores it: demo has its own keys.
   const [accountId, setAccountId] = useState<string | null>(null);
   const pathname = usePathname();
+  // Bumped when a write or a sync answers: the outbox changed, so the Chưa lưu markers are worked out again
+  const [syncVersion, setSyncVersion] = useState(0);
+  // The server's day was read since this account loaded: only then is an unconfirmed entry sent again
+  const [serverDayRead, setServerDayRead] = useState(false);
+  // The refetch running (its account and start): focus and visibilitychange fire together, one refetch is enough.
+  // One older than REFRESH_STALE_MS no longer blocks (a request frozen while a phone had the tab in the background).
+  const refreshing = useRef<{ account: string; at: number } | null>(null);
 
-  const refreshRemoteDay = useCallback((iso: string) => {
+  const markSynced = useCallback((ids: readonly string[]) => {
+    if (ids.length === 0) return;
+    const saved = new Set(ids);
+    setEdits((prev) =>
+      prev.added.some((e) => saved.has(e.id) && !e.synced)
+        ? { ...prev, added: prev.added.map((e) => (saved.has(e.id) && !e.synced ? { ...e, synced: true } : e)) }
+        : prev
+    );
+  }, []);
+
+  const showUnsaved = useCallback((status?: number, message?: string) => {
+    setToast({ message: unsavedMessage(status, message), kind: "unsaved", mealSlot: null, durationMs: NOTICE_TOAST_MS });
+  }, []);
+
+  const onSync = useCallback(
+    (result: SyncResult) => {
+      setSyncVersion((v) => v + 1);
+      markSynced(result.saved);
+      if (result.held.length > 0) showUnsaved(result.held[0].status, result.held[0].message);
+    },
+    [markSynced, showUnsaved]
+  );
+
+  // The answer to one diary write of entry `id`
+  const track = useCallback(
+    (id: string, write: Promise<WriteResult>) => {
+      write
+        .then((result) => {
+          setSyncVersion((v) => v + 1);
+          if (result.state === "saved") markSynced([id]);
+          if (result.state === "held") showUnsaved(result.status, result.message);
+        })
+        .catch(() => {});
+    },
+    [markSynced, showUnsaved]
+  );
+
+  const sendAdd = useCallback(
+    (entry: AddedDiaryEntry, date: string) => track(entry.id, apiClient.addEntry(addPayload(entry, date))),
+    [track]
+  );
+
+  const refreshRemoteDay = useCallback((iso: string, options: { retryHeld?: boolean } = {}) => {
     const account = currentAccountId();
     if (!isLiveMode() || demo || !account) return;
     const startedAt = Date.now();
-    const postingAtStart = new Set(postingEntryIds);
+    const running = refreshing.current;
+    if (running?.account === account && startedAt - running.at < REFRESH_STALE_MS) return;
+    const mine = { account, at: startedAt };
+    refreshing.current = mine;
+    const pendingAtStart = pendingWriteIds();
 
-    syncOfflineOutbox()
-      .then(() => apiClient.getDay(iso))
+    syncOfflineOutbox(options)
+      .then((result) => {
+        onSync(result);
+        return apiClient.getDay(iso);
+      })
       .then((daySummary) => {
-        if (!daySummary || !Array.isArray(daySummary.meals)) return;
+        // Not read (offline, 401 after the session refresh, 5xx): the device keeps what it has. Another account signed
+        // in meanwhile: this day is not theirs
+        if (!daySummary || !Array.isArray(daySummary.meals) || currentAccountId() !== account) return;
         const serverEntries: AddedDiaryEntry[] = [];
         for (const meal of daySummary.meals) {
           for (const e of meal.entries || []) {
@@ -506,17 +594,22 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
               fiber: (e.nutrients?.fiber as number | null) ?? null,
               nutrients: (e.nutrients as Record<string, number | null>) ?? {},
               addedAt: e.created_at || new Date().toISOString(),
+              synced: true,
             });
           }
         }
         setEdits((prev) => {
-          // Queued offline, or a POST in flight when the refetch started or still in flight now
-          const keep = new Set([...getPendingOfflineEntryIds(), ...postingAtStart, ...postingEntryIds]);
+          // A write queued, being sent, or started since the refetch did: the device's version of that entry stays
+          const keep = new Set([...pendingAtStart, ...pendingWriteIds(), ...writtenSince(startedAt)]);
           return { ...prev, added: mergeServerDay(prev.added, serverEntries, { keep, startedAt }) };
         });
+        setServerDayRead(true);
       })
-      .catch(() => {});
-  }, [demo]);
+      .catch(() => {})
+      .finally(() => {
+        if (refreshing.current === mine) refreshing.current = null;
+      });
+  }, [demo, onSync]);
 
   // Reads one account's (or demo's) data into state. Everything is in localStorage under the account's keys; the
   // old unscoped keys and an old sessionStorage copy move to the first account that loads, once.
@@ -548,8 +641,9 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     // This account's recipes (cc-27b) become foods of the catalogue, so search and entries find them
     syncRecipeFoods();
 
+    setServerDayRead(false);
     if (isLiveMode() && account && !demoNow) {
-      refreshRemoteDay(iso);
+      refreshRemoteDay(iso, { retryHeld: true });
 
       apiClient.getFavourites().then((favs) => {
         if (Array.isArray(favs) && favs.length > 0) {
@@ -602,27 +696,61 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     }
   }, [loadData]);
 
-  // Sync on reconnect, window focus, or tab visibility change
+  // Sync when the app comes back: reconnect, window focus, the tab shown again (a phone switching back to the
+  // browser), or the page restored from the back-forward cache. The session cookie is renewed first.
   useEffect(() => {
     if (!isLiveMode() || demo) return;
     const handleSync = () => {
       const iso = todayIsoRef.current || getTodayIsoVN();
-      syncServerSession().then(() => refreshRemoteDay(iso)).catch(() => {});
+      refreshServerSession().then(() => refreshRemoteDay(iso)).catch(() => {});
     };
     const onVisibilityChange = () => {
       if (document.visibilityState === "visible") {
         handleSync();
       }
     };
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) handleSync();
+    };
     window.addEventListener("online", handleSync);
     window.addEventListener("focus", handleSync);
+    window.addEventListener("pageshow", onPageShow);
     document.addEventListener("visibilitychange", onVisibilityChange);
     return () => {
       window.removeEventListener("online", handleSync);
       window.removeEventListener("focus", handleSync);
+      window.removeEventListener("pageshow", onPageShow);
       document.removeEventListener("visibilitychange", onVisibilityChange);
     };
   }, [demo, refreshRemoteDay]);
+
+  // Hôm nay refetches the day every minute while in front and online (never while a write is being sent), so a food
+  // added on another device shows up. The session cookie is renewed every 10 min while the app is in front.
+  useEffect(() => {
+    if (!isLiveMode() || demo || !accountId) return;
+    const inFront = () => document.visibilityState === "visible";
+    const poll = setInterval(() => {
+      if (pathname !== HOME_ROUTE || !inFront() || !navigator.onLine || writesInFlight() > 0) return;
+      refreshRemoteDay(todayIsoRef.current || getTodayIsoVN());
+    }, DAY_POLL_MS);
+    const keepAlive = setInterval(() => {
+      if (inFront()) void refreshServerSession();
+    }, SESSION_REFRESH_MS);
+    return () => {
+      clearInterval(poll);
+      clearInterval(keepAlive);
+    };
+  }, [demo, accountId, pathname, refreshRemoteDay]);
+
+  // An entry of today the server never confirmed and nothing is sending (an add refused before cc-49, or one whose
+  // write was dropped) is sent again. Only after the server's day was read, which confirms the entries it has.
+  useEffect(() => {
+    if (!isLiveMode() || demo || !accountId || !serverDayRead || !todayIso) return;
+    const pending = pendingWriteIds();
+    for (const e of edits.added) {
+      if (!e.synced && isUuid(e.id) && !pending.has(e.id)) sendAdd(e, todayIso);
+    }
+  }, [edits.added, serverDayRead, demo, accountId, todayIso, sendAdd, syncVersion]);
 
   // Another account signed in, or this one signed out (Đăng xuất keeps the data under its account): the
   // state of the account before is dropped and the new one's is read. The persist effects below then write to
@@ -826,19 +954,11 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
 
       addRecentFood(food, qty);
 
-      if (isLiveMode()) {
-        postEntry({
-          id: newEntry.id,
-          foodId: food.id,
-          grams,
-          mealSlot,
-          date: todayIso || getTodayIsoVN(),
-        });
-      }
+      if (isLiveMode()) sendAdd(newEntry, todayIso || getTodayIsoVN());
 
       return true;
     },
-    [addRecentFood, todayIso]
+    [addRecentFood, todayIso, sendAdd]
   );
 
   const addFoodEntries = useCallback(
@@ -864,14 +984,10 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         undoIds: entries.map((e) => e.id),
       });
       items.forEach(({ food, label }) => addRecentFood(food, label));
-      if (isLiveMode()) {
-        entries.forEach((e, i) => {
-          postEntry({ id: e.id, foodId: items[i].food.id, grams: items[i].grams, mealSlot, date: todayIso || getTodayIsoVN() });
-        });
-      }
+      if (isLiveMode()) entries.forEach((e) => sendAdd(e, todayIso || getTodayIsoVN()));
       return true;
     },
-    [addRecentFood, todayIso]
+    [addRecentFood, todayIso, sendAdd]
   );
 
   const dismissToast = useCallback(() => {
@@ -898,15 +1014,18 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   const updateEntry = useCallback((id: string, patch: EntryPatch) => {
     setEdits((prev) => updateEntryIn(prev, id, patch, samples));
     if (isLiveMode()) {
-      apiClient.updateEntry(id, {
-        meal_slot: patch.mealSlot,
-        grams: patch.grams,
-        serving_size_g: patch.grams,
-        serving_label: patch.servingLabel,
-        calories: patch.quick?.calories,
-      }).catch(() => {});
+      track(
+        id,
+        apiClient.updateEntry(id, {
+          meal_slot: patch.mealSlot,
+          grams: patch.grams,
+          serving_size_g: patch.grams,
+          serving_label: patch.servingLabel,
+          calories: patch.quick?.calories,
+        })
+      );
     }
-  }, [samples]);
+  }, [samples, track]);
 
   const deleteEntry = useCallback(
     (id: string) => {
@@ -915,16 +1034,15 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       setEdits((prev) => deleteEntryIn(prev, id, samples));
       setParkedDelete(null);
       setToast({ message: `Đã xóa ${view.name}`, kind: "deleted", mealSlot: null, durationMs: UNDO_TOAST_MS });
-      if (isLiveMode()) {
-        apiClient.deleteEntry(id).catch(() => {});
-      }
+      if (isLiveMode()) track(id, apiClient.deleteEntry(id));
     },
-    [edits, samples]
+    [edits, samples, track]
   );
 
   const deleteMeal = useCallback(
     (slot: MealSlot) => {
-      const count = mealEntryIds(edits, slot, samples).length;
+      const ids = mealEntryIds(edits, slot, samples);
+      const count = ids.length;
       if (count === 0) return;
       setEdits((prev) => deleteMealIn(prev, slot, samples));
       setParkedDelete(null);
@@ -934,11 +1052,9 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         mealSlot: null,
         durationMs: UNDO_TOAST_MS,
       });
-      if (isLiveMode()) {
-        apiClient.deleteMeal(todayIso || getTodayIsoVN(), slot).catch(() => {});
-      }
+      if (isLiveMode()) ids.forEach((id) => track(id, apiClient.deleteEntry(id)));
     },
-    [edits, samples, todayIso]
+    [edits, samples, track]
   );
 
   const deleteEntries = useCallback(
@@ -950,13 +1066,9 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       setEdits((prev) => deleteEntriesIn(prev, ids, samples));
       setParkedDelete(null);
       setToast({ message: `Đã xóa ${count} món`, kind: "deleted", mealSlot: null, durationMs: UNDO_TOAST_MS });
-      if (isLiveMode()) {
-        for (const id of ids) {
-          apiClient.deleteEntry(id).catch(() => {});
-        }
-      }
+      if (isLiveMode()) ids.forEach((id) => track(id, apiClient.deleteEntry(id)));
     },
-    [edits, samples, todayIso]
+    [edits, samples, todayIso, track]
   );
 
   const moveEntries = useCallback(
@@ -979,47 +1091,41 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         durationMs: UNDO_TOAST_MS,
         undoMoves,
       });
-      if (isLiveMode()) {
-        for (const id of ids) {
-          apiClient.updateEntry(id, { meal_slot: slot }).catch(() => {});
-        }
-      }
+      if (isLiveMode()) ids.forEach((id) => track(id, apiClient.updateEntry(id, { meal_slot: slot })));
     },
-    [edits, samples, todayIso, toast]
+    [edits, samples, todayIso, toast, track]
   );
 
   const undoMove = useCallback(() => {
     const moves = toast?.undoMoves;
     if (!moves) return;
     setEdits((prev) => restoreSlotsIn(prev, moves, samples));
-    if (isLiveMode()) {
-      for (const m of moves) {
-        apiClient.updateEntry(m.id, { meal_slot: m.slot }).catch(() => {});
-      }
-    }
+    if (isLiveMode()) moves.forEach((m) => track(m.id, apiClient.updateEntry(m.id, { meal_slot: m.slot })));
     setToast(null);
-  }, [toast, samples]);
+  }, [toast, samples, track]);
 
   const undoLastDelete = useCallback(() => {
     const lastUndo = edits.undo;
     setEdits((prev) => undoDeleteIn(prev));
     if (isLiveMode() && lastUndo) {
       if (lastUndo.kind === "added") {
-        apiClient.restoreEntry(lastUndo.entry.id).catch(() => {});
+        if (lastUndo.entry.synced) track(lastUndo.entry.id, apiClient.restoreEntry(lastUndo.entry.id));
+        else sendAdd(lastUndo.entry, todayIso || getTodayIsoVN());
       } else if (lastUndo.kind === "sample") {
-        apiClient.restoreEntry(lastUndo.id).catch(() => {});
+        track(lastUndo.id, apiClient.restoreEntry(lastUndo.id));
       }
     }
     setToast(null);
-  }, [edits.undo]);
+  }, [edits.undo, track, sendAdd, todayIso]);
 
   const undoParkedDelete = useCallback(() => {
     setEdits((prev) => undoDeleteIn(prev));
     setParkedDelete(null);
   }, []);
 
-  const copyEntries = useCallback((entries: AddedDiaryEntry[], message: string) => {
-    if (entries.length === 0) return;
+  const copyEntries = useCallback((copied: AddedDiaryEntry[], message: string) => {
+    if (copied.length === 0) return;
+    const entries = withNewIds(copied);
     setEdits((prev) => dismissUndoIn({ ...prev, added: [...prev.added, ...entries] }));
     setToast({
       message,
@@ -1028,7 +1134,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       durationMs: UNDO_TOAST_MS,
       undoIds: entries.map((e) => e.id),
     });
-  }, []);
+    if (isLiveMode()) entries.forEach((e) => sendAdd(e, todayIso || getTodayIsoVN()));
+  }, [todayIso, sendAdd]);
 
   const undoCopy = useCallback(() => {
     const ids = toast?.undoIds;
@@ -1036,13 +1143,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     setEdits((prev) => removeAddedIn(prev, ids));
     setToast(null);
     // The entries were already sent: undo removes them on the server too, or they come back on the next load
-    if (isLiveMode()) {
-      for (const id of ids) {
-        dropOfflineEntry(id);
-        apiClient.deleteEntry(id).catch(() => {});
-      }
-    }
-  }, [toast]);
+    if (isLiveMode()) ids.forEach((id) => track(id, apiClient.deleteEntry(id)));
+  }, [toast, track]);
 
   const mealFoods = useCallback(
     (slot: MealSlot, iso: string) => {
@@ -1092,7 +1194,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   const addSavedMeal = useCallback(
     (meal: SavedMeal, slot: MealSlot) => {
       const stamp = Date.now();
-      const entries = savedMealEntries(meal, MOCK_FOODS, slot, `sm-${stamp}`, new Date(stamp).toISOString());
+      const entries = withNewIds(savedMealEntries(meal, MOCK_FOODS, slot, `sm-${stamp}`, new Date(stamp).toISOString()));
       const skipped = savedMealSkipped(meal, MOCK_FOODS);
       if (entries.length === 0) {
         // Nothing can be added: say why instead of doing nothing
@@ -1113,8 +1215,9 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         durationMs: UNDO_TOAST_MS,
         undoIds: entries.map((e) => e.id),
       });
+      if (isLiveMode()) entries.forEach((e) => sendAdd(e, todayIso || getTodayIsoVN()));
     },
-    []
+    [todayIso, sendAdd]
   );
 
   const addQuickEntry = useCallback(
@@ -1132,19 +1235,31 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         durationMs: UNDO_TOAST_MS,
         undoIds: [entry.id],
       });
-      if (isLiveMode()) {
-        postEntry({
-          id: entry.id,
-          kind: "quick",
-          calories: entry.calories,
-          mealSlot: slot,
-          date: todayIso || getTodayIsoVN(),
-        });
-      }
+      if (isLiveMode()) sendAdd(entry, todayIso || getTodayIsoVN());
       return result;
     },
-    [todayIso]
+    [todayIso, sendAdd]
   );
+
+  // Chưa lưu: a write of the entry is queued (or refused), or the server never confirmed it and nothing is sending it.
+  // The second part waits for the first read of the server's day, which confirms the entries it already has.
+  const unsavedIds = useMemo(() => {
+    if (!isLiveMode() || demo || !hydrated) return new Set<string>();
+    const queued = new Set(getPendingOfflineEntryIds());
+    const pending = pendingWriteIds();
+    return new Set(
+      edits.added
+        .filter((e) => queued.has(e.id) || (serverDayRead && !e.synced && !pending.has(e.id)))
+        .map((e) => e.id)
+    );
+    // syncVersion: the outbox changed
+  }, [edits.added, syncVersion, demo, hydrated, serverDayRead]);
+
+  const retryUnsaved = useCallback(() => {
+    markUsed("retry-unsaved");
+    setToast(null);
+    syncOfflineOutbox({ retryHeld: true }).then(onSync).catch(() => {});
+  }, [onSync]);
 
   const targets = useMemo(() => targetsFor(profile), [profile]);
   useMemo(() => setDayArchive(archive), [archive]);
@@ -1222,6 +1337,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       deleteSavedMeal,
       addSavedMeal,
       addQuickEntry,
+      unsavedIds,
+      retryUnsaved,
       todayIso,
       dayArchive: archive,
       hydrated,
@@ -1264,6 +1381,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       deleteSavedMeal,
       addSavedMeal,
       addQuickEntry,
+      unsavedIds,
+      retryUnsaved,
       todayIso,
       archive,
       hydrated,

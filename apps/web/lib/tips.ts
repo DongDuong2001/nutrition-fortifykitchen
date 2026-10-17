@@ -31,6 +31,8 @@ export interface TipContext {
   foodsToday: number;
   /** Chọn nhiều món is open on Hôm nay */
   selectMode?: boolean;
+  /** Entries of today the server has not saved yet (cc-49: the Chưa lưu marker) */
+  unsaved?: number;
 }
 
 /** The share tip waits until today holds this many foods. */
@@ -40,6 +42,14 @@ const home = (c: TipContext) => c.pathname === HOME_ROUTE;
 const today = (c: TipContext) => home(c) && !c.pastDay && !c.selectMode && c.foodsToday > 0;
 
 export const TIPS: readonly Tip[] = [
+  {
+    id: "unsaved",
+    target: "unsaved-marker",
+    title: "Món chưa lưu",
+    body: "Món có chữ Chưa lưu vẫn nằm trên máy này. App tự gửi lại khi có mạng. Nếu app báo lỗi, chạm Thử lại.",
+    used: ["retry-unsaved"],
+    when: (c) => today(c) && (c.unsaved ?? 0) > 0,
+  },
   {
     id: "home-logged",
     target: "home-food-list",
