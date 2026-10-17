@@ -29,6 +29,9 @@ describe("foodSourceLabel", () => {
     expect(foodSourceLabel("vn_fct")).toBe("Bảng TPDD Việt Nam");
     expect(foodSourceLabel("vn-table")).toBe("Bảng TPDD Việt Nam");
     expect(foodSourceLabel("vn_table")).toBe("Bảng TPDD Việt Nam");
+    expect(foodSourceLabel("vn-nin")).toBe("Bảng TPDD Việt Nam");
+    expect(foodSourceLabel("VN_NIN")).toBe("Bảng TPDD Việt Nam");
+    expect(foodSourceLabel("literature")).toBe("Tài liệu");
     expect(foodSourceLabel("custom")).toBe("Của tôi");
     expect(foodSourceLabel("user")).toBe("Của tôi");
     expect(foodSourceLabel("usda_sr_legacy")).toBe("USDA");

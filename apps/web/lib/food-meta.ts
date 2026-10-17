@@ -16,7 +16,10 @@ export function foodSourceLabel(source?: string | null): string {
       return "CNF (Canada)";
     case "vn-table":
     case "vn-fct":
+    case "vn-nin":
       return "Bảng TPDD Việt Nam";
+    case "literature":
+      return "Tài liệu";
     case "custom":
     case "user":
       return "Của tôi";
