@@ -6,7 +6,7 @@ Production build, clock fixed at 2026-10-15 10:00 Asia/Ho_Chi_Minh, demo mode, s
 - A food with a missing micronutrient has the grey dot; an empty slot reads "Chưa ăn · Thêm" and links to /add.
 - 20+ foods: only the list scrolls, meal headers stick.
 - Past day: ⋯ in meal mode opens a sheet with only Lưu thành.
-- Today: bars in the four level colours (Hao, 16/10), long press opens /entry. Past day: four levels, no Sửa, no ⋯, no long press.
+- Today: bars in the four level colours (Hao, 16/10), long press enters multi-select (Hao, 17/10), not /entry. Past day: four levels, no Sửa, no ⋯, no long press.
 - Links /micros?date= and /training?date=.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_22.py
 """
@@ -137,7 +137,7 @@ def run(browser, size, tag):
     pg.wait_for_timeout(200)
     pg.get_by_role("button", name="Xem cả ngày ×").click()
     check(hero_label(pg).startswith("Cả ngày · "), f"{tag} Xem cả ngày × clears the mode")
-    # long press on today opens the entry
+    # long press on today enters multi-select (Hao, 17/10); it no longer opens the entry
     foods.first.hover()
     box = foods.first.bounding_box()
     pg.mouse.move(box["x"] + 20, box["y"] + 10)
@@ -145,7 +145,8 @@ def run(browser, size, tag):
     pg.wait_for_timeout(750)
     pg.mouse.up()
     pg.wait_for_timeout(500)
-    check("/entry/" in pg.url, f"{tag} long press opens /entry ({pg.url})")
+    selecting = pg.locator("header:has-text('Đã chọn')").count() > 0 or pg.locator("[data-tour='select-bar']").count() > 0
+    check(selecting and "/entry/" not in pg.url, f"{tag} long press enters multi-select ({pg.url})")
     ctx.close()
 
     # past day
