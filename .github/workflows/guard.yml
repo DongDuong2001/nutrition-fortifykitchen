@@ -1,0 +1,68 @@
+name: Release guard
+
+# cc-50: the two things that broke silently on 17-18/10 fail here before a deploy.
+# - The web image must serve the coach link page at "/" (cc-48: a WORKDIR named /app built "/" as Hôm nay).
+# - Every diary write must work on Postgres 17 with all migrations (f0b25bc: every food save answered 400, 42P08).
+on:
+  push:
+    branches: [main, feat/ui]
+  pull_request:
+    branches: [main, feat/ui]
+
+jobs:
+  api:
+    name: Go tests and diary integration tests (Postgres 17)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: nutrition_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: apps/api/go.mod
+          cache-dependency-path: apps/api/go.sum
+      - name: go vet
+        working-directory: apps/api
+        run: go vet ./... && go vet -tags=integration ./...
+      - name: go test
+        working-directory: apps/api
+        run: go test ./...
+      - name: Integration tests (shim + every migration, then go test -tags=integration)
+        working-directory: apps/api
+        env:
+          TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/nutrition_test?sslmode=disable
+        run: ./scripts/test-integration.sh
+
+  web-image:
+    name: Web image serves the link page at /
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the production web image (as deploy/docker-compose.prod.yml does)
+        run: |
+          set -o pipefail
+          docker build --progress=plain -t web-guard \
+            --build-arg NEXT_PUBLIC_API_MODE=live \
+            --build-arg NEXT_PUBLIC_API_URL=/api/v1 \
+            --build-arg NEXT_PUBLIC_SITE_URL=https://lehongkhanh.vn \
+            --build-arg NEXT_PUBLIC_SUPABASE_URL=https://guard.supabase.co \
+            --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY=guard \
+            --build-arg NEXT_PUBLIC_HCAPTCHA_SITE_KEY=guard \
+            apps/web 2>&1 | tee build.log
+      - name: '"/" is a dynamic route ("┌ ƒ /") and its manifest has the link page'
+        run: |
+          id="$(docker create web-guard)"
+          docker cp "$id:/srv/web/.next/server/app/page_client-reference-manifest.js" root-manifest.js
+          docker rm "$id" >/dev/null
+          apps/web/scripts/check-root-page.sh build.log root-manifest.js
