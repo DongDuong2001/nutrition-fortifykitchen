@@ -240,6 +240,49 @@ func extractToken(r *http.Request) (string, bool) {
 	return "", false
 }
 
+func (m *Middleware) verifyToken(ctx context.Context, tokenStr string) (*uuid.UUID, *SupabaseClaims, error) {
+	claims := &SupabaseClaims{}
+
+	// Parse and verify token signature (supports both ECDSA P-256 via JWKS and HMAC)
+	token, err := jwt.ParseWithClaims(tokenStr, claims, func(t *jwt.Token) (interface{}, error) {
+		switch t.Method.(type) {
+		case *jwt.SigningMethodECDSA:
+			if m.jwksCache == nil {
+				return nil, errors.New("jwks verification not configured for ecdsa tokens")
+			}
+			kid, _ := t.Header["kid"].(string)
+			return m.jwksCache.GetKey(ctx, kid)
+
+		case *jwt.SigningMethodRSA:
+			if m.jwksCache == nil {
+				return nil, errors.New("jwks verification not configured for rsa tokens")
+			}
+			kid, _ := t.Header["kid"].(string)
+			return m.jwksCache.GetKey(ctx, kid)
+
+		case *jwt.SigningMethodHMAC:
+			if len(m.jwtSecret) == 0 {
+				return nil, errors.New("hmac secret not configured")
+			}
+			return m.jwtSecret, nil
+
+		default:
+			return nil, errors.New("unexpected signing method: " + t.Method.Alg())
+		}
+	})
+
+	if err != nil || token == nil || claims.Sub == "" {
+		return nil, nil, errors.New("invalid or expired token")
+	}
+
+	parsedUserID, err := uuid.Parse(claims.Sub)
+	if err != nil {
+		return nil, nil, errors.New("invalid user id in token claims")
+	}
+
+	return &parsedUserID, claims, nil
+}
+
 // Authenticate extracts and validates Bearer token or session cookie, then injects user info into request context
 func (m *Middleware) Authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -257,49 +300,38 @@ func (m *Middleware) Authenticate(next http.Handler) http.Handler {
 			}
 		}
 
-		claims := &SupabaseClaims{}
-
-		// Parse and verify token signature (supports both ECDSA P-256 via JWKS and HMAC)
-		token, err := jwt.ParseWithClaims(tokenStr, claims, func(t *jwt.Token) (interface{}, error) {
-			switch t.Method.(type) {
-			case *jwt.SigningMethodECDSA:
-				if m.jwksCache == nil {
-					return nil, errors.New("jwks verification not configured for ecdsa tokens")
-				}
-				kid, _ := t.Header["kid"].(string)
-				return m.jwksCache.GetKey(r.Context(), kid)
-
-			case *jwt.SigningMethodRSA:
-				if m.jwksCache == nil {
-					return nil, errors.New("jwks verification not configured for rsa tokens")
-				}
-				kid, _ := t.Header["kid"].(string)
-				return m.jwksCache.GetKey(r.Context(), kid)
-
-			case *jwt.SigningMethodHMAC:
-				if len(m.jwtSecret) == 0 {
-					return nil, errors.New("hmac secret not configured")
-				}
-				return m.jwtSecret, nil
-
-			default:
-				return nil, errors.New("unexpected signing method: " + t.Method.Alg())
-			}
-		})
-
-		if err != nil || token == nil || claims.Sub == "" {
-			response.Error(w, http.StatusUnauthorized, response.CodeUnauthorized, "invalid or expired token")
-			return
-		}
-
-		parsedUserID, err := uuid.Parse(claims.Sub)
+		parsedUserID, claims, err := m.verifyToken(r.Context(), tokenStr)
 		if err != nil {
-			response.Error(w, http.StatusUnauthorized, response.CodeUnauthorized, "invalid user id in token claims")
+			response.Error(w, http.StatusUnauthorized, response.CodeUnauthorized, err.Error())
 			return
 		}
 
 		// Inject user id and claims into context
-		ctx := context.WithValue(r.Context(), UserIDKey, parsedUserID)
+		ctx := context.WithValue(r.Context(), UserIDKey, *parsedUserID)
+		ctx = context.WithValue(ctx, ClaimsKey, claims)
+
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+// OptionalAuthenticate extracts and validates Bearer token or session cookie if present.
+// If valid, it injects user info into request context. If missing or invalid, the request proceeds as guest.
+func (m *Middleware) OptionalAuthenticate(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		tokenStr, _ := extractToken(r)
+		if tokenStr == "" {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		parsedUserID, claims, err := m.verifyToken(r.Context(), tokenStr)
+		if err != nil {
+			// Token invalid or expired, continue as guest
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), UserIDKey, *parsedUserID)
 		ctx = context.WithValue(ctx, ClaimsKey, claims)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
