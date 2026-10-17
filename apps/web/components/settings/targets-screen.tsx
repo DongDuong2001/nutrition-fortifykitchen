@@ -43,8 +43,15 @@ export function TargetsScreen() {
               section={sections[2]}
               note="* Khuyến nghị dinh dưỡng Việt Nam 2016 (VN 2016). Đây không phải quy tắc của huấn luyện viên."
             />
-            <p className="m-0 text-[13px] text-secondary">Chỉ xem ở đây. Cân nặng, mục tiêu và ngày tập mặc định sửa trong Hồ sơ.</p>
-            <PillButton href="/settings/profile">Sửa trong Hồ sơ</PillButton>
+            <p className="m-0 text-[13px] text-secondary">Cân nặng, mục tiêu và ngày tập mặc định sửa trong Hồ sơ. Bạn cũng có thể tùy chỉnh tỉ lệ đa lượng riêng.</p>
+            <div className="flex flex-col gap-2">
+              <PillButton href="/settings/targets/macros" variant="primary">
+                Tùy chỉnh tỉ lệ Macro & Năng lượng ›
+              </PillButton>
+              <PillButton href="/settings/profile" variant="secondary">
+                Sửa trong Hồ sơ
+              </PillButton>
+            </div>
           </div>
         ) : (
           <div aria-busy="true" aria-live="polite" className="flex flex-col gap-4">
