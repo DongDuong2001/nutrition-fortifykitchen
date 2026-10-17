@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import { InstallRow } from "@/components/pwa/install-row";
 import { Card } from "@/components/ui/card";
 import { ChipGroup } from "@/components/ui/chip-group";
 import { FormRow } from "@/components/ui/form-row";
@@ -209,6 +210,7 @@ export function AppCard() {
       <RowGroup>
         <Row icon={SETTINGS_ICONS.install} label="Thêm vào màn hình chính" href="/install" />
       </RowGroup>
+      <InstallRow alignGroup="profile-row" />
       <RowGroup>
         <Row icon={SETTINGS_ICONS.document} label="Điều khoản dịch vụ" href="/terms" />
       </RowGroup>

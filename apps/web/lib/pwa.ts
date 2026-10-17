@@ -76,3 +76,100 @@ export function isIosDevice(userAgent: string, maxTouchPoints = 0): boolean {
 export function isIosSafari(userAgent: string, maxTouchPoints = 0): boolean {
   return isIosDevice(userAgent, maxTouchPoints) && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(userAgent);
 }
+
+export function isAndroidDevice(userAgent: string): boolean {
+  return /Android/i.test(userAgent);
+}
+
+/** The phone the install steps are for, or null on anything else. */
+export function phoneKind(userAgent: string, maxTouchPoints = 0): "ios" | "android" | null {
+  if (isIosDevice(userAgent, maxTouchPoints)) return "ios";
+  return isAndroidDevice(userAgent) ? "android" : null;
+}
+
+/** A touch phone: a coarse pointer and a viewport under 1024 px (the width where the desktop layout starts). */
+export function isTouchPhone(coarsePointer: boolean, viewportWidth: number): boolean {
+  return coarsePointer && viewportWidth < 1024;
+}
+
+export type InAppBrowser = "Zalo" | "Facebook" | "Messenger" | "Instagram" | "TikTok";
+
+/** The app a page is open in when it is a social app's own browser, which cannot install a web app. Else null. */
+export function detectInAppBrowser(userAgent: string): InAppBrowser | null {
+  if (/Zalo/i.test(userAgent)) return "Zalo";
+  if (/Messenger/i.test(userAgent)) return "Messenger";
+  if (/FBAN|FBAV|FB_IAB/.test(userAgent)) return "Facebook";
+  if (/Instagram/i.test(userAgent)) return "Instagram";
+  if (/musical_ly|TikTok|BytedanceWebview/i.test(userAgent)) return "TikTok";
+  return null;
+}
+
+// The install pop-up (design: Install-Ask). Kept per account in h1t_settings_v1 as `installPrompt`.
+export const INSTALL_SNOOZE_MS = 3 * 24 * 60 * 60 * 1000;
+export const INSTALL_MAX_DISMISSALS = 3;
+
+export interface InstallPromptState {
+  dismissCount: number;
+  /** Epoch ms; the pop-up stays away until then. */
+  snoozeUntil: number;
+  done: boolean;
+  /** The first day (YYYY-MM-DD) the app was opened on this account, to tell the 2nd day from the 1st. */
+  firstSeenIso: string | null;
+}
+
+export const DEFAULT_INSTALL_PROMPT: InstallPromptState = { dismissCount: 0, snoozeUntil: 0, done: false, firstSeenIso: null };
+
+/** Anything read from storage, made into a valid state. */
+export function normalizeInstallPrompt(raw: unknown): InstallPromptState {
+  if (!raw || typeof raw !== "object") return { ...DEFAULT_INSTALL_PROMPT };
+  const r = raw as Record<string, unknown>;
+  const count = typeof r.dismissCount === "number" && Number.isFinite(r.dismissCount) && r.dismissCount > 0 ? Math.floor(r.dismissCount) : 0;
+  const until = typeof r.snoozeUntil === "number" && Number.isFinite(r.snoozeUntil) && r.snoozeUntil > 0 ? r.snoozeUntil : 0;
+  return {
+    dismissCount: count,
+    snoozeUntil: until,
+    done: r.done === true,
+    firstSeenIso: typeof r.firstSeenIso === "string" && /^\d{4}-\d{2}-\d{2}$/.test(r.firstSeenIso) ? r.firstSeenIso : null,
+  };
+}
+
+/** "Để sau", the close button or Esc: one more dismissal and a 3-day snooze. */
+export function dismissInstallPrompt(state: InstallPromptState, now: number): InstallPromptState {
+  return { ...state, dismissCount: state.dismissCount + 1, snoozeUntil: now + INSTALL_SNOOZE_MS };
+}
+
+/** "Tôi đã cài xong" or the appinstalled event. */
+export function completeInstallPrompt(state: InstallPromptState): InstallPromptState {
+  return { ...state, done: true };
+}
+
+/** Records the first day the app was opened; the same state comes back when it is already there. */
+export function noteInstallOpen(state: InstallPromptState, todayIso: string): InstallPromptState {
+  return state.firstSeenIso === null ? { ...state, firstSeenIso: todayIso } : state;
+}
+
+export interface InstallPromptInput {
+  touchPhone: boolean;
+  standalone: boolean;
+  /** Signed in, or in demo mode. */
+  signedIn: boolean;
+  setupDone: boolean;
+  pathname: string;
+  hasLoggedFood: boolean;
+  todayIso: string;
+  state: InstallPromptState;
+  now: number;
+  shownThisSession: boolean;
+  /** Another overlay, sheet, tour or tip is open. */
+  busy: boolean;
+}
+
+/** Whether the install pop-up may open by itself now. All conditions must hold. */
+export function shouldShowInstallPrompt(i: InstallPromptInput): boolean {
+  if (!i.touchPhone || i.standalone || !i.signedIn || !i.setupDone) return false;
+  if (i.pathname !== "/" || i.busy || i.shownThisSession) return false;
+  const secondDay = i.state.firstSeenIso !== null && i.state.firstSeenIso < i.todayIso;
+  if (!i.hasLoggedFood && !secondDay) return false;
+  if (i.state.done || i.state.dismissCount >= INSTALL_MAX_DISMISSALS) return false;
+  return i.now >= i.state.snoozeUntil;
+}

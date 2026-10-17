@@ -1,3 +1,4 @@
+import { DEFAULT_INSTALL_PROMPT, normalizeInstallPrompt, type InstallPromptState } from "./pwa";
 import { SETTINGS_STORAGE_KEY, accountStorage } from "./storage-keys";
 
 export { SETTINGS_STORAGE_KEY };
@@ -19,6 +20,8 @@ export interface AppSettings {
   workoutSaltReminder: boolean;
   eveningSummaryReminder: boolean;
   eveningSummaryTime: string;
+  /** The install pop-up's snooze and done flags (lib/pwa) */
+  installPrompt: InstallPromptState;
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -37,6 +40,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   workoutSaltReminder: true,
   eveningSummaryReminder: false,
   eveningSummaryTime: "21:00",
+  installPrompt: DEFAULT_INSTALL_PROMPT,
 };
 
 export type KeyValueStorage = Pick<Storage, "getItem" | "setItem">;
@@ -68,6 +72,7 @@ export function loadSettings(storage: KeyValueStorage | null = accountStorage())
       workoutSaltReminder: typeof parsed.workoutSaltReminder === "boolean" ? parsed.workoutSaltReminder : DEFAULT_SETTINGS.workoutSaltReminder,
       eveningSummaryReminder: typeof parsed.eveningSummaryReminder === "boolean" ? parsed.eveningSummaryReminder : DEFAULT_SETTINGS.eveningSummaryReminder,
       eveningSummaryTime: typeof parsed.eveningSummaryTime === "string" ? parsed.eveningSummaryTime : DEFAULT_SETTINGS.eveningSummaryTime,
+      installPrompt: normalizeInstallPrompt(parsed.installPrompt),
     };
   } catch {
     return { ...DEFAULT_SETTINGS };
@@ -96,4 +101,12 @@ export function saveSettings(
   }
 
   return next;
+}
+
+export function loadInstallPrompt(storage: KeyValueStorage | null = accountStorage()): InstallPromptState {
+  return loadSettings(storage).installPrompt;
+}
+
+export function saveInstallPrompt(installPrompt: InstallPromptState, storage: KeyValueStorage | null = accountStorage()): void {
+  saveSettings({ installPrompt }, storage);
 }

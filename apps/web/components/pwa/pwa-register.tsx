@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { Toast } from "@/components/ui/toast";
+import { startInstallCapture } from "@/lib/install-browser";
 import { shouldRegisterServiceWorker } from "@/lib/pwa";
 
 /**
@@ -12,6 +13,10 @@ import { shouldRegisterServiceWorker } from "@/lib/pwa";
 export function PwaRegister() {
   const [waiting, setWaiting] = useState<ServiceWorker | null>(null);
   const applying = useRef(false);
+
+  useEffect(() => {
+    startInstallCapture();
+  }, []);
 
   useEffect(() => {
     if (!shouldRegisterServiceWorker(process.env.NODE_ENV, "serviceWorker" in navigator)) return;
