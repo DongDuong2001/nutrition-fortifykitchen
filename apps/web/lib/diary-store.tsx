@@ -30,7 +30,7 @@ import { MOCK_FOODS } from "./mock/foods";
 import { syncRecipeFoods } from "./recipe-store";
 import { personaPatch } from "./demo-persona";
 import { isLiveMode } from "./api-mode";
-import { apiClient, dropOfflineEntry, syncOfflineOutbox } from "./api-client";
+import { apiClient, dropOfflineEntry, syncOfflineOutbox, getPendingOfflineEntryIds } from "./api-client";
 import { syncServerSession } from "./server-session";
 import { generateUuid, isUuid } from "./uuid";
 import {
@@ -466,6 +466,49 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   const [accountId, setAccountId] = useState<string | null>(null);
   const pathname = usePathname();
 
+  const refreshRemoteDay = useCallback((iso: string) => {
+    const account = currentAccountId();
+    if (!isLiveMode() || demo || !account) return;
+
+    syncOfflineOutbox()
+      .then(() => apiClient.getDay(iso))
+      .then((daySummary) => {
+        if (!daySummary || !Array.isArray(daySummary.meals)) return;
+        const serverEntries: AddedDiaryEntry[] = [];
+        for (const meal of daySummary.meals) {
+          for (const e of meal.entries || []) {
+            serverEntries.push({
+              id: e.id,
+              foodId: e.food_id || "",
+              foodName: e.food_name || "Món ăn",
+              grams: e.grams,
+              displayQty: e.serving_label || `${e.grams} g`,
+              mealSlot: (e.meal_slot === "preworkout" ? "pre_workout" : e.meal_slot) as MealSlot,
+              // A NULL kcal (unknown, migration 000011) stays null: it adds nothing to a total and is not shown as a measured 0
+              calories: typeof e.calories === "number" ? e.calories : null,
+              protein: (e.nutrients?.protein as number | null) ?? null,
+              carbs: (e.nutrients?.carbs as number | null) ?? null,
+              fat: (e.nutrients?.fat as number | null) ?? null,
+              fiber: (e.nutrients?.fiber as number | null) ?? null,
+              nutrients: (e.nutrients as Record<string, number | null>) ?? {},
+              addedAt: e.created_at || new Date().toISOString(),
+            });
+          }
+        }
+        setEdits((prev) => {
+          const outboxIds = new Set(getPendingOfflineEntryIds());
+          const pendingLocal = prev.added.filter(
+            (it) => !serverEntries.some((se) => se.id === it.id) && outboxIds.has(it.id)
+          );
+          return {
+            ...prev,
+            added: [...serverEntries, ...pendingLocal],
+          };
+        });
+      })
+      .catch(() => {});
+  }, [demo]);
+
   // Reads one account's (or demo's) data into state. Everything is in localStorage under the account's keys; the
   // old unscoped keys and an old sessionStorage copy move to the first account that loads, once.
   const loadData = useCallback((account: string | null, demoNow: boolean, iso: string) => {
@@ -497,44 +540,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     syncRecipeFoods();
 
     if (isLiveMode() && account && !demoNow) {
-      // Entries saved while offline go up now (and again whenever the connection returns, see the online listener)
-      syncOfflineOutbox().catch(() => {});
-      apiClient.getDay(iso).then((daySummary) => {
-        if (daySummary && Array.isArray(daySummary.meals)) {
-          const serverEntries: AddedDiaryEntry[] = [];
-          for (const meal of daySummary.meals) {
-            for (const e of meal.entries || []) {
-              serverEntries.push({
-                id: e.id,
-                foodId: e.food_id || "",
-                foodName: e.food_name || "Món ăn",
-                grams: e.grams,
-                displayQty: e.serving_label || `${e.grams} g`,
-                mealSlot: (e.meal_slot === "preworkout" ? "pre_workout" : e.meal_slot) as MealSlot,
-                // A NULL kcal (unknown, migration 000011) stays null: it adds nothing to a total and is not shown as a measured 0
-                calories: typeof e.calories === "number" ? e.calories : null,
-                protein: (e.nutrients?.protein as number | null) ?? null,
-                carbs: (e.nutrients?.carbs as number | null) ?? null,
-                fat: (e.nutrients?.fat as number | null) ?? null,
-                fiber: (e.nutrients?.fiber as number | null) ?? null,
-                nutrients: (e.nutrients as Record<string, number | null>) ?? {},
-                addedAt: e.created_at || new Date().toISOString(),
-              });
-            }
-          }
-          if (serverEntries.length > 0) {
-            setEdits((prev) => {
-              const existingIds = new Set(prev.added.map((it) => it.id));
-              const toAdd = serverEntries.filter((se) => !existingIds.has(se.id));
-              if (toAdd.length === 0) return prev;
-              return {
-                ...prev,
-                added: [...prev.added, ...toAdd],
-              };
-            });
-          }
-        }
-      }).catch(() => {});
+      refreshRemoteDay(iso);
 
       apiClient.getFavourites().then((favs) => {
         if (Array.isArray(favs) && favs.length > 0) {
@@ -553,7 +559,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
 
       apiClient.loadAllFoods().catch(() => {});
     }
-  }, []);
+  }, [refreshRemoteDay]);
 
   // Load on mount (client-only)
   useEffect(() => {
@@ -587,15 +593,27 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     }
   }, [loadData]);
 
-  // The connection came back: the entries queued offline go to the server
+  // Sync on reconnect, window focus, or tab visibility change
   useEffect(() => {
     if (!isLiveMode() || demo) return;
-    const onOnline = () => {
-      syncServerSession().then(() => syncOfflineOutbox()).catch(() => {});
+    const handleSync = () => {
+      const iso = todayIsoRef.current || getTodayIsoVN();
+      syncServerSession().then(() => refreshRemoteDay(iso)).catch(() => {});
     };
-    window.addEventListener("online", onOnline);
-    return () => window.removeEventListener("online", onOnline);
-  }, [demo]);
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        handleSync();
+      }
+    };
+    window.addEventListener("online", handleSync);
+    window.addEventListener("focus", handleSync);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => {
+      window.removeEventListener("online", handleSync);
+      window.removeEventListener("focus", handleSync);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, [demo, refreshRemoteDay]);
 
   // Another account signed in, or this one signed out (Đăng xuất keeps the data under its account): the
   // state of the account before is dropped and the new one's is read. The persist effects below then write to
