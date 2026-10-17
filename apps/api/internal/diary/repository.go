@@ -143,7 +143,7 @@ const createEntrySQL = `
 			id, client_id, user_id, food_id, kind, meal_slot, portion_label, grams, calories,
 			name_snapshot, nutrients_snapshot, quantity, serving_size_g, log_date
 		) VALUES (
-			$1, $1, $2, $3, $4, $5, $6, $7::numeric, $8, $9, $10, 1, COALESCE($7::numeric, 100), $11
+			$1::uuid, $1::uuid, $2, $3, $4, $5, $6, $7::numeric, $8, $9, $10, 1, COALESCE($7::numeric, 100), $11
 		)
 		ON CONFLICT (id) DO UPDATE SET id = EXCLUDED.id
 		RETURNING created_at

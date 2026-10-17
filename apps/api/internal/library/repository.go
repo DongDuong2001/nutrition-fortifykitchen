@@ -122,9 +122,9 @@ func (r *pgxLibraryRepo) UpsertRecent(ctx context.Context, userID uuid.UUID, foo
 	// 30-per-user cap: delete entries older than the top 30
 	trimSQL := `
 		DELETE FROM nutrition.user_recents
-		WHERE user_id = $1 AND food_id NOT IN (
+		WHERE user_id = $1::uuid AND food_id NOT IN (
 			SELECT food_id FROM nutrition.user_recents
-			WHERE user_id = $1
+			WHERE user_id = $1::uuid
 			ORDER BY used_at DESC
 			LIMIT 30
 		)

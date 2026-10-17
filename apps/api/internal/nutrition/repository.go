@@ -44,7 +44,7 @@ func (r *pgxRepository) SearchFoods(ctx context.Context, filter FoodSearchFilter
 
 	if filter.Query != "" {
 		// Use unaccent trigram matching or ilike
-		whereClauses = append(whereClauses, fmt.Sprintf("(name_search ILIKE '%%' || lower(unaccent($%d)) || '%%' OR name_search %% lower(unaccent($%d)))", argIdx, argIdx))
+		whereClauses = append(whereClauses, fmt.Sprintf("(name_search ILIKE '%%' || lower(unaccent($%d::text)) || '%%' OR name_search %% lower(unaccent($%d::text)))", argIdx, argIdx))
 		args = append(args, filter.Query)
 		argIdx++
 	}
@@ -74,7 +74,7 @@ func (r *pgxRepository) SearchFoods(ctx context.Context, filter FoodSearchFilter
 
 	orderBy := "is_custom ASC, name_vi ASC"
 	if filter.Query != "" {
-		orderBy = "CASE WHEN name_search ILIKE lower(unaccent($1)) || '%' THEN 1 WHEN name_search ILIKE '%' || lower(unaccent($1)) || '%' THEN 2 ELSE 3 END, similarity(name_search, lower(unaccent($1))) DESC, is_custom ASC, name_vi ASC"
+		orderBy = "CASE WHEN name_search ILIKE lower(unaccent($1::text)) || '%' THEN 1 WHEN name_search ILIKE '%' || lower(unaccent($1::text)) || '%' THEN 2 ELSE 3 END, similarity(name_search, lower(unaccent($1::text))) DESC, is_custom ASC, name_vi ASC"
 	}
 
 	querySQL := fmt.Sprintf(`
@@ -306,7 +306,7 @@ func (r *pgxRepository) CreateCustomFood(ctx context.Context, userID uuid.UUID, 
 	insertSQL := `
 		INSERT INTO nutrition.foods (
 			id, name, name_vi, category, source, is_custom, created_by, per_100g, per_100g_nutrients
-		) VALUES ($1, $2, $2, $3, 'custom', true, $4, $5, $5)
+		) VALUES ($1, $2::text, $2::text, $3, 'custom', true, $4, $5::jsonb, $5::jsonb)
 		RETURNING created_at
 	`
 	err = tx.QueryRow(ctx, insertSQL, food.ID, food.NameVi, food.Category, userID, nutrientsJSON).Scan(&food.CreatedAt)

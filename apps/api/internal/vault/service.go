@@ -164,7 +164,7 @@ func (s *vaultService) ListDrafts(ctx context.Context, status string) ([]CoachDr
 	query := `
 		SELECT id, file_path, markdown_content, parsed_data, status, commit_hash, updated_at
 		FROM nutrition.coach_drafts
-		WHERE ($1 = '' OR status = $1)
+		WHERE ($1::text = '' OR status = $1::text)
 		ORDER BY updated_at DESC
 	`
 	rows, err := s.pool.Query(ctx, query, status)
