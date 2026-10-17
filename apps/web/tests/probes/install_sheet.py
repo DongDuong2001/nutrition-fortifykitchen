@@ -270,7 +270,7 @@ def inapp_flow(browser):
     pg.wait_for_timeout(400)
     check(pg.get_by_text("Đã sao chép liên kết").count() >= 1, "in-app: toast 'Đã sao chép liên kết'")
     clip = pg.evaluate("() => navigator.clipboard.readText()")
-    check(clip == "https://lehongkhanh.vn", f"in-app: the clipboard holds the link ({clip})")
+    check(clip == "https://lehongkhanh.vn/?install=1", f"in-app: the clipboard holds the link ({clip})")
     ctx.close()
     for name, ua in [("Facebook", IPHONE + " [FBAN/FBIOS;FBAV/450.0]"), ("Instagram", IPHONE + " Instagram 330.0"), ("TikTok", ANDROID + " musical_ly_32.5")]:
         c = phone(browser, ua)

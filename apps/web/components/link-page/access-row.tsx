@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { CloseIcon } from "@/components/pwa/install-icons";
 import { InstallSheet, SHEET_ICON_BUTTON, SHEET_TITLE_CLASS, type InstallSheetResult } from "@/components/pwa/install-sheet";
@@ -16,11 +16,20 @@ const TITLE_ID = "access-sheet-title";
 /**
  * The H1T MICRO row on the link page. An installed app or a desktop goes straight to Hôm nay (it is a plain link to
  * HOME_ROUTE). A phone in a browser gets a choice first: install the app (the install sheet's steps) or carry on in
- * the browser. Closing the choice returns focus to the row.
+ * the browser. Closing the choice returns focus to the row. "?install=1" (the link the in-app browser copies) opens the
+ * install steps straight away on a phone; a desktop ignores it. The param is dropped from the address either way.
  */
 export function AccessRow() {
   const [choosing, setChoosing] = useState(false);
   const [installing, setInstalling] = useState(false);
+
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("install") !== "1") return;
+    url.searchParams.delete("install");
+    window.history.replaceState(window.history.state, "", url.pathname + url.search + url.hash);
+    if (!readStandalone() && isTouchPhone(window.matchMedia("(pointer: coarse)").matches, window.innerWidth)) setInstalling(true);
+  }, []);
 
   const open = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (readStandalone() || !isTouchPhone(window.matchMedia("(pointer: coarse)").matches, window.innerWidth)) return;

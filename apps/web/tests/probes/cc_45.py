@@ -3,7 +3,7 @@
 Link page at 390, 360, 768 and 1440 (sizes from LinkKhanh / LinkKhanhDesktop.dc.html, no horizontal overflow), the
 "Truy cập" chooser on a phone (Esc, scrim and close button return focus to the row; Cài app opens the install steps;
 Tiếp tục trên web lands on Hôm nay), straight to /app at 1440, an installed app on "/" lands on /app before the link
-page paints, old "/?date=" links redirect with their query, the nav's Hôm nay goes to /app, and reduced motion stops
+page paints, ?install=1 opens the install steps on a phone only, old "/?date=" links redirect with their query, the nav's Hôm nay goes to /app, and reduced motion stops
 the background. Screenshots: .screenshots/cc-45-{link,chooser,app}-{390,1440}.png (plus link-360, link-768, and the two design files as\ncc-45-design-{390,1440}.png).
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_45.py
 """
@@ -47,6 +47,26 @@ SIZES_JS = """() => {
     overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
     svg: [...document.querySelectorAll('svg[viewBox="0 0 390 844"], svg[viewBox="0 0 1440 900"]')].filter(s => s.getBoundingClientRect().width > 0).length,
   };
+}"""
+
+
+# Line boxes of the smallest element whose text starts with each label (the wordmark; the meal pill with its kcal)
+LINES_JS = """() => {
+  const lines = (el) => {
+    const r = document.createRange();
+    r.selectNodeContents(el);
+    return new Set([...r.getClientRects()].filter(b => b.width > 0).map(b => Math.round(b.top + b.height / 2))).size;
+  };
+  const out = {};
+  for (const [label, needs] of [['H1T MICRO', ''], ['TRƯỚC TẬP', 'KCAL']]) {
+    const hits = [...document.querySelectorAll('body *')].filter(e => {
+      const t = e.textContent.replace(/\\s+/g, ' ').trim().toUpperCase();
+      return e.getBoundingClientRect().width > 0 && t.startsWith(label) && t.includes(needs) && t.length < 40;
+    });
+    const leaf = hits.find(e => !hits.some(h => h !== e && e.contains(h)));
+    out[label] = leaf ? lines(leaf) : null;
+  }
+  return out;
 }"""
 
 
@@ -144,6 +164,12 @@ def chooser(browser):
     if lock[1]:
         pg.keyboard.press("Escape")
     pg.wait_for_timeout(500)
+    pg.evaluate("document.fonts.ready")
+    lines = pg.evaluate(LINES_JS)
+    check(lines.get("H1T MICRO") == 1, f"Hôm nay 390: the H1T MICRO wordmark on one line ({lines})")
+    check(lines.get("TRƯỚC TẬP") == 1, f"Hôm nay 390: the Trước tập pill (name and kcal) on one line ({lines})")
+    loaded = pg.evaluate("[...new Set([...document.fonts].filter(f => f.status === 'loaded').map(f => f.family))]")
+    check(any("Manrope" in f for f in loaded) and any("Saira" in f for f in loaded), f"Hôm nay 390: Manrope and Saira Condensed loaded ({loaded})")
     pg.screenshot(path=str(SHOTS / "cc-45-app-390.png"))
     ctx.close()
 
@@ -232,6 +258,28 @@ def reduced_motion(browser):
             ctx.close()
 
 
+def install_param(browser):
+    """?install=1 (the link the in-app browser copies): a phone opens the install steps, a desktop stays on the page."""
+    install = 'div[role="dialog"][aria-labelledby="install-sheet-title"]'
+    for size, phone in [(PHONE, True), (DESKTOP, False)]:
+        ctx = browser.new_context(**size)
+        pg = ctx.new_page()
+        pg.goto(BASE + "/?install=1", wait_until="networkidle")
+        pg.wait_for_timeout(400)
+        w = size["viewport"]["width"]
+        check(pg.url == BASE + "/", f"?install=1 @{w}: the param is dropped ({pg.url})")
+        check(pg.locator(ROW).count() == 1, f"?install=1 @{w}: the link page stays")
+        sheet = pg.locator(install)
+        if phone:
+            check(sheet.count() == 1 and sheet.get_by_text("CÀI H1T MICRO VÀO MÁY CỦA BẠN").count() == 1, "?install=1 @390: the install steps open")
+            check(pg.locator(CHOOSER).count() == 0, "?install=1 @390: straight to the steps, no chooser")
+            pg.keyboard.press("Escape")
+            check(sheet.count() == 0 and pg.url == BASE + "/", "?install=1 @390: Esc closes, still on /")
+        else:
+            check(sheet.count() == 0, "?install=1 @1440: no install sheet on a desktop")
+        ctx.close()
+
+
 DESIGNS = Path(__file__).resolve().parents[4] / "design" / "screens"
 
 
@@ -251,6 +299,7 @@ with sync_playwright() as p:
     design_shots(browser)
     link_page(browser)
     chooser(browser)
+    install_param(browser)
     desktop(browser)
     standalone_and_redirects(browser)
     reduced_motion(browser)

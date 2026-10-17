@@ -22,7 +22,8 @@ import { Toast } from "@/components/ui/toast";
 import { clearInstallEvent, readInstallDevice, useInstallEvent, type InstallDevice } from "@/lib/install-browser";
 import type { InAppBrowser } from "@/lib/pwa";
 
-export const INSTALL_URL = "https://lehongkhanh.vn";
+/** The link the in-app browser copies: the link page, which opens the install steps on a phone (?install=1). */
+export const INSTALL_URL = "https://lehongkhanh.vn/?install=1";
 const INSTALL_HOST = "lehongkhanh.vn";
 
 type View = "ask" | "ios" | "android" | "inapp";
