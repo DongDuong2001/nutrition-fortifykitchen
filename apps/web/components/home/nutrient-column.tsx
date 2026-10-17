@@ -52,10 +52,10 @@ export function NutrientColumn({
         selected ? "before:absolute before:inset-x-0 before:top-0 before:z-20 before:h-[3px] before:bg-cobalt before:content-['']" : ""
       }`}
     >
-      {/* Rows are 34 px where there is room and shrink (to 28 px) so the column fits a short screen; it scrolls when it cannot */}
+      {/* Sections stack at their natural height (34 px rows, 48 px from lg); space left over sits below the last one, and a column that does not fit scrolls */}
       <Scroll share={share}>
         {groups.map((group, groupIndex) => (
-          <section key={group.title} aria-label={group.title} data-tour={groupIndex === 0 ? "nutrient-column" : undefined} className={`flex flex-col ${share ? "" : "shrink-0 grow-[var(--rows)] lg:grow-0"}`} style={share ? undefined : ({ "--rows": group.ids.length } as React.CSSProperties)}>
+          <section key={group.title} aria-label={group.title} data-tour={groupIndex === 0 ? "nutrient-column" : undefined} className="flex shrink-0 flex-col">
             <h3 data-snap-row className={`m-0 flex-none snap-start ${pill.wrap}`}>
               <span data-ink-pill className={`${pill.pill} bg-ink text-on-dark`}>
                 <span className={pill.label}>{group.title}</span>
@@ -84,7 +84,7 @@ export function NutrientColumn({
               const value = values.nutrients[id] ?? null;
               const pct = pctOf(value, targets[id] ?? null);
               return (
-                <div key={id} data-align-group="home-nutrient" data-snap-row className={`flex snap-start flex-col justify-center gap-0.5 px-3 ${share ? "h-9" : "max-h-[34px] min-h-7 flex-1 lg:h-12 lg:max-h-none lg:flex-none lg:gap-1"}`}>
+                <div key={id} data-align-group="home-nutrient" data-snap-row className={`flex snap-start flex-col justify-center gap-0.5 px-3 ${share ? "h-9" : "h-[34px] lg:h-12 lg:gap-1"}`}>
                   <div className="flex items-baseline justify-between gap-1">
                     <span className="flex min-w-0 items-baseline gap-1 whitespace-nowrap">
                       <span className={`text-[13px] font-semibold leading-tight text-text ${lg}`}>{def.name}</span>

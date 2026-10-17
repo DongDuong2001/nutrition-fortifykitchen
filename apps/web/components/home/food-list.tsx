@@ -84,12 +84,12 @@ function FoodRow({
       onPointerLeave={cancel}
       onContextMenu={(e) => e.preventDefault()}
       style={noSelect}
-      className={`flex h-8 w-full cursor-pointer items-center justify-between gap-2 border-0 border-b border-b-divider px-3 text-left lg:h-12 ${
+      className={`flex min-h-8 w-full cursor-pointer items-center justify-between gap-2 border-0 border-b border-b-divider px-3 py-1 text-left lg:min-h-12 ${
         selected ? "bg-cobalt text-on-accent" : "bg-transparent text-text"
       }`}
     >
       <span className="flex min-w-0 items-center gap-1.5">
-        <span className="min-w-0 truncate text-[13px] font-semibold leading-none lg:text-[15px]" title={entry.name}>
+        <span className="min-w-0 break-words text-[13px] font-semibold leading-tight line-clamp-2 lg:text-[15px]" title={entry.name}>
           {entry.name}
         </span>
         {missing && (

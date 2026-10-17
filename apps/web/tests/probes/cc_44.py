@@ -52,6 +52,15 @@ def shoot(browser, route, path, w, empty=False):
     pg.wait_for_timeout(900)
     overflow = pg.evaluate("document.documentElement.scrollWidth - document.documentElement.clientWidth")
     check(overflow <= 0, f"{route} @{w}: no horizontal overflow ({overflow})")
+    if route == "home":
+        # Food names wrap (line-clamp-2, leading-tight): no descender or dot below is clipped ("Yogurt", "Cơm gạo lứt")
+        names = pg.evaluate(
+            """() => [...document.querySelectorAll("button[aria-pressed][aria-label*=', '] > span > span[title]")]
+              .filter(e => e.getBoundingClientRect().width > 0)
+              .map(e => ({ t: e.textContent.trim(), sh: e.scrollHeight, ch: e.clientHeight }))"""
+        )
+        clipped = [n for n in names if n["sh"] > n["ch"] + 1]
+        check(len(names) >= 7 and not clipped, f"{route} @{w}: {len(names)} food names, none clipped ({clipped})")
     pg.screenshot(path=str(SHOTS / name(route, w)))
     ctx.close()
 
@@ -92,7 +101,7 @@ def share(browser, named):
     )
     css_h = round(h * 390 / 1080)
     check(w == 1080, f"share {tag}: 1080 wide ({w})")
-    # ShareC2 says 972; "Thiếu nhiều nhất: Vitamin D, Calcium" wraps to a second 18 px line in the 174 px column (OPEN_QUESTIONS cc-44)
+    # ShareC2 says 972; "Thiếu nhiều nhất: Vitamin D, Calcium" wraps to a second 18 px line in the 174 px column: 989 (Hao accepted, 17/10)
     check(abs(css_h - 972) <= 1 or abs(css_h - 990) <= 1, f"share {tag}: 972 CSS px high, or 990 with the summary on two lines ({css_h}, PNG {h})")
     ctx.close()
 
