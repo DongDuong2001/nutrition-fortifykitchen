@@ -82,7 +82,7 @@ def check_subtabs(browser, size_name, size):
     check(pg.locator('nav[role="tablist"][aria-label="Tổng quan"]:visible').count() == 1, f"{size_name} overview: tab bar is visible")
     for label, route in SUBTABS:
         tab(pg, label).click()
-        pg.wait_for_url(f"**{route}", timeout=8000) if route != "/" else pg.wait_for_url(re.compile(r".*/(\?.*)?$"), timeout=8000)
+        pg.wait_for_url(f"**{route}", timeout=8000) if route != "/app" else pg.wait_for_url(re.compile(r".*/(\?.*)?$"), timeout=8000)
         pg.wait_for_timeout(500)
         check(path_of(pg) == route, f"{size_name} {label}: opens {route} (got {path_of(pg)})")
         current = pg.locator('a[role="tab"][aria-current="page"]:visible').all_inner_texts()
@@ -94,7 +94,7 @@ def check_subtabs(browser, size_name, size):
         # the bottom nav and sidebar now carry the "Hôm nay" tab label on every screen, so leave them out
         nav_text = " ".join(pg.locator('nav[aria-label="Điều hướng chính"]:visible').first.inner_text().split())
         body = " ".join(text(pg).split()).replace(nav_text, "")
-        check("Hôm nay" not in body or route == "/", f"{size_name} {label}: no day lists or day controls")
+        check("Hôm nay" not in body or route == "/app", f"{size_name} {label}: no day lists or day controls")
         check("vượt" not in body.lower() and "quá mức" not in body.lower(), f"{size_name} {label}: no over-limit wording")
     ctx.close()
 
@@ -186,7 +186,7 @@ def check_micros_tab(browser, size_name, size):
 def check_home_rows(browser, size_name, size):
     """The Vi chất and Ngày tập links on Hôm nay open the day shown, and back returns to /."""
     ctx, pg = new_page(browser, size)
-    go(pg, "/")
+    go(pg, "/app")
     check(pg.locator("h1:visible").count() >= 1, f"{size_name} home: a visible h1")
     shot(pg, "home", size_name)
     no_h_scroll(pg, f"{size_name} home")
@@ -206,7 +206,7 @@ def check_home_rows(browser, size_name, size):
     check(f"date={TODAY}" in pg.url, f"{size_name} home: Đủ 22 vi chất › opens /micros?date={TODAY}")
     pg.locator('a[aria-label="Quay lại"]:visible').first.click()
     pg.wait_for_url(re.compile(r".*/(\?.*)?$"), timeout=8000)
-    check(path_of(pg) == "/", f"{size_name} micros: back returns to / (now {path_of(pg)})")
+    check(path_of(pg) == "/app", f"{size_name} micros: back returns to / (now {path_of(pg)})")
     pg.locator(f'a[href="/training?date={TODAY}"]:visible').first.click()
     pg.wait_for_url(f"**/training?date={TODAY}", timeout=8000)
     check(f"date={TODAY}" in pg.url, f"{size_name} home: the Ngày tập pill opens /training?date={TODAY}")
@@ -217,7 +217,7 @@ def check_home_rows(browser, size_name, size):
 
 def check_past_day(browser, size_name, size):
     ctx, pg = new_page(browser, size)
-    go(pg, f"/?date={YESTERDAY}")
+    go(pg, f"/app?date={YESTERDAY}")
     pg.wait_for_timeout(300)
     add = 'a[href^="/add"]:not(#mobile-add-fab):not(#desktop-add-btn):visible'
     check(pg.locator(add).count() == 0, f"{size_name} past home: no add link on a meal")
@@ -238,7 +238,7 @@ def check_past_day(browser, size_name, size):
     go(pg, f"/micros?date={YESTERDAY}")
     check("Chỉ xem" in text(pg) or "Hôm qua" in text(pg), f"{size_name} past micros: shows the date of the day")
     back = pg.locator('a[aria-label="Quay lại"]:visible').first.get_attribute("href")
-    check(back == f"/?date={YESTERDAY}", f"{size_name} past micros: back goes to /?date= ({back})")
+    check(back == f"/app?date={YESTERDAY}", f"{size_name} past micros: back goes to /?date= ({back})")
     check(pg.locator(add).count() == 0, f"{size_name} past micros: no add link")
     check(pg.locator('a[href="/trends/micros"]:visible').count() >= 1, f"{size_name} micros: the trend link goes to /trends/micros")
 
@@ -248,7 +248,7 @@ def check_past_day(browser, size_name, size):
     check(len(disabled) >= 5 and all(disabled), f"{size_name} past training: duration chips are disabled ({len(disabled)})")
     check(pg.locator('input[type="checkbox"]:visible').count() == 0, f"{size_name} past training: no checklist to toggle")
     back = pg.locator('a[aria-label="Quay lại"]:visible').first.get_attribute("href")
-    check(back == f"/?date={YESTERDAY}", f"{size_name} past training: back goes to /?date= ({back})")
+    check(back == f"/app?date={YESTERDAY}", f"{size_name} past training: back goes to /?date= ({back})")
     shot(pg, "past-training", size_name)
     ctx.close()
 
@@ -256,7 +256,7 @@ def check_past_day(browser, size_name, size):
 def check_delete_meal(browser, size_name, size):
     """cc2-32: the meal ⋯ sheet lives on Hôm nay. Tap the breakfast header (meal mode), then the ⋯ pill."""
     ctx, pg = new_page(browser, size)
-    go(pg, "/")
+    go(pg, "/app")
     breakfast = pg.locator("section[aria-label='Bữa sáng']")
     before = re.sub(r"\s+", " ", breakfast.inner_text())
     check("459" in before, f"{size_name} delete: breakfast shows 459 kcal first ({before[:80]!r})")

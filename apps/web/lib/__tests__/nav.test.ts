@@ -1,18 +1,19 @@
 import { describe, it, expect } from "vitest";
-import { NAV_TABS, backFallback, canGoBack, nextHistory, tabForPath } from "../nav";
+import { HOME_ROUTE, NAV_TABS, backFallback, homeRedirectFor, canGoBack, nextHistory, tabForPath } from "../nav";
 
 describe("lib/nav tabs", () => {
   it("lists the four tabs in order (Hôm nay, Tổng quan, Khám phá, Cài đặt) with their routes", () => {
     expect(NAV_TABS.map((t) => [t.tab, t.href, t.label])).toEqual([
-      ["today", "/", "Hôm nay"],
+      ["today", "/app", "Hôm nay"],
       ["overview", "/trends", "Tổng quan"],
       ["explore", "/explore", "Khám phá"],
       ["settings", "/settings", "Cài đặt"],
     ]);
   });
 
-  it("maps each tab route to itself", () => {
-    expect(tabForPath("/")).toBe("today");
+  it("maps each tab route to itself, and the coach link page at / to no tab", () => {
+    expect(tabForPath("/")).toBeNull();
+    expect(tabForPath("/app")).toBe("today");
     expect(tabForPath("/trends")).toBe("overview");
     expect(tabForPath("/explore")).toBe("explore");
     expect(tabForPath("/settings")).toBe("settings");
@@ -99,9 +100,9 @@ describe("lib/nav, compare foods (cc-23)", () => {
 
 describe("lib/nav backFallback", () => {
   it("sends Vi chất and Ngày tập back to the day log, and Tổng quan's sub-screens back to Tổng quan", () => {
-    expect(backFallback("/micros")).toBe("/");
-    expect(backFallback("/training")).toBe("/");
-    expect(backFallback("/trends")).toBe("/");
+    expect(backFallback("/micros")).toBe(HOME_ROUTE);
+    expect(backFallback("/training")).toBe(HOME_ROUTE);
+    expect(backFallback("/trends")).toBe(HOME_ROUTE);
     expect(backFallback("/trends/micros")).toBe("/trends");
     expect(backFallback("/trends/body")).toBe("/trends");
   });
@@ -121,25 +122,25 @@ describe("lib/nav backFallback", () => {
   });
 
   it("keeps a past day's ?date= when the parent is a day screen", () => {
-    expect(backFallback("/micros", "?date=2026-10-14")).toBe("/?date=2026-10-14");
-    expect(backFallback("/training", "?date=2026-10-14")).toBe("/?date=2026-10-14");
+    expect(backFallback("/micros", "?date=2026-10-14")).toBe("/app?date=2026-10-14");
+    expect(backFallback("/training", "?date=2026-10-14")).toBe("/app?date=2026-10-14");
     expect(backFallback("/micros/calcium", "?date=2026-10-14")).toBe("/micros?date=2026-10-14");
-    expect(backFallback("/add", "?date=2026-10-14&meal=lunch")).toBe("/?date=2026-10-14");
+    expect(backFallback("/add", "?date=2026-10-14&meal=lunch")).toBe("/app?date=2026-10-14");
   });
 
   it("ignores a missing or malformed date and dates on screens that are not day screens", () => {
-    expect(backFallback("/micros", "")).toBe("/");
-    expect(backFallback("/micros", null)).toBe("/");
-    expect(backFallback("/micros", "?date=hôm-qua")).toBe("/");
+    expect(backFallback("/micros", "")).toBe(HOME_ROUTE);
+    expect(backFallback("/micros", null)).toBe(HOME_ROUTE);
+    expect(backFallback("/micros", "?date=hôm-qua")).toBe(HOME_ROUTE);
     expect(backFallback("/trends/micros", "?date=2026-10-14")).toBe("/trends");
     expect(backFallback("/foods/egg", "?date=2026-10-14")).toBe("/explore");
   });
 
   it("falls back to the owning tab for the add sheet and entry, and to the root otherwise", () => {
-    expect(backFallback("/add")).toBe("/");
-    expect(backFallback("/entry/item-1")).toBe("/");
-    expect(backFallback("/anything-else")).toBe("/");
-    expect(backFallback(null)).toBe("/");
+    expect(backFallback("/add")).toBe(HOME_ROUTE);
+    expect(backFallback("/entry/item-1")).toBe(HOME_ROUTE);
+    expect(backFallback("/anything-else")).toBe(HOME_ROUTE);
+    expect(backFallback(null)).toBe(HOME_ROUTE);
   });
 });
 
@@ -172,5 +173,22 @@ describe("lib/nav history", () => {
     for (let i = 0; i < 100; i++) stack = nextHistory(stack, `/p${i}`);
     expect(stack.length).toBeLessThanOrEqual(50);
     expect(stack[stack.length - 1]).toBe("/p99");
+  });
+});
+
+describe("lib/nav homeRedirectFor", () => {
+  it("sends an old Hôm nay link at / to /app with the whole query", () => {
+    expect(homeRedirectFor({ date: "2026-10-15" })).toBe("/app?date=2026-10-15");
+    expect(homeRedirectFor({ demo: "1", as: "coach", level: "2" })).toBe("/app?demo=1&as=coach&level=2");
+    expect(homeRedirectFor({ meal: "lunch", utm: "zalo" })).toBe("/app?meal=lunch&utm=zalo");
+    expect(homeRedirectFor({ demo: "" })).toBe("/app?demo=");
+    expect(homeRedirectFor({ loading: "1" })).toBe("/app?loading=1");
+    expect(homeRedirectFor({ date: ["2026-10-14", "2026-10-15"] })).toBe("/app?date=2026-10-14&date=2026-10-15");
+  });
+
+  it("keeps the link page for no query or a query that is not Hôm nay's", () => {
+    expect(homeRedirectFor({})).toBeNull();
+    expect(homeRedirectFor({ utm_source: "facebook" })).toBeNull();
+    expect(homeRedirectFor({ date: undefined })).toBeNull();
   });
 });

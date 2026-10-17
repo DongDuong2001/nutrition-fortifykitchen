@@ -15,6 +15,7 @@ import { createClient } from "./supabase-client";
 import { isDemo } from "./demo";
 import { clearOnboardingStorage, isValidEmail } from "./onboarding";
 import { syncServerSession } from "./server-session";
+import { HOME_ROUTE } from "./nav";
 
 // The one interface the auth screens call. In live mode (NEXT_PUBLIC_API_MODE=live, lib/api-mode.ts) it is backed by
 // Supabase Auth (lib/supabase-client.ts); otherwise by the local mock in lib/auth-mock.ts, so gates and demos run
@@ -333,7 +334,7 @@ export async function signInWithGoogle(): Promise<AuthResult> {
   return guarded(async () => {
     clearSignedOutFlag();
     const supabase = createClient();
-    const redirectTo = typeof window !== "undefined" ? `${window.location.origin}/auth/callback?next=/` : undefined;
+    const redirectTo = typeof window !== "undefined" ? `${window.location.origin}/auth/callback?next=${HOME_ROUTE}` : undefined;
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: { redirectTo },

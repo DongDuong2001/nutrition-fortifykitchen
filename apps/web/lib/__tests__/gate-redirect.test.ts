@@ -71,13 +71,13 @@ describe("the sign-in gate with a session that only Supabase knows", () => {
   it("(a) empty storage and a valid session: the gate lets the user through and keeps the email", async () => {
     getUser.mockResolvedValue({ data: { user }, error: null });
     withProfile();
-    expect(await gate.gateRedirect("/", false)).toBeNull();
+    expect(await gate.gateRedirect("/app", false)).toBeNull();
     expect(local.getItem("h1t_auth_current_email")).toBe(EMAIL);
   });
 
   it("(b) no session: /signin", async () => {
     getUser.mockResolvedValue({ data: { user: null }, error: null });
-    expect(await gate.gateRedirect("/", false)).toBe("/signin");
+    expect(await gate.gateRedirect("/app", false)).toBe("/signin");
     expect(local.getItem("h1t_auth_current_email")).toBeNull();
   });
 
@@ -85,16 +85,16 @@ describe("the sign-in gate with a session that only Supabase knows", () => {
     setViewport(true, local);
     getUser.mockResolvedValue({ data: { user }, error: null });
     withProfile();
-    expect(await gate.gateRedirect("/", false)).toBeNull();
+    expect(await gate.gateRedirect("/app", false)).toBeNull();
     expect(local.getItem("h1t_auth_current_email")).toBe(EMAIL);
   });
 
   it("(b4) a signed-out desktop visitor goes to /landing, a signed-out phone to /signin", async () => {
     getUser.mockResolvedValue({ data: { user: null }, error: null });
     setViewport(true, local);
-    expect(await gate.gateRedirect("/", false)).toBe("/landing");
+    expect(await gate.gateRedirect("/app", false)).toBe("/landing");
     setViewport(false, local);
-    expect(await gate.gateRedirect("/", false)).toBe("/signin");
+    expect(await gate.gateRedirect("/app", false)).toBe("/signin");
   });
 
   it("(b5) only the root goes to /landing: another tab route on desktop is /signin", async () => {
@@ -106,7 +106,7 @@ describe("the sign-in gate with a session that only Supabase knows", () => {
   it("(b6) the viewport is read once per call, so a resize after the check never changes the route", async () => {
     getUser.mockResolvedValue({ data: { user: null }, error: null });
     setViewport(true, local);
-    const pending = gate.gateRedirect("/", false);
+    const pending = gate.gateRedirect("/app", false);
     setViewport(false, local); // the window shrinks while Supabase is answering
     expect(await pending).toBe("/landing");
   });
@@ -121,7 +121,7 @@ describe("the sign-in gate with a session that only Supabase knows", () => {
 
   it("(b2) Supabase failing to answer is /signin, not a stuck gate", async () => {
     getUser.mockRejectedValue(new Error("offline"));
-    expect(await gate.gateRedirect("/", false)).toBe("/signin");
+    expect(await gate.gateRedirect("/app", false)).toBe("/signin");
   });
 
   it("(c) after Đăng xuất a surviving session is not adopted: /signin, and the flag stays until an explicit sign-in", async () => {
@@ -142,7 +142,7 @@ describe("the sign-in gate with a session that only Supabase knows", () => {
 
   it("(d) no profile and a valid session: a first-time Google user goes to /setup/profile, not /", async () => {
     getUser.mockResolvedValue({ data: { user }, error: null });
-    expect(await gate.gateRedirect("/", false)).toBe("/setup/profile");
+    expect(await gate.gateRedirect("/app", false)).toBe("/setup/profile");
     expect(await gate.gateRedirect("/add", false)).toBe("/setup/profile");
   });
 
@@ -162,7 +162,7 @@ describe("the sign-in gate with a session that only Supabase knows", () => {
       events.push("getUser");
       return { data: { user }, error: null };
     });
-    expect(await gate.gateRedirect("/", false)).toBe("/setup/profile");
+    expect(await gate.gateRedirect("/app", false)).toBe("/setup/profile");
     expect(events[0]).toBe("getUser");
     expect(events[1]).toBe(`email stored: ${EMAIL}`);
     // Every profile read comes after the email is stored; the one an account's setup needs is its own key (the bare
@@ -176,29 +176,29 @@ describe("the sign-in gate with a session that only Supabase knows", () => {
   it("with no session the old rule stands: /signin from a tab route", async () => {
     getUser.mockResolvedValue({ data: { user: null }, error: null });
     expect(await gate.gateRedirect("/settings", false)).toBe("/signin");
-    expect(await gate.gateRedirect("/", false)).toBe("/signin");
+    expect(await gate.gateRedirect("/app", false)).toBe("/signin");
   });
 
   it("does not ask Supabase when the email is already known, and never in demo mode", async () => {
     local.setItem("h1t_auth_current_email", EMAIL);
     withProfile();
-    expect(await gate.gateRedirect("/", false)).toBeNull();
+    expect(await gate.gateRedirect("/app", false)).toBeNull();
     expect(getUser).not.toHaveBeenCalled();
     local.removeItem("h1t_auth_current_email");
-    expect(await gate.gateRedirect("/", true)).toBeNull();
+    expect(await gate.gateRedirect("/app", true)).toBeNull();
     expect(getUser).not.toHaveBeenCalled();
   });
 
   it("per-account storage is scoped to the resolved email: the diary reads this account's keys", async () => {
     getUser.mockResolvedValue({ data: { user }, error: null });
-    await gate.gateRedirect("/", false);
+    await gate.gateRedirect("/app", false);
     const { currentAccountId } = await import("../auth-actions");
     expect(currentAccountId()).toBe(EMAIL);
   });
 
   it("(e) the sign-in page goes to / when a session exists, and shows the form when there is none", async () => {
     getUser.mockResolvedValue({ data: { user }, error: null });
-    expect(await gate.homeIfSignedIn()).toBe("/");
+    expect(await gate.homeIfSignedIn()).toBe("/app");
     getUser.mockResolvedValue({ data: { user: null }, error: null });
     vi.resetModules();
     const fresh = await import("../first-run");
@@ -229,7 +229,7 @@ describe("the sign-in gate with a session that only Supabase knows", () => {
       await signOut();
       expect(currentAccountId()).toBeNull();
       expect(await gate.homeIfSignedIn()).toBeNull();
-      expect(await gate.gateRedirect("/", false)).toBe("/signin");
+      expect(await gate.gateRedirect("/app", false)).toBe("/signin");
       expect(await gate.gateRedirect("/add", false)).toBe("/signin");
       expect(await currentAccount()).toBeNull();
       expect(getUser).not.toHaveBeenCalled();
@@ -243,7 +243,7 @@ describe("the sign-in gate with a session that only Supabase knows", () => {
       expect(await gate.homeIfSignedIn()).toBeNull();
       expect(await signInWithGoogle()).toEqual({ ok: true });
       expect(local.getItem("h1t_auth_signed_out")).toBeNull();
-      expect(await gate.homeIfSignedIn()).toBe("/");
+      expect(await gate.homeIfSignedIn()).toBe("/app");
     });
   });
 });

@@ -1,12 +1,15 @@
 /**
  * Navigation map for the bottom nav and the desktop sidebar: the four tabs, which tab owns each route, where
  * "back" goes when there is no in-app history, and the in-app history stack. Pure functions, no React.
- * Hôm nay is "/" (the coach home), Tổng quan is /trends, Nhật ký is no longer a tab (it lives under Hôm nay).
+ * Hôm nay is HOME_ROUTE (/app; "/" is the coach link page), Tổng quan is /trends, Nhật ký is no longer a tab (it lives under Hôm nay).
  */
+/** Hôm nay. Every link, redirect and route check that means Hôm nay uses this. */
+export const HOME_ROUTE = "/app";
+
 export type NavTab = "today" | "overview" | "explore" | "settings";
 
 export const NAV_TABS: { tab: NavTab; href: string; label: string }[] = [
-  { tab: "today", href: "/", label: "Hôm nay" },
+  { tab: "today", href: HOME_ROUTE, label: "Hôm nay" },
   { tab: "overview", href: "/trends", label: "Tổng quan" },
   { tab: "explore", href: "/explore", label: "Khám phá" },
   { tab: "settings", href: "/settings", label: "Cài đặt" },
@@ -14,6 +17,7 @@ export const NAV_TABS: { tab: NavTab; href: string; label: string }[] = [
 
 /** The tab that owns each first path segment. Pushed screens highlight their owner. */
 const OWNER: Record<string, NavTab> = {
+  app: "today",
   diary: "today",
   add: "today",
   entry: "today",
@@ -37,13 +41,12 @@ function segments(pathname: string): string[] {
 export function tabForPath(pathname: string | null | undefined): NavTab | null {
   if (!pathname) return null;
   const [first] = segments(pathname);
-  if (first === undefined) return "today";
   return OWNER[first] ?? null;
 }
 
 /** Where back goes when there is no in-app history: the screen's parent, or its owning tab. */
 export function backFallback(pathname: string | null | undefined, search?: string | null): string {
-  if (!pathname) return "/";
+  if (!pathname) return HOME_ROUTE;
   const [first, second, third] = segments(pathname);
   const target = backTarget(first, second, third, search);
   // Day screens keep the day being viewed, so back from a past day lands on that day, not on today.
@@ -61,7 +64,7 @@ function compareBack(search: string | null | undefined): string {
 
 function backTarget(first: string | undefined, second: string | undefined, third: string | undefined, search?: string | null): string {
   if (first === "micros" && second) return "/micros";
-  if (first === "micros" || first === "training") return "/";
+  if (first === "micros" || first === "training") return HOME_ROUTE;
   if (first === "trends" && second) return "/trends";
   if (first === "settings") {
     if (third === "weight") return "/settings/profile";
@@ -71,8 +74,8 @@ function backTarget(first: string | undefined, second: string | undefined, third
   if (first === "foods" && second === "compare") return compareBack(search);
   if (first === "explore" || first === "foods") return "/explore";
   if (first === "privacy" || first === "terms" || first === "admin") return "/settings";
-  if (first === "add" || first === "entry") return "/";
-  return "/";
+  if (first === "add" || first === "entry") return HOME_ROUTE;
+  return HOME_ROUTE;
 }
 
 const MAX_HISTORY = 50;
@@ -91,4 +94,20 @@ export function nextHistory(stack: readonly string[], pathname: string): string[
 
 export function canGoBack(stack: readonly string[]): boolean {
   return stack.length > 1;
+}
+
+/** The query keys that belong to Hôm nay: a past day, demo mode and its persona and level, the meal, the state previews. */
+const HOME_QUERY_KEYS = ["date", "demo", "as", "level", "meal", "loading", "offline"];
+
+/**
+ * Old links to Hôm nay were "/?date=…" (and the like). "/" is now the coach link page, so a "/" with any Hôm nay key
+ * goes to HOME_ROUTE with the whole query kept. Null when the query has none of them.
+ */
+export function homeRedirectFor(params: Record<string, string | string[] | undefined>): string | null {
+  if (!HOME_QUERY_KEYS.some((key) => params[key] !== undefined)) return null;
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    for (const v of Array.isArray(value) ? value : value === undefined ? [] : [value]) query.append(key, v);
+  }
+  return `${HOME_ROUTE}?${query.toString()}`;
 }

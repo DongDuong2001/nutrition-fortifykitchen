@@ -97,7 +97,7 @@ def run(browser, name, size):
     sign_in_magic(pg, "ban@email.com")  # the empty account below is signed in (cc-19 exception)
 
     # Empty account, before setup
-    go(pg, "/")
+    go(pg, "/app")
     t = text(pg)
     check("Chưa có món nào hôm nay" in t, f"{where} home: 'Chưa có món nào hôm nay'")
     check(pg.get_by_role("button", name="Chép hôm qua").count() == 0, f"{where} diary: no Chép hôm qua without a yesterday")
@@ -177,7 +177,7 @@ def run(browser, name, size):
     clean(pg, f"{where} overview after a meal")
 
     # Demo mode
-    go(pg, "/?demo=1")
+    go(pg, "/app?demo=1")
     t = text(pg)
     check("Yến mạch" in t and "Chưa có món nào hôm nay" not in t, f"{where} ?demo=1: the sample day is back")
     go(pg, "/explore")
@@ -186,13 +186,13 @@ def run(browser, name, size):
     go(pg, "/trends/body")
     check("Dữ liệu mẫu" in text(pg), f"{where} ?demo=1: sample weights are back")
     check(pg.evaluate("localStorage.getItem('h1t_demo_v1')") == "1", f"{where} ?demo=1: the flag is saved")
-    go(pg, "/?demo=0")
+    go(pg, "/app?demo=0")
     t = text(pg)
     check(not any(f in t for f in SAMPLE_FOODS), f"{where} ?demo=0: no sample food")
     check(pg.evaluate("localStorage.getItem('h1t_demo_v1')") is None, f"{where} ?demo=0: the flag is cleared")
     go(pg, "/explore")
     check("Yến mạch" not in text(pg) and food in text(pg), f"{where} ?demo=0: Gần đây is the real one again, no sample foods")
-    go(pg, "/")
+    go(pg, "/app")
     check(food in text(pg), f"{where} ?demo=0: the real meal ({food}) is still in Hôm nay")
     real = [e for e in errors if "status of 404" not in e]
     check(not real, f"{where}: no console or page errors ({real[:2]})")

@@ -8,7 +8,7 @@ import _demo  # noqa: F401
 from playwright.sync_api import sync_playwright
 
 BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3104")
-ROUTES = ["/", "/micros", "/add?meal=snack", "/foods/food-cha-la", "/trends", "/settings", "/explore", "/foods/compare?ids=food-cha-la,food-yen-mach"]
+ROUTES = ["/app", "/micros", "/add?meal=snack", "/foods/food-cha-la", "/trends", "/settings", "/explore", "/foods/compare?ids=food-cha-la,food-yen-mach"]
 found = []
 with sync_playwright() as p:
     browser = p.chromium.launch()

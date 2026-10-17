@@ -21,7 +21,7 @@ SHOTS = Path(__file__).resolve().parent.parent.parent / ".screenshots"
 SIZES = [("390", {"width": 390, "height": 844}), ("1280", {"width": 1280, "height": 800})]
 # route, h1 (case-insensitive), kind: home | tab | pushed
 ROUTES = [
-    ("/", "Hôm nay", "tab"),
+    ("/app", "Hôm nay", "tab"),
     ("/explore", "Khám phá", "tab"),
     ("/settings", "Cài đặt", "tab"),
     ("/settings/profile", "Hồ sơ", "pushed"),
@@ -36,8 +36,8 @@ ROUTES = [
     ("/trends/body", "Tổng quan", "tab"),
     ("/foods/new", "Tạo món mới", "pushed"),
 ]
-INK_BAND_PHONE = {"/", "/", "/trends", "/trends/micros", "/trends/body"}
-SHOT_NAMES = {"/": "home", "/micros": "micros", "/settings": "settings", "/settings/profile": "profile"}
+INK_BAND_PHONE = {"/app", "/trends", "/trends/micros", "/trends/body"}
+SHOT_NAMES = {"/app": "home", "/micros": "micros", "/settings": "settings", "/settings/profile": "profile"}
 problems, notes = [], []
 sys.stdout.reconfigure(encoding="utf-8")
 
@@ -104,7 +104,7 @@ def main():
 
                 wm = pg.evaluate(WORDMARK)
                 if label == "390":
-                    check(wm == (1 if route in ("/", "/trends", "/trends/micros", "/trends/body") else 0), f"{where}: wordmark in {wm} header(s) (only on Tổng quan)")
+                    check(wm == (1 if route in ("/app", "/trends", "/trends/micros", "/trends/body") else 0), f"{where}: wordmark in {wm} header(s) (only on Tổng quan)")
                 else:
                     check(wm == 0, f"{where}: no wordmark in a header on desktop ({wm})")
 

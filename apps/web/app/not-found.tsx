@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { AppHeader } from "@/components/ui/app-header";
 import { PillButton } from "@/components/ui/pill-button";
+import { HOME_ROUTE } from "@/lib/nav";
 
 export default function NotFound() {
   const [reported, setReported] = useState(false);
@@ -21,7 +22,7 @@ export default function NotFound() {
       </main>
 
       <footer className="mx-auto flex w-full max-w-[560px] flex-col gap-3 px-4 pb-6 box-border">
-        <PillButton variant="primary" href="/" fullWidth>
+        <PillButton variant="primary" href={HOME_ROUTE} fullWidth>
           Về Tổng quan
         </PillButton>
         <button

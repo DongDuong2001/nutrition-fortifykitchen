@@ -66,14 +66,14 @@ def run():
             )
 
             # 1. no Issue badge and no console problems on four pages
-            for route in ("/", "/micros", "/add?meal=snack", "/entry/item-1"):
+            for route in ("/app", "/micros", "/add?meal=snack", "/entry/item-1"):
                 pg.goto(BASE + route, wait_until="networkidle")
                 pg.wait_for_timeout(1200)
                 check("true" not in issue_badge(pg), f"{name}: no Next Issue badge on {route}")
             check(not problems_console, f"{name}: no console warnings or errors ({problems_console[:2]})")
 
             # 2. tap the Yến mạch row on Today, edit to 90 g, save, totals updated
-            pg.goto(BASE + "/", wait_until="networkidle")
+            pg.goto(BASE + "/app", wait_until="networkidle")
             pg.wait_for_timeout(500)
             if name == "390":
                 pg.screenshot(path=os.path.join(SHOTS, "cc06-today-390.png"), animations="disabled")

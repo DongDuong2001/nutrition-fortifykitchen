@@ -92,7 +92,7 @@ def voice(browser, size_name, size):
         check("Theo dõi đủ 22 vi chất, không chỉ kcal" in body, f"{w}: sign-up value line")
     ctx.close()
 
-    ctx, pg = new_page(browser, size, "/")
+    ctx, pg = new_page(browser, size, "/app")
     body = squash(pg.inner_text("body"))
     check(re.search(r"·\s*Béo\b", body) is None, f"{w}: no 'Béo' macro label on Hôm nay")
     check("Chất béo" in body, f"{w}: Hôm nay says Chất béo")

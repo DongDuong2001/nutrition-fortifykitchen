@@ -77,7 +77,7 @@ def run(browser, size_name, size):
     ctx.close()
 
     # (h): yesterday is read-only
-    ctx, pg = new_page(browser, size, f"/?date={YESTERDAY}")
+    ctx, pg = new_page(browser, size, f"/app?date={YESTERDAY}")
     w = f"{size_name} Hôm nay, hôm qua"
     check(is_past(pg) and "14/10" in text(pg), f"{w}: the past day is shown (› is enabled, date 14/10)")
     check(pg.locator("a[aria-label^='Thêm vào']").count() == 0, f"{w}: no + Thêm vào on a past meal")

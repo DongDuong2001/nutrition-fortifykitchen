@@ -79,7 +79,7 @@ def test_date_button_busy(browser):
         ctx = browser.new_context(viewport=vp)
         ctx.add_init_script(BUSY_OBSERVER)
         pg = ctx.new_page()
-        pg.goto(BASE + "/", wait_until="networkidle")
+        pg.goto(BASE + "/app", wait_until="networkidle")
         pg.wait_for_timeout(400)
         busy_seen = pg.evaluate("() => window.__dateBusySeen")
         check(busy_seen, f"today @ {vp_name}: date button was aria-busy=\"true\" before its date resolved")

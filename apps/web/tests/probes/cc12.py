@@ -60,7 +60,7 @@ def empty_today(pg):
 
 def go_empty_today(pg):
     empty_today(pg)
-    pg.goto(BASE + "/", wait_until="networkidle")
+    pg.goto(BASE + "/app", wait_until="networkidle")
     pg.wait_for_timeout(400)
 
 
@@ -89,14 +89,14 @@ def micros_vitamins(pg):
 
 def copy_yesterday(pg):
     empty_today(pg)
-    pg.goto(BASE + "/", wait_until="networkidle")
+    pg.goto(BASE + "/app", wait_until="networkidle")
     pg.locator("section[aria-label='Tổng kcal và dinh dưỡng đa lượng'] >> visible=true").first.wait_for(state="visible", timeout=8000)
     pg.locator('button:has-text("Chép hôm qua") >> visible=true').first.click(timeout=8000)
     pg.wait_for_timeout(400)
 
 
 def calendar(pg):
-    pg.goto(BASE + "/", wait_until="networkidle")
+    pg.goto(BASE + "/app", wait_until="networkidle")
     pg.locator('button[aria-label^="Chọn ngày"] >> visible=true').first.click()
     pg.wait_for_timeout(400)
 
@@ -108,12 +108,12 @@ def meal_switcher(pg):
 
 
 def loading(pg):
-    pg.goto(BASE + "/?loading=1", wait_until="networkidle")
+    pg.goto(BASE + "/app?loading=1", wait_until="networkidle")
     pg.wait_for_timeout(300)
 
 
 def offline(pg):
-    pg.goto(BASE + "/?offline=1", wait_until="networkidle")
+    pg.goto(BASE + "/app?offline=1", wait_until="networkidle")
     pg.wait_for_timeout(300)
 
 
@@ -123,7 +123,7 @@ SCREENS = [
     ("TodayAdded", add_chà_là_then_today, "TodayAdded.dc.html", None),
     ("TodayStates-loading", loading, "TodayStates.dc.html", None),
     ("TodayStates-offline", offline, "TodayStates.dc.html", None),
-    ("Today", go("/"), "Today.dc.html", "DesktopToday.dc.html"),
+    ("Today", go("/app"), "Today.dc.html", "DesktopToday.dc.html"),
     ("Micros", go("/micros"), "Micros.dc.html", "DesktopMicros.dc.html"),
     ("MicrosVitamins", micros_vitamins, "MicrosVitamins.dc.html", "DesktopMicros.dc.html"),
     ("NutrientDetail", go("/micros/calcium"), "NutrientDetail.dc.html", None),
@@ -135,7 +135,7 @@ SCREENS = [
     ("MealSwitcher", meal_switcher, "MealSwitcher.dc.html", None),
     ("CopyYesterday", copy_yesterday, "CopyYesterday.dc.html", None),
     ("CalendarPicker", calendar, "CalendarPicker.dc.html", None),
-    ("PastDay", go(f"/?date={YESTERDAY}"), "PastDay.dc.html", None),
+    ("PastDay", go(f"/app?date={YESTERDAY}"), "PastDay.dc.html", None),
     ("Profile", go("/settings/profile"), "Profile.dc.html", "DesktopProfile.dc.html"),
     ("EditWeight", go("/settings/profile/weight"), "EditWeight.dc.html", None),
     ("SetupProfile", go("/setup/profile"), "SetupProfile.dc.html", "DesktopSetup.dc.html"),
@@ -165,7 +165,7 @@ def check_calendar(browser):
     for viewport, label in [(DESKTOP, "1440"), (PHONE, "390")]:
         context = browser.new_context(viewport=viewport)
         page = context.new_page()
-        page.goto(BASE + "/", wait_until="networkidle")
+        page.goto(BASE + "/app", wait_until="networkidle")
         opener = page.locator('button[aria-label^="Chọn ngày"] >> visible=true').first
         opener.wait_for(state="visible", timeout=8000)
         opener.click()

@@ -1,3 +1,4 @@
+import { HOME_ROUTE } from "./nav";
 /**
  * The first-meal tour (cc-42): five steps over Hôm nay and the add sheet. Pure state, no storage and no DOM; the
  * overlay (components/onboarding) and the screens feed it events.
@@ -17,18 +18,18 @@ export interface TourStep {
   /** The element the spotlight measures: data-tour="<target>". Several: the hole is the box around all of them. */
   target: string | readonly string[];
   /** The screen the step lives on */
-  path: "/" | "/add";
+  path: typeof HOME_ROUTE | "/add";
   advance: "button" | "action";
   /** For an "action" step: the action that moves it on */
   action?: TourAction;
 }
 
 export const TOUR_STEPS: readonly TourStep[] = [
-  { id: "kcal", target: "home-hero", path: "/", advance: "button" },
-  { id: "add", target: "nav-add", path: "/", advance: "action", action: "add-opened" },
+  { id: "kcal", target: "home-hero", path: HOME_ROUTE, advance: "button" },
+  { id: "add", target: "nav-add", path: HOME_ROUTE, advance: "action", action: "add-opened" },
   { id: "search", target: ["food-search", "add-results-first"], path: "/add", advance: "action", action: "food-picked" },
   { id: "portion", target: "portion-panel", path: "/add", advance: "action", action: "portion-confirmed" },
-  { id: "result", target: "nutrient-column", path: "/", advance: "button" },
+  { id: "result", target: "nutrient-column", path: HOME_ROUTE, advance: "button" },
 ];
 
 export type TourState =
@@ -70,6 +71,6 @@ export function tourStepFor(state: TourState, pathname: string): TourState {
   // + was tapped: the add sheet is open
   if (step.id === "add" && pathname === "/add") return { status: "step", index: state.index + 1 };
   // The portion was confirmed: the add sheet closed on Hôm nay, which now shows the food
-  if (step.id === "portion" && pathname === "/") return { status: "step", index: state.index + 1 };
+  if (step.id === "portion" && pathname === HOME_ROUTE) return { status: "step", index: state.index + 1 };
   return { status: "done", reason: "left" };
 }

@@ -4,7 +4,7 @@ import "./globals.css";
 import { DiaryProviderWrapper } from "@/components/diary-provider-wrapper";
 import { NavHistoryTracker } from "@/components/nav-history-tracker";
 import { PwaRegister } from "@/components/pwa/pwa-register";
-import { INK_COLOR } from "@/lib/pwa";
+import { INK_COLOR, STANDALONE_HOME_SCRIPT } from "@/lib/pwa";
 
 const manrope = Manrope({
   subsets: ["vietnamese", "latin"],
@@ -49,6 +49,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="vi" className={`${manrope.variable} ${sairaCondensed.variable}`}>
+      <head>
+        {/* Before the first paint: an app installed with the old start_url "/" opens Hôm nay, not the link page */}
+        <script dangerouslySetInnerHTML={{ __html: STANDALONE_HOME_SCRIPT }} />
+      </head>
       <body className="bg-page text-text antialiased min-h-screen flex flex-col font-sans">
         <NavHistoryTracker />
         <PwaRegister />

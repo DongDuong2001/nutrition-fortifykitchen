@@ -66,30 +66,30 @@ describe("lib/first-run", () => {
     expect(rest?.hint).toBe("Ngày nghỉ");
   });
 
-  it("tab routes are the app screens, not auth, setup, offline or install", () => {
-    for (const path of ["/", "/explore", "/explore/meals", "/settings", "/settings/profile", "/add", "/micros", "/micros/calcium", "/training", "/trends/body"]) {
+  it("tab routes are the app screens, not the coach link page, auth, setup, offline or install", () => {
+    for (const path of ["/app", "/explore", "/explore/meals", "/settings", "/settings/profile", "/add", "/micros", "/micros/calcium", "/training", "/trends/body"]) {
       expect(isTabRoute(path), path).toBe(true);
     }
-    for (const path of ["/signin", "/signup", "/reset-password", "/setup/profile", "/setup/done", "/offline", "/install", "/login", "/foods/food-cha-la", "/entry/item-1"]) {
+    for (const path of ["/", "/signin", "/signup", "/reset-password", "/setup/profile", "/setup/done", "/offline", "/install", "/login", "/foods/food-cha-la", "/entry/item-1"]) {
       expect(isTabRoute(path), path).toBe(false);
     }
   });
 
   it("no profile outside demo mode sends a tab route to /setup/profile, and nothing else", () => {
     const none = { profileSaved: false, entryEverLogged: false };
-    expect(setupRedirectFor("/", none, false)).toBe("/setup/profile");
-    expect(setupRedirectFor("/", none, false)).toBe("/setup/profile");
+    expect(setupRedirectFor("/app", none, false)).toBe("/setup/profile");
+    expect(setupRedirectFor("/app", none, false)).toBe("/setup/profile");
     expect(setupRedirectFor("/signin", none, false)).toBeNull();
     expect(setupRedirectFor("/setup/goal", none, false)).toBeNull();
-    expect(setupRedirectFor("/", none, true)).toBeNull();
-    expect(setupRedirectFor("/", { profileSaved: true, entryEverLogged: false }, false)).toBeNull();
+    expect(setupRedirectFor("/app", none, true)).toBeNull();
+    expect(setupRedirectFor("/app", { profileSaved: true, entryEverLogged: false }, false)).toBeNull();
   });
 
   it("nobody signed in outside demo mode is not a setup question: the sign-in gate decides (no profile can be read)", () => {
     const signedOut = { profileSaved: false, entryEverLogged: false, signedIn: false };
-    expect(setupRedirectFor("/", signedOut, false)).toBeNull();
-    expect(setupRedirectFor("/", { ...signedOut, signedIn: true }, false)).toBe("/setup/profile");
-    expect(setupRedirectFor("/", signedOut, true)).toBeNull();
+    expect(setupRedirectFor("/app", signedOut, false)).toBeNull();
+    expect(setupRedirectFor("/app", { ...signedOut, signedIn: true }, false)).toBe("/setup/profile");
+    expect(setupRedirectFor("/app", signedOut, true)).toBeNull();
   });
 
   it("the first meal opens the add sheet for the meal of the clock", () => {

@@ -275,7 +275,7 @@ def run(browser, size, tag):
     w = size["width"]
     # an empty day: every sample item deleted (demo history keeps yesterday)
     ctx, pg = page(browser, size, init(local("h1t_sample_edits_v1_demo", NO_SAMPLE)))
-    go(pg, "/")
+    go(pg, "/app")
     btn = vis(pg, BUTTON)
     check(btn.is_disabled(), f"{tag} empty day: share icon is disabled")
     check(pg.get_by_text("Chưa có món nào để chia sẻ").is_visible(), f"{tag} empty day: the reason is visible")
@@ -286,7 +286,7 @@ def run(browser, size, tag):
     # today with a name, no file sharing: Lưu ảnh is the primary button
     profile = {"sex": "male", "birthYear": 2003, "weightKg": 65.4, "goal": "maintain", "periodMode": False, "trainingMinutesDefault": 60, "displayName": "Học viên Có Tên Khá Dài Mẫu"}
     ctx, pg = page(browser, size, init(NO_SHARE, local("h1t_profile_v1_demo", json.dumps(profile))))
-    go(pg, "/")
+    go(pg, "/app")
     btn = vis(pg, BUTTON)
     check(btn.is_enabled(), f"{tag} today: share icon enabled")
     btn.click()
@@ -332,7 +332,7 @@ def run(browser, size, tag):
 
     # cc-27 fix: no display name -> the sheet asks for it first and draws nothing until it has one
     ctx, pg = page(browser, size, NO_SHARE)
-    go(pg, "/")
+    go(pg, "/app")
     open_sheet(pg)
     dlg = pg.get_by_role("dialog")
     field = dlg.get_by_label("Tên hiện trên ảnh")
@@ -362,7 +362,7 @@ def run(browser, size, tag):
 
     # a day with two meals only: the empty meals are absent
     ctx, pg = page(browser, size, init(NO_SHARE, NAMED_INIT, local("h1t_sample_edits_v1_demo", NO_SAMPLE), local("h1t_added_entries_v1_demo", seeded(["breakfast", "breakfast", "lunch"]))))
-    go(pg, "/")
+    go(pg, "/app")
     open_sheet(pg)
     wait_preview(pg)
     s = snap(pg)
@@ -376,7 +376,7 @@ def run(browser, size, tag):
 
     # a long day: taller than 1920, footer inside
     ctx, pg = page(browser, size, init(NO_SHARE, NAMED_INIT, local("h1t_added_entries_v1_demo", seeded(["breakfast", "lunch", "snack", "dinner"] * 6))))
-    go(pg, "/")
+    go(pg, "/app")
     open_sheet(pg)
     wait_preview(pg)
     s = snap(pg)
@@ -389,7 +389,7 @@ def run(browser, size, tag):
 
     # past day
     ctx, pg = page(browser, size, init(NO_SHARE, NAMED_INIT))
-    go(pg, f"/?date={PAST}")
+    go(pg, f"/app?date={PAST}")
     check(vis(pg, BUTTON).is_enabled(), f"{tag} past day: share icon enabled")
     open_sheet(pg)
     wait_preview(pg)
@@ -411,7 +411,7 @@ def run(browser, size, tag):
 
     # with file sharing
     ctx, pg = page(browser, size, init(STUB_SHARE, NAMED_INIT))
-    go(pg, "/")
+    go(pg, "/app")
     open_sheet(pg)
     wait_preview(pg)
     dialog = pg.get_by_role("dialog")

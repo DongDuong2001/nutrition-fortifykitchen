@@ -20,6 +20,7 @@ import { loadFlags, openReplay, setTipsOff, subscribeFlags } from "@/lib/onboard
 import { startTour } from "@/lib/tour-bus";
 import { getTrainingDurations } from "@/lib/training";
 import type { SexType } from "@/lib/targets";
+import { HOME_ROUTE } from "@/lib/nav";
 
 const SEX_OPTIONS: { value: SexType; label: string }[] = [
   { value: "male", label: "Nam" },
@@ -202,7 +203,7 @@ export function AppCard() {
   const replay = () => {
     openReplay();
     startTour();
-    router.push("/");
+    router.push(HOME_ROUTE);
   };
   useEffect(() => {
     const saved = loadSettings();

@@ -152,7 +152,7 @@ def run():
         # 6. Today: no decimals on hero or meal kcal
         ctx = browser.new_context(viewport=PHONE)
         pg = ctx.new_page()
-        pg.goto(BASE + "/", wait_until="networkidle")
+        pg.goto(BASE + "/app", wait_until="networkidle")
         pg.wait_for_timeout(400)
         body = pg.inner_text("body")
         decimal_kcal = re.findall(r"\d+,\d+\s*kcal", body)
@@ -177,7 +177,7 @@ def run():
         pg.get_by_role("button", name="Hoàn tất").click()
         expect(pg).to_have_url(BASE + "/setup/done")
         pg.get_by_role("link", name="Để sau").click()
-        expect(pg).to_have_url(BASE + "/")
+        expect(pg).to_have_url(BASE + "/app")
         check(True, "onboarding flow reaches /")
         ctx.close()
 

@@ -12,6 +12,7 @@ import { formatNumber, formatRange } from "@/lib/format";
 import { weekdayShort } from "@/lib/overview-board";
 import { bestWorstDays, energyAttention, macroScoreRow, trainingSplit, type DayPick, type SplitSide } from "@/lib/overview-detail";
 import { readDay } from "@/lib/training-checklist";
+import { HOME_ROUTE } from "@/lib/nav";
 
 const dm = (iso: string) => `${iso.slice(8, 10)}/${iso.slice(5, 7)}`;
 
@@ -122,7 +123,7 @@ export function EnergyTab() {
   });
   const items: AttentionItem[] = attention.map((row) => ({
     id: row.title,
-    href: "/",
+    href: HOME_ROUTE,
     title: row.title,
     line: row.line,
     number: row.number,

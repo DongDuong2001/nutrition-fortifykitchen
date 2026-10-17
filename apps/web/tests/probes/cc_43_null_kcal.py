@@ -83,7 +83,7 @@ def note_info(pg):
 def scenario(browser, name, size_name, size, entries, kcal, pct, note):
     ctx = account_context(browser, size, entries)
     pg = ctx.new_page()
-    pg.goto(BASE + "/", wait_until="networkidle")
+    pg.goto(BASE + "/app", wait_until="networkidle")
     wait_home(pg)
     slots = hero_slots(pg)
     where = f"{size_name} {name}"

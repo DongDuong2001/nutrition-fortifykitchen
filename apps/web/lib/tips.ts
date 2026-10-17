@@ -1,4 +1,5 @@
 import type { OnboardingFlags } from "./onboarding-flags";
+import { HOME_ROUTE } from "./nav";
 
 /**
  * The first-visit tips (cc-42): one card on a screen, shown once, and only if the user has never used what it
@@ -35,7 +36,7 @@ export interface TipContext {
 /** The share tip waits until today holds this many foods. */
 export const SHARE_TIP_MIN_FOODS = 3;
 
-const home = (c: TipContext) => c.pathname === "/";
+const home = (c: TipContext) => c.pathname === HOME_ROUTE;
 const today = (c: TipContext) => home(c) && !c.pastDay && !c.selectMode && c.foodsToday > 0;
 
 export const TIPS: readonly Tip[] = [

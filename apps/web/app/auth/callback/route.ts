@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { HOME_ROUTE } from "@/lib/nav";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -10,8 +11,8 @@ export async function GET(request: Request) {
   const baseOrigin = process.env.NODE_ENV === "production" && siteUrl ? siteUrl : origin;
 
   // Sanitize next target to prevent open redirect vulnerabilities
-  const rawNext = searchParams.get("next") ?? "/";
-  const next = rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/";
+  const rawNext = searchParams.get("next") ?? HOME_ROUTE;
+  const next = rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : HOME_ROUTE;
 
   // Handle OAuth cancellation or errors from identity provider
   const oauthError = searchParams.get("error_description") || searchParams.get("error");

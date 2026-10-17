@@ -62,7 +62,7 @@ def run(browser, size_name, size):
         pg.wait_for_timeout(500)
 
     # (f): save a meal, reuse it
-    go("/")
+    go("/app")
     w = f"{size_name} Lưu bữa"
     pg.locator("button[aria-label='Xem riêng bữa sáng']:visible").first.click()
     pg.wait_for_timeout(200)
@@ -110,9 +110,9 @@ def fresh(browser, size_name, size):
     ctx = browser.new_context(viewport=size)
     pg = ctx.new_page()
     pg.clock.set_fixed_time(NOW)
-    pg.goto(BASE + "/", wait_until="networkidle")
+    pg.goto(BASE + "/app", wait_until="networkidle")
     w = f"{size_name} Tài khoản mới"
-    # cc-41: signed out, "/" is the landing page on a desktop window and /signin on a phone
+    # cc-41: signed out, Hôm nay (/app since cc-45) is the landing page on a desktop window and /signin on a phone
     check(pg.url.endswith("/landing" if size["width"] >= 1024 else "/signin"), f"{w}: signed-out / goes to the landing (desktop) or /signin (phone)")
     pg.goto(BASE + "/setup/profile", wait_until="networkidle")
     pg.wait_for_timeout(300)

@@ -80,7 +80,7 @@ def check_manifest(browser):
     check(m.get("name") == "H1T MICRO" and m.get("short_name") == "H1T MICRO", "manifest: name and short_name are H1T MICRO")
     check(m.get("lang") == "vi", "manifest: lang vi")
     check(bool(m.get("description")) and re.search(r"[ạảãàáâấầẩẫậăắằẳẵặđêếềểễệôốồổỗộơớờởỡợưứừửữự]", m["description"]) is not None, "manifest: description is Vietnamese")
-    check(m.get("start_url") == "/" and m.get("scope") == "/", "manifest: start_url and scope are /")
+    check(m.get("start_url") == "/app" and m.get("scope") == "/", "manifest: start_url is /app (Hôm nay), scope is /")
     check(m.get("display") == "standalone", "manifest: display standalone")
     check(m.get("background_color", "").upper() == "#FFFFFF", f"manifest: background_color is the white page ({m.get('background_color')})")
     check(m.get("theme_color", "").upper() == "#111317", f"manifest: theme_color is ink ({m.get('theme_color')})")
@@ -98,7 +98,7 @@ def check_manifest(browser):
 
     shortcuts = {s["name"]: s["url"] for s in m.get("shortcuts", [])}
     check(shortcuts.get("Thêm món") == "/add", f"manifest: shortcut Thêm món -> /add ({shortcuts})")
-    check(shortcuts.get("Hôm nay") == "/", "manifest: shortcut Hôm nay -> /")
+    check(shortcuts.get("Hôm nay") == "/app", "manifest: shortcut Hôm nay -> /app")
 
     for path in ("/icons/icon.svg", "/icons/apple-touch-icon.png", "/icons/favicon.ico"):
         r = ctx.request.get(BASE + path)
@@ -106,7 +106,7 @@ def check_manifest(browser):
     check(png_size(ctx.request.get(BASE + "/icons/apple-touch-icon.png").body()) == (180, 180), "icons: apple-touch-icon is 180x180")
 
     pg = ctx.new_page()
-    pg.goto(BASE + "/", wait_until="networkidle")
+    pg.goto(BASE + "/app", wait_until="networkidle")
     head = pg.evaluate(
         """() => ({
             manifest: document.querySelector('link[rel=manifest]')?.getAttribute('href'),
@@ -155,7 +155,7 @@ def cache_paths(pg):
 def check_service_worker(browser):
     ctx = browser.new_context(viewport=SIZES[0][1])
     pg = ctx.new_page()
-    pg.goto(BASE + "/", wait_until="networkidle")
+    pg.goto(BASE + "/app", wait_until="networkidle")
     reg = pg.evaluate("() => navigator.serviceWorker.getRegistration().then(r => Boolean(r))")
     check(True, f"sw: registration found right after load ({reg})")
     check(wait_controlled(pg), "sw: registered, and controls the page after a reload")
@@ -164,7 +164,7 @@ def check_service_worker(browser):
     check("Có bản mới" not in text(pg), "sw: no update toast on the first install")
 
     paths = cache_paths(pg)
-    for page in ("/", "/explore", "/settings", "/offline"):
+    for page in ("/app", "/explore", "/settings", "/offline"):
         check(page in paths, f"sw: {page} is precached")
     check(any(p.startswith("/_next/static/") and p.endswith(".js") for p in paths), "sw: build scripts are cached")
     check(any(p.endswith(".woff2") for p in paths), "sw: fonts are cached")
@@ -179,7 +179,7 @@ def check_service_worker(browser):
 
     # offline
     ctx.set_offline(True)
-    for route, marker in (("/", "Hôm nay"), ("/explore", "Khám phá")):
+    for route, marker in (("/app", "Hôm nay"), ("/explore", "Khám phá")):
         pg.goto(BASE + route, wait_until="load")
         pg.wait_for_timeout(500)
         body = text(pg)
@@ -203,7 +203,7 @@ def check_update_waits(browser):
     """A changed sw.js installs and waits: it must not skipWaiting by itself."""
     ctx = browser.new_context()
     pg = ctx.new_page()
-    pg.goto(BASE + "/", wait_until="networkidle")
+    pg.goto(BASE + "/app", wait_until="networkidle")
     wait_controlled(pg)
     source = urlopen(BASE + "/sw.js").read().decode("utf-8")
     check("self.skipWaiting()" in source and "SKIP_WAITING" in source, "update: skipWaiting runs only on the SKIP_WAITING message")

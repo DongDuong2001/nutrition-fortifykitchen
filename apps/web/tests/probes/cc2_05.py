@@ -35,7 +35,7 @@ def main():
         pg.get_by_role("button", name="90 phút").click()
         pg.wait_for_timeout(300)
 
-        pg.goto(BASE + "/", wait_until="networkidle")
+        pg.goto(BASE + "/app", wait_until="networkidle")
         pg.wait_for_timeout(600)
         txt = body(pg)
         # cc2-32: Hôm nay's Ngày tập pill follows the profile; the salt total is checked on /training below

@@ -121,7 +121,7 @@ def check_recents(browser, size_name, size):
         {"foodId": "food-cha-la", "servingLabel": "30 g"},
     ]
     ctx, pg = new_page(browser, size, recents=recents)
-    go(pg, "/")
+    go(pg, "/app")
     before = dinner_items(pg)
     clicks = 0
 
@@ -158,7 +158,7 @@ def check_recents(browser, size_name, size):
     pg.wait_for_timeout(300)
     check(path_of(pg) == "/add", f"{size_name} chevron: stays on the add sheet")
     check(pg.locator("button:has-text('Thêm vào'):visible").count() > 0, f"{size_name} chevron: the portion panel with its add button is open")
-    go(pg, "/")
+    go(pg, "/app")
     check(dinner_items(pg) == before, f"{size_name} chevron: nothing was added")
     ctx.close()
 
@@ -197,12 +197,12 @@ def open_meal_menu(pg, meal_name):
 def check_home_meals(browser, size_name, size):
     """cc2-32: the per-meal add and ⋯ of the removed diary screen, as Hôm nay shows them (header tap, then the ⋯ pill)."""
     ctx, pg = new_page(browser, size)
-    go(pg, "/")
+    go(pg, "/app")
     n = pg.locator("button[aria-label^='Xem riêng']:visible").count()
     check(n == 5, f"{size_name} home: five meal headers ({n})")
     check("+ Thêm món" not in text(pg), f"{size_name} home: no '+ Thêm món' link")
 
-    go(pg, "/?date=2026-10-11")
+    go(pg, "/app?date=2026-10-11")
     check(pg.locator("a[aria-label^='Thêm vào']:visible").count() == 0, f"{size_name} past day: no add link on any meal")
     check(pg.locator("a:has-text('Thêm món'):not(#desktop-add-btn):not(#mobile-add-fab):visible").count() == 0, f"{size_name} past day: no add link in the content")
     pg.locator("button[aria-label^='Xem riêng']:visible").first.click()
@@ -220,7 +220,7 @@ def check_home_meals(browser, size_name, size):
 # 4. Bữa ăn của tôi: save, list, one tap adds all, one undo, rename, delete
 def check_saved_meals(browser, size_name, size):
     ctx, pg = new_page(browser, size)
-    go(pg, "/")
+    go(pg, "/app")
     open_meal_menu(pg, "Bữa sáng")
     pg.wait_for_timeout(300)
     pg.get_by_role("button", name=re.compile("Lưu thành Bữa ăn của tôi")).click()
@@ -262,7 +262,7 @@ def check_saved_meals(browser, size_name, size):
     check("Sáng của tôi · 3 món vào Bữa tối" in msg, f"{size_name} saved meal tap: one toast for all foods ({msg!r})")
     # Client navigation to Hôm nay keeps the in-memory toast. The three foods must be on Hôm nay before the undo,
     # so this fails if the add never happened (cc2-32: Nhật ký is folded into Hôm nay).
-    pg.locator("nav[aria-label='Điều hướng chính']:visible a[href='/']").first.click()
+    pg.locator("nav[aria-label='Điều hướng chính']:visible a[href='/app']").first.click()
     pg.wait_for_url(re.compile(r".*/(\?.*)?$"))
     pg.wait_for_timeout(400)
     check(home_dinner_items(pg) == 3, f"{size_name} saved meal tap: three foods in Bữa tối on Hôm nay ({home_dinner_items(pg)})")
@@ -304,7 +304,7 @@ def check_saved_meals(browser, size_name, size):
 # 5. Chỉ ghi kcal
 def check_quick(browser, size_name, size):
     ctx, pg = new_page(browser, size)
-    go(pg, "/")
+    go(pg, "/app")
     micros_before = pg.locator("a[href^='/micros']:visible").first.inner_text()
     go(pg, "/add?meal=dinner")
     pg.locator("button[aria-label='Chỉ thêm kcal']:visible").first.click()
@@ -337,7 +337,7 @@ def check_quick(browser, size_name, size):
         m = re.search(r"Đạm\s*(\d+)\s*g", text(pg))  # the nutrient column on Hôm nay: "Đạm 62 g"
         return m.group(1) if m else None
 
-    go(pg, "/")
+    go(pg, "/app")
     protein_before = protein_total()
     micros_mid = pg.locator("a[href^='/micros']:visible").first.inner_text()
     check(protein_before is not None, f"{size_name} quick add: the day shows an Đạm total ({protein_before})")

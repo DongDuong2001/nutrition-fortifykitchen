@@ -61,6 +61,7 @@ import { getMealSlotNameVi } from "@/lib/meal-slot";
 import { HomeHero, type HeroPill } from "./home-hero";
 import { NutrientColumn } from "./nutrient-column";
 import { ShareSheet } from "./share-sheet";
+import { HOME_ROUTE } from "@/lib/nav";
 
 function subscribeOnline(callback: () => void) {
   window.addEventListener("online", callback);
@@ -172,7 +173,7 @@ function HomeContent() {
   const setMode = (next: HomeMode) => setPicked({ iso: viewIso, mode: next });
   const shown = useMemo(() => (mode.kind === "day" ? valuesFromDay(day) : sumEntries(modeEntries(mode, entries))), [mode, day, entries]);
 
-  const goToDay = (iso: string) => router.push(iso === todayIso ? "/" : `/?date=${iso}`);
+  const goToDay = (iso: string) => router.push(iso === todayIso ? HOME_ROUTE : `${HOME_ROUTE}?date=${iso}`);
 
   // Select mode belongs to the day it was started on, and ends when the day has no food left
   useEffect(() => {
@@ -309,7 +310,7 @@ function HomeContent() {
     if (isPast) {
       copyEntries(copies, pastCopyToast(copies.length));
       exitSelect();
-      router.push("/");
+      router.push(HOME_ROUTE);
       return;
     }
     const slot = target === "keep" ? "breakfast" : target;
@@ -393,7 +394,7 @@ function HomeContent() {
           phoneStart={
             isPast ? (
               <Link
-                href="/"
+                href={HOME_ROUTE}
                 className="-ml-2 inline-flex min-h-11 items-center whitespace-nowrap rounded-full px-2 text-[13px] font-bold text-sky no-underline hover:underline active:scale-[0.97] motion-reduce:active:scale-100 focus-visible:outline-sky"
               >
                 Về hôm nay

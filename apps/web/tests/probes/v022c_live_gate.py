@@ -28,7 +28,7 @@ with sync_playwright() as p:
     for size, tag in [({"width": 390, "height": 844}, "390"), ({"width": 1280, "height": 800}, "1280")]:
         ctx = browser.new_context(viewport=size)
         pg = ctx.new_page()
-        for route in ("/", "/explore", "/settings"):
+        for route in ("/app", "/explore", "/settings"):
             pg.goto(BASE + route, wait_until="domcontentloaded")
             try:
                 pg.wait_for_url("**/signin", timeout=15000)

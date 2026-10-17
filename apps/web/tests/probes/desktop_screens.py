@@ -17,16 +17,16 @@ def main():
         # 1. Test Desktop Root at 1440x900 redirects unauthenticated visitor to /landing
         _demo.enable(False)
         page = browser.new_page(viewport={"width": 1440, "height": 900})
-        page.goto(f"{BASE_URL}/", wait_until="networkidle")
+        page.goto(f"{BASE_URL}/app", wait_until="networkidle")
         page.wait_for_timeout(600)
 
-        # Verify unauthenticated desktop visit at "/" redirects to /landing
+        # Verify unauthenticated desktop visit at Hôm nay (/app) redirects to /landing
         assert "/landing" in page.url, f"Expected desktop root to redirect to /landing, but URL is {page.url}"
         print("[PASS] Desktop root correctly redirects unauthenticated visitor to /landing")
 
         # 1a. Test Desktop Dashboard with ?demo=1 (clean without intro banner)
         _demo.enable(True)
-        page.goto(f"{BASE_URL}/?demo=1", wait_until="networkidle")
+        page.goto(f"{BASE_URL}/app?demo=1", wait_until="networkidle")
         page.wait_for_timeout(600)
         intro = page.locator('section[aria-label="Giới thiệu về H1T MICRO"]')
         assert not intro.is_visible(), "Dashboard should be clean without intro banner"
@@ -114,7 +114,7 @@ def main():
 
         # 4. Verify Mobile (390x844) remains clean and untouched
         page_mobile = browser.new_page(viewport={"width": 390, "height": 844})
-        page_mobile.goto(f"{BASE_URL}/", wait_until="networkidle")
+        page_mobile.goto(f"{BASE_URL}/app", wait_until="networkidle")
         page_mobile.wait_for_timeout(600)
 
         # Intro banner should NOT be visible on mobile

@@ -15,6 +15,7 @@ import { getTodayIsoVN } from "@/lib/date";
 import { pastDayData, useDiary } from "@/lib/diary-store";
 import { viewedIsoDate } from "@/lib/day-history";
 import { markUsed } from "@/lib/onboarding-store";
+import { HOME_ROUTE } from "@/lib/nav";
 
 interface GroupConfig {
   key: NutrientGroup;
@@ -91,7 +92,7 @@ function MicrosContent() {
   // ?date= picks a past day (read-only, as everything about a past day). Read after mount so the first render matches the server.
   const viewIso = hydrated && todayIso ? viewedIsoDate(searchParams?.get("date"), todayIso) : null;
   const isPast = viewIso !== null && viewIso !== todayIso;
-  const diaryHref = isPast && viewIso ? `/?date=${viewIso}` : "/";
+  const diaryHref = isPast && viewIso ? `${HOME_ROUTE}?date=${viewIso}` : HOME_ROUTE;
   const dateQuery = isPast && viewIso ? `?date=${viewIso}` : "";
   const pastData = useMemo(
     () => (isPast && viewIso && todayIso ? pastDayData(viewIso, todayIso, profile, targets) : null),

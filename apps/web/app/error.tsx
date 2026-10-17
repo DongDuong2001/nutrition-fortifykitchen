@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { PillButton } from "@/components/ui/pill-button";
+import { HOME_ROUTE } from "@/lib/nav";
 
 export interface ErrorProps {
   error: Error & { digest?: string };
@@ -52,7 +53,7 @@ export default function ErrorPage({ error, reset }: ErrorProps) {
             Thử lại
           </PillButton>
           <Link
-            href="/"
+            href={HOME_ROUTE}
             className="h-[52px] rounded-full bg-card border border-card-border text-text font-semibold text-base flex items-center justify-center no-underline cursor-pointer active:scale-[0.97] transition-all hover:bg-hover"
           >
             Về Tổng quan

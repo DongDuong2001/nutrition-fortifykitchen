@@ -75,7 +75,7 @@ def main():
 
         ctx = browser.new_context(viewport={"width": 390, "height": 844})
         pg = ctx.new_page()
-        pg.goto(BASE + "/", wait_until="networkidle")
+        pg.goto(BASE + "/app", wait_until="networkidle")
         pg.wait_for_timeout(600)
         check(pg.locator("h1").count() == 1, f"Hôm nay @390 has one h1 (found {pg.locator('h1').count()})")
         small = small_targets(pg)

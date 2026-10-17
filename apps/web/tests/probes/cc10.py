@@ -58,7 +58,7 @@ def energy(pg):
 
 
 def open_day(pg, query=""):
-    pg.goto(BASE + "/" + query, wait_until="networkidle")
+    pg.goto(BASE + "/app" + query, wait_until="networkidle")
     wait_home(pg)
 
 
@@ -110,7 +110,7 @@ def run_phone(browser):
     vis(pg, 'a:has-text("Về hôm nay")').click()
     pg.wait_for_url(re.compile(r".*/$"), timeout=8000)
     pg.wait_for_timeout(300)
-    check(urlparse(pg.url).path == "/" and "date=" not in pg.url, f"390 Về hôm nay lands on / ({pg.url})")
+    check(urlparse(pg.url).path == "/app" and "date=" not in pg.url, f"390 Về hôm nay lands on / ({pg.url})")
     check(not is_past(pg) and visible_count(pg, 'a:has-text("Về hôm nay")') == 0, "390 after Về hôm nay the day is today")
 
     # Hồ sơ: Năm sinh is a row; tapping it opens the field
@@ -155,11 +155,11 @@ def run_desktop(browser):
 
 def run_hydration(browser):
     paths = [
-        "/",
-        f"/?date={iso(YESTERDAY)}",
-        f"/?date={iso(EMPTY_DAY)}",
-        f"/?date={iso(FUTURE)}",
-        "/?date=not-a-date",
+        "/app",
+        f"/app?date={iso(YESTERDAY)}",
+        f"/app?date={iso(EMPTY_DAY)}",
+        f"/app?date={iso(FUTURE)}",
+        "/app?date=not-a-date",
     ]
     for vp in (PHONE, DESKTOP):
         ctx = browser.new_context(viewport=vp)

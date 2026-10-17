@@ -2,12 +2,20 @@
 // public/sw.js is plain JS served as-is and cannot import this file, so it carries a copy of routeFor;
 // lib/__tests__/pwa.test.ts runs the real sw.js and checks both agree.
 
+import { HOME_ROUTE } from "./nav";
+
 /** Manifest colours, the same values as --color-paper and --color-ink in globals.css (a manifest cannot read CSS). */
 export const PAPER_COLOR = "#FFFFFF";
 export const INK_COLOR = "#111317";
 
 /** The app shell, precached when the service worker installs. */
-export const PRECACHE_PAGES = ["/", "/trends", "/explore", "/settings", "/offline"] as const;
+export const PRECACHE_PAGES = ["/", HOME_ROUTE, "/trends", "/explore", "/settings", "/offline"] as const;
+
+/**
+ * Inline in the root layout's <head>: an app installed when start_url was "/" still opens on "/", which is now the coach
+ * link page. Standalone on "/" hides the page and replaces it with Hôm nay before the first paint, query kept.
+ */
+export const STANDALONE_HOME_SCRIPT = `(function(){try{var s=window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone===true;if(s&&window.location.pathname==="/"){document.documentElement.style.visibility="hidden";window.location.replace("${HOME_ROUTE}"+window.location.search)}}catch(e){}})();`;
 
 /** Sign-in and account routes plus the API: never read from or written to a cache. */
 export const NEVER_CACHED = ["/signin", "/signup", "/reset-password", "/login", "/api"] as const;
@@ -167,7 +175,7 @@ export interface InstallPromptInput {
 /** Whether the install pop-up may open by itself now. All conditions must hold. */
 export function shouldShowInstallPrompt(i: InstallPromptInput): boolean {
   if (!i.touchPhone || i.standalone || !i.signedIn || !i.setupDone) return false;
-  if (i.pathname !== "/" || i.busy || i.shownThisSession) return false;
+  if (i.pathname !== HOME_ROUTE || i.busy || i.shownThisSession) return false;
   const secondDay = i.state.firstSeenIso !== null && i.state.firstSeenIso < i.todayIso;
   if (!i.hasLoggedFood && !secondDay) return false;
   if (i.state.done || i.state.dismissCount >= INSTALL_MAX_DISMISSALS) return false;

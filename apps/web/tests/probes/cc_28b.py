@@ -123,7 +123,7 @@ def column(pg):
 def level_run(browser, size, tag, level):
     w = size["width"]
     ctx, pg = new_page(browser, size)
-    go(pg, f"/?level={level}")
+    go(pg, f"/app?level={level}")
     col = column(pg)
     want = LISTS[level]
     check(list(col["groups"].keys()) == list(want.keys()), f"{tag} L{level}: groups {list(col['groups'].keys())}")
@@ -156,7 +156,7 @@ def share_run(browser, size, tag):
     w = size["width"]
     # Level 2, today, from a BLANK name: the sheet asks for the name first, then the image carries it
     ctx, pg = new_page(browser, size, named=False)
-    go(pg, "/?level=2")
+    go(pg, "/app?level=2")
     pg.get_by_role("button", name="Chia sẻ ngày này").click()
     dlg = pg.get_by_role("dialog")
     dlg.get_by_label("Tên hiện trên ảnh").wait_for(state="visible", timeout=5000)
@@ -178,7 +178,7 @@ def share_run(browser, size, tag):
 
     # Level 0 on a past day: short, so the page is filled to 1920 and the footer sits at the bottom
     ctx, pg = new_page(browser, size)
-    go(pg, "/?level=0&date=2026-10-14")
+    go(pg, "/app?level=0&date=2026-10-14")
     pg.get_by_role("button", name="Chia sẻ ngày này").click()
     pg.get_by_role("dialog").get_by_role("img").wait_for(state="visible", timeout=20000)
     s = pg.evaluate("window.__shareSnaps[window.__shareSnaps.length - 1]")
@@ -198,7 +198,7 @@ def share_run(browser, size, tag):
 
     # a long day at Level 5
     ctx, pg = new_page(browser, size)
-    go(pg, "/?level=5")
+    go(pg, "/app?level=5")
     pg.get_by_role("button", name="Chia sẻ ngày này").click()
     pg.get_by_role("dialog").get_by_role("img").wait_for(state="visible", timeout=20000)
     s = pg.evaluate("window.__shareSnaps[window.__shareSnaps.length - 1]")

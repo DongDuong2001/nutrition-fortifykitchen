@@ -147,7 +147,7 @@ def is_filled(btn):
 def iphone_flow(browser):
     ctx = phone(browser, IPHONE)
     pg = ctx.new_page()
-    pg.goto(BASE + "/", wait_until="networkidle")
+    pg.goto(BASE + "/app", wait_until="networkidle")
     wait_open(pg)
     check(heading(pg) == "CÀI H1T MICRO VÀO MÁY CỦA BẠN", f"iPhone: ask view title ({heading(pg)})")
     one_h2(pg, "ask")
@@ -197,7 +197,7 @@ def iphone_flow(browser):
     st = settings(pg)
     check(st.get("done") is True and st.get("dismissCount", 0) == 0, f"ios: done is saved, no dismissal ({st})")
     pg2 = ctx.new_page()
-    pg2.goto(BASE + "/", wait_until="networkidle")
+    pg2.goto(BASE + "/app", wait_until="networkidle")
     check(stays_closed(pg2), "iPhone: done -> never opens again")
     ctx.close()
 
@@ -205,7 +205,7 @@ def iphone_flow(browser):
 def android_flow(browser):
     ctx = phone(browser, ANDROID, script=FAKE_INSTALL_EVENT)
     pg = ctx.new_page()
-    pg.goto(BASE + "/", wait_until="networkidle")
+    pg.goto(BASE + "/app", wait_until="networkidle")
     wait_open(pg)
     pg.wait_for_timeout(1500)  # the fake event arrives at 1.2 s
     check("Máy của bạn" in dialog(pg).get_by_role("button", name=re.compile("Android")).inner_text(), "Android: 'Máy của bạn' on Android")
@@ -240,7 +240,7 @@ def android_flow(browser):
 
     ctx = phone(browser, ANDROID)
     pg = ctx.new_page()
-    pg.goto(BASE + "/", wait_until="networkidle")
+    pg.goto(BASE + "/app", wait_until="networkidle")
     wait_open(pg)
     dialog(pg).get_by_role("button", name=re.compile("Android")).click()
     pg.wait_for_timeout(200)
@@ -255,7 +255,7 @@ def android_flow(browser):
 def inapp_flow(browser):
     ctx = phone(browser, ZALO, perms=True)
     pg = ctx.new_page()
-    pg.goto(BASE + "/", wait_until="networkidle")
+    pg.goto(BASE + "/app", wait_until="networkidle")
     wait_open(pg)
     check(heading(pg) == "MỞ BẰNG TRÌNH DUYỆT TRƯỚC", f"in-app: Zalo opens on the in-app view ({heading(pg)})")
     one_h2(pg, "inapp")
@@ -275,7 +275,7 @@ def inapp_flow(browser):
     for name, ua in [("Facebook", IPHONE + " [FBAN/FBIOS;FBAV/450.0]"), ("Instagram", IPHONE + " Instagram 330.0"), ("TikTok", ANDROID + " musical_ly_32.5")]:
         c = phone(browser, ua)
         p = c.new_page()
-        p.goto(BASE + "/", wait_until="networkidle")
+        p.goto(BASE + "/app", wait_until="networkidle")
         wait_open(p)
         check(f"trong {name}." in dialog(p).inner_text(), f"in-app: {name} is named")
         c.close()
@@ -284,7 +284,7 @@ def inapp_flow(browser):
 def never_flow(browser):
     ctx = phone(browser, IPHONE, script=STANDALONE)
     pg = ctx.new_page()
-    pg.goto(BASE + "/", wait_until="networkidle")
+    pg.goto(BASE + "/app", wait_until="networkidle")
     check(stays_closed(pg), "standalone: the pop-up never opens")
     pg.goto(BASE + "/settings", wait_until="networkidle")
     pg.wait_for_timeout(600)
@@ -293,14 +293,14 @@ def never_flow(browser):
 
     ctx = browser.new_context(viewport={"width": 1440, "height": 900})
     pg = ctx.new_page()
-    pg.goto(BASE + "/", wait_until="networkidle")
+    pg.goto(BASE + "/app", wait_until="networkidle")
     check(stays_closed(pg), "desktop 1440: the pop-up never opens")
     ctx.close()
 
     # a phone with a wide tablet-sized viewport is not a "touch phone"
     ctx = phone(browser, IPHONE, width=1024)
     pg = ctx.new_page()
-    pg.goto(BASE + "/", wait_until="networkidle")
+    pg.goto(BASE + "/app", wait_until="networkidle")
     check(stays_closed(pg), "1024 px touch: no pop-up (a phone is under 1024)")
     ctx.close()
 
@@ -315,7 +315,7 @@ def never_flow(browser):
 def snooze_flow(browser):
     ctx = phone(browser, IPHONE)
     pg = ctx.new_page()
-    pg.goto(BASE + "/", wait_until="networkidle")
+    pg.goto(BASE + "/app", wait_until="networkidle")
     wait_open(pg)
     before = time.time() * 1000
     dialog(pg).get_by_role("button", name="Để sau").click()
@@ -327,13 +327,13 @@ def snooze_flow(browser):
     pg.reload(wait_until="networkidle")
     check(stays_closed(pg), "Để sau: a reload does not bring it back")
     pg2 = ctx.new_page()
-    pg2.goto(BASE + "/", wait_until="networkidle")
+    pg2.goto(BASE + "/app", wait_until="networkidle")
     check(stays_closed(pg2), "Để sau: a new tab (new session) is blocked by the snooze")
 
     # snooze over, two dismissals so far: it shows again, Esc counts as a dismissal
     put_prompt(pg2, {"dismissCount": 2, "snoozeUntil": int(time.time() * 1000) - 1000, "done": False, "firstSeenIso": "2026-01-01"})
     pg3 = ctx.new_page()
-    pg3.goto(BASE + "/", wait_until="networkidle")
+    pg3.goto(BASE + "/app", wait_until="networkidle")
     wait_open(pg3)
     check(True, "snooze over: it shows again")
     pg3.keyboard.press("Escape")
@@ -345,13 +345,13 @@ def snooze_flow(browser):
     # three dismissals: never again, even with the snooze over
     put_prompt(pg3, {"dismissCount": 3, "snoozeUntil": 0, "done": False, "firstSeenIso": "2026-01-01"})
     pg4 = ctx.new_page()
-    pg4.goto(BASE + "/", wait_until="networkidle")
+    pg4.goto(BASE + "/app", wait_until="networkidle")
     check(stays_closed(pg4), "3 dismissals: never opens by itself again")
 
     # the close button is a dismissal too
     put_prompt(pg4, {"dismissCount": 0, "snoozeUntil": 0, "done": False, "firstSeenIso": "2026-01-01"})
     pg5 = ctx.new_page()
-    pg5.goto(BASE + "/", wait_until="networkidle")
+    pg5.goto(BASE + "/app", wait_until="networkidle")
     wait_open(pg5)
     dialog(pg5).get_by_role("button", name=re.compile("iPhone")).click()
     dialog(pg5).get_by_label("Đóng").click()
@@ -404,7 +404,7 @@ def onboarding_flow(browser):
         # a first-visit tip is due on Hôm nay: the pop-up waits, then follows the tip
         ctx = phone(browser, IPHONE)
         pg = ctx.new_page()
-        pg.goto(BASE + "/", wait_until="networkidle")
+        pg.goto(BASE + "/app", wait_until="networkidle")
         pg.get_by_text("Mẹo · lần đầu").wait_for(state="visible", timeout=8000)
         pg.wait_for_timeout(1500)
         check(install_dialog(pg).count() == 0, "tip open: the install pop-up waits")
@@ -439,7 +439,7 @@ def onboarding_flow(browser):
         pg.get_by_role("button", name=re.compile("Xem lại hướng dẫn")).click()
         pg.get_by_text(re.compile(r"Bước 1/5")).wait_for(state="visible", timeout=8000)
         pg.goto(BASE + "/explore", wait_until="networkidle")
-        pg.goto(BASE + "/", wait_until="networkidle")
+        pg.goto(BASE + "/app", wait_until="networkidle")
         check(stays_closed(pg), "tour left halfway: no pop-up that day")
         ctx.close()
     finally:
@@ -449,7 +449,7 @@ def onboarding_flow(browser):
 def narrow(browser):
     ctx = phone(browser, IPHONE, width=360)
     pg = ctx.new_page()
-    pg.goto(BASE + "/", wait_until="networkidle")
+    pg.goto(BASE + "/app", wait_until="networkidle")
     wait_open(pg)
     no_h_scroll(pg, "ask 360")
     dialog(pg).get_by_role("button", name=re.compile("iPhone")).click()

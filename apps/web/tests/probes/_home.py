@@ -1,4 +1,4 @@
-"""cc2-32: shared readers for Hôm nay ("/"), used by the probes that walked the old day screens.
+"""cc2-32: shared readers for Hôm nay ("/app" since cc-45), used by the probes that walked the old day screens.
 
 Not a probe (run_all.py skips names that start with "_").
 """

@@ -14,6 +14,7 @@ import { safeDecode } from "@/lib/coaching-link";
 import { WRONG_CODE, joinPrompt } from "@/lib/level-copy";
 import { findCoachByCode } from "@/lib/mock-coach-server";
 import { writePendingCoachCode } from "@/lib/pending-coach";
+import { HOME_ROUTE } from "@/lib/nav";
 
 /**
  * /join/<code>: the link a coach shares. Signed in: confirm, then the user is linked and lands on Hôm nay.
@@ -47,7 +48,7 @@ export default function JoinPage() {
 
   return (
     <AppShell>
-      <AppHeader variant="sub" title="Tham gia HLV" backHref="/" layout="wide" />
+      <AppHeader variant="sub" title="Tham gia HLV" backHref={HOME_ROUTE} layout="wide" />
       <main className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-6 pt-4 lg:mx-0 lg:px-8">
         {!ready && signedIn !== false ? (
           <div aria-busy="true" className="h-[120px] rounded-[18px] bg-divider motion-safe:animate-pulse" />
@@ -63,7 +64,7 @@ export default function JoinPage() {
         ) : linked?.id === target.id ? (
           <Card className="flex flex-col gap-3">
             <p className="m-0 text-[15px] leading-snug text-text">Bạn đang được {target.name} theo dõi.</p>
-            <Link href="/" className="inline-flex min-h-[44px] items-center text-[15px] font-bold text-blue no-underline">
+            <Link href={HOME_ROUTE} className="inline-flex min-h-[44px] items-center text-[15px] font-bold text-blue no-underline">
               Về Hôm nay
             </Link>
           </Card>
@@ -75,7 +76,7 @@ export default function JoinPage() {
           open={open}
           onClose={() => {
             setOpen(false);
-            router.push("/");
+            router.push(HOME_ROUTE);
           }}
           title={joinPrompt(target.name)}
           titleId="join-title"
@@ -89,7 +90,7 @@ export default function JoinPage() {
             onClick={() => {
               joinByCode(target.code);
               setOpen(false);
-              router.push("/");
+              router.push(HOME_ROUTE);
             }}
           >
             Tham gia
@@ -99,7 +100,7 @@ export default function JoinPage() {
             variant="secondary"
             onClick={() => {
               setOpen(false);
-              router.push("/");
+              router.push(HOME_ROUTE);
             }}
           >
             Để sau

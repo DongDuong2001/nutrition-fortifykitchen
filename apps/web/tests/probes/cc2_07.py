@@ -21,7 +21,7 @@ import _demo  # noqa: F401  (cc2-15b: demo mode on, see _demo.py)
 BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3102")
 SHOTS = Path(__file__).resolve().parent.parent.parent / ".screenshots"
 SIZES = [("390", {"width": 390, "height": 844}), ("1280", {"width": 1280, "height": 800})]
-TABS = [("Hôm nay", "/"), ("Tổng quan", "/trends"), ("Khám phá", "/explore"), ("Cài đặt", "/settings")]
+TABS = [("Hôm nay", "/app"), ("Tổng quan", "/trends"), ("Khám phá", "/explore"), ("Cài đặt", "/settings")]
 SLUGS = {"Hôm nay": "today", "Tổng quan": "overview", "Khám phá": "explore", "Cài đặt": "settings"}
 NAV = 'nav[aria-label="Điều hướng chính"]:visible'
 YESTERDAY = (date.today() - timedelta(days=1)).isoformat()
@@ -70,13 +70,13 @@ def back_button(pg):
 
 
 def probe_tabs(pg, name):
-    go(pg, "/")
+    go(pg, "/app")
     nav = pg.locator(NAV)
     check(nav.count() == 1, f"{name}: one visible main nav (found {nav.count()})")
     labels = [t.strip() for t in pg.locator(f"{NAV} a").all_inner_texts() if t.strip()]
     check(labels == [t for t, _ in TABS], f"{name}: nav lists {', '.join(t for t, _ in TABS)} in order (got {labels})")
     for label, route in TABS:
-        go(pg, "/")
+        go(pg, "/app")
         pg.locator(f'{NAV} a:has-text("{label}")').first.click()
         pg.wait_for_url(lambda u, r=route: (urlparse(u).path or "/") == r, timeout=8000)
         settle(pg)
@@ -134,8 +134,8 @@ def path_of_url(u):
 
 def probe_redirects(pg, name):
     cases = [
-        (f"/today?date={YESTERDAY}", "/", f"date={YESTERDAY}"),
-        ("/today", "/", ""),
+        (f"/today?date={YESTERDAY}", "/app", f"date={YESTERDAY}"),
+        ("/today", "/app", ""),
         ("/profile", "/settings/profile", ""),
         ("/profile/weight", "/settings/profile/weight", ""),
         ("/foods", "/explore", ""),
@@ -152,7 +152,7 @@ def probe_redirects(pg, name):
         status = first.response().status if first.response() else None
         check(status == 308, f"{name}: {src} is a permanent redirect (status {status})")
     # A past day stays read-only on /diary
-    go(pg, f"/?date={YESTERDAY}")
+    go(pg, f"/app?date={YESTERDAY}")
     # cc2-32: Hôm nay marks a past day read-only with "Chỉ xem" in its header (the diary's "Đang xem ngày cũ" is gone)
     if name == "1280":
         check("Chỉ xem" in pg.inner_text("body"), f"{name}: /?date=<past> shows the read-only past day (Chỉ xem)")
@@ -162,7 +162,7 @@ def probe_redirects(pg, name):
     pg.goto(BASE + f"/add?date={YESTERDAY}", wait_until="networkidle")
     pg.wait_for_timeout(500)
     check(
-        path_of(pg) == "/" and f"date={YESTERDAY}" in pg.url,
+        path_of(pg) == "/app" and f"date={YESTERDAY}" in pg.url,
         f"{name}: /add?date=<past> goes to /diary?date=<past> (got {pg.url})",
     )
 
@@ -175,33 +175,33 @@ def open_micros_from_diary(pg, name):
 
 
 def probe_back(pg, name):
-    go(pg, "/")
+    go(pg, "/app")
     open_micros_from_diary(pg, name)
     btn = back_button(pg)
     check(btn.count() == 1, f"{name}: /micros has one back control (found {btn.count()})")
     if name == "390":
         pg.screenshot(path=str(SHOTS / "cc2-07-micros-390.png"))
     btn.first.click()
-    pg.wait_for_url(lambda u: path_of_url(u) == "/", timeout=8000)
-    check(path_of(pg) == "/", f"{name}: back from /micros returns to /diary (now {path_of(pg)})")
+    pg.wait_for_url(lambda u: path_of_url(u) == "/app", timeout=8000)
+    check(path_of(pg) == "/app", f"{name}: back from /micros returns to /diary (now {path_of(pg)})")
 
     # /diary -> /training -> back -> /diary
-    go(pg, "/")
+    go(pg, "/app")
     pg.locator('a[href^="/training?date="] >> visible=true').first.click()
     pg.wait_for_url(lambda u: path_of_url(u) == "/training", timeout=8000)
     settle(pg)
     btn = back_button(pg)
     check(btn.count() == 1, f"{name}: /training has one back control (found {btn.count()})")
     btn.first.click()
-    pg.wait_for_url(lambda u: path_of_url(u) == "/", timeout=8000)
-    check(path_of(pg) == "/", f"{name}: back from /training returns to /diary (now {path_of(pg)})")
+    pg.wait_for_url(lambda u: path_of_url(u) == "/app", timeout=8000)
+    check(path_of(pg) == "/app", f"{name}: back from /training returns to /diary (now {path_of(pg)})")
 
     # Tổng quan sub-tabs are tabs: no back control
     go(pg, "/trends")
     check(back_button(pg).count() == 0, f"{name}: /trends is a tab screen with no back control")
 
     # Direct link: no in-app history, so back goes to the owning tab
-    for route, owner in (("/micros", "/"), ("/training", "/"), ("/micros/calcium", "/micros")):
+    for route, owner in (("/micros", "/app"), ("/training", "/app"), ("/micros/calcium", "/micros")):
         go(pg, route)
         btn = back_button(pg)
         if btn.count() != 1:
@@ -258,8 +258,8 @@ def probe_setup(browser):
     pg.get_by_role("button", name="Hoàn tất").click()
     pg.wait_for_url("**/setup/done", timeout=8000)
     pg.get_by_role("link", name="Để sau").click()
-    pg.wait_for_url(lambda u: path_of_url(u) == "/", timeout=8000)
-    check(path_of(pg) == "/", "390: finishing setup lands on /")
+    pg.wait_for_url(lambda u: path_of_url(u) == "/app", timeout=8000)
+    check(path_of(pg) == "/app", "390: finishing setup lands on /")
     ctx.close()
 
 

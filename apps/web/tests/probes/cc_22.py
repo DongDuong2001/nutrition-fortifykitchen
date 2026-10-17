@@ -1,4 +1,4 @@
-"""cc-22: Hôm nay at "/" (coach layout).
+"""cc-22: Hôm nay at "/" (coach layout; /app since cc-45).
 
 Production build, clock fixed at 2026-10-15 10:00 Asia/Ho_Chi_Minh, demo mode, sizes 390x844 and 1280x800.
 - No page scroll at 390; the header is 52 px; the nutrient column and the hero are on the same screen.
@@ -80,8 +80,8 @@ def run(browser, size, tag):
     w = size["width"]
     phone = w < 1024
     ctx, pg = page(browser, size)
-    go(pg, "/")
-    check(pg.url.rstrip("/") == BASE, f"{tag} / stays at /")
+    go(pg, "/app")
+    check(pg.url == BASE + "/app", f"{tag} /app stays at /app")
     check(hero_label(pg).startswith("Cả ngày · "), f"{tag} day mode label: {hero_label(pg)}")
     if phone:
         scroll = pg.evaluate("document.documentElement.scrollHeight - window.innerHeight")
@@ -150,7 +150,7 @@ def run(browser, size, tag):
 
     # past day
     ctx, pg = page(browser, size)
-    go(pg, f"/?date={PAST}")
+    go(pg, f"/app?date={PAST}")
     foods = pg.locator("button[aria-pressed][aria-label*=', ']")
     check(foods.count() >= 1, f"{tag} past day lists foods ({foods.count()})")
     foods.first.click()
@@ -192,7 +192,7 @@ def run(browser, size, tag):
 
     # many foods: sticky headers, only the list scrolls
     ctx, pg = page(browser, size, extra=22)
-    go(pg, "/")
+    go(pg, "/app")
     check(pg.locator("button[aria-pressed][aria-label*=', ']").count() >= 29, f"{tag} 22 seeded foods plus the sample day")
     if phone:
         scroll = pg.evaluate("document.documentElement.scrollHeight - window.innerHeight")
@@ -209,7 +209,7 @@ def run(browser, size, tag):
     ctx, pg = page(browser, size)
     deleted = json.dumps({f"item-{i}": {"deleted": True} for i in range(1, 8)})
     pg.add_init_script(f"try {{ localStorage.setItem('h1t_sample_edits_v1_demo', {json.dumps(deleted)}); }} catch (e) {{}}")
-    go(pg, "/")
+    go(pg, "/app")
     check("Chưa có món nào hôm nay" in pg.inner_text("body"), f"{tag} empty day line")
     check(pg.get_by_role("button", name="Chép hôm qua").count() == 1, f"{tag} Chép hôm qua when yesterday has entries")
     add = pg.get_by_role("link", name=re.compile("^Thêm vào Bữa sáng"))

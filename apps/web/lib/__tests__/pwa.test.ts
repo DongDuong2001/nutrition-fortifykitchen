@@ -6,6 +6,7 @@ import {
   INK_COLOR,
   PAPER_COLOR,
   PRECACHE_PAGES,
+  STANDALONE_HOME_SCRIPT,
   installView,
   isIosDevice,
   isIosSafari,
@@ -126,5 +127,30 @@ describe("manifest colours", () => {
     const css = readFileSync(join(__dirname, "..", "..", "app", "globals.css"), "utf8").toLowerCase();
     expect(css).toContain(`--color-paper: ${PAPER_COLOR.toLowerCase()}`);
     expect(css).toContain(`--color-ink: ${INK_COLOR.toLowerCase()}`);
+  });
+});
+
+describe("STANDALONE_HOME_SCRIPT", () => {
+  function run(pathname: string, search: string, standalone: { media?: boolean; ios?: boolean }) {
+    const replaced: string[] = [];
+    const root = { style: { visibility: "" } };
+    const window = {
+      matchMedia: (q: string) => ({ matches: q === "(display-mode: standalone)" && standalone.media === true }),
+      navigator: { standalone: standalone.ios },
+      location: { pathname, search, replace: (to: string) => replaced.push(to) },
+    };
+    runInNewContext(STANDALONE_HOME_SCRIPT, { window, document: { documentElement: root } });
+    return { replaced, hidden: root.style.visibility === "hidden" };
+  }
+
+  it("sends an installed app on / to Hôm nay, query kept, hidden until it leaves", () => {
+    expect(run("/", "", { media: true })).toEqual({ replaced: ["/app"], hidden: true });
+    expect(run("/", "?date=2026-10-15", { ios: true })).toEqual({ replaced: ["/app?date=2026-10-15"], hidden: true });
+  });
+
+  it("leaves the link page in a browser tab, and every other route", () => {
+    expect(run("/", "", {})).toEqual({ replaced: [], hidden: false });
+    expect(run("/app", "", { media: true })).toEqual({ replaced: [], hidden: false });
+    expect(run("/settings", "", { ios: true })).toEqual({ replaced: [], hidden: false });
   });
 });

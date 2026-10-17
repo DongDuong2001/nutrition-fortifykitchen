@@ -164,7 +164,7 @@ def back_and_links(browser, size_name, size):
     check(urlpath(pg) == "/settings", f"{size_name}: back from the privacy page goes to Cài đặt ({urlpath(pg)})")
     # nobody links to /admin
     bad = []
-    for route in ("/", "/explore", "/explore/leaderboard", "/explore/coaches", "/settings", "/settings/profile", "/trends", "/micros", "/privacy", "/terms"):
+    for route in ("/app", "/explore", "/explore/leaderboard", "/explore/coaches", "/settings", "/settings/profile", "/trends", "/micros", "/privacy", "/terms"):
         pg.goto(BASE + route, wait_until="networkidle")
         pg.wait_for_timeout(250)
         hrefs = pg.evaluate("[...document.querySelectorAll('a[href]')].map(a => a.getAttribute('href'))")

@@ -11,6 +11,7 @@ import { Row } from "@/components/ui/row";
 import { Switch } from "@/components/ui/switch";
 import { Sheet } from "@/components/ui/sheet";
 import { Toast } from "@/components/ui/toast";
+import { HOME_ROUTE } from "@/lib/nav";
 
 export default function DevUiPage() {
   const [switch1, setSwitch1] = useState(true);
@@ -49,7 +50,7 @@ export default function DevUiPage() {
             variant="sub"
             title="Về bạn"
             subtitle="Mục tiêu được tính theo cân nặng và giới tính."
-            backHref="/"
+            backHref={HOME_ROUTE}
           />
         </section>
 
@@ -62,7 +63,7 @@ export default function DevUiPage() {
             title="Về bạn"
             progress={{ current: 1, total: 2 }}
             actions={<span className="text-[13px] text-muted-on-dark">Bước 1 / 2</span>}
-            backHref="/"
+            backHref={HOME_ROUTE}
           />
         </section>
 
@@ -277,7 +278,7 @@ export default function DevUiPage() {
           <Toast
             message="Đã thêm Chà là 30 g vào Trước tập"
             actionLabel="Xem"
-            actionHref="/"
+            actionHref={HOME_ROUTE}
           />
           <Toast
             message="Đã xóa Thịt bò nạc"

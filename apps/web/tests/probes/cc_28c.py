@@ -65,7 +65,7 @@ def new_page(browser, size):
 
 
 def home(pg, query=""):
-    pg.goto(BASE + "/" + query, wait_until="networkidle")
+    pg.goto(BASE + "/app" + query, wait_until="networkidle")
     pg.locator(HERO + " >> visible=true").first.wait_for(state="visible", timeout=8000)
     pg.wait_for_timeout(500)
 

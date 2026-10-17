@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useOverview } from "@/components/overview/overview-frame";
 import { formatPeriodRange } from "@/lib/format";
 import { summaryAddHref } from "@/lib/first-run";
+import { HOME_ROUTE } from "@/lib/nav";
 
 /** A white card with a 16 px heading row. `aside` is a short caption at the right of the heading. */
 export function OverviewCard({
@@ -62,7 +63,7 @@ export function NotEnoughData() {
         Kỳ này có {days} ngày đã ghi. Cần ít nhất 3 ngày để xem trung bình, số ngày đạt và xu hướng.
       </p>
       <Link
-        href="/"
+        href={HOME_ROUTE}
         className="inline-flex min-h-[44px] items-center justify-center self-start rounded-full border border-card-border bg-card px-4 text-[15px] font-bold text-text no-underline active:scale-[0.97] motion-reduce:active:scale-100"
       >
         Xem hôm nay

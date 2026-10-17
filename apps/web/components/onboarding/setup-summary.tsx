@@ -11,6 +11,7 @@ import { onboardingDisabled } from "@/lib/onboarding-store";
 import { startTour } from "@/lib/tour-bus";
 import { AppHeader } from "@/components/ui/app-header";
 import { PillButton } from "@/components/ui/pill-button";
+import { HOME_ROUTE } from "@/lib/nav";
 
 interface Ready {
   summary: Summary;
@@ -57,7 +58,7 @@ export function SetupSummary() {
       return;
     }
     startTour();
-    router.push("/");
+    router.push(HOME_ROUTE);
   };
 
   return (
@@ -109,7 +110,7 @@ export function SetupSummary() {
                 Thêm bữa đầu tiên
               </PillButton>
               <Link
-                href="/"
+                href={HOME_ROUTE}
                 className="inline-flex min-h-[44px] items-center justify-center px-2 text-[15px] font-semibold text-secondary no-underline"
               >
                 Để sau
@@ -117,7 +118,7 @@ export function SetupSummary() {
               <p className="m-0 text-center text-xs leading-snug text-secondary">Xem lại hướng dẫn trong Cài đặt › Ứng dụng</p>
             </>
           ) : (
-            <PillButton href="/" disabled={ready === null}>
+            <PillButton href={HOME_ROUTE} disabled={ready === null}>
               Xem tổng quan
             </PillButton>
           )}

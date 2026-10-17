@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { INK_COLOR, PAPER_COLOR } from "@/lib/pwa";
+import { HOME_ROUTE } from "@/lib/nav";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -7,7 +8,8 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: "H1T MICRO",
     lang: "vi",
     description: "Theo dõi 22 vi chất và dinh dưỡng mỗi ngày, ghi nhật ký ăn uống ngay cả khi ngoại tuyến.",
-    start_url: "/",
+    // Installed phones open on Hôm nay; scope stays "/" so the link page and every app route stay in the app window
+    start_url: HOME_ROUTE,
     scope: "/",
     display: "standalone",
     background_color: PAPER_COLOR,
@@ -19,7 +21,7 @@ export default function manifest(): MetadataRoute.Manifest {
     ],
     shortcuts: [
       { name: "Thêm món", url: "/add", icons: [{ src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }] },
-      { name: "Hôm nay", url: "/", icons: [{ src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }] },
+      { name: "Hôm nay", url: HOME_ROUTE, icons: [{ src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }] },
     ],
   };
 }

@@ -19,11 +19,12 @@ import {
 import { isLiveMode } from "@/lib/api-mode";
 import { HCaptcha } from "@/components/auth/hcaptcha";
 import { readPendingEmail, writePendingEmail } from "@/lib/onboarding";
+import { HOME_ROUTE } from "@/lib/nav";
 
 type Errors = { email?: string; password?: string; confirm?: string };
 
 const COPY = {
-  signin: { primary: "Đăng nhập", magic: "Gửi liên kết đăng nhập qua email", next: "/" },
+  signin: { primary: "Đăng nhập", magic: "Gửi liên kết đăng nhập qua email", next: HOME_ROUTE },
   signup: { primary: "Đăng ký", magic: "Gửi liên kết đăng ký qua email", next: "/setup/profile" },
 } as const;
 

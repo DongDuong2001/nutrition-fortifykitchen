@@ -72,7 +72,7 @@ def bar_text(pg):
 def today_flow(browser, size, tag):
     w = size["width"]
     ctx, pg, errors = new_page(browser, size)
-    go(pg, "/")
+    go(pg, "/app")
     total = hero_count(pg)
     check(total == 7, f"{tag} today: 7 foods ({total})")
     pill = pg.get_by_role("button", name="Tùy chọn ngày")
@@ -191,7 +191,7 @@ def stack_flow(browser, size, tag):
     """v0.2.1: a move keeps a pending delete's Hoàn tác reachable (two toasts stacked) and has its own Hoàn tác."""
     w = size["width"]
     ctx, pg, errors = new_page(browser, size)
-    go(pg, "/")
+    go(pg, "/app")
     snack_before = squash(pg.locator("section[aria-label='Bữa phụ']").inner_text())
     start_select(pg)
     pg.locator("[role=checkbox]").nth(0).click()
@@ -216,7 +216,7 @@ def stack_flow(browser, size, tag):
 def past_flow(browser, size, tag):
     w = size["width"]
     ctx, pg, errors = new_page(browser, size)
-    go(pg, f"/?date={PAST}")
+    go(pg, f"/app?date={PAST}")
     n_past = hero_count(pg)
     start_select(pg)
     check(pg.get_by_role("button", name="Chép sang", exact=True).count() == 0 and pg.get_by_role("button", name="Xóa", exact=True).count() == 0, f"{tag} past: no Chép sang, Chuyển bữa or Xóa")
@@ -249,7 +249,7 @@ def past_flow(browser, size, tag):
     snack = squash(pg.locator("section[aria-label='Bữa phụ']").inner_text())
     check(snack.count("kcal") >= 1 and meal_count(pg, "Bữa phụ") >= 2, f"{tag} past: both copies are in Bữa phụ ({snack[:80]})")
     # the past day is unchanged
-    go(pg, f"/?date={PAST}")
+    go(pg, f"/app?date={PAST}")
     check(hero_count(pg) == n_past, f"{tag} past: the past day is unchanged ({hero_count(pg)} vs {n_past})")
     check([e for e in errors if "preloaded using link preload" not in e] == [], f"{tag}: no console errors {errors[:1]}")
     ctx.close()

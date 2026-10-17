@@ -1,6 +1,7 @@
-import { HomeScreen } from "@/components/home/home-screen";
+import { redirect } from "next/navigation";
+import { HOME_ROUTE, homeRedirectFor } from "@/lib/nav";
 
-/** Hôm nay (IA v2): the day at a glance, food by food. Nhật ký is folded in; ?date= shows a past day. */
-export default function HomePage() {
-  return <HomeScreen />;
+/** Hôm nay lives at HOME_ROUTE; "/" sends there, with an old "/?date=…" query kept. */
+export default async function RootPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  redirect(homeRedirectFor(await searchParams) ?? HOME_ROUTE);
 }

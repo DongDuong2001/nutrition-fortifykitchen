@@ -20,10 +20,10 @@ import _demo  # noqa: F401  (cc2-15b: demo mode on, see _demo.py)
 BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3102")
 SHOTS = Path(__file__).resolve().parent.parent.parent / ".screenshots"
 SIZES = [("390", {"width": 390, "height": 844}), ("1280", {"width": 1280, "height": 800})]
-TABS = [("Hôm nay", "/"), ("Tổng quan", "/trends"), ("Khám phá", "/explore"), ("Cài đặt", "/settings")]
+TABS = [("Hôm nay", "/app"), ("Tổng quan", "/trends"), ("Khám phá", "/explore"), ("Cài đặt", "/settings")]
 # route → the only tab that may be active there
 ACTIVE = [
-    ("/", "Hôm nay"),
+    ("/app", "Hôm nay"),
     ("/micros", "Hôm nay"),
     ("/trends", "Tổng quan"),
     ("/trends/energy", "Tổng quan"),
@@ -70,7 +70,7 @@ def no_h_scroll(pg, where):
 
 
 def probe_nav(pg, name):
-    status = go(pg, "/")
+    status = go(pg, "/app")
     check(status == 200, f"{name}: / answers 200 (got {status})")
     check(pg.locator(NAV).count() == 1, f"{name}: one visible main nav (found {pg.locator(NAV).count()})")
     links = pg.locator(f"{NAV} a").evaluate_all(

@@ -4,6 +4,7 @@ import * as React from "react";
 import { Manrope, Saira_Condensed } from "next/font/google";
 // The root layout is gone when this renders, so it brings the tokens (colours, press feedback) and fonts itself.
 import "./globals.css";
+import { HOME_ROUTE } from "@/lib/nav";
 
 const manrope = Manrope({
   subsets: ["vietnamese", "latin"],
@@ -65,7 +66,7 @@ export default function GlobalError({
               Tải lại trang
             </button>
             <a
-              href="/"
+              href={HOME_ROUTE}
               className="flex h-[52px] w-full items-center justify-center rounded-full border border-card-border bg-card px-6 text-base font-bold text-text no-underline hover:text-text active:scale-[0.97] motion-reduce:active:scale-100"
             >
               Về trang chủ

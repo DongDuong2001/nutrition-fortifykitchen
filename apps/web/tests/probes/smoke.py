@@ -19,8 +19,8 @@ APP_DIR = HERE.parent.parent / "app"
 OUT_DIR = HERE / "out"
 WIDTHS = [(390, 844), (1280, 800)]
 NOT_FOUND_ROUTE = "/this-page-does-not-exist"
-# Routes with no header by design (decided 12/10). Only the header check is relaxed; all others stay strict.
-NO_HEADER_ROUTES = {"/signin", "/signin/check-email", "/signin/expired", "/signin/forgot", "/reset-password", "/signup", NOT_FOUND_ROUTE, "/login", "/landing"}
+# Routes with no header by design (decided 12/10; "/" is the coach link page since cc-45). Only the header check is relaxed; all others stay strict.
+NO_HEADER_ROUTES = {"/", "/signin", "/signin/check-email", "/signin/expired", "/signin/forgot", "/reset-password", "/signup", NOT_FOUND_ROUTE, "/login", "/landing"}
 # /login is a sign-in screen (Dong's file, no AppHeader), the same kind as /signin; only the header rule is relaxed (cc2-07).
 # /add is a bottom sheet on phones, so it has no header below the desktop width
 NO_HEADER_BELOW_DESKTOP = {"/add"}
@@ -93,7 +93,7 @@ EXTRA_ROUTES = ["/foods/compare?ids=food-cha-la,food-yen-mach,food-chuoi"]
 
 
 def slug(route):
-    return "home" if route == "/" else re.sub(r"[^A-Za-z0-9-]+", "-", route.strip("/").replace("/", "-")).strip("-")
+    return {"/": "link", "/app": "home"}.get(route) or re.sub(r"[^A-Za-z0-9-]+", "-", route.strip("/").replace("/", "-")).strip("-")
 
 
 def gated(route):
@@ -173,7 +173,7 @@ def check(browser, route, width, height):
 
 
 # cc2-15b: the empty-account pass. A new user has no entries, no history and no sample data.
-EMPTY_ROUTES = ["/", "/trends", "/trends/micros", "/trends/body", "/", "/micros", "/training", "/explore", "/explore/meals", "/explore/leaderboard", "/explore/coaches", "/privacy", "/terms", "/add", "/settings", "/setup/done", "/foods/compare?ids=food-cha-la,food-yen-mach,food-chuoi"]
+EMPTY_ROUTES = ["/app", "/trends", "/trends/micros", "/trends/body", "/app", "/micros", "/training", "/explore", "/explore/meals", "/explore/leaderboard", "/explore/coaches", "/privacy", "/terms", "/add", "/settings", "/setup/done", "/foods/compare?ids=food-cha-la,food-yen-mach,food-chuoi"]
 BAD_TEXT = re.compile(r"\bNaN\b|\bundefined\b|\bInfinity\b")
 
 

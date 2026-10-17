@@ -6,6 +6,7 @@ import { currentAccount, currentAccountId, wasExplicitlySignedOut } from "./auth
 import { isLiveMode } from "./api-mode";
 import { ADDED_ENTRIES_KEY, adoptLegacyKeys, adoptLegacyPersonal, browserLocal, browserSession, keyedStorage } from "./storage-keys";
 import { apiClient } from "./api-client";
+import { HOME_ROUTE } from "./nav";
 
 // The entries this user added live in localStorage under the signed-in account's key (lib/storage-keys). Only
 // real entries count here: the sample day, history and seeded Gần đây exist in demo mode only (lib/demo), and
@@ -31,7 +32,7 @@ export function firstRunState({ profileSaved, entryEverLogged }: FirstRunFacts):
 const TAB_ROUTES = ["/explore", "/settings", "/add", "/micros", "/training", "/trends"];
 
 export function isTabRoute(pathname: string): boolean {
-  return pathname === "/" || TAB_ROUTES.some((route) => pathname === route || pathname.startsWith(route + "/"));
+  return pathname === HOME_ROUTE || TAB_ROUTES.some((route) => pathname === route || pathname.startsWith(route + "/"));
 }
 
 /** Where to send a user who has no profile yet (outside demo mode): setup, from any tab route. Else null. */
@@ -93,7 +94,7 @@ export function readFirstRunFacts(demo: boolean = isDemo()): FirstRunFacts {
 /**
  * Where SetupGate sends the user from a tab route: a path, or null to let them through. Outside demo mode a user with
  * no profile goes to setup and nobody signed in goes to /signin. A session that exists only in Supabase's cookies (the
- * OAuth callback sets those and sends the user to "/") has no email in this browser's storage yet. So when no account
+ * OAuth callback sets those and sends the user to Hôm nay) has no email in this browser's storage yet. So when no account
  * id is known the account is resolved FIRST (currentAccount asks Supabase, stores the email and clears the signed-out
  * flag), and only then is the setup redirect decided, from that account's own storage keys: a first-time Google user
  * lands on /setup/profile with the profile saved under their email, never under unscoped keys. With no session at all
@@ -111,7 +112,7 @@ export async function gateRedirect(pathname: string, demo: boolean = isDemo(), d
 
   // After Đăng xuất a session that survived (a failed sign-out) is not adopted until the next explicit sign-in
   if (!demo && !(await hasSession())) {
-    return pathname === "/" && desktop ? "/landing" : "/signin";
+    return pathname === HOME_ROUTE && desktop ? "/landing" : "/signin";
   }
   const facts = readFirstRunFacts(demo);
   if (!demo && isLiveMode() && !facts.profileSaved && currentAccountId()) {
@@ -128,10 +129,10 @@ export async function gateRedirect(pathname: string, demo: boolean = isDemo(), d
   return setupRedirectFor(pathname, facts, demo);
 }
 
-/** "/" when a live session already exists (the sign-in form has nothing to do), else null. Live mode only. */
+/** HOME_ROUTE when a live session already exists (the sign-in form has nothing to do), else null. Live mode only. */
 export async function homeIfSignedIn(): Promise<string | null> {
   if (!isLiveMode() || isDemo() || wasExplicitlySignedOut()) return null;
-  return (await currentAccount()) === null ? null : "/";
+  return (await currentAccount()) === null ? null : HOME_ROUTE;
 }
 
 /** One line of the day targets on the setup summary. */

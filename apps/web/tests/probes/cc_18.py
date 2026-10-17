@@ -213,7 +213,7 @@ def sign_out_and_back_in(pg, width, email):
     email_input(pg).fill(email)
     pg.locator('input[autocomplete="current-password"]').fill(NEW_PASSWORD)
     submit(pg, "Đăng nhập")
-    pg.wait_for_url(BASE + "/", timeout=8000)
+    pg.wait_for_url(BASE + "/app", timeout=8000)
     check(True, f"{width} the new password signs in")
 
 

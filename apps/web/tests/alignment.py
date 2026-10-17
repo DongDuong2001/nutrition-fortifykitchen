@@ -27,11 +27,13 @@ ONBOARDING_CHECKS = [
     ("/add?meal=snack", "desktop (1440px)", "add-list", "lr"),
     ("/micros", "mobile (390px)", "micros-header", "lr"),
     ("/micros", "desktop (1440px)", "micros-header", "lr"),
-    ("/", "mobile (390px)", "home-hero", "lr"),
-    ("/", "desktop (1440px)", "home-hero", "lr"),
-    ("/", "desktop (1440px)", "home-page", "lr"),  # cc-44: the h1 row and the body share one container
-    ("/", "mobile (390px)", "home-nutrient", "lr"),
-    ("/", "desktop (1440px)", "home-nutrient", "lr"),
+    ("/", "mobile (390px)", "link-rows", "lr"),  # cc-45: the coach link page's two rows
+    ("/", "desktop (1440px)", "link-rows", "lr"),
+    ("/app", "mobile (390px)", "home-hero", "lr"),
+    ("/app", "desktop (1440px)", "home-hero", "lr"),
+    ("/app", "desktop (1440px)", "home-page", "lr"),  # cc-44: the h1 row and the body share one container
+    ("/app", "mobile (390px)", "home-nutrient", "lr"),
+    ("/app", "desktop (1440px)", "home-nutrient", "lr"),
     ("/trends", "mobile (390px)", "overview-rows", "lr"),
     ("/trends", "desktop (1440px)", "overview-rows", "lr"),
     ("/trends/micros", "mobile (390px)", "overview-micro", "lr"),
@@ -183,15 +185,15 @@ def main():
         for vp in VIEWPORTS:
             page.set_viewport_size({"width": vp["width"], "height": vp["height"]})
 
-            # / (Hôm nay)
-            page.goto(f"{BASE_URL}/", wait_until="networkidle")
+            # /app (Hôm nay)
+            page.goto(f"{BASE_URL}/app", wait_until="networkidle")
             page.wait_for_timeout(500)
             res = check_align_groups(page)
             if res["errors"]:
-                print(f"[FAIL] / @ {vp['name']}: {res['errors']}")
+                print(f"[FAIL] /app @ {vp['name']}: {res['errors']}")
                 total_errors.extend(res["errors"])
             else:
-                print(f"[PASS] / @ {vp['name']} (checked groups: {res['checkedGroups']})")
+                print(f"[PASS] /app @ {vp['name']} (checked groups: {res['checkedGroups']})")
 
             # cc-27 fix: the share image always has a name, so the sheet opens straight on the image only for a named profile
             page.evaluate("localStorage.setItem('h1t_profile_v1_demo', JSON.stringify({sex:'male',birthYear:2003,weightKg:65,goal:'maintain',periodMode:false,trainingMinutesDefault:60,displayName:'Học viên A',hintSeen:true}))")
@@ -317,7 +319,7 @@ def main():
         # cc-27a: select mode on Hôm nay (the action bar's rows, the target sheet's radios); real pairs
         for vp in VIEWPORTS:
             page.set_viewport_size({"width": vp["width"], "height": vp["height"]})
-            page.goto(f"{BASE_URL}/", wait_until="networkidle")
+            page.goto(f"{BASE_URL}/app", wait_until="networkidle")
             page.wait_for_timeout(500)
             page.get_by_role("button", name="Tùy chọn ngày").click()
             page.get_by_role("dialog").get_by_role("button", name="Chọn nhiều món").click()
@@ -346,7 +348,7 @@ def main():
         # cc-28c: the Level explainer's rows (a user at Level 2 opens it from the label above the column)
         for vp in VIEWPORTS:
             page.set_viewport_size({"width": vp["width"], "height": vp["height"]})
-            page.goto(f"{BASE_URL}/?level=2", wait_until="networkidle")
+            page.goto(f"{BASE_URL}/app?level=2", wait_until="networkidle")
             page.wait_for_timeout(600)
             page.get_by_role("button", name="Level 2 · HLV Khánh").click()
             page.get_by_role("dialog", name="Level là gì?").wait_for(state="visible", timeout=5000)

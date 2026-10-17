@@ -8,6 +8,7 @@ import { requestMagicLink } from "@/lib/auth-actions";
 import { firstRunState, readFirstRunFacts } from "@/lib/first-run";
 import { readPendingEmail, resendLabel } from "@/lib/onboarding";
 import { PillButton } from "@/components/ui/pill-button";
+import { HOME_ROUTE } from "@/lib/nav";
 
 const RESEND_WAIT_SECONDS = 45;
 
@@ -19,7 +20,7 @@ export default function CheckEmailPage() {
 
   useEffect(() => {
     setEmail(readPendingEmail());
-    setOpenTarget(firstRunState(readFirstRunFacts()) === "needs-setup" ? "/setup/profile" : "/");
+    setOpenTarget(firstRunState(readFirstRunFacts()) === "needs-setup" ? "/setup/profile" : HOME_ROUTE);
   }, []);
 
   useEffect(() => {

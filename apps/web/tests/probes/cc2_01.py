@@ -82,7 +82,7 @@ def probe_foods_redirect(pg):
 
 
 def probe_date_label(pg):
-    pg.goto(BASE + "/", wait_until="networkidle")
+    pg.goto(BASE + "/app", wait_until="networkidle")
     pg.wait_for_timeout(400)
     body = pg.inner_text("body")
     expected = f"Hôm nay {TODAY.day:02d}/{TODAY.month:02d}"

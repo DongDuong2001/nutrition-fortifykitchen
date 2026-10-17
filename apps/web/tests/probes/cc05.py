@@ -80,7 +80,7 @@ def run():
             check(shown(pg, 'text="Không tìm thấy món này"'), f"{name}: unknown id shows the empty state")
 
             # Baseline on Today before any edit
-            pg.goto(BASE + "/", wait_until="networkidle")
+            pg.goto(BASE + "/app", wait_until="networkidle")
             pg.wait_for_timeout(300)
             check("459 kcal" in meal_text(pg, "breakfast"), f"{name}: breakfast starts at 459 kcal")
             check("1.041" in pg.inner_text("body"), f"{name}: day starts at 1.041 kcal")

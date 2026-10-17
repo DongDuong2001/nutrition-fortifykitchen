@@ -2,6 +2,7 @@
 
 import React from "react";
 import { PillButton } from "@/components/ui/pill-button";
+import { HOME_ROUTE } from "@/lib/nav";
 
 /**
  * "Thử lại" on the offline screen. The service worker answers any failed page load with /offline, so the
@@ -10,7 +11,7 @@ import { PillButton } from "@/components/ui/pill-button";
  */
 export function RetryButton() {
   const retry = () => {
-    if (window.location.pathname === "/offline") window.location.replace("/");
+    if (window.location.pathname === "/offline") window.location.replace(HOME_ROUTE);
     else window.location.reload();
   };
   return (

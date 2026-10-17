@@ -17,6 +17,7 @@ import { draftToRecipe, recipeDraftFromFood, recipeToDraft, RECIPE_ID_PREFIX } f
 import { getRecipe, saveRecipe } from "@/lib/recipe-store";
 import { useBack } from "@/hooks/use-back";
 import { markUsed } from "@/lib/onboarding-store";
+import { HOME_ROUTE } from "@/lib/nav";
 
 function CreateFoodInner() {
   const router = useRouter();
@@ -181,7 +182,7 @@ function CreateFoodInner() {
       markUsed("create-food");
       // Add to diary and redirect
       await addFoodEntry(createdFood, parsedSize, mealSlot, `${formatAmount(parsedSize, servingUnit)} ${servingUnit}`);
-      router.push("/");
+      router.push(HOME_ROUTE);
     } finally {
       setIsSubmitting(false);
     }

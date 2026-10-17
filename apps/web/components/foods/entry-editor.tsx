@@ -14,6 +14,7 @@ import { FormRow } from "../ui/form-row";
 import { parseDecimalInput } from "../../lib/quick-entry";
 
 import { formatGramsServingLabel } from "../../lib/portion";
+import { HOME_ROUTE } from "@/lib/nav";
 
 const quickFieldClass =
   "h-12 w-full rounded-xl border-2 border-card-border bg-surface px-3 text-base text-text outline-none transition-colors focus:border-blue";
@@ -78,12 +79,12 @@ export function EntryEditor({ view }: { view: EntryView }) {
     } else {
       updateEntry(view.id, canPortion ? { grams, servingLabel, mealSlot } : { mealSlot });
     }
-    router.push("/");
+    router.push(HOME_ROUTE);
   };
 
   const handleDelete = () => {
     deleteEntry(view.id);
-    router.push("/");
+    router.push(HOME_ROUTE);
   };
 
   return (
@@ -103,7 +104,7 @@ export function EntryEditor({ view }: { view: EntryView }) {
             getMealSlotNameVi(view.mealSlot)
           )
         }
-        backHref="/"
+        backHref={HOME_ROUTE}
       />
       <div className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-8 pt-4">
         <section className="flex flex-col gap-4 rounded-[18px] lg:shadow-card border border-card-border bg-card p-4">

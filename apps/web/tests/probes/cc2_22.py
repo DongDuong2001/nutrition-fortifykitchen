@@ -46,7 +46,7 @@ def shot(pg, name, size_name, full=True):
 
 def home(browser, size_name, size):
     """cc2-32: the diary tiles and meal cards went with the diary screen; Hôm nay is covered by cc_22 and cc2_32."""
-    ctx, pg = new_page(browser, size, "/")
+    ctx, pg = new_page(browser, size, "/app")
     w = f"{size_name} Hôm nay"
     h = pg.evaluate("Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) > window.innerWidth")
     check(not h, f"{w}: no horizontal scroll")

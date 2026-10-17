@@ -142,7 +142,7 @@ def tour_phone(browser):
     pg.get_by_role("button", name="Thêm bữa đầu tiên").click()
     check(wait_card(pg), "tour step 1 shows")
     check("Bước 1/5" in card(pg).inner_text(), "step 1: Bước 1/5")
-    check(pg.url.rstrip("/") == BASE, f"step 1 is on Hôm nay ({pg.url})")
+    check(pg.url == BASE + "/app", f"step 1 is on Hôm nay ({pg.url})")
     check(card(pg).get_by_role("button", name="Tiếp").count() == 1, "step 1: Tiếp")
     check(card(pg).get_by_role("button", name="Bỏ qua hướng dẫn").count() == 1, "step 1: Bỏ qua hướng dẫn")
     check(card(pg).get_attribute("aria-modal") == "true" and card(pg).get_attribute("role") == "dialog", "step 1: role dialog, aria-modal")
@@ -154,7 +154,7 @@ def tour_phone(browser):
     # The scrim blocks taps outside the hole: a tap on the nav Cài đặt does nothing
     pg.mouse.click(350, 810)
     pg.wait_for_timeout(300)
-    check(pg.url.rstrip("/") == BASE, "step 1: the scrim blocks a tap on the bar below")
+    check(pg.url == BASE + "/app", "step 1: the scrim blocks a tap on the bar below")
     card(pg).get_by_role("button", name="Tiếp").click()
     pg.wait_for_timeout(500)
     check("Bước 2/5" in card(pg).inner_text(), "step 2: Bước 2/5 after Tiếp")
@@ -177,7 +177,7 @@ def tour_phone(browser):
     hint_check(pg, "step 4")
     shot(pg, "tour-4-390")
     pg.locator('[data-tour="portion-add"]:visible').click()
-    pg.wait_for_url(BASE + "/")
+    pg.wait_for_url(BASE + "/app")
     pg.wait_for_timeout(900)
     check("Bước 5/5" in card(pg).inner_text(), "step 5: back on Hôm nay with the food")
     text = card(pg).inner_text()
@@ -212,7 +212,7 @@ def tour_phone(browser):
     pg.wait_for_timeout(500)
     check(not flags(pg).get("tourDone"), "leaving mid-tour: tourDone stays false")
     check(not any("Bước " in t for t in [pg.inner_text("body")]), "leaving mid-tour: no tour card on the other screen")
-    go(pg, "/")
+    go(pg, "/app")
     check("Bước 1/5" not in pg.inner_text("body"), "leaving mid-tour: the tour does not come back")
     ctx.close()
 
@@ -220,7 +220,7 @@ def tour_phone(browser):
     ctx, pg = ctx_page(browser, PHONE)
     go(pg, "/setup/done")
     pg.get_by_role("link", name="Để sau").click()
-    pg.wait_for_url(BASE + "/")
+    pg.wait_for_url(BASE + "/app")
     pg.wait_for_timeout(700)
     check("Bước 1/5" not in pg.inner_text("body"), "Để sau: no tour")
     ctx.close()
@@ -250,8 +250,8 @@ def tour_desktop(browser):
 
 # ---------------------------------------------------------------- tips
 TIP_SCREENS = [
-    ("home-logged", "/", "Sửa nhanh"),
-    ("past-day", f"/?date={YESTERDAY}", "Ngày đã qua"),
+    ("home-logged", "/app", "Sửa nhanh"),
+    ("past-day", f"/app?date={YESTERDAY}", "Ngày đã qua"),
     ("add-tray", "/add?meal=lunch", "Chọn nhiều món cùng lúc"),
     ("food-detail", "/foods/food-cha-la", "Lưu món hay ăn"),
     ("compare", "/foods/compare?ids=food-cha-la,food-yen-mach", "Đọc bảng so sánh"),
@@ -292,13 +292,13 @@ def tips(browser, size, tag):
 def tips_rules(browser):
     # Second Hôm nay visit: the next tip (one per visit), the first is not repeated
     ctx, pg = ctx_page(browser, PHONE)
-    go(pg, "/", wait=200)
+    go(pg, "/app", wait=200)
     wait_card(pg)
     first = card(pg).inner_text()
     card(pg).get_by_role("button", name="Đã hiểu").click()
     pg.wait_for_timeout(600)
     check(card(pg).count() == 0, "one tip per visit: nothing else after Đã hiểu")
-    go(pg, "/", wait=200)
+    go(pg, "/app", wait=200)
     wait_card(pg)
     second = card(pg).inner_text() if card(pg).count() else ""
     check("Thêm vào bữa bất kỳ lúc nào" in second and "Sửa nhanh" not in second, f"next visit: the next tip, not the same ({second[:60]!r})")
@@ -339,7 +339,7 @@ def tips_rules(browser):
     # Selecting several foods on Hôm nay: the multi-select tip when the mode opens
     ctx, pg = ctx_page(browser, PHONE)
     pg.add_init_script("localStorage.setItem('h1t_settings_v1_demo', JSON.stringify({onboarding: {seen: ['home-logged', 'meal-add', 'home-share']}}))")
-    go(pg, "/", wait=300)
+    go(pg, "/app", wait=300)
     pg.get_by_role("button", name="Thêm tùy chọn").first.click() if pg.get_by_role("button", name="Thêm tùy chọn").count() else None
     opened = False
     for name in ("Chọn nhiều món", "Chọn nhiều"):
@@ -409,7 +409,7 @@ def tray(browser):
     pg.wait_for_timeout(200)
     count = pg.locator("[data-tray-review] li").count()
     pg.get_by_role("button", name=f"Thêm {count} món vào Bữa trưa").click()
-    pg.wait_for_url(BASE + "/")
+    pg.wait_for_url(BASE + "/app")
     pg.wait_for_timeout(600)
     toast = pg.get_by_role("status").filter(has_text="Đã thêm").first
     check(toast.is_visible() and f"Đã thêm {count} món vào Bữa trưa" in toast.inner_text(), f"tray add: one toast for {count} foods")
@@ -556,7 +556,7 @@ def settings(browser):
     check(pg.get_by_role("switch", name="Mẹo trên từng màn hình").get_attribute("aria-checked") == "true", "Cài đặt: the tips switch is on")
     shot(pg, "settings-390")
     replay.click()
-    pg.wait_for_url(BASE + "/")
+    pg.wait_for_url(BASE + "/app")
     check(wait_card(pg) and "Bước 1/5" in card(pg).inner_text(), "Xem lại hướng dẫn restarts the tour on Hôm nay")
     card(pg).get_by_role("button", name="Bỏ qua hướng dẫn").click()
     go(pg, "/settings")
@@ -588,7 +588,7 @@ SEEN_FIRST = ["home-logged", "meal-add"]
 def share_tip(browser):
     # 3 foods today: the tip shows, with its copy, a round 44 px hole on the share button and the arrow under it
     ctx, pg = share_ctx(browser, 3, {"seen": SEEN_FIRST})
-    go(pg, "/", wait=200)
+    go(pg, "/app", wait=200)
     check(wait_card(pg, 5000), "share tip: shows at 3 foods today")
     body = card(pg).inner_text()
     check("Mẹo · lần đầu" in body and "Chia sẻ ngày ăn của bạn" in body and "Chạm biểu tượng chia sẻ để tạo ảnh tóm tắt ngày: tên, Level, kcal và vi chất. Chia sẻ cho HLV hoặc đăng lên mạng xã hội nhanh chóng." in body, f"share tip: copy ({body[:80]!r})")
@@ -628,7 +628,7 @@ def share_tip(browser):
     # Thử ngay with no display name: the sheet asks for the name first
     ctx, pg = share_ctx(browser, 3, {"seen": SEEN_FIRST}, named=False)
     ctx.add_init_script("try { localStorage.setItem('h1t_profile_v1_demo', JSON.stringify({sex: 'male', birthYear: 2003, weightKg: 65.4, goal: 'maintain', periodMode: false, trainingMinutesDefault: 60, displayName: '', hintSeen: true})); } catch (e) {}")
-    go(pg, "/", wait=200)
+    go(pg, "/app", wait=200)
     wait_card(pg, 5000)
     card(pg).get_by_role("button", name="Thử ngay").click()
     pg.get_by_label("Tên hiện trên ảnh").wait_for(state="visible", timeout=8000)
@@ -637,7 +637,7 @@ def share_tip(browser):
 
     # Đã hiểu only closes it
     ctx, pg = share_ctx(browser, 3, {"seen": SEEN_FIRST})
-    go(pg, "/", wait=200)
+    go(pg, "/app", wait=200)
     wait_card(pg, 5000)
     card(pg).get_by_role("button", name="Đã hiểu").click()
     pg.wait_for_timeout(400)
@@ -646,7 +646,7 @@ def share_tip(browser):
 
     # Tắt mọi mẹo works as in the other tips
     ctx, pg = share_ctx(browser, 3, {"seen": SEEN_FIRST})
-    go(pg, "/", wait=200)
+    go(pg, "/app", wait=200)
     wait_card(pg, 5000)
     card(pg).get_by_role("button", name="Tắt mọi mẹo").click()
     pg.wait_for_timeout(300)
@@ -655,9 +655,9 @@ def share_tip(browser):
 
     # Not at 2 foods, not on a past day, not after a share
     for label, foods, onboarding, route in (
-        ("2 foods", 2, {"seen": SEEN_FIRST}, "/"),
-        ("a past day", 3, {"seen": SEEN_FIRST + ["past-day"]}, f"/?date={YESTERDAY}"),
-        ("after a share", 3, {"seen": SEEN_FIRST, "used": ["share-day"]}, "/"),
+        ("2 foods", 2, {"seen": SEEN_FIRST}, "/app"),
+        ("a past day", 3, {"seen": SEEN_FIRST + ["past-day"]}, f"/app?date={YESTERDAY}"),
+        ("after a share", 3, {"seen": SEEN_FIRST, "used": ["share-day"]}, "/app"),
     ):
         ctx, pg = share_ctx(browser, foods, onboarding)
         go(pg, route, wait=200)
@@ -674,7 +674,7 @@ def meal_add_link(browser):
     for size, tag, row_h, add_fs in ((PHONE, "390", 24, "12px"), (DESKTOP, "1440", 36, "13px")):  # cc-44: the ink meal pill
         ctx, pg = ctx_page(browser, size)
         ctx.add_init_script("try { localStorage.setItem('h1t_onboarding_off', '1'); } catch (e) {}")
-        go(pg, "/")
+        go(pg, "/app")
         pg.locator("section[aria-label='Tổng kcal và dinh dưỡng đa lượng']").first.wait_for(state="visible", timeout=8000)
         links = pg.locator(MEAL_ADD + ":visible")
         check(links.count() >= 4, f"{tag} meal add: one + Thêm per meal ({links.count()})")
@@ -723,7 +723,7 @@ def meal_add_link(browser):
         pg.mouse.move(5, 5)
         pg.mouse.up()
         pg.wait_for_timeout(300)
-        check(pg.url.split("?")[0].rstrip("/") == BASE, f"{tag} meal add: letting go elsewhere does not open /add ({pg.url})")
+        check(pg.url.split("?")[0] == BASE + "/app", f"{tag} meal add: letting go elsewhere does not open /add ({pg.url})")
         # focus-visible ring: 2 px cobalt, offset 2
         link.evaluate("el => { el.setAttribute('tabindex', '0'); }")
         pg.keyboard.press("Tab")
@@ -738,7 +738,7 @@ def meal_add_link(browser):
         # a past day has none
         ctx, pg = ctx_page(browser, size)
         ctx.add_init_script("try { localStorage.setItem('h1t_onboarding_off', '1'); } catch (e) {}")
-        go(pg, f"/?date={YESTERDAY}")
+        go(pg, f"/app?date={YESTERDAY}")
         check(pg.locator(MEAL_ADD).count() == 0, f"{tag} meal add: hidden on a past day")
         ctx.close()
 

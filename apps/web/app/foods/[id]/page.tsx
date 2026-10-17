@@ -31,6 +31,7 @@ import { ingredientPerServing, isRecipeId } from "@/lib/recipe";
 import { getRecipe, syncRecipeFoods } from "@/lib/recipe-store";
 import { CatalogStatus } from "@/components/foods/catalog-status";
 import { useCatalogFoods } from "@/hooks/use-catalog-foods";
+import { HOME_ROUTE } from "@/lib/nav";
 
 function FoodDetailInner() {
   const params = useParams();
@@ -109,7 +110,7 @@ function FoodDetailInner() {
     setIsSubmitting(true);
     try {
       const added = await addFoodEntry(food, parsedGrams, mealSlot, selectedServingLabel === CUSTOM_PORTION ? gramsServingLabel(parsedGrams) : selectedServingLabel);
-      if (added) router.push("/");
+      if (added) router.push(HOME_ROUTE);
     } finally {
       setIsSubmitting(false);
     }

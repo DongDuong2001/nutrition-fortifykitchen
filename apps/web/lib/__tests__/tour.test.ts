@@ -19,7 +19,7 @@ describe("tour steps", () => {
   });
 
   it("each step names the screen it lives on", () => {
-    expect(TOUR_STEPS.map((s) => s.path)).toEqual(["/", "/", "/add", "/add", "/"]);
+    expect(TOUR_STEPS.map((s) => s.path)).toEqual(["/app", "/app", "/add", "/add", "/app"]);
   });
 });
 
@@ -66,7 +66,7 @@ describe("tourReduce", () => {
 
 describe("tourStepFor (what a route change does to a running tour)", () => {
   it("keeps the step while the route is the step's screen", () => {
-    expect(tourStepFor(at(0), "/")).toEqual(at(0));
+    expect(tourStepFor(at(0), "/app")).toEqual(at(0));
     expect(tourStepFor(at(2), "/add")).toEqual(at(2));
   });
 
@@ -75,18 +75,18 @@ describe("tourStepFor (what a route change does to a running tour)", () => {
   });
 
   it("back on / after confirming the portion in step 4 is step 5", () => {
-    expect(tourStepFor(at(3), "/")).toEqual(at(4));
+    expect(tourStepFor(at(3), "/app")).toEqual(at(4));
   });
 
   it("any other route ends the tour silently (not for good: left, not skipped)", () => {
     expect(tourStepFor(at(0), "/explore")).toEqual({ status: "done", reason: "left" });
     expect(tourStepFor(at(1), "/settings")).toEqual({ status: "done", reason: "left" });
-    expect(tourStepFor(at(2), "/")).toEqual({ status: "done", reason: "left" });
+    expect(tourStepFor(at(2), "/app")).toEqual({ status: "done", reason: "left" });
     expect(tourStepFor(at(4), "/trends")).toEqual({ status: "done", reason: "left" });
   });
 
   it("a tour that is off or done stays as it is", () => {
     expect(tourStepFor(OFF, "/explore")).toEqual(OFF);
-    expect(tourStepFor({ status: "done", reason: "left" }, "/")).toEqual({ status: "done", reason: "left" });
+    expect(tourStepFor({ status: "done", reason: "left" }, "/app")).toEqual({ status: "done", reason: "left" });
   });
 });

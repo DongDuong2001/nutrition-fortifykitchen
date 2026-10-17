@@ -54,7 +54,7 @@ def run(browser, size, tag):
         ctx = browser.new_context(viewport=size)
         pg = ctx.new_page()
         pg.clock.set_fixed_time(NOW)
-        go(pg, f"/?date={PAST}" if past else "/")
+        go(pg, f"/app?date={PAST}" if past else "/app")
         hero = pg.locator(HERO + " >> visible=true").first
         label = hero.locator("h2").inner_text()
         check(re.fullmatch(r"Cả ngày · \d+ món", label) is not None, f"{t}: hero label in sentence case ({label!r})")
@@ -70,7 +70,7 @@ def run(browser, size, tag):
             }""",
             HERO,
         )
-        target = next(s for s in geo if "kcal" in s["t"] and "/" in s["t"])
+        target = next(s for s in geo if "kcal" in s["t"] and "/app" in s["t"])
         pct = next(s for s in geo if re.fullmatch(r"\d+%|<1%", s["t"]))
         gap = pct["r"]["left"] - target["r"]["right"]
         check(abs(pct["r"]["top"] + pct["r"]["height"] - (target["r"]["top"] + target["r"]["height"])) < 10, f"{t}: kcal percent on the target's line")

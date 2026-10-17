@@ -57,7 +57,7 @@ def esc_returns_focus(pg, opener, where, dialog_sel='[role="dialog"][aria-modal=
 
 
 def diary(browser, size_name, size):
-    ctx, pg = new_page(browser, size, "/")
+    ctx, pg = new_page(browser, size, "/app")
     w = f"{size_name} home"
     no_h_scroll(pg, w)
     # The meal menu (⋯) shows in meal mode: tap a meal header first

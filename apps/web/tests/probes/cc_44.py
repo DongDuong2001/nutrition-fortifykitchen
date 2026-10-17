@@ -18,7 +18,7 @@ SHOTS = Path(__file__).resolve().parent.parent.parent / ".screenshots"
 SHOTS.mkdir(exist_ok=True)
 SIZES = {"390": {"width": 390, "height": 844}, "1440": {"width": 1440, "height": 900}}
 ROUTES = [
-    ("home", "/"),
+    ("home", "/app"),
     ("micros", "/micros"),
     ("trends", "/trends"),
     ("explore", "/explore"),
@@ -74,7 +74,7 @@ def share(browser, named):
     ctx.add_init_script("Object.defineProperty(navigator, 'canShare', { value: undefined }); Object.defineProperty(navigator, 'share', { value: undefined });")
     pg = ctx.new_page()
     pg.clock.set_fixed_time("2026-10-15T10:00:00+07:00")
-    pg.goto(BASE + "/?level=2", wait_until="networkidle")
+    pg.goto(BASE + "/app?level=2", wait_until="networkidle")
     pg.locator("[aria-label='Chia sẻ ngày này'] >> visible=true").first.click()
     dlg = pg.get_by_role("dialog")
     if not named:
@@ -114,7 +114,7 @@ def main():
                 if not ONLY or route in ONLY:
                     shoot(browser, route, path, w)
             if not ONLY or "home-empty" in ONLY:
-                shoot(browser, "home-empty", "/", w, empty=True)
+                shoot(browser, "home-empty", "/app", w, empty=True)
         if not ONLY or "share" in ONLY:
             share(browser, True)
             share(browser, False)

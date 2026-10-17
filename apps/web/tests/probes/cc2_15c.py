@@ -89,13 +89,13 @@ def run(browser, name, size):
     # 1. No profile: tab routes go to setup
     ctx, pg = new_page(browser, size, profile=False)
     # cc-21: nobody signed in goes to /signin first (no account can have a profile yet); setup applies once someone is in
-    for route in ("/", "/", "/explore", "/settings", "/add", "/micros", "/training"):
+    for route in ("/app", "/app", "/explore", "/settings", "/add", "/micros", "/training"):
         go(pg, route)
         # cc-41: signed out, the root of a desktop window is the landing page; everything else goes to /signin
-        want = "/landing" if route == "/" and size["width"] >= 1024 else "/signin"
+        want = "/landing" if route == "/app" and size["width"] >= 1024 else "/signin"
         check(pg.url.endswith(want), f"{where} nobody signed in: {route} goes to {want} ({pg.url[len(BASE):]})")
     sign_in_magic(pg, "ban@email.com")  # an account with no profile
-    for route in ("/", "/", "/explore", "/settings", "/add", "/micros", "/training"):
+    for route in ("/app", "/app", "/explore", "/settings", "/add", "/micros", "/training"):
         go(pg, route)
         check(pg.url.endswith("/setup/profile"), f"{where} no profile: {route} lands on /setup/profile ({pg.url[len(BASE):]})")
     for route in ("/signin", "/signup", "/offline", "/install", "/setup/profile"):
@@ -120,7 +120,7 @@ def run(browser, name, size):
     ctx.close()
 
     ctx, pg = new_page(browser, size, state=state)
-    go(pg, "/")
+    go(pg, "/app")
     check(food in text(pg) and "Chưa có món nào hôm nay" not in text(pg), f"{where} new context: the meal ({food}) is still in Hôm nay")
     go(pg, "/explore")
     check(food in text(pg), f"{where} new context: Gần đây still lists {food}")
@@ -129,15 +129,15 @@ def run(browser, name, size):
     check("Kỳ này có 1 ngày đã ghi" in t, f"{where} Tổng quan: 'Kỳ này có 1 ngày đã ghi' (page: {t[:240]!r})")
 
     # 3. Demo sandbox
-    go(pg, "/?demo=1")
+    go(pg, "/app?demo=1")
     t = text(pg)
     check("Yến mạch" in t and food not in t, f"{where} ?demo=1: the sample day, and not the real meal ({food})")
     demo_food = add_food(pg, SAMPLE_FOODS + [food])
     check(demo_food != "" and demo_food in text(pg), f"{where} ?demo=1: a demo meal ({demo_food}) is added")
-    go(pg, "/?demo=0")
+    go(pg, "/app?demo=0")
     t = text(pg)
     check(food in t and demo_food not in t and "Yến mạch" not in t, f"{where} ?demo=0: the real meal only, no demo meal ({demo_food})")
-    go(pg, "/?demo=1")
+    go(pg, "/app?demo=1")
     t = text(pg)
     check(demo_food in t and food not in t, f"{where} ?demo=1 again: the demo meal is back, the real one is not")
 
@@ -146,7 +146,7 @@ def run(browser, name, size):
     pg.get_by_label("Tìm món").locator("visible=true").first.fill("Bột củ dền")
     pg.wait_for_timeout(400)
     check(pg.locator(BOT_CU_DEN).count() > 0, f"{where} demo: Bột củ dền is found in Khám phá")
-    go(pg, "/?demo=0")
+    go(pg, "/app?demo=0")
     go(pg, "/explore")
     pg.get_by_label("Tìm món").locator("visible=true").first.fill("Bột củ dền")
     pg.wait_for_timeout(400)
@@ -171,7 +171,7 @@ def run(browser, name, size):
         "try { if (localStorage.getItem('h1t_added_entries_v1') === null) "
         f"sessionStorage.setItem('h1t_added_entries_v1', JSON.stringify([{json.dumps(entry)}])); }} catch (e) {{}}"
     )
-    go(pg, "/")
+    go(pg, "/app")
     check("Chà là hạt dẻ cũ" in text(pg), f"{where} migration: the session entry shows in Hôm nay")
     moved = pg.evaluate(
         "() => [localStorage.getItem('h1t_added_entries_v1_ban@email.com') !== null, sessionStorage.getItem('h1t_added_entries_v1'),"
@@ -198,7 +198,7 @@ def run(browser, name, size):
         pg.locator('input[type="email"]').fill(email)
         pg.locator('input[type="password"]').first.fill(password)
         pg.locator('button[type="submit"]').first.click()
-        pg.wait_for_url(BASE + "/")
+        pg.wait_for_url(BASE + "/app")
         pg.wait_for_timeout(500)
 
     def open_tab(label, url_end):
@@ -214,26 +214,26 @@ def run(browser, name, size):
         pg.wait_for_url("**/signin")
         pg.wait_for_timeout(300)
 
-    go(pg, "/")
+    go(pg, "/app")
     a_food = add_food(pg, SAMPLE_FOODS)
     check(a_food != "" and a_food in text(pg), f"{where} accounts: A logs {a_food}")
     keys = pg.evaluate("() => Object.keys(localStorage)")
     check("h1t_added_entries_v1_a@example.com" in keys, f"{where} accounts: A's entries are under A's key ({keys})")
     sign_out()
-    go(pg, "/")
+    go(pg, "/app")
     want = "/landing" if size["width"] >= 1024 else "/signin"
     check(pg.url.endswith(want), f"{where} accounts: nobody signed in, /diary goes to {want} ({pg.url[len(BASE):]})")
     go(pg, "/signin")
     sign_in("b@example.com")
     go(pg, "/trends")  # cc2-31b: Tổng quan is /trends (sign-in lands on the home screen)
     check("Chưa có ngày nào được ghi" in text(pg), f"{where} accounts: B's Tổng quan is empty")
-    go(pg, "/")  # Hôm nay is no longer a nav tab (cc2-31a), so load it directly
+    go(pg, "/app")  # Hôm nay is no longer a nav tab (cc2-31a), so load it directly
     t = text(pg)
     check(a_food not in t, f"{where} accounts: B's Hôm nay does not show A's {a_food}")
     check("Chưa có món nào hôm nay" in t, f"{where} accounts: B's Hôm nay is empty ('Chưa có món hôm nay')")
     sign_out()
     sign_in("a@example.com")
-    go(pg, "/")  # Hôm nay is no longer a nav tab (cc2-31a), so load it directly
+    go(pg, "/app")  # Hôm nay is no longer a nav tab (cc2-31a), so load it directly
     check(a_food in text(pg), f"{where} accounts: A signs back in and {a_food} is there")
     ctx.close()
 
@@ -242,7 +242,7 @@ def run(browser, name, size):
         ctx = browser.new_context(viewport=size, reduced_motion=scheme)
         pg = ctx.new_page()
         pg.route("**/*", lambda r: r.abort() if r.request.resource_type == "script" else r.continue_())
-        pg.goto(BASE + "/", wait_until="load")
+        pg.goto(BASE + "/app", wait_until="load")
         busy = pg.locator('[aria-busy="true"]')
         check(busy.count() == 1 and busy.first.is_visible(), f"{where} first paint of / ({scheme}): the skeleton is on screen")
         check(len(text(pg).strip()) > 0 and "kcal" not in text(pg), f"{where} first paint ({scheme}): not blank, no sample targets")

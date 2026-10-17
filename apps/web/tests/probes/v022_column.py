@@ -66,7 +66,7 @@ def run(browser, size, level, tag):
     ctx = browser.new_context(viewport=size)
     pg = ctx.new_page()
     pg.clock.set_fixed_time(NOW)
-    pg.goto(BASE + f"/?level={level}", wait_until="networkidle")
+    pg.goto(BASE + f"/app?level={level}", wait_until="networkidle")
     pg.locator(HERO + " >> visible=true").first.wait_for(state="visible", timeout=8000)
     pg.wait_for_timeout(700)
     g = pg.evaluate(GEOMETRY)

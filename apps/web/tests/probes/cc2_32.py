@@ -23,7 +23,7 @@ SHOTS = Path(__file__).resolve().parent.parent.parent / ".screenshots"
 SIZES = [("390", {"width": 390, "height": 844}), ("1280", {"width": 1280, "height": 800})]
 YESTERDAY = (date.today() - timedelta(days=1)).isoformat()
 ROUTES_SCANNED = [
-    "/", "/trends", "/trends/energy", "/trends/micros", "/trends/body", "/micros", "/micros/calcium",
+    "/app", "/trends", "/trends/energy", "/trends/micros", "/trends/body", "/micros", "/micros/calcium",
     "/training", "/explore", "/settings", "/settings/profile", "/add", "/entry/item-1", "/foods/food-cha-la",
 ]
 problems, notes = [], []
@@ -56,11 +56,11 @@ def redirects(browser):
         pg.wait_for_timeout(400)
         q = parse_qs(urlparse(pg.url).query)
         want_date = YESTERDAY if query else None
-        ok = path_of(pg) == "/" and (q.get("date", [None])[0] == want_date)
+        ok = path_of(pg) == "/app" and (q.get("date", [None])[0] == want_date)
         check(ok, f"redirect {src}{query} lands on / with date {want_date} (got {pg.url.replace(BASE, '')})")
         if src == "/diary" and query:
             pg.screenshot(path=str(SHOTS / "cc2-32-redirect-390.png"))
-    go(pg, "/")
+    go(pg, "/app")
     pg.goto(BASE + "/diary", wait_until="networkidle")
     settle(pg)
     pg.screenshot(path=str(SHOTS / "cc2-32-home-from-diary-390.png"))
@@ -84,10 +84,10 @@ def back_fallback(browser, name, size):
     ctx = browser.new_context(viewport=size)
     pg = ctx.new_page()
     cases = [
-        ("/micros", "/"),
-        ("/training", "/"),
-        (f"/micros?date={YESTERDAY}", ("/", YESTERDAY)),
-        (f"/training?date={YESTERDAY}", ("/", YESTERDAY)),
+        ("/micros", "/app"),
+        ("/training", "/app"),
+        (f"/micros?date={YESTERDAY}", ("/app", YESTERDAY)),
+        (f"/training?date={YESTERDAY}", ("/app", YESTERDAY)),
         (f"/micros/calcium?date={YESTERDAY}", ("/micros", YESTERDAY)),
     ]
     for route, want in cases:
@@ -137,7 +137,7 @@ def meal_menu_opener(pg):
 def home_sheets(browser, name, size):
     ctx = browser.new_context(viewport=size)
     pg = ctx.new_page()
-    go(pg, "/")
+    go(pg, "/app")
     settle(pg)
     sheet_closes_with_focus(pg, name, "meal menu", lambda: meal_menu_opener(pg))
     sheet_closes_with_focus(pg, name, "calendar", lambda: pg.locator("button[aria-label^='Chọn ngày']:visible"))
@@ -150,7 +150,7 @@ def copy_yesterday_sheet(browser, name, size):
     deleted = json.dumps({f"item-{i}": {"deleted": True} for i in range(1, 8)})
     ctx.add_init_script(f"try {{ localStorage.setItem('h1t_sample_edits_v1_demo', {json.dumps(deleted)}); }} catch (e) {{}}")
     pg = ctx.new_page()
-    go(pg, "/")
+    go(pg, "/app")
     settle(pg)
     button = pg.get_by_role("button", name="Chép hôm qua").locator("visible=true")
     check(button.count() == 1, f"{name}: Chép hôm qua is on an empty today with yesterday logged ({button.count()})")
@@ -172,7 +172,7 @@ def home_details(browser, name, size):
     """cc2-32 round 3: a food logged in ml keeps its portion; an emptied day has no negative amounts; Về hôm nay."""
     ctx = browser.new_context(viewport=size)
     pg = ctx.new_page()
-    go(pg, "/")
+    go(pg, "/app")
     settle(pg)
     row = pg.locator("button[aria-label^='Yogurt kefir,']:visible").first
     label = row.get_attribute("aria-label") or ""
@@ -189,7 +189,7 @@ def home_details(browser, name, size):
     # Về hôm nay: phone only, past days only, goes to /
     ctx = browser.new_context(viewport=size)
     pg = ctx.new_page()
-    go(pg, f"/?date={YESTERDAY}")
+    go(pg, f"/app?date={YESTERDAY}")
     settle(pg)
     link = pg.locator("a:has-text('Về hôm nay'):visible")
     if name == "390":
@@ -210,7 +210,7 @@ def home_details(browser, name, size):
     deleted = json.dumps({f"item-{i}": {"deleted": True} for i in range(1, 13)})
     ctx.add_init_script(f"try {{ localStorage.setItem('h1t_sample_edits_v1_demo', {json.dumps(deleted)}); }} catch (e) {{}}")
     pg = ctx.new_page()
-    go(pg, "/")
+    go(pg, "/app")
     settle(pg)
     body = pg.inner_text("body")
     negatives = re.findall(r"(?:^|[\s(])-\d[\d.,]*", body)

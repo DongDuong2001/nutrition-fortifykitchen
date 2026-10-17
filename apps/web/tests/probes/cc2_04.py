@@ -29,7 +29,7 @@ def body_text(pg):
 
 def test_no_bg_white(browser):
     # bg-white is replaced by bg-card (both #FFFFFF); no element still carries the raw class
-    for route in ["/", "/micros", "/add?meal=snack", "/foods/new", "/settings/notifications", "/paywall", "/settings/profile"]:
+    for route in ["/app", "/micros", "/add?meal=snack", "/foods/new", "/settings/notifications", "/paywall", "/settings/profile"]:
         for vp_name, vp in (("390", PHONE), ("1440", DESKTOP)):
             ctx = browser.new_context(viewport=vp)
             pg = ctx.new_page()
@@ -65,7 +65,7 @@ def test_today_cards(browser):
     # The desktop salt card and the potassium row come from the calculators for 60 minutes and 65 kg
     ctx = browser.new_context(viewport=DESKTOP)
     pg = ctx.new_page()
-    pg.goto(BASE + "/", wait_until="networkidle")
+    pg.goto(BASE + "/app", wait_until="networkidle")
     pg.wait_for_timeout(400)
     txt = body_text(pg)
     # cc2-32: Nhật ký folded into Hôm nay, whose Ngày tập pill reads the minutes; the salt range is checked on /training below

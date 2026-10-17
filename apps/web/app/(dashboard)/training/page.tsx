@@ -23,6 +23,7 @@ import { PhaseChecklist } from "@/components/training/phase-checklist";
 import { RestDayCard } from "@/components/training/rest-day-card";
 import { TrainingTipBanner } from "@/components/training/training-tip-banner";
 import { markUsed } from "@/lib/onboarding-store";
+import { HOME_ROUTE } from "@/lib/nav";
 
 export default function TrainingPage() {
   return (
@@ -54,7 +55,7 @@ function TrainingContent() {
   const isPast = !isEditableDay(viewIso, todayIso);
   // Sodium logged on the viewed day (today's diary, or a past day's entries); nothing logged reads as 0
   const sodiumMg = useMemo(() => dayTotals(viewIso, todayIso, diaryData).nutrients.sodium ?? 0, [viewIso, todayIso, diaryData]);
-  const diaryHref = isPast ? `/?date=${viewIso}` : "/";
+  const diaryHref = isPast ? `${HOME_ROUTE}?date=${viewIso}` : HOME_ROUTE;
 
   // The viewed day's saved record (null when nothing was saved for that date). Read after mount.
   const [saved, setSaved] = useState<DayChecklist | null>(null);
