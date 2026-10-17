@@ -35,7 +35,7 @@ DESKTOP = {"width": 1440, "height": 900}
 SETTINGS_KEY = "h1t_settings_v1_demo"
 RELEASE = "2026-10-18"
 HOME_TIPS = ["home-logged", "meal-add", "home-share"]
-ITEMS = ["Đồng bộ ổn định hơn"]
+ITEMS = ["Đồng bộ ổn định hơn", "Gần đây và Hay ăn", "Như hôm qua", "Chạm vi chất để xem nguồn", "Rung khi chạm"]
 ITEMS_1710 = ["Trang chủ mới", "Chọn nhiều món", "Mục tiêu đa lượng", "Bữa ăn dễ đọc hơn", "Thanh vi chất 4 màu", "Ảnh chia sẻ rõ hơn"]
 problems = []
 
@@ -104,7 +104,8 @@ def targets_ok(pg, selector, label):
     check(not small, f"{label}: every target is 44 px or more ({small})")
 
 
-SEEN_TIPS = {"tourDone": True, "seen": HOME_TIPS}
+# cc-49/51 tips on Hôm nay (Chưa lưu, kéo xuống, chạm vi chất) are seen too, so the sheet is not waiting for a tip
+SEEN_TIPS = {"tourDone": True, "seen": HOME_TIPS + ["unsaved", "pull-refresh", "nutrient-sources", "haptics", "add-shortlists"]}
 
 
 def once(browser):

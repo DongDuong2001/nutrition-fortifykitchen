@@ -9,6 +9,8 @@ import { useBack } from "@/hooks/use-back";
 import { MOCK_FOODS, type FoodItem, type FoodServing } from "@/lib/mock/foods";
 import { useFoodBrowse } from "@/hooks/use-food-browse";
 import { lastPortionOf, resolveRecent, type ResolvedRecent } from "@/lib/recent-foods";
+import { SHORTLIST_DAYS, frequentFoods, recentForMeal, type Shortlisted } from "@/lib/meal-shortlists";
+import { dayEntries, shiftIsoDate } from "@/lib/day-history";
 import { savedMealTotals, type SavedMeal } from "@/lib/saved-meals";
 import type { QuickEntryInput, QuickEntryResult } from "@/lib/quick-entry";
 import { AddShortcuts, type RecentShortcut, type SavedMealShortcut } from "@/components/add/add-shortcuts";
@@ -53,7 +55,7 @@ function AddFoodInner() {
   // Closing the sheet returns to the tab it was opened from (the diary when there is no history)
   const goBack = useBack();
   const searchParams = useSearchParams();
-  const { data, addFoodEntry, addFoodEntries, recentFoods, savedMeals, addSavedMeal, addQuickEntry, favouriteIds } = useDiary();
+  const { data, addFoodEntry, addFoodEntries, recentFoods, savedMeals, addSavedMeal, addQuickEntry, favouriteIds, addedEntries, dayArchive, todayIso } = useDiary();
 
   const resolvedSlot = useMealSlot(searchParams.get("meal"));
   const [overrideSlot, setOverrideSlot] = useState<MealSlot | null>(null);
@@ -93,13 +95,15 @@ function AddFoodInner() {
   }, [isDesktop]);
 
   // Pick a food with one serving (default: its first). Sets the amount too, so the portion panel shows it.
+  // cc-51: a food opens on the portion this user last logged for it, else the catalogue's first portion
   const pickFood = useCallback((food: FoodItem, serving?: FoodServing) => {
-    const s = serving ?? food.servings[0] ?? { label: "100 g", grams: 100 };
+    const last = serving ? null : lastPortionOf(food.id, recentFoods, MOCK_FOODS);
+    const s = serving ?? (last ? { label: last.label, grams: last.grams } : food.servings[0] ?? { label: "100 g", grams: 100 });
     setSelectedFood(food);
     setGramsInput(String(s.grams));
     setSelectedServingLabel(s.label);
     tourAction("food-picked");
-  }, []);
+  }, [recentFoods]);
 
   // Current meal calories map for MealSwitcher
   const mealCalories = useMemo(() => {
@@ -148,29 +152,58 @@ function AddFoodInner() {
     return subscribeTour(apply);
   }, [setQuery]);
 
-  // Recents are foods with the serving they were logged with: tap = add with that serving, chevron = portion panel
-  const recentShortcuts = useMemo<RecentShortcut[]>(
+  // cc-51 D1: Gần đây is the last 8 foods of this meal and Hay ăn the 8 logged most in 14 days, from the diary on this
+  // device, each with the portion it was last logged with. Without diary history for the meal, Gần đây is the
+  // account's recent list as before.
+  // Today and the 13 days before it, as Nhật ký shows them (lib/day-history: the archive, else the demo history)
+  const diaryEntries = useMemo(
     () =>
-      recentFoods
-        .map((r) => resolveRecent(r, MOCK_FOODS))
-        .filter((r): r is ResolvedRecent => r !== null)
-        .map((r) => ({ key: `${r.food.id}|${r.label}`, food: r.food, label: r.label, grams: r.grams }))
-        .slice(0, MAX_SHORTCUT_RECENTS),
-    [recentFoods, catalogVersion]
+      todayIso
+        ? [...addedEntries, ...Array.from({ length: SHORTLIST_DAYS - 1 }, (_, i) => dayEntries(shiftIsoDate(todayIso, -(i + 1)), todayIso)).flat()]
+        : addedEntries,
+    // dayArchive: dayEntries reads it
+    [addedEntries, dayArchive, todayIso]
+  );
+  const shortcutOf = useCallback(
+    (s: Shortlisted, prefix: string): RecentShortcut | null => {
+      const food = MOCK_FOODS.find((f) => f.id === s.foodId);
+      return food ? { key: `${prefix}|${food.id}|${s.servingLabel}`, food, label: s.servingLabel, grams: s.grams } : null;
+    },
+    // catalogVersion: MOCK_FOODS changed
+    [catalogVersion]
+  );
+  // Recents are foods with the serving they were logged with: tap = add with that serving, chevron = portion panel
+  const recentShortcuts = useMemo<RecentShortcut[]>(() => {
+    const ofMeal = mealSlot ? recentForMeal(diaryEntries, mealSlot).map((s) => shortcutOf(s, "meal")).filter((r): r is RecentShortcut => r !== null) : [];
+    if (ofMeal.length > 0) return ofMeal;
+    return recentFoods
+      .map((r) => resolveRecent(r, MOCK_FOODS))
+      .filter((r): r is ResolvedRecent => r !== null)
+      .map((r) => ({ key: `${r.food.id}|${r.label}`, food: r.food, label: r.label, grams: r.grams }))
+      .slice(0, MAX_SHORTCUT_RECENTS);
+  }, [recentFoods, diaryEntries, mealSlot, shortcutOf]);
+  const frequentShortcuts = useMemo<RecentShortcut[]>(
+    () =>
+      todayIso
+        ? frequentFoods(diaryEntries, todayIso)
+            .map((s) => shortcutOf(s, "often"))
+            .filter((r): r is RecentShortcut => r !== null && !recentShortcuts.some((x) => x.food.id === r.food.id))
+        : [],
+    [diaryEntries, todayIso, recentShortcuts, shortcutOf]
   );
   // Favourites add with the portion they were last logged with, else their first serving
   // A favourite already in Gần đây is not repeated (two identical buttons confuse screen readers)
   const favouriteShortcuts = useMemo<RecentShortcut[]>(
     () =>
       resolveFavourites(favouriteIds, MOCK_FOODS)
-        .filter((food) => !recentShortcuts.some((r) => r.food.id === food.id))
+        .filter((food) => !recentShortcuts.some((r) => r.food.id === food.id) && !frequentShortcuts.some((r) => r.food.id === food.id))
         .slice(0, MAX_SHORTCUT_FAVOURITES)
         .map((food) => {
           const last = lastPortionOf(food.id, recentFoods, MOCK_FOODS);
           const serving = last ? { label: last.label, grams: last.grams } : (food.servings[0] ?? { label: "100 g", grams: 100 });
           return { key: `fav|${food.id}`, food, label: serving.label, grams: serving.grams };
         }),
-    [favouriteIds, recentFoods, recentShortcuts, catalogVersion]
+    [favouriteIds, recentFoods, recentShortcuts, frequentShortcuts, catalogVersion]
   );
   const savedMealShortcuts = useMemo<SavedMealShortcut[]>(
     () =>
@@ -329,9 +362,13 @@ function AddFoodInner() {
   const shortcuts = (
     <AddShortcuts
       recents={recentShortcuts}
+      frequent={frequentShortcuts}
       favourites={favouriteShortcuts}
       savedMeals={savedMealShortcuts}
-      onAddRecent={(r) => void addWithPortion(r.food, r.grams, r.label)}
+      onAddRecent={(r) => {
+        markUsed("shortlist-add");
+        void addWithPortion(r.food, r.grams, r.label);
+      }}
       onOpenRecent={(r) => pickFood(r.food, { label: r.label, grams: r.grams })}
       onAddSavedMeal={addSavedMealToMeal}
       onQuickKcal={() => setQuickOpen(true)}

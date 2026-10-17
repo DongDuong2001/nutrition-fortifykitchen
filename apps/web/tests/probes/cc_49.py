@@ -251,6 +251,9 @@ with sync_playwright() as p:
         check(len(outbox_ids(pg)) == 1, f"2: the entry waits in the outbox ({outbox_ids(pg)})")
         check(row_of(pg, "Bắp luộc").count() == 1, "2: the row stays on Hôm nay")
         check(pg.locator("[data-unsaved]:visible").count() == 1, "2: the row shows Chưa lưu")
+        # cc-51 D5: the header says it too, and the button sends it again
+        state = pg.locator("[data-sync-state]:visible").first
+        check(state.get_attribute("data-sync-state") == "unsaved" and "Chưa lưu (1)" in state.inner_text(), f"2: the header shows Chưa lưu (1) ({state.get_attribute('data-sync-state')})")
         # Tutorials: the Chưa lưu tip (tips are on in a live build) puts its ring on the marker
         card = pg.locator("[data-onboarding-card]:visible")
         try:
@@ -279,6 +282,8 @@ with sync_playwright() as p:
         pg.wait_for_timeout(800)
         check(outbox_ids(pg) == [], "2: the outbox is empty after the retry")
         check(pg.locator("[data-unsaved]:visible").count() == 0, "2: the Chưa lưu marker is gone")
+        hdr = pg.locator("[data-sync-state]").first.get_attribute("data-sync-state")
+        check(hdr in ("saved", "idle"), f"2: the header no longer says Chưa lưu ({hdr})")
         check(len([e for e in api.entries.values() if e["food_name"] == "Bắp luộc"]) == 1, "2: saved once, not twice")
         ctx.close()
 

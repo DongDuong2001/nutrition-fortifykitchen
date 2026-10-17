@@ -75,6 +75,18 @@ describe("cause b: an expired session cookie is refreshed and the request sent a
   });
 });
 
+describe("addEntry body (cc-51)", () => {
+  it("sends the portion as picked, so another device shows 1 chén, not 150 g", async () => {
+    const bodies: unknown[] = [];
+    vi.stubGlobal("fetch", vi.fn(async (_url: string, init?: RequestInit) => {
+      bodies.push(JSON.parse(String(init?.body)));
+      return new Response("{}", { status: 201 });
+    }));
+    await apiClient.addEntry({ id: ID, foodId: FOOD, grams: 150, mealSlot: "lunch", date: "2026-10-18", servingLabel: "1 chén" });
+    expect(bodies[0]).toMatchObject({ grams: 150, serving_label: "1 chén" });
+  });
+});
+
 describe("writeOutcome", () => {
   it("saved on 2xx, sent again without an answer, on 401, 408, 429 and 5xx, held on any other 4xx", () => {
     expect([200, 201, 204].map((s) => writeOutcome(s, "POST"))).toEqual(["saved", "saved", "saved"]);
