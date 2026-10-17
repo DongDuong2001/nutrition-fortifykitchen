@@ -64,6 +64,12 @@ main() {
   echo "==> Pruning unused images"
   docker image prune -f
 
+  # Last: the site, the API and a write round trip as a user. A failure exits non-zero and rolls nothing back.
+  if ! deploy/smoke.sh; then
+    echo "==> Deployed $ref at $(git rev-parse --short HEAD), but the SMOKE TEST FAILED (see above)." >&2
+    exit 1
+  fi
+
   echo "==> Deployed $ref at $(git rev-parse --short HEAD)"
 }
 
