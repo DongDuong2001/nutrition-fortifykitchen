@@ -136,6 +136,19 @@ func (r *pgxDiaryRepo) GetFoodNutrients(ctx context.Context, foodID uuid.UUID) (
 	return nameVi, nutrients, nil
 }
 
+// grams ($7) is used twice. Without the casts Postgres deduces numeric for the grams column and integer for
+// COALESCE($7, 100), and rejects every insert (SQLSTATE 42P08). repository_sql_test.go checks it.
+const createEntrySQL = `
+		INSERT INTO nutrition.diary_logs (
+			id, client_id, user_id, food_id, kind, meal_slot, portion_label, grams, calories,
+			name_snapshot, nutrients_snapshot, quantity, serving_size_g, log_date
+		) VALUES (
+			$1, $1, $2, $3, $4, $5, $6, $7::numeric, $8, $9, $10, 1, COALESCE($7::numeric, 100), $11
+		)
+		ON CONFLICT (id) DO UPDATE SET id = EXCLUDED.id
+		RETURNING created_at
+	`
+
 func (r *pgxDiaryRepo) CreateEntry(ctx context.Context, userID uuid.UUID, date string, entry *DiaryEntryItem) (*DiaryEntryItem, error) {
 	nutrientsJSON, err := json.Marshal(entry.Nutrients)
 	if err != nil {
@@ -147,17 +160,7 @@ func (r *pgxDiaryRepo) CreateEntry(ctx context.Context, userID uuid.UUID, date s
 		return nil, fmt.Errorf("invalid date format: %w", err)
 	}
 
-	query := `
-		INSERT INTO nutrition.diary_logs (
-			id, client_id, user_id, food_id, kind, meal_slot, portion_label, grams, calories,
-			name_snapshot, nutrients_snapshot, quantity, serving_size_g, log_date
-		) VALUES (
-			$1, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 1, COALESCE($7, 100), $11
-		)
-		ON CONFLICT (id) DO UPDATE SET id = EXCLUDED.id
-		RETURNING created_at
-	`
-	err = r.pool.QueryRow(ctx, query,
+	err = r.pool.QueryRow(ctx, createEntrySQL,
 		entry.ID, userID, entry.FoodID, entry.Kind, entry.MealSlot,
 		entry.ServingLabel, entry.Grams, entry.Calories, entry.FoodName,
 		nutrientsJSON, parsedDate,
