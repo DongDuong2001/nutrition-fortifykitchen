@@ -35,11 +35,17 @@ func (h *Handler) SearchFoods(w http.ResponseWriter, r *http.Request) {
 		page = 1
 	}
 
+	var userID *uuid.UUID
+	if uid, err := auth.GetUserID(r.Context()); err == nil {
+		userID = &uid
+	}
+
 	filter := FoodSearchFilter{
 		Query:    q,
 		Category: category,
 		Page:     page,
 		Limit:    limit,
+		UserID:   userID,
 	}
 
 	result, err := h.service.SearchFoods(r.Context(), filter)
@@ -60,7 +66,12 @@ func (h *Handler) GetFoodByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	food, err := h.service.GetFoodByID(r.Context(), id)
+	var userID *uuid.UUID
+	if uid, err := auth.GetUserID(r.Context()); err == nil {
+		userID = &uid
+	}
+
+	food, err := h.service.GetFoodByID(r.Context(), id, userID)
 	if err != nil {
 		if err == ErrFoodNotFound {
 			response.Error(w, http.StatusNotFound, response.CodeNotFound, "Food not found")
@@ -81,7 +92,12 @@ func (h *Handler) GetFoodsRichIn(w http.ResponseWriter, r *http.Request) {
 	}
 	limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
 
-	result, err := h.service.GetFoodsRichIn(r.Context(), nutrient, limit)
+	var userID *uuid.UUID
+	if uid, err := auth.GetUserID(r.Context()); err == nil {
+		userID = &uid
+	}
+
+	result, err := h.service.GetFoodsRichIn(r.Context(), nutrient, limit, userID)
 	if err != nil {
 		if errors.Is(err, ErrInvalidNutrient) {
 			response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, "Invalid nutrient key")
