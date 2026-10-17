@@ -400,6 +400,14 @@ describe("mergeServerDay (refetch on focus)", () => {
     expect(mergeServerDay(local, server, { keep: new Set(), startedAt: started }).map((e) => e.id)).toEqual(["s1", "late"]);
   });
 
+  it("cause c: keeps a local entry the server never confirmed (its POST failed before this refetch)", () => {
+    const failed = { ...at("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", "2026-10-18T07:30:00.000Z") };
+    expect(mergeServerDay([failed], server, { keep: new Set(), startedAt: started }).map((e) => e.id)).toEqual([
+      "s1",
+      failed.id,
+    ]);
+  });
+
   it("does not list an entry twice when the server already has it", () => {
     const local = [at("s1", "2026-10-18T08:00:05.000Z")];
     expect(mergeServerDay(local, server, { keep: new Set(["s1"]), startedAt: started }).map((e) => e.id)).toEqual(["s1"]);
