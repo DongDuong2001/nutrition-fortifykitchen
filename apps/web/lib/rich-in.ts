@@ -1,5 +1,5 @@
 import type { FoodItem } from "./mock/foods";
-import { getNutrientDefinition } from "./nutrients";
+import { getNutrientDefinition, type NutrientDefinition } from "./nutrients";
 
 /** The nutrients with a "Giàu …" list in Khám phá, in display order. Ids are catalog ids. */
 export const RICH_NUTRIENT_IDS = [
@@ -19,9 +19,9 @@ export function isRichNutrientId(id: string): id is RichNutrientId {
   return (RICH_NUTRIENT_IDS as readonly string[]).includes(id);
 }
 
-/** Vietnamese nutrient name inside a sentence: "Canxi" → "canxi", "Vitamin D" → "vitamin D". */
-export function richName(nameVi: string): string {
-  return nameVi.startsWith("Vitamin") ? nameVi.replace(/^Vitamin/, "vitamin") : nameVi.toLowerCase();
+/** The nutrient name inside a sentence: English mineral and vitamin names as they are ("Calcium", "Vitamin D"), a Vietnamese name lowercased ("đạm"). */
+export function richName(def: NutrientDefinition): string {
+  return def.group === "minerals" || def.group === "vitamins" ? def.name : def.name.toLowerCase();
 }
 
 export type RichBasis = "per100" | "portion";

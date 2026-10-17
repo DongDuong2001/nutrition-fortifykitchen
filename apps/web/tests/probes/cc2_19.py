@@ -2,7 +2,7 @@
 
 - (c) Tổng quan › Vi chất: the lowest nutrient is first in the list and its detail link is one tap away
 - (d) Tổng quan: the period label keeps "dd/mm – dd/mm" on one line (no break at the dash)
-- (e) Khám phá › Giàu canxi: the rich-in list opens and lists foods with the % of target
+- (e) Khám phá › Giàu Calcium: the rich-in list opens and lists foods with the % of target
 - (h) Hôm nay on yesterday: read-only (no "Thêm vào" link on a past day)
 - (i) Khám phá › food detail › back returns to Khám phá
 - no horizontal scroll on the walked screens
@@ -70,7 +70,7 @@ def run(browser, size_name, size):
 
     # (e): rich-in list
     ctx, pg = new_page(browser, size, "/explore/rich/calcium")
-    w = f"{size_name} Giàu canxi"
+    w = f"{size_name} Giàu Calcium"
     check("mục tiêu ngày" in text(pg), f"{w}: rows show % of the daily target")
     no_h_scroll(pg, w)
     shot(pg, "calcium", size_name)

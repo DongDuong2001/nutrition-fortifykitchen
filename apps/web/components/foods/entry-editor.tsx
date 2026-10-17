@@ -7,6 +7,7 @@ import { NO_ENERGY_MESSAGE, entryNumbers, hasEnergy } from "../../lib/diary-edit
 import { MEAL_SLOTS, type MealSlot, getMealSlotNameVi } from "../../lib/meal-slot";
 import { parseGramsInput } from "../../lib/portion";
 import { formatAmount } from "../../lib/format";
+import { nutrientName } from "../../lib/nutrients";
 import { AppHeader } from "../ui/app-header";
 import { ChipGroup } from "../ui/chip-group";
 import { FormRow } from "../ui/form-row";
@@ -215,13 +216,13 @@ export function EntryEditor({ view }: { view: EntryView }) {
             />
           </fieldset>
 
-          {/* Preview of the portion: kcal, Đạm, Béo, Sắt (a quick entry has its own fields above) */}
+          {/* Preview of the portion: kcal, Đạm, Béo, Iron (a quick entry has its own fields above) */}
           {!quick && (
             <div data-align-group="entry" className="grid w-full grid-cols-4 gap-2 rounded-xl bg-surface p-3">
               <Stat value={preview ? formatAmount(preview.calories, "kcal") : "—"} label="kcal" />
               <Stat value={preview ? `${formatAmount(preview.protein, "g")} g` : "—"} label="Đạm" />
               <Stat value={preview ? `${formatAmount(preview.fat, "g")} g` : "—"} label="Chất béo" />
-              <Stat value={iron !== null ? `${formatAmount(iron, "mg")} mg` : "—"} label="Sắt" />
+              <Stat value={iron !== null ? `${formatAmount(iron, "mg")} mg` : "—"} label={nutrientName("iron")} />
             </div>
           )}
 

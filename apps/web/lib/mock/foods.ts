@@ -229,7 +229,7 @@ export const MOCK_FOODS: FoodItem[] = [
       { label: "1 quả", grams: 118 },
       { label: "100 g", grams: 100 },
     ],
-    tipVi: "Nguồn kali và vitamin B6 tự nhiên nhanh.",
+    tipVi: "Nguồn Potassium và Vitamin B6 tự nhiên nhanh.",
     nutrients: {
       energy: 89,
       carbs: 22.84,
@@ -283,7 +283,7 @@ export const MOCK_FOODS: FoodItem[] = [
       { label: "150 g", grams: 150 },
       { label: "100 g", grams: 100 },
     ],
-    tipVi: "Giàu sắt heme và kẽm sinh khả dụng cao.",
+    tipVi: "Giàu Iron heme và Zinc sinh khả dụng cao.",
     nutrients: {
       energy: 213.33, // 213.33 * 1.5 = 320 kcal
       protein: 26.0, // 39 g / 150g
@@ -663,7 +663,7 @@ export const MOCK_FOODS: FoodItem[] = [
       { label: "100 g", grams: 100 },
       { label: "1 chén", grams: 30 },
     ],
-    tipVi: "Giàu folate, vitamin K và magie.",
+    tipVi: "Giàu Folate, Vitamin K và Magnesium.",
     nutrients: {
       energy: 23,
       carbs: 3.6,
@@ -746,7 +746,7 @@ export const MOCK_FOODS: FoodItem[] = [
       { label: "1/2 quả", grams: 100 },
       { label: "100 g", grams: 100 },
     ],
-    tipVi: "Chất béo đơn không bão hòa lành mạnh và giàu kali.",
+    tipVi: "Chất béo đơn không bão hòa lành mạnh và giàu Potassium.",
     nutrients: {
       energy: 160,
       fat: 14.7,

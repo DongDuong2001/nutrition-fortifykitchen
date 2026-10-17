@@ -14,8 +14,8 @@ describe("previewForLevel", () => {
     const groups = previewForLevel(1, 2);
     const minerals = groups.find((g) => g.title === "Khoáng chất")!;
     const vitamins = groups.find((g) => g.title === "Vitamin")!;
-    expect(names(minerals, "added")).toEqual(["Selen"]);
-    expect(names(vitamins, "added")).toEqual(["Vitamin D", "Vitamin E", "Vitamin K", "Vitamin B6", "Vitamin B9", "Vitamin B12"]);
+    expect(names(minerals, "added")).toEqual(["Selenium"]);
+    expect(names(vitamins, "added")).toEqual(["Vitamin D", "Vitamin E", "Vitamin K", "Vitamin B6", "Folate", "Vitamin B12"]);
     // Vitamin C is on Level 1's list and not on Level 2's: it is marked removed
     expect(names(vitamins, "removed")).toEqual(["Vitamin C"]);
     expect(previewHasChanges(groups)).toBe(true);
@@ -31,7 +31,7 @@ describe("previewForLevel", () => {
     const groups = previewForLevel(3, 2);
     const extras = groups.find((g) => g.title === "Chi tiết béo & xơ")!;
     expect(extras.items.every((i) => i.status === "removed")).toBe(true);
-    expect(names(groups.find((g) => g.title === "Khoáng chất")!, "removed")).toEqual(["Phốt pho", "Đồng"]);
+    expect(names(groups.find((g) => g.title === "Khoáng chất")!, "removed")).toEqual(["Phosphorus", "Copper"]);
   });
 
   it("the draft's own order is kept for what stays and what is added", () => {

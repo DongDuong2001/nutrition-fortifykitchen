@@ -1,6 +1,7 @@
 import type { FoodItem } from "./mock/foods";
 import { scaleNutrients } from "./portion";
 import { formatAmount } from "./format";
+import { nutrientName } from "./nutrients";
 
 /** Maps a food source code to a Vietnamese UI label, never returning a raw code. */
 export function foodSourceLabel(source?: string | null): string {
@@ -34,11 +35,11 @@ export function foodMeta(food: FoodItem): string {
   const scaled = scaleNutrients(food.nutrients, defaultServing.grams);
   const cals = Math.round(scaled.energy ?? 0);
   const carbs = Math.round((scaled.carbs ?? 0) * 10) / 10;
-  const kali = scaled.potassium ? Math.round(scaled.potassium) : null;
+  const potassium = scaled.potassium ? Math.round(scaled.potassium) : null;
 
   const parts = [`${formatAmount(cals, "kcal")} kcal / ${defaultServing.label}`];
   if (carbs > 0) parts.push(`${formatAmount(carbs, "g")} g tinh bột`);
-  if (kali) parts.push(`${formatAmount(kali, "mg")} mg kali`);
+  if (potassium) parts.push(`${formatAmount(potassium, "mg")} mg ${nutrientName("potassium")}`);
   return parts.join(" · ");
 }
 

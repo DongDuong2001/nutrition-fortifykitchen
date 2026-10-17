@@ -68,7 +68,7 @@ export function NutrientColumn({
                     data-snap-row
                     className="flex min-h-7 snap-start items-center justify-between gap-2 px-3 py-1"
                   >
-                    <span className="min-w-0 break-words text-[13px] font-semibold leading-snug text-text">{def.nameVi}</span>
+                    <span className="min-w-0 break-words text-[13px] font-semibold leading-snug text-text">{def.name}</span>
                     <span className="shrink-0 text-[13px] leading-tight text-secondary tabular-nums">
                       {amount === null ? "—" : `${formatAmount(amount, def.unit)} ${def.unit}`}
                     </span>
@@ -81,7 +81,7 @@ export function NutrientColumn({
                 <div key={id} data-align-group="home-nutrient" data-snap-row className={`flex snap-start flex-col justify-center gap-0.5 px-3 ${share ? "h-[34px]" : "max-h-[34px] min-h-7 flex-1"}`}>
                   <div className="flex items-baseline justify-between gap-1">
                     <span className="flex min-w-0 items-baseline gap-1 whitespace-nowrap">
-                      <span className="text-[13px] font-semibold leading-tight text-text">{def.nameVi}</span>
+                      <span className="text-[13px] font-semibold leading-tight text-text">{def.name}</span>
                       <span className="text-[13px] leading-tight text-secondary tabular-nums">
                         {value === null ? "—" : `${formatAmount(value, def.unit)} ${def.unit}`}
                       </span>
@@ -90,7 +90,7 @@ export function NutrientColumn({
                       {pctLabel(value, targets[id] ?? null)}
                     </span>
                   </div>
-                  <LevelBar label={`${def.nameVi} so với mục tiêu ngày`} pct={pct} heightClass={share ? "h-[9px]" : "h-[9px] lg:h-[10px]"} />
+                  <LevelBar label={`${def.name} so với mục tiêu ngày`} pct={pct} heightClass={share ? "h-[9px]" : "h-[9px] lg:h-[10px]"} />
                 </div>
               );
             })}

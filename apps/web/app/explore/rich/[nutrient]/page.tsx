@@ -30,7 +30,7 @@ export default function RichInPage() {
   const rows = useMemo(() => (valid ? richInFoods(foods, id, basis, min) : []), [valid, id, basis, min, foods]);
   if (!valid || !definition) notFound();
 
-  const name = richName(definition.nameVi);
+  const name = richName(definition);
 
   return (
     <AppShell>

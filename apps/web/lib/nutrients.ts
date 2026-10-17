@@ -14,6 +14,9 @@ export interface FoodNutrientValue {
 
 export interface NutrientDefinition {
   id: string;
+  /** The name every screen shows: English for minerals and vitamins (Hao, 17/10), Vietnamese for the rest. */
+  name: string;
+  /** The Vietnamese name ("Canxi", "Sắt", "Vitamin B9"), kept for search. */
   nameVi: string;
   nameEn: string;
   unit: "kcal" | "g" | "mg" | "µg";
@@ -23,7 +26,7 @@ export interface NutrientDefinition {
   targetSource: TargetSource;
 }
 
-export const NUTRIENT_CATALOG: NutrientDefinition[] = [
+const CATALOG: Omit<NutrientDefinition, "name">[] = [
   // 1. General (6)
   { id: "energy", nameVi: "Năng lượng", nameEn: "Energy", unit: "kcal", group: "general", depth: 0, targetSource: "coach" },
   { id: "water", nameVi: "Nước", nameEn: "Water", unit: "g", group: "general", depth: 0, targetSource: "none" },
@@ -70,13 +73,13 @@ export const NUTRIENT_CATALOG: NutrientDefinition[] = [
   { id: "valine", nameVi: "Valine", nameEn: "Valine", unit: "g", group: "protein", depth: 1, parentId: "protein", targetSource: "none" },
 
   // 5. Vitamin (12)
-  { id: "b1", nameVi: "Vitamin B1", nameEn: "B1", unit: "mg", group: "vitamins", depth: 0, targetSource: "vn2016" },
-  { id: "b2", nameVi: "Vitamin B2", nameEn: "B2", unit: "mg", group: "vitamins", depth: 0, targetSource: "vn2016" },
-  { id: "b3", nameVi: "Vitamin B3", nameEn: "B3", unit: "mg", group: "vitamins", depth: 0, targetSource: "vn2016" },
-  { id: "b5", nameVi: "Vitamin B5", nameEn: "B5", unit: "mg", group: "vitamins", depth: 0, targetSource: "vn2016" },
-  { id: "b6", nameVi: "Vitamin B6", nameEn: "B6", unit: "mg", group: "vitamins", depth: 0, targetSource: "vn2016" },
+  { id: "b1", nameVi: "Vitamin B1", nameEn: "Vitamin B1", unit: "mg", group: "vitamins", depth: 0, targetSource: "vn2016" },
+  { id: "b2", nameVi: "Vitamin B2", nameEn: "Vitamin B2", unit: "mg", group: "vitamins", depth: 0, targetSource: "vn2016" },
+  { id: "b3", nameVi: "Vitamin B3", nameEn: "Vitamin B3", unit: "mg", group: "vitamins", depth: 0, targetSource: "vn2016" },
+  { id: "b5", nameVi: "Vitamin B5", nameEn: "Vitamin B5", unit: "mg", group: "vitamins", depth: 0, targetSource: "vn2016" },
+  { id: "b6", nameVi: "Vitamin B6", nameEn: "Vitamin B6", unit: "mg", group: "vitamins", depth: 0, targetSource: "vn2016" },
   { id: "folate", nameVi: "Vitamin B9", nameEn: "Folate", unit: "µg", group: "vitamins", depth: 0, targetSource: "vn2016" },
-  { id: "b12", nameVi: "Vitamin B12", nameEn: "B12", unit: "µg", group: "vitamins", depth: 0, targetSource: "vn2016" },
+  { id: "b12", nameVi: "Vitamin B12", nameEn: "Vitamin B12", unit: "µg", group: "vitamins", depth: 0, targetSource: "vn2016" },
   { id: "vitamin_a", nameVi: "Vitamin A", nameEn: "Vitamin A", unit: "µg", group: "vitamins", depth: 0, targetSource: "vn2016" },
   { id: "vitamin_c", nameVi: "Vitamin C", nameEn: "Vitamin C", unit: "mg", group: "vitamins", depth: 0, targetSource: "vn2016" },
   { id: "vitamin_d", nameVi: "Vitamin D", nameEn: "Vitamin D", unit: "µg", group: "vitamins", depth: 0, targetSource: "vn2016" },
@@ -96,12 +99,23 @@ export const NUTRIENT_CATALOG: NutrientDefinition[] = [
   { id: "zinc", nameVi: "Kẽm", nameEn: "Zinc", unit: "mg", group: "minerals", depth: 0, targetSource: "coach" },
 ];
 
+/** Minerals and vitamins show their English name, everything else its Vietnamese name. */
+export const NUTRIENT_CATALOG: NutrientDefinition[] = CATALOG.map((n) => ({
+  ...n,
+  name: n.group === "minerals" || n.group === "vitamins" ? n.nameEn : n.nameVi,
+}));
+
 const CATALOG_BY_ID = new Map<string, NutrientDefinition>(
   NUTRIENT_CATALOG.map((n) => [n.id, n])
 );
 
 export function getNutrientDefinition(id: string): NutrientDefinition | undefined {
   return CATALOG_BY_ID.get(id);
+}
+
+/** The name a screen shows for a catalogue id (English for minerals and vitamins); the id when it is not in the catalogue. */
+export function nutrientName(id: string): string {
+  return CATALOG_BY_ID.get(id)?.name ?? id;
 }
 
 /**

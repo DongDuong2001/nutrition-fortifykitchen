@@ -92,7 +92,7 @@ function rowFor(id: string, foods: readonly FoodItem[], grams: readonly number[]
     const per100 = food.nutrients[id];
     return per100 === null || per100 === undefined ? null : (per100 * grams[i]) / 100;
   });
-  return { id, name: def?.nameVi ?? id, unit, values, highest: markHighest(values, unit) };
+  return { id, name: def?.name ?? id, unit, values, highest: markHighest(values, unit) };
 }
 
 /** Rows where every column is unknown are not drawn; their names go to `missing`. */

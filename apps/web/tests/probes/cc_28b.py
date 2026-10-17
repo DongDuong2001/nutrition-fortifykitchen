@@ -21,20 +21,20 @@ BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3104")
 NOW = "2026-10-15T10:00:00+07:00"
 SHOTS = os.path.join(os.path.dirname(__file__), "..", "..", ".screenshots")
 HERO = "section[aria-label='Tổng kcal và dinh dưỡng đa lượng']"
-BASIC_M = ["Natri", "Kali", "Canxi", "Magie", "Sắt", "Kẽm"]
+BASIC_M = ["Sodium", "Potassium", "Calcium", "Magnesium", "Iron", "Zinc"]
 LISTS = {
     0: {"Khoáng chất": BASIC_M, "Vitamin": ["Vitamin A", "Vitamin C"]},
     1: {"Khoáng chất": BASIC_M, "Vitamin": ["Vitamin A", "Vitamin C"]},
-    2: {"Khoáng chất": BASIC_M + ["Selen"], "Vitamin": ["Vitamin A", "Vitamin D", "Vitamin E", "Vitamin K", "Vitamin B6", "Vitamin B9", "Vitamin B12"]},
+    2: {"Khoáng chất": BASIC_M + ["Selenium"], "Vitamin": ["Vitamin A", "Vitamin D", "Vitamin E", "Vitamin K", "Vitamin B6", "Folate", "Vitamin B12"]},
     3: {
         "Chi tiết béo & xơ": ["Béo không bão hòa đơn", "Béo không bão hòa đa", "Omega-3", "Omega-6", "Xơ hòa tan", "Xơ không tan"],
-        "Khoáng chất": ["Natri", "Kali", "Canxi", "Magie", "Phốt pho", "Sắt", "Kẽm", "Đồng", "Selen"],
-        "Vitamin": ["Vitamin A", "Vitamin D", "Vitamin E", "Vitamin K", "Vitamin B1", "Vitamin B3", "Vitamin B6", "Vitamin B9", "Vitamin B12"],
+        "Khoáng chất": ["Sodium", "Potassium", "Calcium", "Magnesium", "Phosphorus", "Iron", "Zinc", "Copper", "Selenium"],
+        "Vitamin": ["Vitamin A", "Vitamin D", "Vitamin E", "Vitamin K", "Vitamin B1", "Vitamin B3", "Vitamin B6", "Folate", "Vitamin B12"],
     },
     5: {
         "Chi tiết béo & xơ": ["Béo không bão hòa đơn", "Béo không bão hòa đa", "Omega-3", "Omega-6", "Xơ hòa tan", "Xơ không tan"],
-        "Khoáng chất": ["Natri", "Kali", "Canxi", "Magie", "Phốt pho", "Sắt", "Kẽm", "Đồng", "Mangan", "Selen"],
-        "Vitamin": ["Vitamin A", "Vitamin C", "Vitamin D", "Vitamin E", "Vitamin K", "Vitamin B1", "Vitamin B2", "Vitamin B3", "Vitamin B5", "Vitamin B6", "Vitamin B9", "Vitamin B12"],
+        "Khoáng chất": ["Sodium", "Potassium", "Calcium", "Magnesium", "Phosphorus", "Iron", "Zinc", "Copper", "Manganese", "Selenium"],
+        "Vitamin": ["Vitamin A", "Vitamin C", "Vitamin D", "Vitamin E", "Vitamin K", "Vitamin B1", "Vitamin B2", "Vitamin B3", "Vitamin B5", "Vitamin B6", "Folate", "Vitamin B12"],
     },
 }
 TOTAL = {0: 8, 1: 8, 2: 14, 3: 18, 5: 22}

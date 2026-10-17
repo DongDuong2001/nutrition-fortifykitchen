@@ -106,7 +106,7 @@ export function microRows(averages: PeriodAverages, targetDays: Overview["target
     const count = targetDays.nutrients[key] ?? { met: 0, of: 0 };
     return {
       key,
-      name: def?.nameVi ?? key,
+      name: def?.name ?? key,
       unit: def?.unit ?? "",
       average,
       targetMin,

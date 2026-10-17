@@ -48,7 +48,7 @@ describe("foodSourceLabel", () => {
 
 describe("foodMeta", () => {
   it("formats kcal, tinh bột (never carb) and kali for the first serving", () => {
-    expect(foodMeta(BASE_FOOD)).toBe("84 kcal / 30 g · 22 g tinh bột · 197 mg kali");
+    expect(foodMeta(BASE_FOOD)).toBe("84 kcal / 30 g · 22 g tinh bột · 197 mg Potassium");
     expect(foodMeta(BASE_FOOD).toLowerCase()).not.toContain("carb");
   });
 

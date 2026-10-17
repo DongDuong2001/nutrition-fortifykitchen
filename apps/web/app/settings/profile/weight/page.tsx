@@ -9,6 +9,7 @@ import { FormRow } from "@/components/ui/form-row";
 import { PillButton } from "@/components/ui/pill-button";
 import { useDiary } from "@/lib/diary-store";
 import { formatNumber } from "@/lib/format";
+import { nutrientName } from "@/lib/nutrients";
 import { parseWeightKg, validateSetupDraft } from "@/lib/onboarding";
 import { profileToDraft, targetRangeText, targetsFor } from "@/lib/profile";
 
@@ -101,7 +102,7 @@ export default function WeightPage() {
           <>
             <TargetLine label="Năng lượng" value={targetRangeText(preview.calories, "kcal")} />
             <TargetLine label="Đạm" value={targetRangeText(preview.protein, "g")} />
-            <TargetLine label="Kali" value={targetRangeText(preview.potassium, "mg")} />
+            <TargetLine label={nutrientName("potassium")} value={targetRangeText(preview.potassium, "mg")} />
           </>
         ) : (
           <p className="m-0 text-sm text-secondary">Nhập cân nặng để xem mục tiêu</p>

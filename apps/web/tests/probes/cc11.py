@@ -59,7 +59,7 @@ def open_today(pg, query=""):
 
 
 def log_tofu_today(pg):
-    # Đậu hũ trắng: 1 bìa is about 525 mg calcium, enough to push Canxi out of the two lacking most
+    # Đậu hũ trắng: 1 bìa is about 525 mg calcium, enough to push Calcium out of the two lacking most
     pg.goto(BASE + "/add?meal=dinner", wait_until="networkidle")
     search = vis(pg, 'input[aria-label="Tìm món"]')
     search.wait_for(state="visible", timeout=8000)
@@ -77,11 +77,11 @@ def run_phone(browser):
     # Calcium-rich food today changes the lacking list
     open_today(pg)
     before = lacking(pg)
-    check(before is not None and "Canxi" in before, f"390 today lacks Canxi before logging ({before})")
+    check(before is not None and "Calcium" in before, f"390 today lacks Calcium before logging ({before})")
     log_tofu_today(pg)
     open_today(pg)
     after = lacking(pg)
-    check(after is not None and after != before and "Canxi" not in after,
+    check(after is not None and after != before and "Calcium" not in after,
           f"390 logging Đậu hũ trắng changes Thiếu nhiều nhất ({before} -> {after})")
     pg.screenshot(path=shot("cc11-lacking-390.png"), animations="disabled")
 

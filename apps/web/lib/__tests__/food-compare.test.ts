@@ -140,7 +140,7 @@ describe("buildCompare", () => {
     expect(sections[1].missing.slice(0, 3)).toEqual(["Vitamin B1", "Vitamin B2", "Vitamin B3"]);
     expect(sections[1].missing).not.toContain("Vitamin C");
     expect(sections[2].missing).toHaveLength(8);
-    expect(sections[2].missing[0]).toBe("Đồng");
+    expect(sections[2].missing[0]).toBe("Copper");
     // every counted micro is either a row or in the missing line
     expect(sections[1].rows.length + sections[1].missing.length).toBe(12);
     expect(sections[2].rows.length + sections[2].missing.length).toBe(10);

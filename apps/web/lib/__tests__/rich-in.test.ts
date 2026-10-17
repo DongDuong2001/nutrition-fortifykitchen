@@ -37,11 +37,13 @@ describe("richInFoods", () => {
 });
 
 describe("richName", () => {
-  it("keeps the vitamin letter capital and lowercases the rest", () => {
-    const title = (id: string) => `Giàu ${richName(getNutrientDefinition(id)!.nameVi)}`;
-    expect(title("vitamin_d")).toBe("Giàu vitamin D");
-    expect(title("vitamin_c")).toBe("Giàu vitamin C");
-    expect(title("calcium")).toBe("Giàu canxi");
-    expect(title("iron")).toBe("Giàu sắt");
+  it("keeps mineral and vitamin names in English as they are and lowercases the macros (Hao, 17/10)", () => {
+    const title = (id: string) => `Giàu ${richName(getNutrientDefinition(id)!)}`;
+    expect(title("vitamin_d")).toBe("Giàu Vitamin D");
+    expect(title("vitamin_c")).toBe("Giàu Vitamin C");
+    expect(title("calcium")).toBe("Giàu Calcium");
+    expect(title("iron")).toBe("Giàu Iron");
+    expect(title("protein")).toBe("Giàu đạm");
+    expect(title("fiber")).toBe("Giàu chất xơ");
   });
 });

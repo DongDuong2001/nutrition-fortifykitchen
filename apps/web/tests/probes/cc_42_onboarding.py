@@ -459,7 +459,7 @@ def create_food(browser):
     pg.wait_for_timeout(300)
     notice = pg.get_by_role("note").filter(has_text="Tự nhập chỉ có kcal")
     check(notice.count() == 1 and "Vi chất để trống nếu bạn không nhập. Món sẽ có nhãn Tự nhập." in notice.inner_text(), "create: Tự nhập shows the amber notice")
-    check(pg.get_by_text("+ Thêm vi chất (Natri, Canxi, Sắt…)").count() == 1, "create: the manual form keeps + Thêm vi chất")
+    check(pg.get_by_text("+ Thêm vi chất (Sodium, Calcium, Iron…)").count() == 1, "create: the manual form keeps + Thêm vi chất")
     shot(pg, "food-new-manual-390")
     recipe.click()
     pg.wait_for_timeout(300)

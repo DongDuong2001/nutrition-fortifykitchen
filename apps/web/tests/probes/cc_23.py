@@ -160,8 +160,8 @@ def compare_page(browser, size, size_name):
     miss = [re.sub(r"\s+", " ", t).strip() for t in pg.locator("p", has_text="Chưa có dữ liệu:").all_inner_texts()]
     check(
         miss == [
-            "Chưa có dữ liệu: Vitamin B2, Vitamin B3, Vitamin B5, Vitamin B9, Vitamin B12, Vitamin A, Vitamin C, Vitamin D, Vitamin E, Vitamin K",
-            "Chưa có dữ liệu: Mangan, Selen",
+            "Chưa có dữ liệu: Vitamin B2, Vitamin B3, Vitamin B5, Folate, Vitamin B12, Vitamin A, Vitamin C, Vitamin D, Vitamin E, Vitamin K",
+            "Chưa có dữ liệu: Manganese, Selenium",
         ],
         f"{w}: missing-data lines {miss}",
     )
@@ -169,7 +169,7 @@ def compare_page(browser, size, size_name):
     # row order: macros, then Vitamin, then Khoáng chất
     order = pg.locator('[role="rowheader"]').all_inner_texts()
     check(order[:5] == ["Năng lượng", "Đạm", "Chất béo", "Tinh bột", "Chất xơ"], f"{w}: macro rows in order {order[:5]}")
-    check(order[5] == "Vitamin B1" and order[7] == "Canxi", f"{w}: Vitamin before Khoáng chất ({order[5]}, {order[7]})")
+    check(order[5] == "Vitamin B1" and order[7] == "Calcium", f"{w}: Vitamin before Khoáng chất ({order[5]}, {order[7]})")
     titles = pg.locator('[role="rowgroup"] h3').all_inner_texts()
     check(titles == ["Năng lượng và đa lượng", "Vitamin", "Khoáng chất"], f"{w}: section titles {titles}")
 

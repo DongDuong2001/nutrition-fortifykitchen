@@ -746,7 +746,7 @@ function NutrientRow({ row, dateQuery = "" }: { row: NutrientRowData; dateQuery?
             {...(definition.depth === 0 ? { "data-align-group": "micros-card", "data-align-edge": "left" } : {})}
             className="font-semibold text-text truncate"
           >
-            {definition.nameVi}
+            {definition.name}
           </span>
           {isProvisional && (
             <sup
@@ -789,7 +789,7 @@ function NutrientRow({ row, dateQuery = "" }: { row: NutrientRowData; dateQuery?
         <div className="w-full">
           <LevelBar
             pct={percentage}
-            label={`${definition.nameVi} ${percentage !== null ? `${percentage}%` : "chưa có dữ liệu"}`}
+            label={`${definition.name} ${percentage !== null ? `${percentage}%` : "chưa có dữ liệu"}`}
             heightClass="h-[9px] lg:h-[10px]"
           />
         </div>

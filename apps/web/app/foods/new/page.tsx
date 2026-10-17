@@ -7,6 +7,7 @@ import { useDiary } from "@/lib/diary-store";
 import { getMealSlotNameVi } from "@/lib/meal-slot";
 import { useMealSlot } from "@/lib/use-meal-slot";
 import { formatAmount } from "@/lib/format";
+import { nutrientName } from "@/lib/nutrients";
 import { FormRow } from "@/components/ui/form-row";
 import { AppHeader } from "@/components/ui/app-header";
 import { AppShell } from "@/components/ui/app-shell";
@@ -86,7 +87,7 @@ function CreateFoodInner() {
   const [carbs, setCarbs] = useState("");
   const [fat, setFat] = useState("");
 
-  // Optional Micros (Natri, Canxi, Sắt, Kali, Vitamin D)
+  // Optional micros (sodium, potassium, calcium, iron, vitamin D)
   const [showMicros, setShowMicros] = useState(false);
   const [sodium, setSodium] = useState("");
   const [calcium, setCalcium] = useState("");
@@ -384,7 +385,7 @@ function CreateFoodInner() {
             onClick={() => setShowMicros(!showMicros)}
             className="w-full min-h-[48px] px-4 rounded-xl border border-card-border bg-card text-text flex items-center justify-between font-semibold text-sm cursor-pointer hover:bg-surface transition-colors"
           >
-            <span>+ Thêm vi chất (Natri, Canxi, Sắt…)</span>
+            <span>+ Thêm vi chất ({nutrientName("sodium")}, {nutrientName("calcium")}, {nutrientName("iron")}…)</span>
             <svg
               width="18"
               height="18"
@@ -403,7 +404,7 @@ function CreateFoodInner() {
 
           {showMicros && (
             <div className="bg-card border border-card-border rounded-[18px] lg:shadow-card p-4 grid grid-cols-2 gap-3 animate-in fade-in duration-200">
-              <FormRow label="Natri (mg)" htmlFor="cf-na">
+              <FormRow label={`${nutrientName("sodium")} (mg)`} htmlFor="cf-na">
                 <input
                   id="cf-na"
                   type="text"
@@ -415,7 +416,7 @@ function CreateFoodInner() {
                 />
               </FormRow>
 
-              <FormRow label="Kali (mg)" htmlFor="cf-k">
+              <FormRow label={`${nutrientName("potassium")} (mg)`} htmlFor="cf-k">
                 <input
                   id="cf-k"
                   type="text"
@@ -427,7 +428,7 @@ function CreateFoodInner() {
                 />
               </FormRow>
 
-              <FormRow label="Canxi (mg)" htmlFor="cf-ca">
+              <FormRow label={`${nutrientName("calcium")} (mg)`} htmlFor="cf-ca">
                 <input
                   id="cf-ca"
                   type="text"
@@ -439,7 +440,7 @@ function CreateFoodInner() {
                 />
               </FormRow>
 
-              <FormRow label="Sắt (mg)" htmlFor="cf-fe">
+              <FormRow label={`${nutrientName("iron")} (mg)`} htmlFor="cf-fe">
                 <input
                   id="cf-fe"
                   type="text"

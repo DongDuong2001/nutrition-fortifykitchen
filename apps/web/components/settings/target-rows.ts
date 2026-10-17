@@ -2,6 +2,7 @@ import { calculateSaltTarget, formatSaltRange } from "../../lib/training";
 import { formatAmount, formatNumber, formatRange } from "../../lib/format";
 import { goalName } from "../../lib/onboarding";
 import { calculateEnergyTarget, type TargetRange } from "../../lib/targets";
+import { getNutrientDefinition, nutrientName } from "../../lib/nutrients";
 import { targetsFor, type Profile } from "../../lib/profile";
 
 export interface TargetRowData {
@@ -16,25 +17,26 @@ export interface TargetSection {
   rows: TargetRowData[];
 }
 
-// The VN 2016 values (lib/targets.ts VN2016_TARGETS) in the design's order, with the unit each one is shown in.
-const VITAMIN_ROWS: [key: string, label: string, unit: string][] = [
-  ["vitamin_a", "Vitamin A", "µg"],
-  ["vitamin_c", "Vitamin C", "mg"],
-  ["vitamin_d", "Vitamin D", "µg"],
-  ["vitamin_e", "Vitamin E", "mg"],
-  ["vitamin_k", "Vitamin K", "µg"],
-  ["b1", "Vitamin B1", "mg"],
-  ["b2", "Vitamin B2", "mg"],
-  ["b3", "Vitamin B3", "mg"],
-  ["b5", "Vitamin B5", "mg"],
-  ["b6", "Vitamin B6", "mg"],
-  ["folate", "Vitamin B9", "µg"],
-  ["b12", "Vitamin B12", "µg"],
-  ["copper", "Đồng", "mg"],
-  ["manganese", "Mangan", "mg"],
-  ["phosphorus", "Phốt pho", "mg"],
-  ["selenium", "Selen", "µg"],
+// The VN 2016 values (lib/targets.ts VN2016_TARGETS) in the design's order; names and units come from the catalogue.
+const VITAMIN_ROWS = [
+  "vitamin_a",
+  "vitamin_c",
+  "vitamin_d",
+  "vitamin_e",
+  "vitamin_k",
+  "b1",
+  "b2",
+  "b3",
+  "b5",
+  "b6",
+  "folate",
+  "b12",
+  "copper",
+  "manganese",
+  "phosphorus",
+  "selenium",
 ];
+
 
 function range(target: TargetRange, unit: string): string {
   return `${formatRange(target.min, target.max)} ${unit}`;
@@ -82,22 +84,23 @@ export function targetSections(profile: Profile): TargetSection[] {
           detail: "Nền 4–6 g + 1–1,5 g mỗi 20 phút tập",
           value: `${formatSaltRange(salt.totalMin, salt.totalMax)} g`,
         },
-        { label: "Kali", detail: `80–100 mg/kg × ${weight} kg`, value: range(t.potassium, "mg") },
-        { label: "Canxi", detail: "Khoảng mục tiêu theo huấn luyện viên", value: range(t.calcium, "mg") },
-        { label: "Magie", detail: "50% mục tiêu canxi", value: range(t.magnesium, "mg") },
+        { label: nutrientName("potassium"), detail: `80–100 mg/kg × ${weight} kg`, value: range(t.potassium, "mg") },
+        { label: nutrientName("calcium"), detail: "Khoảng mục tiêu theo huấn luyện viên", value: range(t.calcium, "mg") },
+        { label: nutrientName("magnesium"), detail: `50% mục tiêu ${nutrientName("calcium")}`, value: range(t.magnesium, "mg") },
         {
-          label: "Sắt",
+          label: nutrientName("iron"),
           detail: "Nam 8 mg · Nữ 18 mg, đang kinh 28 mg",
           value: `${formatNumber(t.iron.min)} mg`,
         },
-        { label: "Kẽm", detail: "Nam 12 mg · Nữ 8 mg", value: `${formatNumber(t.zinc.min)} mg` },
+        { label: nutrientName("zinc"), detail: "Nam 12 mg · Nữ 8 mg", value: `${formatNumber(t.zinc.min)} mg` },
       ],
     },
     {
       title: "Vitamin và khoáng khác*",
-      rows: VITAMIN_ROWS.map(([key, label, unit]) => {
+      rows: VITAMIN_ROWS.map((key) => {
         const target = t[key];
-        return { label, detail: "", value: target ? `${formatAmount(target.min, unit)} ${unit}` : "—" };
+        const unit = getNutrientDefinition(key)?.unit ?? "";
+        return { label: nutrientName(key), detail: "", value: target ? `${formatAmount(target.min, unit)} ${unit}` : "—" };
       }),
     },
   ];

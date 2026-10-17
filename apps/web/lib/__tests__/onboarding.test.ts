@@ -92,7 +92,7 @@ describe("dailyTargetRows", () => {
       { label: "Năng lượng", value: "1.950–2.275 kcal" },
       { label: "Đạm (1,6–2,2 g/kg)", value: "104–143 g" },
       { label: "Chất béo (0,5–1 g/kg)", value: "33–65 g" },
-      { label: "Kali (80–100 mg/kg)", value: "5.200–6.500 mg" },
+      { label: "Potassium (80–100 mg/kg)", value: "5.200–6.500 mg" },
     ]);
   });
 });

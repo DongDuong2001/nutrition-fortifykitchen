@@ -243,7 +243,7 @@ export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
   minerals: [
     {
       key: "sodium",
-      name: "Natri (muối)",
+      name: "Sodium",
       group: "mineral",
       consumed: 2900,
       targetMin: 2750,
@@ -255,7 +255,7 @@ export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
     },
     {
       key: "iron",
-      name: "Sắt",
+      name: "Iron",
       group: "mineral",
       consumed: 11,
       targetMin: 8,
@@ -267,7 +267,7 @@ export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
     },
     {
       key: "zinc",
-      name: "Kẽm",
+      name: "Zinc",
       group: "mineral",
       consumed: 12.4,
       targetMin: 12,
@@ -278,7 +278,7 @@ export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
     },
     {
       key: "phosphorus",
-      name: "Phốt pho",
+      name: "Phosphorus",
       group: "mineral",
       consumed: 1050,
       targetMin: 700,
@@ -289,7 +289,7 @@ export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
     },
     {
       key: "selenium",
-      name: "Selen",
+      name: "Selenium",
       group: "mineral",
       consumed: 52,
       targetMin: 34,
@@ -300,7 +300,7 @@ export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
     },
     {
       key: "copper",
-      name: "Đồng",
+      name: "Copper",
       group: "mineral",
       consumed: 0.8,
       targetMin: 0.9,
@@ -311,7 +311,7 @@ export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
     },
     {
       key: "potassium",
-      name: "Kali",
+      name: "Potassium",
       group: "mineral",
       consumed: 3900,
       targetMin: 5200,
@@ -323,7 +323,7 @@ export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
     },
     {
       key: "magnesium",
-      name: "Magie",
+      name: "Magnesium",
       group: "mineral",
       consumed: 410,
       targetMin: 600,
@@ -335,7 +335,7 @@ export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
     },
     {
       key: "calcium",
-      name: "Canxi",
+      name: "Calcium",
       group: "mineral",
       consumed: 331,
       targetMin: 1200,
@@ -348,7 +348,7 @@ export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
     },
     {
       key: "manganese",
-      name: "Mangan",
+      name: "Manganese",
       group: "mineral",
       consumed: 1.8,
       targetMin: 2.3,
@@ -446,7 +446,7 @@ export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
     },
     {
       key: "folate",
-      name: "Folate (B9)",
+      name: "Folate",
       group: "vitamin",
       consumed: 290,
       targetMin: 400,
@@ -512,6 +512,6 @@ export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
     mineralsTotal: 10,
     vitaminsAchieved: 3,
     vitaminsTotal: 12,
-    mostLacking: ["Vitamin D", "Canxi"],
+    mostLacking: ["Vitamin D", "Calcium"],
   },
 };

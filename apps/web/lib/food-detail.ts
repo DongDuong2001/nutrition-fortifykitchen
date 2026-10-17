@@ -45,7 +45,7 @@ export function microRowsFor(
     const share = value !== null && min !== null ? (value / min) * 100 : null;
     return {
       id,
-      name: def?.nameVi ?? id,
+      name: def?.name ?? id,
       unit: def?.unit ?? "mg",
       group: def?.group === "vitamins" ? "vitamins" : "minerals",
       value,

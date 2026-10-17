@@ -48,6 +48,7 @@ Treat the design files as the **visual source of truth**. Rebuild them as real c
   - Be Vietnam Pro for everything.
   - Saira italic 800 (font-stretch 118%) only for titles and hero numbers 20 px and up.
   - Tabular numbers. Vietnamese number format: 1.041 and 2,1.
+- **Nutrient names (Hao, 17/10):** the exception to "copy is Vietnamese": mineral and vitamin names are English everywhere (Sodium, Calcium, Iron, Vitamin B1, Folate), from the catalogue in `apps/web/lib/nutrients.ts`; macros (Tinh bột, Đạm, Chất béo, Chất xơ) and the words around a name stay Vietnamese.
 - **Colours:**
   - ink #0A0A0B (header/nav)
   - page #F5F5F7

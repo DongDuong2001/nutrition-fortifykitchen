@@ -101,7 +101,7 @@ export default function NutrientDetailPage({ params }: PageProps) {
     <AppShell>
       <AppHeader
         variant="sub"
-        title={def.nameVi}
+        title={def.name}
         subtitle={isPast && viewIso ? `Vi chất · ${formatDayLabel(viewIso, new Date())} · Chỉ xem` : "Vi chất · Hôm nay"}
         {...(isPast && viewIso ? { backHref: `/micros?date=${viewIso}` } : { onBack: goBack })}
         backLabel="Quay lại"
@@ -116,7 +116,7 @@ export default function NutrientDetailPage({ params }: PageProps) {
               </span>
             </div>
             {row.percentage !== null && (
-              <LevelBar pct={row.percentage} surface="dark" heightClass="h-[10px]" label={`${def.nameVi} ${row.percentage}%`} />
+              <LevelBar pct={row.percentage} surface="dark" heightClass="h-[10px]" label={`${def.name} ${row.percentage}%`} />
             )}
             {level && levelText && (
               <span className="text-sm font-bold text-on-dark">{levelText}</span>

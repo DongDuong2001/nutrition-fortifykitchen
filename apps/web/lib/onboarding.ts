@@ -6,6 +6,7 @@ import {
   type SexType,
 } from "./targets";
 import { formatNumber, formatRange } from "./format";
+import { nutrientName } from "./nutrients";
 
 export interface SetupDraft {
   sex: SexType;
@@ -146,7 +147,7 @@ export function dailyTargetRows(weightKg: number | null, sex: SexType, goal: Goa
       value: `${formatRange(targets.fat.min, targets.fat.max)} g`,
     },
     {
-      label: "Kali (80–100 mg/kg)",
+      label: `${nutrientName("potassium")} (80–100 mg/kg)`,
       value: `${formatRange(targets.potassium.min, targets.potassium.max)} mg`,
     },
   ];

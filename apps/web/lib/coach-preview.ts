@@ -23,7 +23,7 @@ export interface PreviewGroup {
 export function previewForLevel(current: Level, draft: Level): PreviewGroup[] {
   const before = columnGroups(current);
   const after = columnGroups(draft);
-  const name = (id: string) => getNutrientDefinition(id)?.nameVi ?? id;
+  const name = (id: string) => getNutrientDefinition(id)?.name ?? id;
   const titles = [...new Set([...after.map((g) => g.title), ...before.map((g) => g.title)])];
   const order = ["Chi tiết béo & xơ", "Khoáng chất", "Vitamin"];
   titles.sort((a, b) => order.indexOf(a) - order.indexOf(b));

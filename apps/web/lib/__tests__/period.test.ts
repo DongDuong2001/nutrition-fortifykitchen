@@ -197,7 +197,7 @@ describe("comparePeriods: biggest changes first, facts only", () => {
     expect(calcium.previous).toBe(500);
     expect(calcium.delta).toBe(90);
     expect(calcium.deltaPct).toBe(18);
-    expect(calcium.label).toBe("Canxi");
+    expect(calcium.label).toBe("Calcium");
     expect(calcium.unit).toBe("mg");
     const protein = changes.find((c) => c.key === "protein")!;
     expect(protein.delta).toBe(-12);

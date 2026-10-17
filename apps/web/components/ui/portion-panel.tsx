@@ -71,7 +71,7 @@ export function PortionPanel({
         }
 
         const def = getNutrientDefinition(key);
-        const name = def?.nameVi || key;
+        const name = def?.name || key;
         const unit = def?.unit || "mg";
         const target = dailyTargets[key]?.min ?? (def?.id ? dailyTargets[def.id]?.min : undefined);
         const pct = target ? Math.round((val / target) * 100) : null;

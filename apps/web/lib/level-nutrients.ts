@@ -86,7 +86,7 @@ export function levelSummary(
   const lacking = [...known]
     .sort((a, b) => a.ratio - b.ratio)
     .slice(0, 2)
-    .map((k) => getNutrientDefinition(k.id)?.nameVi ?? k.id);
+    .map((k) => getNutrientDefinition(k.id)?.name ?? k.id);
   return { reached, total: ids.length, lacking };
 }
 
@@ -94,7 +94,7 @@ export function levelSummary(
 export function addedNames(from: Level, to: Level): string[] {
   const a = nutrientsForLevel(from);
   const b = nutrientsForLevel(to);
-  const name = (id: string) => getNutrientDefinition(id)?.nameVi ?? id;
+  const name = (id: string) => getNutrientDefinition(id)?.name ?? id;
   const added = [...b.minerals.filter((id) => !a.minerals.includes(id)), ...b.vitamins.filter((id) => !a.vitamins.includes(id))].map(name);
   if (a.extras.length === 0 && b.extras.length > 0) added.push("chi tiết béo và xơ");
   return added;

@@ -2,6 +2,7 @@ import type { DayTotals } from "./day-totals";
 import type { AddedDiaryEntry } from "./diary-edits";
 import { formatAmount, formatNumber, formatRange, formatSigned } from "./format";
 import { getLevelLabel, type NutrientLevel } from "./levels";
+import { nutrientName } from "./nutrients";
 import type { MicroRow, Overview } from "./overview";
 import {
   boardDays,
@@ -302,7 +303,7 @@ export function weightShift(
   const rows: { key: ShiftRow["key"]; label: string; unit: string }[] = [
     { key: "calories", label: "Kcal", unit: "kcal" },
     { key: "protein", label: "Đạm", unit: "g" },
-    { key: "potassium", label: "Kali", unit: "mg" },
+    { key: "potassium", label: nutrientName("potassium"), unit: "mg" },
   ];
   return rows.map((r) => {
     const b = before[r.key] as TargetRange;

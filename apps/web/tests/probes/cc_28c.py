@@ -174,7 +174,7 @@ def run(browser, size, tag):
     home(pg)
     card = pg.locator("[data-level-card]")
     text = squash(card.inner_text()) if card.count() else ""
-    check("HLV Khánh đã nâng bạn lên Level 3: thêm" in text and "Phốt pho" in text and "Vitamin B1" in text and "chi tiết béo và xơ" in text, f"{tag} raised: the card ({text!r})")
+    check("HLV Khánh đã nâng bạn lên Level 3: thêm" in text and "Phosphorus" in text and "Vitamin B1" in text and "chi tiết béo và xơ" in text, f"{tag} raised: the card ({text!r})")
     check(card.get_by_role("button", name="Xem").count() == 1, f"{tag} raised: Xem opens the explainer")
     card.get_by_role("button", name="Xem").click()
     pg.get_by_role("dialog", name="Level là gì?").wait_for(state="visible", timeout=4000)

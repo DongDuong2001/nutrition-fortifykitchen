@@ -29,7 +29,7 @@ ROUTES = [
     ("/settings/language", "Ngôn ngữ", "pushed"),
     ("/settings/notifications", "Nhắc nhở", "pushed"),
     ("/micros", "Vi chất", "pushed"),
-    ("/micros/calcium", "Canxi", "pushed"),
+    ("/micros/calcium", "Calcium", "pushed"),
     ("/training", "Ngày tập", "pushed"),
     ("/trends", "Tổng quan", "tab"),
     ("/trends/micros", "Tổng quan", "tab"),

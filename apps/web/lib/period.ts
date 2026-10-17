@@ -171,7 +171,7 @@ const MACRO_METRICS: { key: "calories" | "protein" | "carbs" | "fat"; label: str
   { key: "fat", label: "Chất béo", unit: "g" },
 ];
 
-const NUTRIENT_INFO = new Map(NUTRIENT_CATALOG.map((n) => [n.id, { label: n.nameVi, unit: n.unit as string }]));
+const NUTRIENT_INFO = new Map(NUTRIENT_CATALOG.map((n) => [n.id, { label: n.name, unit: n.unit as string }]));
 
 /**
  * What changed from the previous period to the current one, biggest relative change first. Facts only:

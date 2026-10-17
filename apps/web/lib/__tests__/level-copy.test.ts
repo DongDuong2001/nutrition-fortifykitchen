@@ -15,7 +15,7 @@ describe("level copy", () => {
     expect(noticeText("HLV Khánh", { kind: "linked", from: 0, to: 1 })).toBe("Bạn đang được HLV Khánh theo dõi · Level 1");
     expect(noticeText("HLV Khánh", { kind: "lowered", from: 2, to: 1 })).toBe("HLV Khánh đã đổi Level của bạn thành 1");
     expect(noticeText("HLV Khánh", { kind: "raised", from: 1, to: 2 })).toBe(
-      "HLV Khánh đã nâng bạn lên Level 2: thêm Selen, Vitamin D, Vitamin E, Vitamin K, Vitamin B6, Vitamin B9, Vitamin B12"
+      "HLV Khánh đã nâng bạn lên Level 2: thêm Selenium, Vitamin D, Vitamin E, Vitamin K, Vitamin B6, Folate, Vitamin B12"
     );
   });
 

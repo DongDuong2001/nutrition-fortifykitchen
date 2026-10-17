@@ -285,7 +285,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
 
             {draft.sex === "female" && (
               <Card className="text-[13px] leading-normal text-secondary">
-                Với nữ, bạn có thể bật “Gần/đang trong kỳ” trên trang Hồ sơ để tăng mục tiêu sắt từ 18 lên 28 mg/ngày.
+                Với nữ, bạn có thể bật “Gần/đang trong kỳ” trên trang Hồ sơ để tăng mục tiêu Iron từ 18 lên 28 mg/ngày.
               </Card>
             )}
           </section>

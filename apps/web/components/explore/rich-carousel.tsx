@@ -21,7 +21,7 @@ export function RichCarousel() {
     <Carousel title="Món giàu vi chất" id="explore-rich">
       {RICH_NUTRIENT_IDS.map((id) => {
         const def = getNutrientDefinition(id);
-        const name = richName(def?.nameVi ?? id);
+        const name = def ? richName(def) : id;
         const tone = TILE_TONE[def?.group ?? ""] ?? DEFAULT_TONE;
         return (
           <li key={id} className="w-[9.5rem] shrink-0 snap-start">

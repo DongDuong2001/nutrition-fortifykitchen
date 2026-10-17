@@ -53,11 +53,11 @@ describe("targetSections", () => {
 
   it("gives the sample user the design's mineral rows", () => {
     expect(row(SAMPLE, "Khoáng chất", "Muối")).toMatchObject({ value: "7–10,5 g" });
-    expect(row(SAMPLE, "Khoáng chất", "Kali")).toMatchObject({ value: "5.200–6.500 mg" });
-    expect(row(SAMPLE, "Khoáng chất", "Canxi")).toMatchObject({ value: "1.200–1.500 mg" });
-    expect(row(SAMPLE, "Khoáng chất", "Magie")).toMatchObject({ value: "600–750 mg" });
-    expect(row(SAMPLE, "Khoáng chất", "Sắt")).toMatchObject({ value: "8 mg" });
-    expect(row(SAMPLE, "Khoáng chất", "Kẽm")).toMatchObject({ value: "12 mg" });
+    expect(row(SAMPLE, "Khoáng chất", "Potassium")).toMatchObject({ value: "5.200–6.500 mg" });
+    expect(row(SAMPLE, "Khoáng chất", "Calcium")).toMatchObject({ value: "1.200–1.500 mg" });
+    expect(row(SAMPLE, "Khoáng chất", "Magnesium")).toMatchObject({ value: "600–750 mg" });
+    expect(row(SAMPLE, "Khoáng chất", "Iron")).toMatchObject({ value: "8 mg" });
+    expect(row(SAMPLE, "Khoáng chất", "Zinc")).toMatchObject({ value: "12 mg" });
   });
 
   it("uses the goal's kcal per kg", () => {
@@ -72,9 +72,9 @@ describe("targetSections", () => {
 
   it("gives women iron 18 mg, or 28 mg in period mode", () => {
     const woman = { ...SAMPLE, sex: "female" as const };
-    expect(row(woman, "Khoáng chất", "Sắt")).toMatchObject({ value: "18 mg" });
-    expect(row(woman, "Khoáng chất", "Kẽm")).toMatchObject({ value: "8 mg" });
-    expect(row({ ...woman, periodMode: true }, "Khoáng chất", "Sắt")).toMatchObject({ value: "28 mg" });
+    expect(row(woman, "Khoáng chất", "Iron")).toMatchObject({ value: "18 mg" });
+    expect(row(woman, "Khoáng chất", "Zinc")).toMatchObject({ value: "8 mg" });
+    expect(row({ ...woman, periodMode: true }, "Khoáng chất", "Iron")).toMatchObject({ value: "28 mg" });
   });
 
   it("lists the 16 VN 2016 reference values with their units", () => {
@@ -86,7 +86,9 @@ describe("targetSections", () => {
     expect(vitamins[5]).toMatchObject({ label: "Vitamin B1", value: "1,2 mg" });
     expect(vitamins[7]).toMatchObject({ label: "Vitamin B3", value: "16 mg" });
     expect(vitamins[11]).toMatchObject({ label: "Vitamin B12", value: "2,4 µg" });
-    expect(vitamins[13]).toMatchObject({ label: "Mangan", value: "2,3 mg" });
-    expect(vitamins[15]).toMatchObject({ label: "Selen", value: "34 µg" });
+    expect(vitamins[10]).toMatchObject({ label: "Folate", value: "400 µg" });
+    expect(vitamins[12]).toMatchObject({ label: "Copper" });
+    expect(vitamins[13]).toMatchObject({ label: "Manganese", value: "2,3 mg" });
+    expect(vitamins[15]).toMatchObject({ label: "Selenium", value: "34 µg" });
   });
 });
