@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { scaleNutrients, parseGramsInput, calculateMacroPreview, formatGramsServingLabel, gramsServingLabel } from "../portion";
+import { scaleNutrients, parseGramsInput, calculateMacroPreview, formatGramsServingLabel, gramsServingLabel, MAX_GRAMS_PER_PORTION } from "../portion";
 import { MOCK_FOODS } from "../mock/foods";
 
 // Grams as Vietnamese text: comma for decimals, dot for thousands (2,5 g; 1.000 g)
@@ -41,6 +41,12 @@ describe("lib/portion", () => {
       expect(parseGramsInput("abc")).toBe(0);
       expect(parseGramsInput("-5")).toBe(0);
       expect(parseGramsInput("")).toBe(0);
+    });
+
+    it("clamps large values to MAX_GRAMS_PER_PORTION", () => {
+      expect(parseGramsInput("100000")).toBe(MAX_GRAMS_PER_PORTION);
+      expect(parseGramsInput("5001")).toBe(MAX_GRAMS_PER_PORTION);
+      expect(parseGramsInput("5000")).toBe(5000);
     });
   });
 

@@ -13,14 +13,19 @@ export function formatGramsServingLabel(raw: string, fallback: string): string {
   return gramsServingLabel(n);
 }
 
+/** Maximum grams allowed for a single food entry (5 kg). Prevents accidental overflow or typing mistakes. */
+export const MAX_GRAMS_PER_PORTION = 5000;
+
 /**
  * Parses user-entered grams supporting Vietnamese decimal comma ("2,5") or standard dot ("2.5").
+ * Clamped to MAX_GRAMS_PER_PORTION.
  */
 export function parseGramsInput(input: string): number {
   if (!input) return 0;
   const normalized = input.trim().replace(",", ".");
   const num = parseFloat(normalized);
   if (isNaN(num) || num <= 0) return 0;
+  if (num > MAX_GRAMS_PER_PORTION) return MAX_GRAMS_PER_PORTION;
   return num;
 }
 
