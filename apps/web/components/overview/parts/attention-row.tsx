@@ -23,7 +23,7 @@ export function AttentionRow({
   return (
     <Link
       href={href}
-      className="grid min-h-[56px] grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-[18px] border border-card-border bg-card p-4 text-text no-underline active:scale-[0.99] motion-reduce:active:scale-100"
+      className="grid min-h-[56px] grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-[18px] lg:shadow-card border border-card-border bg-card p-4 text-text no-underline active:scale-[0.99] motion-reduce:active:scale-100"
     >
       <span className="min-w-0">
         <span className="block text-[15px] font-bold leading-snug">{title}</span>

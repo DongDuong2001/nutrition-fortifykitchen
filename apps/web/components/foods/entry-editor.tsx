@@ -15,7 +15,7 @@ import { parseDecimalInput } from "../../lib/quick-entry";
 import { formatGramsServingLabel } from "../../lib/portion";
 
 const quickFieldClass =
-  "h-12 w-full rounded-xl border-2 border-card-border bg-card px-3 text-base text-text outline-none transition-colors focus:border-blue";
+  "h-12 w-full rounded-xl border-2 border-card-border bg-surface px-3 text-base text-text outline-none transition-colors focus:border-blue";
 
 /**
  * Edit one diary entry: portion, meal, save or delete. Shown on the entry route, phone and desktop.
@@ -105,7 +105,7 @@ export function EntryEditor({ view }: { view: EntryView }) {
         backHref="/"
       />
       <div className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-8 pt-4">
-        <section className="flex flex-col gap-4 rounded-[18px] border border-card-border bg-card p-4">
+        <section className="flex flex-col gap-4 rounded-[18px] lg:shadow-card border border-card-border bg-card p-4">
           {quick && (
             <div data-align-group="entry" className="flex w-full flex-col gap-3">
               <FormRow label="Tên" htmlFor="entry-quick-name">
@@ -151,7 +151,7 @@ export function EntryEditor({ view }: { view: EntryView }) {
             <div className="flex w-full items-stretch gap-2">
               <span
                 className={`flex h-12 w-[104px] shrink-0 items-center gap-1.5 rounded-xl border-2 px-3 focus-within:ring-2 focus-within:ring-blue ${
-                  canPortion ? "border-blue bg-card" : "border-card-border bg-page"
+                  canPortion ? "border-blue bg-card" : "border-card-border bg-surface"
                 }`}
               >
                 <input
@@ -183,7 +183,7 @@ export function EntryEditor({ view }: { view: EntryView }) {
                         setServingLabel(s.label);
                       }}
                       className={`h-12 min-w-0 flex-1 cursor-pointer rounded-xl border-0 px-2 text-sm font-semibold transition-transform active:scale-[0.97] disabled:opacity-60 ${
-                        active ? "bg-ink text-on-dark font-bold" : "bg-page text-text"
+                        active ? "bg-ink text-on-dark font-bold" : "bg-surface text-text"
                       }`}
                     >
                       {s.label}
@@ -217,7 +217,7 @@ export function EntryEditor({ view }: { view: EntryView }) {
 
           {/* Preview of the portion: kcal, Đạm, Béo, Sắt (a quick entry has its own fields above) */}
           {!quick && (
-            <div data-align-group="entry" className="grid w-full grid-cols-4 gap-2 rounded-xl bg-page p-3">
+            <div data-align-group="entry" className="grid w-full grid-cols-4 gap-2 rounded-xl bg-surface p-3">
               <Stat value={preview ? formatAmount(preview.calories, "kcal") : "—"} label="kcal" />
               <Stat value={preview ? `${formatAmount(preview.protein, "g")} g` : "—"} label="Đạm" />
               <Stat value={preview ? `${formatAmount(preview.fat, "g")} g` : "—"} label="Chất béo" />

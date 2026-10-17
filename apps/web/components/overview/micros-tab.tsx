@@ -118,7 +118,7 @@ export function MicrosTab() {
             key={section.level}
             open={section.level !== "dat"}
             data-align-group="overview-micro"
-            className="group overflow-hidden rounded-[18px] border border-card-border bg-card text-text"
+            className="group overflow-hidden rounded-[18px] lg:shadow-card border border-card-border bg-card text-text"
           >
             <summary className="flex min-h-[56px] cursor-pointer list-none items-center justify-between gap-3 p-4 [&::-webkit-details-marker]:hidden">
               <span className="flex items-center gap-3">
@@ -146,7 +146,7 @@ export function MicrosTab() {
                     <li key={item.key} className="border-t border-divider">
                       <Link
                         href={`/micros/${item.key}`}
-                        className="grid min-h-[56px] grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 text-text no-underline active:bg-page motion-reduce:active:bg-transparent"
+                        className="grid min-h-[56px] grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 text-text no-underline active:bg-surface motion-reduce:active:bg-transparent"
                       >
                         <span className="min-w-0">
                           <span className="block text-[15px] font-semibold">{item.name}</span>
@@ -168,7 +168,7 @@ export function MicrosTab() {
           </details>
         ))}
         {board.unknown > 0 && (
-          <details data-align-group="overview-micro" className="group overflow-hidden rounded-[18px] border border-card-border bg-card text-text">
+          <details data-align-group="overview-micro" className="group overflow-hidden rounded-[18px] lg:shadow-card border border-card-border bg-card text-text">
             <summary className="flex min-h-[56px] cursor-pointer list-none items-center justify-between gap-3 p-4 [&::-webkit-details-marker]:hidden">
               <span className="flex items-center gap-3">
                 <span aria-hidden="true" className="inline-block h-3 w-3 shrink-0 rounded-[3px] bg-level-empty" />
@@ -186,7 +186,7 @@ export function MicrosTab() {
                   <li key={s.key} className="border-t border-divider">
                     <Link
                       href={`/micros/${s.key}`}
-                      className="grid min-h-[56px] grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 text-text no-underline active:bg-page motion-reduce:active:bg-transparent"
+                      className="grid min-h-[56px] grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 text-text no-underline active:bg-surface motion-reduce:active:bg-transparent"
                     >
                       <span className="min-w-0">
                         <span className="block text-[15px] font-semibold">{s.name}</span>

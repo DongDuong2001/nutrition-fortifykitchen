@@ -13,7 +13,7 @@ export default function TermsPage() {
       <LegalHeader title="Điều khoản dịch vụ" alignGroup="terms-header" />
 
       <main className="mx-auto w-full max-w-[760px] px-4 pb-6 pt-4 lg:mx-0 lg:px-8">
-        <article className="flex flex-col gap-6 rounded-[18px] border border-card-border bg-card p-5 text-text lg:p-8">
+        <article className="flex flex-col gap-6 rounded-[18px] lg:shadow-card border border-card-border bg-card p-5 text-text lg:p-8">
           <header className="flex flex-col gap-2 border-b border-divider pb-4">
             <h2 className="m-0 text-xl font-bold leading-snug text-text">
               Điều khoản sử dụng dịch vụ H1T MICRO
@@ -30,7 +30,7 @@ export default function TermsPage() {
             </p>
           </section>
 
-          <section className="flex flex-col gap-2.5 rounded-xl border border-divider bg-page p-4">
+          <section className="flex flex-col gap-2.5 rounded-xl border border-divider bg-surface p-4">
             <h3 className="m-0 text-base font-bold text-text">
               2. Tuyên bố từ chối trách nhiệm y tế (Quan trọng)
             </h3>

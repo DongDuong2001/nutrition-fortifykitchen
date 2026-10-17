@@ -20,12 +20,12 @@ export function CoachesCarousel() {
           <li key={c.id} className="w-[260px] shrink-0 snap-start">
             <Link
               href={`/explore/coaches/${c.id}`}
-              className="flex h-full flex-col gap-3 rounded-[18px] border border-card-border bg-card p-4 text-text no-underline hover:bg-page"
+              className="flex h-full flex-col gap-3 rounded-[18px] lg:shadow-card border border-card-border bg-card p-4 text-text no-underline hover:bg-surface"
             >
               <span className="flex items-center gap-3">
                 <span
                   aria-hidden="true"
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-page text-[15px] font-bold text-blue"
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-surface text-[15px] font-bold text-blue"
                 >
                   {initialsOf(c.name)}
                 </span>

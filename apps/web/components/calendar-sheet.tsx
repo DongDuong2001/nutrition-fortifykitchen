@@ -73,7 +73,7 @@ function CalendarMonth({ selectedIso, onPick }: Pick<CalendarSheetProps, "select
           type="button"
           onClick={() => setMonth((prev) => shiftMonth(prev, -1))}
           aria-label="Tháng trước"
-          className="w-11 h-11 rounded-lg bg-paper text-text flex items-center justify-center cursor-pointer active:scale-[0.97] transition-transform"
+          className="w-11 h-11 rounded-lg bg-surface text-text flex items-center justify-center cursor-pointer active:scale-[0.97] transition-transform"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
             <path d="M15 5l-7 7 7 7" />
@@ -85,7 +85,7 @@ function CalendarMonth({ selectedIso, onPick }: Pick<CalendarSheetProps, "select
           onClick={() => setMonth((prev) => shiftMonth(prev, 1))}
           disabled={!canGoNext}
           aria-label="Tháng sau"
-          className="w-11 h-11 rounded-lg bg-paper text-text flex items-center justify-center cursor-pointer active:scale-[0.97] transition-transform disabled:opacity-50 disabled:pointer-events-none"
+          className="w-11 h-11 rounded-lg bg-surface text-text flex items-center justify-center cursor-pointer active:scale-[0.97] transition-transform disabled:opacity-50 disabled:pointer-events-none"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
             <path d="M9 5l7 7-7 7" />

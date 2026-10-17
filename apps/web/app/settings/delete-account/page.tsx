@@ -52,7 +52,7 @@ export default function DeleteAccountPage() {
 
         <main className="w-full max-w-[560px] mx-auto px-4 pt-4 pb-4 flex flex-col gap-3">
           {/* Warning card */}
-          <div className="bg-card border border-card-border rounded-[18px] p-4 md:p-4 flex flex-col gap-2">
+          <div className="bg-card border border-card-border rounded-[18px] lg:shadow-card p-4 md:p-4 flex flex-col gap-2">
             <div className="flex gap-3 items-start">
               <svg
                 width="28"
@@ -84,7 +84,7 @@ export default function DeleteAccountPage() {
           <button
             type="button"
             onClick={handleExportCsv}
-            className="w-full h-12 rounded-full border border-card-border bg-card text-ink text-[15px] font-semibold hover:bg-page active:scale-[0.97] transition-transform cursor-pointer"
+            className="w-full h-12 rounded-full border border-card-border bg-card text-ink text-[15px] font-semibold hover:bg-surface active:scale-[0.97] transition-transform cursor-pointer"
           >
             Tải dữ liệu về (CSV)
           </button>
@@ -98,7 +98,7 @@ export default function DeleteAccountPage() {
               onChange={(e) => setConfirmationText(e.target.value)}
               placeholder="Xóa"
               autoComplete="off"
-              className="h-[52px] rounded-xl border-2 border-grabber bg-card px-4 text-lg font-semibold text-ink outline-none focus:border-blue transition-colors"
+              className="h-[52px] rounded-xl border-2 border-grabber bg-surface px-4 text-lg font-semibold text-ink outline-none focus:border-blue transition-colors"
             />
           </label>
         </main>

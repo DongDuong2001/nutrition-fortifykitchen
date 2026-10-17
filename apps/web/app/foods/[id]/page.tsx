@@ -195,7 +195,7 @@ function FoodDetailInner() {
               <span className="inline-flex h-6 items-center rounded-full bg-warning-bg px-2 text-xs font-bold text-warning-text">Ước tính</span>
             )}
             {isManualFood(food) && (
-              <span className="inline-flex h-6 items-center rounded-full border border-card-border bg-page px-2 text-xs font-bold text-secondary">Tự nhập</span>
+              <span className="inline-flex h-6 items-center rounded-full border border-card-border bg-surface px-2 text-xs font-bold text-secondary">Tự nhập</span>
             )}
             <span>·</span>
             <span>{food.servings[0]?.grams ?? 100} g mỗi khẩu phần</span>
@@ -277,7 +277,7 @@ function FoodDetailInner() {
         </div>
 
         {/* Big Kcal & 3-up Macro Card */}
-        <div data-align-group="food-detail" className="w-full bg-card border border-card-border rounded-[18px] p-4">
+        <div data-align-group="food-detail" className="w-full bg-card border border-card-border rounded-[18px] lg:shadow-card p-4">
           <StatGroup
             columns={4}
             tone="light"

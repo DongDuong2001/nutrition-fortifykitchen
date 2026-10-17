@@ -52,7 +52,7 @@ export default function ExplorePage() {
         subtitle="Tìm món, lọc theo nhóm, hoặc xem món giàu vi chất"
         layout="wide"
         alignGroup="explore-header"
-        search={<FoodSearchField value={query} onChange={setQuery} className="bg-page lg:max-w-[656px]" />}
+        search={<FoodSearchField value={query} onChange={setQuery} className="bg-surface lg:max-w-[656px]" />}
       />
 
       <main className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-6 pt-4 lg:mx-0 lg:max-w-[720px] lg:px-8">

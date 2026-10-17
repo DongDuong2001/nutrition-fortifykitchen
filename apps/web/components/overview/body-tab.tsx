@@ -105,7 +105,7 @@ export function BodyTab() {
         <HeroCard id="bd-hero" label="Cân nặng">
           <HeroNumber value="—" unit="kg" side={<p className="m-0">Hồ sơ {kg(profile.weightKg)} kg</p>} />
         </HeroCard>
-        <section className="rounded-[18px] border border-card-border bg-card p-4 text-text">
+        <section className="rounded-[18px] lg:shadow-card border border-card-border bg-card p-4 text-text">
           <p className="m-0 text-[15px] font-semibold">Chưa có số cân</p>
           <p className="m-0 mt-1 text-[13px] leading-snug text-secondary">Chưa có số cân trong kỳ này. Mỗi lần cân bạn ghi sẽ hiện ở đây.</p>
         </section>
@@ -138,10 +138,10 @@ export function BodyTab() {
           {demo && <p className="m-0 text-[13px] text-muted-subtitle">Dữ liệu mẫu cho đến khi có nhật ký cân thật.</p>}
         </HeroCard>
 
-        <section aria-labelledby="bd-line" className="flex flex-col gap-3 rounded-[18px] border border-card-border bg-card p-4 text-text">
+        <section aria-labelledby="bd-line" className="flex flex-col gap-3 rounded-[18px] lg:shadow-card border border-card-border bg-card p-4 text-text">
           <div className="flex min-h-[44px] items-center justify-between gap-3">
             <SectionTitle id="bd-line">Cân nặng {period.length} ngày</SectionTitle>
-            {demo && <span className="inline-flex min-h-[28px] items-center rounded-full bg-page px-3 text-[13px] font-bold">Dữ liệu mẫu</span>}
+            {demo && <span className="inline-flex min-h-[28px] items-center rounded-full bg-surface px-3 text-[13px] font-bold">Dữ liệu mẫu</span>}
           </div>
           {hasPoints && point ? (
             <>
@@ -161,7 +161,7 @@ export function BodyTab() {
                 >
                   <span aria-hidden="true">‹</span>
                 </button>
-                <p aria-live="polite" className="m-0 flex min-w-0 flex-1 items-baseline justify-between gap-3 rounded-xl bg-page px-3 py-3">
+                <p aria-live="polite" className="m-0 flex min-w-0 flex-1 items-baseline justify-between gap-3 rounded-xl bg-surface px-3 py-3">
                   <span className="whitespace-nowrap text-[13px] font-semibold text-secondary">
                     {weekdayShort(point.date)} {dm(point.date)}
                   </span>
@@ -188,7 +188,7 @@ export function BodyTab() {
       </div>
 
       <div className="flex flex-col gap-3 lg:col-span-5 lg:gap-5">
-        <section aria-labelledby="bd-facts" className="flex flex-col rounded-[18px] border border-card-border bg-card px-4 text-text">
+        <section aria-labelledby="bd-facts" className="flex flex-col rounded-[18px] lg:shadow-card border border-card-border bg-card px-4 text-text">
           <SectionTitle id="bd-facts" className="py-3">Trong kỳ này</SectionTitle>
           <dl className="m-0 flex flex-col">
             <div data-align-group="overview-stats" className="flex min-h-[56px] items-center justify-between gap-3 border-t border-divider">
@@ -212,7 +212,7 @@ export function BodyTab() {
           </dl>
         </section>
 
-        <section aria-labelledby="bd-shift" className="flex flex-col gap-3 rounded-[18px] border border-card-border bg-card p-4 text-text">
+        <section aria-labelledby="bd-shift" className="flex flex-col gap-3 rounded-[18px] lg:shadow-card border border-card-border bg-card p-4 text-text">
           <SectionTitle id="bd-shift">Mục tiêu theo cân nặng</SectionTitle>
           {shift === null ? (
             <p className="m-0 text-[13px] leading-snug text-secondary">Cần ít nhất hai lần cân trong kỳ để so sánh mục tiêu.</p>

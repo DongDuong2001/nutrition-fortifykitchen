@@ -384,7 +384,7 @@ function AddFoodInner() {
                   type="button"
                   onClick={() => setSwitcherOpen(true)}
                   aria-haspopup="listbox"
-                  className="min-h-[44px] px-2 -ml-2 rounded-lg bg-transparent border-0 text-text font-normal text-lg flex items-center gap-2 cursor-pointer hover:bg-page active:scale-[0.98] transition-all"
+                  className="min-h-[44px] px-2 -ml-2 rounded-lg bg-transparent border-0 text-text font-normal text-lg flex items-center gap-2 cursor-pointer hover:bg-surface active:scale-[0.98] transition-all"
                 >
                   <span id="dlg-title">
                     Thêm vào: <strong className="font-bold">{mealNameVi}</strong>
@@ -403,7 +403,7 @@ function AddFoodInner() {
                   type="button"
                   onClick={handleClose}
                   aria-label="Đóng"
-                  className="w-11 h-11 rounded-full bg-page text-text flex items-center justify-center border-0 cursor-pointer hover:bg-divider transition-colors active:scale-[0.97]"
+                  className="w-11 h-11 rounded-full bg-surface text-text flex items-center justify-center border-0 cursor-pointer hover:bg-divider transition-colors active:scale-[0.97]"
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                     <path d="M6 6l12 12M18 6L6 18" />
@@ -529,7 +529,7 @@ function AddFoodInner() {
                   type="button"
                   onClick={handleClose}
                   aria-label="Đóng"
-                  className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border-0 bg-page text-text active:scale-[0.97]"
+                  className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border-0 bg-surface text-text active:scale-[0.97]"
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                     <path d="M6 6l12 12M18 6L6 18" />

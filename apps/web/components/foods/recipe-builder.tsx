@@ -96,7 +96,7 @@ function previewRecipe(draft: RecipeDraft): Recipe {
 }
 
 const INPUT =
-  "h-12 w-full rounded-xl border-2 bg-card px-4 text-base text-text outline-none transition-colors";
+  "h-12 w-full rounded-xl border-2 bg-surface px-4 text-base text-text outline-none transition-colors";
 const BORDER_OK = "border-card-border focus:border-blue";
 const BORDER_BAD = "border-destructive";
 
@@ -178,14 +178,14 @@ export function RecipeBuilder({ state, excludeId }: { state: RecipeDraftState; e
               const amountError = shown.amounts[index] ? errors.amounts[index] : undefined;
               const id = `rb-amount-${index}`;
               return (
-                <li key={`${ingredient.foodId}-${index}`} data-align-group="recipe-row" className="flex flex-col gap-1 rounded-[18px] border border-card-border bg-card p-3">
+                <li key={`${ingredient.foodId}-${index}`} data-align-group="recipe-row" className="flex flex-col gap-1 rounded-[18px] lg:shadow-card border border-card-border bg-card p-3">
                   <div className="flex items-center gap-2">
                     <span className="min-w-0 flex-1 break-words text-[15px] font-semibold leading-snug text-text">{ingredient.name}</span>
                     <button
                       type="button"
                       aria-label={`Bỏ ${ingredient.name}`}
                       onClick={() => removeIngredient(index)}
-                      className="-mr-1 inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-secondary hover:bg-page active:scale-[0.97] motion-reduce:active:scale-100"
+                      className="-mr-1 inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-secondary hover:bg-surface active:scale-[0.97] motion-reduce:active:scale-100"
                     >
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                         <path d="M6 6l12 12M18 6L6 18" />
@@ -204,7 +204,7 @@ export function RecipeBuilder({ state, excludeId }: { state: RecipeDraftState; e
                       onChange={(e) => setAmount(index, e.target.value)}
                       onBlur={() => setShown((s) => ({ ...s, amounts: { ...s.amounts, [index]: true } }))}
                       placeholder="0"
-                      className={`h-11 min-w-0 flex-1 rounded-xl border-2 bg-card px-3 text-right text-base font-bold tabular-nums text-text outline-none ${
+                      className={`h-11 min-w-0 flex-1 rounded-xl border-2 bg-surface px-3 text-right text-base font-bold tabular-nums text-text outline-none ${
                         amountError ? BORDER_BAD : BORDER_OK
                       }`}
                     />
@@ -212,7 +212,7 @@ export function RecipeBuilder({ state, excludeId }: { state: RecipeDraftState; e
                       type="button"
                       onClick={() => toggleUnit(index)}
                       aria-label={`Đơn vị của ${ingredient.name}: ${ingredient.unit}. Chạm để đổi`}
-                      className="inline-flex h-11 min-w-[56px] shrink-0 cursor-pointer items-center justify-center rounded-full border border-card-border bg-page px-3 text-sm font-semibold text-text active:scale-[0.97] motion-reduce:active:scale-100"
+                      className="inline-flex h-11 min-w-[56px] shrink-0 cursor-pointer items-center justify-center rounded-full border border-card-border bg-surface px-3 text-sm font-semibold text-text active:scale-[0.97] motion-reduce:active:scale-100"
                     >
                       {ingredient.unit}
                     </button>

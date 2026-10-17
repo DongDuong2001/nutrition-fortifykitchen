@@ -112,7 +112,7 @@ export function MealMenuSheet({
               onFocus={(e) => e.currentTarget.select()}
               placeholder={defaultSaveName}
               autoComplete="off"
-              className="h-12 w-full rounded-xl border-2 border-card-border bg-card px-3 text-base text-text outline-none transition-colors focus:border-blue"
+              className="h-12 w-full rounded-xl border-2 border-card-border bg-surface px-3 text-base text-text outline-none transition-colors focus:border-blue"
             />
           </FormRow>
           <PillButton type="submit" variant="primary">

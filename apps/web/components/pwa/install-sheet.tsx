@@ -68,7 +68,7 @@ function Step({ n, title, sub, children }: { n: number; title: string; sub?: str
 /** A browser's bottom or top bar, drawn small: the back chevron, the address, and the menu button that step points at. */
 function MiniBar({ menu }: { menu: React.ReactNode }) {
   return (
-    <div aria-hidden="true" className="flex items-center gap-2 rounded-xl border border-card-border bg-page p-2">
+    <div aria-hidden="true" className="flex items-center gap-2 rounded-xl border border-card-border bg-surface p-2">
       <span className="shrink-0 text-secondary">
         <ChevronLeftIcon />
       </span>

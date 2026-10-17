@@ -95,7 +95,7 @@ function PickerBody({ onClose, onConfirm, disabledIds }: { onClose: () => void; 
                   <button
                     type="button"
                     onClick={() => setFilter("all")}
-                    className="min-h-[44px] cursor-pointer rounded-full border-0 bg-page px-5 text-sm font-semibold text-text active:scale-[0.97]"
+                    className="min-h-[44px] cursor-pointer rounded-full border-0 bg-surface px-5 text-sm font-semibold text-text active:scale-[0.97]"
                   >
                     Bỏ lọc
                   </button>

@@ -121,7 +121,7 @@ export default function NotificationsSettingsPage() {
 
       <main className="flex-1 w-full max-w-[560px] mx-auto px-4 pt-4 pb-8 flex flex-col gap-3">
         {/* Permission card */}
-        <div className="bg-card border border-card-border rounded-[18px] p-3 md:p-4 flex flex-col gap-2">
+        <div className="bg-card border border-card-border rounded-[18px] lg:shadow-card p-3 md:p-4 flex flex-col gap-2">
           <div className="flex gap-3 items-start">
             <svg
               width="22"
@@ -146,7 +146,7 @@ export default function NotificationsSettingsPage() {
             <button
               type="button"
               onClick={requestPermission}
-              className="self-start h-11 px-4.5 rounded-full border border-card-border bg-card text-ink text-sm font-semibold hover:bg-page active:scale-[0.97] transition-transform cursor-pointer"
+              className="self-start h-11 px-4.5 rounded-full border border-card-border bg-card text-ink text-sm font-semibold hover:bg-surface active:scale-[0.97] transition-transform cursor-pointer"
             >
               Bật quyền thông báo
             </button>
@@ -159,7 +159,7 @@ export default function NotificationsSettingsPage() {
         </div>
 
         {/* Notification toggle rows */}
-        <section className="bg-card border border-card-border rounded-[18px] px-4 py-1">
+        <section className="bg-card border border-card-border rounded-[18px] lg:shadow-card px-4 py-1">
           {NOTIFICATION_ROWS.map((row, index) => {
             const isChecked = settings[row.toggleKey];
             const timeVal = row.timeKey ? settings[row.timeKey] : "";
@@ -197,7 +197,7 @@ export default function NotificationsSettingsPage() {
                     />
                     <span
                       aria-hidden="true"
-                      className="flex items-center justify-center h-11 min-w-[64px] px-3 rounded-full border border-card-border bg-card text-ink text-sm font-semibold tabular-nums hover:bg-page active:scale-[0.97] transition-transform select-none peer-focus-visible:ring-2 peer-focus-visible:ring-blue peer-focus-visible:ring-offset-2"
+                      className="flex items-center justify-center h-11 min-w-[64px] px-3 rounded-full border border-card-border bg-card text-ink text-sm font-semibold tabular-nums hover:bg-surface active:scale-[0.97] transition-transform select-none peer-focus-visible:ring-2 peer-focus-visible:ring-blue peer-focus-visible:ring-offset-2"
                     >
                       {timeVal}
                     </span>

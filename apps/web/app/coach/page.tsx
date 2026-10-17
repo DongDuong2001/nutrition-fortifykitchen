@@ -101,7 +101,7 @@ export default function CoachPage() {
                   <Link
                     href={`/coach/clients/${encodeURIComponent(c.id)}`}
                     data-align-group="client-row"
-                    className="flex min-h-[64px] items-center gap-3 rounded-[18px] border border-card-border bg-card p-3 text-text no-underline active:scale-[0.99] motion-reduce:active:scale-100"
+                    className="flex min-h-[64px] items-center gap-3 rounded-[18px] lg:shadow-card border border-card-border bg-card p-3 text-text no-underline active:scale-[0.99] motion-reduce:active:scale-100"
                   >
                     <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                       <span className="break-words text-[15px] font-semibold leading-snug">{c.name}</span>

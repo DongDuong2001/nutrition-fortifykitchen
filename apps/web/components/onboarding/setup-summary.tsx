@@ -83,7 +83,7 @@ export function SetupSummary() {
             {ready.first && (
               <ol className="m-0 flex list-none flex-col gap-2 p-0">
                 {TOUR_PREVIEW.map((text, i) => (
-                  <li key={text} className="flex min-h-[44px] items-center gap-3 rounded-[18px] border border-card-border bg-card px-4 py-2">
+                  <li key={text} className="flex min-h-[44px] items-center gap-3 rounded-[18px] lg:shadow-card border border-card-border bg-card px-4 py-2">
                     <span aria-hidden="true" className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue/10 text-sm font-bold text-blue">
                       {i + 1}
                     </span>

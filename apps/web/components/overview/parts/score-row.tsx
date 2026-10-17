@@ -53,7 +53,7 @@ export function ScoreRow({
         aria-expanded={open}
         aria-controls={open ? panelId : undefined}
         onClick={onToggle}
-        className="grid w-full cursor-pointer grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 border-0 bg-transparent p-4 text-left font-sans text-text active:bg-page motion-reduce:active:bg-transparent"
+        className="grid w-full cursor-pointer grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 border-0 bg-transparent p-4 text-left font-sans text-text active:bg-surface motion-reduce:active:bg-transparent"
       >
         <span className="text-[15px] font-bold">{row.title}</span>
         <span className="text-right text-[13px] font-semibold text-secondary">{row.change}</span>

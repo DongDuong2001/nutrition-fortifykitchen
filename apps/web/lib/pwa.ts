@@ -3,7 +3,7 @@
 // lib/__tests__/pwa.test.ts runs the real sw.js and checks both agree.
 
 /** Manifest colours, the same values as --color-paper and --color-ink in globals.css (a manifest cannot read CSS). */
-export const PAPER_COLOR = "#F3F1EC";
+export const PAPER_COLOR = "#FFFFFF";
 export const INK_COLOR = "#111317";
 
 /** The app shell, precached when the service worker installs. */

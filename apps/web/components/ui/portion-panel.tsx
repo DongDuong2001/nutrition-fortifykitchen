@@ -95,7 +95,7 @@ export function PortionPanel({
       className={`rounded-[18px] p-4 flex flex-col gap-3 transition-colors ${
         isDark
           ? "bg-ink text-on-dark shadow-lg"
-          : "bg-page text-text border border-card-border"
+          : "bg-surface text-text border border-card-border"
       } ${className}`}
     >
       {/* Row 1: Title row */}

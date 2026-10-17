@@ -94,7 +94,7 @@ function ShareCapture({ model, onDone, onError }: { model: ShareModel; onDone: (
         pixelRatio: 1,
         fontEmbedCSS,
         // A page height that is not a whole number of image rows must not leave a see-through last row
-        backgroundColor: getComputedStyle(node).backgroundColor || "#F3F1EC",
+        backgroundColor: getComputedStyle(node).backgroundColor || "#FFFFFF",
         style: {
           transform: `scale(${scale})`,
           transformOrigin: "top left",
@@ -285,7 +285,7 @@ export function ShareSheet({
               }}
               placeholder="Tên của bạn"
               aria-invalid={nameError ? true : undefined}
-              className={`h-[52px] w-full rounded-xl border-2 bg-card px-4 text-base font-semibold text-text outline-none focus:border-blue ${
+              className={`h-[52px] w-full rounded-xl border-2 bg-surface px-4 text-base font-semibold text-text outline-none focus:border-blue ${
                 nameError ? "border-destructive" : "border-card-border"
               }`}
             />
@@ -311,7 +311,7 @@ export function ShareSheet({
             className="h-auto max-h-full w-auto max-w-full rounded-xl border border-card-border object-contain"
           />
         ) : failure === "generate" ? (
-          <div className="aspect-[9/16] h-full rounded-xl border border-card-border bg-page" />
+          <div className="aspect-[9/16] h-full rounded-xl border border-card-border bg-surface" />
         ) : (
           <div role="status" className="aspect-[9/16] h-full rounded-xl bg-level-empty motion-safe:animate-pulse">
             <span className="sr-only">Đang tạo ảnh…</span>

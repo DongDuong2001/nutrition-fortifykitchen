@@ -17,7 +17,7 @@ export interface QuickAddSheetProps {
 const EMPTY: QuickEntryInput = { name: "", kcal: "", protein: "", carbs: "", fat: "" };
 
 const fieldClass = (invalid: boolean) =>
-  `h-12 w-full rounded-xl border-2 bg-card px-3 text-base text-text outline-none transition-colors focus:border-blue ${
+  `h-12 w-full rounded-xl border-2 bg-surface px-3 text-base text-text outline-none transition-colors focus:border-blue ${
     invalid ? "border-destructive" : "border-card-border"
   }`;
 const numberClass = `${fieldClass(false)} text-right font-bold tabular-nums`;

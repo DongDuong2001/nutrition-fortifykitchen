@@ -58,13 +58,13 @@ function ShortcutCard({
     </>
   );
   return (
-    <li className="flex w-[11rem] shrink-0 snap-start overflow-hidden rounded-[18px] border border-card-border bg-card">
+    <li className="flex w-[11rem] shrink-0 snap-start overflow-hidden rounded-[18px] lg:shadow-card border border-card-border bg-card">
       {onOpen ? (
         <button
           type="button"
           onClick={onOpen}
           aria-label={openLabel}
-          className="flex min-w-0 flex-1 cursor-pointer flex-col justify-center gap-0.5 border-0 bg-transparent p-3 text-left text-text active:bg-page motion-reduce:active:bg-transparent"
+          className="flex min-w-0 flex-1 cursor-pointer flex-col justify-center gap-0.5 border-0 bg-transparent p-3 text-left text-text active:bg-surface motion-reduce:active:bg-transparent"
         >
           {body}
         </button>
@@ -75,7 +75,7 @@ function ShortcutCard({
         type="button"
         onClick={onAdd}
         aria-label={addLabel}
-        className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center self-center rounded-full border-0 bg-transparent text-blue active:bg-page motion-reduce:active:bg-transparent"
+        className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center self-center rounded-full border-0 bg-transparent text-blue active:bg-surface motion-reduce:active:bg-transparent"
       >
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
           <path d="M12 5v14M5 12h14" />

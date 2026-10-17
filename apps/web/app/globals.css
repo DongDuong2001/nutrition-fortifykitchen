@@ -6,12 +6,15 @@
   --font-saira: var(--font-saira-condensed-face), sans-serif;
 
   /* Cobalt Sign core tokens */
-  --color-paper: #F3F1EC;
-  --color-page: #F3F1EC;
+  /* The app background is white (Hao, 17/10). */
+  --color-paper: #FFFFFF;
+  --color-page: #FFFFFF;
+  /* Second surface on white: chips, search fields, segmented tabs, inputs and small tiles. */
+  --color-surface: #F6F5F2;
   --color-card: #FFFFFF;
-  /* Meal headers of the home food list: one step darker than paper. */
+  /* Hover of chips on the surface token: one step darker. */
   --color-paper-dark: #EAE6DE;
-  --color-card-border: #E0DACF;
+  --color-card-border: #E8E5DE;
   --color-ink: #111317;
   --color-text: #141519;
   --color-secondary: #6B6A66;
@@ -21,7 +24,7 @@
   /* Light cobalt wash: the phone you are on in the install sheet, and its info box. */
   --color-cobalt-tint: #F2F5FF;
   --color-destructive: #D93F44;
-  /* Darker shade of #D93F44 for text contrast >= 4.5:1 (5.30:1 on #FFFFFF, 4.70:1 on #F3F1EC) */
+  /* Darker shade of #D93F44 for text contrast >= 4.5:1 (5.30:1 on #FFFFFF, 4.9:1 on --color-surface) */
   --color-destructive-text: #C4373C;
   --color-red: #D93F44;
 
@@ -31,6 +34,8 @@
   --color-level-green: #17945F;
   --color-level-blue: #1238D6;
   --color-level-empty: #E6E1D7;
+  /* Track of the continuous level bar on light surfaces (inside ink cards it is --color-level-empty-dark). */
+  --color-track: #ECEAE6;
 
   /* 4 level colours - dark (ink) background */
   --color-level-red-dark: #E5484D;
@@ -39,7 +44,7 @@
   --color-level-blue-dark: #5C86F2;
   --color-level-empty-dark: #2A2C31;
 
-  --color-divider: #E0DACF;
+  --color-divider: #E6E2DA;
   --color-hover: #FAF9F6;
   --color-muted-dark: #6B6A66;
   --color-muted-subtitle: #C9CDD6;
@@ -59,6 +64,9 @@
   --color-warning-text: #7A4A00;
   /* Level badge (cc-28): provisional, the coach may change them. Gold is for Level 4 and 5 only. */
   --color-gold: #E0B54A;
+
+  /* Soft card shadow, desktop only (lg:shadow-card). */
+  --shadow-card: 0 1px 2px rgba(17, 19, 23, 0.06);
 }
 
 :root {
@@ -68,7 +76,7 @@
 @layer base {
   body {
     margin: 0;
-    background-color: var(--color-page, #F3F1EC);
+    background-color: var(--color-page, #FFFFFF);
     color: var(--color-text, #141519);
     font-family: var(--font-sans);
     min-height: 100vh;

@@ -100,8 +100,8 @@ ANALYSE = """async (b64) => {
   const W = c.width, H = c.height;
   const all = x.getImageData(0, 0, W, H).data;
   const px = (ix, iy) => { const o = (iy * W + ix) * 4; return all[o] + ',' + all[o + 1] + ',' + all[o + 2]; };
-  const PAPER = '243,241,236';
-  const near = (k) => k.split(',').every((v, i) => Math.abs(Number(v) - [243, 241, 236][i]) <= 2);
+  const PAPER = '255,255,255';
+  const near = (k) => k.split(',').every((v, i) => Math.abs(Number(v) - [255, 255, 255][i]) <= 2);
   let edgeBad = 0; const badAt = []; const mark = (ix, iy) => { edgeBad++; if (badAt.length < 4) badAt.push([ix, iy, px(ix, iy)]); };
   // Hôm nay runs edge to edge in its body (the two columns), so the side edges are checked above the body (paper)
   // and in the footer (an ink band); the top row is paper and the bottom row is ink.
@@ -213,7 +213,7 @@ def check_head(s, tag, label, named):
         check(False, f"{tag} {label}: header geometry was not read")
         return
     check(h["badge"] is not None and abs(h["col"]["mid"] - h["badge"]["mid"]) <= 1.5, f"{tag} {label}: the badge is centred on the name column ({h['col']['mid']:.1f} vs {h['badge']['mid']:.1f})")
-    check(h["height"] >= 86 - 0.5 and h["bg"] in ("rgba(0, 0, 0, 0)", "rgb(243, 241, 236)"), f"{tag} {label}: the header is at least 86 px on paper ({h['height']}, {h['bg']})")
+    check(h["height"] >= 86 - 0.5 and h["bg"] in ("rgba(0, 0, 0, 0)", "rgb(255, 255, 255)"), f"{tag} {label}: the header is at least 86 px on paper ({h['height']}, {h['bg']})")
     check(h["paddingTop"] == 16 and h["paddingLeft"] == 12, f"{tag} {label}: padding 16 top, 12 sides ({h['paddingTop']}, {h['paddingLeft']})")
     check(abs(h["firstFs"] - 38) < 0.5 and h["firstTransform"] == "uppercase" and h["firstWeight"] in ("800", "900") and h["firstStyle"] == "italic" and "Saira" in h["firstFamily"] and h["firstColor"] == "rgb(17, 19, 23)",
           f"{tag} {label}: the name is Saira italic 38 px uppercase ink ({h['firstFs']}, {h['firstTransform']}, {h['firstWeight']}, {h['firstFamily'][:24]}, {h['firstColor']})")
@@ -303,7 +303,7 @@ def run(browser, size, tag):
     s = snap(pg)
     check(s is not None, f"{tag} the drawn page was read")
     check_png(info, s, tag, "today")
-    check(info["corner"] == "243,241,236", f"{tag} paper background {info['corner']}")
+    check(info["corner"] == "255,255,255", f"{tag} white background {info['corner']}")
     lv = info["found"]
     check(lv["red"] + lv["yellow"] + lv["green"] + lv["blue"] > 0, f"{tag} today uses the level colours in the image {lv}")
     if s:

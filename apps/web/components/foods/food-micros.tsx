@@ -65,7 +65,7 @@ export function GoodSources({ rows }: { rows: MicroRow[] }) {
         {rows.map((r) => (
           <li
             key={r.id}
-            className="inline-flex min-h-[32px] items-center rounded-full bg-page px-3 text-[13px] font-bold text-text"
+            className="inline-flex min-h-[32px] items-center rounded-full bg-surface px-3 text-[13px] font-bold text-text"
           >
             {r.name} · {r.pct}%
           </li>

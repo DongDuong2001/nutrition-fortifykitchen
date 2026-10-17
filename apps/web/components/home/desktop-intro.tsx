@@ -85,21 +85,21 @@ export function DesktopIntroBanner() {
           </div>
 
           <div className="grid grid-cols-3 gap-4 pt-3 border-t border-card-border">
-            <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-page border border-card-border/60">
+            <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-surface border border-card-border/60">
               <div className="text-xs font-bold text-text">1. Ghi nhận khẩu phần chính xác</div>
               <p className="m-0 text-xs text-secondary leading-relaxed">
                 Tra cứu dữ liệu thực phẩm chuẩn hóa, hỗ trợ thêm nhiều món liên tục vào từng bữa ăn với khối lượng tùy chỉnh.
               </p>
             </div>
 
-            <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-page border border-card-border/60">
+            <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-surface border border-card-border/60">
               <div className="text-xs font-bold text-text">2. Phân tích 22 vi chất tức thì</div>
               <p className="m-0 text-xs text-secondary leading-relaxed">
                 Biểu đồ 10 mức hiển thị trực quan tỷ lệ đạt chuẩn của từng vitamin và khoáng chất, cho thấy vi chất nào còn thiếu.
               </p>
             </div>
 
-            <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-page border border-card-border/60">
+            <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-surface border border-card-border/60">
               <div className="text-xs font-bold text-text">3. Điều chỉnh theo vận động</div>
               <p className="m-0 text-xs text-secondary leading-relaxed">
                 Khuyến nghị muối được tính lại theo số phút tập luyện bạn ghi mỗi ngày.
@@ -117,7 +117,7 @@ export function DesktopIntroBanner() {
               </Link>
               <Link
                 href="/micros"
-                className="min-h-[44px] px-4 rounded-full bg-card border border-card-border text-text font-bold text-xs inline-flex items-center justify-center no-underline hover:bg-page active:scale-[0.97] motion-reduce:active:scale-100 transition-all"
+                className="min-h-[44px] px-4 rounded-full bg-card border border-card-border text-text font-bold text-xs inline-flex items-center justify-center no-underline hover:bg-surface active:scale-[0.97] motion-reduce:active:scale-100 transition-all"
               >
                 Khám phá 22 vi chất
               </Link>

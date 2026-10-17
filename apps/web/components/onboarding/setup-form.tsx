@@ -203,7 +203,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
                 }}
                 placeholder="Tên của bạn"
                 aria-invalid={errors.displayName ? true : undefined}
-                className={`h-[52px] w-full rounded-xl border-2 bg-card px-4 text-base font-semibold text-text outline-none focus:border-blue ${
+                className={`h-[52px] w-full rounded-xl border-2 bg-surface px-4 text-base font-semibold text-text outline-none focus:border-blue ${
                   errors.displayName ? "border-destructive" : "border-grabber"
                 }`}
               />
@@ -238,7 +238,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
                     onBlur={() => checkField("birthYear")}
                     onKeyDown={nextFieldOnEnter}
                     aria-invalid={errors.birthYear ? true : undefined}
-                    className={`h-[52px] w-full rounded-xl border-2 bg-card px-4 text-base font-semibold tabular-nums text-text outline-none focus:border-blue ${
+                    className={`h-[52px] w-full rounded-xl border-2 bg-surface px-4 text-base font-semibold tabular-nums text-text outline-none focus:border-blue ${
                       errors.birthYear ? "border-destructive" : "border-grabber"
                     }`}
                   />
@@ -255,7 +255,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
                     onChange={(e) => update({ weight: e.target.value })}
                     onBlur={() => checkField("weight")}
                     aria-invalid={errors.weight ? true : undefined}
-                    className={`h-[52px] w-full rounded-xl border-2 bg-card px-4 text-base font-semibold tabular-nums text-text outline-none focus:border-blue ${
+                    className={`h-[52px] w-full rounded-xl border-2 bg-surface px-4 text-base font-semibold tabular-nums text-text outline-none focus:border-blue ${
                       errors.weight ? "border-destructive" : "border-grabber"
                     }`}
                   />
@@ -278,7 +278,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
                   writePendingCoachCode(e.target.value);
                 }}
                 placeholder="Mã gồm 10 ký tự"
-                className="h-[52px] w-full rounded-xl border-2 border-grabber bg-card px-4 text-base font-semibold uppercase text-text outline-none focus:border-blue"
+                className="h-[52px] w-full rounded-xl border-2 border-grabber bg-surface px-4 text-base font-semibold uppercase text-text outline-none focus:border-blue"
               />
             </FormRow>
             )}
@@ -307,7 +307,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
                     role="radio"
                     aria-checked={on}
                     onClick={() => update({ goal: option.goal })}
-                    className={`flex min-h-[60px] items-center gap-3 rounded-xl border-2 bg-card px-4 py-3 text-left text-text lg:min-h-[72px] ${
+                    className={`flex min-h-[60px] items-center gap-3 rounded-xl border-2 bg-surface px-4 py-3 text-left text-text lg:min-h-[72px] ${
                       on ? "border-blue" : "border-divider"
                     }`}
                   >

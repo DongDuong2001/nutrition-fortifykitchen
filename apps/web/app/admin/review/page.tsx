@@ -119,7 +119,7 @@ export default function AdminReviewPage() {
                         Mã bản ghi: <strong className="text-text">{draft.commit_hash}</strong>
                       </span>
                     </div>
-                    <p className="m-0 break-all rounded-xl border border-card-border bg-page px-3 py-2 text-[13px] font-semibold text-text">
+                    <p className="m-0 break-all rounded-xl border border-card-border bg-surface px-3 py-2 text-[13px] font-semibold text-text">
                       {draft.file_path}
                     </p>
 

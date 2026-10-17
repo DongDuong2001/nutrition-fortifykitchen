@@ -101,7 +101,7 @@ export function DayBars({
           })}
         </div>
       </div>
-      <p aria-live="polite" className="m-0 flex items-baseline justify-between gap-3 rounded-xl bg-page px-3 py-3">
+      <p aria-live="polite" className="m-0 flex items-baseline justify-between gap-3 rounded-xl bg-surface px-3 py-3">
         <span className="text-[13px] font-semibold text-secondary">{day.dateLabel}</span>
         <span className="text-right">
           <span className="font-display text-2xl font-bold tabular-nums">{shown}</span>

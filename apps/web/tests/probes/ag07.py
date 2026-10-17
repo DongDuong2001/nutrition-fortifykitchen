@@ -1,7 +1,7 @@
 """ag-07: verification probe for remaining accessibility items:
 1. /foods/[id]: gram input fills 44px label (h-full) and shows focus ring on Tab
 2. /foods/new: inputs (cf-name, cf-size, cf-kcal, cf-pro, cf-carbs, cf-fat) linked to label via htmlFor/id
-3. FormRow required "*" uses --color-destructive-text with contrast >= 4.5:1 on #FFFFFF and #F3F1EC
+3. FormRow required "*" uses --color-destructive-text with contrast >= 4.5:1 on #FFFFFF and the surface #F6F5F2
 4. /signin (MagicLinkForm): email input has visible keyboard focus ring
 Asserted at both 390x844 (mobile) and 1440x900 (desktop).
 
@@ -111,7 +111,7 @@ def test_item_2(browser, vp_name, vp):
 
 
 def test_item_3(browser, vp_name, vp):
-    """Item 3: FormRow required '*' has contrast >= 4.5:1 on #FFFFFF and #F3F1EC"""
+    """Item 3: FormRow required '*' has contrast >= 4.5:1 on #FFFFFF and the surface #F6F5F2"""
     ctx = browser.new_context(viewport=vp)
     pg = ctx.new_page()
     pg.goto(BASE + "/foods/new?mode=nutrition", wait_until="networkidle")  # cc-42: Tự nhập is the second mode
@@ -127,10 +127,10 @@ def test_item_3(browser, vp_name, vp):
     rgb = parse_rgb(color_rgb)
 
     cr_white = contrast_ratio(rgb, (255, 255, 255))
-    cr_paper = contrast_ratio(rgb, (243, 241, 236))
+    cr_paper = contrast_ratio(rgb, (246, 245, 242))
 
     check(cr_white >= 4.5, f"[{vp_name}] asterisk contrast on #FFFFFF >= 4.5:1 (measured: {cr_white:.2f}:1)")
-    check(cr_paper >= 4.5, f"[{vp_name}] asterisk contrast on #F3F1EC >= 4.5:1 (measured: {cr_paper:.2f}:1)")
+    check(cr_paper >= 4.5, f"[{vp_name}] asterisk contrast on #F6F5F2 >= 4.5:1 (measured: {cr_paper:.2f}:1)")
 
     ctx.close()
 

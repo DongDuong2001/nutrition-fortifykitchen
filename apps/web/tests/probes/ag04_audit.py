@@ -200,7 +200,7 @@ AUDIT_JS = """
             }
             cur = cur.parentElement;
         }
-        return { r: 243, g: 241, b: 236, a: 1 }; // Default #F3F1EC
+        return { r: 255, g: 255, b: 255, a: 1 }; // Default: the white page
     };
 
     const lum = (c) => {

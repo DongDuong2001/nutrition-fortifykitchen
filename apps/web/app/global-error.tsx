@@ -39,7 +39,7 @@ export default function GlobalError({
         <main
           role="alert"
           aria-live="assertive"
-          className="flex w-full max-w-[560px] flex-col gap-4 rounded-[18px] border border-card-border bg-card p-6 text-center"
+          className="flex w-full max-w-[560px] flex-col gap-4 rounded-[18px] lg:shadow-card border border-card-border bg-card p-6 text-center"
         >
           <div className="flex flex-col gap-2">
             <h1 className="m-0 font-display text-2xl font-extrabold italic leading-tight text-text">
@@ -51,7 +51,7 @@ export default function GlobalError({
           </div>
 
           {error.digest && (
-            <p className="m-0 rounded-xl bg-page px-3 py-2 text-[13px] tabular-nums text-secondary">
+            <p className="m-0 rounded-xl bg-surface px-3 py-2 text-[13px] tabular-nums text-secondary">
               Mã lỗi: {error.digest}
             </p>
           )}

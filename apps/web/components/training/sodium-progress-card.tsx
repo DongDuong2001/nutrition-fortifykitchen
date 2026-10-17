@@ -20,7 +20,7 @@ export function SodiumProgressCard({
   return (
     <div
       data-align-group="training-summary"
-      className={`bg-card border border-card-border rounded-[18px] p-5.5 flex flex-col justify-between gap-3 ${className}`}
+      className={`bg-card border border-card-border rounded-[18px] lg:shadow-card p-5.5 flex flex-col justify-between gap-3 ${className}`}
     >
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="m-0 text-lg font-bold text-text">Natri hôm nay</h2>

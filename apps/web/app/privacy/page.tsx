@@ -13,7 +13,7 @@ export default function PrivacyPage() {
       <LegalHeader title="Chính sách bảo mật" alignGroup="privacy-header" />
 
       <main className="mx-auto w-full max-w-[760px] px-4 pb-6 pt-4 lg:mx-0 lg:px-8">
-        <article className="flex flex-col gap-6 rounded-[18px] border border-card-border bg-card p-5 text-text lg:p-8">
+        <article className="flex flex-col gap-6 rounded-[18px] lg:shadow-card border border-card-border bg-card p-5 text-text lg:p-8">
           <header className="flex flex-col gap-2 border-b border-divider pb-4">
             <h2 className="m-0 text-xl font-bold leading-snug text-text">
               Chính sách bảo mật dữ liệu H1T MICRO

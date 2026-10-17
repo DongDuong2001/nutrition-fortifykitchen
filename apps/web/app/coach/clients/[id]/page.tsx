@@ -108,8 +108,8 @@ export default function CoachClientPage() {
                           item.status === "added"
                             ? "bg-blue/10 text-blue"
                             : item.status === "removed"
-                              ? "bg-page text-secondary line-through"
-                              : "bg-page text-text"
+                              ? "bg-surface text-secondary line-through"
+                              : "bg-surface text-text"
                         }`}
                       >
                         {item.status === "added" && <span className="sr-only">Thêm: </span>}

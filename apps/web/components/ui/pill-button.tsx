@@ -33,7 +33,7 @@ export function PillButton({
     primary:
       "bg-blue text-on-accent hover:bg-blue/90 border-0 shadow-sm active:-skew-x-[14deg]",
     secondary:
-      "bg-card text-text border border-card-border hover:bg-page",
+      "bg-card text-text border border-card-border hover:bg-surface",
     destructive: "bg-red text-on-accent hover:bg-red/90 border-0 shadow-sm",
   }[variant];
 

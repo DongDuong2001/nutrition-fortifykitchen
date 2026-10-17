@@ -360,7 +360,7 @@ function MicrosContent() {
           </div>
 
           <main className="flex-1 w-full max-w-[560px] mx-auto px-4 py-6 flex flex-col gap-4">
-            <div className="bg-card border border-card-border rounded-[18px] p-6 text-center flex flex-col items-center gap-3">
+            <div className="bg-card border border-card-border rounded-[18px] lg:shadow-card p-6 text-center flex flex-col items-center gap-3">
               <h2 className="m-0 text-base font-bold">{isPast ? "Chưa có món ngày này" : "Chưa có món hôm nay"}</h2>
               <p className="m-0 text-sm text-secondary leading-relaxed max-w-[320px]">
                 Thêm món vào nhật ký để theo dõi 22 vi chất mỗi ngày.
@@ -467,7 +467,7 @@ function MicrosContent() {
                       className={`h-9 px-4 rounded-full text-xs font-semibold flex items-center justify-center whitespace-nowrap transition-colors ${
                         isActive
                           ? "bg-ink text-on-dark shadow-xs"
-                          : "bg-card text-text border border-card-border hover:bg-page"
+                          : "bg-surface text-text border border-card-border hover:bg-paper-dark"
                       }`}
                     >
                       {chipLabels[group.key]}
@@ -570,7 +570,7 @@ function MicrosContent() {
                     className={`h-9 px-4 rounded-full text-xs font-semibold flex items-center justify-center transition-colors ${
                       isActive
                         ? "bg-ink text-on-dark shadow-xs"
-                        : "bg-card text-text border border-card-border hover:bg-page"
+                        : "bg-surface text-text border border-card-border hover:bg-paper-dark"
                     }`}
                   >
                     {chipLabels[group.key]}
@@ -669,7 +669,7 @@ function GroupCard({
       id={`${idPrefix}${group.key}`}
       data-align-group={alignGroup}
       data-align-edge={alignGroup && idPrefix.includes("desktop") ? "left" : undefined}
-      className="bg-card border border-card-border rounded-[18px] overflow-clip flex flex-col scroll-mt-2 lg:scroll-mt-6 break-inside-avoid"
+      className="bg-card border border-card-border rounded-[18px] lg:shadow-card overflow-clip flex flex-col scroll-mt-2 lg:scroll-mt-6 break-inside-avoid"
     >
       {/* Sticky group header: sticks to the top of the scrolling body */}
       <div className="sticky top-[var(--micros-sticky,0px)] z-10 bg-card border-b border-card-border">
@@ -800,7 +800,7 @@ function NutrientRow({ row, dateQuery = "" }: { row: NutrientRowData; dateQuery?
   return (
     <Link
       href={`/micros/${definition.id}${dateQuery}`}
-      className="no-underline text-inherit block hover:bg-page/50 active:scale-[0.99] transition-all -mx-2 px-2 rounded-lg"
+      className="no-underline text-inherit block hover:bg-surface/50 active:scale-[0.99] transition-all -mx-2 px-2 rounded-lg"
     >
       {content}
     </Link>

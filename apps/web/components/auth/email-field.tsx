@@ -19,7 +19,7 @@ export function EmailField({ value, onChange, error }: { value: string; onChange
         value={value}
         onChange={(e) => onChange(e.target.value)}
         aria-invalid={error ? true : undefined}
-        className={`h-[52px] w-full rounded-xl border-2 bg-card px-4 text-base text-text placeholder:text-secondary outline-none focus:border-blue focus-visible:ring-2 focus-visible:ring-blue ${
+        className={`h-[52px] w-full rounded-xl border-2 bg-surface px-4 text-base text-text placeholder:text-secondary outline-none focus:border-blue focus-visible:ring-2 focus-visible:ring-blue ${
           error ? "border-destructive" : "border-grabber"
         }`}
       />

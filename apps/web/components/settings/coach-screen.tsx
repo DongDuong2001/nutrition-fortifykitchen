@@ -64,7 +64,7 @@ export function CoachScreen() {
                   }}
                   placeholder="Mã gồm 10 ký tự"
                   aria-invalid={error ? true : undefined}
-                  className={`h-[52px] w-full rounded-xl border-2 bg-card px-4 text-base font-semibold uppercase text-text outline-none focus:border-blue ${
+                  className={`h-[52px] w-full rounded-xl border-2 bg-surface px-4 text-base font-semibold uppercase text-text outline-none focus:border-blue ${
                     error ? "border-destructive" : "border-card-border"
                   }`}
                 />

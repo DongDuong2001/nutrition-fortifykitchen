@@ -7,7 +7,7 @@ import { IconCheck, IconSparkles } from "@/components/ui/icons";
 import { initialsOf } from "./coach-initials";
 
 const LINK_BUTTON =
-  "flex min-h-11 w-full items-center justify-center rounded-full border border-card-border bg-card px-4 text-[13px] font-bold text-text no-underline hover:bg-page hover:text-text active:scale-[0.97] motion-reduce:active:scale-100";
+  "flex min-h-11 w-full items-center justify-center rounded-full border border-card-border bg-card px-4 text-[13px] font-bold text-text no-underline hover:bg-surface hover:text-text active:scale-[0.97] motion-reduce:active:scale-100";
 
 /** A coach's profile: who, what they know, what they recommend, how to reach them. The page's h1 is the name. */
 export function CoachDetailCard({ coach }: { coach: CoachProfile }) {
@@ -48,7 +48,7 @@ export function CoachDetailCard({ coach }: { coach: CoachProfile }) {
             <SectionTitle as="h2">Lĩnh vực chuyên môn</SectionTitle>
             <ul role="list" className="m-0 flex list-none flex-wrap gap-2 p-0">
               {coach.specialties.map((s) => (
-                <li key={s} className="rounded-full border border-card-border bg-page px-3 py-1 text-[13px] font-semibold text-text">
+                <li key={s} className="rounded-full border border-card-border bg-surface px-3 py-1 text-[13px] font-semibold text-text">
                   {s}
                 </li>
               ))}
@@ -81,7 +81,7 @@ export function CoachDetailCard({ coach }: { coach: CoachProfile }) {
           </div>
           <ul role="list" className="m-0 grid list-none grid-cols-2 gap-2 p-0">
             {coach.recommendedFoods.map((f) => (
-              <li key={f} className="flex min-h-11 items-center rounded-xl border border-card-border bg-page px-3 py-2 text-[13px] font-semibold leading-snug text-text">
+              <li key={f} className="flex min-h-11 items-center rounded-xl border border-card-border bg-surface px-3 py-2 text-[13px] font-semibold leading-snug text-text">
                 {f}
               </li>
             ))}

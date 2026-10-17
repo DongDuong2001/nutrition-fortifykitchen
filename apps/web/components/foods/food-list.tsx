@@ -8,7 +8,7 @@ function SourceTag({ food }: { food: FoodItem }) {
   return (
     <span
       className={`inline-flex h-6 shrink-0 items-center rounded-full px-2 text-xs font-bold ${
-        tag.warning ? "bg-warning-bg text-warning-text" : "border border-card-border bg-page text-secondary"
+        tag.warning ? "bg-warning-bg text-warning-text" : "border border-card-border bg-surface text-secondary"
       }`}
     >
       {tag.label}
@@ -167,7 +167,7 @@ export function FoodList({
   };
 
   // No overflow-hidden on the grouped Card: it would stop the category label from sticking while the list scrolls
-  const cardClass = "rounded-[18px] border border-card-border bg-card";
+  const cardClass = "rounded-[18px] lg:shadow-card border border-card-border bg-card";
 
   return (
     <div data-tour={dataTour} className={`flex flex-col gap-3 ${className}`}>
@@ -183,7 +183,7 @@ export function FoodList({
             data-align-edge={group.key === firstHeaderKey ? "left" : undefined}
             className={cardClass}
           >
-            <div className="sticky top-0 z-10 rounded-t-[18px] border-b border-divider bg-page px-4 py-2 text-xs font-bold text-secondary">
+            <div className="sticky top-0 z-10 rounded-t-[18px] border-b border-divider bg-surface px-4 py-2 text-xs font-bold text-secondary">
               {group.label} · {group.foods.length}
             </div>
             <ul className="m-0 flex list-none flex-col overflow-hidden rounded-b-[18px] p-0">{group.foods.map((food) => renderRow(food, false))}</ul>

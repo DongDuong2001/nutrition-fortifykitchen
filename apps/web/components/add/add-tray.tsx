@@ -114,7 +114,7 @@ function PortionRow({
           Nhập g
         </button>
         {custom && (
-          <label className="flex h-11 w-28 items-center gap-1 rounded-xl border-2 border-blue bg-card px-2">
+          <label className="flex h-11 w-28 items-center gap-1 rounded-xl border-2 border-blue bg-surface px-2">
             <span className="sr-only">Số gam {food.nameVi}</span>
             <input
               type="text"

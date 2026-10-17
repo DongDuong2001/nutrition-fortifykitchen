@@ -82,7 +82,7 @@ def check_manifest(browser):
     check(bool(m.get("description")) and re.search(r"[ạảãàáâấầẩẫậăắằẳẵặđêếềểễệôốồổỗộơớờởỡợưứừửữự]", m["description"]) is not None, "manifest: description is Vietnamese")
     check(m.get("start_url") == "/" and m.get("scope") == "/", "manifest: start_url and scope are /")
     check(m.get("display") == "standalone", "manifest: display standalone")
-    check(m.get("background_color", "").upper() == "#F3F1EC", f"manifest: background_color is paper ({m.get('background_color')})")
+    check(m.get("background_color", "").upper() == "#FFFFFF", f"manifest: background_color is the white page ({m.get('background_color')})")
     check(m.get("theme_color", "").upper() == "#111317", f"manifest: theme_color is ink ({m.get('theme_color')})")
 
     icons = m.get("icons", [])
