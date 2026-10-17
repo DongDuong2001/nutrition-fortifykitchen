@@ -46,7 +46,7 @@ export const TIPS: readonly Tip[] = [
     id: "unsaved",
     target: "unsaved-marker",
     title: "Món chưa lưu",
-    body: "Món có chữ Chưa lưu vẫn nằm trên máy này. App tự gửi lại khi có mạng. Nếu app báo lỗi, chạm Thử lại.",
+    body: "Món có chữ Chưa lưu vẫn nằm trên máy này. App tự gửi lại khi có mạng và mỗi lần mở app.",
     used: ["retry-unsaved"],
     when: (c) => today(c) && (c.unsaved ?? 0) > 0,
   },

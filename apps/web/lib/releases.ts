@@ -38,7 +38,7 @@ export const RELEASES: readonly Release[] = [
       {
         icon: "meal",
         title: "Đồng bộ ổn định hơn",
-        body: "Món đã thêm luôn được lưu, kể cả khi mở app lâu; máy khác thấy món mới trong vòng 1 phút.",
+        body: "Món chưa lưu được sẽ có chữ Chưa lưu và được gửi lại tự động; máy khác thấy món mới trong vòng 1 phút.",
       },
     ],
   },
