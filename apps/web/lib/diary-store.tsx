@@ -80,6 +80,7 @@ import {
   findEntry,
   mealEntryIds,
   mealPortions,
+  mergeServerDay,
   parseAddedEntries,
   parseSampleEdits,
   removeAddedIn,
@@ -438,6 +439,17 @@ export function pastDayData(iso: string, todayIso: string, profile: Profile, tar
   return { ...day, minerals, vitamins, microsSummary: microsSummaryFor({ minerals, vitamins }), date: iso };
 }
 
+/** Entry ids whose POST has not answered yet: a refetch on focus keeps them (mergeServerDay). */
+const postingEntryIds = new Set<string>();
+
+function postEntry(input: Parameters<typeof apiClient.addEntry>[0] & { id: string }): void {
+  postingEntryIds.add(input.id);
+  apiClient
+    .addEntry(input)
+    .catch(() => {})
+    .finally(() => postingEntryIds.delete(input.id));
+}
+
 export function DiaryProvider({ children }: { children: React.ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
   const [demo, setDemo] = useState(false);
@@ -469,6 +481,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   const refreshRemoteDay = useCallback((iso: string) => {
     const account = currentAccountId();
     if (!isLiveMode() || demo || !account) return;
+    const startedAt = Date.now();
+    const postingAtStart = new Set(postingEntryIds);
 
     syncOfflineOutbox()
       .then(() => apiClient.getDay(iso))
@@ -496,14 +510,9 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
           }
         }
         setEdits((prev) => {
-          const outboxIds = new Set(getPendingOfflineEntryIds());
-          const pendingLocal = prev.added.filter(
-            (it) => !serverEntries.some((se) => se.id === it.id) && outboxIds.has(it.id)
-          );
-          return {
-            ...prev,
-            added: [...serverEntries, ...pendingLocal],
-          };
+          // Queued offline, or a POST in flight when the refetch started or still in flight now
+          const keep = new Set([...getPendingOfflineEntryIds(), ...postingAtStart, ...postingEntryIds]);
+          return { ...prev, added: mergeServerDay(prev.added, serverEntries, { keep, startedAt }) };
         });
       })
       .catch(() => {});
@@ -818,13 +827,13 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       addRecentFood(food, qty);
 
       if (isLiveMode()) {
-        apiClient.addEntry({
+        postEntry({
           id: newEntry.id,
           foodId: food.id,
           grams,
           mealSlot,
           date: todayIso || getTodayIsoVN(),
-        }).catch(() => {});
+        });
       }
 
       return true;
@@ -857,7 +866,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       items.forEach(({ food, label }) => addRecentFood(food, label));
       if (isLiveMode()) {
         entries.forEach((e, i) => {
-          apiClient.addEntry({ id: e.id, foodId: items[i].food.id, grams: items[i].grams, mealSlot, date: todayIso || getTodayIsoVN() }).catch(() => {});
+          postEntry({ id: e.id, foodId: items[i].food.id, grams: items[i].grams, mealSlot, date: todayIso || getTodayIsoVN() });
         });
       }
       return true;
@@ -1124,15 +1133,13 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         undoIds: [entry.id],
       });
       if (isLiveMode()) {
-        apiClient
-          .addEntry({
-            id: entry.id,
-            kind: "quick",
-            calories: entry.calories,
-            mealSlot: slot,
-            date: todayIso || getTodayIsoVN(),
-          })
-          .catch(() => {});
+        postEntry({
+          id: entry.id,
+          kind: "quick",
+          calories: entry.calories,
+          mealSlot: slot,
+          date: todayIso || getTodayIsoVN(),
+        });
       }
       return result;
     },

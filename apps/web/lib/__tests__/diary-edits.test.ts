@@ -12,6 +12,7 @@ import {
   findEntry,
   hasEnergy,
   mealEntryIds,
+  mergeServerDay,
   parseAddedEntries,
   parseSampleEdits,
   moveEntriesIn,
@@ -376,5 +377,31 @@ describe("Chuyển bữa undo", () => {
     const moves = slotsBeforeMove(base(), ["a"], "snack", []);
     const gone = removeAddedIn(moveEntriesIn(base(), ["a"], "snack", []), ["a"]);
     expect(restoreSlotsIn(gone, moves, []).added.map((e) => e.id)).toEqual(["b"]);
+  });
+});
+
+describe("mergeServerDay (refetch on focus)", () => {
+  const at = (id: string, addedAt: string): AddedDiaryEntry => ({ ...addedEntry(id, "food-chuoi", 100, "breakfast"), addedAt });
+  const started = Date.parse("2026-10-18T08:00:00.000Z");
+  const server = [at("s1", "2026-10-18T07:00:00.000Z")];
+
+  it("takes the server's entries and drops a local one the server no longer has", () => {
+    const local = [at("s1", "2026-10-18T07:00:00.000Z"), at("gone", "2026-10-18T06:00:00.000Z")];
+    expect(mergeServerDay(local, server, { keep: new Set(), startedAt: started }).map((e) => e.id)).toEqual(["s1"]);
+  });
+
+  it("keeps a local entry whose POST is still in flight (or queued offline)", () => {
+    const local = [at("posting", "2026-10-18T07:59:00.000Z")];
+    expect(mergeServerDay(local, server, { keep: new Set(["posting"]), startedAt: started }).map((e) => e.id)).toEqual(["s1", "posting"]);
+  });
+
+  it("keeps a local entry added after the refresh started: the server answered before its POST landed", () => {
+    const local = [at("late", "2026-10-18T08:00:01.000Z")];
+    expect(mergeServerDay(local, server, { keep: new Set(), startedAt: started }).map((e) => e.id)).toEqual(["s1", "late"]);
+  });
+
+  it("does not list an entry twice when the server already has it", () => {
+    const local = [at("s1", "2026-10-18T08:00:05.000Z")];
+    expect(mergeServerDay(local, server, { keep: new Set(["s1"]), startedAt: started }).map((e) => e.id)).toEqual(["s1"]);
   });
 });

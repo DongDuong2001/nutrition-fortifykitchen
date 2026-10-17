@@ -494,3 +494,18 @@ export function mealPortions(edits: DiaryEdits, slot: MealSlot, samples: SampleI
     .map((e) => ({ foodId: e.foodId, servingLabel: e.displayQty, grams: e.grams }));
   return [...fromSamples, ...fromAdded];
 }
+
+/**
+ * A day refetched from the server (diary-store refreshRemoteDay, on focus): the server's entries, plus each local
+ * entry the server does not have yet that must stay: one in `keep` (queued offline, or its POST in flight) or one
+ * added after the refetch started (its POST landed after the server answered). Other local entries were deleted
+ * elsewhere and go.
+ */
+export function mergeServerDay(
+  local: readonly AddedDiaryEntry[],
+  server: readonly AddedDiaryEntry[],
+  { keep, startedAt }: { keep: ReadonlySet<string>; startedAt: number }
+): AddedDiaryEntry[] {
+  const onServer = new Set(server.map((e) => e.id));
+  return [...server, ...local.filter((e) => !onServer.has(e.id) && (keep.has(e.id) || Date.parse(e.addedAt) >= startedAt))];
+}
