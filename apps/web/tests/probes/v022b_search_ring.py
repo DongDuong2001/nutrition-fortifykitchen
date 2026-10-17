@@ -52,7 +52,8 @@ def run(browser, size, route, name):
     pg.goto(BASE + route, wait_until="networkidle")
     pg.wait_for_timeout(600)
     pg.locator(SEARCH).first.wait_for(state="visible", timeout=8000)
-    for _ in range(150):
+    # cc-51: Gần đây and Hay ăn add up to 32 focusable buttons before the field on /add
+    for _ in range(300):
         pg.keyboard.press("Tab")
         if pg.evaluate("document.activeElement && document.activeElement.getAttribute('aria-label') === 'Tìm món'"):
             break
