@@ -23,6 +23,8 @@ export interface SavedMealShortcut {
 
 export interface AddShortcutsProps {
   recents: RecentShortcut[];
+  /** cc-51 D1: the foods logged most in the last 14 days (Hay ăn) */
+  frequent?: RecentShortcut[];
   favourites: RecentShortcut[];
   savedMeals: SavedMealShortcut[];
   /** The + of a card: add with the portion it shows (an undo toast follows). */
@@ -90,7 +92,7 @@ function ShortcutCard({
  * + = add with that portion) and Bữa ăn của tôi (+ adds every food), as carousels; then Chỉ thêm kcal.
  * Nothing here is shown while searching.
  */
-export function AddShortcuts({ recents, favourites, savedMeals, onAddRecent, onOpenRecent, onAddSavedMeal, onQuickKcal }: AddShortcutsProps) {
+export function AddShortcuts({ recents, frequent = [], favourites, savedMeals, onAddRecent, onOpenRecent, onAddSavedMeal, onQuickKcal }: AddShortcutsProps) {
   const foodCard = (r: RecentShortcut) => {
     const kcal = foodRowKcal(r.food, r.grams);
     return (
@@ -108,7 +110,12 @@ export function AddShortcuts({ recents, favourites, savedMeals, onAddRecent, onO
 
   return (
     <div className="flex shrink-0 flex-col gap-3">
-      {recents.length > 0 && <Carousel title="Gần đây">{recents.map(foodCard)}</Carousel>}
+      {recents.length > 0 && (
+        <Carousel title="Gần đây" id="add-recents">
+          {recents.map(foodCard)}
+        </Carousel>
+      )}
+      {frequent.length > 0 && <Carousel title="Hay ăn">{frequent.map(foodCard)}</Carousel>}
       {favourites.length > 0 && <Carousel title="Yêu thích">{favourites.map(foodCard)}</Carousel>}
       {savedMeals.length > 0 && (
         <Carousel title="Bữa ăn của tôi">

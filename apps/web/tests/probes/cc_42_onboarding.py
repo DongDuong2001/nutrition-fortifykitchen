@@ -279,13 +279,15 @@ def tips(browser, size, tag):
             check(pg.locator("[data-onboarding-card]").count() == 1, f"{tag} tip {tip_id}: one card only")
             overlap_free(pg, f"{tag} tip {tip_id}")
             shot(pg, f"tip-{tip_id}-{tag}")
+            first_text = card(pg).inner_text()
             card(pg).get_by_role("button", name="Đã hiểu").click()
             pg.wait_for_timeout(300)
             check(card(pg).count() == 0, f"{tag} tip {tip_id}: Đã hiểu closes it")
             check(tip_id in flags(pg).get("seen", []), f"{tag} tip {tip_id}: saved as seen")
             go(pg, route, wait=200)
             pg.wait_for_timeout(1200)
-            check(card(pg).count() == 0 or tip_id == "home-logged", f"{tag} tip {tip_id}: not again on the second visit")
+            # cc-51: the screen's next tip may show (Gần đây và Hay ăn after add-tray); this one never again
+            check(card(pg).count() == 0 or tip_id == "home-logged" or card(pg).inner_text() != first_text, f"{tag} tip {tip_id}: not again on the second visit")
         ctx.close()
 
 
@@ -327,7 +329,7 @@ def tips_rules(browser):
     check("tray-add" in flags(pg).get("used", []), "using the + circle records tray-add")
     ctx.close()
     ctx, pg = ctx_page(browser, PHONE)
-    pg.add_init_script("localStorage.setItem('h1t_settings_v1_demo', JSON.stringify({onboarding: {used: ['tray-add', 'training-minutes']}}))")
+    pg.add_init_script("localStorage.setItem('h1t_settings_v1_demo', JSON.stringify({onboarding: {used: ['tray-add', 'shortlist-add', 'training-minutes']}}))")
     go(pg, "/add?meal=lunch", wait=200)
     pg.wait_for_timeout(1200)
     check(card(pg).count() == 0, "a feature already used: no tip")
@@ -551,6 +553,12 @@ def keyboard(browser):
 def settings(browser):
     ctx, pg = ctx_page(browser, PHONE)
     go(pg, "/settings")
+    # cc-51: Cài đặt has its own tip now (Rung khi chạm, where the phone can vibrate); close it first
+    pg.wait_for_timeout(1000)
+    if card(pg).count() > 0:
+        check("Rung khi chạm" in card(pg).inner_text(), "Cài đặt: the Rung khi chạm tip (Chromium has vibrate)")
+        card(pg).get_by_role("button", name="Đã hiểu").click()
+        pg.wait_for_timeout(300)
     replay = pg.get_by_role("button", name="Xem lại hướng dẫn")
     check(replay.count() == 1 and "Mới" in replay.inner_text(), "Cài đặt: Xem lại hướng dẫn with the Mới pill")
     check(pg.get_by_role("switch", name="Mẹo trên từng màn hình").get_attribute("aria-checked") == "true", "Cài đặt: the tips switch is on")
@@ -662,7 +670,8 @@ def share_tip(browser):
         ctx, pg = share_ctx(browser, foods, onboarding)
         go(pg, route, wait=200)
         pg.wait_for_timeout(1500)
-        check(card(pg).count() == 0, f"share tip: not with {label}")
+        # cc-51: another Hôm nay tip (chạm vi chất) may show; never the share tip
+        check(card(pg).count() == 0 or "Chia sẻ ngày ăn của bạn" not in card(pg).inner_text(), f"share tip: not with {label}")
         ctx.close()
 
 

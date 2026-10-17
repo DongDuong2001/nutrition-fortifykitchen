@@ -11,10 +11,10 @@ describe("RELEASES", () => {
     expect([...ids].sort().reverse()).toEqual(ids);
   });
 
-  it("starts with the 18/10 release: Đồng bộ ổn định hơn, no tour", () => {
+  it("starts with the 18/10 release: Đồng bộ ổn định hơn and cc-51's four, no tour", () => {
     const r = latestRelease();
     expect(r?.id).toBe("2026-10-18");
-    expect(r?.items.map((i) => i.title)).toEqual(["Đồng bộ ổn định hơn"]);
+    expect(r?.items.map((i) => i.title)).toEqual(["Đồng bộ ổn định hơn", "Gần đây và Hay ăn", "Như hôm qua", "Chạm vi chất để xem nguồn", "Rung khi chạm"]);
     expect(r?.tour).toBeUndefined();
   });
 

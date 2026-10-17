@@ -33,6 +33,10 @@ export interface TipContext {
   selectMode?: boolean;
   /** Entries of today the server has not saved yet (cc-49: the Chưa lưu marker) */
   unsaved?: number;
+  /** A touch screen (pointer: coarse): pull to refresh exists only there (cc-51) */
+  touch?: boolean;
+  /** The phone can vibrate (Android): the Rung khi chạm switch exists only there (cc-51) */
+  vibrate?: boolean;
 }
 
 /** The share tip waits until today holds this many foods. */
@@ -77,6 +81,22 @@ export const TIPS: readonly Tip[] = [
     when: (c) => today(c) && c.foodsToday >= SHARE_TIP_MIN_FOODS,
   },
   {
+    id: "pull-refresh",
+    target: "meal-pill",
+    title: "Kéo xuống để tải lại",
+    body: "Ở đầu danh sách món, kéo xuống rồi thả để lấy món vừa thêm trên máy khác.",
+    used: ["pull-refresh"],
+    when: (c) => today(c) && c.touch === true,
+  },
+  {
+    id: "nutrient-sources",
+    target: "nutrient-column",
+    title: "Món nào góp phần?",
+    body: "Chạm một vi chất để xem món nào hôm nay góp vào con số đó, món nhiều nhất ở trên.",
+    used: ["nutrient-sources"],
+    when: today,
+  },
+  {
     id: "past-day",
     target: "home-hero",
     title: "Ngày đã qua",
@@ -99,6 +119,22 @@ export const TIPS: readonly Tip[] = [
     body: "Chạm dấu + ở từng món để thêm nhanh vào bữa. Chọn xong và thêm tất cả một lần. Chạm vào tên món nếu muốn chỉnh khẩu phần trước.",
     used: ["tray-add"],
     when: (c) => c.pathname === "/add",
+  },
+  {
+    id: "add-shortlists",
+    target: "add-recents",
+    title: "Gần đây và Hay ăn",
+    body: "Món bạn ăn ở bữa này gần đây, và món hay ăn nhất 14 ngày qua. Chạm + để thêm ngay với khẩu phần lần trước.",
+    used: ["shortlist-add"],
+    when: (c) => c.pathname === "/add",
+  },
+  {
+    id: "haptics",
+    target: "haptics-switch",
+    title: "Rung khi chạm",
+    body: "Điện thoại rung nhẹ khi bạn lưu, xóa hay hoàn tác một món. Không thích thì tắt ở đây.",
+    used: ["haptics-switch"],
+    when: (c) => c.pathname === "/settings" && c.vibrate === true,
   },
   {
     id: "food-detail",
