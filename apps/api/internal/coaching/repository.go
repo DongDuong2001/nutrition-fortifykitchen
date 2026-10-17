@@ -137,7 +137,7 @@ func (r *PostgresRepository) UpdateApplicationStatus(ctx context.Context, id uui
 	now := time.Now()
 	query := `
 		UPDATE nutrition.coach_applications
-		SET status = $1, reviewed_by = $2, reviewed_at = $3, updated_at = $3
+		SET status = $1, reviewed_by = $2, reviewed_at = $3::timestamptz, updated_at = $3::timestamptz
 		WHERE id = $4
 	`
 	cmd, err := r.pool.Exec(ctx, query, status, reviewerID, now, id)

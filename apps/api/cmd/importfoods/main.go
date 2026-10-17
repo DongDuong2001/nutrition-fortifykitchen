@@ -119,7 +119,7 @@ func main() {
 		query := `
 			INSERT INTO nutrition.foods (
 				name, name_vi, category, source, source_id, brand, tip_vi, per_100g, per_100g_nutrients, is_custom
-			) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $8, false)
+			) VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb, $8::jsonb, false)
 			ON CONFLICT (source, source_id) DO UPDATE SET
 				name = EXCLUDED.name,
 				name_vi = EXCLUDED.name_vi,

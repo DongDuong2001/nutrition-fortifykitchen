@@ -87,8 +87,8 @@ func (r *PostgresRepository) GetWeightLogs(ctx context.Context, userID uuid.UUID
 		SELECT user_id, log_date, weight_kg, created_at
 		FROM nutrition.weight_logs
 		WHERE user_id = $1
-		  AND ($2 = '' OR log_date >= $2::date)
-		  AND ($3 = '' OR log_date <= $3::date)
+		  AND ($2::text = '' OR log_date >= NULLIF($2::text, '')::date)
+		  AND ($3::text = '' OR log_date <= NULLIF($3::text, '')::date)
 		ORDER BY log_date ASC
 	`
 	rows, err := r.pool.Query(ctx, query, userID, fromDate, toDate)
@@ -132,10 +132,10 @@ func (r *PostgresRepository) UpsertWeightLog(ctx context.Context, userID uuid.UU
 	profileQuery := `
 		UPDATE nutrition.profiles
 		SET weight_kg = $2, updated_at = now()
-		WHERE user_id = $1
+		WHERE user_id = $1::uuid
 		  AND NOT EXISTS (
 			  SELECT 1 FROM nutrition.weight_logs
-			  WHERE user_id = $1 AND log_date > $3::date
+			  WHERE user_id = $1::uuid AND log_date > $3::date
 		  )
 	`
 	if _, err := tx.Exec(ctx, profileQuery, userID, weightKg, logDate); err != nil {
