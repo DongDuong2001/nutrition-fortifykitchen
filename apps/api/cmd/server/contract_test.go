@@ -38,6 +38,7 @@ func TestOpenAPIContractRoutes_Registered(t *testing.T) {
 		{"GET", "/api/v1/foods/11111111-1111-1111-1111-111111111111"},
 		{"GET", "/api/v1/foods/rich-in"},
 		{"GET", "/api/v1/foods/rich-in/calcium"},
+		{"POST", "/api/v1/client-errors"},
 
 		// Protected Profile
 		{"GET", "/api/v1/me"},

@@ -103,7 +103,9 @@ describe("the outbox", () => {
     expect(outbox()).toHaveLength(1);
     expect(await syncOfflineOutbox({ retryHeld: true })).toEqual({ saved: [ID], held: [] });
     expect(outbox()).toEqual([]);
-    expect(calls.filter((c) => c.startsWith("POST"))).toHaveLength(1);
+    expect(calls.filter((c) => c.startsWith("POST /days"))).toHaveLength(1);
+    // cc-50: the refusal is reported once (POST /client-errors), however often it is held again
+    expect(calls.filter((c) => c === "POST /client-errors")).toHaveLength(1);
   });
 
   it("a 500 is sent again on the next sync and leaves the outbox once saved; five failures do not drop it", async () => {

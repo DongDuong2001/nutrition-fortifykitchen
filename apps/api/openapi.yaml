@@ -479,6 +479,31 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
 
+  /client-errors:
+    post:
+      summary: Report a failure seen by the web app (logged as event client_error)
+      description: >-
+        Signed in or not (the user id is logged when there is a session). At most 10 a minute per user or address.
+        The route and path lose their query string and every field is cut short; nothing else personal is kept.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [kind]
+              properties:
+                kind: { type: string, enum: [write, sync, share, setup] }
+                route: { type: string, description: The app screen, e.g. /app }
+                method: { type: string }
+                path: { type: string, description: The API path that answered }
+                status: { type: integer }
+                message: { type: string, description: The server's message or the error text }
+                version: { type: string, description: The app version (sw.js VERSION) }
+      responses:
+        '204': { description: Logged }
+        '400': { description: Not a valid report }
+        '429': { description: Too many reports }
   /foods:
     get:
       summary: Search and browse food catalog
