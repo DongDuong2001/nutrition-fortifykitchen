@@ -4,6 +4,7 @@ import { kcalValue } from "@/lib/kcal";
 import { pctLabel, pctOf, type HomeValues } from "@/lib/home";
 import { getLevel, getLevelLabel } from "@/lib/levels";
 import { LevelBar } from "@/components/ui/level-bar";
+import { useCountUp } from "@/lib/count-up";
 
 // The 24 px pill sits inside a 44 px hit area: padding that the negative margin takes back
 const PILL = "-m-2.5 inline-flex shrink-0 items-center border-0 bg-transparent p-2.5 text-on-dark no-underline hover:text-sky";
@@ -55,6 +56,8 @@ export function HomeHero({
   share?: boolean;
 }) {
   const kcalKnown = pctOf(values.kcal, kcalTarget.min);
+  // cc-51: the big kcal and its percent count to a new value (300 ms); the first value and "—" show as they are
+  const shownKcal = useCountUp(values.kcal);
   const kcalPct = kcalKnown ?? 0;
   return (
     <>
@@ -85,11 +88,11 @@ export function HomeHero({
         </div>
 
         <div data-align-group="home-hero" className="flex flex-wrap items-baseline gap-x-1.5">
-          <span className="font-display text-[32px] font-extrabold leading-none tabular-nums">{kcalValue(values.kcal)}</span>
+          <span className="font-display text-[32px] font-extrabold leading-none tabular-nums">{kcalValue(shownKcal)}</span>
           <span className={`text-[13px] text-muted-on-dark ${share ? "whitespace-nowrap" : ""}`}>
             / {formatAmount(kcalTarget.min, "kcal")}–{formatAmount(kcalTarget.max, "kcal")} kcal
           </span>
-          <span className="ml-1 font-display text-[32px] font-extrabold italic leading-none tabular-nums">{pctLabel(values.kcal, kcalTarget.min)}</span>
+          <span className="ml-1 font-display text-[32px] font-extrabold italic leading-none tabular-nums">{pctLabel(shownKcal, kcalTarget.min)}</span>
           {finished && kcalKnown !== null && <span className="text-[13px] font-bold text-sky">{getLevelLabel(getLevel(kcalKnown))}</span>}
         </div>
 

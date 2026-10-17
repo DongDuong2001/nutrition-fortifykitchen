@@ -28,8 +28,9 @@ export function AppShell({
       className="flex min-h-dvh w-full flex-col bg-page text-text font-sans lg:flex-row"
     >
       <DesktopSidebar />
+      {/* cc-51: a screen fades in when it opens (120 ms; a tab switch is a new screen) */}
       <div
-        className={`flex min-w-0 flex-1 flex-col ${
+        className={`m-tab-enter flex min-w-0 flex-1 flex-col ${
           bottomBar
             ? "pb-[calc(112px+env(safe-area-inset-bottom))]"
             : cta

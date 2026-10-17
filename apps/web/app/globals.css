@@ -232,3 +232,164 @@
     animation-name: wn-fade-out;
   }
 }
+
+/*
+ * cc-51 motion. 200 ms by default, 150 ms for small things, 250 ms for sheets; ease-out in, ease-in out; transform and
+ * opacity only (the row collapse animates grid-template-rows, the one exception). Every class below has a
+ * prefers-reduced-motion rule after it: no movement, an opacity change at most. lib/__tests__/motion.test.ts checks both.
+ */
+@keyframes m-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+@keyframes m-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes m-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes m-sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+}
+@keyframes m-sheet-out {
+  to {
+    transform: translateY(100%);
+  }
+}
+@keyframes m-slide-from-right {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+}
+@keyframes m-slide-from-left {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+}
+
+/* Enter animations on wrappers fill backwards only: a fill that stays after the end keeps a stacking context (and, for
+   a transform, a containing block for fixed children), which put sheets inside a screen under the bottom nav. */
+/* A food row that was just added (or put back by Hoàn tác) */
+.m-row-enter {
+  animation: m-rise-in 200ms ease-out backwards;
+}
+/* A deleted row: fades and its height closes (grid rows 1fr → 0fr) */
+.m-row-exit {
+  display: grid;
+  grid-template-rows: 1fr;
+  animation: m-fade-out 200ms ease-in both;
+  transition: grid-template-rows 200ms ease-in;
+}
+.m-row-exit.m-collapsed {
+  grid-template-rows: 0fr;
+}
+.m-row-exit > * {
+  min-height: 0;
+  overflow: hidden;
+}
+/* A row that moved (FLIP): the inline transform eases back to none */
+.m-flip {
+  transition: transform 200ms ease-out;
+}
+/* Sheets and their scrim */
+.m-sheet-enter {
+  animation: m-sheet-in 250ms ease-out both;
+}
+.m-sheet-exit {
+  animation: m-sheet-out 250ms ease-in both;
+}
+.m-scrim-enter {
+  animation: m-fade-in 250ms ease-out both;
+}
+.m-scrim-exit {
+  animation: m-fade-out 250ms ease-in both;
+}
+/* A sheet let go after a short drag goes back up */
+.m-snap {
+  transition: transform 200ms ease-out;
+}
+/* Bars: the fill grows from the left (scaleX) */
+.m-bar {
+  transform-origin: left center;
+  transition: transform 300ms ease-out;
+}
+/* A tab's screen, and a day changed with the arrows (direction: earlier from the left, later from the right) */
+.m-tab-enter {
+  animation: m-fade-in 120ms ease-out backwards;
+}
+.m-day-earlier {
+  animation: m-slide-from-left 200ms ease-out backwards;
+}
+.m-day-later {
+  animation: m-slide-from-right 200ms ease-out backwards;
+}
+/* Pull to refresh: the indicator follows the finger, then spins while the day is fetched */
+.m-pull {
+  transition: transform 200ms ease-out, opacity 150ms ease-out;
+}
+@keyframes m-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.m-spin {
+  animation: m-spin 800ms linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .m-row-enter {
+    animation-name: m-fade-in;
+  }
+  .m-row-exit {
+    transition: none;
+  }
+  .m-flip {
+    transition: none;
+  }
+  .m-sheet-enter,
+  .m-scrim-enter {
+    animation-name: m-fade-in;
+  }
+  .m-sheet-exit,
+  .m-scrim-exit {
+    animation-name: m-fade-out;
+  }
+  .m-snap {
+    transition: none;
+  }
+  .m-bar {
+    transition: none;
+  }
+  .m-tab-enter {
+    animation-name: m-fade-in;
+  }
+  .m-day-earlier,
+  .m-day-later {
+    animation-name: m-fade-in;
+  }
+  .m-pull {
+    transition: opacity 150ms ease-out;
+  }
+  .m-spin {
+    animation: none;
+  }
+}
+/* A sheet that is a centred dialog on a desktop fades instead of sliding */
+@media (min-width: 1024px) {
+  .m-dialog.m-sheet-enter {
+    animation-name: m-fade-in;
+  }
+  .m-dialog.m-sheet-exit {
+    animation-name: m-fade-out;
+  }
+}
