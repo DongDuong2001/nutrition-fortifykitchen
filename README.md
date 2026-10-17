@@ -260,6 +260,8 @@ The repository includes dedicated guides for production operations and security:
   - Reverse proxy configurations (Caddy / Nginx) with HTTP/2 and Brotli compression.
   - Supabase Auth production redirect URL whitelisting.
 
+- **Same-origin API (live mode)**: `NEXT_PUBLIC_API_URL` must be `https://lehongkhanh.vn/api/v1`, the same origin as the web app. The `sb-access-token` httpOnly cookie is host-only, so a browser does not send it to another domain; the app logs the console warning "API khác domain: cookie đăng nhập sẽ không được gửi" when the origins differ.
+
 - **Disaster Recovery & Database Backups ([docs/09-disaster-recovery.md](docs/09-disaster-recovery.md))**:
   - Automated daily encrypted backups to S3 / Cloudflare R2 (`scripts/db-backup.sh`).
   - Emergency database restoration procedure (`scripts/db-restore.sh`).

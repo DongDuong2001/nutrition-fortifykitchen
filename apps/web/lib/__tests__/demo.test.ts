@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { DEMO_KEY, demoActive, demoBuildAllowed, resolveDemo, setDemoActive } from "../demo";
+import { DEMO_KEY, demoActive, demoBuildAllowed, onboardingSwitchHonoured, resolveDemo, setDemoActive } from "../demo";
 import { dayEntries } from "../day-history";
 import { weightLogSample } from "../mock/weight-log";
 
@@ -71,5 +71,18 @@ describe("sample data only exists in demo mode", () => {
     expect(demoActive()).toBe(false);
     expect(dayEntries("2026-10-12", "2026-10-13")).toEqual([]);
     expect(weightLogSample("2026-10-13")).toEqual([]);
+  });
+});
+
+describe("lib/demo onboardingSwitchHonoured (h1t_onboarding_off)", () => {
+  it("is honoured in a demo build and in development, and ignored in production", () => {
+    expect(onboardingSwitchHonoured("1", "production", "1")).toBe(true);
+    expect(onboardingSwitchHonoured("1", "development", "")).toBe(true);
+    expect(onboardingSwitchHonoured("1", "production", "")).toBe(false);
+    expect(onboardingSwitchHonoured("1", "production", undefined)).toBe(false);
+  });
+  it("needs the switch to be exactly 1", () => {
+    expect(onboardingSwitchHonoured(null, "production", "1")).toBe(false);
+    expect(onboardingSwitchHonoured("0", "development", "")).toBe(false);
   });
 });

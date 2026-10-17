@@ -16,6 +16,11 @@ export function demoBuildAllowed(nodeEnv: string | undefined, demoBuild: string 
   return nodeEnv !== "production" || demoBuild === "1";
 }
 
+/** The device switch h1t_onboarding_off = "1" (the probes' seed) counts only in a demo build or development, never in production. */
+export function onboardingSwitchHonoured(stored: string | null, nodeEnv: string | undefined, demoBuild: string | undefined): boolean {
+  return stored === "1" && demoBuildAllowed(nodeEnv, demoBuild);
+}
+
 /**
  * Pure rule. NODE_ENV development is always demo; otherwise the saved flag or ?demo= decides. Live mode (a real
  * backend) and a production build without DEMO_BUILD=1 have no demo at all: no ?demo, no saved flag, no development

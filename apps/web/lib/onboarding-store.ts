@@ -1,3 +1,4 @@
+import { onboardingSwitchHonoured } from "./demo";
 import { loadSettings, saveSettings } from "./settings";
 import {
   markSeenIn,
@@ -11,12 +12,12 @@ import {
  * per device for now: Dong to sync them through the API later (OPEN_QUESTIONS). Client only.
  */
 
-/** A device-level switch (the probes' seed): "1" means no tour and no tips on this browser, whatever the account says. */
+/** A device-level switch (the probes' seed): "1" means no tour and no tips on this browser, whatever the account says. Demo builds only; production ignores it. */
 export const ONBOARDING_OFF_KEY = "h1t_onboarding_off";
 
 export function onboardingDisabled(): boolean {
   try {
-    return globalThis.localStorage?.getItem(ONBOARDING_OFF_KEY) === "1";
+    return onboardingSwitchHonoured(globalThis.localStorage?.getItem(ONBOARDING_OFF_KEY) ?? null, process.env.NODE_ENV, process.env.NEXT_PUBLIC_DEMO_BUILD);
   } catch {
     return false;
   }
