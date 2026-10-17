@@ -206,6 +206,17 @@ describe("apiFetch", () => {
 });
 
 describe("accounts", () => {
+  it("cc-51: one account's queued writes are never shown or sent for another", async () => {
+    server({ "POST /days/2026-10-18/entries": [503] });
+    await add();
+    expect(getPendingOfflineEntryIds()).toEqual([ID]);
+    localStorage.setItem("h1t_auth_current_email", "other@example.com");
+    expect(getPendingOfflineEntryIds()).toEqual([]);
+    expect(pendingWriteIds().has(ID)).toBe(false);
+    localStorage.setItem("h1t_auth_current_email", "sync@example.com");
+    expect(getPendingOfflineEntryIds()).toEqual([ID]);
+  });
+
   it("a write that fails after the account changed is not queued in the new account's outbox", async () => {
     let release: (r: Response) => void = () => {};
     vi.stubGlobal("fetch", vi.fn(() => new Promise<Response>((resolve) => (release = resolve))));
