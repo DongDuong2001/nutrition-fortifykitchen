@@ -1,4 +1,13 @@
-import { calculateTargets, type CompleteTargets, type GoalType, type SexType, type TargetRange } from "./targets";
+import {
+  calculateTargets,
+  type CompleteTargets,
+  type GoalType,
+  type MacroFixedGrams,
+  type MacroRatios,
+  type MacroTargetMode,
+  type SexType,
+  type TargetRange,
+} from "./targets";
 import { DRAFT_KEY, goalName, readDraft, validateSetupDraft, type SetupDraft } from "./onboarding";
 import { formatAmount } from "./format";
 import type { MockDayData, MockMacroStat, MockMicroStat } from "./mock/sample-day";
@@ -18,6 +27,10 @@ export interface Profile extends CoachingState {
   trainingMinutesDefault: number;
   /** Optional name shown on Cài đặt. "" means not set. */
   displayName: string;
+  macroMode?: MacroTargetMode;
+  macroRatios?: MacroRatios;
+  macroFixed?: MacroFixedGrams;
+  customEnergyKcal?: number;
 }
 
 // The sample-day user. Used when nothing is saved and no setup has started.
@@ -87,6 +100,16 @@ export function parseStoredProfile(raw: string | null, currentYear: number): Pro
       typeof stored.displayName === "string" && validateDisplayName(stored.displayName) === null
         ? cleanDisplayName(stored.displayName)
         : "",
+    macroMode: typeof stored.macroMode === "string" ? (stored.macroMode as MacroTargetMode) : undefined,
+    macroRatios:
+      stored.macroRatios && typeof stored.macroRatios === "object"
+        ? (stored.macroRatios as MacroRatios)
+        : undefined,
+    macroFixed:
+      stored.macroFixed && typeof stored.macroFixed === "object"
+        ? (stored.macroFixed as MacroFixedGrams)
+        : undefined,
+    customEnergyKcal: typeof stored.customEnergyKcal === "number" ? stored.customEnergyKcal : undefined,
     // Role, Level, coach: a profile saved before they existed loads as user, Level 0, no coach
     ...normaliseCoaching(stored),
   };
@@ -130,6 +153,10 @@ export function targetsFor(profile: Profile): CompleteTargets {
     goal: profile.goal,
     trainingMinutes: profile.trainingMinutesDefault,
     isPeriod: profile.sex === "female" && profile.periodMode,
+    macroMode: profile.macroMode,
+    macroRatios: profile.macroRatios,
+    macroFixed: profile.macroFixed,
+    customEnergyKcal: profile.customEnergyKcal,
   });
 }
 
