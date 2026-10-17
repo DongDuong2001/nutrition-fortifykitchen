@@ -13,6 +13,7 @@ import {
   shareKey,
   shareMeals,
   shareName,
+  shareFontsEmbedded,
   shareNeedsName,
   keepInShareImage,
 } from "../share-card";
@@ -191,5 +192,32 @@ describe("keepInShareImage", () => {
     expect(keepInShareImage({ dataset: {} })).toBe(true);
     expect(keepInShareImage({})).toBe(true);
     expect(keepInShareImage(null)).toBe(true);
+  });
+});
+
+describe("shareFontsEmbedded", () => {
+  const face = (family: string, src: string) => `@font-face { font-family: ${family}; font-weight: 400; src: url(${src}) format("woff2"); }`;
+  const manrope = face("Manrope", '"data:font/woff2;base64,d09GMgABAAAA"');
+  const saira = face("'Saira Condensed'", "data:application/font-woff;base64,d09GMgABAAAA");
+
+  it("is true when both families are there and every face is inlined", () => {
+    expect(shareFontsEmbedded(manrope + saira)).toBe(true);
+  });
+
+  it("is false without the CSS or without one of the two families", () => {
+    expect(shareFontsEmbedded(undefined)).toBe(false);
+    expect(shareFontsEmbedded("")).toBe(false);
+    expect(shareFontsEmbedded(manrope)).toBe(false);
+    expect(shareFontsEmbedded(saira)).toBe(false);
+  });
+
+  it("is false when a face's file did not load (html-to-image leaves url() empty and only warns)", () => {
+    expect(shareFontsEmbedded(manrope + saira + face("Manrope", ""))).toBe(false);
+    expect(shareFontsEmbedded(manrope + saira + face("Manrope", '""'))).toBe(false);
+    expect(shareFontsEmbedded(manrope + saira + face("Manrope", "data:font/woff2;base64,"))).toBe(false);
+  });
+
+  it("is false when a face still points at a file: the picture cannot fetch it", () => {
+    expect(shareFontsEmbedded(manrope + saira + face("Manrope", "/_next/static/media/x.woff2"))).toBe(false);
   });
 });

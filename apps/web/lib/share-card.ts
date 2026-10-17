@@ -172,6 +172,24 @@ export function buildShareModel({
   };
 }
 
+/** The two families the share image is drawn in (app/layout.tsx). */
+export const SHARE_FONTS = ["manrope", "saira condensed"];
+
+/**
+ * Whether html-to-image's font CSS can draw the picture in its own fonts: both families have a face, and every face's
+ * file is inlined as a data URL. A font file that fails to load only warns and leaves `url()` empty, and the picture
+ * then falls back to a wider system font that wraps and overlaps inside the sizes measured in the real fonts.
+ */
+export function shareFontsEmbedded(css: string | undefined): boolean {
+  const faces = css?.match(/@font-face\s*{[^}]*}/g) ?? [];
+  const families = faces.map((f) => /font-family:\s*([^;]+)/.exec(f)?.[1].replace(/["']/g, "").trim().toLowerCase());
+  const inlined = faces.every((f) => {
+    const urls = [...f.matchAll(/url\(\s*["']?([^"')]*)/g)].map((m) => m[1]);
+    return urls.length > 0 && urls.every((u) => /^data:[^,]+,.+/.test(u));
+  });
+  return inlined && SHARE_FONTS.every((name) => families.includes(name));
+}
+
 /** html-to-image `filter`: a node marked data-export="hide" (the + Thêm buttons) is left out of the share image. */
 export function keepInShareImage(node: { dataset?: { export?: string } } | null | undefined): boolean {
   return node?.dataset?.export !== "hide";

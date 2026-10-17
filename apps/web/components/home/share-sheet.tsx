@@ -2,13 +2,13 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { getFontEmbedCSS, toBlob } from "html-to-image";
+import { getFontEmbedCSS, toSvg } from "html-to-image";
 import { Sheet } from "@/components/ui/sheet";
 import { FormRow } from "@/components/ui/form-row";
 import { PillButton } from "@/components/ui/pill-button";
 import type { HomeEntry, HomeMeal } from "@/lib/home";
 import type { MockDayData } from "@/lib/mock/sample-day";
-import { SHARE_CSS_WIDTH, buildShareModel, keepInShareImage, shareImageSize, shareNeedsName, type ShareModel } from "@/lib/share-card";
+import { SHARE_CSS_WIDTH, buildShareModel, keepInShareImage, shareFontsEmbedded, shareImageSize, shareNeedsName, type ShareModel } from "@/lib/share-card";
 import { cleanDisplayName } from "@/lib/display-name";
 import { markUsed } from "@/lib/onboarding-store";
 import { validateSetupName } from "@/lib/onboarding";
@@ -65,6 +65,57 @@ async function loadShareFonts(node: HTMLElement): Promise<void> {
 }
 
 /**
+ * html-to-image's font CSS with every font inlined, or an error (then the sheet shows Không tạo được ảnh). The second
+ * try helps when the call itself fails; a font file that failed is cached empty by html-to-image until the page reloads.
+ */
+async function shareFontCSS(node: HTMLElement): Promise<string> {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const css = await getFontEmbedCSS(node).catch(() => undefined);
+    if (css && shareFontsEmbedded(css)) return css;
+  }
+  throw new Error("share fonts not embedded");
+}
+
+/**
+ * html-to-image writes every computed style into the clone, sizes included: each text box keeps the width and
+ * height it had in the real fonts. If the picture is drawn in another face (a font that did not load on a phone),
+ * text wraps inside those widths and runs over the next row. So in the SVG, a box with text of its own sizes to its
+ * text again, and so does an inline-level box (its classes say so: a flex item's computed display is never inline),
+ * like the Level badge. A box around text keeps its height only as a minimum and a grid around text loses its
+ * frozen row heights, so rows grow. Boxes without text (bars, dots, dividers) keep their sizes; so does the page.
+ */
+function relayoutText(svg: string): string {
+  const comma = svg.indexOf(",");
+  const doc = new DOMParser().parseFromString(decodeURIComponent(svg.slice(comma + 1)), "image/svg+xml");
+  doc.querySelectorAll<HTMLElement>("[data-share-root] *").forEach((el) => {
+    const s = el.style;
+    if (!s || !el.textContent?.trim()) return;
+    const ownText = [...el.childNodes].some((n) => n.nodeType === Node.TEXT_NODE && n.textContent?.trim());
+    if (ownText || s.display.startsWith("inline") || /\binline-(flex|block|grid)\b/.test(el.getAttribute("class") ?? "")) {
+      ["width", "height", "inline-size", "block-size"].forEach((p) => s.removeProperty(p));
+      return;
+    }
+    const height = parseFloat(s.height);
+    s.removeProperty("height");
+    s.removeProperty("block-size");
+    if (height > 0) s.minHeight = `${Math.max(height, parseFloat(s.minHeight) || 0)}px`;
+    s.removeProperty("grid-template-rows");
+  });
+  return svg.slice(0, comma + 1) + encodeURIComponent(new XMLSerializer().serializeToString(doc));
+}
+
+function loadImage(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    // As html-to-image: decoded, then one frame, before it is drawn
+    img.onload = () => img.decode().then(() => requestAnimationFrame(() => resolve(img)), reject);
+    img.onerror = reject;
+    img.decoding = "async";
+    img.src = src;
+  });
+}
+
+/**
  * Draws the page (a ShareDay in an off-screen portal) into a 1080-px-wide PNG and hands the file up. The page is
  * mounted only while the picture is made, so it never lingers in the DOM next to the real screen.
  */
@@ -84,16 +135,15 @@ function ShareCapture({ model, onDone, onError }: { model: ShareModel; onDone: (
       await nextFrame();
       const cssHeight = node.getBoundingClientRect().height;
       const { scale, width, height } = shareImageSize(cssHeight);
-      const fontEmbedCSS = await getFontEmbedCSS(node).catch(() => undefined);
+      const fontEmbedCSS = await shareFontCSS(node);
       const footer = node.querySelector<HTMLElement>("[data-share-footer]");
       const ink = getComputedStyle(footer ?? node).backgroundColor;
       // The page is scaled by layout (transform on the clone), so text stays vector-sharp at 1080 px
-      const blob = await toBlob(node, {
+      const svg = await toSvg(node, {
         // Buttons marked data-export="hide" (the + Thêm pills) never reach the image
         filter: keepInShareImage,
         width,
         height,
-        pixelRatio: 1,
         fontEmbedCSS,
         // A page height that is not a whole number of image rows leaves a last row the page only partly covers: the
         // canvas fill gives it the footer's ink. html-to-image also paints this colour on the page, so `style` puts the
@@ -109,6 +159,16 @@ function ShareCapture({ model, onDone, onError }: { model: ShareModel; onDone: (
           minHeight: `${height / scale}px`,
         },
       });
+      const img = await loadImage(relayoutText(svg));
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const context = canvas.getContext("2d");
+      if (!context) throw new Error("no canvas");
+      context.fillStyle = ink;
+      context.fillRect(0, 0, width, height);
+      context.drawImage(img, 0, 0, width, height);
+      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
       if (!blob) throw new Error("no image");
       if (!cancelled) callbacks.current.onDone(new File([blob], model.filename, { type: "image/png" }), width, height);
     })().catch(() => {
