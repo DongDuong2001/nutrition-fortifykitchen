@@ -23,6 +23,7 @@ type FoodDetail struct {
 	Brand            *string                 `json:"brand,omitempty"`
 	TipVi            *string                 `json:"tip_vi,omitempty"`
 	IsCustom         bool                    `json:"is_custom"`
+	CreatedBy        *uuid.UUID              `json:"created_by,omitempty"`
 	Servings         []Portion               `json:"servings"`
 	Per100gNutrients map[string]*float64     `json:"per_100g_nutrients"`
 	CreatedAt        time.Time               `json:"created_at"`
@@ -33,6 +34,7 @@ type FoodSearchFilter struct {
 	Category string
 	Page     int
 	Limit    int
+	UserID   *uuid.UUID
 }
 
 type FoodSearchResponse struct {
