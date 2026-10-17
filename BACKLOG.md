@@ -26,3 +26,6 @@ The core stays free: logging, barcode, the full nutrient report. Pro charges for
 - [ ] **Training checklist ticks aren't saved:** store the ticks per day in the diary.
 - [ ] **Duration chips wrap 3+2:** use an even grid.
 - [ ] **"Carb nhanh" sub-line copy:** check it against design/screens/Training.dc.html.
+
+## Share image (from cc-47)
+- [ ] **Share image: draw anyway in the fallback face, measuring the height in that face** (today a picture whose fonts do not embed shows Không tạo được ảnh. Tải lại trang rồi thử lại.).
