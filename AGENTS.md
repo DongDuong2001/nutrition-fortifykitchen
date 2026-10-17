@@ -125,6 +125,7 @@ Always use **your agent's fixed port**: **3100 for Antigravity, 3101 for Claude 
   - Claude Code: branches feat/ui-cc-<task>, port 3101, in its own clone.
   - Claude Code #2: branches feat/ui-cc2-<n>, port 3102, in its own clone.
 - **Every worker:** `git fetch && git rebase origin/feat/ui` before each task. Before merging, rebase again, re-run the gates, then `git merge --ff-only` into feat/ui and push feat/ui only. Never merge commits and never force-push.
+- **Release notes:** Every merge to main that users can see adds or extends the top RELEASES entry in lib/releases.ts (Vietnamese, user words, no tech terms) and bumps sw.js VERSION.
 - Claim your files on the **Now working** board before editing. Never edit a file another active task has claimed.
 - Tests follow their file: lib/__tests__/<name>.test.ts belongs to the owner of lib/<name>.
 - Dong's: lib/api-client, lib/supabase-client, apps/api, migrations (UI agents may only read; mock changes go through OPEN_QUESTIONS).
