@@ -15,9 +15,11 @@ export interface OnboardingFlags {
   replayOpened: boolean;
   /** The day (YYYY-MM-DD) the tour was last started. The install pop-up waits on that day until the tour is done. */
   tourStartedIso: string | null;
+  /** The newest release (lib/releases id) whose "Có gì mới" sheet this account has seen (cc-46) */
+  whatsNewSeen: string | null;
 }
 
-export const DEFAULT_FLAGS: OnboardingFlags = { tourDone: false, tipsOff: false, seen: [], used: [], replayOpened: false, tourStartedIso: null };
+export const DEFAULT_FLAGS: OnboardingFlags = { tourDone: false, tipsOff: false, seen: [], used: [], replayOpened: false, tourStartedIso: null, whatsNewSeen: null };
 
 const strings = (v: unknown): string[] => (Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : []);
 
@@ -32,6 +34,7 @@ export function parseFlags(raw: unknown): OnboardingFlags {
     used: strings(v.used),
     replayOpened: v.replayOpened === true,
     tourStartedIso: typeof v.tourStartedIso === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v.tourStartedIso) ? v.tourStartedIso : null,
+    whatsNewSeen: typeof v.whatsNewSeen === "string" ? v.whatsNewSeen : null,
   };
 }
 

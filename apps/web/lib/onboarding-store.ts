@@ -52,3 +52,5 @@ export const setTipsOff = (off: boolean) => update((f) => setTipsOffIn(f, off));
 export const finishTour = () => update((f) => ({ ...f, tourDone: true }));
 export const openReplay = () => update((f) => ({ ...f, replayOpened: true }));
 export const markTourStarted = (iso: string) => update((f) => markTourStartedIn(f, iso));
+/** The "Có gì mới" sheet of this release was closed (or setup finished: a new account starts with the onboarding tour instead) */
+export const markWhatsNewSeen = (id: string) => update((f) => ({ ...f, whatsNewSeen: id }));

@@ -11,18 +11,23 @@ import { tourOpenOn } from "@/lib/onboarding-flags";
 import { loadFlags, onboardingDisabled, subscribeFlags } from "@/lib/onboarding-store";
 import { noteInstallOpen, shouldShowInstallPrompt } from "@/lib/pwa";
 import { loadInstallPrompt, saveInstallPrompt } from "@/lib/settings";
-import { isTipBusy, readTour, subscribeTipBusy, subscribeTour } from "@/lib/tour-bus";
+import { isOverlayOpen, isTipBusy, readTour, setOverlayOpen, subscribeTipBusy, subscribeTour } from "@/lib/tour-bus";
 
 /**
  * True while the first-run tour is running (or was started today and is not finished or skipped), or a first-visit
- * tip is open or still due (the layer has not looked yet, or found one). The pop-up waits for all of them.
+ * tip is open or still due (the layer has not looked yet, or found one), or "Có gì mới" or its tour is open. The pop-up
+ * waits for all of them.
  */
 function useOnboardingBusy(todayIso: string | null): boolean {
   const [busy, setBusy] = useState(true);
   useEffect(() => {
     if (!todayIso) return;
     const read = () =>
-      setBusy(!onboardingDisabled() && (readTour().status === "step" || isTipBusy() !== false || tourOpenOn(loadFlags(), todayIso)));
+      setBusy(
+        isOverlayOpen("whats-new") ||
+          isOverlayOpen("whats-new-tour") ||
+          (!onboardingDisabled() && (readTour().status === "step" || isTipBusy() !== false || tourOpenOn(loadFlags(), todayIso)))
+      );
     read();
     const offs = [subscribeTour(read), subscribeFlags(read), subscribeTipBusy(read)];
     return () => offs.forEach((off) => off());
@@ -66,6 +71,9 @@ export function InstallPromptHost({ busy }: { busy: boolean }) {
     markInstallShown();
     setOpen(true);
   }, [hydrated, todayIso, loggedEver, pathname, busy, onboardingBusy, open]);
+
+  useEffect(() => setOverlayOpen("install", open), [open]);
+  useEffect(() => () => setOverlayOpen("install", false), []);
 
   const close = (result: InstallSheetResult) => {
     setOpen(false);

@@ -9,6 +9,8 @@ import { coachingAvailable } from "@/lib/coaching-link";
 import { isLiveMode } from "@/lib/api-mode";
 import { formatNumber } from "@/lib/format";
 import { cleanDisplayName } from "@/lib/display-name";
+import { markWhatsNewSeen } from "@/lib/onboarding-store";
+import { latestRelease } from "@/lib/releases";
 import {
   DEFAULT_DRAFT,
   dailyTargetRows,
@@ -127,6 +129,9 @@ export function SetupForm({ step }: { step: SetupStep }) {
     try {
       await apiClient.saveSetup({ ...result.profile, displayName });
       updateProfile({ ...result.profile, displayName });
+      // A new account gets the onboarding tour, not "Có gì mới"
+      const latest = latestRelease();
+      if (latest) markWhatsNewSeen(latest.id);
       router.push("/setup/done");
     } catch (err) {
       const msg = err instanceof Error && err.message ? err.message : "Chưa lưu được hồ sơ. Thử lại sau ít phút.";

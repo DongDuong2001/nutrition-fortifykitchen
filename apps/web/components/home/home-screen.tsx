@@ -145,7 +145,19 @@ function HomeContent() {
   }, []);
 
   // The share tip's "Thử ngay" opens the share sheet (which asks for a name first when there is none)
-  useEffect(() => subscribeSignal((signal) => signal === "open-share" && setIsShareOpen(true)), []);
+  useEffect(
+    () =>
+      subscribeSignal((signal) => {
+        if (signal === "open-share") setIsShareOpen(true);
+        // The "Có gì mới" tour ended: leave Chọn nhiều món, nothing else changes
+        if (signal === "end-select") {
+          setSelecting(false);
+          setSelectedIds(new Set());
+          setTargetSheet(null);
+        }
+      }),
+    []
+  );
 
   // Return focus to the control that opened /add (same contract as the diary)
   useEffect(() => {
@@ -184,6 +196,9 @@ function HomeContent() {
   useEffect(() => {
     if (selecting && entries.length === 0) setSelecting(false);
   }, [selecting, entries.length]);
+  useEffect(() => {
+    if (!selecting) emitSignal("select-off");
+  }, [selecting]);
   // Foods deleted or moved away leave the chosen set
   const liveSelected = useMemo(() => new Set(chosenEntries(entries, selectedIds).map((e) => e.id)), [entries, selectedIds]);
   const exitSelect = () => {

@@ -53,8 +53,8 @@ export function tourAction(name: TourAction): void {
   if (after !== before) writeTour(after);
 }
 
-/** Other things the overlay watches (Chọn nhiều món opened). */
-type UiSignal = "select-mode" | "open-share";
+/** Other things the overlay watches (Chọn nhiều món opened or closed), and requests to Hôm nay (end Chọn nhiều món). */
+type UiSignal = "select-mode" | "select-off" | "end-select" | "open-share";
 const signalListeners = new Set<(signal: UiSignal) => void>();
 export const emitSignal = (signal: UiSignal) => signalListeners.forEach((l) => l(signal));
 export function subscribeSignal(listener: (signal: UiSignal) => void): () => void {
@@ -78,4 +78,45 @@ export function setTipBusy(next: boolean | null): void {
 export function subscribeTipBusy(listener: Listener): () => void {
   busyListeners.add(listener);
   return () => busyListeners.delete(listener);
+}
+
+/**
+ * Overlays that open by themselves and must not open on top of each other (cc-46): the install pop-up, the "Có gì
+ * mới" sheet and its tour. Each sets its own flag; listeners are the tip-busy ones.
+ */
+export type Overlay = "install" | "whats-new" | "whats-new-tour";
+const overlays = new Set<Overlay>();
+export const isOverlayOpen = (name: Overlay): boolean => overlays.has(name);
+export function setOverlayOpen(name: Overlay, open: boolean): void {
+  if (open === overlays.has(name)) return;
+  if (open) overlays.add(name);
+  else overlays.delete(name);
+  busyListeners.forEach((l) => l());
+}
+
+/** The running "Có gì mới" tour (cc-46), in sessionStorage like the first-run tour. */
+export interface WhatsNewTour {
+  releaseId: string;
+  index: number;
+}
+const WN_TOUR_KEY = "h1t_wn_tour_v1";
+
+export function readWhatsNewTour(): WhatsNewTour | null {
+  try {
+    const v = JSON.parse(globalThis.sessionStorage?.getItem(WN_TOUR_KEY) ?? "null");
+    if (typeof v?.releaseId === "string" && Number.isInteger(v.index) && v.index >= 0) return { releaseId: v.releaseId, index: v.index };
+  } catch {
+    // Storage blocked or bad JSON: no tour
+  }
+  return null;
+}
+
+export function writeWhatsNewTour(tour: WhatsNewTour | null): void {
+  try {
+    if (tour) globalThis.sessionStorage?.setItem(WN_TOUR_KEY, JSON.stringify(tour));
+    else globalThis.sessionStorage?.removeItem(WN_TOUR_KEY);
+  } catch {
+    // Storage blocked
+  }
+  notify();
 }
