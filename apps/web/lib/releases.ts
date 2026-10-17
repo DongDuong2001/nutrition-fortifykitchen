@@ -32,6 +32,17 @@ export interface Release {
 
 export const RELEASES: readonly Release[] = [
   {
+    id: "2026-10-18",
+    date: "18/10",
+    items: [
+      {
+        icon: "meal",
+        title: "Đồng bộ ổn định hơn",
+        body: "Món đã thêm luôn được lưu, kể cả khi mở app lâu; máy khác thấy món mới trong vòng 1 phút.",
+      },
+    ],
+  },
+  {
     id: "2026-10-17",
     date: "17/10",
     items: [
