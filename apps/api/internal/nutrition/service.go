@@ -16,8 +16,8 @@ var (
 
 type Service interface {
 	SearchFoods(ctx context.Context, filter FoodSearchFilter) (*FoodSearchResponse, error)
-	GetFoodByID(ctx context.Context, id uuid.UUID) (*FoodDetail, error)
-	GetFoodsRichIn(ctx context.Context, nutrient string, limit int) (*RichInResponse, error)
+	GetFoodByID(ctx context.Context, id uuid.UUID, userID *uuid.UUID) (*FoodDetail, error)
+	GetFoodsRichIn(ctx context.Context, nutrient string, limit int, userID *uuid.UUID) (*RichInResponse, error)
 	CreateCustomFood(ctx context.Context, userID uuid.UUID, req CreateCustomFoodRequest) (*FoodDetail, error)
 	DeleteCustomFood(ctx context.Context, userID uuid.UUID, foodID uuid.UUID) error
 }
@@ -34,8 +34,8 @@ func (s *nutritionService) SearchFoods(ctx context.Context, filter FoodSearchFil
 	return s.repo.SearchFoods(ctx, filter)
 }
 
-func (s *nutritionService) GetFoodByID(ctx context.Context, id uuid.UUID) (*FoodDetail, error) {
-	food, err := s.repo.GetFoodByID(ctx, id)
+func (s *nutritionService) GetFoodByID(ctx context.Context, id uuid.UUID, userID *uuid.UUID) (*FoodDetail, error) {
+	food, err := s.repo.GetFoodByID(ctx, id, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -70,13 +70,13 @@ var ValidNutrients = map[string]string{
 	"sodium": "mg", "zinc": "mg",
 }
 
-func (s *nutritionService) GetFoodsRichIn(ctx context.Context, nutrient string, limit int) (*RichInResponse, error) {
+func (s *nutritionService) GetFoodsRichIn(ctx context.Context, nutrient string, limit int, userID *uuid.UUID) (*RichInResponse, error) {
 	unit, ok := ValidNutrients[nutrient]
 	if !ok {
 		return nil, ErrInvalidNutrient
 	}
 
-	items, err := s.repo.GetFoodsRichIn(ctx, nutrient, limit)
+	items, err := s.repo.GetFoodsRichIn(ctx, nutrient, limit, userID)
 	if err != nil {
 		return nil, err
 	}
