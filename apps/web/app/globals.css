@@ -53,6 +53,12 @@
   --color-level-empty-dark: #2A2C31;
 
   --color-divider: #E6E2DA;
+  /* Text a step darker than --color-secondary: the coach tagline on the link page. */
+  --color-secondary-strong: #4A4945;
+  /* The link page's background doodles (LinkKhanh.dc.html): objects, barbell and floor line, wind dust. */
+  --color-doodle: #D9D5CD;
+  --color-doodle-line: #D6D2CA;
+  --color-doodle-dust: #D2CEC5;
   --color-hover: #FAF9F6;
   --color-muted-dark: #6B6A66;
   --color-muted-subtitle: #C9CDD6;
@@ -144,5 +150,43 @@
     button:active {
       transform: none;
     }
+  }
+}
+
+/* The link page background (LinkKhanh / LinkKhanhDesktop.dc.html). Objects (.link-d) bob between their two ends;
+   dust (.link-p) blows left to right across the viewBox, from --wind-from through --wind-mid to --wind-to. */
+@keyframes link-bob {
+  0% {
+    transform: translate(calc(var(--x) - var(--dx) * 0.6), calc(var(--y) - var(--dy) * 0.6)) rotate(calc(var(--tilt) * -1)) scale(0.96);
+  }
+  100% {
+    transform: translate(calc(var(--x) + var(--dx) * 0.6), calc(var(--y) + var(--dy) * 0.6)) rotate(var(--tilt)) scale(1.02);
+  }
+}
+@keyframes link-wind {
+  0% {
+    transform: translate(var(--wind-from), var(--y));
+  }
+  50% {
+    transform: translate(var(--wind-mid), calc(var(--y) + var(--sy)));
+  }
+  100% {
+    transform: translate(var(--wind-to), var(--y));
+  }
+}
+.link-d {
+  transform: translate(var(--x), var(--y));
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: link-bob calc(var(--t) / 4) ease-in-out var(--dl) infinite alternate;
+}
+.link-p {
+  transform: translate(var(--sx, var(--wind-from)), var(--y));
+  animation: link-wind var(--t) linear var(--dl) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .link-d,
+  .link-p {
+    animation: none;
   }
 }

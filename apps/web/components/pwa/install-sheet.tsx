@@ -36,8 +36,8 @@ interface InstallSheetProps {
 }
 
 const TITLE_ID = "install-sheet-title";
-const TITLE_CLASS = "m-0 font-display font-extrabold italic uppercase leading-none text-text";
-const ICON_BUTTON =
+export const SHEET_TITLE_CLASS = "m-0 font-display font-extrabold italic uppercase leading-none text-text";
+export const SHEET_ICON_BUTTON =
   "inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 text-text transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100";
 const LATER_BUTTON =
   "inline-flex min-h-12 w-full cursor-pointer items-center justify-center rounded-full border-0 bg-transparent px-4 text-[15px] font-bold text-secondary transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100";
@@ -95,14 +95,14 @@ function SubHeader({ title, onBack, onClose }: { title: string; onBack?: () => v
   return (
     <header className="flex items-center gap-2">
       {onBack && (
-        <button type="button" aria-label="Quay lại chọn loại máy" onClick={onBack} className={`${ICON_BUTTON} -ml-2`}>
+        <button type="button" aria-label="Quay lại chọn loại máy" onClick={onBack} className={`${SHEET_ICON_BUTTON} -ml-2`}>
           <ChevronLeftIcon />
         </button>
       )}
-      <h2 id={TITLE_ID} className={`${TITLE_CLASS} min-w-0 flex-1 text-[26px]`}>
+      <h2 id={TITLE_ID} className={`${SHEET_TITLE_CLASS} min-w-0 flex-1 text-[26px]`}>
         {title}
       </h2>
-      <button type="button" aria-label="Đóng" onClick={onClose} className={`${ICON_BUTTON} -mr-2`}>
+      <button type="button" aria-label="Đóng" onClick={onClose} className={`${SHEET_ICON_BUTTON} -mr-2`}>
         <CloseIcon />
       </button>
     </header>
@@ -124,7 +124,7 @@ function AskView({ detected, onPick, onLater }: { detected: "ios" | "android" | 
       <div className="flex items-center gap-4">
         <img src="/icons/icon-512.png" alt="" width={56} height={56} className="h-14 w-14 shrink-0 rounded-[14px]" />
         <div className="flex min-w-0 flex-col gap-1">
-          <h2 id={TITLE_ID} className={`${TITLE_CLASS} text-[22px]`}>
+          <h2 id={TITLE_ID} className={`${SHEET_TITLE_CLASS} text-[22px]`}>
             CÀI H1T MICRO VÀO MÁY CỦA BẠN
           </h2>
           <p className="m-0 text-[13px] leading-snug text-secondary">Như một ứng dụng thật, chỉ mất 20 giây.</p>
