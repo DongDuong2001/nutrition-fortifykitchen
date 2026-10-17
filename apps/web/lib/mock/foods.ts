@@ -1,4 +1,5 @@
 import type { FoodCategory } from "../food-categories";
+import { isLiveMode } from "../api-mode";
 import { demoActive } from "../demo";
 
 export interface FoodServing {
@@ -49,6 +50,9 @@ const fdc = (id: number): FoodSourceRef => ({ db: "SR Legacy", id: `FDC ${id}`, 
  * is on. Look-ups by id (a saved entry, a recent, a favourite) read MOCK_FOODS directly and still find them.
  */
 export function browsableFoods(): FoodItem[] {
+  // Live mode lists the database's foods (and the user's own) only: the sample foods never mix in, not even before
+  // the database catalogue has arrived
+  if (isLiveMode()) return MOCK_FOODS.filter((f) => !SAMPLE_FOOD_IDS.has(f.id));
   return demoActive() ? MOCK_FOODS : MOCK_FOODS.filter((f) => !f.demoOnly);
 }
 
@@ -868,3 +872,6 @@ export const MOCK_FOODS: FoodItem[] = [
     },
   },
 ];
+
+/** The ids of the sample foods above, taken before any database catalogue replaces them. */
+const SAMPLE_FOOD_IDS: ReadonlySet<string> = new Set(MOCK_FOODS.map((f) => f.id));

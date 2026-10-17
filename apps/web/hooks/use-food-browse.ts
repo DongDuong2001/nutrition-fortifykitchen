@@ -26,7 +26,7 @@ export function useFoodBrowse() {
 
   useEffect(() => {
     if (isLiveMode() && !catalogLoaded) {
-      apiClient.searchFoods("").then(() => {
+      apiClient.loadAllFoods().then(() => {
         setCatalogLoaded(true);
       }).catch(() => {});
     }

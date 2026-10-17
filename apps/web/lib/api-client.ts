@@ -11,7 +11,8 @@ import { calculateTargets } from "./targets";
 import { MOCK_FOODS, setCatalogFoods, type FoodItem } from "./mock/foods";
 import { searchFoods as searchMockFoods } from "./search";
 import type { SetupProfile } from "./onboarding";
-import { accountStorage } from "./storage-keys";
+import { currentAccountId } from "./auth-actions";
+import { accountStorage, browserSession, keyedStorage, type KeyValueStore } from "./storage-keys";
 import { type CoachProfile, filterCoachesBySpecialty, getCoachById } from "./coaches";
 import { type LeaderboardPeriod, type LeaderboardResponse, getMockLeaderboard, setLeaderboardOptIn as setLeaderboardOptInState } from "./leaderboard";
 import { readStoredProfile, type Profile } from "./profile";
@@ -192,6 +193,35 @@ export interface LogMealPayload {
   serving_size_g?: number;
   log_date?: string;
   calories?: number;
+}
+
+// The whole catalogue, kept for a while so a repeat visit does not page /foods again
+const FOODS_PAGE_SIZE = 50;
+const FOODS_MAX_PAGES = 30;
+const FOODS_CACHE_KEY = "h1t_foods_cache_v1";
+const FOODS_CACHE_MS = 10 * 60 * 1000;
+
+function foodsCache(): KeyValueStore | null {
+  const session = browserSession();
+  return session ? keyedStorage(session, false, currentAccountId()) : null;
+}
+
+function readFoodsCache(cache: KeyValueStore | null): FoodItem[] | null {
+  try {
+    const parsed = JSON.parse(cache?.getItem(FOODS_CACHE_KEY) ?? "null");
+    if (parsed && Date.now() - parsed.at < FOODS_CACHE_MS && Array.isArray(parsed.foods) && parsed.foods.length > 0) return parsed.foods;
+  } catch {
+    // Unreadable: load again
+  }
+  return null;
+}
+
+function writeFoodsCache(cache: KeyValueStore | null, foods: FoodItem[]): void {
+  try {
+    cache?.setItem(FOODS_CACHE_KEY, JSON.stringify({ at: Date.now(), foods }));
+  } catch {
+    // Storage full or blocked: the next visit loads again
+  }
 }
 
 export function getApiBaseUrl(): string {
@@ -561,6 +591,53 @@ export const apiClient = {
 
     const filtered = category ? MOCK_FOODS.filter((f) => f.category === category) : MOCK_FOODS;
     return searchMockFoods(filtered, query);
+  },
+
+  /**
+   * Live mode: the whole catalogue. The API caps a page at 50 foods, so this pages /foods?limit=50&page=N until a page
+   * has fewer than 50 rows, the total is reached, or 30 pages are read, then hands everything to setCatalogFoods
+   * once. A page that fails keeps what loaded before it; with nothing loaded it throws (the caller offers Thử lại).
+   * The result is kept in sessionStorage for 10 minutes, per account. Mock mode: nothing to load.
+   */
+  async loadAllFoods(): Promise<FoodItem[]> {
+    if (!isLiveMode()) return MOCK_FOODS;
+
+    const cache = foodsCache();
+    const cached = readFoodsCache(cache);
+    if (cached) {
+      setCatalogFoods(cached);
+      return cached;
+    }
+
+    const collected = new Map<string, FoodItem>();
+    let complete = false;
+    try {
+      for (let page = 1; page <= FOODS_MAX_PAGES; page++) {
+        const res = await apiFetch(`/foods?limit=${FOODS_PAGE_SIZE}&page=${page}`);
+        if (!res.ok) break;
+        const json = await res.json();
+        const payload = json.data ?? json;
+        const items = payload.items ?? (Array.isArray(payload) ? payload : null);
+        if (!Array.isArray(items)) break;
+        for (const raw of items) {
+          const food = mapApiFoodToFoodItem(raw);
+          collected.set(food.id, food);
+        }
+        const total = Number(payload.total);
+        if (items.length < FOODS_PAGE_SIZE || (total > 0 && collected.size >= total)) {
+          complete = true;
+          break;
+        }
+      }
+    } catch {
+      // Keep what loaded
+    }
+
+    const foods = Array.from(collected.values());
+    if (foods.length === 0) throw new Error("Chưa tải được danh mục món ăn");
+    setCatalogFoods(foods);
+    if (complete) writeFoodsCache(cache, foods);
+    return foods;
   },
 
   async getFood(id: string): Promise<FoodItem | null> {
