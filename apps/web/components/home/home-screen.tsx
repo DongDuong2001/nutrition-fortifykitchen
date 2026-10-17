@@ -12,7 +12,8 @@ import { MealMenuSheet } from "@/components/diary/meal-menu-sheet";
 import { copyMeals, dayEntries, shiftIsoDate, viewedIsoDate } from "@/lib/day-history";
 import { defaultMealName } from "@/lib/saved-meals";
 import { pastDayData, useDiary } from "@/lib/diary-store";
-import { formatAmount, formatDesktopDate } from "@/lib/format";
+import { formatDesktopDate } from "@/lib/format";
+import { kcalLabel, sumKcal } from "@/lib/kcal";
 import { trainingTile } from "@/lib/diary-rows";
 import { calculateSaltTarget } from "@/lib/training";
 import {
@@ -477,12 +478,12 @@ function HomeContent() {
         mealName={menuMeal?.fullName ?? ""}
         readOnly={isPast}
         itemCount={menuMeal?.entries.length ?? 0}
-        kcal={menuMeal?.kcal ?? 0}
+        kcal={menuMeal?.kcal ?? null}
         savableCount={menuSlot ? mealFoods(menuSlot, viewIso).length : 0}
         defaultSaveName={menuSlot ? defaultMealName(menuSlot, viewIso) : ""}
         onSave={(name) => menuSlot && saveMealAs(menuSlot, viewIso, name)}
         yesterdayItemCount={yesterdayMeal.length}
-        yesterdayKcal={yesterdayMeal.reduce((sum, e) => sum + e.calories, 0)}
+        yesterdayKcal={sumKcal(yesterdayMeal.map((e) => e.calories))}
         onCopyYesterday={copyMealFromYesterday}
         onDelete={() => {
           if (!menuSlot) return;
@@ -504,7 +505,7 @@ function HomeContent() {
         open={targetSheet === "copy"}
         onClose={() => setTargetSheet(null)}
         title={`Chép ${chosenCount} món sang`}
-        description={`${chosenCount} món · ${formatAmount(chosenKcal(entries, liveSelected), "kcal")} kcal`}
+        description={`${chosenCount} món · ${kcalLabel(chosenKcal(entries, liveSelected))}`}
         withKeep={false}
         initial={chosen[0]?.slot && chosen[0].slot !== "pre_workout" ? chosen[0].slot : "breakfast"}
         confirmLabel="Chép"
@@ -514,7 +515,7 @@ function HomeContent() {
         open={targetSheet === "move"}
         onClose={() => setTargetSheet(null)}
         title={`Chuyển ${chosenCount} món sang`}
-        description={`${chosenCount} món · ${formatAmount(chosenKcal(entries, liveSelected), "kcal")} kcal`}
+        description={`${chosenCount} món · ${kcalLabel(chosenKcal(entries, liveSelected))}`}
         withKeep={false}
         initial={chosen[0]?.slot && chosen[0].slot !== "pre_workout" ? chosen[0].slot : "breakfast"}
         confirmLabel="Chuyển"

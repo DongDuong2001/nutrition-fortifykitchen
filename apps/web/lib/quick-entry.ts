@@ -22,7 +22,7 @@ export interface QuickEntryInput {
 }
 
 export type QuickEntryResult =
-  | { ok: true; entry: AddedDiaryEntry }
+  | { ok: true; entry: AddedDiaryEntry & { calories: number } }
   | { ok: false; field: "kcal" | "protein" | "carbs" | "fat"; message: string };
 
 const round1 = (n: number) => Math.round(n * 10) / 10;

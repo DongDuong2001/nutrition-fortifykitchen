@@ -56,7 +56,7 @@ export function SelectActionBar({
   onCopyToToday,
 }: {
   count: number;
-  kcal: number;
+  kcal: number | null;
   /** A past day is read-only: the only action is Chép vào hôm nay. */
   past: boolean;
   onCopy: () => void;

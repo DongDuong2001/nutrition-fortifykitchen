@@ -112,7 +112,7 @@ function AddFoodInner() {
     for (const m of data.meals) {
       const s = slotMap[m.slot];
       if (s) {
-        cals[s] = m.kcal;
+        if (m.kcal !== null) cals[s] = m.kcal;
       }
     }
     return cals;

@@ -72,6 +72,13 @@ describe("selection", () => {
     expect(chosenKcal(day, sel)).toBe(553);
     expect(chosenKcal(day, new Set())).toBe(0);
   });
+
+  it("skips entries with unknown kcal, and is unknown when none of the chosen has kcal", () => {
+    const day = [entry("a", { kcal: 459 }), entry("b", { kcal: null }), entry("c", { kcal: null })];
+    expect(chosenKcal(day, new Set(["a", "b"]))).toBe(459);
+    expect(chosenKcal(day, new Set(["b", "c"]))).toBeNull();
+    expect(actionBarLabel(2, null)).toBe("2 món · — kcal");
+  });
 });
 
 describe("texts", () => {

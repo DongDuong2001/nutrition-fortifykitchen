@@ -277,3 +277,18 @@ describe("weightSummary", () => {
     });
   });
 });
+
+describe("a logged day whose entries have no kcal", () => {
+  const unknownKcal: DayTotals = { ...day("2026-10-10", { calories: 0, protein: 100, carbs: 200, fat: 60 }), calories: null };
+
+  it("is skipped by the kcal average, and the average is null (not 0) when no day knows kcal", () => {
+    const withKnown = periodAverages([unknownKcal, day("2026-10-11", { calories: 2000, protein: 100, carbs: 200, fat: 60 })], TODAY);
+    expect(withKnown.calories).toBe(2000);
+    expect(periodAverages([unknownKcal], TODAY).calories).toBeNull();
+    expect(periodAverages([unknownKcal], TODAY).protein).toBe(100);
+  });
+
+  it("is not counted in the days on kcal target", () => {
+    expect(periodTargetDays([unknownKcal], TODAY, TARGETS).calories).toEqual({ met: 0, of: 0 });
+  });
+});

@@ -14,7 +14,8 @@ export interface AddedDiaryEntry {
   grams: number;
   displayQty: string;
   mealSlot: MealSlot;
-  calories: number;
+  /** null = unknown energy (the server stored NULL): kept as null, skipped by every total. */
+  calories: number | null;
   /** Macros and fibre are null (unknown) on a quick kcal entry that left them blank. */
   protein: number | null;
   carbs: number | null;
@@ -148,7 +149,7 @@ export interface SampleEffect {
   deleted: boolean;
   mealSlot: MealSlot;
   qty: string;
-  kcal: number;
+  kcal: number | null;
   /** Nutrition as it now stands. Null when it cannot be read, or the item is deleted. */
   numbers: EntryNumbers | null;
 }
@@ -186,11 +187,11 @@ function numericNutrients(nutrients: Record<string, number | null>): Record<stri
 
 /** An unknown (null) macro adds nothing to a total: totals sum known values only. */
 export function amountsOfNumbers(
-  n: (Omit<EntryNumbers, "protein" | "carbs" | "fat" | "fiber"> & Record<"protein" | "carbs" | "fat" | "fiber", number | null>) | null
+  n: (Omit<EntryNumbers, "calories" | "protein" | "carbs" | "fat" | "fiber"> & Record<"calories" | "protein" | "carbs" | "fat" | "fiber", number | null>) | null
 ): Amounts {
   if (!n) return NO_AMOUNTS;
   return {
-    calories: n.calories,
+    calories: n.calories ?? 0,
     carbs: n.carbs ?? 0,
     protein: n.protein ?? 0,
     fat: n.fat ?? 0,
@@ -221,7 +222,7 @@ export function addAmounts(a: Amounts, b: Amounts, sign = 1): Amounts {
 export function sampleDelta(info: SampleItemInfo, effect: SampleEffect): Amounts {
   const before = amountsOfNumbers(info.food && info.grams !== null ? entryNumbers(info.food, info.grams) : null);
   const after = amountsOfNumbers(effect.numbers);
-  return { ...addAmounts(after, before, -1), calories: effect.kcal - info.item.kcal };
+  return { ...addAmounts(after, before, -1), calories: (effect.kcal ?? 0) - (info.item.kcal ?? 0) };
 }
 
 export const NOT_IN_CATALOG = "Món này chưa có trong danh mục, nên không đổi khẩu phần được.";
@@ -234,7 +235,7 @@ export interface EntryView {
   grams: number | null;
   servingLabel: string;
   mealSlot: MealSlot;
-  kcal: number;
+  kcal: number | null;
   canChangePortion: boolean;
   portionNote: string | null;
   /** A kcal-only entry (Chỉ ghi kcal): its name and numbers are edited directly, there is no portion. */

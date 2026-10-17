@@ -171,7 +171,7 @@ export function applyProfileTargets(day: MockDayData, profile: Profile, targets:
   const minerals = retargetAll(day.minerals);
   const vitamins = retargetAll(day.vitamins);
   const kcal = targets.calories;
-  const consumed = day.calories.consumed;
+  const consumed = day.calories.consumed ?? 0;
   const achieved = (stats: MockMicroStat[]) => stats.filter((s) => (s.percentage ?? 0) >= 100).length;
   const vitaminsAchieved = achieved(vitamins);
   const mineralsAchieved = achieved(minerals);

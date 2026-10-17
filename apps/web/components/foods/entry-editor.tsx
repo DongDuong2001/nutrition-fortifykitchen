@@ -36,7 +36,7 @@ export function EntryEditor({ view }: { view: EntryView }) {
   // A quick kcal entry (Chỉ ghi kcal) edits its name and numbers directly
   const quick = view.quick;
   const [quickName, setQuickName] = useState(view.name);
-  const [quickKcal, setQuickKcal] = useState(quick ? String(view.kcal) : "");
+  const [quickKcal, setQuickKcal] = useState(quick && view.kcal !== null ? String(view.kcal) : "");
   const [quickProtein, setQuickProtein] = useState(quick?.protein != null ? String(quick.protein) : "");
   const [quickCarbs, setQuickCarbs] = useState(quick?.carbs != null ? String(quick.carbs) : "");
   const [quickFat, setQuickFat] = useState(quick?.fat != null ? String(quick.fat) : "");

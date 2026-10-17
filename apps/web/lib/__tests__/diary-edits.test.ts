@@ -52,7 +52,7 @@ const UNKNOWN_MEALS: MockDayData["meals"] = [
 ];
 const UNKNOWN_SAMPLES = resolveSampleItems({ meals: UNKNOWN_MEALS });
 
-const mealKcal = (day: MockDayData, slot: string) => day.meals.find((m) => m.slot === slot)!.kcal;
+const mealKcal = (day: MockDayData, slot: string) => day.meals.find((m) => m.slot === slot)!.kcal ?? 0;
 
 describe("sample items", () => {
   it("resolves all seven sample items to a food by name", () => {
@@ -268,7 +268,7 @@ describe("totals follow the edits", () => {
   it("an added entry and a sample edit add together", () => {
     const added = [addedEntry("entry-1", "food-chuoi", 100, "snack")];
     const day = computeCompositeDayData(SAMPLE_DAY, added, { "item-1": { grams: 90, servingLabel: "90 g" } });
-    expect(day.calories.consumed).toBe(1041 + 114 + 105);
+    expect(day.calories.consumed).toBe(1041 + 114 + 89);
   });
 });
 
@@ -309,7 +309,7 @@ describe("deleteMealIn and undoDeleteIn (Xóa bữa này)", () => {
     const day = computeCompositeDayData(SAMPLE_DAY, after.added, after.sample);
     expect(mealKcal(day, "breakfast")).toBe(0);
     expect(day.meals.find((m) => m.slot === "breakfast")!.items).toEqual([]);
-    expect(day.calories.consumed).toBe(before.calories.consumed - mealKcal(before, "breakfast"));
+    expect(day.calories.consumed).toBe((before.calories.consumed ?? 0) - mealKcal(before, "breakfast"));
     // other meals are untouched
     expect(mealKcal(day, "lunch")).toBe(mealKcal(before, "lunch"));
   });

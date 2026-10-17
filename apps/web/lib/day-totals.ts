@@ -1,5 +1,6 @@
 import { dayEntries } from "./day-history";
 import type { AddedDiaryEntry } from "./diary-edits";
+import { sumKcal } from "./kcal";
 import type { MockDayData } from "./mock/sample-day";
 import { SAMPLE_DAY } from "./mock/sample-day";
 import { NUTRIENT_CATALOG } from "./nutrients";
@@ -36,7 +37,6 @@ export function totalsFromEntries(iso: string, entries: AddedDiaryEntry[]): DayT
   if (entries.length === 0) {
     return { date: iso, logged: false, calories: null, protein: null, carbs: null, fat: null, fiber: null, nutrients: nullNutrients() };
   }
-  const sum = (pick: (e: AddedDiaryEntry) => number) => entries.reduce((acc, e) => acc + pick(e), 0);
   // Known values only: an unknown macro (a quick kcal entry) adds nothing, and stays null when no entry knows it
   const knownSum = (pick: (e: AddedDiaryEntry) => number | null): number | null => {
     const known = entries.map(pick).filter((v): v is number => typeof v === "number");
@@ -54,7 +54,7 @@ export function totalsFromEntries(iso: string, entries: AddedDiaryEntry[]): DayT
   return {
     date: iso,
     logged: true,
-    calories: sum((e) => e.calories),
+    calories: sumKcal(entries.map((e) => e.calories)),
     protein: knownSum((e) => e.protein),
     carbs: knownSum((e) => e.carbs),
     fat: knownSum((e) => e.fat),

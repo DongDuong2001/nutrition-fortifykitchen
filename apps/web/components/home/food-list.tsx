@@ -4,7 +4,7 @@ import React, { useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { rememberAddOpener } from "@/components/ui/add-opener";
-import { formatAmount } from "@/lib/format";
+import { kcalLabel } from "@/lib/kcal";
 import { missingMicros, portionLabel, type HomeEntry, type HomeMeal, type HomeMode } from "@/lib/home";
 import { mealFullySelected } from "@/lib/multi-select";
 import { markUsed } from "@/lib/onboarding-store";
@@ -128,7 +128,7 @@ function SelectList({ meals, select }: { meals: HomeMeal[]; select: SelectProps 
               <div className="sticky top-0 z-10 flex min-h-11 w-full items-center justify-between gap-2 bg-paper-dark px-3 text-text">
                 <span className="text-[11px] font-extrabold leading-none">{meal.label}</span>
                 <span className="flex items-center gap-2">
-                  <span className="font-display text-[13px] font-bold leading-none tabular-nums">{`${formatAmount(meal.kcal, "kcal")} kcal`}</span>
+                  <span className="font-display text-[13px] font-bold leading-none tabular-nums">{kcalLabel(meal.kcal)}</span>
                   <button
                     type="button"
                     onClick={() => select.onToggleMeal(meal.slot)}
@@ -212,7 +212,7 @@ export function FoodList({
             <section key={meal.slot} aria-label={meal.fullName}>
               <div className="flex h-[22px] w-full items-center justify-between gap-2 bg-paper-dark px-3 text-text">
                 <span className="text-[11px] font-extrabold leading-none">{meal.label}</span>
-                <span className="font-display text-[13px] font-bold leading-none tabular-nums">{`${formatAmount(meal.kcal, "kcal")} kcal`}</span>
+                <span className="font-display text-[13px] font-bold leading-none tabular-nums">{kcalLabel(meal.kcal)}</span>
               </div>
               {meal.entries.map((entry) => (
                 <ShareFoodRow key={entry.id} entry={entry} />
@@ -258,7 +258,7 @@ export function FoodList({
               >
                 <span className="text-[11px] font-extrabold leading-none">{meal.label}</span>
                 <span className="font-display text-[13px] font-bold leading-none tabular-nums">
-                  {meal.entries.length > 0 ? `${formatAmount(meal.kcal, "kcal")} kcal` : ""}
+                  {meal.entries.length > 0 ? kcalLabel(meal.kcal) : ""}
                 </span>
               </button>
               {!readOnly && (

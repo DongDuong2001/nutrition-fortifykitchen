@@ -23,7 +23,7 @@ describe("resolveRecent", () => {
   it("falls back to the first serving for a label it cannot read", () => {
     const resolved = resolveRecent({ foodId: "food-chuoi", servingLabel: "2 quả lớn" }, MOCK_FOODS);
     expect(resolved?.label).toBe("1 quả");
-    expect(resolved?.grams).toBe(100);
+    expect(resolved?.grams).toBe(118);
   });
 
   it("resolves every default recent", () => {

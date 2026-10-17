@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Sheet } from "@/components/ui/sheet";
 import { FormRow } from "@/components/ui/form-row";
 import { PillButton } from "@/components/ui/pill-button";
-import { formatAmount } from "@/lib/format";
+import { kcalLabel } from "@/lib/kcal";
 
 export interface MealMenuSheetProps {
   open: boolean;
@@ -14,14 +14,14 @@ export interface MealMenuSheetProps {
   readOnly?: boolean;
   /** What the meal holds on the day shown */
   itemCount: number;
-  kcal: number;
+  kcal: number | null;
   /** How many foods Lưu thành Bữa ăn của tôi would keep. 0 disables it. */
   savableCount: number;
   /** The name the save step starts with, "<Bữa> <dd/mm>". */
   defaultSaveName: string;
   /** What yesterday's same meal holds. 0 items: nothing to copy. */
   yesterdayItemCount: number;
-  yesterdayKcal: number;
+  yesterdayKcal: number | null;
   onCopyYesterday: () => void;
   onSave: (name: string) => void;
   onDelete: () => void;
@@ -70,7 +70,7 @@ export function MealMenuSheet({
       {step === "confirm" ? (
         <>
           <p className="m-0 px-1 text-sm leading-snug text-secondary">
-            {itemCount} món · {formatAmount(kcal, "kcal")} kcal sẽ bị xóa khỏi {mealName}. Bạn có 5 giây để hoàn tác.
+            {itemCount} món · {kcalLabel(kcal)} sẽ bị xóa khỏi {mealName}. Bạn có 5 giây để hoàn tác.
           </p>
           <button
             type="button"
@@ -138,7 +138,7 @@ export function MealMenuSheet({
                 <span className={`text-base font-bold ${canCopy ? "text-text" : "text-secondary"}`}>Chép hôm qua</span>
                 <span className="text-[13px] text-secondary">
                   {canCopy
-                    ? `Chép ${yesterdayItemCount} món · ${formatAmount(yesterdayKcal, "kcal")} kcal từ hôm qua`
+                    ? `Chép ${yesterdayItemCount} món · ${kcalLabel(yesterdayKcal)} từ hôm qua`
                     : "Hôm qua chưa ghi bữa này"}
                 </span>
               </button>

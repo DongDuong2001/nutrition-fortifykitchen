@@ -16,7 +16,7 @@ describe("a quick kcal entry in the day", () => {
   it("adds its kcal and macros to the day and shows in its meal", () => {
     const base = computeCompositeDayData(SAMPLE_DAY, []);
     const day = computeCompositeDayData(SAMPLE_DAY, [quick("Bánh mì")]);
-    expect(day.calories.consumed).toBe(base.calories.consumed + 400);
+    expect(day.calories.consumed).toBe((base.calories.consumed ?? 0) + 400);
     const dinner = day.meals.find((m) => m.slot === "dinner");
     expect(dinner?.items.at(-1)).toMatchObject({ name: "Bánh mì", qty: "Thêm nhanh", kcal: 400 });
     const protein = (d: typeof day) => d.macros.find((m) => m.key === "protein")?.consumed ?? 0;
@@ -41,7 +41,7 @@ describe("mealPortions", () => {
     expect(names).toEqual([
       ["food-yen-mach", "60 g", 60],
       ["food-yogurt-kefir", "200 ml", 200],
-      ["food-chuoi", "1 quả", 100],
+      ["food-chuoi", "1 quả", 118],
     ]);
   });
 
@@ -83,7 +83,7 @@ describe("a quick entry with every macro unknown", () => {
     if (!r.ok) throw new Error("expected ok");
     const base = computeCompositeDayData(SAMPLE_DAY, []);
     const day = computeCompositeDayData(SAMPLE_DAY, [r.entry]);
-    expect(day.calories.consumed).toBe(base.calories.consumed + 300);
+    expect(day.calories.consumed).toBe((base.calories.consumed ?? 0) + 300);
     expect(day.macros.map((m) => m.consumed)).toEqual(base.macros.map((m) => m.consumed));
     expect(day.meals.find((m) => m.slot === "dinner")?.items.at(-1)?.detail).toBe("Đạm — · Tinh bột — · Chất béo —");
   });

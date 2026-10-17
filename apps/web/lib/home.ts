@@ -1,6 +1,7 @@
 import { COUNTED_NUTRIENT_KEYS } from "./day-totals";
 import { SAMPLE_SLOT, entryNumbers, type AddedDiaryEntry, type EntryView } from "./diary-edits";
 import { formatAmount } from "./format";
+import { sumKcal } from "./kcal";
 import { MEAL_SLOTS, type MealSlot } from "./meal-slot";
 import type { MockDayData } from "./mock/sample-day";
 
@@ -14,7 +15,8 @@ export interface HomeEntry {
   qty: string;
   grams: number | null;
   slot: MealSlot;
-  kcal: number;
+  /** null = unknown energy: shown as "—", skipped by every total. */
+  kcal: number | null;
   protein: number | null;
   carbs: number | null;
   fat: number | null;
@@ -31,11 +33,12 @@ export interface HomeMeal {
   /** Bữa sáng, Bữa trưa … */
   fullName: string;
   entries: HomeEntry[];
-  kcal: number;
+  /** null when the meal has entries and none has a kcal value. */
+  kcal: number | null;
 }
 
 export interface HomeValues {
-  kcal: number;
+  kcal: number | null;
   protein: number | null;
   carbs: number | null;
   fat: number | null;
@@ -68,7 +71,7 @@ export function groupMeals(entries: HomeEntry[]): HomeMeal[] {
   const slots: MealSlot[] = hasPre ? ["breakfast", "lunch", "pre_workout", "snack", "dinner"] : FIXED_SLOTS;
   return slots.map((slot) => {
     const own = entries.filter((e) => e.slot === slot);
-    return { slot, label: SLOT_LABEL[slot], fullName: fullName(slot), entries: own, kcal: own.reduce((s, e) => s + e.kcal, 0) };
+    return { slot, label: SLOT_LABEL[slot], fullName: fullName(slot), entries: own, kcal: own.length === 0 ? 0 : sumKcal(own.map((e) => e.kcal)) };
   });
 }
 
@@ -89,7 +92,7 @@ export function sumEntries(entries: HomeEntry[]): HomeValues {
     return total === null ? null : Math.round(total * 10) / 10;
   };
   return {
-    kcal: entries.reduce((s, e) => s + e.kcal, 0),
+    kcal: sumKcal(entries.map((e) => e.kcal)),
     protein: macro((e) => e.protein),
     carbs: macro((e) => e.carbs),
     fat: macro((e) => e.fat),

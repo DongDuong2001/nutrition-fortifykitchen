@@ -1,5 +1,5 @@
 import type { AddedDiaryEntry } from "./diary-edits";
-import { formatAmount } from "./format";
+import { kcalLabel, sumKcal } from "./kcal";
 import type { HomeEntry } from "./home";
 import { MEAL_SLOTS, type MealSlot } from "./meal-slot";
 
@@ -35,13 +35,15 @@ export function chosenEntries<T extends Pick<HomeEntry, "id">>(entries: readonly
   return entries.filter((e) => selected.has(e.id));
 }
 
-export function chosenKcal(entries: readonly Pick<HomeEntry, "id" | "kcal">[], selected: ReadonlySet<string>): number {
-  return chosenEntries(entries, selected).reduce((sum, e) => sum + e.kcal, 0);
+export function chosenKcal(entries: readonly Pick<HomeEntry, "id" | "kcal">[], selected: ReadonlySet<string>): number | null {
+  const chosen = chosenEntries(entries, selected);
+  // Nothing chosen is 0; entries chosen but none with a kcal value is unknown (null)
+  return chosen.length === 0 ? 0 : sumKcal(chosen.map((e) => e.kcal));
 }
 
 /** "3 món · 1.041 kcal" */
-export function actionBarLabel(count: number, kcal: number): string {
-  return `${count} món · ${formatAmount(kcal, "kcal")} kcal`;
+export function actionBarLabel(count: number, kcal: number | null): string {
+  return `${count} món · ${kcalLabel(kcal)}`;
 }
 
 export function selectTitle(count: number): string {
@@ -84,8 +86,8 @@ export function pastCopyTitle(count: number): string {
 }
 
 /** "Từ Hôm qua 14/10 · 1.532 kcal. Ngày đã qua chỉ xem, nên món được chép vào hôm nay 15/10." */
-export function pastCopySubtitle(dayLabel: string, kcal: number, todayDdMm: string): string {
-  return `Từ ${dayLabel} · ${formatAmount(kcal, "kcal")} kcal. Ngày đã qua chỉ xem, nên món được chép vào hôm nay ${todayDdMm}.`;
+export function pastCopySubtitle(dayLabel: string, kcal: number | null, todayDdMm: string): string {
+  return `Từ ${dayLabel} · ${kcalLabel(kcal)}. Ngày đã qua chỉ xem, nên món được chép vào hôm nay ${todayDdMm}.`;
 }
 
 export function pastCopyToast(count: number): string {

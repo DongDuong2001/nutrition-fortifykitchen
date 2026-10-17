@@ -7,6 +7,7 @@ import { SAMPLE_DAY, type MockDayData, type MockFoodItem } from "./mock/sample-d
 import { type FoodItem } from "./mock/foods";
 import { type MealSlot, getMealSlotNameVi } from "./meal-slot";
 import { formatAmount } from "./format";
+import { sumKcal } from "./kcal";
 import { getTodayIsoVN, withRuntimeDate } from "./date";
 import { DAY_ARCHIVE_KEY, mergeArchive, msUntilNextDay, parseArchive, splitByDay, type DayArchive } from "./day-archive";
 import { isDemo, setDemoActive } from "./demo";
@@ -265,9 +266,13 @@ export function computeCompositeDayData(
   });
 
   // 1. Calories
-  const totalConsumedCals = Math.max(0, baseDay.calories.consumed + extraCals);
-  const remainingCals = Math.max(0, baseDay.calories.targetMin - totalConsumedCals);
-  const calPercentage = Math.round((totalConsumedCals / baseDay.calories.targetMin) * 100);
+  // Unknown kcal (an entry the server stored with NULL) adds nothing; when every food of the day is unknown the
+  // total is unknown too (null, shown as a dash), not 0
+  const keptKcals = [...effects.filter((e) => !e.effect.deleted).map((e) => e.effect.kcal), ...addedEntries.map((e) => e.calories)];
+  const kcalUnknown = keptKcals.length > 0 && keptKcals.every((k) => k === null);
+  const totalConsumedCals = kcalUnknown ? null : Math.max(0, (baseDay.calories.consumed ?? 0) + extraCals);
+  const remainingCals = Math.max(0, baseDay.calories.targetMin - (totalConsumedCals ?? 0));
+  const calPercentage = totalConsumedCals === null ? 0 : Math.round((totalConsumedCals / baseDay.calories.targetMin) * 100);
 
   // 2. Macros
   const updatedMacros = baseDay.macros.map((m) => {
@@ -333,7 +338,7 @@ export function computeCompositeDayData(
     return {
       ...meal,
       items,
-      kcal: items.reduce((acc, it) => acc + it.kcal, 0),
+      kcal: items.length === 0 ? 0 : sumKcal(items.map((it) => it.kcal)),
     };
   });
 
@@ -506,8 +511,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
                 grams: e.grams,
                 displayQty: e.serving_label || `${e.grams} g`,
                 mealSlot: (e.meal_slot === "preworkout" ? "pre_workout" : e.meal_slot) as MealSlot,
-                // A NULL kcal (unknown, migration 000011) adds nothing to a total; it is not shown as a measured 0
-                calories: typeof e.calories === "number" ? e.calories : 0,
+                // A NULL kcal (unknown, migration 000011) stays null: it adds nothing to a total and is not shown as a measured 0
+                calories: typeof e.calories === "number" ? e.calories : null,
                 protein: (e.nutrients?.protein as number | null) ?? null,
                 carbs: (e.nutrients?.carbs as number | null) ?? null,
                 fat: (e.nutrients?.fat as number | null) ?? null,

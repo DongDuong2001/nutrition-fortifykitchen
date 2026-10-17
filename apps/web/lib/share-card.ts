@@ -1,4 +1,5 @@
 import { formatAmount, formatDayLabel, formatRange } from "./format";
+import { kcalValue } from "./kcal";
 import { cleanDisplayName, validateDisplayName } from "./display-name";
 import { DAY_MODE, heroLabel, pctLabel, targetOf, valuesFromDay, type HomeEntry, type HomeMeal, type HomeValues } from "./home";
 import type { Level } from "./coaching-link";
@@ -146,7 +147,7 @@ export function buildShareModel({
   };
   const alt = [
     `Ảnh tóm tắt ${dateLabel}${name ? ` của ${name}` : ""}`,
-    `${formatAmount(values.kcal, "kcal")} / ${formatRange(kcalTarget.min, kcalTarget.max)} kcal, ${pctLabel(values.kcal, kcalTarget.min)}`,
+    `${kcalValue(values.kcal)} / ${formatRange(kcalTarget.min, kcalTarget.max)} kcal, ${pctLabel(values.kcal, kcalTarget.min)}`,
     [macro("Tinh bột", "carbs"), macro("Đạm", "protein"), macro("Chất béo", "fat"), macro("Chất xơ", "fiber")].join("; "),
     `Vi chất đạt ${summary.reached}/${summary.total}`,
   ].join(". ");

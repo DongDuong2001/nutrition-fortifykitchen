@@ -5,7 +5,8 @@ import { PillButton } from "@/components/ui/pill-button";
 import { Sheet } from "@/components/ui/sheet";
 import { useDiary } from "@/lib/diary-store";
 import { copyMeals, dayEntries, entriesKcal, shiftIsoDate } from "@/lib/day-history";
-import { formatAmount, formatDayLabel } from "@/lib/format";
+import { formatDayLabel } from "@/lib/format";
+import { kcalLabel } from "@/lib/kcal";
 import { MEAL_SLOTS, getMealSlotNameVi, type MealSlot } from "@/lib/meal-slot";
 import { isLiveMode } from "@/lib/api-mode";
 import { apiClient } from "@/lib/api-client";
@@ -32,7 +33,7 @@ export function CopyYesterdaySheet({ open, onClose }: CopyYesterdaySheetProps) {
 
   // Day label in the app's date style: "Hôm qua 12/10"
   const dayLabel = formatDayLabel(yesterday, new Date(`${todayIso}T12:00:00+07:00`));
-  const description = `${dayLabel} · ${formatAmount(entriesKcal(entries), "kcal")} kcal`;
+  const description = `${dayLabel} · ${kcalLabel(entriesKcal(entries))}`;
 
   return (
     <Sheet open={open} onClose={onClose} title="Chép bữa hôm qua?" description={description}>
@@ -96,7 +97,7 @@ function CopyChoices({ entries, onDone }: { entries: AddedDiaryEntry[]; onDone: 
               />
               <span className="flex-1 text-base font-semibold text-text">{meal.name}</span>
               <span className="text-sm text-secondary tabular-nums">
-                {meal.items.length} món · {formatAmount(kcal, "kcal")} kcal
+                {meal.items.length} món · {kcalLabel(kcal)}
               </span>
             </label>
           );

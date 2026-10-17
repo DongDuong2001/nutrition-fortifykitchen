@@ -60,7 +60,7 @@ function CalendarMonth({ selectedIso, onPick }: Pick<CalendarSheetProps, "select
   // Today's kcal comes from the diary; a past day from its own entries
   const statusOf = (iso: string): DayStatus => {
     const kcal = iso === today ? data.calories.consumed : entriesKcal(dayEntries(iso, today));
-    return dayStatus(kcal, range);
+    return dayStatus(kcal ?? 0, range);
   };
 
   const [, m] = month.split("-");

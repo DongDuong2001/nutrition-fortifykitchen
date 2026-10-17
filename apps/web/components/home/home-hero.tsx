@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { formatAmount } from "@/lib/format";
+import { kcalValue } from "@/lib/kcal";
 import { pctLabel, pctOf, type HomeValues } from "@/lib/home";
 import { getLevel, getLevelLabel } from "@/lib/levels";
 import { HomeBar } from "./home-bar";
@@ -77,7 +78,7 @@ export function HomeHero({
       </div>
 
       <div data-align-group="home-hero" className="flex flex-wrap items-baseline gap-x-1.5">
-        <span className="font-display text-[32px] font-extrabold leading-none tabular-nums">{formatAmount(values.kcal, "kcal")}</span>
+        <span className="font-display text-[32px] font-extrabold leading-none tabular-nums">{kcalValue(values.kcal)}</span>
         <span className="text-[13px] text-muted-on-dark">
           / {formatAmount(kcalTarget.min, "kcal")}–{formatAmount(kcalTarget.max, "kcal")} kcal
         </span>

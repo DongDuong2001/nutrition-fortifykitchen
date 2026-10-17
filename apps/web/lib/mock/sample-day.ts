@@ -5,7 +5,8 @@ export interface MockFoodItem {
   id: string;
   name: string;
   qty: string;
-  kcal: number;
+  /** null = unknown energy (a server entry with NULL calories): never read as 0. */
+  kcal: number | null;
   /** Second line of a row, e.g. the macros of a quick kcal entry ("Đạm — · Tinh bột 30 g · Chất béo —"). */
   detail?: string;
   /** Đạm, tinh bột, béo of the entry in grams; null = unknown (a quick kcal entry that left it blank). */
@@ -17,7 +18,8 @@ export interface MockMeal {
   id: string;
   slot: "breakfast" | "lunch" | "preworkout" | "dinner" | "snack";
   name: string;
-  kcal: number;
+  /** Sum of the known kcal of its items; null when it has items and none has a kcal value. */
+  kcal: number | null;
   items: MockFoodItem[];
 }
 
@@ -60,7 +62,8 @@ export interface MockDayData {
     trainingMinutes: number;
   };
   calories: {
-    consumed: number;
+    /** null when the day has entries and none carries a kcal value. */
+    consumed: number | null;
     targetMin: number;
     targetMax: number;
     remaining: number;
@@ -82,7 +85,8 @@ export interface MockDayData {
   nutrients?: Record<string, number | null>;
 }
 
-export const SAMPLE_DAY: MockDayData = {
+/** The sample day always has a kcal total (number), unlike a live day whose entries may all lack kcal. */
+export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
   date: "2026-10-10",
   dateLabel: "Hôm nay 10/10",
   desktopDateLabel: "Thứ Bảy, 10/10/2026 · Ngày tập 60′ · Giữ cân · 65 kg",

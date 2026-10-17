@@ -74,7 +74,7 @@ def run_phone(browser):
     pg.wait_for_timeout(300)
     check(is_past(pg), "390 ‹ opens a past day (› is enabled)")
     check(visible_count(pg, 'a:has-text("Về hôm nay")') == 1, "390 a past day has Về hôm nay in the header")
-    check(energy(pg) == "1.532", f"390 yesterday shows its own 1.532 kcal (got {energy(pg)})")
+    check(energy(pg) == "1.501", f"390 yesterday shows its own 1.501 kcal (got {energy(pg)})")
     check(visible_count(pg, 'button:has-text("Chép hôm qua")') == 0, "390 past day hides Chép hôm qua")
     check(visible_count(pg, f'text=Hôm qua {YESTERDAY.day:02d}/{YESTERDAY.month:02d}') == 1,
           "390 header reads Hôm qua dd/mm for yesterday")

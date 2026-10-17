@@ -124,7 +124,7 @@ describe("savedMealTotals", () => {
     const totals = savedMealTotals(meal("a"), MOCK_FOODS);
     const entries = savedMealEntries(meal("a"), MOCK_FOODS, "lunch", "p", "t");
     expect(totals.itemCount).toBe(2);
-    expect(totals.kcal).toBe(entries.reduce((s, e) => s + e.calories, 0));
+    expect(totals.kcal).toBe(entries.reduce((s, e) => s + (e.calories ?? 0), 0));
   });
 });
 

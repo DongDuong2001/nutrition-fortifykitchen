@@ -49,9 +49,9 @@ describe("totalsFromEntries (a past day)", () => {
   const entries = dayEntries(YESTERDAY, TODAY);
   const totals = totalsFromEntries(YESTERDAY, entries);
 
-  it("sums the entries of the day: yesterday is 1.532 kcal", () => {
+  it("sums the entries of the day: yesterday is 1.501 kcal", () => {
     expect(totals.logged).toBe(true);
-    expect(totals.calories).toBe(1532);
+    expect(totals.calories).toBe(1501);
   });
 
   it("has a key for all 22 nutrients, a number only where a food knows it", () => {
@@ -66,7 +66,7 @@ describe("totalsFromEntries (a past day)", () => {
     const withQuick = totalsFromEntries(YESTERDAY, [...entries, quick]);
     expect(withQuick.protein).toBe(totals.protein);
     expect(withQuick.fat).toBe(totals.fat);
-    expect(withQuick.calories).toBe((totals.calories ?? 0) + first.calories);
+    expect(withQuick.calories).toBe((totals.calories ?? 0) + (first.calories ?? 0));
 
     const onlyQuick = totalsFromEntries(YESTERDAY, [quick]);
     expect(onlyQuick.protein).toBeNull();
@@ -75,6 +75,15 @@ describe("totalsFromEntries (a past day)", () => {
     expect(onlyQuick.fiber).toBeNull();
     expect(onlyQuick.calories).toBe(first.calories);
     expect(rest.length).toBeGreaterThan(0);
+  });
+
+  it("skips an entry with unknown kcal, and is null (not 0) when no entry has kcal", () => {
+    const [first] = entries;
+    const unknownKcal = { ...first, id: "u", calories: null };
+    expect(totalsFromEntries(YESTERDAY, [...entries, unknownKcal]).calories).toBe(totals.calories);
+    const none = totalsFromEntries(YESTERDAY, [unknownKcal]);
+    expect(none.logged).toBe(true);
+    expect(none.calories).toBeNull();
   });
 
   it("is not logged, with null (not 0) everywhere, for a day with no entries", () => {
@@ -98,7 +107,7 @@ describe("dayTotals: today from the live day, other days from the history", () =
   });
 
   it("reads yesterday from its entries", () => {
-    expect(dayTotals(YESTERDAY, TODAY).calories).toBe(1532);
+    expect(dayTotals(YESTERDAY, TODAY).calories).toBe(1501);
   });
 
   it("is not logged for a day older than the history", () => {

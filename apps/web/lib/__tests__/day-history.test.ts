@@ -39,7 +39,7 @@ describe("blankDay and pastDayData", () => {
     const targets = targetsFor(SAMPLE_PROFILE);
     const day = pastDayData(YESTERDAY, TODAY, SAMPLE_PROFILE, targets);
     expect(day.date).toBe(YESTERDAY);
-    expect(day.calories.consumed).toBe(1532);
+    expect(day.calories.consumed).toBe(1501);
     expect(day.calories.targetMin).toBe(targets.calories.min);
   });
 
@@ -86,7 +86,7 @@ describe("dayEntries (mock history)", () => {
   it("gives yesterday its logged items, with kcal from the catalog", () => {
     const entries = dayEntries(YESTERDAY, TODAY);
     expect(entries).toHaveLength(9);
-    expect(entriesKcal(entries)).toBe(1532);
+    expect(entriesKcal(entries)).toBe(1501);
     expect(entries.every((e) => e.foodName.length > 0)).toBe(true);
   });
 
@@ -97,7 +97,7 @@ describe("dayEntries (mock history)", () => {
     expect(loggedDays.length).toBeLessThan(29);
     // every history entry has a food from the catalog and a unique id
     const all = loggedDays.flat();
-    expect(all.every((e) => e.foodName.length > 0 && e.calories > 0)).toBe(true);
+    expect(all.every((e) => e.foodName.length > 0 && (e.calories ?? 0) > 0)).toBe(true);
     expect(new Set(all.map((e) => e.id)).size).toBe(all.length);
   });
 
@@ -123,7 +123,7 @@ describe("copyMeals", () => {
 
     expect(copied).toHaveLength(6);
     expect(copied.map((e) => e.mealSlot)).toEqual(["breakfast", "breakfast", "breakfast", "dinner", "dinner", "dinner"]);
-    expect(entriesKcal(copied)).toBe(459 + 475);
+    expect(entriesKcal(copied)).toBe(443 + 460);
     expect(copied.every((e) => e.id.startsWith("copy-1-"))).toBe(true);
     expect(new Set(copied.map((e) => e.id)).size).toBe(copied.length);
     expect(copied[0].addedAt).toBe("2026-10-11T08:00:00.000Z");

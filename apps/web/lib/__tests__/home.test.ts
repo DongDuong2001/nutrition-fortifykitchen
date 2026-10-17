@@ -295,3 +295,45 @@ describe("a day edited down never goes below 0 (cc2-32)", () => {
     for (const stat of everyStat(day)) expect(stat.consumed, stat.key).toBeNull();
   });
 });
+
+describe("unknown kcal (an entry the server stored with NULL)", () => {
+  const known = entry({ id: "k", kcal: 200 });
+  const unknown = entry({ id: "u", kcal: null });
+  const homeAdded = (id: string): AddedDiaryEntry => ({
+    id,
+    foodId: "f",
+    foodName: "Cơm",
+    grams: 100,
+    displayQty: "100 g",
+    mealSlot: "lunch",
+    calories: 0,
+    protein: null,
+    carbs: null,
+    fat: null,
+    fiber: null,
+    nutrients: {},
+    addedAt: "2026-10-14T12:00:00.000Z",
+  });
+
+  it("a meal and the day skip the unknown ones", () => {
+    expect(groupMeals([known, unknown]).find((m) => m.slot === "lunch")?.kcal).toBe(200);
+    expect(sumEntries([known, unknown]).kcal).toBe(200);
+  });
+
+  it("a meal and the day with no kcal at all are unknown (null), an empty meal stays 0", () => {
+    const meals = groupMeals([unknown]);
+    expect(meals.find((m) => m.slot === "lunch")?.kcal).toBeNull();
+    expect(meals.find((m) => m.slot === "breakfast")?.kcal).toBe(0);
+    expect(sumEntries([unknown]).kcal).toBeNull();
+  });
+
+  it("the store's day has a null kcal total and a null meal total when every entry is unknown", () => {
+    const added = [{ ...homeAdded("u1"), calories: null }];
+    const day = computeCompositeDayData(blankDay(SAMPLE_DAY), added, {});
+    expect(day.calories.consumed).toBeNull();
+    expect(day.meals.find((m) => m.slot === "lunch")?.kcal).toBeNull();
+    expect(valuesFromDay(day).kcal).toBeNull();
+    const withKnown = computeCompositeDayData(blankDay(SAMPLE_DAY), [...added, { ...homeAdded("k1"), calories: 300 }], {});
+    expect(withKnown.calories.consumed).toBe(300);
+  });
+});

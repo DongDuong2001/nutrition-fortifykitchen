@@ -1,5 +1,6 @@
 import { entryNumbers, hasEnergy, type AddedDiaryEntry } from "./diary-edits";
 import { formatAmount } from "./format";
+import { sumKcal } from "./kcal";
 import type { MealSlot } from "./meal-slot";
 import { MOCK_FOODS } from "./mock/foods";
 import type { MockDayData, MockMacroStat, MockMicroStat } from "./mock/sample-day";
@@ -76,8 +77,9 @@ export function copyMeals(
   return source.filter((e) => chosen.has(e.mealSlot)).map((e, i) => ({ ...e, id: `${idPrefix}-${i}`, addedAt }));
 }
 
-export function entriesKcal(entries: AddedDiaryEntry[]): number {
-  return entries.reduce((sum, e) => sum + e.calories, 0);
+/** The kcal of the entries that have one; null when none does (unknown, not 0). */
+export function entriesKcal(entries: AddedDiaryEntry[]): number | null {
+  return sumKcal(entries.map((e) => e.calories));
 }
 
 export type DayStatus = "none" | "under" | "met" | "over";
