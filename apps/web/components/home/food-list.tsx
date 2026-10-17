@@ -245,7 +245,7 @@ export function FoodList({
           .map((meal) => (
             <section key={meal.slot} aria-label={meal.fullName}>
               <div className={pill.wrap}>
-                <div data-ink-pill className={`${pill.pill} justify-between bg-ink text-on-dark`}>
+                <div data-ink-pill data-tour="meal-pill" className={`${pill.pill} justify-between bg-ink text-on-dark`}>
                   <span className={pill.label}>{meal.label}</span>
                   <span className={pill.kcal}>{kcalLabel(meal.kcal)}</span>
                 </div>
