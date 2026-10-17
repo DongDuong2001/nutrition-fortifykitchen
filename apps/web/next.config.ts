@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 import path from "path";
 import { loadEnvConfig } from "@next/env";
+import { readFileSync } from "fs";
 import { PERMANENT_REDIRECTS } from "./lib/redirects";
+
+const APP_VERSION = readFileSync(path.join(__dirname, "public/sw.js"), "utf8").match(/const VERSION = "([^"]+)"/)?.[1] ?? "unknown";
 
 // Automatically load the monorepo root .env.local if present
 loadEnvConfig(path.resolve(process.cwd(), "../.."));
@@ -60,7 +63,8 @@ const SECURITY_HEADERS = [
 
 const nextConfig: NextConfig = {
   // DEMO_BUILD=1 at build time keeps ?demo, ?as and ?level working in a production build (gates and probes only)
-  env: { NEXT_PUBLIC_DEMO_BUILD: process.env.DEMO_BUILD === "1" ? "1" : "" },
+  // NEXT_PUBLIC_APP_VERSION: sw.js VERSION, one source for the app version (client error reports, cc-50)
+  env: { NEXT_PUBLIC_DEMO_BUILD: process.env.DEMO_BUILD === "1" ? "1" : "", NEXT_PUBLIC_APP_VERSION: APP_VERSION },
   async redirects() {
     return PERMANENT_REDIRECTS.map((r) => ({ ...r }));
   },

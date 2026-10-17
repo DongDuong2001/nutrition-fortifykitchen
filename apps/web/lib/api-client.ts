@@ -19,6 +19,7 @@ import { readStoredProfile, type Profile } from "./profile";
 import { shiftIsoDate } from "./day-history";
 import { generateUuid, isUuid } from "./uuid";
 import { refreshServerSession } from "./server-session";
+import { reportClientError } from "./client-errors";
 import { normaliseCoaching } from "./coaching-link";
 import type { GoalType, SexType } from "./targets";
 
@@ -488,12 +489,14 @@ async function sendWrite(write: DiaryWrite): Promise<{ outcome: "saved" | "retry
       signal: diaryTimeout(),
     });
     status = res.status;
-    if (writeOutcome(status, method) === "held") answer = await serverAnswer(res);
+    if (status >= 300) answer = await serverAnswer(res);
   } catch {
     // No answer: sent again from the outbox
   }
   const outcome = writeOutcome(status, method);
   if (outcome === "held") console.warn(`Diary write not saved: ${method} ${itemPath(write)} → ${status} ${answer.message}`);
+  // Any non-2xx answer (not a 404 on a delete, which means done) is reported once
+  if (status >= 300 && outcome !== "saved") reportClientError({ kind: "write", method, path: itemPath(write), status, message: answer.message });
   return { outcome, status, message: answer.message, final: outcome === "held" && status === 409 && answer.code === PAST_DAY_READ_ONLY };
 }
 
@@ -610,6 +613,7 @@ export const apiClient = {
           const json = await res.json();
           return json.data ?? json;
         }
+        reportClientError({ kind: "sync", method: "GET", path: `/days/${targetDate}`, status: res.status, message: (await serverAnswer(res)).message });
       } catch {
         // No answer (or no answer within DIARY_REQUEST_MS)
       }

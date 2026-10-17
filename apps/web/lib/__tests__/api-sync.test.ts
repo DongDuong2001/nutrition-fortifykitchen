@@ -103,7 +103,9 @@ describe("the outbox", () => {
     expect(outbox()).toHaveLength(1);
     expect(await syncOfflineOutbox({ retryHeld: true })).toEqual({ saved: [ID], held: [] });
     expect(outbox()).toEqual([]);
-    expect(calls.filter((c) => c.startsWith("POST"))).toHaveLength(1);
+    expect(calls.filter((c) => c.startsWith("POST /days"))).toHaveLength(1);
+    // cc-50: the refusal is reported once (POST /client-errors), however often it is held again
+    expect(calls.filter((c) => c === "POST /client-errors")).toHaveLength(1);
   });
 
   it("a 500 is sent again on the next sync and leaves the outbox once saved; five failures do not drop it", async () => {
@@ -271,12 +273,13 @@ describe("writes that can never succeed (review 05:30 M1)", () => {
       "h1t_offline_outbox_sync@example.com",
       JSON.stringify([{ id: ID, date: "2026-10-17", payload: { id: ID }, createdAt: 1, key: "k1" }])
     );
-    const fetchMock = vi.fn(async () => new Response(JSON.stringify({ error: { code: "PAST_DAY_READ_ONLY", message: "Cannot write to past dates" } }), { status: 409 }));
+    const fetchMock = vi.fn(async (_url: string) => new Response(JSON.stringify({ error: { code: "PAST_DAY_READ_ONLY", message: "Cannot write to past dates" } }), { status: 409 }));
     vi.stubGlobal("fetch", fetchMock);
     const first = await syncOfflineOutbox();
     expect(first.held).toEqual([{ id: ID, status: 409, message: "Cannot write to past dates", date: "2026-10-17", final: true }]);
     expect(await syncOfflineOutbox({ retryHeld: true })).toEqual({ saved: [], held: [] });
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    // cc-50: the refusal is reported once to /client-errors; the write itself went out once
+    expect(fetchMock.mock.calls.filter(([url]) => String(url).includes("/days/"))).toHaveLength(1);
     expect(getPendingOfflineEntryIds()).toEqual([ID]);
   });
 

@@ -76,6 +76,10 @@ class FakeApi:
             req = route.request
             path = req.url.split("/api/v1", 1)[1].split("?")[0]
             device["calls"].append(f"{req.method} {path}")
+            if req.method == "POST" and path == "/client-errors":
+                # cc-50: a failure report (no session needed)
+                device["reports"].append(json.loads(req.post_data or "{}"))
+                return route.fulfill(status=204, body="")
             if device["expired"]:
                 route.fulfill(status=401, content_type="application/json", body='{"error":"unauthorized"}')
                 return
@@ -123,7 +127,7 @@ class FakeApi:
 def device(browser, api, size=PHONE, signed_in=True):
     """A browser context on the fake API. `state["expired"]` makes every API call 401 until /auth/session is asked."""
     ctx = browser.new_context(**size)
-    state = {"expired": False, "calls": [], "refreshes": 0}
+    state = {"expired": False, "calls": [], "refreshes": 0, "reports": []}
     if signed_in:
         ctx.add_init_script(f"try {{ localStorage.setItem('h1t_auth_current_email', '{EMAIL}'); }} catch (e) {{}}")
     ctx.route("**/api/v1/**", api.handler(state))
@@ -297,6 +301,8 @@ with sync_playwright() as p:
         pg.reload(wait_until="domcontentloaded")
         pg.wait_for_timeout(2500)
         check(row_of(pg, "Bánh mì đen").count() == 1, "3: reload while GET /days answers 500: the saved entry is still shown")
+        syncs = [r for r in st["reports"] if r.get("kind") == "sync"]
+        check(len(syncs) == 1 and syncs[0].get("status") == 500, f"3: the failed day read is reported once (sync 500) ({syncs})")
         api.script["GET_DAY"] = []
         st["expired"] = True
         pg.reload(wait_until="domcontentloaded")
@@ -318,6 +324,14 @@ with sync_playwright() as p:
         close_tips(pg)
         retry = pg.get_by_role("button", name="Thử lại").locator("visible=true")
         check(retry.count() >= 1, "4: the toast offers Thử lại")
+        # cc-50: the refusal is reported once, with the server's message and the app version
+        writes = [r for r in st["reports"] if r.get("kind") == "write"]
+        check(
+            len(writes) == 1 and writes[0].get("status") == 400 and writes[0].get("message") == "scripted"
+            and writes[0].get("path") == f"/days/{TODAY}/entries" and writes[0].get("route") == "/add"
+            and re.fullmatch(r"\d{4}-\d{2}-\d{2}\.\d+", writes[0].get("version", "")) is not None,
+            f"4: one client error report: write 400 scripted, /days/…/entries, route /add (where it was added), app version ({writes})",
+        )
         if retry.count():
             retry.first.click()
         ok = wait_until(lambda: on_server(api, "Yến mạch cán"), 10, pg=pg)

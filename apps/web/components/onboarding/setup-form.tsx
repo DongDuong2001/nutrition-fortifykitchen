@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
 import { apiClient } from "@/lib/api-client";
+import { errorText, reportClientError } from "@/lib/client-errors";
 import { useDiary } from "@/lib/diary-store";
 import { readPendingCoachCode, writePendingCoachCode } from "@/lib/pending-coach";
 import { coachingAvailable } from "@/lib/coaching-link";
@@ -134,6 +135,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
       if (latest) markWhatsNewSeen(latest.id);
       router.push("/setup/done");
     } catch (err) {
+      reportClientError({ kind: "setup", message: errorText(err) });
       const msg = err instanceof Error && err.message ? err.message : "Chưa lưu được hồ sơ. Thử lại sau ít phút.";
       setSaveError(msg);
       setSaving(false);

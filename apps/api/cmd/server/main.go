@@ -16,6 +16,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"nutrition-api/internal/auth"
+	"nutrition-api/internal/clienterrors"
 	"nutrition-api/internal/coaching"
 	"nutrition-api/internal/config"
 	"nutrition-api/internal/diary"
@@ -131,6 +132,8 @@ func SetupRouter(cfg *config.Config, pool *pgxpool.Pool) chi.Router {
 	coachingHandler := coaching.NewHandler(coachingService)
 
 	userRateLimiter := ratelimit.NewUserRateLimiter(60)
+	// Failure reports from the web app: at most 10 a minute per user (per address when signed out)
+	clientErrorLimiter := ratelimit.NewUserRateLimiter(10)
 
 	if cfg.SupabaseJWTSecret == "" && os.Getenv("SUPABASE_SERVICE_ROLE_KEY") == "" && cfg.SupabaseJWKSURL == "" && cfg.SupabaseURL == "" {
 		logger.Log.Fatal().Msg("Authentication configuration missing: SUPABASE_JWT_SECRET (or SUPABASE_SERVICE_ROLE_KEY) or SUPABASE_JWKS_URL (or SUPABASE_URL) is required to start the server")
@@ -196,6 +199,9 @@ func SetupRouter(cfg *config.Config, pool *pgxpool.Pool) chi.Router {
 
 		// Public Webhook: GitHub Vault Ingestion
 		r.Post("/vault/webhook", vaultHandler.HandleWebhook)
+
+		// Failure reports from the web app, logged as event client_error (signed in or not)
+		r.With(authMiddleware.OptionalAuthenticate, clientErrorLimiter.LimitWrites).Post("/client-errors", clienterrors.Handle)
 
 		// Food catalog routes (public browsing allowed, custom foods filtered to creator)
 		r.Route("/foods", func(r chi.Router) {

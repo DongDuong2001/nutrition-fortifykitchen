@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { getFontEmbedCSS, toSvg } from "html-to-image";
+import { errorText, reportClientError } from "@/lib/client-errors";
 import { Sheet } from "@/components/ui/sheet";
 import { FormRow } from "@/components/ui/form-row";
 import { PillButton } from "@/components/ui/pill-button";
@@ -184,6 +185,7 @@ function ShareCapture({
       if (!blob) throw new Error("no image");
       if (!cancelled) callbacks.current.onDone(new File([blob], model.filename, { type: "image/png" }), width, height);
     })().catch((error: unknown) => {
+      reportClientError({ kind: "share", message: errorText(error) });
       if (!cancelled) callbacks.current.onError(error instanceof ShareFontsError ? "fonts" : "generate");
     });
     return () => {

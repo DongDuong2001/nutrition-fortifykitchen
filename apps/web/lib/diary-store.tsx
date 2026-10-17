@@ -43,6 +43,7 @@ import {
 import { refreshServerSession } from "./server-session";
 import { markUsed } from "./onboarding-store";
 import { isLocalOnly, syncNotice } from "./sync-notice";
+import { errorText, reportClientError } from "./client-errors";
 import { HOME_ROUTE } from "./nav";
 import { generateUuid, isUuid } from "./uuid";
 import {
@@ -612,7 +613,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         });
         setServerDayRead(true);
       })
-      .catch(() => {})
+      .catch((error: unknown) => reportClientError({ kind: "sync", message: errorText(error) }))
       .finally(() => {
         if (refreshing.current === mine) refreshing.current = null;
       });
