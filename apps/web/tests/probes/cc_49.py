@@ -8,7 +8,9 @@ every API call until it asks /auth/session, which is what the middleware's cooki
   2  POST 500 → Chưa lưu marker, kept in the outbox → retried on `online` → saved, marker gone
   3  reload while the POST keeps failing: the entry stays (Chưa lưu); reload while GET /days fails: nothing is wiped
   4  a 400: the entry stays, toast "Chưa lưu được món. Thử lại"; Thử lại with a healthy server saves it
-  5  two contexts on one account: B shows A's new food within 65 s without focus or reload
+  5  two contexts on one account, B a 390 px phone left open: B shows A's new food within 65 s without focus or
+     reload; B hidden, A adds, B shown again: it is there within 10 s (the session refresh first); the same after a
+     pageshow from the back-forward cache; deleted on the server: B drops it
   6  signed out at 1440: /app and the link page's Truy cập end on /signin; /landing still opens directly
 Run with: LIVE_BUILD=1 ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_49.py
 """
@@ -138,12 +140,26 @@ def open_today(pg):
     pg.wait_for_timeout(800)
 
 
-def add_food(pg, name):
+def close_tips(pg):
+    """A first-visit tip of a live account covers the screen; Đã hiểu closes it."""
+    tip = pg.get_by_role("button", name="Đã hiểu").locator("visible=true")
+    for _ in range(3):
+        if tip.count() == 0:
+            return
+        tip.first.click()
+        pg.wait_for_timeout(300)
+
+
+def add_food(pg, name, before_add=None):
     pg.goto(BASE + "/add?meal=dinner", wait_until="domcontentloaded")
     row = pg.locator("[data-food-row]:visible", has_text=name).first
     row.wait_for(timeout=20000)
     row.click()
-    pg.get_by_role("button", name=re.compile("^Thêm vào Bữa tối")).locator("visible=true").first.click()
+    button = pg.get_by_role("button", name=re.compile("^Thêm vào Bữa tối")).locator("visible=true").first
+    button.wait_for(timeout=10000)
+    if before_add:
+        before_add()
+    button.click()
     pg.wait_for_url(re.compile(r".*/app(\?.*)?$"), timeout=15000)
     pg.wait_for_timeout(1200)
 
@@ -176,6 +192,25 @@ def wait_until(fn, timeout_s, step_ms=500, pg=None):
     return fn()
 
 
+def set_visible(pg, visible):
+    """The tab goes to the background (a phone switching apps) or comes back: visibilityState and its event."""
+    pg.evaluate(
+        """(state) => {
+             Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => state });
+             Object.defineProperty(document, 'hidden', { configurable: true, get: () => state === 'hidden' });
+             document.dispatchEvent(new Event('visibilitychange'));
+           }""",
+        "visible" if visible else "hidden",
+    )
+
+
+def session_before_refetch(calls, since):
+    """After index `since`, /auth/session is asked before the next GET /days/…"""
+    later = calls[since:]
+    day = next((i for i, c in enumerate(later) if re.fullmatch(r"GET /days/[\d-]+", c)), None)
+    return day is not None and "GET /auth/session" in later[:day]
+
+
 def want(n):
     return not ONLY or str(n) in ONLY
 
@@ -187,8 +222,8 @@ with sync_playwright() as p:
         api = FakeApi()
         ctx, pg, st = device(browser, api)
         open_today(pg)
-        st["expired"] = True  # the app stayed open past the token life
-        add_food(pg, "Khoai lang luộc")
+        # The app stayed open past the token life: the cookie expires just before the tap on Thêm vào
+        add_food(pg, "Khoai lang luộc", before_add=lambda: st.update(expired=True))
         ok = wait_until(lambda: on_server(api, "Khoai lang luộc"), 10, pg=pg)
         check(ok, "1: POST 401 with an expired session: the food reaches the server after the refresh")
         check(st["refreshes"] >= 1, f"1: /auth/session was asked ({st['refreshes']} times)")
@@ -208,7 +243,28 @@ with sync_playwright() as p:
         check(len(outbox_ids(pg)) == 1, f"2: the entry waits in the outbox ({outbox_ids(pg)})")
         check(row_of(pg, "Bắp luộc").count() == 1, "2: the row stays on Hôm nay")
         check(pg.locator("[data-unsaved]:visible").count() == 1, "2: the row shows Chưa lưu")
+        # Tutorials: the Chưa lưu tip (tips are on in a live build) puts its ring on the marker
+        card = pg.locator("[data-onboarding-card]:visible")
+        try:
+            card.first.wait_for(timeout=4000)
+        except Exception:
+            pass
+        check(card.count() == 1 and "Món chưa lưu" in card.first.inner_text(), "2: the tip Món chưa lưu opens")
+        ring = pg.locator("[data-onboarding-overlay] > div.border-sky").first.bounding_box()
+        mark = pg.locator("[data-unsaved]:visible").first.bounding_box()
+        check(
+            ring is not None and mark is not None and ring["x"] <= mark["x"] + 1 and ring["y"] <= mark["y"] + 1
+            and ring["x"] + ring["width"] >= mark["x"] + mark["width"] - 1 and ring["y"] + ring["height"] >= mark["y"] + mark["height"] - 1,
+            f"2: …its ring holds the Chưa lưu marker ({ring}, {mark})",
+        )
         pg.screenshot(path=str(SHOTS / "cc49-unsaved-390.png"))
+        close_tips(pg)
+        pg.set_viewport_size({"width": 1440, "height": 900})
+        pg.wait_for_timeout(600)
+        check(pg.locator("[data-unsaved]:visible").count() == 1, "2: 1440: the row shows Chưa lưu")
+        pg.screenshot(path=str(SHOTS / "cc49-unsaved-1440.png"))
+        pg.set_viewport_size(PHONE["viewport"])
+        pg.wait_for_timeout(400)
         pg.evaluate("window.dispatchEvent(new Event('online'))")
         ok = wait_until(lambda: on_server(api, "Bắp luộc"), 10, pg=pg)
         check(ok, "2: back online, the outbox sends it: saved")
@@ -255,7 +311,8 @@ with sync_playwright() as p:
         toast = pg.get_by_text("Chưa lưu được món", exact=False)
         check(toast.count() >= 1, "4: the toast says Chưa lưu được món")
         pg.screenshot(path=str(SHOTS / "cc49-held-toast-390.png"))
-        retry = pg.get_by_role("button", name="Thử lại")
+        close_tips(pg)
+        retry = pg.get_by_role("button", name="Thử lại").locator("visible=true")
         check(retry.count() >= 1, "4: the toast offers Thử lại")
         if retry.count():
             retry.first.click()
@@ -278,6 +335,28 @@ with sync_playwright() as p:
         check(seen, f"5: B shows A's food without focus or reload ({time.time() - started:.0f} s)")
         check(time.time() - started <= 66, f"5: …within a minute ({time.time() - started:.0f} s)")
         b.screenshot(path=str(SHOTS / "cc49-other-device-390.png"))
+
+        # The phone puts the tab in the background; the laptop adds a food; the phone comes back
+        set_visible(b, False)
+        add_food(a, "Bún tươi")
+        b.wait_for_timeout(3000)
+        check(row_of(b, "Bún tươi").count() == 0, "5: while B is hidden it does not refetch (no Bún tươi yet)")
+        mark = len(st_b["calls"])
+        set_visible(b, True)
+        started = time.time()
+        seen = wait_until(lambda: row_of(b, "Bún tươi").count() == 1, 10, pg=b)
+        check(seen, f"5: B shown again: Bún tươi is there ({time.time() - started:.1f} s)")
+        check(session_before_refetch(st_b["calls"], mark), "5: …the session was renewed before the refetch")
+
+        # Restored from the back-forward cache (pageshow with persisted)
+        add_food(a, "Khoai lang luộc")
+        mark = len(st_b["calls"])
+        b.evaluate("window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true }))")
+        started = time.time()
+        seen = wait_until(lambda: row_of(b, "Khoai lang luộc").count() == 1, 10, pg=b)
+        check(seen, f"5: pageshow from the back-forward cache: B shows Khoai lang luộc ({time.time() - started:.1f} s)")
+        check(session_before_refetch(st_b["calls"], mark), "5: …the session was renewed before the refetch")
+        b.screenshot(path=str(SHOTS / "cc49-other-device-shown-again-390.png"))
         # A deletes it on the server (another device): B drops it on its next refetch, it was saved before
         for k in [k for k, e in api.entries.items() if e["food_name"] == "Gạo lứt nấu"]:
             api.entries.pop(k)
