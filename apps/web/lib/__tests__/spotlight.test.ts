@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cardPlacement, holeFor, type Box } from "../spotlight";
+import { cardPlacement, holeFor, roundHole, type Box } from "../spotlight";
 
 const VIEW = { width: 390, height: 844 };
 
@@ -61,5 +61,12 @@ describe("cardPlacement", () => {
 
   it("is narrower than the screen on a small phone", () => {
     expect(cardPlacement({ left: 10, top: 100, width: 50, height: 50 }, { width: 320, height: 640 }, card).width).toBe(288);
+  });
+});
+
+describe("roundHole", () => {
+  it("is 44 px and centred on the element, whatever its size", () => {
+    expect(roundHole({ left: 300, top: 10, width: 44, height: 44 })).toEqual({ left: 300, top: 10, width: 44, height: 44 });
+    expect(roundHole({ left: 100, top: 100, width: 60, height: 30 })).toEqual({ left: 108, top: 93, width: 44, height: 44 });
   });
 });

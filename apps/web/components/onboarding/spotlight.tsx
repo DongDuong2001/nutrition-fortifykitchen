@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { cardPlacement, holeFor, type Box } from "@/lib/spotlight";
+import { cardPlacement, holeFor, roundHole, type Box } from "@/lib/spotlight";
 
 const FOCUSABLE = 'button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])';
 const POLL_MS = 100;
@@ -31,6 +31,8 @@ export interface SpotlightProps {
   target: string | readonly string[];
   /** The dialog's accessible name (an element id inside the card) */
   labelledBy: string;
+  /** A round 44 px hole centred on the element (a small icon button), instead of the rounded box around it */
+  round?: boolean;
   /** An action step: taps reach the highlighted element. Otherwise the whole page is blocked. */
   interactive?: boolean;
   /** Esc: skip the tour, or "Đã hiểu" for a tip */
@@ -47,7 +49,7 @@ export interface SpotlightProps {
  * follows the element (ResizeObserver, scroll and resize), so nothing here is hard-coded. role="dialog" and
  * aria-modal; focus moves to the card and goes back afterwards. Mount it on the client only (after mount).
  */
-export function Spotlight({ target, labelledBy, interactive = false, onEscape, onMissing, onShown, children }: SpotlightProps) {
+export function Spotlight({ target, labelledBy, round = false, interactive = false, onEscape, onMissing, onShown, children }: SpotlightProps) {
   const [box, setBox] = useState<Box | null>(null);
   const [view, setView] = useState({ width: 0, height: 0 });
   const [cardSize, setCardSize] = useState({ width: 0, height: 0 });
@@ -176,7 +178,7 @@ export function Spotlight({ target, labelledBy, interactive = false, onEscape, o
   }, []);
 
   if (!box || view.width === 0) return null;
-  const hole = holeFor(box, view);
+  const hole = round ? roundHole(box) : holeFor(box, view);
   const place = cardPlacement(hole, view, cardSize);
 
   return (
@@ -184,7 +186,7 @@ export function Spotlight({ target, labelledBy, interactive = false, onEscape, o
       {/* The dim is the shadow of the hole, so the hole's corners are round like the card's (18 px) */}
       <div
         aria-hidden="true"
-        className="absolute rounded-[18px] border-2 border-sky shadow-[0_0_0_100vmax_var(--color-scrim)]"
+        className={`absolute border-2 border-sky shadow-[0_0_0_100vmax_var(--color-scrim)] ${round ? "rounded-full" : "rounded-[18px]"}`}
         style={{ top: hole.top, left: hole.left, width: hole.width, height: hole.height }}
       />
       {/* Four panels leave the hole open; the page under the hole stays tappable only in an action step */}

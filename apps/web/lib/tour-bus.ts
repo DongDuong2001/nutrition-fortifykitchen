@@ -54,7 +54,7 @@ export function tourAction(name: TourAction): void {
 }
 
 /** Other things the overlay watches (Chọn nhiều món opened). */
-type UiSignal = "select-mode";
+type UiSignal = "select-mode" | "open-share";
 const signalListeners = new Set<(signal: UiSignal) => void>();
 export const emitSignal = (signal: UiSignal) => signalListeners.forEach((l) => l(signal));
 export function subscribeSignal(listener: (signal: UiSignal) => void): () => void {

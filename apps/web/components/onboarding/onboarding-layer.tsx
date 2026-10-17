@@ -10,7 +10,7 @@ import { DEFAULT_FLAGS, type OnboardingFlags } from "@/lib/onboarding-flags";
 import { finishTour, loadFlags, markTipSeen, onboardingDisabled, setTipsOff, subscribeFlags } from "@/lib/onboarding-store";
 import { TIPS, pickTip, type Tip } from "@/lib/tips";
 import { TOUR_STEPS, tourReduce, tourStepFor, type TourState } from "@/lib/tour";
-import { readTour, setTipBusy, subscribeSignal, subscribeTour, writeTour } from "@/lib/tour-bus";
+import { emitSignal, readTour, setTipBusy, subscribeSignal, subscribeTour, writeTour } from "@/lib/tour-bus";
 
 const OFF: TourState = { status: "off" };
 const TIP_DELAY_MS = 500;
@@ -104,7 +104,7 @@ function TourCard({ index, onNext, onSkip }: { index: number; onNext: () => void
   );
 }
 
-function TipCard({ tip, onGotIt, onTurnOff }: { tip: Tip; onGotIt: () => void; onTurnOff: () => void }) {
+function TipCard({ tip, onGotIt, onTry, onTurnOff }: { tip: Tip; onGotIt: () => void; onTry: () => void; onTurnOff: () => void }) {
   return (
     <>
       <p className="m-0 text-xs font-bold text-blue">Mẹo · lần đầu</p>
@@ -117,9 +117,20 @@ function TipCard({ tip, onGotIt, onTurnOff }: { tip: Tip; onGotIt: () => void; o
         <button type="button" onClick={onTurnOff} className={`${quietButton} -ml-3`}>
           Tắt mọi mẹo
         </button>
-        <button type="button" onClick={onGotIt} className={primaryButton}>
-          Đã hiểu
-        </button>
+        {tip.tryLabel ? (
+          <div className="flex items-center gap-1">
+            <button type="button" onClick={onGotIt} className={quietButton}>
+              Đã hiểu
+            </button>
+            <button type="button" onClick={onTry} className={primaryButton}>
+              {tip.tryLabel}
+            </button>
+          </div>
+        ) : (
+          <button type="button" onClick={onGotIt} className={primaryButton}>
+            Đã hiểu
+          </button>
+        )}
       </div>
     </>
   );
@@ -266,6 +277,7 @@ export function OnboardingLayer() {
     <Spotlight
       key={`tip-${tip.id}`}
       target={tip.target}
+      round={tip.round}
       labelledBy="tip-title"
       onShown={() => markTipSeen(tip.id)}
       onEscape={() => setTipId(null)}
@@ -274,6 +286,10 @@ export function OnboardingLayer() {
       <TipCard
         tip={tip}
         onGotIt={() => setTipId(null)}
+        onTry={() => {
+          setTipId(null);
+          emitSignal("open-share");
+        }}
         onTurnOff={() => {
           setTipsOff(true);
           setTipId(null);

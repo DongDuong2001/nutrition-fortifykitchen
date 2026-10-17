@@ -35,7 +35,7 @@ import type { MealSlot } from "@/lib/meal-slot";
 import { InstallPromptHost } from "@/components/pwa/install-prompt";
 import { FoodList } from "./food-list";
 import { markUsed } from "@/lib/onboarding-store";
-import { emitSignal } from "@/lib/tour-bus";
+import { emitSignal, subscribeSignal } from "@/lib/tour-bus";
 import { useCoaching } from "@/hooks/use-coaching";
 import { useSaveDisplayName } from "@/hooks/use-save-display-name";
 import { LevelExplainerSheet } from "@/components/coaching/level-explainer-sheet";
@@ -142,6 +142,9 @@ function HomeContent() {
   useEffect(() => {
     setClientNow(true);
   }, []);
+
+  // The share tip's "Thử ngay" opens the share sheet (which asks for a name first when there is none)
+  useEffect(() => subscribeSignal((signal) => signal === "open-share" && setIsShareOpen(true)), []);
 
   // Return focus to the control that opened /add (same contract as the diary)
   useEffect(() => {
@@ -378,6 +381,7 @@ function HomeContent() {
               onClick={() => setIsShareOpen(true)}
               disabled={nothingLogged}
               aria-label="Chia sẻ ngày này"
+              data-tour="home-share"
               aria-haspopup="dialog"
               aria-describedby={nothingLogged ? "share-reason" : undefined}
               className={`${HEADER_ICON_BUTTON} disabled:cursor-default disabled:opacity-50`}

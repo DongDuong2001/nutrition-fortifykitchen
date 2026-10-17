@@ -12,6 +12,7 @@ export interface Size {
 }
 
 const HOLE_PAD = 6;
+const ROUND_HOLE = 44;
 const GAP = 12;
 const SIDE = 16;
 const MAX_CARD_WIDTH = 340;
@@ -24,6 +25,11 @@ export function holeFor(box: Box, view: Size): Box {
   const right = Math.min(view.width, box.left + box.width + HOLE_PAD);
   const bottom = Math.min(view.height, box.top + box.height + HOLE_PAD);
   return { left, top, width: right - left, height: bottom - top };
+}
+
+/** A 44 px round hole centred on the element: for a small icon button. */
+export function roundHole(box: Box): Box {
+  return { left: box.left + box.width / 2 - ROUND_HOLE / 2, top: box.top + box.height / 2 - ROUND_HOLE / 2, width: ROUND_HOLE, height: ROUND_HOLE };
 }
 
 export interface Placement {

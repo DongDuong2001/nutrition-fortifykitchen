@@ -7,9 +7,9 @@ const flags = (over: Partial<OnboardingFlags> = {}): OnboardingFlags => ({ ...DE
 const ids = (c: TipContext, f = flags()) => pickTip({ ctx: c, flags: f, tourActive: false })?.id ?? null;
 
 describe("the tips table", () => {
-  it("has the 14 tips of the design boards, each with the card copy", () => {
+  it("has the 15 tips of the design boards, each with the card copy", () => {
     expect(TIPS.map((t) => t.id)).toEqual([
-      "home-logged", "meal-add", "past-day", "multi-select", "add-tray", "food-detail", "compare",
+      "home-logged", "meal-add", "home-share", "past-day", "multi-select", "add-tray", "food-detail", "compare",
       "food-new", "training", "micros", "trends-micros", "explore", "overview", "leaderboard",
     ]);
     for (const t of TIPS) {
@@ -129,5 +129,47 @@ describe("the tour day", () => {
     expect(parseFlags({ tourStartedIso: "2026-10-17" }).tourStartedIso).toBe("2026-10-17");
     expect(parseFlags({ tourStartedIso: 5 }).tourStartedIso).toBeNull();
     expect(parseFlags({ tourStartedIso: "yesterday" }).tourStartedIso).toBeNull();
+  });
+});
+
+describe("the share tip", () => {
+  const seenFirst = flags({ seen: ["home-logged", "meal-add"] });
+
+  it("shows on Hôm nay today once it holds 3 foods", () => {
+    expect(ids(ctx({ foodsToday: 3 }), seenFirst)).toBe("home-share");
+    expect(ids(ctx({ foodsToday: 7 }), seenFirst)).toBe("home-share");
+  });
+
+  it("not at 2 foods, none, or on a past day or in select mode", () => {
+    expect(ids(ctx({ foodsToday: 2 }), seenFirst)).toBeNull();
+    expect(ids(ctx({ foodsToday: 0 }), seenFirst)).toBeNull();
+    expect(ids(ctx({ foodsToday: 5, pastDay: true }), seenFirst)).toBe("past-day");
+    expect(ids(ctx({ foodsToday: 5, pastDay: true }), flags({ seen: ["past-day"] }))).toBeNull();
+    expect(ids(ctx({ foodsToday: 5, selectMode: true }), seenFirst)).toBe("multi-select");
+  });
+
+  it("not on another screen", () => {
+    expect(ids(ctx({ foodsToday: 5, pathname: "/explore" }), seenFirst)).toBe("explore");
+  });
+
+  it("not after the account has shared (a successful share or export), once seen, or with tips off", () => {
+    expect(ids(ctx({ foodsToday: 3 }), flags({ ...seenFirst, used: ["share-day"] }))).toBeNull();
+    expect(ids(ctx({ foodsToday: 3 }), flags({ seen: ["home-logged", "meal-add", "home-share"] }))).toBeNull();
+    expect(ids(ctx({ foodsToday: 3 }), flags({ ...seenFirst, tipsOff: true }))).toBeNull();
+  });
+
+  it("never during the tour, and one tip per visit: the earlier tips come first", () => {
+    expect(pickTip({ ctx: ctx({ foodsToday: 3 }), flags: seenFirst, tourActive: true })).toBeNull();
+    expect(ids(ctx({ foodsToday: 3 }))).toBe("home-logged");
+    expect(ids(ctx({ foodsToday: 3 }), flags({ seen: ["home-logged"] }))).toBe("meal-add");
+  });
+
+  it("has the card copy, a round hole and the Thử ngay button", () => {
+    const tip = TIPS.find((t) => t.id === "home-share");
+    expect(tip?.title).toBe("Chia sẻ ngày ăn của bạn");
+    expect(tip?.body).toBe("Chạm biểu tượng chia sẻ để tạo ảnh tóm tắt ngày: tên, Level, kcal và vi chất. Chia sẻ cho HLV hoặc đăng lên mạng xã hội nhanh chóng.");
+    expect(tip?.tryLabel).toBe("Thử ngay");
+    expect(tip?.round).toBe(true);
+    expect(tip?.target).toBe("home-share");
   });
 });

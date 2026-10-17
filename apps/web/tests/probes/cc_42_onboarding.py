@@ -12,6 +12,8 @@ tips off (_seed.py); this one turns them on with `_seed.onboarding(True)`.
 - Tùy chỉnh thành món của tôi: on a recipe dish only, pre-fills name and ingredients
 - Keyboard: Esc closes a tip (Đã hiểu) and skips the tour; Tab stays in the card
 - Cài đặt: Xem lại hướng dẫn with the Mới pill, the tips switch
+- Share tip (home-share): at 3 foods today, not at 2, not on a past day, not after a share; round 44 px hole centred on the
+  share button, arrow under it; Thử ngay opens the share sheet, Đã hiểu closes; a successful save marks share-day used
 - Hôm nay: the meal header's + Thêm is a text link (no background, border or radius; cobalt, Manrope 13 px 700; hit area 44x44 that
   leaves the 22/44 px header row alone; 12 px from the kcal; focus ring, hover underline, pressed opacity; hidden on a past day)
 Screenshots: .screenshots/cc-42-*.png
@@ -335,7 +337,7 @@ def tips_rules(browser):
 
     # Selecting several foods on Hôm nay: the multi-select tip when the mode opens
     ctx, pg = ctx_page(browser, PHONE)
-    pg.add_init_script("localStorage.setItem('h1t_settings_v1_demo', JSON.stringify({onboarding: {seen: ['home-logged', 'meal-add']}}))")
+    pg.add_init_script("localStorage.setItem('h1t_settings_v1_demo', JSON.stringify({onboarding: {seen: ['home-logged', 'meal-add', 'home-share']}}))")
     go(pg, "/", wait=300)
     pg.get_by_role("button", name="Thêm tùy chọn").first.click() if pg.get_by_role("button", name="Thêm tùy chọn").count() else None
     opened = False
@@ -561,6 +563,108 @@ def settings(browser):
     ctx.close()
 
 
+SETTINGS_KEY = "h1t_settings_v1_demo"
+NAMED_PROFILE = json.dumps({"sex": "male", "birthYear": 2003, "weightKg": 65.4, "goal": "maintain", "periodMode": False, "trainingMinutesDefault": 60, "displayName": "Học viên A", "hintSeen": True})
+
+
+def share_ctx(browser, foods, onboarding, named=True):
+    """Hôm nay with `foods` sample foods left (the sample day has 7: item-1..item-7) and the given onboarding flags."""
+    ctx = browser.new_context(viewport=PHONE, accept_downloads=True)
+    gone = {f"item-{i}": {"deleted": True} for i in range(foods + 1, 8)}
+    ctx.add_init_script(
+        "try {"
+        f"if (localStorage.getItem('h1t_sample_edits_v1_demo') === null) localStorage.setItem('h1t_sample_edits_v1_demo', {json.dumps(json.dumps(gone))});"
+        f"if (localStorage.getItem('{SETTINGS_KEY}') === null) localStorage.setItem('{SETTINGS_KEY}', {json.dumps(json.dumps({'onboarding': onboarding}))});"
+        + (f"localStorage.setItem('h1t_profile_v1_demo', {json.dumps(NAMED_PROFILE)});" if named else "")
+        + "} catch (e) {}"
+    )
+    return ctx, ctx.new_page()
+
+
+SEEN_FIRST = ["home-logged", "meal-add"]
+
+
+def share_tip(browser):
+    # 3 foods today: the tip shows, with its copy, a round 44 px hole on the share button and the arrow under it
+    ctx, pg = share_ctx(browser, 3, {"seen": SEEN_FIRST})
+    go(pg, "/", wait=200)
+    check(wait_card(pg, 5000), "share tip: shows at 3 foods today")
+    body = card(pg).inner_text()
+    check("Mẹo · lần đầu" in body and "Chia sẻ ngày ăn của bạn" in body and "Chạm biểu tượng chia sẻ để tạo ảnh tóm tắt ngày: tên, Level, kcal và vi chất. Chia sẻ cho HLV hoặc đăng lên mạng xã hội nhanh chóng." in body, f"share tip: copy ({body[:80]!r})")
+    names = [b.inner_text().strip() for b in card(pg).get_by_role("button").all()]
+    check(names == ["Tắt mọi mẹo", "Đã hiểu", "Thử ngay"], f"share tip: buttons Tắt mọi mẹo, Đã hiểu, Thử ngay in that order ({names})")
+    check("bg-blue" in (card(pg).get_by_role("button", name="Thử ngay").get_attribute("class") or "") and "bg-blue" not in (card(pg).get_by_role("button", name="Đã hiểu").get_attribute("class") or ""), "share tip: Thử ngay is the primary, Đã hiểu a text button")
+    geo = pg.evaluate(
+        """() => {
+          const btn = document.querySelector("[data-tour='home-share']"), b = btn.getBoundingClientRect();
+          const hole = [...document.querySelectorAll('[data-onboarding-overlay] > div')].find(d => d.className.includes('border-sky'));
+          const h = hole.getBoundingClientRect(), hs = getComputedStyle(hole);
+          const c = document.querySelector('[data-onboarding-card]'), arrow = c.querySelector(':scope > span').getBoundingClientRect();
+          return { btnW: b.width, btnH: b.height, bx: b.left + b.width / 2, by: b.top + b.height / 2, hw: h.width, hh: h.height, hx: h.left + h.width / 2, hy: h.top + h.height / 2,
+                   radius: hs.borderTopLeftRadius, border: hs.borderTopWidth, borderColor: hs.borderTopColor, ax: arrow.left + arrow.width / 2, placement: c.getAttribute('data-placement') };
+        }"""
+    )
+    check(abs(geo["hw"] - 44) <= 0.5 and abs(geo["hh"] - 44) <= 0.5 and geo["border"] == "2px", f"share tip: the hole is 44 px with a 2 px ring ({geo['hw']}x{geo['hh']}, {geo['border']})")
+    check(float(geo["radius"].replace("px", "")) >= 22, f"share tip: the hole is round ({geo['radius']})")
+    check(abs(geo["hx"] - geo["bx"]) <= 2 and abs(geo["hy"] - geo["by"]) <= 2, f"share tip: the hole is centred on the share button ({geo['hx']:.1f},{geo['hy']:.1f} vs {geo['bx']:.1f},{geo['by']:.1f})")
+    check(geo["placement"] == "below" and abs(geo["ax"] - geo["bx"]) <= 2, f"share tip: the arrow is centred under the button ({geo['ax']:.1f} vs {geo['bx']:.1f})")
+    overlap_free(pg, "share tip")
+    shot(pg, "tip-home-share-390")
+    # Thử ngay: the tip closes, is saved as seen, and the share sheet opens (a name is set, so the image follows)
+    card(pg).get_by_role("button", name="Thử ngay").click()
+    pg.wait_for_timeout(400)
+    check(card(pg).count() == 0, "share tip: Thử ngay closes the tip")
+    check("home-share" in flags(pg).get("seen", []), "share tip: saved as seen")
+    save = pg.get_by_role("button", name="Lưu ảnh")
+    save.wait_for(state="visible", timeout=15000)
+    check(pg.get_by_role("dialog").count() == 1, "share tip: Thử ngay opens the share sheet")
+    with pg.expect_download():
+        save.click()
+    pg.wait_for_timeout(300)
+    check("share-day" in flags(pg).get("used", []), f"a successful save records share-day as used ({flags(pg).get('used')})")
+    ctx.close()
+
+    # Thử ngay with no display name: the sheet asks for the name first
+    ctx, pg = share_ctx(browser, 3, {"seen": SEEN_FIRST}, named=False)
+    ctx.add_init_script("try { localStorage.setItem('h1t_profile_v1_demo', JSON.stringify({sex: 'male', birthYear: 2003, weightKg: 65.4, goal: 'maintain', periodMode: false, trainingMinutesDefault: 60, displayName: '', hintSeen: true})); } catch (e) {}")
+    go(pg, "/", wait=200)
+    wait_card(pg, 5000)
+    card(pg).get_by_role("button", name="Thử ngay").click()
+    pg.get_by_label("Tên hiện trên ảnh").wait_for(state="visible", timeout=8000)
+    check(True, "share tip: Thử ngay asks for the display name first when it is missing")
+    ctx.close()
+
+    # Đã hiểu only closes it
+    ctx, pg = share_ctx(browser, 3, {"seen": SEEN_FIRST})
+    go(pg, "/", wait=200)
+    wait_card(pg, 5000)
+    card(pg).get_by_role("button", name="Đã hiểu").click()
+    pg.wait_for_timeout(400)
+    check(card(pg).count() == 0 and pg.get_by_role("dialog").count() == 0 and "home-share" in flags(pg).get("seen", []), "share tip: Đã hiểu just closes it and marks it seen")
+    ctx.close()
+
+    # Tắt mọi mẹo works as in the other tips
+    ctx, pg = share_ctx(browser, 3, {"seen": SEEN_FIRST})
+    go(pg, "/", wait=200)
+    wait_card(pg, 5000)
+    card(pg).get_by_role("button", name="Tắt mọi mẹo").click()
+    pg.wait_for_timeout(300)
+    check(flags(pg).get("tipsOff") is True, "share tip: Tắt mọi mẹo saves tipsOff")
+    ctx.close()
+
+    # Not at 2 foods, not on a past day, not after a share
+    for label, foods, onboarding, route in (
+        ("2 foods", 2, {"seen": SEEN_FIRST}, "/"),
+        ("a past day", 3, {"seen": SEEN_FIRST + ["past-day"]}, f"/?date={YESTERDAY}"),
+        ("after a share", 3, {"seen": SEEN_FIRST, "used": ["share-day"]}, "/"),
+    ):
+        ctx, pg = share_ctx(browser, foods, onboarding)
+        go(pg, route, wait=200)
+        pg.wait_for_timeout(1500)
+        check(card(pg).count() == 0, f"share tip: not with {label}")
+        ctx.close()
+
+
 MEAL_ADD = "a[data-tour='meal-add']"
 
 
@@ -652,6 +756,7 @@ def main():
             ("customise", lambda: customise(browser)),
             ("keyboard", lambda: keyboard(browser)),
             ("settings", lambda: settings(browser)),
+            ("sharetip", lambda: share_tip(browser)),
             ("mealadd", lambda: meal_add_link(browser)),
         ]
         for name, run in parts:

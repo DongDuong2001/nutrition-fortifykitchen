@@ -10,6 +10,7 @@ import type { HomeEntry, HomeMeal } from "@/lib/home";
 import type { MockDayData } from "@/lib/mock/sample-day";
 import { SHARE_CSS_WIDTH, buildShareModel, keepInShareImage, shareImageSize, shareNeedsName, type ShareModel } from "@/lib/share-card";
 import { cleanDisplayName } from "@/lib/display-name";
+import { markUsed } from "@/lib/onboarding-store";
 import { validateSetupName } from "@/lib/onboarding";
 import { ShareDay } from "./share-day";
 import { countedForLevel } from "@/lib/level-nutrients";
@@ -213,7 +214,10 @@ export function ShareSheet({
       setFailure("share");
     };
     try {
-      navigator.share({ files: [ready.file], title: "H1T MICRO" }).catch(failed);
+      navigator
+        .share({ files: [ready.file], title: "H1T MICRO" })
+        .then(() => markUsed("share-day"))
+        .catch(failed);
     } catch (error) {
       failed(error);
     }
@@ -229,6 +233,7 @@ export function ShareSheet({
       document.body.append(link);
       link.click();
       link.remove();
+      markUsed("share-day");
     } catch {
       setFailure("save");
     }

@@ -12,6 +12,10 @@ export interface Tip {
   body: string;
   /** A second paragraph, when the board has one */
   note?: string;
+  /** A round 44 px hole centred on the target (a small icon button) instead of the rounded box around it */
+  round?: boolean;
+  /** A primary button that closes the tip and does what it explains ("Thử ngay"); "Đã hiểu" then stays as a text button */
+  tryLabel?: string;
   /** The usage events that mean the user already knows this feature */
   used: readonly string[];
   /** Whether the tip belongs to the screen the user is on */
@@ -27,6 +31,9 @@ export interface TipContext {
   /** Chọn nhiều món is open on Hôm nay */
   selectMode?: boolean;
 }
+
+/** The share tip waits until today holds this many foods. */
+export const SHARE_TIP_MIN_FOODS = 3;
 
 const home = (c: TipContext) => c.pathname === "/";
 const today = (c: TipContext) => home(c) && !c.pastDay && !c.selectMode && c.foodsToday > 0;
@@ -47,6 +54,16 @@ export const TIPS: readonly Tip[] = [
     body: "Chạm vào nút + Thêm ở dòng tên bữa để thêm món vào bữa ăn đó.",
     used: ["meal-add"],
     when: today,
+  },
+  {
+    id: "home-share",
+    target: "home-share",
+    round: true,
+    tryLabel: "Thử ngay",
+    title: "Chia sẻ ngày ăn của bạn",
+    body: "Chạm biểu tượng chia sẻ để tạo ảnh tóm tắt ngày: tên, Level, kcal và vi chất. Chia sẻ cho HLV hoặc đăng lên mạng xã hội nhanh chóng.",
+    used: ["share-day"],
+    when: (c) => today(c) && c.foodsToday >= SHARE_TIP_MIN_FOODS,
   },
   {
     id: "past-day",
