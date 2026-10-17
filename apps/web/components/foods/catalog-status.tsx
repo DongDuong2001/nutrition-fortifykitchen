@@ -25,3 +25,12 @@ export function CatalogStatus({ failed, onRetry }: { failed: boolean; onRetry: (
     </div>
   );
 }
+
+/** The live catalogue is still arriving but the list already has foods (the user's own): one line above it. */
+export function CatalogNote() {
+  return (
+    <p role="status" className="m-0 text-[13px] leading-snug text-secondary">
+      Đang tải thêm món…
+    </p>
+  );
+}

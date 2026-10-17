@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import React from "react";
 import { renderToString } from "react-dom/server";
 import { useCatalogFoods } from "../use-catalog-foods";
-import { MOCK_FOODS, setCatalogFoods, setCatalogStatus, type FoodItem } from "@/lib/mock/foods";
+import { MOCK_FOODS, addCatalogFood, catalogChanged, setCatalogFoods, setCatalogStatus, type FoodItem } from "@/lib/mock/foods";
 
 const SAMPLE = MOCK_FOODS.slice();
 const tinhBot = (i: number): FoodItem => ({
@@ -50,5 +50,40 @@ describe("useCatalogFoods", () => {
     }
     setCatalogStatus("failed");
     expect(renderToString(<Failed />)).toContain("failed");
+  });
+});
+
+describe("useCatalogFoods in demo mode (browsableFoods is MOCK_FOODS itself)", () => {
+  function Capture({ into }: { into: FoodItem[][] }) {
+    const { foods } = useCatalogFoods();
+    into.push(foods);
+    return null;
+  }
+
+  beforeEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("returns a new array after a made food is added, and it holds the food", () => {
+    const seen: FoodItem[][] = [];
+    renderToString(<Capture into={seen} />);
+    addCatalogFood(tinhBot(900));
+    renderToString(<Capture into={seen} />);
+    expect(seen[1]).not.toBe(seen[0]);
+    expect(seen[0].some((f) => f.id === "tb-900")).toBe(false);
+    expect(seen[1].some((f) => f.id === "tb-900")).toBe(true);
+    // Never the catalogue array itself, which is changed in place
+    expect(seen[0]).not.toBe(MOCK_FOODS);
+    expect(seen[1]).not.toBe(MOCK_FOODS);
+  });
+
+  it("returns a new array after any change that is announced (a recipe sync)", () => {
+    const seen: FoodItem[][] = [];
+    renderToString(<Capture into={seen} />);
+    MOCK_FOODS.unshift(tinhBot(901));
+    catalogChanged();
+    renderToString(<Capture into={seen} />);
+    expect(seen[1]).not.toBe(seen[0]);
+    expect(seen[1].some((f) => f.id === "tb-901")).toBe(true);
   });
 });

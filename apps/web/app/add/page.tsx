@@ -16,7 +16,7 @@ import { QuickAddSheet } from "@/components/add/quick-add-sheet";
 import { ChipRow } from "@/components/foods/chip-row";
 import { FoodList } from "@/components/foods/food-list";
 import { FoodEmptyState } from "@/components/foods/food-empty-state";
-import { CatalogStatus } from "@/components/foods/catalog-status";
+import { CatalogNote, CatalogStatus } from "@/components/foods/catalog-status";
 import { FoodSearchField } from "@/components/foods/food-search-field";
 import { foodMeta } from "@/lib/food-meta";
 import { CreateFoodButton } from "@/components/foods/create-food-button";
@@ -439,6 +439,7 @@ function AddFoodInner() {
                 {showShortcuts && shortcuts}
 
                 {/* Results: grouped or flat */}
+                {catalogPending && list.foods.length > 0 && <CatalogNote />}
                 <FoodList
                   list={list}
                   {...listPick}
@@ -591,6 +592,7 @@ function AddFoodInner() {
           <div data-add-scroll className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pb-6">
             {showShortcuts && shortcuts}
 
+            {catalogPending && list.foods.length > 0 && <CatalogNote />}
             <FoodList
               list={list}
               {...listPick}

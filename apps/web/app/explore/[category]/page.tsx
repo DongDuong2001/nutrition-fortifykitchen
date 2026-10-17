@@ -6,7 +6,7 @@ import { AppHeader } from "@/components/ui/app-header";
 import { AppShell } from "@/components/ui/app-shell";
 import { CreateFoodButton } from "@/components/foods/create-food-button";
 import { FoodListCard } from "@/components/foods/food-list-card";
-import { CatalogStatus } from "@/components/foods/catalog-status";
+import { CatalogNote, CatalogStatus } from "@/components/foods/catalog-status";
 import { useCatalogFoods } from "@/hooks/use-catalog-foods";
 import { FOOD_CATEGORIES, categoryOf, isOwnFood } from "@/lib/food-categories";
 import { useBack } from "@/hooks/use-back";
@@ -29,6 +29,7 @@ export default function ExploreCategoryPage() {
     <AppShell>
       <AppHeader variant="sub" title={category.label} subtitle={waiting ? (failed ? "Chưa tải được món" : "Đang tải món…") : `${foods.length} món`} onBack={goBack} layout="wide" />
       <main className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-6 pt-4 lg:mx-0 lg:max-w-[720px] lg:px-8">
+        {pending && foods.length > 0 && <CatalogNote />}
         <FoodListCard
           foods={foods}
           empty={

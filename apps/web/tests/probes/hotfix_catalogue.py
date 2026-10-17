@@ -35,7 +35,7 @@ def part_a(browser):
     pg = ctx.new_page()
     pg.goto(BASE + "/add", wait_until="networkidle")
     pg.wait_for_timeout(600)
-    check(pg.locator("ul[data-food-list], [data-food-row]:visible").count() >= 0, "A: the desktop add dialog is open")
+    check(pg.get_by_text("Thêm vào:").count() >= 1, "A: the desktop add dialog is open")
     chips = pg.locator('[role="group"][aria-label="Lọc món theo nhóm"]:visible button, [aria-label="Lọc món theo nhóm"]:visible button')
     names = [chips.nth(i).inner_text().strip() for i in range(chips.count())]
     check("Tinh bột" in names, f"A: the Tinh bột chip is there ({names})")
@@ -102,7 +102,13 @@ def mock_api(ctx, state):
             if state["mode"] == "fail":
                 route.fulfill(status=500, body="boom")
                 return
-            body = {"data": {"items": foods_rows(35), "total": 35}}
+            # The page size is what the client asked for, unless the server caps it (state["cap"], like the old API)
+            asked = int(route.request.url.split("limit=")[1].split("&")[0]) if "limit=" in route.request.url else 50
+            size = min(asked, state.get("cap") or asked)
+            page = int(route.request.url.split("page=")[1].split("&")[0]) if "page=" in route.request.url else 1
+            total = state.get("total", 35)
+            state.setdefault("asked", []).append(route.request.url)
+            body = {"data": {"items": foods_rows(total)[(page - 1) * size : page * size], "total": total}}
             if state["mode"] == "slow":
                 # Held until the probe lets it go, so the page is seen while it waits
                 state.setdefault("held", []).append((route, body))
@@ -138,8 +144,9 @@ def part_b(browser):
     check("Đang tải món" in body, "B: it says Đang tải món… while /foods is slow")
     check("Đang tải món" in pg.locator("header, h1").first.inner_text() or pg.locator("[data-catalog-loading]").count() >= 1, "B: the list shows its loading state")
     state["release"]()
-    pg.wait_for_selector("text=35 món", timeout=15000)
-    check(True, "B: the header reads 35 món once the catalogue arrives")
+    pg.get_by_text("35 món", exact=True).wait_for(timeout=15000)
+    check(pg.get_by_text("35 món", exact=True).count() == 1, "B: the header reads exactly 35 món once the catalogue arrives")
+    check("Đang tải" not in pg.inner_text("body"), "B: no loading text is left once it arrived")
     check(pg.locator('a[href^="/foods/tb-"]').count() == 35, "B: all 35 Tinh bột foods are listed")
     pg.screenshot(path=str(SHOTS / "hotfix-catalogue-explore-tinh-bot.png"))
     ctx.close()
@@ -155,8 +162,8 @@ def part_b(browser):
     check("Chưa có món nào" not in pg.inner_text("body"), "B: a failed load shows Thử lại, not Chưa có món nào")
     state["mode"] = "ok"
     pg.get_by_role("button", name="Thử lại").click()
-    pg.wait_for_selector("text=35 món", timeout=15000)
-    check(True, "B: Thử lại loads the 35 foods")
+    pg.get_by_text("35 món", exact=True).wait_for(timeout=15000)
+    check(pg.locator('a[href^="/foods/tb-"]').count() == 35, "B: Thử lại loads the 35 foods")
     ctx.close()
 
     # /add: the diary provider and the search both ask for the catalogue, the API is asked once
@@ -171,6 +178,44 @@ def part_b(browser):
     pg.wait_for_timeout(800)
     check(len(asked) == 1, f"B: /add asks /foods once ({len(asked)}: {asked})")
     check(pg.locator("[data-food-row]:visible").count() > 0, "B: /add lists the foods that arrived")
+    ctx.close()
+
+    # A server that ignores limit=500 and caps a page at 50 (397 foods): every page is read, 8 requests
+    state2 = {"mode": "ok", "cap": 50, "total": 397}
+    ctx = browser.new_context(viewport={"width": 390, "height": 844})
+    fake_session(ctx, supabase)
+    mock_api(ctx, state2)
+    pg = ctx.new_page()
+    pg.goto(BASE + "/explore/tinh_bot", wait_until="domcontentloaded")
+    pg.get_by_text("397 món", exact=True).wait_for(timeout=20000)
+    check(pg.get_by_text("397 món", exact=True).count() == 1, "B: with pages capped at 50, the header reads 397 món")
+    check(pg.locator('a[href^="/foods/tb-"]').count() == 397, "B: all 397 foods are listed")
+    check(len(state2["asked"]) == 8, f"B: /foods was asked exactly 8 times ({len(state2['asked'])})")
+    check(all("limit=500" in u for u in state2["asked"]), "B: every request asked for limit=500")
+    ctx.close()
+
+    # A food of the user's own is there while /foods is slow: the list shows it and says more is coming
+    state3 = {"mode": "slow"}
+    ctx = browser.new_context(viewport={"width": 390, "height": 844})
+    fake_session(ctx, supabase)
+    ctx.add_init_script(
+        "try { localStorage.setItem('h1t_auth_current_email', 'probe@example.com');"
+        " localStorage.setItem('h1t_recipes_v1_probe@example.com', JSON.stringify([{ id: 'recipe-probe1', name: 'Cơm nhà tôi', servings: 2,"
+        " ingredients: [{ foodId: 'tb-1', name: 'Tinh bột 1', grams: 100, unit: 'g' }], cookedGrams: null, createdAt: '2026-10-01T00:00:00Z' }])); } catch (e) {}"
+    )
+    mock_api(ctx, state3)
+    pg = ctx.new_page()
+    pg.goto(BASE + "/explore/cua_toi", wait_until="domcontentloaded")
+    pg.wait_for_timeout(900)
+    check(pg.get_by_text("Cơm nhà tôi").count() >= 1, "B: the user's own food is listed while /foods is slow")
+    note = pg.get_by_role("status").filter(has_text="Đang tải thêm món…")
+    check(note.count() == 1, "B: the one-line note Đang tải thêm món… is above the list")
+    check(pg.locator("[data-catalog-loading]").count() == 0, "B: the list is not replaced by the loading block")
+    check(pg.get_by_text("1 món", exact=True).count() == 1, "B: the header subtitle stays 1 món")
+    state3["release"]()
+    pg.wait_for_timeout(800)
+    check(pg.get_by_text("Cơm nhà tôi").count() >= 1, "B: the own food is still there after the catalogue arrived")
+    check(pg.get_by_role("status").filter(has_text="Đang tải thêm món…").count() == 0, "B: the note is gone once it arrived")
     ctx.close()
 
 

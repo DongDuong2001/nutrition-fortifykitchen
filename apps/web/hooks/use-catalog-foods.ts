@@ -13,12 +13,14 @@ import { browsableFoods, catalogStatus, catalogVersion, subscribeCatalog } from 
  * `version` changes with the catalogue: put it in the deps of anything computed from MOCK_FOODS.
  */
 export function useCatalogFoods() {
-  const version = useSyncExternalStore(subscribeCatalog, catalogVersion, catalogVersion);
+  const version = useSyncExternalStore(subscribeCatalog, catalogVersion, () => 0);
   const status = catalogStatus();
   const live = isLiveMode();
   // Demo mode is known after mount and changes what browsableFoods returns
   const demo = demoActive();
-  const foods = useMemo(() => browsableFoods(), [version, demo]);
+  // A copy: in demo mode browsableFoods() is MOCK_FOODS itself, which is changed in place, so a memo keyed on
+  // `foods` would otherwise never see a made food or a recipe sync
+  const foods = useMemo(() => browsableFoods().slice(), [version, demo]);
 
   // A screen opened directly (a deep link) starts the load itself; one call at a time, whoever asks
   useEffect(() => {

@@ -9,7 +9,7 @@ import { ChipRow } from "@/components/foods/chip-row";
 import { FoodListCard } from "@/components/foods/food-list-card";
 import { FoodSearchField } from "@/components/foods/food-search-field";
 import { ExploreSections } from "@/components/explore/explore-sections";
-import { CatalogStatus } from "@/components/foods/catalog-status";
+import { CatalogNote, CatalogStatus } from "@/components/foods/catalog-status";
 import { useCatalogFoods } from "@/hooks/use-catalog-foods";
 import { searchFoods } from "@/lib/search";
 import { FOOD_CATEGORIES, categoryLabel, categoryOf } from "@/lib/food-categories";
@@ -60,6 +60,7 @@ export default function ExplorePage() {
         <div data-align-group="add-list" data-align-edge="left" className="flex flex-col gap-4">
           {searching ? (
             <>
+              {pending && results.length > 0 && <CatalogNote />}
               <FoodListCard
                 title={`Kết quả cho “${query.trim()}”`}
                 foods={results.map((food) => ({ food }))}
