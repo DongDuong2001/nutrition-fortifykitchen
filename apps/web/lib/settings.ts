@@ -25,6 +25,8 @@ export interface AppSettings {
   onboarding: OnboardingFlags;
   /** The install pop-up's snooze and done flags (lib/pwa) */
   installPrompt: InstallPromptState;
+  /** "Rung khi chạm" (cc-51, Android): null until the user touches the switch (lib/haptics hapticsWanted) */
+  haptics: boolean | null;
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -45,6 +47,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   eveningSummaryTime: "21:00",
   onboarding: DEFAULT_FLAGS,
   installPrompt: DEFAULT_INSTALL_PROMPT,
+  haptics: null,
 };
 
 export type KeyValueStorage = Pick<Storage, "getItem" | "setItem">;
@@ -78,6 +81,7 @@ export function loadSettings(storage: KeyValueStorage | null = accountStorage())
       eveningSummaryTime: typeof parsed.eveningSummaryTime === "string" ? parsed.eveningSummaryTime : DEFAULT_SETTINGS.eveningSummaryTime,
       onboarding: parseFlags(parsed.onboarding),
       installPrompt: normalizeInstallPrompt(parsed.installPrompt),
+      haptics: typeof parsed.haptics === "boolean" ? parsed.haptics : null,
     };
   } catch {
     return { ...DEFAULT_SETTINGS };
