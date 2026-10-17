@@ -100,15 +100,19 @@ export function HomeHero({
         <div data-align-group="home-hero" className="mt-1 grid grid-cols-4 gap-2.5">
           {MACROS.map((m) => {
             const value = values[m.key];
-            const pct = pctOf(value, macroTargets[m.key]);
+            const target = macroTargets[m.key];
+            const pct = pctOf(value, target);
             return (
               <div key={m.key} className="flex min-w-0 flex-col gap-1">
                 <span className="text-xs font-bold leading-tight">{m.label}</span>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-xs leading-tight text-muted-on-dark tabular-nums">
-                    {value === null ? "—" : `${formatAmount(value, "g")} g`}
+                <div className="flex flex-wrap items-baseline justify-between gap-x-1">
+                  <span className="text-[11px] leading-tight text-muted-on-dark tabular-nums lg:text-xs">
+                    {value === null ? "—" : formatAmount(value, "g")}
+                    {target !== null ? ` / ${formatAmount(target, "g")} g` : " g"}
                   </span>
-                  <span className="font-display text-[15px] font-bold leading-none tabular-nums">{pctLabel(value, macroTargets[m.key])}</span>
+                  <span className="shrink-0 font-display text-[13px] font-bold leading-none tabular-nums lg:text-[15px]">
+                    {pctLabel(value, target)}
+                  </span>
                 </div>
                 <LevelBar label={`${m.label} so với mục tiêu ngày`} pct={pct} surface="dark" heightClass="h-[7px]" />
               </div>
