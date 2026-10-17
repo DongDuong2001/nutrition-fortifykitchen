@@ -203,8 +203,10 @@ describe("apiFetch", () => {
   });
 });
 
-describe("accounts", () => {
-  it("a write that fails after the account changed is not queued in the new account's outbox", async () => {
+describe("accounts (review 05:30 M2: the outbox is pinned to its account)", () => {
+  const outboxOf = (email: string) => JSON.parse(localStorage.getItem(`h1t_offline_outbox_${email}`) || "[]") as Array<{ id: string; method?: string }>;
+
+  it("a write that fails after the account changed goes to its own account's outbox, never the new one's", async () => {
     let release: (r: Response) => void = () => {};
     vi.stubGlobal("fetch", vi.fn(() => new Promise<Response>((resolve) => (release = resolve))));
     const sending = add();
@@ -213,6 +215,75 @@ describe("accounts", () => {
     release(new Response("{}", { status: 500 }));
     await sending;
     expect(localStorage.getItem("h1t_offline_outbox_other@example.com")).toBeNull();
-    expect(localStorage.getItem("h1t_offline_outbox_sync@example.com")).toBeNull();
+    expect(outboxOf("sync@example.com").map((i) => i.id)).toEqual([ID]);
+  });
+
+  it("a DELETE failing after the switch is in A's outbox (it is not lost)", async () => {
+    let release: (r: Response) => void = () => {};
+    vi.stubGlobal("fetch", vi.fn(() => new Promise<Response>((resolve) => (release = resolve))));
+    const deleting = apiClient.deleteEntry(ID);
+    localStorage.setItem("h1t_auth_current_email", "other@example.com");
+    await Promise.resolve();
+    release(new Response("{}", { status: 503 }));
+    await deleting;
+    expect(outboxOf("sync@example.com")).toMatchObject([{ id: ID, method: "DELETE" }]);
+    expect(localStorage.getItem("h1t_offline_outbox_other@example.com")).toBeNull();
+  });
+
+  it("an account switch between two outbox items: the second is not sent, and stays in A's outbox", async () => {
+    const OTHER = "33333333-3333-4333-8333-333333333333";
+    localStorage.setItem(
+      "h1t_offline_outbox_sync@example.com",
+      JSON.stringify([
+        { id: ID, date: "2026-10-18", payload: { id: ID }, createdAt: 1, key: "k1" },
+        { id: OTHER, date: "2026-10-18", payload: { id: OTHER }, createdAt: 2, key: "k2" },
+      ])
+    );
+    const sent: string[] = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (_url: string, init?: RequestInit) => {
+        sent.push(JSON.parse(String(init?.body)).id);
+        localStorage.setItem("h1t_auth_current_email", "other@example.com");
+        return new Response("{}", { status: 201 });
+      })
+    );
+    await syncOfflineOutbox();
+    expect(sent).toEqual([ID]);
+    expect(outboxOf("sync@example.com").map((i) => i.id)).toEqual([OTHER]);
+    expect(localStorage.getItem("h1t_offline_outbox_other@example.com")).toBeNull();
+  });
+});
+
+describe("writes that can never succeed (review 05:30 M1)", () => {
+  it("a recipe (no server food row) is never sent: state local, no request", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    const result = await apiClient.addEntry({ id: ID, foodId: "recipe-1729", grams: 200, mealSlot: "lunch", date: "2026-10-18" });
+    expect(result.state).toBe("local");
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(getPendingOfflineEntryIds()).toEqual([]);
+  });
+
+  it("409 PAST_DAY_READ_ONLY is final: reported once, never sent again, not even on app open or Thử lại", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    localStorage.setItem(
+      "h1t_offline_outbox_sync@example.com",
+      JSON.stringify([{ id: ID, date: "2026-10-17", payload: { id: ID }, createdAt: 1, key: "k1" }])
+    );
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({ error: { code: "PAST_DAY_READ_ONLY", message: "Cannot write to past dates" } }), { status: 409 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const first = await syncOfflineOutbox();
+    expect(first.held).toEqual([{ id: ID, status: 409, message: "Cannot write to past dates", date: "2026-10-17", final: true }]);
+    expect(await syncOfflineOutbox({ retryHeld: true })).toEqual({ saved: [], held: [] });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(getPendingOfflineEntryIds()).toEqual([ID]);
+  });
+
+  it("another 409 (not a past day) is held as before: sent again on Thử lại", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    server({ "POST /days/2026-10-18/entries": [409, 201] });
+    expect((await add()).final).toBe(false);
+    expect((await syncOfflineOutbox({ retryHeld: true })).saved).toEqual([ID]);
   });
 });

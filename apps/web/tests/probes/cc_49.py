@@ -12,6 +12,8 @@ every API call until it asks /auth/session, which is what the middleware's cooki
      reload; B hidden, A adds, B shown again: it is there within 10 s (the session refresh first); the same after a
      pageshow from the back-forward cache; deleted on the server: B drops it
   6  signed out at 1440: /app and the link page's Truy cập end on /signin; /landing still opens directly
+  7  review 05:30 M1: 409 PAST_DAY_READ_ONLY (an add sent after midnight): one notice "…vì ngày đã qua…", no Thử lại;
+     after a reload it is not sent again and the notice does not come back
 Run with: LIVE_BUILD=1 ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_49.py
 """
 import json
@@ -87,7 +89,9 @@ class FakeApi:
                 return route.fulfill(status=200, content_type="application/json", body=json.dumps(self.day()))
             if req.method == "POST" and re.fullmatch(r"/days/[\d-]+/entries", path):
                 if self.script["POST"]:
-                    return route.fulfill(status=self.script["POST"].pop(0), content_type="application/json", body='{"error":"scripted"}')
+                    item = self.script["POST"].pop(0)
+                    status, answer = item if isinstance(item, tuple) else (item, '{"error":"scripted"}')
+                    return route.fulfill(status=status, content_type="application/json", body=answer)
                 body = json.loads(req.post_data or "{}")
                 food = next((f for f in FOODS if f["id"] == body.get("food_id")), None)
                 grams = body.get("grams") or 100
@@ -384,6 +388,28 @@ with sync_playwright() as p:
         pg.goto(BASE + "/landing", wait_until="domcontentloaded")
         pg.wait_for_timeout(1000)
         check(pg.url.split("?")[0].endswith("/landing"), f"6: /landing still opens directly ({pg.url[len(BASE):]})")
+        ctx.close()
+
+    if want(7):
+        api = FakeApi()
+        ctx, pg, st = device(browser, api)
+        open_today(pg)
+        past_day = '{"error":{"code":"PAST_DAY_READ_ONLY","message":"Cannot write to past dates"}}'
+        api.script["POST"] = [(409, past_day)] * 5
+        add_food(pg, "Bắp luộc")
+        notice = pg.get_by_text("chưa lưu lên máy chủ vì ngày đã qua", exact=False)
+        try:
+            notice.first.wait_for(timeout=5000)
+        except Exception:
+            pass
+        check(notice.count() >= 1, "7: 409 past day: the notice says the day has passed and the food stays on this device")
+        close_tips(pg)
+        check(pg.get_by_role("button", name="Thử lại").count() == 0, "7: …with no Thử lại (it can never work)")
+        posts = len([c for c in st["calls"] if c.startswith("POST /days/")])
+        pg.reload(wait_until="domcontentloaded")
+        pg.wait_for_timeout(3000)
+        check(len([c for c in st["calls"] if c.startswith("POST /days/")]) == posts, f"7: after a reload it is not sent again ({posts} POST)")
+        check(pg.get_by_text("vì ngày đã qua", exact=False).count() == 0, "7: …and the notice does not come back")
         ctx.close()
 
     browser.close()

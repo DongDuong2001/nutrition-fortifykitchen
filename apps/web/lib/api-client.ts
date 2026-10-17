@@ -11,7 +11,8 @@ import { MOCK_FOODS, addCatalogFood, catalogChanged, setCatalogFoods, setCatalog
 import { searchFoods as searchMockFoods } from "./search";
 import type { SetupProfile } from "./onboarding";
 import { currentAccountId } from "./auth-actions";
-import { OFFLINE_OUTBOX_KEY, accountStorage, browserSession, keyedStorage, type KeyValueStore } from "./storage-keys";
+import { OFFLINE_OUTBOX_KEY, accountStorage, browserLocal, browserSession, keyedStorage, type KeyValueStore } from "./storage-keys";
+import { isDemo } from "./demo";
 import { type CoachProfile, filterCoachesBySpecialty, getCoachById } from "./coaches";
 import { type LeaderboardPeriod, type LeaderboardResponse, getMockLeaderboard, setLeaderboardOptIn as setLeaderboardOptInState } from "./leaderboard";
 import { readStoredProfile, type Profile } from "./profile";
@@ -336,15 +337,24 @@ export async function apiFetch(path: string, init: RequestInit = {}): Promise<Re
 // only: api-client, storage-keys and auth-actions import each other, so a module-level read of it can run before
 // storage-keys has finished loading ("Cannot access 'x' before initialization", depending on which page loads first).
 
-/** The server saved it, it waits in the outbox to be sent again, or the server refused it (a 4xx) and it waits for Thử lại. */
-export type WriteState = "saved" | "queued" | "held";
+/**
+ * The server saved it, it waits in the outbox to be sent again, the server refused it (a 4xx) and it waits for Thử lại,
+ * or "local": it can never reach the server (a food the server has no row for, a recipe made in the app) and stays on
+ * this device only (review 05:30 M1).
+ */
+export type WriteState = "saved" | "queued" | "held" | "local";
 
 export interface WriteResult {
   state: WriteState;
   /** The answer's status (0 = no answer) and the server's message, for a held write. */
   status?: number;
   message?: string;
+  /** Held for good (409 PAST_DAY_READ_ONLY): never sent again, not even by Thử lại. */
+  final?: boolean;
 }
+
+/** The server's code for a write to a day that has passed: sending it again can never work. */
+const PAST_DAY_READ_ONLY = "PAST_DAY_READ_ONLY";
 
 /** What a diary write's answer means. 0 = no answer (offline, or the request failed). */
 export function writeOutcome(status: number, method: string): "saved" | "retry" | "held" {
@@ -367,8 +377,11 @@ interface OutboxItem {
   key?: string;
   createdAt: number;
   retries?: number;
-  /** The server refused it with a 4xx: not sent again until Thử lại (syncOfflineOutbox({ retryHeld: true })). */
-  held?: { status: number; message: string };
+  /**
+   * The server refused it with a 4xx: not sent again until Thử lại or the next app open (syncOfflineOutbox({ retryHeld:
+   * true })). `final`: refused for good (a past day), never sent again.
+   */
+  held?: { status: number; message: string; final?: boolean };
 }
 
 type DiaryWrite = Pick<OutboxItem, "id" | "date" | "payload" | "method" | "path">;
@@ -378,26 +391,34 @@ const itemMethod = (item: DiaryWrite) => item.method ?? "POST";
 const itemPath = (item: DiaryWrite) => item.path ?? `/days/${item.date}/entries`;
 const isAdd = (item: DiaryWrite) => itemMethod(item) === "POST" && itemPath(item) === `/days/${item.date}/entries`;
 
-function readOutbox(): OutboxItem[] {
+/** The storage of one account's outbox: the signed-in one, or `account` when a write or a run belongs to it. */
+function outboxStorage(account?: string | null): KeyValueStore | null {
+  if (account === undefined) return accountStorage();
+  const local = browserLocal();
+  return local ? keyedStorage(local, isDemo(), account) : null;
+}
+
+function readOutbox(account?: string | null): OutboxItem[] {
   try {
-    const items: unknown = JSON.parse(accountStorage()?.getItem(OFFLINE_OUTBOX_KEY) || "[]");
+    const items: unknown = JSON.parse(outboxStorage(account)?.getItem(OFFLINE_OUTBOX_KEY) || "[]");
     return Array.isArray(items) ? (items as OutboxItem[]) : [];
   } catch {
     return [];
   }
 }
 
-function writeOutbox(items: OutboxItem[]): void {
+function writeOutbox(items: OutboxItem[], account?: string | null): void {
   try {
-    accountStorage()?.setItem(OFFLINE_OUTBOX_KEY, JSON.stringify(items));
+    outboxStorage(account)?.setItem(OFFLINE_OUTBOX_KEY, JSON.stringify(items));
   } catch {
     // Storage unavailable
   }
 }
 
-function queueWrite(write: DiaryWrite, held?: OutboxItem["held"]): void {
+/** Queues a write in the outbox of `account` (default: the signed-in one), never another account's. */
+function queueWrite(write: DiaryWrite, held?: OutboxItem["held"], account?: string | null): void {
   const createdAt = Date.now();
-  writeOutbox([...readOutbox(), { ...write, key: `${write.id}:${createdAt}:${generateUuid()}`, createdAt, retries: 0, held }]);
+  writeOutbox([...readOutbox(account), { ...write, key: `${write.id}:${createdAt}:${generateUuid()}`, createdAt, retries: 0, held }], account);
 }
 
 /** Queues an add to send later (kept for callers from before cc-49; diary writes queue themselves). */
@@ -437,17 +458,17 @@ export function writesInFlight(): number {
   return inFlight.size;
 }
 
-async function serverMessage(res: Response): Promise<string> {
+async function serverAnswer(res: Response): Promise<{ message: string; code: string }> {
   try {
     const text = await res.text();
     try {
       const json = JSON.parse(text);
-      return String(json?.error?.message ?? json?.message ?? json?.error ?? text);
+      return { message: String(json?.error?.message ?? json?.message ?? json?.error ?? text), code: String(json?.error?.code ?? "") };
     } catch {
-      return text;
+      return { message: text, code: "" };
     }
   } catch {
-    return "";
+    return { message: "", code: "" };
   }
 }
 
@@ -456,10 +477,10 @@ const DIARY_REQUEST_MS = 20 * 1000;
 const diaryTimeout = (): AbortSignal | undefined =>
   typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function" ? AbortSignal.timeout(DIARY_REQUEST_MS) : undefined;
 
-async function sendWrite(write: DiaryWrite): Promise<{ outcome: "saved" | "retry" | "held"; status: number; message: string }> {
+async function sendWrite(write: DiaryWrite): Promise<{ outcome: "saved" | "retry" | "held"; status: number; message: string; final: boolean }> {
   const method = itemMethod(write);
   let status = 0;
-  let message = "";
+  let answer = { message: "", code: "" };
   try {
     const res = await apiFetch(itemPath(write), {
       method,
@@ -467,13 +488,13 @@ async function sendWrite(write: DiaryWrite): Promise<{ outcome: "saved" | "retry
       signal: diaryTimeout(),
     });
     status = res.status;
-    if (writeOutcome(status, method) === "held") message = await serverMessage(res);
+    if (writeOutcome(status, method) === "held") answer = await serverAnswer(res);
   } catch {
     // No answer: sent again from the outbox
   }
   const outcome = writeOutcome(status, method);
-  if (outcome === "held") console.warn(`Diary write not saved: ${method} ${itemPath(write)} → ${status} ${message}`);
-  return { outcome, status, message };
+  if (outcome === "held") console.warn(`Diary write not saved: ${method} ${itemPath(write)} → ${status} ${answer.message}`);
+  return { outcome, status, message: answer.message, final: outcome === "held" && status === 409 && answer.code === PAST_DAY_READ_ONLY };
 }
 
 /**
@@ -498,13 +519,11 @@ function diaryWrite(write: DiaryWrite): Promise<WriteResult> {
       void syncOfflineOutbox();
       return { state: "queued" };
     }
-    const { outcome, status, message } = await sendWrite(write);
+    const { outcome, status, message, final } = await sendWrite(write);
     if (outcome === "saved") return { state: "saved" };
-    // Signed out (or another account) meanwhile: never into their outbox. The entry stays unconfirmed in this
-    // account's storage, and is sent again when it signs back in.
-    if (currentAccountId() !== account) return { state: "queued", status };
-    queueWrite(write, outcome === "held" ? { status, message } : undefined);
-    return outcome === "held" ? { state: "held", status, message } : { state: "queued", status };
+    // Into the outbox of the account the write belongs to, even when another one signed in meanwhile
+    queueWrite(write, outcome === "held" ? { status, message, final } : undefined, account);
+    return outcome === "held" ? { state: "held", status, message, final } : { state: "queued", status };
   });
   inFlight.set(write.id, run);
   void run.finally(() => {
@@ -516,8 +535,8 @@ function diaryWrite(write: DiaryWrite): Promise<WriteResult> {
 export interface SyncResult {
   /** Entries whose add or edit the server has now (a delete is not listed). */
   saved: string[];
-  /** Writes the server refused in this run, with its answer. */
-  held: Array<{ id: string; status: number; message: string }>;
+  /** Writes the server refused in this run, with its answer (`final`: refused for good, now and never sent again). */
+  held: Array<{ id: string; status: number; message: string; date: string; final: boolean }>;
 }
 
 let syncQueue: Promise<SyncResult> = Promise.resolve({ saved: [], held: [] });
@@ -534,17 +553,20 @@ export function syncOfflineOutbox(options: { retryHeld?: boolean } = {}): Promis
 
 async function runOutbox(retryHeld: boolean): Promise<SyncResult> {
   const result: SyncResult = { saved: [], held: [] };
-  const items = readOutbox();
+  // The run belongs to the account signed in when it starts: its writes never go out with another account's session
+  const account = currentAccountId();
+  const items = readOutbox(account);
   if (!items.length) return result;
   const blocked = new Set<string>();
   const sent = new Set<string>();
   const changed = new Map<string, Partial<OutboxItem>>();
   for (const item of items) {
-    if (blocked.has(item.id) || (item.held && !retryHeld)) {
+    if (blocked.has(item.id) || item.held?.final || (item.held && !retryHeld)) {
       blocked.add(item.id);
       continue;
     }
-    const { outcome, status, message } = await sendWrite(item);
+    if (currentAccountId() !== account) break;
+    const { outcome, status, message, final } = await sendWrite(item);
     if (outcome === "saved") {
       sent.add(itemKey(item));
       if (itemMethod(item) !== "DELETE") result.saved.push(item.id);
@@ -553,17 +575,18 @@ async function runOutbox(retryHeld: boolean): Promise<SyncResult> {
     blocked.add(item.id);
     const retries = (item.retries ?? 0) + 1;
     if (outcome === "held") {
-      changed.set(itemKey(item), { retries, held: { status, message } });
-      result.held.push({ id: item.id, status, message });
+      changed.set(itemKey(item), { retries, held: { status, message, final } });
+      result.held.push({ id: item.id, status, message, date: item.date, final });
     } else {
       changed.set(itemKey(item), { retries, held: undefined });
       if (status === 0) break;
     }
   }
   writeOutbox(
-    readOutbox()
+    readOutbox(account)
       .filter((item) => !sent.has(itemKey(item)))
-      .map((item) => (changed.has(itemKey(item)) ? { ...item, ...changed.get(itemKey(item)) } : item))
+      .map((item) => (changed.has(itemKey(item)) ? { ...item, ...changed.get(itemKey(item)) } : item)),
+    account
   );
   return result;
 }
@@ -933,6 +956,8 @@ export const apiClient = {
 
     if (isLiveMode()) {
       const isQuick = kind === "quick";
+      // A food the server has no row for (a recipe made in the app) can never be saved there: it stays on this device
+      if (!isQuick && !isUuid(payload.foodId)) return { success: false, id: entryId, state: "local" };
       const body: Record<string, unknown> = {
         id: entryId,
         kind,
@@ -942,9 +967,7 @@ export const apiClient = {
         // A quick entry is kcal only; an unknown value is left out so the server stores NULL (migration 000011), never 0
         if (typeof payload.calories === "number") body.calories = payload.calories;
       } else {
-        if (payload.foodId && isUuid(payload.foodId)) {
-          body.food_id = payload.foodId;
-        }
+        body.food_id = payload.foodId;
         body.grams = payload.grams ?? 100;
         body.serving_size_g = payload.grams ?? 100;
       }

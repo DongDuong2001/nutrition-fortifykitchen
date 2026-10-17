@@ -56,7 +56,10 @@ function FoodRow({
   const quantity = portionLabel(entry);
   const missing = missingMicros(entry);
   // The server has not saved it yet (live mode): it stays on the device and is sent again
-  const unsaved = useDiary().unsavedIds.has(entry.id);
+  const { unsavedIds, localOnlyIds } = useDiary();
+  const unsaved = unsavedIds.has(entry.id);
+  // Review 05:30 M1: a food without a server row (a recipe made in the app) stays on this device only
+  const localOnly = localOnlyIds.has(entry.id);
 
   return (
     <button
@@ -73,7 +76,7 @@ function FoodRow({
       }}
       aria-pressed={selected}
       data-tour={tourTarget}
-      aria-label={`${entry.name}, ${quantity}${missing ? ", thiếu dữ liệu vi chất" : ""}${unsaved ? ", chưa lưu" : ""}`}
+      aria-label={`${entry.name}, ${quantity}${missing ? ", thiếu dữ liệu vi chất" : ""}${unsaved ? ", chưa lưu" : ""}${localOnly ? ", chỉ trên máy này" : ""}`}
       onClick={() => {
         if (suppressClick.current) {
           suppressClick.current = false;
@@ -135,6 +138,15 @@ function FoodRow({
             className={`shrink-0 whitespace-nowrap text-[11px] font-semibold leading-none ${selected ? "text-sky" : "text-secondary"}`}
           >
             Chưa lưu
+          </span>
+        )}
+        {localOnly && (
+          <span
+            aria-hidden="true"
+            data-local-only
+            className={`shrink-0 whitespace-nowrap text-[11px] font-semibold leading-none ${selected ? "text-sky" : "text-secondary"}`}
+          >
+            Chỉ trên máy này
           </span>
         )}
       </span>

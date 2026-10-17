@@ -42,6 +42,7 @@ import {
 } from "./api-client";
 import { refreshServerSession } from "./server-session";
 import { markUsed } from "./onboarding-store";
+import { isLocalOnly, syncNotice } from "./sync-notice";
 import { HOME_ROUTE } from "./nav";
 import { generateUuid, isUuid } from "./uuid";
 import {
@@ -198,6 +199,8 @@ interface DiaryContextValue {
   addQuickEntry: (input: QuickEntryInput, slot: MealSlot) => QuickEntryResult;
   /** Live mode: today's entries the server has not saved yet. Each row shows Chưa lưu. */
   unsavedIds: ReadonlySet<string>;
+  /** Live mode: today's entries whose food has no server row (a recipe made in the app): they stay on this device. */
+  localOnlyIds: ReadonlySet<string>;
   /** Thử lại of the "unsaved" toast: the writes the server refused are sent again. */
   retryUnsaved: () => void;
   /** Today as YYYY-MM-DD (Asia/Ho_Chi_Minh). Null until mounted. */
@@ -473,12 +476,6 @@ function withNewIds(entries: AddedDiaryEntry[]): AddedDiaryEntry[] {
   return entries.map((e) => ({ ...e, id: generateUuid(), synced: undefined }));
 }
 
-/** The "unsaved" toast. The server's answer is in it, so a refused save is never silent. */
-export function unsavedMessage(status?: number, message?: string): string {
-  const text = (message ?? "").trim();
-  const detail = text ? `: ${text.length > 90 ? `${text.slice(0, 89)}…` : text}` : "";
-  return status ? `Chưa lưu được món (lỗi ${status}${detail})` : "Chưa lưu được món";
-}
 
 export function DiaryProvider({ children }: { children: React.ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
@@ -525,35 +522,45 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     );
   }, []);
 
-  const showUnsaved = useCallback((status?: number, message?: string) => {
-    setToast({ message: unsavedMessage(status, message), kind: "unsaved", mealSlot: null, durationMs: NOTICE_TOAST_MS });
+  // Review 05:30 M1: one "unsaved" toast per app open from syncs (each write the user just made still says so)
+  const unsavedShown = useRef(false);
+  const showNotice = useCallback((notice: ReturnType<typeof syncNotice>) => {
+    if (!notice) return;
+    if (notice.kind === "unsaved") unsavedShown.current = true;
+    setToast({ message: notice.message, kind: notice.kind, mealSlot: null, durationMs: NOTICE_TOAST_MS });
   }, []);
 
   const onSync = useCallback(
     (result: SyncResult) => {
       setSyncVersion((v) => v + 1);
       markSynced(result.saved);
-      if (result.held.length > 0) showUnsaved(result.held[0].status, result.held[0].message);
+      showNotice(syncNotice(result.held, unsavedShown.current));
     },
-    [markSynced, showUnsaved]
+    [markSynced, showNotice]
   );
 
   // The answer to one diary write of entry `id`
   const track = useCallback(
-    (id: string, write: Promise<WriteResult>) => {
+    (id: string, write: Promise<WriteResult>, date?: string) => {
       write
         .then((result) => {
           setSyncVersion((v) => v + 1);
           if (result.state === "saved") markSynced([id]);
-          if (result.state === "held") showUnsaved(result.status, result.message);
+          if (result.state === "held") {
+            const day = date ?? getTodayIsoVN();
+            showNotice(syncNotice([{ id, status: result.status ?? 0, message: result.message ?? "", date: day, final: result.final === true }], false));
+          }
         })
         .catch(() => {});
     },
-    [markSynced, showUnsaved]
+    [markSynced, showNotice]
   );
 
+  // A food without a server row (a recipe made in the app) is never sent: it stays on this device (Chỉ trên máy này)
   const sendAdd = useCallback(
-    (entry: AddedDiaryEntry, date: string) => track(entry.id, apiClient.addEntry(addPayload(entry, date))),
+    (entry: AddedDiaryEntry, date: string) => {
+      if (!isLocalOnly(entry)) track(entry.id, apiClient.addEntry(addPayload(entry, date)), date);
+    },
     [track]
   );
 
@@ -642,6 +649,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     syncRecipeFoods();
 
     setServerDayRead(false);
+    unsavedShown.current = false;
     if (isLiveMode() && account && !demoNow) {
       refreshRemoteDay(iso, { retryHeld: true });
 
@@ -748,7 +756,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     if (!isLiveMode() || demo || !accountId || !serverDayRead || !todayIso) return;
     const pending = pendingWriteIds();
     for (const e of edits.added) {
-      if (!e.synced && isUuid(e.id) && !pending.has(e.id)) sendAdd(e, todayIso);
+      if (!e.synced && isUuid(e.id) && !isLocalOnly(e) && !pending.has(e.id)) sendAdd(e, todayIso);
     }
   }, [edits.added, serverDayRead, demo, accountId, todayIso, sendAdd, syncVersion]);
 
@@ -1249,14 +1257,20 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     const pending = pendingWriteIds();
     return new Set(
       edits.added
-        .filter((e) => queued.has(e.id) || (serverDayRead && !e.synced && !pending.has(e.id)))
+        .filter((e) => !isLocalOnly(e) && (queued.has(e.id) || (serverDayRead && !e.synced && !pending.has(e.id))))
         .map((e) => e.id)
     );
     // syncVersion: the outbox changed
   }, [edits.added, syncVersion, demo, hydrated, serverDayRead]);
+  // Entries that can never reach the server: the row says Chỉ trên máy này (review 05:30 M1)
+  const localOnlyIds = useMemo(
+    () => (isLiveMode() && !demo ? new Set(edits.added.filter(isLocalOnly).map((e) => e.id)) : new Set<string>()),
+    [edits.added, demo]
+  );
 
   const retryUnsaved = useCallback(() => {
     markUsed("retry-unsaved");
+    unsavedShown.current = false;
     setToast(null);
     syncOfflineOutbox({ retryHeld: true }).then(onSync).catch(() => {});
   }, [onSync]);
@@ -1338,6 +1352,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       addSavedMeal,
       addQuickEntry,
       unsavedIds,
+      localOnlyIds,
       retryUnsaved,
       todayIso,
       dayArchive: archive,
@@ -1382,6 +1397,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       addSavedMeal,
       addQuickEntry,
       unsavedIds,
+      localOnlyIds,
       retryUnsaved,
       todayIso,
       archive,
