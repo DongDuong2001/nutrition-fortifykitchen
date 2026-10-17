@@ -1,4 +1,4 @@
-.PHONY: dev dev-api dev-web build build-api build-web db-migrate migrate-up migrate-down db-backup db-restore test test-api test-web lint lint-api lint-web clean
+.PHONY: dev dev-api dev-web build build-api build-web db-migrate migrate-up migrate-down db-backup db-restore test test-api test-integration test-web lint lint-api lint-web clean
 
 dev:
 	@echo "Starting development environment..."
@@ -45,6 +45,10 @@ test: test-api test-web
 
 test-api:
 	cd apps/api && go test -v ./...
+
+# Every diary write against a throwaway Postgres 17 with all migrations (docker compose; or TEST_DATABASE_URL)
+test-integration:
+	cd apps/api && ./scripts/test-integration.sh
 
 test-web:
 	cd apps/web && npm run test --if-present

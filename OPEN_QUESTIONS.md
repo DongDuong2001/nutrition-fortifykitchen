@@ -286,3 +286,17 @@
 - The add POST sends no serving_label, so after a refetch (and on another device) a row shows "150 g" instead of the portion picked ("1 chén"). CreateEntryRequest already accepts serving_label, so it is a one-line client change. Do it in cc-51 (D6, smart default portion)?
 - Có gì mới shows only the newest release. With the new 18/10 entry, someone who never opened 17/10 gets only 18/10; the 17/10 items and tour stay in Cài đặt › Có gì mới. Show every unseen release instead?
 - An "unsaved" toast replaces a delete's undo toast if a refused write answers within its 5 s (ponytail-review 3). Park it like a move does?
+
+## cc-50 (18/10/2026, for Dong: Hao approved these apps/api and deploy/ edits)
+- SQL audit (every SQL string in apps/api, static and fmt.Sprintf-built): placeholders now carry one explicit cast wherever they are used twice, compared to a literal, or passed to a function. Only diary CreateEntry was a real failure (fixed in f0b25bc); the rest were safe by luck of column types and are now explicit:
+  - internal/diary/repository.go:146 `$1, $1` → `$1::uuid` (id, client_id); `$7::numeric` twice (f0b25bc)
+  - internal/profile/repository.go:90-91 GetWeightLogs `$2 = '' OR log_date >= $2::date` → `$2::text = '' OR log_date >= NULLIF($2::text, '')::date` (same for $3; no ''::date can be evaluated)
+  - internal/profile/repository.go:135,138 UpsertWeightLog profile update `$1` twice → `$1::uuid`
+  - internal/vault/service.go:167 `$1 = '' OR status = $1` → `$1::text`
+  - internal/nutrition/repository.go:47 search `unaccent($N)` twice → `unaccent($N::text)`; :77 ORDER BY CASE with `unaccent($1)` three times → `$1::text`
+  - internal/nutrition/repository.go:309 custom food insert `$2, $2` → `$2::text`, `$5, $5` → `$5::jsonb`
+  - internal/library/repository.go:125,128 recents trim `$1` twice → `$1::uuid`
+  - internal/coaching/repository.go:140 `reviewed_at = $3, updated_at = $3` → `$3::timestamptz`
+  - cmd/importfoods/main.go:122 `$8, $8` → `$8::jsonb`
+- Not a finding: internal/nutrition/repository.go:219-233 builds `per_100g->>'%s'` with Sprintf, but the nutrient key is checked against ValidNutrients first (line 205).
+- Integration tests: apps/api/cmd/server/integration_test.go (build tag integration) runs every diary write through the real router: food entry, replayed POST, quick entry with NULL calories, update grams, move meal, delete + restore, copy-yesterday, delete meal, add from a saved meal, recents; custom food create/read/delete, favourites, weight (with and without a range), accent-free search. `make test-integration` (apps/api/scripts/test-integration.sh) starts Postgres 17 (apps/api/docker-compose.test.yml), loads testdata/supabase_shim.sql (auth.users, auth.uid(), roles) and every migration with ON_ERROR_STOP, then `go test -tags=integration`. With TEST_DATABASE_URL set it uses that database instead (CI service container).
