@@ -1,4 +1,4 @@
-import { MOCK_FOODS } from "./mock/foods";
+import { MOCK_FOODS, catalogChanged } from "./mock/foods";
 import { accountStorage } from "./storage-keys";
 import {
   RECIPES_KEY,
@@ -47,6 +47,7 @@ export function syncRecipeFoods(recipes: Recipe[] = readRecipes()): void {
     if (isRecipeId(MOCK_FOODS[i].id)) MOCK_FOODS.splice(i, 1);
   }
   MOCK_FOODS.unshift(...recipes.map((r) => recipeToFood(flattenRecipe(r, recipes), catalogueLookup)));
+  catalogChanged();
 }
 
 export function getRecipe(id: string): Recipe | null {

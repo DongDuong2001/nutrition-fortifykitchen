@@ -158,7 +158,7 @@ export function FoodList({
           </section>
         ))
       ) : (
-        <ul data-align-group="add-list" data-align-edge="left" className={`m-0 flex list-none flex-col overflow-hidden p-0 ${cardClass}`}>
+        <ul data-align-group="add-list" data-align-edge="left" className={`m-0 flex shrink-0 list-none flex-col overflow-hidden p-0 ${cardClass}`}>
           {list.foods.map((food) => renderRow(food, showCategory))}
         </ul>
       )}

@@ -16,6 +16,7 @@ import { QuickAddSheet } from "@/components/add/quick-add-sheet";
 import { ChipRow } from "@/components/foods/chip-row";
 import { FoodList } from "@/components/foods/food-list";
 import { FoodEmptyState } from "@/components/foods/food-empty-state";
+import { CatalogStatus } from "@/components/foods/catalog-status";
 import { FoodSearchField } from "@/components/foods/food-search-field";
 import { foodMeta } from "@/lib/food-meta";
 import { CreateFoodButton } from "@/components/foods/create-food-button";
@@ -114,8 +115,22 @@ function AddFoodInner() {
   }, [data]);
 
   // Search, filter and list: the same state as Khám phá
-  const { query, setQuery, filter, setFilter, list, filterItems, categoryName, isFavouriteFood, similarFoods, noFavourites } =
-    useFoodBrowse();
+  const {
+    query,
+    setQuery,
+    filter,
+    setFilter,
+    list,
+    filterItems,
+    categoryName,
+    isFavouriteFood,
+    similarFoods,
+    noFavourites,
+    catalogVersion,
+    catalogPending,
+    catalogFailed,
+    retryCatalog,
+  } = useFoodBrowse();
 
   // Recents are foods with the serving they were logged with: tap = add with that serving, chevron = portion panel
   const recentShortcuts = useMemo<RecentShortcut[]>(
@@ -125,7 +140,7 @@ function AddFoodInner() {
         .filter((r): r is ResolvedRecent => r !== null)
         .map((r) => ({ key: `${r.food.id}|${r.label}`, food: r.food, label: r.label, grams: r.grams }))
         .slice(0, MAX_SHORTCUT_RECENTS),
-    [recentFoods]
+    [recentFoods, catalogVersion]
   );
   // Favourites add with the portion they were last logged with, else their first serving
   // A favourite already in Gần đây is not repeated (two identical buttons confuse screen readers)
@@ -139,7 +154,7 @@ function AddFoodInner() {
           const serving = last ? { label: last.label, grams: last.grams } : (food.servings[0] ?? { label: "100 g", grams: 100 });
           return { key: `fav|${food.id}`, food, label: serving.label, grams: serving.grams };
         }),
-    [favouriteIds, recentFoods, recentShortcuts]
+    [favouriteIds, recentFoods, recentShortcuts, catalogVersion]
   );
   const savedMealShortcuts = useMemo<SavedMealShortcut[]>(
     () =>
@@ -147,7 +162,7 @@ function AddFoodInner() {
         .map((meal) => ({ meal, ...savedMealTotals(meal, MOCK_FOODS) }))
         .filter((s) => s.itemCount > 0)
         .slice(0, MAX_SHORTCUT_MEALS),
-    [savedMeals]
+    [savedMeals, catalogVersion]
   );
 
   const showShortcuts = !query.trim() && filter === "all" && !compareMode;
@@ -282,7 +297,10 @@ function AddFoodInner() {
 
   // Shared by the phone sheet and the desktop dialog
   const newFoodHref = mealSlot ? `/foods/new?meal=${mealSlot}` : "/foods/new";
-  const emptyState = (
+  // The live catalogue is not here yet (or did not come): say that, never "no foods"
+  const emptyState = catalogPending || catalogFailed ? (
+    <CatalogStatus failed={catalogFailed} onRetry={retryCatalog} />
+  ) : (
     <FoodEmptyState
       query={query}
       filter={filter}

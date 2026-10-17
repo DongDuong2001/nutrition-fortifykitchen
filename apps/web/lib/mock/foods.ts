@@ -56,6 +56,45 @@ export function browsableFoods(): FoodItem[] {
   return demoActive() ? MOCK_FOODS : MOCK_FOODS.filter((f) => !f.demoOnly);
 }
 
+// A tiny store, so a screen re-renders when the catalogue changes (the live load arrives, a food or recipe is made).
+// useCatalogFoods (hooks) reads it with useSyncExternalStore.
+export type CatalogStatus = "idle" | "loading" | "ready" | "failed";
+
+let catalogVersionNumber = 0;
+let catalogStatusValue: CatalogStatus = "idle";
+const catalogListeners = new Set<() => void>();
+
+export const catalogVersion = (): number => catalogVersionNumber;
+export const catalogStatus = (): CatalogStatus => catalogStatusValue;
+
+export function subscribeCatalog(listener: () => void): () => void {
+  catalogListeners.add(listener);
+  return () => {
+    catalogListeners.delete(listener);
+  };
+}
+
+/** The catalogue changed: call after anything that adds to, replaces or removes from MOCK_FOODS. */
+export function catalogChanged(): void {
+  catalogVersionNumber++;
+  for (const listener of Array.from(catalogListeners)) listener();
+}
+
+/** Where the live load stands. Only a change is announced. */
+export function setCatalogStatus(next: CatalogStatus): void {
+  if (next === catalogStatusValue) return;
+  catalogStatusValue = next;
+  catalogChanged();
+}
+
+/** A food made by the user (live mode): added to the catalogue that is there, which stays as it is. */
+export function addCatalogFood(food: FoodItem): void {
+  const at = MOCK_FOODS.findIndex((f) => f.id === food.id);
+  if (at >= 0) MOCK_FOODS.splice(at, 1);
+  MOCK_FOODS.unshift(food);
+  catalogChanged();
+}
+
 /**
  * Sets or merges database foods into the catalog for live mode.
  */
@@ -74,6 +113,7 @@ export function setCatalogFoods(foods: FoodItem[]): void {
 
   MOCK_FOODS.length = 0;
   MOCK_FOODS.push(...combined);
+  catalogChanged();
 }
 
 export const MOCK_FOODS: FoodItem[] = [

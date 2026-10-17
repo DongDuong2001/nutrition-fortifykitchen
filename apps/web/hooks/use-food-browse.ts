@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { browsableFoods, type FoodItem } from "@/lib/mock/foods";
+import { useCallback, useMemo, useState } from "react";
+import type { FoodItem } from "@/lib/mock/foods";
+import { useCatalogFoods } from "@/hooks/use-catalog-foods";
 import { findSimilarFoods } from "@/lib/search";
 import {
   buildFoodList,
@@ -11,34 +12,21 @@ import {
   type FoodFilter,
 } from "@/lib/food-categories";
 import { useDiary } from "@/lib/diary-store";
-import { isLiveMode } from "@/lib/api-mode";
-import { apiClient } from "@/lib/api-client";
 
 /**
  * Search, filter and list state for browsing foods. Shared by the add sheet and Khám phá, so both use
  * the same index, the same category chips and the same empty states.
  */
 export function useFoodBrowse() {
-  const { favouriteIds, isFavourite, demo } = useDiary();
+  const { favouriteIds, isFavourite } = useDiary();
+  const { foods, version, pending: catalogPending, failed: catalogFailed, retry: retryCatalog } = useCatalogFoods();
   const [filter, setFilter] = useState<FoodFilter>("all");
   const [query, setQuery] = useState("");
-  const [catalogLoaded, setCatalogLoaded] = useState(false);
-
-  useEffect(() => {
-    if (isLiveMode() && !catalogLoaded) {
-      apiClient.loadAllFoods().then(() => {
-        setCatalogLoaded(true);
-      }).catch(() => {});
-    }
-  }, [catalogLoaded]);
 
   // Filter and search combined. Grouped only for Tất cả with no query.
-  // `demo` is a dependency because the catalogue read follows demo mode, which is known after mount
-  const list = useMemo(
-    () => buildFoodList(browsableFoods(), query, filter, favouriteIds),
-    [query, filter, favouriteIds, demo, catalogLoaded]
-  );
-  const categories = useMemo(() => chipCategories(browsableFoods()), [demo, catalogLoaded]);
+  // `foods` follows the catalogue (the live load, a made food) and demo mode
+  const list = useMemo(() => buildFoodList(foods, query, filter, favouriteIds), [query, filter, favouriteIds, foods]);
+  const categories = useMemo(() => chipCategories(foods), [foods]);
   const categoryName = useCallback((food: FoodItem) => categoryLabel(categoryOf(food)), []);
   const isFavouriteFood = useCallback((food: FoodItem) => isFavourite(food.id), [isFavourite]);
 
@@ -60,10 +48,10 @@ export function useFoodBrowse() {
   // Fuzzy suggestions when results are empty
   const similarFoods = useMemo(() => {
     if (list.foods.length === 0 && query.trim()) {
-      return findSimilarFoods(browsableFoods(), query, 4);
+      return findSimilarFoods(foods, query, 4);
     }
     return [];
-  }, [list.foods, query]);
+  }, [list.foods, query, foods]);
 
   // No saved favourite: the Yêu thích filter, no query, nothing in the list
   const noFavourites = filter === "favorite" && !query.trim() && list.foods.length === 0;
@@ -79,5 +67,12 @@ export function useFoodBrowse() {
     isFavouriteFood,
     similarFoods,
     noFavourites,
+    /** The catalogue the list is built from changed: put it in the deps of anything read from MOCK_FOODS. */
+    catalogVersion: version,
+    /** The live catalogue is not here yet: show "Đang tải món…", not an empty state. */
+    catalogPending,
+    /** The live load brought nothing: offer Thử lại (retryCatalog). */
+    catalogFailed,
+    retryCatalog,
   };
 }
