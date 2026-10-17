@@ -289,6 +289,9 @@ async function fetchAllFoods(): Promise<FoodItem[]> {
 export function getApiBaseUrl(): string {
   const url = process.env.NEXT_PUBLIC_API_URL;
   if (url) return url;
+  if (typeof window !== "undefined" && isLiveMode()) {
+    return "/api/v1";
+  }
   return "http://localhost:8080/api/v1";
 }
 
@@ -361,6 +364,18 @@ export function dropOfflineEntry(id: string): void {
     if (kept.length !== items.length) storage.setItem(OFFLINE_OUTBOX_KEY, JSON.stringify(kept));
   } catch {
     // Storage unavailable
+  }
+}
+
+/** Returns all entry IDs currently queued in the offline outbox for the active account. */
+export function getPendingOfflineEntryIds(): string[] {
+  const storage = accountStorage();
+  if (!storage) return [];
+  try {
+    const items: OutboxItem[] = JSON.parse(storage.getItem(OFFLINE_OUTBOX_KEY) || "[]");
+    return items.map((item) => item.id);
+  } catch {
+    return [];
   }
 }
 
