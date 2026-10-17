@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { rememberAddOpener } from "@/components/ui/add-opener";
@@ -30,18 +30,21 @@ function FoodRow({
   selected,
   editable,
   onSelect,
+  onLongPress,
   tourTarget,
 }: {
   entry: HomeEntry;
   selected: boolean;
   editable: boolean;
   onSelect: () => void;
+  onLongPress?: (id: string) => void;
   tourTarget?: string;
 }) {
   const router = useRouter();
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const origin = useRef<{ x: number; y: number } | null>(null);
   const suppressClick = useRef(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   const cancel = () => {
     if (timer.current) clearTimeout(timer.current);
@@ -55,6 +58,16 @@ function FoodRow({
   return (
     <button
       type="button"
+      draggable={editable}
+      onDragStart={(e) => {
+        cancel();
+        setIsDragging(true);
+        e.dataTransfer.setData("application/json", JSON.stringify({ id: entry.id, fromSlot: entry.slot }));
+        e.dataTransfer.effectAllowed = "move";
+      }}
+      onDragEnd={() => {
+        setIsDragging(false);
+      }}
       aria-pressed={selected}
       data-tour={tourTarget}
       aria-label={`${entry.name}, ${quantity}${missing ? ", thiếu dữ liệu vi chất" : ""}`}
@@ -71,8 +84,19 @@ function FoodRow({
         timer.current = setTimeout(() => {
           timer.current = null;
           suppressClick.current = true;
-          markUsed("long-press-edit");
-          router.push(`/entry/${entry.id}`);
+          if (typeof navigator !== "undefined" && navigator.vibrate) {
+            try {
+              navigator.vibrate(50);
+            } catch {
+              // Ignore vibration failure
+            }
+          }
+          if (onLongPress) {
+            onLongPress(entry.id);
+          } else {
+            markUsed("long-press-edit");
+            router.push(`/entry/${entry.id}`);
+          }
         }, LONG_PRESS_MS);
       }}
       onPointerMove={(e) => {
@@ -85,6 +109,8 @@ function FoodRow({
       onContextMenu={(e) => e.preventDefault()}
       style={noSelect}
       className={`flex min-h-8 w-full cursor-pointer items-center justify-between gap-2 border-0 border-b border-b-divider px-3 py-1 text-left lg:min-h-12 ${
+        isDragging ? "opacity-40" : ""
+      } ${
         selected ? "bg-cobalt text-on-accent" : "bg-transparent text-text"
       }`}
     >
@@ -187,6 +213,8 @@ export function FoodList({
   onFood,
   onMeal,
   onCopyYesterday,
+  onLongPressSelect,
+  onMoveFood,
   share = false,
   select,
 }: {
@@ -198,11 +226,15 @@ export function FoodList({
   onFood: (id: string) => void;
   onMeal: (slot: HomeMeal["slot"]) => void;
   onCopyYesterday: () => void;
+  onLongPressSelect?: (id: string) => void;
+  onMoveFood?: (entryId: string, targetSlot: HomeMeal["slot"]) => void;
   /** The share image: meals with no food are left out, nothing is a control, no legend. */
   share?: boolean;
   /** Select mode (Chọn nhiều món): rows are checkboxes and nothing else is pressable. */
   select?: SelectProps;
 }) {
+  const [dragOverSlot, setDragOverSlot] = useState<HomeMeal["slot"] | null>(null);
+
   if (select) return <SelectList meals={meals} select={select} />;
   if (share) {
     const pill = inkPill(true);
@@ -246,10 +278,49 @@ export function FoodList({
       {meals.map((meal) => {
         const firstEntryId = meals.find((m) => m.entries.length > 0)?.entries[0].id;
         const mealSelected = mode.kind === "meal" && mode.slot === meal.slot;
+        const isDropTarget = dragOverSlot === meal.slot;
         return (
-          <section key={meal.slot} aria-label={meal.fullName}>
+          <section
+            key={meal.slot}
+            aria-label={meal.fullName}
+            data-meal-slot={meal.slot}
+            onDragOver={(e) => {
+              if (readOnly) return;
+              e.preventDefault();
+              e.dataTransfer.dropEffect = "move";
+            }}
+            onDragEnter={(e) => {
+              if (readOnly) return;
+              e.preventDefault();
+              setDragOverSlot(meal.slot);
+            }}
+            onDragLeave={(e) => {
+              if (readOnly) return;
+              if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                setDragOverSlot((curr) => (curr === meal.slot ? null : curr));
+              }
+            }}
+            onDrop={(e) => {
+              if (readOnly) return;
+              e.preventDefault();
+              setDragOverSlot(null);
+              try {
+                const raw = e.dataTransfer.getData("application/json");
+                if (!raw) return;
+                const data = JSON.parse(raw);
+                if (data.id && data.fromSlot !== meal.slot && onMoveFood) {
+                  onMoveFood(data.id, meal.slot);
+                }
+              } catch {
+                // Ignore parse error
+              }
+            }}
+            className={`transition-all duration-150 ${
+              isDropTarget ? "bg-blue/10 ring-2 ring-blue/60 rounded-xl" : ""
+            }`}
+          >
             <div className={`sticky top-0 z-10 ${pill.wrap}`}>
-            <div data-ink-pill className={`${pill.pill} ${mealSelected ? "bg-cobalt" : "bg-ink"} text-on-dark`}>
+            <div data-ink-pill className={`${pill.pill} ${mealSelected ? "bg-cobalt" : "bg-ink"} text-on-dark ${isDropTarget ? "ring-2 ring-sky" : ""}`}>
               <button
                 type="button"
                 aria-pressed={mealSelected}
@@ -260,7 +331,7 @@ export function FoodList({
               >
                 <span className={pill.label}>{meal.label}</span>
                 <span className={pill.kcal}>
-                  {meal.entries.length > 0 ? kcalLabel(meal.kcal) : ""}
+                  {isDropTarget ? "Thả vào đây để chuyển" : meal.entries.length > 0 ? kcalLabel(meal.kcal) : ""}
                 </span>
               </button>
               {!readOnly && (
@@ -291,6 +362,7 @@ export function FoodList({
                 editable={!readOnly}
                 tourTarget={entry.id === firstEntryId ? "home-food-list" : undefined}
                 onSelect={() => onFood(entry.id)}
+                onLongPress={onLongPressSelect}
               />
             ))}
             {meal.entries.length === 0 && (
