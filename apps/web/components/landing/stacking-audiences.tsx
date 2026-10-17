@@ -20,9 +20,9 @@ const AUDIENCES_DATA: AudienceCardData[] = [
     tag: "TẬP LUYỆN & THỂ HÌNH",
     title: "Người tập gym & Vận động viên",
     subtitle: "Tối ưu hóa năng lượng thâm hụt / thặng dư và bù khoáng",
-    desc: "Kiểm soát chính xác lượng calo và 4 đại lượng macronutrients (Đạm, Carb, Béo, Xơ). Tự động tính toán nhu cầu muối khoáng bù đắp điện giải theo thời lượng tập luyện thực tế mỗi ngày.",
+    desc: "Kiểm soát chính xác lượng calo và 4 đại lượng macronutrients (Đạm, Carb, Béo, Xơ). Khuyến nghị muối được tính lại theo số phút tập luyện bạn ghi mỗi ngày.",
     points: [
-      "Tính toán muối khoáng bù đắp cho ngày tập luyện 60–90 phút",
+      "Khuyến nghị muối tăng theo số phút tập mỗi ngày",
       "Theo dõi 4 thành phần đại lượng: Tinh bột, Đạm, Béo, Chất xơ",
       "Hỗ trợ ghi nhận nhanh nhiều món liên tiếp vào từng bữa ăn",
     ],
@@ -31,7 +31,7 @@ const AUDIENCES_DATA: AudienceCardData[] = [
     theme: "dark",
     stats: [
       { label: "Mục tiêu đạm", value: "120–160 g", hint: "2.0 g/kg thể trọng" },
-      { label: "Bù muối điện giải", value: "+1.200 mg", hint: "Theo giờ tập 60p" },
+      { label: "Natri tăng thêm", value: "+1.180–1.770 mg", hint: "Ngày tập 60 phút" },
       { label: "Kiểm soát Calo", value: "1.950–2.275", hint: "Thâm hụt chuẩn xác" },
     ],
   },
@@ -43,7 +43,7 @@ const AUDIENCES_DATA: AudienceCardData[] = [
     points: [
       "Đối chiếu với mục tiêu tính theo hồ sơ của bạn",
       "Biểu đồ 10 mức trực quan hiển thị mức độ đáp ứng từng vi chất",
-      "Cảnh báo ngưỡng an toàn phòng tránh dư thừa hoặc mất cân đối",
+      "Bốn mức Thiếu, Trung bình, Gần đủ, Đạt cho từng vi chất",
     ],
     ctaText: "Tạo tài khoản theo dõi vi chất",
     ctaHref: "/signup",
@@ -57,20 +57,20 @@ const AUDIENCES_DATA: AudienceCardData[] = [
   {
     tag: "CHUYÊN NGHIỆP & HUẤN LUYỆN",
     title: "Huấn luyện viên & Chuyên gia dinh dưỡng",
-    subtitle: "Đồng hành và quản lý thực đơn khách hàng dựa trên dữ liệu",
-    desc: "Thiết lập kế hoạch dinh dưỡng cá nhân hóa cho học viên, theo dõi nhật ký thực tế minh bạch theo thời gian thực và loại bỏ hoàn toàn việc ước tính thủ công cảm tính.",
+    subtitle: "Dữ liệu dinh dưỡng rõ nguồn để tham chiếu khi tư vấn",
+    desc: "Tra cứu thành phần từng món với nhãn nguồn rõ ràng, so sánh 2 đến 3 món cạnh nhau và đối chiếu 22 vi chất với mục tiêu tính theo hồ sơ.",
     points: [
-      "Theo dõi nhật ký và tỷ lệ đạt mục tiêu của học viên theo thời gian thực",
+      "Nhãn nguồn trên từng món: USDA, bảng thành phần Việt Nam, nhãn bao bì",
       "Điều chỉnh khuyến nghị muối theo số phút tập mỗi ngày",
-      "Dữ liệu dinh dưỡng chuẩn mực, không phụ thuộc vào bảng tính thủ công",
+      "So sánh 2 hoặc 3 món cạnh nhau trên cùng một bảng",
     ],
     ctaText: "Bắt đầu cùng H1T MICRO",
     ctaHref: "/signup",
     theme: "cobalt",
     stats: [
-      { label: "Học viên", value: "Theo dõi 1-1", hint: "Báo cáo tuân thủ ngày" },
+      { label: "So sánh món", value: "2–3 món", hint: "Cạnh nhau" },
       { label: "Dữ liệu nguồn", value: "USDA", hint: "FoodData Central" },
-      { label: "Độ chính xác", value: "Đến từng gam", hint: "Không làm tròn lệch" },
+      { label: "Vi chất", value: "22", hint: "10 khoáng chất, 12 vitamin" },
     ],
   },
 ];

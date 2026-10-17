@@ -95,14 +95,14 @@ export function DesktopIntroBanner() {
             <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-page border border-card-border/60">
               <div className="text-xs font-bold text-text">2. Phân tích 22 vi chất tức thì</div>
               <p className="m-0 text-xs text-secondary leading-relaxed">
-                Biểu đồ 10 mức hiển thị trực quan tỷ lệ đạt chuẩn của từng vitamin và khoáng chất, cảnh báo sớm nguy cơ thiếu hụt.
+                Biểu đồ 10 mức hiển thị trực quan tỷ lệ đạt chuẩn của từng vitamin và khoáng chất, cho thấy vi chất nào còn thiếu.
               </p>
             </div>
 
             <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-page border border-card-border/60">
               <div className="text-xs font-bold text-text">3. Điều chỉnh theo vận động</div>
               <p className="m-0 text-xs text-secondary leading-relaxed">
-                Tự động tối ưu hóa lượng muối khoáng và nước theo cường độ tập luyện.
+                Khuyến nghị muối được tính lại theo số phút tập luyện bạn ghi mỗi ngày.
               </p>
             </div>
           </div>

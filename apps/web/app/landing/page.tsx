@@ -61,16 +61,16 @@ const STEPS = [
   {
     num: "03",
     stepLabel: "BƯỚC 3",
-    title: "Tối ưu hóa theo cường độ vận động",
-    desc: "Hệ thống tự động tính toán nhu cầu bù muối điện giải và nước theo thời lượng tập luyện thực tế mỗi ngày.",
+    title: "Điều chỉnh theo số phút tập",
+    desc: "Khuyến nghị muối được tính lại theo số phút tập luyện bạn ghi mỗi ngày.",
     microUi: (
       <div className="p-3.5 rounded-2xl bg-page/80 border border-card-border/70 flex items-center justify-between">
         <div>
           <div className="text-xs font-bold text-text">Tập gym 60 phút</div>
-          <div className="text-[11px] text-secondary">Cường độ vận động cao</div>
+          <div className="text-[11px] text-secondary">Ngày có tập luyện</div>
         </div>
         <span className="shrink-0 text-[11px] font-extrabold text-warning-text bg-warning-bg px-2.5 py-1 rounded-full border border-level-yellow/30 flex items-center gap-1">
-          +1.200 mg bù muối
+          +1.180–1.770 mg natri
         </span>
       </div>
     ),
@@ -222,7 +222,7 @@ export default function LandingPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-blue font-bold">✓</span>
-                  <span>Tối ưu điện giải theo vận động</span>
+                  <span>Khuyến nghị muối theo số phút tập</span>
                 </div>
               </div>
             </div>
