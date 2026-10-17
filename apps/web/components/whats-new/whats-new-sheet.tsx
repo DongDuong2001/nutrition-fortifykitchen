@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Sheet } from "@/components/ui/sheet";
 import { PillButton } from "@/components/ui/pill-button";
-import { IconCheck, IconEye, IconGrid, IconTarget } from "@/components/ui/icons";
+import { IconCheck, IconEye, IconGrid, IconHome, IconTarget } from "@/components/ui/icons";
 import { CloseIcon } from "@/components/pwa/install-icons";
 import { SHEET_ICON_BUTTON, SHEET_TITLE_CLASS } from "@/components/pwa/install-sheet";
 import type { Release, ReleaseIcon } from "@/lib/releases";
@@ -12,6 +12,7 @@ const TITLE_ID = "whats-new-title";
 const EXIT_MS = 140;
 
 const RELEASE_ICONS: Record<ReleaseIcon, React.ComponentType<{ size?: number }>> = {
+  home: IconHome,
   select: IconCheck,
   target: IconTarget,
   meal: IconEye,
@@ -68,13 +69,14 @@ export function WhatsNewSheet({ release, open, onClose }: { release: Release; op
       open={open}
       onClose={() => close(false)}
       labelledBy={TITLE_ID}
+      initialFocusId={TITLE_ID}
       desktopDialog
       className={`gap-3 lg:w-[480px]! lg:max-w-[480px]! ${leaving ? "wn-leave" : "wn-enter"}`}
     >
       <header data-align-group="wn-sheet" className="flex items-start gap-2">
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <p className="m-0 text-xs font-bold text-cobalt">Cập nhật {release.date}</p>
-          <h2 id={TITLE_ID} className={`${SHEET_TITLE_CLASS} text-[26px]`}>
+          <h2 id={TITLE_ID} tabIndex={-1} className={`${SHEET_TITLE_CLASS} text-[26px] outline-none`}>
             Có gì mới
           </h2>
         </div>

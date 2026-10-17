@@ -34,7 +34,7 @@ DESKTOP = {"width": 1440, "height": 900}
 SETTINGS_KEY = "h1t_settings_v1_demo"
 RELEASE = "2026-10-17"
 HOME_TIPS = ["home-logged", "meal-add", "home-share"]
-ITEMS = ["Chọn nhiều món", "Mục tiêu đa lượng", "Bữa ăn dễ đọc hơn", "Thanh vi chất 4 màu"]
+ITEMS = ["Trang chủ mới", "Chọn nhiều món", "Mục tiêu đa lượng", "Bữa ăn dễ đọc hơn", "Thanh vi chất 4 màu"]
 problems = []
 
 
@@ -110,7 +110,13 @@ def once(browser):
     go(pg, "/app", 1200)
     check(visible(sheet(pg)), "opens by itself on /app")
     text = sheet(pg).inner_text()
-    check("Cập nhật 17/10/2026" in text and "CÓ GÌ MỚI" in text.upper(), "header: Cập nhật 17/10/2026 and Có gì mới")
+    check("Cập nhật 17/10\n" in text + "\n" and "17/10/2026" not in text and "CÓ GÌ MỚI" in text.upper(), "header: Cập nhật 17/10 and Có gì mới")
+    check(text.index("Trang chủ mới") < text.index("Chọn nhiều món"), "Trang chủ mới is the first item")
+    pg.wait_for_timeout(200)
+    focus = pg.evaluate("() => { const a = document.activeElement; return a && a.tagName + '|' + a.textContent.trim() + '|' + getComputedStyle(a).outlineStyle }")
+    check(focus == "H2|Có gì mới|none", f"initial focus on the heading, no ring ({focus})")
+    pg.keyboard.press("Shift+Tab")
+    check(pg.evaluate("() => !!document.activeElement.closest('[role=dialog]')"), "Shift+Tab from the heading stays in the sheet")
     check(all(t in text for t in ITEMS), "the four items")
     check(sheet(pg).get_by_role("button", name="Thử ngay (1 phút)").count() == 1, "Thử ngay (1 phút)")
     check(sheet(pg).get_by_role("button", name="Để sau").count() == 1, "Để sau")
@@ -197,6 +203,7 @@ def tour(browser):
     pg.mouse.up()
     pg.wait_for_timeout(600)
     check("Mới · 2/3" in card(pg).inner_text() and "Đổi bữa hoặc xóa" in card(pg).inner_text(), "long press moves to step 2")
+    check("Chọn Chuyển bữa để đổi bữa, Xóa để xóa. Luôn có nút hoàn tác." in card(pg).inner_text(), "step 2 body names Chuyển bữa")
     check(pg.locator('[data-tour="select-bar"]:visible').count() == 1, "step 2: the select bar is open")
     hole = ring.bounding_box()
     bar = pg.locator('[data-tour="select-bar"]:visible').first.bounding_box()
@@ -254,7 +261,7 @@ def history(browser):
     pg.wait_for_url(re.compile(r".*/settings/whats-new$"), timeout=5000)
     pg.wait_for_timeout(400)
     text = pg.locator("main").inner_text()
-    check("Cập nhật 17/10/2026" in text and all(t in text for t in ITEMS), "the history lists the release and its items")
+    check("Cập nhật 17/10" in text and "17/10/2026" not in text and all(t in text for t in ITEMS), "the history lists the release (Cập nhật 17/10) and its items")
     check(pg.get_by_role("button", name="Xem hướng dẫn").count() == 1, "Xem hướng dẫn")
     targets_ok(pg, "main", "history")
     shot(pg, "history-390")

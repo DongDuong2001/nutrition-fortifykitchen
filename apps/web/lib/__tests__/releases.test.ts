@@ -11,10 +11,10 @@ describe("RELEASES", () => {
     expect([...ids].sort().reverse()).toEqual(ids);
   });
 
-  it("starts with the 17/10 release: 4 items and a 3-step tour", () => {
+  it("starts with the 17/10 release: 5 items and a 3-step tour", () => {
     const r = latestRelease();
     expect(r?.id).toBe("2026-10-17");
-    expect(r?.items.map((i) => i.title)).toEqual(["Chọn nhiều món", "Mục tiêu đa lượng", "Bữa ăn dễ đọc hơn", "Thanh vi chất 4 màu"]);
+    expect(r?.items.map((i) => i.title)).toEqual(["Trang chủ mới", "Chọn nhiều món", "Mục tiêu đa lượng", "Bữa ăn dễ đọc hơn", "Thanh vi chất 4 màu"]);
     expect(r?.tour?.map((s) => s.title)).toEqual(["Giữ để chọn nhiều món", "Đổi bữa hoặc xóa", "Mục tiêu đa lượng"]);
     expect(r?.tour?.[0].advanceOn).toBe("long-press");
   });

@@ -2,7 +2,7 @@
  * "Có gì mới" (cc-46): what each release brings, newest first. Every merge to main that users can see adds or
  * extends the top entry (Vietnamese, the user's words, no tech terms). Pure.
  */
-export type ReleaseIcon = "select" | "target" | "meal" | "bars";
+export type ReleaseIcon = "home" | "select" | "target" | "meal" | "bars";
 
 export interface ReleaseItem {
   icon: ReleaseIcon;
@@ -24,7 +24,7 @@ export interface ReleaseTourStep {
 export interface Release {
   /** The release day, YYYY-MM-DD */
   id: string;
-  /** dd/mm/yyyy, as shown */
+  /** dd/mm, as shown ("Cập nhật 17/10") */
   date: string;
   items: readonly ReleaseItem[];
   tour?: readonly ReleaseTourStep[];
@@ -33,8 +33,9 @@ export interface Release {
 export const RELEASES: readonly Release[] = [
   {
     id: "2026-10-17",
-    date: "17/10/2026",
+    date: "17/10",
     items: [
+      { icon: "home", title: "Trang chủ mới", body: "lehongkhanh.vn giờ là trang của HLV Khánh. Bấm Truy cập để vào app." },
       { icon: "select", title: "Chọn nhiều món", body: "Giữ một món để chọn nhiều món, rồi đổi bữa hoặc xóa cùng lúc." },
       { icon: "target", title: "Mục tiêu đa lượng", body: "Tự chia đạm, tinh bột, chất béo trong Cài đặt › Mục tiêu." },
       { icon: "meal", title: "Bữa ăn dễ đọc hơn", body: "Đầu bữa màu mực, nền trắng, chữ to hơn." },
@@ -51,7 +52,7 @@ export const RELEASES: readonly Release[] = [
         target: "select-bar",
         fallback: "meal-pill",
         title: "Đổi bữa hoặc xóa",
-        body: "Chọn Chuyển để đổi bữa, Xóa để xóa. Luôn có nút hoàn tác.",
+        body: "Chọn Chuyển bữa để đổi bữa, Xóa để xóa. Luôn có nút hoàn tác.",
       },
       { target: "nav-settings", title: "Mục tiêu đa lượng", body: "Vào Cài đặt › Mục tiêu để tự chia đạm, tinh bột, chất béo." },
     ],
