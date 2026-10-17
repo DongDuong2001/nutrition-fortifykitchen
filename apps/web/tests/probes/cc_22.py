@@ -100,9 +100,9 @@ def run(browser, size, tag):
     check(pg.get_by_role("link", name=re.compile("Ngày tập")).get_attribute("href") == f"/training?date=2026-10-15", f"{tag} training link carries the date")
     check(pg.get_by_role("link", name=re.compile("Đủ 22 vi chất")).get_attribute("href") == "/micros?date=2026-10-15", f"{tag} micros link carries the date")
     check(pg.get_by_role("link", name="Sửa món này").count() == 0 and pg.get_by_role("button", name=re.compile("^Tùy chọn Bữa")).count() == 0, f"{tag} no Sửa or meal ⋯ in day mode (cc-27a: the day has its own ⋯)")
-    # today: the four level colours (hero is on ink, so the dark tones: red, yellow, green, blue)
+    # today: the four level colours (one palette on ink and light since cc-44: red, amber, light green, green)
     kcal = fills(pg, "Kcal so với mục tiêu ngày")
-    level_dark = {"rgb(229, 72, 77)", "rgb(232, 164, 0)", "rgb(31, 169, 113)", "rgb(92, 134, 242)"}
+    level_dark = {"rgb(242, 69, 61)", "rgb(255, 176, 32)", "rgb(128, 216, 160)", "rgb(47, 196, 107)"}
     empty_dark = "rgb(42, 44, 49)"
     lit = [c for c in kcal if c != empty_dark]
     check(len(lit) > 0 and len(set(lit)) == 1 and set(lit) <= level_dark, f"{tag} today kcal bar is lit in one level colour ({set(lit)})")
@@ -185,7 +185,7 @@ def run(browser, size, tag):
     allfills = set()
     for label in ["Kcal so với mục tiêu ngày", "Đạm so với mục tiêu ngày", "Chất béo so với mục tiêu ngày", "Natri so với mục tiêu ngày", "Canxi so với mục tiêu ngày", "Vitamin C so với mục tiêu ngày"]:
         allfills |= set(fills(pg, label))
-    coloured = {"rgb(92, 134, 242)", "rgb(229, 72, 77)", "rgb(232, 164, 0)", "rgb(31, 169, 113)"} & allfills
+    coloured = {"rgb(242, 69, 61)", "rgb(255, 176, 32)", "rgb(128, 216, 160)", "rgb(47, 196, 107)"} & allfills
     check(len(coloured) >= 1, f"{tag} past day bars use level colours {sorted(coloured)}")
     pg.screenshot(path=os.path.join(SHOTS, f"cc-22-past-{w}.png"))
     ctx.close()

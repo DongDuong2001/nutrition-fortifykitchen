@@ -18,11 +18,10 @@ BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3101")
 NOW = "2026-10-15T10:00:00+07:00"
 SHOTS = os.path.join(os.path.dirname(__file__), "..", "..", ".screenshots")
 HERO = "section[aria-label='Tổng kcal và dinh dưỡng đa lượng']"
-LEVEL_COLOURS = {  # dark tones on the ink hero, light tones in the column
-    "rgb(217, 63, 68)", "rgb(176, 120, 0)", "rgb(23, 148, 95)", "rgb(18, 56, 214)",
-    "rgb(229, 72, 77)", "rgb(232, 164, 0)", "rgb(31, 169, 113)", "rgb(92, 134, 242)",
+LEVEL_COLOURS = {  # cc-44: one palette on ink and on light surfaces
+    "rgb(242, 69, 61)", "rgb(255, 176, 32)", "rgb(128, 216, 160)", "rgb(47, 196, 107)",
 }
-EMPTY = {"rgb(230, 225, 215)", "rgb(42, 44, 49)"}
+EMPTY = {"rgb(236, 234, 230)", "rgb(42, 44, 49)"}  # the light track and the ink track
 problems = []
 
 GEOMETRY = """() => {
@@ -37,6 +36,7 @@ GEOMETRY = """() => {
   const fills = new Set();
   let faded = 0;
   for (const bar of bars) {
+    fills.add(getComputedStyle(bar).backgroundColor);
     for (const seg of bar.children) {
       const cs = getComputedStyle(seg);
       fills.add(cs.backgroundColor);
@@ -72,7 +72,7 @@ def run(browser, size, level, tag):
     g = pg.evaluate(GEOMETRY)
     w = size["width"]
     check(g["mask"] in ("none", ""), f"{tag}: no fade or mask on the area ({g['mask']})")
-    check(g["faded"] == 0, f"{tag}: every bar segment is at full opacity ({g['faded']} are not)")
+    check(g["faded"] == 0, f"{tag}: every bar fill is at full opacity ({g['faded']} are not)")
     unknown = [c for c in g["fills"] if c not in LEVEL_COLOURS and c not in EMPTY]
     check(not unknown, f"{tag}: bars use only the level colours and the empty colour ({unknown})")
     check(g["blockTop"] is not None and g["blockTop"] >= g["areaBottom"] - 0.5, f"{tag}: the x/N đạt block is below the area ({g['blockTop']} vs {g['areaBottom']})")

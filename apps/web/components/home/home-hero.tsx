@@ -3,7 +3,7 @@ import { formatAmount } from "@/lib/format";
 import { kcalValue } from "@/lib/kcal";
 import { pctLabel, pctOf, type HomeValues } from "@/lib/home";
 import { getLevel, getLevelLabel } from "@/lib/levels";
-import { HomeBar } from "./home-bar";
+import { LevelBar } from "@/components/ui/level-bar";
 
 // The 24 px pill sits inside a 44 px hit area: padding that the negative margin takes back
 const PILL = "-m-2.5 inline-flex shrink-0 items-center border-0 bg-transparent p-2.5 text-on-dark no-underline hover:text-sky";
@@ -91,7 +91,7 @@ export function HomeHero({
         </div>
 
         <div data-align-group="home-hero">
-          <HomeBar label="Kcal so với mục tiêu ngày" pct={kcalPct} surface="dark" heightClass="h-2" />
+          <LevelBar label="Kcal so với mục tiêu ngày" pct={kcalPct} surface="dark" heightClass="h-[10px]" />
         </div>
 
         <div data-align-group="home-hero" className="mt-1 grid grid-cols-4 gap-2.5">
@@ -107,7 +107,7 @@ export function HomeHero({
                   </span>
                   <span className="font-display text-[15px] font-bold leading-none tabular-nums">{pctLabel(value, macroTargets[m.key])}</span>
                 </div>
-                <HomeBar label={`${m.label} so với mục tiêu ngày`} pct={pct} surface="dark" heightClass="h-[5px]" />
+                <LevelBar label={`${m.label} so với mục tiêu ngày`} pct={pct} surface="dark" heightClass="h-[7px]" />
               </div>
             );
           })}

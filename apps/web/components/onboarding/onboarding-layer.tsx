@@ -76,7 +76,7 @@ function TourCard({ index, onNext, onSkip }: { index: number; onNext: () => void
         <ul className="m-0 grid list-none grid-cols-2 gap-2 p-0">
           {LEVELS.map((l) => (
             <li key={l.name} className="flex items-center gap-2 text-[13px]">
-              <span aria-hidden="true" className={`h-2 w-6 shrink-0 rounded-full ${l.bar}`} />
+              <span aria-hidden="true" className={`h-[9px] w-[9px] shrink-0 rounded-[3px] ${l.bar}`} />
               <span>
                 <strong className="font-bold">{l.name}</strong> <span className="text-secondary">{l.range}</span>
               </span>

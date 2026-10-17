@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { AppHeader } from "@/components/ui/app-header";
 import { BottomNav } from "@/components/ui/bottom-nav";
-import { SegmentedBar } from "@/components/ui/segmented-bar";
+import { LevelBar } from "@/components/ui/level-bar";
 import { PillButton } from "@/components/ui/pill-button";
 import { Chip } from "@/components/ui/chip";
 import { Card } from "@/components/ui/card";
@@ -80,10 +80,10 @@ export default function DevUiPage() {
 
       <div className="flex-1 w-full max-w-[560px] mx-auto px-4 py-4 flex flex-col gap-6">
 
-        {/* Section: SegmentedBar */}
+        {/* Section: LevelBar */}
         <section className="flex flex-col gap-3">
           <div className="text-xs font-bold text-secondary">
-            Thanh tiến độ 10 đoạn (4 mức độ)
+            Thanh mức độ (4 mức)
           </div>
 
           <Card className="flex flex-col gap-3">
@@ -93,25 +93,25 @@ export default function DevUiPage() {
             <div className="flex flex-col gap-1">
               <div className="flex justify-between text-xs">
                 <span>Thiếu (&lt;50%): Canxi 28%</span>
-                <span className="font-semibold text-level-red">28%</span>
+                <span className="font-semibold text-text">28%</span>
               </div>
-              <SegmentedBar aria-label="Tiến độ Canxi 28%" percentage={28} />
+              <LevelBar label="Tiến độ Canxi 28%" pct={28} heightClass="h-[10px]" />
             </div>
 
             <div className="flex flex-col gap-1">
               <div className="flex justify-between text-xs">
                 <span>Trung bình (50–79%): Béo 64%</span>
-                <span className="font-semibold text-level-yellow">64%</span>
+                <span className="font-semibold text-text">64%</span>
               </div>
-              <SegmentedBar aria-label="Tiến độ Béo 64%" percentage={64} />
+              <LevelBar label="Tiến độ Béo 64%" pct={64} heightClass="h-[10px]" />
             </div>
 
             <div className="flex flex-col gap-1">
               <div className="flex justify-between text-xs">
                 <span>Gần đủ (80–99%): Đồng 89%</span>
-                <span className="font-semibold text-level-green">89%</span>
+                <span className="font-semibold text-text">89%</span>
               </div>
-              <SegmentedBar aria-label="Tiến độ Đồng 89%" percentage={89} />
+              <LevelBar label="Tiến độ Đồng 89%" pct={89} heightClass="h-[10px]" />
             </div>
 
             <div className="flex flex-col gap-1">
@@ -119,11 +119,11 @@ export default function DevUiPage() {
                 <span>Đạt (≥100%): Natri 100%</span>
                 <span className="font-semibold text-blue">100%</span>
               </div>
-              <SegmentedBar aria-label="Tiến độ Natri 100%" percentage={100} />
+              <LevelBar label="Tiến độ Natri 100%" pct={100} heightClass="h-[10px]" />
             </div>
           </Card>
 
-          {/* Dark Header SegmentedBar */}
+          {/* LevelBar on ink */}
           <div className="bg-ink p-4 rounded-[18px] text-on-dark flex flex-col gap-3">
             <div className="text-xs font-semibold text-sky">
               Nền tối (trong đầu trang):
@@ -133,14 +133,14 @@ export default function DevUiPage() {
                 <span>Đạm 60%</span>
                 <span className="text-grabber tabular-nums">62 / 104 g</span>
               </div>
-              <SegmentedBar aria-label="Tiến độ Đạm 60%" percentage={60} tone="dark" />
+              <LevelBar label="Tiến độ Đạm 60%" pct={60} surface="dark" heightClass="h-[10px]" />
             </div>
             <div className="flex flex-col gap-1">
               <div className="flex justify-between text-xs">
                 <span>Chất xơ 47%</span>
                 <span className="text-grabber tabular-nums">14 / 30 g</span>
               </div>
-              <SegmentedBar aria-label="Tiến độ Chất xơ 47%" percentage={47} tone="dark" />
+              <LevelBar label="Tiến độ Chất xơ 47%" pct={47} surface="dark" heightClass="h-[10px]" />
             </div>
           </div>
         </section>

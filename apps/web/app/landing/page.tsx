@@ -43,10 +43,10 @@ const STEPS = [
       <div className="p-3.5 rounded-2xl bg-page/80 border border-card-border/70 flex flex-col gap-2">
         <div className="flex items-center justify-between text-[11px]">
           <span className="font-semibold text-secondary">Canxi (Ca)</span>
-          <span className="font-extrabold text-level-green">85% mục tiêu</span>
+          <span className="font-extrabold text-success">85% mục tiêu</span>
         </div>
         <div className="h-1.5 w-full bg-card-border/50 rounded-full overflow-hidden">
-          <div className="h-full bg-level-green rounded-full" style={{ width: "85%" }} />
+          <div className="h-full bg-success rounded-full" style={{ width: "85%" }} />
         </div>
         <div className="flex items-center justify-between text-[11px]">
           <span className="font-semibold text-secondary">Kẽm (Zn)</span>
@@ -69,7 +69,7 @@ const STEPS = [
           <div className="text-xs font-bold text-text">Tập gym 60 phút</div>
           <div className="text-[11px] text-secondary">Ngày có tập luyện</div>
         </div>
-        <span className="shrink-0 text-[11px] font-extrabold text-warning-text bg-warning-bg px-2.5 py-1 rounded-full border border-level-yellow/30 flex items-center gap-1">
+        <span className="shrink-0 text-[11px] font-extrabold text-warning-text bg-warning-bg px-2.5 py-1 rounded-full border border-amber/30 flex items-center gap-1">
           +1.180–1.770 mg natri
         </span>
       </div>
@@ -107,7 +107,7 @@ const TRANSPARENCY_PRINCIPLES = [
     desc: "Mỗi món có nhãn nguồn: USDA, bảng thành phần Việt Nam, nhãn bao bì, món ước tính hoặc món do bạn tự tạo.",
     badge: "Mỗi món có nhãn nguồn",
     icon: (
-      <svg className="w-5 h-5 text-level-green" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+      <svg className="w-5 h-5 text-success" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
         <path d="M9 12l2 2 4-4" />
         <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z" />
       </svg>
@@ -361,7 +361,7 @@ export default function LandingPage() {
           {/* Bottom Trust Verification Strip */}
           <div className="mt-12 rounded-2xl border border-card-border/80 bg-card/60 p-4 sm:p-5 flex flex-wrap items-center justify-between gap-4 text-xs font-semibold text-secondary">
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-level-green" />
+              <span className="w-2 h-2 rounded-full bg-success" />
               <span>Mục tiêu tính theo hồ sơ của bạn</span>
             </div>
             <div className="flex items-center gap-2">

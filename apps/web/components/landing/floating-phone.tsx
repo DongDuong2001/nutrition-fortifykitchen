@@ -124,7 +124,7 @@ export function FloatingPhone() {
               {/* 22 Micronutrients Status Pill */}
               <div className="rounded-lg bg-card border border-card-border p-2 flex items-center justify-between text-[11px] shadow-2xs">
                 <div className="flex items-center gap-1.5 font-bold text-ink">
-                  <span className="h-2 w-2 rounded-full bg-level-green" />
+                  <span className="h-2 w-2 rounded-full bg-success" />
                   <span>Vi chất đạt 18/22</span>
                 </div>
                 <span className="text-[10px] font-semibold text-blue">Xem chi tiết &rsaquo;</span>

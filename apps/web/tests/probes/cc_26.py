@@ -112,7 +112,7 @@ ANALYSE = """async (b64) => {
   for (let i = 0; i < W; i++) { if (!near(px(i, 0))) mark(i, 0); if (!nearInk(px(i, H - 1))) mark(i, H - 1); }
   let lastInk = -1;
   for (let y = H - 1; y >= 0 && lastInk < 0; y--) for (let ix = 0; ix < W; ix += 2) if (px(ix, y) !== PAPER) { lastInk = y; break; }
-  const levels = { red: '217,63,68', yellow: '176,120,0', green: '23,148,95', blue: '18,56,214' };
+  const levels = { red: '242,69,61', yellow: '255,176,32', green: '128,216,160', blue: '47,196,107' };
   const found = { red: 0, yellow: 0, green: 0, blue: 0 };
   const whole = new Set();
   for (let i = 0; i < all.length; i += 4) {

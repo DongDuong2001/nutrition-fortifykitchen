@@ -1,7 +1,7 @@
 import type { DayTotals } from "./day-totals";
 import { shiftIsoDate } from "./day-history";
 import { formatAmount, formatNumber, formatSigned, getWeekdayName } from "./format";
-import { calculateSegments, getLevel, type NutrientLevel } from "./levels";
+import { getLevel, type NutrientLevel } from "./levels";
 import type { MockMeal } from "./mock/sample-day";
 import type { MicroRow } from "./overview";
 import type { Period, WeightPoint } from "./period";
@@ -107,7 +107,6 @@ export interface MicroBoard {
   achieved: number;
   /** Achieved now minus achieved in the previous period; null when the previous period has no numbers */
   change: number | null;
-  segments: number;
   counts: Record<NutrientLevel, number>;
   /** Nutrients with no number in the period (no logged food carries a value) */
   unknown: number;
@@ -144,7 +143,6 @@ export function microBoard(rows: MicroRow[], previous: MicroRow[]): MicroBoard {
     total: squares.length,
     achieved,
     change: previousKnown ? achieved - achievedOf(previous) : null,
-    segments: squares.length > 0 ? calculateSegments((achieved / squares.length) * 100) : 0,
     counts,
     unknown: squares.filter((s) => s.percentage === null).length,
     squares,

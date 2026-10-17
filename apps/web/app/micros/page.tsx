@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { DesktopSidebar } from "@/components/ui/desktop-sidebar";
 import { AppHeader } from "@/components/ui/app-header";
-import { SegmentedBar } from "@/components/ui/segmented-bar";
+import { LevelBar } from "@/components/ui/level-bar";
 import { type NutrientGroup } from "@/lib/nutrients";
 import { buildNutrientRows, type NutrientRowData } from "@/lib/nutrient-rows";
 import { formatAmount, formatDayLabel, formatDesktopDate, formatNumber } from "@/lib/format";
@@ -631,7 +631,7 @@ function Legend() {
           <div className="flex items-center justify-center gap-1.5 min-w-0">
             <span
               aria-hidden="true"
-              className={`w-3.5 h-2 rounded-[1px] ${t.colorClass} -skew-x-[14deg] inline-block shrink-0`}
+              className={`h-[9px] w-[9px] rounded-[3px] ${t.colorClass} inline-block shrink-0`}
             />
             <span className="text-xs font-semibold text-text truncate">{t.name}</span>
           </div>
@@ -784,13 +784,13 @@ function NutrientRow({ row, dateQuery = "" }: { row: NutrientRowData; dateQuery?
         </div>
       </div>
 
-      {/* Line 2: Slanted SegmentedBar directly under it for nutrients with target */}
+      {/* Line 2: the level bar directly under it */}
       {hasTarget && (
         <div className="w-full">
-          <SegmentedBar
-            percentage={percentage ?? 0}
-            aria-label={`${definition.nameVi} ${percentage !== null ? `${percentage}%` : "chưa có dữ liệu"}`}
-            tone="light"
+          <LevelBar
+            pct={percentage}
+            label={`${definition.nameVi} ${percentage !== null ? `${percentage}%` : "chưa có dữ liệu"}`}
+            heightClass="h-[9px] lg:h-[10px]"
           />
         </div>
       )}

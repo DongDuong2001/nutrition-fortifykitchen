@@ -5,7 +5,7 @@ import Link from "next/link";
 import { NotEnoughData } from "@/components/overview/overview-parts";
 import { useOverview } from "@/components/overview/overview-frame";
 import { AttentionList, type AttentionItem } from "@/components/overview/attention-list";
-import { HeroCard, HeroNumber, Segments } from "@/components/overview/parts/hero-card";
+import { HeroCard, HeroNumber, HeroBar } from "@/components/overview/parts/hero-card";
 import { NutrientGrid } from "@/components/overview/parts/nutrient-grid";
 import { dayEntries } from "@/lib/day-history";
 import { formatAmount, formatNumber, formatRange } from "@/lib/format";
@@ -98,7 +98,7 @@ export function MicrosTab() {
             }
           />
           <div data-tour="trends-summary" role="img" aria-label={`${board.achieved} trên ${board.total} vi chất đạt mục tiêu`}>
-            <Segments filled={board.segments} />
+            <HeroBar pct={board.total > 0 ? (board.achieved / board.total) * 100 : 0} />
           </div>
           <NutrientGrid id="mi-grid" squares={board.squares} selected={selected} onSelect={(i) => setSelectedKey(board.squares[i]?.key ?? null)} detailLink />
           <p className="m-0 flex flex-wrap gap-x-3 gap-y-1 text-xs font-semibold text-muted-subtitle">
@@ -122,7 +122,7 @@ export function MicrosTab() {
           >
             <summary className="flex min-h-[56px] cursor-pointer list-none items-center justify-between gap-3 p-4 [&::-webkit-details-marker]:hidden">
               <span className="flex items-center gap-3">
-                <span aria-hidden="true" className={`inline-block h-3 w-3 shrink-0 rounded-[3px] ${DOT[section.level]}`} />
+                <span aria-hidden="true" className={`inline-block h-[9px] w-[9px] shrink-0 rounded-[3px] ${DOT[section.level]}`} />
                 <SectionTitle as="p">{section.label}</SectionTitle>
               </span>
               <span className="flex items-center gap-3">
@@ -171,7 +171,7 @@ export function MicrosTab() {
           <details data-align-group="overview-micro" className="group overflow-hidden rounded-[18px] lg:shadow-card border border-card-border bg-card text-text">
             <summary className="flex min-h-[56px] cursor-pointer list-none items-center justify-between gap-3 p-4 [&::-webkit-details-marker]:hidden">
               <span className="flex items-center gap-3">
-                <span aria-hidden="true" className="inline-block h-3 w-3 shrink-0 rounded-[3px] bg-level-empty" />
+                <span aria-hidden="true" className="inline-block h-[9px] w-[9px] shrink-0 rounded-[3px] bg-level-empty" />
                 <SectionTitle as="p">Chưa có dữ liệu</SectionTitle>
               </span>
               <span className="flex items-center gap-3">

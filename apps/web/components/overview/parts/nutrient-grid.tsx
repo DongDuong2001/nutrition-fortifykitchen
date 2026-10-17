@@ -13,13 +13,6 @@ const SQUARE_BG: Record<NutrientLevel, string> = {
   dat: "bg-level-blue-dark",
 };
 
-const LEVEL_TEXT: Record<NutrientLevel, string> = {
-  thieu: "text-level-red-dark",
-  trungbinh: "text-level-yellow-dark",
-  ganDu: "text-level-green-dark",
-  dat: "text-level-blue-dark",
-};
-
 /**
  * The 22 nutrients as squares coloured by level (dark tokens), in the order given (lowest share first). A
  * square is a button; the line below names the selected nutrient, its share and level, and with `detailLink`
@@ -65,7 +58,7 @@ export function NutrientGrid({
         <span className="text-right">
           {square && square.percentage !== null && square.level ? (
             <>
-              <span className={`font-display text-2xl font-bold tabular-nums ${LEVEL_TEXT[square.level]}`}>
+              <span className="font-display text-2xl font-bold tabular-nums text-on-dark">
                 {formatNumber(square.percentage)}%
               </span>
               <span className="ml-2 text-xs font-bold text-muted-subtitle">{getLevelLabel(square.level)}</span>

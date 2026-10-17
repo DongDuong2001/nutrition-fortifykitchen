@@ -17,7 +17,7 @@ function ShareBar({ share, label }: { share: number; label: string }) {
     <div
       role="img"
       aria-label={label}
-      className="h-2 w-full overflow-hidden rounded-full bg-level-empty"
+      className="h-2 w-full overflow-hidden rounded-full bg-track"
     >
       <div className="h-full rounded-full bg-blue" style={{ width: `${Math.min(100, Math.max(0, share))}%` }} />
     </div>

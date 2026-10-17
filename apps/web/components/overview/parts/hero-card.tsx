@@ -1,23 +1,18 @@
 import React from "react";
+import { LevelBar } from "@/components/ui/level-bar";
 
-/** Slanted segments (the Cobalt Sign motif) on a dark card: sky filled, dark empty. */
-export function Segments({ filled, total = 10 }: { filled: number; total?: number }) {
+/** The continuous bar of a dark card (the level bar's shape), sky filled: a share, not a level. Hidden from AT; the caller labels it. */
+export function HeroBar({ pct }: { pct: number }) {
   return (
-    <div aria-hidden="true" className="grid gap-1" style={{ gridTemplateColumns: `repeat(${total}, minmax(0, 1fr))` }}>
-      {Array.from({ length: total }).map((_, i) => (
-        <span
-          key={i}
-          className={`h-3 rounded-[1px] ${i < filled ? "bg-sky" : "bg-level-empty-dark"}`}
-          style={{ transform: "skewX(-14deg)" }}
-        />
-      ))}
+    <div aria-hidden="true">
+      <LevelBar label="" pct={pct} surface="dark" heightClass="h-[10px]" color="var(--color-sky)" />
     </div>
   );
 }
 
 /**
  * The one dark accent card of a Tổng quan screen: a small Saira label (uppercase, sky), an optional control at
- * its right, the body (usually a HeroNumber and its side stats, then Segments) and an optional footer action.
+ * its right, the body (usually a HeroNumber and its side stats, then HeroBar) and an optional footer action.
  */
 export function HeroCard({
   id,

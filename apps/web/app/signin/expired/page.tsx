@@ -19,13 +19,13 @@ export default function LinkExpiredPage() {
               strokeWidth="1.6"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="text-level-yellow-dark"
+              className="text-amber-on-dark"
               aria-hidden="true"
             >
               <circle cx="12" cy="12" r="9" />
               <path d="M12 7v5l3.5 2" />
             </svg>
-            <h1 className="m-0 font-display text-[28px] font-black italic uppercase leading-tight text-level-yellow-dark">
+            <h1 className="m-0 font-display text-[28px] font-black italic uppercase leading-tight text-amber-on-dark">
               LIÊN KẾT ĐÃ HẾT HẠN
             </h1>
             <p className="m-0 text-[15px] leading-normal text-muted-subtitle">

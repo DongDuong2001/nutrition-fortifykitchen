@@ -7,14 +7,14 @@ import { AppHeader } from "@/components/ui/app-header";
 import { AppShell } from "@/components/ui/app-shell";
 import { useBack } from "@/hooks/use-back";
 import { Card } from "@/components/ui/card";
-import { SegmentedBar } from "@/components/ui/segmented-bar";
+import { LevelBar } from "@/components/ui/level-bar";
 import { ContributingFoods } from "@/components/nutrient-detail/contributing-foods";
 import { NutrientHistory, type HistoryPoint } from "@/components/nutrient-detail/nutrient-history";
 import { pastDayData, useDiary } from "@/lib/diary-store";
 import { dayEntries, viewedIsoDate } from "@/lib/day-history";
 import { formatDayLabel } from "@/lib/format";
 import { nutrientSourcesIn } from "@/lib/nutrient-sources";
-import { getLevelLabel, type NutrientLevel } from "@/lib/levels";
+import { getLevelLabel } from "@/lib/levels";
 import { getNutrientDefinition } from "@/lib/nutrients";
 import { targetRangeText } from "@/lib/profile";
 import {
@@ -27,14 +27,6 @@ import {
 interface PageProps {
   params: Promise<{ nutrient: string }>;
 }
-
-// Level text on the ink header uses the dark-surface level tokens
-const LEVEL_TEXT: Record<NutrientLevel, string> = {
-  thieu: "text-level-red-dark",
-  trungbinh: "text-level-yellow-dark",
-  ganDu: "text-level-green-dark",
-  dat: "text-level-blue-dark",
-};
 
 export default function NutrientDetailPage({ params }: PageProps) {
   const { nutrient } = use(params);
@@ -124,14 +116,10 @@ export default function NutrientDetailPage({ params }: PageProps) {
               </span>
             </div>
             {row.percentage !== null && (
-              <SegmentedBar
-                percentage={row.percentage}
-                tone="dark"
-                aria-label={`${def.nameVi} ${row.percentage}%`}
-              />
+              <LevelBar pct={row.percentage} surface="dark" heightClass="h-[10px]" label={`${def.nameVi} ${row.percentage}%`} />
             )}
             {level && levelText && (
-              <span className={`text-sm font-bold ${LEVEL_TEXT[level]}`}>{levelText}</span>
+              <span className="text-sm font-bold text-on-dark">{levelText}</span>
             )}
             {targetText && (
               <p data-align-group="nutrient-header" className="m-0 text-[13px] text-muted-subtitle">Mục tiêu: {targetText}/ngày.</p>

@@ -28,20 +28,28 @@
   --color-destructive-text: #C4373C;
   --color-red: #D93F44;
 
-  /* 4 level colours - light background */
-  --color-level-red: #D93F44;
-  --color-level-yellow: #B07800;
-  --color-level-green: #17945F;
-  --color-level-blue: #1238D6;
+  /* 4 level fill colours (Hao, 17/10): Thiếu, Trung bình, Gần đủ, Đạt. Fills only, never text. The names are kept
+     from the first palette, so "blue" is the Đạt fill (green now). */
+  --color-level-red: #F2453D;
+  --color-level-yellow: #FFB020;
+  --color-level-green: #80D8A0;
+  --color-level-blue: #2FC46B;
   --color-level-empty: #E6E1D7;
   /* Track of the continuous level bar on light surfaces (inside ink cards it is --color-level-empty-dark). */
   --color-track: #ECEAE6;
 
-  /* 4 level colours - dark (ink) background */
-  --color-level-red-dark: #E5484D;
-  --color-level-yellow-dark: #E8A400;
-  --color-level-green-dark: #1FA971;
-  --color-level-blue-dark: #5C86F2;
+  /* The same 4 level fills inside ink cards (one palette on both surfaces since 17/10). */
+  --color-level-red-dark: #F2453D;
+  --color-level-yellow-dark: #FFB020;
+  --color-level-green-dark: #80D8A0;
+  --color-level-blue-dark: #2FC46B;
+
+  /* The first palette's values, kept for what is not a level fill: the landing's green ticks and amber chip border,
+     the medal, the expired-link icon and title on ink, and "MICRO" in the share image footer. */
+  --color-success: #17945F;
+  --color-amber: #B07800;
+  --color-amber-on-dark: #E8A400;
+  --color-cobalt-on-dark: #5C86F2;
   --color-level-empty-dark: #2A2C31;
 
   --color-divider: #E6E2DA;

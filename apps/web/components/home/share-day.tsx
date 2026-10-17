@@ -69,7 +69,7 @@ export function ShareDay({ model }: { model: ShareModel }) {
       <div data-share-footer className="flex h-[58px] flex-none items-center justify-between bg-ink px-4">
         <span className="flex items-center font-display text-2xl font-extrabold italic leading-none">
           <span className="text-on-dark">H1T</span>
-          <span className="ml-1 text-level-blue-dark">MICRO</span>
+          <span className="ml-1 text-cobalt-on-dark">MICRO</span>
         </span>
         <span className="flex flex-col items-end gap-0.5">
           <span className="text-[13px] font-extrabold leading-none text-on-dark">lehongkhanh.vn</span>

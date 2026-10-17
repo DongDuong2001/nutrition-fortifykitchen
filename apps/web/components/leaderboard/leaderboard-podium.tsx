@@ -3,9 +3,9 @@ import type { LeaderboardRankItem } from "@/lib/leaderboard";
 import { formatNumber } from "@/lib/format";
 import { IconStar } from "@/components/ui/icons";
 
-// Medal colours come from the existing tokens: gold = level-yellow, silver = the neutral track, bronze = the warm warning pair.
+// Medal colours come from the existing tokens: gold = amber (the first level yellow), silver = the neutral track, bronze = the warm warning pair.
 const MEDAL = {
-  1: "bg-level-yellow text-on-accent",
+  1: "bg-amber text-on-accent",
   2: "bg-level-empty text-secondary",
   3: "bg-warning-bg text-warning-text",
 } as const;
@@ -15,7 +15,7 @@ function PodiumPlace({ item, place }: { item: LeaderboardRankItem; place: 1 | 2 
   return (
     <li
       className={`flex min-w-0 flex-col items-center gap-2 rounded-[18px] bg-card p-3 text-center ${
-        first ? "border-2 border-level-yellow" : "border border-card-border"
+        first ? "border-2 border-amber" : "border border-card-border"
       }`}
     >
       <span

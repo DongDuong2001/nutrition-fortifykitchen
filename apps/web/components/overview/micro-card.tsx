@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { NutrientGrid } from "@/components/overview/parts/nutrient-grid";
-import { Segments } from "@/components/overview/parts/hero-card";
+import { HeroBar } from "@/components/overview/parts/hero-card";
 import type { MicroBoard } from "@/lib/overview-board";
 
 function Chevron({ open }: { open: boolean }) {
@@ -25,8 +25,8 @@ function Chevron({ open }: { open: boolean }) {
 }
 
 /**
- * The Vi chất card of Tóm tắt (dark): how many of the 22 counted nutrients reach their target, ten slanted
- * segments, and what is lowest. Tapping opens the NutrientGrid, lowest share first.
+ * The Vi chất card of Tóm tắt (dark): how many of the 22 counted nutrients reach their target, one continuous
+ * bar, and what is lowest. Tapping opens the NutrientGrid, lowest share first.
  */
 export function MicroCard({ board }: { board: MicroBoard }) {
   const [open, setOpen] = useState(false);
@@ -65,7 +65,7 @@ export function MicroCard({ board }: { board: MicroBoard }) {
           </span>
         </span>
         <span aria-hidden="true" className="w-full">
-          <Segments filled={board.segments} />
+          <HeroBar pct={board.total > 0 ? (board.achieved / board.total) * 100 : 0} />
         </span>
         <span className="flex w-full items-center justify-between gap-3 text-[13px] text-muted-subtitle">
           <span>{open ? "Chạm vào từng ô để xem chi tiết" : hint}</span>

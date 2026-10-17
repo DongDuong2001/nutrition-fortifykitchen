@@ -5,11 +5,10 @@ import Link from "next/link";
 import { NotEnoughData } from "@/components/overview/overview-parts";
 import { useOverview } from "@/components/overview/overview-frame";
 import { AttentionList, type AttentionItem } from "@/components/overview/attention-list";
-import { HeroCard, HeroNumber, Segments } from "@/components/overview/parts/hero-card";
+import { HeroCard, HeroNumber, HeroBar } from "@/components/overview/parts/hero-card";
 import { Scoreboard } from "@/components/overview/scoreboard";
 import { SectionTitle } from "@/components/ui/section-title";
 import { formatNumber, formatRange } from "@/lib/format";
-import { calculateSegments } from "@/lib/levels";
 import { weekdayShort } from "@/lib/overview-board";
 import { bestWorstDays, energyAttention, macroScoreRow, trainingSplit, type DayPick, type SplitSide } from "@/lib/overview-detail";
 import { readDay } from "@/lib/training-checklist";
@@ -149,7 +148,7 @@ export function EnergyTab() {
             }
           />
           <div role="img" aria-label="Trung bình so với mức kcal tối thiểu">
-            <Segments filled={calculateSegments(kcal.min > 0 ? (averages.calories / kcal.min) * 100 : 0)} />
+            <HeroBar pct={kcal.min > 0 ? (averages.calories / kcal.min) * 100 : 0} />
           </div>
         </HeroCard>
 

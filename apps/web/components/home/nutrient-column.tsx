@@ -5,7 +5,7 @@ import { isExtra, type ColumnGroup } from "@/lib/level-nutrients";
 import { getNutrientDefinition } from "@/lib/nutrients";
 import type { ShareKeyItem } from "@/lib/share-card";
 import { ColumnScroll } from "./column-scroll";
-import { HomeBar } from "./home-bar";
+import { LevelBar } from "@/components/ui/level-bar";
 
 /** The share image draws every row (no scrolling); the screen scrolls, with a fade while rows wait below. */
 function Scroll({ share, children }: { share: boolean; children: React.ReactNode }) {
@@ -90,7 +90,7 @@ export function NutrientColumn({
                       {pctLabel(value, targets[id] ?? null)}
                     </span>
                   </div>
-                  <HomeBar label={`${def.nameVi} so với mục tiêu ngày`} pct={pct} />
+                  <LevelBar label={`${def.nameVi} so với mục tiêu ngày`} pct={pct} heightClass={share ? "h-[9px]" : "h-[9px] lg:h-[10px]"} />
                 </div>
               );
             })}
@@ -110,7 +110,7 @@ export function NutrientColumn({
           <ul className="m-0 mt-auto grid list-none grid-cols-2 gap-x-2.5 gap-y-1.5 px-3 pt-3 text-[11px] leading-snug text-secondary">
             {shareKey.map((item) => (
               <li key={item.label} className="flex items-center gap-1.5 whitespace-nowrap">
-                <span aria-hidden="true" className="h-2 w-4 flex-none -skew-x-[14deg] rounded-[1px]" style={{ backgroundColor: item.color }} />
+                <span aria-hidden="true" className="h-[9px] w-[9px] flex-none rounded-[3px]" style={{ backgroundColor: item.color }} />
                 {item.label}
               </li>
             ))}
