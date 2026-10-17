@@ -477,3 +477,87 @@ func TestRoleGuards(t *testing.T) {
 		}
 	})
 }
+
+func TestOptionalAuthenticate(t *testing.T) {
+	validSecret := []byte("test-optional-secret-key-12345")
+	mw := auth.NewMiddlewareWithSecret(validSecret)
+	testUserID := uuid.New()
+
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		uid, err := auth.GetUserID(r.Context())
+		if err == nil {
+			w.Header().Set("X-User-ID", uid.String())
+		} else {
+			w.Header().Set("X-User-ID", "guest")
+		}
+		w.WriteHeader(http.StatusOK)
+	})
+
+	t.Run("no token proceeds as guest", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/api/v1/foods", nil)
+		rec := httptest.NewRecorder()
+
+		mw.OptionalAuthenticate(handler).ServeHTTP(rec, req)
+		if rec.Code != http.StatusOK {
+			t.Errorf("expected 200 OK, got %d", rec.Code)
+		}
+		if got := rec.Header().Get("X-User-ID"); got != "guest" {
+			t.Errorf("expected guest, got %s", got)
+		}
+	})
+
+	t.Run("invalid token proceeds as guest", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/api/v1/foods", nil)
+		req.Header.Set("Authorization", "Bearer invalid-token-string")
+		rec := httptest.NewRecorder()
+
+		mw.OptionalAuthenticate(handler).ServeHTTP(rec, req)
+		if rec.Code != http.StatusOK {
+			t.Errorf("expected 200 OK, got %d", rec.Code)
+		}
+		if got := rec.Header().Get("X-User-ID"); got != "guest" {
+			t.Errorf("expected guest, got %s", got)
+		}
+	})
+
+	t.Run("valid Bearer token injects userID", func(t *testing.T) {
+		claims := auth.SupabaseClaims{
+			Sub: testUserID.String(),
+		}
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		tokenStr, _ := token.SignedString(validSecret)
+
+		req := httptest.NewRequest("GET", "/api/v1/foods", nil)
+		req.Header.Set("Authorization", "Bearer "+tokenStr)
+		rec := httptest.NewRecorder()
+
+		mw.OptionalAuthenticate(handler).ServeHTTP(rec, req)
+		if rec.Code != http.StatusOK {
+			t.Errorf("expected 200 OK, got %d", rec.Code)
+		}
+		if got := rec.Header().Get("X-User-ID"); got != testUserID.String() {
+			t.Errorf("expected user ID %s, got %s", testUserID.String(), got)
+		}
+	})
+
+	t.Run("valid session cookie injects userID", func(t *testing.T) {
+		claims := auth.SupabaseClaims{
+			Sub: testUserID.String(),
+		}
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		tokenStr, _ := token.SignedString(validSecret)
+
+		req := httptest.NewRequest("GET", "/api/v1/foods", nil)
+		req.AddCookie(&http.Cookie{Name: "sb-access-token", Value: tokenStr})
+		rec := httptest.NewRecorder()
+
+		mw.OptionalAuthenticate(handler).ServeHTTP(rec, req)
+		if rec.Code != http.StatusOK {
+			t.Errorf("expected 200 OK, got %d", rec.Code)
+		}
+		if got := rec.Header().Get("X-User-ID"); got != testUserID.String() {
+			t.Errorf("expected user ID %s, got %s", testUserID.String(), got)
+		}
+	})
+}
+
