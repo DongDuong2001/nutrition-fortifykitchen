@@ -57,6 +57,47 @@ def shoot(browser, route, path, w, demo=True):
     _demo.enable(True)
 
 
+def share(browser, named):
+    """The share image of the sample day at Level 2 ("5/14 đạt"; Lưu ảnh, no file sharing): saved PNG, 1080 wide, 972 CSS px high."""
+    tag = "named" if named else "unnamed"
+    ctx = browser.new_context(viewport=SIZES["390"], accept_downloads=True)
+    profile = '{"sex":"male","birthYear":2003,"weightKg":65.4,"goal":"maintain","periodMode":false,"trainingMinutesDefault":60,"displayName":"%s","hintSeen":true}' % ("Học viên A" if named else "")
+    ctx.add_init_script("try { localStorage.setItem('h1t_profile_v1_demo', JSON.stringify(%s)); } catch (e) {}" % profile)
+    ctx.add_init_script("Object.defineProperty(navigator, 'canShare', { value: undefined }); Object.defineProperty(navigator, 'share', { value: undefined });")
+    pg = ctx.new_page()
+    pg.clock.set_fixed_time("2026-10-15T10:00:00+07:00")
+    pg.goto(BASE + "/?level=2", wait_until="networkidle")
+    pg.locator("[aria-label='Chia sẻ ngày này'] >> visible=true").first.click()
+    dlg = pg.get_by_role("dialog")
+    if not named:
+        # No display name: the sheet asks for one first (lib/share-card: the image always has a name)
+        field = dlg.get_by_label("Tên hiện trên ảnh")
+        field.wait_for(state="visible", timeout=10000)
+        pg.screenshot(path=str(SHOTS / name("share-unnamed-step", "390")))
+        field.fill("Minh")
+        dlg.get_by_role("button", name="Tiếp tục", exact=True).click()
+    try:
+        dlg.get_by_role("img").wait_for(state="visible", timeout=30000)
+    except Exception:
+        pg.screenshot(path=str(SHOTS / name(f"share-{tag}-failed", "390")))
+        check(False, f"share {tag}: the preview never showed")
+        ctx.close()
+        return
+    with pg.expect_download() as info:
+        dlg.get_by_role("button", name="Lưu ảnh").click()
+    path = SHOTS / name(f"share-{tag}", "390")
+    info.value.save_as(str(path))
+    w, h = pg.evaluate(
+        """async (b64) => { const img = new Image(); img.src = 'data:image/png;base64,' + b64; await img.decode(); return [img.naturalWidth, img.naturalHeight]; }""",
+        __import__("base64").b64encode(path.read_bytes()).decode(),
+    )
+    css_h = round(h * 390 / 1080)
+    check(w == 1080, f"share {tag}: 1080 wide ({w})")
+    # ShareC2 says 972; "Thiếu nhiều nhất: Vitamin D, Calcium" wraps to a second 18 px line in the 174 px column (OPEN_QUESTIONS cc-44)
+    check(abs(css_h - 972) <= 1 or abs(css_h - 990) <= 1, f"share {tag}: 972 CSS px high, or 990 with the summary on two lines ({css_h}, PNG {h})")
+    ctx.close()
+
+
 def main():
     with sync_playwright() as p:
         browser = p.chromium.launch()
@@ -66,6 +107,9 @@ def main():
                     shoot(browser, route, path, w)
             if not ONLY or "home-empty" in ONLY:
                 shoot(browser, "home-empty", "/", w, demo=False)
+        if not ONLY or "share" in ONLY:
+            share(browser, True)
+            share(browser, False)
         browser.close()
     print(f"\n{len(problems)} problem(s)")
     sys.exit(1 if problems else 0)

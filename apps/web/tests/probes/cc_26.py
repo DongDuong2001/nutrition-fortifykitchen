@@ -69,7 +69,7 @@ window.__shareSnaps = [];
       head: (() => { const h = r.querySelector('[data-share-header]'); if (!h) return null; const ps = [...h.querySelectorAll('p')]; const b = h.querySelector('[data-level-badge]');
         const c = (e) => { const q = e.getBoundingClientRect(); return { top: q.top, bottom: q.bottom, mid: (q.top + q.bottom) / 2, left: q.left, right: q.right }; };
         const cs0 = getComputedStyle(ps[0]), cs1 = ps.length > 1 ? getComputedStyle(ps[1]) : null;
-        return { height: h.getBoundingClientRect().height, bg: getComputedStyle(h).backgroundColor, col: c(ps[0].parentElement), first: c(ps[0]), date: ps.length > 1 ? c(ps[1]) : null, badge: b ? c(b) : null,
+        return { height: h.getBoundingClientRect().height, box: c(h), bg: getComputedStyle(h).backgroundColor, col: c(ps[0].parentElement), first: c(ps[0]), date: ps.length > 1 ? c(ps[1]) : null, badge: b ? c(b) : null,
           firstFs: parseFloat(cs0.fontSize), firstLh: cs0.lineHeight, firstTransform: cs0.textTransform, firstFamily: cs0.fontFamily, firstWeight: cs0.fontWeight, firstStyle: cs0.fontStyle, firstColor: cs0.color, firstText: ps[0].innerText,
           dateFs: cs1 ? parseFloat(cs1.fontSize) : null, dateWeight: cs1 ? cs1.fontWeight : null, dateColor: cs1 ? cs1.color : null, dateTransform: cs1 ? cs1.textTransform : null,
           paddingTop: parseFloat(getComputedStyle(h).paddingTop), paddingLeft: parseFloat(getComputedStyle(h).paddingLeft), badgeW: b ? b.getBoundingClientRect().width : null }; })(),
@@ -101,7 +101,8 @@ ANALYSE = """async (b64) => {
   const all = x.getImageData(0, 0, W, H).data;
   const px = (ix, iy) => { const o = (iy * W + ix) * 4; return all[o] + ',' + all[o + 1] + ',' + all[o + 2]; };
   const PAPER = '255,255,255';
-  const near = (k) => k.split(',').every((v, i) => Math.abs(Number(v) - [255, 255, 255][i]) <= 2);
+  // White, or the 1 px divider under the header (ShareC2) that runs edge to edge
+  const near = (k) => k.split(',').every((v, i) => Number(v) >= [228, 224, 216][i]);  // between the divider and white (the scaled line blends)
   let edgeBad = 0; const badAt = []; const mark = (ix, iy) => { edgeBad++; if (badAt.length < 4) badAt.push([ix, iy, px(ix, iy)]); };
   // Hôm nay runs edge to edge in its body (the two columns), so the side edges are checked above the body (paper)
   // and in the footer (an ink band); the top row is paper and the bottom row is ink.
@@ -207,14 +208,14 @@ def snap(pg):
 
 
 def check_head(s, tag, label, named):
-    """Header: the name big over the date (8 px between), the Level badge centred on that column, 86 px tall."""
+    """Header (ShareC2): the name big over the date (8 px between), all centred in 86 px with the Level badge, a 1 px divider under it."""
     h = s and s.get("head")
     if not h:
         check(False, f"{tag} {label}: header geometry was not read")
         return
     check(h["badge"] is not None and abs(h["col"]["mid"] - h["badge"]["mid"]) <= 1.5, f"{tag} {label}: the badge is centred on the name column ({h['col']['mid']:.1f} vs {h['badge']['mid']:.1f})")
     check(h["height"] >= 86 - 0.5 and h["bg"] in ("rgba(0, 0, 0, 0)", "rgb(255, 255, 255)"), f"{tag} {label}: the header is at least 86 px on paper ({h['height']}, {h['bg']})")
-    check(h["paddingTop"] == 16 and h["paddingLeft"] == 12, f"{tag} {label}: padding 16 top, 12 sides ({h['paddingTop']}, {h['paddingLeft']})")
+    check(h["paddingLeft"] == 12 and abs(h["col"]["mid"] - (h["box"]["top"] + h["box"]["bottom"] - 1) / 2) <= 1.5, f"{tag} {label}: 12 px sides, name and date centred in the header above its 1 px divider (ShareC2) ({h['paddingLeft']}, {h['col']['mid']:.1f} vs {h['box']['top']:.1f}-{h['box']['bottom']:.1f})")
     check(abs(h["firstFs"] - 38) < 0.5 and h["firstTransform"] == "uppercase" and h["firstWeight"] in ("800", "900") and h["firstStyle"] == "italic" and "Saira" in h["firstFamily"] and h["firstColor"] == "rgb(17, 19, 23)",
           f"{tag} {label}: the name is Saira italic 38 px uppercase ink ({h['firstFs']}, {h['firstTransform']}, {h['firstWeight']}, {h['firstFamily'][:24]}, {h['firstColor']})")
     check(h["firstText"] == h["firstText"].upper(), f"{tag} {label}: the name reads in capitals ({h['firstText']!r})")

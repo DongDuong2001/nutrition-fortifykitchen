@@ -18,9 +18,9 @@ const noSelect: React.CSSProperties = { WebkitUserSelect: "none", userSelect: "n
 /** The share image's row: the same row without the button, long press or dot. A long name wraps. */
 function ShareFoodRow({ entry }: { entry: HomeEntry }) {
   return (
-    <div className="flex min-h-7 w-full items-center justify-between gap-2 border-b border-b-divider px-3 py-1 text-text">
+    <div className="flex min-h-[30px] w-full items-center justify-between gap-2 border-b border-b-divider px-3 py-1 text-text">
       <span className="min-w-0 break-words text-[13px] font-semibold leading-snug">{entry.name}</span>
-      <span className="shrink-0 font-display text-[15px] font-medium leading-none tabular-nums text-secondary">{portionLabel(entry)}</span>
+      <span className="shrink-0 font-display text-[15px] font-bold leading-none tabular-nums text-text">{portionLabel(entry)}</span>
     </div>
   );
 }
@@ -205,15 +205,18 @@ export function FoodList({
 }) {
   if (select) return <SelectList meals={meals} select={select} />;
   if (share) {
+    const pill = inkPill(true);
     return (
-      <div className="min-w-0 flex-1 bg-paper pb-3">
+      <div className="min-w-0 flex-1 bg-page pb-3">
         {meals
           .filter((meal) => meal.entries.length > 0)
           .map((meal) => (
             <section key={meal.slot} aria-label={meal.fullName}>
-              <div className="flex h-[22px] w-full items-center justify-between gap-2 bg-paper-dark px-3 text-text">
-                <span className="text-[11px] font-extrabold leading-none">{meal.label}</span>
-                <span className="font-display text-[13px] font-bold leading-none tabular-nums">{kcalLabel(meal.kcal)}</span>
+              <div className={pill.wrap}>
+                <div className={`${pill.pill} justify-between bg-ink text-on-dark`}>
+                  <span className={pill.label}>{meal.label}</span>
+                  <span className={pill.kcal}>{kcalLabel(meal.kcal)}</span>
+                </div>
               </div>
               {meal.entries.map((entry) => (
                 <ShareFoodRow key={entry.id} entry={entry} />

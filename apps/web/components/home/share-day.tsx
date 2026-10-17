@@ -18,17 +18,16 @@ export function ShareDay({ model }: { model: ShareModel }) {
       style={{ width: SHARE_CSS_WIDTH, minHeight: SHARE_MIN_CSS_HEIGHT }}
       className="flex flex-col bg-paper font-sans text-text"
     >
-      {/* The name in big Saira with the date under it, and the Level badge centred on that column. 86 px at least: a long name wraps and the header grows. */}
-      <div data-share-header className="flex min-h-[86px] flex-none flex-col px-3 pt-4">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex min-w-0 flex-1 flex-col gap-2">
-            <p className="m-0 min-w-0 break-words font-display text-[38px] font-extrabold italic uppercase leading-[0.9] text-ink">
-              {model.name ?? model.dateLabel}
-            </p>
-            {model.name && <p className="m-0 text-[13px] font-medium leading-snug text-secondary">{model.dateLabel}</p>}
-          </div>
-          <LevelBadge level={model.level} size="share" />
+      {/* ShareC2: the name in big Saira with the date under it and the Level badge on the right, all centred in 86 px
+          (a long name wraps and the header grows), a 1 px divider under it. */}
+      <div data-share-header className="flex min-h-[86px] flex-none items-center justify-between gap-3 border-b border-b-divider px-3 py-2">
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
+          <p className="m-0 min-w-0 break-words font-display text-[38px] font-extrabold italic uppercase leading-[0.9] text-ink">
+            {model.name ?? model.dateLabel}
+          </p>
+          {model.name && <p className="m-0 text-[13px] font-medium leading-snug text-secondary">{model.dateLabel}</p>}
         </div>
+        <LevelBadge level={model.level} size="share" />
       </div>
 
       <div className="flex flex-1 flex-col">
@@ -41,7 +40,7 @@ export function ShareDay({ model }: { model: ShareModel }) {
           finished={model.finished}
           selected={false}
         />
-        <div className="mt-2 flex flex-1 border-t border-t-card-border">
+        <div className="mt-2 flex flex-1 border-t border-t-divider">
           <FoodList
             share
             meals={model.meals}

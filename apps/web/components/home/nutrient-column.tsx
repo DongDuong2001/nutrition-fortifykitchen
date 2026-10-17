@@ -84,7 +84,7 @@ export function NutrientColumn({
               const value = values.nutrients[id] ?? null;
               const pct = pctOf(value, targets[id] ?? null);
               return (
-                <div key={id} data-align-group="home-nutrient" data-snap-row className={`flex snap-start flex-col justify-center gap-0.5 px-3 ${share ? "h-[34px]" : "max-h-[34px] min-h-7 flex-1 lg:h-12 lg:max-h-none lg:flex-none lg:gap-1"}`}>
+                <div key={id} data-align-group="home-nutrient" data-snap-row className={`flex snap-start flex-col justify-center gap-0.5 px-3 ${share ? "h-9" : "max-h-[34px] min-h-7 flex-1 lg:h-12 lg:max-h-none lg:flex-none lg:gap-1"}`}>
                   <div className="flex items-baseline justify-between gap-1">
                     <span className="flex min-w-0 items-baseline gap-1 whitespace-nowrap">
                       <span className={`text-[13px] font-semibold leading-tight text-text ${lg}`}>{def.name}</span>
