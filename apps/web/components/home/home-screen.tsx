@@ -445,7 +445,7 @@ function HomeContent() {
               </button>
             </div>
           )}
-          <div className={`flex min-h-0 flex-1 border-t border-t-card-border ${coach && !selecting ? "" : "mt-2"}`}>
+          <div className={`flex min-h-0 flex-1 border-t border-t-divider lg:gap-4 lg:border-t-0 lg:pb-8 ${coach && !selecting ? "lg:mt-2" : "mt-2 lg:mt-4"}`}>
             <FoodList
               meals={meals}
               mode={mode}

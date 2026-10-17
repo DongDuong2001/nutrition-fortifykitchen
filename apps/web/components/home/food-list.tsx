@@ -8,6 +8,7 @@ import { kcalLabel } from "@/lib/kcal";
 import { missingMicros, portionLabel, type HomeEntry, type HomeMeal, type HomeMode } from "@/lib/home";
 import { mealFullySelected } from "@/lib/multi-select";
 import { markUsed } from "@/lib/onboarding-store";
+import { inkPill } from "./ink-pill";
 
 const LONG_PRESS_MS = 500;
 const MOVE_LIMIT_PX = 10;
@@ -83,12 +84,12 @@ function FoodRow({
       onPointerLeave={cancel}
       onContextMenu={(e) => e.preventDefault()}
       style={noSelect}
-      className={`flex h-7 w-full cursor-pointer items-center justify-between gap-2 border-0 border-b border-b-divider px-3 text-left lg:h-11 ${
+      className={`flex h-8 w-full cursor-pointer items-center justify-between gap-2 border-0 border-b border-b-divider px-3 text-left lg:h-12 ${
         selected ? "bg-cobalt text-on-accent" : "bg-transparent text-text"
       }`}
     >
       <span className="flex min-w-0 items-center gap-1.5">
-        <span className="min-w-0 truncate text-[13px] font-semibold leading-none" title={entry.name}>
+        <span className="min-w-0 truncate text-[13px] font-semibold leading-none lg:text-[15px]" title={entry.name}>
           {entry.name}
         </span>
         {missing && (
@@ -98,7 +99,7 @@ function FoodRow({
           />
         )}
       </span>
-      <span className={`shrink-0 font-display text-[15px] font-medium leading-none tabular-nums ${selected ? "text-sky" : "text-secondary"}`}>
+      <span className={`shrink-0 font-display text-[15px] font-bold leading-none tabular-nums lg:text-[18px] ${selected ? "text-sky" : "text-text"}`}>
         {quantity}
       </span>
     </button>
@@ -106,8 +107,8 @@ function FoodRow({
 }
 
 /**
- * The left column of the home body: four meals, each a 24 px header (tap = that meal alone) and its foods
- * as 28 px rows (tap = that food alone, long press = edit, today only). Only this list scrolls; headers stick.
+ * The left column of the home body: four meals, each an ink pill header (tap = that meal alone) and its foods
+ * as 32 px rows (48 px from lg) (tap = that food alone, long press = edit, today only). Only this list scrolls; headers stick.
  */
 export interface SelectProps {
   ids: ReadonlySet<string>;
@@ -222,11 +223,12 @@ export function FoodList({
       </div>
     );
   }
+  const pill = inkPill();
   return (
-    <div className="min-h-0 min-w-0 flex-1 overflow-y-auto bg-paper pb-3">
+    <div className="min-h-0 min-w-0 flex-1 overflow-y-auto bg-page pb-3 lg:rounded-2xl lg:border lg:border-card-border lg:shadow-card">
       {isEmpty && (
         <div className="flex min-h-11 items-center justify-between gap-2 px-3 py-2">
-          <p className="m-0 text-[13px] text-secondary">{readOnly ? "Chưa có món nào ngày này" : "Chưa có món nào hôm nay"}</p>
+          <p className="m-0 text-[15px] font-semibold text-text">{readOnly ? "Chưa có món nào ngày này" : "Chưa có món nào hôm nay"}</p>
           {canCopyYesterday && (
             <button
               type="button"
@@ -243,11 +245,8 @@ export function FoodList({
         const mealSelected = mode.kind === "meal" && mode.slot === meal.slot;
         return (
           <section key={meal.slot} aria-label={meal.fullName}>
-            <div
-              className={`sticky top-0 z-10 flex h-[22px] w-full items-center gap-3 px-3 lg:h-11 ${
-                mealSelected ? "bg-cobalt text-on-accent" : "bg-paper-dark text-text"
-              }`}
-            >
+            <div className={`sticky top-0 z-10 ${pill.wrap}`}>
+            <div className={`${pill.pill} ${mealSelected ? "bg-cobalt" : "bg-ink"} text-on-dark`}>
               <button
                 type="button"
                 aria-pressed={mealSelected}
@@ -256,8 +255,8 @@ export function FoodList({
                 style={noSelect}
                 className="flex h-full min-w-0 flex-1 cursor-pointer items-center justify-between gap-2 border-0 bg-transparent p-0 text-inherit"
               >
-                <span className="text-[11px] font-extrabold leading-none">{meal.label}</span>
-                <span className="font-display text-[13px] font-bold leading-none tabular-nums">
+                <span className={pill.label}>{meal.label}</span>
+                <span className={pill.kcal}>
                   {meal.entries.length > 0 ? kcalLabel(meal.kcal) : ""}
                 </span>
               </button>
@@ -272,13 +271,14 @@ export function FoodList({
                   aria-label={`Thêm vào ${meal.fullName}`}
                   data-export="hide"
                   data-tour="meal-add"
-                  className={`relative flex h-[22px] shrink-0 items-center text-[13px] font-bold leading-none no-underline transition-opacity duration-150 before:absolute before:-inset-y-[11px] before:-inset-x-2 before:content-[''] hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-60 ${
-                    mealSelected ? "text-on-accent focus-visible:outline-on-accent" : "text-blue focus-visible:outline-blue"
+                  className={`relative flex h-6 shrink-0 items-center text-xs font-bold leading-none no-underline transition-[color,opacity] duration-150 before:absolute before:-inset-y-2.5 before:-inset-x-2 before:content-[''] hover:text-on-dark focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-60 lg:h-9 lg:text-[13px] lg:before:-inset-y-1 ${
+                    mealSelected ? "text-on-accent focus-visible:outline-on-accent" : "text-sky focus-visible:outline-sky"
                   }`}
                 >
                   + Thêm
                 </Link>
               )}
+            </div>
             </div>
             {meal.entries.map((entry) => (
               <FoodRow
@@ -291,14 +291,14 @@ export function FoodList({
               />
             ))}
             {meal.entries.length === 0 && (
-              <p className="m-0 flex h-7 items-center border-b border-b-divider px-3 text-[13px] text-secondary lg:h-11">
+              <p className="m-0 flex h-8 items-center border-b border-b-divider px-3 text-[13px] font-medium text-secondary lg:h-12 lg:text-[15px]">
                 {readOnly ? "Không có món" : "Chưa ăn"}
               </p>
             )}
           </section>
         );
       })}
-      <p className="m-0 px-3 pt-3 text-[11px] leading-snug text-secondary">
+      <p className="m-0 px-3 pt-3 text-[11px] leading-snug text-secondary lg:text-[13px]">
         <span aria-hidden="true">●</span> Thiếu dữ liệu vi chất · chạm tên bữa để xem riêng bữa đó
       </p>
     </div>

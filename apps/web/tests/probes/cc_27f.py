@@ -2,10 +2,10 @@
 
 Production build, clock fixed at 2026-10-15 10:00 Asia/Ho_Chi_Minh, demo mode, sizes 390x844 and 1440x900.
 - Hero: sentence case label ("Cả ngày · 7 món"); every text 11 px or more; the kcal percent sits right after the
-  target on the same line (about 26 px, small gap); each macro reads amount then percent with a 6 px gap; on a
+  target on the same line (the kcal number's 32 px, 10 px gap, cc-44); each macro reads amount then percent with an 8 px gap; on a
   past day the level word follows the kcal percent.
-- Nutrient column: no caption; "Khoáng chất" and "Vitamin" are 22 px bands (phone) in the colour of the meal
-  header bands, and the first band is level with the first meal band; food rows and nutrient rows share the name size.
+- Nutrient column: no caption; "Khoáng chất" and "Vitamin" are the meal headers' ink pills (24 px phone, cc-44), and the
+  first pill is level with the first meal pill; food rows and nutrient rows share the name size.
 Run with: ALIGN_BASE_URL=http://localhost:3104 npm run probe -- tests/probes/cc_27f.py
 """
 import os
@@ -60,7 +60,7 @@ def run(browser, size, tag):
         check(re.fullmatch(r"Cả ngày · \d+ món", label) is not None, f"{t}: hero label in sentence case ({label!r})")
         check(pg.evaluate(SMALL_TEXT_JS, HERO) == [], f"{t}: every hero text is 11 px or more {pg.evaluate(SMALL_TEXT_JS, HERO)}")
 
-        # kcal line: the percent follows the target on the same line, about 26 px, small gap
+        # kcal line: the percent follows the target on the same line, the kcal number's size, 10 px gap (cc-44)
         geo = pg.evaluate(
             """(sel) => {
               const hero = document.querySelector(sel);
@@ -74,15 +74,15 @@ def run(browser, size, tag):
         pct = next(s for s in geo if re.fullmatch(r"\d+%|<1%", s["t"]))
         gap = pct["r"]["left"] - target["r"]["right"]
         check(abs(pct["r"]["top"] + pct["r"]["height"] - (target["r"]["top"] + target["r"]["height"])) < 10, f"{t}: kcal percent on the target's line")
-        check(0 <= gap <= 8, f"{t}: small gap between target and percent ({gap:.1f} px)")
-        check(24 <= pct["fs"] <= 28 and pct["st"] == "italic", f"{t}: percent about 26 px Saira italic ({pct['fs']} {pct['st']})")
+        check(abs(gap - 10) <= 1, f"{t}: 10 px between target and percent ({gap:.1f} px)")
+        check(pct["fs"] == 32 and pct["st"] == "italic", f"{t}: percent 32 px Saira italic ({pct['fs']} {pct['st']})")
         if past:
             word = [s for s in geo if s["t"] in ("Thiếu", "Trung bình", "Gần đủ", "Đạt")]
             check(len(word) == 1 and word[0]["r"]["left"] >= pct["r"]["right"] - 1, f"{t}: the level word follows the percent ({[s['t'] for s in geo]})")
         else:
             check(not [s for s in geo if s["t"] in ("Thiếu", "Trung bình", "Gần đủ", "Đạt")], f"{t}: no level word on today")
 
-        # macros: amount then percent, 6 px apart
+        # macros: amount then percent, 8 px apart (cc-44)
         macro = pg.evaluate(
             """(sel) => {
               const hero = document.querySelector(sel);
@@ -92,27 +92,28 @@ def run(browser, size, tag):
             }""",
             HERO,
         )
-        check(len(macro) == 4 and all(m["order"] and abs(m["gap"] - 6) <= 1.5 for m in macro), f"{t}: macro amount then percent, 6 px gap {[(m['amount'], m['pct'], round(m['gap'], 1)) for m in macro]}")
+        check(len(macro) == 4 and all(m["order"] and abs(m["gap"] - 8) <= 1.5 for m in macro), f"{t}: macro amount then percent, 8 px gap {[(m['amount'], m['pct'], round(m['gap'], 1)) for m in macro]}")
 
-        # nutrient column: no caption, bands like the meal headers
+        # nutrient column: no caption, ink pills like the meal headers (cc-44)
         aside = pg.locator("aside[aria-label='Vi chất'] >> visible=true").first
         check(aside.locator("> p:not([data-level-summary])").count() == 0, f"{t}: no caption over the nutrient column")
-        titles = aside.locator("h3").all_inner_texts()
+        titles = aside.locator("h3").all_text_contents()  # the pill draws them uppercase (cc-44)
         check(titles == ["Khoáng chất", "Vitamin"], f"{t}: group bands in normal case {titles}")
         band = pg.evaluate(
             """() => {
-              const h3 = document.querySelector("aside[aria-label='Vi chất'] h3");
-              const meal = document.querySelector("section[aria-label='Bữa sáng'] > div");
+              const h3 = document.querySelector("aside[aria-label='Vi chất'] h3 > span");
+              const meal = document.querySelector("section[aria-label='Bữa sáng'] > div > div");
               const a = h3.getBoundingClientRect(), b = meal.getBoundingClientRect();
-              const cs = getComputedStyle(h3), ms = getComputedStyle(meal.querySelector('button span')), mp = getComputedStyle(meal);
-              return { aTop: a.top, bTop: b.top, aH: a.height, bH: b.height, bg: [cs.backgroundColor, mp.backgroundColor], fw: [cs.fontWeight, ms.fontWeight], fs: [cs.fontSize, ms.fontSize], pl: [cs.paddingLeft, mp.paddingLeft] };
+              const cs = getComputedStyle(h3.querySelector('span')), ms = getComputedStyle(meal.querySelector('button span'));
+              const hs = getComputedStyle(h3), mp = getComputedStyle(meal);
+              return { aTop: a.top, bTop: b.top, aH: a.height, bH: b.height, bg: [hs.backgroundColor, mp.backgroundColor], fw: [cs.fontWeight, ms.fontWeight], fs: [cs.fontSize, ms.fontSize], pl: [hs.paddingLeft, mp.paddingLeft] };
             }"""
         )
-        check(abs(band["aTop"] - band["bTop"]) <= 1, f"{t}: first nutrient band level with the first meal band ({band['aTop']:.1f} vs {band['bTop']:.1f})")
-        check(band["bg"][0] == band["bg"][1], f"{t}: same band background {band['bg']}")
+        check(abs(band["aTop"] - band["bTop"]) <= 1, f"{t}: first nutrient pill level with the first meal pill ({band['aTop']:.1f} vs {band['bTop']:.1f})")
+        check(band["bg"][0] == band["bg"][1], f"{t}: same pill background {band['bg']}")
         check(band["fw"][0] == band["fw"][1] and band["fs"][0] == band["fs"][1] and band["pl"][0] == band["pl"][1], f"{t}: same weight, size and padding {band['fw']} {band['fs']} {band['pl']}")
         if phone:
-            check(abs(band["aH"] - 22) <= 0.5 and abs(band["bH"] - 22) <= 0.5, f"{t}: bands are 22 px ({band['aH']}, {band['bH']})")
+            check(abs(band["aH"] - 24) <= 0.5 and abs(band["bH"] - 24) <= 0.5, f"{t}: pills are 24 px ({band['aH']}, {band['bH']})")
 
         # food rows and nutrient rows use the same name size
         sizes = pg.evaluate(

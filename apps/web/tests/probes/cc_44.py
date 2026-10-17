@@ -38,9 +38,15 @@ def name(route, w):
     return f"cc-44-{TAG + '-' if TAG else ''}{route}-{w}.png"
 
 
+# A new account that finished setup (as smoke.py's empty pass): no entries, no sample data
+SAVED_PROFILE = '{"sex":"male","birthYear":2003,"weightKg":65,"goal":"maintain","periodMode":false,"trainingMinutesDefault":60,"displayName":"","hintSeen":true}'
+
+
 def shoot(browser, route, path, w, demo=True):
     _demo.enable(demo)
     ctx = browser.new_context(viewport=SIZES[w])
+    if not demo:
+        ctx.add_init_script(f"try {{ localStorage.setItem('h1t_profile_v1', JSON.stringify({SAVED_PROFILE})); }} catch (e) {{}}")
     pg = ctx.new_page()
     pg.goto(BASE + path, wait_until="networkidle")
     pg.wait_for_timeout(900)

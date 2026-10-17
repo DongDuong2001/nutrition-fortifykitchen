@@ -86,7 +86,7 @@ export function HomeHero({
           <span className="text-[13px] text-muted-on-dark">
             / {formatAmount(kcalTarget.min, "kcal")}–{formatAmount(kcalTarget.max, "kcal")} kcal
           </span>
-          <span className="font-display text-[26px] font-extrabold italic leading-none tabular-nums">{pctLabel(values.kcal, kcalTarget.min)}</span>
+          <span className="ml-1 font-display text-[32px] font-extrabold italic leading-none tabular-nums">{pctLabel(values.kcal, kcalTarget.min)}</span>
           {finished && kcalKnown !== null && <span className="text-[13px] font-bold text-sky">{getLevelLabel(getLevel(kcalKnown))}</span>}
         </div>
 
@@ -101,7 +101,7 @@ export function HomeHero({
             return (
               <div key={m.key} className="flex min-w-0 flex-col gap-1">
                 <span className="text-xs font-bold leading-tight">{m.label}</span>
-                <div className="flex items-baseline gap-1.5">
+                <div className="flex items-baseline gap-2">
                   <span className="text-xs leading-tight text-muted-on-dark tabular-nums">
                     {value === null ? "—" : `${formatAmount(value, "g")} g`}
                   </span>

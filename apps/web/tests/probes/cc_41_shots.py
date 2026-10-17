@@ -28,7 +28,7 @@ def check(cond, msg):
 
 
 def small_targets(pg):
-    # A control counts at the height of its hit area: a ::before that reaches past it (the 28 px food rows), or the
+    # A control counts at the height of its hit area: a ::before that reaches past it (the meal pill's + Thêm), or the
     # 44 px label that wraps a bare input
     return pg.evaluate(
         """() => {
@@ -44,8 +44,8 @@ def small_targets(pg):
           return [...document.querySelectorAll('button, input, select, textarea, a[role=button]')]
             .filter(e => { const r = e.getBoundingClientRect(); const s = getComputedStyle(e);
               return r.width > 0 && r.height > 0 && s.visibility !== 'hidden' && s.display !== 'none' && e.type !== 'hidden' && e.type !== 'checkbox' && e.type !== 'radio'; })
-            // Hôm nay's phone list is a design decision (28 px food rows, 22 px meal headers, 44 px from lg): see cc-22
-            .filter(e => !(e.classList.contains('h-7') || e.classList.contains('h-[22px]') || (e.parentElement && e.parentElement.classList.contains('h-[22px]'))) && hit(e) < 43.5)
+            // Hôm nay's phone list is a design decision (32 px food rows, 24 px meal pills, 48 and 36 px from lg): see cc-22, cc-44
+            .filter(e => !(e.classList.contains('h-8') || (e.parentElement && e.parentElement.classList.contains('h-6'))) && hit(e) < 43.5)
             .map(e => (e.getAttribute('aria-label') || e.textContent || e.tagName).trim().slice(0, 40) + ' ' + Math.round(hit(e)));
         }"""
     )
