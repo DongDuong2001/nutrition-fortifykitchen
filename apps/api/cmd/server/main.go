@@ -197,8 +197,9 @@ func SetupRouter(cfg *config.Config, pool *pgxpool.Pool) chi.Router {
 		// Public Webhook: GitHub Vault Ingestion
 		r.Post("/vault/webhook", vaultHandler.HandleWebhook)
 
-		// Food catalog routes (public browsing allowed)
+		// Food catalog routes (public browsing allowed, custom foods filtered to creator)
 		r.Route("/foods", func(r chi.Router) {
+			r.Use(authMiddleware.OptionalAuthenticate)
 			r.Get("/", nutritionHandler.SearchFoods)
 			r.Get("/rich-in", nutritionHandler.GetFoodsRichIn)
 			r.Get("/rich-in/{nutrient}", nutritionHandler.GetFoodsRichIn)
