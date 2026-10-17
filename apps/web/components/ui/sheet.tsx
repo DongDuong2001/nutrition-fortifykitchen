@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 export interface SheetProps {
   open: boolean;
@@ -16,7 +16,16 @@ export interface SheetProps {
   desktopDialog?: boolean;
   /** The id of the element that takes focus on open (a heading with tabIndex -1), instead of the first control. */
   initialFocusId?: string;
+  /** cc-51: false for a sheet that animates itself (Có gì mới): no slide classes, and it unmounts at once on close. */
+  motion?: boolean;
 }
+
+/** cc-51: how long a sheet takes to slide in or out (globals.css .m-sheet-*). */
+const SHEET_MS = 250;
+/** Let go after dragging down this share of the sheet's height, or faster than this (px per ms): it closes. */
+const DRAG_CLOSE_SHARE = 0.25;
+const DRAG_CLOSE_SPEED = 0.5;
+let sheetCount = 0;
 
 const FOCUSABLE_SELECTOR =
   'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -32,11 +41,92 @@ export function Sheet({
   className = "",
   desktopDialog = false,
   initialFocusId,
+  motion = true,
 }: SheetProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const openerRef = useRef<HTMLElement | null>(null);
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
+  // cc-51: stays mounted for the exit animation; a drag that closes it slides out from where the finger let go
+  const [mounted, setMounted] = useState(open);
+  const draggedOut = useRef(false);
+  const drag = useRef<{ y: number; t: number; dy: number; v: number } | null>(null);
+  // Every opening gets fresh content (a form opened again starts blank, as when the sheet unmounted at once)
+  const openings = useRef(0);
+  const wasOpen = useRef(false);
+  if (open && !wasOpen.current) openings.current += 1;
+  wasOpen.current = open;
+
+  useEffect(() => {
+    if (open) {
+      draggedOut.current = false;
+      setMounted(true);
+      return;
+    }
+    if (!mounted) return;
+    if (!motion) {
+      setMounted(false);
+      return;
+    }
+    const timer = setTimeout(() => setMounted(false), SHEET_MS);
+    return () => clearTimeout(timer);
+  }, [open, mounted, motion]);
+
+  // Back (the phone's back gesture or button) closes the sheet instead of leaving the page. The entry copies the
+  // router's own state, so Next restores the same page. Closed another way, the entry is taken back, unless the sheet
+  // navigated somewhere (the URL changed).
+  useEffect(() => {
+    if (!open || typeof window === "undefined") return;
+    const id = ++sheetCount;
+    const href = window.location.href;
+    let popped = false;
+    window.history.pushState({ ...(window.history.state ?? {}), h1tSheet: id }, "");
+    const onPop = () => {
+      if (window.history.state?.h1tSheet === id) return;
+      popped = true;
+      onCloseRef.current();
+    };
+    window.addEventListener("popstate", onPop);
+    return () => {
+      window.removeEventListener("popstate", onPop);
+      if (popped) return;
+      setTimeout(() => {
+        if (window.location.href === href && window.history.state?.h1tSheet === id) window.history.back();
+      }, 50);
+    };
+  }, [open]);
+
+  const onDragStart = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!open || (e.pointerType === "mouse" && e.button !== 0)) return;
+    drag.current = { y: e.clientY, t: e.timeStamp, dy: 0, v: 0 };
+    e.currentTarget.setPointerCapture(e.pointerId);
+    dialogRef.current?.classList.remove("m-snap", "m-sheet-enter");
+  };
+  const onDragMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const d = drag.current;
+    if (!d || !dialogRef.current) return;
+    const dy = Math.max(0, e.clientY - d.y);
+    const dt = Math.max(1, e.timeStamp - d.t);
+    d.v = (dy - d.dy) / dt;
+    d.dy = dy;
+    d.t = e.timeStamp;
+    dialogRef.current.style.transform = `translateY(${dy}px)`;
+  };
+  const onDragEnd = () => {
+    const d = drag.current;
+    const el = dialogRef.current;
+    drag.current = null;
+    if (!d || !el) return;
+    if (d.dy > el.offsetHeight * DRAG_CLOSE_SHARE || d.v > DRAG_CLOSE_SPEED) {
+      draggedOut.current = true;
+      el.style.transition = `transform ${SHEET_MS}ms ease-in`;
+      el.style.transform = "translateY(100%)";
+      onCloseRef.current();
+    } else {
+      el.classList.add("m-snap");
+      el.style.transform = "";
+    }
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -108,31 +198,42 @@ export function Sheet({
     };
   }, [open, initialFocusId]);
 
-  if (!open) return null;
+  if (!open && (!mounted || !motion)) return null;
+  // Leaving: still drawn for the exit animation, but no longer a dialog for screen readers, focus or taps
+  const showing = open;
 
   return (
-    <div className={`fixed inset-0 z-50 flex flex-col justify-end ${desktopDialog ? "lg:justify-center lg:items-center" : ""}`}>
+    <div className={`fixed inset-0 z-50 flex flex-col justify-end ${desktopDialog ? "lg:justify-center lg:items-center" : ""} ${showing ? "" : "pointer-events-none"}`} inert={!showing}>
       {/* Dim Scrim */}
       <div
         aria-hidden="true"
         onClick={onClose}
-        className="fixed inset-0 bg-scrim backdrop-blur-[1px] transition-opacity duration-200"
+        className={`fixed inset-0 bg-scrim backdrop-blur-[1px] ${!motion ? "" : showing ? "m-scrim-enter" : "m-scrim-exit"}`}
       />
 
       {/* Bottom Sheet Dialog */}
       <div
         ref={dialogRef}
-        role="dialog"
+        role={showing ? "dialog" : undefined}
         tabIndex={-1}
-        aria-modal="true"
-        aria-labelledby={title ? titleId : labelledBy}
-        className={`relative z-10 w-full max-w-[390px] mx-auto bg-card rounded-t-[20px] px-4 pt-3 pb-6 flex flex-col gap-2 shadow-2xl transition-transform duration-200 outline-none ${desktopDialog ? "lg:w-[420px] lg:max-w-[420px] lg:rounded-[20px] lg:px-6 lg:pt-6" : ""} ${className}`}
+        aria-modal={showing ? "true" : undefined}
+        aria-hidden={showing ? undefined : true}
+        aria-labelledby={showing ? (title ? titleId : labelledBy) : undefined}
+        className={`relative z-10 w-full max-w-[390px] mx-auto bg-card rounded-t-[20px] px-4 pt-3 pb-6 flex flex-col gap-2 shadow-2xl outline-none ${desktopDialog ? "m-dialog lg:w-[420px] lg:max-w-[420px] lg:rounded-[20px] lg:px-6 lg:pt-6" : ""} ${!motion ? "" : showing ? "m-sheet-enter" : draggedOut.current ? "" : "m-sheet-exit"} ${className}`}
       >
-        {/* Grabber */}
+        {/* Grabber: drag it down to close (a 24 px strip around the 5 px bar) */}
         <div
           aria-hidden="true"
-          className={`w-9 h-[5px] rounded-full bg-grabber self-center shrink-0 mb-1 ${desktopDialog ? "lg:hidden" : ""}`}
-        />
+          data-sheet-handle
+          onPointerDown={onDragStart}
+          onPointerMove={onDragMove}
+          onPointerUp={onDragEnd}
+          onPointerCancel={onDragEnd}
+          style={{ touchAction: "none" }}
+          className={`-mx-4 -mt-3 flex h-6 shrink-0 cursor-grab items-center justify-center self-stretch ${desktopDialog ? "lg:hidden" : ""}`}
+        >
+          <div className="w-9 h-[5px] rounded-full bg-grabber" />
+        </div>
 
         {/* Optional Header */}
         {(title || description) && (
@@ -153,7 +254,7 @@ export function Sheet({
           </div>
         )}
 
-        {children}
+        <React.Fragment key={openings.current}>{children}</React.Fragment>
       </div>
     </div>
   );
