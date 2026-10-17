@@ -13,8 +13,8 @@ import (
 
 type Repository interface {
 	SearchFoods(ctx context.Context, filter FoodSearchFilter) (*FoodSearchResponse, error)
-	GetFoodByID(ctx context.Context, id uuid.UUID) (*FoodDetail, error)
-	GetFoodsRichIn(ctx context.Context, nutrient string, limit int) ([]RichInFoodItem, error)
+	GetFoodByID(ctx context.Context, id uuid.UUID, userID *uuid.UUID) (*FoodDetail, error)
+	GetFoodsRichIn(ctx context.Context, nutrient string, limit int, userID *uuid.UUID) ([]RichInFoodItem, error)
 	CreateCustomFood(ctx context.Context, userID uuid.UUID, food *FoodDetail, portions []Portion) (*FoodDetail, error)
 	DeleteCustomFood(ctx context.Context, userID uuid.UUID, foodID uuid.UUID) error
 }
@@ -55,6 +55,14 @@ func (r *pgxRepository) SearchFoods(ctx context.Context, filter FoodSearchFilter
 		argIdx++
 	}
 
+	if filter.UserID != nil {
+		whereClauses = append(whereClauses, fmt.Sprintf("(is_custom = false OR created_by = $%d)", argIdx))
+		args = append(args, *filter.UserID)
+		argIdx++
+	} else {
+		whereClauses = append(whereClauses, "is_custom = false")
+	}
+
 	whereSQL := strings.Join(whereClauses, " AND ")
 
 	countSQL := fmt.Sprintf("SELECT COUNT(*) FROM nutrition.foods WHERE %s", whereSQL)
@@ -70,7 +78,7 @@ func (r *pgxRepository) SearchFoods(ctx context.Context, filter FoodSearchFilter
 	}
 
 	querySQL := fmt.Sprintf(`
-		SELECT id, name_vi, category, source, source_id, brand, tip_vi, is_custom, per_100g, created_at
+		SELECT id, name_vi, category, source, source_id, brand, tip_vi, is_custom, created_by, per_100g, created_at
 		FROM nutrition.foods
 		WHERE %s
 		ORDER BY %s
@@ -88,7 +96,7 @@ func (r *pgxRepository) SearchFoods(ctx context.Context, filter FoodSearchFilter
 	for rows.Next() {
 		var f FoodDetail
 		var per100gJSON []byte
-		if err := rows.Scan(&f.ID, &f.NameVi, &f.Category, &f.Source, &f.SourceID, &f.Brand, &f.TipVi, &f.IsCustom, &per100gJSON, &f.CreatedAt); err != nil {
+		if err := rows.Scan(&f.ID, &f.NameVi, &f.Category, &f.Source, &f.SourceID, &f.Brand, &f.TipVi, &f.IsCustom, &f.CreatedBy, &per100gJSON, &f.CreatedAt); err != nil {
 			return nil, fmt.Errorf("failed to scan food item: %w", err)
 		}
 		if len(per100gJSON) > 0 {
@@ -138,17 +146,32 @@ func (r *pgxRepository) SearchFoods(ctx context.Context, filter FoodSearchFilter
 	}, nil
 }
 
-func (r *pgxRepository) GetFoodByID(ctx context.Context, id uuid.UUID) (*FoodDetail, error) {
-	query := `
-		SELECT id, name_vi, category, source, source_id, brand, tip_vi, is_custom, per_100g, created_at
-		FROM nutrition.foods
-		WHERE id = $1
-	`
+func (r *pgxRepository) GetFoodByID(ctx context.Context, id uuid.UUID, userID *uuid.UUID) (*FoodDetail, error) {
+	var query string
+	var err error
 	var f FoodDetail
 	var per100gJSON []byte
-	err := r.pool.QueryRow(ctx, query, id).Scan(
-		&f.ID, &f.NameVi, &f.Category, &f.Source, &f.SourceID, &f.Brand, &f.TipVi, &f.IsCustom, &per100gJSON, &f.CreatedAt,
-	)
+
+	if userID != nil {
+		query = `
+			SELECT id, name_vi, category, source, source_id, brand, tip_vi, is_custom, created_by, per_100g, created_at
+			FROM nutrition.foods
+			WHERE id = $1 AND (is_custom = false OR created_by = $2)
+		`
+		err = r.pool.QueryRow(ctx, query, id, *userID).Scan(
+			&f.ID, &f.NameVi, &f.Category, &f.Source, &f.SourceID, &f.Brand, &f.TipVi, &f.IsCustom, &f.CreatedBy, &per100gJSON, &f.CreatedAt,
+		)
+	} else {
+		query = `
+			SELECT id, name_vi, category, source, source_id, brand, tip_vi, is_custom, created_by, per_100g, created_at
+			FROM nutrition.foods
+			WHERE id = $1 AND is_custom = false
+		`
+		err = r.pool.QueryRow(ctx, query, id).Scan(
+			&f.ID, &f.NameVi, &f.Category, &f.Source, &f.SourceID, &f.Brand, &f.TipVi, &f.IsCustom, &f.CreatedBy, &per100gJSON, &f.CreatedAt,
+		)
+	}
+
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, nil
@@ -178,7 +201,7 @@ func (r *pgxRepository) GetFoodByID(ctx context.Context, id uuid.UUID) (*FoodDet
 	return &f, nil
 }
 
-func (r *pgxRepository) GetFoodsRichIn(ctx context.Context, nutrient string, limit int) ([]RichInFoodItem, error) {
+func (r *pgxRepository) GetFoodsRichIn(ctx context.Context, nutrient string, limit int, userID *uuid.UUID) ([]RichInFoodItem, error) {
 	if _, ok := ValidNutrients[nutrient]; !ok {
 		return nil, ErrInvalidNutrient
 	}
@@ -187,15 +210,31 @@ func (r *pgxRepository) GetFoodsRichIn(ctx context.Context, nutrient string, lim
 		limit = 10
 	}
 
-	query := fmt.Sprintf(`
-		SELECT id, name_vi, category, (per_100g->>'%s')::numeric AS amount
-		FROM nutrition.foods
-		WHERE per_100g->>'%s' IS NOT NULL AND (per_100g->>'%s')::numeric > 0
-		ORDER BY (per_100g->>'%s')::numeric DESC
-		LIMIT $1
-	`, nutrient, nutrient, nutrient, nutrient)
+	var query string
+	var rows pgx.Rows
+	var err error
 
-	rows, err := r.pool.Query(ctx, query, limit)
+	if userID != nil {
+		query = fmt.Sprintf(`
+			SELECT id, name_vi, category, (per_100g->>'%s')::numeric AS amount
+			FROM nutrition.foods
+			WHERE per_100g->>'%s' IS NOT NULL AND (per_100g->>'%s')::numeric > 0
+			  AND (is_custom = false OR created_by = $2)
+			ORDER BY (per_100g->>'%s')::numeric DESC
+			LIMIT $1
+		`, nutrient, nutrient, nutrient, nutrient)
+		rows, err = r.pool.Query(ctx, query, limit, *userID)
+	} else {
+		query = fmt.Sprintf(`
+			SELECT id, name_vi, category, (per_100g->>'%s')::numeric AS amount
+			FROM nutrition.foods
+			WHERE per_100g->>'%s' IS NOT NULL AND (per_100g->>'%s')::numeric > 0
+			  AND is_custom = false
+			ORDER BY (per_100g->>'%s')::numeric DESC
+			LIMIT $1
+		`, nutrient, nutrient, nutrient, nutrient)
+		rows, err = r.pool.Query(ctx, query, limit)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to query rich-in foods: %w", err)
 	}
@@ -298,6 +337,7 @@ func (r *pgxRepository) CreateCustomFood(ctx context.Context, userID uuid.UUID, 
 	}
 
 	food.Servings = portions
+	food.CreatedBy = &userID
 	return food, nil
 }
 
