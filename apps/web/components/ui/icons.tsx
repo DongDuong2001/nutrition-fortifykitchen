@@ -57,6 +57,7 @@ export const IconEye = createH1TIcon(Myna.Eye);
 export const IconEyeOff = createH1TIcon(Myna.EyeOff);
 export const IconCheck = createH1TIcon(Myna.Check);
 export const IconX = createH1TIcon(Myna.X);
+export const IconArrowUp = createH1TIcon(Myna.ArrowUp);
 export const IconChevronRight = createH1TIcon(Myna.ChevronRight);
 export const IconChevronLeft = createH1TIcon(Myna.ChevronLeft);
 export const IconChevronDown = createH1TIcon(Myna.ChevronDown);

@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Spotlight } from "@/components/onboarding/spotlight";
+import { IconArrowUp } from "@/components/ui/icons";
 import { useDiary } from "@/lib/diary-store";
 import { getTodayIsoVN } from "@/lib/date";
 import { DEFAULT_FLAGS, type OnboardingFlags } from "@/lib/onboarding-flags";
@@ -92,7 +93,11 @@ function TourCard({ index, onNext, onSkip }: { index: number; onNext: () => void
             {last ? "Hoàn tất" : "Tiếp"}
           </button>
         ) : (
-          <span className="rounded-full bg-blue/10 px-3 py-2 text-[13px] font-bold text-blue">{hint}</span>
+          <span className="inline-flex items-center gap-1 text-[13px] font-bold text-blue">
+            {hint}
+            {/* Points at the highlighted element: up when the card is under it, down when the card is above it */}
+            <IconArrowUp size={16} className="group-data-[placement=above]:rotate-180" />
+          </span>
         )}
       </div>
     </>

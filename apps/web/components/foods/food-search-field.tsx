@@ -12,6 +12,7 @@ export interface FoodSearchFieldProps {
 export function FoodSearchField({ value, onChange, inputRef, className = "" }: FoodSearchFieldProps) {
   return (
     <label
+      data-tour="food-search"
       data-align-group="add-list"
       data-align-edge="left"
       className={`flex items-center gap-3 bg-page border border-card-border rounded-full px-4 min-h-[48px] focus-within:border-blue focus-within:ring-2 focus-within:ring-blue ${className}`}

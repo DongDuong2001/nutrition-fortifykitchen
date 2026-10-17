@@ -17,11 +17,18 @@ function findTarget(id: string): HTMLElement | null {
   return null;
 }
 
-const toBox = (r: DOMRect): Box => ({ left: r.left, top: r.top, width: r.width, height: r.height });
+/** The smallest box that holds every rect (one rect: itself). */
+function unionBox(rects: DOMRect[]): Box {
+  const left = Math.min(...rects.map((r) => r.left));
+  const top = Math.min(...rects.map((r) => r.top));
+  const right = Math.max(...rects.map((r) => r.right));
+  const bottom = Math.max(...rects.map((r) => r.bottom));
+  return { left, top, width: right - left, height: bottom - top };
+}
 
 export interface SpotlightProps {
-  /** data-tour="<target>": the element to point at, measured live (never fixed coordinates) */
-  target: string;
+  /** data-tour="<target>": the element to point at, measured live (never fixed coordinates). Several: the hole is the box around all of them. */
+  target: string | readonly string[];
   /** The dialog's accessible name (an element id inside the card) */
   labelledBy: string;
   /** An action step: taps reach the highlighted element. Otherwise the whole page is blocked. */
@@ -50,8 +57,10 @@ export function Spotlight({ target, labelledBy, interactive = false, onEscape, o
   const shown = useRef(false);
 
   // Find the target (it can mount a moment after the route) and follow it
+  const targetKey = typeof target === "string" ? target : target.join(" ");
   useEffect(() => {
-    let element: HTMLElement | null = null;
+    const ids = targetKey.split(" ");
+    let elements: HTMLElement[] = [];
     let observer: ResizeObserver | null = null;
     let frame = 0;
     let poll: ReturnType<typeof setInterval> | null = null;
@@ -59,23 +68,23 @@ export function Spotlight({ target, labelledBy, interactive = false, onEscape, o
 
     const measure = () => {
       frame = 0;
-      if (!element || !element.isConnected) return;
-      const r = element.getBoundingClientRect();
+      if (elements.length === 0 || elements.some((el) => !el.isConnected)) return;
+      const r = unionBox(elements.map((el) => el.getBoundingClientRect()));
       setView({ width: window.innerWidth, height: window.innerHeight });
-      if (r.width === 0 || r.height === 0 || r.bottom < 0 || r.top > window.innerHeight || r.right < 0 || r.left > window.innerWidth) {
+      if (r.width === 0 || r.height === 0 || r.top + r.height < 0 || r.top > window.innerHeight || r.left + r.width < 0 || r.left > window.innerWidth) {
         callbacks.current.onMissing();
         return;
       }
-      setBox(toBox(r));
+      setBox(r);
     };
     const schedule = () => {
       if (!frame) frame = requestAnimationFrame(measure);
     };
 
-    const attach = (el: HTMLElement) => {
-      element = el;
+    const attach = (els: HTMLElement[]) => {
+      elements = els;
       observer = new ResizeObserver(schedule);
-      observer.observe(el);
+      for (const el of els) observer.observe(el);
       window.addEventListener("scroll", schedule, true);
       window.addEventListener("resize", schedule);
       measure();
@@ -86,11 +95,11 @@ export function Spotlight({ target, labelledBy, interactive = false, onEscape, o
     };
 
     const tryFind = () => {
-      const el = findTarget(target);
-      if (el) {
+      const found = ids.map(findTarget);
+      if (found.every((el): el is HTMLElement => el !== null)) {
         if (poll) clearInterval(poll);
         poll = null;
-        attach(el);
+        attach(found);
       } else if (Date.now() - started > GIVE_UP_MS) {
         if (poll) clearInterval(poll);
         poll = null;
@@ -98,7 +107,7 @@ export function Spotlight({ target, labelledBy, interactive = false, onEscape, o
       }
     };
     tryFind();
-    if (!element) poll = setInterval(tryFind, POLL_MS);
+    if (elements.length === 0) poll = setInterval(tryFind, POLL_MS);
 
     return () => {
       if (poll) clearInterval(poll);
@@ -107,7 +116,7 @@ export function Spotlight({ target, labelledBy, interactive = false, onEscape, o
       window.removeEventListener("scroll", schedule, true);
       window.removeEventListener("resize", schedule);
     };
-  }, [target]);
+  }, [targetKey]);
 
   // The card's own size decides above or below
   useLayoutEffect(() => {
@@ -172,19 +181,20 @@ export function Spotlight({ target, labelledBy, interactive = false, onEscape, o
 
   return (
     <div data-onboarding-overlay className="fixed inset-0 z-[60]" style={{ pointerEvents: "none" }}>
+      {/* The dim is the shadow of the hole, so the hole's corners are round like the card's (18 px) */}
+      <div
+        aria-hidden="true"
+        className="absolute rounded-[18px] border-2 border-sky shadow-[0_0_0_100vmax_var(--color-scrim)]"
+        style={{ top: hole.top, left: hole.left, width: hole.width, height: hole.height }}
+      />
       {/* Four panels leave the hole open; the page under the hole stays tappable only in an action step */}
-      <div aria-hidden="true" className="absolute inset-x-0 top-0 bg-scrim" style={{ height: hole.top, pointerEvents: "auto" }} />
-      <div aria-hidden="true" className="absolute inset-x-0 bg-scrim" style={{ top: hole.top + hole.height, bottom: 0, pointerEvents: "auto" }} />
-      <div aria-hidden="true" className="absolute left-0 bg-scrim" style={{ top: hole.top, height: hole.height, width: hole.left, pointerEvents: "auto" }} />
-      <div aria-hidden="true" className="absolute right-0 bg-scrim" style={{ top: hole.top, height: hole.height, left: hole.left + hole.width, pointerEvents: "auto" }} />
+      <div aria-hidden="true" className="absolute inset-x-0 top-0" style={{ height: hole.top, pointerEvents: "auto" }} />
+      <div aria-hidden="true" className="absolute inset-x-0" style={{ top: hole.top + hole.height, bottom: 0, pointerEvents: "auto" }} />
+      <div aria-hidden="true" className="absolute left-0" style={{ top: hole.top, height: hole.height, width: hole.left, pointerEvents: "auto" }} />
+      <div aria-hidden="true" className="absolute right-0" style={{ top: hole.top, height: hole.height, left: hole.left + hole.width, pointerEvents: "auto" }} />
       {!interactive && (
         <div aria-hidden="true" className="absolute" style={{ top: hole.top, left: hole.left, width: hole.width, height: hole.height, pointerEvents: "auto" }} />
       )}
-      <div
-        aria-hidden="true"
-        className="absolute rounded-xl border-2 border-sky"
-        style={{ top: hole.top, left: hole.left, width: hole.width, height: hole.height }}
-      />
 
       <div
         ref={cardRef}
@@ -195,7 +205,7 @@ export function Spotlight({ target, labelledBy, interactive = false, onEscape, o
         onKeyDown={onKeyDown}
         data-onboarding-card
         data-placement={place.side}
-        className="absolute rounded-[18px] bg-card text-text shadow-2xl outline-none"
+        className="group absolute rounded-[18px] bg-card text-text shadow-2xl outline-none"
         style={{ left: place.left, top: place.top, width: place.width, pointerEvents: "auto" }}
       >
         <div className="flex flex-col gap-3 overflow-y-auto rounded-[18px] p-4" style={{ maxHeight: place.maxHeight }}>

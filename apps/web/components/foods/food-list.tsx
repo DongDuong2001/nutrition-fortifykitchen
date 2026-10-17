@@ -73,6 +73,8 @@ export function FoodList({
   dataTour,
 }: FoodListProps) {
   const firstHeaderKey = list.grouped ? list.groups[0]?.key : undefined;
+  // The first row on screen, for the tour: it spotlights the search field and this row together
+  const firstFoodId = list.grouped ? list.groups[0]?.foods[0]?.id : list.foods[0]?.id;
 
   const renderRow = (food: FoodItem, withCategory: boolean) => {
     const selected = selectedId === food.id || !!selectedIds?.includes(food.id);
@@ -81,7 +83,7 @@ export function FoodList({
     const showHeart = list.grouped && !!isFavourite?.(food);
     const carried = !!tray?.ids.includes(food.id);
     return (
-      <li key={food.id} className={`flex items-center border-t border-divider first:border-t-0 ${carried ? "bg-blue/10" : ""}`}>
+      <li key={food.id} data-tour={dataTour && food.id === firstFoodId ? `${dataTour}-first` : undefined} className={`flex items-center border-t border-divider first:border-t-0 ${carried ? "bg-blue/10" : ""}`}>
         <button
           type="button"
           data-food-row

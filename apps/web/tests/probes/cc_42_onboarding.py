@@ -64,6 +64,31 @@ def wait_card(pg, timeout=4000):
         return False
 
 
+def hint_check(pg, tag):
+    """Steps 2 to 4: the hint is plain cobalt text with an arrow, no pill, no hover state, not focusable."""
+    hint = card(pg).locator("span:has(svg)").last
+    check(hint.count() == 1 and hint.locator("svg").count() == 1, f"{tag}: the hint has an arrow icon")
+    bg = hint.evaluate("el => getComputedStyle(el).backgroundColor")
+    check(bg in ("rgba(0, 0, 0, 0)", "transparent"), f"{tag}: the hint has no pill background ({bg})")
+    focusable = card(pg).locator('button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])').count()
+    check(focusable == 1, f"{tag}: only Bỏ qua hướng dẫn is focusable in the card ({focusable})")
+    check(hint.evaluate("el => el.getAttribute('tabindex') === null && el.tagName === 'SPAN'"), f"{tag}: the hint is a plain span")
+
+
+def hole_check(pg, tag):
+    """Step 3: the hole is round like the card and covers the search field and the first result, not the whole list."""
+    hole = pg.locator("[data-onboarding-overlay] > div.border-sky").first
+    radius = hole.evaluate("el => getComputedStyle(el).borderTopLeftRadius")
+    check(radius == "18px", f"{tag}: the hole radius is the card's 18 px ({radius})")
+    box = hole.bounding_box()
+    field = pg.locator('[data-tour="food-search"]:visible').first.bounding_box()
+    first = pg.locator('[data-tour="add-results-first"]:visible').first.bounding_box()
+    check(box and field and first and box["y"] <= field["y"] and box["y"] + box["height"] >= first["y"] + first["height"], f"{tag}: the hole holds the search field and the first result")
+    rows = pg.locator("button[data-food-row]:visible").count()
+    last = pg.locator("button[data-food-row]:visible").last.bounding_box()
+    check(rows < 2 or (last and box["y"] + box["height"] < last["y"] + last["height"]), f"{tag}: the hole stops at the first result, not the whole list ({rows} rows)")
+
+
 def flags(pg):
     raw = pg.evaluate("() => localStorage.getItem('h1t_settings_v1_demo')")
     try:
@@ -128,6 +153,7 @@ def tour_phone(browser):
     card(pg).get_by_role("button", name="Tiếp").click()
     pg.wait_for_timeout(500)
     check("Bước 2/5" in card(pg).inner_text(), "step 2: Bước 2/5 after Tiếp")
+    hint_check(pg, "step 2")
     check(card(pg).get_by_role("button", name="Tiếp").count() == 0, "step 2: no Tiếp, it waits for the real tap")
     shot(pg, "tour-2-390")
     # The hole lets the tap through to the real + button
@@ -136,11 +162,14 @@ def tour_phone(browser):
     pg.wait_for_timeout(700)
     check("Bước 3/5" in card(pg).inner_text(), "step 3: the add sheet opened by the real tap")
     check(pg.locator('input[type="search"]:visible, input[placeholder*="Tìm món"]:visible').first.input_value() == "phở", "step 3: the search starts with phở")
+    hole_check(pg, "step 3")
+    hint_check(pg, "step 3")
     shot(pg, "tour-3-390")
     pg.locator("button[data-food-row]:visible").first.click()
     pg.wait_for_timeout(600)
     check("Bước 4/5" in card(pg).inner_text(), "step 4: a food was picked, the portion panel is the target")
     check("Chạm Thêm vào" in card(pg).inner_text(), f"step 4: the hint names the real button ({card(pg).inner_text()[-60:]!r})")
+    hint_check(pg, "step 4")
     shot(pg, "tour-4-390")
     pg.locator('[data-tour="portion-add"]:visible').click()
     pg.wait_for_url(BASE + "/")
@@ -205,6 +234,7 @@ def tour_desktop(browser):
     pg.wait_for_url("**/add*")
     pg.wait_for_timeout(800)
     check("Bước 3/5" in card(pg).inner_text(), "1440 step 3: the add modal")
+    hole_check(pg, "1440 step 3")
     shot(pg, "tour-3-1440")
     pg.locator("button[data-food-row]:visible").first.click()
     pg.wait_for_timeout(600)

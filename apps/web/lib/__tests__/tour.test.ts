@@ -13,6 +13,11 @@ describe("tour steps", () => {
     expect(TOUR_STEPS.map((s) => s.advance)).toEqual(["button", "action", "action", "action", "button"]);
   });
 
+  it("the search step spotlights the search field and the first result only, not the whole list", () => {
+    const search = TOUR_STEPS.find((s) => s.id === "search");
+    expect(search?.target).toEqual(["food-search", "add-results-first"]);
+  });
+
   it("each step names the screen it lives on", () => {
     expect(TOUR_STEPS.map((s) => s.path)).toEqual(["/", "/", "/add", "/add", "/"]);
   });

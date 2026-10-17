@@ -14,8 +14,8 @@ export type TourAction = "add-opened" | "food-picked" | "portion-confirmed";
 
 export interface TourStep {
   id: TourStepId;
-  /** The element the spotlight measures: data-tour="<target>" */
-  target: string;
+  /** The element the spotlight measures: data-tour="<target>". Several: the hole is the box around all of them. */
+  target: string | readonly string[];
   /** The screen the step lives on */
   path: "/" | "/add";
   advance: "button" | "action";
@@ -26,7 +26,7 @@ export interface TourStep {
 export const TOUR_STEPS: readonly TourStep[] = [
   { id: "kcal", target: "home-hero", path: "/", advance: "button" },
   { id: "add", target: "nav-add", path: "/", advance: "action", action: "add-opened" },
-  { id: "search", target: "add-results", path: "/add", advance: "action", action: "food-picked" },
+  { id: "search", target: ["food-search", "add-results-first"], path: "/add", advance: "action", action: "food-picked" },
   { id: "portion", target: "portion-panel", path: "/add", advance: "action", action: "portion-confirmed" },
   { id: "result", target: "nutrient-column", path: "/", advance: "button" },
 ];
