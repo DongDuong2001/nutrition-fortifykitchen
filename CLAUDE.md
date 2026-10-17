@@ -16,6 +16,7 @@ The shared rules above apply to every agent. Everything below applies only to Cl
 - **Port 3101** for Claude Code (Antigravity owns 3100). The port rules in AGENTS.md apply with 3101 instead of 3100. For `npm run test:align`, set `ALIGN_BASE_URL=http://localhost:3101`.
 - **Claude Code #2** works in its own clone, on `feat/ui-cc2-<n>` branches, port **3102** (`npm run dev:3102`, `ALIGN_BASE_URL=http://localhost:3102`). Same lane rules as AGENTS.md: fetch and rebase on `feat/ui` before each task, claim files on the Now working board, and never edit another row's files.
 - When done, rebase onto `feat/ui`, run all gates and push the branch. Merge with `--ff-only` into `feat/ui` (and `main`) only after Hao has reviewed it and says to merge (AGENTS.md, "Review first").
+- Every merge to main that users can see adds or extends the top RELEASES entry in lib/releases.ts (Vietnamese, user words, no tech terms) and bumps sw.js VERSION.
 - After merging, switch your clone back to your feat/ui-cc-* (or feat/ui-cc2-*) branch; never leave it on feat/ui.
 
 ## Saving quota

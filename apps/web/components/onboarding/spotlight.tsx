@@ -30,7 +30,15 @@ export interface SpotlightProps {
   /** data-tour="<target>": the element to point at, measured live (never fixed coordinates). Several: the hole is the box around all of them. */
   target: string | readonly string[];
   /** The dialog's accessible name (an element id inside the card) */
-  labelledBy: string;
+  labelledBy?: string;
+  /** Or the name itself ("Hướng dẫn bước 1 trên 3") */
+  ariaLabel?: string;
+  /** Pointed at when the target is not on screen at the first look (cc-46) */
+  fallback?: string;
+  /** Scroll the target into view first (cc-46) */
+  scroll?: boolean;
+  /** "news": the "Có gì mới" tour, 70 % ink dim and a 16 px card */
+  tone?: "tip" | "news";
   /** A round 44 px hole centred on the element (a small icon button), instead of the rounded box around it */
   round?: boolean;
   /** An action step: taps reach the highlighted element. Otherwise the whole page is blocked. */
@@ -49,7 +57,20 @@ export interface SpotlightProps {
  * follows the element (ResizeObserver, scroll and resize), so nothing here is hard-coded. role="dialog" and
  * aria-modal; focus moves to the card and goes back afterwards. Mount it on the client only (after mount).
  */
-export function Spotlight({ target, labelledBy, round = false, interactive = false, onEscape, onMissing, onShown, children }: SpotlightProps) {
+export function Spotlight({
+  target,
+  labelledBy,
+  ariaLabel,
+  fallback,
+  scroll = false,
+  tone = "tip",
+  round = false,
+  interactive = false,
+  onEscape,
+  onMissing,
+  onShown,
+  children,
+}: SpotlightProps) {
   const [box, setBox] = useState<Box | null>(null);
   const [view, setView] = useState({ width: 0, height: 0 });
   const [cardSize, setCardSize] = useState({ width: 0, height: 0 });
@@ -85,6 +106,7 @@ export function Spotlight({ target, labelledBy, round = false, interactive = fal
 
     const attach = (els: HTMLElement[]) => {
       elements = els;
+      if (scroll) els[0].scrollIntoView({ block: "center" });
       observer = new ResizeObserver(schedule);
       for (const el of els) observer.observe(el);
       window.addEventListener("scroll", schedule, true);
@@ -96,9 +118,14 @@ export function Spotlight({ target, labelledBy, round = false, interactive = fal
       }
     };
 
+    let first = true;
     const tryFind = () => {
       const found = ids.map(findTarget);
-      if (found.every((el): el is HTMLElement => el !== null)) {
+      const alternative = first && fallback ? findTarget(fallback) : null;
+      first = false;
+      if (!found.every((el) => el !== null) && alternative) {
+        attach([alternative]);
+      } else if (found.every((el): el is HTMLElement => el !== null)) {
         if (poll) clearInterval(poll);
         poll = null;
         attach(found);
@@ -118,7 +145,7 @@ export function Spotlight({ target, labelledBy, round = false, interactive = fal
       window.removeEventListener("scroll", schedule, true);
       window.removeEventListener("resize", schedule);
     };
-  }, [targetKey]);
+  }, [targetKey, fallback, scroll]);
 
   // The card's own size decides above or below
   useLayoutEffect(() => {
@@ -180,13 +207,17 @@ export function Spotlight({ target, labelledBy, round = false, interactive = fal
   if (!box || view.width === 0) return null;
   const hole = round ? roundHole(box) : holeFor(box, view);
   const place = cardPlacement(hole, view, cardSize);
+  const news = tone === "news";
+  const radius = news ? "rounded-2xl" : "rounded-[18px]";
 
   return (
     <div data-onboarding-overlay className="fixed inset-0 z-[60]" style={{ pointerEvents: "none" }}>
       {/* The dim is the shadow of the hole, so the hole's corners are round like the card's (18 px) */}
       <div
         aria-hidden="true"
-        className={`absolute border-2 border-sky shadow-[0_0_0_100vmax_var(--color-scrim)] ${round ? "rounded-full" : "rounded-[18px]"}`}
+        className={`absolute border-2 border-sky ${
+          news ? "shadow-[0_0_0_100vmax_color-mix(in_srgb,var(--color-ink)_70%,transparent)]" : "shadow-[0_0_0_100vmax_var(--color-scrim)]"
+        } ${round ? "rounded-full" : radius}`}
         style={{ top: hole.top, left: hole.left, width: hole.width, height: hole.height }}
       />
       {/* Four panels leave the hole open; the page under the hole stays tappable only in an action step */}
@@ -202,15 +233,16 @@ export function Spotlight({ target, labelledBy, round = false, interactive = fal
         ref={cardRef}
         role="dialog"
         aria-modal="true"
-        aria-labelledby={labelledBy}
+        aria-labelledby={ariaLabel ? undefined : labelledBy}
+        aria-label={ariaLabel}
         tabIndex={-1}
         onKeyDown={onKeyDown}
         data-onboarding-card
         data-placement={place.side}
-        className="group absolute rounded-[18px] bg-card text-text shadow-2xl outline-none"
+        className={`group absolute ${radius} bg-card text-text shadow-2xl outline-none`}
         style={{ left: place.left, top: place.top, width: place.width, pointerEvents: "auto" }}
       >
-        <div className="flex flex-col gap-3 overflow-y-auto rounded-[18px] p-4" style={{ maxHeight: place.maxHeight }}>
+        <div className={`flex flex-col gap-3 overflow-y-auto ${radius} p-4`} style={{ maxHeight: place.maxHeight }}>
           {children}
         </div>
         <span

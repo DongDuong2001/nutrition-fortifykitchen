@@ -29,6 +29,7 @@ export function BottomNav({ currentTab, className = "" }: BottomNavProps) {
       <Link
         key={item.tab}
         href={item.href}
+        data-tour={item.tab === "settings" ? "nav-settings" : undefined}
         aria-current={isActive ? "page" : undefined}
         className={`relative flex flex-col items-center justify-center gap-[2px] min-h-[56px] text-xs font-semibold no-underline transition-colors active:scale-[0.97] motion-reduce:active:scale-100 ${
           isActive ? "text-on-dark" : "text-muted-on-dark hover:text-on-dark"

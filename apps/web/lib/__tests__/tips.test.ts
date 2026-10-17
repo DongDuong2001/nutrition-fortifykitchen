@@ -80,18 +80,20 @@ describe("pickTip", () => {
 
 describe("the flags", () => {
   it("start empty: tour not done, tips on, nothing seen or used", () => {
-    expect(DEFAULT_FLAGS).toEqual({ tourDone: false, tipsOff: false, seen: [], used: [], replayOpened: false, tourStartedIso: null });
+    expect(DEFAULT_FLAGS).toEqual({ tourDone: false, tipsOff: false, seen: [], used: [], replayOpened: false, tourStartedIso: null, whatsNewSeen: null });
   });
 
   it("read from storage, with anything wrong ignored", () => {
-    expect(parseFlags({ tourDone: true, tipsOff: true, seen: ["a", 3, "b"], used: "x", replayOpened: true })).toEqual({
+    expect(parseFlags({ tourDone: true, tipsOff: true, seen: ["a", 3, "b"], used: "x", replayOpened: true, whatsNewSeen: 7 })).toEqual({
       tourDone: true,
       tipsOff: true,
       seen: ["a", "b"],
       used: [],
       replayOpened: true,
       tourStartedIso: null,
+      whatsNewSeen: null,
     });
+    expect(parseFlags({ whatsNewSeen: "2026-10-17" }).whatsNewSeen).toBe("2026-10-17");
     expect(parseFlags(null)).toEqual(DEFAULT_FLAGS);
     expect(parseFlags("nope")).toEqual(DEFAULT_FLAGS);
   });

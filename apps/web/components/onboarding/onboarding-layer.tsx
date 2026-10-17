@@ -8,9 +8,24 @@ import { useDiary } from "@/lib/diary-store";
 import { getTodayIsoVN } from "@/lib/date";
 import { DEFAULT_FLAGS, type OnboardingFlags } from "@/lib/onboarding-flags";
 import { finishTour, loadFlags, markTipSeen, onboardingDisabled, setTipsOff, subscribeFlags } from "@/lib/onboarding-store";
+import { HOME_ROUTE } from "@/lib/nav";
+import { releaseById, type ReleaseTourStep } from "@/lib/releases";
 import { TIPS, pickTip, type Tip } from "@/lib/tips";
 import { TOUR_STEPS, tourReduce, tourStepFor, type TourState } from "@/lib/tour";
-import { emitSignal, readTour, setTipBusy, subscribeSignal, subscribeTour, writeTour } from "@/lib/tour-bus";
+import {
+  emitSignal,
+  isOverlayOpen,
+  readTour,
+  readWhatsNewTour,
+  setOverlayOpen,
+  setTipBusy,
+  subscribeSignal,
+  subscribeTipBusy,
+  subscribeTour,
+  writeTour,
+  writeWhatsNewTour,
+  type WhatsNewTour,
+} from "@/lib/tour-bus";
 
 const OFF: TourState = { status: "off" };
 const TIP_DELAY_MS = 500;
@@ -104,6 +119,37 @@ function TourCard({ index, onNext, onSkip }: { index: number; onNext: () => void
   );
 }
 
+/** A step of the "Có gì mới" tour (WNTour): "Mới · n/3", title, body, dots, Bỏ qua / Tiếp / Xong. */
+function WhatsNewCard({ step, index, total, onNext, onSkip }: { step: ReleaseTourStep; index: number; total: number; onNext: () => void; onSkip: () => void }) {
+  const last = index === total - 1;
+  return (
+    <>
+      <p className="m-0 text-xs font-bold text-cobalt">
+        Mới · {index + 1}/{total}
+      </p>
+      <h2 className="m-0 text-lg font-bold leading-snug">{step.title}</h2>
+      <p className="m-0 text-[15px] leading-relaxed text-secondary">{step.body}</p>
+      <div className="flex items-center justify-between gap-2">
+        <span aria-hidden="true" className="flex gap-1">
+          {Array.from({ length: total }, (_, i) => (
+            <span key={i} className={`h-2 w-2 rounded-full ${i === index ? "bg-cobalt" : "bg-divider"}`} />
+          ))}
+        </span>
+        <div className="flex items-center gap-1">
+          {!last && (
+            <button type="button" onClick={onSkip} className={quietButton}>
+              Bỏ qua
+            </button>
+          )}
+          <button type="button" onClick={onNext} className={primaryButton}>
+            {last ? "Xong" : "Tiếp"}
+          </button>
+        </div>
+      </div>
+    </>
+  );
+}
+
 function TipCard({ tip, onGotIt, onTry, onTurnOff }: { tip: Tip; onGotIt: () => void; onTry: () => void; onTurnOff: () => void }) {
   return (
     <>
@@ -149,6 +195,9 @@ export function OnboardingLayer() {
   const [flags, setFlags] = useState<OnboardingFlags>(DEFAULT_FLAGS);
   const [tipId, setTipId] = useState<string | null>(null);
   const [selectMode, setSelectMode] = useState(false);
+  // The "Có gì mới" tour (cc-46), and whether its sheet is open (no tip then)
+  const [wn, setWn] = useState<WhatsNewTour | null>(null);
+  const [wnSheet, setWnSheet] = useState(false);
   // One tip per visit: reset when the route changes (or Chọn nhiều món opens)
   const visit = useRef({ path: "", tipShown: false });
   const foodsToday = data.meals.reduce((n, m) => n + m.items.length, 0);
@@ -177,22 +226,34 @@ export function OnboardingLayer() {
     setMounted(true);
     setFlags(loadFlags());
     const offFlags = subscribeFlags(() => setFlags(loadFlags()));
-    const offTour = subscribeTour(() => sync(false));
+    setWn(readWhatsNewTour());
+    const offTour = subscribeTour(() => {
+      sync(false);
+      setWn(readWhatsNewTour());
+    });
+    const offBusy = subscribeTipBusy(() => setWnSheet(isOverlayOpen("whats-new")));
     const offSignal = subscribeSignal((signal) => {
       if (signal === "select-mode") {
         visit.current.tipShown = false;
         setSelectMode(true);
+        // Step 1 of "Có gì mới" moves on when the user long-presses a food
+        const current = readWhatsNewTour();
+        if (current?.index === 0) writeWhatsNewTour({ ...current, index: 1 });
       }
+      if (signal === "select-off") setSelectMode(false);
     });
     return () => {
       offFlags();
       offTour();
+      offBusy();
       offSignal();
     };
   }, [sync]);
 
   useEffect(() => {
     sync(true);
+    // "Có gì mới" runs on Hôm nay only: leaving ends it
+    if (pathname !== HOME_ROUTE && readWhatsNewTour()) writeWhatsNewTour(null);
     // A new screen is a new visit
     visit.current = { path: pathname, tipShown: false };
     setTipId(null);
@@ -200,17 +261,24 @@ export function OnboardingLayer() {
   }, [pathname, sync]);
 
   const tourActive = tour.status === "step";
+  const wnActive = wn !== null;
+  useEffect(() => setOverlayOpen("whats-new-tour", wnActive), [wnActive]);
+  useEffect(() => () => setOverlayOpen("whats-new-tour", false), []);
+  // A tour whose release or step is gone (an old session) just ends
+  useEffect(() => {
+    if (wn && !releaseById(wn.releaseId)?.tour?.[wn.index]) writeWhatsNewTour(null);
+  }, [wn]);
 
   // The tip this screen would show now (null when none is due)
   const dueTip = useCallback((): Tip | null => {
-    if (tourActive || onboardingDisabled() || visit.current.tipShown) return null;
+    if (tourActive || wnActive || wnSheet || onboardingDisabled() || visit.current.tipShown) return null;
     const date = new URLSearchParams(window.location.search).get("date");
     return pickTip({
       ctx: { pathname, pastDay: date !== null && date < getTodayIsoVN(), foodsToday, selectMode },
       flags,
       tourActive,
     });
-  }, [tourActive, pathname, foodsToday, selectMode, flags]);
+  }, [tourActive, wnActive, wnSheet, pathname, foodsToday, selectMode, flags]);
 
   // The tip of this visit, once the screen has settled
   useEffect(() => {
@@ -267,6 +335,37 @@ export function OnboardingLayer() {
         }}
       >
         <TourCard index={tour.index} onNext={() => act({ type: "next" })} onSkip={() => act({ type: "skip" })} />
+      </Spotlight>
+    );
+  }
+
+  const wnSteps = wn ? releaseById(wn.releaseId)?.tour ?? [] : [];
+  if (wn && pathname === HOME_ROUTE) {
+    const endWn = () => {
+      writeWhatsNewTour(null);
+      emitSignal("end-select");
+    };
+    const goTo = (index: number) => {
+      if (index >= wnSteps.length) return endWn();
+      // The last step points at the Cài đặt tab, which Chọn nhiều món hides on the phone
+      if (index === wnSteps.length - 1) emitSignal("end-select");
+      writeWhatsNewTour({ ...wn, index });
+    };
+    const step = wnSteps[wn.index];
+    if (!step) return null;
+    return (
+      <Spotlight
+        key={`wn-${wn.releaseId}-${wn.index}`}
+        target={step.target}
+        fallback={step.fallback}
+        scroll
+        tone="news"
+        ariaLabel={`Hướng dẫn bước ${wn.index + 1} trên ${wnSteps.length}`}
+        interactive={step.advanceOn !== undefined}
+        onEscape={endWn}
+        onMissing={() => goTo(wn.index + 1)}
+      >
+        <WhatsNewCard step={step} index={wn.index} total={wnSteps.length} onNext={() => goTo(wn.index + 1)} onSkip={endWn} />
       </Spotlight>
     );
   }

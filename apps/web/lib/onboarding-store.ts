@@ -24,6 +24,18 @@ export function onboardingDisabled(): boolean {
   }
 }
 
+/** The same kind of switch for "Có gì mới" alone (cc-46): the probes set it so the sheet stays away unless a probe tests it. */
+export const WHATS_NEW_OFF_KEY = "h1t_whats_new_off";
+
+export function whatsNewDisabled(): boolean {
+  if (onboardingDisabled()) return true;
+  try {
+    return onboardingSwitchHonoured(globalThis.localStorage?.getItem(WHATS_NEW_OFF_KEY) ?? null, process.env.NODE_ENV, process.env.NEXT_PUBLIC_DEMO_BUILD);
+  } catch {
+    return false;
+  }
+}
+
 export function loadFlags(): OnboardingFlags {
   return loadSettings().onboarding;
 }
@@ -52,3 +64,5 @@ export const setTipsOff = (off: boolean) => update((f) => setTipsOffIn(f, off));
 export const finishTour = () => update((f) => ({ ...f, tourDone: true }));
 export const openReplay = () => update((f) => ({ ...f, replayOpened: true }));
 export const markTourStarted = (iso: string) => update((f) => markTourStartedIn(f, iso));
+/** The "Có gì mới" sheet of this release was closed (or setup finished: a new account starts with the onboarding tour instead) */
+export const markWhatsNewSeen = (id: string) => update((f) => ({ ...f, whatsNewSeen: id }));

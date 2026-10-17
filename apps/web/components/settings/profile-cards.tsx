@@ -230,6 +230,9 @@ export function AppCard() {
         </Row>
       </RowGroup>
       <RowGroup>
+        <Row icon={SETTINGS_ICONS.news} label="Có gì mới" href="/settings/whats-new" className="min-h-[56px]" />
+      </RowGroup>
+      <RowGroup>
         <Row icon={SETTINGS_ICONS.tips} label="Mẹo trên từng màn hình" hint="Bật lại để xem mẹo lần đầu" showChevron={false} className="min-h-[56px]">
           <Switch
             checked={flags ? !flags.tipsOff : true}

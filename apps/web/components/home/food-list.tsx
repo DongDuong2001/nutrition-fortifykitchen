@@ -320,7 +320,7 @@ export function FoodList({
             }`}
           >
             <div className={`sticky top-0 z-10 ${pill.wrap}`}>
-            <div data-ink-pill className={`${pill.pill} ${mealSelected ? "bg-cobalt" : "bg-ink"} text-on-dark ${isDropTarget ? "ring-2 ring-sky" : ""}`}>
+            <div data-ink-pill data-tour="meal-pill" className={`${pill.pill} ${mealSelected ? "bg-cobalt" : "bg-ink"} text-on-dark ${isDropTarget ? "ring-2 ring-sky" : ""}`}>
               <button
                 type="button"
                 aria-pressed={mealSelected}

@@ -14,6 +14,8 @@ export interface SheetProps {
   className?: string;
   /** At 1024 px and up, show as a centred dialog instead of a bottom sheet. The phone keeps the sheet. */
   desktopDialog?: boolean;
+  /** The id of the element that takes focus on open (a heading with tabIndex -1), instead of the first control. */
+  initialFocusId?: string;
 }
 
 const FOCUSABLE_SELECTOR =
@@ -29,6 +31,7 @@ export function Sheet({
   children,
   className = "",
   desktopDialog = false,
+  initialFocusId,
 }: SheetProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const openerRef = useRef<HTMLElement | null>(null);
@@ -47,7 +50,10 @@ export function Sheet({
 
     // Move focus into the dialog
     const focusTimer = setTimeout(() => {
-      if (dialogRef.current) {
+      const initial = initialFocusId ? document.getElementById(initialFocusId) : null;
+      if (initial) {
+        initial.focus();
+      } else if (dialogRef.current) {
         const focusables = dialogRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
         if (focusables.length > 0) {
           focusables[0].focus();
@@ -78,7 +84,8 @@ export function Sheet({
         const last = focusables[focusables.length - 1];
 
         if (e.shiftKey) {
-          if (document.activeElement === first || document.activeElement === dialogRef.current) {
+          // From the first control, the dialog itself or a focused heading, Shift+Tab wraps to the last control
+          if (document.activeElement === first || !focusables.includes(document.activeElement as HTMLElement)) {
             e.preventDefault();
             last.focus();
           }
@@ -99,7 +106,7 @@ export function Sheet({
       document.body.style.overflow = originalOverflow;
       openerRef.current?.focus?.();
     };
-  }, [open]);
+  }, [open, initialFocusId]);
 
   if (!open) return null;
 
