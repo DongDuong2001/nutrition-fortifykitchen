@@ -8,7 +8,8 @@ import { Card } from "@/components/ui/card";
 import { ChipGroup } from "@/components/ui/chip-group";
 import { FoodRowLink } from "@/components/foods/food-row-link";
 import { useDiary } from "@/lib/diary-store";
-import { browsableFoods } from "@/lib/mock/foods";
+import { CatalogStatus } from "@/components/foods/catalog-status";
+import { useCatalogFoods } from "@/hooks/use-catalog-foods";
 import { getNutrientDefinition } from "@/lib/nutrients";
 import { formatAmount } from "@/lib/format";
 import { isRichNutrientId, richInFoods, richName, type RichBasis } from "@/lib/rich-in";
@@ -18,14 +19,15 @@ import { useBack } from "@/hooks/use-back";
 export default function RichInPage() {
   const params = useParams<{ nutrient: string }>();
   const goBack = useBack();
-  const { targets, demo } = useDiary();
+  const { targets } = useDiary();
   const [basis, setBasis] = useState<RichBasis>("per100");
 
   const id = params?.nutrient ?? "";
   const valid = isRichNutrientId(id);
   const definition = valid ? getNutrientDefinition(id) : undefined;
   const min = valid ? (targets[id]?.min ?? null) : null;
-  const rows = useMemo(() => (valid ? richInFoods(browsableFoods(), id, basis, min) : []), [valid, id, basis, min, demo]);
+  const { foods, pending, failed, retry } = useCatalogFoods();
+  const rows = useMemo(() => (valid ? richInFoods(foods, id, basis, min) : []), [valid, id, basis, min, foods]);
   if (!valid || !definition) notFound();
 
   const name = richName(definition.nameVi);
@@ -49,7 +51,9 @@ export default function RichInPage() {
           ]}
         />
         <Card as="section" aria-label={`Món giàu ${name}`} className="flex flex-col">
-          {rows.length === 0 ? (
+          {rows.length === 0 && (pending || failed) ? (
+            <CatalogStatus failed={failed} onRetry={retry} />
+          ) : rows.length === 0 ? (
             <p className="m-0 py-3 text-[13px] leading-snug text-secondary">Chưa có món nào có dữ liệu {name}. Bạn có thể tự tạo món mới từ nhãn bao bì.</p>
           ) : (
             rows.map((row, i) => (

@@ -1,3 +1,5 @@
+import { getTodayIsoVN } from "./date";
+import { markTourStarted } from "./onboarding-store";
 import { tourReduce, type TourAction, type TourEvent, type TourState } from "./tour";
 
 /**
@@ -39,6 +41,7 @@ export function subscribeTour(listener: Listener): () => void {
 }
 
 export function startTour(): void {
+  markTourStarted(getTodayIsoVN());
   writeTour(tourReduce(OFF, { type: "start" }));
 }
 
@@ -57,4 +60,22 @@ export const emitSignal = (signal: UiSignal) => signalListeners.forEach((l) => l
 export function subscribeSignal(listener: (signal: UiSignal) => void): () => void {
   signalListeners.add(listener);
   return () => signalListeners.delete(listener);
+}
+
+/**
+ * Whether a first-visit tip is open or due on the screen shown (OnboardingLayer sets it). Things that must not open
+ * on top of a tip, like the install pop-up, wait while it is true.
+ */
+let tipBusy: boolean | null = null;
+const busyListeners = new Set<Listener>();
+/** null: the layer has not looked yet (or is not mounted), so a tip may still turn up. */
+export const isTipBusy = (): boolean | null => tipBusy;
+export function setTipBusy(next: boolean | null): void {
+  if (next === tipBusy) return;
+  tipBusy = next;
+  busyListeners.forEach((l) => l());
+}
+export function subscribeTipBusy(listener: Listener): () => void {
+  busyListeners.add(listener);
+  return () => busyListeners.delete(listener);
 }

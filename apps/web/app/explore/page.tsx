@@ -9,8 +9,8 @@ import { ChipRow } from "@/components/foods/chip-row";
 import { FoodListCard } from "@/components/foods/food-list-card";
 import { FoodSearchField } from "@/components/foods/food-search-field";
 import { ExploreSections } from "@/components/explore/explore-sections";
-import { browsableFoods } from "@/lib/mock/foods";
-import { useDiary } from "@/lib/diary-store";
+import { CatalogNote, CatalogStatus } from "@/components/foods/catalog-status";
+import { useCatalogFoods } from "@/hooks/use-catalog-foods";
 import { searchFoods } from "@/lib/search";
 import { FOOD_CATEGORIES, categoryLabel, categoryOf } from "@/lib/food-categories";
 import { coachingAvailable } from "@/lib/coaching-link";
@@ -24,8 +24,9 @@ export default function ExplorePage() {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const searching = query.trim().length > 0;
-  const { demo } = useDiary();
-  const results = useMemo(() => searchFoods(browsableFoods(), query), [query, demo]);
+  const { foods, pending, failed, retry } = useCatalogFoods();
+  const results = useMemo(() => searchFoods(foods, query), [query, foods]);
+  const waiting = results.length === 0 && (pending || failed);
 
   const chips = [
     { id: "all", label: "Tất cả", active: true },
@@ -59,17 +60,22 @@ export default function ExplorePage() {
         <div data-align-group="add-list" data-align-edge="left" className="flex flex-col gap-4">
           {searching ? (
             <>
+              {pending && results.length > 0 && <CatalogNote />}
               <FoodListCard
                 title={`Kết quả cho “${query.trim()}”`}
                 foods={results.map((food) => ({ food }))}
                 withCategory={(food) => categoryLabel(categoryOf(food))}
                 empty={
-                  <div className="flex flex-col gap-3 py-2">
-                    <p className="m-0 text-[13px] leading-snug text-secondary">
-                      Không có món nào khớp. Thử từ ngắn hơn, bỏ dấu, hoặc tạo món mới.
-                    </p>
-                    <CreateFoodButton href="/foods/new" helper={null} />
-                  </div>
+                  waiting ? (
+                    <CatalogStatus failed={failed} onRetry={retry} />
+                  ) : (
+                    <div className="flex flex-col gap-3 py-2">
+                      <p className="m-0 text-[13px] leading-snug text-secondary">
+                        Không có món nào khớp. Thử từ ngắn hơn, bỏ dấu, hoặc tạo món mới.
+                      </p>
+                      <CreateFoodButton href="/foods/new" helper={null} />
+                    </div>
+                  )
                 }
               />
             </>

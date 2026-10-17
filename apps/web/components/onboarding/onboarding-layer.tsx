@@ -10,7 +10,7 @@ import { DEFAULT_FLAGS, type OnboardingFlags } from "@/lib/onboarding-flags";
 import { finishTour, loadFlags, markTipSeen, onboardingDisabled, setTipsOff, subscribeFlags } from "@/lib/onboarding-store";
 import { TIPS, pickTip, type Tip } from "@/lib/tips";
 import { TOUR_STEPS, tourReduce, tourStepFor, type TourState } from "@/lib/tour";
-import { readTour, subscribeSignal, subscribeTour, writeTour } from "@/lib/tour-bus";
+import { readTour, setTipBusy, subscribeSignal, subscribeTour, writeTour } from "@/lib/tour-bus";
 
 const OFF: TourState = { status: "off" };
 const TIP_DELAY_MS = 500;
@@ -190,23 +190,34 @@ export function OnboardingLayer() {
 
   const tourActive = tour.status === "step";
 
-  // The tip of this visit, once the screen has settled
-  useEffect(() => {
-    if (!mounted || tourActive || onboardingDisabled() || visit.current.tipShown || tipId) return;
-    const search = new URLSearchParams(window.location.search);
-    const date = search.get("date");
-    const tip = pickTip({
+  // The tip this screen would show now (null when none is due)
+  const dueTip = useCallback((): Tip | null => {
+    if (tourActive || onboardingDisabled() || visit.current.tipShown) return null;
+    const date = new URLSearchParams(window.location.search).get("date");
+    return pickTip({
       ctx: { pathname, pastDay: date !== null && date < getTodayIsoVN(), foodsToday, selectMode },
       flags,
       tourActive,
     });
+  }, [tourActive, pathname, foodsToday, selectMode, flags]);
+
+  // The tip of this visit, once the screen has settled
+  useEffect(() => {
+    if (!mounted || tipId) return;
+    const tip = dueTip();
     if (!tip) return;
     const timer = setTimeout(() => {
       visit.current.tipShown = true;
       setTipId(tip.id);
     }, TIP_DELAY_MS);
     return () => clearTimeout(timer);
-  }, [mounted, tourActive, pathname, foodsToday, selectMode, flags, tipId]);
+  }, [mounted, tipId, dueTip]);
+
+  // Others that open by themselves (the install pop-up) wait while a tip is open or due
+  useEffect(() => {
+    if (mounted) setTipBusy(tipId !== null || dueTip() !== null);
+  }, [mounted, tipId, dueTip]);
+  useEffect(() => () => setTipBusy(null), []);
 
   if (!mounted) return null;
 

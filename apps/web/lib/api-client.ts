@@ -7,10 +7,11 @@ import {
   type MockMicroStat,
 } from "./mock/sample-day";
 import { calculateTargets } from "./targets";
-import { MOCK_FOODS, setCatalogFoods, type FoodItem } from "./mock/foods";
+import { MOCK_FOODS, addCatalogFood, catalogChanged, setCatalogFoods, setCatalogStatus, type FoodItem } from "./mock/foods";
 import { searchFoods as searchMockFoods } from "./search";
 import type { SetupProfile } from "./onboarding";
-import { OFFLINE_OUTBOX_KEY, accountStorage } from "./storage-keys";
+import { currentAccountId } from "./auth-actions";
+import { OFFLINE_OUTBOX_KEY, accountStorage, browserSession, keyedStorage, type KeyValueStore } from "./storage-keys";
 import { type CoachProfile, filterCoachesBySpecialty, getCoachById } from "./coaches";
 import { type LeaderboardPeriod, type LeaderboardResponse, getMockLeaderboard, setLeaderboardOptIn as setLeaderboardOptInState } from "./leaderboard";
 import { readStoredProfile, type Profile } from "./profile";
@@ -207,6 +208,83 @@ export interface LogMealPayload {
 
 /** Thrown by searchFoods in live mode when /foods did not answer. */
 export const FOODS_UNAVAILABLE = "foods_unavailable";
+
+// The whole catalogue, kept for a while so a repeat visit does not page /foods again
+const FOODS_PAGE_LIMIT = 500;
+const FOODS_MAX_PAGES = 30;
+const FOODS_CACHE_KEY = "h1t_foods_cache_v1";
+const FOODS_CACHE_MS = 10 * 60 * 1000;
+
+function foodsCache(): KeyValueStore | null {
+  const session = browserSession();
+  return session ? keyedStorage(session, false, currentAccountId()) : null;
+}
+
+function readFoodsCache(cache: KeyValueStore | null): FoodItem[] | null {
+  try {
+    const parsed = JSON.parse(cache?.getItem(FOODS_CACHE_KEY) ?? "null");
+    if (parsed && Date.now() - parsed.at < FOODS_CACHE_MS && Array.isArray(parsed.foods) && parsed.foods.length > 0) return parsed.foods;
+  } catch {
+    // Unreadable: load again
+  }
+  return null;
+}
+
+function writeFoodsCache(cache: KeyValueStore | null, foods: FoodItem[]): void {
+  try {
+    cache?.setItem(FOODS_CACHE_KEY, JSON.stringify({ at: Date.now(), foods }));
+  } catch {
+    // Storage full or blocked: the next visit loads again
+  }
+}
+
+let foodsInFlight: Promise<FoodItem[]> | null = null;
+
+async function fetchAllFoods(): Promise<FoodItem[]> {
+  const cache = foodsCache();
+  const cached = readFoodsCache(cache);
+  if (cached) {
+    setCatalogFoods(cached);
+    setCatalogStatus("ready");
+    return cached;
+  }
+
+  setCatalogStatus("loading");
+  const collected = new Map<string, FoodItem>();
+  let complete = false;
+  try {
+    for (let page = 1; page <= FOODS_MAX_PAGES; page++) {
+      const res = await apiFetch(`/foods?limit=${FOODS_PAGE_LIMIT}&page=${page}`);
+      if (!res.ok) break;
+      const json = await res.json();
+      const payload = json.data ?? json;
+      const items = payload.items ?? (Array.isArray(payload) ? payload : null);
+      if (!Array.isArray(items)) break;
+      for (const raw of items) {
+        const food = mapApiFoodToFoodItem(raw);
+        collected.set(food.id, food);
+      }
+      const total = Number(payload.total);
+      if (total > 0 ? collected.size >= total : items.length === 0) {
+        complete = true;
+        break;
+      }
+      if (items.length === 0) break;
+    }
+  } catch {
+    // Keep what loaded
+  }
+
+  const foods = Array.from(collected.values());
+  if (foods.length === 0) {
+    setCatalogStatus("failed");
+    throw new Error("Chưa tải được danh mục món ăn");
+  }
+  setCatalogFoods(foods);
+  setCatalogStatus("ready");
+  if (complete) writeFoodsCache(cache, foods);
+  return foods;
+}
 
 export function getApiBaseUrl(): string {
   const url = process.env.NEXT_PUBLIC_API_URL;
@@ -563,6 +641,24 @@ export const apiClient = {
     return searchMockFoods(filtered, query);
   },
 
+  /**
+   * Live mode: the whole catalogue. Asks /foods?limit=500&page=1 and goes on with the next page (same limit) while
+   * fewer foods than the response's total are collected, at most 30 pages (a server that caps a page at 50 still
+   * answers every page; with no total, it stops at an empty page). Everything goes to setCatalogFoods once. A page
+   * that fails keeps what loaded before it; with nothing loaded it throws (the screen offers Thử lại). One load at a
+   * time: a call made while one runs gets the same promise. The result is kept in sessionStorage for 10 minutes, per
+   * account. Mock mode: nothing to load.
+   */
+  loadAllFoods(): Promise<FoodItem[]> {
+    if (!isLiveMode()) return Promise.resolve(MOCK_FOODS);
+    if (!foodsInFlight) {
+      foodsInFlight = fetchAllFoods().finally(() => {
+        foodsInFlight = null;
+      });
+    }
+    return foodsInFlight;
+  },
+
   async getFood(id: string): Promise<FoodItem | null> {
     if (isLiveMode()) {
       try {
@@ -622,7 +718,7 @@ export const apiClient = {
           const json = await res.json();
           const raw = json.data ?? json;
           const mapped = mapApiFoodToFoodItem(raw);
-          setCatalogFoods([mapped]);
+          addCatalogFood(mapped);
           return mapped;
         }
         let msg = `Không thể tạo món (${res.status})`;
@@ -662,6 +758,7 @@ export const apiClient = {
       },
     };
     MOCK_FOODS.unshift(newFood);
+    catalogChanged();
     return newFood;
   },
 

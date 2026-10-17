@@ -21,6 +21,7 @@ import {
 } from "@/lib/food-compare";
 import { MOCK_FOODS, type FoodItem } from "@/lib/mock/foods";
 import { markUsed } from "@/lib/onboarding-store";
+import { useCatalogFoods } from "@/hooks/use-catalog-foods";
 
 const isKnownFood = (id: string) => MOCK_FOODS.some((f) => f.id === id);
 
@@ -40,16 +41,20 @@ function CompareInner() {
   const [basis, setBasis] = useState<CompareBasis>("per100");
   const [pickerOpen, setPickerOpen] = useState(false);
 
-  const ids = useMemo(() => parseCompareIds(raw, isKnownFood), [raw]);
+  const { version, pending, failed } = useCatalogFoods();
+  // The ids are checked against the catalogue: until the live one has arrived they are kept, not dropped as unknown
+  const ids = useMemo(() => (pending || failed ? parseCompareIds(raw, () => true) : parseCompareIds(raw, isKnownFood)), [raw, version, pending, failed]);
   const foods = useMemo(
     () => ids.map((id) => MOCK_FOODS.find((f) => f.id === id)).filter((f): f is FoodItem => !!f),
-    [ids]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [ids, version]
   );
 
   // Keep the address clean: duplicates, unknown ids and a fourth id are dropped from ?ids=
   useEffect(() => {
+    if (pending || failed) return;
     if ((raw ?? "") !== ids.join(",")) router.replace(compareHref(ids));
-  }, [raw, ids, router]);
+  }, [raw, ids, router, pending, failed]);
 
   const compare = useMemo(() => (foods.length >= MIN_COMPARE_FOODS ? buildCompare(foods, basis) : null), [foods, basis]);
 

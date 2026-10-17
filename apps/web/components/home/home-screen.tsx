@@ -32,6 +32,7 @@ import {
   type HomeMode,
 } from "@/lib/home";
 import type { MealSlot } from "@/lib/meal-slot";
+import { InstallPromptHost } from "@/components/pwa/install-prompt";
 import { FoodList } from "./food-list";
 import { markUsed } from "@/lib/onboarding-store";
 import { emitSignal } from "@/lib/tour-bus";
@@ -289,6 +290,10 @@ function HomeContent() {
     day.desktopDateLabel
   );
 
+  // The install pop-up waits while anything else is open, and on a past day
+  const installBusy =
+    isPast || selecting || isCalendarOpen || isCopySheetOpen || isShareOpen || explainerOpen || dayMenuOpen || menuSlot !== null || targetSheet !== null;
+
   const chosen = chosenEntries(entries, liveSelected);
   const chosenCount = chosen.length;
   const dayLabel = clientNow ? formatDayLabel(day.date, new Date()) : day.date;
@@ -493,6 +498,7 @@ function HomeContent() {
           setMode(DAY_MODE);
         }}
       />
+      <InstallPromptHost busy={installBusy} />
       <LevelExplainerSheet open={explainerOpen} onClose={() => setExplainerOpen(false)} level={level} />
       <CopyYesterdaySheet open={isCopySheetOpen} onClose={() => setIsCopySheetOpen(false)} />
       <DayMenuSheet

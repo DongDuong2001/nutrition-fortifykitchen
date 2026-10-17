@@ -1,4 +1,5 @@
 import type { FoodCategory } from "../food-categories";
+import { isLiveMode } from "../api-mode";
 import { demoActive } from "../demo";
 import { RECIPE_DISH_FOODS, RECIPE_INGREDIENT_FOODS } from "./recipe-dishes";
 
@@ -58,10 +59,52 @@ const fdc = (id: number): FoodSourceRef => ({ db: "SR Legacy", id: `FDC ${id}`, 
  * is on. Look-ups by id (a saved entry, a recent, a favourite) read MOCK_FOODS directly and still find them.
  */
 export function browsableFoods(): FoodItem[] {
+  // Live mode lists the database's foods (and the user's own) only: the sample foods never mix in, not even before
+  // the database catalogue has arrived
+  if (isLiveMode()) return MOCK_FOODS.filter((f) => !SAMPLE_FOOD_IDS.has(f.id));
   return demoActive() ? MOCK_FOODS : MOCK_FOODS.filter((f) => !f.demoOnly);
 }
 
 const isOwnFood = (f: FoodItem) => f.source === "user" || f.category === "cua_toi";
+
+// A tiny store, so a screen re-renders when the catalogue changes (the live load arrives, a food or recipe is made).
+// useCatalogFoods (hooks) reads it with useSyncExternalStore.
+export type CatalogStatus = "idle" | "loading" | "ready" | "failed";
+
+let catalogVersionNumber = 0;
+let catalogStatusValue: CatalogStatus = "idle";
+const catalogListeners = new Set<() => void>();
+
+export const catalogVersion = (): number => catalogVersionNumber;
+export const catalogStatus = (): CatalogStatus => catalogStatusValue;
+
+export function subscribeCatalog(listener: () => void): () => void {
+  catalogListeners.add(listener);
+  return () => {
+    catalogListeners.delete(listener);
+  };
+}
+
+/** The catalogue changed: call after anything that adds to, replaces or removes from MOCK_FOODS. */
+export function catalogChanged(): void {
+  catalogVersionNumber++;
+  for (const listener of Array.from(catalogListeners)) listener();
+}
+
+/** Where the live load stands. Only a change is announced. */
+export function setCatalogStatus(next: CatalogStatus): void {
+  if (next === catalogStatusValue) return;
+  catalogStatusValue = next;
+  catalogChanged();
+}
+
+/** A food made by the user (live mode): added to the catalogue that is there, which stays as it is. */
+export function addCatalogFood(food: FoodItem): void {
+  const at = MOCK_FOODS.findIndex((f) => f.id === food.id);
+  if (at >= 0) MOCK_FOODS.splice(at, 1);
+  MOCK_FOODS.unshift(food);
+  catalogChanged();
+}
 
 /** Merges foods from the database into the catalogue: a food with the same id is replaced, every other food stays. */
 export function setCatalogFoods(foods: FoodItem[]): void {
@@ -70,6 +113,7 @@ export function setCatalogFoods(foods: FoodItem[]): void {
   for (const f of foods) byId.set(f.id, f);
   MOCK_FOODS.length = 0;
   MOCK_FOODS.push(...byId.values());
+  catalogChanged();
 }
 
 /** Live mode: the built-in sample foods are not real foods, so only the user's own stay until /foods answers. */
@@ -77,6 +121,7 @@ export function dropMockCatalog(): void {
   const own = MOCK_FOODS.filter(isOwnFood);
   MOCK_FOODS.length = 0;
   MOCK_FOODS.push(...own);
+  catalogChanged();
 }
 
 export const MOCK_FOODS: FoodItem[] = [
@@ -877,5 +922,8 @@ export const MOCK_FOODS: FoodItem[] = [
 ];
 
 MOCK_FOODS.push(...RECIPE_INGREDIENT_FOODS, ...RECIPE_DISH_FOODS);
+
+/** The ids of the sample foods above, taken before the live mode drops them or a database catalogue arrives. */
+const SAMPLE_FOOD_IDS: ReadonlySet<string> = new Set(MOCK_FOODS.map((f) => f.id));
 
 if (process.env.NEXT_PUBLIC_API_MODE === "live") dropMockCatalog();

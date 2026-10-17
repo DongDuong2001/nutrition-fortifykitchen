@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_FLAGS, markSeenIn, markUsedIn, parseFlags, setTipsOffIn, type OnboardingFlags } from "../onboarding-flags";
+import { DEFAULT_FLAGS, markSeenIn, markTourStartedIn, markUsedIn, parseFlags, setTipsOffIn, tourOpenOn, type OnboardingFlags } from "../onboarding-flags";
 import { TIPS, pickTip, type TipContext } from "../tips";
 
 const ctx = (over: Partial<TipContext> = {}): TipContext => ({ pathname: "/", pastDay: false, foodsToday: 2, ...over });
@@ -80,7 +80,7 @@ describe("pickTip", () => {
 
 describe("the flags", () => {
   it("start empty: tour not done, tips on, nothing seen or used", () => {
-    expect(DEFAULT_FLAGS).toEqual({ tourDone: false, tipsOff: false, seen: [], used: [], replayOpened: false });
+    expect(DEFAULT_FLAGS).toEqual({ tourDone: false, tipsOff: false, seen: [], used: [], replayOpened: false, tourStartedIso: null });
   });
 
   it("read from storage, with anything wrong ignored", () => {
@@ -90,6 +90,7 @@ describe("the flags", () => {
       seen: ["a", "b"],
       used: [],
       replayOpened: true,
+      tourStartedIso: null,
     });
     expect(parseFlags(null)).toEqual(DEFAULT_FLAGS);
     expect(parseFlags("nope")).toEqual(DEFAULT_FLAGS);
@@ -109,5 +110,24 @@ describe("the flags", () => {
     const on = setTipsOffIn(off, false);
     expect(on).toEqual({ ...off, tipsOff: false, seen: [] });
     expect(on.used).toEqual(["tray-add"]);
+  });
+});
+
+describe("the tour day", () => {
+  it("is open from the day it starts until it is finished or skipped", () => {
+    const started = markTourStartedIn(DEFAULT_FLAGS, "2026-10-17");
+    expect(tourOpenOn(started, "2026-10-17")).toBe(true);
+    expect(tourOpenOn({ ...started, tourDone: true }, "2026-10-17")).toBe(false);
+  });
+
+  it("is not open on another day, or when it never started", () => {
+    expect(tourOpenOn(DEFAULT_FLAGS, "2026-10-17")).toBe(false);
+    expect(tourOpenOn(markTourStartedIn(DEFAULT_FLAGS, "2026-10-16"), "2026-10-17")).toBe(false);
+  });
+
+  it("reads the day from storage and ignores a wrong value", () => {
+    expect(parseFlags({ tourStartedIso: "2026-10-17" }).tourStartedIso).toBe("2026-10-17");
+    expect(parseFlags({ tourStartedIso: 5 }).tourStartedIso).toBeNull();
+    expect(parseFlags({ tourStartedIso: "yesterday" }).tourStartedIso).toBeNull();
   });
 });

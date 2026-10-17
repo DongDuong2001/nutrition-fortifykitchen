@@ -551,7 +551,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         }
       }).catch(() => {});
 
-      apiClient.searchFoods("").catch(() => {});
+      apiClient.loadAllFoods().catch(() => {});
     }
   }, []);
 

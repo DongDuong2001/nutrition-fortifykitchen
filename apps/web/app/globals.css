@@ -18,6 +18,8 @@
   --color-cobalt: #1238D6;
   --color-blue: #1238D6;
   --color-sky: #9EC3FF;
+  /* Light cobalt wash: the phone you are on in the install sheet, and its info box. */
+  --color-cobalt-tint: #F2F5FF;
   --color-destructive: #D93F44;
   /* Darker shade of #D93F44 for text contrast >= 4.5:1 (5.30:1 on #FFFFFF, 4.70:1 on #F3F1EC) */
   --color-destructive-text: #C4373C;

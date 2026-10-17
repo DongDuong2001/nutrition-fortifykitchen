@@ -28,8 +28,8 @@ func (h *Handler) SearchFoods(w http.ResponseWriter, r *http.Request) {
 	limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
 	if limit <= 0 {
 		limit = 20
-	} else if limit > 50 {
-		limit = 50
+	} else if limit > 500 {
+		limit = 500
 	}
 	if page <= 0 {
 		page = 1

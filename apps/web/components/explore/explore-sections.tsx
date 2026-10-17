@@ -2,7 +2,8 @@
 
 import React from "react";
 import { useDiary } from "@/lib/diary-store";
-import { MOCK_FOODS, browsableFoods } from "@/lib/mock/foods";
+import { MOCK_FOODS } from "@/lib/mock/foods";
+import { useCatalogFoods } from "@/hooks/use-catalog-foods";
 import { resolveFavourites } from "@/lib/favourites";
 import { resolveRecent } from "@/lib/recent-foods";
 import { Card } from "@/components/ui/card";
@@ -26,6 +27,8 @@ const SHOWN_MEALS = 3;
 /** Gần đây, Yêu thích, Món của tôi and the "Giàu …" index: the Khám phá home when nothing is searched. */
 export function ExploreSections() {
   const { recentFoods, favouriteIds } = useDiary();
+  // Re-renders when the catalogue arrives: Gần đây and Yêu thích are looked up in it
+  const { foods: catalogue } = useCatalogFoods();
 
   const recents = recentFoods
     .flatMap((r) => {
@@ -37,7 +40,7 @@ export function ExploreSections() {
 
   const favourites = resolveFavourites(favouriteIds, MOCK_FOODS);
   // The sample user food (Bột củ dền) is demo-only: a new account owns nothing until it creates a food
-  const mine = browsableFoods().filter(isOwnFood);
+  const mine = catalogue.filter(isOwnFood);
 
   return (
     <>

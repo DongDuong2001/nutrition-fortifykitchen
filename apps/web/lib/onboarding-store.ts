@@ -2,6 +2,7 @@ import { onboardingSwitchHonoured } from "./demo";
 import { loadSettings, saveSettings } from "./settings";
 import {
   markSeenIn,
+  markTourStartedIn,
   markUsedIn,
   setTipsOffIn,
   type OnboardingFlags,
@@ -50,3 +51,4 @@ export const markUsed = (event: string) => update((f) => markUsedIn(f, event));
 export const setTipsOff = (off: boolean) => update((f) => setTipsOffIn(f, off));
 export const finishTour = () => update((f) => ({ ...f, tourDone: true }));
 export const openReplay = () => update((f) => ({ ...f, replayOpened: true }));
+export const markTourStarted = (iso: string) => update((f) => markTourStartedIn(f, iso));

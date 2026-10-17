@@ -1,4 +1,5 @@
 import { DEFAULT_FLAGS, parseFlags, type OnboardingFlags } from "./onboarding-flags";
+import { DEFAULT_INSTALL_PROMPT, normalizeInstallPrompt, type InstallPromptState } from "./pwa";
 import { SETTINGS_STORAGE_KEY, accountStorage } from "./storage-keys";
 
 export { SETTINGS_STORAGE_KEY };
@@ -22,6 +23,8 @@ export interface AppSettings {
   eveningSummaryTime: string;
   /** The tour and tips (cc-42): per account, kept here like levelSeen */
   onboarding: OnboardingFlags;
+  /** The install pop-up's snooze and done flags (lib/pwa) */
+  installPrompt: InstallPromptState;
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -41,6 +44,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   eveningSummaryReminder: false,
   eveningSummaryTime: "21:00",
   onboarding: DEFAULT_FLAGS,
+  installPrompt: DEFAULT_INSTALL_PROMPT,
 };
 
 export type KeyValueStorage = Pick<Storage, "getItem" | "setItem">;
@@ -73,6 +77,7 @@ export function loadSettings(storage: KeyValueStorage | null = accountStorage())
       eveningSummaryReminder: typeof parsed.eveningSummaryReminder === "boolean" ? parsed.eveningSummaryReminder : DEFAULT_SETTINGS.eveningSummaryReminder,
       eveningSummaryTime: typeof parsed.eveningSummaryTime === "string" ? parsed.eveningSummaryTime : DEFAULT_SETTINGS.eveningSummaryTime,
       onboarding: parseFlags(parsed.onboarding),
+      installPrompt: normalizeInstallPrompt(parsed.installPrompt),
     };
   } catch {
     return { ...DEFAULT_SETTINGS };
@@ -101,4 +106,12 @@ export function saveSettings(
   }
 
   return next;
+}
+
+export function loadInstallPrompt(storage: KeyValueStorage | null = accountStorage()): InstallPromptState {
+  return loadSettings(storage).installPrompt;
+}
+
+export function saveInstallPrompt(installPrompt: InstallPromptState, storage: KeyValueStorage | null = accountStorage()): void {
+  saveSettings({ installPrompt }, storage);
 }

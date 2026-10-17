@@ -29,6 +29,8 @@ import { useBack } from "@/hooks/use-back";
 import { Card } from "@/components/ui/card";
 import { ingredientPerServing, isRecipeId } from "@/lib/recipe";
 import { getRecipe, syncRecipeFoods } from "@/lib/recipe-store";
+import { CatalogStatus } from "@/components/foods/catalog-status";
+import { useCatalogFoods } from "@/hooks/use-catalog-foods";
 
 function FoodDetailInner() {
   const params = useParams();
@@ -47,11 +49,12 @@ function FoodDetailInner() {
     syncRecipeFoods();
     setRecipesReady(true);
   }, [foodId]);
+  const { version: catalogVersion, pending: catalogPending, failed: catalogFailed, retry: retryCatalog } = useCatalogFoods();
   const food = useMemo(() => {
     return MOCK_FOODS.find((f) => f.id === foodId);
-    // recipesReady: the stored recipes are put into the catalogue by then
+    // recipesReady: the stored recipes are put into the catalogue by then. catalogVersion: so is the live catalogue.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [foodId, recipesReady]);
+  }, [foodId, recipesReady, catalogVersion]);
   const recipe = useMemo(() => (isRecipe && recipesReady ? getRecipe(foodId) : null), [isRecipe, recipesReady, foodId]);
 
   const mealSlot = useMealSlot(searchParams.get("meal"));
@@ -117,6 +120,18 @@ function FoodDetailInner() {
       <AppShell>
         <h1 className="sr-only">Món của tôi</h1>
         <div role="status" aria-busy="true" className="mx-auto h-40 w-full max-w-[560px] rounded-2xl bg-level-empty motion-safe:animate-pulse lg:mx-0" />
+      </AppShell>
+    );
+  }
+
+  // A food of the live catalogue, opened directly: wait for the catalogue before saying it is gone
+  if (!food && (catalogPending || catalogFailed)) {
+    return (
+      <AppShell>
+        <AppHeader variant="sub" title={catalogFailed ? "Chưa tải được món" : "Đang tải món…"} onBack={goBack} layout="wide" />
+        <main className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pt-4 lg:mx-0 lg:px-8">
+          <CatalogStatus failed={catalogFailed} onRetry={retryCatalog} />
+        </main>
       </AppShell>
     );
   }

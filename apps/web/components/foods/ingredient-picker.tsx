@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Sheet } from "@/components/ui/sheet";
 import { PillButton } from "@/components/ui/pill-button";
+import { CatalogStatus } from "@/components/foods/catalog-status";
 import { Toast } from "@/components/ui/toast";
 import { ChipRow } from "@/components/foods/chip-row";
 import { FoodList } from "@/components/foods/food-list";
@@ -35,7 +36,7 @@ export function IngredientPicker({
 
 // Mounted only while the sheet is open, so each opening starts with a blank search and nothing ticked
 function PickerBody({ onClose, onConfirm, disabledIds }: { onClose: () => void; onConfirm: (foods: FoodItem[]) => void; disabledIds: string[] }) {
-  const { query, setQuery, filter, setFilter, list, filterItems, categoryName, isFavouriteFood, catalogError, retryCatalog } = useFoodBrowse();
+  const { query, setQuery, filter, setFilter, list, filterItems, categoryName, isFavouriteFood, catalogPending, catalogFailed, retryCatalog } = useFoodBrowse();
   const [picked, setPicked] = useState<FoodItem[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
   const toggle = (food: FoodItem) =>
@@ -84,17 +85,8 @@ function PickerBody({ onClose, onConfirm, disabledIds }: { onClose: () => void; 
             )
           }
           empty={
-            catalogError ? (
-              <div role="alert" className="flex flex-col items-center gap-2 py-6 text-center">
-                <div className="text-base font-bold">Chưa tải được danh sách món</div>
-                <button
-                  type="button"
-                  onClick={retryCatalog}
-                  className="min-h-11 cursor-pointer rounded-full border-0 bg-ink px-5 text-sm font-semibold text-on-dark active:scale-[0.97]"
-                >
-                  Thử lại
-                </button>
-              </div>
+            catalogPending || catalogFailed ? (
+              <CatalogStatus failed={catalogFailed} onRetry={retryCatalog} />
             ) : (
               <div className="flex flex-col items-center gap-2 py-6 text-center">
                 <div className="text-base font-bold">{query.trim() ? `Không có “${query.trim()}”` : "Chưa có món nào"}</div>

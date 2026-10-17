@@ -11,6 +11,7 @@ import { MOCK_FOODS } from "@/lib/mock/foods";
 import { formatAmount } from "@/lib/format";
 import { getMealSlotNameVi } from "@/lib/meal-slot";
 import { useMealSlot } from "@/lib/use-meal-slot";
+import { useCatalogFoods } from "@/hooks/use-catalog-foods";
 import { savedMealTotals, type SavedMeal } from "@/lib/saved-meals";
 
 function MoreIcon() {
@@ -42,9 +43,11 @@ export function SavedMealsCard({ limit }: { limit?: number }) {
   };
   const [managedId, setManagedId] = useState<string | null>(null);
 
+  // The foods of a saved meal are looked up in the catalogue, which may still be on its way
+  const { version: catalogVersion } = useCatalogFoods();
   const rows = useMemo(
     () => savedMeals.map((meal) => ({ meal, ...savedMealTotals(meal, MOCK_FOODS) })).filter((r) => r.itemCount > 0),
-    [savedMeals]
+    [savedMeals, catalogVersion]
   );
   const shown = limit ? rows.slice(0, limit) : rows;
   const managed = rows.find((r) => r.meal.id === managedId) ?? null;
