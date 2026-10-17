@@ -67,6 +67,7 @@ export function WhatsNewSheet({ release, open, onClose }: { release: Release; op
 
   return (
     <Sheet
+      motion={false}
       open={open}
       onClose={() => close(false)}
       labelledBy={TITLE_ID}
