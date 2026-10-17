@@ -8,7 +8,7 @@ import { useDiary } from "@/lib/diary-store";
 import { readFirstRunFacts } from "@/lib/first-run";
 import { HOME_ROUTE } from "@/lib/nav";
 import { tourOpenOn } from "@/lib/onboarding-flags";
-import { loadFlags, markWhatsNewSeen, onboardingDisabled, subscribeFlags } from "@/lib/onboarding-store";
+import { loadFlags, markWhatsNewSeen, subscribeFlags, whatsNewDisabled } from "@/lib/onboarding-store";
 import { latestRelease, shouldShowWhatsNew } from "@/lib/releases";
 import { isOverlayOpen, isTipBusy, readTour, setOverlayOpen, subscribeTipBusy, subscribeTour, writeWhatsNewTour } from "@/lib/tour-bus";
 
@@ -34,7 +34,7 @@ function useOthersBusy(todayIso: string | null): boolean {
 
 /**
  * Opens "Có gì mới" by itself on Hôm nay, once per release per account: signed in, setup done, and only when nothing
- * else is open (`busy`: Hôm nay's own sheets and Chọn nhiều món). Uses the same device switch as the tour and tips.
+ * else is open (`busy`: Hôm nay's own sheets and Chọn nhiều món). The probes' device switches keep it away (whatsNewDisabled).
  */
 export function WhatsNewHost({ busy }: { busy: boolean }) {
   const pathname = usePathname();
@@ -44,7 +44,7 @@ export function WhatsNewHost({ busy }: { busy: boolean }) {
   const release = latestRelease();
 
   useEffect(() => {
-    if (!hydrated || open || !release || pathname !== HOME_ROUTE || onboardingDisabled()) return;
+    if (!hydrated || open || !release || pathname !== HOME_ROUTE || whatsNewDisabled()) return;
     const demo = isDemo();
     const facts = readFirstRunFacts(demo);
     if (!demo && facts.signedIn !== true) return;

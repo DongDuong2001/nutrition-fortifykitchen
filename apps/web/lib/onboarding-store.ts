@@ -24,6 +24,18 @@ export function onboardingDisabled(): boolean {
   }
 }
 
+/** The same kind of switch for "Có gì mới" alone (cc-46): the probes set it so the sheet stays away unless a probe tests it. */
+export const WHATS_NEW_OFF_KEY = "h1t_whats_new_off";
+
+export function whatsNewDisabled(): boolean {
+  if (onboardingDisabled()) return true;
+  try {
+    return onboardingSwitchHonoured(globalThis.localStorage?.getItem(WHATS_NEW_OFF_KEY) ?? null, process.env.NODE_ENV, process.env.NEXT_PUBLIC_DEMO_BUILD);
+  } catch {
+    return false;
+  }
+}
+
 export function loadFlags(): OnboardingFlags {
   return loadSettings().onboarding;
 }

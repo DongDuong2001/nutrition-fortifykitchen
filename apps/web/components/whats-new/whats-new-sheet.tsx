@@ -11,7 +11,7 @@ import type { Release, ReleaseIcon } from "@/lib/releases";
 const TITLE_ID = "whats-new-title";
 const EXIT_MS = 140;
 
-export const RELEASE_ICONS: Record<ReleaseIcon, React.ComponentType<{ size?: number }>> = {
+const RELEASE_ICONS: Record<ReleaseIcon, React.ComponentType<{ size?: number }>> = {
   select: IconCheck,
   target: IconTarget,
   meal: IconEye,
