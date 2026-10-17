@@ -14,6 +14,7 @@ import {
   targetOf,
   pctLabel,
   portionLabel,
+  unknownKcalNote,
   type HomeEntry,
   type HomeMode,
 } from "../home";
@@ -335,5 +336,26 @@ describe("unknown kcal (an entry the server stored with NULL)", () => {
     expect(valuesFromDay(day).kcal).toBeNull();
     const withKnown = computeCompositeDayData(blankDay(SAMPLE_DAY), [...added, { ...homeAdded("k1"), calories: 300 }], {});
     expect(withKnown.calories.consumed).toBe(300);
+  });
+});
+
+describe("unknownKcalNote", () => {
+  it("counts the foods whose kcal is unknown", () => {
+    const entries = [entry({ id: "a" }), entry({ id: "b", kcal: null }), entry({ id: "c", kcal: null })];
+    expect(unknownKcalNote(entries)).toBe("2 món chưa rõ kcal");
+    expect(unknownKcalNote([entry({ id: "a", kcal: null })])).toBe("1 món chưa rõ kcal");
+  });
+
+  it("is null when every food has a kcal value, or there is no food", () => {
+    expect(unknownKcalNote([entry({ id: "a" }), entry({ id: "b", kcal: 0 })])).toBeNull();
+    expect(unknownKcalNote([])).toBeNull();
+  });
+
+  it("an all-unknown day has no total, so the hero percent is a dash", () => {
+    const entries = [entry({ id: "a", kcal: null })];
+    const shown = sumEntries(entries);
+    expect(shown.kcal).toBeNull();
+    expect(pctLabel(shown.kcal, 1950)).toBe("—");
+    expect(unknownKcalNote(entries)).toBe("1 món chưa rõ kcal");
   });
 });

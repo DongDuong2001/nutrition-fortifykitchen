@@ -246,3 +246,9 @@ export function pctLabel(value: number | null, target: number | null): string {
   if (pct === 0 && value !== null && value > 0) return "<1%";
   return `${pct}%`;
 }
+
+/** "2 món chưa rõ kcal": the foods of the shown set whose energy is unknown. Null when every food has a value. */
+export function unknownKcalNote(entries: readonly Pick<HomeEntry, "kcal">[]): string | null {
+  const n = entries.filter((e) => e.kcal === null).length;
+  return n === 0 ? null : `${n} món chưa rõ kcal`;
+}

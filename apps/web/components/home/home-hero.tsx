@@ -38,6 +38,7 @@ export function HomeHero({
   macroTargets,
   finished,
   selected,
+  kcalNote,
 }: {
   label: string;
   pills: HeroPill[];
@@ -47,67 +48,72 @@ export function HomeHero({
   finished: boolean;
   /** Food or meal mode: the border turns sky. */
   selected: boolean;
+  /** "2 món chưa rõ kcal": under the card when some of the shown foods have no energy value. */
+  kcalNote?: string | null;
 }) {
   const kcalKnown = pctOf(values.kcal, kcalTarget.min);
   const kcalPct = kcalKnown ?? 0;
   return (
-    <section
-      aria-label="Tổng kcal và dinh dưỡng đa lượng"
-      data-tour="home-hero"
-      className={`mx-3 mt-2 flex flex-none flex-col gap-1 rounded-2xl border-2 bg-surface-dark px-3.5 pt-2 pb-2.5 text-on-dark ${
-        selected ? "border-sky" : "border-surface-dark"
-      }`}
-    >
-      <div data-align-group="home-hero" className="flex min-h-[22px] items-center justify-between gap-2">
-        <h2 aria-live="polite" className="m-0 min-w-0 break-words text-xs font-bold leading-snug text-sky">
-          {label}
-        </h2>
-        <div className="flex shrink-0 items-center gap-2">
-          {pills.map((p) =>
-            p.href ? (
-              <Link key={p.key} id={p.id} href={p.href} aria-label={p.ariaLabel} className={PILL}>
-                <span className={PILL_FACE}>{p.label}</span>
-              </Link>
-            ) : (
-              <button key={p.key} id={p.id} type="button" onClick={p.onClick} aria-label={p.ariaLabel} className={PILL}>
-                <span className={PILL_FACE}>{p.label}</span>
-              </button>
-            )
-          )}
+    <>
+      <section
+        aria-label="Tổng kcal và dinh dưỡng đa lượng"
+        data-tour="home-hero"
+        className={`mx-3 mt-2 flex flex-none flex-col gap-1 rounded-2xl border-2 bg-surface-dark px-3.5 pt-2 pb-2.5 text-on-dark ${
+          selected ? "border-sky" : "border-surface-dark"
+        }`}
+      >
+        <div data-align-group="home-hero" className="flex min-h-[22px] items-center justify-between gap-2">
+          <h2 aria-live="polite" className="m-0 min-w-0 break-words text-xs font-bold leading-snug text-sky">
+            {label}
+          </h2>
+          <div className="flex shrink-0 items-center gap-2">
+            {pills.map((p) =>
+              p.href ? (
+                <Link key={p.key} id={p.id} href={p.href} aria-label={p.ariaLabel} className={PILL}>
+                  <span className={PILL_FACE}>{p.label}</span>
+                </Link>
+              ) : (
+                <button key={p.key} id={p.id} type="button" onClick={p.onClick} aria-label={p.ariaLabel} className={PILL}>
+                  <span className={PILL_FACE}>{p.label}</span>
+                </button>
+              )
+            )}
+          </div>
         </div>
-      </div>
 
-      <div data-align-group="home-hero" className="flex flex-wrap items-baseline gap-x-1.5">
-        <span className="font-display text-[32px] font-extrabold leading-none tabular-nums">{kcalValue(values.kcal)}</span>
-        <span className="text-[13px] text-muted-on-dark">
-          / {formatAmount(kcalTarget.min, "kcal")}–{formatAmount(kcalTarget.max, "kcal")} kcal
-        </span>
-        <span className="font-display text-[26px] font-extrabold italic leading-none tabular-nums">{pctLabel(values.kcal, kcalTarget.min)}</span>
-        {finished && kcalKnown !== null && <span className="text-[13px] font-bold text-sky">{getLevelLabel(getLevel(kcalKnown))}</span>}
-      </div>
+        <div data-align-group="home-hero" className="flex flex-wrap items-baseline gap-x-1.5">
+          <span className="font-display text-[32px] font-extrabold leading-none tabular-nums">{kcalValue(values.kcal)}</span>
+          <span className="text-[13px] text-muted-on-dark">
+            / {formatAmount(kcalTarget.min, "kcal")}–{formatAmount(kcalTarget.max, "kcal")} kcal
+          </span>
+          <span className="font-display text-[26px] font-extrabold italic leading-none tabular-nums">{pctLabel(values.kcal, kcalTarget.min)}</span>
+          {finished && kcalKnown !== null && <span className="text-[13px] font-bold text-sky">{getLevelLabel(getLevel(kcalKnown))}</span>}
+        </div>
 
-      <div data-align-group="home-hero">
-        <HomeBar label="Kcal so với mục tiêu ngày" pct={kcalPct} surface="dark" heightClass="h-2" />
-      </div>
+        <div data-align-group="home-hero">
+          <HomeBar label="Kcal so với mục tiêu ngày" pct={kcalPct} surface="dark" heightClass="h-2" />
+        </div>
 
-      <div data-align-group="home-hero" className="mt-1 grid grid-cols-4 gap-2.5">
-        {MACROS.map((m) => {
-          const value = values[m.key];
-          const pct = pctOf(value, macroTargets[m.key]);
-          return (
-            <div key={m.key} className="flex min-w-0 flex-col gap-1">
-              <span className="text-xs font-bold leading-tight">{m.label}</span>
-              <div className="flex items-baseline gap-1.5">
-                <span className="text-xs leading-tight text-muted-on-dark tabular-nums">
-                  {value === null ? "—" : `${formatAmount(value, "g")} g`}
-                </span>
-                <span className="font-display text-[15px] font-bold leading-none tabular-nums">{pctLabel(value, macroTargets[m.key])}</span>
+        <div data-align-group="home-hero" className="mt-1 grid grid-cols-4 gap-2.5">
+          {MACROS.map((m) => {
+            const value = values[m.key];
+            const pct = pctOf(value, macroTargets[m.key]);
+            return (
+              <div key={m.key} className="flex min-w-0 flex-col gap-1">
+                <span className="text-xs font-bold leading-tight">{m.label}</span>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-xs leading-tight text-muted-on-dark tabular-nums">
+                    {value === null ? "—" : `${formatAmount(value, "g")} g`}
+                  </span>
+                  <span className="font-display text-[15px] font-bold leading-none tabular-nums">{pctLabel(value, macroTargets[m.key])}</span>
+                </div>
+                <HomeBar label={`${m.label} so với mục tiêu ngày`} pct={pct} surface="dark" heightClass="h-[5px]" />
               </div>
-              <HomeBar label={`${m.label} so với mục tiêu ngày`} pct={pct} surface="dark" heightClass="h-[5px]" />
-            </div>
-          );
-        })}
-      </div>
-    </section>
+            );
+          })}
+        </div>
+      </section>
+      {kcalNote && <p className="m-0 mx-3 mt-1 flex-none text-[13px] leading-snug text-secondary">{kcalNote}</p>}
+    </>
   );
 }

@@ -27,6 +27,7 @@ import {
   targetOf,
   toggleFood,
   toggleMeal,
+  unknownKcalNote,
   valuesFromDay,
   type HomeMode,
 } from "@/lib/home";
@@ -420,6 +421,7 @@ function HomeContent() {
             macroTargets={macroTargets}
             finished={isPast}
             selected={selected}
+            kcalNote={unknownKcalNote(modeEntries(mode, entries))}
           />
           {coach && !selecting && (
             <div className="mt-2 flex min-h-11 flex-none items-center justify-end border-t border-t-card-border px-3 lg:px-0">
