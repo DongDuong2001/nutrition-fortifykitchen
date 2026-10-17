@@ -19,8 +19,8 @@ const noSelect: React.CSSProperties = { WebkitUserSelect: "none", userSelect: "n
 function ShareFoodRow({ entry }: { entry: HomeEntry }) {
   return (
     <div className="flex min-h-[30px] w-full items-center justify-between gap-2 border-b border-b-divider px-3 py-1 text-text">
-      <span className="min-w-0 break-words text-[13px] font-semibold leading-snug">{entry.name}</span>
-      <span className="shrink-0 font-display text-[15px] font-bold leading-none tabular-nums text-text">{portionLabel(entry)}</span>
+      <span data-share-wrap className="min-w-0 break-words text-[13px] font-semibold leading-snug">{entry.name}</span>
+      <span className="shrink-0 whitespace-nowrap font-display text-[15px] font-bold leading-none tabular-nums text-text">{portionLabel(entry)}</span>
     </div>
   );
 }

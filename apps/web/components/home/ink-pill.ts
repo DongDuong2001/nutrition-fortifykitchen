@@ -8,7 +8,7 @@ export function inkPill(share = false) {
   return {
     wrap: `bg-page px-1 pt-1 ${share ? "" : "lg:px-1.5 lg:pt-1.5"}`,
     pill: `flex h-6 items-center gap-3 rounded-md px-2 ${share ? "" : "lg:h-9 lg:rounded-lg lg:px-1.5"}`,
-    label: `text-[11px] font-extrabold uppercase leading-none tracking-[0.06em] ${share ? "" : "lg:text-xs"}`,
-    kcal: `font-display text-[13px] font-extrabold leading-none tabular-nums ${share ? "" : "lg:text-[15px]"}`,
+    label: `text-[11px] font-extrabold uppercase leading-none tracking-[0.06em] ${share ? "whitespace-nowrap" : "lg:text-xs"}`,
+    kcal: `font-display text-[13px] font-extrabold leading-none tabular-nums ${share ? "whitespace-nowrap" : "lg:text-[15px]"}`,
   };
 }

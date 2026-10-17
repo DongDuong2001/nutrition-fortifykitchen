@@ -74,7 +74,7 @@ export function NutrientColumn({
                     data-snap-row
                     className={`flex min-h-7 snap-start items-center justify-between gap-2 px-3 py-1 ${share ? "" : "lg:min-h-12"}`}
                   >
-                    <span className={`min-w-0 break-words text-[13px] font-semibold leading-snug text-text ${lg}`}>{def.name}</span>
+                    <span data-share-wrap className={`min-w-0 break-words text-[13px] font-semibold leading-snug text-text ${lg}`}>{def.name}</span>
                     <span className={`shrink-0 text-[13px] leading-tight text-secondary tabular-nums ${lg}`}>
                       {amount === null ? "—" : `${formatAmount(amount, def.unit)} ${def.unit}`}
                     </span>
@@ -110,7 +110,7 @@ export function NutrientColumn({
               <span className="font-bold tabular-nums text-text">
                 {summary.reached}/{summary.total} đạt
               </span>
-              {summary.lacking.length > 0 && <span>Thiếu nhiều nhất: {summary.lacking.join(", ")}</span>}
+              {summary.lacking.length > 0 && <span data-share-wrap>Thiếu nhiều nhất: {summary.lacking.join(", ")}</span>}
             </p>
           )}
           <ul className="m-0 mt-auto grid list-none grid-cols-2 gap-x-2.5 gap-y-1.5 px-3 pt-3 text-[11px] leading-snug text-secondary">

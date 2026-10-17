@@ -66,7 +66,7 @@ export function HomeHero({
         }`}
       >
         <div data-align-group="home-hero" className="flex min-h-[22px] items-center justify-between gap-2">
-          <h2 aria-live="polite" className="m-0 min-w-0 break-words text-xs font-bold leading-snug text-sky">
+          <h2 aria-live="polite" className={`m-0 min-w-0 text-xs font-bold leading-snug text-sky ${share ? "whitespace-nowrap" : "break-words"}`}>
             {label}
           </h2>
           <div className="flex shrink-0 items-center gap-2">
@@ -86,7 +86,7 @@ export function HomeHero({
 
         <div data-align-group="home-hero" className="flex flex-wrap items-baseline gap-x-1.5">
           <span className="font-display text-[32px] font-extrabold leading-none tabular-nums">{kcalValue(values.kcal)}</span>
-          <span className="text-[13px] text-muted-on-dark">
+          <span className={`text-[13px] text-muted-on-dark ${share ? "whitespace-nowrap" : ""}`}>
             / {formatAmount(kcalTarget.min, "kcal")}–{formatAmount(kcalTarget.max, "kcal")} kcal
           </span>
           <span className="ml-1 font-display text-[32px] font-extrabold italic leading-none tabular-nums">{pctLabel(values.kcal, kcalTarget.min)}</span>
@@ -107,7 +107,8 @@ export function HomeHero({
                 <span className="text-xs font-bold leading-tight">{m.label}</span>
                 {/* Amount/target and percent on one line, 8 px apart, 12 and 15 px (cc-44). Macro numbers in Saira Condensed (HANDOFF
                     fonts) and no spaces around "/": "118/104 g 113%" fits the 77 px column at 390 */}
-                <div className="flex items-baseline gap-2 whitespace-nowrap">
+                {/* Share image: in a wider face the percent goes under the amount instead of into the next column */}
+                <div className={`flex items-baseline gap-2 whitespace-nowrap ${share ? "flex-wrap" : ""}`}>
                   <span className="font-display text-xs font-extrabold leading-none text-muted-on-dark tabular-nums">
                     {value === null ? "—" : formatAmount(value, "g")}
                     {target !== null ? `/${formatAmount(target, "g")} g` : " g"}

@@ -88,6 +88,12 @@
 }
 
 @layer base {
+  /* iOS enlarges text on its own (text inflation): sizes stay as written, on screen and in the share image */
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
   body {
     margin: 0;
     background-color: var(--color-page, #FFFFFF);
