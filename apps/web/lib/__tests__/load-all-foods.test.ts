@@ -157,6 +157,14 @@ describe("apiClient.loadAllFoods with the device's copy", () => {
     expect(written).toHaveBeenCalledTimes(1);
   });
 
+  it("cc-51: offline with an expired copy: the copy is used, search still has foods", async () => {
+    vi.spyOn(cache, "readCatalogCache").mockResolvedValue(saved(30 * 3600_000) as never);
+    vi.stubGlobal("fetch", vi.fn(async () => Promise.reject(new TypeError("Failed to fetch"))));
+    const foods = await apiClient.loadAllFoods();
+    expect(foods.map((f) => f.id)).toEqual(["db-900", "db-901"]);
+    expect(browsableFoods().some((f) => f.id === "db-901")).toBe(true);
+  });
+
   it("a failed background refresh keeps the copy on screen", async () => {
     vi.spyOn(cache, "readCatalogCache").mockResolvedValue(saved(11 * 60_000) as never);
     const written = vi.spyOn(cache, "writeCatalogCache").mockResolvedValue();

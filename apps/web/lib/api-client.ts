@@ -248,7 +248,15 @@ async function fetchAllFoods(): Promise<FoodItem[]> {
     if (state === "stale") void downloadCatalog(account, true).catch(() => {});
     return saved.foods;
   }
-  return downloadCatalog(account, false);
+  try {
+    return await downloadCatalog(account, false);
+  } catch (error) {
+    // Offline (or the API is down) with a copy older than 24 h: an old list beats no list, search keeps working
+    if (!saved) throw error;
+    setCatalogFoods(saved.foods);
+    setCatalogStatus("ready");
+    return saved.foods;
+  }
 }
 
 /** Every page of /foods. A background refresh changes nothing on screen until it has the whole list. */
