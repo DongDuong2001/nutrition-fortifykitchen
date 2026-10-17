@@ -70,6 +70,36 @@ def grab(browser, engine):
     return ctx, pg, svg
 
 
+def fonts_fail(browser):
+    """Font files that do not load: the sheet says to reload; Thử lại retries once in place, then reloads the page."""
+    ctx = browser.new_context(viewport={"width": 390, "height": 844})
+    ctx.add_init_script("try { localStorage.setItem('h1t_profile_v1_demo', JSON.stringify(%s)); } catch (e) {}" % PROFILE)
+    ctx.route(re.compile(r".*\.woff2?(\?.*)?$"), lambda route: route.abort())
+    pg = ctx.new_page()
+    pg.goto(BASE + "/app?level=2", wait_until="networkidle")
+    pg.locator("[aria-label='Chia sẻ ngày này'] >> visible=true").first.click()
+    alert = pg.get_by_role("dialog").get_by_role("alert")
+    text = "Không tạo được ảnh. Tải lại trang rồi thử lại."
+    try:
+        alert.get_by_text(text, exact=True).wait_for(timeout=30000)
+        shown = True
+    except Exception:
+        shown = False
+    check(shown, f"fonts not loaded: the sheet says '{text}'")
+    if not shown:
+        ctx.close()
+        return
+    pg.screenshot(path=str(SHOTS / "cc-47-share-fonts-error-390.png"))
+    pg.evaluate("window.__beforeRetry = 1")
+    alert.get_by_role("button", name="Thử lại").click()
+    alert.get_by_text(text, exact=True).wait_for(timeout=30000)
+    check(pg.evaluate("window.__beforeRetry") == 1, "first Thử lại retries in place (no reload)")
+    with pg.expect_event("load", timeout=30000):
+        alert.get_by_role("button", name="Thử lại").click()
+    check(pg.evaluate("window.__beforeRetry") is None, "second Thử lại reloads the page")
+    ctx.close()
+
+
 def main():
     with sync_playwright() as p:
         for engine in ("chromium", "webkit"):
@@ -88,6 +118,8 @@ def main():
                 png = pg.evaluate(DRAW, "data:image/svg+xml;charset=utf-8," + urllib.parse.quote(bare))
                 (SHOTS / f"cc-47-nofonts-{engine}.png").write_bytes(base64.b64decode(png.split(",", 1)[1]))
             ctx.close()
+            if engine == "chromium":
+                fonts_fail(browser)
             browser.close()
     print(f"\n{len(problems)} problem(s)")
     sys.exit(1 if problems else 0)

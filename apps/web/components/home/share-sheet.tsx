@@ -16,7 +16,7 @@ import { ShareDay } from "./share-day";
 import { countedForLevel } from "@/lib/level-nutrients";
 import type { Level } from "@/lib/coaching-link";
 
-type Failure = "generate" | "share" | "save";
+type Failure = "generate" | "fonts" | "share" | "save";
 
 interface Ready {
   file: File;
@@ -30,6 +30,7 @@ interface Ready {
 
 const FAILURE_TEXT: Record<Failure, string> = {
   generate: "Không tạo được ảnh.",
+  fonts: "Không tạo được ảnh. Tải lại trang rồi thử lại.",
   share: "Không chia sẻ được.",
   save: "Không lưu được ảnh.",
 };
@@ -64,8 +65,11 @@ async function loadShareFonts(node: HTMLElement): Promise<void> {
   }
 }
 
+/** The fonts could not be put in the picture. */
+class ShareFontsError extends Error {}
+
 /**
- * html-to-image's font CSS with every font inlined, or an error (then the sheet shows Không tạo được ảnh). The second
+ * html-to-image's font CSS with every font inlined, or a ShareFontsError (then the sheet asks to reload). The second
  * try helps when the call itself fails; a font file that failed is cached empty by html-to-image until the page reloads.
  */
 async function shareFontCSS(node: HTMLElement): Promise<string> {
@@ -73,7 +77,7 @@ async function shareFontCSS(node: HTMLElement): Promise<string> {
     const css = await getFontEmbedCSS(node).catch(() => undefined);
     if (css && shareFontsEmbedded(css)) return css;
   }
-  throw new Error("share fonts not embedded");
+  throw new ShareFontsError("share fonts not embedded");
 }
 
 /**
@@ -119,7 +123,15 @@ function loadImage(src: string): Promise<HTMLImageElement> {
  * Draws the page (a ShareDay in an off-screen portal) into a 1080-px-wide PNG and hands the file up. The page is
  * mounted only while the picture is made, so it never lingers in the DOM next to the real screen.
  */
-function ShareCapture({ model, onDone, onError }: { model: ShareModel; onDone: (file: File, width: number, height: number) => void; onError: () => void }) {
+function ShareCapture({
+  model,
+  onDone,
+  onError,
+}: {
+  model: ShareModel;
+  onDone: (file: File, width: number, height: number) => void;
+  onError: (failure: "generate" | "fonts") => void;
+}) {
   const hostRef = useRef<HTMLDivElement>(null);
   const callbacks = useRef({ onDone, onError });
   callbacks.current = { onDone, onError };
@@ -171,8 +183,8 @@ function ShareCapture({ model, onDone, onError }: { model: ShareModel; onDone: (
       const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
       if (!blob) throw new Error("no image");
       if (!cancelled) callbacks.current.onDone(new File([blob], model.filename, { type: "image/png" }), width, height);
-    })().catch(() => {
-      if (!cancelled) callbacks.current.onError();
+    })().catch((error: unknown) => {
+      if (!cancelled) callbacks.current.onError(error instanceof ShareFontsError ? "fonts" : "generate");
     });
     return () => {
       cancelled = true;
@@ -218,6 +230,8 @@ export function ShareSheet({
   const [ready, setReady] = useState<Ready | null>(null);
   const [failure, setFailure] = useState<Failure | null>(null);
   const [attempt, setAttempt] = useState(0);
+  // Fonts that failed stay failed until the page reloads (html-to-image's cache): after a retry, Thử lại reloads
+  const [fontFailures, setFontFailures] = useState(0);
   const [job, setJob] = useState<ShareModel | null>(null);
   // The latest day, read when the page is drawn; a change to it while the sheet is open does not redraw it
   const latest = useRef({ day, entries, meals, finished, displayName, level });
@@ -308,6 +322,7 @@ export function ShareSheet({
   const retry = () => {
     if (failure === "share") share();
     else if (failure === "save") save();
+    else if (failure === "fonts" && fontFailures > 1) window.location.reload();
     else setAttempt((n) => n + 1);
   };
 
@@ -426,9 +441,10 @@ export function ShareSheet({
           key={attempt}
           model={job}
           onDone={onDone}
-          onError={() => {
+          onError={(reason) => {
             setJob(null);
-            setFailure("generate");
+            setFailure(reason);
+            if (reason === "fonts") setFontFailures((n) => n + 1);
           }}
         />
       )}
