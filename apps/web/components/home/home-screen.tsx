@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { Suspense, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -33,7 +34,6 @@ import {
 } from "@/lib/home";
 import type { MealSlot } from "@/lib/meal-slot";
 import { InstallPromptHost } from "@/components/pwa/install-prompt";
-import { WhatsNewHost } from "@/components/whats-new/whats-new-host";
 import { FoodList } from "./food-list";
 import { markUsed } from "@/lib/onboarding-store";
 import { emitSignal, subscribeSignal } from "@/lib/tour-bus";
@@ -61,8 +61,11 @@ import { formatDayLabel } from "@/lib/format";
 import { getMealSlotNameVi } from "@/lib/meal-slot";
 import { HomeHero, type HeroPill } from "./home-hero";
 import { NutrientColumn } from "./nutrient-column";
-import { ShareSheet } from "./share-sheet";
 import { HOME_ROUTE } from "@/lib/nav";
+
+// cc-51: loaded after the first paint (the share image with html-to-image, Có gì mới); neither shows until it opens
+const ShareSheet = dynamic(() => import("./share-sheet").then((m) => m.ShareSheet), { ssr: false });
+const WhatsNewHost = dynamic(() => import("@/components/whats-new/whats-new-host").then((m) => m.WhatsNewHost), { ssr: false });
 
 function subscribeOnline(callback: () => void) {
   window.addEventListener("online", callback);

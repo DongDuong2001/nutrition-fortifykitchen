@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { AccessRow } from "@/components/link-page/access-row";
 import { CoachHeader } from "@/components/link-page/coach-header";
-import { LinkBackground } from "@/components/link-page/link-background";
+import { LinkBackgroundLazy } from "@/components/link-page/link-background-lazy";
 import { LinkRowContent, ROW_CLASS, ROW_ICON_CLASS } from "@/components/link-page/link-row";
 import { COACH, FORTIFY_KITCHEN } from "@/lib/coach-links";
 import { homeRedirectFor } from "@/lib/nav";
@@ -22,7 +22,7 @@ export default async function LinkPage({ searchParams }: { searchParams: Promise
 
   return (
     <div className="relative flex-1 overflow-hidden bg-page">
-      <LinkBackground />
+      <LinkBackgroundLazy />
       <main className="relative flex flex-col gap-10 px-6 pt-16 pb-8 lg:mx-auto lg:w-[480px] lg:gap-11 lg:px-0 lg:pt-[168px]">
         <CoachHeader />
         <ul className="m-0 flex list-none flex-col p-0">
