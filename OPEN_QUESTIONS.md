@@ -266,3 +266,8 @@
 
 ## cc-48 (18/10/2026)
 - Dong: refreshRemoteDay (diary refetch on focus) replaced `added` with the server's entries plus outbox entries only, so an entry whose POST was still in flight vanished until the next refresh. cc-48 keeps a local entry missing from the server when it is queued offline, its POST is in flight (diary-store postEntry tracks ids), or it was added after the refetch started (lib/diary-edits mergeServerDay, tested). OK with you, or should api-client expose in-flight ids itself?
+
+## cc-47 (18/10/2026)
+- The user's phone, browser and text setting are unknown. Locally only "the picture drawn in another face than the one measured" reproduces the bug image (per-word wraps, pill wraps, "Cả ngày · N món" into the kcal, "kcal" gone, tagline wrapped). Text-size-adjust 130 % and a 1.15× font scale enlarge text and boxes together (sideways overlaps, not the bug's signature); Chromium's accessibility font scale does nothing on desktop. Why the face was missing on that phone (a font file that failed to load, which html-to-image only warns about, or the phone not using fonts inside the SVG) needs the phone.
+- Release note: added "Ảnh chia sẻ rõ hơn" to the top entry (17/10) instead of a new 18/10 entry, so "Có gì mới" does not open again for a fix. New entry instead?
+- In a wider face the image's content grows (macro percents under the amounts) but the image height is measured in the real fonts, so the bottom of the vi chất column can cover the footer. Only when fonts fail; the font check now shows Không tạo được ảnh when they are not embedded.
