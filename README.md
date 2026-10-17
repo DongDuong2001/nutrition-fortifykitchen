@@ -8,18 +8,22 @@ A high-performance monorepo platform engineered for 22-micronutrient tracking, e
 
 H1T MICRO delivers precision nutritional tracking calibrated against official dietary guidelines, including the Vietnamese Food Composition Table (National Institute of Nutrition, Ministry of Health) and USDA FoodData Central.
 
-The platform follows a clean separation between an authenticated Go API service and a Next.js App Router client:
+### High-Level Architecture
 
 ```
-[ Next.js 16 Web Client / PWA ]
+[ Next.js 16 Web Client / PWA ] (Port 3000 in Docker / 3100 in dev)
           |
-          | HTTPS / HTTPOnly Cookies / Bearer JWT
+          | HTTPS / HTTPOnly Cookies (Same-Origin via Caddy)
           v
-[ Go 1.24+ Modular Monolith API ]  <--->  [ Supabase Auth (ECC P-256 JWKS) ]
-          |
-          | pgxpool (Session Mode, Port 5432)
-          v
-[ PostgreSQL 17 Database (nutrition schema, RLS, pg_trgm) ]
+[ Caddy 2 Reverse Proxy ] (Ports 80 / 443, Automatic Let's Encrypt TLS)
+    |                  |
+    | /api/*           | /*
+    v                  v
+[ Go 1.24+ API ]   [ Next.js Web App ]
+    |
+    +---> [ Supabase Auth ] (ECC P-256 JWKS validation)
+    |
+    +---> [ PostgreSQL 17 Database ] (Supabase Session Pooler / Port 5432)
 ```
 
 ### Technology Stack
@@ -27,7 +31,7 @@ The platform follows a clean separation between an authenticated Go API service 
 - **Frontend Client (`apps/web`)**:
   - Framework: Next.js 16.4+ (App Router, Turbopack / Webpack build pipeline)
   - Core Library: React 19, TypeScript 5.x
-  - Styling & Design System: Tailwind CSS v4, H1T MICRO design tokens
+  - Styling & Design Tokens: Tailwind CSS v4, H1T MICRO color and spacing tokens
   - Icons: Official `@mynaui/icons-react` suite unified via centralized adapter (`components/ui/icons.tsx`)
   - Authentication: Supabase Auth (`@supabase/ssr`) with secure HTTPOnly cookies and PKCE callback flow
   - Offline Engine: Custom Service Worker (`public/sw.js`) with app shell precaching, runtime caching, and client offline outbox synchronization
@@ -48,7 +52,49 @@ The platform follows a clean separation between an authenticated Go API service 
 
 ---
 
-## 2. Repository Layout
+## 2. Key Architectural Concepts for Maintainers
+
+### 2.1 Multi-Device Synchronization & Offline Architecture
+- **Client Store (`apps/web/lib/diary-store.tsx`)**:
+  - The client maintains state for today and viewed dates.
+  - When offline or during network latency, created/updated entries are saved to an offline outbox in `localStorage` under `h1t_offline_outbox_v1_<accountId>`.
+  - Background synchronization (`syncOfflineOutbox`) replays queued actions idempotently using UUIDv4 entry IDs.
+- **Revalidation on Focus / Visibility**:
+  - `refreshRemoteDay(iso)` triggers automatically whenever the browser tab becomes active (`visibilitychange`), receives focus (`window.onfocus`), or reconnects (`window.online`).
+  - Remote entries from `apiClient.getDay(iso)` reconcile cleanly with the local state while preserving entries still pending in the offline outbox.
+- **Same-Origin API Routing**:
+  - In production, Caddy reverse-proxies requests to `/api/*` directly to the Go API container (`api:8080`).
+  - `NEXT_PUBLIC_API_URL` should be configured as `/api/v1` (same-origin with the apex domain `lehongkhanh.vn`). This prevents Safari ITP and modern browser third-party cookie restrictions from dropping the `sb-access-token` HTTPOnly session cookie.
+
+### 2.2 Custom Food Privacy & Data Isolation
+- Standard foods in the catalog have `is_custom = false` and `created_by = NULL`.
+- Custom foods created by a user have `is_custom = true` and `created_by = $userID`.
+- The `OptionalAuthenticate` middleware (`apps/api/internal/auth/middleware.go`) extracts user tokens if present without blocking unauthenticated guests:
+  - Unauthenticated guests can search and view standard foods only (`is_custom = false`).
+  - Authenticated users see both standard foods and their own custom foods (`is_custom = false OR created_by = $userID`).
+  - Accessing another user's custom food directly via `/api/v1/foods/{id}` returns `404 Not Found`.
+- Diary entries snapshot nutrient totals and names at the time of logging (`nutrition.diary_entries`), ensuring that future changes or deletions of food items never corrupt past historical logs.
+
+### 2.3 Portion Scaling & Input Clamping
+- Portion handling lives in `apps/web/lib/portion.ts`.
+- **Upper Limit Guard**: `MAX_GRAMS_PER_PORTION = 5000` (5 kg). All inputs parsed via `parseGramsInput` are clamped to prevent accidental overflow (e.g. typing 100000 instead of 100.0) from ballooning daily calorie calculations.
+- Decimal formatting supports Vietnamese comma notation (`2,5 g`) as well as standard dots (`2.5 g`).
+
+### 2.4 Macro Targets & Interaction
+- Macro target configuration lives at `/settings/targets/macros`:
+  - **Ratios (%) Mode**: Allows adjusting Protein / Carbs / Fat percentages constrained to 100% total.
+  - **Fixed (g) Mode**: Direct gram inputs for bodybuilding and specific clinical protocols.
+  - **Keto Mode**: 70% Fat, 25% Protein, 5% Carbs preset.
+- Meal logging supports HTML5 drag-and-drop between meal slots with visual drop indicators, and long-press (500 ms + haptic) multi-select mode for batch deletion with an instant undo toast.
+
+### 2.5 Coaching & Roles
+- Roles (`user`, `coach`, `admin`) are defined exclusively in `nutrition.profiles.role`.
+- Levels (Level 0: self-managed; Levels 1 to 5: progressive nutrient guidance) determine which nutrients are surfaced on the daily dashboard (`lib/level-nutrients.ts`).
+- Admin review portal (`/admin/review`) allows administrators to inspect meal plans and coach applications.
+
+---
+
+## 3. Repository Layout
 
 ```
 .
@@ -58,7 +104,7 @@ The platform follows a clean separation between an authenticated Go API service 
 |   |   |   |-- server/            # API server entrypoint (router, middlewares, graceful shutdown)
 |   |   |   `-- importfoods/       # Catalog ingestion tool (seeds 22 nutrients and food catalog)
 |   |   |-- internal/
-|   |   |   |-- auth/              # JWT verification (JWKS/HMAC), hCaptcha, RBAC middleware
+|   |   |   |-- auth/              # JWT verification (JWKS/HMAC), hCaptcha, RBAC, OptionalAuth
 |   |   |   |-- config/            # Centralized environment configuration with production validator
 |   |   |   |-- diary/             # Daily food logging, meal slot summaries, copy yesterday
 |   |   |   |-- library/           # Favourites, user recents, saved meals ("Bua an cua toi")
@@ -76,7 +122,13 @@ The platform follows a clean separation between an authenticated Go API service 
 |       |-- components/            # UI components (atoms, cards, sheets, headers, navigation)
 |       |-- hooks/                 # Custom React hooks (food browse, navigation history, PWA)
 |       `-- lib/                   # API client, targets calculation, levels, formatting, PWA helpers
-|-- migrations/                    # Sequential SQL schema migrations (000001 to 000009)
+|-- deploy/                        # Production deployment manifests and run scripts
+|   |-- Caddyfile                  # Caddy 2 reverse-proxy configuration
+|   |-- docker-compose.prod.yml    # Production 3-tier container stack (web, api, caddy)
+|   |-- deploy.sh                  # Zero-downtime production deployment and rollback script
+|   |-- setup-server.sh            # Idempotent VPS provisioner (Docker, UFW, Swap, Fail2ban)
+|   `-- .env.prod.example          # Production environment variable template
+|-- migrations/                    # Sequential SQL schema migrations (000001 to 000011)
 |-- docs/                          # Comprehensive architectural and operational documentation
 |-- scripts/                       # Database backup, restore, port management, and test runners
 |-- packages/
@@ -87,74 +139,37 @@ The platform follows a clean separation between an authenticated Go API service 
 
 ---
 
-## 3. Core Capabilities & Product Features
+## 4. Local Development Guide
 
-### Information Architecture v2 (IA-v2) Navigation
-- **Hom nay (`/`)**: Daily coach dashboard with calorie dial, macro distribution, 4 meal slots (Breakfast, Lunch, Dinner, Snack), and 14-nutrient status column.
-- **Tong quan (`/trends`)**: Periodic analytics across 7-day and 30-day windows:
-  - Tom tat (`/trends`): High-level intake vs targets, day-on-target metrics, key moves.
-  - Nang luong (`/trends/energy`): Caloric progression and macronutrient composition.
-  - Vi chat (`/trends/micros`): 22-micronutrient completion rates and deficit rankings.
-  - Co the (`/trends/body`): Body weight history and tracking.
-- **Ghi nhanh (`/add`)**: Fast food logging, 1-tap re-logging from recent foods, and saved meal insertion.
-- **Kham pha (`/explore`)**: Food catalog search, 10 food categories, "Giau..." micronutrient food lists, and, in mock and demo mode only, a sample coaches directory (`/explore/coaches`) and leaderboard (`/explore/leaderboard`).
-- **Cai dat (`/settings`)**: Profile body data, daily targets, account management, notification reminders, data sources, Terms of Service (`/terms`), and Privacy Policy (`/privacy`).
-
-### Coaching & Level System
-- **Level is set by the coach, not earned.** Level 0 means no coach. Joining a coach (invite code or `/join/<code>`) starts Level 1; only the coach changes it afterwards, between 1 and 5. The Level decides which nutrients Hôm nay lists (`lib/level-nutrients.ts`).
-- **Roles** (user, coach, admin) come only from the API (`nutrition.profiles.role`). Until the API returns the role the app treats everyone as a user.
-- **No coach application flow.** Nobody applies to become a coach in the app; the admin review queue (`/admin/review`) holds meal-plan drafts only.
-- **Live mode (`NEXT_PUBLIC_API_MODE=live`) shows no sample data:** the coaching screens, the coach directory (`/explore/coaches`), the leaderboard (`/explore/leaderboard`) and the coach carousel are hidden until the API provides them, and `?demo`, `?as` and `?level` do nothing. They exist in mock and demo mode for walking the flows.
-
-### SEO & Legal Compliance
-- **Robots.txt & Sitemap**: Native Next.js metadata routes (`/robots.txt` and `/sitemap.xml`) exposing public exploration routes while blocking private user data from search indexing.
-- **Chinh sach bao mat (`/privacy`)**: Discloses exact data collection, PostgreSQL Row Level Security (RLS) isolation, zero advertising data sales, and user account deletion rights.
-- **Dieu khoan dich vu (`/terms`)**: Contains explicit health and medical disclaimers declaring H1T MICRO as an educational tracking platform, not a provider of clinical medical diagnosis.
-
----
-
-## 4. Prerequisites
-
-Ensure the following tools are installed on your workstation:
+### Prerequisites
 - **Go**: Version 1.24 or higher
 - **Node.js**: Version 22 LTS or higher
 - **npm**: Version 10 or higher
 - **Docker & Docker Compose**: Version 24+
-- **PostgreSQL Client (`psql`)** or `golang-migrate` CLI (optional for manual migrations)
 
----
-
-## 5. Step-by-Step Running Guide
-
-### Step 1: Environment Configuration
-
-Clone the repository and prepare your local environment file:
+### Step 1: Environment Setup
 
 ```bash
 cp .env.example .env
 ```
 
-Review `.env` and configure credentials:
-- For local development with default settings, the database connection string is `postgresql://postgres:postgres@localhost:5432/postgres?sslmode=disable`.
-- For mock frontend mode, set `NEXT_PUBLIC_API_MODE=mock`.
-- For live backend connectivity, set `NEXT_PUBLIC_API_MODE=live` and provide valid Supabase credentials (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_JWKS_URL`).
+Review `.env`:
+- Database connection: `postgresql://postgres:postgres@localhost:5432/postgres?sslmode=disable`
+- To run frontend in mock mode: `NEXT_PUBLIC_API_MODE=mock`
+- To run frontend with live backend: `NEXT_PUBLIC_API_MODE=live` and `NEXT_PUBLIC_API_URL=http://localhost:8080/api/v1`
 
-### Step 2: Start PostgreSQL Database
-
-Launch the hardened PostgreSQL 17 container:
+### Step 2: Start Local PostgreSQL Database
 
 ```bash
 docker compose up -d
 ```
-
-*Note: The database is bound strictly to `127.0.0.1:5432` to prevent unauthorized public network exposure.*
+*The container binds strictly to `127.0.0.1:5432`.*
 
 ### Step 3: Run Database Migrations
 
-Apply the 9 sequential migrations to provision schemas, extensions, tables, and RLS policies:
+Apply the 11 sequential migrations in order:
 
 ```bash
-# Option A: Using psql
 psql "postgresql://postgres:postgres@localhost:5432/postgres?sslmode=disable" -f migrations/000001_init_nutrition_schema.up.sql
 psql "postgresql://postgres:postgres@localhost:5432/postgres?sslmode=disable" -f migrations/000002_profiles_and_weight.up.sql
 psql "postgresql://postgres:postgres@localhost:5432/postgres?sslmode=disable" -f migrations/000003_foods_catalog.up.sql
@@ -164,114 +179,112 @@ psql "postgresql://postgres:postgres@localhost:5432/postgres?sslmode=disable" -f
 psql "postgresql://postgres:postgres@localhost:5432/postgres?sslmode=disable" -f migrations/000007_profiles_display_name.up.sql
 psql "postgresql://postgres:postgres@localhost:5432/postgres?sslmode=disable" -f migrations/000008_foods_source_unique.up.sql
 psql "postgresql://postgres:postgres@localhost:5432/postgres?sslmode=disable" -f migrations/000009_foods_plain_unique_index.up.sql
-
-# Option B: Using golang-migrate CLI
-migrate -path migrations -database "postgresql://postgres:postgres@localhost:5432/postgres?sslmode=disable" up
+psql "postgresql://postgres:postgres@localhost:5432/postgres?sslmode=disable" -f migrations/000010_user_roles.up.sql
+psql "postgresql://postgres:postgres@localhost:5432/postgres?sslmode=disable" -f migrations/000011_diary_nullable_calories.up.sql
 ```
 
-### Step 4: Seed Micronutrients & Food Catalog
-
-Run the import CLI tool to seed the 22 counted micronutrients and standard Vietnamese food catalog:
+### Step 4: Seed Food & Micronutrient Catalog
 
 ```bash
 cd apps/api
 go run ./cmd/importfoods
 ```
+Populates `nutrition.nutrients` with 10 minerals and 12 vitamins, standard Vietnamese foods, and common beverages.
 
-This populates `nutrition.nutrients` with 10 minerals and 12 vitamins, along with the Vietnamese food database and common beverages.
-
-### Step 5: Start the Backend API Service
-
-Run the Go API server:
+### Step 5: Start Backend API
 
 ```bash
 cd apps/api
 go run ./cmd/server
 ```
-
 - API Base URL: `http://localhost:8080`
-- Health check: `http://localhost:8080/healthz` (verifies API and database pool health)
+- Health check: `http://localhost:8080/healthz`
 
-### Step 6: Start the Frontend Application
+### Step 6: Start Frontend Application
 
-In a separate terminal, navigate to `apps/web`:
+In another terminal:
 
 ```bash
 cd apps/web
 npm install
 npm run dev:3100
 ```
-
-- Web Application URL: `http://localhost:3100`
-- To run production build locally:
-  ```bash
-  npm run build
-  npm run start
-  ```
+- Application URL: `http://localhost:3100`
 
 ---
 
-## 6. Verification & Quality Gates
+## 5. Verification & Quality Gates
 
-Before committing changes or deploying releases, execute all quality gates across both workspaces.
+Run all quality gates before committing code or merging branches:
 
-### Backend Gates (`apps/api`)
-
+### Backend Quality Gates (`apps/api`)
 ```bash
 cd apps/api
-
-# 1. Static analysis & vet
 go vet ./...
-
-# 2. Execute full unit test suite
 go test -count=1 -v ./...
 ```
 
-### Frontend Gates (`apps/web`)
-
+### Frontend Quality Gates (`apps/web`)
 ```bash
 cd apps/web
 
-# 1. Typecheck
+# 1. Typecheck (zero errors required)
 npm run typecheck
 
-# 2. Run Vitest test suite (56 test files, 666 unit tests)
+# 2. Vitest unit tests (92 suites, 1077 tests)
 npm run test
 
-# 3. Compile production Next.js build (46 static/dynamic/metadata routes)
+# 3. Production build
 npm run build
 ```
 
 ---
 
-## 7. Production Hardening & Operational Runbooks
+## 6. Production Deployment & Operations
 
-The repository includes dedicated guides for production operations and security:
+### Production Architecture
+- Deployment runbook: `docs/deploy.md`
+- Production manifests live in `deploy/`:
+  - `deploy/docker-compose.prod.yml`: 3 services (`web`, `api`, `caddy`).
+  - `deploy/Caddyfile`: Reverse proxy, SSL auto-provisioning, HTTP to HTTPS redirection.
+  - `deploy/deploy.sh`: Automated build and zero-downtime deployment script.
 
-- **VPS Docker Security Runbook ([docs/10-vps-hardening.md](docs/10-vps-hardening.md))**:
-  - Detailed post-mortem of Docker iptables firewall bypass vulnerabilities.
-  - Commands for detecting and purging rogue miner processes masquerading as `postgres`.
-  - Step-by-step Linux host firewall configuration using `DOCKER-USER` or `ufw-docker`.
-  - SSH hardening (disabling password authentication, enforcing key pairs, fail2ban).
+### Deploying to VPS
+On the VPS (as the `deploy` user in the repository directory):
 
-- **Production Go-Live Checklist ([docs/11-go-live-checklist.md](docs/11-go-live-checklist.md))**:
-  - Pre-flight checklist covering DNS, SSL/TLS, and domain configuration.
-  - Production secrets validation matrix.
-  - Reverse proxy configurations (Caddy / Nginx) with HTTP/2 and Brotli compression.
-  - Supabase Auth production redirect URL whitelisting.
+```bash
+deploy/deploy.sh
+```
+The script will:
+1. Pull the latest commits from `main`.
+2. Build new Docker images for `web` and `api` in the background.
+3. Perform a zero-downtime container swap once the new images pass health checks.
+4. Prune dangling Docker images.
 
-- **Same-origin API (live mode)**: `NEXT_PUBLIC_API_URL` must be `https://lehongkhanh.vn/api/v1`, the same origin as the web app. The `sb-access-token` httpOnly cookie is host-only, so a browser does not send it to another domain; the app logs the console warning "API khác domain: cookie đăng nhập sẽ không được gửi" when the origins differ.
+### Instant Rollback
+If an issue occurs in production, roll back to a specific commit or tag within 1 minute:
 
-- **Disaster Recovery & Database Backups ([docs/09-disaster-recovery.md](docs/09-disaster-recovery.md))**:
-  - Automated daily encrypted backups to S3 / Cloudflare R2 (`scripts/db-backup.sh`).
-  - Emergency database restoration procedure (`scripts/db-restore.sh`).
+```bash
+deploy/deploy.sh <previous-commit-or-tag>
+# Example: deploy/deploy.sh 2337c46
+```
+
+### Operational Runbooks
+- **VPS Hardening Guide**: `docs/10-vps-hardening.md` (firewall, fail2ban, docker isolation)
+- **Production Go-Live Checklist**: `docs/11-go-live-checklist.md` (pre-flight DNS, TLS, secrets)
+- **Disaster Recovery & Backup**: `docs/09-disaster-recovery.md` (database backup and restore procedures)
 
 ---
 
-## 8. License & Terms
+## 7. Maintainer Guidelines
+
+1. **Ponytail Rule (Minimal & Clean)**: Prefer standard libraries, native browser features, and existing utilities over adding heavy dependencies or message brokers (e.g. no Redis, no Kafka, no Asynq for simple client-to-server sync).
+2. **Number & String Formatting**: All numbers displayed in Vietnamese UI must use `lib/format.ts` (`1.041` for thousands, `2,1` for decimals).
+3. **Commit Integrity**: Commit file-by-file with clean messages. Never include tool names or emojis in commits, code, or documentation.
+
+---
+
+## 8. License
 
 This software is proprietary and confidential. All rights reserved.
-
-Unauthorized copying, reverse engineering, distribution, or public commercial deployment without prior written authorization from the copyright holders is strictly prohibited.
-
-For inquiries or licensing terms, contact: `dongduong840@gmail.com`.
+For inquiries, contact: `dongduong840@gmail.com`.
