@@ -2,7 +2,7 @@
  * "Có gì mới" (cc-46): what each release brings, newest first. Every merge to main that users can see adds or
  * extends the top entry (Vietnamese, the user's words, no tech terms). Pure.
  */
-export type ReleaseIcon = "home" | "select" | "target" | "meal" | "bars";
+export type ReleaseIcon = "home" | "select" | "target" | "meal" | "bars" | "share";
 
 export interface ReleaseItem {
   icon: ReleaseIcon;
@@ -40,6 +40,7 @@ export const RELEASES: readonly Release[] = [
       { icon: "target", title: "Mục tiêu đa lượng", body: "Tự chia đạm, tinh bột, chất béo trong Cài đặt › Mục tiêu." },
       { icon: "meal", title: "Bữa ăn dễ đọc hơn", body: "Đầu bữa màu mực, nền trắng, chữ to hơn." },
       { icon: "bars", title: "Thanh vi chất 4 màu", body: "Đỏ là thiếu, vàng trung bình, xanh nhạt gần đủ, xanh lá đạt." },
+      { icon: "share", title: "Ảnh chia sẻ rõ hơn", body: "Chữ trong ảnh chia sẻ không còn chồng lên nhau trên một số điện thoại." },
     ],
     tour: [
       {

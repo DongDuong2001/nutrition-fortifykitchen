@@ -34,7 +34,7 @@ DESKTOP = {"width": 1440, "height": 900}
 SETTINGS_KEY = "h1t_settings_v1_demo"
 RELEASE = "2026-10-17"
 HOME_TIPS = ["home-logged", "meal-add", "home-share"]
-ITEMS = ["Trang chủ mới", "Chọn nhiều món", "Mục tiêu đa lượng", "Bữa ăn dễ đọc hơn", "Thanh vi chất 4 màu"]
+ITEMS = ["Trang chủ mới", "Chọn nhiều món", "Mục tiêu đa lượng", "Bữa ăn dễ đọc hơn", "Thanh vi chất 4 màu", "Ảnh chia sẻ rõ hơn"]
 problems = []
 
 

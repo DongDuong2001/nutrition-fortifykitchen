@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Sheet } from "@/components/ui/sheet";
 import { PillButton } from "@/components/ui/pill-button";
-import { IconCheck, IconEye, IconGrid, IconHome, IconTarget } from "@/components/ui/icons";
+import { IconCheck, IconEye, IconGrid, IconHome, IconShare, IconTarget } from "@/components/ui/icons";
 import { CloseIcon } from "@/components/pwa/install-icons";
 import { SHEET_ICON_BUTTON, SHEET_TITLE_CLASS } from "@/components/pwa/install-sheet";
 import type { Release, ReleaseIcon } from "@/lib/releases";
@@ -17,6 +17,7 @@ const RELEASE_ICONS: Record<ReleaseIcon, React.ComponentType<{ size?: number }>>
   target: IconTarget,
   meal: IconEye,
   bars: IconGrid,
+  share: IconShare,
 };
 
 /** One release's items: 36 px icon tile, 15 px bold title, 14 px body, a divider between items. Also on /settings/whats-new. */
