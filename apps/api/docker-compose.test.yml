@@ -1,0 +1,17 @@
+# Postgres 17 for the API integration tests (make test-integration, scripts/test-integration.sh).
+# POSTGRES_IMAGE overrides the image (17 is the default, as in production). Throwaway: data lives in tmpfs and the container is removed after the run. Port 55432 on localhost only.
+services:
+  db:
+    image: ${POSTGRES_IMAGE:-postgres:17-alpine}
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: nutrition_test
+    ports:
+      - "127.0.0.1:55432:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d nutrition_test"]
+      interval: 1s
+      timeout: 3s
+      retries: 60
