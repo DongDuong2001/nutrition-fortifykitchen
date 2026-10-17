@@ -91,8 +91,8 @@ def run(browser, name, size):
     # cc-21: nobody signed in goes to /signin first (no account can have a profile yet); setup applies once someone is in
     for route in ("/app", "/app", "/explore", "/settings", "/add", "/micros", "/training"):
         go(pg, route)
-        # cc-41: signed out, the root of a desktop window is the landing page; everything else goes to /signin
-        want = "/landing" if route == "/app" and size["width"] >= 1024 else "/signin"
+        # cc-49: signed out, every tab route goes to /signin on every window size (cc-41's desktop landing is gone)
+        want = "/signin"
         check(pg.url.endswith(want), f"{where} nobody signed in: {route} goes to {want} ({pg.url[len(BASE):]})")
     sign_in_magic(pg, "ban@email.com")  # an account with no profile
     for route in ("/app", "/app", "/explore", "/settings", "/add", "/micros", "/training"):
@@ -221,7 +221,7 @@ def run(browser, name, size):
     check("h1t_added_entries_v1_a@example.com" in keys, f"{where} accounts: A's entries are under A's key ({keys})")
     sign_out()
     go(pg, "/app")
-    want = "/landing" if size["width"] >= 1024 else "/signin"
+    want = "/signin"
     check(pg.url.endswith(want), f"{where} accounts: nobody signed in, /diary goes to {want} ({pg.url[len(BASE):]})")
     go(pg, "/signin")
     sign_in("b@example.com")

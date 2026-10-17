@@ -14,15 +14,14 @@ def main():
     with sync_playwright() as p:
         browser = p.chromium.launch()
 
-        # 1. Test Desktop Root at 1440x900 redirects unauthenticated visitor to /landing
+        # 1. cc-49: a signed-out visitor of Hôm nay at 1440x900 goes to /signin (the landing opens only by its address)
         _demo.enable(False)
         page = browser.new_page(viewport={"width": 1440, "height": 900})
         page.goto(f"{BASE_URL}/app", wait_until="networkidle")
         page.wait_for_timeout(600)
 
-        # Verify unauthenticated desktop visit at Hôm nay (/app) redirects to /landing
-        assert "/landing" in page.url, f"Expected desktop root to redirect to /landing, but URL is {page.url}"
-        print("[PASS] Desktop root correctly redirects unauthenticated visitor to /landing")
+        assert page.url.split("?")[0].endswith("/signin"), f"Expected desktop /app to redirect to /signin, but URL is {page.url}"
+        print("[PASS] Desktop /app sends a signed-out visitor to /signin")
 
         # 1a. Test Desktop Dashboard with ?demo=1 (clean without intro banner)
         _demo.enable(True)

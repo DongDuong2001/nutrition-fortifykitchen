@@ -89,26 +89,18 @@ describe("the sign-in gate with a session that only Supabase knows", () => {
     expect(local.getItem("h1t_auth_current_email")).toBe(EMAIL);
   });
 
-  it("(b4) a signed-out desktop visitor goes to /landing, a signed-out phone to /signin", async () => {
+  it("(b4) cc-49: a signed-out visitor goes to /signin on a desktop and on a phone (Truy cập on the link page included)", async () => {
     getUser.mockResolvedValue({ data: { user: null }, error: null });
     setViewport(true, local);
-    expect(await gate.gateRedirect("/app", false)).toBe("/landing");
+    expect(await gate.gateRedirect("/app", false)).toBe("/signin");
     setViewport(false, local);
     expect(await gate.gateRedirect("/app", false)).toBe("/signin");
   });
 
-  it("(b5) only the root goes to /landing: another tab route on desktop is /signin", async () => {
+  it("(b5) another tab route on desktop is /signin too", async () => {
     getUser.mockResolvedValue({ data: { user: null }, error: null });
     setViewport(true, local);
     expect(await gate.gateRedirect("/explore", false)).toBe("/signin");
-  });
-
-  it("(b6) the viewport is read once per call, so a resize after the check never changes the route", async () => {
-    getUser.mockResolvedValue({ data: { user: null }, error: null });
-    setViewport(true, local);
-    const pending = gate.gateRedirect("/app", false);
-    setViewport(false, local); // the window shrinks while Supabase is answering
-    expect(await pending).toBe("/landing");
   });
 
   it("(b7) /setup never opens without a session in live mode, and does with one", async () => {

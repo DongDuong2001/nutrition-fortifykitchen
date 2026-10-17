@@ -45,14 +45,6 @@ export function isSetupRoute(pathname: string): boolean {
   return pathname === "/setup" || pathname.startsWith("/setup/");
 }
 
-/**
- * True on a desktop-width window (1024 px and up), asked of matchMedia. The gate asks once per navigation and keeps
- * the answer, so resizing the window afterwards never moves the user to another route.
- */
-export function isDesktopViewport(): boolean {
-  return typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia("(min-width: 1024px)").matches;
-}
-
 export function isNewUser(facts: FirstRunFacts): boolean {
   return firstRunState(facts) !== "ready";
 }
@@ -98,11 +90,11 @@ export function readFirstRunFacts(demo: boolean = isDemo()): FirstRunFacts {
  * id is known the account is resolved FIRST (currentAccount asks Supabase, stores the email and clears the signed-out
  * flag), and only then is the setup redirect decided, from that account's own storage keys: a first-time Google user
  * lands on /setup/profile with the profile saved under their email, never under unscoped keys. With no session at all
- * the old rule stands: the setup redirect if there is one, else /signin.
+ * the old rule stands: the setup redirect if there is one, else /signin. cc-49: that is /signin on every window size
+ * (Truy cập on the link page opens Hôm nay); /landing is only reached by its own address.
  */
-export async function gateRedirect(pathname: string, demo: boolean = isDemo(), desktop: boolean = isDesktopViewport()): Promise<string | null> {
-  // The account is resolved FIRST. A visitor with no session and no account is the only one the landing is for: a
-  // signed-in user (an OAuth return with empty storage included) never lands there, whatever the window size
+export async function gateRedirect(pathname: string, demo: boolean = isDemo()): Promise<string | null> {
+  // The account is resolved FIRST, so a signed-in user (an OAuth return with empty storage included) is let through
   const hasSession = () => currentAccountId() !== null || (!wasExplicitlySignedOut() && currentAccount().then((a) => a !== null));
   if (isSetupRoute(pathname)) {
     // Setup needs an account to save the profile under: in live mode it never opens without a session
@@ -112,7 +104,7 @@ export async function gateRedirect(pathname: string, demo: boolean = isDemo(), d
 
   // After Đăng xuất a session that survived (a failed sign-out) is not adopted until the next explicit sign-in
   if (!demo && !(await hasSession())) {
-    return pathname === HOME_ROUTE && desktop ? "/landing" : "/signin";
+    return "/signin";
   }
   const facts = readFirstRunFacts(demo);
   if (!demo && isLiveMode() && !facts.profileSaved && currentAccountId()) {
