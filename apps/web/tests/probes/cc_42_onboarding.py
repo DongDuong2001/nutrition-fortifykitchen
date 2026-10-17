@@ -12,6 +12,8 @@ tips off (_seed.py); this one turns them on with `_seed.onboarding(True)`.
 - Tùy chỉnh thành món của tôi: on a recipe dish only, pre-fills name and ingredients
 - Keyboard: Esc closes a tip (Đã hiểu) and skips the tour; Tab stays in the card
 - Cài đặt: Xem lại hướng dẫn with the Mới pill, the tips switch
+- Hôm nay: the meal header's + Thêm is a text link (no background, border or radius; cobalt, Manrope 13 px 700; hit area 44x44 that
+  leaves the 22/44 px header row alone; 12 px from the kcal; focus ring, hover underline, pressed opacity; hidden on a past day)
 Screenshots: .screenshots/cc-42-*.png
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_42_onboarding.py
 """
@@ -559,6 +561,81 @@ def settings(browser):
     ctx.close()
 
 
+MEAL_ADD = "a[data-tour='meal-add']"
+
+
+def meal_add_link(browser):
+    """The + Thêm on a meal header is a text link: looks, hit area, row height, states (390 and 1440)."""
+    for size, tag, row_h in ((PHONE, "390", 22), (DESKTOP, "1440", 44)):
+        ctx, pg = ctx_page(browser, size)
+        ctx.add_init_script("try { localStorage.setItem('h1t_onboarding_off', '1'); } catch (e) {}")
+        go(pg, "/")
+        pg.locator("section[aria-label='Tổng kcal và dinh dưỡng đa lượng']").first.wait_for(state="visible", timeout=8000)
+        links = pg.locator(MEAL_ADD + ":visible")
+        check(links.count() >= 4, f"{tag} meal add: one + Thêm per meal ({links.count()})")
+        link = links.first
+        info = link.evaluate(
+            """el => {
+              const cs = getComputedStyle(el), before = getComputedStyle(el, '::before');
+              const row = el.parentElement.getBoundingClientRect(), r = el.getBoundingClientRect();
+              const btn = el.parentElement.querySelector('button'), kcal = btn.querySelector('span:last-child').getBoundingClientRect();
+              return {
+                text: el.textContent.trim(), label: el.getAttribute('aria-label'), exp: el.getAttribute('data-export'),
+                bg: cs.backgroundColor, borderW: cs.borderTopWidth, radius: cs.borderTopLeftRadius, shadow: cs.boxShadow,
+                color: cs.color, fs: cs.fontSize, fw: cs.fontWeight, ff: cs.fontFamily,
+                hitW: parseFloat(before.width), hitH: parseFloat(before.height),
+                rowH: row.height, mid: (r.top + r.bottom) / 2, rowMid: (row.top + row.bottom) / 2,
+                rightGap: row.right - r.right, kcalGap: r.left - kcal.right, kcalText: btn.querySelector('span:last-child').textContent.trim(),
+              };
+            }"""
+        )
+        check(info["text"] == "+ Thêm" and info["exp"] == "hide" and info["label"].startswith("Thêm vào Bữa"), f"{tag} meal add: text, data-export and label kept ({info['text']!r}, {info['label']!r}, {info['exp']!r})")
+        check(info["bg"] == "rgba(0, 0, 0, 0)" and info["borderW"] == "0px" and info["radius"] == "0px" and info["shadow"] == "none", f"{tag} meal add: no background, border, radius or shadow ({info['bg']}, {info['borderW']}, {info['radius']}, {info['shadow']})")
+        check(info["color"] == "rgb(18, 56, 214)" and info["fs"] == "13px" and info["fw"] == "700" and "Manrope" in info["ff"], f"{tag} meal add: cobalt Manrope 13 px 700 ({info['color']}, {info['fs']}, {info['fw']}, {info['ff'][:30]})")
+        check(info["hitW"] >= 44 and info["hitH"] >= 44, f"{tag} meal add: hit area at least 44x44 ({info['hitW']}x{info['hitH']})")
+        check(info["rowH"] == row_h, f"{tag} meal add: the meal header row stays {row_h} px ({info['rowH']})")
+        check(abs(info["mid"] - info["rowMid"]) <= 1, f"{tag} meal add: centred with the meal name ({info['mid']} vs {info['rowMid']})")
+        check(abs(info["rightGap"] - 12) <= 1, f"{tag} meal add: right-aligned on the row's 12 px edge ({info['rightGap']})")
+        if info["kcalText"]:
+            check(abs(info["kcalGap"] - 12) <= 1, f"{tag} meal add: 12 px from the kcal value ({info['kcalGap']})")
+        # the invisible hit area: a point 10 px above the text still reaches the link
+        # (the first meal header sits at the top edge of the list's scroll box, which clips the overlay above it, so the
+        # second one is used)
+        box = links.nth(1).bounding_box()
+        top = pg.evaluate("([x, y]) => document.elementFromPoint(x, y)?.closest(\"a[data-tour='meal-add']\") !== null", [box["x"] + box["width"] / 2, box["y"] - 10])
+        check(top, f"{tag} meal add: a tap 10 px above the text still lands on the link")
+        # hover underline (desktop), pressed opacity
+        link.hover()
+        pg.wait_for_timeout(200)
+        deco = link.evaluate("el => getComputedStyle(el).textDecorationLine")
+        check(deco == "underline", f"{tag} meal add: hover underlines ({deco})")
+        pg.mouse.down()
+        pg.wait_for_timeout(300)
+        op = link.evaluate("el => getComputedStyle(el).opacity")
+        check(float(op) == 0.6, f"{tag} meal add: pressed opacity 0.6 ({op})")
+        pg.mouse.move(5, 5)
+        pg.mouse.up()
+        pg.wait_for_timeout(300)
+        check(pg.url.split("?")[0].rstrip("/") == BASE, f"{tag} meal add: letting go elsewhere does not open /add ({pg.url})")
+        # focus-visible ring: 2 px cobalt, offset 2
+        link.evaluate("el => { el.setAttribute('tabindex', '0'); }")
+        pg.keyboard.press("Tab")
+        for _ in range(60):
+            if pg.evaluate("() => document.activeElement && document.activeElement.matches(\"a[data-tour='meal-add']\")"):
+                break
+            pg.keyboard.press("Tab")
+        ring = pg.evaluate("() => { const e = document.activeElement, cs = getComputedStyle(e); return { w: cs.outlineWidth, s: cs.outlineStyle, o: cs.outlineOffset, c: cs.outlineColor, ok: e.matches(\"a[data-tour='meal-add']\") }; }")
+        check(ring["ok"] and ring["w"] == "2px" and ring["s"] == "solid" and ring["o"] == "2px" and ring["c"] == "rgb(18, 56, 214)", f"{tag} meal add: focus ring 2 px cobalt, offset 2 ({ring})")
+        pg.screenshot(path=str(SHOTS / f"cc-42-meal-add-{tag}.png"))
+        ctx.close()
+        # a past day has none
+        ctx, pg = ctx_page(browser, size)
+        ctx.add_init_script("try { localStorage.setItem('h1t_onboarding_off', '1'); } catch (e) {}")
+        go(pg, f"/?date={YESTERDAY}")
+        check(pg.locator(MEAL_ADD).count() == 0, f"{tag} meal add: hidden on a past day")
+        ctx.close()
+
+
 def main():
     with sync_playwright() as p:
         browser = p.chromium.launch()
@@ -575,6 +652,7 @@ def main():
             ("customise", lambda: customise(browser)),
             ("keyboard", lambda: keyboard(browser)),
             ("settings", lambda: settings(browser)),
+            ("mealadd", lambda: meal_add_link(browser)),
         ]
         for name, run in parts:
             if not only or name in only:

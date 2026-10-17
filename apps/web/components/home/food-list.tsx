@@ -244,7 +244,7 @@ export function FoodList({
         return (
           <section key={meal.slot} aria-label={meal.fullName}>
             <div
-              className={`sticky top-0 z-10 flex h-[22px] w-full items-center gap-4 px-3 lg:h-11 ${
+              className={`sticky top-0 z-10 flex h-[22px] w-full items-center gap-3 px-3 lg:h-11 ${
                 mealSelected ? "bg-cobalt text-on-accent" : "bg-paper-dark text-text"
               }`}
             >
@@ -272,8 +272,8 @@ export function FoodList({
                   aria-label={`Thêm vào ${meal.fullName}`}
                   data-export="hide"
                   data-tour="meal-add"
-                  className={`relative flex h-[22px] shrink-0 items-center rounded-full px-2 text-xs font-bold leading-none no-underline before:absolute before:-inset-y-[11px] before:-inset-x-1 before:content-[''] ${
-                    mealSelected ? "bg-on-accent text-cobalt" : "bg-card text-blue"
+                  className={`relative flex h-[22px] shrink-0 items-center text-[13px] font-bold leading-none no-underline transition-opacity duration-150 before:absolute before:-inset-y-[11px] before:-inset-x-2 before:content-[''] hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-60 ${
+                    mealSelected ? "text-on-accent focus-visible:outline-on-accent" : "text-blue focus-visible:outline-blue"
                   }`}
                 >
                   + Thêm
