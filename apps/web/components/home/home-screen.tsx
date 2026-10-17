@@ -33,6 +33,7 @@ import {
 } from "@/lib/home";
 import type { MealSlot } from "@/lib/meal-slot";
 import { InstallPromptHost } from "@/components/pwa/install-prompt";
+import { WhatsNewHost } from "@/components/whats-new/whats-new-host";
 import { FoodList } from "./food-list";
 import { markUsed } from "@/lib/onboarding-store";
 import { emitSignal, subscribeSignal } from "@/lib/tour-bus";
@@ -525,6 +526,7 @@ function HomeContent() {
         }}
       />
       <InstallPromptHost busy={installBusy} />
+      <WhatsNewHost busy={installBusy} />
       <LevelExplainerSheet open={explainerOpen} onClose={() => setExplainerOpen(false)} level={level} />
       <CopyYesterdaySheet open={isCopySheetOpen} onClose={() => setIsCopySheetOpen(false)} />
       <DayMenuSheet

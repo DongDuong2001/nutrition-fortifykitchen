@@ -190,3 +190,39 @@
     animation: none;
   }
 }
+
+/* "Có gì mới" sheet (cc-46): slides up in 200 ms, away in 140 ms; reduced motion fades only */
+@keyframes wn-up {
+  from {
+    transform: translateY(100%);
+  }
+}
+@keyframes wn-down {
+  to {
+    transform: translateY(100%);
+  }
+}
+@keyframes wn-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes wn-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+.wn-enter {
+  animation: wn-up 200ms ease-out both;
+}
+.wn-leave {
+  animation: wn-down 140ms ease-in both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .wn-enter {
+    animation-name: wn-fade-in;
+  }
+  .wn-leave {
+    animation-name: wn-fade-out;
+  }
+}
