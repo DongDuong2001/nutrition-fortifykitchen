@@ -240,7 +240,7 @@ def past_flow(browser, size, tag):
     pg.screenshot(path=os.path.join(SHOTS, f"cc-27a-past-sheet-{w}.png"))
     dlg.get_by_role("radio", name="Bữa phụ").click()
     dlg.get_by_role("button", name="Chép vào hôm nay", exact=True).click()
-    pg.wait_for_url(re.compile(r"^[^?]*/$"), timeout=8000)
+    pg.wait_for_url(re.compile(r"^[^?]*/app$"), timeout=8000)
     pg.wait_for_timeout(600)
     check("date=" not in pg.url, f"{tag} past: lands on today ({pg.url})")
     toast = squash(pg.locator("[role=status] >> visible=true").first.inner_text())

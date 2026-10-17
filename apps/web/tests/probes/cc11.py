@@ -99,7 +99,7 @@ def run_phone(browser):
     back_today = vis(pg, 'a:has-text("Về hôm nay")')
     check(back_today.bounding_box()["height"] >= 44, "390 past day: Về hôm nay is a 44 px target")
     back_today.click()
-    pg.wait_for_url(re.compile(r".*/$"), timeout=8000)
+    pg.wait_for_url(re.compile(r".*/app$"), timeout=8000)
     pg.wait_for_timeout(300)
     check("date=" not in pg.url and visible_count(pg, 'a:has-text("Về hôm nay")') == 0, f"390 Về hôm nay lands on today ({pg.url})")
     open_today(pg, f"?date={iso(YESTERDAY)}")
@@ -110,10 +110,10 @@ def run_phone(browser):
 
     # Entry and add pages with a past day go back to that day's Today view
     pg.goto(BASE + f"/entry/item-1?date={iso(YESTERDAY)}", wait_until="networkidle")
-    pg.wait_for_url(f"**/?date={iso(YESTERDAY)}", timeout=8000)
+    pg.wait_for_url(f"**/app?date={iso(YESTERDAY)}", timeout=8000)
     check(f"/app?date={iso(YESTERDAY)}" in pg.url, "390 /entry/item-1 with a past date redirects to that day's Today")
     pg.goto(BASE + f"/add?meal=dinner&date={iso(YESTERDAY)}", wait_until="networkidle")
-    pg.wait_for_url(f"**/?date={iso(YESTERDAY)}", timeout=8000)
+    pg.wait_for_url(f"**/app?date={iso(YESTERDAY)}", timeout=8000)
     check(f"/app?date={iso(YESTERDAY)}" in pg.url, "390 /add with a past date redirects to that day's Today")
     ctx.close()
 

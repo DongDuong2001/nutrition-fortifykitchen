@@ -93,7 +93,7 @@ def long_name(browser, size_name, size):
     pg.fill("#cf-carbs", "40")
     pg.fill("#cf-fat", "8")
     pg.get_by_role("button", name=re.compile("Lưu và thêm")).click()
-    pg.wait_for_url("**/", timeout=8000)
+    pg.wait_for_url("**/app", timeout=8000)
     pg.wait_for_timeout(600)
     w = f"{size_name} long name"
     row = pg.locator(f"button[aria-label^='{LONG_NAME[:24]}']").first

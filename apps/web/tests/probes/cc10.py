@@ -108,7 +108,7 @@ def run_phone(browser):
     check(visible_count(pg, 'text=Chưa có món nào ngày này') == 1, "390 a past day with nothing logged says so")
     pg.screenshot(path=shot("cc10-past-empty-390.png"), animations="disabled")
     vis(pg, 'a:has-text("Về hôm nay")').click()
-    pg.wait_for_url(re.compile(r".*/$"), timeout=8000)
+    pg.wait_for_url(re.compile(r".*/app$"), timeout=8000)
     pg.wait_for_timeout(300)
     check(urlparse(pg.url).path == "/app" and "date=" not in pg.url, f"390 Về hôm nay lands on / ({pg.url})")
     check(not is_past(pg) and visible_count(pg, 'a:has-text("Về hôm nay")') == 0, "390 after Về hôm nay the day is today")

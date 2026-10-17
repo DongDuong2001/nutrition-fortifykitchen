@@ -165,7 +165,7 @@ def run(browser, name, size):
     check(row is not None, f"{where} add: a food that is not in the sample day")
     row.click()
     pg.get_by_role("button", name=re.compile("^Thêm vào Bữa tối")).locator("visible=true").first.click()
-    pg.wait_for_url(re.compile(r".*/(\?.*)?$"))
+    pg.wait_for_url(re.compile(r".*/app(\?.*)?$"))
     pg.wait_for_timeout(500)
     t = text(pg)
     check(food in t, f"{where} diary: the first meal ({food}) is listed")

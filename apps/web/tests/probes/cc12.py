@@ -70,7 +70,7 @@ def add_chà_là_then_today(pg):
     # the add sheet's result row (the home rows under it are buttons too): the one with kcal in it
     pg.locator('button:has-text("Chà là"):has-text("kcal") >> visible=true').first.click()
     pg.locator('button:has-text("Thêm vào Trước tập") >> visible=true').first.click()
-    pg.wait_for_url(re.compile(r".*/(\?.*)?$"), timeout=8000)
+    pg.wait_for_url(re.compile(r".*/app(\?.*)?$"), timeout=8000)
     pg.wait_for_timeout(400)
 
 

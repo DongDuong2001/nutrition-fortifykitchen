@@ -82,7 +82,7 @@ def check_subtabs(browser, size_name, size):
     check(pg.locator('nav[role="tablist"][aria-label="Tổng quan"]:visible').count() == 1, f"{size_name} overview: tab bar is visible")
     for label, route in SUBTABS:
         tab(pg, label).click()
-        pg.wait_for_url(f"**{route}", timeout=8000) if route != "/app" else pg.wait_for_url(re.compile(r".*/(\?.*)?$"), timeout=8000)
+        pg.wait_for_url(f"**{route}", timeout=8000) if route != "/app" else pg.wait_for_url(re.compile(r".*/app(\?.*)?$"), timeout=8000)
         pg.wait_for_timeout(500)
         check(path_of(pg) == route, f"{size_name} {label}: opens {route} (got {path_of(pg)})")
         current = pg.locator('a[role="tab"][aria-current="page"]:visible').all_inner_texts()
@@ -205,7 +205,7 @@ def check_home_rows(browser, size_name, size):
     pg.wait_for_url(f"**/micros?date={TODAY}", timeout=8000)
     check(f"date={TODAY}" in pg.url, f"{size_name} home: Đủ 22 vi chất › opens /micros?date={TODAY}")
     pg.locator('a[aria-label="Quay lại"]:visible').first.click()
-    pg.wait_for_url(re.compile(r".*/(\?.*)?$"), timeout=8000)
+    pg.wait_for_url(re.compile(r".*/app(\?.*)?$"), timeout=8000)
     check(path_of(pg) == "/app", f"{size_name} micros: back returns to / (now {path_of(pg)})")
     pg.locator(f'a[href="/training?date={TODAY}"]:visible').first.click()
     pg.wait_for_url(f"**/training?date={TODAY}", timeout=8000)

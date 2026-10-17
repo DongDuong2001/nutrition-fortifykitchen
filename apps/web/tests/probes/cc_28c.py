@@ -216,7 +216,7 @@ def run(browser, size, tag):
     dlg.wait_for(state="visible", timeout=6000)
     pg.screenshot(path=os.path.join(SHOTS, f"cc-28c-join-{w}.png"))
     dlg.get_by_role("button", name="Tham gia", exact=True).click()
-    pg.wait_for_url(re.compile(r"^[^?]*/$"), timeout=8000)
+    pg.wait_for_url(re.compile(r"^[^?]*/app$"), timeout=8000)
     pg.locator(HERO + " >> visible=true").first.wait_for(state="visible", timeout=8000)
     pg.wait_for_timeout(500)
     check("Bạn đang được HLV Khánh theo dõi · Level 1" in body(pg), f"{tag} join: linked and on Hôm nay")

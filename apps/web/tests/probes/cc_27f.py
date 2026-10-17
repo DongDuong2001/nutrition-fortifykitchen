@@ -70,7 +70,7 @@ def run(browser, size, tag):
             }""",
             HERO,
         )
-        target = next(s for s in geo if "kcal" in s["t"] and "/app" in s["t"])
+        target = next(s for s in geo if "kcal" in s["t"] and "/" in s["t"])
         pct = next(s for s in geo if re.fullmatch(r"\d+%|<1%", s["t"]))
         gap = pct["r"]["left"] - target["r"]["right"]
         check(abs(pct["r"]["top"] + pct["r"]["height"] - (target["r"]["top"] + target["r"]["height"])) < 10, f"{t}: kcal percent on the target's line")

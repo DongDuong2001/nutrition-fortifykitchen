@@ -164,7 +164,7 @@ def run(browser, name, size):
         pg.locator("#fd-size").fill(grams)
         pg.wait_for_timeout(200)
         pg.get_by_role("button", name=re.compile("^Thêm vào Bữa")).locator("visible=true").first.click()
-        pg.wait_for_url(re.compile(r".*/(\?.*)?$"))
+        pg.wait_for_url(re.compile(r".*/app(\?.*)?$"))
         pg.wait_for_timeout(500)
         t = text(pg)
         check(label in t and f"{grams} g" not in t, f"{name} grams: {grams} typed is saved as '{label}' in the diary")

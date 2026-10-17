@@ -86,7 +86,7 @@ def run():
             check(pg.locator('fieldset button >> visible=true').count() == 5, f"{name}: five inline meal chips")
             pg.locator('input[aria-label="Số gam"] >> visible=true').first.fill("90")
             button(pg, "Lưu thay đổi").click()
-            pg.wait_for_url(re.compile(r".*/(\?.*)?$"))
+            pg.wait_for_url(re.compile(r".*/app(\?.*)?$"))
             pg.wait_for_timeout(400)
             check("Yến mạch 90 g" in meal_text(pg, "breakfast"), f"{name}: row shows 90 g")
             check("573 kcal" in meal_text(pg, "breakfast"), f"{name}: breakfast 573 kcal")
@@ -95,7 +95,7 @@ def run():
             # 3. delete: exactly one toast, Hoàn tác restores
             edit_food(pg, "Yogurt kefir", "item-2")
             button(pg, "Xóa món này").click()
-            pg.wait_for_url(re.compile(r".*/(\?.*)?$"))
+            pg.wait_for_url(re.compile(r".*/app(\?.*)?$"))
             pg.wait_for_timeout(300)
             toasts = pg.locator('[role=status] >> visible=true')
             check(toasts.count() == 1, f"{name}: one toast after delete ({toasts.count()})")

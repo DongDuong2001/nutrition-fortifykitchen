@@ -138,7 +138,7 @@ def check_recents(browser, size_name, size):
 
     pg.locator("button[aria-label^='Thêm Yến mạch']:visible").first.click()
     clicks += 1
-    pg.wait_for_url(re.compile(r".*/(\?.*)?$"))
+    pg.wait_for_url(re.compile(r".*/app(\?.*)?$"))
     pg.wait_for_timeout(400)
     msg = toast_text(pg)
     check("Yến mạch 45 g" in msg and "Bữa tối" in msg, f"{size_name} recent tap: toast names the last portion and the meal by the clock ({msg!r})")
@@ -179,7 +179,7 @@ def check_favourites(browser, size_name, size):
     check(pg.locator("button:has-text('Thêm vào'):visible").count() > 0, f"{size_name} favourite with no history: opens the portion panel")
 
     pg.locator("[data-food-row]:visible:has-text('Chuối')").first.click()
-    pg.wait_for_url(re.compile(r".*/(\?.*)?$"))
+    pg.wait_for_url(re.compile(r".*/app(\?.*)?$"))
     pg.wait_for_timeout(300)
     check("Chuối 1 quả" in toast_text(pg), f"{size_name} favourite with history: adds with its last portion ({toast_text(pg)!r})")
     ctx.close()
@@ -263,7 +263,7 @@ def check_saved_meals(browser, size_name, size):
     # Client navigation to Hôm nay keeps the in-memory toast. The three foods must be on Hôm nay before the undo,
     # so this fails if the add never happened (cc2-32: Nhật ký is folded into Hôm nay).
     pg.locator("nav[aria-label='Điều hướng chính']:visible a[href='/app']").first.click()
-    pg.wait_for_url(re.compile(r".*/(\?.*)?$"))
+    pg.wait_for_url(re.compile(r".*/app(\?.*)?$"))
     pg.wait_for_timeout(400)
     check(home_dinner_items(pg) == 3, f"{size_name} saved meal tap: three foods in Bữa tối on Hôm nay ({home_dinner_items(pg)})")
     pg.locator("button:has-text('Hoàn tác'):visible").first.click()
@@ -274,7 +274,7 @@ def check_saved_meals(browser, size_name, size):
     go(pg, "/add?meal=lunch")
     check("Bữa ăn của tôi" in text(pg) and "Sáng của tôi" in text(pg), f"{size_name} add: Bữa ăn của tôi section lists it")
     pg.locator("button[aria-label^='Thêm Sáng của tôi']:visible").first.click()
-    pg.wait_for_url(re.compile(r".*/(\?.*)?$"))
+    pg.wait_for_url(re.compile(r".*/app(\?.*)?$"))
     pg.wait_for_timeout(300)
     lunch = meal_food_count(pg, "Bữa trưa")
     check(lunch == 2 + 3, f"{size_name} add sheet: one tap adds the three foods to the chosen meal ({lunch})")
@@ -324,7 +324,7 @@ def check_quick(browser, size_name, size):
     pg.fill("#quick-kcal", "420,4")
     pg.fill("#quick-protein", "12,5")
     submit.click()
-    pg.wait_for_url(re.compile(r".*/(\?.*)?$"))
+    pg.wait_for_url(re.compile(r".*/app(\?.*)?$"))
     pg.wait_for_timeout(400)
     dinner = re.sub(r"\s+", " ", pg.locator("section[aria-label='Bữa tối']").inner_text())
     check("Bánh mì" in dinner and "420" in dinner, f"{size_name} quick add: Bánh mì with 420 kcal is listed in Bữa tối ({dinner!r})")
@@ -345,7 +345,7 @@ def check_quick(browser, size_name, size):
     pg.locator("button[aria-label='Chỉ thêm kcal']:visible").first.click()
     pg.fill("#quick-kcal", "150")
     pg.get_by_role("button", name=re.compile("^Thêm vào Bữa tối")).click()
-    pg.wait_for_url(re.compile(r".*/(\?.*)?$"))
+    pg.wait_for_url(re.compile(r".*/app(\?.*)?$"))
     pg.wait_for_timeout(300)
     check(dinner_items(pg) == 2, f"{size_name} quick add: a second entry with the default name ({dinner_items(pg)})")
     # cc2-32: Hôm nay's food rows show name and portion only; the diary's macro line ("Đạm — · …") is gone with the diary screen
@@ -361,7 +361,7 @@ def check_quick(browser, size_name, size):
     check(pg.locator("#entry-quick-kcal").input_value() == "420", f"{size_name} entry: kcal field holds 420")
     pg.fill("#entry-quick-kcal", "500")
     pg.get_by_role("button", name="Lưu thay đổi").click()
-    pg.wait_for_url(re.compile(r".*/(\?.*)?$"))
+    pg.wait_for_url(re.compile(r".*/app(\?.*)?$"))
     pg.wait_for_timeout(300)
     check(meal_kcal(pg, "Bữa tối") == (kcal_before or 0) + 80, f"{size_name} entry: the edited kcal (420 to 500) moves the meal total by 80 ({kcal_before} -> {meal_kcal(pg, 'Bữa tối')})")
     ctx.close()
