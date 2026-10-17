@@ -190,9 +190,9 @@ function HomeContent() {
     setSelectedIds(new Set());
     setTargetSheet(null);
   };
-  const startSelect = () => {
+  const startSelect = (initialId?: string) => {
     setMode(DAY_MODE);
-    setSelectedIds(new Set());
+    setSelectedIds(initialId ? new Set([initialId]) : new Set());
     setSelecting(true);
     emitSignal("select-mode");
   };
@@ -456,6 +456,11 @@ function HomeContent() {
               onFood={(id) => setMode(toggleFood(mode, id))}
               onMeal={(slot) => setMode(toggleMeal(mode, slot))}
               onCopyYesterday={() => setIsCopySheetOpen(true)}
+              onLongPressSelect={(id) => startSelect(id)}
+              onMoveFood={(id, targetSlot) => {
+                if (isPast) return;
+                moveEntries([id], targetSlot, viewIso);
+              }}
               select={
                 selecting
                   ? {
