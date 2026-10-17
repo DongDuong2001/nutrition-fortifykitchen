@@ -9,7 +9,7 @@ const ids = (c: TipContext, f = flags()) => pickTip({ ctx: c, flags: f, tourActi
 describe("the tips table", () => {
   it("has the 15 tips of the design boards and cc-49's Chưa lưu, each with the card copy", () => {
     expect(TIPS.map((t) => t.id)).toEqual([
-      "unsaved", "home-logged", "meal-add", "home-share", "past-day", "multi-select", "add-tray", "food-detail", "compare",
+      "unsaved", "home-logged", "meal-add", "home-share", "pull-refresh", "nutrient-sources", "past-day", "multi-select", "add-tray", "add-shortlists", "haptics", "food-detail", "compare",
       "food-new", "training", "micros", "trends-micros", "explore", "overview", "leaderboard",
     ]);
     for (const t of TIPS) {
@@ -22,6 +22,36 @@ describe("the tips table", () => {
 
   it("every id is unique", () => {
     expect(new Set(TIPS.map((t) => t.id)).size).toBe(TIPS.length);
+  });
+});
+
+describe("pickTip: pull to refresh (cc-51)", () => {
+  const seen = flags({ seen: ["home-logged", "meal-add"] });
+  it("on a touch screen, once the first tips of Hôm nay were seen", () => {
+    expect(ids(ctx({ touch: true, foodsToday: 1 }), seen)).toBe("pull-refresh");
+  });
+  it("never with a mouse, never on a past day, never after a pull", () => {
+    // cc-51: the nutrient tip comes next on Hôm nay for everyone
+    expect(ids(ctx({ touch: false, foodsToday: 1 }), seen)).toBe("nutrient-sources");
+    expect(ids(ctx({ touch: true, foodsToday: 1, pastDay: true }), seen)).toBe("past-day");
+    expect(ids(ctx({ touch: true, foodsToday: 1 }), flags({ seen: ["home-logged", "meal-add", "nutrient-sources"], used: ["pull-refresh"] }))).toBe(null);
+  });
+});
+
+describe("pickTip: tap a nutrient (cc-51)", () => {
+  it("on today once the first tips were seen, never on a past day, never after a tap", () => {
+    const seen = flags({ seen: ["home-logged", "meal-add"] });
+    expect(ids(ctx({ foodsToday: 1 }), seen)).toBe("nutrient-sources");
+    expect(ids(ctx({ foodsToday: 1, pastDay: true }), seen)).toBe("past-day");
+    expect(ids(ctx({ foodsToday: 1 }), flags({ seen: ["home-logged", "meal-add"], used: ["nutrient-sources"] }))).toBe(null);
+  });
+});
+
+describe("pickTip: Rung khi chạm (cc-51)", () => {
+  it("on Cài đặt where the phone can vibrate; never on iOS (no vibrate); never after the switch was used", () => {
+    expect(ids(ctx({ pathname: "/settings", vibrate: true }))).toBe("haptics");
+    expect(ids(ctx({ pathname: "/settings", vibrate: false }))).toBe(null);
+    expect(ids(ctx({ pathname: "/settings", vibrate: true }), flags({ used: ["haptics-switch"] }))).toBe(null);
   });
 });
 
@@ -59,7 +89,9 @@ describe("pickTip", () => {
 
   it("not when the user has already used the feature", () => {
     expect(ids(ctx({ pathname: "/training" }), flags({ used: ["training-minutes"] }))).toBeNull();
-    expect(ids(ctx({ pathname: "/add" }), flags({ used: ["tray-add"] }))).toBeNull();
+    // cc-51: then the shortlist tip is next on /add, until a one-tap add from Gần đây or Hay ăn
+    expect(ids(ctx({ pathname: "/add" }), flags({ used: ["tray-add"] }))).toBe("add-shortlists");
+    expect(ids(ctx({ pathname: "/add" }), flags({ used: ["tray-add", "shortlist-add"] }))).toBeNull();
   });
 
   it("not when tips are off, and not while the tour runs", () => {
@@ -72,7 +104,8 @@ describe("pickTip", () => {
     expect(first).toBe("home-logged");
     const second = ids(ctx(), flags({ seen: ["home-logged"] }));
     expect(second).toBe("meal-add");
-    expect(ids(ctx(), flags({ seen: ["home-logged", "meal-add"] }))).toBeNull();
+    expect(ids(ctx(), flags({ seen: ["home-logged", "meal-add"] }))).toBe("nutrient-sources");
+    expect(ids(ctx(), flags({ seen: ["home-logged", "meal-add", "nutrient-sources"] }))).toBeNull();
   });
 
   it("Hôm nay tips wait for the first food, and the past-day tip is for a past day only", () => {
@@ -157,7 +190,7 @@ describe("the share tip", () => {
   });
 
   it("not at 2 foods, none, or on a past day or in select mode", () => {
-    expect(ids(ctx({ foodsToday: 2 }), seenFirst)).toBeNull();
+    expect(ids(ctx({ foodsToday: 2 }), seenFirst)).toBe("nutrient-sources");
     expect(ids(ctx({ foodsToday: 0 }), seenFirst)).toBeNull();
     expect(ids(ctx({ foodsToday: 5, pastDay: true }), seenFirst)).toBe("past-day");
     expect(ids(ctx({ foodsToday: 5, pastDay: true }), flags({ seen: ["past-day"] }))).toBeNull();
@@ -169,8 +202,8 @@ describe("the share tip", () => {
   });
 
   it("not after the account has shared (a successful share or export), once seen, or with tips off", () => {
-    expect(ids(ctx({ foodsToday: 3 }), flags({ ...seenFirst, used: ["share-day"] }))).toBeNull();
-    expect(ids(ctx({ foodsToday: 3 }), flags({ seen: ["home-logged", "meal-add", "home-share"] }))).toBeNull();
+    expect(ids(ctx({ foodsToday: 3 }), flags({ ...seenFirst, used: ["share-day"] }))).toBe("nutrient-sources");
+    expect(ids(ctx({ foodsToday: 3 }), flags({ seen: ["home-logged", "meal-add", "home-share"] }))).toBe("nutrient-sources");
     expect(ids(ctx({ foodsToday: 3 }), flags({ ...seenFirst, tipsOff: true }))).toBeNull();
   });
 

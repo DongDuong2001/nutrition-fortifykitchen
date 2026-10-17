@@ -105,7 +105,8 @@ def targets_ok(pg, selector, label):
     check(not small, f"{label}: every target is 44 px or more ({small})")
 
 
-SEEN_TIPS = {"tourDone": True, "seen": HOME_TIPS}
+# cc-49/51 tips on Hôm nay (Chưa lưu, kéo xuống, chạm vi chất) are seen too, so the sheet is not waiting for a tip
+SEEN_TIPS = {"tourDone": True, "seen": HOME_TIPS + ["unsaved", "pull-refresh", "nutrient-sources", "haptics", "add-shortlists"]}
 
 
 def once(browser):

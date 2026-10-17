@@ -26,6 +26,7 @@ export function NutrientColumn({
   targets,
   selected,
   microsHref,
+  onNutrient,
   summary,
   shareKey,
 }: {
@@ -36,6 +37,8 @@ export function NutrientColumn({
   targets: Record<string, number | null>;
   selected: boolean;
   microsHref: string;
+  /** Today only (cc-51 D4): a tapped nutrient opens the foods that add to it */
+  onNutrient?: (id: string) => void;
   /** "x/N đạt" and the lowest micros of the Level; left out when a food or a meal is picked. */
   summary?: { reached: number; total: number; lacking: string[] };
   /** The share image: rows have fixed heights (no media queries: the image is drawn at 390 px on any screen), no link, a colour key. */
@@ -83,8 +86,25 @@ export function NutrientColumn({
               }
               const value = values.nutrients[id] ?? null;
               const pct = pctOf(value, targets[id] ?? null);
+              // cc-51 D4: today's rows are buttons that open the foods behind the number (a 46 px hit area)
+              const Row = onNutrient && !share ? "button" : "div";
               return (
-                <div key={id} data-align-group="home-nutrient" data-snap-row className={`flex snap-start flex-col justify-center gap-0.5 px-3 ${share ? "h-9" : "h-[34px] lg:h-12 lg:gap-1"}`}>
+                <Row
+                  key={id}
+                  {...(Row === "button"
+                    ? {
+                        type: "button" as const,
+                        onClick: () => onNutrient?.(id),
+                        "aria-label": `${def.name}, ${value === null ? "chưa có dữ liệu" : `${formatAmount(value, def.unit)} ${def.unit}`}, ${pctLabel(value, targets[id] ?? null)} mục tiêu. Xem món góp phần`,
+                        "aria-haspopup": "dialog" as const,
+                      }
+                    : {})}
+                  data-align-group="home-nutrient"
+                  data-snap-row
+                  className={`flex snap-start flex-col justify-center gap-0.5 px-3 ${share ? "h-9" : "h-[34px] lg:h-12 lg:gap-1"} ${
+                    Row === "button" ? "relative w-full cursor-pointer border-0 bg-transparent text-left before:absolute before:inset-x-0 before:-inset-y-1.5 before:content-['']" : ""
+                  }`}
+                >
                   <div className="flex items-baseline justify-between gap-1">
                     <span className="flex min-w-0 items-baseline gap-1 whitespace-nowrap">
                       <span className={`text-[13px] font-semibold leading-tight text-text ${lg}`}>{def.name}</span>
@@ -97,7 +117,7 @@ export function NutrientColumn({
                     </span>
                   </div>
                   <LevelBar label={`${def.name} so với mục tiêu ngày`} pct={pct} heightClass={share ? "h-[9px]" : "h-[9px] lg:h-[10px]"} />
-                </div>
+                </Row>
               );
             })}
           </section>

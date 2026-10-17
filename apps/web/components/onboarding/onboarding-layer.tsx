@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Spotlight } from "@/components/onboarding/spotlight";
 import { IconArrowUp } from "@/components/ui/icons";
 import { useDiary } from "@/lib/diary-store";
+import { canVibrate } from "@/lib/haptics";
 import { getTodayIsoVN } from "@/lib/date";
 import { DEFAULT_FLAGS, type OnboardingFlags } from "@/lib/onboarding-flags";
 import { finishTour, loadFlags, markTipSeen, onboardingDisabled, setTipsOff, subscribeFlags } from "@/lib/onboarding-store";
@@ -274,7 +275,15 @@ export function OnboardingLayer() {
     if (tourActive || wnActive || wnSheet || onboardingDisabled() || visit.current.tipShown) return null;
     const date = new URLSearchParams(window.location.search).get("date");
     return pickTip({
-      ctx: { pathname, pastDay: date !== null && date < getTodayIsoVN(), foodsToday, selectMode, unsaved: unsavedIds.size },
+      ctx: {
+        pathname,
+        pastDay: date !== null && date < getTodayIsoVN(),
+        foodsToday,
+        selectMode,
+        unsaved: unsavedIds.size,
+        touch: window.matchMedia?.("(pointer: coarse)").matches === true,
+        vibrate: canVibrate(),
+      },
       flags,
       tourActive,
     });

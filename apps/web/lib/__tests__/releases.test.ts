@@ -22,7 +22,7 @@ describe("RELEASES", () => {
   it("then the first 18/10 release: Đồng bộ ổn định hơn, no tour", () => {
     const r = RELEASES[1];
     expect(r?.id).toBe("2026-10-18");
-    expect(r?.items.map((i) => i.title)).toEqual(["Đồng bộ ổn định hơn"]);
+    expect(r?.items.map((i) => i.title)).toEqual(["Đồng bộ ổn định hơn", "Gần đây và Hay ăn", "Như hôm qua", "Chạm vi chất để xem nguồn", "Rung khi chạm"]);
     expect(r?.tour).toBeUndefined();
   });
 

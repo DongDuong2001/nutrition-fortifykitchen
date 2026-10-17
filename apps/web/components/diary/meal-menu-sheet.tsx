@@ -30,7 +30,7 @@ export interface MealMenuSheetProps {
 const optionClass =
   "w-full min-h-[56px] px-1 py-2 flex flex-col items-start justify-center text-left bg-transparent border-0 border-t border-divider first:border-t-0 enabled:cursor-pointer enabled:active:scale-[0.99] disabled:cursor-default";
 
-type Step = "menu" | "confirm" | "name";
+type Step = "menu" | "confirm" | "name" | "copy";
 
 /**
  * The ⋯ menu of one meal: Chép hôm qua (today), Lưu thành Bữa ăn của tôi (any day, asks for a name) and
@@ -63,11 +63,41 @@ export function MealMenuSheet({
   const canDelete = itemCount > 0;
   const canSave = savableCount > 0;
 
-  const title = step === "confirm" ? `Xóa ${mealName}?` : step === "name" ? "Lưu thành Bữa ăn của tôi" : mealName;
+  const title =
+    step === "confirm"
+      ? `Xóa ${mealName}?`
+      : step === "name"
+        ? "Lưu thành Bữa ăn của tôi"
+        : step === "copy"
+          ? `Thêm ${yesterdayItemCount} món như hôm qua?`
+          : mealName;
 
   return (
     <Sheet open={open} onClose={onClose} title={title} titleId="meal-menu-title" desktopDialog>
-      {step === "confirm" ? (
+      {step === "copy" ? (
+        <>
+          <p className="m-0 px-1 text-sm leading-snug text-secondary">
+            {yesterdayItemCount} món · {kcalLabel(yesterdayKcal)} của {mealName} hôm qua sẽ được thêm vào hôm nay. Bạn có 5 giây để hoàn tác.
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              onCopyYesterday();
+              onClose();
+            }}
+            className="mt-2 min-h-[52px] w-full cursor-pointer rounded-full border-0 bg-blue text-[15px] font-bold text-on-accent active:scale-[0.97] motion-reduce:active:scale-100"
+          >
+            Thêm {yesterdayItemCount} món
+          </button>
+          <button
+            type="button"
+            onClick={() => setStep("menu")}
+            className="min-h-[52px] w-full cursor-pointer rounded-full border border-card-border bg-card text-[15px] font-bold text-text active:scale-[0.97] motion-reduce:active:scale-100"
+          >
+            Hủy
+          </button>
+        </>
+      ) : step === "confirm" ? (
         <>
           <p className="m-0 px-1 text-sm leading-snug text-secondary">
             {itemCount} món · {kcalLabel(kcal)} sẽ bị xóa khỏi {mealName}. Bạn có 5 giây để hoàn tác.
@@ -129,16 +159,13 @@ export function MealMenuSheet({
               <button
                 type="button"
                 disabled={!canCopy}
-                onClick={() => {
-                  onCopyYesterday();
-                  onClose();
-                }}
+                onClick={() => setStep("copy")}
                 className={optionClass}
               >
-                <span className={`text-base font-bold ${canCopy ? "text-text" : "text-secondary"}`}>Chép hôm qua</span>
+                <span className={`text-base font-bold ${canCopy ? "text-text" : "text-secondary"}`}>Như hôm qua</span>
                 <span className="text-[13px] text-secondary">
                   {canCopy
-                    ? `Chép ${yesterdayItemCount} món · ${kcalLabel(yesterdayKcal)} từ hôm qua`
+                    ? `Thêm ${yesterdayItemCount} món · ${kcalLabel(yesterdayKcal)} như hôm qua`
                     : "Hôm qua chưa ghi bữa này"}
                 </span>
               </button>

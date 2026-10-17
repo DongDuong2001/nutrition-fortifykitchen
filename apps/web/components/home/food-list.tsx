@@ -9,7 +9,10 @@ import { missingMicros, portionLabel, type HomeEntry, type HomeMeal, type HomeMo
 import { mealFullySelected } from "@/lib/multi-select";
 import { markUsed } from "@/lib/onboarding-store";
 import { useDiary } from "@/lib/diary-store";
+import { haptic } from "@/lib/haptics";
 import { inkPill } from "./ink-pill";
+import { useRowMotion } from "./row-motion";
+import { PullIndicator, usePullRefresh } from "./pull-refresh";
 
 const LONG_PRESS_MS = 500;
 const MOVE_LIMIT_PX = 10;
@@ -33,6 +36,7 @@ function FoodRow({
   onSelect,
   onLongPress,
   tourTarget,
+  motionClass = "",
 }: {
   entry: HomeEntry;
   selected: boolean;
@@ -40,6 +44,8 @@ function FoodRow({
   onSelect: () => void;
   onLongPress?: (id: string) => void;
   tourTarget?: string;
+  /** cc-51: m-row-enter for a row that just arrived (row-motion.ts) */
+  motionClass?: string;
 }) {
   const router = useRouter();
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -76,6 +82,7 @@ function FoodRow({
       }}
       aria-pressed={selected}
       data-tour={tourTarget}
+      data-entry-id={entry.id}
       aria-label={`${entry.name}, ${quantity}${missing ? ", thiếu dữ liệu vi chất" : ""}${unsaved ? ", chưa lưu" : ""}${localOnly ? ", chỉ trên máy này" : ""}`}
       onClick={() => {
         if (suppressClick.current) {
@@ -90,13 +97,7 @@ function FoodRow({
         timer.current = setTimeout(() => {
           timer.current = null;
           suppressClick.current = true;
-          if (typeof navigator !== "undefined" && navigator.vibrate) {
-            try {
-              navigator.vibrate(50);
-            } catch {
-              // Ignore vibration failure
-            }
-          }
+          haptic("longPress");
           markUsed("long-press-edit");
           if (onLongPress) {
             onLongPress(entry.id);
@@ -114,7 +115,7 @@ function FoodRow({
       onPointerLeave={cancel}
       onContextMenu={(e) => e.preventDefault()}
       style={noSelect}
-      className={`flex min-h-8 w-full cursor-pointer items-center justify-between gap-2 border-0 border-b border-b-divider px-3 py-1 text-left lg:min-h-12 ${
+      className={`${motionClass} flex min-h-8 w-full cursor-pointer items-center justify-between gap-2 border-0 border-b border-b-divider px-3 py-1 text-left lg:min-h-12 ${
         isDragging ? "opacity-40" : ""
       } ${
         selected ? "bg-cobalt text-on-accent" : "bg-transparent text-text"
@@ -242,6 +243,8 @@ export function FoodList({
   onMoveFood,
   share = false,
   select,
+  dayKey = "",
+  onPullRefresh,
 }: {
   meals: HomeMeal[];
   mode: HomeMode;
@@ -257,8 +260,14 @@ export function FoodList({
   share?: boolean;
   /** Select mode (Chọn nhiều món): rows are checkboxes and nothing else is pressable. */
   select?: SelectProps;
+  /** The day shown: rows of another day are a new list, nothing animates when it changes (cc-51). */
+  dayKey?: string;
+  /** Pull to refresh (cc-51): today only. */
+  onPullRefresh?: () => Promise<void>;
 }) {
   const [dragOverSlot, setDragOverSlot] = useState<HomeMeal["slot"] | null>(null);
+  const { listRef, rowsOf } = useRowMotion(meals, dayKey);
+  const pull = usePullRefresh(listRef, onPullRefresh, !share && !select && !readOnly);
 
   if (select) return <SelectList meals={meals} select={select} />;
   if (share) {
@@ -285,7 +294,8 @@ export function FoodList({
   }
   const pill = inkPill();
   return (
-    <div className="min-h-0 min-w-0 flex-1 overflow-y-auto bg-page pb-3 lg:rounded-2xl lg:border lg:border-card-border lg:shadow-card">
+    <div ref={listRef} className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-y-contain bg-page pb-3 lg:rounded-2xl lg:border lg:border-card-border lg:shadow-card">
+      {onPullRefresh && !readOnly && <PullIndicator {...pull} />}
       {isEmpty && (
         <div className="flex min-h-11 flex-col items-start px-3 pt-2 lg:flex-row lg:items-center lg:justify-between lg:gap-2 lg:py-2">
           <p className="m-0 text-[15px] font-semibold text-text">{readOnly ? "Chưa có món nào ngày này" : "Chưa có món nào hôm nay"}</p>
@@ -379,18 +389,27 @@ export function FoodList({
               )}
             </div>
             </div>
-            {meal.entries.map((entry) => (
-              <FoodRow
-                key={entry.id}
-                entry={entry}
-                selected={mode.kind === "food" && mode.id === entry.id}
-                editable={!readOnly}
-                tourTarget={entry.id === firstEntryId ? "home-food-list" : undefined}
-                onSelect={() => onFood(entry.id)}
-                onLongPress={onLongPressSelect}
-              />
-            ))}
-            {meal.entries.length === 0 && (
+            {rowsOf(meal).map(({ entry, state }) =>
+              state === "exit" ? (
+                <div key={entry.id} data-exiting className="m-row-exit" aria-hidden="true" inert>
+                  <div>
+                    <FoodRow entry={entry} selected={false} editable={false} onSelect={() => {}} />
+                  </div>
+                </div>
+              ) : (
+                <FoodRow
+                  key={entry.id}
+                  entry={entry}
+                  selected={mode.kind === "food" && mode.id === entry.id}
+                  editable={!readOnly}
+                  tourTarget={entry.id === firstEntryId ? "home-food-list" : undefined}
+                  onSelect={() => onFood(entry.id)}
+                  onLongPress={onLongPressSelect}
+                  motionClass={state === "enter" ? "m-row-enter" : ""}
+                />
+              )
+            )}
+            {rowsOf(meal).length === 0 && (
               <p className="m-0 flex h-8 items-center border-b border-b-divider px-3 text-[13px] font-medium text-secondary lg:h-12 lg:text-[15px]">
                 {readOnly ? "Không có món" : "Chưa ăn"}
               </p>

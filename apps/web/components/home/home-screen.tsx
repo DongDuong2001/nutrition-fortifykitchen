@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Suspense, useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AppShell } from "@/components/ui/app-shell";
@@ -10,6 +10,8 @@ import { IconShare } from "@/components/ui/icons";
 import { CalendarSheet } from "@/components/calendar-sheet";
 import { CopyYesterdaySheet } from "@/components/copy-yesterday-sheet";
 import { MealMenuSheet } from "@/components/diary/meal-menu-sheet";
+import { SyncStatus } from "./sync-status";
+import { NutrientSourcesSheet } from "./nutrient-sources-sheet";
 import { copyMeals, dayEntries, shiftIsoDate, viewedIsoDate } from "@/lib/day-history";
 import { defaultMealName } from "@/lib/saved-meals";
 import { pastDayData, useDiary } from "@/lib/diary-store";
@@ -111,6 +113,7 @@ function HomeContent() {
     deleteMeal,
     deleteEntries,
     moveEntries,
+    refreshToday,
     mealFoods,
     saveMealAs,
   } = useDiary();
@@ -126,6 +129,8 @@ function HomeContent() {
   const [isCopySheetOpen, setIsCopySheetOpen] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [menuSlot, setMenuSlot] = useState<MealSlot | null>(null);
+  // cc-51 D4: the nutrient whose foods are listed in a sheet
+  const [sourcesOf, setSourcesOf] = useState<string | null>(null);
   // Chọn nhiều món: the day's ⋯ menu, the chosen set, and which target sheet is open
   const [dayMenuOpen, setDayMenuOpen] = useState(false);
   const [selecting, setSelecting] = useState(false);
@@ -143,6 +148,11 @@ function HomeContent() {
   );
   const day = pastData ?? diaryData;
   const viewIso = day.date;
+  // cc-51: another day slides in from the side it comes from (earlier from the left); the first day does not move
+  const dayMotion = useRef({ iso: viewIso, className: "" });
+  if (dayMotion.current.iso !== viewIso) {
+    dayMotion.current = { iso: viewIso, className: viewIso < dayMotion.current.iso ? "m-day-earlier" : "m-day-later" };
+  }
 
   useEffect(() => {
     setClientNow(true);
@@ -397,6 +407,8 @@ function HomeContent() {
           alignMode="page"
           subtitle={desktopSubtitle}
           actions={
+            <>
+            {!isPast && <SyncStatus />}
             <button
               type="button"
               onClick={() => setIsShareOpen(true)}
@@ -409,6 +421,7 @@ function HomeContent() {
             >
               <IconShare />
             </button>
+            </>
           }
           phoneStart={
             isPast ? (
@@ -466,9 +479,11 @@ function HomeContent() {
               </button>
             </div>
           )}
-          <div data-align-group="home-page" data-align-from="lg" className={`flex min-h-0 flex-1 border-t border-t-divider lg:gap-4 lg:border-t-0 lg:pb-8 ${coach && !selecting ? "lg:mt-2" : "mt-2 lg:mt-4"}`}>
+          <div key={viewIso} data-align-group="home-page" data-align-from="lg" className={`${dayMotion.current.className} flex min-h-0 flex-1 border-t border-t-divider lg:gap-4 lg:border-t-0 lg:pb-8 ${coach && !selecting ? "lg:mt-2" : "mt-2 lg:mt-4"}`}>
             <FoodList
               meals={meals}
+              dayKey={viewIso}
+              onPullRefresh={isPast ? undefined : refreshToday}
               mode={mode}
               readOnly={isPast}
               isEmpty={nothingLogged}
@@ -503,12 +518,26 @@ function HomeContent() {
                 targets={nutrientTargets}
                 selected={selected}
                 microsHref={`/micros?date=${viewIso}`}
+                onNutrient={
+                  isPast
+                    ? undefined
+                    : (id) => {
+                        markUsed("nutrient-sources");
+                        setSourcesOf(id);
+                      }
+                }
               />
             )}
           </div>
         </div>
       </div>
 
+      <NutrientSourcesSheet
+        nutrient={sourcesOf}
+        value={sourcesOf ? shown.nutrients[sourcesOf] ?? null : null}
+        target={sourcesOf ? nutrientTargets[sourcesOf] ?? null : null}
+        onClose={() => setSourcesOf(null)}
+      />
       <MealMenuSheet
         open={menuSlot !== null}
         onClose={() => setMenuSlot(null)}

@@ -172,3 +172,20 @@ describe("lib/search findSimilarFoods with accents", () => {
     expect(similar.some((n) => n.startsWith("Gan") || n.startsWith("Gạo"))).toBe(false);
   });
 });
+
+describe("searchFoods ignores Vietnamese accents (cc-51 D7)", () => {
+  const food = (id: string, nameVi: string) => ({ id, nameVi, category: "khac", source: "USDA", servings: [{ label: "100 g", grams: 100 }], nutrients: {} }) as unknown as FoodItem;
+  const foods = [food("pho", "Phở bò tái"), food("dau", "Đậu phụ chiên"), food("dua", "Dưa hấu"), food("com", "Cơm trắng")];
+  const names = (q: string) => searchFoods(foods, q).map((f) => f.id);
+
+  it('"pho" finds Phở bò tái', () => expect(names("pho")).toContain("pho"));
+  it('"dau" finds Đậu phụ and "đau" too (đ ↔ d)', () => {
+    expect(names("dau")).toContain("dau");
+    expect(names("đau")).toContain("dau");
+  });
+  it('"dua hau" finds Dưa hấu, "DƯA" in capitals too', () => {
+    expect(names("dua hau")).toContain("dua");
+    expect(names("DƯA")).toContain("dua");
+  });
+  it("accents in the query still match exactly", () => expect(names("cơm")).toEqual(["com"]));
+});
