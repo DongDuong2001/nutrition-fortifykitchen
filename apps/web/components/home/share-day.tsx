@@ -18,13 +18,17 @@ export function ShareDay({ model }: { model: ShareModel }) {
       style={{ width: SHARE_CSS_WIDTH, minHeight: SHARE_MIN_CSS_HEIGHT }}
       className="flex flex-col bg-paper font-sans text-text"
     >
-      {/* Row 1: the name (or, with no name, the date) and the Level badge, centred on one line. Row 2: the date. */}
-      <div data-share-header className="flex flex-none flex-col gap-0.5 px-3 pt-4 pb-1">
+      {/* The name in big Saira with the date under it, and the Level badge centred on that column. 86 px at least: a long name wraps and the header grows. */}
+      <div data-share-header className="flex min-h-[86px] flex-none flex-col px-3 pt-4">
         <div className="flex items-center justify-between gap-3">
-          <p className="m-0 min-w-0 break-words text-[19px] font-bold leading-tight text-text">{model.name ?? model.dateLabel}</p>
+          <div className="flex min-w-0 flex-1 flex-col gap-2">
+            <p className="m-0 min-w-0 break-words font-display text-[38px] font-extrabold italic uppercase leading-[0.9] text-ink">
+              {model.name ?? model.dateLabel}
+            </p>
+            {model.name && <p className="m-0 text-[13px] font-medium leading-snug text-secondary">{model.dateLabel}</p>}
+          </div>
           <LevelBadge level={model.level} size="share" />
         </div>
-        {model.name && <p className="m-0 text-[13px] leading-snug text-secondary">{model.dateLabel}</p>}
       </div>
 
       <div className="flex flex-1 flex-col">
@@ -62,12 +66,15 @@ export function ShareDay({ model }: { model: ShareModel }) {
         </div>
       </div>
 
-      <div data-share-footer className="flex flex-none items-center justify-center gap-2 border-t border-t-divider py-3">
-        <span className="flex h-6 items-center font-display text-lg font-black italic leading-none">
-          <span className="text-ink">H1T</span>
-          <span className="ml-1 text-cobalt">MICRO</span>
+      <div data-share-footer className="flex h-[58px] flex-none items-center justify-between bg-ink px-4">
+        <span className="flex items-center font-display text-2xl font-extrabold italic leading-none">
+          <span className="text-on-dark">H1T</span>
+          <span className="ml-1 text-level-blue-dark">MICRO</span>
         </span>
-        <span className="flex h-6 items-center text-xs font-semibold leading-none text-secondary">Theo dõi vi chất mỗi ngày</span>
+        <span className="flex flex-col items-end gap-0.5">
+          <span className="text-[13px] font-extrabold leading-none text-on-dark">lehongkhanh.vn</span>
+          <span className="text-[11px] font-medium leading-none text-secondary-light">Theo dõi vi chất mỗi ngày</span>
+        </span>
       </div>
     </div>
   );

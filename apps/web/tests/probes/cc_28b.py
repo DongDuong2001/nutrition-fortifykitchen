@@ -61,7 +61,7 @@ window.__shareSnaps = [];
       top: r.firstElementChild ? r.firstElementChild.innerText.replace(/\\s+/g, ' ') : '',
       head: (() => { const h = r.querySelector('[data-share-header]'); if (!h) return null; const p0 = h.querySelector('p'); const b = h.querySelector('[data-level-badge]');
         const m = (e) => { const q = e.getBoundingClientRect(); return (q.top + q.bottom) / 2; };
-        return { name: p0.innerText.trim(), nameMid: m(p0), badgeMid: b ? m(b) : null }; })(),
+        return { name: p0.innerText.trim(), nameMid: m(p0.parentElement), badgeMid: b ? m(b) : null }; })(),
       groups: [...r.querySelectorAll('aside[aria-label="Vi chất"] h3')].map(h => h.innerText.trim()),
       rows: [...r.querySelectorAll('aside[aria-label="Vi chất"] [data-align-group=home-nutrient]')].length,
     });
@@ -167,7 +167,7 @@ def share_run(browser, size, tag):
     pg.get_by_role("dialog").get_by_role("img").wait_for(state="visible", timeout=20000)
     s = pg.evaluate("window.__shareSnaps[window.__shareSnaps.length - 1]")
     check(s and s["badge"] == "2" and "LEVEL 2" in s["badgeText"].upper(), f"{tag} share L2: badge ({s and s['badgeText']!r})")
-    check(s and s["head"] and s["head"]["name"] == "Học viên A" and abs(s["head"]["nameMid"] - s["head"]["badgeMid"]) <= 1.5, f"{tag} share L2: name and badge share a row ({s and s['head']})")
+    check(s and s["head"] and s["head"]["name"] == "HỌC VIÊN A" and abs(s["head"]["nameMid"] - s["head"]["badgeMid"]) <= 1.5, f"{tag} share L2: the badge is centred on the name column ({s and s['head']})")
     check(s and s["groups"] == ["Khoáng chất", "Vitamin"] and s["rows"] == 14, f"{tag} share L2: 14 nutrients ({s and s['rows']})")
     check(s and re.search(r"\d+/14 đạt", s["text"]) is not None, f"{tag} share L2: x/14 đạt in the image")
     with pg.expect_download() as info:
@@ -183,7 +183,7 @@ def share_run(browser, size, tag):
     pg.get_by_role("dialog").get_by_role("img").wait_for(state="visible", timeout=20000)
     s = pg.evaluate("window.__shareSnaps[window.__shareSnaps.length - 1]")
     check(s and s["badge"] == "0", f"{tag} share L0: the badge is there at Level 0 ({s and s['badge']})")
-    check(s and s["head"] and s["head"]["name"] == "Học viên A" and abs(s["head"]["nameMid"] - s["head"]["badgeMid"]) <= 1.5, f"{tag} share L0: name and badge share a row ({s and s['head']})")
+    check(s and s["head"] and s["head"]["name"] == "HỌC VIÊN A" and abs(s["head"]["nameMid"] - s["head"]["badgeMid"]) <= 1.5, f"{tag} share L0: the badge is centred on the name column ({s and s['head']})")
     check(s and s["rows"] == 8, f"{tag} share L0: 8 nutrients ({s and s['rows']})")
     with pg.expect_download() as info:
         pg.get_by_role("button", name="Lưu ảnh").click()
@@ -202,7 +202,7 @@ def share_run(browser, size, tag):
     pg.get_by_role("button", name="Chia sẻ ngày này").click()
     pg.get_by_role("dialog").get_by_role("img").wait_for(state="visible", timeout=20000)
     s = pg.evaluate("window.__shareSnaps[window.__shareSnaps.length - 1]")
-    check(s and s["head"] and s["head"]["name"] == "Học viên A", f"{tag} share L5: the name is on top ({s and s['head']})")
+    check(s and s["head"] and s["head"]["name"] == "HỌC VIÊN A", f"{tag} share L5: the name is on top ({s and s['head']})")
     check(s and s["badge"] == "5" and s["rows"] == 22 + 6, f"{tag} share L5: badge 5 and 22 nutrients plus 6 extras ({s and (s['badge'], s['rows'])})")
     with pg.expect_download() as info:
         pg.get_by_role("button", name="Lưu ảnh").click()

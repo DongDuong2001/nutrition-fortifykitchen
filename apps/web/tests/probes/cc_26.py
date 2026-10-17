@@ -6,7 +6,9 @@ Production build, clock fixed at 2026-10-15 10:00 Asia/Ho_Chi_Minh, sizes 390x84
   1080 wide, at least 1920 high, paper at every edge (nothing clipped), not blank; no weight or email.
 - The page behind the PNG (read while it is drawn): name on top when set, the date under it; no header, tab bar,
   Thêm, ⋯, dots, "Đủ 22 vi chất"; meals with no food absent; the four-level key today and on a
-  past day; footer wordmark and line, pinned to the bottom (gap 0, within 12 px).
+  past day, as a 2x2 grid; footer (ink band, wordmark, site and line), pinned to the bottom (gap 0, within 12 px).
+- Header: the name in Saira 38 px uppercase over the date, the Level badge centred on that column, 86 px tall (a long name
+  wraps and the header grows); footer: 58 px ink band, H1T white + MICRO in the dark cobalt token, lehongkhanh.vn over the line.
 - A long day (12+ foods) is taller than 1920 with the footer fully inside; the height follows the content.
 - Past day: the PNG uses level colours (4 levels), today's PNG uses them too (Hao, 16/10).
 - Without file sharing, Lưu ảnh is the only (primary) button. With it, Chia sẻ calls navigator.share with one
@@ -66,7 +68,20 @@ window.__shareSnaps = [];
       controls: r.querySelectorAll('button, a, input, select, textarea').length,
       head: (() => { const h = r.querySelector('[data-share-header]'); if (!h) return null; const ps = [...h.querySelectorAll('p')]; const b = h.querySelector('[data-level-badge]');
         const c = (e) => { const q = e.getBoundingClientRect(); return { top: q.top, bottom: q.bottom, mid: (q.top + q.bottom) / 2, left: q.left, right: q.right }; };
-        return { first: c(ps[0]), date: ps.length > 1 ? c(ps[1]) : null, badge: b ? c(b) : null, firstFs: parseFloat(getComputedStyle(ps[0]).fontSize), dateFs: ps.length > 1 ? parseFloat(getComputedStyle(ps[1]).fontSize) : null }; })(),
+        const cs0 = getComputedStyle(ps[0]), cs1 = ps.length > 1 ? getComputedStyle(ps[1]) : null;
+        return { height: h.getBoundingClientRect().height, bg: getComputedStyle(h).backgroundColor, col: c(ps[0].parentElement), first: c(ps[0]), date: ps.length > 1 ? c(ps[1]) : null, badge: b ? c(b) : null,
+          firstFs: parseFloat(cs0.fontSize), firstLh: cs0.lineHeight, firstTransform: cs0.textTransform, firstFamily: cs0.fontFamily, firstWeight: cs0.fontWeight, firstStyle: cs0.fontStyle, firstColor: cs0.color, firstText: ps[0].innerText,
+          dateFs: cs1 ? parseFloat(cs1.fontSize) : null, dateWeight: cs1 ? cs1.fontWeight : null, dateColor: cs1 ? cs1.color : null, dateTransform: cs1 ? cs1.textTransform : null,
+          paddingTop: parseFloat(getComputedStyle(h).paddingTop), paddingLeft: parseFloat(getComputedStyle(h).paddingLeft), badgeW: b ? b.getBoundingClientRect().width : null }; })(),
+      foot: (() => { const cs = getComputedStyle(f); const spans = [...f.querySelectorAll('span')];
+        const find = (t) => spans.find(x => x.children.length === 0 && x.textContent.trim() === t);
+        const css = (e) => { const g = getComputedStyle(e), q = e.getBoundingClientRect(); return e ? { fs: parseFloat(g.fontSize), fw: g.fontWeight, color: g.color, family: g.fontFamily, style: g.fontStyle, right: q.right, left: q.left } : null; };
+        return { bg: cs.backgroundColor, h: f.getBoundingClientRect().height, padL: parseFloat(cs.paddingLeft), padR: parseFloat(cs.paddingRight), h1t: css(find('H1T')), micro: css(find('MICRO')), site: css(find('lehongkhanh.vn')), line: css(find('Theo dõi vi chất mỗi ngày')),
+          siteBox: find('lehongkhanh.vn').getBoundingClientRect(), lineBox: find('Theo dõi vi chất mỗi ngày').getBoundingClientRect(), right: f.getBoundingClientRect().right, left: f.getBoundingClientRect().left }; })(),
+      keyGrid: (() => { const li = [...r.querySelectorAll('li')].filter(x => ['Thiếu <50%', 'Trung bình', 'Gần đủ', 'Đạt ≥100%'].includes(x.textContent.trim())); if (li.length !== 4) return null;
+        const q = li.map(x => x.getBoundingClientRect()), sw = li.map(x => x.firstElementChild.getBoundingClientRect()); const ul = li[0].parentElement;
+        const g = getComputedStyle(ul); return { labels: li.map(x => x.textContent.trim()), lefts: q.map(x => x.left), tops: q.map(x => x.top), heights: q.map(x => x.height), widths: q.map(x => x.width), swW: sw[0].width,
+          colGap: g.columnGap, rowGap: g.rowGap, fs: getComputedStyle(li[0]).fontSize, nowrap: li.map(x => getComputedStyle(x).whiteSpace), colRight: ul.getBoundingClientRect().right, rights: q.map(x => x.right), swatchLabelGap: getComputedStyle(li[0]).columnGap, display: g.display }; })(),
       sections: [...r.querySelectorAll('section[aria-label]')].map(s => s.getAttribute('aria-label')).filter(n => n.startsWith('Bữa')),
       header: !!r.querySelector('header, nav'),
     });
@@ -88,12 +103,13 @@ ANALYSE = """async (b64) => {
   const PAPER = '243,241,236';
   const near = (k) => k.split(',').every((v, i) => Math.abs(Number(v) - [243, 241, 236][i]) <= 2);
   let edgeBad = 0; const badAt = []; const mark = (ix, iy) => { edgeBad++; if (badAt.length < 4) badAt.push([ix, iy, px(ix, iy)]); };
-  // Hôm nay runs edge to edge in its body (the two columns), so the side edges are checked above the body and
-  // in the footer; the top and bottom rows are paper everywhere.
+  // Hôm nay runs edge to edge in its body (the two columns), so the side edges are checked above the body (paper)
+  // and in the footer (an ink band); the top row is paper and the bottom row is ink.
   const bodyTop = Math.round(H * 0), headRows = 330;
   for (let i = bodyTop; i < Math.min(H, headRows); i++) { if (!near(px(0, i))) mark(0, i); if (!near(px(W - 1, i))) mark(W - 1, i); }
-  for (let i = H - 100; i < H; i++) { if (!near(px(0, i))) mark(0, i); if (!near(px(W - 1, i))) mark(W - 1, i); }
-  for (let i = 0; i < W; i++) { if (!near(px(i, 0))) mark(i, 0); if (!near(px(i, H - 1))) mark(i, H - 1); }
+  const INK = [17, 19, 23]; const nearInk = (k) => k.split(',').every((v, i) => Math.abs(Number(v) - INK[i]) <= 2);
+  for (let i = H - 150; i < H; i++) { if (!nearInk(px(0, i))) mark(0, i); if (!nearInk(px(W - 1, i))) mark(W - 1, i); }
+  for (let i = 0; i < W; i++) { if (!near(px(i, 0))) mark(i, 0); if (!nearInk(px(i, H - 1))) mark(i, H - 1); }
   let lastInk = -1;
   for (let y = H - 1; y >= 0 && lastInk < 0; y--) for (let ix = 0; ix < W; ix += 2) if (px(ix, y) !== PAPER) { lastInk = y; break; }
   const levels = { red: '217,63,68', yellow: '176,120,0', green: '23,148,95', blue: '18,56,214' };
@@ -191,31 +207,65 @@ def snap(pg):
 
 
 def check_head(s, tag, label, named):
-    """cc-27 fix: name and badge in one row, centred on each other; the date under the name (or in row 1 with no name)."""
+    """Header: the name big over the date (8 px between), the Level badge centred on that column, 86 px tall."""
     h = s and s.get("head")
     if not h:
         check(False, f"{tag} {label}: header geometry was not read")
         return
-    check(h["badge"] is not None and abs(h["first"]["mid"] - h["badge"]["mid"]) <= 1.5, f"{tag} {label}: first row is centred with the badge ({h['first']['mid']:.1f} vs {h['badge']['mid']:.1f})")
-    check(h["firstFs"] >= 18.5, f"{tag} {label}: first row is 19 px ({h['firstFs']})")
+    check(h["badge"] is not None and abs(h["col"]["mid"] - h["badge"]["mid"]) <= 1.5, f"{tag} {label}: the badge is centred on the name column ({h['col']['mid']:.1f} vs {h['badge']['mid']:.1f})")
+    check(h["height"] >= 86 - 0.5 and h["bg"] in ("rgba(0, 0, 0, 0)", "rgb(243, 241, 236)"), f"{tag} {label}: the header is at least 86 px on paper ({h['height']}, {h['bg']})")
+    check(h["paddingTop"] == 16 and h["paddingLeft"] == 12, f"{tag} {label}: padding 16 top, 12 sides ({h['paddingTop']}, {h['paddingLeft']})")
+    check(abs(h["firstFs"] - 38) < 0.5 and h["firstTransform"] == "uppercase" and h["firstWeight"] in ("800", "900") and h["firstStyle"] == "italic" and "Saira" in h["firstFamily"] and h["firstColor"] == "rgb(17, 19, 23)",
+          f"{tag} {label}: the name is Saira italic 38 px uppercase ink ({h['firstFs']}, {h['firstTransform']}, {h['firstWeight']}, {h['firstFamily'][:24]}, {h['firstColor']})")
+    check(h["firstText"] == h["firstText"].upper(), f"{tag} {label}: the name reads in capitals ({h['firstText']!r})")
+    check(h["badgeW"] is not None and h["badgeW"] >= 80, f"{tag} {label}: the badge keeps its width ({h['badgeW']})")
+    check(h["badge"] is not None and h["first"]["right"] <= h["badge"]["left"] - 4, f"{tag} {label}: the name stops short of the badge (the skewed badge's box reaches 4.7 px left of its face) ({h['first']['right']:.1f} vs {h['badge']['left']:.1f})")
     if named:
-        check(h["date"] is not None and h["date"]["top"] >= h["first"]["bottom"] - 1 and abs(h["dateFs"] - 13) < 0.5, f"{tag} {label}: the date is under the name at 13 px ({h['dateFs']})")
+        lh = h["first"]["bottom"] - h["first"]["top"]
+        check(abs(lh / h["firstFs"] / round(lh / (h["firstFs"] * 0.9)) - 0.9) < 0.02, f"{tag} {label}: name line-height 0.9 ({lh:.1f} px for {h['firstFs']} px)")
+        check(h["date"] is not None and abs(h["date"]["top"] - h["first"]["bottom"] - 8) <= 1, f"{tag} {label}: the date sits 8 px under the name ({h['date'] and h['date']['top'] - h['first']['bottom']:.1f})")
+        check(abs(h["dateFs"] - 13) < 0.5 and h["dateWeight"] == "500" and h["dateTransform"] == "none" and h["dateColor"] == "rgb(107, 106, 102)", f"{tag} {label}: the date is 13 px 500 secondary, sentence case ({h['dateFs']}, {h['dateWeight']}, {h['dateTransform']}, {h['dateColor']})")
         check(abs(h["date"]["left"] - h["first"]["left"]) <= 1, f"{tag} {label}: date and name share a left edge")
     else:
         check(h["date"] is None, f"{tag} {label}: no second row without a name")
 
 
+def check_frame(s, tag, label):
+    """Footer band and the 2x2 colour key."""
+    f = s and s.get("foot")
+    if not f:
+        check(False, f"{tag} {label}: footer geometry was not read")
+        return
+    check(f["bg"] == "rgb(17, 19, 23)" and abs(f["h"] - 58) <= 0.5 and f["padL"] == 16 and f["padR"] == 16, f"{tag} {label}: footer is a 58 px ink band, padding 16 ({f['bg']}, {f['h']}, {f['padL']}, {f['padR']})")
+    check(f["h1t"]["color"] == "rgb(255, 255, 255)" and f["micro"]["color"] == "rgb(92, 134, 242)" and f["h1t"]["fs"] == 24 and f["micro"]["fs"] == 24 and f["h1t"]["style"] == "italic" and "Saira" in f["h1t"]["family"],
+          f"{tag} {label}: H1T white, MICRO #5C86F2 token, Saira italic 24 px ({f['h1t']['color']}, {f['micro']['color']}, {f['h1t']['fs']})")
+    check(f["site"]["fs"] == 13 and f["site"]["fw"] == "800" and f["site"]["color"] == "rgb(255, 255, 255)", f"{tag} {label}: lehongkhanh.vn 13 px 800 white ({f['site']['fs']}, {f['site']['fw']}, {f['site']['color']})")
+    check(f["line"]["fs"] == 11 and f["line"]["fw"] == "500" and f["line"]["color"] == "rgb(169, 168, 163)", f"{tag} {label}: the line is 11 px 500 #A9A8A3 ({f['line']['fs']}, {f['line']['fw']}, {f['line']['color']})")
+    check(abs(f["siteBox"]["right"] - f["lineBox"]["right"]) <= 0.6 and abs(f["right"] - 16 - f["siteBox"]["right"]) <= 0.6, f"{tag} {label}: the right column is right-aligned on the 16 px edge")
+    check(abs((f["lineBox"]["top"] - f["siteBox"]["bottom"]) - 2) <= 1, f"{tag} {label}: 2 px between site and line ({f['lineBox']['top'] - f['siteBox']['bottom']:.1f})")
+    check(abs(f["h1t"]["left"] - (f["left"] + 16)) <= 0.6, f"{tag} {label}: the wordmark starts on the 16 px edge")
+    k = s.get("keyGrid")
+    if not k:
+        check(False, f"{tag} {label}: the colour key was not read")
+        return
+    check(k["display"] == "grid" and k["labels"] == ["Thiếu <50%", "Trung bình", "Gần đủ", "Đạt ≥100%"], f"{tag} {label}: the key is a grid in the order Thiếu, Trung bình / Gần đủ, Đạt ({k['labels']})")
+    check(abs(k["tops"][0] - k["tops"][1]) < 0.5 and abs(k["tops"][2] - k["tops"][3]) < 0.5 and k["tops"][2] > k["tops"][0] and abs(k["lefts"][0] - k["lefts"][2]) < 0.5 and abs(k["lefts"][1] - k["lefts"][3]) < 0.5 and k["lefts"][1] > k["lefts"][0], f"{tag} {label}: 2 columns by 2 rows")
+    check(k["colGap"] == "10px" and k["rowGap"] == "6px" and k["swatchLabelGap"] == "6px" and k["fs"] == "11px", f"{tag} {label}: gaps 10 / 6 / 6 and 11 px labels ({k['colGap']}, {k['rowGap']}, {k['swatchLabelGap']}, {k['fs']})")
+    check(all(w == "nowrap" for w in k["nowrap"]) and all(h < 16 for h in k["heights"]), f"{tag} {label}: labels never wrap ({k['heights']})")
+    check(max(k["rights"]) <= k["colRight"] + 0.5, f"{tag} {label}: the grid stays inside the column")
+
+
 def check_png(info, snapshot, tag, label):
     check(info["w"] == 1080 and info["h"] >= 1920, f"{tag} {label}: PNG is {info['w']}x{info['h']} (1080 wide, 1920 high at least)")
-    check(info["edgeBad"] == 0, f"{tag} {label}: paper at every edge, nothing clipped ({info['edgeBad']} off-paper edge pixels {info['badAt']})")
+    check(info["edgeBad"] == 0, f"{tag} {label}: paper above the body, ink in the footer, nothing clipped ({info['edgeBad']} off-paper edge pixels {info['badAt']})")
     check(info["colours"] >= 8, f"{tag} {label}: not blank ({info['colours']} colours)")
     if snapshot:
         want = max(1920, math.ceil(snapshot["rootH"] * SCALE - 1e-6))
         check(abs(info["h"] - want) <= 1, f"{tag} {label}: height follows the content ({info['h']} vs {want} from {snapshot['rootH']:.1f} px)")
         check(snapshot["footerGap"] <= 12 and snapshot["footerGap"] >= -0.5, f"{tag} {label}: footer is at the bottom edge (gap {snapshot['footerGap']:.1f} px)")
-        # the lowest ink of the image is inside the footer: no more than its 24 px line + 12 px padding above the edge
+        # the ink band runs to the bottom edge
         low = info["h"] - 1 - info["lastInk"]
-        check(low <= (12 + 24) * SCALE, f"{tag} {label}: the footer ink ends near the bottom ({low} px from the edge)")
+        check(low <= 1, f"{tag} {label}: the footer band ends at the bottom edge ({low} px from it)")
 
 
 def run(browser, size, tag):
@@ -258,15 +308,17 @@ def run(browser, size, tag):
     check(lv["red"] + lv["yellow"] + lv["green"] + lv["blue"] > 0, f"{tag} today uses the level colours in the image {lv}")
     if s:
         t = s["text"]
-        check(s["top"].startswith("Học viên Có Tên Khá Dài Mẫu") and "Hôm nay 15/10" in s["top"], f"{tag} name then the date on top ({s['top']!r})")
+        check(s["top"].startswith("HỌC VIÊN CÓ TÊN KHÁ DÀI MẪU") and "Hôm nay 15/10" in s["top"], f"{tag} name (capitals) then the date on top ({s['top']!r})")
         check_head(s, tag, "today", named=True)
+        hh = s["head"]
+        check((hh["first"]["bottom"] - hh["first"]["top"]) >= 2 * 34 - 1, f"{tag} today: the long name wraps to 2 lines ({hh['first']['bottom'] - hh['first']['top']:.1f} px) and the badge stays put ({hh['badgeW']})")
         check("Cả ngày · 7 món" in t, f"{tag} the summary card is in the image")
         for banned in ["Thêm", "Chia sẻ", "Đủ 22 vi chất", "Chưa ăn", "●", "⋯", "Tổng quan", "Khám phá", "Cài đặt", "Về hôm nay", "Ngày tập"]:
             check(banned not in t, f"{tag} no {banned!r} in the image")
         check(s["controls"] == 0 and not s["header"], f"{tag} nothing interactive, no header or nav ({s['controls']})")
         check(all(x in t for x in ["Thiếu <50%", "Trung bình", "Gần đủ", "Đạt ≥100%"]) and "Xanh: đạt mục tiêu" not in t, f"{tag} today's key is the four levels")
-        check("H1T MICRO" in t.replace("H1T MICRO", "H1T MICRO") and "Theo dõi vi chất mỗi ngày" in t, f"{tag} footer wordmark and line")
-        check(s["footerH"] >= 48 - 0.5, f"{tag} footer is 24 px line + 12 px above and below ({s['footerH']})")
+        check("H1T MICRO" in t and "lehongkhanh.vn" in t and "Theo dõi vi chất mỗi ngày" in t, f"{tag} footer wordmark, site and line")
+        check_frame(s, tag, "today")
         check("Khoáng chất" in t and "Vitamin" in t, f"{tag} nutrient column groups are in the image")
         check(abs(s["rootW"] - 390) <= 0.5, f"{tag} drawn at 390 px ({s['rootW']})")
     pg.keyboard.press("Escape")
@@ -295,7 +347,7 @@ def run(browser, size, tag):
     go_on.click()
     wait_preview(pg)
     s = snap(pg)
-    check(s is not None and s["top"].startswith("Học viên C"), f"{tag} no name: the image has the name ({s['top'] if s else None!r})")
+    check(s is not None and s["top"].startswith("HỌC VIÊN C"), f"{tag} no name: the image has the name ({s['top'] if s else None!r})")
     check_head(s, tag, "name step", named=True)
     pg.keyboard.press("Escape")
     pg.reload(wait_until="networkidle")
@@ -312,8 +364,9 @@ def run(browser, size, tag):
     wait_preview(pg)
     s = snap(pg)
     check(s is not None and s["sections"] == ["Bữa sáng", "Bữa trưa"], f"{tag} meals with no food are absent ({s['sections'] if s else None})")
-    check(s is not None and s["top"].startswith("Học viên A"), f"{tag} short day: the name is on top ({s['top'] if s else None!r})")
+    check(s is not None and s["top"].startswith("HỌC VIÊN A"), f"{tag} short day: the name is on top ({s['top'] if s else None!r})")
     check_head(s, tag, "short day", named=True)
+    check_frame(s, tag, "short day")
     name, path = download(pg, f"cc-27g-short-{w}.png")
     check_png(analyse(pg, path), s, tag, "two meals")
     ctx.close()
@@ -346,8 +399,9 @@ def run(browser, size, tag):
     check(lv["red"] + lv["yellow"] + lv["green"] + lv["blue"] > 0, f"{tag} past day uses the four levels {lv}")
     if s:
         check(all(x in s["text"] for x in ["Thiếu <50%", "Trung bình", "Gần đủ", "Đạt ≥100%"]) and "Xanh: đạt mục tiêu" not in s["text"], f"{tag} past day's 4-level key")
-        check("Hôm qua 14/10" in s["top"] and s["top"].startswith("Học viên A"), f"{tag} past: name and date label ({s['top']!r})")
+        check("Hôm qua 14/10" in s["top"] and s["top"].startswith("HỌC VIÊN A"), f"{tag} past: name and date label ({s['top']!r})")
         check_head(s, tag, "past day", named=True)
+    check_frame(s, tag, "past day")
     alt = pg.get_by_role("dialog").get_by_role("img").get_attribute("alt") or ""
     check(alt.startswith("Ảnh tóm tắt Hôm qua 14/10"), f"{tag} past alt: {alt[:60]}")
     ctx.close()

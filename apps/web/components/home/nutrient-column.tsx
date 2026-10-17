@@ -107,9 +107,9 @@ export function NutrientColumn({
               {summary.lacking.length > 0 && <span>Thiếu nhiều nhất: {summary.lacking.join(", ")}</span>}
             </p>
           )}
-          <ul className="m-0 mt-auto flex list-none flex-col gap-1 px-3 pt-3 text-[11px] leading-snug text-secondary">
+          <ul className="m-0 mt-auto grid list-none grid-cols-2 gap-x-2.5 gap-y-1.5 px-3 pt-3 text-[11px] leading-snug text-secondary">
             {shareKey.map((item) => (
-              <li key={item.label} className="flex items-center gap-1.5">
+              <li key={item.label} className="flex items-center gap-1.5 whitespace-nowrap">
                 <span aria-hidden="true" className="h-2 w-4 flex-none -skew-x-[14deg] rounded-[1px]" style={{ backgroundColor: item.color }} />
                 {item.label}
               </li>

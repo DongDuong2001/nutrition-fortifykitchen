@@ -44,6 +44,8 @@
   --color-muted-dark: #6B6A66;
   --color-muted-subtitle: #C9CDD6;
   --color-muted-on-dark: #8C92A0;
+  /* Small secondary text on ink that is lighter than --color-muted-on-dark: the share image footer's tagline. */
+  --color-secondary-light: #A9A8A3;
   /* Text on ink and surface-dark: headers, sidebar, toasts, dark cards, dial number. Same value as --color-card. */
   --color-on-dark: #FFFFFF;
   /* Text on accent fills: cobalt/blue and destructive buttons, badges and selected chips. */
