@@ -334,7 +334,7 @@ def check_quick(browser, size_name, size):
 
     # no name, only kcal = Ghi nhanh with every macro unknown: "—", and no total moves except kcal
     def protein_total():
-        m = re.search(r"Đạm\s*(\d+)(?:\s*/\s*[\d.,]+)?\s*g", text(pg))  # the hero on Hôm nay: "Đạm 62 / 104 g"
+        m = re.search(r"Đạm\s*(\d+)(?:\s*/\s*[\d.,]+)?\s*g", text(pg))  # the hero on Hôm nay: "Đạm 62/104 g"
         return m.group(1) if m else None
 
     go(pg, "/app")

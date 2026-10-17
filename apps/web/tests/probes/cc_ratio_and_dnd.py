@@ -1,7 +1,7 @@
 """cc_ratio_and_dnd.py: probe for drag & drop, long-press multi-select, and macro ratios screen.
 
 Tests:
-1. HomeHero renders macro targets alongside consumed grams (e.g. '— / 143 g' or '100 / 143 g').
+1. HomeHero renders macro targets alongside consumed grams (e.g. '—/143 g' or '100/143 g', no spaces around '/' since the cc-45 review).
 2. Long-press on a food item on Hôm nay enters select mode with that item selected.
 3. Multi-select deletion: tapping Delete removes selected items at once.
 4. Mục tiêu đa lượng screen (/settings/targets/macros) loads and saves custom ratios; at 390 its copy is Vietnamese only and the title fits one line.
@@ -44,7 +44,7 @@ def test_home_and_select(browser):
     # 1. Check that HomeHero displays targets in macro columns
     hero_text = pg.locator(HERO).inner_text()
     check("Đạm" in hero_text and "Tinh bột" in hero_text and "Chất béo" in hero_text, "HomeHero has all 3 macro labels")
-    check("/ " in hero_text and "g" in hero_text, "HomeHero displays target grams alongside consumed")
+    check(re.search(r"(\d[\d.]*|—)/\d[\d.]* g", hero_text) is not None, "HomeHero displays target grams alongside consumed")
 
     # 2. Test long press on first food item to enter select mode
     first_food = pg.locator("section[aria-label*='Bữa'] button[aria-pressed][aria-label*=', ']").first
