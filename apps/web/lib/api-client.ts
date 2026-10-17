@@ -17,6 +17,7 @@ import { type LeaderboardPeriod, type LeaderboardResponse, getMockLeaderboard, s
 import { readStoredProfile, type Profile } from "./profile";
 import { shiftIsoDate } from "./day-history";
 import { generateUuid, isUuid } from "./uuid";
+import { refreshServerSession } from "./server-session";
 import { normaliseCoaching } from "./coaching-link";
 import type { GoalType, SexType } from "./targets";
 
@@ -309,113 +310,262 @@ const JSON_HEADERS: Record<string, string> = { "Content-Type": "application/json
 /**
  * apiFetch executes authenticated requests against the Go backend API.
  * Sends the httpOnly session cookie via credentials: "include"; there is no Authorization header.
+ * A 401 in the browser means the cookie expired: /auth/session renews it (refreshServerSession) and the request is
+ * sent once more. A second 401 is returned as it is.
  */
 export async function apiFetch(path: string, init: RequestInit = {}): Promise<Response> {
-  const baseUrl = getApiBaseUrl();
   const mergedHeaders: Record<string, string> = {
     ...JSON_HEADERS,
     ...((init.headers as Record<string, string>) || {}),
   };
+  const send = () =>
+    fetch(`${getApiBaseUrl()}${path}`, {
+      ...init,
+      headers: mergedHeaders,
+      credentials: "include",
+    });
 
-  return fetch(`${baseUrl}${path}`, {
-    ...init,
-    headers: mergedHeaders,
-    credentials: "include",
-  });
+  const res = await send();
+  if (res.status !== 401 || typeof window === "undefined") return res;
+  await refreshServerSession();
+  return send();
 }
 
-// Offline queue for idempotent replay. OFFLINE_OUTBOX_KEY is read inside the functions only: api-client, storage-keys and
-// auth-actions import each other, so a module-level read of it can run before storage-keys has finished loading
-// ("Cannot access 'x' before initialization", depending on which page loads first).
+// Diary writes and the outbox. A write that did not reach the server is never dropped: it waits in the outbox
+// (localStorage, per account) and is sent again on the next sync. OFFLINE_OUTBOX_KEY is read inside the functions
+// only: api-client, storage-keys and auth-actions import each other, so a module-level read of it can run before
+// storage-keys has finished loading ("Cannot access 'x' before initialization", depending on which page loads first).
+
+/** The server saved it, it waits in the outbox to be sent again, or the server refused it (a 4xx) and it waits for Thử lại. */
+export type WriteState = "saved" | "queued" | "held";
+
+export interface WriteResult {
+  state: WriteState;
+  /** The answer's status (0 = no answer) and the server's message, for a held write. */
+  status?: number;
+  message?: string;
+}
+
+/** What a diary write's answer means. 0 = no answer (offline, or the request failed). */
+export function writeOutcome(status: number, method: string): "saved" | "retry" | "held" {
+  if (status === 0 || status === 401 || status === 408 || status === 429 || status >= 500) return "retry";
+  if (status >= 200 && status < 300) return "saved";
+  // Deleted already (here or on another device)
+  if (status === 404 && method === "DELETE") return "saved";
+  return "held";
+}
 
 interface OutboxItem {
+  /** The entry the write is about. */
   id: string;
   date: string;
   payload: Record<string, unknown>;
+  /** Absent on an add queued before cc-49: POST /days/{date}/entries. */
+  method?: "POST" | "PATCH" | "DELETE";
+  path?: string;
+  /** This one write (an entry can have several queued). Absent before cc-49: `${id}:${createdAt}`. */
+  key?: string;
   createdAt: number;
   retries?: number;
+  /** The server refused it with a 4xx: not sent again until Thử lại (syncOfflineOutbox({ retryHeld: true })). */
+  held?: { status: number; message: string };
 }
 
-export function enqueueOfflineEntry(date: string, payload: Record<string, unknown>): void {
-  const storage = accountStorage();
-  if (!storage) return;
-  try {
-    const current: OutboxItem[] = JSON.parse(storage.getItem(OFFLINE_OUTBOX_KEY) || "[]");
-    current.push({
-      id: (payload.id as string) || `offline-${Date.now()}`,
-      date,
-      payload,
-      createdAt: Date.now(),
-      retries: 0,
-    });
-    storage.setItem(OFFLINE_OUTBOX_KEY, JSON.stringify(current));
-  } catch {
-    // Storage unavailable
-  }
-}
+type DiaryWrite = Pick<OutboxItem, "id" | "date" | "payload" | "method" | "path">;
 
-/** Removes a queued entry that was undone before it reached the server. */
-export function dropOfflineEntry(id: string): void {
-  const storage = accountStorage();
-  if (!storage) return;
-  try {
-    const items: OutboxItem[] = JSON.parse(storage.getItem(OFFLINE_OUTBOX_KEY) || "[]");
-    const kept = items.filter((item) => item.id !== id);
-    if (kept.length !== items.length) storage.setItem(OFFLINE_OUTBOX_KEY, JSON.stringify(kept));
-  } catch {
-    // Storage unavailable
-  }
-}
+const itemKey = (item: OutboxItem) => item.key ?? `${item.id}:${item.createdAt}`;
+const itemMethod = (item: DiaryWrite) => item.method ?? "POST";
+const itemPath = (item: DiaryWrite) => item.path ?? `/days/${item.date}/entries`;
+const isAdd = (item: DiaryWrite) => itemMethod(item) === "POST" && itemPath(item) === `/days/${item.date}/entries`;
 
-/** Returns all entry IDs currently queued in the offline outbox for the active account. */
-export function getPendingOfflineEntryIds(): string[] {
-  const storage = accountStorage();
-  if (!storage) return [];
+function readOutbox(): OutboxItem[] {
   try {
-    const items: OutboxItem[] = JSON.parse(storage.getItem(OFFLINE_OUTBOX_KEY) || "[]");
-    return items.map((item) => item.id);
+    const items: unknown = JSON.parse(accountStorage()?.getItem(OFFLINE_OUTBOX_KEY) || "[]");
+    return Array.isArray(items) ? (items as OutboxItem[]) : [];
   } catch {
     return [];
   }
 }
 
-export async function syncOfflineOutbox(): Promise<number> {
-  const storage = accountStorage();
-  if (!storage) return 0;
+function writeOutbox(items: OutboxItem[]): void {
   try {
-    const items: OutboxItem[] = JSON.parse(storage.getItem(OFFLINE_OUTBOX_KEY) || "[]");
-    if (!items.length) return 0;
-
-    const remaining: OutboxItem[] = [];
-    let synced = 0;
-
-    for (const item of items) {
-      const attempts = (item.retries ?? 0) + 1;
-      try {
-        const res = await apiFetch(`/days/${item.date}/entries`, {
-          method: "POST",
-          body: JSON.stringify(item.payload),
-        });
-        if (res.ok || res.status === 409) {
-          synced++;
-        } else if (res.status >= 400 && res.status < 500 && res.status !== 429) {
-          // Drop non-recoverable 4xx client errors (400, 422) to avoid permanent queue blockage
-          continue;
-        } else if (attempts < 5) {
-          remaining.push({ ...item, retries: attempts });
-        }
-      } catch {
-        if (attempts < 5) {
-          remaining.push({ ...item, retries: attempts });
-        }
-      }
-    }
-
-    storage.setItem(OFFLINE_OUTBOX_KEY, JSON.stringify(remaining));
-    return synced;
+    accountStorage()?.setItem(OFFLINE_OUTBOX_KEY, JSON.stringify(items));
   } catch {
-    return 0;
+    // Storage unavailable
   }
+}
+
+function queueWrite(write: DiaryWrite, held?: OutboxItem["held"]): void {
+  const createdAt = Date.now();
+  writeOutbox([...readOutbox(), { ...write, key: `${write.id}:${createdAt}:${generateUuid()}`, createdAt, retries: 0, held }]);
+}
+
+/** Queues an add to send later (kept for callers from before cc-49; diary writes queue themselves). */
+export function enqueueOfflineEntry(date: string, payload: Record<string, unknown>): void {
+  queueWrite({ id: (payload.id as string) || `offline-${Date.now()}`, date, payload });
+}
+
+/** Removes every queued write of an entry (an entry that never reached the server, deleted or undone). */
+export function dropOfflineEntry(id: string): void {
+  const items = readOutbox();
+  const kept = items.filter((item) => item.id !== id);
+  if (kept.length !== items.length) writeOutbox(kept);
+}
+
+/** Entry ids with a write in the outbox for the active account. */
+export function getPendingOfflineEntryIds(): string[] {
+  return readOutbox().map((item) => item.id);
+}
+
+// Writes being sent now, by entry: the next write of the same entry waits for it, so the server sees them in order
+const inFlight = new Map<string, Promise<WriteResult>>();
+// When each entry's last write started: a refetch that started before it must not overwrite it (diary-store)
+const writeStartedAt = new Map<string, number>();
+
+/** Entry ids a refetch must leave as they are on the device: a write is queued or being sent. */
+export function pendingWriteIds(): Set<string> {
+  return new Set([...getPendingOfflineEntryIds(), ...inFlight.keys()]);
+}
+
+/** Entry ids whose last write started at or after `time` (ms). */
+export function writtenSince(time: number): string[] {
+  return [...writeStartedAt].filter(([, at]) => at >= time).map(([id]) => id);
+}
+
+/** How many diary writes are being sent now. */
+export function writesInFlight(): number {
+  return inFlight.size;
+}
+
+async function serverMessage(res: Response): Promise<string> {
+  try {
+    const text = await res.text();
+    try {
+      const json = JSON.parse(text);
+      return String(json?.error?.message ?? json?.message ?? json?.error ?? text);
+    } catch {
+      return text;
+    }
+  } catch {
+    return "";
+  }
+}
+
+/** Diary requests give up after this: a request a phone froze in the background must not hold the outbox or a refetch. */
+const DIARY_REQUEST_MS = 20 * 1000;
+const diaryTimeout = (): AbortSignal | undefined =>
+  typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function" ? AbortSignal.timeout(DIARY_REQUEST_MS) : undefined;
+
+async function sendWrite(write: DiaryWrite): Promise<{ outcome: "saved" | "retry" | "held"; status: number; message: string }> {
+  const method = itemMethod(write);
+  let status = 0;
+  let message = "";
+  try {
+    const res = await apiFetch(itemPath(write), {
+      method,
+      body: method === "DELETE" ? undefined : JSON.stringify(write.payload),
+      signal: diaryTimeout(),
+    });
+    status = res.status;
+    if (writeOutcome(status, method) === "held") message = await serverMessage(res);
+  } catch {
+    // No answer: sent again from the outbox
+  }
+  const outcome = writeOutcome(status, method);
+  if (outcome === "held") console.warn(`Diary write not saved: ${method} ${itemPath(write)} → ${status} ${message}`);
+  return { outcome, status, message };
+}
+
+/**
+ * Sends one diary write, after any write of the same entry that is still being sent or still queued. What does not
+ * reach the server goes to the outbox: no answer, 401 after the session refresh, 408, 429 and 5xx to be sent again,
+ * any other 4xx held for Thử lại (with the server's message).
+ */
+function diaryWrite(write: DiaryWrite): Promise<WriteResult> {
+  writeStartedAt.set(write.id, Date.now());
+  const account = currentAccountId();
+  const before = inFlight.get(write.id) ?? Promise.resolve<WriteResult>({ state: "saved" });
+  const run = before.then(async (): Promise<WriteResult> => {
+    const queued = readOutbox().filter((item) => item.id === write.id);
+    if (itemMethod(write) === "DELETE" && queued.some(isAdd)) {
+      // The server never had this entry: nothing to delete, and its queued writes go too
+      dropOfflineEntry(write.id);
+      return { state: "saved" };
+    }
+    if (queued.length > 0) {
+      // Earlier writes of this entry wait in the outbox: this one goes after them
+      queueWrite(write);
+      void syncOfflineOutbox();
+      return { state: "queued" };
+    }
+    const { outcome, status, message } = await sendWrite(write);
+    if (outcome === "saved") return { state: "saved" };
+    // Signed out (or another account) meanwhile: never into their outbox. The entry stays unconfirmed in this
+    // account's storage, and is sent again when it signs back in.
+    if (currentAccountId() !== account) return { state: "queued", status };
+    queueWrite(write, outcome === "held" ? { status, message } : undefined);
+    return outcome === "held" ? { state: "held", status, message } : { state: "queued", status };
+  });
+  inFlight.set(write.id, run);
+  void run.finally(() => {
+    if (inFlight.get(write.id) === run) inFlight.delete(write.id);
+  });
+  return run;
+}
+
+export interface SyncResult {
+  /** Entries whose add or edit the server has now (a delete is not listed). */
+  saved: string[];
+  /** Writes the server refused in this run, with its answer. */
+  held: Array<{ id: string; status: number; message: string }>;
+}
+
+let syncQueue: Promise<SyncResult> = Promise.resolve({ saved: [], held: [] });
+
+/**
+ * Sends the outbox in order, one run at a time (a call during a run starts after it). A write that fails again stays,
+ * and the later writes of its entry wait behind it; no answer at all ends the run (offline). Held writes are sent
+ * only with `retryHeld` (Thử lại). Writes queued while a run is going are kept.
+ */
+export function syncOfflineOutbox(options: { retryHeld?: boolean } = {}): Promise<SyncResult> {
+  syncQueue = syncQueue.catch(() => ({ saved: [], held: [] })).then(() => runOutbox(options.retryHeld === true));
+  return syncQueue;
+}
+
+async function runOutbox(retryHeld: boolean): Promise<SyncResult> {
+  const result: SyncResult = { saved: [], held: [] };
+  const items = readOutbox();
+  if (!items.length) return result;
+  const blocked = new Set<string>();
+  const sent = new Set<string>();
+  const changed = new Map<string, Partial<OutboxItem>>();
+  for (const item of items) {
+    if (blocked.has(item.id) || (item.held && !retryHeld)) {
+      blocked.add(item.id);
+      continue;
+    }
+    const { outcome, status, message } = await sendWrite(item);
+    if (outcome === "saved") {
+      sent.add(itemKey(item));
+      if (itemMethod(item) !== "DELETE") result.saved.push(item.id);
+      continue;
+    }
+    blocked.add(item.id);
+    const retries = (item.retries ?? 0) + 1;
+    if (outcome === "held") {
+      changed.set(itemKey(item), { retries, held: { status, message } });
+      result.held.push({ id: item.id, status, message });
+    } else {
+      changed.set(itemKey(item), { retries, held: undefined });
+      if (status === 0) break;
+    }
+  }
+  writeOutbox(
+    readOutbox()
+      .filter((item) => !sent.has(itemKey(item)))
+      .map((item) => (changed.has(itemKey(item)) ? { ...item, ...changed.get(itemKey(item)) } : item))
+  );
+  return result;
 }
 
 export const apiClient = {
@@ -427,30 +577,20 @@ export const apiClient = {
     return Promise.resolve(SAMPLE_DAY);
   },
 
-  async getDay(date?: string): Promise<DaySummaryResponse> {
+  /** The day as the server has it. Null in live mode when it could not be read: never an empty day, which a refetch would take for "everything was deleted". */
+  async getDay(date?: string): Promise<DaySummaryResponse | null> {
     const targetDate = date || getTodayIsoVN();
     if (isLiveMode()) {
       try {
-        const res = await apiFetch(`/days/${encodeURIComponent(targetDate)}`);
+        const res = await apiFetch(`/days/${encodeURIComponent(targetDate)}`, { signal: diaryTimeout() });
         if (res.ok) {
           const json = await res.json();
           return json.data ?? json;
         }
       } catch {
-        // Fallback below
+        // No answer (or no answer within DIARY_REQUEST_MS)
       }
-      return {
-        date: targetDate,
-        training_minutes: 0,
-        is_read_only: false,
-        summary: {
-          calories: 0,
-          protein: 0,
-          carbs: 0,
-          fat: 0,
-        },
-        meals: [],
-      };
+      return null;
     }
     return {
       date: targetDate,
@@ -785,7 +925,7 @@ export const apiClient = {
     id?: string;
     kind?: "food" | "quick";
     calories?: number;
-  }): Promise<{ success: boolean; id: string }> {
+  }): Promise<{ success: boolean; id: string } & WriteResult> {
     const entryId = isUuid(payload.id) ? payload.id! : generateUuid();
     const date = payload.date || getTodayIsoVN();
     const kind = payload.kind || "food";
@@ -809,21 +949,12 @@ export const apiClient = {
         body.serving_size_g = payload.grams ?? 100;
       }
 
-      try {
-        const res = await apiFetch(`/days/${date}/entries`, {
-          method: "POST",
-          body: JSON.stringify(body),
-        });
-        if (res.ok) {
-          const json = await res.json();
-          return { success: true, id: json.id || entryId };
-        }
-      } catch {
-        enqueueOfflineEntry(date, body);
-      }
+      // The id is the client's (idempotent on the server), so a write sent again never adds the entry twice
+      const result = await diaryWrite({ id: entryId, date, payload: body });
+      return { success: result.state === "saved", id: entryId, ...result };
     }
 
-    return { success: true, id: entryId };
+    return { success: true, id: entryId, state: "saved" };
   },
 
   async getTrends(days = 7, offset = 0): Promise<Record<string, unknown>> {
@@ -1068,57 +1199,39 @@ export const apiClient = {
       serving_label?: string;
       calories?: number;
     }
-  ): Promise<boolean> {
-    if (isLiveMode()) {
-      if (!isUuid(id)) return true;
-      try {
-        const slot = patch.meal_slot === "preworkout" ? "pre_workout" : patch.meal_slot;
-        const res = await apiFetch(`/entries/${encodeURIComponent(id)}`, {
-          method: "PATCH",
-          body: JSON.stringify({
-            meal_slot: slot,
-            grams: patch.grams,
-            serving_size_g: patch.serving_size_g ?? patch.grams,
-            serving_label: patch.serving_label,
-            calories: patch.calories,
-          }),
-        });
-        return res.ok;
-      } catch {
-        return false;
-      }
-    }
-    return true;
+  ): Promise<WriteResult> {
+    // Only a uuid can be on the server (a sample entry of the demo is not)
+    if (!isLiveMode() || !isUuid(id)) return { state: "saved" };
+    const slot = patch.meal_slot === "preworkout" ? "pre_workout" : patch.meal_slot;
+    return diaryWrite({
+      id,
+      date: "",
+      method: "PATCH",
+      path: `/entries/${encodeURIComponent(id)}`,
+      payload: {
+        meal_slot: slot,
+        grams: patch.grams,
+        serving_size_g: patch.serving_size_g ?? patch.grams,
+        serving_label: patch.serving_label,
+        calories: patch.calories,
+      },
+    });
   },
 
-  async restoreEntry(id: string): Promise<boolean> {
-    if (isLiveMode()) {
-      if (!isUuid(id)) return true;
-      try {
-        const res = await apiFetch(`/entries/${encodeURIComponent(id)}/restore`, {
-          method: "POST",
-        });
-        return res.ok;
-      } catch {
-        return false;
-      }
+  async restoreEntry(id: string): Promise<WriteResult> {
+    if (!isLiveMode() || !isUuid(id)) return { state: "saved" };
+    // Undo of a delete that is still queued: the delete is taken back, the server never saw it
+    const queuedDelete = readOutbox().find((item) => item.id === id && item.method === "DELETE");
+    if (queuedDelete) {
+      writeOutbox(readOutbox().filter((item) => itemKey(item) !== itemKey(queuedDelete)));
+      return { state: "saved" };
     }
-    return true;
+    return diaryWrite({ id, date: "", method: "POST", path: `/entries/${encodeURIComponent(id)}/restore`, payload: {} });
   },
 
-  async deleteEntry(id: string): Promise<boolean> {
-    if (isLiveMode()) {
-      if (!isUuid(id)) return true;
-      try {
-        const res = await apiFetch(`/entries/${encodeURIComponent(id)}`, {
-          method: "DELETE",
-        });
-        return res.ok;
-      } catch {
-        return false;
-      }
-    }
-    return true;
+  async deleteEntry(id: string): Promise<WriteResult> {
+    if (!isLiveMode() || !isUuid(id)) return { state: "saved" };
+    return diaryWrite({ id, date: "", method: "DELETE", path: `/entries/${encodeURIComponent(id)}`, payload: {} });
   },
 
   async requestMagicLink(email: string): Promise<{ ok: true }> {
