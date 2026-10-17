@@ -213,7 +213,7 @@ export function FoodList({
           .map((meal) => (
             <section key={meal.slot} aria-label={meal.fullName}>
               <div className={pill.wrap}>
-                <div className={`${pill.pill} justify-between bg-ink text-on-dark`}>
+                <div data-ink-pill className={`${pill.pill} justify-between bg-ink text-on-dark`}>
                   <span className={pill.label}>{meal.label}</span>
                   <span className={pill.kcal}>{kcalLabel(meal.kcal)}</span>
                 </div>
@@ -230,13 +230,13 @@ export function FoodList({
   return (
     <div className="min-h-0 min-w-0 flex-1 overflow-y-auto bg-page pb-3 lg:rounded-2xl lg:border lg:border-card-border lg:shadow-card">
       {isEmpty && (
-        <div className="flex min-h-11 items-center justify-between gap-2 px-3 py-2">
+        <div className="flex min-h-11 flex-col items-start px-3 pt-2 lg:flex-row lg:items-center lg:justify-between lg:gap-2 lg:py-2">
           <p className="m-0 text-[15px] font-semibold text-text">{readOnly ? "Chưa có món nào ngày này" : "Chưa có món nào hôm nay"}</p>
           {canCopyYesterday && (
             <button
               type="button"
               onClick={onCopyYesterday}
-              className="min-h-11 shrink-0 cursor-pointer rounded-full border-0 bg-transparent px-2 text-[13px] font-bold text-blue"
+              className="-mx-2 min-h-11 shrink-0 cursor-pointer rounded-full border-0 bg-transparent px-2 text-[13px] font-bold text-blue lg:mx-0"
             >
               Chép hôm qua
             </button>
@@ -249,7 +249,7 @@ export function FoodList({
         return (
           <section key={meal.slot} aria-label={meal.fullName}>
             <div className={`sticky top-0 z-10 ${pill.wrap}`}>
-            <div className={`${pill.pill} ${mealSelected ? "bg-cobalt" : "bg-ink"} text-on-dark`}>
+            <div data-ink-pill className={`${pill.pill} ${mealSelected ? "bg-cobalt" : "bg-ink"} text-on-dark`}>
               <button
                 type="button"
                 aria-pressed={mealSelected}

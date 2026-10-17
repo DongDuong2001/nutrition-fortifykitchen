@@ -183,7 +183,7 @@ def run(browser, size, tag):
     check(pg.get_by_role("link", name=re.compile("Ngày tập")).get_attribute("href") == f"/training?date={PAST}", f"{tag} past training link")
     check(pg.get_by_role("link", name=re.compile("Đủ 22 vi chất")).get_attribute("href") == f"/micros?date={PAST}", f"{tag} past micros link")
     allfills = set()
-    for label in ["Kcal so với mục tiêu ngày", "Đạm so với mục tiêu ngày", "Chất béo so với mục tiêu ngày", "Natri so với mục tiêu ngày", "Canxi so với mục tiêu ngày", "Vitamin C so với mục tiêu ngày"]:
+    for label in ["Kcal so với mục tiêu ngày", "Đạm so với mục tiêu ngày", "Chất béo so với mục tiêu ngày", "Sodium so với mục tiêu ngày", "Calcium so với mục tiêu ngày", "Vitamin C so với mục tiêu ngày"]:
         allfills |= set(fills(pg, label))
     coloured = {"rgb(242, 69, 61)", "rgb(255, 176, 32)", "rgb(128, 216, 160)", "rgb(47, 196, 107)"} & allfills
     check(len(coloured) >= 1, f"{tag} past day bars use level colours {sorted(coloured)}")
@@ -200,7 +200,8 @@ def run(browser, size, tag):
     pg.evaluate(LIST + ".scrollTop = " + LIST + ".querySelector('section').offsetHeight / 2")
     pg.wait_for_timeout(200)
     sticky = pg.evaluate("(() => { const l = document.querySelector('aside[aria-label=\"Vi chất\"]').previousElementSibling; const hs = [...l.querySelectorAll('button[aria-pressed]:not([aria-label*=\", \"])')]; return hs.map(h => Math.round(h.getBoundingClientRect().top - l.getBoundingClientRect().top)); })()")
-    check(any(abs(v) <= 1 for v in sticky), f"{tag} a meal header sticks to the top of the list ({sticky}, scrollTop {pg.evaluate(LIST + '.scrollTop')})")
+    inset = 4 if phone else 7  # cc-44: the ink pill sits 4 px in (6 px plus the card's 1 px border from lg)
+    check(any(abs(v - inset) <= 1 for v in sticky), f"{tag} a meal header sticks to the top of the list, {inset} px in ({sticky}, scrollTop {pg.evaluate(LIST + '.scrollTop')})")
     # empty day: the slot rows
     ctx.close()
 

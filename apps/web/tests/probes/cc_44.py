@@ -1,14 +1,15 @@
 """cc-44: white background, level colours and bar, English nutrient names, Hôm nay meal pills, desktop fixes.
 
 Screenshots of the main routes at 390x844 and 1440x900 into .screenshots/cc-44-<route>-<w>.png (demo mode; the
-empty day is a fresh account). CC44_TAG=<tag> adds the tag to the names (cc-44-<tag>-...), for work-in-progress shots.
+empty day is the demo account with the seven sample foods deleted, as cc_26). CC44_TAG=<tag> adds the tag to the names (cc-44-<tag>-...), for work-in-progress shots.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_44.py
 """
+import json
 import os
 import sys
 from pathlib import Path
 
-import _demo
+import _demo  # noqa: F401
 from playwright.sync_api import sync_playwright
 
 BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3101")
@@ -38,15 +39,14 @@ def name(route, w):
     return f"cc-44-{TAG + '-' if TAG else ''}{route}-{w}.png"
 
 
-# A new account that finished setup (as smoke.py's empty pass): no entries, no sample data
-SAVED_PROFILE = '{"sex":"male","birthYear":2003,"weightKg":65,"goal":"maintain","periodMode":false,"trainingMinutesDefault":60,"displayName":"","hintSeen":true}'
+# An empty day: the demo account with the seven sample foods deleted (cc_26's NO_SAMPLE)
+NO_SAMPLE = json.dumps({f"item-{i}": {"deleted": True} for i in range(1, 8)})
 
 
-def shoot(browser, route, path, w, demo=True):
-    _demo.enable(demo)
+def shoot(browser, route, path, w, empty=False):
     ctx = browser.new_context(viewport=SIZES[w])
-    if not demo:
-        ctx.add_init_script(f"try {{ localStorage.setItem('h1t_profile_v1', JSON.stringify({SAVED_PROFILE})); }} catch (e) {{}}")
+    if empty:
+        ctx.add_init_script(f"try {{ localStorage.setItem('h1t_sample_edits_v1_demo', {json.dumps(NO_SAMPLE)}); }} catch (e) {{}}")
     pg = ctx.new_page()
     pg.goto(BASE + path, wait_until="networkidle")
     pg.wait_for_timeout(900)
@@ -54,7 +54,6 @@ def shoot(browser, route, path, w, demo=True):
     check(overflow <= 0, f"{route} @{w}: no horizontal overflow ({overflow})")
     pg.screenshot(path=str(SHOTS / name(route, w)))
     ctx.close()
-    _demo.enable(True)
 
 
 def share(browser, named):
@@ -106,7 +105,7 @@ def main():
                 if not ONLY or route in ONLY:
                     shoot(browser, route, path, w)
             if not ONLY or "home-empty" in ONLY:
-                shoot(browser, "home-empty", "/", w, demo=False)
+                shoot(browser, "home-empty", "/", w, empty=True)
         if not ONLY or "share" in ONLY:
             share(browser, True)
             share(browser, False)

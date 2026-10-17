@@ -108,7 +108,9 @@ ANALYSE = """async (b64) => {
   // and in the footer (an ink band); the top row is paper and the bottom row is ink.
   const bodyTop = Math.round(H * 0), headRows = 330;
   for (let i = bodyTop; i < Math.min(H, headRows); i++) { if (!near(px(0, i))) mark(0, i); if (!near(px(W - 1, i))) mark(W - 1, i); }
-  const INK = [17, 19, 23]; const nearInk = (k) => k.split(',').every((v, i) => Math.abs(Number(v) - INK[i]) <= 2);
+  // 6, not 2: when the page height is not a whole number of image rows, the last row's two corner pixels blend a
+  // few levels lighter (anti-aliasing, cc-44)
+  const INK = [17, 19, 23]; const nearInk = (k) => k.split(',').every((v, i) => Math.abs(Number(v) - INK[i]) <= 6);
   for (let i = H - 150; i < H; i++) { if (!nearInk(px(0, i))) mark(0, i); if (!nearInk(px(W - 1, i))) mark(W - 1, i); }
   for (let i = 0; i < W; i++) { if (!near(px(i, 0))) mark(i, 0); if (!nearInk(px(i, H - 1))) mark(i, H - 1); }
   let lastInk = -1;
@@ -320,7 +322,7 @@ def run(browser, size, tag):
         check(all(x in t for x in ["Thiếu <50%", "Trung bình", "Gần đủ", "Đạt ≥100%"]) and "Xanh: đạt mục tiêu" not in t, f"{tag} today's key is the four levels")
         check("H1T MICRO" in t and "lehongkhanh.vn" in t and "Theo dõi vi chất mỗi ngày" in t, f"{tag} footer wordmark, site and line")
         check_frame(s, tag, "today")
-        check("Khoáng chất" in t and "Vitamin" in t, f"{tag} nutrient column groups are in the image")
+        check("KHOÁNG CHẤT" in t.upper() and "VITAMIN" in t.upper(), f"{tag} nutrient column groups are in the image (uppercase pills, cc-44)")
         check(abs(s["rootW"] - 390) <= 0.5, f"{tag} drawn at 390 px ({s['rootW']})")
     pg.keyboard.press("Escape")
     pg.wait_for_timeout(200)

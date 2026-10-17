@@ -85,6 +85,8 @@ function ShareCapture({ model, onDone, onError }: { model: ShareModel; onDone: (
       const cssHeight = node.getBoundingClientRect().height;
       const { scale, width, height } = shareImageSize(cssHeight);
       const fontEmbedCSS = await getFontEmbedCSS(node).catch(() => undefined);
+      const footer = node.querySelector<HTMLElement>("[data-share-footer]");
+      const ink = getComputedStyle(footer ?? node).backgroundColor;
       // The page is scaled by layout (transform on the clone), so text stays vector-sharp at 1080 px
       const blob = await toBlob(node, {
         // Buttons marked data-export="hide" (the + Thêm pills) never reach the image
@@ -93,9 +95,13 @@ function ShareCapture({ model, onDone, onError }: { model: ShareModel; onDone: (
         height,
         pixelRatio: 1,
         fontEmbedCSS,
-        // A page height that is not a whole number of image rows must not leave a see-through last row
-        backgroundColor: getComputedStyle(node).backgroundColor || "#FFFFFF",
+        // A page height that is not a whole number of image rows leaves a last row the page only partly covers: the
+        // canvas fill gives it the footer's ink. html-to-image also paints this colour on the page, so `style` puts the
+        // page's white back, with ink under the footer so the blended last row stays ink to the corners.
+        backgroundColor: ink,
         style: {
+          backgroundColor: getComputedStyle(node).backgroundColor,
+          backgroundImage: `linear-gradient(to top, ${ink} ${footer?.offsetHeight ?? 0}px, transparent 0)`,
           transform: `scale(${scale})`,
           transformOrigin: "top left",
           width: `${SHARE_CSS_WIDTH}px`,

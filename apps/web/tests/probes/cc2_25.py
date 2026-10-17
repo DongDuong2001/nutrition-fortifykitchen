@@ -66,7 +66,7 @@ def training(browser, size_name, size):
         w = f"{size_name} /training (today, demo day)"
         ctx, pg = new_page(browser, size, "/training")
         body = pg.inner_text("body")
-        at = body.find("Natri hôm nay")
+        at = body.find("Sodium hôm nay")  # cc-44: English mineral names
         text = squash(body[at : at + 260]) if at >= 0 else ""
         check(at >= 0, f"{w}: sodium card is shown")
         check("2.900" in text, f"{w}: sodium card reads the diary's sodium ({text[:90]!r})")

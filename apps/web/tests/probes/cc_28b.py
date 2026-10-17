@@ -62,7 +62,7 @@ window.__shareSnaps = [];
       head: (() => { const h = r.querySelector('[data-share-header]'); if (!h) return null; const p0 = h.querySelector('p'); const b = h.querySelector('[data-level-badge]');
         const m = (e) => { const q = e.getBoundingClientRect(); return (q.top + q.bottom) / 2; };
         return { name: p0.innerText.trim(), nameMid: m(p0.parentElement), badgeMid: b ? m(b) : null }; })(),
-      groups: [...r.querySelectorAll('aside[aria-label="Vi chất"] h3')].map(h => h.innerText.trim()),
+      groups: [...r.querySelectorAll('aside[aria-label="Vi chất"] h3')].map(h => h.textContent.trim()),
       rows: [...r.querySelectorAll('aside[aria-label="Vi chất"] [data-align-group=home-nutrient]')].length,
     });
   }, 5);
@@ -111,7 +111,7 @@ def column(pg):
           const aside = [...document.querySelectorAll("aside[aria-label='Vi chất']")].find(a => a.getBoundingClientRect().width > 0);
           const out = {}; const extras = [];
           for (const sec of aside.querySelectorAll('section')) {
-            const title = sec.querySelector('h3').innerText.trim();
+            const title = sec.querySelector('h3').textContent.trim();  // cc-44: the pill draws it uppercase
             out[title] = [...sec.querySelectorAll('[data-align-group=home-nutrient]')].map(r => r.innerText.split('\\n')[0].trim());
             if (title.startsWith('Chi tiết')) for (const r of sec.querySelectorAll('[data-extra]')) extras.push({ text: r.innerText.replace(/\\s+/g, ' ').trim(), bars: r.querySelectorAll('[role=progressbar]').length, pct: /%/.test(r.innerText) });
           }

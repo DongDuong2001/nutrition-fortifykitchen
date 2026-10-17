@@ -57,7 +57,7 @@ export function NutrientColumn({
         {groups.map((group, groupIndex) => (
           <section key={group.title} aria-label={group.title} data-tour={groupIndex === 0 ? "nutrient-column" : undefined} className={`flex flex-col ${share ? "" : "shrink-0 grow-[var(--rows)] lg:grow-0"}`} style={share ? undefined : ({ "--rows": group.ids.length } as React.CSSProperties)}>
             <h3 data-snap-row className={`m-0 flex-none snap-start ${pill.wrap}`}>
-              <span className={`${pill.pill} bg-ink text-on-dark`}>
+              <span data-ink-pill className={`${pill.pill} bg-ink text-on-dark`}>
                 <span className={pill.label}>{group.title}</span>
               </span>
             </h3>

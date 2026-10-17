@@ -185,7 +185,7 @@ def run(browser, size, tag):
     pg.wait_for_timeout(300)
     home(pg)
     check(pg.locator("[data-level-card]").count() == 0, f"{tag} raised: shown once")
-    check(pg.locator("aside[aria-label='Vi chất'] h3").first.inner_text().strip() == "Chi tiết béo & xơ", f"{tag} raised: Hôm nay now lists the Level 3 groups")
+    check(pg.locator("aside[aria-label='Vi chất'] h3").first.text_content().strip() == "Chi tiết béo & xơ", f"{tag} raised: Hôm nay now lists the Level 3 groups")
     set_server_level(pg, 1)
     home(pg)
     card = pg.locator("[data-level-card]")
@@ -205,7 +205,7 @@ def run(browser, size, tag):
     check("Bạn chưa có huấn luyện viên" in body(pg), f"{tag} leave: back to no coach")
     home(pg)
     check(pg.get_by_role("button", name=re.compile("^Level \\d · HLV")).count() == 0, f"{tag} leave: no label on Hôm nay")
-    check(pg.locator("aside[aria-label='Vi chất'] h3").all_inner_texts() == ["Khoáng chất", "Vitamin"], f"{tag} leave: the basic list is back")
+    check(pg.locator("aside[aria-label='Vi chất'] h3").all_text_contents() == ["Khoáng chất", "Vitamin"], f"{tag} leave: the basic list is back")
     check([e for e in errors if "preloaded using link preload" not in e] == [], f"{tag}: no console errors {errors[:1]}")
     ctx.close()
 

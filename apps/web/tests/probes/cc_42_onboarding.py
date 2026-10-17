@@ -682,7 +682,7 @@ def meal_add_link(browser):
         info = link.evaluate(
             """el => {
               const cs = getComputedStyle(el), before = getComputedStyle(el, '::before');
-              const row = el.parentElement.getBoundingClientRect(), r = el.getBoundingClientRect();
+              const row = el.parentElement.getBoundingClientRect(), r = el.getBoundingClientRect(), list = el.closest('section').getBoundingClientRect();
               const btn = el.parentElement.querySelector('button'), kcal = btn.querySelector('span:last-child').getBoundingClientRect();
               return {
                 text: el.textContent.trim(), label: el.getAttribute('aria-label'), exp: el.getAttribute('data-export'),
@@ -690,7 +690,7 @@ def meal_add_link(browser):
                 color: cs.color, fs: cs.fontSize, fw: cs.fontWeight, ff: cs.fontFamily,
                 hitW: parseFloat(before.width), hitH: parseFloat(before.height),
                 rowH: row.height, mid: (r.top + r.bottom) / 2, rowMid: (row.top + row.bottom) / 2,
-                rightGap: row.right - r.right, kcalGap: r.left - kcal.right, kcalText: btn.querySelector('span:last-child').textContent.trim(),
+                rightGap: list.right - r.right, kcalGap: r.left - kcal.right, kcalText: btn.querySelector('span:last-child').textContent.trim(),
               };
             }"""
         )
@@ -700,15 +700,17 @@ def meal_add_link(browser):
         check(info["hitW"] >= 44 and info["hitH"] >= 44, f"{tag} meal add: hit area at least 44x44 ({info['hitW']}x{info['hitH']})")
         check(info["rowH"] == row_h, f"{tag} meal add: the meal pill is {row_h} px ({info['rowH']})")
         check(abs(info["mid"] - info["rowMid"]) <= 1, f"{tag} meal add: centred with the meal name ({info['mid']} vs {info['rowMid']})")
-        check(abs(info["rightGap"] - 12) <= 1, f"{tag} meal add: right-aligned on the row's 12 px edge ({info['rightGap']})")
+        check(abs(info["rightGap"] - 12) <= 1, f"{tag} meal add: right-aligned on the list's 12 px text edge ({info['rightGap']})")
         if info["kcalText"]:
             check(abs(info["kcalGap"] - 12) <= 1, f"{tag} meal add: 12 px from the kcal value ({info['kcalGap']})")
-        # the invisible hit area: a point 10 px above the text still reaches the link
+        # the invisible hit area: a point just inside the 44 px hit area above the link still reaches it (10 px on the
+        # 24 px phone pill, 4 px on the 36 px desktop pill, cc-44)
         # (the first meal header sits at the top edge of the list's scroll box, which clips the overlay above it, so the
         # second one is used)
         box = links.nth(1).bounding_box()
-        top = pg.evaluate("([x, y]) => document.elementFromPoint(x, y)?.closest(\"a[data-tour='meal-add']\") !== null", [box["x"] + box["width"] / 2, box["y"] - 10])
-        check(top, f"{tag} meal add: a tap 10 px above the text still lands on the link")
+        above = (44 - box["height"]) / 2 - 0.5
+        top = pg.evaluate("([x, y]) => document.elementFromPoint(x, y)?.closest(\"a[data-tour='meal-add']\") !== null", [box["x"] + box["width"] / 2, box["y"] - above])
+        check(top, f"{tag} meal add: a tap {above:.1f} px above the link still lands on it")
         # hover turns the text white (cc-44), pressed opacity
         link.hover()
         pg.wait_for_timeout(200)

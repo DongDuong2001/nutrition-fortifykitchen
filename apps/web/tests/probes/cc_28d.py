@@ -93,7 +93,7 @@ def run(browser, size, tag):
     check(save.is_enabled(), f"{tag}: Lưu enables when the Level changes")
     added = [li.inner_text().strip() for li in pg.locator("li[data-status=added]").all()]
     joined = " | ".join(added)
-    check("+ Phốt pho" in joined and "+ Vitamin B1" in joined and "+ Omega-3" in joined, f"{tag}: the preview marks added items ({added[:4]})")
+    check("+ Phosphorus" in joined and "+ Vitamin B1" in joined and "+ Omega-3" in joined, f"{tag}: the preview marks added items ({added[:4]})")
     removed = [li.inner_text().strip() for li in pg.locator("li[data-status=removed]").all()]
     check("− Vitamin C" in " | ".join(removed), f"{tag}: and removed ones ({removed})")
     pg.screenshot(path=os.path.join(SHOTS, f"cc-28d-client-{w}.png"), full_page=True)
