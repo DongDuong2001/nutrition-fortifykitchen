@@ -263,3 +263,6 @@
 - The WNSheet / WNTour boards (meal-list canvas, "Thông báo cập nhật + hướng dẫn") are not in `design/`; built from the task text. Item icons are my pick (home, check, target, eye, grid); the date reads "Cập nhật 17/10" (Hao, review). Swap once the boards land.
 - Tour step 3 hides Bỏ qua (Xong already ends it). Step 2 without a long press points at the first meal pill (data-tour="meal-pill").
 - Probes keep "Có gì mới" off with a new demo-only switch `h1t_whats_new_off` (set by `_seed.py`); cc_46 turns it on.
+
+## cc-48 (18/10/2026)
+- Dong: refreshRemoteDay (diary refetch on focus) replaced `added` with the server's entries plus outbox entries only, so an entry whose POST was still in flight vanished until the next refresh. cc-48 keeps a local entry missing from the server when it is queued offline, its POST is in flight (diary-store postEntry tracks ids), or it was added after the refetch started (lib/diary-edits mergeServerDay, tested). OK with you, or should api-client expose in-flight ids itself?
