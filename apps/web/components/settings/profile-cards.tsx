@@ -14,9 +14,10 @@ import { useDiary } from "@/lib/diary-store";
 import { formatNumber } from "@/lib/format";
 import { goalOptions, parseBirthYear, validateSetupDraft } from "@/lib/onboarding";
 import { profileToDraft } from "@/lib/profile";
-import { loadSettings } from "@/lib/settings";
+import { loadSettings, saveSettings } from "@/lib/settings";
+import { canVibrate, haptic, hapticsWanted } from "@/lib/haptics";
 import type { OnboardingFlags } from "@/lib/onboarding-flags";
-import { loadFlags, openReplay, setTipsOff, subscribeFlags } from "@/lib/onboarding-store";
+import { loadFlags, markUsed, openReplay, setTipsOff, subscribeFlags } from "@/lib/onboarding-store";
 import { startTour } from "@/lib/tour-bus";
 import { getTrainingDurations } from "@/lib/training";
 import type { SexType } from "@/lib/targets";
@@ -196,6 +197,18 @@ export function AppCard() {
   // The tour and tips (cc-42): read after mount for the same reason
   const router = useRouter();
   const [flags, setFlags] = useState<OnboardingFlags | null>(null);
+  // "Rung khi chạm" (cc-51): only on a phone that can vibrate (Android; iOS has no vibrate), read after mount
+  const [haptics, setHaptics] = useState<boolean | null>(null);
+  useEffect(() => {
+    if (!canVibrate()) return;
+    setHaptics(hapticsWanted(loadSettings().haptics, window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true));
+  }, []);
+  const toggleHaptics = (on: boolean) => {
+    saveSettings({ haptics: on });
+    setHaptics(on);
+    markUsed("haptics-switch");
+    if (on) haptic("saved");
+  };
   useEffect(() => {
     setFlags(loadFlags());
     return subscribeFlags(() => setFlags(loadFlags()));
@@ -242,6 +255,13 @@ export function AppCard() {
           />
         </Row>
       </RowGroup>
+      {haptics !== null && (
+        <div data-align-group="profile-row" data-tour="haptics-switch">
+          <Row icon={SETTINGS_ICONS.vibrate} label="Rung khi chạm" hint="Rung nhẹ khi lưu, xóa hay hoàn tác" showChevron={false} className="min-h-[56px]">
+            <Switch checked={haptics} onCheckedChange={toggleHaptics} aria-label="Rung khi chạm" />
+          </Row>
+        </div>
+      )}
       <RowGroup>
         <Row icon={SETTINGS_ICONS.language} label="Ngôn ngữ" value={language} href="/settings/language" />
       </RowGroup>

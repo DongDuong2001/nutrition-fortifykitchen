@@ -23,6 +23,12 @@ export const SETTINGS_ICONS = {
       <path d="M18.5 16.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z" />
     </Svg>
   ),
+  vibrate: (
+    <Svg>
+      <rect x="8" y="3" width="8" height="18" rx="2" />
+      <path d="M4 9v6M20 9v6" />
+    </Svg>
+  ),
   tips: (
     <Svg>
       <path d="M9 18h6M10 21h4" />
