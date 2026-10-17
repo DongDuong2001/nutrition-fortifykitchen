@@ -3,6 +3,7 @@ import { SAMPLE_DAY, type MockDayData, type MockFoodItem } from "./mock/sample-d
 import { MEAL_SLOTS, getMealSlotNameVi, type MealSlot } from "./meal-slot";
 import { scaleNutrients } from "./portion";
 import { formatAmount } from "./format";
+import { isUuid } from "./uuid";
 
 /** A diary entry the user added (from /add or the food detail page). */
 export interface AddedDiaryEntry {
@@ -23,6 +24,11 @@ export interface AddedDiaryEntry {
   fiber: number | null;
   nutrients: Record<string, number | null>;
   addedAt: string;
+  /**
+   * Live mode: the server confirmed this entry (its add was saved, or a refetch listed it). A refetch drops a confirmed
+   * entry the server no longer has (deleted on another device); an unconfirmed one stays and is sent again.
+   */
+  synced?: boolean;
 }
 
 /** Nutrition for one portion of a food. Added entries and sample edits round the same way. */
@@ -496,10 +502,11 @@ export function mealPortions(edits: DiaryEdits, slot: MealSlot, samples: SampleI
 }
 
 /**
- * A day refetched from the server (diary-store refreshRemoteDay, on focus): the server's entries, plus each local
- * entry the server does not have yet that must stay: one in `keep` (queued offline, or its POST in flight) or one
- * added after the refetch started (its POST landed after the server answered). Other local entries were deleted
- * elsewhere and go.
+ * A day refetched from the server (diary-store refreshRemoteDay). `keep` holds the entries with a write queued, being
+ * sent, or started after the refetch did: the device's version of those wins (an edit not sent yet stays, a delete
+ * not sent yet does not come back). Any other entry is the server's. A local entry the server does not have stays
+ * unless the server confirmed it before (`synced`: it was deleted elsewhere), or it was added before the refetch
+ * started and its id is not a uuid (it can never reach the server).
  */
 export function mergeServerDay(
   local: readonly AddedDiaryEntry[],
@@ -507,5 +514,13 @@ export function mergeServerDay(
   { keep, startedAt }: { keep: ReadonlySet<string>; startedAt: number }
 ): AddedDiaryEntry[] {
   const onServer = new Set(server.map((e) => e.id));
-  return [...server, ...local.filter((e) => !onServer.has(e.id) && (keep.has(e.id) || Date.parse(e.addedAt) >= startedAt))];
+  const mine = new Map(local.map((e) => [e.id, e]));
+  const fromServer = server.flatMap((e): AddedDiaryEntry[] => {
+    if (!keep.has(e.id)) return [{ ...e, synced: true }];
+    const own = mine.get(e.id);
+    return own ? [{ ...own, synced: true }] : [];
+  });
+  const stays = (e: AddedDiaryEntry) =>
+    keep.has(e.id) || Date.parse(e.addedAt) >= startedAt || (!e.synced && isUuid(e.id));
+  return [...fromServer, ...local.filter((e) => !onServer.has(e.id) && stays(e))];
 }

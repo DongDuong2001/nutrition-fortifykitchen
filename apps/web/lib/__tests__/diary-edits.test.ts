@@ -408,6 +408,50 @@ describe("mergeServerDay (refetch on focus)", () => {
     ]);
   });
 
+  // cc-49: what the server confirmed (synced) decides whether a missing entry was deleted elsewhere
+  const U1 = "aaaaaaaa-aaaa-4aaa-8aaa-000000000001";
+  const U2 = "aaaaaaaa-aaaa-4aaa-8aaa-000000000002";
+  const old = "2026-10-18T07:30:00.000Z";
+  const ids = (list: AddedDiaryEntry[]) => list.map((e) => e.id);
+
+  it("drops a confirmed entry the server no longer has: deleted on another device", () => {
+    const local = [{ ...at(U1, old), synced: true }];
+    expect(ids(mergeServerDay(local, server, { keep: new Set(), startedAt: started }))).toEqual(["s1"]);
+  });
+
+  it("keeps a confirmed entry the server no longer has while a write of it is queued or in flight", () => {
+    const local = [{ ...at(U1, old), synced: true }];
+    expect(ids(mergeServerDay(local, server, { keep: new Set([U1]), startedAt: started }))).toEqual(["s1", U1]);
+  });
+
+  it("a server entry comes back marked confirmed", () => {
+    const merged = mergeServerDay([], [{ ...at(U2, old), synced: true }], { keep: new Set(), startedAt: started });
+    expect(merged[0].synced).toBe(true);
+  });
+
+  it("an edit not sent yet wins over the server's copy; the entry stays confirmed", () => {
+    const local = [{ ...at(U2, old), grams: 250 }];
+    const fromServer = [{ ...at(U2, old), grams: 100, synced: true }];
+    const merged = mergeServerDay(local, fromServer, { keep: new Set([U2]), startedAt: started });
+    expect(merged.map((e) => [e.id, e.grams, e.synced])).toEqual([[U2, 250, true]]);
+  });
+
+  it("with no write pending, the server's copy wins (an edit made on another device)", () => {
+    const local = [{ ...at(U2, old), grams: 250, synced: true }];
+    const fromServer = [{ ...at(U2, old), grams: 100, synced: true }];
+    expect(mergeServerDay(local, fromServer, { keep: new Set(), startedAt: started })[0].grams).toBe(100);
+  });
+
+  it("a delete not sent yet: the server's copy does not come back", () => {
+    const fromServer = [{ ...at(U2, old), synced: true }];
+    expect(ids(mergeServerDay([], fromServer, { keep: new Set([U2]), startedAt: started }))).toEqual([]);
+  });
+
+  it("an id that is not a uuid never reaches the server: dropped as before unless a write keeps it", () => {
+    const local = [at("copy-1-0", old)];
+    expect(ids(mergeServerDay(local, server, { keep: new Set(), startedAt: started }))).toEqual(["s1"]);
+  });
+
   it("does not list an entry twice when the server already has it", () => {
     const local = [at("s1", "2026-10-18T08:00:05.000Z")];
     expect(mergeServerDay(local, server, { keep: new Set(["s1"]), startedAt: started }).map((e) => e.id)).toEqual(["s1"]);
