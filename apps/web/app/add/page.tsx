@@ -45,6 +45,9 @@ import { HomeScreen } from "@/components/home/home-screen";
 import { useMealSlot } from "@/lib/use-meal-slot";
 import { HOME_ROUTE } from "@/lib/nav";
 import { navigateFromSheet } from "@/lib/sheet-history";
+import { markSheetClosed, scrollOfHome } from "@/lib/nav-direction";
+import { SHEET_EXIT_MS } from "@/components/ui/sheet";
+import { useSheetDrag } from "@/components/ui/use-sheet-drag";
 
 // The add sheet shows carousels of the newest: Khám phá holds the full lists
 const MAX_SHORTCUT_RECENTS = 8;
@@ -78,6 +81,16 @@ function AddFoodInner() {
 
   const desktopSearchInputRef = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
+  // cc-55: /add is a sheet over Hôm nay. Hôm nay is drawn behind it where it was scrolled to; the panel (a dialog on a
+  // desktop) slides up from @starting-style, and ✕, the scrim or a drag down slide it away before the route pops.
+  const panelRef = useRef<HTMLDivElement>(null);
+  const behindRef = useRef<HTMLDivElement>(null);
+  const [closing, setClosing] = useState(false);
+  const closingRef = useRef(false);
+  const sheetState = closing ? "closed" : "open";
+  useEffect(() => {
+    if (behindRef.current) behindRef.current.scrollTop = scrollOfHome();
+  }, []);
 
   useEffect(() => {
     const checkDesktop = () => {
@@ -306,7 +319,10 @@ function AddFoodInner() {
     else pickFood(food);
   };
 
-  const handleClose = useCallback(() => {
+  // `instant`: Esc on a keyboard closes at once (a keyboard action never waits for an animation)
+  const handleClose = useCallback((instant = false) => {
+    if (closingRef.current) return;
+    closingRef.current = true;
     if (typeof window !== "undefined") {
       const openerId =
         sessionStorage.getItem("last_add_opener_id") ||
@@ -314,8 +330,18 @@ function AddFoodInner() {
       sessionStorage.removeItem("last_add_opener_id");
       sessionStorage.setItem("return_focus_id", openerId);
     }
-    goBack();
+    const leave = () => {
+      markSheetClosed();
+      goBack();
+    };
+    if (instant) return leave();
+    setClosing(true);
+    setTimeout(leave, SHEET_EXIT_MS);
   }, [mealSlot, goBack]);
+  const panelDrag = useSheetDrag(panelRef, () => {
+    markUsed("sheet-drag");
+    handleClose();
+  });
 
   // Keyboard navigation on desktop: Enter adds, Esc closes
   useEffect(() => {
@@ -324,7 +350,7 @@ function AddFoodInner() {
         // An open sheet (Chỉ ghi kcal, meal switcher) closes itself on Esc; the add screen stays
         if (quickOpen || switcherOpen || reviewOpen) return;
         e.preventDefault();
-        handleClose();
+        handleClose(true);
       } else if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {
         // If not typing in input or if adding (the Chỉ ghi kcal form handles its own Enter)
         if (selectedFood && parsedGrams > 0 && !quickOpen) {
@@ -394,27 +420,29 @@ function AddFoodInner() {
 
   return (
     <div className="min-h-screen bg-page text-text font-sans">
+      {/* Hôm nay behind the sheet (both widths), scrolled to where it was left; inert, and no blur on the scrim */}
+      <div ref={behindRef} data-add-behind aria-hidden="true" inert className="pointer-events-none fixed inset-0 select-none overflow-hidden">
+        <HomeScreen />
+      </div>
+      <div aria-hidden="true" data-state={sheetState} onClick={() => handleClose()} className="m-scrim fixed inset-0 z-40 bg-scrim" />
+
       {/* ============================================================== */}
       {/* DESKTOP MODAL OVER TODAY (≥1024px)                             */}
       {/* ============================================================== */}
-      <div className="hidden lg:block relative min-h-screen">
-        {/* Background Today page (inert while modal is open) */}
-        <div aria-hidden="true" className="pointer-events-none select-none opacity-40">
-          <HomeScreen />
-        </div>
-
-        {/* Modal Overlay / Scrim */}
+      <div className="hidden lg:block">
         <div
-          onClick={handleClose}
-          className="fixed inset-0 bg-scrim z-50 flex items-center justify-center p-4 backdrop-blur-xs"
+          onClick={() => handleClose()}
+          className={`fixed inset-0 z-50 flex items-center justify-center p-4 ${closing ? "pointer-events-none" : ""}`}
         >
           <div
             ref={dialogRef}
             role="dialog"
             aria-modal="true"
             aria-labelledby="dlg-title"
+            data-state={sheetState}
+            inert={closing}
             onClick={(e) => e.stopPropagation()}
-            className="w-[min(900px,100%-32px)] bg-card border border-card-border rounded-[18px] p-6 shadow-2xl flex flex-col gap-4 max-h-[92vh] overflow-y-auto"
+            className="m-pop w-[min(900px,100%-32px)] bg-card border border-card-border rounded-[18px] p-6 shadow-2xl flex flex-col gap-4 max-h-[92vh] overflow-y-auto"
           >
             {/* Dialog Header */}
             <div className="flex items-start justify-between gap-4">
@@ -423,7 +451,7 @@ function AddFoodInner() {
                   type="button"
                   onClick={() => setSwitcherOpen(true)}
                   aria-haspopup="listbox"
-                  className="min-h-[44px] px-2 -ml-2 rounded-lg bg-transparent border-0 text-text font-normal text-lg flex items-center gap-2 cursor-pointer hover:bg-surface active:scale-[0.98] transition-all"
+                  className="min-h-[44px] px-2 -ml-2 rounded-lg bg-transparent border-0 text-text font-normal text-lg flex items-center gap-2 cursor-pointer hover:bg-surface active:scale-[0.98] transition-press"
                 >
                   <span id="dlg-title">
                     Thêm vào: <strong className="font-bold">{mealNameVi}</strong>
@@ -440,7 +468,7 @@ function AddFoodInner() {
               <div className="flex shrink-0 items-center gap-2">
                 <button
                   type="button"
-                  onClick={handleClose}
+                  onClick={() => handleClose()}
                   aria-label="Đóng"
                   className="w-11 h-11 rounded-full bg-surface text-text flex items-center justify-center border-0 cursor-pointer hover:bg-divider transition-colors active:scale-[0.97]"
                 >
@@ -524,24 +552,30 @@ function AddFoodInner() {
       {/* ============================================================== */}
       {/* MOBILE / TABLET LAYOUT (<1024px)                               */}
       {/* ============================================================== */}
-      <div className="lg:hidden flex flex-col min-h-screen relative bg-page pb-28">
-        {/* Background header banner */}
-        <div aria-hidden="true" className="bg-ink h-32 p-4 rounded-b-[20px] text-on-dark">
-          <div className="font-display italic font-black text-xl tracking-wide">
-            H1T <span className="text-sky">MICRO</span>
-          </div>
-        </div>
-
+      <div className="lg:hidden">
         {/* Main Sheet Container: opens tall, the header stays pinned and everything under it scrolls as one */}
         <div
+          ref={panelRef}
           role="dialog"
           aria-label={`Thêm món vào ${mealNameVi}`}
           data-align-container="add-list"
-          className="fixed inset-x-0 bottom-0 top-[8dvh] z-40 flex flex-col rounded-t-[20px] bg-card shadow-xl"
+          data-add-panel
+          data-state={sheetState}
+          inert={closing}
+          className="m-sheet m-vt-sheet fixed inset-x-0 bottom-0 top-[8dvh] z-40 flex flex-col rounded-t-[20px] bg-card shadow-xl"
         >
           {/* Pinned header: grabber, meal switcher + close, search, chips */}
           <div className="flex shrink-0 flex-col gap-3 px-4 pt-3 pb-3">
-            <div aria-hidden="true" className="h-1 w-10 shrink-0 self-center rounded-full bg-grabber" />
+            {/* Grabber: drag it down to close (a 24 px strip around the bar) */}
+            <div
+              aria-hidden="true"
+              data-sheet-handle
+              {...panelDrag}
+              style={{ touchAction: "none" }}
+              className="-mx-4 -mt-3 -mb-2 flex h-6 shrink-0 cursor-grab items-center justify-center self-stretch"
+            >
+              <div className="h-1 w-10 rounded-full bg-grabber" />
+            </div>
             {/* The phone sheet's heading: /add has no visible h1 on a phone (the desktop modal sits over Today's header) */}
             <h1 className="sr-only">Thêm món</h1>
 
@@ -567,7 +601,7 @@ function AddFoodInner() {
               <div className="flex shrink-0 items-center gap-2">
                 <button
                   type="button"
-                  onClick={handleClose}
+                  onClick={() => handleClose()}
                   aria-label="Đóng"
                   className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border-0 bg-surface text-text active:scale-[0.97]"
                 >
