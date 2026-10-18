@@ -16,6 +16,8 @@ export interface FoodItem {
   category: FoodCategory;
   brand?: string;
   source: "USDA" | "VN FCT" | "user";
+  /** Live foods: the row's id in its source database (the API's source_id, with `source` as the API sends it) */
+  sourceId?: string;
   servings: FoodServing[];
   tipVi?: string;
   nutrients: Record<string, number | null>; // per 100g
@@ -364,6 +366,21 @@ export const MOCK_FOODS: FoodItem[] = [
       magnesium: 242,
       sodium: 37,
     },
+  },
+  // cc-52: Red Bull for the Ngày tập fast carbs, as the live label row (food-research/h1t-foods-units-import.json)
+  {
+    id: "food-red-bull",
+    category: "do_uong",
+    nameVi: "Red Bull (nước tăng lực)",
+    brand: "Red Bull",
+    source: "user",
+    match: "unknown",
+    sourceRef: { db: "Nhãn bao bì", id: "Red Bull S.r.l. 25 cl can label (Italy)", verified: false },
+    servings: [
+      { label: "1 lon (250 ml)", grams: 260 },
+      { label: "100 g", grams: 100 },
+    ],
+    nutrients: { energy: 46, carbs: 11, sugars: 11, protein: 0, fat: 0, saturated_fat: 0, b3: 8, b5: 2, b6: 2, b12: 2 },
   },
   // 9. Bánh tráng (10g = 33 kcal)
   {
