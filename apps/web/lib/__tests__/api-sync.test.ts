@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { apiClient, apiFetch, getPendingOfflineEntryIds, pendingWriteIds, syncOfflineOutbox, writeOutcome, writesInFlight } from "../api-client";
+import { FINAL_OUTBOX_KEEP_MS, apiClient, apiFetch, getPendingOfflineEntryIds, pendingWriteIds, pruneOutbox, syncOfflineOutbox, writeOutcome, writesInFlight } from "../api-client";
 
 // cc-49: a diary write must never live only on the device. These run the real apiClient against a mocked fetch.
 
@@ -315,7 +315,7 @@ describe("writes that can never succeed (review 05:30 M1)", () => {
     vi.spyOn(console, "warn").mockImplementation(() => {});
     localStorage.setItem(
       "h1t_offline_outbox_sync@example.com",
-      JSON.stringify([{ id: ID, date: "2026-10-17", payload: { id: ID }, createdAt: 1, key: "k1" }])
+      JSON.stringify([{ id: ID, date: "2026-10-17", payload: { id: ID }, createdAt: Date.now(), key: "k1" }])
     );
     const fetchMock = vi.fn(async (_url: string) => new Response(JSON.stringify({ error: { code: "PAST_DAY_READ_ONLY", message: "Cannot write to past dates" } }), { status: 409 }));
     vi.stubGlobal("fetch", fetchMock);
@@ -362,5 +362,38 @@ describe("the portion label is stored with the entry", () => {
     );
     await add();
     expect(bodies[0]).not.toHaveProperty("serving_label");
+  });
+});
+
+describe("writes refused for good leave the outbox after 7 days (review 07:00)", () => {
+  const DAY = 24 * 60 * 60 * 1000;
+  const now = Date.parse("2026-10-18T08:00:00Z");
+  const final = { status: 409, message: "Cannot write to past dates", final: true };
+
+  it("pruneOutbox drops final items older than 7 days, by createdAt; everything else stays", () => {
+    const items = [
+      { key: "old-final", createdAt: now - 8 * DAY, held: final },
+      { key: "new-final", createdAt: now - 6 * DAY, held: final },
+      { key: "old-held", createdAt: now - 30 * DAY, held: { status: 400, message: "bad" } },
+      { key: "old-queued", createdAt: now - 30 * DAY },
+    ];
+    expect(pruneOutbox(items, now).map((i) => i.key)).toEqual(["new-final", "old-held", "old-queued"]);
+    expect(pruneOutbox([{ createdAt: now - FINAL_OUTBOX_KEEP_MS, held: final }], now)).toHaveLength(1);
+  });
+
+  it("a sync writes the outbox back without them, and sends nothing for them", async () => {
+    const OTHER = "33333333-3333-4333-8333-333333333333";
+    localStorage.setItem(
+      "h1t_offline_outbox_sync@example.com",
+      JSON.stringify([
+        { id: ID, date: "2026-10-01", payload: { id: ID }, createdAt: Date.now() - 8 * DAY, key: "k1", held: final },
+        { id: OTHER, date: "2026-10-16", payload: { id: OTHER }, createdAt: Date.now() - DAY, key: "k2", held: final },
+      ])
+    );
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    await syncOfflineOutbox({ retryHeld: true });
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(getPendingOfflineEntryIds()).toEqual([OTHER]);
   });
 });

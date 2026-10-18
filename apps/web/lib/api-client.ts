@@ -410,6 +410,14 @@ const isAdd = (item: DiaryWrite) => itemMethod(item) === "POST" && itemPath(item
 /** A write that names a recipe's local id: the server refuses it, so it waits until repointOutboxFood gives it the server food. */
 const waitsForFood = (item: DiaryWrite) => typeof item.payload?.food_id === "string" && isRecipeId(item.payload.food_id);
 
+/** A write refused for good (held.final) is kept this long, then dropped so the outbox does not grow without end. */
+export const FINAL_OUTBOX_KEEP_MS = 7 * 24 * 60 * 60 * 1000;
+
+/** The outbox without the writes refused for good more than FINAL_OUTBOX_KEEP_MS ago (by createdAt). */
+export function pruneOutbox<T extends Pick<OutboxItem, "createdAt" | "held">>(items: T[], now: number): T[] {
+  return items.filter((item) => !(item.held?.final && now - item.createdAt > FINAL_OUTBOX_KEEP_MS));
+}
+
 /** The storage of one account's outbox: the signed-in one, or `account` when a write or a run belongs to it. */
 function outboxStorage(account?: string | null): KeyValueStore | null {
   if (account === undefined) return accountStorage();
@@ -618,10 +626,14 @@ async function runOutbox(retryHeld: boolean): Promise<SyncResult> {
       if (status === 0) break;
     }
   }
+  // Writes refused for good leave after FINAL_OUTBOX_KEEP_MS (their notice was shown when they were refused)
   writeOutbox(
-    readOutbox(account)
-      .filter((item) => !sent.has(itemKey(item)))
-      .map((item) => (changed.has(itemKey(item)) ? { ...item, ...changed.get(itemKey(item)) } : item)),
+    pruneOutbox(
+      readOutbox(account)
+        .filter((item) => !sent.has(itemKey(item)))
+        .map((item) => (changed.has(itemKey(item)) ? { ...item, ...changed.get(itemKey(item)) } : item)),
+      Date.now()
+    ),
     account
   );
   return result;
