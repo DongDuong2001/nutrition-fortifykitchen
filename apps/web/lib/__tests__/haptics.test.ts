@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { HAPTIC_PATTERNS, firstGoalToday, haptic, hapticsWanted } from "../haptics";
+import { HAPTIC_PATTERNS, canVibrate, firstGoalToday, haptic, hapticsWanted } from "../haptics";
 import { saveSettings } from "../settings";
 
 // cc-51 Part C: Android vibration (iOS has no navigator.vibrate: nothing happens there).
@@ -26,6 +26,30 @@ describe("hapticsWanted", () => {
   });
 });
 
+/** A window whose matchMedia answers the touch (pointer: coarse) and reduced-motion queries. */
+const media = ({ coarse = true, reduced = false } = {}) => ({
+  matchMedia: (q: string) => ({ matches: q === "(pointer: coarse)" ? coarse : q === "(prefers-reduced-motion: reduce)" ? reduced : false }),
+});
+
+describe("canVibrate (review 07:00: Android phones only)", () => {
+  afterEach(() => vi.unstubAllGlobals());
+  it("a touch phone with navigator.vibrate (Android)", () => {
+    vi.stubGlobal("navigator", { vibrate: () => true });
+    vi.stubGlobal("window", media());
+    expect(canVibrate()).toBe(true);
+  });
+  it("desktop Chrome (vibrate, but a mouse): no", () => {
+    vi.stubGlobal("navigator", { vibrate: () => true });
+    vi.stubGlobal("window", media({ coarse: false }));
+    expect(canVibrate()).toBe(false);
+  });
+  it("iOS (touch, no vibrate): no", () => {
+    vi.stubGlobal("navigator", {});
+    vi.stubGlobal("window", media());
+    expect(canVibrate()).toBe(false);
+  });
+});
+
 describe("haptic", () => {
   const vibrate = vi.fn(() => true);
   let storage: ReturnType<typeof memoryStorage>;
@@ -33,7 +57,7 @@ describe("haptic", () => {
     storage = memoryStorage();
     vibrate.mockClear();
     vi.stubGlobal("navigator", { vibrate });
-    vi.stubGlobal("window", { matchMedia: () => ({ matches: false }) });
+    vi.stubGlobal("window", media());
   });
   afterEach(() => vi.unstubAllGlobals());
 
@@ -51,8 +75,13 @@ describe("haptic", () => {
     expect(() => haptic("saved", storage)).not.toThrow();
   });
   it("reduced motion with the switch never touched: nothing", () => {
-    vi.stubGlobal("window", { matchMedia: () => ({ matches: true }) });
+    vi.stubGlobal("window", media({ reduced: true }));
     haptic("saved", storage);
+    expect(vibrate).not.toHaveBeenCalled();
+  });
+  it("desktop Chrome (no coarse pointer): nothing", () => {
+    vi.stubGlobal("window", media({ coarse: false }));
+    haptic("delete", storage);
     expect(vibrate).not.toHaveBeenCalled();
   });
 });

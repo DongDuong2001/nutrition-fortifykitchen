@@ -22,8 +22,14 @@ export function hapticsWanted(setting: boolean | null, reducedMotion: boolean): 
   return setting ?? !reducedMotion;
 }
 
+/** A touch phone that can vibrate (Android). Desktop Chrome has navigator.vibrate too, but nothing vibrates there. */
 export function canVibrate(): boolean {
-  return typeof navigator !== "undefined" && typeof navigator.vibrate === "function";
+  return (
+    typeof navigator !== "undefined" &&
+    typeof navigator.vibrate === "function" &&
+    typeof window !== "undefined" &&
+    window.matchMedia?.("(pointer: coarse)").matches === true
+  );
 }
 
 export function haptic(kind: HapticKind, storage: KeyValueStore | null = accountStorage()): void {

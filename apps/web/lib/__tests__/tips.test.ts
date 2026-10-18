@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import { canVibrate } from "../haptics";
 import { DEFAULT_FLAGS, markSeenIn, markTourStartedIn, markUsedIn, parseFlags, setTipsOffIn, tourOpenOn, type OnboardingFlags } from "../onboarding-flags";
 import { TIPS, pickTip, type TipContext } from "../tips";
 
@@ -52,6 +53,15 @@ describe("pickTip: Rung khi chạm (cc-51)", () => {
     expect(ids(ctx({ pathname: "/settings", vibrate: true }))).toBe("haptics");
     expect(ids(ctx({ pathname: "/settings", vibrate: false }))).toBe(null);
     expect(ids(ctx({ pathname: "/settings", vibrate: true }), flags({ used: ["haptics-switch"] }))).toBe(null);
+  });
+  it("review 07:00: never on desktop Chrome (navigator.vibrate exists, but no touch screen)", () => {
+    vi.stubGlobal("navigator", { vibrate: () => true });
+    vi.stubGlobal("window", { matchMedia: () => ({ matches: false }) });
+    try {
+      expect(ids(ctx({ pathname: "/settings", vibrate: canVibrate() }))).toBe(null);
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 });
 
