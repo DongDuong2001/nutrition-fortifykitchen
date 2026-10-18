@@ -16,6 +16,7 @@ import {
   untick,
   writeDay,
 } from "@/lib/training-checklist";
+import { trainingChanged } from "@/lib/training-minutes";
 import { type OwnTrainingItem, type TrainingPhaseId, type TrainingPrefs, addOwnItem, readPrefs, removeOwnItem, writePrefs } from "@/lib/training-prefs";
 import { generateUuid } from "@/lib/uuid";
 import { useCatalogFoods } from "@/hooks/use-catalog-foods";
@@ -53,16 +54,14 @@ function TrainingContent() {
   if (searchParams?.get("error") === "1") {
     throw new Error("Simulated server error");
   }
-  const initialDuration =
-    searchParams?.get("rest") === "1"
-      ? "rest"
-      : searchParams?.get("duration") || "60";
-
-  const [selectedDuration, setSelectedDuration] = useState<string>(initialDuration);
-  // The profile's default training time (Hồ sơ) applies until the URL names a duration
+  // Today's minutes (lib/training-minutes: chosen here, else the server's, else Hồ sơ) apply until the URL names a duration.
+  // diaryData.user.trainingMinutes is that value, read again whenever a day's minutes change.
   const { profile, hydrated, data: diaryData, getEntry, deleteEntry, deleteEntries } = useDiary();
   const { foods, pending: catalogPending } = useCatalogFoods();
-  const profileDuration = profile.trainingMinutesDefault === 0 ? "rest" : String(profile.trainingMinutesDefault);
+  const todayMinutes = diaryData.user.trainingMinutes;
+  const todayDuration = todayMinutes === 0 ? "rest" : String(todayMinutes);
+  const urlDuration = searchParams?.get("rest") === "1" ? "rest" : searchParams?.get("duration") || null;
+  const [selectedDuration, setSelectedDuration] = useState<string>(urlDuration ?? todayDuration);
   const [clientNow, setClientNow] = useState<Date | null>(null);
   const [isDesktop, setIsDesktop] = useState(false);
   const todayIso = useMemo(() => getTodayIsoVN(), []);
@@ -83,16 +82,13 @@ function TrainingContent() {
   const [waitingId, setWaitingId] = useState<string | null>(null);
   const [ownTarget, setOwnTarget] = useState<OwnItemTarget | null>(null);
 
-  // Sync state if url changes; with no duration in the url, the profile's default once it is read
+  // ?duration / ?rest win when the url names one; else today's minutes once they are read
   useEffect(() => {
-    if (searchParams?.get("rest") === "1") {
-      setSelectedDuration("rest");
-    } else if (searchParams?.get("duration")) {
-      setSelectedDuration(searchParams.get("duration")!);
-    } else if (hydrated) {
-      setSelectedDuration(profileDuration);
-    }
-  }, [searchParams, hydrated, profileDuration]);
+    if (urlDuration) setSelectedDuration(urlDuration);
+  }, [urlDuration]);
+  useEffect(() => {
+    if (!urlDuration && hydrated) setSelectedDuration(todayDuration);
+  }, [urlDuration, hydrated, todayDuration]);
 
   useEffect(() => {
     setClientNow(new Date());
@@ -113,8 +109,8 @@ function TrainingContent() {
   const trainingMinutes = useMemo(() => {
     if (activeDuration === "rest") return 0;
     const mins = parseInt(activeDuration, 10);
-    return isNaN(mins) ? 60 : mins;
-  }, [activeDuration]);
+    return isNaN(mins) ? profile.trainingMinutesDefault : mins;
+  }, [activeDuration, profile.trainingMinutesDefault]);
 
   const isRestDay = activeDuration === "rest";
   // Today always shows its checklist (or the rest card). A past day shows its saved checklist only if it logged minutes.
@@ -157,10 +153,11 @@ function TrainingContent() {
     [isPast, hydrated, record, getEntry]
   );
 
-  // Saves the day's minutes, ticks and links together, so a past view can show them later.
+  // Saves the day's minutes, ticks and links together, so a past view can show them later. Hôm nay reads the minutes again.
   const saveDay = (next: DayChecklist) => {
     writeDay(todayIso, next);
     setSaved(next);
+    trainingChanged();
   };
 
   // An entry deleted on Hôm nay (or put back with Hoàn tác) changes the ticks: keep the saved day in step

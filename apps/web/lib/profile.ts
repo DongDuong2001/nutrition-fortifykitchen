@@ -146,12 +146,13 @@ export function loadProfile(currentYear: number): Profile {
   return readStoredProfile(currentYear) ?? readDraftProfile(currentYear) ?? SAMPLE_PROFILE;
 }
 
-export function targetsFor(profile: Profile): CompleteTargets {
+/** The profile's targets on a day of `trainingMinutes` (lib/training-minutes); the Hồ sơ default when not given. */
+export function targetsFor(profile: Profile, trainingMinutes = profile.trainingMinutesDefault): CompleteTargets {
   return calculateTargets({
     sex: profile.sex,
     weightKg: profile.weightKg,
     goal: profile.goal,
-    trainingMinutes: profile.trainingMinutesDefault,
+    trainingMinutes,
     isPeriod: profile.sex === "female" && profile.periodMode,
     macroMode: profile.macroMode,
     macroRatios: profile.macroRatios,
@@ -187,7 +188,12 @@ function retarget<S extends MockMacroStat | MockMicroStat>(stat: S, range: Targe
  * The day with its targets, user and achieved counts set from the profile. Pure: the day it is
  * given is not changed. Stats the profile does not set keep the values the day has.
  */
-export function applyProfileTargets(day: MockDayData, profile: Profile, targets: CompleteTargets): MockDayData {
+export function applyProfileTargets(
+  day: MockDayData,
+  profile: Profile,
+  targets: CompleteTargets,
+  trainingMinutes = profile.trainingMinutesDefault
+): MockDayData {
   const retargetAll = <S extends MockMacroStat | MockMicroStat>(stats: S[]): S[] =>
     stats.map((stat) => {
       const range = targets[stat.key];
@@ -212,7 +218,7 @@ export function applyProfileTargets(day: MockDayData, profile: Profile, targets:
       weightKg: profile.weightKg,
       goal: profile.goal,
       goalLabel: goalName(profile.goal),
-      trainingMinutes: profile.trainingMinutesDefault,
+      trainingMinutes,
     },
     calories: {
       ...day.calories,

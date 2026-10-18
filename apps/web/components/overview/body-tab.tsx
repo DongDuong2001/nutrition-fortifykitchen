@@ -81,7 +81,8 @@ function WeightLine({
 /** Cơ thể (/trends/body): the latest weight, the weight line of the period, and what moves with it. */
 export function BodyTab() {
   const { overview } = useOverview();
-  const { profile, demo } = useDiary();
+  // data.user.trainingMinutes: today's minutes (lib/training-minutes)
+  const { profile, demo, data: today } = useDiary();
   const { weight, period, weightLog } = overview;
   const [pickedDate, setPickedDate] = useState<string | null>(null);
 
@@ -89,8 +90,8 @@ export function BodyTab() {
   const counted = useMemo(() => weighIns(period.days, weightLog), [period.days, weightLog]);
   const shift = useMemo(() => {
     if (weight.points.length < 2) return null;
-    return weightShift(profile, weight.points[0].kg, weight.points[weight.points.length - 1].kg);
-  }, [weight.points, profile]);
+    return weightShift(profile, weight.points[0].kg, weight.points[weight.points.length - 1].kg, today.user.trainingMinutes);
+  }, [weight.points, profile, today.user.trainingMinutes]);
 
   const hasPoints = weight.points.length > 0;
   // The selected weigh-in by date, so a new period never points at another day: the last one by default

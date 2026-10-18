@@ -72,6 +72,7 @@ import {
   type Profile,
 } from "./profile";
 import type { CompleteTargets } from "./targets";
+import { rememberServerTraining, subscribeTraining, trainingMinutesFor, trainingVersion } from "./training-minutes";
 import {
   type AddedDiaryEntry,
   type Amounts,
@@ -453,10 +454,11 @@ export function computeCompositeDayData(
 
 /**
  * A past day as the Today screen shows it: nothing logged except the mock entries of that day (see day-history).
- * Targets follow the profile, the same as today.
+ * Targets follow the profile, the same as today, with that day's training minutes (lib/training-minutes).
  */
-export function pastDayData(iso: string, todayIso: string, profile: Profile, targets: CompleteTargets): MockDayData {
-  const base = blankDay(applyProfileTargets(SAMPLE_DAY, profile, targets));
+export function pastDayData(iso: string, todayIso: string, profile: Profile): MockDayData {
+  const minutes = trainingMinutesFor(iso, profile);
+  const base = blankDay(applyProfileTargets(SAMPLE_DAY, profile, targetsFor(profile, minutes), minutes));
   const entries = dayEntries(iso, todayIso);
   const day = computeCompositeDayData(base, entries, {});
   // Vitamins and minerals take the day's totals (lib/day-totals), so Nhật ký and Tổng quan show one number per day;
@@ -518,6 +520,11 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   const [archive, setArchive] = useState<DayArchive>({});
   // Same rule for the profile: the sample user until the saved one is read after mount
   const [profile, setProfile] = useState<Profile>(SAMPLE_PROFILE);
+  // The Hồ sơ training default when the server's day answers (lib/training-minutes)
+  const trainingDefaultRef = useRef(profile.trainingMinutesDefault);
+  useEffect(() => {
+    trainingDefaultRef.current = profile.trainingMinutesDefault;
+  }, [profile.trainingMinutesDefault]);
 
   // The signed-in account the data below belongs to; null when nobody is signed in (then nothing is read or
   // written). Demo mode ignores it: demo has its own keys.
@@ -608,6 +615,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         // Not read (offline, 401 after the session refresh, 5xx): the device keeps what it has. Another account signed
         // in meanwhile: this day is not theirs
         if (!daySummary || !Array.isArray(daySummary.meals) || currentAccountId() !== account) return;
+        rememberServerTraining(account, iso, daySummary.training_minutes, trainingDefaultRef.current);
         const serverEntries: AddedDiaryEntry[] = [];
         for (const meal of daySummary.meals) {
           for (const e of meal.entries || []) {
@@ -1343,7 +1351,15 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     syncOfflineOutbox({ retryHeld: true }).then(onSync).catch(() => {});
   }, [onSync]);
 
-  const targets = useMemo(() => targetsFor(profile), [profile]);
+  // Today's training minutes (lib/training-minutes): chosen on Ngày tập, else the server's, else Hồ sơ. Read after
+  // mount, and again whenever a day's minutes change, so Hôm nay's pill and targets follow without a reload.
+  const trainingV = useSyncExternalStore(subscribeTraining, trainingVersion, trainingVersion);
+  const todayMinutes = useMemo(
+    () => (hydrated && todayIso ? trainingMinutesFor(todayIso, profile) : profile.trainingMinutesDefault),
+    // accountId: the saved days are per account; trainingV: a day's minutes changed
+    [hydrated, todayIso, profile, accountId, trainingV]
+  );
+  const targets = useMemo(() => targetsFor(profile, todayMinutes), [profile, todayMinutes]);
   useMemo(() => setDayArchive(archive), [archive]);
 
   const nutrientSources = useCallback(
@@ -1381,10 +1397,10 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   const compositeData = useMemo<MockDayData>(() => {
     // A real account starts from an empty day; only demo mode starts from the sample day
     const start = demo ? SAMPLE_DAY : blankDay(SAMPLE_DAY);
-    const base = applyProfileTargets(start, profile, targets);
+    const base = applyProfileTargets(start, profile, targets, todayMinutes);
     const day = computeCompositeDayData(base, edits.added, demo ? edits.sample : {});
     return todayIso ? withRuntimeDate(day, todayIso) : day;
-  }, [edits.added, edits.sample, todayIso, profile, targets, demo, catalogV]);
+  }, [edits.added, edits.sample, todayIso, profile, targets, todayMinutes, demo, catalogV]);
 
   // A vitamin or mineral that a local add brings to 100 % of its target today vibrates once that day (lib/haptics).
   // The ones over 100 % when the app opens, or after a refetch, are recorded without vibrating.
