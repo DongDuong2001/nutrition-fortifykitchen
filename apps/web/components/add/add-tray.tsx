@@ -5,7 +5,8 @@ import { Sheet } from "@/components/ui/sheet";
 import { PillButton } from "@/components/ui/pill-button";
 import { NO_ENERGY_MESSAGE } from "@/lib/diary-edits";
 import { formatAmount } from "@/lib/format";
-import { parseGramsInput, formatGramsServingLabel, hidesGrams, scaleNutrients } from "@/lib/portion";
+import { parseGramsInput, formatGramsServingLabel, hidesGrams, scaleNutrients, unitCountOf } from "@/lib/portion";
+import { QuantityStepper } from "@/components/ui/quantity-stepper";
 import type { TrayItem, TrayTotals } from "@/lib/tray";
 
 const kcalText = (kcal: number | null) => (kcal === null ? "—" : formatAmount(kcal, "kcal"));
@@ -99,13 +100,13 @@ function PortionRow({
           <button
             key={s.label}
             type="button"
-            aria-pressed={!custom && item.label === s.label}
+            aria-pressed={!custom && (hidesGrams(food) ? unitCountOf(food.servings, item.label, item.grams)?.serving.label : item.label) === s.label}
             onClick={() => {
               setCustom(false);
               setText(String(s.grams));
               onSetPortion(s.grams, s.label);
             }}
-            className={chipClass(!custom && item.label === s.label)}
+            className={chipClass(!custom && (hidesGrams(food) ? unitCountOf(food.servings, item.label, item.grams)?.serving.label : item.label) === s.label)}
           >
             {s.label}
           </button>
@@ -133,6 +134,7 @@ function PortionRow({
           </label>
         )}
       </div>
+      {hidesGrams(food) && <QuantityStepper servings={food.servings} label={item.label} grams={item.grams} onChange={onSetPortion} />}
     </li>
   );
 }

@@ -98,6 +98,11 @@ export function setCatalogStatus(next: CatalogStatus): void {
   catalogChanged();
 }
 
+/** A food of the catalogue in use by id: the sample foods, or in live mode the foods the database sent (setCatalogFoods merges into the same list). */
+export function catalogFoodById(id: string | undefined | null): FoodItem | undefined {
+  return id ? MOCK_FOODS.find((f) => f.id === id) : undefined;
+}
+
 /** A food made by the user (live mode): added to the catalogue that is there, which stays as it is. */
 export function addCatalogFood(food: FoodItem): void {
   const at = MOCK_FOODS.findIndex((f) => f.id === food.id);

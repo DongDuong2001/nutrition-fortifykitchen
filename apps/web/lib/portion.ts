@@ -58,6 +58,45 @@ export function unitAmountText(food: UnitFood | null | undefined, label: string 
   return text;
 }
 
+/** The most units of a supplement one entry takes (the ×N stepper). */
+export const MAX_UNIT_COUNT = 10;
+
+export interface UnitPortion {
+  grams: number;
+  label: string;
+}
+
+/** N units of a serving: the grams are N × the serving's (nominal) grams, the label is the collapsed "N viên". */
+export function unitPortion(serving: { label: string; grams: number }, count: number): UnitPortion {
+  const n = Math.min(MAX_UNIT_COUNT, Math.max(1, Math.round(count) || 1));
+  return { grams: serving.grams * n, label: unitPortionText(serving.label, n) };
+}
+
+/**
+ * Which serving and how many of it a label and grams stand for: "2 viên" at 2 g is 2 × "1 viên"; a serving's own
+ * label is 1 × it. A label that matches nothing falls back to the first serving with the count its grams give.
+ */
+export function unitCountOf(
+  servings: ReadonlyArray<{ label: string; grams: number }>,
+  label: string,
+  grams: number
+): { serving: { label: string; grams: number }; count: number } | null {
+  if (servings.length === 0) return null;
+  const own = servings.find((s) => s.label === label);
+  if (own) {
+    // A serving's own label at more grams ("1 viên" logged as 2 g) is that many of it
+    const n = own.grams > 0 && grams > 0 ? Math.round(grams / own.grams) : 1;
+    return { serving: own, count: Math.min(MAX_UNIT_COUNT, Math.max(1, n)) };
+  }
+  for (const serving of servings) {
+    for (let n = 2; n <= MAX_UNIT_COUNT; n++) {
+      if (Math.abs(serving.grams * n - grams) < 1e-6 && unitPortionText(serving.label, n) === label) return { serving, count: n };
+    }
+  }
+  const first = servings[0];
+  return { serving: first, count: Math.min(MAX_UNIT_COUNT, Math.max(1, Math.round(grams / (first.grams || 1)) || 1)) };
+}
+
 /** Maximum grams allowed for a single food entry (5 kg). Prevents accidental overflow or typing mistakes. */
 export const MAX_GRAMS_PER_PORTION = 5000;
 

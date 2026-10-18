@@ -4,7 +4,8 @@ import React, { useMemo } from "react";
 import Link from "next/link";
 import { type FoodItem } from "@/lib/mock/foods";
 import { type MealSlot, getMealSlotNameVi } from "@/lib/meal-slot";
-import { parseGramsInput, calculateMacroPreview, scaleNutrients, formatGramsServingLabel, gramsServingLabel, hidesGrams, unitAmountText } from "@/lib/portion";
+import { parseGramsInput, calculateMacroPreview, scaleNutrients, formatGramsServingLabel, gramsServingLabel, hidesGrams, unitAmountText, unitCountOf } from "@/lib/portion";
+import { QuantityStepper } from "@/components/ui/quantity-stepper";
 import { formatAmount } from "@/lib/format";
 import { ChipGroup } from "@/components/ui/chip-group";
 import { StatGroup } from "@/components/ui/stat-group";
@@ -47,6 +48,7 @@ export function PortionPanel({
 
   // A supplement from a pack label is logged by the unit: no gram field, no gram figure
   const noGrams = hidesGrams(food);
+  const baseLabel = noGrams ? unitCountOf(food.servings, selectedServingLabel, parsedGrams)?.serving.label : undefined;
   const amountText = unitAmountText(food, selectedServingLabel, parsedGrams) ?? gramsServingLabel(parsedGrams);
 
   // Derive columns = servings.length + 1 (for leading gram input)
@@ -180,13 +182,26 @@ export function PortionPanel({
           items={food.servings.map((s) => ({
             id: s.label,
             label: s.label,
-            active: selectedServingLabel === s.label,
+            active: (baseLabel ?? selectedServingLabel) === s.label,
             onClick: () => {
               setGramsInput(s.grams.toString());
               setSelectedServingLabel(s.label);
             },
           }))}
         />
+        {noGrams && (
+          <QuantityStepper
+            servings={food.servings}
+            label={selectedServingLabel}
+            grams={parsedGrams}
+            tone={tone}
+            className="mt-2"
+            onChange={(grams, label) => {
+              setGramsInput(grams.toString());
+              setSelectedServingLabel(label);
+            }}
+          />
+        )}
       </div>
 
       {/* Row 4: StatGroup */}

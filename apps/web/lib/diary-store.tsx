@@ -469,7 +469,7 @@ const REFRESH_STALE_MS = 45 * 1000;
 function addPayload(entry: AddedDiaryEntry, date: string): Parameters<typeof apiClient.addEntry>[0] {
   return entry.kind === "quick"
     ? { id: entry.id, kind: "quick", calories: entry.calories ?? undefined, mealSlot: entry.mealSlot, date }
-    : { id: entry.id, foodId: entry.foodId, grams: entry.grams, mealSlot: entry.mealSlot, date };
+    : { id: entry.id, foodId: entry.foodId, grams: entry.grams, mealSlot: entry.mealSlot, date, servingLabel: entry.displayQty };
 }
 
 /** Copied entries get new uuids: the server keys an entry by its id, and a copy is a new entry. */

@@ -21,7 +21,8 @@ import {
 import { COUNTED_NUTRIENT_KEYS } from "../day-totals";
 import type { AddedDiaryEntry } from "../diary-edits";
 import { SAMPLE_DAY } from "../mock/sample-day";
-import { MOCK_FOODS, addCatalogFood, type FoodItem } from "../mock/foods";
+import { MOCK_FOODS, addCatalogFood, setCatalogFoods, type FoodItem } from "../mock/foods";
+import { mapApiFoodToFoodItem } from "../api-client";
 import { entryNumbers } from "../diary-edits";
 import { blankDay } from "../day-history";
 import { computeCompositeDayData } from "../diary-store";
@@ -387,5 +388,34 @@ describe("portionLabel: a supplement shows its unit quantity, never grams", () =
 
   it("other foods still show grams", () => {
     expect(portionLabel({ foodId: "food-unknown", qty: "1 quả", grams: 60 })).toBe("60 g");
+  });
+});
+
+describe("a supplement of the live catalogue (the foods the database sent)", () => {
+  const live = mapApiFoodToFoodItem({
+    id: "33333333-3333-4333-8333-333333333333",
+    name_vi: "Vitamin D3 thử",
+    category: "bo_sung",
+    source: "label",
+    servings: [{ label: "1 viên", grams: 1 }],
+    nutrients: { energy: 0 },
+  });
+  setCatalogFoods([live]);
+
+  const added = (displayQty: string, grams: number): AddedDiaryEntry =>
+    ({ id: "e-live", foodId: live.id, foodName: live.nameVi, grams, displayQty, mealSlot: "breakfast", calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, nutrients: {}, addedAt: "2026-10-18T00:00:00.000Z" }) as unknown as AddedDiaryEntry;
+
+  it("a logged entry shows 2 viên, not 2 g", () => {
+    expect(portionLabel(homeEntryFromAdded(added("2 viên", 2)))).toBe("2 viên");
+  });
+
+  it("an entry read back from the server (serving_label 2 viên, grams 2) still shows 2 viên", () => {
+    const refetched = added("2 viên", 2);
+    expect(homeEntryFromAdded(refetched).qty).toBe("2 viên");
+    expect(portionLabel(homeEntryFromAdded(refetched))).toBe("2 viên");
+  });
+
+  it("an old entry with no label (read back as 2 g) falls back to grams", () => {
+    expect(portionLabel(homeEntryFromAdded(added("2 g", 2)))).toBe("2 g");
   });
 });

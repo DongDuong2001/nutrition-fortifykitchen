@@ -1,7 +1,7 @@
 import { COUNTED_NUTRIENT_KEYS } from "./day-totals";
 import { SAMPLE_SLOT, entryNumbers, type AddedDiaryEntry, type EntryView } from "./diary-edits";
 import { formatAmount } from "./format";
-import { MOCK_FOODS } from "./mock/foods";
+import { catalogFoodById } from "./mock/foods";
 import { unitAmountText } from "./portion";
 import { sumKcal } from "./kcal";
 import { MEAL_SLOTS, type MealSlot } from "./meal-slot";
@@ -133,7 +133,7 @@ const VOLUME_QTY = /^\d+(?:[.,]\d+)?\s*(?:ml|l)$/i;
  */
 export function portionLabel(entry: Pick<HomeEntry, "qty" | "grams" | "foodId">): string {
   // A supplement logged by the unit shows its quantity ("2 viên"), never its nominal grams
-  const unit = entry.foodId ? unitAmountText(MOCK_FOODS.find((f) => f.id === entry.foodId), entry.qty, entry.grams) : null;
+  const unit = unitAmountText(catalogFoodById(entry.foodId), entry.qty, entry.grams);
   if (unit) return unit;
   if (VOLUME_QTY.test(entry.qty.trim())) return entry.qty.trim();
   return entry.grams !== null ? `${formatAmount(entry.grams, "g")} g` : entry.qty;

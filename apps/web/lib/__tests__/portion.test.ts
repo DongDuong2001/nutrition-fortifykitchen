@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { scaleNutrients, parseGramsInput, calculateMacroPreview, formatGramsServingLabel, gramsServingLabel, MAX_GRAMS_PER_PORTION, hidesGrams, unitPortionText, unitAmountText } from "../portion";
+import { scaleNutrients, parseGramsInput, calculateMacroPreview, formatGramsServingLabel, gramsServingLabel, MAX_GRAMS_PER_PORTION, hidesGrams, unitPortionText, unitAmountText, unitPortion, unitCountOf, MAX_UNIT_COUNT } from "../portion";
 import { MOCK_FOODS } from "../mock/foods";
 
 // Grams as Vietnamese text: comma for decimals, dot for thousands (2,5 g; 1.000 g)
@@ -128,5 +128,37 @@ describe("supplement amounts (unit portions)", () => {
     expect(hidesGrams({ ...canxi, source: "USDA" })).toBe(false);
     expect(hidesGrams({ category: "tinh_bot", source: "label" })).toBe(false);
     expect(hidesGrams(undefined)).toBe(false);
+  });
+});
+
+describe("the ×N quantity of a supplement", () => {
+  const servings = [
+    { label: "1 viên", grams: 1 },
+    { label: "2 viên (liều trên nhãn)", grams: 2 },
+  ];
+
+  it("N units are N × the serving's grams under the collapsed label", () => {
+    expect(unitPortion(servings[0], 1)).toEqual({ grams: 1, label: "1 viên" });
+    expect(unitPortion(servings[0], 3)).toEqual({ grams: 3, label: "3 viên" });
+    expect(unitPortion(servings[1], 2)).toEqual({ grams: 4, label: "4 viên (liều trên nhãn)" });
+  });
+
+  it("keeps the count between 1 and 10", () => {
+    expect(MAX_UNIT_COUNT).toBe(10);
+    expect(unitPortion(servings[0], 0).grams).toBe(1);
+    expect(unitPortion(servings[0], 25)).toEqual({ grams: 10, label: "10 viên" });
+  });
+
+  it("reads the serving and count back from a label and grams", () => {
+    expect(unitCountOf(servings, "1 viên", 1)).toEqual({ serving: servings[0], count: 1 });
+    expect(unitCountOf(servings, "1 viên", 2)).toEqual({ serving: servings[0], count: 2 });
+    expect(unitCountOf(servings, "3 viên", 3)).toEqual({ serving: servings[0], count: 3 });
+    expect(unitCountOf(servings, "2 viên (liều trên nhãn)", 2)).toEqual({ serving: servings[1], count: 1 });
+    expect(unitCountOf(servings, "4 viên (liều trên nhãn)", 4)).toEqual({ serving: servings[1], count: 2 });
+  });
+
+  it("a label that matches nothing falls back to the first serving and the count its grams give", () => {
+    expect(unitCountOf(servings, "một ít", 5)).toEqual({ serving: servings[0], count: 5 });
+    expect(unitCountOf([], "1 viên", 1)).toBeNull();
   });
 });

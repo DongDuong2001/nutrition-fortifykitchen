@@ -939,6 +939,8 @@ export const apiClient = {
     id?: string;
     kind?: "food" | "quick";
     calories?: number;
+    /** The portion as shown ("1 viên", "150 g"): stored by the server as the entry's portion label. */
+    servingLabel?: string;
   }): Promise<{ success: boolean; id: string } & WriteResult> {
     const entryId = isUuid(payload.id) ? payload.id! : generateUuid();
     const date = payload.date || getTodayIsoVN();
@@ -961,6 +963,7 @@ export const apiClient = {
         body.food_id = payload.foodId;
         body.grams = payload.grams ?? 100;
         body.serving_size_g = payload.grams ?? 100;
+        if (payload.servingLabel) body.serving_label = payload.servingLabel;
       }
 
       // The id is the client's (idempotent on the server), so a write sent again never adds the entry twice

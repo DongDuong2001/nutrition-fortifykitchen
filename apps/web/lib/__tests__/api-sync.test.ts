@@ -290,3 +290,33 @@ describe("writes that can never succeed (review 05:30 M1)", () => {
     expect((await syncOfflineOutbox({ retryHeld: true })).saved).toEqual([ID]);
   });
 });
+
+describe("the portion label is stored with the entry", () => {
+  it("a food entry sends serving_label (the portion as shown), a quick entry does not", async () => {
+    const bodies: Array<Record<string, unknown>> = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (_url: string, init?: RequestInit) => {
+        bodies.push(JSON.parse(String(init?.body ?? "{}")));
+        return new Response("{}", { status: 201 });
+      })
+    );
+    await apiClient.addEntry({ id: ID, foodId: FOOD, grams: 2, mealSlot: "breakfast", date: "2026-10-18", servingLabel: "2 viên" });
+    await apiClient.addEntry({ id: "44444444-4444-4444-8444-444444444444", kind: "quick", calories: 100, mealSlot: "lunch", date: "2026-10-18", servingLabel: "x" });
+    expect(bodies[0]).toMatchObject({ food_id: FOOD, grams: 2, serving_label: "2 viên" });
+    expect(bodies[1]).not.toHaveProperty("serving_label");
+  });
+
+  it("an entry without a label sends none (the server keeps its empty label)", async () => {
+    const bodies: Array<Record<string, unknown>> = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (_url: string, init?: RequestInit) => {
+        bodies.push(JSON.parse(String(init?.body ?? "{}")));
+        return new Response("{}", { status: 201 });
+      })
+    );
+    await add();
+    expect(bodies[0]).not.toHaveProperty("serving_label");
+  });
+});

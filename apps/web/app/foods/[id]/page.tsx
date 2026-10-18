@@ -8,7 +8,8 @@ import { NO_ENERGY_MESSAGE, hasEnergy } from "@/lib/diary-edits";
 import { MOCK_FOODS, type FoodItem } from "@/lib/mock/foods";
 import { getMealSlotNameVi } from "@/lib/meal-slot";
 import { useMealSlot } from "@/lib/use-meal-slot";
-import { parseGramsInput, calculateMacroPreview, gramsServingLabel, hidesGrams, unitAmountText } from "@/lib/portion";
+import { parseGramsInput, calculateMacroPreview, gramsServingLabel, hidesGrams, unitAmountText, unitCountOf } from "@/lib/portion";
+import { QuantityStepper } from "@/components/ui/quantity-stepper";
 import { goodSourcesOf, microRowsFor } from "@/lib/food-detail";
 import { categoryLabel, categoryOf } from "@/lib/food-categories";
 import { formatAmount } from "@/lib/format";
@@ -246,7 +247,7 @@ function FoodDetailInner() {
               ...food.servings.map((s) => ({
                 id: s.label,
                 label: s.display ?? (hidesGrams(food) || s.label === `${s.grams} g` ? s.label : `${s.label} · ${s.grams} g`),
-                active: selectedServingLabel === s.label,
+                active: (hidesGrams(food) ? unitCountOf(food.servings, selectedServingLabel, parsedGrams)?.serving.label : selectedServingLabel) === s.label,
                 onClick: () => {
                   setGramsInput(s.grams.toString());
                   setSelectedServingLabel(s.label);
@@ -264,6 +265,17 @@ function FoodDetailInner() {
                   ]),
             ]}
           />
+          {hidesGrams(food) && (
+            <QuantityStepper
+              servings={food.servings}
+              label={selectedServingLabel}
+              grams={parsedGrams}
+              onChange={(grams, label) => {
+                setGramsInput(grams.toString());
+                setSelectedServingLabel(label);
+              }}
+            />
+          )}
           {selectedServingLabel === CUSTOM_PORTION && (
             <label className="flex h-11 w-full cursor-text items-center justify-end rounded-xl border border-card-border bg-card px-3 focus-within:ring-2 focus-within:ring-blue">
               <span className="sr-only">Khối lượng theo gam</span>

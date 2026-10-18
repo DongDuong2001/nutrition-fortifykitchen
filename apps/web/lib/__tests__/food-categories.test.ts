@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { MOCK_FOODS, type FoodItem } from "../mock/foods";
+import { mapApiFoodToFoodItem } from "../api-client";
 import {
   FOOD_CATEGORIES,
   buildFoodList,
@@ -179,5 +180,38 @@ describe("a food with an unknown category", () => {
 
   it("does not make a chip of its own", () => {
     expect(categoriesWithFoods([odd]).map((c) => c.key)).toEqual(["cua_toi"]);
+  });
+});
+
+describe("a live-shaped /foods response", () => {
+  const raw = (id: string, name_vi: string, category?: string) => ({
+    id,
+    name_vi,
+    ...(category ? { category } : {}),
+    source: "label",
+    servings: [{ label: "1 viên", grams: 1 }],
+    nutrients: { energy: 4 },
+  });
+  const foods = [
+    raw("a1", "Vitamin D3 CanPrev", "bo_sung"),
+    raw("a2", "Muối biển", "gia_vi"),
+    raw("a3", "Cơm trắng", "tinh_bot"),
+    raw("a4", "Bột lạ", "khac"),
+    raw("a5", "Món chưa phân loại"),
+  ].map(mapApiFoodToFoodItem);
+
+  it("puts bo_sung and gia_vi foods in their own chips", () => {
+    const chips = chipCategories(foods).map((c) => c.key);
+    expect(chips).toContain("bo_sung");
+    expect(chips).toContain("gia_vi");
+    expect(ids(buildFoodList(foods, "", "bo_sung").foods)).toEqual(["a1"]);
+    expect(ids(buildFoodList(foods, "", "gia_vi").foods)).toEqual(["a2"]);
+  });
+
+  it("keeps a khac food and one with no category in Tất cả, grouped and flat, and in search", () => {
+    const all = buildFoodList(foods, "", "all");
+    expect(ids(all.groups.flatMap((g) => g.foods)).sort()).toEqual(["a1", "a2", "a3", "a4", "a5"]);
+    expect(ids(buildFoodList(foods, "lạ", "all").foods)).toEqual(["a4"]);
+    expect(ids(buildFoodList(foods, "chưa phân loại", "all").foods)).toEqual(["a5"]);
   });
 });

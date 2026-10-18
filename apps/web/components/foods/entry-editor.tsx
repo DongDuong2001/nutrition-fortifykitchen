@@ -13,7 +13,8 @@ import { ChipGroup } from "../ui/chip-group";
 import { FormRow } from "../ui/form-row";
 import { parseDecimalInput } from "../../lib/quick-entry";
 
-import { formatGramsServingLabel, hidesGrams } from "../../lib/portion";
+import { formatGramsServingLabel, hidesGrams, unitCountOf } from "../../lib/portion";
+import { QuantityStepper } from "../ui/quantity-stepper";
 import { HOME_ROUTE } from "@/lib/nav";
 
 const quickFieldClass =
@@ -175,7 +176,7 @@ export function EntryEditor({ view }: { view: EntryView }) {
               )}
               <div role="group" aria-label="Khẩu phần" className="flex min-w-0 flex-1 gap-2">
                 {food?.servings.map((s) => {
-                  const active = servingLabel === s.label;
+                  const active = (hidesGrams(food) ? unitCountOf(food?.servings ?? [], servingLabel, parseGramsInput(gramsInput))?.serving.label : servingLabel) === s.label;
                   return (
                     <button
                       key={s.label}
@@ -196,6 +197,18 @@ export function EntryEditor({ view }: { view: EntryView }) {
                 })}
               </div>
             </div>
+            {hidesGrams(food) && food && (
+              <QuantityStepper
+                servings={food.servings}
+                label={servingLabel}
+                grams={parseGramsInput(gramsInput)}
+                disabled={!canPortion}
+                onChange={(grams, label) => {
+                  setGramsInput(String(grams));
+                  setServingLabel(label);
+                }}
+              />
+            )}
             {energyUnknown && view.canChangePortion ? (
               <p role="note" className="m-0 text-sm text-secondary">{NO_ENERGY_MESSAGE}</p>
             ) : (
