@@ -173,7 +173,7 @@ export interface MealSlotSummary {
 
 export interface DaySummaryResponse {
   date: string;
-  training_minutes: number;
+  training_minutes: number | null;
   is_read_only: boolean;
   summary: Record<string, number | null>;
   targets?: unknown;
