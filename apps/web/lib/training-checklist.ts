@@ -13,12 +13,13 @@ export interface DayChecklist {
   minutes: number;
   /** Ids of the checklist items ticked that day. */
   ticked: string[];
-  /** cc-52: the diary entry a tick logged, and its amount, by item id. Kept after an untick so Hoàn tác re-ticks it. */
+  /** cc-52: the diary entries a tick logged, and its amount, by item id. Kept after an untick so Hoàn tác re-ticks it. */
   logged?: Record<string, LoggedTick>;
 }
 
 export interface LoggedTick {
-  entryId: string;
+  /** One entry, or two for the Red Bull + mật mía mix */
+  entryIds: string[];
   /** The amount as logged ("1,5 g") */
   qty: string;
 }
@@ -44,7 +45,8 @@ export function readDay(dateKey: string, storage: KeyValueStorage | null = accou
   if (!day || typeof day.minutes !== "number" || !Array.isArray(day.ticked)) return null;
   const ticked = day.ticked.filter((id): id is string => typeof id === "string");
   const links = Object.entries(day.logged ?? {}).filter(
-    (e): e is [string, LoggedTick] => typeof e[1]?.entryId === "string" && typeof e[1]?.qty === "string"
+    (e): e is [string, LoggedTick] =>
+      Array.isArray(e[1]?.entryIds) && e[1].entryIds.length > 0 && e[1].entryIds.every((id) => typeof id === "string") && typeof e[1]?.qty === "string"
   );
   return links.length > 0 ? { minutes: day.minutes, ticked, logged: Object.fromEntries(links) } : { minutes: day.minutes, ticked };
 }
@@ -70,12 +72,12 @@ export function toggleTick(ticked: string[], id: string): string[] {
   return ticked.includes(id) ? ticked.filter((x) => x !== id) : [...ticked, id];
 }
 
-/** A tick that logged a diary entry: the item is ticked and remembers the entry. */
-export function logTick(day: DayChecklist, itemId: string, entryId: string, qty: string): DayChecklist {
+/** A tick that logged diary entries: the item is ticked and remembers them. */
+export function logTick(day: DayChecklist, itemId: string, entryIds: string[], qty: string): DayChecklist {
   return {
     ...day,
     ticked: day.ticked.includes(itemId) ? day.ticked : [...day.ticked, itemId],
-    logged: { ...day.logged, [itemId]: { entryId, qty } },
+    logged: { ...day.logged, [itemId]: { entryIds, qty } },
   };
 }
 
@@ -85,13 +87,14 @@ export function untick(day: DayChecklist, itemId: string): DayChecklist {
 }
 
 /**
- * Today's ticks as the diary has them: a logged item is ticked exactly while its entry exists (deleted on Hôm nay, it
- * shows unticked; put back with Hoàn tác, ticked again). Items that log nothing keep their saved tick.
+ * Today's ticks as the diary has them: a logged item is ticked exactly while one of its entries exists (all deleted on
+ * Hôm nay, it shows unticked; put back with Hoàn tác, ticked again). Items that log nothing keep their saved tick.
  */
 export function effectiveTicked(day: DayChecklist, entryExists: (entryId: string) => boolean): string[] {
   const links = day.logged ?? {};
-  const kept = day.ticked.filter((id) => !links[id] || entryExists(links[id].entryId));
-  const back = Object.keys(links).filter((id) => !kept.includes(id) && entryExists(links[id].entryId));
+  const there = (id: string) => links[id].entryIds.some(entryExists);
+  const kept = day.ticked.filter((id) => !links[id] || there(id));
+  const back = Object.keys(links).filter((id) => !kept.includes(id) && there(id));
   return [...kept, ...back];
 }
 

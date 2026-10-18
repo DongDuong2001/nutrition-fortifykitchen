@@ -151,8 +151,11 @@ interface DiaryContextValue {
     servingLabel?: string,
     options?: { undoable?: boolean; id?: string }
   ) => Promise<boolean>;
-  /** The add tray: every item in one diary update and one toast whose Hoàn tác removes them all. False when an item has no energy figure. */
-  addFoodEntries: (items: Array<{ food: FoodItem; grams: number; label: string }>, mealSlot: MealSlot) => boolean;
+  /**
+   * The add tray: every item in one diary update and one toast whose Hoàn tác removes them all. False when an item has no
+   * energy figure. An item's `id` is its entry's id when the caller keeps a link (the Ngày tập Red Bull + mật mía mix).
+   */
+  addFoodEntries: (items: Array<{ food: FoodItem; grams: number; label: string; id?: string }>, mealSlot: MealSlot) => boolean;
   recentFoods: RecentFood[];
   addRecentFood: (food: FoodItem, servingLabel: string) => void;
   toast: ToastInfo | null;
@@ -1011,11 +1014,11 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   );
 
   const addFoodEntries = useCallback(
-    (items: Array<{ food: FoodItem; grams: number; label: string }>, mealSlot: MealSlot) => {
+    (items: Array<{ food: FoodItem; grams: number; label: string; id?: string }>, mealSlot: MealSlot) => {
       if (items.length === 0 || !items.every((i) => canLog(i.food))) return false;
       const addedAt = new Date().toISOString();
-      const entries: AddedDiaryEntry[] = items.map(({ food, grams, label }) => ({
-        id: generateUuid(),
+      const entries: AddedDiaryEntry[] = items.map(({ food, grams, label, id }) => ({
+        id: id ?? generateUuid(),
         foodId: serverFoodIdOf(food.id),
         foodName: food.nameVi,
         grams,

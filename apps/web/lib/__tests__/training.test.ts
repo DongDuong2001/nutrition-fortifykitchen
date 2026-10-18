@@ -172,6 +172,9 @@ describe("Training calculations (lib/training.ts)", () => {
       expect(foods["pre-cu-den"]).toEqual(["cu-den"]);
       expect(foods["intra-salt-20-40"]).toEqual(["muoi"]);
       expect(foods["intra-carb"]).toEqual(["redbull", "redbull-mat-mia", "mat-mia"]);
+      // Hao 18/10: its 30–45 g are grams of carbs; only that item says so
+      const carbItems = getTrainingPhases(60).flatMap((p) => p.items.filter((i) => i.carbs).map((i) => i.id));
+      expect(carbItems).toEqual(["intra-carb"]);
     });
   });
 
