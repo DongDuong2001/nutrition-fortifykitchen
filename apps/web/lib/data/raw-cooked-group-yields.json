@@ -1,0 +1,153 @@
+[
+ {
+  "group": "meat_poultry",
+  "label_vi": "Thịt heo, bò, dê, vịt, gà (meat and poultry)",
+  "n_pairs": 23,
+  "min": 53,
+  "median": 74,
+  "max": 82,
+  "unit": "cooked_g_per_100g_raw",
+  "published": [
+   "USDA table, beef steaks and roasts (broiled/roasted): 69-85 (median 80, 24 rows)",
+   "USDA table, ground beef (patty, crumbles, loaf): 62-73 (median 68, 8 rows)",
+   "USDA table, fresh pork chops and roasts: 73-85 (median 79, 28 rows)",
+   "USDA table, ground pork: 66-68 (median 68, 5 rows)",
+   "USDA table, chicken parts and whole (AH-102 1975 rows): 66-86 (median 74, 8 rows)",
+   "Bognár 2002 has German-recipe meat dishes with added fat and sauce; not used"
+  ]
+ },
+ {
+  "group": "offal",
+  "label_vi": "Nội tạng (offal)",
+  "n_pairs": 10,
+  "min": 53,
+  "median": 66,
+  "max": 82,
+  "unit": "cooked_g_per_100g_raw",
+  "published": [
+   "USDA table, offal (simmered, braised, fried): 53-85 (median 65, 8 rows)"
+  ]
+ },
+ {
+  "group": "fish",
+  "label_vi": "Cá (fish, cooked from raw fillet or whole edible meat)",
+  "n_pairs": 24,
+  "min": 74,
+  "median": 78,
+  "max": 90,
+  "unit": "cooked_g_per_100g_raw",
+  "published": [
+   "Bognár 2002 (cod, redfish, pollock fillet, edible/edible): boiled 77, steamed 80, fried 80 (n=10), breaded pan-fried 78, deep-fried 80; blue carp/trout boiled whole, with skin 88 (with waste)",
+   "USDA SR Legacy cooked/raw fillet weights, 7 species: 75-90"
+  ]
+ },
+ {
+  "group": "shellfish",
+  "label_vi": "Tôm, cua, ghẹ, mực, nghêu, sò, hàu, vẹm, lươn (shellfish, squid, eel)",
+  "n_pairs": 14,
+  "min": 50,
+  "median": 60,
+  "max": 101,
+  "unit": "cooked_g_per_100g_raw",
+  "published": [
+   "Bognár 2002 gives only whole-animal factors with shells (shrimp 0.96, lobster 0.95, mussel 0.95 of the raw whole weight; edible meat 0.16-0.35 of it), which cannot be applied to picked meat",
+   "no published edible-to-edible factor found: protein balance only"
+  ]
+ },
+ {
+  "group": "egg",
+  "label_vi": "Trứng (eggs, edible contents)",
+  "n_pairs": 3,
+  "min": 92,
+  "median": 100,
+  "max": 122,
+  "unit": "cooked_g_per_100g_raw",
+  "published": [
+   "USDA SR Legacy household measures: hard-boiled 1.00, fried 0.92, omelet 1.22 of the raw edible egg"
+  ]
+ },
+ {
+  "group": "rice",
+  "label_vi": "Gạo tẻ -> cơm (rice, white and brown)",
+  "n_pairs": 9,
+  "min": 272,
+  "median": 272,
+  "max": 301,
+  "unit": "cooked_g_per_100g_raw",
+  "published": [
+   "Bognár 2002 (boiled, edible/edible): long polished 298 (n=140), parboiled 290 (n=43), long unpolished 260 (n=7), round polished 319 (n=8)"
+  ]
+ },
+ {
+  "group": "glutinous_rice",
+  "label_vi": "Gạo nếp -> xôi (glutinous rice)",
+  "n_pairs": 4,
+  "min": 150,
+  "median": 368,
+  "max": 383,
+  "unit": "cooked_g_per_100g_raw",
+  "published": [
+   "no published factor found; USDA 'Rice, white, glutinous, cooked' is a boiled row (97 kcal), the NIN xôi rows are steamed (235-254 kcal): the two give 383 vs 150"
+  ]
+ },
+ {
+  "group": "other_grains",
+  "label_vi": "Yến mạch, quinoa, kê, kiều mạch (other grains)",
+  "n_pairs": 6,
+  "min": 305,
+  "median": 460,
+  "max": 548,
+  "unit": "cooked_g_per_100g_raw",
+  "published": [
+   "Bognár 2002 (boiled): oat flakes 410, quinoa 342, millet 240, buckwheat 360, spelt 180, pearl barley 250"
+  ]
+ },
+ {
+  "group": "pasta",
+  "label_vi": "Mì ý, nui, mì trứng khô (dry pasta and egg noodles)",
+  "n_pairs": 4,
+  "min": 238,
+  "median": 238,
+  "max": 282,
+  "unit": "cooked_g_per_100g_raw",
+  "published": [
+   "Bognár 2002 (boiled): hard-wheat egg-free noodles 210 (n=4), wheat noodles with egg 260 (n=239), wholemeal with egg 263 (n=7)"
+  ]
+ },
+ {
+  "group": "noodle_dry",
+  "label_vi": "Bún khô, phở khô, hủ tiếu khô, miến (dry rice and starch noodles)",
+  "n_pairs": 4,
+  "min": 336,
+  "median": 346,
+  "max": 380,
+  "unit": "cooked_g_per_100g_raw",
+  "published": [
+   "no rice-noodle row in Bognár 2002 or the USDA tables read here; USDA SR rice noodles dry/cooked solids balance is the only source (336)"
+  ]
+ },
+ {
+  "group": "legume",
+  "label_vi": "Đậu khô và đậu hạt (dry and fresh legumes)",
+  "n_pairs": 10,
+  "min": 91,
+  "median": 252,
+  "max": 333,
+  "unit": "cooked_g_per_100g_raw",
+  "published": [
+   "Bognár 2002 (stews, so with other ingredients): dry white/red beans 203 (n=3), lentils 281 (n=3), green peas 182 (n=1); USDA solids balance of the pure boiled rows is used for the pairs"
+  ]
+ },
+ {
+  "group": "tuber",
+  "label_vi": "Khoai và củ (tubers and roots)",
+  "n_pairs": 16,
+  "min": 74,
+  "median": 100,
+  "max": 146,
+  "unit": "cooked_g_per_100g_raw",
+  "published": [
+   "Bognár 2002: potato peeled boiled 100 (n=272), steamed 98 (n=242), with peel boiled 80 (edible/with waste), baked in skin 68; no sweet potato, cassava or taro row"
+  ]
+ }
+]
