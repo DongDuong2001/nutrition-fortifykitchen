@@ -714,7 +714,11 @@ export function portionNote(p: PortionState, sw: CookSwitch | null, loggedGrams:
   const amount = p.base * p.mult;
   const g = (n: number) => `${formatAmount(Math.round(n), "g")} g`;
   const converted = state !== sw.own && !sw.pair && sw.factor !== null;
-  if (converted && state === "cooked") return `Món chín nhẹ hơn lúc sống, nên ${g(amount)} chín bằng khoảng ${g(loggedGrams)} sống. App tính theo số đó cho bạn.`;
+  if (converted && state === "cooked") {
+    // Meat and fish lose weight in cooking, dry grains and beans gain it, tubers keep it
+    const why = sw.factor === 1 ? "" : `Món chín ${(sw.factor ?? 1) < 1 ? "nhẹ" : "nặng"} hơn lúc sống, nên `;
+    return `${why}${g(amount)} chín bằng khoảng ${g(loggedGrams)} sống. App tính theo số đó cho bạn.`;
+  }
   if (converted) return `${g(amount)} lúc sống nấu xong thành khoảng ${g(loggedGrams)}. App tính theo số đó cho bạn.`;
   if (state === "raw") return "Cân lúc đã nấu chín thì chọn Đã nấu chín.";
   if (sw.factor !== null && amount > 0) return `${g(amount)} chín là khoảng ${g(amount / sw.factor)} trước khi nấu.`;
