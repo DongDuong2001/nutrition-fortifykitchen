@@ -19,7 +19,7 @@ export default function WhatsNewPage() {
   const router = useRouter();
   const replay = (release: Release) => {
     if (release.id === latestRelease()?.id) markWhatsNewSeen(release.id);
-    writeWhatsNewTour({ releaseId: release.id, index: 0 });
+    writeWhatsNewTour({ releaseIds: [release.id], index: 0 });
     router.push(HOME_ROUTE);
   };
 

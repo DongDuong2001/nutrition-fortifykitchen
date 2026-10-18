@@ -17,6 +17,7 @@ import {
   capitalizeWord,
 } from "@/lib/portion";
 import { QuantityStepper } from "@/components/ui/quantity-stepper";
+import { markUsed } from "@/lib/onboarding-store";
 import { ChipGroup } from "@/components/ui/chip-group";
 
 export interface PortionAreaProps {
@@ -87,6 +88,8 @@ export function PortionArea({
   const handleTabChange = (targetTab: string) => {
     if (targetTab === activeTab || disabled) return;
     setActiveTab(targetTab);
+    // The unit-toggle tip stays quiet once the toggle was used
+    markUsed("unit-toggle");
 
     if (targetTab === "gam") {
       // Unit → Gam fills grams

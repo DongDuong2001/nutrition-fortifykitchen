@@ -408,7 +408,8 @@ function HomeContent() {
           alignMode="page"
           subtitle={desktopSubtitle}
           actions={
-            <>
+            // header-actions: where the sync status shows, for the tour when there is no status to point at
+            <div data-tour="header-actions" className="flex items-center gap-2">
             {!isPast && <SyncStatus />}
             <button
               type="button"
@@ -422,7 +423,7 @@ function HomeContent() {
             >
               <IconShare />
             </button>
-            </>
+            </div>
           }
           phoneStart={
             isPast ? (

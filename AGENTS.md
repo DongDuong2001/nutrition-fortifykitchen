@@ -56,6 +56,16 @@ Antigravity: also follow .agent/rules/antigravity.md.
 - [ ] No "Coach" tags, no raw hex, no `console.log`, no `TODO` without an entry in `OPEN_QUESTIONS.md`.
 - [ ] `npx tsc --noEmit`, `npm run build` and the unit tests pass.
 - [ ] `PROGRESS.md` is updated.
+- [ ] Tutorials ship with the feature (see **Tutorials** below).
+
+## Tutorials (every agent, Antigravity included)
+Every feature task that users can see ships its own teaching in the same branch:
+- **(a) A release entry with a tour.** Add or extend the top entry of `lib/releases.ts` (items in Vietnamese, the user's words) with a `tour` of 2–5 steps that point at the real controls (`data-tour` targets, a `fallback` where the control may be missing). Never create a new release id for a fix; extend the top one.
+- **(b) A one-time tip for each new control a newcomer cannot guess** (a gesture, an icon-only button, a hidden menu): an entry in `lib/tips.ts` on the existing Spotlight, with a `used` event the control marks.
+- **(c) `lib/__tests__/tutorial-targets.test.ts` is green**, so every tip and tour target is a `data-tour` some screen renders.
+- **Ids and versions:** pick the next unused release id and `sw.js` VERSION on `origin/main` right before merging (`git fetch` first): another branch may have taken the one you picked when you started.
+- "Có gì mới" lists every release newer than the last one the account saw, and "Thử ngay" runs their tours oldest first, at most 8 steps in all, on Hôm nay. A step whose control is not on Hôm nay is skipped there, so put a release's tour on Hôm nay controls (with a `fallback`) when it should show from the sheet.
+- Reviews check (a)–(c). A feature merged or pushed straight to `main` without them is not done.
 
 ## UI/UX skill (required for UI work)
 The ui-ux-pro-max skill lives in `.agent/skills/ui-ux-pro-max/`. Read its `SKILL.md` once, and use it for every UI task:

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { MIN_UNIT_AMOUNT, MAX_UNIT_AMOUNT, UNIT_AMOUNT_STEP, clampUnitAmount, parseUnitAmountInput, unitCountOf, unitPortion } from "@/lib/portion";
 import { formatNumber } from "@/lib/format";
+import { markUsed } from "@/lib/onboarding-store";
+import { setPresent } from "@/lib/tour-bus";
 
 export interface QuantityStepperProps {
   servings: ReadonlyArray<{ label: string; grams: number }>;
@@ -15,7 +17,8 @@ export interface QuantityStepperProps {
 
 /**
  * "Số lượng ×N" for a unit portion (0.5 to 20 in 0.5 steps): N × the chosen serving.
- * Amount stepper that is also a typed field (comma or dot).
+ * Amount stepper that is also a typed field (comma or dot). data-tour="unit-stepper" on the root is its one tip
+ * target wherever it shows (supplements, eggs, fruit and other unit portions).
  */
 export function QuantityStepper({ servings, label, grams, onChange, tone = "light", disabled = false, className = "" }: QuantityStepperProps) {
   const current = unitCountOf(servings, label, grams);
@@ -29,9 +32,18 @@ export function QuantityStepper({ servings, label, grams, onChange, tone = "ligh
     setTypedText(formatNumber(count));
   }, [count]);
 
+  // Its first-visit tip waits for it to be on screen
+  const shown = !!serving;
+  useEffect(() => {
+    if (!shown) return;
+    setPresent("stepper", true);
+    return () => setPresent("stepper", false);
+  }, [shown]);
+
   if (!serving) return null;
 
   const set = (next: number) => {
+    markUsed("quantity-step");
     const clamped = clampUnitAmount(next);
     const p = unitPortion(serving, clamped);
     setTypedText(formatNumber(clamped));
@@ -43,6 +55,7 @@ export function QuantityStepper({ servings, label, grams, onChange, tone = "ligh
     setTypedText(val);
     const parsed = parseUnitAmountInput(val);
     if (parsed !== null) {
+      markUsed("quantity-step");
       const p = unitPortion(serving, parsed);
       onChange(p.grams, p.label);
     }

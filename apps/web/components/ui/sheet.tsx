@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { markUsed } from "@/lib/onboarding-store";
 import { closeSheetEntry, openSheetEntry } from "@/lib/sheet-history";
+import { setPresent } from "@/lib/tour-bus";
 
 export interface SheetProps {
   open: boolean;
@@ -115,6 +117,7 @@ export function Sheet({
     if (!d || !el) return;
     if (d.dy > el.offsetHeight * DRAG_CLOSE_SHARE || d.v > DRAG_CLOSE_SPEED) {
       draggedOut.current = true;
+      markUsed("sheet-drag");
       el.style.transition = `transform ${SHEET_MS}ms ease-in`;
       el.style.transform = "translateY(100%)";
       onCloseRef.current();
@@ -133,6 +136,8 @@ export function Sheet({
     // Lock body scroll
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    // The drag-down tip waits for an open sheet
+    setPresent("sheet", true);
 
     // Move focus into the dialog
     const focusTimer = setTimeout(() => {
@@ -150,6 +155,8 @@ export function Sheet({
     }, 50);
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      // A tip open over the sheet keeps Esc and Tab for its own card
+      if (e.defaultPrevented || document.querySelector("[data-onboarding-overlay]")) return;
       if (e.key === "Escape") {
         e.preventDefault();
         onCloseRef.current();
@@ -189,6 +196,7 @@ export function Sheet({
     return () => {
       clearTimeout(focusTimer);
       window.removeEventListener("keydown", handleKeyDown);
+      setPresent("sheet", false);
       document.body.style.overflow = originalOverflow;
       openerRef.current?.focus?.();
     };
@@ -221,6 +229,7 @@ export function Sheet({
         <div
           aria-hidden="true"
           data-sheet-handle
+          data-tour="sheet-handle"
           onPointerDown={onDragStart}
           onPointerMove={onDragMove}
           onPointerUp={onDragEnd}

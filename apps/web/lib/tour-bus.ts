@@ -1,5 +1,6 @@
 import { getTodayIsoVN } from "./date";
 import { markTourStarted } from "./onboarding-store";
+import { joinedTour, type ReleaseTourStep } from "./releases";
 import { tourReduce, type TourAction, type TourEvent, type TourState } from "./tour";
 
 /**
@@ -94,21 +95,50 @@ export function setOverlayOpen(name: Overlay, open: boolean): void {
   busyListeners.forEach((l) => l());
 }
 
-/** The running "Có gì mới" tour (cc-46), in sessionStorage like the first-run tour. */
+/**
+ * Things on screen that have a first-visit tip of their own: an open sheet (drag down to close) and the ×N stepper.
+ * Counted, since two can be up at once (the add tray holds one stepper per food). Listeners are the tip-busy ones.
+ */
+export type Presence = "sheet" | "stepper";
+const present = new Map<Presence, number>();
+export const isPresent = (name: Presence): boolean => (present.get(name) ?? 0) > 0;
+export function setPresent(name: Presence, on: boolean): void {
+  const before = isPresent(name);
+  present.set(name, Math.max(0, (present.get(name) ?? 0) + (on ? 1 : -1)));
+  if (isPresent(name) !== before) busyListeners.forEach((l) => l());
+}
+
+/**
+ * The running "Có gì mới" tour (cc-46), in sessionStorage like the first-run tour: the releases whose tours it joins
+ * (lib/releases joinedTour), the step it is on, and (`only`) which of the joined steps were on the page when it
+ * started, so a step that cannot show on Hôm nay is never counted in "Mới · n/N".
+ */
 export interface WhatsNewTour {
-  releaseId: string;
+  releaseIds: string[];
   index: number;
+  only?: number[];
 }
 const WN_TOUR_KEY = "h1t_wn_tour_v1";
 
 export function readWhatsNewTour(): WhatsNewTour | null {
   try {
     const v = JSON.parse(globalThis.sessionStorage?.getItem(WN_TOUR_KEY) ?? "null");
-    if (typeof v?.releaseId === "string" && Number.isInteger(v.index) && v.index >= 0) return { releaseId: v.releaseId, index: v.index };
+    if (!Number.isInteger(v?.index) || v.index < 0) return null;
+    const only = Array.isArray(v.only) && v.only.every(Number.isInteger) ? (v.only as number[]) : undefined;
+    if (Array.isArray(v.releaseIds) && v.releaseIds.every((id: unknown) => typeof id === "string")) return { releaseIds: v.releaseIds, index: v.index, only };
+    // A tour saved before several releases could run together: one release
+    if (typeof v.releaseId === "string") return { releaseIds: [v.releaseId], index: v.index };
   } catch {
     // Storage blocked or bad JSON: no tour
   }
   return null;
+}
+
+/** The steps a running tour walks through, in order. */
+export function whatsNewSteps(tour: WhatsNewTour | null): ReleaseTourStep[] {
+  if (!tour) return [];
+  const joined = joinedTour(tour.releaseIds);
+  return tour.only ? tour.only.map((i) => joined[i]).filter((s): s is ReleaseTourStep => s !== undefined) : joined;
 }
 
 export function writeWhatsNewTour(tour: WhatsNewTour | null): void {

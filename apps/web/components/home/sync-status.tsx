@@ -39,7 +39,7 @@ export function SyncStatus() {
   if (!isLiveMode() || demo) return null;
   const text = "text-xs font-semibold leading-none text-muted-on-dark lg:text-secondary";
   return (
-    <div aria-live="polite" className="flex items-center" data-sync-state={!online ? "offline" : saving ? "saving" : unsaved > 0 ? "unsaved" : justSaved ? "saved" : "idle"}>
+    <div aria-live="polite" className="flex items-center" data-tour="sync-status" data-sync-state={!online ? "offline" : saving ? "saving" : unsaved > 0 ? "unsaved" : justSaved ? "saved" : "idle"}>
       {!online ? (
         <span className={text}>Ngoại tuyến</span>
       ) : saving ? (

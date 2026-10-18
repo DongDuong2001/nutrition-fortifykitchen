@@ -10,12 +10,13 @@ import { getTodayIsoVN } from "@/lib/date";
 import { DEFAULT_FLAGS, type OnboardingFlags } from "@/lib/onboarding-flags";
 import { finishTour, loadFlags, markTipSeen, onboardingDisabled, setTipsOff, subscribeFlags } from "@/lib/onboarding-store";
 import { HOME_ROUTE } from "@/lib/nav";
-import { releaseById, type ReleaseTourStep } from "@/lib/releases";
-import { TIPS, pickTip, type Tip } from "@/lib/tips";
+import { tourStepAfter, type ReleaseTourStep } from "@/lib/releases";
+import { TIPS, pickTip, tipDue, type Tip, type TipContext } from "@/lib/tips";
 import { TOUR_STEPS, tourReduce, tourStepFor, type TourState } from "@/lib/tour";
 import {
   emitSignal,
   isOverlayOpen,
+  isPresent,
   readTour,
   readWhatsNewTour,
   setOverlayOpen,
@@ -23,6 +24,7 @@ import {
   subscribeSignal,
   subscribeTipBusy,
   subscribeTour,
+  whatsNewSteps,
   writeTour,
   writeWhatsNewTour,
   type WhatsNewTour,
@@ -199,9 +201,41 @@ export function OnboardingLayer() {
   // The "Có gì mới" tour (cc-46), and whether its sheet is open (no tip then)
   const [wn, setWn] = useState<WhatsNewTour | null>(null);
   const [wnSheet, setWnSheet] = useState(false);
+  // A sheet the user opened, and the ×N stepper, are on screen (each has a tip of its own)
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [stepper, setStepper] = useState(false);
+  // No network (the header says Ngoại tuyến): its tip waits for this
+  const [offline, setOffline] = useState(false);
+  useEffect(() => {
+    const read = () => setOffline(navigator.onLine === false);
+    read();
+    window.addEventListener("online", read);
+    window.addEventListener("offline", read);
+    return () => {
+      window.removeEventListener("online", read);
+      window.removeEventListener("offline", read);
+    };
+  }, []);
   // One tip per visit: reset when the route changes (or Chọn nhiều món opens)
   const visit = useRef({ path: "", tipShown: false });
   const foodsToday = data.meals.reduce((n, m) => n + m.items.length, 0);
+
+  // What the tips need to know about this screen
+  const tipContext = useCallback((): TipContext => {
+    const date = new URLSearchParams(window.location.search).get("date");
+    return {
+      pathname,
+      pastDay: date !== null && date < getTodayIsoVN(),
+      foodsToday,
+      selectMode,
+      unsaved: unsavedIds.size,
+      touch: window.matchMedia?.("(pointer: coarse)").matches === true,
+      vibrate: canVibrate(),
+      sheetOpen,
+      stepper,
+      offline,
+    };
+  }, [pathname, foodsToday, selectMode, unsavedIds, sheetOpen, stepper, offline]);
 
   // Read the running tour. On a route change (applyRoute) the route also moves it on or ends it (lib/tour tourStepFor);
   // when only the tour changed (a button, an action, Thêm bữa đầu tiên) the screen is left alone.
@@ -232,14 +266,24 @@ export function OnboardingLayer() {
       sync(false);
       setWn(readWhatsNewTour());
     });
-    const offBusy = subscribeTipBusy(() => setWnSheet(isOverlayOpen("whats-new")));
+    const readPresence = () => {
+      setWnSheet(isOverlayOpen("whats-new"));
+      // Sheets that open by themselves (Có gì mới, the install pop-up) are not "a sheet the user opened"
+      setSheetOpen(isPresent("sheet") && !isOverlayOpen("whats-new") && !isOverlayOpen("install"));
+      setStepper(isPresent("stepper"));
+    };
+    readPresence();
+    const offBusy = subscribeTipBusy(readPresence);
     const offSignal = subscribeSignal((signal) => {
       if (signal === "select-mode") {
         visit.current.tipShown = false;
         setSelectMode(true);
-        // Step 1 of "Có gì mới" moves on when the user long-presses a food
+        // A "Có gì mới" step that waits for a long press on a food moves on
         const current = readWhatsNewTour();
-        if (current?.index === 0) writeWhatsNewTour({ ...current, index: 1 });
+        if (current) {
+          const next = tourStepAfter(whatsNewSteps(current), current.index, "long-press");
+          if (next !== current.index) writeWhatsNewTour(next === null ? null : { ...current, index: next });
+        }
       }
       if (signal === "select-off") setSelectMode(false);
     });
@@ -267,27 +311,42 @@ export function OnboardingLayer() {
   useEffect(() => () => setOverlayOpen("whats-new-tour", false), []);
   // A tour whose release or step is gone (an old session) just ends
   useEffect(() => {
-    if (wn && !releaseById(wn.releaseId)?.tour?.[wn.index]) writeWhatsNewTour(null);
+    if (wn && !whatsNewSteps(wn)[wn.index]) writeWhatsNewTour(null);
   }, [wn]);
 
   // The tip this screen would show now (null when none is due)
   const dueTip = useCallback((): Tip | null => {
     if (tourActive || wnActive || wnSheet || onboardingDisabled() || visit.current.tipShown) return null;
-    const date = new URLSearchParams(window.location.search).get("date");
-    return pickTip({
-      ctx: {
-        pathname,
-        pastDay: date !== null && date < getTodayIsoVN(),
-        foodsToday,
-        selectMode,
-        unsaved: unsavedIds.size,
-        touch: window.matchMedia?.("(pointer: coarse)").matches === true,
-        vibrate: canVibrate(),
-      },
-      flags,
-      tourActive,
-    });
-  }, [tourActive, wnActive, wnSheet, pathname, foodsToday, selectMode, flags, unsavedIds]);
+    return pickTip({ ctx: tipContext(), flags, tourActive });
+  }, [tourActive, wnActive, wnSheet, tipContext, flags]);
+
+  // Opening a sheet, or the stepper turning up, is a new visit for its own tip (when that tip is still due)
+  const contextNow = useRef(tipContext);
+  contextNow.current = tipContext;
+  useEffect(() => {
+    if (!sheetOpen && !stepper) return;
+    const ctx = contextNow.current();
+    if (TIPS.some((t) => t.inSheet && tipDue(t, ctx, loadFlags()))) visit.current.tipShown = false;
+  }, [sheetOpen, stepper]);
+
+  // A "Có gì mới" step that waits for a tap on its element moves on after the tap has done its job (Chưa lưu sends)
+  const wnSteps = whatsNewSteps(wn);
+  const wnStep = wn ? wnSteps[wn.index] : undefined;
+  useEffect(() => {
+    if (!wn || wnStep?.advanceOn !== "tap") return;
+    const target = wnStep.target;
+    const onClick = (e: MouseEvent) => {
+      if (!(e.target instanceof Element) || !e.target.closest(`[data-tour="${target}"]`)) return;
+      setTimeout(() => {
+        const current = readWhatsNewTour();
+        if (!current || current.index !== wn.index || current.releaseIds.join() !== wn.releaseIds.join()) return;
+        const next = tourStepAfter(whatsNewSteps(current), wn.index, "tap");
+        writeWhatsNewTour(next === null ? null : { ...wn, index: next });
+      }, 0);
+    };
+    document.addEventListener("click", onClick, true);
+    return () => document.removeEventListener("click", onClick, true);
+  }, [wn, wnStep]);
 
   // The tip of this visit, once the screen has settled
   useEffect(() => {
@@ -348,15 +407,15 @@ export function OnboardingLayer() {
     );
   }
 
-  const wnSteps = wn ? releaseById(wn.releaseId)?.tour ?? [] : [];
   if (wn && pathname === HOME_ROUTE) {
+    // Tiếp, Xong and a target that is not on screen all use the same rule (lib/releases tourStepAfter)
     const endWn = () => {
       writeWhatsNewTour(null);
       emitSignal("end-select");
     };
-    const goTo = (index: number) => {
-      if (index >= wnSteps.length) return endWn();
-      // The last step points at the Cài đặt tab, which Chọn nhiều món hides on the phone
+    const goTo = (index: number | null) => {
+      if (index === null || index >= wnSteps.length) return endWn();
+      // The last step points at a tab (Cài đặt, Khám phá), which Chọn nhiều món hides on the phone
       if (index === wnSteps.length - 1) emitSignal("end-select");
       writeWhatsNewTour({ ...wn, index });
     };
@@ -364,7 +423,7 @@ export function OnboardingLayer() {
     if (!step) return null;
     return (
       <Spotlight
-        key={`wn-${wn.releaseId}-${wn.index}`}
+        key={`wn-${wn.releaseIds.join("+")}-${wn.index}`}
         target={step.target}
         fallback={step.fallback}
         scroll
@@ -372,9 +431,15 @@ export function OnboardingLayer() {
         ariaLabel={`Hướng dẫn bước ${wn.index + 1} trên ${wnSteps.length}`}
         interactive={step.advanceOn !== undefined}
         onEscape={endWn}
-        onMissing={() => goTo(wn.index + 1)}
+        onMissing={() => goTo(tourStepAfter(wnSteps, wn.index, "missing"))}
       >
-        <WhatsNewCard step={step} index={wn.index} total={wnSteps.length} onNext={() => goTo(wn.index + 1)} onSkip={endWn} />
+        <WhatsNewCard
+          step={step}
+          index={wn.index}
+          total={wnSteps.length}
+          onNext={() => goTo(tourStepAfter(wnSteps, wn.index, "next"))}
+          onSkip={endWn}
+        />
       </Spotlight>
     );
   }

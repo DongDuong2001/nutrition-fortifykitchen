@@ -40,6 +40,13 @@ describe("tutorial targets", () => {
     expect(targets.length).toBeGreaterThan(20);
   });
 
+  it("covers the 18c and 18d tours and the sheet, stepper and offline tips", () => {
+    const named = new Set(targets.map((t) => t.target));
+    for (const t of ["sync-status", "header-actions", "home-food-list", "meal-pill", "nutrient-column", "nav-explore", "sheet-handle", "unit-stepper", "unit-toggle", "unit-size", "unit-amount"]) {
+      expect(named.has(t), t).toBe(true);
+    }
+  });
+
   it.each(targets)("$where points at data-tour=\"$target\", which a screen renders", ({ target }) => {
     expect(rendered(target)).toBe(true);
   });

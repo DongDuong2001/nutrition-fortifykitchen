@@ -43,10 +43,12 @@ export function ReleaseItems({ release, alignGroup }: { release: Release; alignG
 }
 
 /**
- * "Có gì mới" (WNSheet): the latest release's items, with "Thử ngay (1 phút)" when the release has a tour. A bottom
- * sheet on the phone, a centred 480 px dialog from 1024 px. Any close calls onClose once, after the 140 ms exit.
+ * "Có gì mới" (WNSheet): the items of every release the account has not seen, grouped by release, newest first, with
+ * "Thử ngay (1 phút)" when their tours have a step to show (`canTour`). A bottom sheet on the phone, a centred 480 px
+ * dialog from 1024 px; the list scrolls when it is long. Any close calls onClose once, after the 140 ms exit.
  */
-export function WhatsNewSheet({ release, open, onClose }: { release: Release; open: boolean; onClose: (tryTour: boolean) => void }) {
+export function WhatsNewSheet({ releases, canTour, open, onClose }: { releases: readonly Release[]; canTour: boolean; open: boolean; onClose: (tryTour: boolean) => void }) {
+  const newest = releases[0];
   const [leaving, setLeaving] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
@@ -77,7 +79,7 @@ export function WhatsNewSheet({ release, open, onClose }: { release: Release; op
     >
       <header data-align-group="wn-sheet" className="flex items-start gap-2">
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <p className="m-0 text-xs font-bold text-cobalt">Cập nhật {release.date}</p>
+          <p className="m-0 text-xs font-bold text-cobalt">Cập nhật {newest?.date}</p>
           <h2 id={TITLE_ID} tabIndex={-1} className={`${SHEET_TITLE_CLASS} text-[26px] outline-none`}>
             Có gì mới
           </h2>
@@ -86,11 +88,23 @@ export function WhatsNewSheet({ release, open, onClose }: { release: Release; op
           <CloseIcon />
         </button>
       </header>
-      <div data-align-group="wn-sheet">
-        <ReleaseItems release={release} alignGroup="wn-items" />
+      {/* One group per release; a later group of another day names its day. Focusable so the keyboard can scroll it. */}
+      <div
+        data-align-group="wn-sheet"
+        role="region"
+        aria-label="Các thay đổi"
+        tabIndex={0}
+        className="flex max-h-[55dvh] flex-col overflow-y-auto overscroll-contain rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-blue"
+      >
+        {releases.map((release, i) => (
+          <section key={release.id} aria-label={`Cập nhật ${release.date}`} className={i > 0 ? "border-t-2 border-divider pt-2" : ""}>
+            {i > 0 && release.date !== releases[i - 1].date && <p className="m-0 text-xs font-bold text-cobalt">Cập nhật {release.date}</p>}
+            <ReleaseItems release={release} alignGroup="wn-items" />
+          </section>
+        ))}
       </div>
       <div data-align-group="wn-sheet" className="flex flex-col gap-2">
-        {release.tour && release.tour.length > 0 && <PillButton onClick={() => close(true)}>Thử ngay (1 phút)</PillButton>}
+        {canTour && <PillButton onClick={() => close(true)}>Thử ngay (1 phút)</PillButton>}
         <PillButton variant="secondary" onClick={() => close(false)}>
           Để sau
         </PillButton>
