@@ -11,6 +11,9 @@
   in Trước tập; it can be removed.
 - Cài đặt › Hồ sơ › Bé: salt rows 1 g, header 7 g. A past day: no chip, no + Thêm món, ticks disabled.
 - New controls are 44 px or more; no horizontal scroll.
+- hotfix-training-minutes: choose 90 → Hôm nay (no reload) shows Ngày tập 90′ and Sodium for 90 min → Ngày tập reopens
+  on 90; reloads keep it; ?duration still wins; a new Hồ sơ default leaves a set day; the next day reads the default and
+  the past day keeps 90.
 Screenshots: .screenshots/cc-52-*.png
 Run with: ALIGN_BASE_URL=http://localhost:3105 npm run probe -- tests/probes/cc_52_training.py
 """
@@ -344,6 +347,92 @@ def past_day(pg):
     check(boxes.count() == 0 or all(boxes.nth(i).is_disabled() for i in range(boxes.count())), "past day: ticks are view-only")
 
 
+def pill(pg):
+    return pg.locator('[data-tour="training-pill"]:visible').first.inner_text().strip()
+
+
+def sodium(pg):
+    """Hôm nay's Sodium row as the column shows it (amount, % of the day's target)."""
+    return pg.evaluate(
+        """() => { const t = document.body.innerText; const i = t.indexOf('Sodium'); return i < 0 ? '' : t.slice(i, i + 24).replace(/\\n/g, ' '); }"""
+    )
+
+
+def chosen(pg):
+    return pg.locator(f'{MOBILE} [role="group"][aria-label="Thời gian tập"] [aria-pressed="true"]').inner_text().strip()
+
+
+def minutes_stick(browser):
+    """hotfix-training-minutes: today's chosen duration sticks (Hôm nay's pill and salt follow it, without a reload);
+    tomorrow and days with nothing chosen read the Hồ sơ default; a day already set keeps its minutes."""
+    _seed.training_asked(True)  # the Bự / Bé question is flows' job; here it stays closed
+    ctx = browser.new_context(viewport=PHONE)
+    pg = ctx.new_page()
+    go(pg, "/app", 1000)
+    check(pill(pg) == "Ngày tập 60′ ›", f"nothing chosen: the pill shows the Hồ sơ default ({pill(pg)!r})")
+    # Sodium target at 60 min: (4 g + 3 g salt) × 393 mg = 2.750 mg (lib/targets.ts); the sample 2.900 mg is 105 %
+    check("105%" in sodium(pg), f"nothing chosen: Sodium against 60 min ({sodium(pg)!r})")
+    pg.locator('[data-tour="training-pill"]:visible').first.click()
+    pg.wait_for_url("**/training**")
+    pg.wait_for_timeout(800)
+    check(chosen(pg) == "60 phút", f"Ngày tập opens on the default ({chosen(pg)!r})")
+    pg.locator(f'{MOBILE} [role="group"][aria-label="Thời gian tập"]').get_by_role("button", name="90 phút").click()
+    pg.wait_for_timeout(400)
+    day = storage(pg, CHECKLIST)[today_key(pg)]
+    check(day["minutes"] == 90, f"choosing 90 saves it for today ({day})")
+    # Back to Hôm nay in the app (no reload): the pill and the salt follow
+    pg.evaluate("() => { window.__noReload = 1 }")
+    pg.locator(f'{MOBILE} a[href="/app"]').first.click()
+    pg.wait_for_url("**/app")
+    pg.wait_for_timeout(800)
+    check(pg.evaluate("() => window.__noReload === 1"), "Hôm nay was reached without a reload")
+    check(pill(pg) == "Ngày tập 90′ ›", f"Hôm nay: the pill shows 90 ({pill(pg)!r})")
+    # At 90 min: (4 g + 4,5 g) × 393 mg = 3.340 mg; 2.900 mg is 87 %
+    check("87%" in sodium(pg), f"Hôm nay: Sodium follows 90 min ({sodium(pg)!r})")
+    shot(pg, "minutes-home-90-390")
+    pg.locator('[data-tour="training-pill"]:visible').first.click()
+    pg.wait_for_url("**/training**")
+    pg.wait_for_timeout(800)
+    check(chosen(pg) == "90 phút", f"reopening Ngày tập shows 90 ({chosen(pg)!r})")
+    # Top-up salt 1–1,5 g per 20 min: 4,5 g at least for 90 min (3 g for 60)
+    banner = re.search(r"\+ [^\n]* g khi tập", pg.locator(MOBILE).inner_text())
+    check(banner is not None and banner.group(0).startswith("+ 4,5"), f"the salt banner adds 90 min of salt ({banner and banner.group(0)!r})")
+    go(pg, "/training", 1000)
+    check(chosen(pg) == "90 phút", f"a reload of Ngày tập keeps 90 ({chosen(pg)!r})")
+    go(pg, "/app", 1000)
+    check(pill(pg) == "Ngày tập 90′ ›" and "87%" in sodium(pg), f"a reload of Hôm nay keeps 90 ({pill(pg)!r}, {sodium(pg)!r})")
+    go(pg, "/training?duration=45", 1000)
+    check(chosen(pg) == "45 phút", f"?duration still wins when present ({chosen(pg)!r})")
+    check(storage(pg, CHECKLIST)[today_key(pg)]["minutes"] == 90, "?duration alone saves nothing")
+
+    # Hồ sơ default 45: today (set) keeps 90
+    go(pg, "/settings/profile", 1000)
+    pg.get_by_role("group", name="Ngày tập mặc định").get_by_role("button", name="45 phút").click()
+    pg.wait_for_timeout(400)
+    go(pg, "/app", 1000)
+    check(pill(pg) == "Ngày tập 90′ ›", f"a new Hồ sơ default leaves a day already set ({pill(pg)!r})")
+
+    # The next day: today's record becomes yesterday's (as after midnight); the new day reads the default
+    yday = pg.evaluate("() => { const d = new Date(Date.now() - 86400000); return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' }).format(d) }")
+    pg.evaluate(
+        """([key, today, yday]) => { const s = JSON.parse(localStorage.getItem(key)); s[yday] = s[today]; delete s[today]; localStorage.setItem(key, JSON.stringify(s)); }""",
+        [CHECKLIST, today_key(pg), yday],
+    )
+    go(pg, "/app", 1000)
+    check(pill(pg) == "Ngày tập 45′ ›", f"a day with nothing chosen reads the Hồ sơ default ({pill(pg)!r})")
+    go(pg, "/training", 1000)
+    check(chosen(pg) == "45 phút", f"Ngày tập of that day opens on the default ({chosen(pg)!r})")
+    go(pg, f"/app?date={yday}", 1000)
+    check(pill(pg) == "Ngày tập 90′ ›", f"the past day keeps its 90 ({pill(pg)!r})")
+    go(pg, f"/training?date={yday}", 1000)
+    check(chosen(pg) == "90 phút", f"past Ngày tập still shows its 90, read-only ({chosen(pg)!r})")
+    check(storage(pg, CHECKLIST)[yday]["minutes"] == 90, "the past day's record is unchanged")
+    go(pg, "/settings/profile", 1000)
+    pg.get_by_role("group", name="Ngày tập mặc định").get_by_role("button", name="60 phút").click()
+    pg.wait_for_timeout(300)
+    ctx.close()
+
+
 def desktop(browser):
     ctx = browser.new_context(viewport=DESKTOP)
     pg = ctx.new_page()
@@ -361,7 +450,7 @@ def desktop(browser):
 def main():
     with sync_playwright() as p:
         browser = p.chromium.launch()
-        for part in (flows, desktop):
+        for part in (flows, minutes_stick, desktop):
             print(f"\n=== {part.__name__} ===")
             try:
                 part(browser)
