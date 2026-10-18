@@ -1,4 +1,6 @@
 import { formatAmount, formatNumber } from "./format";
+import type { FoodItem } from "./mock/foods";
+import type { CookState, CookSwitch } from "./yield";
 
 function parseDecimal(input: string): number | null {
   const text = input.trim().replace(",", ".");
@@ -508,4 +510,218 @@ export function getEggPartChips<T extends { id: string; nameVi: string }>(
     }
   }
   return chips;
+}
+
+/* ------------------------------------------------------------------------------------------------------------------ */
+/* cc-53b: the coach's portion model. Normal foods go by grams (a gram amount × N, raw or cooked), eggs by the piece   */
+/* (size from the box × how many), and supplements, món Việt, cans and recipes keep their unit (the code above).       */
+/* ------------------------------------------------------------------------------------------------------------------ */
+
+/** What the user set for a food weighed in grams: an amount, how many times it, and when it was weighed. */
+export interface GramPortion {
+  kind: "grams";
+  base: number;
+  mult: number;
+  /** null when the food has no Sống | Chín switch */
+  state: CookState | null;
+}
+
+/** Eggs by the piece: the size on the box (null when the food has one size) and how many. */
+export interface EggPortion {
+  kind: "egg";
+  size: SizeWord | null;
+  count: number;
+}
+
+export type PortionState = GramPortion | EggPortion;
+
+/** The most times ×N multiplies an amount (and the most eggs). */
+export const MAX_MULT = 20;
+
+const STATE_TEXT: Record<CookState, string> = { raw: "Cân sống", cooked: "Đã nấu chín" };
+const EGG_SIZES: readonly SizeWord[] = ["nhỏ", "vừa", "lớn", "rất lớn"];
+const round1 = (n: number) => Math.round(n * 10) / 10;
+
+/** A new amount keeps N (coach rule 2). */
+export function withBase(p: GramPortion, base: number): GramPortion {
+  return { ...p, base };
+}
+
+/** N in whole steps, 1 to MAX_MULT. */
+export function withMult(p: GramPortion, mult: number): GramPortion {
+  return { ...p, mult: Math.min(MAX_MULT, Math.max(1, Math.round(mult))) };
+}
+
+/** "100 g × 3 = 300 g", or how to start when N is 1. */
+export function portionHint(p: GramPortion): string {
+  const base = formatNumber(p.base);
+  return p.mult === 1 ? `Bấm + để nhân ${base} g này lên` : `${base} g × ${p.mult} = ${formatNumber(round1(p.base * p.mult))} g`;
+}
+
+/**
+ * The serving_label of a portion: "150 g", "100 g × 3", "Đã nấu chín · 150 g", "Cỡ lớn · 3 quả", "2 quả".
+ * The server keeps it as the entry's label; parsePortionLabel reads it back when the entry is edited.
+ */
+export function formatPortionLabel(p: PortionState): string {
+  if (p.kind === "egg") return `${p.size ? `Cỡ ${p.size} · ` : ""}${p.count} quả`;
+  const amount = `${formatNumber(p.base)} g${p.mult > 1 ? ` × ${p.mult}` : ""}`;
+  return p.state ? `${STATE_TEXT[p.state]} · ${amount}` : amount;
+}
+
+/** "1.200" and "2,5" (vi-VN), and the dot decimals of older labels ("2.5"). */
+function readNumber(text: string): number {
+  const vi = /^\d{1,3}(?:\.\d{3})+(?:,\d+)?$/.test(text) ? text.replace(/\./g, "") : text;
+  return Number(vi.replace(",", "."));
+}
+
+const GRAM_LABEL = /^(?:(Cân sống|Đã nấu chín) · )?(\d[\d.,]*) g(?: × (\d+))?$/;
+const EGG_LABEL = new RegExp(`^(?:Cỡ (${EGG_SIZES.join("|")}) · )?(\\d+) quả$`);
+
+/** The portion a label written by formatPortionLabel stands for; null for anything else (a unit label, an old one). */
+export function parsePortionLabel(label: string | null | undefined): PortionState | null {
+  const text = (label ?? "").trim();
+  const g = GRAM_LABEL.exec(text);
+  if (g) {
+    const base = readNumber(g[2]);
+    if (!Number.isFinite(base)) return null;
+    const state = g[1] === STATE_TEXT.raw ? "raw" : g[1] === STATE_TEXT.cooked ? "cooked" : null;
+    return { kind: "grams", base, mult: g[3] ? Number(g[3]) : 1, state };
+  }
+  const e = EGG_LABEL.exec(text);
+  if (e) return { kind: "egg", size: (e[1] as SizeWord | undefined) ?? null, count: Number(e[2]) };
+  return null;
+}
+
+export interface EggSize {
+  size: SizeWord | null;
+  /** "Lớn" */
+  label: string;
+  /** The box range, weighed with the shell: "55–60 g" */
+  hint: string;
+  /** The edible grams of one egg of this size */
+  serving: { label: string; grams: number };
+}
+
+/** The egg sizes of a food, from its own "1 quả <size> (trứng 55-60 g)" portions, smallest first. */
+export function eggSizes(food: Pick<UnitFood, "servings">): EggSize[] {
+  const sizes: EggSize[] = [];
+  for (const serving of food.servings ?? []) {
+    const p = parseUnitServing(serving.label);
+    if (!p || p.unit !== "quả" || serving.grams <= 0) continue;
+    if (p.size && !EGG_SIZES.includes(p.size)) continue;
+    sizes.push({
+      size: p.size ?? null,
+      label: p.sizeDisplay ?? "1 quả",
+      hint: (p.hint ?? "").replace(/^trứng\s+/i, "").replace(/(\d)\s*-\s*(\d)/, "$1–$2"),
+      serving,
+    });
+  }
+  return sizes.sort((a, b) => (a.size ? EGG_SIZES.indexOf(a.size) : 0) - (b.size ? EGG_SIZES.indexOf(b.size) : 0));
+}
+
+type ModeFood = UnitFood & { nameVi: string };
+
+/** An egg (Trứng gà, Trứng vịt…) with portions by the piece. Lòng trắng and lòng đỏ go by grams. */
+export function isEggFood(food: ModeFood): boolean {
+  return /^trứng\s/i.test(food.nameVi) && eggSizes(food).length > 0;
+}
+
+/**
+ * How a food's portion is set (coach rules 1, 4 and 5): "units" for supplements, món Việt, cans (Red Bull in lon) and
+ * the user's own foods and recipes, which keep their unit; "egg" for eggs; "grams" for everything else.
+ */
+export function portionModeOf(food: ModeFood): "units" | "egg" | "grams" {
+  if (hidesGrams(food) || food.category === "bo_sung" || food.category === "mon_viet" || food.category === "cua_toi" || food.source === "user") return "units";
+  if ((food.servings ?? []).some((s) => parseUnitServing(s.label)?.unit === "lon")) return "units";
+  return isEggFood(food) ? "egg" : "grams";
+}
+
+/**
+ * The portion an entry (or a picked food) opens with: its label when this model wrote it, an old egg label ("2 quả
+ * vừa (trứng 50-55 g)") as eggs, else its grams.
+ */
+export function startPortion(food: ModeFood, label: string | null | undefined, grams: number): PortionState {
+  const egg = portionModeOf(food) === "egg";
+  const parsed = parsePortionLabel(label);
+  if (parsed && (parsed.kind === "grams" || egg)) return parsed;
+  if (egg) {
+    const unit = parseUnitAmount(label) ?? (parseUnitServing(label) ? { ...parseUnitServing(label)!, amount: 1 } : null);
+    if (unit && unit.unit === "quả") {
+      const size = eggSizes(food).some((s) => s.size === (unit.size ?? null)) ? (unit.size ?? null) : null;
+      return { kind: "egg", size, count: Math.min(MAX_MULT, Math.max(1, Math.round(unit.amount))) };
+    }
+  }
+  return { kind: "grams", base: grams > 0 ? round1(grams) : 100, mult: 1, state: null };
+}
+
+/**
+ * What is logged for a portion: the food row, its grams (so per-100 g scaling on the server stays right) and the label.
+ * Cooked chicken with only raw data logs the raw row at 150 / 0.7 = 214 g; a food with a pair logs the pair.
+ */
+export function resolvePortion(food: FoodItem, p: PortionState, sw: CookSwitch | null): { food: FoodItem; grams: number; label: string } {
+  if (p.kind === "egg") {
+    const sizes = eggSizes(food);
+    const pick = sizes.find((s) => s.size === p.size) ?? sizes[0];
+    const size = sizes.length > 1 && pick ? pick.size : null;
+    return { food, grams: round1((pick?.serving.grams ?? 0) * p.count), label: formatPortionLabel({ ...p, size }) };
+  }
+  const amount = p.base * p.mult;
+  const state = sw ? (p.state ?? sw.own) : null;
+  let logged = food;
+  let grams = amount;
+  if (sw && state !== sw.own) {
+    if (sw.pair) logged = sw.pair;
+    else if (sw.factor) grams = sw.own === "raw" ? amount / sw.factor : amount * sw.factor;
+  }
+  return { food: logged, grams: round1(grams), label: formatPortionLabel({ ...p, state }) };
+}
+
+/** The amount Hôm nay shows for a label this model wrote with a state, ×N or eggs ("150 g", "300 g", "3 quả"); null otherwise. */
+export function portionAmountText(label: string | null | undefined): string | null {
+  const p = parsePortionLabel(label);
+  if (!p) return null;
+  if (p.kind === "egg") return `${p.count} quả`;
+  if (!p.state && p.mult === 1) return null;
+  return `${formatAmount(p.base * p.mult, "g")} g`;
+}
+
+/** The line under a Hôm nay row: how it was weighed ("Đã nấu chín · bằng 214 g lúc sống", "100 g × 3", "Cỡ lớn"). */
+export function portionDetail(label: string | null | undefined, grams: number | null): string | null {
+  const p = parsePortionLabel(label);
+  if (!p) return null;
+  if (p.kind === "egg") return p.size ? `Cỡ ${p.size}` : null;
+  const times = p.mult > 1 ? `${formatNumber(p.base)} g × ${p.mult}` : null;
+  if (!p.state) return times;
+  const amount = p.base * p.mult;
+  if (grams !== null && Math.abs(grams - amount) > 0.5) {
+    return `${STATE_TEXT[p.state]} · bằng ${formatAmount(Math.round(grams), "g")} g lúc ${p.state === "cooked" ? "sống" : "chín"}`;
+  }
+  return times ? `${STATE_TEXT[p.state]} · ${times}` : STATE_TEXT[p.state];
+}
+
+/** The kcal card's line beside the kcal: "3 quả lớn", "300 g đã nấu chín", "200 g lúc sống", "300 g". */
+export function portionSummary(p: PortionState, sw: CookSwitch | null): string {
+  if (p.kind === "egg") return `${p.count} quả${p.size ? ` ${p.size}` : ""}`;
+  const state = sw ? (p.state ?? sw.own) : null;
+  const amount = `${formatNumber(round1(p.base * p.mult))} g`;
+  return state === "raw" ? `${amount} lúc sống` : state === "cooked" ? `${amount} đã nấu chín` : amount;
+}
+
+/**
+ * The note under the kcal card: how eggs are weighed, or what a raw / cooked amount stands for. Null when there is
+ * nothing to say. `loggedGrams` is what resolvePortion logs.
+ */
+export function portionNote(p: PortionState, sw: CookSwitch | null, loggedGrams: number, egg = false): string | null {
+  if (p.kind === "egg") return "Hộp ghi cân cả vỏ, app tự trừ vỏ khi tính.";
+  if (egg) return "Bóc vỏ rồi cân thì nhập số gam ở đây.";
+  if (!sw) return null;
+  const state = p.state ?? sw.own;
+  const amount = p.base * p.mult;
+  const g = (n: number) => `${formatAmount(Math.round(n), "g")} g`;
+  const converted = state !== sw.own && !sw.pair && sw.factor !== null;
+  if (converted && state === "cooked") return `Món chín nhẹ hơn lúc sống, nên ${g(amount)} chín bằng khoảng ${g(loggedGrams)} sống. App tính theo số đó cho bạn.`;
+  if (converted) return `${g(amount)} lúc sống nấu xong thành khoảng ${g(loggedGrams)}. App tính theo số đó cho bạn.`;
+  if (state === "raw") return "Cân lúc đã nấu chín thì chọn Đã nấu chín.";
+  if (sw.factor !== null && amount > 0) return `${g(amount)} chín là khoảng ${g(amount / sw.factor)} trước khi nấu.`;
+  return null;
 }

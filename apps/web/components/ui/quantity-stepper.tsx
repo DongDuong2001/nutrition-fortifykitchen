@@ -4,6 +4,10 @@ import { formatNumber } from "@/lib/format";
 import { markUsed } from "@/lib/onboarding-store";
 import { setPresent } from "@/lib/tour-bus";
 
+/** The round 44 px − / + of every stepper (units, ×N, how many eggs). */
+const stepButton = (colors: string) =>
+  `flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 font-bold transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100 disabled:cursor-default disabled:opacity-40 ${colors}`;
+
 export interface QuantityStepperProps {
   servings: ReadonlyArray<{ label: string; grams: number }>;
   /** The portion label and nominal grams now chosen; the count is worked out from them. */
@@ -70,9 +74,7 @@ export function QuantityStepper({ servings, label, grams, onChange, tone = "ligh
     }
   };
 
-  const button = `flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 text-lg font-bold transition-transform active:scale-[0.97] motion-reduce:active:scale-100 disabled:cursor-default disabled:opacity-40 ${
-    dark ? "bg-card/20 text-on-dark" : "bg-surface text-text"
-  }`;
+  const button = stepButton(dark ? "bg-card/20 text-lg text-on-dark" : "bg-surface text-lg text-text");
 
   return (
     <div
@@ -127,6 +129,60 @@ export function QuantityStepper({ servings, label, grams, onChange, tone = "ligh
           <span aria-hidden="true">+</span>
         </button>
       </div>
+    </div>
+  );
+}
+
+export interface TimesStepperProps {
+  /** "Nhân khẩu phần nhanh" or "Mấy quả?" */
+  label: string;
+  /** The line under the label: "100 g × 3 = 300 g" */
+  hint?: string;
+  value: number;
+  /** "×3" for a multiplier, "3" for a count */
+  valueText: string;
+  min?: number;
+  max: number;
+  onChange: (value: number) => void;
+  /** panel: the portion sheet's row on paper with white buttons; tray: the label left, a paper pill right, no hint */
+  variant?: "panel" | "tray";
+  disabled?: boolean;
+  /** The usage event its tip waits for */
+  usedEvent?: string;
+  dataTour?: string;
+}
+
+/**
+ * cc-53b: the ×N row of a gram portion (whole steps from 1) and the egg count, on the stepper's buttons. No typed field:
+ * the amount is typed in the gram field above it.
+ */
+export function TimesStepper({ label, hint, value, valueText, min = 1, max, onChange, variant = "panel", disabled = false, usedEvent, dataTour }: TimesStepperProps) {
+  const step = (next: number) => {
+    if (usedEvent) markUsed(usedEvent);
+    onChange(Math.min(max, Math.max(min, next)));
+  };
+  const panel = variant === "panel";
+  const button = stepButton(panel ? "bg-card text-xl text-text" : "bg-transparent text-xl text-text");
+  const controls = (
+    <div role="group" aria-label={label} className={`flex shrink-0 items-center gap-1 ${panel ? "" : "rounded-full bg-surface p-0.5"}`}>
+      <button type="button" aria-label={`Giảm ${label.toLowerCase()}`} disabled={disabled || value <= min} onClick={() => step(value - 1)} className={button}>
+        <span aria-hidden="true">−</span>
+      </button>
+      <output aria-live="polite" className={`text-center font-display font-bold tabular-nums ${panel ? "min-w-[52px] text-[26px]" : "min-w-10 text-xl"}`}>
+        {valueText}
+      </output>
+      <button type="button" aria-label={`Tăng ${label.toLowerCase()}`} disabled={disabled || value >= max} onClick={() => step(value + 1)} className={button}>
+        <span aria-hidden="true">+</span>
+      </button>
+    </div>
+  );
+  return (
+    <div data-tour={dataTour} className={`flex items-center justify-between gap-3 ${panel ? "rounded-[14px] bg-surface py-2 pr-2 pl-4" : ""}`}>
+      <span className="flex min-w-0 flex-col gap-0.5">
+        <span className="text-[13px] font-bold text-text">{label}</span>
+        {panel && hint && <span className="text-[13px] text-secondary">{hint}</span>}
+      </span>
+      {controls}
     </div>
   );
 }
