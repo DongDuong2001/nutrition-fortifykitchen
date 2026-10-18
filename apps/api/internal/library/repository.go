@@ -36,7 +36,7 @@ func (r *pgxLibraryRepo) GetFavourites(ctx context.Context, userID uuid.UUID) ([
 		SELECT f.id, f.name_vi, f.category, uf.created_at
 		FROM nutrition.user_favourites uf
 		JOIN nutrition.foods f ON f.id = uf.food_id
-		WHERE uf.user_id = $1
+		WHERE uf.user_id = $1 AND f.is_archived = false
 		ORDER BY uf.created_at DESC
 	`
 	rows, err := r.pool.Query(ctx, query, userID)
@@ -53,7 +53,7 @@ func (r *pgxLibraryRepo) GetFavourites(ctx context.Context, userID uuid.UUID) ([
 		}
 		list = append(list, item)
 	}
-	return list, nil
+	return list, rows.Err()
 }
 
 func (r *pgxLibraryRepo) AddFavourite(ctx context.Context, userID uuid.UUID, foodID uuid.UUID) error {
@@ -80,7 +80,7 @@ func (r *pgxLibraryRepo) GetRecents(ctx context.Context, userID uuid.UUID, limit
 		SELECT f.id, f.name_vi, ur.last_portion_label, ur.last_grams, ur.used_at
 		FROM nutrition.user_recents ur
 		JOIN nutrition.foods f ON f.id = ur.food_id
-		WHERE ur.user_id = $1
+		WHERE ur.user_id = $1 AND f.is_archived = false
 		ORDER BY ur.used_at DESC
 		LIMIT $2
 	`
@@ -102,7 +102,7 @@ func (r *pgxLibraryRepo) GetRecents(ctx context.Context, userID uuid.UUID, limit
 		}
 		list = append(list, item)
 	}
-	return list, nil
+	return list, rows.Err()
 }
 
 func (r *pgxLibraryRepo) UpsertRecent(ctx context.Context, userID uuid.UUID, foodID uuid.UUID, portionLabel string, grams float64) error {
@@ -171,7 +171,7 @@ func (r *pgxLibraryRepo) GetSavedMeals(ctx context.Context, userID uuid.UUID) ([
 			SELECT smi.saved_meal_id, smi.id, smi.food_id, f.name_vi, smi.portion_label, smi.grams, smi.sort
 			FROM nutrition.saved_meal_items smi
 			JOIN nutrition.foods f ON f.id = smi.food_id
-			WHERE smi.saved_meal_id = ANY($1)
+			WHERE smi.saved_meal_id = ANY($1) AND f.is_archived = false
 			ORDER BY smi.sort ASC
 		`
 		iRows, err := r.pool.Query(ctx, itemsSQL, mealIDs)
@@ -215,7 +215,7 @@ func (r *pgxLibraryRepo) GetSavedMealByID(ctx context.Context, userID uuid.UUID,
 		SELECT smi.id, smi.food_id, f.name_vi, smi.portion_label, smi.grams, smi.sort
 		FROM nutrition.saved_meal_items smi
 		JOIN nutrition.foods f ON f.id = smi.food_id
-		WHERE smi.saved_meal_id = $1
+		WHERE smi.saved_meal_id = $1 AND f.is_archived = false
 		ORDER BY smi.sort ASC
 	`
 	rows, err := r.pool.Query(ctx, itemsSQL, mealID)

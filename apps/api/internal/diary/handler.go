@@ -272,6 +272,10 @@ func (h *Handler) SetTraining(w http.ResponseWriter, r *http.Request) {
 			response.Error(w, http.StatusConflict, response.CodePastDayReadOnly, "Cannot write to past dates")
 			return
 		}
+		if errors.Is(err, ErrInvalidTrainingMinutes) {
+			response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, err.Error())
+			return
+		}
 		response.Error(w, http.StatusInternalServerError, response.CodeInternalServerError, "Failed to set training")
 		return
 	}

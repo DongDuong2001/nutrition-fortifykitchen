@@ -138,6 +138,9 @@ func (r *pgxRepository) SearchFoods(ctx context.Context, filter FoodSearchFilter
 		}
 		items = append(items, f)
 	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("failed during foods iteration: %w", err)
+	}
 
 	// Fetch portions for returned foods
 	if len(items) > 0 {
@@ -162,6 +165,9 @@ func (r *pgxRepository) SearchFoods(ctx context.Context, filter FoodSearchFilter
 				if err := pRows.Scan(&fid, &p.ID, &p.LabelVi, &p.Grams); err == nil {
 					portionMap[fid] = append(portionMap[fid], p)
 				}
+			}
+			if err := pRows.Err(); err != nil {
+				return nil, fmt.Errorf("failed during portions iteration: %w", err)
 			}
 			for i := range items {
 				items[i].Servings = portionMap[items[i].ID]
@@ -227,6 +233,9 @@ func (r *pgxRepository) GetFoodByID(ctx context.Context, id uuid.UUID, userID *u
 				f.Servings = append(f.Servings, p)
 			}
 		}
+		if err := rows.Err(); err != nil {
+			return nil, fmt.Errorf("failed during food portions iteration: %w", err)
+		}
 	}
 	if f.Servings == nil {
 		f.Servings = []Portion{}
@@ -282,6 +291,9 @@ func (r *pgxRepository) GetFoodsRichIn(ctx context.Context, nutrient string, lim
 		}
 		items = append(items, item)
 	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("failed during rich-in iteration: %w", err)
+	}
 
 	// Fetch standard serving (first portion) for each item
 	if len(items) > 0 {
@@ -318,6 +330,9 @@ func (r *pgxRepository) GetFoodsRichIn(ctx context.Context, nutrient string, lim
 						}
 					}
 				}
+			}
+			if err := pRows.Err(); err != nil {
+				return nil, fmt.Errorf("failed during rich-in portions iteration: %w", err)
 			}
 		}
 	}

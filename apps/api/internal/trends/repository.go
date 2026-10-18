@@ -64,6 +64,9 @@ func (r *pgxTrendsRepo) GetHistoryDays(ctx context.Context, userID uuid.UUID, st
 			}{cal: cal, nutrients: nut})
 		}
 	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("failed during day totals iteration: %w", err)
+	}
 
 	var result []TrendDayTotals
 	for cur := startT; !cur.After(endT); cur = cur.AddDate(0, 0, 1) {
@@ -225,7 +228,7 @@ func (r *pgxTrendsRepo) GetWeightLogs(ctx context.Context, userID uuid.UUID, upT
 			})
 		}
 	}
-	return points, nil
+	return points, rows.Err()
 }
 
 func (r *pgxTrendsRepo) GetTopFoodsForPeriod(ctx context.Context, userID uuid.UUID, startDate string, endDate string) (map[string][]FoodContribution, error) {
@@ -278,6 +281,9 @@ func (r *pgxTrendsRepo) GetTopFoodsForPeriod(ctx context.Context, userID uuid.UU
 			}
 		}
 	}
+	if err := rows.Err(); err != nil {
+		return make(map[string][]FoodContribution), fmt.Errorf("failed during top foods iteration: %w", err)
+	}
 
 	result := make(map[string][]FoodContribution)
 	for _, k := range CountedNutrientKeys {
@@ -324,6 +330,9 @@ func (r *pgxTrendsRepo) GetStreak(ctx context.Context, userID uuid.UUID, todayIs
 		if err := rows.Scan(&d); err == nil {
 			dates[d] = true
 		}
+	}
+	if err := rows.Err(); err != nil {
+		return 0, fmt.Errorf("failed during streak iteration: %w", err)
 	}
 
 	todayT, err := time.Parse("2006-01-02", todayIso)

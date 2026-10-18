@@ -73,9 +73,18 @@ func TestOpenAPIContractRoutes_Registered(t *testing.T) {
 		// Protected Trends
 		{"GET", "/api/v1/trends"},
 
+		// Protected Coaching
+		{"POST", "/api/v1/coaches/apply"},
+		{"GET", "/api/v1/coaches/my-application"},
+
+		// Entry restore
+		{"POST", "/api/v1/entries/11111111-1111-1111-1111-111111111111/restore"},
+
 		// Admin
 		{"GET", "/api/v1/admin/drafts"},
 		{"PATCH", "/api/v1/admin/drafts/11111111-1111-1111-1111-111111111111/status"},
+		{"GET", "/api/v1/admin/coach-applications"},
+		{"PATCH", "/api/v1/admin/coach-applications/11111111-1111-1111-1111-111111111111/status"},
 	}
 
 	for _, rt := range routes {
