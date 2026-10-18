@@ -60,7 +60,7 @@ function TrainingContent() {
 
   const [selectedDuration, setSelectedDuration] = useState<string>(initialDuration);
   // The profile's default training time (Hồ sơ) applies until the URL names a duration
-  const { profile, hydrated, data: diaryData, getEntry, deleteEntry } = useDiary();
+  const { profile, hydrated, data: diaryData, getEntry, deleteEntry, deleteEntries } = useDiary();
   const { foods, pending: catalogPending } = useCatalogFoods();
   const profileDuration = profile.trainingMinutesDefault === 0 ? "rest" : String(profile.trainingMinutesDefault);
   const [clientNow, setClientNow] = useState<Date | null>(null);
@@ -175,9 +175,10 @@ function TrainingContent() {
     if (isPast) return;
     const day = { ...record, minutes: trainingMinutes, ticked };
     if (ticked.includes(item.id)) {
-      // Untick: the linked entry goes, with the usual Hoàn tác (which ticks the item again)
-      const link = day.logged?.[item.id];
-      if (link && getEntry(link.entryId)) deleteEntry(link.entryId);
+      // Untick: the linked entries go (both of the Red Bull + mật mía mix) with one Hoàn tác, which ticks the item again
+      const ids = (day.logged?.[item.id]?.entryIds ?? []).filter((id) => getEntry(id) !== null);
+      if (ids.length === 1) deleteEntry(ids[0]);
+      else if (ids.length > 1) deleteEntries(ids, todayIso);
       saveDay(untick(day, item.id));
     } else if (canLogItem(item, foods)) {
       setLogItem(item);
@@ -187,8 +188,8 @@ function TrainingContent() {
     }
   };
 
-  const handleLogged = (itemId: string, entryId: string, qty: string) => {
-    saveDay(logTick({ ...record, minutes: trainingMinutes, ticked }, itemId, entryId, qty));
+  const handleLogged = (itemId: string, entryIds: string[], qty: string) => {
+    saveDay(logTick({ ...record, minutes: trainingMinutes, ticked }, itemId, entryIds, qty));
     setLogItem(null);
   };
 
