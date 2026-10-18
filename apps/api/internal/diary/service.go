@@ -11,8 +11,9 @@ import (
 )
 
 var (
-	ErrEntryNotFound         = errors.New("diary entry not found")
-	ErrRestoreWindowExpired = errors.New("restore window expired (must be within 10 seconds)")
+	ErrEntryNotFound          = errors.New("diary entry not found")
+	ErrRestoreWindowExpired  = errors.New("restore window expired (must be within 10 seconds)")
+	ErrInvalidTrainingMinutes = errors.New("training_minutes must be one of: 0, 45, 60, 90, 120, 240")
 )
 
 type RecentsTracker interface {
@@ -456,7 +457,7 @@ func (s *diaryServiceImpl) SetTraining(ctx context.Context, userID uuid.UUID, da
 		return nil, err
 	}
 	if minutes != 0 && minutes != 45 && minutes != 60 && minutes != 90 && minutes != 120 && minutes != 240 {
-		return nil, errors.New("training_minutes must be one of: 0, 45, 60, 90, 120, 240")
+		return nil, ErrInvalidTrainingMinutes
 	}
 	err := s.repo.UpsertDayTraining(ctx, userID, date, minutes)
 	if err != nil {
