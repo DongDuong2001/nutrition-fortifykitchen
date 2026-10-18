@@ -28,7 +28,8 @@ const COACH_FOODS: Record<CoachFoodKey, CoachFood> = {
   redbull: {
     source: "label",
     sourceId: "Red Bull S.r.l. 25 cl can label (Italy)",
-    names: [{ name: "Red Bull (nước tăng lực)" }],
+    // The demo catalogue's row (cc-53) is plain "Red Bull"
+    names: [{ name: "Red Bull (nước tăng lực)" }, { name: "Red Bull", brand: "Red Bull" }],
     label: "Red Bull",
   },
   "mat-mia": {
