@@ -24,13 +24,19 @@ export const COOKED_PER_RAW: Readonly<Record<YieldGroup, number>> = { meat: 0.7,
 const COOKED_WORDS = ["nấu chín", "chín", "luộc", "hấp", "nướng", "chiên", "rang", "áp chảo", "quay", "kho", "xào", "rim"];
 const RAW_WORDS = ["sống", "hạt khô", "khô"];
 // "nấu chín" before "chín", "hạt khô" before "khô": the longer word is taken first
-const wordRe = (words: readonly string[]) => new RegExp(`(?:^|[\\s(,])(${words.join("|")})(?=$|[\\s),])`, "giu");
+const wordRe = (words: readonly string[], flags = "iu") => new RegExp(`(?:^|[\\s(,])(${words.join("|")})(?=$|[\\s),])`, flags);
+// Built once: the pair search runs them over the whole catalogue
+const COOKED_RE = wordRe(COOKED_WORDS);
+const RAW_RE = wordRe(RAW_WORDS);
+const STATE_WORDS_RE = wordRe([...COOKED_WORDS, ...RAW_WORDS], "giu");
+// The cooked row to prefer when there are several (Cá nục luộc, nấu chín, nướng)
+const COOKED_RANK = ["nấu chín", "chín", "luộc", "hấp"].map((w) => wordRe([w]));
+const RAW_RANK = RAW_WORDS.map((w) => wordRe([w]));
 
 /** The state the name says, or null when it says none ("Ức gà phi lê"). A cooking word wins: "Bún khô (luộc)" is cooked. */
 export function cookStateOf(nameVi: string): CookState | null {
-  const name = nameVi.toLowerCase();
-  if (wordRe(COOKED_WORDS).test(name)) return "cooked";
-  if (wordRe(RAW_WORDS).test(name)) return "raw";
+  if (COOKED_RE.test(nameVi)) return "cooked";
+  if (RAW_RE.test(nameVi)) return "raw";
   return null;
 }
 
@@ -39,7 +45,7 @@ export function nameStem(nameVi: string): string {
   return nameVi
     .toLowerCase()
     .replace(/\([^)]*\)/g, " ")
-    .replace(wordRe([...COOKED_WORDS, ...RAW_WORDS]), " ")
+    .replace(STATE_WORDS_RE, " ")
     .replace(/[\s,]+/g, " ")
     .trim();
 }
@@ -95,8 +101,6 @@ export function ownCookState(food: Pick<FoodItem, "nameVi" | "category" | "cookS
   return group === "noodle" ? "cooked" : "raw";
 }
 
-// The cooked row to prefer when there are several (Cá nục luộc, nấu chín, nướng)
-const COOKED_ORDER = ["nấu chín", "chín", "luộc", "hấp"];
 
 function pairOf(food: FoodItem, catalog: readonly FoodItem[], own: CookState): FoodItem | null {
   const stem = nameStem(food.nameVi);
@@ -104,8 +108,7 @@ function pairOf(food: FoodItem, catalog: readonly FoodItem[], own: CookState): F
   const found = catalog.filter((f) => f.id !== food.id && f.category === food.category && cookStateOf(f.nameVi) === other && nameStem(f.nameVi) === stem);
   if (found.length === 0) return null;
   const rank = (f: FoodItem) => {
-    const name = f.nameVi.toLowerCase();
-    const at = (other === "cooked" ? COOKED_ORDER : RAW_WORDS).findIndex((w) => wordRe([w]).test(name));
+    const at = (other === "cooked" ? COOKED_RANK : RAW_RANK).findIndex((re) => re.test(f.nameVi));
     return at === -1 ? 99 : at;
   };
   return [...found].sort((a, b) => rank(a) - rank(b))[0];

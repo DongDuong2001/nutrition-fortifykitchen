@@ -14,6 +14,7 @@ import {
   getFoodUnitTabs,
   capitalizeWord,
   eggParts,
+  gramFieldText as fieldText,
   eggSizes,
   portionHint,
   portionModeOf,
@@ -40,7 +41,6 @@ export interface PortionAreaProps {
   /** The logged food changes (a raw / cooked pair, an egg part). Without it the food stays and grams are converted. */
   onFoodChange?: (food: FoodItem) => void;
   disabled?: boolean;
-  tone?: "light" | "dark";
   /** cc-53b: panel is the portion sheet (labels, hints, tips); tray is a row of Khay · xem lại (compact, no tips) */
   variant?: "panel" | "tray";
   className?: string;
@@ -55,8 +55,6 @@ export function PortionArea(props: PortionAreaProps) {
   return portionModeOf(props.food) === "units" ? <UnitPortionArea {...props} /> : <GramPortionArea {...props} />;
 }
 
-/** Grams as the gram field shows them: a decimal comma, no thousands dot ("1.000" would read as 1 g). */
-const fieldText = (n: number) => (n > 0 ? String(Math.round(n * 10) / 10).replace(".", ",") : "");
 
 /** A thing on screen with a tip of its own, counted while it shows. */
 function usePresent(name: Presence, on: boolean) {
@@ -81,9 +79,10 @@ function GramPortionArea({
 }: PortionAreaProps) {
   const panel = variant === "panel";
   const isEggFood = portionModeOf(food) === "egg";
-  const sw = useMemo(() => cookSwitchFor(food, MOCK_FOODS, !!onFoodChange), [food, onFoodChange]);
+  const canSwap = !!onFoodChange;
+  const sw = useMemo(() => cookSwitchFor(food, MOCK_FOODS, canSwap), [food, canSwap]);
   const sizes = useMemo(() => eggSizes(food), [food]);
-  const parts = useMemo(() => (onFoodChange ? eggParts(food, MOCK_FOODS) : []), [food, onFoodChange]);
+  const parts = useMemo(() => (canSwap ? eggParts(food, MOCK_FOODS) : []), [food, canSwap]);
 
   // The state is held here and written out as grams + label; a label from outside (another food, Lưu & chọn tiếp)
   // starts it again. emitted is the last label this area wrote, so its own writes do not restart it.
@@ -207,9 +206,9 @@ function GramPortionArea({
                         markUsed("egg-mode");
                         emit({ ...p, size: z.size });
                       }}
-                      className={`flex cursor-pointer flex-col justify-center rounded-xl bg-card text-text      disabled:opacity-50 ${
-                        panel ? "min-h-[52px] items-start px-3 py-1.5 text-left" : "h-11 items-center px-1 text-[13px]"
-                      } ${on ? `border-2 border-blue ${panel ? "" : "bg-cobalt-tint font-bold text-blue"}` : "border border-card-border"}`}
+                      className={`flex cursor-pointer flex-col justify-center rounded-xl bg-card text-text disabled:opacity-50 ${
+ panel ? "min-h-[52px] items-start px-3 py-1.5 text-left" : "h-11 items-center px-1 text-[13px]"
+ } ${on ? `border-2 border-blue ${panel ? "" : "bg-cobalt-tint font-bold text-blue"}` : "border border-card-border"}`}
                     >
                       <span className={panel ? `text-[15px] ${on ? "font-bold" : "font-semibold"}` : ""}>{z.label}</span>
                       {panel && z.hint && <span className="text-xs text-secondary">{z.hint}</span>}
@@ -234,9 +233,9 @@ function GramPortionArea({
               onClick={() => {
                 if (!part.active) onFoodChange?.(part.food);
               }}
-              className={`min-h-11 cursor-pointer rounded-full px-2 text-[13px]      disabled:opacity-50 ${
-                part.active ? "border-0 bg-ink font-bold text-on-dark" : "border border-card-border bg-card font-semibold text-text"
-              }`}
+              className={`min-h-11 cursor-pointer rounded-full px-2 text-[13px] disabled:opacity-50 ${
+ part.active ? "border-0 bg-ink font-bold text-on-dark" : "border border-card-border bg-card font-semibold text-text"
+ }`}
             >
               {part.label}
             </button>
@@ -255,8 +254,8 @@ function GramPortionArea({
           <div className="flex items-stretch gap-2">
             <div
               className={`flex min-w-0 flex-1 items-center gap-1 border-2 border-blue bg-card focus-within:ring-2 focus-within:ring-blue/30 ${
-                panel ? "h-15 rounded-[14px] px-4" : "h-12 rounded-xl px-3"
-              }`}
+ panel ? "h-15 rounded-[14px] px-4" : "h-12 rounded-xl px-3"
+ }`}
             >
               <input
                 id={`${ids}-grams`}
@@ -282,9 +281,9 @@ function GramPortionArea({
                 setText("100");
                 emit(withBase(p, 100));
               }}
-              className={`shrink-0 cursor-pointer whitespace-nowrap rounded-[14px]      disabled:opacity-50 ${
-                panel ? "w-23 text-base" : "h-12 rounded-xl px-3 text-sm"
-              } ${p.base === 100 ? "border-2 border-blue bg-cobalt-tint font-bold text-blue" : "border border-card-border bg-card font-semibold text-text"}`}
+              className={`shrink-0 cursor-pointer whitespace-nowrap rounded-[14px] disabled:opacity-50 ${
+ panel ? "w-23 text-base" : "h-12 rounded-xl px-3 text-sm"
+ } ${p.base === 100 ? "border-2 border-blue bg-cobalt-tint font-bold text-blue" : "border border-card-border bg-card font-semibold text-text"}`}
             >
               100 g
             </button>
@@ -333,11 +332,9 @@ function UnitPortionArea({
   selectedServingLabel,
   setSelectedServingLabel,
   disabled = false,
-  tone = "light",
   className = "",
   "data-align-group": dataAlignGroup,
 }: PortionAreaProps) {
-  const isDark = tone === "dark";
   const parsedGrams = useMemo(() => parseGramsInput(gramsInput), [gramsInput]);
   const noGrams = hidesGrams(food);
 
@@ -449,9 +446,7 @@ function UnitPortionArea({
           role="tablist"
           aria-label="Đơn vị khẩu phần"
           data-tour="unit-toggle"
-          className={`grid gap-1 p-1 rounded-2xl w-full border ${
-            isDark ? "bg-surface-dark/80 border-card-border/30" : "bg-card-border/20 border-card-border/40"
-          }`}
+          className="grid gap-1 p-1 rounded-2xl w-full border bg-card-border/20 border-card-border/40"
           style={{ gridTemplateColumns: `repeat(${tabsInfo.tabs.length}, minmax(0, 1fr))` }}
         >
           {tabsInfo.tabs.map((tab) => {
@@ -464,15 +459,11 @@ function UnitPortionArea({
                 aria-selected={isActive}
                 disabled={disabled}
                 onClick={() => handleTabChange(tab.id)}
-                className={`min-h-[44px] rounded-xl text-sm font-bold flex items-center justify-center transition-press cursor-pointer   disabled:opacity-50 ${
-                  isActive
-                    ? isDark
-                      ? "bg-surface text-text shadow-xs"
-                      : "bg-ink text-on-dark shadow-xs"
-                    : isDark
-                    ? "text-muted-on-dark hover:text-on-dark"
-                    : "text-secondary hover:text-text"
-                }`}
+                className={`min-h-[44px] rounded-xl text-sm font-bold flex items-center justify-center transition-press cursor-pointer disabled:opacity-50 ${
+ isActive
+ ? "bg-ink text-on-dark shadow-xs"
+ : "text-secondary hover:text-text"
+ }`}
               >
                 {tab.label}
               </button>
@@ -524,15 +515,11 @@ function UnitPortionArea({
                       setGramsInput(String(newGrams));
                       setSelectedServingLabel(newLabel);
                     }}
-                    className={`min-h-[44px] rounded-full text-xs px-2 flex items-center justify-center text-center transition-press cursor-pointer font-semibold border   disabled:opacity-50 ${
-                      isActive
-                        ? isDark
-                          ? "bg-surface text-text font-bold shadow-xs border-transparent"
-                          : "bg-ink text-on-dark font-bold shadow-xs border-transparent"
-                        : isDark
-                        ? "bg-surface-dark text-on-dark border-card-border/40 hover:bg-card-border/20"
-                        : "bg-surface text-text border-card-border hover:bg-paper-dark"
-                    }`}
+                    className={`min-h-[44px] rounded-full text-xs px-2 flex items-center justify-center text-center transition-press cursor-pointer font-semibold border disabled:opacity-50 ${
+ isActive
+ ? "bg-ink text-on-dark font-bold shadow-xs border-transparent"
+ : "bg-surface text-text border-card-border hover:bg-paper-dark"
+ }`}
                   >
                     {chipText}
                   </button>
@@ -546,7 +533,6 @@ function UnitPortionArea({
             servings={food.servings}
             label={selectedServingLabel}
             grams={parsedGrams}
-            tone={tone}
             disabled={disabled}
             onChange={(g, l) => {
               setGramsInput(String(g));
@@ -561,15 +547,10 @@ function UnitPortionArea({
         <div className="flex flex-col gap-2 w-full">
           {/* Gram typed input and gram chips */}
           <ChipGroup
-            tone={tone}
             columns={Math.max(1, gramServings.length + 1)}
             leadingInput={
               <label
-                className={`flex items-center justify-center rounded-xl px-2 h-11 w-full cursor-text box-border border-2 focus-within:ring-2 ${
-                  isDark
-                    ? "bg-surface-dark border-sky text-on-dark focus-within:ring-sky"
-                    : "bg-card border-blue text-text focus-within:ring-blue"
-                }`}
+                className="flex items-center justify-center rounded-xl px-2 h-11 w-full cursor-text box-border border-2 focus-within:ring-2 bg-card border-blue text-text focus-within:ring-blue"
               >
                 <input
                   id="portion-grams-input"
@@ -584,14 +565,10 @@ function UnitPortionArea({
                     setGramsInput(text);
                     setSelectedServingLabel(formatGramsServingLabel(text, `${text} g`));
                   }}
-                  className={`w-full bg-transparent border-0 outline-none focus-visible:outline-none font-bold text-sm tabular-nums text-right ${
-                    isDark ? "text-on-dark" : "text-text"
-                  }`}
+                  className="w-full bg-transparent border-0 outline-none focus-visible:outline-none font-bold text-sm tabular-nums text-right text-text"
                 />
                 <span
-                  className={`text-xs ml-1 font-semibold ${
-                    isDark ? "text-muted-on-dark" : "text-secondary"
-                  }`}
+                  className="text-xs ml-1 font-semibold text-secondary"
                 >
                   g
                 </span>

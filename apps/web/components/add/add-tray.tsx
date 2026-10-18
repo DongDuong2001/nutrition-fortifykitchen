@@ -8,12 +8,11 @@ import { Presence, usePresence } from "@/components/ui/presence";
 import { NO_ENERGY_MESSAGE } from "@/lib/diary-edits";
 import { formatAmount } from "@/lib/format";
 import { markUsed } from "@/lib/onboarding-store";
-import { parseGramsInput, parsePortionLabel, portionDetail, portionHint, scaleNutrients } from "@/lib/portion";
+import { gramFieldText, parseGramsInput, parsePortionLabel, portionHint, scaleNutrients } from "@/lib/portion";
 import { setPresent } from "@/lib/tour-bus";
 import type { TrayItem, TrayTotals } from "@/lib/tray";
 
 const kcalText = (kcal: number | null) => (kcal === null ? "—" : formatAmount(kcal, "kcal"));
-const gramsText = (value: number | null) => (value === null ? "—" : `${formatAmount(value, "g")} g`);
 
 export interface TrayBarProps {
   totals: TrayTotals;
@@ -60,17 +59,15 @@ export function TrayBar({ totals, mealName, canAdd, submitting = false, onReview
   );
 }
 
-/** Grams as a gram field holds them (decimal comma). */
-const fieldText = (grams: number) => String(grams).replace(".", ",");
 
 /** The line beside Xong: the ×N sum, what a raw / cooked amount stands for, or how eggs are counted. */
 function rowHint(item: TrayItem): string | null {
   const p = parsePortionLabel(item.label);
   if (!p) return null;
   if (p.kind === "egg") return p.size ? "Cỡ ghi trên hộp, app tự trừ vỏ." : null;
-  const detail = portionDetail(item.label, item.grams);
-  const converted = detail?.includes("bằng") ? detail.slice(detail.indexOf("bằng")) : null;
-  return converted ? `${portionHint(p)}, ${converted}` : portionHint(p);
+  // Logged at other grams than the amount set: a raw / cooked conversion (lib/portion portionDetail reads it the same way)
+  const converted = p.state !== null && Math.abs(item.grams - p.base * p.mult) > 0.5;
+  return converted ? `${portionHint(p)}, bằng khoảng ${formatAmount(Math.round(item.grams), "g")} g lúc ${p.state === "cooked" ? "sống" : "chín"}` : portionHint(p);
 }
 
 /** How long a removed card takes to leave: Presence's exit (the .m-pop out, --m-pop-out). */
@@ -150,7 +147,7 @@ function TrayCard({ item, open, first, onToggle, onRemove, onChange }: TrayRowPr
       <Expand open={open} id={editorId} className="flex flex-col gap-3 px-3 pb-3">
         <PortionArea
           food={food}
-          gramsInput={fieldText(item.grams)}
+          gramsInput={gramFieldText(item.grams)}
           setGramsInput={(v) => onChange({ grams: parseGramsInput(v) })}
           selectedServingLabel={item.label}
           setSelectedServingLabel={(label) => onChange({ label })}
@@ -261,7 +258,7 @@ function TrayReview({ items, totals, mealName, canAdd, submitting, onRemove, onC
     return () => setPresent("tray", false);
   }, [shown]);
 
-  const kcal = totals.kcal === null ? "—" : formatAmount(totals.kcal, "kcal");
+  const kcal = kcalText(totals.kcal);
 
   return (
     <div data-tray-review className="relative -mx-4 -mb-6 flex h-[min(790px,88dvh)] flex-col lg:h-[min(720px,80dvh)]">

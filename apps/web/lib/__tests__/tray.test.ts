@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { FoodItem } from "../mock/foods";
-import { canAddTray, inTray, putInTray, removeFromTray, setTrayPortion, toggleTray, trayTotals, type TrayItem } from "../tray";
+import { canAddTray, inTray, patchTrayItem, putInTray, removeFromTray, setTrayPortion, toggleTray, trayTotals, type TrayItem } from "../tray";
 
 const food = (id: string, nutrients: Record<string, number | null>, servings = [{ label: "1 chén", grams: 200 }, { label: "100 g", grams: 100 }]): FoodItem => ({
   id,
@@ -78,5 +78,26 @@ describe("tray (the multi-add list on /add)", () => {
     expect(canAddTray([{ food: rice, grams: 200, label: "1 chén" }])).toBe(true);
     expect(canAddTray([{ food: mystery, grams: 100, label: "100 g" }])).toBe(false);
     expect(canAddTray([])).toBe(false);
+  });
+});
+
+describe("cc-53b: editing the tray", () => {
+  it("an item cleared to 0 g blocks the add (it would log an empty entry)", () => {
+    const tray = toggleTray(toggleTray([], rice), egg);
+    expect(canAddTray(tray)).toBe(true);
+    expect(canAddTray(patchTrayItem(tray, "egg", { grams: 0 }))).toBe(false);
+  });
+
+  it("swapping in a pair already in the tray merges into it: no food twice", () => {
+    const cooked = food("rice-cooked", { energy: 130 });
+    const tray = [...toggleTray([], rice), { food: cooked, grams: 50, label: "50 g" }];
+    const out = patchTrayItem(tray, "rice", { food: cooked, grams: 300, label: "Đã nấu chín · 100 g × 3" });
+    expect(out).toEqual([{ food: cooked, grams: 300, label: "Đã nấu chín · 100 g × 3" }]);
+  });
+
+  it("swapping in a new pair replaces the food in place", () => {
+    const cooked = food("rice-cooked", { energy: 130 });
+    const out = patchTrayItem(toggleTray(toggleTray([], rice), egg), "rice", { food: cooked });
+    expect(out.map((i) => i.food.id)).toEqual(["rice-cooked", "egg"]);
   });
 });

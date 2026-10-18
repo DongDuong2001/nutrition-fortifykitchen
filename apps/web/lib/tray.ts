@@ -41,8 +41,16 @@ export function putInTray(items: readonly TrayItem[], food: FoodItem, grams: num
   return [...items, { food, grams, label }];
 }
 
-/** One item changed: its grams and label, or its food (a raw / cooked pair swapped in, cc-53b). */
+/**
+ * One item changed: its grams and label, or its food (a raw / cooked pair swapped in, cc-53b). A pair already in the
+ * tray takes the item's portion and the item goes, so a food is never in it twice.
+ */
 export function patchTrayItem(items: readonly TrayItem[], foodId: string, patch: Partial<TrayItem>): TrayItem[] {
+  const to = patch.food?.id;
+  if (to && to !== foodId && inTray(items, to)) {
+    const item = items.find((i) => i.food.id === foodId);
+    return item ? setTrayPortion(removeFromTray(items, foodId), to, patch.grams ?? item.grams, patch.label ?? item.label) : [...items];
+  }
   return items.map((i) => (i.food.id === foodId ? { ...i, ...patch } : i));
 }
 
@@ -71,7 +79,7 @@ export function trayTotals(items: readonly TrayItem[]): TrayTotals {
   };
 }
 
-/** Every food can be logged (canLog) and there is at least one. */
+/** Every food can be logged (canLog) at more than 0 g, and there is at least one. */
 export function canAddTray(items: readonly TrayItem[]): boolean {
-  return items.length > 0 && items.every((i) => canLog(i.food));
+  return items.length > 0 && items.every((i) => i.grams > 0 && canLog(i.food));
 }

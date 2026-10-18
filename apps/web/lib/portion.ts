@@ -9,6 +9,11 @@ function parseDecimal(input: string): number | null {
   return Number.isFinite(n) && n >= 0 ? n : null;
 }
 
+/** Grams as a gram field holds them: a decimal comma, no thousands dot ("1.000" would read as 1 g), blank for 0. */
+export function gramFieldText(grams: number): string {
+  return grams > 0 ? String(Math.round(grams * 10) / 10).replace(".", ",") : "";
+}
+
 /** A gram amount as shown: "2,5 g", "1.000 g". */
 export function gramsServingLabel(grams: number): string {
   return `${formatAmount(grams, "g")} g`;

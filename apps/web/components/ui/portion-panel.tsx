@@ -59,7 +59,8 @@ export function PortionPanel({
   const parsed = mode === "units" ? null : parsePortionLabel(selectedServingLabel);
   // An older "1 quả" of a fruit reads as an egg label: only an egg food takes it as one
   const portion = parsed?.kind === "egg" && mode !== "egg" ? null : parsed;
-  const sw = useMemo(() => (mode === "grams" ? cookSwitchFor(food, MOCK_FOODS, !!onFoodChange) : null), [mode, food, onFoodChange]);
+  const canSwap = !!onFoodChange;
+  const sw = useMemo(() => (mode === "grams" ? cookSwitchFor(food, MOCK_FOODS, canSwap) : null), [mode, food, canSwap]);
   const amountText = unitAmountText(food, selectedServingLabel, parsedGrams) ?? (selectedServingLabel.includes("g") ? gramsServingLabel(parsedGrams) : selectedServingLabel);
   const summary = portion ? portionSummary(portion, sw) : amountText;
   const note = portion ? portionNote(portion, sw, parsedGrams, mode === "egg") : null;

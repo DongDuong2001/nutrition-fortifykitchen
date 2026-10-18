@@ -14,7 +14,6 @@ export interface QuantityStepperProps {
   label: string;
   grams: number;
   onChange: (grams: number, label: string) => void;
-  tone?: "light" | "dark";
   disabled?: boolean;
   className?: string;
 }
@@ -24,11 +23,10 @@ export interface QuantityStepperProps {
  * Amount stepper that is also a typed field (comma or dot). data-tour="unit-stepper" on the root is its one tip
  * target wherever it shows (supplements, eggs, fruit and other unit portions).
  */
-export function QuantityStepper({ servings, label, grams, onChange, tone = "light", disabled = false, className = "" }: QuantityStepperProps) {
+export function QuantityStepper({ servings, label, grams, onChange, disabled = false, className = "" }: QuantityStepperProps) {
   const current = unitCountOf(servings, label, grams);
   const count = current ? current.count : 1;
   const serving = current?.serving ?? servings[0];
-  const dark = tone === "dark";
 
   const [typedText, setTypedText] = useState(formatNumber(count));
 
@@ -74,7 +72,7 @@ export function QuantityStepper({ servings, label, grams, onChange, tone = "ligh
     }
   };
 
-  const button = stepButton(dark ? "bg-card/20 text-lg text-on-dark" : "bg-surface text-lg text-text");
+  const button = stepButton("bg-surface text-lg text-text");
 
   return (
     <div
@@ -83,7 +81,7 @@ export function QuantityStepper({ servings, label, grams, onChange, tone = "ligh
       data-tour="unit-stepper"
       className={`flex items-center justify-between gap-2 ${className}`}
     >
-      <span className={`text-sm font-semibold ${dark ? "text-muted-on-dark" : "text-secondary"}`}>Số lượng</span>
+      <span className="text-sm font-semibold text-secondary">Số lượng</span>
       <div className="flex items-center gap-2">
         <button
           type="button"
@@ -95,14 +93,10 @@ export function QuantityStepper({ servings, label, grams, onChange, tone = "ligh
           <span aria-hidden="true">−</span>
         </button>
         <div
-          className={`flex h-11 min-w-[72px] items-center justify-center rounded-xl border px-2 focus-within:ring-2 ${
-            dark
-              ? "border-card-border/30 bg-surface-dark focus-within:ring-sky text-on-dark"
-              : "border-card-border bg-card focus-within:ring-blue text-text"
-          }`}
+          className="flex h-11 min-w-[72px] items-center justify-center rounded-xl border px-2 focus-within:ring-2 border-card-border bg-card focus-within:ring-blue text-text"
         >
           <span className="sr-only">{`×${count}`}</span>
-          <span aria-hidden="true" className={`font-bold select-none text-base mr-0.5 ${dark ? "text-muted-on-dark" : "text-secondary"}`}>
+          <span aria-hidden="true" className="font-bold select-none text-base mr-0.5 text-secondary">
             ×
           </span>
           <input
@@ -114,9 +108,7 @@ export function QuantityStepper({ servings, label, grams, onChange, tone = "ligh
             onChange={handleInputChange}
             onBlur={handleInputBlur}
             disabled={disabled}
-            className={`w-10 bg-transparent text-center text-base font-bold tabular-nums outline-none border-0 focus-visible:outline-none ${
-              dark ? "text-on-dark" : "text-text"
-            }`}
+            className="w-10 bg-transparent text-center text-base font-bold tabular-nums outline-none border-0 focus-visible:outline-none text-text"
           />
         </div>
         <button
