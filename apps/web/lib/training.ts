@@ -41,6 +41,8 @@ export interface TrainingCheckItem {
   dose: string;
   /** The portion a tick logs, in grams: the dose at the chosen end (the lower end until a size is chosen) */
   grams?: number;
+  /** `grams` are grams of carbs, not of the food (Tinh bột nhanh, Hao 18/10): the amount comes from the food's carbs */
+  carbs?: boolean;
   /** Coach item: what it can log (lib/training-foods choices); several = the user picks one in the sheet */
   foods?: readonly string[];
   /** The user's own item: logs this catalogue food, and can be removed */
@@ -181,8 +183,9 @@ export function getTrainingPhases(
   intraItems.push({
     id: "intra-carb",
     label: "Tinh bột nhanh",
-    note: note("intra-carb", "Redbull · Redbull + mật mía · mật mía Golden Barrel"),
+    note: note("intra-carb", "Red Bull · Red Bull + mật mía · mật mía Golden Barrel"),
     ...coachDose(30, 45, size),
+    carbs: true,
     foods: ["redbull", "redbull-mat-mia", "mat-mia"],
   });
   intraItems.push(...ownOf("intra-workout"));
