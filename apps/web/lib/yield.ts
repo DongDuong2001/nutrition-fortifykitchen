@@ -1,25 +1,22 @@
 import type { FoodItem } from "./mock/foods";
-import PAIRS from "./data/raw-cooked-pairs.json";
-import GROUP_YIELDS from "./data/raw-cooked-group-yields.json";
+import PAIRS from "./data/raw-cooked-pairs.slim.json";
+import GROUP_MEDIANS from "./data/raw-cooked-group-yields.slim.json";
 
 /**
  * Raw or cooked (cc-53b, coach rule 3). A food is weighed either before cooking ("Cân sống") or after ("Đã nấu chín").
  * Where the catalogue has both rows (Cá chép (sống) and Cá chép (nấu chín)), the switch logs the other row. Where it
  * has one, the grams are converted with a yield factor, so the row that is logged gets its own weight.
  *
- * cc-53c: the food research's raw-cooked-pairs.json (lib/data, copied as it is) comes first, by source + source_id:
- * it gives a row's state, its other row and the yield of that pair. A row it does not list (the demo foods, a new row)
+ * cc-53c: the food research's raw-cooked-pairs.json comes first, by source + source_id: it gives a row's state, its
+ * other row and the yield of that pair. The research files sit in tests/fixtures; the app reads their slim copies in
+ * lib/data (scripts/slim-pairs.mjs: keys and yields only, so names and sources stay out of the bundle). A row it does not list (the demo foods, a new row)
  * falls back to the group yield, then to the name: its state words and nameStem.
  */
 export type CookState = "raw" | "cooked";
 export type YieldGroup = "meat" | "offal" | "fish" | "rice" | "pasta" | "noodle" | "tuber" | "legume" | "grain";
 
 /** Cooked grams per raw gram: the research's median for a group (raw-cooked-group-yields.json, cooked g per 100 g raw) */
-const groupMedian = (group: string) => {
-  const row = GROUP_YIELDS.find((g) => g.group === group);
-  if (!row) throw new Error(`raw-cooked-group-yields.json has no ${group}`);
-  return row.median / 100;
-};
+const groupMedian = (group: keyof typeof GROUP_MEDIANS) => GROUP_MEDIANS[group] / 100;
 
 /**
  * Cooked weight per gram of raw (or dry) weight, for a row the pairs do not list: the median of the group's pairs in
@@ -43,25 +40,25 @@ export const COOKED_PER_RAW: Readonly<Record<YieldGroup, number>> = {
 interface PairLink {
   /** The state of the row this link was found by */
   own: CookState;
-  other: { source: string; source_id: string; name_vi: string };
+  /** The other row, `${source}|${source_id}` */
+  other: string;
   /** Cooked grams per raw gram of this pair */
   factor: number;
 }
 
 /** Every pair a row is in, by `${source}|${source_id}`: a raw row can have several cooked rows, and the other way round */
 const PAIR_LINKS = new Map<string, PairLink[]>();
-for (const p of PAIRS) {
-  const factor = p.yield / 100;
-  for (const [row, own, other] of [[p.raw, "raw", p.cooked], [p.cooked, "cooked", p.raw]] as const) {
-    const key = `${row.source}|${row.source_id}`;
-    PAIR_LINKS.set(key, [...(PAIR_LINKS.get(key) ?? []), { own, other, factor }]);
-  }
+const addLink = (key: string, link: PairLink) => PAIR_LINKS.set(key, [...(PAIR_LINKS.get(key) ?? []), link]);
+for (const [raw, cooked, cookedPer100] of PAIRS as [string, string, number][]) {
+  addLink(raw, { own: "raw", other: cooked, factor: cookedPer100 / 100 });
+  addLink(cooked, { own: "cooked", other: raw, factor: cookedPer100 / 100 });
 }
+const rowKey = (food: Pick<FoodItem, "source" | "sourceId">) => `${food.source}|${food.sourceId}`;
 
 /** The pairs the research lists for a food (none for a food without a source_id, or an egg: eggs go by quả) */
 function pairLinksOf(food: Pick<FoodItem, "nameVi" | "source" | "sourceId">): PairLink[] {
   if (!food.sourceId || /^trứng\s/iu.test(food.nameVi)) return [];
-  return PAIR_LINKS.get(`${food.source}|${food.sourceId}`) ?? [];
+  return PAIR_LINKS.get(rowKey(food)) ?? [];
 }
 
 const COOKED_WORDS = ["nấu chín", "chín", "luộc", "hấp", "nướng", "chiên", "rang", "áp chảo", "quay", "kho", "xào", "rim"];
@@ -167,16 +164,16 @@ function pairOf(food: FoodItem, catalog: readonly FoodItem[], own: CookState): F
   return [...found].sort((a, b) => rankIn(other, a.nameVi) - rankIn(other, b.nameVi))[0] ?? null;
 }
 
-/** The switch from the research pairs: the preferred other row the catalogue has, and the yield of that very pair */
+/**
+ * The switch from the research pairs: of the other rows the catalogue has, the preferred one (nấu chín, chín, luộc,
+ * hấp; then the file's order), with the yield of that very pair. With none, the file's first pair gives the yield (the
+ * file lists the preferred row first wherever a row has several).
+ */
 function pairSwitch(own: CookState, links: readonly PairLink[], catalog: readonly FoodItem[], canSwap: boolean): CookSwitch {
   const other: CookState = own === "raw" ? "cooked" : "raw";
-  const ranked = [...links].sort((a, b) => rankIn(other, a.other.name_vi) - rankIn(other, b.other.name_vi));
-  const rowOf = (l: PairLink) => catalog.find((f) => f.source === l.other.source && f.sourceId === l.other.source_id);
-  for (const link of canSwap ? ranked : []) {
-    const pair = rowOf(link);
-    if (pair) return { own, pair, factor: link.factor };
-  }
-  return { own, pair: null, factor: ranked[0].factor };
+  const found = canSwap ? links.flatMap((link) => catalog.filter((f) => f.sourceId && rowKey(f) === link.other).map((pair) => ({ link, pair }))) : [];
+  const best = found.sort((a, b) => rankIn(other, a.pair.nameVi) - rankIn(other, b.pair.nameVi))[0];
+  return best ? { own, pair: best.pair, factor: best.link.factor } : { own, pair: null, factor: links[0].factor };
 }
 
 export interface CookSwitch {
