@@ -26,8 +26,9 @@ import { totalsFromEntries } from "./day-totals";
 import { microsSummaryFor } from "./lacking";
 import { nutrientSourcesIn, type NutrientSource } from "./nutrient-sources";
 import { DEFAULT_RECENT_FOODS, isRecentFood, pushRecent, type RecentFood } from "./recent-foods";
-import { MOCK_FOODS } from "./mock/foods";
-import { syncRecipeFoods } from "./recipe-store";
+import { MOCK_FOODS, subscribeCatalog } from "./mock/foods";
+import { readRecipes, serverFoodIdOf, syncRecipeFoods, uploadPendingRecipes } from "./recipe-store";
+import { withServerFoods } from "./recipe";
 import { personaPatch } from "./demo-persona";
 import { isLiveMode } from "./api-mode";
 import {
@@ -472,9 +473,12 @@ function addPayload(entry: AddedDiaryEntry, date: string): Parameters<typeof api
     : { id: entry.id, foodId: entry.foodId, grams: entry.grams, mealSlot: entry.mealSlot, date, servingLabel: entry.displayQty };
 }
 
-/** Copied entries get new uuids: the server keys an entry by its id, and a copy is a new entry. */
+/**
+ * Copied entries get new uuids: the server keys an entry by its id, and a copy is a new entry. A recipe's entry
+ * names its server food once it has one.
+ */
 function withNewIds(entries: AddedDiaryEntry[]): AddedDiaryEntry[] {
-  return entries.map((e) => ({ ...e, id: generateUuid(), synced: undefined }));
+  return withServerFoods(entries.map((e) => ({ ...e, id: generateUuid(), synced: undefined })), readRecipes());
 }
 
 
@@ -640,7 +644,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       // Ignore storage access errors
     }
     // Entries of earlier days are filed by date in the same step, so today starts with today's entries only
-    const split = splitByDay(added, iso);
+    // Entries of a recipe that has since reached the server name its server food, so they are sent
+    const split = splitByDay(withServerFoods(added, readRecipes()), iso);
     setEdits({ added: split.today, sample, undo: null });
     setArchive(mergeArchive(parseArchive(own?.getItem(DAY_ARCHIVE_KEY) ?? null), split.past));
     setRecentFoods(recents);
@@ -669,7 +674,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         }
       }).catch(() => {});
 
-      apiClient.loadAllFoods().catch(() => {});
+      // Recipes made before they were saved on the server get their server food, once the ingredients are known
+      apiClient.loadAllFoods().then(() => uploadPendingRecipes(account)).catch(() => {});
     }
   }, [refreshRemoteDay]);
 
@@ -760,6 +766,18 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       if (!e.synced && isUuid(e.id) && !isLocalOnly(e) && !pending.has(e.id)) sendAdd(e, todayIso);
     }
   }, [edits.added, serverDayRead, demo, accountId, todayIso, sendAdd, syncVersion]);
+
+  // A recipe got its server food (lib/recipe-store, which refreshes the catalogue): today's entries that name its
+  // local id (Chỉ trên máy này) name the server food, and the effect above sends them
+  useEffect(() => {
+    if (!hydrated) return;
+    return subscribeCatalog(() => {
+      setEdits((prev) => {
+        const added = withServerFoods(prev.added, readRecipes());
+        return added === prev.added ? prev : { ...prev, added };
+      });
+    });
+  }, [hydrated]);
 
   // Another account signed in, or this one signed out (Đăng xuất keeps the data under its account): the
   // state of the account before is dropped and the new one's is read. The persist effects below then write to
@@ -931,7 +949,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
 
       const newEntry: AddedDiaryEntry = {
         id: generateUuid(),
-        foodId: food.id,
+        foodId: serverFoodIdOf(food.id),
         foodName: food.nameVi,
         grams,
         displayQty: qty,
@@ -976,7 +994,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       const addedAt = new Date().toISOString();
       const entries: AddedDiaryEntry[] = items.map(({ food, grams, label }) => ({
         id: generateUuid(),
-        foodId: food.id,
+        foodId: serverFoodIdOf(food.id),
         foodName: food.nameVi,
         grams,
         displayQty: label || `${formatAmount(grams, "g")} g`,

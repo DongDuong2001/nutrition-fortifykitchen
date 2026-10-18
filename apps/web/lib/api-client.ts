@@ -22,6 +22,7 @@ import { refreshServerSession } from "./server-session";
 import { reportClientError } from "./client-errors";
 import { catalogCacheState, readCatalogCache, writeCatalogCache } from "./catalog-cache";
 import { normaliseCoaching } from "./coaching-link";
+import { isRecipeId } from "./recipe";
 import type { GoalType, SexType } from "./targets";
 
 export * from "./nutrients";
@@ -210,6 +211,21 @@ export interface LogMealPayload {
   calories?: number;
 }
 
+/**
+ * POST /foods/custom: the values of one serving of `servingSize` (the server stores them per 100 g). `micros` takes
+ * any canonical nutrient key (fiber and the 22 micros); null is unknown.
+ */
+export interface CreateFoodInput {
+  nameVi: string;
+  servingUnit: string;
+  servingSize: number;
+  calories: number | null;
+  protein?: number | null;
+  carbs?: number | null;
+  fat?: number | null;
+  micros?: Record<string, number | null | undefined>;
+}
+
 /** Thrown by searchFoods in live mode when /foods did not answer. */
 export const FOODS_UNAVAILABLE = "foods_unavailable";
 
@@ -379,6 +395,9 @@ const itemMethod = (item: DiaryWrite) => item.method ?? "POST";
 const itemPath = (item: DiaryWrite) => item.path ?? `/days/${item.date}/entries`;
 const isAdd = (item: DiaryWrite) => itemMethod(item) === "POST" && itemPath(item) === `/days/${item.date}/entries`;
 
+/** A write that names a recipe's local id: the server refuses it, so it waits until repointOutboxFood gives it the server food. */
+const waitsForFood = (item: DiaryWrite) => typeof item.payload?.food_id === "string" && isRecipeId(item.payload.food_id);
+
 /** The storage of one account's outbox: the signed-in one, or `account` when a write or a run belongs to it. */
 function outboxStorage(account?: string | null): KeyValueStore | null {
   if (account === undefined) return accountStorage();
@@ -419,6 +438,21 @@ export function dropOfflineEntry(id: string): void {
   const items = readOutbox();
   const kept = items.filter((item) => item.id !== id);
   if (kept.length !== items.length) writeOutbox(kept);
+}
+
+/**
+ * Points `account`'s queued writes that name food `from` (a recipe's local id) at `to` (its server food), and lifts
+ * their hold (the server refused the local id), so the next sync sends them. A write held for good stays held.
+ */
+export function repointOutboxFood(from: string, to: string, account: string | null): number {
+  let changed = 0;
+  const items = readOutbox(account).map((item) => {
+    if (item.payload?.food_id !== from) return item;
+    changed++;
+    return { ...item, payload: { ...item.payload, food_id: to }, held: item.held?.final ? item.held : undefined };
+  });
+  if (changed > 0) writeOutbox(items, account);
+  return changed;
 }
 
 /** Entry ids with a write in the outbox for the active account. */
@@ -551,7 +585,7 @@ async function runOutbox(retryHeld: boolean): Promise<SyncResult> {
   const sent = new Set<string>();
   const changed = new Map<string, Partial<OutboxItem>>();
   for (const item of items) {
-    if (blocked.has(item.id) || item.held?.final || (item.held && !retryHeld)) {
+    if (blocked.has(item.id) || item.held?.final || (item.held && !retryHeld) || waitsForFood(item)) {
       blocked.add(item.id);
       continue;
     }
@@ -848,22 +882,7 @@ export const apiClient = {
     return MOCK_FOODS.find((f) => f.id === id) || null;
   },
 
-  async createFood(input: {
-    nameVi: string;
-    servingUnit: string;
-    servingSize: number;
-    calories: number;
-    protein?: number | null;
-    carbs?: number | null;
-    fat?: number | null;
-    micros?: {
-      sodium?: number | null;
-      calcium?: number | null;
-      iron?: number | null;
-      potassium?: number | null;
-      vitamin_d?: number | null;
-    };
-  }): Promise<FoodItem> {
+  async createFood(input: CreateFoodInput): Promise<FoodItem> {
     if (isLiveMode()) {
       try {
         const payload = {
@@ -915,15 +934,13 @@ export const apiClient = {
         { label: "100 g", grams: 100 },
       ],
       nutrients: {
-        energy: Math.round(input.calories * factor),
+        ...Object.fromEntries(
+          Object.entries(input.micros ?? {}).map(([k, v]) => [k, typeof v === "number" ? Math.round(v * factor * 100) / 100 : null])
+        ),
+        energy: input.calories != null ? Math.round(input.calories * factor) : null,
         protein: input.protein != null ? Math.round(input.protein * factor * 10) / 10 : null,
         carbs: input.carbs != null ? Math.round(input.carbs * factor * 10) / 10 : null,
         fat: input.fat != null ? Math.round(input.fat * factor * 10) / 10 : null,
-        sodium: input.micros?.sodium != null ? Math.round(input.micros.sodium * factor) : null,
-        calcium: input.micros?.calcium != null ? Math.round(input.micros.calcium * factor) : null,
-        iron: input.micros?.iron != null ? Math.round(input.micros.iron * factor * 10) / 10 : null,
-        potassium: input.micros?.potassium != null ? Math.round(input.micros.potassium * factor) : null,
-        vitamin_d: input.micros?.vitamin_d != null ? Math.round(input.micros.vitamin_d * factor * 10) / 10 : null,
       },
     };
     MOCK_FOODS.unshift(newFood);

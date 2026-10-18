@@ -240,7 +240,7 @@ function CreateFoodInner() {
                   {recipeSaveError}
                 </p>
               )}
-              <p className="m-0 text-xs leading-snug text-secondary">Món tự tạo chỉ lưu trên máy này.</p>
+              <p className="m-0 text-xs leading-snug text-secondary">Món được lưu vào tài khoản. Danh sách nguyên liệu chỉ có trên máy này.</p>
             </>
           )
         ) : (

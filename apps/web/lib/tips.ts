@@ -121,7 +121,7 @@ export const TIPS: readonly Tip[] = [
     target: "create-mode",
     title: "Món tự tính từ nguyên liệu có sẵn",
     body: "Chọn nguyên liệu có sẵn trong app và nhập số gram. Kcal và đủ 22 vi chất được tính tự động. Món đóng gói có nhãn? Chọn Tự nhập ở trên.",
-    note: "Món ăn sẽ chỉ lưu trên máy này. Khi đổi điện thoại sẽ không còn.",
+    note: "Món được lưu vào tài khoản. Danh sách nguyên liệu chỉ có trên máy này.",
     used: ["create-food"],
     when: (c) => c.pathname === "/foods/new",
   },

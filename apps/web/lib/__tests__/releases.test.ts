@@ -11,11 +11,11 @@ describe("RELEASES", () => {
     expect([...ids].sort().reverse()).toEqual(ids);
   });
 
-  it("starts with the second 18/10 release: Thực phẩm bổ sung, Gia vị, Thêm cà phê, no tour", () => {
+  it("starts with the second 18/10 release: Món của tôi được lưu, Thực phẩm bổ sung, Gia vị, Thêm cà phê, no tour", () => {
     const r = latestRelease();
     expect(r?.id).toBe("2026-10-18b");
     expect(r?.date).toBe("18/10");
-    expect(r?.items.map((i) => i.title)).toEqual(["Thực phẩm bổ sung", "Gia vị", "Thêm cà phê"]);
+    expect(r?.items.map((i) => i.title)).toEqual(["Món của tôi được lưu", "Thực phẩm bổ sung", "Gia vị", "Thêm cà phê"]);
     expect(r?.tour).toBeUndefined();
   });
 
