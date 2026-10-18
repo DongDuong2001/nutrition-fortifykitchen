@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useDeferredValue, useMemo, useState } from "react";
 import type { FoodItem } from "@/lib/mock/foods";
 import { useCatalogFoods } from "@/hooks/use-catalog-foods";
 import { findSimilarFoods } from "@/lib/search";
@@ -22,10 +22,13 @@ export function useFoodBrowse() {
   const { foods, version, pending: catalogPending, failed: catalogFailed, retry: retryCatalog } = useCatalogFoods();
   const [filter, setFilter] = useState<FoodFilter>("all");
   const [query, setQuery] = useState("");
+  // cc-58: the field follows every keystroke, the list follows the query when the browser has a moment, so a key
+  // never waits for a search of the whole catalogue
+  const searched = useDeferredValue(query);
 
   // Filter and search combined. Grouped only for Tất cả with no query.
   // `foods` follows the catalogue (the live load, a made food) and demo mode
-  const list = useMemo(() => buildFoodList(foods, query, filter, favouriteIds), [query, filter, favouriteIds, foods]);
+  const list = useMemo(() => buildFoodList(foods, searched, filter, favouriteIds), [searched, filter, favouriteIds, foods]);
   const categories = useMemo(() => chipCategories(foods), [foods]);
   const categoryName = useCallback((food: FoodItem) => categoryLabel(categoryOf(food)), []);
   const isFavouriteFood = useCallback((food: FoodItem) => isFavourite(food.id), [isFavourite]);
@@ -47,14 +50,14 @@ export function useFoodBrowse() {
 
   // Fuzzy suggestions when results are empty
   const similarFoods = useMemo(() => {
-    if (list.foods.length === 0 && query.trim()) {
-      return findSimilarFoods(foods, query, 4);
+    if (list.foods.length === 0 && searched.trim()) {
+      return findSimilarFoods(foods, searched, 4);
     }
     return [];
-  }, [list.foods, query, foods]);
+  }, [list.foods, searched, foods]);
 
   // No saved favourite: the Yêu thích filter, no query, nothing in the list
-  const noFavourites = filter === "favorite" && !query.trim() && list.foods.length === 0;
+  const noFavourites = filter === "favorite" && !searched.trim() && list.foods.length === 0;
 
   return {
     query,
