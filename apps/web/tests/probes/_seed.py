@@ -4,6 +4,8 @@
 context the probe opens, so the first-run tour and the first-visit tips never put an overlay over a page. The one
 probe that tests them (cc_42_onboarding.py) calls `_seed.onboarding(True)` before it opens a page. "Có gì mới" has its
 own switch, h1t_whats_new_off, also on by default; cc_46.py turns it off with `_seed.whats_new(True)`.
+cc-52: the demo account starts with the Ngày tập question (Bự / Bé) already asked and no size chosen, so /training shows
+the coach's ranges and no sheet; cc_52_training.py calls `_seed.training_asked(False)` to see the first open.
 It is not a probe itself (run_all.py skips names that start with "_").
 """
 from playwright.sync_api import Browser
@@ -12,7 +14,8 @@ _OFF = "try { localStorage.setItem('h1t_onboarding_off', '1'); } catch (e) {}"
 _ON = "try { localStorage.removeItem('h1t_onboarding_off'); } catch (e) {}"
 _WN_OFF = "try { localStorage.setItem('h1t_whats_new_off', '1'); } catch (e) {}"
 _WN_ON = "try { localStorage.removeItem('h1t_whats_new_off'); } catch (e) {}"
-_state = {"onboarding": False, "whats_new": False}
+_ASKED = "try { if (localStorage.getItem('h1t_training_prefs_v1_demo') === null) localStorage.setItem('h1t_training_prefs_v1_demo', '{\"size\":null,\"asked\":true,\"own\":[]}'); } catch (e) {}"
+_state = {"onboarding": False, "whats_new": False, "training_asked": True}
 
 
 def onboarding(on: bool) -> None:
@@ -25,8 +28,13 @@ def whats_new(on: bool) -> None:
     _state["whats_new"] = on
 
 
+def training_asked(asked: bool) -> None:
+    """cc-52: the demo account's Bự / Bé question already asked (True, the default) or not yet (False)."""
+    _state["training_asked"] = asked
+
+
 def _script() -> str:
-    return (_ON if _state["onboarding"] else _OFF) + (_WN_ON if _state["whats_new"] else _WN_OFF)
+    return (_ON if _state["onboarding"] else _OFF) + (_WN_ON if _state["whats_new"] else _WN_OFF) + (_ASKED if _state["training_asked"] else "")
 
 
 _new_context = Browser.new_context
