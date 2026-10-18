@@ -23,6 +23,18 @@ function findTarget(id: string): HTMLElement | null {
   return null;
 }
 
+/** cc-55: an animation still moving the target (a sheet sliding up), so the hole waits until it has settled. */
+function moving(elements: HTMLElement[]): Animation | null {
+  if (typeof document.getAnimations !== "function") return null;
+  return (
+    document.getAnimations().find((a) => {
+      const t = (a.effect as KeyframeEffect | null)?.target;
+      const ends = a.effect?.getComputedTiming().endTime !== Infinity;
+      return a.playState === "running" && ends && t instanceof Element && elements.some((el) => t.contains(el));
+    }) ?? null
+  );
+}
+
 /** A tour step can show on the page now: its target, or its fallback, is drawn (it may be scrolled away). */
 export function stepOnPage(step: { target: string; fallback?: string }): boolean {
   return findTarget(step.target) !== null || (step.fallback !== undefined && findTarget(step.fallback) !== null);
@@ -126,6 +138,11 @@ export function Spotlight({
       if (elements.length === 0) return;
       if (elements.some((el) => !el.isConnected) && !refind()) {
         callbacks.current.onMissing();
+        return;
+      }
+      const settling = moving(elements);
+      if (settling) {
+        settling.finished.then(schedule, schedule);
         return;
       }
       const r = unionBox(elements.map((el) => el.getBoundingClientRect()));

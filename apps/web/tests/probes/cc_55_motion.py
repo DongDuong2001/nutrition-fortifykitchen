@@ -158,11 +158,15 @@ def sheets(browser):
     dialog.wait_for(state="visible")
     pg.wait_for_timeout(450)
     pg.keyboard.press("Escape")
-    pg.wait_for_timeout(60)
+    pg.wait_for_timeout(30)
     pg.locator('button[aria-label^="Chọn ngày"]:visible').first.tap()
-    y = pg.evaluate("() => { const el = document.querySelector('.m-sheet'); return new DOMMatrix(getComputedStyle(el).transform).m42 }")
+    ys = []
+    for _ in range(4):
+        ys.append(pg.evaluate("() => { const el = document.querySelector('.m-sheet'); return new DOMMatrix(getComputedStyle(el).transform).m42 }"))
+        pg.wait_for_timeout(40)
     h = pg.evaluate("() => document.querySelector('.m-sheet').offsetHeight")
-    check(0 <= y < h * 0.9, f"reopened mid-close: reverses from where it was ({round(y)} of {h} px)")
+    # A keyframe would start again from the very bottom (h); a transition goes back up from where the sheet was
+    check(0 <= ys[0] < h - 1 and ys[-1] < ys[0], f"reopened mid-close: reverses from where it was ({[round(y) for y in ys]} of {h} px)")
     pg.wait_for_timeout(500)
     pg.keyboard.press("Escape")
     pg.wait_for_timeout(400)

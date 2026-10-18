@@ -72,7 +72,8 @@ def sheet(pg):
 
 
 def card(pg):
-    return pg.locator("[data-onboarding-card]")
+    # cc-55: a card that is closing stays drawn (inert) for its 150 ms exit; it no longer counts
+    return pg.locator('[data-onboarding-card]:not([data-state="closed"])')
 
 
 def replay_1710(pg):
@@ -107,6 +108,7 @@ def shot(pg, name):
 
 
 def targets_ok(pg, selector, label):
+    pg.wait_for_timeout(250)  # cc-55: a card pops in from scale 0.96; measure it at full size
     small = pg.evaluate(
         """(sel) => [...document.querySelectorAll(sel + ' button, ' + sel + ' a')]
           .filter(e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && (r.height < 43.5 || r.width < 43.5); })
