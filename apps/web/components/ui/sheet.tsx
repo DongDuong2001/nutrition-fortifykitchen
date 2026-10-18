@@ -51,6 +51,10 @@ export function Sheet({
   const openings = useRef(0);
   const wasOpen = useRef(false);
   if (open && !wasOpen.current) openings.current += 1;
+  // cc-55: while it slides away it keeps what it showed (a sheet whose content comes from state that is already
+  // cleared would otherwise lose its title and rows mid-exit)
+  const shownContent = useRef({ title, description, children });
+  if (open) shownContent.current = { title, description, children };
   wasOpen.current = open;
 
   useEffect(() => {
@@ -167,6 +171,7 @@ export function Sheet({
   // Leaving: still drawn for the exit animation, but no longer a dialog for screen readers, focus or taps
   const showing = open;
   const state = showing ? "open" : "closed";
+  const content = shownContent.current;
 
   return (
     <div className={`fixed inset-0 z-50 flex flex-col justify-end ${desktopDialog ? "lg:justify-center lg:items-center" : ""} ${showing ? "" : "pointer-events-none"}`} inert={!showing}>
@@ -202,25 +207,25 @@ export function Sheet({
         </div>
 
         {/* Optional Header */}
-        {(title || description) && (
+        {(content.title || content.description) && (
           <div className="px-1 mb-1">
-            {title && (
+            {content.title && (
               <h2
                 id={titleId}
                 className="m-0 text-lg font-bold text-text leading-tight"
               >
-                {title}
+                {content.title}
               </h2>
             )}
-            {description && (
+            {content.description && (
               <p className="m-0 text-sm text-secondary tabular-nums mt-0.5">
-                {description}
+                {content.description}
               </p>
             )}
           </div>
         )}
 
-        <React.Fragment key={openings.current}>{children}</React.Fragment>
+        <React.Fragment key={openings.current}>{content.children}</React.Fragment>
       </div>
     </div>
   );
