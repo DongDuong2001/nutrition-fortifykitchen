@@ -74,7 +74,7 @@ export function AccessRow() {
             <PillButton type="button" onClick={install}>
               Cài app
             </PillButton>
-            <PillButton variant="secondary" href={HOME_ROUTE}>
+            <PillButton variant="secondary" href={HOME_ROUTE} replace>
               Tiếp tục trên web
             </PillButton>
           </div>

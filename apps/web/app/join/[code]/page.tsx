@@ -15,6 +15,7 @@ import { WRONG_CODE, joinPrompt } from "@/lib/level-copy";
 import { findCoachByCode } from "@/lib/mock-coach-server";
 import { writePendingCoachCode } from "@/lib/pending-coach";
 import { HOME_ROUTE } from "@/lib/nav";
+import { navigateFromSheet } from "@/lib/sheet-history";
 
 /**
  * /join/<code>: the link a coach shares. Signed in: confirm, then the user is linked and lands on Hôm nay.
@@ -76,7 +77,7 @@ export default function JoinPage() {
           open={open}
           onClose={() => {
             setOpen(false);
-            router.push(HOME_ROUTE);
+            navigateFromSheet(router, HOME_ROUTE);
           }}
           title={joinPrompt(target.name)}
           titleId="join-title"
@@ -90,7 +91,7 @@ export default function JoinPage() {
             onClick={() => {
               joinByCode(target.code);
               setOpen(false);
-              router.push(HOME_ROUTE);
+              navigateFromSheet(router, HOME_ROUTE);
             }}
           >
             Tham gia
@@ -100,7 +101,7 @@ export default function JoinPage() {
             variant="secondary"
             onClick={() => {
               setOpen(false);
-              router.push(HOME_ROUTE);
+              navigateFromSheet(router, HOME_ROUTE);
             }}
           >
             Để sau

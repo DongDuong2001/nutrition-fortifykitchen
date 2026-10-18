@@ -60,7 +60,7 @@ export function SourceSheet({ food, open, onClose }: { food: FoodItem; open: boo
           </span>
         </Row>
       </dl>
-      <Link href="/settings/data-sources" className="inline-flex min-h-[44px] items-center px-1 text-[15px] font-bold text-blue no-underline">
+      <Link href="/settings/data-sources" replace className="inline-flex min-h-[44px] items-center px-1 text-[15px] font-bold text-blue no-underline">
         Xem tất cả nguồn dữ liệu
       </Link>
       <PillButton type="button" variant="secondary" onClick={onClose}>

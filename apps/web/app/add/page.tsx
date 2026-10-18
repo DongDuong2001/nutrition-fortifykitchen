@@ -44,6 +44,7 @@ import { HomeScreen } from "@/components/home/home-screen";
 
 import { useMealSlot } from "@/lib/use-meal-slot";
 import { HOME_ROUTE } from "@/lib/nav";
+import { navigateFromSheet } from "@/lib/sheet-history";
 
 // The add sheet shows carousels of the newest: Khám phá holds the full lists
 const MAX_SHORTCUT_RECENTS = 8;
@@ -229,7 +230,7 @@ function AddFoodInner() {
     try {
       if (await addFoodEntry(selectedFood, parsedGrams, mealSlot, selectedServingLabel)) {
         tourAction("portion-confirmed");
-        router.push(HOME_ROUTE);
+        navigateFromSheet(router, HOME_ROUTE);
       }
     } finally {
       setIsSubmitting(false);
@@ -253,7 +254,7 @@ function AddFoodInner() {
     setIsSubmitting(true);
     if (addFoodEntries(tray, mealSlot)) {
       setTray([]);
-      router.push(HOME_ROUTE);
+      navigateFromSheet(router, HOME_ROUTE);
     } else {
       setIsSubmitting(false);
     }
@@ -274,7 +275,7 @@ function AddFoodInner() {
     setIsSubmitting(true);
     try {
       await addFoodEntry(food, grams, mealSlot, label, { undoable: true });
-      router.push(HOME_ROUTE);
+      navigateFromSheet(router, HOME_ROUTE);
     } finally {
       setIsSubmitting(false);
     }
@@ -284,7 +285,7 @@ function AddFoodInner() {
     if (oneTapLock.current || mealSlot === null) return;
     oneTapLock.current = true;
     addSavedMeal(meal, mealSlot);
-    router.push(HOME_ROUTE);
+    navigateFromSheet(router, HOME_ROUTE);
   };
 
   const submitQuickEntry = (input: QuickEntryInput): QuickEntryResult => {
@@ -293,7 +294,7 @@ function AddFoodInner() {
     const result = addQuickEntry(input, mealSlot);
     if (result.ok) {
       oneTapLock.current = true;
-      router.push(HOME_ROUTE);
+      navigateFromSheet(router, HOME_ROUTE);
     }
     return result;
   };

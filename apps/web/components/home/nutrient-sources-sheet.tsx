@@ -56,7 +56,7 @@ export function NutrientSourcesSheet({
         </ul>
       )}
       {nutrient && (
-        <Link href={`/micros/${nutrient}`} className="flex min-h-11 items-center px-1 text-[15px] font-bold text-blue no-underline">
+        <Link href={`/micros/${nutrient}`} replace className="flex min-h-11 items-center px-1 text-[15px] font-bold text-blue no-underline">
           Xem chi tiết ›
         </Link>
       )}

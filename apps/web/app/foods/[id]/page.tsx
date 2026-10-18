@@ -33,6 +33,7 @@ import { getRecipe, syncRecipeFoods } from "@/lib/recipe-store";
 import { CatalogStatus } from "@/components/foods/catalog-status";
 import { useCatalogFoods } from "@/hooks/use-catalog-foods";
 import { HOME_ROUTE } from "@/lib/nav";
+import { navigateFromSheet } from "@/lib/sheet-history";
 
 function FoodDetailInner() {
   const params = useParams();
@@ -111,7 +112,7 @@ function FoodDetailInner() {
     setIsSubmitting(true);
     try {
       const added = await addFoodEntry(food, parsedGrams, mealSlot, selectedServingLabel === CUSTOM_PORTION ? gramsServingLabel(parsedGrams) : selectedServingLabel);
-      if (added) router.push(HOME_ROUTE);
+      if (added) navigateFromSheet(router, HOME_ROUTE);
     } finally {
       setIsSubmitting(false);
     }
@@ -356,7 +357,7 @@ function FoodDetailInner() {
         lockedIds={[food.id]}
         onConfirm={(ids) => {
           setCompareOpen(false);
-          router.push(compareHref(ids));
+          navigateFromSheet(router, compareHref(ids));
         }}
       />
 

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { closeSheetEntry, openSheetEntry } from "@/lib/sheet-history";
 
 export interface SheetProps {
   open: boolean;
@@ -25,7 +26,6 @@ const SHEET_MS = 250;
 /** Let go after dragging down this share of the sheet's height, or faster than this (px per ms): it closes. */
 const DRAG_CLOSE_SHARE = 0.25;
 const DRAG_CLOSE_SPEED = 0.5;
-let sheetCount = 0;
 
 const FOCUSABLE_SELECTOR =
   'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -73,14 +73,13 @@ export function Sheet({
   }, [open, mounted, motion]);
 
   // Back (the phone's back gesture or button) closes the sheet instead of leaving the page. The entry copies the
-  // router's own state, so Next restores the same page. Closed another way, the entry is taken back, unless the sheet
-  // navigated somewhere (the URL changed).
+  // router's own state, so Next restores the same page. Closed another way, the entry is taken back, unless a
+  // navigation is pending, the route changed or another sheet sits above it (lib/sheet-history).
   useEffect(() => {
     if (!open || typeof window === "undefined") return;
-    const id = ++sheetCount;
     const href = window.location.href;
+    const id = openSheetEntry();
     let popped = false;
-    window.history.pushState({ ...(window.history.state ?? {}), h1tSheet: id }, "");
     const onPop = () => {
       if (window.history.state?.h1tSheet === id) return;
       popped = true;
@@ -89,10 +88,7 @@ export function Sheet({
     window.addEventListener("popstate", onPop);
     return () => {
       window.removeEventListener("popstate", onPop);
-      if (popped) return;
-      setTimeout(() => {
-        if (window.location.href === href && window.history.state?.h1tSheet === id) window.history.back();
-      }, 50);
+      closeSheetEntry(id, href, popped);
     };
   }, [open]);
 

@@ -7,6 +7,8 @@ export interface PillButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: PillButtonVariant;
   href?: string;
+  /** With href: the link replaces the current history entry (a link inside a sheet, lib/sheet-history). */
+  replace?: boolean;
   fullWidth?: boolean;
   children: React.ReactNode;
 }
@@ -18,6 +20,7 @@ export interface PillButtonProps
 export function PillButton({
   variant = "primary",
   href,
+  replace,
   fullWidth = true,
   className = "",
   disabled,
@@ -52,6 +55,7 @@ export function PillButton({
     return (
       <Link
         href={href}
+        replace={replace}
         className={`${baseClasses} ${variantClasses} ${widthClass} ${className}`}
       >
         {content}

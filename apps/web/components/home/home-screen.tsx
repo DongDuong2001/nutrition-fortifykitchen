@@ -64,6 +64,7 @@ import { getMealSlotNameVi } from "@/lib/meal-slot";
 import { HomeHero, type HeroPill } from "./home-hero";
 import { NutrientColumn } from "./nutrient-column";
 import { HOME_ROUTE } from "@/lib/nav";
+import { navigateFromSheet } from "@/lib/sheet-history";
 
 // cc-51: loaded after the first paint (the share image with html-to-image, Có gì mới); neither shows until it opens
 const ShareSheet = dynamic(() => import("./share-sheet").then((m) => m.ShareSheet), { ssr: false });
@@ -199,7 +200,7 @@ function HomeContent() {
   const setMode = (next: HomeMode) => setPicked({ iso: viewIso, mode: next });
   const shown = useMemo(() => (mode.kind === "day" ? valuesFromDay(day) : sumEntries(modeEntries(mode, entries))), [mode, day, entries]);
 
-  const goToDay = (iso: string) => router.push(iso === todayIso ? HOME_ROUTE : `${HOME_ROUTE}?date=${iso}`);
+  const goToDay = (iso: string) => navigateFromSheet(router, iso === todayIso ? HOME_ROUTE : `${HOME_ROUTE}?date=${iso}`);
 
   // Select mode belongs to the day it was started on, and ends when the day has no food left
   useEffect(() => {
@@ -339,7 +340,7 @@ function HomeContent() {
     if (isPast) {
       copyEntries(copies, pastCopyToast(copies.length));
       exitSelect();
-      router.push(HOME_ROUTE);
+      navigateFromSheet(router, HOME_ROUTE);
       return;
     }
     const slot = target === "keep" ? "breakfast" : target;
