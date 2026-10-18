@@ -521,11 +521,6 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   const [archive, setArchive] = useState<DayArchive>({});
   // Same rule for the profile: the sample user until the saved one is read after mount
   const [profile, setProfile] = useState<Profile>(SAMPLE_PROFILE);
-  // The Hồ sơ training default when the server's day answers (lib/training-minutes)
-  const trainingDefaultRef = useRef(profile.trainingMinutesDefault);
-  useEffect(() => {
-    trainingDefaultRef.current = profile.trainingMinutesDefault;
-  }, [profile.trainingMinutesDefault]);
 
   // The signed-in account the data below belongs to; null when nobody is signed in (then nothing is read or
   // written). Demo mode ignores it: demo has its own keys.
@@ -616,7 +611,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         // Not read (offline, 401 after the session refresh, 5xx): the device keeps what it has. Another account signed
         // in meanwhile: this day is not theirs
         if (!daySummary || !Array.isArray(daySummary.meals) || currentAccountId() !== account) return;
-        rememberServerTraining(account, iso, daySummary.training_minutes, trainingDefaultRef.current);
+        rememberServerTraining(account, iso, daySummary.training_minutes);
         const serverEntries: AddedDiaryEntry[] = [];
         for (const meal of daySummary.meals) {
           for (const e of meal.entries || []) {
