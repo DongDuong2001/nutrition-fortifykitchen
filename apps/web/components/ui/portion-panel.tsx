@@ -1,19 +1,21 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { Suspense, lazy, useMemo } from "react";
 import Link from "next/link";
 import { type FoodItem, MOCK_FOODS } from "@/lib/mock/foods";
 import { type MealSlot, getMealSlotNameVi } from "@/lib/meal-slot";
 import { parseGramsInput, calculateMacroPreview, macroGramsText, scaleNutrients, gramsServingLabel, unitAmountText, parsePortionLabel, portionModeOf, portionNote, portionSummary } from "@/lib/portion";
 import { cookSwitchFor } from "@/lib/yield";
 import { PortionArea } from "@/components/ui/portion-area";
-import { DishParts } from "@/components/ui/dish-parts";
-import { isDishFood, type AddOnEntry } from "@/lib/dish-recipes";
+import type { AddOnEntry } from "@/lib/dish-recipes";
 import { formatAmount } from "@/lib/format";
 import { getNutrientDefinition } from "@/lib/nutrients";
 import { useDiary } from "@/lib/diary-store";
 import { canLog as canLogFood, energyNotice } from "@/lib/diary-edits";
 import { kcalValue } from "@/lib/kcal";
+
+// cc-54: the Thành phần of a dish (and the recipes with it) is its own chunk, fetched when a Món Việt food's panel opens
+const DishParts = lazy(() => import("@/components/ui/dish-parts").then((m) => ({ default: m.DishParts })));
 
 export interface PortionPanelProps {
   food: FoodItem;
@@ -184,7 +186,11 @@ export function PortionPanel({
       )}
       {notice && canLog && <p role="note" className="m-0 text-[13px] leading-snug text-secondary">{notice}</p>}
       {/* cc-54: what is inside a premade dish, and its add-ons for this meal */}
-      {onExtrasChange && isDishFood(food) && <DishParts key={food.id} food={food} portionGrams={parsedGrams} onAddOns={onExtrasChange} />}
+      {onExtrasChange && food.category === "mon_viet" && (
+        <Suspense fallback={null}>
+          <DishParts key={food.id} food={food} portionGrams={parsedGrams} onAddOns={onExtrasChange} />
+        </Suspense>
+      )}
 
       {/* Side by side on a phone; stacked in the narrower desktop pane, the add on top */}
       <div data-align-group="portion" data-align-edge="left" className="flex w-full items-center gap-2 lg:flex-col-reverse lg:items-stretch">

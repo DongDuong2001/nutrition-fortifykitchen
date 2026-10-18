@@ -39,7 +39,7 @@ async function loadDemoFoods(): Promise<void> {
   addDemoFoods(DISH_DEMO_FOODS);
 }
 
-/** A dish is a food of the Món Việt category: only those open the recipes file at all. */
+/** A dish is a food of the Món Việt category: only those open the recipes file at all (components/ui/portion-panel checks the same). */
 export const isDishFood = (food: Pick<FoodItem, "category">): boolean => food.category === "mon_viet";
 
 // The mock catalogue (demo and mock mode) names its sources the way the sheet shows them, and its ids are the source ids

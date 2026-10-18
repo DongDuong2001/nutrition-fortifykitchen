@@ -48,7 +48,7 @@ def open_food(pg, query, name):
     pg.locator('[data-add-panel] input[type="search"], [data-add-panel] input').first.fill(query)
     pg.wait_for_timeout(600)
     pg.locator("[data-add-panel] button[data-food-row]").filter(has_text=name).first.tap()
-    pg.locator('[data-tour="portion-panel"]').first.wait_for(state="visible")
+    pg.locator('[data-tour="portion-panel"]:visible').first.wait_for(state="visible")
     pg.wait_for_timeout(500)
 
 
