@@ -13,7 +13,7 @@ import { ChipGroup } from "../ui/chip-group";
 import { FormRow } from "../ui/form-row";
 import { parseDecimalInput } from "../../lib/quick-entry";
 
-import { formatGramsServingLabel, hidesGrams } from "../../lib/portion";
+import { hidesGrams, portionModeOf } from "../../lib/portion";
 import { PortionArea } from "../ui/portion-area";
 import { HOME_ROUTE } from "@/lib/nav";
 
@@ -150,7 +150,8 @@ export function EntryEditor({ view }: { view: EntryView }) {
           {/* Portion: PortionArea with unit/gram tabs and steppers */}
           {!quick && food && (
           <div data-align-group="entry" className="flex w-full flex-col gap-2">
-            <span className="text-sm font-bold">{hidesGrams(food) ? "Khẩu phần" : "Khối lượng"}</span>
+            {/* A gram or egg portion names its own fields (Bao nhiêu gam?); a unit one keeps the heading */}
+            {portionModeOf(food) === "units" && <span className="text-sm font-bold">{hidesGrams(food) ? "Khẩu phần" : "Khối lượng"}</span>}
             <PortionArea
               food={food}
               gramsInput={gramsInput}

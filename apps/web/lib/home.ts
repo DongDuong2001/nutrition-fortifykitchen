@@ -2,7 +2,7 @@ import { COUNTED_NUTRIENT_KEYS } from "./day-totals";
 import { SAMPLE_SLOT, entryNumbers, type AddedDiaryEntry, type EntryView } from "./diary-edits";
 import { formatAmount } from "./format";
 import { catalogFoodById } from "./mock/foods";
-import { unitAmountText } from "./portion";
+import { portionAmountText, portionDetail, unitAmountText } from "./portion";
 import { sumKcal } from "./kcal";
 import { MEAL_SLOTS, type MealSlot } from "./meal-slot";
 import type { MockDayData } from "./mock/sample-day";
@@ -132,11 +132,19 @@ const VOLUME_QTY = /^\d+(?:[.,]\d+)?\s*(?:ml|l)$/i;
  * when there are no grams.
  */
 export function portionLabel(entry: Pick<HomeEntry, "qty" | "grams" | "foodId">): string {
+  // cc-53b: what the user set ("150 g" of cooked chicken, never the 214 g of raw it was logged as; "3 quả")
+  const set = portionAmountText(entry.qty);
+  if (set) return set;
   // A supplement logged by the unit shows its quantity ("2 viên"), never its nominal grams
   const unit = unitAmountText(catalogFoodById(entry.foodId), entry.qty, entry.grams);
   if (unit) return unit;
   if (VOLUME_QTY.test(entry.qty.trim())) return entry.qty.trim();
   return entry.grams !== null ? `${formatAmount(entry.grams, "g")} g` : entry.qty;
+}
+
+/** The line under a home row: how it was weighed ("Đã nấu chín · 100 g × 3", "Cỡ lớn"), or null. */
+export function portionDetailOf(entry: Pick<HomeEntry, "qty" | "grams">): string | null {
+  return portionDetail(entry.qty, entry.grams);
 }
 
 /** First line of the hero card, in sentence case: "Cả ngày · 16 món", "Cá hồi nướng · 120 g", "Yogurt kefir · 200 ml", "Bữa trưa · 3 món". */

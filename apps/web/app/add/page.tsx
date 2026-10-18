@@ -15,6 +15,7 @@ import { savedMealTotals, type SavedMeal } from "@/lib/saved-meals";
 import type { QuickEntryInput, QuickEntryResult } from "@/lib/quick-entry";
 import { AddShortcuts, type RecentShortcut, type SavedMealShortcut } from "@/components/add/add-shortcuts";
 import { QuickAddSheet } from "@/components/add/quick-add-sheet";
+import { Sheet } from "@/components/ui/sheet";
 import { ChipRow } from "@/components/foods/chip-row";
 import { FoodList } from "@/components/foods/food-list";
 import { FoodEmptyState } from "@/components/foods/food-empty-state";
@@ -37,7 +38,7 @@ import {
   type MealSlot,
   MEAL_SLOTS,
 } from "@/lib/meal-slot";
-import { parseGramsInput } from "@/lib/portion";
+import { defaultPortionOf, parseGramsInput } from "@/lib/portion";
 import { MealSwitcher } from "@/components/meal-switcher";
 import { PortionPanel } from "@/components/ui/portion-panel";
 import { HomeScreen } from "@/components/home/home-screen";
@@ -111,7 +112,7 @@ function AddFoodInner() {
   // cc-51: a food opens on the portion this user last logged for it, else the catalogue's first portion
   const pickFood = useCallback((food: FoodItem, serving?: FoodServing) => {
     const last = serving ? null : lastPortionOf(food.id, recentFoods, MOCK_FOODS);
-    const s = serving ?? (last ? { label: last.label, grams: last.grams } : food.servings[0] ?? { label: "100 g", grams: 100 });
+    const s = serving ?? (last ? { label: last.label, grams: last.grams } : defaultPortionOf(food));
     setSelectedFood(food);
     setGramsInput(String(s.grams));
     setSelectedServingLabel(s.label);
@@ -344,7 +345,7 @@ function AddFoodInner() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         // An open sheet (Chỉ ghi kcal, meal switcher) closes itself on Esc; the add screen stays
-        if (quickOpen || switcherOpen || reviewOpen) return;
+        if (quickOpen || switcherOpen || reviewOpen || (selectedFood && !isDesktop)) return;
         e.preventDefault();
         handleClose(true);
       } else if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {
@@ -356,7 +357,7 @@ function AddFoodInner() {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleClose, selectedFood, parsedGrams, handleAddFood, quickOpen, switcherOpen, reviewOpen]);
+  }, [handleClose, selectedFood, parsedGrams, handleAddFood, quickOpen, switcherOpen, reviewOpen, isDesktop]);
 
   const mealNameVi = mealSlot ? getMealSlotNameVi(mealSlot) : "—";
 
@@ -528,8 +529,8 @@ function AddFoodInner() {
                     onAdd={handleAddFood}
                     onAddAndContinue={handleAddAndContinue}
                     isSubmitting={isSubmitting}
-                    tone="light"
                     showMicros={true}
+                    className="rounded-[18px] border border-card-border bg-card p-4"
                   />
                 ) : (
                   <div className="h-full flex items-center justify-center text-center text-sm text-secondary p-4">
@@ -635,7 +636,7 @@ function AddFoodInner() {
             />
           </div>
 
-          {/* Bottom Selected Food Portion Panel */}
+          {/* The tray bar, under the list while the tray holds a food */}
           {tray.length > 0 && (
             <div className="shrink-0 px-4 pb-2">
               <TrayBar
@@ -648,26 +649,29 @@ function AddFoodInner() {
               />
             </div>
           )}
-          {selectedFood && (
-            <div className="shrink-0 px-4 pb-[max(16px,env(safe-area-inset-bottom))]">
-              <PortionPanel
-                food={selectedFood}
-                gramsInput={gramsInput}
-                setGramsInput={setGramsInput}
-                selectedServingLabel={selectedServingLabel}
-                setSelectedServingLabel={setSelectedServingLabel}
-                onFoodChange={(newFood) => setSelectedFood(newFood)}
-                mealSlot={mealSlot}
-                onAdd={handleAddFood}
-                onAddAndContinue={handleAddAndContinue}
-                isSubmitting={isSubmitting}
-                tone="dark"
-                showMicros={false}
-              />
-            </div>
-          )}
         </div>
       </div>
+
+      {/* The portion sheet (phone): white, over the list, as in design/portion-mockup */}
+      <Sheet open={selectedFood !== null && !isDesktop} onClose={() => setSelectedFood(null)} labelledBy="portion-sheet-title">
+        {selectedFood && (
+          <div className="-mx-4 max-h-[86dvh] overflow-y-auto overscroll-contain px-4 pb-[env(safe-area-inset-bottom)]">
+            <PortionPanel
+              food={selectedFood}
+              gramsInput={gramsInput}
+              setGramsInput={setGramsInput}
+              selectedServingLabel={selectedServingLabel}
+              setSelectedServingLabel={setSelectedServingLabel}
+              onFoodChange={(newFood) => setSelectedFood(newFood)}
+              mealSlot={mealSlot}
+              onAdd={handleAddFood}
+              onAddAndContinue={handleAddAndContinue}
+              isSubmitting={isSubmitting}
+              headingId="portion-sheet-title"
+            />
+          </div>
+        )}
+      </Sheet>
 
       <TrayReviewSheet
         open={reviewOpen}

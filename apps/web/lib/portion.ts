@@ -1,6 +1,6 @@
 import { formatAmount, formatNumber } from "./format";
 import type { FoodItem } from "./mock/foods";
-import type { CookState, CookSwitch } from "./yield";
+import { cookSwitchFor, type CookState, type CookSwitch } from "./yield";
 
 function parseDecimal(input: string): number | null {
   const text = input.trim().replace(",", ".");
@@ -471,45 +471,31 @@ export function getFoodUnitTabs(
   }
 }
 
-export function isChickenEggFood(nameVi: string | null | undefined): boolean {
-  if (!nameVi) return false;
-  return (
-    nameVi === "Trứng gà" ||
-    nameVi === "Lòng trắng trứng gà" ||
-    nameVi === "Lòng đỏ trứng gà"
-  );
-}
-
-export interface EggPartChip<T = unknown> {
-  id: string;
+export interface EggPart<T> {
   label: "Cả quả" | "Lòng trắng" | "Lòng đỏ";
   food: T;
   active: boolean;
 }
 
-export function getEggPartChips<T extends { id: string; nameVi: string }>(
-  currentNameVi: string,
-  catalog: T[]
-): EggPartChip<T>[] {
-  const parts: Array<{ label: "Cả quả" | "Lòng trắng" | "Lòng đỏ"; nameVi: string }> = [
-    { label: "Cả quả", nameVi: "Trứng gà" },
-    { label: "Lòng trắng", nameVi: "Lòng trắng trứng gà" },
-    { label: "Lòng đỏ", nameVi: "Lòng đỏ trứng gà" },
-  ];
+const WHITE = /^lòng trắng trứng gà/i;
+const YOLK = /^lòng đỏ trứng gà/i;
 
-  const chips: EggPartChip<T>[] = [];
-  for (const p of parts) {
-    const found = catalog.find((f) => f.nameVi === p.nameVi);
-    if (found) {
-      chips.push({
-        id: found.id,
-        label: p.label,
-        food: found,
-        active: currentNameVi === p.nameVi,
-      });
-    }
-  }
-  return chips;
+/**
+ * Cả quả | Lòng trắng | Lòng đỏ for a chicken egg weighed in grams (coach rule 4: whites and yolks are their own
+ * foods). On an egg, Cả quả is that egg; on a white or a yolk it is the raw egg row. Empty when fewer than two exist.
+ */
+export function eggParts<T extends { id: string; nameVi: string }>(food: T, catalog: readonly T[]): EggPart<T>[] {
+  const name = food.nameVi;
+  const onPart = WHITE.test(name) || YOLK.test(name);
+  if (!onPart && !/^trứng gà(?=$|[\s(])/i.test(name)) return [];
+  const whole = onPart ? catalog.find((f) => f.nameVi === "Trứng gà" || f.nameVi === "Trứng gà (sống)") : food;
+  const parts: Array<[EggPart<T>["label"], T | undefined]> = [
+    ["Cả quả", whole],
+    ["Lòng trắng", catalog.find((f) => WHITE.test(f.nameVi))],
+    ["Lòng đỏ", catalog.find((f) => YOLK.test(f.nameVi))],
+  ];
+  const found = parts.filter((x): x is [EggPart<T>["label"], T] => !!x[1]).map(([label, f]) => ({ label, food: f, active: f.id === food.id }));
+  return found.length > 1 ? found : [];
 }
 
 /* ------------------------------------------------------------------------------------------------------------------ */
@@ -676,11 +662,14 @@ export function resolvePortion(food: FoodItem, p: PortionState, sw: CookSwitch |
   return { food: logged, grams: round1(grams), label: formatPortionLabel({ ...p, state }) };
 }
 
-/** The amount Hôm nay shows for a label this model wrote with a state, ×N or eggs ("150 g", "300 g", "3 quả"); null otherwise. */
+/**
+ * The amount Hôm nay shows for a label this model wrote with a state, ×N or an egg size ("150 g", "300 g", "3 quả");
+ * null otherwise. "2 quả" alone is also an older fruit label: it keeps the unit text (or grams) as before.
+ */
 export function portionAmountText(label: string | null | undefined): string | null {
   const p = parsePortionLabel(label);
   if (!p) return null;
-  if (p.kind === "egg") return `${p.count} quả`;
+  if (p.kind === "egg") return p.size ? `${p.count} quả` : null;
   if (!p.state && p.mult === 1) return null;
   return `${formatAmount(p.base * p.mult, "g")} g`;
 }
@@ -724,4 +713,20 @@ export function portionNote(p: PortionState, sw: CookSwitch | null, loggedGrams:
   if (state === "raw") return "Cân lúc đã nấu chín thì chọn Đã nấu chín.";
   if (sw.factor !== null && amount > 0) return `${g(amount)} chín là khoảng ${g(amount / sw.factor)} trước khi nấu.`;
   return null;
+}
+
+/**
+ * The portion a food starts at when nothing was logged for it before: its first portion for a unit food, one medium
+ * egg (or the first size), else its first gram portion or 100 g, weighed in the food's own state.
+ */
+export function defaultPortionOf(food: FoodItem): { label: string; grams: number } {
+  const mode = portionModeOf(food);
+  if (mode === "units") return food.servings[0] ?? { label: "100 g", grams: 100 };
+  if (mode === "egg") {
+    const sizes = eggSizes(food);
+    const size = (sizes.find((s) => s.size === "vừa") ?? sizes[0]).size;
+    return resolvePortion(food, { kind: "egg", size, count: 1 }, null);
+  }
+  const gram = food.servings.find((s) => /^\d+(?:[.,]\d+)?\s*g$/i.test(s.label.trim()) && s.grams > 0);
+  return resolvePortion(food, { kind: "grams", base: gram?.grams ?? 100, mult: 1, state: null }, cookSwitchFor(food, [], false));
 }

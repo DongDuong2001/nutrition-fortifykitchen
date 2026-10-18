@@ -12,12 +12,13 @@ import { DEFAULT_FLAGS, type OnboardingFlags } from "@/lib/onboarding-flags";
 import { finishTour, loadFlags, markTipSeen, onboardingDisabled, setTipsOff, subscribeFlags } from "@/lib/onboarding-store";
 import { HOME_ROUTE } from "@/lib/nav";
 import { tourStepAfter, type ReleaseTourStep } from "@/lib/releases";
-import { TIPS, pickTip, tipDue, type Tip, type TipContext } from "@/lib/tips";
+import { TIPS, pickTip, tipDue, type PortionControls, type Tip, type TipContext } from "@/lib/tips";
 import { TOUR_STEPS, tourReduce, tourStepFor, type TourState } from "@/lib/tour";
 import {
   emitSignal,
   isOverlayOpen,
   isPresent,
+  PORTION_PRESENCES,
   readTour,
   readWhatsNewTour,
   setOverlayOpen,
@@ -202,9 +203,9 @@ export function OnboardingLayer() {
   // The "Có gì mới" tour (cc-46), and whether its sheet is open (no tip then)
   const [wn, setWn] = useState<WhatsNewTour | null>(null);
   const [wnSheet, setWnSheet] = useState(false);
-  // A sheet the user opened, and the ×N stepper, are on screen (each has a tip of its own)
+  // A sheet the user opened, and the portion controls, are on screen (each has a tip of its own)
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [stepper, setStepper] = useState(false);
+  const [controls, setControls] = useState<PortionControls>({});
   // No network (the header says Ngoại tuyến): its tip waits for this
   const [offline, setOffline] = useState(false);
   useEffect(() => {
@@ -233,10 +234,10 @@ export function OnboardingLayer() {
       touch: window.matchMedia?.("(pointer: coarse)").matches === true,
       vibrate: canVibrate(),
       sheetOpen,
-      stepper,
+      ...controls,
       offline,
     };
-  }, [pathname, foodsToday, selectMode, unsavedIds, sheetOpen, stepper, offline]);
+  }, [pathname, foodsToday, selectMode, unsavedIds, sheetOpen, controls, offline]);
 
   // Read the running tour. On a route change (applyRoute) the route also moves it on or ends it (lib/tour tourStepFor);
   // when only the tour changed (a button, an action, Thêm bữa đầu tiên) the screen is left alone.
@@ -271,7 +272,10 @@ export function OnboardingLayer() {
       setWnSheet(isOverlayOpen("whats-new"));
       // Sheets that open by themselves (Có gì mới, the install pop-up) are not "a sheet the user opened"
       setSheetOpen(isPresent("sheet") && !isOverlayOpen("whats-new") && !isOverlayOpen("install"));
-      setStepper(isPresent("stepper"));
+      setControls((was) => {
+        const now: PortionControls = Object.fromEntries(PORTION_PRESENCES.map((name) => [name, isPresent(name)]));
+        return PORTION_PRESENCES.every((name) => !!was[name] === !!now[name]) ? was : now;
+      });
     };
     readPresence();
     const offBusy = subscribeTipBusy(readPresence);
@@ -321,14 +325,14 @@ export function OnboardingLayer() {
     return pickTip({ ctx: tipContext(), flags, tourActive });
   }, [tourActive, wnActive, wnSheet, tipContext, flags]);
 
-  // Opening a sheet, or the stepper turning up, is a new visit for its own tip (when that tip is still due)
+  // Opening a sheet, or a portion control turning up, is a new visit for its own tip (when that tip is still due)
   const contextNow = useRef(tipContext);
   contextNow.current = tipContext;
   useEffect(() => {
-    if (!sheetOpen && !stepper) return;
+    if (!sheetOpen && !PORTION_PRESENCES.some((name) => controls[name])) return;
     const ctx = contextNow.current();
     if (TIPS.some((t) => t.inSheet && tipDue(t, ctx, loadFlags()))) visit.current.tipShown = false;
-  }, [sheetOpen, stepper]);
+  }, [sheetOpen, controls]);
 
   // A "Có gì mới" step that waits for a tap on its element moves on after the tap has done its job (Chưa lưu sends)
   const wnSteps = whatsNewSteps(wn);

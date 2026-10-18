@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { rememberAddOpener } from "@/components/ui/add-opener";
 import { kcalLabel } from "@/lib/kcal";
-import { missingMicros, portionLabel, type HomeEntry, type HomeMeal, type HomeMode } from "@/lib/home";
+import { missingMicros, portionDetailOf, portionLabel, type HomeEntry, type HomeMeal, type HomeMode } from "@/lib/home";
 import { mealFullySelected } from "@/lib/multi-select";
 import { markUsed } from "@/lib/onboarding-store";
 import { useDiary } from "@/lib/diary-store";
@@ -60,6 +60,7 @@ function FoodRow({
   };
 
   const quantity = portionLabel(entry);
+  const detail = portionDetailOf(entry);
   const missing = missingMicros(entry);
   // The server has not saved it yet (live mode): it stays on the device and is sent again
   const { unsavedIds, localOnlyIds } = useDiary();
@@ -83,7 +84,7 @@ function FoodRow({
       aria-pressed={selected}
       data-tour={tourTarget}
       data-entry-id={entry.id}
-      aria-label={`${entry.name}, ${quantity}${missing ? ", thiếu dữ liệu vi chất" : ""}${unsaved ? ", chưa lưu" : ""}${localOnly ? ", chỉ trên máy này" : ""}`}
+      aria-label={`${entry.name}, ${quantity}${detail ? `, ${detail}` : ""}${missing ? ", thiếu dữ liệu vi chất" : ""}${unsaved ? ", chưa lưu" : ""}${localOnly ? ", chỉ trên máy này" : ""}`}
       onClick={() => {
         if (suppressClick.current) {
           suppressClick.current = false;
@@ -121,6 +122,7 @@ function FoodRow({
         selected ? "bg-cobalt text-on-accent" : "bg-transparent text-text"
       }`}
     >
+      <span className="flex min-w-0 flex-col py-0.5">
       <span className="flex min-w-0 items-center gap-1.5">
         <span className="min-w-0 break-words text-[13px] font-semibold leading-tight line-clamp-2 lg:text-[15px]" title={entry.name}>
           {entry.name}
@@ -150,6 +152,9 @@ function FoodRow({
             Chỉ trên máy này
           </span>
         )}
+      </span>
+      {/* cc-53b: how it was weighed (Today.dc.html): Cân sống, Đã nấu chín · 100 g × 3, Cỡ lớn */}
+      {detail && <span className={`text-[11px] leading-tight lg:text-[13px] ${selected ? "text-sky" : "text-secondary"}`}>{detail}</span>}
       </span>
       <span className={`shrink-0 font-display text-[15px] font-bold leading-none tabular-nums lg:text-[18px] ${selected ? "text-sky" : "text-text"}`}>
         {quantity}

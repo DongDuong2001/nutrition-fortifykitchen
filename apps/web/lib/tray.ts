@@ -1,6 +1,6 @@
 import { canLog } from "./diary-edits";
 import type { FoodItem } from "./mock/foods";
-import { hidesGrams, scaleNutrients } from "./portion";
+import { defaultPortionOf, hidesGrams, scaleNutrients } from "./portion";
 
 /** One food in the add tray with the portion it will be logged at. */
 export interface TrayItem {
@@ -20,18 +20,14 @@ export interface TrayTotals {
 
 const round1 = (n: number) => Math.round(n * 10) / 10;
 
-function defaultPortion(food: FoodItem): { label: string; grams: number } {
-  return food.servings[0] ?? { label: "100 g", grams: 100 };
-}
-
 export function inTray(items: readonly TrayItem[], foodId: string): boolean {
   return items.some((i) => i.food.id === foodId);
 }
 
-/** The + circle: in at the food's first serving, or out when it is already there. */
+/** The + circle: in at the food's default portion (lib/portion defaultPortionOf), or out when it is already there. */
 export function toggleTray(items: readonly TrayItem[], food: FoodItem): TrayItem[] {
   if (inTray(items, food.id)) return removeFromTray(items, food.id);
-  const { label, grams } = defaultPortion(food);
+  const { label, grams } = defaultPortionOf(food);
   return [...items, { food, grams, label }];
 }
 

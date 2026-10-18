@@ -9,7 +9,7 @@ import { kcalValue } from "@/lib/kcal";
 import { MOCK_FOODS, type FoodItem } from "@/lib/mock/foods";
 import { getMealSlotNameVi } from "@/lib/meal-slot";
 import { useMealSlot } from "@/lib/use-meal-slot";
-import { parseGramsInput, calculateMacroPreview, macroGramsText, gramsServingLabel, hidesGrams, unitAmountText } from "@/lib/portion";
+import { defaultPortionOf, portionAmountText, parseGramsInput, calculateMacroPreview, macroGramsText, gramsServingLabel, hidesGrams, unitAmountText } from "@/lib/portion";
 import { PortionArea } from "@/components/ui/portion-area";
 import { goodSourcesOf, microRowsFor } from "@/lib/food-detail";
 import { categoryLabel, categoryOf } from "@/lib/food-categories";
@@ -65,21 +65,19 @@ function FoodDetailInner() {
   const mealSlot = useMealSlot(searchParams.get("meal"));
   const mealNameVi = mealSlot ? getMealSlotNameVi(mealSlot) : "—";
 
-  const [gramsInput, setGramsInput] = useState(() => {
-    return food?.servings[0]?.grams.toString() || "100";
-  });
-  const [selectedServingLabel, setSelectedServingLabel] = useState(() => {
-    return food?.servings[0]?.label || "100 g";
-  });
+  // cc-53b: the food's default portion (grams in its own state, one medium egg, or a unit food's first portion)
+  const [gramsInput, setGramsInput] = useState(() => String(food ? defaultPortionOf(food).grams : 100));
+  const [selectedServingLabel, setSelectedServingLabel] = useState(() => (food ? defaultPortionOf(food).label : "100 g"));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [compareOpen, setCompareOpen] = useState(false);
   const [sourceOpen, setSourceOpen] = useState(false);
   const [favouriteToast, setFavouriteToast] = useState<{ message: string } | null>(null);
 
   useEffect(() => {
-    if (food?.servings[0]) {
-      setGramsInput(food.servings[0].grams.toString());
-      setSelectedServingLabel(food.servings[0].label);
+    if (food) {
+      const start = defaultPortionOf(food);
+      setGramsInput(String(start.grams));
+      setSelectedServingLabel(start.label);
     }
   }, [food]);
 
@@ -309,7 +307,7 @@ function FoodDetailInner() {
         )}
 
         <GoodSources rows={goodSources} />
-        {micros && <FoodMicros rows={micros.rows} unknown={micros.unknown} portionLabel={unitAmountText(food, selectedServingLabel, parsedGrams) ?? `${formatAmount(parsedGrams, "g")} g`} />}
+        {micros && <FoodMicros rows={micros.rows} unknown={micros.unknown} portionLabel={portionAmountText(selectedServingLabel) ?? unitAmountText(food, selectedServingLabel, parsedGrams) ?? `${formatAmount(parsedGrams, "g")} g`} />}
       </main>
 
       <SourceSheet food={food} open={sourceOpen} onClose={() => setSourceOpen(false)} />

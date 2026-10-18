@@ -8,10 +8,10 @@ const flags = (over: Partial<OnboardingFlags> = {}): OnboardingFlags => ({ ...DE
 const ids = (c: TipContext, f = flags()) => pickTip({ ctx: c, flags: f, tourActive: false })?.id ?? null;
 
 describe("the tips table", () => {
-  it("has the 15 tips of the design boards, cc-49's Chưa lưu and the sheet, stepper and offline tips, each with the card copy", () => {
+  it("has the 15 tips of the design boards, cc-49's Chưa lưu, the sheet, offline and cc-53b's portion tips, each with the card copy", () => {
     expect(TIPS.map((t) => t.id)).toEqual([
       "sheet-drag", "sync-offline", "unsaved", "home-logged", "meal-add", "home-share", "pull-refresh", "nutrient-sources", "past-day", "multi-select", "add-tray", "add-shortlists", "haptics",
-      "food-detail", "unit-toggle", "quantity-stepper", "compare",
+      "food-detail", "cook-state", "egg-mode", "portion-multiply", "tray-row", "quantity-stepper", "compare",
       "food-new", "training", "training-size", "training-add-item", "micros", "trends-micros", "explore", "overview", "leaderboard",
     ]);
     for (const t of TIPS) {
@@ -31,18 +31,18 @@ describe("pickTip: the ×N stepper", () => {
   // A supplement or an egg: on its food page, in the add screen's portion panel, in the entry editor
   const page = "/foods/food-trung-ga";
   it("shows once the stepper is on screen, for a supplement and for an egg", () => {
-    const settled = flags({ seen: ["food-detail", "unit-toggle", "add-tray", "add-shortlists"] });
+    const settled = flags({ seen: ["food-detail", "add-tray", "add-shortlists"] });
     expect(ids(ctx({ pathname: page, stepper: true }), settled)).toBe("quantity-stepper");
     expect(ids(ctx({ pathname: "/foods/sup-canprev-mag", stepper: true }), settled)).toBe("quantity-stepper");
     expect(ids(ctx({ pathname: "/add", stepper: true }), settled)).toBe("quantity-stepper");
     expect(ids(ctx({ pathname: page, stepper: false }), settled)).toBeNull();
   });
-  it("on a food page it comes after the unit toggle (cc-53): first the unit, then how many", () => {
-    expect(ids(ctx({ pathname: page, stepper: true }), flags({ seen: ["food-detail"] }))).toBe("unit-toggle");
-    expect(ids(ctx({ pathname: page, stepper: true }), flags({ seen: ["food-detail", "unit-toggle"] }))).toBe("quantity-stepper");
+  it("no longer waits for a unit toggle tip (cc-53b retired it: normal foods go by grams)", () => {
+    expect(TIPS.some((t) => t.id === "unit-toggle")).toBe(false);
+    expect(ids(ctx({ pathname: page, stepper: true }), flags({ seen: ["food-detail"] }))).toBe("quantity-stepper");
   });
   it("only once, and never after the user stepped a count", () => {
-    const settled = ["food-detail", "unit-toggle"];
+    const settled = ["food-detail"];
     expect(ids(ctx({ pathname: page, stepper: true }), flags({ seen: [...settled, "quantity-stepper"] }))).toBeNull();
     expect(ids(ctx({ pathname: page, stepper: true }), flags({ seen: settled, used: ["quantity-step"] }))).toBeNull();
   });
@@ -51,6 +51,21 @@ describe("pickTip: the ×N stepper", () => {
   });
   it("points at the stepper's one stable target, unit-stepper (cc-53)", () => {
     expect(TIPS.find((t) => t.id === "quantity-stepper")?.target).toBe("unit-stepper");
+  });
+});
+
+describe("pickTip: the portion sheet's controls (cc-53b)", () => {
+  const inSheet = (over: Partial<TipContext>) => ctx({ pathname: "/add", sheetOpen: true, ...over });
+  const settled = flags({ seen: ["sheet-drag", "add-tray", "add-shortlists"] });
+  it("Sống | Chín first, then ×N, each once and never after it was used", () => {
+    expect(ids(inSheet({ cook: true, multiply: true }), settled)).toBe("cook-state");
+    expect(ids(inSheet({ cook: true, multiply: true }), flags({ seen: [...settled.seen, "cook-state"] }))).toBe("portion-multiply");
+    expect(ids(inSheet({ cook: true, multiply: true }), flags({ seen: settled.seen, used: ["cook-state", "portion-multiply"] }))).toBeNull();
+  });
+  it("an egg gets its Quả | Gam tip, the tray its row tip", () => {
+    expect(ids(inSheet({ egg: true }), settled)).toBe("egg-mode");
+    expect(ids(inSheet({ tray: true }), settled)).toBe("tray-row");
+    expect(ids(inSheet({ tray: true }), flags({ seen: settled.seen, used: ["tray-row"] }))).toBeNull();
   });
 });
 

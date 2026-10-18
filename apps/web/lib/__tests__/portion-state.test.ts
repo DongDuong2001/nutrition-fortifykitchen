@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  defaultPortionOf,
+  eggParts,
   eggSizes,
   formatPortionLabel,
   parsePortionLabel,
@@ -223,5 +225,33 @@ describe("the kcal card's summary and note", () => {
     expect(portionNote({ kind: "egg", size: "lớn", count: 3 }, null, 151.8)).toBe("Hộp ghi cân cả vỏ, app tự trừ vỏ khi tính.");
     expect(portionNote(grams(120), null, 120, true)).toBe("Bóc vỏ rồi cân thì nhập số gam ở đây.");
     expect(portionNote(grams(120), null, 120)).toBeNull();
+  });
+});
+
+describe("eggParts and defaultPortionOf", () => {
+  const white = food("w", "Lòng trắng trứng gà", "dam", [{ label: "1 lòng trắng", grams: 33 }]);
+  const yolk = food("y", "Lòng đỏ trứng gà", "dam", [{ label: "1 lòng đỏ", grams: 17 }]);
+  const rawEgg = food("raw-egg", "Trứng gà (sống)", "dam", egg.servings);
+  const catalog = [egg, rawEgg, white, yolk];
+
+  it("Cả quả is the egg itself; on a white it is the raw egg", () => {
+    expect(eggParts(egg, catalog).map((p) => [p.label, p.food.id, p.active])).toEqual([
+      ["Cả quả", "egg", true],
+      ["Lòng trắng", "w", false],
+      ["Lòng đỏ", "y", false],
+    ]);
+    expect(eggParts(white, catalog).map((p) => [p.label, p.food.id, p.active])).toEqual([
+      ["Cả quả", "raw-egg", false],
+      ["Lòng trắng", "w", true],
+      ["Lòng đỏ", "y", false],
+    ]);
+    expect(eggParts(chicken, catalog)).toEqual([]);
+  });
+
+  it("a food starts at its gram portion in its own state, an egg at one medium, a unit food at its first portion", () => {
+    expect(defaultPortionOf(chicken)).toEqual({ food: chicken, grams: 100, label: "Cân sống · 100 g" });
+    expect(defaultPortionOf(banana)).toEqual({ food: banana, grams: 100, label: "100 g" });
+    expect(defaultPortionOf(egg)).toEqual({ food: egg, grams: 46.2, label: "Cỡ vừa · 1 quả" });
+    expect(defaultPortionOf(supplement)).toEqual({ label: "1 viên", grams: 1 });
   });
 });

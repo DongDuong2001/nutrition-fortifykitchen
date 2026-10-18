@@ -2,12 +2,12 @@
 
 import React, { useMemo } from "react";
 import Link from "next/link";
-import { type FoodItem } from "@/lib/mock/foods";
+import { type FoodItem, MOCK_FOODS } from "@/lib/mock/foods";
 import { type MealSlot, getMealSlotNameVi } from "@/lib/meal-slot";
-import { parseGramsInput, calculateMacroPreview, macroGramsText, scaleNutrients, formatGramsServingLabel, gramsServingLabel, hidesGrams, unitAmountText } from "@/lib/portion";
+import { parseGramsInput, calculateMacroPreview, macroGramsText, scaleNutrients, gramsServingLabel, unitAmountText, parsePortionLabel, portionModeOf, portionNote, portionSummary } from "@/lib/portion";
+import { cookSwitchFor } from "@/lib/yield";
 import { PortionArea } from "@/components/ui/portion-area";
 import { formatAmount } from "@/lib/format";
-import { StatGroup } from "@/components/ui/stat-group";
 import { getNutrientDefinition } from "@/lib/nutrients";
 import { useDiary } from "@/lib/diary-store";
 import { canLog as canLogFood, energyNotice } from "@/lib/diary-edits";
@@ -23,12 +23,18 @@ export interface PortionPanelProps {
   onAdd: () => void;
   onAddAndContinue?: () => void;
   isSubmitting?: boolean;
-  tone?: "light" | "dark";
   showMicros?: boolean;
   className?: string;
   onFoodChange?: (food: FoodItem) => void;
+  /** The heading's id, for a sheet that is named by it */
+  headingId?: string;
 }
 
+/**
+ * The portion sheet (design/portion-mockup/Main.dc.html, cc-53b): the food, its portion area, a dark card with kcal
+ * and macros, a note on how the amount is read, and the cobalt add. Phone: in a sheet; desktop: the add dialog's
+ * right pane; Ngày tập: in the tick sheet.
+ */
 export function PortionPanel({
   food,
   gramsInput,
@@ -39,24 +45,26 @@ export function PortionPanel({
   onAdd,
   onAddAndContinue,
   isSubmitting = false,
-  tone = "light",
   showMicros = false,
   className = "",
   onFoodChange,
+  headingId,
 }: PortionPanelProps) {
   const canLog = canLogFood(food);
   const notice = energyNotice(food);
-  const isDark = tone === "dark";
   const parsedGrams = useMemo(() => parseGramsInput(gramsInput), [gramsInput]);
 
-  // A supplement from a pack label is logged by the unit: no gram field, no gram figure
-  const noGrams = hidesGrams(food);
+  // How the amount reads: "3 quả lớn", "300 g đã nấu chín"; a unit food keeps its quantity ("2 viên")
+  const mode = portionModeOf(food);
+  const parsed = mode === "units" ? null : parsePortionLabel(selectedServingLabel);
+  // An older "1 quả" of a fruit reads as an egg label: only an egg food takes it as one
+  const portion = parsed?.kind === "egg" && mode !== "egg" ? null : parsed;
+  const sw = useMemo(() => (mode === "grams" ? cookSwitchFor(food, MOCK_FOODS, !!onFoodChange) : null), [mode, food, onFoodChange]);
   const amountText = unitAmountText(food, selectedServingLabel, parsedGrams) ?? (selectedServingLabel.includes("g") ? gramsServingLabel(parsedGrams) : selectedServingLabel);
+  const summary = portion ? portionSummary(portion, sw) : amountText;
+  const note = portion ? portionNote(portion, sw, parsedGrams, mode === "egg") : null;
 
-  // Macro preview
-  const macroPreview = useMemo(() => {
-    return calculateMacroPreview(food.nutrients, parsedGrams);
-  }, [food, parsedGrams]);
+  const macroPreview = useMemo(() => calculateMacroPreview(food.nutrients, parsedGrams), [food, parsedGrams]);
 
   // Daily targets from the profile, for the micronutrient %
   const { targets: dailyTargets } = useDiary();
@@ -92,109 +100,85 @@ export function PortionPanel({
   }, [food, parsedGrams, dailyTargets, showMicros]);
 
   const mealNameVi = mealSlot ? getMealSlotNameVi(mealSlot) : "bữa ăn";
+  const cannotAdd = isSubmitting || parsedGrams <= 0 || mealSlot === null || !canLog;
 
   return (
-    <div
-      data-align-container="portion-panel"
-      data-tour="portion-panel"
-      className={`rounded-[18px] p-4 flex flex-col gap-3 transition-colors ${
-        isDark
-          ? "bg-ink text-on-dark shadow-lg"
-          : "bg-surface text-text border border-card-border"
-      } ${className}`}
-    >
-      {/* Row 1: Title row */}
-      <div
-        className="flex items-center justify-between gap-2 min-h-[44px] w-full"
-      >
-        <span
-          data-align-group="portion"
-          data-align-edge="left"
-          title={food.nameVi}
-          className={`min-w-0 break-words line-clamp-2 font-bold ${isDark ? "text-lg text-on-dark" : "text-xl text-text"}`}
-        >
-          {food.nameVi}
-        </span>
+    <div data-align-container="portion-panel" data-tour="portion-panel" className={`flex flex-col gap-4 text-text ${className}`}>
+      {/* The meal, the food (a long name wraps to two lines), and its page */}
+      <div className="flex w-full items-start justify-between gap-2">
+        <div data-align-group="portion" data-align-edge="left" className="flex min-w-0 flex-col gap-0.5">
+          {mealSlot && <span className="text-[13px] font-semibold text-secondary">{mealNameVi}</span>}
+          <h2 id={headingId} title={food.nameVi} className="m-0 line-clamp-2 break-words font-display text-[32px] font-bold uppercase leading-[1.05] tracking-[0.01em]">
+            {food.nameVi}
+          </h2>
+        </div>
         <Link
           href={`/foods/${food.id}${mealSlot ? `?meal=${mealSlot}` : ""}`}
-          className={`text-xs font-semibold hover:underline shrink-0 min-h-[44px] inline-flex items-center ${
-            isDark ? "text-sky no-underline" : "text-blue"
-          }`}
+          className="inline-flex min-h-11 shrink-0 items-center text-xs font-semibold text-blue hover:underline"
         >
           Xem chi tiết →
         </Link>
       </div>
 
-      {/* Row 2: Tip row */}
       {food.tipVi && (
-        <div
-          data-align-group="portion"
-          data-align-edge="left"
-          className={`text-xs font-medium leading-relaxed line-clamp-2 w-full ${
-            isDark ? "text-sky" : "text-blue"
-          }`}
-        >
+        <div data-align-group="portion" data-align-edge="left" className="line-clamp-2 w-full text-xs font-medium leading-relaxed text-blue">
           {food.tipVi}
         </div>
       )}
 
-      {/* Row 3: PortionArea */}
-      <div className="w-full">
-        <PortionArea
-          food={food}
-          gramsInput={gramsInput}
-          setGramsInput={setGramsInput}
-          selectedServingLabel={selectedServingLabel}
-          setSelectedServingLabel={setSelectedServingLabel}
-          onFoodChange={onFoodChange}
-          disabled={isSubmitting}
-          tone={tone}
-          data-align-group="portion"
-        />
-      </div>
-
-      {/* Row 4: StatGroup */}
-      <div
+      <PortionArea
+        food={food}
+        gramsInput={gramsInput}
+        setGramsInput={setGramsInput}
+        selectedServingLabel={selectedServingLabel}
+        setSelectedServingLabel={setSelectedServingLabel}
+        onFoodChange={onFoodChange}
+        disabled={isSubmitting}
         data-align-group="portion"
-        data-align-edge="left"
-        className={`w-full pt-1 border-t ${
-          isDark ? "border-card-border/20" : "border-card-border"
-        }`}
-      >
-        <StatGroup
-          columns={4}
-          tone={tone}
-          items={[
-            { id: "cal", value: kcalValue(macroPreview.calories), label: "kcal" },
-            { id: "carb", value: macroGramsText(macroPreview.carbs), label: "Tinh bột" },
-            { id: "protein", value: macroGramsText(macroPreview.protein), label: "Đạm" },
-            { id: "fat", value: macroGramsText(macroPreview.fat), label: "Chất béo" },
-          ]}
-        />
+      />
+
+      {/* kcal and macros of the portion, on a dark card */}
+      <div data-align-group="portion" data-align-edge="left" className="flex w-full flex-col gap-3 rounded-2xl bg-ink p-4 text-on-dark">
+        <div className="flex items-baseline justify-between gap-3">
+          <span className="font-display text-[44px] font-bold leading-none tabular-nums">
+            {kcalValue(macroPreview.calories)} <span className="text-lg text-sky">kcal</span>
+          </span>
+          <span className="text-right text-[13px] text-muted-subtitle">{summary}</span>
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          {[
+            ["Tinh bột", macroPreview.carbs],
+            ["Đạm", macroPreview.protein],
+            ["Chất béo", macroPreview.fat],
+          ].map(([label, value]) => (
+            <div key={label as string} className="flex flex-col gap-0.5">
+              <span className="text-xs text-muted-subtitle">{label}</span>
+              <span className="text-[17px] font-bold tabular-nums">{macroGramsText(value as number | null)}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* Row 5: CTA button. A food with unknown energy cannot be logged: it would read 0 kcal. */}
+      {note && (
+        <p data-align-group="portion" data-align-edge="left" className="m-0 text-[13px] leading-normal text-secondary-strong">
+          {note}
+        </p>
+      )}
+
+      {/* A food with unknown energy cannot be logged: it would read 0 kcal */}
       {notice && !canLog && (
         <p role="alert" className="m-0 rounded-xl bg-warning-bg px-3 py-2 text-[13px] leading-snug text-warning-text">
           {notice}
         </p>
       )}
-      {notice && canLog && <p role="note" className={`m-0 text-[13px] leading-snug ${isDark ? "text-muted-on-dark" : "text-secondary"}`}>{notice}</p>}
-      <div
-        data-align-group="portion"
-        data-align-edge="left"
-        className="flex items-center gap-2 w-full"
-      >
+      {notice && canLog && <p role="note" className="m-0 text-[13px] leading-snug text-secondary">{notice}</p>}
+      <div data-align-group="portion" data-align-edge="left" className="flex w-full items-center gap-2">
         {onAddAndContinue && (
           <button
             type="button"
             onClick={onAddAndContinue}
-            disabled={isSubmitting || parsedGrams <= 0 || mealSlot === null || !canLog}
-            className={`flex-1 min-h-[48px] rounded-full font-bold text-sm cursor-pointer active:scale-[0.98] motion-reduce:active:scale-100 transition-all flex items-center justify-center border disabled:opacity-50 ${
-              isDark
-                ? "border-card-border bg-card/20 text-on-dark hover:bg-card/40"
-                : "border-card-border bg-card text-text hover:bg-divider"
-            }`}
+            disabled={cannotAdd}
+            className="flex h-14 flex-1 cursor-pointer items-center justify-center rounded-2xl border border-card-border bg-card text-[15px] font-bold text-text transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100 disabled:opacity-50"
           >
             Lưu &amp; chọn tiếp
           </button>
@@ -203,12 +187,10 @@ export function PortionPanel({
           type="button"
           onClick={onAdd}
           data-tour="portion-add"
-          disabled={isSubmitting || parsedGrams <= 0 || mealSlot === null || !canLog}
-          className={`${
-            onAddAndContinue ? "flex-1" : "w-full"
-          } min-h-[48px] rounded-full text-on-accent font-bold text-sm cursor-pointer active:scale-[0.98] motion-reduce:active:scale-100 transition-all border-0 flex items-center justify-center shadow-md disabled:opacity-50 bg-blue hover:bg-blue/90`}
+          disabled={cannotAdd}
+          className={`${onAddAndContinue ? "flex-1" : "w-full"} flex h-14 cursor-pointer items-center justify-center rounded-2xl border-0 bg-blue text-[17px] font-bold text-on-accent transition-transform duration-150 hover:bg-blue/90 active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100 disabled:opacity-50`}
         >
-          {onAddAndContinue ? `Thêm vào ${mealSlot ? mealNameVi : "bữa"}` : `Thêm vào ${mealSlot ? mealNameVi : "—"}`}
+          {`Thêm vào ${mealSlot ? mealNameVi : "—"}`}
         </button>
       </div>
 
@@ -216,7 +198,7 @@ export function PortionPanel({
       {showMicros && scaledMicros.length > 0 && (
         <div className="w-full bg-card rounded-xl p-3 border border-card-border flex flex-col gap-1.5 mt-1">
           <div className="text-xs font-semibold text-secondary pb-1 border-b border-card-border">
-            Vi chất trong {amountText}:
+            Vi chất trong {summary}:
           </div>
           {scaledMicros.map((m) => (
             <div key={m.name} className="flex justify-between items-center text-xs py-0.5">

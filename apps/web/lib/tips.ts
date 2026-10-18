@@ -25,7 +25,7 @@ export interface Tip {
   when: (ctx: TipContext) => boolean;
 }
 
-export interface TipContext {
+export interface TipContext extends PortionControls {
   pathname: string;
   /** Hôm nay is showing an earlier day (?date=) */
   pastDay: boolean;
@@ -41,11 +41,15 @@ export interface TipContext {
   vibrate?: boolean;
   /** A sheet the user opened is up (not Có gì mới or the install pop-up): only sheet tips then */
   sheetOpen?: boolean;
-  /** The ×N stepper is on screen (supplements, eggs and fruit by the piece) */
-  stepper?: boolean;
   /** No network: the header says Ngoại tuyến */
   offline?: boolean;
 }
+
+/**
+ * Portion controls on screen (lib/tour-bus Presence): the unit stepper (supplements, món Việt, cans), and cc-53b's ×N
+ * row, Sống | Chín switch, egg Quả | Gam and the tray's rows.
+ */
+export type PortionControls = Partial<Record<"stepper" | "multiply" | "cook" | "egg" | "tray", boolean>>;
 
 /** The share tip waits until today holds this many foods. */
 export const SHARE_TIP_MIN_FOODS = 3;
@@ -169,20 +173,49 @@ export const TIPS: readonly Tip[] = [
     used: ["favourite"],
     when: (c) => /^\/foods\/(?!new$|compare$)[^/]+$/.test(c.pathname),
   },
+  // cc-53b: the portion sheet's own controls, in the order they come in the sheet, then the tray's rows
   {
-    id: "unit-toggle",
-    target: "unit-toggle",
-    title: "Ghi món theo cách bạn quen",
-    body: "Chọn trái, chén, lon… và cỡ nhỏ, vừa, lớn, hoặc nhập gam. Cơm, mì, yến mạch mở sẵn ở Gam.",
-    used: ["unit-toggle"],
-    when: (c) => /^\/foods\/(?!new$|compare$)[^/]+$/.test(c.pathname),
+    id: "cook-state",
+    target: "cook-state",
+    title: "Cân sống hay đã nấu chín",
+    body: "Cân lúc nào thì chọn đúng lúc đó. App tự đổi ra số liệu khớp với món.",
+    used: ["cook-state"],
+    inSheet: true,
+    when: (c) => c.cook === true,
+  },
+  {
+    id: "egg-mode",
+    target: "egg-mode",
+    title: "Trứng ghi theo quả",
+    body: "Chọn cỡ ghi trên hộp rồi chọn mấy quả. Muốn cân thì chuyển qua Gam.",
+    used: ["egg-mode"],
+    inSheet: true,
+    when: (c) => c.egg === true,
+  },
+  {
+    id: "portion-multiply",
+    target: "portion-multiply",
+    title: "Nhân khẩu phần nhanh",
+    body: "Gõ số gam hoặc chọn 100 g, rồi bấm + để nhân lên. 100 g × 3 là 300 g.",
+    used: ["portion-multiply"],
+    inSheet: true,
+    when: (c) => c.multiply === true,
+  },
+  {
+    id: "tray-row",
+    target: "tray-row",
+    title: "Chỉnh từng món trong khay",
+    body: "Chạm một món để đổi khẩu phần, xong thì chọn Xong. Cả khay thêm vô bữa một lần.",
+    used: ["tray-row"],
+    inSheet: true,
+    when: (c) => c.tray === true,
   },
   {
     id: "quantity-stepper",
     target: "unit-stepper",
-    // After the unit toggle: first the unit, then how many
+    // Only the foods that keep their unit: supplements by the pill, món Việt by the dish, cans
     title: "Tăng giảm số lượng",
-    body: "Chọn khẩu phần như 1 quả hay 1 viên, rồi chạm + hoặc − để ghi 2, 3 quả. Kcal và vi chất nhân theo.",
+    body: "Thực phẩm bổ sung ghi theo viên, món Việt theo phần. Chạm + hoặc − để ghi 2, 3 viên.",
     used: ["quantity-step"],
     inSheet: true,
     when: (c) => c.stepper === true && !c.selectMode,

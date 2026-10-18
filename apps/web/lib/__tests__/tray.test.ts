@@ -16,9 +16,9 @@ const egg = food("egg", { energy: 150, protein: 12, carbs: 1, fat: 10 }, [{ labe
 const mystery = food("mystery", { energy: null, protein: 5, carbs: null, fat: null });
 
 describe("tray (the multi-add list on /add)", () => {
-  it("toggling a food puts it in at its first serving, toggling again takes it out", () => {
+  it("toggling a food puts it in at its default portion (cc-53b: grams, 100 g), toggling again takes it out", () => {
     const one = toggleTray([], rice);
-    expect(one).toEqual([{ food: rice, grams: 200, label: "1 chén" }]);
+    expect(one).toEqual([{ food: rice, grams: 100, label: "100 g" }]);
     expect(inTray(one, "rice")).toBe(true);
     expect(toggleTray(one, rice)).toEqual([]);
   });
@@ -36,7 +36,7 @@ describe("tray (the multi-add list on /add)", () => {
     const first = putInTray([], rice, 150, "150 g");
     expect(first).toEqual([{ food: rice, grams: 150, label: "150 g" }]);
     const again = putInTray(toggleTray(first, egg), rice, 300, "300 g");
-    expect(again.map((i) => [i.food.id, i.grams])).toEqual([["rice", 300], ["egg", 50]]);
+    expect(again.map((i) => [i.food.id, i.grams])).toEqual([["rice", 300], ["egg", 100]]);
   });
 
   it("setTrayPortion changes one item and leaves the rest", () => {

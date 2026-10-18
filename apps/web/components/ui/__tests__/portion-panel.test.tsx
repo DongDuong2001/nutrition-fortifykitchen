@@ -79,78 +79,67 @@ describe("PortionPanel for a supplement from a pack label", () => {
   });
 });
 
-describe("PortionPanel for a food with unit servings (e.g. Trứng gà)", () => {
-  const eggFood = {
+describe("PortionPanel by the coach's portion model (cc-53b)", () => {
+  const egg = {
     id: "food-egg",
-    nameVi: "Trứng gà",
+    nameVi: "Trứng gà luộc",
     category: "dam",
+    source: "USDA",
     servings: [
-      { label: "1 quả", grams: 55 },
-      { label: "2 quả", grams: 110 },
+      { label: "1 quả vừa (trứng 50-55 g)", grams: 46.2 },
+      { label: "1 quả nhỏ (trứng 45-50 g)", grams: 41.8 },
+      { label: "1 quả lớn (trứng 55-60 g)", grams: 50.6 },
+      { label: "1 quả rất lớn (trứng 60-65 g)", grams: 55 },
       { label: "100 g", grams: 100 },
     ],
-    nutrients: { energy: 142, protein: 12.6, fat: 9.5, carbs: 0.7 },
+    nutrients: { energy: 155, protein: 12.6, fat: 10.6, carbs: 1.1 },
   } as unknown as (typeof MOCK_FOODS)[number];
-
-  it("renders segmented toggle and QuantityStepper when a unit chip is active", () => {
-    const html = renderToString(
+  const chicken = MOCK_FOODS.find((f) => f.id === "food-uc-ga")!;
+  const redBull = {
+    id: "food-red-bull",
+    nameVi: "Red Bull",
+    category: "do_uong",
+    source: "label",
+    servings: [{ label: "1 lon", grams: 250 }, { label: "100 g", grams: 100 }],
+    nutrients: { energy: 45, carbs: 11 },
+  } as unknown as (typeof MOCK_FOODS)[number];
+  const render = (food: (typeof MOCK_FOODS)[number], label: string, grams: string) =>
+    renderToString(
       <DiaryProvider>
-        <PortionPanel
-          food={eggFood}
-          gramsInput="55"
-          setGramsInput={vi.fn()}
-          selectedServingLabel="1 quả"
-          setSelectedServingLabel={vi.fn()}
-          mealSlot="breakfast"
-          onAdd={vi.fn()}
-        />
+        <PortionPanel food={food} gramsInput={grams} setGramsInput={vi.fn()} selectedServingLabel={label} setSelectedServingLabel={vi.fn()} mealSlot="lunch" onAdd={vi.fn()} />
       </DiaryProvider>
     );
 
-    // Toggle tabs are present: Quả and Gam
-    expect(html).toContain("Quả");
-    expect(html).toContain("Gam");
-    // QuantityStepper is present on unit tab
-    expect(html).toContain("Số lượng");
-    expect(html).toContain("×1");
+  it("3 large eggs: Quả | Gam, the four box sizes, Mấy quả? and the summary", () => {
+    const html = render(egg, "Cỡ lớn · 3 quả", "151,8");
+    for (const text of ["Quả", "Gam", "Trứng cỡ nào?", "Nhỏ", "Vừa", "Lớn", "Rất lớn", "55–60 g", "Mấy quả?", "3 quả lớn", "app tự trừ vỏ"]) {
+      expect(html, text).toContain(text);
+    }
+    expect(html).not.toContain("Số gam");
   });
 
-  it("shows ×2 when 2 quả is selected", () => {
-    const html = renderToString(
-      <DiaryProvider>
-        <PortionPanel
-          food={eggFood}
-          gramsInput="110"
-          setGramsInput={vi.fn()}
-          selectedServingLabel="2 quả"
-          setSelectedServingLabel={vi.fn()}
-          mealSlot="breakfast"
-          onAdd={vi.fn()}
-        />
-      </DiaryProvider>
-    );
-
-    expect(html).toContain("Số lượng");
-    expect(html).toContain("×2");
-  });
-
-  it("hides QuantityStepper when a gram serving (100 g) is active", () => {
-    const html = renderToString(
-      <DiaryProvider>
-        <PortionPanel
-          food={eggFood}
-          gramsInput="100"
-          setGramsInput={vi.fn()}
-          selectedServingLabel="100 g"
-          setSelectedServingLabel={vi.fn()}
-          mealSlot="breakfast"
-          onAdd={vi.fn()}
-        />
-      </DiaryProvider>
-    );
-
+  it("an egg in grams has the gram field, 100 g and ×N", () => {
+    const html = render(egg, "120 g", "120");
     expect(html).toContain("Số gam");
-    expect(html).not.toContain("Số lượng");
-    expect(html).not.toContain("Tăng số lượng");
+    expect(html).toContain("100 g");
+    expect(html).toContain("Nhân khẩu phần nhanh");
+    expect(html).not.toContain("Mấy quả?");
+  });
+
+  it("cooked chicken: Sống | Chín, the amount set, and what it stands for raw", () => {
+    const html = render(chicken, "Đã nấu chín · 150 g", "214,3");
+    expect(html).toContain("Bạn cân lúc nào?");
+    expect(html).toContain("Cân sống");
+    expect(html).toContain("Đã nấu chín");
+    expect(html).toContain("150 g đã nấu chín");
+    expect(html).toContain("bằng khoảng 214 g sống");
+    expect(html).toContain("Bấm + để nhân 150 g này lên");
+  });
+
+  it("Red Bull keeps its lon tabs and the unit stepper (coach rule 5)", () => {
+    const html = render(redBull, "1,5 lon", "375");
+    expect(html).toContain("Đơn vị khẩu phần");
+    expect(html).toContain("Tăng số lượng");
+    expect(html).not.toContain("Nhân khẩu phần nhanh");
   });
 });
