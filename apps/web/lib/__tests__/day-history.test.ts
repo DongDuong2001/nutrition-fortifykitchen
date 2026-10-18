@@ -37,14 +37,14 @@ describe("blankDay and pastDayData", () => {
 
   it("pastDayData for yesterday adds its mock entries to the empty day", () => {
     const targets = targetsFor(SAMPLE_PROFILE);
-    const day = pastDayData(YESTERDAY, TODAY, SAMPLE_PROFILE, targets);
+    const day = pastDayData(YESTERDAY, TODAY, SAMPLE_PROFILE);
     expect(day.date).toBe(YESTERDAY);
     expect(day.calories.consumed).toBe(1501);
     expect(day.calories.targetMin).toBe(targets.calories.min);
   });
 
   it("pastDayData for a day with nothing logged reads zero", () => {
-    const day = pastDayData("2026-08-05", TODAY, SAMPLE_PROFILE, targetsFor(SAMPLE_PROFILE));
+    const day = pastDayData("2026-08-05", TODAY, SAMPLE_PROFILE);
     expect(day.calories.consumed).toBe(0);
     expect(day.meals.every((m) => m.items.length === 0)).toBe(true);
   });

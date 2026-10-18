@@ -284,18 +284,19 @@ export interface ShiftRow {
   changed: boolean;
 }
 
-/** The targets that follow body weight (kcal, đạm, kali) at `beforeKg` and at `nowKg`. */
+/** The targets that follow body weight (kcal, đạm, kali) at `beforeKg` and at `nowKg`, on a day of `trainingMinutes` (lib/training-minutes). */
 export function weightShift(
   profile: { sex: SexType; goal: GoalType; trainingMinutesDefault: number; periodMode: boolean },
   beforeKg: number,
-  nowKg: number
+  nowKg: number,
+  trainingMinutes = profile.trainingMinutesDefault
 ): ShiftRow[] {
   const at = (weightKg: number) =>
     calculateTargets({
       sex: profile.sex,
       weightKg,
       goal: profile.goal,
-      trainingMinutes: profile.trainingMinutesDefault,
+      trainingMinutes,
       isPeriod: profile.sex === "female" && profile.periodMode,
     });
   const before = at(beforeKg);

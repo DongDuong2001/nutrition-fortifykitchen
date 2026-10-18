@@ -31,7 +31,7 @@ interface PageProps {
 export default function NutrientDetailPage({ params }: PageProps) {
   const { nutrient } = use(params);
   const def = getNutrientDefinition(nutrient);
-  const { data, hydrated, todayIso, profile, targets, nutrientSources } = useDiary();
+  const { data, hydrated, todayIso, profile, nutrientSources } = useDiary();
   const goBack = useBack();
   const searchParams = useSearchParams();
 
@@ -39,8 +39,8 @@ export default function NutrientDetailPage({ params }: PageProps) {
   const viewIso = hydrated && todayIso ? viewedIsoDate(searchParams?.get("date"), todayIso) : null;
   const isPast = viewIso !== null && viewIso !== todayIso;
   const dayData = useMemo(
-    () => (isPast && viewIso && todayIso ? pastDayData(viewIso, todayIso, profile, targets) : data),
-    [isPast, viewIso, todayIso, profile, targets, data]
+    () => (isPast && viewIso && todayIso ? pastDayData(viewIso, todayIso, profile) : data),
+    [isPast, viewIso, todayIso, profile, data]
   );
 
   // The day's row. Null until the diary is read after mount, so the server and first client render agree.
@@ -50,11 +50,11 @@ export default function NutrientDetailPage({ params }: PageProps) {
   const history = useMemo<HistoryPoint[]>(() => {
     if (!def || !hydrated || !todayIso || !viewIso) return [];
     return historyDays(viewIso).map((iso) => {
-      const day = iso === todayIso ? data : pastDayData(iso, todayIso, profile, targets);
+      const day = iso === todayIso ? data : pastDayData(iso, todayIso, profile);
       const dayRow = nutrientOnDay(day, def);
       return { iso, consumed: dayRow?.consumed ?? null, percentage: dayRow?.percentage ?? null };
     });
-  }, [def, hydrated, todayIso, viewIso, data, profile, targets]);
+  }, [def, hydrated, todayIso, viewIso, data, profile]);
 
   const sources = useMemo(() => {
     if (!def || !hydrated) return [];

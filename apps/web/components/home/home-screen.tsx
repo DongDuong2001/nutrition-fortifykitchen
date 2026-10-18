@@ -107,7 +107,6 @@ function HomeContent() {
     todayIso,
     dayArchive,
     profile,
-    targets,
     addedEntries,
     getEntry,
     copyEntries,
@@ -144,8 +143,8 @@ function HomeContent() {
   const viewIsoParam = hydrated && todayIso ? viewedIsoDate(searchParams?.get("date"), todayIso) : null;
   const isPast = viewIsoParam !== null && viewIsoParam !== todayIso;
   const pastData = useMemo(
-    () => (isPast && viewIsoParam && todayIso ? pastDayData(viewIsoParam, todayIso, profile, targets) : null),
-    [isPast, viewIsoParam, todayIso, profile, targets]
+    () => (isPast && viewIsoParam && todayIso ? pastDayData(viewIsoParam, todayIso, profile) : null),
+    [isPast, viewIsoParam, todayIso, profile]
   );
   const day = pastData ?? diaryData;
   const viewIso = day.date;

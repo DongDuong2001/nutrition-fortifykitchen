@@ -87,7 +87,7 @@ export default function MicrosPage() {
 }
 
 function MicrosContent() {
-  const { data: diaryData, hydrated, profile, targets, todayIso } = useDiary();
+  const { data: diaryData, hydrated, profile, todayIso } = useDiary();
   const searchParams = useSearchParams();
   // ?date= picks a past day (read-only, as everything about a past day). Read after mount so the first render matches the server.
   const viewIso = hydrated && todayIso ? viewedIsoDate(searchParams?.get("date"), todayIso) : null;
@@ -95,8 +95,8 @@ function MicrosContent() {
   const diaryHref = isPast && viewIso ? `${HOME_ROUTE}?date=${viewIso}` : HOME_ROUTE;
   const dateQuery = isPast && viewIso ? `?date=${viewIso}` : "";
   const pastData = useMemo(
-    () => (isPast && viewIso && todayIso ? pastDayData(viewIso, todayIso, profile, targets) : null),
-    [isPast, viewIso, todayIso, profile, targets]
+    () => (isPast && viewIso && todayIso ? pastDayData(viewIso, todayIso, profile) : null),
+    [isPast, viewIso, todayIso, profile]
   );
   const [activeGroup, setActiveGroup] = useState<NutrientGroup>("vitamins");
   const [openGroups, setOpenGroups] = useState<Record<NutrientGroup, boolean>>({

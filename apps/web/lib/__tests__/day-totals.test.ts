@@ -3,7 +3,7 @@ import { COUNTED_NUTRIENT_KEYS, dayTotals, totalsFromDay, totalsFromEntries } fr
 import { blankDay, dayEntries, shiftIsoDate } from "../day-history";
 import { computeCompositeDayData, pastDayData } from "../diary-store";
 import { quickEntryFrom } from "../quick-entry";
-import { SAMPLE_PROFILE, targetsFor } from "../profile";
+import { SAMPLE_PROFILE } from "../profile";
 import { SAMPLE_DAY } from "../mock/sample-day";
 
 const TODAY = "2026-10-12";
@@ -118,7 +118,6 @@ describe("dayTotals: today from the live day, other days from the history", () =
 });
 
 describe("one source: Nhật ký and Tổng quan show the same numbers for the same day", () => {
-  const targets = targetsFor(SAMPLE_PROFILE);
 
   it("pastDayData matches dayTotals for every logged day of the history", () => {
     let checked = 0;
@@ -127,7 +126,7 @@ describe("one source: Nhật ký and Tổng quan show the same numbers for the s
       const totals = dayTotals(iso, TODAY);
       if (!totals.logged) continue;
       checked++;
-      const day = pastDayData(iso, TODAY, SAMPLE_PROFILE, targets);
+      const day = pastDayData(iso, TODAY, SAMPLE_PROFILE);
       expect(day.calories.consumed).toBe(totals.calories);
       const macro = (key: string) => day.macros.find((m) => m.key === key)?.consumed;
       expect(macro("protein")).toBe(totals.protein);
@@ -143,7 +142,7 @@ describe("one source: Nhật ký and Tổng quan show the same numbers for the s
 
   it("a day with no entries reads null for every nutrient in the diary too", () => {
     const iso = shiftIsoDate(TODAY, -60);
-    const day = pastDayData(iso, TODAY, SAMPLE_PROFILE, targets);
+    const day = pastDayData(iso, TODAY, SAMPLE_PROFILE);
     expect([...day.minerals, ...day.vitamins].every((s) => s.consumed === null)).toBe(true);
   });
 });
