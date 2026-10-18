@@ -6,12 +6,12 @@ Production demo build, 390x844 (and 1440x900 for the dialog). Tour, tips and "C�
 - Shows once on /app; Để sau and Esc hide it and mark the release seen; a reload shows nothing
 - A new account (setup finished) never sees it
 - Waits while a tip is open, opens after Đã hiểu
-- An account that has seen nothing gets the newest release only (2026-10-18e, cc-52, Ngày tập ghi vào nhật ký): its 3-step tour
-  falls back to the Ngày tập pill on Hôm nay, so the sheet has Thử ngay and runs it on /app; cc_tutorials.py covers several unseen
-  releases in one sheet and their joined tour. The 17/10 tour is started from
+- An account that has seen nothing gets the newest release only (2026-10-18f, cc-53b, the portion model): its 3-step tour
+  is on Hôm nay (+ Thêm, the food list, the meal pill), so the sheet has Thử ngay and runs it on /app; cc_tutorials.py covers
+  several unseen releases in one sheet and their joined tour (with cc-52's 18e on the Ngày tập pill). The 17/10 tour is started from
   Cài đặt › Có gì mới › Xem hướng dẫn (the last one) -> 3 steps -> Xong; a long press moves step 1 and opens the select bar (step 2); step 3 points at Cài đặt with
   select mode off; Bỏ qua and Esc end it; the entries never change
-- /settings/whats-new lists the five 18/10 releases (18e cc-52, 18d cc-53, 18c, 18b, 18) and 17/10, newest first, and replays the tour on /app
+- /settings/whats-new lists the six 18/10 releases (18f cc-53b, 18e cc-52, 18d cc-53, 18c, 18b, 18) and 17/10, newest first, and replays the tour on /app
 - 44 px targets, screen-reader names, reduced motion fades, 480 px centred dialog at 1440
 Screenshots: .screenshots/cc-46-*.png
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_46.py
@@ -35,12 +35,13 @@ SHOTS.mkdir(exist_ok=True)
 PHONE = {"width": 390, "height": 844}
 DESKTOP = {"width": 1440, "height": 900}
 SETTINGS_KEY = "h1t_settings_v1_demo"
-RELEASE = "2026-10-18e"
+RELEASE = "2026-10-18f"
 HOME_TIPS = ["home-logged", "meal-add", "home-share"]
-# Newest first: cc-52 (2026-10-18e), cc-53 (2026-10-18d), cc-51 (2026-10-18c), Thực phẩm bổ sung và Gia vị (2026-10-18b), then cc-49 (2026-10-18)
-ITEMS = ["Ngày tập ghi vào nhật ký", "Mở và đóng màn hình mượt hơn"]  # cc-55 adds the second
-ITEMS_1810D = ["Ghi món theo cách bạn quen"]
-ITEMS_1810C = ["Gần đây và Hay ăn", "Như hôm qua", "Chạm vi chất để xem nguồn", "Rung khi chạm", "Kéo xuống để tải lại", "Món của tôi được lưu", "Ghi thực phẩm bổ sung theo viên", "Ghi theo quả, viên"]
+# Newest first: cc-53b (2026-10-18f), cc-52 (2026-10-18e), cc-53 (2026-10-18d), cc-51 (2026-10-18c), Thực phẩm bổ sung và Gia vị (2026-10-18b), then cc-49 (2026-10-18)
+ITEMS = ["Khẩu phần theo gam", "Cân sống hay đã nấu chín", "Trứng ghi theo quả", "Khay gọn hơn"]
+ITEMS_1810E = ["Ngày tập ghi vào nhật ký", "Mở và đóng màn hình mượt hơn"]  # cc-55 adds the second
+ITEMS_1810D = ["Ghi theo lon, viên, phần"]
+ITEMS_1810C = ["Gần đây và Hay ăn", "Như hôm qua", "Chạm vi chất để xem nguồn", "Rung khi chạm", "Kéo xuống để tải lại", "Món của tôi được lưu", "Ghi thực phẩm bổ sung theo viên", "Ghi theo viên"]
 ITEMS_1810B = ["Thực phẩm bổ sung", "Gia vị", "Thêm cà phê"]
 ITEMS_1810 = ["Đồng bộ ổn định hơn"]
 ITEMS_1710 = ["Trang chủ mới", "Chọn nhiều món", "Mục tiêu đa lượng", "Bữa ăn dễ đọc hơn", "Thanh vi chất 4 màu", "Ảnh chia sẻ rõ hơn"]
@@ -133,7 +134,7 @@ def once(browser):
     focus = pg.evaluate("() => { const a = document.activeElement; return a && a.tagName + '|' + a.textContent.trim() + '|' + getComputedStyle(a).outlineStyle }")
     check(focus == "H2|Có gì mới|none", f"initial focus on the heading, no ring ({focus})")
     check(all(t in text for t in ITEMS), "the release's items")
-    check(sheet(pg).get_by_role("button", name="Thử ngay (1 phút)").count() == 1, "Thử ngay: 18e's tour falls back to the Ngày tập pill on Hôm nay")
+    check(sheet(pg).get_by_role("button", name="Thử ngay (1 phút)").count() == 1, "Thử ngay: 18f's tour is on Hôm nay")
     check(sheet(pg).get_by_role("button", name="Để sau").count() == 1, "Để sau")
     check(sheet(pg).get_by_role("button", name="Đóng").count() == 1, "close button named Đóng")
     check(sheet(pg).get_attribute("aria-modal") == "true", "aria-modal")
@@ -270,24 +271,25 @@ def tour(browser):
     ctx.close()
 
 
-def training_tour(browser):
-    """cc-52: Thử ngay runs the 18d tour on /app; its targets live on Ngày tập, so every step rings the Ngày tập pill."""
+def home_tour(browser):
+    """cc-53b: Thử ngay runs the 18f tour on /app: + Thêm, the food list, a meal pill."""
     ctx, pg = new_page(browser, onboarding=SEEN_TIPS)
     go(pg, "/app", 1200)
     visible(sheet(pg))
     before = entries(pg)
     sheet(pg).get_by_role("button", name="Thử ngay (1 phút)").click()
-    titles = ["Nhóm Bự / Bé", "Đánh dấu để ghi", "+ Thêm món"]
-    for i, title in enumerate(titles, start=1):
-        check(visible(card(pg)) and f"Mới · {i}/3" in card(pg).inner_text() and title in card(pg).inner_text(), f"18d step {i}: {title}")
-        pill = pg.locator('[data-tour="training-pill"]:visible').first.bounding_box()
+    steps = [("Ghi theo gam", ["meal-add", "nav-add"]), ("Sống hay chín", ["home-food-list", "meal-pill"]), ("Khay xem lại", ["meal-pill"])]
+    for i, (title, targets) in enumerate(steps, start=1):
+        check(visible(card(pg)) and f"Mới · {i}/3" in card(pg).inner_text() and title in card(pg).inner_text(), f"18f step {i}: {title}")
         hole = pg.locator("[data-onboarding-overlay] > div.border-sky").first.bounding_box()
-        check(pill and hole and hole["x"] <= pill["x"] + 1 and hole["x"] + hole["width"] >= pill["x"] + pill["width"] - 1, f"18d step {i}: the ring is on the Ngày tập pill")
+        boxes = [b for t in targets for b in [pg.locator(f'[data-tour="{t}"]:visible').first.bounding_box()] if b]
+        on = any(hole and hole["x"] <= b["x"] + 1 and hole["x"] + hole["width"] >= b["x"] + b["width"] - 1 for b in boxes)
+        check(on, f"18f step {i}: the ring is on {' or '.join(targets)}")
         if i == 1:
-            shot(pg, "tour-18d-390")
+            shot(pg, "tour-18f-390")
         card(pg).get_by_role("button", name="Xong" if i == 3 else "Tiếp").click()
         pg.wait_for_timeout(500)
-    check(card(pg).count() == 0 and pg.url.endswith("/app") and entries(pg) == before, "Xong ends the 18d tour on /app; entries unchanged")
+    check(card(pg).count() == 0 and pg.url.endswith("/app") and entries(pg) == before, "Xong ends the 18f tour on /app; entries unchanged")
     ctx.close()
 
 
@@ -300,11 +302,11 @@ def history(browser):
     pg.wait_for_url(re.compile(r".*/settings/whats-new$"), timeout=5000)
     pg.wait_for_timeout(400)
     text = pg.locator("main").inner_text()
-    check(text.count("Cập nhật 18/10") == 5 and all(t in text for t in ITEMS + ITEMS_1810D + ITEMS_1810C + ITEMS_1810B + ITEMS_1810), "the history lists the five 18/10 releases and their items")
-    check(text.index("Ngày tập ghi vào nhật ký") < text.index("Ghi món theo cách bạn quen") < text.index("Kéo xuống để tải lại") < text.index("Thực phẩm bổ sung") < text.index("Đồng bộ ổn định hơn"), "…newest first: 18e, 18d, 18c, 18b, 18")
+    check(text.count("Cập nhật 18/10") == 6 and all(t in text for t in ITEMS + ITEMS_1810E + ITEMS_1810D + ITEMS_1810C + ITEMS_1810B + ITEMS_1810), "the history lists the six 18/10 releases and their items")
+    check(text.index("Khẩu phần theo gam") < text.index("Ngày tập ghi vào nhật ký") < text.index("Ghi theo lon, viên, phần") < text.index("Kéo xuống để tải lại") < text.index("Thực phẩm bổ sung") < text.index("Đồng bộ ổn định hơn"), "…newest first: 18f, 18e, 18d, 18c, 18b, 18")
     check("Cập nhật 17/10" in text and "17/10/2026" not in text and all(t in text for t in ITEMS_1710), "the history lists the release (Cập nhật 17/10) and its items")
     check(text.index("Cập nhật 18/10") < text.index("Cập nhật 17/10"), "newest first")
-    check(pg.get_by_role("button", name="Xem hướng dẫn").count() == 4, "Xem hướng dẫn on 18e, 18d, 18c and 17/10")
+    check(pg.get_by_role("button", name="Xem hướng dẫn").count() == 4, "Xem hướng dẫn on 18f, 18e, 18c and 17/10 (18d's tour is retired)")
     targets_ok(pg, "main", "history")
     shot(pg, "history-390")
     replay_1710(pg).click()
@@ -344,7 +346,7 @@ def reduced_motion(browser):
 def main():
     with sync_playwright() as p:
         browser = p.chromium.launch()
-        for part in (once, new_account, waits_for_tip, tour, training_tour, history, desktop, reduced_motion):
+        for part in (once, new_account, waits_for_tip, tour, home_tour, history, desktop, reduced_motion):
             print(f"\n=== {part.__name__} ===")
             try:
                 part(browser)
