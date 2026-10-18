@@ -4,15 +4,16 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Sheet } from "@/components/ui/sheet";
 import { PillButton } from "@/components/ui/pill-button";
+import { PortionArea } from "@/components/ui/portion-area";
 import { PortionPanel } from "@/components/ui/portion-panel";
 import { useDiary } from "@/lib/diary-store";
 import { canLog } from "@/lib/diary-edits";
-import { formatAmount, formatNumber } from "@/lib/format";
+import { formatAmount } from "@/lib/format";
 import { catalogFoodById, type FoodItem } from "@/lib/mock/foods";
-import { MAX_UNIT_COUNT, gramsServingLabel, parseGramsInput, unitPortionText } from "@/lib/portion";
+import { gramsServingLabel, parseGramsInput } from "@/lib/portion";
 import { navigateFromSheet } from "@/lib/sheet-history";
 import type { TrainingCheckItem } from "@/lib/training";
-import { LON_STEP, carbsIn, gramsForCarbs, lonsForCarbs, mixPrefill, resolveChoices, unitServing, type ResolvedChoice } from "@/lib/training-foods";
+import { carbsIn, gramsForCarbs, lonPortion, lonsForCarbs, mixPrefill, resolveChoices, type ResolvedChoice } from "@/lib/training-foods";
 import { generateUuid } from "@/lib/uuid";
 
 /** Grams as the gram field takes them: a decimal comma and no thousands dot (formatAmount's "1.000" reads as 1 g). */
@@ -35,9 +36,26 @@ export const canLogItem = (item: TrainingCheckItem, foods: readonly FoodItem[]) 
 type OnLogged = (itemId: string, entryIds: string[], qty: string) => void;
 
 /**
+ * The amount a tick pre-fills, in the unit the portion area opens on: a can food (Red Bull) in lon, in half cans; the
+ * rest in gam. Tinh bột nhanh's dose is grams of carbs (Hao 18/10), so its amount comes from the food's carbs.
+ */
+function prefill(item: TrainingCheckItem, food: FoodItem): { grams: number; label: string } {
+  const dose = item.grams ?? 0;
+  if (item.carbs) {
+    const cans = lonPortion(food, lonsForCarbs(food, dose));
+    if (cans) return cans;
+    const grams = gramsForCarbs(food, dose) ?? dose;
+    return { grams, label: gramsServingLabel(grams) };
+  }
+  return { grams: dose, label: item.servingLabel ?? gramsServingLabel(dose) };
+}
+
+/** "Tinh bột 45 / 45 g": the carbs of the amounts against the dose. */
+const carbTotal = (carbs: number, dose: number) => `Tinh bột ${formatAmount(Math.round(carbs), "g")} / ${formatAmount(dose, "g")} g`;
+
+/**
  * cc-52: a tick on Ngày tập opens the portion sheet with the item's food, its Bự / Bé amount and Bữa phụ. Thêm logs the
- * entries (onLogged, with their ids for the tick's link); closing it logs nothing. Tinh bột nhanh's dose is grams of
- * carbs: mật mía opens the portion sheet at the grams that hold them, Red Bull and the mix count cans in half steps.
+ * entries (onLogged, with their ids for the tick's link); closing it logs nothing.
  */
 export function TrainingLogSheet({
   item,
@@ -61,8 +79,6 @@ function LogBody({ item, foods, onLogged }: { item: TrainingCheckItem; foods: re
   const choices = itemChoices(item, foods);
   const [choiceKey, setChoiceKey] = useState(() => choices.find(loggable)?.key ?? "");
   const choice = choices.find((c) => c.key === choiceKey && loggable(c));
-  const target = item.grams ?? 0;
-  const byCan = choice && item.carbs && unitServing(choice.foods[0]) && (choice.foods.length === 2 || choice.key === "redbull");
 
   return (
     <div className="flex flex-col gap-3">
@@ -93,8 +109,8 @@ function LogBody({ item, foods, onLogged }: { item: TrainingCheckItem; foods: re
       )}
       {/* Keyed by the choice: another choice starts from its own pre-filled amount */}
       {choice &&
-        (byCan ? (
-          <CanPanel key={choice.key} item={item} choice={choice} target={target} onLogged={onLogged} />
+        (choice.foods.length === 2 ? (
+          <MixPanel key={choice.key} item={item} redBull={choice.foods[0]} matMia={choice.foods[1]} onLogged={onLogged} />
         ) : (
           <PortionChoice key={choice.key} item={item} choice={choice} onLogged={onLogged} />
         ))}
@@ -102,14 +118,14 @@ function LogBody({ item, foods, onLogged }: { item: TrainingCheckItem; foods: re
   );
 }
 
-/** One food by grams, in the shared portion panel. A carbs dose pre-fills the grams that hold it and says so. */
+/** One food in the shared portion panel (its portion area: lon for Red Bull, gam for mật mía and muối). */
 function PortionChoice({ item, choice, onLogged }: { item: TrainingCheckItem; choice: ResolvedChoice; onLogged: OnLogged }) {
   const router = useRouter();
   const { addFoodEntry } = useDiary();
   const food = choice.foods[0];
-  const grams = (item.carbs ? gramsForCarbs(food, item.grams ?? 0) : null) ?? item.grams ?? 0;
-  const [gramsInput, setGramsInput] = useState(gramsText(grams));
-  const [servingLabel, setServingLabel] = useState(item.servingLabel ?? gramsServingLabel(grams));
+  const start = prefill(item, food);
+  const [gramsInput, setGramsInput] = useState(gramsText(start.grams));
+  const [servingLabel, setServingLabel] = useState(start.label);
   const [submitting, setSubmitting] = useState(false);
   const parsed = parseGramsInput(gramsInput);
 
@@ -134,7 +150,7 @@ function PortionChoice({ item, choice, onLogged }: { item: TrainingCheckItem; ch
     <>
       {item.carbs && (
         <p role="status" data-align-group="training-log" className="m-0 px-1 text-sm font-semibold text-text tabular-nums">
-          ≈ {formatAmount(parsed, "g")} g {choice.short} · {formatAmount(Math.round(carbsIn(food, parsed)), "g")} g tinh bột
+          ≈ {servingLabel || gramsServingLabel(parsed)} {choice.short} · {formatAmount(Math.round(carbsIn(food, parsed)), "g")} g tinh bột
         </p>
       )}
       <div onClickCapture={leaveByLink}>
@@ -154,83 +170,51 @@ function PortionChoice({ item, choice, onLogged }: { item: TrainingCheckItem; ch
 }
 
 /**
- * Red Bull, alone or with mật mía (Hao 18/10): cans in half steps (the portion panel's stepper counts whole units), the
- * mix's mật mía in grams, and a live total of carbs against the dose. The mix starts at 1 can, mật mía topping up.
+ * Red Bull + mật mía (Hao 18/10): two portion areas, Red Bull in lon and mật mía in gam, and a live total of carbs
+ * against the dose. It starts at 1 lon with mật mía topping up; Thêm logs two entries with one Hoàn tác.
  */
-function CanPanel({ item, choice, target, onLogged }: { item: TrainingCheckItem; choice: ResolvedChoice; target: number; onLogged: OnLogged }) {
-  const { addFoodEntry, addFoodEntries } = useDiary();
-  const [redBull, matMia] = choice.foods;
-  const can = unitServing(redBull)!;
-  const start = matMia ? mixPrefill(redBull, matMia, target) : { lons: lonsForCarbs(redBull, target), grams: 0 };
-  const [lons, setLons] = useState(start.lons);
-  const [gramsInput, setGramsInput] = useState(gramsText(start.grams));
+function MixPanel({ item, redBull, matMia, onLogged }: { item: TrainingCheckItem; redBull: FoodItem; matMia: FoodItem; onLogged: OnLogged }) {
+  const { addFoodEntries } = useDiary();
+  const dose = item.grams ?? 0;
+  const start = mixPrefill(redBull, matMia, dose);
+  const can = lonPortion(redBull, start.lons) ?? { grams: 0, label: "" };
+  const [rbInput, setRbInput] = useState(gramsText(can.grams));
+  const [rbLabel, setRbLabel] = useState(can.label);
+  const [mmInput, setMmInput] = useState(gramsText(start.grams));
+  const [mmLabel, setMmLabel] = useState(gramsServingLabel(start.grams));
   const [submitting, setSubmitting] = useState(false);
-  const grams = matMia ? parseGramsInput(gramsInput) : 0;
-  const total = Math.round(carbsIn(redBull, lons * can.grams) + (matMia ? carbsIn(matMia, grams) : 0));
-  const step = (d: number) => setLons((n) => Math.min(MAX_UNIT_COUNT, Math.max(LON_STEP, n + d)));
+  const rb = parseGramsInput(rbInput);
+  const mm = parseGramsInput(mmInput);
 
-  const add = async () => {
-    if (submitting) return;
+  const add = () => {
+    if (submitting || rb + mm <= 0) return;
     setSubmitting(true);
-    const can1 = { food: redBull, grams: lons * can.grams, label: unitPortionText(can.label, lons), id: generateUuid() };
-    const lonText = `${formatNumber(lons)} lon`;
-    if (matMia && grams > 0) {
-      const mm = { food: matMia, grams, label: gramsServingLabel(grams), id: generateUuid() };
-      if (addFoodEntries([can1, mm], "snack")) return onLogged(item.id, [can1.id, mm.id], `${lonText} Red Bull + ${formatAmount(grams, "g")} g mật mía`);
-    } else if (await addFoodEntry(redBull, can1.grams, "snack", can1.label, { id: can1.id })) {
-      return onLogged(item.id, [can1.id], `${lonText} Red Bull`);
+    const parts = [
+      { food: redBull, grams: rb, label: rbLabel || gramsServingLabel(rb), id: generateUuid(), short: "Red Bull" },
+      { food: matMia, grams: mm, label: mmLabel || gramsServingLabel(mm), id: generateUuid(), short: "mật mía" },
+    ].filter((p) => p.grams > 0);
+    if (addFoodEntries(parts, "snack")) {
+      onLogged(item.id, parts.map((p) => p.id), parts.map((p) => `${p.label} ${p.short}`).join(" + "));
+    } else {
+      setSubmitting(false);
     }
-    setSubmitting(false);
   };
+
+  const area = (food: FoodItem, input: string, setInput: (v: string) => void, label: string, setLabel: (v: string) => void) => (
+    <div data-align-group="training-mix" className="flex flex-col gap-2">
+      <span className="text-base font-bold text-text">{food.nameVi}</span>
+      <PortionArea food={food} gramsInput={input} setGramsInput={setInput} selectedServingLabel={label} setSelectedServingLabel={setLabel} />
+    </div>
+  );
 
   return (
     <div className="flex flex-col gap-3 rounded-[18px] border border-card-border bg-surface p-4">
-      <div data-align-group="training-can" className="flex min-h-[48px] items-center justify-between gap-3">
-        <span className="min-w-0 text-base font-bold text-text">{redBull.nameVi}</span>
-        <div role="group" aria-label="Số lon Red Bull" className="flex shrink-0 items-center gap-1">
-          <button
-            type="button"
-            onClick={() => step(-LON_STEP)}
-            disabled={lons <= LON_STEP}
-            aria-label="Bớt nửa lon"
-            className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-card-border bg-card text-lg font-bold text-text active:scale-[0.97] disabled:opacity-40 motion-reduce:active:scale-100"
-          >
-            −
-          </button>
-          <span aria-live="polite" className="min-w-[64px] text-center text-[15px] font-bold tabular-nums text-text">
-            {formatNumber(lons)} lon
-          </span>
-          <button
-            type="button"
-            onClick={() => step(LON_STEP)}
-            disabled={lons >= MAX_UNIT_COUNT}
-            aria-label="Thêm nửa lon"
-            className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-card-border bg-card text-lg font-bold text-text active:scale-[0.97] disabled:opacity-40 motion-reduce:active:scale-100"
-          >
-            +
-          </button>
-        </div>
-      </div>
-      {matMia && (
-        <label data-align-group="training-can" className="flex min-h-[48px] items-center justify-between gap-3 border-t border-card-border pt-3">
-          <span className="min-w-0 text-base font-bold text-text">{matMia.nameVi}</span>
-          <span className="flex h-11 w-[120px] shrink-0 items-center rounded-xl border-2 border-blue bg-card px-2 focus-within:ring-2 focus-within:ring-blue">
-            <input
-              type="text"
-              inputMode="decimal"
-              aria-label="Số gam mật mía"
-              value={gramsInput}
-              onChange={(e) => setGramsInput(e.target.value)}
-              className="w-full border-0 bg-transparent text-right text-sm font-bold tabular-nums text-text outline-none"
-            />
-            <span className="ml-1 text-xs font-semibold text-secondary">g</span>
-          </span>
-        </label>
-      )}
-      <p role="status" data-align-group="training-can" className="m-0 border-t border-card-border pt-3 text-sm font-semibold tabular-nums text-text">
-        Tinh bột {formatAmount(total, "g")} / {formatAmount(target, "g")} g
+      {area(redBull, rbInput, setRbInput, rbLabel, setRbLabel)}
+      <div className="border-t border-card-border pt-3">{area(matMia, mmInput, setMmInput, mmLabel, setMmLabel)}</div>
+      <p role="status" data-align-group="training-mix" className="m-0 border-t border-card-border pt-3 text-sm font-semibold tabular-nums text-text">
+        {carbTotal(carbsIn(redBull, rb) + carbsIn(matMia, mm), dose)}
       </p>
-      <PillButton onClick={add} disabled={submitting}>
+      <PillButton onClick={add} disabled={submitting || rb + mm <= 0}>
         Thêm vào Bữa phụ
       </PillButton>
     </div>

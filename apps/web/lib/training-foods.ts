@@ -1,5 +1,5 @@
 import type { FoodItem, FoodServing } from "./mock/foods";
-import { isUnitServingLabel } from "./portion";
+import { UNIT_AMOUNT_STEP, formatUnitServingLabel, parseUnitServing } from "./portion";
 
 /**
  * cc-52: the catalogue foods behind the coach's Ngày tập items. A live food is found by its (source, source_id), the
@@ -87,8 +87,8 @@ export function resolveChoices(keys: readonly string[], foods: readonly FoodItem
 
 // ---- Tinh bột nhanh: the coach's 30–45 g are grams of carbs (Hao 18/10); the food amount comes from its carbs
 
-/** Red Bull is logged by the can, in half cans. */
-export const LON_STEP = 0.5;
+/** Red Bull is logged by the can, in the portion area's half steps. */
+const LON_STEP = UNIT_AMOUNT_STEP;
 
 /** Grams of carbs in an amount of a food (0 when the food has no carb figure). */
 export const carbsIn = (food: FoodItem, grams: number): number => ((food.nutrients.carbs ?? 0) * grams) / 100;
@@ -99,12 +99,20 @@ export function gramsForCarbs(food: FoodItem, carbs: number): number | null {
   return per100 > 0 ? Math.round((carbs / per100) * 100) : null;
 }
 
-/** The food's unit portion ("1 lon (250 ml)"), when it has one. */
-export const unitServing = (food: FoodItem): FoodServing | null => food.servings.find((s) => isUnitServingLabel(s.label)) ?? null;
+/** The food's can portion ("1 lon", "1 lon (250 ml)"), when it is logged by the can. */
+export const canServing = (food: FoodItem): FoodServing | null => food.servings.find((s) => parseUnitServing(s.label)?.unit === "lon") ?? null;
+
+/** N cans as the portion area writes them: "1,5 lon" (with the can's size or hint) and their grams. */
+export function lonPortion(food: FoodItem, lons: number): { grams: number; label: string } | null {
+  const can = canServing(food);
+  const unit = can && parseUnitServing(can.label);
+  if (!can || !unit) return null;
+  return { grams: Math.round(lons * can.grams), label: formatUnitServingLabel(lons, unit.unit, unit.size, unit.hint) };
+}
 
 /** Cans of Red Bull for this many grams of carbs, in half cans, at least half a can. */
 export function lonsForCarbs(food: FoodItem, carbs: number): number {
-  const can = unitServing(food);
+  const can = canServing(food);
   const perCan = can ? carbsIn(food, can.grams) : 0;
   if (perCan <= 0) return 1;
   return Math.max(LON_STEP, Math.round(carbs / perCan / LON_STEP) * LON_STEP);
@@ -112,7 +120,7 @@ export function lonsForCarbs(food: FoodItem, carbs: number): number {
 
 /** The mix: 1 can of Red Bull, and mật mía tops up to the target (none when the can already reaches it). */
 export function mixPrefill(redBull: FoodItem, matMia: FoodItem, carbs: number): { lons: number; grams: number } {
-  const can = unitServing(redBull);
+  const can = canServing(redBull);
   const rest = carbs - (can ? carbsIn(redBull, can.grams) : 0);
   return { lons: 1, grams: rest > 0 ? gramsForCarbs(matMia, rest) ?? 0 : 0 };
 }

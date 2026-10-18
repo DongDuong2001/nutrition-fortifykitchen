@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { FoodItem } from "../mock/foods";
-import { carbsIn, findCoachFood, gramsForCarbs, lonsForCarbs, mixPrefill, resolveChoices, unitServing } from "../training-foods";
+import { canServing, carbsIn, findCoachFood, gramsForCarbs, lonPortion, lonsForCarbs, mixPrefill, resolveChoices } from "../training-foods";
 
 const food = (id: string, nameVi: string, over: Partial<FoodItem> = {}): FoodItem => ({
   id,
@@ -109,10 +109,18 @@ describe("fast carbs as grams of carbs", () => {
   });
 
   it("Red Bull by the can in half steps: 28,6 g carbs a can, so Bé 1 lon and Bự 1,5 lon", () => {
-    expect(unitServing(RED_BULL)).toEqual({ label: "1 lon (250 ml)", grams: 260 });
+    expect(canServing(RED_BULL)).toEqual({ label: "1 lon (250 ml)", grams: 260 });
+    expect(canServing(MAT_MIA_LABEL)).toBeNull();
     expect(lonsForCarbs(RED_BULL, 30)).toBe(1);
     expect(lonsForCarbs(RED_BULL, 45)).toBe(1.5);
     expect(lonsForCarbs(RED_BULL, 5)).toBe(0.5);
+  });
+
+  it("cans are written as the portion area writes them, so its lon tab opens on that amount", () => {
+    expect(lonPortion(RED_BULL, 1.5)).toEqual({ grams: 390, label: "1,5 lon (250 ml)" });
+    const demo = food("food-red-bull", "Red Bull", { servings: [{ label: "1 lon", grams: 250 }, { label: "100 ml", grams: 100 }], nutrients: { energy: 45, carbs: 11 } });
+    expect(lonPortion(demo, 1)).toEqual({ grams: 250, label: "1 lon" });
+    expect(lonPortion(MAT_MIA_LABEL, 1)).toBeNull();
   });
 
   it("the mix starts at 1 lon and mật mía tops up to the target", () => {
