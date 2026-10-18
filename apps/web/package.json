@@ -13,6 +13,8 @@
     "start:3101": "next start -p 3101",
     "start:3104": "next start -p 3104",
     "start:3105": "next start -p 3105",
+    "dev:3106": "next dev --webpack -p 3106",
+    "start:3106": "next start -p 3106",
     "port:free": "node scripts/free-port.js",
     "build": "next build --webpack",
     "build:demo": "node scripts/build-demo.mjs",
@@ -23,6 +25,7 @@
     "test:align": "node scripts/py.mjs tests/alignment.py",
     "test:hydration": "node scripts/py.mjs tests/probes/hydration.py",
     "probe": "node scripts/probe.mjs",
+    "sizes": "node scripts/route-sizes.mjs",
     "probe:all": "node scripts/py.mjs tests/probes/run_all.py",
     "check": "npm run typecheck && npm run test && npm run build:demo && npm run test:align && npm run test:hydration"
   },
