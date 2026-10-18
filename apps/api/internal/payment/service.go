@@ -73,7 +73,7 @@ func (s *paymentService) VerifySignature(payload PayOSWebhookPayload) bool {
 	mac.Write([]byte(dataStr))
 	expectedSig := hex.EncodeToString(mac.Sum(nil))
 
-	return strings.EqualFold(payload.Signature, expectedSig)
+	return hmac.Equal([]byte(strings.ToLower(payload.Signature)), []byte(strings.ToLower(expectedSig)))
 }
 
 func (s *paymentService) ProcessPaymentWebhook(ctx context.Context, payload PayOSWebhookPayload) error {
