@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { MAX_TOUR_STEPS, RELEASES, joinedTour, latestRelease, shouldShowWhatsNew, tourStepAfter, unseenReleases, type Release } from "../releases";
+import { MAX_TOUR_STEPS, RELEASES, joinedTour, latestRelease, shouldShowWhatsNew, tourStepAfter, tourSteps, unseenReleases, type Release } from "../releases";
+import { whatsNewSteps } from "../tour-bus";
 
 const show = (over: Partial<Parameters<typeof shouldShowWhatsNew>[0]> = {}) =>
   shouldShowWhatsNew({ seenId: null, latestId: "2026-10-17", firstRun: false, busy: false, ...over });
@@ -133,6 +134,33 @@ describe("joinedTour (what Thử ngay runs)", () => {
     expect(titles("2026-10-17")).toEqual([...T18C.slice(0, 2), ...T18D, ...T18E]);
   });
 
+  // Hôm nay as "Thử ngay" sees it: 18c's and 18e's controls (18e through the Ngày tập pill), never 18d's portion area
+  const ON_HOME = new Set(["sync-status", "header-actions", "home-food-list", "meal-pill", "nutrient-column", "nav-explore", "training-pill"]);
+  const onHome = (s: { target: string; fallback?: string }) => ON_HOME.has(s.target) || (s.fallback !== undefined && ON_HOME.has(s.fallback));
+
+  it("seen 18b, on Hôm nay: the steps not on the page go first, then the cap: 18c keeps all 5, then 18e (18d is not on Hôm nay)", () => {
+    const ids = unseenReleases("2026-10-18b").map((r) => r.id);
+    expect(ids).toEqual(["2026-10-18e", "2026-10-18d", "2026-10-18c"]);
+    expect(joinedTour(ids, RELEASES, onHome).map((s) => s.title)).toEqual([...T18C, ...T18E]);
+  });
+
+  it("the keep test sees each step's place in the whole joined list, oldest release first, before the cap", () => {
+    const seen: [string, number][] = [];
+    joinedTour(unseenReleases("2026-10-18b").map((r) => r.id), RELEASES, (s, i) => (seen.push([s.title, i]), false));
+    expect(seen.map(([t]) => t)).toEqual(tourSteps(["2026-10-18e", "2026-10-18d", "2026-10-18c"]).map((s) => s.title));
+    expect(seen.map(([, i]) => i)).toEqual(Array.from({ length: 11 }, (_, i) => i));
+    expect(seen.map(([t]) => t)).toEqual([...T18C, ...T18D, ...T18E]);
+  });
+
+  it("the cap still holds after the filter: more than 8 steps on the page drops the oldest release's last ones", () => {
+    const step = (t: string) => ({ target: "x", title: t, body: "" });
+    const fake: Release[] = [
+      { id: "b", date: "", items: [], tour: ["b1", "b2", "b3", "b4", "b5"].map(step) },
+      { id: "a", date: "", items: [], tour: ["a1", "a2", "a3", "a4", "a5"].map(step) },
+    ];
+    expect(joinedTour(["a", "b"], fake, (s) => s.title !== "a1").map((s) => s.title)).toEqual(["a2", "a3", "a4", "b1", "b2", "b3", "b4", "b5"]);
+  });
+
   it(`at most ${MAX_TOUR_STEPS} steps: the later steps of the oldest release go first`, () => {
     const step = (t: string) => ({ target: "x", title: t, body: "" });
     const fake: Release[] = [
@@ -144,6 +172,22 @@ describe("joinedTour (what Thử ngay runs)", () => {
     expect(joinedTour(["b", "c"], fake).map((s) => s.title)).toEqual(["b1", "b2", "b3", "c1", "c2", "c3", "c4"]);
     const long: Release[] = [{ id: "z", date: "", items: [], tour: Array.from({ length: 10 }, (_, i) => step(`z${i}`)) }, ...fake];
     expect(joinedTour(["a", "z"], long).map((s) => s.title)).toEqual(["z0", "z1", "z2", "z3", "z4", "z5", "z6", "z7"]);
+  });
+});
+
+describe("whatsNewSteps (the running tour, as Thử ngay saved it)", () => {
+  it("`only` holds places in the whole joined list; the cap comes after them: 18b's 18c + 18e on Hôm nay is all 8 steps", () => {
+    const releaseIds = ["2026-10-18e", "2026-10-18d", "2026-10-18c"];
+    const all = tourSteps(releaseIds);
+    const only = all.flatMap((s, i) => (s.target.startsWith("unit-") ? [] : [i]));
+    const steps = whatsNewSteps({ releaseIds, index: 0, only });
+    expect(steps).toHaveLength(MAX_TOUR_STEPS);
+    expect(steps.slice(0, 5).map((s) => s.target)).toEqual(["sync-status", "home-food-list", "nutrient-column", "meal-pill", "nav-explore"]);
+    expect(steps.slice(5).map((s) => s.target)).toEqual(["training-size", "training-checklist", "training-add-item"]);
+  });
+
+  it("without `only` (a tour saved before it existed) it is the capped joined tour", () => {
+    expect(whatsNewSteps({ releaseIds: ["2026-10-18d", "2026-10-18c"], index: 0 }).map((s) => s.title)).toEqual(joinedTour(["2026-10-18d", "2026-10-18c"]).map((s) => s.title));
   });
 });
 

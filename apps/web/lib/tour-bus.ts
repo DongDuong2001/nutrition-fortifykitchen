@@ -1,6 +1,6 @@
 import { getTodayIsoVN } from "./date";
 import { markTourStarted } from "./onboarding-store";
-import { joinedTour, type ReleaseTourStep } from "./releases";
+import { RELEASES, joinedTour, type ReleaseTourStep } from "./releases";
 import { tourReduce, type TourAction, type TourEvent, type TourState } from "./tour";
 
 /**
@@ -110,8 +110,9 @@ export function setPresent(name: Presence, on: boolean): void {
 
 /**
  * The running "Có gì mới" tour (cc-46), in sessionStorage like the first-run tour: the releases whose tours it joins
- * (lib/releases joinedTour), the step it is on, and (`only`) which of the joined steps were on the page when it
- * started, so a step that cannot show on Hôm nay is never counted in "Mới · n/N".
+ * (lib/releases joinedTour), the step it is on, and (`only`) which steps were on the page when it started, as places
+ * in lib/releases tourSteps (before the 8-step cap), so a step that cannot show on Hôm nay is never counted in
+ * "Mới · n/N" and never takes the place of one that can.
  */
 export interface WhatsNewTour {
   releaseIds: string[];
@@ -134,11 +135,11 @@ export function readWhatsNewTour(): WhatsNewTour | null {
   return null;
 }
 
-/** The steps a running tour walks through, in order. */
+/** The steps a running tour walks through, in order: those on the page when it started, then the 8-step cap. */
 export function whatsNewSteps(tour: WhatsNewTour | null): ReleaseTourStep[] {
   if (!tour) return [];
-  const joined = joinedTour(tour.releaseIds);
-  return tour.only ? tour.only.map((i) => joined[i]).filter((s): s is ReleaseTourStep => s !== undefined) : joined;
+  const only = tour.only;
+  return only ? joinedTour(tour.releaseIds, RELEASES, (_, i) => only.includes(i)) : joinedTour(tour.releaseIds);
 }
 
 export function writeWhatsNewTour(tour: WhatsNewTour | null): void {

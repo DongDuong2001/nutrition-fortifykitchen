@@ -10,7 +10,7 @@ import { readFirstRunFacts } from "@/lib/first-run";
 import { HOME_ROUTE } from "@/lib/nav";
 import { tourOpenOn } from "@/lib/onboarding-flags";
 import { loadFlags, markWhatsNewSeen, subscribeFlags, whatsNewDisabled } from "@/lib/onboarding-store";
-import { joinedTour, latestRelease, shouldShowWhatsNew, unseenReleases, type Release } from "@/lib/releases";
+import { latestRelease, shouldShowWhatsNew, tourSteps, unseenReleases, type Release } from "@/lib/releases";
 import { isOverlayOpen, isTipBusy, readTour, setOverlayOpen, subscribeTipBusy, subscribeTour, writeWhatsNewTour } from "@/lib/tour-bus";
 
 /** A tip (open or due), the install pop-up, the onboarding tour or the what's-new tour is on screen. */
@@ -33,9 +33,12 @@ function useOthersBusy(todayIso: string | null): boolean {
   return busy;
 }
 
-/** Which joined tour steps can show on Hôm nay now (the sheet sits over it): a step whose control lives elsewhere is left out. */
+/**
+ * Which tour steps can show on Hôm nay now (the sheet sits over it), as places in tourSteps: a step whose control lives
+ * elsewhere is left out before the 8-step cap (lib/tour-bus whatsNewSteps), so it never takes the place of one that can.
+ */
 function stepsOnPage(releases: readonly Release[]): number[] {
-  return joinedTour(releases.map((r) => r.id)).flatMap((step, i) => (stepOnPage(step) ? [i] : []));
+  return tourSteps(releases.map((r) => r.id)).flatMap((step, i) => (stepOnPage(step) ? [i] : []));
 }
 
 /**

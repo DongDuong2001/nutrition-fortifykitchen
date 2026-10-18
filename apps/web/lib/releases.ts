@@ -170,15 +170,29 @@ export function unseenReleases(seenId: string | null, releases: readonly Release
 /** The most steps "Thử ngay" runs in one go, however many releases it covers. */
 export const MAX_TOUR_STEPS = 8;
 
-/**
- * The tour "Thử ngay" runs for these releases: their tours one after another, oldest release first. Past
- * MAX_TOUR_STEPS the later steps of the oldest release are dropped first (the newest release is shown whole).
- */
-export function joinedTour(releaseIds: readonly string[], releases: readonly Release[] = RELEASES): ReleaseTourStep[] {
-  const parts = releases
+const tourParts = (releaseIds: readonly string[], releases: readonly Release[]) =>
+  releases
     .filter((r) => releaseIds.includes(r.id))
     .reverse()
     .map((r) => [...(r.tour ?? [])]);
+
+/** Every tour step of these releases, oldest release first, with no cap: what `keep` and a saved tour's `only` count in. */
+export function tourSteps(releaseIds: readonly string[], releases: readonly Release[] = RELEASES): ReleaseTourStep[] {
+  return tourParts(releaseIds, releases).flat();
+}
+
+/**
+ * The tour "Thử ngay" runs for these releases: their tours one after another, oldest release first. Steps that fail
+ * `keep` (a control not on Hôm nay; `i` is the step's place in tourSteps) go first, then the cap: past MAX_TOUR_STEPS
+ * the later steps of the oldest release are dropped first (the newest release is shown whole).
+ */
+export function joinedTour(
+  releaseIds: readonly string[],
+  releases: readonly Release[] = RELEASES,
+  keep: (step: ReleaseTourStep, i: number) => boolean = () => true
+): ReleaseTourStep[] {
+  let i = 0;
+  const parts = tourParts(releaseIds, releases).map((part) => part.filter((step) => keep(step, i++)));
   let extra = parts.reduce((n, p) => n + p.length, 0) - MAX_TOUR_STEPS;
   for (const part of parts) {
     while (extra > 0 && part.length > 0) {
