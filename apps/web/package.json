@@ -13,7 +13,7 @@
     "start:3104": "next start -p 3104",
     "port:free": "node scripts/free-port.js",
     "build": "next build --webpack",
-    "build:demo": "DEMO_BUILD=1 next build --webpack",
+    "build:demo": "node scripts/build-demo.mjs",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",

@@ -21,9 +21,15 @@ describe("resolveRecent", () => {
   });
 
   it("falls back to the first serving for a label it cannot read", () => {
-    const resolved = resolveRecent({ foodId: "food-chuoi", servingLabel: "2 quả lớn" }, MOCK_FOODS);
-    expect(resolved?.label).toBe("1 quả");
+    const resolved = resolveRecent({ foodId: "food-chuoi", servingLabel: "không rõ" }, MOCK_FOODS);
+    expect(resolved?.label).toBe("1 trái vừa");
     expect(resolved?.grams).toBe(118);
+  });
+
+  it("resolves unit amounts like 2 trái lớn", () => {
+    const resolved = resolveRecent({ foodId: "food-chuoi", servingLabel: "2 trái lớn" }, MOCK_FOODS);
+    expect(resolved?.label).toBe("2 trái lớn");
+    expect(resolved?.grams).toBe(272);
   });
 
   it("resolves every default recent", () => {

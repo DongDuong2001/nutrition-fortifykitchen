@@ -5,7 +5,7 @@ import { Sheet } from "@/components/ui/sheet";
 import { PillButton } from "@/components/ui/pill-button";
 import { NO_ENERGY_MESSAGE } from "@/lib/diary-edits";
 import { formatAmount } from "@/lib/format";
-import { parseGramsInput, formatGramsServingLabel, hidesGrams, scaleNutrients, unitCountOf } from "@/lib/portion";
+import { parseGramsInput, formatGramsServingLabel, hidesGrams, scaleNutrients, unitCountOf, parseUnitServing, parseUnitAmount } from "@/lib/portion";
 import { QuantityStepper } from "@/components/ui/quantity-stepper";
 import type { TrayItem, TrayTotals } from "@/lib/tray";
 
@@ -134,7 +134,9 @@ function PortionRow({
           </label>
         )}
       </div>
-      {hidesGrams(food) && <QuantityStepper servings={food.servings} label={item.label} grams={item.grams} onChange={onSetPortion} />}
+      {(hidesGrams(food) || parseUnitServing(item.label) !== null || parseUnitAmount(item.label) !== null) && (
+        <QuantityStepper servings={food.servings} label={item.label} grams={item.grams} onChange={onSetPortion} />
+      )}
     </li>
   );
 }

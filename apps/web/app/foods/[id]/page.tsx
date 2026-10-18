@@ -9,8 +9,8 @@ import { kcalValue } from "@/lib/kcal";
 import { MOCK_FOODS, type FoodItem } from "@/lib/mock/foods";
 import { getMealSlotNameVi } from "@/lib/meal-slot";
 import { useMealSlot } from "@/lib/use-meal-slot";
-import { parseGramsInput, calculateMacroPreview, macroGramsText, gramsServingLabel, hidesGrams, unitAmountText, unitCountOf } from "@/lib/portion";
-import { QuantityStepper } from "@/components/ui/quantity-stepper";
+import { parseGramsInput, calculateMacroPreview, macroGramsText, gramsServingLabel, hidesGrams, unitAmountText } from "@/lib/portion";
+import { PortionArea } from "@/components/ui/portion-area";
 import { goodSourcesOf, microRowsFor } from "@/lib/food-detail";
 import { categoryLabel, categoryOf } from "@/lib/food-categories";
 import { formatAmount } from "@/lib/format";
@@ -159,6 +159,7 @@ function FoodDetailInner() {
       cta={
         <button
           type="button"
+          data-tour="food-add-cta"
           onClick={handleAdd}
           disabled={isSubmitting || parsedGrams <= 0 || mealSlot === null || !canLog(food)}
           className="w-full min-h-[52px] rounded-full bg-blue text-on-accent font-bold text-base cursor-pointer hover:bg-blue/90 active:scale-[0.98] transition-all border-0 flex items-center justify-center shadow-md disabled:opacity-50"
@@ -242,57 +243,15 @@ function FoodDetailInner() {
         {/* Serving and Gram Selection */}
         <div data-align-group="food-detail" className="flex w-full flex-col gap-2">
           <span className="text-[13px] font-semibold text-secondary">Khẩu phần</span>
-          <ChipGroup
-            columns={Math.min(food.servings.length + (hidesGrams(food) ? 0 : 1), 4)}
-            tone="light"
-            items={[
-              ...food.servings.map((s) => ({
-                id: s.label,
-                label: s.display ?? (hidesGrams(food) || s.label === `${s.grams} g` ? s.label : `${s.label} · ${s.grams} g`),
-                active: (hidesGrams(food) ? unitCountOf(food.servings, selectedServingLabel, parsedGrams)?.serving.label : selectedServingLabel) === s.label,
-                onClick: () => {
-                  setGramsInput(s.grams.toString());
-                  setSelectedServingLabel(s.label);
-                },
-              })),
-              ...(hidesGrams(food)
-                ? []
-                : [
-                    {
-                      id: "custom",
-                      label: "Tùy chỉnh",
-                      active: selectedServingLabel === CUSTOM_PORTION,
-                      onClick: () => setSelectedServingLabel(CUSTOM_PORTION),
-                    },
-                  ]),
-            ]}
+          <PortionArea
+            food={food}
+            gramsInput={gramsInput}
+            setGramsInput={setGramsInput}
+            selectedServingLabel={selectedServingLabel}
+            setSelectedServingLabel={setSelectedServingLabel}
+            onFoodChange={(newFood) => router.replace(`/foods/${newFood.id}${searchParams.get("meal") ? `?meal=${searchParams.get("meal")}` : ""}`)}
+            data-align-group="food-detail"
           />
-          {hidesGrams(food) && (
-            <QuantityStepper
-              servings={food.servings}
-              label={selectedServingLabel}
-              grams={parsedGrams}
-              onChange={(grams, label) => {
-                setGramsInput(grams.toString());
-                setSelectedServingLabel(label);
-              }}
-            />
-          )}
-          {selectedServingLabel === CUSTOM_PORTION && (
-            <label className="flex h-11 w-full cursor-text items-center justify-end rounded-xl border border-card-border bg-card px-3 focus-within:ring-2 focus-within:ring-blue">
-              <span className="sr-only">Khối lượng theo gam</span>
-              <input
-                id="fd-size"
-                type="text"
-                inputMode="decimal"
-                aria-label="Khối lượng theo gam"
-                value={gramsInput}
-                onChange={(e) => setGramsInput(e.target.value)}
-                className="h-full w-full border-0 bg-transparent text-right text-sm font-bold tabular-nums text-text outline-none focus-visible:outline-none"
-              />
-              <span className="ml-1 text-xs font-semibold text-secondary">g</span>
-            </label>
-          )}
         </div>
 
         {/* Big Kcal & 3-up Macro Card */}

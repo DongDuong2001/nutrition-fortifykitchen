@@ -92,7 +92,7 @@ describe("PortionPanel for a food with unit servings (e.g. Trứng gà)", () => 
     nutrients: { energy: 142, protein: 12.6, fat: 9.5, carbs: 0.7 },
   } as unknown as (typeof MOCK_FOODS)[number];
 
-  it("renders both gram input and QuantityStepper when a unit chip is active", () => {
+  it("renders segmented toggle and QuantityStepper when a unit chip is active", () => {
     const html = renderToString(
       <DiaryProvider>
         <PortionPanel
@@ -107,9 +107,10 @@ describe("PortionPanel for a food with unit servings (e.g. Trứng gà)", () => 
       </DiaryProvider>
     );
 
-    // Gram field is present for scale weighing
-    expect(html).toContain("Số gam");
-    // QuantityStepper is also present for unit counting
+    // Toggle tabs are present: Quả and Gam
+    expect(html).toContain("Quả");
+    expect(html).toContain("Gam");
+    // QuantityStepper is present on unit tab
     expect(html).toContain("Số lượng");
     expect(html).toContain("×1");
   });

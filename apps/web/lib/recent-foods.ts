@@ -1,5 +1,5 @@
 import type { FoodItem } from "./mock/foods";
-import { MAX_UNIT_COUNT, unitPortionText } from "./portion";
+import { MAX_UNIT_COUNT, unitPortionText, parseUnitAmount, parseUnitServing } from "./portion";
 
 /** A recently logged food, with the serving it was logged with. */
 export interface RecentFood {
@@ -39,6 +39,26 @@ export function resolveRecent(recent: RecentFood, foods: FoodItem[]): ResolvedRe
 
   const serving = food.servings.find((s) => s.label === recent.servingLabel);
   if (serving) return { food, grams: serving.grams, label: serving.label };
+
+  // Parse arbitrary unit amounts, e.g. "2 trái vừa", "1,5 chén đầy", "3 cuốn"
+  const parsedAmt = parseUnitAmount(recent.servingLabel.trim());
+  if (parsedAmt) {
+    const isUnit = (unit: string) =>
+      unit === parsedAmt.unit || ((parsedAmt.unit === "quả" || parsedAmt.unit === "trái") && (unit === "quả" || unit === "trái"));
+    const s =
+      food.servings.find((item) => {
+        const p = parseUnitServing(item.label);
+        if (!p || !isUnit(p.unit)) return false;
+        return parsedAmt.size ? p.size === parsedAmt.size : (p.size === "vừa" || !p.size);
+      }) ??
+      food.servings.find((item) => {
+        const p = parseUnitServing(item.label);
+        return p && isUnit(p.unit);
+      });
+    if (s) {
+      return { food, grams: Math.round(s.grams * parsedAmt.amount * 10) / 10, label: recent.servingLabel.trim() };
+    }
+  }
 
   // A count of a unit portion ("2 viên" = 2 × "1 viên", a supplement's stepper): that many of the serving
   for (const s of food.servings) {

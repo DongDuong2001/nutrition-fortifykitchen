@@ -1,7 +1,7 @@
 import { MOCK_FOODS, catalogFoodById, type FoodItem } from "./mock/foods";
 import { SAMPLE_DAY, type MockDayData, type MockFoodItem } from "./mock/sample-day";
 import { MEAL_SLOTS, getMealSlotNameVi, type MealSlot } from "./meal-slot";
-import { hidesGrams, scaleNutrients } from "./portion";
+import { hidesGrams, parseUnitAmount, parseUnitServing, scaleNutrients } from "./portion";
 import { formatAmount } from "./format";
 import { isUuid } from "./uuid";
 
@@ -108,7 +108,24 @@ function sampleGrams(food: FoodItem, qty: string): number | null {
   const serving = food.servings.find((s) => s.label === qty);
   if (serving) return serving.grams;
   const match = GRAMS_LABEL.exec(qty.trim());
-  return match ? Number(match[1].replace(",", ".")) : null;
+  if (match) return Number(match[1].replace(",", "."));
+  const parsed = parseUnitAmount(qty);
+  if (parsed) {
+    const isUnit = (unit: string) =>
+      unit === parsed.unit || ((parsed.unit === "quả" || parsed.unit === "trái") && (unit === "quả" || unit === "trái"));
+    const unitServing =
+      food.servings.find((s) => {
+        const p = parseUnitServing(s.label);
+        if (!p || !isUnit(p.unit)) return false;
+        return parsed.size ? p.size === parsed.size : (p.size === "vừa" || !p.size);
+      }) ??
+      food.servings.find((s) => {
+        const p = parseUnitServing(s.label);
+        return p && isUnit(p.unit);
+      });
+    if (unitServing) return unitServing.grams * parsed.amount;
+  }
+  return null;
 }
 
 /** A sample item, with the food it matches by name. The sample day file itself is not changed. */

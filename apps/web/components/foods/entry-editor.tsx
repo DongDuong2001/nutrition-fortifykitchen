@@ -13,8 +13,8 @@ import { ChipGroup } from "../ui/chip-group";
 import { FormRow } from "../ui/form-row";
 import { parseDecimalInput } from "../../lib/quick-entry";
 
-import { formatGramsServingLabel, hidesGrams, unitCountOf } from "../../lib/portion";
-import { QuantityStepper } from "../ui/quantity-stepper";
+import { formatGramsServingLabel, hidesGrams } from "../../lib/portion";
+import { PortionArea } from "../ui/portion-area";
 import { HOME_ROUTE } from "@/lib/nav";
 
 const quickFieldClass =
@@ -147,68 +147,19 @@ export function EntryEditor({ view }: { view: EntryView }) {
             </div>
           )}
 
-          {/* Portion: gram field and the food's serving chips */}
-          {!quick && (
+          {/* Portion: PortionArea with unit/gram tabs and steppers */}
+          {!quick && food && (
           <div data-align-group="entry" className="flex w-full flex-col gap-2">
             <span className="text-sm font-bold">{hidesGrams(food) ? "Khẩu phần" : "Khối lượng"}</span>
-            <div className="flex w-full items-stretch gap-2">
-              {!hidesGrams(food) && (
-              <span
-                className={`flex h-12 w-[104px] shrink-0 items-center gap-1.5 rounded-xl border-2 px-3 focus-within:ring-2 focus-within:ring-blue ${
-                  canPortion ? "border-blue bg-card" : "border-card-border bg-surface"
-                }`}
-              >
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  aria-label="Số gam"
-                  value={gramsInput}
-                  disabled={!canPortion}
-                  onChange={(e) => {
-                    const text = e.target.value;
-                    setGramsInput(text);
-                    setServingLabel((prev) => formatGramsServingLabel(text, prev));
-                  }}
-                  className="h-11 min-w-0 flex-1 border-0 bg-transparent text-lg font-semibold tabular-nums outline-none focus-visible:outline-none disabled:opacity-60"
-                />
-                <span className="text-sm font-normal text-secondary">g</span>
-              </span>
-              )}
-              <div role="group" aria-label="Khẩu phần" className="flex min-w-0 flex-1 gap-2">
-                {food?.servings.map((s) => {
-                  const active = (hidesGrams(food) ? unitCountOf(food?.servings ?? [], servingLabel, parseGramsInput(gramsInput))?.serving.label : servingLabel) === s.label;
-                  return (
-                    <button
-                      key={s.label}
-                      type="button"
-                      disabled={!canPortion}
-                      aria-pressed={active}
-                      onClick={() => {
-                        setGramsInput(String(s.grams));
-                        setServingLabel(s.label);
-                      }}
-                      className={`h-12 min-w-0 flex-1 cursor-pointer rounded-xl border-0 px-2 text-sm font-semibold transition-transform active:scale-[0.97] disabled:opacity-60 ${
-                        active ? "bg-ink text-on-dark font-bold" : "bg-surface text-text"
-                      }`}
-                    >
-                      {s.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-            {hidesGrams(food) && food && (
-              <QuantityStepper
-                servings={food.servings}
-                label={servingLabel}
-                grams={parseGramsInput(gramsInput)}
-                disabled={!canPortion}
-                onChange={(grams, label) => {
-                  setGramsInput(String(grams));
-                  setServingLabel(label);
-                }}
-              />
-            )}
+            <PortionArea
+              food={food}
+              gramsInput={gramsInput}
+              setGramsInput={setGramsInput}
+              selectedServingLabel={servingLabel}
+              setSelectedServingLabel={setServingLabel}
+              disabled={!canPortion}
+              data-align-group="entry"
+            />
             {energyUnknown && view.canChangePortion ? (
               <p role="note" className="m-0 text-sm text-secondary">{NO_ENERGY_MESSAGE}</p>
             ) : (

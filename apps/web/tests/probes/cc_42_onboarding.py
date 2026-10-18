@@ -32,7 +32,7 @@ import _seed
 
 _seed.onboarding(True)
 
-BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3101")
+BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3100")
 SHOTS = Path(__file__).resolve().parent.parent.parent / ".screenshots"
 SHOTS.mkdir(exist_ok=True)
 PHONE = {"width": 390, "height": 844}

@@ -498,6 +498,7 @@ function AddFoodInner() {
                     setGramsInput={setGramsInput}
                     selectedServingLabel={selectedServingLabel}
                     setSelectedServingLabel={setSelectedServingLabel}
+                    onFoodChange={(newFood) => setSelectedFood(newFood)}
                     mealSlot={mealSlot}
                     onAdd={handleAddFood}
                     onAddAndContinue={handleAddAndContinue}
@@ -623,6 +624,7 @@ function AddFoodInner() {
                 setGramsInput={setGramsInput}
                 selectedServingLabel={selectedServingLabel}
                 setSelectedServingLabel={setSelectedServingLabel}
+                onFoodChange={(newFood) => setSelectedFood(newFood)}
                 mealSlot={mealSlot}
                 onAdd={handleAddFood}
                 onAddAndContinue={handleAddAndContinue}

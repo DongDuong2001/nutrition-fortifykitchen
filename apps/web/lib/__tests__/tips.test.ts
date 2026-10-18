@@ -10,7 +10,7 @@ const ids = (c: TipContext, f = flags()) => pickTip({ ctx: c, flags: f, tourActi
 describe("the tips table", () => {
   it("has the 15 tips of the design boards and cc-49's Chưa lưu, each with the card copy", () => {
     expect(TIPS.map((t) => t.id)).toEqual([
-      "unsaved", "home-logged", "meal-add", "home-share", "pull-refresh", "nutrient-sources", "past-day", "multi-select", "add-tray", "add-shortlists", "haptics", "food-detail", "compare",
+      "unsaved", "home-logged", "meal-add", "home-share", "pull-refresh", "nutrient-sources", "past-day", "multi-select", "add-tray", "add-shortlists", "haptics", "food-detail", "unit-toggle", "compare",
       "food-new", "training", "micros", "trends-micros", "explore", "overview", "leaderboard",
     ]);
     for (const t of TIPS) {

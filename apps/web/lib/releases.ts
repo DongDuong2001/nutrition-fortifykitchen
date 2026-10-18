@@ -32,6 +32,34 @@ export interface Release {
 
 export const RELEASES: readonly Release[] = [
   {
+    id: "2026-10-18d",
+    date: "18/10",
+    items: [
+      {
+        icon: "select",
+        title: "Ghi món theo cách bạn quen",
+        body: "Chọn trái, chén, lon… và cỡ nhỏ, vừa, lớn, hoặc nhập gam. Cơm, mì, yến mạch mở sẵn ở Gam.",
+      },
+    ],
+    tour: [
+      {
+        target: "unit-toggle",
+        title: "Chọn đơn vị",
+        body: "Chuyển giữa các đơn vị quen thuộc hoặc nhập gam.",
+      },
+      {
+        target: "unit-size",
+        title: "Chọn kích cỡ",
+        body: "Chọn cỡ nhỏ, vừa, lớn hoặc lưng, đầy.",
+      },
+      {
+        target: "unit-amount",
+        title: "Nhập số lượng",
+        body: "Chạm để gõ hoặc bấm cộng trừ để chỉnh số lượng.",
+      },
+    ],
+  },
+  {
     id: "2026-10-18c",
     date: "18/10",
     items: [

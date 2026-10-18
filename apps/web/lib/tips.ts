@@ -145,6 +145,14 @@ export const TIPS: readonly Tip[] = [
     when: (c) => /^\/foods\/(?!new$|compare$)[^/]+$/.test(c.pathname),
   },
   {
+    id: "unit-toggle",
+    target: "unit-toggle",
+    title: "Ghi món theo cách bạn quen",
+    body: "Chọn trái, chén, lon… và cỡ nhỏ, vừa, lớn, hoặc nhập gam. Cơm, mì, yến mạch mở sẵn ở Gam.",
+    used: ["unit-toggle"],
+    when: (c) => /^\/foods\/(?!new$|compare$)[^/]+$/.test(c.pathname),
+  },
+  {
     id: "compare",
     target: "compare-table",
     title: "Đọc bảng so sánh",

@@ -4,10 +4,9 @@ import React, { useMemo } from "react";
 import Link from "next/link";
 import { type FoodItem } from "@/lib/mock/foods";
 import { type MealSlot, getMealSlotNameVi } from "@/lib/meal-slot";
-import { parseGramsInput, calculateMacroPreview, macroGramsText, scaleNutrients, formatGramsServingLabel, gramsServingLabel, hidesGrams, unitAmountText, unitCountOf, isUnitServingLabel } from "@/lib/portion";
-import { QuantityStepper } from "@/components/ui/quantity-stepper";
+import { parseGramsInput, calculateMacroPreview, macroGramsText, scaleNutrients, formatGramsServingLabel, gramsServingLabel, hidesGrams, unitAmountText } from "@/lib/portion";
+import { PortionArea } from "@/components/ui/portion-area";
 import { formatAmount } from "@/lib/format";
-import { ChipGroup } from "@/components/ui/chip-group";
 import { StatGroup } from "@/components/ui/stat-group";
 import { getNutrientDefinition } from "@/lib/nutrients";
 import { useDiary } from "@/lib/diary-store";
@@ -27,6 +26,7 @@ export interface PortionPanelProps {
   tone?: "light" | "dark";
   showMicros?: boolean;
   className?: string;
+  onFoodChange?: (food: FoodItem) => void;
 }
 
 export function PortionPanel({
@@ -42,6 +42,7 @@ export function PortionPanel({
   tone = "light",
   showMicros = false,
   className = "",
+  onFoodChange,
 }: PortionPanelProps) {
   const canLog = canLogFood(food);
   const notice = energyNotice(food);
@@ -50,13 +51,7 @@ export function PortionPanel({
 
   // A supplement from a pack label is logged by the unit: no gram field, no gram figure
   const noGrams = hidesGrams(food);
-  const isUnitActive = isUnitServingLabel(selectedServingLabel);
-  const unitInfo = (noGrams || isUnitActive) ? unitCountOf(food.servings, selectedServingLabel, parsedGrams) : null;
-  const baseLabel = unitInfo?.serving.label;
-  const amountText = unitAmountText(food, selectedServingLabel, parsedGrams) ?? (isUnitActive ? selectedServingLabel : gramsServingLabel(parsedGrams));
-
-  // Derive columns = servings.length + 1 (for leading gram input)
-  const columns = food.servings.length + (noGrams ? 0 : 1);
+  const amountText = unitAmountText(food, selectedServingLabel, parsedGrams) ?? (selectedServingLabel.includes("g") ? gramsServingLabel(parsedGrams) : selectedServingLabel);
 
   // Macro preview
   const macroPreview = useMemo(() => {
@@ -143,69 +138,19 @@ export function PortionPanel({
         </div>
       )}
 
-      {/* Row 3: ChipGroup */}
+      {/* Row 3: PortionArea */}
       <div className="w-full">
-        <ChipGroup
-          columns={columns}
+        <PortionArea
+          food={food}
+          gramsInput={gramsInput}
+          setGramsInput={setGramsInput}
+          selectedServingLabel={selectedServingLabel}
+          setSelectedServingLabel={setSelectedServingLabel}
+          onFoodChange={onFoodChange}
+          disabled={isSubmitting}
           tone={tone}
-          leadingInput={
-            noGrams ? undefined : (
-            <label
-              data-align-group="portion"
-              data-align-edge="left"
-              className={`flex items-center justify-center rounded-xl px-2 h-11 w-full cursor-text box-border border-2 focus-within:ring-2 ${
-                isDark
-                  ? "bg-surface-dark border-sky text-on-dark focus-within:ring-sky"
-                  : "bg-card border-blue text-text focus-within:ring-blue"
-              }`}
-            >
-              <span className="sr-only">Khối lượng</span>
-              <input
-                type="text"
-                inputMode="decimal"
-                aria-label="Số gam"
-                value={gramsInput}
-                onChange={(e) => {
-                  setGramsInput(e.target.value);
-                  setSelectedServingLabel(formatGramsServingLabel(e.target.value, `${e.target.value} g`));
-                }}
-                className={`w-full bg-transparent border-0 outline-none focus-visible:outline-none font-bold text-sm tabular-nums text-right ${
-                  isDark ? "text-on-dark" : "text-text"
-                }`}
-              />
-              <span
-                className={`text-xs ml-1 font-semibold ${
-                  isDark ? "text-muted-on-dark" : "text-secondary"
-                }`}
-              >
-                g
-              </span>
-            </label>
-            )
-          }
-          items={food.servings.map((s) => ({
-            id: s.label,
-            label: s.label,
-            active: selectedServingLabel === s.label || (baseLabel === s.label && !food.servings.some((sv) => sv.label === selectedServingLabel)),
-            onClick: () => {
-              setGramsInput(s.grams.toString());
-              setSelectedServingLabel(s.label);
-            },
-          }))}
+          data-align-group="portion"
         />
-        {(noGrams || isUnitActive) && unitInfo && (
-          <QuantityStepper
-            servings={food.servings}
-            label={selectedServingLabel}
-            grams={parsedGrams}
-            tone={tone}
-            className="mt-2"
-            onChange={(grams, label) => {
-              setGramsInput(grams.toString());
-              setSelectedServingLabel(label);
-            }}
-          />
-        )}
       </div>
 
       {/* Row 4: StatGroup */}
