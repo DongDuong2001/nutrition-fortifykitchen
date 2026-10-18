@@ -3,6 +3,7 @@ package ratelimit
 import (
 	"net"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -57,12 +58,19 @@ func (rl *UserRateLimiter) LimitWrites(next http.Handler) http.Handler {
 			return
 		}
 
-		key := r.RemoteAddr
-		if host, _, err := net.SplitHostPort(r.RemoteAddr); err == nil && host != "" {
-			key = host
-		}
+		key := ""
 		if uid, err := auth.GetUserID(r.Context()); err == nil {
 			key = uid.String()
+		} else if xrip := strings.TrimSpace(r.Header.Get("X-Real-IP")); xrip != "" {
+			key = xrip
+		} else if xff := strings.TrimSpace(r.Header.Get("X-Forwarded-For")); xff != "" {
+			parts := strings.Split(xff, ",")
+			key = strings.TrimSpace(parts[0])
+		} else {
+			key = r.RemoteAddr
+			if host, _, err := net.SplitHostPort(r.RemoteAddr); err == nil && host != "" {
+				key = host
+			}
 		}
 
 		rl.mu.Lock()
@@ -74,6 +82,17 @@ func (rl *UserRateLimiter) LimitWrites(next http.Handler) http.Handler {
 				for k, oldB := range rl.buckets {
 					if oldB.lastRefill.Before(cutoff) {
 						delete(rl.buckets, k)
+					}
+				}
+				// If still at capacity under flood, drop excess buckets to hard-cap memory
+				if len(rl.buckets) >= 10000 {
+					excess := len(rl.buckets) - 8000
+					for k := range rl.buckets {
+						delete(rl.buckets, k)
+						excess--
+						if excess <= 0 {
+							break
+						}
 					}
 				}
 			}
