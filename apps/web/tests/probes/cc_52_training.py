@@ -143,7 +143,8 @@ def tick_and_log(pg):
     check(sheet.is_visible(), "tick salt: the portion sheet opens")
     text = sheet.inner_text()
     grams = sheet.get_by_label("Số gam").input_value()
-    check("Muối ăn" in text and grams == "1,5", f"pre-filled Muối ăn 1,5 g ({grams})")
+    # cc-53b: the panel's food title is uppercase (design/portion-mockup), so compare without case
+    check("muối ăn" in text.lower() and grams == "1,5", f"pre-filled Muối ăn 1,5 g ({grams})")
     check(sheet.get_by_role("button", name="Thêm vào Bữa phụ").count() == 1, "meal Bữa phụ")
     check(not box(pg, SALT0).is_checked(), "not ticked while the sheet is open")
     shot(pg, "portion-sheet-390")

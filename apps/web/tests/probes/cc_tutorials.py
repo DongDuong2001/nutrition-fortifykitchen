@@ -1,16 +1,17 @@
-"""cc_tutorials: the "Có gì mới" releases and tours, and the one-time tips (hotfix/tutorials with cc-53's units).
+"""cc_tutorials: the "Có gì mới" releases and tours, and the one-time tips (hotfix/tutorials, cc-53 units, cc-53b portions).
 
 Production demo build at 390x844. Tour, tips and "Có gì mới" are on here (`_seed.onboarding(True)`, `_seed.whats_new(True)`).
-- Several unseen releases: an account that saw 18b gets 18e, 18d and 18c in one sheet (newest first, grouped); Thử ngay
-  runs the joined tour oldest first. 18d's steps live on a food's portion area, not on Hôm nay, so they are left out
-  before the 8-step cap: 18c keeps all five (header sync status, or the header actions when there is none as in demo;
-  the food list; the nutrient column; the meal pill; the Khám phá tab), then cc-52's 18e three on the Ngày tập pill.
-  The counter reads n/8; Xong ends it, entries unchanged
-- An account that saw 18c gets 18e and 18d; 18e's steps are on Hôm nay (the pill), so the sheet has Thử ngay
+- Several unseen releases: an account that saw 18b gets 18f, 18e, 18d and 18c in one sheet (newest first, grouped);
+  Thử ngay runs the joined tour oldest first, capped at 8: 18c's first two (header sync status, or the header actions
+  when there is none as in demo; the food list), cc-52's 18e three on the Ngày tập pill, then cc-53b's 18f three
+  (+ Thêm, the food list, the meal pill). 18d has no tour (cc-53b retired it). The counter reads n/8; Xong ends it,
+  entries unchanged
+- An account that saw 18c gets 18f, 18e and 18d, with Thử ngay
 - A step whose target is gone is skipped; a target that leaves the page mid-step moves the tour on (no stuck ring)
-- cc-53: Cài đặt › Có gì mới lists 18d (exact copy) with Xem hướng dẫn; the unit-toggle tip shows once on a food page
-  (Chuối) and is followed by the stepper tip, never by itself again; unit-toggle, unit-size and unit-amount render
-- The ×N stepper tip (data-tour="unit-stepper") shows once for an egg (Trứng gà) and for a supplement (Bột củ dền)
+- cc-53b: Cài đặt › Có gì mới lists 18d's corrected copy with no tour, and 18f with Xem hướng dẫn. The portion sheet's
+  tips show once each: Trứng ghi theo quả on an egg, Cân sống hay đã nấu chín on rice, then Nhân khẩu phần nhanh, and
+  Chỉnh từng món trong khay on the tray; on a food page the ×N tip shows once. The unit stepper tip stays for a
+  supplement (Bột củ dền)
 - On a phone, the first sheet opened shows the drag-down tip once
 Screenshots: .screenshots/cc-tutorials-*.png
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_tutorials.py
@@ -33,23 +34,23 @@ SHOTS.mkdir(exist_ok=True)
 PHONE = {"width": 390, "height": 844}
 TOUCH = {"has_touch": True, "is_mobile": True}
 SETTINGS_KEY = "h1t_settings_v1_demo"
-RELEASE = "2026-10-18e"
+RELEASE = "2026-10-18f"
 # Every tip that existed before 18c: a returning user has seen them
 OLD_TIPS = [
     "unsaved", "home-logged", "meal-add", "home-share", "pull-refresh", "nutrient-sources", "past-day", "multi-select", "add-tray", "add-shortlists", "haptics",
-    "food-detail", "unit-toggle", "compare", "food-new", "training", "micros", "trends-micros", "explore", "overview", "leaderboard",
+    "food-detail", "compare", "food-new", "training", "micros", "trends-micros", "explore", "overview", "leaderboard",
 ]
 RETURNING = {"tourDone": True, "seen": OLD_TIPS, "whatsNewSeen": "2026-10-18b"}
-# 18c's five steps, then cc-52's 18e on the Ngày tập pill (18d is not on Hôm nay, so it is left out before the cap)
+# 18c's first two (the cap drops its last three), cc-52's 18e on the Ngày tập pill, then cc-53b's 18f on Hôm nay
 STEPS = [
     ("Món chưa lưu", ["sync-status", "header-actions"]),
     ("Kéo xuống để tải lại", ["home-food-list", "meal-pill"]),
-    ("Chạm vi chất để xem nguồn", ["nutrient-column"]),
-    ("Gần đây và Như hôm qua", ["meal-pill"]),
-    ("Thực phẩm bổ sung và Gia vị", ["nav-explore"]),
     ("Nhóm Bự / Bé", ["training-size", "training-pill"]),
     ("Đánh dấu để ghi", ["training-checklist", "training-pill"]),
     ("+ Thêm món", ["training-add-item", "training-pill"]),
+    ("Ghi theo gam", ["meal-add", "nav-add"]),
+    ("Sống hay chín", ["home-food-list", "meal-pill"]),
+    ("Khay xem lại", ["meal-pill"]),
 ]
 problems = []
 
@@ -133,11 +134,12 @@ def start_tour(pg):
     go(pg, "/app", 1200)
     check(visible(sheet(pg)), "a returning user: Có gì mới opens by itself on Hôm nay")
     text = sheet(pg).inner_text()
-    check("Ghi theo quả, viên" in text and "Trứng, trái cây và thực phẩm bổ sung có nút ×N" in text, "the sheet lists 18c (Ghi theo quả, viên)")
-    check("Ghi món theo cách bạn quen" in text and text.index("Ghi món theo cách bạn quen") < text.index("Gần đây và Hay ăn"), "…and 18d above it (newest first)")
-    check("Ngày tập ghi vào nhật ký" in text and text.index("Ngày tập ghi vào nhật ký") < text.index("Ghi món theo cách bạn quen"), "…and cc-52's 18e on top")
+    check("Ghi theo viên" in text and "Thực phẩm bổ sung có nút + và − để ghi 2, 3 viên." in text, "the sheet lists 18c (Ghi theo viên)")
+    check("Ghi theo lon, viên, phần" in text and text.index("Ghi theo lon, viên, phần") < text.index("Gần đây và Hay ăn"), "…and 18d above it (newest first)")
+    check("Ngày tập ghi vào nhật ký" in text and text.index("Ngày tập ghi vào nhật ký") < text.index("Ghi theo lon, viên, phần"), "…and cc-52's 18e above that")
+    check("Khẩu phần theo gam" in text and text.index("Khẩu phần theo gam") < text.index("Ngày tập ghi vào nhật ký"), "…and cc-53b's 18f on top")
     check("Thực phẩm bổ sung\n" not in text + "\n" and "Đồng bộ ổn định hơn" not in text, "…not 18b or 18, which were seen")
-    check(sheet(pg).locator("section").count() == 3, "three groups, one per release")
+    check(sheet(pg).locator("section").count() == 4, "four groups, one per release")
     try_now = sheet(pg).get_by_role("button", name="Thử ngay (1 phút)")
     check(try_now.count() == 1, "Thử ngay (1 phút): 18c has a tour")
     shot(pg, "sheet")
@@ -151,7 +153,7 @@ def tour(browser):
     before = entries(pg)
     start_tour(pg)
     check(sheet(pg).count() == 0, "Thử ngay closes the sheet")
-    check(flags(pg).get("whatsNewSeen") == RELEASE, "the newest release (18e) is marked seen")
+    check(flags(pg).get("whatsNewSeen") == RELEASE, "the newest release (18f) is marked seen")
     for i, (title, targets) in enumerate(STEPS):
         ok = visible(card(pg))
         text = step_text(pg)
@@ -172,35 +174,39 @@ def tour(browser):
     check(card(pg).count() == 0, "Xong ends the tour")
     check(pg.url.endswith("/app"), "still on Hôm nay")
     check(entries(pg) == before, "the entries never change")
-    check(pg.evaluate("() => sessionStorage.getItem('h1t_wn_tour_v1')") is None, "the tour is over (18d's steps are not on Hôm nay)")
+    check(pg.evaluate("() => sessionStorage.getItem('h1t_wn_tour_v1')") is None, "the tour is over")
     go(pg, "/app", 1500)
     check(card(pg).count() == 0 and sheet(pg).count() == 0, "nothing comes back after a reload")
     ctx.close()
 
 
 def skipped(browser):
-    # A step whose target is gone is skipped: no nutrient column -> step 2 goes straight to step 4
+    # Steps whose target is gone are skipped: no Ngày tập pill -> step 2 goes straight to step 6
     ctx, pg = new_page(browser, RETURNING)
     start_tour(pg)
     card(pg).get_by_role("button", name="Tiếp").click()
     pg.wait_for_timeout(700)
     check("Mới · 2/8" in step_text(pg), "skip: on step 2")
-    pg.evaluate("() => document.querySelectorAll('[data-tour=\"nutrient-column\"]').forEach(el => el.removeAttribute('data-tour'))")
+    pg.evaluate("() => document.querySelectorAll('[data-tour^=\"training-\"]').forEach(el => el.removeAttribute('data-tour'))")
     card(pg).get_by_role("button", name="Tiếp").click()
-    pg.wait_for_timeout(2500)
-    check("Mới · 4/8" in step_text(pg), f"skip: step 3 has no target, so step 4 shows ({step_text(pg)[:30]!r})")
+    # Each missing step waits the spotlight's give-up time before it is skipped: three in a row
+    for _ in range(20):
+        pg.wait_for_timeout(500)
+        if "Mới · 6/8" in step_text(pg):
+            break
+    check("Mới · 6/8" in step_text(pg), f"skip: steps 3 to 5 have no target, so step 6 shows ({step_text(pg)[:30]!r})")
     check(pg.locator("[data-onboarding-overlay]").count() == 1, "skip: one overlay, no ring left behind")
     # A target that leaves the page mid-step moves the tour on (the ring is not left on an empty spot)
-    pg.evaluate("() => document.querySelectorAll('[data-tour=\"meal-pill\"]').forEach(el => el.remove())")
+    pg.evaluate("() => document.querySelectorAll('[data-tour=\"meal-add\"], [data-tour=\"nav-add\"]').forEach(el => el.remove())")
     pg.wait_for_timeout(1200)
-    check("Mới · 5/8" in step_text(pg), f"gone mid-step: step 4's meal pill left the page, step 5 shows ({step_text(pg)[:30]!r})")
-    check(ring_holds(pg, ["nav-explore"]) == "nav-explore", "gone mid-step: the ring is on Khám phá")
+    check("Mới · 7/8" in step_text(pg), f"gone mid-step: step 6's + Thêm left the page, step 7 shows ({step_text(pg)[:30]!r})")
+    check(ring_holds(pg, ["home-food-list", "meal-pill"]) is not None, "gone mid-step: the ring is on the food list")
     shot(pg, "skipped")
-    # cc-52's 18e steps follow on the Ngày tập pill; with the pill gone too, Tiếp after step 5 ends the tour
-    pg.evaluate("() => document.querySelectorAll('[data-tour=\"training-pill\"]').forEach(el => el.remove())")
+    # With the food list and the meal pills gone too, Tiếp after step 7 ends the tour
+    pg.evaluate("() => document.querySelectorAll('[data-tour=\"meal-pill\"], [data-tour=\"home-food-list\"]').forEach(el => el.removeAttribute('data-tour'))")
     card(pg).get_by_role("button", name="Tiếp").click()
     pg.wait_for_timeout(2500)
-    check(card(pg).count() == 0 and pg.locator("[data-onboarding-overlay]").count() == 0, f"skip: 18e's steps have no target left, the tour ends ({step_text(pg)[:30]!r})")
+    check(card(pg).count() == 0 and pg.locator("[data-onboarding-overlay]").count() == 0, f"skip: 18f's last step has no target left, the tour ends ({step_text(pg)[:30]!r})")
     ctx.close()
 
 
@@ -213,54 +219,80 @@ def open_food(pg, query, name):
     pg.wait_for_timeout(400)
 
 
-def stepper_tip(pg, label):
+def tip(pg, label, title, target):
     ok = visible(card(pg), 4000)
     text = step_text(pg)
-    check(ok and "Tăng giảm số lượng" in text and "Mẹo · lần đầu" in text, f"{label}: the ×N stepper tip shows ({text[:40]!r})")
-    on = ring_holds(pg, ["unit-stepper"])
-    check(on == "unit-stepper", f"{label}: the ring is on the stepper")
+    check(ok and title in text and "Mẹo · lần đầu" in text, f"{label}: the {title} tip shows ({text[:50]!r})")
+    check(ring_holds(pg, [target]) == target, f"{label}: the ring is on {target}")
     return ok
 
 
-def stepper(browser):
-    # An egg (Dong's unit portions): picking Trứng gà selects 1 quả, the stepper shows, and its tip with it
+def got_it(pg):
+    card(pg).get_by_role("button", name="Đã hiểu").click()
+    pg.wait_for_timeout(300)
+
+
+def portion_tips(browser):
+    # cc-53b: an egg in the portion sheet: Quả | Gam's tip, once, and using the toggle settles it
     ctx, pg = new_page(browser, RETURNING | {"whatsNewSeen": RELEASE})
     open_food(pg, "trứng gà", "Trứng gà")
-    check(pg.locator('[data-tour="unit-stepper"]:visible').count() >= 1, "egg: the stepper is on screen")
-    if stepper_tip(pg, "egg"):
-        shot(pg, "stepper-egg")
-        card(pg).get_by_role("button", name="Đã hiểu").click()
-        pg.wait_for_timeout(300)
-    check("quantity-stepper" in flags(pg).get("seen", []), "egg: saved as seen")
-    check(card(pg).count() == 0, "egg: Đã hiểu closes it")
-    before_amount = pg.locator('[data-tour="unit-amount"]:visible').first.input_value()
-    pg.get_by_role("button", name="Tăng số lượng").first.click()
+    if tip(pg, "egg", "Trứng ghi theo quả", "egg-mode"):
+        shot(pg, "tip-egg")
+        got_it(pg)
+    check("egg-mode" in flags(pg).get("seen", []), "egg: saved as seen")
+    pg.get_by_role("button", name="Gam", exact=True).click()
     pg.wait_for_timeout(200)
-    after_amount = pg.locator('[data-tour="unit-amount"]:visible').first.input_value()
-    check(after_amount != before_amount, f"egg: + changes the amount ({before_amount} -> {after_amount}); the tip did not block it")
-    check("quantity-step" in flags(pg).get("used", []), "egg: stepping marks the stepper used")
-    open_food(pg, "trứng gà", "Trứng gà")
-    pg.wait_for_timeout(1500)
-    check(card(pg).count() == 0, "egg: never again")
+    check("egg-mode" in flags(pg).get("used", []), "egg: the toggle marks it used")
+    # Rice: Sống | Chín first, the ×N tip on the next sheet
+    open_food(pg, "cơm trắng", "Cơm trắng")
+    if tip(pg, "rice", "Cân sống hay đã nấu chín", "cook-state"):
+        shot(pg, "tip-cook")
+        got_it(pg)
+    open_food(pg, "cơm trắng", "Cơm trắng")
+    if tip(pg, "rice again", "Nhân khẩu phần nhanh", "portion-multiply"):
+        shot(pg, "tip-multiply")
+        got_it(pg)
+    pg.get_by_role("button", name="Tăng nhân khẩu phần nhanh").first.click()
+    pg.wait_for_timeout(200)
+    check("portion-multiply" in flags(pg).get("used", []), "×N: stepping marks it used")
+    open_food(pg, "cơm trắng", "Cơm trắng")
+    pg.wait_for_timeout(1200)
+    check(card(pg).count() == 0, "rice: no tip a third time")
+    pg.keyboard.press("Escape")
+    pg.wait_for_timeout(400)
+    # The tray: its row tip
+    go(pg, "/add?meal=lunch", 800)
+    toggles = pg.locator("[data-tray-toggle]:visible")
+    toggles.nth(0).click()
+    toggles.nth(1).click()
+    pg.get_by_role("button", name="Xem lại").click()
+    if tip(pg, "tray", "Chỉnh từng món trong khay", "tray-row"):
+        shot(pg, "tip-tray")
+        got_it(pg)
+    check("tray-row" in flags(pg).get("seen", []), "tray: saved as seen")
     ctx.close()
 
-    # A supplement: Bột củ dền by the spoon (1 muỗng)
+    # A supplement keeps its unit, and the unit stepper's tip: Bột củ dền by the spoon (1 muỗng)
     ctx, pg = new_page(browser, RETURNING | {"whatsNewSeen": RELEASE})
     open_food(pg, "củ dền", "Bột củ dền")
     tab = pg.get_by_role("tab", name="Muỗng")
     (tab.first if tab.count() else pg.get_by_role("button", name="1 muỗng").first).click()
     pg.wait_for_timeout(300)
     check(pg.locator('[data-tour="unit-stepper"]:visible').count() >= 1, "supplement: the stepper is on screen by the spoon")
-    if stepper_tip(pg, "supplement"):
+    if tip(pg, "supplement", "Tăng giảm số lượng", "unit-stepper"):
         shot(pg, "stepper-supplement")
-        card(pg).get_by_role("button", name="Đã hiểu").click()
-        pg.wait_for_timeout(300)
+        got_it(pg)
     check("quantity-stepper" in flags(pg).get("seen", []), "supplement: saved as seen")
+    before = pg.locator('[data-tour="unit-amount"]:visible').first.input_value()
+    pg.get_by_role("button", name="Tăng số lượng").first.click()
+    pg.wait_for_timeout(200)
+    check(pg.locator('[data-tour="unit-amount"]:visible').first.input_value() != before, "supplement: + changes the amount; the tip did not block it")
+    check("quantity-step" in flags(pg).get("used", []), "supplement: stepping marks the stepper used")
     ctx.close()
 
 
 def drag(browser):
-    ctx, pg = new_page(browser, RETURNING | {"whatsNewSeen": RELEASE, "seen": OLD_TIPS + ["quantity-stepper"]}, touch=True)
+    ctx, pg = new_page(browser, RETURNING | {"whatsNewSeen": RELEASE, "seen": OLD_TIPS + ["quantity-stepper", "cook-state", "egg-mode", "portion-multiply", "tray-row"]}, touch=True)
     go(pg, "/app", 1500)
     check(card(pg).count() == 0, "drag: no tip on Hôm nay before a sheet opens")
     pg.get_by_role("button", name="Tùy chọn ngày").first.tap()
@@ -284,63 +316,58 @@ def drag(browser):
     ctx.close()
 
 
-def only_18d(browser):
+def seen_18c(browser):
     ctx, pg = new_page(browser, {**RETURNING, "whatsNewSeen": "2026-10-18c"})
     go(pg, "/app", 1200)
     check(visible(sheet(pg)), "seen 18c: Có gì mới opens")
     text = sheet(pg).inner_text()
-    check("Ngày tập ghi vào nhật ký" in text and "Ghi món theo cách bạn quen" in text and "Gần đây và Hay ăn" not in text, "seen 18c: 18e's and 18d's items only")
-    check(sheet(pg).get_by_role("button", name="Thử ngay (1 phút)").count() == 1, "seen 18c: Thử ngay (18e's steps fall back to the Ngày tập pill; 18d's are on a food page)")
-    shot(pg, "only-18d")
+    check("Khẩu phần theo gam" in text and "Ngày tập ghi vào nhật ký" in text and "Ghi theo lon, viên, phần" in text and "Gần đây và Hay ăn" not in text, "seen 18c: 18f's, 18e's and 18d's items only")
+    check(sheet(pg).get_by_role("button", name="Thử ngay (1 phút)").count() == 1, "seen 18c: Thử ngay (18e's and 18f's steps are on Hôm nay)")
+    shot(pg, "seen-18c")
     sheet(pg).get_by_role("button", name="Để sau").click()
     pg.wait_for_timeout(500)
-    check(flags(pg).get("whatsNewSeen") == RELEASE, "seen 18c: Để sau marks 18e seen")
+    check(flags(pg).get("whatsNewSeen") == RELEASE, "seen 18c: Để sau marks 18f seen")
     ctx.close()
     # (A new account never sees it: cc_46.py new_account)
 
 
 def units(browser):
-    # cc-53: the 18d release in Cài đặt › Có gì mới
+    # Cài đặt › Có gì mới: 18d's corrected copy, no tour; 18f with Xem hướng dẫn
     ctx, pg = new_page(browser, {**RETURNING, "whatsNewSeen": RELEASE})
     go(pg, "/settings/whats-new", 800)
     main_text = pg.locator("main").inner_text()
-    check("Ghi món theo cách bạn quen" in main_text, "units: the 18d item is listed")
-    check("Chọn trái, chén, lon… và cỡ nhỏ, vừa, lớn, hoặc nhập gam. Cơm, mì, yến mạch mở sẵn ở Gam." in main_text, "units: its body is the exact copy")
-    check(pg.locator('section[aria-labelledby="release-2026-10-18d"]').get_by_role("button", name="Xem hướng dẫn").count() == 1, "units: 18d has Xem hướng dẫn")
+    check("Red Bull ghi theo lon, thực phẩm bổ sung theo viên, món Việt theo phần. Chọn cỡ rồi chỉnh số lượng." in main_text, "units: 18d's corrected body")
+    check(pg.locator('section[aria-labelledby="release-2026-10-18d"]').get_by_role("button", name="Xem hướng dẫn").count() == 0, "units: 18d has no tour now")
+    check(pg.locator('section[aria-labelledby="release-2026-10-18f"]').get_by_role("button", name="Xem hướng dẫn").count() == 1, "units: 18f has Xem hướng dẫn")
     shot(pg, "whats-new-history")
     ctx.close()
 
-    # cc-53: the unit-toggle tip on a food page, once; the stepper tip comes after it, on the next visit
+    # A food page: the ×N tip once (the unit toggle tip is retired: Chuối goes by grams)
     ctx, pg = new_page(browser, {"tourDone": True, "seen": ["food-detail"], "whatsNewSeen": RELEASE})
     go(pg, "/foods/food-chuoi", 1200)
-    ok = visible(card(pg), 4000)
-    text = step_text(pg)
-    check(ok and "Ghi món theo cách bạn quen" in text, f"units: the unit-toggle tip shows on Chuối ({text[:40]!r})")
-    check("Chọn trái, chén, lon… và cỡ nhỏ, vừa, lớn, hoặc nhập gam." in text, "units: tip body")
-    check(ring_holds(pg, ["unit-toggle"]) == "unit-toggle", "units: the ring is on the unit toggle")
-    shot(pg, "unit-toggle")
-    if ok:
-        card(pg).get_by_role("button", name="Đã hiểu").click()
-        pg.wait_for_timeout(400)
-    check(card(pg).count() == 0, "units: Đã hiểu closes it")
+    if tip(pg, "food page", "Nhân khẩu phần nhanh", "portion-multiply"):
+        shot(pg, "tip-food-page")
+        got_it(pg)
     go(pg, "/foods/food-chuoi", 1500)
-    nxt = step_text(pg)
-    check("Ghi món theo cách bạn quen" not in nxt, "units: the unit-toggle tip never shows again")
-    check(nxt == "" or "Tăng giảm số lượng" in nxt, f"units: the next visit may show the stepper tip only ({nxt[:30]!r})")
+    check("Nhân khẩu phần nhanh" not in step_text(pg), "food page: the ×N tip never shows again")
     ctx.close()
 
-    # cc-53: the unit targets render on a food page
-    ctx, pg = new_page(browser, {"tourDone": True, "seen": OLD_TIPS + ["quantity-stepper"], "whatsNewSeen": RELEASE})
+    # The targets render: the gram ones on Chuối, the unit ones on Bún đậu
+    ctx, pg = new_page(browser, {"tourDone": True, "seen": OLD_TIPS + ["quantity-stepper", "portion-multiply"], "whatsNewSeen": RELEASE})
     go(pg, "/foods/food-chuoi", 800)
-    for t in ("unit-toggle", "unit-size", "unit-amount", "unit-stepper"):
-        check(pg.locator(f'[data-tour="{t}"]').count() >= 1, f"units: data-tour={t} renders")
+    for t in ("portion-multiply", "portion-grams-input"):
+        check(pg.locator(f'[data-tour="{t}"]').count() >= 1, f"Chuối: data-tour={t} renders")
+    check(pg.locator('[data-tour="unit-toggle"]').count() == 0, "Chuối: no unit toggle")
+    go(pg, "/foods/food-bun-dau", 800)
+    for t in ("unit-toggle", "unit-amount", "unit-stepper"):
+        check(pg.locator(f'[data-tour="{t}"]').count() >= 1, f"Bún đậu: data-tour={t} renders")
     ctx.close()
 
 
 def main():
     with sync_playwright() as p:
         browser = p.chromium.launch()
-        for part in (tour, only_18d, skipped, stepper, units, drag):
+        for part in (tour, seen_18c, skipped, portion_tips, units, drag):
             print(f"\n=== {part.__name__} ===")
             try:
                 part(browser)
