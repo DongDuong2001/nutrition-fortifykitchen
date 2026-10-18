@@ -16,6 +16,8 @@ export interface FoodItem {
   category: FoodCategory;
   brand?: string;
   source: "USDA" | "VN FCT" | "user" | "label";
+  /** Live foods: the row's id in its source database (the API's source_id, with `source` as the API sends it) */
+  sourceId?: string;
   servings: FoodServing[];
   tipVi?: string;
   nutrients: Record<string, number | null>; // per 100g
