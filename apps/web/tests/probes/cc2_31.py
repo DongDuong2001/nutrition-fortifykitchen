@@ -108,7 +108,7 @@ def probe_subtabs(pg, name):
     for route, label in SUBTABS:
         status = go(pg, route)
         check(status == 200, f"{name}: {route} answers 200, not 404 (got {status})")
-        current = pg.locator('a[role="tab"][aria-current="page"]:visible').all_inner_texts()
+        current = pg.locator('nav[aria-label="Tổng quan"] a[aria-current="page"]:visible').all_inner_texts()
         check(current == [label], f"{name}: {route} has '{label}' as the only Tổng quan sub-tab current (got {current})")
         if route == "/trends" and name == "390":
             pg.screenshot(path=str(SHOTS / "cc2-31-trends-390.png"))

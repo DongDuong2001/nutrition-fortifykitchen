@@ -275,7 +275,7 @@ def portion_tips(browser):
     # A supplement keeps its unit, and the unit stepper's tip: Bột củ dền by the spoon (1 muỗng)
     ctx, pg = new_page(browser, RETURNING | {"whatsNewSeen": RELEASE})
     open_food(pg, "củ dền", "Bột củ dền")
-    tab = pg.get_by_role("tab", name="Muỗng")
+    tab = pg.get_by_role("button", name="Muỗng", exact=True)
     (tab.first if tab.count() else pg.get_by_role("button", name="1 muỗng").first).click()
     pg.wait_for_timeout(300)
     check(pg.locator('[data-tour="unit-stepper"]:visible').count() >= 1, "supplement: the stepper is on screen by the spoon")

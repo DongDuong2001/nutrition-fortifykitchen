@@ -96,7 +96,7 @@ export function reactTransitionClass(pathname: string): string {
 
 // ---- Back (popstate) as a view transition ----
 /** How long a Back waits for the screen it lands on before it gives up on the animation (the page is not cached). */
-const POP_WAIT_MS = 300;
+const POP_WAIT_MS = 120;
 let committed: { path: string; resolve: () => void } | null = null;
 
 /** The screen for `pathname` is on the page (RouteTransition's layout effect): a Back waiting for it can animate. */

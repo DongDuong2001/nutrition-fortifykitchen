@@ -49,7 +49,7 @@ export function FormRow({
         : children}
 
       {error && (
-        <span id={errorId} role="alert" className="text-xs font-semibold text-destructive">
+        <span id={errorId} role="alert" className="text-xs font-semibold text-destructive-text">
           {error}
         </span>
       )}

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense, createContext, useContext, useMemo } from "react";
+import React, { Suspense, createContext, startTransition, useContext, useMemo, useOptimistic } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { Period } from "@/lib/period";
@@ -158,7 +158,7 @@ function ContentSkeleton() {
 }
 
 /**
- * The frame of the four Tổng quan sub-tabs (app/(tabs)/trends/layout.tsx, so it stays mounted while the content swaps): the phone's ink band with the wordmark (the h1 "Tổng quan" is
+ * The frame of the four Tổng quan sub-tabs (app/(app)/(tabs)/trends/layout.tsx, so it stays mounted while the content swaps): the phone's ink band with the wordmark (the h1 "Tổng quan" is
  * sr-only there), the sub-tab bar (a tablist of links; on desktop it sits in the title row), and the period
  * control shared by all four. The period is in the URL (?p=7|30 and ?o=offset), so the sub-tab links carry it.
  */
@@ -183,7 +183,9 @@ export function overviewTabOf(pathname: string): OverviewTab {
 
 function FrameInner({ children }: { children: React.ReactNode }) {
   const searchParams = useSearchParams();
-  const active = overviewTabOf(usePathname() ?? "");
+  const current = overviewTabOf(usePathname() ?? "");
+  // cc-58: the tapped sub-tab lights up on the tap, not when its content is ready
+  const [active, setActive] = useOptimistic(current);
   const { todayIso, data, targets } = useDiary();
 
   const { length, offset } = parsePeriodParams(searchParams?.get("p"), searchParams?.get("o"));
@@ -210,7 +212,6 @@ function FrameInner({ children }: { children: React.ReactNode }) {
         alignGroup="overview-header"
         tabs={
           <nav
-            role="tablist"
             aria-label="Tổng quan"
             className="flex w-full overflow-x-auto border-b border-surface-dark [scrollbar-width:none] lg:w-auto lg:self-start lg:border-divider"
           >
@@ -219,9 +220,8 @@ function FrameInner({ children }: { children: React.ReactNode }) {
               return (
                 <Link
                   key={tab.id}
-                  role="tab"
                   href={`${tab.href}${query}`}
-                  aria-selected={isActive}
+                  onNavigate={() => startTransition(() => setActive(tab.id))}
                   aria-current={isActive ? "page" : undefined}
                   className={`relative inline-flex min-h-[44px] flex-1 shrink-0 items-center justify-center whitespace-nowrap px-2 text-[15px] font-bold no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100 lg:flex-none lg:px-4 focus-visible:outline-sky lg:focus-visible:outline-blue ${
                     isActive ? "text-on-dark lg:text-text" : "text-muted-on-dark hover:text-on-dark lg:text-secondary lg:hover:text-text"

@@ -443,7 +443,7 @@ function UnitPortionArea({
       {/* 1. Segmented Toggle (if food has unit portions and does not hide grams) */}
       {tabsInfo && (
         <div
-          role="tablist"
+          role="group"
           aria-label="Đơn vị khẩu phần"
           data-tour="unit-toggle"
           className="grid gap-1 p-1 rounded-2xl w-full border bg-card-border/20 border-card-border/40"
@@ -454,9 +454,8 @@ function UnitPortionArea({
             return (
               <button
                 key={tab.id}
-                role="tab"
                 type="button"
-                aria-selected={isActive}
+                aria-pressed={isActive}
                 disabled={disabled}
                 onClick={() => handleTabChange(tab.id)}
                 className={`min-h-[44px] rounded-xl text-sm font-bold flex items-center justify-center transition-press cursor-pointer disabled:opacity-50 ${

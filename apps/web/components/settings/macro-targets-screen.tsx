@@ -172,11 +172,10 @@ export function MacroTargetsScreen() {
           </div>
 
           {/* Segmented control: Tỉ lệ | Cố định | Keto */}
-          <div role="tablist" aria-label="Cách chia đa lượng" className="grid grid-cols-3 gap-1 rounded-xl bg-page p-1 border border-card-border">
+          <div role="group" aria-label="Cách chia đa lượng" className="grid grid-cols-3 gap-1 rounded-xl bg-page p-1 border border-card-border">
             <button
               type="button"
-              role="tab"
-              aria-selected={mode === "ratios"}
+              aria-pressed={mode === "ratios"}
               onClick={() => setMode("ratios")}
               className={`min-h-11 rounded-lg text-[13px] font-bold transition-press ${
                 mode === "ratios" ? "bg-card text-text shadow-sm" : "bg-transparent text-secondary hover:text-text"
@@ -186,8 +185,7 @@ export function MacroTargetsScreen() {
             </button>
             <button
               type="button"
-              role="tab"
-              aria-selected={mode === "fixed"}
+              aria-pressed={mode === "fixed"}
               onClick={() => setMode("fixed")}
               className={`min-h-11 rounded-lg text-[13px] font-bold transition-press ${
                 mode === "fixed" ? "bg-card text-text shadow-sm" : "bg-transparent text-secondary hover:text-text"
@@ -197,8 +195,7 @@ export function MacroTargetsScreen() {
             </button>
             <button
               type="button"
-              role="tab"
-              aria-selected={mode === "keto"}
+              aria-pressed={mode === "keto"}
               onClick={() => setMode("keto")}
               className={`min-h-11 rounded-lg text-[13px] font-bold transition-press ${
                 mode === "keto" ? "bg-card text-text shadow-sm" : "bg-transparent text-secondary hover:text-text"
@@ -237,7 +234,7 @@ export function MacroTargetsScreen() {
                 </span>
 
                 {mode === "ratios" && (
-                  <div className="flex items-center gap-1 rounded-lg border border-card-border bg-page px-2 py-1">
+                  <div className="flex items-center gap-1 rounded-lg border border-card-border bg-page px-2 py-1 focus-within:ring-2 focus-within:ring-blue">
                     <input
                       type="number"
                       min="5"
@@ -253,7 +250,7 @@ export function MacroTargetsScreen() {
                 )}
 
                 {mode === "fixed" && (
-                  <div className="flex items-center gap-1 rounded-lg border border-card-border bg-page px-2 py-1">
+                  <div className="flex items-center gap-1 rounded-lg border border-card-border bg-page px-2 py-1 focus-within:ring-2 focus-within:ring-blue">
                     <input
                       type="number"
                       min="10"
@@ -294,7 +291,7 @@ export function MacroTargetsScreen() {
                 </span>
 
                 {mode === "ratios" && (
-                  <div className="flex items-center gap-1 rounded-lg border border-card-border bg-page px-2 py-1">
+                  <div className="flex items-center gap-1 rounded-lg border border-card-border bg-page px-2 py-1 focus-within:ring-2 focus-within:ring-blue">
                     <input
                       type="number"
                       min="5"
@@ -310,7 +307,7 @@ export function MacroTargetsScreen() {
                 )}
 
                 {mode === "fixed" && (
-                  <div className="flex items-center gap-1 rounded-lg border border-card-border bg-page px-2 py-1">
+                  <div className="flex items-center gap-1 rounded-lg border border-card-border bg-page px-2 py-1 focus-within:ring-2 focus-within:ring-blue">
                     <input
                       type="number"
                       min="10"
@@ -351,7 +348,7 @@ export function MacroTargetsScreen() {
                 </span>
 
                 {mode === "ratios" && (
-                  <div className="flex items-center gap-1 rounded-lg border border-card-border bg-page px-2 py-1">
+                  <div className="flex items-center gap-1 rounded-lg border border-card-border bg-page px-2 py-1 focus-within:ring-2 focus-within:ring-blue">
                     <input
                       type="number"
                       min="5"
@@ -367,7 +364,7 @@ export function MacroTargetsScreen() {
                 )}
 
                 {mode === "fixed" && (
-                  <div className="flex items-center gap-1 rounded-lg border border-card-border bg-page px-2 py-1">
+                  <div className="flex items-center gap-1 rounded-lg border border-card-border bg-page px-2 py-1 focus-within:ring-2 focus-within:ring-blue">
                     <input
                       type="number"
                       min="10"

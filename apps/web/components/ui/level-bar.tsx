@@ -1,4 +1,4 @@
-import { getLevel, getLevelColor, type SegmentTone } from "@/lib/levels";
+import { getLevel, getLevelColor, getLevelLabel, type SegmentTone } from "@/lib/levels";
 
 /**
  * The level bar (Hao, 17/10): one continuous rounded bar. The fill is min(pct, 100)% wide in the level colour of pct
@@ -26,7 +26,7 @@ export function LevelBar({
       role="progressbar"
       aria-label={label}
       aria-valuenow={pct === null ? undefined : Math.min(100, Math.round(value))}
-      aria-valuetext={pct === null ? "Chưa có dữ liệu" : undefined}
+      aria-valuetext={pct === null ? "Chưa có dữ liệu" : `${Math.round(value)}% · ${getLevelLabel(getLevel(value))}`}
       aria-valuemin={0}
       aria-valuemax={100}
       className={`w-full overflow-hidden rounded-full ${heightClass} ${surface === "dark" ? "bg-level-empty-dark" : "bg-track"}`}

@@ -201,7 +201,7 @@ def exceptions(pg):
     print("\n--- 5. Exceptions keep their unit ---")
     go(pg, "/foods/food-bun-dau", 800)
     toggle = pg.locator('[data-tour="unit-toggle"]')
-    check(toggle.count() == 1 and "Phần" in toggle.locator('[role="tab"]').first.inner_text(), "Bún đậu: Phần | Gam")
+    check(toggle.count() == 1 and "Phần" in toggle.locator("button").first.inner_text(), "Bún đậu: Phần | Gam")
     amount = pg.locator('[data-tour="unit-amount"]')
     amount.fill("1,5")
     amount.dispatch_event("blur")

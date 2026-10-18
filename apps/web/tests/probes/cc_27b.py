@@ -123,9 +123,9 @@ def run(browser, size, tag):
     head = squash(pg.locator("header").first.text_content())
     check("Cơm chiên thử" in head and "Món của tôi · 2 phần · 2 nguyên liệu" in head, f"{tag}: header subtitle ({head[:100]})")
     # cc-53b: a dish by the phần keeps its unit: a Phần | Gam toggle and a ×N amount, 1 phần by default
-    units = pg.get_by_role("tablist", name="Đơn vị khẩu phần").locator("visible=true").first
-    check(units.get_by_role("tab", name="Phần", exact=True).get_attribute("aria-selected") == "true", f"{tag}: Phần is the default unit")
-    check(units.get_by_role("tab", name="Gam", exact=True).count() == 1, f"{tag}: a Gam tab")
+    units = pg.get_by_role("group", name="Đơn vị khẩu phần").locator("visible=true").first
+    check(units.get_by_role("button", name="Phần", exact=True).get_attribute("aria-pressed") == "true", f"{tag}: Phần is the default unit")
+    check(units.get_by_role("button", name="Gam", exact=True).count() == 1, f"{tag}: a Gam button")
     check(pg.locator('main input[aria-label="Số lượng"]:visible').first.input_value() == "1", f"{tag}: 1 phần to start")
     card = pg.get_by_role("region", name="Trong 1 phần", exact=True)
     ct = squash(card.inner_text())
