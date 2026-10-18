@@ -648,7 +648,7 @@ export function startPortion(food: ModeFood, label: string | null | undefined, g
 
 /**
  * What is logged for a portion: the food row, its grams (so per-100 g scaling on the server stays right) and the label.
- * Cooked chicken with only raw data logs the raw row at 150 / 0.7 = 214 g; a food with a pair logs the pair.
+ * Cooked chicken with only raw data logs the raw row at 150 / 0.74 = 203 g; a food with a pair logs the pair.
  */
 export function resolvePortion(food: FoodItem, p: PortionState, sw: CookSwitch | null): { food: FoodItem; grams: number; label: string } {
   if (p.kind === "egg") {
@@ -680,7 +680,7 @@ export function portionAmountText(label: string | null | undefined): string | nu
   return `${formatAmount(p.base * p.mult, "g")} g`;
 }
 
-/** The line under a Hôm nay row: how it was weighed ("Đã nấu chín · bằng 214 g lúc sống", "100 g × 3", "Cỡ lớn"). */
+/** The line under a Hôm nay row: how it was weighed ("Đã nấu chín · bằng 203 g lúc sống", "100 g × 3", "Cỡ lớn"). */
 export function portionDetail(label: string | null | undefined, grams: number | null): string | null {
   const p = parsePortionLabel(label);
   if (!p) return null;
@@ -714,7 +714,11 @@ export function portionNote(p: PortionState, sw: CookSwitch | null, loggedGrams:
   const amount = p.base * p.mult;
   const g = (n: number) => `${formatAmount(Math.round(n), "g")} g`;
   const converted = state !== sw.own && !sw.pair && sw.factor !== null;
-  if (converted && state === "cooked") return `Món chín nhẹ hơn lúc sống, nên ${g(amount)} chín bằng khoảng ${g(loggedGrams)} sống. App tính theo số đó cho bạn.`;
+  if (converted && state === "cooked") {
+    // Meat and fish lose weight in cooking, dry grains and beans gain it, tubers keep it
+    const why = sw.factor === 1 ? "" : `Món chín ${(sw.factor ?? 1) < 1 ? "nhẹ" : "nặng"} hơn lúc sống, nên `;
+    return `${why}${g(amount)} chín bằng khoảng ${g(loggedGrams)} sống. App tính theo số đó cho bạn.`;
+  }
   if (converted) return `${g(amount)} lúc sống nấu xong thành khoảng ${g(loggedGrams)}. App tính theo số đó cho bạn.`;
   if (state === "raw") return "Cân lúc đã nấu chín thì chọn Đã nấu chín.";
   if (sw.factor !== null && amount > 0) return `${g(amount)} chín là khoảng ${g(amount / sw.factor)} trước khi nấu.`;

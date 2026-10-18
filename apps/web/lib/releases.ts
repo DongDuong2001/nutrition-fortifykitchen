@@ -37,7 +37,7 @@ export const RELEASES: readonly Release[] = [
     date: "18/10",
     items: [
       { icon: "select", title: "Khẩu phần theo gam", body: "Gõ số gam hoặc chọn 100 g, rồi bấm + để nhân lên. 100 g × 3 là 300 g." },
-      { icon: "meal", title: "Cân sống hay đã nấu chín", body: "Thịt, cá, cơm, mì có nút Cân sống và Đã nấu chín. App tự đổi ra số liệu khớp." },
+      { icon: "meal", title: "Cân sống hay đã nấu chín", body: "Thịt, cá, cơm, mì, khoai, đậu và yến mạch có nút Cân sống và Đã nấu chín. App tự đổi ra số liệu khớp." },
       { icon: "select", title: "Trứng ghi theo quả", body: "Chọn cỡ ghi trên hộp rồi chọn mấy quả. App tự trừ vỏ." },
       { icon: "home", title: "Khay gọn hơn", body: "Chạm từng món trong khay để chỉnh, rồi thêm cả khay vô bữa một lần." },
     ],

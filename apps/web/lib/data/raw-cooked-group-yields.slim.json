@@ -1,0 +1,14 @@
+{
+  "meat_poultry": 74,
+  "offal": 66,
+  "fish": 78,
+  "shellfish": 60,
+  "egg": 100,
+  "rice": 272,
+  "glutinous_rice": 368,
+  "other_grains": 460,
+  "pasta": 238,
+  "noodle_dry": 346,
+  "legume": 252,
+  "tuber": 100
+}

@@ -1,0 +1,1907 @@
+[
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 169441",
+   "name_vi": "Bắp bò (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 169442",
+   "name_vi": "Bắp bò (hầm)"
+  },
+  "method": "nấu",
+  "yield": 65,
+  "yield_source": "protein balance: 100 x protein raw 21.75 / protein cooked 33.68 (FDC 169441 vs FDC 169442); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 174048",
+   "name_vi": "Nạm bò (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 174047",
+   "name_vi": "Nạm bò (hầm)"
+  },
+  "method": "nấu",
+  "yield": 65,
+  "yield_source": "protein balance: 100 x protein raw 21.57 / protein cooked 33.15 (FDC 174048 vs FDC 174047); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 171814",
+   "name_vi": "Thăn ngoại bò (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 171813",
+   "name_vi": "Thăn ngoại bò (áp chảo/nướng)"
+  },
+  "method": "nướng",
+  "yield": 82,
+  "yield_source": "USDA Table of Cooking Yields for Meat and Poultry (Showell et al., 2012), NDB 23606 \"Beef, short loin, top loin, steak, separable lean only, trimmed to 1/8\" fat, all grades Broiled or Grilled\", n=2"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 171812",
+   "name_vi": "Thịt bò thăn (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 171811",
+   "name_vi": "Thịt bò thăn (áp chảo/nướng)"
+  },
+  "method": "nướng",
+  "yield": 80,
+  "yield_source": "USDA Table of Cooking Yields for Meat and Poultry (Showell et al., 2012), NDB 23600 \"Beef, tenderloin, steak, separable lean only, trimmed to 1/8\" fat, all grades Broiled or Grilled\", n=1"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 174030",
+   "name_vi": "Thịt bò xay (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 171794",
+   "name_vi": "Thịt bò xay (nấu chín)"
+  },
+  "method": "nấu",
+  "yield": 70,
+  "yield_source": "protein balance: 100 x protein raw 20 / protein cooked 28.4 (FDC 174030 vs FDC 171794); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 169439",
+   "name_vi": "Sườn bò (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 168613",
+   "name_vi": "Sườn bò (hầm)"
+  },
+  "method": "nấu",
+  "yield": 67,
+  "yield_source": "protein balance: 100 x protein raw 14.4 / protein cooked 21.57 (FDC 169439 vs FDC 168613); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 175303",
+   "name_vi": "Thịt dê (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 175304",
+   "name_vi": "Thịt dê (nướng)"
+  },
+  "method": "nướng",
+  "yield": 76,
+  "yield_source": "protein balance: 100 x protein raw 20.6 / protein cooked 27.1 (FDC 175303 vs FDC 175304); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 168249",
+   "name_vi": "Thịt heo nạc (thăn)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 168250",
+   "name_vi": "Thịt heo nạc (thăn) nấu chín"
+  },
+  "method": "nướng",
+  "yield": 80,
+  "yield_source": "USDA Table of Cooking Yields for Meat and Poultry (Showell et al., 2012), NDB 10061 \"Pork, fresh, loin, tenderloin, separable lean only Baked or Roasted, unspecified\", n=1"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 167902",
+   "name_vi": "Thịt heo xay (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 167903",
+   "name_vi": "Thịt heo xay (nấu chín)"
+  },
+  "method": "nấu",
+  "yield": 66,
+  "yield_source": "protein balance: 100 x protein raw 16.88 / protein cooked 25.69 (FDC 167902 vs FDC 167903); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 167845",
+   "name_vi": "Nạc vai heo (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 167846",
+   "name_vi": "Nạc vai heo (nấu chín)"
+  },
+  "method": "nướng",
+  "yield": 77,
+  "yield_source": "protein balance: 100 x protein raw 19.55 / protein cooked 25.33 (FDC 167845 vs FDC 167846); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 167853",
+   "name_vi": "Sườn non heo (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 167854",
+   "name_vi": "Sườn non heo (hầm)"
+  },
+  "method": "nấu",
+  "yield": 53,
+  "yield_source": "protein balance: 100 x protein raw 15.47 / protein cooked 29.06 (FDC 167853 vs FDC 167854); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 172410",
+   "name_vi": "Thịt vịt bỏ da (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 172411",
+   "name_vi": "Thịt vịt bỏ da (nướng)"
+  },
+  "method": "nướng",
+  "yield": 78,
+  "yield_source": "protein balance: 100 x protein raw 18.28 / protein cooked 23.48 (FDC 172410 vs FDC 172411); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 167812",
+   "name_vi": "Ba chỉ heo (sống)"
+  },
+  "cooked": {
+   "source": "vn_nin",
+   "source_id": "NIN 7018002",
+   "name_vi": "Thịt ba chỉ heo (luộc)"
+  },
+  "method": "luộc",
+  "yield": 74,
+  "yield_source": "USDA Table of Cooking Yields for Meat and Poultry (Showell et al., 2012), NDB 10075 \"Pork, fresh, shoulder, arm picnic, separable lean and fat\", braised, n=12: nearest tabulated fatty fresh-pork cut for boiled belly. A protein balance is not usable here: the raw USDA belly (518 kcal) and the NIN boiled row (220 kcal) are different fat levels, it would keep only 28 % of the energy. Low confidence"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 167812",
+   "name_vi": "Ba chỉ heo (sống)"
+  },
+  "cooked": {
+   "source": "vn_nin",
+   "source_id": "NIN 7086",
+   "name_vi": "Thịt ba chỉ heo (nướng)"
+  },
+  "method": "nướng",
+  "yield": 76,
+  "yield_source": "USDA Table of Cooking Yields for Meat and Poultry (Showell et al., 2012), NDB 10940 \"Pork, fresh, spareribs, separable lean and fat\", baked or roasted, n=1: nearest tabulated fatty fresh-pork cut for roast belly. A protein balance is not usable here (different fat level of the two rows, 36 % of the energy kept). Low confidence"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 168226",
+   "name_vi": "Chân giò heo (sống)"
+  },
+  "cooked": {
+   "source": "vn_nin",
+   "source_id": "NIN 7032002",
+   "name_vi": "Thịt chân giò heo (luộc)"
+  },
+  "method": "luộc",
+  "yield": 74,
+  "yield_source": "USDA Table of Cooking Yields for Meat and Poultry (Showell et al., 2012), NDB 10075 \"Pork, fresh, shoulder, arm picnic, separable lean and fat\", braised, n=12: the nearest tabulated cut for a boiled chân giò (the raw USDA shank row and the NIN boiled row are not the same cut, so a protein balance would give 127)"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 172400",
+   "name_vi": "Gà ta (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 172401",
+   "name_vi": "Gà ta (luộc)"
+  },
+  "method": "luộc",
+  "yield": 65,
+  "yield_source": "protein balance: 100 x protein raw 17.55 / protein cooked 26.88 (FDC 172400 vs FDC 172401); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 171447",
+   "name_vi": "Gà nguyên con có da (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 171450",
+   "name_vi": "Gà nguyên con có da (nướng)"
+  },
+  "method": "nướng",
+  "yield": 68,
+  "yield_source": "protein balance: 100 x protein raw 18.6 / protein cooked 27.3 (FDC 171447 vs FDC 171450); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 172390",
+   "name_vi": "Cánh gà (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 173630",
+   "name_vi": "Cánh gà (nướng)"
+  },
+  "method": "nướng",
+  "yield": 74,
+  "yield_source": "USDA Table of Cooking Yields for Meat and Poultry (Showell et al., 2012), NDB 5103 \"Chicken, broiler-fryer, wing, baked/roasted\""
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 172378",
+   "name_vi": "Má đùi gà có da (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 173617",
+   "name_vi": "Má đùi gà có da (nướng)"
+  },
+  "method": "nướng",
+  "yield": 68,
+  "yield_source": "protein balance: 100 x protein raw 16.37 / protein cooked 24.03 (FDC 172378 vs FDC 173617); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 173627",
+   "name_vi": "Đùi gà bỏ da"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 172853",
+   "name_vi": "Đùi gà bỏ da nấu chín"
+  },
+  "method": "nấu",
+  "yield": 80,
+  "yield_source": "protein balance: 100 x protein raw 19.7 / protein cooked 24.6 (FDC 173627 vs FDC 172853); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 172418",
+   "name_vi": "Chim cút (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 169902",
+   "name_vi": "Chim cút (nấu chín)"
+  },
+  "method": "nấu",
+  "yield": 78,
+  "yield_source": "protein balance: 100 x protein raw 19.63 / protein cooked 25.1 (FDC 172418 vs FDC 169902); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 171077",
+   "name_vi": "Ức gà"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 171478",
+   "name_vi": "Ức gà luộc"
+  },
+  "method": "luộc",
+  "yield": 78,
+  "yield_source": "protein balance: 100 x protein raw 22.5 / protein cooked 29 (FDC 171077 vs FDC 171478); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 171077",
+   "name_vi": "Ức gà"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 171477",
+   "name_vi": "Ức gà nướng"
+  },
+  "method": "nướng",
+  "yield": 73,
+  "yield_source": "protein balance: 100 x protein raw 22.5 / protein cooked 31 (FDC 171077 vs FDC 171477); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 169449",
+   "name_vi": "Cật bò (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 169450",
+   "name_vi": "Cật bò (hầm)"
+  },
+  "method": "nấu",
+  "yield": 53,
+  "yield_source": "USDA Table of Cooking Yields for Meat and Poultry (Showell et al., 2012), NDB 13324 \"Beef, variety meats, kidneys, poached/simmered\""
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 168270",
+   "name_vi": "Cật heo (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 167860",
+   "name_vi": "Cật heo (nấu chín)"
+  },
+  "method": "nấu",
+  "yield": 65,
+  "yield_source": "protein balance: 100 x protein raw 16.46 / protein cooked 25.4 (FDC 168270 vs FDC 167860); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 169451",
+   "name_vi": "Gan bò (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 168626",
+   "name_vi": "Gan bò (nấu chín)"
+  },
+  "method": "nấu",
+  "yield": 68,
+  "yield_source": "USDA Table of Cooking Yields for Meat and Poultry (Showell et al., 2012), NDB 13326 \"Beef, variety meats, liver, braised\""
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 171060",
+   "name_vi": "Gan gà (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 171061",
+   "name_vi": "Gan gà (nấu chín)"
+  },
+  "method": "nấu",
+  "yield": 69,
+  "yield_source": "protein balance: 100 x protein raw 16.9 / protein cooked 24.5 (FDC 171060 vs FDC 171061); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 167862",
+   "name_vi": "Gan heo (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 167863",
+   "name_vi": "Gan heo (nấu chín)"
+  },
+  "method": "nấu",
+  "yield": 82,
+  "yield_source": "protein balance: 100 x protein raw 21.4 / protein cooked 26 (FDC 167862 vs FDC 167863); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 170196",
+   "name_vi": "Lưỡi bò (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 170598",
+   "name_vi": "Lưỡi bò (hầm)"
+  },
+  "method": "nấu",
+  "yield": 77,
+  "yield_source": "protein balance: 100 x protein raw 14.9 / protein cooked 19.29 (FDC 170196 vs FDC 170598); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 168625",
+   "name_vi": "Tim bò (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 169448",
+   "name_vi": "Tim bò (hầm)"
+  },
+  "method": "nấu",
+  "yield": 57,
+  "yield_source": "USDA Table of Cooking Yields for Meat and Poultry (Showell et al., 2012), NDB 13322 \"Beef, variety meats, heart, poached/simmered\""
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 171458",
+   "name_vi": "Tim gà (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 171059",
+   "name_vi": "Tim gà (luộc)"
+  },
+  "method": "luộc",
+  "yield": 59,
+  "yield_source": "protein balance: 100 x protein raw 15.55 / protein cooked 26.41 (FDC 171458 vs FDC 171059); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 168267",
+   "name_vi": "Tim heo (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 168268",
+   "name_vi": "Tim heo (hầm)"
+  },
+  "method": "nấu",
+  "yield": 73,
+  "yield_source": "protein balance: 100 x protein raw 17.27 / protein cooked 23.6 (FDC 168267 vs FDC 168268); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 171456",
+   "name_vi": "Mề gà (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 171457",
+   "name_vi": "Mề gà (luộc)"
+  },
+  "method": "luộc",
+  "yield": 55,
+  "yield_source": "USDA Table of Cooking Yields for Meat and Poultry (Showell et al., 2012), NDB 5024 \"Chicken, gizzard, all classes, poached/simmered\""
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 175165",
+   "name_vi": "Cá basa / cá tra"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 175166",
+   "name_vi": "Cá basa / cá tra nấu chín"
+  },
+  "method": "nướng",
+  "yield": 90,
+  "yield_source": "USDA SR Legacy household measures: cooked fillet 143 g / raw fillet 159 g (FDC 175166, FDC 175165)"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 173682",
+   "name_vi": "Cá chim (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 173683",
+   "name_vi": "Cá chim (nấu chín)"
+  },
+  "method": "nướng",
+  "yield": 79,
+  "yield_source": "USDA SR Legacy household measures: cooked fillet 88 g / raw fillet 112 g (FDC 173683, FDC 173682)"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 171952",
+   "name_vi": "Cá chép (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 174185",
+   "name_vi": "Cá chép (nấu chín)"
+  },
+  "method": "nướng",
+  "yield": 78,
+  "yield_source": "USDA SR Legacy household measures: cooked fillet 170 g / raw fillet 218 g (FDC 174185, FDC 171952)"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 175176:ca-dieu-hong-song",
+   "name_vi": "Cá diêu hồng (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 175177:ca-dieu-hong-chin",
+   "name_vi": "Cá diêu hồng (nấu chín)"
+  },
+  "method": "nướng",
+  "yield": 75,
+  "yield_source": "USDA SR Legacy household measures: cooked fillet 87 g / raw fillet 116 g (FDC 175177:ca-dieu-hong-chin, FDC 175176:ca-dieu-hong-song)"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 175167",
+   "name_vi": "Cá hồi (Atlantic, nuôi)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 175168",
+   "name_vi": "Cá hồi (Atlantic, nuôi) nấu chín"
+  },
+  "method": "nướng",
+  "yield": 90,
+  "yield_source": "USDA SR Legacy household measures: cooked fillet 178 g / raw fillet 198 g (FDC 175168, FDC 175167)"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 173691",
+   "name_vi": "Cá hồi hoang sockeye (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 173692",
+   "name_vi": "Cá hồi hoang sockeye (nấu chín)"
+  },
+  "method": "nướng",
+  "yield": 78,
+  "yield_source": "USDA SR Legacy household measures: cooked fillet 155 g / raw fillet 198 g (FDC 173692, FDC 173691)"
+ },
+ {
+  "raw": {
+   "source": "vn_nin",
+   "source_id": "NIN 8022",
+   "name_vi": "Cá lóc (cá quả, sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 175127",
+   "name_vi": "Cá lóc (nấu chín)"
+  },
+  "method": "nướng",
+  "yield": 74,
+  "yield_source": "protein balance: 100 x protein raw 18.2 / protein cooked 24.69 (NIN 8022 vs FDC 175127); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 175159",
+   "name_vi": "Cá ngừ tươi (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 172006",
+   "name_vi": "Cá ngừ tươi (nấu chín)"
+  },
+  "method": "nướng",
+  "yield": 84,
+  "yield_source": "protein balance: 100 x protein raw 24.4 / protein cooked 29.15 (FDC 175159 vs FDC 172006); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 173672",
+   "name_vi": "Cá nục (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 171994",
+   "name_vi": "Cá nục (nấu chín)"
+  },
+  "method": "nướng",
+  "yield": 78,
+  "yield_source": "USDA SR Legacy household measures: cooked fillet 176 g / raw fillet 225 g (FDC 171994, FDC 173672)"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 175176",
+   "name_vi": "Cá rô phi (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 175177",
+   "name_vi": "Cá rô phi (nấu chín)"
+  },
+  "method": "nướng",
+  "yield": 75,
+  "yield_source": "USDA SR Legacy household measures: cooked fillet 87 g / raw fillet 116 g (FDC 175177, FDC 175176)"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 175119",
+   "name_vi": "Cá saba Na Uy (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 175120",
+   "name_vi": "Cá saba Na Uy (nướng)"
+  },
+  "method": "nướng",
+  "yield": 79,
+  "yield_source": "USDA SR Legacy household measures: cooked fillet 88 g / raw fillet 112 g (FDC 175120, FDC 175119)"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 173673",
+   "name_vi": "Cá thu (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 173674",
+   "name_vi": "Cá thu (chín)"
+  },
+  "method": "nướng",
+  "yield": 78,
+  "yield_source": "USDA SR Legacy household measures: cooked fillet 146 g / raw fillet 187 g (FDC 173674, FDC 173673)"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 175116",
+   "name_vi": "Cá trích (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 175117",
+   "name_vi": "Cá trích (nấu chín)"
+  },
+  "method": "nướng",
+  "yield": 78,
+  "yield_source": "USDA SR Legacy household measures: cooked fillet 143 g / raw fillet 184 g (FDC 175117, FDC 175116)"
+ },
+ {
+  "raw": {
+   "source": "vn_nin",
+   "source_id": "NIN 8013",
+   "name_vi": "Cá thát lát (cá lác)"
+  },
+  "cooked": {
+   "source": "vn_nin",
+   "source_id": "NIN 8013002",
+   "name_vi": "Cá thát lát (luộc)"
+  },
+  "method": "luộc",
+  "yield": 83,
+  "yield_source": "protein balance: 100 x protein raw 16.7 / protein cooked 20.12 (NIN 8013 vs NIN 8013002); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 174196",
+   "name_vi": "Cá bơn (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 174197",
+   "name_vi": "Cá bơn (chín)"
+  },
+  "method": "nướng",
+  "yield": 78,
+  "yield_source": "USDA SR Legacy household measures: cooked fillet 127 g / raw fillet 163 g (FDC 174197, FDC 174196)"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 175163",
+   "name_vi": "Cá cam (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 174248",
+   "name_vi": "Cá cam (chín)"
+  },
+  "method": "nướng",
+  "yield": 78,
+  "yield_source": "USDA SR Legacy household measures: cooked fillet 146 g / raw fillet 187 g (FDC 174248, FDC 175163)"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 175142",
+   "name_vi": "Cá chẽm (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 173694",
+   "name_vi": "Cá chẽm (chín)"
+  },
+  "method": "nướng",
+  "yield": 78,
+  "yield_source": "USDA SR Legacy household measures: cooked fillet 101 g / raw fillet 129 g (FDC 173694, FDC 175142)"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 173698",
+   "name_vi": "Cá hồng (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 173699",
+   "name_vi": "Cá hồng (chín)"
+  },
+  "method": "nướng",
+  "yield": 78,
+  "yield_source": "USDA SR Legacy household measures: cooked fillet 170 g / raw fillet 218 g (FDC 173699, FDC 173698)"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 173703",
+   "name_vi": "Cá kiếm (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 173704",
+   "name_vi": "Cá kiếm (chín)"
+  },
+  "method": "nướng",
+  "yield": 84,
+  "yield_source": "protein balance: 100 x protein raw 19.7 / protein cooked 23.4 (FDC 173703 vs FDC 173704); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 171962",
+   "name_vi": "Cá mú (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 171963",
+   "name_vi": "Cá mú (chín)"
+  },
+  "method": "nướng",
+  "yield": 78,
+  "yield_source": "USDA SR Legacy household measures: cooked fillet 202 g / raw fillet 259 g (FDC 171963, FDC 171962)"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 173675",
+   "name_vi": "Cá măng (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 171995",
+   "name_vi": "Cá măng (chín)"
+  },
+  "method": "nướng",
+  "yield": 78,
+  "yield_source": "protein balance: 100 x protein raw 20.5 / protein cooked 26.3 (FDC 173675 vs FDC 171995); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 175156",
+   "name_vi": "Cá ngừ vằn (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 172005",
+   "name_vi": "Cá ngừ vằn (chín)"
+  },
+  "method": "nướng",
+  "yield": 78,
+  "yield_source": "USDA SR Legacy household measures: cooked fillet 154 g / raw fillet 198 g (FDC 172005, FDC 175156)"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 173672",
+   "name_vi": "Cá nục (sống)"
+  },
+  "cooked": {
+   "source": "vn_nin",
+   "source_id": "NIN 8020002",
+   "name_vi": "Cá nục (luộc)"
+  },
+  "method": "luộc",
+  "yield": 77,
+  "yield_source": "Bognár 2002 (BFE-R-02-03), fish fillet (cod, redfish, pollock), boiled 0.77 (n=10). A protein balance between the USDA raw mackerel and the NIN boiled cá nục is not usable (different species, 69 % of the energy kept)"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 173672",
+   "name_vi": "Cá nục (sống)"
+  },
+  "cooked": {
+   "source": "vn_nin",
+   "source_id": "NIN 8020014",
+   "name_vi": "Cá nục (nướng)"
+  },
+  "method": "nướng",
+  "yield": 80,
+  "yield_source": "Bognár 2002 (BFE-R-02-03), fish fillet, fried/grilled 0.80 (n=10). A protein balance between the USDA raw mackerel and the NIN grilled cá nục is not usable (different species, 69 % of the energy kept)"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 174218",
+   "name_vi": "Bạch tuộc (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 174249",
+   "name_vi": "Bạch tuộc (luộc)"
+  },
+  "method": "luộc",
+  "yield": 50,
+  "yield_source": "protein balance: 100 x protein raw 14.91 / protein cooked 29.82 (FDC 174218 vs FDC 174249); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "vn_nin",
+   "source_id": "NIN 8033",
+   "name_vi": "Cua biển (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 172007",
+   "name_vi": "Cua biển (hấp)"
+  },
+  "method": "hấp",
+  "yield": 78,
+  "yield_source": "protein balance: 100 x protein raw 17.5 / protein cooked 22.32 (NIN 8033 vs FDC 172007); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 174204",
+   "name_vi": "Ghẹ (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 174205",
+   "name_vi": "Ghẹ (hấp)"
+  },
+  "method": "hấp",
+  "yield": 101,
+  "yield_source": "protein balance: 100 x protein raw 18.06 / protein cooked 17.88 (FDC 174204 vs FDC 174205); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 174219",
+   "name_vi": "Hàu (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 174250",
+   "name_vi": "Hàu (hấp)"
+  },
+  "method": "hấp",
+  "yield": 50,
+  "yield_source": "protein balance: 100 x protein raw 9.45 / protein cooked 18.9 (FDC 174219 vs FDC 174250); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "vn_nin",
+   "source_id": "NIN 8040",
+   "name_vi": "Mực ống"
+  },
+  "cooked": {
+   "source": "vn_nin",
+   "source_id": "NIN 8040003",
+   "name_vi": "Mực ống (hấp)"
+  },
+  "method": "hấp",
+  "yield": 64,
+  "yield_source": "protein balance: 100 x protein raw 16.3 / protein cooked 25.47 (NIN 8040 vs NIN 8040003); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 174214",
+   "name_vi": "Nghêu (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 171975",
+   "name_vi": "Nghêu (hấp)"
+  },
+  "method": "hấp",
+  "yield": 57,
+  "yield_source": "protein balance: 100 x protein raw 14.7 / protein cooked 25.6 (FDC 174214 vs FDC 171975); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 174214:so-long-song",
+   "name_vi": "Sò lông (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 171975:so-long-hap",
+   "name_vi": "Sò lông (hấp)"
+  },
+  "method": "hấp",
+  "yield": 57,
+  "yield_source": "protein balance: 100 x protein raw 14.67 / protein cooked 25.55 (FDC 174214:so-long-song vs FDC 171975:so-long-hap); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 174220",
+   "name_vi": "Sò điệp (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 167742",
+   "name_vi": "Sò điệp (hấp)"
+  },
+  "method": "hấp",
+  "yield": 59,
+  "yield_source": "protein balance: 100 x protein raw 12.06 / protein cooked 20.54 (FDC 174220 vs FDC 167742); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 174216",
+   "name_vi": "Vẹm (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 174217",
+   "name_vi": "Vẹm (hấp)"
+  },
+  "method": "hấp",
+  "yield": 50,
+  "yield_source": "protein balance: 100 x protein raw 11.9 / protein cooked 23.8 (FDC 174216 vs FDC 174217); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 174210",
+   "name_vi": "Tôm"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 171971",
+   "name_vi": "Tôm luộc"
+  },
+  "method": "luộc",
+  "yield": 60,
+  "yield_source": "protein balance: 100 x protein raw 13.6 / protein cooked 22.8 (FDC 174210 vs FDC 171971); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 174210:tom-the-song",
+   "name_vi": "Tôm thẻ (tôm chân trắng)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 171971:tom-the-luoc",
+   "name_vi": "Tôm thẻ (luộc)"
+  },
+  "method": "luộc",
+  "yield": 60,
+  "yield_source": "protein balance: 100 x protein raw 13.61 / protein cooked 22.78 (FDC 174210:tom-the-song vs FDC 171971:tom-the-luoc); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "vn_nin",
+   "source_id": "NIN 8051:tom-su-song",
+   "name_vi": "Tôm sú"
+  },
+  "cooked": {
+   "source": "vn_nin",
+   "source_id": "NIN 8051014:tom-su-nuong",
+   "name_vi": "Tôm sú (nướng)"
+  },
+  "method": "nướng",
+  "yield": 66,
+  "yield_source": "protein balance: 100 x protein raw 17.6 / protein cooked 26.67 (NIN 8051:tom-su-song vs NIN 8051014:tom-su-nuong); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "vn_nin",
+   "source_id": "NIN 8052",
+   "name_vi": "Tôm đồng"
+  },
+  "cooked": {
+   "source": "vn_nin",
+   "source_id": "NIN 8052014",
+   "name_vi": "Tôm đồng (nướng)"
+  },
+  "method": "nướng",
+  "yield": 66,
+  "yield_source": "protein balance: 100 x protein raw 18.4 / protein cooked 27.88 (NIN 8052 vs NIN 8052014); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 174193",
+   "name_vi": "Lươn"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 174194",
+   "name_vi": "Lươn (nướng)"
+  },
+  "method": "nướng",
+  "yield": 78,
+  "yield_source": "protein balance: 100 x protein raw 18.44 / protein cooked 23.65 (FDC 174193 vs FDC 174194); the method agrees with 8 USDA table yields to 3.7 points (mean) and with 7 USDA fillet ratios to 2.6 points"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 171287",
+   "name_vi": "Trứng gà (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 173424",
+   "name_vi": "Trứng gà luộc"
+  },
+  "method": "luộc",
+  "yield": 100,
+  "yield_source": "hard-boiled egg: USDA SR Legacy household measure 1 large = 50 g (FDC 173424) from a 50 g raw large egg (FDC 171287); protein per 100 g 12.58 vs 12.56 agrees"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 171287",
+   "name_vi": "Trứng gà (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 173423",
+   "name_vi": "Trứng gà ốp la"
+  },
+  "method": "chiên",
+  "yield": 92,
+  "yield_source": "fried egg: USDA SR Legacy 1 large fried = 46 g (FDC 173423) from a 50 g raw egg; protein 12.56 / 13.61 = 0.92 agrees"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 171287",
+   "name_vi": "Trứng gà (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 172185",
+   "name_vi": "Trứng gà chiên (đánh)"
+  },
+  "method": "chiên",
+  "yield": 122,
+  "yield_source": "omelet: USDA SR Legacy 1 large omelet = 61 g (FDC 172185) from a 50 g raw egg (milk and fat added in the SR recipe); protein 12.56 / 10.57 = 1.19 agrees"
+ },
+ {
+  "raw": {
+   "source": "vn_nin",
+   "source_id": "NIN 1004",
+   "name_vi": "Gạo tẻ trắng (xát máy, hạt khô)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "SR Legacy NDB 20445 (FDC id not shown on mirror)",
+   "name_vi": "Cơm trắng"
+  },
+  "method": "nấu",
+  "yield": 272,
+  "yield_source": "dry-matter balance: 100 x (100 - 14 % water raw) / (100 - 68.4 % water cooked) from the two rows (NIN 1004, SR Legacy NDB 20445 (FDC id not shown on mirror)); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): rice long-grain polished boiled 2.98, parboiled 2.90, unpolished 2.60, round 3.19; oat flakes 4.10, quinoa 3.42, millet 2.40, buckwheat 3.60"
+ },
+ {
+  "raw": {
+   "source": "vn_nin",
+   "source_id": "NIN 1004:gao-st25-kho",
+   "name_vi": "Gạo ST25 (hạt khô)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "SR Legacy NDB 20445 (FDC id not shown on mirror)",
+   "name_vi": "Cơm trắng"
+  },
+  "method": "nấu",
+  "yield": 272,
+  "yield_source": "dry-matter balance: 100 x (100 - 14 % water raw) / (100 - 68.4 % water cooked) from the two rows (NIN 1004:gao-st25-kho, SR Legacy NDB 20445 (FDC id not shown on mirror)); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): rice long-grain polished boiled 2.98, parboiled 2.90, unpolished 2.60, round 3.19; oat flakes 4.10, quinoa 3.42, millet 2.40, buckwheat 3.60 Proxy pair: the cooked row is the generic one for this food."
+ },
+ {
+  "raw": {
+   "source": "vn_nin",
+   "source_id": "NIN 1004:gao-nang-huong-kho",
+   "name_vi": "Gạo nàng hương (hạt khô)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "SR Legacy NDB 20445 (FDC id not shown on mirror)",
+   "name_vi": "Cơm trắng"
+  },
+  "method": "nấu",
+  "yield": 272,
+  "yield_source": "dry-matter balance: 100 x (100 - 14 % water raw) / (100 - 68.4 % water cooked) from the two rows (NIN 1004:gao-nang-huong-kho, SR Legacy NDB 20445 (FDC id not shown on mirror)); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): rice long-grain polished boiled 2.98, parboiled 2.90, unpolished 2.60, round 3.19; oat flakes 4.10, quinoa 3.42, millet 2.40, buckwheat 3.60 Proxy pair: the cooked row is the generic one for this food."
+ },
+ {
+  "raw": {
+   "source": "vn_nin",
+   "source_id": "NIN 1004:gao-tam-thom-kho",
+   "name_vi": "Gạo tám thơm (hạt khô)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "SR Legacy NDB 20445 (FDC id not shown on mirror)",
+   "name_vi": "Cơm trắng"
+  },
+  "method": "nấu",
+  "yield": 272,
+  "yield_source": "dry-matter balance: 100 x (100 - 14 % water raw) / (100 - 68.4 % water cooked) from the two rows (NIN 1004:gao-tam-thom-kho, SR Legacy NDB 20445 (FDC id not shown on mirror)); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): rice long-grain polished boiled 2.98, parboiled 2.90, unpolished 2.60, round 3.19; oat flakes 4.10, quinoa 3.42, millet 2.40, buckwheat 3.60 Proxy pair: the cooked row is the generic one for this food."
+ },
+ {
+  "raw": {
+   "source": "vn_nin",
+   "source_id": "NIN 1003",
+   "name_vi": "Gạo tẻ giã tay (hạt khô)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "SR Legacy NDB 20445 (FDC id not shown on mirror)",
+   "name_vi": "Cơm trắng"
+  },
+  "method": "nấu",
+  "yield": 272,
+  "yield_source": "dry-matter balance: 100 x (100 - 14 % water raw) / (100 - 68.4 % water cooked) from the two rows (NIN 1003, SR Legacy NDB 20445 (FDC id not shown on mirror)); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): rice long-grain polished boiled 2.98, parboiled 2.90, unpolished 2.60, round 3.19; oat flakes 4.10, quinoa 3.42, millet 2.40, buckwheat 3.60 Proxy pair: the cooked row is the generic one for this food."
+ },
+ {
+  "raw": {
+   "source": "vn_nin",
+   "source_id": "NIN 1005",
+   "name_vi": "Gạo lứt (hạt khô)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 169704",
+   "name_vi": "Cơm gạo lứt"
+  },
+  "method": "nấu",
+  "yield": 295,
+  "yield_source": "dry-matter balance: 100 x (100 - 12.37 % water raw) / (100 - 70.3 % water cooked) from the two rows (NIN 1005, FDC 169704); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): rice long-grain polished boiled 2.98, parboiled 2.90, unpolished 2.60, round 3.19; oat flakes 4.10, quinoa 3.42, millet 2.40, buckwheat 3.60"
+ },
+ {
+  "raw": {
+   "source": "vn_nin",
+   "source_id": "NIN 1005:gao-lut-huyet-rong-kho",
+   "name_vi": "Gạo lứt huyết rồng (hạt khô)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 169704",
+   "name_vi": "Cơm gạo lứt"
+  },
+  "method": "nấu",
+  "yield": 295,
+  "yield_source": "dry-matter balance: 100 x (100 - 12.37 % water raw) / (100 - 70.3 % water cooked) from the two rows (NIN 1005:gao-lut-huyet-rong-kho, FDC 169704); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): rice long-grain polished boiled 2.98, parboiled 2.90, unpolished 2.60, round 3.19; oat flakes 4.10, quinoa 3.42, millet 2.40, buckwheat 3.60 Proxy pair: the cooked row is the generic one for this food."
+ },
+ {
+  "raw": {
+   "source": "usda_foundation",
+   "source_id": "FDC 2710825",
+   "name_vi": "Gạo lứt đen (hạt khô)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 169704",
+   "name_vi": "Cơm gạo lứt"
+  },
+  "method": "nấu",
+  "yield": 301,
+  "yield_source": "dry-matter balance: 100 x (100 - 10.46 % water raw) / (100 - 70.3 % water cooked) from the two rows (FDC 2710825, FDC 169704); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): rice long-grain polished boiled 2.98, parboiled 2.90, unpolished 2.60, round 3.19; oat flakes 4.10, quinoa 3.42, millet 2.40, buckwheat 3.60 Proxy pair: the cooked row is the generic one for this food."
+ },
+ {
+  "raw": {
+   "source": "usda_foundation",
+   "source_id": "FDC 2710838",
+   "name_vi": "Gạo lứt đỏ (hạt khô)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 169704",
+   "name_vi": "Cơm gạo lứt"
+  },
+  "method": "nấu",
+  "yield": 301,
+  "yield_source": "dry-matter balance: 100 x (100 - 10.51 % water raw) / (100 - 70.3 % water cooked) from the two rows (FDC 2710838, FDC 169704); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): rice long-grain polished boiled 2.98, parboiled 2.90, unpolished 2.60, round 3.19; oat flakes 4.10, quinoa 3.42, millet 2.40, buckwheat 3.60 Proxy pair: the cooked row is the generic one for this food."
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 168883",
+   "name_vi": "Gạo nếp (hạt khô)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 169711",
+   "name_vi": "Xôi trắng (nếp đồ)"
+  },
+  "method": "hấp",
+  "yield": 383,
+  "yield_source": "dry-matter balance: 100 x (100 - 10.46 % water raw) / (100 - 76.63 % water cooked) from the two rows (FDC 168883, FDC 169711); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): rice long-grain polished boiled 2.98, parboiled 2.90, unpolished 2.60, round 3.19; oat flakes 4.10, quinoa 3.42, millet 2.40, buckwheat 3.60"
+ },
+ {
+  "raw": {
+   "source": "vn_nin",
+   "source_id": "NIN 1001",
+   "name_vi": "Gạo nếp cái (hạt khô)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 169711",
+   "name_vi": "Xôi trắng (nếp đồ)"
+  },
+  "method": "hấp",
+  "yield": 368,
+  "yield_source": "dry-matter balance: 100 x (100 - 14 % water raw) / (100 - 76.63 % water cooked) from the two rows (NIN 1001, FDC 169711); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): rice long-grain polished boiled 2.98, parboiled 2.90, unpolished 2.60, round 3.19; oat flakes 4.10, quinoa 3.42, millet 2.40, buckwheat 3.60 Proxy pair: the cooked row is the generic one for this food."
+ },
+ {
+  "raw": {
+   "source": "vn_nin",
+   "source_id": "NIN 1002",
+   "name_vi": "Gạo nếp thường (hạt khô)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 169711",
+   "name_vi": "Xôi trắng (nếp đồ)"
+  },
+  "method": "hấp",
+  "yield": 368,
+  "yield_source": "dry-matter balance: 100 x (100 - 13.9 % water raw) / (100 - 76.63 % water cooked) from the two rows (NIN 1002, FDC 169711); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): rice long-grain polished boiled 2.98, parboiled 2.90, unpolished 2.60, round 3.19; oat flakes 4.10, quinoa 3.42, millet 2.40, buckwheat 3.60 Proxy pair: the cooked row is the generic one for this food."
+ },
+ {
+  "raw": {
+   "source": "vn_nin",
+   "source_id": "NIN 1002:nep-cam-kho",
+   "name_vi": "Nếp cẩm (hạt khô)"
+  },
+  "cooked": {
+   "source": "vn_nin",
+   "source_id": "NIN 1024002",
+   "name_vi": "Xôi nếp cẩm"
+  },
+  "method": "hấp",
+  "yield": 150,
+  "yield_source": "dry-matter balance: 100 x (100 - 13.9 % water raw) / (100 - 42.57 % water cooked) from the two rows (NIN 1002:nep-cam-kho, NIN 1024002); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): rice long-grain polished boiled 2.98, parboiled 2.90, unpolished 2.60, round 3.19; oat flakes 4.10, quinoa 3.42, millet 2.40, buckwheat 3.60"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 168874",
+   "name_vi": "Quinoa (hạt khô)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 168917",
+   "name_vi": "Quinoa (nấu chín)"
+  },
+  "method": "nấu",
+  "yield": 305,
+  "yield_source": "dry-matter balance: 100 x (100 - 13.28 % water raw) / (100 - 71.61 % water cooked) from the two rows (FDC 168874, FDC 168917); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): rice long-grain polished boiled 2.98, parboiled 2.90, unpolished 2.60, round 3.19; oat flakes 4.10, quinoa 3.42, millet 2.40, buckwheat 3.60"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 169702",
+   "name_vi": "Hạt kê (khô)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 168871",
+   "name_vi": "Hạt kê (nấu chín)"
+  },
+  "method": "nấu",
+  "yield": 319,
+  "yield_source": "dry-matter balance: 100 x (100 - 8.67 % water raw) / (100 - 71.41 % water cooked) from the two rows (FDC 169702, FDC 168871); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): rice long-grain polished boiled 2.98, parboiled 2.90, unpolished 2.60, round 3.19; oat flakes 4.10, quinoa 3.42, millet 2.40, buckwheat 3.60"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 170685",
+   "name_vi": "Kiều mạch (hạt rang, khô)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 170686",
+   "name_vi": "Kiều mạch (nấu chín)"
+  },
+  "method": "nấu",
+  "yield": 376,
+  "yield_source": "dry-matter balance: 100 x (100 - 8.41 % water raw) / (100 - 75.63 % water cooked) from the two rows (FDC 170685, FDC 170686); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): rice long-grain polished boiled 2.98, parboiled 2.90, unpolished 2.60, round 3.19; oat flakes 4.10, quinoa 3.42, millet 2.40, buckwheat 3.60"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 173904",
+   "name_vi": "Yến mạch (cán, khô)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 173905:yen-mach-can-det-chin",
+   "name_vi": "Yến mạch cán dẹt (chín)"
+  },
+  "method": "nấu",
+  "yield": 544,
+  "yield_source": "dry-matter balance: 100 x (100 - 10.8 % water raw) / (100 - 83.6 % water cooked) from the two rows (FDC 173904, FDC 173905:yen-mach-can-det-chin); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): rice long-grain polished boiled 2.98, parboiled 2.90, unpolished 2.60, round 3.19; oat flakes 4.10, quinoa 3.42, millet 2.40, buckwheat 3.60"
+ },
+ {
+  "raw": {
+   "source": "usda_foundation",
+   "source_id": "FDC 2346397",
+   "name_vi": "Yến mạch cắt hạt steel-cut (khô)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 173905:yen-mach-cat-hat-chin",
+   "name_vi": "Yến mạch cắt hạt steel-cut (chín)"
+  },
+  "method": "nấu",
+  "yield": 548,
+  "yield_source": "dry-matter balance: 100 x (100 - 10.14 % water raw) / (100 - 83.6 % water cooked) from the two rows (FDC 2346397, FDC 173905:yen-mach-cat-hat-chin); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): rice long-grain polished boiled 2.98, parboiled 2.90, unpolished 2.60, round 3.19; oat flakes 4.10, quinoa 3.42, millet 2.40, buckwheat 3.60 Proxy pair: the cooked row is the generic one for this food."
+ },
+ {
+  "raw": {
+   "source": "usda_foundation",
+   "source_id": "food-yen-mach",
+   "name_vi": "Yến mạch"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 173905:yen-mach-can-det-chin",
+   "name_vi": "Yến mạch cán dẹt (chín)"
+  },
+  "method": "nấu",
+  "yield": 544,
+  "yield_source": "dry-matter balance: 100 x (100 - 10.8 % water raw) / (100 - 83.6 % water cooked) from the two rows (FDC 173904, FDC 173905:yen-mach-can-det-chin); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): rice long-grain polished boiled 2.98, parboiled 2.90, unpolished 2.60, round 3.19; oat flakes 4.10, quinoa 3.42, millet 2.40, buckwheat 3.60 The raw row (Foundation seed row) has no water value, so the rolled-oat raw row FDC 173904 gives the factor. Proxy pair: the cooked row is the generic one for this food."
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 169742",
+   "name_vi": "Bún khô"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 168914:bun-kho-luoc",
+   "name_vi": "Bún khô (luộc)"
+  },
+  "method": "luộc",
+  "yield": 336,
+  "yield_source": "dry-matter balance: 100 x (100 - 11.91 % water raw) / (100 - 73.82 % water cooked) from the two rows (FDC 169742, FDC 168914:bun-kho-luoc); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): no rice-noodle row in the tables"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 169742:pho-kho-kho",
+   "name_vi": "Phở khô (sợi khô)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 168914:pho-kho-chin",
+   "name_vi": "Phở khô (chín)"
+  },
+  "method": "luộc",
+  "yield": 336,
+  "yield_source": "dry-matter balance: 100 x (100 - 11.9 % water raw) / (100 - 73.8 % water cooked) from the two rows (FDC 169742:pho-kho-kho, FDC 168914:pho-kho-chin); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): no rice-noodle row in the tables"
+ },
+ {
+  "raw": {
+   "source": "vn_nin",
+   "source_id": "NIN 1041:hu-tieu-kho-kho",
+   "name_vi": "Hủ tiếu khô"
+  },
+  "cooked": {
+   "source": "vn_nin",
+   "source_id": "NIN 1041002:hu-tieu-luoc",
+   "name_vi": "Hủ tiếu (luộc)"
+  },
+  "method": "luộc",
+  "yield": 357,
+  "yield_source": "dry-matter balance: 100 x (100 - 13 % water raw) / (100 - 75.63 % water cooked) from the two rows (NIN 1041:hu-tieu-kho-kho, NIN 1041002:hu-tieu-luoc); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): no rice-noodle row in the tables"
+ },
+ {
+  "raw": {
+   "source": "vn_nin",
+   "source_id": "NIN 2015",
+   "name_vi": "Miến dong (khô)"
+  },
+  "cooked": {
+   "source": "recipe_calc",
+   "source_id": "recipe:mien-dong-chin",
+   "name_vi": "Miến dong (chín)"
+  },
+  "method": "luộc",
+  "yield": 380,
+  "yield_source": "dry-matter balance: 100 x (100 - 14.5 % water raw) / (100 - 77.5 % water cooked) from the two rows (NIN 2015, recipe:mien-dong-chin); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): no rice-noodle row in the tables"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 169736:mi-y-spaghetti-kho",
+   "name_vi": "Mì ý spaghetti (khô)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 169737:mi-y-spaghetti-chin",
+   "name_vi": "Mì ý spaghetti (chín)"
+  },
+  "method": "luộc",
+  "yield": 238,
+  "yield_source": "dry-matter balance: 100 x (100 - 9.9 % water raw) / (100 - 62.1 % water cooked) from the two rows (FDC 169736:mi-y-spaghetti-kho, FDC 169737:mi-y-spaghetti-chin); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): pasta hard wheat egg-free boiled 2.10, with egg 2.60"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 169736:mi-y-penne-kho",
+   "name_vi": "Mì ý penne (khô)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 169737:mi-y-penne-chin",
+   "name_vi": "Mì ý penne (chín)"
+  },
+  "method": "luộc",
+  "yield": 238,
+  "yield_source": "dry-matter balance: 100 x (100 - 9.9 % water raw) / (100 - 62.1 % water cooked) from the two rows (FDC 169736:mi-y-penne-kho, FDC 169737:mi-y-penne-chin); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): pasta hard wheat egg-free boiled 2.10, with egg 2.60"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 169736:nui-kho",
+   "name_vi": "Nui (khô)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 169737:nui-chin",
+   "name_vi": "Nui (chín)"
+  },
+  "method": "luộc",
+  "yield": 238,
+  "yield_source": "dry-matter balance: 100 x (100 - 9.9 % water raw) / (100 - 62.1 % water cooked) from the two rows (FDC 169736:nui-kho, FDC 169737:nui-chin); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): pasta hard wheat egg-free boiled 2.10, with egg 2.60"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 169731:mi-trung-kho",
+   "name_vi": "Mì trứng khô (sợi khô)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 169732:mi-trung-chin",
+   "name_vi": "Mì trứng khô (chín)"
+  },
+  "method": "luộc",
+  "yield": 282,
+  "yield_source": "dry-matter balance: 100 x (100 - 9.01 % water raw) / (100 - 67.7 % water cooked) from the two rows (FDC 169731:mi-trung-kho, FDC 169732:mi-trung-chin); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): pasta hard wheat egg-free boiled 2.10, with egg 2.60"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 173756",
+   "name_vi": "Đậu gà (hạt khô)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 173757",
+   "name_vi": "Đậu gà (luộc)"
+  },
+  "method": "luộc",
+  "yield": 232,
+  "yield_source": "dry-matter balance: 100 x (100 - 7.68 % water raw) / (100 - 60.21 % water cooked) from the two rows (FDC 173756, FDC 173757); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): bean stew from dry white/red beans 2.03, lentil stew 2.81 (with other ingredients)"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 172420",
+   "name_vi": "Đậu lăng nâu (hạt khô)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 172421",
+   "name_vi": "Đậu lăng nâu (luộc)"
+  },
+  "method": "luộc",
+  "yield": 302,
+  "yield_source": "dry-matter balance: 100 x (100 - 8.26 % water raw) / (100 - 69.64 % water cooked) from the two rows (FDC 172420, FDC 172421); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): bean stew from dry white/red beans 2.03, lentil stew 2.81 (with other ingredients)"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 174252",
+   "name_vi": "Đậu ngự (hạt khô)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 174253",
+   "name_vi": "Đậu ngự (luộc)"
+  },
+  "method": "luộc",
+  "yield": 297,
+  "yield_source": "dry-matter balance: 100 x (100 - 10.17 % water raw) / (100 - 69.79 % water cooked) from the two rows (FDC 174252, FDC 174253); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): bean stew from dry white/red beans 2.03, lentil stew 2.81 (with other ingredients)"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 174270",
+   "name_vi": "Đậu nành (hạt khô)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 174271",
+   "name_vi": "Đậu nành (luộc)"
+  },
+  "method": "luộc",
+  "yield": 244,
+  "yield_source": "dry-matter balance: 100 x (100 - 8.54 % water raw) / (100 - 62.55 % water cooked) from the two rows (FDC 174270, FDC 174271); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): bean stew from dry white/red beans 2.03, lentil stew 2.81 (with other ingredients)"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 175202",
+   "name_vi": "Đậu trắng (hạt khô)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 175203",
+   "name_vi": "Đậu trắng (luộc)"
+  },
+  "method": "luộc",
+  "yield": 240,
+  "yield_source": "dry-matter balance: 100 x (100 - 11.32 % water raw) / (100 - 63.08 % water cooked) from the two rows (FDC 175202, FDC 175203); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): bean stew from dry white/red beans 2.03, lentil stew 2.81 (with other ingredients)"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 174256",
+   "name_vi": "Đậu xanh (hạt khô)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 174257",
+   "name_vi": "Đậu xanh (luộc)"
+  },
+  "method": "luộc",
+  "yield": 333,
+  "yield_source": "dry-matter balance: 100 x (100 - 9.05 % water raw) / (100 - 72.66 % water cooked) from the two rows (FDC 174256, FDC 174257); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): bean stew from dry white/red beans 2.03, lentil stew 2.81 (with other ingredients)"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 175186",
+   "name_vi": "Đậu đen (hạt khô)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 175187",
+   "name_vi": "Đậu đen (luộc)"
+  },
+  "method": "luộc",
+  "yield": 260,
+  "yield_source": "dry-matter balance: 100 x (100 - 11 % water raw) / (100 - 65.74 % water cooked) from the two rows (FDC 175186, FDC 175187); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): bean stew from dry white/red beans 2.03, lentil stew 2.81 (with other ingredients)"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 173744",
+   "name_vi": "Đậu đỏ (hạt khô)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 175194",
+   "name_vi": "Đậu đỏ (luộc)"
+  },
+  "method": "luộc",
+  "yield": 267,
+  "yield_source": "dry-matter balance: 100 x (100 - 11.75 % water raw) / (100 - 66.94 % water cooked) from the two rows (FDC 173744, FDC 175194); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): bean stew from dry white/red beans 2.03, lentil stew 2.81 (with other ingredients)"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 168410",
+   "name_vi": "Edamame (đông lạnh, chưa nấu)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 168411",
+   "name_vi": "Edamame (luộc)"
+  },
+  "method": "luộc",
+  "yield": 91,
+  "yield_source": "dry-matter balance: 100 x (100 - 75.17 % water raw) / (100 - 72.77 % water cooked) from the two rows (FDC 168410, FDC 168411); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): bean stew from dry white/red beans 2.03, lentil stew 2.81 (with other ingredients)"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 170419",
+   "name_vi": "Đậu Hà Lan (hạt, sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 170420",
+   "name_vi": "Đậu Hà Lan (hạt, luộc)"
+  },
+  "method": "luộc",
+  "yield": 96,
+  "yield_source": "dry-matter balance: 100 x (100 - 78.86 % water raw) / (100 - 77.87 % water cooked) from the two rows (FDC 170419, FDC 170420); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): bean stew from dry white/red beans 2.03, lentil stew 2.81 (with other ingredients)"
+ },
+ {
+  "raw": {
+   "source": "vn_nin",
+   "source_id": "NIN 2008:khoai-lang-trang-song",
+   "name_vi": "Khoai lang trắng"
+  },
+  "cooked": {
+   "source": "vn_nin",
+   "source_id": "NIN 2008002:khoai-lang-trang-luoc",
+   "name_vi": "Khoai lang trắng (luộc)"
+  },
+  "method": "luộc",
+  "yield": 102,
+  "yield_source": "dry-matter balance: 100 x (100 - 68 % water raw) / (100 - 68.63 % water cooked) from the two rows (NIN 2008:khoai-lang-trang-song, NIN 2008002:khoai-lang-trang-luoc); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): potato peeled boiled 1.00, baked in skin 0.68"
+ },
+ {
+  "raw": {
+   "source": "vn_nin",
+   "source_id": "NIN 2008:khoai-tim-song",
+   "name_vi": "Khoai tím"
+  },
+  "cooked": {
+   "source": "vn_nin",
+   "source_id": "NIN 2008002:khoai-tim-luoc",
+   "name_vi": "Khoai tím (luộc)"
+  },
+  "method": "luộc",
+  "yield": 102,
+  "yield_source": "dry-matter balance: 100 x (100 - 68 % water raw) / (100 - 68.63 % water cooked) from the two rows (NIN 2008:khoai-tim-song, NIN 2008002:khoai-tim-luoc); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): potato peeled boiled 1.00, baked in skin 0.68"
+ },
+ {
+  "raw": {
+   "source": "usda_foundation",
+   "source_id": "FDC 2346404:khoai-nhat-song",
+   "name_vi": "Khoai Nhật"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 168484",
+   "name_vi": "Khoai lang (luộc, bỏ vỏ)"
+  },
+  "method": "luộc",
+  "yield": 103,
+  "yield_source": "dry-matter balance: 100 x (100 - 79.54 % water raw) / (100 - 80.1 % water cooked) from the two rows (FDC 2346404:khoai-nhat-song, FDC 168484); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): potato peeled boiled 1.00, baked in skin 0.68 Proxy pair: the cooked row is the generic one for this food."
+ },
+ {
+  "raw": {
+   "source": "usda_foundation",
+   "source_id": "FDC 2346404:khoai-nhat-song",
+   "name_vi": "Khoai Nhật"
+  },
+  "cooked": {
+   "source": "usda_foundation",
+   "source_id": "food-khoai-lang",
+   "name_vi": "Khoai lang luộc"
+  },
+  "method": "luộc",
+  "yield": 103,
+  "yield_source": "dry-matter balance: 100 x (100 - 79.54 % water raw) / (100 - 80.1 % water cooked) from the two rows (FDC 2346404:khoai-nhat-song, FDC 168484); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): potato peeled boiled 1.00, baked in skin 0.68 The cooked row (Foundation seed row, 10 nutrients) has no water value, so the USDA boiled sweet potato row FDC 168484 gives the factor. Proxy pair: the cooked row is the generic one for this food."
+ },
+ {
+  "raw": {
+   "source": "usda_foundation",
+   "source_id": "FDC 2346404:khoai-nhat-song",
+   "name_vi": "Khoai Nhật"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 168483",
+   "name_vi": "Khoai lang (nướng, cả vỏ)"
+  },
+  "method": "nướng",
+  "yield": 85,
+  "yield_source": "dry-matter balance: 100 x (100 - 79.54 % water raw) / (100 - 75.8 % water cooked) from the two rows (FDC 2346404:khoai-nhat-song, FDC 168483); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): potato peeled boiled 1.00, baked in skin 0.68 Proxy pair: the cooked row is the generic one for this food."
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 170026",
+   "name_vi": "Khoai tây (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 170438",
+   "name_vi": "Khoai tây (luộc)"
+  },
+  "method": "luộc",
+  "yield": 100,
+  "yield_source": "Bognár 2002 (BFE-R-02-03, FAO/INFOODS): potato without peel, boiled 1.00 (n=272), steamed 0.98; the USDA rows (raw with skin 79.3 % water, boiled flesh 77.0 %) give 90 by dry matter, which mixes in the skin, so the published edible-to-edible factor is used"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 169308",
+   "name_vi": "Khoai môn (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 168486",
+   "name_vi": "Khoai môn (nấu chín)"
+  },
+  "method": "luộc",
+  "yield": 81,
+  "yield_source": "dry-matter balance: 100 x (100 - 70.6 % water raw) / (100 - 63.8 % water cooked) from the two rows (FDC 169308, FDC 168486); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): potato peeled boiled 1.00, baked in skin 0.68"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 169985",
+   "name_vi": "Khoai mì (sắn, sống)"
+  },
+  "cooked": {
+   "source": "vn_nin",
+   "source_id": "NIN 2004:khoai-mi-luoc",
+   "name_vi": "Khoai mì (sắn, luộc)"
+  },
+  "method": "luộc",
+  "yield": 101,
+  "yield_source": "dry-matter balance: 100 x (100 - 59.68 % water raw) / (100 - 60 % water cooked) from the two rows (FDC 169985, NIN 2004:khoai-mi-luoc); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): potato peeled boiled 1.00, baked in skin 0.68"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 169985",
+   "name_vi": "Khoai mì (sắn, sống)"
+  },
+  "cooked": {
+   "source": "vn_nin",
+   "source_id": "NIN 2004014",
+   "name_vi": "Khoai mì (sắn, nướng)"
+  },
+  "method": "nướng",
+  "yield": 74,
+  "yield_source": "dry-matter balance: 100 x (100 - 59.68 % water raw) / (100 - 45.21 % water cooked) from the two rows (FDC 169985, NIN 2004014); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): potato peeled boiled 1.00, baked in skin 0.68"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 170071",
+   "name_vi": "Khoai mỡ (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 170072",
+   "name_vi": "Khoai mỡ (luộc)"
+  },
+  "method": "luộc",
+  "yield": 102,
+  "yield_source": "dry-matter balance: 100 x (100 - 69.6 % water raw) / (100 - 70.13 % water cooked) from the two rows (FDC 170071, FDC 170072); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): potato peeled boiled 1.00, baked in skin 0.68"
+ },
+ {
+  "raw": {
+   "source": "vn_nin",
+   "source_id": "NIN 2013",
+   "name_vi": "Khoai sọ"
+  },
+  "cooked": {
+   "source": "vn_nin",
+   "source_id": "NIN 2013002",
+   "name_vi": "Khoai sọ (luộc)"
+  },
+  "method": "luộc",
+  "yield": 98,
+  "yield_source": "dry-matter balance: 100 x (100 - 69 % water raw) / (100 - 68.37 % water cooked) from the two rows (NIN 2013, NIN 2013002); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): potato peeled boiled 1.00, baked in skin 0.68"
+ },
+ {
+  "raw": {
+   "source": "vn_nin",
+   "source_id": "NIN 2012",
+   "name_vi": "Khoai riềng (củ dong riềng)"
+  },
+  "cooked": {
+   "source": "vn_nin",
+   "source_id": "NIN 2012002",
+   "name_vi": "Khoai riềng (luộc)"
+  },
+  "method": "luộc",
+  "yield": 98,
+  "yield_source": "dry-matter balance: 100 x (100 - 70 % water raw) / (100 - 69.39 % water cooked) from the two rows (NIN 2012, NIN 2012002); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): potato peeled boiled 1.00, baked in skin 0.68"
+ },
+ {
+  "raw": {
+   "source": "vn_nin",
+   "source_id": "NIN 2003",
+   "name_vi": "Củ dong"
+  },
+  "cooked": {
+   "source": "vn_nin",
+   "source_id": "NIN 2003002",
+   "name_vi": "Củ dong (luộc)"
+  },
+  "method": "luộc",
+  "yield": 98,
+  "yield_source": "dry-matter balance: 100 x (100 - 66.5 % water raw) / (100 - 65.82 % water cooked) from the two rows (NIN 2003, NIN 2003002); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): potato peeled boiled 1.00, baked in skin 0.68"
+ },
+ {
+  "raw": {
+   "source": "vn_nin",
+   "source_id": "NIN 2005",
+   "name_vi": "Củ sắn dây"
+  },
+  "cooked": {
+   "source": "vn_nin",
+   "source_id": "NIN 2005002",
+   "name_vi": "Củ sắn dây (luộc)"
+  },
+  "method": "luộc",
+  "yield": 103,
+  "yield_source": "dry-matter balance: 100 x (100 - 60.3 % water raw) / (100 - 61.46 % water cooked) from the two rows (NIN 2005, NIN 2005002); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): potato peeled boiled 1.00, baked in skin 0.68"
+ },
+ {
+  "raw": {
+   "source": "vn_nin",
+   "source_id": "NIN 2007",
+   "name_vi": "Củ từ (sống)"
+  },
+  "cooked": {
+   "source": "vn_nin",
+   "source_id": "NIN 2007002",
+   "name_vi": "Củ từ (luộc)"
+  },
+  "method": "luộc",
+  "yield": 98,
+  "yield_source": "dry-matter balance: 100 x (100 - 75 % water raw) / (100 - 74.49 % water cooked) from the two rows (NIN 2007, NIN 2007002); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): potato peeled boiled 1.00, baked in skin 0.68"
+ },
+ {
+  "raw": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 170164",
+   "name_vi": "Hạt dẻ (sống)"
+  },
+  "cooked": {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 170166",
+   "name_vi": "Hạt dẻ (luộc/hấp)"
+  },
+  "method": "luộc",
+  "yield": 146,
+  "yield_source": "dry-matter balance: 100 x (100 - 43.95 % water raw) / (100 - 61.57 % water cooked) from the two rows (FDC 170164, FDC 170166); reference: Bognár 2002 (BFE-R-02-03, FAO/INFOODS): potato peeled boiled 1.00, baked in skin 0.68"
+ }
+]

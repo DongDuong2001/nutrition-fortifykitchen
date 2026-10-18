@@ -228,6 +228,13 @@ describe("the kcal card's summary and note", () => {
     expect(portionNote(grams(120), null, 120, true)).toBe("Bóc vỏ rồi cân thì nhập số gam ở đây.");
     expect(portionNote(grams(120), null, 120)).toBeNull();
   });
+
+  it("says cooked food is heavier where it is (dry grains, beans), and says neither when the weight stays (tubers)", () => {
+    const dryRiceSw = { own: "raw" as const, pair: null, factor: 2.5 };
+    expect(portionNote(grams(300, 1, "cooked"), dryRiceSw, 120)).toBe("Món chín nặng hơn lúc sống, nên 300 g chín bằng khoảng 120 g sống. App tính theo số đó cho bạn.");
+    const tuberSw = { own: "raw" as const, pair: null, factor: 1 };
+    expect(portionNote(grams(200, 1, "cooked"), tuberSw, 200)).toBe("200 g chín bằng khoảng 200 g sống. App tính theo số đó cho bạn.");
+  });
 });
 
 describe("eggParts and defaultPortionOf", () => {

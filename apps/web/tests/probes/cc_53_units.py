@@ -4,7 +4,7 @@
    then typing 200 keeps N: 600 g); Hôm nay shows 600 g with "200 g × 3".
 2. Cơm trắng (chín) in the /add sheet: Sống | Chín on Đã nấu chín, ×3 = 300 g; Hôm nay "Đã nấu chín · 100 g × 3".
 3. Ức gà (the demo row is roasted): opens on Đã nấu chín; weighed raw it converts. Thịt bò nạc (raw data) weighed
-   cooked: 150 g logs 214 g of the raw row; Hôm nay shows 150 g and "Đã nấu chín · bằng 214 g lúc sống"; the entry
+   cooked: 150 g logs 203 g of the raw row (meat median 0,74); Hôm nay shows 150 g and "Đã nấu chín · bằng 203 g lúc sống"; the entry
    editor opens on the same state.
 4. Trứng gà: Quả | Gam, four box sizes, Lớn × 3 = "3 quả lớn"; Hôm nay "3 quả" with "Cỡ lớn"; Gam has the part chips
    and Lòng trắng switches the food.
@@ -104,7 +104,7 @@ def portions(pg):
     pg.wait_for_timeout(200)
     text = s.inner_text()
     check("100 g × 3 = 300 g" in text and "300 g đã nấu chín" in text, "rice: ×3 = 300 g đã nấu chín")
-    check("120 g trước khi nấu" in text, "rice: the note says what 300 g cooked was dry")
+    check("110 g trước khi nấu" in text, "rice: the note says what 300 g cooked was dry")
     # Hao 18/10: "TRẮNG" read "TRĂNG": a clipping title cut the acute stacked over the breve. The title must not clip.
     clip = s.locator("h2#portion-sheet-title").evaluate("el => getComputedStyle(el).overflow + ' ' + getComputedStyle(el).webkitLineClamp")
     check(clip.startswith("visible") and "none" in clip, f"rice: the title does not clip its stacked accents ({clip})")
@@ -121,7 +121,7 @@ def portions(pg):
     shot(pg, "chicken-cooked-390")
     s.get_by_role("button", name="Cân sống", exact=True).click()
     pg.wait_for_timeout(200)
-    check("nấu xong thành khoảng 105 g" in s.inner_text(), "chicken weighed raw: 150 g raw is about 105 g of the cooked row")
+    check("nấu xong thành khoảng 111 g" in s.inner_text(), "chicken weighed raw: 150 g raw is about 111 g of the cooked row")
     pg.keyboard.press("Escape")
     pg.wait_for_timeout(400)
 
@@ -130,11 +130,11 @@ def portions(pg):
     s.get_by_role("button", name="Đã nấu chín", exact=True).click()
     s.get_by_label("Số gam").fill("150")
     pg.wait_for_timeout(200)
-    check("150 g chín bằng khoảng 214 g sống" in s.inner_text(), "beef 150 g cooked = about 214 g raw")
+    check("150 g chín bằng khoảng 203 g sống" in s.inner_text(), "beef 150 g cooked = about 203 g raw")
     shot(pg, "beef-cooked-390")
     add_from_sheet(pg, s)
     r = row(pg, "Thịt bò")
-    check("150 g" in r.inner_text() and "Đã nấu chín · bằng 214 g lúc sống" in r.inner_text(), f"Hôm nay: beef 150 g, bằng 214 g lúc sống ({r.inner_text()!r})")
+    check("150 g" in r.inner_text() and "Đã nấu chín · bằng 203 g lúc sống" in r.inner_text(), f"Hôm nay: beef 150 g, bằng 203 g lúc sống ({r.inner_text()!r})")
     entry = r.get_attribute("data-entry-id")
     go(pg, f"/entry/{entry}", 900)
     check(pressed(pg, "Đã nấu chín") and pg.get_by_label("Số gam").input_value() == "150", "edit: reopens on Đã nấu chín, 150")
@@ -168,6 +168,31 @@ def portions(pg):
     parts.get_by_role("button", name="Lòng trắng").click()
     pg.wait_for_timeout(300)
     check("lòng trắng trứng gà" in s.inner_text().lower(), "egg Gam: Lòng trắng switches the food")
+    pg.keyboard.press("Escape")
+    pg.wait_for_timeout(300)
+
+
+def groups(pg):
+    print("\n--- 4b. cc-53c: grains and tubers by the research's group yield ---")
+    s = pick(pg, "yến mạch")
+    check(s.get_by_role("group", name="Sống hoặc chín").count() == 1, "oats: Sống | Chín")
+    check(pressed(s, "Cân sống"), "oats (dry row): opens on Cân sống")
+    s.get_by_role("button", name="Đã nấu chín", exact=True).click()
+    s.get_by_label("Số gam").fill("230")
+    pg.wait_for_timeout(200)
+    text = s.inner_text()
+    check("Món chín nặng hơn lúc sống, nên 230 g chín bằng khoảng 50 g sống" in text, f"oats: 230 g cooked = 50 g dry, heavier ({text[-160:]!r})")
+    pg.screenshot(path=str(SHOTS / "cc-53c-oats-cooked-390.png"))
+    pg.keyboard.press("Escape")
+    pg.wait_for_timeout(400)
+
+    s = pick(pg, "khoai lang")
+    check(pressed(s, "Đã nấu chín"), "sweet potato (boiled row): opens on Đã nấu chín")
+    s.get_by_role("button", name="Cân sống", exact=True).click()
+    s.get_by_label("Số gam").fill("200")
+    pg.wait_for_timeout(200)
+    check("200 g lúc sống nấu xong thành khoảng 200 g" in s.inner_text(), "sweet potato: 200 g raw stays 200 g (tuber median 100)")
+    pg.screenshot(path=str(SHOTS / "cc-53c-sweet-potato-raw-390.png"))
     pg.keyboard.press("Escape")
     pg.wait_for_timeout(300)
 
@@ -272,7 +297,7 @@ def desktop(pg):
 def run_probe():
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        for part in (portions, exceptions, tray, desktop):
+        for part in (portions, groups, exceptions, tray, desktop):
             ctx = browser.new_context(viewport=PHONE)
             pg = ctx.new_page()
             try:

@@ -132,7 +132,7 @@ const VOLUME_QTY = /^\d+(?:[.,]\d+)?\s*(?:ml|l)$/i;
  * when there are no grams.
  */
 export function portionLabel(entry: Pick<HomeEntry, "qty" | "grams" | "foodId">): string {
-  // cc-53b: what the user set ("150 g" of cooked chicken, never the 214 g of raw it was logged as; "3 quả")
+  // cc-53b: what the user set ("150 g" of cooked chicken, never the 203 g of raw it was logged as; "3 quả")
   const set = portionAmountText(entry.qty);
   if (set) return set;
   // A supplement logged by the unit shows its quantity ("2 viên"), never its nominal grams
