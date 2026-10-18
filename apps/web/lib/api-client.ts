@@ -57,6 +57,7 @@ export function mapApiFoodToFoodItem(raw: any): FoodItem {
     category: raw.category || "khac",
     brand: raw.brand,
     source: raw.source || "user",
+    sourceId: raw.source_id ?? raw.sourceId,
     servings,
     tipVi: raw.tipVi || raw.tip_vi,
     nutrients,
