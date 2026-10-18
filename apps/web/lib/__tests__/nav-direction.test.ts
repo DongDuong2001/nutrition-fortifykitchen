@@ -12,6 +12,12 @@ describe("navKind (cc-55 route direction)", () => {
     expect(navKind("/settings/profile", "/settings", BACK)).toBe("back");
   });
 
+  it("a screen's own back button that replaces it with its parent slides back too", () => {
+    expect(navKind("/settings/profile/weight", "/settings/profile", PUSH)).toBe("back");
+    expect(navKind("/settings/profile", "/settings", PUSH)).toBe("back");
+    expect(navKind("/trends/micros", "/trends", PUSH)).toBe("back");
+  });
+
   it("tabs never slide, by the nav or by Back", () => {
     expect(navKind("/app", "/trends", PUSH)).toBe("tab");
     expect(navKind("/trends", "/app", BACK)).toBe("tab");

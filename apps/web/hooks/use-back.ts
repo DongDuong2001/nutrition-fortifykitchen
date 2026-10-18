@@ -3,7 +3,6 @@
 import { useCallback, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { backFallback, canGoBack, nextHistory } from "@/lib/nav";
-import { markBack } from "@/lib/nav-direction";
 
 // The in-app history of this tab. It lives for the page session and starts empty after a reload.
 let history: string[] = [];
@@ -24,7 +23,6 @@ export function useBack(): () => void {
   const router = useRouter();
   const pathname = usePathname();
   return useCallback(() => {
-    markBack();
     if (canGoBack(history)) router.back();
     else router.replace(backFallback(pathname, window.location.search));
   }, [router, pathname]);

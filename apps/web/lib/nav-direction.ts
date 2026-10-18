@@ -7,8 +7,11 @@
  * - "tab": a tab of the bottom nav or the sidebar: no transition at all (tapped hundreds of times a day).
  * - "none": the first screen, the same screen with another query, /add closed by its own ✕ (it slid down already),
  *   and everything when reduced motion or Data Saver is on.
- * navKind is pure; the rest is a tiny store fed by popstate and by the screens that go back in code.
+ * navKind is pure; the rest is a tiny store fed by popstate. Pages never import it (it would be copied into their
+ * chunks): a screen that goes back in code lands on a parent path, and the /add sheet that slid down by itself says
+ * so on the page (data-sheet-route with data-state="closed").
  */
+import { setHomeScroll } from "./home-scroll";
 import { HOME_ROUTE, NAV_TABS } from "./nav";
 
 export type NavKind = "none" | "push" | "back" | "sheet-up" | "sheet-down" | "tab";
@@ -23,18 +26,20 @@ export const isTabRoot = (p: string) => TAB_ROOTS.has(path(p));
 export const isSheetRoute = (p: string) => SHEET_ROUTES.includes(path(p));
 
 export interface NavFlags {
-  /** The change came from popstate (the browser's or the phone's Back) or from a screen's own back button. */
+  /** The change came from popstate (the browser's or the phone's Back). Landing on a parent path counts too. */
   back: boolean;
   /** The sheet being left already slid down (its ✕, Esc, the scrim or a drag closed it). */
   sheetClosed: boolean;
 }
 
-export function navKind(from: string | null, to: string, flags: NavFlags): NavKind {
+export function navKind(from: string | null, to: string, { sheetClosed, ...flags }: NavFlags): NavKind {
   if (from === null || path(from) === path(to)) return "none";
-  if (isSheetRoute(from)) return flags.sheetClosed || !flags.back ? "none" : "sheet-down";
-  if (isSheetRoute(to)) return flags.back ? "none" : "sheet-up";
+  // A screen's own back button with no history replaces it with its parent (lib/nav backFallback)
+  const back = flags.back || path(from).startsWith(path(to) + "/");
+  if (isSheetRoute(from)) return sheetClosed || !back ? "none" : "sheet-down";
+  if (isSheetRoute(to)) return back ? "none" : "sheet-up";
   if (isTabRoot(from) && isTabRoot(to)) return "tab";
-  if (flags.back) return "back";
+  if (back) return "back";
   if (isTabRoot(to)) return "tab";
   return "push";
 }
@@ -48,27 +53,17 @@ export function transitionClass(kind: NavKind): string {
 }
 
 // ---- the store (client only) ----
-let flags: NavFlags = { back: false, sheetClosed: false };
 // Where the last popstate landed. A popstate that changes no route (a sheet taking its history entry back) must not
 // make a later change look like Back, so Back counts only when the new screen is the one popstate landed on.
 let poppedTo: string | null = null;
 let current: { path: string; kind: NavKind; popped: boolean } | null = null;
-const scrollOf = new Map<string, number>();
 
 const motionOff = () =>
   window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true ||
   (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true;
 
-/** A screen goes back in code (router.back or replace to its parent): the change slides back, like Back. */
-export function markBack(): void {
-  flags.back = true;
-}
-
-/** The /add sheet slid down by itself before leaving: the change that follows has no transition. */
-export function markSheetClosed(): void {
-  flags.sheetClosed = true;
-  flags.back = true;
-}
+/** The /add sheet (data-sheet-route) already slid down by its ✕, the scrim or a drag: Back has nothing to animate. */
+const sheetClosed = () => document.querySelector('[data-sheet-route][data-state="closed"]') !== null;
 
 /**
  * The kind of change that lands on `pathname`, worked out once per path (React may render a screen more than once).
@@ -78,11 +73,10 @@ export function navKindFor(pathname: string): NavKind {
   if (typeof window === "undefined") return "none";
   if (current?.path === pathname) return current.kind;
   const from = current?.path ?? null;
-  if (from !== null) scrollOf.set(path(from), window.scrollY);
+  if (from !== null && path(from) === HOME_ROUTE) setHomeScroll(window.scrollY);
   const popped = poppedTo === path(pathname);
-  let kind = navKind(from, pathname, { ...flags, back: flags.back || popped });
+  let kind = navKind(from, pathname, { back: popped, sheetClosed: false });
   if (kind !== "sheet-up" && motionOff()) kind = "none";
-  flags = { back: false, sheetClosed: false };
   poppedTo = null;
   current = { path: pathname, kind, popped };
   return kind;
@@ -95,11 +89,6 @@ export function navKindFor(pathname: string): NavKind {
 export function reactTransitionClass(pathname: string): string {
   const kind = navKindFor(pathname);
   return current?.popped ? "none" : transitionClass(kind);
-}
-
-/** Where Hôm nay was scrolled when it was left, so the /add sheet draws it behind at the same place. */
-export function scrollOfHome(): number {
-  return scrollOf.get(HOME_ROUTE) ?? 0;
 }
 
 // ---- Back (popstate) as a view transition ----
@@ -124,7 +113,7 @@ if (typeof window !== "undefined") {
     (e) => {
       if (replaying) return;
       const to = path(window.location.pathname);
-      const kind = current ? navKind(current.path, to, { back: true, sheetClosed: flags.sheetClosed }) : "none";
+      const kind = current ? navKind(current.path, to, { back: true, sheetClosed: sheetClosed() }) : "none";
       const ua = (e as PopStateEvent & { hasUAVisualTransition?: boolean }).hasUAVisualTransition === true;
       if ((kind !== "back" && kind !== "sheet-down") || ua || motionOff() || !document.startViewTransition) return;
       e.stopImmediatePropagation();

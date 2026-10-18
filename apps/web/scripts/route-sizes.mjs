@@ -13,8 +13,11 @@ const rows = [];
 for (const route of ROUTES) {
   const html = await (await fetch(BASE + route)).text();
   const srcs = [...new Set([...html.matchAll(/<script src="\/_next\/([^"]+\.js)"/g)].map((m) => m[1]))];
-  const bytes = srcs.reduce((sum, src) => sum + gzipSync(readFileSync(path.join(root, ".next", decodeURIComponent(src)))).length, 0);
+  const sizes = srcs.map((src) => [src, gzipSync(readFileSync(path.join(root, ".next", decodeURIComponent(src)))).length]);
+  const bytes = sizes.reduce((sum, [, n]) => sum + n, 0);
   rows.push([route, srcs.length, kb(bytes)]);
+  // SIZES_VERBOSE=1: every chunk of each route, to see what grew
+  if (process.env.SIZES_VERBOSE) for (const [src, n] of sizes) console.error(`${route}\t${src.replace(/-[0-9a-f]{16}\.js$/, ".js")}\t${n}`);
 }
 console.log("| Route | Chunks | First-load JS (gzip kB) |\n|---|---|---|");
 for (const [route, n, size] of rows) console.log(`| ${route} | ${n} | ${size} |`);

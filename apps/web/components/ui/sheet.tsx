@@ -6,6 +6,9 @@ import { closeSheetEntry, openSheetEntry } from "@/lib/sheet-history";
 import { setPresent } from "@/lib/tour-bus";
 import { useSheetDrag } from "@/components/ui/use-sheet-drag";
 
+// The /add panel drags and closes like a sheet; it imports both from here, so they stay in the sheet's shared chunk
+export { useSheetDrag };
+
 export interface SheetProps {
   open: boolean;
   onClose: () => void;

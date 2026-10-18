@@ -45,9 +45,8 @@ import { HomeScreen } from "@/components/home/home-screen";
 import { useMealSlot } from "@/lib/use-meal-slot";
 import { HOME_ROUTE } from "@/lib/nav";
 import { navigateFromSheet } from "@/lib/sheet-history";
-import { markSheetClosed, scrollOfHome } from "@/lib/nav-direction";
-import { SHEET_EXIT_MS } from "@/components/ui/sheet";
-import { useSheetDrag } from "@/components/ui/use-sheet-drag";
+import { homeScroll } from "@/lib/home-scroll";
+import { SHEET_EXIT_MS, useSheetDrag } from "@/components/ui/sheet";
 
 // The add sheet shows carousels of the newest: Khám phá holds the full lists
 const MAX_SHORTCUT_RECENTS = 8;
@@ -89,7 +88,7 @@ function AddFoodInner() {
   const closingRef = useRef(false);
   const sheetState = closing ? "closed" : "open";
   useEffect(() => {
-    if (behindRef.current) behindRef.current.scrollTop = scrollOfHome();
+    if (behindRef.current) behindRef.current.scrollTop = homeScroll();
   }, []);
 
   useEffect(() => {
@@ -330,13 +329,10 @@ function AddFoodInner() {
       sessionStorage.removeItem("last_add_opener_id");
       sessionStorage.setItem("return_focus_id", openerId);
     }
-    const leave = () => {
-      markSheetClosed();
-      goBack();
-    };
-    if (instant) return leave();
+    // data-state="closed" also tells the Back that follows that the sheet has slid down already (lib/nav-direction)
     setClosing(true);
-    setTimeout(leave, SHEET_EXIT_MS);
+    if (instant) return goBack();
+    setTimeout(goBack, SHEET_EXIT_MS);
   }, [mealSlot, goBack]);
   const panelDrag = useSheetDrag(panelRef, () => {
     markUsed("sheet-drag");
@@ -439,6 +435,7 @@ function AddFoodInner() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="dlg-title"
+            data-sheet-route
             data-state={sheetState}
             inert={closing}
             onClick={(e) => e.stopPropagation()}
@@ -560,6 +557,7 @@ function AddFoodInner() {
           aria-label={`Thêm món vào ${mealNameVi}`}
           data-align-container="add-list"
           data-add-panel
+          data-sheet-route
           data-state={sheetState}
           inert={closing}
           className="m-sheet m-vt-sheet fixed inset-x-0 bottom-0 top-[8dvh] z-40 flex flex-col rounded-t-[20px] bg-card shadow-xl"
