@@ -4,7 +4,7 @@ import React, { useMemo } from "react";
 import Link from "next/link";
 import { type FoodItem } from "@/lib/mock/foods";
 import { type MealSlot, getMealSlotNameVi } from "@/lib/meal-slot";
-import { parseGramsInput, calculateMacroPreview, macroGramsText, scaleNutrients, formatGramsServingLabel, gramsServingLabel, hidesGrams, unitAmountText, unitCountOf } from "@/lib/portion";
+import { parseGramsInput, calculateMacroPreview, macroGramsText, scaleNutrients, formatGramsServingLabel, gramsServingLabel, hidesGrams, unitAmountText, unitCountOf, isUnitServingLabel } from "@/lib/portion";
 import { QuantityStepper } from "@/components/ui/quantity-stepper";
 import { formatAmount } from "@/lib/format";
 import { ChipGroup } from "@/components/ui/chip-group";
@@ -50,8 +50,10 @@ export function PortionPanel({
 
   // A supplement from a pack label is logged by the unit: no gram field, no gram figure
   const noGrams = hidesGrams(food);
-  const baseLabel = noGrams ? unitCountOf(food.servings, selectedServingLabel, parsedGrams)?.serving.label : undefined;
-  const amountText = unitAmountText(food, selectedServingLabel, parsedGrams) ?? gramsServingLabel(parsedGrams);
+  const isUnitActive = isUnitServingLabel(selectedServingLabel);
+  const unitInfo = (noGrams || isUnitActive) ? unitCountOf(food.servings, selectedServingLabel, parsedGrams) : null;
+  const baseLabel = unitInfo?.serving.label;
+  const amountText = unitAmountText(food, selectedServingLabel, parsedGrams) ?? (isUnitActive ? selectedServingLabel : gramsServingLabel(parsedGrams));
 
   // Derive columns = servings.length + 1 (for leading gram input)
   const columns = food.servings.length + (noGrams ? 0 : 1);
@@ -184,14 +186,14 @@ export function PortionPanel({
           items={food.servings.map((s) => ({
             id: s.label,
             label: s.label,
-            active: (baseLabel ?? selectedServingLabel) === s.label,
+            active: selectedServingLabel === s.label || (baseLabel === s.label && !food.servings.some((sv) => sv.label === selectedServingLabel)),
             onClick: () => {
               setGramsInput(s.grams.toString());
               setSelectedServingLabel(s.label);
             },
           }))}
         />
-        {noGrams && (
+        {(noGrams || isUnitActive) && unitInfo && (
           <QuantityStepper
             servings={food.servings}
             label={selectedServingLabel}

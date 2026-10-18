@@ -78,3 +78,78 @@ describe("PortionPanel for a supplement from a pack label", () => {
     expect(render("3 viên", "3")).toContain("×3");
   });
 });
+
+describe("PortionPanel for a food with unit servings (e.g. Trứng gà)", () => {
+  const eggFood = {
+    id: "food-egg",
+    nameVi: "Trứng gà",
+    category: "dam",
+    servings: [
+      { label: "1 quả", grams: 55 },
+      { label: "2 quả", grams: 110 },
+      { label: "100 g", grams: 100 },
+    ],
+    nutrients: { energy: 142, protein: 12.6, fat: 9.5, carbs: 0.7 },
+  } as unknown as (typeof MOCK_FOODS)[number];
+
+  it("renders both gram input and QuantityStepper when a unit chip is active", () => {
+    const html = renderToString(
+      <DiaryProvider>
+        <PortionPanel
+          food={eggFood}
+          gramsInput="55"
+          setGramsInput={vi.fn()}
+          selectedServingLabel="1 quả"
+          setSelectedServingLabel={vi.fn()}
+          mealSlot="breakfast"
+          onAdd={vi.fn()}
+        />
+      </DiaryProvider>
+    );
+
+    // Gram field is present for scale weighing
+    expect(html).toContain("Số gam");
+    // QuantityStepper is also present for unit counting
+    expect(html).toContain("Số lượng");
+    expect(html).toContain("×1");
+  });
+
+  it("shows ×2 when 2 quả is selected", () => {
+    const html = renderToString(
+      <DiaryProvider>
+        <PortionPanel
+          food={eggFood}
+          gramsInput="110"
+          setGramsInput={vi.fn()}
+          selectedServingLabel="2 quả"
+          setSelectedServingLabel={vi.fn()}
+          mealSlot="breakfast"
+          onAdd={vi.fn()}
+        />
+      </DiaryProvider>
+    );
+
+    expect(html).toContain("Số lượng");
+    expect(html).toContain("×2");
+  });
+
+  it("hides QuantityStepper when a gram serving (100 g) is active", () => {
+    const html = renderToString(
+      <DiaryProvider>
+        <PortionPanel
+          food={eggFood}
+          gramsInput="100"
+          setGramsInput={vi.fn()}
+          selectedServingLabel="100 g"
+          setSelectedServingLabel={vi.fn()}
+          mealSlot="breakfast"
+          onAdd={vi.fn()}
+        />
+      </DiaryProvider>
+    );
+
+    expect(html).toContain("Số gam");
+    expect(html).not.toContain("Số lượng");
+    expect(html).not.toContain("Tăng số lượng");
+  });
+});
