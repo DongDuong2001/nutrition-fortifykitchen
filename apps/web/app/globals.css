@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+/* Hover effects only where there is a real pointer: a tap on a phone never leaves a stuck hover (cc-55) */
+@custom-variant hover {
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      @slot;
+    }
+  }
+}
+
 @theme {
   --font-sans: var(--font-manrope-face), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-display: var(--font-saira-condensed-face), sans-serif;
@@ -72,15 +81,32 @@
   /* Calorie dial background ring. 3.44:1 on ink #111317 and 3.15:1 on the surface-dark inset panel #1A1C22 (WCAG 1.4.11 needs 3:1). */
   --color-track-on-dark: #666A75;
   --color-grabber: #D5D8DF;
-  --color-scrim: rgba(17, 19, 23, 0.5);
+  --color-scrim: rgba(17, 19, 23, 0.4);
+  /* A row, card or full-width button being pressed tints instead of shrinking (cc-55) */
+  --color-press: rgba(17, 19, 23, 0.06);
   --color-surface-dark: #1A1C22;
   --color-warning-bg: #FFF4E0;
   --color-warning-text: #7A4A00;
   /* Level badge (cc-28): provisional, the coach may change them. Gold is for Level 4 and 5 only. */
   --color-gold: #E0B54A;
 
+  /* Motion curves (cc-55). They replace Tailwind's ease-out / ease-in-out and feed every transition-* utility; the
+     durations live with the motion classes at the end of this file. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --default-transition-duration: 160ms;
+  --default-transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+
   /* Soft card shadow, desktop only (lg:shadow-card). */
   --shadow-card: 0 1px 2px rgba(17, 19, 23, 0.06);
+}
+
+/* Press and hover feedback names its properties (cc-55), never all of them: "all" animates layout too */
+@utility transition-press {
+  transition-property: transform, background-color, border-color, color, opacity;
+  transition-duration: var(--m-press);
+  transition-timing-function: var(--ease-out);
 }
 
 :root {
@@ -107,8 +133,10 @@
   a {
     color: var(--color-blue, #1238D6);
   }
-  a:hover {
-    color: var(--color-ink, #111317);
+  @media (hover: hover) and (pointer: fine) {
+    a:hover {
+      color: var(--color-ink, #111317);
+    }
   }
 
   button,
@@ -127,15 +155,28 @@
     outline-offset: 2px;
   }
 
-  a:active,
-  button:active {
-    transform: scale(0.97);
-  }
-
+  /* Press feedback (cc-55): buttons, chips, icon buttons and pill links scale to 0.97. A row, card or action that fills
+     the width tints instead (instant, no movement): shrinking a full-width block reads as a glitch. */
   a,
   button {
-    transition: transform 150ms ease-out;
     cursor: pointer;
+  }
+  button,
+  a.inline-flex {
+    transition: transform var(--m-press) var(--ease-out);
+  }
+  button:active,
+  a.inline-flex:active {
+    transform: scale(0.97);
+  }
+  button.w-full:active,
+  a.w-full:active,
+  a.block:active,
+  a.flex:active,
+  [role="option"]:active,
+  .m-tint:active {
+    transform: none;
+    background-image: linear-gradient(var(--color-press), var(--color-press));
   }
 
   a,
@@ -184,7 +225,7 @@
   transform: translate(var(--x), var(--y));
   transform-box: fill-box;
   transform-origin: center;
-  animation: link-bob calc(var(--t) / 4) ease-in-out var(--dl) infinite alternate;
+  animation: link-bob calc(var(--t) / 4) var(--ease-in-out) var(--dl) infinite alternate;
 }
 .link-p {
   transform: translate(var(--sx, var(--wind-from)), var(--y));
@@ -197,47 +238,31 @@
   }
 }
 
-/* "Có gì mới" sheet (cc-46): slides up in 200 ms, away in 140 ms; reduced motion fades only */
-@keyframes wn-up {
-  from {
-    transform: translateY(100%);
-  }
-}
-@keyframes wn-down {
-  to {
-    transform: translateY(100%);
-  }
-}
-@keyframes wn-fade-in {
-  from {
-    opacity: 0;
-  }
-}
-@keyframes wn-fade-out {
-  to {
-    opacity: 0;
-  }
-}
-.wn-enter {
-  animation: wn-up 200ms ease-out both;
-}
-.wn-leave {
-  animation: wn-down 140ms ease-in both;
-}
-@media (prefers-reduced-motion: reduce) {
-  .wn-enter {
-    animation-name: wn-fade-in;
-  }
-  .wn-leave {
-    animation-name: wn-fade-out;
-  }
+/*
+ * Motion (cc-51, retuned by cc-55). One motion language for the whole app:
+ * - Curves: --ease-out for anything that enters, leaves or is pressed, --ease-drawer for sheets, --ease-in-out for
+ *   something that moves on screen. Never the bare ease / ease-in / ease-out keywords, never ease-in.
+ * - Durations: press 160 ms; dialogs, popovers, tips and toasts 200 ms in, 150 ms out; rows 200 ms; push screens
+ *   300 ms; sheets 350 ms in, 220 ms out (the one place over 300 ms). An exit is always shorter than its enter.
+ * - Only transform and opacity move (grid-template-rows for an expanding row and a deleted row's collapse).
+ * - Anything that can be interrupted (sheets, dialogs, popovers, tips, toasts, expanding rows) is a CSS transition on
+ *   data-state="open" | "closed" that enters from @starting-style, so closing it mid-open reverses from where it is.
+ *   components/ui/presence.tsx keeps a closing element mounted for its exit.
+ * - No will-change, no blur, no box-shadow or filter in motion.
+ * - Every class has a prefers-reduced-motion rule at the end: no movement, opacity only, 120 ms at most.
+ * lib/__tests__/motion.test.ts checks all of this.
+ */
+:root {
+  --m-press: 160ms;
+  --m-pop-in: 200ms;
+  --m-pop-out: 150ms;
+  --m-row: 200ms;
+  --m-push: 300ms;
+  --m-sheet-in: 350ms;
+  --m-sheet-out: 220ms;
+  --m-fade: 120ms;
 }
 
-/*
- * cc-51 motion. 200 ms by default, 150 ms for small things, 250 ms for sheets; ease-out in, ease-in out; transform and
- * opacity only (the row collapse animates grid-template-rows, the one exception). Every class below has a
- * prefers-reduced-motion rule after it: no movement, an opacity change at most. lib/__tests__/motion.test.ts checks both.
- */
 @keyframes m-rise-in {
   from {
     opacity: 0;
@@ -254,16 +279,6 @@
     opacity: 0;
   }
 }
-@keyframes m-sheet-in {
-  from {
-    transform: translateY(100%);
-  }
-}
-@keyframes m-sheet-out {
-  to {
-    transform: translateY(100%);
-  }
-}
 @keyframes m-slide-from-right {
   from {
     opacity: 0;
@@ -277,18 +292,137 @@
   }
 }
 
+/* Sheets (components/ui/sheet.tsx and the /add panel) slide up from their own height; the scrim fades with them */
+.m-sheet {
+  transition: transform var(--m-sheet-in) var(--ease-drawer);
+}
+.m-sheet[data-state="closed"] {
+  transform: translateY(100%);
+  transition-duration: var(--m-sheet-out);
+}
+.m-scrim {
+  transition: opacity var(--m-sheet-in) var(--ease-drawer);
+}
+.m-scrim[data-state="closed"] {
+  opacity: 0;
+  transition-duration: var(--m-sheet-out);
+}
+@starting-style {
+  .m-sheet[data-state="open"] {
+    transform: translateY(100%);
+  }
+  .m-scrim[data-state="open"] {
+    opacity: 0;
+  }
+}
+/* A finger on the grabber: the sheet follows it 1:1 (the transform is written on the element), then lets go with the
+   sheet's own curve from where it is */
+.m-sheet[data-dragging] {
+  transition: none;
+}
+
+/* Centred dialogs, popovers and tip cards: scale 0.96 → 1 with a fade, from --m-origin (the trigger or the tip's arrow;
+   the centre for a dialog). Never from 0. */
+.m-pop {
+  transform-origin: var(--m-origin, center);
+  transition:
+    transform var(--m-pop-in) var(--ease-out),
+    opacity var(--m-pop-in) var(--ease-out);
+}
+.m-pop[data-state="closed"] {
+  transform: scale(0.96);
+  opacity: 0;
+  transition-duration: var(--m-pop-out);
+}
+/* A tip's dim and other overlays that only fade */
+.m-fade {
+  transition: opacity var(--m-pop-in) var(--ease-out);
+}
+.m-fade[data-state="closed"] {
+  opacity: 0;
+  transition-duration: var(--m-pop-out);
+}
+/* A toast rises 8 px into place and fades; it leaves the same way, faster */
+.m-toast {
+  transition:
+    transform var(--m-pop-in) var(--ease-out),
+    opacity var(--m-pop-in) var(--ease-out);
+}
+.m-toast[data-state="closed"] {
+  transform: translateY(8px);
+  opacity: 0;
+  transition-duration: var(--m-pop-out);
+}
+@starting-style {
+  .m-pop:not([data-state="closed"]) {
+    transform: scale(0.96);
+    opacity: 0;
+  }
+  .m-fade:not([data-state="closed"]) {
+    opacity: 0;
+  }
+  .m-toast:not([data-state="closed"]) {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+}
+/* The toast's countdown bar empties at a constant pace (scaleX, linear: it is a clock, not a movement) */
+@keyframes m-countdown {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+.m-countdown {
+  transform-origin: left center;
+  animation: m-countdown linear both;
+}
+
+/* An expanding row (accordion): its height opens with grid rows 0fr → 1fr while the content fades in; one row at a
+   time. The chevron of its button turns 180°. */
+.m-expand {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition:
+    grid-template-rows var(--m-row) var(--ease-out),
+    opacity var(--m-row) var(--ease-out);
+}
+.m-expand[data-state="closed"] {
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition-duration: var(--m-pop-out);
+}
+@starting-style {
+  .m-expand:not([data-state="closed"]) {
+    grid-template-rows: 0fr;
+    opacity: 0;
+  }
+}
+.m-expand > * {
+  min-height: 0;
+  overflow: hidden;
+}
+.m-chevron {
+  transition: transform var(--m-row) var(--ease-out);
+}
+[aria-expanded="true"] .m-chevron {
+  transform: rotate(180deg);
+}
+
 /* Enter animations on wrappers fill backwards only: a fill that stays after the end keeps a stacking context (and, for
    a transform, a containing block for fixed children), which put sheets inside a screen under the bottom nav. */
-/* A food row that was just added (or put back by Hoàn tác) */
+/* A food row that was just added (or put back by Hoàn tác) rises 8 px and fades in */
 .m-row-enter {
-  animation: m-rise-in 200ms ease-out backwards;
+  animation: m-rise-in var(--m-row) var(--ease-out) backwards;
 }
 /* A deleted row: fades and its height closes (grid rows 1fr → 0fr) */
 .m-row-exit {
   display: grid;
   grid-template-rows: 1fr;
-  animation: m-fade-out 200ms ease-in both;
-  transition: grid-template-rows 200ms ease-in;
+  animation: m-fade-out var(--m-row) var(--ease-out) both;
+  transition: grid-template-rows var(--m-row) var(--ease-out);
 }
 .m-row-exit.m-collapsed {
   grid-template-rows: 0fr;
@@ -299,43 +433,25 @@
 }
 /* A row that moved (FLIP): the inline transform eases back to none */
 .m-flip {
-  transition: transform 200ms ease-out;
-}
-/* Sheets and their scrim */
-.m-sheet-enter {
-  animation: m-sheet-in 250ms ease-out both;
-}
-.m-sheet-exit {
-  animation: m-sheet-out 250ms ease-in both;
-}
-.m-scrim-enter {
-  animation: m-fade-in 250ms ease-out both;
-}
-.m-scrim-exit {
-  animation: m-fade-out 250ms ease-in both;
-}
-/* A sheet let go after a short drag goes back up */
-.m-snap {
-  transition: transform 200ms ease-out;
+  transition: transform var(--m-row) var(--ease-in-out);
 }
 /* Bars: the fill grows from the left (scaleX) */
 .m-bar {
   transform-origin: left center;
-  transition: transform 300ms ease-out;
+  transition: transform 300ms var(--ease-out);
 }
-/* A tab's screen, and a day changed with the arrows (direction: earlier from the left, later from the right) */
-.m-tab-enter {
-  animation: m-fade-in 120ms ease-out backwards;
-}
+/* A day changed with the arrows (direction: earlier from the left, later from the right) */
 .m-day-earlier {
-  animation: m-slide-from-left 200ms ease-out backwards;
+  animation: m-slide-from-left var(--m-row) var(--ease-out) backwards;
 }
 .m-day-later {
-  animation: m-slide-from-right 200ms ease-out backwards;
+  animation: m-slide-from-right var(--m-row) var(--ease-out) backwards;
 }
 /* Pull to refresh: the indicator follows the finger, then spins while the day is fetched */
 .m-pull {
-  transition: transform 200ms ease-out, opacity 150ms ease-out;
+  transition:
+    transform var(--m-row) var(--ease-out),
+    opacity var(--m-pop-out) var(--ease-out);
 }
 @keyframes m-spin {
   to {
@@ -346,50 +462,180 @@
   animation: m-spin 800ms linear infinite;
 }
 
+/* Desktop: a sheet that is a centred dialog pops (scale and fade) instead of sliding */
+@media (min-width: 1024px) {
+  .m-dialog.m-sheet {
+    transform-origin: center;
+    transition:
+      transform var(--m-pop-in) var(--ease-out),
+      opacity var(--m-pop-in) var(--ease-out);
+  }
+  .m-dialog.m-sheet[data-state="closed"] {
+    transform: scale(0.96);
+    opacity: 0;
+    transition-duration: var(--m-pop-out);
+  }
+  @starting-style {
+    .m-dialog.m-sheet[data-state="open"] {
+      transform: scale(0.96);
+      opacity: 0;
+    }
+  }
+}
+
+/*
+ * Screen changes (components/route-transition.tsx): a view transition on the page root only, with the class the
+ * nav-direction store picks. A push slides the new screen in from the right while the old one shifts 20% left and
+ * dims (it fades over the ink behind it); Back reverses it. Back out of /add slides its panel (m-sheet) down while the
+ * scrim fades off Hôm nay. Tabs, first loads, reduced motion and Data Saver get none. The bottom nav has its own name
+ * and never moves. The page stays tappable during the transition.
+ */
+:root {
+  view-transition-name: none;
+}
+/* Back is a transition of the whole page (lib/nav-direction starts it; React names the page only for a push) */
+:root[data-vt="back"] {
+  view-transition-name: m-page;
+  view-transition-class: m-vt-back;
+}
+:root[data-vt="sheet-down"] {
+  view-transition-name: m-page;
+  view-transition-class: m-vt-sheet-down;
+}
+::view-transition {
+  pointer-events: none;
+}
+.m-vt-nav {
+  view-transition-name: m-nav;
+}
+.m-vt-sheet {
+  view-transition-name: m-sheet;
+}
+::view-transition-group(m-nav),
+::view-transition-old(m-nav),
+::view-transition-new(m-nav),
+::view-transition-group(.m-vt-push),
+::view-transition-group(.m-vt-back),
+::view-transition-group(.m-vt-sheet-down),
+::view-transition-new(.m-vt-sheet-down) {
+  animation: none;
+}
+::view-transition-image-pair(.m-vt-push),
+::view-transition-image-pair(.m-vt-back) {
+  background-color: var(--color-ink);
+}
+@keyframes m-vt-from-right {
+  from {
+    transform: translateX(100%);
+  }
+}
+@keyframes m-vt-to-right {
+  to {
+    transform: translateX(100%);
+  }
+}
+@keyframes m-vt-from-left {
+  from {
+    transform: translateX(-20%);
+    opacity: 0.85;
+  }
+}
+@keyframes m-vt-to-left {
+  to {
+    transform: translateX(-20%);
+    opacity: 0.85;
+  }
+}
+@keyframes m-vt-sheet-down {
+  to {
+    transform: translateY(100%);
+  }
+}
+::view-transition-new(.m-vt-push) {
+  animation: m-vt-from-right var(--m-push) var(--ease-out) both;
+}
+::view-transition-old(.m-vt-push) {
+  animation: m-vt-to-left var(--m-push) var(--ease-out) both;
+}
+::view-transition-new(.m-vt-back) {
+  animation: m-vt-from-left var(--m-push) var(--ease-out) both;
+}
+::view-transition-old(.m-vt-back) {
+  z-index: 1;
+  animation: m-vt-to-right var(--m-push) var(--ease-out) both;
+}
+::view-transition-old(.m-vt-sheet-down) {
+  z-index: 1;
+  animation: m-fade-out var(--m-sheet-out) var(--ease-drawer) both;
+}
+::view-transition-old(m-sheet) {
+  animation: m-vt-sheet-down var(--m-sheet-out) var(--ease-drawer) both;
+}
+
+/* Reduced motion: nothing moves; what fades does it in 120 ms at most */
 @media (prefers-reduced-motion: reduce) {
+  .m-sheet,
+  .m-scrim,
+  .m-pop,
+  .m-fade,
+  .m-toast,
+  .m-dialog.m-sheet {
+    transition: opacity var(--m-fade) var(--ease-out);
+  }
+  .m-sheet[data-state="closed"],
+  .m-pop[data-state="closed"],
+  .m-toast[data-state="closed"],
+  .m-dialog.m-sheet[data-state="closed"] {
+    transform: none;
+    opacity: 0;
+  }
+  @starting-style {
+    .m-sheet[data-state="open"],
+    .m-pop:not([data-state="closed"]),
+    .m-toast:not([data-state="closed"]),
+    .m-dialog.m-sheet[data-state="open"] {
+      transform: none;
+      opacity: 0;
+    }
+  }
+  .m-sheet[data-dragging] {
+    transition: none;
+  }
+  .m-countdown {
+    animation: none;
+  }
+  .m-expand {
+    transition: opacity var(--m-fade) var(--ease-out);
+  }
+  .m-chevron {
+    transition: none;
+  }
   .m-row-enter {
-    animation-name: m-fade-in;
+    animation: m-fade-in var(--m-fade) var(--ease-out) backwards;
   }
   .m-row-exit {
+    animation-duration: var(--m-fade);
     transition: none;
   }
   .m-flip {
     transition: none;
   }
-  .m-sheet-enter,
-  .m-scrim-enter {
-    animation-name: m-fade-in;
-  }
-  .m-sheet-exit,
-  .m-scrim-exit {
-    animation-name: m-fade-out;
-  }
-  .m-snap {
-    transition: none;
-  }
   .m-bar {
     transition: none;
   }
-  .m-tab-enter {
-    animation-name: m-fade-in;
-  }
   .m-day-earlier,
   .m-day-later {
-    animation-name: m-fade-in;
+    animation: m-fade-in var(--m-fade) var(--ease-out) backwards;
   }
   .m-pull {
-    transition: opacity 150ms ease-out;
+    transition: opacity var(--m-fade) var(--ease-out);
   }
   .m-spin {
     animation: none;
   }
-}
-/* A sheet that is a centred dialog on a desktop fades instead of sliding */
-@media (min-width: 1024px) {
-  .m-dialog.m-sheet-enter {
-    animation-name: m-fade-in;
-  }
-  .m-dialog.m-sheet-exit {
-    animation-name: m-fade-out;
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
   }
 }
