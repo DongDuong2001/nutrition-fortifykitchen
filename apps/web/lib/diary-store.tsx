@@ -140,13 +140,16 @@ const NOTICE_TOAST_MS = 6000;
 interface DiaryContextValue {
   data: MockDayData;
   addedEntries: AddedDiaryEntry[];
-  /** `undoable` is the one-tap add of a recent: the toast offers Hoàn tác for 5 s instead of Xem. */
+  /**
+   * `undoable` is the one-tap add of a recent: the toast offers Hoàn tác for 5 s instead of Xem. `id` is the new entry's
+   * id when the caller keeps a link to it (a Ngày tập tick, cc-52); a fresh one otherwise.
+   */
   addFoodEntry: (
     food: FoodItem,
     grams: number,
     mealSlot: MealSlot,
     servingLabel?: string,
-    options?: { undoable?: boolean }
+    options?: { undoable?: boolean; id?: string }
   ) => Promise<boolean>;
   /** The add tray: every item in one diary update and one toast whose Hoàn tác removes them all. False when an item has no energy figure. */
   addFoodEntries: (items: Array<{ food: FoodItem; grams: number; label: string }>, mealSlot: MealSlot) => boolean;
@@ -958,14 +961,14 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
 
   // Add a food entry
   const addFoodEntry = useCallback(
-    async (food: FoodItem, grams: number, mealSlot: MealSlot, servingLabel?: string, options?: { undoable?: boolean }) => {
+    async (food: FoodItem, grams: number, mealSlot: MealSlot, servingLabel?: string, options?: { undoable?: boolean; id?: string }) => {
       // Unknown energy is not 0: nothing is logged, and the caller shows NO_ENERGY_MESSAGE (a label supplement can, canLog)
       if (!canLog(food)) return false;
       const numbers = entryNumbers(food, grams);
       const qty = servingLabel || `${formatAmount(grams, "g")} g`;
 
       const newEntry: AddedDiaryEntry = {
-        id: generateUuid(),
+        id: options?.id ?? generateUuid(),
         foodId: serverFoodIdOf(food.id),
         foodName: food.nameVi,
         grams,
