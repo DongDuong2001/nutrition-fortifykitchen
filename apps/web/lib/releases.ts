@@ -40,6 +40,8 @@ export const RELEASES: readonly Release[] = [
       { icon: "meal", title: "Cân sống hay đã nấu chín", body: "Thịt, cá, cơm, mì, khoai, đậu và yến mạch có nút Cân sống và Đã nấu chín. App tự đổi ra số liệu khớp." },
       { icon: "select", title: "Trứng ghi theo quả", body: "Chọn cỡ ghi trên hộp rồi chọn mấy quả. App tự trừ vỏ." },
       { icon: "home", title: "Khay gọn hơn", body: "Chạm từng món trong khay để chỉnh, rồi thêm cả khay vô bữa một lần." },
+      // cc-57: an improvement, no tour
+      { icon: "home", title: "Chuyển tab mượt hơn", body: "Thanh bên dưới đứng yên khi bạn chạm qua lại giữa các tab. Nút bấm phản hồi liền, kéo bảng xuống không bị giật." },
     ],
     tour: [
       { target: "meal-add", fallback: "nav-add", title: "Ghi theo gam", body: "Chạm + Thêm rồi chọn món. Gõ số gam hoặc chọn 100 g, bấm + để nhân lên." },

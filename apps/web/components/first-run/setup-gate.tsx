@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { gateRedirect, isSetupRoute, isTabRoute } from "@/lib/first-run";
 import { isLiveMode } from "@/lib/api-mode";
+import { NAV_TABS } from "@/lib/nav";
 
 /**
  * While the check runs, a tab route shows the page frame as a skeleton: the paper page, the phone header shape
@@ -15,7 +16,11 @@ import { isLiveMode } from "@/lib/api-mode";
 function GateSkeleton() {
   return (
     <div className="flex min-h-dvh w-full flex-col bg-page text-text font-sans lg:flex-row">
-      <div aria-hidden="true" className="hidden w-60 shrink-0 bg-ink lg:block" />
+      <div aria-hidden="true" className="hidden w-60 shrink-0 bg-ink p-6 text-on-dark lg:block">
+        <div className="px-2 font-display text-2xl font-black italic">
+          H1T <span className="text-sky">MICRO</span>
+        </div>
+      </div>
       <div className="flex min-w-0 flex-1 flex-col pb-[calc(88px+env(safe-area-inset-bottom))] lg:pb-0">
         <div aria-hidden="true" className="h-[92px] rounded-b-[20px] bg-ink lg:hidden" />
         <div aria-hidden="true" className="hidden h-8 w-48 rounded bg-surface-dark motion-safe:animate-pulse lg:mx-8 lg:mt-8 lg:block" />
@@ -34,7 +39,14 @@ function GateSkeleton() {
           ))}
         </main>
       </div>
-      <div aria-hidden="true" className="fixed bottom-0 left-0 right-0 z-40 h-[calc(72px+env(safe-area-inset-bottom))] bg-ink lg:hidden" />
+      {/* The nav band with its four names as text: the first thing painted on a cold start (FCP) */}
+      <div aria-hidden="true" className="fixed bottom-0 left-0 right-0 z-40 h-[calc(72px+env(safe-area-inset-bottom))] bg-ink lg:hidden">
+        <div className="mx-auto grid h-[72px] w-full max-w-[560px] grid-cols-4 items-center px-4 text-center text-[11px] font-semibold text-muted-on-dark">
+          {NAV_TABS.map((t) => (
+            <span key={t.tab}>{t.label}</span>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
