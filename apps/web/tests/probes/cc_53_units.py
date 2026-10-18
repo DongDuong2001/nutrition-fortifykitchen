@@ -172,6 +172,31 @@ def portions(pg):
     pg.wait_for_timeout(300)
 
 
+def groups(pg):
+    print("\n--- 4b. cc-53c: grains and tubers by the research's group yield ---")
+    s = pick(pg, "yến mạch")
+    check(s.get_by_role("group", name="Sống hoặc chín").count() == 1, "oats: Sống | Chín")
+    check(pressed(s, "Cân sống"), "oats (dry row): opens on Cân sống")
+    s.get_by_role("button", name="Đã nấu chín", exact=True).click()
+    s.get_by_label("Số gam").fill("230")
+    pg.wait_for_timeout(200)
+    text = s.inner_text()
+    check("Món chín nặng hơn lúc sống, nên 230 g chín bằng khoảng 50 g sống" in text, f"oats: 230 g cooked = 50 g dry, heavier ({text[-160:]!r})")
+    pg.screenshot(path=str(SHOTS / "cc-53c-oats-cooked-390.png"))
+    pg.keyboard.press("Escape")
+    pg.wait_for_timeout(400)
+
+    s = pick(pg, "khoai lang")
+    check(pressed(s, "Đã nấu chín"), "sweet potato (boiled row): opens on Đã nấu chín")
+    s.get_by_role("button", name="Cân sống", exact=True).click()
+    s.get_by_label("Số gam").fill("200")
+    pg.wait_for_timeout(200)
+    check("200 g lúc sống nấu xong thành khoảng 200 g" in s.inner_text(), "sweet potato: 200 g raw stays 200 g (tuber median 100)")
+    pg.screenshot(path=str(SHOTS / "cc-53c-sweet-potato-raw-390.png"))
+    pg.keyboard.press("Escape")
+    pg.wait_for_timeout(300)
+
+
 def exceptions(pg):
     print("\n--- 5. Exceptions keep their unit ---")
     go(pg, "/foods/food-bun-dau", 800)
@@ -272,7 +297,7 @@ def desktop(pg):
 def run_probe():
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        for part in (portions, exceptions, tray, desktop):
+        for part in (portions, groups, exceptions, tray, desktop):
             ctx = browser.new_context(viewport=PHONE)
             pg = ctx.new_page()
             try:
