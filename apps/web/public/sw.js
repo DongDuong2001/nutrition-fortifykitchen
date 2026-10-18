@@ -5,7 +5,7 @@
  *  - auth routes and the API: never cached (always the network)
  *  - an update waits until the page asks for it (SKIP_WAITING); it never takes over mid-edit.
  * Bump VERSION on a release that changes this file or the shell list. lib/pwa.ts holds the tested copy of routeFor. */
-const VERSION = "2026-10-18.16";
+const VERSION = "2026-10-19.4";
 const SHELL_CACHE = "h1t-shell-" + VERSION;
 const STATIC_CACHE = "h1t-static-" + VERSION;
 const PAGES = ["/", "/app", "/trends", "/explore", "/settings", "/offline"];
