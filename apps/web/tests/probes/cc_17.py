@@ -119,6 +119,9 @@ def check_training(browser, size_name, size):
     carb = pg.locator("input[aria-label='Tinh bột nhanh']:visible")
     check(carb.count() == 1 and not carb.is_checked(), f"{label}: nothing is ticked on a day with no record")
     carb.click()
+    # cc-52: a tick opens the portion sheet; Thêm logs to Bữa phụ and ticks the item
+    pg.get_by_role("dialog", name="Tinh bột nhanh").get_by_role("button", name="Thêm vào Bữa phụ").click()
+    pg.wait_for_timeout(500)
     check(carb.is_checked(), f"{label}: today's tick is editable and checks")
     saved = read_store(pg)
     check(saved is not None and TODAY_ISO in saved and "intra-carb" in saved, f"{label}: the tick is saved under today's key")
