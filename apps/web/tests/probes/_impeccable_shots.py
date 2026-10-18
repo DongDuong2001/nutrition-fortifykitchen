@@ -1,6 +1,6 @@
 """Screenshots for docs/design/impeccable-audit-2026-10-19.md: Hôm nay, the /add portion panel and the Khay (tray bar and
 review sheet), Tổng quan > Năng lượng, all at 390 x 844, 2x, demo build. No checks; it writes the pictures.
-Run with: ALIGN_BASE_URL=http://localhost:3107 npm run probe -- tests/probes/impeccable_shots.py
+Not a probe (the leading underscore keeps probe:all from running it). Run with: ALIGN_BASE_URL=http://localhost:3107 npm run probe -- tests/probes/_impeccable_shots.py
 """
 import os
 import re

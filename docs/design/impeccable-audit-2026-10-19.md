@@ -3,7 +3,7 @@
 **Method: source plus screenshot assessment. The detector did not run.** `scripts/impeccable` downloads an engine binary on first use, which the night rules forbid, so there is no `impeccable detect` output, no overlay and no deterministic scan: everything below is read from the source and from screenshots, and contrast ratios are computed from the token values. Nothing here is "verified by the detector".
 
 - Branch assessed: the final branch of items 1 to 4 (`feat/ui-cc-54`, on cc-58, on cc-57), demo build, 390 × 844 at 2x, Chromium, one pass, no animation checks (the motion work is cc-57's).
-- Screens (pictures in `impeccable-audit-2026-10-19/`, made by `apps/web/tests/probes/impeccable_shots.py`): Hôm nay, the /add sheet (list, portion panel, Khay bar, Khay review), Tổng quan › Năng lượng.
+- Screens (pictures in `impeccable-audit-2026-10-19/`, made by `apps/web/tests/probes/_impeccable_shots.py`): Hôm nay, the /add sheet (list, portion panel, Khay bar, Khay review), Tổng quan › Năng lượng.
 - Style is fixed: **Cobalt Sign**, paper `#F3F1EC`, card `#FFF`, ink `#111317`, cobalt `#1238D6`, sky `#9EC3FF`, Saira Condensed and Manrope. Nothing below proposes a new look; the items are hierarchy, spacing, density and polish inside it.
 - Mode: Operate (app UI): scanability and consistency outrank expression.
 
