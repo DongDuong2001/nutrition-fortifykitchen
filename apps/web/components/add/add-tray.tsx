@@ -3,6 +3,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Sheet } from "@/components/ui/sheet";
 import { PortionArea } from "@/components/ui/portion-area";
+import { Expand } from "@/components/ui/expand";
+import { Presence, usePresence } from "@/components/ui/presence";
 import { NO_ENERGY_MESSAGE } from "@/lib/diary-edits";
 import { formatAmount } from "@/lib/format";
 import { markUsed } from "@/lib/onboarding-store";
@@ -42,7 +44,7 @@ export function TrayBar({ totals, mealName, canAdd, submitting = false, onReview
       <button
         type="button"
         onClick={onReview}
-        className="min-h-11 shrink-0 cursor-pointer rounded-full border-0 bg-transparent px-2 text-[13px] font-bold text-sky active:scale-[0.97] motion-reduce:active:scale-100"
+        className="min-h-11 shrink-0 cursor-pointer rounded-full border-0 bg-transparent px-2 text-[13px] font-bold text-sky "
       >
         Xem lại
       </button>
@@ -50,7 +52,7 @@ export function TrayBar({ totals, mealName, canAdd, submitting = false, onReview
         type="button"
         onClick={onAdd}
         disabled={!canAdd || submitting}
-        className="min-h-11 shrink-0 cursor-pointer rounded-full border-0 bg-blue px-4 text-[13px] font-bold text-on-accent active:scale-[0.97] disabled:cursor-default disabled:opacity-50 motion-reduce:active:scale-100"
+        className="min-h-11 shrink-0 cursor-pointer rounded-full border-0 bg-blue px-4 text-[13px] font-bold text-on-accent disabled:cursor-default disabled:opacity-50 "
       >
         Thêm vào {mealName}
       </button>
@@ -71,31 +73,44 @@ function rowHint(item: TrayItem): string | null {
   return converted ? `${portionHint(p)}, ${converted}` : portionHint(p);
 }
 
-/**
- * One food of the tray (Tray.dc.html): a bordered card whose header opens its editor (one at a time), and a × apart
- * from it. The editor is the portion sheet's own area, compact: Sống | Chín or the egg sizes, grams + 100 g, ×N, Xong.
- */
-function TrayRow({
-  item,
-  open,
-  first,
-  onToggle,
-  onRemove,
-  onChange,
-}: {
+/** How long a removed card takes to leave: Presence's exit (the .m-pop out, --m-pop-out). */
+const LEAVE_MS = 150;
+
+interface TrayRowProps {
   item: TrayItem;
   open: boolean;
   first: boolean;
   onToggle: () => void;
   onRemove: () => void;
   onChange: (patch: Partial<TrayItem>) => void;
-}) {
+}
+
+/**
+ * One food of the tray (Tray.dc.html): a bordered card whose header opens its editor (one at a time, cc-55's Expand),
+ * and a × apart from it. The × lets the card pop out (Presence) before the food leaves the tray.
+ */
+function TrayRow({ onRemove, ...props }: TrayRowProps) {
+  const [leaving, setLeaving] = useState(false);
+  // The latest onRemove, so a re-render while the card leaves does not restart its timer
+  const remove = useRef(onRemove);
+  remove.current = onRemove;
+  useEffect(() => {
+    if (!leaving) return;
+    const timer = setTimeout(() => remove.current(), LEAVE_MS);
+    return () => clearTimeout(timer);
+  }, [leaving]);
+  return <Presence exitMs={LEAVE_MS}>{!leaving && <TrayCard {...props} onRemove={() => setLeaving(true)} />}</Presence>;
+}
+
+/** The card: the editor is the portion sheet's own area, compact: Sống | Chín or the egg sizes, grams + 100 g, ×N, Xong. */
+function TrayCard({ item, open, first, onToggle, onRemove, onChange }: TrayRowProps) {
+  const state = usePresence();
   const { food } = item;
   const kcal = scaleNutrients(food.nutrients, item.grams).energy;
   const hint = rowHint(item);
   const editorId = `tray-edit-${food.id}`;
   return (
-    <li className="flex flex-col rounded-2xl border border-card-border bg-card">
+    <li data-state={state} className="m-pop flex flex-col rounded-2xl border border-card-border bg-card">
       <div className="flex items-center">
         <button
           type="button"
@@ -103,7 +118,7 @@ function TrayRow({
           aria-controls={editorId}
           data-tour={first ? "tray-row" : undefined}
           onClick={onToggle}
-          className="flex min-h-15 min-w-0 flex-1 cursor-pointer items-center justify-between gap-3 border-0 bg-transparent py-2 pr-1 pl-3 text-left text-text transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100"
+          className="m-tint flex min-h-15 min-w-0 flex-1 cursor-pointer items-center justify-between gap-3 rounded-l-2xl border-0 bg-transparent py-2 pr-1 pl-3 text-left text-text"
         >
           <span className="flex min-w-0 flex-col gap-0.5">
             <span title={food.nameVi} className="line-clamp-2 break-words text-[15px] font-bold leading-snug">
@@ -115,19 +130,8 @@ function TrayRow({
             <span className="font-display text-xl font-bold tabular-nums">
               {typeof kcal === "number" ? formatAmount(kcal, "kcal") : "—"} <span className="text-[13px] text-secondary">kcal</span>
             </span>
-            {/* cc-55's .m-chevron turns it once merged; until then the same turn with utilities */}
-            <svg
-              width="26"
-              height="26"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-              className={`m-chevron text-secondary-strong transition-transform duration-200 ease-out motion-reduce:transition-none ${open ? "rotate-180" : ""}`}
-            >
+            {/* .m-chevron turns while the button has aria-expanded="true" */}
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="m-chevron text-secondary-strong">
               <path d="M6 9l6 6 6-6" />
             </svg>
           </span>
@@ -136,47 +140,49 @@ function TrayRow({
           type="button"
           onClick={onRemove}
           aria-label={`Bỏ khỏi khay: ${food.nameVi}`}
-          className="mr-1.5 flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-secondary transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100"
+          className="mr-1.5 flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-secondary"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
             <path d="M6 6l12 12M18 6L6 18" />
           </svg>
         </button>
       </div>
-      {/* The editor opens with grid rows 0fr → 1fr (cc-55's .m-expand; cc-51's m-row-exit pattern until it lands) */}
-      <div
-        id={editorId}
-        data-state={open ? "open" : "closed"}
-        inert={!open}
-        className={`m-expand grid transition-[grid-template-rows,opacity] duration-200 ease-out motion-reduce:transition-opacity ${open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}
-      >
-        <div className="min-h-0 overflow-hidden">
-          {open && (
-            <div className="flex flex-col gap-3 px-3 pb-3">
-              <PortionArea
-                food={food}
-                gramsInput={fieldText(item.grams)}
-                setGramsInput={(v) => onChange({ grams: parseGramsInput(v) })}
-                selectedServingLabel={item.label}
-                setSelectedServingLabel={(label) => onChange({ label })}
-                onFoodChange={(next) => onChange({ food: next })}
-                variant="tray"
-              />
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-[13px] text-secondary-strong">{hint}</span>
-                <button
-                  type="button"
-                  onClick={onToggle}
-                  className="h-11 shrink-0 cursor-pointer rounded-full border-0 bg-ink px-4 text-sm font-bold text-on-dark transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100"
-                >
-                  Xong
-                </button>
-              </div>
-            </div>
-          )}
+      <Expand open={open} id={editorId} className="flex flex-col gap-3 px-3 pb-3">
+        <PortionArea
+          food={food}
+          gramsInput={fieldText(item.grams)}
+          setGramsInput={(v) => onChange({ grams: parseGramsInput(v) })}
+          selectedServingLabel={item.label}
+          setSelectedServingLabel={(label) => onChange({ label })}
+          onFoodChange={(next) => onChange({ food: next })}
+          variant="tray"
+        />
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-[13px] text-secondary-strong">{hint}</span>
+          <button type="button" onClick={onToggle} className="h-11 shrink-0 cursor-pointer rounded-full border-0 bg-ink px-4 text-sm font-bold text-on-dark">
+            Xong
+          </button>
         </div>
-      </div>
+      </Expand>
     </li>
+  );
+}
+
+/** The ↓ above the footer while cards are below: it pops in and out (Presence + .m-pop). */
+function MoreBelow({ onClick }: { onClick: () => void }) {
+  const state = usePresence();
+  return (
+    <button
+      type="button"
+      data-state={state}
+      aria-label="Còn món bên dưới, cuộn xuống"
+      onClick={onClick}
+      className="m-pop absolute inset-x-0 -top-14 mx-auto flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-card-border bg-card text-text shadow-md"
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M12 5v14M6 13l6 6 6-6" />
+      </svg>
+    </button>
   );
 }
 
@@ -298,28 +304,23 @@ function TrayReview({ items, totals, mealName, canAdd, submitting, onRemove, onC
 
       {/* The footer floats over the list; the list's bottom padding lets the last card clear it */}
       <div className="absolute inset-x-3 bottom-4 flex flex-col gap-3 rounded-[22px] bg-ink p-4 text-on-dark shadow-2xl">
-        {moreBelow && (
-          <button
-            type="button"
-            aria-label="Còn món bên dưới, cuộn xuống"
-            onClick={() => {
-              const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-              listRef.current?.scrollBy({ top: listRef.current.clientHeight * 0.7, behavior: reduce ? "auto" : "smooth" });
-            }}
-            className="absolute -top-14 left-1/2 flex h-11 w-11 -translate-x-1/2 cursor-pointer items-center justify-center rounded-full border border-card-border bg-card text-text shadow-md transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M12 5v14M6 13l6 6 6-6" />
-            </svg>
-          </button>
-        )}
+        <Presence>
+          {moreBelow && (
+            <MoreBelow
+              onClick={() => {
+                const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+                listRef.current?.scrollBy({ top: listRef.current.clientHeight * 0.7, behavior: reduce ? "auto" : "smooth" });
+              }}
+            />
+          )}
+        </Presence>
         <div className="flex items-center justify-between gap-3 px-1">
           <span className="text-sm font-semibold">Thêm vào</span>
           <button
             type="button"
             onClick={onChangeMeal}
             aria-label={`Thêm vào ${mealName}, đổi bữa`}
-            className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-full border border-on-dark/15 bg-surface-dark px-4 text-sm font-bold text-on-dark transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100"
+            className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-full border border-on-dark/15 bg-surface-dark px-4 text-sm font-bold text-on-dark "
           >
             {mealName}
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -337,7 +338,7 @@ function TrayReview({ items, totals, mealName, canAdd, submitting, onRemove, onC
           type="button"
           onClick={onAdd}
           disabled={!canAdd || submitting}
-          className="flex h-14 cursor-pointer items-center justify-center gap-2 rounded-2xl border-0 bg-blue text-[17px] font-bold text-on-accent transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100 disabled:cursor-default disabled:opacity-50"
+          className="flex h-14 cursor-pointer items-center justify-center gap-2 rounded-2xl border-0 bg-blue text-[17px] font-bold text-on-accent disabled:cursor-default disabled:opacity-50"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
             <path d="M12 5v14M5 12h14" />

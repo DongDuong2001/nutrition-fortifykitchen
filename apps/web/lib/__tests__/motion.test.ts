@@ -96,8 +96,6 @@ describe("motion classes", () => {
   });
 
   it("no inline style or class in the app animates width, height, top or left, or transitions all", () => {
-    // cc-53b rewrites these files; their transition-all goes with that rewrite
-    const LATER = ["portion-panel.tsx", "portion-area.tsx", "quantity-stepper.tsx", "entry-editor.tsx", "add-tray.tsx"];
     const files = (dir: string): string[] =>
       readdirSync(dir).flatMap((n) => {
         const f = path.join(dir, n);
@@ -109,7 +107,7 @@ describe("motion classes", () => {
       /transition-\[(width|height|top|left)|transition(Property)?:\s*["']?(width|height|top|left)\b|transition-(width|height)\b/.test(readFileSync(f, "utf8"))
     );
     expect(layout.map((f) => path.relative(ROOT, f))).toEqual([]);
-    const transitionAll = all.filter((f) => !LATER.includes(path.basename(f)) && /transition-all|transition:\s*all/.test(readFileSync(f, "utf8")));
+    const transitionAll = all.filter((f) => /transition-all|transition:\s*all/.test(readFileSync(f, "utf8")));
     expect(transitionAll.map((f) => path.relative(ROOT, f))).toEqual([]);
   });
 });

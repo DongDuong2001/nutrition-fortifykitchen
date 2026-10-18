@@ -6,7 +6,7 @@ import { setPresent } from "@/lib/tour-bus";
 
 /** The round 44 px − / + of every stepper (units, ×N, how many eggs). */
 const stepButton = (colors: string) =>
-  `flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 font-bold transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100 disabled:cursor-default disabled:opacity-40 ${colors}`;
+ `flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 font-bold disabled:cursor-default disabled:opacity-40 ${colors}`;
 
 export interface QuantityStepperProps {
   servings: ReadonlyArray<{ label: string; grams: number }>;

@@ -200,14 +200,14 @@ export function EntryEditor({ view }: { view: EntryView }) {
               type="button"
               onClick={handleSave}
               disabled={!canSave}
-              className="flex min-h-[52px] w-full cursor-pointer items-center justify-center rounded-full border-0 bg-blue text-base font-bold text-on-accent transition-transform active:scale-[0.98] disabled:opacity-50"
+              className="flex min-h-[52px] w-full cursor-pointer items-center justify-center rounded-full border-0 bg-blue text-base font-bold text-on-accent disabled:opacity-50"
             >
               Lưu thay đổi
             </button>
             <button
               type="button"
               onClick={handleDelete}
-              className="flex min-h-[48px] w-full cursor-pointer items-center justify-center gap-2 rounded-xl border-0 bg-transparent text-[15px] font-bold text-red transition-transform active:scale-[0.98]"
+              className="flex min-h-[48px] w-full cursor-pointer items-center justify-center gap-2 rounded-xl border-0 bg-transparent text-[15px] font-bold text-red "
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" />

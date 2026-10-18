@@ -178,7 +178,7 @@ export function PortionPanel({
             type="button"
             onClick={onAddAndContinue}
             disabled={cannotAdd}
-            className="flex h-14 flex-1 cursor-pointer items-center justify-center rounded-2xl border border-card-border bg-card text-[15px] font-bold text-text transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100 disabled:opacity-50"
+            className="flex h-14 flex-1 cursor-pointer items-center justify-center rounded-2xl border border-card-border bg-card text-[15px] font-bold text-text disabled:opacity-50"
           >
             Lưu &amp; chọn tiếp
           </button>
@@ -188,7 +188,7 @@ export function PortionPanel({
           onClick={onAdd}
           data-tour="portion-add"
           disabled={cannotAdd}
-          className={`${onAddAndContinue ? "flex-1" : "w-full"} flex h-14 cursor-pointer items-center justify-center rounded-2xl border-0 bg-blue text-[17px] font-bold text-on-accent transition-transform duration-150 hover:bg-blue/90 active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100 disabled:opacity-50`}
+          className={`${onAddAndContinue ? "flex-1" : "w-full"} flex h-14 cursor-pointer items-center justify-center rounded-2xl border-0 bg-blue text-[17px] font-bold text-on-accent   hover:bg-blue/90    disabled:opacity-50`}
         >
           {`Thêm vào ${mealSlot ? mealNameVi : "—"}`}
         </button>

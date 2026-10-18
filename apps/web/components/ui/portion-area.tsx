@@ -124,7 +124,7 @@ function GramPortionArea({
   const align = { "data-align-group": alignGroup, "data-align-edge": "left" } as const;
 
   const segment = (on: boolean) =>
-    `${panel ? "h-11 rounded-[10px] text-[15px]" : "h-11 rounded-[9px] text-sm"} cursor-pointer border-0 transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100 disabled:opacity-50 ${
+    `${panel ? "h-11 rounded-[10px] text-[15px]" : "h-11 rounded-[9px] text-sm"} cursor-pointer border-0      disabled:opacity-50 ${
       on ? "bg-ink font-bold text-on-dark" : "bg-transparent font-semibold text-text"
     }`;
   const track = `grid grid-cols-2 gap-1 bg-divider p-1 ${panel ? "rounded-[14px]" : "rounded-xl"}`;
@@ -207,7 +207,7 @@ function GramPortionArea({
                         markUsed("egg-mode");
                         emit({ ...p, size: z.size });
                       }}
-                      className={`flex cursor-pointer flex-col justify-center rounded-xl bg-card text-text transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100 disabled:opacity-50 ${
+                      className={`flex cursor-pointer flex-col justify-center rounded-xl bg-card text-text      disabled:opacity-50 ${
                         panel ? "min-h-[52px] items-start px-3 py-1.5 text-left" : "h-11 items-center px-1 text-[13px]"
                       } ${on ? `border-2 border-blue ${panel ? "" : "bg-cobalt-tint font-bold text-blue"}` : "border border-card-border"}`}
                     >
@@ -234,7 +234,7 @@ function GramPortionArea({
               onClick={() => {
                 if (!part.active) onFoodChange?.(part.food);
               }}
-              className={`min-h-11 cursor-pointer rounded-full px-2 text-[13px] transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100 disabled:opacity-50 ${
+              className={`min-h-11 cursor-pointer rounded-full px-2 text-[13px]      disabled:opacity-50 ${
                 part.active ? "border-0 bg-ink font-bold text-on-dark" : "border border-card-border bg-card font-semibold text-text"
               }`}
             >
@@ -282,7 +282,7 @@ function GramPortionArea({
                 setText("100");
                 emit(withBase(p, 100));
               }}
-              className={`shrink-0 cursor-pointer whitespace-nowrap rounded-[14px] transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100 disabled:opacity-50 ${
+              className={`shrink-0 cursor-pointer whitespace-nowrap rounded-[14px]      disabled:opacity-50 ${
                 panel ? "w-23 text-base" : "h-12 rounded-xl px-3 text-sm"
               } ${p.base === 100 ? "border-2 border-blue bg-cobalt-tint font-bold text-blue" : "border border-card-border bg-card font-semibold text-text"}`}
             >
@@ -464,7 +464,7 @@ function UnitPortionArea({
                 aria-selected={isActive}
                 disabled={disabled}
                 onClick={() => handleTabChange(tab.id)}
-                className={`min-h-[44px] rounded-xl text-sm font-bold flex items-center justify-center transition-all cursor-pointer active:scale-[0.97] motion-reduce:active:scale-100 disabled:opacity-50 ${
+                className={`min-h-[44px] rounded-xl text-sm font-bold flex items-center justify-center transition-press cursor-pointer   disabled:opacity-50 ${
                   isActive
                     ? isDark
                       ? "bg-surface text-text shadow-xs"
@@ -524,7 +524,7 @@ function UnitPortionArea({
                       setGramsInput(String(newGrams));
                       setSelectedServingLabel(newLabel);
                     }}
-                    className={`min-h-[44px] rounded-full text-xs px-2 flex items-center justify-center text-center transition-all cursor-pointer font-semibold border active:scale-[0.97] motion-reduce:active:scale-100 disabled:opacity-50 ${
+                    className={`min-h-[44px] rounded-full text-xs px-2 flex items-center justify-center text-center transition-press cursor-pointer font-semibold border   disabled:opacity-50 ${
                       isActive
                         ? isDark
                           ? "bg-surface text-text font-bold shadow-xs border-transparent"
