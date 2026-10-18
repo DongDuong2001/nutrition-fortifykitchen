@@ -7,6 +7,7 @@ import { SAMPLE_DAY, type MockDayData, type MockFoodItem } from "./mock/sample-d
 import { type FoodItem } from "./mock/foods";
 import { type MealSlot, getMealSlotNameVi } from "./meal-slot";
 import { formatAmount } from "./format";
+import { portionAmountText } from "./portion";
 import { sumKcal } from "./kcal";
 import { getTodayIsoVN, withRuntimeDate } from "./date";
 import { DAY_ARCHIVE_KEY, mergeArchive, msUntilNextDay, parseArchive, splitByDay, type DayArchive } from "./day-archive";
@@ -994,18 +995,20 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       haptic("saved");
 
       const mealNameVi = getMealSlotNameVi(mealSlot);
+      // cc-53b: the amount set ("150 g", "3 quả"), not the label's state words
+      const amount = portionAmountText(qty) ?? qty;
       setEdits((prev) => dismissUndoIn(prev));
       setToast(
         options?.undoable
           ? {
-              message: `Đã thêm ${food.nameVi} ${qty} vào ${mealNameVi}`,
+              message: `Đã thêm ${food.nameVi} ${amount} vào ${mealNameVi}`,
               kind: "undoable",
               mealSlot,
               durationMs: UNDO_TOAST_MS,
               undoIds: [newEntry.id],
             }
           : {
-              message: `Đã thêm ${food.nameVi} ${qty} vào ${mealNameVi}`,
+              message: `Đã thêm ${food.nameVi} ${amount} vào ${mealNameVi}`,
               kind: "added",
               mealSlot,
               durationMs: ADDED_TOAST_MS,

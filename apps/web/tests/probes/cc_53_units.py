@@ -1,14 +1,19 @@
-"""cc-53: food unit portions and switching between units and grams.
+"""cc-53 / cc-53b: food portions by the coach's model (design/portion-mockup), at 390x844.
 
-Tests at 390x844:
-1. Chuối opens on Trái -> Vừa x2 -> Hôm nay "2 trái vừa"
-2. Cơm opens on Gam -> 180 -> Chén shows nearest size
-3. Mì ý (khô) on Gam -> 80 g (no toggle)
-4. Trứng gà -> Gam -> Lòng trắng (switches food to Lòng trắng trứng gà)
-5. Bún đậu x1,5 phần -> "1,5 phần"
-6. CanPrev x2 viên -> no grams displayed
-7. Red Bull (Lon | Gam) and Dầu ăn (Muỗng | Gam)
-Run with: ALIGN_BASE_URL=http://localhost:3100 npm run probe -- tests/probes/cc_53_units.py
+1. Chuối (a normal food): no unit tabs; gram field + one 100 g chip; ×N multiplies the amount set (100 × 3 = 300,
+   then typing 200 keeps N: 600 g); Hôm nay shows 600 g with "200 g × 3".
+2. Cơm trắng (chín) in the /add sheet: Sống | Chín on Đã nấu chín, ×3 = 300 g; Hôm nay "Đã nấu chín · 100 g × 3".
+3. Ức gà (the demo row is roasted): opens on Đã nấu chín; weighed raw it converts. Thịt bò nạc (raw data) weighed
+   cooked: 150 g logs 214 g of the raw row; Hôm nay shows 150 g and "Đã nấu chín · bằng 214 g lúc sống"; the entry
+   editor opens on the same state.
+4. Trứng gà: Quả | Gam, four box sizes, Lớn × 3 = "3 quả lớn"; Hôm nay "3 quả" with "Cỡ lớn"; Gam has the part chips
+   and Lòng trắng switches the food.
+5. Exceptions keep their unit: Bún đậu ×1,5 phần, CanPrev in viên (no gram field, 0 kcal), Red Bull in lon. Dầu ăn
+   (not an exception) goes by grams.
+6. The tray with 4 foods: accordion cards (first open, one at a time), a named × per card, a dark footer with Tổng
+   cộng and one add, the ↓ while more is below; stepping a row changes it; Thêm 4 món adds with one toast and one
+   Hoàn tác.
+Run with: ALIGN_BASE_URL=http://localhost:3107 npm run probe -- tests/probes/cc_53_units.py
 """
 import os
 import re
@@ -30,187 +35,222 @@ def check(cond, msg):
         problems.append(msg)
 
 
-def go(pg, route, wait=600):
+def go(pg, route, wait=700):
     pg.goto(BASE + route, wait_until="networkidle")
     pg.wait_for_timeout(wait)
+
+
+def shot(pg, name):
+    pg.screenshot(path=str(SHOTS / f"cc-53b-{name}.png"))
+
+
+def pick(pg, query):
+    """Open /add for lunch, search, and open the first result's portion sheet."""
+    go(pg, "/add?meal=lunch")
+    field = pg.locator('input[type="search"]:visible, input[placeholder*="Tìm món"]:visible').first
+    field.fill(query)
+    pg.wait_for_timeout(400)
+    pg.locator("button[data-food-row]:visible").first.click()
+    pg.wait_for_timeout(600)
+    return pg.locator('[role="dialog"][aria-labelledby="portion-sheet-title"]')
+
+
+def row(pg, name):
+    """The newest row of a food (the demo day has its own Chuối and Thịt bò nạc)."""
+    return pg.locator("[data-entry-id]:visible").filter(has_text=name).last
+
+
+def pressed(scope, name):
+    b = scope.get_by_role("button", name=name, exact=True)
+    return b.count() >= 1 and b.first.get_attribute("aria-pressed") == "true"
+
+
+def add_from_sheet(pg, s):
+    s.get_by_role("button", name="Thêm vào Bữa trưa").click()
+    pg.wait_for_url(BASE + "/app")
+    pg.wait_for_timeout(800)
+
+
+def portions(pg):
+    print("\n--- 1. Chuối: grams, 100 g, ×N ---")
+    go(pg, "/foods/food-chuoi", 900)
+    check(pg.locator('[data-tour="unit-toggle"]').count() == 0, "Chuối: no unit tabs (fruit goes by grams)")
+    grams = pg.get_by_label("Số gam")
+    check(grams.input_value() == "100", f"Chuối: opens at 100 g ({grams.input_value()})")
+    check(pressed(pg, "100 g"), "Chuối: the 100 g chip is on")
+    plus = pg.get_by_role("button", name="Tăng nhân khẩu phần nhanh")
+    plus.click()
+    plus.click()
+    pg.wait_for_timeout(200)
+    check("100 g × 3 = 300 g" in pg.locator("main").inner_text(), "chip 100 × 3 = 300 g")
+    grams.fill("200")
+    pg.wait_for_timeout(200)
+    body = pg.locator("main").inner_text()
+    check("200 g × 3 = 600 g" in body, "typed 200 keeps ×3: 600 g")
+    pg.locator('[data-tour="food-add-cta"]').first.click()
+    pg.wait_for_timeout(900)
+    go(pg, "/app", 900)
+    r = row(pg, "Chuối")
+    check("600 g" in r.inner_text() and "200 g × 3" in r.inner_text(), f"Hôm nay: Chuối 600 g, 200 g × 3 ({r.inner_text()!r})")
+
+    print("\n--- 2. Cơm trắng: Đã nấu chín × 3 in the /add sheet ---")
+    s = pick(pg, "cơm trắng")
+    check(s.is_visible(), "the portion sheet opens (white, over the list)")
+    check(s.get_by_role("group", name="Sống hoặc chín").count() == 1, "rice: Sống | Chín")
+    check(pressed(s, "Đã nấu chín"), "rice: opens on Đã nấu chín (cooked row)")
+    plus = s.get_by_role("button", name="Tăng nhân khẩu phần nhanh")
+    plus.click()
+    plus.click()
+    pg.wait_for_timeout(200)
+    text = s.inner_text()
+    check("100 g × 3 = 300 g" in text and "300 g đã nấu chín" in text, "rice: ×3 = 300 g đã nấu chín")
+    check("120 g trước khi nấu" in text, "rice: the note says what 300 g cooked was dry")
+    shot(pg, "rice-cooked-x3-390")
+    add_from_sheet(pg, s)
+    r = row(pg, "Cơm trắng")
+    check("300 g" in r.inner_text() and "Đã nấu chín · 100 g × 3" in r.inner_text(), f"Hôm nay: Cơm 300 g, Đã nấu chín · 100 g × 3 ({r.inner_text()!r})")
+
+    print("\n--- 3. Chicken and beef: raw or cooked ---")
+    s = pick(pg, "ức gà")
+    check(pressed(s, "Đã nấu chín"), "chicken (roasted row): opens on Đã nấu chín")
+    s.get_by_label("Số gam").fill("150")
+    pg.wait_for_timeout(200)
+    shot(pg, "chicken-cooked-390")
+    s.get_by_role("button", name="Cân sống", exact=True).click()
+    pg.wait_for_timeout(200)
+    check("nấu xong thành khoảng 105 g" in s.inner_text(), "chicken weighed raw: 150 g raw is about 105 g of the cooked row")
+    pg.keyboard.press("Escape")
+    pg.wait_for_timeout(400)
+
+    s = pick(pg, "thịt bò")
+    check(pressed(s, "Cân sống"), "beef (raw row): opens on Cân sống")
+    s.get_by_role("button", name="Đã nấu chín", exact=True).click()
+    s.get_by_label("Số gam").fill("150")
+    pg.wait_for_timeout(200)
+    check("150 g chín bằng khoảng 214 g sống" in s.inner_text(), "beef 150 g cooked = about 214 g raw")
+    shot(pg, "beef-cooked-390")
+    add_from_sheet(pg, s)
+    r = row(pg, "Thịt bò")
+    check("150 g" in r.inner_text() and "Đã nấu chín · bằng 214 g lúc sống" in r.inner_text(), f"Hôm nay: beef 150 g, bằng 214 g lúc sống ({r.inner_text()!r})")
+    entry = r.get_attribute("data-entry-id")
+    go(pg, f"/entry/{entry}", 900)
+    check(pressed(pg, "Đã nấu chín") and pg.get_by_label("Số gam").input_value() == "150", "edit: reopens on Đã nấu chín, 150")
+    shot(pg, "beef-edit-390")
+
+    print("\n--- 4. Eggs by the piece ---")
+    s = pick(pg, "trứng gà")
+    check(pressed(s, "Quả"), "egg: opens on Quả")
+    sizes = s.get_by_role("group", name="Cỡ trứng").get_by_role("button")
+    check(sizes.count() == 4, f"egg: four box sizes ({sizes.count()})")
+    check("55–60 g" in s.inner_text(), "egg: sizes show the box range")
+    sizes.nth(2).click()
+    plus = s.get_by_role("button", name="Tăng mấy quả?")
+    plus.click()
+    plus.click()
+    pg.wait_for_timeout(200)
+    text = s.inner_text()
+    check("3 quả lớn" in text and "app tự trừ vỏ" in text, "egg: Lớn × 3 = 3 quả lớn, the shell note")
+    check(re.search(r"216\s+kcal", text) is not None, f"egg: 3 × 50,6 g × 142 kcal = 216 kcal")
+    shot(pg, "eggs-3-large-390")
+    add_from_sheet(pg, s)
+    r = row(pg, "Trứng gà")
+    check("3 quả" in r.inner_text() and "Cỡ lớn" in r.inner_text(), f"Hôm nay: egg 3 quả, Cỡ lớn ({r.inner_text()!r})")
+    shot(pg, "today-rows-390")
+
+    s = pick(pg, "trứng gà")
+    s.get_by_role("button", name="Gam", exact=True).click()
+    pg.wait_for_timeout(200)
+    parts = s.get_by_role("group", name="Phần trứng")
+    check(parts.count() == 1 and s.get_by_label("Số gam").count() == 1, "egg Gam: the gram field and Cả quả | Lòng trắng | Lòng đỏ")
+    parts.get_by_role("button", name="Lòng trắng").click()
+    pg.wait_for_timeout(300)
+    check("lòng trắng trứng gà" in s.inner_text().lower(), "egg Gam: Lòng trắng switches the food")
+    pg.keyboard.press("Escape")
+    pg.wait_for_timeout(300)
+
+
+def exceptions(pg):
+    print("\n--- 5. Exceptions keep their unit ---")
+    go(pg, "/foods/food-bun-dau", 800)
+    toggle = pg.locator('[data-tour="unit-toggle"]')
+    check(toggle.count() == 1 and "Phần" in toggle.locator('[role="tab"]').first.inner_text(), "Bún đậu: Phần | Gam")
+    amount = pg.locator('[data-tour="unit-amount"]')
+    amount.fill("1,5")
+    amount.dispatch_event("blur")
+    pg.wait_for_timeout(300)
+    check(re.search(r"761\s+kcal", pg.locator("main").inner_text()) is not None, "Bún đậu ×1,5 phần: 761 kcal")
+    check(pg.get_by_role("button", name="Tăng nhân khẩu phần nhanh").count() == 0, "Bún đậu: no ×N gram row")
+
+    go(pg, "/foods/11111111-2222-4333-8444-555555555555", 800)
+    check(pg.get_by_label("Số gam").count() == 0, "CanPrev: no gram field")
+    amount = pg.locator('[data-tour="unit-amount"]')
+    amount.fill("2")
+    amount.dispatch_event("blur")
+    pg.wait_for_timeout(300)
+    text = pg.locator("main").inner_text()
+    check("2 viên" in text and "0 kcal" in text, "CanPrev: 2 viên, 0 kcal")
+
+    go(pg, "/foods/food-red-bull", 700)
+    toggle = pg.locator('[data-tour="unit-toggle"]')
+    check(toggle.count() == 1 and "Lon" in toggle.inner_text(), "Red Bull: Lon | Gam")
+    go(pg, "/foods/food-dau-an", 700)
+    check(pg.locator('[data-tour="unit-toggle"]').count() == 0 and pg.get_by_label("Số gam").count() == 1, "Dầu ăn: grams (not an exception)")
+
+
+def tray(pg):
+    print("\n--- 6. The tray, 4 foods ---")
+    go(pg, "/add?meal=lunch")
+    toggles = pg.locator("[data-tray-toggle]:visible")
+    for i in range(4):
+        toggles.nth(i).click()
+        pg.wait_for_timeout(120)
+    pg.get_by_role("button", name="Xem lại").click()
+    pg.wait_for_timeout(500)
+    review = pg.locator("[data-tray-review]")
+    cards = review.locator("li")
+    check(cards.count() == 4, f"tray: four cards ({cards.count()})")
+    check(review.locator("button[aria-expanded='true']").count() == 1, "tray: the first card is open")
+    check(review.get_by_role("button", name=re.compile("^Bỏ khỏi khay: ")).count() == 4, "tray: a named × per card")
+    check(review.get_by_text("Tổng cộng").count() == 1 and pg.get_by_role("button", name="Thêm 4 món vào Bữa trưa").count() == 1, "tray: footer with Tổng cộng and Thêm 4 món")
+    down = pg.get_by_role("button", name="Còn món bên dưới, cuộn xuống")
+    check(down.count() == 1, "tray: the ↓ while cards are below")
+    shot(pg, "tray-4-items-390")
+    cards.nth(1).locator("button[aria-expanded]").click()
+    pg.wait_for_timeout(350)
+    check(cards.nth(1).locator("button[aria-expanded='true']").count() == 1 and review.locator("button[aria-expanded='true']").count() == 1, "tray: one row open at a time")
+    head = cards.nth(1).locator("button[aria-expanded]")
+    before = head.inner_text()
+    cards.nth(1).get_by_role("button", name=re.compile("^Tăng ")).first.click()
+    pg.wait_for_timeout(200)
+    check(head.inner_text() != before, f"tray: stepping a row changes its portion and kcal ({before!r} → {head.inner_text()!r})")
+    shot(pg, "tray-edit-390")
+    if down.count():
+        down.click()
+        pg.wait_for_timeout(600)
+    check(down.count() == 0, "tray: the ↓ hides at the end of the list")
+    pg.get_by_role("button", name="Thêm 4 món vào Bữa trưa").click()
+    pg.wait_for_url(BASE + "/app")
+    pg.wait_for_timeout(700)
+    toast = pg.get_by_role("status").filter(has_text="Đã thêm").first
+    check(toast.is_visible() and "Đã thêm 4 món vào Bữa trưa" in toast.inner_text(), "tray: one toast for 4 foods")
+    n_before = pg.locator("[data-entry-id]:visible").count()
+    toast.get_by_role("button", name="Hoàn tác").click()
+    pg.wait_for_timeout(700)
+    n_after = pg.locator("[data-entry-id]:visible").count()
+    check(n_before - n_after == 4, f"tray: one Hoàn tác takes all 4 back ({n_before} → {n_after})")
 
 
 def run_probe():
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        ctx = browser.new_context(viewport=PHONE)
-        # Clear settings/diary to start clean
-        pg = ctx.new_page()
-
-        # 1. Chuối: opens on Trái -> Vừa x2 -> Hôm nay "2 trái vừa"
-        print("\n--- 1. Chuối (Trái -> Vừa x2 -> Hôm nay 2 trái vừa) ---")
-        go(pg, "/foods/food-chuoi", 800)
-        toggle = pg.locator('[data-tour="unit-toggle"]')
-        check(toggle.count() == 1, "Chuối has unit toggle")
-        tabs = toggle.locator('[role="tab"]')
-        check(tabs.count() == 2, "Chuối toggle has 2 tabs")
-        first_tab = tabs.first
-        check("Trái" in first_tab.inner_text() and first_tab.get_attribute("aria-selected") == "true", "Chuối opens on Trái tab")
-
-        # Size chips: Vừa, Nhỏ, Lớn
-        size_chips = pg.locator('[data-tour="unit-size"]')
-        check(size_chips.count() == 3, f"Chuối has 3 size chips (found {size_chips.count()})")
-        chip_texts = [size_chips.nth(i).inner_text().strip() for i in range(size_chips.count())]
-        check("Vừa" in chip_texts and "Nhỏ" in chip_texts and "Lớn" in chip_texts, f"Size words only: {chip_texts}")
-        check(all("g" not in t.lower() for t in chip_texts), f"No gram numbers in size chips: {chip_texts}")
-
-        # Active chip is Vừa
-        vua_chip = size_chips.filter(has_text="Vừa").first
-        check(vua_chip.get_attribute("aria-pressed") == "true", "Vừa is active size chip")
-
-        # Stepper: change amount to 2
-        amount_input = pg.locator('[data-tour="unit-amount"]')
-        check(amount_input.count() == 1, "Typed amount input exists")
-        check(amount_input.input_value() == "1", "Initial amount is 1")
-
-        # Click plus button to reach 2
-        plus_btn = pg.locator('button[aria-label="Tăng số lượng"]')
-        plus_btn.click()
-        pg.wait_for_timeout(200)
-        plus_btn.click()
-        pg.wait_for_timeout(200)
-        # 1 -> 1.5 -> 2
-        check(amount_input.input_value() == "2", f"Amount after two clicks is 2 (got {amount_input.input_value()})")
-
-        # Check kcal calculation: 2 * 118g * 89 / 100 = ~210 kcal
-        macro_text = pg.locator("main").inner_text()
-        check(re.search(r"210\s+kcal", macro_text) is not None, "Calculates kcal for 2 trái vừa: 210 kcal")
-
-        # Add food to breakfast
-        add_btn = pg.locator('[data-tour="food-add-cta"]')
-        check(add_btn.count() >= 1, "Thêm button found")
-        add_btn.click()
-        pg.wait_for_timeout(1000)
-
-        # Check Hôm nay (/app) shows "2 trái vừa"
-        go(pg, "/app", 1000)
-        app_text = pg.locator("body").inner_text()
-        check("2 trái vừa" in app_text, f"Hôm nay row shows '2 trái vừa'")
-        pg.screenshot(path=str(SHOTS / "cc-53-chuoi-390.png"))
-
-        # 2. Cơm trắng (chín): opens on Gam -> 180 -> Chén shows nearest size
-        print("\n--- 2. Cơm trắng (Gam -> 180 -> Chén shows nearest size) ---")
-        go(pg, "/foods/food-com-trang", 800)
-        toggle = pg.locator('[data-tour="unit-toggle"]')
-        check(toggle.count() == 1, "Cơm has unit toggle")
-        tabs = toggle.locator('[role="tab"]')
-        gam_tab = tabs.first
-        check("Gam" in gam_tab.inner_text() and gam_tab.get_attribute("aria-selected") == "true", "Cơm opens on Gam tab")
-
-        # Type 180 into gram input
-        gram_input = pg.locator("#portion-grams-input")
-        check(gram_input.count() == 1, "Gram input exists on Gam tab")
-        gram_input.fill("180")
-        pg.wait_for_timeout(300)
-
-        # Switch to Chén tab
-        chen_tab = tabs.filter(has_text="Chén").first
-        chen_tab.click()
-        pg.wait_for_timeout(400)
-
-        # Check nearest size chosen: 180g is 1 chén đầy
-        active_chip = pg.locator('[data-tour="unit-size"][aria-pressed="true"]')
-        check(active_chip.count() == 1 and "Đầy" in active_chip.inner_text(), f"Nearest size selected is 'Đầy' ({active_chip.inner_text()})")
-        amount_val = pg.locator('[data-tour="unit-amount"]').input_value()
-        check(amount_val == "1", f"Amount for 180g chén đầy is 1 (got {amount_val})")
-        pg.screenshot(path=str(SHOTS / "cc-53-com-390.png"))
-
-        # 3. Mì ý (khô): on Gam -> 80 g (no toggle)
-        print("\n--- 3. Mì ý khô (No toggle, 80 g) ---")
-        go(pg, "/foods/food-mi-y-kho", 800)
-        toggle = pg.locator('[data-tour="unit-toggle"]')
-        check(toggle.count() == 0, "Mì ý has no unit toggle (all portions in grams)")
-        gram_chips = pg.locator("button:has-text('80 g')")
-        check(gram_chips.count() >= 1, "80 g chip present")
-        gram_chips.first.click()
-        pg.wait_for_timeout(200)
-        macro_text = pg.locator("main").inner_text()
-        # 80g * 371 / 100 = 297 kcal
-        check(re.search(r"297\s+kcal", macro_text) is not None, "Calculates kcal for 80 g: 297 kcal")
-        pg.screenshot(path=str(SHOTS / "cc-53-mi-y-390.png"))
-
-        # 4. Trứng gà -> Gam -> Lòng trắng
-        print("\n--- 4. Trứng gà (Gam -> Lòng trắng part chip) ---")
-        go(pg, "/foods/food-trung-ga", 800)
-        toggle = pg.locator('[data-tour="unit-toggle"]')
-        check(toggle.count() == 1, "Trứng gà has unit toggle")
-        # Check egg size chip shows hint (50–55 g)
-        size_chip = pg.locator('[data-tour="unit-size"]').first
-        check("50–55 g" in size_chip.inner_text(), f"Egg size chip shows hint: {size_chip.inner_text()}")
-
-        # Switch to Gam tab
-        gam_tab = toggle.locator('[role="tab"]:has-text("Gam")').first
-        gam_tab.click()
-        pg.wait_for_timeout(300)
-
-        # Check chicken egg part chips: Cả quả | Lòng trắng | Lòng đỏ
-        part_group = pg.locator('[role="group"][aria-label="Phần trứng"]')
-        check(part_group.count() == 1, "Phần trứng group present on Gam tab")
-        white_chip = part_group.locator('button:has-text("Lòng trắng")')
-        check(white_chip.count() == 1, "Lòng trắng chip found")
-        white_chip.click()
-        pg.wait_for_url(re.compile(r".*/foods/food-long-trang-trung-ga.*"), timeout=5000)
-        pg.wait_for_timeout(500)
-
-        # Food should switch to Lòng trắng trứng gà
-        body_text = pg.locator("body").inner_text()
-        check("lòng trắng trứng gà" in body_text.lower(), "Food switched to Lòng trắng trứng gà")
-        pg.screenshot(path=str(SHOTS / "cc-53-trung-white-390.png"))
-
-        # 5. Bún đậu x1,5 phần
-        print("\n--- 5. Bún đậu (x1,5 phần) ---")
-        go(pg, "/foods/food-bun-dau", 800)
-        toggle = pg.locator('[data-tour="unit-toggle"]')
-        check(toggle.count() == 1, "Bún đậu has unit toggle")
-        first_tab = toggle.locator('[role="tab"]').first
-        check("Phần" in first_tab.inner_text() and first_tab.get_attribute("aria-selected") == "true", "Bún đậu opens on Phần tab")
-
-        # Set amount to 1.5
-        amount_input = pg.locator('[data-tour="unit-amount"]')
-        amount_input.fill("1,5")
-        amount_input.dispatch_event("blur")
-        pg.wait_for_timeout(300)
-
-        # 1.5 * 350g = 525g, 1.5 * 350 * 145 / 100 = 761 kcal
-        macro_text = pg.locator("main").inner_text()
-        check(re.search(r"761\s+kcal", macro_text) is not None, "Calculates kcal for 1,5 phần: 761 kcal")
-        pg.screenshot(path=str(SHOTS / "cc-53-bun-dau-390.png"))
-
-        # 6. CanPrev x2 viên, no grams
-        print("\n--- 6. CanPrev (Unit tab only, x2 viên, no grams) ---")
-        go(pg, "/foods/11111111-2222-4333-8444-555555555555", 800)
-        toggle = pg.locator('[data-tour="unit-toggle"]')
-        check(toggle.count() == 0, "CanPrev has NO toggle (unit tab only)")
-        check(pg.locator("#portion-grams-input").count() == 0, "No gram field displayed for CanPrev")
-
-        # Stepper exists with 0.5 steps
-        amount_input = pg.locator('[data-tour="unit-amount"]')
-        check(amount_input.count() == 1, "Stepper input present")
-        amount_input.fill("2")
-        amount_input.dispatch_event("blur")
-        pg.wait_for_timeout(300)
-
-        main_text = pg.locator("main").inner_text()
-        check("2 viên" in main_text, "Shows 2 viên")
-        check("0 kcal" in main_text, "0 kcal behaviour maintained")
-        pg.screenshot(path=str(SHOTS / "cc-53-canprev-390.png"))
-
-        # 7. Red Bull and Dầu ăn
-        print("\n--- 7. Red Bull (Lon) and Dầu ăn (Muỗng) ---")
-        go(pg, "/foods/food-red-bull", 600)
-        toggle = pg.locator('[data-tour="unit-toggle"]')
-        check(toggle.count() == 1 and "Lon" in toggle.inner_text(), "Red Bull toggle has Lon")
-
-        go(pg, "/foods/food-dau-an", 600)
-        toggle = pg.locator('[data-tour="unit-toggle"]')
-        check(toggle.count() == 1 and "Muỗng" in toggle.inner_text(), "Dầu ăn toggle has Muỗng")
-
-        ctx.close()
+        for part in (portions, exceptions, tray):
+            ctx = browser.new_context(viewport=PHONE)
+            pg = ctx.new_page()
+            try:
+                part(pg)
+            except Exception as e:  # a step that throws is one failure, and the next part still runs
+                check(False, f"{part.__name__}: {type(e).__name__}: {str(e).splitlines()[0][:160]}")
+            ctx.close()
         browser.close()
 
 
@@ -222,6 +262,5 @@ if __name__ == "__main__":
         for prob in problems:
             print(f"  - {prob}")
         sys.exit(1)
-    else:
-        print("ALL CHECKS PASSED")
-        sys.exit(0)
+    print("ALL CHECKS PASSED")
+    sys.exit(0)

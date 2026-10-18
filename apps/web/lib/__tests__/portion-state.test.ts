@@ -177,6 +177,8 @@ describe("portionModeOf (coach rule 5: exceptions keep their unit)", () => {
     expect(portionModeOf(dish)).toBe("units");
     expect(portionModeOf(redBull)).toBe("units");
     expect(portionModeOf(recipe)).toBe("units");
+    // A dish by the phần filed under another group (Bún đậu is in Đạm) still keeps it
+    expect(portionModeOf(food("bd", "Bún đậu", "dam", [{ label: "1 phần", grams: 350 }, { label: "100 g", grams: 100 }]))).toBe("units");
   });
 
   it("eggs go by the piece, everything else by grams", () => {

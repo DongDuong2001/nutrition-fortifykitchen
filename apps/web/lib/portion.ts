@@ -613,12 +613,13 @@ export function isEggFood(food: ModeFood): boolean {
 }
 
 /**
- * How a food's portion is set (coach rules 1, 4 and 5): "units" for supplements, món Việt, cans (Red Bull in lon) and
- * the user's own foods and recipes, which keep their unit; "egg" for eggs; "grams" for everything else.
+ * How a food's portion is set (coach rules 1, 4 and 5): "units" for supplements, món Việt and dishes by the phần, cans
+ * (Red Bull in lon) and the user's own foods and recipes, which keep their unit; "egg" for eggs; "grams" for everything else.
  */
 export function portionModeOf(food: ModeFood): "units" | "egg" | "grams" {
   if (hidesGrams(food) || food.category === "bo_sung" || food.category === "mon_viet" || food.category === "cua_toi" || food.source === "user") return "units";
-  if ((food.servings ?? []).some((s) => parseUnitServing(s.label)?.unit === "lon")) return "units";
+  // A dish by the plate ("1 phần") and a can ("1 lon") keep their unit whatever their category says
+  if ((food.servings ?? []).some((s) => ["lon", "phần"].includes(parseUnitServing(s.label)?.unit ?? ""))) return "units";
   return isEggFood(food) ? "egg" : "grams";
 }
 
