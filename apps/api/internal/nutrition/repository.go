@@ -59,9 +59,22 @@ func (r *pgxRepository) SearchFoods(ctx context.Context, filter FoodSearchFilter
 
 		var orClauses []string
 		for _, term := range searchTerms {
-			orClauses = append(orClauses, fmt.Sprintf("(name_search ILIKE '%%' || lower(unaccent($%d::text)) || '%%' OR name_search %% lower(unaccent($%d::text)))", argIdx, argIdx))
-			args = append(args, term)
-			argIdx++
+			words := strings.Fields(term)
+			if len(words) > 1 {
+				var andWords []string
+				for _, w := range words {
+					andWords = append(andWords, fmt.Sprintf("name_search ILIKE '%%' || lower(unaccent($%d::text)) || '%%'", argIdx))
+					args = append(args, w)
+					argIdx++
+				}
+				orClauses = append(orClauses, fmt.Sprintf("(name_search ILIKE '%%' || lower(unaccent($%d::text)) || '%%' OR name_search %% lower(unaccent($%d::text)) OR (%s))", argIdx, argIdx, strings.Join(andWords, " AND ")))
+				args = append(args, term)
+				argIdx++
+			} else {
+				orClauses = append(orClauses, fmt.Sprintf("(name_search ILIKE '%%' || lower(unaccent($%d::text)) || '%%' OR name_search %% lower(unaccent($%d::text)))", argIdx, argIdx))
+				args = append(args, term)
+				argIdx++
+			}
 		}
 		whereClauses = append(whereClauses, "("+strings.Join(orClauses, " OR ")+")")
 	}
