@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { HAPTIC_PATTERNS, canVibrate, firstGoalToday, haptic, hapticsWanted } from "../haptics";
+import { HAPTIC_PATTERNS, canVibrate, firstGoalToday, goal100Reached, haptic, hapticsWanted } from "../haptics";
 import { saveSettings } from "../settings";
 
 // cc-51 Part C: Android vibration (iOS has no navigator.vibrate: nothing happens there).
@@ -83,6 +83,40 @@ describe("haptic", () => {
     vi.stubGlobal("window", media({ coarse: false }));
     haptic("delete", storage);
     expect(vibrate).not.toHaveBeenCalled();
+  });
+});
+
+describe("goal100Reached (review 07:00: only after a local add)", () => {
+  const firstToday = () => {
+    const storage = memoryStorage();
+    return (key: string) => firstGoalToday(key, "2026-10-18", storage);
+  };
+
+  it("the first read of the day records what is over 100 %, no vibration", () => {
+    expect(goal100Reached(new Set(["iron"]), null, false, firstToday())).toBe(false);
+  });
+  it("a refetch (another device, the poll, pull to refresh) that brings a nutrient to 100 %: no vibration", () => {
+    expect(goal100Reached(new Set(["iron"]), new Set(), false, firstToday())).toBe(false);
+  });
+  it("a local add that brings two nutrients to 100 %: one vibration, then never again that day", () => {
+    const first = firstToday();
+    let vibrations = 0;
+    let before: Set<string> | null = null;
+    const look = (over: string[], localAdd: boolean) => {
+      if (goal100Reached(new Set(over), before, localAdd, first)) vibrations += 1;
+      before = new Set(over);
+    };
+    look([], false); // the app opens
+    look(["iron", "zinc"], true); // a local add
+    expect(vibrations).toBe(1);
+    look([], true); // deleted
+    look(["iron"], true); // added again: iron reached 100 % today already
+    expect(vibrations).toBe(1);
+  });
+  it("a nutrient a refetch brought to 100 % is reached for the day: a later add does not vibrate for it", () => {
+    const first = firstToday();
+    expect(goal100Reached(new Set(["iron"]), new Set(), false, first)).toBe(false);
+    expect(goal100Reached(new Set(["iron"]), new Set(), true, first)).toBe(false);
   });
 });
 

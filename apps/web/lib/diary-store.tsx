@@ -45,7 +45,7 @@ import { refreshServerSession } from "./server-session";
 import { markUsed } from "./onboarding-store";
 import { isLocalOnly, syncNotice } from "./sync-notice";
 import { errorText, reportClientError } from "./client-errors";
-import { firstGoalToday, haptic } from "./haptics";
+import { firstGoalToday, goal100Reached, haptic } from "./haptics";
 import { HOME_ROUTE } from "./nav";
 import { generateUuid, isUuid } from "./uuid";
 import {
@@ -513,6 +513,10 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   // The signed-in account the data below belongs to; null when nobody is signed in (then nothing is read or
   // written). Demo mode ignores it: demo has its own keys.
   const [accountId, setAccountId] = useState<string | null>(null);
+  // goal100 (lib/haptics): the vitamins and minerals over 100 % at the last look (null: not looked yet), and whether
+  // the next change of the day comes from a local add. Only a local add vibrates, never a refetch.
+  const overTarget = useRef<Set<string> | null>(null);
+  const pendingGoalCheck = useRef(false);
   const pathname = usePathname();
   // Bumped when a write or a sync answers: the outbox changed, so the Chưa lưu markers are worked out again
   const [syncVersion, setSyncVersion] = useState(0);
@@ -794,6 +798,9 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     const now = currentAccountId();
     if (now === accountId) return;
     setAccountId(now);
+    // The new account's day is a first look: what is over 100 % there does not vibrate
+    overTarget.current = null;
+    pendingGoalCheck.current = false;
     loadData(now, false, todayIso ?? getTodayIsoVN());
     // The profile is per account too: without this, account B would keep A's targets until a reload
     setProfile(loadProfile(new Date().getFullYear()));
@@ -966,6 +973,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       };
 
       setEdits((prev) => ({ ...prev, added: [...prev.added, newEntry] }));
+      pendingGoalCheck.current = true;
       haptic("saved");
 
       const mealNameVi = getMealSlotNameVi(mealSlot);
@@ -1011,6 +1019,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         addedAt,
       }));
       setEdits((prev) => dismissUndoIn({ ...prev, added: [...prev.added, ...entries] }));
+      pendingGoalCheck.current = true;
       haptic("saved");
       setToast({
         message: `Đã thêm ${entries.length} món vào ${getMealSlotNameVi(mealSlot)}`,
@@ -1170,6 +1179,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     if (copied.length === 0) return;
     const entries = withNewIds(copied);
     setEdits((prev) => dismissUndoIn({ ...prev, added: [...prev.added, ...entries] }));
+    pendingGoalCheck.current = true;
     haptic("saved");
     setToast({
       message,
@@ -1251,6 +1261,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         [...entries].reverse().reduce((list, e) => pushRecent(list, { foodId: e.foodId, servingLabel: e.displayQty }), prev)
       );
       setEdits((prev) => dismissUndoIn({ ...prev, added: [...prev.added, ...entries] }));
+      pendingGoalCheck.current = true;
       haptic("saved");
       setToast({
         message: `Đã thêm ${meal.name} · ${entries.length} món vào ${getMealSlotNameVi(slot)}${
@@ -1274,6 +1285,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       if (!result.ok) return result;
       const { entry } = result;
       setEdits((prev) => dismissUndoIn({ ...prev, added: [...prev.added, entry] }));
+      pendingGoalCheck.current = true;
       haptic("saved");
       setToast({
         message: `Đã thêm ${entry.foodName} · ${formatAmount(entry.calories, "kcal")} kcal vào ${getMealSlotNameVi(slot)}`,
@@ -1363,16 +1375,16 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     return todayIso ? withRuntimeDate(day, todayIso) : day;
   }, [edits.added, edits.sample, todayIso, profile, targets, demo]);
 
-  // A vitamin or mineral that reaches 100 % of its target today vibrates once that day (lib/haptics). The ones
-  // already over 100 % when the app opens are recorded without vibrating: nothing vibrates on a page load.
-  const overTarget = useRef<Set<string> | null>(null);
+  // A vitamin or mineral that a local add brings to 100 % of its target today vibrates once that day (lib/haptics).
+  // The ones over 100 % when the app opens, or after a refetch, are recorded without vibrating.
   useEffect(() => {
     if (!hydrated || !todayIso) return;
     const over = new Set([...compositeData.minerals, ...compositeData.vitamins].filter((n) => (n.percentage ?? 0) >= 100).map((n) => n.key));
     const before = overTarget.current;
+    const localAdd = pendingGoalCheck.current;
     overTarget.current = over;
-    const reached = [...over].filter((key) => firstGoalToday(key, todayIso) && before !== null && !before.has(key));
-    if (reached.length > 0) haptic("goal100");
+    pendingGoalCheck.current = false;
+    if (goal100Reached(over, before, localAdd, (key) => firstGoalToday(key, todayIso))) haptic("goal100");
   }, [compositeData, hydrated, todayIso]);
 
   // Memoised so a toast or highlight change does not re-render every useDiary() consumer

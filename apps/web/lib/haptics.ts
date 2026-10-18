@@ -43,6 +43,21 @@ export function haptic(kind: HapticKind, storage: KeyValueStore | null = account
   }
 }
 
+/**
+ * After today's nutrients changed: true when a vitamin or mineral is over 100 % now, was not before, and reaches it
+ * for the first time today (`firstToday` records it), and the change came from a local add. The first read (`before`
+ * null) and a refetch (entries from another device, the poll, pull to refresh) record but never vibrate.
+ */
+export function goal100Reached(
+  over: ReadonlySet<string>,
+  before: ReadonlySet<string> | null,
+  localAdd: boolean,
+  firstToday: (key: string) => boolean
+): boolean {
+  const reached = [...over].filter((key) => firstToday(key) && before !== null && !before.has(key));
+  return localAdd && reached.length > 0;
+}
+
 const GOAL_KEY = "h1t_goal100";
 
 /** True the first time `nutrient` reaches 100 % on `date` for this account (remembered), false after that. */
