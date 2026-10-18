@@ -105,15 +105,18 @@ func (s *diaryServiceImpl) GetDay(ctx context.Context, userID uuid.UUID, date st
 		return nil, err
 	}
 
-	training, err := s.repo.GetDayTraining(ctx, userID, date)
+	rawTraining, err := s.repo.GetDayTraining(ctx, userID, date)
 	if err != nil {
 		return nil, err
 	}
-	if training < 0 {
-		training, err = s.repo.GetUserDefaultTraining(ctx, userID)
-		if err != nil {
-			training = 60
-		}
+	var trainingMinutes *int
+	effectiveMinutes := 60
+	if rawTraining >= 0 {
+		m := rawTraining
+		trainingMinutes = &m
+		effectiveMinutes = rawTraining
+	} else if defTraining, defErr := s.repo.GetUserDefaultTraining(ctx, userID); defErr == nil && defTraining >= 0 {
+		effectiveMinutes = defTraining
 	}
 
 	isReadOnly := date < GetServerToday()
@@ -148,16 +151,12 @@ func (s *diaryServiceImpl) GetDay(ctx context.Context, userID uuid.UUID, date st
 	dayTotals := computeDayTotals(entries)
 
 	var dayTargets any
-	if sex, weight, goal, defTraining, isPeriod, err := s.repo.GetUserProfile(ctx, userID); err == nil {
-		mins := training
-		if mins < 0 {
-			mins = defTraining
-		}
+	if sex, weight, goal, _, isPeriod, err := s.repo.GetUserProfile(ctx, userID); err == nil {
 		t := targets.CalculateTargets(targets.UserProfileForTargets{
 			Sex:             sex,
 			WeightKg:        weight,
 			Goal:            goal,
-			TrainingMinutes: mins,
+			TrainingMinutes: effectiveMinutes,
 			IsPeriod:        isPeriod,
 		})
 		dayTargets = t
@@ -178,7 +177,7 @@ func (s *diaryServiceImpl) GetDay(ctx context.Context, userID uuid.UUID, date st
 
 	return &DaySummaryResponse{
 		Date:            date,
-		TrainingMinutes: training,
+		TrainingMinutes: trainingMinutes,
 		IsReadOnly:      isReadOnly,
 		Summary:         dayTotals,
 		Targets:         dayTargets,

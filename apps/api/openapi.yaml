@@ -278,7 +278,6 @@ components:
       type: object
       required:
         - date
-        - training_minutes
         - is_read_only
         - summary
         - meals
@@ -288,6 +287,7 @@ components:
           format: date
         training_minutes:
           type: integer
+          nullable: true
         is_read_only:
           type: boolean
         summary:
