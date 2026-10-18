@@ -12,6 +12,9 @@ export interface NutrientSource {
   name: string;
   qty: string;
   amount: number;
+  /** For the portion as Hôm nay shows it (lib/home portionLabel: "2 viên" for a supplement, never its grams) */
+  foodId: string;
+  grams: number | null;
 }
 
 /**
@@ -31,6 +34,8 @@ export function nutrientSourcesIn(
       name: info.item.name,
       qty: effect.qty,
       amount: effect.deleted ? null : effect.numbers?.nutrients[key],
+      foodId: info.food?.id ?? "",
+      grams: sampleEdits[info.item.id]?.grams ?? info.grams,
     };
   });
   const fromAdded = added.map((entry) => ({
@@ -38,6 +43,8 @@ export function nutrientSourcesIn(
     name: entry.foodName,
     qty: entry.displayQty,
     amount: entry.nutrients[key],
+    foodId: entry.kind === "quick" ? "" : entry.foodId,
+    grams: entry.kind === "quick" ? null : entry.grams,
   }));
 
   return [...fromSamples, ...fromAdded]

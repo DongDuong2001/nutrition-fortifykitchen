@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Sheet } from "@/components/ui/sheet";
 import { useDiary } from "@/lib/diary-store";
 import { formatAmount } from "@/lib/format";
-import { pctLabel } from "@/lib/home";
+import { pctLabel, portionLabel } from "@/lib/home";
 import { getNutrientDefinition } from "@/lib/nutrients";
 
 /**
@@ -43,7 +43,7 @@ export function NutrientSourcesSheet({
             <li key={s.id} data-align-group="nutrient-sources" className="flex min-h-11 items-center justify-between gap-3 border-b border-divider px-1 py-2">
               <span className="flex min-w-0 flex-col">
                 <span className="line-clamp-2 text-[15px] font-semibold leading-snug text-text">{s.name}</span>
-                <span className="text-[13px] text-secondary">{s.qty}</span>
+                <span className="text-[13px] text-secondary">{portionLabel({ qty: s.qty, grams: s.grams ?? null, foodId: s.foodId ?? "" })}</span>
               </span>
               <span className="flex shrink-0 flex-col items-end">
                 <span className="font-display text-[15px] font-bold leading-none tabular-nums text-text">{pctLabel(s.amount, target)}</span>

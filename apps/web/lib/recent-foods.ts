@@ -1,4 +1,5 @@
 import type { FoodItem } from "./mock/foods";
+import { MAX_UNIT_COUNT, unitPortionText } from "./portion";
 
 /** A recently logged food, with the serving it was logged with. */
 export interface RecentFood {
@@ -38,6 +39,13 @@ export function resolveRecent(recent: RecentFood, foods: FoodItem[]): ResolvedRe
 
   const serving = food.servings.find((s) => s.label === recent.servingLabel);
   if (serving) return { food, grams: serving.grams, label: serving.label };
+
+  // A count of a unit portion ("2 viên" = 2 × "1 viên", a supplement's stepper): that many of the serving
+  for (const s of food.servings) {
+    for (let n = 2; n <= MAX_UNIT_COUNT; n++) {
+      if (unitPortionText(s.label, n) === recent.servingLabel.trim()) return { food, grams: s.grams * n, label: recent.servingLabel.trim() };
+    }
+  }
 
   const match = GRAMS_LABEL.exec(recent.servingLabel.trim());
   if (match) {
