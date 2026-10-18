@@ -13,6 +13,7 @@ import os
 import re
 import sys
 
+from _motion import settled  # noqa: E402  (cc-55: measure after the pop)
 import _demo  # noqa: F401
 from playwright.sync_api import sync_playwright
 
@@ -227,6 +228,7 @@ def past_flow(browser, size, tag):
     pg.get_by_role("button", name="Chép vào hôm nay", exact=True).click()
     dlg = pg.get_by_role("dialog", name="Chép 2 món vào hôm nay")
     dlg.wait_for(state="visible", timeout=4000)
+    settled(pg)  # cc-55: measure the rows after the dialog's pop
     text = squash(dlg.inner_text())
     check(re.search(r"Từ Hôm qua 14/10 · [\d.]+ kcal\. Ngày đã qua chỉ xem, nên món được chép vào hôm nay 15/10\.", text) is not None, f"{tag} past: subtitle ({text[:160]!r})")
     radios = dlg.get_by_role("radio")
