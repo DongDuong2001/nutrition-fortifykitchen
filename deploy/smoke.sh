@@ -7,7 +7,8 @@
 # deploy/.env.prod (add these two lines; the account is a dedicated, otherwise empty smoke account):
 #   SMOKE_EMAIL=smoke@...      SMOKE_PASSWORD=...
 # Without them the write round trip prints SKIP. SMOKE_ACCESS_TOKEN (a Supabase access token) can replace the
-# sign-in, for a test against a local API.
+# sign-in, for a test against a local API. With captcha on in Supabase the sign-in also needs SMOKE_SERVICE_KEY
+# (the service role key, server only), sent instead of the anon key.
 set -uo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -32,6 +33,7 @@ anon="$(setting NEXT_PUBLIC_SUPABASE_ANON_KEY)"
 email="$(setting SMOKE_EMAIL)"
 password="$(setting SMOKE_PASSWORD)"
 token="$(setting SMOKE_ACCESS_TOKEN)"
+service_key="$(setting SMOKE_SERVICE_KEY)"
 want_title="Lê Hồng Khánh · HIT1 Coaching"
 
 if [ -z "$base" ]; then
@@ -69,8 +71,13 @@ elif [ -z "$food_id" ]; then
   fail "write round trip" "no food to log"
 else
   if [ -z "$token" ]; then
+    # Supabase has captcha on, so the password sign-in needs the service key when it is set (never printed)
+    key_headers=(-H "apikey: $anon")
+    if [ -n "$service_key" ]; then
+      key_headers=(-H "apikey: $service_key" -H "Authorization: Bearer $service_key")
+    fi
     login="$(curl -sS --max-time 20 -X POST "$supabase/auth/v1/token?grant_type=password" \
-      -H "apikey: $anon" -H "Content-Type: application/json" \
+      "${key_headers[@]}" -H "Content-Type: application/json" \
       --data "{\"email\":\"$email\",\"password\":\"$password\"}" 2>/dev/null)"
     token="$(printf '%s' "$login" | grep -o '"access_token":"[^"]*"' | head -1 | cut -d'"' -f4)"
   fi
