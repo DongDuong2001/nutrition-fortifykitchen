@@ -91,17 +91,18 @@ describe("unseenReleases (what Có gì mới lists)", () => {
   const ids = (seen: string | null) => unseenReleases(seen).map((r) => r.id);
 
   it("every release newer than the last one seen, newest first", () => {
-    expect(ids("2026-10-18b")).toEqual(["2026-10-18d", "2026-10-18c"]);
-    expect(ids("2026-10-17")).toEqual(["2026-10-18d", "2026-10-18c", "2026-10-18b", "2026-10-18"]);
+    expect(ids("2026-10-18b")).toEqual(["2026-10-18e", "2026-10-18d", "2026-10-18c"]);
+    expect(ids("2026-10-17")).toEqual(["2026-10-18e", "2026-10-18d", "2026-10-18c", "2026-10-18b", "2026-10-18"]);
   });
 
-  it("seen 18c: only 18d; seen the newest: nothing", () => {
-    expect(ids("2026-10-18c")).toEqual(["2026-10-18d"]);
-    expect(ids("2026-10-18d")).toEqual([]);
+  it("seen 18c: 18e and 18d; seen 18d: only 18e; seen the newest: nothing", () => {
+    expect(ids("2026-10-18c")).toEqual(["2026-10-18e", "2026-10-18d"]);
+    expect(ids("2026-10-18d")).toEqual(["2026-10-18e"]);
+    expect(ids("2026-10-18e")).toEqual([]);
   });
 
   it("an account that has seen none gets the newest only", () => {
-    expect(ids(null)).toEqual(["2026-10-18d"]);
+    expect(ids(null)).toEqual(["2026-10-18e"]);
   });
 });
 
@@ -109,17 +110,22 @@ describe("joinedTour (what Thử ngay runs)", () => {
   const titles = (seen: string) => joinedTour(unseenReleases(seen).map((r) => r.id)).map((s) => s.title);
   const T18C = ["Món chưa lưu", "Kéo xuống để tải lại", "Chạm vi chất để xem nguồn", "Gần đây và Như hôm qua", "Thực phẩm bổ sung và Gia vị"];
   const T18D = ["Chọn đơn vị", "Chọn kích cỡ", "Nhập số lượng"];
+  const T18E = ["Nhóm Bự / Bé", "Đánh dấu để ghi", "+ Thêm món"];
 
-  it("seen 18b: the 18c tour, then the 18d tour (oldest first), 8 steps", () => {
-    expect(titles("2026-10-18b")).toEqual([...T18C, ...T18D]);
+  it("seen 18b: 18c, 18d, then 18e (oldest first), cut to 8 steps from the end of 18c's", () => {
+    expect(titles("2026-10-18b")).toEqual([...T18C.slice(0, 2), ...T18D, ...T18E]);
   });
 
-  it("seen 18c: only the 18d tour", () => {
-    expect(titles("2026-10-18c")).toEqual(T18D);
+  it("seen 18c: the 18d tour, then the 18e tour", () => {
+    expect(titles("2026-10-18c")).toEqual([...T18D, ...T18E]);
+  });
+
+  it("seen 18d: only the 18e tour", () => {
+    expect(titles("2026-10-18d")).toEqual(T18E);
   });
 
   it("releases without a tour add nothing", () => {
-    expect(titles("2026-10-17")).toEqual([...T18C, ...T18D]);
+    expect(titles("2026-10-17")).toEqual([...T18C.slice(0, 2), ...T18D, ...T18E]);
   });
 
   it(`at most ${MAX_TOUR_STEPS} steps: the later steps of the oldest release go first`, () => {
