@@ -1,6 +1,6 @@
 """cc-51 Part B: motion on the running app (demo build, 390 x 844).
 
-- Sheet (Chia sẻ ngày này): slides in (m-sheet-in) over a fading scrim; Back closes it without leaving or reloading
+- Sheet (Chia sẻ ngày này): slides in (cc-55: an m-sheet transition on data-state) over a fading scrim (m-scrim); Back closes it without leaving or reloading
   Hôm nay; Esc closes it and takes its history entry back; dragging the grabber down closes it; reduced motion fades
 - Rows: a row deleted (Chọn nhiều món › Xóa) fades and collapses (data-exiting) and is gone after 200 ms; Hoàn tác
   brings it back with m-row-enter; nothing animates on the first draw
@@ -49,8 +49,9 @@ def sheet_part(browser):
     share.click()
     dialog = pg.locator('[role="dialog"]').first
     dialog.wait_for(state="visible")
-    check(anim(dialog) == "m-sheet-in", f"sheet slides in ({anim(dialog)})")
-    check("m-scrim-enter" in (pg.locator(".bg-scrim").first.get_attribute("class") or ""), "the scrim fades in")
+    slide = dialog.evaluate("el => [el.dataset.state, el.classList.contains('m-sheet'), getComputedStyle(el).transitionProperty].join(' ')")
+    check(slide == "open true transform", f"sheet slides in ({slide})")
+    check("m-scrim" in (pg.locator(".bg-scrim").first.get_attribute("class") or ""), "the scrim fades in")
     pg.wait_for_timeout(400)
     pg.go_back()
     pg.wait_for_timeout(500)
@@ -113,7 +114,8 @@ def sheet_part(browser):
     pg.get_by_role("button", name="Chia sẻ ngày này").first.click()
     dialog = pg.locator('[role="dialog"]').first
     dialog.wait_for(state="visible")
-    check(anim(dialog) == "m-fade-in", f"reduced motion: the sheet fades, no slide ({anim(dialog)})")
+    fade = dialog.evaluate("el => getComputedStyle(el).transitionProperty")
+    check(fade == "opacity", f"reduced motion: the sheet fades, no slide ({fade})")
     ctx.close()
 
 
