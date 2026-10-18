@@ -14,6 +14,7 @@ Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_
 import os
 import sys
 
+from _motion import settled  # noqa: E402  (cc-55: measure after the pop)
 from playwright.sync_api import sync_playwright
 import _seed  # noqa: F401  (cc-42: tour done, tips off)
 
@@ -222,6 +223,7 @@ def check_source_link(browser):
         src.click()
         link = pg.get_by_role("dialog").locator('a[href="/settings/data-sources"]').first
         link.wait_for(state="visible", timeout=10000)
+        settled(pg)
         check(link.inner_text().strip() != "", f"{label} food detail: the source link has a name")
         min_target(link, f"{label} food detail: source link")
         context.close()

@@ -59,9 +59,22 @@ func (r *pgxRepository) SearchFoods(ctx context.Context, filter FoodSearchFilter
 
 		var orClauses []string
 		for _, term := range searchTerms {
-			orClauses = append(orClauses, fmt.Sprintf("(name_search ILIKE '%%' || lower(unaccent($%d::text)) || '%%' OR name_search %% lower(unaccent($%d::text)))", argIdx, argIdx))
-			args = append(args, term)
-			argIdx++
+			words := strings.Fields(term)
+			if len(words) > 1 {
+				var andWords []string
+				for _, w := range words {
+					andWords = append(andWords, fmt.Sprintf("name_search ILIKE '%%' || lower(unaccent($%d::text)) || '%%'", argIdx))
+					args = append(args, w)
+					argIdx++
+				}
+				orClauses = append(orClauses, fmt.Sprintf("(name_search ILIKE '%%' || lower(unaccent($%d::text)) || '%%' OR name_search %% lower(unaccent($%d::text)) OR (%s))", argIdx, argIdx, strings.Join(andWords, " AND ")))
+				args = append(args, term)
+				argIdx++
+			} else {
+				orClauses = append(orClauses, fmt.Sprintf("(name_search ILIKE '%%' || lower(unaccent($%d::text)) || '%%' OR name_search %% lower(unaccent($%d::text)))", argIdx, argIdx))
+				args = append(args, term)
+				argIdx++
+			}
 		}
 		whereClauses = append(whereClauses, "("+strings.Join(orClauses, " OR ")+")")
 	}
@@ -73,11 +86,11 @@ func (r *pgxRepository) SearchFoods(ctx context.Context, filter FoodSearchFilter
 	}
 
 	if filter.UserID != nil {
-		whereClauses = append(whereClauses, fmt.Sprintf("(is_custom = false OR created_by = $%d)", argIdx))
+		whereClauses = append(whereClauses, fmt.Sprintf("(is_custom = false OR created_by = $%d) AND is_archived = false", argIdx))
 		args = append(args, *filter.UserID)
 		argIdx++
 	} else {
-		whereClauses = append(whereClauses, "is_custom = false")
+		whereClauses = append(whereClauses, "is_custom = false AND is_archived = false")
 	}
 
 	whereSQL := strings.Join(whereClauses, " AND ")
@@ -240,7 +253,7 @@ func (r *pgxRepository) GetFoodsRichIn(ctx context.Context, nutrient string, lim
 			SELECT id, name_vi, category, (per_100g->>'%s')::numeric AS amount
 			FROM nutrition.foods
 			WHERE per_100g->>'%s' IS NOT NULL AND (per_100g->>'%s')::numeric > 0
-			  AND (is_custom = false OR created_by = $2)
+			  AND (is_custom = false OR created_by = $2) AND is_archived = false
 			ORDER BY (per_100g->>'%s')::numeric DESC
 			LIMIT $1
 		`, nutrient, nutrient, nutrient, nutrient)
@@ -250,7 +263,7 @@ func (r *pgxRepository) GetFoodsRichIn(ctx context.Context, nutrient string, lim
 			SELECT id, name_vi, category, (per_100g->>'%s')::numeric AS amount
 			FROM nutrition.foods
 			WHERE per_100g->>'%s' IS NOT NULL AND (per_100g->>'%s')::numeric > 0
-			  AND is_custom = false
+			  AND is_custom = false AND is_archived = false
 			ORDER BY (per_100g->>'%s')::numeric DESC
 			LIMIT $1
 		`, nutrient, nutrient, nutrient, nutrient)
@@ -364,12 +377,13 @@ func (r *pgxRepository) CreateCustomFood(ctx context.Context, userID uuid.UUID, 
 
 func (r *pgxRepository) DeleteCustomFood(ctx context.Context, userID uuid.UUID, foodID uuid.UUID) error {
 	query := `
-		DELETE FROM nutrition.foods
-		WHERE id = $1 AND created_by = $2 AND is_custom = true
+		UPDATE nutrition.foods
+		SET is_archived = true
+		WHERE id = $1 AND created_by = $2 AND is_custom = true AND is_archived = false
 	`
 	tag, err := r.pool.Exec(ctx, query, foodID, userID)
 	if err != nil {
-		return fmt.Errorf("failed to delete custom food: %w", err)
+		return fmt.Errorf("failed to archive custom food: %w", err)
 	}
 	if tag.RowsAffected() == 0 {
 		return pgx.ErrNoRows

@@ -2,6 +2,7 @@ package profile
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"time"
 
@@ -24,14 +25,14 @@ func NewRepository(pool *pgxpool.Pool) *PostgresRepository {
 func (r *PostgresRepository) GetProfile(ctx context.Context, userID uuid.UUID) (*Profile, error) {
 	query := `
 		SELECT user_id, sex, birth_year, weight_kg, goal, training_minutes_default,
-		       near_period, language, reminders, display_name, COALESCE(role, 'user'), created_at, updated_at
+		       near_period, language, reminders, COALESCE(training_prefs, '{}'::jsonb), display_name, COALESCE(role, 'user'), created_at, updated_at
 		FROM nutrition.profiles
 		WHERE user_id = $1
 	`
 	var p Profile
 	err := r.pool.QueryRow(ctx, query, userID).Scan(
 		&p.UserID, &p.Sex, &p.BirthYear, &p.WeightKg, &p.Goal, &p.TrainingMinutesDefault,
-		&p.NearPeriod, &p.Language, &p.Reminders, &p.DisplayName, &p.Role, &p.CreatedAt, &p.UpdatedAt,
+		&p.NearPeriod, &p.Language, &p.Reminders, &p.TrainingPrefs, &p.DisplayName, &p.Role, &p.CreatedAt, &p.UpdatedAt,
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -59,11 +60,19 @@ func (r *PostgresRepository) GetRole(ctx context.Context, userID uuid.UUID) (str
 }
 
 func (r *PostgresRepository) UpsertProfile(ctx context.Context, p *Profile) error {
+	var prefsJSON []byte
+	if p.TrainingPrefs != nil {
+		prefsJSON, _ = json.Marshal(p.TrainingPrefs)
+	}
+	if len(prefsJSON) == 0 {
+		prefsJSON = []byte("{}")
+	}
+
 	query := `
 		INSERT INTO nutrition.profiles (
 			user_id, sex, birth_year, weight_kg, goal, training_minutes_default,
-			near_period, language, display_name, updated_at
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, now())
+			near_period, language, display_name, training_prefs, updated_at
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb, now())
 		ON CONFLICT (user_id) DO UPDATE SET
 			sex = EXCLUDED.sex,
 			birth_year = EXCLUDED.birth_year,
@@ -73,11 +82,12 @@ func (r *PostgresRepository) UpsertProfile(ctx context.Context, p *Profile) erro
 			near_period = EXCLUDED.near_period,
 			language = EXCLUDED.language,
 			display_name = COALESCE(EXCLUDED.display_name, nutrition.profiles.display_name),
+			training_prefs = CASE WHEN $10::jsonb != '{}'::jsonb THEN $10::jsonb ELSE nutrition.profiles.training_prefs END,
 			updated_at = now()
 	`
 	_, err := r.pool.Exec(ctx, query,
 		p.UserID, p.Sex, p.BirthYear, p.WeightKg, p.Goal, p.TrainingMinutesDefault,
-		p.NearPeriod, p.Language, p.DisplayName,
+		p.NearPeriod, p.Language, p.DisplayName, string(prefsJSON),
 	)
 	return err
 }

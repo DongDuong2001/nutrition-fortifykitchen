@@ -29,7 +29,7 @@ type MealSlotSummary struct {
 
 type DaySummaryResponse struct {
 	Date            string              `json:"date"`
-	TrainingMinutes int                 `json:"training_minutes"`
+	TrainingMinutes *int                `json:"training_minutes"`
 	IsReadOnly      bool                `json:"is_read_only"`
 	Summary         map[string]*float64 `json:"summary"`
 	Targets         any                 `json:"targets,omitempty"`

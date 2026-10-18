@@ -324,3 +324,34 @@ func TestDiaryService_RestoreWithin10s(t *testing.T) {
 		t.Errorf("expected ErrRestoreWindowExpired, got %v", err)
 	}
 }
+
+func TestDiaryService_GetDay_TrainingMinutesNullable(t *testing.T) {
+	repo := newMockDiaryRepo()
+	svc := NewService(repo)
+
+	userID := uuid.New()
+	today := GetServerToday()
+
+	// When training is not set for the day, TrainingMinutes must be nil
+	day1, err := svc.GetDay(context.Background(), userID, today)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if day1.TrainingMinutes != nil {
+		t.Errorf("expected nil TrainingMinutes when unset, got %v", *day1.TrainingMinutes)
+	}
+
+	// Explicitly set training to 45 minutes
+	_, err = svc.SetTraining(context.Background(), userID, today, 45)
+	if err != nil {
+		t.Fatalf("unexpected error setting training: %v", err)
+	}
+
+	day2, err := svc.GetDay(context.Background(), userID, today)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if day2.TrainingMinutes == nil || *day2.TrainingMinutes != 45 {
+		t.Errorf("expected TrainingMinutes 45, got %v", day2.TrainingMinutes)
+	}
+}

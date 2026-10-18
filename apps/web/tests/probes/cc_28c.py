@@ -15,6 +15,7 @@ import os
 import re
 import sys
 
+from _motion import settled  # noqa: E402  (cc-55: measure after the pop)
 import _demo
 from playwright.sync_api import sync_playwright
 
@@ -137,6 +138,7 @@ def run(browser, size, tag):
     pg.get_by_role("button", name="Level là gì?").click()
     dlg = pg.get_by_role("dialog", name="Level là gì?")
     dlg.wait_for(state="visible", timeout=4000)
+    settled(pg)
     rows = dlg.locator("li")
     check(rows.count() == 6, f"{tag} explainer: six Levels ({rows.count()})")
     cur = dlg.locator("li[aria-current=true]")

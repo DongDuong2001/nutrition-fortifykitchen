@@ -46,7 +46,7 @@ import { HomeScreen } from "@/components/home/home-screen";
 import { useMealSlot } from "@/lib/use-meal-slot";
 import { HOME_ROUTE } from "@/lib/nav";
 import { navigateFromSheet } from "@/lib/sheet-history";
-import { homeScroll } from "@/lib/home-scroll";
+import { cameFromHome, homeScroll } from "@/lib/home-scroll";
 import { SHEET_EXIT_MS, useSheetDrag } from "@/components/ui/sheet";
 
 // The add sheet shows carousels of the newest: Khám phá holds the full lists
@@ -417,9 +417,10 @@ function AddFoodInner() {
 
   return (
     <div className="min-h-screen bg-page text-text font-sans">
-      {/* Hôm nay behind the sheet (both widths), scrolled to where it was left; inert, and no blur on the scrim */}
-      <div ref={behindRef} data-add-behind aria-hidden="true" inert className="pointer-events-none fixed inset-0 select-none overflow-hidden">
-        <HomeScreen />
+      {/* Hôm nay behind the sheet (both widths), scrolled to where it was left: a light, inert copy (HomeScreen backdrop);
+          no blur on the scrim */}
+      <div ref={behindRef} data-add-behind={cameFromHome() ? "home" : "light"} aria-hidden="true" inert className="pointer-events-none fixed inset-0 select-none overflow-hidden">
+        <HomeScreen backdrop />
       </div>
       <div aria-hidden="true" data-state={sheetState} onClick={() => handleClose()} className="m-scrim fixed inset-0 z-40 bg-scrim" />
 
@@ -442,6 +443,8 @@ function AddFoodInner() {
             onClick={(e) => e.stopPropagation()}
             className="m-pop w-[min(900px,100%-32px)] bg-card border border-card-border rounded-[18px] p-6 shadow-2xl flex flex-col gap-4 max-h-[92vh] overflow-y-auto"
           >
+            {/* The page's heading (Hôm nay behind is a picture without one since cc-55b), as the phone sheet has */}
+            <h1 className="sr-only">Thêm món</h1>
             {/* Dialog Header */}
             <div className="flex items-start justify-between gap-4">
               <div className="flex flex-col items-start">

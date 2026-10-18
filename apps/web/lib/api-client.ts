@@ -90,6 +90,7 @@ export function mapApiProfileToProfile(raw: any): Profile {
     periodMode: Boolean(data.near_period ?? data.nearPeriod ?? data.periodMode),
     trainingMinutesDefault: Number(data.training_minutes_default ?? data.trainingMinutesDefault) || 60,
     displayName: data.display_name ?? data.displayName ?? "",
+    trainingPrefs: data.training_prefs ?? data.trainingPrefs ?? undefined,
     ...normaliseCoaching(data),
   };
 }
@@ -173,7 +174,7 @@ export interface MealSlotSummary {
 
 export interface DaySummaryResponse {
   date: string;
-  training_minutes: number;
+  training_minutes: number | null;
   is_read_only: boolean;
   summary: Record<string, number | null>;
   targets?: unknown;

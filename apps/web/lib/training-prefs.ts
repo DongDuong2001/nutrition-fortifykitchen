@@ -48,7 +48,25 @@ const isOwnItem = (i: unknown): i is OwnTrainingItem => {
 export function readPrefs(storage: Storage | null = accountStorage()): TrainingPrefs {
   try {
     const raw = storage?.getItem(TRAINING_PREFS_KEY);
-    if (!raw) return EMPTY;
+    if (!raw) {
+      const profileRaw = storage?.getItem("h1t_profile_v1");
+      if (profileRaw) {
+        const prof = JSON.parse(profileRaw);
+        const p = prof?.trainingPrefs ?? prof?.training_prefs;
+        if (p && typeof p === "object") {
+          const synced: TrainingPrefs = {
+            size: p.size === "be" || p.size === "bu" ? p.size : null,
+            asked: p.asked === true,
+            own: Array.isArray(p.own) ? p.own.filter(isOwnItem) : [],
+          };
+          if (synced.size || synced.asked || synced.own.length > 0) {
+            writePrefs(synced, storage);
+            return synced;
+          }
+        }
+      }
+      return EMPTY;
+    }
     const p = JSON.parse(raw);
     return {
       size: p?.size === "be" || p?.size === "bu" ? p.size : null,

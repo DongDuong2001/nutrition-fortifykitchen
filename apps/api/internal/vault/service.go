@@ -147,17 +147,24 @@ func (s *vaultService) fetchRawGitHubFile(ctx context.Context, repo, ref, path, 
 }
 
 func (s *vaultService) saveDraft(ctx context.Context, draft *CoachDraft) error {
+	var existingID uuid.UUID
+	err := s.pool.QueryRow(ctx, "SELECT id FROM nutrition.coach_drafts WHERE file_path = $1 ORDER BY updated_at DESC LIMIT 1", draft.FilePath).Scan(&existingID)
+	if err == nil {
+		query := `
+			UPDATE nutrition.coach_drafts
+			SET markdown_content = $1, status = $2, commit_hash = $3, updated_at = NOW()
+			WHERE id = $4
+		`
+		_, updateErr := s.pool.Exec(ctx, query, draft.MarkdownContent, draft.Status, draft.CommitHash, existingID)
+		return updateErr
+	}
+
 	query := `
 		INSERT INTO nutrition.coach_drafts (id, file_path, markdown_content, parsed_data, status, commit_hash, updated_at)
 		VALUES ($1, $2, $3, $4, $5, $6, NOW())
-		ON CONFLICT (id) DO UPDATE SET
-			markdown_content = EXCLUDED.markdown_content,
-			status = EXCLUDED.status,
-			commit_hash = EXCLUDED.commit_hash,
-			updated_at = NOW()
 	`
-	_, err := s.pool.Exec(ctx, query, draft.ID, draft.FilePath, draft.MarkdownContent, draft.ParsedData, draft.Status, draft.CommitHash)
-	return err
+	_, insertErr := s.pool.Exec(ctx, query, draft.ID, draft.FilePath, draft.MarkdownContent, draft.ParsedData, draft.Status, draft.CommitHash)
+	return insertErr
 }
 
 func (s *vaultService) ListDrafts(ctx context.Context, status string) ([]CoachDraft, error) {

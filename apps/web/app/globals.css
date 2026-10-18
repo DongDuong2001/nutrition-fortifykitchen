@@ -572,6 +572,15 @@
   animation: m-vt-sheet-down var(--m-sheet-out) var(--ease-drawer) both;
 }
 
+/* cc-55b: /add opened straight (a link, a reload): Hôm nay behind the sheet is a picture nobody saw a moment ago, so its
+   meals and nutrient groups below the screen are not laid out or painted. Opened from Hôm nay it is drawn in full: its
+   real heights keep it where Hôm nay was, and content-visibility would re-check every section on each frame of the
+   slide (17 layouts instead of 4, measured at 4x CPU). */
+[data-add-behind="light"] section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 240px;
+}
+
 /* Reduced motion: nothing moves; what fades does it in 120 ms at most */
 @media (prefers-reduced-motion: reduce) {
   .m-sheet,

@@ -53,35 +53,29 @@ def parse_rgb(rgb_str):
 
 
 def test_item_1(browser, vp_name, vp):
-    """Item 1: /foods/[id] gram input fills 44 px label (h-full) and shows focus ring on Tab"""
+    """Item 1: /foods/[id] gram field fills its 44 px box (h-full) and the box shows a focus ring.
+    cc-53b replaced the portion chips and the Tùy chỉnh field with one gram field (PortionArea); the check follows it."""
     ctx = browser.new_context(viewport=vp)
     pg = ctx.new_page()
-    pg.goto(BASE + "/foods/food-pho-bo", wait_until="networkidle")
+    # A food weighed in grams (phở bò is a dish by the phần since cc-53b: Phần | Gam, no gram field until Gam)
+    pg.goto(BASE + "/foods/food-yen-mach", wait_until="networkidle")
     pg.wait_for_timeout(300)
 
-    check(pg.locator("#fd-size").count() == 0, f"[{vp_name}] foods/[id]: gram input hidden until Tùy chỉnh is selected")
-    pg.get_by_role("button", name="Tùy chỉnh").click()
-    pg.wait_for_timeout(100)
-    inp = pg.locator("#fd-size")
-    check(inp.count() > 0, f"[{vp_name}] foods/[id]: #fd-size input exists")
+    inp = pg.get_by_role("textbox", name=re.compile(r"^Số gam")).locator("visible=true").first
+    check(inp.count() > 0, f"[{vp_name}] foods/[id]: the gram field exists")
 
-    parent_label = pg.locator("label:has(#fd-size)")
-    parent_box = parent_label.bounding_box()
-    check(parent_box is not None and parent_box["height"] >= 43.5,
-          f"[{vp_name}] foods/[id]: label wrapper height >= 44 px (measured: {parent_box['height'] if parent_box else 'None'} px)")
+    box_el = inp.locator("xpath=..")
+    box = box_el.bounding_box()
+    check(box is not None and box["height"] >= 43.5,
+          f"[{vp_name}] foods/[id]: gram box height >= 44 px (measured: {box['height'] if box else 'None'} px)")
 
     inp_classes = inp.get_attribute("class") or ""
-    check("h-full" in inp_classes, f"[{vp_name}] foods/[id]: #fd-size input has h-full class")
+    check("h-full" in inp_classes, f"[{vp_name}] foods/[id]: the gram input has h-full class")
 
-    # Tab navigation to verify focus ring
     inp.focus()
     pg.wait_for_timeout(100)
-
-    # Check parent label focus ring
-    label_classes = parent_label.get_attribute("class") or ""
-    has_ring_classes = ("ring-blue" in label_classes and
-                        ("focus-within:ring-2" in label_classes or "focus-visible:ring-2" in label_classes))
-    check(has_ring_classes, f"[{vp_name}] foods/[id]: label has focus ring classes ({label_classes})")
+    box_classes = box_el.get_attribute("class") or ""
+    check("focus-within:ring-2" in box_classes and "ring-blue" in box_classes, f"[{vp_name}] foods/[id]: the gram box has focus ring classes ({box_classes})")
 
     ctx.close()
 
