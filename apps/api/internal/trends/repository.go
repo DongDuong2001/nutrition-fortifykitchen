@@ -83,7 +83,7 @@ func (r *pgxTrendsRepo) GetHistoryDays(ctx context.Context, userID uuid.UUID, st
 		dayNutrients := make(map[string]*float64)
 
 		for _, e := range entries {
-			if e.cal != nil && *e.cal > 0 {
+			if e.cal != nil && *e.cal >= 0 {
 				if dayCal == nil {
 					val := 0.0
 					dayCal = &val
