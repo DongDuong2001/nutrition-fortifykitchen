@@ -31,6 +31,23 @@ export interface Release {
 }
 
 export const RELEASES: readonly Release[] = [
+  // cc-52. The tour runs on Hôm nay, where the Ngày tập controls are not: each step falls back to the Ngày tập pill
+  {
+    id: "2026-10-18e",
+    date: "18/10",
+    items: [
+      {
+        icon: "meal",
+        title: "Ngày tập ghi vào nhật ký",
+        body: "Đánh dấu một món ở Ngày tập để ghi vào Bữa phụ. Liều theo nhóm Bự/Bé của bạn. Thêm món riêng như nước dừa, cam.",
+      },
+    ],
+    tour: [
+      { target: "training-size", fallback: "training-pill", title: "Nhóm Bự / Bé", body: "Ở Ngày tập, chạm Bé · đổi hoặc Bự · đổi để chọn liều thấp hay liều cao." },
+      { target: "training-checklist", fallback: "training-pill", title: "Đánh dấu để ghi", body: "Đánh dấu một món ở Ngày tập, kiểm tra khẩu phần rồi chọn Thêm: món vào Bữa phụ." },
+      { target: "training-add-item", fallback: "training-pill", title: "+ Thêm món", body: "Thêm món riêng như nước dừa, cam vào Trước tập hoặc Trong tập. Món ở lại cho mọi ngày tập." },
+    ],
+  },
   {
     id: "2026-10-18d",
     date: "18/10",

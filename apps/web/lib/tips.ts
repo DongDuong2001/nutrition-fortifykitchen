@@ -177,6 +177,23 @@ export const TIPS: readonly Tip[] = [
     used: ["training-minutes"],
     when: (c) => c.pathname === "/training",
   },
+  // cc-52: the Bự / Bé chip and + Thêm món are on today's Ngày tập only (a past day is view-only)
+  {
+    id: "training-size",
+    target: "training-size",
+    title: "Nhóm Bự / Bé",
+    body: "Liều muối và tinh bột nhanh được điền theo nhóm của bạn: Bé lấy mức thấp, Bự mức cao. Chạm để đổi nhóm.",
+    used: ["training-size"],
+    when: (c) => c.pathname === "/training" && !c.pastDay,
+  },
+  {
+    id: "training-add-item",
+    target: "training-add-item",
+    title: "Thêm món riêng",
+    body: "Thêm món bạn hay dùng khi tập, như nước dừa hay cam. Món ở lại cho mọi ngày tập; đánh dấu là ghi vào Bữa phụ.",
+    used: ["training-add-item"],
+    when: (c) => c.pathname === "/training" && !c.pastDay,
+  },
   {
     id: "micros",
     target: "micros-groups",

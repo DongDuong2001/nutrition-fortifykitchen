@@ -278,7 +278,7 @@ function HomeContent() {
 
   const pills: HeroPill[] = [];
   if (mode.kind === "day") {
-    pills.push({ key: "training", label: `Ngày tập ${trainingValue} ›`, href: `/training?date=${viewIso}` });
+    pills.push({ key: "training", label: `Ngày tập ${trainingValue} ›`, href: `/training?date=${viewIso}`, tour: "training-pill" });
     if (!nothingLogged) {
       pills.push({ key: "day-menu", label: "⋯", id: "home-day-menu", ariaLabel: "Tùy chọn ngày", onClick: () => setDayMenuOpen(true) });
     }

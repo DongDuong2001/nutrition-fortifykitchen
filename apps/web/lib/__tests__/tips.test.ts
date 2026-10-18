@@ -11,7 +11,7 @@ describe("the tips table", () => {
   it("has the 15 tips of the design boards and cc-49's Chưa lưu, each with the card copy", () => {
     expect(TIPS.map((t) => t.id)).toEqual([
       "unsaved", "home-logged", "meal-add", "home-share", "pull-refresh", "nutrient-sources", "past-day", "multi-select", "add-tray", "add-shortlists", "haptics", "food-detail", "unit-toggle", "compare",
-      "food-new", "training", "micros", "trends-micros", "explore", "overview", "leaderboard",
+      "food-new", "training", "training-size", "training-add-item", "micros", "trends-micros", "explore", "overview", "leaderboard",
     ]);
     for (const t of TIPS) {
       expect(t.title.length).toBeGreaterThan(0);
@@ -84,6 +84,20 @@ describe("pickTip: Chưa lưu (cc-49)", () => {
   });
 });
 
+describe("pickTip: Ngày tập (cc-52)", () => {
+  const training = (over: Partial<TipContext> = {}) => ctx({ pathname: "/training", ...over });
+  it("the Bự / Bé chip after the minutes tip, then + Thêm món, one per visit", () => {
+    expect(ids(training())).toBe("training");
+    expect(ids(training(), flags({ seen: ["training"] }))).toBe("training-size");
+    expect(ids(training(), flags({ seen: ["training", "training-size"] }))).toBe("training-add-item");
+  });
+  it("never once the control was used, never on a past day (view-only, no chip, no + Thêm món)", () => {
+    expect(ids(training(), flags({ used: ["training-minutes", "training-size"] }))).toBe("training-add-item");
+    expect(ids(training(), flags({ used: ["training-minutes", "training-size", "training-add-item"] }))).toBeNull();
+    expect(ids(training({ pastDay: true }), flags({ used: ["training-minutes"] }))).toBeNull();
+  });
+});
+
 describe("pickTip", () => {
   it("shows the tip of a screen on its first visit", () => {
     expect(ids(ctx({ pathname: "/training" }))).toBe("training");
@@ -98,12 +112,14 @@ describe("pickTip", () => {
     expect(ids(ctx({ pathname: "/explore/leaderboard" }))).toBe("leaderboard");
   });
 
+  const trainingDone = ["training-minutes", "training-size", "training-add-item"];
+
   it("not on a second visit: a tip that was seen stays quiet", () => {
-    expect(ids(ctx({ pathname: "/training" }), flags({ seen: ["training"] }))).toBeNull();
+    expect(ids(ctx({ pathname: "/training" }), flags({ seen: ["training", "training-size", "training-add-item"] }))).toBeNull();
   });
 
   it("not when the user has already used the feature", () => {
-    expect(ids(ctx({ pathname: "/training" }), flags({ used: ["training-minutes"] }))).toBeNull();
+    expect(ids(ctx({ pathname: "/training" }), flags({ used: trainingDone }))).toBeNull();
     // cc-51: then the shortlist tip is next on /add, until a one-tap add from Gần đây or Hay ăn
     expect(ids(ctx({ pathname: "/add" }), flags({ used: ["tray-add"] }))).toBe("add-shortlists");
     expect(ids(ctx({ pathname: "/add" }), flags({ used: ["tray-add", "shortlist-add"] }))).toBeNull();
