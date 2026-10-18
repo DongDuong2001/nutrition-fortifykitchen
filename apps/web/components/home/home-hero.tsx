@@ -18,6 +18,8 @@ export interface HeroPill {
   href?: string;
   onClick?: () => void;
   id?: string;
+  /** data-tour, for a tour step that points at the pill */
+  tour?: string;
 }
 
 const MACROS: { key: "carbs" | "protein" | "fat" | "fiber"; label: string }[] = [
@@ -75,7 +77,7 @@ export function HomeHero({
           <div className="flex shrink-0 items-center gap-2">
             {pills.map((p) =>
               p.href ? (
-                <Link key={p.key} id={p.id} href={p.href} aria-label={p.ariaLabel} className={PILL}>
+                <Link key={p.key} id={p.id} href={p.href} aria-label={p.ariaLabel} data-tour={p.tour} className={PILL}>
                   <span className={PILL_FACE}>{p.label}</span>
                 </Link>
               ) : (
