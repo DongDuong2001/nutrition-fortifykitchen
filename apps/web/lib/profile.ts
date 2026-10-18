@@ -27,6 +27,7 @@ export interface Profile extends CoachingState {
   trainingMinutesDefault: number;
   /** Optional name shown on Cài đặt. "" means not set. */
   displayName: string;
+  trainingPrefs?: unknown;
   macroMode?: MacroTargetMode;
   macroRatios?: MacroRatios;
   macroFixed?: MacroFixedGrams;
