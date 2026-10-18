@@ -22,8 +22,10 @@ function GateSkeleton() {
         </div>
       </div>
       <div className="flex min-w-0 flex-1 flex-col pb-[calc(88px+env(safe-area-inset-bottom))] lg:pb-0">
-        <div aria-hidden="true" className="h-[92px] rounded-b-[20px] bg-ink lg:hidden" />
-        <div aria-hidden="true" className="hidden h-8 w-48 rounded bg-surface-dark motion-safe:animate-pulse lg:mx-8 lg:mt-8 lg:block" />
+        {/* The header's shape: the ink band on a phone, the title row's placeholder from 1024 px */}
+        <header aria-hidden="true" className="h-[92px] rounded-b-[20px] bg-ink lg:h-auto lg:rounded-none lg:bg-transparent lg:px-8 lg:pt-8">
+          <span className="hidden h-8 w-48 rounded bg-surface-dark motion-safe:animate-pulse lg:block" />
+        </header>
         <main
           role="status"
           aria-busy="true"

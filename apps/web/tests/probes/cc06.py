@@ -88,7 +88,7 @@ def run():
             button(pg, "Lưu thay đổi").click()
             pg.wait_for_url(re.compile(r".*/app(\?.*)?$"))
             pg.wait_for_timeout(400)
-            check("Yến mạch 90 g" in meal_text(pg, "breakfast"), f"{name}: row shows 90 g")
+            check(re.search(r"Yến mạch (Cân sống )?90 g", meal_text(pg, "breakfast")) is not None, f"{name}: row shows 90 g")
             check("573 kcal" in meal_text(pg, "breakfast"), f"{name}: breakfast 573 kcal")
             check("1.155" in pg.inner_text("body"), f"{name}: day total 1.155")
 
