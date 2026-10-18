@@ -5,8 +5,23 @@ import { useSearchParams } from "next/navigation";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { DesktopSidebar } from "@/components/ui/desktop-sidebar";
 import { AppHeader } from "@/components/ui/app-header";
-import { calculateSaltTarget, getTrainingPhases } from "@/lib/training";
-import { type DayChecklist, isEditableDay, readDay, toggleTick, writeDay } from "@/lib/training-checklist";
+import { calculateSaltTarget, getTrainingPhases, type TrainingCheckItem, type TrainingPhase, type TrainingSize } from "@/lib/training";
+import {
+  type DayChecklist,
+  effectiveTicked,
+  isEditableDay,
+  logTick,
+  loggedAmounts,
+  readDay,
+  untick,
+  writeDay,
+} from "@/lib/training-checklist";
+import { type OwnTrainingItem, type TrainingPhaseId, type TrainingPrefs, addOwnItem, readPrefs, removeOwnItem, writePrefs } from "@/lib/training-prefs";
+import { generateUuid } from "@/lib/uuid";
+import { useCatalogFoods } from "@/hooks/use-catalog-foods";
+import { TrainingSizeChip, TrainingSizeSheet } from "@/components/training/training-size-sheet";
+import { TrainingLogSheet, canLogItem } from "@/components/training/training-log-sheet";
+import { OwnItemSheet, type OwnItemTarget } from "@/components/training/own-item-sheet";
 import { formatDayLabel, formatDesktopDate, formatNumber } from "@/lib/format";
 import { goalName } from "@/lib/onboarding";
 import { getTodayIsoVN } from "@/lib/date";
@@ -45,7 +60,8 @@ function TrainingContent() {
 
   const [selectedDuration, setSelectedDuration] = useState<string>(initialDuration);
   // The profile's default training time (Hồ sơ) applies until the URL names a duration
-  const { profile, hydrated, data: diaryData } = useDiary();
+  const { profile, hydrated, data: diaryData, getEntry, deleteEntry } = useDiary();
+  const { foods, pending: catalogPending } = useCatalogFoods();
   const profileDuration = profile.trainingMinutesDefault === 0 ? "rest" : String(profile.trainingMinutesDefault);
   const [clientNow, setClientNow] = useState<Date | null>(null);
   const [isDesktop, setIsDesktop] = useState(false);
@@ -59,7 +75,11 @@ function TrainingContent() {
 
   // The viewed day's saved record (null when nothing was saved for that date). Read after mount.
   const [saved, setSaved] = useState<DayChecklist | null>(null);
-  const [ticked, setTicked] = useState<string[]>([]);
+  // cc-52: Bự / Bé and the user's own items (per account, on this device), read after mount
+  const [prefs, setPrefs] = useState<TrainingPrefs | null>(null);
+  const [sizeOpen, setSizeOpen] = useState(false);
+  const [logItem, setLogItem] = useState<TrainingCheckItem | null>(null);
+  const [ownTarget, setOwnTarget] = useState<OwnItemTarget | null>(null);
 
   // Sync state if url changes; with no duration in the url, the profile's default once it is read
   useEffect(() => {
@@ -74,9 +94,7 @@ function TrainingContent() {
 
   useEffect(() => {
     setClientNow(new Date());
-    const day = readDay(viewIso);
-    setSaved(day);
-    setTicked(day?.ticked ?? []);
+    setSaved(readDay(viewIso));
 
     const handleResize = () => {
       setIsDesktop(window.innerWidth >= 1024);
@@ -100,32 +118,112 @@ function TrainingContent() {
   // Today always shows its checklist (or the rest card). A past day shows its saved checklist only if it logged minutes.
   const showChecklist = !isRestDay && (!isPast || saved !== null);
 
-  // Saves the day's minutes and ticks together, so a past view can show them later.
-  const handleToggle = (itemId: string) => {
+  // The first open of Ngày tập (today, once the account is known) asks Bự or Bé, once per account
+  useEffect(() => {
+    if (!hydrated) return;
+    const read = readPrefs();
+    if (!read.asked && !isPast) {
+      const asked = { ...read, asked: true };
+      writePrefs(asked);
+      setPrefs(asked);
+      setSizeOpen(true);
+    } else {
+      setPrefs(read);
+    }
+  }, [hydrated, isPast]);
+  const size = prefs?.size ?? null;
+
+  const savePrefs = (next: TrainingPrefs) => {
+    writePrefs(next);
+    setPrefs(next);
+  };
+  const chooseSize = (next: TrainingSize) => {
+    savePrefs({ ...(prefs ?? readPrefs()), size: next });
+    setSizeOpen(false);
+  };
+  // The chip's tip is done once the user has found the chip (the first-open answer does not count)
+  const openSizeFromChip = () => {
+    markUsed("training-size");
+    setSizeOpen(true);
+  };
+
+  // Today's ticks follow the diary: a logged item is ticked while its entry exists (lib/training-checklist).
+  // A past day shows its saved ticks.
+  const record = useMemo<DayChecklist>(() => saved ?? { minutes: trainingMinutes, ticked: [] }, [saved, trainingMinutes]);
+  const ticked = useMemo(
+    () => (isPast || !hydrated ? record.ticked : effectiveTicked(record, (id) => getEntry(id) !== null)),
+    [isPast, hydrated, record, getEntry]
+  );
+
+  // Saves the day's minutes, ticks and links together, so a past view can show them later.
+  const saveDay = (next: DayChecklist) => {
+    writeDay(todayIso, next);
+    setSaved(next);
+  };
+
+  // An entry deleted on Hôm nay (or put back with Hoàn tác) changes the ticks: keep the saved day in step
+  useEffect(() => {
+    if (isPast || !hydrated || !saved) return;
+    if (ticked.length !== saved.ticked.length || ticked.some((id) => !saved.ticked.includes(id))) {
+      const next = { ...saved, ticked };
+      writeDay(todayIso, next);
+      setSaved(next);
+    }
+  }, [ticked, saved, isPast, hydrated, todayIso]);
+
+  const handleToggle = (item: TrainingCheckItem) => {
     if (isPast) return;
-    const next = toggleTick(ticked, itemId);
-    setTicked(next);
-    writeDay(todayIso, { minutes: trainingMinutes, ticked: next });
+    const day = { ...record, minutes: trainingMinutes, ticked };
+    if (ticked.includes(item.id)) {
+      // Untick: the linked entry goes, with the usual Hoàn tác (which ticks the item again)
+      const link = day.logged?.[item.id];
+      if (link && getEntry(link.entryId)) deleteEntry(link.entryId);
+      saveDay(untick(day, item.id));
+    } else if (canLogItem(item, foods)) {
+      setLogItem(item);
+    } else if (!catalogPending) {
+      // No catalogue food for it (OPEN_QUESTIONS): a plain tick
+      saveDay({ ...day, ticked: [...ticked, item.id] });
+    }
+  };
+
+  const handleLogged = (itemId: string, entryId: string, qty: string) => {
+    saveDay(logTick({ ...record, minutes: trainingMinutes, ticked }, itemId, entryId, qty));
+    setLogItem(null);
+  };
+
+  const addOwn = (item: Omit<OwnTrainingItem, "id">) => {
+    const current = prefs ?? readPrefs();
+    savePrefs({ ...current, own: addOwnItem(current.own, item, `own-${generateUuid()}`) });
+    setOwnTarget(null);
+  };
+  const removeOwn = (item: TrainingCheckItem) => {
+    const current = prefs ?? readPrefs();
+    savePrefs({ ...current, own: removeOwnItem(current.own, item.id) });
+  };
+  const openOwn = (phase: TrainingPhase) => {
+    markUsed("training-add-item");
+    setOwnTarget({ phase: phase.id as TrainingPhaseId, name: phase.id === "pre-workout" ? "Trước tập" : "Trong tập" });
   };
 
   const handleSelectDuration = (id: string, minutes: number) => {
     markUsed("training-minutes");
     if (isPast) return;
     setSelectedDuration(id);
-    writeDay(todayIso, { minutes, ticked });
+    saveDay({ ...record, minutes, ticked });
     if (isLiveMode() && todayIso) {
       apiClient.setTraining(todayIso, minutes).catch(() => {});
     }
   };
 
   const saltTarget = useMemo(
-    () => calculateSaltTarget(trainingMinutes),
-    [trainingMinutes]
+    () => calculateSaltTarget(trainingMinutes, size),
+    [trainingMinutes, size]
   );
 
   const phases = useMemo(
-    () => getTrainingPhases(trainingMinutes, ticked),
-    [trainingMinutes, ticked]
+    () => getTrainingPhases(trainingMinutes, ticked, { size, logged: loggedAmounts(record, ticked), own: prefs?.own ?? [] }),
+    [trainingMinutes, ticked, size, record, prefs]
   );
   // The rest-day tips quote this user's protein and energy targets (from Hồ sơ), not a sample profile's
   const restTargets = useMemo(() => targetsFor(profile), [profile]);
@@ -186,6 +284,12 @@ function TrainingContent() {
         />
 
         <main className="flex-1 w-full max-w-[560px] mx-auto px-4 pt-4 pb-6 flex flex-col gap-3">
+          {!isPast && prefs && (
+            <div className="flex items-center gap-2">
+              <TrainingSizeChip size={size} onClick={openSizeFromChip} />
+            </div>
+          )}
+
           {isRestDay && !isPast && <RestDayCard targets={restTargets} />}
 
           {showChecklist && (
@@ -193,6 +297,8 @@ function TrainingContent() {
               phases={phases}
               ticked={ticked}
               onToggle={handleToggle}
+              onAddItem={openOwn}
+              onRemoveItem={removeOwn}
               readOnly={isPast}
               variant="mobile"
             />
@@ -227,7 +333,10 @@ function TrainingContent() {
             backHref={diaryHref}
             alignGroup="training-header"
             actions={
-              <DurationSelector value={activeDuration} onChange={handleSelectDuration} variant="desktop" disabled={isPast} />
+              <div className="flex items-center gap-3">
+                {!isPast && prefs && <TrainingSizeChip size={size} onClick={openSizeFromChip} className="shrink-0" />}
+                <DurationSelector value={activeDuration} onChange={handleSelectDuration} variant="desktop" disabled={isPast} />
+              </div>
             }
           />
 
@@ -262,6 +371,8 @@ function TrainingContent() {
                 phases={phases}
                 ticked={ticked}
                 onToggle={handleToggle}
+                onAddItem={openOwn}
+                onRemoveItem={removeOwn}
                 readOnly={isPast}
                 variant="desktop"
               />
@@ -271,6 +382,10 @@ function TrainingContent() {
           )}
         </main>
       </div>
+
+      <TrainingSizeSheet open={sizeOpen} value={size} onChoose={chooseSize} onClose={() => setSizeOpen(false)} />
+      <TrainingLogSheet item={logItem} foods={foods} onClose={() => setLogItem(null)} onLogged={handleLogged} />
+      <OwnItemSheet target={ownTarget} onClose={() => setOwnTarget(null)} onAdd={addOwn} />
     </div>
   );
 }
