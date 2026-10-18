@@ -1,6 +1,7 @@
 import { formatAmount } from "./format";
 import { targetRangeText } from "./profile";
 import type { CompleteTargets } from "./targets";
+import type { OwnTrainingItem, TrainingPhaseId } from "./training-prefs";
 
 export const BASE_SALT_MIN = 4;
 export const BASE_SALT_MAX = 6;
@@ -26,11 +27,26 @@ export interface TrainingDurationOption {
   label: string;
 }
 
+/** cc-52: Bé takes the lower end of every coach range, Bự the upper. */
+export type TrainingSize = "be" | "bu";
+
+export const TRAINING_SIZE_NAME: Record<TrainingSize, string> = { be: "Bé", bu: "Bự" };
+
+const pickEnd = (min: number, max: number, size: TrainingSize | null) => (size === "bu" ? max : min);
+
 export interface TrainingCheckItem {
   id: string;
   label: string;
   note: string;
   dose: string;
+  /** The portion a tick logs, in grams: the dose at the chosen end (the lower end until a size is chosen) */
+  grams?: number;
+  /** Coach item: what it can log (lib/training-foods choices); several = the user picks one in the sheet */
+  foods?: readonly string[];
+  /** The user's own item: logs this catalogue food, and can be removed */
+  own?: boolean;
+  foodId?: string;
+  servingLabel?: string;
 }
 
 export interface TrainingPhase {
@@ -58,50 +74,33 @@ export function formatSaltRange(min: number, max: number): string {
 
 /**
  * Calculate base salt, top-up salt (1–1,5 g per 20 min training), total salt, and sodium.
+ * With a size (cc-52), every range collapses to its chosen end: Bé 4 g + 1 g per 20 min, Bự 6 g + 1,5 g.
  */
-export function calculateSaltTarget(trainingMinutes = 0): SaltTarget {
-  if (trainingMinutes <= 0) {
-    const totalMin = BASE_SALT_MIN;
-    const totalMax = BASE_SALT_MAX;
-    const sodiumMin = Math.round(totalMin * SODIUM_MG_PER_G_SALT);
-    const sodiumMax = Math.round(totalMax * SODIUM_MG_PER_G_SALT);
-
-    return {
-      baseMin: BASE_SALT_MIN,
-      baseMax: BASE_SALT_MAX,
-      topUpMin: 0,
-      topUpMax: 0,
-      totalMin,
-      totalMax,
-      sodiumMin,
-      sodiumMax,
-      formattedTopUp: "0",
-      formattedTotal: formatSaltRange(totalMin, totalMax),
-      formattedSodiumRange: `${formatAmount(sodiumMin, "mg")}–${formatAmount(sodiumMax, "mg")} mg`,
-    };
-  }
-
-  const intervals = trainingMinutes / 20;
-  const topUpMin = intervals * 1.0;
-  const topUpMax = intervals * 1.5;
-  const totalMin = BASE_SALT_MIN + topUpMin;
-  const totalMax = BASE_SALT_MAX + topUpMax;
-
+export function calculateSaltTarget(trainingMinutes = 0, size: TrainingSize | null = null): SaltTarget {
+  const intervals = trainingMinutes > 0 ? trainingMinutes / 20 : 0;
+  const end = (min: number, max: number): [number, number] => (size ? [pickEnd(min, max, size), pickEnd(min, max, size)] : [min, max]);
+  const [baseMin, baseMax] = end(BASE_SALT_MIN, BASE_SALT_MAX);
+  const [topUpMin, topUpMax] = end(intervals * 1.0, intervals * 1.5);
+  const totalMin = baseMin + topUpMin;
+  const totalMax = baseMax + topUpMax;
   const sodiumMin = Math.round(totalMin * SODIUM_MG_PER_G_SALT);
   const sodiumMax = Math.round(totalMax * SODIUM_MG_PER_G_SALT);
 
   return {
-    baseMin: BASE_SALT_MIN,
-    baseMax: BASE_SALT_MAX,
+    baseMin,
+    baseMax,
     topUpMin,
     topUpMax,
     totalMin,
     totalMax,
     sodiumMin,
     sodiumMax,
-    formattedTopUp: formatSaltRange(topUpMin, topUpMax),
+    formattedTopUp: intervals > 0 ? formatSaltRange(topUpMin, topUpMax) : "0",
     formattedTotal: formatSaltRange(totalMin, totalMax),
-    formattedSodiumRange: `${formatAmount(sodiumMin, "mg")}–${formatAmount(sodiumMax, "mg")} mg`,
+    formattedSodiumRange:
+      sodiumMin === sodiumMax
+        ? `${formatAmount(sodiumMin, "mg")} mg`
+        : `${formatAmount(sodiumMin, "mg")}–${formatAmount(sodiumMax, "mg")} mg`,
   };
 }
 
@@ -118,29 +117,53 @@ export function getTrainingDurations(): TrainingDurationOption[] {
   ];
 }
 
+export interface TrainingPhaseOptions {
+  size?: TrainingSize | null;
+  /** The amount each ticked item logged, by item id: its note says so ("✓ Đã ghi 1,5 g") */
+  logged?: Readonly<Record<string, string>>;
+  /** The user's own items, shown after the coach items of their phase */
+  own?: readonly OwnTrainingItem[];
+}
+
+/** A coach dose: fixed (30 g), or a range shown and pre-filled at the chosen end (the lower end until one is chosen). */
+function coachDose(min: number, max: number, size: TrainingSize | null): Pick<TrainingCheckItem, "dose" | "grams"> {
+  if (min === max || size) {
+    const grams = pickEnd(min, max, size);
+    return { dose: `${formatAmount(grams, "g")} g`, grams };
+  }
+  return { dose: `${formatSaltRange(min, max)} g`, grams: min };
+}
+
 /**
  * Generate checklist phases for a given training duration.
  */
-export function getTrainingPhases(trainingMinutes: number, ticked: readonly string[] = []): TrainingPhase[] {
+export function getTrainingPhases(
+  trainingMinutes: number,
+  ticked: readonly string[] = [],
+  { size = null, logged = {}, own = [] }: TrainingPhaseOptions = {}
+): TrainingPhase[] {
   if (trainingMinutes <= 0) {
     return [];
   }
-  // A "✓ Đã ghi" note only for an item the user ticked that day; an untouched day shows none
-  const loggedNote = (id: string, note: string) => (ticked.includes(id) ? note : "");
+  // A ✓ note only for an item the user ticked that day; an untouched day shows none
+  const note = (id: string, untickedNote = "") =>
+    ticked.includes(id) ? (logged[id] ? `✓ Đã ghi ${logged[id]}` : "✓ Đã dùng") : untickedNote;
+
+  const ownOf = (phase: TrainingPhaseId): TrainingCheckItem[] =>
+    own
+      .filter((i) => i.phase === phase)
+      .map((i) => ({ id: i.id, label: i.name, note: note(i.id), dose: i.label, grams: i.grams, own: true, foodId: i.foodId, servingLabel: i.label }));
 
   const preItems: TrainingCheckItem[] = [
-    {
-      id: "pre-cha-la",
-      label: "Chà là",
-      note: loggedNote("pre-cha-la", "✓ Đã dùng"),
-      dose: "30 g",
-    },
+    { id: "pre-cha-la", label: "Chà là", note: note("pre-cha-la"), ...coachDose(30, 30, size), foods: ["cha-la"] },
     {
       id: "pre-cu-den",
       label: "Bột củ dền (Dalahouse)",
-      note: "Tăng lưu chuyển dinh dưỡng",
-      dose: "3 g",
+      note: note("pre-cu-den", "Tăng lưu chuyển dinh dưỡng"),
+      ...coachDose(3, 3, size),
+      foods: ["cu-den"],
     },
+    ...ownOf("pre-workout"),
   ];
 
   // Intra items: 20-min salt doses + Fast Carb
@@ -152,20 +175,17 @@ export function getTrainingPhases(trainingMinutes: number, ticked: readonly stri
     const endMin = (i + 1) * 20;
     const id = `intra-salt-${startMin}-${endMin}`;
 
-    intraItems.push({
-      id,
-      label: `Muối · phút ${startMin}–${endMin}`,
-      note: loggedNote(id, "✓ Đã dùng"),
-      dose: "1–1,5 g",
-    });
+    intraItems.push({ id, label: `Muối · phút ${startMin}–${endMin}`, note: note(id), ...coachDose(1, 1.5, size), foods: ["muoi"] });
   }
 
   intraItems.push({
     id: "intra-carb",
     label: "Tinh bột nhanh",
-    note: "Redbull · Redbull + mật mía · mật mía Golden Barrel",
-    dose: "30–45 g",
+    note: note("intra-carb", "Redbull · Redbull + mật mía · mật mía Golden Barrel"),
+    ...coachDose(30, 45, size),
+    foods: ["redbull", "redbull-mat-mia", "mat-mia"],
   });
+  intraItems.push(...ownOf("intra-workout"));
 
   return [
     {

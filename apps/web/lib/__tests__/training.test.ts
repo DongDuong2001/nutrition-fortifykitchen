@@ -124,6 +124,80 @@ describe("Training calculations (lib/training.ts)", () => {
     });
   });
 
+  // cc-52: Bé takes the lower end of every coach range, Bự the upper (HANDOFF: 4–6 g a day, 1–1,5 g per 20 min, 30–45 g fast carbs)
+  describe("Bự / Bé", () => {
+    it("Bé: the header total is the lower end (4 g + 1 g per 20 min)", () => {
+      const t = calculateSaltTarget(60, "be");
+      expect([t.totalMin, t.totalMax]).toEqual([7, 7]);
+      expect(t.formattedTotal).toBe("7");
+      expect(t.formattedTopUp).toBe("3");
+      expect([t.baseMin, t.baseMax]).toEqual([4, 4]);
+      expect(t.formattedSodiumRange).toBe("2.751 mg");
+    });
+
+    it("Bự: the header total is the upper end (6 g + 1,5 g per 20 min)", () => {
+      const t = calculateSaltTarget(60, "bu");
+      expect(t.formattedTotal).toBe("10,5");
+      expect(t.formattedTopUp).toBe("4,5");
+      expect(calculateSaltTarget(0, "bu").formattedTotal).toBe("6");
+      expect(calculateSaltTarget(0, "be").formattedTotal).toBe("4");
+    });
+
+    it("no choice keeps the ranges", () => {
+      expect(calculateSaltTarget(60, null).formattedTotal).toBe("7–10,5");
+    });
+
+    const doses = (size: "be" | "bu" | null) =>
+      Object.fromEntries(getTrainingPhases(60, [], { size }).flatMap((p) => p.items.map((i) => [i.id, [i.dose, i.grams]])));
+
+    it("ranged doses show and pre-fill the chosen end; fixed doses stay as written", () => {
+      expect(doses("be")["intra-salt-0-20"]).toEqual(["1 g", 1]);
+      expect(doses("bu")["intra-salt-0-20"]).toEqual(["1,5 g", 1.5]);
+      expect(doses("be")["intra-carb"]).toEqual(["30 g", 30]);
+      expect(doses("bu")["intra-carb"]).toEqual(["45 g", 45]);
+      for (const size of ["be", "bu"] as const) {
+        expect(doses(size)["pre-cha-la"]).toEqual(["30 g", 30]);
+        expect(doses(size)["pre-cu-den"]).toEqual(["3 g", 3]);
+      }
+    });
+
+    it("no choice shows the ranges and pre-fills the lower end", () => {
+      expect(doses(null)["intra-salt-0-20"]).toEqual(["1–1,5 g", 1]);
+      expect(doses(null)["intra-carb"]).toEqual(["30–45 g", 30]);
+    });
+
+    it("each coach item names the catalogue foods it logs", () => {
+      const foods = Object.fromEntries(getTrainingPhases(60).flatMap((p) => p.items.map((i) => [i.id, i.foods])));
+      expect(foods["pre-cha-la"]).toEqual(["cha-la"]);
+      expect(foods["pre-cu-den"]).toEqual(["cu-den"]);
+      expect(foods["intra-salt-20-40"]).toEqual(["muoi"]);
+      expect(foods["intra-carb"]).toEqual(["redbull", "redbull-mat-mia", "mat-mia"]);
+    });
+  });
+
+  describe("logged notes and own items (cc-52)", () => {
+    it("a logged item says how much was logged", () => {
+      const phases = getTrainingPhases(60, ["intra-salt-0-20"], { logged: { "intra-salt-0-20": "1,5 g" } });
+      expect(phases[1].items[0].note).toBe("✓ Đã ghi 1,5 g");
+    });
+
+    it("a ticked item with nothing logged (no catalogue food) still says ✓ Đã dùng", () => {
+      expect(getTrainingPhases(60, ["pre-cu-den"])[0].items[1].note).toBe("✓ Đã dùng");
+    });
+
+    it("own items follow the coach items of their phase, with their amount as the dose", () => {
+      const own = [
+        { id: "own-1", phase: "pre-workout" as const, foodId: "food-dua", name: "Nước dừa", grams: 250, label: "250 g" },
+        { id: "own-2", phase: "intra-workout" as const, foodId: "food-cam", name: "Cam", grams: 130, label: "1 quả" },
+      ];
+      const phases = getTrainingPhases(60, ["own-1"], { own, logged: { "own-1": "250 g" } });
+      expect(phases[0].items.map((i) => i.id)).toEqual(["pre-cha-la", "pre-cu-den", "own-1"]);
+      expect(phases[0].items[2]).toMatchObject({ label: "Nước dừa", dose: "250 g", own: true, foodId: "food-dua", grams: 250, servingLabel: "250 g", note: "✓ Đã ghi 250 g" });
+      expect(phases[1].items.at(-1)).toMatchObject({ id: "own-2", label: "Cam", dose: "1 quả", own: true });
+      expect(phases[1].items.slice(0, -1).every((i) => !i.own)).toBe(true);
+    });
+  });
+
   describe("getRestDayTips", () => {
     it("returns 3 recovery tips matching TrainingRest design", () => {
       const tips = getRestDayTips(targetsFor(SAMPLE_PROFILE));
