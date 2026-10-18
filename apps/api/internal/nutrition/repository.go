@@ -41,12 +41,29 @@ func (r *pgxRepository) SearchFoods(ctx context.Context, filter FoodSearchFilter
 	whereClauses := []string{"1=1"}
 	args := []any{}
 	argIdx := 1
+	var searchTerms []string
 
 	if filter.Query != "" {
-		// Use unaccent trigram matching or ilike
-		whereClauses = append(whereClauses, fmt.Sprintf("(name_search ILIKE '%%' || lower(unaccent($%d::text)) || '%%' OR name_search %% lower(unaccent($%d::text)))", argIdx, argIdx))
-		args = append(args, filter.Query)
-		argIdx++
+		q := strings.TrimSpace(filter.Query)
+		searchTerms = []string{q}
+		lowerQ := strings.ToLower(q)
+		if strings.Contains(lowerQ, "trái") {
+			searchTerms = append(searchTerms, strings.ReplaceAll(lowerQ, "trái", "quả"))
+		} else if strings.Contains(lowerQ, "trai") {
+			searchTerms = append(searchTerms, strings.ReplaceAll(lowerQ, "trai", "qua"))
+		} else if strings.Contains(lowerQ, "quả") {
+			searchTerms = append(searchTerms, strings.ReplaceAll(lowerQ, "quả", "trái"))
+		} else if strings.Contains(lowerQ, "qua") {
+			searchTerms = append(searchTerms, strings.ReplaceAll(lowerQ, "qua", "trai"))
+		}
+
+		var orClauses []string
+		for _, term := range searchTerms {
+			orClauses = append(orClauses, fmt.Sprintf("(name_search ILIKE '%%' || lower(unaccent($%d::text)) || '%%' OR name_search %% lower(unaccent($%d::text)))", argIdx, argIdx))
+			args = append(args, term)
+			argIdx++
+		}
+		whereClauses = append(whereClauses, "("+strings.Join(orClauses, " OR ")+")")
 	}
 
 	if filter.Category != "" && filter.Category != "all" {
@@ -74,7 +91,11 @@ func (r *pgxRepository) SearchFoods(ctx context.Context, filter FoodSearchFilter
 
 	orderBy := "is_custom ASC, name_vi ASC"
 	if filter.Query != "" {
-		orderBy = "CASE WHEN name_search ILIKE lower(unaccent($1::text)) || '%' THEN 1 WHEN name_search ILIKE '%' || lower(unaccent($1::text)) || '%' THEN 2 ELSE 3 END, similarity(name_search, lower(unaccent($1::text))) DESC, is_custom ASC, name_vi ASC"
+		if len(searchTerms) > 1 {
+			orderBy = "CASE WHEN name_search ILIKE lower(unaccent($1::text)) || '%' THEN 1 WHEN name_search ILIKE '%' || lower(unaccent($1::text)) || '%' THEN 2 WHEN name_search ILIKE '%' || lower(unaccent($2::text)) || '%' THEN 3 ELSE 4 END, similarity(name_search, lower(unaccent($1::text))) DESC, similarity(name_search, lower(unaccent($2::text))) DESC, is_custom ASC, name_vi ASC"
+		} else {
+			orderBy = "CASE WHEN name_search ILIKE lower(unaccent($1::text)) || '%' THEN 1 WHEN name_search ILIKE '%' || lower(unaccent($1::text)) || '%' THEN 2 ELSE 3 END, similarity(name_search, lower(unaccent($1::text))) DESC, is_custom ASC, name_vi ASC"
+		}
 	}
 
 	querySQL := fmt.Sprintf(`
