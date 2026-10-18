@@ -42,6 +42,7 @@ import { defaultPortionOf, parseGramsInput } from "@/lib/portion";
 import { MealSwitcher } from "@/components/meal-switcher";
 import { PortionPanel } from "@/components/ui/portion-panel";
 import { HomeScreen } from "@/components/home/home-screen";
+import { AppShell } from "@/components/ui/app-shell";
 
 import { useMealSlot } from "@/lib/use-meal-slot";
 import { HOME_ROUTE } from "@/lib/nav";
@@ -85,9 +86,23 @@ function AddFoodInner() {
   // desktop) slides up from @starting-style, and ✕, the scrim or a drag down slide it away before the route pops.
   const panelRef = useRef<HTMLDivElement>(null);
   const behindRef = useRef<HTMLDivElement>(null);
-  const [closing, setClosing] = useState(false);
+  // cc-57: closing sets data-state="closed" on these elements directly (no React re-render of the page and its Hôm nay
+  // backdrop just as the slide starts), so the render below never changes sheetState
+  const scrimRef = useRef<HTMLDivElement>(null);
+  const desktopWrapRef = useRef<HTMLDivElement>(null);
   const closingRef = useRef(false);
-  const sheetState = closing ? "closed" : "open";
+  const closeTimer = useRef<number | undefined>(undefined);
+  const sheetState = "open";
+  // The picture of Hôm nay behind the sheet is one element for the life of the page: nothing here re-renders it
+  // (Hôm nay's own frame is app/(tabs)/layout.tsx, which /add is outside: the backdrop brings its own)
+  const backdrop = useMemo(
+    () => (
+      <AppShell alignContainer="home-page">
+        <HomeScreen backdrop />
+      </AppShell>
+    ),
+    []
+  );
   useEffect(() => {
     if (behindRef.current) behindRef.current.scrollTop = homeScroll();
   }, []);
@@ -331,10 +346,30 @@ function AddFoodInner() {
       sessionStorage.setItem("return_focus_id", openerId);
     }
     // data-state="closed" also tells the Back that follows that the sheet has slid down already (lib/nav-direction)
-    setClosing(true);
+    for (const el of [scrimRef.current, dialogRef.current, panelRef.current]) {
+      if (!el) continue;
+      el.dataset.state = "closed";
+      if (el !== scrimRef.current) el.inert = true;
+    }
+    desktopWrapRef.current?.classList.add("pointer-events-none");
     if (instant) return goBack();
-    setTimeout(goBack, SHEET_EXIT_MS);
+    // Stored, so a Back pressed during the slide cancels it instead of going back twice
+    closeTimer.current = window.setTimeout(() => {
+      closeTimer.current = undefined;
+      if (window.location.pathname === "/add") goBack();
+    }, SHEET_EXIT_MS);
   }, [mealSlot, goBack]);
+  useEffect(() => {
+    const cancel = () => {
+      window.clearTimeout(closeTimer.current);
+      closeTimer.current = undefined;
+    };
+    window.addEventListener("popstate", cancel);
+    return () => {
+      window.removeEventListener("popstate", cancel);
+      cancel();
+    };
+  }, []);
   const panelDrag = useSheetDrag(panelRef, () => {
     markUsed("sheet-drag");
     handleClose();
@@ -420,17 +455,18 @@ function AddFoodInner() {
       {/* Hôm nay behind the sheet (both widths), scrolled to where it was left: a light, inert copy (HomeScreen backdrop);
           no blur on the scrim */}
       <div ref={behindRef} data-add-behind={cameFromHome() ? "home" : "light"} aria-hidden="true" inert className="pointer-events-none fixed inset-0 select-none overflow-hidden">
-        <HomeScreen backdrop />
+        {backdrop}
       </div>
-      <div aria-hidden="true" data-state={sheetState} onClick={() => handleClose()} className="m-scrim fixed inset-0 z-40 bg-scrim" />
+      <div ref={scrimRef} aria-hidden="true" data-state={sheetState} onClick={() => handleClose()} className="m-scrim m-scrim-dialog fixed inset-0 z-40 bg-scrim" />
 
       {/* ============================================================== */}
       {/* DESKTOP MODAL OVER TODAY (≥1024px)                             */}
       {/* ============================================================== */}
       <div className="hidden lg:block">
         <div
+          ref={desktopWrapRef}
           onClick={() => handleClose()}
-          className={`fixed inset-0 z-50 flex items-center justify-center p-4 ${closing ? "pointer-events-none" : ""}`}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
         >
           <div
             ref={dialogRef}
@@ -439,7 +475,6 @@ function AddFoodInner() {
             aria-labelledby="dlg-title"
             data-sheet-route
             data-state={sheetState}
-            inert={closing}
             onClick={(e) => e.stopPropagation()}
             className="m-pop w-[min(900px,100%-32px)] bg-card border border-card-border rounded-[18px] p-6 shadow-2xl flex flex-col gap-4 max-h-[92vh] overflow-y-auto"
           >
@@ -471,7 +506,7 @@ function AddFoodInner() {
                   type="button"
                   onClick={() => handleClose()}
                   aria-label="Đóng"
-                  className="w-11 h-11 rounded-full bg-surface text-text flex items-center justify-center border-0 cursor-pointer hover:bg-divider transition-colors active:scale-[0.97]"
+                  className="w-11 h-11 rounded-full bg-surface text-text flex items-center justify-center border-0 cursor-pointer hover:bg-divider active:scale-[0.97] transition-press"
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                     <path d="M6 6l12 12M18 6L6 18" />
@@ -563,7 +598,6 @@ function AddFoodInner() {
           data-add-panel
           data-sheet-route
           data-state={sheetState}
-          inert={closing}
           className="m-sheet m-vt-sheet fixed inset-x-0 bottom-0 top-[8dvh] z-40 flex flex-col rounded-t-[20px] bg-card shadow-xl"
         >
           {/* Pinned header: grabber, meal switcher + close, search, chips */}
@@ -588,7 +622,7 @@ function AddFoodInner() {
                   onClick={() => setSwitcherOpen(true)}
                   aria-haspopup="listbox"
                   aria-label="Đổi bữa"
-                  className="-ml-2 flex min-h-[44px] cursor-pointer items-center gap-2 rounded-lg border-0 bg-transparent px-2 text-lg text-text transition-transform active:scale-[0.98]"
+                  className="-ml-2 flex min-h-[44px] cursor-pointer items-center gap-2 rounded-lg border-0 bg-transparent px-2 text-lg text-text active:scale-[0.98] transition-press"
                 >
                   <span>
                     Thêm vào: <strong className="font-bold">{mealNameVi}</strong>
@@ -605,7 +639,7 @@ function AddFoodInner() {
                   type="button"
                   onClick={() => handleClose()}
                   aria-label="Đóng"
-                  className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border-0 bg-surface text-text active:scale-[0.97]"
+                  className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border-0 bg-surface text-text active:scale-[0.97] transition-press"
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                     <path d="M6 6l12 12M18 6L6 18" />

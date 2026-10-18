@@ -1,11 +1,11 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Suspense, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { Suspense, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { createPortal } from "react-dom";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AppShell, useShellBottomBar } from "@/components/ui/app-shell";
+import { useShellBottomBar } from "@/components/ui/shell-slot";
 import { AppHeader, HEADER_ICON_BUTTON } from "@/components/ui/app-header";
 import { IconShare } from "@/components/ui/icons";
 import { CalendarSheet } from "@/components/calendar-sheet";
@@ -70,11 +70,6 @@ import { navigateFromSheet } from "@/lib/sheet-history";
 // cc-51: loaded after the first paint (the share image with html-to-image, Có gì mới); neither shows until it opens
 const ShareSheet = dynamic(() => import("./share-sheet").then((m) => m.ShareSheet), { ssr: false });
 const WhatsNewHost = dynamic(() => import("@/components/whats-new/whats-new-host").then((m) => m.WhatsNewHost), { ssr: false });
-
-/** Hôm nay's frame (sidebar, nav) is app/(tabs)/layout.tsx. The /add backdrop is drawn outside it, so it brings its own. */
-function BackdropFrame({ backdrop, children }: { backdrop: boolean; children: React.ReactNode }) {
-  return backdrop ? <AppShell alignContainer="home-page">{children}</AppShell> : <>{children}</>;
-}
 
 function subscribeOnline(callback: () => void) {
   window.addEventListener("online", callback);
@@ -210,6 +205,25 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
   const setMode = (next: HomeMode) => setPicked({ iso: viewIso, mode: next });
   const shown = useMemo(() => (mode.kind === "day" ? valuesFromDay(day) : sumEntries(modeEntries(mode, entries))), [mode, day, entries]);
 
+  // cc-57: memoized, so the heavy columns only re-render when the day's numbers change (not for a sheet opening)
+  const nutrientTargets = useMemo(() => Object.fromEntries(countedIds.map((id) => [id, targetOf(day, id)])), [countedIds, day]);
+  const extras = useMemo(() => sumExtras(modeEntries(mode, entries)), [mode, entries]);
+  const levelCounts = useMemo(
+    () => (mode.kind === "day" ? levelSummary(shown.nutrients, nutrientTargets, countedIds) : undefined),
+    [mode.kind, shown, nutrientTargets, countedIds]
+  );
+  const macroTargets = useMemo(
+    () => ({ carbs: targetOf(day, "carbs"), protein: targetOf(day, "protein"), fat: targetOf(day, "fat"), fiber: targetOf(day, "fiber") }),
+    [day]
+  );
+  // cc-57: the frame and the hero come first; the food list and the nutrient column (the heavy part) follow in a
+  // second, low-priority render, so a tab tap or the + shows its first frame sooner
+  const heavyReady = useDeferredValue(true, false);
+  const openSources = useCallback((id: string) => {
+    markUsed("nutrient-sources");
+    setSourcesOf(id);
+  }, []);
+
   const goToDay = (iso: string) => navigateFromSheet(router, iso === todayIso ? HOME_ROUTE : `${HOME_ROUTE}?date=${iso}`);
 
   // Select mode belongs to the day it was started on, and ends when the day has no food left
@@ -256,7 +270,7 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
 
   if (showLoading) {
     return (
-      <BackdropFrame backdrop={backdrop}>
+      <>
         {!backdrop && <h1 className="sr-only">Hôm nay</h1>}
         <div className="h-[52px] rounded-b-[20px] bg-ink lg:hidden" />
         <main role="status" aria-busy="true" className="mx-auto flex w-full max-w-[560px] flex-col gap-3 px-3 pt-2 lg:mx-0 lg:max-w-[1240px] lg:px-8 lg:pt-8">
@@ -275,7 +289,7 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
             </div>
           </div>
         </main>
-      </BackdropFrame>
+      </>
     );
   }
 
@@ -309,16 +323,6 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
     }
     pills.push({ key: "clear", label: "Xem cả ngày ×", onClick: () => setMode(DAY_MODE) });
   }
-
-  const nutrientTargets = Object.fromEntries(countedIds.map((id) => [id, targetOf(day, id)]));
-  const extras = sumExtras(modeEntries(mode, entries));
-  const levelCounts = mode.kind === "day" ? levelSummary(shown.nutrients, nutrientTargets, countedIds) : undefined;
-  const macroTargets = {
-    carbs: targetOf(day, "carbs"),
-    protein: targetOf(day, "protein"),
-    fat: targetOf(day, "fat"),
-    fiber: targetOf(day, "fiber"),
-  };
 
   const desktopSubtitle = clientNow ? (
     <>
@@ -370,7 +374,7 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
   }
 
   return (
-    <BackdropFrame backdrop={backdrop}>
+    <>
       {barHost &&
         createPortal(
           <SelectActionBar
@@ -441,7 +445,7 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
             isPast ? (
               <Link
                 href={HOME_ROUTE}
-                className="-ml-2 inline-flex min-h-11 items-center whitespace-nowrap rounded-full px-2 text-[13px] font-bold text-sky no-underline hover:underline active:scale-[0.97] motion-reduce:active:scale-100 focus-visible:outline-sky"
+                className="-ml-2 inline-flex min-h-11 items-center whitespace-nowrap rounded-full px-2 text-[13px] font-bold text-sky no-underline hover:underline active:scale-[0.97] transition-press motion-reduce:active:scale-100 focus-visible:outline-sky"
               >
                 Về hôm nay
               </Link>
@@ -486,7 +490,7 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
                 type="button"
                 onClick={() => setExplainerOpen(true)}
                 aria-haspopup="dialog"
-                className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border-0 bg-transparent px-1 text-[13px] font-bold text-blue active:scale-[0.97] motion-reduce:active:scale-100"
+                className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border-0 bg-transparent px-1 text-[13px] font-bold text-blue active:scale-[0.97] transition-press motion-reduce:active:scale-100"
               >
                 <span>{levelLabel(level, coach.name)}</span>
                 <span aria-hidden="true">›</span>
@@ -494,36 +498,39 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
             </div>
           )}
           <div key={viewIso} data-align-group="home-page" data-align-from="lg" className={`${dayMotion.current.className} flex min-h-0 flex-1 border-t border-t-divider lg:gap-4 lg:border-t-0 lg:pb-8 ${coach && !selecting ? "lg:mt-2" : "mt-2 lg:mt-4"}`}>
-            <FoodList
-              meals={meals}
-              dayKey={viewIso}
-              onPullRefresh={isPast || backdrop ? undefined : refreshToday}
-              mode={mode}
-              readOnly={isPast}
-              isEmpty={nothingLogged}
-              canCopyYesterday={!isPast && nothingLogged && yesterdayEntries.length > 0}
-              onFood={(id) => setMode(toggleFood(mode, id))}
-              onMeal={(slot) => setMode(toggleMeal(mode, slot))}
-              onCopyYesterday={() => setIsCopySheetOpen(true)}
-              onLongPressSelect={(id) => startSelect(id)}
-              onMoveFood={(id, targetSlot) => {
-                if (isPast) return;
-                moveEntries([id], targetSlot, viewIso);
-              }}
-              select={
-                selecting
-                  ? {
-                      ids: liveSelected,
-                      onToggleFood: (id) => setSelectedIds((prev) => toggleId(prev, id)),
-                      onToggleMeal: (slot) => {
-                        const meal = meals.find((m) => m.slot === slot);
-                        if (meal) setSelectedIds((prev) => toggleMealSelection(prev, meal.entries));
-                      },
-                    }
-                  : undefined
-              }
-            />
-            {!selecting && (
+            {!heavyReady && <div className="flex-1" aria-hidden="true" />}
+            {heavyReady && (
+              <FoodList
+                meals={meals}
+                dayKey={viewIso}
+                onPullRefresh={isPast || backdrop ? undefined : refreshToday}
+                mode={mode}
+                readOnly={isPast}
+                isEmpty={nothingLogged}
+                canCopyYesterday={!isPast && nothingLogged && yesterdayEntries.length > 0}
+                onFood={(id) => setMode(toggleFood(mode, id))}
+                onMeal={(slot) => setMode(toggleMeal(mode, slot))}
+                onCopyYesterday={() => setIsCopySheetOpen(true)}
+                onLongPressSelect={(id) => startSelect(id)}
+                onMoveFood={(id, targetSlot) => {
+                  if (isPast) return;
+                  moveEntries([id], targetSlot, viewIso);
+                }}
+                select={
+                  selecting
+                    ? {
+                        ids: liveSelected,
+                        onToggleFood: (id) => setSelectedIds((prev) => toggleId(prev, id)),
+                        onToggleMeal: (slot) => {
+                          const meal = meals.find((m) => m.slot === slot);
+                          if (meal) setSelectedIds((prev) => toggleMealSelection(prev, meal.entries));
+                        },
+                      }
+                    : undefined
+                }
+              />
+            )}
+            {heavyReady && !selecting && (
               <NutrientColumn
                 values={shown}
                 extras={extras}
@@ -532,14 +539,7 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
                 targets={nutrientTargets}
                 selected={selected}
                 microsHref={`/micros?date=${viewIso}`}
-                onNutrient={
-                  isPast
-                    ? undefined
-                    : (id) => {
-                        markUsed("nutrient-sources");
-                        setSourcesOf(id);
-                      }
-                }
+                onNutrient={isPast ? undefined : openSources}
               />
             )}
           </div>
@@ -639,6 +639,6 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
       )}
       </>
       )}
-    </BackdropFrame>
+    </>
   );
 }
