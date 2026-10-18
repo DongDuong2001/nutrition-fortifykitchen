@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { CATALOG_FRESH_MS, CATALOG_MAX_AGE_MS, catalogCacheKey, catalogCacheState } from "../catalog-cache";
+import { CATALOG_FRESH_MS, CATALOG_MAX_AGE_MS, catalogCacheKey, catalogCacheState, withCatalogFood } from "../catalog-cache";
+import type { FoodItem } from "../mock/foods";
 
 // cc-50: the catalogue is kept on the device per account (custom foods are per user) and refreshed in the background.
 
@@ -26,5 +27,19 @@ describe("catalogCacheKey", () => {
     expect(catalogCacheKey("a@example.com")).toBe("foods:a@example.com");
     expect(catalogCacheKey("b@example.com")).not.toBe(catalogCacheKey("a@example.com"));
     expect(catalogCacheKey(null)).toBe("foods:guest");
+  });
+});
+
+describe("withCatalogFood (review 07:00: a food just made is in the device's copy)", () => {
+  const food = (id: string, nameVi: string) => ({ id, nameVi }) as FoodItem;
+  it("adds the new food first and keeps the copy's age (a fresh copy stays fresh, an old one is still refreshed)", () => {
+    const saved = { at: 1234, foods: [food("a", "Cơm"), food("b", "Phở")] };
+    const next = withCatalogFood(saved, food("mine", "Bánh của tôi"));
+    expect(next.at).toBe(1234);
+    expect(next.foods.map((f) => f.id)).toEqual(["mine", "a", "b"]);
+  });
+  it("a food with the same id is replaced, not doubled", () => {
+    const next = withCatalogFood({ at: 1, foods: [food("a", "Cũ"), food("b", "Phở")] }, food("a", "Mới"));
+    expect(next.foods.map((f) => f.nameVi)).toEqual(["Mới", "Phở"]);
   });
 });

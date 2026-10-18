@@ -20,7 +20,7 @@ import { shiftIsoDate } from "./day-history";
 import { generateUuid, isUuid } from "./uuid";
 import { refreshServerSession } from "./server-session";
 import { reportClientError } from "./client-errors";
-import { catalogCacheState, readCatalogCache, writeCatalogCache } from "./catalog-cache";
+import { addToCatalogCache, catalogCacheState, readCatalogCache, writeCatalogCache } from "./catalog-cache";
 import { normaliseCoaching } from "./coaching-link";
 import { isRecipeId } from "./recipe";
 import type { GoalType, SexType } from "./targets";
@@ -915,6 +915,7 @@ export const apiClient = {
           const raw = json.data ?? json;
           const mapped = mapApiFoodToFoodItem(raw);
           addCatalogFood(mapped);
+          void addToCatalogCache(currentAccountId(), mapped);
           return mapped;
         }
         let msg = `Không thể tạo món (${res.status})`;

@@ -70,3 +70,18 @@ export async function readCatalogCache(account: string | null): Promise<SavedCat
 export async function writeCatalogCache(account: string | null, foods: FoodItem[]): Promise<void> {
   await run("readwrite", (store) => store.put({ at: Date.now(), foods } satisfies SavedCatalog, catalogCacheKey(account)));
 }
+
+/** The copy with `food` added first (a food with the same id replaced); its age stays as it was. */
+export function withCatalogFood(saved: SavedCatalog, food: FoodItem): SavedCatalog {
+  return { at: saved.at, foods: [food, ...saved.foods.filter((f) => f.id !== food.id)] };
+}
+
+/**
+ * A food the user just made goes into the device's copy too, so an app reopened while the copy is fresh shows it
+ * (review 07:00). Without a copy there is nothing to change: the next load reads /foods, which has it.
+ */
+export async function addToCatalogCache(account: string | null, food: FoodItem): Promise<void> {
+  const saved = await readCatalogCache(account);
+  if (!saved) return;
+  await run("readwrite", (store) => store.put(withCatalogFood(saved, food), catalogCacheKey(account)));
+}
