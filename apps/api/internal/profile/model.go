@@ -19,6 +19,7 @@ type Profile struct {
 	DisplayName            *string   `json:"display_name,omitempty"`
 	Role                   string    `json:"role"`
 	Reminders              any       `json:"reminders"`
+	TrainingPrefs          any       `json:"training_prefs,omitempty"`
 	Targets                any       `json:"targets,omitempty"`
 	CreatedAt              time.Time `json:"created_at"`
 	UpdatedAt              time.Time `json:"updated_at"`
@@ -40,6 +41,7 @@ type UpsertProfileRequest struct {
 	NearPeriod             *bool    `json:"near_period,omitempty"`
 	Language               *string  `json:"language,omitempty"`
 	DisplayName            *string  `json:"display_name,omitempty"`
+	TrainingPrefs          any      `json:"training_prefs,omitempty"`
 }
 
 type UpsertWeightRequest struct {
