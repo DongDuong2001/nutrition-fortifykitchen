@@ -20,6 +20,11 @@ describe("RELEASES", () => {
     ]);
     expect(r?.tour?.map((s) => s.target)).toEqual(["training-size", "training-checklist", "training-add-item"]);
     expect(r?.tour?.every((s) => s.fallback === "training-pill")).toBe(true);
+    expect(r?.tour?.[1].body).toBe("Đánh dấu một món ở Ngày tập, xem lại khẩu phần rồi chọn Thêm. Món sẽ vào Bữa phụ.");
+    // AGENTS.md › Tutorials: 2–5 steps, short enough for one card at 390
+    expect(r?.tour?.length).toBeGreaterThanOrEqual(2);
+    expect(r?.tour?.length).toBeLessThanOrEqual(5);
+    for (const s of r?.tour ?? []) expect(s.body.length).toBeLessThanOrEqual(100);
   });
 
   it("then the fourth 18/10 release (2026-10-18d, cc-53): Ghi món theo cách bạn quen, with a 3-step tour", () => {

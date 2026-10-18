@@ -44,7 +44,7 @@ export const RELEASES: readonly Release[] = [
     ],
     tour: [
       { target: "training-size", fallback: "training-pill", title: "Nhóm Bự / Bé", body: "Ở Ngày tập, chạm Bé · đổi hoặc Bự · đổi để chọn liều thấp hay liều cao." },
-      { target: "training-checklist", fallback: "training-pill", title: "Đánh dấu để ghi", body: "Đánh dấu một món ở Ngày tập, kiểm tra khẩu phần rồi chọn Thêm: món vào Bữa phụ." },
+      { target: "training-checklist", fallback: "training-pill", title: "Đánh dấu để ghi", body: "Đánh dấu một món ở Ngày tập, xem lại khẩu phần rồi chọn Thêm. Món sẽ vào Bữa phụ." },
       { target: "training-add-item", fallback: "training-pill", title: "+ Thêm món", body: "Thêm món riêng như nước dừa, cam vào Trước tập hoặc Trong tập. Món ở lại cho mọi ngày tập." },
     ],
   },
