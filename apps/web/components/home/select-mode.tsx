@@ -43,7 +43,7 @@ export function SelectHeader({
 }
 
 const ACTION =
-  "inline-flex min-h-11 w-full cursor-pointer items-center justify-center rounded-full border px-3 text-[15px] font-bold active:scale-[0.97] disabled:cursor-default disabled:opacity-50 motion-reduce:active:scale-100";
+  "inline-flex min-h-11 w-full cursor-pointer items-center justify-center rounded-full border px-3 text-[15px] font-bold m-tint disabled:cursor-default disabled:opacity-50";
 
 /** The action bar of select mode, in the bottom nav's place: "N món · X kcal" and the buttons. */
 export function SelectActionBar({

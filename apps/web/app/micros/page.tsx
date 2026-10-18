@@ -462,7 +462,7 @@ function MicrosContent() {
                     type="button"
                     onClick={() => scrollToGroup(group.key)}
                     aria-pressed={isActive}
-                    className={`min-h-[44px] flex items-center shrink-0 cursor-pointer bg-transparent border-0 p-0 active:scale-[0.97] transition-all`}
+                    className={`min-h-[44px] flex items-center shrink-0 cursor-pointer bg-transparent border-0 p-0 active:scale-[0.97] transition-press`}
                   >
                     <span
                       className={`h-9 px-4 rounded-full text-xs font-semibold flex items-center justify-center whitespace-nowrap transition-colors ${
@@ -565,7 +565,7 @@ function MicrosContent() {
                   type="button"
                   onClick={() => scrollToGroup(group.key)}
                   aria-pressed={isActive}
-                  className={`min-h-[44px] flex items-center shrink-0 cursor-pointer bg-transparent border-0 p-0 active:scale-[0.97] transition-all`}
+                  className={`min-h-[44px] flex items-center shrink-0 cursor-pointer bg-transparent border-0 p-0 active:scale-[0.97] transition-press`}
                 >
                   <span
                     className={`h-9 px-4 rounded-full text-xs font-semibold flex items-center justify-center transition-colors ${
@@ -678,7 +678,7 @@ function GroupCard({
           type="button"
           onClick={onToggle}
           aria-expanded={isOpen}
-          className="w-full min-h-[48px] px-4 py-3 flex items-center justify-between text-left cursor-pointer bg-transparent border-0 active:scale-[0.99] transition-transform"
+          className="w-full min-h-[48px] px-4 py-3 flex items-center justify-between text-left cursor-pointer bg-transparent border-0 m-tint transition-transform"
         >
           <div className="w-full flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -801,7 +801,7 @@ function NutrientRow({ row, dateQuery = "" }: { row: NutrientRowData; dateQuery?
   return (
     <Link
       href={`/micros/${definition.id}${dateQuery}`}
-      className="no-underline text-inherit block hover:bg-surface/50 active:scale-[0.99] transition-all -mx-2 px-2 rounded-lg"
+      className="no-underline text-inherit block hover:bg-surface/50 m-tint transition-press -mx-2 px-2 rounded-lg"
     >
       {content}
     </Link>

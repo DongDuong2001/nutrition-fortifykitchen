@@ -49,7 +49,7 @@ export function MealSwitcher({
                 onSelectSlot(slot.id);
                 onClose();
               }}
-              className={`w-full min-h-[52px] px-4 rounded-xl flex items-center gap-3 cursor-pointer text-left transition-colors active:scale-[0.98] border-0 ${
+              className={`w-full min-h-[52px] px-4 rounded-xl flex items-center gap-3 cursor-pointer text-left transition-colors m-tint border-0 ${
                 isSelected
                   ? "bg-blue/10 text-text font-bold"
                   : "bg-surface hover:bg-paper-dark text-text font-medium"

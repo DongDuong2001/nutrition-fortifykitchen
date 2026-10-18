@@ -181,7 +181,7 @@ export function StackingAudiences() {
                 <div>
                   <Link
                     href={aud.ctaHref}
-                    className="min-h-[44px] px-6 rounded-full bg-blue text-on-accent text-xs sm:text-sm font-bold inline-flex items-center gap-2 no-underline hover:bg-blue/90 active:scale-[0.97] motion-reduce:active:scale-100 transition-all shadow-sm"
+                    className="min-h-[44px] px-6 rounded-full bg-blue text-on-accent text-xs sm:text-sm font-bold inline-flex items-center gap-2 no-underline hover:bg-blue/90 active:scale-[0.97] motion-reduce:active:scale-100 transition-press shadow-sm"
                   >
                     <span>{aud.ctaText}</span>
                     <span aria-hidden="true">&rarr;</span>

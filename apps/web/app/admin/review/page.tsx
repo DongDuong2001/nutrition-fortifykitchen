@@ -55,7 +55,7 @@ const PILL = {
   wait: "bg-warning-bg text-warning-text",
 } as const;
 
-const ACTION = "flex min-h-11 w-full cursor-pointer items-center justify-center rounded-full px-4 text-[13px] font-bold active:scale-[0.97] motion-reduce:active:scale-100";
+const ACTION = "flex min-h-11 w-full cursor-pointer items-center justify-center rounded-full px-4 text-[13px] font-bold m-tint";
 
 /**
  * Kiểm duyệt: the meal-plan drafts waiting for an admin (food drafts only; there is no coach application flow).

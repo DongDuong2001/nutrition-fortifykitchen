@@ -7,7 +7,7 @@ import { IconCheck, IconSparkles } from "@/components/ui/icons";
 import { initialsOf } from "./coach-initials";
 
 const LINK_BUTTON =
-  "flex min-h-11 w-full items-center justify-center rounded-full border border-card-border bg-card px-4 text-[13px] font-bold text-text no-underline hover:bg-surface hover:text-text active:scale-[0.97] motion-reduce:active:scale-100";
+  "flex min-h-11 w-full items-center justify-center rounded-full border border-card-border bg-card px-4 text-[13px] font-bold text-text no-underline hover:bg-surface hover:text-text m-tint";
 
 /** A coach's profile: who, what they know, what they recommend, how to reach them. The page's h1 is the name. */
 export function CoachDetailCard({ coach }: { coach: CoachProfile }) {
@@ -103,7 +103,7 @@ export function CoachDetailCard({ coach }: { coach: CoachProfile }) {
               href={coach.social.bookingUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex h-[52px] w-full items-center justify-center rounded-full bg-blue px-6 text-base font-bold text-on-accent no-underline hover:text-on-accent active:scale-[0.97] motion-reduce:active:scale-100"
+              className="flex h-[52px] w-full items-center justify-center rounded-full bg-blue px-6 text-base font-bold text-on-accent no-underline hover:text-on-accent m-tint"
             >
               Đặt lịch tư vấn 1:1
             </a>

@@ -61,13 +61,13 @@ export default function GlobalError({
             <button
               type="button"
               onClick={() => reset()}
-              className="h-[52px] w-full cursor-pointer rounded-full border-0 bg-blue px-6 text-base font-bold text-on-accent active:scale-[0.97] motion-reduce:active:scale-100"
+              className="h-[52px] w-full cursor-pointer rounded-full border-0 bg-blue px-6 text-base font-bold text-on-accent m-tint"
             >
               Tải lại trang
             </button>
             <a
               href={HOME_ROUTE}
-              className="flex h-[52px] w-full items-center justify-center rounded-full border border-card-border bg-card px-6 text-base font-bold text-text no-underline hover:text-text active:scale-[0.97] motion-reduce:active:scale-100"
+              className="flex h-[52px] w-full items-center justify-center rounded-full border border-card-border bg-card px-6 text-base font-bold text-text no-underline hover:text-text m-tint"
             >
               Về trang chủ
             </a>

@@ -111,13 +111,13 @@ export function DesktopIntroBanner() {
             <div className="flex items-center gap-3">
               <Link
                 href="/add"
-                className="min-h-[44px] px-5 rounded-full bg-blue text-on-accent font-bold text-xs inline-flex items-center justify-center no-underline hover:bg-blue/90 active:scale-[0.97] motion-reduce:active:scale-100 transition-all shadow-xs"
+                className="min-h-[44px] px-5 rounded-full bg-blue text-on-accent font-bold text-xs inline-flex items-center justify-center no-underline hover:bg-blue/90 active:scale-[0.97] motion-reduce:active:scale-100 transition-press shadow-xs"
               >
                 Thêm món vào bữa ăn
               </Link>
               <Link
                 href="/micros"
-                className="min-h-[44px] px-4 rounded-full bg-card border border-card-border text-text font-bold text-xs inline-flex items-center justify-center no-underline hover:bg-surface active:scale-[0.97] motion-reduce:active:scale-100 transition-all"
+                className="min-h-[44px] px-4 rounded-full bg-card border border-card-border text-text font-bold text-xs inline-flex items-center justify-center no-underline hover:bg-surface active:scale-[0.97] motion-reduce:active:scale-100 transition-press"
               >
                 Khám phá 22 vi chất
               </Link>

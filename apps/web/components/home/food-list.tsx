@@ -350,7 +350,7 @@ export function FoodList({
                 // Ignore parse error
               }
             }}
-            className={`transition-all duration-150 ${
+            className={`transition-press duration-150 ${
               isDropTarget ? "bg-blue/10 ring-2 ring-blue/60 rounded-xl" : ""
             }`}
           >

@@ -82,7 +82,7 @@ export function Row({
       <button
         type="button"
         onClick={onClick}
-        className={`w-full text-left bg-transparent border-0 cursor-pointer ${containerClasses} active:scale-[0.99]`}
+        className={`w-full text-left bg-transparent border-0 cursor-pointer ${containerClasses} m-tint`}
       >
         {content}
       </button>

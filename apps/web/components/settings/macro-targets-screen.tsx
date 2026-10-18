@@ -178,7 +178,7 @@ export function MacroTargetsScreen() {
               role="tab"
               aria-selected={mode === "ratios"}
               onClick={() => setMode("ratios")}
-              className={`min-h-11 rounded-lg text-[13px] font-bold transition-all ${
+              className={`min-h-11 rounded-lg text-[13px] font-bold transition-press ${
                 mode === "ratios" ? "bg-card text-text shadow-sm" : "bg-transparent text-secondary hover:text-text"
               }`}
             >
@@ -189,7 +189,7 @@ export function MacroTargetsScreen() {
               role="tab"
               aria-selected={mode === "fixed"}
               onClick={() => setMode("fixed")}
-              className={`min-h-11 rounded-lg text-[13px] font-bold transition-all ${
+              className={`min-h-11 rounded-lg text-[13px] font-bold transition-press ${
                 mode === "fixed" ? "bg-card text-text shadow-sm" : "bg-transparent text-secondary hover:text-text"
               }`}
             >
@@ -200,7 +200,7 @@ export function MacroTargetsScreen() {
               role="tab"
               aria-selected={mode === "keto"}
               onClick={() => setMode("keto")}
-              className={`min-h-11 rounded-lg text-[13px] font-bold transition-all ${
+              className={`min-h-11 rounded-lg text-[13px] font-bold transition-press ${
                 mode === "keto" ? "bg-card text-text shadow-sm" : "bg-transparent text-secondary hover:text-text"
               }`}
             >

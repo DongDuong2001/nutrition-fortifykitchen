@@ -37,7 +37,7 @@ export function Switch({
         }`}
       >
         <span
-          className={`absolute top-[2px] w-[27px] h-[27px] rounded-full bg-card shadow-[0_1px_3px_rgba(0,0,0,0.25)] transition-all duration-200 ${
+          className={`absolute top-[2px] w-[27px] h-[27px] rounded-full bg-card shadow-[0_1px_3px_rgba(0,0,0,0.25)] transition-press duration-200 ${
             checked ? "left-[22px]" : "left-[2px]"
           }`}
         />

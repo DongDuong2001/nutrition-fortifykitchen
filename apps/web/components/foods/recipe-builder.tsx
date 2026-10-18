@@ -236,7 +236,7 @@ export function RecipeBuilder({ state, excludeId }: { state: RecipeDraftState; e
           type="button"
           onClick={() => setPickerOpen(true)}
           aria-haspopup="dialog"
-          className="flex min-h-[48px] w-full cursor-pointer items-center justify-center rounded-xl border border-card-border bg-card px-4 text-sm font-semibold text-blue active:scale-[0.99] motion-reduce:active:scale-100"
+          className="flex min-h-[48px] w-full cursor-pointer items-center justify-center rounded-xl border border-card-border bg-card px-4 text-sm font-semibold text-blue m-tint"
         >
           + Thêm nguyên liệu
         </button>

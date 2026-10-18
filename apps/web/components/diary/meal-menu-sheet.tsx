@@ -28,7 +28,7 @@ export interface MealMenuSheetProps {
 }
 
 const optionClass =
-  "w-full min-h-[56px] px-1 py-2 flex flex-col items-start justify-center text-left bg-transparent border-0 border-t border-divider first:border-t-0 enabled:cursor-pointer enabled:active:scale-[0.99] disabled:cursor-default";
+  "w-full min-h-[56px] px-1 py-2 flex flex-col items-start justify-center text-left bg-transparent border-0 border-t border-divider first:border-t-0 enabled:cursor-pointer m-tint disabled:cursor-default";
 
 type Step = "menu" | "confirm" | "name" | "copy";
 
@@ -85,14 +85,14 @@ export function MealMenuSheet({
               onCopyYesterday();
               onClose();
             }}
-            className="mt-2 min-h-[52px] w-full cursor-pointer rounded-full border-0 bg-blue text-[15px] font-bold text-on-accent active:scale-[0.97] motion-reduce:active:scale-100"
+            className="mt-2 min-h-[52px] w-full cursor-pointer rounded-full border-0 bg-blue text-[15px] font-bold text-on-accent m-tint"
           >
             Thêm {yesterdayItemCount} món
           </button>
           <button
             type="button"
             onClick={() => setStep("menu")}
-            className="min-h-[52px] w-full cursor-pointer rounded-full border border-card-border bg-card text-[15px] font-bold text-text active:scale-[0.97] motion-reduce:active:scale-100"
+            className="min-h-[52px] w-full cursor-pointer rounded-full border border-card-border bg-card text-[15px] font-bold text-text m-tint"
           >
             Hủy
           </button>
@@ -108,14 +108,14 @@ export function MealMenuSheet({
               onDelete();
               onClose();
             }}
-            className="mt-2 min-h-[52px] w-full cursor-pointer rounded-full border border-destructive bg-card text-[15px] font-bold text-destructive-text active:scale-[0.97] motion-reduce:active:scale-100"
+            className="mt-2 min-h-[52px] w-full cursor-pointer rounded-full border border-destructive bg-card text-[15px] font-bold text-destructive-text m-tint"
           >
             Xóa bữa này
           </button>
           <button
             type="button"
             onClick={() => setStep("menu")}
-            className="min-h-[52px] w-full cursor-pointer rounded-full border border-card-border bg-card text-[15px] font-bold text-text active:scale-[0.97] motion-reduce:active:scale-100"
+            className="min-h-[52px] w-full cursor-pointer rounded-full border border-card-border bg-card text-[15px] font-bold text-text m-tint"
           >
             Hủy
           </button>
@@ -196,7 +196,7 @@ export function MealMenuSheet({
           <button
             type="button"
             onClick={onClose}
-            className="mt-1 min-h-[52px] w-full cursor-pointer rounded-full border border-card-border bg-card text-[15px] font-bold text-text active:scale-[0.97] motion-reduce:active:scale-100"
+            className="mt-1 min-h-[52px] w-full cursor-pointer rounded-full border border-card-border bg-card text-[15px] font-bold text-text m-tint"
           >
             Đóng
           </button>

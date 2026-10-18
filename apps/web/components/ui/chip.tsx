@@ -16,7 +16,7 @@ export function Chip({
     <button
       type="button"
       aria-pressed={selected}
-      className={`h-11 px-4 rounded-full text-sm font-semibold inline-flex items-center justify-center transition-all duration-150 cursor-pointer select-none active:scale-[0.97] min-h-[44px] ${
+      className={`h-11 px-4 rounded-full text-sm font-semibold inline-flex items-center justify-center transition-press duration-150 cursor-pointer select-none active:scale-[0.97] min-h-[44px] ${
         selected
           ? "bg-ink text-on-dark border-0 shadow-sm"
           : "bg-surface text-text border border-card-border hover:bg-paper-dark"

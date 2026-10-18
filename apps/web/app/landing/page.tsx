@@ -165,7 +165,7 @@ export default function LandingPage() {
             </Link>
             <Link
               href="/signup"
-              className="min-h-[44px] px-5 rounded-full bg-blue text-on-accent text-sm font-bold inline-flex items-center justify-center no-underline hover:bg-blue/90 active:scale-[0.97] motion-reduce:active:scale-100 transition-all shadow-sm"
+              className="min-h-[44px] px-5 rounded-full bg-blue text-on-accent text-sm font-bold inline-flex items-center justify-center no-underline hover:bg-blue/90 active:scale-[0.97] motion-reduce:active:scale-100 transition-press shadow-sm"
             >
               Bắt đầu ngay
             </Link>
@@ -198,13 +198,13 @@ export default function LandingPage() {
               <div className="mt-8 flex flex-wrap items-center gap-4">
                 <Link
                   href="/signup"
-                  className="min-h-[50px] px-8 rounded-full bg-blue text-on-accent text-base font-bold inline-flex items-center justify-center no-underline hover:bg-blue/90 active:scale-[0.97] motion-reduce:active:scale-100 transition-all shadow-md"
+                  className="min-h-[50px] px-8 rounded-full bg-blue text-on-accent text-base font-bold inline-flex items-center justify-center no-underline hover:bg-blue/90 active:scale-[0.97] motion-reduce:active:scale-100 transition-press shadow-md"
                 >
                   Tạo tài khoản miễn phí
                 </Link>
                 <Link
                   href="/signin"
-                  className="min-h-[50px] px-7 rounded-full bg-card border border-card-border text-text text-base font-bold inline-flex items-center justify-center no-underline hover:bg-divider active:scale-[0.97] motion-reduce:active:scale-100 transition-all"
+                  className="min-h-[50px] px-7 rounded-full bg-card border border-card-border text-text text-base font-bold inline-flex items-center justify-center no-underline hover:bg-divider active:scale-[0.97] motion-reduce:active:scale-100 transition-press"
                 >
                   Đăng nhập tài khoản
                 </Link>
@@ -277,7 +277,7 @@ export default function LandingPage() {
             {STEPS.map((step) => (
               <div
                 key={step.num}
-                className="relative flex flex-col justify-between p-6 sm:p-8 rounded-3xl border border-card-border/90 bg-card shadow-sm hover:shadow-lg hover:border-blue/50 transition-all duration-300 group"
+                className="relative flex flex-col justify-between p-6 sm:p-8 rounded-3xl border border-card-border/90 bg-card shadow-sm hover:shadow-lg hover:border-blue/50 transition-press duration-300 group"
               >
                 <div>
                   <div className="flex items-center justify-between mb-4">
@@ -327,7 +327,7 @@ export default function LandingPage() {
             {TRANSPARENCY_PRINCIPLES.map((item) => (
               <div
                 key={item.title}
-                className="rounded-3xl border border-card-border/85 bg-card p-7 sm:p-8 shadow-sm hover:shadow-md hover:border-blue/40 transition-all duration-300 flex flex-col justify-between group"
+                className="rounded-3xl border border-card-border/85 bg-card p-7 sm:p-8 shadow-sm hover:shadow-md hover:border-blue/40 transition-press duration-300 flex flex-col justify-between group"
               >
                 <div>
                   <div className="flex items-center justify-between gap-4 mb-4">
@@ -390,13 +390,13 @@ export default function LandingPage() {
           <div className="mt-8 flex flex-wrap gap-4 justify-center">
             <Link
               href="/signup"
-              className="min-h-[50px] px-8 rounded-full bg-blue text-on-accent text-base font-bold inline-flex items-center justify-center no-underline hover:bg-blue/90 active:scale-[0.97] motion-reduce:active:scale-100 transition-all shadow-md"
+              className="min-h-[50px] px-8 rounded-full bg-blue text-on-accent text-base font-bold inline-flex items-center justify-center no-underline hover:bg-blue/90 active:scale-[0.97] motion-reduce:active:scale-100 transition-press shadow-md"
             >
               Đăng ký miễn phí
             </Link>
             <Link
               href="/signin"
-              className="min-h-[50px] px-7 rounded-full bg-card/20 border border-card-border/40 text-on-dark text-base font-bold inline-flex items-center justify-center no-underline hover:bg-card/30 active:scale-[0.97] motion-reduce:active:scale-100 transition-all"
+              className="min-h-[50px] px-7 rounded-full bg-card/20 border border-card-border/40 text-on-dark text-base font-bold inline-flex items-center justify-center no-underline hover:bg-card/30 active:scale-[0.97] motion-reduce:active:scale-100 transition-press"
             >
               Đăng nhập tài khoản
             </Link>

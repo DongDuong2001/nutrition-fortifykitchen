@@ -21,7 +21,7 @@ export function FloatingPhone() {
         }
         .floating-phone-wrap {
           transform-style: preserve-3d;
-          animation: float-phone 5s ease-in-out infinite;
+          animation: float-phone 5s var(--ease-in-out) infinite;
         }
         @media (prefers-reduced-motion: reduce) {
           .floating-phone-wrap {
