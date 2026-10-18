@@ -51,7 +51,7 @@ export function BottomNav({ currentTab, className = "" }: BottomNavProps) {
   return (
     <nav
       aria-label="Điều hướng chính"
-      className={`h-[calc(72px+env(safe-area-inset-bottom))] pb-[env(safe-area-inset-bottom)] flex-none bg-ink w-full select-none box-border ${className}`}
+      className={`m-vt-nav h-[calc(72px+env(safe-area-inset-bottom))] pb-[env(safe-area-inset-bottom)] flex-none bg-ink w-full select-none box-border ${className}`}
     >
       <div className="w-full max-w-[560px] mx-auto px-4 h-[72px] grid grid-cols-5 items-center">
         {renderTab(first)}
