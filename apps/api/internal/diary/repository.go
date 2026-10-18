@@ -80,7 +80,7 @@ func (r *pgxDiaryRepo) GetDayEntries(ctx context.Context, userID uuid.UUID, date
 		entries = append(entries, item)
 	}
 
-	return entries, nil
+	return entries, rows.Err()
 }
 
 func (r *pgxDiaryRepo) GetDayTraining(ctx context.Context, userID uuid.UUID, date string) (int, error) {

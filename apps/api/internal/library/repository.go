@@ -53,7 +53,7 @@ func (r *pgxLibraryRepo) GetFavourites(ctx context.Context, userID uuid.UUID) ([
 		}
 		list = append(list, item)
 	}
-	return list, nil
+	return list, rows.Err()
 }
 
 func (r *pgxLibraryRepo) AddFavourite(ctx context.Context, userID uuid.UUID, foodID uuid.UUID) error {
@@ -102,7 +102,7 @@ func (r *pgxLibraryRepo) GetRecents(ctx context.Context, userID uuid.UUID, limit
 		}
 		list = append(list, item)
 	}
-	return list, nil
+	return list, rows.Err()
 }
 
 func (r *pgxLibraryRepo) UpsertRecent(ctx context.Context, userID uuid.UUID, foodID uuid.UUID, portionLabel string, grams float64) error {

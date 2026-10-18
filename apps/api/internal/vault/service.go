@@ -188,7 +188,7 @@ func (s *vaultService) ListDrafts(ctx context.Context, status string) ([]CoachDr
 		}
 		drafts = append(drafts, d)
 	}
-	return drafts, nil
+	return drafts, rows.Err()
 }
 
 func (s *vaultService) UpdateDraftStatus(ctx context.Context, id uuid.UUID, newStatus string) (*CoachDraft, error) {
