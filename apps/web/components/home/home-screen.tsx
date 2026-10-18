@@ -87,15 +87,20 @@ const getOnlineServerSnapshot = () => true;
  * and the 14 watched nutrients on the right. Tap a food or a meal to see that alone; ?date= shows a past day
  * (read-only). Everything the Nhật ký day view did lives here.
  */
-export function HomeScreen() {
+/**
+ * Hôm nay. `backdrop` (cc-55b): the picture of Hôm nay that the /add sheet sits on. The same markup, so it looks the
+ * same, but nothing of its own runs: no Có gì mới, install pop-up or sheets, no sync status or pull to refresh, no tour
+ * signals and no focus return. It is inert behind the sheet.
+ */
+export function HomeScreen({ backdrop = false }: { backdrop?: boolean } = {}) {
   return (
     <Suspense fallback={<div className="min-h-dvh w-full bg-page" />}>
-      <HomeContent />
+      <HomeContent backdrop={backdrop} />
     </Suspense>
   );
 }
 
-function HomeContent() {
+function HomeContent({ backdrop }: { backdrop: boolean }) {
   const searchParams = useSearchParams();
   const forceLoading = searchParams?.get("loading") === "1";
   const forceOffline = searchParams?.get("offline") === "1";
@@ -159,9 +164,9 @@ function HomeContent() {
   }, []);
 
   // The share tip's "Thử ngay" opens the share sheet (which asks for a name first when there is none)
-  useEffect(
-    () =>
-      subscribeSignal((signal) => {
+  useEffect(() => {
+    if (backdrop) return;
+    return subscribeSignal((signal) => {
         if (signal === "open-share") setIsShareOpen(true);
         // The "Có gì mới" tour ended: leave Chọn nhiều món, nothing else changes
         if (signal === "end-select") {
@@ -169,12 +174,12 @@ function HomeContent() {
           setSelectedIds(new Set());
           setTargetSheet(null);
         }
-      }),
-    []
-  );
+    });
+  }, [backdrop]);
 
   // Return focus to the control that opened /add (same contract as the diary)
   useEffect(() => {
+    if (backdrop) return;
     try {
       const returnId = sessionStorage.getItem("return_focus_id");
       if (returnId) {
@@ -184,7 +189,7 @@ function HomeContent() {
     } catch {
       // Storage unavailable
     }
-  }, []);
+  }, [backdrop]);
 
   const entries = useMemo(() => {
     if (isPast && viewIsoParam && todayIso) return entriesFromAdded(dayEntries(viewIsoParam, todayIso));
@@ -211,8 +216,8 @@ function HomeContent() {
     if (selecting && entries.length === 0) setSelecting(false);
   }, [selecting, entries.length]);
   useEffect(() => {
-    if (!selecting) emitSignal("select-off");
-  }, [selecting]);
+    if (!selecting && !backdrop) emitSignal("select-off");
+  }, [selecting, backdrop]);
   // Foods deleted or moved away leave the chosen set
   const liveSelected = useMemo(() => new Set(chosenEntries(entries, selectedIds).map((e) => e.id)), [entries, selectedIds]);
   const exitSelect = () => {
@@ -409,7 +414,7 @@ function HomeContent() {
           actions={
             // header-actions: where the sync status shows, for the tour when there is no status to point at
             <div data-tour="header-actions" className="flex items-center gap-2">
-            {!isPast && <SyncStatus />}
+            {!isPast && !backdrop && <SyncStatus />}
             <button
               type="button"
               onClick={() => setIsShareOpen(true)}
@@ -484,7 +489,7 @@ function HomeContent() {
             <FoodList
               meals={meals}
               dayKey={viewIso}
-              onPullRefresh={isPast ? undefined : refreshToday}
+              onPullRefresh={isPast || backdrop ? undefined : refreshToday}
               mode={mode}
               readOnly={isPast}
               isEmpty={nothingLogged}
@@ -533,6 +538,8 @@ function HomeContent() {
         </div>
       </div>
 
+      {!backdrop && (
+      <>
       <NutrientSourcesSheet
         nutrient={sourcesOf}
         value={sourcesOf ? shown.nutrients[sourcesOf] ?? null : null}
@@ -621,6 +628,8 @@ function HomeContent() {
             goToDay(iso);
           }}
         />
+      )}
+      </>
       )}
     </AppShell>
   );

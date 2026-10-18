@@ -87,6 +87,9 @@ def routes(browser):
     check(panel.get_attribute("data-state") == "open", "/add: the panel is open")
     check("m-sheet" in (panel.get_attribute("class") or ""), "/add: the panel is an m-sheet")
     check(pg.locator('[data-add-behind] [data-align-group="home-page"]').count() > 0, "/add: Hôm nay is drawn behind the panel")
+    # cc-55b: a light copy: none of Hôm nay's own sheets, pop-ups or sync status run behind the sheet
+    behind = pg.evaluate("() => { const b = document.querySelector('[data-add-behind]'); return [b.dataset.addBehind, b.querySelectorAll('[role=dialog], .m-sheet, [data-sync-state]').length] }")
+    check(behind == ["home", 0], f"/add: the backdrop is static, drawn in full when opened from Hôm nay, nothing of its own mounted ({behind})")
 
     pg.evaluate("window.__vts = []")
     pg.go_back()
