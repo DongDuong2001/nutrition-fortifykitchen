@@ -5,6 +5,8 @@ import type { MealSlot } from "./meal-slot";
 import { MOCK_FOODS } from "./mock/foods";
 import type { MockDayData, MockMacroStat, MockMicroStat } from "./mock/sample-day";
 import { historyItems } from "./mock/history";
+import { isLiveMode } from "./api-mode";
+import { isDemo } from "./demo";
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -46,6 +48,7 @@ export function dayEntries(iso: string, todayIso: string): AddedDiaryEntry[] {
   // A day the user logged in this app (filed by lib/day-archive when the date moved on) wins over the sample history
   const archived = dayArchive[iso];
   if (archived && archived.length > 0) return archived;
+  if (isLiveMode() && !isDemo()) return [];
   const items = historyItems(daysBefore(iso, todayIso));
   if (!items) return [];
   return items.flatMap((item, i) => {
