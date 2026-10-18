@@ -105,6 +105,9 @@ def portions(pg):
     text = s.inner_text()
     check("100 g × 3 = 300 g" in text and "300 g đã nấu chín" in text, "rice: ×3 = 300 g đã nấu chín")
     check("120 g trước khi nấu" in text, "rice: the note says what 300 g cooked was dry")
+    # Hao 18/10: "TRẮNG" read "TRĂNG": a clipping title cut the acute stacked over the breve. The title must not clip.
+    clip = s.locator("h2#portion-sheet-title").evaluate("el => getComputedStyle(el).overflow + ' ' + getComputedStyle(el).webkitLineClamp")
+    check(clip.startswith("visible") and "none" in clip, f"rice: the title does not clip its stacked accents ({clip})")
     shot(pg, "rice-cooked-x3-390")
     add_from_sheet(pg, s)
     r = row(pg, "Cơm trắng")
@@ -193,6 +196,9 @@ def exceptions(pg):
     go(pg, "/foods/food-red-bull", 700)
     toggle = pg.locator('[data-tour="unit-toggle"]')
     check(toggle.count() == 1 and "Lon" in toggle.inner_text(), "Red Bull: Lon | Gam")
+    # The food page header is uppercase too: its stacked accents must show (looked at by eye)
+    go(pg, "/foods/food-com-trang", 900)
+    shot(pg, "header-com-trang-390")
     go(pg, "/foods/food-dau-an", 700)
     check(pg.locator('[data-tour="unit-toggle"]').count() == 0 and pg.get_by_label("Số gam").count() == 1, "Dầu ăn: grams (not an exception)")
 
