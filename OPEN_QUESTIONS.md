@@ -322,3 +322,9 @@
 - cc-51 B2: bars move with translateX of a full-width rounded fill inside the clipped track instead of scaleX: scaleX squashes the rounded end of a short bar. Both are transform-only.
 - cc-51 B3: Back closes a sheet by pushing a history entry that copies Next's own state (a foreign state makes Next reload the page). Closed another way, the entry is taken back only if the URL did not change, so a sheet action that navigates is never undone.
 - cc-51 releases: the four new items are in the 18/10 entry (one entry per day). If cc-49 is deployed before cc-51, people who opened 18/10 will not see these four in Có gì mới (same id). Give cc-51 its own id (2026-10-18b) then?
+
+## 18/10/2026 morning (lead)
+- Agent B's sheet history leaves two edge cases, neither on a current path: two sheets closing within the same 50 ms can leave one stray history entry; navigateFromSheet to the URL already shown, with the sheet staying open, keeps the navigating flag until that sheet's next close.
+- Smoke against a live build is not meaningful: it opens every app route with ?demo, which a live build ignores, so the 72 routes behind sign-in land on /signin. A live smoke needs a seeded session (like cc_49's fake API). Worth a probe of its own?
+- The commits of cc-49, cc-50b and cc-51b carry Co-Authored-By lines, against AGENTS.md. Those on main (ff32ca7 and earlier) cannot be rewritten without a force-push; feat/ui-cc-51c's messages were cleaned when the branch was rebuilt.
+- CI annotations on the first Release guard run: actions/checkout@v4 and setup-go@v5 run on Node 20 (deprecated, forced to Node 24), and ubuntu-latest moves to Ubuntu 26 on 19/10. Bump to checkout@v5/setup-go@v6 when they exist?
