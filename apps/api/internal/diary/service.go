@@ -64,7 +64,7 @@ func computeDayTotals(entries []DiaryEntryItem) map[string]*float64 {
 
 	for _, entry := range entries {
 		// Energy / calories is accounted when known
-		if entry.Calories != nil && *entry.Calories > 0 {
+		if entry.Calories != nil && *entry.Calories >= 0 {
 			if totals["calories"] == nil {
 				cal := 0.0
 				en := 0.0
@@ -454,6 +454,9 @@ func (s *diaryServiceImpl) DeleteMeal(ctx context.Context, userID uuid.UUID, dat
 func (s *diaryServiceImpl) SetTraining(ctx context.Context, userID uuid.UUID, date string, minutes int) (*SetTrainingResponse, error) {
 	if err := ValidateDateWritable(date); err != nil {
 		return nil, err
+	}
+	if minutes != 0 && minutes != 45 && minutes != 60 && minutes != 90 && minutes != 120 && minutes != 240 {
+		return nil, errors.New("training_minutes must be one of: 0, 45, 60, 90, 120, 240")
 	}
 	err := s.repo.UpsertDayTraining(ctx, userID, date, minutes)
 	if err != nil {
