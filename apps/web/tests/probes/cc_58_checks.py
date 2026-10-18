@@ -1,6 +1,7 @@
 """cc-58: the numbers the PR asks for (390 x 844, demo build). Run against a build, print and save to
 .screenshots/cc58/checks-<label>.json:
   public    /signin and /landing: which scripts load, and whether any holds the diary store or supabase-js
+  toast_dismiss  one 'moved' toast going by on its own (no entry changes): what React re-rendered
   toasts    three delete toasts on Hôm nay: how many components React re-rendered (function-component fibers that
             performed work), counted through a React DevTools hook that is injected before the app loads
   typing    "ca" then "cá lóc" in the /add search: the longest event (keydown/input to the next paint) per keystroke, 4x CPU
@@ -107,12 +108,35 @@ def toast_renders(browser):
         pg.locator('button[aria-label="Tùy chọn ngày"]').first.tap()
         pg.get_by_text("Chọn nhiều món").first.tap()
         pg.wait_for_timeout(500)
-        pg.locator("[data-entry-id]").first.tap()
+        pg.locator('button[role="checkbox"]').first.tap()
         pg.wait_for_timeout(200)
         pg.get_by_role("button", name="Xóa", exact=True).first.tap()
         pg.wait_for_timeout(700)
     pg.wait_for_timeout(6500)  # the last toast goes by itself
     got = pg.evaluate("({ renders: window.__rc.renders, commits: window.__rc.commits, top: Object.entries(window.__rc.names).sort((a, b) => b[1] - a[1]).slice(0, 8) })")
+    ctx.close()
+    return got
+
+
+def toast_dismiss(browser):
+    """Only the toast going by: a 'moved' toast is dismissed by its clock and changes no entry, so what re-renders is the toast."""
+    ctx = browser.new_context(**PHONE)
+    ctx.add_init_script(RENDER_HOOK)
+    pg = ctx.new_page()
+    open_today(pg)
+    pg.locator('button[aria-label="Tùy chọn ngày"]').first.tap()
+    pg.get_by_text("Chọn nhiều món").first.tap()
+    pg.wait_for_timeout(500)
+    pg.locator('button[role="checkbox"]').first.tap()
+    pg.get_by_role("button", name="Chuyển bữa", exact=True).first.tap()
+    pg.wait_for_timeout(600)
+    pg.get_by_role("radio").last.tap()
+    pg.get_by_role("button", name="Chuyển", exact=True).first.tap()
+    pg.wait_for_timeout(900)
+    # the toast is up: count from here
+    pg.evaluate("window.__rc.on = true; window.__rc.renders = 0; window.__rc.commits = 0; window.__rc.names = {}")
+    pg.wait_for_timeout(6500)
+    got = pg.evaluate("({ renders: window.__rc.renders, commits: window.__rc.commits, top: Object.entries(window.__rc.names).sort((a, b) => b[1] - a[1]).slice(0, 6) })")
     ctx.close()
     return got
 
@@ -177,7 +201,7 @@ def main():
     with sync_playwright() as p:
         browser = p.chromium.launch()
         data = {"label": LABEL, "public": public_routes(browser)}
-        for key, fn in [("toasts", toast_renders), ("typing", typing), ("focus", focus_rings)]:
+        for key, fn in [("toasts", toast_renders), ("toast_dismiss", toast_dismiss), ("typing", typing), ("focus", focus_rings)]:
             try:
                 data[key] = fn(browser)
             except Exception as e:  # report what failed, keep the rest

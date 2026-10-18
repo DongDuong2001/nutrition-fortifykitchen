@@ -1,4 +1,3 @@
-import { apiClient } from "./api-client";
 import { isLiveMode } from "./api-mode";
 import {
   mockCurrentAccount,
@@ -315,7 +314,8 @@ export function requestMagicLink(email: string, captchaToken?: string): Promise<
     if (emailError) return { ok: false, error: emailError };
 
     // The API client is told first (a no-op until Dong's endpoint exists), then Supabase sends the link
-    await apiClient.requestMagicLink(email);
+    // (api-client is loaded here, not with the screen: the sign-in page does not need the catalogue and the sample data it brings)
+    await (await import("./api-client")).apiClient.requestMagicLink(email);
     clearSignedOutFlag();
 
     const address = normaliseEmail(email);

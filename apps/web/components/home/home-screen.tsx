@@ -81,6 +81,12 @@ const MealTargetSheet = dynamic(() => loadSelect().then((m) => m.MealTargetSheet
 const SelectActionBar = dynamic(() => loadSelect().then((m) => m.SelectActionBar), { ssr: false });
 const SelectHeader = dynamic(() => loadSelect().then((m) => m.SelectHeader), { ssr: false });
 const loadShare = () => import("./share-sheet");
+/** True from the first time `open` is true: a sheet is mounted once it has been used, so a closed one costs nothing before that. */
+function useOnceOpen(open: boolean): boolean {
+  const [seen, setSeen] = useState(open);
+  if (open && !seen) setSeen(true);
+  return seen || open;
+}
 function loadSheets() {
   void Promise.all([loadCalendar(), loadCopyYesterday(), loadMealMenu(), loadSources(), loadExplainer(), loadSelect(), loadShare()]);
 }
@@ -286,6 +292,16 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
   // cc-57: the frame and the hero come first; the food list and the nutrient column (the heavy part) follow in a
   // second, low-priority render, so a tab tap or the + shows its first frame sooner
   const heavyReady = useDeferredValue(true, false);
+  // cc-58: each sheet is mounted the first time it opens (the chunks are fetched ahead, see loadSheets)
+  const sourcesMounted = useOnceOpen(sourcesOf !== null);
+  const mealMenuMounted = useOnceOpen(menuSlot !== null);
+  const explainerMounted = useOnceOpen(explainerOpen);
+  const copySheetMounted = useOnceOpen(isCopySheetOpen);
+  const dayMenuMounted = useOnceOpen(dayMenuOpen);
+  const copyTargetMounted = useOnceOpen(targetSheet === "copy");
+  const moveTargetMounted = useOnceOpen(targetSheet === "move");
+  const pastTargetMounted = useOnceOpen(targetSheet === "past");
+  const calendarMounted = useOnceOpen(isCalendarOpen);
   const openSources = useCallback((id: string) => {
     markUsed("nutrient-sources");
     setSourcesOf(id);
@@ -597,73 +613,85 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
 
       {!backdrop && (
       <>
-      <NutrientSourcesSheet
-        nutrient={sourcesOf}
-        value={sourcesOf ? shown.nutrients[sourcesOf] ?? null : null}
-        target={sourcesOf ? nutrientTargets[sourcesOf] ?? null : null}
-        onClose={() => setSourcesOf(null)}
-      />
-      <MealMenuSheet
-        open={menuSlot !== null}
-        onClose={() => setMenuSlot(null)}
-        mealName={menuMeal?.fullName ?? ""}
-        readOnly={isPast}
-        itemCount={menuMeal?.entries.length ?? 0}
-        kcal={menuMeal?.kcal ?? null}
-        savableCount={menuSlot ? mealFoods(menuSlot, viewIso).length : 0}
-        defaultSaveName={menuSlot ? defaultMealName(menuSlot, viewIso) : ""}
-        onSave={(name) => menuSlot && saveMealAs(menuSlot, viewIso, name)}
-        yesterdayItemCount={yesterdayMeal.length}
-        yesterdayKcal={sumKcal(yesterdayMeal.map((e) => e.calories))}
-        onCopyYesterday={copyMealFromYesterday}
-        onDelete={() => {
-          if (!menuSlot) return;
-          deleteMeal(menuSlot);
-          setMode(DAY_MODE);
-        }}
-      />
+      {sourcesMounted && (
+        <NutrientSourcesSheet
+          nutrient={sourcesOf}
+          value={sourcesOf ? shown.nutrients[sourcesOf] ?? null : null}
+          target={sourcesOf ? nutrientTargets[sourcesOf] ?? null : null}
+          onClose={() => setSourcesOf(null)}
+        />
+      )}
+      {mealMenuMounted && (
+        <MealMenuSheet
+          open={menuSlot !== null}
+          onClose={() => setMenuSlot(null)}
+          mealName={menuMeal?.fullName ?? ""}
+          readOnly={isPast}
+          itemCount={menuMeal?.entries.length ?? 0}
+          kcal={menuMeal?.kcal ?? null}
+          savableCount={menuSlot ? mealFoods(menuSlot, viewIso).length : 0}
+          defaultSaveName={menuSlot ? defaultMealName(menuSlot, viewIso) : ""}
+          onSave={(name) => menuSlot && saveMealAs(menuSlot, viewIso, name)}
+          yesterdayItemCount={yesterdayMeal.length}
+          yesterdayKcal={sumKcal(yesterdayMeal.map((e) => e.calories))}
+          onCopyYesterday={copyMealFromYesterday}
+          onDelete={() => {
+            if (!menuSlot) return;
+            deleteMeal(menuSlot);
+            setMode(DAY_MODE);
+          }}
+        />
+      )}
       <InstallPromptHost busy={installBusy} />
       <WhatsNewHost busy={installBusy} />
-      <LevelExplainerSheet open={explainerOpen} onClose={() => setExplainerOpen(false)} level={level} />
-      <CopyYesterdaySheet open={isCopySheetOpen} onClose={() => setIsCopySheetOpen(false)} />
-      <DayMenuSheet
-        open={dayMenuOpen}
-        onClose={() => setDayMenuOpen(false)}
-        title={dayLabel}
-        past={isPast}
-        hasEntries={!nothingLogged}
-        onSelect={startSelect}
-      />
-      <MealTargetSheet
-        open={targetSheet === "copy"}
-        onClose={() => setTargetSheet(null)}
-        title={`Chép ${chosenCount} món sang`}
-        description={`${chosenCount} món · ${kcalLabel(chosenKcal(entries, liveSelected))}`}
-        withKeep={false}
-        initial={chosen[0]?.slot && chosen[0].slot !== "pre_workout" ? chosen[0].slot : "breakfast"}
-        confirmLabel="Chép"
-        onConfirm={confirmCopy}
-      />
-      <MealTargetSheet
-        open={targetSheet === "move"}
-        onClose={() => setTargetSheet(null)}
-        title={`Chuyển ${chosenCount} món sang`}
-        description={`${chosenCount} món · ${kcalLabel(chosenKcal(entries, liveSelected))}`}
-        withKeep={false}
-        initial={chosen[0]?.slot && chosen[0].slot !== "pre_workout" ? chosen[0].slot : "breakfast"}
-        confirmLabel="Chuyển"
-        onConfirm={confirmMove}
-      />
-      <MealTargetSheet
-        open={targetSheet === "past"}
-        onClose={() => setTargetSheet(null)}
-        title={pastCopyTitle(chosenCount)}
-        description={pastCopySubtitle(dayLabel, chosenKcal(entries, liveSelected), todayDdMm)}
-        withKeep
-        initial="keep"
-        confirmLabel="Chép vào hôm nay"
-        onConfirm={confirmCopy}
-      />
+      {explainerMounted && <LevelExplainerSheet open={explainerOpen} onClose={() => setExplainerOpen(false)} level={level} />}
+      {copySheetMounted && <CopyYesterdaySheet open={isCopySheetOpen} onClose={() => setIsCopySheetOpen(false)} />}
+      {dayMenuMounted && (
+        <DayMenuSheet
+          open={dayMenuOpen}
+          onClose={() => setDayMenuOpen(false)}
+          title={dayLabel}
+          past={isPast}
+          hasEntries={!nothingLogged}
+          onSelect={startSelect}
+        />
+      )}
+      {copyTargetMounted && (
+        <MealTargetSheet
+          open={targetSheet === "copy"}
+          onClose={() => setTargetSheet(null)}
+          title={`Chép ${chosenCount} món sang`}
+          description={`${chosenCount} món · ${kcalLabel(chosenKcal(entries, liveSelected))}`}
+          withKeep={false}
+          initial={chosen[0]?.slot && chosen[0].slot !== "pre_workout" ? chosen[0].slot : "breakfast"}
+          confirmLabel="Chép"
+          onConfirm={confirmCopy}
+        />
+      )}
+      {moveTargetMounted && (
+        <MealTargetSheet
+          open={targetSheet === "move"}
+          onClose={() => setTargetSheet(null)}
+          title={`Chuyển ${chosenCount} món sang`}
+          description={`${chosenCount} món · ${kcalLabel(chosenKcal(entries, liveSelected))}`}
+          withKeep={false}
+          initial={chosen[0]?.slot && chosen[0].slot !== "pre_workout" ? chosen[0].slot : "breakfast"}
+          confirmLabel="Chuyển"
+          onConfirm={confirmMove}
+        />
+      )}
+      {pastTargetMounted && (
+        <MealTargetSheet
+          open={targetSheet === "past"}
+          onClose={() => setTargetSheet(null)}
+          title={pastCopyTitle(chosenCount)}
+          description={pastCopySubtitle(dayLabel, chosenKcal(entries, liveSelected), todayDdMm)}
+          withKeep
+          initial="keep"
+          confirmLabel="Chép vào hôm nay"
+          onConfirm={confirmCopy}
+        />
+      )}
       {shareUsed && (
       <ShareSheet
         open={isShareOpen}
@@ -677,7 +705,7 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
         onSaveName={saveName}
       />
       )}
-      {todayIso && (
+      {todayIso && calendarMounted && (
         <CalendarSheet
           open={isCalendarOpen}
           onClose={() => setIsCalendarOpen(false)}
