@@ -41,6 +41,12 @@ export const RELEASES: readonly Release[] = [
         title: "Ngày tập ghi vào nhật ký",
         body: "Đánh dấu một món ở Ngày tập để ghi vào Bữa phụ. Liều theo nhóm Bự/Bé của bạn. Thêm món riêng như nước dừa, cam.",
       },
+      // cc-55: an improvement, no tour
+      {
+        icon: "home",
+        title: "Mở và đóng màn hình mượt hơn",
+        body: "Thêm món trượt lên trên Hôm nay và trượt xuống khi đóng. Trang chi tiết trượt vào từ bên phải, quay lại thì trượt ra.",
+      },
     ],
     tour: [
       { target: "training-size", fallback: "training-pill", title: "Nhóm Bự / Bé", body: "Ở Ngày tập, chạm Bé · đổi hoặc Bự · đổi để chọn liều thấp hay liều cao." },

@@ -12,12 +12,14 @@ describe("RELEASES", () => {
     expect([...ids].sort().reverse()).toEqual(ids);
   });
 
-  it("starts with Ngày tập ghi vào nhật ký (2026-10-18e, cc-52): one item and a 3-step tour that falls back to the Ngày tập pill on Hôm nay", () => {
+  it("starts with Ngày tập ghi vào nhật ký (2026-10-18e, cc-52) and cc-55's smoother screens: two items and a 3-step tour that falls back to the Ngày tập pill on Hôm nay", () => {
     const r = latestRelease();
     expect(r?.id).toBe("2026-10-18e");
     expect(r?.date).toBe("18/10");
     expect(r?.items).toEqual([
       { icon: "meal", title: "Ngày tập ghi vào nhật ký", body: "Đánh dấu một món ở Ngày tập để ghi vào Bữa phụ. Liều theo nhóm Bự/Bé của bạn. Thêm món riêng như nước dừa, cam." },
+      // cc-55: an improvement on the same release, no tour of its own
+      { icon: "home", title: "Mở và đóng màn hình mượt hơn", body: "Thêm món trượt lên trên Hôm nay và trượt xuống khi đóng. Trang chi tiết trượt vào từ bên phải, quay lại thì trượt ra." },
     ]);
     expect(r?.tour?.map((s) => s.target)).toEqual(["training-size", "training-checklist", "training-add-item"]);
     expect(r?.tour?.every((s) => s.fallback === "training-pill")).toBe(true);
