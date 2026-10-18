@@ -7,6 +7,8 @@ import { type MealSlot, getMealSlotNameVi } from "@/lib/meal-slot";
 import { parseGramsInput, calculateMacroPreview, macroGramsText, scaleNutrients, gramsServingLabel, unitAmountText, parsePortionLabel, portionModeOf, portionNote, portionSummary } from "@/lib/portion";
 import { cookSwitchFor } from "@/lib/yield";
 import { PortionArea } from "@/components/ui/portion-area";
+import { DishParts } from "@/components/ui/dish-parts";
+import { isDishFood, type AddOnEntry } from "@/lib/dish-recipes";
 import { formatAmount } from "@/lib/format";
 import { getNutrientDefinition } from "@/lib/nutrients";
 import { useDiary } from "@/lib/diary-store";
@@ -28,6 +30,11 @@ export interface PortionPanelProps {
   onFoodChange?: (food: FoodItem) => void;
   /** The heading's id, for a sheet that is named by it */
   headingId?: string;
+  /**
+   * cc-54: where the add-ons of a dish ("+ Bún") that are switched on are reported, as entries to log with it. Without
+   * this a dish shows no Thành phần (a screen that cannot log the extras does not offer them).
+   */
+  onExtrasChange?: (entries: AddOnEntry[]) => void;
 }
 
 /**
@@ -49,6 +56,7 @@ export function PortionPanel({
   className = "",
   onFoodChange,
   headingId,
+  onExtrasChange,
 }: PortionPanelProps) {
   const canLog = canLogFood(food);
   const notice = energyNotice(food);
@@ -175,6 +183,9 @@ export function PortionPanel({
         </p>
       )}
       {notice && canLog && <p role="note" className="m-0 text-[13px] leading-snug text-secondary">{notice}</p>}
+      {/* cc-54: what is inside a premade dish, and its add-ons for this meal */}
+      {onExtrasChange && isDishFood(food) && <DishParts key={food.id} food={food} portionGrams={parsedGrams} onAddOns={onExtrasChange} />}
+
       {/* Side by side on a phone; stacked in the narrower desktop pane, the add on top */}
       <div data-align-group="portion" data-align-edge="left" className="flex w-full items-center gap-2 lg:flex-col-reverse lg:items-stretch">
         {onAddAndContinue && (

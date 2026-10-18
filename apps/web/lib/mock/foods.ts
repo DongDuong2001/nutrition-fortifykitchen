@@ -132,6 +132,18 @@ export function setCatalogFoods(foods: FoodItem[]): void {
   catalogChanged();
 }
 
+/**
+ * Demo mode only (lib/dish-recipes): sample foods the demo catalogue lacks, added once when something needs them. They are
+ * `demoOnly`, so lists and search show them in demo mode only; a food already in the catalogue is left as it is.
+ */
+export function addDemoFoods(foods: readonly FoodItem[]): void {
+  const have = new Set(MOCK_FOODS.map((f) => f.id));
+  const fresh = foods.filter((f) => !have.has(f.id));
+  if (fresh.length === 0) return;
+  MOCK_FOODS.push(...fresh);
+  catalogChanged();
+}
+
 /** Live mode: the built-in sample foods are not real foods, so only the user's own stay until /foods answers. */
 export function dropMockCatalog(): void {
   const own = MOCK_FOODS.filter(isOwnFood);

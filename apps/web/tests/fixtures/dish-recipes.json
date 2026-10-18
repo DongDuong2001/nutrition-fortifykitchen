@@ -1,0 +1,6451 @@
+[
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:bun-dau-mam-tom",
+   "name_vi": "Bún đậu mắm tôm"
+  },
+  "serving_label": "1 dĩa vừa (gồm 46 g mắm tôm)",
+  "serving_grams": 495,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 168914",
+    "name_vi": "Bún (sợi tươi)",
+    "grams": 200,
+    "role": "base",
+    "addon": {
+     "label": "+ Bún",
+     "grams": 100
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 172451",
+    "name_vi": "Đậu hũ chiên",
+    "grams": 90,
+    "role": "protein",
+    "addon": {
+     "label": "+ Đậu hũ chiên",
+     "grams": 60
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 167846",
+    "name_vi": "Nạc vai heo (chín)",
+    "grams": 28,
+    "role": "protein",
+    "addon": {
+     "label": "+ Chả cốm",
+     "grams": 35
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 1021",
+    "name_vi": "Cốm (tươi)",
+    "grams": 12,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 10,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 7018002",
+    "name_vi": "Thịt ba chỉ heo (luộc)",
+    "grams": 45,
+    "role": "protein",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169249",
+    "name_vi": "Xà lách lá (xanh)",
+    "grams": 25,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4094:hung-lui-song",
+    "name_vi": "Húng lủi",
+    "grams": 14,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 168409",
+    "name_vi": "Dưa leo (cả vỏ)",
+    "grams": 30,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13011",
+    "name_vi": "Mắm tôm đặc",
+    "grams": 16,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 6,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 5003",
+    "name_vi": "Chanh ta",
+    "grams": 6,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13039",
+    "name_vi": "Ớt tươi",
+    "grams": 2,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 11,
+    "role": "sauce",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:bun-rieu",
+   "name_vi": "Bún riêu cua"
+  },
+  "serving_label": "1 tô vừa",
+  "serving_grams": 685,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 168914",
+    "name_vi": "Bún (sợi tươi)",
+    "grams": 180,
+    "role": "base",
+    "addon": {
+     "label": "+ Bún",
+     "grams": 100
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 8034",
+    "name_vi": "Cua đồng",
+    "grams": 55,
+    "role": "protein",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 172189",
+    "name_vi": "Trứng vịt",
+    "grams": 25,
+    "role": "protein",
+    "addon": {
+     "label": "+ Trứng vịt",
+     "grams": 60
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170457",
+    "name_vi": "Cà chua (sống)",
+    "grams": 70,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 172451",
+    "name_vi": "Đậu hũ chiên",
+    "grams": 35,
+    "role": "topping",
+    "addon": {
+     "label": "+ Đậu hũ chiên",
+     "grams": 40
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 7059",
+    "name_vi": "Tiết heo (luộc)",
+    "grams": 30,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4037",
+    "name_vi": "Hành củ (hành tím)",
+    "grams": 8,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 6,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 6,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13011",
+    "name_vi": "Mắm tôm đặc",
+    "grams": 3,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169301",
+    "name_vi": "Rau muống",
+    "grams": 35,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169957",
+    "name_vi": "Giá đỗ (sống)",
+    "grams": 20,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4094:hung-lui-song",
+    "name_vi": "Húng lủi",
+    "grams": 8,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 204,
+    "role": "broth",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:bun-mam",
+   "name_vi": "Bún mắm"
+  },
+  "serving_label": "1 tô vừa",
+  "serving_grams": 690,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 168914",
+    "name_vi": "Bún (sợi tươi)",
+    "grams": 200,
+    "role": "base",
+    "addon": {
+     "label": "+ Bún",
+     "grams": 100
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 7086",
+    "name_vi": "Thịt ba chỉ heo (nướng)",
+    "grams": 45,
+    "role": "protein",
+    "addon": {
+     "label": "+ Heo quay",
+     "grams": 40
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171971",
+    "name_vi": "Tôm (chín)",
+    "grams": 34,
+    "role": "protein",
+    "addon": {
+     "label": "+ Tôm",
+     "grams": 30
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 8040003",
+    "name_vi": "Mực ống (chín)",
+    "grams": 24,
+    "role": "protein",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169229",
+    "name_vi": "Cà tím (luộc)",
+    "grams": 45,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13013",
+    "name_vi": "Mắm tép chua",
+    "grams": 25,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 10,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 6,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 5,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169249",
+    "name_vi": "Xà lách lá (xanh)",
+    "grams": 30,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169957",
+    "name_vi": "Giá đỗ (sống)",
+    "grams": 20,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4094:hung-lui-song",
+    "name_vi": "Húng lủi",
+    "grams": 8,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 238,
+    "role": "broth",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:bun-thit-nuong",
+   "name_vi": "Bún thịt nướng"
+  },
+  "serving_label": "1 tô vừa (gồm 70 g nước mắm pha)",
+  "serving_grams": 500,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 168914",
+    "name_vi": "Bún (sợi tươi)",
+    "grams": 190,
+    "role": "base",
+    "addon": {
+     "label": "+ Bún",
+     "grams": 100
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 167846",
+    "name_vi": "Nạc vai heo (chín)",
+    "grams": 75,
+    "role": "protein",
+    "addon": {
+     "label": "+ Thịt nướng",
+     "grams": 60
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 22,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 20,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 7,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169230",
+    "name_vi": "Tỏi",
+    "grams": 6,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4037",
+    "name_vi": "Hành củ (hành tím)",
+    "grams": 11,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 15063",
+    "name_vi": "Chả giò (nem rán)",
+    "grams": 40,
+    "role": "protein",
+    "addon": {
+     "label": "+ Chả giò",
+     "grams": 40
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169249",
+    "name_vi": "Xà lách lá (xanh)",
+    "grams": 25,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169957",
+    "name_vi": "Giá đỗ (sống)",
+    "grams": 20,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 168409",
+    "name_vi": "Dưa leo (cả vỏ)",
+    "grams": 25,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4094:hung-lui-song",
+    "name_vi": "Húng lủi",
+    "grams": 10,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 173806",
+    "name_vi": "Đậu phộng (lạc) rang",
+    "grams": 8,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 5003",
+    "name_vi": "Chanh ta",
+    "grams": 8,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13039",
+    "name_vi": "Ớt tươi",
+    "grams": 2,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 30,
+    "role": "sauce",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:bun-moc",
+   "name_vi": "Bún mọc"
+  },
+  "serving_label": "1 tô vừa",
+  "serving_grams": 650,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 168914",
+    "name_vi": "Bún (sợi tươi)",
+    "grams": 180,
+    "role": "base",
+    "addon": {
+     "label": "+ Bún",
+     "grams": 100
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 167903",
+    "name_vi": "Thịt heo xay (chín)",
+    "grams": 55,
+    "role": "protein",
+    "addon": {
+     "label": "+ Mọc",
+     "grams": 55
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 167846",
+    "name_vi": "Nạc vai heo (chín)",
+    "grams": 28,
+    "role": "protein",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 173468",
+    "name_vi": "Muối ăn",
+    "grams": 2,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 167854",
+    "name_vi": "Sườn non heo (chín)",
+    "grams": 50,
+    "role": "protein",
+    "addon": {
+     "label": "+ Sườn",
+     "grams": 50
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170457",
+    "name_vi": "Cà chua (sống)",
+    "grams": 40,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4037",
+    "name_vi": "Hành củ (hành tím)",
+    "grams": 5,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 7,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170005",
+    "name_vi": "Hành lá",
+    "grams": 5,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4094:hung-lui-song",
+    "name_vi": "Húng lủi",
+    "grams": 5,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 273,
+    "role": "broth",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:hu-tieu-nam-vang",
+   "name_vi": "Hủ tiếu Nam Vang"
+  },
+  "serving_label": "1 tô vừa",
+  "serving_grams": 580,
+  "ingredients": [
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 1041002:hu-tieu-luoc",
+    "name_vi": "Hủ tiếu khô (chín)",
+    "grams": 170,
+    "role": "base",
+    "addon": {
+     "label": "+ Hủ tiếu",
+     "grams": 100
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 168250",
+    "name_vi": "Thịt heo nạc thăn (chín)",
+    "grams": 28,
+    "role": "protein",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171971",
+    "name_vi": "Tôm (chín)",
+    "grams": 25,
+    "role": "protein",
+    "addon": {
+     "label": "+ Tôm",
+     "grams": 30
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 167863",
+    "name_vi": "Gan heo (chín)",
+    "grams": 20,
+    "role": "protein",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 172191",
+    "name_vi": "Trứng cút",
+    "grams": 20,
+    "role": "protein",
+    "addon": {
+     "label": "+ Trứng cút",
+     "grams": 20
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169957",
+    "name_vi": "Giá đỗ (sống)",
+    "grams": 30,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4042",
+    "name_vi": "Hẹ lá",
+    "grams": 6,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 7,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 3,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 4,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4037",
+    "name_vi": "Hành củ (hành tím)",
+    "grams": 5,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169230",
+    "name_vi": "Tỏi",
+    "grams": 2,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 173468",
+    "name_vi": "Muối ăn",
+    "grams": 1.5,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 258.5,
+    "role": "broth",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:mi-quang",
+   "name_vi": "Mì Quảng"
+  },
+  "serving_label": "1 tô vừa",
+  "serving_grams": 485,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 168914:banh-pho-chin",
+    "name_vi": "Bánh phở (tươi)",
+    "grams": 190,
+    "role": "base",
+    "addon": {
+     "label": "+ Bánh phở",
+     "grams": 100
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 7018002",
+    "name_vi": "Thịt ba chỉ heo (luộc)",
+    "grams": 40,
+    "role": "protein",
+    "addon": {
+     "label": "+ Thịt heo",
+     "grams": 40
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171971",
+    "name_vi": "Tôm (chín)",
+    "grams": 30,
+    "role": "protein",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 172191",
+    "name_vi": "Trứng cút",
+    "grams": 20,
+    "role": "protein",
+    "addon": {
+     "label": "+ Trứng cút",
+     "grams": 20
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 173806",
+    "name_vi": "Đậu phộng (lạc) rang",
+    "grams": 10,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_table",
+    "source_id": "food-banh-trang",
+    "name_vi": "Bánh tráng",
+    "grams": 8,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169249",
+    "name_vi": "Xà lách lá (xanh)",
+    "grams": 20,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169975",
+    "name_vi": "Bắp cải (sống)",
+    "grams": 25,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169957",
+    "name_vi": "Giá đỗ (sống)",
+    "grams": 20,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4094:hung-lui-song",
+    "name_vi": "Húng lủi",
+    "grams": 8,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4043",
+    "name_vi": "Hoa chuối (bắp chuối)",
+    "grams": 10,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 6,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 3,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 8,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4037",
+    "name_vi": "Hành củ (hành tím)",
+    "grams": 5,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 82,
+    "role": "broth",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:cao-lau",
+   "name_vi": "Cao lầu"
+  },
+  "serving_label": "1 tô vừa",
+  "serving_grams": 395,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 168914:banh-pho-chin",
+    "name_vi": "Bánh phở (tươi)",
+    "grams": 190,
+    "role": "base",
+    "addon": {
+     "label": "+ Mì cao lầu",
+     "grams": 100
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 167846",
+    "name_vi": "Nạc vai heo (chín)",
+    "grams": 70,
+    "role": "protein",
+    "addon": {
+     "label": "+ Xá xíu",
+     "grams": 50
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 9,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13022",
+    "name_vi": "Xì dầu (nước tương)",
+    "grams": 6,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169249",
+    "name_vi": "Xà lách lá (xanh)",
+    "grams": 20,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169957",
+    "name_vi": "Giá đỗ (sống)",
+    "grams": 20,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4094:hung-lui-song",
+    "name_vi": "Húng lủi",
+    "grams": 10,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4088",
+    "name_vi": "Rau răm",
+    "grams": 5,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4037",
+    "name_vi": "Hành củ (hành tím)",
+    "grams": 5,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 6,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 4,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 50,
+    "role": "broth",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:banh-canh-cua",
+   "name_vi": "Bánh canh cua"
+  },
+  "serving_label": "1 tô vừa",
+  "serving_grams": 610,
+  "ingredients": [
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 1013:banh-canh-song",
+    "name_vi": "Bánh canh (sợi tươi)",
+    "grams": 140,
+    "role": "base",
+    "addon": {
+     "label": "+ Bánh canh",
+     "grams": 100
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 8069",
+    "name_vi": "Thịt cua",
+    "grams": 45,
+    "role": "protein",
+    "addon": {
+     "label": "+ Thịt cua",
+     "grams": 30
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171971",
+    "name_vi": "Tôm (chín)",
+    "grams": 25,
+    "role": "protein",
+    "addon": {
+     "label": "+ Tôm",
+     "grams": 30
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 7032002",
+    "name_vi": "Thịt chân giò heo (luộc)",
+    "grams": 30,
+    "role": "protein",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13046",
+    "name_vi": "Bột năng (bột sắn)",
+    "grams": 8,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4037",
+    "name_vi": "Hành củ (hành tím)",
+    "grams": 5,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 5,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 6,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 173468",
+    "name_vi": "Muối ăn",
+    "grams": 1,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170005",
+    "name_vi": "Hành lá",
+    "grams": 5,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 340,
+    "role": "broth",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:banh-xeo",
+   "name_vi": "Bánh xèo"
+  },
+  "serving_label": "1 cái (gồm rau sống và 42 g nước mắm)",
+  "serving_grams": 245,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169714",
+    "name_vi": "Bột gạo (sống)",
+    "grams": 38,
+    "role": "base",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170173",
+    "name_vi": "Nước cốt dừa (lon)",
+    "grams": 18,
+    "role": "base",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 7018002",
+    "name_vi": "Thịt ba chỉ heo (luộc)",
+    "grams": 25,
+    "role": "protein",
+    "addon": {
+     "label": "+ Thịt heo",
+     "grams": 25
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171971",
+    "name_vi": "Tôm (chín)",
+    "grams": 18,
+    "role": "protein",
+    "addon": {
+     "label": "+ Tôm",
+     "grams": 20
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169957",
+    "name_vi": "Giá đỗ (sống)",
+    "grams": 30,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170005",
+    "name_vi": "Hành lá",
+    "grams": 5,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 14,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169249",
+    "name_vi": "Xà lách lá (xanh)",
+    "grams": 30,
+    "role": "veg",
+    "addon": {
+     "label": "+ Rau sống",
+     "grams": 30
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4094:hung-lui-song",
+    "name_vi": "Húng lủi",
+    "grams": 8,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 10,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 10,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 5003",
+    "name_vi": "Chanh ta",
+    "grams": 5,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169230",
+    "name_vi": "Tỏi",
+    "grams": 1,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13039",
+    "name_vi": "Ớt tươi",
+    "grams": 1,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 32,
+    "role": "base",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:banh-khot",
+   "name_vi": "Bánh khọt"
+  },
+  "serving_label": "1 dĩa vừa (8 cái, gồm rau sống và 44 g nước mắm)",
+  "serving_grams": 205,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169714",
+    "name_vi": "Bột gạo (sống)",
+    "grams": 40,
+    "role": "base",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170173",
+    "name_vi": "Nước cốt dừa (lon)",
+    "grams": 24,
+    "role": "base",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171971",
+    "name_vi": "Tôm (chín)",
+    "grams": 25,
+    "role": "protein",
+    "addon": {
+     "label": "+ Tôm",
+     "grams": 25
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170005",
+    "name_vi": "Hành lá",
+    "grams": 8,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 12,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169249",
+    "name_vi": "Xà lách lá (xanh)",
+    "grams": 35,
+    "role": "veg",
+    "addon": {
+     "label": "+ Rau sống",
+     "grams": 30
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4094:hung-lui-song",
+    "name_vi": "Húng lủi",
+    "grams": 8,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 10,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 10,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 5003",
+    "name_vi": "Chanh ta",
+    "grams": 4,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 29,
+    "role": "sauce",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:goi-cuon",
+   "name_vi": "Gỏi cuốn"
+  },
+  "serving_label": "1 cuốn (gồm 17 g tương)",
+  "serving_grams": 90,
+  "ingredients": [
+   {
+    "source": "vn_table",
+    "source_id": "food-banh-trang",
+    "name_vi": "Bánh tráng",
+    "grams": 7,
+    "role": "base",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 168914",
+    "name_vi": "Bún (sợi tươi)",
+    "grams": 20,
+    "role": "base",
+    "addon": {
+     "label": "+ Bún",
+     "grams": 15
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171971",
+    "name_vi": "Tôm (chín)",
+    "grams": 15,
+    "role": "protein",
+    "addon": {
+     "label": "+ Tôm",
+     "grams": 15
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 7018002",
+    "name_vi": "Thịt ba chỉ heo (luộc)",
+    "grams": 15,
+    "role": "protein",
+    "addon": {
+     "label": "+ Thịt luộc",
+     "grams": 15
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169249",
+    "name_vi": "Xà lách lá (xanh)",
+    "grams": 10,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4094:hung-lui-song",
+    "name_vi": "Húng lủi",
+    "grams": 4,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4042",
+    "name_vi": "Hẹ lá",
+    "grams": 2,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 172886",
+    "name_vi": "Tương hoisin",
+    "grams": 8,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 172470",
+    "name_vi": "Bơ đậu phộng nguyên chất",
+    "grams": 4,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 4,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169230",
+    "name_vi": "Tỏi",
+    "grams": 0.5,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13039",
+    "name_vi": "Ớt tươi",
+    "grams": 0.5,
+    "role": "sauce",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:xoi-ga",
+   "name_vi": "Xôi gà (xôi mặn)"
+  },
+  "serving_label": "1 dĩa vừa",
+  "serving_grams": 295,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169711",
+    "name_vi": "Xôi trắng (nếp đồ)",
+    "grams": 200,
+    "role": "base",
+    "addon": {
+     "label": "+ Xôi",
+     "grams": 100
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171478",
+    "name_vi": "Ức gà luộc (chín)",
+    "grams": 50,
+    "role": "protein",
+    "addon": {
+     "label": "+ Gà xé",
+     "grams": 50
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 7074",
+    "name_vi": "Ruốc thịt heo (chà bông)",
+    "grams": 6,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 172191",
+    "name_vi": "Trứng cút",
+    "grams": 20,
+    "role": "protein",
+    "addon": {
+     "label": "+ Trứng cút",
+     "grams": 20
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4037",
+    "name_vi": "Hành củ (hành tím)",
+    "grams": 6,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 7,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170005",
+    "name_vi": "Hành lá",
+    "grams": 4,
+    "role": "veg",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:com-ga",
+   "name_vi": "Cơm gà"
+  },
+  "serving_label": "1 dĩa vừa (gồm 37 g nước mắm gừng)",
+  "serving_grams": 420,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "SR Legacy NDB 20445 (FDC id not shown on mirror)",
+    "name_vi": "Cơm trắng",
+    "grams": 200,
+    "role": "base",
+    "addon": {
+     "label": "+ Cơm",
+     "grams": 100
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 4,
+    "role": "base",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 172853",
+    "name_vi": "Đùi gà bỏ da (chín)",
+    "grams": 70,
+    "role": "protein",
+    "addon": {
+     "label": "+ Thịt gà",
+     "grams": 50
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 172401",
+    "name_vi": "Gà ta (chín)",
+    "grams": 30,
+    "role": "protein",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170000",
+    "name_vi": "Hành tây",
+    "grams": 40,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 173469",
+    "name_vi": "Giấm táo (chung)",
+    "grams": 8,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 9,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4088",
+    "name_vi": "Rau răm",
+    "grams": 5,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 168409",
+    "name_vi": "Dưa leo (cả vỏ)",
+    "grams": 20,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 12,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169231",
+    "name_vi": "Gừng tươi",
+    "grams": 4,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 5003",
+    "name_vi": "Chanh ta",
+    "grams": 5,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13039",
+    "name_vi": "Ớt tươi",
+    "grams": 1,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 10,
+    "role": "sauce",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:chao-ga",
+   "name_vi": "Cháo gà"
+  },
+  "serving_label": "1 tô vừa",
+  "serving_grams": 500,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "SR Legacy NDB 20445 (FDC id not shown on mirror)",
+    "name_vi": "Cơm trắng",
+    "grams": 107,
+    "role": "base",
+    "addon": {
+     "label": "+ Cháo",
+     "grams": 100
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 172401",
+    "name_vi": "Gà ta (chín)",
+    "grams": 45,
+    "role": "protein",
+    "addon": {
+     "label": "+ Gà xé",
+     "grams": 50
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169231",
+    "name_vi": "Gừng tươi",
+    "grams": 3,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170005",
+    "name_vi": "Hành lá",
+    "grams": 6,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 4,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 173468",
+    "name_vi": "Muối ăn",
+    "grams": 1,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 334,
+    "role": "broth",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:bo-kho",
+   "name_vi": "Bò kho"
+  },
+  "serving_label": "1 tô vừa (chưa gồm bánh mì)",
+  "serving_grams": 385,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169442",
+    "name_vi": "Bắp bò (chín)",
+    "grams": 80,
+    "role": "protein",
+    "addon": {
+     "label": "+ Thịt bò",
+     "grams": 50
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170393",
+    "name_vi": "Cà rốt (sống)",
+    "grams": 70,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170000",
+    "name_vi": "Hành tây",
+    "grams": 20,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 8,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 5,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 5,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13054",
+    "name_vi": "Sa tế",
+    "grams": 5,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 192,
+    "role": "broth",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:thit-kho-trung",
+   "name_vi": "Thịt kho trứng"
+  },
+  "serving_label": "1 chén vừa (thịt + 1 trứng)",
+  "serving_grams": 190,
+  "ingredients": [
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 7018002",
+    "name_vi": "Thịt ba chỉ heo (luộc)",
+    "grams": 100,
+    "role": "protein",
+    "addon": {
+     "label": "+ Thịt kho",
+     "grams": 50
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 172189",
+    "name_vi": "Trứng vịt",
+    "grams": 65,
+    "role": "protein",
+    "addon": {
+     "label": "+ Trứng vịt",
+     "grams": 65
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 8,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 8,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 3,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4037",
+    "name_vi": "Hành củ (hành tím)",
+    "grams": 5,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169230",
+    "name_vi": "Tỏi",
+    "grams": 3,
+    "role": "topping",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:ca-kho-to",
+   "name_vi": "Cá kho tộ"
+  },
+  "serving_label": "1 chén vừa",
+  "serving_grams": 145,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 175166",
+    "name_vi": "Cá basa / cá tra (chín)",
+    "grams": 90,
+    "role": "protein",
+    "addon": {
+     "label": "+ Cá",
+     "grams": 50
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 7018002",
+    "name_vi": "Thịt ba chỉ heo (luộc)",
+    "grams": 20,
+    "role": "protein",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 9,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 10,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4037",
+    "name_vi": "Hành củ (hành tím)",
+    "grams": 6,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169230",
+    "name_vi": "Tỏi",
+    "grams": 3,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13039",
+    "name_vi": "Ớt tươi",
+    "grams": 2,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 3,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169231",
+    "name_vi": "Gừng tươi",
+    "grams": 3,
+    "role": "topping",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:canh-chua-ca",
+   "name_vi": "Canh chua cá"
+  },
+  "serving_label": "1 tô vừa",
+  "serving_grams": 540,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 175166",
+    "name_vi": "Cá basa / cá tra (chín)",
+    "grams": 70,
+    "role": "protein",
+    "addon": {
+     "label": "+ Cá",
+     "grams": 50
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169124",
+    "name_vi": "Thơm (dứa)",
+    "grams": 45,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170457",
+    "name_vi": "Cà chua (sống)",
+    "grams": 55,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169957",
+    "name_vi": "Giá đỗ (sống)",
+    "grams": 30,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169260",
+    "name_vi": "Đậu bắp (sống)",
+    "grams": 25,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4026",
+    "name_vi": "Dọc mùng",
+    "grams": 35,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 167763",
+    "name_vi": "Me chín",
+    "grams": 8,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 8,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 5,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4037",
+    "name_vi": "Hành củ (hành tím)",
+    "grams": 4,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 3,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4094:hung-lui-song",
+    "name_vi": "Húng lủi",
+    "grams": 6,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 173468",
+    "name_vi": "Muối ăn",
+    "grams": 1,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 245,
+    "role": "broth",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:suon-ram",
+   "name_vi": "Sườn ram mặn"
+  },
+  "serving_label": "1 dĩa vừa (5-6 miếng)",
+  "serving_grams": 130,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 167854",
+    "name_vi": "Sườn non heo (chín)",
+    "grams": 95,
+    "role": "protein",
+    "addon": {
+     "label": "+ Sườn",
+     "grams": 50
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 12,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 9,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 5,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4037",
+    "name_vi": "Hành củ (hành tím)",
+    "grams": 5,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169230",
+    "name_vi": "Tỏi",
+    "grams": 3,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 1,
+    "role": "sauce",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:oc-luoc",
+   "name_vi": "Ốc luộc sả"
+  },
+  "serving_label": "1 dĩa vừa (thịt ốc + 31 g nước chấm gừng)",
+  "serving_grams": 160,
+  "ingredients": [
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 8041",
+    "name_vi": "Ốc bươu",
+    "grams": 130,
+    "role": "protein",
+    "addon": {
+     "label": "+ Ốc",
+     "grams": 60
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 8,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 4,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169231",
+    "name_vi": "Gừng tươi",
+    "grams": 4,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 5003",
+    "name_vi": "Chanh ta",
+    "grams": 4,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13039",
+    "name_vi": "Ớt tươi",
+    "grams": 2,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169230",
+    "name_vi": "Tỏi",
+    "grams": 1,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 7,
+    "role": "sauce",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:oc-xao-me",
+   "name_vi": "Ốc xào me"
+  },
+  "serving_label": "1 dĩa vừa (thịt ốc + sốt)",
+  "serving_grams": 185,
+  "ingredients": [
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 8041",
+    "name_vi": "Ốc bươu",
+    "grams": 109,
+    "role": "protein",
+    "addon": {
+     "label": "+ Ốc",
+     "grams": 60
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 10,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 167763",
+    "name_vi": "Me chín",
+    "grams": 12,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 6,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169230",
+    "name_vi": "Tỏi",
+    "grams": 6,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4037",
+    "name_vi": "Hành củ (hành tím)",
+    "grams": 8,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 5,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13054",
+    "name_vi": "Sa tế",
+    "grams": 4,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 25,
+    "role": "sauce",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:bot-chien",
+   "name_vi": "Bột chiên trứng"
+  },
+  "serving_label": "1 dĩa vừa (gồm 35 g nước chấm và tương ớt)",
+  "serving_grams": 265,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169714",
+    "name_vi": "Bột gạo (sống)",
+    "grams": 50,
+    "role": "base",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13046",
+    "name_vi": "Bột năng (bột sắn)",
+    "grams": 15,
+    "role": "base",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171287",
+    "name_vi": "Trứng gà",
+    "grams": 100,
+    "role": "protein",
+    "addon": {
+     "label": "+ Trứng",
+     "grams": 50
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4033",
+    "name_vi": "Đu đủ xanh",
+    "grams": 35,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170005",
+    "name_vi": "Hành lá",
+    "grams": 10,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 22,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13022",
+    "name_vi": "Xì dầu (nước tương)",
+    "grams": 8,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 173469",
+    "name_vi": "Giấm táo (chung)",
+    "grams": 8,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 3,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169230",
+    "name_vi": "Tỏi",
+    "grams": 2,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13021",
+    "name_vi": "Tương ớt",
+    "grams": 14,
+    "role": "sauce",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:banh-trang-tron",
+   "name_vi": "Bánh tráng trộn"
+  },
+  "serving_label": "1 gói (bịch)",
+  "serving_grams": 190,
+  "ingredients": [
+   {
+    "source": "vn_table",
+    "source_id": "food-banh-trang",
+    "name_vi": "Bánh tráng",
+    "grams": 35,
+    "role": "base",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169910",
+    "name_vi": "Xoài chín",
+    "grams": 35,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 172191",
+    "name_vi": "Trứng cút",
+    "grams": 22,
+    "role": "protein",
+    "addon": {
+     "label": "+ Trứng cút",
+     "grams": 22
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 7075",
+    "name_vi": "Thịt bò khô",
+    "grams": 15,
+    "role": "protein",
+    "addon": {
+     "label": "+ Bò khô",
+     "grams": 15
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 8053",
+    "name_vi": "Tôm khô",
+    "grams": 8,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 173806",
+    "name_vi": "Đậu phộng (lạc) rang",
+    "grams": 8,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4037",
+    "name_vi": "Hành củ (hành tím)",
+    "grams": 4,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 13,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4088",
+    "name_vi": "Rau răm",
+    "grams": 5,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13054",
+    "name_vi": "Sa tế",
+    "grams": 6,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13022",
+    "name_vi": "Xì dầu (nước tương)",
+    "grams": 8,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 6,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 5003",
+    "name_vi": "Chanh ta",
+    "grams": 5,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 20,
+    "role": "sauce",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:lau-thap-cam",
+   "name_vi": "Lẩu thập cẩm"
+  },
+  "serving_label": "1 tô vừa (1 người, gồm 300 g nước lẩu)",
+  "serving_grams": 860,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171811",
+    "name_vi": "Thịt bò thăn (chín)",
+    "grams": 45,
+    "role": "protein",
+    "addon": {
+     "label": "+ Thịt bò",
+     "grams": 100
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171971",
+    "name_vi": "Tôm (chín)",
+    "grams": 45,
+    "role": "protein",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 8040003",
+    "name_vi": "Mực ống (chín)",
+    "grams": 35,
+    "role": "protein",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 172476",
+    "name_vi": "Đậu hũ (đậu phụ trắng)",
+    "grams": 40,
+    "role": "protein",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 168580",
+    "name_vi": "Nấm bào ngư",
+    "grams": 50,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169301",
+    "name_vi": "Rau muống",
+    "grams": 80,
+    "role": "veg",
+    "addon": {
+     "label": "+ Rau",
+     "grams": 100
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169979",
+    "name_vi": "Cải thảo (sống)",
+    "grams": 40,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170457",
+    "name_vi": "Cà chua (sống)",
+    "grams": 50,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 168914",
+    "name_vi": "Bún (sợi tươi)",
+    "grams": 130,
+    "role": "base",
+    "addon": {
+     "label": "+ Bún",
+     "grams": 100
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 8,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 6,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13054",
+    "name_vi": "Sa tế",
+    "grams": 10,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 173468",
+    "name_vi": "Muối ăn",
+    "grams": 1,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 320,
+    "role": "broth",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "vn_nin",
+   "source_id": "NIN 1009",
+   "name_vi": "Bánh bao nhân thịt"
+  },
+  "serving_label": "1 cái",
+  "serving_grams": 110,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 168894:bot-mi-kho",
+    "name_vi": "Bột mì (khô)",
+    "grams": 45,
+    "role": "base",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 18,
+    "role": "base",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 167903",
+    "name_vi": "Thịt heo xay (chín)",
+    "grams": 25,
+    "role": "protein",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 172191",
+    "name_vi": "Trứng cút",
+    "grams": 10,
+    "role": "protein",
+    "addon": {
+     "label": "+ Trứng cút",
+     "grams": 20
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170000",
+    "name_vi": "Hành tây",
+    "grams": 5,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 3,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 4,
+    "role": "sauce",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "vn_nin",
+   "source_id": "NIN 15002",
+   "name_vi": "Bánh bèo"
+  },
+  "serving_label": "1 dĩa vừa (10 cái)",
+  "serving_grams": 150,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169714",
+    "name_vi": "Bột gạo (sống)",
+    "grams": 24,
+    "role": "base",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13046",
+    "name_vi": "Bột năng (bột sắn)",
+    "grams": 6,
+    "role": "base",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 8053",
+    "name_vi": "Tôm khô",
+    "grams": 4,
+    "role": "topping",
+    "addon": {
+     "label": "+ Tôm cháy",
+     "grams": 8
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 3,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 3,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 6,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4037",
+    "name_vi": "Hành củ (hành tím)",
+    "grams": 3,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 101,
+    "role": "base",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "vn_nin",
+   "source_id": "NIN 15003",
+   "name_vi": "Bánh bột lọc"
+  },
+  "serving_label": "1 dĩa vừa (6 cái)",
+  "serving_grams": 150,
+  "ingredients": [
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13046",
+    "name_vi": "Bột năng (bột sắn)",
+    "grams": 30,
+    "role": "base",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171971",
+    "name_vi": "Tôm (chín)",
+    "grams": 20,
+    "role": "protein",
+    "addon": {
+     "label": "+ Tôm",
+     "grams": 20
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 7018002",
+    "name_vi": "Thịt ba chỉ heo (luộc)",
+    "grams": 20,
+    "role": "protein",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4037",
+    "name_vi": "Hành củ (hành tím)",
+    "grams": 5,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 4,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 5,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 66,
+    "role": "base",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "vn_nin",
+   "source_id": "NIN 15010",
+   "name_vi": "Bánh cuốn nóng (nhân thịt)"
+  },
+  "serving_label": "1 dĩa vừa",
+  "serving_grams": 200,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169714",
+    "name_vi": "Bột gạo (sống)",
+    "grams": 22,
+    "role": "base",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13046",
+    "name_vi": "Bột năng (bột sắn)",
+    "grams": 4,
+    "role": "base",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 167903",
+    "name_vi": "Thịt heo xay (chín)",
+    "grams": 20,
+    "role": "protein",
+    "addon": {
+     "label": "+ Chả lụa",
+     "grams": 30
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4125",
+    "name_vi": "Mộc nhĩ (nấm mèo, khô)",
+    "grams": 1,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4037",
+    "name_vi": "Hành củ (hành tím)",
+    "grams": 5,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 2,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 7069",
+    "name_vi": "Giò lụa (chả lụa)",
+    "grams": 10,
+    "role": "protein",
+    "addon": {
+     "label": "+ Chả lụa",
+     "grams": 20
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 8,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 3,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 5003",
+    "name_vi": "Chanh ta",
+    "grams": 3,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 122,
+    "role": "sauce",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "vn_nin",
+   "source_id": "NIN 15017",
+   "name_vi": "Bánh giò"
+  },
+  "serving_label": "1 cái",
+  "serving_grams": 120,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169714",
+    "name_vi": "Bột gạo (sống)",
+    "grams": 30,
+    "role": "base",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 167903",
+    "name_vi": "Thịt heo xay (chín)",
+    "grams": 30,
+    "role": "protein",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4125",
+    "name_vi": "Mộc nhĩ (nấm mèo, khô)",
+    "grams": 1,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4037",
+    "name_vi": "Hành củ (hành tím)",
+    "grams": 5,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 5,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 172191",
+    "name_vi": "Trứng cút",
+    "grams": 10,
+    "role": "protein",
+    "addon": {
+     "label": "+ Trứng cút",
+     "grams": 20
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 3,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 36,
+    "role": "base",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "vn_nin",
+   "source_id": "NIN 15033",
+   "name_vi": "Bún bò Nam Bộ"
+  },
+  "serving_label": "1 tô vừa",
+  "serving_grams": 350,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 168914",
+    "name_vi": "Bún (sợi tươi)",
+    "grams": 120,
+    "role": "base",
+    "addon": {
+     "label": "+ Bún",
+     "grams": 100
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171811",
+    "name_vi": "Thịt bò thăn (chín)",
+    "grams": 40,
+    "role": "protein",
+    "addon": {
+     "label": "+ Thịt bò",
+     "grams": 50
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 173806",
+    "name_vi": "Đậu phộng (lạc) rang",
+    "grams": 6,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4037",
+    "name_vi": "Hành củ (hành tím)",
+    "grams": 5,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 3,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169249",
+    "name_vi": "Xà lách lá (xanh)",
+    "grams": 25,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169957",
+    "name_vi": "Giá đỗ (sống)",
+    "grams": 20,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 168409",
+    "name_vi": "Dưa leo (cả vỏ)",
+    "grams": 20,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4094:hung-lui-song",
+    "name_vi": "Húng lủi",
+    "grams": 10,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 10,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 4,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 5003",
+    "name_vi": "Chanh ta",
+    "grams": 5,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169230",
+    "name_vi": "Tỏi",
+    "grams": 2,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 80,
+    "role": "sauce",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "vn_nin",
+   "source_id": "NIN 15039",
+   "name_vi": "Bún ốc"
+  },
+  "serving_label": "1 tô vừa",
+  "serving_grams": 500,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 168914",
+    "name_vi": "Bún (sợi tươi)",
+    "grams": 150,
+    "role": "base",
+    "addon": {
+     "label": "+ Bún",
+     "grams": 100
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 8041",
+    "name_vi": "Ốc bươu",
+    "grams": 40,
+    "role": "protein",
+    "addon": {
+     "label": "+ Ốc",
+     "grams": 50
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 172451",
+    "name_vi": "Đậu hũ chiên",
+    "grams": 30,
+    "role": "protein",
+    "addon": {
+     "label": "+ Đậu hũ chiên",
+     "grams": 40
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170457",
+    "name_vi": "Cà chua (sống)",
+    "grams": 50,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4037",
+    "name_vi": "Hành củ (hành tím)",
+    "grams": 5,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 3,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 5,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13011",
+    "name_vi": "Mắm tôm đặc",
+    "grams": 3,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169301",
+    "name_vi": "Rau muống",
+    "grams": 30,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169957",
+    "name_vi": "Giá đỗ (sống)",
+    "grams": 20,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4094:hung-lui-song",
+    "name_vi": "Húng lủi",
+    "grams": 8,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 156,
+    "role": "broth",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "vn_nin",
+   "source_id": "NIN 15042",
+   "name_vi": "Cháo lòng"
+  },
+  "serving_label": "1 tô vừa",
+  "serving_grams": 400,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "SR Legacy NDB 20445 (FDC id not shown on mirror)",
+    "name_vi": "Cơm trắng",
+    "grams": 110,
+    "role": "base",
+    "addon": {
+     "label": "+ Cháo",
+     "grams": 100
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 7047002",
+    "name_vi": "Lòng heo (ruột non, luộc)",
+    "grams": 40,
+    "role": "protein",
+    "addon": {
+     "label": "+ Lòng",
+     "grams": 50
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 7034002",
+    "name_vi": "Dạ dày heo (luộc)",
+    "grams": 25,
+    "role": "protein",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 167863",
+    "name_vi": "Gan heo (chín)",
+    "grams": 25,
+    "role": "protein",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 7059",
+    "name_vi": "Tiết heo (luộc)",
+    "grams": 20,
+    "role": "protein",
+    "addon": {
+     "label": "+ Huyết",
+     "grams": 30
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169231",
+    "name_vi": "Gừng tươi",
+    "grams": 3,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170005",
+    "name_vi": "Hành lá",
+    "grams": 5,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 4,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 3,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 165,
+    "role": "broth",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "vn_nin",
+   "source_id": "NIN 15043",
+   "name_vi": "Cháo sườn"
+  },
+  "serving_label": "1 tô vừa",
+  "serving_grams": 400,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "SR Legacy NDB 20445 (FDC id not shown on mirror)",
+    "name_vi": "Cơm trắng",
+    "grams": 55,
+    "role": "base",
+    "addon": {
+     "label": "+ Cháo",
+     "grams": 100
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 167854",
+    "name_vi": "Sườn non heo (chín)",
+    "grams": 22,
+    "role": "protein",
+    "addon": {
+     "label": "+ Sườn",
+     "grams": 30
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169231",
+    "name_vi": "Gừng tươi",
+    "grams": 2,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170005",
+    "name_vi": "Hành lá",
+    "grams": 5,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 3,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 313,
+    "role": "broth",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "vn_nin",
+   "source_id": "NIN 15056",
+   "name_vi": "Cơm rang (cơm chiên trứng)"
+  },
+  "serving_label": "1 dĩa vừa",
+  "serving_grams": 300,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "SR Legacy NDB 20445 (FDC id not shown on mirror)",
+    "name_vi": "Cơm trắng",
+    "grams": 200,
+    "role": "base",
+    "addon": {
+     "label": "+ Cơm",
+     "grams": 100
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171287",
+    "name_vi": "Trứng gà",
+    "grams": 60,
+    "role": "protein",
+    "addon": {
+     "label": "+ Trứng",
+     "grams": 50
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 20,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170005",
+    "name_vi": "Hành lá",
+    "grams": 10,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4037",
+    "name_vi": "Hành củ (hành tím)",
+    "grams": 5,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13022",
+    "name_vi": "Xì dầu (nước tương)",
+    "grams": 5,
+    "role": "sauce",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "vn_nin",
+   "source_id": "NIN 15060",
+   "name_vi": "Mì hoành thánh (mì vằn thắn)"
+  },
+  "serving_label": "1 tô vừa",
+  "serving_grams": 400,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169732:mi-trung-chin",
+    "name_vi": "Mì trứng khô (chín)",
+    "grams": 100,
+    "role": "base",
+    "addon": {
+     "label": "+ Mì",
+     "grams": 100
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 167903",
+    "name_vi": "Thịt heo xay (chín)",
+    "grams": 25,
+    "role": "protein",
+    "addon": {
+     "label": "+ Hoành thánh",
+     "grams": 30
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171971",
+    "name_vi": "Tôm (chín)",
+    "grams": 15,
+    "role": "protein",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 167846",
+    "name_vi": "Nạc vai heo (chín)",
+    "grams": 20,
+    "role": "protein",
+    "addon": {
+     "label": "+ Xá xíu",
+     "grams": 30
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170391",
+    "name_vi": "Cải ngọt (luộc)",
+    "grams": 30,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170005",
+    "name_vi": "Hành lá",
+    "grams": 5,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 5,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 3,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 197,
+    "role": "broth",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "vn_nin",
+   "source_id": "NIN 15061",
+   "name_vi": "Mì xào"
+  },
+  "serving_label": "1 dĩa vừa",
+  "serving_grams": 300,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169732:mi-trung-chin",
+    "name_vi": "Mì trứng khô (chín)",
+    "grams": 150,
+    "role": "base",
+    "addon": {
+     "label": "+ Mì",
+     "grams": 100
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 167846",
+    "name_vi": "Nạc vai heo (chín)",
+    "grams": 40,
+    "role": "protein",
+    "addon": {
+     "label": "+ Thịt",
+     "grams": 40
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170393",
+    "name_vi": "Cà rốt (sống)",
+    "grams": 30,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169975",
+    "name_vi": "Bắp cải (sống)",
+    "grams": 40,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170000",
+    "name_vi": "Hành tây",
+    "grams": 20,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 8,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13022",
+    "name_vi": "Xì dầu (nước tương)",
+    "grams": 8,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169230",
+    "name_vi": "Tỏi",
+    "grams": 2,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 2,
+    "role": "sauce",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "vn_nin",
+   "source_id": "NIN 15062",
+   "name_vi": "Nem lụi"
+  },
+  "serving_label": "1 cây",
+  "serving_grams": 60,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 167903",
+    "name_vi": "Thịt heo xay (chín)",
+    "grams": 32,
+    "role": "protein",
+    "addon": {
+     "label": "+ Thịt xay",
+     "grams": 30
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4037",
+    "name_vi": "Hành củ (hành tím)",
+    "grams": 4,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169230",
+    "name_vi": "Tỏi",
+    "grams": 2,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 3,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 168573",
+    "name_vi": "Sả",
+    "grams": 6,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 13,
+    "role": "base",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "vn_nin",
+   "source_id": "NIN 15063",
+   "name_vi": "Chả giò (nem rán)"
+  },
+  "serving_label": "1 cuốn",
+  "serving_grams": 40,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 167903",
+    "name_vi": "Thịt heo xay (chín)",
+    "grams": 9,
+    "role": "protein",
+    "addon": null
+   },
+   {
+    "source": "vn_table",
+    "source_id": "food-banh-trang",
+    "name_vi": "Bánh tráng",
+    "grams": 4,
+    "role": "base",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170393",
+    "name_vi": "Cà rốt (sống)",
+    "grams": 5,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4037",
+    "name_vi": "Hành củ (hành tím)",
+    "grams": 3,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 1.5,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171971",
+    "name_vi": "Tôm (chín)",
+    "grams": 4,
+    "role": "protein",
+    "addon": {
+     "label": "+ Tôm",
+     "grams": 10
+    }
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 13.5,
+    "role": "base",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "vn_nin",
+   "source_id": "NIN 15073",
+   "name_vi": "Xôi xéo"
+  },
+  "serving_label": "1 dĩa vừa",
+  "serving_grams": 200,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169711",
+    "name_vi": "Xôi trắng (nếp đồ)",
+    "grams": 100,
+    "role": "base",
+    "addon": {
+     "label": "+ Xôi",
+     "grams": 100
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 174257",
+    "name_vi": "Đậu xanh (luộc)",
+    "grams": 45,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 25,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4037",
+    "name_vi": "Hành củ (hành tím)",
+    "grams": 12,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170173",
+    "name_vi": "Nước cốt dừa (lon)",
+    "grams": 15,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 10,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 173468",
+    "name_vi": "Muối ăn",
+    "grams": 1,
+    "role": "sauce",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "vn_table",
+   "source_id": "food-pho-bo",
+   "name_vi": "Phở bò"
+  },
+  "serving_label": "1 tô vừa",
+  "serving_grams": 600,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 168914:banh-pho-chin",
+    "name_vi": "Bánh phở (tươi)",
+    "grams": 200,
+    "role": "base",
+    "addon": {
+     "label": "+ Bánh phở",
+     "grams": 100
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171811",
+    "name_vi": "Thịt bò thăn (chín)",
+    "grams": 60,
+    "role": "protein",
+    "addon": {
+     "label": "+ Thịt bò",
+     "grams": 50
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 174047",
+    "name_vi": "Nạm bò (chín)",
+    "grams": 30,
+    "role": "protein",
+    "addon": {
+     "label": "+ Nạm",
+     "grams": 30
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170005",
+    "name_vi": "Hành lá",
+    "grams": 6,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170000",
+    "name_vi": "Hành tây",
+    "grams": 15,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169957",
+    "name_vi": "Giá đỗ (sống)",
+    "grams": 25,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4094:hung-lui-song",
+    "name_vi": "Húng lủi",
+    "grams": 8,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 256,
+    "role": "broth",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "vn_fct",
+   "source_id": "food-pho-ga",
+   "name_vi": "Phở gà"
+  },
+  "serving_label": "1 tô vừa",
+  "serving_grams": 500,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 168914:banh-pho-chin",
+    "name_vi": "Bánh phở (tươi)",
+    "grams": 170,
+    "role": "base",
+    "addon": {
+     "label": "+ Bánh phở",
+     "grams": 100
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171478",
+    "name_vi": "Ức gà luộc (chín)",
+    "grams": 60,
+    "role": "protein",
+    "addon": {
+     "label": "+ Thịt gà",
+     "grams": 50
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 172401",
+    "name_vi": "Gà ta (chín)",
+    "grams": 70,
+    "role": "protein",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170005",
+    "name_vi": "Hành lá",
+    "grams": 6,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170000",
+    "name_vi": "Hành tây",
+    "grams": 15,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169957",
+    "name_vi": "Giá đỗ (sống)",
+    "grams": 20,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4094:hung-lui-song",
+    "name_vi": "Húng lủi",
+    "grams": 8,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 151,
+    "role": "broth",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "vn_table",
+   "source_id": "food-bun-bo-hue",
+   "name_vi": "Bún bò Huế"
+  },
+  "serving_label": "1 tô vừa",
+  "serving_grams": 600,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 168914",
+    "name_vi": "Bún (sợi tươi)",
+    "grams": 200,
+    "role": "base",
+    "addon": {
+     "label": "+ Bún",
+     "grams": 100
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169442",
+    "name_vi": "Bắp bò (chín)",
+    "grams": 50,
+    "role": "protein",
+    "addon": {
+     "label": "+ Bắp bò",
+     "grams": 50
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 7032002",
+    "name_vi": "Thịt chân giò heo (luộc)",
+    "grams": 40,
+    "role": "protein",
+    "addon": {
+     "label": "+ Giò heo",
+     "grams": 50
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 7059",
+    "name_vi": "Tiết heo (luộc)",
+    "grams": 20,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 7069",
+    "name_vi": "Giò lụa (chả lụa)",
+    "grams": 20,
+    "role": "protein",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170000",
+    "name_vi": "Hành tây",
+    "grams": 15,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169975",
+    "name_vi": "Bắp cải (sống)",
+    "grams": 25,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4043",
+    "name_vi": "Hoa chuối (bắp chuối)",
+    "grams": 10,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4094:hung-lui-song",
+    "name_vi": "Húng lủi",
+    "grams": 10,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169957",
+    "name_vi": "Giá đỗ (sống)",
+    "grams": 15,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13054",
+    "name_vi": "Sa tế",
+    "grams": 8,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 5,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 182,
+    "role": "broth",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "vn_table",
+   "source_id": "food-bun-cha",
+   "name_vi": "Bún chả Hà Nội"
+  },
+  "serving_label": "1 tô vừa",
+  "serving_grams": 350,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 168914",
+    "name_vi": "Bún (sợi tươi)",
+    "grams": 145,
+    "role": "base",
+    "addon": {
+     "label": "+ Bún",
+     "grams": 100
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 167846",
+    "name_vi": "Nạc vai heo (chín)",
+    "grams": 55,
+    "role": "protein",
+    "addon": {
+     "label": "+ Thịt nướng",
+     "grams": 50
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 7086",
+    "name_vi": "Thịt ba chỉ heo (nướng)",
+    "grams": 35,
+    "role": "protein",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 167903",
+    "name_vi": "Thịt heo xay (chín)",
+    "grams": 40,
+    "role": "protein",
+    "addon": {
+     "label": "+ Chả viên",
+     "grams": 40
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4033",
+    "name_vi": "Đu đủ xanh",
+    "grams": 20,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169249",
+    "name_vi": "Xà lách lá (xanh)",
+    "grams": 15,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4094:hung-lui-song",
+    "name_vi": "Húng lủi",
+    "grams": 15,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 12,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 12,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 173469",
+    "name_vi": "Giấm táo (chung)",
+    "grams": 4,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169230",
+    "name_vi": "Tỏi",
+    "grams": 2,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13039",
+    "name_vi": "Ớt tươi",
+    "grams": 1,
+    "role": "sauce",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "vn_fct",
+   "source_id": "food-bun-cha",
+   "name_vi": "Bún chả Hà Nội"
+  },
+  "serving_label": "1 tô vừa",
+  "serving_grams": 450,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 168914",
+    "name_vi": "Bún (sợi tươi)",
+    "grams": 180,
+    "role": "base",
+    "addon": {
+     "label": "+ Bún",
+     "grams": 100
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 167846",
+    "name_vi": "Nạc vai heo (chín)",
+    "grams": 65,
+    "role": "protein",
+    "addon": {
+     "label": "+ Thịt nướng",
+     "grams": 50
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 7086",
+    "name_vi": "Thịt ba chỉ heo (nướng)",
+    "grams": 25,
+    "role": "protein",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 167903",
+    "name_vi": "Thịt heo xay (chín)",
+    "grams": 40,
+    "role": "protein",
+    "addon": {
+     "label": "+ Chả viên",
+     "grams": 40
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4033",
+    "name_vi": "Đu đủ xanh",
+    "grams": 25,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169249",
+    "name_vi": "Xà lách lá (xanh)",
+    "grams": 20,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4094:hung-lui-song",
+    "name_vi": "Húng lủi",
+    "grams": 20,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 15,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 15,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 173469",
+    "name_vi": "Giấm táo (chung)",
+    "grams": 5,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169230",
+    "name_vi": "Tỏi",
+    "grams": 3,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13039",
+    "name_vi": "Ớt tươi",
+    "grams": 1,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 36,
+    "role": "sauce",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "vn_table",
+   "source_id": "food-com-tam-suon",
+   "name_vi": "Cơm tấm sườn"
+  },
+  "serving_label": "1 dĩa vừa",
+  "serving_grams": 400,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "SR Legacy NDB 20445 (FDC id not shown on mirror)",
+    "name_vi": "Cơm trắng",
+    "grams": 220,
+    "role": "base",
+    "addon": {
+     "label": "+ Cơm",
+     "grams": 100
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 167854",
+    "name_vi": "Sườn non heo (chín)",
+    "grams": 70,
+    "role": "protein",
+    "addon": {
+     "label": "+ Sườn",
+     "grams": 70
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170005",
+    "name_vi": "Hành lá",
+    "grams": 8,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 5,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 168409",
+    "name_vi": "Dưa leo (cả vỏ)",
+    "grams": 30,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170393",
+    "name_vi": "Cà rốt (sống)",
+    "grams": 20,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 10,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 10,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169230",
+    "name_vi": "Tỏi",
+    "grams": 2,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13039",
+    "name_vi": "Ớt tươi",
+    "grams": 1,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 24,
+    "role": "sauce",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "vn_table",
+   "source_id": "food-banh-mi-thit",
+   "name_vi": "Bánh mì thịt"
+  },
+  "serving_label": "1 ổ vừa",
+  "serving_grams": 200,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 172675",
+    "name_vi": "Bánh mì (ổ Việt Nam)",
+    "grams": 95,
+    "role": "base",
+    "addon": {
+     "label": "+ Bánh mì",
+     "grams": 50
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 7086",
+    "name_vi": "Thịt ba chỉ heo (nướng)",
+    "grams": 20,
+    "role": "protein",
+    "addon": {
+     "label": "+ Thịt",
+     "grams": 30
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 7069",
+    "name_vi": "Giò lụa (chả lụa)",
+    "grams": 25,
+    "role": "protein",
+    "addon": {
+     "label": "+ Chả lụa",
+     "grams": 25
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 168409",
+    "name_vi": "Dưa leo (cả vỏ)",
+    "grams": 25,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170393",
+    "name_vi": "Cà rốt (sống)",
+    "grams": 20,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4094:hung-lui-song",
+    "name_vi": "Húng lủi",
+    "grams": 5,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 2,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13022",
+    "name_vi": "Xì dầu (nước tương)",
+    "grams": 3,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13039",
+    "name_vi": "Ớt tươi",
+    "grams": 1,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 4,
+    "role": "base",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:ga-kho-gung",
+   "name_vi": "Gà kho gừng"
+  },
+  "serving_label": "1 chén vừa",
+  "serving_grams": 173.5,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 172401",
+    "name_vi": "Gà ta (chín)",
+    "grams": 100,
+    "role": "protein",
+    "addon": {
+     "label": "+ Thịt gà",
+     "grams": 50
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169231",
+    "name_vi": "Gừng tươi",
+    "grams": 15,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 8,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 10,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4037",
+    "name_vi": "Hành củ (hành tím)",
+    "grams": 8,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169230",
+    "name_vi": "Tỏi",
+    "grams": 3,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 4,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170931",
+    "name_vi": "Tiêu đen xay",
+    "grams": 0.5,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 25,
+    "role": "sauce",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:ga-kho-sa-ot",
+   "name_vi": "Gà kho sả ớt"
+  },
+  "serving_label": "1 chén vừa",
+  "serving_grams": 174,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 172401",
+    "name_vi": "Gà ta (chín)",
+    "grams": 100,
+    "role": "protein",
+    "addon": {
+     "label": "+ Thịt gà",
+     "grams": 50
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 168573",
+    "name_vi": "Sả",
+    "grams": 12,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13039",
+    "name_vi": "Ớt tươi",
+    "grams": 4,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 8,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 10,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4037",
+    "name_vi": "Hành củ (hành tím)",
+    "grams": 8,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169230",
+    "name_vi": "Tỏi",
+    "grams": 3,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 4,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 25,
+    "role": "sauce",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:vit-kho-sa-gung",
+   "name_vi": "Vịt kho sả gừng"
+  },
+  "serving_label": "1 chén vừa",
+  "serving_grams": 160,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 172409",
+    "name_vi": "Thịt vịt có da (nướng)",
+    "grams": 85,
+    "role": "protein",
+    "addon": {
+     "label": "+ Thịt vịt",
+     "grams": 50
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169231",
+    "name_vi": "Gừng tươi",
+    "grams": 12,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 168573",
+    "name_vi": "Sả",
+    "grams": 8,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 6,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 10,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4037",
+    "name_vi": "Hành củ (hành tím)",
+    "grams": 8,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169230",
+    "name_vi": "Tỏi",
+    "grams": 3,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 3,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 25,
+    "role": "sauce",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:thit-kho-tieu",
+   "name_vi": "Thịt ba rọi kho tiêu"
+  },
+  "serving_label": "1 chén vừa",
+  "serving_grams": 155,
+  "ingredients": [
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 7018002",
+    "name_vi": "Thịt ba chỉ heo (luộc)",
+    "grams": 100,
+    "role": "protein",
+    "addon": {
+     "label": "+ Thịt kho",
+     "grams": 50
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 10,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 8,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4037",
+    "name_vi": "Hành củ (hành tím)",
+    "grams": 8,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169230",
+    "name_vi": "Tỏi",
+    "grams": 3,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170931",
+    "name_vi": "Tiêu đen xay",
+    "grams": 1,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 25,
+    "role": "sauce",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:ca-loc-kho-tieu",
+   "name_vi": "Cá lóc kho tiêu"
+  },
+  "serving_label": "1 chén vừa",
+  "serving_grams": 158,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 175127",
+    "name_vi": "Cá lóc/cá quả (chín)",
+    "grams": 100,
+    "role": "protein",
+    "addon": {
+     "label": "+ Cá",
+     "grams": 50
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 10,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 10,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4037",
+    "name_vi": "Hành củ (hành tím)",
+    "grams": 6,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169230",
+    "name_vi": "Tỏi",
+    "grams": 3,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170931",
+    "name_vi": "Tiêu đen xay",
+    "grams": 1,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 3,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 25,
+    "role": "sauce",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:ca-cam-kho-tieu",
+   "name_vi": "Cá cam kho tiêu"
+  },
+  "serving_label": "1 chén vừa",
+  "serving_grams": 158,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 174248",
+    "name_vi": "Cá cam (chín)",
+    "grams": 100,
+    "role": "protein",
+    "addon": {
+     "label": "+ Cá",
+     "grams": 50
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 10,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 10,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4037",
+    "name_vi": "Hành củ (hành tím)",
+    "grams": 6,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169230",
+    "name_vi": "Tỏi",
+    "grams": 3,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170931",
+    "name_vi": "Tiêu đen xay",
+    "grams": 1,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 3,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 25,
+    "role": "sauce",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:tom-rim-thit",
+   "name_vi": "Tôm rim thịt"
+  },
+  "serving_label": "1 chén vừa",
+  "serving_grams": 160,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171971",
+    "name_vi": "Tôm (chín)",
+    "grams": 80,
+    "role": "protein",
+    "addon": {
+     "label": "+ Tôm",
+     "grams": 40
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 7018002",
+    "name_vi": "Thịt ba chỉ heo (luộc)",
+    "grams": 40,
+    "role": "protein",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 8,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 8,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4037",
+    "name_vi": "Hành củ (hành tím)",
+    "grams": 6,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169230",
+    "name_vi": "Tỏi",
+    "grams": 3,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170931",
+    "name_vi": "Tiêu đen xay",
+    "grams": 1,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 4,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 10,
+    "role": "sauce",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:thit-rang-chay-canh",
+   "name_vi": "Thịt heo rang cháy cạnh"
+  },
+  "serving_label": "1 chén vừa",
+  "serving_grams": 130,
+  "ingredients": [
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 7018002",
+    "name_vi": "Thịt ba chỉ heo (luộc)",
+    "grams": 90,
+    "role": "protein",
+    "addon": {
+     "label": "+ Thịt rang",
+     "grams": 50
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 8,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 12,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4037",
+    "name_vi": "Hành củ (hành tím)",
+    "grams": 8,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169230",
+    "name_vi": "Tỏi",
+    "grams": 3,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170931",
+    "name_vi": "Tiêu đen xay",
+    "grams": 1,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 3,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170005",
+    "name_vi": "Hành lá",
+    "grams": 5,
+    "role": "veg",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:suon-xao-chua-ngot",
+   "name_vi": "Sườn xào chua ngọt"
+  },
+  "serving_label": "1 dĩa vừa",
+  "serving_grams": 257,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 167854",
+    "name_vi": "Sườn non heo (chín)",
+    "grams": 90,
+    "role": "protein",
+    "addon": {
+     "label": "+ Sườn",
+     "grams": 50
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170457",
+    "name_vi": "Cà chua (sống)",
+    "grams": 40,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169124",
+    "name_vi": "Thơm (dứa)",
+    "grams": 30,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170000",
+    "name_vi": "Hành tây",
+    "grams": 20,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 15,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 173469",
+    "name_vi": "Giấm táo (chung)",
+    "grams": 8,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13021",
+    "name_vi": "Tương ớt",
+    "grams": 10,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 6,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169230",
+    "name_vi": "Tỏi",
+    "grams": 3,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 5,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13046",
+    "name_vi": "Bột năng (bột sắn)",
+    "grams": 5,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 25,
+    "role": "sauce",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:dau-hu-sot-ca-chua",
+   "name_vi": "Đậu hũ sốt cà chua"
+  },
+  "serving_label": "1 dĩa vừa",
+  "serving_grams": 243,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 172451",
+    "name_vi": "Đậu hũ chiên",
+    "grams": 90,
+    "role": "protein",
+    "addon": {
+     "label": "+ Đậu hũ chiên",
+     "grams": 60
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170457",
+    "name_vi": "Cà chua (sống)",
+    "grams": 100,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4037",
+    "name_vi": "Hành củ (hành tím)",
+    "grams": 8,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170005",
+    "name_vi": "Hành lá",
+    "grams": 8,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 5,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 6,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 5,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 173468",
+    "name_vi": "Muối ăn",
+    "grams": 1,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 20,
+    "role": "sauce",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:trung-chien-thit-bam",
+   "name_vi": "Trứng chiên thịt băm"
+  },
+  "serving_label": "1 dĩa vừa",
+  "serving_grams": 168.5,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171287",
+    "name_vi": "Trứng gà",
+    "grams": 100,
+    "role": "protein",
+    "addon": {
+     "label": "+ Trứng",
+     "grams": 50
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 167903",
+    "name_vi": "Thịt heo xay (chín)",
+    "grams": 40,
+    "role": "protein",
+    "addon": {
+     "label": "+ Thịt bằm",
+     "grams": 30
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170005",
+    "name_vi": "Hành lá",
+    "grams": 8,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4037",
+    "name_vi": "Hành củ (hành tím)",
+    "grams": 5,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 5,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 10,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170931",
+    "name_vi": "Tiêu đen xay",
+    "grams": 0.5,
+    "role": "sauce",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:rau-muong-xao-toi",
+   "name_vi": "Rau muống xào tỏi"
+  },
+  "serving_label": "1 dĩa vừa",
+  "serving_grams": 193.5,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169301",
+    "name_vi": "Rau muống",
+    "grams": 160,
+    "role": "veg",
+    "addon": {
+     "label": "+ Rau",
+     "grams": 100
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169230",
+    "name_vi": "Tỏi",
+    "grams": 8,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 8,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 5,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 2,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 173468",
+    "name_vi": "Muối ăn",
+    "grams": 0.5,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 10,
+    "role": "sauce",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:bo-xao-hanh-tay",
+   "name_vi": "Bò xào hành tây"
+  },
+  "serving_label": "1 dĩa vừa",
+  "serving_grams": 202,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171811",
+    "name_vi": "Thịt bò thăn (chín)",
+    "grams": 90,
+    "role": "protein",
+    "addon": {
+     "label": "+ Thịt bò",
+     "grams": 50
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170000",
+    "name_vi": "Hành tây",
+    "grams": 80,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 8,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169230",
+    "name_vi": "Tỏi",
+    "grams": 4,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13022",
+    "name_vi": "Xì dầu (nước tương)",
+    "grams": 6,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 3,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170931",
+    "name_vi": "Tiêu đen xay",
+    "grams": 1,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 10,
+    "role": "sauce",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:nam-dui-ga-xao-toi",
+   "name_vi": "Nấm đùi gà xào tỏi"
+  },
+  "serving_label": "1 dĩa vừa",
+  "serving_grams": 167.5,
+  "ingredients": [
+   {
+    "source": "usda_foundation",
+    "source_id": "FDC 2003599",
+    "name_vi": "Nấm đùi gà",
+    "grams": 130,
+    "role": "veg",
+    "addon": {
+     "label": "+ Nấm",
+     "grams": 80
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169230",
+    "name_vi": "Tỏi",
+    "grams": 8,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 8,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13022",
+    "name_vi": "Xì dầu (nước tương)",
+    "grams": 5,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170005",
+    "name_vi": "Hành lá",
+    "grams": 5,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 1,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170931",
+    "name_vi": "Tiêu đen xay",
+    "grams": 0.5,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 10,
+    "role": "sauce",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:canh-ga-chien-nuoc-mam",
+   "name_vi": "Cánh gà chiên nước mắm"
+  },
+  "serving_label": "1 dĩa vừa (3 cánh)",
+  "serving_grams": 156,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 173630",
+    "name_vi": "Cánh gà (chín)",
+    "grams": 120,
+    "role": "protein",
+    "addon": {
+     "label": "+ Cánh gà",
+     "grams": 40
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 10,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 10,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 10,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169230",
+    "name_vi": "Tỏi",
+    "grams": 4,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13039",
+    "name_vi": "Ớt tươi",
+    "grams": 2,
+    "role": "topping",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:ca-thu-chien",
+   "name_vi": "Cá thu chiên"
+  },
+  "serving_label": "1 miếng vừa",
+  "serving_grams": 129,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 173674",
+    "name_vi": "Cá thu (chín)",
+    "grams": 120,
+    "role": "protein",
+    "addon": {
+     "label": "+ Cá",
+     "grams": 50
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 8,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 173468",
+    "name_vi": "Muối ăn",
+    "grams": 1,
+    "role": "sauce",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:com-chien-duong-chau",
+   "name_vi": "Cơm chiên Dương Châu"
+  },
+  "serving_label": "1 dĩa vừa",
+  "serving_grams": 377,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "SR Legacy NDB 20445 (FDC id not shown on mirror)",
+    "name_vi": "Cơm trắng",
+    "grams": 200,
+    "role": "base",
+    "addon": {
+     "label": "+ Cơm",
+     "grams": 100
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171287",
+    "name_vi": "Trứng gà",
+    "grams": 50,
+    "role": "protein",
+    "addon": {
+     "label": "+ Trứng",
+     "grams": 50
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171971",
+    "name_vi": "Tôm (chín)",
+    "grams": 30,
+    "role": "protein",
+    "addon": {
+     "label": "+ Tôm",
+     "grams": 30
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 167846",
+    "name_vi": "Nạc vai heo (chín)",
+    "grams": 30,
+    "role": "protein",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170393",
+    "name_vi": "Cà rốt (sống)",
+    "grams": 20,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170420",
+    "name_vi": "Đậu Hà Lan (hạt, luộc)",
+    "grams": 20,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170005",
+    "name_vi": "Hành lá",
+    "grams": 8,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 12,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13022",
+    "name_vi": "Xì dầu (nước tương)",
+    "grams": 6,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 173468",
+    "name_vi": "Muối ăn",
+    "grams": 1,
+    "role": "sauce",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:com-ga-xoi-mo",
+   "name_vi": "Cơm gà xối mỡ"
+  },
+  "serving_label": "1 dĩa vừa",
+  "serving_grams": 431,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "SR Legacy NDB 20445 (FDC id not shown on mirror)",
+    "name_vi": "Cơm trắng",
+    "grams": 200,
+    "role": "base",
+    "addon": {
+     "label": "+ Cơm",
+     "grams": 100
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171450",
+    "name_vi": "Gà nguyên con có da (chín)",
+    "grams": 120,
+    "role": "protein",
+    "addon": {
+     "label": "+ Gà chiên",
+     "grams": 60
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171411",
+    "name_vi": "Dầu ăn (dầu nành)",
+    "grams": 10,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 168409",
+    "name_vi": "Dưa leo (cả vỏ)",
+    "grams": 40,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170457",
+    "name_vi": "Cà chua (sống)",
+    "grams": 30,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 10,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169655",
+    "name_vi": "Đường cát trắng",
+    "grams": 5,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 5003",
+    "name_vi": "Chanh ta",
+    "grams": 5,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13039",
+    "name_vi": "Ớt tươi",
+    "grams": 1,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 10,
+    "role": "sauce",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:canh-kho-qua-nhoi-thit",
+   "name_vi": "Canh khổ qua nhồi thịt"
+  },
+  "serving_label": "1 tô vừa",
+  "serving_grams": 481,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 168394",
+    "name_vi": "Khổ qua (luộc)",
+    "grams": 120,
+    "role": "veg",
+    "addon": {
+     "label": "+ Khổ qua",
+     "grams": 60
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 167903",
+    "name_vi": "Thịt heo xay (chín)",
+    "grams": 45,
+    "role": "protein",
+    "addon": {
+     "label": "+ Thịt bằm",
+     "grams": 40
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4125",
+    "name_vi": "Mộc nhĩ (nấm mèo, khô)",
+    "grams": 1,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4037",
+    "name_vi": "Hành củ (hành tím)",
+    "grams": 5,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 5,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170005",
+    "name_vi": "Hành lá",
+    "grams": 5,
+    "role": "veg",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 300,
+    "role": "broth",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:canh-rau-ngot-thit-bam",
+   "name_vi": "Canh rau ngót thịt băm"
+  },
+  "serving_label": "1 tô vừa",
+  "serving_grams": 420,
+  "ingredients": [
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4086",
+    "name_vi": "Rau ngót",
+    "grams": 70,
+    "role": "veg",
+    "addon": {
+     "label": "+ Rau ngót",
+     "grams": 50
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 167903",
+    "name_vi": "Thịt heo xay (chín)",
+    "grams": 40,
+    "role": "protein",
+    "addon": {
+     "label": "+ Thịt bằm",
+     "grams": 30
+    }
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 13017",
+    "name_vi": "Nước mắm cá",
+    "grams": 5,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 4037",
+    "name_vi": "Hành củ (hành tím)",
+    "grams": 4,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 173468",
+    "name_vi": "Muối ăn",
+    "grams": 1,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "drink-nuoc-loc",
+    "name_vi": "Nước lọc",
+    "grams": 300,
+    "role": "broth",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:com-phan-thit-kho-trung",
+   "name_vi": "Cơm phần thịt kho trứng + rau luộc"
+  },
+  "serving_label": "1 dĩa vừa (cơm + thịt kho trứng + rau luộc)",
+  "serving_grams": 490,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "SR Legacy NDB 20445 (FDC id not shown on mirror)",
+    "name_vi": "Cơm trắng",
+    "grams": 200,
+    "role": "base",
+    "addon": {
+     "label": "+ Cơm",
+     "grams": 100
+    }
+   },
+   {
+    "source": "recipe_calc",
+    "source_id": "recipe:thit-kho-trung",
+    "name_vi": "Thịt kho trứng",
+    "grams": 190,
+    "role": "protein",
+    "addon": {
+     "label": "+ Trứng",
+     "grams": 50
+    }
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170391",
+    "name_vi": "Cải ngọt (luộc)",
+    "grams": 100,
+    "role": "veg",
+    "addon": {
+     "label": "+ Rau luộc",
+     "grams": 100
+    }
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:com-phan-ca-kho-canh-chua",
+   "name_vi": "Cơm phần cá kho tộ + canh chua"
+  },
+  "serving_label": "1 dĩa vừa (cơm + cá kho + canh chua)",
+  "serving_grams": 645,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "SR Legacy NDB 20445 (FDC id not shown on mirror)",
+    "name_vi": "Cơm trắng",
+    "grams": 200,
+    "role": "base",
+    "addon": {
+     "label": "+ Cơm",
+     "grams": 100
+    }
+   },
+   {
+    "source": "recipe_calc",
+    "source_id": "recipe:ca-kho-to",
+    "name_vi": "Cá kho tộ",
+    "grams": 145,
+    "role": "protein",
+    "addon": {
+     "label": "+ Cá kho",
+     "grams": 50
+    }
+   },
+   {
+    "source": "recipe_calc",
+    "source_id": "recipe:canh-chua-ca",
+    "name_vi": "Canh chua cá",
+    "grams": 300,
+    "role": "broth",
+    "addon": null
+   }
+  ]
+ },
+ {
+  "dish": {
+   "source": "recipe_calc",
+   "source_id": "recipe:com-phan-ga-kho-gung-canh-kho-qua",
+   "name_vi": "Cơm phần gà kho gừng + canh khổ qua"
+  },
+  "serving_label": "1 dĩa vừa (cơm + gà kho gừng + canh khổ qua + dưa leo)",
+  "serving_grams": 715,
+  "ingredients": [
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "SR Legacy NDB 20445 (FDC id not shown on mirror)",
+    "name_vi": "Cơm trắng",
+    "grams": 200,
+    "role": "base",
+    "addon": {
+     "label": "+ Cơm",
+     "grams": 100
+    }
+   },
+   {
+    "source": "recipe_calc",
+    "source_id": "recipe:ga-kho-gung",
+    "name_vi": "Gà kho gừng",
+    "grams": 175,
+    "role": "protein",
+    "addon": {
+     "label": "+ Gà kho",
+     "grams": 60
+    }
+   },
+   {
+    "source": "recipe_calc",
+    "source_id": "recipe:canh-kho-qua-nhoi-thit",
+    "name_vi": "Canh khổ qua nhồi thịt",
+    "grams": 300,
+    "role": "broth",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 168409",
+    "name_vi": "Dưa leo (cả vỏ)",
+    "grams": 40,
+    "role": "veg",
+    "addon": null
+   }
+  ]
+ }
+]
