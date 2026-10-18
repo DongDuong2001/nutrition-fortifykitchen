@@ -60,9 +60,16 @@ const fdc = (id: number): FoodSourceRef => ({ db: "SR Legacy", id: `FDC ${id}`, 
  */
 export function browsableFoods(): FoodItem[] {
   // Live mode lists the database's foods (and the user's own) only: the sample foods never mix in, not even before
-  // the database catalogue has arrived
-  if (isLiveMode()) return MOCK_FOODS.filter((f) => !SAMPLE_FOOD_IDS.has(f.id));
+  // the database catalogue has arrived. A recipe's server food is listed as the recipe, never a second time.
+  if (isLiveMode()) return MOCK_FOODS.filter((f) => !SAMPLE_FOOD_IDS.has(f.id) && !hiddenFoodIds.has(f.id));
   return demoActive() ? MOCK_FOODS : MOCK_FOODS.filter((f) => !f.demoOnly);
+}
+
+let hiddenFoodIds: ReadonlySet<string> = new Set();
+
+/** The server foods that hold a recipe's totals (lib/recipe-store): left out of the lists, still found by id. */
+export function setHiddenFoodIds(ids: Iterable<string>): void {
+  hiddenFoodIds = new Set(ids);
 }
 
 const isOwnFood = (f: FoodItem) => f.source === "user" || f.category === "cua_toi";

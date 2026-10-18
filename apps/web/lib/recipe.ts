@@ -1,5 +1,7 @@
 import { COUNTED_NUTRIENT_KEYS } from "./day-totals";
+import type { CreateFoodInput } from "./api-client";
 import type { FoodItem } from "./mock/foods";
+import { isUuid } from "./uuid";
 
 /**
  * Recipes (dishes made from ingredients), cc-27b. Pure helpers, no React and no storage.
@@ -33,6 +35,10 @@ export interface Recipe {
   /** The whole pot weighed after cooking; null = not given (the raw total stands in). */
   cookedGrams: number | null;
   createdAt: string;
+  /** Live mode: the server food (POST /foods/custom) that holds this version's totals. Entries are logged with it. */
+  serverFoodId?: string;
+  /** The server foods of earlier versions: past entries still name them, so they stay on the server, out of the lists. */
+  pastServerFoodIds?: string[];
 }
 
 /** The per-100 g nutrients of an ingredient's food, or null when the food is not in the catalogue. */
@@ -305,4 +311,72 @@ export function parseRecipes(raw: string | null): Recipe[] {
 /** Adds a recipe, or replaces the one with the same id (an edit keeps its place). */
 export function upsertRecipe(list: Recipe[], recipe: Recipe): Recipe[] {
   return list.some((r) => r.id === recipe.id) ? list.map((r) => (r.id === recipe.id ? recipe : r)) : [recipe, ...list];
+}
+
+/** Whether two versions of a recipe give the same server food (name and numbers); the ingredient names do not count. */
+export function sameServerFood(a: Recipe, b: Recipe): boolean {
+  const numbers = (r: Recipe) =>
+    JSON.stringify([r.name, r.servings, r.cookedGrams, r.ingredients.map((i) => [i.foodId, i.grams, i.unit])]);
+  return numbers(a) === numbers(b);
+}
+
+/**
+ * A saved version with the server foods of the one before. An edit that changes the name or the numbers gets a new
+ * server food: the old one moves to pastServerFoodIds and stays on the server, because past entries name it.
+ */
+export function carryServerFood(next: Recipe, before: Recipe | undefined): Recipe {
+  const plain: Recipe = { ...next };
+  delete plain.serverFoodId;
+  delete plain.pastServerFoodIds;
+  if (!before) return plain;
+  const past = before.pastServerFoodIds ?? [];
+  if (before.serverFoodId && sameServerFood(plain, before)) return { ...plain, serverFoodId: before.serverFoodId, ...(past.length ? { pastServerFoodIds: past } : {}) };
+  const all = before.serverFoodId ? [...past, before.serverFoodId] : past;
+  return all.length ? { ...plain, pastServerFoodIds: all } : plain;
+}
+
+/**
+ * The recipe as POST /foods/custom takes it: one serving ("phần") of the serving's grams, with that serving's values.
+ * The server divides by serving_size and multiplies by 100, so it stores exactly the recipe's per-100 g values.
+ * Every computed nutrient is sent, unknown ones as null. Null when the recipe cannot be sent yet: an ingredient is not
+ * in the catalogue (it would make every value unknown), or it has no weight.
+ */
+export function recipeFoodInput(recipe: Recipe, lookup: IngredientLookup): CreateFoodInput | null {
+  const grams = servingGrams(recipe);
+  if (!(grams > 0) || recipe.ingredients.some((i) => lookup(i.foodId) === null)) return null;
+  const per100 = per100Nutrients(recipe, lookup);
+  const serving = (key: string) => {
+    const v = per100[key];
+    return typeof v === "number" ? (v * grams) / 100 : null;
+  };
+  const macros = ["energy", "protein", "carbs", "fat"];
+  return {
+    nameVi: recipe.name,
+    servingUnit: "phần",
+    servingSize: grams,
+    calories: serving("energy"),
+    protein: serving("protein"),
+    carbs: serving("carbs"),
+    fat: serving("fat"),
+    micros: Object.fromEntries(RECIPE_NUTRIENT_KEYS.filter((k) => !macros.includes(k)).map((k) => [k, serving(k)])),
+  };
+}
+
+/** The food an entry of `foodId` is logged with: a recipe's server food once it has one, else the id as it is. */
+export function loggedFoodId(foodId: string, recipes: readonly Recipe[]): string {
+  if (!isRecipeId(foodId)) return foodId;
+  const server = recipes.find((r) => r.id === foodId)?.serverFoodId;
+  return server && isUuid(server) ? server : foodId;
+}
+
+/** Entries named by a recipe's local id, pointed at its server food. The same array when nothing changes. */
+export function withServerFoods<T extends { foodId: string; kind?: string }>(entries: T[], recipes: readonly Recipe[]): T[] {
+  let changed = false;
+  const next = entries.map((e) => {
+    const foodId = e.kind === "quick" ? e.foodId : loggedFoodId(e.foodId, recipes);
+    if (foodId === e.foodId) return e;
+    changed = true;
+    return { ...e, foodId };
+  });
+  return changed ? next : entries;
 }
