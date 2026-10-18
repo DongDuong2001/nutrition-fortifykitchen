@@ -3,12 +3,28 @@ import { createServerClient } from "@supabase/ssr";
 
 const ACCESS_TOKEN_COOKIE = "sb-access-token";
 
+/** Supabase keeps the session in sb-<project>-auth-token (in chunks .0, .1 when it is long). The API token cookie is not it. */
+const hasSupabaseSession = (request: NextRequest) =>
+  request.cookies.getAll().some((c) => c.name.startsWith("sb-") && c.name.includes("-auth-token"));
+
+/** next/link prefetches a page in the background: nothing there needs a session refresh. */
+const isPrefetch = (request: NextRequest) =>
+  request.headers.has("next-router-prefetch") || request.headers.get("purpose") === "prefetch";
+
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
     request: {
       headers: request.headers,
     },
   });
+
+  // cc-58: no Supabase call for a prefetch, or for a visitor with no session cookie. The API token cookie of a
+  // session that is gone still goes (the same as the end of this function).
+  if (isPrefetch(request)) return response;
+  if (!hasSupabaseSession(request)) {
+    if (request.cookies.has(ACCESS_TOKEN_COOKIE)) response.cookies.delete(ACCESS_TOKEN_COOKIE);
+    return response;
+  }
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -37,7 +53,9 @@ export async function middleware(request: NextRequest) {
         },
       });
 
-      await supabase.auth.getUser();
+      // cc-58: the token is checked here against the project's signing keys (no round trip to the Auth server on most
+      // projects), and a token about to expire is refreshed first. getUser() asked the server on every request.
+      await supabase.auth.getClaims();
 
       // The API reads the access token from this httpOnly cookie, so no client script ever holds the token. It is
       // re-issued from the Supabase session on every request (a refreshed token replaces the old one) and removed
@@ -66,6 +84,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|icons|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    // The public pages (landing, terms, privacy, offline, install) need no session: they skip it
+    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|icons|landing|terms|privacy|offline|install|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
