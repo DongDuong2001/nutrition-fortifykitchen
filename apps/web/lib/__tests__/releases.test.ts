@@ -11,23 +11,32 @@ describe("RELEASES", () => {
     expect([...ids].sort().reverse()).toEqual(ids);
   });
 
-  it("starts with the second 18/10 release: Thực phẩm bổ sung, Gia vị, Thêm cà phê, no tour", () => {
+  it("starts with cc-51's 18/10 release (2026-10-18c): its five items, Kéo xuống để tải lại last, no tour", () => {
     const r = latestRelease();
+    expect(r?.id).toBe("2026-10-18c");
+    expect(r?.date).toBe("18/10");
+    expect(r?.items.map((i) => i.title)).toEqual(["Gần đây và Hay ăn", "Như hôm qua", "Chạm vi chất để xem nguồn", "Rung khi chạm", "Kéo xuống để tải lại"]);
+    expect(r?.items[4]).toEqual({ icon: "home", title: "Kéo xuống để tải lại", body: "Ở Hôm nay, kéo danh sách món xuống rồi thả để lấy món vừa thêm trên máy khác." });
+    expect(r?.tour).toBeUndefined();
+  });
+
+  it("then Thực phẩm bổ sung và Gia vị (2026-10-18b): three items, no tour", () => {
+    const r = RELEASES[1];
     expect(r?.id).toBe("2026-10-18b");
     expect(r?.date).toBe("18/10");
     expect(r?.items.map((i) => i.title)).toEqual(["Thực phẩm bổ sung", "Gia vị", "Thêm cà phê"]);
     expect(r?.tour).toBeUndefined();
   });
 
-  it("then the first 18/10 release: Đồng bộ ổn định hơn, no tour", () => {
-    const r = RELEASES[1];
+  it("then the first 18/10 release (cc-49): only Đồng bộ ổn định hơn", () => {
+    const r = RELEASES[2];
     expect(r?.id).toBe("2026-10-18");
-    expect(r?.items.map((i) => i.title)).toEqual(["Đồng bộ ổn định hơn", "Gần đây và Hay ăn", "Như hôm qua", "Chạm vi chất để xem nguồn", "Rung khi chạm"]);
+    expect(r?.items.map((i) => i.title)).toEqual(["Đồng bộ ổn định hơn"]);
     expect(r?.tour).toBeUndefined();
   });
 
   it("then the 17/10 release: 6 items and a 3-step tour", () => {
-    const r = RELEASES[2];
+    const r = RELEASES[3];
     expect(r?.id).toBe("2026-10-17");
     expect(r?.items.map((i) => i.title)).toEqual(["Trang chủ mới", "Chọn nhiều món", "Mục tiêu đa lượng", "Bữa ăn dễ đọc hơn", "Thanh vi chất 4 màu", "Ảnh chia sẻ rõ hơn"]);
     expect(r?.tour?.map((s) => s.title)).toEqual(["Giữ để chọn nhiều món", "Đổi bữa hoặc xóa", "Mục tiêu đa lượng"]);

@@ -6,10 +6,10 @@ Production demo build, 390x844 (and 1440x900 for the dialog). Tour, tips and "C�
 - Shows once on /app; Để sau and Esc hide it and mark the release seen; a reload shows nothing
 - A new account (setup finished) never sees it
 - Waits while a tip is open, opens after Đã hiểu
-- cc-49: the newest release is 18/10 (one item, no tour), so the sheet has no Thử ngay; the 17/10 tour is started from
+- The newest release is cc-51's 18/10 (2026-10-18c, five items, no tour), so the sheet has no Thử ngay; the 17/10 tour is started from
   Cài đặt › Có gì mới › Xem hướng dẫn -> 3 steps -> Xong; a long press moves step 1 and opens the select bar (step 2); step 3 points at Cài đặt with
   select mode off; Bỏ qua and Esc end it; the entries never change
-- /settings/whats-new lists the release and replays the tour on /app
+- /settings/whats-new lists both 18/10 releases and 17/10, newest first, and replays the tour on /app
 - 44 px targets, screen-reader names, reduced motion fades, 480 px centred dialog at 1440
 Screenshots: .screenshots/cc-46-*.png
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_46.py
@@ -33,9 +33,11 @@ SHOTS.mkdir(exist_ok=True)
 PHONE = {"width": 390, "height": 844}
 DESKTOP = {"width": 1440, "height": 900}
 SETTINGS_KEY = "h1t_settings_v1_demo"
-RELEASE = "2026-10-18b"
+RELEASE = "2026-10-18c"
 HOME_TIPS = ["home-logged", "meal-add", "home-share"]
-ITEMS = ["Thực phẩm bổ sung", "Gia vị", "Thêm cà phê"]
+# Newest first: cc-51 (2026-10-18c), Thực phẩm bổ sung và Gia vị (2026-10-18b), then cc-49 (2026-10-18)
+ITEMS = ["Gần đây và Hay ăn", "Như hôm qua", "Chạm vi chất để xem nguồn", "Rung khi chạm", "Kéo xuống để tải lại"]
+ITEMS_1810B = ["Thực phẩm bổ sung", "Gia vị", "Thêm cà phê"]
 ITEMS_1810 = ["Đồng bộ ổn định hơn"]
 ITEMS_1710 = ["Trang chủ mới", "Chọn nhiều món", "Mục tiêu đa lượng", "Bữa ăn dễ đọc hơn", "Thanh vi chất 4 màu", "Ảnh chia sẻ rõ hơn"]
 problems = []
@@ -115,7 +117,7 @@ def once(browser):
     check(visible(sheet(pg)), "opens by itself on /app")
     text = sheet(pg).inner_text()
     check("Cập nhật 18/10\n" in text + "\n" and "18/10/2026" not in text and "CÓ GÌ MỚI" in text.upper(), "header: Cập nhật 18/10 and Có gì mới")
-    check("Trang chủ mới" not in text, "only the newest release's items")
+    check("Trang chủ mới" not in text and "Đồng bộ ổn định hơn" not in text, "only the newest release's items (not 17/10, not the first 18/10)")
     pg.wait_for_timeout(200)
     focus = pg.evaluate("() => { const a = document.activeElement; return a && a.tagName + '|' + a.textContent.trim() + '|' + getComputedStyle(a).outlineStyle }")
     check(focus == "H2|Có gì mới|none", f"initial focus on the heading, no ring ({focus})")
@@ -266,7 +268,8 @@ def history(browser):
     pg.wait_for_url(re.compile(r".*/settings/whats-new$"), timeout=5000)
     pg.wait_for_timeout(400)
     text = pg.locator("main").inner_text()
-    check("Cập nhật 18/10" in text and all(t in text for t in ITEMS + ITEMS_1810), "the history lists both 18/10 releases and their items")
+    check(text.count("Cập nhật 18/10") == 3 and all(t in text for t in ITEMS + ITEMS_1810B + ITEMS_1810), "the history lists the three 18/10 releases and their items")
+    check(text.index("Kéo xuống để tải lại") < text.index("Thực phẩm bổ sung") < text.index("Đồng bộ ổn định hơn"), "…newest first: 18c, 18b, 18")
     check("Cập nhật 17/10" in text and "17/10/2026" not in text and all(t in text for t in ITEMS_1710), "the history lists the release (Cập nhật 17/10) and its items")
     check(text.index("Cập nhật 18/10") < text.index("Cập nhật 17/10"), "newest first")
     check(pg.get_by_role("button", name="Xem hướng dẫn").count() == 1, "Xem hướng dẫn")

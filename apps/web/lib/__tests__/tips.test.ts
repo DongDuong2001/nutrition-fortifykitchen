@@ -77,6 +77,11 @@ describe("pickTip: Chưa lưu (cc-49)", () => {
   it("not once the user tapped Thử lại", () => {
     expect(ids(ctx({ unsaved: 1 }), flags({ used: ["retry-unsaved"] }))).toBe("home-logged");
   });
+  it("review 07:00: the copy also tells about the Chưa lưu button at the top", () => {
+    expect(TIPS.find((t) => t.id === "unsaved")?.body).toBe(
+      "Món có chữ Chưa lưu vẫn nằm trên máy này. App tự gửi lại khi có mạng và mỗi lần mở app; chạm Chưa lưu ở đầu trang để gửi ngay."
+    );
+  });
 });
 
 describe("pickTip", () => {

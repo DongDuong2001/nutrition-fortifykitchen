@@ -22,7 +22,7 @@ export interface ReleaseTourStep {
 }
 
 export interface Release {
-  /** The release day, YYYY-MM-DD */
+  /** The release day, YYYY-MM-DD, with a letter after it for a later release the same day (2026-10-18c) */
   id: string;
   /** dd/mm, as shown ("Cập nhật 17/10") */
   date: string;
@@ -31,6 +31,17 @@ export interface Release {
 }
 
 export const RELEASES: readonly Release[] = [
+  {
+    id: "2026-10-18c",
+    date: "18/10",
+    items: [
+      { icon: "select", title: "Gần đây và Hay ăn", body: "Khi thêm món, món bạn hay ăn ở bữa đó hiện sẵn. Một chạm là thêm, đúng khẩu phần lần trước." },
+      { icon: "home", title: "Như hôm qua", body: "Ở mỗi bữa hôm nay, chọn Như hôm qua để thêm lại các món của bữa đó hôm qua." },
+      { icon: "bars", title: "Chạm vi chất để xem nguồn", body: "Chạm một vi chất ở Hôm nay để xem món nào đã góp vào, món nhiều nhất ở trên." },
+      { icon: "target", title: "Rung khi chạm", body: "Trên Android, điện thoại rung nhẹ khi lưu, xóa hay hoàn tác. Tắt trong Cài đặt." },
+      { icon: "home", title: "Kéo xuống để tải lại", body: "Ở Hôm nay, kéo danh sách món xuống rồi thả để lấy món vừa thêm trên máy khác." },
+    ],
+  },
   // Thêm Thực phẩm bổ sung và Gia vị
   {
     id: "2026-10-18b",
@@ -50,10 +61,6 @@ export const RELEASES: readonly Release[] = [
         title: "Đồng bộ ổn định hơn",
         body: "Món chưa lưu được sẽ có chữ Chưa lưu và được gửi lại tự động; máy khác thấy món mới trong vòng 1 phút.",
       },
-      { icon: "select", title: "Gần đây và Hay ăn", body: "Khi thêm món, món bạn hay ăn ở bữa đó hiện sẵn. Một chạm là thêm, đúng khẩu phần lần trước." },
-      { icon: "home", title: "Như hôm qua", body: "Ở mỗi bữa hôm nay, chọn Như hôm qua để thêm lại các món của bữa đó hôm qua." },
-      { icon: "bars", title: "Chạm vi chất để xem nguồn", body: "Chạm một vi chất ở Hôm nay để xem món nào đã góp vào, món nhiều nhất ở trên." },
-      { icon: "target", title: "Rung khi chạm", body: "Trên Android, điện thoại rung nhẹ khi lưu, xóa hay hoàn tác. Tắt trong Cài đặt." },
     ],
   },
   {
