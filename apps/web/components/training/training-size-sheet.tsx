@@ -44,7 +44,7 @@ export function TrainingSizeSheet({
             type="button"
             aria-pressed={value === size}
             onClick={() => onChoose(size)}
-            className={`flex min-h-[120px] cursor-pointer flex-col items-start justify-between gap-2 rounded-[18px] border-2 p-4 text-left transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100 ${
+            className={`flex min-h-[120px] cursor-pointer flex-col items-start justify-between gap-2 rounded-[18px] border-2 p-4 text-left active:scale-[0.97] transition-press motion-reduce:transition-none motion-reduce:active:scale-100 ${
               value === size ? "border-blue bg-cobalt-tint" : "border-card-border bg-card hover:bg-hover"
             }`}
           >

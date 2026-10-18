@@ -31,13 +31,12 @@ export function LevelBar({
       aria-valuemax={100}
       className={`w-full overflow-hidden rounded-full ${heightClass} ${surface === "dark" ? "bg-level-empty-dark" : "bg-track"}`}
     >
-      {/* cc-51: a full-width rounded fill slid left (transform only) keeps its rounded end and eases to a new value */}
-      {value > 0 && (
-        <div
-          className="m-bar h-full w-full rounded-full"
-          style={{ transform: `translateX(${Math.min(value, 100) - 100}%)`, backgroundColor: color ?? getLevelColor(getLevel(value), surface) }}
-        />
-      )}
+      {/* cc-51: a full-width rounded fill slid left (transform only) keeps its rounded end and eases to a new value.
+          cc-57: always drawn (off the track at 0), so a bar going from 0 to a value grows instead of appearing */}
+      <div
+        className="m-bar h-full w-full rounded-full"
+        style={{ transform: `translateX(${Math.min(value, 100) - 100}%)`, backgroundColor: color ?? getLevelColor(getLevel(value), surface) }}
+      />
     </div>
   );
 }

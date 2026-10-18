@@ -301,7 +301,7 @@ function CreateFoodInner() {
                     role="radio"
                     aria-checked={isChecked}
                     onClick={() => setServingUnit(u)}
-                    className={`min-h-[44px] min-w-[52px] px-4 rounded-full text-sm font-semibold border-0 cursor-pointer active:scale-[0.97] transition-colors ${
+                    className={`min-h-[44px] min-w-[52px] px-4 rounded-full text-sm font-semibold border-0 cursor-pointer active:scale-[0.97] transition-press ${
                       isChecked ? "bg-ink text-on-dark" : "bg-surface text-text border border-card-border hover:bg-paper-dark"
                     }`}
                   >

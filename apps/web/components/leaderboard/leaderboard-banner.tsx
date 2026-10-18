@@ -24,7 +24,7 @@ export function LeaderboardBanner() {
       </div>
       <Link
         href="/explore/leaderboard"
-        className="flex min-h-11 shrink-0 items-center whitespace-nowrap rounded-full bg-blue px-4 text-[13px] font-bold text-on-accent no-underline hover:text-on-accent active:scale-[0.97] motion-reduce:active:scale-100"
+        className="flex min-h-11 shrink-0 items-center whitespace-nowrap rounded-full bg-blue px-4 text-[13px] font-bold text-on-accent no-underline hover:text-on-accent active:scale-[0.97] transition-press motion-reduce:active:scale-100"
       >
         Xem bảng
       </Link>

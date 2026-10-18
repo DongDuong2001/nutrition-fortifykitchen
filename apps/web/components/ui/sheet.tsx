@@ -53,6 +53,8 @@ export function Sheet({
   // Every opening gets fresh content (a form opened again starts blank, as when the sheet unmounted at once)
   const openings = useRef(0);
   const wasOpen = useRef(false);
+  // Esc on a keyboard closes at once: a keyboard action never waits for an animation (like /add)
+  const instantClose = useRef(false);
   if (open && !wasOpen.current) openings.current += 1;
   // cc-55: while it slides away it keeps what it showed (a sheet whose content comes from state that is already
   // cleared would otherwise lose its title and rows mid-exit)
@@ -62,10 +64,16 @@ export function Sheet({
 
   useEffect(() => {
     if (open) {
+      instantClose.current = false;
       setMounted(true);
       return;
     }
     if (!mounted) return;
+    if (instantClose.current) {
+      instantClose.current = false;
+      setMounted(false);
+      return;
+    }
     const timer = setTimeout(() => setMounted(false), SHEET_EXIT_MS);
     return () => clearTimeout(timer);
   }, [open, mounted]);
@@ -127,6 +135,7 @@ export function Sheet({
       if (e.defaultPrevented || document.querySelector("[data-onboarding-overlay]")) return;
       if (e.key === "Escape") {
         e.preventDefault();
+        instantClose.current = true;
         onCloseRef.current();
         return;
       }
@@ -183,7 +192,7 @@ export function Sheet({
         aria-hidden="true"
         onClick={onClose}
         data-state={state}
-        className="m-scrim fixed inset-0 bg-scrim"
+        className={`m-scrim fixed inset-0 bg-scrim ${desktopDialog ? "m-scrim-dialog" : ""}`}
       />
 
       {/* Bottom Sheet Dialog */}

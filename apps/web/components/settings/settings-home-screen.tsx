@@ -23,7 +23,7 @@ function ProfileHero() {
   return (
     <Link
       href="/settings/profile"
-      className="flex flex-col gap-3 rounded-[18px] bg-surface-dark p-4 text-on-dark no-underline transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100"
+      className="flex flex-col gap-3 rounded-[18px] bg-surface-dark p-4 text-on-dark no-underline active:scale-[0.97] transition-press motion-reduce:transition-none motion-reduce:active:scale-100"
     >
       <span className="flex items-start justify-between gap-3">
         <span className="flex min-w-0 flex-col gap-1">
@@ -59,7 +59,7 @@ function ProOffer() {
       </div>
       <Link
         href="/paywall"
-        className="inline-flex min-h-[44px] items-center self-start rounded-full border border-card-border bg-card px-5 text-[15px] font-bold text-text no-underline transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100"
+        className="inline-flex min-h-[44px] items-center self-start rounded-full border border-card-border bg-card px-5 text-[15px] font-bold text-text no-underline active:scale-[0.97] transition-press motion-reduce:transition-none motion-reduce:active:scale-100"
       >
         Xem gói
       </Link>

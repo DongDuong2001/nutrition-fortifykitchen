@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import { Expand } from "@/components/ui/expand";
+import React, { useId, useMemo, useState } from "react";
 import Link from "next/link";
 import { NotEnoughData } from "@/components/overview/overview-parts";
 import { useOverview } from "@/components/overview/overview-frame";
@@ -34,10 +35,51 @@ function Chevron() {
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
-      className="shrink-0 text-secondary transition-transform motion-reduce:transition-none group-open:rotate-180"
+      className="m-chevron shrink-0 text-secondary"
     >
       <path d="M6 9l6 6 6-6" />
     </svg>
+  );
+}
+
+/** A collapsible list (cc-57): a button with aria-expanded and the shared Expand motion, so it opens and closes smoothly. */
+function Accordion({
+  defaultOpen,
+  dot,
+  title,
+  count,
+  children,
+}: {
+  defaultOpen: boolean;
+  dot: string;
+  title: string;
+  count: number;
+  children: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  const id = useId();
+  return (
+    <div data-align-group="overview-micro" className="overflow-hidden rounded-[18px] lg:shadow-card border border-card-border bg-card text-text">
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-controls={id}
+        onClick={() => setOpen((o) => !o)}
+        className="flex min-h-[56px] w-full cursor-pointer items-center justify-between gap-3 border-0 bg-transparent p-4 text-left text-inherit"
+      >
+        <span className="flex items-center gap-3">
+          <span aria-hidden="true" className={`inline-block h-[9px] w-[9px] shrink-0 rounded-[3px] ${dot}`} />
+          <SectionTitle as="p">{title}</SectionTitle>
+        </span>
+        <span className="flex items-center gap-3">
+          <span className="font-display text-xl font-bold tabular-nums">{count}</span>
+          <Chevron />
+        </span>
+      </button>
+      <Expand open={open} id={id}>
+        {children}
+      </Expand>
+    </div>
   );
 }
 
@@ -114,22 +156,7 @@ export function MicrosTab() {
 
       <section id="mi-sections" aria-label="Vi chất theo mức" className="flex flex-col gap-3 lg:col-span-7">
         {sections.map((section) => (
-          <details
-            key={section.level}
-            open={section.level !== "dat"}
-            data-align-group="overview-micro"
-            className="group overflow-hidden rounded-[18px] lg:shadow-card border border-card-border bg-card text-text"
-          >
-            <summary className="flex min-h-[56px] cursor-pointer list-none items-center justify-between gap-3 p-4 [&::-webkit-details-marker]:hidden">
-              <span className="flex items-center gap-3">
-                <span aria-hidden="true" className={`inline-block h-[9px] w-[9px] shrink-0 rounded-[3px] ${DOT[section.level]}`} />
-                <SectionTitle as="p">{section.label}</SectionTitle>
-              </span>
-              <span className="flex items-center gap-3">
-                <span className="font-display text-xl font-bold tabular-nums">{section.items.length}</span>
-                <Chevron />
-              </span>
-            </summary>
+          <Accordion key={section.level} defaultOpen={section.level !== "dat"} dot={DOT[section.level]} title={section.label} count={section.items.length}>
             {section.items.length === 0 ? (
               <p className="m-0 border-t border-divider px-4 py-4 text-[13px] text-secondary">Không có vi chất nào ở mức này.</p>
             ) : (
@@ -165,20 +192,10 @@ export function MicrosTab() {
                 })}
               </ul>
             )}
-          </details>
+          </Accordion>
         ))}
         {board.unknown > 0 && (
-          <details data-align-group="overview-micro" className="group overflow-hidden rounded-[18px] lg:shadow-card border border-card-border bg-card text-text">
-            <summary className="flex min-h-[56px] cursor-pointer list-none items-center justify-between gap-3 p-4 [&::-webkit-details-marker]:hidden">
-              <span className="flex items-center gap-3">
-                <span aria-hidden="true" className="inline-block h-[9px] w-[9px] shrink-0 rounded-[3px] bg-level-empty" />
-                <SectionTitle as="p">Chưa có dữ liệu</SectionTitle>
-              </span>
-              <span className="flex items-center gap-3">
-                <span className="font-display text-xl font-bold tabular-nums">{board.unknown}</span>
-                <Chevron />
-              </span>
-            </summary>
+          <Accordion defaultOpen={false} dot="bg-level-empty" title="Chưa có dữ liệu" count={board.unknown}>
             <ul className="m-0 list-none p-0">
               {board.squares
                 .filter((s) => s.level === null)
@@ -197,7 +214,7 @@ export function MicrosTab() {
                   </li>
                 ))}
             </ul>
-          </details>
+          </Accordion>
         )}
       </section>
     </div>

@@ -1,5 +1,7 @@
 "use client";
 
+import { Expand } from "@/components/ui/expand";
+import { scrollBehavior } from "@/lib/scroll-behavior";
 import React, { useState, useEffect, useMemo, useRef, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -52,7 +54,7 @@ function CompactBar({ show, backHref, date, achieved, total, className = "" }: {
           href={backHref}
           aria-label="Quay lại"
           tabIndex={show ? 0 : -1}
-          className="-ml-2 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-on-dark no-underline hover:text-sky active:scale-[0.97] motion-reduce:active:scale-100 focus-visible:outline-sky"
+          className="-ml-2 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-on-dark no-underline hover:text-sky active:scale-[0.97] transition-press motion-reduce:active:scale-100 focus-visible:outline-sky"
         >
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M15 5l-7 7 7 7" />
@@ -146,7 +148,7 @@ function MicrosContent() {
       const chipWidth = activeChip.offsetWidth;
       const containerWidth = container.clientWidth;
       const targetScroll = chipLeft - (containerWidth - chipWidth) / 2;
-      container.scrollTo({ left: Math.max(0, targetScroll), behavior: "smooth" });
+      container.scrollTo({ left: Math.max(0, targetScroll), behavior: scrollBehavior() });
     }
   }, [activeGroup]);
 
@@ -297,24 +299,24 @@ function MicrosContent() {
         <div className="bg-ink text-on-dark rounded-b-[20px]">
           <div className="w-full max-w-[560px] mx-auto px-4 pt-3 pb-5 flex flex-col gap-3">
             <div className="flex items-center justify-between min-h-[44px]">
-              <div className="w-11 h-11 bg-surface-dark rounded-lg animate-pulse" />
-              <div className="h-4 w-28 bg-surface-dark rounded-lg animate-pulse" />
-              <div className="w-11 h-11 bg-surface-dark rounded-lg animate-pulse" />
+              <div className="w-11 h-11 bg-surface-dark rounded-lg motion-safe:animate-pulse" />
+              <div className="h-4 w-28 bg-surface-dark rounded-lg motion-safe:animate-pulse" />
+              <div className="w-11 h-11 bg-surface-dark rounded-lg motion-safe:animate-pulse" />
             </div>
             <div className="flex items-end justify-between pt-1">
               <div className="flex flex-col gap-2">
-                <div className="h-7 w-28 bg-surface-dark rounded animate-pulse" />
-                <div className="h-3.5 w-44 bg-surface-dark rounded animate-pulse" />
+                <div className="h-7 w-28 bg-surface-dark rounded motion-safe:animate-pulse" />
+                <div className="h-3.5 w-44 bg-surface-dark rounded motion-safe:animate-pulse" />
               </div>
-              <div className="h-9 w-16 bg-surface-dark rounded animate-pulse" />
+              <div className="h-9 w-16 bg-surface-dark rounded motion-safe:animate-pulse" />
             </div>
           </div>
         </div>
 
         <div className="flex-1 w-full max-w-[560px] mx-auto px-4 py-4 flex flex-col gap-4">
-          <div className="h-9 w-full bg-level-empty rounded-full animate-pulse" />
-          <div className="h-14 w-full bg-level-empty rounded-xl animate-pulse" />
-          <div className="bg-card border border-card-border rounded-[18px] p-4 flex flex-col gap-3 animate-pulse">
+          <div className="h-9 w-full bg-level-empty rounded-full motion-safe:animate-pulse" />
+          <div className="h-14 w-full bg-level-empty rounded-xl motion-safe:animate-pulse" />
+          <div className="bg-card border border-card-border rounded-[18px] p-4 flex flex-col gap-3 motion-safe:animate-pulse">
             <div className="h-4 w-1/3 bg-level-empty rounded" />
             <div className="h-8 w-full bg-level-empty rounded" />
             <div className="h-8 w-full bg-level-empty rounded" />
@@ -368,7 +370,7 @@ function MicrosContent() {
               </p>
               <Link
                 href={diaryHref}
-                className="mt-2 h-11 px-6 rounded-full bg-blue text-on-accent flex items-center justify-center text-sm font-bold no-underline active:scale-[0.97] transition-transform"
+                className="mt-2 h-11 px-6 rounded-full bg-blue text-on-accent flex items-center justify-center text-sm font-bold no-underline active:scale-[0.97] transition-press"
               >
                 {isPast ? "Về Hôm nay" : "+ Thêm món"}
               </Link>
@@ -431,7 +433,7 @@ function MicrosContent() {
               footer={
                 <Link
                   href="/trends/micros"
-                  className="min-h-[44px] flex items-center justify-between text-sm font-semibold text-sky no-underline active:scale-[0.97] transition-transform"
+                  className="min-h-[44px] flex items-center justify-between text-sm font-semibold text-sky no-underline active:scale-[0.97] transition-press"
                 >
                   Xu hướng 7 và 30 ngày
                   <span aria-hidden="true">›</span>
@@ -465,7 +467,7 @@ function MicrosContent() {
                     className={`min-h-[44px] flex items-center shrink-0 cursor-pointer bg-transparent border-0 p-0 active:scale-[0.97] transition-press`}
                   >
                     <span
-                      className={`h-9 px-4 rounded-full text-xs font-semibold flex items-center justify-center whitespace-nowrap transition-colors ${
+                      className={`h-9 px-4 rounded-full text-xs font-semibold flex items-center justify-center whitespace-nowrap transition-press ${
                         isActive
                           ? "bg-ink text-on-dark shadow-xs"
                           : "bg-surface text-text border border-card-border hover:bg-paper-dark"
@@ -568,7 +570,7 @@ function MicrosContent() {
                   className={`min-h-[44px] flex items-center shrink-0 cursor-pointer bg-transparent border-0 p-0 active:scale-[0.97] transition-press`}
                 >
                   <span
-                    className={`h-9 px-4 rounded-full text-xs font-semibold flex items-center justify-center transition-colors ${
+                    className={`h-9 px-4 rounded-full text-xs font-semibold flex items-center justify-center transition-press ${
                       isActive
                         ? "bg-ink text-on-dark shadow-xs"
                         : "bg-surface text-text border border-card-border hover:bg-paper-dark"
@@ -695,7 +697,7 @@ function GroupCard({
               strokeLinecap="round"
               strokeLinejoin="round"
               aria-hidden="true"
-              className={`text-secondary transform transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+              className="m-chevron text-secondary"
             >
               <path d="M6 9l6 6 6-6" />
             </svg>
@@ -704,13 +706,11 @@ function GroupCard({
       </div>
 
       {/* Rows */}
-      {isOpen && (
-        <div className="px-4 py-1 divide-y divide-divider">
-          {rows.map((row) => (
-            <NutrientRow key={row.definition.id} row={row} dateQuery={dateQuery} />
-          ))}
-        </div>
-      )}
+      <Expand open={isOpen} className="px-4 py-1 divide-y divide-divider">
+        {rows.map((row) => (
+          <NutrientRow key={row.definition.id} row={row} dateQuery={dateQuery} />
+        ))}
+      </Expand>
     </section>
   );
 }

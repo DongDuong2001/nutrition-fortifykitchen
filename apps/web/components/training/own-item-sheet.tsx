@@ -78,7 +78,7 @@ function PickStep({ onPick, onClose }: { onPick: (food: FoodItem) => void; onClo
                   <button
                     type="button"
                     onClick={() => setFilter("all")}
-                    className="min-h-[44px] cursor-pointer rounded-full border-0 bg-surface px-5 text-sm font-semibold text-text active:scale-[0.97] motion-reduce:active:scale-100"
+                    className="min-h-[44px] cursor-pointer rounded-full border-0 bg-surface px-5 text-sm font-semibold text-text active:scale-[0.97] transition-press motion-reduce:active:scale-100"
                   >
                     Bỏ lọc
                   </button>
@@ -111,7 +111,7 @@ function AmountStep({ food, target, onBack, onAdd }: { food: FoodItem; target: O
         <button
           type="button"
           onClick={onBack}
-          className="inline-flex min-h-[44px] shrink-0 cursor-pointer items-center border-0 bg-transparent text-sm font-semibold text-blue active:scale-[0.97] motion-reduce:active:scale-100"
+          className="inline-flex min-h-[44px] shrink-0 cursor-pointer items-center border-0 bg-transparent text-sm font-semibold text-blue active:scale-[0.97] transition-press motion-reduce:active:scale-100"
         >
           Đổi món
         </button>

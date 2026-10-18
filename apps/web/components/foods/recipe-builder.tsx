@@ -107,7 +107,7 @@ function StepButton({ label, onClick, disabled, children }: { label: string; onC
       aria-label={label}
       onClick={onClick}
       disabled={disabled}
-      className="inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-card-border bg-card text-xl font-bold text-text active:scale-[0.97] disabled:cursor-default disabled:opacity-40 motion-reduce:active:scale-100"
+      className="inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-card-border bg-card text-xl font-bold text-text active:scale-[0.97] transition-press disabled:cursor-default disabled:opacity-40 motion-reduce:active:scale-100"
     >
       {children}
     </button>
@@ -185,7 +185,7 @@ export function RecipeBuilder({ state, excludeId }: { state: RecipeDraftState; e
                       type="button"
                       aria-label={`Bỏ ${ingredient.name}`}
                       onClick={() => removeIngredient(index)}
-                      className="-mr-1 inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-secondary hover:bg-surface active:scale-[0.97] motion-reduce:active:scale-100"
+                      className="-mr-1 inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-secondary hover:bg-surface active:scale-[0.97] transition-press motion-reduce:active:scale-100"
                     >
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                         <path d="M6 6l12 12M18 6L6 18" />
@@ -212,7 +212,7 @@ export function RecipeBuilder({ state, excludeId }: { state: RecipeDraftState; e
                       type="button"
                       onClick={() => toggleUnit(index)}
                       aria-label={`Đơn vị của ${ingredient.name}: ${ingredient.unit}. Chạm để đổi`}
-                      className="inline-flex h-11 min-w-[56px] shrink-0 cursor-pointer items-center justify-center rounded-full border border-card-border bg-surface px-3 text-sm font-semibold text-text active:scale-[0.97] motion-reduce:active:scale-100"
+                      className="inline-flex h-11 min-w-[56px] shrink-0 cursor-pointer items-center justify-center rounded-full border border-card-border bg-surface px-3 text-sm font-semibold text-text active:scale-[0.97] transition-press motion-reduce:active:scale-100"
                     >
                       {ingredient.unit}
                     </button>

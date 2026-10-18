@@ -33,13 +33,16 @@ CONTENT = {
     "/settings": "main [data-align-group='settings-row']",
 }
 
+# Hôm nay: the heavy part (food list rows, nutrient column) is on the page
+FULL = {"/app": "[data-tour='nutrient-column']"}
+
 HOOK = """
-([contentSel, tabHref, tag]) => {
+([contentSel, tabHref, tag, fullSel]) => {
   const nav = document.querySelector('nav[aria-label="Điều hướng chính"]');
   const header = document.querySelector('header');
   if (nav) nav.__kept = tag;
   if (header) header.__kept = tag;
-  const out = { t0: 0, active: null, content: null, longTasks: [], done: false };
+  const out = { t0: 0, active: null, content: null, full: fullSel ? null : 0, longTasks: [], done: false };
   window.__m = out;
   let obs;
   try {
@@ -68,7 +71,11 @@ HOOK = """
       const el = [...document.querySelectorAll(contentSel)].find((x) => x.getClientRects().length);
       if (el) paint(() => { if (out.content === null) out.content = Math.round(performance.now() - out.t0); });
     }
-    if (out.active !== null && out.content !== null) finish();
+    if (out.full === null && location.pathname === tabHref.split('?')[0]) {
+      const el = [...document.querySelectorAll(fullSel)].find((x) => x.getClientRects().length);
+      if (el) paint(() => { if (out.full === null) out.full = Math.round(performance.now() - out.t0); });
+    }
+    if (out.active !== null && out.content !== null && out.full !== null) finish();
     if (now - out.t0 > 3000) finish();
   }, 4);
   setTimeout(finish, 6000);
@@ -95,7 +102,7 @@ def open_today(pg):
 def tap_and_measure(pg, locator, href, tag):
     """Taps `locator`; returns the page's own numbers for the screen at `href`."""
     sel = CONTENT.get(href.split("?")[0], "main")
-    pg.evaluate(HOOK, [sel, href, tag])
+    pg.evaluate(HOOK, [sel, href, tag, FULL.get(href.split("?")[0], "")])
     pg.wait_for_timeout(50)
     locator.tap()
     pg.wait_for_function("() => window.__m && window.__m.done", timeout=9000)
@@ -166,7 +173,7 @@ def summarise(rows):
         sel = [r for r in rows if r["kind"] == kind]
         if not sel:
             continue
-        keys = ["active", "content"] if kind != "plus" else ["exists", "moved"]
+        keys = ["active", "content", "full"] if kind != "plus" else ["exists", "moved"]
         agg = {}
         for k in keys:
             vals = sorted(v for v in (r.get(k) for r in sel) if v is not None)

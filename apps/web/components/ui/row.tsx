@@ -71,7 +71,7 @@ export function Row({
 
   if (href) {
     return (
-      <Link href={href} className={`${containerClasses} active:scale-[0.99]`}>
+      <Link href={href} className={`${containerClasses} active:scale-[0.99] transition-press`}>
         {content}
       </Link>
     );

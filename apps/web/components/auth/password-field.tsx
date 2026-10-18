@@ -44,7 +44,7 @@ export function PasswordField({ label, value, onChange, error, autoComplete, hin
           onClick={() => setVisible((v) => !v)}
           aria-label={visible ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
           aria-controls={inputId}
-          className="absolute right-1 top-1/2 flex h-11 w-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-secondary transition-transform duration-150 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-blue motion-reduce:transition-none motion-reduce:active:scale-100"
+          className="absolute right-1 top-1/2 flex h-11 w-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-secondary active:scale-[0.97] transition-press focus-visible:ring-2 focus-visible:ring-blue motion-reduce:transition-none motion-reduce:active:scale-100"
         >
           {visible ? <IconEyeOff size={22} /> : <IconEye size={22} />}
         </button>

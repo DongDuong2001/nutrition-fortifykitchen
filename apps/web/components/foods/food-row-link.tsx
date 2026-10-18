@@ -17,7 +17,7 @@ export function FoodRowLink({ href, name, meta, value, withBorderTop = true }: F
     <Link
       href={href}
       data-food-row
-      className={`flex min-h-[56px] items-center gap-3 py-2 text-text no-underline active:scale-[0.99] motion-reduce:active:scale-100 ${
+      className={`flex min-h-[56px] items-center gap-3 py-2 text-text no-underline active:scale-[0.99] transition-press motion-reduce:active:scale-100 ${
         withBorderTop ? "border-t border-divider" : ""
       }`}
     >

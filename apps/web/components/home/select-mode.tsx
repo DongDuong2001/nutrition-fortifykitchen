@@ -6,7 +6,7 @@ import { PillButton } from "@/components/ui/pill-button";
 import { TARGET_MEALS, actionBarLabel, selectTitle, type CopyTarget } from "@/lib/multi-select";
 
 const HEAD_BUTTON =
-  "inline-flex min-h-11 shrink-0 cursor-pointer items-center rounded-full border-0 bg-transparent px-2 text-[15px] font-bold text-on-dark hover:text-sky active:scale-[0.97] motion-reduce:active:scale-100 focus-visible:outline-sky lg:text-blue lg:hover:text-blue";
+  "inline-flex min-h-11 shrink-0 cursor-pointer items-center rounded-full border-0 bg-transparent px-2 text-[15px] font-bold text-on-dark hover:text-sky active:scale-[0.97] transition-press motion-reduce:active:scale-100 focus-visible:outline-sky lg:text-blue lg:hover:text-blue";
 
 /** The header of select mode: Hủy · "Đã chọn N" with the date · Chọn hết. It takes the place of the day header. */
 export function SelectHeader({

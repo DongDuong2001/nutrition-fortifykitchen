@@ -4,6 +4,7 @@ import React, { useRef } from "react";
 import { Presence } from "@/components/ui/presence";
 import { Toast } from "@/components/ui/toast";
 import { useDiary, type ToastInfo } from "@/lib/diary-store";
+import { scrollBehavior } from "@/lib/scroll-behavior";
 
 /**
  * The app's one toast, from the diary store. "Đã thêm …" offers Xem (jump to the meal), "Đã xóa …",
@@ -26,7 +27,7 @@ export function DiaryToast() {
     if (!mealSlot) return;
     setHighlightedMeal(mealSlot);
     const el = document.getElementById(`meal-${mealSlot}`) || document.getElementById(`desktop-meal-${mealSlot}`);
-    el?.scrollIntoView({ behavior: "smooth", block: "center" });
+    el?.scrollIntoView({ behavior: scrollBehavior(), block: "center" });
     setTimeout(() => setHighlightedMeal(null), 2500);
   };
 

@@ -159,7 +159,7 @@ export function EmailPasswordForm({ variant }: { variant: "signin" | "signup" })
         type="button"
         onClick={handleMagicLink}
         disabled={busy}
-        className="inline-flex min-h-[44px] cursor-pointer items-center justify-center border-0 bg-transparent px-2 text-[15px] font-semibold text-blue transition-transform duration-150 active:scale-[0.97] disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100"
+        className="inline-flex min-h-[44px] cursor-pointer items-center justify-center border-0 bg-transparent px-2 text-[15px] font-semibold text-blue active:scale-[0.97] transition-press disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100"
       >
         {COPY[variant].magic}
       </button>

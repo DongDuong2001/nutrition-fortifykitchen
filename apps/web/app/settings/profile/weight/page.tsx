@@ -65,7 +65,7 @@ export default function WeightPage() {
               type="button"
               aria-label="Giảm 0,1 kg"
               onClick={() => step(-STEP_KG)}
-              className="h-14 w-14 shrink-0 rounded-full border border-card-border bg-card text-sm font-bold tabular-nums active:scale-[0.97]"
+              className="h-14 w-14 shrink-0 rounded-full border border-card-border bg-card text-sm font-bold tabular-nums active:scale-[0.97] transition-press"
             >
               −0,1
             </button>
@@ -88,7 +88,7 @@ export default function WeightPage() {
               type="button"
               aria-label="Tăng 0,1 kg"
               onClick={() => step(STEP_KG)}
-              className="h-14 w-14 shrink-0 rounded-full border border-card-border bg-card text-sm font-bold tabular-nums active:scale-[0.97]"
+              className="h-14 w-14 shrink-0 rounded-full border border-card-border bg-card text-sm font-bold tabular-nums active:scale-[0.97] transition-press"
             >
               +0,1
             </button>

@@ -72,7 +72,7 @@ export function PeriodControl({
     router.replace(`${pathname}${periodQuery(nextLength, nextOffset)}`, { scroll: false });
 
   const stepClass =
-    "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-0 bg-transparent text-text cursor-pointer hover:bg-divider active:scale-[0.97] motion-reduce:active:scale-100 disabled:cursor-default disabled:opacity-45";
+    "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-0 bg-transparent text-text cursor-pointer hover:bg-divider active:scale-[0.97] transition-press motion-reduce:active:scale-100 disabled:cursor-default disabled:opacity-45";
   const prev = (
     <button type="button" aria-label="Kỳ trước" disabled={!period} onClick={() => period && go(length, period.offset + 1)} className={stepClass}>
       <ChevronIcon direction="left" />
@@ -95,7 +95,7 @@ export function PeriodControl({
             scroll={false}
             onClick={() => markUsed("range-toggle")}
             aria-current={isActive ? "true" : "false"}
-            className={`inline-flex min-h-[44px] items-center justify-center rounded-full text-sm font-bold no-underline transition-colors active:scale-[0.97] motion-reduce:active:scale-100 ${
+            className={`inline-flex min-h-[44px] items-center justify-center rounded-full text-sm font-bold no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100 ${
               compact ? "min-w-[44px] px-2" : "px-4"
             } ${isActive ? "bg-ink text-on-dark" : "text-secondary hover:text-text"}`}
           >
@@ -223,7 +223,7 @@ function FrameInner({ children }: { children: React.ReactNode }) {
                   href={`${tab.href}${query}`}
                   aria-selected={isActive}
                   aria-current={isActive ? "page" : undefined}
-                  className={`relative inline-flex min-h-[44px] flex-1 shrink-0 items-center justify-center whitespace-nowrap px-2 text-[15px] font-bold no-underline transition-colors active:scale-[0.97] motion-reduce:active:scale-100 lg:flex-none lg:px-4 focus-visible:outline-sky lg:focus-visible:outline-blue ${
+                  className={`relative inline-flex min-h-[44px] flex-1 shrink-0 items-center justify-center whitespace-nowrap px-2 text-[15px] font-bold no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100 lg:flex-none lg:px-4 focus-visible:outline-sky lg:focus-visible:outline-blue ${
                     isActive ? "text-on-dark lg:text-text" : "text-muted-on-dark hover:text-on-dark lg:text-secondary lg:hover:text-text"
                   }`}
                 >
