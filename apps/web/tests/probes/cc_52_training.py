@@ -5,6 +5,8 @@
 - Tick salt 0–20: the portion sheet with Muối ăn pre-filled 1,5 g and Thêm vào Bữa phụ. Thêm ticks it ("✓ Đã ghi 1,5 g")
   and Hôm nay's Bữa phụ shows Muối ăn 1,5 g; closing the sheet leaves the item unticked.
 - Untick: the entry goes with Hoàn tác (which ticks it again); the entry deleted on Hôm nay unticks the item.
+- Tinh bột nhanh is grams of carbs (Bự 45 g): Red Bull resolves, 1,5 lon in half-can steps; mật mía ≈ 60 g; the
+  Red Bull + mật mía mix pre-fills 1 lon + 22 g = 45 g carbs, logs two entries, and untick removes both.
 - + Thêm món: "Nước dừa" (made in Món của tôi first; the demo catalogue has none) in Trước tập stays after a reload, only
   in Trước tập; it can be removed.
 - Cài đặt › Hồ sơ › Bé: salt rows 1 g, header 7 g. A past day: no chip, no + Thêm món, ticks disabled.
@@ -148,7 +150,7 @@ def tick_and_log(pg):
     check(box(pg, SALT0).is_checked(), "the item is ticked")
     check("✓ Đã ghi 1,5 g" in row_text(pg, SALT0), f"note ✓ Đã ghi 1,5 g ({row_text(pg, SALT0)!r})")
     link = (storage(pg, CHECKLIST) or {}).get(today_key(pg), {}).get("logged", {}).get("intra-salt-0-20")
-    check(bool(link and link.get("entryId")), f"the tick keeps the entry id ({link})")
+    check(bool(link and len(link.get("entryIds", [])) == 1), f"the tick keeps the entry id ({link})")
     shot(pg, "ticked-390")
 
     # Cancel leaves it unticked
@@ -159,17 +161,56 @@ def tick_and_log(pg):
     pg.wait_for_timeout(500)
     check(not box(pg, other).is_checked(), "closing the sheet leaves the item unticked")
 
-    # Tinh bột nhanh: three choices, the ones not in the catalogue cannot be picked
+    return link["entryIds"][0] if link else None
+
+
+def carbs(pg):
+    """Tinh bột nhanh: 45 g of carbs for Bự (Hao 18/10). Red Bull resolves; mật mía pre-fills the grams that hold 45 g;
+    the mix starts at 1 lon with mật mía topping up to 45 g, logs two entries, and untick removes both."""
+    go(pg, "/training", 1000)
     box(pg, "Tinh bột nhanh").click()
     carb = dialog(pg, "Tinh bột nhanh")
     radios = carb.get_by_role("radio")
-    check(radios.count() == 3, f"fast carbs: three choices ({radios.count()})")
-    check(carb.get_by_role("radio", name=re.compile("Mật mía Golden Barrel")).is_checked(), "mật mía Golden Barrel is picked")
-    check(carb.get_by_label("Số gam").input_value() == "45", "pre-filled 45 g (Bự)")
-    shot(pg, "carb-sheet-390")
-    pg.keyboard.press("Escape")
+    check(radios.count() == 3 and all(radios.nth(i).is_enabled() for i in range(3)), f"fast carbs: three choices, all in the catalogue ({radios.count()})")
+    check(carb.get_by_role("radio", name="Red Bull", exact=True).is_checked(), "Red Bull resolves and is picked first")
+    text = carb.inner_text()
+    check("1,5 lon" in text and "Tinh bột 43 / 45 g" in text, f"Red Bull: 1,5 lon for 45 g carbs, in half cans ({text[-120:]!r})")
+    carb.get_by_role("button", name="Thêm nửa lon").click()
+    check("2 lon" in carb.inner_text() and "Tinh bột 57 / 45 g" in carb.inner_text(), "half-can steps update the live total")
+    carb.get_by_role("radio", name="Mật mía Golden Barrel").check()
+    pg.wait_for_timeout(200)
+    check(carb.get_by_label("Số gam").input_value() == "60" and "≈ 60 g mật mía · 45 g tinh bột" in carb.inner_text(), "mật mía: ≈ 60 g mật mía · 45 g tinh bột")
+    shot(pg, "carb-mat-mia-390")
+    carb.get_by_role("radio", name="Red Bull + mật mía").check()
+    pg.wait_for_timeout(200)
+    text = carb.inner_text()
+    grams = carb.get_by_label("Số gam mật mía").input_value()
+    check("1 lon" in text and grams == "22" and "Tinh bột 45 / 45 g" in text, f"Bự mix: 1 lon + 22 g mật mía = 45 g carbs ({grams}, {text[-80:]!r})")
+    check(not small_targets(pg, '[role="dialog"] button'), "mix: 44 px targets")
+    shot(pg, "carb-mix-390")
+    carb.get_by_role("button", name="Thêm vào Bữa phụ").click()
+    pg.wait_for_timeout(600)
+    check(box(pg, "Tinh bột nhanh").is_checked() and "✓ Đã ghi 1 lon Red Bull + 22 g mật mía" in row_text(pg, "Tinh bột nhanh"), f"the mix ticks the item ({row_text(pg, 'Tinh bột nhanh')!r})")
+    ids = storage(pg, CHECKLIST)[today_key(pg)]["logged"]["intra-carb"]["entryIds"]
+    check(len(ids) == 2, f"two entries linked ({ids})")
+    go(pg, "/app", 1000)
+    text = pg.locator("body").inner_text()
+    snack = text[text.find("BỮA PHỤ"):text.find("TỐI")]
+    check("Red Bull (nước tăng lực)" in snack and "Mật mía" in snack, f"Hôm nay: both in Bữa phụ ({snack!r})")
+    go(pg, "/training", 1000)
+    box(pg, "Tinh bột nhanh").click()
+    pg.wait_for_timeout(400)
+    check(not box(pg, "Tinh bột nhanh").is_checked() and pg.get_by_role("button", name="Hoàn tác").count() == 1, "untick: one Hoàn tác")
+    pg.get_by_role("button", name="Hoàn tác").click()
     pg.wait_for_timeout(500)
-    return link["entryId"] if link else None
+    present = pg.evaluate("(ids) => { const raw = localStorage.getItem('h1t_added_entries_v1_demo') || '[]'; return ids.filter((id) => raw.includes(id)).length }", ids)
+    check(box(pg, "Tinh bột nhanh").is_checked() and present == 2, f"Hoàn tác brings both entries back and ticks it ({present})")
+    box(pg, "Tinh bột nhanh").click()
+    pg.wait_for_timeout(400)
+    go(pg, "/app", 1000)
+    text = pg.locator("body").inner_text()
+    snack = text[text.find("BỮA PHỤ"):text.find("TỐI")]
+    check("Red Bull" not in snack and "Mật mía" not in snack, f"untick removed both entries ({snack!r})")
 
 
 def today_key(pg):
@@ -215,13 +256,14 @@ def flows(browser):
     box(pg, SALT0).click()
     dialog(pg, SALT0).get_by_role("button", name="Thêm vào Bữa phụ").click()
     pg.wait_for_timeout(600)
-    entry = storage(pg, CHECKLIST)[today_key(pg)]["logged"]["intra-salt-0-20"]["entryId"]
+    entry = storage(pg, CHECKLIST)[today_key(pg)]["logged"]["intra-salt-0-20"]["entryIds"][0]
     go(pg, f"/entry/{entry}", 800)
     pg.get_by_role("button", name="Xóa món này").click()
     pg.wait_for_timeout(800)
     go(pg, "/training", 1000)
     check(not box(pg, SALT0).is_checked(), "entry deleted on Hôm nay: the item shows unticked")
 
+    carbs(pg)
     own_items(pg)
     settings_be(pg)
     past_day(pg)
