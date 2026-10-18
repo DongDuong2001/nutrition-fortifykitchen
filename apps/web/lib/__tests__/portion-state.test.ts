@@ -13,6 +13,7 @@ import {
   startPortion,
   withBase,
   withMult,
+  type GramPortion,
   type PortionState,
 } from "../portion";
 import type { FoodItem } from "../mock/foods";
@@ -45,7 +46,7 @@ const dish = food("bun", "Bún chả Hà Nội", "mon_viet", [{ label: "1 phần
 const redBull = food("rb", "Red Bull", "do_uong", [{ label: "1 lon", grams: 250 }, { label: "100 g", grams: 100 }]);
 const recipe = food("mine", "Gà kho gừng", "cua_toi", [{ label: "1 phần", grams: 220 }], { source: "user" });
 
-const grams = (base: number, mult = 1, state: "raw" | "cooked" | null = null): PortionState => ({ kind: "grams", base, mult, state });
+const grams = (base: number, mult = 1, state: "raw" | "cooked" | null = null): GramPortion => ({ kind: "grams", base, mult, state });
 
 describe("portion math (coach rule 2: ×N multiplies whatever gram amount is set)", () => {
   it("typed 200 × 3 is 600 g; the 100 g chip × 3 is 300 g", () => {
