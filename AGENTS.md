@@ -29,6 +29,9 @@ Antigravity: also follow .agent/rules/antigravity.md.
 - Rebuild the screens in `design/screens/*.dc.html` as React components. Skip the `Browser*` files; they only wrap phone screens in a Safari frame.
 - Mobile first: 390 px phone. At 1024 px and up, use the `Desktop*` layouts.
 - Every tap target is at least 44 px. Use real buttons, links and labels, and add `aria` attributes as in the designs.
+- **Motion (cc-55).** Every new screen, sheet, dialog, popover or expanding row uses Sheet or the m-* motion classes. Nothing mounts or unmounts with no transition. No one-off animation code.
+  - The classes, curves (`--ease-out`, `--ease-in-out`, `--ease-drawer`) and durations live at the end of `app/globals.css`; `lib/__tests__/motion.test.ts` checks them. Never the bare `ease` / `ease-in` / `ease-out` keywords, never `transition-all`.
+  - Something that unmounts plays its exit through `components/ui/presence.tsx` (toasts, tips) or `components/ui/expand.tsx` (accordions). Screen changes go through `components/route-transition.tsx` and `lib/nav-direction.ts`; a new sheet-like route is added to `SHEET_ROUTES` there.
 
 ## How to work (every task)
 1. **Plan first.** Before writing code, reply with a short plan: the screens or components involved, the files you will create or change, and anything unclear. Then build.
@@ -51,7 +54,7 @@ Antigravity: also follow .agent/rules/antigravity.md.
 ## Definition of done (check before every commit)
 - [ ] Matches the design at 390 px (and at 1440 px for desktop screens). Copy is exact Vietnamese.
 - [ ] Every tap target is at least 44 px. Buttons, links and labels are real elements; icon-only buttons have `aria-label`; focus ring is visible.
-- [ ] Press feedback is scale 0.97 over 150 ms, with a `prefers-reduced-motion` fallback.
+- [ ] Press feedback is scale 0.97 over 160 ms on buttons, chips and icon buttons (rows, cards and full-width actions tint instead), with a `prefers-reduced-motion` fallback.
 - [ ] Loading, empty and error states are handled.
 - [ ] No "Coach" tags, no raw hex, no `console.log`, no `TODO` without an entry in `OPEN_QUESTIONS.md`.
 - [ ] `npx tsc --noEmit`, `npm run build` and the unit tests pass.
