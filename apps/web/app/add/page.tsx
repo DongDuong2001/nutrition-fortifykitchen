@@ -443,6 +443,8 @@ function AddFoodInner() {
             onClick={(e) => e.stopPropagation()}
             className="m-pop w-[min(900px,100%-32px)] bg-card border border-card-border rounded-[18px] p-6 shadow-2xl flex flex-col gap-4 max-h-[92vh] overflow-y-auto"
           >
+            {/* The page's heading (Hôm nay behind is a picture without one since cc-55b), as the phone sheet has */}
+            <h1 className="sr-only">Thêm món</h1>
             {/* Dialog Header */}
             <div className="flex items-start justify-between gap-4">
               <div className="flex flex-col items-start">
