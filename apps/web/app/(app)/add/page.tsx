@@ -81,6 +81,7 @@ function AddFoodInner() {
   const [isDesktop, setIsDesktop] = useState(false);
 
   const desktopSearchInputRef = useRef<HTMLInputElement>(null);
+  const phoneSearchInputRef = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   // cc-55: /add is a sheet over Hôm nay. Hôm nay is drawn behind it where it was scrolled to; the panel (a dialog on a
   // desktop) slides up from @starting-style, and ✕, the scrim or a drag down slide it away before the route pops.
@@ -94,7 +95,7 @@ function AddFoodInner() {
   const closeTimer = useRef<number | undefined>(undefined);
   const sheetState = "open";
   // The picture of Hôm nay behind the sheet is one element for the life of the page: nothing here re-renders it
-  // (Hôm nay's own frame is app/(tabs)/layout.tsx, which /add is outside: the backdrop brings its own)
+  // (Hôm nay's own frame is app/(app)/(tabs)/layout.tsx, which /add is outside: the backdrop brings its own)
   const backdrop = useMemo(
     () => (
       <AppShell alignContainer="home-page">
@@ -116,10 +117,12 @@ function AddFoodInner() {
     return () => window.removeEventListener("resize", checkDesktop);
   }, []);
 
-  // Autofocus search on desktop only
+  // Focus goes into the dialog: the search field, on a phone too (cc-58). No scroll, so the open motion stays as it is.
   useEffect(() => {
     if (isDesktop && desktopSearchInputRef.current) {
       desktopSearchInputRef.current.focus();
+    } else if (!isDesktop) {
+      phoneSearchInputRef.current?.focus({ preventScroll: true });
     }
   }, [isDesktop]);
 
@@ -593,6 +596,7 @@ function AddFoodInner() {
         <div
           ref={panelRef}
           role="dialog"
+          aria-modal="true"
           aria-label={`Thêm món vào ${mealNameVi}`}
           data-align-container="add-list"
           data-add-panel
@@ -648,7 +652,7 @@ function AddFoodInner() {
               </div>
             </div>
 
-            <FoodSearchField value={query} onChange={setQuery} className="shrink-0" />
+            <FoodSearchField value={query} onChange={setQuery} inputRef={phoneSearchInputRef} className="shrink-0" />
 
             {/* Filter row: Tất cả, Yêu thích, then categories with foods */}
             <ChipRow items={filterItems} ariaLabel="Lọc món theo nhóm" data-align-group="add-list" data-align-edge="left" />

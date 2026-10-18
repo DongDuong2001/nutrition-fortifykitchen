@@ -62,6 +62,8 @@ const SECURITY_HEADERS = [
 ];
 
 const nextConfig: NextConfig = {
+  // cc-58: the icon package is one big index; only the icons used are bundled
+  experimental: { optimizePackageImports: ["@mynaui/icons-react"] },
   // DEMO_BUILD=1 at build time keeps ?demo, ?as and ?level working in a production build (gates and probes only)
   // NEXT_PUBLIC_APP_VERSION: sw.js VERSION, one source for the app version (client error reports, cc-50)
   env: { NEXT_PUBLIC_DEMO_BUILD: process.env.DEMO_BUILD === "1" ? "1" : "", NEXT_PUBLIC_APP_VERSION: APP_VERSION },
