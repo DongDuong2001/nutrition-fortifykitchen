@@ -29,7 +29,7 @@ import { TrayBar, TrayReviewSheet } from "@/components/add/add-tray";
 import { markUsed } from "@/lib/onboarding-store";
 import { TOUR_STEPS } from "@/lib/tour";
 import { readTour, subscribeTour, tourAction } from "@/lib/tour-bus";
-import { canAddTray, putInTray, removeFromTray, setTrayPortion, toggleTray, trayTotals, type TrayItem } from "@/lib/tray";
+import { canAddTray, patchTrayItem, putInTray, removeFromTray, toggleTray, trayTotals, type TrayItem } from "@/lib/tray";
 
 import {
   parseMealSlot,
@@ -686,7 +686,7 @@ function AddFoodInner() {
           setTray(next);
           if (next.length === 0) setReviewOpen(false);
         }}
-        onSetPortion={(id, grams, label) => setTray((t) => setTrayPortion(t, id, grams, label))}
+        onChangeItem={(id, patch) => setTray((t) => patchTrayItem(t, id, patch))}
         onChangeMeal={() => {
           reopenReview.current = true;
           setReviewOpen(false);

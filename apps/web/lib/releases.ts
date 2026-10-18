@@ -31,6 +31,22 @@ export interface Release {
 }
 
 export const RELEASES: readonly Release[] = [
+  // cc-53b: the coach's portion model. The tour runs on Hôm nay: + Thêm (or the + of the nav), the food list, a meal
+  {
+    id: "2026-10-18f",
+    date: "18/10",
+    items: [
+      { icon: "select", title: "Khẩu phần theo gam", body: "Gõ số gam hoặc chọn 100 g, rồi bấm + để nhân lên. 100 g × 3 là 300 g." },
+      { icon: "meal", title: "Cân sống hay đã nấu chín", body: "Thịt, cá, cơm, mì có nút Cân sống và Đã nấu chín. App tự đổi ra số liệu khớp." },
+      { icon: "select", title: "Trứng ghi theo quả", body: "Chọn cỡ ghi trên hộp rồi chọn mấy quả. App tự trừ vỏ." },
+      { icon: "home", title: "Khay gọn hơn", body: "Chạm từng món trong khay để chỉnh, rồi thêm cả khay vô bữa một lần." },
+    ],
+    tour: [
+      { target: "meal-add", fallback: "nav-add", title: "Ghi theo gam", body: "Chạm + Thêm rồi chọn món. Gõ số gam hoặc chọn 100 g, bấm + để nhân lên." },
+      { target: "home-food-list", fallback: "meal-pill", title: "Sống hay chín", body: "Dòng món ghi rõ bạn cân lúc sống hay đã nấu chín. Trứng ghi theo cỡ và số quả." },
+      { target: "meal-pill", title: "Khay xem lại", body: "Ở + Thêm, gom nhiều món vô khay. Chạm từng món trong khay để chỉnh rồi thêm một lần." },
+    ],
+  },
   // cc-52. The tour runs on Hôm nay, where the Ngày tập controls are not: each step falls back to the Ngày tập pill
   {
     id: "2026-10-18e",
@@ -57,28 +73,12 @@ export const RELEASES: readonly Release[] = [
   {
     id: "2026-10-18d",
     date: "18/10",
+    // cc-53b: normal foods now go by grams; units stay for supplements, món Việt and cans. The unit tour is retired.
     items: [
       {
         icon: "select",
-        title: "Ghi món theo cách bạn quen",
-        body: "Chọn trái, chén, lon… và cỡ nhỏ, vừa, lớn, hoặc nhập gam. Cơm, mì, yến mạch mở sẵn ở Gam.",
-      },
-    ],
-    tour: [
-      {
-        target: "unit-toggle",
-        title: "Chọn đơn vị",
-        body: "Chuyển giữa các đơn vị quen thuộc hoặc nhập gam.",
-      },
-      {
-        target: "unit-size",
-        title: "Chọn kích cỡ",
-        body: "Chọn cỡ nhỏ, vừa, lớn hoặc lưng, đầy.",
-      },
-      {
-        target: "unit-amount",
-        title: "Nhập số lượng",
-        body: "Chạm để gõ hoặc bấm cộng trừ để chỉnh số lượng.",
+        title: "Ghi theo lon, viên, phần",
+        body: "Red Bull ghi theo lon, thực phẩm bổ sung theo viên, món Việt theo phần. Chọn cỡ rồi chỉnh số lượng.",
       },
     ],
   },
@@ -93,7 +93,7 @@ export const RELEASES: readonly Release[] = [
       { icon: "home", title: "Kéo xuống để tải lại", body: "Ở Hôm nay, kéo danh sách món xuống rồi thả để lấy món vừa thêm trên máy khác." },
       { icon: "meal", title: "Món của tôi được lưu", body: "Món tự tạo giờ lưu vào tài khoản; danh sách nguyên liệu chỉ có trên máy này." },
       { icon: "meal", title: "Ghi thực phẩm bổ sung theo viên", body: "Thêm được viên, giọt, muỗng dù nhãn không ghi kcal." },
-      { icon: "select", title: "Ghi theo quả, viên", body: "Trứng, trái cây và thực phẩm bổ sung có nút ×N: chọn khẩu phần rồi tăng giảm số lượng." },
+      { icon: "select", title: "Ghi theo viên", body: "Thực phẩm bổ sung có nút + và − để ghi 2, 3 viên." },
     ],
     // Everything since 17/10 (18/10, 18b and 18c), on Hôm nay: "Có gì mới" shows only this release
     tour: [
@@ -107,7 +107,7 @@ export const RELEASES: readonly Release[] = [
       { target: "home-food-list", fallback: "meal-pill", title: "Kéo xuống để tải lại", body: "Kéo danh sách món xuống rồi thả để lấy món vừa thêm trên máy khác." },
       { target: "nutrient-column", title: "Chạm vi chất để xem nguồn", body: "Chạm một vi chất để xem món nào cung cấp, món nhiều nhất ở trên." },
       { target: "meal-pill", title: "Gần đây và Như hôm qua", body: "Chạm + Thêm: Gần đây là món bạn ăn ở bữa này. Chạm tên bữa rồi ⋯ để chọn Như hôm qua." },
-      { target: "nav-explore", title: "Thực phẩm bổ sung và Gia vị", body: "Tìm ở Khám phá. Trứng, trái cây và thực phẩm bổ sung ghi theo quả, viên với nút ×N." },
+      { target: "nav-explore", title: "Thực phẩm bổ sung và Gia vị", body: "Tìm ở Khám phá. Thực phẩm bổ sung ghi theo viên với nút + và −." },
     ],
   },
   // Thêm Thực phẩm bổ sung và Gia vị

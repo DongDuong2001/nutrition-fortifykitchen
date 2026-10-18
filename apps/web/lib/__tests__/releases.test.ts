@@ -12,8 +12,26 @@ describe("RELEASES", () => {
     expect([...ids].sort().reverse()).toEqual(ids);
   });
 
-  it("starts with Ngày tập ghi vào nhật ký (2026-10-18e, cc-52) and cc-55's smoother screens: two items and a 3-step tour that falls back to the Ngày tập pill on Hôm nay", () => {
+  it("starts with the portion model (2026-10-18f, cc-53b): four items and a 3-step tour on Hôm nay's controls", () => {
     const r = latestRelease();
+    expect(r?.id).toBe("2026-10-18f");
+    expect(r?.date).toBe("18/10");
+    expect(r?.items.map((i) => i.title)).toEqual(["Khẩu phần theo gam", "Cân sống hay đã nấu chín", "Trứng ghi theo quả", "Khay gọn hơn"]);
+    expect(r?.tour?.map((s) => [s.target, s.fallback ?? null])).toEqual([
+      ["meal-add", "nav-add"],
+      ["home-food-list", "meal-pill"],
+      ["meal-pill", null],
+    ]);
+    // AGENTS.md › Tutorials and the copy rules: 2–5 steps, 1–2 short sentences, no colon inside a sentence
+    for (const s of r?.tour ?? []) {
+      expect(s.body.length).toBeLessThanOrEqual(100);
+      expect(s.body).not.toContain(":");
+    }
+    for (const i of r?.items ?? []) expect(i.body).not.toContain(":");
+  });
+
+  it("then Ngày tập ghi vào nhật ký (2026-10-18e, cc-52) and cc-55's smoother screens: two items and a 3-step tour that falls back to the Ngày tập pill on Hôm nay", () => {
+    const r = RELEASES.find((x) => x.id === "2026-10-18e");
     expect(r?.id).toBe("2026-10-18e");
     expect(r?.date).toBe("18/10");
     expect(r?.items).toEqual([
@@ -30,22 +48,22 @@ describe("RELEASES", () => {
     for (const s of r?.tour ?? []) expect(s.body.length).toBeLessThanOrEqual(100);
   });
 
-  it("then the fourth 18/10 release (2026-10-18d, cc-53): Ghi món theo cách bạn quen, with a 3-step tour", () => {
-    const r = RELEASES[1];
-    expect(r?.id).toBe("2026-10-18d");
+  it("then the fourth 18/10 release (2026-10-18d, cc-53): units for the foods that keep them, its unit tour retired (cc-53b)", () => {
+    const r = RELEASES.find((x) => x.id === "2026-10-18d");
     expect(r?.date).toBe("18/10");
-    expect(r?.items.map((i) => i.title)).toEqual(["Ghi món theo cách bạn quen"]);
-    expect(r?.tour?.length).toBe(3);
+    expect(r?.items.map((i) => i.title)).toEqual(["Ghi theo lon, viên, phần"]);
+    expect(r?.tour).toBeUndefined();
   });
 
-  it("then the third 18/10 release (2026-10-18c): cc-51's five items, Món của tôi được lưu, Ghi thực phẩm bổ sung theo viên, Ghi theo quả, viên", () => {
+  it("then the third 18/10 release (2026-10-18c): cc-51's five items, Món của tôi được lưu, Ghi thực phẩm bổ sung theo viên, Ghi theo viên", () => {
     const r = RELEASES.find((x) => x.id === "2026-10-18c");
     expect(r?.id).toBe("2026-10-18c");
     expect(r?.date).toBe("18/10");
     expect(r?.items.map((i) => i.title)).toEqual([
-      "Gần đây và Hay ăn", "Như hôm qua", "Chạm vi chất để xem nguồn", "Rung khi chạm", "Kéo xuống để tải lại", "Món của tôi được lưu", "Ghi thực phẩm bổ sung theo viên", "Ghi theo quả, viên",
+      "Gần đây và Hay ăn", "Như hôm qua", "Chạm vi chất để xem nguồn", "Rung khi chạm", "Kéo xuống để tải lại", "Món của tôi được lưu", "Ghi thực phẩm bổ sung theo viên", "Ghi theo viên",
     ]);
-    expect(r?.items[7]).toEqual({ icon: "select", title: "Ghi theo quả, viên", body: "Trứng, trái cây và thực phẩm bổ sung có nút ×N: chọn khẩu phần rồi tăng giảm số lượng." });
+    // cc-53b: fruit and eggs no longer go by a ×N of units
+    expect(r?.items[7]).toEqual({ icon: "select", title: "Ghi theo viên", body: "Thực phẩm bổ sung có nút + và − để ghi 2, 3 viên." });
     expect(r?.items[6]).toEqual({ icon: "meal", title: "Ghi thực phẩm bổ sung theo viên", body: "Thêm được viên, giọt, muỗng dù nhãn không ghi kcal." });
     expect(r?.items[5]).toEqual({ icon: "meal", title: "Món của tôi được lưu", body: "Món tự tạo giờ lưu vào tài khoản; danh sách nguyên liệu chỉ có trên máy này." });
     expect(r?.items[4]).toEqual({ icon: "home", title: "Kéo xuống để tải lại", body: "Ở Hôm nay, kéo danh sách món xuống rồi thả để lấy món vừa thêm trên máy khác." });
@@ -66,7 +84,7 @@ describe("RELEASES", () => {
     expect(tour.slice(1).every((s) => s.advanceOn === undefined)).toBe(true);
     expect(tour[0].body).toContain("Chưa lưu");
     expect(tour[3].body).toContain("Như hôm qua");
-    expect(tour[4].body).toContain("×N");
+    expect(tour[4].body).toContain("viên");
     // Short: one card, no scrolling at 390
     for (const s of tour) expect(s.body.length).toBeLessThanOrEqual(100);
   });
@@ -99,59 +117,59 @@ describe("unseenReleases (what Có gì mới lists)", () => {
   const ids = (seen: string | null) => unseenReleases(seen).map((r) => r.id);
 
   it("every release newer than the last one seen, newest first", () => {
-    expect(ids("2026-10-18b")).toEqual(["2026-10-18e", "2026-10-18d", "2026-10-18c"]);
-    expect(ids("2026-10-17")).toEqual(["2026-10-18e", "2026-10-18d", "2026-10-18c", "2026-10-18b", "2026-10-18"]);
+    expect(ids("2026-10-18b")).toEqual(["2026-10-18f", "2026-10-18e", "2026-10-18d", "2026-10-18c"]);
+    expect(ids("2026-10-17")).toEqual(["2026-10-18f", "2026-10-18e", "2026-10-18d", "2026-10-18c", "2026-10-18b", "2026-10-18"]);
   });
 
-  it("seen 18c: 18e and 18d; seen 18d: only 18e; seen the newest: nothing", () => {
-    expect(ids("2026-10-18c")).toEqual(["2026-10-18e", "2026-10-18d"]);
-    expect(ids("2026-10-18d")).toEqual(["2026-10-18e"]);
-    expect(ids("2026-10-18e")).toEqual([]);
+  it("seen 18c: 18f, 18e and 18d; seen 18e: only 18f; seen the newest: nothing", () => {
+    expect(ids("2026-10-18c")).toEqual(["2026-10-18f", "2026-10-18e", "2026-10-18d"]);
+    expect(ids("2026-10-18e")).toEqual(["2026-10-18f"]);
+    expect(ids("2026-10-18f")).toEqual([]);
   });
 
   it("an account that has seen none gets the newest only", () => {
-    expect(ids(null)).toEqual(["2026-10-18e"]);
+    expect(ids(null)).toEqual(["2026-10-18f"]);
   });
 });
 
 describe("joinedTour (what Thử ngay runs)", () => {
   const titles = (seen: string) => joinedTour(unseenReleases(seen).map((r) => r.id)).map((s) => s.title);
   const T18C = ["Món chưa lưu", "Kéo xuống để tải lại", "Chạm vi chất để xem nguồn", "Gần đây và Như hôm qua", "Thực phẩm bổ sung và Gia vị"];
-  const T18D = ["Chọn đơn vị", "Chọn kích cỡ", "Nhập số lượng"];
   const T18E = ["Nhóm Bự / Bé", "Đánh dấu để ghi", "+ Thêm món"];
+  const T18F = ["Ghi theo gam", "Sống hay chín", "Khay xem lại"];
 
-  it("seen 18b: 18c, 18d, then 18e (oldest first), cut to 8 steps from the end of 18c's", () => {
-    expect(titles("2026-10-18b")).toEqual([...T18C.slice(0, 2), ...T18D, ...T18E]);
+  it("seen 18b: 18c, 18e, then 18f (oldest first; 18d has no tour), cut to 8 steps from the end of 18c's", () => {
+    expect(titles("2026-10-18b")).toEqual([...T18C.slice(0, 2), ...T18E, ...T18F]);
   });
 
-  it("seen 18c: the 18d tour, then the 18e tour", () => {
-    expect(titles("2026-10-18c")).toEqual([...T18D, ...T18E]);
+  it("seen 18c: the 18e tour, then the 18f tour", () => {
+    expect(titles("2026-10-18c")).toEqual([...T18E, ...T18F]);
   });
 
-  it("seen 18d: only the 18e tour", () => {
-    expect(titles("2026-10-18d")).toEqual(T18E);
+  it("seen 18e: only the 18f tour", () => {
+    expect(titles("2026-10-18e")).toEqual(T18F);
   });
 
   it("releases without a tour add nothing", () => {
-    expect(titles("2026-10-17")).toEqual([...T18C.slice(0, 2), ...T18D, ...T18E]);
+    expect(titles("2026-10-17")).toEqual([...T18C.slice(0, 2), ...T18E, ...T18F]);
   });
 
-  // Hôm nay as "Thử ngay" sees it: 18c's and 18e's controls (18e through the Ngày tập pill), never 18d's portion area
-  const ON_HOME = new Set(["sync-status", "header-actions", "home-food-list", "meal-pill", "nutrient-column", "nav-explore", "training-pill"]);
+  // Hôm nay as "Thử ngay" sees it: 18c's, 18e's (through the Ngày tập pill) and 18f's controls
+  const ON_HOME = new Set(["sync-status", "header-actions", "home-food-list", "meal-pill", "meal-add", "nutrient-column", "nav-explore", "training-pill"]);
   const onHome = (s: { target: string; fallback?: string }) => ON_HOME.has(s.target) || (s.fallback !== undefined && ON_HOME.has(s.fallback));
 
-  it("seen 18b, on Hôm nay: the steps not on the page go first, then the cap: 18c keeps all 5, then 18e (18d is not on Hôm nay)", () => {
+  it("seen 18b, on Hôm nay: every step is on the page, so the cap drops 18c's last three", () => {
     const ids = unseenReleases("2026-10-18b").map((r) => r.id);
-    expect(ids).toEqual(["2026-10-18e", "2026-10-18d", "2026-10-18c"]);
-    expect(joinedTour(ids, RELEASES, onHome).map((s) => s.title)).toEqual([...T18C, ...T18E]);
+    expect(ids).toEqual(["2026-10-18f", "2026-10-18e", "2026-10-18d", "2026-10-18c"]);
+    expect(joinedTour(ids, RELEASES, onHome).map((s) => s.title)).toEqual([...T18C.slice(0, 2), ...T18E, ...T18F]);
   });
 
   it("the keep test sees each step's place in the whole joined list, oldest release first, before the cap", () => {
     const seen: [string, number][] = [];
     joinedTour(unseenReleases("2026-10-18b").map((r) => r.id), RELEASES, (s, i) => (seen.push([s.title, i]), false));
-    expect(seen.map(([t]) => t)).toEqual(tourSteps(["2026-10-18e", "2026-10-18d", "2026-10-18c"]).map((s) => s.title));
+    expect(seen.map(([t]) => t)).toEqual(tourSteps(["2026-10-18f", "2026-10-18e", "2026-10-18d", "2026-10-18c"]).map((s) => s.title));
     expect(seen.map(([, i]) => i)).toEqual(Array.from({ length: 11 }, (_, i) => i));
-    expect(seen.map(([t]) => t)).toEqual([...T18C, ...T18D, ...T18E]);
+    expect(seen.map(([t]) => t)).toEqual([...T18C, ...T18E, ...T18F]);
   });
 
   it("the cap still holds after the filter: more than 8 steps on the page drops the oldest release's last ones", () => {
@@ -194,10 +212,10 @@ describe("whatsNewSteps (the running tour, as Thử ngay saved it)", () => {
 });
 
 describe("tourStepAfter (moving through the Có gì mới tour)", () => {
-  const joined = joinedTour(["2026-10-18c", "2026-10-18d"]);
+  const joined = joinedTour(["2026-10-18c", "2026-10-18e"]);
   const r17 = RELEASES.find((r) => r.id === "2026-10-17")?.tour ?? [];
 
-  it("the joined tour runs end to end with Tiếp: 18c's five steps, then 18d's three, then it ends", () => {
+  it("the joined tour runs end to end with Tiếp: 18c's five steps, then 18e's three, then it ends", () => {
     const seen: number[] = [];
     let i: number | null = 0;
     while (i !== null) {

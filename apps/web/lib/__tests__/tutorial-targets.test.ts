@@ -40,9 +40,9 @@ describe("tutorial targets", () => {
     expect(targets.length).toBeGreaterThan(20);
   });
 
-  it("covers the 18c and 18d tours and the sheet, stepper and offline tips", () => {
+  it("covers the 18c and 18f tours and the sheet, stepper, portion and offline tips", () => {
     const named = new Set(targets.map((t) => t.target));
-    for (const t of ["sync-status", "header-actions", "home-food-list", "meal-pill", "nutrient-column", "nav-explore", "sheet-handle", "unit-stepper", "unit-toggle", "unit-size", "unit-amount"]) {
+    for (const t of ["sync-status", "header-actions", "home-food-list", "meal-pill", "meal-add", "nav-add", "nutrient-column", "nav-explore", "sheet-handle", "unit-stepper", "cook-state", "egg-mode", "portion-multiply", "tray-row"]) {
       expect(named.has(t), t).toBe(true);
     }
   });

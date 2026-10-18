@@ -82,8 +82,12 @@ function rawCookedMatters(food: Pick<FoodItem, "nameVi" | "category">): boolean 
   return food.category === "rau" && TUBERS.some((w) => name.startsWith(w));
 }
 
-/** The food's own state: what its name says, else cơm and fresh noodles are cooked and the rest raw. */
-export function ownCookState(food: Pick<FoodItem, "nameVi" | "category">): CookState {
+/**
+ * The food's own state: its cookState when the data has one, else what its name says, else cơm and fresh noodles are
+ * cooked and the rest raw (meat and fish rows without a word are USDA raw cuts as a rule).
+ */
+export function ownCookState(food: Pick<FoodItem, "nameVi" | "category" | "cookState">): CookState {
+  if (food.cookState) return food.cookState;
   const said = cookStateOf(food.nameVi);
   if (said) return said;
   const group = yieldGroupOf(food);

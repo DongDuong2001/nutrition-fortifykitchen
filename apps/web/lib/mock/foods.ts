@@ -29,6 +29,8 @@ export interface FoodItem {
   sourceRef?: FoodSourceRef;
   /** A dish made from ingredients (grams of each, the cooked weight): its food page offers "Tùy chỉnh thành món của tôi". */
   recipe?: FoodRecipe;
+  /** cc-53b: whether the numbers are for the food raw or cooked, when the name does not say (lib/yield ownCookState) */
+  cookState?: "raw" | "cooked";
 }
 
 export interface FoodRecipe {
@@ -529,7 +531,7 @@ export const MOCK_FOODS: FoodItem[] = [
       fiber: 0.6,
     },
   },
-  // 16. Trứng gà (1 quả ~ 55g = 78 kcal)
+  // 16. Trứng gà (edible grams per box size, as the live rows: food-research eggs-notes.md, 0.88 × the label midpoint)
   {
     id: "food-trung-ga",
     category: "dam",
@@ -538,7 +540,10 @@ export const MOCK_FOODS: FoodItem[] = [
     match: "unknown",
     sourceRef: fdc(171287),
     servings: [
-      { label: "1 quả vừa (50–55 g)", grams: 55 },
+      { label: "1 quả vừa (trứng 50-55 g)", grams: 46.2 },
+      { label: "1 quả nhỏ (trứng 45-50 g)", grams: 41.8 },
+      { label: "1 quả lớn (trứng 55-60 g)", grams: 50.6 },
+      { label: "1 quả rất lớn (trứng 60-65 g)", grams: 55 },
       { label: "100 g", grams: 100 },
     ],
     tipVi: "Protein chuẩn tham chiếu, giàu lutein.",
@@ -566,6 +571,7 @@ export const MOCK_FOODS: FoodItem[] = [
     source: "USDA",
     match: "unknown",
     sourceRef: fdc(171477),
+    cookState: "cooked",
     servings: [
       { label: "100 g", grams: 100 },
       { label: "150 g", grams: 150 },

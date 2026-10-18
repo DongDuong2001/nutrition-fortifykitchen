@@ -94,7 +94,8 @@ describe("PortionPanel by the coach's portion model (cc-53b)", () => {
     ],
     nutrients: { energy: 155, protein: 12.6, fat: 10.6, carbs: 1.1 },
   } as unknown as (typeof MOCK_FOODS)[number];
-  const chicken = MOCK_FOODS.find((f) => f.id === "food-uc-ga")!;
+  // Lean beef with raw numbers: cooked weight converts by the meat factor 0.7
+  const beef = MOCK_FOODS.find((f) => f.id === "food-thit-bo-nac")!;
   const redBull = {
     id: "food-red-bull",
     nameVi: "Red Bull",
@@ -126,8 +127,8 @@ describe("PortionPanel by the coach's portion model (cc-53b)", () => {
     expect(html).not.toContain("Mấy quả?");
   });
 
-  it("cooked chicken: Sống | Chín, the amount set, and what it stands for raw", () => {
-    const html = render(chicken, "Đã nấu chín · 150 g", "214,3");
+  it("cooked meat with raw data: Sống | Chín, the amount set, and what it stands for raw", () => {
+    const html = render(beef, "Đã nấu chín · 150 g", "214,3");
     expect(html).toContain("Bạn cân lúc nào?");
     expect(html).toContain("Cân sống");
     expect(html).toContain("Đã nấu chín");

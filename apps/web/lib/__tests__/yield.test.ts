@@ -104,3 +104,9 @@ describe("cookSwitchFor", () => {
     expect(cookSwitchFor(tuber, [tuber, tuberCooked], true)).toEqual({ own: "raw", pair: tuberCooked, factor: null });
   });
 });
+
+describe("cookState in the data wins over the name", () => {
+  it("the roasted chicken breast (FDC 171477) is cooked though its name says nothing", () => {
+    expect(ownCookState({ ...food("g", "Ức gà phi lê"), cookState: "cooked" })).toBe("cooked");
+  });
+});

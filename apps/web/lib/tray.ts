@@ -41,6 +41,11 @@ export function putInTray(items: readonly TrayItem[], food: FoodItem, grams: num
   return [...items, { food, grams, label }];
 }
 
+/** One item changed: its grams and label, or its food (a raw / cooked pair swapped in, cc-53b). */
+export function patchTrayItem(items: readonly TrayItem[], foodId: string, patch: Partial<TrayItem>): TrayItem[] {
+  return items.map((i) => (i.food.id === foodId ? { ...i, ...patch } : i));
+}
+
 export function setTrayPortion(items: readonly TrayItem[], foodId: string, grams: number, label: string): TrayItem[] {
   return items.map((i) => (i.food.id === foodId ? { ...i, grams, label } : i));
 }
