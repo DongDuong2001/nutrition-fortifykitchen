@@ -299,7 +299,7 @@ def main():
             else:
                 print(f"[PASS] /foods/new recipe @ {vp['name']} [recipe-row] ({pairs} pairs)")
 
-        # cc-42: the tray review sheet on /add (the total, the macro line, the meal row and the buttons share edges)
+        # cc-42 / cc-53b: the tray review sheet on /add (Tray.dc.html: every food card shares both edges)
         for vp in VIEWPORTS:
             page.set_viewport_size({"width": vp["width"], "height": vp["height"]})
             page.goto(f"{BASE_URL}/add?meal=lunch", wait_until="networkidle")
@@ -308,6 +308,8 @@ def main():
                 page.locator("[data-tray-toggle]:visible").nth(i).click()
             page.get_by_role("button", name="Xem lại").locator("visible=true").first.click()
             page.locator('[data-align-group="tray-review"]:visible').nth(1).wait_for(timeout=5000)
+            # The cards pop in (.m-pop from opacity 0): measure them once the sheet and the pop have settled
+            page.wait_for_timeout(500)
             res = check_align_groups(page, "tray-review")
             pairs = res["pairs"].get("tray-review", 0)
             if res["errors"] or pairs < 1:

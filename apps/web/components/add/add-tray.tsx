@@ -107,7 +107,7 @@ function TrayCard({ item, open, first, onToggle, onRemove, onChange }: TrayRowPr
   const hint = rowHint(item);
   const editorId = `tray-edit-${food.id}`;
   return (
-    <li data-state={state} className="m-pop flex flex-col rounded-2xl border border-card-border bg-card">
+    <li data-state={state} data-align-group="tray-review" className="m-pop flex flex-col rounded-2xl border border-card-border bg-card">
       <div className="flex items-center">
         <button
           type="button"
@@ -153,8 +153,9 @@ function TrayCard({ item, open, first, onToggle, onRemove, onChange }: TrayRowPr
           setSelectedServingLabel={(label) => onChange({ label })}
           onFoodChange={(next) => onChange({ food: next })}
           variant="tray"
+          data-align-group="tray-edit"
         />
-        <div className="flex items-center justify-between gap-2">
+        <div data-align-group="tray-edit" data-align-edge="left" className="flex items-center justify-between gap-2">
           <span className="text-[13px] text-secondary-strong">{hint}</span>
           <button type="button" onClick={onToggle} className="h-11 shrink-0 cursor-pointer rounded-full border-0 bg-ink px-4 text-sm font-bold text-on-dark">
             Xong
