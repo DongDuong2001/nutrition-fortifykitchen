@@ -165,8 +165,11 @@ def run(browser, name, size):
     # Grams: the diary keeps the label in Vietnamese format
     for grams, label in [("2.5", "2,5 g"), ("1000", "1.000 g")]:
         go(pg, "/foods/food-cha-la")
-        pg.get_by_role("button", name="Tùy chỉnh", exact=True).locator("visible=true").first.click()
-        pg.locator("#fd-size").fill(grams)
+        # cc-53: the food page's portion area; grams are typed on its Gam tab
+        gam = pg.get_by_role("tab", name="Gam", exact=True).locator("visible=true")
+        if gam.count() and gam.first.get_attribute("aria-selected") != "true":
+            gam.first.click()
+        pg.get_by_label("Số gam", exact=True).locator("visible=true").first.fill(grams)
         pg.wait_for_timeout(200)
         pg.get_by_role("button", name=re.compile("^Thêm vào Bữa")).locator("visible=true").first.click()
         pg.wait_for_url(re.compile(r".*/app(\?.*)?$"))
