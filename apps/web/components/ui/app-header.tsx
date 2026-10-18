@@ -12,6 +12,8 @@ export interface AppHeaderProps {
   variant?: AppHeaderVariant;
   /** The screen's name (Saira Condensed). One h1 per page. */
   title?: string;
+  /** cc-55b: "p" when the screen is only a picture behind another one (Hôm nay behind /add): one h1 per page. */
+  titleAs?: "h1" | "p";
   /** One line under the title. On the daily header it shows from 1024 px up only (the phone has the date label). */
   subtitle?: React.ReactNode;
   /** Date object or YYYY-MM-DD string for the daily header */
@@ -82,6 +84,7 @@ function Chevron({ dir }: { dir: "left" | "right" }) {
 export function AppHeader({
   variant = "daily",
   title,
+  titleAs: Title = "h1",
   subtitle,
   date,
   onPrev,
@@ -171,16 +174,16 @@ export function AppHeader({
                   </div>
                 )}
                 {title && (
-                  <h1 className="sr-only lg:not-sr-only m-0 font-display italic font-extrabold text-2xl lg:text-[32px] leading-tight uppercase tracking-tight">
+                  <Title className="sr-only lg:not-sr-only m-0 font-display italic font-extrabold text-2xl lg:text-[32px] leading-tight uppercase tracking-tight">
                     {title}
-                  </h1>
+                  </Title>
                 )}
               </>
             ) : (
               title && (
-                <h1 title={typeof title === "string" ? title : undefined} className="m-0 break-words font-display italic font-extrabold text-2xl lg:text-[32px] leading-tight uppercase tracking-tight line-clamp-2">
+                <Title title={typeof title === "string" ? title : undefined} className="m-0 break-words font-display italic font-extrabold text-2xl lg:text-[32px] leading-tight uppercase tracking-tight line-clamp-2">
                   {title}
-                </h1>
+                </Title>
               )
             )}
             {subtitle && (

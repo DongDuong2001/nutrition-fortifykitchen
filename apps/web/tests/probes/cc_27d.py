@@ -12,6 +12,7 @@ import os
 import re
 import sys
 
+from _motion import settled  # noqa: E402  (cc-55: measure after the pop)
 import _demo  # noqa: F401
 from playwright.sync_api import sync_playwright
 
@@ -46,6 +47,7 @@ def run(browser, size, tag):
     src.click()
     dlg = pg.get_by_role("dialog", name="Nguồn dữ liệu")
     dlg.wait_for(state="visible", timeout=4000)
+    settled(pg)
     text = re.sub(r"\s+", " ", dlg.inner_text())
     check(NOTICE in text, f"{tag} proxy: the amber notice")
     notice_bg = dlg.get_by_role("note").evaluate("e => getComputedStyle(e).backgroundColor")

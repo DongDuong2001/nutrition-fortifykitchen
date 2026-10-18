@@ -17,6 +17,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 from playwright.sync_api import sync_playwright
+from _motion import settled  # noqa: E402  (cc-55: Back is a view transition)
 import _demo  # noqa: F401  (cc2-15b: demo mode on, see _demo.py)
 
 BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3102")
@@ -176,6 +177,7 @@ def check_food(browser, size_name, size):
     # back returns to Khám phá and the food is in Yêu thích
     pg.locator("button[aria-label='Quay lại'], a[aria-label='Quay lại']").first.click()
     pg.wait_for_url("**/explore")
+    settled(pg)  # cc-55: Back is a view transition; Khám phá is on the page once it has run
     check("Yến mạch" in text(pg), f"{size_name} food: back to Khám phá, favourite listed")
     ctx.close()
 
