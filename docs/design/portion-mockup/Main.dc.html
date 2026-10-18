@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Khẩu phần</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&amp;family=Saira+Condensed:wght@600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #8A8D93; font-family: Manrope, system-ui, sans-serif; color: #111317; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden">
+  <div style="background: #FFFFFF; border-radius: 24px 24px 0 0; padding: 10px 20px 28px; display: flex; flex-direction: column; gap: 18px; min-height: 760px; box-sizing: border-box">
+    <div style="width: 40px; height: 5px; border-radius: 3px; background: #C9C5BC; align-self: center"></div>
+
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <div style="font-size: 13px; font-weight: 600; color: #5B5F66">{{slotLabel}}</div>
+      <h1 style="margin: 0; font-family: 'Saira Condensed', sans-serif; font-weight: 700; font-size: 32px; line-height: 1.05; text-transform: uppercase; letter-spacing: 0.01em">{{foodName}}</h1>
+    </div>
+
+    <sc-if value="{{showStateSwitch}}" hint-placeholder-val="{{ true }}">
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <span style="font-size: 13px; font-weight: 700">Bạn cân lúc nào?</span>
+        <div role="group" aria-label="Sống hoặc chín" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; background: #E6E2DA; padding: 4px; border-radius: 14px">
+          <sc-for list="{{stateOpts}}" as="opt" hint-placeholder-count="2">
+            <sc-if value="{{opt.selected}}" hint-placeholder-val="{{ false }}">
+              <button type="button" aria-pressed="true" onClick="{{opt.pick}}" style="height: 44px; border: 0; border-radius: 10px; background: #111317; color: #FFFFFF; font-family: Manrope, sans-serif; font-weight: 700; font-size: 15px; cursor: pointer">{{opt.label}}</button>
+            </sc-if>
+            <sc-if value="{{opt.notSelected}}" hint-placeholder-val="{{ true }}">
+              <button type="button" aria-pressed="false" onClick="{{opt.pick}}" style="height: 44px; border: 0; border-radius: 10px; background: transparent; color: #111317; font-family: Manrope, sans-serif; font-weight: 600; font-size: 15px; cursor: pointer">{{opt.label}}</button>
+            </sc-if>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{isEgg}}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; flex-direction: column; gap: 10px">
+        <div role="group" aria-label="Ghi theo" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; background: #E6E2DA; padding: 4px; border-radius: 14px">
+          <sc-for list="{{tabOpts}}" as="opt" hint-placeholder-count="2">
+            <sc-if value="{{opt.selected}}" hint-placeholder-val="{{ false }}">
+              <button type="button" aria-pressed="true" onClick="{{opt.pick}}" style="height: 44px; border: 0; border-radius: 10px; background: #111317; color: #FFFFFF; font-family: Manrope, sans-serif; font-weight: 700; font-size: 15px; cursor: pointer">{{opt.label}}</button>
+            </sc-if>
+            <sc-if value="{{opt.notSelected}}" hint-placeholder-val="{{ true }}">
+              <button type="button" aria-pressed="false" onClick="{{opt.pick}}" style="height: 44px; border: 0; border-radius: 10px; background: transparent; color: #111317; font-family: Manrope, sans-serif; font-weight: 600; font-size: 15px; cursor: pointer">{{opt.label}}</button>
+            </sc-if>
+          </sc-for>
+        </div>
+        <sc-if value="{{eggQua}}" hint-placeholder-val="{{ true }}">
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <span style="font-size: 13px; font-weight: 700">Trứng cỡ nào? <span style="font-weight: 400; color: #5B5F66">Xem trên hộp là biết</span></span>
+            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+              <sc-for list="{{sizeOpts}}" as="sz" hint-placeholder-count="4">
+                <sc-if value="{{sz.selected}}" hint-placeholder-val="{{ false }}">
+                  <button type="button" aria-pressed="true" onClick="{{sz.pick}}" style="min-height: 52px; border: 2px solid #1238D6; border-radius: 12px; background: #FFFFFF; color: #111317; font-family: Manrope, sans-serif; text-align: left; padding: 6px 12px; cursor: pointer; display: flex; flex-direction: column; justify-content: center"><span style="font-weight: 700; font-size: 15px">{{sz.label}}</span><span style="font-size: 12px; color: #5B5F66">{{sz.hint}}</span></button>
+                </sc-if>
+                <sc-if value="{{sz.notSelected}}" hint-placeholder-val="{{ true }}">
+                  <button type="button" aria-pressed="false" onClick="{{sz.pick}}" style="min-height: 52px; border: 1px solid #DDD8CF; border-radius: 12px; background: #FFFFFF; color: #111317; font-family: Manrope, sans-serif; text-align: left; padding: 7px 13px; cursor: pointer; display: flex; flex-direction: column; justify-content: center"><span style="font-weight: 600; font-size: 15px">{{sz.label}}</span><span style="font-size: 12px; color: #5B5F66">{{sz.hint}}</span></button>
+                </sc-if>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{showGramField}}" hint-placeholder-val="{{ true }}">
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <label for="grams" style="font-size: 13px; font-weight: 700">Bao nhiêu gam? <span style="font-weight: 400; color: #5B5F66">{{gramStateNote}}</span></label>
+        <div style="display: flex; gap: 8px; align-items: stretch">
+          <div style="flex: 1; display: flex; align-items: center; gap: 6px; height: 60px; box-sizing: border-box; padding: 0 16px; background: #FFFFFF; border: 2px solid #1238D6; border-radius: 14px">
+            <input id="grams" type="text" inputmode="decimal" value="{{gramsText}}" onChange="{{onType}}" style="flex: 1; min-width: 0; border: 0; outline: none; background: transparent; font-family: 'Saira Condensed', sans-serif; font-weight: 700; font-size: 34px; color: #111317; padding: 0">
+            <span style="font-size: 16px; font-weight: 600; color: #5B5F66">g</span>
+          </div>
+          <sc-if value="{{chipOn}}" hint-placeholder-val="{{ false }}">
+            <button type="button" aria-pressed="true" onClick="{{pickChip}}" style="width: 92px; border: 2px solid #1238D6; border-radius: 14px; background: #E9EEFF; color: #1238D6; font-family: Manrope, sans-serif; font-weight: 700; font-size: 16px; cursor: pointer">100 g</button>
+          </sc-if>
+          <sc-if value="{{chipOff}}" hint-placeholder-val="{{ true }}">
+            <button type="button" aria-pressed="false" onClick="{{pickChip}}" style="width: 92px; border: 1px solid #DDD8CF; border-radius: 14px; background: #FFFFFF; color: #111317; font-family: Manrope, sans-serif; font-weight: 600; font-size: 16px; cursor: pointer">100 g</button>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; background: #F3F1EC; border-radius: 14px; padding: 8px 8px 8px 16px">
+      <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+        <span style="font-size: 13px; font-weight: 700">{{multLabel}}</span>
+        <span style="font-size: 13px; color: #5B5F66">{{multHint}}</span>
+      </div>
+      <div role="group" aria-label="{{multLabel}}" style="display: flex; align-items: center; gap: 4px">
+        <button type="button" aria-label="Giảm" onClick="{{dec}}" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: #FFFFFF; color: #111317; font-size: 22px; font-weight: 700; cursor: pointer">−</button>
+        <output aria-live="polite" style="min-width: 52px; text-align: center; font-family: 'Saira Condensed', sans-serif; font-weight: 700; font-size: 26px">{{multText}}</output>
+        <button type="button" aria-label="Tăng" onClick="{{inc}}" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: #FFFFFF; color: #111317; font-size: 22px; font-weight: 700; cursor: pointer">+</button>
+      </div>
+    </div>
+
+    <div style="background: #111317; color: #FFFFFF; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+      <div style="display: flex; align-items: baseline; justify-content: space-between">
+        <span style="font-family: 'Saira Condensed', sans-serif; font-weight: 700; font-size: 44px; line-height: 1">{{kcal}} <span style="font-size: 18px; color: #9EC3FF">kcal</span></span>
+        <span style="font-size: 13px; color: #C9CCD2">{{summary}}</span>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+        <div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #C9CCD2">Tinh bột</span><span style="font-weight: 700; font-size: 17px">{{carb}} g</span></div>
+        <div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #C9CCD2">Đạm</span><span style="font-weight: 700; font-size: 17px">{{protein}} g</span></div>
+        <div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #C9CCD2">Chất béo</span><span style="font-weight: 700; font-size: 17px">{{fat}} g</span></div>
+      </div>
+    </div>
+
+    <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #4A4E55">{{note}}</p>
+
+    <div style="flex: 1"></div>
+    <button type="button" style="height: 56px; border: 0; border-radius: 16px; background: #1238D6; color: #FFFFFF; font-family: Manrope, sans-serif; font-weight: 700; font-size: 17px; cursor: pointer">Thêm vào bữa trưa</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"food":{"editor":"enum","options":["khoai","com","ga","trung"],"default":"khoai"},"mode":{"editor":"enum","options":["","raw","cooked"],"default":""},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  foods() {
+    return {
+      khoai: { name: 'Khoai lang', raw: { label: 'Sống', per: { kcal: 86, p: 1.6, c: 20.1, f: 0.1 }, src: 'khoai lang sống (USDA)' }, cooked: { label: 'Chín', per: { kcal: 76, p: 1.4, c: 17.7, f: 0.1 }, src: 'khoai lang luộc (USDA)' }, def: 'raw', base: 200, mult: 1 },
+      com: { name: 'Cơm trắng', raw: { label: 'Sống', per: { kcal: 365, p: 7.1, c: 80, f: 0.7 }, src: 'gạo trắng khô (USDA)' }, cooked: { label: 'Chín', per: { kcal: 130, p: 2.7, c: 28.2, f: 0.3 }, src: 'cơm trắng (USDA)' }, def: 'cooked', base: 100, mult: 3, yield: 2.7 },
+      ga: { name: 'Ức gà', raw: { label: 'Sống', per: { kcal: 120, p: 22.5, c: 0, f: 2.6 }, src: 'ức gà sống (USDA)' }, yieldOnly: true, yield: 0.7, def: 'raw', base: 150, mult: 1 },
+      trung: { name: 'Trứng gà luộc', per: { kcal: 155, p: 12.6, c: 1.1, f: 10.6 }, sizes: [
+        { id: 'nho', label: 'Nhỏ', hint: '45–50 g', g: 41.8 }, { id: 'vua', label: 'Vừa', hint: '50–55 g', g: 46.2 },
+        { id: 'lon', label: 'Lớn', hint: '55–60 g', g: 50.6 }, { id: 'rl', label: 'Rất lớn', hint: '60–65 g', g: 55 } ], defSize: 'lon', count: 3 }
+    };
+  }
+  multHint(base, mult) {
+    return mult === 1
+      ? 'Bấm + để nhân ' + this.fmt(base, 0) + ' g này lên'
+      : this.fmt(base, 0) + ' g × ' + this.fmt(mult, 1) + ' = ' + this.fmt(base * mult, 0) + ' g';
+  }
+  fmt(n, d) { const v = Math.round(n * Math.pow(10, d)) / Math.pow(10, d); return String(v).replace('.', ','); }
+  renderVals() {
+    const food = this.foods()[this.props.food || 'khoai'] || this.foods().khoai;
+    const s = this.state || {};
+    const set = (o) => this.setState(o);
+    const isEgg = !!food.sizes;
+    let base = 100, mult = 1, grams, logged, per, note, multLabel, multHint, multText, dec, inc, mode = 'raw', chipOn = false;
+    let stateOpts = [], tabOpts = [], sizeOpts = [], eggQua = false, gramStateNote = '', switchHint = '';
+    if (isEgg) {
+      const tab = s.tab || 'qua';
+      eggQua = tab === 'qua';
+      tabOpts = [['qua', 'Quả'], ['gam', 'Gam']].map(([id, label]) => ({ label, selected: tab === id, notSelected: tab !== id, pick: () => set({ tab: id }) }));
+      const sizeId = s.size || food.defSize;
+      const size = food.sizes.find((z) => z.id === sizeId);
+      sizeOpts = food.sizes.map((z) => ({ label: z.label, hint: z.hint, selected: z.id === sizeId, notSelected: z.id !== sizeId, pick: () => set({ size: z.id }) }));
+      const count = s.count ?? food.count;
+      per = food.per;
+      if (eggQua) {
+        grams = size.g * count; logged = grams;
+        multLabel = 'Mấy quả?'; multText = this.fmt(count, 1); multHint = this.fmt(count, 1) + ' quả ' + size.label.toLowerCase();
+        dec = () => set({ count: Math.max(1, count - 1) }); inc = () => set({ count: Math.min(12, count + 1) });
+        note = 'Hộp ghi cân cả vỏ, app tự trừ vỏ khi tính.';
+      } else {
+        base = s.base ?? 100; mult = s.mult ?? 1;
+        grams = base * mult; logged = grams; chipOn = base === 100;
+        multLabel = 'Nhân khẩu phần nhanh'; multText = '×' + this.fmt(mult, 1);
+        multHint = this.multHint(base, mult);
+        dec = () => set({ mult: Math.max(0.5, mult - 0.5) }); inc = () => set({ mult: Math.min(20, mult + 0.5) });
+        note = 'Bóc vỏ rồi cân thì nhập số gam ở đây.';
+      }
+    } else {
+      mode = s.mode || this.props.mode || food.def;
+      stateOpts = [['raw', 'Cân sống'], ['cooked', 'Đã nấu chín']].map(([id, label]) => ({ label, selected: mode === id, notSelected: mode !== id, pick: () => set({ mode: id }) }));
+      base = s.base ?? food.base; mult = s.mult ?? food.mult;
+      grams = base * mult;
+      chipOn = base === 100;
+      multLabel = 'Nhân khẩu phần nhanh';
+      multText = '×' + this.fmt(mult, 1);
+      multHint = this.multHint(base, mult);
+      dec = () => set({ mult: Math.max(0.5, mult - 0.5) });
+      inc = () => set({ mult: Math.min(20, mult + 0.5) });
+      gramStateNote = '';
+      if (food.yieldOnly) {
+        per = food.raw.per;
+        logged = mode === 'cooked' ? grams / food.yield : grams;
+        note = mode === 'cooked'
+          ? 'Gà chín nhẹ hơn lúc sống, nên ' + this.fmt(grams, 0) + ' g chín bằng khoảng ' + this.fmt(logged, 0) + ' g sống. App tính theo số đó cho bạn.'
+          : 'Nếu bạn cân lúc đã nấu chín, hãy đổi qua thanh "Đã nấu chín".';
+      } else {
+        per = (mode === 'raw' ? food.raw : food.cooked).per; logged = grams;
+        note = food.yield && mode === 'cooked'
+          ? this.fmt(grams, 0) + ' g cơm là khoảng ' + this.fmt(grams / food.yield, 0) + ' g gạo trước khi nấu.'
+          : (mode === 'raw' ? 'Nếu bạn cân lúc đã nấu chín, hãy đổi qua thanh "Đã nấu chín".' : 'Cân sau khi nấu thì chọn Đã nấu chín, số liệu sẽ khớp.');
+      }
+    }
+    const k = (v) => this.fmt(v * logged / 100, 0);
+    const kd = (v) => this.fmt(v * logged / 100, 1);
+    return {
+      foodName: food.name,
+      slotLabel: 'Bữa trưa · Hôm nay 18/10',
+      isEgg, eggQua, stateOpts, tabOpts, sizeOpts, switchHint, gramStateNote,
+      showStateSwitch: !isEgg,
+      showGramField: !isEgg || !eggQua,
+      gramsText: s.typed !== undefined ? s.typed : this.fmt(base, 0),
+      onType: (e) => { const raw = e.target.value; const v = parseFloat(raw.replace(',', '.')); this.setState({ typed: raw, base: isNaN(v) ? 0 : v }); },
+      chipOn, chipOff: !chipOn,
+      pickChip: () => set({ base: 100, typed: undefined }),
+      multLabel, multHint, multText, dec, inc,
+      kcal: k(per.kcal), carb: kd(per.c), protein: kd(per.p), fat: kd(per.f),
+      summary: isEgg && eggQua ? multHint : this.fmt(grams, 0) + ' g' + (isEgg ? '' : (mode === 'raw' ? ' lúc sống' : ' đã nấu chín')),
+      note
+    };
+  }
+}
+</script>
+</body>
+</html>
