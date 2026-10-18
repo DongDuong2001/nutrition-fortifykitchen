@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React from "react";
 import { Sheet } from "@/components/ui/sheet";
 import { PillButton } from "@/components/ui/pill-button";
 import { IconCheck, IconEye, IconGrid, IconHome, IconShare, IconTarget } from "@/components/ui/icons";
@@ -9,7 +9,6 @@ import { SHEET_ICON_BUTTON, SHEET_TITLE_CLASS } from "@/components/pwa/install-s
 import type { Release, ReleaseIcon } from "@/lib/releases";
 
 const TITLE_ID = "whats-new-title";
-const EXIT_MS = 140;
 
 const RELEASE_ICONS: Record<ReleaseIcon, React.ComponentType<{ size?: number }>> = {
   home: IconHome,
@@ -45,37 +44,23 @@ export function ReleaseItems({ release, alignGroup }: { release: Release; alignG
 /**
  * "Có gì mới" (WNSheet): the items of every release the account has not seen, grouped by release, newest first, with
  * "Thử ngay (1 phút)" when their tours have a step to show (`canTour`). A bottom sheet on the phone, a centred 480 px
- * dialog from 1024 px; the list scrolls when it is long. Any close calls onClose once, after the 140 ms exit.
+ * dialog from 1024 px; the list scrolls when it is long. cc-55: it moves like every other sheet (the shared m-sheet
+ * motion), so a close calls onClose at once and the sheet slides away by itself.
  */
 export function WhatsNewSheet({ releases, canTour, open, onClose }: { releases: readonly Release[]; canTour: boolean; open: boolean; onClose: (tryTour: boolean) => void }) {
   const newest = releases[0];
-  const [leaving, setLeaving] = useState(false);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(() => {
-    if (open) setLeaving(false);
-  }, [open]);
-  useEffect(() => () => {
-    if (timer.current) clearTimeout(timer.current);
-  }, []);
-
   const close = (tryTour: boolean) => {
-    if (timer.current) return;
-    setLeaving(true);
-    timer.current = setTimeout(() => {
-      timer.current = null;
-      onClose(tryTour);
-    }, EXIT_MS);
+    if (open) onClose(tryTour);
   };
 
   return (
     <Sheet
-      motion={false}
       open={open}
       onClose={() => close(false)}
       labelledBy={TITLE_ID}
       initialFocusId={TITLE_ID}
       desktopDialog
-      className={`gap-3 lg:w-[480px]! lg:max-w-[480px]! ${leaving ? "wn-leave" : "wn-enter"}`}
+      className="gap-3 lg:w-[480px]! lg:max-w-[480px]!"
     >
       <header data-align-group="wn-sheet" className="flex items-start gap-2">
         <div className="flex min-w-0 flex-1 flex-col gap-1">

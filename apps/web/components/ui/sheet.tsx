@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { markUsed } from "@/lib/onboarding-store";
 import { closeSheetEntry, openSheetEntry } from "@/lib/sheet-history";
 import { setPresent } from "@/lib/tour-bus";
+import { useSheetDrag } from "@/components/ui/use-sheet-drag";
 
 export interface SheetProps {
   open: boolean;
@@ -19,15 +20,10 @@ export interface SheetProps {
   desktopDialog?: boolean;
   /** The id of the element that takes focus on open (a heading with tabIndex -1), instead of the first control. */
   initialFocusId?: string;
-  /** cc-51: false for a sheet that animates itself (Có gì mới): no slide classes, and it unmounts at once on close. */
-  motion?: boolean;
 }
 
-/** cc-51: how long a sheet takes to slide in or out (globals.css .m-sheet-*). */
-const SHEET_MS = 250;
-/** Let go after dragging down this share of the sheet's height, or faster than this (px per ms): it closes. */
-const DRAG_CLOSE_SHARE = 0.25;
-const DRAG_CLOSE_SPEED = 0.5;
+/** cc-55: how long a closing sheet stays drawn (globals.css --m-sheet-out, the exit; the enter takes 350 ms). */
+export const SHEET_EXIT_MS = 220;
 
 const FOCUSABLE_SELECTOR =
   'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -43,16 +39,14 @@ export function Sheet({
   className = "",
   desktopDialog = false,
   initialFocusId,
-  motion = true,
 }: SheetProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const openerRef = useRef<HTMLElement | null>(null);
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
-  // cc-51: stays mounted for the exit animation; a drag that closes it slides out from where the finger let go
+  // cc-51: stays mounted for the exit; cc-55: the slide is a transition on data-state, so a sheet opened again while
+  // it closes goes back up from where it is, and a drag that closes it slides on from where the finger let go
   const [mounted, setMounted] = useState(open);
-  const draggedOut = useRef(false);
-  const drag = useRef<{ y: number; t: number; dy: number; v: number } | null>(null);
   // Every opening gets fresh content (a form opened again starts blank, as when the sheet unmounted at once)
   const openings = useRef(0);
   const wasOpen = useRef(false);
@@ -61,18 +55,13 @@ export function Sheet({
 
   useEffect(() => {
     if (open) {
-      draggedOut.current = false;
       setMounted(true);
       return;
     }
     if (!mounted) return;
-    if (!motion) {
-      setMounted(false);
-      return;
-    }
-    const timer = setTimeout(() => setMounted(false), SHEET_MS);
+    const timer = setTimeout(() => setMounted(false), SHEET_EXIT_MS);
     return () => clearTimeout(timer);
-  }, [open, mounted, motion]);
+  }, [open, mounted]);
 
   // Back (the phone's back gesture or button) closes the sheet instead of leaving the page. The entry copies the
   // router's own state, so Next restores the same page. Closed another way, the entry is taken back, unless a
@@ -94,38 +83,10 @@ export function Sheet({
     };
   }, [open]);
 
-  const onDragStart = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!open || (e.pointerType === "mouse" && e.button !== 0)) return;
-    drag.current = { y: e.clientY, t: e.timeStamp, dy: 0, v: 0 };
-    e.currentTarget.setPointerCapture(e.pointerId);
-    dialogRef.current?.classList.remove("m-snap", "m-sheet-enter");
-  };
-  const onDragMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    const d = drag.current;
-    if (!d || !dialogRef.current) return;
-    const dy = Math.max(0, e.clientY - d.y);
-    const dt = Math.max(1, e.timeStamp - d.t);
-    d.v = (dy - d.dy) / dt;
-    d.dy = dy;
-    d.t = e.timeStamp;
-    dialogRef.current.style.transform = `translateY(${dy}px)`;
-  };
-  const onDragEnd = () => {
-    const d = drag.current;
-    const el = dialogRef.current;
-    drag.current = null;
-    if (!d || !el) return;
-    if (d.dy > el.offsetHeight * DRAG_CLOSE_SHARE || d.v > DRAG_CLOSE_SPEED) {
-      draggedOut.current = true;
-      markUsed("sheet-drag");
-      el.style.transition = `transform ${SHEET_MS}ms ease-in`;
-      el.style.transform = "translateY(100%)";
-      onCloseRef.current();
-    } else {
-      el.classList.add("m-snap");
-      el.style.transform = "";
-    }
-  };
+  const dragHandlers = useSheetDrag(dialogRef, () => {
+    markUsed("sheet-drag");
+    onCloseRef.current();
+  });
 
   useEffect(() => {
     if (!open) return;
@@ -202,9 +163,10 @@ export function Sheet({
     };
   }, [open, initialFocusId]);
 
-  if (!open && (!mounted || !motion)) return null;
+  if (!open && !mounted) return null;
   // Leaving: still drawn for the exit animation, but no longer a dialog for screen readers, focus or taps
   const showing = open;
+  const state = showing ? "open" : "closed";
 
   return (
     <div className={`fixed inset-0 z-50 flex flex-col justify-end ${desktopDialog ? "lg:justify-center lg:items-center" : ""} ${showing ? "" : "pointer-events-none"}`} inert={!showing}>
@@ -212,28 +174,27 @@ export function Sheet({
       <div
         aria-hidden="true"
         onClick={onClose}
-        className={`fixed inset-0 bg-scrim backdrop-blur-[1px] ${!motion ? "" : showing ? "m-scrim-enter" : "m-scrim-exit"}`}
+        data-state={state}
+        className="m-scrim fixed inset-0 bg-scrim"
       />
 
       {/* Bottom Sheet Dialog */}
       <div
         ref={dialogRef}
+        data-state={state}
         role={showing ? "dialog" : undefined}
         tabIndex={-1}
         aria-modal={showing ? "true" : undefined}
         aria-hidden={showing ? undefined : true}
         aria-labelledby={showing ? (title ? titleId : labelledBy) : undefined}
-        className={`relative z-10 w-full max-w-[390px] mx-auto bg-card rounded-t-[20px] px-4 pt-3 pb-6 flex flex-col gap-2 shadow-2xl outline-none ${desktopDialog ? "m-dialog lg:w-[420px] lg:max-w-[420px] lg:rounded-[20px] lg:px-6 lg:pt-6" : ""} ${!motion ? "" : showing ? "m-sheet-enter" : draggedOut.current ? "" : "m-sheet-exit"} ${className}`}
+        className={`relative z-10 w-full max-w-[390px] mx-auto bg-card rounded-t-[20px] px-4 pt-3 pb-6 flex flex-col gap-2 shadow-2xl outline-none m-sheet ${desktopDialog ? "m-dialog lg:w-[420px] lg:max-w-[420px] lg:rounded-[20px] lg:px-6 lg:pt-6" : ""} ${className}`}
       >
         {/* Grabber: drag it down to close (a 24 px strip around the 5 px bar) */}
         <div
           aria-hidden="true"
           data-sheet-handle
           data-tour="sheet-handle"
-          onPointerDown={onDragStart}
-          onPointerMove={onDragMove}
-          onPointerUp={onDragEnd}
-          onPointerCancel={onDragEnd}
+          {...dragHandlers}
           style={{ touchAction: "none" }}
           className={`-mx-4 -mt-3 flex h-6 shrink-0 cursor-grab items-center justify-center self-stretch ${desktopDialog ? "lg:hidden" : ""}`}
         >
