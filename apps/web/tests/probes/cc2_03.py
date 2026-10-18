@@ -21,13 +21,16 @@ notes = []
 # Records whether the date button was ever in the DOM with aria-busy="true" (it is unresolved before mount)
 BUSY_OBSERVER = """
 window.__dateBusySeen = false;
-new MutationObserver(() => {
+const isDate = (b) => b.matches && b.matches('button[aria-haspopup="dialog"]') && (b.getAttribute('aria-label') || '').startsWith('Chọn ngày');
+new MutationObserver((records) => {
+  // cc-55: the busy state can be set and cleared in one task, so read each record's old value, not only the DOM now
+  for (const r of records) {
+    if (r.type === 'attributes' && r.attributeName === 'aria-busy' && r.oldValue === 'true' && isDate(r.target)) window.__dateBusySeen = true;
+  }
   document.querySelectorAll('button[aria-haspopup="dialog"]').forEach((b) => {
-    if ((b.getAttribute('aria-label') || '').startsWith('Chọn ngày') && b.getAttribute('aria-busy') === 'true') {
-      window.__dateBusySeen = true;
-    }
+    if (isDate(b) && b.getAttribute('aria-busy') === 'true') window.__dateBusySeen = true;
   });
-}).observe(document, { subtree: true, childList: true, attributes: true, attributeFilter: ['aria-busy', 'aria-label'] });
+}).observe(document, { subtree: true, childList: true, attributes: true, attributeOldValue: true, attributeFilter: ['aria-busy', 'aria-label'] });
 """
 
 

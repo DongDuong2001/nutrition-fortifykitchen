@@ -248,7 +248,7 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
   if (showLoading) {
     return (
       <AppShell>
-        <h1 className="sr-only">Hôm nay</h1>
+        {!backdrop && <h1 className="sr-only">Hôm nay</h1>}
         <div className="h-[52px] rounded-b-[20px] bg-ink lg:hidden" />
         <main role="status" aria-busy="true" className="mx-auto flex w-full max-w-[560px] flex-col gap-3 px-3 pt-2 lg:mx-0 lg:max-w-[1240px] lg:px-8 lg:pt-8">
           <span className="sr-only">Đang tải…</span>
@@ -399,6 +399,7 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
           />
         ) : (
         <AppHeader
+          titleAs={backdrop ? "p" : "h1"}
           variant="daily"
           title="Hôm nay"
           wordmark

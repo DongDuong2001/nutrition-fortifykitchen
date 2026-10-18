@@ -122,10 +122,12 @@ def run(browser, size, tag):
     detail_url = pg.url
     head = squash(pg.locator("header").first.text_content())
     check("Cơm chiên thử" in head and "Món của tôi · 2 phần · 2 nguyên liệu" in head, f"{tag}: header subtitle ({head[:100]})")
-    for chip in ["1 phần · 120 g", "½ phần", "100 g", "Tùy chỉnh"]:
-        check(pg.get_by_role("button", name=chip, exact=True).count() == 1, f"{tag}: chip {chip}")
-    check(pg.get_by_role("button", name="1 phần · 120 g", exact=True).get_attribute("aria-pressed") == "true", f"{tag}: 1 phần is the default")
-    card = pg.get_by_label("Trong 1 phần")
+    # cc-53b: a dish by the phần keeps its unit: a Phần | Gam toggle and a ×N amount, 1 phần by default
+    units = pg.get_by_role("tablist", name="Đơn vị khẩu phần").locator("visible=true").first
+    check(units.get_by_role("tab", name="Phần", exact=True).get_attribute("aria-selected") == "true", f"{tag}: Phần is the default unit")
+    check(units.get_by_role("tab", name="Gam", exact=True).count() == 1, f"{tag}: a Gam tab")
+    check(pg.locator('main input[aria-label="Số lượng"]:visible').first.input_value() == "1", f"{tag}: 1 phần to start")
+    card = pg.get_by_role("region", name="Trong 1 phần", exact=True)
     ct = squash(card.inner_text())
     check("Cơm gạo lứt 100 g" in ct and "Trứng gà 50 g" in ct, f"{tag}: ingredients per serving ({ct})")
     edit = card.get_by_role("link", name="Sửa")
@@ -140,7 +142,7 @@ def run(browser, size, tag):
     check("Món của tôi · 2 phần · 2 nguyên liệu" in squash(pg.locator("header").first.text_content()), f"{tag}: the recipe survives a reload")
 
     # edit
-    pg.get_by_label("Trong 1 phần").get_by_role("link", name="Sửa").click()
+    pg.get_by_role("region", name="Trong 1 phần", exact=True).get_by_role("link", name="Sửa").click()
     pg.wait_for_url(re.compile(r".*/foods/new\?recipe=recipe-\d+.*"), timeout=8000)
     pg.wait_for_timeout(600)
     check(pg.locator("#rb-name").input_value() == "Cơm chiên thử", f"{tag}: edit opens with the saved name")
