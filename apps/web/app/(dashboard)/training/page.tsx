@@ -20,7 +20,7 @@ import { type OwnTrainingItem, type TrainingPhaseId, type TrainingPrefs, addOwnI
 import { generateUuid } from "@/lib/uuid";
 import { useCatalogFoods } from "@/hooks/use-catalog-foods";
 import { TrainingSizeChip, TrainingSizeSheet } from "@/components/training/training-size-sheet";
-import { TrainingLogSheet, canLogItem } from "@/components/training/training-log-sheet";
+import { TrainingLogSheet, tickAction } from "@/components/training/training-log-sheet";
 import { OwnItemSheet, type OwnItemTarget } from "@/components/training/own-item-sheet";
 import { formatDayLabel, formatDesktopDate, formatNumber } from "@/lib/format";
 import { goalName } from "@/lib/onboarding";
@@ -79,6 +79,8 @@ function TrainingContent() {
   const [prefs, setPrefs] = useState<TrainingPrefs | null>(null);
   const [sizeOpen, setSizeOpen] = useState(false);
   const [logItem, setLogItem] = useState<TrainingCheckItem | null>(null);
+  // An item tapped while the live catalogue is still loading: its row shows it is busy until the sheet can open
+  const [waitingId, setWaitingId] = useState<string | null>(null);
   const [ownTarget, setOwnTarget] = useState<OwnItemTarget | null>(null);
 
   // Sync state if url changes; with no duration in the url, the profile's default once it is read
@@ -174,19 +176,30 @@ function TrainingContent() {
   const handleToggle = (item: TrainingCheckItem) => {
     if (isPast) return;
     const day = { ...record, minutes: trainingMinutes, ticked };
-    if (ticked.includes(item.id)) {
+    const action = tickAction(item, ticked, foods, catalogPending);
+    setWaitingId(action === "wait" ? item.id : null);
+    if (action === "untick") {
       // Untick: the linked entries go (both of the Red Bull + mật mía mix) with one Hoàn tác, which ticks the item again
       const ids = (day.logged?.[item.id]?.entryIds ?? []).filter((id) => getEntry(id) !== null);
       if (ids.length === 1) deleteEntry(ids[0]);
       else if (ids.length > 1) deleteEntries(ids, todayIso);
       saveDay(untick(day, item.id));
-    } else if (canLogItem(item, foods)) {
+    } else if (action === "sheet") {
       setLogItem(item);
-    } else if (!catalogPending) {
+    } else if (action === "tick") {
       // No catalogue food for it (OPEN_QUESTIONS): a plain tick
       saveDay({ ...day, ticked: [...ticked, item.id] });
     }
   };
+
+  // The catalogue has arrived: the tapped item goes on, as if tapped now (its sheet, or a plain tick if it has no food)
+  useEffect(() => {
+    if (!waitingId || catalogPending) return;
+    const item = phases.flatMap((p) => p.items).find((i) => i.id === waitingId);
+    setWaitingId(null);
+    if (item) handleToggle(item);
+    // Only when the load ends: handleToggle reads this render's ticks and foods
+  }, [waitingId, catalogPending]);
 
   const handleLogged = (itemId: string, entryIds: string[], qty: string) => {
     saveDay(logTick({ ...record, minutes: trainingMinutes, ticked }, itemId, entryIds, qty));
@@ -300,6 +313,7 @@ function TrainingContent() {
               onToggle={handleToggle}
               onAddItem={openOwn}
               onRemoveItem={removeOwn}
+              busyId={waitingId}
               readOnly={isPast}
               variant="mobile"
             />
@@ -374,6 +388,7 @@ function TrainingContent() {
                 onToggle={handleToggle}
                 onAddItem={openOwn}
                 onRemoveItem={removeOwn}
+                busyId={waitingId}
                 readOnly={isPast}
                 variant="desktop"
               />

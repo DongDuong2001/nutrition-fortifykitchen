@@ -11,6 +11,8 @@ export interface PhaseChecklistProps {
   /** cc-52: "+ Thêm món" at the bottom of a phase, and the remove button of the user's own items */
   onAddItem?: (phase: TrainingPhase) => void;
   onRemoveItem?: (item: TrainingCheckItem) => void;
+  /** The item tapped while the catalogue is still loading: its row says so until the sheet opens */
+  busyId?: string | null;
   /** A past day: the ticks show as saved and cannot change */
   readOnly?: boolean;
   variant?: "mobile" | "desktop";
@@ -23,6 +25,7 @@ export function PhaseChecklist({
   onToggle,
   onAddItem,
   onRemoveItem,
+  busyId = null,
   readOnly = false,
   variant = "mobile",
   className = "",
@@ -35,8 +38,9 @@ export function PhaseChecklist({
   const renderItem = (it: TrainingCheckItem) => {
     const isChecked = ticked.includes(it.id);
     const removable = it.own && !readOnly && onRemoveItem;
+    const busy = busyId === it.id;
     return (
-      <div key={it.id} className={rowClass}>
+      <div key={it.id} className={rowClass} aria-busy={busy || undefined}>
         <label
           className={`flex flex-1 min-w-0 items-center self-stretch transition-transform ${
             readOnly ? "cursor-default" : "cursor-pointer active:scale-[0.99] motion-reduce:active:scale-100"
@@ -56,8 +60,17 @@ export function PhaseChecklist({
             <span title={it.own ? it.label : undefined} className={`${isDesktop ? "text-[15px]" : "text-sm"} font-semibold text-text leading-snug line-clamp-2 break-words`}>
               {it.label}
             </span>
-            {it.note ? <span className="text-[13px] text-secondary leading-normal">{it.note}</span> : null}
+            {busy ? (
+              <span role="status" className="text-[13px] text-secondary leading-normal">Đang tải danh mục…</span>
+            ) : it.note ? (
+              <span className="text-[13px] text-secondary leading-normal">{it.note}</span>
+            ) : null}
           </span>
+          {busy && (
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" className="shrink-0 text-blue animate-spin motion-reduce:animate-none">
+              <path d="M12 3a9 9 0 1 0 9 9" />
+            </svg>
+          )}
           <span className="font-bold text-[15px] tabular-nums text-text shrink-0">{it.dose}</span>
         </label>
         {removable && (

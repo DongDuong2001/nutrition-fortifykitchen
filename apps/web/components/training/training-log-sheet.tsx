@@ -33,6 +33,16 @@ const loggable = (c: ResolvedChoice) => c.foods.length > 0 && c.foods.every(canL
 /** An item logs to the diary when one of its choices can be logged; otherwise it is tick-only. */
 export const canLogItem = (item: TrainingCheckItem, foods: readonly FoodItem[]) => itemChoices(item, foods).some(loggable);
 
+/**
+ * What a tap on a checklist item does: untick it; open the portion sheet; wait for the live catalogue, which is still
+ * loading (the row shows it is busy and the sheet opens once it is there); or tick it (no catalogue food for it).
+ */
+export function tickAction(item: TrainingCheckItem, ticked: readonly string[], foods: readonly FoodItem[], catalogPending: boolean) {
+  if (ticked.includes(item.id)) return "untick" as const;
+  if (canLogItem(item, foods)) return "sheet" as const;
+  return catalogPending ? ("wait" as const) : ("tick" as const);
+}
+
 type OnLogged = (itemId: string, entryIds: string[], qty: string) => void;
 
 /**
