@@ -58,6 +58,11 @@ describe("coach foods (lib/training-foods.ts)", () => {
     expect(findCoachFood("redbull", demo)?.id).toBe("food-red-bull");
   });
 
+  it("the demo catalogue's plain Red Bull row (brand Red Bull) resolves too", () => {
+    expect(findCoachFood("redbull", [food("food-red-bull", "Red Bull", { brand: "Red Bull" })])?.id).toBe("food-red-bull");
+    expect(findCoachFood("redbull", [food("x", "Red Bull")])).toBeNull();
+  });
+
   it("ignores case, spaces and Unicode form in the fallback, never a look-alike", () => {
     expect(findCoachFood("cha-la", [food("x", "CHÀ LÀ".normalize("NFD"))])?.id).toBe("x");
     expect(findCoachFood("cha-la", [food("f", "Chà là sấy dẻo")])).toBeNull();
