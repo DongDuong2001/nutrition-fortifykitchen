@@ -12,7 +12,7 @@ import GROUP_YIELDS from "./data/raw-cooked-group-yields.json";
  * falls back to the group yield, then to the name: its state words and nameStem.
  */
 export type CookState = "raw" | "cooked";
-export type YieldGroup = "meat" | "fish" | "rice" | "pasta" | "noodle" | "tuber" | "legume" | "grain";
+export type YieldGroup = "meat" | "offal" | "fish" | "rice" | "pasta" | "noodle" | "tuber" | "legume" | "grain";
 
 /** Cooked grams per raw gram: the research's median for a group (raw-cooked-group-yields.json, cooked g per 100 g raw) */
 const groupMedian = (group: string) => {
@@ -22,20 +22,19 @@ const groupMedian = (group: string) => {
 };
 
 /**
- * Cooked weight per gram of raw (or dry) weight. Starting values set by the coach for cc-53b (Hao 18/10), in line with:
- * - meat and poultry 0.70: USDA Table of Cooking Yields for Meat and Poultry (Release 2, 2014), lean cuts roasted,
- *   grilled or boiled lose about 25–35 % of their weight;
- * - fish 0.80: USDA Agriculture Handbook 102, Food Yields Summarized by Different Stages of Preparation (1975), fish
- *   fillets baked or broiled;
- * - white rice 2.5, dry pasta 2.25, dry rice noodles (bún, phở) 2.5: the same handbook, cereals cooked in water.
- * Tubers, dry legumes and other grains (oats, quinoa, millet, buckwheat) take the research's group median.
+ * Cooked weight per gram of raw (or dry) weight, for a row the pairs do not list: the median of the group's pairs in
+ * the food research's raw-cooked-group-yields.json (its sources: USDA Table of Cooking Yields for Meat and Poultry 2012,
+ * Bognár 2002, USDA SR Legacy fillet measures, protein and dry-matter balance). Shellfish, eggs and glutinous rice have
+ * a group there but no group here: their rows are paired, or go by quả. other_grains (4.60) is pulled up by the oat
+ * porridge rows; it only ever stands behind the pairs, which carry each grain's own yield.
  */
 export const COOKED_PER_RAW: Readonly<Record<YieldGroup, number>> = {
-  meat: 0.7,
-  fish: 0.8,
-  rice: 2.5,
-  pasta: 2.25,
-  noodle: 2.5,
+  meat: groupMedian("meat_poultry"),
+  offal: groupMedian("offal"),
+  fish: groupMedian("fish"),
+  rice: groupMedian("rice"),
+  pasta: groupMedian("pasta"),
+  noodle: groupMedian("noodle_dry"),
   tuber: groupMedian("tuber"),
   legume: groupMedian("legume"),
   grain: groupMedian("other_grains"),
@@ -98,7 +97,8 @@ const has = (name: string, words: readonly string[]) => words.some((w) => new Re
 
 // Processed, dried or canned: no cooking yield applies
 const PROCESSED = ["trứng", "chả", "giò", "xúc xích", "lạp xưởng", "nem", "pate", "ruốc", "chà bông", "xông khói", "hộp", "đóng hộp", "khô", "hạt khô", "đậu", "sữa"];
-const MEAT = ["gà", "heo", "lợn", "bò", "vịt", "ngan", "ngỗng", "dê", "cừu", "thịt", "sườn", "ba chỉ", "nạc", "ức", "đùi", "cánh", "thăn", "gan", "tim", "cật", "chim cút"];
+const OFFAL = ["gan", "tim", "cật", "lưỡi", "mề"];
+const MEAT = ["gà", "heo", "lợn", "bò", "vịt", "ngan", "ngỗng", "dê", "cừu", "thịt", "sườn", "ba chỉ", "nạc", "ức", "đùi", "cánh", "thăn", "chim cút"];
 const PASTA = ["mì ý", "nui", "pasta", "spaghetti", "mì"];
 const NOODLES = ["bún", "phở", "hủ tiếu", "miến"];
 const TUBERS = ["khoai", "củ", "sắn", "môn"];
@@ -112,6 +112,7 @@ export function yieldGroupOf(food: Pick<FoodItem, "nameVi" | "category">): Yield
     if (/^đậu\s/.test(name) && !has(name, ["hũ", "phụ"]) && has(name, ["khô"])) return "legume";
     if (has(name, PROCESSED)) return null;
     if (/^cá\s/.test(name)) return "fish";
+    if (has(name, OFFAL)) return "offal";
     if (has(name, MEAT)) return "meat";
     return null;
   }

@@ -648,7 +648,7 @@ export function startPortion(food: ModeFood, label: string | null | undefined, g
 
 /**
  * What is logged for a portion: the food row, its grams (so per-100 g scaling on the server stays right) and the label.
- * Cooked chicken with only raw data logs the raw row at 150 / 0.7 = 214 g; a food with a pair logs the pair.
+ * Cooked chicken with only raw data logs the raw row at 150 / 0.74 = 203 g; a food with a pair logs the pair.
  */
 export function resolvePortion(food: FoodItem, p: PortionState, sw: CookSwitch | null): { food: FoodItem; grams: number; label: string } {
   if (p.kind === "egg") {
@@ -680,7 +680,7 @@ export function portionAmountText(label: string | null | undefined): string | nu
   return `${formatAmount(p.base * p.mult, "g")} g`;
 }
 
-/** The line under a Hôm nay row: how it was weighed ("Đã nấu chín · bằng 214 g lúc sống", "100 g × 3", "Cỡ lớn"). */
+/** The line under a Hôm nay row: how it was weighed ("Đã nấu chín · bằng 203 g lúc sống", "100 g × 3", "Cỡ lớn"). */
 export function portionDetail(label: string | null | undefined, grams: number | null): string | null {
   const p = parsePortionLabel(label);
   if (!p) return null;

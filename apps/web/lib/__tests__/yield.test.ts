@@ -58,9 +58,16 @@ describe("yieldGroupOf", () => {
     expect(yieldGroupOf(food("a", "Bắp/ngô ngọt", "tinh_bot"))).toBeNull();
   });
 
-  it("uses the coach's starting factors, and the research medians for tubers, legumes and grains", () => {
-    // raw-cooked-group-yields.json: tuber 100, legume 252, other_grains 460 cooked g per 100 g raw
-    expect(COOKED_PER_RAW).toEqual({ meat: 0.7, fish: 0.8, rice: 2.5, pasta: 2.25, noodle: 2.5, tuber: 1, legume: 2.52, grain: 4.6 });
+  it("puts offal in its own group", () => {
+    expect(yieldGroupOf(food("a", "Gan gà"))).toBe("offal");
+    expect(yieldGroupOf(food("a", "Tim heo"))).toBe("offal");
+    expect(yieldGroupOf(food("a", "Lưỡi bò"))).toBe("offal");
+  });
+
+  it("uses the research medians of every group", () => {
+    // raw-cooked-group-yields.json, cooked g per 100 g raw: meat_poultry 74, offal 66, fish 78, rice 272, pasta 238,
+    // noodle_dry 346, tuber 100, legume 252, other_grains 460
+    expect(COOKED_PER_RAW).toEqual({ meat: 0.74, offal: 0.66, fish: 0.78, rice: 2.72, pasta: 2.38, noodle: 3.46, tuber: 1, legume: 2.52, grain: 4.6 });
   });
 });
 
@@ -88,16 +95,16 @@ describe("cookSwitchFor", () => {
   const catalog = [raw, grilled, cooked, food("x", "Cá chim (nấu chín)")];
 
   it("finds the paired row, preferring nấu chín", () => {
-    expect(cookSwitchFor(raw, catalog, true)).toEqual({ own: "raw", pair: cooked, factor: 0.8 });
+    expect(cookSwitchFor(raw, catalog, true)).toEqual({ own: "raw", pair: cooked, factor: 0.78 });
     expect(cookSwitchFor(cooked, catalog, true)?.pair).toBe(raw);
   });
 
   it("falls back to the yield factor when the pair cannot be swapped in", () => {
-    expect(cookSwitchFor(raw, catalog, false)).toEqual({ own: "raw", pair: null, factor: 0.8 });
+    expect(cookSwitchFor(raw, catalog, false)).toEqual({ own: "raw", pair: null, factor: 0.78 });
   });
 
   it("has a factor for chicken with no cooked row", () => {
-    expect(cookSwitchFor(food("g", "Ức gà phi lê"), [], true)).toEqual({ own: "raw", pair: null, factor: 0.7 });
+    expect(cookSwitchFor(food("g", "Ức gà phi lê"), [], true)).toEqual({ own: "raw", pair: null, factor: 0.74 });
   });
 
   it("shows no switch where raw or cooked does not matter or nothing converts", () => {
