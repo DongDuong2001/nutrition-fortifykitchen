@@ -149,6 +149,16 @@ describe("lib/search ranking with accents", () => {
     expect(names(searchFoods(list, "cam sành")).slice(0, 2)).toEqual(["Cam sành", "Cam sành lớn"]);
     expect(names(searchFoods([food("Cam xoàn"), food("Cam mật")], "cam"))).toEqual(["Cam mật", "Cam xoàn"]);
   });
+
+  it('matches "trái bơ" and "trai bo" to "Quả bơ" via classifier synonym', () => {
+    const resAccent = names(searchFoods(CATALOGUE, "trái bơ"));
+    expect(resAccent).toContain("Quả bơ");
+    expect(resAccent[0]).toBe("Quả bơ");
+
+    const resFolded = names(searchFoods(CATALOGUE, "trai bo"));
+    expect(resFolded).toContain("Quả bơ");
+    expect(resFolded[0]).toBe("Quả bơ");
+  });
 });
 
 describe("lib/search duplicates", () => {

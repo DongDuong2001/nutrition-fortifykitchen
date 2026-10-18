@@ -40,6 +40,7 @@ function matchTier(food: FoodItem, query: string, foldedQuery: string): number |
   if (name.startsWith(query)) return 2;
   if (name.includes(query)) return 3;
   const foldedName = removeVietnameseTones(food.nameVi);
+  if (foldedName === foldedQuery) return 3.5;
   if (hasWholeWords(foldedName, foldedQuery)) return 4;
   if (foldedName.startsWith(foldedQuery)) return 5;
   if (foldedName.includes(foldedQuery)) return 6;
@@ -59,6 +60,28 @@ function withoutDuplicates(foods: FoodItem[]): FoodItem[] {
 }
 
 /**
+ * Normalizes query terms into alternative search variants (e.g. swapping "trái" and "quả", and stripping classifier).
+ */
+export function queryVariants(query: string): string[] {
+  const q = norm(query);
+  const variants = [q];
+  if (/\btrái\b/i.test(q)) {
+    variants.push(q.replace(/\btrái\b/gi, "quả"));
+    variants.push(q.replace(/\btrái\s+/gi, ""));
+  } else if (/\btrai\b/i.test(q)) {
+    variants.push(q.replace(/\btrai\b/gi, "qua"));
+    variants.push(q.replace(/\btrai\s+/gi, ""));
+  } else if (/\bquả\b/i.test(q)) {
+    variants.push(q.replace(/\bquả\b/gi, "trái"));
+    variants.push(q.replace(/\bquả\s+/gi, ""));
+  } else if (/\bqua\b/i.test(q)) {
+    variants.push(q.replace(/\bqua\b/gi, "trai"));
+    variants.push(q.replace(/\bqua\s+/gi, ""));
+  }
+  return Array.from(new Set(variants.map(norm).filter(Boolean)));
+}
+
+/**
  * Search foods by name or brand. The accents the user typed count first: "bơ" lists Quả bơ before Bột quế and
  * Bò xào, which only match once the accents are folded away (they stay in the list, below). Same tier: the
  * shorter name, then Vietnamese order. Duplicates collapse to one.
@@ -66,12 +89,25 @@ function withoutDuplicates(foods: FoodItem[]): FoodItem[] {
 export function searchFoods(foods: FoodItem[], query: string): FoodItem[] {
   const q = norm(query);
   if (!q) return withoutDuplicates(foods);
-  const foldedQuery = removeVietnameseTones(query);
+
+  const variants = queryVariants(q);
 
   const matches: { food: FoodItem; tier: number }[] = [];
   for (const food of withoutDuplicates(foods)) {
-    const tier = matchTier(food, q, foldedQuery);
-    if (tier !== null) matches.push({ food, tier });
+    let bestTier: number | null = null;
+    for (let i = 0; i < variants.length; i++) {
+      const v = variants[i];
+      const foldedV = removeVietnameseTones(v);
+      const tier = matchTier(food, v, foldedV);
+      if (tier !== null) {
+        const penalty = i === 0 ? 0 : i === 1 ? 0.05 : 0.2;
+        const adjustedTier = tier + penalty;
+        if (bestTier === null || adjustedTier < bestTier) {
+          bestTier = adjustedTier;
+        }
+      }
+    }
+    if (bestTier !== null) matches.push({ food, tier: bestTier });
   }
 
   return matches
@@ -85,7 +121,8 @@ export function searchFoods(foods: FoodItem[], query: string): FoodItem[] {
  * then with the accents folded away. More points first, then the shorter name.
  */
 export function findSimilarFoods(foods: FoodItem[], query: string, limit = 4): FoodItem[] {
-  const words = wordsOf(norm(query)).filter((w) => w.length > 1);
+  const allQueries = queryVariants(query);
+  const words = Array.from(new Set(allQueries.flatMap((q) => wordsOf(q)).filter((w) => w.length > 1)));
 
   if (words.length === 0) {
     return foods.slice(0, limit);
