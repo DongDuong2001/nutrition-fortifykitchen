@@ -4,14 +4,15 @@ import React, { useMemo } from "react";
 import Link from "next/link";
 import { type FoodItem } from "@/lib/mock/foods";
 import { type MealSlot, getMealSlotNameVi } from "@/lib/meal-slot";
-import { parseGramsInput, calculateMacroPreview, scaleNutrients, formatGramsServingLabel, gramsServingLabel, hidesGrams, unitAmountText, unitCountOf } from "@/lib/portion";
+import { parseGramsInput, calculateMacroPreview, macroGramsText, scaleNutrients, formatGramsServingLabel, gramsServingLabel, hidesGrams, unitAmountText, unitCountOf } from "@/lib/portion";
 import { QuantityStepper } from "@/components/ui/quantity-stepper";
 import { formatAmount } from "@/lib/format";
 import { ChipGroup } from "@/components/ui/chip-group";
 import { StatGroup } from "@/components/ui/stat-group";
 import { getNutrientDefinition } from "@/lib/nutrients";
 import { useDiary } from "@/lib/diary-store";
-import { NO_ENERGY_MESSAGE, hasEnergy } from "@/lib/diary-edits";
+import { canLog as canLogFood, energyNotice } from "@/lib/diary-edits";
+import { kcalValue } from "@/lib/kcal";
 
 export interface PortionPanelProps {
   food: FoodItem;
@@ -42,7 +43,8 @@ export function PortionPanel({
   showMicros = false,
   className = "",
 }: PortionPanelProps) {
-  const canLog = hasEnergy(food);
+  const canLog = canLogFood(food);
+  const notice = energyNotice(food);
   const isDark = tone === "dark";
   const parsedGrams = useMemo(() => parseGramsInput(gramsInput), [gramsInput]);
 
@@ -216,20 +218,21 @@ export function PortionPanel({
           columns={4}
           tone={tone}
           items={[
-            { id: "cal", value: formatAmount(macroPreview.calories, "kcal"), label: "kcal" },
-            { id: "carb", value: `${formatAmount(macroPreview.carbs, "g")} g`, label: "Tinh bột" },
-            { id: "protein", value: `${formatAmount(macroPreview.protein, "g")} g`, label: "Đạm" },
-            { id: "fat", value: `${formatAmount(macroPreview.fat, "g")} g`, label: "Chất béo" },
+            { id: "cal", value: kcalValue(macroPreview.calories), label: "kcal" },
+            { id: "carb", value: macroGramsText(macroPreview.carbs), label: "Tinh bột" },
+            { id: "protein", value: macroGramsText(macroPreview.protein), label: "Đạm" },
+            { id: "fat", value: macroGramsText(macroPreview.fat), label: "Chất béo" },
           ]}
         />
       </div>
 
       {/* Row 5: CTA button. A food with unknown energy cannot be logged: it would read 0 kcal. */}
-      {!canLog && (
+      {notice && !canLog && (
         <p role="alert" className="m-0 rounded-xl bg-warning-bg px-3 py-2 text-[13px] leading-snug text-warning-text">
-          {NO_ENERGY_MESSAGE}
+          {notice}
         </p>
       )}
+      {notice && canLog && <p role="note" className={`m-0 text-[13px] leading-snug ${isDark ? "text-muted-on-dark" : "text-secondary"}`}>{notice}</p>}
       <div
         data-align-group="portion"
         data-align-edge="left"

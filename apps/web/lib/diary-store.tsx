@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from "react";
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 import { currentAccountId } from "./auth-actions";
 import { SAMPLE_DAY, type MockDayData, type MockFoodItem } from "./mock/sample-day";
@@ -26,7 +26,7 @@ import { totalsFromEntries } from "./day-totals";
 import { microsSummaryFor } from "./lacking";
 import { nutrientSourcesIn, type NutrientSource } from "./nutrient-sources";
 import { DEFAULT_RECENT_FOODS, isRecentFood, pushRecent, type RecentFood } from "./recent-foods";
-import { MOCK_FOODS, subscribeCatalog } from "./mock/foods";
+import { MOCK_FOODS, catalogVersion, subscribeCatalog } from "./mock/foods";
 import { readRecipes, serverFoodIdOf, syncRecipeFoods, uploadPendingRecipes } from "./recipe-store";
 import { withServerFoods } from "./recipe";
 import { personaPatch } from "./demo-persona";
@@ -89,8 +89,9 @@ import {
   slotsBeforeMove,
   type SlotMove,
   dismissUndoIn,
+  canLog,
   entryNumbers,
-  hasEnergy,
+  labelZeros,
   NO_ENERGY_MESSAGE,
   findEntry,
   mealEntryIds,
@@ -236,9 +237,11 @@ const DiaryContext = createContext<DiaryContextValue | null>(null);
  */
 export function computeCompositeDayData(
   baseDay: MockDayData,
-  addedEntries: AddedDiaryEntry[],
+  loggedEntries: AddedDiaryEntry[],
   sampleEdits: SampleEdits = {}
 ): MockDayData {
+  // A supplement whose label states no energy counts as 0 kcal and 0 g of macros, so it never makes the day unknown
+  const addedEntries = loggedEntries.map((e) => labelZeros(e));
   const samples = resolveSampleItems(baseDay);
   const effects = samples.map((info) => ({ info, effect: sampleEffect(info, sampleEdits[info.item.id]) }));
   if (addedEntries.length === 0 && Object.keys(sampleEdits).length === 0) {
@@ -956,8 +959,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   // Add a food entry
   const addFoodEntry = useCallback(
     async (food: FoodItem, grams: number, mealSlot: MealSlot, servingLabel?: string, options?: { undoable?: boolean }) => {
-      // Unknown energy is not 0: nothing is logged, and the caller shows NO_ENERGY_MESSAGE
-      if (!hasEnergy(food)) return false;
+      // Unknown energy is not 0: nothing is logged, and the caller shows NO_ENERGY_MESSAGE (a label supplement can, canLog)
+      if (!canLog(food)) return false;
       const numbers = entryNumbers(food, grams);
       const qty = servingLabel || `${formatAmount(grams, "g")} g`;
 
@@ -1006,7 +1009,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
 
   const addFoodEntries = useCallback(
     (items: Array<{ food: FoodItem; grams: number; label: string }>, mealSlot: MealSlot) => {
-      if (items.length === 0 || !items.every((i) => hasEnergy(i.food))) return false;
+      if (items.length === 0 || !items.every((i) => canLog(i.food))) return false;
       const addedAt = new Date().toISOString();
       const entries: AddedDiaryEntry[] = items.map(({ food, grams, label }) => ({
         id: generateUuid(),
@@ -1367,13 +1370,15 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     [profile, todayIso]
   );
 
+  // The catalogue version: a label supplement's entry counts as 0 kcal once its food is in the catalogue (labelZeros)
+  const catalogV = useSyncExternalStore(subscribeCatalog, catalogVersion, catalogVersion);
   const compositeData = useMemo<MockDayData>(() => {
     // A real account starts from an empty day; only demo mode starts from the sample day
     const start = demo ? SAMPLE_DAY : blankDay(SAMPLE_DAY);
     const base = applyProfileTargets(start, profile, targets);
     const day = computeCompositeDayData(base, edits.added, demo ? edits.sample : {});
     return todayIso ? withRuntimeDate(day, todayIso) : day;
-  }, [edits.added, edits.sample, todayIso, profile, targets, demo]);
+  }, [edits.added, edits.sample, todayIso, profile, targets, demo, catalogV]);
 
   // A vitamin or mineral that a local add brings to 100 % of its target today vibrates once that day (lib/haptics).
   // The ones over 100 % when the app opens, or after a refetch, are recorded without vibrating.

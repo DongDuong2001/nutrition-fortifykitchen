@@ -1,6 +1,6 @@
-import { hasEnergy } from "./diary-edits";
+import { canLog } from "./diary-edits";
 import type { FoodItem } from "./mock/foods";
-import { scaleNutrients } from "./portion";
+import { hidesGrams, scaleNutrients } from "./portion";
 
 /** One food in the add tray with the portion it will be logged at. */
 export interface TrayItem {
@@ -49,7 +49,10 @@ export function setTrayPortion(items: readonly TrayItem[], foodId: string, grams
   return items.map((i) => (i.food.id === foodId ? { ...i, grams, label } : i));
 }
 
-/** Known values only for the macros; kcal is null as soon as one item has no energy figure. */
+/**
+ * Known values only for the macros; kcal is null as soon as one item has no energy figure, except a supplement logged
+ * by the unit, whose label states none: it adds 0 (labelZeros).
+ */
 export function trayTotals(items: readonly TrayItem[]): TrayTotals {
   if (items.length === 0) return { count: 0, kcal: null, protein: null, carbs: null, fat: null };
   const scaled = items.map((i) => scaleNutrients(i.food.nutrients, i.grams));
@@ -57,17 +60,17 @@ export function trayTotals(items: readonly TrayItem[]): TrayTotals {
     const known = scaled.map((n) => n[key]).filter((v): v is number => typeof v === "number");
     return known.length === 0 ? null : round1(known.reduce((a, b) => a + b, 0));
   };
-  const energyKnown = scaled.every((n) => typeof n.energy === "number");
+  const energyKnown = items.every((i, at) => typeof scaled[at].energy === "number" || hidesGrams(i.food));
   return {
     count: items.length,
-    kcal: energyKnown ? Math.round(scaled.reduce((a, n) => a + (n.energy as number), 0)) : null,
+    kcal: energyKnown ? Math.round(scaled.reduce((a, n) => a + (n.energy ?? 0), 0)) : null,
     protein: sum("protein"),
     carbs: sum("carbs"),
     fat: sum("fat"),
   };
 }
 
-/** Every food can be logged (a number for energy) and there is at least one. */
+/** Every food can be logged (canLog) and there is at least one. */
 export function canAddTray(items: readonly TrayItem[]): boolean {
-  return items.length > 0 && items.every((i) => hasEnergy(i.food));
+  return items.length > 0 && items.every((i) => canLog(i.food));
 }

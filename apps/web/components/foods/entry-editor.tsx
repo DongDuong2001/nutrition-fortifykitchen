@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDiary, type EntryView } from "../../lib/diary-store";
-import { NO_ENERGY_MESSAGE, entryNumbers, hasEnergy } from "../../lib/diary-edits";
+import { NO_ENERGY_MESSAGE, canLog, entryNumbers } from "../../lib/diary-edits";
 import { MEAL_SLOTS, type MealSlot, getMealSlotNameVi } from "../../lib/meal-slot";
 import { parseGramsInput } from "../../lib/portion";
 import { formatAmount } from "../../lib/format";
@@ -29,7 +29,7 @@ export function EntryEditor({ view }: { view: EntryView }) {
   const { updateEntry, deleteEntry } = useDiary();
   const food = view.food;
   // A food whose energy is unknown cannot take a new portion: its kcal would be written as 0 (NO_ENERGY_MESSAGE says so)
-  const energyUnknown = food !== null && !hasEnergy(food);
+  const energyUnknown = food !== null && !canLog(food);
   const canPortion = view.canChangePortion && food !== null && !energyUnknown;
 
   const [gramsInput, setGramsInput] = useState(view.grams !== null ? String(view.grams) : "");

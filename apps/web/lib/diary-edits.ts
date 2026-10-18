@@ -1,7 +1,7 @@
-import { MOCK_FOODS, type FoodItem } from "./mock/foods";
+import { MOCK_FOODS, catalogFoodById, type FoodItem } from "./mock/foods";
 import { SAMPLE_DAY, type MockDayData, type MockFoodItem } from "./mock/sample-day";
 import { MEAL_SLOTS, getMealSlotNameVi, type MealSlot } from "./meal-slot";
-import { scaleNutrients } from "./portion";
+import { hidesGrams, scaleNutrients } from "./portion";
 import { formatAmount } from "./format";
 import { isUuid } from "./uuid";
 
@@ -44,9 +44,40 @@ export interface EntryNumbers {
 /** Shown when a food with unknown energy is about to be logged: its kcal would read 0, which is not true. */
 export const NO_ENERGY_MESSAGE = "Món này chưa có số kcal (một nguyên liệu chưa có dữ liệu năng lượng), nên chưa thể ghi vào nhật ký.";
 
-/** Whether a food can be logged: its energy is a number. Unknown (null or missing) is never read as 0. */
+/** Shown instead of NO_ENERGY_MESSAGE on a supplement logged by the unit whose pack label states no energy. */
+export const LABEL_NO_ENERGY_NOTE = "Nhãn không ghi năng lượng; tính là 0 kcal.";
+
+/** Whether a food's energy is a number. Unknown (null or missing) is never read as 0. */
 export function hasEnergy(food: Pick<FoodItem, "nutrients">): boolean {
   return typeof food.nutrients.energy === "number";
+}
+
+type LoggableFood = Pick<FoodItem, "nutrients" | "category" | "source" | "servings">;
+
+/**
+ * Whether a food can be logged: its energy is a number, or it is a supplement logged by the unit (hidesGrams), whose
+ * capsule, tablet or drop label states no energy: that one counts as 0 kcal (labelZeros). Any other food with unknown
+ * energy cannot be logged, since its kcal would read 0.
+ */
+export function canLog(food: LoggableFood): boolean {
+  return hasEnergy(food) || hidesGrams(food);
+}
+
+/** What a food page or portion panel says about the energy: the warning, the label note, or nothing (energy known). */
+export function energyNotice(food: LoggableFood): string | null {
+  if (hasEnergy(food)) return null;
+  return hidesGrams(food) ? LABEL_NO_ENERGY_NOTE : NO_ENERGY_MESSAGE;
+}
+
+/**
+ * An entry of a supplement logged by the unit (the server stores the kcal and macros its label leaves out as NULL):
+ * they count as 0, so the day's kcal is never unknown because of it. Fibre and the vitamins and minerals stay as they
+ * are. Any other entry is returned as it is: its NULL kcal stays unknown.
+ */
+export function labelZeros(entry: AddedDiaryEntry, food: Parameters<typeof hidesGrams>[0] = catalogFoodById(entry.foodId)): AddedDiaryEntry {
+  if (entry.kind === "quick" || !hidesGrams(food)) return entry;
+  if ([entry.calories, entry.protein, entry.carbs, entry.fat].every((v) => typeof v === "number")) return entry;
+  return { ...entry, calories: entry.calories ?? 0, protein: entry.protein ?? 0, carbs: entry.carbs ?? 0, fat: entry.fat ?? 0 };
 }
 
 export function entryNumbers(food: FoodItem, grams: number): EntryNumbers {
@@ -319,7 +350,7 @@ export function updateEntryIn(edits: DiaryEdits, id: string, patch: EntryPatch, 
   const added = edits.added.find((e) => e.id === id);
   if (added) {
     let updated: AddedDiaryEntry =
-      grams !== null && view.food && hasEnergy(view.food)
+      grams !== null && view.food && canLog(view.food)
         ? { ...added, mealSlot, grams, displayQty: patch.servingLabel ?? `${formatAmount(grams, "g")} g`, ...entryNumbers(view.food, grams) }
         : { ...added, mealSlot };
     if (added.kind === "quick" && patch.quick) {

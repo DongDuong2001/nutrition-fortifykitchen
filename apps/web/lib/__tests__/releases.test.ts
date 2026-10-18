@@ -11,11 +11,12 @@ describe("RELEASES", () => {
     expect([...ids].sort().reverse()).toEqual(ids);
   });
 
-  it("starts with the third 18/10 release (2026-10-18c): cc-51's five items, then Món của tôi được lưu, no tour", () => {
+  it("starts with the third 18/10 release (2026-10-18c): cc-51's five items, then Món của tôi được lưu and Ghi thực phẩm bổ sung theo viên, no tour", () => {
     const r = latestRelease();
     expect(r?.id).toBe("2026-10-18c");
     expect(r?.date).toBe("18/10");
-    expect(r?.items.map((i) => i.title)).toEqual(["Gần đây và Hay ăn", "Như hôm qua", "Chạm vi chất để xem nguồn", "Rung khi chạm", "Kéo xuống để tải lại", "Món của tôi được lưu"]);
+    expect(r?.items.map((i) => i.title)).toEqual(["Gần đây và Hay ăn", "Như hôm qua", "Chạm vi chất để xem nguồn", "Rung khi chạm", "Kéo xuống để tải lại", "Món của tôi được lưu", "Ghi thực phẩm bổ sung theo viên"]);
+    expect(r?.items[6]).toEqual({ icon: "meal", title: "Ghi thực phẩm bổ sung theo viên", body: "Thêm được viên, giọt, muỗng dù nhãn không ghi kcal." });
     expect(r?.items[5]).toEqual({ icon: "meal", title: "Món của tôi được lưu", body: "Món tự tạo giờ lưu vào tài khoản; danh sách nguyên liệu chỉ có trên máy này." });
     expect(r?.items[4]).toEqual({ icon: "home", title: "Kéo xuống để tải lại", body: "Ở Hôm nay, kéo danh sách món xuống rồi thả để lấy món vừa thêm trên máy khác." });
     expect(r?.tour).toBeUndefined();

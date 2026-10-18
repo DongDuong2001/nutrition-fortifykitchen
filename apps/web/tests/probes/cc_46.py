@@ -6,7 +6,7 @@ Production demo build, 390x844 (and 1440x900 for the dialog). Tour, tips and "C�
 - Shows once on /app; Để sau and Esc hide it and mark the release seen; a reload shows nothing
 - A new account (setup finished) never sees it
 - Waits while a tip is open, opens after Đã hiểu
-- The newest release is cc-51's 18/10 (2026-10-18c, six items: cc-51's five and Món của tôi được lưu, no tour), so the sheet has no Thử ngay; the 17/10 tour is started from
+- The newest release is cc-51's 18/10 (2026-10-18c, seven items: cc-51's five, Món của tôi được lưu and Ghi thực phẩm bổ sung theo viên, no tour), so the sheet has no Thử ngay; the 17/10 tour is started from
   Cài đặt › Có gì mới › Xem hướng dẫn -> 3 steps -> Xong; a long press moves step 1 and opens the select bar (step 2); step 3 points at Cài đặt with
   select mode off; Bỏ qua and Esc end it; the entries never change
 - /settings/whats-new lists both 18/10 releases and 17/10, newest first, and replays the tour on /app
@@ -36,7 +36,7 @@ SETTINGS_KEY = "h1t_settings_v1_demo"
 RELEASE = "2026-10-18c"
 HOME_TIPS = ["home-logged", "meal-add", "home-share"]
 # Newest first: cc-51 (2026-10-18c), Thực phẩm bổ sung và Gia vị (2026-10-18b), then cc-49 (2026-10-18)
-ITEMS = ["Gần đây và Hay ăn", "Như hôm qua", "Chạm vi chất để xem nguồn", "Rung khi chạm", "Kéo xuống để tải lại", "Món của tôi được lưu"]
+ITEMS = ["Gần đây và Hay ăn", "Như hôm qua", "Chạm vi chất để xem nguồn", "Rung khi chạm", "Kéo xuống để tải lại", "Món của tôi được lưu", "Ghi thực phẩm bổ sung theo viên"]
 ITEMS_1810B = ["Thực phẩm bổ sung", "Gia vị", "Thêm cà phê"]
 ITEMS_1810 = ["Đồng bộ ổn định hơn"]
 ITEMS_1710 = ["Trang chủ mới", "Chọn nhiều món", "Mục tiêu đa lượng", "Bữa ăn dễ đọc hơn", "Thanh vi chất 4 màu", "Ảnh chia sẻ rõ hơn"]

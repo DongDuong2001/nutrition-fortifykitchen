@@ -1,5 +1,5 @@
 import { dayEntries } from "./day-history";
-import type { AddedDiaryEntry } from "./diary-edits";
+import { labelZeros, type AddedDiaryEntry } from "./diary-edits";
 import { sumKcal } from "./kcal";
 import type { MockDayData } from "./mock/sample-day";
 import { SAMPLE_DAY } from "./mock/sample-day";
@@ -33,7 +33,9 @@ const nullNutrients = (): Record<string, number | null> =>
   Object.fromEntries(COUNTED_NUTRIENT_KEYS.map((key) => [key, null]));
 
 /** Totals of a past day from its entries. Macros are whole grams, as the day screens show them. */
-export function totalsFromEntries(iso: string, entries: AddedDiaryEntry[]): DayTotals {
+export function totalsFromEntries(iso: string, raw: AddedDiaryEntry[]): DayTotals {
+  // A supplement whose label states no energy counts as 0 kcal, not unknown
+  const entries = raw.map((e) => labelZeros(e));
   if (entries.length === 0) {
     return { date: iso, logged: false, calories: null, protein: null, carbs: null, fat: null, fiber: null, nutrients: nullNutrients() };
   }

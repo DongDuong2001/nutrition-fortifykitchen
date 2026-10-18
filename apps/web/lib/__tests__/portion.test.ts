@@ -86,6 +86,14 @@ describe("lib/portion", () => {
       expect(preview.protein).toBeCloseTo(0.7, 1);
       expect(preview.fat).toBeCloseTo(0.1, 1);
     });
+
+    it("keeps an unknown kcal or macro unknown (null, shown as a dash), never 0", () => {
+      const preview = calculateMacroPreview({ energy: null, protein: null, carbs: 2, magnesium: 40 }, 1);
+      expect(preview.calories).toBeNull();
+      expect(preview.protein).toBeNull();
+      expect(preview.fat).toBeNull();
+      expect(preview.carbs).toBeCloseTo(0, 1);
+    });
   });
 });
 
@@ -128,6 +136,14 @@ describe("supplement amounts (unit portions)", () => {
     expect(hidesGrams({ ...canxi, source: "USDA" })).toBe(false);
     expect(hidesGrams({ category: "tinh_bot", source: "label" })).toBe(false);
     expect(hidesGrams(undefined)).toBe(false);
+  });
+
+  it("keeps grams for a label powder that has a gram or volume portion", () => {
+    const whey = { category: "bo_sung", source: "label", servings: [{ label: "1 muỗng", grams: 31 }, { label: "100 g", grams: 100 }] };
+    expect(hidesGrams(whey)).toBe(false);
+    expect(hidesGrams({ ...whey, servings: [{ label: "15 ml", grams: 15 }] })).toBe(false);
+    expect(hidesGrams({ ...whey, servings: [{ label: "2,5 g", grams: 2.5 }] })).toBe(false);
+    expect(hidesGrams({ ...canxi, servings: [{ label: "1 viên (500 mg)", grams: 1 }] })).toBe(true);
   });
 });
 

@@ -25,10 +25,16 @@ const GRAM_OR_VOLUME_LABEL = /^\d+(?:[.,]\d+)?\s*(?:g|kg|ml|l)$/i;
 /**
  * Supplements (Thực phẩm bổ sung) are logged by the unit on the pack: "1 viên", "1 giọt", "1 muỗng". Their grams are
  * nominal (1 g per unit), only there so the totals stay grams × per-100 g. Whose numbers come from the label never
- * show a gram figure.
+ * show a gram figure, unless one of its portions is a real weight or volume ("100 g" of a whey powder): that one keeps
+ * the gram field.
  */
 export function hidesGrams(food: UnitFood | null | undefined): boolean {
-  return !!food && food.category === "bo_sung" && (food.source ?? "").trim().toLowerCase() === "label";
+  return (
+    !!food &&
+    food.category === "bo_sung" &&
+    (food.source ?? "").trim().toLowerCase() === "label" &&
+    !(food.servings ?? []).some((s) => GRAM_OR_VOLUME_LABEL.test(s.label.trim()))
+  );
 }
 
 /**
@@ -136,26 +142,32 @@ export function scaleNutrients(
 }
 
 export interface MacroPreview {
-  calories: number;
-  carbs: number;
-  protein: number;
-  fat: number;
-  fiber: number;
+  calories: number | null;
+  carbs: number | null;
+  protein: number | null;
+  fat: number | null;
+  fiber: number | null;
+}
+
+/** A macro of the preview card: "2,1 g", or "—" when unknown (never "0 g"). */
+export function macroGramsText(grams: number | null): string {
+  return grams === null ? "—" : `${formatAmount(grams, "g")} g`;
 }
 
 /**
- * Calculates primary macros for live preview and quick display.
+ * Calculates primary macros for live preview and quick display. An unknown value stays null (shown as "—"), never 0.
  */
 export function calculateMacroPreview(
   nutrientsPer100g: Record<string, number | null>,
   grams: number
 ): MacroPreview {
   const scaled = scaleNutrients(nutrientsPer100g, grams);
+  const tenth = (v: number | null | undefined) => (typeof v === "number" ? Math.round(v * 10) / 10 : null);
   return {
-    calories: Math.round(scaled.energy ?? 0),
-    carbs: Math.round((scaled.carbs ?? 0) * 10) / 10,
-    protein: Math.round((scaled.protein ?? 0) * 10) / 10,
-    fat: Math.round((scaled.fat ?? 0) * 10) / 10,
-    fiber: Math.round((scaled.fiber ?? 0) * 10) / 10,
+    calories: typeof scaled.energy === "number" ? Math.round(scaled.energy) : null,
+    carbs: tenth(scaled.carbs),
+    protein: tenth(scaled.protein),
+    fat: tenth(scaled.fat),
+    fiber: tenth(scaled.fiber),
   };
 }

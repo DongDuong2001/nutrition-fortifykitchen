@@ -1,5 +1,5 @@
 import type { FoodItem } from "./mock/foods";
-import { entryNumbers, hasEnergy, type AddedDiaryEntry } from "./diary-edits";
+import { canLog, entryNumbers, type AddedDiaryEntry } from "./diary-edits";
 import { sumKcal } from "./kcal";
 import { getMealSlotNameVi, type MealSlot } from "./meal-slot";
 import type { KeyValueStorage } from "./favourites";
@@ -123,7 +123,7 @@ export function savedMealEntries(
   return meal.items.flatMap((item, i) => {
     const food = foods.find((f) => f.id === item.foodId);
     // A food with unknown energy is left out: its kcal would be logged as 0
-    if (!food || !hasEnergy(food)) return [];
+    if (!food || !canLog(food)) return [];
     return [
       {
         id: `${idPrefix}-${i}`,
@@ -143,7 +143,7 @@ export function savedMealEntries(
 export function savedMealSkipped(meal: SavedMeal, foods: FoodItem[]): number {
   return meal.items.filter((item) => {
     const food = foods.find((f) => f.id === item.foodId);
-    return food !== undefined && !hasEnergy(food);
+    return food !== undefined && !canLog(food);
   }).length;
 }
 

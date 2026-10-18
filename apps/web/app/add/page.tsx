@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useDiary } from "@/lib/diary-store";
-import { hasEnergy } from "@/lib/diary-edits";
+import { canLog } from "@/lib/diary-edits";
 import { usePastDayRedirect } from "@/hooks/use-past-day-redirect";
 import { useBack } from "@/hooks/use-back";
 import { MOCK_FOODS, type FoodItem, type FoodServing } from "@/lib/mock/foods";
@@ -267,7 +267,7 @@ function AddFoodInner() {
   const addWithPortion = async (food: FoodItem, grams: number, label: string) => {
     if (oneTapLock.current || isSubmitting || mealSlot === null) return;
     // Unknown energy cannot be logged in one tap: open the portion panel, which says why
-    if (!hasEnergy(food)) {
+    if (!canLog(food)) {
       pickFood(food, { label, grams });
       return;
     }

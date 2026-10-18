@@ -1,4 +1,4 @@
-import { entryNumbers, hasEnergy, type AddedDiaryEntry } from "./diary-edits";
+import { canLog, entryNumbers, type AddedDiaryEntry } from "./diary-edits";
 import { formatAmount } from "./format";
 import { sumKcal } from "./kcal";
 import type { MealSlot } from "./meal-slot";
@@ -50,7 +50,7 @@ export function dayEntries(iso: string, todayIso: string): AddedDiaryEntry[] {
   if (!items) return [];
   return items.flatMap((item, i) => {
     const food = MOCK_FOODS.find((f) => f.id === item.foodId);
-    if (!food || !hasEnergy(food)) return [];
+    if (!food || !canLog(food)) return [];
     return [
       {
         id: `hist-${iso}-${i}`,
