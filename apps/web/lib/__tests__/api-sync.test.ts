@@ -210,6 +210,27 @@ describe("apiFetch", () => {
     expect(calls).toEqual(["GET /me", "GET /auth/session", "GET /me"]);
   });
 
+  it("review 07:00: another account signed in during the refresh: not sent again, the write waits in its own outbox", async () => {
+    const calls: string[] = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string, init?: RequestInit) => {
+        const path = url.replace("https://api.test/api/v1", "");
+        calls.push(`${init?.method ?? "GET"} ${path}`);
+        if (path === "/auth/session") {
+          localStorage.setItem("h1t_auth_current_email", "other@example.com");
+          return new Response(null, { status: 204 });
+        }
+        return new Response("{}", { status: 401 });
+      })
+    );
+    const result = await add();
+    expect(calls.filter((c) => !c.endsWith("/client-errors"))).toEqual(["POST /days/2026-10-18/entries", "GET /auth/session"]);
+    expect(result.state).toBe("queued");
+    expect(JSON.parse(localStorage.getItem("h1t_offline_outbox_sync@example.com") || "[]").map((i: { id: string }) => i.id)).toEqual([ID]);
+    expect(localStorage.getItem("h1t_offline_outbox_other@example.com")).toBeNull();
+  });
+
   it("two 401s at once share one /auth/session", async () => {
     const calls = server({ "GET /me": [401, 401, 200], "/auth/session": [204] });
     await Promise.all([apiFetch("/me"), apiFetch("/me")]);

@@ -324,7 +324,7 @@ const JSON_HEADERS: Record<string, string> = { "Content-Type": "application/json
  * apiFetch executes authenticated requests against the Go backend API.
  * Sends the httpOnly session cookie via credentials: "include"; there is no Authorization header.
  * A 401 in the browser means the cookie expired: /auth/session renews it (refreshServerSession) and the request is
- * sent once more. A second 401 is returned as it is.
+ * sent once more, unless another account signed in meanwhile. A second 401 is returned as it is.
  */
 export async function apiFetch(path: string, init: RequestInit = {}): Promise<Response> {
   const mergedHeaders: Record<string, string> = {
@@ -338,9 +338,13 @@ export async function apiFetch(path: string, init: RequestInit = {}): Promise<Re
       credentials: "include",
     });
 
+  const account = currentAccountId();
   const res = await send();
   if (res.status !== 401 || typeof window === "undefined") return res;
   await refreshServerSession();
+  // Another account signed in meanwhile: its cookie must not carry this request. The 401 stands (a diary write then
+  // counts it as "retry" and goes back to the outbox of the account it belongs to).
+  if (currentAccountId() !== account) return res;
   return send();
 }
 
