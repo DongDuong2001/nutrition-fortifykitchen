@@ -19,6 +19,7 @@ import {
 import { PillButton } from "@/components/ui/pill-button";
 import { Sheet } from "@/components/ui/sheet";
 import { Toast } from "@/components/ui/toast";
+import { Presence } from "@/components/ui/presence";
 import { clearInstallEvent, readInstallDevice, useInstallEvent, type InstallDevice } from "@/lib/install-browser";
 import type { InAppBrowser } from "@/lib/pwa";
 
@@ -41,7 +42,7 @@ export const SHEET_TITLE_CLASS = "m-0 font-display font-extrabold italic upperca
 export const SHEET_ICON_BUTTON =
   "inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 text-text transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100";
 const LATER_BUTTON =
-  "inline-flex min-h-12 w-full cursor-pointer items-center justify-center rounded-full border-0 bg-transparent px-4 text-[15px] font-bold text-secondary transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100";
+  "inline-flex min-h-12 w-full cursor-pointer items-center justify-center rounded-full border-0 bg-transparent px-4 text-[15px] font-bold text-secondary transition-transform duration-150 m-tint motion-reduce:transition-none";
 const RING = "ring-[3px] ring-blue";
 
 function startView(device: InstallDevice): View {
@@ -396,11 +397,13 @@ export function InstallSheet({ open, onClose }: InstallSheetProps) {
         )}
         {view === "inapp" && <InAppView app={device?.inApp ?? "Zalo"} onClose={later} onCopy={copy} onLater={later} />}
       </Sheet>
-      {open && toast && (
-        <div className="pointer-events-none fixed inset-x-0 bottom-[calc(24px+env(safe-area-inset-bottom))] z-[60] px-3">
-          <Toast message={toast} />
-        </div>
-      )}
+      <Presence>
+        {open && toast && (
+          <div className="pointer-events-none fixed inset-x-0 bottom-[calc(24px+env(safe-area-inset-bottom))] z-[60] px-3">
+            <Toast message={toast} />
+          </div>
+        )}
+      </Presence>
     </>
   );
 }

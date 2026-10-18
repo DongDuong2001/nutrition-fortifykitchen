@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { ChipGroup } from "@/components/ui/chip-group";
 import { PillButton } from "@/components/ui/pill-button";
 import { Toast } from "@/components/ui/toast";
+import { Presence } from "@/components/ui/presence";
 import { LevelBadge } from "@/components/profile/level-badge";
 import { useBack } from "@/hooks/use-back";
 import { safeDecode, toLevel } from "@/lib/coaching-link";
@@ -132,11 +133,13 @@ export default function CoachClientPage() {
           </>
         )}
       </main>
-      {toast && (
-        <div className="pointer-events-none fixed inset-x-0 bottom-[calc(88px+env(safe-area-inset-bottom))] z-40 px-4 lg:bottom-8 lg:left-60">
-          <Toast message={toast} />
-        </div>
-      )}
+      <Presence>
+        {toast && (
+          <div className="pointer-events-none fixed inset-x-0 bottom-[calc(88px+env(safe-area-inset-bottom))] z-40 px-4 lg:bottom-8 lg:left-60">
+            <Toast message={toast} />
+          </div>
+        )}
+      </Presence>
     </AppShell>
   );
 }

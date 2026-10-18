@@ -5,6 +5,7 @@ import { Sheet } from "@/components/ui/sheet";
 import { PillButton } from "@/components/ui/pill-button";
 import { CatalogStatus } from "@/components/foods/catalog-status";
 import { Toast } from "@/components/ui/toast";
+import { Presence } from "@/components/ui/presence";
 import { ChipRow } from "@/components/foods/chip-row";
 import { FoodList } from "@/components/foods/food-list";
 import { FoodSearchField } from "@/components/foods/food-search-field";
@@ -105,7 +106,7 @@ function PickerBody({ onClose, onConfirm, disabledIds }: { onClose: () => void; 
           }
         />
       </div>
-      {notice && <Toast message={notice} />}
+      <Presence>{notice && <Toast message={notice} />}</Presence>
       {picked.length > 0 ? (
         <div
           role="region"

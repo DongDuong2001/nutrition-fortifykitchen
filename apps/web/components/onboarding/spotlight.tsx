@@ -2,12 +2,16 @@
 
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { cardPlacement, holeFor, roundHole, type Box } from "@/lib/spotlight";
+import { usePresence } from "@/components/ui/presence";
 
 const FOCUSABLE = 'button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])';
 const POLL_MS = 100;
 const GIVE_UP_MS = 1500;
 /** How often a shown target is checked for still being in the page (a re-render or a closed sheet removes it) */
 const WATCH_MS = 300;
+/** cc-55: a spotlight that follows another within this time is the next step: its dim does not fade in again. */
+const NEXT_STEP_MS = 300;
+let lastGoneAt = -Infinity;
 
 /** The first element of data-tour="<id>" that is on screen (a phone and a desktop copy can both exist). */
 function findTarget(id: string): HTMLElement | null {
@@ -83,8 +87,15 @@ export function Spotlight({
   const [view, setView] = useState({ width: 0, height: 0 });
   const [cardSize, setCardSize] = useState({ width: 0, height: 0 });
   const cardRef = useRef<HTMLDivElement>(null);
+  // cc-55: inside <Presence> a closing spotlight stays drawn for its exit: inert, and its callbacks are spent
+  const leaving = usePresence() === "closed";
   const callbacks = useRef({ onEscape, onMissing, onShown });
-  callbacks.current = { onEscape, onMissing, onShown };
+  callbacks.current = leaving ? { onEscape: () => {}, onMissing: () => {}, onShown: undefined } : { onEscape, onMissing, onShown };
+  // The dim fades in only when no spotlight was just on screen (a tour's next step keeps the page dimmed)
+  const [fadeDim] = useState(() => performance.now() - lastGoneAt > NEXT_STEP_MS);
+  useEffect(() => () => {
+    lastGoneAt = performance.now();
+  }, []);
   const shown = useRef(false);
 
   // Find the target (it can mount a moment after the route) and follow it
@@ -242,11 +253,12 @@ export function Spotlight({
   const radius = news ? "rounded-2xl" : "rounded-[18px]";
 
   return (
-    <div data-onboarding-overlay className="fixed inset-0 z-[60]" style={{ pointerEvents: "none" }}>
+    <div data-onboarding-overlay={leaving ? undefined : ""} inert={leaving} className="fixed inset-0 z-[60]" style={{ pointerEvents: "none" }}>
       {/* The dim is the shadow of the hole, so the hole's corners are round like the card's (18 px) */}
       <div
         aria-hidden="true"
-        className={`absolute border-2 border-sky ${
+        data-state={leaving ? "closed" : "open"}
+        className={`${fadeDim || leaving ? "m-fade" : ""} absolute border-2 border-sky ${
           news ? "shadow-[0_0_0_100vmax_color-mix(in_srgb,var(--color-ink)_70%,transparent)]" : "shadow-[0_0_0_100vmax_var(--color-scrim)]"
         } ${round ? "rounded-full" : radius}`}
         style={{ top: hole.top, left: hole.left, width: hole.width, height: hole.height }}
@@ -270,8 +282,18 @@ export function Spotlight({
         onKeyDown={onKeyDown}
         data-onboarding-card
         data-placement={place.side}
-        className={`group absolute ${radius} bg-card text-text shadow-2xl outline-none`}
-        style={{ left: place.left, top: place.top, width: place.width, pointerEvents: "auto" }}
+        data-state={leaving ? "closed" : "open"}
+        className={`m-pop group absolute ${radius} bg-card text-text shadow-2xl outline-none`}
+        // The card scales from its arrow, so it grows out of the control it points at
+        style={
+          {
+            left: place.left,
+            top: place.top,
+            width: place.width,
+            pointerEvents: "auto",
+            "--m-origin": `${place.arrowLeft}px ${place.side === "below" ? "0" : "100%"}`,
+          } as React.CSSProperties
+        }
       >
         <div className={`flex flex-col gap-3 overflow-y-auto ${radius} p-4`} style={{ maxHeight: place.maxHeight }}>
           {children}

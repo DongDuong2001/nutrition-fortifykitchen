@@ -1,40 +1,25 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useRef } from "react";
+import { Presence } from "@/components/ui/presence";
 import { Toast } from "@/components/ui/toast";
-import { useDiary } from "@/lib/diary-store";
-
-const TICK_MS = 100;
+import { useDiary, type ToastInfo } from "@/lib/diary-store";
 
 /**
  * The app's one toast, from the diary store. "Đã thêm …" offers Xem (jump to the meal), "Đã xóa …",
  * "Đã chép …", "Đã chuyển …" and the one-tap adds (a recent, a Bữa ăn của tôi, Chỉ ghi kcal) offer Hoàn tác, "Đã lưu …" offers
- * Xem (Khám phá), "Chưa lưu được món" offers Thử lại. The store ends it after its duration; this draws the countdown.
+ * Xem (Khám phá), "Chưa lưu được món" offers Thử lại. The store ends it after its duration. cc-55: the countdown bar is
+ * CSS (no timer re-rendering the toast), and each toast rises in and fades away (Presence).
  */
 export function DiaryToast() {
   const { toast, parkedDelete, undoParkedDelete, undoLastDelete, undoCopy, undoMove, retryUnsaved, setHighlightedMeal } = useDiary();
-  const [percent, setPercent] = useState(100);
-  // A delete's toast parked under a newer one counts down on its own clock
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    if (!parkedDelete) return;
-    const timer = setInterval(() => setNow(Date.now()), TICK_MS);
-    return () => clearInterval(timer);
-  }, [parkedDelete]);
-
-  useEffect(() => {
-    if (!toast) return;
-    const started = Date.now();
-    const timer = setInterval(() => {
-      setPercent(Math.max(0, 100 - ((Date.now() - started) / toast.durationMs) * 100));
-    }, TICK_MS);
-    return () => {
-      clearInterval(timer);
-      setPercent(100);
-    };
-  }, [toast]);
-
-  if (!toast && !parkedDelete) return null;
+  // A new toast is a new element: its countdown starts over
+  const ids = useRef({ map: new WeakMap<ToastInfo, number>(), next: 0 });
+  const idOf = (t: ToastInfo) => {
+    const { map } = ids.current;
+    if (!map.has(t)) map.set(t, ++ids.current.next);
+    return map.get(t);
+  };
 
   const mealSlot = toast?.mealSlot ?? null;
   const showMeal = () => {
@@ -47,19 +32,24 @@ export function DiaryToast() {
 
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-24 z-50 flex flex-col gap-2 px-3 lg:inset-x-auto lg:bottom-8 lg:right-8 lg:w-[400px]">
-      {parkedDelete && (
+      <Presence>
+        {parkedDelete && (
+          <div className="pointer-events-auto">
+            <Toast
+              key={idOf(parkedDelete.toast)}
+              message={parkedDelete.toast.message}
+              actionLabel="Hoàn tác"
+              onAction={undoParkedDelete}
+              countdown={{ totalMs: parkedDelete.toast.durationMs, leftMs: parkedDelete.expiresAt - Date.now() }}
+            />
+          </div>
+        )}
+      </Presence>
+      <Presence>
+        {toast && (
         <div className="pointer-events-auto">
           <Toast
-            message={parkedDelete.toast.message}
-            actionLabel="Hoàn tác"
-            onAction={undoParkedDelete}
-            progressPercent={((parkedDelete.expiresAt - now) / parkedDelete.toast.durationMs) * 100}
-          />
-        </div>
-      )}
-      {toast && (
-        <div className="pointer-events-auto">
-          <Toast
+            key={idOf(toast)}
             message={toast.message}
             actionLabel={
               toast.kind === "notice"
@@ -82,10 +72,11 @@ export function DiaryToast() {
                       ? retryUnsaved
                       : showMeal
             }
-            progressPercent={percent}
+            countdown={{ totalMs: toast.durationMs, leftMs: toast.durationMs }}
           />
         </div>
-      )}
+        )}
+      </Presence>
     </div>
   );
 }

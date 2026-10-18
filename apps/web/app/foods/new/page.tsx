@@ -9,6 +9,7 @@ import { useMealSlot } from "@/lib/use-meal-slot";
 import { formatAmount } from "@/lib/format";
 import { nutrientName } from "@/lib/nutrients";
 import { FormRow } from "@/components/ui/form-row";
+import { Expand } from "@/components/ui/expand";
 import { AppHeader } from "@/components/ui/app-header";
 import { AppShell } from "@/components/ui/app-shell";
 import { ChipGroup } from "@/components/ui/chip-group";
@@ -195,7 +196,7 @@ function CreateFoodInner() {
           type="button"
           onClick={handleSubmit}
           disabled={mode === "recipe" ? recipeMissing : isSubmitting || mealSlot === null}
-          className="w-full min-h-[52px] rounded-full bg-blue text-on-accent font-bold text-base cursor-pointer hover:bg-blue/90 active:scale-[0.98] transition-all border-0 flex items-center justify-center shadow-md disabled:opacity-50"
+          className="w-full min-h-[52px] rounded-full bg-blue text-on-accent font-bold text-base cursor-pointer hover:bg-blue/90 m-tint transition-press border-0 flex items-center justify-center shadow-md disabled:opacity-50"
         >
           {mode === "recipe" ? "Lưu món" : `Lưu và thêm vào ${mealNameVi}`}
         </button>
@@ -396,15 +397,14 @@ function CreateFoodInner() {
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className={`text-secondary transform transition-transform duration-200 ${showMicros ? "rotate-180" : ""}`}
+              className="m-chevron text-secondary"
               aria-hidden="true"
             >
               <path d="M6 9l6 6 6-6" />
             </svg>
           </button>
 
-          {showMicros && (
-            <div className="bg-card border border-card-border rounded-[18px] lg:shadow-card p-4 grid grid-cols-2 gap-3 animate-in fade-in duration-200">
+          <Expand open={showMicros} className="bg-card border border-card-border rounded-[18px] lg:shadow-card p-4 grid grid-cols-2 gap-3">
               <FormRow label={`${nutrientName("sodium")} (mg)`} htmlFor="cf-na">
                 <input
                   id="cf-na"
@@ -466,8 +466,7 @@ function CreateFoodInner() {
                   />
                 </FormRow>
               </div>
-            </div>
-          )}
+          </Expand>
         </div>
         </>
         )}

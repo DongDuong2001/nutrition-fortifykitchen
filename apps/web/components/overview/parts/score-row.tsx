@@ -2,9 +2,10 @@
 
 import React from "react";
 import { DayBars } from "@/components/overview/parts/day-bars";
+import { Expand } from "@/components/ui/expand";
 import type { ScoreRowData } from "@/lib/overview-detail";
 
-function Chevron({ open }: { open: boolean }) {
+function Chevron() {
   return (
     <svg
       width="14"
@@ -16,7 +17,7 @@ function Chevron({ open }: { open: boolean }) {
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
-      className={`shrink-0 text-secondary transition-transform motion-reduce:transition-none ${open ? "rotate-180" : ""}`}
+      className="m-chevron shrink-0 text-secondary"
     >
       <path d="M6 9l6 6 6-6" />
     </svg>
@@ -74,15 +75,13 @@ export function ScoreRow({
           )}
           <span className="flex items-center gap-2 text-[13px] font-bold">
             {row.caption}
-            <Chevron open={open} />
+            <Chevron />
           </span>
         </span>
       </button>
-      {open && (
-        <div id={panelId}>
-          <DayBars row={row} selected={selected} onSelect={onSelect} />
-        </div>
-      )}
+      <Expand open={open} id={panelId}>
+        <DayBars row={row} selected={selected} onSelect={onSelect} />
+      </Expand>
     </li>
   );
 }

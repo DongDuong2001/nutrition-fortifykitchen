@@ -2,10 +2,11 @@
 
 import React, { useState } from "react";
 import { NutrientGrid } from "@/components/overview/parts/nutrient-grid";
+import { Expand } from "@/components/ui/expand";
 import { HeroBar } from "@/components/overview/parts/hero-card";
 import type { MicroBoard } from "@/lib/overview-board";
 
-function Chevron({ open }: { open: boolean }) {
+function Chevron() {
   return (
     <svg
       width="14"
@@ -17,7 +18,7 @@ function Chevron({ open }: { open: boolean }) {
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
-      className={`shrink-0 transition-transform motion-reduce:transition-none ${open ? "rotate-180" : ""}`}
+      className="m-chevron shrink-0"
     >
       <path d="M6 9l6 6 6-6" />
     </svg>
@@ -69,12 +70,11 @@ export function MicroCard({ board }: { board: MicroBoard }) {
         </span>
         <span className="flex w-full items-center justify-between gap-3 text-[13px] text-muted-subtitle">
           <span>{open ? "Chạm vào từng ô để xem chi tiết" : hint}</span>
-          <Chevron open={open} />
+          <Chevron />
         </span>
       </button>
 
-      {open && (
-        <div className="px-4 pb-4">
+      <Expand open={open} className="px-4 pb-4">
           <NutrientGrid id="ov-micro-grid" squares={board.squares} selected={selected} onSelect={setSelected} />
           <p className="m-0 mt-3 flex flex-wrap gap-x-3 gap-y-1 text-xs font-semibold text-muted-subtitle">
             <span>Thiếu {board.counts.thieu}</span>
@@ -82,8 +82,7 @@ export function MicroCard({ board }: { board: MicroBoard }) {
             <span>Gần đủ {board.counts.ganDu}</span>
             <span>Đạt {board.counts.dat}</span>
           </p>
-        </div>
-      )}
+      </Expand>
     </section>
   );
 }

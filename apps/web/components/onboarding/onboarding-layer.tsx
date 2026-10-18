@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
+import { Presence } from "@/components/ui/presence";
 import { Spotlight } from "@/components/onboarding/spotlight";
 import { IconArrowUp } from "@/components/ui/icons";
 import { useDiary } from "@/lib/diary-store";
@@ -369,7 +370,7 @@ export function OnboardingLayer() {
   if (!mounted) return null;
 
   // The tour is drawn only on the screen of its step: Thêm bữa đầu tiên starts it one screen early
-  if (tour.status === "step" && pathname !== TOUR_STEPS[tour.index].path) return null;
+  if (tour.status === "step" && pathname !== TOUR_STEPS[tour.index].path) return <Presence>{null}</Presence>;
   if (tour.status === "step") {
     const step = TOUR_STEPS[tour.index];
     const act = (event: Parameters<typeof tourReduce>[1]) => {
@@ -384,6 +385,7 @@ export function OnboardingLayer() {
       }
     };
     return (
+      <Presence>
       <Spotlight
         key={`tour-${step.id}`}
         target={step.target}
@@ -404,6 +406,7 @@ export function OnboardingLayer() {
       >
         <TourCard index={tour.index} onNext={() => act({ type: "next" })} onSkip={() => act({ type: "skip" })} />
       </Spotlight>
+      </Presence>
     );
   }
 
@@ -420,8 +423,9 @@ export function OnboardingLayer() {
       writeWhatsNewTour({ ...wn, index });
     };
     const step = wnSteps[wn.index];
-    if (!step) return null;
+    if (!step) return <Presence>{null}</Presence>;
     return (
+      <Presence>
       <Spotlight
         key={`wn-${wn.releaseIds.join("+")}-${wn.index}`}
         target={step.target}
@@ -441,12 +445,14 @@ export function OnboardingLayer() {
           onSkip={endWn}
         />
       </Spotlight>
+      </Presence>
     );
   }
 
   const tip = tipId ? TIPS.find((t) => t.id === tipId) : null;
-  if (!tip) return null;
+  if (!tip) return <Presence>{null}</Presence>;
   return (
+    <Presence>
     <Spotlight
       key={`tip-${tip.id}`}
       target={tip.target}
@@ -469,5 +475,6 @@ export function OnboardingLayer() {
         }}
       />
     </Spotlight>
+    </Presence>
   );
 }

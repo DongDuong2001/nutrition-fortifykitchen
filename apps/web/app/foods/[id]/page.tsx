@@ -25,6 +25,7 @@ import { compareHref } from "@/lib/food-compare";
 import { ChipGroup } from "@/components/ui/chip-group";
 import { StatGroup } from "@/components/ui/stat-group";
 import { Toast } from "@/components/ui/toast";
+import { Presence } from "@/components/ui/presence";
 import { AppHeader, HEADER_ICON_BUTTON } from "@/components/ui/app-header";
 import { AppShell } from "@/components/ui/app-shell";
 import { useBack } from "@/hooks/use-back";
@@ -162,7 +163,7 @@ function FoodDetailInner() {
           data-tour="food-add-cta"
           onClick={handleAdd}
           disabled={isSubmitting || parsedGrams <= 0 || mealSlot === null || !canLog(food)}
-          className="w-full min-h-[52px] rounded-full bg-blue text-on-accent font-bold text-base cursor-pointer hover:bg-blue/90 active:scale-[0.98] transition-all border-0 flex items-center justify-center shadow-md disabled:opacity-50"
+          className="w-full min-h-[52px] rounded-full bg-blue text-on-accent font-bold text-base cursor-pointer hover:bg-blue/90 m-tint transition-press border-0 flex items-center justify-center shadow-md disabled:opacity-50"
         >
           Thêm vào {mealSlot ? mealNameVi : "—"}
         </button>
@@ -324,11 +325,13 @@ function FoodDetailInner() {
       />
 
       {/* Favourite toast, just above the sticky CTA */}
-      {favouriteToast && (
-        <div className="fixed bottom-[168px] lg:bottom-24 inset-x-0 px-4 z-40 pointer-events-none">
-          <Toast message={favouriteToast.message} />
-        </div>
-      )}
+      <Presence>
+        {favouriteToast && (
+          <div className="fixed bottom-[168px] lg:bottom-24 inset-x-0 px-4 z-40 pointer-events-none">
+            <Toast message={favouriteToast.message} />
+          </div>
+        )}
+      </Presence>
     </AppShell>
   );
 }

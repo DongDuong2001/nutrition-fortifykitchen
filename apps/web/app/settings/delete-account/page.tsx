@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { AppHeader } from "@/components/ui/app-header";
 import { useBack } from "@/hooks/use-back";
 import { Toast } from "@/components/ui/toast";
+import { Presence } from "@/components/ui/presence";
 
 const LOST_ITEMS = [
   "Nhật ký bữa ăn và ngày tập",
@@ -84,7 +85,7 @@ export default function DeleteAccountPage() {
           <button
             type="button"
             onClick={handleExportCsv}
-            className="w-full h-12 rounded-full border border-card-border bg-card text-ink text-[15px] font-semibold hover:bg-surface active:scale-[0.97] transition-transform cursor-pointer"
+            className="w-full h-12 rounded-full border border-card-border bg-card text-ink text-[15px] font-semibold hover:bg-surface m-tint transition-transform cursor-pointer"
           >
             Tải dữ liệu về (CSV)
           </button>
@@ -106,18 +107,20 @@ export default function DeleteAccountPage() {
 
       {/* Action buttons & toast */}
       <footer className="w-full max-w-[560px] mx-auto px-4 pt-2 pb-4 flex flex-col gap-0.5">
-        {toastMessage && (
-          <div className="mb-3 animate-fade-in">
-            <Toast message={toastMessage} />
-          </div>
-        )}
+        <Presence>
+          {toastMessage && (
+            <div className="mb-3">
+              <Toast message={toastMessage} />
+            </div>
+          )}
+        </Presence>
 
         <button
           type="button"
           disabled={!isConfirmed}
           aria-disabled={!isConfirmed}
           onClick={handleDelete}
-          className={`h-[52px] w-full border-0 rounded-full font-bold text-base transition-all select-none ${
+          className={`h-[52px] w-full border-0 rounded-full font-bold text-base transition-press select-none ${
             isConfirmed
               ? "bg-destructive text-on-accent cursor-pointer active:scale-[0.97]"
               : "bg-destructive text-on-accent opacity-45 cursor-not-allowed"
@@ -128,7 +131,7 @@ export default function DeleteAccountPage() {
 
         <Link
           href="/settings"
-          className="no-underline h-11 flex items-center justify-center text-ink text-[15px] font-semibold hover:opacity-80 active:scale-[0.97] transition-all"
+          className="no-underline h-11 flex items-center justify-center text-ink text-[15px] font-semibold hover:opacity-80 active:scale-[0.97] transition-press"
         >
           Hủy
         </Link>
