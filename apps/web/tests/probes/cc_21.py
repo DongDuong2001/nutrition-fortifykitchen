@@ -121,7 +121,12 @@ def run(browser, name, size):
     pg.wait_for_timeout(300)
 
     go(pg, "/training")
-    box = pg.locator('input[type="checkbox"]').locator("visible=true").first
+    # cc-52: a new account is asked Bự or Bé first (closed here); Bột củ dền has no catalogue food outside demo, so
+    # its tick is a plain tick (the others open the portion sheet)
+    if pg.get_by_role("dialog", name="Bạn thuộc nhóm nào?").count():
+        pg.keyboard.press("Escape")
+        pg.wait_for_timeout(400)
+    box = pg.locator("input[aria-label='Bột củ dền (Dalahouse)']").locator("visible=true").first
     box.check()
     pg.wait_for_timeout(300)
     ticked_a = pg.locator('input[type="checkbox"]:checked').count()
