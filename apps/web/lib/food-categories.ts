@@ -14,6 +14,7 @@ export type FoodCategory =
   | "mon_viet"
   | "an_vat"
   | "bo_sung"
+  | "gia_vi"
   | "cua_toi";
 
 export interface FoodCategoryDef {
@@ -33,6 +34,7 @@ export const FOOD_CATEGORIES: FoodCategoryDef[] = [
   { key: "mon_viet", label: "Món Việt" },
   { key: "an_vat", label: "Đồ ngọt & ăn vặt" },
   { key: "bo_sung", label: "Thực phẩm bổ sung" },
+  { key: "gia_vi", label: "Gia vị" },
   { key: "cua_toi", label: "Món của tôi" },
 ];
 
@@ -57,18 +59,24 @@ export function categoryLabel(key: FoodCategory): string {
   return FOOD_CATEGORIES.find((c) => c.key === key)?.label ?? "";
 }
 
-/** Foods without a category (for example, from the API) count as Món của tôi. */
+/** True for a key of FOOD_CATEGORIES. */
+export function isKnownCategory(key: unknown): key is FoodCategory {
+  return typeof key === "string" && FOOD_CATEGORIES.some((c) => c.key === key);
+}
+
+/** Foods without a category, or with one this app does not know (for example, from the API), count as Món của tôi: they never vanish from a list. */
 export function categoryOf(food: FoodItem): FoodCategory {
-  return food.category ?? "cua_toi";
+  return isKnownCategory(food.category) ? food.category : "cua_toi";
 }
 
 /** One definition of Món của tôi: the category, or a food the user made. */
 export function isOwnFood(food: FoodItem): boolean {
-  return categoryOf(food) === "cua_toi" || food.source === "user";
+  // A food with an unknown (non-empty) category is listed under Món của tôi but is not the user's own
+  return food.category === "cua_toi" || !food.category || food.source === "user";
 }
 
 export function isCategoryFilter(filter: FoodFilter): filter is FoodCategory {
-  return FOOD_CATEGORIES.some((c) => c.key === filter);
+  return isKnownCategory(filter);
 }
 
 /** Groups in display order. Empty categories are dropped. */

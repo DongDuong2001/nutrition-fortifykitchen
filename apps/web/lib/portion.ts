@@ -13,6 +13,51 @@ export function formatGramsServingLabel(raw: string, fallback: string): string {
   return gramsServingLabel(n);
 }
 
+/** A food with a `category` and a source, as the supplement rules below need it. */
+interface UnitFood {
+  category?: string;
+  source?: string | null;
+  servings?: Array<{ label: string; grams: number }>;
+}
+
+const GRAM_OR_VOLUME_LABEL = /^\d+(?:[.,]\d+)?\s*(?:g|kg|ml|l)$/i;
+
+/**
+ * Supplements (Thực phẩm bổ sung) are logged by the unit on the pack: "1 viên", "1 giọt", "1 muỗng". Their grams are
+ * nominal (1 g per unit), only there so the totals stay grams × per-100 g. Whose numbers come from the label never
+ * show a gram figure.
+ */
+export function hidesGrams(food: UnitFood | null | undefined): boolean {
+  return !!food && food.category === "bo_sung" && (food.source ?? "").trim().toLowerCase() === "label";
+}
+
+/**
+ * A portion label times a quantity, in the natural form: 2 × "1 viên" is "2 viên", 3 × "1 muỗng" is "3 muỗng",
+ * 1 × "2 viên (liều trên nhãn)" stays as it is. A label with no leading number reads "2 × muỗng canh".
+ */
+export function unitPortionText(label: string, qty: number): string {
+  const text = label.trim();
+  const q = Math.round(qty * 100) / 100;
+  if (!(q > 0) || q === 1) return text;
+  const lead = /^(\d+(?:[.,]\d+)?)\s+(.+)$/.exec(text);
+  if (lead) return `${formatNumber(Number(lead[1].replace(",", ".")) * q)} ${lead[2]}`;
+  return `${formatNumber(q)} × ${text}`;
+}
+
+/**
+ * The amount of a supplement entry as shown (Hôm nay rows, the share image, the portion panel): the quantity of its
+ * portion, never grams. `label` is the portion it was logged with, `grams` the nominal grams. Null when the food is
+ * not a supplement, or the entry was logged in grams: the caller keeps its usual grams text.
+ */
+export function unitAmountText(food: UnitFood | null | undefined, label: string | null | undefined, grams: number | null): string | null {
+  if (!food || food.category !== "bo_sung") return null;
+  const text = (label ?? "").trim();
+  if (!text || GRAM_OR_VOLUME_LABEL.test(text)) return null;
+  const serving = food.servings?.find((s) => s.label === text);
+  if (serving && serving.grams > 0 && grams !== null && grams > 0) return unitPortionText(serving.label, grams / serving.grams);
+  return text;
+}
+
 /** Maximum grams allowed for a single food entry (5 kg). Prevents accidental overflow or typing mistakes. */
 export const MAX_GRAMS_PER_PORTION = 5000;
 

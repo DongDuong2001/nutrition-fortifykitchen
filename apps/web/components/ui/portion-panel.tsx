@@ -4,7 +4,7 @@ import React, { useMemo } from "react";
 import Link from "next/link";
 import { type FoodItem } from "@/lib/mock/foods";
 import { type MealSlot, getMealSlotNameVi } from "@/lib/meal-slot";
-import { parseGramsInput, calculateMacroPreview, scaleNutrients, formatGramsServingLabel, gramsServingLabel } from "@/lib/portion";
+import { parseGramsInput, calculateMacroPreview, scaleNutrients, formatGramsServingLabel, gramsServingLabel, hidesGrams, unitAmountText } from "@/lib/portion";
 import { formatAmount } from "@/lib/format";
 import { ChipGroup } from "@/components/ui/chip-group";
 import { StatGroup } from "@/components/ui/stat-group";
@@ -45,8 +45,12 @@ export function PortionPanel({
   const isDark = tone === "dark";
   const parsedGrams = useMemo(() => parseGramsInput(gramsInput), [gramsInput]);
 
+  // A supplement from a pack label is logged by the unit: no gram field, no gram figure
+  const noGrams = hidesGrams(food);
+  const amountText = unitAmountText(food, selectedServingLabel, parsedGrams) ?? gramsServingLabel(parsedGrams);
+
   // Derive columns = servings.length + 1 (for leading gram input)
-  const columns = food.servings.length + 1;
+  const columns = food.servings.length + (noGrams ? 0 : 1);
 
   // Macro preview
   const macroPreview = useMemo(() => {
@@ -139,6 +143,7 @@ export function PortionPanel({
           columns={columns}
           tone={tone}
           leadingInput={
+            noGrams ? undefined : (
             <label
               data-align-group="portion"
               data-align-edge="left"
@@ -170,6 +175,7 @@ export function PortionPanel({
                 g
               </span>
             </label>
+            )
           }
           items={food.servings.map((s) => ({
             id: s.label,
@@ -245,7 +251,7 @@ export function PortionPanel({
       {showMicros && scaledMicros.length > 0 && (
         <div className="w-full bg-card rounded-xl p-3 border border-card-border flex flex-col gap-1.5 mt-1">
           <div className="text-xs font-semibold text-secondary pb-1 border-b border-card-border">
-            Vi chất trong {gramsServingLabel(parsedGrams)}:
+            Vi chất trong {amountText}:
           </div>
           {scaledMicros.map((m) => (
             <div key={m.name} className="flex justify-between items-center text-xs py-0.5">

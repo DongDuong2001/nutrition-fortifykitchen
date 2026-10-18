@@ -13,7 +13,7 @@ import { ChipGroup } from "../ui/chip-group";
 import { FormRow } from "../ui/form-row";
 import { parseDecimalInput } from "../../lib/quick-entry";
 
-import { formatGramsServingLabel } from "../../lib/portion";
+import { formatGramsServingLabel, hidesGrams } from "../../lib/portion";
 import { HOME_ROUTE } from "@/lib/nav";
 
 const quickFieldClass =
@@ -149,8 +149,9 @@ export function EntryEditor({ view }: { view: EntryView }) {
           {/* Portion: gram field and the food's serving chips */}
           {!quick && (
           <div data-align-group="entry" className="flex w-full flex-col gap-2">
-            <span className="text-sm font-bold">Khối lượng</span>
+            <span className="text-sm font-bold">{hidesGrams(food) ? "Khẩu phần" : "Khối lượng"}</span>
             <div className="flex w-full items-stretch gap-2">
+              {!hidesGrams(food) && (
               <span
                 className={`flex h-12 w-[104px] shrink-0 items-center gap-1.5 rounded-xl border-2 px-3 focus-within:ring-2 focus-within:ring-blue ${
                   canPortion ? "border-blue bg-card" : "border-card-border bg-surface"
@@ -171,6 +172,7 @@ export function EntryEditor({ view }: { view: EntryView }) {
                 />
                 <span className="text-sm font-normal text-secondary">g</span>
               </span>
+              )}
               <div role="group" aria-label="Khẩu phần" className="flex min-w-0 flex-1 gap-2">
                 {food?.servings.map((s) => {
                   const active = servingLabel === s.label;

@@ -6,6 +6,9 @@ import {
   categoriesWithFoods,
   chipCategories,
   groupFoodsByCategory,
+  categoryOf,
+  isKnownCategory,
+  isOwnFood,
 } from "../food-categories";
 
 const ids = (foods: FoodItem[]) => foods.map((f) => f.id);
@@ -30,6 +33,7 @@ describe("food categories data", () => {
       "Món Việt",
       "Đồ ngọt & ăn vặt",
       "Thực phẩm bổ sung",
+      "Gia vị",
       "Món của tôi",
     ]);
   });
@@ -43,6 +47,7 @@ describe("food categories data", () => {
     expect(byId.get("food-yen-mach")).toBe("tinh_bot");
     expect(byId.get("food-whey-protein")).toBe("bo_sung");
     expect(byId.get("food-bot-cu-den")).toBe("bo_sung");
+    expect(byId.get("ing-muoi")).toBe("gia_vi");
   });
 });
 
@@ -148,5 +153,31 @@ describe("buildFoodList", () => {
     const list = buildFoodList(foods, "", "all", ["rau"]);
     expect(list.grouped).toBe(true);
     expect(list.groups.map((g) => g.key)).toEqual(["tinh_bot", "rau", "trai_cay"]);
+  });
+});
+
+describe("a food with an unknown category", () => {
+  const odd = { id: "odd", nameVi: "Bột lạ", category: "khac" } as unknown as FoodItem;
+  const tinhBot = { id: "t", nameVi: "Cơm", category: "tinh_bot" } as FoodItem;
+
+  it("knows only the keys of the list", () => {
+    expect(isKnownCategory("gia_vi")).toBe(true);
+    expect(isKnownCategory("khac")).toBe(false);
+    expect(isKnownCategory(undefined)).toBe(false);
+  });
+
+  it("counts as Món của tôi without being the user's own food", () => {
+    expect(categoryOf(odd)).toBe("cua_toi");
+    expect(isOwnFood(odd)).toBe(false);
+  });
+
+  it("still appears in Tất cả, grouped and flat, and in a search", () => {
+    const all = buildFoodList([tinhBot, odd], "", "all");
+    expect(ids(all.groups.flatMap((g) => g.foods))).toContain("odd");
+    expect(ids(buildFoodList([tinhBot, odd], "lạ", "all").foods)).toEqual(["odd"]);
+  });
+
+  it("does not make a chip of its own", () => {
+    expect(categoriesWithFoods([odd]).map((c) => c.key)).toEqual(["cua_toi"]);
   });
 });

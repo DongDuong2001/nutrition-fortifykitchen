@@ -11,15 +11,23 @@ describe("RELEASES", () => {
     expect([...ids].sort().reverse()).toEqual(ids);
   });
 
-  it("starts with the 18/10 release: Đồng bộ ổn định hơn, no tour", () => {
+  it("starts with the second 18/10 release: Thực phẩm bổ sung, Gia vị, Thêm cà phê, no tour", () => {
     const r = latestRelease();
+    expect(r?.id).toBe("2026-10-18b");
+    expect(r?.date).toBe("18/10");
+    expect(r?.items.map((i) => i.title)).toEqual(["Thực phẩm bổ sung", "Gia vị", "Thêm cà phê"]);
+    expect(r?.tour).toBeUndefined();
+  });
+
+  it("then the first 18/10 release: Đồng bộ ổn định hơn, no tour", () => {
+    const r = RELEASES[1];
     expect(r?.id).toBe("2026-10-18");
     expect(r?.items.map((i) => i.title)).toEqual(["Đồng bộ ổn định hơn"]);
     expect(r?.tour).toBeUndefined();
   });
 
   it("then the 17/10 release: 6 items and a 3-step tour", () => {
-    const r = RELEASES[1];
+    const r = RELEASES[2];
     expect(r?.id).toBe("2026-10-17");
     expect(r?.items.map((i) => i.title)).toEqual(["Trang chủ mới", "Chọn nhiều món", "Mục tiêu đa lượng", "Bữa ăn dễ đọc hơn", "Thanh vi chất 4 màu", "Ảnh chia sẻ rõ hơn"]);
     expect(r?.tour?.map((s) => s.title)).toEqual(["Giữ để chọn nhiều món", "Đổi bữa hoặc xóa", "Mục tiêu đa lượng"]);

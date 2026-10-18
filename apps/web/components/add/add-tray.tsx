@@ -5,7 +5,7 @@ import { Sheet } from "@/components/ui/sheet";
 import { PillButton } from "@/components/ui/pill-button";
 import { NO_ENERGY_MESSAGE } from "@/lib/diary-edits";
 import { formatAmount } from "@/lib/format";
-import { parseGramsInput, formatGramsServingLabel, scaleNutrients } from "@/lib/portion";
+import { parseGramsInput, formatGramsServingLabel, hidesGrams, scaleNutrients } from "@/lib/portion";
 import type { TrayItem, TrayTotals } from "@/lib/tray";
 
 const kcalText = (kcal: number | null) => (kcal === null ? "—" : formatAmount(kcal, "kcal"));
@@ -110,10 +110,12 @@ function PortionRow({
             {s.label}
           </button>
         ))}
-        <button type="button" aria-pressed={custom} onClick={() => setCustom(true)} className={chipClass(custom)}>
-          Nhập g
-        </button>
-        {custom && (
+        {!hidesGrams(food) && (
+          <button type="button" aria-pressed={custom} onClick={() => setCustom(true)} className={chipClass(custom)}>
+            Nhập g
+          </button>
+        )}
+        {custom && !hidesGrams(food) && (
           <label className="flex h-11 w-28 items-center gap-1 rounded-xl border-2 border-blue bg-surface px-2">
             <span className="sr-only">Số gam {food.nameVi}</span>
             <input

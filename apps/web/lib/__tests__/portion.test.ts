@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { scaleNutrients, parseGramsInput, calculateMacroPreview, formatGramsServingLabel, gramsServingLabel, MAX_GRAMS_PER_PORTION } from "../portion";
+import { scaleNutrients, parseGramsInput, calculateMacroPreview, formatGramsServingLabel, gramsServingLabel, MAX_GRAMS_PER_PORTION, hidesGrams, unitPortionText, unitAmountText } from "../portion";
 import { MOCK_FOODS } from "../mock/foods";
 
 // Grams as Vietnamese text: comma for decimals, dot for thousands (2,5 g; 1.000 g)
@@ -86,5 +86,47 @@ describe("lib/portion", () => {
       expect(preview.protein).toBeCloseTo(0.7, 1);
       expect(preview.fat).toBeCloseTo(0.1, 1);
     });
+  });
+});
+
+describe("supplement amounts (unit portions)", () => {
+  const canxi = {
+    category: "bo_sung",
+    source: "label",
+    servings: [
+      { label: "1 viên", grams: 1 },
+      { label: "2 viên (liều trên nhãn)", grams: 2 },
+    ],
+  };
+
+  it("collapses a quantity of a portion into its natural form", () => {
+    expect(unitPortionText("1 viên", 1)).toBe("1 viên");
+    expect(unitPortionText("1 viên", 2)).toBe("2 viên");
+    expect(unitPortionText("1 giọt", 3)).toBe("3 giọt");
+    expect(unitPortionText("1 muỗng", 0.5)).toBe("0,5 muỗng");
+    expect(unitPortionText("2 viên (liều trên nhãn)", 2)).toBe("4 viên (liều trên nhãn)");
+    expect(unitPortionText("muỗng canh", 2)).toBe("2 × muỗng canh");
+  });
+
+  it("shows the quantity of the portion, not grams, for a supplement", () => {
+    expect(unitAmountText(canxi, "1 viên", 1)).toBe("1 viên");
+    expect(unitAmountText(canxi, "1 viên", 2)).toBe("2 viên");
+    expect(unitAmountText(canxi, "2 viên (liều trên nhãn)", 2)).toBe("2 viên (liều trên nhãn)");
+    expect(unitAmountText(canxi, "1 viên", null)).toBe("1 viên");
+  });
+
+  it("leaves other foods and gram entries to the usual grams text", () => {
+    expect(unitAmountText({ category: "trai_cay", servings: [{ label: "1 quả", grams: 60 }] }, "1 quả", 60)).toBeNull();
+    expect(unitAmountText({ category: "bo_sung", source: "USDA" }, "30 g", 30)).toBeNull();
+    expect(unitAmountText(null, "1 viên", 1)).toBeNull();
+    expect(unitAmountText(canxi, "", 1)).toBeNull();
+  });
+
+  it("never shows grams for a supplement whose source is the pack label", () => {
+    expect(hidesGrams(canxi)).toBe(true);
+    expect(hidesGrams({ ...canxi, source: "Label" })).toBe(true);
+    expect(hidesGrams({ ...canxi, source: "USDA" })).toBe(false);
+    expect(hidesGrams({ category: "tinh_bot", source: "label" })).toBe(false);
+    expect(hidesGrams(undefined)).toBe(false);
   });
 });

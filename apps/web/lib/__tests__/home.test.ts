@@ -21,7 +21,7 @@ import {
 import { COUNTED_NUTRIENT_KEYS } from "../day-totals";
 import type { AddedDiaryEntry } from "../diary-edits";
 import { SAMPLE_DAY } from "../mock/sample-day";
-import { MOCK_FOODS } from "../mock/foods";
+import { MOCK_FOODS, addCatalogFood, type FoodItem } from "../mock/foods";
 import { entryNumbers } from "../diary-edits";
 import { blankDay } from "../day-history";
 import { computeCompositeDayData } from "../diary-store";
@@ -357,5 +357,35 @@ describe("unknownKcalNote", () => {
     expect(shown.kcal).toBeNull();
     expect(pctLabel(shown.kcal, 1950)).toBe("—");
     expect(unknownKcalNote(entries)).toBe("1 món chưa rõ kcal");
+  });
+});
+
+describe("portionLabel: a supplement shows its unit quantity, never grams", () => {
+  const food = {
+    id: "food-test-canxi",
+    nameVi: "Canxi thử",
+    category: "bo_sung",
+    source: "label",
+    servings: [{ label: "1 viên", grams: 1 }, { label: "2 viên (liều trên nhãn)", grams: 2 }],
+    nutrients: { energy: 0 },
+  } as unknown as FoodItem;
+  addCatalogFood(food);
+
+  it("2 × 1 viên reads 2 viên", () => {
+    expect(portionLabel({ foodId: food.id, qty: "1 viên", grams: 2 })).toBe("2 viên");
+    expect(portionLabel({ foodId: food.id, qty: "1 viên", grams: 1 })).toBe("1 viên");
+  });
+
+  it("keeps the label dose as written", () => {
+    expect(portionLabel({ foodId: food.id, qty: "2 viên (liều trên nhãn)", grams: 2 })).toBe("2 viên (liều trên nhãn)");
+  });
+
+  it("is the hero label too", () => {
+    const entry = { id: "e1", foodId: food.id, name: food.nameVi, qty: "1 viên", grams: 2 } as unknown as HomeEntry;
+    expect(heroLabel({ kind: "food", id: "e1" }, [entry], [])).toBe("Canxi thử · 2 viên");
+  });
+
+  it("other foods still show grams", () => {
+    expect(portionLabel({ foodId: "food-unknown", qty: "1 quả", grams: 60 })).toBe("60 g");
   });
 });

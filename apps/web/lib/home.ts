@@ -1,6 +1,8 @@
 import { COUNTED_NUTRIENT_KEYS } from "./day-totals";
 import { SAMPLE_SLOT, entryNumbers, type AddedDiaryEntry, type EntryView } from "./diary-edits";
 import { formatAmount } from "./format";
+import { MOCK_FOODS } from "./mock/foods";
+import { unitAmountText } from "./portion";
 import { sumKcal } from "./kcal";
 import { MEAL_SLOTS, type MealSlot } from "./meal-slot";
 import type { MockDayData } from "./mock/sample-day";
@@ -125,10 +127,14 @@ export function modeEntries(mode: HomeMode, entries: HomeEntry[]): HomeEntry[] {
 const VOLUME_QTY = /^\d+(?:[.,]\d+)?\s*(?:ml|l)$/i;
 
 /**
- * The portion a home row shows: a food logged in ml or l keeps "200 ml" as logged; everything else shows its grams
- * ("60 g" for "1 quả"), or the typed portion when there are no grams.
+ * The portion a home row shows: a food logged in ml or l keeps "200 ml" as logged; a supplement shows its unit
+ * quantity ("2 viên", see lib/portion); everything else shows its grams ("60 g" for "1 quả"), or the typed portion
+ * when there are no grams.
  */
-export function portionLabel(entry: Pick<HomeEntry, "qty" | "grams">): string {
+export function portionLabel(entry: Pick<HomeEntry, "qty" | "grams" | "foodId">): string {
+  // A supplement logged by the unit shows its quantity ("2 viên"), never its nominal grams
+  const unit = entry.foodId ? unitAmountText(MOCK_FOODS.find((f) => f.id === entry.foodId), entry.qty, entry.grams) : null;
+  if (unit) return unit;
   if (VOLUME_QTY.test(entry.qty.trim())) return entry.qty.trim();
   return entry.grams !== null ? `${formatAmount(entry.grams, "g")} g` : entry.qty;
 }

@@ -33,9 +33,10 @@ SHOTS.mkdir(exist_ok=True)
 PHONE = {"width": 390, "height": 844}
 DESKTOP = {"width": 1440, "height": 900}
 SETTINGS_KEY = "h1t_settings_v1_demo"
-RELEASE = "2026-10-18"
+RELEASE = "2026-10-18b"
 HOME_TIPS = ["home-logged", "meal-add", "home-share"]
-ITEMS = ["Đồng bộ ổn định hơn"]
+ITEMS = ["Thực phẩm bổ sung", "Gia vị", "Thêm cà phê"]
+ITEMS_1810 = ["Đồng bộ ổn định hơn"]
 ITEMS_1710 = ["Trang chủ mới", "Chọn nhiều món", "Mục tiêu đa lượng", "Bữa ăn dễ đọc hơn", "Thanh vi chất 4 màu", "Ảnh chia sẻ rõ hơn"]
 problems = []
 
@@ -264,7 +265,7 @@ def history(browser):
     pg.wait_for_url(re.compile(r".*/settings/whats-new$"), timeout=5000)
     pg.wait_for_timeout(400)
     text = pg.locator("main").inner_text()
-    check("Cập nhật 18/10" in text and all(t in text for t in ITEMS), "the history lists 18/10 and its item")
+    check("Cập nhật 18/10" in text and all(t in text for t in ITEMS + ITEMS_1810), "the history lists both 18/10 releases and their items")
     check("Cập nhật 17/10" in text and "17/10/2026" not in text and all(t in text for t in ITEMS_1710), "the history lists the release (Cập nhật 17/10) and its items")
     check(text.index("Cập nhật 18/10") < text.index("Cập nhật 17/10"), "newest first")
     check(pg.get_by_role("button", name="Xem hướng dẫn").count() == 1, "Xem hướng dẫn")

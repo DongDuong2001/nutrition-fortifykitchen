@@ -31,6 +31,16 @@ export interface Release {
 }
 
 export const RELEASES: readonly Release[] = [
+  // Thêm Thực phẩm bổ sung và Gia vị
+  {
+    id: "2026-10-18b",
+    date: "18/10",
+    items: [
+      { icon: "meal", title: "Thực phẩm bổ sung", body: "Thêm CanPrev, Webber Naturals, Codeage. Ghi theo viên, giọt hoặc muỗng như trên nhãn." },
+      { icon: "bars", title: "Gia vị", body: "Gia vị, muối và giấm có mục Gia vị riêng." },
+      { icon: "select", title: "Thêm cà phê", body: "Thêm cà phê phin, cà phê quán và cà phê gói." },
+    ],
+  },
   {
     id: "2026-10-18",
     date: "18/10",

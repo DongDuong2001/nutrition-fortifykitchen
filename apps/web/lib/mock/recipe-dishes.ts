@@ -20,7 +20,7 @@ export const RECIPE_INGREDIENT_FOODS: FoodItem[] = [
   {
     id: "ing-muoi",
     nameVi: "Muối ăn",
-    category: "bo_sung",
+    category: "gia_vi",
     source: "USDA",
     match: "close",
     servings: [{ label: "1 g", grams: 1 }, { label: "100 g", grams: 100 }],

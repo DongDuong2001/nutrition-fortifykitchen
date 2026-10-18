@@ -17,7 +17,7 @@ import { coachingAvailable } from "@/lib/coaching-link";
 import { isLiveMode } from "@/lib/api-mode";
 
 /**
- * Khám phá (IA v2): find a food and understand it. Search, the 10 category chips, then Gần đây, Yêu thích,
+ * Khám phá (IA v2): find a food and understand it. Search, the category chips, then Gần đây, Yêu thích,
  * Món của tôi and the "Giàu …" lists. A category or a rich-in list is a pushed screen; a food opens its detail.
  */
 export default function ExplorePage() {

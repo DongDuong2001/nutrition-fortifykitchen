@@ -8,7 +8,7 @@ import { NO_ENERGY_MESSAGE, hasEnergy } from "@/lib/diary-edits";
 import { MOCK_FOODS, type FoodItem } from "@/lib/mock/foods";
 import { getMealSlotNameVi } from "@/lib/meal-slot";
 import { useMealSlot } from "@/lib/use-meal-slot";
-import { parseGramsInput, calculateMacroPreview, gramsServingLabel } from "@/lib/portion";
+import { parseGramsInput, calculateMacroPreview, gramsServingLabel, hidesGrams, unitAmountText } from "@/lib/portion";
 import { goodSourcesOf, microRowsFor } from "@/lib/food-detail";
 import { categoryLabel, categoryOf } from "@/lib/food-categories";
 import { formatAmount } from "@/lib/format";
@@ -199,7 +199,7 @@ function FoodDetailInner() {
               <span className="inline-flex h-6 items-center rounded-full border border-card-border bg-surface px-2 text-xs font-bold text-secondary">Tự nhập</span>
             )}
             <span>·</span>
-            <span>{food.servings[0]?.grams ?? 100} g mỗi khẩu phần</span>
+            <span>{hidesGrams(food) ? `${food.servings[0]?.label ?? "1 viên"} mỗi khẩu phần` : `${food.servings[0]?.grams ?? 100} g mỗi khẩu phần`}</span>
           </span>
           )
         }
@@ -240,24 +240,28 @@ function FoodDetailInner() {
         <div data-align-group="food-detail" className="flex w-full flex-col gap-2">
           <span className="text-[13px] font-semibold text-secondary">Khẩu phần</span>
           <ChipGroup
-            columns={Math.min(food.servings.length + 1, 4)}
+            columns={Math.min(food.servings.length + (hidesGrams(food) ? 0 : 1), 4)}
             tone="light"
             items={[
               ...food.servings.map((s) => ({
                 id: s.label,
-                label: s.display ?? (s.label === `${s.grams} g` ? s.label : `${s.label} · ${s.grams} g`),
+                label: s.display ?? (hidesGrams(food) || s.label === `${s.grams} g` ? s.label : `${s.label} · ${s.grams} g`),
                 active: selectedServingLabel === s.label,
                 onClick: () => {
                   setGramsInput(s.grams.toString());
                   setSelectedServingLabel(s.label);
                 },
               })),
-              {
-                id: "custom",
-                label: "Tùy chỉnh",
-                active: selectedServingLabel === CUSTOM_PORTION,
-                onClick: () => setSelectedServingLabel(CUSTOM_PORTION),
-              },
+              ...(hidesGrams(food)
+                ? []
+                : [
+                    {
+                      id: "custom",
+                      label: "Tùy chỉnh",
+                      active: selectedServingLabel === CUSTOM_PORTION,
+                      onClick: () => setSelectedServingLabel(CUSTOM_PORTION),
+                    },
+                  ]),
             ]}
           />
           {selectedServingLabel === CUSTOM_PORTION && (
@@ -329,7 +333,7 @@ function FoodDetailInner() {
         )}
 
         <GoodSources rows={goodSources} />
-        {micros && <FoodMicros rows={micros.rows} unknown={micros.unknown} portionLabel={`${formatAmount(parsedGrams, "g")} g`} />}
+        {micros && <FoodMicros rows={micros.rows} unknown={micros.unknown} portionLabel={unitAmountText(food, selectedServingLabel, parsedGrams) ?? `${formatAmount(parsedGrams, "g")} g`} />}
       </main>
 
       <SourceSheet food={food} open={sourceOpen} onClose={() => setSourceOpen(false)} />
