@@ -3,8 +3,9 @@
 import dynamic from "next/dynamic";
 import { Suspense, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
+import { createPortal } from "react-dom";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AppShell } from "@/components/ui/app-shell";
+import { AppShell, useShellBottomBar } from "@/components/ui/app-shell";
 import { AppHeader, HEADER_ICON_BUTTON } from "@/components/ui/app-header";
 import { IconShare } from "@/components/ui/icons";
 import { CalendarSheet } from "@/components/calendar-sheet";
@@ -69,6 +70,11 @@ import { navigateFromSheet } from "@/lib/sheet-history";
 // cc-51: loaded after the first paint (the share image with html-to-image, Có gì mới); neither shows until it opens
 const ShareSheet = dynamic(() => import("./share-sheet").then((m) => m.ShareSheet), { ssr: false });
 const WhatsNewHost = dynamic(() => import("@/components/whats-new/whats-new-host").then((m) => m.WhatsNewHost), { ssr: false });
+
+/** Hôm nay's frame (sidebar, nav) is app/(tabs)/layout.tsx. The /add backdrop is drawn outside it, so it brings its own. */
+function BackdropFrame({ backdrop, children }: { backdrop: boolean; children: React.ReactNode }) {
+  return backdrop ? <AppShell alignContainer="home-page">{children}</AppShell> : <>{children}</>;
+}
 
 function subscribeOnline(callback: () => void) {
   window.addEventListener("online", callback);
@@ -242,12 +248,15 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
     copyEntries(copies, `Đã chép ${menuMeal.fullName} từ hôm qua · ${copies.length} món`);
   }
 
+  // Select mode's action bar takes the bottom nav's place (the shell's bar slot); the backdrop has no select mode
+  const barHost = useShellBottomBar(selecting && !backdrop);
+
   const showLoading = forceLoading || !hydrated;
   const showOffline = forceOffline || !isOnline;
 
   if (showLoading) {
     return (
-      <AppShell>
+      <BackdropFrame backdrop={backdrop}>
         {!backdrop && <h1 className="sr-only">Hôm nay</h1>}
         <div className="h-[52px] rounded-b-[20px] bg-ink lg:hidden" />
         <main role="status" aria-busy="true" className="mx-auto flex w-full max-w-[560px] flex-col gap-3 px-3 pt-2 lg:mx-0 lg:max-w-[1240px] lg:px-8 lg:pt-8">
@@ -266,7 +275,7 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
             </div>
           </div>
         </main>
-      </AppShell>
+      </BackdropFrame>
     );
   }
 
@@ -361,10 +370,9 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
   }
 
   return (
-    <AppShell
-      alignContainer="home-page"
-      bottomBar={
-        selecting ? (
+    <BackdropFrame backdrop={backdrop}>
+      {barHost &&
+        createPortal(
           <SelectActionBar
             count={chosenCount}
             kcal={chosenKcal(entries, liveSelected)}
@@ -378,10 +386,9 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
               exitSelect();
             }}
             onCopyToToday={() => setTargetSheet("past")}
-          />
-        ) : undefined
-      }
-    >
+          />,
+          barHost
+        )}
       <div
         className={`flex flex-col ${
           selecting
@@ -632,6 +639,6 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
       )}
       </>
       )}
-    </AppShell>
+    </BackdropFrame>
   );
 }

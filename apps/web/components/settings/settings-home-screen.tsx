@@ -1,7 +1,6 @@
 "use client";
 
 import { AppHeader } from "@/components/ui/app-header";
-import { AppShell } from "@/components/ui/app-shell";
 import { Card } from "@/components/ui/card";
 import { Row } from "@/components/ui/row";
 import { SectionTitle } from "@/components/ui/section-title";
@@ -75,7 +74,7 @@ export function SettingsHomeScreen() {
   const { coach, level, role, available } = useCoaching();
 
   return (
-    <AppShell alignContainer="settings-page">
+    <>
       <AppHeader variant="tab" title="Cài đặt" layout="wide" alignGroup="settings-header" />
 
       <main className="mx-auto grid w-full max-w-[560px] grid-cols-1 items-start gap-4 px-4 pb-6 pt-4 lg:mx-0 lg:max-w-[1240px] lg:grid-cols-2 lg:px-8 lg:pb-12 lg:pt-5">
@@ -141,6 +140,6 @@ export function SettingsHomeScreen() {
           </div>
         )}
       </main>
-    </AppShell>
+    </>
   );
 }

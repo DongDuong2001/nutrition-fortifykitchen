@@ -15,7 +15,6 @@ describe("navKind (cc-55 route direction)", () => {
   it("a screen's own back button that replaces it with its parent slides back too", () => {
     expect(navKind("/settings/profile/weight", "/settings/profile", PUSH)).toBe("back");
     expect(navKind("/settings/profile", "/settings", PUSH)).toBe("back");
-    expect(navKind("/trends/micros", "/trends", PUSH)).toBe("back");
   });
 
   it("tabs never slide, by the nav or by Back", () => {
@@ -23,6 +22,16 @@ describe("navKind (cc-55 route direction)", () => {
     expect(navKind("/trends", "/app", BACK)).toBe("tab");
     // the bottom nav from a pushed screen goes to the tab, not back
     expect(navKind("/foods/food-cha-la", "/explore", PUSH)).toBe("tab");
+  });
+
+  it("Tổng quan's sub-tabs are siblings of one frame: no slide, by a tap or by Back (cc-57)", () => {
+    expect(navKind("/trends", "/trends/energy", PUSH)).toBe("tab");
+    expect(navKind("/trends/energy", "/trends/micros", PUSH)).toBe("tab");
+    expect(navKind("/trends/micros", "/trends", PUSH)).toBe("tab");
+    expect(navKind("/trends/body", "/trends/energy", BACK)).toBe("tab");
+    expect(navKind("/trends/micros?p=30", "/trends/body?p=30", PUSH)).toBe("tab");
+    // leaving Tổng quan for a pushed screen still pushes
+    expect(navKind("/trends/micros", "/micros", PUSH)).toBe("push");
   });
 
   it("/add is a sheet: it opens itself, Back slides its panel down, its own ✕ leaves nothing to animate", () => {

@@ -6,7 +6,6 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { Period } from "@/lib/period";
 import { markUsed } from "@/lib/onboarding-store";
 import { AppHeader } from "@/components/ui/app-header";
-import { AppShell } from "@/components/ui/app-shell";
 import { useDiary } from "@/lib/diary-store";
 import type { MockDayData } from "@/lib/mock/sample-day";
 import { buildOverview, type Overview } from "@/lib/overview";
@@ -159,28 +158,32 @@ function ContentSkeleton() {
 }
 
 /**
- * The frame of the four Tổng quan sub-tabs: the phone's ink band with the wordmark (the h1 "Tổng quan" is
+ * The frame of the four Tổng quan sub-tabs (app/(tabs)/trends/layout.tsx, so it stays mounted while the content swaps): the phone's ink band with the wordmark (the h1 "Tổng quan" is
  * sr-only there), the sub-tab bar (a tablist of links; on desktop it sits in the title row), and the period
  * control shared by all four. The period is in the URL (?p=7|30 and ?o=offset), so the sub-tab links carry it.
  */
-export function OverviewFrame({ active, children }: { active: OverviewTab; children: React.ReactNode }) {
+export function OverviewFrame({ children }: { children: React.ReactNode }) {
   return (
     <Suspense
       fallback={
-        <AppShell>
-          <div className="w-full px-4 pt-6">
-            <ContentSkeleton />
-          </div>
-        </AppShell>
+        <div className="w-full px-4 pt-6">
+          <ContentSkeleton />
+        </div>
       }
     >
-      <FrameInner active={active}>{children}</FrameInner>
+      <FrameInner>{children}</FrameInner>
     </Suspense>
   );
 }
 
-function FrameInner({ active, children }: { active: OverviewTab; children: React.ReactNode }) {
+/** The sub-tab of a /trends path. */
+export function overviewTabOf(pathname: string): OverviewTab {
+  return TABS.find((t) => t.id !== "summary" && (pathname === t.href || pathname.startsWith(t.href + "/")))?.id ?? "summary";
+}
+
+function FrameInner({ children }: { children: React.ReactNode }) {
   const searchParams = useSearchParams();
+  const active = overviewTabOf(usePathname() ?? "");
   const { todayIso, data, targets } = useDiary();
 
   const { length, offset } = parsePeriodParams(searchParams?.get("p"), searchParams?.get("o"));
@@ -198,7 +201,7 @@ function FrameInner({ active, children }: { active: OverviewTab; children: React
   const period = overview?.period;
 
   return (
-    <AppShell alignContainer="overview-page">
+    <>
       <AppHeader
         variant="tab"
         layout="wide"
@@ -241,6 +244,6 @@ function FrameInner({ active, children }: { active: OverviewTab; children: React
 
         {ctx ? <OverviewContext.Provider value={ctx}>{children}</OverviewContext.Provider> : <ContentSkeleton />}
       </main>
-    </AppShell>
+    </>
   );
 }

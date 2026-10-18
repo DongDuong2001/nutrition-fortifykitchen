@@ -3,7 +3,6 @@
 import React, { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AppHeader } from "@/components/ui/app-header";
-import { AppShell } from "@/components/ui/app-shell";
 import { CreateFoodButton } from "@/components/foods/create-food-button";
 import { ChipRow } from "@/components/foods/chip-row";
 import { FoodListCard } from "@/components/foods/food-list-card";
@@ -45,7 +44,7 @@ export default function ExplorePage() {
   ];
 
   return (
-    <AppShell alignContainer="add-list">
+    <>
       <AppHeader
         variant="tab"
         title="Khám phá"
@@ -84,6 +83,6 @@ export default function ExplorePage() {
           )}
         </div>
       </main>
-    </AppShell>
+    </>
   );
 }
