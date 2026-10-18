@@ -240,10 +240,33 @@ def tray(pg):
     check(n_before - n_after == 4, f"tray: one Hoàn tác takes all 4 back ({n_before} → {n_after})")
 
 
+def desktop(pg):
+    print("\n--- 7. 1440: the portion panel in the add dialog's right pane ---")
+    pg.set_viewport_size({"width": 1440, "height": 900})
+    go(pg, "/add?meal=lunch", 900)
+    field = pg.locator('input[type="search"]:visible').first
+    field.fill("cơm trắng")
+    pg.wait_for_timeout(400)
+    pg.locator("button[data-food-row]:visible").first.click()
+    pg.wait_for_timeout(500)
+    panel = pg.locator('[data-tour="portion-panel"]:visible')
+    check(panel.count() == 1 and pg.locator('[role="dialog"][aria-labelledby="portion-sheet-title"]').count() == 0, "1440: the panel is in the pane, no phone sheet")
+    check(pressed(panel, "Đã nấu chín") and panel.get_by_label("Số gam").count() == 1, "1440: Sống | Chín and the gram field")
+    shot(pg, "rice-1440")
+    # The pane scrolls inside the dialog: the stacked Lưu & chọn tiếp under the add can be reached and used
+    more = panel.get_by_role("button", name="Lưu & chọn tiếp")
+    more.scroll_into_view_if_needed()
+    box = more.bounding_box()
+    check(box is not None and box["y"] + box["height"] <= 900, f"1440: Lưu & chọn tiếp scrolls into view ({box})")
+    more.click()
+    pg.wait_for_timeout(300)
+    check(pg.locator("[data-tray-bar]:visible").count() == 1, "1440: Lưu & chọn tiếp puts the food in the tray")
+
+
 def run_probe():
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        for part in (portions, exceptions, tray):
+        for part in (portions, exceptions, tray, desktop):
             ctx = browser.new_context(viewport=PHONE)
             pg = ctx.new_page()
             try:

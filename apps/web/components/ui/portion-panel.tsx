@@ -173,13 +173,14 @@ export function PortionPanel({
         </p>
       )}
       {notice && canLog && <p role="note" className="m-0 text-[13px] leading-snug text-secondary">{notice}</p>}
-      <div data-align-group="portion" data-align-edge="left" className="flex w-full items-center gap-2">
+      {/* Side by side on a phone; stacked in the narrower desktop pane, the add on top */}
+      <div data-align-group="portion" data-align-edge="left" className="flex w-full items-center gap-2 lg:flex-col-reverse lg:items-stretch">
         {onAddAndContinue && (
           <button
             type="button"
             onClick={onAddAndContinue}
             disabled={cannotAdd}
-            className="flex h-14 flex-1 cursor-pointer items-center justify-center rounded-2xl border border-card-border bg-card text-[15px] font-bold text-text disabled:opacity-50"
+            className="flex h-14 flex-1 cursor-pointer items-center justify-center rounded-2xl border border-card-border bg-card text-[15px] font-bold text-text disabled:opacity-50 lg:flex-none"
           >
             Lưu &amp; chọn tiếp
           </button>
@@ -189,7 +190,7 @@ export function PortionPanel({
           onClick={onAdd}
           data-tour="portion-add"
           disabled={cannotAdd}
-          className={`${onAddAndContinue ? "flex-1" : "w-full"} flex h-14 cursor-pointer items-center justify-center rounded-2xl border-0 bg-blue text-[17px] font-bold text-on-accent   hover:bg-blue/90    disabled:opacity-50`}
+          className={`${onAddAndContinue ? "flex-1 lg:flex-none" : "w-full"} flex h-14 cursor-pointer items-center justify-center rounded-2xl border-0 bg-blue text-[17px] font-bold text-on-accent   hover:bg-blue/90    disabled:opacity-50`}
         >
           {`Thêm vào ${mealSlot ? mealNameVi : "—"}`}
         </button>

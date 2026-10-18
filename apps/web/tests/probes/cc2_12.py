@@ -178,6 +178,10 @@ def check_favourites(browser, size_name, size):
     pg.wait_for_timeout(300)
     check(path_of(pg) == "/add", f"{size_name} favourite with no history: stays on /add")
     check(pg.locator("button:has-text('Thêm vào'):visible").count() > 0, f"{size_name} favourite with no history: opens the portion panel")
+    # cc-53b: on a phone the portion panel is a sheet over the list; close it to tap the next row
+    if pg.locator('[role="dialog"][aria-labelledby="portion-sheet-title"]').count():
+        pg.keyboard.press("Escape")
+        pg.wait_for_timeout(400)
 
     pg.locator("[data-food-row]:visible:has-text('Chuối')").first.click()
     pg.wait_for_url(re.compile(r".*/app(\?.*)?$"))

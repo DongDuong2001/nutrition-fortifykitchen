@@ -122,8 +122,8 @@ function FoodRow({
         selected ? "bg-cobalt text-on-accent" : "bg-transparent text-text"
       }`}
     >
-      <span className="flex min-w-0 flex-col py-0.5">
-      <span className="flex min-w-0 items-center gap-1.5">
+      {/* The name, its markers and, on a line of its own, how it was weighed (cc-53b) */}
+      <span className={`flex min-w-0 flex-wrap items-center gap-x-1.5 ${detail ? "py-0.5" : ""}`}>
         <span className="min-w-0 break-words text-[13px] font-semibold leading-tight line-clamp-2 lg:text-[15px]" title={entry.name}>
           {entry.name}
         </span>
@@ -152,9 +152,8 @@ function FoodRow({
             Chỉ trên máy này
           </span>
         )}
-      </span>
-      {/* cc-53b: how it was weighed (Today.dc.html): Cân sống, Đã nấu chín · 100 g × 3, Cỡ lớn */}
-      {detail && <span className={`text-[11px] leading-tight lg:text-[13px] ${selected ? "text-sky" : "text-secondary"}`}>{detail}</span>}
+        {/* Today.dc.html: Cân sống, Đã nấu chín · 100 g × 3, Cỡ lớn */}
+        {detail && <span className={`basis-full text-[11px] leading-tight lg:text-[13px] ${selected ? "text-sky" : "text-secondary"}`}>{detail}</span>}
       </span>
       <span className={`shrink-0 font-display text-[15px] font-bold leading-none tabular-nums lg:text-[18px] ${selected ? "text-sky" : "text-text"}`}>
         {quantity}

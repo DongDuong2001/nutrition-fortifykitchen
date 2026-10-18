@@ -516,7 +516,7 @@ function AddFoodInner() {
               </div>
 
               {/* Right Pane: Selected Food Portion & Macros, or an empty state until a food is picked */}
-              <div className="w-[340px] shrink-0 self-stretch">
+              <div className="min-h-0 w-[340px] shrink-0 self-stretch overflow-y-auto overscroll-contain">
                 {selectedFood ? (
                   <PortionPanel
                     food={selectedFood}
