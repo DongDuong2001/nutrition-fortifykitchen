@@ -270,7 +270,7 @@ function GramPortionArea({
                   setText(e.target.value);
                   emit(withBase(p, parseGramsInput(e.target.value)));
                 }}
-                className={`w-full min-w-0 border-0 bg-transparent p-0 font-display font-bold text-text tabular-nums outline-none ${panel ? "text-[34px]" : "text-2xl"}`}
+                className={`h-full w-full min-w-0 border-0 bg-transparent p-0 font-display font-bold text-text tabular-nums outline-none ${panel ? "text-[34px]" : "text-2xl"}`}
               />
               <span className={`font-semibold text-secondary ${panel ? "text-base" : "text-sm"}`}>g</span>
             </div>
