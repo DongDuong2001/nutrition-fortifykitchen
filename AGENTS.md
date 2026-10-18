@@ -56,6 +56,14 @@ Antigravity: also follow .agent/rules/antigravity.md.
 - [ ] No "Coach" tags, no raw hex, no `console.log`, no `TODO` without an entry in `OPEN_QUESTIONS.md`.
 - [ ] `npx tsc --noEmit`, `npm run build` and the unit tests pass.
 - [ ] `PROGRESS.md` is updated.
+- [ ] Tutorials ship with the feature (see **Tutorials** below).
+
+## Tutorials (every agent, Antigravity included)
+Every feature task that users can see ships its own teaching in the same branch:
+- **(a) A release entry with a tour.** Add or extend the top entry of `lib/releases.ts` (items in Vietnamese, the user's words) with a `tour` of 2–5 steps that point at the real controls (`data-tour` targets, a `fallback` where the control may be missing). "Có gì mới" shows only the newest release, so its tour covers everything since the last release that had one. Never create a new release id for a fix; extend the top one.
+- **(b) A one-time tip for each new control a newcomer cannot guess** (a gesture, an icon-only button, a hidden menu): an entry in `lib/tips.ts` on the existing Spotlight, with a `used` event the control marks.
+- **(c) `lib/__tests__/tutorial-targets.test.ts` is green**, so every tip and tour target is a `data-tour` some screen renders.
+- Reviews check (a)–(c). A feature merged or pushed straight to `main` without them is not done.
 
 ## UI/UX skill (required for UI work)
 The ui-ux-pro-max skill lives in `.agent/skills/ui-ux-pro-max/`. Read its `SKILL.md` once, and use it for every UI task:

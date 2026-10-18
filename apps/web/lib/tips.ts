@@ -19,6 +19,8 @@ export interface Tip {
   tryLabel?: string;
   /** The usage events that mean the user already knows this feature */
   used: readonly string[];
+  /** It explains something inside an open sheet: the only tips that may show while one is open */
+  inSheet?: boolean;
   /** Whether the tip belongs to the screen the user is on */
   when: (ctx: TipContext) => boolean;
 }
@@ -37,6 +39,12 @@ export interface TipContext {
   touch?: boolean;
   /** The phone can vibrate (Android): the Rung khi chạm switch exists only there (cc-51) */
   vibrate?: boolean;
+  /** A sheet the user opened is up (not Có gì mới or the install pop-up): only sheet tips then */
+  sheetOpen?: boolean;
+  /** The ×N stepper is on screen (supplements, eggs and fruit by the piece) */
+  stepper?: boolean;
+  /** No network: the header says Ngoại tuyến */
+  offline?: boolean;
 }
 
 /** The share tip waits until today holds this many foods. */
@@ -46,6 +54,32 @@ const home = (c: TipContext) => c.pathname === HOME_ROUTE;
 const today = (c: TipContext) => home(c) && !c.pastDay && !c.selectMode && c.foodsToday > 0;
 
 export const TIPS: readonly Tip[] = [
+  {
+    id: "sheet-drag",
+    target: "sheet-handle",
+    title: "Kéo xuống để đóng",
+    body: "Kéo thanh nhỏ ở đầu bảng này xuống để đóng. Chạm ra ngoài bảng cũng được.",
+    used: ["sheet-drag"],
+    inSheet: true,
+    when: (c) => c.sheetOpen === true && c.touch === true,
+  },
+  {
+    id: "quantity-stepper",
+    target: "quantity-stepper",
+    title: "Tăng giảm số lượng",
+    body: "Chọn khẩu phần như 1 quả hay 1 viên, rồi chạm + hoặc − để ghi 2, 3 quả. Kcal và vi chất nhân theo.",
+    used: ["quantity-step"],
+    inSheet: true,
+    when: (c) => c.stepper === true && !c.selectMode,
+  },
+  {
+    id: "sync-offline",
+    target: "sync-status",
+    title: "Đang ngoại tuyến",
+    body: "Món bạn thêm vẫn lưu trên máy này và tự gửi khi có mạng. Chữ ở đầu trang cho biết món đã lưu chưa.",
+    used: ["retry-unsaved"],
+    when: (c) => home(c) && !c.pastDay && !c.selectMode && c.offline === true,
+  },
   {
     id: "unsaved",
     target: "unsaved-marker",
@@ -156,8 +190,8 @@ export const TIPS: readonly Tip[] = [
     id: "food-new",
     target: "create-mode",
     title: "Món tự tính từ nguyên liệu có sẵn",
-    body: "Chọn nguyên liệu có sẵn trong app và nhập số gram. Kcal và đủ 22 vi chất được tính tự động. Món đóng gói có nhãn? Chọn Tự nhập ở trên.",
-    note: "Món được lưu vào tài khoản. Danh sách nguyên liệu chỉ có trên máy này.",
+    body: "Chọn nguyên liệu có sẵn trong app và nhập số gram. Kcal và đủ 22 vi chất được tính tự động. Món lưu vào tài khoản, máy khác cũng thấy. Món đóng gói có nhãn? Chọn Tự nhập ở trên.",
+    note: "Danh sách nguyên liệu của món chỉ có trên máy này.",
     used: ["create-food"],
     when: (c) => c.pathname === "/foods/new",
   },
@@ -214,8 +248,15 @@ export const TIPS: readonly Tip[] = [
 /**
  * The one tip to show on this visit, or null. A tip shows when tips are on, no tour is running, the user has not seen
  * it and has never used what it explains. At most one: the first of the table that fits (the next fits next visit).
+ * While a sheet is open only the sheet's own tips can show (the page's would point under it).
  */
 export function pickTip({ ctx, flags, tourActive }: { ctx: TipContext; flags: OnboardingFlags; tourActive: boolean }): Tip | null {
   if (tourActive || flags.tipsOff) return null;
-  return TIPS.find((t) => t.when(ctx) && !flags.seen.includes(t.id) && !t.used.some((u) => flags.used.includes(u))) ?? null;
+  return TIPS.find((t) => tipDue(t, ctx, flags)) ?? null;
+}
+
+/** This tip fits the screen and the user has neither seen it nor used what it explains. */
+export function tipDue(tip: Tip, ctx: TipContext, flags: OnboardingFlags): boolean {
+  if (ctx.sheetOpen && !tip.inSheet) return false;
+  return tip.when(ctx) && !flags.seen.includes(tip.id) && !tip.used.some((u) => flags.used.includes(u));
 }

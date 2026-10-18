@@ -94,6 +94,19 @@ export function setOverlayOpen(name: Overlay, open: boolean): void {
   busyListeners.forEach((l) => l());
 }
 
+/**
+ * Things on screen that have a first-visit tip of their own: an open sheet (drag down to close) and the ×N stepper.
+ * Counted, since two can be up at once (the add tray holds one stepper per food). Listeners are the tip-busy ones.
+ */
+export type Presence = "sheet" | "stepper";
+const present = new Map<Presence, number>();
+export const isPresent = (name: Presence): boolean => (present.get(name) ?? 0) > 0;
+export function setPresent(name: Presence, on: boolean): void {
+  const before = isPresent(name);
+  present.set(name, Math.max(0, (present.get(name) ?? 0) + (on ? 1 : -1)));
+  if (isPresent(name) !== before) busyListeners.forEach((l) => l());
+}
+
 /** The running "Có gì mới" tour (cc-46), in sessionStorage like the first-run tour. */
 export interface WhatsNewTour {
   releaseId: string;

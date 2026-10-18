@@ -34,11 +34,12 @@ function useOthersBusy(todayIso: string | null): boolean {
 
 /**
  * Opens "Có gì mới" by itself on Hôm nay, once per release per account: signed in, setup done, and only when nothing
- * else is open (`busy`: Hôm nay's own sheets and Chọn nhiều món). The probes' device switches keep it away (whatsNewDisabled).
+ * else is open (`busy`: Hôm nay's own sheets and Chọn nhiều món) and no save is on its way (its tour must not stand
+ * over a write). The probes' device switches keep it away (whatsNewDisabled).
  */
 export function WhatsNewHost({ busy }: { busy: boolean }) {
   const pathname = usePathname();
-  const { hydrated, todayIso } = useDiary();
+  const { hydrated, todayIso, saving } = useDiary();
   const [open, setOpen] = useState(false);
   const othersBusy = useOthersBusy(todayIso);
   const release = latestRelease();
@@ -52,10 +53,10 @@ export function WhatsNewHost({ busy }: { busy: boolean }) {
       seenId: loadFlags().whatsNewSeen,
       latestId: release.id,
       firstRun: !(demo || facts.profileSaved),
-      busy: busy || othersBusy,
+      busy: busy || othersBusy || saving,
     });
     if (show) setOpen(true);
-  }, [hydrated, open, release, pathname, busy, othersBusy]);
+  }, [hydrated, open, release, pathname, busy, othersBusy, saving]);
 
   useEffect(() => setOverlayOpen("whats-new", open), [open]);
   useEffect(() => () => setOverlayOpen("whats-new", false), []);

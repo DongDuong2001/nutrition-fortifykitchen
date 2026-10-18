@@ -6,6 +6,8 @@ import { cardPlacement, holeFor, roundHole, type Box } from "@/lib/spotlight";
 const FOCUSABLE = 'button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])';
 const POLL_MS = 100;
 const GIVE_UP_MS = 1500;
+/** How often a shown target is checked for still being in the page (a re-render or a closed sheet removes it) */
+const WATCH_MS = 300;
 
 /** The first element of data-tour="<id>" that is on screen (a phone and a desktop copy can both exist). */
 function findTarget(id: string): HTMLElement | null {
@@ -33,7 +35,7 @@ export interface SpotlightProps {
   labelledBy?: string;
   /** Or the name itself ("Hướng dẫn bước 1 trên 3") */
   ariaLabel?: string;
-  /** Pointed at when the target is not on screen at the first look (cc-46) */
+  /** Pointed at when the target is not on screen at the first look (cc-46). Only pointed at: never tappable. */
   fallback?: string;
   /** Scroll the target into view first (cc-46) */
   scroll?: boolean;
@@ -72,6 +74,7 @@ export function Spotlight({
   children,
 }: SpotlightProps) {
   const [box, setBox] = useState<Box | null>(null);
+  const [onFallback, setOnFallback] = useState(false);
   const [view, setView] = useState({ width: 0, height: 0 });
   const [cardSize, setCardSize] = useState({ width: 0, height: 0 });
   const cardRef = useRef<HTMLDivElement>(null);
@@ -87,11 +90,28 @@ export function Spotlight({
     let observer: ResizeObserver | null = null;
     let frame = 0;
     let poll: ReturnType<typeof setInterval> | null = null;
+    let watch: ReturnType<typeof setInterval> | null = null;
+    let usingFallback = false;
     const started = Date.now();
+
+    // The element left the page: point at its new copy if there is one, else the step or tip is skipped (no ring
+    // left on an empty spot)
+    const refind = (): boolean => {
+      const found = usingFallback && fallback ? [findTarget(fallback)] : ids.map(findTarget);
+      if (!found.every((el): el is HTMLElement => el !== null)) return false;
+      observer?.disconnect();
+      elements = found;
+      for (const el of found) observer?.observe(el);
+      return true;
+    };
 
     const measure = () => {
       frame = 0;
-      if (elements.length === 0 || elements.some((el) => !el.isConnected)) return;
+      if (elements.length === 0) return;
+      if (elements.some((el) => !el.isConnected) && !refind()) {
+        callbacks.current.onMissing();
+        return;
+      }
       const r = unionBox(elements.map((el) => el.getBoundingClientRect()));
       setView({ width: window.innerWidth, height: window.innerHeight });
       if (r.width === 0 || r.height === 0 || r.top + r.height < 0 || r.top > window.innerHeight || r.left + r.width < 0 || r.left > window.innerWidth) {
@@ -111,6 +131,9 @@ export function Spotlight({
       for (const el of els) observer.observe(el);
       window.addEventListener("scroll", schedule, true);
       window.addEventListener("resize", schedule);
+      watch = setInterval(() => {
+        if (elements.some((el) => !el.isConnected)) schedule();
+      }, WATCH_MS);
       measure();
       if (!shown.current) {
         shown.current = true;
@@ -124,6 +147,8 @@ export function Spotlight({
       const alternative = first && fallback ? findTarget(fallback) : null;
       first = false;
       if (!found.every((el) => el !== null) && alternative) {
+        usingFallback = true;
+        setOnFallback(true);
         attach([alternative]);
       } else if (found.every((el): el is HTMLElement => el !== null)) {
         if (poll) clearInterval(poll);
@@ -140,6 +165,7 @@ export function Spotlight({
 
     return () => {
       if (poll) clearInterval(poll);
+      if (watch) clearInterval(watch);
       if (frame) cancelAnimationFrame(frame);
       observer?.disconnect();
       window.removeEventListener("scroll", schedule, true);
@@ -225,7 +251,7 @@ export function Spotlight({
       <div aria-hidden="true" className="absolute inset-x-0" style={{ top: hole.top + hole.height, bottom: 0, pointerEvents: "auto" }} />
       <div aria-hidden="true" className="absolute left-0" style={{ top: hole.top, height: hole.height, width: hole.left, pointerEvents: "auto" }} />
       <div aria-hidden="true" className="absolute right-0" style={{ top: hole.top, height: hole.height, left: hole.left + hole.width, pointerEvents: "auto" }} />
-      {!interactive && (
+      {(!interactive || onFallback) && (
         <div aria-hidden="true" className="absolute" style={{ top: hole.top, left: hole.left, width: hole.width, height: hole.height, pointerEvents: "auto" }} />
       )}
 

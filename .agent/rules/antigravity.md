@@ -22,6 +22,7 @@ Read AGENTS.md first. These rules add to it and win if anything conflicts.
 - Write the test first for any logic change (test-driven-development).
 
 ## Finish
+- A feature task is not done without its tutorials: AGENTS.md › Tutorials (release tour, one-time tips, tutorial-targets.test.ts green).
 - Run `npm run check` once at the end, plus the probes the prompt lists. Show real alignment pair counts.
 - One commit per task (fix rounds: "<task>-fix-N"). Author Vu Thien Minh Hao <s3938011@rmit.edu.vn>, no AI names or trailers. Don't push.
 - Never write "approved" anywhere. Status is "ready for review"; only the user approves.

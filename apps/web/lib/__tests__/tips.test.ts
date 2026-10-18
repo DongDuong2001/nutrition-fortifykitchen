@@ -8,9 +8,9 @@ const flags = (over: Partial<OnboardingFlags> = {}): OnboardingFlags => ({ ...DE
 const ids = (c: TipContext, f = flags()) => pickTip({ ctx: c, flags: f, tourActive: false })?.id ?? null;
 
 describe("the tips table", () => {
-  it("has the 15 tips of the design boards and cc-49's Chưa lưu, each with the card copy", () => {
+  it("has the 15 tips of the design boards, cc-49's Chưa lưu and the sheet, stepper and offline tips, each with the card copy", () => {
     expect(TIPS.map((t) => t.id)).toEqual([
-      "unsaved", "home-logged", "meal-add", "home-share", "pull-refresh", "nutrient-sources", "past-day", "multi-select", "add-tray", "add-shortlists", "haptics", "food-detail", "compare",
+      "sheet-drag", "quantity-stepper", "sync-offline", "unsaved", "home-logged", "meal-add", "home-share", "pull-refresh", "nutrient-sources", "past-day", "multi-select", "add-tray", "add-shortlists", "haptics", "food-detail", "compare",
       "food-new", "training", "micros", "trends-micros", "explore", "overview", "leaderboard",
     ]);
     for (const t of TIPS) {
@@ -23,6 +23,62 @@ describe("the tips table", () => {
 
   it("every id is unique", () => {
     expect(new Set(TIPS.map((t) => t.id)).size).toBe(TIPS.length);
+  });
+});
+
+describe("pickTip: the ×N stepper", () => {
+  // A supplement on its page, and an egg (Dong's unit portions) in the add sheet's portion panel
+  it("shows once the stepper is on screen, for a supplement and for an egg, before the screen's own tip", () => {
+    expect(ids(ctx({ pathname: "/foods/sup-canprev-d3", stepper: true }))).toBe("quantity-stepper");
+    expect(ids(ctx({ pathname: "/add", stepper: true }))).toBe("quantity-stepper");
+    expect(ids(ctx({ pathname: "/foods/sup-canprev-d3", stepper: false }))).toBe("food-detail");
+  });
+  it("only once, and never after the user stepped a count", () => {
+    expect(ids(ctx({ pathname: "/add", stepper: true }), flags({ seen: ["quantity-stepper"] }))).toBe("add-tray");
+    expect(ids(ctx({ pathname: "/add", stepper: true }), flags({ used: ["quantity-step"] }))).toBe("add-tray");
+  });
+  it("also inside a sheet (the add tray, the entry editor)", () => {
+    expect(ids(ctx({ pathname: "/add", stepper: true, sheetOpen: true }), flags({ seen: ["sheet-drag"] }))).toBe("quantity-stepper");
+  });
+  it("points at the one stable target the stepper renders", () => {
+    expect(TIPS.find((t) => t.id === "quantity-stepper")?.target).toBe("quantity-stepper");
+  });
+});
+
+describe("pickTip: drag a sheet down to close", () => {
+  it("on the first sheet opened on a phone, before any other tip", () => {
+    expect(ids(ctx({ sheetOpen: true, touch: true }))).toBe("sheet-drag");
+    expect(ids(ctx({ sheetOpen: true, touch: true, stepper: true }))).toBe("sheet-drag");
+  });
+  it("never with a mouse, once seen, or after a drag", () => {
+    expect(ids(ctx({ sheetOpen: true, touch: false }))).toBeNull();
+    expect(ids(ctx({ sheetOpen: true, touch: true }), flags({ seen: ["sheet-drag"] }))).toBeNull();
+    expect(ids(ctx({ sheetOpen: true, touch: true }), flags({ used: ["sheet-drag"] }))).toBeNull();
+  });
+  it("while a sheet is open, the page's own tips wait (they would point under it)", () => {
+    expect(ids(ctx({ sheetOpen: true, touch: true }), flags({ seen: ["sheet-drag"] }))).toBeNull();
+    expect(ids(ctx({ pathname: "/training", sheetOpen: true }))).toBeNull();
+    expect(ids(ctx({ pathname: "/training", sheetOpen: false }))).toBe("training");
+  });
+});
+
+describe("pickTip: offline", () => {
+  it("on today's Hôm nay with no network, pointing at the header sync status", () => {
+    expect(ids(ctx({ offline: true }))).toBe("sync-offline");
+    expect(ids(ctx({ offline: true, foodsToday: 0 }))).toBe("sync-offline");
+    expect(TIPS.find((t) => t.id === "sync-offline")?.target).toBe("sync-status");
+  });
+  it("not online, not on a past day, not in select mode, not once seen", () => {
+    expect(ids(ctx({ offline: false }))).toBe("home-logged");
+    expect(ids(ctx({ offline: true, pastDay: true }))).toBe("past-day");
+    expect(ids(ctx({ offline: true, selectMode: true }))).toBe("multi-select");
+    expect(ids(ctx({ offline: true }), flags({ seen: ["sync-offline"] }))).toBe("home-logged");
+  });
+});
+
+describe("pickTip: Món tự tính", () => {
+  it("says the dish is saved to the account", () => {
+    expect(TIPS.find((t) => t.id === "food-new")?.body).toContain("Món lưu vào tài khoản");
   });
 });
 

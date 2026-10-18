@@ -17,7 +17,7 @@ export interface ReleaseTourStep {
   fallback?: string;
   title: string;
   body: string;
-  /** What the user can do on the highlighted element to move on ("Tiếp" works too) */
+  /** What the user can do on the highlighted element to move on ("Tiếp" works too). The element stays tappable. */
   advanceOn?: "long-press" | "tap";
 }
 
@@ -42,6 +42,21 @@ export const RELEASES: readonly Release[] = [
       { icon: "home", title: "Kéo xuống để tải lại", body: "Ở Hôm nay, kéo danh sách món xuống rồi thả để lấy món vừa thêm trên máy khác." },
       { icon: "meal", title: "Món của tôi được lưu", body: "Món tự tạo giờ lưu vào tài khoản; danh sách nguyên liệu chỉ có trên máy này." },
       { icon: "meal", title: "Ghi thực phẩm bổ sung theo viên", body: "Thêm được viên, giọt, muỗng dù nhãn không ghi kcal." },
+      { icon: "select", title: "Ghi theo quả, viên", body: "Trứng, trái cây và thực phẩm bổ sung có nút ×N: chọn khẩu phần rồi tăng giảm số lượng." },
+    ],
+    // Everything since 17/10 (18/10, 18b and 18c), on Hôm nay: "Có gì mới" shows only this release
+    tour: [
+      {
+        target: "sync-status",
+        fallback: "header-actions",
+        title: "Món chưa lưu",
+        body: "Khi đầu trang có chữ Chưa lưu, món vẫn nằm trên máy này. Chạm vào chữ đó để gửi ngay.",
+        advanceOn: "tap",
+      },
+      { target: "home-food-list", fallback: "meal-pill", title: "Kéo xuống để tải lại", body: "Kéo danh sách món xuống rồi thả để lấy món vừa thêm trên máy khác." },
+      { target: "nutrient-column", title: "Chạm vi chất để xem nguồn", body: "Chạm một vi chất để xem món nào cung cấp, món nhiều nhất ở trên." },
+      { target: "meal-pill", title: "Gần đây và Như hôm qua", body: "Chạm + Thêm: Gần đây là món bạn ăn ở bữa này. Chạm tên bữa rồi ⋯ để chọn Như hôm qua." },
+      { target: "nav-explore", title: "Thực phẩm bổ sung và Gia vị", body: "Tìm ở Khám phá. Trứng, trái cây và thực phẩm bổ sung ghi theo quả, viên với nút ×N." },
     ],
   },
   // Thêm Thực phẩm bổ sung và Gia vị
@@ -97,6 +112,19 @@ export const RELEASES: readonly Release[] = [
 export const latestRelease = (): Release | null => RELEASES[0] ?? null;
 
 export const releaseById = (id: string): Release | null => RELEASES.find((r) => r.id === id) ?? null;
+
+/**
+ * Where a running "Có gì mới" tour goes from step `index`: Tiếp and a target that is not on screen move one on, and so
+ * does the step's own action (a long press, a tap on the element); the action of another step does nothing. Past the
+ * last step, or for a release without that step, the tour ends (null).
+ */
+export function releaseTourStepAfter(release: Release | null, index: number, event: "next" | "missing" | "long-press" | "tap"): number | null {
+  const steps = release?.tour ?? [];
+  const step = steps[index];
+  if (!step) return null;
+  if ((event === "long-press" || event === "tap") && step.advanceOn !== event) return index;
+  return index + 1 < steps.length ? index + 1 : null;
+}
 
 /** The sheet opens by itself once per release: not on the first run, and only when nothing else is open. */
 export function shouldShowWhatsNew({ seenId, latestId, firstRun, busy }: { seenId: string | null; latestId: string | null; firstRun: boolean; busy: boolean }): boolean {

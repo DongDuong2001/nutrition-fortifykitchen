@@ -36,7 +36,7 @@ export function DesktopSidebar({ currentTab }: { currentTab?: NavTab }) {
             <Link
               key={item.tab}
               href={item.href}
-              data-tour={item.tab === "settings" ? "nav-settings" : undefined}
+              data-tour={item.tab === "settings" ? "nav-settings" : item.tab === "explore" ? "nav-explore" : undefined}
               aria-current={isActive ? "page" : undefined}
               className={`no-underline flex min-h-[44px] items-center gap-3 rounded-xl px-3 text-[15px] font-semibold transition-colors ${
                 isActive ? "bg-card/10 text-on-dark" : "text-muted-on-dark hover:bg-card/5 hover:text-on-dark"
