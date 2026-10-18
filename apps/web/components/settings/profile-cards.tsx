@@ -19,7 +19,8 @@ import { canVibrate, haptic, hapticsWanted } from "@/lib/haptics";
 import type { OnboardingFlags } from "@/lib/onboarding-flags";
 import { loadFlags, markUsed, openReplay, setTipsOff, subscribeFlags } from "@/lib/onboarding-store";
 import { startTour } from "@/lib/tour-bus";
-import { getTrainingDurations } from "@/lib/training";
+import { getTrainingDurations, TRAINING_SIZE_NAME, type TrainingSize } from "@/lib/training";
+import { readPrefs, writePrefs } from "@/lib/training-prefs";
 import type { SexType } from "@/lib/targets";
 import { HOME_ROUTE } from "@/lib/nav";
 
@@ -185,7 +186,45 @@ export function GoalCard() {
           />
         </div>
       </RowGroup>
+      <TrainingSizeRow />
     </Card>
+  );
+}
+
+// cc-52: Bự / Bé for Ngày tập (per account, on this device: lib/training-prefs). Read after mount, with the account.
+function TrainingSizeRow() {
+  const { hydrated } = useDiary();
+  const [size, setSize] = useState<TrainingSize | null | undefined>(undefined);
+  useEffect(() => {
+    if (hydrated) setSize(readPrefs().size);
+  }, [hydrated]);
+  const choose = (next: TrainingSize) => {
+    markUsed("training-size");
+    writePrefs({ ...readPrefs(), size: next, asked: true });
+    setSize(next);
+  };
+  return (
+    <RowGroup>
+      <div role="group" aria-labelledby="profile-training-size-label" className="flex flex-col gap-2 border-t border-divider py-3">
+        <div className="flex items-baseline justify-between gap-3">
+          <span id="profile-training-size-label" className="text-[15px]">Nhóm Bự / Bé</span>
+          <span className="text-[13px] text-secondary">liều khi tập</span>
+        </div>
+        <ChipGroup
+          size="lg"
+          columns={2}
+          columnsLg={2}
+          items={(["be", "bu"] as const).map((option) => ({
+            id: option,
+            label: TRAINING_SIZE_NAME[option],
+            ariaLabel: `${TRAINING_SIZE_NAME[option]}, ${option === "be" ? "liều thấp" : "liều cao"}`,
+            active: size === option,
+            disabled: size === undefined,
+            onClick: () => choose(option),
+          }))}
+        />
+      </div>
+    </RowGroup>
   );
 }
 
