@@ -329,13 +329,14 @@ def tips_rules(browser):
     check("tray-add" in flags(pg).get("used", []), "using the + circle records tray-add")
     ctx.close()
     ctx, pg = ctx_page(browser, PHONE)
-    pg.add_init_script("localStorage.setItem('h1t_settings_v1_demo', JSON.stringify({onboarding: {used: ['tray-add', 'shortlist-add', 'training-minutes']}}))")
+    # cc-52: Ngày tập has three tips (minutes, the Bự / Bé chip, + Thêm món); all three used means none
+    pg.add_init_script("localStorage.setItem('h1t_settings_v1_demo', JSON.stringify({onboarding: {used: ['tray-add', 'shortlist-add', 'training-minutes', 'training-size', 'training-add-item']}}))")
     go(pg, "/add?meal=lunch", wait=200)
     pg.wait_for_timeout(1200)
     check(card(pg).count() == 0, "a feature already used: no tip")
     go(pg, "/training", wait=200)
     pg.wait_for_timeout(1200)
-    check(card(pg).count() == 0, "training minutes already used: no tip")
+    check(card(pg).count() == 0, "training features already used: no tip")
     ctx.close()
 
     # Selecting several foods on Hôm nay: the multi-select tip when the mode opens
