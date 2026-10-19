@@ -66,7 +66,7 @@ export function SelectActionBar({
 }) {
   const none = count === 0;
   return (
-    <div data-tour="select-bar" className="mx-auto flex w-full max-w-[560px] flex-col gap-2 px-3 py-2 lg:max-w-[1100px] lg:px-8">
+    <div data-tour="select-bar" className="m-toast mx-auto flex w-full max-w-[560px] flex-col gap-2 px-3 py-2 lg:max-w-[1100px] lg:px-8">
       <p data-align-group="select-bar" role="status" className="m-0 text-cap font-semibold leading-snug text-text tabular-nums">
         {actionBarLabel(count, kcal)}
       </p>

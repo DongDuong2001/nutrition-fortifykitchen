@@ -83,7 +83,7 @@ function CompactBar({ show, backHref, date, achieved, total, className = "" }: {
 
 export default function MicrosPage() {
   return (
-    <Suspense fallback={<div className="w-full min-h-screen bg-page" />}>
+    <Suspense fallback={<div className="w-full min-h-dvh bg-page" />}>
       <MicrosContent />
     </Suspense>
   );
@@ -299,7 +299,7 @@ function MicrosContent() {
   // 1. SKELETON LOADING STATE
   if (isLoading && !currentData) {
     return (
-      <div className="w-full min-h-screen bg-page text-text font-sans flex flex-col pb-[88px] lg:pb-0">
+      <div className="w-full min-h-dvh bg-page text-text font-sans flex flex-col pb-[88px] lg:pb-0">
         <h1 className="sr-only">Vi chất — Đang tải</h1>
         <div className="bg-ink text-on-dark rounded-b-sheet">
           <div className="w-full max-w-[560px] mx-auto px-4 pt-3 pb-5 flex flex-col gap-3">
@@ -338,7 +338,7 @@ function MicrosContent() {
   // 2. EMPTY STATE ("Chưa ghi món nào hôm nay")
   if (isEmpty) {
     return (
-      <div className="w-full min-h-screen bg-page text-text font-sans flex flex-col lg:flex-row">
+      <div className="w-full min-h-dvh bg-page text-text font-sans flex flex-col lg:flex-row">
         <DesktopSidebar />
 
         <div className="flex min-w-0 flex-1 flex-col pb-[88px] lg:pb-0">
@@ -391,7 +391,7 @@ function MicrosContent() {
   }
   // 3. ACTIVE REPORT SCREEN (Mobile & Desktop)
   return (
-    <div className="w-full min-h-screen bg-page text-text font-sans flex flex-col">
+    <div className="w-full min-h-dvh bg-page text-text font-sans flex flex-col">
       {/* ============================================================== */}
       {/* MOBILE / TABLET LAYOUT (<1024px)                               */}
       {/* ============================================================== */}

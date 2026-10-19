@@ -6,7 +6,8 @@
  * - "sheet-down": Back out of /add: its panel slides down off Hôm nay.
  * - "tab": a tab of the bottom nav or the sidebar, or a Tổng quan sub-tab: no transition at all (tapped hundreds of times a day).
  * - "none": the first screen, the same screen with another query, /add closed by its own ✕ (it slid down already),
- *   and everything when Data Saver is on (reduced motion keeps the change as a 120 ms cross-fade, cc-62).
+ *   and everything when Data Saver is on or on a low-end phone (2 GB or 4 cores, cc-64); reduced motion keeps the
+ *   change as a 120 ms cross-fade (cc-62).
  * navKind is pure; the rest is a tiny store fed by popstate. Pages never import it (it would be copied into their
  * chunks): a screen that goes back in code lands on a parent path, and the /add sheet that slid down by itself says
  * so on the page (data-sheet-route with data-state="closed").
@@ -63,7 +64,13 @@ let current: { path: string; kind: NavKind; popped: boolean } | null = null;
 
 // cc-62 (S6): reduced motion keeps the view transition (globals.css turns it into a 120 ms cross-fade, nothing slides);
 // only Data Saver turns it off
-const motionOff = () => (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true;
+const motionOff = () => {
+  const nav = navigator as Navigator & { connection?: { saveData?: boolean }; deviceMemory?: number };
+  // cc-64 (P5): a view transition snapshots the whole screen twice; on a 2 GB or 4-core phone that is a stutter, so a
+  // screen change is a hard cut there
+  const lowEnd = (nav.deviceMemory !== undefined && nav.deviceMemory <= 2) || (nav.hardwareConcurrency > 0 && nav.hardwareConcurrency <= 4);
+  return nav.connection?.saveData === true || lowEnd;
+};
 
 /** The /add sheet (data-sheet-route) already slid down by its ✕, the scrim or a drag: Back has nothing to animate. */
 const sheetClosed = () => document.querySelector('[data-sheet-route][data-state="closed"]') !== null;

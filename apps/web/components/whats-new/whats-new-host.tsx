@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { whenIdle } from "@/lib/idle";
 import { usePathname } from "next/navigation";
 import { stepOnPage } from "@/components/onboarding/spotlight";
 import { WhatsNewSheet } from "@/components/whats-new/whats-new-sheet";
@@ -47,6 +48,9 @@ function stepsOnPage(releases: readonly Release[]): number[] {
  * over a write). It lists every release newer than the last one seen; "Thử ngay" runs their tours oldest first
  * (lib/releases joinedTour). The probes' device switches keep it away (whatsNewDisabled).
  */
+/** How long "Có gì mới" waits after Hôm nay shows before it opens by itself (then for an idle moment). */
+const WHATS_NEW_DELAY_MS = 600;
+
 export function WhatsNewHost({ busy }: { busy: boolean }) {
   const pathname = usePathname();
   const { hydrated, todayIso, saving } = useDiary();
@@ -69,10 +73,20 @@ export function WhatsNewHost({ busy }: { busy: boolean }) {
       busy: busy || othersBusy || saving,
     });
     if (!show) return;
-    const releases = unseenReleases(seenId);
-    setShown(releases);
-    setTourSteps(stepsOnPage(releases));
-    setOpen(true);
+    // cc-64: it waits until Hôm nay has painted and the page is idle (at least 600 ms), so it never covers the first frame
+    let cancelIdle = () => {};
+    const timer = window.setTimeout(() => {
+      cancelIdle = whenIdle(() => {
+        const releases = unseenReleases(seenId);
+        setShown(releases);
+        setTourSteps(stepsOnPage(releases));
+        setOpen(true);
+      });
+    }, WHATS_NEW_DELAY_MS);
+    return () => {
+      window.clearTimeout(timer);
+      cancelIdle();
+    };
   }, [hydrated, open, latest, pathname, busy, othersBusy, saving]);
 
   useEffect(() => setOverlayOpen("whats-new", open), [open]);

@@ -36,7 +36,7 @@ export default function GlobalError({
 
   return (
     <html lang="vi" className={`${manrope.variable} ${sairaCondensed.variable}`}>
-      <body className="flex min-h-screen items-center justify-center bg-page p-4 font-sans text-text antialiased">
+      <body className="flex min-h-dvh items-center justify-center bg-page p-4 font-sans text-text antialiased">
         <main
           role="alert"
           aria-live="assertive"

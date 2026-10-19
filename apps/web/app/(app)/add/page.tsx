@@ -43,6 +43,7 @@ import {
 import { defaultPortionOf, gramsServingLabel, parseGramsInput } from "@/lib/portion";
 import { MealSwitcher } from "@/components/meal-switcher";
 import { PortionPanel } from "@/components/ui/portion-panel";
+import { Expand } from "@/components/ui/expand";
 import { HomeScreen } from "@/components/home/home-screen";
 import { AppShell } from "@/components/ui/app-shell";
 import type { DishEdit } from "@/lib/dish-recipes";
@@ -528,7 +529,7 @@ function AddFoodInner() {
   };
 
   return (
-    <div className="min-h-screen bg-page text-text font-sans">
+    <div className="min-h-dvh bg-page text-text font-sans">
       {/* Hôm nay behind the sheet (both widths), scrolled to where it was left: a light, inert copy (HomeScreen backdrop);
           no blur on the scrim */}
       <div ref={behindRef} data-add-behind={cameFromHome() ? "home" : "light"} aria-hidden="true" inert className="pointer-events-none fixed inset-0 select-none overflow-hidden">
@@ -553,7 +554,7 @@ function AddFoodInner() {
             data-sheet-route
             data-state={sheetState}
             onClick={(e) => e.stopPropagation()}
-            className="m-pop w-[min(900px,100%-32px)] bg-card rounded-card border border-transparent p-6 shadow-2xl flex flex-col gap-4 max-h-[92vh] overflow-y-auto"
+            className="m-pop w-[min(900px,100%-32px)] bg-card rounded-card border border-transparent p-6 shadow-2xl flex flex-col gap-4 max-h-[92dvh] overflow-y-auto"
           >
             {/* The page's heading (Hôm nay behind is a picture without one since cc-55b), as the phone sheet has */}
             <h1 className="sr-only">Thêm món</h1>
@@ -737,7 +738,7 @@ function AddFoodInner() {
           </div>
 
           {/* One scroll region: carousels, the food list and the create button (the last item stays reachable) */}
-          <div data-add-scroll className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pb-6">
+          <div data-add-scroll className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain px-4 pb-[max(24px,env(safe-area-inset-bottom))]">
             {showShortcuts && shortcuts}
 
             {catalogPending && list.foods.length > 0 && <CatalogNote />}
@@ -755,9 +756,14 @@ function AddFoodInner() {
             />
           </div>
 
-          {/* The tray bar, under the list while the tray holds a food */}
-          {tray.length > 0 && (
-            <div className="relative shrink-0 px-4 pb-2 before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-3 before:bg-linear-to-t before:from-card before:to-transparent">
+          {/* The tray bar, under the list while the tray holds a food. cc-64 (A1): it opens and closes with Expand, so the
+              list above eases instead of jumping */}
+          <div
+            className={`relative shrink-0 ${
+              tray.length > 0 ? "before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-3 before:bg-linear-to-t before:from-card before:to-transparent" : ""
+            }`}
+          >
+            <Expand open={tray.length > 0} className="px-4 pb-2">
               <TrayBar
                 totals={trayTotalsNow}
                 mealName={mealNameVi}
@@ -766,8 +772,8 @@ function AddFoodInner() {
                 onReview={() => setReviewOpen(true)}
                 onAdd={handleAddTray}
               />
-            </div>
-          )}
+            </Expand>
+          </div>
         </div>
       </div>
 
@@ -848,13 +854,13 @@ function AddFoodInner() {
 // Days older than yesterday are read-only, so the add form opens for today and yesterday (an older ?date= goes back to that day's Today view)
 function AddFoodGate() {
   const isPastDay = usePastDayRedirect();
-  if (isPastDay) return <div className="w-full min-h-screen bg-page" />;
+  if (isPastDay) return <div className="w-full min-h-dvh bg-page" />;
   return <AddFoodInner />;
 }
 
 export default function AddFoodPage() {
   return (
-    <Suspense fallback={<div className="w-full min-h-screen bg-page" />}>
+    <Suspense fallback={<div className="w-full min-h-dvh bg-page" />}>
       <AddFoodGate />
     </Suspense>
   );

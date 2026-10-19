@@ -23,7 +23,7 @@ export function QuickAddRow({ name, meta, addLabel, onAdd, trailing, withBorderT
         type="button"
         onClick={onAdd}
         aria-label={addLabel}
-        className="flex min-h-[52px] min-w-0 flex-1 cursor-pointer items-center gap-3 rounded-xl border-0 bg-transparent py-2 text-left text-text active:scale-[0.99] transition-press motion-reduce:active:scale-100"
+        className="flex min-h-[52px] min-w-0 flex-1 cursor-pointer items-center gap-3 rounded-xl border-0 bg-transparent py-2 text-left text-text m-tint transition-press"
       >
         <span className="flex min-w-0 flex-1 flex-col gap-1">
           <span className="line-clamp-2 text-callout font-semibold leading-snug">{name}</span>

@@ -473,7 +473,7 @@ function CreateFoodInner() {
 
 export default function CreateFoodPage() {
   return (
-    <Suspense fallback={<div className="w-full min-h-screen bg-page" />}>
+    <Suspense fallback={<div className="w-full min-h-dvh bg-page" />}>
       <CreateFoodInner />
     </Suspense>
   );

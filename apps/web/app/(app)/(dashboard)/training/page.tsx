@@ -43,7 +43,7 @@ import { HOME_ROUTE } from "@/lib/nav";
 
 export default function TrainingPage() {
   return (
-    <Suspense fallback={<div className="w-full min-h-screen bg-page" />}>
+    <Suspense fallback={<div className="w-full min-h-dvh bg-page" />}>
       <TrainingContent />
     </Suspense>
   );
@@ -260,13 +260,13 @@ function TrainingContent() {
     : "Ngày này chưa lưu thời lượng tập · Chỉ xem";
 
   return (
-    <div className="w-full min-h-screen bg-page text-text font-sans flex flex-col">
+    <div className="w-full min-h-dvh bg-page text-text font-sans flex flex-col">
       {/* ============================================================== */}
       {/* MOBILE LAYOUT (<1024px) — Matches Training.dc.html & TrainingRest.dc.html */}
       {/* ============================================================== */}
       <div
         data-align-container="training-mobile"
-        className="w-full min-h-screen bg-page flex flex-col relative lg:hidden pb-[88px] overflow-x-hidden"
+        className="w-full min-h-dvh bg-page flex flex-col relative lg:hidden pb-[88px] overflow-x-hidden"
       >
         <AppHeader
           variant="sub"

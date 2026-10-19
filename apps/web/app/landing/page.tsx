@@ -129,11 +129,11 @@ const TRANSPARENCY_PRINCIPLES = [
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-page text-text font-sans antialiased selection:bg-cobalt selection:text-on-accent">
+    <div className="min-h-dvh bg-page text-text font-sans antialiased selection:bg-cobalt selection:text-on-accent">
       {/* ============================================================== */}
       {/* 1. TOP NAVBAR                                                 */}
       {/* ============================================================== */}
-      <header className="sticky top-0 z-nav w-full border-b border-card-border/80 bg-page/90 backdrop-blur-md reduced-transparency:bg-page reduced-transparency:backdrop-blur-none">
+      <header className="sticky top-0 z-nav w-full pt-[env(safe-area-inset-top)] border-b border-card-border/80 bg-page/90 backdrop-blur-md reduced-transparency:bg-page reduced-transparency:backdrop-blur-none">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link href="/landing" className="flex items-center gap-2 no-underline text-text">
             <span className="font-display italic font-black text-2xl tracking-wide text-ink">

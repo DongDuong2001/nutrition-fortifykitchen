@@ -41,7 +41,7 @@ export default function DeleteAccountPage() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-page text-text font-sans flex flex-col justify-between">
+    <div className="w-full min-h-dvh bg-page text-text font-sans flex flex-col justify-between">
       <div className="flex flex-col">
         <AppHeader
           variant="sub"

@@ -4,6 +4,8 @@ import { useEffect, useLayoutEffect, useReducer, useRef } from "react";
 import type { HomeEntry, HomeMeal } from "@/lib/home";
 
 const EXIT_MS = 200;
+/** A row moved to another meal slides there in this long (globals.css --m-row). */
+const FLIP_MS = 200;
 
 export interface MotionRow {
   entry: HomeEntry;
@@ -20,7 +22,7 @@ interface Drawn {
 /**
  * cc-51: motion of the Hôm nay food rows (globals.css .m-row-enter, .m-row-exit, .m-flip). A row that arrives rises in;
  * a deleted row stays in its place for 200 ms while it fades and its height closes, so the rows below glide up; a row
- * moved to another meal slides from where it was (FLIP). Nothing moves on the first draw or when `dayKey` changes.
+ * moved to another meal slides from where it was (FLIP, played with the Web Animations API). Nothing moves on the first draw or when `dayKey` changes.
  */
 export function useRowMotion(meals: HomeMeal[], dayKey: string) {
   const listRef = useRef<HTMLDivElement>(null);
@@ -75,13 +77,13 @@ export function useRowMotion(meals: HomeMeal[], dayKey: string) {
       const moved = before?.slotOf.has(id) && before.slotOf.get(id) !== slotOf.get(id);
       if (moved && old && !el.closest("[data-exiting]")) flips.push({ el, dx: old.x - pos.x, dy: old.y - pos.y });
     });
-    for (const { el, dx, dy } of flips) {
-      el.classList.remove("m-flip");
-      el.style.transform = `translate(${dx}px, ${dy}px)`;
-      requestAnimationFrame(() => {
-        el.classList.add("m-flip");
-        el.style.transform = "";
-      });
+    // cc-64 (P1): the browser never painted the inverted transform when it was set and cleared in one frame, so a moved
+    // row snapped. WAAPI plays it from the inverted place to its own, on the compositor; reduced motion: no slide
+    if (flips.length > 0 && !window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+      const easing = getComputedStyle(document.documentElement).getPropertyValue("--ease-in-out").trim() || "cubic-bezier(0.77, 0, 0.175, 1)";
+      for (const { el, dx, dy } of flips) {
+        el.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: "none" }], { duration: FLIP_MS, easing });
+      }
     }
     boxes.current = next;
     // Rows just deleted: close their height on the next frame, and drop them when the animation is over

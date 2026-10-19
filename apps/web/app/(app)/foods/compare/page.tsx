@@ -131,7 +131,7 @@ function CompareInner() {
 
 export default function FoodComparePage() {
   return (
-    <Suspense fallback={<div className="min-h-screen w-full bg-page" />}>
+    <Suspense fallback={<div className="min-h-dvh w-full bg-page" />}>
       <CompareInner />
     </Suspense>
   );

@@ -91,7 +91,7 @@ export function EntryEditor({ view }: { view: EntryView }) {
   };
 
   return (
-    <div className="min-h-screen bg-page text-text font-sans">
+    <div className="min-h-dvh bg-page text-text font-sans">
       {/* Title is the food, subtitle the meal, as in design/screens/EditEntry.dc.html */}
       <AppHeader
         variant="sub"

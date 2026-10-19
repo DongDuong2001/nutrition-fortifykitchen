@@ -12,6 +12,8 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: HOME_ROUTE,
     scope: "/",
     display: "standalone",
+    // cc-64 (N10): the app is laid out for a phone held upright
+    orientation: "portrait",
     background_color: PAPER_COLOR,
     theme_color: INK_COLOR,
     icons: [

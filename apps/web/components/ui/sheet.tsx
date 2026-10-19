@@ -247,7 +247,7 @@ export function Sheet({
         aria-modal={showing ? "true" : undefined}
         aria-hidden={showing ? undefined : true}
         aria-labelledby={showing ? (title ? titleId : labelledBy) : undefined}
-        className={`relative z-sticky w-full max-w-[390px] mx-auto bg-card rounded-t-sheet px-4 pt-3 pb-6 flex flex-col gap-2 shadow-sheet outline-none m-sheet ${desktopDialog ? "m-dialog lg:w-[420px] lg:max-w-[420px] lg:rounded-sheet lg:px-6 lg:pt-6" : ""} ${className}`}
+        className={`relative z-sticky w-full max-w-[390px] mx-auto bg-card rounded-t-sheet px-4 pt-3 pb-[max(24px,env(safe-area-inset-bottom))] max-h-[calc(100dvh-24px)] overflow-y-auto overscroll-contain flex flex-col gap-2 shadow-sheet outline-none m-sheet ${desktopDialog ? "m-dialog lg:w-[420px] lg:max-w-[420px] lg:rounded-sheet lg:px-6 lg:pt-6" : ""} ${className}`}
       >
         {/* Grabber: drag it down to close (a 24 px strip around the 5 px bar); the title block below drags too */}
         <div

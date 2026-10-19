@@ -25,12 +25,17 @@ export function FoodSearchField({ value, onChange, inputRef, className = "" }: F
       <input
         ref={inputRef}
         type="search"
+        // cc-64 (N9): the keyboard's key says Tìm; no capitals, autocorrect or spell check on food names
+        enterKeyHint="search"
+        autoCapitalize="off"
+        autoCorrect="off"
+        spellCheck={false}
         aria-label="Tìm món"
         data-testid="food-search"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Tìm món: cơm, trứng, chà là…"
-        className="flex-1 bg-transparent border-0 outline-none focus-visible:outline-none text-text text-base min-h-11 [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
+        className="min-w-0 flex-1 bg-transparent border-0 outline-none focus-visible:outline-none text-text text-base min-h-11 [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
       />
       {value && (
         <button

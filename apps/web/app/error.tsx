@@ -21,7 +21,7 @@ export default function ErrorPage({ error, reset }: ErrorProps) {
   }, []);
 
   return (
-    <div className="w-full min-h-screen bg-page text-text font-sans flex flex-col justify-center items-center p-4 sm:p-6 box-border select-none">
+    <div className="w-full min-h-dvh bg-page text-text font-sans flex flex-col justify-center items-center p-4 sm:p-6 box-border select-none">
       <div
         role="alert"
         className="w-full max-w-[440px] bg-card rounded-card border border-transparent shadow-card p-6 sm:p-8 flex flex-col items-center text-center gap-3"

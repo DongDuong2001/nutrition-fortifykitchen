@@ -18,6 +18,39 @@ import {
   type MacroTargetMode,
 } from "@/lib/targets";
 
+
+/**
+ * cc-64 (N9): a whole-number field that keeps what is typed (clearing it does not snap to 0) and commits a number,
+ * clamped to min–max, when it loses focus. A text field with the numeric keypad, not type="number".
+ */
+function NumberField({ value, onCommit, min, max, className, "aria-label": ariaLabel }: { value: number; onCommit: (n: number) => void; min: number; max: number; className: string; "aria-label": string }) {
+  const [text, setText] = useState(String(value));
+  const [focused, setFocused] = useState(false);
+  const shown = focused ? text : String(value);
+  return (
+    <input
+      type="text"
+      inputMode="numeric"
+      enterKeyHint="done"
+      autoComplete="off"
+      aria-label={ariaLabel}
+      value={shown}
+      onFocus={() => {
+        setText(String(value));
+        setFocused(true);
+      }}
+      onChange={(e) => setText(e.target.value.replace(/[^0-9]/g, ""))}
+      onBlur={() => {
+        setFocused(false);
+        const n = Number(text);
+        if (text !== "" && Number.isFinite(n)) onCommit(Math.min(max, Math.max(min, Math.round(n))));
+      }}
+      // 16 px at least (iOS zooms into smaller fields); the call sites pass text-base too
+      className={`text-base ${className}`}
+    />
+  );
+}
+
 export function MacroTargetsScreen() {
   const router = useRouter();
   const { profile, targets, hydrated, updateProfile } = useDiary();
@@ -235,32 +268,14 @@ export function MacroTargetsScreen() {
 
                 {mode === "ratios" && (
                   <div className="flex items-center gap-1 rounded-lg border border-card-border bg-page px-2 py-1 focus-within:ring-2 focus-within:ring-cobalt">
-                    <input
-                      type="number"
-                      min="5"
-                      max="80"
-                      step="1"
-                      aria-label="Tỉ lệ phần trăm đạm"
-                      value={proteinPct}
-                      onChange={(e) => setProteinPct(Number(e.target.value) || 0)}
-                      className="w-12 border-0 bg-transparent text-center font-display text-base font-extrabold tabular-nums text-text focus:outline-none"
-                    />
+                    <NumberField                      min={5}                      max={80}                      aria-label="Tỉ lệ phần trăm đạm"                      value={proteinPct}                      onCommit={setProteinPct}                      className="w-12 border-0 bg-transparent text-center font-display text-base font-extrabold tabular-nums text-text focus:outline-none"                    />
                     <span className="text-xs font-semibold text-secondary">%</span>
                   </div>
                 )}
 
                 {mode === "fixed" && (
                   <div className="flex items-center gap-1 rounded-lg border border-card-border bg-page px-2 py-1 focus-within:ring-2 focus-within:ring-cobalt">
-                    <input
-                      type="number"
-                      min="10"
-                      max="400"
-                      step="1"
-                      aria-label="Số gram đạm cố định"
-                      value={fixedProtein}
-                      onChange={(e) => setFixedProtein(Number(e.target.value) || 0)}
-                      className="w-16 border-0 bg-transparent text-center font-display text-base font-bold tabular-nums text-text focus:outline-none"
-                    />
+                    <NumberField                      min={10}                      max={400}                      aria-label="Số gram đạm cố định"                      value={fixedProtein}                      onCommit={setFixedProtein}                      className="w-16 border-0 bg-transparent text-center font-display text-base font-bold tabular-nums text-text focus:outline-none"                    />
                     <span className="text-xs font-semibold text-secondary">g</span>
                   </div>
                 )}
@@ -292,32 +307,14 @@ export function MacroTargetsScreen() {
 
                 {mode === "ratios" && (
                   <div className="flex items-center gap-1 rounded-lg border border-card-border bg-page px-2 py-1 focus-within:ring-2 focus-within:ring-cobalt">
-                    <input
-                      type="number"
-                      min="5"
-                      max="85"
-                      step="1"
-                      aria-label="Tỉ lệ phần trăm tinh bột"
-                      value={carbsPct}
-                      onChange={(e) => setCarbsPct(Number(e.target.value) || 0)}
-                      className="w-12 border-0 bg-transparent text-center font-display text-base font-bold tabular-nums text-text focus:outline-none"
-                    />
+                    <NumberField                      min={5}                      max={85}                      aria-label="Tỉ lệ phần trăm tinh bột"                      value={carbsPct}                      onCommit={setCarbsPct}                      className="w-12 border-0 bg-transparent text-center font-display text-base font-bold tabular-nums text-text focus:outline-none"                    />
                     <span className="text-xs font-semibold text-secondary">%</span>
                   </div>
                 )}
 
                 {mode === "fixed" && (
                   <div className="flex items-center gap-1 rounded-lg border border-card-border bg-page px-2 py-1 focus-within:ring-2 focus-within:ring-cobalt">
-                    <input
-                      type="number"
-                      min="10"
-                      max="600"
-                      step="1"
-                      aria-label="Số gram tinh bột cố định"
-                      value={fixedCarbs}
-                      onChange={(e) => setFixedCarbs(Number(e.target.value) || 0)}
-                      className="w-16 border-0 bg-transparent text-center font-display text-base font-bold tabular-nums text-text focus:outline-none"
-                    />
+                    <NumberField                      min={10}                      max={600}                      aria-label="Số gram tinh bột cố định"                      value={fixedCarbs}                      onCommit={setFixedCarbs}                      className="w-16 border-0 bg-transparent text-center font-display text-base font-bold tabular-nums text-text focus:outline-none"                    />
                     <span className="text-xs font-semibold text-secondary">g</span>
                   </div>
                 )}
@@ -349,32 +346,14 @@ export function MacroTargetsScreen() {
 
                 {mode === "ratios" && (
                   <div className="flex items-center gap-1 rounded-lg border border-card-border bg-page px-2 py-1 focus-within:ring-2 focus-within:ring-cobalt">
-                    <input
-                      type="number"
-                      min="5"
-                      max="80"
-                      step="1"
-                      aria-label="Tỉ lệ phần trăm chất béo"
-                      value={fatPct}
-                      onChange={(e) => setFatPct(Number(e.target.value) || 0)}
-                      className="w-12 border-0 bg-transparent text-center font-display text-base font-bold tabular-nums text-text focus:outline-none"
-                    />
+                    <NumberField                      min={5}                      max={80}                      aria-label="Tỉ lệ phần trăm chất béo"                      value={fatPct}                      onCommit={setFatPct}                      className="w-12 border-0 bg-transparent text-center font-display text-base font-bold tabular-nums text-text focus:outline-none"                    />
                     <span className="text-xs font-semibold text-secondary">%</span>
                   </div>
                 )}
 
                 {mode === "fixed" && (
                   <div className="flex items-center gap-1 rounded-lg border border-card-border bg-page px-2 py-1 focus-within:ring-2 focus-within:ring-cobalt">
-                    <input
-                      type="number"
-                      min="10"
-                      max="300"
-                      step="1"
-                      aria-label="Số gram chất béo cố định"
-                      value={fixedFat}
-                      onChange={(e) => setFixedFat(Number(e.target.value) || 0)}
-                      className="w-16 border-0 bg-transparent text-center font-display text-base font-bold tabular-nums text-text focus:outline-none"
-                    />
+                    <NumberField                      min={10}                      max={300}                      aria-label="Số gram chất béo cố định"                      value={fixedFat}                      onCommit={setFixedFat}                      className="w-16 border-0 bg-transparent text-center font-display text-base font-bold tabular-nums text-text focus:outline-none"                    />
                     <span className="text-xs font-semibold text-secondary">g</span>
                   </div>
                 )}

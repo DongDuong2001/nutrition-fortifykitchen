@@ -185,7 +185,9 @@ describe("press feedback", () => {
 describe("cc-57 motion details", () => {
   it("the bar has its own 300 ms token and the dialog scrim uses the pop time", () => {
     expect(motion).toMatch(/--m-bar: 300ms;/);
-    expect(main).toMatch(/\.m-bar \{[^}]*transform var\(--m-bar\) var\(--ease-out\),\s*background-color var\(--m-bar\) var\(--ease-out\)/);
+    // cc-64 (R3): transform only, the colour snaps at a level boundary
+    expect(main).toMatch(/\.m-bar \{[^}]*transition: transform var\(--m-bar\) var\(--ease-out\);/);
+    expect(main).not.toMatch(/\.m-bar \{[^}]*background-color var\(--m-bar\)/);
     expect(main).toMatch(/\.m-scrim-dialog \{\s*transition-duration: var\(--m-pop-in\);/);
     expect(main).toMatch(/\.m-scrim-dialog\[data-state="closed"\] \{\s*transition-duration: var\(--m-pop-out\);/);
   });

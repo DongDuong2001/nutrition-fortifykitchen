@@ -43,7 +43,7 @@ export function PhaseChecklist({
       <div key={it.id} className={rowClass} aria-busy={busy || undefined}>
         <label
           className={`flex flex-1 min-w-0 items-center self-stretch transition-transform ${
-            readOnly ? "cursor-default" : "cursor-pointer active:scale-[0.99] transition-press motion-reduce:active:scale-100"
+            readOnly ? "cursor-default" : "cursor-pointer m-tint transition-press"
           } ${isDesktop ? "gap-4" : "gap-3"}`}
         >
           <span className="w-11 h-11 -ml-2.5 flex items-center justify-center shrink-0">

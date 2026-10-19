@@ -68,7 +68,7 @@ export default function NutrientDetailPage({ params }: PageProps) {
 
   if (!def) {
     return (
-      <div className="min-h-screen bg-page flex items-center justify-center p-4">
+      <div className="min-h-dvh bg-page flex items-center justify-center p-4">
         <div className="text-center">
           <p className="text-secondary">Không tìm thấy vi chất.</p>
           <Link href="/micros" className="text-cobalt font-bold">
@@ -81,7 +81,7 @@ export default function NutrientDetailPage({ params }: PageProps) {
 
   if (!hydrated || !todayIso || !row) {
     return (
-      <div className="w-full min-h-screen bg-page text-text font-sans flex flex-col">
+      <div className="w-full min-h-dvh bg-page text-text font-sans flex flex-col">
         <h1 className="sr-only">Chi tiết vi chất — Đang tải</h1>
         <div className="bg-ink rounded-b-sheet h-44 motion-safe:animate-pulse" aria-hidden="true" />
         <div className="flex-1 w-full max-w-[560px] mx-auto p-4 flex flex-col gap-3">

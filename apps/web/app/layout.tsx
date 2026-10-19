@@ -41,6 +41,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   themeColor: INK_COLOR,
   viewportFit: "cover",
+  // cc-64 (N3): the on-screen keyboard shrinks the layout viewport, so a sheet's button is not left under it
+  interactiveWidget: "resizes-content",
 };
 
 export default function RootLayout({
@@ -54,7 +56,7 @@ export default function RootLayout({
         {/* Before the first paint: an app installed with the old start_url "/" opens Hôm nay, not the link page */}
         <script dangerouslySetInnerHTML={{ __html: STANDALONE_HOME_SCRIPT }} />
       </head>
-      <body className="bg-page text-text antialiased min-h-screen flex flex-col font-sans">
+      <body className="bg-page text-text antialiased min-h-dvh flex flex-col font-sans">
         <NavHistoryTracker />
         <PwaRegister />
         <TouchActive />

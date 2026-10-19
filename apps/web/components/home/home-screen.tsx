@@ -375,6 +375,11 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
   const barHost = useShellBottomBar(selecting && !backdrop);
 
   const showLoading = forceLoading || !hydrated;
+  // cc-64 (A2): the first draw after the skeleton fades in; later draws (another day) keep the day motion
+  const firstContent = useRef(true);
+  useEffect(() => {
+    if (!showLoading) firstContent.current = false;
+  });
   const showOffline = forceOffline || !isOnline;
 
   if (showLoading) return <HomeLoading backdrop={backdrop} />;
@@ -573,6 +578,7 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
             finished={isPast}
             selected={selected}
             kcalNote={unknownKcalNote(modeEntries(mode, entries))}
+            countKey={`${viewIso} ${JSON.stringify(mode)}`}
           />
           {coach && !selecting && (
             <div className="mt-2 flex min-h-11 flex-none items-center justify-end border-t border-t-card-border px-3 lg:px-0">
@@ -587,7 +593,7 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
               </button>
             </div>
           )}
-          <div key={viewIso} data-align-group="home-page" data-align-from="lg" className={`${dayMotion.current.className} flex min-h-0 flex-1 border-t border-t-divider lg:gap-4 lg:border-t-0 lg:pb-8 ${coach && !selecting ? "lg:mt-2" : "mt-2 lg:mt-4"}`}>
+          <div key={viewIso} data-align-group="home-page" data-align-from="lg" className={`${firstContent.current ? "m-content-in" : dayMotion.current.className} flex min-h-0 flex-1 border-t border-t-divider lg:gap-4 lg:border-t-0 lg:pb-8 ${coach && !selecting ? "lg:mt-2" : "mt-2 lg:mt-4"}`}>
             {!heavyReady && <div className="flex-1" aria-hidden="true" />}
             {heavyReady && (
               <FoodList

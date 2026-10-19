@@ -207,12 +207,32 @@
     overscroll-behavior-y: none;
   }
 
+  /* cc-64 (N8): a long press on a control does not select its text or open the link menu (iOS callout). The share
+     image keeps its menu: a long press is how a picture is saved there. Fields stay selectable. */
+  button,
+  nav a,
+  a.flex,
+  a.block,
+  a.inline-flex,
+  [role="button"],
+  [role="tab"] {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  a,
+  img {
+    -webkit-touch-callout: none;
+  }
+  img[data-share-image] {
+    -webkit-touch-callout: default;
+  }
+
   body {
     margin: 0;
     background-color: var(--color-page);
     color: var(--color-text);
     font-family: var(--font-sans);
-    min-height: 100vh;
+    min-height: 100dvh;
     overflow-x: hidden;
   }
 
@@ -268,6 +288,7 @@
     transform: none;
   }
   button.w-full,
+  button.flex-1,
   a.w-full,
   a.block,
   a.flex,
@@ -276,6 +297,7 @@
     position: relative;
   }
   button.w-full::after,
+  button.flex-1::after,
   a.w-full::after,
   a.block::after,
   a.flex::after,
@@ -291,6 +313,7 @@
     transition: opacity var(--m-tint-out) var(--ease-out);
   }
   button.w-full:active,
+  button.flex-1:active,
   a.w-full:active,
   a.block:active,
   a.flex:active,
@@ -299,6 +322,7 @@
     transform: none;
   }
   button.w-full:active::after,
+  button.flex-1:active::after,
   a.w-full:active::after,
   a.block:active::after,
   a.flex:active::after,
@@ -621,12 +645,15 @@
 .m-flip {
   transition: transform var(--m-row) var(--ease-in-out);
 }
-/* Bars: the fill grows from the left (scaleX) */
+/* cc-64 (A2): content that replaces its skeleton fades in (a cross-fade with the skeleton that just went) */
+.m-content-in {
+  animation: m-fade-in var(--m-fade) var(--ease-out) both;
+}
+/* Bars: the fill grows from the left (scaleX). cc-64 (R3): only the transform animates (compositor); the colour snaps
+   when the fill crosses a level, instead of repainting ~30 bars every frame */
 .m-bar {
   transform-origin: left center;
-  transition:
-    transform var(--m-bar) var(--ease-out),
-    background-color var(--m-bar) var(--ease-out);
+  transition: transform var(--m-bar) var(--ease-out);
 }
 /* A day changed with the arrows (direction: earlier from the left, later from the right): the new day's wrapper
    eases in from 12 px off to its place, as a transition from @starting-style, so a quick second tap starts from where
@@ -904,6 +931,9 @@ button.m-drag-lift[data-touch-drag="dragging"] {
   }
   .m-bar {
     transition: none;
+  }
+  .m-content-in {
+    animation-duration: var(--m-fade);
   }
   .m-day-earlier,
   .m-day-later {

@@ -72,6 +72,7 @@ export function QuickAddSheet({ open, onClose, mealName, onSubmit }: QuickAddShe
             value={input.name}
             onChange={set("name")}
             placeholder="Thêm nhanh"
+            enterKeyHint="next"
             maxLength={MAX_QUICK_NAME}
             autoComplete="off"
             className={fieldClass(false)}

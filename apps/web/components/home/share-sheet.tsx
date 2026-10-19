@@ -386,6 +386,7 @@ export function ShareSheet({
         {ready ? (
           // eslint-disable-next-line @next/next/no-img-element -- a blob URL made in the page, not a file to optimise
           <img
+            data-share-image
             src={ready.url}
             alt={ready.alt}
             width={ready.width}

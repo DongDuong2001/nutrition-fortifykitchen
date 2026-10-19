@@ -166,7 +166,8 @@ export function FoodList({
             className="mr-2 inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent p-0 active:scale-[0.97] transition-press motion-reduce:active:scale-100"
           >
             <span
-              className={`flex h-9 w-9 items-center justify-center rounded-full ${carried ? "bg-cobalt text-on-accent" : "bg-cobalt/10 text-cobalt"}`}
+              // cc-64 (A5): the fill and the glyph colour cross over (the press timing), instead of snapping
+              className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-[var(--m-press)] ease-out motion-reduce:transition-none ${carried ? "bg-cobalt text-on-accent" : "bg-cobalt/10 text-cobalt"}`}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 {carried ? <path d="m5 12.5 4.5 4.5L19 7.5" /> : <path d="M12 5v14M5 12h14" />}

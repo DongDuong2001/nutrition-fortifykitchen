@@ -21,7 +21,7 @@ export default function DevUiPage() {
   const [sheetInput, setSheetInput] = useState("");
 
   return (
-    <div className="w-full min-h-screen bg-page text-text flex flex-col relative font-sans pb-24">
+    <div className="w-full min-h-dvh bg-page text-text flex flex-col relative font-sans pb-24">
       {/* AppHeader Showcases: Daily, Sub, Tab */}
       <div className="flex flex-col gap-6 w-full mb-6">
         <section className="flex flex-col gap-2">
