@@ -28,10 +28,12 @@ GEOMETRY = """() => {
   const aside = document.querySelector("aside[aria-label='Vi chất']");
   const area = [...aside.children].find(c => c.scrollHeight > 0 && getComputedStyle(c).overflowY === 'auto');
   const block = aside.querySelector('[data-level-summary]');
+  const firstBar = area.querySelector('[role=progressbar]');
   const link = [...aside.querySelectorAll('a')].find(a => a.textContent.includes('Đủ 22 vi chất'));
   const a = area.getBoundingClientRect();
   const rows = [...area.querySelectorAll('[data-snap-row]')].map(r => r.getBoundingClientRect());
   const crossing = rows.filter(r => r.top < a.bottom - 0.5 && r.bottom > a.bottom + 0.5).length;
+  const crossRows = [...area.querySelectorAll('[data-snap-row]')].filter(e => { const r = e.getBoundingClientRect(); return r.top < a.bottom - 0.5 && r.bottom > a.bottom + 0.5; }).map(e => e.innerText.slice(0, 30) + ' ' + JSON.stringify(e.getBoundingClientRect()) + ' area ' + a.bottom + ' maxH ' + area.style.maxHeight + ' sh ' + area.scrollHeight + ' ch ' + area.clientHeight);
   const bars = [...area.querySelectorAll('[role=progressbar]')];
   const fills = new Set();
   let faded = 0;
@@ -47,8 +49,11 @@ GEOMETRY = """() => {
   return {
     areaTop: a.top, areaBottom: a.bottom, scrollable: area.scrollHeight > area.clientHeight + 1,
     blockTop: block ? block.getBoundingClientRect().top : null,
+    blockBottom: block ? block.getBoundingClientRect().bottom : null,
+    inArea: block ? area.contains(block) : false,
+    firstBarTop: firstBar ? firstBar.getBoundingClientRect().top : null,
     linkTop: link ? link.getBoundingClientRect().top : null,
-    crossing, fills: [...fills], faded,
+    crossing, crossRows, fills: [...fills], faded,
     mask: cs.maskImage || cs.webkitMaskImage || 'none',
     lastRowBottom: rows.length ? Math.max(...rows.map(r => r.bottom)) : null,
     scrollTop: area.scrollTop, maxScroll: area.scrollHeight - area.clientHeight,
@@ -75,9 +80,10 @@ def run(browser, size, level, tag):
     check(g["faded"] == 0, f"{tag}: every bar fill is at full opacity ({g['faded']} are not)")
     unknown = [c for c in g["fills"] if c not in LEVEL_COLOURS and c not in EMPTY]
     check(not unknown, f"{tag}: bars use only the level colours and the empty colour ({unknown})")
-    check(g["blockTop"] is not None and g["blockTop"] >= g["areaBottom"] - 0.5, f"{tag}: the x/N đạt block is below the area ({g['blockTop']} vs {g['areaBottom']})")
+    # cc-61: the verdict heads the column, above the scrolling area (which starts at the first band)
+    check((not g["inArea"]) and g["blockBottom"] <= g["areaTop"] + 0.5, f"{tag}: the x/N đạt verdict is the column header, above the area ({g['blockBottom']} vs {g['areaTop']})")
     check(g["linkTop"] is not None and g["linkTop"] >= g["areaBottom"] - 0.5, f"{tag}: Đủ 22 vi chất is below the area ({g['linkTop']} vs {g['areaBottom']})")
-    check(g["crossing"] == 0, f"{tag}: at the top, no row is cut by the area's bottom edge ({g['crossing']})")
+    check(g["crossing"] == 0, f"{tag}: at the top, no row is cut by the area's bottom edge ({g['crossing']} {g['crossRows']})")
     print(f"note: {tag} scrollable={g['scrollable']} area {g['areaTop']:.0f}-{g['areaBottom']:.0f}")
     pg.screenshot(path=os.path.join(SHOTS, f"v022-home-L{level}-{w}.png"))
     if g["scrollable"]:
@@ -85,7 +91,7 @@ def run(browser, size, level, tag):
         pg.wait_for_timeout(300)
         e = pg.evaluate(GEOMETRY)
         check(e["lastRowBottom"] <= e["areaBottom"] + 0.5, f"{tag}: scrolled to the end, the last row is whole ({e['lastRowBottom']:.1f} <= {e['areaBottom']:.1f})")
-        check(e["blockTop"] >= e["areaBottom"] - 0.5 and e["linkTop"] >= e["areaBottom"] - 0.5, f"{tag}: at the end the block and link are still below the area")
+        check(e["linkTop"] >= e["areaBottom"] - 0.5, f"{tag}: at the end the link is still below the area")
         pg.screenshot(path=os.path.join(SHOTS, f"v022-home-L{level}-end-{w}.png"))
     ctx.close()
 

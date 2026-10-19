@@ -474,8 +474,8 @@ function UnitPortionArea({
       {/* 2. Unit Tab Content */}
       {isUnitTab && (
         <div className="flex flex-col gap-2 w-full">
-          {/* Size chips */}
-          {unitServings.length > 0 && (
+          {/* Size chips: only with a choice (cc-61); one size is the tab above and the stepper below */}
+          {unitServings.length > 1 && (
             <div
               role="group"
               aria-label="Kích cỡ"
