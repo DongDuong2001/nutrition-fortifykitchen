@@ -6,7 +6,6 @@ import {
   type MockMacroStat,
   type MockMicroStat,
 } from "./mock/sample-day";
-import { calculateTargets } from "./targets";
 import { MOCK_FOODS, addCatalogFood, catalogChanged, setCatalogFoods, setCatalogStatus, type FoodItem } from "./mock/foods";
 import { searchFoods as searchMockFoods } from "./search";
 import type { SetupProfile } from "./onboarding";
@@ -181,38 +180,6 @@ export interface DaySummaryResponse {
   summary: Record<string, number | null>;
   targets?: unknown;
   meals: MealSlotSummary[];
-}
-
-export interface DiaryLog {
-  id: string;
-  user_id: string;
-  food_id: string;
-  kind?: "food" | "quick";
-  meal_slot: "breakfast" | "lunch" | "dinner" | "snack" | "pre_workout" | "preworkout" | "intraworkout" | "postworkout";
-  quantity: number;
-  serving_size_g: number;
-  nutrients_snapshot: NutrientValues;
-  log_date: string;
-  created_at: string;
-}
-
-export interface DailyProgress {
-  log_date: string;
-  total_nutrients: NutrientValues;
-  target_nutrients?: NutrientValues;
-  completion_percentages?: Record<string, number>;
-  logs_count: number;
-}
-
-export interface LogMealPayload {
-  id: string; // Client-generated UUID
-  food_id: string;
-  kind?: "food" | "quick";
-  meal_slot: "breakfast" | "lunch" | "dinner" | "snack" | "pre_workout" | "preworkout" | "intraworkout" | "postworkout";
-  quantity: number;
-  serving_size_g?: number;
-  log_date?: string;
-  calories?: number;
 }
 
 /**
@@ -505,12 +472,6 @@ export function reportStorageWorked(): void {
   void loadSyncEngine().then((loaded) => loaded.storageWorked());
 }
 
-/** The function that folds a day read from the server into the diary's list (lazy: only a sync needs it). */
-export const loadServerDay = () => withEngine((e) => e.applyServerDay);
-
-/** Starts reading the account's outbox from disk (and moves the old localStorage array over). Call when an account loads. */
-export const loadOfflineOutbox = (): Promise<void> => withEngine((e) => e.loadOfflineOutbox());
-
 /**
  * Sends the outbox in order, one run at a time. A write that fails again stays, and the later writes of its entry wait
  * behind it; no answer at all ends the run (offline). Held writes are sent only with `retryHeld` (Thử lại). Only one
@@ -522,8 +483,6 @@ export const syncOfflineOutbox = (options: { retryHeld?: boolean } = {}): Promis
 export const getPendingOfflineEntryIds = (): string[] => engine?.getPendingOfflineEntryIds() ?? [];
 /** Entry ids a refetch must leave as they are on the device: a write is queued or being sent. */
 export const pendingWriteIds = (): Set<string> => engine?.pendingWriteIds() ?? new Set<string>();
-/** Entry ids whose last write started at or after `time` (ms). */
-export const writtenSince = (time: number): string[] => engine?.writtenSince(time) ?? [];
 /** How many diary writes are being sent now. */
 export const writesInFlight = (): number => engine?.writesInFlight() ?? 0;
 /** Whether a side write (profile, weight, favourite, training) is waiting: a server copy read now must not replace it. */
@@ -531,12 +490,24 @@ export const hasPendingWrite = (entity: string): boolean => engine?.hasPendingWr
 /** The favourites changes waiting to be sent, oldest first: [foodId, on]. Applied on top of a list read from the server. */
 export const pendingFavouriteOps = (): Array<[string, boolean]> => engine?.pendingFavouriteOps() ?? [];
 
-/** Runs `onChange` when the outbox changes, here or in another tab (the screens' "Chưa lưu" markers follow it). */
-export function watchOutbox(onChange: () => void): () => void {
+/**
+ * Calls a function of the sync engine (loaded after the first paint). It is how the rest of the app reaches what lives there:
+ * the outbox, the history cache, the server-day merge, the account guard, the wipe on Đăng xuất.
+ */
+type EngineFn = { [K in keyof Engine]: Engine[K] extends (...args: never[]) => unknown ? K : never }[keyof Engine];
+export function callEngine<K extends EngineFn>(name: K, ...args: Parameters<Engine[K] extends (...a: never[]) => unknown ? Engine[K] : never>): Promise<Awaited<ReturnType<Engine[K] extends (...a: never[]) => unknown ? Engine[K] : never>>> {
+  return withEngine((loaded) => (loaded[name] as (...a: unknown[]) => unknown)(...args)) as never;
+}
+
+/**
+ * Runs `onChange` when the outbox changes, here or in another tab (the screens' "Chưa lưu" markers follow it), and `onDiary`
+ * when another tab saved something to the server (this tab then reads the server's day again).
+ */
+export function watchOutbox(onChange: () => void, onDiary?: () => void): () => void {
   let stop = () => {};
   let stopped = false;
   void loadSyncEngine().then((loaded) => {
-    if (!stopped) stop = loaded.watchOutbox(onChange);
+    if (!stopped) stop = loaded.watchOutbox(onChange, onDiary);
   });
   return () => {
     stopped = true;
@@ -544,14 +515,25 @@ export function watchOutbox(onChange: () => void): () => void {
   };
 }
 
-/** Queues an add to send later (kept for callers from before cc-49; diary writes queue themselves). */
-export function enqueueOfflineEntry(date: string, payload: Record<string, unknown>): void {
-  void withEngine((e) => e.enqueueOfflineEntry(date, payload));
-}
-
-/** Removes every queued write of an entry (an entry that never reached the server, deleted or undone). */
-export function dropOfflineEntry(id: string): void {
-  void withEngine((e) => e.dropOfflineEntry(id));
+/**
+ * Calls `onMismatch` when the account signed in on this browser is no longer `account` (another tab signed in as someone
+ * else, or signed out): from then on nothing of this page is written or sent (X1, lib/account-guard).
+ */
+export function watchAccountChange(account: string, onMismatch: (now: string | null) => void): () => void {
+  let stop = () => {};
+  let stopped = false;
+  void loadSyncEngine().then((loaded) => {
+    if (!stopped) {
+      stop = loaded.watchAccount(account, (now) => {
+        loaded.freezeWrites();
+        onMismatch(now);
+      });
+    }
+  });
+  return () => {
+    stopped = true;
+    stop();
+  };
 }
 
 /**
@@ -582,14 +564,6 @@ function profileBody(profile: SetupProfile): Record<string, unknown> {
 }
 
 export const apiClient = {
-  /**
-   * Get the complete typed day data matching design/SPEC.md
-   * (Backed by typed mock until backend API is ready)
-   */
-  async getTodayData(): Promise<MockDayData> {
-    return Promise.resolve(SAMPLE_DAY);
-  },
-
   /** The day as the server has it. Null in live mode when it could not be read: never an empty day, which a refetch would take for "everything was deleted". */
   async getDay(date?: string): Promise<DaySummaryResponse | null> {
     const targetDate = date || getTodayIsoVN();
@@ -618,167 +592,6 @@ export const apiClient = {
       },
       meals: [],
     };
-  },
-
-  async getDailyProgress(date?: string): Promise<{ progress: DailyProgress; logs: DiaryLog[] }> {
-    if (isLiveMode()) {
-      try {
-        const targetDate = date || getTodayIsoVN();
-        const res = await apiFetch(`/days/${encodeURIComponent(targetDate)}`);
-        if (res.ok) {
-          const json = await res.json();
-          const dayData = json.data ?? json;
-          if (dayData.meals && dayData.summary) {
-            const logs: DiaryLog[] = [];
-            for (const m of dayData.meals) {
-              for (const e of m.entries || []) {
-                logs.push({
-                  id: e.id,
-                  user_id: "",
-                  food_id: e.food_id || "",
-                  kind: e.kind,
-                  meal_slot: e.meal_slot,
-                  quantity: 1,
-                  serving_size_g: e.grams,
-                  nutrients_snapshot: e.nutrients || {},
-                  log_date: dayData.date,
-                  created_at: e.created_at,
-                });
-              }
-            }
-            const progress: DailyProgress = {
-              log_date: dayData.date,
-              total_nutrients: {
-                calories: dayData.summary.calories || dayData.summary.energy || 0,
-                protein: dayData.summary.protein || 0,
-                carbohydrates: dayData.summary.carbs || 0,
-                fat: dayData.summary.fat || 0,
-                fiber: dayData.summary.fiber || 0,
-                sodium: dayData.summary.sodium || 0,
-                potassium: dayData.summary.potassium || 0,
-                calcium: dayData.summary.calcium || 0,
-                magnesium: dayData.summary.magnesium || 0,
-                iron: dayData.summary.iron || 0,
-                zinc: dayData.summary.zinc || 0,
-              },
-              logs_count: logs.length,
-            };
-            return { progress, logs };
-          }
-          return dayData;
-        }
-      } catch {
-        // Fallback to mock on transport failure
-      }
-      return {
-        progress: {
-          log_date: date || getTodayIsoVN(),
-          total_nutrients: {
-            calories: 0,
-            protein: 0,
-            carbohydrates: 0,
-            fat: 0,
-            fiber: 0,
-            sodium: 0,
-            potassium: 0,
-            calcium: 0,
-            magnesium: 0,
-            iron: 0,
-            zinc: 0,
-          },
-          logs_count: 0,
-        },
-        logs: [],
-      };
-    }
-
-    // Convert SAMPLE_DAY to DailyProgress fallback
-    const targets = calculateTargets({
-      weightKg: 65,
-      goal: "maintain",
-      trainingMinutes: 60,
-      sex: "male",
-    });
-
-    const mockProgress: DailyProgress = {
-      log_date: date || SAMPLE_DAY.date,
-      total_nutrients: {
-        calories: SAMPLE_DAY.calories.consumed,
-        protein: SAMPLE_DAY.macros.find((m) => m.key === "protein")?.consumed || 62,
-        carbohydrates: SAMPLE_DAY.macros.find((m) => m.key === "carbs")?.consumed || 133,
-        fat: SAMPLE_DAY.macros.find((m) => m.key === "fat")?.consumed || 21,
-        fiber: SAMPLE_DAY.macros.find((m) => m.key === "fiber")?.consumed || 14,
-        sodium: 2900,
-        potassium: 3900,
-        calcium: 331,
-        magnesium: 410,
-        iron: 11,
-        zinc: 12.4,
-      },
-      target_nutrients: {
-        calories: targets.calories.min,
-        protein: targets.protein.min,
-        carbohydrates: targets.carbs.min,
-        fat: targets.fat.min,
-        fiber: targets.fiber.min,
-        sodium: targets.sodium.min,
-        potassium: targets.potassium.min,
-        calcium: targets.calcium.min,
-        magnesium: targets.magnesium.min,
-        iron: targets.iron.min,
-        zinc: targets.zinc.min,
-      },
-      completion_percentages: {
-        calories: SAMPLE_DAY.calories.percentage,
-        protein: 60,
-        carbohydrates: 52,
-        fat: 64,
-        fiber: 47,
-      },
-      logs_count: SAMPLE_DAY.meals.reduce((acc, m) => acc + m.items.length, 0),
-    };
-
-    return { progress: mockProgress, logs: [] };
-  },
-
-  async logMeal(payload: LogMealPayload): Promise<{ log: DiaryLog; today_progress: DailyProgress }> {
-    if (isLiveMode()) {
-      try {
-        const date = payload.log_date || getTodayIsoVN();
-        const res = await apiFetch(`/days/${date}/entries`, {
-          method: "POST",
-          body: JSON.stringify(payload),
-        });
-        if (res.ok) {
-          const json = await res.json();
-          return json.data ?? json;
-        }
-      } catch {
-        enqueueOfflineEntry(payload.log_date || getTodayIsoVN(), payload as unknown as Record<string, unknown>);
-      }
-    }
-
-    const dummyLog: DiaryLog = {
-      id: payload.id,
-      user_id: "mock-user",
-      food_id: payload.food_id,
-      meal_slot: payload.meal_slot,
-      quantity: payload.quantity,
-      serving_size_g: payload.serving_size_g || 100,
-      nutrients_snapshot: {
-        calories: 100,
-        protein: 10,
-        carbohydrates: 10,
-        fat: 2,
-        fiber: 1,
-        sodium: 50,
-      },
-      log_date: payload.log_date || "2026-10-10",
-      created_at: new Date().toISOString(),
-    };
-
-    const { progress } = await this.getDailyProgress();
-    return { log: dummyLog, today_progress: progress };
   },
 
   async searchFoods(query = "", category?: string, limit = 500): Promise<FoodItem[]> {

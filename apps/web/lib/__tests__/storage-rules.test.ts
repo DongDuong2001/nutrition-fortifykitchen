@@ -7,8 +7,8 @@ import { describe, expect, it } from "vitest";
 const read = (file: string) => readFileSync(path.resolve(__dirname, "..", file), "utf8");
 
 describe("never through deferred-write", () => {
-  it("the outbox modules do not use the idle writer at all", () => {
-    for (const file of ["outbox.ts", "api-client.ts", "idb.ts", "day-cache.ts"]) {
+  it("nothing the diary keeps goes through an idle writer: lib/deferred-write is gone, and no module names it", () => {
+    for (const file of ["outbox.ts", "api-client.ts", "idb.ts", "day-cache.ts", "sync-engine.ts", "history.ts", "diary-store.tsx"]) {
       let source = "";
       try {
         source = read(file);
@@ -19,10 +19,11 @@ describe("never through deferred-write", () => {
     }
   });
 
-  it("the diary store writes today's list at once, and only the sample edits wait for idle", () => {
+  it("the diary store writes its lists at once and tells a failed write to the person", () => {
     const source = read("diary-store.tsx");
-    expect(source).not.toMatch(/deferredWrites\.schedule\([^)]*ADDED_ENTRIES_KEY/);
-    expect(source).toMatch(/own\.setItem\(ADDED_ENTRIES_KEY/);
+    expect(source).toMatch(/persist\(ADDED_ENTRIES_KEY, edits\.added\)/);
+    expect(source).toMatch(/own\.setItem\(key, JSON\.stringify\(value\)\)/);
     expect(source).toMatch(/reportStorageFailure\(error\)/);
+    expect(() => read("deferred-write.ts")).toThrow();
   });
 });

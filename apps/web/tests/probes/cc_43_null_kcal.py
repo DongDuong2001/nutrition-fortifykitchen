@@ -50,7 +50,7 @@ def account_context(browser, size, entries):
     ctx.add_init_script(
         "try {"
         f"localStorage.setItem('h1t_mock_auth_v1', {json.dumps(json.dumps(store))});"
-        f"localStorage.setItem('h1t_profile_v1', {json.dumps(json.dumps(profile))});"
+        f"localStorage.setItem('h1t_profile_v1_{EMAIL}', {json.dumps(json.dumps(profile))});"
         f"localStorage.setItem('h1t_added_entries_v1_{EMAIL}', {json.dumps(json.dumps(entries))});"
         "} catch (e) {}"
     )

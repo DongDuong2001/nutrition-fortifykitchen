@@ -4,10 +4,15 @@ any anon key), not in probe:all. The API is a fake in this file (route intercept
   B  yesterday is editable: Hôm qua 18/10 has + Thêm, a food added there goes to POST /days/<yesterday>/entries and shows on that
      day (not today), and deleting it sends DELETE and takes it off; two days back is Chỉ xem, with no + Thêm, and /add?date= of
      it goes back to that day
-  C  sign-out with writes waiting asks first (Part 3)
+  D  history is the server's: a day three days back that this device never saw is read from GET /days/{date}, shows on Hôm nay
+     (Chỉ xem), is cached (one IndexedDB record), shows again from the cache with the network gone, and a second device sees it too
+  C  sign-out with writes waiting asks first (X8): "Còn 1 mục chưa đồng bộ. Đăng xuất bây giờ sẽ xóa chúng khỏi máy này." with
+     "Đồng bộ rồi đăng xuất" (the default) and "Vẫn đăng xuất"; offline the first keeps the dialog (the count stays), online it sends
+     the write and signs out; sign-out with nothing waiting goes straight to /signin; either way what the device kept is gone
 Run with: LIVE_BUILD=1 ALIGN_BASE_URL=http://localhost:3112 npm run probe -- tests/probes/cc_68.py
 Pick parts with CC68_ONLY=A,B
 """
+import base64
 import json
 import os
 import re
@@ -33,6 +38,7 @@ NOW_VN = datetime.now(timezone.utc) + timedelta(hours=7)
 TODAY = NOW_VN.strftime("%Y-%m-%d")
 YESTERDAY = (NOW_VN - timedelta(days=1)).strftime("%Y-%m-%d")
 TWO_BACK = (NOW_VN - timedelta(days=2)).strftime("%Y-%m-%d")
+THREE_BACK = (NOW_VN - timedelta(days=3)).strftime("%Y-%m-%d")
 PROFILE = {"sex": "male", "birth_year": 2000, "weight_kg": 65, "goal": "maintain", "display_name": "Probe", "training_minutes_default": 60}
 FOODS = [
     {
@@ -80,6 +86,9 @@ class FakeApi:
                 return route.fulfill(status=200, content_type="application/json", body=json.dumps({"data": PROFILE}))
             if req.method == "GET" and path == "/foods":
                 return route.fulfill(status=200, content_type="application/json", body=json.dumps({"data": {"items": FOODS, "total": len(FOODS)}}))
+            if req.method == "GET" and path == "/days":
+                # There is no range endpoint yet (apps/api has GET /days/{date} only)
+                return route.fulfill(status=404, content_type="application/json", body='{"error":{"code":"NOT_FOUND"}}')
             m = re.fullmatch(r"/days/([\d-]+)", path)
             if req.method == "GET" and m:
                 return route.fulfill(status=200, content_type="application/json", body=json.dumps(self.day(m.group(1))))
@@ -173,6 +182,61 @@ def pick_food(pg, name, button_name):
     button = pg.get_by_role("button", name=re.compile(button_name)).locator("visible=true").first
     button.wait_for(timeout=10000)
     button.click()
+
+
+def b64url(data):
+    return base64.urlsafe_b64encode(data).decode().rstrip("=")
+
+
+def supabase_session(email):
+    """A signed-in Supabase session as the browser client keeps it (cookie sb-localhost-auth-token), and the fake /auth/v1/user for it."""
+    now = int(time.time())
+    user = {"id": "00000000-0000-4000-8000-000000000068", "aud": "authenticated", "role": "authenticated", "email": email, "app_metadata": {"provider": "email", "providers": ["email"]}, "user_metadata": {"has_password": True}, "identities": [{"provider": "email"}], "created_at": "2026-10-01T00:00:00Z"}
+    jwt = ".".join([b64url(b'{"alg":"HS256","typ":"JWT"}'), b64url(json.dumps({"sub": user["id"], "email": email, "aud": "authenticated", "role": "authenticated", "exp": now + 3600}).encode()), "sig"])
+    session = {"access_token": jwt, "token_type": "bearer", "expires_in": 3600, "expires_at": now + 3600, "refresh_token": "refresh68", "user": user}
+    return user, "base64-" + base64.b64encode(json.dumps(session).encode()).decode()
+
+
+def signed_in_device(browser, api):
+    """A device on the fake API whose Supabase session is real enough for Cài đặt › Tài khoản to show the account and Đăng xuất."""
+    ctx, pg, st = device(browser, api)
+    user, cookie = supabase_session(EMAIL)
+    ctx.add_cookies([{"name": "sb-localhost-auth-token", "value": cookie, "url": BASE}])
+    # The last route registered wins: the catch-all first, then the two the account screen uses
+    ctx.route("http://localhost:54399/**", lambda route: route.fulfill(status=200, content_type="application/json", body="{}"))
+    ctx.route("http://localhost:54399/auth/v1/user", lambda route: route.fulfill(status=200, content_type="application/json", body=json.dumps(user)))
+    ctx.route("http://localhost:54399/auth/v1/logout*", lambda route: route.fulfill(status=204, body=""))
+    return ctx, pg, st
+
+
+def local_keys(pg):
+    return pg.evaluate("(email) => Object.keys(localStorage).filter((k) => k.endsWith('_' + email))", EMAIL)
+
+
+def open_account(pg):
+    pg.goto(BASE + "/settings/account", wait_until="domcontentloaded")
+    pg.get_by_text("Đăng xuất", exact=True).locator("visible=true").first.wait_for(timeout=20000)
+    pg.wait_for_timeout(500)
+
+
+def day_records(pg):
+    """The history cache: one record per day in IndexedDB (store 'days' of database 'h1t') for this account."""
+    return pg.evaluate(
+        """(email) => new Promise((resolve) => {
+             const open = indexedDB.open('h1t');
+             open.onerror = () => resolve([]);
+             open.onsuccess = () => {
+               try {
+                 const db = open.result;
+                 if (!db.objectStoreNames.contains('days')) return resolve([]);
+                 const all = db.transaction('days').objectStore('days').getAll();
+                 all.onsuccess = () => resolve(all.result.filter((r) => r.scope === email).map((r) => ({ date: r.date, n: r.entries.length, final: r.final })));
+                 all.onerror = () => resolve([]);
+               } catch (e) { resolve([]); }
+             };
+           })""",
+        EMAIL,
+    )
 
 
 def want(key):
@@ -271,6 +335,129 @@ with sync_playwright() as p:
         except Exception:
             pass
         check("/app?date=" + TWO_BACK in pg.url, f"B: /add?date= of it goes back to that day ({pg.url[len(BASE):]})")
+        ctx.close()
+
+    if want("D"):
+        api = FakeApi()
+        api.entries["d1"] = {"id": "d1", "date": THREE_BACK, "food_id": FOODS[5]["id"], "food_name": "Bún tươi", "grams": 200, "serving_label": "200 g", "meal_slot": "lunch", "calories": 210, "nutrients": {}, "created_at": "2026-10-16T05:00:00Z"}
+        ctx, pg, st = device(browser, api)
+        open_day(pg, THREE_BACK)
+        try:
+            row_of(pg, "Bún tươi").first.wait_for(timeout=15000)
+        except Exception:
+            pass
+        check(row_of(pg, "Bún tươi").count() >= 1, "D: a day this device never saw comes from the server")
+        check(any(c == f"GET /days/{THREE_BACK}" for c in st["calls"]), "D: it asked GET /days/{date}")
+        check(pg.get_by_text("Chỉ xem").count() >= 1 or pg.locator('a[data-tour="meal-add"]:visible').count() == 0, "D: it is Chỉ xem (two or more days back)")
+        pg.wait_for_timeout(800)
+        records = day_records(pg)
+        check(any(r["date"] == THREE_BACK and r["n"] == 1 and r["final"] for r in records), f"D: one cached record, final ({records})")
+        pg.screenshot(path=str(SHOTS / "D-history-390.png"))
+        # The network is gone: the cache shows it
+        api.offline = True
+        pg.reload(wait_until="domcontentloaded")
+        pg.locator('[data-align-group="home-page"]').first.wait_for(state="visible", timeout=20000)
+        pg.wait_for_timeout(1800)
+        close_tips(pg)
+        check(row_of(pg, "Bún tươi").count() >= 1, "D: offline, after a reload, the day shows from the cache")
+        ctx.close()
+        # Another device, nothing on it: the same day
+        ctx2, pg2, st2 = device(browser, api)
+        api.offline = False
+        open_day(pg2, THREE_BACK)
+        try:
+            row_of(pg2, "Bún tươi").first.wait_for(timeout=15000)
+        except Exception:
+            pass
+        check(row_of(pg2, "Bún tươi").count() >= 1, "D: a second device shows the same day (one diary on every device)")
+        ctx2.close()
+
+    if want("C"):
+        # Writes waiting: the person is asked first
+        api = FakeApi()
+        ctx, pg, st = signed_in_device(browser, api)
+        open_day(pg)
+        api.offline = True
+        pg.locator('a[data-tour="meal-add"]:visible', has_text="Thêm").first.click()
+        pg.wait_for_url(re.compile(r".*/add.*"), timeout=15000)
+        pick_food(pg, "Gạo lứt nấu", "^Thêm vào Bữa")
+        pg.wait_for_url(re.compile(r".*/app(\?.*)?$"), timeout=15000)
+        pg.wait_for_timeout(1200)
+        check(len(outbox(pg)) == 1, "C: one write waits in the outbox")
+        open_account(pg)
+        pg.get_by_text("Đăng xuất", exact=True).locator("visible=true").first.click()
+        dialog = pg.get_by_role("dialog", name="Đăng xuất?")
+        dialog.wait_for(timeout=10000)
+        text = dialog.inner_text()
+        check("Còn 1 mục chưa đồng bộ. Đăng xuất bây giờ sẽ xóa chúng khỏi máy này." in text, f"C: the confirm says how many ({text[:90]!r})")
+        sync_button = dialog.get_by_role("button", name="Đồng bộ rồi đăng xuất")
+        leave_button = dialog.get_by_role("button", name="Vẫn đăng xuất")
+        check(sync_button.count() == 1 and leave_button.count() == 1, "C: Đồng bộ rồi đăng xuất and Vẫn đăng xuất")
+        focused = pg.evaluate("() => document.activeElement && document.activeElement.textContent.trim()")
+        check(focused == "Đồng bộ rồi đăng xuất", f"C: Đồng bộ rồi đăng xuất is the default ({focused!r})")
+        check(pg.evaluate("() => location.pathname") == "/settings/account", "C: still signed in, on the account screen")
+        pg.screenshot(path=str(SHOTS / "C-confirm-390.png"))
+        # Offline the sync cannot send it: the dialog stays and says so
+        sync_button.click()
+        pg.wait_for_timeout(2500)
+        check(dialog.count() == 1 and "Chưa đồng bộ hết được" in dialog.inner_text() and "Còn 1 mục" in dialog.inner_text(), "C: offline the sync keeps the dialog and the count")
+        check(len(outbox(pg)) == 1, "C: the write is still in the outbox")
+        # Back online: it is sent, then the person is signed out and the device is clean
+        api.offline = False
+        sync_button.click()
+        try:
+            pg.wait_for_url(re.compile(r".*/signin.*"), timeout=20000)
+        except Exception:
+            pass
+        check("/signin" in pg.url, f"C: online it signs out to /signin ({pg.url[len(BASE):]})")
+        check(len(api.posts) == 1, f"C: the write reached the server first ({api.posts})")
+        check(local_keys(pg) == [] or all("settings" in k for k in local_keys(pg)), f"C: the device kept nothing of the account ({local_keys(pg)})")
+        check(len(outbox(pg)) == 0, "C: the outbox is empty")
+        ctx.close()
+
+        # Vẫn đăng xuất: signs out and drops what waits
+        api = FakeApi()
+        ctx, pg, st = signed_in_device(browser, api)
+        open_day(pg)
+        api.offline = True
+        pg.locator('a[data-tour="meal-add"]:visible', has_text="Thêm").first.click()
+        pg.wait_for_url(re.compile(r".*/add.*"), timeout=15000)
+        pick_food(pg, "Bún tươi", "^Thêm vào Bữa")
+        pg.wait_for_url(re.compile(r".*/app(\?.*)?$"), timeout=15000)
+        pg.wait_for_timeout(1000)
+        open_account(pg)
+        pg.get_by_text("Đăng xuất", exact=True).locator("visible=true").first.click()
+        dialog = pg.get_by_role("dialog", name="Đăng xuất?")
+        dialog.wait_for(timeout=10000)
+        dialog.get_by_role("button", name="Vẫn đăng xuất").click()
+        try:
+            pg.wait_for_url(re.compile(r".*/signin.*"), timeout=20000)
+        except Exception:
+            pass
+        check("/signin" in pg.url, f"C: Vẫn đăng xuất signs out ({pg.url[len(BASE):]})")
+        check(len(api.posts) == 0 and len(outbox(pg)) == 0, "C: …and drops the write that waited (nothing was sent, nothing is kept)")
+        check(local_keys(pg) == [] or all("settings" in k for k in local_keys(pg)), f"C: the device kept nothing of the account ({local_keys(pg)})")
+        ctx.close()
+
+        # Nothing waiting: no dialog
+        api = FakeApi()
+        ctx, pg, st = signed_in_device(browser, api)
+        open_day(pg)
+        pg.locator('a[data-tour="meal-add"]:visible', has_text="Thêm").first.click()
+        pg.wait_for_url(re.compile(r".*/add.*"), timeout=15000)
+        pick_food(pg, "Bắp luộc", "^Thêm vào Bữa")
+        pg.wait_for_url(re.compile(r".*/app(\?.*)?$"), timeout=15000)
+        pg.wait_for_timeout(1500)
+        check(len(api.posts) == 1 and len(outbox(pg)) == 0, "C: the write was saved: nothing waits")
+        check(len(local_keys(pg)) > 0, f"C: the device holds the account's data before Đăng xuất ({len(local_keys(pg))} keys)")
+        open_account(pg)
+        pg.get_by_text("Đăng xuất", exact=True).locator("visible=true").first.click()
+        try:
+            pg.wait_for_url(re.compile(r".*/signin.*"), timeout=20000)
+        except Exception:
+            pass
+        check("/signin" in pg.url and pg.get_by_role("dialog", name="Đăng xuất?").count() == 0, f"C: nothing waiting: straight to /signin, no dialog ({pg.url[len(BASE):]})")
+        check(local_keys(pg) == [] or all("settings" in k for k in local_keys(pg)), f"C: the device kept nothing of the account ({local_keys(pg)})")
         ctx.close()
 
     browser.close()

@@ -161,6 +161,7 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
     todayIso,
     dayArchive,
     isEditable,
+    loadDays,
     profile,
     addedEntries,
     getEntry,
@@ -207,6 +208,10 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
   // cc-68: yesterday can be edited like today; a day older than that is read-only
   const readOnly = isPast && viewIsoParam !== null && !isEditable(viewIsoParam);
   const editablePast = isPast && !readOnly;
+  // S5: a day older than yesterday is the server's: it is read (and cached on this device) when it is on screen
+  useEffect(() => {
+    if (readOnly && viewIsoParam && !backdrop) loadDays([viewIsoParam]);
+  }, [readOnly, viewIsoParam, backdrop, loadDays]);
   // The + of the nav adds to this day (see lib/home-scroll homeDay); the picture behind /add does not claim it
   const shownDay = editablePast ? viewIsoParam : null;
   useEffect(() => {

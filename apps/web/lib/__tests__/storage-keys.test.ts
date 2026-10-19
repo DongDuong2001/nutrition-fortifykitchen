@@ -6,9 +6,9 @@ import {
   SAMPLE_EDITS_KEY,
   SETTINGS_STORAGE_KEY,
   TRAINING_CHECKLIST_KEY,
-  adoptLegacyKeys,
+  dropLegacyKeys,
   OFFLINE_OUTBOX_KEY,
-  adoptLegacyPersonal,
+  dropLegacyPersonal,
   keyedStorage,
   loadMigrated,
   storageKey,
@@ -85,7 +85,7 @@ describe("keyedStorage", () => {
   });
 });
 
-describe("adoptLegacyKeys (the old unscoped keys move to the first account, once)", () => {
+describe("dropLegacyKeys (X8: the old unscoped keys are deleted, never adopted by whoever loads first)", () => {
   const legacy = () => ({
     [ADDED_ENTRIES_KEY]: '[{"id":"old"}]',
     [SAMPLE_EDITS_KEY]: '{"s":1}',
@@ -94,56 +94,35 @@ describe("adoptLegacyKeys (the old unscoped keys move to the first account, once
     [SAVED_MEALS_KEY]: '[{"id":"m"}]',
   });
 
-  it("moves every old key to the account and deletes the old keys", () => {
+  it("deletes every old key and gives nothing to any account", () => {
     const local = memory(legacy());
-    adoptLegacyKeys(local, null, "a@x.vn");
-    expect(local.data).toEqual({
-      [`${ADDED_ENTRIES_KEY}_a@x.vn`]: '[{"id":"old"}]',
-      [`${SAMPLE_EDITS_KEY}_a@x.vn`]: '{"s":1}',
-      [`${RECENT_FOODS_KEY}_a@x.vn`]: '[{"foodId":"f","servingLabel":"1 g"}]',
-      [`${FAVOURITES_KEY}_a@x.vn`]: '["f"]',
-      [`${SAVED_MEALS_KEY}_a@x.vn`]: '[{"id":"m"}]',
-    });
+    dropLegacyKeys(local, null);
+    expect(local.data).toEqual({});
+    expect(keyedStorage(local, false, "a@x.vn").getItem(ADDED_ENTRIES_KEY)).toBeNull();
   });
 
-  it("a second account gets nothing: the old keys moved once", () => {
-    const local = memory(legacy());
-    adoptLegacyKeys(local, null, "a@x.vn");
-    adoptLegacyKeys(local, null, "b@x.vn");
-    expect(keyedStorage(local, false, "b@x.vn").getItem(ADDED_ENTRIES_KEY)).toBeNull();
-    expect(keyedStorage(local, false, "a@x.vn").getItem(ADDED_ENTRIES_KEY)).toBe('[{"id":"old"}]');
-  });
-
-  it("an account that already has data keeps it and the old keys stay untouched", () => {
+  it("an account's own data stays, the old keys go", () => {
     const local = memory({ ...legacy(), [`${ADDED_ENTRIES_KEY}_a@x.vn`]: '[{"id":"mine"}]' });
-    adoptLegacyKeys(local, null, "a@x.vn");
-    expect(local.data[`${ADDED_ENTRIES_KEY}_a@x.vn`]).toBe('[{"id":"mine"}]');
-    expect(local.data[ADDED_ENTRIES_KEY]).toBe('[{"id":"old"}]');
+    dropLegacyKeys(local, null);
+    expect(local.data).toEqual({ [`${ADDED_ENTRIES_KEY}_a@x.vn`]: '[{"id":"mine"}]' });
   });
 
-  it("empty scoped values count as no data", () => {
-    const local = memory({ ...legacy(), [`${ADDED_ENTRIES_KEY}_a@x.vn`]: "[]", [`${SAMPLE_EDITS_KEY}_a@x.vn`]: "{}" });
-    adoptLegacyKeys(local, null, "a@x.vn");
-    expect(local.data[`${ADDED_ENTRIES_KEY}_a@x.vn`]).toBe('[{"id":"old"}]');
-    expect(local.data[ADDED_ENTRIES_KEY]).toBeUndefined();
-  });
-
-  it("an old sessionStorage copy goes to the account too", () => {
+  it("an old sessionStorage copy goes too", () => {
     const local = memory();
     const session = memory({ [ADDED_ENTRIES_KEY]: '[{"id":"s"}]' });
-    adoptLegacyKeys(local, session, "a@x.vn");
-    expect(local.data).toEqual({ [`${ADDED_ENTRIES_KEY}_a@x.vn`]: '[{"id":"s"}]' });
+    dropLegacyKeys(local, session);
+    expect(local.data).toEqual({});
     expect(session.data).toEqual({});
   });
 
   it("leaves demo keys alone", () => {
     const local = memory({ ...legacy(), [`${ADDED_ENTRIES_KEY}_demo`]: '[{"id":"d"}]' });
-    adoptLegacyKeys(local, null, "a@x.vn");
+    dropLegacyKeys(local, null);
     expect(local.data[`${ADDED_ENTRIES_KEY}_demo`]).toBe('[{"id":"d"}]');
   });
 
   it("does nothing with no storage", () => {
-    expect(() => adoptLegacyKeys(null, null, "a@x.vn")).not.toThrow();
+    expect(() => dropLegacyKeys(null, null)).not.toThrow();
   });
 });
 
@@ -209,42 +188,34 @@ describe("loadMigrated (session values move to local storage once)", () => {
   });
 });
 
-describe("adoptLegacyPersonal (the old profile, settings and training ticks move to the first account, once)", () => {
-  it("moves each old global value to the first account and removes the old key", () => {
-    const local = memory({ [PROFILE_KEY]: '{"sex":"male"}', [SETTINGS_STORAGE_KEY]: '{"language":"en"}' });
-    adoptLegacyPersonal(local, "a@x.vn");
-    expect(local.getItem(`${PROFILE_KEY}_a@x.vn`)).toBe('{"sex":"male"}');
-    expect(local.getItem(`${SETTINGS_STORAGE_KEY}_a@x.vn`)).toBe('{"language":"en"}');
-    expect(local.getItem(PROFILE_KEY)).toBeNull();
-    expect(local.getItem(SETTINGS_STORAGE_KEY)).toBeNull();
+describe("dropLegacyPersonal (the old profile, settings and ticks are deleted; the old outbox is the one thing an account takes)", () => {
+  it("deletes each old global value and gives it to no account", () => {
+    const local = memory({ [PROFILE_KEY]: '{"sex":"male"}', [SETTINGS_STORAGE_KEY]: '{"language":"en"}', [TRAINING_CHECKLIST_KEY]: "{}" });
+    dropLegacyPersonal(local, "a@x.vn");
+    expect(local.data).toEqual({});
   });
 
-  it("the old unscoped offline outbox is adopted by the first account, not left orphaned", () => {
+  it("the old unscoped offline outbox is writes that never reached the server: the first account takes it, so nothing is lost", () => {
     const local = memory({ [OFFLINE_OUTBOX_KEY]: '[{"id":"e1"}]' });
-    adoptLegacyPersonal(local, "a@x.vn");
+    dropLegacyPersonal(local, "a@x.vn");
     expect(local.getItem(`${OFFLINE_OUTBOX_KEY}_a@x.vn`)).toBe('[{"id":"e1"}]');
+    expect(local.getItem(OFFLINE_OUTBOX_KEY)).toBeNull();
+    // A later account finds nothing left to take
+    dropLegacyPersonal(local, "b@x.vn");
+    expect(local.getItem(`${OFFLINE_OUTBOX_KEY}_b@x.vn`)).toBeNull();
+  });
+
+  it("an account that has an outbox of its own keeps it, and the old key still goes", () => {
+    const local = memory({ [OFFLINE_OUTBOX_KEY]: "old", [`${OFFLINE_OUTBOX_KEY}_a@x.vn`]: "own" });
+    dropLegacyPersonal(local, "a@x.vn");
+    expect(local.getItem(`${OFFLINE_OUTBOX_KEY}_a@x.vn`)).toBe("own");
     expect(local.getItem(OFFLINE_OUTBOX_KEY)).toBeNull();
   });
 
-  it("a later account finds nothing left to take", () => {
-    const local = memory({ [TRAINING_CHECKLIST_KEY]: '{"2026-10-11":{"minutes":60,"ticked":[]}}' });
-    adoptLegacyPersonal(local, "a@x.vn");
-    adoptLegacyPersonal(local, "b@x.vn");
-    expect(local.getItem(`${TRAINING_CHECKLIST_KEY}_b@x.vn`)).toBeNull();
-    expect(local.getItem(`${TRAINING_CHECKLIST_KEY}_a@x.vn`)).toBe('{"2026-10-11":{"minutes":60,"ticked":[]}}');
-  });
-
-  it("keeps an account's own value, and the old key still goes", () => {
-    const local = memory({ [PROFILE_KEY]: "old", [`${PROFILE_KEY}_a@x.vn`]: "own" });
-    adoptLegacyPersonal(local, "a@x.vn");
-    expect(local.getItem(`${PROFILE_KEY}_a@x.vn`)).toBe("own");
-    expect(local.getItem(PROFILE_KEY)).toBeNull();
-  });
-
   it("does nothing without storage or without an old value", () => {
-    expect(() => adoptLegacyPersonal(null, "a@x.vn")).not.toThrow();
+    expect(() => dropLegacyPersonal(null, "a@x.vn")).not.toThrow();
     const local = memory();
-    adoptLegacyPersonal(local, "a@x.vn");
+    dropLegacyPersonal(local, "a@x.vn");
     expect(local.data).toEqual({});
   });
 });
@@ -303,10 +274,10 @@ describe("account data stays with its account (profile, reminders and training t
     expect(readDay("2026-10-11")).toEqual({ minutes: 60, ticked: ["intra-carb"] });
   });
 
-  it("the old global values are kept for the first account only", async () => {
+  it("X8: the old global values are deleted: no account, the first one included, gets them", async () => {
     local.setItem(PROFILE_KEY, JSON.stringify({ ...SAMPLE_PROFILE, displayName: "Cũ" }));
     await signUpWithPassword("a@example.com", "abcdef12");
-    expect(loadProfile(2026).displayName).toBe("Cũ");
+    expect(loadProfile(2026)).toEqual(SAMPLE_PROFILE);
     expect(local.getItem(PROFILE_KEY)).toBeNull();
 
     await signOut();

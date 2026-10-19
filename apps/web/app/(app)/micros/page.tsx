@@ -90,11 +90,15 @@ export default function MicrosPage() {
 }
 
 function MicrosContent() {
-  const { data: diaryData, hydrated, profile, todayIso, isEditable } = useDiary();
+  const { data: diaryData, hydrated, profile, todayIso, isEditable, loadDays } = useDiary();
   const searchParams = useSearchParams();
   // ?date= picks a past day (read-only, as everything about a past day). Read after mount so the first render matches the server.
   const viewIso = hydrated && todayIso ? viewedIsoDate(searchParams?.get("date"), todayIso) : null;
   const isPast = viewIso !== null && viewIso !== todayIso;
+  // S5: an older day is read from the server (cached on this device) when it is on screen
+  useEffect(() => {
+    if (isPast && viewIso) loadDays([viewIso]);
+  }, [isPast, viewIso, loadDays]);
   const diaryHref = isPast && viewIso ? `${HOME_ROUTE}?date=${viewIso}` : HOME_ROUTE;
   const dateQuery = isPast && viewIso ? `?date=${viewIso}` : "";
   const pastData = useMemo(

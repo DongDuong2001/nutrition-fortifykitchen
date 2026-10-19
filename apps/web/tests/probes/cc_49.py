@@ -146,17 +146,20 @@ def device(browser, api, size=PHONE, signed_in=True):
 def open_today(pg):
     pg.goto(BASE + "/app", wait_until="domcontentloaded")
     pg.locator('[data-align-group="home-page"]').first.wait_for(state="visible", timeout=20000)
-    pg.wait_for_timeout(800)
+    pg.wait_for_timeout(1400)
+    close_tips(pg)
 
 
 def close_tips(pg):
-    """A first-visit tip of a live account covers the screen; Đã hiểu closes it."""
-    tip = pg.get_by_role("button", name="Đã hiểu").locator("visible=true")
-    for _ in range(3):
-        if tip.count() == 0:
-            return
-        tip.first.click()
-        pg.wait_for_timeout(300)
+    """A first-visit tip of a live account covers the screen: Đã hiểu closes it. So does Có gì mới (cc-68: Để sau): a live
+    account has not seen the newest release, and the sheet opens by itself a moment after Hôm nay."""
+    for name in ("Đã hiểu", "Để sau"):
+        button = pg.get_by_role("button", name=name).locator("visible=true")
+        for _ in range(3):
+            if button.count() == 0:
+                break
+            button.first.click()
+            pg.wait_for_timeout(300)
 
 
 def add_food(pg, name, before_add=None):

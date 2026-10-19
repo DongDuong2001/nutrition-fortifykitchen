@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PillButton } from "@/components/ui/pill-button";
 import { Sheet } from "./ui/sheet";
 import { useDiary } from "../lib/diary-store";
@@ -52,8 +52,12 @@ export function CalendarSheet({ open, onClose, selectedIso, onPick }: CalendarSh
 
 // Mounted only while open, so each opening starts on the viewed day's month.
 function CalendarMonth({ selectedIso, onPick }: Pick<CalendarSheetProps, "selectedIso" | "onPick">) {
-  const { todayIso, data, targets } = useDiary();
+  const { todayIso, data, targets, loadDays, dayArchive } = useDiary();
   const [month, setMonth] = useState(() => monthOf(selectedIso));
+  // S5: the days of the month on screen are read from the server (cached on this device) when this month is shown
+  useEffect(() => {
+    if (todayIso) loadDays(monthGrid(month, todayIso).days.filter((d) => !d.future).map((d) => d.iso));
+  }, [month, todayIso, loadDays]);
   if (!todayIso) return null;
   const today: string = todayIso;
 
@@ -62,6 +66,8 @@ function CalendarMonth({ selectedIso, onPick }: Pick<CalendarSheetProps, "select
   const canGoNext = month < monthOf(today);
 
   // Today's kcal comes from the diary; a past day from its own entries
+  // dayArchive: a day read from the server changes what dayEntries returns
+  void dayArchive;
   const statusOf = (iso: string): DayStatus => {
     const kcal = iso === today ? data.calories.consumed : entriesKcal(dayEntries(iso, today));
     return dayStatus(kcal ?? 0, range);

@@ -1,14 +1,21 @@
-import { apiFetch, diaryTimeout, serverAnswer, writeOutcome, PAST_DAY_READ_ONLY, pruneOutbox, type SyncResult, type WriteResult } from "./api-client";
+import { apiClient, apiFetch, diaryTimeout, serverAnswer, writeOutcome, PAST_DAY_READ_ONLY, pruneOutbox, type SyncResult, type WriteResult } from "./api-client";
 import { currentAccountId } from "./auth-actions";
 import { isDemo } from "./demo";
 import { getTodayIsoVN } from "./date";
 import { isEditableDay } from "./day-rules";
 import { generateUuid } from "./uuid";
+import type { AddedDiaryEntry } from "./diary-edits";
 import { isRecipeId } from "./recipe";
 import { reportClientError } from "./client-errors";
 import { clearStorageAlert, raiseStorageAlert } from "./sync-state";
 import { storageErrorKind } from "./storage-error";
 import { requestPersistentStorage } from "./storage-persist";
+import { onTab, postTab } from "./tab-sync";
+export { watchAccount } from "./account-guard";
+export { unsyncedCount, wipeAccount } from "./account-wipe";
+export { initHistory, requestDays, saveHistoryDays } from "./history";
+import { applyServerDay } from "./server-day";
+import { rememberServerTraining } from "./training-minutes";
 export { applyServerDay } from "./server-day";
 import {
   STALE_SENDING_MS,
@@ -78,20 +85,6 @@ function makeItem(write: DiaryWrite, extra: Partial<OutboxItem> = {}): OutboxIte
   };
 }
 
-/** Queues an add to send later (kept for callers from before cc-49; diary writes queue themselves). */
-export function enqueueOfflineEntry(date: string, payload: Record<string, unknown>): void {
-  const scope = currentScope();
-  if (scope) void putItem(scope, makeItem({ id: (payload.id as string) || `offline-${Date.now()}`, date, payload }));
-}
-
-/** Removes every queued write of an entry (an entry that never reached the server, deleted or undone). */
-export function dropOfflineEntry(id: string): void {
-  const scope = currentScope();
-  if (!scope) return;
-  const keys = readItems(scope).filter((item) => item.id === id).map(itemKey);
-  if (keys.length > 0) void removeItems(scope, keys);
-}
-
 /**
  * Points `account`'s queued writes that name food `from` (a recipe's local id) at `to` (its server food), and lifts
  * their hold (the server refused the local id), so the next sync sends them. A write held for good stays held.
@@ -122,6 +115,8 @@ const writeStartedAt = new Map<string, number>();
 /** For tests: forgets the writes this page life had in the air (a page that was killed has none). */
 export function resetWriteMemory(): void {
   wired = false;
+  frozen = false;
+  lastDiaryPost = 0;
   inFlight.clear();
   sendingKeys.clear();
   writeStartedAt.clear();
@@ -214,6 +209,7 @@ async function attempt(scope: OutboxScope, item: OutboxItem): Promise<Sent> {
   if (!current) return sent;
   if (sent.outcome === "saved") {
     await removeItems(scope, [item.key]);
+    tellOtherTabs(scope);
   } else if (sent.outcome === "held") {
     await putItem(scope, { ...current, state: "held", retries: (current.retries ?? 0) + 1, held: { status: sent.status, message: sent.message, final: sent.final } });
   } else {
@@ -230,6 +226,8 @@ async function attempt(scope: OutboxScope, item: OutboxItem): Promise<Sent> {
  */
 export function diaryWrite(write: DiaryWrite): Promise<WriteResult> {
   wireAlerts();
+  // The account changed under this tab (lib/account-guard): nothing of this page goes out, or is kept, for anyone
+  if (frozen) return Promise.resolve({ state: "queued" });
   writeStartedAt.set(write.id, Date.now());
   const scope = currentScope();
   const before = inFlight.get(write.id) ?? Promise.resolve<WriteResult>({ state: "saved" });
@@ -279,6 +277,14 @@ export function diaryWrite(write: DiaryWrite): Promise<WriteResult> {
   return run;
 }
 
+// Set when the account changed under this tab: the page reloads to the gate, and until then nothing is written or sent
+let frozen = false;
+
+/** The account this tab loaded for is no longer the signed-in one: no write is made or sent from this page any more. */
+export function freezeWrites(): void {
+  frozen = true;
+}
+
 let syncQueue: Promise<SyncResult> = Promise.resolve({ saved: [], held: [] });
 
 /**
@@ -309,6 +315,7 @@ function sendingElsewhere(item: OutboxItem, now: number): boolean {
 
 async function runOutbox(retryHeld: boolean): Promise<SyncResult> {
   const result = EMPTY_RESULT();
+  if (frozen) return result;
   // The run belongs to the account signed in when it starts: its writes never go out with another account's session
   const account = currentAccountId();
   const scope = currentScope();
@@ -357,6 +364,7 @@ async function runOutbox(retryHeld: boolean): Promise<SyncResult> {
  * (last write wins, by `updatedAt`), so a long offline stretch sends one request per thing, not one per tap.
  */
 export function sideWrite(write: { kind: OutboxKind; entity: string; method: "PUT" | "POST" | "DELETE"; path: string; payload: Record<string, unknown>; day?: string }): Promise<WriteResult> {
+  if (frozen) return Promise.resolve({ state: "queued" });
   const scope = currentScope();
   const now = Date.now();
   // The thing's id is its entity, so writes of one thing are sent in order (the chain below) and its older queued ones go
@@ -415,15 +423,31 @@ function wireAlerts(): void {
   onStorageOk(clearStorageAlert);
 }
 
-/** Runs `onChange` when the outbox changes here or in another tab. Returns the unsubscribe. */
-export function watchOutbox(onChange: () => void): () => void {
+/**
+ * Runs `onChange` when the outbox changes here or in another tab, and `onDiary` when another tab says the server has
+ * something new for the diary (a write of its was saved): this tab reads the server's day again. Returns the unsubscribe.
+ */
+export function watchOutbox(onChange: () => void, onDiary?: () => void): () => void {
   wireAlerts();
   const off = subscribeOutbox(onChange);
   const offTabs = listenForOtherTabs(() => currentScope());
+  const offDiary = onTab((message) => {
+    if (message.type === "diary" && message.scope === currentScope()?.id) onDiary?.();
+  });
   return () => {
     off();
     offTabs();
+    offDiary();
   };
+}
+
+// A saved write tells the other tabs (at most once in a while), so they read the server's day instead of showing an old one
+let lastDiaryPost = 0;
+function tellOtherTabs(scope: OutboxScope): void {
+  const now = Date.now();
+  if (now - lastDiaryPost < 400) return;
+  lastDiaryPost = now;
+  postTab({ type: "diary", scope: scope.id });
 }
 
 /** The diary's list could not be written (no room, storage blocked): the lasting banner goes up. */
@@ -434,4 +458,21 @@ export function storageFailed(error: unknown): void {
 /** A write of the diary's list worked: the banner of a full disk goes down. */
 export function storageWorked(): void {
   clearStorageAlert();
+}
+
+/**
+ * Reads the server's day `day` for the diary's list: null when it did not come (offline, 401 after the session refresh, 5xx:
+ * the device keeps what it has) or another account signed in meanwhile; else the function that folds it into the list.
+ * What has a write queued, being sent, or started since `startedAt` stays as the device has it.
+ */
+export async function readServerDay(
+  account: string,
+  day: string,
+  pendingAtStart: ReadonlySet<string>,
+  startedAt: number
+): Promise<((added: AddedDiaryEntry[]) => AddedDiaryEntry[]) | null> {
+  const summary = await apiClient.getDay(day);
+  if (!summary || !Array.isArray(summary.meals) || currentAccountId() !== account) return null;
+  rememberServerTraining(account, day, summary.training_minutes);
+  return (added) => applyServerDay(added, summary, day, getTodayIsoVN(), { keep: new Set([...pendingAtStart, ...pendingWriteIds(), ...writtenSince(startedAt)]), startedAt });
 }

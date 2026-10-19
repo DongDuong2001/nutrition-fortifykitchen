@@ -109,6 +109,31 @@ export async function idbBatch(store: StoreName, ops: IdbOp[]): Promise<IdbResul
   });
 }
 
+/** Several records by key, in one read transaction (a key with no record gives null). */
+export async function idbGetMany<T>(store: StoreName, keys: IDBValidKey[]): Promise<IdbResult<Array<T | null>>> {
+  if (keys.length === 0) return { ok: true, value: [] };
+  const db = await openDb();
+  if (!db) return unavailable;
+  return new Promise((resolve) => {
+    try {
+      const tx = db.transaction(store, "readonly");
+      const s = tx.objectStore(store);
+      const out: Array<T | null> = new Array(keys.length).fill(null);
+      keys.forEach((key, i) => {
+        const request = s.get(key);
+        request.onsuccess = () => {
+          out[i] = (request.result as T | undefined) ?? null;
+        };
+      });
+      tx.oncomplete = () => resolve({ ok: true, value: out });
+      tx.onerror = () => resolve({ ok: false, error: tx.error });
+      tx.onabort = () => resolve({ ok: false, error: tx.error ?? new Error("aborted") });
+    } catch (error) {
+      resolve({ ok: false, error });
+    }
+  });
+}
+
 /** Every record of a store (the outbox and the day cache are small: a few hundred records at most). */
 export async function idbAll<T>(store: StoreName): Promise<IdbResult<T[]>> {
   return idbRun<T[]>(store, "readonly", (s) => s.getAll() as IDBRequest<T[]>);

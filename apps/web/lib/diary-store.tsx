@@ -18,14 +18,13 @@ import {
   DAY_ARCHIVE_KEY,
   RECENT_FOODS_KEY,
   SAMPLE_EDITS_KEY,
-  adoptLegacyKeys,
+  dropLegacyKeys,
   browserLocal,
   browserSession,
   keyedStorage,
   type KeyValueStore,
 } from "./storage-keys";
 import { blankDay, dayEntries, setDayArchive, statDisplay } from "./day-history";
-import { deferredWrites } from "./deferred-write";
 import { whenIdle } from "./idle";
 import { totalsFromEntries } from "./day-totals";
 import { microsSummaryFor } from "./lacking";
@@ -40,16 +39,15 @@ import {
   apiClient,
   getPendingOfflineEntryIds,
   hasPendingWrite,
-  loadOfflineOutbox,
+  callEngine,
   pendingFavouriteOps,
   pendingWriteIds,
-  loadServerDay,
   reportStorageFailure,
   reportStorageWorked,
   syncOfflineOutbox,
+  watchAccountChange,
   watchOutbox,
   writesInFlight,
-  writtenSince,
   type SyncResult,
   type WriteResult,
 } from "./api-client";
@@ -84,7 +82,7 @@ import {
   type Profile,
 } from "./profile";
 import type { CompleteTargets } from "./targets";
-import { rememberServerTraining, subscribeTraining, trainingMinutesFor, trainingVersion } from "./training-minutes";
+import { subscribeTraining, trainingMinutesFor, trainingVersion } from "./training-minutes";
 import {
   type AddedDiaryEntry,
   type Amounts,
@@ -233,6 +231,11 @@ interface DiaryContextValue {
   todayIso: string | null;
   /** Earlier days the user logged, by date (yesterday's entries included while it is editable); memo dependency for anything that calls dayEntries. */
   dayArchive: DayArchive;
+  /**
+   * Reads the days `isos` before the editable ones (S5: from the server, cached on this device) so history screens have
+   * them: the calendar's month, Tổng quan's period, an older day on Hôm nay. Days already asked for are not asked again.
+   */
+  loadDays: (isos: readonly string[] | null) => void;
   /** Whether a day can be added to, edited and deleted from: today, and yesterday (lib/day-rules). False before mount and in demo for any earlier day. */
   isEditable: (iso: string) => boolean;
   hydrated: boolean;
@@ -525,7 +528,7 @@ function withNewIds(entries: AddedDiaryEntry[], day: string): AddedDiaryEntry[] 
 
 /** " hôm qua" after a message about an entry added to yesterday; nothing for today. */
 function onDayText(day: string, todayIso: string): string {
-  return day === todayIso ? "" : day === yesterdayOf(todayIso) ? " hôm qua" : ` ngày ${day.slice(8)}/${day.slice(5, 7)}`;
+  return day === todayIso ? "" : " hôm qua";
 }
 
 
@@ -623,20 +626,6 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     [markSynced, showNotice]
   );
 
-  // The answer to a side write (profile, weight, favourite): a refusal is told once, the rest waits in the outbox
-  const trackSide = useCallback(
-    (write: Promise<WriteResult>) => {
-      setSyncVersion((v) => v + 1);
-      write
-        .then((result) => {
-          setSyncVersion((v) => v + 1);
-          if (result.state === "held") showNotice(syncNotice([{ id: "side", status: result.status ?? 0, message: result.message ?? "", date: getTodayIsoVN(), final: false }], unsavedShown.current));
-        })
-        .catch(() => {});
-    },
-    [showNotice]
-  );
-
   // A food without a server row (a recipe made in the app) is never sent: it stays on this device (Chỉ trên máy này).
   // S14: the day is the entry's own, worked out when the write is made (not the date the screen last showed, which is
   // wrong after the phone slept past midnight)
@@ -648,6 +637,25 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     },
     [track]
   );
+
+  // S5: days older than the editable ones are the server's; this device keeps a cache. The days already asked for are not asked again.
+  const requestedDays = useRef(new Set<string>());
+  const loadDays = useCallback(
+    (isos: readonly string[] | null) => {
+      const account = currentAccountId();
+      if (isLiveMode() && !demo && account) void callEngine("requestDays", account, isos, pastDaysRef.current, requestedDays.current, (days) => setArchive((prev) => ({ ...prev, ...days })));
+    },
+    [demo]
+  );
+
+  // Days that left the editable list (the date moved on): kept in the history, the writes the server never confirmed sent again
+  const fileDays = useCallback((past: DayArchive) => {
+    setArchive((prev) => mergeArchive(prev, past));
+    const account = currentAccountId();
+    if (!isLiveMode() || !account) return;
+    // Entries of those days the server never confirmed are sent again; a day beyond the window refuses them (lasting marker)
+    void callEngine("saveHistoryDays", account, past).then((unsent) => unsent.forEach((e) => sendAdd(e)));
+  }, [sendAdd]);
 
   /**
    * Sends the outbox, then reads the server's day: `iso` (today), and with `earlier` the days before it that can still be
@@ -664,16 +672,10 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     const pendingAtStart = pendingWriteIds();
 
     const readDay = async (day: string) => {
-      const daySummary = await apiClient.getDay(day);
-      // Not read (offline, 401 after the session refresh, 5xx): the device keeps what it has. Another account signed
-      // in meanwhile: this day is not theirs
-      if (!daySummary || !Array.isArray(daySummary.meals) || currentAccountId() !== account) return false;
-      rememberServerTraining(account, day, daySummary.training_minutes);
-      const apply = await loadServerDay();
+      const apply = await callEngine("readServerDay", account, day, pendingAtStart, startedAt);
+      if (!apply) return false;
       setEdits((prev) => {
-        // A write queued, being sent, or started since the refetch did: the device's version of that entry stays
-        const keep = new Set([...pendingAtStart, ...pendingWriteIds(), ...writtenSince(startedAt)]);
-        const added = apply(prev.added, daySummary, day, getTodayIsoVN(), { keep, startedAt });
+        const added = apply(prev.added);
         return added === prev.added ? prev : { ...prev, added };
       });
       return true;
@@ -702,7 +704,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   // old unscoped keys and an old sessionStorage copy move to the first account that loads, once.
   const loadData = useCallback((account: string | null, demoNow: boolean, iso: string) => {
     const local = browserLocal();
-    if (!demoNow && account) adoptLegacyKeys(local, browserSession(), account);
+    if (!demoNow && account) dropLegacyKeys(local, browserSession());
     const own = local ? keyedStorage(local, demoNow, account) : null;
     let added: AddedDiaryEntry[] = [];
     let sample: SampleEdits = {};
@@ -736,6 +738,15 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     unsavedShown.current = false;
     if (isLiveMode() && account && !demoNow) {
       refreshRemoteDay(iso, { retryHeld: true, earlier: true });
+      // S5: the days before the editable ones come from this device's cache at once (the old localStorage archive is moved into
+      // it first, nothing lost) and from the server in the background once today is read
+      requestedDays.current.clear();
+      void (async () => {
+        const { days: found, unsent } = await callEngine("initHistory", account, filed.archive, iso, days);
+        // Entries of those days the server never confirmed are sent again; a day beyond the window refuses them (lasting marker)
+        unsent.forEach((e) => sendAdd(e));
+        if (currentAccountId() === account && Object.keys(found).length > 0) setArchive((prev) => ({ ...prev, ...found }));
+      })();
 
       apiClient.getFavourites().then((favs) => {
         if (Array.isArray(favs) && favs.length > 0) {
@@ -808,10 +819,16 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!isLiveMode() || demo || !accountId) return;
     const bump = () => setSyncVersion((v) => v + 1);
-    const stop = watchOutbox(bump);
-    void loadOfflineOutbox().then(bump);
-    return stop;
-  }, [demo, accountId]);
+    const stop = watchOutbox(bump, () => void refreshRemoteDay(getTodayIsoVN(), { earlier: true }));
+    // X1: another tab signed in as someone else (or out): this page's diary is not that account's. It drops everything and
+    // reloads to the gate; nothing is merged and nothing is written meanwhile.
+    const stopGuard = watchAccountChange(accountId, () => window.location.reload());
+    void callEngine("loadOfflineOutbox").then(bump);
+    return () => {
+      stop();
+      stopGuard();
+    };
+  }, [demo, accountId, refreshRemoteDay]);
 
   // Sync when the app comes back: reconnect, window focus, the tab shown again (a phone switching back to the
   // browser), or the page restored from the back-forward cache. The session cookie is renewed first.
@@ -872,6 +889,12 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     }
   }, [edits.added, serverDayRead, demo, accountId, todayIso, sendAdd, syncVersion]);
 
+  // S5: once today's server day is read, the closed days of the last weeks are read too (cache first; the server for what the cache lacks)
+  useEffect(() => {
+    if (!isLiveMode() || demo || !accountId || !serverDayRead || !todayIso) return;
+    loadDays(null);
+  }, [demo, accountId, serverDayRead, todayIso, loadDays]);
+
   // A recipe got its server food (lib/recipe-store, which refreshes the catalogue): today's entries that name its
   // local id (Chỉ trên máy này) name the server food, and the effect above sends them
   useEffect(() => {
@@ -926,29 +949,29 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     writeSavedMeals(savedMeals, ownStorage());
   }, [savedMeals, hydrated, ownStorage]);
 
-  // A "no room" banner is up (the list could not be written): the next write that works takes it down
+  // Everything the diary keeps in localStorage is written at once, in the effect that follows the change (cc-68, S3: a crash in
+  // an idle window must not lose it), and a write that fails is told to the person: a lasting notice, not a swallowed error
+  // ("Đã lưu" that was not). A "no room" banner is up until a write works again.
   const storageAlertUp = useRef(false);
-  // Persist added entries and sample edits only after hydrated. Today's list is written at once, never through the
-  // idle writer (S3: a crash in the idle window must not lose it), and a write that fails is told to the person: a
-  // lasting notice, not a swallowed error ("Đã lưu" that was not).
-  useEffect(() => {
-    if (!hydrated) return;
-    const own = ownStorage();
-    if (!own) return;
-    try {
-      own.setItem(ADDED_ENTRIES_KEY, JSON.stringify(edits.added));
-      // Room again: the banner goes
-      if (storageAlertUp.current) {
-        storageAlertUp.current = false;
-        reportStorageWorked();
+  const persist = useCallback(
+    (key: string, value: unknown) => {
+      const own = ownStorage();
+      if (!hydrated || !own) return;
+      try {
+        own.setItem(key, JSON.stringify(value));
+        if (storageAlertUp.current) {
+          storageAlertUp.current = false;
+          reportStorageWorked();
+        }
+      } catch (error) {
+        storageAlertUp.current = true;
+        reportStorageFailure(error);
       }
-    } catch (error) {
-      storageAlertUp.current = true;
-      reportStorageFailure(error);
-    }
-    // The sample edits are demo-only and small: they may wait for an idle moment
-    deferredWrites.schedule(own, SAMPLE_EDITS_KEY, () => JSON.stringify(edits.sample));
-  }, [edits.added, edits.sample, hydrated, ownStorage]);
+    },
+    [hydrated, ownStorage]
+  );
+  useEffect(() => persist(ADDED_ENTRIES_KEY, edits.added), [edits.added, persist]);
+  useEffect(() => persist(SAMPLE_EDITS_KEY, edits.sample), [edits.sample, persist]);
 
   // The latest list and date, for the midnight timer (it must not restart on every added entry)
   const addedRef = useRef(edits.added);
@@ -966,22 +989,13 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     const { today, past } = splitByDay(edits.added, todayIso, keepFrom);
     if (today === edits.added) return;
     setEdits((prev) => ({ ...prev, added: splitByDay(prev.added, todayIso, keepFrom).today }));
-    setArchive((prev) => mergeArchive(prev, past));
-  }, [hydrated, todayIso, edits.added, pastDays]);
+    fileDays(past);
+  }, [hydrated, todayIso, edits.added, pastDays, fileDays]);
 
-  // cc-58: writes that wait for an idle moment are written now when the provider goes (a route outside the diary)
-  useEffect(() => () => deferredWrites.flush(), []);
-
-  // Persist the archive only after hydrated
+  // The archive: a real account keeps it in IndexedDB (lib/day-cache), not here (S4); demo and the mock keep their sample history here
   useEffect(() => {
-    if (!hydrated) return;
-    try {
-      const own = ownStorage();
-      if (own) deferredWrites.schedule(own, DAY_ARCHIVE_KEY, () => JSON.stringify(archive));
-    } catch {
-      // Ignore quota/access errors
-    }
-  }, [archive, hydrated, ownStorage]);
+    if (!isLiveMode() || demo) persist(DAY_ARCHIVE_KEY, archive);
+  }, [archive, demo, persist]);
 
   // The clock reaches midnight while the app is open, or the tab comes back to the foreground on another day
   useEffect(() => {
@@ -994,7 +1008,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       const { today, past } = splitByDay(addedRef.current, now, keepFrom);
       if (today !== addedRef.current) {
         setEdits((prev) => ({ ...prev, added: splitByDay(prev.added, now, keepFrom).today }));
-        setArchive((prev) => mergeArchive(prev, past));
+        fileDays(past);
       }
       setTodayIso(now);
     };
@@ -1017,20 +1031,12 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       document.removeEventListener("visibilitychange", onVisible);
       window.removeEventListener("focus", refresh);
     };
-  }, [hydrated]);
+  }, [hydrated, fileDays]);
 
-  // Persist recent foods only after hydrated
+  // Recent foods. The sample recents are never saved: a real account must not inherit them when demo mode goes off
   useEffect(() => {
-    if (!hydrated) return;
-    // The sample recents are never saved: a real account must not inherit them when demo mode goes off
-    if (recentFoods === DEFAULT_RECENT_FOODS) return;
-    try {
-      const own = ownStorage();
-      if (own) deferredWrites.schedule(own, RECENT_FOODS_KEY, () => JSON.stringify(recentFoods));
-    } catch {
-      // Ignore
-    }
-  }, [recentFoods, hydrated, ownStorage]);
+    if (recentFoods !== DEFAULT_RECENT_FOODS) persist(RECENT_FOODS_KEY, recentFoods);
+  }, [recentFoods, persist]);
 
   useEffect(() => {
     toastStartedAt.current = Date.now();
@@ -1207,8 +1213,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   const toggleFavourite = useCallback((food: FoodItem) => {
     const willBeFavourite = !favouriteIds.includes(food.id);
     setFavouriteIds((prev) => toggleFavouriteId(prev, food.id));
-    if (isLiveMode()) trackSide(apiClient.setFavourite(food.id, willBeFavourite));
-  }, [favouriteIds, trackSide]);
+    if (isLiveMode()) track("side", apiClient.setFavourite(food.id, willBeFavourite));
+  }, [favouriteIds, track]);
 
   const getEntry = useCallback((id: string) => findEntry(edits, id, samples), [edits, samples]);
 
@@ -1485,21 +1491,14 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   // The same Set comes back while its members do not change, so an outbox commit that changes nothing here re-renders no one.
   const unsavedRef = useRef<ReadonlySet<string>>(new Set());
   const unsavedIds = useMemo(() => {
-    const none = (): ReadonlySet<string> => {
-      if (unsavedRef.current.size === 0) return unsavedRef.current;
-      return (unsavedRef.current = new Set());
-    };
-    if (!isLiveMode() || demo || !hydrated) return none();
     const queued = new Set(getPendingOfflineEntryIds());
     const pending = pendingWriteIds();
+    const live = isLiveMode() && !demo && hydrated;
     const next = new Set(
-      edits.added
-        .filter((e) => !isLocalOnly(e) && (queued.has(e.id) || (serverDayRead && !e.synced && !pending.has(e.id))))
-        .map((e) => e.id)
+      live ? edits.added.filter((e) => !isLocalOnly(e) && (queued.has(e.id) || (serverDayRead && !e.synced && !pending.has(e.id)))).map((e) => e.id) : []
     );
     const prev = unsavedRef.current;
-    if (prev.size === next.size && [...next].every((id) => prev.has(id))) return prev;
-    return (unsavedRef.current = next);
+    return next.size === prev.size && [...next].every((id) => prev.has(id)) ? prev : (unsavedRef.current = next);
     // syncVersion: the outbox changed
   }, [edits.added, syncVersion, demo, hydrated, serverDayRead]);
   // Entries that can never reach the server: the row says Chỉ trên máy này (review 05:30 M1)
@@ -1546,7 +1545,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       writeStoredProfile(next);
       if (isLiveMode()) {
         // S6: through the outbox (an offline change is sent later, the newest wins), not fire-and-forget
-        trackSide(
+        track(
+          "side",
           apiClient.queueProfile({
             sex: next.sex,
             birthYear: next.birthYear,
@@ -1558,10 +1558,10 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
           })
         );
         // S14: the day of the weight is worked out now, not the date the screen last showed
-        if (patch.weightKg !== undefined) trackSide(apiClient.queueWeight(getTodayIsoVN(), patch.weightKg));
+        if (patch.weightKg !== undefined) track("side", apiClient.queueWeight(getTodayIsoVN(), patch.weightKg));
       }
     },
-    [profile, trackSide]
+    [profile, track]
   );
 
   // The catalogue version: a label supplement's entry counts as 0 kcal once its food is in the catalogue (labelZeros)
@@ -1627,6 +1627,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       saving,
       todayIso,
       dayArchive: history,
+      loadDays,
       isEditable,
       hydrated,
       demo,
@@ -1674,6 +1675,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       saving,
       todayIso,
       history,
+      loadDays,
       isEditable,
       hydrated,
       demo,

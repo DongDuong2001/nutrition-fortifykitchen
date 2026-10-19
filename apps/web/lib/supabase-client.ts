@@ -3,6 +3,11 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 let clientInstance: SupabaseClient | null = null;
 
+/** The client this page already made, or null: a listener that must not be the reason the SDK is downloaded asks this. */
+export function existingClient(): SupabaseClient | null {
+  return clientInstance;
+}
+
 /**
  * Creates a browser-compatible Supabase client using @supabase/ssr.
  * Singleton-safe for React components and client hooks.

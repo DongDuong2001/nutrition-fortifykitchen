@@ -4,7 +4,7 @@ import { calculateSaltTarget } from "./training";
 import { isDemo } from "./demo";
 import { currentAccount, currentAccountId, wasExplicitlySignedOut } from "./auth-actions";
 import { isLiveMode } from "./api-mode";
-import { ADDED_ENTRIES_KEY, adoptLegacyKeys, adoptLegacyPersonal, browserLocal, browserSession, keyedStorage } from "./storage-keys";
+import { ADDED_ENTRIES_KEY, browserLocal, browserSession, dropLegacyKeys, dropLegacyPersonal, keyedStorage } from "./storage-keys";
 import { HOME_ROUTE } from "./nav";
 
 // The entries this user added live in localStorage under the signed-in account's key (lib/storage-keys). Only
@@ -65,12 +65,12 @@ export function readFirstRunFacts(demo: boolean = isDemo()): FirstRunFacts {
   let entryEverLogged = false;
   let signedIn = false;
   try {
-    // The old unscoped keys move to the first account here, the same as the diary store does on load
+    // The old unscoped keys are deleted here, the same as the diary store does on load (X8: never adopted by another account)
     const account = currentAccountId();
     const local = browserLocal();
     if (!demo && account) {
-      adoptLegacyKeys(local, browserSession(), account);
-      adoptLegacyPersonal(local, account);
+      dropLegacyKeys(local, browserSession());
+      dropLegacyPersonal(local, account);
     }
     const own = local ? keyedStorage(local, demo, account) : null;
     profileSaved = own?.getItem(PROFILE_KEY) != null;
