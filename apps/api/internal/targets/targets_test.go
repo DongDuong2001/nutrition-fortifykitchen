@@ -75,5 +75,56 @@ func TestSharedTargetVectors(t *testing.T) {
 		if calculated.Zinc.Min != tc.Output.Zinc.Min || calculated.Zinc.Max != tc.Output.Zinc.Max {
 			t.Errorf("[%d] Zinc mismatch: got %+v, want %+v", idx, calculated.Zinc, tc.Output.Zinc)
 		}
+		if calculated.Fiber.Min != tc.Output.Fiber.Min || calculated.Fiber.Max != tc.Output.Fiber.Max {
+			t.Errorf("[%d] Fiber mismatch: got %+v, want %+v", idx, calculated.Fiber, tc.Output.Fiber)
+		}
+		if calculated.Phosphorus.Min != tc.Output.Phosphorus.Min || calculated.Phosphorus.Max != tc.Output.Phosphorus.Max {
+			t.Errorf("[%d] Phosphorus mismatch: got %+v, want %+v", idx, calculated.Phosphorus, tc.Output.Phosphorus)
+		}
+		if calculated.Selenium.Min != tc.Output.Selenium.Min || calculated.Selenium.Max != tc.Output.Selenium.Max {
+			t.Errorf("[%d] Selenium mismatch: got %+v, want %+v", idx, calculated.Selenium, tc.Output.Selenium)
+		}
+		if calculated.Copper.Min != tc.Output.Copper.Min || calculated.Copper.Max != tc.Output.Copper.Max {
+			t.Errorf("[%d] Copper mismatch: got %+v, want %+v", idx, calculated.Copper, tc.Output.Copper)
+		}
+		if calculated.Manganese.Min != tc.Output.Manganese.Min || calculated.Manganese.Max != tc.Output.Manganese.Max {
+			t.Errorf("[%d] Manganese mismatch: got %+v, want %+v", idx, calculated.Manganese, tc.Output.Manganese)
+		}
+		if calculated.VitaminA.Min != tc.Output.VitaminA.Min || calculated.VitaminA.Max != tc.Output.VitaminA.Max {
+			t.Errorf("[%d] VitaminA mismatch: got %+v, want %+v", idx, calculated.VitaminA, tc.Output.VitaminA)
+		}
+		if calculated.VitaminD.Min != tc.Output.VitaminD.Min || calculated.VitaminD.Max != tc.Output.VitaminD.Max {
+			t.Errorf("[%d] VitaminD mismatch: got %+v, want %+v", idx, calculated.VitaminD, tc.Output.VitaminD)
+		}
+		if calculated.VitaminE.Min != tc.Output.VitaminE.Min || calculated.VitaminE.Max != tc.Output.VitaminE.Max {
+			t.Errorf("[%d] VitaminE mismatch: got %+v, want %+v", idx, calculated.VitaminE, tc.Output.VitaminE)
+		}
+		if calculated.VitaminK.Min != tc.Output.VitaminK.Min || calculated.VitaminK.Max != tc.Output.VitaminK.Max {
+			t.Errorf("[%d] VitaminK mismatch: got %+v, want %+v", idx, calculated.VitaminK, tc.Output.VitaminK)
+		}
+		if calculated.B1.Min != tc.Output.B1.Min || calculated.B1.Max != tc.Output.B1.Max {
+			t.Errorf("[%d] B1 mismatch: got %+v, want %+v", idx, calculated.B1, tc.Output.B1)
+		}
+		if calculated.B2.Min != tc.Output.B2.Min || calculated.B2.Max != tc.Output.B2.Max {
+			t.Errorf("[%d] B2 mismatch: got %+v, want %+v", idx, calculated.B2, tc.Output.B2)
+		}
+		if calculated.B3.Min != tc.Output.B3.Min || calculated.B3.Max != tc.Output.B3.Max {
+			t.Errorf("[%d] B3 mismatch: got %+v, want %+v", idx, calculated.B3, tc.Output.B3)
+		}
+		if calculated.B5.Min != tc.Output.B5.Min || calculated.B5.Max != tc.Output.B5.Max {
+			t.Errorf("[%d] B5 mismatch: got %+v, want %+v", idx, calculated.B5, tc.Output.B5)
+		}
+		if calculated.B6.Min != tc.Output.B6.Min || calculated.B6.Max != tc.Output.B6.Max {
+			t.Errorf("[%d] B6 mismatch: got %+v, want %+v", idx, calculated.B6, tc.Output.B6)
+		}
+		if calculated.Folate.Min != tc.Output.Folate.Min || calculated.Folate.Max != tc.Output.Folate.Max {
+			t.Errorf("[%d] Folate mismatch: got %+v, want %+v", idx, calculated.Folate, tc.Output.Folate)
+		}
+		if calculated.B12.Min != tc.Output.B12.Min || calculated.B12.Max != tc.Output.B12.Max {
+			t.Errorf("[%d] B12 mismatch: got %+v, want %+v", idx, calculated.B12, tc.Output.B12)
+		}
+		if calculated.VitaminC.Min != tc.Output.VitaminC.Min || calculated.VitaminC.Max != tc.Output.VitaminC.Max {
+			t.Errorf("[%d] VitaminC mismatch: got %+v, want %+v", idx, calculated.VitaminC, tc.Output.VitaminC)
+		}
 	}
 }
