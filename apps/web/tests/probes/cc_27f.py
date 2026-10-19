@@ -5,7 +5,7 @@ Production build, clock fixed at 2026-10-15 10:00 Asia/Ho_Chi_Minh, demo mode, s
   target on the same line (the kcal number's 32 px, 10 px gap, cc-44); each macro reads amount then percent with an 8 px gap; on a
   past day the level word follows the kcal percent.
 - Nutrient column: no caption; "Khoáng chất" and "Vitamin" are the meal headers' ink pills (24 px phone, cc-44), and the
-  first pill is level with the first meal pill; food rows and nutrient rows share the name size.
+  first pill sits one verdict header (cc-61) below the first meal pill; food rows and nutrient rows share the name size.
 Run with: ALIGN_BASE_URL=http://localhost:3104 npm run probe -- tests/probes/cc_27f.py
 """
 import os
@@ -104,12 +104,14 @@ def run(browser, size, tag):
               const h3 = document.querySelector("aside[aria-label='Vi chất'] h3 > span");
               const meal = document.querySelector("section[aria-label='Bữa sáng'] > div > div");
               const a = h3.getBoundingClientRect(), b = meal.getBoundingClientRect();
+              const head = document.querySelector("aside[aria-label='Vi chất'] [data-level-summary]").getBoundingClientRect().height;
               const cs = getComputedStyle(h3.querySelector('span')), ms = getComputedStyle(meal.querySelector('button span'));
               const hs = getComputedStyle(h3), mp = getComputedStyle(meal);
-              return { aTop: a.top, bTop: b.top, aH: a.height, bH: b.height, bg: [hs.backgroundColor, mp.backgroundColor], fw: [cs.fontWeight, ms.fontWeight], fs: [cs.fontSize, ms.fontSize], pl: [hs.paddingLeft, mp.paddingLeft] };
+              return { head, aTop: a.top, bTop: b.top, aH: a.height, bH: b.height, bg: [hs.backgroundColor, mp.backgroundColor], fw: [cs.fontWeight, ms.fontWeight], fs: [cs.fontSize, ms.fontSize], pl: [hs.paddingLeft, mp.paddingLeft] };
             }"""
         )
-        check(abs(band["aTop"] - band["bTop"]) <= 1, f"{t}: first nutrient pill level with the first meal pill ({band['aTop']:.1f} vs {band['bTop']:.1f})")
+        # cc-61: the x/N đạt header sits above the first band, so the pill is one header height below the first meal pill
+        check(abs(band["aTop"] - band["bTop"] - band["head"]) <= 1, f"{t}: first nutrient pill one verdict header ({band['head']:.0f} px) below the first meal pill ({band['aTop']:.1f} vs {band['bTop']:.1f})")
         check(band["bg"][0] == band["bg"][1], f"{t}: same pill background {band['bg']}")
         check(band["fw"][0] == band["fw"][1] and band["fs"][0] == band["fs"][1] and band["pl"][0] == band["pl"][1], f"{t}: same weight, size and padding {band['fw']} {band['fs']} {band['pl']}")
         if phone:

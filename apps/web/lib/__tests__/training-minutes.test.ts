@@ -48,30 +48,63 @@ describe("trainingMinutesFor (lib/training-minutes.ts)", () => {
 
   it("with nothing saved on the device, the server's minutes for that day come next", () => {
     const storage = fakeStorage();
-    rememberServerTraining("b@x.vn", TODAY, 120, 60);
+    rememberServerTraining("b@x.vn", TODAY, 120);
     expect(trainingMinutesFor(TODAY, PROFILE, { storage, account: "b@x.vn" })).toBe(120);
     // Only that day, only that account
     expect(trainingMinutesFor(TOMORROW, PROFILE, { storage, account: "b@x.vn" })).toBe(60);
     expect(trainingMinutesFor(TODAY, PROFILE, { storage, account: "c@x.vn" })).toBe(60);
-    // The device's own choice still wins
+  });
+
+  it("Ngày tập's choice on this device still wins over the server's minutes", () => {
+    const storage = fakeStorage();
+    rememberServerTraining("b2@x.vn", TODAY, 120);
     writeDay(TODAY, { minutes: 45, ticked: [] }, storage);
-    expect(trainingMinutesFor(TODAY, PROFILE, { storage, account: "b@x.vn" })).toBe(45);
+    expect(trainingMinutesFor(TODAY, PROFILE, { storage, account: "b2@x.vn" })).toBe(45);
+    // and a day without a choice here still reads the server's
+    expect(trainingMinutesFor("2026-10-17", PROFILE, { storage, account: "b2@x.vn" })).toBe(60);
+    rememberServerTraining("b2@x.vn", "2026-10-17", 30);
+    expect(trainingMinutesFor("2026-10-17", PROFILE, { storage, account: "b2@x.vn" })).toBe(30);
   });
 
-  it("a server value equal to the default is the default, so a later change in Hồ sơ applies", () => {
+  it("a server value equal to the Hồ sơ default is the day's own, kept: a later change of the default leaves the day", () => {
     const storage = fakeStorage();
-    rememberServerTraining("d@x.vn", TODAY, 60, 60);
-    expect(trainingMinutesFor(TODAY, { trainingMinutesDefault: 90 }, { storage, account: "d@x.vn" })).toBe(90);
+    rememberServerTraining("d@x.vn", TODAY, 60);
+    expect(trainingMinutesFor(TODAY, { trainingMinutesDefault: 60 }, { storage, account: "d@x.vn" })).toBe(60);
+    expect(trainingMinutesFor(TODAY, { trainingMinutesDefault: 90 }, { storage, account: "d@x.vn" })).toBe(60);
+    // a day with none set still follows the default
+    expect(trainingMinutesFor(TOMORROW, { trainingMinutesDefault: 90 }, { storage, account: "d@x.vn" })).toBe(90);
   });
 
-  it("a later server answer replaces the earlier one; a bad value is ignored", () => {
+  it("a rest day of 0 on the server is the day's own too", () => {
     const storage = fakeStorage();
-    rememberServerTraining("e@x.vn", TODAY, 120, 60);
-    rememberServerTraining("e@x.vn", TODAY, 60, 60);
+    rememberServerTraining("z@x.vn", TODAY, 0);
+    expect(trainingMinutesFor(TODAY, PROFILE, { storage, account: "z@x.vn" })).toBe(0);
+  });
+
+  it("null (no minutes set for that day) clears an earlier value, and the day reads the Hồ sơ default again", () => {
+    const storage = fakeStorage();
+    rememberServerTraining("e@x.vn", TODAY, 120);
+    expect(trainingMinutesFor(TODAY, PROFILE, { storage, account: "e@x.vn" })).toBe(120);
+    rememberServerTraining("e@x.vn", TODAY, null);
     expect(trainingMinutesFor(TODAY, PROFILE, { storage, account: "e@x.vn" })).toBe(60);
-    rememberServerTraining("e@x.vn", TODAY, "90", 60);
-    rememberServerTraining("e@x.vn", TODAY, -1, 60);
-    expect(trainingMinutesFor(TODAY, PROFILE, { storage, account: "e@x.vn" })).toBe(60);
+    expect(trainingMinutesFor(TODAY, { trainingMinutesDefault: 45 }, { storage, account: "e@x.vn" })).toBe(45);
+    rememberServerTraining("e@x.vn", TODAY, undefined);
+    expect(trainingMinutesFor(TODAY, { trainingMinutesDefault: 45 }, { storage, account: "e@x.vn" })).toBe(45);
+  });
+
+  it("a later server answer replaces the earlier one; a bad value counts as none", () => {
+    const storage = fakeStorage();
+    rememberServerTraining("g@x.vn", TODAY, 120);
+    rememberServerTraining("g@x.vn", TODAY, 75);
+    expect(trainingMinutesFor(TODAY, PROFILE, { storage, account: "g@x.vn" })).toBe(75);
+    rememberServerTraining("g@x.vn", TODAY, "90");
+    expect(trainingMinutesFor(TODAY, PROFILE, { storage, account: "g@x.vn" })).toBe(60);
+    rememberServerTraining("g@x.vn", TODAY, 120);
+    rememberServerTraining("g@x.vn", TODAY, -1);
+    expect(trainingMinutesFor(TODAY, PROFILE, { storage, account: "g@x.vn" })).toBe(60);
+    rememberServerTraining("g@x.vn", TODAY, 120);
+    rememberServerTraining("g@x.vn", TODAY, Number.NaN);
+    expect(trainingMinutesFor(TODAY, PROFILE, { storage, account: "g@x.vn" })).toBe(60);
   });
 
   it("tells the screens when a day's minutes may have changed", () => {
@@ -81,14 +114,19 @@ describe("trainingMinutesFor (lib/training-minutes.ts)", () => {
     trainingChanged();
     expect(trainingVersion()).toBe(before + 1);
     expect(listener).toHaveBeenCalledTimes(1);
-    // A server answer that changes nothing does not
-    rememberServerTraining("f@x.vn", TODAY, 60, 60);
+    // A server answer that changes nothing does not (no minutes set, still none)
+    rememberServerTraining("f@x.vn", TODAY, null);
     expect(listener).toHaveBeenCalledTimes(1);
-    rememberServerTraining("f@x.vn", TODAY, 90, 60);
+    // A day's own minutes, even one equal to the default, is a change: the day now keeps it
+    rememberServerTraining("f@x.vn", TODAY, 60);
     expect(listener).toHaveBeenCalledTimes(2);
+    rememberServerTraining("f@x.vn", TODAY, 60);
+    expect(listener).toHaveBeenCalledTimes(2);
+    rememberServerTraining("f@x.vn", TODAY, 90);
+    expect(listener).toHaveBeenCalledTimes(3);
     stop();
     trainingChanged();
-    expect(listener).toHaveBeenCalledTimes(2);
+    expect(listener).toHaveBeenCalledTimes(3);
   });
 });
 

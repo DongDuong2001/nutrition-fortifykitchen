@@ -1,7 +1,8 @@
 /**
  * The training minutes of one day (0 is a rest day), for Ngày tập, Hôm nay's pill and the day's salt and carb targets.
  * In order: what was chosen for that day on Ngày tập (lib/training-checklist), else what the server has for that day,
- * else the Hồ sơ default. Changing the default never changes a day that has its own minutes.
+ * else the Hồ sơ default. Changing the default never changes a day that has its own minutes, whether they were set on
+ * this device or on another one (GET /days/{date} answers `training_minutes` null for a day with none set).
  */
 
 import { readDay, type KeyValueStorage } from "./training-checklist";
@@ -9,9 +10,9 @@ import { accountStorage } from "./storage-keys";
 import { currentAccountId } from "./auth-actions";
 
 /**
- * GET /days/{date} answers the day's minutes, or the server's profile default when none was set for it (it does not
- * say which: OPEN_QUESTIONS). A value other than the device's default when it answered was set for that day
- * (on another device); one equal to it is taken as the default, so a later change in Hồ sơ still applies.
+ * The minutes the server holds for a day of an account, only for a day that has its own. GET /days/{date} answers
+ * `training_minutes: null` when none were set for that day and a number when they were (apps/api diary model,
+ * TrainingMinutes *int), so a number is always the day's own, even when it equals the Hồ sơ default.
  */
 const serverMinutes = new Map<string, number>();
 
@@ -35,11 +36,15 @@ export function trainingChanged(): void {
   listeners.forEach((l) => l());
 }
 
-/** The server's minutes for one day of one account, as read from GET /days/{date}. */
-export function rememberServerTraining(account: string, dateIso: string, minutes: unknown, profileDefault: number): void {
+/**
+ * The server's minutes for one day of one account, as read from GET /days/{date}. A finite number of 0 or more is the
+ * day's own minutes (kept, a value equal to the Hồ sơ default included, so a later change of the default leaves the
+ * day alone). null, undefined or anything else means none were set: any earlier value is dropped.
+ */
+export function rememberServerTraining(account: string, dateIso: string, minutes: unknown): void {
   const key = `${account}|${dateIso}`;
   const before = serverMinutes.get(key);
-  if (typeof minutes === "number" && Number.isFinite(minutes) && minutes >= 0 && minutes !== profileDefault) {
+  if (typeof minutes === "number" && Number.isFinite(minutes) && minutes >= 0) {
     serverMinutes.set(key, minutes);
   } else {
     serverMinutes.delete(key);

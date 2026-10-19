@@ -144,3 +144,27 @@ describe("PortionPanel by the coach's portion model (cc-53b)", () => {
     expect(html).not.toContain("Nhân khẩu phần nhanh");
   });
 });
+
+describe("PortionPanel size chips (cc-61)", () => {
+  const dish = (servings: Array<{ label: string; grams: number }>) =>
+    ({ id: "food-test-dish", nameVi: "Món thử", category: "mon_viet", source: "USDA", servings, nutrients: { energy: 100 } }) as unknown as (typeof MOCK_FOODS)[number];
+  const render = (food: (typeof MOCK_FOODS)[number], label: string, grams: string) =>
+    renderToString(
+      <DiaryProvider>
+        <PortionPanel food={food} gramsInput={grams} setGramsInput={vi.fn()} selectedServingLabel={label} setSelectedServingLabel={vi.fn()} mealSlot="lunch" onAdd={vi.fn()} />
+      </DiaryProvider>
+    );
+
+  it("one size (Phở bò: Tô | Gam) has the toggle and no lone size chip", () => {
+    const html = render(dish([{ label: "1 tô", grams: 500 }, { label: "100 g", grams: 100 }]), "1 tô", "500");
+    expect(html).toContain('aria-label="Đơn vị khẩu phần"');
+    expect(html).not.toContain('aria-label="Kích cỡ"');
+  });
+
+  it("several sizes keep the chip row with one chip each", () => {
+    const html = render(dish([{ label: "1 tô nhỏ", grams: 350 }, { label: "1 tô vừa", grams: 500 }, { label: "1 tô lớn", grams: 650 }, { label: "100 g", grams: 100 }]), "1 tô vừa", "500");
+    expect(html).toContain('aria-label="Kích cỡ"');
+    expect(html.match(/aria-pressed/g)?.length).toBeGreaterThanOrEqual(5);
+    for (const size of ["Nhỏ", "Vừa", "Lớn"]) expect(html).toContain(`>${size}</button>`);
+  });
+});
