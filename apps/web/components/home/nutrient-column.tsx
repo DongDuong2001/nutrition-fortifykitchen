@@ -19,7 +19,9 @@ function Scroll({ share, fitKey, children }: { share: boolean; fitKey: string; c
  * The right column of the home body: the nutrients of the user's Level against the day's targets (lib/level-
  * nutrients). The group labels are bands like the meal headers on the left, so the first band sits level with the
  * first meal band. The extras (Level 3 and up) show an amount only: no bar, no percent. A food or a meal picked on
- * the left shows as a cobalt line on top. An unknown value is a dash and an empty bar, never 0.
+ * the left shows as a cobalt line on top. An unknown value is a dash and an empty bar, never 0. cc-61: the "x/N đạt"
+ * verdict is the first row under the first group band, so it reads first on a full day and on an empty one; the
+ * "Đủ 22 vi chất" link stays at the foot.
  */
 export const NutrientColumn = memo(function NutrientColumn({
   values,
@@ -58,7 +60,7 @@ export const NutrientColumn = memo(function NutrientColumn({
       }`}
     >
       {/* Sections stack at their natural height (34 px rows, 48 px from lg); space left over sits below the last one, and a column that does not fit scrolls */}
-      <Scroll share={share} fitKey={groups.map((g) => `${g.title}:${g.ids.join(",")}`).join("|") + (selected ? "!" : "")}>
+      <Scroll share={share} fitKey={groups.map((g) => `${g.title}:${g.ids.join(",")}`).join("|") + (selected ? "!" : "") + (summary ? `#${summary.lacking.length}` : "")}>
         {groups.map((group, groupIndex) => (
           <section key={group.title} aria-label={group.title} data-tour={groupIndex === 0 ? "nutrient-column" : undefined} className="flex shrink-0 flex-col">
             <h3 data-snap-row className={`m-0 flex-none snap-start ${pill.wrap}`}>
@@ -66,6 +68,22 @@ export const NutrientColumn = memo(function NutrientColumn({
                 <span className={pill.label}>{group.title}</span>
               </span>
             </h3>
+            {groupIndex === 0 && summary && !share && (
+              // Whole-pixel heights (a 24 px numeral line, 18 px text lines): the whole-row cut of the area needs them
+              <p
+                data-level-summary
+                data-snap-row
+                className="m-0 flex snap-start flex-col gap-1 px-3 py-2 text-[13px] leading-[18px] text-secondary lg:text-[15px] lg:leading-5"
+              >
+                <span className="block h-6 font-semibold text-text lg:h-7">
+                  <span className="font-display text-[22px] font-bold leading-none tabular-nums lg:text-[26px]">
+                    {summary.reached}/{summary.total}
+                  </span>{" "}
+                  đạt
+                </span>
+                {summary.lacking.length > 0 && <span>Thiếu nhiều nhất: {summary.lacking.join(", ")}</span>}
+              </p>
+            )}
             {group.ids.map((id) => {
               const def = getNutrientDefinition(id);
               if (!def) return null;
@@ -147,14 +165,6 @@ export const NutrientColumn = memo(function NutrientColumn({
       ) : (
         // Below the scroll area, never over it; any space the whole-row cut leaves sits above this block
         <div className="mt-auto flex flex-none flex-col">
-          {summary && (
-            <p data-level-summary className="m-0 flex flex-none flex-col gap-0.5 px-3 pt-2 text-[13px] leading-snug text-secondary">
-              <span className="font-bold tabular-nums text-text">
-                {summary.reached}/{summary.total} đạt
-              </span>
-              {summary.lacking.length > 0 && <span>Thiếu nhiều nhất: {summary.lacking.join(", ")}</span>}
-            </p>
-          )}
           <Link
             href={microsHref}
             className="relative flex h-8 flex-none items-center px-3 text-[13px] font-bold text-blue no-underline before:absolute before:inset-x-0 before:-inset-y-1.5 before:content-['']"
