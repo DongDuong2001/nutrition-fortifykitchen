@@ -6,7 +6,7 @@
 import { currentAccountId } from "./auth-actions";
 import { isDemo } from "./demo";
 import { FAVOURITES_KEY } from "./favourites";
-import { OFFLINE_OUTBOX_KEY, claimLegacyOutbox } from "./legacy-outbox";
+import { OFFLINE_OUTBOX_KEY } from "./legacy-outbox-owner";
 
 // One value per account: the profile (sex, birth year, weight, goal, period mode, name), the reminder settings and
 // the training ticks. Each is kept under the account's key too, so a second account on this browser never sees them.
@@ -122,18 +122,15 @@ export function dropLegacyKeys(local: KeyValueStore | null, session: KeyValueSto
 
 /**
  * The same for the old global profile, settings and training ticks: they are deleted. The one exception is the old offline
- * outbox: that is writes that never reached the server, so it is kept, but only for the account it was written for (the one
- * noteLegacyOutboxOwner recorded; with no change of account since the update, the account that loads). Another account that
- * signs in first does not take it and nothing is sent for it: it stays on disk until its own account signs in, and the
- * mismatch is reported once. Demo keys are never touched (the caller skips demo).
+ * outbox: that is writes that never reached the server, so it is kept for the account it was written for
+ * (lib/legacy-outbox-owner, lib/legacy-outbox). Demo keys are never touched (the caller skips demo).
  */
 export function dropLegacyPersonal(local: KeyValueStore | null, accountId: string): void {
   if (!local) return;
   attempt(() => {
     for (const base of PERSONAL_KEYS) {
-      if (base === OFFLINE_OUTBOX_KEY) {
-        if (!claimLegacyOutbox(local, accountId)) continue;
-      } else if (local.getItem(base) === null) continue;
+      // The old outbox is not deleted here: lib/legacy-outbox gives it to its account when the outbox loads
+      if (base === OFFLINE_OUTBOX_KEY || local.getItem(base) === null) continue;
       local.removeItem(base);
     }
   }, undefined);

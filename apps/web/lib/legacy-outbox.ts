@@ -1,35 +1,8 @@
+import { LEGACY_OUTBOX_OWNER_KEY, OFFLINE_OUTBOX_KEY } from "./legacy-outbox-owner";
 import type { KeyValueStore } from "./storage-keys";
 
-// cc-68: the outbox of the first versions was one unscoped localStorage key. It holds writes that never reached the server, so it
-// is not deleted like the other old unscoped keys, but it goes to the account it was written for and to no one else. Its own
-// module: lib/auth-actions (which storage-keys imports) records the owner when the browser's email changes.
-
-/** Entries waiting to reach the server. Once unscoped, now per account (`<key>_<account>`) like the rest. */
-export const OFFLINE_OUTBOX_KEY = "h1t_offline_outbox";
-
-/** Who the old unscoped outbox belongs to (see noteLegacyOutboxOwner): an email, or "" when nobody can be named. */
-export const LEGACY_OUTBOX_OWNER_KEY = "h1t_legacy_outbox_owner";
-
-function attempt(fn: () => void): void {
-  try {
-    fn();
-  } catch {
-    // Storage blocked: nothing was kept there
-  }
-}
-
-/**
- * The email stored for the browser is about to change (sign-in as someone else, Đăng xuất). If the old unscoped outbox is still
- * there and nobody owns it yet, it belongs to the account that was on this browser until now: that is written down, so it
- * goes to that account only. With nobody signed in before (the old version signed out) it cannot be named: "".
- */
-export function noteLegacyOutboxOwner(local: KeyValueStore | null, previous: string | null, next: string | null): void {
-  if (!local || previous === next) return;
-  attempt(() => {
-    if (local.getItem(OFFLINE_OUTBOX_KEY) === null || local.getItem(LEGACY_OUTBOX_OWNER_KEY) !== null) return;
-    local.setItem(LEGACY_OUTBOX_OWNER_KEY, previous ?? "");
-  });
-}
+// cc-68: the old unscoped outbox goes to the account it was written for (lib/legacy-outbox-owner records who that is), and to no one
+// else. Loaded with the outbox, not with every page.
 
 let unclaimedReported = false;
 
@@ -63,15 +36,15 @@ function mergeOutboxes(own: string, legacy: string): string | null {
  * The old unscoped outbox for `accountId`, who loads now. It moves to the account's own key only when it is that account's: the one
  * noteLegacyOutboxOwner recorded, or, with no change of account since the update, the account that loads. Another account that
  * signs in first does not take it and nothing is sent for it: it stays on disk until its own account signs in, and the mismatch is
- * reported once. True when the old key should now be removed (taken, or nothing there to take).
+ * reported once. The old key is removed once it is taken.
  */
-export function claimLegacyOutbox(local: KeyValueStore, accountId: string): boolean {
+export function claimLegacyOutbox(local: KeyValueStore, accountId: string): void {
   const legacy = local.getItem(OFFLINE_OUTBOX_KEY);
-  if (legacy === null) return false;
+  if (legacy === null) return;
   const owner = local.getItem(LEGACY_OUTBOX_OWNER_KEY) ?? accountId;
   if (owner !== accountId) {
     reportUnclaimed();
-    return false;
+    return;
   }
   const own = `${OFFLINE_OUTBOX_KEY}_${accountId}`;
   const mine = local.getItem(own);
@@ -81,5 +54,5 @@ export function claimLegacyOutbox(local: KeyValueStore, accountId: string): bool
     if (merged !== null) local.setItem(own, merged);
   }
   local.removeItem(LEGACY_OUTBOX_OWNER_KEY);
-  return true;
+  local.removeItem(OFFLINE_OUTBOX_KEY);
 }

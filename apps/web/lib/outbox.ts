@@ -1,3 +1,4 @@
+import { claimLegacyOutbox } from "./legacy-outbox";
 import { hasIndexedDb, idbAll, idbBatch, openDb, storageErrorKind } from "./idb";
 import { OFFLINE_OUTBOX_KEY, browserLocal, dropLegacyPersonal, storageKey } from "./storage-keys";
 import { postTab, onTab } from "./tab-sync";
@@ -132,7 +133,11 @@ function stateOf(scope: OutboxScope): ScopeState {
   };
   states.set(scope.id, state);
   // The old unscoped outbox (before it was per account) goes to the first account that loads: writes never lost. The other legacy keys are deleted.
-  if (scope.account && scope.id !== "demo") dropLegacyPersonal(localRef as Parameters<typeof dropLegacyPersonal>[0], scope.account);
+  if (scope.account && scope.id !== "demo") {
+    const local = localRef as Parameters<typeof dropLegacyPersonal>[0];
+    dropLegacyPersonal(local, scope.account);
+    if (local) claimLegacyOutbox(local, scope.account);
+  }
   // Without IndexedDB the array in localStorage is the outbox, and it is read at once
   if (state.backend.kind === "local") loadLocalInto(state);
   return state;

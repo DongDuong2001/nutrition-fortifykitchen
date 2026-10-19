@@ -3,8 +3,8 @@ import { apiClient, getPendingOfflineEntryIds, hasPendingWrite, loadSyncEngine, 
 import { resetIdb } from "../idb";
 import { STALE_SENDING_MS, countItems, loadOutbox, putItem, readItems, resetOutboxState, scopeFor } from "../outbox";
 import { getSyncAlerts, resetSyncAlerts } from "../sync-state";
-import { accountStorage } from "../storage-keys";
-import { noteLegacyOutboxOwner, resetLegacyOutboxReport } from "../legacy-outbox";
+import { noteLegacyOutboxOwner } from "../legacy-outbox-owner";
+import { resetLegacyOutboxReport } from "../legacy-outbox";
 import { createFakeIdb, quotaError, type FakeIdb } from "./fake-idb";
 
 // cc-68 Part 1: the write-ahead outbox in IndexedDB. The requests are a mocked fetch; the disk is a fake IndexedDB that
@@ -476,7 +476,6 @@ describe("the old unscoped outbox goes to its own account only (cc-68)", () => {
 
     // B signs in first (A was on this browser)
     signIn(B);
-    accountStorage();
     killPage();
     await loadSyncEngine();
     await loadOutbox(scopeFor(B, false)!);
@@ -486,34 +485,32 @@ describe("the old unscoped outbox goes to its own account only (cc-68)", () => {
     expect(local.getItem(`h1t_offline_outbox_${B}`)).toBeNull();
     await vi.waitFor(() => expect(reports).toEqual([expect.objectContaining({ kind: "storage", message: "legacy_outbox_unclaimed" })]));
     // reported once, however often B's page loads
-    accountStorage();
-    accountStorage();
-    await Promise.resolve();
+    killPage();
+    await loadOutbox(scopeFor(B, false)!);
     expect(reports).toHaveLength(1);
 
     // A signs in: the queue is hers and goes out
     signIn(ACCOUNT);
-    accountStorage();
-    expect(local.getItem("h1t_offline_outbox")).toBeNull();
     killPage();
     await loadSyncEngine();
     await loadOutbox(scope);
+    expect(local.getItem("h1t_offline_outbox")).toBeNull();
     expect((await syncOfflineOutbox({ force: true })).saved).toEqual([ID]);
     expect(calls.filter((c) => c.startsWith("POST /days"))).toEqual(["POST /days/2026-10-18/entries"]);
   });
 
-  it("a queue found with nobody switching accounts belongs to the account that loads, and a queue after a sign-out nobody can name stays unclaimed", () => {
+  it("a queue found with nobody switching accounts belongs to the account that loads, and a queue after a sign-out nobody can name stays unclaimed", async () => {
     local.setItem("h1t_offline_outbox", LEGACY);
-    accountStorage();
-    expect(local.getItem(`h1t_offline_outbox_${ACCOUNT}`)).toBe(LEGACY);
+    await loadOutbox(scope);
+    expect(local.getItem(`h1t_offline_outbox_${ACCOUNT}`) !== null || idb.values("outbox").length === 1).toBe(true);
     expect(local.getItem("h1t_offline_outbox")).toBeNull();
 
+    killPage();
     local.setItem("h1t_offline_outbox", LEGACY);
-    local.removeItem(`h1t_offline_outbox_${ACCOUNT}`);
     local.removeItem("h1t_auth_current_email");
     // Signed out under the old version (no email to name), then B signs in
     signIn(B);
-    accountStorage();
+    await loadOutbox(scopeFor(B, false)!);
     expect(local.getItem("h1t_offline_outbox")).toBe(LEGACY);
     expect(local.getItem(`h1t_offline_outbox_${B}`)).toBeNull();
   });

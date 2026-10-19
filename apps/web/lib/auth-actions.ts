@@ -1,4 +1,4 @@
-import { noteLegacyOutboxOwner } from "./legacy-outbox";
+import { noteLegacyOutboxOwner } from "./legacy-outbox-owner";
 import { isLiveMode } from "./api-mode";
 import {
   mockCurrentAccount,

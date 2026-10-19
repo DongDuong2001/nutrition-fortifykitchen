@@ -15,6 +15,8 @@ import {
   type KeyValueStore,
 } from "../storage-keys";
 import { FAVOURITES_KEY } from "../favourites";
+import { claimLegacyOutbox } from "../legacy-outbox";
+import { noteLegacyOutboxOwner } from "../legacy-outbox-owner";
 import { SAVED_MEALS_KEY } from "../saved-meals";
 import { SAMPLE_PROFILE, loadProfile, readStoredProfile, writeStoredProfile } from "../profile";
 import { DEFAULT_SETTINGS, loadSettings, saveSettings } from "../settings";
@@ -195,20 +197,42 @@ describe("dropLegacyPersonal (the old profile, settings and ticks are deleted; t
     expect(local.data).toEqual({});
   });
 
-  it("the old unscoped offline outbox is writes that never reached the server: the first account takes it, so nothing is lost", () => {
+  it("leaves the old unscoped offline outbox where it is: it is writes that never reached the server, and lib/legacy-outbox gives it to its account", () => {
     const local = memory({ [OFFLINE_OUTBOX_KEY]: '[{"id":"e1"}]' });
     dropLegacyPersonal(local, "a@x.vn");
+    expect(local.getItem(OFFLINE_OUTBOX_KEY)).toBe('[{"id":"e1"}]');
+  });
+
+  it("the account the old outbox was written for takes it, so nothing is lost; a later account finds nothing left to take", () => {
+    const local = memory({ [OFFLINE_OUTBOX_KEY]: '[{"id":"e1"}]' });
+    claimLegacyOutbox(local, "a@x.vn");
     expect(local.getItem(`${OFFLINE_OUTBOX_KEY}_a@x.vn`)).toBe('[{"id":"e1"}]');
     expect(local.getItem(OFFLINE_OUTBOX_KEY)).toBeNull();
-    // A later account finds nothing left to take
-    dropLegacyPersonal(local, "b@x.vn");
+    claimLegacyOutbox(local, "b@x.vn");
     expect(local.getItem(`${OFFLINE_OUTBOX_KEY}_b@x.vn`)).toBeNull();
   });
 
-  it("an account that has an outbox of its own keeps it, and the old key still goes", () => {
-    const local = memory({ [OFFLINE_OUTBOX_KEY]: "old", [`${OFFLINE_OUTBOX_KEY}_a@x.vn`]: "own" });
-    dropLegacyPersonal(local, "a@x.vn");
-    expect(local.getItem(`${OFFLINE_OUTBOX_KEY}_a@x.vn`)).toBe("own");
+  it("an account that has an outbox of its own keeps it, the old writes are added to it by key, and the old key goes", () => {
+    const own = '[{"id":"e0","key":"k0","createdAt":1}]';
+    const local = memory({ [OFFLINE_OUTBOX_KEY]: '[{"id":"e0","key":"k0","createdAt":1},{"id":"e1","key":"k1","createdAt":2}]', [`${OFFLINE_OUTBOX_KEY}_a@x.vn`]: own });
+    claimLegacyOutbox(local, "a@x.vn");
+    expect(JSON.parse(local.getItem(`${OFFLINE_OUTBOX_KEY}_a@x.vn`)!).map((i: { id: string }) => i.id)).toEqual(["e0", "e1"]);
+    expect(local.getItem(OFFLINE_OUTBOX_KEY)).toBeNull();
+    // Not a list: the account's own stays as it is
+    const odd = memory({ [OFFLINE_OUTBOX_KEY]: "old", [`${OFFLINE_OUTBOX_KEY}_a@x.vn`]: "own" });
+    claimLegacyOutbox(odd, "a@x.vn");
+    expect(odd.getItem(`${OFFLINE_OUTBOX_KEY}_a@x.vn`)).toBe("own");
+    expect(odd.getItem(OFFLINE_OUTBOX_KEY)).toBeNull();
+  });
+
+  it("another account does not take it: it stays, owned by the account that was here", () => {
+    const local = memory({ [OFFLINE_OUTBOX_KEY]: '[{"id":"e1"}]' });
+    noteLegacyOutboxOwner(local, "a@x.vn", "b@x.vn");
+    claimLegacyOutbox(local, "b@x.vn");
+    expect(local.getItem(OFFLINE_OUTBOX_KEY)).toBe('[{"id":"e1"}]');
+    expect(local.getItem(`${OFFLINE_OUTBOX_KEY}_b@x.vn`)).toBeNull();
+    claimLegacyOutbox(local, "a@x.vn");
+    expect(local.getItem(`${OFFLINE_OUTBOX_KEY}_a@x.vn`)).toBe('[{"id":"e1"}]');
     expect(local.getItem(OFFLINE_OUTBOX_KEY)).toBeNull();
   });
 
