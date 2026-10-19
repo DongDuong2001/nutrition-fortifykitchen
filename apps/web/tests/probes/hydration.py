@@ -1,4 +1,5 @@
 # PROBE_COVERS: app/(app)/(dashboard)/training/** app/(app)/(tabs)/app/** app/(app)/(tabs)/explore/** app/(app)/(tabs)/settings/** app/(app)/(tabs)/trends/** app/(app)/(tabs)/trends/body/** app/(app)/(tabs)/trends/micros/** app/(app)/add/** app/(app)/entry/[id]/** app/(app)/micros/** app/(app)/settings/delete-account/** app/(app)/settings/language/** app/(app)/settings/notifications/** app/(app)/settings/profile/** app/(app)/settings/profile/weight/** app/(app)/settings/whats-new/** app/install/** app/landing/** app/page.tsx app/paywall/**
+# PROBE_TAGS: smoke
 import os
 import sys
 from playwright.sync_api import sync_playwright

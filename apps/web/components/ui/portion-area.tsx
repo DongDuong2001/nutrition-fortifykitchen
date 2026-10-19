@@ -358,6 +358,8 @@ function UnitPortionArea({
 }: PortionAreaProps) {
   const parsedGrams = useMemo(() => parseGramsInput(gramsInput), [gramsInput]);
   const noGrams = hidesGrams(food);
+  // One id per panel: two portion areas on one page (the Khay review) must not share an id
+  const gramsId = useId();
   const [overLimit, setOverLimit] = useState(false);
 
   // Tabs for the food (in data order plus "Gam", e.g. "Lon | Gam", "Phần | Gam")
@@ -574,14 +576,14 @@ function UnitPortionArea({
                 className="flex items-center justify-center rounded-xl px-2 h-11 w-full cursor-text box-border border-2 focus-within:ring-2 bg-card border-blue text-text focus-within:ring-blue"
               >
                 <input
-                  id="portion-grams-input"
+                  id={`${gramsId}-grams`}
                   data-tour="portion-grams-input"
                   type="text"
                   inputMode="decimal"
                   aria-label="Số gam"
                   value={gramsInput}
                   disabled={disabled}
-                  aria-describedby={overLimit ? "portion-grams-error" : undefined}
+                  aria-describedby={overLimit ? `${gramsId}-grams-error` : undefined}
                   onChange={(e) => {
                     // Over the limit: the field is written back clamped, so the label, the grams and the kcal agree
                     const over = overGramLimit(e.target.value);
@@ -611,7 +613,7 @@ function UnitPortionArea({
             }))}
           />
           {overLimit && (
-            <p id="portion-grams-error" role="alert" className="m-0 px-1 text-[13px] font-semibold leading-snug text-destructive-text">
+            <p id={`${gramsId}-grams-error`} role="alert" className="m-0 px-1 text-[13px] font-semibold leading-snug text-destructive-text">
               {MAX_GRAMS_MESSAGE}
             </p>
           )}

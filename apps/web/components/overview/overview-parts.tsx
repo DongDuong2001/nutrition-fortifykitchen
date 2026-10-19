@@ -7,36 +7,6 @@ import { formatPeriodRange } from "@/lib/format";
 import { summaryAddHref } from "@/lib/first-run";
 import { HOME_ROUTE } from "@/lib/nav";
 
-/** A white card with a 16 px heading row. `aside` is a short caption at the right of the heading. */
-export function OverviewCard({
-  id,
-  title,
-  aside,
-  className = "",
-  children,
-}: {
-  id: string;
-  title: string;
-  aside?: React.ReactNode;
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section
-      aria-labelledby={id}
-      className={`bg-card border border-card-border rounded-[18px] lg:shadow-card p-4 flex flex-col gap-3 text-text ${className}`}
-    >
-      <div className="flex min-h-[44px] items-center justify-between gap-3">
-        <h2 id={id} className="m-0 text-base font-bold lg:text-lg">
-          {title}
-        </h2>
-        {aside ? <span className="text-[13px] font-semibold text-secondary">{aside}</span> : null}
-      </div>
-      {children}
-    </section>
-  );
-}
-
 export function ChevronRight() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true" className="shrink-0 text-secondary">

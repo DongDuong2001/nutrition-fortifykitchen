@@ -409,6 +409,7 @@ export function FoodList({
                 aria-pressed={mealSelected}
                 aria-label={`Xem riêng ${meal.fullName.toLocaleLowerCase("vi-VN")}`}
                 onClick={() => onMeal(meal.slot)}
+                data-testid="meal-header"
                 style={noSelect}
                 className="flex h-full min-w-0 flex-1 cursor-pointer items-center justify-between gap-2 border-0 bg-transparent p-0 text-inherit"
               >
@@ -428,6 +429,7 @@ export function FoodList({
                   aria-label={`Thêm vào ${meal.fullName}`}
                   data-export="hide"
                   data-tour="meal-add"
+                  data-testid="meal-add"
                   className={`relative flex h-6 shrink-0 items-center text-xs font-bold leading-none no-underline transition-press before:absolute before:-inset-y-2.5 before:-inset-x-2 before:content-[''] hover:text-on-dark focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-60 lg:h-9 lg:text-[13px] lg:before:-inset-y-1 ${
                     mealSelected ? "text-on-accent focus-visible:outline-on-accent" : "text-sky focus-visible:outline-sky"
                   }`}

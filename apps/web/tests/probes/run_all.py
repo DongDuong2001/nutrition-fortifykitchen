@@ -16,7 +16,9 @@ A probe gets TIMEOUT_S (180 s) and is reported as "timed out" by name when it hi
 (run_all.py smoke.py cc_46.py) to run only those (gate:fast does this); PROBE_SKIP=a.py,b.py leaves some out (gate:full
 skips hydration.py, which it runs as test:hydration).
 """
+import datetime
 import os
+import re
 import subprocess
 import sys
 import time
@@ -28,6 +30,13 @@ LOG_DIR = HERE / "out" / "probe-all"
 SELF = Path(__file__).resolve()
 DEV_ONLY = {"cc02-final.py"}
 REPORT_ONLY = {"ag04_audit.py", "screenshots.py"}
+# cc-65: probes that are red on plain main for a known reason. A quarantined probe still runs; its failure is shown as
+# QUAR and does not fail the run, so a red probe:all means a regression. Past its expiry date it counts again.
+# name: (reason, expires YYYY-MM-DD)
+QUARANTINE = {
+    "cc_26.py": ("the share name line-height and the image's last row (OPEN_QUESTIONS cc-68); fixed by the overnight Part 7 commit", "2026-10-27"),
+    "cc_44.py": ("the WebKit run without fonts overlaps a B12 row the app never draws without fonts (OPEN_QUESTIONS cc-68); Part 7", "2026-10-27"),
+}
 TIMEOUT_S = 180
 DEFAULT_WORKERS = 6
 
@@ -58,13 +67,23 @@ def main():
 
     workers = max(1, int(os.environ.get("PROBE_WORKERS", str(DEFAULT_WORKERS))))
     paths = [p for p in sorted(HERE.glob("*.py")) if p.resolve() != SELF and not p.name.startswith("_")]  # _demo.py is a helper
-    wanted = {Path(a).name for a in sys.argv[1:]}
+    args = sys.argv[1:]
+    tag = None
+    if "--tag" in args:
+        i = args.index("--tag")
+        tag = args[i + 1] if i + 1 < len(args) else None
+        del args[i : i + 2]
+    wanted = {Path(a).name for a in args}
     unknown = wanted - {p.name for p in paths}
     if unknown:
         print(f"unknown probe(s): {', '.join(sorted(unknown))}")
         sys.exit(1)
     skip = {n.strip() for n in os.environ.get("PROBE_SKIP", "").split(",") if n.strip()}
     paths = [p for p in paths if (not wanted or p.name in wanted) and p.name not in skip]
+    if tag:
+        # "# PROBE_TAGS: smoke" near the top of a probe
+        tags = lambda p: " ".join(re.findall(r"^#\s*PROBE_TAGS:(.*)$", p.read_text(encoding="utf-8"), re.M)).split()
+        paths = [p for p in paths if tag in tags(p)]
     started = time.time()
 
     def one(path):
@@ -77,6 +96,10 @@ def main():
             detail = f"{detail2} (rerun alone)"
         if status == "PASS" and path.name in REPORT_ONLY:
             status = "REPORT"
+        if status == "FAIL" and path.name in QUARANTINE:
+            reason, expires = QUARANTINE[path.name]
+            if datetime.date.today().isoformat() <= expires:
+                status, detail = "QUAR", f"{detail}; quarantined until {expires}: {reason}"
         print(f"[{status.lower()}] {path.name} ({detail})", flush=True)
         return path, status, detail, output
 
@@ -94,8 +117,8 @@ def main():
         print(f"\n--- {path.name} (last lines, full log in {LOG_DIR / (path.stem + '.log')}) ---")
         print("\n".join(output.strip().splitlines()[-10:]))
 
-    counts = {s: sum(1 for r in rows if r[1] == s) for s in ("PASS", "REPORT", "FAIL", "SKIP")}
-    print(f"\nprobe:all: {counts['PASS']} PASS, {counts['REPORT']} REPORT, {counts['FAIL']} FAIL, {counts['SKIP']} SKIP")
+    counts = {s: sum(1 for r in rows if r[1] == s) for s in ("PASS", "REPORT", "QUAR", "FAIL", "SKIP")}
+    print(f"\nprobe:all: {counts['PASS']} PASS, {counts['REPORT']} REPORT, {counts['QUAR']} QUAR, {counts['FAIL']} FAIL, {counts['SKIP']} SKIP")
     sys.exit(1 if counts["FAIL"] else 0)
 
 

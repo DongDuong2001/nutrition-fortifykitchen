@@ -16,6 +16,7 @@
 Run with: ALIGN_BASE_URL=http://localhost:3107 npm run probe -- tests/probes/cc_53_units.py
 """
 # PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/add/** app/(app)/entry/[id]/** app/(app)/foods/[id]/**
+# PROBE_TAGS: smoke
 import os
 import re
 import sys
@@ -48,12 +49,14 @@ def shot(pg, name):
 def pick(pg, query):
     """Open /add for lunch, search, and open the first result's portion sheet."""
     go(pg, "/add?meal=lunch")
-    field = pg.locator('input[type="search"]:visible, input[placeholder*="Tìm món"]:visible').first
+    field = pg.locator('[data-testid="food-search"]:visible').first
     field.fill(query)
-    pg.wait_for_timeout(400)
-    pg.locator("button[data-food-row]:visible").first.click()
-    pg.wait_for_timeout(600)
-    return pg.locator('[role="dialog"][aria-labelledby="portion-sheet-title"]')
+    first = pg.locator("button[data-food-row]:visible").first
+    first.wait_for(state="visible", timeout=5000)
+    first.click()
+    sheet = pg.locator('[role="dialog"][aria-labelledby="portion-sheet-title"]')
+    sheet.locator('[data-testid="portion-add"]').wait_for(state="visible", timeout=5000)
+    return sheet
 
 
 def row(pg, name):
@@ -67,9 +70,9 @@ def pressed(scope, name):
 
 
 def add_from_sheet(pg, s):
-    s.get_by_role("button", name="Thêm vào Bữa trưa").click()
+    s.locator('[data-testid="portion-add"]').click()
     pg.wait_for_url(BASE + "/app")
-    pg.wait_for_timeout(800)
+    pg.locator('[data-testid="meal-header"]:visible').first.wait_for(state="visible", timeout=8000)
 
 
 def portions(pg):
@@ -233,13 +236,13 @@ def exceptions(pg):
 def tray(pg):
     print("\n--- 6. The tray, 4 foods ---")
     go(pg, "/add?meal=lunch")
-    toggles = pg.locator("[data-tray-toggle]:visible")
+    toggles = pg.locator('[data-testid="tray-toggle"]:visible')
     for i in range(4):
         toggles.nth(i).click()
-        pg.wait_for_timeout(120)
-    pg.get_by_role("button", name="Xem lại").click()
-    pg.wait_for_timeout(500)
+        pg.wait_for_function("(i) => document.querySelectorAll('[data-testid=tray-toggle][aria-checked=true]').length > i", arg=i)
+    pg.locator('[data-testid="tray-review"]:visible').click()
     review = pg.locator("[data-tray-review]")
+    review.locator("li").first.wait_for(state="visible", timeout=5000)
     cards = review.locator("li")
     check(cards.count() == 4, f"tray: four cards ({cards.count()})")
     check(review.locator("button[aria-expanded='true']").count() == 1, "tray: the first card is open")

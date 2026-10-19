@@ -136,7 +136,7 @@ describe("public/sw.js", () => {
     const paths = [
       "/", "/explore", "/settings", "/offline", "/entry/1", "/signin", "/signin/expired", "/signup",
       "/reset-password", "/api/x", "/login", "/signing", "/_next/static/a.js", "/icons/icon-512.png", "/m.woff2",
-      "/manifest.webmanifest",
+      "/manifest.webmanifest", "/auth", "/auth/callback", "/join/ABC123", "/joining", "/add", "/settings/whats-new",
     ];
     for (const path of paths) {
       for (const mode of ["navigate", "cors", "no-cors"]) {

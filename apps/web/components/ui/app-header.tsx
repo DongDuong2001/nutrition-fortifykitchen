@@ -203,7 +203,7 @@ export function AppHeader({
 
           {hasDateNav && (
             <div className="flex shrink-0 items-center lg:gap-1.5">
-              <button type="button" onClick={onPrev} disabled={prevDisabled} aria-label="Ngày trước" data-tour="day-prev" className={DATE_BUTTON}>
+              <button type="button" onClick={onPrev} disabled={prevDisabled} aria-label="Ngày trước" data-tour="day-prev" data-testid="day-prev" className={DATE_BUTTON}>
                 <Chevron dir="left" />
               </button>
               {onDateTap ? (
@@ -222,7 +222,7 @@ export function AppHeader({
                   {dateLabel || <span aria-hidden="true" className="inline-block h-5 w-[104px]" />}
                 </span>
               )}
-              <button type="button" onClick={onNext} disabled={nextDisabled} aria-label="Ngày sau" className={DATE_BUTTON}>
+              <button type="button" onClick={onNext} disabled={nextDisabled} aria-label="Ngày sau" data-testid="day-next" className={DATE_BUTTON}>
                 <Chevron dir="right" />
               </button>
             </div>

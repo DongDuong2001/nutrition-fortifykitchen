@@ -6,6 +6,7 @@ Screenshots go to tests/probes/out/smoke-<route>-<width>.png. Exits 1 if any rou
 Routes are the page.tsx files under app/, so a new route is covered without a change here. The old URLs that\nIA v2 redirects (/today, /profile, /foods) have no page.tsx; tests/probes/cc2_07.py checks them.\nRun with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/smoke.py
 """
 # PROBE_COVERS: app/**
+# PROBE_TAGS: smoke
 import os
 import re
 import sys

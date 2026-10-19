@@ -26,6 +26,7 @@ export function FoodSearchField({ value, onChange, inputRef, className = "" }: F
         ref={inputRef}
         type="search"
         aria-label="Tìm món"
+        data-testid="food-search"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Tìm món: cơm, trứng, chà là…"

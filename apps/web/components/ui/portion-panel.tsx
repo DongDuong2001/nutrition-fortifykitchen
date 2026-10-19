@@ -230,6 +230,7 @@ export function PortionPanel({
           type="button"
           onClick={onAdd}
           data-tour="portion-add"
+          data-testid="portion-add"
           disabled={cannotAdd}
           className={`${onAddAndContinue ? "flex-1 lg:flex-none" : "w-full"} flex h-14 cursor-pointer items-center justify-center rounded-2xl border-0 bg-blue text-[17px] font-bold text-on-accent   hover:bg-blue/90    disabled:opacity-50`}
         >

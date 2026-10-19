@@ -1,3 +1,5 @@
+import { vnDateParts, vnNoon } from "./vn-time";
+
 export interface FormatNumberOptions {
   decimals?: number;
 }
@@ -66,8 +68,6 @@ export function formatAmount(value: number, unit: string): string {
   return formatWhole.format(value);
 }
 
-const TIMEZONE_VN = "Asia/Ho_Chi_Minh";
-
 const WEEKDAY_NAMES_VI: Record<string, string> = {
   Sun: "Chủ nhật",
   Mon: "Thứ Hai",
@@ -78,34 +78,11 @@ const WEEKDAY_NAMES_VI: Record<string, string> = {
   Sat: "Thứ Bảy",
 };
 
-const vnDateFormatter = new Intl.DateTimeFormat("en-US", {
-  timeZone: TIMEZONE_VN,
-  year: "numeric",
-  month: "2-digit",
-  day: "2-digit",
-  weekday: "short",
-});
-
-function getSaigonDateParts(d: Date) {
-  const parts = vnDateFormatter.formatToParts(d);
-  let year = "";
-  let month = "";
-  let day = "";
-  let weekday = "";
-  for (const part of parts) {
-    if (part.type === "year") year = part.value;
-    else if (part.type === "month") month = part.value;
-    else if (part.type === "day") day = part.value;
-    else if (part.type === "weekday") weekday = part.value;
-  }
-  return { year, month, day, weekday };
-}
-
 function parseTargetDate(targetDate: Date | string): Date {
   if (targetDate instanceof Date) return targetDate;
   if (typeof targetDate === "string") {
     if (/^\d{4}-\d{2}-\d{2}$/.test(targetDate)) {
-      return new Date(`${targetDate}T12:00:00+07:00`);
+      return vnNoon(targetDate);
     }
     return new Date(targetDate);
   }
@@ -118,7 +95,7 @@ function parseTargetDate(targetDate: Date | string): Date {
 export function getWeekdayName(targetDate: Date | string): string {
   const target = parseTargetDate(targetDate);
   if (isNaN(target.getTime())) return "";
-  const parts = getSaigonDateParts(target);
+  const parts = vnDateParts(target);
   return WEEKDAY_NAMES_VI[parts.weekday] || parts.weekday;
 }
 
@@ -136,8 +113,8 @@ export function formatDayLabel(targetDate: Date | string, now: Date): string {
     return String(targetDate);
   }
 
-  const targetParts = getSaigonDateParts(target);
-  const nowParts = getSaigonDateParts(now);
+  const targetParts = vnDateParts(target);
+  const nowParts = vnDateParts(now);
 
   const isToday =
     targetParts.year === nowParts.year &&
@@ -150,7 +127,7 @@ export function formatDayLabel(targetDate: Date | string, now: Date): string {
 
   // Yesterday in Asia/Ho_Chi_Minh (UTC+7 has no DST, exactly 24h before now)
   const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-  const yesterdayParts = getSaigonDateParts(yesterday);
+  const yesterdayParts = vnDateParts(yesterday);
   const isYesterday =
     targetParts.year === yesterdayParts.year &&
     targetParts.month === yesterdayParts.month &&
@@ -171,7 +148,7 @@ export function formatDayLabel(targetDate: Date | string, now: Date): string {
 export function formatDesktopDate(targetDate: Date | string): string {
   const target = parseTargetDate(targetDate);
   if (isNaN(target.getTime())) return String(targetDate);
-  const parts = getSaigonDateParts(target);
+  const parts = vnDateParts(target);
   const weekday = getWeekdayName(target);
   return `${weekday}, ${parts.day}/${parts.month}/${parts.year}`;
 }

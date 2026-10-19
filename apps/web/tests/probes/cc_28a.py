@@ -8,6 +8,7 @@ Production build, demo mode, 390x844 and 1280x800.
 Run with: ALIGN_BASE_URL=http://localhost:3104 npm run probe -- tests/probes/cc_28a.py
 """
 # PROBE_COVERS: app/(app)/admin/review/** app/(app)/coach/** app/(app)/coach/clients/[id]/**
+# PROBE_TAGS: smoke
 import os
 import re
 import sys

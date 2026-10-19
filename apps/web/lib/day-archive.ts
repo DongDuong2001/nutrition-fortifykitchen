@@ -1,5 +1,8 @@
 import type { AddedDiaryEntry } from "./diary-edits";
 import { editableFrom } from "./day-rules";
+import { vnDayKey } from "./vn-time";
+
+export { msUntilNextDay } from "./vn-time";
 
 // Earlier days of the entries the user added. The store keeps the entries of today and yesterday as one list; when the date
 // moves on (the app was open at midnight, or it was closed overnight) the entries of the days before are filed here by
@@ -7,18 +10,11 @@ import { editableFrom } from "./day-rules";
 
 export type DayArchive = Record<string, AddedDiaryEntry[]>;
 
-const vnDate = new Intl.DateTimeFormat("sv-SE", {
-  timeZone: "Asia/Ho_Chi_Minh",
-  year: "numeric",
-  month: "2-digit",
-  day: "2-digit",
-});
-
 /** The diary day (YYYY-MM-DD) of an entry: its own `day`, else the Ho Chi Minh date it was added on; null when neither can be read. */
 export function entryIso(entry: Pick<AddedDiaryEntry, "addedAt" | "day">): string | null {
   if (entry.day && /^\d{4}-\d{2}-\d{2}$/.test(entry.day)) return entry.day;
   const t = new Date(entry.addedAt);
-  return Number.isNaN(t.getTime()) ? null : vnDate.format(t);
+  return Number.isNaN(t.getTime()) ? null : vnDayKey(t);
 }
 
 /**
@@ -69,16 +65,6 @@ export function parseArchive(raw: string | null): DayArchive {
   } catch {
     return {};
   }
-}
-
-const DAY_MS = 24 * 60 * 60 * 1000;
-// Ho Chi Minh is UTC+7 all year, so its midnight is 17:00 UTC
-const OFFSET_MS = 7 * 60 * 60 * 1000;
-
-/** Milliseconds until the next midnight in Ho Chi Minh. Never 0: at midnight sharp it is a whole day. */
-export function msUntilNextDay(now: Date): number {
-  const local = now.getTime() + OFFSET_MS;
-  return DAY_MS - (((local % DAY_MS) + DAY_MS) % DAY_MS);
 }
 
 // ---- cc-68 Part 2: the list of editable days (today and yesterday) ----

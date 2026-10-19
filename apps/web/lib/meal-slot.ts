@@ -1,3 +1,5 @@
+import { vnClock } from "./vn-time";
+
 export type MealSlot = "breakfast" | "lunch" | "pre_workout" | "dinner" | "snack";
 
 export const MEAL_SLOTS: { id: MealSlot; nameVi: string }[] = [
@@ -17,25 +19,7 @@ export const MEAL_SLOTS: { id: MealSlot; nameVi: string }[] = [
  * - otherwise Bữa phụ (snack)
  */
 export function getDefaultMealSlot(date = new Date(), isTrainingDay = true): MealSlot {
-  // Compute hours and minutes in Asia/Ho_Chi_Minh timezone
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone: "Asia/Ho_Chi_Minh",
-    hour: "numeric",
-    minute: "numeric",
-    hour12: false,
-  }).formatToParts(date);
-
-  let hours = 0;
-  let minutes = 0;
-  for (const part of parts) {
-    if (part.type === "hour") {
-      hours = parseInt(part.value, 10);
-      if (hours === 24) hours = 0;
-    } else if (part.type === "minute") {
-      minutes = parseInt(part.value, 10);
-    }
-  }
-
+  const { hours, minutes } = vnClock(date);
   const timeInMinutes = hours * 60 + minutes;
 
   // 05:00 to 09:59 -> 300 to 599

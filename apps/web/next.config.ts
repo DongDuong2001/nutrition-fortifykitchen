@@ -52,6 +52,8 @@ const SECURITY_HEADERS = [
 ];
 
 const nextConfig: NextConfig = {
+  // check:live-bundle builds into its own folder, so the demo build a running server serves is left alone
+  ...(process.env.NEXT_DIST_DIR ? { distDir: process.env.NEXT_DIST_DIR } : {}),
   // cc-58: the icon package is one big index; only the icons used are bundled
   experimental: { optimizePackageImports: ["@mynaui/icons-react"] },
   // DEMO_BUILD=1 at build time keeps ?demo, ?as and ?level working in a production build (gates and probes only)

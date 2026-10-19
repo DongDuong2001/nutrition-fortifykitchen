@@ -160,6 +160,7 @@ export function FoodList({
             aria-checked={carried}
             aria-label={`${carried ? "Bỏ khỏi khay" : "Thêm vào khay"}: ${name}`}
             data-tray-toggle
+            data-testid="tray-toggle"
             data-tour="tray-toggle"
             onClick={() => tray.onToggle(food)}
             className="mr-2 inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent p-0 active:scale-[0.97] transition-press motion-reduce:active:scale-100"

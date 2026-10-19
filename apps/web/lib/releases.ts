@@ -212,8 +212,6 @@ export const RELEASES: readonly Release[] = [
 
 export const latestRelease = (): Release | null => RELEASES[0] ?? null;
 
-export const releaseById = (id: string): Release | null => RELEASES.find((r) => r.id === id) ?? null;
-
 /**
  * "Có gì mới" shows every release newer than the last one the account has seen, newest first (ids sort by day, then
  * letter). An account that has seen none gets the newest only, not the whole history.

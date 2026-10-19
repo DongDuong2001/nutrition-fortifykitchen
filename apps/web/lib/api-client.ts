@@ -1,3 +1,4 @@
+import { isLiveMode } from "./api-mode";
 import { getTodayIsoVN } from "./date";
 import {
   SAMPLE_DAY,
@@ -333,10 +334,8 @@ export function getApiBaseUrl(): string {
 
 const API_BASE_URL = getApiBaseUrl();
 
-/** Returns true only when configured to call the live Go backend. Default is mock. */
-export function isLiveMode(): boolean {
-  return process.env.NEXT_PUBLIC_API_MODE === "live";
-}
+// One live-mode check for the app (lib/api-mode.ts); kept exported here for the modules that already import it from here
+export { isLiveMode };
 
 // The API reads the session from the httpOnly sb-access-token cookie that middleware.ts and the auth callback set
 // (credentials: "include" below sends it). No script in the browser reads or forwards the access token.

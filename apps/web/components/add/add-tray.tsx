@@ -44,6 +44,7 @@ export function TrayBar({ totals, mealName, canAdd, submitting = false, onReview
         <button
           type="button"
           onClick={onReview}
+          data-testid="tray-review"
           className="min-h-11 min-w-11 shrink-0 cursor-pointer rounded-full border-0 bg-transparent px-3 text-[15px] font-bold text-sky"
         >
           Xem lại
@@ -53,6 +54,7 @@ export function TrayBar({ totals, mealName, canAdd, submitting = false, onReview
         type="button"
         onClick={onAdd}
         disabled={!canAdd || submitting}
+        data-testid="tray-add"
         className="flex h-12 w-full min-w-0 cursor-pointer items-center justify-center rounded-full border-0 bg-blue px-4 text-[15px] font-bold text-on-accent disabled:cursor-default disabled:opacity-50"
       >
         <span className="truncate">{`Thêm ${totals.count} món vào ${mealName}`}</span>
@@ -342,6 +344,7 @@ function TrayReview({ items, totals, mealName, canAdd, submitting, onRemove, onC
           type="button"
           onClick={onAdd}
           disabled={!canAdd || submitting}
+          data-testid="tray-add"
           className="flex h-14 cursor-pointer items-center justify-center gap-2 rounded-2xl border-0 bg-blue text-[17px] font-bold text-on-accent disabled:cursor-default disabled:opacity-50"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">

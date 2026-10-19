@@ -153,7 +153,7 @@ export function EmailPasswordForm({ variant }: { variant: "signin" | "signup" })
           onExpire={() => setCaptchaToken(undefined)}
         />
       )}
-      <PillButton type="submit" disabled={busy}>
+      <PillButton type="submit" disabled={busy} data-testid="auth-submit">
         {COPY[variant].primary}
       </PillButton>
       <button
