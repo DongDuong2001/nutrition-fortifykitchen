@@ -4,6 +4,7 @@ The sample user is a man born 2003 (23 in 2026): Vi chất shows / 2.500 mg pota
 / 850 µg vitamin A; Cài đặt > Mục tiêu says whose amounts they are; the energy target is unchanged
 Screenshots: .screenshots/cc67/. Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_67_part4.py
 """
+import json
 import os
 import re
 import sys
@@ -54,6 +55,24 @@ def main():
         check("Theo khuyến nghị dinh dưỡng Việt Nam 2016" in text, "Mục tiêu: the note names VN 2016")
         pg.screenshot(path=str(SHOTS / "settings-targets.png"), full_page=True)
         ctx.close()
+
+        # A man and a woman of 30 (born 1996, 30 in 2026): the 30–49 band of VN 2016
+        for sex, born, label, wants in [
+            ("male", 1996, "nam 30–49 tuổi", ["370 mg", "1,2 mg", "900 µg"]),
+            ("female", 1996, "nữ 30–49 tuổi", ["17,4 mg", "290 mg", "700 µg", "1 mg"]),
+        ]:
+            ctx = browser.new_context(**PHONE)
+            profile = '{"sex":"%s","birthYear":%d,"weightKg":65,"goal":"maintain","periodMode":false,"trainingMinutesDefault":60,"displayName":"","hintSeen":true}' % (sex, born)
+            ctx.add_init_script("try { localStorage.setItem('h1t_profile_v1_demo', %s); } catch (e) {}" % json.dumps(profile))
+            pg = ctx.new_page()
+            pg.goto(BASE + "/settings/targets", wait_until="networkidle")
+            pg.wait_for_timeout(600)
+            text = re.sub(r"\s+", " ", pg.locator("body").inner_text())
+            check(f"VN 2016, {label}" in text, f"Mục tiêu {sex} 30: says {label}")
+            for want in wants:
+                check(want in text, f"Mục tiêu {sex} 30 shows {want}")
+            pg.screenshot(path=str(SHOTS / f"targets-{sex}-30.png"), full_page=True)
+            ctx.close()
         browser.close()
 
     print(f"{len(problems)} problem(s)")

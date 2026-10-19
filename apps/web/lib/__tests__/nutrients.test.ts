@@ -70,10 +70,11 @@ describe("Nutrient Catalogue & Null Handling", () => {
     expect(result.achieved).toBe(2);
   });
 
-  it("cc-67: the 22 micros are VN 2016 recommended amounts, not provisional; carbs and fiber still are", () => {
-    for (const id of ["vitamin_d", "b12", "copper", "manganese", "sodium", "potassium", "calcium", "magnesium", "iron", "zinc"]) {
+  it("cc-67: 21 of the 22 micros are VN 2016 recommended amounts, not provisional (sodium keeps the coach's formula); fiber still is", () => {
+    for (const id of ["vitamin_d", "b12", "copper", "manganese", "potassium", "calcium", "magnesium", "iron", "zinc"]) {
       expect(getNutrientDefinition(id)?.targetSource, id).toBe("vn2016");
     }
+    expect(getNutrientDefinition("sodium")?.targetSource).toBe("coach");
     expect(getNutrientDefinition("fiber")?.targetSource).toBe("coach-provisional");
   });
 
