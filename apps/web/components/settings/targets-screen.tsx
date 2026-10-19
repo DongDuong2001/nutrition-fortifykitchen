@@ -36,12 +36,12 @@ export function TargetsScreen() {
           <div className="flex flex-col gap-4">
             <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
               <TargetCard id="targets-energy" section={sections[0]} note="* Chất xơ: tạm thời, chưa có quy tắc của huấn luyện viên." />
-              <TargetCard id="targets-minerals" section={sections[1]} />
+              <TargetCard id="targets-minerals" section={sections[1]} note="Theo khuyến nghị dinh dưỡng Việt Nam 2016 (Bộ Y tế), đúng giới tính và tuổi của bạn." />
             </div>
             <TargetCard
               id="targets-vitamins"
               section={sections[2]}
-              note="* Khuyến nghị dinh dưỡng Việt Nam 2016 (VN 2016). Đây không phải quy tắc của huấn luyện viên."
+              note="Theo khuyến nghị dinh dưỡng Việt Nam 2016 (Bộ Y tế), đúng giới tính và tuổi của bạn."
             />
             <p className="m-0 text-[13px] text-secondary">Cân nặng, mục tiêu và ngày tập mặc định sửa trong Hồ sơ. Bạn cũng có thể tùy chỉnh tỉ lệ đa lượng riêng.</p>
             <div className="flex flex-col gap-2">

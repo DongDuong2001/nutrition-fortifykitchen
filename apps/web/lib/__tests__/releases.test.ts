@@ -16,7 +16,7 @@ describe("RELEASES", () => {
     const r = latestRelease();
     expect(r?.id).toBe("2026-10-19a");
     expect(r?.date).toBe("19/10");
-    expect(r?.items.map((i) => i.title)).toEqual(["Mỗi món một dòng", "Ghi phần ăn được", "Chỉnh thành phần món"]);
+    expect(r?.items.map((i) => i.title)).toEqual(["Mỗi món một dòng", "Ghi phần ăn được", "Chỉnh thành phần món", "Mục tiêu vi chất theo khuyến nghị"]);
     for (const i of r?.items ?? []) expect(i.body).not.toContain(":");
     // Hôm nay's controls, with a fallback for the one that is not always there; one step is the editable parts of a dish
     expect(r?.tour?.map((s) => [s.target, s.fallback ?? null])).toEqual([

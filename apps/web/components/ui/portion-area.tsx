@@ -26,7 +26,8 @@ import {
   MAX_MULT,
   type PortionState,
 } from "@/lib/portion";
-import { cookSwitchFor, type CookState } from "@/lib/yield";
+import { cookSwitchFor, useRowsReady } from "@/lib/food-rows";
+import type { CookState } from "@/lib/yield";
 import { QuantityStepper, TimesStepper } from "@/components/ui/quantity-stepper";
 import { markUsed } from "@/lib/onboarding-store";
 import { setPresent, type Presence } from "@/lib/tour-bus";
@@ -80,7 +81,8 @@ function GramPortionArea({
   const panel = variant === "panel";
   const isEggFood = portionModeOf(food) === "egg";
   const canSwap = !!onFoodChange;
-  const sw = useMemo(() => cookSwitchFor(food, MOCK_FOODS, canSwap), [food, canSwap]);
+  const ready = useRowsReady();
+  const sw = useMemo(() => cookSwitchFor(food, MOCK_FOODS, canSwap), [food, canSwap, ready]);
   const sizes = useMemo(() => eggSizes(food), [food]);
   const parts = useMemo(() => (canSwap ? eggParts(food, MOCK_FOODS) : []), [food, canSwap]);
 

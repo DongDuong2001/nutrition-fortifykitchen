@@ -1,6 +1,7 @@
 import { formatAmount, formatNumber } from "./format";
 import type { FoodItem } from "./mock/foods";
-import { cookSwitchFor, type CookState, type CookSwitch } from "./yield";
+import { cookSwitchFor } from "./food-rows";
+import type { CookState, CookSwitch } from "./yield";
 
 function parseDecimal(input: string): number | null {
   const text = input.trim().replace(",", ".");

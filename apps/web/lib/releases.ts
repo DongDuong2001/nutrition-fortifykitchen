@@ -39,6 +39,7 @@ export const RELEASES: readonly Release[] = [
       { icon: "select", title: "Mỗi món một dòng", body: "Cơm, thịt, cá, khoai chỉ còn một dòng trong danh sách. Chọn Sống hay Chín ngay trong bảng khẩu phần." },
       { icon: "meal", title: "Ghi phần ăn được", body: "Trái cây và món có vỏ, hạt, xương ghi theo gam của phần ăn được. Trứng vẫn ghi theo quả." },
       { icon: "select", title: "Chỉnh thành phần món", body: "Mở Thành phần của món Việt, đổi gam từng phần hoặc thêm bún, thịt. Món vào nhật ký một dòng." },
+      { icon: "target", title: "Mục tiêu vi chất theo khuyến nghị", body: "22 vi chất theo Khuyến nghị dinh dưỡng Việt Nam 2016, đúng giới tính và tuổi của bạn. Năng lượng và đa lượng giữ nguyên." },
     ],
     tour: [
       { target: "meal-add", fallback: "nav-add", title: "Mỗi món một dòng", body: "Chạm + Thêm rồi tìm món. Cơm, thịt, cá chỉ một dòng, chọn Sống hay Chín trong khẩu phần." },

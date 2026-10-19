@@ -1,5 +1,7 @@
 import { MOCK_FOODS, catalogVersion, type FoodItem } from "./mock/foods";
 import { searchWithTwins } from "./search";
+
+export { cookSwitchFor } from "./yield";
 import { COOKED_WORDS, RAW_COOKED_PAIRS, RAW_WORDS, rankIn, rowKey, cookStateOf, isPlainCooked, isPrepared, ownCookState, wordRe } from "./yield";
 
 const PLAIN_RAW_RE = wordRe(["sống", "hạt khô", "khô"]);

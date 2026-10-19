@@ -1,9 +1,9 @@
-import { calculateSaltTarget, formatSaltRange } from "../../lib/training";
 import { formatAmount, formatNumber, formatRange } from "../../lib/format";
 import { goalName } from "../../lib/onboarding";
 import { calculateEnergyTarget, type TargetRange } from "../../lib/targets";
 import { getNutrientDefinition, nutrientName } from "../../lib/nutrients";
 import { targetsFor, type Profile } from "../../lib/profile";
+import { ageOf, rdaWho } from "../../lib/rda";
 
 export interface TargetRowData {
   label: string;
@@ -17,7 +17,7 @@ export interface TargetSection {
   rows: TargetRowData[];
 }
 
-// The VN 2016 values (lib/targets.ts VN2016_TARGETS) in the design's order; names and units come from the catalogue.
+// The VN 2016 values (lib/rda.ts) in the design's order; names and units come from the catalogue.
 const VITAMIN_ROWS = [
   "vitamin_a",
   "vitamin_c",
@@ -43,14 +43,14 @@ function range(target: TargetRange, unit: string): string {
 }
 
 /**
- * The daily targets of a profile as the design lists them: formula lines from the coach rules
- * (lib/targets.ts, lib/training.ts), and VN 2016 values for the rest. Read-only; nothing here is edited.
+ * The daily targets of a profile as the design lists them: formula lines from the coach rules for energy and the macros
+ * (lib/targets.ts), and the VN 2016 recommended amounts for the 22 vitamins and minerals (lib/rda.ts). Read-only; nothing here is edited.
  */
 export function targetSections(profile: Profile): TargetSection[] {
   const t = targetsFor(profile);
+  const who = `VN 2016, ${rdaWho(profile.sex, ageOf(profile.birthYear)).toLowerCase()}`;
   const weight = formatNumber(profile.weightKg);
   const perKg = calculateEnergyTarget(1, profile.goal);
-  const salt = calculateSaltTarget(profile.trainingMinutesDefault);
 
   return [
     {
@@ -79,28 +79,21 @@ export function targetSections(profile: Profile): TargetSection[] {
     {
       title: "Khoáng chất",
       rows: [
-        {
-          label: "Muối",
-          detail: "Nền 4–6 g + 1–1,5 g mỗi 20 phút tập",
-          value: `${formatSaltRange(salt.totalMin, salt.totalMax)} g`,
-        },
-        { label: nutrientName("potassium"), detail: `80–100 mg/kg × ${weight} kg`, value: range(t.potassium, "mg") },
-        { label: nutrientName("calcium"), detail: "Khoảng mục tiêu theo huấn luyện viên", value: range(t.calcium, "mg") },
-        { label: nutrientName("magnesium"), detail: `50% mục tiêu ${nutrientName("calcium")}`, value: range(t.magnesium, "mg") },
-        {
-          label: nutrientName("iron"),
-          detail: "Nam 8 mg · Nữ 18 mg, đang kinh 28 mg",
-          value: `${formatNumber(t.iron.min)} mg`,
-        },
-        { label: nutrientName("zinc"), detail: "Nam 12 mg · Nữ 8 mg", value: `${formatNumber(t.zinc.min)} mg` },
+        // cc-67: natri là mức khuyến nghị (dưới 2.000 mg), không tính theo phút tập: 2,5 g muối cho mỗi g natri
+        { label: "Muối", detail: `Dưới ${formatAmount(t.sodium.min / 400, "g")} g mỗi ngày (${formatAmount(t.sodium.min, "mg")} mg natri), ${who}`, value: `${formatAmount(t.sodium.min / 400, "g")} g` },
+        ...["potassium", "calcium", "magnesium", "iron", "zinc"].map((key) => ({
+          label: nutrientName(key),
+          detail: who,
+          value: `${formatAmount(t[key]?.min ?? 0, "mg")} mg`,
+        })),
       ],
     },
     {
-      title: "Vitamin và khoáng khác*",
+      title: "Vitamin và khoáng khác",
       rows: VITAMIN_ROWS.map((key) => {
         const target = t[key];
         const unit = getNutrientDefinition(key)?.unit ?? "";
-        return { label: nutrientName(key), detail: "", value: target ? `${formatAmount(target.min, unit)} ${unit}` : "—" };
+        return { label: nutrientName(key), detail: who, value: target ? `${formatAmount(target.min, unit)} ${unit}` : "—" };
       }),
     },
   ];

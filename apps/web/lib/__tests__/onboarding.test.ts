@@ -87,12 +87,11 @@ describe("goal and target rows without a valid weight", () => {
 });
 
 describe("dailyTargetRows", () => {
-  it("shows energy and macro/mineral targets from lib/targets.ts for the profile", () => {
+  it("shows the energy and macro targets from lib/targets.ts for the profile (the micros are the recommended amounts, not shown here)", () => {
     expect(dailyTargetRows(65, "male", "maintain")).toEqual([
       { label: "Năng lượng", value: "1.950–2.275 kcal" },
       { label: "Đạm (1,6–2,2 g/kg)", value: "104–143 g" },
       { label: "Chất béo (0,5–1 g/kg)", value: "33–65 g" },
-      { label: "Potassium (80–100 mg/kg)", value: "5.200–6.500 mg" },
     ]);
   });
 });

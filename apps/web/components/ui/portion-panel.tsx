@@ -5,7 +5,7 @@ import Link from "next/link";
 import { type FoodItem, MOCK_FOODS } from "@/lib/mock/foods";
 import { type MealSlot, getMealSlotNameVi } from "@/lib/meal-slot";
 import { parseGramsInput, calculateMacroPreview, macroGramsText, scaleNutrients, gramsServingLabel, unitAmountText, parsePortionLabel, portionModeOf, portionNote, portionSummary } from "@/lib/portion";
-import { cookSwitchFor } from "@/lib/yield";
+import { cookSwitchFor, useRowsReady } from "@/lib/food-rows";
 import { PortionArea } from "@/components/ui/portion-area";
 import type { DishEdit } from "@/lib/dish-recipes";
 import { formatAmount, formatNumber } from "@/lib/format";
@@ -85,7 +85,9 @@ export function PortionPanel({
   // An older "1 quả" of a fruit reads as an egg label: only an egg food takes it as one
   const portion = parsed?.kind === "egg" && mode !== "egg" ? null : parsed;
   const canSwap = !!onFoodChange;
-  const sw = useMemo(() => (mode === "grams" ? cookSwitchFor(food, MOCK_FOODS, canSwap) : null), [mode, food, canSwap]);
+  // The raw / cooked data loads a moment after the first paint: until then the sheet has no switch, and cannot add
+  const ready = useRowsReady();
+  const sw = useMemo(() => (mode === "grams" ? cookSwitchFor(food, MOCK_FOODS, canSwap) : null), [mode, food, canSwap, ready]);
   const amountText = unitAmountText(food, selectedServingLabel, parsedGrams) ?? (selectedServingLabel.includes("g") ? gramsServingLabel(parsedGrams) : selectedServingLabel);
   const summary = changed ? `${formatNumber(changed.grams)} g · đã chỉnh` : portion ? portionSummary(portion, sw) : amountText;
   const note = portion ? portionNote(portion, sw, parsedGrams, mode === "egg", food.category === "trai_cay") : null;
@@ -127,7 +129,7 @@ export function PortionPanel({
   }, [food, changed, shownGrams, dailyTargets, showMicros]);
 
   const mealNameVi = mealSlot ? getMealSlotNameVi(mealSlot) : "bữa ăn";
-  const cannotAdd = isSubmitting || shownGrams <= 0 || mealSlot === null || !canLog || (!!changed && typeof changed.per100.energy !== "number");
+  const cannotAdd = isSubmitting || shownGrams <= 0 || mealSlot === null || !canLog || (!!changed && typeof changed.per100.energy !== "number") || (mode === "grams" && !ready);
 
   return (
     <div data-align-container="portion-panel" data-tour="portion-panel" className={`flex flex-col gap-4 text-text ${className}`}>

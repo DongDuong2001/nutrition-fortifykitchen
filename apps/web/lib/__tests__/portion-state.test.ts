@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import {
   defaultPortionOf,
   eggParts,
@@ -19,6 +19,10 @@ import {
   type PortionState,
 } from "../portion";
 import type { FoodItem } from "../mock/foods";
+import { loadFoodRows } from "../food-rows";
+
+// defaultPortionOf asks for the raw / cooked data, which loads after the first paint (lib/food-rows)
+beforeAll(() => loadFoodRows());
 
 const food = (id: string, nameVi: string, category: FoodItem["category"], servings: FoodItem["servings"], extra: Partial<FoodItem> = {}): FoodItem => ({
   id,

@@ -6,7 +6,6 @@ import {
   countAchievedNutrients,
   getNutrientDefinition,
 } from "../nutrients";
-import { PROVISIONAL_TARGETS, VN2016_TARGETS } from "../targets";
 import { SAMPLE_DAY } from "../mock/sample-day";
 import { MOCK_FOODS } from "../mock/foods";
 import { computeCompositeDayData } from "../diary-store";
@@ -71,16 +70,11 @@ describe("Nutrient Catalogue & Null Handling", () => {
     expect(result.achieved).toBe(2);
   });
 
-  it("VN2016 targets exist and are flagged as provisional", () => {
-    expect(VN2016_TARGETS.vitamin_d.min).toBe(15);
-    expect(VN2016_TARGETS.b12.min).toBe(2.4);
-    expect(VN2016_TARGETS.copper.min).toBe(0.9);
-    expect(VN2016_TARGETS.manganese.min).toBe(2.3);
-
-    expect(PROVISIONAL_TARGETS.vitamin_d).toBe(true);
-    expect(PROVISIONAL_TARGETS.b12).toBe(true);
-    expect(PROVISIONAL_TARGETS.copper).toBe(true);
-    expect(PROVISIONAL_TARGETS.manganese).toBe(true);
+  it("cc-67: the 22 micros are VN 2016 recommended amounts, not provisional; carbs and fiber still are", () => {
+    for (const id of ["vitamin_d", "b12", "copper", "manganese", "sodium", "potassium", "calcium", "magnesium", "iron", "zinc"]) {
+      expect(getNutrientDefinition(id)?.targetSource, id).toBe("vn2016");
+    }
+    expect(getNutrientDefinition("fiber")?.targetSource).toBe("coach-provisional");
   });
 
   it("percentage calculation uses lower bound for range targets and handles single target values", () => {
