@@ -12,8 +12,9 @@ every API call until it asks /auth/session, which is what the middleware's cooki
      reload; B hidden, A adds, B shown again: it is there within 10 s (the session refresh first); the same after a
      pageshow from the back-forward cache; deleted on the server: B drops it
   6  signed out at 1440: /app and the link page's Truy cập end on /signin; /landing still opens directly
-  7  review 05:30 M1: 409 PAST_DAY_READ_ONLY (an add sent after midnight): one notice "…vì ngày đã qua…", no Thử lại;
-     after a reload it is not sent again and the notice does not come back
+  7  409 PAST_DAY_READ_ONLY: for today (the API may not allow yesterday yet) the write is held with Thử lại; for a day
+     beyond the editable window (today and yesterday, cc-68) one notice "…vì ngày đã qua…", no Thử lại; after a
+     reload it is not sent again and the notice does not come back
 Run with: LIVE_BUILD=1 ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_49.py
 """
 import json
@@ -181,10 +182,37 @@ def on_server(api, name):
 
 
 def outbox_ids(pg):
+    """cc-68: the outbox is one IndexedDB record per write (store 'outbox' of database 'h1t')."""
     return pg.evaluate(
-        """(email) => { try { return JSON.parse(localStorage.getItem('h1t_offline_outbox_' + email) || '[]').map((i) => i.id); }
-           catch (e) { return []; } }""",
+        """(email) => new Promise((resolve) => {
+             const open = indexedDB.open('h1t');
+             open.onerror = () => resolve([]);
+             open.onsuccess = () => {
+               try {
+                 const db = open.result;
+                 if (!db.objectStoreNames.contains('outbox')) return resolve([]);
+                 const all = db.transaction('outbox').objectStore('outbox').getAll();
+                 all.onsuccess = () => resolve(all.result.filter((i) => i.scope === email).map((i) => i.id));
+                 all.onerror = () => resolve([]);
+               } catch (e) { resolve([]); }
+             };
+           })""",
         EMAIL,
+    )
+
+
+def seed_outbox(pg, item):
+    """Puts one write into the outbox as an earlier page life would have left it."""
+    pg.evaluate(
+        """([email, item]) => new Promise((resolve) => {
+             const open = indexedDB.open('h1t');
+             open.onsuccess = () => {
+               const tx = open.result.transaction('outbox', 'readwrite');
+               tx.objectStore('outbox').put({ ...item, scope: email });
+               tx.oncomplete = () => resolve(true);
+             };
+           })""",
+        [EMAIL, item],
     )
 
 
@@ -410,18 +438,45 @@ with sync_playwright() as p:
         ctx.close()
 
     if want(7):
+        # cc-68: today and yesterday are editable, so a 409 for them is the API not allowing it yet (held, Thử lại stays).
+        # Only a day beyond the window is refused for good: seeded here as a write an earlier page life left behind.
         api = FakeApi()
         ctx, pg, st = device(browser, api)
         open_today(pg)
         past_day = '{"error":{"code":"PAST_DAY_READ_ONLY","message":"Cannot write to past dates"}}'
-        api.script["POST"] = [(409, past_day)] * 5
+        api.script["POST"] = [(409, past_day)] * 2
         add_food(pg, "Bắp luộc")
+        pg.wait_for_timeout(1500)
+        check(pg.get_by_text("vì ngày đã qua", exact=False).count() == 0, "7: 409 for today: no 'day has passed' notice (the API may not allow it yet)")
+        check(pg.get_by_role("button", name="Thử lại").count() >= 1, "7: …it is held with Thử lại")
+        ctx.close()
+
+        api = FakeApi()
+        ctx, pg, st = device(browser, api)
+        open_today(pg)
+        old = (datetime.now(timezone.utc) + timedelta(hours=7) - timedelta(days=3)).strftime("%Y-%m-%d")
+        entry_id = "99999999-9999-4999-8999-999999999999"
+        api.script["POST"] = [(409, past_day)] * 5
+        seed_outbox(
+            pg,
+            {
+                "key": f"{entry_id}:1:k",
+                "seq": 1,
+                "id": entry_id,
+                "date": old,
+                "payload": {"id": entry_id, "kind": "food", "meal_slot": "lunch", "food_id": FOODS[1]["id"], "grams": 100, "serving_size_g": 100},
+                "createdAt": int(time.time() * 1000),
+                "state": "queued",
+                "attempts": 0,
+            },
+        )
+        pg.reload(wait_until="domcontentloaded")
         notice = pg.get_by_text("chưa lưu lên máy chủ vì ngày đã qua", exact=False)
         try:
-            notice.first.wait_for(timeout=5000)
+            notice.first.wait_for(timeout=8000)
         except Exception:
             pass
-        check(notice.count() >= 1, "7: 409 past day: the notice says the day has passed and the food stays on this device")
+        check(notice.count() >= 1, "7: 409 for a day beyond the window: the notice says the day has passed and the food stays on this device")
         close_tips(pg)
         check(pg.get_by_role("button", name="Thử lại").count() == 0, "7: …with no Thử lại (it can never work)")
         posts = len([c for c in st["calls"] if c.startswith("POST /days/")])

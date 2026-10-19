@@ -5,6 +5,7 @@ import { getApiBaseUrl } from "@/lib/api-client";
 import { warnIfApiCrossOrigin } from "@/lib/api-mode";
 import { DiaryProvider } from "@/lib/diary-store";
 import { DiaryToast } from "@/components/diary-toast";
+import { SyncAlerts } from "@/components/sync/sync-alerts";
 import { SetupGate } from "@/components/first-run/setup-gate";
 import { OnboardingLayer } from "@/components/onboarding/onboarding-layer";
 
@@ -17,6 +18,7 @@ export function DiaryProviderWrapper({ children }: { children: React.ReactNode }
         <DiaryProvider>
           {content}
           <DiaryToast />
+          <SyncAlerts />
           <OnboardingLayer />
         </DiaryProvider>
       )}

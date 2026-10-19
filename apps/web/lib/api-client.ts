@@ -12,7 +12,7 @@ import { searchFoods as searchMockFoods } from "./search";
 import type { SetupProfile } from "./onboarding";
 import { currentAccountId } from "./auth-actions";
 import { yieldToMain } from "./idle";
-import { OFFLINE_OUTBOX_KEY, accountStorage, browserLocal, keyedStorage, type KeyValueStore } from "./storage-keys";
+import type { OutboxItem } from "./outbox";
 import { isDemo } from "./demo";
 import { type CoachProfile, filterCoachesBySpecialty, getCoachById } from "./coaches";
 import { type LeaderboardPeriod, type LeaderboardResponse, getMockLeaderboard, setLeaderboardOptIn as setLeaderboardOptInState } from "./leaderboard";
@@ -405,10 +405,10 @@ export async function apiFetch(path: string, init: RequestInit = {}): Promise<Re
   return send();
 }
 
-// Diary writes and the outbox. A write that did not reach the server is never dropped: it waits in the outbox
-// (localStorage, per account) and is sent again on the next sync. OFFLINE_OUTBOX_KEY is read inside the functions
-// only: api-client, storage-keys and auth-actions import each other, so a module-level read of it can run before
-// storage-keys has finished loading ("Cannot access 'x' before initialization", depending on which page loads first).
+// Diary writes and the outbox (cc-68: write-ahead). Every write is committed to the outbox (lib/outbox: IndexedDB, one
+// record per write) BEFORE its request goes out, marked "sending"; it leaves the outbox when the server has it. A write
+// that did not reach the server is never dropped: it waits there to be sent again on the next sync. The outbox belongs
+// to the account that was signed in when the write was made (the scope is taken at that moment), never another's.
 
 /**
  * The server saved it, it waits in the outbox to be sent again, the server refused it (a 4xx) and it waits for Thử lại,
@@ -422,12 +422,12 @@ export interface WriteResult {
   /** The answer's status (0 = no answer) and the server's message, for a held write. */
   status?: number;
   message?: string;
-  /** Held for good (409 PAST_DAY_READ_ONLY): never sent again, not even by Thử lại. */
+  /** Held for good (409 PAST_DAY_READ_ONLY on a day beyond the editable window): never sent again, not even by Thử lại. */
   final?: boolean;
 }
 
-/** The server's code for a write to a day that has passed: sending it again can never work. */
-const PAST_DAY_READ_ONLY = "PAST_DAY_READ_ONLY";
+/** The server's code for a write to a day that has passed: sending it again can never work (beyond the editable window). */
+export const PAST_DAY_READ_ONLY = "PAST_DAY_READ_ONLY";
 
 /** What a diary write's answer means. 0 = no answer (offline, or the request failed). */
 export function writeOutcome(status: number, method: string): "saved" | "retry" | "held" {
@@ -438,34 +438,7 @@ export function writeOutcome(status: number, method: string): "saved" | "retry" 
   return "held";
 }
 
-interface OutboxItem {
-  /** The entry the write is about. */
-  id: string;
-  date: string;
-  payload: Record<string, unknown>;
-  /** Absent on an add queued before cc-49: POST /days/{date}/entries. */
-  method?: "POST" | "PATCH" | "DELETE";
-  path?: string;
-  /** This one write (an entry can have several queued). Absent before cc-49: `${id}:${createdAt}`. */
-  key?: string;
-  createdAt: number;
-  retries?: number;
-  /**
-   * The server refused it with a 4xx: not sent again until Thử lại or the next app open (syncOfflineOutbox({ retryHeld:
-   * true })). `final`: refused for good (a past day), never sent again.
-   */
-  held?: { status: number; message: string; final?: boolean };
-}
-
-type DiaryWrite = Pick<OutboxItem, "id" | "date" | "payload" | "method" | "path">;
-
-const itemKey = (item: OutboxItem) => item.key ?? `${item.id}:${item.createdAt}`;
-const itemMethod = (item: DiaryWrite) => item.method ?? "POST";
-const itemPath = (item: DiaryWrite) => item.path ?? `/days/${item.date}/entries`;
-const isAdd = (item: DiaryWrite) => itemMethod(item) === "POST" && itemPath(item) === `/days/${item.date}/entries`;
-
-/** A write that names a recipe's local id: the server refuses it, so it waits until repointOutboxFood gives it the server food. */
-const waitsForFood = (item: DiaryWrite) => typeof item.payload?.food_id === "string" && isRecipeId(item.payload.food_id);
+export type { OutboxItem } from "./outbox";
 
 /** A write refused for good (held.final) is kept this long, then dropped so the outbox does not grow without end. */
 export const FINAL_OUTBOX_KEEP_MS = 7 * 24 * 60 * 60 * 1000;
@@ -475,89 +448,7 @@ export function pruneOutbox<T extends Pick<OutboxItem, "createdAt" | "held">>(it
   return items.filter((item) => !(item.held?.final && now - item.createdAt > FINAL_OUTBOX_KEEP_MS));
 }
 
-/** The storage of one account's outbox: the signed-in one, or `account` when a write or a run belongs to it. */
-function outboxStorage(account?: string | null): KeyValueStore | null {
-  if (account === undefined) return accountStorage();
-  const local = browserLocal();
-  return local ? keyedStorage(local, isDemo(), account) : null;
-}
-
-function readOutbox(account?: string | null): OutboxItem[] {
-  try {
-    const items: unknown = JSON.parse(outboxStorage(account)?.getItem(OFFLINE_OUTBOX_KEY) || "[]");
-    return Array.isArray(items) ? (items as OutboxItem[]) : [];
-  } catch {
-    return [];
-  }
-}
-
-function writeOutbox(items: OutboxItem[], account?: string | null): void {
-  try {
-    outboxStorage(account)?.setItem(OFFLINE_OUTBOX_KEY, JSON.stringify(items));
-  } catch {
-    // Storage unavailable
-  }
-}
-
-/** Queues a write in the outbox of `account` (default: the signed-in one), never another account's. */
-function queueWrite(write: DiaryWrite, held?: OutboxItem["held"], account?: string | null): void {
-  const createdAt = Date.now();
-  writeOutbox([...readOutbox(account), { ...write, key: `${write.id}:${createdAt}:${generateUuid()}`, createdAt, retries: 0, held }], account);
-}
-
-/** Queues an add to send later (kept for callers from before cc-49; diary writes queue themselves). */
-export function enqueueOfflineEntry(date: string, payload: Record<string, unknown>): void {
-  queueWrite({ id: (payload.id as string) || `offline-${Date.now()}`, date, payload });
-}
-
-/** Removes every queued write of an entry (an entry that never reached the server, deleted or undone). */
-export function dropOfflineEntry(id: string): void {
-  const items = readOutbox();
-  const kept = items.filter((item) => item.id !== id);
-  if (kept.length !== items.length) writeOutbox(kept);
-}
-
-/**
- * Points `account`'s queued writes that name food `from` (a recipe's local id) at `to` (its server food), and lifts
- * their hold (the server refused the local id), so the next sync sends them. A write held for good stays held.
- */
-export function repointOutboxFood(from: string, to: string, account: string | null): number {
-  let changed = 0;
-  const items = readOutbox(account).map((item) => {
-    if (item.payload?.food_id !== from) return item;
-    changed++;
-    return { ...item, payload: { ...item.payload, food_id: to }, held: item.held?.final ? item.held : undefined };
-  });
-  if (changed > 0) writeOutbox(items, account);
-  return changed;
-}
-
-/** Entry ids with a write in the outbox for the active account. */
-export function getPendingOfflineEntryIds(): string[] {
-  return readOutbox().map((item) => item.id);
-}
-
-// Writes being sent now, by entry: the next write of the same entry waits for it, so the server sees them in order
-const inFlight = new Map<string, Promise<WriteResult>>();
-// When each entry's last write started: a refetch that started before it must not overwrite it (diary-store)
-const writeStartedAt = new Map<string, number>();
-
-/** Entry ids a refetch must leave as they are on the device: a write is queued or being sent. */
-export function pendingWriteIds(): Set<string> {
-  return new Set([...getPendingOfflineEntryIds(), ...inFlight.keys()]);
-}
-
-/** Entry ids whose last write started at or after `time` (ms). */
-export function writtenSince(time: number): string[] {
-  return [...writeStartedAt].filter(([, at]) => at >= time).map(([id]) => id);
-}
-
-/** How many diary writes are being sent now. */
-export function writesInFlight(): number {
-  return inFlight.size;
-}
-
-async function serverAnswer(res: Response): Promise<{ message: string; code: string }> {
+export async function serverAnswer(res: Response): Promise<{ message: string; code: string }> {
   try {
     const text = await res.text();
     try {
@@ -572,66 +463,9 @@ async function serverAnswer(res: Response): Promise<{ message: string; code: str
 }
 
 /** Diary requests give up after this: a request a phone froze in the background must not hold the outbox or a refetch. */
-const DIARY_REQUEST_MS = 20 * 1000;
-const diaryTimeout = (): AbortSignal | undefined =>
+export const DIARY_REQUEST_MS = 20 * 1000;
+export const diaryTimeout = (): AbortSignal | undefined =>
   typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function" ? AbortSignal.timeout(DIARY_REQUEST_MS) : undefined;
-
-async function sendWrite(write: DiaryWrite): Promise<{ outcome: "saved" | "retry" | "held"; status: number; message: string; final: boolean }> {
-  const method = itemMethod(write);
-  let status = 0;
-  let answer = { message: "", code: "" };
-  try {
-    const res = await apiFetch(itemPath(write), {
-      method,
-      body: method === "DELETE" ? undefined : JSON.stringify(write.payload),
-      signal: diaryTimeout(),
-    });
-    status = res.status;
-    if (status >= 300) answer = await serverAnswer(res);
-  } catch {
-    // No answer: sent again from the outbox
-  }
-  const outcome = writeOutcome(status, method);
-  if (outcome === "held") console.warn(`Diary write not saved: ${method} ${itemPath(write)} → ${status} ${answer.message}`);
-  // Any non-2xx answer (not a 404 on a delete, which means done) is reported once
-  if (status >= 300 && outcome !== "saved") reportClientError({ kind: "write", method, path: itemPath(write), status, message: answer.message });
-  return { outcome, status, message: answer.message, final: outcome === "held" && status === 409 && answer.code === PAST_DAY_READ_ONLY };
-}
-
-/**
- * Sends one diary write, after any write of the same entry that is still being sent or still queued. What does not
- * reach the server goes to the outbox: no answer, 401 after the session refresh, 408, 429 and 5xx to be sent again,
- * any other 4xx held for Thử lại (with the server's message).
- */
-function diaryWrite(write: DiaryWrite): Promise<WriteResult> {
-  writeStartedAt.set(write.id, Date.now());
-  const account = currentAccountId();
-  const before = inFlight.get(write.id) ?? Promise.resolve<WriteResult>({ state: "saved" });
-  const run = before.then(async (): Promise<WriteResult> => {
-    const queued = readOutbox().filter((item) => item.id === write.id);
-    if (itemMethod(write) === "DELETE" && queued.some(isAdd)) {
-      // The server never had this entry: nothing to delete, and its queued writes go too
-      dropOfflineEntry(write.id);
-      return { state: "saved" };
-    }
-    if (queued.length > 0) {
-      // Earlier writes of this entry wait in the outbox: this one goes after them
-      queueWrite(write);
-      void syncOfflineOutbox();
-      return { state: "queued" };
-    }
-    const { outcome, status, message, final } = await sendWrite(write);
-    if (outcome === "saved") return { state: "saved" };
-    // Into the outbox of the account the write belongs to, even when another one signed in meanwhile
-    queueWrite(write, outcome === "held" ? { status, message, final } : undefined, account);
-    return outcome === "held" ? { state: "held", status, message, final } : { state: "queued", status };
-  });
-  inFlight.set(write.id, run);
-  void run.finally(() => {
-    if (inFlight.get(write.id) === run) inFlight.delete(write.id);
-  });
-  return run;
-}
 
 export interface SyncResult {
   /** Entries whose add or edit the server has now (a delete is not listed). */
@@ -640,60 +474,96 @@ export interface SyncResult {
   held: Array<{ id: string; status: number; message: string; date: string; final: boolean }>;
 }
 
-let syncQueue: Promise<SyncResult> = Promise.resolve({ saved: [], held: [] });
 
-/**
- * Sends the outbox in order, one run at a time (a call during a run starts after it). A write that fails again stays,
- * and the later writes of its entry wait behind it; no answer at all ends the run (offline). Held writes are sent
- * only with `retryHeld` (Thử lại). Writes queued while a run is going are kept.
- */
-export function syncOfflineOutbox(options: { retryHeld?: boolean } = {}): Promise<SyncResult> {
-  syncQueue = syncQueue.catch(() => ({ saved: [], held: [] })).then(() => runOutbox(options.retryHeld === true));
-  return syncQueue;
+// The sending side of the outbox (lib/sync-engine, with lib/outbox and IndexedDB behind it) is loaded after the first
+// paint: the diary provider asks for it on mount, and the first write or sync loads it if it is not there yet. These
+// are its front. The reads the screens make while rendering answer "nothing waiting" until it is loaded, which is true:
+// nothing can be sent or queued by this page life before it is.
+type Engine = typeof import("./sync-engine");
+let engine: Engine | null = null;
+let engineLoading: Promise<Engine> | null = null;
+
+export function loadSyncEngine(): Promise<Engine> {
+  engineLoading ??= import("./sync-engine").then((loaded) => (engine = loaded));
+  return engineLoading;
 }
 
-async function runOutbox(retryHeld: boolean): Promise<SyncResult> {
-  const result: SyncResult = { saved: [], held: [] };
-  // The run belongs to the account signed in when it starts: its writes never go out with another account's session
-  const account = currentAccountId();
-  const items = readOutbox(account);
-  if (!items.length) return result;
-  const blocked = new Set<string>();
-  const sent = new Set<string>();
-  const changed = new Map<string, Partial<OutboxItem>>();
-  for (const item of items) {
-    if (blocked.has(item.id) || item.held?.final || (item.held && !retryHeld) || waitsForFood(item)) {
-      blocked.add(item.id);
-      continue;
-    }
-    if (currentAccountId() !== account) break;
-    const { outcome, status, message, final } = await sendWrite(item);
-    if (outcome === "saved") {
-      sent.add(itemKey(item));
-      if (itemMethod(item) !== "DELETE") result.saved.push(item.id);
-      continue;
-    }
-    blocked.add(item.id);
-    const retries = (item.retries ?? 0) + 1;
-    if (outcome === "held") {
-      changed.set(itemKey(item), { retries, held: { status, message, final } });
-      result.held.push({ id: item.id, status, message, date: item.date, final });
-    } else {
-      changed.set(itemKey(item), { retries, held: undefined });
-      if (status === 0) break;
-    }
-  }
-  // Writes refused for good leave after FINAL_OUTBOX_KEEP_MS (their notice was shown when they were refused)
-  writeOutbox(
-    pruneOutbox(
-      readOutbox(account)
-        .filter((item) => !sent.has(itemKey(item)))
-        .map((item) => (changed.has(itemKey(item)) ? { ...item, ...changed.get(itemKey(item)) } : item)),
-      Date.now()
-    ),
-    account
-  );
-  return result;
+/** Runs `use` with the engine: at once when it is loaded (a write is registered in the same tick), else after it loads. */
+function withEngine<T>(use: (loaded: Engine) => T | Promise<T>): Promise<T> {
+  return engine ? Promise.resolve(use(engine)) : loadSyncEngine().then(use);
+}
+
+/** Starts reading the account's outbox from disk (and moves the old localStorage array over). Call when an account loads. */
+export const loadOfflineOutbox = (): Promise<void> => withEngine((e) => e.loadOfflineOutbox());
+
+/**
+ * Sends the outbox in order, one run at a time. A write that fails again stays, and the later writes of its entry wait
+ * behind it; no answer at all ends the run (offline). Held writes are sent only with `retryHeld` (Thử lại). Only one
+ * tab drains at a time.
+ */
+export const syncOfflineOutbox = (options: { retryHeld?: boolean } = {}): Promise<SyncResult> => withEngine((e) => e.syncOfflineOutbox(options));
+
+/** Entry ids with a write in the outbox for the active account. */
+export const getPendingOfflineEntryIds = (): string[] => engine?.getPendingOfflineEntryIds() ?? [];
+/** Entry ids a refetch must leave as they are on the device: a write is queued or being sent. */
+export const pendingWriteIds = (): Set<string> => engine?.pendingWriteIds() ?? new Set<string>();
+/** Entry ids whose last write started at or after `time` (ms). */
+export const writtenSince = (time: number): string[] => engine?.writtenSince(time) ?? [];
+/** How many diary writes are being sent now. */
+export const writesInFlight = (): number => engine?.writesInFlight() ?? 0;
+/** Whether a side write (profile, weight, favourite, training) is waiting: a server copy read now must not replace it. */
+export const hasPendingWrite = (entity: string): boolean => engine?.hasPendingWrite(entity) ?? false;
+/** The favourites changes waiting to be sent, oldest first: [foodId, on]. Applied on top of a list read from the server. */
+export const pendingFavouriteOps = (): Array<[string, boolean]> => engine?.pendingFavouriteOps() ?? [];
+
+/** Runs `onChange` when the outbox changes, here or in another tab (the screens' "Chưa lưu" markers follow it). */
+export function watchOutbox(onChange: () => void): () => void {
+  let stop = () => {};
+  let stopped = false;
+  void loadSyncEngine().then((loaded) => {
+    if (!stopped) stop = loaded.watchOutbox(onChange);
+  });
+  return () => {
+    stopped = true;
+    stop();
+  };
+}
+
+/** Queues an add to send later (kept for callers from before cc-49; diary writes queue themselves). */
+export function enqueueOfflineEntry(date: string, payload: Record<string, unknown>): void {
+  void withEngine((e) => e.enqueueOfflineEntry(date, payload));
+}
+
+/** Removes every queued write of an entry (an entry that never reached the server, deleted or undone). */
+export function dropOfflineEntry(id: string): void {
+  void withEngine((e) => e.dropOfflineEntry(id));
+}
+
+/**
+ * Points `account`'s queued writes that name food `from` (a recipe's local id) at `to` (its server food), and lifts
+ * their hold (the server refused the local id), so the next sync sends them. A write held for good stays held.
+ */
+export function repointOutboxFood(from: string, to: string, account: string | null): number {
+  return engine?.repointOutboxFood(from, to, account) ?? 0;
+}
+
+/** For tests: forgets the writes this page life had in the air (a page that was killed has none). */
+export function resetWriteMemory(): void {
+  engine?.resetWriteMemory();
+}
+
+/** The body of PUT /me/profile. */
+function profileBody(profile: SetupProfile): Record<string, unknown> {
+  return {
+    sex: profile.sex,
+    birth_year: profile.birthYear,
+    weight_kg: profile.weightKg,
+    goal: profile.goal,
+    ...(profile.nearPeriod !== undefined || profile.periodMode !== undefined ? { near_period: Boolean(profile.nearPeriod ?? profile.periodMode) } : {}),
+    ...(profile.trainingMinutesDefault !== undefined ? { training_minutes_default: profile.trainingMinutesDefault } : {}),
+    // The display name travels with the profile save
+    ...(profile.displayName ? { display_name: profile.displayName } : {}),
+  };
 }
 
 export const apiClient = {
@@ -1066,7 +936,7 @@ export const apiClient = {
       }
 
       // The id is the client's (idempotent on the server), so a write sent again never adds the entry twice
-      const result = await diaryWrite({ id: entryId, date, payload: body });
+      const result = await withEngine((e) => e.diaryWrite({ id: entryId, date, payload: body }));
       return { success: result.state === "saved", id: entryId, ...result };
     }
 
@@ -1105,33 +975,24 @@ export const apiClient = {
     return [];
   },
 
+  /** A favourite on or off: through the outbox (S6), so an offline tap is sent later and the last one wins. */
+  async setFavourite(foodId: string, on: boolean): Promise<WriteResult> {
+    if (!isLiveMode() || !isUuid(foodId)) return { state: "saved" };
+    return withEngine((e) => e.sideWrite({
+      kind: "favourite",
+      entity: `fav:${foodId}`,
+      method: on ? "POST" : "DELETE",
+      path: on ? "/favourites" : `/favourites/${encodeURIComponent(foodId)}`,
+      payload: { food_id: foodId },
+    }));
+  },
+
   async addFavourite(foodId: string): Promise<boolean> {
-    if (isLiveMode()) {
-      try {
-        const res = await apiFetch(`/favourites`, {
-          method: "POST",
-          body: JSON.stringify({ food_id: foodId }),
-        });
-        return res.ok;
-      } catch {
-        return false;
-      }
-    }
-    return true;
+    return (await apiClient.setFavourite(foodId, true)).state !== "held";
   },
 
   async removeFavourite(foodId: string): Promise<boolean> {
-    if (isLiveMode()) {
-      try {
-        const res = await apiFetch(`/favourites/${encodeURIComponent(foodId)}`, {
-          method: "DELETE",
-        });
-        return res.ok;
-      } catch {
-        return false;
-      }
-    }
-    return true;
+    return (await apiClient.setFavourite(foodId, false)).state !== "held";
   },
 
   async getRecents(): Promise<FoodItem[]> {
@@ -1224,19 +1085,23 @@ export const apiClient = {
     return true;
   },
 
+  /** The weight of a day: through the outbox (S6), the newest value of the day wins. */
+  async queueWeight(date: string, weightKg: number): Promise<WriteResult> {
+    if (!isLiveMode()) return { state: "saved" };
+    return withEngine((e) =>
+      e.sideWrite({
+        kind: "weight",
+        entity: `weight:${date}`,
+        method: "PUT",
+        path: `/me/weight/${encodeURIComponent(date)}`,
+        payload: { weight_kg: weightKg },
+        day: date,
+      })
+    );
+  },
+
   async updateWeight(date: string, weightKg: number): Promise<boolean> {
-    if (isLiveMode()) {
-      try {
-        const res = await apiFetch(`/me/weight/${encodeURIComponent(date)}`, {
-          method: "PUT",
-          body: JSON.stringify({ weight_kg: weightKg }),
-        });
-        return res.ok;
-      } catch {
-        return false;
-      }
-    }
-    return true;
+    return (await apiClient.queueWeight(date, weightKg)).state !== "held";
   },
 
   async getWeightLogs(from?: string, to?: string): Promise<Array<{ log_date: string; weight_kg: number }>> {
@@ -1258,19 +1123,18 @@ export const apiClient = {
     return [];
   },
 
+  /** A day's training minutes: through the outbox (S6), the newest value of the day wins. */
   async setTraining(date: string, minutes: number): Promise<boolean> {
-    if (isLiveMode()) {
-      try {
-        const res = await apiFetch(`/days/${encodeURIComponent(date)}/training`, {
-          method: "PUT",
-          body: JSON.stringify({ training_minutes: minutes }),
-        });
-        return res.ok;
-      } catch {
-        return false;
-      }
-    }
-    return true;
+    if (!isLiveMode()) return true;
+    const result = await withEngine((e) => e.sideWrite({
+      kind: "weight",
+      entity: `training:${date}`,
+      method: "PUT",
+      path: `/days/${encodeURIComponent(date)}/training`,
+      payload: { training_minutes: minutes },
+      day: date,
+    }));
+    return result.state !== "held";
   },
 
   async copyYesterday(date: string, mealSlots?: string[]): Promise<boolean> {
@@ -1306,6 +1170,7 @@ export const apiClient = {
     return true;
   },
 
+  /** `day` is the entry's day, so a 409 for a day beyond the editable window is told from one the API does not allow yet. */
   async updateEntry(
     id: string,
     patch: {
@@ -1314,40 +1179,38 @@ export const apiClient = {
       serving_size_g?: number;
       serving_label?: string;
       calories?: number;
-    }
+    },
+    day?: string
   ): Promise<WriteResult> {
     // Only a uuid can be on the server (a sample entry of the demo is not)
     if (!isLiveMode() || !isUuid(id)) return { state: "saved" };
     const slot = patch.meal_slot === "preworkout" ? "pre_workout" : patch.meal_slot;
-    return diaryWrite({
-      id,
-      date: "",
-      method: "PATCH",
-      path: `/entries/${encodeURIComponent(id)}`,
-      payload: {
-        meal_slot: slot,
-        grams: patch.grams,
-        serving_size_g: patch.serving_size_g ?? patch.grams,
-        serving_label: patch.serving_label,
-        calories: patch.calories,
-      },
-    });
+    return withEngine((e) =>
+      e.diaryWrite({
+        id,
+        date: "",
+        day,
+        method: "PATCH",
+        path: `/entries/${encodeURIComponent(id)}`,
+        payload: {
+          meal_slot: slot,
+          grams: patch.grams,
+          serving_size_g: patch.serving_size_g ?? patch.grams,
+          serving_label: patch.serving_label,
+          calories: patch.calories,
+        },
+      })
+    );
   },
 
-  async restoreEntry(id: string): Promise<WriteResult> {
+  async restoreEntry(id: string, day?: string): Promise<WriteResult> {
     if (!isLiveMode() || !isUuid(id)) return { state: "saved" };
-    // Undo of a delete that is still queued: the delete is taken back, the server never saw it
-    const queuedDelete = readOutbox().find((item) => item.id === id && item.method === "DELETE");
-    if (queuedDelete) {
-      writeOutbox(readOutbox().filter((item) => itemKey(item) !== itemKey(queuedDelete)));
-      return { state: "saved" };
-    }
-    return diaryWrite({ id, date: "", method: "POST", path: `/entries/${encodeURIComponent(id)}/restore`, payload: {} });
+    return withEngine((e) => e.restoreEntryWrite(id, day));
   },
 
-  async deleteEntry(id: string): Promise<WriteResult> {
+  async deleteEntry(id: string, day?: string): Promise<WriteResult> {
     if (!isLiveMode() || !isUuid(id)) return { state: "saved" };
-    return diaryWrite({ id, date: "", method: "DELETE", path: `/entries/${encodeURIComponent(id)}`, payload: {} });
+    return withEngine((e) => e.diaryWrite({ id, date: "", day, method: "DELETE", path: `/entries/${encodeURIComponent(id)}`, payload: {} }));
   },
 
   async requestMagicLink(email: string): Promise<{ ok: true }> {
@@ -1379,25 +1242,18 @@ export const apiClient = {
     return readStoredProfile(new Date().getFullYear());
   },
 
-  /** Saves the profile (setup, and later name changes). Live mode throws when the API cannot be reached or says no. */
+  /** A profile change from Hồ sơ or a name edit: through the outbox (S6), the newest one wins. Setup uses saveSetup. */
+  async queueProfile(profile: SetupProfile): Promise<WriteResult> {
+    if (!isLiveMode()) return { state: "saved" };
+    return withEngine((e) => e.sideWrite({ kind: "profile", entity: "profile", method: "PUT", path: `/me/profile`, payload: profileBody(profile) }));
+  },
+
+  /** Saves the profile (setup). Live mode throws when the API cannot be reached or says no: the person sees it and tries again. */
   async saveSetup(profile: SetupProfile): Promise<{ ok: true }> {
     if (isLiveMode()) {
       const res = await apiFetch(`/me/profile`, {
         method: "PUT",
-        body: JSON.stringify({
-          sex: profile.sex,
-          birth_year: profile.birthYear,
-          weight_kg: profile.weightKg,
-          goal: profile.goal,
-          ...(profile.nearPeriod !== undefined || profile.periodMode !== undefined
-            ? { near_period: Boolean(profile.nearPeriod ?? profile.periodMode) }
-            : {}),
-          ...(profile.trainingMinutesDefault !== undefined
-            ? { training_minutes_default: profile.trainingMinutesDefault }
-            : {}),
-          // The display name travels with the profile save
-          ...(profile.displayName ? { display_name: profile.displayName } : {}),
-        }),
+        body: JSON.stringify(profileBody(profile)),
       });
       if (!res.ok) {
         let msg = `profile save failed (${res.status})`;

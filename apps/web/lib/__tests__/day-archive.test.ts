@@ -95,3 +95,21 @@ describe("parseArchive entry shape", () => {
     expect(parseArchive(raw)["2026-10-12"]).toHaveLength(1);
   });
 });
+
+
+describe("cc-68: an entry's own day", () => {
+  it("entryIso takes the entry's day when it has one (added to yesterday today, or listed by the server under a day)", () => {
+    expect(entryIso({ addedAt: "2026-10-19T03:00:00.000Z", day: "2026-10-18" })).toBe("2026-10-18");
+    expect(entryIso({ addedAt: "2026-10-19T03:00:00.000Z" })).toBe("2026-10-19");
+    // A day that is not a date is ignored
+    expect(entryIso({ addedAt: "2026-10-19T03:00:00.000Z", day: "hôm qua" })).toBe("2026-10-19");
+  });
+
+  it("splitByDay files by that day", () => {
+    const today = { id: "a", addedAt: "2026-10-19T03:00:00.000Z" } as AddedDiaryEntry;
+    const yesterdayAddedToday = { id: "b", addedAt: "2026-10-19T03:00:00.000Z", day: "2026-10-18" } as AddedDiaryEntry;
+    const split = splitByDay([today, yesterdayAddedToday], "2026-10-19");
+    expect(split.today).toEqual([today]);
+    expect(split.past["2026-10-18"]).toEqual([yesterdayAddedToday]);
+  });
+});

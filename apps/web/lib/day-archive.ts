@@ -16,8 +16,9 @@ const vnDate = new Intl.DateTimeFormat("sv-SE", {
   day: "2-digit",
 });
 
-/** The Ho Chi Minh date (YYYY-MM-DD) an entry was added on, or null when its time cannot be read. */
-export function entryIso(entry: Pick<AddedDiaryEntry, "addedAt">): string | null {
+/** The diary day (YYYY-MM-DD) of an entry: its own `day`, else the Ho Chi Minh date it was added on; null when neither can be read. */
+export function entryIso(entry: Pick<AddedDiaryEntry, "addedAt" | "day">): string | null {
+  if (entry.day && /^\d{4}-\d{2}-\d{2}$/.test(entry.day)) return entry.day;
   const t = new Date(entry.addedAt);
   return Number.isNaN(t.getTime()) ? null : vnDate.format(t);
 }

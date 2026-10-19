@@ -1,4 +1,5 @@
 import type { FoodItem } from "./mock/foods";
+import { idbRun } from "./idb";
 
 /**
  * cc-50: the food catalogue on the device, so /app does not download every page of /foods on each load. One copy per
@@ -26,49 +27,14 @@ export interface SavedCatalog {
   foods: FoodItem[];
 }
 
-const DB_NAME = "h1t";
-const STORE = "kv";
-let opening: Promise<IDBDatabase | null> | null = null;
-
-function database(): Promise<IDBDatabase | null> {
-  opening ??= new Promise((resolve) => {
-    try {
-      if (typeof indexedDB === "undefined") return resolve(null);
-      const request = indexedDB.open(DB_NAME, 1);
-      request.onupgradeneeded = () => request.result.createObjectStore(STORE);
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => resolve(null);
-      request.onblocked = () => resolve(null);
-    } catch {
-      resolve(null);
-    }
-  });
-  return opening;
-}
-
-function run<T>(mode: IDBTransactionMode, work: (store: IDBObjectStore) => IDBRequest<T>): Promise<T | null> {
-  return database().then(
-    (db) =>
-      new Promise<T | null>((resolve) => {
-        if (!db) return resolve(null);
-        try {
-          const request = work(db.transaction(STORE, mode).objectStore(STORE));
-          request.onsuccess = () => resolve(request.result ?? null);
-          request.onerror = () => resolve(null);
-        } catch {
-          resolve(null);
-        }
-      })
-  );
-}
-
 export async function readCatalogCache(account: string | null): Promise<SavedCatalog | null> {
-  const saved = await run<SavedCatalog>("readonly", (store) => store.get(catalogCacheKey(account)));
+  const result = await idbRun<SavedCatalog>("kv", "readonly", (store) => store.get(catalogCacheKey(account)));
+  const saved = result.ok ? result.value : null;
   return saved && typeof saved.at === "number" && Array.isArray(saved.foods) && saved.foods.length > 0 ? saved : null;
 }
 
 export async function writeCatalogCache(account: string | null, foods: FoodItem[]): Promise<void> {
-  await run("readwrite", (store) => store.put({ at: Date.now(), foods } satisfies SavedCatalog, catalogCacheKey(account)));
+  await idbRun("kv", "readwrite", (store) => store.put({ at: Date.now(), foods } satisfies SavedCatalog, catalogCacheKey(account)));
 }
 
 /** The copy with `food` added first (a food with the same id replaced); its age stays as it was. */
@@ -83,5 +49,5 @@ export function withCatalogFood(saved: SavedCatalog, food: FoodItem): SavedCatal
 export async function addToCatalogCache(account: string | null, food: FoodItem): Promise<void> {
   const saved = await readCatalogCache(account);
   if (!saved) return;
-  await run("readwrite", (store) => store.put(withCatalogFood(saved, food), catalogCacheKey(account)));
+  await idbRun("kv", "readwrite", (store) => store.put(withCatalogFood(saved, food), catalogCacheKey(account)));
 }

@@ -10,7 +10,7 @@ import { formatAmount } from "./format";
 import { portionAmountText } from "./portion";
 import { sumKcal } from "./kcal";
 import { getTodayIsoVN, withRuntimeDate } from "./date";
-import { DAY_ARCHIVE_KEY, mergeArchive, msUntilNextDay, parseArchive, splitByDay, type DayArchive } from "./day-archive";
+import { DAY_ARCHIVE_KEY, entryIso, mergeArchive, msUntilNextDay, parseArchive, splitByDay, type DayArchive } from "./day-archive";
 import { isDemo, setDemoActive } from "./demo";
 import {
   ADDED_ENTRIES_KEY,
@@ -37,13 +37,20 @@ import { isLiveMode } from "./api-mode";
 import {
   apiClient,
   getPendingOfflineEntryIds,
+  hasPendingWrite,
+  loadOfflineOutbox,
+  pendingFavouriteOps,
   pendingWriteIds,
   syncOfflineOutbox,
+  watchOutbox,
   writesInFlight,
   writtenSince,
   type SyncResult,
   type WriteResult,
 } from "./api-client";
+import { clearStorageAlert, raiseStorageAlert } from "./sync-state";
+import { storageErrorKind } from "./storage-error";
+import { requestPersistentStorage } from "./storage-persist";
 import { refreshServerSession } from "./server-session";
 import { markUsed } from "./onboarding-store";
 import { isLocalOnly, syncNotice } from "./sync-notice";
@@ -601,10 +608,28 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     [markSynced, showNotice]
   );
 
-  // A food without a server row (a recipe made in the app) is never sent: it stays on this device (Chỉ trên máy này)
+  // The answer to a side write (profile, weight, favourite): a refusal is told once, the rest waits in the outbox
+  const trackSide = useCallback(
+    (write: Promise<WriteResult>) => {
+      setSyncVersion((v) => v + 1);
+      write
+        .then((result) => {
+          setSyncVersion((v) => v + 1);
+          if (result.state === "held") showNotice(syncNotice([{ id: "side", status: result.status ?? 0, message: result.message ?? "", date: getTodayIsoVN(), final: false }], unsavedShown.current));
+        })
+        .catch(() => {});
+    },
+    [showNotice]
+  );
+
+  // A food without a server row (a recipe made in the app) is never sent: it stays on this device (Chỉ trên máy này).
+  // S14: the day is the entry's own, worked out when the write is made (not the date the screen last showed, which is
+  // wrong after the phone slept past midnight)
   const sendAdd = useCallback(
-    (entry: AddedDiaryEntry, date: string) => {
-      if (!isLocalOnly(entry)) track(entry.id, apiClient.addEntry(addPayload(entry, date)), date);
+    (entry: AddedDiaryEntry) => {
+      if (isLocalOnly(entry)) return;
+      const date = entryIso(entry) ?? getTodayIsoVN();
+      track(entry.id, apiClient.addEntry(addPayload(entry, date)), date);
     },
     [track]
   );
@@ -702,7 +727,9 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
 
       apiClient.getFavourites().then((favs) => {
         if (Array.isArray(favs) && favs.length > 0) {
-          setFavouriteIds(favs.map((f: any) => (typeof f === "string" ? f : f.food_id || f.id)));
+          // S6: a favourite changed here and not sent yet is applied on top of the server's list
+          const ids = favs.map((f: any) => (typeof f === "string" ? f : f.food_id || f.id));
+          setFavouriteIds(pendingFavouriteOps().reduce((list, [foodId, on]) => (on ? (list.includes(foodId) ? list : [foodId, ...list]) : list.filter((id) => id !== foodId)), ids));
         }
       }).catch(() => {});
 
@@ -722,6 +749,19 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       });
     }
   }, [refreshRemoteDay]);
+
+  // S6: the server's profile on load never overwrites a change made on this device that has not been sent yet (a profile
+  // write waiting in the outbox is newer than what the server has). Once it is sent, the next load takes the server's.
+  const adoptServerProfile = useCallback(() => {
+    apiClient
+      .getProfile()
+      .then((serverProfile) => {
+        if (!serverProfile || hasPendingWrite("profile")) return;
+        writeStoredProfile(serverProfile);
+        setProfile(serverProfile);
+      })
+      .catch(() => {});
+  }, []);
 
   // Load on mount (client-only)
   useEffect(() => {
@@ -744,16 +784,23 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       if (persona) writeStoredProfile(seeded);
       setProfile(seeded);
       if (isLiveMode() && account && !demoNow) {
-        apiClient.getProfile().then((serverProfile) => {
-          if (serverProfile) {
-            writeStoredProfile(serverProfile);
-            setProfile(serverProfile);
-          }
-        }).catch(() => {});
+        adoptServerProfile();
       }
       setHydrated(true);
     }
-  }, [loadData]);
+  }, [loadData, adoptServerProfile]);
+
+  // cc-68: the outbox is read from disk once an account is there (the old localStorage array is moved over), and the
+  // screens follow it: a write committed here or by another tab bumps syncVersion. The banner for "no room to save" is
+  // wired once. Persistent storage is asked for after sign-in (Safari clears a site's data after 7 days otherwise).
+  useEffect(() => {
+    if (!isLiveMode() || demo || !accountId) return;
+    const bump = () => setSyncVersion((v) => v + 1);
+    const stop = watchOutbox(bump);
+    void loadOfflineOutbox().then(bump);
+    void requestPersistentStorage();
+    return stop;
+  }, [demo, accountId]);
 
   // Sync when the app comes back: reconnect, window focus, the tab shown again (a phone switching back to the
   // browser), or the page restored from the back-forward cache. The session cookie is renewed first.
@@ -807,7 +854,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     if (!isLiveMode() || demo || !accountId || !serverDayRead || !todayIso) return;
     const pending = pendingWriteIds();
     for (const e of edits.added) {
-      if (!e.synced && isUuid(e.id) && !isLocalOnly(e) && !pending.has(e.id)) sendAdd(e, todayIso);
+      if (!e.synced && isUuid(e.id) && !isLocalOnly(e) && !pending.has(e.id)) sendAdd(e);
     }
   }, [edits.added, serverDayRead, demo, accountId, todayIso, sendAdd, syncVersion]);
 
@@ -837,15 +884,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     loadData(now, false, todayIso ?? getTodayIsoVN());
     // The profile is per account too: without this, account B would keep A's targets until a reload
     setProfile(loadProfile(new Date().getFullYear()));
-    if (isLiveMode() && now) {
-      apiClient.getProfile().then((serverProfile) => {
-        if (serverProfile) {
-          writeStoredProfile(serverProfile);
-          setProfile(serverProfile);
-        }
-      }).catch(() => {});
-    }
-  }, [pathname, hydrated, demo, accountId, loadData, todayIso]);
+    if (isLiveMode() && now) adoptServerProfile();
+  }, [pathname, hydrated, demo, accountId, loadData, todayIso, adoptServerProfile]);
 
   // The storage this account (or demo) writes to; without an account it reads and writes nothing
   // One object per account: the deferred writer tells accounts apart by it
@@ -872,18 +912,21 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     writeSavedMeals(savedMeals, ownStorage());
   }, [savedMeals, hydrated, ownStorage]);
 
-  // Persist added entries and sample edits only after hydrated
+  // Persist added entries and sample edits only after hydrated. Today's list is written at once, never through the
+  // idle writer (S3: a crash in the idle window must not lose it), and a write that fails is told to the person: a
+  // lasting notice, not a swallowed error ("Đã lưu" that was not).
   useEffect(() => {
     if (!hydrated) return;
+    const own = ownStorage();
+    if (!own) return;
     try {
-      const own = ownStorage();
-      if (own) {
-        deferredWrites.schedule(own, ADDED_ENTRIES_KEY, () => JSON.stringify(edits.added));
-        deferredWrites.schedule(own, SAMPLE_EDITS_KEY, () => JSON.stringify(edits.sample));
-      }
-    } catch {
-      // Ignore quota/access errors
+      own.setItem(ADDED_ENTRIES_KEY, JSON.stringify(edits.added));
+      clearStorageAlert();
+    } catch (error) {
+      raiseStorageAlert(storageErrorKind(error), error);
     }
+    // The sample edits are demo-only and small: they may wait for an idle moment
+    deferredWrites.schedule(own, SAMPLE_EDITS_KEY, () => JSON.stringify(edits.sample));
   }, [edits.added, edits.sample, hydrated, ownStorage]);
 
   // The latest list and date, for the midnight timer (it must not restart on every added entry)
@@ -1065,7 +1108,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
 
       addRecentFood(food, qty);
 
-      if (isLiveMode()) sendAdd(newEntry, todayIso || getTodayIsoVN());
+      if (isLiveMode()) sendAdd(newEntry);
 
       return true;
     },
@@ -1097,7 +1140,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         undoIds: entries.map((e) => e.id),
       });
       items.forEach(({ food, label }) => addRecentFood(food, label));
-      if (isLiveMode()) entries.forEach((e) => sendAdd(e, todayIso || getTodayIsoVN()));
+      if (isLiveMode()) entries.forEach((e) => sendAdd(e));
       return true;
     },
     [addRecentFood, todayIso, sendAdd]
@@ -1113,14 +1156,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   const toggleFavourite = useCallback((food: FoodItem) => {
     const willBeFavourite = !favouriteIds.includes(food.id);
     setFavouriteIds((prev) => toggleFavouriteId(prev, food.id));
-    if (isLiveMode()) {
-      if (willBeFavourite) {
-        apiClient.addFavourite(food.id).catch(() => {});
-      } else {
-        apiClient.removeFavourite(food.id).catch(() => {});
-      }
-    }
-  }, [favouriteIds]);
+    if (isLiveMode()) trackSide(apiClient.setFavourite(food.id, willBeFavourite));
+  }, [favouriteIds, trackSide]);
 
   const getEntry = useCallback((id: string) => findEntry(edits, id, samples), [edits, samples]);
 
@@ -1230,7 +1267,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     if (isLiveMode() && lastUndo) {
       if (lastUndo.kind === "added") {
         if (lastUndo.entry.synced) track(lastUndo.entry.id, apiClient.restoreEntry(lastUndo.entry.id));
-        else sendAdd(lastUndo.entry, todayIso || getTodayIsoVN());
+        else sendAdd(lastUndo.entry);
       } else if (lastUndo.kind === "sample") {
         track(lastUndo.id, apiClient.restoreEntry(lastUndo.id));
       }
@@ -1257,7 +1294,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       durationMs: UNDO_TOAST_MS,
       undoIds: entries.map((e) => e.id),
     });
-    if (isLiveMode()) entries.forEach((e) => sendAdd(e, todayIso || getTodayIsoVN()));
+    if (isLiveMode()) entries.forEach((e) => sendAdd(e));
   }, [todayIso, sendAdd]);
 
   const undoCopy = useCallback(() => {
@@ -1341,7 +1378,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         durationMs: UNDO_TOAST_MS,
         undoIds: entries.map((e) => e.id),
       });
-      if (isLiveMode()) entries.forEach((e) => sendAdd(e, todayIso || getTodayIsoVN()));
+      if (isLiveMode()) entries.forEach((e) => sendAdd(e));
     },
     [todayIso, sendAdd]
   );
@@ -1363,7 +1400,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         durationMs: UNDO_TOAST_MS,
         undoIds: [entry.id],
       });
-      if (isLiveMode()) sendAdd(entry, todayIso || getTodayIsoVN());
+      if (isLiveMode()) sendAdd(entry);
       return result;
     },
     [todayIso, sendAdd]
@@ -1371,15 +1408,24 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
 
   // Chưa lưu: a write of the entry is queued (or refused), or the server never confirmed it and nothing is sending it.
   // The second part waits for the first read of the server's day, which confirms the entries it already has.
+  // The same Set comes back while its members do not change, so an outbox commit that changes nothing here re-renders no one.
+  const unsavedRef = useRef<ReadonlySet<string>>(new Set());
   const unsavedIds = useMemo(() => {
-    if (!isLiveMode() || demo || !hydrated) return new Set<string>();
+    const none = (): ReadonlySet<string> => {
+      if (unsavedRef.current.size === 0) return unsavedRef.current;
+      return (unsavedRef.current = new Set());
+    };
+    if (!isLiveMode() || demo || !hydrated) return none();
     const queued = new Set(getPendingOfflineEntryIds());
     const pending = pendingWriteIds();
-    return new Set(
+    const next = new Set(
       edits.added
         .filter((e) => !isLocalOnly(e) && (queued.has(e.id) || (serverDayRead && !e.synced && !pending.has(e.id))))
         .map((e) => e.id)
     );
+    const prev = unsavedRef.current;
+    if (prev.size === next.size && [...next].every((id) => prev.has(id))) return prev;
+    return (unsavedRef.current = next);
     // syncVersion: the outbox changed
   }, [edits.added, syncVersion, demo, hydrated, serverDayRead]);
   // Entries that can never reach the server: the row says Chỉ trên máy này (review 05:30 M1)
@@ -1425,8 +1471,9 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       setProfile(next);
       writeStoredProfile(next);
       if (isLiveMode()) {
-        apiClient
-          .saveSetup({
+        // S6: through the outbox (an offline change is sent later, the newest wins), not fire-and-forget
+        trackSide(
+          apiClient.queueProfile({
             sex: next.sex,
             birthYear: next.birthYear,
             weightKg: next.weightKg,
@@ -1435,13 +1482,12 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
             trainingMinutesDefault: next.trainingMinutesDefault,
             displayName: next.displayName,
           })
-          .catch(() => {});
-        if (patch.weightKg !== undefined) {
-          apiClient.updateWeight(todayIso || getTodayIsoVN(), patch.weightKg).catch(() => {});
-        }
+        );
+        // S14: the day of the weight is worked out now, not the date the screen last showed
+        if (patch.weightKg !== undefined) trackSide(apiClient.queueWeight(getTodayIsoVN(), patch.weightKg));
       }
     },
-    [profile, todayIso]
+    [profile, trackSide]
   );
 
   // The catalogue version: a label supplement's entry counts as 0 kcal once its food is in the catalogue (labelZeros)

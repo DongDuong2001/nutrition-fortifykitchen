@@ -25,6 +25,11 @@ export interface AddedDiaryEntry {
   nutrients: Record<string, number | null>;
   addedAt: string;
   /**
+   * The diary day the entry belongs to (YYYY-MM-DD, Asia/Ho_Chi_Minh), when it is not the day of `addedAt`: an entry added
+   * to yesterday today, or one the server lists under a day it was created after. Absent: the day of `addedAt`.
+   */
+  day?: string;
+  /**
    * Live mode: the server confirmed this entry (its add was saved, or a refetch listed it). A refetch drops a confirmed
    * entry the server no longer has (deleted on another device); an unconfirmed one stays and is sent again.
    */
