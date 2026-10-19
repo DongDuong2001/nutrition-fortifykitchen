@@ -6,7 +6,7 @@ import {
   type MockMacroStat,
   type MockMicroStat,
 } from "./mock/sample-day";
-import { MOCK_FOODS, addCatalogFood, catalogChanged, setCatalogFoods, setCatalogStatus, type FoodItem } from "./mock/foods";
+import { MOCK_FOODS, addCatalogFood, catalogChanged, setCatalogFoods, setCatalogStatus, weighedFruit, type FoodItem } from "./mock/foods";
 import type { SetupProfile } from "./onboarding";
 import { currentAccountId } from "./auth-actions";
 import { yieldToMain } from "./idle";
@@ -46,7 +46,7 @@ export function mapApiFoodToFoodItem(raw: any): FoodItem {
     nutrients.energy = nutrients.calories;
   }
 
-  return {
+  return weighedFruit({
     id: String(raw.id),
     nameVi,
     category: raw.category || "khac",
@@ -59,7 +59,7 @@ export function mapApiFoodToFoodItem(raw: any): FoodItem {
     match: raw.match,
     sourceRef: raw.sourceRef,
     recipe: mapApiRecipe(raw.recipe),
-  };
+  });
 }
 
 /** The API's `recipe` ({ ingredients: [{ food_id, name_vi, grams }], cooked_g }); anything else is no recipe. */
@@ -382,7 +382,7 @@ export type WriteState = "saved" | "queued" | "held" | "local";
 
 export interface WriteResult {
   state: WriteState;
-  /** The answer's status (0 = no answer) and the server's message, for a held write. */
+  /** The answer's status (0 = no answer), for a held write. The server's body is never kept: it can be a proxy's page. */
   status?: number;
   message?: string;
   /** Held for good (409 PAST_DAY_READ_ONLY on a day beyond the editable window): never sent again, not even by Thử lại. */
@@ -411,17 +411,16 @@ export function pruneOutbox<T extends Pick<OutboxItem, "createdAt" | "held">>(it
   return items.filter((item) => !(item.held?.final && now - item.createdAt > FINAL_OUTBOX_KEEP_MS));
 }
 
-export async function serverAnswer(res: Response): Promise<{ message: string; code: string }> {
+/**
+ * The error code of an answer ("PAST_DAY_READ_ONLY"), and nothing else of its body: the body can be a proxy's HTML page or
+ * a stack trace, so it is never shown, logged or sent (cc-63, X7). A code that does not look like one is "".
+ */
+export async function serverCode(res: Response): Promise<string> {
   try {
-    const text = await res.text();
-    try {
-      const json = JSON.parse(text);
-      return { message: String(json?.error?.message ?? json?.message ?? json?.error ?? text), code: String(json?.error?.code ?? "") };
-    } catch {
-      return { message: text, code: "" };
-    }
+    const code = JSON.parse(await res.text())?.error?.code;
+    return typeof code === "string" && /^[A-Za-z0-9_.-]{1,64}$/.test(code) ? code : "";
   } catch {
-    return { message: "", code: "" };
+    return "";
   }
 }
 
@@ -434,7 +433,7 @@ export interface SyncResult {
   /** Entries whose add or edit the server has now (a delete is not listed). */
   saved: string[];
   /** Writes the server refused in this run, with its answer (`final`: refused for good, now and never sent again). */
-  held: Array<{ id: string; status: number; message: string; date: string; final: boolean }>;
+  held: Array<{ id: string; status: number; date: string; final: boolean }>;
 }
 
 
@@ -573,7 +572,7 @@ export const apiClient = {
           const json = await res.json();
           return json.data ?? json;
         }
-        reportClientError({ kind: "sync", method: "GET", path: `/days/${targetDate}`, status: res.status, message: (await serverAnswer(res)).message });
+        reportClientError({ kind: "sync", method: "GET", path: `/days/${targetDate}`, status: res.status, message: await serverCode(res) });
       } catch {
         // No answer (or no answer within DIARY_REQUEST_MS)
       }
@@ -662,12 +661,8 @@ export const apiClient = {
           void catalogCache().then((c) => c.addToCatalogCache(currentAccountId(), mapped));
           return mapped;
         }
-        let msg = `Không thể tạo món (${res.status})`;
-        try {
-          const errJson = await res.json();
-          if (errJson?.error?.message) msg = errJson.error.message;
-        } catch {}
-        throw new Error(msg);
+        // Fixed words and the status: the server's own text is never shown
+        throw new Error(`Không thể tạo món (${res.status})`);
       } catch (err) {
         if (err instanceof Error && err.message.startsWith("Không thể tạo món")) {
           throw err;
@@ -696,8 +691,7 @@ export const apiClient = {
         fat: input.fat != null ? Math.round(input.fat * factor * 10) / 10 : null,
       },
     };
-    MOCK_FOODS.unshift(newFood);
-    catalogChanged();
+    addCatalogFood(newFood);
     return newFood;
   },
 
@@ -901,14 +895,7 @@ export const apiClient = {
         body: JSON.stringify(profileBody(profile)),
       });
       if (!res.ok) {
-        let msg = `profile save failed (${res.status})`;
-        try {
-          const errJson = await res.json();
-          if (errJson?.error?.message) msg = errJson.error.message;
-        } catch {
-          // ignore
-        }
-        throw new Error(msg);
+        throw new Error(`profile save failed (${res.status})`);
       }
     }
     return { ok: true };

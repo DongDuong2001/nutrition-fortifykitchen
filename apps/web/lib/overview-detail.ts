@@ -2,7 +2,6 @@ import type { DayTotals } from "./day-totals";
 import type { AddedDiaryEntry } from "./diary-edits";
 import { formatAmount, formatNumber, formatRange, formatSigned } from "./format";
 import { getLevelLabel, type NutrientLevel } from "./levels";
-import { nutrientName } from "./nutrients";
 import type { MicroRow, Overview } from "./overview";
 import {
   boardDays,
@@ -276,7 +275,7 @@ export function weighIns(dates: string[], log: WeightPoint[]): { count: number; 
 }
 
 export interface ShiftRow {
-  key: "calories" | "protein" | "potassium";
+  key: "calories" | "protein";
   label: string;
   unit: string;
   before: TargetRange;
@@ -284,9 +283,9 @@ export interface ShiftRow {
   changed: boolean;
 }
 
-/** The targets that follow body weight (kcal, đạm, kali) at `beforeKg` and at `nowKg`, on a day of `trainingMinutes` (lib/training-minutes). */
+/** The targets that follow body weight (kcal, đạm; the micros are the recommended amounts, whatever the weight) at `beforeKg` and at `nowKg`, on a day of `trainingMinutes` (lib/training-minutes). */
 export function weightShift(
-  profile: { sex: SexType; goal: GoalType; trainingMinutesDefault: number; periodMode: boolean },
+  profile: { sex: SexType; goal: GoalType; trainingMinutesDefault: number },
   beforeKg: number,
   nowKg: number,
   trainingMinutes = profile.trainingMinutesDefault
@@ -297,14 +296,12 @@ export function weightShift(
       weightKg,
       goal: profile.goal,
       trainingMinutes,
-      isPeriod: profile.sex === "female" && profile.periodMode,
     });
   const before = at(beforeKg);
   const now = at(nowKg);
   const rows: { key: ShiftRow["key"]; label: string; unit: string }[] = [
     { key: "calories", label: "Kcal", unit: "kcal" },
     { key: "protein", label: "Đạm", unit: "g" },
-    { key: "potassium", label: nutrientName("potassium"), unit: "mg" },
   ];
   return rows.map((r) => {
     const b = before[r.key] as TargetRange;

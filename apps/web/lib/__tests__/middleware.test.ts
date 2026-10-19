@@ -5,13 +5,15 @@ import { NextRequest } from "next/server";
 // call after the refresh) need a real project: they are listed in the night report for a check on staging.
 const calls: string[] = [];
 let session: { access_token: string; expires_at: number } | null = null;
+// What getClaims answers: verified claims (with the token's own exp), a failed check, or no session
+let claimsAnswer: { data: { claims: { exp: number } } | null; error: Error | null } = { data: null, error: null };
 
 vi.mock("@supabase/ssr", () => ({
   createServerClient: () => ({
     auth: {
       getClaims: async () => {
         calls.push("getClaims");
-        return { data: null, error: null };
+        return claimsAnswer;
       },
       getUser: async () => {
         calls.push("getUser");
@@ -37,6 +39,7 @@ const setCookies = (res: Response) => res.headers.getSetCookie();
 beforeEach(() => {
   calls.length = 0;
   session = null;
+  claimsAnswer = { data: null, error: null };
 });
 
 describe("middleware (cc-58)", () => {
@@ -57,19 +60,38 @@ describe("middleware (cc-58)", () => {
     expect(calls).toEqual([]);
   });
 
-  it("with a session cookie: verifies with getClaims (never getUser) and issues the API token cookie from the session", async () => {
-    session = { access_token: "jwt-123", expires_at: Math.floor(Date.now() / 1000) + 1800 };
+  it("with a session cookie: verifies with getClaims (never getUser) and issues the API token cookie, living as long as the claims' exp", async () => {
+    session = { access_token: "jwt-123", expires_at: Math.floor(Date.now() / 1000) + 9999 };
+    claimsAnswer = { data: { claims: { exp: Math.floor(Date.now() / 1000) + 1800 } }, error: null };
     const res = await middleware(request("sb-abc-auth-token=x"));
     expect(calls).toEqual(["getClaims", "getSession"]);
     const cookie = setCookies(res).find((c) => c.startsWith("sb-access-token="));
     expect(cookie).toMatch(/sb-access-token=jwt-123/);
     expect(cookie).toMatch(/HttpOnly/i);
+    // From claims.exp (about 1.800 s), not from the session's expires_at (9.999 s)
     expect(cookie).toMatch(/Max-Age=1[78]\d\d/);
+  });
+
+  it("a failed getClaims issues no API token cookie, and removes one that is there (cc-63, X3)", async () => {
+    session = { access_token: "forged", expires_at: Math.floor(Date.now() / 1000) + 1800 };
+    claimsAnswer = { data: null, error: new Error("Invalid JWT signature") };
+    const none = await middleware(request("sb-abc-auth-token=x"));
+    expect(calls).toEqual(["getClaims"]);
+    expect(setCookies(none).find((c) => c.startsWith("sb-access-token="))).toBeUndefined();
+    const stale = await middleware(request("sb-abc-auth-token=x; sb-access-token=old"));
+    expect(setCookies(stale).join(";")).toMatch(/sb-access-token=;/);
+  });
+
+  it("claims without an exp are not trusted either", async () => {
+    session = { access_token: "jwt-123", expires_at: Math.floor(Date.now() / 1000) + 1800 };
+    claimsAnswer = { data: { claims: {} as { exp: number } }, error: null };
+    const res = await middleware(request("sb-abc-auth-token=x"));
+    expect(setCookies(res).find((c) => c.startsWith("sb-access-token="))).toBeUndefined();
   });
 
   it("with a session cookie but no session left: the API token cookie is removed", async () => {
     const res = await middleware(request("sb-abc-auth-token.0=x; sb-access-token=stale"));
-    expect(calls).toEqual(["getClaims", "getSession"]);
+    expect(calls).toEqual(["getClaims"]);
     expect(setCookies(res).join(";")).toMatch(/sb-access-token=;/);
   });
 
@@ -82,5 +104,15 @@ describe("middleware (cc-58)", () => {
     const re = new RegExp(`^${config.matcher[0]}$`);
     for (const path of ["/landing", "/terms", "/privacy", "/offline", "/install"]) expect([path, re.test(path)]).toEqual([path, false]);
     for (const path of ["/app", "/trends", "/add", "/signin", "/settings/profile", "/"]) expect([path, re.test(path)]).toEqual([path, true]);
+  });
+
+  it("the public names are anchored: a page below them is outside, a longer name is not (cc-63, X4)", () => {
+    const re = new RegExp(`^${config.matcher[0]}$`);
+    for (const path of ["/terms/", "/terms/x", "/landing/pricing", "/install/ios", "/icons/icon-192.png", "/privacy", "/offline"]) {
+      expect([path, re.test(path)]).toEqual([path, false]);
+    }
+    for (const path of ["/installer", "/terms-x", "/termsx", "/landing-page", "/privacy-policy", "/offlined", "/iconsx", "/installation/x"]) {
+      expect([path, re.test(path)]).toEqual([path, true]);
+    }
   });
 });

@@ -1,4 +1,5 @@
 import { catalogVersion, type FoodItem } from "./mock/foods";
+import type { TwinGroup } from "./food-twins";
 
 /**
  * Remove Vietnamese diacritical marks and tone markers for fuzzy/ascii comparison.
@@ -105,20 +106,12 @@ function withoutDuplicates(foods: FoodItem[]): FoodItem[] {
  */
 export function queryVariants(query: string): string[] {
   const q = norm(query);
-  const variants = [q];
-  if (/\btrái\b/i.test(q)) {
-    variants.push(q.replace(/\btrái\b/gi, "quả"));
-    variants.push(q.replace(/\btrái\s+/gi, ""));
-  } else if (/\btrai\b/i.test(q)) {
-    variants.push(q.replace(/\btrai\b/gi, "qua"));
-    variants.push(q.replace(/\btrai\s+/gi, ""));
-  } else if (/\bquả\b/i.test(q)) {
-    variants.push(q.replace(/\bquả\b/gi, "trái"));
-    variants.push(q.replace(/\bquả\s+/gi, ""));
-  } else if (/\bqua\b/i.test(q)) {
-    variants.push(q.replace(/\bqua\b/gi, "trai"));
-    variants.push(q.replace(/\bqua\s+/gi, ""));
-  }
+  // trái ↔ quả (accented or not), and the query without the classifier
+  const swap: Record<string, string> = { "trái": "quả", trai: "qua", "quả": "trái", qua: "trai" };
+  const word = /\b(trái|trai|quả|qua)\b/i.exec(q)?.[1].toLowerCase();
+  const variants = word
+    ? [q, q.replace(new RegExp(`\\b${word}\\b`, "gi"), swap[word]), q.replace(new RegExp(`\\b${word}\\s+`, "gi"), "")]
+    : [q];
   return Array.from(new Set(variants.map(norm).filter(Boolean)));
 }
 
@@ -128,31 +121,57 @@ export function queryVariants(query: string): string[] {
  * shorter name, then Vietnamese order. Duplicates collapse to one.
  */
 export function searchFoods(foods: FoodItem[], query: string): FoodItem[] {
+  return rank(foods, query, null);
+}
+
+/** How a search sees raw and cooked twins (lib/food-twins passes itself in: lib/food-rows loads it after the first paint). */
+export interface TwinLookup {
+  groupOf: (food: FoodItem) => TwinGroup | null;
+  collapse: (foods: readonly FoodItem[]) => FoodItem[];
+  /** A name that says the food was made into something else (chiên, xào, kho): it comes after the plain row */
+  prepared: (name: string) => boolean;
+}
+
+/**
+ * cc-67: the same search, one row per food. A raw row and its plain cooked row are one result named without a state
+ * ("Khoai lang"), found by the name of either, at the place its best name earns and by the length of the plain name, so
+ * "Khoai lang" comes before "Khoai lang chiên". The row it opens on is the state the food is usually eaten in.
+ */
+export function searchWithTwins(foods: FoodItem[], query: string, twins: TwinLookup): FoodItem[] {
+  return rank(foods, query, twins);
+}
+
+function rank(foods: FoodItem[], query: string, twins: TwinLookup | null): FoodItem[] {
   const q = norm(query);
-  if (!q) return withoutDuplicates(foods);
+  const unique = withoutDuplicates(foods);
+  if (!q) return twins ? twins.collapse(unique) : unique;
 
-  const variants = queryVariants(q);
-
-  const matches: { food: FoodItem; tier: number }[] = [];
-  for (const food of withoutDuplicates(foods)) {
-    let bestTier: number | null = null;
-    for (let i = 0; i < variants.length; i++) {
-      const v = variants[i];
-      const foldedV = removeVietnameseTones(v);
-      const tier = matchTier(food, v, foldedV);
-      if (tier !== null) {
-        const penalty = i === 0 ? 0 : i === 1 ? 0.05 : 0.2;
-        const adjustedTier = tier + penalty;
-        if (bestTier === null || adjustedTier < bestTier) {
-          bestTier = adjustedTier;
-        }
-      }
+  const variants = queryVariants(q).map((v, i) => ({ v, folded: removeVietnameseTones(v), penalty: i === 0 ? 0 : i === 1 ? 0.05 : 0.2 }));
+  const tierOfFood = (food: FoodItem) => {
+    let best = Infinity;
+    for (const { v, folded, penalty } of variants) {
+      const tier = matchTier(food, v, folded);
+      if (tier !== null) best = Math.min(best, tier + penalty);
     }
-    if (bestTier !== null) matches.push({ food, tier: bestTier });
+    return best;
+  };
+
+  const matches: { food: FoodItem; tier: number; prepared: boolean; length: number }[] = [];
+  const seen = new Set<TwinGroup>();
+  const present = twins ? new Set(foods.map((f) => f.id)) : null;
+  for (const food of unique) {
+    const group = twins?.groupOf(food) ?? null;
+    if (group && seen.has(group)) continue;
+    if (group) seen.add(group);
+    // A food is found by the name of any of its rows, and listed under its plain name
+    const tier = Math.min(...(group ? group.members : [food]).map(tierOfFood));
+    if (tier === Infinity) continue;
+    const name = group?.name ?? food.nameVi;
+    matches.push({ food: group && present?.has(group.start.id) ? group.start : food, tier, prepared: !!twins?.prepared(name), length: name.length });
   }
 
   return matches
-    .sort((a, b) => a.tier - b.tier || a.food.nameVi.length - b.food.nameVi.length || VI_COLLATOR.compare(a.food.nameVi, b.food.nameVi))
+    .sort((a, b) => a.tier - b.tier || Number(a.prepared) - Number(b.prepared) || a.length - b.length || VI_COLLATOR.compare(a.food.nameVi, b.food.nameVi))
     .map((m) => m.food);
 }
 

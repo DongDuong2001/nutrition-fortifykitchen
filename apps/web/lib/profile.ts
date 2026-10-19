@@ -10,6 +10,7 @@ import {
 } from "./targets";
 import { DRAFT_KEY, goalName, readDraft, validateSetupDraft, type SetupDraft } from "./onboarding";
 import { formatAmount } from "./format";
+import { ageOf } from "./rda";
 import type { MockDayData, MockMacroStat, MockMicroStat } from "./mock/sample-day";
 import { PROFILE_KEY, accountStorage } from "./storage-keys";
 import { NO_COACHING, normaliseCoaching, type CoachingState } from "./coaching-link";
@@ -22,7 +23,7 @@ export interface Profile extends CoachingState {
   birthYear: number;
   weightKg: number;
   goal: GoalType;
-  /** Women only: iron target 28 mg instead of 18 mg. Always false for men (see normaliseProfile). */
+  /** Women only: iron target 28 mg (the coach rule) instead of the VN 2016 amount for sex and age. Always false for men (see normaliseProfile). */
   periodMode: boolean;
   trainingMinutesDefault: number;
   /** Optional name shown on Cài đặt. "" means not set. */
@@ -155,6 +156,7 @@ export function targetsFor(profile: Profile, trainingMinutes = profile.trainingM
     goal: profile.goal,
     trainingMinutes,
     isPeriod: profile.sex === "female" && profile.periodMode,
+    age: ageOf(profile.birthYear),
     macroMode: profile.macroMode,
     macroRatios: profile.macroRatios,
     macroFixed: profile.macroFixed,

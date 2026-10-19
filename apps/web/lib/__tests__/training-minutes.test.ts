@@ -131,12 +131,13 @@ describe("trainingMinutesFor (lib/training-minutes.ts)", () => {
 });
 
 describe("the day's targets follow its training minutes", () => {
-  it("salt and fast carbs are worked out from the day's minutes, not the Hồ sơ default", () => {
+  it("fast carbs are worked out from the day's minutes, not the Hồ sơ default; so is sodium (the coach's formula, kept until Hao decides on VN 2016)", () => {
     const t = targetsFor(SAMPLE_PROFILE, 90);
-    expect(t.sodium).toEqual(calculateSodiumTarget(90));
     expect(t.fastCarbs).toEqual(calculateFastCarbsTarget(90));
-    expect(t.sodium).not.toEqual(targetsFor(SAMPLE_PROFILE).sodium);
-    expect(targetsFor(SAMPLE_PROFILE).sodium).toEqual(calculateSodiumTarget(SAMPLE_PROFILE.trainingMinutesDefault));
+    expect(t.fastCarbs).not.toEqual(targetsFor(SAMPLE_PROFILE).fastCarbs);
+    expect(targetsFor(SAMPLE_PROFILE).fastCarbs).toEqual(calculateFastCarbsTarget(SAMPLE_PROFILE.trainingMinutesDefault));
+    expect(t.sodium).toEqual(calculateSodiumTarget(90));
+    expect(targetsFor(SAMPLE_PROFILE, 0).sodium).toEqual(calculateSodiumTarget(0));
   });
 
   it("the day's user shows the day's minutes (Hôm nay's Ngày tập pill)", () => {

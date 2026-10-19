@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import type { FoodItem } from "@/lib/mock/foods";
 import type { FoodList as FoodListData } from "@/lib/food-categories";
 import { searchTag } from "@/lib/food-source";
+import { rowName, twinIdsOf } from "@/lib/food-rows";
 
 function SourceTag({ food }: { food: FoodItem }) {
   const tag = searchTag(food);
@@ -96,11 +97,14 @@ export function FoodList({
   const firstFoodId = list.grouped ? list.groups[0]?.foods[0]?.id : list.foods[0]?.id;
 
   const renderRow = (food: FoodItem, withCategory: boolean) => {
-    const selected = selectedId === food.id || !!selectedIds?.includes(food.id);
-    const disabled = !!disabledIds?.includes(food.id);
+    // cc-67: raw and cooked are one row, so a row stands for every row of its food
+    const ids = twinIdsOf(food);
+    const selected = (selectedId !== undefined && ids.includes(selectedId)) || !!selectedIds?.some((id) => ids.includes(id));
+    const disabled = !!disabledIds?.some((id) => ids.includes(id));
+    const name = rowName(food);
     const meta = withCategory ? `${categoryName(food)} · ${getMeta(food)}` : getMeta(food);
     const showHeart = list.grouped && !!isFavourite?.(food);
-    const carried = !!tray?.ids.includes(food.id);
+    const carried = !!tray?.ids.some((id) => ids.includes(id));
     return (
       <li key={food.id} data-tour={dataTour && food.id === firstFoodId ? `${dataTour}-first` : undefined} className={`flex items-center border-t border-divider first:border-t-0 ${carried ? "bg-blue/10" : ""}`}>
         <button
@@ -114,8 +118,8 @@ export function FoodList({
           } ${selected && !carried ? "bg-blue/10" : "bg-transparent"} ${disabled ? "cursor-default opacity-50" : "cursor-pointer"}`}
         >
           <span className="flex min-w-0 flex-1 flex-col gap-1">
-            <span title={food.nameVi} className="line-clamp-2 break-words text-[15px] font-semibold leading-snug">
-              {food.nameVi}
+            <span title={name} className="line-clamp-2 break-words text-[15px] font-semibold leading-snug">
+              {name}
               {showHeart && (
                 <svg
                   width="14"
@@ -154,7 +158,7 @@ export function FoodList({
             type="button"
             role="checkbox"
             aria-checked={carried}
-            aria-label={`${carried ? "Bỏ khỏi khay" : "Thêm vào khay"}: ${food.nameVi}`}
+            aria-label={`${carried ? "Bỏ khỏi khay" : "Thêm vào khay"}: ${name}`}
             data-tray-toggle
             data-tour="tray-toggle"
             onClick={() => tray.onToggle(food)}
@@ -173,7 +177,7 @@ export function FoodList({
           <button
             type="button"
             onClick={() => onOpen(food)}
-            aria-label={`Chọn khẩu phần ${food.nameVi}`}
+            aria-label={`Chọn khẩu phần ${name}`}
             className="mr-1 inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-secondary hover:bg-divider active:scale-[0.97] transition-press motion-reduce:active:scale-100"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">

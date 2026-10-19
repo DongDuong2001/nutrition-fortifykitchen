@@ -1,13 +1,15 @@
+import { isAmount } from "./amount";
 import { formatAmount } from "./format";
 
 /**
- * Energy of a diary entry is a number or null (unknown: the server stored NULL). A total skips the unknown ones;
- * when none is known the total is unknown too (null, shown as "—"), never 0.
+ * Energy of a diary entry is a number or null (unknown: the server stored NULL). A total skips the unknown ones and
+ * any that is not a usable amount (NaN, Infinity, negative); when none is known the total is unknown too (null, shown
+ * as "—"), never 0.
  */
 export function sumKcal(values: readonly (number | null)[]): number | null {
   let total: number | null = null;
   for (const value of values) {
-    if (typeof value === "number") total = (total ?? 0) + value;
+    if (isAmount(value)) total = (total ?? 0) + value;
   }
   return total;
 }

@@ -38,7 +38,8 @@ SETTINGS_KEY = "h1t_settings_v1_demo"
 RELEASE = "2026-10-19b"
 HOME_TIPS = ["home-logged", "meal-add", "home-share"]
 # Newest first: cc-53b (2026-10-18f), cc-52 (2026-10-18e), cc-53 (2026-10-18d), cc-51 (2026-10-18c), Thực phẩm bổ sung và Gia vị (2026-10-18b), then cc-49 (2026-10-18)
-ITEMS = ["Sửa được hôm qua"]
+ITEMS = ["Sửa được hôm qua"]  # cc-68 (2026-10-19b)
+ITEMS_1910A = ["Mỗi món một dòng", "Ghi phần ăn được", "Chỉnh thành phần món", "Mục tiêu vi chất theo khuyến nghị"]  # cc-67 (2026-10-19a)
 ITEMS_1810F = ["Khẩu phần theo gam", "Cân sống hay đã nấu chín", "Trứng ghi theo quả", "Khay gọn hơn"]
 ITEMS_1810E = ["Ngày tập ghi vào nhật ký", "Mở và đóng màn hình mượt hơn"]  # cc-55 adds the second
 ITEMS_1810D = ["Ghi theo lon, viên, phần"]
@@ -304,11 +305,11 @@ def history(browser):
     pg.wait_for_timeout(400)
     text = pg.locator("main").inner_text()
     check(text.count("Cập nhật 18/10") == 6 and all(t in text for t in ITEMS_1810F + ITEMS_1810E + ITEMS_1810D + ITEMS_1810C + ITEMS_1810B + ITEMS_1810), "the history lists the six 18/10 releases and their items")
-    check("Cập nhật 19/10" in text and all(t in text for t in ITEMS), "…and 19/10 (19b)")
-    check(text.index("Sửa được hôm qua") < text.index("Khẩu phần theo gam") < text.index("Ngày tập ghi vào nhật ký") < text.index("Ghi theo lon, viên, phần") < text.index("Kéo xuống để tải lại") < text.index("Thực phẩm bổ sung") < text.index("Đồng bộ ổn định hơn"), "…newest first: 19b, 18f, 18e, 18d, 18c, 18b, 18")
+    check(text.count("Cập nhật 19/10") == 2 and all(t in text for t in ITEMS + ITEMS_1910A), "…and the two 19/10 releases (19b and 19a)")
+    check(text.index("Sửa được hôm qua") < text.index("Mỗi món một dòng") < text.index("Khẩu phần theo gam") < text.index("Ngày tập ghi vào nhật ký") < text.index("Ghi theo lon, viên, phần") < text.index("Kéo xuống để tải lại") < text.index("Thực phẩm bổ sung") < text.index("Đồng bộ ổn định hơn"), "…newest first: 19b, 18f, 18e, 18d, 18c, 18b, 18")
     check("Cập nhật 17/10" in text and "17/10/2026" not in text and all(t in text for t in ITEMS_1710), "the history lists the release (Cập nhật 17/10) and its items")
     check(text.index("Cập nhật 18/10") < text.index("Cập nhật 17/10"), "newest first")
-    check(pg.get_by_role("button", name="Xem hướng dẫn").count() == 5, "Xem hướng dẫn on 19b, 18f, 18e, 18c and 17/10 (18d's tour is retired)")
+    check(pg.get_by_role("button", name="Xem hướng dẫn").count() == 6, "Xem hướng dẫn on 19b, 19a, 18f, 18e, 18c and 17/10 (18d's tour is retired)")
     targets_ok(pg, "main", "history")
     shot(pg, "history-390")
     replay_1710(pg).click()

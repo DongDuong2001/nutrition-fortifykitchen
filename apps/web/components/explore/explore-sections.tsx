@@ -14,6 +14,7 @@ import { FoodCardLink } from "@/components/foods/food-card-link";
 import { RichCarousel } from "@/components/explore/rich-carousel";
 import { foodRowKcal, foodRowMeta } from "@/lib/food-meta";
 import { isOwnFood } from "@/lib/food-categories";
+import { dedupeTwins, rowName } from "@/lib/food-rows";
 import { FoodRowLink } from "@/components/foods/food-row-link";
 import { SavedMealsCard } from "@/components/explore/saved-meals-card";
 import { CoachesCarousel } from "@/components/coaching/coaches-carousel";
@@ -30,15 +31,18 @@ export function ExploreSections() {
   // Re-renders when the catalogue arrives: Gần đây and Yêu thích are looked up in it
   const { foods: catalogue } = useCatalogFoods();
 
-  const recents = recentFoods
-    .flatMap((r) => {
+  // cc-67: one card per food, whatever state it was logged in
+  const recents = dedupeTwins(
+    recentFoods.flatMap((r) => {
       const resolved = resolveRecent(r, MOCK_FOODS);
       return resolved ? [resolved] : [];
-    })
+    }),
+    (r) => r.food
+  )
     .slice(0, SHOWN)
     .map(({ food, grams, label }) => ({ food, grams, label }));
 
-  const favourites = resolveFavourites(favouriteIds, MOCK_FOODS);
+  const favourites = dedupeTwins(resolveFavourites(favouriteIds, MOCK_FOODS), (f) => f);
   // The sample user food (Bột củ dền) is demo-only: a new account owns nothing until it creates a food
   const mine = catalogue.filter(isOwnFood);
 
@@ -61,7 +65,7 @@ export function ExploreSections() {
             <FoodCardLink
               key={`${food.id}|${label}`}
               href={`/foods/${food.id}`}
-              name={food.nameVi}
+              name={rowName(food)}
               meta={`${label}${foodRowKcal(food, grams) ? ` · ${foodRowKcal(food, grams)}` : ""}`}
             />
           ))}
@@ -76,7 +80,7 @@ export function ExploreSections() {
       {favourites.length > 0 ? (
         <Carousel title="Yêu thích">
           {favourites.slice(0, SHOWN).map((food) => (
-            <FoodCardLink key={food.id} href={`/foods/${food.id}`} name={food.nameVi} meta={foodRowMeta(food)} />
+            <FoodCardLink key={food.id} href={`/foods/${food.id}`} name={rowName(food)} meta={foodRowMeta(food)} />
           ))}
         </Carousel>
       ) : (

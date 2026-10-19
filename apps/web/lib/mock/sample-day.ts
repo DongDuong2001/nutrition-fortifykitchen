@@ -202,7 +202,7 @@ export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
       items: [
         { id: "item-1", name: "Yến mạch", qty: "60 g", kcal: 228 },
         { id: "item-2", name: "Yogurt kefir", qty: "200 ml", kcal: 126 },
-        { id: "item-3", name: "Chuối", qty: "1 quả", kcal: 105 },
+        { id: "item-3", name: "Chuối", qty: "118 g", kcal: 105 },
       ],
     },
     {

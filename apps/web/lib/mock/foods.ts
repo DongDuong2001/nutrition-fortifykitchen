@@ -58,18 +58,42 @@ const unlisted = (db: string): FoodSourceRef => ({ db, id: "chưa rõ", verified
 
 const fdc = (id: number): FoodSourceRef => ({ db: "SR Legacy", id: `FDC ${id}`, url: `https://fdc.nal.usda.gov/food-details/${id}/nutrients`, verified: false });
 
+// A serving by weight or volume stays ("100 g", "3 oz", "200 ml"); a count ("1 quả", "1 chén") goes
+const BY_WEIGHT = /^[\d.,/ ]+\s*(?:g|kg|oz|ml|l)(?=$|[\s(])/i;
+
+/**
+ * cc-67 (Hao 19/10): fruit goes by grams of the edible part, so no trái, quả, múi or chén serving stays (the numbers are per
+ * 100 g of flesh already). The other foods with a peel, shell or bone lose theirs in the database
+ * (docs/data/edible-part-portions-2026-10-19.json, scripts/edible-part.ts).
+ */
+export function weighedFruit<T extends { category?: string; servings: FoodServing[] }>(food: T): T {
+  if (food.category !== "trai_cay") return food;
+  const kept = food.servings.filter((s) => BY_WEIGHT.test(s.label));
+  if (kept.length === food.servings.length) return food;
+  return { ...food, servings: kept.length > 0 ? kept : [{ label: "100 g", grams: 100 }] };
+}
+
 /**
  * The catalogue as lists and search read it. Foods that only exist for the demo day are left out unless demo mode
  * is on. Look-ups by id (a saved entry, a recent, a favourite) read MOCK_FOODS directly and still find them.
  */
 export function browsableFoods(): FoodItem[] {
   // Live mode lists the database's foods (and the user's own) only: the sample foods never mix in, not even before
-  // the database catalogue has arrived. A recipe's server food is listed as the recipe, never a second time.
-  if (isLiveMode()) return MOCK_FOODS.filter((f) => !SAMPLE_FOOD_IDS.has(f.id) && !hiddenFoodIds.has(f.id));
-  return demoActive() ? MOCK_FOODS : MOCK_FOODS.filter((f) => !f.demoOnly);
+  // the database catalogue has arrived. A recipe's server food is listed as the recipe, never a second time. A dish
+  // the user changed for one meal (cc-67) is a one-off recipe: its local and server food ids are hidden. Another device has
+  // no recipe record of it, so a server food named "… · đã chỉnh" is hidden too, unless this device made it as the user's
+  // own food (then it lists).
+  const listed = (f: FoodItem) => !hiddenFoodIds.has(f.id) && !(f.nameVi.endsWith(EDITED_DISH_SUFFIX) && !madeHere.has(f.id));
+  if (isLiveMode()) return MOCK_FOODS.filter((f) => !SAMPLE_FOOD_IDS.has(f.id) && listed(f));
+  return (demoActive() ? MOCK_FOODS : MOCK_FOODS.filter((f) => !f.demoOnly)).filter(listed);
 }
 
+/** The name of a premade dish whose parts were changed for one meal: "Phở bò · đã chỉnh" (lib/dish-recipes). */
+export const EDITED_DISH_SUFFIX = " · đã chỉnh";
+
 let hiddenFoodIds: ReadonlySet<string> = new Set();
+/** The foods this device made through "Tạo món" in this session: the user's own, whatever their name */
+const madeHere = new Set<string>();
 
 /** The server foods that hold a recipe's totals (lib/recipe-store): left out of the lists, still found by id. */
 export function setHiddenFoodIds(ids: Iterable<string>): void {
@@ -118,6 +142,7 @@ export function catalogFoodById(id: string | undefined | null): FoodItem | undef
 export function addCatalogFood(food: FoodItem): void {
   const at = MOCK_FOODS.findIndex((f) => f.id === food.id);
   if (at >= 0) MOCK_FOODS.splice(at, 1);
+  madeHere.add(food.id);
   MOCK_FOODS.unshift(food);
   catalogChanged();
 }
@@ -126,7 +151,7 @@ export function addCatalogFood(food: FoodItem): void {
 export function setCatalogFoods(foods: FoodItem[]): void {
   if (!foods || foods.length === 0) return;
   const byId = new Map(MOCK_FOODS.map((f) => [f.id, f]));
-  for (const f of foods) byId.set(f.id, f);
+  for (const f of foods) byId.set(f.id, weighedFruit(f));
   MOCK_FOODS.length = 0;
   MOCK_FOODS.push(...byId.values());
   catalogChanged();
@@ -140,7 +165,7 @@ export function addDemoFoods(foods: readonly FoodItem[]): void {
   const have = new Set(MOCK_FOODS.map((f) => f.id));
   const fresh = foods.filter((f) => !have.has(f.id));
   if (fresh.length === 0) return;
-  MOCK_FOODS.push(...fresh);
+  MOCK_FOODS.push(...fresh.map(weighedFruit));
   catalogChanged();
 }
 
@@ -767,11 +792,11 @@ export const MOCK_FOODS: FoodItem[] = [
       sodium: 27,
     },
   },
-  // 24. Quả bơ (100g = 160 kcal)
+  // 24. Bơ (trái) (100g = 160 kcal)
   {
     id: "food-bo",
     category: "trai_cay",
-    nameVi: "Quả bơ",
+    nameVi: "Bơ (trái)",
     source: "USDA",
     match: "unknown",
     sourceRef: fdc(171705),
@@ -1140,7 +1165,29 @@ export const MOCK_FOODS: FoodItem[] = [
   },
 ];
 
+// cc-67: raw rows for the sample's cooked ones, so the demo shows one row per food (lib/food-twins): "Khoai lang" opens on
+// Chín (Khoai lang luộc) and Sống switches to this row. USDA SR Legacy sweet potato, raw (FDC 168482), per 100 g.
+MOCK_FOODS.push({
+  id: "food-khoai-lang-song",
+  category: "tinh_bot",
+  nameVi: "Khoai lang (sống)",
+  source: "USDA",
+  demoOnly: true,
+  match: "unknown",
+  sourceRef: fdc(168482),
+  servings: [{ label: "100 g", grams: 100 }],
+  nutrients: {
+    energy: 86,
+    carbs: 20.12,
+    protein: 1.57,
+    fat: 0.05,
+    fiber: 3,
+  },
+});
+
 MOCK_FOODS.push(...RECIPE_INGREDIENT_FOODS, ...RECIPE_DISH_FOODS);
+// cc-67: fruit is logged by grams of the edible part
+MOCK_FOODS.forEach((food, i) => (MOCK_FOODS[i] = weighedFruit(food)));
 
 /** The ids of the sample foods above, taken before the live mode drops them or a database catalogue arrives. */
 const SAMPLE_FOOD_IDS: ReadonlySet<string> = new Set(MOCK_FOODS.map((f) => f.id));

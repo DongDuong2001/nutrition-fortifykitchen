@@ -87,16 +87,16 @@ const CATALOG: Omit<NutrientDefinition, "name">[] = [
   { id: "vitamin_k", nameVi: "Vitamin K", nameEn: "Vitamin K", unit: "µg", group: "vitamins", depth: 0, targetSource: "vn2016" },
 
   // 6. Minerals (10)
-  { id: "calcium", nameVi: "Canxi", nameEn: "Calcium", unit: "mg", group: "minerals", depth: 0, targetSource: "coach" },
+  { id: "calcium", nameVi: "Canxi", nameEn: "Calcium", unit: "mg", group: "minerals", depth: 0, targetSource: "vn2016" },
   { id: "copper", nameVi: "Đồng", nameEn: "Copper", unit: "mg", group: "minerals", depth: 0, targetSource: "vn2016" },
-  { id: "iron", nameVi: "Sắt", nameEn: "Iron", unit: "mg", group: "minerals", depth: 0, targetSource: "coach" },
-  { id: "magnesium", nameVi: "Magie", nameEn: "Magnesium", unit: "mg", group: "minerals", depth: 0, targetSource: "coach" },
+  { id: "iron", nameVi: "Sắt", nameEn: "Iron", unit: "mg", group: "minerals", depth: 0, targetSource: "vn2016" },
+  { id: "magnesium", nameVi: "Magie", nameEn: "Magnesium", unit: "mg", group: "minerals", depth: 0, targetSource: "vn2016" },
   { id: "manganese", nameVi: "Mangan", nameEn: "Manganese", unit: "mg", group: "minerals", depth: 0, targetSource: "vn2016" },
   { id: "phosphorus", nameVi: "Phốt pho", nameEn: "Phosphorus", unit: "mg", group: "minerals", depth: 0, targetSource: "vn2016" },
-  { id: "potassium", nameVi: "Kali", nameEn: "Potassium", unit: "mg", group: "minerals", depth: 0, targetSource: "coach" },
+  { id: "potassium", nameVi: "Kali", nameEn: "Potassium", unit: "mg", group: "minerals", depth: 0, targetSource: "vn2016" },
   { id: "selenium", nameVi: "Selen", nameEn: "Selenium", unit: "µg", group: "minerals", depth: 0, targetSource: "vn2016" },
   { id: "sodium", nameVi: "Natri", nameEn: "Sodium", unit: "mg", group: "minerals", depth: 0, targetSource: "coach" },
-  { id: "zinc", nameVi: "Kẽm", nameEn: "Zinc", unit: "mg", group: "minerals", depth: 0, targetSource: "coach" },
+  { id: "zinc", nameVi: "Kẽm", nameEn: "Zinc", unit: "mg", group: "minerals", depth: 0, targetSource: "vn2016" },
 ];
 
 /** Minerals and vitamins show their English name, everything else its Vietnamese name. */
@@ -126,7 +126,7 @@ export function calculateNutrientPercentage(
   consumed: number | null,
   targetMin: number | null
 ): number | null {
-  if (consumed === null || targetMin === null || targetMin <= 0) {
+  if (consumed === null || targetMin === null || !Number.isFinite(consumed) || !Number.isFinite(targetMin) || targetMin <= 0) {
     return null;
   }
   return Math.round((consumed / targetMin) * 100);

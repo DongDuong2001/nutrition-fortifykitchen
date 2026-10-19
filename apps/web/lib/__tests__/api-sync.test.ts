@@ -104,15 +104,18 @@ describe("writeOutcome", () => {
 describe("the outbox", () => {
   const outbox = () => JSON.parse(localStorage.getItem("h1t_offline_outbox_sync@example.com") || "[]");
 
-  it("a 400 is held with the server's message and not sent again until Thử lại", async () => {
+  it("a 400 is held with its status and not sent again until Thử lại", async () => {
     vi.spyOn(console, "warn").mockImplementation(() => {});
     const calls = server({ "POST /days/2026-10-18/entries": [201] });
     vi.mocked(fetch).mockImplementationOnce(
       async () => new Response(JSON.stringify({ error: { code: "VALIDATION_FAILED", message: "failed to insert diary entry" } }), { status: 400 })
     );
     const result = await add();
-    expect(result).toMatchObject({ state: "held", status: 400, message: "failed to insert diary entry" });
-    expect(console.warn).toHaveBeenCalledWith(expect.stringContaining("400 failed to insert diary entry"));
+    expect(result).toMatchObject({ state: "held", status: 400 });
+    // cc-63, X7: the server's text is not kept; its error code is
+    expect(result).not.toHaveProperty("message");
+    expect(console.warn).toHaveBeenCalledWith(expect.stringContaining("400 VALIDATION_FAILED"));
+    expect(console.warn).not.toHaveBeenCalledWith(expect.stringContaining("failed to insert"));
     expect(await syncOfflineOutbox({ force: true })).toEqual({ saved: [], held: [] });
     expect(outbox()).toHaveLength(1);
     expect(await syncOfflineOutbox({ retryHeld: true })).toEqual({ saved: [ID], held: [] });
@@ -347,7 +350,7 @@ describe("writes that can never succeed (review 05:30 M1)", () => {
     const fetchMock = vi.fn(async (_url: string) => new Response(JSON.stringify({ error: { code: "PAST_DAY_READ_ONLY", message: "Cannot write to past dates" } }), { status: 409 }));
     vi.stubGlobal("fetch", fetchMock);
     const first = await syncOfflineOutbox({ force: true });
-    expect(first.held).toEqual([{ id: ID, status: 409, message: "Cannot write to past dates", date: "2026-10-17", final: true }]);
+    expect(first.held).toEqual([{ id: ID, status: 409, date: "2026-10-17", final: true }]);
     expect(await syncOfflineOutbox({ retryHeld: true })).toEqual({ saved: [], held: [] });
     // cc-50: the refusal is reported once to /client-errors; the write itself went out once
     expect(fetchMock.mock.calls.filter(([url]) => String(url).includes("/days/"))).toHaveLength(1);
@@ -395,13 +398,13 @@ describe("the portion label is stored with the entry", () => {
 describe("writes refused for good leave the outbox after 7 days (review 07:00)", () => {
   const DAY = 24 * 60 * 60 * 1000;
   const now = Date.parse("2026-10-18T08:00:00Z");
-  const final = { status: 409, message: "Cannot write to past dates", final: true };
+  const final = { status: 409, final: true };
 
   it("pruneOutbox drops final items older than 7 days, by createdAt; everything else stays", () => {
     const items = [
       { key: "old-final", createdAt: now - 8 * DAY, held: final },
       { key: "new-final", createdAt: now - 6 * DAY, held: final },
-      { key: "old-held", createdAt: now - 30 * DAY, held: { status: 400, message: "bad" } },
+      { key: "old-held", createdAt: now - 30 * DAY, held: { status: 400 } },
       { key: "old-queued", createdAt: now - 30 * DAY },
     ];
     expect(pruneOutbox(items, now).map((i) => i.key)).toEqual(["new-final", "old-held", "old-queued"]);
@@ -422,5 +425,54 @@ describe("writes refused for good leave the outbox after 7 days (review 07:00)",
     await syncOfflineOutbox({ retryHeld: true });
     expect(fetchMock).not.toHaveBeenCalled();
     expect(getPendingOfflineEntryIds()).toEqual([OTHER]);
+  });
+});
+
+describe("the server's body is never shown or sent (cc-63, X7)", () => {
+  const PROXY_PAGE = "<html><body><h1>502 Bad Gateway</h1><pre>panic: runtime error at /srv/api/main.go:41</pre></body></html>";
+  const STACK = JSON.stringify({ error: { code: "internal error\n at /srv/api/db.go:88", message: "pq: password authentication failed for user postgres" } });
+
+  // Each failure is reported once per page load (by its call), so each case uses its own day
+  async function run(status: number, body: string, date: string) {
+    const reports: Array<Record<string, unknown>> = [];
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string, init?: RequestInit) => {
+        if (String(url).endsWith("/client-errors")) {
+          reports.push(JSON.parse(String(init?.body)));
+          return new Response(null, { status: 204 });
+        }
+        return new Response(body, { status });
+      })
+    );
+    const result = await apiClient.addEntry({ id: ID, foodId: FOOD, grams: 100, mealSlot: "breakfast", date });
+    return { result, reports };
+  }
+
+  it("a proxy's HTML page in a 400 reaches no notice and no report", async () => {
+    const { result, reports } = await run(400, PROXY_PAGE, "2026-10-21");
+    expect(result).toMatchObject({ state: "held", status: 400, final: false });
+    expect(result).not.toHaveProperty("message");
+    expect(JSON.stringify(reports)).not.toMatch(/Bad Gateway|panic|main\.go|<html/);
+    expect(reports).toHaveLength(1);
+    expect(reports[0]).toMatchObject({ kind: "write", status: 400, message: "" });
+  });
+
+  it("a stack trace in an error body: only a well-formed error code is sent, and only the code", async () => {
+    const { reports } = await run(400, STACK, "2026-10-22");
+    expect(JSON.stringify(reports)).not.toMatch(/pq:|password|db\.go|internal error/);
+    expect(reports[0]).toMatchObject({ status: 400, message: "" });
+  });
+
+  it("the error code of a real refusal is sent with the status", async () => {
+    const { reports } = await run(400, JSON.stringify({ error: { code: "VALIDATION_FAILED", message: "failed to insert diary entry" } }), "2026-10-23");
+    expect(reports[0]).toMatchObject({ kind: "write", status: 400, message: "VALIDATION_FAILED" });
+    expect(JSON.stringify(reports)).not.toContain("failed to insert");
+  });
+
+  it("creating a food shows fixed words, not the server's text", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ error: { message: "pq: duplicate key value violates unique constraint" } }), { status: 409 })));
+    await expect(apiClient.createFood({ nameVi: "Món", servingUnit: "g", servingSize: 100, calories: 100 })).rejects.toThrow("Không thể tạo món (409)");
   });
 });

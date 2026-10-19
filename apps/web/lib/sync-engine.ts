@@ -1,4 +1,4 @@
-import { getApiBaseUrl, apiClient, apiFetch, diaryTimeout, serverAnswer, writeOutcome, PAST_DAY_READ_ONLY, pruneOutbox, type SyncResult, type WriteResult } from "./api-client";
+import { getApiBaseUrl, apiClient, apiFetch, diaryTimeout, serverCode, writeOutcome, PAST_DAY_READ_ONLY, pruneOutbox, type SyncResult, type WriteResult } from "./api-client";
 import { currentAccountId } from "./auth-actions";
 import { isDemo } from "./demo";
 import { getTodayIsoVN } from "./date";
@@ -212,7 +212,6 @@ function refusedForGood(write: Pick<OutboxItem, "day" | "date">): boolean {
 interface Sent {
   outcome: "saved" | "retry" | "held";
   status: number;
-  message: string;
   final: boolean;
   /** Another part of this tab (a sync run, the write's own chain) is sending this item right now: nothing was sent. */
   busy?: boolean;
@@ -224,7 +223,7 @@ async function sendWrite(write: Pick<OutboxItem, "method" | "path" | "date" | "p
   const method = itemMethod(write);
   let status = 0;
   let retryAfter: string | null = null;
-  let answer = { message: "", code: "" };
+  let code = "";
   try {
     const res = await apiFetch(itemPath(write), {
       method,
@@ -233,16 +232,16 @@ async function sendWrite(write: Pick<OutboxItem, "method" | "path" | "date" | "p
     });
     status = res.status;
     retryAfter = res.headers?.get?.("Retry-After") ?? null;
-    if (status >= 300) answer = await serverAnswer(res);
+    if (status >= 300) code = await serverCode(res);
   } catch {
     // No answer: sent again from the outbox
   }
   const outcome = writeOutcome(status, method);
-  if (outcome === "held") console.warn(`Diary write not saved: ${method} ${itemPath(write)} → ${status} ${answer.message}`);
-  // Any non-2xx answer (not a 404 on a delete, which means done) is reported once
-  if (status >= 300 && outcome !== "saved") reportClientError({ kind: "write", method, path: itemPath(write), status, message: answer.message });
-  const pastDay = outcome === "held" && status === 409 && answer.code === PAST_DAY_READ_ONLY;
-  return { outcome, status, message: answer.message, final: pastDay && refusedForGood(write), retryAfter };
+  if (outcome === "held") console.warn(`Diary write not saved: ${method} ${itemPath(write)} → ${status} ${code}`.trim());
+  // Any non-2xx answer (not a 404 on a delete, which means done) is reported once: its status and error code only
+  if (status >= 300 && outcome !== "saved") reportClientError({ kind: "write", method, path: itemPath(write), status, message: code });
+  const pastDay = outcome === "held" && status === 409 && code === PAST_DAY_READ_ONLY;
+  return { outcome, status, final: pastDay && refusedForGood(write), retryAfter };
 }
 
 // Writes that answered 401 one after another, after the session was renewed: the second one says the session ran out
@@ -262,7 +261,7 @@ function noteSession(status: number): void {
  */
 async function attempt(scope: OutboxScope, item: OutboxItem): Promise<Sent> {
   // One request per item: a sync run and the write's own turn can reach the same item together; the second one leaves it
-  if (sendingKeys.has(item.key)) return { outcome: "retry", status: -1, message: "", final: false, busy: true };
+  if (sendingKeys.has(item.key)) return { outcome: "retry", status: -1, final: false, busy: true };
   // A held or parked item that is sent again (Thử lại) starts with a clean count; the wait of a failed one is over
   const fresh = Boolean(item.held || item.parked);
   const started: OutboxItem = { ...item, state: "sending", attempts: (item.attempts ?? 0) + 1, lastAttemptAt: Date.now(), held: undefined, parked: undefined, nextAttemptAt: undefined, ...(fresh ? { retries: 0 } : {}) };
@@ -281,7 +280,7 @@ async function attempt(scope: OutboxScope, item: OutboxItem): Promise<Sent> {
     await removeItems(scope, [item.key]);
     tellOtherTabs(scope);
   } else if (sent.outcome === "held") {
-    await putItem(scope, { ...current, state: "held", retries: (current.retries ?? 0) + 1, nextAttemptAt: undefined, held: { status: sent.status, message: sent.message, final: sent.final } });
+    await putItem(scope, { ...current, state: "held", retries: (current.retries ?? 0) + 1, nextAttemptAt: undefined, held: { status: sent.status, final: sent.final } });
   } else {
     // Not refused, not answered or answered "later": it goes again after a wait that grows, and is parked after MAX_ATTEMPTS
     await putItem(scope, { ...current, state: "queued", held: undefined, ...afterFailure(current.retries, Date.now(), sent.retryAfter) });
@@ -294,7 +293,7 @@ async function attempt(scope: OutboxScope, item: OutboxItem): Promise<Sent> {
  * Sends one diary write, after any write of the same entry that is still being sent or still queued. The write is in
  * the outbox before its request goes out (a kill during the fetch loses nothing). What does not reach the server stays
  * there: no answer, 401 after the session refresh, 408, 429 and 5xx to be sent again, any other 4xx held for Thử lại
- * (with the server's message).
+ * (its status only: the server's text is never kept).
  */
 export function diaryWrite(write: DiaryWrite): Promise<WriteResult> {
   wireAlerts();
@@ -326,7 +325,7 @@ export function diaryWrite(write: DiaryWrite): Promise<WriteResult> {
       // Nobody is signed in: nothing to keep a write in
       const sent = await sendWrite(item);
       if (sent.outcome === "saved") return { state: "saved" };
-      return sent.outcome === "held" ? { state: "held", status: sent.status, message: sent.message, final: sent.final } : { state: "queued", status: sent.status };
+      return sent.outcome === "held" ? { state: "held", status: sent.status, final: sent.final } : { state: "queued", status: sent.status };
     }
     const current = findItem(scope, item.key);
     // Dropped meanwhile (a delete of an add that never left the device, a sign-out)
@@ -337,10 +336,10 @@ export function diaryWrite(write: DiaryWrite): Promise<WriteResult> {
       void syncOfflineOutbox();
       return { state: "queued" };
     }
-    const { outcome, status, message, final, busy } = await attempt(scope, current);
+    const { outcome, status, final, busy } = await attempt(scope, current);
     if (busy) return { state: "queued" };
     if (outcome === "saved") return { state: "saved" };
-    return outcome === "held" ? { state: "held", status, message, final } : { state: "queued", status };
+    return outcome === "held" ? { state: "held", status, final } : { state: "queued", status };
   });
   inFlight.set(write.id, run);
   void run.finally(() => {
@@ -408,7 +407,7 @@ async function runOutbox(retryHeld: boolean, force: boolean): Promise<SyncResult
         continue;
       }
       if (currentAccountId() !== account) break;
-      const { outcome, status, message, final, busy } = await attempt(scope, item);
+      const { outcome, status, final, busy } = await attempt(scope, item);
       if (busy) {
         blocked.add(item.id);
         continue;
@@ -419,7 +418,7 @@ async function runOutbox(retryHeld: boolean, force: boolean): Promise<SyncResult
       }
       blocked.add(item.id);
       if (outcome === "held") {
-        result.held.push({ id: item.id, status, message, date: item.day || item.date, final });
+        result.held.push({ id: item.id, status, date: item.day || item.date, final });
       } else if (status === 0) {
         break;
       }
@@ -445,7 +444,7 @@ export function sideWrite(write: { kind: OutboxKind; entity: string; method: "PU
   // The thing's id is its entity, so writes of one thing are sent in order (the chain below) and its older queued ones go
   const item = makeItem({ id: write.entity, date: "", payload: write.payload, method: write.method, path: write.path, kind: write.kind, entity: write.entity, day: write.day }, { updatedAt: now });
   if (!scope) {
-    return sendWrite(item).then((sent) => (sent.outcome === "saved" ? { state: "saved" } : { state: sent.outcome === "held" ? "held" : "queued", status: sent.status, message: sent.message }));
+    return sendWrite(item).then((sent) => (sent.outcome === "saved" ? { state: "saved" } : { state: sent.outcome === "held" ? "held" : "queued", status: sent.status }));
   }
   const older = readItems(scope).filter((other) => other.entity === write.entity && !sendingKeys.has(other.key));
   const before = inFlight.get(write.entity) ?? Promise.resolve<WriteResult>({ state: "saved" });
@@ -462,10 +461,10 @@ export function sideWrite(write: { kind: OutboxKind; entity: string; method: "PU
       void syncOfflineOutbox();
       return { state: "queued" };
     }
-    const { outcome, status, message, final, busy } = await attempt(scope, current);
+    const { outcome, status, final, busy } = await attempt(scope, current);
     if (busy) return { state: "queued" };
     if (outcome === "saved") return { state: "saved" };
-    return outcome === "held" ? { state: "held", status, message, final } : { state: "queued", status };
+    return outcome === "held" ? { state: "held", status, final } : { state: "queued", status };
   });
   inFlight.set(write.entity, run);
   void run.finally(() => {

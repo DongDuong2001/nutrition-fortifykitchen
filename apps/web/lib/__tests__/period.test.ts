@@ -137,7 +137,7 @@ describe("periodTargetDays: above the range is đạt, null days are not counted
   const days = [
     day("2026-10-06", { calories: 2380, protein: 118, carbs: 280, fat: 60, nutrients: { calcium: 1600, iron: 9 } }), // above max: đạt
     day("2026-10-07", { calories: 1950, protein: 104, carbs: 250, fat: 60, nutrients: { calcium: 1200, iron: 7 } }), // exactly min: đạt
-    day("2026-10-08", { calories: 1640, protein: 94, carbs: 210, fat: 46, nutrients: { calcium: 900, iron: null } }), // below
+    day("2026-10-08", { calories: 1640, protein: 94, carbs: 210, fat: 46, nutrients: { calcium: 700, iron: null } }), // below (calcium min 800 for a man of 20–29, VN 2016)
     empty("2026-10-09"),
     day(TODAY, { calories: 3000, protein: 200, carbs: 300, fat: 60, nutrients: { calcium: 2000, iron: 20 } }), // today: not counted
   ];
@@ -150,7 +150,7 @@ describe("periodTargetDays: above the range is đạt, null days are not counted
 
   it("counts a nutrient only on days where it is known", () => {
     expect(result.nutrients.calcium).toEqual({ met: 2, of: 3 });
-    expect(result.nutrients.iron).toEqual({ met: 1, of: 2 }); // iron min 8: 9 yes, 7 no, null skipped
+    expect(result.nutrients.iron).toEqual({ met: 1, of: 2 }); // iron min 7,9: 9 yes, 7 no, null skipped
   });
 
   it("has of = 0 for a nutrient no day knows", () => {

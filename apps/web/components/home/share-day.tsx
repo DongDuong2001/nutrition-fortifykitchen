@@ -23,7 +23,7 @@ export function ShareDay({ model }: { model: ShareModel }) {
           (a long name wraps and the header grows), a 1 px divider under it. */}
       <div data-share-header className="flex min-h-[86px] flex-none items-center justify-between gap-3 border-b border-b-divider px-3 py-2">
         <div className="flex min-w-0 flex-1 flex-col gap-2">
-          <p data-share-wrap className="m-0 min-w-0 break-words font-display text-[38px] font-extrabold italic uppercase leading-[0.9] text-ink">
+          <p data-share-wrap className="m-0 min-w-0 break-words font-display text-[38px] font-extrabold italic uppercase leading-[1.05] text-ink">
             {model.name ?? model.dateLabel}
           </p>
           {model.name && <p className="m-0 whitespace-nowrap text-[13px] font-medium leading-snug text-secondary">{model.dateLabel}</p>}

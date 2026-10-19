@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 import path from "path";
 import { loadEnvConfig } from "@next/env";
 import { readFileSync } from "fs";
+import { contentSecurityPolicy } from "./lib/csp";
 import { PERMANENT_REDIRECTS } from "./lib/redirects";
 
 const APP_VERSION = readFileSync(path.join(__dirname, "public/sw.js"), "utf8").match(/const VERSION = "([^"]+)"/)?.[1] ?? "unknown";
@@ -46,18 +47,7 @@ const SECURITY_HEADERS = [
   },
   {
     key: "Content-Security-Policy",
-    value: [
-      "default-src 'self'",
-      `script-src 'self' 'unsafe-inline' ${process.env.NODE_ENV === "development" ? "'unsafe-eval' " : ""}https://hcaptcha.com https://*.hcaptcha.com`,
-      "style-src 'self' 'unsafe-inline' https://hcaptcha.com https://*.hcaptcha.com",
-      "img-src 'self' data: blob: https:",
-      "font-src 'self' data:",
-      `connect-src 'self' ${apiOrigin ? apiOrigin + " " : ""}https://*.supabase.co wss://*.supabase.co https://hcaptcha.com https://*.hcaptcha.com http://localhost:* ws://localhost:*`,
-      "frame-src 'self' https://hcaptcha.com https://*.hcaptcha.com",
-      "frame-ancestors 'none'",
-      "object-src 'none'",
-      "base-uri 'self'",
-    ].join("; "),
+    value: contentSecurityPolicy({ development: process.env.NODE_ENV === "development", apiOrigin }),
   },
 ];
 

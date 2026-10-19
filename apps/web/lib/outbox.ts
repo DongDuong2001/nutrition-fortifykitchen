@@ -52,7 +52,7 @@ export interface OutboxItem {
    * The server refused it with a 4xx: not sent again until Thử lại or the next app open. `final`: refused for good (a
    * day too old), never sent again.
    */
-  held?: { status: number; message: string; final?: boolean };
+  held?: { status: number; final?: boolean };
 }
 
 /** The outbox of one account (or of demo): the id in memory and the old localStorage key it came from. */

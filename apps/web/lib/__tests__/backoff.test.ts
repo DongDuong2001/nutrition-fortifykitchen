@@ -252,6 +252,6 @@ describe("outbox_age (S13)", () => {
 
   it("a refused (held) write is not 'waiting': it has its own count", async () => {
     const engine = await loadSyncEngine();
-    expect(engine.reportOutboxAge([{ ...item(now - 3 * 3600_000), held: { status: 400, message: "bad" } }], now)).toBeNull();
+    expect(engine.reportOutboxAge([{ ...item(now - 3 * 3600_000), held: { status: 400 } }], now)).toBeNull();
   });
 });

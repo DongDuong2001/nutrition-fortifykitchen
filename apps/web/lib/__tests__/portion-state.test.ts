@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import {
   defaultPortionOf,
   eggParts,
@@ -19,6 +19,10 @@ import {
   type PortionState,
 } from "../portion";
 import type { FoodItem } from "../mock/foods";
+import { loadFoodRows } from "../food-rows";
+
+// defaultPortionOf asks for the raw / cooked data, which loads after the first paint (lib/food-rows)
+beforeAll(() => loadFoodRows());
 
 const food = (id: string, nameVi: string, category: FoodItem["category"], servings: FoodItem["servings"], extra: Partial<FoodItem> = {}): FoodItem => ({
   id,
@@ -227,6 +231,8 @@ describe("the kcal card's summary and note", () => {
     expect(portionNote({ kind: "egg", size: "lớn", count: 3 }, null, 151.8)).toBe("Hộp ghi cân cả vỏ, app tự trừ vỏ khi tính.");
     expect(portionNote(grams(120), null, 120, true)).toBe("Bóc vỏ rồi cân thì nhập số gam ở đây.");
     expect(portionNote(grams(120), null, 120)).toBeNull();
+    // cc-67: fruit and the foods with a peel, shell or bone are weighed without it
+    expect(portionNote(grams(120), null, 120, false, true)).toBe("Cân phần ăn được, bỏ vỏ, hạt và xương.");
   });
 
   it("says cooked food is heavier where it is (dry grains, beans), and says neither when the weight stays (tubers)", () => {

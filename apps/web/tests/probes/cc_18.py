@@ -178,7 +178,8 @@ def account_checks(pg, width, email):
     name = pg.locator("#account-display-name")
     name.fill(TOO_LONG_NAME)
     name.press("Enter")
-    check(text_visible(pg, "Tên hiển thị tối đa 40 ký tự", 2000), f"{width} /settings/account: a 41-character name shows the limit")
+    # cc-63 (B7): the field holds 40 code points at most, so a 41st character is not typed
+    check(len(name.input_value()) == 40, f"{width} /settings/account: a 41-character name is cut at 40 ({len(name.input_value())})")
     name.fill(NAME)
     name.press("Enter")
     go(pg, "/settings")

@@ -88,3 +88,27 @@ describe("quickDetail", () => {
     expect(quickDetail({ protein: 12.5, carbs: 0, fat: null })).toBe("Đạm 12,5 g · Tinh bột 0 g · Chất béo —");
   });
 });
+
+describe("quick entry limits (cc-63, B5)", () => {
+  const input = { name: "", kcal: "500", protein: "", carbs: "", fat: "" };
+  const make = (patch: Partial<typeof input>) => quickEntryFrom({ ...input, ...patch }, "breakfast", "id-1", "2026-10-19T08:00:00+07:00");
+
+  it("takes up to 9.999 kcal and says so above", () => {
+    expect(make({ kcal: "9999" }).ok).toBe(true);
+    expect(make({ kcal: "9.999" }).ok).toBe(true);
+    expect(make({ kcal: "10000" })).toEqual({ ok: false, field: "kcal", message: "Tối đa 9.999 kcal" });
+  });
+
+  it("rejects half-numbers and exponents", () => {
+    expect(make({ kcal: "12abc" }).ok).toBe(false);
+    expect(make({ kcal: "1e3" }).ok).toBe(false);
+    expect(make({ kcal: "500", protein: "1e3" }).ok).toBe(false);
+  });
+
+  it("keeps a name to 80 characters, counting an emoji as one", () => {
+    const r = make({ name: "a".repeat(100) });
+    expect(r.ok && Array.from(r.entry.foodName).length).toBe(80);
+    const emoji = make({ name: "🍜".repeat(90) });
+    expect(emoji.ok && Array.from(emoji.entry.foodName).length).toBe(80);
+  });
+});

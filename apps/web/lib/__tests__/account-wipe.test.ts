@@ -107,7 +107,7 @@ describe("unsyncedCount (what Đăng xuất would throw away)", () => {
     await loadOutbox(scopeA);
     expect(await unsyncedCount(A)).toBe(0);
     await putItem(scopeA, { key: "a1", seq: 1, id: "e1", date: "2026-10-18", payload: {}, createdAt: 1, state: "queued" });
-    await putItem(scopeA, { key: "a2", seq: 2, id: "e2", date: "2026-10-18", payload: {}, createdAt: 2, state: "held", held: { status: 400, message: "bad" } });
+    await putItem(scopeA, { key: "a2", seq: 2, id: "e2", date: "2026-10-18", payload: {}, createdAt: 2, state: "held", held: { status: 400 } });
     await putItem(scopeFor(B, false)!, { key: "b1", seq: 3, id: "e3", date: "2026-10-18", payload: {}, createdAt: 3 });
     expect(await unsyncedCount(A)).toBe(2);
     expect(await unsyncedCount(null)).toBe(0);

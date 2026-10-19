@@ -16,7 +16,7 @@ export interface MockHistoryItem {
 export const YESTERDAY_ITEMS: MockHistoryItem[] = [
   { mealSlot: "breakfast", foodId: "food-yen-mach", grams: 60, qty: "60 g" },
   { mealSlot: "breakfast", foodId: "food-yogurt-kefir", grams: 200, qty: "200 ml" },
-  { mealSlot: "breakfast", foodId: "food-chuoi", grams: 100, qty: "1 quả" },
+  { mealSlot: "breakfast", foodId: "food-chuoi", grams: 100, qty: "100 g" },
   { mealSlot: "lunch", foodId: "food-com-gao-lut", grams: 150, qty: "150 g" },
   { mealSlot: "lunch", foodId: "food-thit-bo-nac", grams: 150, qty: "150 g" },
   { mealSlot: "dinner", foodId: "food-ca-hoi", grams: 150, qty: "150 g" },

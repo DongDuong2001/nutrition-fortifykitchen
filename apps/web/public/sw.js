@@ -8,12 +8,12 @@
  *    comes back while the app is closed (cc-68). It only ever removes a write the server has; every other outcome is left
  *    to the page, which owns retries and holds.
  * Bump VERSION on a release that changes this file or the shell list. lib/pwa.ts holds the tested copy of routeFor. */
-const VERSION = "2026-10-19.8";
+const VERSION = "2026-10-19.11";
 const SHELL_CACHE = "h1t-shell-" + VERSION;
 const STATIC_CACHE = "h1t-static-" + VERSION;
 const PAGES = ["/", "/app", "/trends", "/explore", "/settings", "/offline"];
 const ICONS = ["/icons/icon-192.png", "/icons/icon-512.png", "/icons/apple-touch-icon.png", "/icons/favicon.ico"];
-const NEVER = ["/signin", "/signup", "/reset-password", "/login", "/api"];
+const NEVER = ["/signin", "/signup", "/reset-password", "/login", "/auth", "/join", "/api"];
 const FONT_FILE = /\.(?:woff2?|ttf|otf)$/i;
 const STATIC_LIMIT = 300;
 const SHELL_LIMIT = 80;

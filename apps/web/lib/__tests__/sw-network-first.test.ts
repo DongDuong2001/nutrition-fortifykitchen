@@ -123,7 +123,7 @@ describe("sw networkFirst (cc-58)", () => {
     return answer;
   }
 
-  describe.each(["/signin", "/signup", "/reset-password"])("%s (never cached)", (path) => {
+  describe.each(["/signin", "/signup", "/reset-password", "/auth/callback", "/join/ABC123"])("%s (never cached)", (path) => {
     it("uses the navigation preload: the page is the one request the browser started, no second fetch", async () => {
       const t = load();
       const early = t.page("preloaded");

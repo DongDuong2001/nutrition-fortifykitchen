@@ -191,6 +191,7 @@ describe("pctLabel", () => {
     expect(pctLabel(3, 2000)).toBe("<1%");
     expect(pctLabel(10, 2000)).toBe("1%");
     expect(pctLabel(1041, 2000)).toBe("52%");
+    expect(pctLabel(1999, 2000)).toBe("100%");
   });
 });
 
@@ -417,5 +418,15 @@ describe("a supplement of the live catalogue (the foods the database sent)", () 
 
   it("an old entry with no label (read back as 2 g) falls back to grams", () => {
     expect(portionLabel(homeEntryFromAdded(added("2 g", 2)))).toBe("2 g");
+  });
+});
+
+describe("pctLabel above 999 (cc-63, B6)", () => {
+  it("reads 999+% so a supplement at 20.833% fits its column", () => {
+    expect(pctLabel(999, 100)).toBe("999%");
+    expect(pctLabel(1000, 100)).toBe("999+%");
+    expect(pctLabel(20833, 100)).toBe("999+%");
+    expect(pctLabel(Number.NaN, 100)).toBe("—");
+    expect(pctLabel(100, Number.POSITIVE_INFINITY)).toBe("—");
   });
 });

@@ -110,9 +110,23 @@ describe("cookSwitchFor", () => {
   it("shows no switch where raw or cooked does not matter or nothing converts", () => {
     expect(cookSwitchFor(food("b", "Chuối", "trai_cay"), [], true)).toBeNull();
     expect(cookSwitchFor(food("e", "Trứng gà"), [], true)).toBeNull();
-    // A vegetable pair is not one the coach asked for
+    // A vegetable with no plain cooked row has no switch
     const cabbage = food("c1", "Bắp cải (sống)", "rau");
-    expect(cookSwitchFor(cabbage, [cabbage, food("c2", "Bắp cải (luộc)", "rau")], true)).toBeNull();
+    expect(cookSwitchFor(cabbage, [cabbage], true)).toBeNull();
+    // A fried or stir-fried row is a dish of its own, never the cooked state
+    const greens = food("m1", "Rau muống", "rau");
+    expect(cookSwitchFor(greens, [greens, food("m2", "Rau muống xào", "rau")], true)).toBeNull();
+  });
+
+  it("cc-67: a vegetable and its plain cooked row switch both ways", () => {
+    const cabbage = food("c1", "Bắp cải (sống)", "rau");
+    const boiled = food("c2", "Bắp cải (luộc)", "rau");
+    expect(cookSwitchFor(cabbage, [cabbage, boiled], true)).toEqual({ own: "raw", pair: boiled, factor: null });
+    expect(cookSwitchFor(boiled, [cabbage, boiled], true)).toEqual({ own: "cooked", pair: cabbage, factor: null });
+    // The raw row may say nothing
+    const greens = food("m1", "Rau muống", "rau");
+    const greensBoiled = food("m3", "Rau muống luộc", "rau");
+    expect(cookSwitchFor(greensBoiled, [greens, greensBoiled], true)?.pair).toBe(greens);
   });
 
   it("keeps tubers and legumes when they have a pair", () => {

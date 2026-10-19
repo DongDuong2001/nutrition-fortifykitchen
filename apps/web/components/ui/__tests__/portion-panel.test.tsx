@@ -1,9 +1,13 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 import React from "react";
 import { renderToString } from "react-dom/server";
 import { PortionPanel } from "../portion-panel";
 import { MOCK_FOODS } from "@/lib/mock/foods";
 import { DiaryProvider } from "@/lib/diary-store";
+import { loadFoodRows } from "@/lib/food-rows";
+
+// The raw / cooked data (the Sống | Chín switch) loads after the first paint (lib/food-rows)
+beforeAll(() => loadFoodRows());
 
 describe("PortionPanel multi-add action", () => {
   const sampleFood = MOCK_FOODS[0];

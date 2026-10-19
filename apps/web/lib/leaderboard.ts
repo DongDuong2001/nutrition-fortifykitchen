@@ -21,6 +21,14 @@ export interface LeaderboardResponse {
 
 import { accountStorage } from "./storage-keys";
 
+/**
+ * The ranks as the screen draws them: the podium takes the first three when there are three or more, and the rest go
+ * in rows. With one or two ranks there is no podium, so every rank is a row (nothing is left to draw a blank screen).
+ */
+export function splitRanks<T>(ranks: readonly T[]): { podium: T[]; rows: T[] } {
+  return ranks.length >= 3 ? { podium: ranks.slice(0, 3), rows: ranks.slice(3) } : { podium: [], rows: [...ranks] };
+}
+
 export const LEADERBOARD_STORAGE_KEY = "h1t_leaderboard_opt_in";
 
 let memoryOptIn: boolean | null = null;

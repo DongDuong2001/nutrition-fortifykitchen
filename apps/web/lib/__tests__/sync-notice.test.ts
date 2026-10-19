@@ -3,8 +3,8 @@ import { isLocalOnly, pastDayMessage, syncNotice, unsavedMessage } from "../sync
 
 // Review 05:30 M1: a refused write ends in a state the user can understand, and the app does not nag.
 
-const held = (over: Partial<{ id: string; status: number; message: string; date: string; final: boolean }> = {}) => ({
-  id: "a", status: 400, message: "bad", date: "2026-10-18", final: false, ...over,
+const held = (over: Partial<{ id: string; status: number; date: string; final: boolean }> = {}) => ({
+  id: "a", status: 400, date: "2026-10-18", final: false, ...over,
 });
 
 describe("syncNotice", () => {
@@ -15,7 +15,13 @@ describe("syncNotice", () => {
     });
   });
   it("two held writes in one run: one toast", () => {
-    expect(syncNotice([held({ id: "a" }), held({ id: "b", status: 422 })], false)).toEqual({ kind: "unsaved", message: unsavedMessage(400, "bad") });
+    expect(syncNotice([held({ id: "a" }), held({ id: "b", status: 422 })], false)).toEqual({ kind: "unsaved", message: unsavedMessage(400) });
+  });
+  it("the unsaved toast is fixed words and the status (cc-63, X7), whatever an old outbox item kept of the server's text", () => {
+    expect(unsavedMessage(400)).toBe("Chưa lưu được món (lỗi 400)");
+    expect(unsavedMessage()).toBe("Chưa lưu được món");
+    const old = { ...held({ status: 500 }), message: "<html>502 Bad Gateway</html>" };
+    expect(syncNotice([old], false)).toEqual({ kind: "unsaved", message: "Chưa lưu được món (lỗi 500)" });
   });
   it("at most one unsaved toast per app open", () => {
     expect(syncNotice([held()], true)).toBeNull();

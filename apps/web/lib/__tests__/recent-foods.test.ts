@@ -22,12 +22,13 @@ describe("resolveRecent", () => {
 
   it("falls back to the first serving for a label it cannot read", () => {
     const resolved = resolveRecent({ foodId: "food-chuoi", servingLabel: "không rõ" }, MOCK_FOODS);
-    expect(resolved?.label).toBe("1 trái vừa");
-    expect(resolved?.grams).toBe(118);
+    expect(resolved?.label).toBe("100 g");
+    expect(resolved?.grams).toBe(100);
   });
 
-  it("resolves unit amounts like 2 trái lớn", () => {
-    const resolved = resolveRecent({ foodId: "food-chuoi", servingLabel: "2 trái lớn" }, MOCK_FOODS);
+  it("resolves unit amounts like 2 trái lớn (a food that keeps its units: cc-67 took them off fruit)", () => {
+    const fruit = { ...MOCK_FOODS.find((f) => f.id === "food-chuoi")!, servings: [{ label: "1 trái vừa", grams: 118 }, { label: "1 trái lớn", grams: 136 }, { label: "100 g", grams: 100 }] };
+    const resolved = resolveRecent({ foodId: "food-chuoi", servingLabel: "2 trái lớn" }, [fruit]);
     expect(resolved?.label).toBe("2 trái lớn");
     expect(resolved?.grams).toBe(272);
   });

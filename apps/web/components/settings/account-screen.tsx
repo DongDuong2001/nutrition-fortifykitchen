@@ -16,7 +16,7 @@ import { currentAccountId, signOut } from "@/lib/auth-actions";
 import { isLiveMode } from "@/lib/api-mode";
 import { callEngine, syncOfflineOutbox } from "@/lib/api-client";
 import { useSaveDisplayName } from "@/hooks/use-save-display-name";
-import { cleanDisplayName, validateDisplayName } from "@/lib/display-name";
+import { cleanDisplayName, limitDisplayName, validateDisplayName } from "@/lib/display-name";
 
 // Only a person who signs out with writes waiting ever sees it: its chunk is not part of the page
 const SignOutConfirm = dynamic(() => import("@/components/settings/sign-out-confirm").then((m) => m.SignOutConfirm), { ssr: false });
@@ -53,8 +53,9 @@ function DisplayNameRow() {
         autoComplete="nickname"
         value={value}
         onChange={(e) => {
-          setValue(e.target.value);
-          if (error) setError(validateDisplayName(e.target.value) ?? undefined);
+          const next = limitDisplayName(e.target.value);
+          setValue(next);
+          if (error) setError(validateDisplayName(next) ?? undefined);
         }}
         onBlur={() => void save()}
         onKeyDown={(e) => {

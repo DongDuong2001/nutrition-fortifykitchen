@@ -26,6 +26,7 @@ import { foodMeta } from "@/lib/food-meta";
 import { CreateFoodButton } from "@/components/foods/create-food-button";
 import { isCategoryFilter } from "@/lib/food-categories";
 import { resolveFavourites } from "@/lib/favourites";
+import { dedupeTwins, twinIdsOf } from "@/lib/food-rows";
 import { TrayBar, TrayReviewSheet } from "@/components/add/add-tray";
 import { markUsed } from "@/lib/onboarding-store";
 import { TOUR_STEPS } from "@/lib/tour";
@@ -39,12 +40,12 @@ import {
   type MealSlot,
   MEAL_SLOTS,
 } from "@/lib/meal-slot";
-import { defaultPortionOf, parseGramsInput } from "@/lib/portion";
+import { defaultPortionOf, gramsServingLabel, parseGramsInput } from "@/lib/portion";
 import { MealSwitcher } from "@/components/meal-switcher";
 import { PortionPanel } from "@/components/ui/portion-panel";
 import { HomeScreen } from "@/components/home/home-screen";
 import { AppShell } from "@/components/ui/app-shell";
-import type { AddOnEntry } from "@/lib/dish-recipes";
+import type { DishEdit } from "@/lib/dish-recipes";
 
 import { useMealSlot } from "@/lib/use-meal-slot";
 import { HOME_ROUTE } from "@/lib/nav";
@@ -85,9 +86,25 @@ function AddFoodInner() {
   const [reviewOpen, setReviewOpen] = useState(false);
   const reopenReview = useRef(false);
 
-  // cc-54: the add-ons ("+ Bún") of a dish that are switched on: logged with it, each its own entry, in the same meal
-  const [extras, setExtras] = useState<AddOnEntry[]>([]);
-  const onExtrasChange = useCallback((next: AddOnEntry[]) => setExtras((prev) => (prev.length === 0 && next.length === 0 ? prev : next)), []);
+  // cc-67: the parts of a premade dish changed for this meal (Thành phần). Changed, it is logged as ONE entry of a food made
+  // for it ("Phở bò · đã chỉnh", listed nowhere): the parts added up. Unchanged, the dish is logged as it is.
+  const [dishEdit, setDishEdit] = useState<DishEdit | null>(null);
+  const [dishNotice, setDishNotice] = useState<string | null>(null);
+  const onDishEdit = useCallback((next: DishEdit | null) => {
+    setDishEdit(next);
+    setDishNotice(null);
+  }, []);
+  // What a save logs: the food, its grams and the portion label
+  const toLog = () => {
+    const changed = dishEdit?.edited ? dishEdit : null;
+    if (!selectedFood || !changed) return selectedFood ? { food: selectedFood, grams: parsedGrams, label: selectedServingLabel } : null;
+    const food = changed.save();
+    if (!food) {
+      setDishNotice("Chưa lưu được món đã chỉnh vào máy này. Bộ nhớ đầy hoặc đang bị chặn.");
+      return null;
+    }
+    return { food, grams: changed.grams, label: gramsServingLabel(changed.grams) };
+  };
 
   const [gramsInput, setGramsInput] = useState("");
   const [selectedServingLabel, setSelectedServingLabel] = useState("");
@@ -143,9 +160,10 @@ function AddFoodInner() {
   // Pick a food with one serving (default: its first). Sets the amount too, so the portion panel shows it.
   // cc-51: a food opens on the portion this user last logged for it, else the catalogue's first portion
   const pickFood = useCallback((food: FoodItem, serving?: FoodServing) => {
-    const last = serving ? null : lastPortionOf(food.id, recentFoods, MOCK_FOODS);
+    // cc-67: raw and cooked are one list row, so the food opens in the state it was last logged in
+    const last = serving ? null : lastPortionOf(twinIdsOf(food), recentFoods, MOCK_FOODS);
     const s = serving ?? (last ? { label: last.label, grams: last.grams } : defaultPortionOf(food));
-    setSelectedFood(food);
+    setSelectedFood(last?.food ?? food);
     setGramsInput(String(s.grams));
     setSelectedServingLabel(s.label);
     tourAction("food-picked");
@@ -220,20 +238,26 @@ function AddFoodInner() {
   );
   // Recents are foods with the serving they were logged with: tap = add with that serving, chevron = portion panel
   const recentShortcuts = useMemo<RecentShortcut[]>(() => {
+    // cc-67: one card per food, in the state it was last logged in
     const ofMeal = mealSlot ? recentForMeal(diaryEntries, mealSlot).map((s) => shortcutOf(s, "meal")).filter((r): r is RecentShortcut => r !== null) : [];
-    if (ofMeal.length > 0) return ofMeal;
-    return recentFoods
-      .map((r) => resolveRecent(r, MOCK_FOODS))
-      .filter((r): r is ResolvedRecent => r !== null)
-      .map((r) => ({ key: `${r.food.id}|${r.label}`, food: r.food, label: r.label, grams: r.grams }))
-      .slice(0, MAX_SHORTCUT_RECENTS);
+    if (ofMeal.length > 0) return dedupeTwins(ofMeal, (r) => r.food);
+    return dedupeTwins(
+      recentFoods
+        .map((r) => resolveRecent(r, MOCK_FOODS))
+        .filter((r): r is ResolvedRecent => r !== null)
+        .map((r) => ({ key: `${r.food.id}|${r.label}`, food: r.food, label: r.label, grams: r.grams })),
+      (r) => r.food
+    ).slice(0, MAX_SHORTCUT_RECENTS);
   }, [recentFoods, diaryEntries, mealSlot, shortcutOf]);
   const frequentShortcuts = useMemo<RecentShortcut[]>(
     () =>
       todayIso
-        ? frequentFoods(diaryEntries, todayIso)
-            .map((s) => shortcutOf(s, "often"))
-            .filter((r): r is RecentShortcut => r !== null && !recentShortcuts.some((x) => x.food.id === r.food.id))
+        ? dedupeTwins(
+            frequentFoods(diaryEntries, todayIso)
+              .map((s) => shortcutOf(s, "often"))
+              .filter((r): r is RecentShortcut => r !== null && !recentShortcuts.some((x) => twinIdsOf(x.food).includes(r.food.id))),
+            (r) => r.food
+          )
         : [],
     [diaryEntries, todayIso, recentShortcuts, shortcutOf]
   );
@@ -241,13 +265,13 @@ function AddFoodInner() {
   // A favourite already in Gần đây is not repeated (two identical buttons confuse screen readers)
   const favouriteShortcuts = useMemo<RecentShortcut[]>(
     () =>
-      resolveFavourites(favouriteIds, MOCK_FOODS)
-        .filter((food) => !recentShortcuts.some((r) => r.food.id === food.id) && !frequentShortcuts.some((r) => r.food.id === food.id))
+      dedupeTwins(resolveFavourites(favouriteIds, MOCK_FOODS), (food) => food)
+        .filter((food) => !recentShortcuts.some((r) => twinIdsOf(r.food).includes(food.id)) && !frequentShortcuts.some((r) => twinIdsOf(r.food).includes(food.id)))
         .slice(0, MAX_SHORTCUT_FAVOURITES)
         .map((food) => {
-          const last = lastPortionOf(food.id, recentFoods, MOCK_FOODS);
-          const serving = last ? { label: last.label, grams: last.grams } : (food.servings[0] ?? { label: "100 g", grams: 100 });
-          return { key: `fav|${food.id}`, food, label: serving.label, grams: serving.grams };
+          const last = lastPortionOf(twinIdsOf(food), recentFoods, MOCK_FOODS);
+          const serving = last ? { label: last.label, grams: last.grams } : defaultPortionOf(food);
+          return { key: `fav|${food.id}`, food: last?.food ?? food, label: serving.label, grams: serving.grams };
         }),
     [favouriteIds, recentFoods, recentShortcuts, frequentShortcuts, catalogVersion]
   );
@@ -267,17 +291,16 @@ function AddFoodInner() {
   const parsedGrams = useMemo(() => {
     return parseGramsInput(gramsInput);
   }, [gramsInput]);
+  // The grams a save logs: the parts added up for a changed dish
+  const loggedGrams = dishEdit?.edited ? dishEdit.grams : parsedGrams;
 
   // Submit action
   const handleAddFood = async () => {
-    if (!selectedFood || parsedGrams <= 0 || isSubmitting || mealSlot === null) return;
+    if (!selectedFood || loggedGrams <= 0 || isSubmitting || mealSlot === null) return;
     setIsSubmitting(true);
     try {
-      // With add-ons: the dish and each add-on go in together (one update, one Hoàn tác), the add-ons right after the dish
-      const saved =
-        extras.length > 0
-          ? addFoodEntries([{ food: selectedFood, grams: parsedGrams, label: selectedServingLabel }, ...extras], mealSlot, addToDay)
-          : await addFoodEntry(selectedFood, parsedGrams, mealSlot, selectedServingLabel, { day: addToDay });
+      const entry = toLog();
+      const saved = entry ? await addFoodEntry(entry.food, entry.grams, mealSlot, entry.label, { day: addToDay }) : false;
       if (saved) {
         tourAction("portion-confirmed");
         navigateFromSheet(router, homeHref);
@@ -289,9 +312,11 @@ function AddFoodInner() {
 
   // Lưu & chọn tiếp: the food with the chosen portion goes in the tray and the search stays as it was
   const handleAddAndContinue = () => {
-    if (!selectedFood || parsedGrams <= 0 || mealSlot === null) return;
+    if (!selectedFood || loggedGrams <= 0 || mealSlot === null) return;
+    const entry = toLog();
+    if (!entry) return;
     markUsed("tray-add");
-    setTray((t) => extras.reduce((acc, e) => putInTray(acc, e.food, e.grams, e.label), putInTray(t, selectedFood, parsedGrams, selectedServingLabel)));
+    setTray((t) => putInTray(t, entry.food, entry.grams, entry.label));
     setSelectedFood(null);
     setGramsInput("");
     setSelectedServingLabel("");
@@ -351,7 +376,7 @@ function AddFoodInner() {
 
   // A favourite with a last portion adds in one tap, like a recent. Without history the portion panel opens.
   const pickFromList = (food: FoodItem) => {
-    const last = favouritesOnly ? lastPortionOf(food.id, recentFoods, MOCK_FOODS) : null;
+    const last = favouritesOnly ? lastPortionOf(twinIdsOf(food), recentFoods, MOCK_FOODS) : null;
     if (last) void addWithPortion(last.food, last.grams, last.label);
     else pickFood(food);
   };
@@ -407,14 +432,14 @@ function AddFoodInner() {
         handleClose(true);
       } else if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {
         // If not typing in input or if adding (the Chỉ ghi kcal form handles its own Enter)
-        if (selectedFood && parsedGrams > 0 && !quickOpen) {
+        if (selectedFood && loggedGrams > 0 && !quickOpen) {
           handleAddFood();
         }
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleClose, selectedFood, parsedGrams, handleAddFood, quickOpen, switcherOpen, reviewOpen, isDesktop]);
+  }, [handleClose, selectedFood, loggedGrams, handleAddFood, quickOpen, switcherOpen, reviewOpen, isDesktop]);
 
   const mealNameVi = mealSlot ? getMealSlotNameVi(mealSlot) : "—";
 
@@ -588,7 +613,8 @@ function AddFoodInner() {
                     mealSlot={mealSlot}
                     onAdd={handleAddFood}
                     onAddAndContinue={handleAddAndContinue}
-                    onExtrasChange={onExtrasChange}
+                    onDishEdit={onDishEdit}
+              notice={dishNotice}
                     isSubmitting={isSubmitting}
                     showMicros={true}
                     className="rounded-[18px] border border-card-border bg-card p-4"
@@ -714,7 +740,15 @@ function AddFoodInner() {
       </div>
 
       {/* The portion sheet (phone): white, over the list, as in design/portion-mockup */}
-      <Sheet open={selectedFood !== null && !isDesktop} onClose={() => setSelectedFood(null)} labelledBy="portion-sheet-title">
+      <Sheet
+        open={selectedFood !== null && !isDesktop}
+        onClose={() => {
+          setSelectedFood(null);
+          // cc-67: back to the list with the keyboard ready, as when the sheet opened
+          phoneSearchInputRef.current?.focus({ preventScroll: true });
+        }}
+        labelledBy="portion-sheet-title"
+      >
         {selectedFood && (
           <div className="-mx-4 max-h-[86dvh] overflow-y-auto overscroll-contain px-4 pb-[env(safe-area-inset-bottom)]">
             <PortionPanel
@@ -727,7 +761,8 @@ function AddFoodInner() {
               mealSlot={mealSlot}
               onAdd={handleAddFood}
               onAddAndContinue={handleAddAndContinue}
-              onExtrasChange={onExtrasChange}
+              onDishEdit={onDishEdit}
+                    notice={dishNotice}
               isSubmitting={isSubmitting}
               headingId="portion-sheet-title"
             />

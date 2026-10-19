@@ -39,6 +39,8 @@ export interface Recipe {
   serverFoodId?: string;
   /** The server foods of earlier versions: past entries still name them, so they stay on the server, out of the lists. */
   pastServerFoodIds?: string[];
+  /** cc-67: a premade dish with its parts changed for one meal. Logged like any recipe, listed nowhere (lib/mock/foods). */
+  oneOff?: boolean;
 }
 
 /** The per-100 g nutrients of an ingredient's food, or null when the food is not in the catalogue. */

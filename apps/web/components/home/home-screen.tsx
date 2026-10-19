@@ -2,6 +2,8 @@
 
 import dynamic from "next/dynamic";
 import { Suspense, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { whenIdle } from "@/lib/idle";
+import { loadFoodRows } from "@/lib/food-rows";
 import Link from "next/link";
 import { createPortal } from "react-dom";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -279,6 +281,12 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
     } catch {
       // Storage unavailable
     }
+  }, [backdrop]);
+
+  // cc-67: the add sheet's one-row-per-food index is a chunk of its own: fetched when Hôm nay is idle, so /add has it at once
+  useEffect(() => {
+    if (backdrop) return;
+    return whenIdle(() => void loadFoodRows());
   }, [backdrop]);
 
   const entries = useMemo(() => {

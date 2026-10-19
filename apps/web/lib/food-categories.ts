@@ -1,6 +1,7 @@
 import type { FoodItem } from "./mock/foods";
 import { resolveFavourites } from "./favourites";
 import { searchFoods } from "./search";
+import { searchRows } from "./food-rows";
 
 /** Web-side only for now. Dong adds a `category` column to foods with the same keys (see OPEN_QUESTIONS). */
 export type FoodCategory =
@@ -107,13 +108,15 @@ export function chipCategories(foods: FoodItem[]): FoodCategoryDef[] {
  * Favourites are a flat list in saved order, ranked by the search when there is a query.
  * Grouped only for Tất cả with no query.
  */
-export function buildFoodList(foods: FoodItem[], query: string, filter: FoodFilter, favouriteIds: string[] = []): FoodList {
+export function buildFoodList(foods: FoodItem[], query: string, filter: FoodFilter, favouriteIds: string[] = [], oneRowPerFood = true): FoodList {
+  // cc-67: raw and cooked twins are one row unless the caller picks a state itself (the recipe's ingredient picker)
+  const find = oneRowPerFood ? searchRows : searchFoods;
   if (filter === "favorite") {
-    return { grouped: false, foods: searchFoods(resolveFavourites(favouriteIds, foods), query), groups: [] };
+    return { grouped: false, foods: find(resolveFavourites(favouriteIds, foods), query), groups: [] };
   }
   const category = isCategoryFilter(filter) ? filter : null;
   const scope = category ? foods.filter((f) => categoryOf(f) === category) : foods;
-  const ranked = searchFoods(scope, query);
+  const ranked = find(scope, query);
   const grouped = !query.trim() && !category;
   return { grouped, foods: ranked, groups: grouped ? groupFoodsByCategory(ranked) : [] };
 }

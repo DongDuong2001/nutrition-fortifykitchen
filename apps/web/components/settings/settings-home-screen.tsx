@@ -27,7 +27,7 @@ function ProfileHero() {
     >
       <span className="flex items-start justify-between gap-3">
         <span className="flex min-w-0 flex-col gap-1">
-          <span className="text-base font-bold">{profileTitle(profile)}</span>
+          <span className="break-words text-base font-bold">{profileTitle(profile)}</span>
           <span className="text-[13px] leading-snug text-muted-subtitle">{profileSummary(profile)}</span>
         </span>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="mt-1 shrink-0 text-muted-subtitle" aria-hidden="true">

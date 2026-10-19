@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { apiClient, getPendingOfflineEntryIds, hasPendingWrite, loadSyncEngine, pendingFavouriteOps, resetWriteMemory, syncOfflineOutbox } from "../api-client";
+import { apiClient, getPendingOfflineEntryIds, hasPendingWrite, loadSyncEngine, pendingFavouriteOps, repointOutboxFood, resetWriteMemory, syncOfflineOutbox } from "../api-client";
 import { resetIdb } from "../idb";
 import { STALE_SENDING_MS, countItems, loadOutbox, putItem, readItems, resetOutboxState, scopeFor } from "../outbox";
 import { getSyncAlerts, resetSyncAlerts } from "../sync-state";
@@ -400,6 +400,52 @@ describe("cc-68 Part 2: a write for yesterday", () => {
     expect((await syncOfflineOutbox({ force: true })).saved).toEqual([ID]);
     expect(calls).toEqual(["POST /days/2026-10-18/entries"]);
   });
+
+  // cc-67 + cc-68: the one-off food of an edited dish is a recipe the server has no row for yet, and a fruit by grams is an
+  // ordinary entry. Both go through the IndexedDB outbox, for yesterday as for today.
+  it("an edited dish added to yesterday stays on the device until its server food exists (nothing half-sent), then goes to yesterday's list through the outbox", async () => {
+    const ONE_OFF = "recipe-phobo-da-chinh";
+    const { calls, bodies } = server({ "POST /days/2026-10-18/entries": [503, 201] });
+    const first = await apiClient.addEntry({ id: ID, foodId: ONE_OFF, grams: 520, mealSlot: "dinner", date: "2026-10-18" });
+    expect(first.state).toBe("local");
+    expect(calls).toEqual([]);
+    expect(idb.values("outbox")).toEqual([]);
+    // The recipe has its server food: the diary sends the entry again with it. The server is down first: it waits on disk
+    expect((await apiClient.addEntry({ id: ID, foodId: FOOD, grams: 520, mealSlot: "dinner", date: "2026-10-18" })).state).toBe("queued");
+    expect(idb.values("outbox")).toHaveLength(1);
+    killPage();
+    await loadSyncEngine();
+    await loadOutbox(scope);
+    expect(readItems(scope)).toMatchObject([{ id: ID, date: "2026-10-18", state: "queued" }]);
+    expect((await syncOfflineOutbox({ force: true })).saved).toEqual([ID]);
+    expect(calls).toEqual(["POST /days/2026-10-18/entries", "POST /days/2026-10-18/entries"]);
+    expect(bodies["POST /days/2026-10-18/entries"][1]).toMatchObject({ id: ID, food_id: FOOD, grams: 520 });
+    expect(idb.values("outbox")).toEqual([]);
+  });
+
+  it("a write queued under a recipe's local id (before its server food) is held back, pointed at the server food, and sent for its own day", async () => {
+    const ONE_OFF = "recipe-phobo-da-chinh";
+    const { calls, bodies } = server({ "POST /days/2026-10-18/entries": [201] });
+    await putItem(scope, { key: "k1", seq: 1, id: ID, date: "2026-10-18", payload: { id: ID, kind: "food", meal_slot: "dinner", food_id: ONE_OFF, grams: 520 }, createdAt: Date.now(), state: "queued" });
+    expect((await syncOfflineOutbox({ retryHeld: true })).saved).toEqual([]);
+    expect(calls).toEqual([]);
+    repointOutboxFood(ONE_OFF, FOOD, ACCOUNT);
+    expect((await syncOfflineOutbox({ force: true })).saved).toEqual([ID]);
+    expect(bodies["POST /days/2026-10-18/entries"][0]).toMatchObject({ food_id: FOOD, grams: 520 });
+    expect(idb.values("outbox")).toEqual([]);
+  });
+
+  it("a fruit logged by grams can be changed and deleted on yesterday: the grams travel with the edit, the delete queues behind an unsent add", async () => {
+    server({ "POST /days/2026-10-18/entries": [503] });
+    await apiClient.addEntry({ id: ID, foodId: FOOD, grams: 120, mealSlot: "snack", date: "2026-10-18", servingLabel: "120 g" });
+    const { calls, bodies } = server({ "POST /days/2026-10-18/entries": [201], [`PATCH /entries/${ID}`]: [200], [`DELETE /entries/${ID}`]: [204] });
+    expect((await apiClient.updateEntry(ID, { grams: 150, serving_label: "150 g" }, "2026-10-18")).state).toBe("queued");
+    expect((await apiClient.deleteEntry(ID, "2026-10-18")).state).toBe("queued");
+    await syncOfflineOutbox({ force: true });
+    expect(calls).toEqual(["POST /days/2026-10-18/entries", `PATCH /entries/${ID}`, `DELETE /entries/${ID}`]);
+    expect(bodies[`PATCH /entries/${ID}`][0]).toMatchObject({ grams: 150 });
+    expect(idb.values("outbox")).toEqual([]);
+  });
 });
 
 describe("countItems", () => {
@@ -408,8 +454,8 @@ describe("countItems", () => {
     const counts = countItems([
       { ...base, key: "a", createdAt: 500 },
       { ...base, key: "b", createdAt: 100, state: "sending" },
-      { ...base, key: "c", createdAt: 50, held: { status: 400, message: "" } },
-      { ...base, key: "d", createdAt: 60, held: { status: 409, message: "", final: true } },
+      { ...base, key: "c", createdAt: 50, held: { status: 400 } },
+      { ...base, key: "d", createdAt: 60, held: { status: 409, final: true } },
       { ...base, key: "e", createdAt: 70, parked: true },
     ]);
     expect(counts).toEqual({ pending: 2, failed: 3, final: 1, parked: 1, oldestPendingAt: 100 });

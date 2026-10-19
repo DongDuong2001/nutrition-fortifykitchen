@@ -1,7 +1,8 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { FULL_DISHES, SLIM_DISHES, slimText } from "../../scripts/slim-dishes.mjs";
-import { addOnEntries, dishViewOf, foodsByKey, isDishFood, keysOfFood, scaledAddOn, scaledPart, servingsOf, type DishRecipes } from "../dish-recipes";
+import { canEditParts, dishViewOf, editParts, editTotals, foodsByKey, isDishFood, isEdited, keysOfFood, partGrams, scaledAddOn, scaledPart, servingsOf, type DishRecipes } from "../dish-recipes";
+import { calculateMacroPreview } from "../portion";
 import { DISH_DEMO_FOODS } from "../mock/dish-demo-foods";
 import { MOCK_FOODS, type FoodItem } from "../mock/foods";
 
@@ -88,25 +89,77 @@ describe("scaling to the chosen portion", () => {
   });
 });
 
-describe("logging the add-ons with the dish", () => {
+describe("changing the parts for one meal (cc-67)", () => {
   const view = dishViewOf(phoBo, recipes, foodsByKey(withDemo));
   if (!view) throw new Error("no Phở bò view");
+  const BANH = view.parts[0].key;
+  const THIT_BO = "+ Thịt bò";
+  const kcalOfTotals = (t: { grams: number; per100: Record<string, number | null> }) => calculateMacroPreview(t.per100, t.grams).calories;
+  const recipeKcal = view.parts.reduce((sum, p) => sum + (scaledPart(p, 1).kcal ?? 0), 0);
 
-  it("each active add-on is its own entry: that ingredient food, its grams times the servings, in chip order", () => {
-    const entries = addOnEntries(view.addOns, new Set(["+ Nạm", "+ Bánh phở"]), 1);
-    expect(entries.map((e) => [e.food.nameVi, e.grams, e.label])).toEqual([
-      ["Bánh phở (tươi)", 100, "100 g"],
-      ["Nạm bò (chín)", 30, "30 g"],
-    ]);
+  it("starts as the recipe: nothing is changed, the grams are the recipe's for one serving", () => {
+    const parts = editParts(view, {}, []);
+    expect(parts.map((p) => p.perServing)).toEqual(view.parts.map((p) => p.grams));
+    expect(isEdited(parts)).toBe(false);
+    expect(canEditParts(parts)).toBe(true);
+    expect(editTotals(parts, 1).grams).toBe(view.servingGrams);
   });
 
-  it("follows the portion: ×2 doubles the grams, half a bowl halves them", () => {
-    expect(addOnEntries(view.addOns, new Set(["+ Thịt bò"]), 2)[0].grams).toBe(100);
-    expect(addOnEntries(view.addOns, new Set(["+ Thịt bò"]), 0.5)[0].grams).toBe(25);
+  it("scaling: a part's grams follow the portion, typed ones too (the portion ×2 doubles a part set to 150 g)", () => {
+    const typed = { [BANH]: 150 };
+    const parts = editParts(view, typed, []);
+    expect(partGrams(parts[0], 1)).toBe(150);
+    expect(partGrams(parts[0], 2)).toBe(300);
+    expect(partGrams(parts[0], 0.5)).toBe(75);
+    expect(editTotals(parts, 2).grams).toBe((view.servingGrams - 50) * 2);
   });
 
-  it("nothing when no chip is on, or the portion is not positive", () => {
-    expect(addOnEntries(view.addOns, new Set(), 1)).toEqual([]);
-    expect(addOnEntries(view.addOns, new Set(["+ Bánh phở"]), 0)).toEqual([]);
+  it("the dish adds up from its parts: Bánh phở 200 → 150 g takes 54 kcal (108 per 100 g) and 50 g off the total", () => {
+    const before = editTotals(editParts(view, {}, []), 1);
+    const after = editTotals(editParts(view, { [BANH]: 150 }, []), 1);
+    expect(before.grams).toBe(600);
+    expect(after.grams).toBe(550);
+    expect(kcalOfTotals(before)).toBe(Math.round(recipeKcal));
+    expect(kcalOfTotals(after)).toBe(Math.round(recipeKcal - 54));
+    expect(isEdited(editParts(view, { [BANH]: 150 }, []))).toBe(true);
+    // Typing the grams that were there is no change
+    expect(isEdited(editParts(view, { [BANH]: 200 }, []))).toBe(false);
+  });
+
+  it("an add-on is a part of this list: its food, its grams for one serving, after the recipe's parts", () => {
+    const parts = editParts(view, {}, [THIT_BO]);
+    expect(parts).toHaveLength(view.parts.length + 1);
+    const added = parts[parts.length - 1];
+    expect(added).toMatchObject({ name: view.addOns[1].food.nameVi, perServing: 50, base: 0, added: true });
+    expect(isEdited(parts)).toBe(true);
+    expect(editTotals(parts, 1).grams).toBe(650);
+    expect(editTotals(parts, 2).grams).toBe(1300);
+    // The chip off takes it out again
+    expect(isEdited(editParts(view, {}, []))).toBe(false);
+  });
+
+  it("a part set to 0 is out of the totals but stays a row (to put it back)", () => {
+    const parts = editParts(view, { [BANH]: 0 }, []);
+    expect(parts).toHaveLength(view.parts.length);
+    expect(partGrams(parts[0], 1)).toBe(0);
+    expect(editTotals(parts, 1).grams).toBe(400);
+    expect(editTotals(parts, 1).ingredients.some((i) => i.foodId === view.parts[0].food?.id)).toBe(false);
+    expect(isEdited(parts)).toBe(true);
+  });
+
+  it("Khôi phục is the recipe again: no typed grams, no add-ons", () => {
+    expect(isEdited(editParts(view, {}, []))).toBe(false);
+    expect(editTotals(editParts(view, {}, []), 1)).toEqual(editTotals(editParts(view, {}, []), 1));
+  });
+
+  it("a dish with a part the catalogue lacks is shown, not changed (its numbers cannot be added up)", () => {
+    const bare = dishViewOf(phoBo, recipes, foodsByKey(MOCK_FOODS));
+    expect(bare && canEditParts(editParts(bare, {}, []))).toBe(false);
+  });
+
+  it("the numbers per 100 g keep a nutrient unknown when any part lacks it", () => {
+    const parts = editParts(view, {}, []).map((p, i) => (i === 0 && p.food ? { ...p, food: { ...p.food, nutrients: { ...p.food.nutrients, potassium: null } } } : p));
+    expect(editTotals(parts, 1).per100.potassium).toBeNull();
+    expect(typeof editTotals(parts, 1).per100.energy).toBe("number");
   });
 });
