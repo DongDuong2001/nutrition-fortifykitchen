@@ -82,6 +82,10 @@ func (d *mockDiaryService) GetDay(ctx context.Context, userID uuid.UUID, date st
 	return nil, nil
 }
 
+func (d *mockDiaryService) GetDaysRange(ctx context.Context, userID uuid.UUID, fromDate, toDate string) ([]*diary.DaySummaryResponse, error) {
+	return nil, nil
+}
+
 func (d *mockDiaryService) CreateEntry(ctx context.Context, userID uuid.UUID, date string, req diary.CreateEntryRequest) (*diary.DiaryEntryItem, map[string]*float64, error) {
 	item := &diary.DiaryEntryItem{
 		ID:           req.ID,
