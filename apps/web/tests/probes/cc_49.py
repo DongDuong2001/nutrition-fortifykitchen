@@ -360,13 +360,14 @@ with sync_playwright() as p:
         close_tips(pg)
         retry = pg.get_by_role("button", name="Thử lại", exact=True).locator("visible=true")
         check(retry.count() >= 1, "4: the toast offers Thử lại")
-        # cc-50: the refusal is reported once, with the server's message and the app version
+        # cc-50: the refusal is reported once, with the status, the error code (none in this body) and the app version. cc-68: the write is
+        # committed to the outbox first and answered after the page went back to Hôm nay, so the route is /app, not /add
         writes = [r for r in st["reports"] if r.get("kind") == "write"]
         check(
             len(writes) == 1 and writes[0].get("status") == 400 and writes[0].get("message") == ""
-            and writes[0].get("path") == f"/days/{TODAY}/entries" and writes[0].get("route") == "/add"
+            and writes[0].get("path") == f"/days/{TODAY}/entries" and writes[0].get("route") == "/app"
             and re.fullmatch(r"\d{4}-\d{2}-\d{2}\.\d+", writes[0].get("version", "")) is not None,
-            f"4: one client error report: write 400 (its status and error code only: the scripted body has none), /days/…/entries, route /add (where it was added), app version ({writes})",
+            f"4: one client error report: write 400 (its status and error code only: the scripted body has none), /days/…/entries, route /app (the page when the answer came, after the add sheet closed), app version ({writes})",
         )
         if retry.count():
             retry.first.click()
