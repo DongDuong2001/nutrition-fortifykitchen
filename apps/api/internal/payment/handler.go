@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"nutrition-api/internal/logger"
 	"nutrition-api/pkg/response"
 )
 
@@ -19,7 +20,7 @@ func NewHandler(service Service) *Handler {
 func (h *Handler) HandleWebhook(w http.ResponseWriter, r *http.Request) {
 	var payload PayOSWebhookPayload
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		response.Error(w, http.StatusBadRequest, "invalid request body: "+err.Error())
+		response.Error(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
 
@@ -29,7 +30,8 @@ func (h *Handler) HandleWebhook(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.service.ProcessPaymentWebhook(r.Context(), payload); err != nil {
-		response.Error(w, http.StatusInternalServerError, "failed to process payment: "+err.Error())
+		logger.Log.Error().Err(err).Int64("order_code", payload.Data.OrderCode).Msg("failed to process payment webhook")
+		response.Error(w, http.StatusInternalServerError, "Failed to process payment")
 		return
 	}
 

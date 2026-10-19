@@ -9,7 +9,8 @@ import (
 )
 
 var (
-	ErrSavedMealNotFound = errors.New("saved meal not found")
+	ErrSavedMealNotFound     = errors.New("saved meal not found")
+	ErrSavedMealNameRequired = errors.New("saved meal name is required")
 )
 
 type Service interface {
@@ -76,7 +77,7 @@ func (s *libraryServiceImpl) GetSavedMealByID(ctx context.Context, userID uuid.U
 
 func (s *libraryServiceImpl) CreateSavedMeal(ctx context.Context, userID uuid.UUID, req CreateSavedMealRequest) (*SavedMeal, error) {
 	if req.Name == "" {
-		return nil, errors.New("saved meal name is required")
+		return nil, ErrSavedMealNameRequired
 	}
 	for i := range req.Items {
 		if req.Items[i].Grams <= 0 && req.Items[i].ServingSizeG > 0 {

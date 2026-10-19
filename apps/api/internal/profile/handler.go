@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"nutrition-api/internal/auth"
+	"nutrition-api/internal/logger"
 	"nutrition-api/internal/validator"
 	"nutrition-api/pkg/response"
 )
@@ -17,6 +18,24 @@ type Handler struct {
 
 func NewHandler(service Service) *Handler {
 	return &Handler{service: service}
+}
+
+// isProfileValidationError reports whether err is one of the service's own
+// validation sentinels, whose messages are safe to show to the client.
+func isProfileValidationError(err error) bool {
+	for _, target := range []error{
+		ErrInvalidSex,
+		ErrInvalidGoal,
+		ErrInvalidWeight,
+		ErrInvalidBirthYear,
+		ErrInvalidDisplayName,
+		ErrInvalidTrainingMinutes,
+	} {
+		if errors.Is(err, target) {
+			return true
+		}
+	}
+	return false
 }
 
 // GetMe handles GET /api/v1/me
@@ -33,7 +52,8 @@ func (h *Handler) GetMe(w http.ResponseWriter, r *http.Request) {
 			response.Error(w, http.StatusNotFound, response.CodeProfileMissing, "profile not yet completed")
 			return
 		}
-		response.Error(w, http.StatusInternalServerError, response.CodeInternalServerError, err.Error())
+		logger.Log.Error().Err(err).Str("user_id", userID.String()).Msg("failed to load profile")
+		response.Error(w, http.StatusInternalServerError, response.CodeInternalServerError, "Failed to load profile")
 		return
 	}
 
@@ -66,7 +86,12 @@ func (h *Handler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 
 	p, err := h.service.UpsertProfile(r.Context(), userID, req)
 	if err != nil {
-		response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, err.Error())
+		if isProfileValidationError(err) {
+			response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, err.Error())
+			return
+		}
+		logger.Log.Error().Err(err).Str("user_id", userID.String()).Msg("failed to save profile")
+		response.Error(w, http.StatusInternalServerError, response.CodeInternalServerError, "Failed to save profile")
 		return
 	}
 
@@ -86,7 +111,8 @@ func (h *Handler) GetWeightLogs(w http.ResponseWriter, r *http.Request) {
 
 	logs, err := h.service.GetWeightLogs(r.Context(), userID, from, to)
 	if err != nil {
-		response.Error(w, http.StatusInternalServerError, response.CodeInternalServerError, err.Error())
+		logger.Log.Error().Err(err).Str("user_id", userID.String()).Str("from", from).Str("to", to).Msg("failed to load weight logs")
+		response.Error(w, http.StatusInternalServerError, response.CodeInternalServerError, "Failed to load weight logs")
 		return
 	}
 
@@ -120,7 +146,12 @@ func (h *Handler) UpsertWeight(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.service.UpsertWeight(r.Context(), userID, logDate, req.WeightKg); err != nil {
-		response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, err.Error())
+		if isProfileValidationError(err) {
+			response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, err.Error())
+			return
+		}
+		logger.Log.Error().Err(err).Str("user_id", userID.String()).Str("date", logDate).Msg("failed to save weight")
+		response.Error(w, http.StatusInternalServerError, response.CodeInternalServerError, "Failed to save weight")
 		return
 	}
 
@@ -139,7 +170,8 @@ func (h *Handler) DeleteMe(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.service.DeleteAccount(r.Context(), userID); err != nil {
-		response.Error(w, http.StatusInternalServerError, response.CodeInternalServerError, err.Error())
+		logger.Log.Error().Err(err).Str("user_id", userID.String()).Msg("failed to delete account")
+		response.Error(w, http.StatusInternalServerError, response.CodeInternalServerError, "Failed to delete account")
 		return
 	}
 
