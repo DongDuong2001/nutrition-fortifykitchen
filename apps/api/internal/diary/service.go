@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"time"
 
 	"github.com/google/uuid"
 	"nutrition-api/internal/targets"
@@ -12,8 +13,9 @@ import (
 
 var (
 	ErrEntryNotFound          = errors.New("diary entry not found")
-	ErrRestoreWindowExpired  = errors.New("restore window expired (must be within 10 seconds)")
+	ErrRestoreWindowExpired   = errors.New("restore window expired (must be within 10 seconds)")
 	ErrInvalidTrainingMinutes = errors.New("training_minutes must be one of: 0, 45, 60, 90, 120, 240")
+	ErrFoodIDRequired         = errors.New("food_id is required for food entry")
 )
 
 type RecentsTracker interface {
@@ -22,6 +24,7 @@ type RecentsTracker interface {
 
 type Service interface {
 	GetDay(ctx context.Context, userID uuid.UUID, date string) (*DaySummaryResponse, error)
+	GetDaysRange(ctx context.Context, userID uuid.UUID, fromDate, toDate string) ([]*DaySummaryResponse, error)
 	CreateEntry(ctx context.Context, userID uuid.UUID, date string, req CreateEntryRequest) (*DiaryEntryItem, map[string]*float64, error)
 	UpdateEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID, req UpdateEntryRequest) (*DiaryEntryItem, map[string]*float64, error)
 	RestoreEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) (*DiaryEntryItem, map[string]*float64, error)
@@ -120,7 +123,7 @@ func (s *diaryServiceImpl) GetDay(ctx context.Context, userID uuid.UUID, date st
 		effectiveMinutes = defTraining
 	}
 
-	isReadOnly := date < GetServerToday()
+	isReadOnly := date < GetServerYesterday()
 
 	// Organize entries by meal slot
 	meals := make([]MealSlotSummary, len(mealSlotOrder))
@@ -187,6 +190,17 @@ func (s *diaryServiceImpl) GetDay(ctx context.Context, userID uuid.UUID, date st
 }
 
 func (s *diaryServiceImpl) CreateEntry(ctx context.Context, userID uuid.UUID, date string, req CreateEntryRequest) (*DiaryEntryItem, map[string]*float64, error) {
+	if req.ID != uuid.Nil {
+		if existing, _, err := s.repo.GetEntryByID(ctx, userID, req.ID); err == nil && existing != nil {
+			dayEntries, err := s.repo.GetDayEntries(ctx, userID, date)
+			if err != nil {
+				return nil, nil, err
+			}
+			totals := computeDayTotals(dayEntries)
+			return existing, totals, nil
+		}
+	}
+
 	if err := ValidateDateWritable(date); err != nil {
 		return nil, nil, err
 	}
@@ -220,7 +234,7 @@ func (s *diaryServiceImpl) CreateEntry(ctx context.Context, userID uuid.UUID, da
 		item.Nutrients = nil
 	} else {
 		if req.FoodID == nil {
-			return nil, nil, errors.New("food_id is required for food entry")
+			return nil, nil, ErrFoodIDRequired
 		}
 		item.FoodID = req.FoodID
 		if req.Grams <= 0 {
@@ -336,25 +350,26 @@ func (s *diaryServiceImpl) UpdateEntry(ctx context.Context, userID uuid.UUID, en
 			existing.Grams = *gramsVal
 			if existing.FoodID != nil {
 				_, per100g, err := s.repo.GetFoodNutrients(ctx, *existing.FoodID)
-				if err == nil {
-					ratio := *gramsVal / 100.0
-					scaledNutrients := make(map[string]*float64)
-					for k, v := range per100g {
-						if v != nil {
-							scaled := round2(*v * ratio)
-							scaledNutrients[k] = &scaled
-						} else {
-							scaledNutrients[k] = nil
-						}
-					}
-					existing.Nutrients = scaledNutrients
-					if cal, ok := scaledNutrients["calories"]; ok && cal != nil {
-						existing.Calories = cal
-					} else if energy, ok := scaledNutrients["energy"]; ok && energy != nil {
-						existing.Calories = energy
+				if err != nil {
+					return nil, nil, fmt.Errorf("failed to load food nutrients: %w", err)
+				}
+				ratio := *gramsVal / 100.0
+				scaledNutrients := make(map[string]*float64)
+				for k, v := range per100g {
+					if v != nil {
+						scaled := round2(*v * ratio)
+						scaledNutrients[k] = &scaled
 					} else {
-						existing.Calories = nil
+						scaledNutrients[k] = nil
 					}
+				}
+				existing.Nutrients = scaledNutrients
+				if cal, ok := scaledNutrients["calories"]; ok && cal != nil {
+					existing.Calories = cal
+				} else if energy, ok := scaledNutrients["energy"]; ok && energy != nil {
+					existing.Calories = energy
+				} else {
+					existing.Calories = nil
 				}
 			}
 		}
@@ -467,4 +482,124 @@ func (s *diaryServiceImpl) SetTraining(ctx context.Context, userID uuid.UUID, da
 		Date:            date,
 		TrainingMinutes: minutes,
 	}, nil
+}
+
+func (s *diaryServiceImpl) GetDaysRange(ctx context.Context, userID uuid.UUID, fromDate, toDate string) ([]*DaySummaryResponse, error) {
+	fromT, err := time.Parse("2006-01-02", fromDate)
+	if err != nil {
+		return nil, ErrInvalidDateFormat
+	}
+	toT, err := time.Parse("2006-01-02", toDate)
+	if err != nil {
+		return nil, ErrInvalidDateFormat
+	}
+	if fromT.After(toT) {
+		return nil, errors.New("fromDate must be before or equal to toDate")
+	}
+
+	// Clamp max range to 100 days to prevent excessive memory/query load
+	if toT.Sub(fromT) > 100*24*time.Hour {
+		return nil, errors.New("date range exceeds maximum of 100 days")
+	}
+
+	rangeEntries, err := s.repo.GetRangeEntries(ctx, userID, fromDate, toDate)
+	if err != nil {
+		return nil, err
+	}
+
+	rangeTraining, err := s.repo.GetRangeTraining(ctx, userID, fromDate, toDate)
+	if err != nil {
+		return nil, err
+	}
+
+	defTraining := 60
+	if dt, defErr := s.repo.GetUserDefaultTraining(ctx, userID); defErr == nil && dt >= 0 {
+		defTraining = dt
+	}
+
+	userSex, userWeight, userGoal, _, userIsPeriod, profileErr := s.repo.GetUserProfile(ctx, userID)
+
+	yesterday := GetServerYesterday()
+
+	var days []*DaySummaryResponse
+	for cur := fromT; !cur.After(toT); cur = cur.AddDate(0, 0, 1) {
+		dateStr := cur.Format("2006-01-02")
+		entries := rangeEntries[dateStr]
+		if entries == nil {
+			entries = []DiaryEntryItem{}
+		}
+
+		var trainingMinutes *int
+		effectiveMinutes := defTraining
+		if m, ok := rangeTraining[dateStr]; ok && m >= 0 {
+			trainingMinutes = &m
+			effectiveMinutes = m
+		}
+
+		isReadOnly := dateStr < yesterday
+
+		meals := make([]MealSlotSummary, len(mealSlotOrder))
+		for i, slotDef := range mealSlotOrder {
+			meals[i] = MealSlotSummary{
+				Slot:      slotDef.slot,
+				NameVi:    slotDef.nameVi,
+				TotalKcal: 0,
+				Entries:   []DiaryEntryItem{},
+			}
+		}
+
+		for _, e := range entries {
+			slot := e.MealSlot
+			if slot == "preworkout" {
+				slot = "pre_workout"
+			}
+			for i := range meals {
+				if meals[i].Slot == slot {
+					meals[i].Entries = append(meals[i].Entries, e)
+					if e.Calories != nil {
+						meals[i].TotalKcal = round2(meals[i].TotalKcal + *e.Calories)
+					}
+					break
+				}
+			}
+		}
+
+		dayTotals := computeDayTotals(entries)
+
+		var dayTargets any
+		if profileErr == nil {
+			t := targets.CalculateTargets(targets.UserProfileForTargets{
+				Sex:             userSex,
+				WeightKg:        userWeight,
+				Goal:            userGoal,
+				TrainingMinutes: effectiveMinutes,
+				IsPeriod:        userIsPeriod,
+			})
+			dayTargets = t
+
+			for i := range meals {
+				switch meals[i].Slot {
+				case "breakfast":
+					meals[i].TargetMinKcal = round2(t.Calories.Min * 0.25)
+				case "lunch":
+					meals[i].TargetMinKcal = round2(t.Calories.Min * 0.35)
+				case "dinner":
+					meals[i].TargetMinKcal = round2(t.Calories.Min * 0.30)
+				case "snack", "pre_workout":
+					meals[i].TargetMinKcal = round2(t.Calories.Min * 0.10)
+				}
+			}
+		}
+
+		days = append(days, &DaySummaryResponse{
+			Date:            dateStr,
+			TrainingMinutes: trainingMinutes,
+			IsReadOnly:      isReadOnly,
+			Summary:         dayTotals,
+			Targets:         dayTargets,
+			Meals:           meals,
+		})
+	}
+
+	return days, nil
 }

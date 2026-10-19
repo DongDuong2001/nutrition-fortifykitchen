@@ -127,6 +127,24 @@ func (m *mockDiaryRepo) UpsertDayTraining(ctx context.Context, userID uuid.UUID,
 	return nil
 }
 
+func (m *mockDiaryRepo) GetRangeEntries(ctx context.Context, userID uuid.UUID, fromDate, toDate string) (map[string][]DiaryEntryItem, error) {
+	out := make(map[string][]DiaryEntryItem)
+	for _, e := range m.entries {
+		out[fromDate] = append(out[fromDate], *e)
+	}
+	return out, nil
+}
+
+func (m *mockDiaryRepo) GetRangeTraining(ctx context.Context, userID uuid.UUID, fromDate, toDate string) (map[string]int, error) {
+	out := make(map[string]int)
+	for d, v := range m.training {
+		if d >= fromDate && d <= toDate {
+			out[d] = v
+		}
+	}
+	return out, nil
+}
+
 func TestDiaryService_PastDayReadOnly(t *testing.T) {
 	repo := newMockDiaryRepo()
 	svc := NewService(repo)
@@ -359,5 +377,93 @@ func TestDiaryService_GetDay_TrainingMinutesNullable(t *testing.T) {
 	_, err = svc.SetTraining(context.Background(), userID, today, 30)
 	if !errors.Is(err, ErrInvalidTrainingMinutes) {
 		t.Errorf("expected ErrInvalidTrainingMinutes for 30 min, got %v", err)
+	}
+}
+
+func TestDiaryService_YesterdayIsWritable(t *testing.T) {
+	repo := newMockDiaryRepo()
+	svc := NewService(repo)
+
+	userID := uuid.New()
+	yesterday := GetServerYesterday()
+	foodID := uuid.New()
+
+	item, _, err := svc.CreateEntry(context.Background(), userID, yesterday, CreateEntryRequest{
+		Kind:         "food",
+		FoodID:       &foodID,
+		MealSlot:     "lunch",
+		Grams:        100,
+		ServingLabel: "100 g",
+	})
+	if err != nil {
+		t.Fatalf("yesterday should be writable, got: %v", err)
+	}
+	if item == nil {
+		t.Fatalf("expected created entry item, got nil")
+	}
+
+	day, err := svc.GetDay(context.Background(), userID, yesterday)
+	if err != nil {
+		t.Fatalf("failed to get day: %v", err)
+	}
+	if day.IsReadOnly {
+		t.Errorf("yesterday must not be read-only")
+	}
+}
+
+func TestDiaryService_CreateEntry_IdempotencyOnRetry(t *testing.T) {
+	repo := newMockDiaryRepo()
+	svc := NewService(repo)
+
+	userID := uuid.New()
+	twoDaysAgo := "2020-01-01"
+	foodID := uuid.New()
+	existingID := uuid.New()
+
+	// Pre-populate an existing entry
+	existingItem := &DiaryEntryItem{
+		ID:           existingID,
+		Kind:         "food",
+		FoodID:       &foodID,
+		MealSlot:     "breakfast",
+		ServingLabel: "100 g",
+		Grams:        100,
+	}
+	repo.entries[existingID] = existingItem
+
+	// Client retries an existing ID on a past (read-only) date
+	item, _, err := svc.CreateEntry(context.Background(), userID, twoDaysAgo, CreateEntryRequest{
+		ID:           existingID,
+		Kind:         "food",
+		FoodID:       &foodID,
+		MealSlot:     "breakfast",
+		Grams:        100,
+		ServingLabel: "100 g",
+	})
+	if err != nil {
+		t.Fatalf("retry with existing ID should succeed idempotently, got: %v", err)
+	}
+	if item.ID != existingID {
+		t.Errorf("expected item ID %s, got %s", existingID, item.ID)
+	}
+}
+
+func TestDiaryService_GetDaysRange(t *testing.T) {
+	repo := newMockDiaryRepo()
+	svc := NewService(repo)
+
+	userID := uuid.New()
+	from := "2026-10-15"
+	to := "2026-10-18"
+
+	days, err := svc.GetDaysRange(context.Background(), userID, from, to)
+	if err != nil {
+		t.Fatalf("GetDaysRange failed: %v", err)
+	}
+	if len(days) != 4 {
+		t.Fatalf("expected 4 days in range, got %d", len(days))
+	}
+	if days[0].Date != "2026-10-15" || days[3].Date != "2026-10-18" {
+		t.Errorf("unexpected date range: got %s to %s", days[0].Date, days[3].Date)
 	}
 }
