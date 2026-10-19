@@ -29,6 +29,32 @@ type FoodDetail struct {
 	CreatedAt        time.Time               `json:"created_at"`
 }
 
+const (
+	// DefaultFoodsLimit is the page size when the caller sends none.
+	DefaultFoodsLimit = 20
+	// MaxSearchLimit is the most rows one search (a request with q) returns.
+	MaxSearchLimit = 500
+	// MaxCatalogueLimit is the most rows one request without q returns, so a client can download the whole catalogue
+	// in a few big pages instead of dozens of small ones.
+	MaxCatalogueLimit = 5000
+)
+
+// ClampFoodsLimit is the page size actually used for a GET /foods call: 20 when none (or a bad one) was sent, at
+// most MaxSearchLimit when there is a search query, at most MaxCatalogueLimit when there is none.
+func ClampFoodsLimit(query string, limit int) int {
+	if limit <= 0 {
+		return DefaultFoodsLimit
+	}
+	ceiling := MaxSearchLimit
+	if query == "" {
+		ceiling = MaxCatalogueLimit
+	}
+	if limit > ceiling {
+		return ceiling
+	}
+	return limit
+}
+
 type FoodSearchFilter struct {
 	Query    string
 	Category string

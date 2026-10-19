@@ -524,6 +524,12 @@ paths:
   /foods:
     get:
       summary: Search and browse food catalog
+      description: >-
+        Paged with page and limit. A request with q returns at most 500 rows; a request without q (browsing, or
+        downloading the whole catalogue) returns at most 5000 rows. A larger limit is cut to that cap, and the
+        response's limit field says what was used; an API from before this change cuts to 500 either way, so a client
+        asking for 5000 checks the echoed limit. total is the size of the filtered catalogue, so the client fetches
+        ceil(total / limit) pages.
       parameters:
         - name: q
           in: query
@@ -540,9 +546,11 @@ paths:
             default: 1
         - name: limit
           in: query
+          description: Page size. Default 20; maximum 500 with q, 5000 without q.
           schema:
             type: integer
             default: 20
+            maximum: 5000
       responses:
         '200':
           description: List of matching food items

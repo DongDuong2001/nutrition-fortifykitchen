@@ -27,11 +27,7 @@ func (h *Handler) SearchFoods(w http.ResponseWriter, r *http.Request) {
 	category := r.URL.Query().Get("category")
 	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
 	limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
-	if limit <= 0 {
-		limit = 20
-	} else if limit > 500 {
-		limit = 500
-	}
+	limit = ClampFoodsLimit(q, limit)
 	if page <= 0 {
 		page = 1
 	}
