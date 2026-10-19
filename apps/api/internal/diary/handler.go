@@ -19,6 +19,36 @@ func NewHandler(service Service) *Handler {
 	return &Handler{service: service}
 }
 
+// GetDays handles GET /api/v1/days?from=YYYY-MM-DD&to=YYYY-MM-DD
+func (h *Handler) GetDays(w http.ResponseWriter, r *http.Request) {
+	userID, err := auth.GetUserID(r.Context())
+	if err != nil {
+		response.Error(w, http.StatusUnauthorized, response.CodeUnauthorized, "Sign in required")
+		return
+	}
+
+	from := r.URL.Query().Get("from")
+	to := r.URL.Query().Get("to")
+	if from == "" || to == "" {
+		response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, "from and to parameters are required")
+		return
+	}
+
+	days, err := h.service.GetDaysRange(r.Context(), userID, from, to)
+	if err != nil {
+		if errors.Is(err, ErrInvalidDateFormat) {
+			response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, "Invalid date format, expected YYYY-MM-DD")
+			return
+		}
+		response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, err.Error())
+		return
+	}
+
+	response.JSON(w, http.StatusOK, map[string]any{
+		"days": days,
+	})
+}
+
 // GetDay handles GET /api/v1/days/{date}
 func (h *Handler) GetDay(w http.ResponseWriter, r *http.Request) {
 	userID, err := auth.GetUserID(r.Context())
@@ -66,7 +96,11 @@ func (h *Handler) CreateEntry(w http.ResponseWriter, r *http.Request) {
 			response.Error(w, http.StatusConflict, response.CodePastDayReadOnly, "Cannot write to past dates")
 			return
 		}
-		response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, err.Error())
+		if errors.Is(err, ErrFoodIDRequired) || errors.Is(err, ErrInvalidDateFormat) {
+			response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, err.Error())
+			return
+		}
+		response.Error(w, http.StatusInternalServerError, response.CodeInternalServerError, err.Error())
 		return
 	}
 
@@ -111,7 +145,7 @@ func (h *Handler) UpdateEntry(w http.ResponseWriter, r *http.Request) {
 			response.Error(w, http.StatusGone, response.CodeValidationFailed, "Restore window expired (must be within 10 seconds)")
 			return
 		}
-		response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, err.Error())
+		response.Error(w, http.StatusInternalServerError, response.CodeInternalServerError, err.Error())
 		return
 	}
 
