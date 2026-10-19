@@ -156,7 +156,7 @@ describe("public/sw.js", () => {
 describe("manifest colours", () => {
   it("are the paper and ink tokens", () => {
     const css = readFileSync(join(__dirname, "..", "..", "app", "globals.css"), "utf8").toLowerCase();
-    expect(css).toContain(`--color-paper: ${PAPER_COLOR.toLowerCase()}`);
+    expect(css).toContain(`--color-page: ${PAPER_COLOR.toLowerCase()}`);
     expect(css).toContain(`--color-ink: ${INK_COLOR.toLowerCase()}`);
   });
 });

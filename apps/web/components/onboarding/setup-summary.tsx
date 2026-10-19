@@ -67,14 +67,14 @@ export function SetupSummary() {
         <AppHeader variant="sub" title={TITLE} progress={{ current: 2, total: 2 }} />
       </div>
 
-      <main className="flex flex-1 flex-col gap-6 px-4 py-5 lg:w-full lg:max-w-[760px] lg:flex-none lg:rounded-[20px] lg:border lg:border-card-border lg:bg-card lg:p-8">
-        <h1 className="m-0 hidden font-display text-[32px] font-black italic uppercase lg:block">{TITLE}</h1>
+      <main className="flex flex-1 flex-col gap-6 px-4 py-5 lg:w-full lg:max-w-[760px] lg:flex-none lg:rounded-sheet lg:border lg:border-card-border lg:bg-card lg:p-8">
+        <h1 className="m-0 hidden font-display text-display-sm font-black italic uppercase lg:block">{TITLE}</h1>
 
         {ready === null ? (
-          <div aria-busy="true" className="min-h-[320px] flex-1 rounded-[18px] bg-divider animate-pulse motion-reduce:animate-none lg:flex-none" />
+          <div aria-busy="true" className="min-h-[320px] flex-1 rounded-card bg-divider animate-pulse motion-reduce:animate-none lg:flex-none" />
         ) : (
           <section aria-labelledby="setup-done-title" className="flex flex-1 flex-col gap-4 lg:flex-none">
-            <h2 id="setup-done-title" className="m-0 font-display text-[28px] font-black italic uppercase leading-tight">
+            <h2 id="setup-done-title" className="m-0 font-display text-headline font-black italic uppercase leading-tight">
               Thiết lập xong
             </h2>
             <p className="m-0 text-base leading-relaxed text-text">
@@ -84,21 +84,21 @@ export function SetupSummary() {
             {ready.first && (
               <ol className="m-0 flex list-none flex-col gap-2 p-0">
                 {TOUR_PREVIEW.map((text, i) => (
-                  <li key={text} className="flex min-h-[44px] items-center gap-3 rounded-[18px] lg:shadow-card border border-card-border bg-card px-4 py-2">
-                    <span aria-hidden="true" className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue/10 text-sm font-bold text-blue">
+                  <li key={text} className="flex min-h-11 items-center gap-3 rounded-card lg:shadow-card border border-card-border bg-card px-4 py-2">
+                    <span aria-hidden="true" className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cobalt/10 text-sm font-bold text-cobalt">
                       {i + 1}
                     </span>
-                    <span className="text-[15px] font-semibold leading-snug">{text}</span>
+                    <span className="text-callout font-semibold leading-snug">{text}</span>
                   </li>
                 ))}
               </ol>
             )}
-            <p className="m-0 text-[13px] leading-snug text-secondary">Bạn có thể sửa mục tiêu bất cứ lúc nào trong Cài đặt.</p>
+            <p className="m-0 text-cap leading-snug text-secondary">Bạn có thể sửa mục tiêu bất cứ lúc nào trong Cài đặt.</p>
           </section>
         )}
 
         {coachNote && (
-          <p role="status" className="m-0 rounded-xl bg-card px-4 py-3 text-[13px] leading-snug text-text border border-card-border">
+          <p role="status" className="m-0 rounded-xl bg-card px-4 py-3 text-cap leading-snug text-text border border-card-border">
             {coachNote}
           </p>
         )}
@@ -111,7 +111,7 @@ export function SetupSummary() {
               </PillButton>
               <Link
                 href={HOME_ROUTE}
-                className="inline-flex min-h-[44px] items-center justify-center px-2 text-[15px] font-semibold text-secondary no-underline"
+                className="inline-flex min-h-11 items-center justify-center px-2 text-callout font-semibold text-secondary no-underline"
               >
                 Để sau
               </Link>

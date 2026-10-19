@@ -99,7 +99,7 @@ function HomeLoading({ backdrop }: { backdrop: boolean }) {
   return (
     <>
         {!backdrop && <h1 className="sr-only">Hôm nay</h1>}
-        <div className="h-[52px] rounded-b-[20px] bg-ink lg:hidden" />
+        <div className="h-[52px] rounded-b-sheet bg-ink lg:hidden" />
         <main role="status" aria-busy="true" className="mx-auto flex w-full max-w-[560px] flex-col gap-3 px-3 pt-2 lg:mx-0 lg:max-w-[1240px] lg:px-8 lg:pt-8">
           <span className="sr-only">Đang tải…</span>
           <div className="h-[152px] rounded-2xl bg-surface-dark motion-safe:animate-pulse" />
@@ -417,7 +417,7 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
         onClick={() => setIsCalendarOpen(true)}
         aria-haspopup="dialog"
         aria-label={`Chọn ngày, ${formatDesktopDate(day.date)}`}
-        className="inline-flex min-h-[44px] cursor-pointer items-center border-0 bg-transparent p-0 text-inherit underline-offset-4 hover:underline"
+        className="inline-flex min-h-11 cursor-pointer items-center border-0 bg-transparent p-0 text-inherit underline-offset-4 hover:underline"
       >
         {formatDesktopDate(day.date)}
       </button>
@@ -531,7 +531,7 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
             isPast ? (
               <Link
                 href={HOME_ROUTE}
-                className="-ml-2 inline-flex min-h-11 items-center whitespace-nowrap rounded-full px-2 text-[13px] font-bold text-sky no-underline hover:underline active:scale-[0.97] transition-press motion-reduce:active:scale-100 focus-visible:outline-sky"
+                className="-ml-2 inline-flex min-h-11 items-center whitespace-nowrap rounded-full px-2 text-cap font-bold text-sky no-underline hover:underline active:scale-[0.97] transition-press motion-reduce:active:scale-100 focus-visible:outline-sky"
               >
                 Về hôm nay
               </Link>
@@ -558,7 +558,7 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
           // cc-58: a bar over the page, above the bottom nav, so it pushes nothing down when it appears
           <div
             role="status"
-            className="pointer-events-none fixed inset-x-3 bottom-[calc(80px+env(safe-area-inset-bottom))] z-40 mx-auto max-w-[366px] rounded-xl bg-warning-bg px-3 py-2 text-[13px] leading-snug text-warning-text shadow-card lg:inset-x-auto lg:bottom-4 lg:right-8 lg:mx-0 lg:w-[400px] lg:max-w-none"
+            className="pointer-events-none fixed inset-x-3 bottom-[calc(80px+env(safe-area-inset-bottom))] z-nav mx-auto max-w-[366px] rounded-xl bg-warning-bg px-3 py-2 text-cap leading-snug text-warning-text shadow-card lg:inset-x-auto lg:bottom-4 lg:right-8 lg:mx-0 lg:w-[400px] lg:max-w-none"
           >
             Đang ngoại tuyến — món mới sẽ đồng bộ khi có mạng.
           </div>
@@ -580,7 +580,7 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
                 type="button"
                 onClick={() => setExplainerOpen(true)}
                 aria-haspopup="dialog"
-                className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border-0 bg-transparent px-1 text-[13px] font-bold text-blue active:scale-[0.97] transition-press motion-reduce:active:scale-100"
+                className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border-0 bg-transparent px-1 text-cap font-bold text-cobalt active:scale-[0.97] transition-press motion-reduce:active:scale-100"
               >
                 <span>{levelLabel(level, coach.name)}</span>
                 <span aria-hidden="true">›</span>

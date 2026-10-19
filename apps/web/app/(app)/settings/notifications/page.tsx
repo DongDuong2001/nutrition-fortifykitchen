@@ -121,7 +121,7 @@ export default function NotificationsSettingsPage() {
 
       <main className="flex-1 w-full max-w-[560px] mx-auto px-4 pt-4 pb-8 flex flex-col gap-3">
         {/* Permission card */}
-        <div className="bg-card border border-card-border rounded-[18px] lg:shadow-card p-3 md:p-4 flex flex-col gap-2">
+        <div className="bg-card border border-card-border rounded-card lg:shadow-card p-3 md:p-4 flex flex-col gap-2">
           <div className="flex gap-3 items-start">
             <svg
               width="22"
@@ -138,7 +138,7 @@ export default function NotificationsSettingsPage() {
               <path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9z" />
               <path d="M10 20a2 2 0 0 0 4 0" />
             </svg>
-            <div className="text-[15px] font-bold leading-snug">
+            <div className="text-callout font-bold leading-snug">
               Thông báo cần quyền của trình duyệt
             </div>
           </div>
@@ -159,7 +159,7 @@ export default function NotificationsSettingsPage() {
         </div>
 
         {/* Notification toggle rows */}
-        <section className="bg-card border border-card-border rounded-[18px] lg:shadow-card px-4 py-1">
+        <section className="bg-card border border-card-border rounded-card lg:shadow-card px-4 py-1">
           {NOTIFICATION_ROWS.map((row, index) => {
             const isChecked = settings[row.toggleKey];
             const timeVal = row.timeKey ? settings[row.timeKey] : "";
@@ -170,14 +170,14 @@ export default function NotificationsSettingsPage() {
             return (
               <div
                 key={row.id}
-                className={`flex items-center gap-2 min-h-[56px] py-1 ${
+                className={`flex items-center gap-2 min-h-14 py-1 ${
                   index > 0 ? "border-t border-divider" : ""
                 }`}
               >
                 <div className="flex-1 min-w-0 flex flex-col gap-0.5">
-                  <span className="text-[15px] font-normal leading-normal">{row.label}</span>
+                  <span className="text-callout font-normal leading-normal">{row.label}</span>
                   {row.hint && (
-                    <span className="text-[13px] text-secondary leading-normal">{row.hint}</span>
+                    <span className="text-cap text-secondary leading-normal">{row.hint}</span>
                   )}
                 </div>
 
@@ -193,11 +193,11 @@ export default function NotificationsSettingsPage() {
                         handleTimeChange(row.timeKey!, e.target.value)
                       }
                       aria-label={timeLabel}
-                      className="peer absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10 text-base"
+                      className="peer absolute inset-0 opacity-0 w-full h-full cursor-pointer z-sticky text-base"
                     />
                     <span
                       aria-hidden="true"
-                      className="flex items-center justify-center h-11 min-w-[64px] px-3 rounded-full border border-card-border bg-card text-ink text-sm font-semibold tabular-nums hover:bg-surface active:scale-[0.97] transition-press select-none peer-focus-visible:ring-2 peer-focus-visible:ring-blue peer-focus-visible:ring-offset-2"
+                      className="flex items-center justify-center h-11 min-w-[64px] px-3 rounded-full border border-card-border bg-card text-ink text-sm font-semibold tabular-nums hover:bg-surface active:scale-[0.97] transition-press select-none peer-focus-visible:ring-2 peer-focus-visible:ring-cobalt peer-focus-visible:ring-offset-2"
                     >
                       {timeVal}
                     </span>
@@ -214,7 +214,7 @@ export default function NotificationsSettingsPage() {
           })}
         </section>
 
-        <div role="status" className="text-[13px] text-secondary text-center pt-1">
+        <div role="status" className="text-cap text-secondary text-center pt-1">
           Tự động lưu
         </div>
       </main>

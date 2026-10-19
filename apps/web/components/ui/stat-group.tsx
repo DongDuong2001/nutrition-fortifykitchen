@@ -42,7 +42,7 @@ export function StatGroup({
             {it.value}
           </div>
           <div
-            className={`text-[11px] font-semibold mt-0.5 ${
+            className={`text-micro font-semibold mt-0.5 ${
               tone === "dark" ? "text-muted-on-dark" : "text-secondary"
             }`}
           >

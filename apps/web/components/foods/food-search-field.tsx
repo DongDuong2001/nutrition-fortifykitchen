@@ -15,7 +15,7 @@ export function FoodSearchField({ value, onChange, inputRef, className = "" }: F
       data-tour="food-search"
       data-align-group="add-list"
       data-align-edge="left"
-      className={`flex items-center gap-3 bg-surface border border-card-border rounded-full px-4 min-h-[48px] focus-within:border-blue focus-within:ring-2 focus-within:ring-blue ${className}`}
+      className={`flex items-center gap-3 bg-surface border border-card-border rounded-full px-4 min-h-12 focus-within:border-cobalt focus-within:ring-2 focus-within:ring-cobalt ${className}`}
     >
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="text-secondary shrink-0" aria-hidden="true">
         <circle cx="11" cy="11" r="7" />
@@ -30,7 +30,7 @@ export function FoodSearchField({ value, onChange, inputRef, className = "" }: F
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Tìm món: cơm, trứng, chà là…"
-        className="flex-1 bg-transparent border-0 outline-none focus-visible:outline-none text-text text-base min-h-[44px] [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
+        className="flex-1 bg-transparent border-0 outline-none focus-visible:outline-none text-text text-base min-h-11 [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none"
       />
       {value && (
         <button

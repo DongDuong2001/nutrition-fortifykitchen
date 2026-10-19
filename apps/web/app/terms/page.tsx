@@ -13,12 +13,12 @@ export default function TermsPage() {
       <LegalHeader title="Điều khoản dịch vụ" alignGroup="terms-header" />
 
       <main className="mx-auto w-full max-w-[760px] px-4 pb-6 pt-4 lg:mx-0 lg:px-8">
-        <article className="flex flex-col gap-6 rounded-[18px] lg:shadow-card border border-card-border bg-card p-5 text-text lg:p-8">
+        <article className="flex flex-col gap-6 rounded-card lg:shadow-card border border-card-border bg-card p-5 text-text lg:p-8">
           <header className="flex flex-col gap-2 border-b border-divider pb-4">
             <h2 className="m-0 text-xl font-bold leading-snug text-text">
               Điều khoản sử dụng dịch vụ H1T MICRO
             </h2>
-            <p className="m-0 text-[13px] text-secondary">
+            <p className="m-0 text-cap text-secondary">
               Hiệu lực từ: Ngày 15 tháng 10 năm 2026 · Vui lòng đọc kỹ trước khi đăng ký hoặc sử dụng dịch vụ
             </p>
           </header>
@@ -91,7 +91,7 @@ export default function TermsPage() {
           <section className="flex flex-col gap-2.5 border-t border-divider pt-4">
             <h3 className="m-0 text-base font-bold text-text">7. Luật áp dụng và Khiếu nại</h3>
             <p className="m-0 text-sm leading-relaxed text-secondary">
-              Các điều khoản này chịu sự điều chỉnh của pháp luật Nước Cộng hòa Xã hội Chủ nghĩa Việt Nam. Mọi thắc mắc hoặc phản hồi vui lòng gửi đến: <code className="rounded bg-divider px-2 py-0.5 text-[13px] text-text">support@h1tmicro.vn</code>.
+              Các điều khoản này chịu sự điều chỉnh của pháp luật Nước Cộng hòa Xã hội Chủ nghĩa Việt Nam. Mọi thắc mắc hoặc phản hồi vui lòng gửi đến: <code className="rounded bg-divider px-2 py-0.5 text-cap text-text">support@h1tmicro.vn</code>.
             </p>
           </section>
         </article>

@@ -1,4 +1,4 @@
-"""The "Tìm món" search field has one focus indicator: the wrapper's ring (border-blue + ring-2 ring-blue).
+"""The "Tìm món" search field has one focus indicator: the wrapper's ring (border-cobalt + ring-2 ring-cobalt).
 
 Production demo build. /add (a sheet on the phone, a dialog on desktop) and /explore, at 390x844 and 1280x800, the
 field focused by keyboard (Tab) and by tap or click: the inner input has no outline and no box-shadow ring, and the

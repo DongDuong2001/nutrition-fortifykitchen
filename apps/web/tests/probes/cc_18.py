@@ -69,7 +69,7 @@ def check_single_form(pg, width, path, primary):
     # One form per auth screen: one email field, one "hoặc" divider, one primary (blue) button
     check(pg.locator('input[type="email"]').count() == 1, f"{width} {path}: exactly one email input")
     check(pg.get_by_text("hoặc", exact=True).count() == 1, f"{width} {path}: exactly one divider hoặc")
-    primaries = pg.locator("button.bg-blue")
+    primaries = pg.locator("button.bg-cobalt")
     check(
         primaries.count() == 1 and primaries.first.inner_text().strip() == primary,
         f"{width} {path}: one primary button, {primary} ({primaries.count()} found)",

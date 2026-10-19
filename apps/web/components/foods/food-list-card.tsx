@@ -28,7 +28,7 @@ export function FoodListCard({ title, action, foods, withCategory, empty }: Food
   return (
     <Card as="section" aria-label={title} className="flex flex-col gap-1">
       {(title || action) && (
-        <div className="flex min-h-[44px] items-center justify-between gap-2">
+        <div className="flex min-h-11 items-center justify-between gap-2">
           {title && <SectionTitle>{title}</SectionTitle>}
           {action}
         </div>
@@ -49,7 +49,7 @@ export function FoodListCard({ title, action, foods, withCategory, empty }: Food
         <button
           type="button"
           onClick={() => setMore({ listKey, extra: extra + FOOD_CARD_LIMIT })}
-          className="flex min-h-[56px] w-full cursor-pointer items-center justify-center border-0 border-t border-divider bg-transparent px-4 text-[15px] font-bold text-blue"
+          className="flex min-h-14 w-full cursor-pointer items-center justify-center border-0 border-t border-divider bg-transparent px-4 text-callout font-bold text-cobalt"
         >
           Xem thêm
         </button>

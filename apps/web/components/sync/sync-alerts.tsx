@@ -13,7 +13,7 @@ import { SESSION_EXPIRED_MESSAGE, STORAGE_FULL_MESSAGE, useSyncAlerts } from "@/
 export function SyncAlerts() {
   const { storage, sessionExpired } = useSyncAlerts();
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-[calc(232px+env(safe-area-inset-bottom))] z-50 flex flex-col gap-2 px-3 lg:inset-x-auto lg:bottom-28 lg:right-8 lg:w-[400px]">
+    <div className="pointer-events-none fixed inset-x-0 bottom-[calc(232px+env(safe-area-inset-bottom))] z-sheet flex flex-col gap-2 px-3 lg:inset-x-auto lg:bottom-28 lg:right-8 lg:w-[400px]">
       <Presence>
         {storage && (
           <div role="alert" className="pointer-events-auto" data-sync-alert="storage">

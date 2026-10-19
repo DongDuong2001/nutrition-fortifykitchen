@@ -78,7 +78,7 @@ function PickStep({ onPick, onClose }: { onPick: (food: FoodItem) => void; onClo
                   <button
                     type="button"
                     onClick={() => setFilter("all")}
-                    className="min-h-[44px] cursor-pointer rounded-full border-0 bg-surface px-5 text-sm font-semibold text-text active:scale-[0.97] transition-press motion-reduce:active:scale-100"
+                    className="min-h-11 cursor-pointer rounded-full border-0 bg-surface px-5 text-sm font-semibold text-text active:scale-[0.97] transition-press motion-reduce:active:scale-100"
                   >
                     Bỏ lọc
                   </button>
@@ -104,14 +104,14 @@ function AmountStep({ food, target, onBack, onAdd }: { food: FoodItem; target: O
 
   return (
     <div className="flex flex-col gap-3">
-      <div data-align-group="own-item" className="flex min-h-[44px] items-center justify-between gap-2">
+      <div data-align-group="own-item" className="flex min-h-11 items-center justify-between gap-2">
         <span title={food.nameVi} className="line-clamp-2 min-w-0 break-words text-base font-bold text-text">
           {food.nameVi}
         </span>
         <button
           type="button"
           onClick={onBack}
-          className="inline-flex min-h-[44px] shrink-0 cursor-pointer items-center border-0 bg-transparent text-sm font-semibold text-blue active:scale-[0.97] transition-press motion-reduce:active:scale-100"
+          className="inline-flex min-h-11 shrink-0 cursor-pointer items-center border-0 bg-transparent text-sm font-semibold text-cobalt active:scale-[0.97] transition-press motion-reduce:active:scale-100"
         >
           Đổi món
         </button>
@@ -143,7 +143,7 @@ function AmountStep({ food, target, onBack, onAdd }: { food: FoodItem; target: O
               setGramsInput(e.target.value);
               setLabel(formatGramsServingLabel(e.target.value, ""));
             }}
-            className="h-11 w-full rounded-xl border border-card-border bg-card px-3 text-base font-bold tabular-nums text-text focus-visible:outline-2 focus-visible:outline-blue"
+            className="h-11 w-full rounded-xl border border-card-border bg-card px-3 text-base font-bold tabular-nums text-text focus-visible:outline-2 focus-visible:outline-cobalt"
           />
         </FormRow>
       )}

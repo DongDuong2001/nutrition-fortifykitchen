@@ -29,7 +29,7 @@ HERE = Path(__file__).resolve().parent
 LOG_DIR = HERE / "out" / "probe-all"
 SELF = Path(__file__).resolve()
 DEV_ONLY = {"cc02-final.py"}
-REPORT_ONLY = {"ag04_audit.py", "screenshots.py"}
+REPORT_ONLY = {"ag04_audit.py", "screenshots.py", "cc_66_shots.py", "cc_66_weights.py"}
 # cc-65: probes that are red on plain main for a known reason. A quarantined probe still runs; its failure is shown as
 # QUAR and does not fail the run, so a red probe:all means a regression. Past its expiry date it counts again.
 # name: (reason, expires YYYY-MM-DD)

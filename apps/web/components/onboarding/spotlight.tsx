@@ -267,10 +267,10 @@ export function Spotlight({
   const hole = round ? roundHole(box) : holeFor(box, view);
   const place = cardPlacement(hole, view, cardSize);
   const news = tone === "news";
-  const radius = news ? "rounded-2xl" : "rounded-[18px]";
+  const radius = news ? "rounded-2xl" : "rounded-card";
 
   return (
-    <div data-onboarding-overlay={leaving ? undefined : ""} inert={leaving} className="fixed inset-0 z-[60]" style={{ pointerEvents: "none" }}>
+    <div data-onboarding-overlay={leaving ? undefined : ""} inert={leaving} className="fixed inset-0 z-tour" style={{ pointerEvents: "none" }}>
       {/* The dim is the shadow of the hole, so the hole's corners are round like the card's (18 px) */}
       <div
         aria-hidden="true"

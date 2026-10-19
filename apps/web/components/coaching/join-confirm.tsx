@@ -40,13 +40,13 @@ function JoinConfirmBody({ raw }: { raw: string }) {
       <AppHeader variant="sub" title="Tham gia HLV" backHref={HOME_ROUTE} layout="wide" />
       <main className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-6 pt-4 lg:mx-0 lg:px-8">
         {!ready ? (
-          <div aria-busy="true" className="h-[120px] rounded-[18px] bg-divider motion-safe:animate-pulse" />
+          <div aria-busy="true" className="h-[120px] rounded-card bg-divider motion-safe:animate-pulse" />
         ) : !target ? (
           <WrongCode />
         ) : linked?.id === target.id ? (
           <Card className="flex flex-col gap-3">
-            <p className="m-0 text-[15px] leading-snug text-text">Bạn đang được {target.name} theo dõi.</p>
-            <Link href={HOME_ROUTE} className="inline-flex min-h-[44px] items-center text-[15px] font-bold text-blue no-underline">
+            <p className="m-0 text-callout leading-snug text-text">Bạn đang được {target.name} theo dõi.</p>
+            <Link href={HOME_ROUTE} className="inline-flex min-h-11 items-center text-callout font-bold text-cobalt no-underline">
               Về Hôm nay
             </Link>
           </Card>
@@ -64,7 +64,7 @@ function JoinConfirmBody({ raw }: { raw: string }) {
           titleId="join-title"
           desktopDialog
         >
-          <p className="m-0 px-1 text-[13px] leading-snug text-secondary">
+          <p className="m-0 px-1 text-cap leading-snug text-secondary">
             {target.name} sẽ xem được dữ liệu ăn uống của bạn và đặt Level để mở thêm chỉ số trong Hôm nay.
           </p>
           <PillButton

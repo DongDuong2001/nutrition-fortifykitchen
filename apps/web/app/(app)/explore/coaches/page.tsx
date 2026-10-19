@@ -37,7 +37,7 @@ export default function CoachesPage() {
         <ChipRow items={chips} ariaLabel="Lọc huấn luyện viên theo chuyên môn" />
 
         {coaches.length === 0 ? (
-          <Card as="section" aria-label="Chưa có huấn luyện viên" className="text-[13px] leading-snug text-secondary">
+          <Card as="section" aria-label="Chưa có huấn luyện viên" className="text-cap leading-snug text-secondary">
             Chưa có huấn luyện viên ở lĩnh vực này. Hãy chọn một lĩnh vực khác.
           </Card>
         ) : (

@@ -21,12 +21,12 @@ export function SodiumProgressCard({
   return (
     <div
       data-align-group="training-summary"
-      className={`bg-card border border-card-border rounded-[18px] lg:shadow-card p-5.5 flex flex-col justify-between gap-3 ${className}`}
+      className={`bg-card border border-card-border rounded-card lg:shadow-card p-5.5 flex flex-col justify-between gap-3 ${className}`}
     >
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="m-0 text-lg font-bold text-text">{nutrientName("sodium")} hôm nay</h2>
         {isAchieved && (
-          <span className="inline-flex items-center gap-1 text-[13px] font-bold text-blue">
+          <span className="inline-flex items-center gap-1 text-cap font-bold text-cobalt">
             <svg
               width="14"
               height="14"
@@ -64,14 +64,14 @@ export function SodiumProgressCard({
             <span
               key={idx}
               className={`h-2.5 rounded-[3px] ${
-                isAchieved ? "bg-blue" : "bg-level-empty"
+                isAchieved ? "bg-cobalt" : "bg-level-empty"
               }`}
             />
           ))}
         </div>
       </div>
 
-      <div className="text-[13px] text-secondary leading-relaxed">
+      <div className="text-cap text-secondary leading-relaxed">
         {isAchieved
           ? `Đã đạt mức tối thiểu. ${nutrientName("sodium")} từ các bữa ăn hôm nay được cộng tự động vào đây.`
           : `Còn thiếu ${formatAmount(saltTarget.sodiumMin - currentSodiumMg, "mg")} mg để đạt mức tối thiểu.`}

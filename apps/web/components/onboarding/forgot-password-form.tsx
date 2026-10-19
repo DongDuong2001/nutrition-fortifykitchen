@@ -40,7 +40,7 @@ export function ForgotPasswordForm() {
         Gửi liên kết đặt lại
       </PillButton>
       {sent && (
-        <p role="status" className="m-0 text-center text-[15px] font-semibold text-text">
+        <p role="status" className="m-0 text-center text-callout font-semibold text-text">
           Kiểm tra email để đặt lại mật khẩu
         </p>
       )}

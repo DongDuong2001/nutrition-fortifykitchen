@@ -607,7 +607,7 @@ def share_tip(browser):
     check("Mẹo · lần đầu" in body and "Chia sẻ ngày ăn của bạn" in body and "Chạm biểu tượng chia sẻ để tạo ảnh tóm tắt ngày: tên, Level, kcal và vi chất. Chia sẻ cho HLV hoặc đăng lên mạng xã hội nhanh chóng." in body, f"share tip: copy ({body[:80]!r})")
     names = [b.inner_text().strip() for b in card(pg).get_by_role("button").all()]
     check(names == ["Tắt mọi mẹo", "Đã hiểu", "Thử ngay"], f"share tip: buttons Tắt mọi mẹo, Đã hiểu, Thử ngay in that order ({names})")
-    check("bg-blue" in (card(pg).get_by_role("button", name="Thử ngay").get_attribute("class") or "") and "bg-blue" not in (card(pg).get_by_role("button", name="Đã hiểu").get_attribute("class") or ""), "share tip: Thử ngay is the primary, Đã hiểu a text button")
+    check("bg-cobalt" in (card(pg).get_by_role("button", name="Thử ngay").get_attribute("class") or "") and "bg-cobalt" not in (card(pg).get_by_role("button", name="Đã hiểu").get_attribute("class") or ""), "share tip: Thử ngay is the primary, Đã hiểu a text button")
     geo = pg.evaluate(
         """() => {
           const btn = document.querySelector("[data-tour='home-share']"), b = btn.getBoundingClientRect();

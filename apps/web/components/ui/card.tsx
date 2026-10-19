@@ -17,7 +17,7 @@ export function Card({
 }: CardProps) {
   return (
     <Component
-      className={`bg-card border border-card-border rounded-[18px] p-4 text-text lg:shadow-card ${className}`}
+      className={`bg-card border border-card-border rounded-card p-4 text-text lg:shadow-card ${className}`}
       {...props}
     >
       {children}

@@ -151,11 +151,11 @@ def check_energy_bars(browser, size_name, size):
         kcal = int(m.group(1).replace(".", ""))
         red = "bg-destructive" in col["bar"]
         if i == len(cols) - 1:
-            today_grey = "bg-muted-dark" in col["bar"] and not red
+            today_grey = "bg-secondary" in col["bar"] and not red
             continue
         if kcal > 2275:
             over += 1
-            check("bg-blue" in col["bar"] and not red, f"{size_name} energy: {kcal} kcal above the range is on target")
+            check("bg-cobalt" in col["bar"] and not red, f"{size_name} energy: {kcal} kcal above the range is on target")
         if red:
             check(kcal < 1950, f"{size_name} energy: red only below the minimum ({kcal})")
     check(over >= 1, f"{size_name} energy: a day above the range is shown ({over})")

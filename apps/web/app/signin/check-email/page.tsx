@@ -56,8 +56,8 @@ export default function CheckEmailPage() {
               <rect x="3" y="5" width="18" height="14" rx="3" />
               <path d="M3.5 7.5l8.5 6 8.5-6" />
             </svg>
-            <h1 className="m-0 font-display text-[28px] font-black italic uppercase leading-tight">KIỂM TRA EMAIL</h1>
-            <p className="m-0 text-[15px] leading-normal text-muted-subtitle">
+            <h1 className="m-0 font-display text-headline font-black italic uppercase leading-tight">KIỂM TRA EMAIL</h1>
+            <p className="m-0 text-callout leading-normal text-muted-subtitle">
               {email ? (
                 <>
                   Đã gửi liên kết đăng nhập tới <strong className="text-on-dark">{email}</strong>.
@@ -79,19 +79,19 @@ export default function CheckEmailPage() {
       </PillButton>
       <Link
         href="/signup"
-        className="inline-flex min-h-[44px] items-center justify-center px-2 text-[15px] font-semibold text-blue"
+        className="inline-flex min-h-11 items-center justify-center px-2 text-callout font-semibold text-cobalt"
       >
         Dùng email khác
       </Link>
       {process.env.NODE_ENV !== "production" && (
         <Link
           href={openTarget}
-          className="inline-flex min-h-[44px] items-center justify-center px-2 text-[13px] font-semibold text-secondary"
+          className="inline-flex min-h-11 items-center justify-center px-2 text-cap font-semibold text-secondary"
         >
           Mở thẳng liên kết đăng nhập (bản thử)
         </Link>
       )}
-      <p className="m-0 text-center text-[13px] leading-normal text-secondary">
+      <p className="m-0 text-center text-cap leading-normal text-secondary">
         Chưa thấy email? Bạn kiểm tra thêm hộp thư Rác (Spam) hoặc Quảng cáo nhé.
       </p>
     </AuthShell>

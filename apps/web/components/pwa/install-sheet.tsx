@@ -42,8 +42,8 @@ export const SHEET_TITLE_CLASS = "m-0 font-display font-extrabold italic upperca
 export const SHEET_ICON_BUTTON =
   "inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 text-text active:scale-[0.97] transition-press motion-reduce:transition-none motion-reduce:active:scale-100";
 const LATER_BUTTON =
-  "inline-flex min-h-12 w-full cursor-pointer items-center justify-center rounded-full border-0 bg-transparent px-4 text-[15px] font-bold text-secondary transition-press m-tint motion-reduce:transition-none";
-const RING = "ring-[3px] ring-blue";
+  "inline-flex min-h-12 w-full cursor-pointer items-center justify-center rounded-full border-0 bg-transparent px-4 text-callout font-bold text-secondary transition-press m-tint motion-reduce:transition-none";
+const RING = "ring-[3px] ring-cobalt";
 
 function startView(device: InstallDevice): View {
   return device.inApp ? "inapp" : "ask";
@@ -54,14 +54,14 @@ function Step({ n, title, sub, children }: { n: number; title: string; sub?: str
     <li className="flex gap-3">
       <span
         aria-hidden="true"
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue font-display text-base font-extrabold italic text-on-accent"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cobalt font-display text-base font-extrabold italic text-on-accent"
       >
         {n}
       </span>
       <div className="flex min-w-0 flex-1 flex-col gap-2">
-        <p className="m-0 text-[15px] font-semibold leading-snug text-text">{title}</p>
+        <p className="m-0 text-callout font-semibold leading-snug text-text">{title}</p>
         {children}
-        {sub && <p className="m-0 text-[13px] leading-snug text-secondary">{sub}</p>}
+        {sub && <p className="m-0 text-cap leading-snug text-secondary">{sub}</p>}
       </div>
     </li>
   );
@@ -74,7 +74,7 @@ function MiniBar({ menu }: { menu: React.ReactNode }) {
       <span className="shrink-0 text-secondary">
         <ChevronLeftIcon />
       </span>
-      <span className="min-w-0 flex-1 rounded-full bg-card px-3 py-1 text-center text-[13px] text-secondary">{INSTALL_HOST}</span>
+      <span className="min-w-0 flex-1 rounded-full bg-card px-3 py-1 text-center text-cap text-secondary">{INSTALL_HOST}</span>
       {menu}
     </div>
   );
@@ -86,7 +86,7 @@ function RingedButton({ children }: { children: React.ReactNode }) {
 
 function RingedRow({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (
-    <div aria-hidden="true" className={`flex items-center justify-between gap-3 rounded-xl bg-card px-3 py-3 text-[15px] text-text ${RING}`}>
+    <div aria-hidden="true" className={`flex items-center justify-between gap-3 rounded-xl bg-card px-3 py-3 text-callout text-text ${RING}`}>
       <span>{label}</span>
       <span className="text-text">{icon}</span>
     </div>
@@ -101,7 +101,7 @@ function SubHeader({ title, onBack, onClose }: { title: string; onBack?: () => v
           <ChevronLeftIcon />
         </button>
       )}
-      <h2 id={TITLE_ID} className={`${SHEET_TITLE_CLASS} min-w-0 flex-1 text-[26px]`}>
+      <h2 id={TITLE_ID} className={`${SHEET_TITLE_CLASS} min-w-0 flex-1 text-title`}>
         {title}
       </h2>
       <button type="button" aria-label="Đóng" onClick={onClose} className={`${SHEET_ICON_BUTTON} -mr-2`}>
@@ -126,16 +126,16 @@ function AskView({ detected, onPick, onLater }: { detected: "ios" | "android" | 
       <div className="flex items-center gap-4">
         <img src="/icons/icon-512.png" alt="" width={56} height={56} className="h-14 w-14 shrink-0 rounded-[14px]" />
         <div className="flex min-w-0 flex-col gap-1">
-          <h2 id={TITLE_ID} className={`${SHEET_TITLE_CLASS} text-[22px]`}>
+          <h2 id={TITLE_ID} className={`${SHEET_TITLE_CLASS} text-title-sm`}>
             CÀI H1T MICRO VÀO MÁY CỦA BẠN
           </h2>
-          <p className="m-0 text-[13px] leading-snug text-secondary">Như một ứng dụng thật, chỉ mất 20 giây.</p>
+          <p className="m-0 text-cap leading-snug text-secondary">Như một ứng dụng thật, chỉ mất 20 giây.</p>
         </div>
       </div>
       <ul className="m-0 flex list-none flex-col gap-3 p-0">
         {benefits.map((b) => (
-          <li key={b.text} className="flex items-center gap-3 text-[14px] font-semibold leading-snug text-text">
-            <span aria-hidden="true" className="inline-flex shrink-0 text-blue">
+          <li key={b.text} className="flex items-center gap-3 text-[0.875rem] font-semibold leading-snug text-text">
+            <span aria-hidden="true" className="inline-flex shrink-0 text-cobalt">
               {b.icon}
             </span>
             {b.text}
@@ -155,16 +155,16 @@ function AskView({ detected, onPick, onLater }: { detected: "ios" | "android" | 
                 type="button"
                 onClick={() => onPick(c.id)}
                 className={`relative flex min-h-[76px] cursor-pointer flex-col items-start justify-center gap-1 rounded-2xl px-4 py-3 text-left active:scale-[0.97] transition-press motion-reduce:transition-none motion-reduce:active:scale-100 ${
-                  mine ? "border-2 border-blue bg-cobalt-tint" : "border border-card-border bg-card"
+                  mine ? "border-2 border-cobalt bg-cobalt-tint" : "border border-card-border bg-card"
                 }`}
               >
                 {mine && (
-                  <span className="absolute -top-3 left-3 rounded-full bg-blue px-2 py-1 text-[11px] font-bold leading-none text-on-accent">
+                  <span className="absolute -top-3 left-3 rounded-full bg-cobalt px-2 py-1 text-micro font-bold leading-none text-on-accent">
                     Máy của bạn
                   </span>
                 )}
                 <span className="text-base font-bold leading-tight text-text">{c.name}</span>
-                <span className="text-[13px] leading-tight text-secondary">{c.note}</span>
+                <span className="text-cap leading-tight text-secondary">{c.note}</span>
               </button>
             );
           })}
@@ -203,11 +203,11 @@ function IosView({ onBack, onClose, onDone, onLater }: { onBack: () => void; onC
         </Step>
         <Step n={4} title="Chạm Thêm ở góc trên bên phải" sub="Biểu tượng H1T MICRO sẽ nằm trên màn hình chính." />
       </ol>
-      <div className="flex items-start gap-3 rounded-xl bg-cobalt-tint p-3 text-blue">
+      <div className="flex items-start gap-3 rounded-xl bg-cobalt-tint p-3 text-cobalt">
         <span aria-hidden="true" className="inline-flex shrink-0">
           <InfoIcon />
         </span>
-        <p className="m-0 text-[13px] leading-snug text-text">iOS 18 trở về trước: nút Chia sẻ nằm ngay trên thanh dưới, bỏ qua bước 1.</p>
+        <p className="m-0 text-cap leading-snug text-text">iOS 18 trở về trước: nút Chia sẻ nằm ngay trên thanh dưới, bỏ qua bước 1.</p>
       </div>
       <div className="flex flex-col gap-2">
         <PillButton type="button" onClick={onDone}>
@@ -241,7 +241,7 @@ function AndroidView({
       <SubHeader title="CÀI TRÊN ANDROID" onBack={onBack} onClose={onClose} />
       {canPrompt && (
         <section aria-labelledby="install-fastest" className="flex flex-col gap-3 rounded-2xl bg-cobalt-tint p-4">
-          <p id="install-fastest" className="m-0 text-xs font-bold uppercase leading-tight text-blue">
+          <p id="install-fastest" className="m-0 text-xs font-bold uppercase leading-tight text-cobalt">
             Cách nhanh nhất
           </p>
           <PillButton type="button" onClick={onInstall}>
@@ -250,7 +250,7 @@ function AndroidView({
               Cài đặt ngay
             </span>
           </PillButton>
-          <p className="m-0 text-[13px] leading-snug text-secondary">Điện thoại sẽ hỏi lại một lần, chọn Cài đặt.</p>
+          <p className="m-0 text-cap leading-snug text-secondary">Điện thoại sẽ hỏi lại một lần, chọn Cài đặt.</p>
         </section>
       )}
       <div className="flex flex-col gap-4">
@@ -270,7 +270,7 @@ function AndroidView({
           </Step>
           <Step n={3} title="Chạm Cài đặt" />
         </ol>
-        <p className="m-0 text-[13px] leading-snug text-secondary">Samsung Internet: chạm ≡ › Thêm trang vào › Màn hình chính.</p>
+        <p className="m-0 text-cap leading-snug text-secondary">Samsung Internet: chạm ≡ › Thêm trang vào › Màn hình chính.</p>
       </div>
       <div className="flex flex-col gap-2">
         <PillButton type="button" variant={canPrompt ? "secondary" : "primary"} onClick={onDone}>
@@ -288,7 +288,7 @@ function InAppView({ app, onClose, onCopy, onLater }: { app: InAppBrowser; onClo
   return (
     <div className="flex flex-col gap-4">
       <SubHeader title="MỞ BẰNG TRÌNH DUYỆT TRƯỚC" onClose={onClose} />
-      <p className="m-0 text-[15px] leading-snug text-text">
+      <p className="m-0 text-callout leading-snug text-text">
         Bạn đang mở H1T MICRO trong {app}. Ứng dụng chỉ cài được từ Safari (iPhone) hoặc Chrome (Android).
       </p>
       <ol className="m-0 flex list-none flex-col gap-4 p-0">
@@ -305,7 +305,7 @@ function InAppView({ app, onClose, onCopy, onLater }: { app: InAppBrowser; onClo
             Sao chép liên kết
           </span>
         </PillButton>
-        <p className="m-0 text-center text-[13px] leading-snug text-secondary">Rồi dán {INSTALL_HOST} vào Safari hoặc Chrome.</p>
+        <p className="m-0 text-center text-cap leading-snug text-secondary">Rồi dán {INSTALL_HOST} vào Safari hoặc Chrome.</p>
         <button type="button" onClick={onLater} className={LATER_BUTTON}>
           Để sau
         </button>
@@ -399,7 +399,7 @@ export function InstallSheet({ open, onClose }: InstallSheetProps) {
       </Sheet>
       <Presence>
         {open && toast && (
-          <div className="pointer-events-none fixed inset-x-0 bottom-[calc(24px+env(safe-area-inset-bottom))] z-[60] px-3">
+          <div className="pointer-events-none fixed inset-x-0 bottom-[calc(24px+env(safe-area-inset-bottom))] z-sheet px-3">
             <Toast message={toast} />
           </div>
         )}

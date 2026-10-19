@@ -73,7 +73,7 @@ export function ExploreSections() {
       ) : (
         <Card as="section" aria-label="Gần đây" className="flex flex-col gap-1">
           <SectionTitle>Gần đây</SectionTitle>
-          <p className="m-0 py-1 text-[13px] leading-snug text-secondary">Món bạn vừa ghi sẽ hiện ở đây.</p>
+          <p className="m-0 py-1 text-cap leading-snug text-secondary">Món bạn vừa ghi sẽ hiện ở đây.</p>
         </Card>
       )}
 
@@ -86,7 +86,7 @@ export function ExploreSections() {
       ) : (
         <Card as="section" aria-label="Yêu thích" className="flex flex-col gap-1">
           <SectionTitle>Yêu thích</SectionTitle>
-          <p className="m-0 py-1 text-[13px] leading-snug text-secondary">Chưa có món yêu thích. Bấm ♡ ở trang chi tiết món để lưu.</p>
+          <p className="m-0 py-1 text-cap leading-snug text-secondary">Chưa có món yêu thích. Bấm ♡ ở trang chi tiết món để lưu.</p>
         </Card>
       )}
 
@@ -101,7 +101,7 @@ export function ExploreSections() {
             ))}
           </div>
         ) : (
-          <p className="m-0 text-[13px] leading-snug text-secondary">
+          <p className="m-0 text-cap leading-snug text-secondary">
             Chưa có món nào. Tạo món mới để ghi món tự nấu hoặc món không có trong danh sách.
           </p>
         )}

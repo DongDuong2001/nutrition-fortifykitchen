@@ -133,15 +133,15 @@ export function PullIndicator({
   refreshing: boolean;
 }) {
   return (
-    <div className="pointer-events-none sticky top-0 z-10 h-0">
+    <div className="pointer-events-none sticky top-0 z-sticky h-0">
       <div
         ref={indicatorRef}
         aria-hidden="true"
-        className="m-pull mx-auto flex h-9 w-9 items-center justify-center rounded-full bg-card text-blue shadow-card"
+        className="m-pull mx-auto flex h-9 w-9 items-center justify-center rounded-full bg-card text-cobalt shadow-card"
         style={refreshing ? { transform: "translateY(12px)", opacity: 1 } : undefined}
       >
         {refreshing ? (
-          <span className="m-spin block h-4 w-4 rounded-full border-2 border-blue border-t-transparent" />
+          <span className="m-spin block h-4 w-4 rounded-full border-2 border-cobalt border-t-transparent" />
         ) : (
           <svg ref={arrowRef} className="m-pull-arrow" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
             <path d="M8 2v11M3.5 8.5 8 13l4.5-4.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />

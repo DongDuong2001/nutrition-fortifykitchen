@@ -8,7 +8,7 @@ import { SectionTitle } from "@/components/ui/section-title";
 export function Carousel({ title, children, id }: { title: string; children: React.ReactNode; id?: string }) {
   return (
     <section aria-label={title} id={id} data-tour={id} className="flex flex-col">
-      <SectionTitle as="h3" className="flex min-h-[44px] items-center">
+      <SectionTitle as="h3" className="flex min-h-11 items-center">
         {title}
       </SectionTitle>
       <ul

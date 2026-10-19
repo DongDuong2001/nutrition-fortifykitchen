@@ -97,7 +97,7 @@ KEYBOARD_PATHS = [
 MAX_TABS = 150  # the walk stops earlier when focus leaves the page
 
 # Visual state of a control: outline, shadow and border colours. A focus ring shows as any change from the idle state,
-# so a border turning blue (focus:border-blue on the inputs) counts. nextjs-portal is the dev-only error overlay.
+# so a border turning blue (focus:border-cobalt on the inputs) counts. nextjs-portal is the dev-only error overlay.
 IDLE_SNAPSHOT = """() => {
   const snap = (s) => [s.outlineStyle, s.outlineWidth, s.outlineColor, s.boxShadow, s.borderTopColor, s.borderRightColor, s.borderBottomColor, s.borderLeftColor].join('|');
   window.__idle = new Map();

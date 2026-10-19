@@ -16,14 +16,14 @@ describe("TrayBar: Hai hàng (cc-63, B3)", () => {
     expect(html).toMatch(/20 món · <span class="font-display[^"]*">12\.345<\/span> kcal/);
     expect(html.indexOf("Xem lại")).toBeGreaterThan(html.indexOf("12.345"));
     expect(html.indexOf("Thêm 20 món vào Bữa sáng")).toBeGreaterThan(html.indexOf("Xem lại"));
-    expect(html).toContain("flex-col gap-1.5 rounded-[18px] bg-ink p-2");
+    expect(html).toContain("flex-col gap-1.5 rounded-card bg-ink p-2");
   });
 
   it("row 1 truncates and never wraps over a button; Xem lại keeps a 44 px hit area; the add is 48 px", () => {
     const html = render();
     expect(html).toContain("min-w-0 flex-1 truncate");
     expect(html).toMatch(/min-h-11 min-w-11 shrink-0[^"]*text-sky/);
-    expect(html).toMatch(/h-12 w-full[^"]*bg-blue/);
+    expect(html).toMatch(/h-12 w-full[^"]*bg-cobalt/);
   });
 
   it("shows — when the total is unknown, never 0 kcal", () => {

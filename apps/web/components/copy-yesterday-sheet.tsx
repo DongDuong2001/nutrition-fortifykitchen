@@ -93,7 +93,7 @@ function CopyChoices({ entries, onDone, target, sourceWord, isToday }: { entries
                 type="checkbox"
                 checked={ticked.has(meal.slot)}
                 onChange={() => toggle(meal.slot)}
-                className="h-6 w-6 m-0 shrink-0 accent-blue"
+                className="h-6 w-6 m-0 shrink-0 accent-cobalt"
               />
               <span className="flex-1 text-base font-semibold text-text">{meal.name}</span>
               <span className="text-sm text-secondary tabular-nums">
@@ -103,7 +103,7 @@ function CopyChoices({ entries, onDone, target, sourceWord, isToday }: { entries
           );
         })}
       </div>
-      <div className="text-[13px] text-secondary px-1">Món đã có {isToday ? "hôm nay" : "hôm qua"} sẽ không bị ghi đè.</div>
+      <div className="text-cap text-secondary px-1">Món đã có {isToday ? "hôm nay" : "hôm qua"} sẽ không bị ghi đè.</div>
       <PillButton variant="primary" onClick={copy} disabled={chosen.length === 0} className="mt-1.5">
         {chosen.length > 0 ? `Chép ${chosen.length} bữa` : "Chọn bữa để chép"}
       </PillButton>

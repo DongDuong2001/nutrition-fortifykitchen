@@ -135,23 +135,23 @@ export function PortionPanel({
       {/* The meal, the food (a long name wraps to two lines), and its page */}
       <div className="flex w-full items-start justify-between gap-2">
         <div data-align-group="portion" data-align-edge="left" className="flex min-w-0 flex-col gap-0.5">
-          {mealSlot && <span className="text-[13px] font-semibold text-secondary">{mealNameVi}</span>}
+          {mealSlot && <span className="text-cap font-semibold text-secondary">{mealNameVi}</span>}
           {/* No line-clamp here: its overflow clipping cut the stacked marks of capitals like Ắ, Ẫ, Ổ ("TRẮNG" read
               "TRĂNG"). The line height leaves them room; a long name wraps. */}
-          <h2 id={headingId} className="m-0 break-words font-display text-[32px] font-bold uppercase leading-[1.15] tracking-[0.01em]">
+          <h2 id={headingId} className="m-0 break-words font-display text-display-sm font-bold uppercase leading-[1.15] tracking-[0.01em]">
             {rowName(food)}
           </h2>
         </div>
         <Link
           href={`/foods/${food.id}${mealSlot ? `?meal=${mealSlot}` : ""}`}
-          className="inline-flex min-h-11 shrink-0 items-center text-xs font-semibold text-blue hover:underline"
+          className="inline-flex min-h-11 shrink-0 items-center text-xs font-semibold text-cobalt hover:underline"
         >
           Xem chi tiết →
         </Link>
       </div>
 
       {food.tipVi && (
-        <div data-align-group="portion" data-align-edge="left" className="line-clamp-2 w-full text-xs font-medium leading-relaxed text-blue">
+        <div data-align-group="portion" data-align-edge="left" className="line-clamp-2 w-full text-xs font-medium leading-relaxed text-cobalt">
           {food.tipVi}
         </div>
       )}
@@ -170,10 +170,10 @@ export function PortionPanel({
       {/* kcal and macros of the portion, on a dark card */}
       <div data-align-group="portion" data-align-edge="left" className="flex w-full flex-col gap-3 rounded-2xl bg-ink p-4 text-on-dark">
         <div className="flex items-baseline justify-between gap-3">
-          <span className="font-display text-[44px] font-bold leading-none tabular-nums">
+          <span className="font-display text-[2.75rem] font-bold leading-none tabular-nums">
             {kcalValue(macroPreview.calories)} <span className="text-lg text-sky">kcal</span>
           </span>
-          <span className="text-right text-[13px] text-muted-subtitle">{summary}</span>
+          <span className="text-right text-cap text-muted-subtitle">{summary}</span>
         </div>
         <div className="grid grid-cols-3 gap-2">
           {[
@@ -183,25 +183,25 @@ export function PortionPanel({
           ].map(([label, value]) => (
             <div key={label as string} className="flex flex-col gap-0.5">
               <span className="text-xs text-muted-subtitle">{label}</span>
-              <span className="text-[17px] font-bold tabular-nums">{macroGramsText(value as number | null)}</span>
+              <span className="text-body-lg font-bold tabular-nums">{macroGramsText(value as number | null)}</span>
             </div>
           ))}
         </div>
       </div>
 
       {note && (
-        <p data-align-group="portion" data-align-edge="left" className="m-0 text-[13px] leading-normal text-secondary-strong">
+        <p data-align-group="portion" data-align-edge="left" className="m-0 text-cap leading-normal text-secondary-strong">
           {note}
         </p>
       )}
 
       {/* A food with unknown energy cannot be logged: it would read 0 kcal */}
       {notice && !canLog && (
-        <p role="alert" className="m-0 rounded-xl bg-warning-bg px-3 py-2 text-[13px] leading-snug text-warning-text">
+        <p role="alert" className="m-0 rounded-xl bg-warning-bg px-3 py-2 text-cap leading-snug text-warning-text">
           {notice}
         </p>
       )}
-      {notice && canLog && <p role="note" className="m-0 text-[13px] leading-snug text-secondary">{notice}</p>}
+      {notice && canLog && <p role="note" className="m-0 text-cap leading-snug text-secondary">{notice}</p>}
       {/* cc-54: what is inside a premade dish, and its add-ons for this meal */}
       {onDishEdit && food.category === "mon_viet" && (
         <Suspense fallback={null}>
@@ -209,7 +209,7 @@ export function PortionPanel({
         </Suspense>
       )}
       {addNotice && (
-        <p role="alert" className="m-0 rounded-xl bg-warning-bg px-3 py-2 text-[13px] leading-snug text-warning-text">
+        <p role="alert" className="m-0 rounded-xl bg-warning-bg px-3 py-2 text-cap leading-snug text-warning-text">
           {addNotice}
         </p>
       )}
@@ -221,7 +221,7 @@ export function PortionPanel({
             type="button"
             onClick={onAddAndContinue}
             disabled={cannotAdd}
-            className="flex h-14 flex-1 cursor-pointer items-center justify-center rounded-2xl border border-card-border bg-card text-[15px] font-bold text-text disabled:opacity-50 lg:flex-none"
+            className="flex h-14 flex-1 cursor-pointer items-center justify-center rounded-2xl border border-card-border bg-card text-callout font-bold text-text disabled:opacity-50 lg:flex-none"
           >
             Lưu &amp; chọn tiếp
           </button>
@@ -232,7 +232,7 @@ export function PortionPanel({
           data-tour="portion-add"
           data-testid="portion-add"
           disabled={cannotAdd}
-          className={`${onAddAndContinue ? "flex-1 lg:flex-none" : "w-full"} flex h-14 cursor-pointer items-center justify-center rounded-2xl border-0 bg-blue text-[17px] font-bold text-on-accent   hover:bg-blue/90    disabled:opacity-50`}
+          className={`${onAddAndContinue ? "flex-1 lg:flex-none" : "w-full"} flex h-14 cursor-pointer items-center justify-center rounded-2xl border-0 bg-cobalt text-body-lg font-bold text-on-accent   hover:bg-cobalt/90    disabled:opacity-50`}
         >
           {`Thêm vào ${mealSlot ? mealNameVi : "—"}`}
         </button>

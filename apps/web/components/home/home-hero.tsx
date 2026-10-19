@@ -90,12 +90,12 @@ export function HomeHero({
         </div>
 
         <div data-align-group="home-hero" className="flex flex-wrap items-baseline gap-x-1.5">
-          <span className="font-display text-[32px] font-extrabold leading-none tabular-nums">{kcalValue(shownKcal)}</span>
-          <span className={`text-[13px] text-muted-on-dark ${share ? "whitespace-nowrap" : ""}`}>
+          <span className="font-display text-display-sm font-extrabold leading-none tabular-nums">{kcalValue(shownKcal)}</span>
+          <span className={`text-cap text-muted-on-dark ${share ? "whitespace-nowrap" : ""}`}>
             / {formatAmount(kcalTarget.min, "kcal")}–{formatAmount(kcalTarget.max, "kcal")} kcal
           </span>
-          <span className="ml-1 font-display text-[32px] font-extrabold italic leading-none tabular-nums">{pctLabel(shownKcal, kcalTarget.min)}</span>
-          {finished && kcalKnown !== null && <span className="text-[13px] font-bold text-sky">{getLevelLabel(getLevel(kcalKnown))}</span>}
+          <span className="ml-1 font-display text-display-sm font-extrabold italic leading-none tabular-nums">{pctLabel(shownKcal, kcalTarget.min)}</span>
+          {finished && kcalKnown !== null && <span className="text-cap font-bold text-sky">{getLevelLabel(getLevel(kcalKnown))}</span>}
         </div>
 
         <div data-align-group="home-hero">
@@ -118,7 +118,7 @@ export function HomeHero({
                     {value === null ? "—" : formatAmount(value, "g")}
                     {target !== null ? `/${formatAmount(target, "g")} g` : " g"}
                   </span>
-                  <span className="shrink-0 whitespace-nowrap font-display text-[15px] font-bold leading-none tabular-nums">
+                  <span className="shrink-0 whitespace-nowrap font-display text-callout font-bold leading-none tabular-nums">
                     {pctLabel(value, target)}
                   </span>
                 </div>
@@ -128,7 +128,7 @@ export function HomeHero({
           })}
         </div>
       </section>
-      {kcalNote && <p className="m-0 mx-3 mt-1 lg:mx-0 flex-none text-[13px] leading-snug text-secondary">{kcalNote}</p>}
+      {kcalNote && <p className="m-0 mx-3 mt-1 lg:mx-0 flex-none text-cap leading-snug text-secondary">{kcalNote}</p>}
     </>
   );
 }

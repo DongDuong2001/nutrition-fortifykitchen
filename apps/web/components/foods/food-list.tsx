@@ -86,7 +86,7 @@ export function FoodList({
         <button
           type="button"
           onClick={() => setMore({ list, extra: { ...extra, [key]: (extra[key] ?? 0) + FOOD_LIST_LIMIT } })}
-          className="flex min-h-[56px] w-full cursor-pointer items-center justify-center border-0 bg-transparent px-4 text-[15px] font-bold text-blue"
+          className="flex min-h-14 w-full cursor-pointer items-center justify-center border-0 bg-transparent px-4 text-callout font-bold text-cobalt"
         >
           Xem thêm
         </button>
@@ -106,19 +106,19 @@ export function FoodList({
     const showHeart = list.grouped && !!isFavourite?.(food);
     const carried = !!tray?.ids.some((id) => ids.includes(id));
     return (
-      <li key={food.id} data-tour={dataTour && food.id === firstFoodId ? `${dataTour}-first` : undefined} className={`flex items-center border-t border-divider first:border-t-0 ${carried ? "bg-blue/10" : ""}`}>
+      <li key={food.id} data-tour={dataTour && food.id === firstFoodId ? `${dataTour}-first` : undefined} className={`flex items-center border-t border-divider first:border-t-0 ${carried ? "bg-cobalt/10" : ""}`}>
         <button
           type="button"
           data-food-row
           aria-pressed={selected}
           disabled={disabled}
           onClick={() => onPick(food)}
-          className={`flex min-h-[56px] min-w-0 flex-1 items-center gap-3 border-0 py-2 pl-4 text-left text-text transition-colors active:bg-divider motion-reduce:active:bg-transparent disabled:active:bg-transparent ${
+          className={`flex min-h-14 min-w-0 flex-1 items-center gap-3 border-0 py-2 pl-4 text-left text-text transition-colors active:bg-divider motion-reduce:active:bg-transparent disabled:active:bg-transparent ${
             onOpen || tray ? "pr-1" : "pr-4"
-          } ${selected && !carried ? "bg-blue/10" : "bg-transparent"} ${disabled ? "cursor-default opacity-50" : "cursor-pointer"}`}
+          } ${selected && !carried ? "bg-cobalt/10" : "bg-transparent"} ${disabled ? "cursor-default opacity-50" : "cursor-pointer"}`}
         >
           <span className="flex min-w-0 flex-1 flex-col gap-1">
-            <span title={name} className="line-clamp-2 break-words text-[15px] font-semibold leading-snug">
+            <span title={name} className="line-clamp-2 break-words text-callout font-semibold leading-snug">
               {name}
               {showHeart && (
                 <svg
@@ -133,7 +133,7 @@ export function FoodList({
                 </svg>
               )}
             </span>
-            <span className="line-clamp-2 text-[13px] leading-tight text-secondary">{meta}</span>
+            <span className="line-clamp-2 text-cap leading-tight text-secondary">{meta}</span>
           </span>
           {showSourceTag && <SourceTag food={food} />}
           {selected && (
@@ -146,7 +146,7 @@ export function FoodList({
               strokeWidth="2.8"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="shrink-0 text-blue"
+              className="shrink-0 text-cobalt"
               aria-hidden="true"
             >
               <path d="M5 12l5 5 9-10" />
@@ -166,7 +166,7 @@ export function FoodList({
             className="mr-2 inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent p-0 active:scale-[0.97] transition-press motion-reduce:active:scale-100"
           >
             <span
-              className={`flex h-9 w-9 items-center justify-center rounded-full ${carried ? "bg-blue text-on-accent" : "bg-blue/10 text-blue"}`}
+              className={`flex h-9 w-9 items-center justify-center rounded-full ${carried ? "bg-cobalt text-on-accent" : "bg-cobalt/10 text-cobalt"}`}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 {carried ? <path d="m5 12.5 4.5 4.5L19 7.5" /> : <path d="M12 5v14M5 12h14" />}
@@ -191,7 +191,7 @@ export function FoodList({
   };
 
   // No overflow-hidden on the grouped Card: it would stop the category label from sticking while the list scrolls
-  const cardClass = "rounded-[18px] lg:shadow-card border border-card-border bg-card";
+  const cardClass = "rounded-card lg:shadow-card border border-card-border bg-card";
 
   return (
     <div data-tour={dataTour} className={`flex flex-col gap-3 ${className}`}>
@@ -207,10 +207,10 @@ export function FoodList({
             data-align-edge={group.key === firstHeaderKey ? "left" : undefined}
             className={cardClass}
           >
-            <div className="sticky top-0 z-10 rounded-t-[18px] border-b border-divider bg-surface px-4 py-2 text-xs font-bold text-secondary">
+            <div className="sticky top-0 z-sticky rounded-t-card border-b border-divider bg-surface px-4 py-2 text-xs font-bold text-secondary">
               {group.label} · {group.foods.length}
             </div>
-            <ul className="m-0 flex list-none flex-col overflow-hidden rounded-b-[18px] p-0">
+            <ul className="m-0 flex list-none flex-col overflow-hidden rounded-b-card p-0">
               {shownOf(group.key, group.foods).map((food) => renderRow(food, false))}
               {moreRow(group.key, group.foods.length)}
             </ul>

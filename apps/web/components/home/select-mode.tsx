@@ -6,7 +6,7 @@ import { PillButton } from "@/components/ui/pill-button";
 import { TARGET_MEALS, actionBarLabel, selectTitle, type CopyTarget } from "@/lib/multi-select";
 
 const HEAD_BUTTON =
-  "inline-flex min-h-11 shrink-0 cursor-pointer items-center rounded-full border-0 bg-transparent px-2 text-[15px] font-bold text-on-dark hover:text-sky active:scale-[0.97] transition-press motion-reduce:active:scale-100 focus-visible:outline-sky lg:text-blue lg:hover:text-blue";
+  "inline-flex min-h-11 shrink-0 cursor-pointer items-center rounded-full border-0 bg-transparent px-2 text-callout font-bold text-on-dark hover:text-sky active:scale-[0.97] transition-press motion-reduce:active:scale-100 focus-visible:outline-sky lg:text-cobalt lg:hover:text-cobalt";
 
 /** The header of select mode: Hủy · "Đã chọn N" with the date · Chọn hết. It takes the place of the day header. */
 export function SelectHeader({
@@ -23,13 +23,13 @@ export function SelectHeader({
   onToggleAll: () => void;
 }) {
   return (
-    <header className="w-full flex-none select-none rounded-b-[20px] bg-ink text-on-dark lg:rounded-none lg:bg-page lg:text-text">
+    <header className="w-full flex-none select-none rounded-b-sheet bg-ink text-on-dark lg:rounded-none lg:bg-page lg:text-text">
       <div className="mx-auto flex min-h-[52px] w-full max-w-[560px] items-center gap-2 px-3 pt-[max(4px,env(safe-area-inset-top))] pb-1 lg:max-w-[1100px] lg:px-8 lg:pt-8">
         <button type="button" onClick={onCancel} className={`${HEAD_BUTTON} -ml-2`}>
           Hủy
         </button>
         <div className="min-w-0 flex-1 text-center">
-          <h1 aria-live="polite" className="m-0 text-[15px] font-bold leading-tight">
+          <h1 aria-live="polite" className="m-0 text-callout font-bold leading-tight">
             {selectTitle(count)}
           </h1>
           <p className="m-0 text-xs leading-snug text-muted-subtitle lg:text-secondary">{dateLabel}</p>
@@ -43,7 +43,7 @@ export function SelectHeader({
 }
 
 const ACTION =
-  "inline-flex min-h-11 w-full cursor-pointer items-center justify-center rounded-full border px-3 text-[15px] font-bold m-tint disabled:cursor-default disabled:opacity-50";
+  "inline-flex min-h-11 w-full cursor-pointer items-center justify-center rounded-full border px-3 text-callout font-bold m-tint disabled:cursor-default disabled:opacity-50";
 
 /** The action bar of select mode, in the bottom nav's place: "N món · X kcal" and the buttons. */
 export function SelectActionBar({
@@ -67,7 +67,7 @@ export function SelectActionBar({
   const none = count === 0;
   return (
     <div data-tour="select-bar" className="mx-auto flex w-full max-w-[560px] flex-col gap-2 px-3 py-2 lg:max-w-[1100px] lg:px-8">
-      <p data-align-group="select-bar" role="status" className="m-0 text-[13px] font-semibold leading-snug text-text tabular-nums">
+      <p data-align-group="select-bar" role="status" className="m-0 text-cap font-semibold leading-snug text-text tabular-nums">
         {actionBarLabel(count, kcal)}
       </p>
       {past ? (
@@ -76,7 +76,7 @@ export function SelectActionBar({
           data-align-group="select-bar"
           disabled={none}
           onClick={onCopyToToday}
-          className={`${ACTION} border-transparent bg-blue text-on-accent`}
+          className={`${ACTION} border-transparent bg-cobalt text-on-accent`}
         >
           Chép vào hôm nay
         </button>
@@ -151,7 +151,7 @@ function TargetBody({
   return (
     <>
       <div role="radiogroup" aria-label="Vào bữa" className="flex flex-col">
-        <span className="px-1 pb-1 text-[13px] font-semibold text-secondary">Vào bữa</span>
+        <span className="px-1 pb-1 text-cap font-semibold text-secondary">Vào bữa</span>
         {options.map((o) => {
           const checked = target === o.id;
           return (
@@ -162,13 +162,13 @@ function TargetBody({
               aria-checked={checked}
               data-align-group="select-target"
               onClick={() => setTarget(o.id)}
-              className="flex min-h-[48px] w-full cursor-pointer items-center gap-3 border-0 border-t border-divider bg-transparent px-1 text-left text-[15px] text-text"
+              className="flex min-h-12 w-full cursor-pointer items-center gap-3 border-0 border-t border-divider bg-transparent px-1 text-left text-callout text-text"
             >
               <span
                 aria-hidden="true"
-                className={`flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full border-2 ${checked ? "border-blue" : "border-card-border"}`}
+                className={`flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full border-2 ${checked ? "border-cobalt" : "border-card-border"}`}
               >
-                {checked && <span className="h-[10px] w-[10px] rounded-full bg-blue" />}
+                {checked && <span className="h-[10px] w-[10px] rounded-full bg-cobalt" />}
               </span>
               <span className={checked ? "font-bold" : "font-medium"}>{o.label}</span>
             </button>
@@ -210,10 +210,10 @@ export function DayMenuSheet({
           onClose();
           onSelect();
         }}
-        className="flex min-h-[56px] w-full cursor-pointer flex-col items-start justify-center border-0 bg-transparent px-1 py-2 text-left disabled:cursor-default disabled:opacity-50"
+        className="flex min-h-14 w-full cursor-pointer flex-col items-start justify-center border-0 bg-transparent px-1 py-2 text-left disabled:cursor-default disabled:opacity-50"
       >
-        <span className="text-[15px] font-bold text-text">Chọn nhiều món</span>
-        <span className="text-[13px] leading-tight text-secondary">
+        <span className="text-callout font-bold text-text">Chọn nhiều món</span>
+        <span className="text-cap leading-tight text-secondary">
           {hasEntries ? (past ? "Chép nhiều món vào hôm nay" : "Chép, chuyển bữa hoặc xóa nhiều món cùng lúc") : "Chưa có món nào"}
         </span>
       </button>

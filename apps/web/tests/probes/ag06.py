@@ -38,7 +38,7 @@ def test_item_1_and_2(browser):
     inp_classes = search_input.get_attribute("class") or ""
     # One focus indicator: the wrapper label's focus-within ring; the input itself has no ring or outline of its own
     wrapper_classes = search_input.evaluate("el => el.closest('label').className") or ""
-    check("focus-within:ring-blue" in wrapper_classes and "focus-within:ring-2" in wrapper_classes,
+    check("focus-within:ring-cobalt" in wrapper_classes and "focus-within:ring-2" in wrapper_classes,
           f"add: the search wrapper has the focus-within ring ({wrapper_classes})")
     check("focus-visible:ring" not in inp_classes and "focus-visible:outline-none" in inp_classes,
           f"add: the search input has no ring of its own ({inp_classes})")
@@ -85,7 +85,7 @@ def test_item_1_and_2(browser):
     check(grams_input.count() > 0, "entry: grams input present")
     parent = grams_input.locator("..")
     p_classes = parent.get_attribute("class") or ""
-    check("focus-within:ring-blue" in p_classes or "focus-within:ring-2" in p_classes,
+    check("focus-within:ring-cobalt" in p_classes or "focus-within:ring-2" in p_classes,
           f"entry: grams input wrapper has focus-within ring ({p_classes})")
     ctx.close()
 

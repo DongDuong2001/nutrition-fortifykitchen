@@ -91,7 +91,7 @@ function BirthYearField() {
             if (e.key === "Enter") e.currentTarget.blur();
           }}
           aria-invalid={error ? true : undefined}
-          className={`h-[52px] w-full rounded-xl border-2 bg-surface px-4 text-base font-semibold tabular-nums text-text outline-none focus:border-blue ${
+          className={`h-[52px] w-full rounded-xl border-2 bg-surface px-4 text-base font-semibold tabular-nums text-text outline-none focus:border-cobalt ${
             error ? "border-destructive" : "border-grabber"
           }`}
         />
@@ -107,7 +107,7 @@ export function BodyCard({ alignGroup }: { alignGroup?: string }) {
       <SectionTitle>Cơ thể</SectionTitle>
       <RowGroup>
         <div role="group" aria-labelledby="profile-sex-label" className="flex flex-col gap-2 border-t border-divider py-3">
-          <span id="profile-sex-label" className="text-[15px]">
+          <span id="profile-sex-label" className="text-callout">
             Giới tính
           </span>
           <ChipGroup
@@ -126,8 +126,8 @@ export function BodyCard({ alignGroup }: { alignGroup?: string }) {
         <RowGroup>
           <div className="flex min-h-[52px] items-center gap-3 border-t border-divider py-1">
             <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-              <span className="text-[15px]">Gần/đang trong kỳ</span>
-              <span className="text-[13px] leading-tight text-secondary">Chỉ với nữ · Iron lên 28 mg/ngày</span>
+              <span className="text-callout">Gần/đang trong kỳ</span>
+              <span className="text-cap leading-tight text-secondary">Chỉ với nữ · Iron lên 28 mg/ngày</span>
             </div>
             <Switch
               checked={profile.periodMode}
@@ -153,7 +153,7 @@ export function GoalCard() {
       <SectionTitle>Mục tiêu</SectionTitle>
       <RowGroup>
         <div role="group" aria-labelledby="profile-goal-label" className="flex flex-col gap-2 border-t border-divider py-3">
-          <span id="profile-goal-label" className="text-[15px]">Mục tiêu</span>
+          <span id="profile-goal-label" className="text-callout">Mục tiêu</span>
           <ChipGroup
             size="lg"
             columns={2}
@@ -170,8 +170,8 @@ export function GoalCard() {
       <RowGroup>
         <div role="group" aria-labelledby="profile-training-label" className="flex flex-col gap-2 border-t border-divider py-3">
           <div className="flex items-baseline justify-between gap-3">
-            <span id="profile-training-label" className="text-[15px]">Ngày tập mặc định</span>
-            <span className="text-[13px] text-secondary">phút</span>
+            <span id="profile-training-label" className="text-callout">Ngày tập mặc định</span>
+            <span className="text-cap text-secondary">phút</span>
           </div>
           <ChipGroup
             size="lg"
@@ -207,8 +207,8 @@ function TrainingSizeRow() {
     <RowGroup>
       <div role="group" aria-labelledby="profile-training-size-label" className="flex flex-col gap-2 border-t border-divider py-3">
         <div className="flex items-baseline justify-between gap-3">
-          <span id="profile-training-size-label" className="text-[15px]">Nhóm Bự / Bé</span>
-          <span className="text-[13px] text-secondary">liều khi tập</span>
+          <span id="profile-training-size-label" className="text-callout">Nhóm Bự / Bé</span>
+          <span className="text-cap text-secondary">liều khi tập</span>
         </div>
         <ChipGroup
           size="lg"
@@ -274,18 +274,18 @@ export function AppCard() {
           hint="Ghi bữa ăn đầu tiên · 1 phút"
           onClick={replay}
           withBorderTop={false}
-          className="min-h-[56px]"
+          className="min-h-14"
         >
           {flags && !flags.replayOpened && (
-            <span className="inline-flex h-6 shrink-0 items-center rounded-full bg-blue px-2 text-xs font-bold text-on-accent">Mới</span>
+            <span className="inline-flex h-6 shrink-0 items-center rounded-full bg-cobalt px-2 text-xs font-bold text-on-accent">Mới</span>
           )}
         </Row>
       </RowGroup>
       <RowGroup>
-        <Row icon={SETTINGS_ICONS.news} label="Có gì mới" href="/settings/whats-new" className="min-h-[56px]" />
+        <Row icon={SETTINGS_ICONS.news} label="Có gì mới" href="/settings/whats-new" className="min-h-14" />
       </RowGroup>
       <RowGroup>
-        <Row icon={SETTINGS_ICONS.tips} label="Mẹo trên từng màn hình" hint="Bật lại để xem mẹo lần đầu" showChevron={false} className="min-h-[56px]">
+        <Row icon={SETTINGS_ICONS.tips} label="Mẹo trên từng màn hình" hint="Bật lại để xem mẹo lần đầu" showChevron={false} className="min-h-14">
           <Switch
             checked={flags ? !flags.tipsOff : true}
             disabled={flags === null}
@@ -296,7 +296,7 @@ export function AppCard() {
       </RowGroup>
       {haptics !== null && (
         <div data-align-group="profile-row" data-tour="haptics-switch">
-          <Row icon={SETTINGS_ICONS.vibrate} label="Rung khi chạm" hint="Rung nhẹ khi lưu, xóa hay hoàn tác" showChevron={false} className="min-h-[56px]">
+          <Row icon={SETTINGS_ICONS.vibrate} label="Rung khi chạm" hint="Rung nhẹ khi lưu, xóa hay hoàn tác" showChevron={false} className="min-h-14">
             <Switch checked={haptics} onCheckedChange={toggleHaptics} aria-label="Rung khi chạm" />
           </Row>
         </div>

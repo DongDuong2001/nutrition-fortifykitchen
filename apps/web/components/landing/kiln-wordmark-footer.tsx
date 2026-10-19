@@ -398,7 +398,7 @@ const CSS =
   ".kwf-addr p{white-space:pre-line;line-height:1.4}" +
   ".kwf-link{position:relative;display:inline-block;padding:0 .14em;margin:0 -.14em;transition:color .25s;min-height:44px;display:inline-flex;align-items:center}" +
   ".kwf-link::before{content:'';position:absolute;inset:.4em 0;background:var(--kwf-surface);transform:scaleX(0);transform-origin:right;transition:transform .35s cubic-bezier(.7,0,.2,1);z-index:-1;border-radius:3px}" +
-  ".kwf-link:hover,.kwf-link:focus-visible{color:#ffffff}" +
+  ".kwf-link:hover,.kwf-link:focus-visible{color:var(--color-on-dark)}" +
   ".kwf-link:hover::before,.kwf-link:focus-visible::before{transform:scaleX(1);transform-origin:left}" +
   ".kwf-word{display:block;width:100%;height:auto;max-width:none;margin-top:2cqw;overflow:hidden;touch-action:pan-y;cursor:default}" +
   ".kwf-word text{text-transform:none}" +
@@ -407,7 +407,7 @@ const CSS =
   ".kwf-shown .kwf-l{transform:none}" +
   ".kwf-fade{opacity:0;transform:translateY(10px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.8,.2,1);transition-delay:var(--kwf-d,0ms)}" +
   ".kwf-shown .kwf-fade{opacity:1;transform:none}" +
-  ".kwf-bar{margin-top:2cqw;border:1px solid rgba(243,241,236,0.18);border-radius:clamp(8px,1.05cqw,16px);padding:.6cqw 1.4cqw;display:flex;align-items:center;gap:1.5cqw;font-size:clamp(10px,1.05cqw,13px)}" +
+  ".kwf-bar{margin-top:2cqw;border:1px solid color-mix(in srgb,var(--kwf-ink) 18%,transparent);border-radius:clamp(8px,1.05cqw,16px);padding:.6cqw 1.4cqw;display:flex;align-items:center;gap:1.5cqw;font-size:clamp(10px,1.05cqw,13px)}" +
   ".kwf-copy{font-size:clamp(13px,1.4cqw,18px);font-weight:700;letter-spacing:-.01em;white-space:nowrap}" +
   ".kwf-reg{flex:1;min-width:0;opacity:0.8}" +
   ".kwf-legal{display:flex;gap:.75em;white-space:nowrap}" +
@@ -455,10 +455,11 @@ export function KilnWordmarkFooter({
   year = 2026,
   registry = "Hệ thống chuẩn hóa 22 vi chất và kiểm soát năng lượng theo mục tiêu tính từ hồ sơ của bạn",
   legal = DEFAULT_LEGAL,
-  surface = "#1238D6", // Cobalt Blue
-  deep = "#111317", // Ink Black
-  ink = "#F3F1EC", // Paper
-  paper = "#111317",
+  // cc-66 (D2): the footer reads the colour tokens
+  surface = "var(--color-cobalt)",
+  deep = "var(--color-ink)",
+  ink = "var(--color-kiln-paper)",
+  paper = "var(--color-ink)",
   fontSans = "var(--font-sans)",
   weight = 0.95,
   lens = true,
@@ -684,8 +685,8 @@ export function KilnWordmarkFooter({
       <style>{CSS}</style>
 
       <svg className="kwf-tile" viewBox={"0 0 " + size.w + " " + size.h} preserveAspectRatio="none" aria-hidden="true">
-        <ellipse ref={discRef} cx={n1(t.cx * size.w)} cy={n1(t.cy * size.h)} rx={n1(t.r * size.w)} ry={n1(t.r * size.w)} fill={surface} />
-        <rect ref={slabRef} x={n1(t.sx * size.w)} y={0} width={n1(Math.max(0, t.sw * size.w))} height={size.h} fill={surface} />
+        <ellipse ref={discRef} cx={n1(t.cx * size.w)} cy={n1(t.cy * size.h)} rx={n1(t.r * size.w)} ry={n1(t.r * size.w)} style={{ fill: surface }} />
+        <rect ref={slabRef} x={n1(t.sx * size.w)} y={0} width={n1(Math.max(0, t.sw * size.w))} height={size.h} style={{ fill: surface }} />
       </svg>
 
       <div className="kwf-in-wrap">
@@ -756,7 +757,7 @@ export function KilnWordmarkFooter({
                     pathRefs.current[i] = el;
                   }}
                   d={glyphPath(l.ch, anim.current.k[i] ?? base, l.x)}
-                  fill={ink}
+                  style={{ fill: ink }}
                   onClick={() => stamp(i)}
                 />
               </g>
@@ -771,8 +772,7 @@ export function KilnWordmarkFooter({
               lengthAdjust="spacingAndGlyphs"
               fontSize="200"
               fontWeight="900"
-              fill={ink}
-              style={{ fontFamily: fontSans }}
+              style={{ fill: ink, fontFamily: fontSans }}
             >
               {word}
             </text>

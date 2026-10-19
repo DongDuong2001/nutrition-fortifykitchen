@@ -10,7 +10,7 @@ export function StepBars({ current, total, tone }: { current: number; total: num
       {Array.from({ length: total }).map((_, i) => (
         <span
           key={i}
-          className={`h-1 rounded-[1px] ${i < current ? "bg-blue" : empty}`}
+          className={`h-1 rounded-[1px] ${i < current ? "bg-cobalt" : empty}`}
           style={{ transform: "skewX(-14deg)" }}
         />
       ))}

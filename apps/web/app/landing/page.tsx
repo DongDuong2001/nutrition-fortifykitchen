@@ -20,15 +20,15 @@ const STEPS = [
     microUi: (
       <div className="p-3.5 rounded-2xl bg-page/80 border border-card-border/70 flex items-center justify-between">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-7 h-7 rounded-lg bg-blue/10 text-blue font-bold flex items-center justify-center shrink-0 text-xs">
+          <div className="w-7 h-7 rounded-lg bg-cobalt/10 text-cobalt font-bold flex items-center justify-center shrink-0 text-xs">
             +
           </div>
           <div className="min-w-0">
             <div className="text-xs font-bold text-text truncate">Ức gà áp chảo</div>
-            <div className="text-[11px] text-secondary">Bữa trưa · 150g</div>
+            <div className="text-micro text-secondary">Bữa trưa · 150g</div>
           </div>
         </div>
-        <span className="shrink-0 text-[11px] font-extrabold text-blue bg-card px-2.5 py-1 rounded-lg border border-card-border/80 shadow-2xs">
+        <span className="shrink-0 text-micro font-extrabold text-cobalt bg-card px-2.5 py-1 rounded-lg border border-card-border/80 shadow-2xs">
           247 kcal
         </span>
       </div>
@@ -41,19 +41,19 @@ const STEPS = [
     desc: "Tự động đối chiếu từng vitamin và khoáng chất với mục tiêu tính theo hồ sơ của bạn qua biểu đồ 10 mức phân đoạn trực quan.",
     microUi: (
       <div className="p-3.5 rounded-2xl bg-page/80 border border-card-border/70 flex flex-col gap-2">
-        <div className="flex items-center justify-between text-[11px]">
+        <div className="flex items-center justify-between text-micro">
           <span className="font-semibold text-secondary">Canxi (Ca)</span>
           <span className="font-extrabold text-success">85% mục tiêu</span>
         </div>
         <div className="h-1.5 w-full bg-card-border/50 rounded-full overflow-hidden">
           <div className="h-full bg-success rounded-full" style={{ width: "85%" }} />
         </div>
-        <div className="flex items-center justify-between text-[11px]">
+        <div className="flex items-center justify-between text-micro">
           <span className="font-semibold text-secondary">Kẽm (Zn)</span>
-          <span className="font-extrabold text-blue">100% Đạt</span>
+          <span className="font-extrabold text-cobalt">100% Đạt</span>
         </div>
         <div className="h-1.5 w-full bg-card-border/50 rounded-full overflow-hidden">
-          <div className="h-full bg-blue rounded-full" style={{ width: "100%" }} />
+          <div className="h-full bg-cobalt rounded-full" style={{ width: "100%" }} />
         </div>
       </div>
     ),
@@ -67,9 +67,9 @@ const STEPS = [
       <div className="p-3.5 rounded-2xl bg-page/80 border border-card-border/70 flex items-center justify-between">
         <div>
           <div className="text-xs font-bold text-text">Tập gym 60 phút</div>
-          <div className="text-[11px] text-secondary">Ngày có tập luyện</div>
+          <div className="text-micro text-secondary">Ngày có tập luyện</div>
         </div>
-        <span className="shrink-0 text-[11px] font-extrabold text-warning-text bg-warning-bg px-2.5 py-1 rounded-full border border-amber/30 flex items-center gap-1">
+        <span className="shrink-0 text-micro font-extrabold text-warning-text bg-warning-bg px-2.5 py-1 rounded-full border border-amber/30 flex items-center gap-1">
           +1.180–1.770 mg natri
         </span>
       </div>
@@ -84,7 +84,7 @@ const TRANSPARENCY_PRINCIPLES = [
     desc: "Dữ liệu vi chất được tính toán theo tỷ lệ khối lượng thực tế từng gam, định dạng chuẩn mực Việt Nam (1.041 kcal và 2,1 mg sắt), bảo đảm tính chuẩn xác khoa học.",
     badge: "Chuẩn xác đến từng gam",
     icon: (
-      <svg className="w-5 h-5 text-blue" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+      <svg className="w-5 h-5 text-cobalt" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
         <path d="M12 3v18M3 12h18M6 8l6-5 6 5M6 16l6 5 6-5" />
       </svg>
     ),
@@ -95,7 +95,7 @@ const TRANSPARENCY_PRINCIPLES = [
     desc: "Nếu một thực phẩm chưa có dữ liệu phân tích của vi chất nhất định, hệ thống thể hiện dấu gạch ngang (—), tuyệt đối không tự ý gán bằng 0 gây hiểu lầm thiếu hụt.",
     badge: "Chuẩn minh bạch: — (chưa rõ)",
     icon: (
-      <svg className="w-5 h-5 text-blue" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+      <svg className="w-5 h-5 text-cobalt" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
         <circle cx="12" cy="12" r="9" />
         <line x1="8" y1="12" x2="16" y2="12" />
       </svg>
@@ -119,7 +119,7 @@ const TRANSPARENCY_PRINCIPLES = [
     desc: "Nhật ký và hồ sơ của bạn gắn với tài khoản của bạn. Chính sách quyền riêng tư nêu rõ dữ liệu nào được lưu và lưu ở đâu.",
     badge: "Có chính sách quyền riêng tư",
     icon: (
-      <svg className="w-5 h-5 text-blue" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+      <svg className="w-5 h-5 text-cobalt" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
         <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
         <path d="M7 11V7a5 5 0 0 1 10 0v4" />
       </svg>
@@ -129,15 +129,15 @@ const TRANSPARENCY_PRINCIPLES = [
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-page text-text font-sans antialiased selection:bg-blue selection:text-on-accent">
+    <div className="min-h-screen bg-page text-text font-sans antialiased selection:bg-cobalt selection:text-on-accent">
       {/* ============================================================== */}
       {/* 1. TOP NAVBAR                                                 */}
       {/* ============================================================== */}
-      <header className="sticky top-0 z-40 w-full border-b border-card-border/80 bg-page/90 backdrop-blur-md">
+      <header className="sticky top-0 z-nav w-full border-b border-card-border/80 bg-page/90 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link href="/landing" className="flex items-center gap-2 no-underline text-text">
             <span className="font-display italic font-black text-2xl tracking-wide text-ink">
-              H1T <span className="text-blue">MICRO</span>
+              H1T <span className="text-cobalt">MICRO</span>
             </span>
           </Link>
 
@@ -159,13 +159,13 @@ export default function LandingPage() {
           <div className="flex items-center gap-3">
             <Link
               href="/signin"
-              className="min-h-[44px] px-4 inline-flex items-center text-sm font-bold text-text hover:text-blue no-underline transition-press"
+              className="min-h-11 px-4 inline-flex items-center text-sm font-bold text-text hover:text-cobalt no-underline transition-press"
             >
               Đăng nhập
             </Link>
             <Link
               href="/signup"
-              className="min-h-[44px] px-5 rounded-full bg-blue text-on-accent text-sm font-bold inline-flex items-center justify-center no-underline hover:bg-blue/90 active:scale-[0.97] motion-reduce:active:scale-100 transition-press shadow-sm"
+              className="min-h-11 px-5 rounded-full bg-cobalt text-on-accent text-sm font-bold inline-flex items-center justify-center no-underline hover:bg-cobalt/90 active:scale-[0.97] motion-reduce:active:scale-100 transition-press shadow-sm"
             >
               Bắt đầu ngay
             </Link>
@@ -181,8 +181,8 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
             {/* Left Column: Value proposition, headline and CTAs */}
             <div className="lg:col-span-7 flex flex-col items-start text-left">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-card border border-card-border text-xs font-bold text-blue mb-6 shadow-2xs">
-                <span className="h-1.5 w-1.5 rounded-full bg-blue" aria-hidden="true" />
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-card border border-card-border text-xs font-bold text-cobalt mb-6 shadow-2xs">
+                <span className="h-1.5 w-1.5 rounded-full bg-cobalt" aria-hidden="true" />
                 KHOA HỌC DINH DƯỠNG &amp; 22 VI CHẤT THIẾT YẾU
               </div>
 
@@ -198,7 +198,7 @@ export default function LandingPage() {
               <div className="mt-8 flex flex-wrap items-center gap-4">
                 <Link
                   href="/signup"
-                  className="min-h-[50px] px-8 rounded-full bg-blue text-on-accent text-base font-bold inline-flex items-center justify-center no-underline hover:bg-blue/90 active:scale-[0.97] motion-reduce:active:scale-100 transition-press shadow-md"
+                  className="min-h-[50px] px-8 rounded-full bg-cobalt text-on-accent text-base font-bold inline-flex items-center justify-center no-underline hover:bg-cobalt/90 active:scale-[0.97] motion-reduce:active:scale-100 transition-press shadow-md"
                 >
                   Tạo tài khoản miễn phí
                 </Link>
@@ -213,15 +213,15 @@ export default function LandingPage() {
               {/* Trust points */}
               <div className="mt-10 flex flex-wrap items-center gap-6 text-xs sm:text-sm font-semibold text-secondary">
                 <div className="flex items-center gap-2">
-                  <span className="text-blue font-bold">✓</span>
+                  <span className="text-cobalt font-bold">✓</span>
                   <span>22 vi chất thiết yếu</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-blue font-bold">✓</span>
+                  <span className="text-cobalt font-bold">✓</span>
                   <span>Bảng thành phần thực phẩm minh bạch</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-blue font-bold">✓</span>
+                  <span className="text-cobalt font-bold">✓</span>
                   <span>Khuyến nghị muối theo số phút tập</span>
                 </div>
               </div>
@@ -241,7 +241,7 @@ export default function LandingPage() {
       <section id="audiences" className="py-20 border-t border-card-border bg-card/30">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2 className="text-xs font-extrabold uppercase tracking-wider text-blue mb-2">
+            <h2 className="text-xs font-extrabold uppercase tracking-wider text-cobalt mb-2">
               ĐỐI TƯỢNG PHÙ HỢP
             </h2>
             <h3 className="m-0 text-3xl sm:text-4xl font-extrabold text-ink">
@@ -262,7 +262,7 @@ export default function LandingPage() {
       <section id="how-it-works" className="py-24 border-t border-card-border bg-card/20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-16">
-            <span className="text-xs font-extrabold uppercase tracking-wider text-blue">
+            <span className="text-xs font-extrabold uppercase tracking-wider text-cobalt">
               QUY TRÌNH HOẠT ĐỘNG
             </span>
             <h3 className="m-0 text-3xl sm:text-4xl font-extrabold text-ink mt-2">
@@ -277,19 +277,19 @@ export default function LandingPage() {
             {STEPS.map((step) => (
               <div
                 key={step.num}
-                className="relative flex flex-col justify-between p-6 sm:p-8 rounded-3xl border border-card-border/90 bg-card shadow-sm hover:shadow-lg hover:border-blue/50 transition-press duration-300 group"
+                className="relative flex flex-col justify-between p-6 sm:p-8 rounded-3xl border border-card-border/90 bg-card shadow-sm hover:shadow-lg hover:border-cobalt/50 transition-press duration-300 group"
               >
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <span className="font-display font-black text-3xl sm:text-4xl text-blue tracking-tight">
+                    <span className="font-display font-black text-3xl sm:text-4xl text-cobalt tracking-tight">
                       {step.num}
                     </span>
-                    <span className="text-[11px] font-extrabold tracking-wider uppercase px-2.5 py-1 rounded-full bg-blue/10 text-blue border border-blue/20">
+                    <span className="text-micro font-extrabold tracking-wider uppercase px-2.5 py-1 rounded-full bg-cobalt/10 text-cobalt border border-cobalt/20">
                       {step.stepLabel}
                     </span>
                   </div>
 
-                  <h4 className="m-0 text-lg sm:text-xl font-bold text-ink group-hover:text-blue transition-colors mb-2">
+                  <h4 className="m-0 text-lg sm:text-xl font-bold text-ink group-hover:text-cobalt transition-colors mb-2">
                     {step.title}
                   </h4>
                   <p className="m-0 text-sm text-secondary leading-relaxed mb-6">
@@ -312,7 +312,7 @@ export default function LandingPage() {
       <section id="transparency" className="py-24 border-t border-card-border bg-page">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-16">
-            <span className="text-xs font-extrabold uppercase tracking-wider text-blue">
+            <span className="text-xs font-extrabold uppercase tracking-wider text-cobalt">
               CAM KẾT CHUẨN MỰC
             </span>
             <h3 className="m-0 text-3xl sm:text-4xl font-extrabold text-ink mt-2">
@@ -327,19 +327,19 @@ export default function LandingPage() {
             {TRANSPARENCY_PRINCIPLES.map((item) => (
               <div
                 key={item.title}
-                className="rounded-3xl border border-card-border/85 bg-card p-7 sm:p-8 shadow-sm hover:shadow-md hover:border-blue/40 transition-press duration-300 flex flex-col justify-between group"
+                className="rounded-3xl border border-card-border/85 bg-card p-7 sm:p-8 shadow-sm hover:shadow-md hover:border-cobalt/40 transition-press duration-300 flex flex-col justify-between group"
               >
                 <div>
                   <div className="flex items-center justify-between gap-4 mb-4">
                     <div className="w-11 h-11 rounded-2xl bg-page border border-card-border/80 flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
                       {item.icon}
                     </div>
-                    <span className="text-[11px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full bg-blue/5 text-blue border border-blue/15">
+                    <span className="text-micro font-extrabold uppercase tracking-wider px-3 py-1 rounded-full bg-cobalt/5 text-cobalt border border-cobalt/15">
                       {item.tag}
                     </span>
                   </div>
 
-                  <h4 className="m-0 text-xl font-bold text-ink group-hover:text-blue transition-colors">
+                  <h4 className="m-0 text-xl font-bold text-ink group-hover:text-cobalt transition-colors">
                     {item.title}
                   </h4>
                   <p className="mt-2.5 mb-0 text-sm text-secondary leading-relaxed">
@@ -348,11 +348,11 @@ export default function LandingPage() {
                 </div>
 
                 <div className="mt-6 pt-4 border-t border-card-border/50 flex items-center justify-between text-xs font-semibold text-secondary">
-                  <span className="text-blue font-bold flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue" />
+                  <span className="text-cobalt font-bold flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-cobalt" />
                     {item.badge}
                   </span>
-                  <span className="text-[11px] uppercase tracking-wider text-secondary">Tiêu chuẩn chuẩn hoá</span>
+                  <span className="text-micro uppercase tracking-wider text-secondary">Tiêu chuẩn chuẩn hoá</span>
                 </div>
               </div>
             ))}
@@ -365,7 +365,7 @@ export default function LandingPage() {
               <span>Mục tiêu tính theo hồ sơ của bạn</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-blue" />
+              <span className="w-2 h-2 rounded-full bg-cobalt" />
               <span>Định danh thực phẩm USDA FoodData Central</span>
             </div>
             <div className="flex items-center gap-2">
@@ -390,7 +390,7 @@ export default function LandingPage() {
           <div className="mt-8 flex flex-wrap gap-4 justify-center">
             <Link
               href="/signup"
-              className="min-h-[50px] px-8 rounded-full bg-blue text-on-accent text-base font-bold inline-flex items-center justify-center no-underline hover:bg-blue/90 active:scale-[0.97] motion-reduce:active:scale-100 transition-press shadow-md"
+              className="min-h-[50px] px-8 rounded-full bg-cobalt text-on-accent text-base font-bold inline-flex items-center justify-center no-underline hover:bg-cobalt/90 active:scale-[0.97] motion-reduce:active:scale-100 transition-press shadow-md"
             >
               Đăng ký miễn phí
             </Link>

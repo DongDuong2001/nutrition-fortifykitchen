@@ -534,7 +534,7 @@ function AddFoodInner() {
       <div ref={behindRef} data-add-behind={cameFromHome() ? "home" : "light"} aria-hidden="true" inert className="pointer-events-none fixed inset-0 select-none overflow-hidden">
         {backdrop}
       </div>
-      <div ref={scrimRef} aria-hidden="true" data-state={sheetState} onClick={() => handleClose()} className="m-scrim m-scrim-dialog fixed inset-0 z-40 bg-scrim" />
+      <div ref={scrimRef} aria-hidden="true" data-state={sheetState} onClick={() => handleClose()} className="m-scrim m-scrim-dialog fixed inset-0 z-nav bg-scrim" />
 
       {/* ============================================================== */}
       {/* DESKTOP MODAL OVER TODAY (≥1024px)                             */}
@@ -543,7 +543,7 @@ function AddFoodInner() {
         <div
           ref={desktopWrapRef}
           onClick={() => handleClose()}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 z-sheet flex items-center justify-center p-4"
         >
           <div
             ref={dialogRef}
@@ -553,7 +553,7 @@ function AddFoodInner() {
             data-sheet-route
             data-state={sheetState}
             onClick={(e) => e.stopPropagation()}
-            className="m-pop w-[min(900px,100%-32px)] bg-card border border-card-border rounded-[18px] p-6 shadow-2xl flex flex-col gap-4 max-h-[92vh] overflow-y-auto"
+            className="m-pop w-[min(900px,100%-32px)] bg-card border border-card-border rounded-card p-6 shadow-2xl flex flex-col gap-4 max-h-[92vh] overflow-y-auto"
           >
             {/* The page's heading (Hôm nay behind is a picture without one since cc-55b), as the phone sheet has */}
             <h1 className="sr-only">Thêm món</h1>
@@ -564,7 +564,7 @@ function AddFoodInner() {
                   type="button"
                   onClick={() => setSwitcherOpen(true)}
                   aria-haspopup="listbox"
-                  className="min-h-[44px] px-2 -ml-2 rounded-lg bg-transparent border-0 text-text font-normal text-lg flex items-center gap-2 cursor-pointer hover:bg-surface active:scale-[0.98] transition-press"
+                  className="min-h-11 px-2 -ml-2 rounded-lg bg-transparent border-0 text-text font-normal text-lg flex items-center gap-2 cursor-pointer hover:bg-surface active:scale-[0.98] transition-press"
                 >
                   <span id="dlg-title">
                     Thêm vào: <strong className="font-bold">{mealNameVi}</strong>{dayText}
@@ -647,7 +647,7 @@ function AddFoodInner() {
               notice={dishNotice}
                     isSubmitting={isSubmitting}
                     showMicros={true}
-                    className="rounded-[18px] border border-card-border bg-card p-4"
+                    className="rounded-card border border-card-border bg-card p-4"
                   />
                 ) : (
                   <div className="h-full flex items-center justify-center text-center text-sm text-secondary p-4">
@@ -679,10 +679,10 @@ function AddFoodInner() {
           data-sheet-route
           data-state={sheetState}
           data-under-sheet={selectedFood !== null && !isDesktop ? "" : undefined}
-          className="m-sheet m-vt-sheet fixed inset-x-0 bottom-0 top-[8dvh] z-40 flex flex-col rounded-t-[20px] bg-card shadow-xl"
+          className="m-sheet m-vt-sheet fixed inset-x-0 bottom-0 top-[8dvh] z-nav flex flex-col rounded-t-sheet bg-card shadow-xl"
         >
           {/* Pinned header: grabber, meal switcher + close, search, chips. cc-62 (S15): the list fades out under it (a 12 px edge) */}
-          <div className="relative z-10 flex shrink-0 flex-col gap-3 px-4 pt-3 pb-3 after:pointer-events-none after:absolute after:inset-x-0 after:top-full after:h-3 after:bg-linear-to-b after:from-card after:to-transparent">
+          <div className="relative z-sticky flex shrink-0 flex-col gap-3 px-4 pt-3 pb-3 after:pointer-events-none after:absolute after:inset-x-0 after:top-full after:h-3 after:bg-linear-to-b after:from-card after:to-transparent">
             {/* Grabber: drag it down to close (a 24 px strip around the bar) */}
             <div
               aria-hidden="true"
@@ -704,7 +704,7 @@ function AddFoodInner() {
                   onClick={() => setSwitcherOpen(true)}
                   aria-haspopup="listbox"
                   aria-label="Đổi bữa"
-                  className="-ml-2 flex min-h-[44px] cursor-pointer items-center gap-2 rounded-lg border-0 bg-transparent px-2 text-lg text-text active:scale-[0.98] transition-press"
+                  className="-ml-2 flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border-0 bg-transparent px-2 text-lg text-text active:scale-[0.98] transition-press"
                 >
                   <span>
                     Thêm vào: <strong className="font-bold">{mealNameVi}</strong>{dayText}

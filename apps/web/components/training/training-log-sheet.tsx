@@ -94,11 +94,11 @@ function LogBody({ item, foods, onLogged }: { item: TrainingCheckItem; foods: re
     <div className="flex flex-col gap-3">
       {choices.length > 1 && (
         <fieldset data-align-group="training-log" className="m-0 flex flex-col border-0 p-0">
-          <legend className="px-1 pb-1 text-[13px] font-semibold text-secondary">Chọn loại</legend>
+          <legend className="px-1 pb-1 text-cap font-semibold text-secondary">Chọn loại</legend>
           {choices.map((c) => (
             <label
               key={c.key}
-              className={`flex min-h-[48px] items-center gap-3 border-t border-divider px-1 first-of-type:border-t-0 ${loggable(c) ? "cursor-pointer" : "cursor-default"}`}
+              className={`flex min-h-12 items-center gap-3 border-t border-divider px-1 first-of-type:border-t-0 ${loggable(c) ? "cursor-pointer" : "cursor-default"}`}
             >
               <input
                 type="radio"
@@ -107,11 +107,11 @@ function LogBody({ item, foods, onLogged }: { item: TrainingCheckItem; foods: re
                 checked={choiceKey === c.key}
                 disabled={!loggable(c)}
                 onChange={() => setChoiceKey(c.key)}
-                className="h-[22px] w-[22px] shrink-0 accent-blue"
+                className="h-[22px] w-[22px] shrink-0 accent-cobalt"
               />
               <span className="flex min-w-0 flex-1 flex-col py-1">
                 <span className={`text-sm font-semibold ${loggable(c) ? "text-text" : "text-secondary"}`}>{c.label}</span>
-                {c.missing.length > 0 && <span className="text-[13px] leading-snug text-secondary">Chưa có {c.missing.join(", ")} trong danh mục</span>}
+                {c.missing.length > 0 && <span className="text-cap leading-snug text-secondary">Chưa có {c.missing.join(", ")} trong danh mục</span>}
               </span>
             </label>
           ))}
@@ -218,7 +218,7 @@ function MixPanel({ item, redBull, matMia, onLogged }: { item: TrainingCheckItem
   );
 
   return (
-    <div className="flex flex-col gap-3 rounded-[18px] border border-card-border bg-surface p-4">
+    <div className="flex flex-col gap-3 rounded-card border border-card-border bg-surface p-4">
       {area(redBull, rbInput, setRbInput, rbLabel, setRbLabel)}
       <div className="border-t border-card-border pt-3">{area(matMia, mmInput, setMmInput, mmLabel, setMmLabel)}</div>
       <p role="status" data-align-group="training-mix" className="m-0 border-t border-card-border pt-3 text-sm font-semibold tabular-nums text-text">

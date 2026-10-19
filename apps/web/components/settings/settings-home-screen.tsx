@@ -23,20 +23,20 @@ function ProfileHero() {
   return (
     <Link
       href="/settings/profile"
-      className="flex flex-col gap-3 rounded-[18px] bg-surface-dark p-4 text-on-dark no-underline active:scale-[0.97] transition-press motion-reduce:transition-none motion-reduce:active:scale-100"
+      className="flex flex-col gap-3 rounded-card bg-surface-dark p-4 text-on-dark no-underline active:scale-[0.97] transition-press motion-reduce:transition-none motion-reduce:active:scale-100"
     >
       <span className="flex items-start justify-between gap-3">
         <span className="flex min-w-0 flex-col gap-1">
           <span className="break-words text-base font-bold">{profileTitle(profile)}</span>
-          <span className="text-[13px] leading-snug text-muted-subtitle">{profileSummary(profile)}</span>
+          <span className="text-cap leading-snug text-muted-subtitle">{profileSummary(profile)}</span>
         </span>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="mt-1 shrink-0 text-muted-subtitle" aria-hidden="true">
           <path d="M9 5l7 7-7 7" />
         </svg>
       </span>
       <span className="flex flex-col gap-1">
-        <span className="text-[13px] font-semibold text-muted-subtitle">Mục tiêu mỗi ngày</span>
-        <span className="font-display text-[34px] font-black italic leading-none tabular-nums text-sky">
+        <span className="text-cap font-semibold text-muted-subtitle">Mục tiêu mỗi ngày</span>
+        <span className="font-display text-display font-black italic leading-none tabular-nums text-sky">
           {targetRangeText(targets.calories, "kcal")}
         </span>
         <span className="font-display text-2xl font-bold leading-none tabular-nums text-on-dark">
@@ -50,16 +50,16 @@ function ProfileHero() {
 // The Pro offer: a light card with one outline pill, so the profile card stays the one dark accent
 function ProOffer() {
   return (
-    <section aria-labelledby="settings-pro-title" className="flex flex-col gap-3 rounded-[18px] lg:shadow-card border border-card-border bg-card p-4 text-text">
+    <section aria-labelledby="settings-pro-title" className="flex flex-col gap-3 rounded-card lg:shadow-card border border-card-border bg-card p-4 text-text">
       <div className="flex flex-col gap-1">
         <h2 id="settings-pro-title" className="m-0 text-base font-bold">
           H1T MICRO Pro
         </h2>
-        <p className="m-0 text-[13px] leading-snug text-secondary">Xem các gói và quyền lợi của tài khoản</p>
+        <p className="m-0 text-cap leading-snug text-secondary">Xem các gói và quyền lợi của tài khoản</p>
       </div>
       <Link
         href="/paywall"
-        className="inline-flex min-h-[44px] items-center self-start rounded-full border border-card-border bg-card px-5 text-[15px] font-bold text-text no-underline active:scale-[0.97] transition-press motion-reduce:transition-none motion-reduce:active:scale-100"
+        className="inline-flex min-h-11 items-center self-start rounded-full border border-card-border bg-card px-5 text-callout font-bold text-text no-underline active:scale-[0.97] transition-press motion-reduce:transition-none motion-reduce:active:scale-100"
       >
         Xem gói
       </Link>
@@ -134,9 +134,9 @@ export function SettingsHomeScreen() {
           </>
         ) : (
           <div aria-busy="true" aria-live="polite" className="flex flex-col gap-4 lg:col-span-2">
-            <div className="h-[160px] rounded-[18px] bg-divider animate-pulse motion-reduce:animate-none" />
-            <div className="h-[120px] rounded-[18px] bg-divider animate-pulse motion-reduce:animate-none" />
-            <div className="h-[200px] rounded-[18px] bg-divider animate-pulse motion-reduce:animate-none" />
+            <div className="h-[160px] rounded-card bg-divider animate-pulse motion-reduce:animate-none" />
+            <div className="h-[120px] rounded-card bg-divider animate-pulse motion-reduce:animate-none" />
+            <div className="h-[200px] rounded-card bg-divider animate-pulse motion-reduce:animate-none" />
           </div>
         )}
       </main>

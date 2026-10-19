@@ -36,12 +36,12 @@ export function DesktopIntroBanner() {
   return (
     <section
       aria-label="Giới thiệu về H1T MICRO"
-      className="hidden lg:block mx-3 mt-2 mb-1 rounded-[18px] border border-card-border bg-card p-5 text-text shadow-xs"
+      className="hidden lg:block mx-3 mt-2 mb-1 rounded-card border border-card-border bg-card p-5 text-text shadow-xs"
     >
       {collapsed ? (
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 text-sm">
-            <span className="font-display italic font-black text-blue">H1T MICRO</span>
+            <span className="font-display italic font-black text-cobalt">H1T MICRO</span>
             <span className="text-secondary font-medium">
               Theo dõi 22 vi chất và năng lượng mỗi ngày.
             </span>
@@ -50,7 +50,7 @@ export function DesktopIntroBanner() {
             type="button"
             onClick={toggleCollapsed}
             aria-expanded="false"
-            className="min-h-[44px] px-3 inline-flex items-center text-xs font-bold text-blue hover:underline bg-transparent border-0 cursor-pointer active:scale-[0.97] transition-press motion-reduce:active:scale-100"
+            className="min-h-11 px-3 inline-flex items-center text-xs font-bold text-cobalt hover:underline bg-transparent border-0 cursor-pointer active:scale-[0.97] transition-press motion-reduce:active:scale-100"
           >
             Xem giới thiệu
           </button>
@@ -60,7 +60,7 @@ export function DesktopIntroBanner() {
           <div className="flex items-start justify-between gap-4">
             <div className="flex flex-col gap-1">
               <div className="inline-flex items-center gap-2">
-                <span className="text-[11px] font-extrabold uppercase tracking-wider text-blue">
+                <span className="text-micro font-extrabold uppercase tracking-wider text-cobalt">
                   Khoa học dinh dưỡng &amp; Vi chất
                 </span>
                 <span className="text-xs text-secondary">·</span>
@@ -78,7 +78,7 @@ export function DesktopIntroBanner() {
               type="button"
               onClick={toggleCollapsed}
               aria-expanded="true"
-              className="min-h-[44px] px-3 shrink-0 inline-flex items-center text-xs font-semibold text-secondary hover:text-text bg-transparent border-0 cursor-pointer active:scale-[0.97] transition-press motion-reduce:active:scale-100"
+              className="min-h-11 px-3 shrink-0 inline-flex items-center text-xs font-semibold text-secondary hover:text-text bg-transparent border-0 cursor-pointer active:scale-[0.97] transition-press motion-reduce:active:scale-100"
             >
               Thu gọn
             </button>
@@ -111,13 +111,13 @@ export function DesktopIntroBanner() {
             <div className="flex items-center gap-3">
               <Link
                 href="/add"
-                className="min-h-[44px] px-5 rounded-full bg-blue text-on-accent font-bold text-xs inline-flex items-center justify-center no-underline hover:bg-blue/90 active:scale-[0.97] motion-reduce:active:scale-100 transition-press shadow-xs"
+                className="min-h-11 px-5 rounded-full bg-cobalt text-on-accent font-bold text-xs inline-flex items-center justify-center no-underline hover:bg-cobalt/90 active:scale-[0.97] motion-reduce:active:scale-100 transition-press shadow-xs"
               >
                 Thêm món vào bữa ăn
               </Link>
               <Link
                 href="/micros"
-                className="min-h-[44px] px-4 rounded-full bg-card border border-card-border text-text font-bold text-xs inline-flex items-center justify-center no-underline hover:bg-surface active:scale-[0.97] motion-reduce:active:scale-100 transition-press"
+                className="min-h-11 px-4 rounded-full bg-card border border-card-border text-text font-bold text-xs inline-flex items-center justify-center no-underline hover:bg-surface active:scale-[0.97] motion-reduce:active:scale-100 transition-press"
               >
                 Khám phá 22 vi chất
               </Link>
@@ -125,13 +125,13 @@ export function DesktopIntroBanner() {
             <div className="flex items-center gap-4">
               <Link
                 href="/landing"
-                className="min-h-[44px] px-2 text-xs font-semibold text-blue hover:underline inline-flex items-center"
+                className="min-h-11 px-2 text-xs font-semibold text-cobalt hover:underline inline-flex items-center"
               >
                 Trang giới thiệu đầy đủ →
               </Link>
               <Link
                 href="/settings/targets"
-                className="min-h-[44px] px-2 text-xs font-semibold text-secondary hover:text-text inline-flex items-center"
+                className="min-h-11 px-2 text-xs font-semibold text-secondary hover:text-text inline-flex items-center"
               >
                 Mục tiêu dinh dưỡng cá nhân →
               </Link>

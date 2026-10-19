@@ -55,7 +55,7 @@ export default function RichInPage() {
           {rows.length === 0 && (pending || failed) ? (
             <CatalogStatus failed={failed} onRetry={retry} />
           ) : rows.length === 0 ? (
-            <p className="m-0 py-3 text-[13px] leading-snug text-secondary">Chưa có món nào có dữ liệu {name}. Bạn có thể tự tạo món mới từ nhãn bao bì.</p>
+            <p className="m-0 py-3 text-cap leading-snug text-secondary">Chưa có món nào có dữ liệu {name}. Bạn có thể tự tạo món mới từ nhãn bao bì.</p>
           ) : (
             rows.map((row, i) => (
               <FoodRowLink

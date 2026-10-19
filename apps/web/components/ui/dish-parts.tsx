@@ -45,7 +45,7 @@ const kcalOf = (part: EditPart, grams: number) => (part.food ? calculateMacroPre
 function GramField({ name, grams, onChange }: { name: string; grams: number; onChange: (grams: number) => void }) {
   const [draft, setDraft] = useState<string | null>(null);
   return (
-    <label className="flex h-11 w-[72px] items-center gap-1 rounded-xl bg-surface px-2 text-text focus-within:ring-2 focus-within:ring-blue">
+    <label className="flex h-11 w-[72px] items-center gap-1 rounded-xl bg-surface px-2 text-text focus-within:ring-2 focus-within:ring-cobalt">
       <input
         inputMode="decimal"
         aria-label={`Số gam ${name}`}
@@ -68,7 +68,7 @@ function GramField({ name, grams, onChange }: { name: string; grams: number; onC
         }}
         className="min-w-0 flex-1 border-0 bg-transparent p-0 text-right text-base font-semibold tabular-nums outline-none"
       />
-      <span className="text-[13px] text-secondary">g</span>
+      <span className="text-cap text-secondary">g</span>
     </label>
   );
 }
@@ -169,10 +169,10 @@ export function DishParts({ food, portionGrams, onEdit }: DishPartsProps) {
               // Storage unavailable
             }
           }}
-          className="flex min-h-[48px] w-full cursor-pointer items-center justify-between gap-3 border-0 bg-transparent px-4 text-left text-text"
+          className="flex min-h-12 w-full cursor-pointer items-center justify-between gap-3 border-0 bg-transparent px-4 text-left text-text"
         >
-          <span className="text-[15px] font-bold">Thành phần</span>
-          <span className="flex items-center gap-2 text-[13px] text-secondary">
+          <span className="text-callout font-bold">Thành phần</span>
+          <span className="flex items-center gap-2 text-cap text-secondary">
             {edited ? "Đã chỉnh" : `${parts.length} nguyên liệu`}
             <svg className="m-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M6 9l6 6 6-6" />
@@ -181,9 +181,9 @@ export function DishParts({ food, portionGrams, onEdit }: DishPartsProps) {
         </button>
         <Expand open={open} id={panelId}>
           <Expand open={edited}>
-            <div className="flex min-h-11 items-center justify-between gap-3 border-t border-divider px-4 text-[13px] text-secondary">
+            <div className="flex min-h-11 items-center justify-between gap-3 border-t border-divider px-4 text-cap text-secondary">
               <span>Đã chỉnh so với công thức</span>
-              <button type="button" onClick={restore} className="flex min-h-11 cursor-pointer items-center border-0 bg-transparent p-0 text-[13px] font-bold text-blue">
+              <button type="button" onClick={restore} className="flex min-h-11 cursor-pointer items-center border-0 bg-transparent p-0 text-cap font-bold text-cobalt">
                 Khôi phục
               </button>
             </div>
@@ -198,7 +198,7 @@ export function DishParts({ food, portionGrams, onEdit }: DishPartsProps) {
                 <li
                   key={part.key}
                   data-align-group="dish-parts"
-                  className={`grid min-h-[56px] grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 border-t border-divider px-4 py-2 text-[13px] ${editable && grams <= 0 ? "opacity-60" : ""}`}
+                  className={`grid min-h-14 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 border-t border-divider px-4 py-2 text-cap ${editable && grams <= 0 ? "opacity-60" : ""}`}
                 >
                   <span className="flex min-w-0 flex-col gap-0.5">
                     <span className="break-words font-semibold leading-snug text-text">{label}</span>
@@ -234,7 +234,7 @@ export function DishParts({ food, portionGrams, onEdit }: DishPartsProps) {
               );
             })}
             {editable && (
-              <li data-align-group="dish-parts" className="grid min-h-[48px] grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 border-t border-divider px-4 py-2 text-[13px] font-bold text-text">
+              <li data-align-group="dish-parts" className="grid min-h-12 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 border-t border-divider px-4 py-2 text-cap font-bold text-text">
                 <span>Tổng</span>
                 <span className="tabular-nums">
                   {formatAmount(totals.grams, "g")} g{typeof totalKcal === "number" ? ` · ${kcalValue(totalKcal)} kcal` : ""}

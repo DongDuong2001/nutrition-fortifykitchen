@@ -53,7 +53,7 @@ export default function DeleteAccountPage() {
 
         <main className="w-full max-w-[560px] mx-auto px-4 pt-4 pb-4 flex flex-col gap-3">
           {/* Warning card */}
-          <div className="bg-card border border-card-border rounded-[18px] lg:shadow-card p-4 md:p-4 flex flex-col gap-2">
+          <div className="bg-card border border-card-border rounded-card lg:shadow-card p-4 md:p-4 flex flex-col gap-2">
             <div className="flex gap-3 items-start">
               <svg
                 width="28"
@@ -70,7 +70,7 @@ export default function DeleteAccountPage() {
                 <path d="M12 3.5 2.5 20h19z" />
                 <path d="M12 10v4.5M12 17.2v.1" />
               </svg>
-              <div className="text-[15px] font-bold leading-[1.4] text-text">
+              <div className="text-callout font-bold leading-[1.4] text-text">
                 Xóa vĩnh viễn nhật ký, món tự tạo và hồ sơ. Không thể khôi phục.
               </div>
             </div>
@@ -85,13 +85,13 @@ export default function DeleteAccountPage() {
           <button
             type="button"
             onClick={handleExportCsv}
-            className="w-full h-12 rounded-full border border-card-border bg-card text-ink text-[15px] font-semibold hover:bg-surface m-tint transition-transform cursor-pointer"
+            className="w-full h-12 rounded-full border border-card-border bg-card text-ink text-callout font-semibold hover:bg-surface m-tint transition-transform cursor-pointer"
           >
             Tải dữ liệu về (CSV)
           </button>
 
           {/* Confirmation input */}
-          <label className="flex flex-col gap-2 text-[15px] font-bold text-text">
+          <label className="flex flex-col gap-2 text-callout font-bold text-text">
             Gõ Xóa để xác nhận
             <input
               type="text"
@@ -99,7 +99,7 @@ export default function DeleteAccountPage() {
               onChange={(e) => setConfirmationText(e.target.value)}
               placeholder="Xóa"
               autoComplete="off"
-              className="h-[52px] rounded-xl border-2 border-grabber bg-surface px-4 text-lg font-semibold text-ink outline-none focus:border-blue transition-colors"
+              className="h-[52px] rounded-xl border-2 border-grabber bg-surface px-4 text-lg font-semibold text-ink outline-none focus:border-cobalt transition-colors"
             />
           </label>
         </main>
@@ -131,7 +131,7 @@ export default function DeleteAccountPage() {
 
         <Link
           href="/settings"
-          className="no-underline h-11 flex items-center justify-center text-ink text-[15px] font-semibold hover:opacity-80 active:scale-[0.97] transition-press"
+          className="no-underline h-11 flex items-center justify-center text-ink text-callout font-semibold hover:opacity-80 active:scale-[0.97] transition-press"
         >
           Hủy
         </Link>

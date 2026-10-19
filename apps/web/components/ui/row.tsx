@@ -35,12 +35,12 @@ export function Row({
         </span>
       )}
       <div className="flex-1 flex flex-col gap-0.5 min-w-0">
-        <span className="text-[15px] text-text font-normal truncate">{label}</span>
-        {hint && <span className="text-[13px] text-secondary leading-tight">{hint}</span>}
+        <span className="text-callout text-text font-normal truncate">{label}</span>
+        {hint && <span className="text-cap text-secondary leading-tight">{hint}</span>}
       </div>
 
       {value && (
-        <span className="font-semibold text-text text-[15px] tabular-nums shrink-0">
+        <span className="font-semibold text-text text-callout tabular-nums shrink-0">
           {value}
         </span>
       )}
@@ -65,7 +65,7 @@ export function Row({
     </>
   );
 
-  const containerClasses = `flex items-center gap-2 min-h-[48px] py-1.5 text-text no-underline select-none transition-colors ${
+  const containerClasses = `flex items-center gap-2 min-h-12 py-1.5 text-text no-underline select-none transition-colors ${
     withBorderTop ? "border-t border-divider" : ""
   } ${className}`;
 

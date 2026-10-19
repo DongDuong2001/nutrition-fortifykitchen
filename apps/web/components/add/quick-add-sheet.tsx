@@ -17,7 +17,7 @@ export interface QuickAddSheetProps {
 const EMPTY: QuickEntryInput = { name: "", kcal: "", protein: "", carbs: "", fat: "" };
 
 const fieldClass = (invalid: boolean) =>
-  `h-12 w-full rounded-xl border-2 bg-surface px-3 text-base text-text outline-none transition-colors focus:border-blue ${
+  `h-12 w-full rounded-xl border-2 bg-surface px-3 text-base text-text outline-none transition-colors focus:border-cobalt ${
     invalid ? "border-destructive" : "border-card-border"
   }`;
 const numberClass = `${fieldClass(false)} text-right font-bold tabular-nums`;
@@ -61,7 +61,7 @@ export function QuickAddSheet({ open, onClose, mealName, onSubmit }: QuickAddShe
   return (
     <Sheet open={open} onClose={onClose} title="Chỉ thêm kcal" titleId="quick-add-title" desktopDialog>
       <form onSubmit={submit} noValidate className="flex flex-col gap-3">
-        <p className="m-0 px-1 text-[13px] leading-snug text-secondary">
+        <p className="m-0 px-1 text-cap leading-snug text-secondary">
           Thêm vào {mealName}. Vi chất của lần ghi này chưa có dữ liệu.
         </p>
 

@@ -7,6 +7,7 @@ import { describe, expect, it } from "vitest";
 const ROOT = path.resolve(__dirname, "../..");
 const SKIP_TYPES = /\btype=["'](?:checkbox|radio|hidden|range|file|color|submit|button)["']/;
 const SIZE_REM = { xs: 0.75, sm: 0.875, base: 1, lg: 1.125, xl: 1.25 } as const;
+const SCALE_PX = { "2xs": 10, micro: 11, cap: 13, callout: 15, "body-lg": 17, "title-sm": 22, title: 26, headline: 28, "display-sm": 32, display: 34 } as const;
 
 function sourceFiles(dir: string, out: string[] = []): string[] {
   for (const name of readdirSync(dir)) {
@@ -69,6 +70,11 @@ export function textSizesPx(classes: string): number[] {
     if (named) {
       const key = named[1] as string;
       sizes.push((key in SIZE_REM ? SIZE_REM[key as keyof typeof SIZE_REM] : 1.5) * 16);
+      continue;
+    }
+    // cc-66: the rem type scale in app/globals.css (@theme)
+    if (token.startsWith("text-") && token.slice(5) in SCALE_PX) {
+      sizes.push(SCALE_PX[token.slice(5) as keyof typeof SCALE_PX]);
       continue;
     }
     const arbitrary = /^text-\[(\d+(?:\.\d+)?)(px|rem)\]$/.exec(token);

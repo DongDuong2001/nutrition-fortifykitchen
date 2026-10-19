@@ -39,13 +39,13 @@ export function SyncList({ open, onClose }: { open: boolean; onClose: () => void
     <Sheet open={open} onClose={onClose} title="Chưa lưu" titleId="sync-list-title" desktopDialog>
       <div className="flex flex-col gap-3 py-1">
         {items.length === 0 ? (
-          <p className="m-0 text-[15px] text-secondary">Đã lưu hết.</p>
+          <p className="m-0 text-callout text-secondary">Đã lưu hết.</p>
         ) : (
           <ul className="m-0 flex list-none flex-col p-0" data-sync-list>
             {items.map((item) => (
               <li key={item.key} className="flex min-h-11 flex-col justify-center border-b border-divider py-2 last:border-b-0">
-                <span className="text-[15px] font-semibold leading-snug text-text">{labelOf(item, getEntry(item.id)?.name ?? null)}</span>
-                <span className="text-[13px] leading-snug text-secondary">{statusOf(item)}</span>
+                <span className="text-callout font-semibold leading-snug text-text">{labelOf(item, getEntry(item.id)?.name ?? null)}</span>
+                <span className="text-cap leading-snug text-secondary">{statusOf(item)}</span>
               </li>
             ))}
           </ul>

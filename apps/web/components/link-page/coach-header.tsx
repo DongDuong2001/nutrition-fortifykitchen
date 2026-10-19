@@ -37,12 +37,12 @@ export function CoachHeader() {
           <div
             role="img"
             aria-label={`Ảnh đại diện ${COACH.name}`}
-            className={`${AVATAR_CLASS} flex items-center justify-center bg-ink font-display text-[20px] font-extrabold italic text-sky lg:text-[24px]`}
+            className={`${AVATAR_CLASS} flex items-center justify-center bg-ink font-display text-[1.25rem] font-extrabold italic text-sky lg:text-[1.5rem]`}
           >
             {COACH.initials}
           </div>
         )}
-        <h1 className="m-0 font-display text-[32px] font-extrabold italic uppercase leading-[0.95] text-ink lg:text-[40px]">{COACH.name}</h1>
+        <h1 className="m-0 font-display text-display-sm font-extrabold italic uppercase leading-[0.95] text-ink lg:text-[2.5rem]">{COACH.name}</h1>
       </div>
       <div className="flex items-center justify-center gap-[2px] lg:gap-1">
         {COACH_SOCIAL.map((s) => (
@@ -51,7 +51,7 @@ export function CoachHeader() {
           </a>
         ))}
       </div>
-      <p className="m-0 text-sm font-bold text-secondary-strong lg:text-[15px]">{COACH.tagline}</p>
+      <p className="m-0 text-sm font-bold text-secondary-strong lg:text-callout">{COACH.tagline}</p>
     </header>
   );
 }

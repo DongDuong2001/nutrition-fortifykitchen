@@ -74,7 +74,7 @@ function CompareInner() {
         {compare ? (
           <>
             <div className="flex flex-col gap-2">
-              <span className="text-[13px] font-semibold text-secondary">Tính theo</span>
+              <span className="text-cap font-semibold text-secondary">Tính theo</span>
               <ChipGroup
                 columns={2}
                 tone="light"

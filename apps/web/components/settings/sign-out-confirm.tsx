@@ -32,9 +32,9 @@ export function SignOutConfirm({
   return (
     <Sheet open={open} onClose={onClose} title="Đăng xuất?" titleId="sign-out-title" desktopDialog>
       <div className="flex flex-col gap-3 py-1">
-        <p className="m-0 text-[15px] leading-snug text-text">Còn {count} mục chưa đồng bộ. Đăng xuất bây giờ sẽ xóa chúng khỏi máy này.</p>
+        <p className="m-0 text-callout leading-snug text-text">Còn {count} mục chưa đồng bộ. Đăng xuất bây giờ sẽ xóa chúng khỏi máy này.</p>
         {failed && (
-          <p role="alert" className="m-0 text-[13px] leading-snug text-destructive-text">
+          <p role="alert" className="m-0 text-cap leading-snug text-destructive-text">
             Chưa đồng bộ hết được. Kiểm tra mạng rồi thử lại nhé.
           </p>
         )}

@@ -24,8 +24,8 @@ const noSelect: React.CSSProperties = { WebkitUserSelect: "none", userSelect: "n
 function ShareFoodRow({ entry }: { entry: HomeEntry }) {
   return (
     <div className="flex min-h-[30px] w-full items-center justify-between gap-2 border-b border-b-divider px-3 py-1 text-text">
-      <span data-share-wrap className="min-w-0 break-words text-[13px] font-semibold leading-snug">{entry.name}</span>
-      <span className="shrink-0 whitespace-nowrap font-display text-[15px] font-bold leading-none tabular-nums text-text">{portionLabel(entry)}</span>
+      <span data-share-wrap className="min-w-0 break-words text-cap font-semibold leading-snug">{entry.name}</span>
+      <span className="shrink-0 whitespace-nowrap font-display text-callout font-bold leading-none tabular-nums text-text">{portionLabel(entry)}</span>
     </div>
   );
 }
@@ -155,13 +155,13 @@ function FoodRow({
     >
       {/* The name, its markers and, on a line of its own, how it was weighed (cc-53b) */}
       <span className={`flex min-w-0 flex-wrap items-center gap-x-1.5 ${detail ? "py-0.5" : ""}`}>
-        <span className="min-w-0 break-words text-[13px] font-semibold leading-tight line-clamp-2 lg:text-[15px]" title={entry.name}>
+        <span className="min-w-0 break-words text-cap font-semibold leading-tight line-clamp-2 lg:text-callout" title={entry.name}>
           {entry.name}
         </span>
         {missing && (
           <span
             aria-hidden="true"
-            className={`h-1.5 w-1.5 shrink-0 rounded-full ${selected ? "bg-sky" : "bg-muted-dark"}`}
+            className={`h-1.5 w-1.5 shrink-0 rounded-full ${selected ? "bg-sky" : "bg-secondary"}`}
           />
         )}
         {unsaved && (
@@ -169,7 +169,7 @@ function FoodRow({
             aria-hidden="true"
             data-unsaved
             data-tour="unsaved-marker"
-            className={`shrink-0 whitespace-nowrap text-[11px] font-semibold leading-none ${selected ? "text-sky" : "text-secondary"}`}
+            className={`shrink-0 whitespace-nowrap text-micro font-semibold leading-none ${selected ? "text-sky" : "text-secondary"}`}
           >
             Chưa lưu
           </span>
@@ -178,15 +178,15 @@ function FoodRow({
           <span
             aria-hidden="true"
             data-local-only
-            className={`shrink-0 whitespace-nowrap text-[11px] font-semibold leading-none ${selected ? "text-sky" : "text-secondary"}`}
+            className={`shrink-0 whitespace-nowrap text-micro font-semibold leading-none ${selected ? "text-sky" : "text-secondary"}`}
           >
             Chỉ trên máy này
           </span>
         )}
         {/* Today.dc.html: Cân sống, Đã nấu chín · 100 g × 3, Cỡ lớn */}
-        {detail && <span className={`basis-full text-[11px] leading-tight lg:text-[13px] ${selected ? "text-sky" : "text-secondary"}`}>{detail}</span>}
+        {detail && <span className={`basis-full text-micro leading-tight lg:text-cap ${selected ? "text-sky" : "text-secondary"}`}>{detail}</span>}
       </span>
-      <span className={`shrink-0 font-display text-[15px] font-bold leading-none tabular-nums lg:text-[18px] ${selected ? "text-sky" : "text-text"}`}>
+      <span className={`shrink-0 font-display text-callout font-bold leading-none tabular-nums lg:text-[1.125rem] ${selected ? "text-sky" : "text-text"}`}>
         {quantity}
       </span>
     </button>
@@ -206,21 +206,21 @@ export interface SelectProps {
 /** Select mode: a 52 px checkbox row for every food, a 44 px meal header with Chọn cả bữa. */
 function SelectList({ meals, select }: { meals: HomeMeal[]; select: SelectProps }) {
   return (
-    <div className="min-h-0 min-w-0 flex-1 overflow-y-auto bg-paper pb-3">
+    <div className="min-h-0 min-w-0 flex-1 overflow-y-auto bg-page pb-3">
       {meals
         .filter((meal) => meal.entries.length > 0)
         .map((meal) => {
           const all = mealFullySelected(select.ids, meal.entries);
           return (
             <section key={meal.slot} aria-label={meal.fullName}>
-              <div className="sticky top-0 z-10 flex min-h-11 w-full items-center justify-between gap-2 bg-paper-dark px-3 text-text">
-                <span className="text-[11px] font-extrabold leading-none">{meal.label}</span>
+              <div className="sticky top-0 z-sticky flex min-h-11 w-full items-center justify-between gap-2 bg-paper-dark px-3 text-text">
+                <span className="text-micro font-extrabold leading-none">{meal.label}</span>
                 <span className="flex items-center gap-2">
-                  <span className="font-display text-[13px] font-bold leading-none tabular-nums">{kcalLabel(meal.kcal)}</span>
+                  <span className="font-display text-cap font-bold leading-none tabular-nums">{kcalLabel(meal.kcal)}</span>
                   <button
                     type="button"
                     onClick={() => select.onToggleMeal(meal.slot)}
-                    className="inline-flex min-h-11 cursor-pointer items-center border-0 bg-transparent px-1 text-[13px] font-bold text-blue"
+                    className="inline-flex min-h-11 cursor-pointer items-center border-0 bg-transparent px-1 text-cap font-bold text-cobalt"
                   >
                     {all ? "Bỏ chọn bữa" : "Chọn cả bữa"}
                   </button>
@@ -251,8 +251,8 @@ function SelectList({ meals, select }: { meals: HomeMeal[]; select: SelectProps 
                         </svg>
                       )}
                     </span>
-                    <span className="min-w-0 flex-1 break-words text-[13px] font-semibold leading-snug">{entry.name}</span>
-                    <span className={`shrink-0 font-display text-[15px] font-medium leading-none tabular-nums ${checked ? "text-sky" : "text-secondary"}`}>
+                    <span className="min-w-0 flex-1 break-words text-cap font-semibold leading-snug">{entry.name}</span>
+                    <span className={`shrink-0 font-display text-callout font-medium leading-none tabular-nums ${checked ? "text-sky" : "text-secondary"}`}>
                       {portionLabel(entry)}
                     </span>
                   </button>
@@ -346,12 +346,12 @@ export function FoodList({
       {onPullRefresh && !readOnly && <PullIndicator {...pull} />}
       {isEmpty && (
         <div className="flex min-h-11 flex-col items-start px-3 pt-2 lg:flex-row lg:items-center lg:justify-between lg:gap-2 lg:py-2">
-          <p className="m-0 text-[15px] font-semibold text-text">{readOnly ? "Chưa có món nào ngày này" : `Chưa có món nào ${dayWord}`}</p>
+          <p className="m-0 text-callout font-semibold text-text">{readOnly ? "Chưa có món nào ngày này" : `Chưa có món nào ${dayWord}`}</p>
           {canCopyYesterday && (
             <button
               type="button"
               onClick={onCopyYesterday}
-              className="-mx-2 min-h-11 shrink-0 cursor-pointer rounded-full border-0 bg-transparent px-2 text-[13px] font-bold text-blue lg:mx-0"
+              className="-mx-2 min-h-11 shrink-0 cursor-pointer rounded-full border-0 bg-transparent px-2 text-cap font-bold text-cobalt lg:mx-0"
             >
               {copyLabel}
             </button>
@@ -399,10 +399,10 @@ export function FoodList({
               }
             }}
             className={`transition-press ${
-              isDropTarget ? "bg-blue/10 ring-2 ring-blue/60 rounded-xl" : ""
+              isDropTarget ? "bg-cobalt/10 ring-2 ring-cobalt/60 rounded-xl" : ""
             }`}
           >
-            <div className={`sticky top-0 z-10 ${pill.wrap}`}>
+            <div className={`sticky top-0 z-sticky ${pill.wrap}`}>
             <div data-ink-pill data-tour="meal-pill" className={`${pill.pill} ${mealSelected ? "bg-cobalt" : "bg-ink"} text-on-dark ${isDropTarget ? "ring-2 ring-sky" : ""}`}>
               <button
                 type="button"
@@ -430,7 +430,7 @@ export function FoodList({
                   data-export="hide"
                   data-tour="meal-add"
                   data-testid="meal-add"
-                  className={`relative flex h-6 shrink-0 items-center text-xs font-bold leading-none no-underline transition-press before:absolute before:-inset-y-2.5 before:-inset-x-2 before:content-[''] hover:text-on-dark focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-60 lg:h-9 lg:text-[13px] lg:before:-inset-y-1 ${
+                  className={`relative flex h-6 shrink-0 items-center text-xs font-bold leading-none no-underline transition-press before:absolute before:-inset-y-2.5 before:-inset-x-2 before:content-[''] hover:text-on-dark focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-60 lg:h-9 lg:text-cap lg:before:-inset-y-1 ${
                     mealSelected ? "text-on-accent focus-visible:outline-on-accent" : "text-sky focus-visible:outline-sky"
                   }`}
                 >
@@ -465,14 +465,14 @@ export function FoodList({
               )
             )}
             {rowsOf(meal).length === 0 && (
-              <p className="m-0 flex h-8 items-center border-b border-b-divider px-3 text-[13px] font-medium text-secondary lg:h-12 lg:text-[15px]">
+              <p className="m-0 flex h-8 items-center border-b border-b-divider px-3 text-cap font-medium text-secondary lg:h-12 lg:text-callout">
                 {readOnly ? "Không có món" : "Chưa ăn"}
               </p>
             )}
           </section>
         );
       })}
-      <p className="m-0 px-3 pt-3 text-[11px] leading-snug text-secondary lg:text-[13px]">
+      <p className="m-0 px-3 pt-3 text-micro leading-snug text-secondary lg:text-cap">
         <span aria-hidden="true">●</span> Thiếu dữ liệu vi chất · chạm tên bữa để xem riêng bữa đó
       </p>
     </div>

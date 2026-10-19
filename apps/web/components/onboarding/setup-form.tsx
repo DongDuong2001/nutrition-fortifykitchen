@@ -148,7 +148,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
         <AppHeader
           variant="sub"
           backHref={isProfile ? "/signin" : "/setup/profile"}
-          actions={<span className="text-[13px] text-muted-subtitle">{isProfile ? "Bước 1 / 2" : "Bước 2 / 2"}</span>}
+          actions={<span className="text-cap text-muted-subtitle">{isProfile ? "Bước 1 / 2" : "Bước 2 / 2"}</span>}
           progress={{ current: isProfile ? 1 : 2, total: 2 }}
           title={isProfile ? "VỀ BẠN" : "MỤC TIÊU"}
           subtitle={isProfile ? "Mục tiêu được tính theo cân nặng và giới tính. Bạn có thể sửa bất cứ lúc nào." : undefined}
@@ -164,18 +164,18 @@ export function SetupForm({ step }: { step: SetupStep }) {
         <form
           onSubmit={handleSubmit}
           noValidate
-          className="flex flex-1 flex-col gap-6 px-4 py-5 lg:w-full lg:max-w-[760px] lg:flex-none lg:rounded-[20px] lg:border lg:border-card-border lg:bg-card lg:p-8"
+          className="flex flex-1 flex-col gap-6 px-4 py-5 lg:w-full lg:max-w-[760px] lg:flex-none lg:rounded-sheet lg:border lg:border-card-border lg:bg-card lg:p-8"
         >
           {/* Desktop heading (≥1024 px) */}
           <div className="hidden flex-col gap-3 lg:flex">
-            <span className="text-[13px] font-semibold text-secondary">{isProfile ? "Bước 1 / 2 · Về bạn" : "Bước 2 / 2 · Mục tiêu"}</span>
+            <span className="text-cap font-semibold text-secondary">{isProfile ? "Bước 1 / 2 · Về bạn" : "Bước 2 / 2 · Mục tiêu"}</span>
             <div className="flex justify-end">
               <span className="font-display text-xl font-black italic uppercase">
-                H1T <span className="text-blue">MICRO</span>
+                H1T <span className="text-cobalt">MICRO</span>
               </span>
             </div>
-            <h1 className="m-0 font-display text-[32px] font-black italic uppercase">VỀ BẠN</h1>
-            <p className="m-0 text-[15px] text-secondary">
+            <h1 className="m-0 font-display text-display-sm font-black italic uppercase">VỀ BẠN</h1>
+            <p className="m-0 text-callout text-secondary">
               Mục tiêu được tính theo cân nặng và giới tính. Bạn có thể sửa bất cứ lúc nào.
             </p>
           </div>
@@ -209,7 +209,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
                 }}
                 placeholder="Tên của bạn"
                 aria-invalid={errors.displayName ? true : undefined}
-                className={`h-[52px] w-full rounded-xl border-2 bg-surface px-4 text-base font-semibold text-text outline-none focus:border-blue ${
+                className={`h-[52px] w-full rounded-xl border-2 bg-surface px-4 text-base font-semibold text-text outline-none focus:border-cobalt ${
                   errors.displayName ? "border-destructive" : "border-grabber"
                 }`}
               />
@@ -244,7 +244,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
                     onBlur={() => checkField("birthYear")}
                     onKeyDown={nextFieldOnEnter}
                     aria-invalid={errors.birthYear ? true : undefined}
-                    className={`h-[52px] w-full rounded-xl border-2 bg-surface px-4 text-base font-semibold tabular-nums text-text outline-none focus:border-blue ${
+                    className={`h-[52px] w-full rounded-xl border-2 bg-surface px-4 text-base font-semibold tabular-nums text-text outline-none focus:border-cobalt ${
                       errors.birthYear ? "border-destructive" : "border-grabber"
                     }`}
                   />
@@ -261,7 +261,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
                     onChange={(e) => update({ weight: e.target.value })}
                     onBlur={() => checkField("weight")}
                     aria-invalid={errors.weight ? true : undefined}
-                    className={`h-[52px] w-full rounded-xl border-2 bg-surface px-4 text-base font-semibold tabular-nums text-text outline-none focus:border-blue ${
+                    className={`h-[52px] w-full rounded-xl border-2 bg-surface px-4 text-base font-semibold tabular-nums text-text outline-none focus:border-cobalt ${
                       errors.weight ? "border-destructive" : "border-grabber"
                     }`}
                   />
@@ -284,13 +284,13 @@ export function SetupForm({ step }: { step: SetupStep }) {
                   writePendingCoachCode(e.target.value);
                 }}
                 placeholder="Mã gồm 10 ký tự"
-                className="h-[52px] w-full rounded-xl border-2 border-grabber bg-surface px-4 text-base font-semibold uppercase text-text outline-none focus:border-blue"
+                className="h-[52px] w-full rounded-xl border-2 border-grabber bg-surface px-4 text-base font-semibold uppercase text-text outline-none focus:border-cobalt"
               />
             </FormRow>
             )}
 
             {draft.sex === "female" && (
-              <Card className="text-[13px] leading-normal text-secondary">
+              <Card className="text-cap leading-normal text-secondary">
                 Với nữ, bạn có thể bật “Gần/đang trong kỳ” trên trang Hồ sơ để tăng mục tiêu Iron lên 28 mg/ngày.
               </Card>
             )}
@@ -314,21 +314,21 @@ export function SetupForm({ step }: { step: SetupStep }) {
                     aria-checked={on}
                     onClick={() => update({ goal: option.goal })}
                     className={`flex min-h-[60px] items-center gap-3 rounded-xl border-2 bg-surface px-4 py-3 text-left text-text lg:min-h-[72px] ${
-                      on ? "border-blue" : "border-divider"
+                      on ? "border-cobalt" : "border-divider"
                     }`}
                   >
                     <span
                       aria-hidden="true"
                       className={`flex h-5 w-5 flex-none items-center justify-center rounded-full border-2 ${
-                        on ? "border-blue" : "border-divider"
+                        on ? "border-cobalt" : "border-divider"
                       }`}
                     >
-                      <span className={`h-2.5 w-2.5 rounded-full ${on ? "bg-blue" : "bg-transparent"}`} />
+                      <span className={`h-2.5 w-2.5 rounded-full ${on ? "bg-cobalt" : "bg-transparent"}`} />
                     </span>
                     <span className="flex flex-1 flex-col">
                       <span className="text-base font-bold">{option.name}</span>
-                      <span className="text-[13px] text-secondary">{option.note}</span>
-                      <span className="text-[13px] tabular-nums text-secondary">{option.rule}</span>
+                      <span className="text-cap text-secondary">{option.note}</span>
+                      <span className="text-cap tabular-nums text-secondary">{option.rule}</span>
                     </span>
                     <span className="text-sm font-semibold tabular-nums">{option.kcal}</span>
                   </button>
@@ -337,7 +337,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
             </div>
 
             <Card className="flex flex-col gap-2">
-              <h3 className="m-0 text-[15px] font-bold">Mục tiêu mỗi ngày</h3>
+              <h3 className="m-0 text-callout font-bold">Mục tiêu mỗi ngày</h3>
               {targetRows.map((row) => (
                 <div
                   key={row.label}
@@ -348,12 +348,12 @@ export function SetupForm({ step }: { step: SetupStep }) {
                   <span className="font-semibold tabular-nums">{row.value}</span>
                 </div>
               ))}
-              <p className="m-0 text-[13px] text-secondary">{targetCaption}</p>
+              <p className="m-0 text-cap text-secondary">{targetCaption}</p>
             </Card>
           </section>
 
           {saveError && (
-            <p role="alert" className="m-0 text-[13px] text-destructive-text">
+            <p role="alert" className="m-0 text-cap text-destructive-text">
               {saveError}
             </p>
           )}

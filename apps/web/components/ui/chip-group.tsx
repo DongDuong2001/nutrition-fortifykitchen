@@ -41,7 +41,7 @@ export function ChipGroup({
   const colCountLg = columnsLg || colCount;
 
   const sizeClass =
-    size === "lg" ? "h-[52px] rounded-full text-base" : "min-h-[44px] rounded-full text-xs";
+    size === "lg" ? "h-[52px] rounded-full text-base" : "min-h-11 rounded-full text-xs";
 
   return (
     <div
@@ -50,7 +50,7 @@ export function ChipGroup({
       className={`grid grid-cols-[repeat(var(--chip-cols),minmax(0,1fr))] lg:grid-cols-[repeat(var(--chip-cols-lg),minmax(0,1fr))] gap-2 w-full ${className}`}
     >
       {leadingInput && (
-        <div className="flex items-center min-h-[44px] w-full">
+        <div className="flex items-center min-h-11 w-full">
           {leadingInput}
         </div>
       )}

@@ -51,7 +51,7 @@ export const NutrientColumn = memo(function NutrientColumn({
   const share = shareKey !== undefined;
   const pill = inkPill(share);
   // From lg the rows match the food list: 48 px, 15 px text (the share image keeps the phone sizes)
-  const lg = share ? "" : "lg:text-[15px]";
+  const lg = share ? "" : "lg:text-callout";
   return (
     <aside
       aria-label="Vi chất"
@@ -62,9 +62,9 @@ export const NutrientColumn = memo(function NutrientColumn({
       {/* cc-61: the verdict covers every group below (N is minerals plus vitamins), so it heads the column, above the first band.
           Whole-pixel heights (a 24 px numeral line, 18 px text lines) keep the whole-row cut of the area clean. */}
       {summary && !share && (
-        <p data-level-summary className="m-0 flex flex-none flex-col gap-1 px-3 py-2 text-[13px] leading-[18px] text-secondary lg:text-[15px] lg:leading-5">
+        <p data-level-summary className="m-0 flex flex-none flex-col gap-1 px-3 py-2 text-cap leading-[1.125rem] text-secondary lg:text-callout lg:leading-5">
           <span className="block h-6 font-semibold text-text lg:h-7">
-            <span className="font-display text-[22px] font-bold leading-none tabular-nums lg:text-[26px]">
+            <span className="font-display text-title-sm font-bold leading-none tabular-nums lg:text-title">
               {summary.reached}/{summary.total}
             </span>{" "}
             đạt
@@ -94,8 +94,8 @@ export const NutrientColumn = memo(function NutrientColumn({
                     data-snap-row
                     className={`flex min-h-7 snap-start items-center justify-between gap-2 px-3 py-1 ${share ? "" : "lg:min-h-12"}`}
                   >
-                    <span data-share-wrap className={`min-w-0 break-words text-[13px] font-semibold leading-snug text-text ${lg}`}>{def.name}</span>
-                    <span className={`shrink-0 text-[13px] leading-tight text-secondary tabular-nums ${lg}`}>
+                    <span data-share-wrap className={`min-w-0 break-words text-cap font-semibold leading-snug text-text ${lg}`}>{def.name}</span>
+                    <span className={`shrink-0 text-cap leading-tight text-secondary tabular-nums ${lg}`}>
                       {amount === null ? "—" : `${formatAmount(amount, def.unit)} ${def.unit}`}
                     </span>
                   </div>
@@ -124,12 +124,12 @@ export const NutrientColumn = memo(function NutrientColumn({
                 >
                   <div className="flex items-baseline justify-between gap-1">
                     <span className="flex min-w-0 items-baseline gap-1 whitespace-nowrap">
-                      <span title={def.name} className={`min-w-0 truncate text-[13px] font-semibold leading-tight text-text ${lg}`}>{def.name}</span>
-                      <span className={`shrink-0 text-[13px] leading-tight text-secondary tabular-nums ${lg}`}>
+                      <span title={def.name} className={`min-w-0 truncate text-cap font-semibold leading-tight text-text ${lg}`}>{def.name}</span>
+                      <span className={`shrink-0 text-cap leading-tight text-secondary tabular-nums ${lg}`}>
                         {value === null ? "—" : `${formatAmount(value, def.unit)} ${def.unit}`}
                       </span>
                     </span>
-                    <span className={`shrink-0 whitespace-nowrap font-display text-[15px] font-bold leading-none text-text tabular-nums ${share ? "" : "lg:text-[18px]"}`}>
+                    <span className={`shrink-0 whitespace-nowrap font-display text-callout font-bold leading-none text-text tabular-nums ${share ? "" : "lg:text-[1.125rem]"}`}>
                       {pctLabel(value, targets[id] ?? null)}
                     </span>
                   </div>
@@ -143,14 +143,14 @@ export const NutrientColumn = memo(function NutrientColumn({
       {share ? (
         <>
           {summary && (
-            <p data-level-summary className="m-0 flex flex-none flex-col gap-0.5 px-3 pt-2 text-[13px] leading-snug text-secondary">
+            <p data-level-summary className="m-0 flex flex-none flex-col gap-0.5 px-3 pt-2 text-cap leading-snug text-secondary">
               <span className="font-bold tabular-nums text-text">
                 {summary.reached}/{summary.total} đạt
               </span>
               {summary.lacking.length > 0 && <span data-share-wrap>Thiếu nhiều nhất: {summary.lacking.join(", ")}</span>}
             </p>
           )}
-          <ul className="m-0 mt-auto grid list-none grid-cols-2 gap-x-2.5 gap-y-1.5 px-3 pt-3 text-[11px] leading-snug text-secondary">
+          <ul className="m-0 mt-auto grid list-none grid-cols-2 gap-x-2.5 gap-y-1.5 px-3 pt-3 text-micro leading-snug text-secondary">
             {shareKey.map((item) => (
               <li key={item.label} className="flex items-center gap-1.5 whitespace-nowrap">
                 <span aria-hidden="true" className="h-[9px] w-[9px] flex-none rounded-[3px]" style={{ backgroundColor: item.color }} />
@@ -164,7 +164,7 @@ export const NutrientColumn = memo(function NutrientColumn({
         <div className="mt-auto flex flex-none flex-col">
           <Link
             href={microsHref}
-            className="relative flex h-8 flex-none items-center px-3 text-[13px] font-bold text-blue no-underline before:absolute before:inset-x-0 before:-inset-y-1.5 before:content-['']"
+            className="relative flex h-8 flex-none items-center px-3 text-cap font-bold text-cobalt no-underline before:absolute before:inset-x-0 before:-inset-y-1.5 before:content-['']"
           >
             Đủ 22 vi chất ›
           </Link>

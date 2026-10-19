@@ -39,8 +39,8 @@ export default function LanguageSettingsPage() {
 
       <main className="flex-1 w-full max-w-[560px] mx-auto px-4 pt-4 pb-8 flex flex-col gap-3">
         {/* Section 1: Ngôn ngữ */}
-        <section className="bg-card border border-card-border rounded-[18px] lg:shadow-card px-4 pt-2 pb-0.5">
-          <h2 id="lg-label" className="m-0 mb-0.5 text-[13px] font-semibold text-secondary">
+        <section className="bg-card border border-card-border rounded-card lg:shadow-card px-4 pt-2 pb-0.5">
+          <h2 id="lg-label" className="m-0 mb-0.5 text-cap font-semibold text-secondary">
             Ngôn ngữ
           </h2>
           <div role="radiogroup" aria-labelledby="lg-label">
@@ -56,7 +56,7 @@ export default function LanguageSettingsPage() {
                   role="radio"
                   aria-checked={isSelected}
                   onClick={() => handleUpdate({ language: r.id as "vi" | "en" })}
-                  className="w-full text-left border-0 border-t border-divider first:border-t-0 bg-transparent text-text min-h-[56px] py-1.5 flex items-center justify-between gap-3 text-base cursor-pointer m-tint transition-transform"
+                  className="w-full text-left border-0 border-t border-divider first:border-t-0 bg-transparent text-text min-h-14 py-1.5 flex items-center justify-between gap-3 text-base cursor-pointer m-tint transition-transform"
                 >
                   <span className="flex-1 font-medium">{r.label}</span>
                   <span
@@ -73,7 +73,7 @@ export default function LanguageSettingsPage() {
                         strokeWidth="2.4"
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        className="text-blue"
+                        className="text-cobalt"
                       >
                         <path d="M5 12.5l4.5 4.5L19 7.5" />
                       </svg>
@@ -86,8 +86,8 @@ export default function LanguageSettingsPage() {
         </section>
 
         {/* Section 2: Đơn vị · Dấu thập phân */}
-        <section className="bg-card border border-card-border rounded-[18px] lg:shadow-card px-4 pt-2 pb-0.5">
-          <h2 id="dc-label" className="m-0 mb-0.5 text-[13px] font-semibold text-secondary">
+        <section className="bg-card border border-card-border rounded-card lg:shadow-card px-4 pt-2 pb-0.5">
+          <h2 id="dc-label" className="m-0 mb-0.5 text-cap font-semibold text-secondary">
             Đơn vị · Dấu thập phân
           </h2>
           <div role="radiogroup" aria-labelledby="dc-label">
@@ -105,7 +105,7 @@ export default function LanguageSettingsPage() {
                   onClick={() =>
                     handleUpdate({ decimalSeparator: r.id as "comma" | "dot" })
                   }
-                  className="w-full text-left border-0 border-t border-divider first:border-t-0 bg-transparent text-text min-h-[56px] py-1.5 flex items-center justify-between gap-3 text-base cursor-pointer m-tint transition-transform"
+                  className="w-full text-left border-0 border-t border-divider first:border-t-0 bg-transparent text-text min-h-14 py-1.5 flex items-center justify-between gap-3 text-base cursor-pointer m-tint transition-transform"
                 >
                   <span className="flex-1 font-medium">{r.label}</span>
                   <span
@@ -122,7 +122,7 @@ export default function LanguageSettingsPage() {
                         strokeWidth="2.4"
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        className="text-blue"
+                        className="text-cobalt"
                       >
                         <path d="M5 12.5l4.5 4.5L19 7.5" />
                       </svg>
@@ -135,8 +135,8 @@ export default function LanguageSettingsPage() {
         </section>
 
         {/* Section 3: Đơn vị · Năng lượng */}
-        <section className="bg-card border border-card-border rounded-[18px] lg:shadow-card px-4 pt-2 pb-0.5">
-          <h2 id="en-label" className="m-0 mb-0.5 text-[13px] font-semibold text-secondary">
+        <section className="bg-card border border-card-border rounded-card lg:shadow-card px-4 pt-2 pb-0.5">
+          <h2 id="en-label" className="m-0 mb-0.5 text-cap font-semibold text-secondary">
             Đơn vị · Năng lượng
           </h2>
           <div role="radiogroup" aria-labelledby="en-label">
@@ -154,7 +154,7 @@ export default function LanguageSettingsPage() {
                   onClick={() =>
                     handleUpdate({ energyUnit: r.id as "kcal" | "kJ" })
                   }
-                  className="w-full text-left border-0 border-t border-divider first:border-t-0 bg-transparent text-text min-h-[56px] py-1.5 flex items-center justify-between gap-3 text-base cursor-pointer m-tint transition-transform"
+                  className="w-full text-left border-0 border-t border-divider first:border-t-0 bg-transparent text-text min-h-14 py-1.5 flex items-center justify-between gap-3 text-base cursor-pointer m-tint transition-transform"
                 >
                   <span className="flex-1 font-medium">{r.label}</span>
                   <span
@@ -171,7 +171,7 @@ export default function LanguageSettingsPage() {
                         strokeWidth="2.4"
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        className="text-blue"
+                        className="text-cobalt"
                       >
                         <path d="M5 12.5l4.5 4.5L19 7.5" />
                       </svg>
@@ -183,7 +183,7 @@ export default function LanguageSettingsPage() {
           </div>
         </section>
 
-        <div role="status" className="text-[13px] text-secondary text-center pt-1">
+        <div role="status" className="text-cap text-secondary text-center pt-1">
           Tự động lưu
         </div>
       </main>

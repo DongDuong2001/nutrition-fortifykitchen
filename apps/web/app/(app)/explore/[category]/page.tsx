@@ -36,7 +36,7 @@ export default function ExploreCategoryPage() {
               <CatalogStatus failed={failed} onRetry={retry} />
             ) : (
               <div className="flex flex-col gap-3 py-2">
-                <p className="m-0 text-[13px] leading-snug text-secondary">
+                <p className="m-0 text-cap leading-snug text-secondary">
                   Chưa có món nào trong nhóm này. Tạo món mới để ghi món tự nấu hoặc món không có trong danh sách.
                 </p>
                 <CreateFoodButton href="/foods/new" helper={null} />

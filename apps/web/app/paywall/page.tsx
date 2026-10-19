@@ -29,7 +29,7 @@ export default function PaywallPage() {
               {BENEFITS.map((benefit) => (
                 <li
                   key={benefit}
-                  className="flex gap-3 items-start text-[15px] leading-snug text-text"
+                  className="flex gap-3 items-start text-callout leading-snug text-text"
                 >
                   <svg
                     width="22"
@@ -41,7 +41,7 @@ export default function PaywallPage() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     aria-hidden="true"
-                    className="shrink-0 text-blue mt-0.5"
+                    className="shrink-0 text-cobalt mt-0.5"
                   >
                     <path d="M5 12.5l4.5 4.5L19 7.5" />
                   </svg>

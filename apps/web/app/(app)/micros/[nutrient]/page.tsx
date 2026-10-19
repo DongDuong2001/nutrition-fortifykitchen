@@ -71,7 +71,7 @@ export default function NutrientDetailPage({ params }: PageProps) {
       <div className="min-h-screen bg-page flex items-center justify-center p-4">
         <div className="text-center">
           <p className="text-secondary">Không tìm thấy vi chất.</p>
-          <Link href="/micros" className="text-blue font-bold">
+          <Link href="/micros" className="text-cobalt font-bold">
             Về Vi chất
           </Link>
         </div>
@@ -83,10 +83,10 @@ export default function NutrientDetailPage({ params }: PageProps) {
     return (
       <div className="w-full min-h-screen bg-page text-text font-sans flex flex-col">
         <h1 className="sr-only">Chi tiết vi chất — Đang tải</h1>
-        <div className="bg-ink rounded-b-[20px] h-44 motion-safe:animate-pulse" aria-hidden="true" />
+        <div className="bg-ink rounded-b-sheet h-44 motion-safe:animate-pulse" aria-hidden="true" />
         <div className="flex-1 w-full max-w-[560px] mx-auto p-4 flex flex-col gap-3">
-          <div className="h-44 rounded-[18px] bg-level-empty motion-safe:animate-pulse" aria-hidden="true" />
-          <div className="h-28 rounded-[18px] bg-level-empty motion-safe:animate-pulse" aria-hidden="true" />
+          <div className="h-44 rounded-card bg-level-empty motion-safe:animate-pulse" aria-hidden="true" />
+          <div className="h-28 rounded-card bg-level-empty motion-safe:animate-pulse" aria-hidden="true" />
         </div>
       </div>
     );
@@ -112,10 +112,10 @@ export default function NutrientDetailPage({ params }: PageProps) {
         summary={
           <div className="flex flex-col gap-3">
             <div data-align-group="nutrient-header" className="flex items-end justify-between gap-3">
-              <span className="text-[13px] tabular-nums text-muted-subtitle">
+              <span className="text-cap tabular-nums text-muted-subtitle">
                 {targetText ? `${amountText} / ${targetText}` : amountText}
               </span>
-              <span className="font-display italic font-black text-[30px] leading-none tabular-nums text-on-dark">
+              <span className="font-display italic font-black text-[1.875rem] leading-none tabular-nums text-on-dark">
                 {row.percentage !== null ? `${row.percentage}%` : "—"}
               </span>
             </div>
@@ -126,7 +126,7 @@ export default function NutrientDetailPage({ params }: PageProps) {
               <span className="text-sm font-bold text-on-dark">{levelText}</span>
             )}
             {targetText && (
-              <p data-align-group="nutrient-header" className="m-0 text-[13px] text-muted-subtitle">Mục tiêu: {targetText}/ngày.</p>
+              <p data-align-group="nutrient-header" className="m-0 text-cap text-muted-subtitle">Mục tiêu: {targetText}/ngày.</p>
             )}
           </div>
         }

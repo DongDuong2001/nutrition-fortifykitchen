@@ -16,7 +16,6 @@
 
   /* Cobalt Sign core tokens */
   /* The app background is white (Hao, 17/10). */
-  --color-paper: #FFFFFF;
   --color-page: #FFFFFF;
   /* Second surface on white: chips, search fields, segmented tabs, inputs and small tiles. */
   --color-surface: #F6F5F2;
@@ -25,17 +24,16 @@
   --color-paper-dark: #EAE6DE;
   --color-card-border: #E8E5DE;
   --color-ink: #111317;
-  --color-text: #141519;
+  /* cc-66 (D1): text is ink */
+  --color-text: var(--color-ink);
   --color-secondary: #6B6A66;
   --color-cobalt: #1238D6;
-  --color-blue: #1238D6;
   --color-sky: #9EC3FF;
   /* Light cobalt wash: the phone you are on in the install sheet, and its info box. */
   --color-cobalt-tint: #F2F5FF;
   --color-destructive: #D93F44;
   /* Darker shade of #D93F44 for text contrast >= 4.5:1 (5.30:1 on #FFFFFF, 4.9:1 on --color-surface) */
   --color-destructive-text: #C4373C;
-  --color-red: #D93F44;
 
   /* 4 level fill colours (Hao, 17/10): Thiếu, Trung bình, Gần đủ, Đạt. Fills only, never text. The names are kept
      from the first palette, so "blue" is the Đạt fill (green now). */
@@ -47,11 +45,6 @@
   /* Track of the continuous level bar on light surfaces (inside ink cards it is --color-level-empty-dark). */
   --color-track: #ECEAE6;
 
-  /* The same 4 level fills inside ink cards (one palette on both surfaces since 17/10). */
-  --color-level-red-dark: #F2453D;
-  --color-level-yellow-dark: #FFB020;
-  --color-level-green-dark: #80D8A0;
-  --color-level-blue-dark: #2FC46B;
 
   /* The first palette's values, kept for what is not a level fill: the landing's green ticks and amber chip border,
      the medal, the expired-link icon and title on ink, and "MICRO" in the share image footer. */
@@ -69,7 +62,6 @@
   --color-doodle-line: #D6D2CA;
   --color-doodle-dust: #D2CEC5;
   --color-hover: #FAF9F6;
-  --color-muted-dark: #6B6A66;
   --color-muted-subtitle: #C9CDD6;
   --color-muted-on-dark: #8C92A0;
   /* Small secondary text on ink that is lighter than --color-muted-on-dark: the share image footer's tagline. */
@@ -91,6 +83,8 @@
   --color-warning-text: #7A4A00;
   /* Level badge (cc-28): provisional, the coach may change them. Gold is for Level 4 and 5 only. */
   --color-gold: #E0B54A;
+  /* The landing footer's warm paper (kiln wordmark footer) */
+  --color-kiln-paper: #F3F1EC;
 
   /* Motion curves (cc-55). They replace Tailwind's ease-out / ease-in-out and feed every transition-* utility; the
      durations live with the motion classes at the end of this file. */
@@ -102,6 +96,48 @@
 
   /* Soft card shadow, desktop only (lg:shadow-card). */
   --shadow-card: 0 1px 2px rgba(17, 19, 23, 0.06);
+
+  /* cc-66 (D3): two radii for every surface */
+  --radius-card: 18px;
+  --radius-sheet: 20px;
+
+  /* cc-66 (S13): the type scale in rem, the same px at a 16 px root, so text follows the browser and phone text size.
+     Font size only: the line height stays what the element inherits or sets with leading-*. Tailwind's own xs–5xl
+     (rem, with their line heights) stay as they are. */
+  --text-2xs: 0.625rem;
+  --text-micro: 0.6875rem;
+  --text-cap: 0.8125rem;
+  --text-callout: 0.9375rem;
+  --text-body-lg: 1.0625rem;
+  --text-title-sm: 1.375rem;
+  --text-title: 1.625rem;
+  --text-headline: 1.75rem;
+  --text-display-sm: 2rem;
+  --text-display: 2.125rem;
+}
+
+/* cc-66 (D9): one stacking scale. Sticky headers and meal pills, the nav, sheets and dialogs, toasts, the tour. */
+:root {
+  --z-sticky: 10;
+  --z-nav: 40;
+  --z-sheet: 50;
+  --z-toast: 55;
+  --z-tour: 60;
+}
+@utility z-sticky {
+  z-index: var(--z-sticky);
+}
+@utility z-nav {
+  z-index: var(--z-nav);
+}
+@utility z-sheet {
+  z-index: var(--z-sheet);
+}
+@utility z-toast {
+  z-index: var(--z-toast);
+}
+@utility z-tour {
+  z-index: var(--z-tour);
 }
 
 /* Press and hover feedback names its properties (cc-55), never all of them: "all" animates layout too */
@@ -136,8 +172,8 @@
 
   body {
     margin: 0;
-    background-color: var(--color-page, #FFFFFF);
-    color: var(--color-text, #141519);
+    background-color: var(--color-page);
+    color: var(--color-text);
     font-family: var(--font-sans);
     min-height: 100vh;
     overflow-x: hidden;
@@ -145,11 +181,11 @@
 
   /* Global interaction and accessibility rules from design */
   a {
-    color: var(--color-blue, #1238D6);
+    color: var(--color-cobalt);
   }
   @media (hover: hover) and (pointer: fine) {
     a:hover {
-      color: var(--color-ink, #111317);
+      color: var(--color-ink);
     }
   }
 
@@ -165,7 +201,7 @@
   input:focus-visible,
   select:focus-visible,
   textarea:focus-visible {
-    outline: 3px solid var(--color-blue, #1238D6);
+    outline: 3px solid var(--color-cobalt);
     outline-offset: 2px;
   }
 

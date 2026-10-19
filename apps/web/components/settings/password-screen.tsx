@@ -89,7 +89,7 @@ export function PasswordScreen() {
 
       <main className="mx-auto grid w-full max-w-[560px] grid-cols-1 items-start gap-4 px-4 pb-6 pt-4 lg:mx-0 lg:px-8 lg:pb-12 lg:pt-5">
         {!loaded ? (
-          <div aria-busy="true" aria-live="polite" className="h-[280px] rounded-[18px] bg-divider animate-pulse motion-reduce:animate-none" />
+          <div aria-busy="true" aria-live="polite" className="h-[280px] rounded-card bg-divider animate-pulse motion-reduce:animate-none" />
         ) : account ? (
           <PasswordForm hasPassword={account.hasPassword} />
         ) : (

@@ -16,8 +16,8 @@ export const STATUS_TEXT: Record<DayStatus, string> = {
   none: "chưa ghi",
 };
 
-export function calendarDayDot(status: DayStatus): "bg-blue" | "bg-red" | "bg-transparent" {
-  return status === "met" || status === "over" ? "bg-blue" : status === "under" ? "bg-red" : "bg-transparent";
+export function calendarDayDot(status: DayStatus): "bg-cobalt" | "bg-destructive" | "bg-transparent" {
+  return status === "met" || status === "over" ? "bg-cobalt" : status === "under" ? "bg-destructive" : "bg-transparent";
 }
 
 export function calendarDayLabel(iso: string, day: number, monthNumber: number, status: DayStatus, options?: { isToday?: boolean; future?: boolean }): string {
@@ -126,8 +126,8 @@ function CalendarMonth({ selectedIso, onPick }: Pick<CalendarSheetProps, "select
               aria-label={label}
               aria-current={isSelected ? "date" : undefined}
               onClick={() => onPick(day.iso)}
-              className={`w-11 h-11 rounded-full flex flex-col items-center justify-center gap-0.5 text-[15px] font-semibold tabular-nums cursor-pointer active:scale-[0.97] transition-press disabled:opacity-40 disabled:pointer-events-none ${
-                isSelected ? "bg-blue text-on-accent" : "bg-transparent text-text"
+              className={`w-11 h-11 rounded-full flex flex-col items-center justify-center gap-0.5 text-callout font-semibold tabular-nums cursor-pointer active:scale-[0.97] transition-press disabled:opacity-40 disabled:pointer-events-none ${
+                isSelected ? "bg-cobalt text-on-accent" : "bg-transparent text-text"
               }`}
             >
               <span>{day.day}</span>
@@ -137,13 +137,13 @@ function CalendarMonth({ selectedIso, onPick }: Pick<CalendarSheetProps, "select
         })}
       </div>
 
-      <div className="flex flex-wrap gap-x-4 gap-y-1 text-[13px] text-secondary px-1">
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-cap text-secondary px-1">
         <span className="inline-flex items-center gap-1.5">
-          <span aria-hidden="true" className="w-1.5 h-1.5 rounded-full bg-blue" />
+          <span aria-hidden="true" className="w-1.5 h-1.5 rounded-full bg-cobalt" />
           Đạt mục tiêu kcal
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <span aria-hidden="true" className="w-1.5 h-1.5 rounded-full bg-red" />
+          <span aria-hidden="true" className="w-1.5 h-1.5 rounded-full bg-destructive" />
           Thiếu
         </span>
         <span>Không chấm: chưa ghi</span>

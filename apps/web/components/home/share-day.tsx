@@ -17,7 +17,7 @@ export function ShareDay({ model }: { model: ShareModel }) {
       data-share-root
       // A fixed 390 px design: the phone's text size setting does not enlarge it
       style={{ width: SHARE_CSS_WIDTH, minHeight: SHARE_MIN_CSS_HEIGHT, WebkitTextSizeAdjust: "100%", textSizeAdjust: "100%" }}
-      className="flex flex-col bg-paper font-sans text-text"
+      className="flex flex-col bg-page font-sans text-text"
     >
       {/* ShareC2: the name in big Saira with the date under it and the Level badge on the right, all centred in 86 px
           (a long name wraps and the header grows), a 1 px divider under it. */}

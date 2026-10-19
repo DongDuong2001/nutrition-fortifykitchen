@@ -66,7 +66,7 @@ export function SavedMealManageSheet({ open, onClose, name, itemCount, onRename,
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               autoComplete="off"
-              className="h-12 w-full rounded-xl border-2 border-card-border bg-surface px-3 text-base text-text outline-none transition-colors focus:border-blue"
+              className="h-12 w-full rounded-xl border-2 border-card-border bg-surface px-3 text-base text-text outline-none transition-colors focus:border-cobalt"
             />
           </FormRow>
           <PillButton type="submit" variant="primary" disabled={!draft.trim()}>

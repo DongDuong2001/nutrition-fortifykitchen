@@ -22,7 +22,7 @@ export default function SyncStatusDetail({ state, unsaved, failed }: { state: st
           onClick={() => setListOpen(true)}
           aria-haspopup="dialog"
           aria-label={failed > 0 ? `Chưa lưu ${unsaved}, ${failed} cần thử lại. Mở danh sách` : `Chưa lưu ${unsaved}. Mở danh sách`}
-          className="min-h-11 cursor-pointer rounded-full border-0 bg-transparent px-2 text-xs font-bold leading-none text-sky lg:text-blue"
+          className="min-h-11 cursor-pointer rounded-full border-0 bg-transparent px-2 text-xs font-bold leading-none text-sky lg:text-cobalt"
         >
           Chưa lưu ({unsaved})
         </button>

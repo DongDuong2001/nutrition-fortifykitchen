@@ -35,7 +35,7 @@ export default function DevUiPage() {
             subtitle="Thứ Bảy 10/10 · Ngày tập 60′ · Giữ cân · 65 kg"
             canGoNext={false}
             summary={
-              <div className="bg-surface-dark border border-white/10 rounded-[18px] p-4 text-on-dark text-sm">
+              <div className="bg-surface-dark border border-white/10 rounded-card p-4 text-on-dark text-sm">
                 Bảng tóm tắt (Kcal / Đạm / Béo / Tinh bột)
               </div>
             }
@@ -62,7 +62,7 @@ export default function DevUiPage() {
             variant="sub"
             title="Về bạn"
             progress={{ current: 1, total: 2 }}
-            actions={<span className="text-[13px] text-muted-on-dark">Bước 1 / 2</span>}
+            actions={<span className="text-cap text-muted-on-dark">Bước 1 / 2</span>}
             backHref={HOME_ROUTE}
           />
         </section>
@@ -118,14 +118,14 @@ export default function DevUiPage() {
             <div className="flex flex-col gap-1">
               <div className="flex justify-between text-xs">
                 <span>Đạt (≥100%): Natri 100%</span>
-                <span className="font-semibold text-blue">100%</span>
+                <span className="font-semibold text-cobalt">100%</span>
               </div>
               <LevelBar label="Tiến độ Natri 100%" pct={100} heightClass="h-[10px]" />
             </div>
           </Card>
 
           {/* LevelBar on ink */}
-          <div className="bg-ink p-4 rounded-[18px] text-on-dark flex flex-col gap-3">
+          <div className="bg-ink p-4 rounded-card text-on-dark flex flex-col gap-3">
             <div className="text-xs font-semibold text-sky">
               Nền tối (trong đầu trang):
             </div>
@@ -202,8 +202,8 @@ export default function DevUiPage() {
             />
             <div className="flex items-center justify-between min-h-[52px] border-t border-divider py-1">
               <div className="flex flex-col">
-                <span className="text-[15px] font-normal">Gần/trong kỳ</span>
-                <span className="text-[13px] text-secondary">
+                <span className="text-callout font-normal">Gần/trong kỳ</span>
+                <span className="text-cap text-secondary">
                   Nút gạt có dòng chú thích
                 </span>
               </div>
@@ -215,7 +215,7 @@ export default function DevUiPage() {
             </div>
             <div className="flex items-center justify-between min-h-[52px] border-t border-divider py-1">
               <div className="flex flex-col">
-                <span className="text-[15px] font-normal">Nhắc nhở bữa ăn</span>
+                <span className="text-callout font-normal">Nhắc nhở bữa ăn</span>
               </div>
               <Switch
                 checked={switch2}
@@ -248,7 +248,7 @@ export default function DevUiPage() {
                   value={sheetInput}
                   onChange={(e) => setSheetInput(e.target.value)}
                   placeholder="Gõ thử vào đây..."
-                  className="h-10 px-3 rounded-lg border border-divider bg-page text-base outline-none focus-visible:outline-2 focus-visible:outline-blue"
+                  className="h-10 px-3 rounded-lg border border-divider bg-page text-base outline-none focus-visible:outline-2 focus-visible:outline-cobalt"
                 />
               </label>
               <div className="text-sm text-secondary">
@@ -290,7 +290,7 @@ export default function DevUiPage() {
       </div>
 
       {/* BottomNav */}
-      <div className="sticky bottom-0 left-0 right-0 z-40 bg-ink">
+      <div className="sticky bottom-0 left-0 right-0 z-nav bg-ink">
         <BottomNav currentTab="overview" />
       </div>
     </div>

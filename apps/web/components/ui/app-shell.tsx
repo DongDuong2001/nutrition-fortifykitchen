@@ -48,9 +48,9 @@ export function AppShell({
         </div>
       )}
       {bottomBar ? (
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-card-border bg-card pb-[env(safe-area-inset-bottom)] lg:left-60">{bottomBar}</div>
+        <div className="fixed inset-x-0 bottom-0 z-nav border-t border-card-border bg-card pb-[env(safe-area-inset-bottom)] lg:left-60">{bottomBar}</div>
       ) : (
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-ink lg:hidden">
+        <div className="fixed bottom-0 left-0 right-0 z-nav bg-ink lg:hidden">
           <BottomNav />
         </div>
       )}

@@ -228,7 +228,7 @@ export function Sheet({
   const content = shownContent.current;
 
   return (
-    <div className={`fixed inset-0 z-50 flex flex-col justify-end ${desktopDialog ? "lg:justify-center lg:items-center" : ""} ${showing ? "" : "pointer-events-none"}`} inert={!showing}>
+    <div className={`fixed inset-0 z-sheet flex flex-col justify-end ${desktopDialog ? "lg:justify-center lg:items-center" : ""} ${showing ? "" : "pointer-events-none"}`} inert={!showing}>
       {/* Dim Scrim */}
       <div
         ref={scrimRef}
@@ -247,7 +247,7 @@ export function Sheet({
         aria-modal={showing ? "true" : undefined}
         aria-hidden={showing ? undefined : true}
         aria-labelledby={showing ? (title ? titleId : labelledBy) : undefined}
-        className={`relative z-10 w-full max-w-[390px] mx-auto bg-card rounded-t-[20px] px-4 pt-3 pb-6 flex flex-col gap-2 shadow-2xl outline-none m-sheet ${desktopDialog ? "m-dialog lg:w-[420px] lg:max-w-[420px] lg:rounded-[20px] lg:px-6 lg:pt-6" : ""} ${className}`}
+        className={`relative z-sticky w-full max-w-[390px] mx-auto bg-card rounded-t-sheet px-4 pt-3 pb-6 flex flex-col gap-2 shadow-2xl outline-none m-sheet ${desktopDialog ? "m-dialog lg:w-[420px] lg:max-w-[420px] lg:rounded-sheet lg:px-6 lg:pt-6" : ""} ${className}`}
       >
         {/* Grabber: drag it down to close (a 24 px strip around the 5 px bar); the title block below drags too */}
         <div

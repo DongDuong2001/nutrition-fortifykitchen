@@ -50,12 +50,12 @@ const DRAFT_STATUS_LABELS: Record<CoachDraft["status"], string> = {
 };
 
 const PILL = {
-  good: "bg-blue text-on-accent",
+  good: "bg-cobalt text-on-accent",
   bad: "bg-destructive-text text-on-accent",
   wait: "bg-warning-bg text-warning-text",
 } as const;
 
-const ACTION = "flex min-h-11 w-full cursor-pointer items-center justify-center rounded-full px-4 text-[13px] font-bold m-tint";
+const ACTION = "flex min-h-11 w-full cursor-pointer items-center justify-center rounded-full px-4 text-cap font-bold m-tint";
 
 /**
  * Kiểm duyệt: the meal-plan drafts waiting for an admin (food drafts only; there is no coach application flow).
@@ -103,7 +103,7 @@ export default function AdminReviewPage() {
           />
 
           {filteredDrafts.length === 0 ? (
-            <Card as="section" aria-label="Không có bản nháp" className="text-[13px] leading-snug text-secondary">
+            <Card as="section" aria-label="Không có bản nháp" className="text-cap leading-snug text-secondary">
               Không có bản nháp nào trong mục này.
             </Card>
           ) : (
@@ -112,18 +112,18 @@ export default function AdminReviewPage() {
                 <li key={draft.id}>
                   <Card as="article" aria-label={`Bản nháp ${draft.file_path}`} data-align-group="admin-card" className="flex flex-col gap-3">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className={`rounded-full px-3 py-1 text-[11px] font-bold ${PILL[draft.status === "published" ? "good" : draft.status === "rejected" ? "bad" : "wait"]}`}>
+                      <span className={`rounded-full px-3 py-1 text-micro font-bold ${PILL[draft.status === "published" ? "good" : draft.status === "rejected" ? "bad" : "wait"]}`}>
                         {DRAFT_STATUS_LABELS[draft.status]}
                       </span>
-                      <span className="text-[13px] tabular-nums text-secondary">
+                      <span className="text-cap tabular-nums text-secondary">
                         Mã bản ghi: <strong className="text-text">{draft.commit_hash}</strong>
                       </span>
                     </div>
-                    <p className="m-0 break-all rounded-xl border border-card-border bg-surface px-3 py-2 text-[13px] font-semibold text-text">
+                    <p className="m-0 break-all rounded-xl border border-card-border bg-surface px-3 py-2 text-cap font-semibold text-text">
                       {draft.file_path}
                     </p>
 
-                    <pre className="m-0 overflow-x-auto whitespace-pre-wrap rounded-xl bg-surface-dark p-4 font-sans text-[13px] leading-relaxed text-muted-subtitle">
+                    <pre className="m-0 overflow-x-auto whitespace-pre-wrap rounded-xl bg-surface-dark p-4 font-sans text-cap leading-relaxed text-muted-subtitle">
                       {draft.markdown_content}
                     </pre>
 
@@ -132,7 +132,7 @@ export default function AdminReviewPage() {
                         <button
                           type="button"
                           onClick={() => handleUpdateDraftStatus(draft.id, "published")}
-                          className={`${ACTION} border-0 bg-blue text-on-accent`}
+                          className={`${ACTION} border-0 bg-cobalt text-on-accent`}
                         >
                           Duyệt
                         </button>

@@ -278,7 +278,7 @@ function TrainingContent() {
             <div className="flex flex-col gap-3 w-full">
               <DurationSelector value={activeDuration} onChange={handleSelectDuration} variant="mobile" disabled={isPast} />
               {isPast ? (
-                <p className="m-0 pt-1 text-[13px] leading-snug text-muted-on-dark">
+                <p className="m-0 pt-1 text-cap leading-snug text-muted-on-dark">
                   Muối: —<br />
                   {pastNote}
                 </p>
@@ -319,7 +319,7 @@ function TrainingContent() {
           {!isPast && <TrainingTipBanner isRestDay={isRestDay} />}
         </main>
 
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-ink">
+        <div className="fixed bottom-0 left-0 right-0 z-nav bg-ink">
           <BottomNav />
         </div>
       </div>
@@ -353,9 +353,9 @@ function TrainingContent() {
           />
 
           {isPast ? (
-            <section aria-labelledby="past-training" className="bg-card border border-card-border rounded-[18px] lg:shadow-card p-5 flex flex-col gap-2">
+            <section aria-labelledby="past-training" className="bg-card border border-card-border rounded-card lg:shadow-card p-5 flex flex-col gap-2">
               <h2 id="past-training" className="m-0 text-lg font-bold text-text">Muối</h2>
-              <p className="m-0 font-display italic font-extrabold text-[40px] leading-none text-text">—</p>
+              <p className="m-0 font-display italic font-extrabold text-[2.5rem] leading-none text-text">—</p>
               <p className="m-0 text-sm text-secondary">{pastNote}</p>
             </section>
           ) : (

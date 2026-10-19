@@ -181,7 +181,7 @@ def error_page_source():
     check('import "./globals.css"' in src, "error page: imports globals.css (the token CSS)")
     check(re.search(r"#[0-9A-Fa-f]{3,8}\b", src) is None, "error page: no raw hex colour")
     check(re.search(r"\b(?:bg|text|border)-(?:slate|gray|zinc|amber|red|green|blue)-\d", src) is None, "error page: no Tailwind palette colour")
-    check("min-h-[44px]" in src or "h-[52px]" in src, "error page: the actions are 44 px or taller")
+    check("min-h-11" in src or "h-[52px]" in src, "error page: the actions are 44 px or taller")
 
 
 def urlpath(pg):

@@ -31,7 +31,7 @@ export function ReleaseItems({ release, alignGroup }: { release: Release; alignG
               <Icon size={20} />
             </span>
             <div className="flex min-w-0 flex-1 flex-col gap-1">
-              <p className="m-0 text-[15px] font-bold leading-snug text-text">{item.title}</p>
+              <p className="m-0 text-callout font-bold leading-snug text-text">{item.title}</p>
               <p className="m-0 text-sm leading-snug text-secondary">{item.body}</p>
             </div>
           </li>
@@ -65,7 +65,7 @@ export function WhatsNewSheet({ releases, canTour, open, onClose }: { releases: 
       <header data-align-group="wn-sheet" className="flex items-start gap-2">
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <p className="m-0 text-xs font-bold text-cobalt">Cập nhật {newest?.date}</p>
-          <h2 id={TITLE_ID} tabIndex={-1} className={`${SHEET_TITLE_CLASS} text-[26px] outline-none`}>
+          <h2 id={TITLE_ID} tabIndex={-1} className={`${SHEET_TITLE_CLASS} text-title outline-none`}>
             Có gì mới
           </h2>
         </div>
@@ -79,7 +79,7 @@ export function WhatsNewSheet({ releases, canTour, open, onClose }: { releases: 
         role="region"
         aria-label="Các thay đổi"
         tabIndex={0}
-        className="flex max-h-[55dvh] flex-col overflow-y-auto overscroll-contain rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-blue"
+        className="flex max-h-[55dvh] flex-col overflow-y-auto overscroll-contain rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-cobalt"
       >
         {releases.map((release, i) => (
           <section key={release.id} aria-label={`Cập nhật ${release.date}`} className={i > 0 ? "border-t-2 border-divider pt-2" : ""}>

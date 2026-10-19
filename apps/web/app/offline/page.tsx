@@ -18,7 +18,7 @@ export default function OfflinePage() {
             <h2 id="offline-title" className="m-0 text-base font-bold text-text">
               Bạn đang ngoại tuyến
             </h2>
-            <p className="m-0 text-[15px] leading-snug text-secondary">Dữ liệu đã ghi trên máy này vẫn dùng được.</p>
+            <p className="m-0 text-callout leading-snug text-secondary">Dữ liệu đã ghi trên máy này vẫn dùng được.</p>
           </Card>
           <RetryButton />
         </div>

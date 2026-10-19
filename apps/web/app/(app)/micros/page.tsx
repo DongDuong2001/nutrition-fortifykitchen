@@ -45,11 +45,11 @@ const COMPACT_BAR_HEIGHT = 60;
  */
 function CompactBar({ show, backHref, date, achieved, total, className = "" }: { show: boolean; backHref: string; date: string; achieved: number; total: number; className?: string }) {
   return (
-    <div className={`pointer-events-none sticky top-0 z-40 h-0 ${className}`}>
+    <div className={`pointer-events-none sticky top-0 z-nav h-0 ${className}`}>
       <div
         data-micros-compact={show ? "shown" : "hidden"}
         aria-hidden={show ? undefined : true}
-        className={`pointer-events-auto absolute inset-x-0 top-0 box-border flex h-[60px] items-center gap-2 rounded-b-[20px] bg-ink px-4 text-on-dark ${show ? "visible" : "invisible"}`}
+        className={`pointer-events-auto absolute inset-x-0 top-0 box-border flex h-[60px] items-center gap-2 rounded-b-sheet bg-ink px-4 text-on-dark ${show ? "visible" : "invisible"}`}
       >
         <Link
           href={backHref}
@@ -63,18 +63,18 @@ function CompactBar({ show, backHref, date, achieved, total, className = "" }: {
         </Link>
         <div className="min-w-0 flex-1">
           {show ? (
-            <h1 className="m-0 font-display text-[22px] font-extrabold uppercase italic leading-none tracking-tight">Vi chất</h1>
+            <h1 className="m-0 font-display text-title-sm font-extrabold uppercase italic leading-none tracking-tight">Vi chất</h1>
           ) : (
-            <p className="m-0 font-display text-[22px] font-extrabold uppercase italic leading-none tracking-tight">Vi chất</p>
+            <p className="m-0 font-display text-title-sm font-extrabold uppercase italic leading-none tracking-tight">Vi chất</p>
           )}
-          <p className="m-0 mt-0.5 break-words text-[13px] leading-none text-muted-subtitle">{date}</p>
+          <p className="m-0 mt-0.5 break-words text-cap leading-none text-muted-subtitle">{date}</p>
         </div>
         <div className="shrink-0 text-right">
-          <div className="font-display text-[22px] font-black italic leading-none tabular-nums">
+          <div className="font-display text-title-sm font-black italic leading-none tabular-nums">
             {achieved}
             <span className="text-on-dark/55">/{total}</span>
           </div>
-          <div className="mt-0.5 text-[11px] font-semibold leading-none text-sky">đã đạt</div>
+          <div className="mt-0.5 text-micro font-semibold leading-none text-sky">đã đạt</div>
         </div>
       </div>
     </div>
@@ -301,9 +301,9 @@ function MicrosContent() {
     return (
       <div className="w-full min-h-screen bg-page text-text font-sans flex flex-col pb-[88px] lg:pb-0">
         <h1 className="sr-only">Vi chất — Đang tải</h1>
-        <div className="bg-ink text-on-dark rounded-b-[20px]">
+        <div className="bg-ink text-on-dark rounded-b-sheet">
           <div className="w-full max-w-[560px] mx-auto px-4 pt-3 pb-5 flex flex-col gap-3">
-            <div className="flex items-center justify-between min-h-[44px]">
+            <div className="flex items-center justify-between min-h-11">
               <div className="w-11 h-11 bg-surface-dark rounded-lg motion-safe:animate-pulse" />
               <div className="h-4 w-28 bg-surface-dark rounded-lg motion-safe:animate-pulse" />
               <div className="w-11 h-11 bg-surface-dark rounded-lg motion-safe:animate-pulse" />
@@ -321,14 +321,14 @@ function MicrosContent() {
         <div className="flex-1 w-full max-w-[560px] mx-auto px-4 py-4 flex flex-col gap-4">
           <div className="h-9 w-full bg-level-empty rounded-full motion-safe:animate-pulse" />
           <div className="h-14 w-full bg-level-empty rounded-xl motion-safe:animate-pulse" />
-          <div className="bg-card border border-card-border rounded-[18px] p-4 flex flex-col gap-3 motion-safe:animate-pulse">
+          <div className="bg-card border border-card-border rounded-card p-4 flex flex-col gap-3 motion-safe:animate-pulse">
             <div className="h-4 w-1/3 bg-level-empty rounded" />
             <div className="h-8 w-full bg-level-empty rounded" />
             <div className="h-8 w-full bg-level-empty rounded" />
           </div>
         </div>
 
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-ink lg:hidden">
+        <div className="fixed bottom-0 left-0 right-0 z-nav bg-ink lg:hidden">
           <BottomNav />
         </div>
       </div>
@@ -351,7 +351,7 @@ function MicrosContent() {
             alignGroup="micros-header"
             summary={
               <div className="flex items-end justify-between pt-1">
-                <div className="text-[13px] text-muted-subtitle">
+                <div className="text-cap text-muted-subtitle">
                   Thêm món để xem vi chất
                 </div>
                 <div className="text-right">
@@ -368,14 +368,14 @@ function MicrosContent() {
           </div>
 
           <main className="flex-1 w-full max-w-[560px] mx-auto px-4 py-6 flex flex-col gap-4">
-            <div className="bg-card border border-card-border rounded-[18px] lg:shadow-card p-6 text-center flex flex-col items-center gap-3">
+            <div className="bg-card border border-card-border rounded-card lg:shadow-card p-6 text-center flex flex-col items-center gap-3">
               <h2 className="m-0 text-base font-bold">{isPast ? "Chưa có món ngày này" : "Chưa có món hôm nay"}</h2>
               <p className="m-0 text-sm text-secondary leading-relaxed max-w-[320px]">
                 Thêm món vào nhật ký để theo dõi 22 vi chất mỗi ngày.
               </p>
               <Link
                 href={diaryHref}
-                className="mt-2 h-11 px-6 rounded-full bg-blue text-on-accent flex items-center justify-center text-sm font-bold no-underline active:scale-[0.97] transition-press"
+                className="mt-2 h-11 px-6 rounded-full bg-cobalt text-on-accent flex items-center justify-center text-sm font-bold no-underline active:scale-[0.97] transition-press"
               >
                 {isPast ? "Về Hôm nay" : "+ Thêm món"}
               </Link>
@@ -383,7 +383,7 @@ function MicrosContent() {
           </main>
         </div>
 
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-ink lg:hidden">
+        <div className="fixed bottom-0 left-0 right-0 z-nav bg-ink lg:hidden">
           <BottomNav />
         </div>
       </div>
@@ -427,7 +427,7 @@ function MicrosContent() {
                     </div>
                   </div>
                   <div className="text-right shrink-0">
-                    <div className="font-display italic font-black text-[28px] leading-none tabular-nums">
+                    <div className="font-display italic font-black text-headline leading-none tabular-nums">
                       <span className="text-on-dark">{achievedMicrosCount.achieved}</span>
                       <span className="text-on-dark/55">/{achievedMicrosCount.total}</span>
                     </div>
@@ -438,7 +438,7 @@ function MicrosContent() {
               footer={
                 <Link
                   href="/trends/micros"
-                  className="min-h-[44px] flex items-center justify-between text-sm font-semibold text-sky no-underline active:scale-[0.97] transition-press"
+                  className="min-h-11 flex items-center justify-between text-sm font-semibold text-sky no-underline active:scale-[0.97] transition-press"
                 >
                   Xu hướng 7 và 30 ngày
                   <span aria-hidden="true">›</span>
@@ -469,7 +469,7 @@ function MicrosContent() {
                     type="button"
                     onClick={() => scrollToGroup(group.key)}
                     aria-pressed={isActive}
-                    className={`min-h-[44px] flex items-center shrink-0 cursor-pointer bg-transparent border-0 p-0 active:scale-[0.97] transition-press`}
+                    className={`min-h-11 flex items-center shrink-0 cursor-pointer bg-transparent border-0 p-0 active:scale-[0.97] transition-press`}
                   >
                     <span
                       className={`h-9 px-4 rounded-full text-xs font-semibold flex items-center justify-center whitespace-nowrap transition-press ${
@@ -513,7 +513,7 @@ function MicrosContent() {
         </div>
 
         {/* Fixed Mobile Dock */}
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-ink">
+        <div className="fixed bottom-0 left-0 right-0 z-nav bg-ink">
           <BottomNav />
         </div>
       </div>
@@ -547,12 +547,12 @@ function MicrosContent() {
             subtitle={desktopSubtitle}
             desktopStat={
               <div className="flex items-baseline gap-2 mr-2">
-                <div className="font-display italic font-black text-[34px] leading-none tabular-nums">
+                <div className="font-display italic font-black text-display leading-none tabular-nums">
                   <span className="text-cobalt">{achievedMicrosCount.achieved}</span>
                   <span className="text-secondary">/{achievedMicrosCount.total}</span>
                 </div>
                 <span className="text-sm text-secondary font-semibold">vi chất đạt</span>
-                <Link href="/trends/micros" className="ml-2 min-h-[44px] inline-flex items-center text-sm font-semibold text-blue no-underline">
+                <Link href="/trends/micros" className="ml-2 min-h-11 inline-flex items-center text-sm font-semibold text-cobalt no-underline">
                   Xu hướng ›
                 </Link>
               </div>
@@ -572,7 +572,7 @@ function MicrosContent() {
                   type="button"
                   onClick={() => scrollToGroup(group.key)}
                   aria-pressed={isActive}
-                  className={`min-h-[44px] flex items-center shrink-0 cursor-pointer bg-transparent border-0 p-0 active:scale-[0.97] transition-press`}
+                  className={`min-h-11 flex items-center shrink-0 cursor-pointer bg-transparent border-0 p-0 active:scale-[0.97] transition-press`}
                 >
                   <span
                     className={`h-9 px-4 rounded-full text-xs font-semibold flex items-center justify-center transition-press ${
@@ -643,7 +643,7 @@ function Legend() {
             />
             <span className="text-xs font-semibold text-text truncate">{t.name}</span>
           </div>
-          <span className="text-[11px] text-secondary tabular-nums truncate text-center lg:text-left">
+          <span className="text-micro text-secondary tabular-nums truncate text-center lg:text-left">
             {t.range}
           </span>
         </div>
@@ -677,15 +677,15 @@ function GroupCard({
       id={`${idPrefix}${group.key}`}
       data-align-group={alignGroup}
       data-align-edge={alignGroup && idPrefix.includes("desktop") ? "left" : undefined}
-      className="bg-card border border-card-border rounded-[18px] lg:shadow-card overflow-clip flex flex-col scroll-mt-2 lg:scroll-mt-6 break-inside-avoid"
+      className="bg-card border border-card-border rounded-card lg:shadow-card overflow-clip flex flex-col scroll-mt-2 lg:scroll-mt-6 break-inside-avoid"
     >
       {/* Sticky group header: sticks to the top of the scrolling body */}
-      <div className="sticky top-[var(--micros-sticky,0px)] z-10 bg-card border-b border-card-border">
+      <div className="sticky top-[var(--micros-sticky,0px)] z-sticky bg-card border-b border-card-border">
         <button
           type="button"
           onClick={onToggle}
           aria-expanded={isOpen}
-          className="w-full min-h-[48px] px-4 py-3 flex items-center justify-between text-left cursor-pointer bg-transparent border-0 m-tint transition-transform"
+          className="w-full min-h-12 px-4 py-3 flex items-center justify-between text-left cursor-pointer bg-transparent border-0 m-tint transition-transform"
         >
           <div className="w-full flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -743,7 +743,7 @@ function NutrientRow({ row, dateQuery = "" }: { row: NutrientRowData; dateQuery?
   const content = (
     <div
       style={{ paddingLeft: `${indentPx}px` }}
-      className="min-h-[44px] py-2 flex flex-col justify-center gap-1.5 w-full"
+      className="min-h-11 py-2 flex flex-col justify-center gap-1.5 w-full"
     >
       {/* Line 1: Name (* tham khảo) | amount / target · % (bold) */}
       <div className="flex items-baseline justify-between text-sm leading-tight gap-2">
@@ -757,7 +757,7 @@ function NutrientRow({ row, dateQuery = "" }: { row: NutrientRowData; dateQuery?
           {isProvisional && (
             <sup
               aria-label="giá trị tham khảo"
-              className="text-secondary text-[11px] font-bold select-none leading-none shrink-0"
+              className="text-secondary text-micro font-bold select-none leading-none shrink-0"
             >
               *
             </sup>

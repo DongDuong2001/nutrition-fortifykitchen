@@ -95,8 +95,8 @@ export function PeriodControl({
             scroll={false}
             onClick={() => markUsed("range-toggle")}
             aria-current={isActive ? "true" : "false"}
-            className={`inline-flex min-h-[44px] items-center justify-center rounded-full text-sm font-bold no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100 ${
-              compact ? "min-w-[44px] px-2" : "px-4"
+            className={`inline-flex min-h-11 items-center justify-center rounded-full text-sm font-bold no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100 ${
+              compact ? "min-w-11 px-2" : "px-4"
             } ${isActive ? "bg-ink text-on-dark" : "text-secondary hover:text-text"}`}
           >
             {compact ? (
@@ -118,7 +118,7 @@ export function PeriodControl({
       <div className="flex items-center justify-between gap-2">
         <div className="flex min-w-0 items-center">
           {prev}
-          <p id="ov-period" className="m-0 min-w-0 text-center text-[13px] font-semibold leading-snug text-secondary">
+          <p id="ov-period" className="m-0 min-w-0 text-center text-cap font-semibold leading-snug text-secondary">
             {label}
           </p>
           {next}
@@ -130,7 +130,7 @@ export function PeriodControl({
 
   return (
     <div className="flex flex-col gap-1">
-      <p className="m-0 text-[15px] font-bold lg:text-lg">{label}</p>
+      <p className="m-0 text-callout font-bold lg:text-lg">{label}</p>
       <div className="flex items-center justify-between gap-2 lg:justify-start lg:gap-4">
         <div className="flex items-center">
           {prev}
@@ -147,7 +147,7 @@ function ContentSkeleton() {
     <div role="status" aria-busy="true" className="flex flex-col gap-3">
       <span className="sr-only">Đang tải…</span>
       {[0, 1, 2].map((i) => (
-        <div key={i} className="bg-card border border-card-border rounded-[18px] p-4 flex flex-col gap-3 motion-safe:animate-pulse">
+        <div key={i} className="bg-card border border-card-border rounded-card p-4 flex flex-col gap-3 motion-safe:animate-pulse">
           <div className="h-3 w-2/5 rounded bg-level-empty" />
           <div className="h-3 w-[70%] rounded bg-level-empty" />
           <div className="h-3 w-[55%] rounded bg-level-empty" />
@@ -229,12 +229,12 @@ function FrameInner({ children }: { children: React.ReactNode }) {
                   href={`${tab.href}${query}`}
                   onNavigate={() => startTransition(() => setActive(tab.id))}
                   aria-current={isActive ? "page" : undefined}
-                  className={`relative inline-flex min-h-[44px] flex-1 shrink-0 items-center justify-center whitespace-nowrap px-2 text-[15px] font-bold no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100 lg:flex-none lg:px-4 focus-visible:outline-sky lg:focus-visible:outline-blue ${
+                  className={`relative inline-flex min-h-11 flex-1 shrink-0 items-center justify-center whitespace-nowrap px-2 text-callout font-bold no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100 lg:flex-none lg:px-4 focus-visible:outline-sky lg:focus-visible:outline-cobalt ${
                     isActive ? "text-on-dark lg:text-text" : "text-muted-on-dark hover:text-on-dark lg:text-secondary lg:hover:text-text"
                   }`}
                 >
                   {tab.label}
-                  {isActive && <span aria-hidden="true" className="absolute inset-x-2 bottom-[-1px] h-[3px] rounded-full bg-sky lg:bg-blue" />}
+                  {isActive && <span aria-hidden="true" className="absolute inset-x-2 bottom-[-1px] h-[3px] rounded-full bg-sky lg:bg-cobalt" />}
                 </Link>
               );
             })}

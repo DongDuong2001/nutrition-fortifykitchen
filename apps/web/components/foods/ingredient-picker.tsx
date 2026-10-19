@@ -78,7 +78,7 @@ function PickerBody({ onClose, onConfirm, disabledIds }: { onClose: () => void; 
                 <button
                   type="button"
                   onClick={sendRequest}
-                  className="min-h-11 cursor-pointer rounded-full border border-card-border bg-card px-5 text-sm font-semibold text-blue active:scale-[0.97] transition-press motion-reduce:active:scale-100"
+                  className="min-h-11 cursor-pointer rounded-full border border-card-border bg-card px-5 text-sm font-semibold text-cobalt active:scale-[0.97] transition-press motion-reduce:active:scale-100"
                 >
                   Gửi yêu cầu thêm món
                 </button>
@@ -96,7 +96,7 @@ function PickerBody({ onClose, onConfirm, disabledIds }: { onClose: () => void; 
                   <button
                     type="button"
                     onClick={() => setFilter("all")}
-                    className="min-h-[44px] cursor-pointer rounded-full border-0 bg-surface px-5 text-sm font-semibold text-text active:scale-[0.97] transition-press"
+                    className="min-h-11 cursor-pointer rounded-full border-0 bg-surface px-5 text-sm font-semibold text-text active:scale-[0.97] transition-press"
                   >
                     Bỏ lọc
                   </button>
@@ -112,16 +112,16 @@ function PickerBody({ onClose, onConfirm, disabledIds }: { onClose: () => void; 
           role="region"
           aria-label={`${picked.length} nguyên liệu`}
           data-tour="ingredient-bar"
-          className="flex items-center gap-3 rounded-[18px] bg-ink px-3 py-2 text-on-dark"
+          className="flex items-center gap-3 rounded-card bg-ink px-3 py-2 text-on-dark"
         >
-          <span aria-hidden="true" className="flex h-7 min-w-7 items-center justify-center rounded-full bg-blue px-2 text-sm font-bold text-on-accent tabular-nums">
+          <span aria-hidden="true" className="flex h-7 min-w-7 items-center justify-center rounded-full bg-cobalt px-2 text-sm font-bold text-on-accent tabular-nums">
             {picked.length}
           </span>
-          <span className="min-w-0 flex-1 text-[13px] font-semibold">nguyên liệu</span>
+          <span className="min-w-0 flex-1 text-cap font-semibold">nguyên liệu</span>
           <button
             type="button"
             onClick={() => onConfirm(picked)}
-            className="min-h-11 shrink-0 cursor-pointer rounded-full border-0 bg-blue px-4 text-[13px] font-bold text-on-accent active:scale-[0.97] transition-press motion-reduce:active:scale-100"
+            className="min-h-11 shrink-0 cursor-pointer rounded-full border-0 bg-cobalt px-4 text-cap font-bold text-on-accent active:scale-[0.97] transition-press motion-reduce:active:scale-100"
           >
             Thêm vào món
           </button>

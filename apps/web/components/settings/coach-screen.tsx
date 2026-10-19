@@ -42,13 +42,13 @@ export function CoachScreen() {
       <AppHeader variant="sub" title="Huấn luyện viên" onBack={goBack} layout="wide" />
       <main className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-6 pt-4 lg:mx-0 lg:max-w-[760px] lg:px-8">
         {!hydrated ? (
-          <div aria-busy="true" className="h-[160px] rounded-[18px] bg-divider motion-safe:animate-pulse" />
+          <div aria-busy="true" className="h-[160px] rounded-card bg-divider motion-safe:animate-pulse" />
         ) : coach === null ? (
           <Card as="section" aria-labelledby="coach-none" className="flex flex-col gap-3">
             <h2 id="coach-none" className="m-0 text-base font-bold">
               {NO_COACH_TEXT}
             </h2>
-            <p className="m-0 text-[13px] leading-snug text-secondary">Nhập mã để HLV theo dõi và mở thêm chỉ số trong Hôm nay.</p>
+            <p className="m-0 text-cap leading-snug text-secondary">Nhập mã để HLV theo dõi và mở thêm chỉ số trong Hôm nay.</p>
             <form onSubmit={join} noValidate className="flex flex-col gap-3">
               <FormRow label="Mã huấn luyện viên" htmlFor="coach-code" error={error ?? undefined}>
                 <input
@@ -64,7 +64,7 @@ export function CoachScreen() {
                   }}
                   placeholder="Mã gồm 10 ký tự"
                   aria-invalid={error ? true : undefined}
-                  className={`h-[52px] w-full rounded-xl border-2 bg-surface px-4 text-base font-semibold uppercase text-text outline-none focus:border-blue ${
+                  className={`h-[52px] w-full rounded-xl border-2 bg-surface px-4 text-base font-semibold uppercase text-text outline-none focus:border-cobalt ${
                     error ? "border-destructive" : "border-card-border"
                   }`}
                 />
@@ -80,7 +80,7 @@ export function CoachScreen() {
                   <h2 id="coach-name" className="m-0 break-words text-base font-bold">
                     {coach.name}
                   </h2>
-                  <p className="m-0 text-[13px] leading-snug text-secondary">{levelSourceText(level)}</p>
+                  <p className="m-0 text-cap leading-snug text-secondary">{levelSourceText(level)}</p>
                 </div>
                 <LevelBadge level={level} />
               </div>
@@ -97,7 +97,7 @@ export function CoachScreen() {
 
       <LevelExplainerSheet open={explainerOpen} onClose={() => setExplainerOpen(false)} level={LEVELS.includes(level) ? level : 0} />
       <Sheet open={leaveOpen} onClose={() => setLeaveOpen(false)} title="Rời huấn luyện viên?" titleId="leave-coach-title" desktopDialog>
-        <p className="m-0 px-1 text-[15px] leading-snug text-text">{coach ? leaveConfirm(coach.name) : ""}</p>
+        <p className="m-0 px-1 text-callout leading-snug text-text">{coach ? leaveConfirm(coach.name) : ""}</p>
         <PillButton
           type="button"
           variant="destructive"

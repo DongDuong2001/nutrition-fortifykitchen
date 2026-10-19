@@ -142,7 +142,7 @@ export function MacroTargetsScreen() {
 
       <main className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-12 pt-4 lg:mx-0 lg:max-w-[780px] lg:px-8 lg:pt-6">
         {savedToast && (
-          <div role="status" aria-live="polite" className="rounded-xl bg-blue/20 border border-blue px-4 py-3 text-[14px] font-bold text-sky">
+          <div role="status" aria-live="polite" className="rounded-xl bg-cobalt/20 border border-cobalt px-4 py-3 text-[0.875rem] font-bold text-sky">
             Đã lưu mục tiêu đa lượng mới
           </div>
         )}
@@ -151,15 +151,15 @@ export function MacroTargetsScreen() {
         <Card as="section" aria-labelledby="energy-target-title" className="flex flex-col gap-2">
           <SectionTitle id="energy-target-title">Mục tiêu năng lượng</SectionTitle>
           <div className="flex items-baseline justify-between py-1">
-            <span className="text-[14px] text-secondary">Năng lượng mục tiêu</span>
+            <span className="text-[0.875rem] text-secondary">Năng lượng mục tiêu</span>
             <div className="flex items-baseline gap-1.5">
-              <span className="font-display text-[28px] font-extrabold leading-none tabular-nums text-text">
+              <span className="font-display text-headline font-extrabold leading-none tabular-nums text-text">
                 {formatNumber(mode === "fixed" ? fixedCalc.totalKcal : energyKcal)}
               </span>
-              <span className="text-[15px] font-semibold text-secondary">kcal</span>
+              <span className="text-callout font-semibold text-secondary">kcal</span>
             </div>
           </div>
-          <p className="m-0 text-[13px] leading-relaxed text-secondary border-t border-divider pt-2">
+          <p className="m-0 text-cap leading-relaxed text-secondary border-t border-divider pt-2">
             Tính từ hồ sơ ({formatNumber(profile.weightKg)} kg) và mục tiêu thể trạng. Số kcal này dùng làm cơ sở chia các chất đa lượng.
           </p>
         </Card>
@@ -168,7 +168,7 @@ export function MacroTargetsScreen() {
         <Card as="section" aria-labelledby="macro-settings-title" className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
             <SectionTitle id="macro-settings-title">Chia theo đa lượng</SectionTitle>
-            <span className="text-[13px] text-secondary">Chọn phương pháp phân bổ dinh dưỡng đa lượng</span>
+            <span className="text-cap text-secondary">Chọn phương pháp phân bổ dinh dưỡng đa lượng</span>
           </div>
 
           {/* Segmented control: Tỉ lệ | Cố định | Keto */}
@@ -177,7 +177,7 @@ export function MacroTargetsScreen() {
               type="button"
               aria-pressed={mode === "ratios"}
               onClick={() => setMode("ratios")}
-              className={`min-h-11 rounded-lg text-[13px] font-bold transition-press ${
+              className={`min-h-11 rounded-lg text-cap font-bold transition-press ${
                 mode === "ratios" ? "bg-card text-text shadow-sm" : "bg-transparent text-secondary hover:text-text"
               }`}
             >
@@ -187,7 +187,7 @@ export function MacroTargetsScreen() {
               type="button"
               aria-pressed={mode === "fixed"}
               onClick={() => setMode("fixed")}
-              className={`min-h-11 rounded-lg text-[13px] font-bold transition-press ${
+              className={`min-h-11 rounded-lg text-cap font-bold transition-press ${
                 mode === "fixed" ? "bg-card text-text shadow-sm" : "bg-transparent text-secondary hover:text-text"
               }`}
             >
@@ -197,7 +197,7 @@ export function MacroTargetsScreen() {
               type="button"
               aria-pressed={mode === "keto"}
               onClick={() => setMode("keto")}
-              className={`min-h-11 rounded-lg text-[13px] font-bold transition-press ${
+              className={`min-h-11 rounded-lg text-cap font-bold transition-press ${
                 mode === "keto" ? "bg-card text-text shadow-sm" : "bg-transparent text-secondary hover:text-text"
               }`}
             >
@@ -205,7 +205,7 @@ export function MacroTargetsScreen() {
             </button>
           </div>
 
-          <p className="m-0 text-[13px] leading-snug text-secondary">
+          <p className="m-0 text-cap leading-snug text-secondary">
             {mode === "ratios" &&
               "Tỉ lệ chia năng lượng thành đạm, tinh bột và chất béo. Khi cân nặng thay đổi, số gram tự cập nhật để giữ vững tỉ lệ này."}
             {mode === "fixed" &&
@@ -217,24 +217,24 @@ export function MacroTargetsScreen() {
           {/* 3 Hàng Macro: Đạm, Tinh bột, Béo */}
           <div className="flex flex-col divide-y divide-divider border-t border-b border-divider">
             {/* Đạm */}
-            <div className="flex min-h-[56px] items-center justify-between gap-3 py-2">
+            <div className="flex min-h-14 items-center justify-between gap-3 py-2">
               <div className="flex items-center gap-2.5 min-w-0">
-                <span className="h-3 w-3 shrink-0 rounded-full bg-emerald-500" aria-hidden="true" />
+                <span className="h-3 w-3 shrink-0 rounded-full bg-success" aria-hidden="true" />
                 <div className="flex flex-col">
-                  <span className="text-[15px] font-bold text-text">Đạm</span>
-                  <span className="text-[13px] tabular-nums text-secondary">
+                  <span className="text-callout font-bold text-text">Đạm</span>
+                  <span className="text-cap tabular-nums text-secondary">
                     {mode === "fixed" ? `${formatNumber(fixedCalc.proteinKcal)} kcal` : `${formatNumber(ratioCalc.proteinKcal)} kcal`}
                   </span>
                 </div>
               </div>
 
               <div className="flex items-center gap-3 shrink-0">
-                <span className="font-display text-[16px] font-bold tabular-nums text-text">
+                <span className="font-display text-[1rem] font-bold tabular-nums text-text">
                   {mode === "fixed" ? `${formatAmount(fixedProtein, "g")} g` : `${formatAmount(ratioCalc.protein.min, "g")} g`}
                 </span>
 
                 {mode === "ratios" && (
-                  <div className="flex items-center gap-1 rounded-lg border border-card-border bg-page px-2 py-1 focus-within:ring-2 focus-within:ring-blue">
+                  <div className="flex items-center gap-1 rounded-lg border border-card-border bg-page px-2 py-1 focus-within:ring-2 focus-within:ring-cobalt">
                     <input
                       type="number"
                       min="5"
@@ -250,7 +250,7 @@ export function MacroTargetsScreen() {
                 )}
 
                 {mode === "fixed" && (
-                  <div className="flex items-center gap-1 rounded-lg border border-card-border bg-page px-2 py-1 focus-within:ring-2 focus-within:ring-blue">
+                  <div className="flex items-center gap-1 rounded-lg border border-card-border bg-page px-2 py-1 focus-within:ring-2 focus-within:ring-cobalt">
                     <input
                       type="number"
                       min="10"
@@ -274,24 +274,24 @@ export function MacroTargetsScreen() {
             </div>
 
             {/* Tinh bột */}
-            <div className="flex min-h-[56px] items-center justify-between gap-3 py-2">
+            <div className="flex min-h-14 items-center justify-between gap-3 py-2">
               <div className="flex items-center gap-2.5 min-w-0">
                 <span className="h-3 w-3 shrink-0 rounded-full bg-sky" aria-hidden="true" />
                 <div className="flex flex-col">
-                  <span className="text-[15px] font-bold text-text">Tinh bột</span>
-                  <span className="text-[13px] tabular-nums text-secondary">
+                  <span className="text-callout font-bold text-text">Tinh bột</span>
+                  <span className="text-cap tabular-nums text-secondary">
                     {mode === "fixed" ? `${formatNumber(fixedCalc.carbsKcal)} kcal` : `${formatNumber(ratioCalc.carbsKcal)} kcal`}
                   </span>
                 </div>
               </div>
 
               <div className="flex items-center gap-3 shrink-0">
-                <span className="font-display text-[16px] font-bold tabular-nums text-text">
+                <span className="font-display text-[1rem] font-bold tabular-nums text-text">
                   {mode === "fixed" ? `${formatAmount(fixedCarbs, "g")} g` : `${formatAmount(ratioCalc.carbs.min, "g")} g`}
                 </span>
 
                 {mode === "ratios" && (
-                  <div className="flex items-center gap-1 rounded-lg border border-card-border bg-page px-2 py-1 focus-within:ring-2 focus-within:ring-blue">
+                  <div className="flex items-center gap-1 rounded-lg border border-card-border bg-page px-2 py-1 focus-within:ring-2 focus-within:ring-cobalt">
                     <input
                       type="number"
                       min="5"
@@ -307,7 +307,7 @@ export function MacroTargetsScreen() {
                 )}
 
                 {mode === "fixed" && (
-                  <div className="flex items-center gap-1 rounded-lg border border-card-border bg-page px-2 py-1 focus-within:ring-2 focus-within:ring-blue">
+                  <div className="flex items-center gap-1 rounded-lg border border-card-border bg-page px-2 py-1 focus-within:ring-2 focus-within:ring-cobalt">
                     <input
                       type="number"
                       min="10"
@@ -331,24 +331,24 @@ export function MacroTargetsScreen() {
             </div>
 
             {/* Chất béo */}
-            <div className="flex min-h-[56px] items-center justify-between gap-3 py-2">
+            <div className="flex min-h-14 items-center justify-between gap-3 py-2">
               <div className="flex items-center gap-2.5 min-w-0">
                 <span className="h-3 w-3 shrink-0 rounded-full bg-amber-500" aria-hidden="true" />
                 <div className="flex flex-col">
-                  <span className="text-[15px] font-bold text-text">Chất béo</span>
-                  <span className="text-[13px] tabular-nums text-secondary">
+                  <span className="text-callout font-bold text-text">Chất béo</span>
+                  <span className="text-cap tabular-nums text-secondary">
                     {mode === "fixed" ? `${formatNumber(fixedCalc.fatKcal)} kcal` : `${formatNumber(ratioCalc.fatKcal)} kcal`}
                   </span>
                 </div>
               </div>
 
               <div className="flex items-center gap-3 shrink-0">
-                <span className="font-display text-[16px] font-bold tabular-nums text-text">
+                <span className="font-display text-[1rem] font-bold tabular-nums text-text">
                   {mode === "fixed" ? `${formatAmount(fixedFat, "g")} g` : `${formatAmount(ratioCalc.fat.min, "g")} g`}
                 </span>
 
                 {mode === "ratios" && (
-                  <div className="flex items-center gap-1 rounded-lg border border-card-border bg-page px-2 py-1 focus-within:ring-2 focus-within:ring-blue">
+                  <div className="flex items-center gap-1 rounded-lg border border-card-border bg-page px-2 py-1 focus-within:ring-2 focus-within:ring-cobalt">
                     <input
                       type="number"
                       min="5"
@@ -364,7 +364,7 @@ export function MacroTargetsScreen() {
                 )}
 
                 {mode === "fixed" && (
-                  <div className="flex items-center gap-1 rounded-lg border border-card-border bg-page px-2 py-1 focus-within:ring-2 focus-within:ring-blue">
+                  <div className="flex items-center gap-1 rounded-lg border border-card-border bg-page px-2 py-1 focus-within:ring-2 focus-within:ring-cobalt">
                     <input
                       type="number"
                       min="10"
@@ -390,11 +390,11 @@ export function MacroTargetsScreen() {
 
           {/* Hàng tổng phần trăm và cảnh báo */}
           <div className="flex items-center justify-between pt-1">
-            <span className="text-[14px] font-bold text-text">Tổng tỉ lệ phần trăm</span>
+            <span className="text-[0.875rem] font-bold text-text">Tổng tỉ lệ phần trăm</span>
             <div className="flex items-center gap-2">
               <span
-                className={`font-display text-[16px] font-extrabold tabular-nums ${
-                  isRatioValid ? "text-emerald-500" : "text-destructive-text"
+                className={`font-display text-[1rem] font-extrabold tabular-nums ${
+                  isRatioValid ? "text-success" : "text-destructive-text"
                 }`}
               >
                 {formatNumber(totalPct)},0 %
@@ -403,14 +403,14 @@ export function MacroTargetsScreen() {
           </div>
 
           {mode === "ratios" && !isRatioValid && (
-            <p className="m-0 text-[13px] font-semibold text-destructive-text">
+            <p className="m-0 text-cap font-semibold text-destructive-text">
               Tổng ba tỉ lệ phải bằng đúng 100% (hiện tại: {totalPct}%). Hãy điều chỉnh lại các ô nhập.
             </p>
           )}
 
           {/* Gợi ý tỉ lệ nhanh (Presets) */}
           <div className="flex flex-col gap-2 pt-2 border-t border-divider">
-            <span className="text-[13px] font-semibold text-secondary">Gợi ý tỉ lệ phổ biến</span>
+            <span className="text-cap font-semibold text-secondary">Gợi ý tỉ lệ phổ biến</span>
             <div className="flex flex-wrap gap-2">
               {Object.entries(MACRO_PRESETS).map(([key, p]) => (
                 <button
