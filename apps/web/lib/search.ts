@@ -1,4 +1,4 @@
-import type { FoodItem } from "./mock/foods";
+import { catalogVersion, type FoodItem } from "./mock/foods";
 
 /**
  * Remove Vietnamese diacritical marks and tone markers for fuzzy/ascii comparison.
@@ -18,9 +18,8 @@ const norm = (str: string) => str.normalize("NFC").toLowerCase().trim();
 /** Words of a name or query: spaces and ( ) / , are the separators. */
 const wordsOf = (str: string) => str.split(/[\s()/,]+/).filter(Boolean);
 
-/** True when the words of `needle` are a whole word, or a run of whole words, of `haystack`. */
-function hasWholeWords(haystack: string, needle: string): boolean {
-  const hay = wordsOf(haystack);
+/** True when the words of `needle` are a whole word, or a run of whole words, of `hay` (the words of a name). */
+function hasWholeWords(hay: readonly string[], needle: string): boolean {
   const words = wordsOf(needle);
   if (words.length === 0) return false;
   for (let start = 0; start + words.length <= hay.length; start++) {
@@ -30,33 +29,75 @@ function hasWholeWords(haystack: string, needle: string): boolean {
 }
 
 /**
+ * cc-58: what a search reads of a food, worked out once per food (the catalogue has thousands and a query runs on
+ * every keystroke): the name as typed, folded of its accents, both as words, the brand folded, and the duplicate key.
+ */
+interface Folded {
+  name: string;
+  words: readonly string[];
+  foldedName: string;
+  foldedWords: readonly string[];
+  foldedBrand: string | null;
+  dupKey: string;
+}
+const foldedCache = new WeakMap<FoodItem, Folded>();
+function foldedOf(food: FoodItem): Folded {
+  let f = foldedCache.get(food);
+  if (!f) {
+    const name = norm(food.nameVi);
+    const foldedName = removeVietnameseTones(food.nameVi);
+    f = {
+      name,
+      words: wordsOf(name),
+      foldedName,
+      foldedWords: wordsOf(foldedName),
+      foldedBrand: food.brand ? removeVietnameseTones(food.brand) : null,
+      dupKey: `${name}|${food.nutrients?.energy ?? ""}`,
+    };
+    foldedCache.set(food, f);
+  }
+  return f;
+}
+
+/** One Vietnamese collator for every comparison (a new one per localeCompare call is slow). */
+const VI_COLLATOR = new Intl.Collator("vi");
+
+/**
  * How well a food matches the query, lower is better, or null for no match. Tiers 0 to 3 compare the accented
  * text (so "bơ" finds Quả bơ before Bột quế), tiers 4 to 6 the text with the accents folded away, 7 the brand.
  */
 function matchTier(food: FoodItem, query: string, foldedQuery: string): number | null {
-  const name = norm(food.nameVi);
-  if (name === query) return 0;
-  if (hasWholeWords(name, query)) return 1;
-  if (name.startsWith(query)) return 2;
-  if (name.includes(query)) return 3;
-  const foldedName = removeVietnameseTones(food.nameVi);
-  if (foldedName === foldedQuery) return 3.5;
-  if (hasWholeWords(foldedName, foldedQuery)) return 4;
-  if (foldedName.startsWith(foldedQuery)) return 5;
-  if (foldedName.includes(foldedQuery)) return 6;
-  if (food.brand && removeVietnameseTones(food.brand).includes(foldedQuery)) return 7;
+  const f = foldedOf(food);
+  if (f.name === query) return 0;
+  if (hasWholeWords(f.words, query)) return 1;
+  if (f.name.startsWith(query)) return 2;
+  if (f.name.includes(query)) return 3;
+  if (f.foldedName === foldedQuery) return 3.5;
+  if (hasWholeWords(f.foldedWords, foldedQuery)) return 4;
+  if (f.foldedName.startsWith(foldedQuery)) return 5;
+  if (f.foldedName.includes(foldedQuery)) return 6;
+  if (f.foldedBrand !== null && f.foldedBrand.includes(foldedQuery)) return 7;
   return null;
 }
 
-/** The catalogue has the same food twice (same name, same energy per 100 g): keep the first. */
+/**
+ * The catalogue has the same food twice (same name, same energy per 100 g): keep the first. Kept per list and per
+ * catalogue version (the list is the catalogue array itself, changed in place when a food is made or the live one arrives).
+ */
+const uniqueCache = new WeakMap<FoodItem[], { version: number; unique: FoodItem[] }>();
 function withoutDuplicates(foods: FoodItem[]): FoodItem[] {
+  const cached = uniqueCache.get(foods);
+  const version = catalogVersion();
+  if (cached && cached.version === version && cached.unique.length <= foods.length) return cached.unique;
   const seen = new Set<string>();
-  return foods.filter((food) => {
-    const key = `${norm(food.nameVi)}|${food.nutrients?.energy ?? ""}`;
+  const unique = foods.filter((food) => {
+    const key = foldedOf(food).dupKey;
     if (seen.has(key)) return false;
     seen.add(key);
     return true;
   });
+  uniqueCache.set(foods, { version, unique });
+  return unique;
 }
 
 /**
@@ -111,7 +152,7 @@ export function searchFoods(foods: FoodItem[], query: string): FoodItem[] {
   }
 
   return matches
-    .sort((a, b) => a.tier - b.tier || a.food.nameVi.length - b.food.nameVi.length || a.food.nameVi.localeCompare(b.food.nameVi, "vi"))
+    .sort((a, b) => a.tier - b.tier || a.food.nameVi.length - b.food.nameVi.length || VI_COLLATOR.compare(a.food.nameVi, b.food.nameVi))
     .map((m) => m.food);
 }
 

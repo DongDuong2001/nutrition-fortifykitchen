@@ -41,16 +41,17 @@ OLD_TIPS = [
     "food-detail", "compare", "food-new", "training", "micros", "trends-micros", "explore", "overview", "leaderboard",
 ]
 RETURNING = {"tourDone": True, "seen": OLD_TIPS, "whatsNewSeen": "2026-10-18b"}
-# 18c's first two (the cap drops its last three), cc-52's 18e on the Ngày tập pill, then cc-53b's 18f on Hôm nay
+# 18c's first (the cap drops its last four), cc-52's 18e on the Ngày tập pill, then 18f on Hôm nay: cc-53b's three and
+# cc-54's Thành phần (a dish's control is not on Hôm nay, so it points at + Thêm, its fallback)
 STEPS = [
     ("Món chưa lưu", ["sync-status", "header-actions"]),
-    ("Kéo xuống để tải lại", ["home-food-list", "meal-pill"]),
     ("Nhóm Bự / Bé", ["training-size", "training-pill"]),
     ("Đánh dấu để ghi", ["training-checklist", "training-pill"]),
     ("+ Thêm món", ["training-add-item", "training-pill"]),
     ("Ghi theo gam", ["meal-add", "nav-add"]),
     ("Sống hay chín", ["home-food-list", "meal-pill"]),
     ("Khay xem lại", ["meal-pill"]),
+    ("Thành phần của món", ["meal-add", "nav-add"]),
 ]
 problems = []
 
@@ -181,7 +182,7 @@ def tour(browser):
 
 
 def skipped(browser):
-    # Steps whose target is gone are skipped: no Ngày tập pill -> step 2 goes straight to step 6
+    # Steps whose target is gone are skipped: no Ngày tập pill -> step 2 goes straight to step 5
     ctx, pg = new_page(browser, RETURNING)
     start_tour(pg)
     card(pg).get_by_role("button", name="Tiếp").click()
@@ -192,17 +193,17 @@ def skipped(browser):
     # Each missing step waits the spotlight's give-up time before it is skipped: three in a row
     for _ in range(20):
         pg.wait_for_timeout(500)
-        if "Mới · 6/8" in step_text(pg):
+        if "Mới · 5/8" in step_text(pg):
             break
-    check("Mới · 6/8" in step_text(pg), f"skip: steps 3 to 5 have no target, so step 6 shows ({step_text(pg)[:30]!r})")
+    check("Mới · 5/8" in step_text(pg), f"skip: steps 2 to 4 have no target, so step 5 shows ({step_text(pg)[:30]!r})")
     check(pg.locator("[data-onboarding-overlay]").count() == 1, "skip: one overlay, no ring left behind")
     # A target that leaves the page mid-step moves the tour on (the ring is not left on an empty spot)
     pg.evaluate("() => document.querySelectorAll('[data-tour=\"meal-add\"], [data-tour=\"nav-add\"]').forEach(el => el.remove())")
     pg.wait_for_timeout(1200)
-    check("Mới · 7/8" in step_text(pg), f"gone mid-step: step 6's + Thêm left the page, step 7 shows ({step_text(pg)[:30]!r})")
+    check("Mới · 6/8" in step_text(pg), f"gone mid-step: step 5's + Thêm left the page, step 6 shows ({step_text(pg)[:30]!r})")
     check(ring_holds(pg, ["home-food-list", "meal-pill"]) is not None, "gone mid-step: the ring is on the food list")
     shot(pg, "skipped")
-    # With the food list and the meal pills gone too, Tiếp after step 7 ends the tour
+    # With the food list and the meal pills gone too, Tiếp after step 6 ends the tour (the Thành phần step has no + Thêm left either)
     pg.evaluate("() => document.querySelectorAll('[data-tour=\"meal-pill\"], [data-tour=\"home-food-list\"]').forEach(el => el.removeAttribute('data-tour'))")
     card(pg).get_by_role("button", name="Tiếp").click()
     pg.wait_for_timeout(2500)
@@ -275,7 +276,7 @@ def portion_tips(browser):
     # A supplement keeps its unit, and the unit stepper's tip: Bột củ dền by the spoon (1 muỗng)
     ctx, pg = new_page(browser, RETURNING | {"whatsNewSeen": RELEASE})
     open_food(pg, "củ dền", "Bột củ dền")
-    tab = pg.get_by_role("tab", name="Muỗng")
+    tab = pg.get_by_role("button", name="Muỗng", exact=True)
     (tab.first if tab.count() else pg.get_by_role("button", name="1 muỗng").first).click()
     pg.wait_for_timeout(300)
     check(pg.locator('[data-tour="unit-stepper"]:visible').count() >= 1, "supplement: the stepper is on screen by the spoon")

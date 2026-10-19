@@ -82,7 +82,7 @@ def test_macro_screen(browser):
     check(h1.count() > 0, "Mục tiêu đa lượng page renders with correct H1")
 
     # Check segmented control tabs
-    tabs = pg.locator("[role='tablist'] [role='tab']")
+    tabs = pg.locator("[role='group'][aria-label='Cách chia đa lượng'] button")
     check(tabs.count() == 3, "Has 3 macro tabs: Tỉ lệ, Cố định, Keto")
 
     # Check 3 macro rows

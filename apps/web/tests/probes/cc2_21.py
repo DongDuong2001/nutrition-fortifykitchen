@@ -111,16 +111,17 @@ def micros(browser, size_name, size):
     check(name in sel and "%" in sel, f"{w}: a square names the nutrient, share and level ({sel!r})")
     link = pg.locator("#mi-grid a[href^='/micros/']")
     check(link.count() == 1, f"{w}: the selected nutrient links to its detail")
-    details = pg.locator("#mi-sections details")
-    labels = [squash(details.nth(i).locator("summary").inner_text()) for i in range(details.count())]
-    check(details.count() >= 4 and [l.split(" ")[0] for l in labels][:4] == ["Thiếu", "Trung", "Gần", "Đạt"], f"{w}: Thiếu, Trung bình, Gần đủ, Đạt sections ({labels})")
-    first = details.nth(0)
-    check(first.evaluate("e => e.open") is True, f"{w}: Thiếu is open")
-    first.locator("summary").click()
-    pg.wait_for_timeout(150)
-    check(first.evaluate("e => e.open") is False, f"{w}: a section collapses")
-    first.locator("summary").click()
-    pg.wait_for_timeout(100)
+    # cc-57: each section is a button (aria-expanded) with the shared Expand, no longer a <details>
+    sections = pg.locator("#mi-sections > div[data-align-group='overview-micro']")
+    labels = [squash(sections.nth(i).locator("button").first.inner_text()) for i in range(sections.count())]
+    check(sections.count() >= 4 and [l.split(" ")[0] for l in labels][:4] == ["Thiếu", "Trung", "Gần", "Đạt"], f"{w}: Thiếu, Trung bình, Gần đủ, Đạt sections ({labels})")
+    first = sections.nth(0).locator("button").first
+    check(first.get_attribute("aria-expanded") == "true", f"{w}: Thiếu is open")
+    first.click()
+    pg.wait_for_timeout(400)
+    check(first.get_attribute("aria-expanded") == "false", f"{w}: a section collapses")
+    first.click()
+    pg.wait_for_timeout(400)
     att = pg.locator("section[aria-labelledby='ov-attention'] > ul > li")
     check(1 <= att.count() <= 3, f"{w}: Cần chú ý has 1-3 rows ({att.count()})")
     atext = squash(pg.locator("section[aria-labelledby='ov-attention']").inner_text())

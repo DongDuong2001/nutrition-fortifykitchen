@@ -1,10 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { Manrope, Saira_Condensed } from "next/font/google";
 import "./globals.css";
-import { DiaryProviderWrapper } from "@/components/diary-provider-wrapper";
 import { NavHistoryTracker } from "@/components/nav-history-tracker";
 import { PwaRegister } from "@/components/pwa/pwa-register";
 import { RouteTransition } from "@/components/route-transition";
+import { TouchActive } from "@/components/touch-active";
 import { INK_COLOR, STANDALONE_HOME_SCRIPT } from "@/lib/pwa";
 
 const manrope = Manrope({
@@ -57,9 +57,8 @@ export default function RootLayout({
       <body className="bg-page text-text antialiased min-h-screen flex flex-col font-sans">
         <NavHistoryTracker />
         <PwaRegister />
-        <DiaryProviderWrapper>
-          <RouteTransition>{children}</RouteTransition>
-        </DiaryProviderWrapper>
+        <TouchActive />
+        <RouteTransition>{children}</RouteTransition>
       </body>
     </html>
   );

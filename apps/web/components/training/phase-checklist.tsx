@@ -43,7 +43,7 @@ export function PhaseChecklist({
       <div key={it.id} className={rowClass} aria-busy={busy || undefined}>
         <label
           className={`flex flex-1 min-w-0 items-center self-stretch transition-transform ${
-            readOnly ? "cursor-default" : "cursor-pointer active:scale-[0.99] motion-reduce:active:scale-100"
+            readOnly ? "cursor-default" : "cursor-pointer active:scale-[0.99] transition-press motion-reduce:active:scale-100"
           } ${isDesktop ? "gap-4" : "gap-3"}`}
         >
           <span className="w-11 h-11 -ml-2.5 flex items-center justify-center shrink-0">
@@ -78,7 +78,7 @@ export function PhaseChecklist({
             type="button"
             onClick={() => onRemoveItem(it)}
             aria-label={`Bỏ ${it.label} khỏi danh sách`}
-            className="-mr-2.5 ml-1 flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-secondary hover:bg-hover active:scale-[0.97] motion-reduce:active:scale-100"
+            className="-mr-2.5 ml-1 flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-secondary hover:bg-hover active:scale-[0.97] transition-press motion-reduce:active:scale-100"
           >
             <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
               <path d="M6 6l12 12M18 6L6 18" />
@@ -125,7 +125,7 @@ export function PhaseChecklist({
                     type="button"
                     onClick={() => onAddItem(ph)}
                     data-tour={idx === 0 ? "training-add-item" : undefined}
-                    className="-ml-1 flex min-h-[44px] cursor-pointer items-center rounded-full border-0 bg-transparent px-1 text-sm font-semibold text-blue active:scale-[0.97] motion-reduce:active:scale-100"
+                    className="-ml-1 flex min-h-[44px] cursor-pointer items-center rounded-full border-0 bg-transparent px-1 text-sm font-semibold text-blue active:scale-[0.97] transition-press motion-reduce:active:scale-100"
                   >
                     + Thêm món
                   </button>

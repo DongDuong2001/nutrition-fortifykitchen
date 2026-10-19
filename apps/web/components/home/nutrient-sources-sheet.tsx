@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { PillButton } from "@/components/ui/pill-button";
 import { Sheet } from "@/components/ui/sheet";
 import { useDiary } from "@/lib/diary-store";
 import { formatAmount } from "@/lib/format";
@@ -60,6 +61,9 @@ export function NutrientSourcesSheet({
           Xem chi tiết ›
         </Link>
       )}
+      <PillButton type="button" variant="secondary" onClick={onClose}>
+        Đóng
+      </PillButton>
     </Sheet>
   );
 }

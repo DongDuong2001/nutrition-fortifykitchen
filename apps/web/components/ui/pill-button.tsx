@@ -28,7 +28,7 @@ export function PillButton({
   ...props
 }: PillButtonProps) {
   const baseClasses =
-    "group inline-flex items-center justify-center rounded-full h-[52px] px-6 text-base font-bold transition-transform duration-150 active:scale-[0.97] disabled:opacity-50 disabled:pointer-events-none select-none box-border no-underline cursor-pointer motion-reduce:active:transform-none";
+    "group inline-flex items-center justify-center rounded-full h-[52px] px-6 text-base font-bold active:scale-[0.97] transition-press disabled:opacity-50 disabled:pointer-events-none select-none box-border no-underline cursor-pointer motion-reduce:active:transform-none";
 
   const isPrimary = variant === "primary";
 

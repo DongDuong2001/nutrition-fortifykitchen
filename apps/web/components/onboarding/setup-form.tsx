@@ -354,7 +354,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
           </section>
 
           {saveError && (
-            <p role="alert" className="m-0 text-[13px] text-destructive">
+            <p role="alert" className="m-0 text-[13px] text-destructive-text">
               {saveError}
             </p>
           )}

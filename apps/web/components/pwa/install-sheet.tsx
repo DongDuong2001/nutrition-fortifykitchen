@@ -40,9 +40,9 @@ interface InstallSheetProps {
 const TITLE_ID = "install-sheet-title";
 export const SHEET_TITLE_CLASS = "m-0 font-display font-extrabold italic uppercase leading-none text-text";
 export const SHEET_ICON_BUTTON =
-  "inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 text-text transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100";
+  "inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 text-text active:scale-[0.97] transition-press motion-reduce:transition-none motion-reduce:active:scale-100";
 const LATER_BUTTON =
-  "inline-flex min-h-12 w-full cursor-pointer items-center justify-center rounded-full border-0 bg-transparent px-4 text-[15px] font-bold text-secondary transition-transform duration-150 m-tint motion-reduce:transition-none";
+  "inline-flex min-h-12 w-full cursor-pointer items-center justify-center rounded-full border-0 bg-transparent px-4 text-[15px] font-bold text-secondary transition-press m-tint motion-reduce:transition-none";
 const RING = "ring-[3px] ring-blue";
 
 function startView(device: InstallDevice): View {
@@ -154,7 +154,7 @@ function AskView({ detected, onPick, onLater }: { detected: "ios" | "android" | 
                 key={c.id}
                 type="button"
                 onClick={() => onPick(c.id)}
-                className={`relative flex min-h-[76px] cursor-pointer flex-col items-start justify-center gap-1 rounded-2xl px-4 py-3 text-left transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100 ${
+                className={`relative flex min-h-[76px] cursor-pointer flex-col items-start justify-center gap-1 rounded-2xl px-4 py-3 text-left active:scale-[0.97] transition-press motion-reduce:transition-none motion-reduce:active:scale-100 ${
                   mine ? "border-2 border-blue bg-cobalt-tint" : "border border-card-border bg-card"
                 }`}
               >

@@ -414,7 +414,7 @@ export function ShareSheet({
           <button
             type="button"
             onClick={retry}
-            className="inline-flex min-h-[44px] shrink-0 cursor-pointer items-center rounded-full border-0 bg-transparent px-3 text-[13px] font-bold text-blue active:scale-[0.97] motion-reduce:active:scale-100"
+            className="inline-flex min-h-[44px] shrink-0 cursor-pointer items-center rounded-full border-0 bg-transparent px-3 text-[13px] font-bold text-blue active:scale-[0.97] transition-press motion-reduce:active:scale-100"
           >
             Thử lại
           </button>

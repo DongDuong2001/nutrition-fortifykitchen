@@ -5,7 +5,7 @@ import path from "node:path";
 import { gzipSync } from "node:zlib";
 
 const BASE = process.env.ALIGN_BASE_URL || "http://localhost:3100";
-const ROUTES = ["/app", "/add", "/foods/food-cha-la", "/entry/item-1", "/micros", "/trends", "/explore", "/settings", "/settings/profile", "/training"];
+const ROUTES = ["/signin", "/landing", "/app", "/add", "/foods/food-cha-la", "/entry/item-1", "/micros", "/trends", "/explore", "/settings", "/settings/profile", "/training"];
 const root = path.resolve(import.meta.dirname, "..");
 const kb = (n) => (n / 1024).toFixed(1);
 

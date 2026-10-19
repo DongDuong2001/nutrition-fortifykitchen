@@ -20,7 +20,8 @@ export interface SavedMeal {
 }
 
 /** Saved in localStorage like favourites, so saved meals last past the session. */
-export const SAVED_MEALS_KEY = "h1t_saved_meals_v1";
+import { SAVED_MEALS_KEY } from "./storage-keys";
+export { SAVED_MEALS_KEY };
 
 /** "Bữa sáng 13/10": the meal name and the day it was saved from. */
 export function defaultMealName(slot: MealSlot, iso: string): string {

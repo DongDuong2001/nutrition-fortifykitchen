@@ -1,4 +1,3 @@
-import { apiClient } from "./api-client";
 import { isDemo } from "./demo";
 import { clearOnboardingStorage } from "./onboarding";
 import {
@@ -143,7 +142,8 @@ export function mockRequestMagicLink(email: string): Promise<AuthResult> {
     if (emailError) return { ok: false, error: emailError };
 
     // The request goes to the API client first, then the MOCK sign-in below runs
-    await apiClient.requestMagicLink(email);
+    // api-client loads here, on the first sign-in link, not with the sign-in screen
+    await (await import("./api-client")).apiClient.requestMagicLink(email);
 
     const address = normaliseEmail(email);
     const store = readStore();

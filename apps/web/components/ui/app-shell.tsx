@@ -1,8 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
+import { usePathname } from "next/navigation";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { DesktopSidebar } from "@/components/ui/desktop-sidebar";
+import { ShellSlotContext } from "@/components/ui/shell-slot";
 
 /**
  * The page frame for a screen with the main navigation: the desktop sidebar on the left (from 1024 px),
@@ -41,7 +43,7 @@ export function AppShell({
         {children}
       </div>
       {cta && (
-        <div className="fixed inset-x-0 bottom-[calc(72px+env(safe-area-inset-bottom))] z-30 border-t border-card-border bg-page/95 p-3 backdrop-blur-sm lg:bottom-0 lg:left-60">
+        <div className="fixed inset-x-0 bottom-[calc(72px+env(safe-area-inset-bottom))] z-30 border-t border-card-border bg-page/95 p-3 lg:bottom-0 lg:left-60">
           <div className="mx-auto w-full max-w-[560px]">{cta}</div>
         </div>
       )}
@@ -53,5 +55,31 @@ export function AppShell({
         </div>
       )}
     </div>
+  );
+}
+
+// ---- cc-57: the frame the four tabs share ----
+// app/(app)/(tabs)/layout.tsx renders TabsShell once, so a tap on a bottom tab keeps the sidebar, the nav and its active
+// state mounted and only swaps the page. The bar slot (components/ui/shell-slot) is for Hôm nay's select mode.
+
+/** The data-align-container of each tab page (the alignment check scopes its groups to it). */
+const TAB_ALIGN_CONTAINER: [prefix: string, name: string][] = [
+  ["/app", "home-page"],
+  ["/trends", "overview-page"],
+  ["/explore", "add-list"],
+  ["/settings", "settings-page"],
+];
+
+export function TabsShell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname() ?? "";
+  const [barActive, setBarActive] = useState(false);
+  const [barHost, setBarHost] = useState<HTMLElement | null>(null);
+  const alignContainer = TAB_ALIGN_CONTAINER.find(([prefix]) => pathname === prefix || pathname.startsWith(prefix + "/"))?.[1];
+  return (
+    <ShellSlotContext.Provider value={{ setBarActive, barHost }}>
+      <AppShell alignContainer={alignContainer} bottomBar={barActive ? <div ref={setBarHost} /> : undefined}>
+        {children}
+      </AppShell>
+    </ShellSlotContext.Provider>
   );
 }

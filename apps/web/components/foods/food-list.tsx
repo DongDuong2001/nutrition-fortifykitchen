@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import type { FoodItem } from "@/lib/mock/foods";
 import type { FoodList as FoodListData } from "@/lib/food-categories";
 import { searchTag } from "@/lib/food-source";
@@ -15,6 +15,9 @@ function SourceTag({ food }: { food: FoodItem }) {
     </span>
   );
 }
+
+/** A list shows this many rows first (the live catalogue has thousands); "Xem thêm" adds as many again. */
+export const FOOD_LIST_LIMIT = 50;
 
 export interface FoodListProps {
   list: FoodListData;
@@ -72,6 +75,22 @@ export function FoodList({
   className = "",
   dataTour,
 }: FoodListProps) {
+  // cc-58: rows past the limit wait behind "Xem thêm", per list (a new list, from a query or a filter, starts again)
+  const [more, setMore] = useState<{ list: FoodListData; extra: Record<string, number> }>({ list, extra: {} });
+  const extra = more.list === list ? more.extra : {};
+  const shownOf = (key: string, foods: FoodItem[]) => foods.slice(0, FOOD_LIST_LIMIT + (extra[key] ?? 0));
+  const moreRow = (key: string, total: number) =>
+    total > FOOD_LIST_LIMIT + (extra[key] ?? 0) ? (
+      <li key="more" className="flex border-t border-divider">
+        <button
+          type="button"
+          onClick={() => setMore({ list, extra: { ...extra, [key]: (extra[key] ?? 0) + FOOD_LIST_LIMIT } })}
+          className="flex min-h-[56px] w-full cursor-pointer items-center justify-center border-0 bg-transparent px-4 text-[15px] font-bold text-blue"
+        >
+          Xem thêm
+        </button>
+      </li>
+    ) : null;
   const firstHeaderKey = list.grouped ? list.groups[0]?.key : undefined;
   // The first row on screen, for the tour: it spotlights the search field and this row together
   const firstFoodId = list.grouped ? list.groups[0]?.foods[0]?.id : list.foods[0]?.id;
@@ -139,7 +158,7 @@ export function FoodList({
             data-tray-toggle
             data-tour="tray-toggle"
             onClick={() => tray.onToggle(food)}
-            className="mr-2 inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent p-0 active:scale-[0.97] motion-reduce:active:scale-100"
+            className="mr-2 inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent p-0 active:scale-[0.97] transition-press motion-reduce:active:scale-100"
           >
             <span
               className={`flex h-9 w-9 items-center justify-center rounded-full ${carried ? "bg-blue text-on-accent" : "bg-blue/10 text-blue"}`}
@@ -155,7 +174,7 @@ export function FoodList({
             type="button"
             onClick={() => onOpen(food)}
             aria-label={`Chọn khẩu phần ${food.nameVi}`}
-            className="mr-1 inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-secondary hover:bg-divider active:scale-[0.97] motion-reduce:active:scale-100"
+            className="mr-1 inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-secondary hover:bg-divider active:scale-[0.97] transition-press motion-reduce:active:scale-100"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
               <path d="M9 5l7 7-7 7" />
@@ -186,12 +205,16 @@ export function FoodList({
             <div className="sticky top-0 z-10 rounded-t-[18px] border-b border-divider bg-surface px-4 py-2 text-xs font-bold text-secondary">
               {group.label} · {group.foods.length}
             </div>
-            <ul className="m-0 flex list-none flex-col overflow-hidden rounded-b-[18px] p-0">{group.foods.map((food) => renderRow(food, false))}</ul>
+            <ul className="m-0 flex list-none flex-col overflow-hidden rounded-b-[18px] p-0">
+              {shownOf(group.key, group.foods).map((food) => renderRow(food, false))}
+              {moreRow(group.key, group.foods.length)}
+            </ul>
           </section>
         ))
       ) : (
         <ul data-align-group="add-list" data-align-edge="left" className={`m-0 flex shrink-0 list-none flex-col overflow-hidden p-0 ${cardClass}`}>
-          {list.foods.map((food) => renderRow(food, showCategory))}
+          {shownOf("flat", list.foods).map((food) => renderRow(food, showCategory))}
+          {moreRow("flat", list.foods.length)}
         </ul>
       )}
       {footer}

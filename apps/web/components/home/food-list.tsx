@@ -354,7 +354,7 @@ export function FoodList({
                 // Ignore parse error
               }
             }}
-            className={`transition-press duration-150 ${
+            className={`transition-press ${
               isDropTarget ? "bg-blue/10 ring-2 ring-blue/60 rounded-xl" : ""
             }`}
           >
@@ -384,7 +384,7 @@ export function FoodList({
                   aria-label={`Thêm vào ${meal.fullName}`}
                   data-export="hide"
                   data-tour="meal-add"
-                  className={`relative flex h-6 shrink-0 items-center text-xs font-bold leading-none no-underline transition-[color,opacity] duration-150 before:absolute before:-inset-y-2.5 before:-inset-x-2 before:content-[''] hover:text-on-dark focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-60 lg:h-9 lg:text-[13px] lg:before:-inset-y-1 ${
+                  className={`relative flex h-6 shrink-0 items-center text-xs font-bold leading-none no-underline transition-press before:absolute before:-inset-y-2.5 before:-inset-x-2 before:content-[''] hover:text-on-dark focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-60 lg:h-9 lg:text-[13px] lg:before:-inset-y-1 ${
                     mealSelected ? "text-on-accent focus-visible:outline-on-accent" : "text-sky focus-visible:outline-sky"
                   }`}
                 >

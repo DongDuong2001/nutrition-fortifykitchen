@@ -166,8 +166,8 @@ def run(browser, name, size):
     for grams, label in [("2.5", "2,5 g"), ("1000", "1.000 g")]:
         go(pg, "/foods/food-cha-la")
         # cc-53: the food page's portion area; grams are typed on its Gam tab
-        gam = pg.get_by_role("tab", name="Gam", exact=True).locator("visible=true")
-        if gam.count() and gam.first.get_attribute("aria-selected") != "true":
+        gam = pg.get_by_role("button", name="Gam", exact=True).locator("visible=true")
+        if gam.count() and gam.first.get_attribute("aria-pressed") != "true":
             gam.first.click()
         pg.get_by_label("Số gam", exact=True).locator("visible=true").first.fill(grams)
         pg.wait_for_timeout(200)

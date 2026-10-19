@@ -4,7 +4,7 @@
  * - "back": Back (the browser's, the phone's or a screen's own back button): the slide reverses.
  * - "sheet-up": /add opens. It is a sheet over Hôm nay and slides itself up, so the screen change has no transition.
  * - "sheet-down": Back out of /add: its panel slides down off Hôm nay.
- * - "tab": a tab of the bottom nav or the sidebar: no transition at all (tapped hundreds of times a day).
+ * - "tab": a tab of the bottom nav or the sidebar, or a Tổng quan sub-tab: no transition at all (tapped hundreds of times a day).
  * - "none": the first screen, the same screen with another query, /add closed by its own ✕ (it slid down already),
  *   and everything when reduced motion or Data Saver is on.
  * navKind is pure; the rest is a tiny store fed by popstate. Pages never import it (it would be copied into their
@@ -24,6 +24,8 @@ const TAB_ROOTS = new Set(NAV_TABS.map((t) => t.href));
 const path = (p: string) => p.split("?")[0].replace(/\/+$/, "") || "/";
 export const isTabRoot = (p: string) => TAB_ROOTS.has(path(p));
 export const isSheetRoute = (p: string) => SHEET_ROUTES.includes(path(p));
+/** Tổng quan's sub-tabs (/trends, /trends/energy ...) are siblings of one frame: moving between them is a tab change. */
+const inTrends = (p: string) => path(p) === "/trends" || path(p).startsWith("/trends/");
 
 export interface NavFlags {
   /** The change came from popstate (the browser's or the phone's Back). Landing on a parent path counts too. */
@@ -39,6 +41,7 @@ export function navKind(from: string | null, to: string, { sheetClosed, ...flags
   if (isSheetRoute(from)) return sheetClosed || !back ? "none" : "sheet-down";
   if (isSheetRoute(to)) return back ? "none" : "sheet-up";
   if (isTabRoot(from) && isTabRoot(to)) return "tab";
+  if (inTrends(from) && inTrends(to)) return "tab";
   if (back) return "back";
   if (isTabRoot(to)) return "tab";
   return "push";
@@ -93,7 +96,7 @@ export function reactTransitionClass(pathname: string): string {
 
 // ---- Back (popstate) as a view transition ----
 /** How long a Back waits for the screen it lands on before it gives up on the animation (the page is not cached). */
-const POP_WAIT_MS = 300;
+const POP_WAIT_MS = 120;
 let committed: { path: string; resolve: () => void } | null = null;
 
 /** The screen for `pathname` is on the page (RouteTransition's layout effect): a Back waiting for it can animate. */

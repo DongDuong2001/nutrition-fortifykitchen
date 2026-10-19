@@ -1,7 +1,6 @@
 "use client";
 
 import { AppHeader } from "@/components/ui/app-header";
-import { AppShell } from "@/components/ui/app-shell";
 import { Card } from "@/components/ui/card";
 import { Row } from "@/components/ui/row";
 import { SectionTitle } from "@/components/ui/section-title";
@@ -24,7 +23,7 @@ function ProfileHero() {
   return (
     <Link
       href="/settings/profile"
-      className="flex flex-col gap-3 rounded-[18px] bg-surface-dark p-4 text-on-dark no-underline transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100"
+      className="flex flex-col gap-3 rounded-[18px] bg-surface-dark p-4 text-on-dark no-underline active:scale-[0.97] transition-press motion-reduce:transition-none motion-reduce:active:scale-100"
     >
       <span className="flex items-start justify-between gap-3">
         <span className="flex min-w-0 flex-col gap-1">
@@ -60,7 +59,7 @@ function ProOffer() {
       </div>
       <Link
         href="/paywall"
-        className="inline-flex min-h-[44px] items-center self-start rounded-full border border-card-border bg-card px-5 text-[15px] font-bold text-text no-underline transition-transform duration-150 active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100"
+        className="inline-flex min-h-[44px] items-center self-start rounded-full border border-card-border bg-card px-5 text-[15px] font-bold text-text no-underline active:scale-[0.97] transition-press motion-reduce:transition-none motion-reduce:active:scale-100"
       >
         Xem gói
       </Link>
@@ -75,7 +74,7 @@ export function SettingsHomeScreen() {
   const { coach, level, role, available } = useCoaching();
 
   return (
-    <AppShell alignContainer="settings-page">
+    <>
       <AppHeader variant="tab" title="Cài đặt" layout="wide" alignGroup="settings-header" />
 
       <main className="mx-auto grid w-full max-w-[560px] grid-cols-1 items-start gap-4 px-4 pb-6 pt-4 lg:mx-0 lg:max-w-[1240px] lg:grid-cols-2 lg:px-8 lg:pb-12 lg:pt-5">
@@ -141,6 +140,6 @@ export function SettingsHomeScreen() {
           </div>
         )}
       </main>
-    </AppShell>
+    </>
   );
 }

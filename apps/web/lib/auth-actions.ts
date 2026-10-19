@@ -1,4 +1,3 @@
-import { apiClient } from "./api-client";
 import { isLiveMode } from "./api-mode";
 import {
   mockCurrentAccount,
@@ -11,11 +10,16 @@ import {
   mockSignUpWithPassword,
   mockUpdatePassword,
 } from "./auth-mock";
-import { createClient } from "./supabase-client";
 import { isDemo } from "./demo";
 import { clearOnboardingStorage, isValidEmail } from "./onboarding";
 import { syncServerSession } from "./server-session";
 import { HOME_ROUTE } from "./nav";
+
+/**
+ * cc-58: supabase-js loads when a live auth call needs it, not with the first screen: a screen that only reads the
+ * account id (currentAccountId) or checks the mock never ships it.
+ */
+const supabaseClient = async () => (await import("./supabase-client")).createClient();
 
 // The one interface the auth screens call. In live mode (NEXT_PUBLIC_API_MODE=live, lib/api-mode.ts) it is backed by
 // Supabase Auth (lib/supabase-client.ts); otherwise by the local mock in lib/auth-mock.ts, so gates and demos run
@@ -182,7 +186,7 @@ export async function currentAccount(): Promise<AccountInfo | null> {
   // After Đăng xuất a session that survived a failed sign-out is not adopted (no email stored, no flag cleared)
   if (wasExplicitlySignedOut()) return null;
   try {
-    const supabase = createClient();
+    const supabase = await supabaseClient();
     const { data: { user }, error } = await supabase.auth.getUser();
     if (error || !user || !user.email) {
       if (!wasExplicitlySignedOut() && isDemo()) {
@@ -238,7 +242,7 @@ export function signInWithPassword(email: string, password: string, captchaToken
   if (!isLiveMode()) return mockSignInWithPassword(email, password);
   return guarded(async () => {
     const address = normaliseEmail(email);
-    const supabase = createClient();
+    const supabase = await supabaseClient();
     const { data, error } = await supabase.auth.signInWithPassword({
       email: address,
       password,
@@ -263,7 +267,7 @@ export function signUpWithPassword(email: string, password: string, captchaToken
     if (passwordError) return { ok: false, error: passwordError };
 
     const address = normaliseEmail(email);
-    const supabase = createClient();
+    const supabase = await supabaseClient();
     const { data, error } = await supabase.auth.signUp({
       email: address,
       password,
@@ -290,7 +294,7 @@ export async function sendPasswordReset(email: string): Promise<AuthResult> {
   clearSignedOutFlag();
   try {
     const address = normaliseEmail(email);
-    const supabase = createClient();
+    const supabase = await supabaseClient();
     const redirectTo = typeof window !== "undefined" ? `${window.location.origin}/reset-password` : undefined;
     await supabase.auth.resetPasswordForEmail(address, { redirectTo });
   } catch {
@@ -310,11 +314,12 @@ export function requestMagicLink(email: string, captchaToken?: string): Promise<
     if (emailError) return { ok: false, error: emailError };
 
     // The API client is told first (a no-op until Dong's endpoint exists), then Supabase sends the link
-    await apiClient.requestMagicLink(email);
+    // (api-client is loaded here, not with the screen: the sign-in page does not need the catalogue and the sample data it brings)
+    await (await import("./api-client")).apiClient.requestMagicLink(email);
     clearSignedOutFlag();
 
     const address = normaliseEmail(email);
-    const supabase = createClient();
+    const supabase = await supabaseClient();
     const redirectTo = typeof window !== "undefined" ? `${window.location.origin}/auth/callback?next=/setup/profile` : undefined;
     const { error } = await supabase.auth.signInWithOtp({
       email: address,
@@ -333,7 +338,7 @@ export async function signInWithGoogle(): Promise<AuthResult> {
   if (!isLiveMode()) return mockSignInSampleAccount().then(() => ({ ok: true }) as AuthResult);
   return guarded(async () => {
     clearSignedOutFlag();
-    const supabase = createClient();
+    const supabase = await supabaseClient();
     const redirectTo = typeof window !== "undefined" ? `${window.location.origin}/auth/callback?next=${HOME_ROUTE}` : undefined;
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -354,7 +359,7 @@ export function updatePassword(newPassword: string, currentPassword?: string): P
     const passwordError = validateNewPassword(newPassword);
     if (passwordError) return { ok: false, error: passwordError };
 
-    const supabase = createClient();
+    const supabase = await supabaseClient();
     const { data: { user } } = await supabase.auth.getUser();
     const currentMail = user?.email || getStoredEmail();
     if (!currentMail) {
@@ -395,9 +400,9 @@ export async function signOut(): Promise<void> {
   setStoredEmail(null);
   // The server call (global scope) can fail on the network. The cookie must go anyway, or the sign-in page and the
   // gate would find the session again: fall back to a local sign-out, which only clears this browser's session.
-  let supabase: ReturnType<typeof createClient>;
+  let supabase: Awaited<ReturnType<typeof supabaseClient>>;
   try {
-    supabase = createClient();
+    supabase = await supabaseClient();
   } catch {
     return;
   }

@@ -1,7 +1,36 @@
 "use client";
 
 import React from "react";
-import * as Myna from "@mynaui/icons-react";
+import {
+  ArrowUp as MynaArrowUp,
+  Badge as MynaBadge,
+  Bell as MynaBell,
+  Check as MynaCheck,
+  ChevronDown as MynaChevronDown,
+  ChevronLeft as MynaChevronLeft,
+  ChevronRight as MynaChevronRight,
+  Cog as MynaCog,
+  Compass as MynaCompass,
+  Diamond as MynaDiamond,
+  Eye as MynaEye,
+  EyeOff as MynaEyeOff,
+  Flame as MynaFlame,
+  Grid as MynaGrid,
+  Heart as MynaHeart,
+  Home as MynaHome,
+  Link as MynaLink,
+  Plus as MynaPlus,
+  Ribbon as MynaRibbon,
+  Search as MynaSearch,
+  Share as MynaShare,
+  Sparkles as MynaSparkles,
+  Star as MynaStar,
+  Target as MynaTarget,
+  Trash as MynaTrash,
+  User as MynaUser,
+  X as MynaX,
+} from "@mynaui/icons-react";
+import type { MynaIconsProps } from "@mynaui/icons-react";
 
 export interface IconProps extends Omit<React.SVGProps<SVGSVGElement>, "stroke"> {
   size?: number | string;
@@ -19,7 +48,7 @@ export interface IconProps extends Omit<React.SVGProps<SVGSVGElement>, "stroke">
  * - size: 22 px default
  * - decorative (aria-hidden) unless given an aria-label, then an image with that name
  */
-export function createH1TIcon(MynaComponent: React.ComponentType<Myna.MynaIconsProps>) {
+export function createH1TIcon(MynaComponent: React.ComponentType<MynaIconsProps>) {
   return function H1TIconWrapper({
     size = 22,
     color = "currentColor",
@@ -46,34 +75,34 @@ export function createH1TIcon(MynaComponent: React.ComponentType<Myna.MynaIconsP
 }
 
 // Navigation and Layout Icons
-export const IconHome = createH1TIcon(Myna.Home);
-export const IconGrid = createH1TIcon(Myna.Grid);
-export const IconCompass = createH1TIcon(Myna.Compass);
-export const IconCog = createH1TIcon(Myna.Cog);
-export const IconPlus = createH1TIcon(Myna.Plus);
+export const IconHome = createH1TIcon(MynaHome);
+export const IconGrid = createH1TIcon(MynaGrid);
+export const IconCompass = createH1TIcon(MynaCompass);
+export const IconCog = createH1TIcon(MynaCog);
+export const IconPlus = createH1TIcon(MynaPlus);
 
 // Common Action & UI Icons
-export const IconEye = createH1TIcon(Myna.Eye);
-export const IconEyeOff = createH1TIcon(Myna.EyeOff);
-export const IconCheck = createH1TIcon(Myna.Check);
-export const IconX = createH1TIcon(Myna.X);
-export const IconArrowUp = createH1TIcon(Myna.ArrowUp);
-export const IconChevronRight = createH1TIcon(Myna.ChevronRight);
-export const IconChevronLeft = createH1TIcon(Myna.ChevronLeft);
-export const IconChevronDown = createH1TIcon(Myna.ChevronDown);
-export const IconSearch = createH1TIcon(Myna.Search);
-export const IconTrash = createH1TIcon(Myna.Trash);
-export const IconShare = createH1TIcon(Myna.Share);
-export const IconLink = createH1TIcon(Myna.Link);
+export const IconEye = createH1TIcon(MynaEye);
+export const IconEyeOff = createH1TIcon(MynaEyeOff);
+export const IconCheck = createH1TIcon(MynaCheck);
+export const IconX = createH1TIcon(MynaX);
+export const IconArrowUp = createH1TIcon(MynaArrowUp);
+export const IconChevronRight = createH1TIcon(MynaChevronRight);
+export const IconChevronLeft = createH1TIcon(MynaChevronLeft);
+export const IconChevronDown = createH1TIcon(MynaChevronDown);
+export const IconSearch = createH1TIcon(MynaSearch);
+export const IconTrash = createH1TIcon(MynaTrash);
+export const IconShare = createH1TIcon(MynaShare);
+export const IconLink = createH1TIcon(MynaLink);
 
 // Domain & Feature Icons
-export const IconTarget = createH1TIcon(Myna.Target);
-export const IconUser = createH1TIcon(Myna.User);
-export const IconBell = createH1TIcon(Myna.Bell);
-export const IconFlame = createH1TIcon(Myna.Flame);
-export const IconHeart = createH1TIcon(Myna.Heart);
-export const IconStar = createH1TIcon(Myna.Star);
-export const IconSparkles = createH1TIcon(Myna.Sparkles);
-export const IconBadge = createH1TIcon(Myna.Badge);
-export const IconRibbon = createH1TIcon(Myna.Ribbon);
-export const IconDiamond = createH1TIcon(Myna.Diamond);
+export const IconTarget = createH1TIcon(MynaTarget);
+export const IconUser = createH1TIcon(MynaUser);
+export const IconBell = createH1TIcon(MynaBell);
+export const IconFlame = createH1TIcon(MynaFlame);
+export const IconHeart = createH1TIcon(MynaHeart);
+export const IconStar = createH1TIcon(MynaStar);
+export const IconSparkles = createH1TIcon(MynaSparkles);
+export const IconBadge = createH1TIcon(MynaBadge);
+export const IconRibbon = createH1TIcon(MynaRibbon);
+export const IconDiamond = createH1TIcon(MynaDiamond);

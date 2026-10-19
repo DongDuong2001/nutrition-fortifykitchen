@@ -40,11 +40,16 @@ export const RELEASES: readonly Release[] = [
       { icon: "meal", title: "Cân sống hay đã nấu chín", body: "Thịt, cá, cơm, mì, khoai, đậu và yến mạch có nút Cân sống và Đã nấu chín. App tự đổi ra số liệu khớp." },
       { icon: "select", title: "Trứng ghi theo quả", body: "Chọn cỡ ghi trên hộp rồi chọn mấy quả. App tự trừ vỏ." },
       { icon: "home", title: "Khay gọn hơn", body: "Chạm từng món trong khay để chỉnh, rồi thêm cả khay vô bữa một lần." },
+      // cc-54: premade Vietnamese dishes show what is inside, and take extras for one meal
+      { icon: "meal", title: "Thành phần của món Việt", body: "Mở Thành phần để xem món có gì. Thêm bún hay thịt cho riêng bữa đó, món chính giữ nguyên." },
+      // cc-57: an improvement, no tour
+      { icon: "home", title: "Chuyển tab mượt hơn", body: "Thanh bên dưới đứng yên khi bạn chạm qua lại giữa các tab. Nút bấm phản hồi liền, kéo bảng xuống không bị giật." },
     ],
     tour: [
       { target: "meal-add", fallback: "nav-add", title: "Ghi theo gam", body: "Chạm + Thêm rồi chọn món. Gõ số gam hoặc chọn 100 g, bấm + để nhân lên." },
       { target: "home-food-list", fallback: "meal-pill", title: "Sống hay chín", body: "Dòng món ghi rõ bạn cân lúc sống hay đã nấu chín. Trứng ghi theo cỡ và số quả." },
       { target: "meal-pill", title: "Khay xem lại", body: "Ở + Thêm, gom nhiều món vô khay. Chạm từng món trong khay để chỉnh rồi thêm một lần." },
+      { target: "dish-parts", fallback: "meal-add", title: "Thành phần của món", body: "Món Việt có mục Thành phần. Mở ra xem trong tô có gì, chạm chip để thêm bún hay thịt cho bữa đó." },
     ],
   },
   // cc-52. The tour runs on Hôm nay, where the Ngày tập controls are not: each step falls back to the Ngày tập pill

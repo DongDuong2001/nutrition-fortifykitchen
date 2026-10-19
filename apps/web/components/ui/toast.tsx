@@ -13,6 +13,14 @@ export interface ToastProps {
   progressPercent?: number;
   /** cc-55: the auto-dismiss countdown. The bar empties on its own (CSS), from `leftMs` of `totalMs`. */
   countdown?: { totalMs: number; leftMs: number };
+  /**
+   * The toast is a live region itself (role=status). The app's one toast host has a region that stays mounted and
+   * announces what is put into it, so its toasts pass false (a region that appears with its text is often not read).
+   */
+  announce?: boolean;
+  /** The pointer is on the toast or focus is in it (hover and focus stop an auto-dismiss clock, WCAG 2.2.1). */
+  onPause?: () => void;
+  onResume?: () => void;
   className?: string;
 }
 
@@ -23,13 +31,20 @@ export function Toast({
   onAction,
   progressPercent,
   countdown,
+  announce = true,
+  onPause,
+  onResume,
   className = "",
 }: ToastProps) {
   // cc-55: rises in (m-toast, @starting-style); inside <Presence> it fades down and away when it goes
   const state = usePresence();
   return (
     <div
-      role="status"
+      role={announce ? "status" : undefined}
+      onMouseEnter={onPause}
+      onMouseLeave={onResume}
+      onFocus={onPause}
+      onBlur={onResume}
       data-state={state}
       inert={state === "closed"}
       className={`m-toast bg-ink text-on-dark rounded-xl overflow-hidden shadow-[0_8px_24px_rgba(10,10,11,0.35)] min-h-[56px] box-border flex flex-col justify-between w-full max-w-[366px] mx-auto select-none ${className}`}
@@ -41,7 +56,7 @@ export function Toast({
           actionHref ? (
             <Link
               href={actionHref}
-              className="shrink-0 min-h-[44px] px-4 rounded-xl flex items-center text-sky text-[15px] font-bold no-underline hover:text-on-dark transition-colors active:scale-[0.97]"
+              className="shrink-0 min-h-[44px] px-4 rounded-xl flex items-center text-sky text-[15px] font-bold no-underline hover:text-on-dark active:scale-[0.97] transition-press"
             >
               {actionLabel}
             </Link>
@@ -49,7 +64,7 @@ export function Toast({
             <button
               type="button"
               onClick={onAction}
-              className="shrink-0 min-h-[44px] px-4 rounded-xl bg-transparent border-0 flex items-center text-sky text-[15px] font-bold cursor-pointer hover:text-on-dark transition-colors active:scale-[0.97]"
+              className="shrink-0 min-h-[44px] px-4 rounded-xl bg-transparent border-0 flex items-center text-sky text-[15px] font-bold cursor-pointer hover:text-on-dark active:scale-[0.97] transition-press"
             >
               {actionLabel}
             </button>

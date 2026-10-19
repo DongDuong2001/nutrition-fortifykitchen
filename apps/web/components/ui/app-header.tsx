@@ -62,9 +62,9 @@ export interface AppHeaderProps {
 }
 
 export const HEADER_ICON_BUTTON =
-  "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0 text-on-dark lg:text-text no-underline cursor-pointer transition-colors hover:text-sky lg:hover:text-blue active:scale-[0.97] motion-reduce:active:scale-100 focus-visible:outline-sky lg:focus-visible:outline-blue";
+  "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0 text-on-dark lg:text-text no-underline cursor-pointer hover:text-sky lg:hover:text-blue active:scale-[0.97] transition-press motion-reduce:active:scale-100 focus-visible:outline-sky lg:focus-visible:outline-blue";
 const DATE_BUTTON =
-  "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0 text-on-dark cursor-pointer transition-colors hover:text-sky active:scale-[0.97] motion-reduce:active:scale-100 disabled:cursor-default disabled:text-secondary disabled:opacity-50 lg:border lg:border-card-border lg:bg-card lg:text-ink lg:hover:bg-divider lg:hover:text-ink lg:disabled:text-secondary focus-visible:outline-sky lg:focus-visible:outline-blue";
+  "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0 text-on-dark cursor-pointer hover:text-sky active:scale-[0.97] transition-press motion-reduce:active:scale-100 disabled:cursor-default disabled:text-secondary disabled:opacity-50 lg:border lg:border-card-border lg:bg-card lg:text-ink lg:hover:bg-divider lg:hover:text-ink lg:disabled:text-secondary focus-visible:outline-sky lg:focus-visible:outline-blue";
 
 function Chevron({ dir }: { dir: "left" | "right" }) {
   return (
@@ -211,7 +211,7 @@ export function AppHeader({
                   aria-haspopup="dialog"
                   aria-label={`Chọn ngày, ${dateLabel}`}
                   aria-busy={dateLabel ? undefined : true}
-                  className="inline-flex min-h-[44px] min-w-[104px] items-center justify-center rounded-full border-0 bg-transparent px-1 text-center text-sm font-semibold tracking-tight text-on-dark cursor-pointer hover:text-sky focus-visible:outline-sky active:scale-[0.97] motion-reduce:active:scale-100 lg:hidden"
+                  className="inline-flex min-h-[44px] min-w-[104px] items-center justify-center rounded-full border-0 bg-transparent px-1 text-center text-sm font-semibold tracking-tight text-on-dark cursor-pointer hover:text-sky focus-visible:outline-sky active:scale-[0.97] transition-press motion-reduce:active:scale-100 lg:hidden"
                 >
                   {dateLabel || <span aria-hidden="true" className="inline-block h-5 w-[104px]" />}
                 </button>

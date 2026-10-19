@@ -1,12 +1,11 @@
 "use client";
 
-import React, { Suspense, createContext, useContext, useMemo } from "react";
+import React, { Suspense, createContext, startTransition, useContext, useMemo, useOptimistic } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { Period } from "@/lib/period";
 import { markUsed } from "@/lib/onboarding-store";
 import { AppHeader } from "@/components/ui/app-header";
-import { AppShell } from "@/components/ui/app-shell";
 import { useDiary } from "@/lib/diary-store";
 import type { MockDayData } from "@/lib/mock/sample-day";
 import { buildOverview, type Overview } from "@/lib/overview";
@@ -73,7 +72,7 @@ export function PeriodControl({
     router.replace(`${pathname}${periodQuery(nextLength, nextOffset)}`, { scroll: false });
 
   const stepClass =
-    "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-0 bg-transparent text-text cursor-pointer hover:bg-divider active:scale-[0.97] motion-reduce:active:scale-100 disabled:cursor-default disabled:opacity-45";
+    "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-0 bg-transparent text-text cursor-pointer hover:bg-divider active:scale-[0.97] transition-press motion-reduce:active:scale-100 disabled:cursor-default disabled:opacity-45";
   const prev = (
     <button type="button" aria-label="Kỳ trước" disabled={!period} onClick={() => period && go(length, period.offset + 1)} className={stepClass}>
       <ChevronIcon direction="left" />
@@ -96,7 +95,7 @@ export function PeriodControl({
             scroll={false}
             onClick={() => markUsed("range-toggle")}
             aria-current={isActive ? "true" : "false"}
-            className={`inline-flex min-h-[44px] items-center justify-center rounded-full text-sm font-bold no-underline transition-colors active:scale-[0.97] motion-reduce:active:scale-100 ${
+            className={`inline-flex min-h-[44px] items-center justify-center rounded-full text-sm font-bold no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100 ${
               compact ? "min-w-[44px] px-2" : "px-4"
             } ${isActive ? "bg-ink text-on-dark" : "text-secondary hover:text-text"}`}
           >
@@ -159,28 +158,34 @@ function ContentSkeleton() {
 }
 
 /**
- * The frame of the four Tổng quan sub-tabs: the phone's ink band with the wordmark (the h1 "Tổng quan" is
+ * The frame of the four Tổng quan sub-tabs (app/(app)/(tabs)/trends/layout.tsx, so it stays mounted while the content swaps): the phone's ink band with the wordmark (the h1 "Tổng quan" is
  * sr-only there), the sub-tab bar (a tablist of links; on desktop it sits in the title row), and the period
  * control shared by all four. The period is in the URL (?p=7|30 and ?o=offset), so the sub-tab links carry it.
  */
-export function OverviewFrame({ active, children }: { active: OverviewTab; children: React.ReactNode }) {
+export function OverviewFrame({ children }: { children: React.ReactNode }) {
   return (
     <Suspense
       fallback={
-        <AppShell>
-          <div className="w-full px-4 pt-6">
-            <ContentSkeleton />
-          </div>
-        </AppShell>
+        <div className="w-full px-4 pt-6">
+          <ContentSkeleton />
+        </div>
       }
     >
-      <FrameInner active={active}>{children}</FrameInner>
+      <FrameInner>{children}</FrameInner>
     </Suspense>
   );
 }
 
-function FrameInner({ active, children }: { active: OverviewTab; children: React.ReactNode }) {
+/** The sub-tab of a /trends path. */
+export function overviewTabOf(pathname: string): OverviewTab {
+  return TABS.find((t) => t.id !== "summary" && (pathname === t.href || pathname.startsWith(t.href + "/")))?.id ?? "summary";
+}
+
+function FrameInner({ children }: { children: React.ReactNode }) {
   const searchParams = useSearchParams();
+  const current = overviewTabOf(usePathname() ?? "");
+  // cc-58: the tapped sub-tab lights up on the tap, not when its content is ready
+  const [active, setActive] = useOptimistic(current);
   const { todayIso, data, targets } = useDiary();
 
   const { length, offset } = parsePeriodParams(searchParams?.get("p"), searchParams?.get("o"));
@@ -198,7 +203,7 @@ function FrameInner({ active, children }: { active: OverviewTab; children: React
   const period = overview?.period;
 
   return (
-    <AppShell alignContainer="overview-page">
+    <>
       <AppHeader
         variant="tab"
         layout="wide"
@@ -207,7 +212,6 @@ function FrameInner({ active, children }: { active: OverviewTab; children: React
         alignGroup="overview-header"
         tabs={
           <nav
-            role="tablist"
             aria-label="Tổng quan"
             className="flex w-full overflow-x-auto border-b border-surface-dark [scrollbar-width:none] lg:w-auto lg:self-start lg:border-divider"
           >
@@ -216,11 +220,10 @@ function FrameInner({ active, children }: { active: OverviewTab; children: React
               return (
                 <Link
                   key={tab.id}
-                  role="tab"
                   href={`${tab.href}${query}`}
-                  aria-selected={isActive}
+                  onNavigate={() => startTransition(() => setActive(tab.id))}
                   aria-current={isActive ? "page" : undefined}
-                  className={`relative inline-flex min-h-[44px] flex-1 shrink-0 items-center justify-center whitespace-nowrap px-2 text-[15px] font-bold no-underline transition-colors active:scale-[0.97] motion-reduce:active:scale-100 lg:flex-none lg:px-4 focus-visible:outline-sky lg:focus-visible:outline-blue ${
+                  className={`relative inline-flex min-h-[44px] flex-1 shrink-0 items-center justify-center whitespace-nowrap px-2 text-[15px] font-bold no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100 lg:flex-none lg:px-4 focus-visible:outline-sky lg:focus-visible:outline-blue ${
                     isActive ? "text-on-dark lg:text-text" : "text-muted-on-dark hover:text-on-dark lg:text-secondary lg:hover:text-text"
                   }`}
                 >
@@ -241,6 +244,6 @@ function FrameInner({ active, children }: { active: OverviewTab; children: React
 
         {ctx ? <OverviewContext.Provider value={ctx}>{children}</OverviewContext.Provider> : <ContentSkeleton />}
       </main>
-    </AppShell>
+    </>
   );
 }

@@ -159,7 +159,7 @@ export default function LandingPage() {
           <div className="flex items-center gap-3">
             <Link
               href="/signin"
-              className="min-h-[44px] px-4 inline-flex items-center text-sm font-bold text-text hover:text-blue no-underline transition-colors"
+              className="min-h-[44px] px-4 inline-flex items-center text-sm font-bold text-text hover:text-blue no-underline transition-press"
             >
               Đăng nhập
             </Link>
@@ -352,7 +352,7 @@ export default function LandingPage() {
                     <span className="w-1.5 h-1.5 rounded-full bg-blue" />
                     {item.badge}
                   </span>
-                  <span className="text-[11px] uppercase tracking-wider text-secondary/80">Tiêu chuẩn chuẩn hoá</span>
+                  <span className="text-[11px] uppercase tracking-wider text-secondary">Tiêu chuẩn chuẩn hoá</span>
                 </div>
               </div>
             ))}

@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Toast } from "@/components/ui/toast";
 import { startInstallCapture } from "@/lib/install-browser";
 import { shouldRegisterServiceWorker } from "@/lib/pwa";
+import { whenIdle } from "@/lib/idle";
 
 /**
  * Registers /sw.js in production and offers an update when a new version is waiting.
@@ -39,20 +40,35 @@ export function PwaRegister() {
       if (document.visibilityState === "visible") registration?.update().catch(() => {});
     };
 
-    container
-      .register("/sw.js", { scope: "/" })
-      .then((reg) => {
-        registration = reg;
-        if (reg.waiting && container.controller) setWaiting(reg.waiting);
-        if (reg.installing) watch(reg.installing);
-        reg.addEventListener("updatefound", () => reg.installing && watch(reg.installing));
-        document.addEventListener("visibilitychange", onVisible);
-      })
-      .catch(() => {
-        /* the app works without it */
-      });
+    // cc-58: the worker registers after the page has loaded and the browser is idle, not during hydration, so its
+    // first install does not compete with the first paint
+    let cancelled = false;
+    let cancelIdle = () => {};
+    const register = () => {
+      if (cancelled) return;
+      container
+        .register("/sw.js", { scope: "/" })
+        .then((reg) => {
+          registration = reg;
+          if (reg.waiting && container.controller) setWaiting(reg.waiting);
+          if (reg.installing) watch(reg.installing);
+          reg.addEventListener("updatefound", () => reg.installing && watch(reg.installing));
+          document.addEventListener("visibilitychange", onVisible);
+        })
+        .catch(() => {
+          /* the app works without it */
+        });
+    };
+    const afterLoad = () => {
+      cancelIdle = whenIdle(register, 5000);
+    };
+    if (document.readyState === "complete") afterLoad();
+    else window.addEventListener("load", afterLoad, { once: true });
 
     return () => {
+      cancelled = true;
+      cancelIdle();
+      window.removeEventListener("load", afterLoad);
       container.removeEventListener("controllerchange", onControllerChange);
       document.removeEventListener("visibilitychange", onVisible);
     };

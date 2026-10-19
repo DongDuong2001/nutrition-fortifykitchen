@@ -6,8 +6,8 @@ Production demo build, 390x844 (and 1440x900 for the dialog). Tour, tips and "C�
 - Shows once on /app; Để sau and Esc hide it and mark the release seen; a reload shows nothing
 - A new account (setup finished) never sees it
 - Waits while a tip is open, opens after Đã hiểu
-- An account that has seen nothing gets the newest release only (2026-10-18f, cc-53b, the portion model): its 3-step tour
-  is on Hôm nay (+ Thêm, the food list, the meal pill), so the sheet has Thử ngay and runs it on /app; cc_tutorials.py covers
+- An account that has seen nothing gets the newest release only (2026-10-18f, cc-53b, the portion model): its 4-step tour
+  is on Hôm nay (+ Thêm, the food list, the meal pill, + Thêm again for cc-54's Thành phần), so the sheet has Thử ngay and runs it on /app; cc_tutorials.py covers
   several unseen releases in one sheet and their joined tour (with cc-52's 18e on the Ngày tập pill). The 17/10 tour is started from
   Cài đặt › Có gì mới › Xem hướng dẫn (the last one) -> 3 steps -> Xong; a long press moves step 1 and opens the select bar (step 2); step 3 points at Cài đặt with
   select mode off; Bỏ qua and Esc end it; the entries never change
@@ -278,16 +278,17 @@ def home_tour(browser):
     visible(sheet(pg))
     before = entries(pg)
     sheet(pg).get_by_role("button", name="Thử ngay (1 phút)").click()
-    steps = [("Ghi theo gam", ["meal-add", "nav-add"]), ("Sống hay chín", ["home-food-list", "meal-pill"]), ("Khay xem lại", ["meal-pill"])]
+    # cc-54: a 4th step on the Thành phần of a dish; on Hôm nay its control is not there, so it points at + Thêm (its fallback)
+    steps = [("Ghi theo gam", ["meal-add", "nav-add"]), ("Sống hay chín", ["home-food-list", "meal-pill"]), ("Khay xem lại", ["meal-pill"]), ("Thành phần của món", ["meal-add", "nav-add"])]
     for i, (title, targets) in enumerate(steps, start=1):
-        check(visible(card(pg)) and f"Mới · {i}/3" in card(pg).inner_text() and title in card(pg).inner_text(), f"18f step {i}: {title}")
+        check(visible(card(pg)) and f"Mới · {i}/4" in card(pg).inner_text() and title in card(pg).inner_text(), f"18f step {i}: {title}")
         hole = pg.locator("[data-onboarding-overlay] > div.border-sky").first.bounding_box()
         boxes = [b for t in targets for b in [pg.locator(f'[data-tour="{t}"]:visible').first.bounding_box()] if b]
         on = any(hole and hole["x"] <= b["x"] + 1 and hole["x"] + hole["width"] >= b["x"] + b["width"] - 1 for b in boxes)
         check(on, f"18f step {i}: the ring is on {' or '.join(targets)}")
         if i == 1:
             shot(pg, "tour-18f-390")
-        card(pg).get_by_role("button", name="Xong" if i == 3 else "Tiếp").click()
+        card(pg).get_by_role("button", name="Xong" if i == 4 else "Tiếp").click()
         pg.wait_for_timeout(500)
     check(card(pg).count() == 0 and pg.url.endswith("/app") and entries(pg) == before, "Xong ends the 18f tour on /app; entries unchanged")
     ctx.close()

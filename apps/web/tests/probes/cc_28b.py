@@ -137,9 +137,9 @@ def level_run(browser, size, tag, level):
         check(len(col["extras"]) == 6, f"{tag} L{level}: six extras")
         check(all(e["bars"] == 0 and not e["pct"] for e in col["extras"]), f"{tag} L{level}: extras are amounts only {col['extras'][:2]}")
         check(any(e["text"].endswith("—") for e in col["extras"]) or any(re.search(r"\d", e["text"]) for e in col["extras"]), f"{tag} L{level}: extras show an amount or a dash")
-        # the extras band is the first band and level with the first meal band
-        top = pg.evaluate("""() => { const h = [...document.querySelectorAll("aside[aria-label='Vi chất'] h3")].find(x => x.getBoundingClientRect().width > 0); const m = document.querySelector("section[aria-label='Bữa sáng'] > button, section[aria-label='Bữa sáng'] > div"); return [h.getBoundingClientRect().top, m.getBoundingClientRect().top]; }""")
-        check(abs(top[0] - top[1]) <= 1, f"{tag} L{level}: first band level with the first meal band ({top})")
+        # the extras band is the first band, one x/N đạt header (cc-61) below the first meal band
+        top = pg.evaluate("""() => { const h = [...document.querySelectorAll("aside[aria-label='Vi chất'] h3")].find(x => x.getBoundingClientRect().width > 0); const m = document.querySelector("section[aria-label='Bữa sáng'] > button, section[aria-label='Bữa sáng'] > div"); return [h.getBoundingClientRect().top, m.getBoundingClientRect().top, document.querySelector("aside[aria-label='Vi chất'] [data-level-summary]").getBoundingClientRect().height]; }""")
+        check(abs(top[0] - top[1] - top[2]) <= 1, f"{tag} L{level}: first band one verdict header below the first meal band ({top})")
     bars = pg.evaluate("[...document.querySelectorAll(\"aside[aria-label='Vi chất'] [role=progressbar]\")].filter(b => b.getBoundingClientRect().width > 0).length")
     check(bars == TOTAL[level], f"{tag} L{level}: one bar per counted nutrient ({bars})")
     pg.screenshot(path=os.path.join(SHOTS, f"cc-28b-home-L{level}-{w}.png"))

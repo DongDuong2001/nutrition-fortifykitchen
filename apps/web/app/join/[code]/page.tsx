@@ -1,21 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import dynamic from "next/dynamic";
 import { notFound, useParams, useRouter } from "next/navigation";
 import { AppHeader } from "@/components/ui/app-header";
 import { AppShell } from "@/components/ui/app-shell";
-import { Card } from "@/components/ui/card";
-import { PillButton } from "@/components/ui/pill-button";
-import { Sheet } from "@/components/ui/sheet";
-import { useCoaching } from "@/hooks/use-coaching";
+import { WrongCode } from "@/components/coaching/wrong-code";
+import { isLiveMode } from "@/lib/api-mode";
 import { currentAccountId } from "@/lib/auth-actions";
-import { safeDecode } from "@/lib/coaching-link";
-import { WRONG_CODE, joinPrompt } from "@/lib/level-copy";
+import { coachingAvailable, safeDecode } from "@/lib/coaching-link";
 import { findCoachByCode } from "@/lib/mock-coach-server";
 import { writePendingCoachCode } from "@/lib/pending-coach";
 import { HOME_ROUTE } from "@/lib/nav";
-import { navigateFromSheet } from "@/lib/sheet-history";
+
+// Loaded only for a signed-in visitor: it holds the diary provider and the coach link
+const JoinConfirm = dynamic(() => import("@/components/coaching/join-confirm").then((m) => m.JoinConfirm), { ssr: false });
 
 /**
  * /join/<code>: the link a coach shares. Signed in: confirm, then the user is linked and lands on Hôm nay.
@@ -25,16 +24,15 @@ export default function JoinPage() {
   const params = useParams();
   const router = useRouter();
   const raw = safeDecode(String(params?.code ?? ""));
-  const { hydrated, coach: linked, joinByCode, available } = useCoaching();
   const target = findCoachByCode(raw);
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
-  const [open, setOpen] = useState(true);
 
   // Read after mount: the account lives in the browser's storage
   useEffect(() => {
     setSignedIn(currentAccountId() !== null);
   }, []);
 
+  // Signed out: the code waits for sign-up and setup, and the visitor goes to /signup. Nothing of the diary is needed.
   useEffect(() => {
     if (signedIn === false && target) {
       writePendingCoachCode(raw);
@@ -43,71 +41,21 @@ export default function JoinPage() {
   }, [signedIn, target, raw, router]);
 
   // Live mode has no coaching yet: the app's 404
-  if (!available) notFound();
+  if (!coachingAvailable(isLiveMode())) notFound();
 
-  const ready = hydrated && signedIn === true;
-
+  // Only a signed-in visitor needs the diary (the coach link lives in the profile): this page is outside the diary
+  // provider (cc-58), so the part that reads it brings its own
+  if (signedIn === true) return <JoinConfirm raw={raw} />;
   return (
     <AppShell>
       <AppHeader variant="sub" title="Tham gia HLV" backHref={HOME_ROUTE} layout="wide" />
       <main className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-6 pt-4 lg:mx-0 lg:px-8">
-        {!ready && signedIn !== false ? (
+        {signedIn === null || target ? (
           <div aria-busy="true" className="h-[120px] rounded-[18px] bg-divider motion-safe:animate-pulse" />
-        ) : !target ? (
-          <Card className="flex flex-col gap-3">
-            <p role="alert" className="m-0 text-[15px] leading-snug text-text">
-              {WRONG_CODE}
-            </p>
-            <Link href="/settings/coach" className="inline-flex min-h-[44px] items-center text-[15px] font-bold text-blue no-underline">
-              Nhập mã khác
-            </Link>
-          </Card>
-        ) : linked?.id === target.id ? (
-          <Card className="flex flex-col gap-3">
-            <p className="m-0 text-[15px] leading-snug text-text">Bạn đang được {target.name} theo dõi.</p>
-            <Link href={HOME_ROUTE} className="inline-flex min-h-[44px] items-center text-[15px] font-bold text-blue no-underline">
-              Về Hôm nay
-            </Link>
-          </Card>
-        ) : null}
+        ) : (
+          <WrongCode />
+        )}
       </main>
-
-      {ready && target && linked?.id !== target.id && (
-        <Sheet
-          open={open}
-          onClose={() => {
-            setOpen(false);
-            navigateFromSheet(router, HOME_ROUTE);
-          }}
-          title={joinPrompt(target.name)}
-          titleId="join-title"
-          desktopDialog
-        >
-          <p className="m-0 px-1 text-[13px] leading-snug text-secondary">
-            {target.name} sẽ xem được dữ liệu ăn uống của bạn và đặt Level để mở thêm chỉ số trong Hôm nay.
-          </p>
-          <PillButton
-            type="button"
-            onClick={() => {
-              joinByCode(target.code);
-              setOpen(false);
-              navigateFromSheet(router, HOME_ROUTE);
-            }}
-          >
-            Tham gia
-          </PillButton>
-          <PillButton
-            type="button"
-            variant="secondary"
-            onClick={() => {
-              setOpen(false);
-              navigateFromSheet(router, HOME_ROUTE);
-            }}
-          >
-            Để sau
-          </PillButton>
-        </Sheet>
-      )}
     </AppShell>
   );
 }
