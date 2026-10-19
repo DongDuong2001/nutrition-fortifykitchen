@@ -1,7 +1,7 @@
 """cc-61 (audit M1, M2), 390x844 and 1440x900.
 
-M1. Hôm nay: the "x/N đạt" micro verdict is the first row of the Vi chất column, right under the first group band and
-    above the first nutrient bar, on a logged day and on an empty one. "Đủ 22 vi chất" stays at the foot.
+M1. Hôm nay: the "x/N đạt" micro verdict is the Vi chất column's header row, above the first group band (N covers
+    minerals and vitamins), on a logged day and on an empty one. "Đủ 22 vi chất" stays at the foot.
 M2. The portion panel draws the size-chip row ("Kích cỡ") only when the food has 2 or more sizes: Phở bò (Tô | Gam)
     shows the toggle and the stepper and no lone "Tô" chip (a food with several sizes keeps its chips: portion-panel.test.tsx).
 Run with: ALIGN_BASE_URL=http://localhost:3107 npm run probe -- tests/probes/cc_61.py
@@ -44,6 +44,7 @@ COLUMN = """() => {
     linkTop: link ? r(link).top : null,
     asideTop: r(aside).top, asideLeft: r(aside).left, asideRight: r(aside).right,
     left: v ? r(v).left : null, right: v ? r(v).right : null,
+    inArea: v ? [...aside.children].some(ch => ch !== v && ch.contains(v)) : null,
   };
 }"""
 
@@ -60,12 +61,13 @@ def day(browser, size, empty):
     tag = f"{size['width']} {'empty day' if empty else 'logged day'}"
     check(c["count"] == 1, f"{tag}: one verdict ({c['count']})")
     check(c["text"] is not None and re.match(r"^\d+/\d+ đạt", c["text"]) is not None, f"{tag}: it reads x/N đạt ({c['text']!r})")
-    check(c["top"] >= c["bandBottom"] - 0.5 and c["top"] - c["bandBottom"] <= 8, f"{tag}: right under the first band ({c['bandBottom']:.0f} -> {c['top']:.0f})")
-    check(c["bottom"] <= c["barTop"] + 0.5, f"{tag}: above the first bar ({c['bottom']:.0f} <= {c['barTop']:.0f})")
-    check(c["top"] - c["asideTop"] < 120, f"{tag}: near the top of the column ({c['top'] - c['asideTop']:.0f} px down)")
+    check(c["bottom"] <= c["bandTop"] + 0.5 and c["bandTop"] - c["bottom"] <= 8, f"{tag}: right above the first band ({c['bottom']:.0f} -> {c['bandTop']:.0f})")
+    check(c["top"] - c["asideTop"] < 12, f"{tag}: at the top of the column ({c['top'] - c['asideTop']:.0f} px down)")
+    check(c["inArea"] is False, f"{tag}: outside the scrolling area, so it never scrolls away")
+    h = c["bottom"] - c["top"]
+    check(abs(h - round(h)) < 0.01, f"{tag}: a whole-pixel height ({h})")
     check(c["linkTop"] is not None and c["linkTop"] > c["bottom"], f"{tag}: Đủ 22 vi chất stays below it")
     check(abs(c["left"] - (c["asideLeft"] + 1)) <= 2 or c["left"] >= c["asideLeft"], f"{tag}: inside the column edges")
-    check(c["bandTop"] - c["asideTop"] < 12, f"{tag}: the first band is still at the top of the column ({c['bandTop'] - c['asideTop']:.1f} px down)")
     if size is PHONE:
         check(c["linkTop"] is not None, f"{tag}: link drawn")
     ctx.close()

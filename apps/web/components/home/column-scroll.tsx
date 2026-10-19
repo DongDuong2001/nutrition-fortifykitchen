@@ -4,9 +4,9 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNo
 
 /**
  * The scrolling part of the Hôm nay nutrient column. Nothing is ever drawn over a row: no fade, no overlay, and the
- * "Đủ 22 vi chất" link sits below this area, not on it (the "x/N đạt" verdict is its first row). When the rows do not
- * fit, the area is cut to end on the bottom of the last whole row (at the top of the list), so no row is half cut above
- * the link; the strip left over is empty space. Scrolling snaps to row tops (proximity), so a list at rest starts on a row.
+ * "x/N đạt" verdict above it and the "Đủ 22 vi chất" link below it are not on it. When the rows do not fit, the area is
+ * cut to end on the bottom of the last whole row (at the top of the list), so no row is half cut above the link; the
+ * strip left over is empty space. Scrolling snaps to row tops (proximity), so a list at rest starts on a row.
  */
 export function ColumnScroll({ fitKey, children }: { fitKey: string; children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -35,8 +35,9 @@ export function ColumnScroll({ fitKey, children }: { fitKey: string; children: R
     const observer = new ResizeObserver(() => measure(el));
     // The column's own box, not the scroll area: cutting the area must not trigger another fit
     observer.observe(parent);
-    // cc-61: a row whose height depends on its text (the x/N đạt verdict wraps, and the web font loads after the first
-    // fit) re-fits when it changes; the sections keep their natural height when the area is cut, so this cannot loop
+    // cc-61: the blocks around the area (the x/N đạt header wraps, and the web font loads after the first fit) and the
+    // sections inside it re-fit when they change height; cutting the area changes neither, so this cannot loop
+    for (const sibling of parent.children) if (sibling !== el) observer.observe(sibling);
     for (const child of el.children) observer.observe(child);
     return () => observer.disconnect();
   }, [fitKey, measure]);

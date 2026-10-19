@@ -20,8 +20,8 @@ function Scroll({ share, fitKey, children }: { share: boolean; fitKey: string; c
  * nutrients). The group labels are bands like the meal headers on the left, so the first band sits level with the
  * first meal band. The extras (Level 3 and up) show an amount only: no bar, no percent. A food or a meal picked on
  * the left shows as a cobalt line on top. An unknown value is a dash and an empty bar, never 0. cc-61: the "x/N đạt"
- * verdict is the first row under the first group band, so it reads first on a full day and on an empty one; the
- * "Đủ 22 vi chất" link stays at the foot.
+ * verdict is the column's header row, above the first group band, so it reads first on a full day and on an empty one;
+ * the "Đủ 22 vi chất" link stays at the foot.
  */
 export const NutrientColumn = memo(function NutrientColumn({
   values,
@@ -59,6 +59,19 @@ export const NutrientColumn = memo(function NutrientColumn({
         selected ? "before:absolute before:inset-x-0 before:top-0 before:z-20 before:h-[3px] before:bg-cobalt before:content-['']" : ""
       }`}
     >
+      {/* cc-61: the verdict covers every group below (N is minerals plus vitamins), so it heads the column, above the first band.
+          Whole-pixel heights (a 24 px numeral line, 18 px text lines) keep the whole-row cut of the area clean. */}
+      {summary && !share && (
+        <p data-level-summary className="m-0 flex flex-none flex-col gap-1 px-3 py-2 text-[13px] leading-[18px] text-secondary lg:text-[15px] lg:leading-5">
+          <span className="block h-6 font-semibold text-text lg:h-7">
+            <span className="font-display text-[22px] font-bold leading-none tabular-nums lg:text-[26px]">
+              {summary.reached}/{summary.total}
+            </span>{" "}
+            đạt
+          </span>
+          {summary.lacking.length > 0 && <span>Thiếu nhiều nhất: {summary.lacking.join(", ")}</span>}
+        </p>
+      )}
       {/* Sections stack at their natural height (34 px rows, 48 px from lg); space left over sits below the last one, and a column that does not fit scrolls */}
       <Scroll share={share} fitKey={groups.map((g) => `${g.title}:${g.ids.join(",")}`).join("|") + (selected ? "!" : "") + (summary ? `#${summary.lacking.length}` : "")}>
         {groups.map((group, groupIndex) => (
@@ -68,22 +81,6 @@ export const NutrientColumn = memo(function NutrientColumn({
                 <span className={pill.label}>{group.title}</span>
               </span>
             </h3>
-            {groupIndex === 0 && summary && !share && (
-              // Whole-pixel heights (a 24 px numeral line, 18 px text lines): the whole-row cut of the area needs them
-              <p
-                data-level-summary
-                data-snap-row
-                className="m-0 flex snap-start flex-col gap-1 px-3 py-2 text-[13px] leading-[18px] text-secondary lg:text-[15px] lg:leading-5"
-              >
-                <span className="block h-6 font-semibold text-text lg:h-7">
-                  <span className="font-display text-[22px] font-bold leading-none tabular-nums lg:text-[26px]">
-                    {summary.reached}/{summary.total}
-                  </span>{" "}
-                  đạt
-                </span>
-                {summary.lacking.length > 0 && <span>Thiếu nhiều nhất: {summary.lacking.join(", ")}</span>}
-              </p>
-            )}
             {group.ids.map((id) => {
               const def = getNutrientDefinition(id);
               if (!def) return null;

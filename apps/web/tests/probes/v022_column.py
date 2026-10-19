@@ -80,8 +80,8 @@ def run(browser, size, level, tag):
     check(g["faded"] == 0, f"{tag}: every bar fill is at full opacity ({g['faded']} are not)")
     unknown = [c for c in g["fills"] if c not in LEVEL_COLOURS and c not in EMPTY]
     check(not unknown, f"{tag}: bars use only the level colours and the empty colour ({unknown})")
-    # cc-61: the verdict is the first row of the area, under the first band and above the first bar
-    check(g["inArea"] and g["blockTop"] >= g["areaTop"] - 0.5 and g["blockBottom"] <= g["firstBarTop"] + 0.5, f"{tag}: the x/N đạt verdict is the first row of the area, above the first bar ({g['blockTop']}-{g['blockBottom']} vs bar {g['firstBarTop']})")
+    # cc-61: the verdict heads the column, above the scrolling area (which starts at the first band)
+    check((not g["inArea"]) and g["blockBottom"] <= g["areaTop"] + 0.5, f"{tag}: the x/N đạt verdict is the column header, above the area ({g['blockBottom']} vs {g['areaTop']})")
     check(g["linkTop"] is not None and g["linkTop"] >= g["areaBottom"] - 0.5, f"{tag}: Đủ 22 vi chất is below the area ({g['linkTop']} vs {g['areaBottom']})")
     check(g["crossing"] == 0, f"{tag}: at the top, no row is cut by the area's bottom edge ({g['crossing']} {g['crossRows']})")
     print(f"note: {tag} scrollable={g['scrollable']} area {g['areaTop']:.0f}-{g['areaBottom']:.0f}")
