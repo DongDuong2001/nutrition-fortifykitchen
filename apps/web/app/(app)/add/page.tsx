@@ -43,6 +43,7 @@ import { MealSwitcher } from "@/components/meal-switcher";
 import { PortionPanel } from "@/components/ui/portion-panel";
 import { HomeScreen } from "@/components/home/home-screen";
 import { AppShell } from "@/components/ui/app-shell";
+import type { AddOnEntry } from "@/lib/dish-recipes";
 
 import { useMealSlot } from "@/lib/use-meal-slot";
 import { HOME_ROUTE } from "@/lib/nav";
@@ -74,6 +75,10 @@ function AddFoodInner() {
   const [tray, setTray] = useState<TrayItem[]>([]);
   const [reviewOpen, setReviewOpen] = useState(false);
   const reopenReview = useRef(false);
+
+  // cc-54: the add-ons ("+ Bún") of a dish that are switched on: logged with it, each its own entry, in the same meal
+  const [extras, setExtras] = useState<AddOnEntry[]>([]);
+  const onExtrasChange = useCallback((next: AddOnEntry[]) => setExtras((prev) => (prev.length === 0 && next.length === 0 ? prev : next)), []);
 
   const [gramsInput, setGramsInput] = useState("");
   const [selectedServingLabel, setSelectedServingLabel] = useState("");
@@ -259,7 +264,12 @@ function AddFoodInner() {
     if (!selectedFood || parsedGrams <= 0 || isSubmitting || mealSlot === null) return;
     setIsSubmitting(true);
     try {
-      if (await addFoodEntry(selectedFood, parsedGrams, mealSlot, selectedServingLabel)) {
+      // With add-ons: the dish and each add-on go in together (one update, one Hoàn tác), the add-ons right after the dish
+      const saved =
+        extras.length > 0
+          ? addFoodEntries([{ food: selectedFood, grams: parsedGrams, label: selectedServingLabel }, ...extras], mealSlot)
+          : await addFoodEntry(selectedFood, parsedGrams, mealSlot, selectedServingLabel);
+      if (saved) {
         tourAction("portion-confirmed");
         navigateFromSheet(router, HOME_ROUTE);
       }
@@ -272,7 +282,7 @@ function AddFoodInner() {
   const handleAddAndContinue = () => {
     if (!selectedFood || parsedGrams <= 0 || mealSlot === null) return;
     markUsed("tray-add");
-    setTray((t) => putInTray(t, selectedFood, parsedGrams, selectedServingLabel));
+    setTray((t) => extras.reduce((acc, e) => putInTray(acc, e.food, e.grams, e.label), putInTray(t, selectedFood, parsedGrams, selectedServingLabel)));
     setSelectedFood(null);
     setGramsInput("");
     setSelectedServingLabel("");
@@ -569,6 +579,7 @@ function AddFoodInner() {
                     mealSlot={mealSlot}
                     onAdd={handleAddFood}
                     onAddAndContinue={handleAddAndContinue}
+                    onExtrasChange={onExtrasChange}
                     isSubmitting={isSubmitting}
                     showMicros={true}
                     className="rounded-[18px] border border-card-border bg-card p-4"
@@ -707,6 +718,7 @@ function AddFoodInner() {
               mealSlot={mealSlot}
               onAdd={handleAddFood}
               onAddAndContinue={handleAddAndContinue}
+              onExtrasChange={onExtrasChange}
               isSubmitting={isSubmitting}
               headingId="portion-sheet-title"
             />

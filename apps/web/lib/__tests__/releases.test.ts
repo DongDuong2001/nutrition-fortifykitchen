@@ -12,15 +12,16 @@ describe("RELEASES", () => {
     expect([...ids].sort().reverse()).toEqual(ids);
   });
 
-  it("starts with the portion model (2026-10-18f, cc-53b, plus cc-57's smoother tabs): five items and a 3-step tour on Hôm nay's controls", () => {
+  it("starts with the portion model (2026-10-18f, cc-53b, plus cc-54's Thành phần and cc-57's smoother tabs): six items and a 4-step tour on Hôm nay's controls", () => {
     const r = latestRelease();
     expect(r?.id).toBe("2026-10-18f");
     expect(r?.date).toBe("18/10");
-    expect(r?.items.map((i) => i.title)).toEqual(["Khẩu phần theo gam", "Cân sống hay đã nấu chín", "Trứng ghi theo quả", "Khay gọn hơn", "Chuyển tab mượt hơn"]);
+    expect(r?.items.map((i) => i.title)).toEqual(["Khẩu phần theo gam", "Cân sống hay đã nấu chín", "Trứng ghi theo quả", "Khay gọn hơn", "Thành phần của món Việt", "Chuyển tab mượt hơn"]);
     expect(r?.tour?.map((s) => [s.target, s.fallback ?? null])).toEqual([
       ["meal-add", "nav-add"],
       ["home-food-list", "meal-pill"],
       ["meal-pill", null],
+      ["dish-parts", "meal-add"],
     ]);
     // AGENTS.md › Tutorials and the copy rules: 2–5 steps, 1–2 short sentences, no colon inside a sentence
     for (const s of r?.tour ?? []) {
@@ -136,10 +137,10 @@ describe("joinedTour (what Thử ngay runs)", () => {
   const titles = (seen: string) => joinedTour(unseenReleases(seen).map((r) => r.id)).map((s) => s.title);
   const T18C = ["Món chưa lưu", "Kéo xuống để tải lại", "Chạm vi chất để xem nguồn", "Gần đây và Như hôm qua", "Thực phẩm bổ sung và Gia vị"];
   const T18E = ["Nhóm Bự / Bé", "Đánh dấu để ghi", "+ Thêm món"];
-  const T18F = ["Ghi theo gam", "Sống hay chín", "Khay xem lại"];
+  const T18F = ["Ghi theo gam", "Sống hay chín", "Khay xem lại", "Thành phần của món"];
 
-  it("seen 18b: 18c, 18e, then 18f (oldest first; 18d has no tour), cut to 8 steps from the end of 18c's", () => {
-    expect(titles("2026-10-18b")).toEqual([...T18C.slice(0, 2), ...T18E, ...T18F]);
+  it("seen 18b: 18c, 18e, then 18f (oldest first; 18d has no tour), cut to 8 steps from the end of 18c's (the newest tour is whole)", () => {
+    expect(titles("2026-10-18b")).toEqual([...T18C.slice(0, 1), ...T18E, ...T18F]);
   });
 
   it("seen 18c: the 18e tour, then the 18f tour", () => {
@@ -151,24 +152,24 @@ describe("joinedTour (what Thử ngay runs)", () => {
   });
 
   it("releases without a tour add nothing", () => {
-    expect(titles("2026-10-17")).toEqual([...T18C.slice(0, 2), ...T18E, ...T18F]);
+    expect(titles("2026-10-17")).toEqual([...T18C.slice(0, 1), ...T18E, ...T18F]);
   });
 
   // Hôm nay as "Thử ngay" sees it: 18c's, 18e's (through the Ngày tập pill) and 18f's controls
   const ON_HOME = new Set(["sync-status", "header-actions", "home-food-list", "meal-pill", "meal-add", "nutrient-column", "nav-explore", "training-pill"]);
   const onHome = (s: { target: string; fallback?: string }) => ON_HOME.has(s.target) || (s.fallback !== undefined && ON_HOME.has(s.fallback));
 
-  it("seen 18b, on Hôm nay: every step is on the page, so the cap drops 18c's last three", () => {
+  it("seen 18b, on Hôm nay: every step is on the page, so the cap drops 18c's last four", () => {
     const ids = unseenReleases("2026-10-18b").map((r) => r.id);
     expect(ids).toEqual(["2026-10-18f", "2026-10-18e", "2026-10-18d", "2026-10-18c"]);
-    expect(joinedTour(ids, RELEASES, onHome).map((s) => s.title)).toEqual([...T18C.slice(0, 2), ...T18E, ...T18F]);
+    expect(joinedTour(ids, RELEASES, onHome).map((s) => s.title)).toEqual([...T18C.slice(0, 1), ...T18E, ...T18F]);
   });
 
   it("the keep test sees each step's place in the whole joined list, oldest release first, before the cap", () => {
     const seen: [string, number][] = [];
     joinedTour(unseenReleases("2026-10-18b").map((r) => r.id), RELEASES, (s, i) => (seen.push([s.title, i]), false));
     expect(seen.map(([t]) => t)).toEqual(tourSteps(["2026-10-18f", "2026-10-18e", "2026-10-18d", "2026-10-18c"]).map((s) => s.title));
-    expect(seen.map(([, i]) => i)).toEqual(Array.from({ length: 11 }, (_, i) => i));
+    expect(seen.map(([, i]) => i)).toEqual(Array.from({ length: 12 }, (_, i) => i));
     expect(seen.map(([t]) => t)).toEqual([...T18C, ...T18E, ...T18F]);
   });
 
