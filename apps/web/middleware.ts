@@ -55,21 +55,22 @@ export async function middleware(request: NextRequest) {
 
       // cc-58: the token is checked here against the project's signing keys (no round trip to the Auth server on most
       // projects), and a token about to expire is refreshed first. getUser() asked the server on every request.
-      await supabase.auth.getClaims();
+      const { data: verified, error: claimsError } = await supabase.auth.getClaims();
+      const claims = claimsError ? null : verified?.claims;
 
       // The API reads the access token from this httpOnly cookie, so no client script ever holds the token. It is
       // re-issued from the Supabase session on every request (a refreshed token replaces the old one) and removed
-      // once there is no session.
-      const { data } = await supabase.auth.getSession();
-      const token = data.session?.access_token;
-      if (token) {
+      // once there is no session. cc-63: only a token whose claims were verified is issued (a failed check mints
+      // nothing), and it lives as long as its own exp.
+      const exp = claims && typeof claims.exp === "number" ? claims.exp : null;
+      const token = exp === null ? undefined : (await supabase.auth.getSession()).data.session?.access_token;
+      if (token && exp !== null) {
         response.cookies.set(ACCESS_TOKEN_COOKIE, token, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           sameSite: "lax",
           path: "/",
-          // Seconds until this token expires (expires_in is the lifetime at issue, which is stale for an old session)
-          maxAge: Math.max(0, (data.session?.expires_at ?? Math.floor(Date.now() / 1000) + 3600) - Math.floor(Date.now() / 1000)),
+          maxAge: Math.max(0, exp - Math.floor(Date.now() / 1000)),
         });
       } else if (request.cookies.has(ACCESS_TOKEN_COOKIE)) {
         response.cookies.delete(ACCESS_TOKEN_COOKIE);
@@ -84,7 +85,8 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // The public pages (landing, terms, privacy, offline, install) need no session: they skip it
-    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|icons|landing|terms|privacy|offline|install|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    // The public pages (landing, terms, privacy, offline, install) need no session: they skip it. The names are anchored
+    // (the page itself or what is below it), so /installer and /terms-x still go through the middleware.
+    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|(?:landing|terms|privacy|offline|install|icons)(?:/|$)|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

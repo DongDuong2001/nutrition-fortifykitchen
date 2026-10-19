@@ -593,7 +593,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
           if (result.state === "held") {
             haptic("error");
             const day = date ?? getTodayIsoVN();
-            showNotice(syncNotice([{ id, status: result.status ?? 0, message: result.message ?? "", date: day, final: result.final === true }], false));
+            showNotice(syncNotice([{ id, status: result.status ?? 0, date: day, final: result.final === true }], false));
           }
         })
         .catch(() => {});
