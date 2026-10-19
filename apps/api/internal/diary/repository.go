@@ -19,7 +19,7 @@ type Repository interface {
 	GetUserProfile(ctx context.Context, userID uuid.UUID) (string, float64, string, int, bool, int, error)
 	GetFoodNutrients(ctx context.Context, foodID uuid.UUID) (string, map[string]*float64, error)
 	CreateEntry(ctx context.Context, userID uuid.UUID, date string, entry *DiaryEntryItem) (*DiaryEntryItem, error)
-	GetEntryByID(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) (*DiaryEntryItem, string, error)
+	GetEntryByID(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) (*DiaryEntryItem, string, bool, error)
 	UpdateEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID, entry *DiaryEntryItem) (*DiaryEntryItem, string, error)
 	SoftDeleteEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) error
 	RestoreEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) (*DiaryEntryItem, string, error)
@@ -168,34 +168,38 @@ func (r *pgxDiaryRepo) CreateEntry(ctx context.Context, userID uuid.UUID, date s
 		nutrientsJSON, parsedDate,
 	).Scan(&entry.CreatedAt)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrIDConflict
+		}
 		return nil, fmt.Errorf("failed to insert diary entry: %w", err)
 	}
 
 	return entry, nil
 }
 
-func (r *pgxDiaryRepo) GetEntryByID(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) (*DiaryEntryItem, string, error) {
+func (r *pgxDiaryRepo) GetEntryByID(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) (*DiaryEntryItem, string, bool, error) {
 	query := `
-		SELECT id, food_id, kind, meal_slot, portion_label, grams, calories, name_snapshot, nutrients_snapshot, log_date, created_at
+		SELECT id, food_id, kind, meal_slot, portion_label, grams, calories, name_snapshot, nutrients_snapshot, log_date, created_at, (deleted_at IS NOT NULL) AS is_deleted
 		FROM nutrition.diary_logs
-		WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL
+		WHERE id = $1 AND user_id = $2
 	`
 	var item DiaryEntryItem
 	var logDate time.Time
 	var portionLabel, nameSnapshot *string
 	var grams *float64
 	var nutrientsJSON []byte
+	var isDeleted bool
 
 	err := r.pool.QueryRow(ctx, query, entryID, userID).Scan(
 		&item.ID, &item.FoodID, &item.Kind, &item.MealSlot,
 		&portionLabel, &grams, &item.Calories, &nameSnapshot,
-		&nutrientsJSON, &logDate, &item.CreatedAt,
+		&nutrientsJSON, &logDate, &item.CreatedAt, &isDeleted,
 	)
 	if err != nil {
-		if err == pgx.ErrNoRows {
-			return nil, "", nil
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, "", false, nil
 		}
-		return nil, "", err
+		return nil, "", false, err
 	}
 
 	if portionLabel != nil {
@@ -211,7 +215,7 @@ func (r *pgxDiaryRepo) GetEntryByID(ctx context.Context, userID uuid.UUID, entry
 		_ = json.Unmarshal(nutrientsJSON, &item.Nutrients)
 	}
 
-	return &item, logDate.Format("2006-01-02"), nil
+	return &item, logDate.Format("2006-01-02"), isDeleted, nil
 }
 
 func (r *pgxDiaryRepo) UpdateEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID, entry *DiaryEntryItem) (*DiaryEntryItem, string, error) {

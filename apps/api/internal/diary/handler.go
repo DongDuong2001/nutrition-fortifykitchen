@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"nutrition-api/internal/auth"
+	"nutrition-api/internal/logger"
 	"nutrition-api/pkg/response"
 )
 
@@ -40,7 +41,12 @@ func (h *Handler) GetDays(w http.ResponseWriter, r *http.Request) {
 			response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, "Invalid date format, expected YYYY-MM-DD")
 			return
 		}
-		response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, err.Error())
+		if errors.Is(err, ErrInvalidDateRange) || errors.Is(err, ErrRangeTooLarge) {
+			response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, err.Error())
+			return
+		}
+		logger.Log.Error().Err(err).Str("user_id", userID.String()).Str("from", from).Str("to", to).Msg("failed to load days range")
+		response.Error(w, http.StatusInternalServerError, response.CodeInternalServerError, "Failed to load days")
 		return
 	}
 
@@ -64,6 +70,7 @@ func (h *Handler) GetDay(w http.ResponseWriter, r *http.Request) {
 
 	res, err := h.service.GetDay(r.Context(), userID, date)
 	if err != nil {
+		logger.Log.Error().Err(err).Str("user_id", userID.String()).Str("date", date).Msg("failed to load day")
 		response.Error(w, http.StatusInternalServerError, response.CodeInternalServerError, "Failed to load day")
 		return
 	}
@@ -100,7 +107,12 @@ func (h *Handler) CreateEntry(w http.ResponseWriter, r *http.Request) {
 			response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, err.Error())
 			return
 		}
-		response.Error(w, http.StatusInternalServerError, response.CodeInternalServerError, err.Error())
+		if errors.Is(err, ErrIDConflict) {
+			response.Error(w, http.StatusConflict, response.CodeIDConflict, "Entry ID conflict")
+			return
+		}
+		logger.Log.Error().Err(err).Str("user_id", userID.String()).Str("date", date).Msg("failed to create diary entry")
+		response.Error(w, http.StatusInternalServerError, response.CodeInternalServerError, "Failed to create diary entry")
 		return
 	}
 
@@ -145,7 +157,8 @@ func (h *Handler) UpdateEntry(w http.ResponseWriter, r *http.Request) {
 			response.Error(w, http.StatusGone, response.CodeValidationFailed, "Restore window expired (must be within 10 seconds)")
 			return
 		}
-		response.Error(w, http.StatusInternalServerError, response.CodeInternalServerError, err.Error())
+		logger.Log.Error().Err(err).Str("user_id", userID.String()).Str("entry_id", entryID.String()).Msg("failed to update diary entry")
+		response.Error(w, http.StatusInternalServerError, response.CodeInternalServerError, "Failed to update diary entry")
 		return
 	}
 
@@ -184,6 +197,7 @@ func (h *Handler) RestoreEntry(w http.ResponseWriter, r *http.Request) {
 			response.Error(w, http.StatusGone, response.CodeValidationFailed, "Restore window expired (must be within 10 seconds)")
 			return
 		}
+		logger.Log.Error().Err(err).Str("user_id", userID.String()).Str("entry_id", entryID.String()).Msg("failed to restore diary entry")
 		response.Error(w, http.StatusInternalServerError, response.CodeInternalServerError, "Failed to restore entry")
 		return
 	}
@@ -219,6 +233,7 @@ func (h *Handler) DeleteEntry(w http.ResponseWriter, r *http.Request) {
 			response.Error(w, http.StatusNotFound, response.CodeNotFound, "Entry not found")
 			return
 		}
+		logger.Log.Error().Err(err).Str("user_id", userID.String()).Str("entry_id", entryID.String()).Msg("failed to delete diary entry")
 		response.Error(w, http.StatusInternalServerError, response.CodeInternalServerError, "Failed to delete entry")
 		return
 	}
@@ -254,6 +269,7 @@ func (h *Handler) CopyYesterday(w http.ResponseWriter, r *http.Request) {
 			response.Error(w, http.StatusConflict, response.CodePastDayReadOnly, "Cannot write to past dates")
 			return
 		}
+		logger.Log.Error().Err(err).Str("user_id", userID.String()).Str("date", date).Msg("failed to copy yesterday")
 		response.Error(w, http.StatusInternalServerError, response.CodeInternalServerError, "Failed to copy yesterday")
 		return
 	}
@@ -278,6 +294,7 @@ func (h *Handler) DeleteMeal(w http.ResponseWriter, r *http.Request) {
 			response.Error(w, http.StatusConflict, response.CodePastDayReadOnly, "Cannot write to past dates")
 			return
 		}
+		logger.Log.Error().Err(err).Str("user_id", userID.String()).Str("date", date).Str("meal", meal).Msg("failed to delete meal")
 		response.Error(w, http.StatusInternalServerError, response.CodeInternalServerError, "Failed to delete meal")
 		return
 	}
@@ -310,6 +327,7 @@ func (h *Handler) SetTraining(w http.ResponseWriter, r *http.Request) {
 			response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, err.Error())
 			return
 		}
+		logger.Log.Error().Err(err).Str("user_id", userID.String()).Str("date", date).Msg("failed to set training")
 		response.Error(w, http.StatusInternalServerError, response.CodeInternalServerError, "Failed to set training")
 		return
 	}

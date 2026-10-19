@@ -16,6 +16,9 @@ var (
 	ErrRestoreWindowExpired   = errors.New("restore window expired (must be within 10 seconds)")
 	ErrInvalidTrainingMinutes = errors.New("training_minutes must be one of: 0, 45, 60, 90, 120, 240")
 	ErrFoodIDRequired         = errors.New("food_id is required for food entry")
+	ErrIDConflict             = errors.New("entry id conflict")
+	ErrInvalidDateRange       = errors.New("fromDate must be before or equal to toDate")
+	ErrRangeTooLarge          = errors.New("date range exceeds maximum of 100 days")
 )
 
 type RecentsTracker interface {
@@ -196,7 +199,7 @@ func (s *diaryServiceImpl) GetDay(ctx context.Context, userID uuid.UUID, date st
 
 func (s *diaryServiceImpl) CreateEntry(ctx context.Context, userID uuid.UUID, date string, req CreateEntryRequest) (*DiaryEntryItem, map[string]*float64, error) {
 	if req.ID != uuid.Nil {
-		if existing, _, err := s.repo.GetEntryByID(ctx, userID, req.ID); err == nil && existing != nil {
+		if existing, _, isDeleted, err := s.repo.GetEntryByID(ctx, userID, req.ID); err == nil && existing != nil && !isDeleted {
 			dayEntries, err := s.repo.GetDayEntries(ctx, userID, date)
 			if err != nil {
 				return nil, nil, err
@@ -294,13 +297,27 @@ func (s *diaryServiceImpl) CreateEntry(ctx context.Context, userID uuid.UUID, da
 }
 
 func (s *diaryServiceImpl) RestoreEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) (*DiaryEntryItem, map[string]*float64, error) {
-	restored, date, err := s.repo.RestoreEntry(ctx, userID, entryID)
+	existing, date, isDeleted, err := s.repo.GetEntryByID(ctx, userID, entryID)
 	if err != nil {
 		return nil, nil, err
 	}
+	if existing == nil {
+		return nil, nil, ErrEntryNotFound
+	}
+	if !isDeleted {
+		dayEntries, err := s.repo.GetDayEntries(ctx, userID, date)
+		if err != nil {
+			return nil, nil, err
+		}
+		return existing, computeDayTotals(dayEntries), nil
+	}
 
 	if err := ValidateDateWritable(date); err != nil {
-		_ = s.repo.SoftDeleteEntry(ctx, userID, entryID)
+		return nil, nil, err
+	}
+
+	restored, _, err := s.repo.RestoreEntry(ctx, userID, entryID)
+	if err != nil {
 		return nil, nil, err
 	}
 
@@ -318,11 +335,11 @@ func (s *diaryServiceImpl) UpdateEntry(ctx context.Context, userID uuid.UUID, en
 		return s.RestoreEntry(ctx, userID, entryID)
 	}
 
-	existing, date, err := s.repo.GetEntryByID(ctx, userID, entryID)
+	existing, date, isDeleted, err := s.repo.GetEntryByID(ctx, userID, entryID)
 	if err != nil {
 		return nil, nil, err
 	}
-	if existing == nil {
+	if existing == nil || isDeleted {
 		return nil, nil, ErrEntryNotFound
 	}
 
@@ -395,11 +412,11 @@ func (s *diaryServiceImpl) UpdateEntry(ctx context.Context, userID uuid.UUID, en
 }
 
 func (s *diaryServiceImpl) DeleteEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) error {
-	existing, date, err := s.repo.GetEntryByID(ctx, userID, entryID)
+	existing, date, isDeleted, err := s.repo.GetEntryByID(ctx, userID, entryID)
 	if err != nil {
 		return err
 	}
-	if existing == nil {
+	if existing == nil || isDeleted {
 		return ErrEntryNotFound
 	}
 
@@ -499,12 +516,12 @@ func (s *diaryServiceImpl) GetDaysRange(ctx context.Context, userID uuid.UUID, f
 		return nil, ErrInvalidDateFormat
 	}
 	if fromT.After(toT) {
-		return nil, errors.New("fromDate must be before or equal to toDate")
+		return nil, ErrInvalidDateRange
 	}
 
 	// Clamp max range to 100 days to prevent excessive memory/query load
 	if toT.Sub(fromT) > 100*24*time.Hour {
-		return nil, errors.New("date range exceeds maximum of 100 days")
+		return nil, ErrRangeTooLarge
 	}
 
 	rangeEntries, err := s.repo.GetRangeEntries(ctx, userID, fromDate, toDate)
