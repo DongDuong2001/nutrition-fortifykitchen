@@ -21,7 +21,8 @@ import { shiftIsoDate } from "./day-history";
 import { generateUuid, isUuid } from "./uuid";
 import { refreshServerSession } from "./server-session";
 import { reportClientError } from "./client-errors";
-import { addToCatalogCache, catalogCacheState, readCatalogCache, writeCatalogCache } from "./catalog-cache";
+// The device's copy of the catalogue (and IndexedDB behind it) is loaded when the catalogue is read or written, not with the page
+const catalogCache = () => import("./catalog-cache");
 import { normaliseCoaching } from "./coaching-link";
 import { isRecipeId } from "./recipe";
 import type { GoalType, SexType } from "./targets";
@@ -243,6 +244,7 @@ let foodsInFlight: Promise<FoodItem[]> | null = null;
  */
 async function fetchAllFoods(): Promise<FoodItem[]> {
   const account = currentAccountId();
+  const { readCatalogCache, catalogCacheState } = await catalogCache();
   const saved = await readCatalogCache(account);
   const state = catalogCacheState(saved?.at ?? null, Date.now());
   if (saved && (state === "fresh" || state === "stale")) {
@@ -353,7 +355,7 @@ async function downloadCatalog(account: string | null, background: boolean): Pro
   }
   setCatalogFoods(foods);
   setCatalogStatus("ready");
-  if (complete) void writeCatalogCache(account, foods);
+  if (complete) void catalogCache().then((c) => c.writeCatalogCache(account, foods));
   return foods;
 }
 
@@ -492,6 +494,19 @@ export function loadSyncEngine(): Promise<Engine> {
 function withEngine<T>(use: (loaded: Engine) => T | Promise<T>): Promise<T> {
   return engine ? Promise.resolve(use(engine)) : loadSyncEngine().then(use);
 }
+
+/** The diary's list could not be written (no room, storage blocked): the lasting banner goes up. */
+export function reportStorageFailure(error: unknown): void {
+  void loadSyncEngine().then((loaded) => loaded.storageFailed(error));
+}
+
+/** A write of the diary's list worked again: the banner of a full disk goes down. */
+export function reportStorageWorked(): void {
+  void loadSyncEngine().then((loaded) => loaded.storageWorked());
+}
+
+/** The function that folds a day read from the server into the diary's list (lazy: only a sync needs it). */
+export const loadServerDay = () => withEngine((e) => e.applyServerDay);
 
 /** Starts reading the account's outbox from disk (and moves the old localStorage array over). Call when an account loads. */
 export const loadOfflineOutbox = (): Promise<void> => withEngine((e) => e.loadOfflineOutbox());
@@ -858,7 +873,7 @@ export const apiClient = {
           const raw = json.data ?? json;
           const mapped = mapApiFoodToFoodItem(raw);
           addCatalogFood(mapped);
-          void addToCatalogCache(currentAccountId(), mapped);
+          void catalogCache().then((c) => c.addToCatalogCache(currentAccountId(), mapped));
           return mapped;
         }
         let msg = `Không thể tạo món (${res.status})`;

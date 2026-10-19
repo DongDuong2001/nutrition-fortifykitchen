@@ -201,7 +201,7 @@ export function AppHeader({
 
           {hasDateNav && (
             <div className="flex shrink-0 items-center lg:gap-1.5">
-              <button type="button" onClick={onPrev} disabled={prevDisabled} aria-label="Ngày trước" className={DATE_BUTTON}>
+              <button type="button" onClick={onPrev} disabled={prevDisabled} aria-label="Ngày trước" data-tour="day-prev" className={DATE_BUTTON}>
                 <Chevron dir="left" />
               </button>
               {onDateTap ? (

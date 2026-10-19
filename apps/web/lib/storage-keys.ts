@@ -6,7 +6,6 @@
 import { currentAccountId } from "./auth-actions";
 import { isDemo } from "./demo";
 import { FAVOURITES_KEY } from "./favourites";
-import { DAY_ARCHIVE_KEY } from "./day-archive";
 
 // One value per account: the profile (sex, birth year, weight, goal, period mode, name), the reminder settings and
 // the training ticks. Each is kept under the account's key too, so a second account on this browser never sees them.
@@ -30,8 +29,9 @@ export const RECENT_FOODS_KEY = "h1t_recent_foods_v2";
 
 export const DEMO_SUFFIX = "_demo";
 
-// Earlier days of the added entries, filed by date when the date moves on (lib/day-archive)
-export { DAY_ARCHIVE_KEY };
+// Earlier days of the added entries, filed by date when the date moves on (lib/day-archive). The key lives here, not in
+// lib/day-archive: the sign-in page reads this file and must not load the diary's day helpers with it.
+export const DAY_ARCHIVE_KEY = "h1t_day_archive_v1";
 
 /** The same shape as Storage, for the parts of it the app uses. */
 export interface KeyValueStore {

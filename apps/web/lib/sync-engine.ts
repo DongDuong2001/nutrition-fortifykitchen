@@ -7,6 +7,9 @@ import { generateUuid } from "./uuid";
 import { isRecipeId } from "./recipe";
 import { reportClientError } from "./client-errors";
 import { clearStorageAlert, raiseStorageAlert } from "./sync-state";
+import { storageErrorKind } from "./storage-error";
+import { requestPersistentStorage } from "./storage-persist";
+export { applyServerDay } from "./server-day";
 import {
   STALE_SENDING_MS,
   findItem,
@@ -55,6 +58,8 @@ function currentScope(): OutboxScope | null {
 /** Starts reading the account's outbox from disk (and moves the old localStorage array over). Call when an account loads. */
 export function loadOfflineOutbox(): Promise<void> {
   wireAlerts();
+  // After sign-in (an account is loading): ask the browser to keep this site's data (Safari clears it after 7 days otherwise)
+  void requestPersistentStorage();
   return loadOutbox(currentScope());
 }
 
@@ -419,4 +424,14 @@ export function watchOutbox(onChange: () => void): () => void {
     off();
     offTabs();
   };
+}
+
+/** The diary's list could not be written (no room, storage blocked): the lasting banner goes up. */
+export function storageFailed(error: unknown): void {
+  raiseStorageAlert(storageErrorKind(error), error);
+}
+
+/** A write of the diary's list worked: the banner of a full disk goes down. */
+export function storageWorked(): void {
+  clearStorageAlert();
 }

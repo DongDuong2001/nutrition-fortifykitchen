@@ -90,7 +90,7 @@ export default function MicrosPage() {
 }
 
 function MicrosContent() {
-  const { data: diaryData, hydrated, profile, todayIso } = useDiary();
+  const { data: diaryData, hydrated, profile, todayIso, isEditable } = useDiary();
   const searchParams = useSearchParams();
   // ?date= picks a past day (read-only, as everything about a past day). Read after mount so the first render matches the server.
   const viewIso = hydrated && todayIso ? viewedIsoDate(searchParams?.get("date"), todayIso) : null;
@@ -133,7 +133,7 @@ function MicrosContent() {
   // Today comes from the diary store, like the nutrient screen; no separate fetch (it could show the sample day)
   const isLoading = !hydrated;
   const currentData = pastData || (hydrated ? diaryData : null);
-  const readOnlyNote = isPast ? " · Chỉ xem" : "";
+  const readOnlyNote = isPast && viewIso && !isEditable(viewIso) ? " · Chỉ xem" : "";
   const phoneDateLabel = (clientNow && currentData?.date ? formatDayLabel(currentData.date, clientNow) : "") + readOnlyNote;
   const profileParts = [goalName(profile.goal), `${formatNumber(profile.weightKg)} kg`];
   const desktopSubtitle = clientNow

@@ -10,10 +10,12 @@ import { formatAmount } from "./format";
 import { portionAmountText } from "./portion";
 import { sumKcal } from "./kcal";
 import { getTodayIsoVN, withRuntimeDate } from "./date";
-import { DAY_ARCHIVE_KEY, entryIso, mergeArchive, msUntilNextDay, parseArchive, splitByDay, type DayArchive } from "./day-archive";
+import { editableFrom, isEditableDay, pastDaysFor, yesterdayOf } from "./day-rules";
+import { entriesOnDay, entryIso, isTodays, liftEditableDays, mergeArchive, msUntilNextDay, parseArchive, splitByDay, withEditableDays, type DayArchive } from "./day-archive";
 import { isDemo, setDemoActive } from "./demo";
 import {
   ADDED_ENTRIES_KEY,
+  DAY_ARCHIVE_KEY,
   RECENT_FOODS_KEY,
   SAMPLE_EDITS_KEY,
   adoptLegacyKeys,
@@ -41,6 +43,9 @@ import {
   loadOfflineOutbox,
   pendingFavouriteOps,
   pendingWriteIds,
+  loadServerDay,
+  reportStorageFailure,
+  reportStorageWorked,
   syncOfflineOutbox,
   watchOutbox,
   writesInFlight,
@@ -48,9 +53,6 @@ import {
   type SyncResult,
   type WriteResult,
 } from "./api-client";
-import { clearStorageAlert, raiseStorageAlert } from "./sync-state";
-import { storageErrorKind } from "./storage-error";
-import { requestPersistentStorage } from "./storage-persist";
 import { refreshServerSession } from "./server-session";
 import { markUsed } from "./onboarding-store";
 import { isLocalOnly, syncNotice } from "./sync-notice";
@@ -107,7 +109,7 @@ import {
   findEntry,
   mealEntryIds,
   mealPortions,
-  mergeServerDay,
+  type DayFilter,
   parseAddedEntries,
   parseSampleEdits,
   removeAddedIn,
@@ -160,13 +162,13 @@ interface DiaryContextValue {
     grams: number,
     mealSlot: MealSlot,
     servingLabel?: string,
-    options?: { undoable?: boolean; id?: string }
+    options?: { undoable?: boolean; id?: string; day?: string }
   ) => Promise<boolean>;
   /**
    * The add tray: every item in one diary update and one toast whose Hoàn tác removes them all. False when an item has no
    * energy figure. An item's `id` is its entry's id when the caller keeps a link (the Ngày tập Red Bull + mật mía mix).
    */
-  addFoodEntries: (items: Array<{ food: FoodItem; grams: number; label: string; id?: string }>, mealSlot: MealSlot) => boolean;
+  addFoodEntries: (items: Array<{ food: FoodItem; grams: number; label: string; id?: string }>, mealSlot: MealSlot, day?: string) => boolean;
   recentFoods: RecentFood[];
   addRecentFood: (food: FoodItem, servingLabel: string) => void;
   dismissToast: () => void;
@@ -183,14 +185,14 @@ interface DiaryContextValue {
   /** Changes the meal, and the portion when the entry can change portion. */
   updateEntry: (id: string, patch: EntryPatch) => void;
   deleteEntry: (id: string) => void;
-  /** Removes every entry of a meal of today, with one undo toast (Hoàn tác puts the whole meal back). */
-  deleteMeal: (slot: MealSlot) => void;
+  /** Removes every entry of a meal of today (or of `dayIso`, when that day is editable), with one undo toast (Hoàn tác puts the whole meal back). */
+  deleteMeal: (slot: MealSlot, dayIso?: string) => void;
   /**
-   * Removes the chosen entries of today with ONE undo toast (Hoàn tác puts them all back). `dayIso` is the day the ids
-   * were picked on: anything but today is a read-only past day and nothing is removed.
+   * Removes the chosen entries with ONE undo toast (Hoàn tác puts them all back). `dayIso` is the day the ids were picked
+   * on: a day that can no longer be edited (older than yesterday) removes nothing.
    */
   deleteEntries: (ids: string[], dayIso: string) => void;
-  /** Moves the chosen entries of today to a meal of today. Like deleteEntries, a past `dayIso` does nothing. */
+  /** Moves the chosen entries to a meal of their day. Like deleteEntries, a day that can no longer be edited does nothing. */
   moveEntries: (ids: string[], slot: MealSlot, dayIso: string) => void;
   /** Puts the entries of the last Chuyển bữa back. Only works while the "moved" toast is shown. */
   undoMove: () => void;
@@ -198,8 +200,8 @@ interface DiaryContextValue {
   undoLastDelete: () => void;
   /** Hoàn tác of the parked delete. Leaves the toast on top alone. */
   undoParkedDelete: () => void;
-  /** Adds copied entries to today in one step, with one undo toast. Existing entries are kept. */
-  copyEntries: (entries: AddedDiaryEntry[], message: string) => void;
+  /** Adds copied entries to today (or to `day`, when that day is editable) in one step, with one undo toast. Existing entries are kept. */
+  copyEntries: (entries: AddedDiaryEntry[], message: string, day?: string) => void;
   /** Takes out the entries of the last add or copy. Only works while the "undoable" toast is shown. */
   undoCopy: () => void;
   /** Bữa ăn của tôi, newest first. Loaded after mount from localStorage (see lib/saved-meals.ts). */
@@ -214,9 +216,9 @@ interface DiaryContextValue {
   renameSavedMeal: (id: string, name: string) => void;
   deleteSavedMeal: (id: string) => void;
   /** One tap: adds every food of the saved meal to a meal of today, with one undo toast for all of them. */
-  addSavedMeal: (meal: SavedMeal, slot: MealSlot) => void;
+  addSavedMeal: (meal: SavedMeal, slot: MealSlot, day?: string) => void;
   /** Chỉ ghi kcal: adds a quick entry with unknown micronutrients, with an undo toast. */
-  addQuickEntry: (input: QuickEntryInput, slot: MealSlot) => QuickEntryResult;
+  addQuickEntry: (input: QuickEntryInput, slot: MealSlot, day?: string) => QuickEntryResult;
   /** Live mode: a diary write is being sent now (the header shows Đang lưu…, cc-51). */
   saving: boolean;
   /** Pull to refresh on Hôm nay (cc-51): the session is renewed, the outbox sent, and today read again. */
@@ -229,8 +231,10 @@ interface DiaryContextValue {
   retryUnsaved: () => void;
   /** Today as YYYY-MM-DD (Asia/Ho_Chi_Minh). Null until mounted. */
   todayIso: string | null;
-  /** Earlier days the user logged, by date; memo dependency for anything that calls dayEntries. */
+  /** Earlier days the user logged, by date (yesterday's entries included while it is editable); memo dependency for anything that calls dayEntries. */
   dayArchive: DayArchive;
+  /** Whether a day can be added to, edited and deleted from: today, and yesterday (lib/day-rules). False before mount and in demo for any earlier day. */
+  isEditable: (iso: string) => boolean;
   hydrated: boolean;
   /** Demo mode (see lib/demo): the sample day, history and Gần đây are loaded. Off for a real account. */
   demo: boolean;
@@ -513,18 +517,24 @@ function addPayload(entry: AddedDiaryEntry, date: string): Parameters<typeof api
 
 /**
  * Copied entries get new uuids: the server keys an entry by its id, and a copy is a new entry. A recipe's entry
- * names its server food once it has one.
+ * names its server food once it has one. The copy belongs to `day`, whatever day it was copied from.
  */
-function withNewIds(entries: AddedDiaryEntry[]): AddedDiaryEntry[] {
-  return withServerFoods(entries.map((e) => ({ ...e, id: generateUuid(), synced: undefined })), readRecipes());
+function withNewIds(entries: AddedDiaryEntry[], day: string): AddedDiaryEntry[] {
+  return withServerFoods(entries.map((e) => ({ ...e, id: generateUuid(), synced: undefined, day })), readRecipes());
+}
+
+/** " hôm qua" after a message about an entry added to yesterday; nothing for today. */
+function onDayText(day: string, todayIso: string): string {
+  return day === todayIso ? "" : day === yesterdayOf(todayIso) ? " hôm qua" : ` ngày ${day.slice(8)}/${day.slice(5, 7)}`;
 }
 
 
 export function DiaryProvider({ children }: { children: React.ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
   const [demo, setDemo] = useState(false);
+  // cc-68: `edits.added` holds the entries of every day that can be edited (today, and yesterday); `addedEntries` below is
+  // today's alone, which is what the screens that know nothing of yesterday expect
   const [edits, setEdits] = useState<DiaryEdits>({ added: [], sample: {}, undo: null });
-  const addedEntries = edits.added;
   // The sample day exists only in demo mode: without it no sample item can be found, edited or counted
   const samples = useMemo(() => (demo ? SAMPLE_ITEMS : []), [demo]);
   // Empty until mount; the sample recents are seeded only in demo mode
@@ -554,6 +564,11 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   const overTarget = useRef<Set<string> | null>(null);
   const pendingGoalCheck = useRef(false);
   const pathname = usePathname();
+  // How many days before today can be edited: 1 in a real account (lib/day-rules), 0 in demo and the mock
+  const pastDays = pastDaysFor(isLiveMode(), demo);
+  const pastDaysRef = useRef(pastDays);
+  pastDaysRef.current = pastDays;
+  const isEditable = useCallback((iso: string) => isEditableDay(iso, getTodayIsoVN(), pastDays), [pastDays]);
   // Bumped when a write or a sync answers: the outbox changed, so the Chưa lưu markers are worked out again
   const [syncVersion, setSyncVersion] = useState(0);
   // The server's day was read since this account loaded: only then is an unconfirmed entry sent again
@@ -634,7 +649,11 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     [track]
   );
 
-  const refreshRemoteDay = useCallback((iso: string, options: { retryHeld?: boolean } = {}): Promise<void> => {
+  /**
+   * Sends the outbox, then reads the server's day: `iso` (today), and with `earlier` the days before it that can still be
+   * edited (yesterday), each merged into the list by its own day.
+   */
+  const refreshRemoteDay = useCallback((iso: string, options: { retryHeld?: boolean; earlier?: boolean } = {}): Promise<void> => {
     const account = currentAccountId();
     if (!isLiveMode() || demo || !account) return Promise.resolve();
     const startedAt = Date.now();
@@ -644,44 +663,34 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     refreshing.current = mine;
     const pendingAtStart = pendingWriteIds();
 
+    const readDay = async (day: string) => {
+      const daySummary = await apiClient.getDay(day);
+      // Not read (offline, 401 after the session refresh, 5xx): the device keeps what it has. Another account signed
+      // in meanwhile: this day is not theirs
+      if (!daySummary || !Array.isArray(daySummary.meals) || currentAccountId() !== account) return false;
+      rememberServerTraining(account, day, daySummary.training_minutes);
+      const apply = await loadServerDay();
+      setEdits((prev) => {
+        // A write queued, being sent, or started since the refetch did: the device's version of that entry stays
+        const keep = new Set([...pendingAtStart, ...pendingWriteIds(), ...writtenSince(startedAt)]);
+        const added = apply(prev.added, daySummary, day, getTodayIsoVN(), { keep, startedAt });
+        return added === prev.added ? prev : { ...prev, added };
+      });
+      return true;
+    };
+
     return syncOfflineOutbox(options)
-      .then((result) => {
+      .then(async (result) => {
         onSync(result);
-        return apiClient.getDay(iso);
-      })
-      .then((daySummary) => {
-        // Not read (offline, 401 after the session refresh, 5xx): the device keeps what it has. Another account signed
-        // in meanwhile: this day is not theirs
-        if (!daySummary || !Array.isArray(daySummary.meals) || currentAccountId() !== account) return;
-        rememberServerTraining(account, iso, daySummary.training_minutes);
-        const serverEntries: AddedDiaryEntry[] = [];
-        for (const meal of daySummary.meals) {
-          for (const e of meal.entries || []) {
-            serverEntries.push({
-              id: e.id,
-              foodId: e.food_id || "",
-              foodName: e.food_name || "Món ăn",
-              grams: e.grams,
-              displayQty: e.serving_label || `${e.grams} g`,
-              mealSlot: (e.meal_slot === "preworkout" ? "pre_workout" : e.meal_slot) as MealSlot,
-              // A NULL kcal (unknown, migration 000011) stays null: it adds nothing to a total and is not shown as a measured 0
-              calories: typeof e.calories === "number" ? e.calories : null,
-              protein: (e.nutrients?.protein as number | null) ?? null,
-              carbs: (e.nutrients?.carbs as number | null) ?? null,
-              fat: (e.nutrients?.fat as number | null) ?? null,
-              fiber: (e.nutrients?.fiber as number | null) ?? null,
-              nutrients: (e.nutrients as Record<string, number | null>) ?? {},
-              addedAt: e.created_at || new Date().toISOString(),
-              synced: true,
-            });
+        // Today did not come (offline, a server error): the earlier days would not either, so they wait for the next refresh
+        if (!(await readDay(iso))) return;
+        setServerDayRead(true);
+        if (options.earlier) {
+          for (let back = Math.min(pastDaysRef.current, 7); back >= 1; back--) {
+            if (currentAccountId() !== account) return;
+            await readDay(editableFrom(iso, back));
           }
         }
-        setEdits((prev) => {
-          // A write queued, being sent, or started since the refetch did: the device's version of that entry stays
-          const keep = new Set([...pendingAtStart, ...pendingWriteIds(), ...writtenSince(startedAt)]);
-          return { ...prev, added: mergeServerDay(prev.added, serverEntries, { keep, startedAt }) };
-        });
-        setServerDayRead(true);
       })
       .catch((error: unknown) => reportClientError({ kind: "sync", message: errorText(error) }))
       .finally(() => {
@@ -711,9 +720,12 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     }
     // Entries of earlier days are filed by date in the same step, so today starts with today's entries only
     // Entries of a recipe that has since reached the server name its server food, so they are sent
-    const split = splitByDay(withServerFoods(added, readRecipes()), iso);
-    setEdits({ added: split.today, sample, undo: null });
-    setArchive(mergeArchive(parseArchive(own?.getItem(DAY_ARCHIVE_KEY) ?? null), split.past));
+    // cc-68: yesterday stays in the list while it can be edited, and a day that was filed but can be edited again comes back
+    const days = pastDaysFor(isLiveMode(), demoNow);
+    const split = splitByDay(withServerFoods(added, readRecipes()), iso, editableFrom(iso, days));
+    const filed = liftEditableDays(mergeArchive(parseArchive(own?.getItem(DAY_ARCHIVE_KEY) ?? null), split.past), iso, days);
+    setEdits({ added: [...filed.lifted, ...split.today], sample, undo: null });
+    setArchive(filed.archive);
     setRecentFoods(recents);
     setFavouriteIds(readFavouriteIds(own));
     setSavedMeals(readSavedMeals(own));
@@ -723,7 +735,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     setServerDayRead(false);
     unsavedShown.current = false;
     if (isLiveMode() && account && !demoNow) {
-      refreshRemoteDay(iso, { retryHeld: true });
+      refreshRemoteDay(iso, { retryHeld: true, earlier: true });
 
       apiClient.getFavourites().then((favs) => {
         if (Array.isArray(favs) && favs.length > 0) {
@@ -798,7 +810,6 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     const bump = () => setSyncVersion((v) => v + 1);
     const stop = watchOutbox(bump);
     void loadOfflineOutbox().then(bump);
-    void requestPersistentStorage();
     return stop;
   }, [demo, accountId]);
 
@@ -808,7 +819,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     if (!isLiveMode() || demo) return;
     const handleSync = () => {
       const iso = todayIsoRef.current || getTodayIsoVN();
-      refreshServerSession().then(() => refreshRemoteDay(iso)).catch(() => {});
+      refreshServerSession().then(() => refreshRemoteDay(iso, { earlier: true })).catch(() => {});
     };
     const onVisibilityChange = () => {
       if (document.visibilityState === "visible") {
@@ -837,7 +848,10 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     const inFront = () => document.visibilityState === "visible";
     const poll = setInterval(() => {
       if (pathname !== HOME_ROUTE || !inFront() || !navigator.onLine || writesInFlight() > 0) return;
-      refreshRemoteDay(todayIsoRef.current || getTodayIsoVN());
+      const today = todayIsoRef.current || getTodayIsoVN();
+      // Yesterday is read again only while it is the day on screen (?date=)
+      const onYesterday = new URLSearchParams(window.location.search).get("date") === yesterdayOf(today);
+      refreshRemoteDay(today, { earlier: onYesterday });
     }, DAY_POLL_MS);
     const keepAlive = setInterval(() => {
       if (inFront()) void refreshServerSession();
@@ -912,6 +926,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     writeSavedMeals(savedMeals, ownStorage());
   }, [savedMeals, hydrated, ownStorage]);
 
+  // A "no room" banner is up (the list could not be written): the next write that works takes it down
+  const storageAlertUp = useRef(false);
   // Persist added entries and sample edits only after hydrated. Today's list is written at once, never through the
   // idle writer (S3: a crash in the idle window must not lose it), and a write that fails is told to the person: a
   // lasting notice, not a swallowed error ("Đã lưu" that was not).
@@ -921,9 +937,14 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     if (!own) return;
     try {
       own.setItem(ADDED_ENTRIES_KEY, JSON.stringify(edits.added));
-      clearStorageAlert();
+      // Room again: the banner goes
+      if (storageAlertUp.current) {
+        storageAlertUp.current = false;
+        reportStorageWorked();
+      }
     } catch (error) {
-      raiseStorageAlert(storageErrorKind(error), error);
+      storageAlertUp.current = true;
+      reportStorageFailure(error);
     }
     // The sample edits are demo-only and small: they may wait for an idle moment
     deferredWrites.schedule(own, SAMPLE_EDITS_KEY, () => JSON.stringify(edits.sample));
@@ -941,11 +962,12 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   // and are filed by date, so the new day starts empty and the old one shows in the history
   useEffect(() => {
     if (!hydrated || !todayIso) return;
-    const { today, past } = splitByDay(edits.added, todayIso);
+    const keepFrom = editableFrom(todayIso, pastDays);
+    const { today, past } = splitByDay(edits.added, todayIso, keepFrom);
     if (today === edits.added) return;
-    setEdits((prev) => ({ ...prev, added: splitByDay(prev.added, todayIso).today }));
+    setEdits((prev) => ({ ...prev, added: splitByDay(prev.added, todayIso, keepFrom).today }));
     setArchive((prev) => mergeArchive(prev, past));
-  }, [hydrated, todayIso, edits.added]);
+  }, [hydrated, todayIso, edits.added, pastDays]);
 
   // cc-58: writes that wait for an idle moment are written now when the provider goes (a route outside the diary)
   useEffect(() => () => deferredWrites.flush(), []);
@@ -968,9 +990,10 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     const refresh = () => {
       const now = getTodayIsoVN();
       if (now === todayIsoRef.current) return;
-      const { today, past } = splitByDay(addedRef.current, now);
+      const keepFrom = editableFrom(now, pastDaysRef.current);
+      const { today, past } = splitByDay(addedRef.current, now, keepFrom);
       if (today !== addedRef.current) {
-        setEdits((prev) => ({ ...prev, added: splitByDay(prev.added, now).today }));
+        setEdits((prev) => ({ ...prev, added: splitByDay(prev.added, now, keepFrom).today }));
         setArchive((prev) => mergeArchive(prev, past));
       }
       setTodayIso(now);
@@ -1057,6 +1080,27 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   }, []);
   const resumeToast = useCallback(() => setPausedToast(null), []);
 
+  // Today's entries alone (the same array while the list holds nothing else), and the history the screens read for other days
+  const addedEntries = useMemo(() => (todayIso ? entriesOnDay(edits.added, todayIso, todayIso) : edits.added), [edits.added, todayIso]);
+  const history = useMemo(() => (todayIso ? withEditableDays(archive, edits.added, todayIso, pastDays) : archive), [archive, edits.added, todayIso, pastDays]);
+
+  /** The day a new entry goes to: today, or `day` when that day can be edited. Null when it cannot. */
+  const targetDay = useCallback(
+    (day?: string): string | null => {
+      const today = getTodayIsoVN();
+      if (!day || day === today) return today;
+      return isEditableDay(day, today, pastDays) ? day : null;
+    },
+    [pastDays]
+  );
+  /** The day an entry of the list belongs to (today's when it names none). */
+  const dayOf = useCallback((id: string): string | undefined => {
+    const entry = edits.added.find((e) => e.id === id);
+    return entry ? entryIso(entry) ?? undefined : undefined;
+  }, [edits.added]);
+  /** Picks the entries of `day` out of the list, for the slot-wide edits. */
+  const onlyDay = useCallback((day: string): DayFilter => (e) => (day === getTodayIsoVN() ? isTodays(e, day) : entryIso(e) === day), []);
+
   // Remember a food with the serving it was logged with
   const addRecentFood = useCallback((food: FoodItem, servingLabel: string) => {
     setRecentFoods((prev) => pushRecent(prev, { foodId: food.id, servingLabel }));
@@ -1064,9 +1108,12 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
 
   // Add a food entry
   const addFoodEntry = useCallback(
-    async (food: FoodItem, grams: number, mealSlot: MealSlot, servingLabel?: string, options?: { undoable?: boolean; id?: string }) => {
+    async (food: FoodItem, grams: number, mealSlot: MealSlot, servingLabel?: string, options?: { undoable?: boolean; id?: string; day?: string }) => {
       // Unknown energy is not 0: nothing is logged, and the caller shows NO_ENERGY_MESSAGE (a label supplement can, canLog)
       if (!canLog(food)) return false;
+      // The day is worked out now (S14); a day that cannot be edited takes nothing
+      const day = targetDay(options?.day);
+      if (!day) return false;
       const numbers = entryNumbers(food, grams);
       const qty = servingLabel || `${formatAmount(grams, "g")} g`;
 
@@ -1079,6 +1126,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         mealSlot,
         ...numbers,
         addedAt: new Date().toISOString(),
+        day,
       };
 
       setEdits((prev) => ({ ...prev, added: [...prev.added, newEntry] }));
@@ -1092,14 +1140,14 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       setToast(
         options?.undoable
           ? {
-              message: `Đã thêm ${food.nameVi} ${amount} vào ${mealNameVi}`,
+              message: `Đã thêm ${food.nameVi} ${amount} vào ${mealNameVi}${onDayText(day, getTodayIsoVN())}`,
               kind: "undoable",
               mealSlot,
               durationMs: UNDO_TOAST_MS,
               undoIds: [newEntry.id],
             }
           : {
-              message: `Đã thêm ${food.nameVi} ${amount} vào ${mealNameVi}`,
+              message: `Đã thêm ${food.nameVi} ${amount} vào ${mealNameVi}${onDayText(day, getTodayIsoVN())}`,
               kind: "added",
               mealSlot,
               durationMs: ADDED_TOAST_MS,
@@ -1112,12 +1160,14 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
 
       return true;
     },
-    [addRecentFood, todayIso, sendAdd]
+    [addRecentFood, targetDay, sendAdd]
   );
 
   const addFoodEntries = useCallback(
-    (items: Array<{ food: FoodItem; grams: number; label: string; id?: string }>, mealSlot: MealSlot) => {
+    (items: Array<{ food: FoodItem; grams: number; label: string; id?: string }>, mealSlot: MealSlot, dayOpt?: string) => {
       if (items.length === 0 || !items.every((i) => canLog(i.food))) return false;
+      const day = targetDay(dayOpt);
+      if (!day) return false;
       const addedAt = new Date().toISOString();
       const entries: AddedDiaryEntry[] = items.map(({ food, grams, label, id }) => ({
         id: id ?? generateUuid(),
@@ -1128,12 +1178,13 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         mealSlot,
         ...entryNumbers(food, grams),
         addedAt,
+        day,
       }));
       setEdits((prev) => dismissUndoIn({ ...prev, added: [...prev.added, ...entries] }));
       pendingGoalCheck.current = true;
       haptic("saved");
       setToast({
-        message: `Đã thêm ${entries.length} món vào ${getMealSlotNameVi(mealSlot)}`,
+        message: `Đã thêm ${entries.length} món vào ${getMealSlotNameVi(mealSlot)}${onDayText(day, getTodayIsoVN())}`,
         kind: "undoable",
         mealSlot,
         durationMs: UNDO_TOAST_MS,
@@ -1143,7 +1194,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       if (isLiveMode()) entries.forEach((e) => sendAdd(e));
       return true;
     },
-    [addRecentFood, todayIso, sendAdd]
+    [addRecentFood, targetDay, sendAdd]
   );
 
   const dismissToast = useCallback(() => {
@@ -1164,18 +1215,24 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   const updateEntry = useCallback((id: string, patch: EntryPatch) => {
     setEdits((prev) => updateEntryIn(prev, id, patch, samples));
     if (isLiveMode()) {
+      const day = dayOf(id);
       track(
         id,
-        apiClient.updateEntry(id, {
-          meal_slot: patch.mealSlot,
-          grams: patch.grams,
-          serving_size_g: patch.grams,
-          serving_label: patch.servingLabel,
-          calories: patch.quick?.calories,
-        })
+        apiClient.updateEntry(
+          id,
+          {
+            meal_slot: patch.mealSlot,
+            grams: patch.grams,
+            serving_size_g: patch.grams,
+            serving_label: patch.servingLabel,
+            calories: patch.quick?.calories,
+          },
+          day
+        ),
+        day
       );
     }
-  }, [samples, track]);
+  }, [samples, track, dayOf]);
 
   const deleteEntry = useCallback(
     (id: string) => {
@@ -1185,17 +1242,21 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       haptic("delete");
       setParkedDelete(null);
       setToast({ message: `Đã xóa ${view.name}`, kind: "deleted", mealSlot: null, durationMs: UNDO_TOAST_MS });
-      if (isLiveMode()) track(id, apiClient.deleteEntry(id));
+      if (isLiveMode()) track(id, apiClient.deleteEntry(id, dayOf(id)), dayOf(id));
     },
-    [edits, samples, track]
+    [edits, samples, track, dayOf]
   );
 
   const deleteMeal = useCallback(
-    (slot: MealSlot) => {
-      const ids = mealEntryIds(edits, slot, samples);
+    (slot: MealSlot, dayIso?: string) => {
+      const day = targetDay(dayIso);
+      if (!day) return;
+      // The sample items belong to today; an earlier day has none
+      const sampled = day === getTodayIsoVN() ? samples : [];
+      const ids = mealEntryIds(edits, slot, sampled, onlyDay(day));
       const count = ids.length;
       if (count === 0) return;
-      setEdits((prev) => deleteMealIn(prev, slot, samples));
+      setEdits((prev) => deleteMealIn(prev, slot, sampled, onlyDay(day)));
       haptic("delete");
       setParkedDelete(null);
       setToast({
@@ -1204,29 +1265,29 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         mealSlot: null,
         durationMs: UNDO_TOAST_MS,
       });
-      if (isLiveMode()) ids.forEach((id) => track(id, apiClient.deleteEntry(id)));
+      if (isLiveMode()) ids.forEach((id) => track(id, apiClient.deleteEntry(id, day), day));
     },
-    [edits, samples, track]
+    [edits, samples, track, targetDay, onlyDay]
   );
 
   const deleteEntries = useCallback(
     (ids: string[], dayIso: string) => {
-      // A past day is read-only: its entries are not in the edits, and nothing here may touch today's
-      if (!todayIso || dayIso !== todayIso) return;
+      // A day older than yesterday is read-only: its entries are not in the edits, and nothing here may touch the others
+      if (!todayIso || !isEditableDay(dayIso, todayIso, pastDays)) return;
       const count = ids.filter((id) => findEntry(edits, id, samples) !== null).length;
       if (count === 0) return;
       setEdits((prev) => deleteEntriesIn(prev, ids, samples));
       haptic("delete");
       setParkedDelete(null);
       setToast({ message: `Đã xóa ${count} món`, kind: "deleted", mealSlot: null, durationMs: UNDO_TOAST_MS });
-      if (isLiveMode()) ids.forEach((id) => track(id, apiClient.deleteEntry(id)));
+      if (isLiveMode()) ids.forEach((id) => track(id, apiClient.deleteEntry(id, dayIso), dayIso));
     },
-    [edits, samples, todayIso, track]
+    [edits, samples, todayIso, track, pastDays]
   );
 
   const moveEntries = useCallback(
     (ids: string[], slot: MealSlot, dayIso: string) => {
-      if (!todayIso || dayIso !== todayIso) return;
+      if (!todayIso || !isEditableDay(dayIso, todayIso, pastDays)) return;
       const count = ids.filter((id) => findEntry(edits, id, samples) !== null).length;
       if (count === 0) return;
       // A move has its own undo (the toast carries it). A delete's toast it replaces is parked under it, so both
@@ -1246,9 +1307,9 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         durationMs: UNDO_TOAST_MS,
         undoMoves,
       });
-      if (isLiveMode()) ids.forEach((id) => track(id, apiClient.updateEntry(id, { meal_slot: slot })));
+      if (isLiveMode()) ids.forEach((id) => track(id, apiClient.updateEntry(id, { meal_slot: slot }, dayIso), dayIso));
     },
-    [edits, samples, todayIso, track]
+    [edits, samples, todayIso, track, pastDays]
   );
 
   const undoMove = useCallback(() => {
@@ -1256,34 +1317,43 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     if (!moves) return;
     setEdits((prev) => restoreSlotsIn(prev, moves, samples));
     haptic("undo");
-    if (isLiveMode()) moves.forEach((m) => track(m.id, apiClient.updateEntry(m.id, { meal_slot: m.slot })));
+    if (isLiveMode()) moves.forEach((m) => track(m.id, apiClient.updateEntry(m.id, { meal_slot: m.slot }, dayOf(m.id)), dayOf(m.id)));
     setToast(null);
-  }, [samples, track]);
+  }, [samples, track, dayOf]);
 
   const undoLastDelete = useCallback(() => {
     const lastUndo = edits.undo;
     setEdits((prev) => undoDeleteIn(prev));
     haptic("undo");
     if (isLiveMode() && lastUndo) {
-      if (lastUndo.kind === "added") {
-        if (lastUndo.entry.synced) track(lastUndo.entry.id, apiClient.restoreEntry(lastUndo.entry.id));
-        else sendAdd(lastUndo.entry);
-      } else if (lastUndo.kind === "sample") {
+      if (lastUndo.kind === "sample") {
         track(lastUndo.id, apiClient.restoreEntry(lastUndo.id));
+      } else {
+        // One entry, or every entry of a meal or a selection: each is put back on the server, or sent again when it never got there
+        const entries = lastUndo.kind === "added" ? [lastUndo.entry] : lastUndo.added.map((a) => a.entry);
+        entries.forEach((e) => (e.synced ? track(e.id, apiClient.restoreEntry(e.id, entryIso(e) ?? undefined)) : sendAdd(e)));
       }
     }
     setToast(null);
   }, [edits.undo, track, sendAdd, todayIso]);
 
   const undoParkedDelete = useCallback(() => {
+    // The same put-back as undoLastDelete (the parked toast is a delete's), without touching the toast on top
+    const lastUndo = edits.undo;
     setEdits((prev) => undoDeleteIn(prev));
     haptic("undo");
+    if (isLiveMode() && lastUndo && lastUndo.kind !== "sample") {
+      const entries = lastUndo.kind === "added" ? [lastUndo.entry] : lastUndo.added.map((a) => a.entry);
+      entries.forEach((e) => (e.synced ? track(e.id, apiClient.restoreEntry(e.id, entryIso(e) ?? undefined)) : sendAdd(e)));
+    }
     setParkedDelete(null);
-  }, []);
+  }, [edits.undo, track, sendAdd]);
 
-  const copyEntries = useCallback((copied: AddedDiaryEntry[], message: string) => {
+  const copyEntries = useCallback((copied: AddedDiaryEntry[], message: string, dayOpt?: string) => {
     if (copied.length === 0) return;
-    const entries = withNewIds(copied);
+    const day = targetDay(dayOpt);
+    if (!day) return;
+    const entries = withNewIds(copied, day);
     setEdits((prev) => dismissUndoIn({ ...prev, added: [...prev.added, ...entries] }));
     pendingGoalCheck.current = true;
     haptic("saved");
@@ -1295,7 +1365,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       undoIds: entries.map((e) => e.id),
     });
     if (isLiveMode()) entries.forEach((e) => sendAdd(e));
-  }, [todayIso, sendAdd]);
+  }, [targetDay, sendAdd]);
 
   const undoCopy = useCallback(() => {
     const ids = toastRef.current?.undoIds;
@@ -1304,20 +1374,20 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     haptic("undo");
     setToast(null);
     // The entries were already sent: undo removes them on the server too, or they come back on the next load
-    if (isLiveMode()) ids.forEach((id) => track(id, apiClient.deleteEntry(id)));
-  }, [track]);
+    if (isLiveMode()) ids.forEach((id) => track(id, apiClient.deleteEntry(id, dayOf(id)), dayOf(id)));
+  }, [track, dayOf]);
 
   const mealFoods = useCallback(
     (slot: MealSlot, iso: string) => {
       const today = todayIso ?? getTodayIsoVN();
       const items =
         iso === today
-          ? mealPortions(edits, slot, samples)
+          ? mealPortions(edits, slot, samples, onlyDay(today))
           : itemsFromEntries(dayEntries(iso, today).filter((e) => e.mealSlot === slot));
       // Only foods the catalogue has: what is saved is what one tap can add back
       return items.filter((item) => MOCK_FOODS.some((f) => f.id === item.foodId));
     },
-    [edits, samples, todayIso, archive]
+    [edits, samples, todayIso, history, onlyDay]
   );
 
   const saveMealAs = useCallback(
@@ -1353,9 +1423,11 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const addSavedMeal = useCallback(
-    (meal: SavedMeal, slot: MealSlot) => {
+    (meal: SavedMeal, slot: MealSlot, dayOpt?: string) => {
+      const day = targetDay(dayOpt);
+      if (!day) return;
       const stamp = Date.now();
-      const entries = withNewIds(savedMealEntries(meal, MOCK_FOODS, slot, `sm-${stamp}`, new Date(stamp).toISOString()));
+      const entries = withNewIds(savedMealEntries(meal, MOCK_FOODS, slot, `sm-${stamp}`, new Date(stamp).toISOString()), day);
       const skipped = savedMealSkipped(meal, MOCK_FOODS);
       if (entries.length === 0) {
         // Nothing can be added: say why instead of doing nothing
@@ -1370,7 +1442,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       pendingGoalCheck.current = true;
       haptic("saved");
       setToast({
-        message: `Đã thêm ${meal.name} · ${entries.length} món vào ${getMealSlotNameVi(slot)}${
+        message: `Đã thêm ${meal.name} · ${entries.length} món vào ${getMealSlotNameVi(slot)}${onDayText(day, getTodayIsoVN())}${
           skipped > 0 ? `. ${skipped} món chưa có kcal nên chưa thêm` : ""
         }`,
         kind: "undoable",
@@ -1380,30 +1452,32 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       });
       if (isLiveMode()) entries.forEach((e) => sendAdd(e));
     },
-    [todayIso, sendAdd]
+    [targetDay, sendAdd]
   );
 
   const addQuickEntry = useCallback(
-    (input: QuickEntryInput, slot: MealSlot): QuickEntryResult => {
+    (input: QuickEntryInput, slot: MealSlot, dayOpt?: string): QuickEntryResult => {
+      const day = targetDay(dayOpt);
+      if (!day) return { ok: false, field: "kcal", message: "Ngày này chỉ xem" };
       const now = Date.now();
       const entryId = generateUuid();
       const result = quickEntryFrom(input, slot, entryId, new Date(now).toISOString());
       if (!result.ok) return result;
-      const { entry } = result;
+      const entry = { ...result.entry, day };
       setEdits((prev) => dismissUndoIn({ ...prev, added: [...prev.added, entry] }));
       pendingGoalCheck.current = true;
       haptic("saved");
       setToast({
-        message: `Đã thêm ${entry.foodName} · ${formatAmount(entry.calories, "kcal")} kcal vào ${getMealSlotNameVi(slot)}`,
+        message: `Đã thêm ${entry.foodName} · ${formatAmount(entry.calories, "kcal")} kcal vào ${getMealSlotNameVi(slot)}${onDayText(day, getTodayIsoVN())}`,
         kind: "undoable",
         mealSlot: slot,
         durationMs: UNDO_TOAST_MS,
         undoIds: [entry.id],
       });
       if (isLiveMode()) sendAdd(entry);
-      return result;
+      return { ...result, entry };
     },
-    [todayIso, sendAdd]
+    [targetDay, sendAdd]
   );
 
   // Chưa lưu: a write of the entry is queued (or refused), or the server never confirmed it and nothing is sending it.
@@ -1435,7 +1509,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   );
 
   const refreshToday = useCallback(
-    () => refreshServerSession().then(() => refreshRemoteDay(todayIsoRef.current || getTodayIsoVN())),
+    () => refreshServerSession().then(() => refreshRemoteDay(todayIsoRef.current || getTodayIsoVN(), { earlier: true })),
     [refreshRemoteDay]
   );
 
@@ -1458,11 +1532,11 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     [hydrated, todayIso, profile, accountId, trainingV]
   );
   const targets = useMemo(() => targetsFor(profile, todayMinutes), [profile, todayMinutes]);
-  useMemo(() => setDayArchive(archive), [archive]);
+  useMemo(() => setDayArchive(history), [history]);
 
   const nutrientSources = useCallback(
-    (key: string) => nutrientSourcesIn(edits.added, edits.sample, key, samples),
-    [edits, samples]
+    (key: string) => nutrientSourcesIn(addedEntries, edits.sample, key, samples),
+    [addedEntries, edits.sample, samples]
   );
 
   const updateProfile = useCallback(
@@ -1496,9 +1570,9 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     // A real account starts from an empty day; only demo mode starts from the sample day
     const start = demo ? SAMPLE_DAY : blankDay(SAMPLE_DAY);
     const base = applyProfileTargets(start, profile, targets, todayMinutes);
-    const day = computeCompositeDayData(base, edits.added, demo ? edits.sample : {});
+    const day = computeCompositeDayData(base, addedEntries, demo ? edits.sample : {});
     return todayIso ? withRuntimeDate(day, todayIso) : day;
-  }, [edits.added, edits.sample, todayIso, profile, targets, todayMinutes, demo, catalogV]);
+  }, [addedEntries, edits.sample, todayIso, profile, targets, todayMinutes, demo, catalogV]);
 
   // A vitamin or mineral that a local add brings to 100 % of its target today vibrates once that day (lib/haptics).
   // The ones over 100 % when the app opens, or after a refetch, are recorded without vibrating.
@@ -1552,7 +1626,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       refreshToday,
       saving,
       todayIso,
-      dayArchive: archive,
+      dayArchive: history,
+      isEditable,
       hydrated,
       demo,
       profile,
@@ -1598,7 +1673,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       refreshToday,
       saving,
       todayIso,
-      archive,
+      history,
+      isEditable,
       hydrated,
       demo,
       profile,

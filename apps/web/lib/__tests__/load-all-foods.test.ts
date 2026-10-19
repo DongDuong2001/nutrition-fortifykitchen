@@ -154,7 +154,8 @@ describe("apiClient.loadAllFoods with the device's copy", () => {
     foodsServer(60, undefined, 500);
     const foods = await apiClient.loadAllFoods();
     expect(foods).toHaveLength(60);
-    expect(written).toHaveBeenCalledTimes(1);
+    // The copy is written once the catalogue cache module has loaded (it is not part of the first-load JS)
+    await vi.waitFor(() => expect(written).toHaveBeenCalledTimes(1));
   });
 
   it("cc-51: offline with an expired copy: the copy is used, search still has foods", async () => {

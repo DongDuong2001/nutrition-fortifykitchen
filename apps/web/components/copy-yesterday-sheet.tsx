@@ -16,32 +16,36 @@ const UNTICKED_BY_DEFAULT: MealSlot[] = ["snack"];
 interface CopyYesterdaySheetProps {
   open: boolean;
   onClose: () => void;
+  /** The day the meals are copied into (cc-68): today, or yesterday while it can be edited. Today when absent. */
+  targetIso?: string;
 }
 
-/** "Chép bữa hôm qua?": pick the meals from yesterday and copy them into today's diary. */
-export function CopyYesterdaySheet({ open, onClose }: CopyYesterdaySheetProps) {
+/** "Chép bữa hôm qua?": pick the meals of the day before and copy them into the day on screen (today, or yesterday). */
+export function CopyYesterdaySheet({ open, onClose, targetIso }: CopyYesterdaySheetProps) {
   const { todayIso, dayArchive } = useDiary();
-  const yesterday = todayIso ? shiftIsoDate(todayIso, -1) : null;
+  const target = targetIso ?? todayIso;
+  const source = target ? shiftIsoDate(target, -1) : null;
   const entries = useMemo(
-    () => (yesterday && todayIso ? dayEntries(yesterday, todayIso) : []),
-    [yesterday, todayIso, dayArchive]
+    () => (source && todayIso ? dayEntries(source, todayIso) : []),
+    [source, todayIso, dayArchive]
   );
 
-  if (!yesterday) return null;
+  if (!source || !target) return null;
 
-  // Day label in the app's date style: "Hôm qua 12/10"
-  const dayLabel = formatDayLabel(yesterday, new Date(`${todayIso}T12:00:00+07:00`));
+  // Day label in the app's date style: "Hôm qua 12/10", and "Hôm kia" for the day before yesterday
+  const sourceWord = target === todayIso ? "hôm qua" : "hôm kia";
+  const dayLabel = target === todayIso ? formatDayLabel(source, new Date(`${todayIso}T12:00:00+07:00`)) : `Hôm kia ${source.slice(8)}/${source.slice(5, 7)}`;
   const description = `${dayLabel} · ${kcalLabel(entriesKcal(entries))}`;
 
   return (
-    <Sheet open={open} onClose={onClose} title="Chép bữa hôm qua?" description={description}>
-      <CopyChoices entries={entries} onDone={onClose} />
+    <Sheet open={open} onClose={onClose} title={`Chép bữa ${sourceWord}?`} description={description}>
+      <CopyChoices entries={entries} onDone={onClose} target={target} sourceWord={sourceWord} isToday={target === todayIso} />
     </Sheet>
   );
 }
 
 // Mounted only while the sheet is open, so every opening starts from the default ticks.
-function CopyChoices({ entries, onDone }: { entries: AddedDiaryEntry[]; onDone: () => void }) {
+function CopyChoices({ entries, onDone, target, sourceWord, isToday }: { entries: AddedDiaryEntry[]; onDone: () => void; target: string; sourceWord: string; isToday: boolean }) {
   const { copyEntries } = useDiary();
   const meals = MEAL_SLOTS.map((slot) => ({
     slot: slot.id,
@@ -67,12 +71,12 @@ function CopyChoices({ entries, onDone }: { entries: AddedDiaryEntry[]; onDone: 
   function copy() {
     const copied = copyMeals(entries, chosen, `copy-${Date.now()}`, new Date().toISOString());
     // Each copy is sent as its own entry (copyEntries), so the device and the server share its id
-    copyEntries(copied, `Đã chép ${chosen.length} bữa từ hôm qua`);
+    copyEntries(copied, `Đã chép ${chosen.length} bữa từ ${sourceWord}${isToday ? "" : " vào hôm qua"}`, target);
     onDone();
   }
 
   if (meals.length === 0) {
-    return <div className="py-2 text-sm text-secondary">Hôm qua chưa ghi bữa nào.</div>;
+    return <div className="py-2 text-sm text-secondary">{sourceWord === "hôm qua" ? "Hôm qua" : "Hôm kia"} chưa ghi bữa nào.</div>;
   }
 
   return (
@@ -99,7 +103,7 @@ function CopyChoices({ entries, onDone }: { entries: AddedDiaryEntry[]; onDone: 
           );
         })}
       </div>
-      <div className="text-[13px] text-secondary px-1">Món đã có hôm nay sẽ không bị ghi đè.</div>
+      <div className="text-[13px] text-secondary px-1">Món đã có {isToday ? "hôm nay" : "hôm qua"} sẽ không bị ghi đè.</div>
       <PillButton variant="primary" onClick={copy} disabled={chosen.length === 0} className="mt-1.5">
         {chosen.length > 0 ? `Chép ${chosen.length} bữa` : "Chọn bữa để chép"}
       </PillButton>

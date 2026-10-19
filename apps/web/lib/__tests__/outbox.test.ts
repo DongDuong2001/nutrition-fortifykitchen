@@ -344,6 +344,64 @@ describe("S14: the day of a write is worked out when the write is made", () => {
   });
 });
 
+describe("cc-68 Part 2: a write for yesterday", () => {
+  const PAST_DAY = JSON.stringify({ error: { code: "PAST_DAY_READ_ONLY", message: "Cannot write to past dates" } });
+  // Today is 2026-10-19 (VN) in these cases
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-10-19T03:00:00Z"));
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+  });
+  const answer409 = () => vi.fn(async () => new Response(PAST_DAY, { status: 409 }));
+
+  it("add, edit and delete for yesterday are sent like today's", async () => {
+    const { calls } = server({ "POST /days/2026-10-18/entries": [201], [`PATCH /entries/${ID}`]: [200], [`DELETE /entries/${ID}`]: [204] });
+    expect((await add("2026-10-18")).state).toBe("saved");
+    expect((await apiClient.updateEntry(ID, { meal_slot: "lunch" }, "2026-10-18")).state).toBe("saved");
+    expect((await apiClient.deleteEntry(ID, "2026-10-18")).state).toBe("saved");
+    expect(calls).toEqual(["POST /days/2026-10-18/entries", `PATCH /entries/${ID}`, `DELETE /entries/${ID}`]);
+    expect(idb.values("outbox")).toEqual([]);
+  });
+
+  it("while the API does not allow yesterday yet (409 PAST_DAY), the write is held, not final, and goes on Thử lại", async () => {
+    vi.stubGlobal("fetch", answer409());
+    const result = await add("2026-10-18");
+    expect(result).toMatchObject({ state: "held", status: 409, final: false });
+    expect(readItems(scope)[0]).toMatchObject({ state: "held", held: { status: 409, final: false } });
+    // The API allows it now: Thử lại sends it
+    const { calls } = server({ "POST /days/2026-10-18/entries": [201] });
+    expect((await syncOfflineOutbox({ retryHeld: true })).saved).toEqual([ID]);
+    expect(calls).toEqual(["POST /days/2026-10-18/entries"]);
+  });
+
+  it("an edit or delete of yesterday's entry that gets 409 is held the same way", async () => {
+    vi.stubGlobal("fetch", answer409());
+    expect(await apiClient.updateEntry(ID, { meal_slot: "lunch" }, "2026-10-18")).toMatchObject({ state: "held", final: false });
+    expect(await apiClient.deleteEntry(FOOD, "2026-10-18")).toMatchObject({ state: "held", final: false });
+  });
+
+  it("two days back and older stay read-only: 409 is final, kept as a lasting marker and never sent again", async () => {
+    vi.stubGlobal("fetch", answer409());
+    expect(await add("2026-10-17")).toMatchObject({ state: "held", status: 409, final: true });
+    expect(await apiClient.deleteEntry(FOOD, "2026-10-01")).toMatchObject({ state: "held", final: true });
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    expect(await syncOfflineOutbox({ retryHeld: true })).toEqual({ saved: [], held: [] });
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(countItems(readItems(scope))).toMatchObject({ failed: 2, final: 2 });
+  });
+
+  it("an offline add made before midnight reaches the server after it, for the day it was made (yesterday by then)", async () => {
+    vi.setSystemTime(new Date("2026-10-18T16:50:00Z"));
+    server({ "POST /days/2026-10-18/entries": [503] });
+    await apiClient.addEntry({ id: ID, foodId: FOOD, grams: 100, mealSlot: "dinner" });
+    vi.setSystemTime(new Date("2026-10-19T03:00:00Z"));
+    const { calls } = server({ "POST /days/2026-10-18/entries": [201] });
+    expect((await syncOfflineOutbox()).saved).toEqual([ID]);
+    expect(calls).toEqual(["POST /days/2026-10-18/entries"]);
+  });
+});
+
 describe("countItems", () => {
   it("pending, failed, final and parked are counted apart, with the age of the oldest pending write", () => {
     const base = { id: "x", date: "", payload: {} };

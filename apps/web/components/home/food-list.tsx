@@ -238,8 +238,11 @@ export function FoodList({
   meals,
   mode,
   readOnly,
+  dayWord = "hôm nay",
+  addDate,
   isEmpty,
   canCopyYesterday,
+  copyLabel = "Chép hôm qua",
   onFood,
   onMeal,
   onCopyYesterday,
@@ -252,9 +255,16 @@ export function FoodList({
 }: {
   meals: HomeMeal[];
   mode: HomeMode;
+  /** A day older than yesterday: nothing can be added, edited or moved. */
   readOnly: boolean;
+  /** "hôm nay" or "hôm qua": the day shown, for the empty line. */
+  dayWord?: string;
+  /** The day a food added from here goes to, when it is not today (yesterday): /add?date=. */
+  addDate?: string;
   isEmpty: boolean;
   canCopyYesterday: boolean;
+  /** The label of the copy button: "Chép hôm qua", or "Chép hôm kia" on yesterday. */
+  copyLabel?: string;
   onFood: (id: string) => void;
   onMeal: (slot: HomeMeal["slot"]) => void;
   onCopyYesterday: () => void;
@@ -302,14 +312,14 @@ export function FoodList({
       {onPullRefresh && !readOnly && <PullIndicator {...pull} />}
       {isEmpty && (
         <div className="flex min-h-11 flex-col items-start px-3 pt-2 lg:flex-row lg:items-center lg:justify-between lg:gap-2 lg:py-2">
-          <p className="m-0 text-[15px] font-semibold text-text">{readOnly ? "Chưa có món nào ngày này" : "Chưa có món nào hôm nay"}</p>
+          <p className="m-0 text-[15px] font-semibold text-text">{readOnly ? "Chưa có món nào ngày này" : `Chưa có món nào ${dayWord}`}</p>
           {canCopyYesterday && (
             <button
               type="button"
               onClick={onCopyYesterday}
               className="-mx-2 min-h-11 shrink-0 cursor-pointer rounded-full border-0 bg-transparent px-2 text-[13px] font-bold text-blue lg:mx-0"
             >
-              Chép hôm qua
+              {copyLabel}
             </button>
           )}
         </div>
@@ -376,7 +386,7 @@ export function FoodList({
               {!readOnly && (
                 <Link
                   id={`home-add-${meal.slot}`}
-                  href={`/add?meal=${meal.slot}`}
+                  href={addDate ? `/add?meal=${meal.slot}&date=${addDate}` : `/add?meal=${meal.slot}`}
                   onClick={() => {
                     markUsed("meal-add");
                     rememberAddOpener(`home-add-${meal.slot}`);

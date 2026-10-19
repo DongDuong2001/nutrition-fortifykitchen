@@ -31,7 +31,7 @@ interface PageProps {
 export default function NutrientDetailPage({ params }: PageProps) {
   const { nutrient } = use(params);
   const def = getNutrientDefinition(nutrient);
-  const { data, hydrated, todayIso, profile, nutrientSources } = useDiary();
+  const { data, hydrated, todayIso, profile, nutrientSources, isEditable } = useDiary();
   const goBack = useBack();
   const searchParams = useSearchParams();
 
@@ -102,7 +102,7 @@ export default function NutrientDetailPage({ params }: PageProps) {
       <AppHeader
         variant="sub"
         title={def.name}
-        subtitle={isPast && viewIso ? `Vi chất · ${formatDayLabel(viewIso, new Date())} · Chỉ xem` : "Vi chất · Hôm nay"}
+        subtitle={isPast && viewIso ? `Vi chất · ${formatDayLabel(viewIso, new Date())}${isEditable(viewIso) ? "" : " · Chỉ xem"}` : "Vi chất · Hôm nay"}
         {...(isPast && viewIso ? { backHref: `/micros?date=${viewIso}` } : { onBack: goBack })}
         backLabel="Quay lại"
         summary={

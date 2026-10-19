@@ -31,6 +31,19 @@ export interface Release {
 }
 
 export const RELEASES: readonly Release[] = [
+  // cc-68: yesterday can be edited. The tour stays on Hôm nay ("Thử ngay" runs there): it points at the arrow that opens
+  // yesterday, then at + Thêm, which yesterday has too
+  {
+    id: "2026-10-19b",
+    date: "19/10",
+    items: [
+      { icon: "home", title: "Sửa được hôm qua", body: "Quên ghi bữa tối? Mở hôm qua rồi thêm, sửa, xóa hay chuyển bữa như hôm nay. Từ hôm kia trở về trước chỉ xem." },
+    ],
+    tour: [
+      { target: "day-prev", fallback: "header-actions", title: "Mở hôm qua", body: "Chạm mũi tên trái để sang hôm qua. Quên ghi bữa nào thì ghi bù ở đó." },
+      { target: "meal-add", fallback: "nav-add", title: "Ghi bù như hôm nay", body: "Hôm qua vẫn có + Thêm. Chạm một món để sửa hoặc xóa. Từ hôm kia trở về trước chỉ xem." },
+    ],
+  },
   // cc-53b: the coach's portion model. The tour runs on Hôm nay: + Thêm (or the + of the nav), the food list, a meal
   {
     id: "2026-10-18f",

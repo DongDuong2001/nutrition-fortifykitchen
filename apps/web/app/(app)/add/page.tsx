@@ -10,7 +10,8 @@ import { MOCK_FOODS, type FoodItem, type FoodServing } from "@/lib/mock/foods";
 import { useFoodBrowse } from "@/hooks/use-food-browse";
 import { lastPortionOf, resolveRecent, type ResolvedRecent } from "@/lib/recent-foods";
 import { SHORTLIST_DAYS, frequentFoods, recentForMeal, type Shortlisted } from "@/lib/meal-shortlists";
-import { dayEntries, shiftIsoDate } from "@/lib/day-history";
+import { dayEntries, shiftIsoDate, viewedIsoDate } from "@/lib/day-history";
+import { formatDayLabel } from "@/lib/format";
 import { savedMealTotals, type SavedMeal } from "@/lib/saved-meals";
 import type { QuickEntryInput, QuickEntryResult } from "@/lib/quick-entry";
 import { AddShortcuts, type RecentShortcut, type SavedMealShortcut } from "@/components/add/add-shortcuts";
@@ -48,7 +49,7 @@ import type { AddOnEntry } from "@/lib/dish-recipes";
 import { useMealSlot } from "@/lib/use-meal-slot";
 import { HOME_ROUTE } from "@/lib/nav";
 import { navigateFromSheet } from "@/lib/sheet-history";
-import { cameFromHome, homeScroll } from "@/lib/home-scroll";
+import { cameFromHome, homeDay, homeScroll } from "@/lib/home-scroll";
 import { SHEET_EXIT_MS, useSheetDrag } from "@/components/ui/sheet";
 
 // The add sheet shows carousels of the newest: Khám phá holds the full lists
@@ -61,7 +62,15 @@ function AddFoodInner() {
   // Closing the sheet returns to the tab it was opened from (the diary when there is no history)
   const goBack = useBack();
   const searchParams = useSearchParams();
-  const { data, addFoodEntry, addFoodEntries, recentFoods, savedMeals, addSavedMeal, addQuickEntry, favouriteIds, addedEntries, dayArchive, todayIso } = useDiary();
+  const { data, addFoodEntry, addFoodEntries, recentFoods, savedMeals, addSavedMeal, addQuickEntry, favouriteIds, addedEntries, dayArchive, todayIso, hydrated } = useDiary();
+  // cc-68: /add?date=YYYY-MM-DD adds to yesterday (the gate below sends a day that cannot be edited back to Hôm nay)
+  // (the + of the nav carries no date: it adds to the day Hôm nay was showing, which lib/home-scroll remembers)
+  const [dayBehind] = useState(() => homeDay());
+  const dateParam = searchParams.get("date") ?? dayBehind;
+  const addDay = hydrated && todayIso ? viewedIsoDate(dateParam, todayIso) : todayIso;
+  const addToDay = addDay && addDay !== todayIso ? addDay : undefined;
+  const homeHref = addToDay ? `${HOME_ROUTE}?date=${addToDay}` : HOME_ROUTE;
+  const dayText = addToDay ? ` · ${formatDayLabel(addToDay, new Date(`${todayIso}T12:00:00+07:00`)).toLocaleLowerCase("vi-VN")}` : "";
 
   const resolvedSlot = useMealSlot(searchParams.get("meal"));
   const [overrideSlot, setOverrideSlot] = useState<MealSlot | null>(null);
@@ -267,11 +276,11 @@ function AddFoodInner() {
       // With add-ons: the dish and each add-on go in together (one update, one Hoàn tác), the add-ons right after the dish
       const saved =
         extras.length > 0
-          ? addFoodEntries([{ food: selectedFood, grams: parsedGrams, label: selectedServingLabel }, ...extras], mealSlot)
-          : await addFoodEntry(selectedFood, parsedGrams, mealSlot, selectedServingLabel);
+          ? addFoodEntries([{ food: selectedFood, grams: parsedGrams, label: selectedServingLabel }, ...extras], mealSlot, addToDay)
+          : await addFoodEntry(selectedFood, parsedGrams, mealSlot, selectedServingLabel, { day: addToDay });
       if (saved) {
         tourAction("portion-confirmed");
-        navigateFromSheet(router, HOME_ROUTE);
+        navigateFromSheet(router, homeHref);
       }
     } finally {
       setIsSubmitting(false);
@@ -293,9 +302,9 @@ function AddFoodInner() {
   const handleAddTray = () => {
     if (!trayAddable || mealSlot === null || isSubmitting) return;
     setIsSubmitting(true);
-    if (addFoodEntries(tray, mealSlot)) {
+    if (addFoodEntries(tray, mealSlot, addToDay)) {
       setTray([]);
-      navigateFromSheet(router, HOME_ROUTE);
+      navigateFromSheet(router, homeHref);
     } else {
       setIsSubmitting(false);
     }
@@ -315,8 +324,8 @@ function AddFoodInner() {
     oneTapLock.current = true;
     setIsSubmitting(true);
     try {
-      await addFoodEntry(food, grams, mealSlot, label, { undoable: true });
-      navigateFromSheet(router, HOME_ROUTE);
+      await addFoodEntry(food, grams, mealSlot, label, { undoable: true, day: addToDay });
+      navigateFromSheet(router, homeHref);
     } finally {
       setIsSubmitting(false);
     }
@@ -325,17 +334,17 @@ function AddFoodInner() {
   const addSavedMealToMeal = (meal: SavedMeal) => {
     if (oneTapLock.current || mealSlot === null) return;
     oneTapLock.current = true;
-    addSavedMeal(meal, mealSlot);
-    navigateFromSheet(router, HOME_ROUTE);
+    addSavedMeal(meal, mealSlot, addToDay);
+    navigateFromSheet(router, homeHref);
   };
 
   const submitQuickEntry = (input: QuickEntryInput): QuickEntryResult => {
     if (oneTapLock.current) return { ok: false, field: "kcal", message: "Đang thêm…" };
     if (mealSlot === null) return { ok: false, field: "kcal", message: "Chưa chọn bữa" };
-    const result = addQuickEntry(input, mealSlot);
+    const result = addQuickEntry(input, mealSlot, addToDay);
     if (result.ok) {
       oneTapLock.current = true;
-      navigateFromSheet(router, HOME_ROUTE);
+      navigateFromSheet(router, homeHref);
     }
     return result;
   };
@@ -503,7 +512,7 @@ function AddFoodInner() {
                   className="min-h-[44px] px-2 -ml-2 rounded-lg bg-transparent border-0 text-text font-normal text-lg flex items-center gap-2 cursor-pointer hover:bg-surface active:scale-[0.98] transition-press"
                 >
                   <span id="dlg-title">
-                    Thêm vào: <strong className="font-bold">{mealNameVi}</strong>
+                    Thêm vào: <strong className="font-bold">{mealNameVi}</strong>{dayText}
                   </span>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <path d="M6 9l6 6 6-6" />
@@ -640,7 +649,7 @@ function AddFoodInner() {
                   className="-ml-2 flex min-h-[44px] cursor-pointer items-center gap-2 rounded-lg border-0 bg-transparent px-2 text-lg text-text active:scale-[0.98] transition-press"
                 >
                   <span>
-                    Thêm vào: <strong className="font-bold">{mealNameVi}</strong>
+                    Thêm vào: <strong className="font-bold">{mealNameVi}</strong>{dayText}
                   </span>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <path d="M6 9l6 6 6-6" />
@@ -768,7 +777,7 @@ function AddFoodInner() {
   );
 }
 
-// Past days are read-only, so the add form only opens for today (a past ?date= goes back to that day's Today view)
+// Days older than yesterday are read-only, so the add form opens for today and yesterday (an older ?date= goes back to that day's Today view)
 function AddFoodGate() {
   const isPastDay = usePastDayRedirect();
   if (isPastDay) return <div className="w-full min-h-screen bg-page" />;

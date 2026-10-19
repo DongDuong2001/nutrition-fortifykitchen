@@ -194,7 +194,7 @@ function TipCard({ tip, onGotIt, onTry, onTurnOff }: { tip: Tip; onGotIt: () => 
  */
 export function OnboardingLayer() {
   const pathname = usePathname() ?? "/";
-  const { data, unsavedIds } = useDiary();
+  const { data, unsavedIds, isEditable } = useDiary();
   const [mounted, setMounted] = useState(false);
   const [tour, setTour] = useState<TourState>(OFF);
   const [flags, setFlags] = useState<OnboardingFlags>(DEFAULT_FLAGS);
@@ -227,7 +227,8 @@ export function OnboardingLayer() {
     const date = new URLSearchParams(window.location.search).get("date");
     return {
       pathname,
-      pastDay: date !== null && date < getTodayIsoVN(),
+      // Only a day that cannot be edited (older than yesterday) gets the "chỉ để xem" tip
+      pastDay: date !== null && date < getTodayIsoVN() && !isEditable(date),
       foodsToday,
       selectMode,
       unsaved: unsavedIds.size,
@@ -237,7 +238,7 @@ export function OnboardingLayer() {
       ...controls,
       offline,
     };
-  }, [pathname, foodsToday, selectMode, unsavedIds, sheetOpen, controls, offline]);
+  }, [pathname, foodsToday, selectMode, unsavedIds, sheetOpen, controls, offline, isEditable]);
 
   // Read the running tour. On a route change (applyRoute) the route also moves it on or ends it (lib/tour tourStepFor);
   // when only the tour changed (a button, an action, Thêm bữa đầu tiên) the screen is left alone.

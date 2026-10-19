@@ -23,6 +23,6 @@ describe("never through deferred-write", () => {
     const source = read("diary-store.tsx");
     expect(source).not.toMatch(/deferredWrites\.schedule\([^)]*ADDED_ENTRIES_KEY/);
     expect(source).toMatch(/own\.setItem\(ADDED_ENTRIES_KEY/);
-    expect(source).toMatch(/raiseStorageAlert\(storageErrorKind\(error\), error\)/);
+    expect(source).toMatch(/reportStorageFailure\(error\)/);
   });
 });
