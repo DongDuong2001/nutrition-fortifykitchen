@@ -59,8 +59,8 @@ func (m *mockDiaryRepo) GetUserDefaultTraining(ctx context.Context, userID uuid.
 	return 60, nil
 }
 
-func (m *mockDiaryRepo) GetUserProfile(ctx context.Context, userID uuid.UUID) (string, float64, string, int, bool, error) {
-	return "male", 65.0, "maintain", 60, false, nil
+func (m *mockDiaryRepo) GetUserProfile(ctx context.Context, userID uuid.UUID) (string, float64, string, int, bool, int, error) {
+	return "male", 65.0, "maintain", 60, false, 2000, nil
 }
 
 func (m *mockDiaryRepo) GetFoodNutrients(ctx context.Context, foodID uuid.UUID) (string, map[string]*float64, error) {

@@ -155,13 +155,18 @@ func (s *diaryServiceImpl) GetDay(ctx context.Context, userID uuid.UUID, date st
 	dayTotals := computeDayTotals(entries)
 
 	var dayTargets any
-	if sex, weight, goal, _, isPeriod, err := s.repo.GetUserProfile(ctx, userID); err == nil {
+	if sex, weight, goal, _, isPeriod, birthYear, err := s.repo.GetUserProfile(ctx, userID); err == nil {
+		age := targets.DefaultAge
+		if birthYear > 0 {
+			age = time.Now().Year() - birthYear
+		}
 		t := targets.CalculateTargets(targets.UserProfileForTargets{
 			Sex:             sex,
 			WeightKg:        weight,
 			Goal:            goal,
 			TrainingMinutes: effectiveMinutes,
 			IsPeriod:        isPeriod,
+			Age:             age,
 		})
 		dayTargets = t
 
@@ -517,7 +522,11 @@ func (s *diaryServiceImpl) GetDaysRange(ctx context.Context, userID uuid.UUID, f
 		defTraining = dt
 	}
 
-	userSex, userWeight, userGoal, _, userIsPeriod, profileErr := s.repo.GetUserProfile(ctx, userID)
+	userSex, userWeight, userGoal, _, userIsPeriod, userBirthYear, profileErr := s.repo.GetUserProfile(ctx, userID)
+	userAge := targets.DefaultAge
+	if userBirthYear > 0 {
+		userAge = time.Now().Year() - userBirthYear
+	}
 
 	yesterday := GetServerYesterday()
 
@@ -574,6 +583,7 @@ func (s *diaryServiceImpl) GetDaysRange(ctx context.Context, userID uuid.UUID, f
 				Goal:            userGoal,
 				TrainingMinutes: effectiveMinutes,
 				IsPeriod:        userIsPeriod,
+				Age:             userAge,
 			})
 			dayTargets = t
 
