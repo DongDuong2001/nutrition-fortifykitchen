@@ -6,7 +6,8 @@ import { apiClient } from "@/lib/api-client";
 import { useDiary } from "@/lib/diary-store";
 import { getMealSlotNameVi } from "@/lib/meal-slot";
 import { useMealSlot } from "@/lib/use-meal-slot";
-import { formatAmount } from "@/lib/format";
+import { formatAmount, parseNumberInput } from "@/lib/format";
+import { MAX_QUICK_KCAL, MAX_QUICK_NAME } from "@/lib/quick-entry";
 import { nutrientName } from "@/lib/nutrients";
 import { FormRow } from "@/components/ui/form-row";
 import { Expand } from "@/components/ui/expand";
@@ -107,13 +108,14 @@ function CreateFoodInner() {
     if (field === "nameVi") {
       if (!val.trim()) err = "Nhập tên món ăn";
     } else if (field === "servingSize") {
-      const num = parseFloat(val.replace(",", "."));
-      if (isNaN(num) || num <= 0) err = "Khẩu phần phải lớn hơn 0.";
+      const num = parseNumberInput(val);
+      if (num === null || num <= 0) err = "Khẩu phần phải lớn hơn 0.";
     } else if (field === "calories") {
       // Blank is unknown, and an unknown energy is never logged as 0 kcal
-      const num = parseFloat(val.replace(",", "."));
+      const num = parseNumberInput(val);
       if (val.trim() === "") err = "Nhập năng lượng (kcal) để ghi vào nhật ký";
-      else if (isNaN(num) || num < 0) err = "Nhập số năng lượng từ 0 trở lên";
+      else if (num === null) err = "Nhập số năng lượng từ 0 trở lên";
+      else if (num > MAX_QUICK_KCAL) err = "Tối đa 9.999 kcal";
     }
     setErrors((prev) => ({ ...prev, [field]: err }));
     return err;
@@ -151,14 +153,9 @@ function CreateFoodInner() {
 
     setIsSubmitting(true);
     try {
-      const parsedSize = parseFloat(servingSize.replace(",", ".")) || 100;
-      const parsedCals = parseFloat(calories.replace(",", "."));
-      const parseMacro = (val: string): number | null => {
-        const trimmed = val.trim();
-        if (trimmed === "") return null;
-        const num = parseFloat(trimmed.replace(",", "."));
-        return isNaN(num) ? null : Math.max(0, num);
-      };
+      const parsedSize = parseNumberInput(servingSize) || 100;
+      const parsedCals = parseNumberInput(calories) ?? 0;
+      const parseMacro = (val: string): number | null => parseNumberInput(val);
       const parsedPro = parseMacro(protein);
       const parsedCarbs = parseMacro(carbs);
       const parsedFat = parseMacro(fat);
@@ -172,11 +169,11 @@ function CreateFoodInner() {
         carbs: parsedCarbs,
         fat: parsedFat,
         micros: {
-          sodium: sodium ? parseFloat(sodium.replace(",", ".")) : undefined,
-          calcium: calcium ? parseFloat(calcium.replace(",", ".")) : undefined,
-          iron: iron ? parseFloat(iron.replace(",", ".")) : undefined,
-          potassium: potassium ? parseFloat(potassium.replace(",", ".")) : undefined,
-          vitamin_d: vitaminD ? parseFloat(vitaminD.replace(",", ".")) : undefined,
+          sodium: parseNumberInput(sodium) ?? undefined,
+          calcium: parseNumberInput(calcium) ?? undefined,
+          iron: parseNumberInput(iron) ?? undefined,
+          potassium: parseNumberInput(potassium) ?? undefined,
+          vitamin_d: parseNumberInput(vitaminD) ?? undefined,
         },
       });
 
@@ -256,6 +253,7 @@ function CreateFoodInner() {
           <input
             id="cf-name"
             type="text"
+            maxLength={MAX_QUICK_NAME}
             value={nameVi}
             onChange={(e) => {
               setNameVi(e.target.value);

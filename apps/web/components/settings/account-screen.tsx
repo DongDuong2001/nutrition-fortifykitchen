@@ -13,7 +13,7 @@ import { Row } from "@/components/ui/row";
 import { useDiary } from "@/lib/diary-store";
 import { signOut } from "@/lib/auth-actions";
 import { useSaveDisplayName } from "@/hooks/use-save-display-name";
-import { cleanDisplayName, validateDisplayName } from "@/lib/display-name";
+import { cleanDisplayName, limitDisplayName, validateDisplayName } from "@/lib/display-name";
 
 /** Tên hiển thị. It saves on blur or Enter. A name is required (it is on the share image): a blank or unusable one stays on screen with its error. */
 function DisplayNameRow() {
@@ -47,8 +47,9 @@ function DisplayNameRow() {
         autoComplete="nickname"
         value={value}
         onChange={(e) => {
-          setValue(e.target.value);
-          if (error) setError(validateDisplayName(e.target.value) ?? undefined);
+          const next = limitDisplayName(e.target.value);
+          setValue(next);
+          if (error) setError(validateDisplayName(next) ?? undefined);
         }}
         onBlur={() => void save()}
         onKeyDown={(e) => {

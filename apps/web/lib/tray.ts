@@ -1,3 +1,4 @@
+import { isAmount } from "./amount";
 import { canLog } from "./diary-edits";
 import type { FoodItem } from "./mock/foods";
 import { defaultPortionOf, hidesGrams, scaleNutrients } from "./portion";
@@ -66,13 +67,13 @@ export function trayTotals(items: readonly TrayItem[]): TrayTotals {
   if (items.length === 0) return { count: 0, kcal: null, protein: null, carbs: null, fat: null };
   const scaled = items.map((i) => scaleNutrients(i.food.nutrients, i.grams));
   const sum = (key: string): number | null => {
-    const known = scaled.map((n) => n[key]).filter((v): v is number => typeof v === "number");
+    const known = scaled.map((n) => n[key]).filter(isAmount);
     return known.length === 0 ? null : round1(known.reduce((a, b) => a + b, 0));
   };
-  const energyKnown = items.every((i, at) => typeof scaled[at].energy === "number" || hidesGrams(i.food));
+  const energyKnown = items.every((i, at) => isAmount(scaled[at].energy) || hidesGrams(i.food));
   return {
     count: items.length,
-    kcal: energyKnown ? Math.round(scaled.reduce((a, n) => a + (n.energy ?? 0), 0)) : null,
+    kcal: energyKnown ? Math.round(scaled.reduce((a, n) => a + (isAmount(n.energy) ? n.energy : 0), 0)) : null,
     protein: sum("protein"),
     carbs: sum("carbs"),
     fat: sum("fat"),

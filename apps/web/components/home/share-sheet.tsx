@@ -10,7 +10,7 @@ import { PillButton } from "@/components/ui/pill-button";
 import type { HomeEntry, HomeMeal } from "@/lib/home";
 import type { MockDayData } from "@/lib/mock/sample-day";
 import { SHARE_CSS_WIDTH, buildShareModel, keepInShareImage, shareFontsEmbedded, shareImageSize, shareNeedsName, type ShareModel } from "@/lib/share-card";
-import { cleanDisplayName } from "@/lib/display-name";
+import { cleanDisplayName, limitDisplayName } from "@/lib/display-name";
 import { markUsed } from "@/lib/onboarding-store";
 import { validateSetupName } from "@/lib/onboarding";
 import { ShareDay } from "./share-day";
@@ -360,10 +360,9 @@ export function ShareSheet({
               id="share-name"
               type="text"
               autoComplete="nickname"
-              maxLength={40}
               value={nameDraft}
               onChange={(e) => {
-                setNameDraft(e.target.value);
+                setNameDraft(limitDisplayName(e.target.value));
                 if (nameError) setNameError(null);
               }}
               placeholder="Tên của bạn"
