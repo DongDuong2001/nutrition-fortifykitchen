@@ -67,6 +67,18 @@ export const HEADER_ICON_BUTTON =
 const DATE_BUTTON =
   "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0 text-on-dark cursor-pointer hover:text-sky active:scale-[0.97] transition-press motion-reduce:active:scale-100 disabled:cursor-default disabled:text-secondary disabled:opacity-50 lg:border lg:border-card-border lg:bg-card lg:text-ink lg:hover:bg-divider lg:hover:text-ink lg:disabled:text-secondary focus-visible:outline-sky lg:focus-visible:outline-cobalt";
 
+/**
+ * cc-72: the calendar beside the date (the icon set's Calendar path, drawn here like the chevrons: the header is on every
+ * screen, and importing the icon module would put the whole icon set in every route's first load).
+ */
+export function CalendarGlyph({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" data-testid="date-calendar-icon">
+      <path d="M16.5 5V3m-9 2V3M3.25 8h17.5M3 10.044c0-2.115 0-3.173.436-3.981a3.9 3.9 0 0 1 1.748-1.651C6.04 4 7.16 4 9.4 4h5.2c2.24 0 3.36 0 4.216.412.753.362 1.364.94 1.748 1.65.436.81.436 1.868.436 3.983v4.912c0 2.115 0 3.173-.436 3.981a3.9 3.9 0 0 1-1.748 1.651C17.96 21 16.84 21 14.6 21H9.4c-2.24 0-3.36 0-4.216-.412a3.9 3.9 0 0 1-1.748-1.65C3 18.128 3 17.07 3 14.955z" />
+    </svg>
+  );
+}
+
 function Chevron({ dir }: { dir: "left" | "right" }) {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -212,10 +224,19 @@ export function AppHeader({
                   onClick={onDateTap}
                   aria-haspopup="dialog"
                   aria-label={`Chọn ngày, ${dateLabel}`}
+                  data-tour="day-date"
                   aria-busy={dateLabel ? undefined : true}
                   className="inline-flex min-h-11 min-w-[104px] items-center justify-center rounded-full border-0 bg-transparent px-1 text-center text-sm font-semibold tracking-tight text-on-dark cursor-pointer hover:text-sky focus-visible:outline-sky active:scale-[0.97] transition-press motion-reduce:active:scale-100 lg:hidden"
                 >
-                  {dateLabel || <span aria-hidden="true" className="inline-block h-5 w-[104px]" />}
+                  {dateLabel ? (
+                    // cc-72: the calendar glyph says the date opens the calendar (the date stays the one control)
+                    <span className="inline-flex items-center gap-1">
+                      {dateLabel}
+                      <CalendarGlyph size={16} />
+                    </span>
+                  ) : (
+                    <span aria-hidden="true" className="inline-block h-5 w-[104px]" />
+                  )}
                 </button>
               ) : (
                 <span className="inline-flex min-w-[104px] items-center justify-center text-center text-sm font-semibold tracking-tight lg:hidden">

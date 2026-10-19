@@ -8,7 +8,7 @@ import Link from "next/link";
 import { createPortal } from "react-dom";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useShellBottomBar } from "@/components/ui/shell-slot";
-import { AppHeader, HEADER_ICON_BUTTON } from "@/components/ui/app-header";
+import { AppHeader, HEADER_ICON_BUTTON, CalendarGlyph } from "@/components/ui/app-header";
 import { IconShare } from "@/components/ui/icons";
 import { setHomeDay } from "@/lib/home-scroll";
 import { copyMeals, dayEntries, shiftIsoDate, viewedIsoDate } from "@/lib/day-history";
@@ -422,8 +422,11 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
         onClick={() => setIsCalendarOpen(true)}
         aria-haspopup="dialog"
         aria-label={`Chọn ngày, ${formatDesktopDate(day.date)}`}
-        className="inline-flex min-h-11 cursor-pointer items-center border-0 bg-transparent p-0 text-inherit underline-offset-4 hover:underline"
+        data-tour="day-date"
+        className="inline-flex min-h-11 cursor-pointer items-center gap-2 border-0 bg-transparent p-0 text-inherit underline-offset-4 hover:underline"
       >
+        {/* cc-72: the calendar glyph says the date opens the calendar */}
+        <CalendarGlyph size={18} />
         {formatDesktopDate(day.date)}
       </button>
       {readOnly ? " · Chỉ xem" : ""}
