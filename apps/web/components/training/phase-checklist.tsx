@@ -90,8 +90,8 @@ export function PhaseChecklist({
   };
 
   const cardClass = isDesktop
-    ? "bg-card border border-card-border rounded-card lg:shadow-card px-5 pt-2 pb-3 flex flex-col"
-    : "bg-card border border-card-border rounded-card lg:shadow-card px-4 pt-3 pb-1 flex flex-col";
+    ? "bg-card rounded-card border border-transparent shadow-ring lg:shadow-card px-5 pt-2 pb-3 flex flex-col"
+    : "bg-card rounded-card border border-transparent shadow-ring lg:shadow-card px-4 pt-3 pb-1 flex flex-col";
 
   return (
     <div

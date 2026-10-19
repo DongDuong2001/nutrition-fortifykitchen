@@ -15,7 +15,7 @@ export function TrainingTipBanner({
 
   return (
     <div
-      className={`bg-card border border-card-border rounded-card lg:shadow-card p-3 sm:p-4 text-cap sm:text-sm leading-relaxed flex items-start gap-3 text-text ${className}`}
+      className={`bg-card rounded-card border border-transparent shadow-ring lg:shadow-card p-3 sm:p-4 text-cap sm:text-sm leading-relaxed flex items-start gap-3 text-text ${className}`}
     >
       <span
         className="w-1 self-stretch rounded-full bg-cobalt shrink-0"

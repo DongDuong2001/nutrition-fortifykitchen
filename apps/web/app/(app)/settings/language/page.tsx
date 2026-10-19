@@ -39,7 +39,7 @@ export default function LanguageSettingsPage() {
 
       <main className="flex-1 w-full max-w-[560px] mx-auto px-4 pt-4 pb-8 flex flex-col gap-3">
         {/* Section 1: Ngôn ngữ */}
-        <section className="bg-card border border-card-border rounded-card lg:shadow-card px-4 pt-2 pb-0.5">
+        <section className="bg-card rounded-card border border-transparent shadow-ring lg:shadow-card px-4 pt-2 pb-0.5">
           <h2 id="lg-label" className="m-0 mb-0.5 text-cap font-semibold text-secondary">
             Ngôn ngữ
           </h2>
@@ -86,7 +86,7 @@ export default function LanguageSettingsPage() {
         </section>
 
         {/* Section 2: Đơn vị · Dấu thập phân */}
-        <section className="bg-card border border-card-border rounded-card lg:shadow-card px-4 pt-2 pb-0.5">
+        <section className="bg-card rounded-card border border-transparent shadow-ring lg:shadow-card px-4 pt-2 pb-0.5">
           <h2 id="dc-label" className="m-0 mb-0.5 text-cap font-semibold text-secondary">
             Đơn vị · Dấu thập phân
           </h2>
@@ -135,7 +135,7 @@ export default function LanguageSettingsPage() {
         </section>
 
         {/* Section 3: Đơn vị · Năng lượng */}
-        <section className="bg-card border border-card-border rounded-card lg:shadow-card px-4 pt-2 pb-0.5">
+        <section className="bg-card rounded-card border border-transparent shadow-ring lg:shadow-card px-4 pt-2 pb-0.5">
           <h2 id="en-label" className="m-0 mb-0.5 text-cap font-semibold text-secondary">
             Đơn vị · Năng lượng
           </h2>

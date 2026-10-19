@@ -24,7 +24,7 @@ function MacroSplit({ protein, fat, carbs }: { protein: number; fat: number; car
     { key: "carbs", label: "Tinh bột", share: carbs, bg: "bg-sky" },
   ];
   return (
-    <section aria-labelledby="en-split" className="flex flex-col gap-3 rounded-card lg:shadow-card border border-card-border bg-card p-4 text-text">
+    <section aria-labelledby="en-split" className="flex flex-col gap-3 rounded-card border border-transparent shadow-ring lg:shadow-card bg-card p-4 text-text">
       <SectionTitle id="en-split">Chia kcal</SectionTitle>
       <div
         role="img"
@@ -42,7 +42,7 @@ function MacroSplit({ protein, fat, carbs }: { protein: number; fat: number; car
               <span aria-hidden="true" className={`inline-block h-3 w-3 shrink-0 rounded-[3px] ${p.bg}`} />
               {p.label}
             </span>
-            <span className="font-display text-title font-bold leading-none tabular-nums">{p.share}%</span>
+            <span className="font-display text-title font-extrabold leading-none tabular-nums">{p.share}%</span>
           </li>
         ))}
       </ul>
@@ -58,7 +58,7 @@ function SplitTile({ title, side }: { title: string; side: SplitSide }) {
         {side.days > 0 ? ` · ${side.days} ngày` : ""}
       </span>
       {side.calories === null ? (
-        <span className="font-display text-title font-bold leading-none text-secondary">—</span>
+        <span className="font-display text-title font-extrabold leading-none text-secondary">—</span>
       ) : (
         <>
           <span className="font-display text-title font-bold leading-none tabular-nums">
@@ -160,7 +160,7 @@ export function EnergyTab() {
       <div className="flex flex-col gap-3 lg:col-span-5 lg:gap-5">
         <MacroSplit protein={composition.protein} fat={composition.fat} carbs={composition.carbs} />
 
-        <section aria-labelledby="en-train" className="flex flex-col gap-3 rounded-card lg:shadow-card border border-card-border bg-card p-4 text-text">
+        <section aria-labelledby="en-train" className="flex flex-col gap-3 rounded-card border border-transparent shadow-ring lg:shadow-card bg-card p-4 text-text">
           <SectionTitle id="en-train">Ngày tập và ngày nghỉ</SectionTitle>
           <div className="grid grid-cols-2 gap-3">
             <SplitTile title="Ngày tập" side={split.training} />
@@ -176,7 +176,7 @@ export function EnergyTab() {
           )}
         </section>
 
-        <section aria-labelledby="en-days" className="flex flex-col gap-3 rounded-card lg:shadow-card border border-card-border bg-card p-4 text-text">
+        <section aria-labelledby="en-days" className="flex flex-col gap-3 rounded-card border border-transparent shadow-ring lg:shadow-card bg-card p-4 text-text">
           <SectionTitle id="en-days">Ngày gần và xa mục tiêu</SectionTitle>
           <div className="grid grid-cols-2 gap-3">
             <PickTile title="Gần mục tiêu nhất" pick={picks.best} />

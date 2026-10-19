@@ -28,7 +28,7 @@ const STEPS = [
             <div className="text-micro text-secondary">Bữa trưa · 150g</div>
           </div>
         </div>
-        <span className="shrink-0 text-micro font-extrabold text-cobalt bg-card px-2.5 py-1 rounded-lg border border-card-border/80 shadow-2xs">
+        <span className="shrink-0 text-micro font-bold text-cobalt bg-card px-2.5 py-1 rounded-lg border border-card-border/80 shadow-2xs">
           247 kcal
         </span>
       </div>
@@ -43,7 +43,7 @@ const STEPS = [
       <div className="p-3.5 rounded-2xl bg-page/80 border border-card-border/70 flex flex-col gap-2">
         <div className="flex items-center justify-between text-micro">
           <span className="font-semibold text-secondary">Canxi (Ca)</span>
-          <span className="font-extrabold text-success">85% mục tiêu</span>
+          <span className="font-bold text-success">85% mục tiêu</span>
         </div>
         <div className="h-1.5 w-full bg-card-border/50 rounded-full overflow-hidden">
           <div className="h-full bg-success rounded-full" style={{ width: "85%" }} />
@@ -69,7 +69,7 @@ const STEPS = [
           <div className="text-xs font-bold text-text">Tập gym 60 phút</div>
           <div className="text-micro text-secondary">Ngày có tập luyện</div>
         </div>
-        <span className="shrink-0 text-micro font-extrabold text-warning-text bg-warning-bg px-2.5 py-1 rounded-full border border-amber/30 flex items-center gap-1">
+        <span className="shrink-0 text-micro font-bold text-warning-text bg-warning-bg px-2.5 py-1 rounded-full border border-amber/30 flex items-center gap-1">
           +1.180–1.770 mg natri
         </span>
       </div>
@@ -133,7 +133,7 @@ export default function LandingPage() {
       {/* ============================================================== */}
       {/* 1. TOP NAVBAR                                                 */}
       {/* ============================================================== */}
-      <header className="sticky top-0 z-nav w-full border-b border-card-border/80 bg-page/90 backdrop-blur-md">
+      <header className="sticky top-0 z-nav w-full border-b border-card-border/80 bg-page/90 backdrop-blur-md reduced-transparency:bg-page reduced-transparency:backdrop-blur-none">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link href="/landing" className="flex items-center gap-2 no-underline text-text">
             <span className="font-display italic font-black text-2xl tracking-wide text-ink">
@@ -241,10 +241,10 @@ export default function LandingPage() {
       <section id="audiences" className="py-20 border-t border-card-border bg-card/30">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2 className="text-xs font-extrabold uppercase tracking-wider text-cobalt mb-2">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-cobalt mb-2">
               ĐỐI TƯỢNG PHÙ HỢP
             </h2>
-            <h3 className="m-0 text-3xl sm:text-4xl font-extrabold text-ink">
+            <h3 className="m-0 text-3xl sm:text-4xl font-bold text-ink">
               Giải pháp cho từng nhu cầu dinh dưỡng
             </h3>
             <p className="mt-3 text-secondary text-sm sm:text-base leading-relaxed">
@@ -265,7 +265,7 @@ export default function LandingPage() {
             <span className="text-xs font-extrabold uppercase tracking-wider text-cobalt">
               QUY TRÌNH HOẠT ĐỘNG
             </span>
-            <h3 className="m-0 text-3xl sm:text-4xl font-extrabold text-ink mt-2">
+            <h3 className="m-0 text-3xl sm:text-4xl font-bold text-ink mt-2">
               3 bước kiểm soát dinh dưỡng toàn diện
             </h3>
             <p className="mt-3 text-secondary text-sm sm:text-base leading-relaxed">
@@ -284,7 +284,7 @@ export default function LandingPage() {
                     <span className="font-display font-black text-3xl sm:text-4xl text-cobalt tracking-tight">
                       {step.num}
                     </span>
-                    <span className="text-micro font-extrabold tracking-wider uppercase px-2.5 py-1 rounded-full bg-cobalt/10 text-cobalt border border-cobalt/20">
+                    <span className="text-micro font-bold tracking-wider uppercase px-2.5 py-1 rounded-full bg-cobalt/10 text-cobalt border border-cobalt/20">
                       {step.stepLabel}
                     </span>
                   </div>
@@ -334,7 +334,7 @@ export default function LandingPage() {
                     <div className="w-11 h-11 rounded-2xl bg-page border border-card-border/80 flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
                       {item.icon}
                     </div>
-                    <span className="text-micro font-extrabold uppercase tracking-wider px-3 py-1 rounded-full bg-cobalt/5 text-cobalt border border-cobalt/15">
+                    <span className="text-micro font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-cobalt/5 text-cobalt border border-cobalt/15">
                       {item.tag}
                     </span>
                   </div>

@@ -86,7 +86,7 @@ def row_text(pg, name):
 
 
 def header_total(pg):
-    return pg.locator(MOBILE).locator(".font-display.italic.font-bold").first.inner_text().replace("\n", " ").strip()
+    return pg.locator(MOBILE).locator(".font-display.italic.text-display.tabular-nums").first.inner_text().replace("\n", " ").strip()
 
 
 def small_targets(pg, selector):

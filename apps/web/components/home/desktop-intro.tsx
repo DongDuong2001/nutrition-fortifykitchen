@@ -36,7 +36,7 @@ export function DesktopIntroBanner() {
   return (
     <section
       aria-label="Giới thiệu về H1T MICRO"
-      className="hidden lg:block mx-3 mt-2 mb-1 rounded-card border border-card-border bg-card p-5 text-text shadow-xs"
+      className="hidden lg:block mx-3 mt-2 mb-1 rounded-card border border-transparent shadow-card bg-card p-5 text-text"
     >
       {collapsed ? (
         <div className="flex items-center justify-between gap-4">

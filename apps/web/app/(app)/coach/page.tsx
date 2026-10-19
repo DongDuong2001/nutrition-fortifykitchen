@@ -63,7 +63,7 @@ export default function CoachPage() {
           <h2 id="coach-code" className="m-0 text-base font-bold">
             Mã mời của bạn
           </h2>
-          <p data-align-group="coach-invite" className="m-0 font-display text-display-sm font-extrabold italic leading-none tabular-nums text-text">
+          <p data-align-group="coach-invite" className="m-0 font-display text-display-sm font-extrabold italic leading-none tabular-nums text-text tracking-display">
             {code || "Chưa tạo được mã"}
           </p>
           <div data-align-group="coach-invite" className="flex flex-wrap gap-2">
@@ -101,7 +101,7 @@ export default function CoachPage() {
                   <Link
                     href={`/coach/clients/${encodeURIComponent(c.id)}`}
                     data-align-group="client-row"
-                    className="flex min-h-[64px] items-center gap-3 rounded-card lg:shadow-card border border-card-border bg-card p-3 text-text no-underline active:scale-[0.99] transition-press motion-reduce:active:scale-100"
+                    className="flex min-h-[64px] items-center gap-3 rounded-card border border-transparent shadow-ring lg:shadow-card bg-card p-3 text-text no-underline active:scale-[0.99] transition-press motion-reduce:active:scale-100"
                   >
                     <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                       <span className="break-words text-callout font-semibold leading-snug">{c.name}</span>

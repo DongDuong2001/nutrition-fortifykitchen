@@ -36,10 +36,10 @@ function ProfileHero() {
       </span>
       <span className="flex flex-col gap-1">
         <span className="text-cap font-semibold text-muted-subtitle">Mục tiêu mỗi ngày</span>
-        <span className="font-display text-display font-black italic leading-none tabular-nums text-sky">
+        <span className="font-display text-display font-black italic leading-none tabular-nums text-sky tracking-display">
           {targetRangeText(targets.calories, "kcal")}
         </span>
-        <span className="font-display text-2xl font-bold leading-none tabular-nums text-on-dark">
+        <span className="font-display text-2xl font-extrabold leading-none tabular-nums text-on-dark tracking-display">
           đạm {targetRangeText(targets.protein, "g")}
         </span>
       </span>
@@ -50,7 +50,7 @@ function ProfileHero() {
 // The Pro offer: a light card with one outline pill, so the profile card stays the one dark accent
 function ProOffer() {
   return (
-    <section aria-labelledby="settings-pro-title" className="flex flex-col gap-3 rounded-card lg:shadow-card border border-card-border bg-card p-4 text-text">
+    <section aria-labelledby="settings-pro-title" className="flex flex-col gap-3 rounded-card border border-transparent shadow-ring lg:shadow-card bg-card p-4 text-text">
       <div className="flex flex-col gap-1">
         <h2 id="settings-pro-title" className="m-0 text-base font-bold">
           H1T MICRO Pro

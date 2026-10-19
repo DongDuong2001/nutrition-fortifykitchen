@@ -53,7 +53,7 @@ export default function DeleteAccountPage() {
 
         <main className="w-full max-w-[560px] mx-auto px-4 pt-4 pb-4 flex flex-col gap-3">
           {/* Warning card */}
-          <div className="bg-card border border-card-border rounded-card lg:shadow-card p-4 md:p-4 flex flex-col gap-2">
+          <div className="bg-card rounded-card border border-transparent shadow-ring lg:shadow-card p-4 md:p-4 flex flex-col gap-2">
             <div className="flex gap-3 items-start">
               <svg
                 width="28"

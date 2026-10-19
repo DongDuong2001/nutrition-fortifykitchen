@@ -25,7 +25,7 @@ function ShareFoodRow({ entry }: { entry: HomeEntry }) {
   return (
     <div className="flex min-h-[30px] w-full items-center justify-between gap-2 border-b border-b-divider px-3 py-1 text-text">
       <span data-share-wrap className="min-w-0 break-words text-cap font-semibold leading-snug">{entry.name}</span>
-      <span className="shrink-0 whitespace-nowrap font-display text-callout font-bold leading-none tabular-nums text-text">{portionLabel(entry)}</span>
+      <span className="shrink-0 whitespace-nowrap font-display text-callout font-bold leading-none tabular-nums text-text tracking-label">{portionLabel(entry)}</span>
     </div>
   );
 }
@@ -186,7 +186,7 @@ function FoodRow({
         {/* Today.dc.html: Cân sống, Đã nấu chín · 100 g × 3, Cỡ lớn */}
         {detail && <span className={`basis-full text-micro leading-tight lg:text-cap ${selected ? "text-sky" : "text-secondary"}`}>{detail}</span>}
       </span>
-      <span className={`shrink-0 font-display text-callout font-bold leading-none tabular-nums lg:text-[1.125rem] ${selected ? "text-sky" : "text-text"}`}>
+      <span className={`shrink-0 font-display text-callout font-extrabold leading-none tabular-nums lg:text-[1.125rem] ${selected ? "text-sky" : "text-text"}`}>
         {quantity}
       </span>
     </button>
@@ -216,7 +216,7 @@ function SelectList({ meals, select }: { meals: HomeMeal[]; select: SelectProps 
               <div className="sticky top-0 z-sticky flex min-h-11 w-full items-center justify-between gap-2 bg-paper-dark px-3 text-text">
                 <span className="text-micro font-extrabold leading-none">{meal.label}</span>
                 <span className="flex items-center gap-2">
-                  <span className="font-display text-cap font-bold leading-none tabular-nums">{kcalLabel(meal.kcal)}</span>
+                  <span className="font-display text-cap font-bold leading-none tabular-nums tracking-label">{kcalLabel(meal.kcal)}</span>
                   <button
                     type="button"
                     onClick={() => select.onToggleMeal(meal.slot)}
@@ -465,7 +465,7 @@ export function FoodList({
               )
             )}
             {rowsOf(meal).length === 0 && (
-              <p className="m-0 flex h-8 items-center border-b border-b-divider px-3 text-cap font-medium text-secondary lg:h-12 lg:text-callout">
+              <p className="m-0 flex h-8 items-center border-b border-b-divider px-3 text-cap font-normal text-secondary lg:h-12 lg:text-callout">
                 {readOnly ? "Không có món" : "Chưa ăn"}
               </p>
             )}

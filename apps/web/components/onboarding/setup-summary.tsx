@@ -68,7 +68,7 @@ export function SetupSummary() {
       </div>
 
       <main className="flex flex-1 flex-col gap-6 px-4 py-5 lg:w-full lg:max-w-[760px] lg:flex-none lg:rounded-sheet lg:border lg:border-card-border lg:bg-card lg:p-8">
-        <h1 className="m-0 hidden font-display text-display-sm font-black italic uppercase lg:block">{TITLE}</h1>
+        <h1 className="m-0 hidden font-display text-display-sm font-black italic uppercase lg:block tracking-display">{TITLE}</h1>
 
         {ready === null ? (
           <div aria-busy="true" className="min-h-[320px] flex-1 rounded-card bg-divider animate-pulse motion-reduce:animate-none lg:flex-none" />
@@ -84,7 +84,7 @@ export function SetupSummary() {
             {ready.first && (
               <ol className="m-0 flex list-none flex-col gap-2 p-0">
                 {TOUR_PREVIEW.map((text, i) => (
-                  <li key={text} className="flex min-h-11 items-center gap-3 rounded-card lg:shadow-card border border-card-border bg-card px-4 py-2">
+                  <li key={text} className="flex min-h-11 items-center gap-3 rounded-card border border-transparent shadow-ring lg:shadow-card bg-card px-4 py-2">
                     <span aria-hidden="true" className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cobalt/10 text-sm font-bold text-cobalt">
                       {i + 1}
                     </span>

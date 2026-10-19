@@ -62,7 +62,7 @@ export default function SignUpPage() {
         </>
       }
     >
-      <p className="m-0 hidden text-cap font-semibold text-secondary lg:block">Tạo tài khoản</p>
+      <p className="m-0 hidden text-cap font-extrabold text-secondary lg:block">Tạo tài khoản</p>
       <GoogleSignInButton />
       <div className="flex items-center gap-3 text-cap text-secondary" aria-hidden="true">
         <span className="h-px flex-1 bg-divider" />

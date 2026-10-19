@@ -42,7 +42,7 @@ export function CoachHeader() {
             {COACH.initials}
           </div>
         )}
-        <h1 className="m-0 font-display text-display-sm font-extrabold italic uppercase leading-[0.95] text-ink lg:text-[2.5rem]">{COACH.name}</h1>
+        <h1 className="m-0 font-display text-display-sm font-extrabold italic uppercase leading-[1.1] text-ink lg:text-[2.5rem] tracking-display">{COACH.name}</h1>
       </div>
       <div className="flex items-center justify-center gap-[2px] lg:gap-1">
         {COACH_SOCIAL.map((s) => (

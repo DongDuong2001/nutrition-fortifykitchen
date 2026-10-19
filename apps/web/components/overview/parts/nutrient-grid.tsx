@@ -58,7 +58,7 @@ export function NutrientGrid({
         <span className="text-right">
           {square && square.percentage !== null && square.level ? (
             <>
-              <span className="font-display text-2xl font-bold tabular-nums text-on-dark">
+              <span className="font-display text-2xl font-extrabold tabular-nums text-on-dark tracking-display">
                 {formatNumber(square.percentage)}%
               </span>
               <span className="ml-2 text-xs font-bold text-muted-subtitle">{getLevelLabel(square.level)}</span>

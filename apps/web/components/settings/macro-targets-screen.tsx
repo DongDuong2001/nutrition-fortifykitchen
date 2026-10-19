@@ -229,7 +229,7 @@ export function MacroTargetsScreen() {
               </div>
 
               <div className="flex items-center gap-3 shrink-0">
-                <span className="font-display text-[1rem] font-bold tabular-nums text-text">
+                <span className="font-display text-[1rem] font-extrabold tabular-nums text-text">
                   {mode === "fixed" ? `${formatAmount(fixedProtein, "g")} g` : `${formatAmount(ratioCalc.protein.min, "g")} g`}
                 </span>
 
@@ -243,7 +243,7 @@ export function MacroTargetsScreen() {
                       aria-label="Tỉ lệ phần trăm đạm"
                       value={proteinPct}
                       onChange={(e) => setProteinPct(Number(e.target.value) || 0)}
-                      className="w-12 border-0 bg-transparent text-center font-display text-base font-bold tabular-nums text-text focus:outline-none"
+                      className="w-12 border-0 bg-transparent text-center font-display text-base font-extrabold tabular-nums text-text focus:outline-none"
                     />
                     <span className="text-xs font-semibold text-secondary">%</span>
                   </div>

@@ -174,7 +174,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
                 H1T <span className="text-cobalt">MICRO</span>
               </span>
             </div>
-            <h1 className="m-0 font-display text-display-sm font-black italic uppercase">VỀ BẠN</h1>
+            <h1 className="m-0 font-display text-display-sm font-black italic uppercase tracking-display">VỀ BẠN</h1>
             <p className="m-0 text-callout text-secondary">
               Mục tiêu được tính theo cân nặng và giới tính. Bạn có thể sửa bất cứ lúc nào.
             </p>

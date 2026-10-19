@@ -7,7 +7,7 @@ export function FoodCardLink({ href, name, meta }: { href: string; name: string;
     <li className="w-[11rem] shrink-0 snap-start">
       <Link
         href={href}
-        className="flex min-h-[88px] flex-col gap-1 rounded-card lg:shadow-card border border-card-border bg-card p-3 text-text no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100"
+        className="flex min-h-[88px] flex-col gap-1 rounded-card border border-transparent shadow-ring lg:shadow-card bg-card p-3 text-text no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100"
       >
         <span title={name} className="line-clamp-2 break-words text-callout font-semibold leading-snug">
           {name}

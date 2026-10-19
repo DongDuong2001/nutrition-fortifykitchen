@@ -63,14 +63,14 @@ function CompactBar({ show, backHref, date, achieved, total, className = "" }: {
         </Link>
         <div className="min-w-0 flex-1">
           {show ? (
-            <h1 className="m-0 font-display text-title-sm font-extrabold uppercase italic leading-none tracking-tight">Vi chất</h1>
+            <h1 className="m-0 font-display text-title-sm font-extrabold uppercase italic leading-none tracking-display">Vi chất</h1>
           ) : (
-            <p className="m-0 font-display text-title-sm font-extrabold uppercase italic leading-none tracking-tight">Vi chất</p>
+            <p className="m-0 font-display text-title-sm font-extrabold uppercase italic leading-none tracking-display">Vi chất</p>
           )}
           <p className="m-0 mt-0.5 break-words text-cap leading-none text-muted-subtitle">{date}</p>
         </div>
         <div className="shrink-0 text-right">
-          <div className="font-display text-title-sm font-black italic leading-none tabular-nums">
+          <div className="font-display text-title-sm font-black italic leading-none tabular-nums tracking-display">
             {achieved}
             <span className="text-on-dark/55">/{total}</span>
           </div>
@@ -321,7 +321,7 @@ function MicrosContent() {
         <div className="flex-1 w-full max-w-[560px] mx-auto px-4 py-4 flex flex-col gap-4">
           <div className="h-9 w-full bg-level-empty rounded-full motion-safe:animate-pulse" />
           <div className="h-14 w-full bg-level-empty rounded-xl motion-safe:animate-pulse" />
-          <div className="bg-card border border-card-border rounded-card p-4 flex flex-col gap-3 motion-safe:animate-pulse">
+          <div className="bg-card rounded-card border border-transparent shadow-ring p-4 flex flex-col gap-3 motion-safe:animate-pulse">
             <div className="h-4 w-1/3 bg-level-empty rounded" />
             <div className="h-8 w-full bg-level-empty rounded" />
             <div className="h-8 w-full bg-level-empty rounded" />
@@ -368,7 +368,7 @@ function MicrosContent() {
           </div>
 
           <main className="flex-1 w-full max-w-[560px] mx-auto px-4 py-6 flex flex-col gap-4">
-            <div className="bg-card border border-card-border rounded-card lg:shadow-card p-6 text-center flex flex-col items-center gap-3">
+            <div className="bg-card rounded-card border border-transparent shadow-ring lg:shadow-card p-6 text-center flex flex-col items-center gap-3">
               <h2 className="m-0 text-base font-bold">{isPast ? "Chưa có món ngày này" : "Chưa có món hôm nay"}</h2>
               <p className="m-0 text-sm text-secondary leading-relaxed max-w-[320px]">
                 Thêm món vào nhật ký để theo dõi 22 vi chất mỗi ngày.
@@ -421,7 +421,7 @@ function MicrosContent() {
               summary={
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="text-xs text-muted-subtitle font-medium">Thiếu nhiều nhất</div>
+                    <div className="text-xs text-muted-subtitle font-normal">Thiếu nhiều nhất</div>
                     <div className="text-sm font-semibold text-on-dark mt-0.5">
                       {currentData?.microsSummary.mostLacking.join(", ")}
                     </div>
@@ -547,7 +547,7 @@ function MicrosContent() {
             subtitle={desktopSubtitle}
             desktopStat={
               <div className="flex items-baseline gap-2 mr-2">
-                <div className="font-display italic font-black text-display leading-none tabular-nums">
+                <div className="font-display italic font-black text-display leading-none tabular-nums tracking-display">
                   <span className="text-cobalt">{achievedMicrosCount.achieved}</span>
                   <span className="text-secondary">/{achievedMicrosCount.total}</span>
                 </div>
@@ -677,7 +677,7 @@ function GroupCard({
       id={`${idPrefix}${group.key}`}
       data-align-group={alignGroup}
       data-align-edge={alignGroup && idPrefix.includes("desktop") ? "left" : undefined}
-      className="bg-card border border-card-border rounded-card lg:shadow-card overflow-clip flex flex-col scroll-mt-2 lg:scroll-mt-6 break-inside-avoid"
+      className="bg-card rounded-card border border-transparent shadow-ring lg:shadow-card overflow-clip flex flex-col scroll-mt-2 lg:scroll-mt-6 break-inside-avoid"
     >
       {/* Sticky group header: sticks to the top of the scrolling body */}
       <div className="sticky top-[var(--micros-sticky,0px)] z-sticky bg-card border-b border-card-border">
@@ -783,7 +783,7 @@ function NutrientRow({ row, dateQuery = "" }: { row: NutrientRowData; dateQuery?
               </span>
             </>
           ) : (
-            <span className="tabular-nums text-xs text-secondary font-medium">
+            <span className="tabular-nums text-xs text-secondary font-normal">
               {formattedAmount}
             </span>
           )}

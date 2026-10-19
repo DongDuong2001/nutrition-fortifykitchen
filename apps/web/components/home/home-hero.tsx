@@ -90,11 +90,11 @@ export function HomeHero({
         </div>
 
         <div data-align-group="home-hero" className="flex flex-wrap items-baseline gap-x-1.5">
-          <span className="font-display text-display-sm font-extrabold leading-none tabular-nums">{kcalValue(shownKcal)}</span>
+          <span className="font-display text-display-sm font-extrabold leading-none tabular-nums tracking-display">{kcalValue(shownKcal)}</span>
           <span className={`text-cap text-muted-on-dark ${share ? "whitespace-nowrap" : ""}`}>
             / {formatAmount(kcalTarget.min, "kcal")}–{formatAmount(kcalTarget.max, "kcal")} kcal
           </span>
-          <span className="ml-1 font-display text-display-sm font-extrabold italic leading-none tabular-nums">{pctLabel(shownKcal, kcalTarget.min)}</span>
+          <span className="ml-1 font-display text-display-sm font-extrabold italic leading-none tabular-nums tracking-display">{pctLabel(shownKcal, kcalTarget.min)}</span>
           {finished && kcalKnown !== null && <span className="text-cap font-bold text-sky">{getLevelLabel(getLevel(kcalKnown))}</span>}
         </div>
 
@@ -118,7 +118,7 @@ export function HomeHero({
                     {value === null ? "—" : formatAmount(value, "g")}
                     {target !== null ? `/${formatAmount(target, "g")} g` : " g"}
                   </span>
-                  <span className="shrink-0 whitespace-nowrap font-display text-callout font-bold leading-none tabular-nums">
+                  <span className="shrink-0 whitespace-nowrap font-display text-callout font-extrabold leading-none tabular-nums">
                     {pctLabel(value, target)}
                   </span>
                 </div>

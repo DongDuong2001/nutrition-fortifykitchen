@@ -191,7 +191,7 @@ export function FoodList({
   };
 
   // No overflow-hidden on the grouped Card: it would stop the category label from sticking while the list scrolls
-  const cardClass = "rounded-card lg:shadow-card border border-card-border bg-card";
+  const cardClass = "rounded-card border border-transparent shadow-ring lg:shadow-card bg-card";
 
   return (
     <div data-tour={dataTour} className={`flex flex-col gap-3 ${className}`}>

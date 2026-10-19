@@ -310,7 +310,7 @@ function CreateFoodInner() {
         </FormRow>
 
         {/* Nutrition Info Card */}
-        <div className="bg-card border border-card-border rounded-card lg:shadow-card p-4 flex flex-col gap-3">
+        <div className="bg-card rounded-card border border-transparent shadow-ring lg:shadow-card p-4 flex flex-col gap-3">
           <div>
             <h2 className="m-0 text-base font-bold text-text">Dinh dưỡng mỗi khẩu phần</h2>
             <p className="m-0 text-xs text-secondary mt-1 leading-relaxed">
@@ -400,7 +400,7 @@ function CreateFoodInner() {
             </svg>
           </button>
 
-          <Expand open={showMicros} className="bg-card border border-card-border rounded-card lg:shadow-card p-4 grid grid-cols-2 gap-3">
+          <Expand open={showMicros} className="bg-card rounded-card border border-transparent shadow-ring lg:shadow-card p-4 grid grid-cols-2 gap-3">
               <FormRow label={`${nutrientName("sodium")} (mg)`} htmlFor="cf-na">
                 <input
                   id="cf-na"

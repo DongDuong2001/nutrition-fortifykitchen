@@ -93,7 +93,7 @@ export function DayBars({
                     <span className="block h-1 w-full rounded-[1px] bg-level-empty" />
                   )}
                 </span>
-                <span className={`flex h-8 items-center justify-center text-xs ${isSel ? "font-extrabold text-text" : "font-semibold text-secondary"}`}>
+                <span className={`flex h-8 items-center justify-center text-xs ${isSel ? "font-bold text-text" : "font-semibold text-secondary"}`}>
                   {d.label}
                 </span>
               </button>
@@ -104,7 +104,7 @@ export function DayBars({
       <p aria-live="polite" className="m-0 flex items-baseline justify-between gap-3 rounded-xl bg-surface px-3 py-3">
         <span className="text-cap font-semibold text-secondary">{day.dateLabel}</span>
         <span className="text-right">
-          <span className="font-display text-2xl font-bold tabular-nums">{shown}</span>
+          <span className="font-display text-2xl font-bold tabular-nums tracking-display">{shown}</span>
           {note && <span className={`ml-2 text-xs font-bold ${noteClass}`}>{note}</span>}
         </span>
       </p>

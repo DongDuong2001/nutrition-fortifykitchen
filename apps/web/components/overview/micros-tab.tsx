@@ -59,7 +59,7 @@ function Accordion({
   const [open, setOpen] = useState(defaultOpen);
   const id = useId();
   return (
-    <div data-align-group="overview-micro" className="overflow-hidden rounded-card lg:shadow-card border border-card-border bg-card text-text">
+    <div data-align-group="overview-micro" className="overflow-hidden rounded-card border border-transparent shadow-ring lg:shadow-card bg-card text-text">
       <button
         type="button"
         aria-expanded={open}

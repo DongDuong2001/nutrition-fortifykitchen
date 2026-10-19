@@ -30,7 +30,7 @@ export function HeroCard({
   return (
     <section id={id} aria-labelledby={`${id}-label`} className="flex flex-col gap-3 rounded-card bg-surface-dark p-4 text-on-dark">
       <div className="flex items-center justify-between gap-3">
-        <h2 id={`${id}-label`} className="m-0 font-display text-cap font-bold uppercase tracking-wider text-sky">
+        <h2 id={`${id}-label`} className="m-0 font-display text-cap font-extrabold uppercase tracking-wider text-sky">
           {label}
         </h2>
         {aside}
@@ -56,7 +56,7 @@ export function HeroNumber({
   return (
     <div className="flex items-end justify-between gap-3">
       <p className="m-0 min-w-0">
-        <span id={id} className="font-display text-[6rem] font-black italic leading-[0.82] tabular-nums text-sky">
+        <span id={id} className="font-display text-[6rem] font-black italic leading-[0.82] tabular-nums text-sky tracking-display">
           {value}
         </span>
         {unit && (

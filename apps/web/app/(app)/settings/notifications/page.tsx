@@ -121,7 +121,7 @@ export default function NotificationsSettingsPage() {
 
       <main className="flex-1 w-full max-w-[560px] mx-auto px-4 pt-4 pb-8 flex flex-col gap-3">
         {/* Permission card */}
-        <div className="bg-card border border-card-border rounded-card lg:shadow-card p-3 md:p-4 flex flex-col gap-2">
+        <div className="bg-card rounded-card border border-transparent shadow-ring lg:shadow-card p-3 md:p-4 flex flex-col gap-2">
           <div className="flex gap-3 items-start">
             <svg
               width="22"
@@ -159,7 +159,7 @@ export default function NotificationsSettingsPage() {
         </div>
 
         {/* Notification toggle rows */}
-        <section className="bg-card border border-card-border rounded-card lg:shadow-card px-4 py-1">
+        <section className="bg-card rounded-card border border-transparent shadow-ring lg:shadow-card px-4 py-1">
           {NOTIFICATION_ROWS.map((row, index) => {
             const isChecked = settings[row.toggleKey];
             const timeVal = row.timeKey ? settings[row.timeKey] : "";

@@ -56,8 +56,8 @@ export function MicroCard({ board }: { board: MicroBoard }) {
         <span aria-hidden="true" className="flex w-full items-baseline justify-between">
           <span className="text-callout font-bold">Vi chất đạt</span>
           <span>
-            <span className="font-display text-4xl font-bold leading-none tabular-nums">{board.achieved}</span>
-            <span className="font-display text-4xl font-bold leading-none text-muted-subtitle">/{board.total}</span>
+            <span className="font-display text-4xl font-extrabold leading-none tabular-nums tracking-display">{board.achieved}</span>
+            <span className="font-display text-4xl font-extrabold leading-none text-muted-subtitle tracking-display">/{board.total}</span>
             {change !== null && (
               <span className="ml-2 text-cap font-bold text-sky">
                 {change > 0 ? `▲ ${change}` : change < 0 ? `▼ ${Math.abs(change)}` : "Không đổi"}

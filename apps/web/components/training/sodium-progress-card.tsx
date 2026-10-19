@@ -21,7 +21,7 @@ export function SodiumProgressCard({
   return (
     <div
       data-align-group="training-summary"
-      className={`bg-card border border-card-border rounded-card lg:shadow-card p-5.5 flex flex-col justify-between gap-3 ${className}`}
+      className={`bg-card rounded-card border border-transparent shadow-ring lg:shadow-card p-5.5 flex flex-col justify-between gap-3 ${className}`}
     >
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="m-0 text-lg font-bold text-text">{nutrientName("sodium")} hôm nay</h2>
@@ -48,7 +48,7 @@ export function SodiumProgressCard({
       <div>
         <div className="font-display italic font-extrabold text-3xl tabular-nums text-text">
           {currentFormatted}{" "}
-          <span className="text-base font-semibold not-italic text-secondary">
+          <span className="text-base font-extrabold not-italic text-secondary">
             / {targetLabel}
           </span>
         </div>

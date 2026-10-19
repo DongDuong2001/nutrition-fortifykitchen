@@ -64,7 +64,7 @@ export const NutrientColumn = memo(function NutrientColumn({
       {summary && !share && (
         <p data-level-summary className="m-0 flex flex-none flex-col gap-1 px-3 py-2 text-cap leading-[1.125rem] text-secondary lg:text-callout lg:leading-5">
           <span className="block h-6 font-semibold text-text lg:h-7">
-            <span className="font-display text-title-sm font-bold leading-none tabular-nums lg:text-title">
+            <span className="font-display text-title-sm font-extrabold leading-none tabular-nums lg:text-title tracking-display">
               {summary.reached}/{summary.total}
             </span>{" "}
             đạt
@@ -129,7 +129,7 @@ export const NutrientColumn = memo(function NutrientColumn({
                         {value === null ? "—" : `${formatAmount(value, def.unit)} ${def.unit}`}
                       </span>
                     </span>
-                    <span className={`shrink-0 whitespace-nowrap font-display text-callout font-bold leading-none text-text tabular-nums ${share ? "" : "lg:text-[1.125rem]"}`}>
+                    <span className={`shrink-0 whitespace-nowrap font-display text-callout font-extrabold leading-none text-text tabular-nums ${share ? "" : "lg:text-[1.125rem]"}`}>
                       {pctLabel(value, targets[id] ?? null)}
                     </span>
                   </div>

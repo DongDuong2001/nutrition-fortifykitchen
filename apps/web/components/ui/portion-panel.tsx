@@ -170,7 +170,7 @@ export function PortionPanel({
       {/* kcal and macros of the portion, on a dark card */}
       <div data-align-group="portion" data-align-edge="left" className="flex w-full flex-col gap-3 rounded-2xl bg-ink p-4 text-on-dark">
         <div className="flex items-baseline justify-between gap-3">
-          <span className="font-display text-[2.75rem] font-bold leading-none tabular-nums">
+          <span className="font-display text-[2.75rem] font-extrabold leading-none tabular-nums tracking-display">
             {kcalValue(macroPreview.calories)} <span className="text-lg text-sky">kcal</span>
           </span>
           <span className="text-right text-cap text-muted-subtitle">{summary}</span>

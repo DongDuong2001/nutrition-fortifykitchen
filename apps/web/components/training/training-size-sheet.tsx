@@ -49,7 +49,7 @@ export function TrainingSizeSheet({
             }`}
           >
             <span className="flex flex-col">
-              <span className="font-display text-display-sm font-extrabold italic leading-none text-text">{TRAINING_SIZE_NAME[size]}</span>
+              <span className="font-display text-display-sm font-extrabold italic leading-none text-text tracking-display">{TRAINING_SIZE_NAME[size]}</span>
               <span className="text-sm font-semibold text-secondary">{hint}</span>
             </span>
             <span className="text-cap leading-snug text-text">{dosesOf(size)}</span>

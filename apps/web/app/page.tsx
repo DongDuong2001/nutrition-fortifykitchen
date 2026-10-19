@@ -38,7 +38,7 @@ export default async function LinkPage({ searchParams }: { searchParams: Promise
                   ) : (
                     <span
                       aria-hidden="true"
-                      className={`${ROW_ICON_CLASS} flex items-center justify-center bg-ink font-display text-sm font-extrabold text-on-dark lg:text-callout`}
+                      className={`${ROW_ICON_CLASS} flex items-center justify-center bg-ink font-display text-sm font-extrabold text-on-dark lg:text-callout tracking-label`}
                     >
                       FK
                     </span>

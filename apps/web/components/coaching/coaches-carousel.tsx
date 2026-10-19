@@ -20,7 +20,7 @@ export function CoachesCarousel() {
           <li key={c.id} className="w-[260px] shrink-0 snap-start">
             <Link
               href={`/explore/coaches/${c.id}`}
-              className="flex h-full flex-col gap-3 rounded-card lg:shadow-card border border-card-border bg-card p-4 text-text no-underline hover:bg-surface"
+              className="flex h-full flex-col gap-3 rounded-card border border-transparent shadow-ring lg:shadow-card bg-card p-4 text-text no-underline hover:bg-surface"
             >
               <span className="flex items-center gap-3">
                 <span

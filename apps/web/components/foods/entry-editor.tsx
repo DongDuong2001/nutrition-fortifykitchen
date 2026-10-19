@@ -110,7 +110,7 @@ export function EntryEditor({ view }: { view: EntryView }) {
         backHref={homeHref}
       />
       <div className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-8 pt-4">
-        <section className="flex flex-col gap-4 rounded-card lg:shadow-card border border-card-border bg-card p-4">
+        <section className="flex flex-col gap-4 rounded-card border border-transparent shadow-ring lg:shadow-card bg-card p-4">
           {quick && (
             <div data-align-group="entry" className="flex w-full flex-col gap-3">
               <FormRow label="Tên" htmlFor="entry-quick-name">

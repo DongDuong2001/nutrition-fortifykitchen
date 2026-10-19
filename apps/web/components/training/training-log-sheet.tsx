@@ -218,7 +218,7 @@ function MixPanel({ item, redBull, matMia, onLogged }: { item: TrainingCheckItem
   );
 
   return (
-    <div className="flex flex-col gap-3 rounded-card border border-card-border bg-surface p-4">
+    <div className="flex flex-col gap-3 rounded-card border border-transparent shadow-ring bg-surface p-4">
       {area(redBull, rbInput, setRbInput, rbLabel, setRbLabel)}
       <div className="border-t border-card-border pt-3">{area(matMia, mmInput, setMmInput, mmLabel, setMmLabel)}</div>
       <p role="status" data-align-group="training-mix" className="m-0 border-t border-card-border pt-3 text-sm font-semibold tabular-nums text-text">

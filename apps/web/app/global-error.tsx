@@ -40,10 +40,10 @@ export default function GlobalError({
         <main
           role="alert"
           aria-live="assertive"
-          className="flex w-full max-w-[560px] flex-col gap-4 rounded-card lg:shadow-card border border-card-border bg-card p-6 text-center"
+          className="flex w-full max-w-[560px] flex-col gap-4 rounded-card border border-transparent shadow-ring lg:shadow-card bg-card p-6 text-center"
         >
           <div className="flex flex-col gap-2">
-            <h1 className="m-0 font-display text-2xl font-extrabold italic leading-tight text-text">
+            <h1 className="m-0 font-display text-2xl font-extrabold italic leading-tight text-text tracking-display">
               Có lỗi khi tải ứng dụng
             </h1>
             <p className="m-0 text-callout leading-snug text-secondary">

@@ -254,7 +254,7 @@ function FoodDetailInner() {
         </div>
 
         {/* Big Kcal & 3-up Macro Card */}
-        <div data-align-group="food-detail" className="w-full bg-card border border-card-border rounded-card lg:shadow-card p-4">
+        <div data-align-group="food-detail" className="w-full bg-card rounded-card border border-transparent shadow-ring lg:shadow-card p-4">
           <StatGroup
             columns={4}
             tone="light"

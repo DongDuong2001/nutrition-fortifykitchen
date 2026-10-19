@@ -59,7 +59,7 @@ export function ScoreRow({
         <span className="text-callout font-bold">{row.title}</span>
         <span className="text-right text-cap font-semibold text-secondary">{row.change}</span>
         <span className="min-w-0">
-          <span className="font-display text-[2.75rem] font-bold leading-none tabular-nums">{row.value}</span>
+          <span className="font-display text-[2.75rem] font-bold leading-none tabular-nums tracking-display">{row.value}</span>
           <span className="block text-cap text-secondary">{row.sub}</span>
         </span>
         <span className="flex flex-col items-end justify-center gap-1">

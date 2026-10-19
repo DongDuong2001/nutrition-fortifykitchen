@@ -176,14 +176,14 @@ export function AppHeader({
                   </div>
                 )}
                 {title && (
-                  <Title className="sr-only lg:not-sr-only m-0 font-display italic font-extrabold text-2xl lg:text-display-sm leading-tight uppercase tracking-tight">
+                  <Title className="sr-only lg:not-sr-only m-0 font-display italic font-extrabold text-2xl lg:text-display-sm leading-tight uppercase tracking-display">
                     {title}
                   </Title>
                 )}
               </>
             ) : (
               title && (
-                <Title title={typeof title === "string" ? title : undefined} className="m-0 break-words font-display italic font-extrabold text-2xl lg:text-display-sm leading-tight uppercase tracking-tight line-clamp-2">
+                <Title title={typeof title === "string" ? title : undefined} className="m-0 break-words font-display italic font-extrabold text-2xl lg:text-display-sm leading-tight uppercase tracking-display line-clamp-2">
                   {title}
                 </Title>
               )

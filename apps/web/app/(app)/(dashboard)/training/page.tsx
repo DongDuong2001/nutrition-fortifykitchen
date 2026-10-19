@@ -353,9 +353,9 @@ function TrainingContent() {
           />
 
           {isPast ? (
-            <section aria-labelledby="past-training" className="bg-card border border-card-border rounded-card lg:shadow-card p-5 flex flex-col gap-2">
+            <section aria-labelledby="past-training" className="bg-card rounded-card border border-transparent shadow-ring lg:shadow-card p-5 flex flex-col gap-2">
               <h2 id="past-training" className="m-0 text-lg font-bold text-text">Muối</h2>
-              <p className="m-0 font-display italic font-extrabold text-[2.5rem] leading-none text-text">—</p>
+              <p className="m-0 font-display italic font-extrabold text-[2.5rem] leading-none text-text tracking-display">—</p>
               <p className="m-0 text-sm text-secondary">{pastNote}</p>
             </section>
           ) : (

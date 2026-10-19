@@ -25,7 +25,7 @@ export function NotEnoughData() {
   const days = overview.days.filter((d) => d.logged).length;
   if (days === 0) return <NothingLogged current={overview.period.isCurrent} />;
   return (
-    <section aria-labelledby="ov-empty" className="bg-card border border-card-border rounded-card lg:shadow-card p-4 flex flex-col gap-3 text-text">
+    <section aria-labelledby="ov-empty" className="bg-card rounded-card border border-transparent shadow-ring lg:shadow-card p-4 flex flex-col gap-3 text-text">
       <h2 id="ov-empty" className="m-0 text-base font-bold lg:text-lg">
         Chưa đủ dữ liệu
       </h2>
@@ -45,7 +45,7 @@ export function NotEnoughData() {
 /** No day of the period is logged: one fact, and for the current period one link to the first meal. */
 function NothingLogged({ current }: { current: boolean }) {
   return (
-    <section aria-labelledby="ov-empty" className="bg-card border border-card-border rounded-card lg:shadow-card p-4 flex flex-col gap-3 text-text">
+    <section aria-labelledby="ov-empty" className="bg-card rounded-card border border-transparent shadow-ring lg:shadow-card p-4 flex flex-col gap-3 text-text">
       <h2 id="ov-empty" className="m-0 text-base font-bold lg:text-lg">
         Chưa có ngày nào được ghi
       </h2>

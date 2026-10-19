@@ -24,7 +24,7 @@ export default function ErrorPage({ error, reset }: ErrorProps) {
     <div className="w-full min-h-screen bg-page text-text font-sans flex flex-col justify-center items-center p-4 sm:p-6 box-border select-none">
       <div
         role="alert"
-        className="w-full max-w-[440px] bg-card border border-card-border rounded-card p-6 sm:p-8 flex flex-col items-center text-center gap-3 shadow-xs"
+        className="w-full max-w-[440px] bg-card rounded-card border border-transparent shadow-card p-6 sm:p-8 flex flex-col items-center text-center gap-3"
       >
         <div className="w-12 h-12 rounded-full bg-destructive/10 text-destructive flex items-center justify-center shrink-0">
           <svg

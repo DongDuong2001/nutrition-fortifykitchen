@@ -553,7 +553,7 @@ function AddFoodInner() {
             data-sheet-route
             data-state={sheetState}
             onClick={(e) => e.stopPropagation()}
-            className="m-pop w-[min(900px,100%-32px)] bg-card border border-card-border rounded-card p-6 shadow-2xl flex flex-col gap-4 max-h-[92vh] overflow-y-auto"
+            className="m-pop w-[min(900px,100%-32px)] bg-card rounded-card border border-transparent p-6 shadow-2xl flex flex-col gap-4 max-h-[92vh] overflow-y-auto"
           >
             {/* The page's heading (Hôm nay behind is a picture without one since cc-55b), as the phone sheet has */}
             <h1 className="sr-only">Thêm món</h1>
@@ -647,7 +647,7 @@ function AddFoodInner() {
               notice={dishNotice}
                     isSubmitting={isSubmitting}
                     showMicros={true}
-                    className="rounded-card border border-card-border bg-card p-4"
+                    className="rounded-card border border-transparent shadow-ring bg-card p-4"
                   />
                 ) : (
                   <div className="h-full flex items-center justify-center text-center text-sm text-secondary p-4">
@@ -679,7 +679,7 @@ function AddFoodInner() {
           data-sheet-route
           data-state={sheetState}
           data-under-sheet={selectedFood !== null && !isDesktop ? "" : undefined}
-          className="m-sheet m-vt-sheet fixed inset-x-0 bottom-0 top-[8dvh] z-nav flex flex-col rounded-t-sheet bg-card shadow-xl"
+          className="m-sheet m-vt-sheet fixed inset-x-0 bottom-0 top-[8dvh] z-nav flex flex-col rounded-t-sheet bg-card shadow-sheet"
         >
           {/* Pinned header: grabber, meal switcher + close, search, chips. cc-62 (S15): the list fades out under it (a 12 px edge) */}
           <div className="relative z-sticky flex shrink-0 flex-col gap-3 px-4 pt-3 pb-3 after:pointer-events-none after:absolute after:inset-x-0 after:top-full after:h-3 after:bg-linear-to-b after:from-card after:to-transparent">
@@ -713,7 +713,7 @@ function AddFoodInner() {
                     <path d="M6 9l6 6 6-6" />
                   </svg>
                 </button>
-                <div className="text-xs font-medium text-secondary">Tự chọn theo giờ trong ngày · chạm để đổi</div>
+                <div className="text-xs font-normal text-secondary">Tự chọn theo giờ trong ngày · chạm để đổi</div>
               </div>
 
               <div className="flex shrink-0 items-center gap-2">

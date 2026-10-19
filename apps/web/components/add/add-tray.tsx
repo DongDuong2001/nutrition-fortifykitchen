@@ -128,7 +128,7 @@ function TrayCard({ item, open, first, onToggle, onRemove, onChange }: TrayRowPr
             <span className="text-cap text-secondary">{item.label}</span>
           </span>
           <span className="flex shrink-0 items-center gap-3">
-            <span className="font-display text-xl font-bold tabular-nums">
+            <span className="font-display text-xl font-extrabold tabular-nums">
               {typeof kcal === "number" ? formatAmount(kcal, "kcal") : "—"} <span className="text-cap text-secondary">kcal</span>
             </span>
             {/* .m-chevron turns while the button has aria-expanded="true" */}

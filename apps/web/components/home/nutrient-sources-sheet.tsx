@@ -47,7 +47,7 @@ export function NutrientSourcesSheet({
                 <span className="text-cap text-secondary">{portionLabel({ qty: s.qty, grams: s.grams ?? null, foodId: s.foodId ?? "" })}</span>
               </span>
               <span className="flex shrink-0 flex-col items-end">
-                <span className="font-display text-callout font-bold leading-none tabular-nums text-text">{pctLabel(s.amount, target)}</span>
+                <span className="font-display text-callout font-bold leading-none tabular-nums text-text tracking-label">{pctLabel(s.amount, target)}</span>
                 <span className="text-cap tabular-nums text-secondary">
                   {formatAmount(s.amount, unit)} {unit}
                 </span>

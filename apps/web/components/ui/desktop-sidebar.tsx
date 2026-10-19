@@ -18,7 +18,7 @@ export function DesktopSidebar({ currentTab }: { currentTab?: NavTab }) {
 
   return (
     <aside className="hidden w-60 shrink-0 flex-col gap-6 bg-ink p-6 text-on-dark box-border lg:flex">
-      <div className="px-2 font-display italic font-black text-2xl">
+      <div className="px-2 font-display italic font-black text-2xl tracking-display">
         H1T <span className="text-sky">MICRO</span>
       </div>
       <Link

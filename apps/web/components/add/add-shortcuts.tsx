@@ -61,7 +61,7 @@ function ShortcutCard({
     </>
   );
   return (
-    <li className="flex w-[11rem] shrink-0 snap-start overflow-hidden rounded-card lg:shadow-card border border-card-border bg-card">
+    <li className="flex w-[11rem] shrink-0 snap-start overflow-hidden rounded-card border border-transparent shadow-ring lg:shadow-card bg-card">
       {onOpen ? (
         <button
           type="button"

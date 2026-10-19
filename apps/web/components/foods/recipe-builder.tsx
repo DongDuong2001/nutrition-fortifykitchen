@@ -178,7 +178,7 @@ export function RecipeBuilder({ state, excludeId }: { state: RecipeDraftState; e
               const amountError = shown.amounts[index] ? errors.amounts[index] : undefined;
               const id = `rb-amount-${index}`;
               return (
-                <li key={`${ingredient.foodId}-${index}`} data-align-group="recipe-row" className="flex flex-col gap-1 rounded-card lg:shadow-card border border-card-border bg-card p-3">
+                <li key={`${ingredient.foodId}-${index}`} data-align-group="recipe-row" className="flex flex-col gap-1 rounded-card border border-transparent shadow-ring lg:shadow-card bg-card p-3">
                   <div className="flex items-center gap-2">
                     <span className="min-w-0 flex-1 break-words text-callout font-semibold leading-snug text-text">{ingredient.name}</span>
                     <button
@@ -275,7 +275,7 @@ export function RecipeBuilder({ state, excludeId }: { state: RecipeDraftState; e
       <section aria-label="Mỗi phần" data-recipe-card className="flex flex-col gap-3 rounded-card bg-surface-dark p-4 text-on-dark">
         <div className="flex items-baseline justify-between gap-2">
           <h2 className="m-0 text-cap font-bold text-sky">Mỗi phần · {hasWeight ? `${formatAmount(grams, "g")} g` : "—"}</h2>
-          <span className="font-display text-display-sm font-extrabold leading-none tabular-nums">
+          <span className="font-display text-display-sm font-extrabold leading-none tabular-nums tracking-display">
             {kcal === null || kcal === undefined ? "—" : formatAmount(kcal, "kcal")}
             <span className="ml-1 text-cap font-semibold text-muted-on-dark">kcal</span>
           </span>

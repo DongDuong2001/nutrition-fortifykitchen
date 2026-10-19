@@ -74,7 +74,7 @@ export function FloatingPhone() {
                   H1T <span className="text-cobalt">MICRO</span>
                 </span>
               </div>
-              <span className="text-2xs font-extrabold uppercase px-2 py-0.5 rounded-full bg-cobalt/10 text-cobalt border border-cobalt/20">
+              <span className="text-2xs font-bold uppercase px-2 py-0.5 rounded-full bg-cobalt/10 text-cobalt border border-cobalt/20">
                 Hôm nay
               </span>
             </div>
@@ -132,7 +132,7 @@ export function FloatingPhone() {
 
               {/* Meals List */}
               <div className="flex flex-col gap-1.5">
-                <div className="text-2xs font-extrabold uppercase text-secondary tracking-wider px-1">
+                <div className="text-2xs font-bold uppercase text-secondary tracking-wider px-1">
                   Nhật ký món ăn
                 </div>
 

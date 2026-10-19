@@ -36,9 +36,9 @@ export function SaltSummaryCard({
             </>
           )}
         </div>
-        <div className="font-display italic font-bold text-display leading-none tabular-nums text-on-dark shrink-0">
+        <div className="font-display italic font-extrabold text-display leading-none tabular-nums text-on-dark shrink-0 tracking-display">
           {saltTarget.formattedTotal}
-          <span className="text-lg not-italic font-normal text-sky"> g</span>
+          <span className="text-lg not-italic font-extrabold text-sky"> g</span>
         </div>
       </div>
     );
@@ -55,9 +55,9 @@ export function SaltSummaryCard({
         {isRestDay ? "Muối hôm nay" : "Muối cần hôm nay"}
       </div>
 
-      <div className="font-display italic font-extrabold text-[3.5rem] leading-none tabular-nums text-on-dark">
+      <div className="font-display italic font-extrabold text-[3.5rem] leading-none tabular-nums text-on-dark tracking-display">
         {saltTarget.formattedTotal}
-        <span className="text-title not-italic font-normal text-sky"> g</span>
+        <span className="text-title not-italic font-extrabold text-sky"> g</span>
       </div>
 
       <div className="flex flex-wrap gap-3">

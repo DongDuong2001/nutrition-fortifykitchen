@@ -37,7 +37,7 @@ export function LeaderboardRow({
         </div>
       </div>
       <div className="shrink-0 text-right">
-        <span className="block font-display text-2xl font-extrabold italic leading-none tabular-nums text-cobalt">
+        <span className="block font-display text-2xl font-extrabold italic leading-none tabular-nums text-cobalt tracking-display">
           {formatNumber(item.totalScore)}
         </span>
         <span className="block text-cap text-secondary">điểm</span>

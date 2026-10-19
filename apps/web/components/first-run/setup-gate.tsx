@@ -17,7 +17,7 @@ function GateSkeleton() {
   return (
     <div className="flex min-h-dvh w-full flex-col bg-page text-text font-sans lg:flex-row">
       <div aria-hidden="true" className="hidden w-60 shrink-0 bg-ink p-6 text-on-dark lg:block">
-        <div className="px-2 font-display text-2xl font-black italic">
+        <div className="px-2 font-display text-2xl font-black italic tracking-display">
           H1T <span className="text-sky">MICRO</span>
         </div>
       </div>
@@ -33,7 +33,7 @@ function GateSkeleton() {
         >
           <span className="sr-only">Đang tải…</span>
           {[0, 1].map((i) => (
-            <div key={i} className="flex flex-col gap-3 rounded-card border border-card-border bg-card p-4 motion-safe:animate-pulse">
+            <div key={i} className="flex flex-col gap-3 rounded-card border border-transparent shadow-ring bg-card p-4 motion-safe:animate-pulse">
               <div className="h-3 w-2/5 rounded bg-level-empty" />
               <div className="h-3 w-[70%] rounded bg-level-empty" />
               <div className="h-3 w-[55%] rounded bg-level-empty" />
