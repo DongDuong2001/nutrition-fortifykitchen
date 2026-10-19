@@ -242,7 +242,7 @@ def tray(pg):
     check(cards.count() == 4, f"tray: four cards ({cards.count()})")
     check(review.locator("button[aria-expanded='true']").count() == 1, "tray: the first card is open")
     check(review.get_by_role("button", name=re.compile("^Bỏ khỏi khay: ")).count() == 4, "tray: a named × per card")
-    check(review.get_by_text("Tổng cộng").count() == 1 and pg.get_by_role("button", name="Thêm 4 món vào Bữa trưa").count() == 1, "tray: footer with Tổng cộng and Thêm 4 món")
+    check(review.get_by_text("Tổng cộng").count() == 1 and review.get_by_role("button", name="Thêm 4 món vào Bữa trưa").count() == 1, "tray: footer with Tổng cộng and Thêm 4 món")
     down = pg.get_by_role("button", name="Còn món bên dưới, cuộn xuống")
     check(down.count() == 1, "tray: the ↓ while cards are below")
     shot(pg, "tray-4-items-390")
@@ -259,7 +259,7 @@ def tray(pg):
         down.click()
         pg.wait_for_timeout(600)
     check(down.count() == 0, "tray: the ↓ hides at the end of the list")
-    pg.get_by_role("button", name="Thêm 4 món vào Bữa trưa").click()
+    review.get_by_role("button", name="Thêm 4 món vào Bữa trưa").click()
     pg.wait_for_url(BASE + "/app")
     pg.wait_for_timeout(700)
     toast = pg.get_by_role("status").filter(has_text="Đã thêm").first

@@ -2,14 +2,15 @@ export type NutrientLevel = "thieu" | "trungbinh" | "ganDu" | "dat";
 export type SegmentTone = "light" | "dark";
 
 export function calculateSegments(pct: number): number {
-  if (pct <= 0) return 0;
+  if (!(pct > 0)) return 0; // 0, a negative and NaN
   return Math.min(10, Math.floor(pct / 10));
 }
 
 export function getLevel(pct: number): NutrientLevel {
-  if (pct < 50) return "thieu";
-  if (pct < 80) return "trungbinh";
-  if (pct < 100) return "ganDu";
+  // Written so a NaN falls to the lowest level, not the highest
+  if (!(pct >= 50)) return "thieu";
+  if (!(pct >= 80)) return "trungbinh";
+  if (!(pct >= 100)) return "ganDu";
   return "dat";
 }
 
@@ -60,7 +61,7 @@ export function getEmptySegmentColor(tone: SegmentTone = "light"): string {
 
 /** Segments of a home bar: like calculateSegments, but any value above 0 lights at least one segment. */
 export function homeSegments(pct: number): number {
-  if (pct <= 0) return 0;
+  if (!(pct > 0)) return 0;
   return Math.max(1, Math.min(10, Math.floor(pct / 10)));
 }
 

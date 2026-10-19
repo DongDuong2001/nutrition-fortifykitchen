@@ -20,9 +20,9 @@ export function LeaderboardRow({
       <div className="flex min-w-0 items-center gap-3">
         <span
           aria-hidden="true"
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface text-[13px] font-bold tabular-nums text-secondary"
+          className="flex h-8 min-w-8 shrink-0 items-center justify-center rounded-full bg-surface px-2 text-[13px] font-bold tabular-nums text-secondary"
         >
-          {item.rank}
+          {formatNumber(item.rank)}
         </span>
         <div className="flex min-w-0 flex-col">
           <span className="flex min-w-0 items-center gap-2">

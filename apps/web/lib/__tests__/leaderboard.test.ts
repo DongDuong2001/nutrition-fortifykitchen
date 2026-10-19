@@ -5,6 +5,7 @@ import {
   LEADERBOARD_STORAGE_KEY,
   isLeaderboardOptedIn,
   setLeaderboardOptIn,
+  splitRanks,
 } from "../leaderboard";
 
 describe("leaderboard", () => {
@@ -45,5 +46,18 @@ describe("leaderboard", () => {
 
     setLeaderboardOptIn(false);
     expect(isLeaderboardOptedIn()).toBe(false);
+  });
+});
+
+describe("splitRanks (cc-63, B9)", () => {
+  it("takes a podium from three ranks and rows for the rest", () => {
+    expect(splitRanks([1, 2, 3, 4, 5])).toEqual({ podium: [1, 2, 3], rows: [4, 5] });
+    expect(splitRanks([1, 2, 3])).toEqual({ podium: [1, 2, 3], rows: [] });
+  });
+
+  it("with fewer than three ranks there is no podium and every rank is a row", () => {
+    expect(splitRanks([1, 2])).toEqual({ podium: [], rows: [1, 2] });
+    expect(splitRanks([1])).toEqual({ podium: [], rows: [1] });
+    expect(splitRanks([])).toEqual({ podium: [], rows: [] });
   });
 });

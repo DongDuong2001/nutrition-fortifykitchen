@@ -419,9 +419,8 @@ export type WriteState = "saved" | "queued" | "held" | "local";
 
 export interface WriteResult {
   state: WriteState;
-  /** The answer's status (0 = no answer) and the server's message, for a held write. */
+  /** The answer's status (0 = no answer), for a held write. The server's body is never kept: it can be a proxy's page. */
   status?: number;
-  message?: string;
   /** Held for good (409 PAST_DAY_READ_ONLY): never sent again, not even by Thử lại. */
   final?: boolean;
 }
@@ -454,7 +453,7 @@ interface OutboxItem {
    * The server refused it with a 4xx: not sent again until Thử lại or the next app open (syncOfflineOutbox({ retryHeld:
    * true })). `final`: refused for good (a past day), never sent again.
    */
-  held?: { status: number; message: string; final?: boolean };
+  held?: { status: number; final?: boolean };
 }
 
 type DiaryWrite = Pick<OutboxItem, "id" | "date" | "payload" | "method" | "path">;
@@ -557,17 +556,16 @@ export function writesInFlight(): number {
   return inFlight.size;
 }
 
-async function serverAnswer(res: Response): Promise<{ message: string; code: string }> {
+/**
+ * The error code of an answer ("PAST_DAY_READ_ONLY"), and nothing else of its body: the body can be a proxy's HTML page or
+ * a stack trace, so it is never shown, logged or sent (cc-63, X7). A code that does not look like one is "".
+ */
+async function serverCode(res: Response): Promise<string> {
   try {
-    const text = await res.text();
-    try {
-      const json = JSON.parse(text);
-      return { message: String(json?.error?.message ?? json?.message ?? json?.error ?? text), code: String(json?.error?.code ?? "") };
-    } catch {
-      return { message: text, code: "" };
-    }
+    const code = JSON.parse(await res.text())?.error?.code;
+    return typeof code === "string" && /^[A-Za-z0-9_.-]{1,64}$/.test(code) ? code : "";
   } catch {
-    return { message: "", code: "" };
+    return "";
   }
 }
 
@@ -576,10 +574,10 @@ const DIARY_REQUEST_MS = 20 * 1000;
 const diaryTimeout = (): AbortSignal | undefined =>
   typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function" ? AbortSignal.timeout(DIARY_REQUEST_MS) : undefined;
 
-async function sendWrite(write: DiaryWrite): Promise<{ outcome: "saved" | "retry" | "held"; status: number; message: string; final: boolean }> {
+async function sendWrite(write: DiaryWrite): Promise<{ outcome: "saved" | "retry" | "held"; status: number; final: boolean }> {
   const method = itemMethod(write);
   let status = 0;
-  let answer = { message: "", code: "" };
+  let code = "";
   try {
     const res = await apiFetch(itemPath(write), {
       method,
@@ -587,21 +585,21 @@ async function sendWrite(write: DiaryWrite): Promise<{ outcome: "saved" | "retry
       signal: diaryTimeout(),
     });
     status = res.status;
-    if (status >= 300) answer = await serverAnswer(res);
+    if (status >= 300) code = await serverCode(res);
   } catch {
     // No answer: sent again from the outbox
   }
   const outcome = writeOutcome(status, method);
-  if (outcome === "held") console.warn(`Diary write not saved: ${method} ${itemPath(write)} → ${status} ${answer.message}`);
-  // Any non-2xx answer (not a 404 on a delete, which means done) is reported once
-  if (status >= 300 && outcome !== "saved") reportClientError({ kind: "write", method, path: itemPath(write), status, message: answer.message });
-  return { outcome, status, message: answer.message, final: outcome === "held" && status === 409 && answer.code === PAST_DAY_READ_ONLY };
+  if (outcome === "held") console.warn(`Diary write not saved: ${method} ${itemPath(write)} → ${status} ${code}`.trim());
+  // Any non-2xx answer (not a 404 on a delete, which means done) is reported once: its status and error code only
+  if (status >= 300 && outcome !== "saved") reportClientError({ kind: "write", method, path: itemPath(write), status, message: code });
+  return { outcome, status, final: outcome === "held" && status === 409 && code === PAST_DAY_READ_ONLY };
 }
 
 /**
  * Sends one diary write, after any write of the same entry that is still being sent or still queued. What does not
  * reach the server goes to the outbox: no answer, 401 after the session refresh, 408, 429 and 5xx to be sent again,
- * any other 4xx held for Thử lại (with the server's message).
+ * any other 4xx held for Thử lại (its status only: the server's text is never kept).
  */
 function diaryWrite(write: DiaryWrite): Promise<WriteResult> {
   writeStartedAt.set(write.id, Date.now());
@@ -620,11 +618,11 @@ function diaryWrite(write: DiaryWrite): Promise<WriteResult> {
       void syncOfflineOutbox();
       return { state: "queued" };
     }
-    const { outcome, status, message, final } = await sendWrite(write);
+    const { outcome, status, final } = await sendWrite(write);
     if (outcome === "saved") return { state: "saved" };
     // Into the outbox of the account the write belongs to, even when another one signed in meanwhile
-    queueWrite(write, outcome === "held" ? { status, message, final } : undefined, account);
-    return outcome === "held" ? { state: "held", status, message, final } : { state: "queued", status };
+    queueWrite(write, outcome === "held" ? { status, final } : undefined, account);
+    return outcome === "held" ? { state: "held", status, final } : { state: "queued", status };
   });
   inFlight.set(write.id, run);
   void run.finally(() => {
@@ -637,7 +635,7 @@ export interface SyncResult {
   /** Entries whose add or edit the server has now (a delete is not listed). */
   saved: string[];
   /** Writes the server refused in this run, with its answer (`final`: refused for good, now and never sent again). */
-  held: Array<{ id: string; status: number; message: string; date: string; final: boolean }>;
+  held: Array<{ id: string; status: number; date: string; final: boolean }>;
 }
 
 let syncQueue: Promise<SyncResult> = Promise.resolve({ saved: [], held: [] });
@@ -667,7 +665,7 @@ async function runOutbox(retryHeld: boolean): Promise<SyncResult> {
       continue;
     }
     if (currentAccountId() !== account) break;
-    const { outcome, status, message, final } = await sendWrite(item);
+    const { outcome, status, final } = await sendWrite(item);
     if (outcome === "saved") {
       sent.add(itemKey(item));
       if (itemMethod(item) !== "DELETE") result.saved.push(item.id);
@@ -676,8 +674,8 @@ async function runOutbox(retryHeld: boolean): Promise<SyncResult> {
     blocked.add(item.id);
     const retries = (item.retries ?? 0) + 1;
     if (outcome === "held") {
-      changed.set(itemKey(item), { retries, held: { status, message, final } });
-      result.held.push({ id: item.id, status, message, date: item.date, final });
+      changed.set(itemKey(item), { retries, held: { status, final } });
+      result.held.push({ id: item.id, status, date: item.date, final });
     } else {
       changed.set(itemKey(item), { retries, held: undefined });
       if (status === 0) break;
@@ -715,7 +713,7 @@ export const apiClient = {
           const json = await res.json();
           return json.data ?? json;
         }
-        reportClientError({ kind: "sync", method: "GET", path: `/days/${targetDate}`, status: res.status, message: (await serverAnswer(res)).message });
+        reportClientError({ kind: "sync", method: "GET", path: `/days/${targetDate}`, status: res.status, message: await serverCode(res) });
       } catch {
         // No answer (or no answer within DIARY_REQUEST_MS)
       }
@@ -991,12 +989,8 @@ export const apiClient = {
           void addToCatalogCache(currentAccountId(), mapped);
           return mapped;
         }
-        let msg = `Không thể tạo món (${res.status})`;
-        try {
-          const errJson = await res.json();
-          if (errJson?.error?.message) msg = errJson.error.message;
-        } catch {}
-        throw new Error(msg);
+        // Fixed words and the status: the server's own text is never shown
+        throw new Error(`Không thể tạo món (${res.status})`);
       } catch (err) {
         if (err instanceof Error && err.message.startsWith("Không thể tạo món")) {
           throw err;
@@ -1400,14 +1394,7 @@ export const apiClient = {
         }),
       });
       if (!res.ok) {
-        let msg = `profile save failed (${res.status})`;
-        try {
-          const errJson = await res.json();
-          if (errJson?.error?.message) msg = errJson.error.message;
-        } catch {
-          // ignore
-        }
-        throw new Error(msg);
+        throw new Error(`profile save failed (${res.status})`);
       }
     }
     return { ok: true };

@@ -381,7 +381,7 @@ def tray(browser):
     check(pg.locator("[data-tray-bar]:visible").count() == 1, "tray: one bar")
     bar = pg.locator("[data-tray-bar]:visible").inner_text()
     label = pg.locator("[data-tray-bar]:visible").get_attribute("aria-label") or ""
-    check(label.startswith("3 món · ") and label.endswith(" kcal") and "món · " in bar and "Xem lại" in bar and "Thêm vào Bữa trưa" in bar, f"tray: bar shows count, kcal, Xem lại, Thêm vào ({label!r}, {bar!r})")
+    check(label.startswith("3 món · ") and label.endswith(" kcal") and "món · " in bar and "Xem lại" in bar and "Thêm 3 món vào Bữa trưa" in bar, f"tray: bar shows count, kcal, Xem lại, Thêm vào ({label!r}, {bar!r})")
     check(pg.locator('[data-tray-toggle]:visible[aria-checked="true"]').count() == 3, "tray: three circles are checked")
     # The tray survives a query and a filter
     field = pg.locator('input[type="search"]:visible, input[placeholder*="Tìm món"]:visible').first
@@ -398,14 +398,14 @@ def tray(browser):
     check(sheet.get_by_role("button", name="Bỏ khỏi khay").count() == 3, "review: a × on each item (Bỏ khỏi khay)")
     # cc-53b (Tray.dc.html): the footer card holds the meal, Tổng cộng and the one add; the first row opens to edit
     check(sheet.get_by_text("Tổng cộng").count() == 1 and "kcal" in sheet.inner_text(), "review: Tổng cộng kcal")
-    check(pg.get_by_role("button", name="Thêm 3 món vào Bữa trưa").count() == 1, "review: Thêm 3 món vào Bữa trưa")
+    check(sheet.get_by_role("button", name="Thêm 3 món vào Bữa trưa").count() == 1, "review: Thêm 3 món vào Bữa trưa")
     check(sheet.locator("li button[aria-expanded='true']").count() == 1, "review: one row open")
     check(pg.get_by_role("button", name="Thêm vào Bữa trưa, đổi bữa").count() == 1, "review: the meal chip")
     targets_ok(pg, "[data-tray-review]", "tray review")
     shot(pg, "tray-review-390")
     sheet.get_by_role("button", name="Bỏ khỏi khay").first.click()
     pg.wait_for_timeout(200)
-    check(pg.get_by_role("button", name="Thêm 2 món vào Bữa trưa").count() == 1, "review: × removes one item")
+    check(sheet.get_by_role("button", name="Thêm 2 món vào Bữa trưa").count() == 1, "review: × removes one item")
     pg.keyboard.press("Escape")
     pg.wait_for_timeout(400)
     pg.locator("[data-tray-toggle]:visible").first.click()
@@ -413,7 +413,7 @@ def tray(browser):
     pg.get_by_role("button", name="Xem lại").click()
     pg.wait_for_timeout(200)
     count = pg.locator("[data-tray-review] li").count()
-    pg.get_by_role("button", name=f"Thêm {count} món vào Bữa trưa").click()
+    pg.locator("[data-tray-review]").get_by_role("button", name=f"Thêm {count} món vào Bữa trưa").click()
     pg.wait_for_url(BASE + "/app")
     pg.wait_for_timeout(600)
     toast = pg.get_by_role("status").filter(has_text="Đã thêm").first

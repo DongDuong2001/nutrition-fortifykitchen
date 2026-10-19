@@ -243,7 +243,7 @@ export function MacroTargetsScreen() {
                       aria-label="Tỉ lệ phần trăm đạm"
                       value={proteinPct}
                       onChange={(e) => setProteinPct(Number(e.target.value) || 0)}
-                      className="w-10 border-0 bg-transparent text-center font-display text-[15px] font-bold tabular-nums text-text focus:outline-none"
+                      className="w-12 border-0 bg-transparent text-center font-display text-base font-bold tabular-nums text-text focus:outline-none"
                     />
                     <span className="text-xs font-semibold text-secondary">%</span>
                   </div>
@@ -259,7 +259,7 @@ export function MacroTargetsScreen() {
                       aria-label="Số gram đạm cố định"
                       value={fixedProtein}
                       onChange={(e) => setFixedProtein(Number(e.target.value) || 0)}
-                      className="w-12 border-0 bg-transparent text-center font-display text-[15px] font-bold tabular-nums text-text focus:outline-none"
+                      className="w-16 border-0 bg-transparent text-center font-display text-base font-bold tabular-nums text-text focus:outline-none"
                     />
                     <span className="text-xs font-semibold text-secondary">g</span>
                   </div>
@@ -300,7 +300,7 @@ export function MacroTargetsScreen() {
                       aria-label="Tỉ lệ phần trăm tinh bột"
                       value={carbsPct}
                       onChange={(e) => setCarbsPct(Number(e.target.value) || 0)}
-                      className="w-10 border-0 bg-transparent text-center font-display text-[15px] font-bold tabular-nums text-text focus:outline-none"
+                      className="w-12 border-0 bg-transparent text-center font-display text-base font-bold tabular-nums text-text focus:outline-none"
                     />
                     <span className="text-xs font-semibold text-secondary">%</span>
                   </div>
@@ -316,7 +316,7 @@ export function MacroTargetsScreen() {
                       aria-label="Số gram tinh bột cố định"
                       value={fixedCarbs}
                       onChange={(e) => setFixedCarbs(Number(e.target.value) || 0)}
-                      className="w-12 border-0 bg-transparent text-center font-display text-[15px] font-bold tabular-nums text-text focus:outline-none"
+                      className="w-16 border-0 bg-transparent text-center font-display text-base font-bold tabular-nums text-text focus:outline-none"
                     />
                     <span className="text-xs font-semibold text-secondary">g</span>
                   </div>
@@ -357,7 +357,7 @@ export function MacroTargetsScreen() {
                       aria-label="Tỉ lệ phần trăm chất béo"
                       value={fatPct}
                       onChange={(e) => setFatPct(Number(e.target.value) || 0)}
-                      className="w-10 border-0 bg-transparent text-center font-display text-[15px] font-bold tabular-nums text-text focus:outline-none"
+                      className="w-12 border-0 bg-transparent text-center font-display text-base font-bold tabular-nums text-text focus:outline-none"
                     />
                     <span className="text-xs font-semibold text-secondary">%</span>
                   </div>
@@ -373,7 +373,7 @@ export function MacroTargetsScreen() {
                       aria-label="Số gram chất béo cố định"
                       value={fixedFat}
                       onChange={(e) => setFixedFat(Number(e.target.value) || 0)}
-                      className="w-12 border-0 bg-transparent text-center font-display text-[15px] font-bold tabular-nums text-text focus:outline-none"
+                      className="w-16 border-0 bg-transparent text-center font-display text-base font-bold tabular-nums text-text focus:outline-none"
                     />
                     <span className="text-xs font-semibold text-secondary">g</span>
                   </div>

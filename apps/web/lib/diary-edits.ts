@@ -2,6 +2,7 @@ import { MOCK_FOODS, catalogFoodById, type FoodItem } from "./mock/foods";
 import { SAMPLE_DAY, type MockDayData, type MockFoodItem } from "./mock/sample-day";
 import { MEAL_SLOTS, getMealSlotNameVi, type MealSlot } from "./meal-slot";
 import { hidesGrams, parseUnitAmount, parseUnitServing, scaleNutrients } from "./portion";
+import { isAmount } from "./amount";
 import { formatAmount } from "./format";
 import { isUuid } from "./uuid";
 
@@ -234,7 +235,7 @@ const NO_AMOUNTS: Amounts = { calories: 0, carbs: 0, protein: 0, fat: 0, fiber: 
 function numericNutrients(nutrients: Record<string, number | null>): Record<string, number> {
   const out: Record<string, number> = {};
   for (const [key, val] of Object.entries(nutrients)) {
-    if (typeof val === "number") out[key] = val;
+    if (isAmount(val)) out[key] = val;
   }
   return out;
 }
@@ -245,11 +246,11 @@ export function amountsOfNumbers(
 ): Amounts {
   if (!n) return NO_AMOUNTS;
   return {
-    calories: n.calories ?? 0,
-    carbs: n.carbs ?? 0,
-    protein: n.protein ?? 0,
-    fat: n.fat ?? 0,
-    fiber: n.fiber ?? 0,
+    calories: isAmount(n.calories) ? n.calories : 0,
+    carbs: isAmount(n.carbs) ? n.carbs : 0,
+    protein: isAmount(n.protein) ? n.protein : 0,
+    fat: isAmount(n.fat) ? n.fat : 0,
+    fiber: isAmount(n.fiber) ? n.fiber : 0,
     nutrients: numericNutrients(n.nutrients),
   };
 }

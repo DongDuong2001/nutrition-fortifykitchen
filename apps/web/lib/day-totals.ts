@@ -1,5 +1,6 @@
 import { dayEntries } from "./day-history";
 import { labelZeros, type AddedDiaryEntry } from "./diary-edits";
+import { isAmount } from "./amount";
 import { sumKcal } from "./kcal";
 import type { MockDayData } from "./mock/sample-day";
 import { SAMPLE_DAY } from "./mock/sample-day";
@@ -41,7 +42,7 @@ export function totalsFromEntries(iso: string, raw: AddedDiaryEntry[]): DayTotal
   }
   // Known values only: an unknown macro (a quick kcal entry) adds nothing, and stays null when no entry knows it
   const knownSum = (pick: (e: AddedDiaryEntry) => number | null): number | null => {
-    const known = entries.map(pick).filter((v): v is number => typeof v === "number");
+    const known = entries.map(pick).filter(isAmount);
     return known.length === 0 ? null : Math.round(known.reduce((acc, v) => acc + v, 0));
   };
   const nutrients = nullNutrients();
@@ -49,7 +50,7 @@ export function totalsFromEntries(iso: string, raw: AddedDiaryEntry[]): DayTotal
     let total: number | null = null;
     for (const entry of entries) {
       const value = entry.nutrients[key];
-      if (typeof value === "number") total = (total ?? 0) + value;
+      if (isAmount(value)) total = (total ?? 0) + value;
     }
     nutrients[key] = total === null ? null : Math.round(total * 100) / 100;
   }

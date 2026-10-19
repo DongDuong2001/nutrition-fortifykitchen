@@ -1,8 +1,9 @@
 import { COUNTED_NUTRIENT_KEYS } from "./day-totals";
 import { SAMPLE_SLOT, entryNumbers, type AddedDiaryEntry, type EntryView } from "./diary-edits";
-import { formatAmount } from "./format";
+import { formatAmount, formatNumber } from "./format";
 import { catalogFoodById } from "./mock/foods";
 import { portionAmountText, portionDetail, unitAmountText } from "./portion";
+import { isAmount } from "./amount";
 import { sumKcal } from "./kcal";
 import { MEAL_SLOTS, type MealSlot } from "./meal-slot";
 import type { MockDayData } from "./mock/sample-day";
@@ -79,7 +80,7 @@ export function groupMeals(entries: HomeEntry[]): HomeMeal[] {
 
 /** Known values only: an unknown stays unknown (null) until some entry carries a number. Never 0. */
 function knownSum(values: (number | null | undefined)[]): number | null {
-  const known = values.filter((v): v is number => typeof v === "number");
+  const known = values.filter(isAmount);
   return known.length === 0 ? null : known.reduce((a, b) => a + b, 0);
 }
 
@@ -165,9 +166,12 @@ export function heroLabel(mode: HomeMode, entries: HomeEntry[], meals: HomeMeal[
 
 /** Percent of a target, rounded; null when the value or the target is unknown. */
 export function pctOf(value: number | null, target: number | null): number | null {
-  if (value === null || target === null || target <= 0) return null;
+  if (value === null || target === null || target <= 0 || !Number.isFinite(value) || !Number.isFinite(target)) return null;
   return Math.round((value / target) * 100);
 }
+
+/** The most a percent shows: 20.833% (a supplement against a small target) reads "999+%", so it fits its column. */
+export const MAX_PCT_SHOWN = 999;
 
 export function homeEntryFromAdded(e: AddedDiaryEntry): HomeEntry {
   const quick = e.kind === "quick";
@@ -253,12 +257,13 @@ export function targetOf(day: MockDayData, key: string): number | null {
   return stat?.targetMin ?? null;
 }
 
-/** The percent text: a dash when unknown, "<1%" for a value above 0 that rounds to 0%, else the rounded percent. */
+/** The percent text: a dash when unknown, "<1%" for a value above 0 that rounds to 0%, "999+%" above 999, else the rounded percent. */
 export function pctLabel(value: number | null, target: number | null): string {
   const pct = pctOf(value, target);
   if (pct === null) return "—";
   if (pct === 0 && value !== null && value > 0) return "<1%";
-  return `${pct}%`;
+  if (pct > MAX_PCT_SHOWN) return `${MAX_PCT_SHOWN}+%`;
+  return `${formatNumber(pct)}%`;
 }
 
 /** "2 món chưa rõ kcal": the foods of the shown set whose energy is unknown. Null when every food has a value. */

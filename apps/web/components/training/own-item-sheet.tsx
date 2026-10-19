@@ -143,7 +143,7 @@ function AmountStep({ food, target, onBack, onAdd }: { food: FoodItem; target: O
               setGramsInput(e.target.value);
               setLabel(formatGramsServingLabel(e.target.value, ""));
             }}
-            className="h-11 w-full rounded-xl border border-card-border bg-card px-3 text-sm font-bold tabular-nums text-text focus-visible:outline-2 focus-visible:outline-blue"
+            className="h-11 w-full rounded-xl border border-card-border bg-card px-3 text-base font-bold tabular-nums text-text focus-visible:outline-2 focus-visible:outline-blue"
           />
         </FormRow>
       )}

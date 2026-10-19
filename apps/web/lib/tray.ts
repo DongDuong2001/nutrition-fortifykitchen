@@ -1,3 +1,4 @@
+import { isAmount } from "./amount";
 import { canLog } from "./diary-edits";
 import type { FoodItem } from "./mock/foods";
 import { defaultPortionOf, hidesGrams, scaleNutrients } from "./portion";
@@ -66,13 +67,13 @@ export function trayTotals(items: readonly TrayItem[]): TrayTotals {
   if (items.length === 0) return { count: 0, kcal: null, protein: null, carbs: null, fat: null };
   const scaled = items.map((i) => scaleNutrients(i.food.nutrients, i.grams));
   const sum = (key: string): number | null => {
-    const known = scaled.map((n) => n[key]).filter((v): v is number => typeof v === "number");
+    const known = scaled.map((n) => n[key]).filter(isAmount);
     return known.length === 0 ? null : round1(known.reduce((a, b) => a + b, 0));
   };
-  const energyKnown = items.every((i, at) => typeof scaled[at].energy === "number" || hidesGrams(i.food));
+  const energyKnown = items.every((i, at) => isAmount(scaled[at].energy) || hidesGrams(i.food));
   return {
     count: items.length,
-    kcal: energyKnown ? Math.round(scaled.reduce((a, n) => a + (n.energy ?? 0), 0)) : null,
+    kcal: energyKnown ? Math.round(scaled.reduce((a, n) => a + (isAmount(n.energy) ? n.energy : 0), 0)) : null,
     protein: sum("protein"),
     carbs: sum("carbs"),
     fat: sum("fat"),
@@ -82,4 +83,42 @@ export function trayTotals(items: readonly TrayItem[]): TrayTotals {
 /** Every food can be logged (canLog) at more than 0 g, and there is at least one. */
 export function canAddTray(items: readonly TrayItem[]): boolean {
   return items.length > 0 && items.every((i) => i.grams > 0 && canLog(i.food));
+}
+
+/**
+ * Keys for the cards of Khay · xem lại that stay with the card: a Sống ↔ Chín swap changes the card's food (and its
+ * id) but it is the same card, so it must not remount and lose focus. A key is the card's first food id; a second
+ * card for the same id gets `#2`.
+ */
+export interface StableKeys {
+  keyFor(foodId: string): string;
+  /** The card showing `from` now shows `to`. */
+  renamed(from: string, to: string): void;
+  /** Forgets the cards that left (call with the ids now in the tray, before keyFor). */
+  keep(foodIds: readonly string[]): void;
+}
+
+export function createStableKeys(): StableKeys {
+  const keys = new Map<string, string>();
+  const keyFor = (foodId: string): string => {
+    const known = keys.get(foodId);
+    if (known !== undefined) return known;
+    const used = new Set(keys.values());
+    let key = foodId;
+    for (let n = 2; used.has(key); n++) key = `${foodId}#${n}`;
+    keys.set(foodId, key);
+    return key;
+  };
+  return {
+    keyFor,
+    renamed(from, to) {
+      const key = keyFor(from);
+      keys.delete(from);
+      keys.set(to, key);
+    },
+    keep(foodIds) {
+      const now = new Set(foodIds);
+      for (const id of [...keys.keys()]) if (!now.has(id)) keys.delete(id);
+    },
+  };
 }
