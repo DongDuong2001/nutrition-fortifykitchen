@@ -428,8 +428,8 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
   );
 
   // The install pop-up waits while anything else is open, and on a past day
-  const installBusy =
-    isPast || selecting || isCalendarOpen || isCopySheetOpen || isShareOpen || explainerOpen || dayMenuOpen || menuSlot !== null || targetSheet !== null;
+  const sheetOpen = isCalendarOpen || isCopySheetOpen || isShareOpen || explainerOpen || dayMenuOpen || menuSlot !== null || targetSheet !== null;
+  const installBusy = isPast || selecting || sheetOpen;
 
   const chosen = chosenEntries(entries, liveSelected);
   const chosenCount = chosen.length;
@@ -605,6 +605,7 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
                 onMeal={(slot) => setMode(toggleMeal(mode, slot))}
                 onCopyYesterday={() => setIsCopySheetOpen(true)}
                 onLongPressSelect={(id) => startSelect(id)}
+                touchDrag={!backdrop && !sheetOpen && sourcesOf === null}
                 onMoveFood={(id, targetSlot) => {
                   if (readOnly) return;
                   moveEntries([id], targetSlot, viewIso);

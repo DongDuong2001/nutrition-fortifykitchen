@@ -13,6 +13,7 @@ import { haptic } from "@/lib/haptics";
 import { inkPill } from "./ink-pill";
 import { useRowMotion } from "./row-motion";
 import { PullIndicator, usePullRefresh } from "./pull-refresh";
+import { useTouchDrag } from "@/lib/use-touch-drag";
 
 const LONG_PRESS_MS = 500;
 const MOVE_LIMIT_PX = 10;
@@ -37,6 +38,7 @@ function FoodRow({
   onLongPress,
   tourTarget,
   motionClass = "",
+  touchDrag,
 }: {
   entry: HomeEntry;
   selected: boolean;
@@ -46,6 +48,8 @@ function FoodRow({
   tourTarget?: string;
   /** cc-51: m-row-enter for a row that just arrived (row-motion.ts) */
   motionClass?: string;
+  /** cc-70: hold, then drag to another meal (touch and pen). Off: the long press alone. */
+  touchDrag?: { enabled: boolean; onTarget: (slot: HomeMeal["slot"] | null) => void; onDrop: (slot: HomeMeal["slot"]) => void };
 }) {
   const router = useRouter();
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -68,11 +72,31 @@ function FoodRow({
   // Review 05:30 M1: a food without a server row (a recipe made in the app) stays on this device only
   const localOnly = localOnlyIds.has(entry.id);
 
+  // Released after the lift without moving: the long press, as before
+  const longPress = () => {
+    suppressClick.current = true;
+    markUsed("long-press-edit");
+    if (onLongPress) onLongPress(entry.id);
+    else router.push(`/entry/${entry.id}`);
+  };
+  const drag = useTouchDrag({
+    enabled: editable && !!touchDrag?.enabled,
+    slot: entry.slot,
+    onLongPress: longPress,
+    onTarget: (slot) => touchDrag?.onTarget(slot as HomeMeal["slot"] | null),
+    onDrop: (slot) => touchDrag?.onDrop(slot as HomeMeal["slot"]),
+  });
+
   return (
     <button
       type="button"
       draggable={editable}
       onDragStart={(e) => {
+        // A finger or a pen drags through the pointer events, not through the browser's own drag
+        if (drag.touchLast() && touchDrag?.enabled) {
+          e.preventDefault();
+          return;
+        }
         cancel();
         setIsDragging(true);
         e.dataTransfer.setData("application/json", JSON.stringify({ id: entry.id, fromSlot: entry.slot }));
@@ -86,13 +110,15 @@ function FoodRow({
       data-entry-id={entry.id}
       aria-label={`${entry.name}, ${quantity}${detail ? `, ${detail}` : ""}${missing ? ", thiếu dữ liệu vi chất" : ""}${unsaved ? ", chưa lưu" : ""}${localOnly ? ", chỉ trên máy này" : ""}`}
       onClick={() => {
-        if (suppressClick.current) {
+        if (suppressClick.current || drag.justLifted.current) {
           suppressClick.current = false;
+          drag.justLifted.current = false;
           return;
         }
         onSelect();
       }}
       onPointerDown={(e) => {
+        if (drag.onPointerDown(e)) return;
         if (!editable) return;
         origin.current = { x: e.clientX, y: e.clientY };
         timer.current = setTimeout(() => {
@@ -108,15 +134,20 @@ function FoodRow({
         }, LONG_PRESS_MS);
       }}
       onPointerMove={(e) => {
+        if (drag.onPointerMove(e)) return;
         const o = origin.current;
         if (o && Math.hypot(e.clientX - o.x, e.clientY - o.y) > MOVE_LIMIT_PX) cancel();
       }}
-      onPointerUp={cancel}
-      onPointerCancel={cancel}
+      onPointerUp={(e) => {
+        if (!drag.onPointerUp(e)) cancel();
+      }}
+      onPointerCancel={(e) => {
+        if (!drag.onPointerCancel(e)) cancel();
+      }}
       onPointerLeave={cancel}
       onContextMenu={(e) => e.preventDefault()}
       style={noSelect}
-      className={`${motionClass} flex min-h-8 w-full cursor-pointer items-center justify-between gap-2 border-0 border-b border-b-divider px-3 py-1 text-left lg:min-h-12 ${
+      className={`${motionClass} ${touchDrag?.enabled ? "m-drag-lift" : ""} flex min-h-8 w-full cursor-pointer items-center justify-between gap-2 border-0 border-b border-b-divider px-3 py-1 text-left lg:min-h-12 ${
         isDragging ? "opacity-40" : ""
       } ${
         selected ? "bg-cobalt text-on-accent" : "bg-transparent text-text"
@@ -248,6 +279,7 @@ export function FoodList({
   onCopyYesterday,
   onLongPressSelect,
   onMoveFood,
+  touchDrag = true,
   share = false,
   select,
   dayKey = "",
@@ -270,6 +302,8 @@ export function FoodList({
   onCopyYesterday: () => void;
   onLongPressSelect?: (id: string) => void;
   onMoveFood?: (entryId: string, targetSlot: HomeMeal["slot"]) => void;
+  /** cc-70: foods lift after a hold and drag to another meal with a finger. False while a sheet is open. */
+  touchDrag?: boolean;
   /** The share image: meals with no food are left out, nothing is a control, no legend. */
   share?: boolean;
   /** Select mode (Chọn nhiều món): rows are checkboxes and nothing else is pressable. */
@@ -308,7 +342,7 @@ export function FoodList({
   }
   const pill = inkPill();
   return (
-    <div ref={listRef} className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-y-contain bg-page pb-3 lg:rounded-2xl lg:border lg:border-card-border lg:shadow-card">
+    <div ref={listRef} data-food-scroll className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-y-contain bg-page pb-3 lg:rounded-2xl lg:border lg:border-card-border lg:shadow-card">
       {onPullRefresh && !readOnly && <PullIndicator {...pull} />}
       {isEmpty && (
         <div className="flex min-h-11 flex-col items-start px-3 pt-2 lg:flex-row lg:items-center lg:justify-between lg:gap-2 lg:py-2">
@@ -420,6 +454,11 @@ export function FoodList({
                   onSelect={() => onFood(entry.id)}
                   onLongPress={onLongPressSelect}
                   motionClass={state === "enter" ? "m-row-enter" : ""}
+                  touchDrag={
+                    onMoveFood
+                      ? { enabled: touchDrag && !readOnly, onTarget: setDragOverSlot, onDrop: (slot) => onMoveFood(entry.id, slot) }
+                      : undefined
+                  }
                 />
               )
             )}

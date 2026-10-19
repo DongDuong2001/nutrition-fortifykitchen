@@ -48,6 +48,13 @@ export function usePullRefresh(listRef: RefObject<HTMLElement | null>, onRefresh
     };
     const move = (e: TouchEvent) => {
       if (start.current === null) return;
+      // cc-70: a food held for a drag is the list's finger now; it must not pull the day
+      if (list.hasAttribute("data-touch-dragging")) {
+        start.current = null;
+        pullRef.current = 0;
+        paint(0);
+        return;
+      }
       const dy = (e.touches[0].clientY - start.current) * 0.5;
       if (dy <= 0) {
         pullRef.current = 0;

@@ -31,6 +31,18 @@ export interface Release {
 }
 
 export const RELEASES: readonly Release[] = [
+  // cc-70: hold a food, then drag it to another meal (a finger or a pen). The tour stays on Hôm nay: the food list, or the
+  // meal pill when the day has no food yet
+  {
+    id: "2026-10-20a",
+    date: "20/10",
+    items: [
+      { icon: "select", title: "Giữ rồi kéo món sang bữa khác", body: "Trên điện thoại, giữ một món chừng nửa giây rồi kéo sang bữa khác. Kéo nhầm thì bấm Hoàn tác." },
+    ],
+    tour: [
+      { target: "home-food-list", fallback: "meal-pill", title: "Thử kéo món", body: "Giữ một món cho tới khi nó nổi lên, rồi kéo sang bữa khác." },
+    ],
+  },
   // cc-68: yesterday can be edited, history is read from the account, offline logging and the sync status. The tour stays on
   // Hôm nay ("Thử ngay" runs there): the arrow that opens yesterday, + Thêm (yesterday has it too), then the save status
   {
