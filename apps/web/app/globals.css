@@ -122,6 +122,13 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  /* cc-63: no Android pull-to-reload and no white iOS rubber band on the page itself. The lists that scroll keep their own
+     overscroll-behavior (Hôm nay's list is `contain`, and its pull to refresh is its own touch handling). */
+  html,
+  body {
+    overscroll-behavior-y: none;
+  }
+
   body {
     margin: 0;
     background-color: var(--color-page, #FFFFFF);
@@ -449,8 +456,13 @@
   transform-origin: left center;
   animation: m-countdown linear both;
 }
-/* Hover or focus on the toast stops its clock (the store stops its timer): the bar stops with it */
-.m-toast:hover .m-countdown,
+/* Hover (a mouse only: a tap leaves :hover stuck on a phone) or focus on the toast stops its clock (the store stops
+   its timer): the bar stops with it */
+@media (hover: hover) and (pointer: fine) {
+  .m-toast:hover .m-countdown {
+    animation-play-state: paused;
+  }
+}
 .m-toast:focus-within .m-countdown {
   animation-play-state: paused;
 }

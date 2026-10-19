@@ -381,7 +381,7 @@ def tray(browser):
     check(pg.locator("[data-tray-bar]:visible").count() == 1, "tray: one bar")
     bar = pg.locator("[data-tray-bar]:visible").inner_text()
     label = pg.locator("[data-tray-bar]:visible").get_attribute("aria-label") or ""
-    check(label.startswith("3 món · ") and label.endswith(" kcal") and "món · " in bar and "Xem lại" in bar and "Thêm vào Bữa trưa" in bar, f"tray: bar shows count, kcal, Xem lại, Thêm vào ({label!r}, {bar!r})")
+    check(label.startswith("3 món · ") and label.endswith(" kcal") and "món · " in bar and "Xem lại" in bar and "Thêm 3 món vào Bữa trưa" in bar, f"tray: bar shows count, kcal, Xem lại, Thêm vào ({label!r}, {bar!r})")
     check(pg.locator('[data-tray-toggle]:visible[aria-checked="true"]').count() == 3, "tray: three circles are checked")
     # The tray survives a query and a filter
     field = pg.locator('input[type="search"]:visible, input[placeholder*="Tìm món"]:visible').first

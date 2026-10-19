@@ -1,12 +1,9 @@
-import { formatAmount, formatNumber } from "./format";
+import { formatAmount, formatNumber, parseNumberInput } from "./format";
 import type { FoodItem } from "./mock/foods";
 import { cookSwitchFor, type CookState, type CookSwitch } from "./yield";
 
 function parseDecimal(input: string): number | null {
-  const text = input.trim().replace(",", ".");
-  if (!text) return null;
-  const n = Number(text);
-  return Number.isFinite(n) && n >= 0 ? n : null;
+  return parseNumberInput(input);
 }
 
 /** Grams as a gram field holds them: a decimal comma, no thousands dot ("1.000" would read as 1 g), blank for 0. */
@@ -23,7 +20,7 @@ export function gramsServingLabel(grams: number): string {
 export function formatGramsServingLabel(raw: string, fallback: string): string {
   const n = parseDecimal(raw);
   if (n === null) return fallback;
-  return gramsServingLabel(n);
+  return gramsServingLabel(Math.min(n, MAX_GRAMS_PER_PORTION));
 }
 
 /** A food with a `category` and a source, as the supplement rules below need it. */
@@ -364,17 +361,23 @@ export function unitCountOf(
 /** Maximum grams allowed for a single food entry (5 kg). Prevents accidental overflow or typing mistakes. */
 export const MAX_GRAMS_PER_PORTION = 5000;
 
+/** The line under a gram field when what was typed or multiplied went over the limit. */
+export const MAX_GRAMS_MESSAGE = "Tối đa 5.000 g";
+
 /**
- * Parses user-entered grams supporting Vietnamese decimal comma ("2,5") or standard dot ("2.5").
- * Clamped to MAX_GRAMS_PER_PORTION.
+ * Parses user-entered grams: Vietnamese decimal comma ("2,5"), a dot decimal ("2.5") and a thousands dot ("1.000" is
+ * 1000 g). Text and exponents ("12abc", "1e3") are 0. Clamped to MAX_GRAMS_PER_PORTION.
  */
 export function parseGramsInput(input: string): number {
-  if (!input) return 0;
-  const normalized = input.trim().replace(",", ".");
-  const num = parseFloat(normalized);
-  if (isNaN(num) || num <= 0) return 0;
-  if (num > MAX_GRAMS_PER_PORTION) return MAX_GRAMS_PER_PORTION;
-  return num;
+  const num = parseNumberInput(input ?? "");
+  if (num === null || num <= 0) return 0;
+  return Math.min(num, MAX_GRAMS_PER_PORTION);
+}
+
+/** True when a typed amount is above the limit (so the field is written back clamped, with MAX_GRAMS_MESSAGE under it). */
+export function overGramLimit(input: string): boolean {
+  const num = parseNumberInput(input ?? "");
+  return num !== null && num > MAX_GRAMS_PER_PORTION;
 }
 
 /**
@@ -533,9 +536,15 @@ const STATE_TEXT: Record<CookState, string> = { raw: "Cân sống", cooked: "Đ�
 const EGG_SIZES: readonly SizeWord[] = ["nhỏ", "vừa", "lớn", "rất lớn"];
 const round1 = (n: number) => Math.round(n * 10) / 10;
 
-/** A new amount keeps N (coach rule 2). */
+/** The largest amount that keeps base × mult within the limit (to a tenth of a gram, so the product never goes over). */
+function capBase(base: number, mult: number, limit: number): number {
+  const max = Math.floor((limit / Math.max(1, mult)) * 10 + 1e-9) / 10;
+  return Math.max(0, Math.min(base, max));
+}
+
+/** A new amount keeps N (coach rule 2); base × N never goes over MAX_GRAMS_PER_PORTION. */
 export function withBase(p: GramPortion, base: number): GramPortion {
-  return { ...p, base };
+  return { ...p, base: capBase(base, p.mult, MAX_GRAMS_PER_PORTION) };
 }
 
 /** N in whole steps, 1 to MAX_MULT. */
@@ -646,26 +655,52 @@ export function startPortion(food: ModeFood, label: string | null | undefined, g
   return { kind: "grams", base: grams > 0 ? round1(grams) : 100, mult: 1, state: null };
 }
 
+/** What a portion logs: the food row, its grams and label, and the portion as kept (over the limit it is lowered). */
+export interface ResolvedPortion {
+  food: FoodItem;
+  grams: number;
+  label: string;
+  portion: PortionState;
+  /** The amount was lowered to stay within MAX_GRAMS_PER_PORTION */
+  clamped: boolean;
+}
+
 /**
- * What is logged for a portion: the food row, its grams (so per-100 g scaling on the server stays right) and the label.
+ * What is logged for a portion: the food row, its grams (so per-100 g scaling on the server stays right) and the label,
+ * and the portion as kept: base × N never goes over MAX_GRAMS_PER_PORTION, so the label, the grams and the kcal agree.
  * Cooked chicken with only raw data logs the raw row at 150 / 0.74 = 203 g; a food with a pair logs the pair.
  */
-export function resolvePortion(food: FoodItem, p: PortionState, sw: CookSwitch | null): { food: FoodItem; grams: number; label: string } {
+export function fitPortion(food: FoodItem, p: PortionState, sw: CookSwitch | null): ResolvedPortion {
   if (p.kind === "egg") {
     const sizes = eggSizes(food);
     const pick = sizes.find((s) => s.size === p.size) ?? sizes[0];
     const size = sizes.length > 1 && pick ? pick.size : null;
-    return { food, grams: round1((pick?.serving.grams ?? 0) * p.count), label: formatPortionLabel({ ...p, size }) };
+    const portion: EggPortion = { ...p, size };
+    return { food, grams: round1((pick?.serving.grams ?? 0) * p.count), label: formatPortionLabel(portion), portion, clamped: false };
   }
-  const amount = p.base * p.mult;
   const state = sw ? (p.state ?? sw.own) : null;
   let logged = food;
-  let grams = amount;
+  // Logged grams per gram weighed: a raw / cooked conversion scales them
+  let ratio = 1;
   if (sw && state !== sw.own) {
     if (sw.pair) logged = sw.pair;
-    else if (sw.factor) grams = sw.own === "raw" ? amount / sw.factor : amount * sw.factor;
+    else if (sw.factor) ratio = sw.own === "raw" ? 1 / sw.factor : sw.factor;
   }
-  return { food: logged, grams: round1(grams), label: formatPortionLabel({ ...p, state }) };
+  // The amount, its label and the logged grams all stay within the limit, so they cannot disagree
+  const portion: GramPortion = { ...p, state, base: capBase(p.base, p.mult, MAX_GRAMS_PER_PORTION / Math.max(1, ratio)) };
+  return {
+    food: logged,
+    grams: Math.min(MAX_GRAMS_PER_PORTION, round1(portion.base * portion.mult * ratio)),
+    label: formatPortionLabel(portion),
+    portion,
+    clamped: portion.base < p.base,
+  };
+}
+
+/** What is logged for a portion: the food row, its grams and its label (fitPortion without the portion as kept). */
+export function resolvePortion(food: FoodItem, p: PortionState, sw: CookSwitch | null): { food: FoodItem; grams: number; label: string } {
+  const { food: logged, grams, label } = fitPortion(food, p, sw);
+  return { food: logged, grams, label };
 }
 
 /**

@@ -193,7 +193,7 @@ export default function NotificationsSettingsPage() {
                         handleTimeChange(row.timeKey!, e.target.value)
                       }
                       aria-label={timeLabel}
-                      className="peer absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
+                      className="peer absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10 text-base"
                     />
                     <span
                       aria-hidden="true"

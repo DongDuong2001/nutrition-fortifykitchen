@@ -1,17 +1,18 @@
 import { COUNTED_NUTRIENT_KEYS } from "./day-totals";
 import type { AddedDiaryEntry } from "./diary-edits";
 import type { MealSlot } from "./meal-slot";
-import { formatAmount } from "./format";
+import { formatAmount, parseNumberInput } from "./format";
 
 export const QUICK_NAME = "Thêm nhanh";
 
-/** A number typed with a Vietnamese comma ("2,5") or a dot. Blank, text and negatives give null; 0 stays 0. */
+/** A number typed with a Vietnamese comma ("2,5") or a dot. Blank, text ("12abc", "1e3") and negatives give null; 0 stays 0. */
 export function parseDecimalInput(input: string): number | null {
-  const text = input.trim().replace(",", ".");
-  if (!text) return null;
-  const n = Number(text);
-  return Number.isFinite(n) && n >= 0 ? n : null;
+  return parseNumberInput(input);
 }
+
+/** The most kcal one quick entry takes, and the longest name. */
+export const MAX_QUICK_KCAL = 9999;
+export const MAX_QUICK_NAME = 80;
 
 export interface QuickEntryInput {
   name: string;
@@ -40,6 +41,7 @@ export function quickEntryFrom(input: QuickEntryInput, slot: MealSlot, id: strin
   const kcal = parseDecimalInput(input.kcal);
   // Stored as whole kcal, so "0,4" would become 0: it must round to at least 1
   if (kcal === null || Math.round(kcal) < 1) return { ok: false, field: "kcal", message: "Nhập kcal lớn hơn 0" };
+  if (kcal > MAX_QUICK_KCAL) return { ok: false, field: "kcal", message: "Tối đa 9.999 kcal" };
 
   const macros: Record<"protein" | "carbs" | "fat", number | null> = { protein: null, carbs: null, fat: null };
   for (const field of ["protein", "carbs", "fat"] as const) {
@@ -50,7 +52,7 @@ export function quickEntryFrom(input: QuickEntryInput, slot: MealSlot, id: strin
     macros[field] = round1(value);
   }
 
-  const name = input.name.trim() || QUICK_NAME;
+  const name = Array.from(input.name.trim()).slice(0, MAX_QUICK_NAME).join("") || QUICK_NAME;
   return {
     ok: true,
     entry: {

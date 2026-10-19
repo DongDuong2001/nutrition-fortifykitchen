@@ -248,7 +248,7 @@ export default function DevUiPage() {
                   value={sheetInput}
                   onChange={(e) => setSheetInput(e.target.value)}
                   placeholder="Gõ thử vào đây..."
-                  className="h-10 px-3 rounded-lg border border-divider bg-page text-sm outline-none focus-visible:outline-2 focus-visible:outline-blue"
+                  className="h-10 px-3 rounded-lg border border-divider bg-page text-base outline-none focus-visible:outline-2 focus-visible:outline-blue"
                 />
               </label>
               <div className="text-sm text-secondary">

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { formatNumber, formatRange, formatAmount, getWeekdayName, formatDesktopDate, formatDayLabel } from "../format";
+import { formatNumber, formatRange, formatAmount, getWeekdayName, formatDesktopDate, formatDayLabel, parseNumberInput } from "../format";
 
 describe("lib/format", () => {
   describe("formatNumber", () => {
@@ -128,5 +128,20 @@ describe("lib/format", () => {
       expect(formatDayLabel("2026-10-09", now0030)).toBe("Thứ Sáu 09/10");
       expect(formatDayLabel("2026-10-12", now0030)).toBe("Thứ Hai 12/10");
     });
+  });
+});
+
+describe("parseNumberInput (cc-63, B5)", () => {
+  it("reads the Vietnamese way", () => {
+    expect(parseNumberInput("1.000")).toBe(1000);
+    expect(parseNumberInput("12.345.678")).toBe(12345678);
+    expect(parseNumberInput("1,5")).toBe(1.5);
+    expect(parseNumberInput("1.5")).toBe(1.5);
+    expect(parseNumberInput("0")).toBe(0);
+    expect(parseNumberInput(",5")).toBe(0.5);
+  });
+
+  it("gives null for anything it cannot read whole", () => {
+    for (const bad of ["12abc", "1e3", "", " ", "-1", "1.2.3", "1,2,3", "NaN", "Infinity"]) expect(parseNumberInput(bad), bad).toBeNull();
   });
 });

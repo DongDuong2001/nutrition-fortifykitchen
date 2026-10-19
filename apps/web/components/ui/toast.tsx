@@ -18,7 +18,10 @@ export interface ToastProps {
    * announces what is put into it, so its toasts pass false (a region that appears with its text is often not read).
    */
   announce?: boolean;
-  /** The pointer is on the toast or focus is in it (hover and focus stop an auto-dismiss clock, WCAG 2.2.1). */
+  /**
+   * A mouse is on the toast or focus is in it (hover and focus stop an auto-dismiss clock, WCAG 2.2.1). A finger never
+   * counts: iOS fires an emulated mouseenter on a tap and no leave, which left the toast paused for good.
+   */
   onPause?: () => void;
   onResume?: () => void;
   className?: string;
@@ -41,8 +44,8 @@ export function Toast({
   return (
     <div
       role={announce ? "status" : undefined}
-      onMouseEnter={onPause}
-      onMouseLeave={onResume}
+      onPointerEnter={(e) => e.pointerType === "mouse" && onPause?.()}
+      onPointerLeave={(e) => e.pointerType === "mouse" && onResume?.()}
       onFocus={onPause}
       onBlur={onResume}
       data-state={state}

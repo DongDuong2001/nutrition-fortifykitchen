@@ -24,7 +24,10 @@ export interface TrayBarProps {
   className?: string;
 }
 
-/** The bar fixed under the /add list while the tray holds a food: count, total, Xem lại and the one primary action. */
+/**
+ * The bar under the /add list while the tray holds a food ("Hai hàng", Hao 19/10): the count and total with Xem lại on
+ * row 1, the one primary action full width on row 2. Row 1 truncates, so 20 món and 12.345 kcal never overlap a button.
+ */
 export function TrayBar({ totals, mealName, canAdd, submitting = false, onReview, onAdd, className = "" }: TrayBarProps) {
   return (
     <div
@@ -32,28 +35,27 @@ export function TrayBar({ totals, mealName, canAdd, submitting = false, onReview
       aria-label={`${totals.count} món · ${kcalText(totals.kcal)} kcal`}
       data-tray-bar
       data-tour="tray-bar"
-      className={`flex items-center gap-2 rounded-[18px] bg-ink px-3 py-2 text-on-dark shadow-lg ${className}`}
+      className={`flex flex-col gap-1.5 rounded-[18px] bg-ink p-2 text-on-dark shadow-lg ${className}`}
     >
-      <span aria-hidden="true" className="flex h-7 min-w-7 shrink-0 items-center justify-center rounded-full bg-blue px-2 text-sm font-bold text-on-accent tabular-nums">
-        {totals.count}
-      </span>
-      <span aria-hidden="true" className="min-w-0 flex-1 whitespace-nowrap text-[13px] font-semibold leading-tight">
-        món · {kcalText(totals.kcal)} kcal
-      </span>
-      <button
-        type="button"
-        onClick={onReview}
-        className="min-h-11 shrink-0 cursor-pointer rounded-full border-0 bg-transparent px-2 text-[13px] font-bold text-sky "
-      >
-        Xem lại
-      </button>
+      <div className="flex items-center gap-2 pl-3">
+        <span aria-hidden="true" className="min-w-0 flex-1 truncate text-[15px] font-semibold leading-tight tabular-nums">
+          {totals.count} món · <span className="font-display text-lg font-bold">{kcalText(totals.kcal)}</span> kcal
+        </span>
+        <button
+          type="button"
+          onClick={onReview}
+          className="min-h-11 min-w-11 shrink-0 cursor-pointer rounded-full border-0 bg-transparent px-3 text-[15px] font-bold text-sky"
+        >
+          Xem lại
+        </button>
+      </div>
       <button
         type="button"
         onClick={onAdd}
         disabled={!canAdd || submitting}
-        className="min-h-11 shrink-0 cursor-pointer rounded-full border-0 bg-blue px-4 text-[13px] font-bold text-on-accent disabled:cursor-default disabled:opacity-50 "
+        className="flex h-12 w-full min-w-0 cursor-pointer items-center justify-center rounded-full border-0 bg-blue px-4 text-[15px] font-bold text-on-accent disabled:cursor-default disabled:opacity-50"
       >
-        Thêm vào {mealName}
+        <span className="truncate">{`Thêm ${totals.count} món vào ${mealName}`}</span>
       </button>
     </div>
   );
