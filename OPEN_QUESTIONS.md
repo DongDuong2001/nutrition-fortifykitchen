@@ -368,10 +368,11 @@
 - [x] (cc-58, D2) `m-header` / `m-sidebar` view-transition names were not added: since cc-57 a tab or sub-tab change starts no view transition, so there is nothing to isolate; the names would only change how a real push looks.
 - [ ] (Dong) `lib/api-client.ts` `downloadCatalog` now fetches the pages after the first together (at most 4 at a time; the page size that really came sets the page count). Web-vitals field reporting needs a `/client-errors` payload type on the API (not added).
 
+- [ ] (Dong) GET /foods is capped at 50 rows per page on the server, whatever `limit` asks for. The old serial catalogue download therefore stopped at its 30-page limit (about 1,500 foods); the parallel one loads every page, which can mean hundreds of requests on a cold start. Either a bulk catalogue endpoint (one compressed file, or a cursor with a large page for the download only) or a higher cap for the catalogue download would fix it. The web needs no change until then (`downloadCatalog` reads the page size that really came).
+
 ## cc-54 phase 1 (19/10/2026)
 - [ ] (Dong, phase 2) Removing or reducing a part of a dish for one meal ("không bún", "nửa phần thịt") needs a one-off composite entry the API can store (the dish with its own totals and the parts it holds). Phase 1 only adds extras.
 - [ ] (Dong, phase 2) Importing the dish recipes into the database (dish id, ingredient food ids, grams, role, add-ons) instead of the slim file in the web bundle; then the web reads them from the food's payload.
 - [ ] (Hao) The Phở bò add-ons in the research file are + Bánh phở 100 g, + Thịt bò 50 g, + Nạm 30 g. The spec's example "+ Bún" belongs to Bún đậu mắm tôm (+ Bún 100 g, + Đậu hũ chiên, + Chả cốm). The tests use Phở bò with + Bánh phở.
 - [ ] (cc-54) The demo catalogue has none of a dish's ingredients and no source ids, so the portion sheet finds them by (source, source_id) only in live mode. For the demo, Phở bò's eight ingredients are added (demoOnly, from food-research/h1t-foods-units-import.json) when its recipe loads; every other dish shows its rows without kcal in the demo. In live mode an ingredient the catalogue lacks also shows without kcal and cannot be an add-on; the dish ids that did not resolve are listed in the night report.
 - [ ] (cc-54) `dish-recipes.slim.json` also carries each ingredient's name and the dish's serving grams (the spec lists only key, grams, role and the add-on): the name only labels a row that does not resolve, never finds one.
-

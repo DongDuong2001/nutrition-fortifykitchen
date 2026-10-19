@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createDeferredWriter } from "../deferred-write";
+import { keyedStorage } from "../storage-keys";
 
 function setup() {
   const idleQueue: Array<() => void> = [];
@@ -65,14 +66,49 @@ describe("deferred localStorage writes (cc-58)", () => {
     expect(writes).toHaveLength(1);
   });
 
-  it("the same key for another store (the account changed) writes the old value first", () => {
-    const { writer, store, writes } = setup();
+  it("the same key for another store is kept apart: each store gets its own newest value", () => {
+    const { writer, store, writes, idleQueue } = setup();
     const other = { setItem: (k: string, v: string) => void writes.push([`other:${k}`, v]) };
     writer.schedule(store, "entries", () => "mine");
     writer.schedule(other, "entries", () => "theirs");
-    expect(writes).toEqual([["entries", "mine"]]);
-    writer.flush();
-    expect(writes).toEqual([["entries", "mine"], ["other:entries", "theirs"]]);
+    writer.schedule(store, "entries", () => "mine, newer");
+    expect(writes).toEqual([]);
+    idleQueue[0]();
+    expect(writes).toEqual([["entries", "mine, newer"], ["other:entries", "theirs"]]);
+  });
+
+  it("an account switch inside the idle window: A's last edit goes to A's key, B's to B's", () => {
+    const { writer, idleQueue } = setup();
+    const backing = new Map<string, string>();
+    const local = {
+      getItem: (k: string) => backing.get(k) ?? null,
+      setItem: (k: string, v: string) => void backing.set(k, v),
+      removeItem: (k: string) => void backing.delete(k),
+    };
+    const a = keyedStorage(local, false, "acc-a");
+    const b = keyedStorage(local, false, "acc-b");
+    writer.schedule(a, "entries", () => "a-1");
+    writer.schedule(a, "entries", () => "a-last");
+    writer.schedule(b, "entries", () => "b-1");
+    writer.schedule(a, "entries", () => "a-after-switch-back");
+    writer.schedule(b, "entries", () => "b-last");
+    expect(backing.size).toBe(0);
+    expect(idleQueue).toHaveLength(1);
+    idleQueue[0]();
+    expect([...backing]).toEqual([
+      ["entries_acc-a", "a-after-switch-back"],
+      ["entries_acc-b", "b-last"],
+    ]);
+  });
+
+  it("the account's last edit is written when the page hides right after the switch", () => {
+    const { writer, writes, listeners } = setup();
+    const a = { setItem: (k: string, v: string) => void writes.push([`a:${k}`, v]) };
+    const b = { setItem: (k: string, v: string) => void writes.push([`b:${k}`, v]) };
+    writer.schedule(a, "archive", () => "a");
+    writer.schedule(b, "archive", () => "b");
+    listeners.get("pagehide")?.();
+    expect(writes).toEqual([["a:archive", "a"], ["b:archive", "b"]]);
   });
 
   it("a failing store does not stop the other writes", () => {
