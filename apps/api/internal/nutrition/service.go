@@ -166,10 +166,15 @@ func (s *nutritionService) CreateCustomFood(ctx context.Context, userID uuid.UUI
 		{ID: uuid.New(), LabelVi: "100 g", Grams: 100},
 	}
 
+	category := "cua_toi"
+	if req.OneOff || req.IsOneOff {
+		category = "one_off"
+	}
+
 	food := &FoodDetail{
 		ID:               uuid.New(),
 		NameVi:           req.NameVi,
-		Category:         "cua_toi",
+		Category:         category,
 		Source:           "custom",
 		IsCustom:         true,
 		Per100gNutrients: per100g,

@@ -5,15 +5,8 @@ import {
   calculateProteinTarget,
   calculateFatTarget,
   calculateCarbTarget,
-  calculateSodiumTarget,
-  calculatePotassiumTarget,
-  calculateCalciumTarget,
-  calculateMagnesiumTarget,
-  calculateIronTarget,
-  calculateZincTarget,
   calculateFiberTarget,
   calculateFastCarbsTarget,
-  PROVISIONAL_TARGETS,
   type UserProfileForTargets,
 } from "../targets";
 
@@ -23,6 +16,7 @@ describe("lib/targets", () => {
     weightKg: 65,
     goal: "maintain", // Giữ cân
     trainingMinutes: 60,
+    age: 23,
   };
 
   describe("Sample User Verification (HANDOFF.md & SPEC.md)", () => {
@@ -41,35 +35,49 @@ describe("lib/targets", () => {
       expect(targets.fat.min).toBe(33);
       expect(targets.fat.max).toBe(65);
 
-      // Potassium 5.200–6.500 mg
-      expect(targets.potassium.min).toBe(5200);
-      expect(targets.potassium.max).toBe(6500);
-
-      // Sodium 2.750–4.130 mg (rounded to nearest 10 mg)
-      expect(targets.sodium.min).toBe(2750);
-      expect(targets.sodium.max).toBe(4130);
-
-      // Calcium 1.200–1.500 mg
-      expect(targets.calcium.min).toBe(1200);
-      expect(targets.calcium.max).toBe(1500);
-
-      // Magnesium 600–750 mg
-      expect(targets.magnesium.min).toBe(600);
-      expect(targets.magnesium.max).toBe(750);
-
-      // Iron: Men 8 mg (coach rule, HANDOFF.md and design/SPEC.md)
-      expect(targets.iron.min).toBe(8);
-      expect(targets.iron.max).toBe(8);
-
-      // Zinc: Men 12 mg
-      expect(targets.zinc.min).toBe(12);
-
       // Carbs: ~254 g min target
       expect(targets.carbs.min).toBe(254);
+    });
 
-      // VN2016 reference targets included in calculateTargets
-      expect(targets.vitamin_k?.min).toBe(150);
-      expect(targets.b6?.min).toBe(1.3);
+    it("cc-67: 21 of the 22 vitamins and minerals are the VN 2016 recommended amounts for a man of 20–29, not formulas", () => {
+      const t = calculateTargets(sampleUser);
+      const single = (id: string) => {
+        expect(t[id]?.min, id).toBe(t[id]?.max);
+        return t[id]?.min;
+      };
+      expect(single("potassium")).toBe(2500);
+      expect(single("calcium")).toBe(800);
+      expect(single("magnesium")).toBe(340);
+      expect(single("iron")).toBe(7.9);
+      expect(single("zinc")).toBe(10);
+      expect(single("vitamin_k")).toBe(150);
+      expect(single("b6")).toBe(1.3);
+    });
+
+    it("sodium stays the coach's training formula until Hao decides on VN 2016's 2.000 mg (OPEN_QUESTIONS, cc-67 sodium)", () => {
+      expect(calculateTargets({ ...sampleUser, trainingMinutes: 0 }).sodium).toEqual({ min: 1570, max: 2360 });
+      expect(calculateTargets({ ...sampleUser, trainingMinutes: 60 }).sodium).toEqual({ min: 2750, max: 4130 });
+    });
+
+    it("the weight and the training minutes do not move them", () => {
+      const light = calculateTargets({ ...sampleUser, weightKg: 50, trainingMinutes: 0 });
+      const heavy = calculateTargets({ ...sampleUser, weightKg: 95, trainingMinutes: 120 });
+      for (const id of ["potassium", "calcium", "magnesium", "iron", "zinc", "b1", "vitamin_a"]) expect(light[id]).toEqual(heavy[id]);
+    });
+
+    it("a woman and an older man get their own amounts", () => {
+      const woman = calculateTargets({ ...sampleUser, sex: "female" });
+      expect(woman.iron?.min).toBe(17.4);
+      expect(woman.zinc?.min).toBe(8);
+      expect(woman.potassium?.min).toBe(2000);
+      const older = calculateTargets({ ...sampleUser, age: 55 });
+      expect(older.calcium?.min).toBe(800);
+      expect(older.vitamin_d?.min).toBe(20);
+      expect(calculateTargets({ ...sampleUser, sex: "female", age: 55 }).calcium?.min).toBe(900);
+    });
+
+    it("an age that is not given counts as 20–29", () => {
+      expect(calculateTargets({ sex: "male", weightKg: 65, goal: "maintain" }).magnesium?.min).toBe(340);
     });
   });
 
@@ -82,62 +90,4 @@ describe("lib/targets", () => {
     });
   });
 
-  describe("Female-specific targets (Iron & Period)", () => {
-    it("sets iron for male to a single 8 mg value, even in period mode", () => {
-      expect(calculateIronTarget("male", false)).toEqual({ min: 8, max: 8 });
-      expect(calculateIronTarget("male", true)).toEqual({ min: 8, max: 8 });
-    });
-
-    it("sets standard iron for female to 18 mg", () => {
-      const female: UserProfileForTargets = {
-        sex: "female",
-        weightKg: 50,
-        goal: "maintain",
-        isPeriod: false,
-      };
-      expect(calculateIronTarget(female.sex, female.isPeriod)).toEqual({ min: 18, max: 18 });
-      expect(calculateZincTarget(female.sex)).toEqual({ min: 8, max: 8 });
-    });
-
-    it("increases iron to 28 mg when in or near period", () => {
-      const femaleInPeriod: UserProfileForTargets = {
-        sex: "female",
-        weightKg: 50,
-        goal: "maintain",
-        isPeriod: true,
-      };
-      expect(calculateIronTarget(femaleInPeriod.sex, femaleInPeriod.isPeriod)).toEqual({ min: 28, max: 28 });
-    });
-  });
-
-  describe("Training sodium calculation", () => {
-    it("calculates sodium on rest days (0 training min, rounded to nearest 10 mg)", () => {
-      // 4-6 g salt * 393 mg = 1572 - 2358 mg -> 1570 - 2360 mg
-      expect(calculateSodiumTarget(0)).toEqual({ min: 1570, max: 2360 });
-    });
-
-    it("scales salt for 60 min training (3 intervals of 20m -> 7-10.5g salt, rounded to nearest 10 mg)", () => {
-      // 7-10.5 g salt * 393 mg = 2751 - 4126.5 mg -> 2750 - 4130 mg
-      expect(calculateSodiumTarget(60)).toEqual({ min: 2750, max: 4130 });
-    });
-
-    it("rounds potassium target to nearest 10 mg", () => {
-      expect(calculatePotassiumTarget(65)).toEqual({ min: 5200, max: 6500 });
-      expect(calculatePotassiumTarget(63.3)).toEqual({ min: 5060, max: 6330 });
-    });
-  });
-
-  describe("Magnesium derivation", () => {
-    it("derives magnesium as exactly 50% of calcium", () => {
-      expect(calculateMagnesiumTarget({ min: 1000, max: 2000 })).toEqual({ min: 500, max: 1000 });
-      expect(calculateMagnesiumTarget()).toEqual({ min: 600, max: 750 });
-    });
-  });
-
-  describe("Provisional targets flag", () => {
-    it("marks fiber and fastCarbs as provisional", () => {
-      expect(PROVISIONAL_TARGETS.fiber).toBe(true);
-      expect(PROVISIONAL_TARGETS.fastCarbs).toBe(true);
-    });
-  });
 });

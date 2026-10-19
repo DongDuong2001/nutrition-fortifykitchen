@@ -14,6 +14,7 @@ import { getNutrientDefinition } from "@/lib/nutrients";
 import { formatAmount } from "@/lib/format";
 import { isRichNutrientId, richInFoods, richName, type RichBasis } from "@/lib/rich-in";
 import { useBack } from "@/hooks/use-back";
+import { dedupeTwins, rowName } from "@/lib/food-rows";
 
 /** Foods ranked by one nutrient, per 100 g or per usual portion, with the share of the daily target. */
 export default function RichInPage() {
@@ -27,7 +28,7 @@ export default function RichInPage() {
   const definition = valid ? getNutrientDefinition(id) : undefined;
   const min = valid ? (targets[id]?.min ?? null) : null;
   const { foods, pending, failed, retry } = useCatalogFoods();
-  const rows = useMemo(() => (valid ? richInFoods(foods, id, basis, min) : []), [valid, id, basis, min, foods]);
+  const rows = useMemo(() => (valid ? dedupeTwins(richInFoods(foods, id, basis, min), (r) => r.food) : []), [valid, id, basis, min, foods]);
   if (!valid || !definition) notFound();
 
   const name = richName(definition);
@@ -60,7 +61,7 @@ export default function RichInPage() {
               <FoodRowLink
                 key={row.food.id}
                 href={`/foods/${row.food.id}`}
-                name={row.food.nameVi}
+                name={rowName(row.food)}
                 meta={row.pct === null ? row.basis : `${row.pct}% mục tiêu ngày · ${row.basis}`}
                 value={`${formatAmount(row.amount, row.unit)} ${row.unit}`}
                 withBorderTop={i > 0}

@@ -1,10 +1,13 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Toast } from "@/components/ui/toast";
+import dynamic from "next/dynamic";
 import { startInstallCapture } from "@/lib/install-browser";
 import { shouldRegisterServiceWorker } from "@/lib/pwa";
 import { whenIdle } from "@/lib/idle";
+
+// The toast and its wait for the outbox are loaded when an update is waiting
+const UpdateOffer = dynamic(() => import("@/components/pwa/update-offer"), { ssr: false });
 
 /**
  * Registers /sw.js in production and offers an update when a new version is waiting.
@@ -14,6 +17,9 @@ import { whenIdle } from "@/lib/idle";
 export function PwaRegister() {
   const [waiting, setWaiting] = useState<ServiceWorker | null>(null);
   const applying = useRef(false);
+  const apply = useRef(() => {
+    applying.current = true;
+  }).current;
 
   useEffect(() => {
     startInstallCapture();
@@ -74,18 +80,5 @@ export function PwaRegister() {
     };
   }, []);
 
-  if (!waiting) return null;
-
-  const reload = () => {
-    applying.current = true;
-    waiting.postMessage({ type: "SKIP_WAITING" });
-  };
-
-  return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-[calc(168px+env(safe-area-inset-bottom))] z-50 px-3 lg:inset-x-auto lg:bottom-24 lg:right-8 lg:w-[400px]">
-      <div className="pointer-events-auto">
-        <Toast message="Có bản mới" actionLabel="Tải lại" onAction={reload} />
-      </div>
-    </div>
-  );
+  return waiting ? <UpdateOffer worker={waiting} onApply={apply} /> : null;
 }

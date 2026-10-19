@@ -1,3 +1,4 @@
+import { noteLegacyOutboxOwner } from "./legacy-outbox-owner";
 import { isLiveMode } from "./api-mode";
 import {
   mockCurrentAccount,
@@ -92,17 +93,29 @@ function signUpErrorMessage(error: SupabaseErrorLike): string {
 let inMemoryEmail: string | null | undefined = undefined;
 
 function getStoredEmail(): string | null {
-  if (inMemoryEmail !== undefined) return inMemoryEmail;
+  // cc-68 (X1): the key is shared by every tab of the browser, so another tab can sign in as someone else: it is read each
+  // time. What this page last set stands in only where storage cannot be read.
   try {
-    return globalThis.localStorage?.getItem(CURRENT_USER_KEY) ?? null;
+    const stored = globalThis.localStorage?.getItem(CURRENT_USER_KEY);
+    if (stored !== undefined) return stored;
   } catch {
-    return null;
+    // Storage blocked
   }
+  return inMemoryEmail ?? null;
 }
+
+/** The storage keys that say who is signed in: a change to one of them in another tab is a change of account (lib/account-guard). */
+export const isAccountKey = (key: string | null): boolean => key === null || key === CURRENT_USER_KEY || key === SIGNED_OUT_KEY;
+
+// Đăng xuất is running in this tab: its own SIGNED_OUT is not another tab's change of account
+let signingOut = false;
+export const isSigningOut = (): boolean => signingOut;
 
 function setStoredEmail(email: string | null): void {
   inMemoryEmail = email;
   try {
+    // cc-68: the old unscoped outbox goes to the account that was here until now, not to whoever signs in next
+    noteLegacyOutboxOwner(globalThis.localStorage ?? null, globalThis.localStorage?.getItem(CURRENT_USER_KEY) ?? null, email);
     if (email) {
       globalThis.localStorage?.setItem(CURRENT_USER_KEY, email);
       globalThis.localStorage?.removeItem(SIGNED_OUT_KEY);
@@ -397,6 +410,8 @@ export async function signInSampleAccount(): Promise<void> {
 export async function signOut(): Promise<void> {
   clearOnboardingStorage();
   if (!isLiveMode()) return mockSignOut();
+  signingOut = true;
+  setTimeout(() => (signingOut = false), 10_000);
   setStoredEmail(null);
   try {
     await signOutOfSupabase();

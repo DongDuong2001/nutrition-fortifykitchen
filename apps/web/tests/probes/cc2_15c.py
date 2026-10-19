@@ -4,7 +4,7 @@ Production build, clock fixed at 18:00 Asia/Ho_Chi_Minh (Bữa tối). No _demo 
 - an empty account (no profile) opening a tab route lands on /setup/profile; auth, /offline and /install stay
 - a meal is added, the context is closed, a new one opens with the saved storage: the meal, Gần đây and Tổng quan
   ("Kỳ này có 1 ngày đã ghi") still show it
-- an old sessionStorage diary is moved to localStorage once
+- an old sessionStorage diary (from before accounts) is deleted, never adopted by the account (cc-68, X8)
 - demo entries never show after ?demo=0, and real entries never show in demo
 - "Bột củ dền" is not found by search outside demo (Khám phá and the add sheet), and is found in demo
 - each account has its own diary: A logs a food and signs out, B signs in and sees an empty diary, A signs back in and
@@ -55,7 +55,8 @@ def sign_in_magic(pg, email):
 
 def with_profile(ctx):
     ctx.add_init_script(
-        f"try {{ if (localStorage.getItem('h1t_profile_v1') === null) localStorage.setItem('h1t_profile_v1', JSON.stringify({PROFILE})); }} catch (e) {{}}"
+        # cc-68 (X8): an old unscoped profile is deleted, not adopted: the account's own key holds the profile
+        f"try {{ for (const email of ['ban@email.com', 'a@example.com', 'b@example.com']) if (localStorage.getItem('h1t_profile_v1_' + email) === null) localStorage.setItem('h1t_profile_v1_' + email, JSON.stringify({PROFILE})); }} catch (e) {{}}"
     )
 
 
@@ -157,7 +158,7 @@ def run(browser, name, size):
     check("food-bot-cu-den" not in pg.content(), f"{where} no demo: Bột củ dền is not found in the add sheet")
     ctx.close()
 
-    # 5. An old sessionStorage diary moves to localStorage once
+    # 5. An old sessionStorage diary is deleted, never adopted (cc-68, X8)
     ctx, pg = new_page(browser, size)
     # cc-19 exception: sign in before the old entry is seeded, so the seed runs once, on the diary load (the one migration)
     sign_in_magic(pg, "ban@email.com")  # the diary belongs to a signed-in account (the key checked below)
@@ -172,14 +173,14 @@ def run(browser, name, size):
         f"sessionStorage.setItem('h1t_added_entries_v1', JSON.stringify([{json.dumps(entry)}])); }} catch (e) {{}}"
     )
     go(pg, "/app")
-    check("Chà là hạt dẻ cũ" in text(pg), f"{where} migration: the session entry shows in Hôm nay")
-    moved = pg.evaluate(
-        "() => [localStorage.getItem('h1t_added_entries_v1_ban@email.com') !== null, sessionStorage.getItem('h1t_added_entries_v1'),"
+    check("Chà là hạt dẻ cũ" not in text(pg), f"{where} legacy: the old unscoped entry does not show in Hôm nay (never adopted)")
+    gone = pg.evaluate(
+        "() => [localStorage.getItem('h1t_added_entries_v1_ban@email.com'), sessionStorage.getItem('h1t_added_entries_v1'),"
         " localStorage.getItem('h1t_added_entries_v1')]"
     )
     check(
-        moved[0] is True and moved[1] is None and moved[2] is None,
-        f"{where} migration: now under the account's key in localStorage, gone from sessionStorage and the old key ({moved})",
+        gone[1] is None and gone[2] is None and (gone[0] is None or "old-session-1" not in gone[0]),
+        f"{where} legacy: the old keys are deleted and the account's own key does not hold the old entry ({gone})",
     )
     ctx.close()
 

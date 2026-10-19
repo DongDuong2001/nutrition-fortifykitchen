@@ -10,8 +10,10 @@ export interface MealMenuSheetProps {
   open: boolean;
   onClose: () => void;
   mealName: string;
-  /** A past day is read-only: only Lưu thành Bữa ăn của tôi is offered. */
+  /** A day older than yesterday is read-only: only Lưu thành Bữa ăn của tôi is offered. */
   readOnly?: boolean;
+  /** Yesterday (cc-68): it can be edited, but "Như hôm qua" would copy the day before it, so that row is left out. */
+  hideYesterday?: boolean;
   /** What the meal holds on the day shown */
   itemCount: number;
   kcal: number | null;
@@ -41,6 +43,7 @@ export function MealMenuSheet({
   onClose,
   mealName,
   readOnly = false,
+  hideYesterday = false,
   itemCount,
   kcal,
   savableCount,
@@ -155,7 +158,7 @@ export function MealMenuSheet({
       ) : (
         <>
           <div className="flex flex-col">
-            {!readOnly && (
+            {!readOnly && !hideYesterday && (
               <button
                 type="button"
                 disabled={!canCopy}

@@ -87,7 +87,8 @@ def setup(pg, phone):
 def run(browser, name, size):
     phone = size["width"] < 1024
     ctx = browser.new_context(viewport=size)
-    ctx.add_init_script(f"try {{ if (localStorage.getItem('h1t_profile_v1') === null) localStorage.setItem('h1t_profile_v1', JSON.stringify({PROFILE})); }} catch (e) {{}}")
+    # cc-68 (X8): an old unscoped profile is deleted, not adopted: the account's own key holds the profile
+    ctx.add_init_script(f"try {{ if (localStorage.getItem('h1t_profile_v1_ban@email.com') === null) localStorage.setItem('h1t_profile_v1_ban@email.com', JSON.stringify({PROFILE})); }} catch (e) {{}}")
     pg = ctx.new_page()
     errors = []
     pg.on("pageerror", lambda e: errors.append(str(e)))

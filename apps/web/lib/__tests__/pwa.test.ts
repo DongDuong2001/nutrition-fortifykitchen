@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import path, { join } from "node:path";
 import { runInNewContext } from "node:vm";
 import { describe, expect, it } from "vitest";
 import {
@@ -14,6 +14,7 @@ import {
   routeFor,
   shouldRegisterServiceWorker,
 } from "../pwa";
+import { canApplyUpdate, updatePhase } from "../update-phase";
 
 describe("routeFor", () => {
   it("never caches auth routes and the API, for pages and for fetches", () => {
@@ -54,6 +55,34 @@ describe("routeFor", () => {
     expect(routeFor("/manifest.webmanifest", "cors", "GET")).toBe("pass");
     expect(routeFor("/", "navigate", "POST")).toBe("pass");
     expect(routeFor("/_next/static/chunks/a.js", "cors", "POST")).toBe("pass");
+  });
+});
+
+describe("a service-worker update never reloads while the outbox is busy (cc-68)", () => {
+  const idle = { tapped: true, busy: false, saving: false, offline: false, failed: 0 };
+
+  it("is only applied when the person tapped Tải lại and nothing waits or is being sent", () => {
+    expect(canApplyUpdate({ tapped: false, busy: false })).toBe(false);
+    expect(canApplyUpdate({ tapped: true, busy: true })).toBe(false);
+    expect(canApplyUpdate({ tapped: true, busy: false })).toBe(true);
+  });
+
+  it("the toast says what it is doing: ready before the tap, waiting while a send runs, blocked when writes wait on the person or the network", () => {
+    expect(updatePhase({ ...idle, tapped: false, busy: true })).toBe("ready");
+    expect(updatePhase(idle)).toBe("waiting");
+    expect(updatePhase({ ...idle, busy: true, saving: true })).toBe("waiting");
+    // Waiting out a backoff, online, nothing refused: it will go by itself
+    expect(updatePhase({ ...idle, busy: true })).toBe("waiting");
+    // Refused writes, or no network: nothing will clear it without the person
+    expect(updatePhase({ ...idle, busy: true, failed: 2 })).toBe("blocked");
+    expect(updatePhase({ ...idle, busy: true, offline: true })).toBe("blocked");
+  });
+
+  it("the update offer reads the sync summary before it asks the worker to take over", () => {
+    const source = readFileSync(path.resolve(__dirname, "../../components/pwa/update-offer.tsx"), "utf8");
+    expect(source).toMatch(/canApplyUpdate\(\{ tapped, busy \}\)/);
+    // The tap itself only asks for a send; SKIP_WAITING is posted from the effect that waits for an idle outbox
+    expect(source.indexOf("SKIP_WAITING")).toBeGreaterThan(source.indexOf("canApplyUpdate"));
   });
 });
 

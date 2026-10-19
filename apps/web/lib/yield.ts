@@ -53,7 +53,10 @@ for (const [raw, cooked, cookedPer100] of PAIRS as [string, string, number][]) {
   addLink(raw, { own: "raw", other: cooked, factor: cookedPer100 / 100 });
   addLink(cooked, { own: "cooked", other: raw, factor: cookedPer100 / 100 });
 }
-const rowKey = (food: Pick<FoodItem, "source" | "sourceId">) => `${food.source}|${food.sourceId}`;
+export const rowKey = (food: Pick<FoodItem, "source" | "sourceId">) => `${food.source}|${food.sourceId}`;
+
+/** Every raw → cooked pair of the research, in the file's order (the preferred cooked row of a raw row comes first) */
+export const RAW_COOKED_PAIRS: readonly [raw: string, cooked: string, cookedPer100: number][] = PAIRS as [string, string, number][];
 
 /** The pairs the research lists for a food (none for a food without a source_id, or an egg: eggs go by quả) */
 function pairLinksOf(food: Pick<FoodItem, "nameVi" | "source" | "sourceId">): PairLink[] {
@@ -61,10 +64,10 @@ function pairLinksOf(food: Pick<FoodItem, "nameVi" | "source" | "sourceId">): Pa
   return PAIR_LINKS.get(rowKey(food)) ?? [];
 }
 
-const COOKED_WORDS = ["nấu chín", "chín", "luộc", "hấp", "nướng", "chiên", "rang", "áp chảo", "quay", "kho", "xào", "rim"];
-const RAW_WORDS = ["sống", "hạt khô", "khô"];
+export const COOKED_WORDS = ["nấu chín", "chín", "luộc", "hấp", "nướng", "chiên", "rang", "áp chảo", "quay", "kho", "xào", "rim"];
+export const RAW_WORDS = ["sống", "hạt khô", "khô"];
 // "nấu chín" before "chín", "hạt khô" before "khô": the longer word is taken first
-const wordRe = (words: readonly string[], flags = "iu") => new RegExp(`(?:^|[\\s(,])(${words.join("|")})(?=$|[\\s),])`, flags);
+export const wordRe = (words: readonly string[], flags = "iu") => new RegExp(`(?:^|[\\s(,/])(${words.join("|")})(?=$|[\\s),/])`, flags);
 // Built once: the pair search runs them over the whole catalogue
 const COOKED_RE = wordRe(COOKED_WORDS);
 const RAW_RE = wordRe(RAW_WORDS);
@@ -89,6 +92,19 @@ export function nameStem(nameVi: string): string {
     .replace(/[\s,]+/g, " ")
     .trim();
 }
+
+/**
+ * cc-67: the cooking words that only say the food was cooked (nấu chín, chín, luộc, hấp): a row with one of them is the
+ * plain cooked twin of the raw row, and shares its list row. Chiên, xào, nướng, rang, kho, rim change the food (oil,
+ * sauce, char) and stay rows of their own.
+ */
+const PLAIN_COOKED_RE = wordRe(["nấu chín", "chín", "luộc", "hấp"]);
+const PREPARED_RE = wordRe(["nướng", "chiên", "rán", "xào", "kho", "rim", "rang", "quay", "áp chảo", "sốt"]);
+/** True when the name says the food was made into something else (chiên, xào, nướng, kho, rim, rang, quay, sốt). */
+export const isPrepared = (nameVi: string): boolean => PREPARED_RE.test(nameVi);
+
+/** True when the name says plainly that the food is cooked: nấu chín, chín, luộc or hấp, and not made into something (nướng, chiên, xào, kho...). */
+export const isPlainCooked = (nameVi: string): boolean => PLAIN_COOKED_RE.test(nameVi) && !isPrepared(nameVi);
 
 const has = (name: string, words: readonly string[]) => words.some((w) => new RegExp(`(?:^|\\s)${w}(?=$|[\\s,)])`, "iu").test(name));
 
@@ -152,7 +168,7 @@ export function ownCookState(food: Pick<FoodItem, "nameVi" | "category" | "cookS
 
 
 /** Where a name stands among the rows to prefer for a state (stable sort: equal names keep their order) */
-function rankIn(state: CookState, nameVi: string): number {
+export function rankIn(state: CookState, nameVi: string): number {
   const at = (state === "cooked" ? COOKED_RANK : RAW_RANK).findIndex((re) => re.test(nameVi));
   return at === -1 ? 99 : at;
 }
@@ -160,7 +176,9 @@ function rankIn(state: CookState, nameVi: string): number {
 function pairOf(food: FoodItem, catalog: readonly FoodItem[], own: CookState): FoodItem | null {
   const stem = nameStem(food.nameVi);
   const other: CookState = own === "raw" ? "cooked" : "raw";
-  const found = catalog.filter((f) => f.id !== food.id && f.category === food.category && cookStateOf(f.nameVi) === other && nameStem(f.nameVi) === stem);
+  // The raw row of a cooked one may say nothing ("Rau muống" beside "Rau muống (luộc)"): a name with no state is raw
+  const stateOf = (f: FoodItem) => cookStateOf(f.nameVi) ?? (yieldGroupOf(f) === "rice" || yieldGroupOf(f) === "noodle" ? null : "raw");
+  const found = catalog.filter((f) => f.id !== food.id && f.category === food.category && stateOf(f) === other && nameStem(f.nameVi) === stem);
   return [...found].sort((a, b) => rankIn(other, a.nameVi) - rankIn(other, b.nameVi))[0] ?? null;
 }
 
@@ -194,7 +212,12 @@ export function cookSwitchFor(food: FoodItem, catalog: readonly FoodItem[], canS
   const own = ownCookState(food);
   const links = pairLinksOf(food).filter((l) => l.own === own);
   if (links.length > 0) return pairSwitch(own, links, catalog, canSwap);
-  if (!rawCookedMatters(food)) return null;
+  if (!rawCookedMatters(food)) {
+    // cc-67: a vegetable with a plain cooked row (Rau muống, Rau muống luộc) is one list row, so it needs the switch too
+    const twin = canSwap && food.category === "rau" && !has(food.nameVi.toLowerCase(), ["trứng"]) ? pairOf(food, catalog, own) : null;
+    const plain = twin && (own === "raw" ? isPlainCooked(twin.nameVi) : isPlainCooked(food.nameVi));
+    return plain ? { own, pair: twin, factor: null } : null;
+  }
   const pair = canSwap ? pairOf(food, catalog, own) : null;
   const group = yieldGroupOf(food);
   const factor = group ? COOKED_PER_RAW[group] : null;

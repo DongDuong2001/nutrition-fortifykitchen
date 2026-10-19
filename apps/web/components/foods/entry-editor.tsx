@@ -26,7 +26,9 @@ const quickFieldClass =
  */
 export function EntryEditor({ view }: { view: EntryView }) {
   const router = useRouter();
-  const { updateEntry, deleteEntry } = useDiary();
+  const { updateEntry, deleteEntry, todayIso } = useDiary();
+  // An entry of yesterday goes back to yesterday's Hôm nay (cc-68), not to today's
+  const homeHref = view.day && todayIso && view.day < todayIso ? `${HOME_ROUTE}?date=${view.day}` : HOME_ROUTE;
   const food = view.food;
   // A food whose energy is unknown cannot take a new portion: its kcal would be written as 0 (NO_ENERGY_MESSAGE says so)
   const energyUnknown = food !== null && !canLog(food);
@@ -80,12 +82,12 @@ export function EntryEditor({ view }: { view: EntryView }) {
     } else {
       updateEntry(view.id, canPortion ? { grams, servingLabel, mealSlot } : { mealSlot });
     }
-    router.push(HOME_ROUTE);
+    router.push(homeHref);
   };
 
   const handleDelete = () => {
     deleteEntry(view.id);
-    router.push(HOME_ROUTE);
+    router.push(homeHref);
   };
 
   return (
@@ -105,7 +107,7 @@ export function EntryEditor({ view }: { view: EntryView }) {
             getMealSlotNameVi(view.mealSlot)
           )
         }
-        backHref={HOME_ROUTE}
+        backHref={homeHref}
       />
       <div className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-8 pt-4">
         <section className="flex flex-col gap-4 rounded-[18px] lg:shadow-card border border-card-border bg-card p-4">

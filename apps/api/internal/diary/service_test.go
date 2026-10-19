@@ -11,15 +11,20 @@ import (
 type mockDiaryRepo struct {
 	entries        map[uuid.UUID]*DiaryEntryItem
 	deletedEntries map[uuid.UUID]*DiaryEntryItem
+	entryDates     map[uuid.UUID]string
 	training       map[string]int
 	restoreExpired bool
+	conflictIDs    map[uuid.UUID]bool
+	dbError        error
 }
 
 func newMockDiaryRepo() *mockDiaryRepo {
 	return &mockDiaryRepo{
 		entries:        make(map[uuid.UUID]*DiaryEntryItem),
 		deletedEntries: make(map[uuid.UUID]*DiaryEntryItem),
+		entryDates:     make(map[uuid.UUID]string),
 		training:       make(map[string]int),
+		conflictIDs:    make(map[uuid.UUID]bool),
 	}
 }
 
@@ -59,8 +64,8 @@ func (m *mockDiaryRepo) GetUserDefaultTraining(ctx context.Context, userID uuid.
 	return 60, nil
 }
 
-func (m *mockDiaryRepo) GetUserProfile(ctx context.Context, userID uuid.UUID) (string, float64, string, int, bool, error) {
-	return "male", 65.0, "maintain", 60, false, nil
+func (m *mockDiaryRepo) GetUserProfile(ctx context.Context, userID uuid.UUID) (string, float64, string, int, bool, int, error) {
+	return "male", 65.0, "maintain", 60, false, 2000, nil
 }
 
 func (m *mockDiaryRepo) GetFoodNutrients(ctx context.Context, foodID uuid.UUID) (string, map[string]*float64, error) {
@@ -77,20 +82,35 @@ func (m *mockDiaryRepo) GetFoodNutrients(ctx context.Context, foodID uuid.UUID) 
 }
 
 func (m *mockDiaryRepo) CreateEntry(ctx context.Context, userID uuid.UUID, date string, entry *DiaryEntryItem) (*DiaryEntryItem, error) {
+	if m.conflictIDs[entry.ID] {
+		return nil, ErrIDConflict
+	}
 	m.entries[entry.ID] = entry
+	m.entryDates[entry.ID] = date
 	return entry, nil
 }
 
-func (m *mockDiaryRepo) GetEntryByID(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) (*DiaryEntryItem, string, error) {
-	if e, ok := m.entries[entryID]; ok {
-		return e, GetServerToday(), nil
+func (m *mockDiaryRepo) GetEntryByID(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) (*DiaryEntryItem, string, bool, error) {
+	date := GetServerToday()
+	if d, ok := m.entryDates[entryID]; ok {
+		date = d
 	}
-	return nil, "", nil
+	if e, ok := m.entries[entryID]; ok {
+		return e, date, false, nil
+	}
+	if e, ok := m.deletedEntries[entryID]; ok {
+		return e, date, true, nil
+	}
+	return nil, "", false, nil
 }
 
 func (m *mockDiaryRepo) UpdateEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID, entry *DiaryEntryItem) (*DiaryEntryItem, string, error) {
 	m.entries[entryID] = entry
-	return entry, GetServerToday(), nil
+	date := GetServerToday()
+	if d, ok := m.entryDates[entryID]; ok {
+		date = d
+	}
+	return entry, date, nil
 }
 
 func (m *mockDiaryRepo) SoftDeleteEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) error {
@@ -108,7 +128,11 @@ func (m *mockDiaryRepo) RestoreEntry(ctx context.Context, userID uuid.UUID, entr
 	if e, ok := m.deletedEntries[entryID]; ok {
 		m.entries[entryID] = e
 		delete(m.deletedEntries, entryID)
-		return e, GetServerToday(), nil
+		date := GetServerToday()
+		if d, ok := m.entryDates[entryID]; ok {
+			date = d
+		}
+		return e, date, nil
 	}
 	return nil, "", ErrEntryNotFound
 }
@@ -125,6 +149,30 @@ func (m *mockDiaryRepo) DeleteMealEntries(ctx context.Context, userID uuid.UUID,
 func (m *mockDiaryRepo) UpsertDayTraining(ctx context.Context, userID uuid.UUID, date string, minutes int) error {
 	m.training[date] = minutes
 	return nil
+}
+
+func (m *mockDiaryRepo) GetRangeEntries(ctx context.Context, userID uuid.UUID, fromDate, toDate string) (map[string][]DiaryEntryItem, error) {
+	if m.dbError != nil {
+		return nil, m.dbError
+	}
+	out := make(map[string][]DiaryEntryItem)
+	for _, e := range m.entries {
+		out[fromDate] = append(out[fromDate], *e)
+	}
+	return out, nil
+}
+
+func (m *mockDiaryRepo) GetRangeTraining(ctx context.Context, userID uuid.UUID, fromDate, toDate string) (map[string]int, error) {
+	if m.dbError != nil {
+		return nil, m.dbError
+	}
+	out := make(map[string]int)
+	for d, v := range m.training {
+		if d >= fromDate && d <= toDate {
+			out[d] = v
+		}
+	}
+	return out, nil
 }
 
 func TestDiaryService_PastDayReadOnly(t *testing.T) {
@@ -359,5 +407,215 @@ func TestDiaryService_GetDay_TrainingMinutesNullable(t *testing.T) {
 	_, err = svc.SetTraining(context.Background(), userID, today, 30)
 	if !errors.Is(err, ErrInvalidTrainingMinutes) {
 		t.Errorf("expected ErrInvalidTrainingMinutes for 30 min, got %v", err)
+	}
+}
+
+func TestDiaryService_YesterdayIsWritable(t *testing.T) {
+	repo := newMockDiaryRepo()
+	svc := NewService(repo)
+
+	userID := uuid.New()
+	yesterday := GetServerYesterday()
+	foodID := uuid.New()
+
+	item, _, err := svc.CreateEntry(context.Background(), userID, yesterday, CreateEntryRequest{
+		Kind:         "food",
+		FoodID:       &foodID,
+		MealSlot:     "lunch",
+		Grams:        100,
+		ServingLabel: "100 g",
+	})
+	if err != nil {
+		t.Fatalf("yesterday should be writable, got: %v", err)
+	}
+	if item == nil {
+		t.Fatalf("expected created entry item, got nil")
+	}
+
+	day, err := svc.GetDay(context.Background(), userID, yesterday)
+	if err != nil {
+		t.Fatalf("failed to get day: %v", err)
+	}
+	if day.IsReadOnly {
+		t.Errorf("yesterday must not be read-only")
+	}
+}
+
+func TestDiaryService_CreateEntry_IdempotencyOnRetry(t *testing.T) {
+	repo := newMockDiaryRepo()
+	svc := NewService(repo)
+
+	userID := uuid.New()
+	twoDaysAgo := "2020-01-01"
+	foodID := uuid.New()
+	existingID := uuid.New()
+
+	// Pre-populate an existing entry
+	existingItem := &DiaryEntryItem{
+		ID:           existingID,
+		Kind:         "food",
+		FoodID:       &foodID,
+		MealSlot:     "breakfast",
+		ServingLabel: "100 g",
+		Grams:        100,
+	}
+	repo.entries[existingID] = existingItem
+
+	// Client retries an existing ID on a past (read-only) date
+	item, _, err := svc.CreateEntry(context.Background(), userID, twoDaysAgo, CreateEntryRequest{
+		ID:           existingID,
+		Kind:         "food",
+		FoodID:       &foodID,
+		MealSlot:     "breakfast",
+		Grams:        100,
+		ServingLabel: "100 g",
+	})
+	if err != nil {
+		t.Fatalf("retry with existing ID should succeed idempotently, got: %v", err)
+	}
+	if item.ID != existingID {
+		t.Errorf("expected item ID %s, got %s", existingID, item.ID)
+	}
+}
+
+func TestDiaryService_GetDaysRange(t *testing.T) {
+	repo := newMockDiaryRepo()
+	svc := NewService(repo)
+
+	userID := uuid.New()
+	from := "2026-10-15"
+	to := "2026-10-18"
+
+	days, err := svc.GetDaysRange(context.Background(), userID, from, to)
+	if err != nil {
+		t.Fatalf("GetDaysRange failed: %v", err)
+	}
+	if len(days) != 4 {
+		t.Fatalf("expected 4 days in range, got %d", len(days))
+	}
+	if days[0].Date != "2026-10-15" || days[3].Date != "2026-10-18" {
+		t.Errorf("unexpected date range: got %s to %s", days[0].Date, days[3].Date)
+	}
+}
+
+func TestDiaryService_RestorePastDayDoesNotUnDelete(t *testing.T) {
+	repo := newMockDiaryRepo()
+	svc := NewService(repo)
+
+	userID := uuid.New()
+	pastDate := "2020-01-01"
+	entryID := uuid.New()
+	foodID := uuid.New()
+
+	item := &DiaryEntryItem{
+		ID:           entryID,
+		Kind:         "food",
+		FoodID:       &foodID,
+		MealSlot:     "lunch",
+		ServingLabel: "100 g",
+		Grams:        100,
+	}
+	repo.deletedEntries[entryID] = item
+	repo.entryDates[entryID] = pastDate
+
+	// Restoring an entry from a past (read-only) day must return ErrPastDayReadOnly
+	// and MUST NOT un-delete the entry in the DB.
+	_, _, err := svc.RestoreEntry(context.Background(), userID, entryID)
+	if !errors.Is(err, ErrPastDayReadOnly) {
+		t.Fatalf("expected ErrPastDayReadOnly, got: %v", err)
+	}
+
+	if _, ok := repo.entries[entryID]; ok {
+		t.Errorf("entry must not be restored to active entries in DB")
+	}
+	if _, ok := repo.deletedEntries[entryID]; !ok {
+		t.Errorf("entry must remain in deletedEntries")
+	}
+}
+
+func TestDiaryService_RestoreReplayAlreadyLive(t *testing.T) {
+	repo := newMockDiaryRepo()
+	svc := NewService(repo)
+
+	userID := uuid.New()
+	entryID := uuid.New()
+	foodID := uuid.New()
+
+	item := &DiaryEntryItem{
+		ID:           entryID,
+		Kind:         "food",
+		FoodID:       &foodID,
+		MealSlot:     "breakfast",
+		ServingLabel: "100 g",
+		Grams:        100,
+	}
+	repo.entries[entryID] = item
+	repo.entryDates[entryID] = GetServerToday()
+
+	// Replayed restore of an already-live entry returns the entry with 200 (nil error)
+	restored, totals, err := svc.RestoreEntry(context.Background(), userID, entryID)
+	if err != nil {
+		t.Fatalf("replayed restore should succeed, got: %v", err)
+	}
+	if restored.ID != entryID {
+		t.Errorf("expected restored ID %s, got %s", entryID, restored.ID)
+	}
+	if totals == nil {
+		t.Errorf("expected totals to be computed")
+	}
+}
+
+func TestDiaryService_CreateEntry_IDConflict(t *testing.T) {
+	repo := newMockDiaryRepo()
+	svc := NewService(repo)
+
+	userID := uuid.New()
+	foreignID := uuid.New()
+	repo.conflictIDs[foreignID] = true
+	today := GetServerToday()
+	foodID := uuid.New()
+
+	_, _, err := svc.CreateEntry(context.Background(), userID, today, CreateEntryRequest{
+		ID:           foreignID,
+		Kind:         "food",
+		FoodID:       &foodID,
+		MealSlot:     "lunch",
+		Grams:        100,
+		ServingLabel: "100 g",
+	})
+	if !errors.Is(err, ErrIDConflict) {
+		t.Fatalf("expected ErrIDConflict, got: %v", err)
+	}
+}
+
+func TestDiaryService_GetDaysRange_ValidationAndDBError(t *testing.T) {
+	repo := newMockDiaryRepo()
+	svc := NewService(repo)
+	userID := uuid.New()
+
+	// 1. Invalid date format
+	_, err := svc.GetDaysRange(context.Background(), userID, "invalid", "2026-10-18")
+	if !errors.Is(err, ErrInvalidDateFormat) {
+		t.Errorf("expected ErrInvalidDateFormat, got: %v", err)
+	}
+
+	// 2. from > to
+	_, err = svc.GetDaysRange(context.Background(), userID, "2026-10-19", "2026-10-18")
+	if !errors.Is(err, ErrInvalidDateRange) {
+		t.Errorf("expected ErrInvalidDateRange, got: %v", err)
+	}
+
+	// 3. Range > 100 days
+	_, err = svc.GetDaysRange(context.Background(), userID, "2026-01-01", "2026-05-01")
+	if !errors.Is(err, ErrRangeTooLarge) {
+		t.Errorf("expected ErrRangeTooLarge, got: %v", err)
+	}
+
+	// 4. DB error returned as-is from service (handler maps to 500)
+	dbErr := errors.New("database connection reset")
+	repo.dbError = dbErr
+	_, err = svc.GetDaysRange(context.Background(), userID, "2026-10-15", "2026-10-18")
+	if !errors.Is(err, dbErr) {
+		t.Errorf("expected dbErr, got: %v", err)
 	}
 }

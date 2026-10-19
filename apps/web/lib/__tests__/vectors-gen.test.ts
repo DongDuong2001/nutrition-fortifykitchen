@@ -14,6 +14,7 @@ import { COUNTED_NUTRIENT_KEYS, type DayTotals } from "../day-totals";
 
 describe("Export shared test vectors for Go API", () => {
   it("generates packages/vectors/targets.json and period.json", () => {
+    const AGES = [11, 16, 19, 25, 40, 55, 75];
     const targetCases: any[] = [];
     const sexes: ("male" | "female")[] = ["male", "female"];
     const goals: ("build" | "maintain" | "cut" | "deep_cut")[] = ["build", "maintain", "cut", "deep_cut"];
@@ -24,8 +25,10 @@ describe("Export shared test vectors for Go API", () => {
       for (const goal of goals) {
         for (const weightKg of weights) {
           for (const trainingMinutes of [0, 60]) {
+            // cc-67: the 22 micros follow sex and age (lib/rda): the ages go round the VN 2016 bands
+            const age = AGES[targetCases.length % AGES.length];
             const isPeriod = sex === "female";
-            const profile: UserProfileForTargets = { sex, goal, weightKg, trainingMinutes, isPeriod };
+            const profile: UserProfileForTargets = { sex, goal, weightKg, trainingMinutes, isPeriod, age };
             const output = calculateTargets(profile);
             targetCases.push({ input: profile, output });
           }
@@ -55,6 +58,7 @@ describe("Export shared test vectors for Go API", () => {
       goal: "maintain",
       trainingMinutes: 60,
       isPeriod: false,
+      age: 25,
     });
 
     // 1. Period Averages Cases

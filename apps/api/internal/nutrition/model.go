@@ -74,6 +74,8 @@ type CreateCustomFoodRequest struct {
 	Carbs          *float64            `json:"carbs,omitempty"`
 	Fat            *float64            `json:"fat,omitempty"`
 	Micros         map[string]*float64 `json:"micros,omitempty"`
+	OneOff         bool                `json:"one_off,omitempty"`
+	IsOneOff       bool                `json:"is_one_off,omitempty"`
 }
 
 var ErrInvalidNutrient = errors.New("invalid nutrient identifier")

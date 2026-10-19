@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { FINAL_OUTBOX_KEEP_MS, apiClient, apiFetch, getPendingOfflineEntryIds, pendingWriteIds, pruneOutbox, syncOfflineOutbox, writeOutcome, writesInFlight } from "../api-client";
+import { putItem } from "../outbox";
+import { FINAL_OUTBOX_KEEP_MS, loadSyncEngine, apiClient, apiFetch, getPendingOfflineEntryIds, pendingWriteIds, pruneOutbox, syncOfflineOutbox, writeOutcome, writesInFlight } from "../api-client";
 
 // cc-49: a diary write must never live only on the device. These run the real apiClient against a mocked fetch.
 
@@ -38,13 +39,14 @@ const ID = "11111111-1111-4111-8111-111111111111";
 const FOOD = "22222222-2222-4222-8222-222222222222";
 const add = () => apiClient.addEntry({ id: ID, foodId: FOOD, grams: 100, mealSlot: "breakfast", date: "2026-10-18" });
 
-beforeEach(() => {
+beforeEach(async () => {
   vi.stubEnv("NEXT_PUBLIC_API_MODE", "live");
   vi.stubEnv("NEXT_PUBLIC_API_URL", "https://api.test/api/v1");
   const local = memoryStorage();
   local.setItem("h1t_auth_current_email", "sync@example.com");
   vi.stubGlobal("localStorage", local);
   vi.stubGlobal("window", { localStorage: local, sessionStorage: memoryStorage(), location: { search: "", pathname: "/app" } });
+  await loadSyncEngine();
 });
 
 afterEach(() => {
@@ -114,7 +116,7 @@ describe("the outbox", () => {
     expect(result).not.toHaveProperty("message");
     expect(console.warn).toHaveBeenCalledWith(expect.stringContaining("400 VALIDATION_FAILED"));
     expect(console.warn).not.toHaveBeenCalledWith(expect.stringContaining("failed to insert"));
-    expect(await syncOfflineOutbox()).toEqual({ saved: [], held: [] });
+    expect(await syncOfflineOutbox({ force: true })).toEqual({ saved: [], held: [] });
     expect(outbox()).toHaveLength(1);
     expect(await syncOfflineOutbox({ retryHeld: true })).toEqual({ saved: [ID], held: [] });
     expect(outbox()).toEqual([]);
@@ -126,9 +128,9 @@ describe("the outbox", () => {
   it("a 500 is sent again on the next sync and leaves the outbox once saved; five failures do not drop it", async () => {
     server({ "POST /days/2026-10-18/entries": [500, 500, 500, 500, 500, 500, 201] });
     expect((await add()).state).toBe("queued");
-    for (let i = 0; i < 5; i++) await syncOfflineOutbox();
+    for (let i = 0; i < 5; i++) await syncOfflineOutbox({ force: true });
     expect(outbox()).toHaveLength(1);
-    expect((await syncOfflineOutbox()).saved).toEqual([ID]);
+    expect((await syncOfflineOutbox({ force: true })).saved).toEqual([ID]);
     expect(outbox()).toEqual([]);
   });
 
@@ -138,26 +140,49 @@ describe("the outbox", () => {
     expect((await apiClient.updateEntry(ID, { meal_slot: "lunch", grams: 150 })).state).toBe("queued");
     expect(calls.filter((c) => c.startsWith("PATCH"))).toEqual([]);
     expect(outbox().map((i: { method?: string }) => i.method ?? "POST")).toEqual(["POST", "PATCH"]);
-    await syncOfflineOutbox();
+    await syncOfflineOutbox({ force: true });
     expect(calls.slice(-2)).toEqual(["POST /days/2026-10-18/entries", `PATCH /entries/${ID}`]);
     expect(outbox()).toEqual([]);
   });
 
-  it("deleting an entry the server never had drops its queued writes and sends nothing", async () => {
-    const calls = server({ "POST /days/2026-10-18/entries": [503] });
+  it("S7: deleting an entry whose add was attempted keeps the add and queues the DELETE behind it", async () => {
+    const calls = server({ "POST /days/2026-10-18/entries": [503, 201] });
     await add();
-    expect((await apiClient.deleteEntry(ID)).state).toBe("saved");
-    expect(outbox()).toEqual([]);
+    // The add was attempted (a 503 from a proxy may come after the database saved it): it is not dropped
+    expect((await apiClient.deleteEntry(ID)).state).toBe("queued");
+    expect(outbox().map((i: { method?: string }) => i.method ?? "POST")).toEqual(["POST", "DELETE"]);
     expect(calls.filter((c) => c.startsWith("DELETE"))).toEqual([]);
+    await syncOfflineOutbox({ force: true });
+    expect(calls.slice(-2)).toEqual(["POST /days/2026-10-18/entries", `DELETE /entries/${ID}`]);
+    expect(outbox()).toEqual([]);
   });
 
-  it("a delete that fails is queued; undo takes the queued delete back", async () => {
-    const calls = server({ [`DELETE /entries/${ID}`]: [500] });
+  it("S7: an add that never left the device is dropped with the delete, and nothing is sent", async () => {
+    const calls = server({});
+    const scope = { id: "sync@example.com", legacyKey: "h1t_offline_outbox_sync@example.com", account: "sync@example.com" };
+    await putItem(scope, { key: "k1", seq: 1, id: ID, date: "2026-10-18", payload: { id: ID }, createdAt: Date.now(), state: "queued", attempts: 0 });
+    expect((await apiClient.deleteEntry(ID)).state).toBe("saved");
+    expect(outbox()).toEqual([]);
+    expect(calls).toEqual([]);
+  });
+
+  it("a delete that fails is queued; undo of an attempted delete queues the restore behind it", async () => {
+    const calls = server({ [`DELETE /entries/${ID}`]: [500], [`POST /entries/${ID}/restore`]: [200] });
     expect((await apiClient.deleteEntry(ID)).state).toBe("queued");
     expect(pendingWriteIds().has(ID)).toBe(true);
+    // The delete was attempted (it may have been applied): the restore goes after it
+    expect((await apiClient.restoreEntry(ID)).state).toBe("queued");
+    expect(outbox().map((i: { method?: string; path?: string }) => `${i.method} ${i.path}`)).toEqual([`DELETE /entries/${ID}`, `POST /entries/${ID}/restore`]);
+    expect(calls.filter((c) => c.includes("/restore"))).toEqual([]);
+  });
+
+  it("undo of a delete that never left the device takes it back and sends nothing", async () => {
+    const calls = server({});
+    const scope = { id: "sync@example.com", legacyKey: "h1t_offline_outbox_sync@example.com", account: "sync@example.com" };
+    await putItem(scope, { key: "k1", seq: 1, id: ID, date: "", method: "DELETE", path: `/entries/${ID}`, payload: {}, createdAt: Date.now(), state: "queued", attempts: 0 });
     expect((await apiClient.restoreEntry(ID)).state).toBe("saved");
     expect(outbox()).toEqual([]);
-    expect(calls.filter((c) => c.includes("/restore"))).toEqual([]);
+    expect(calls).toEqual([]);
   });
 
   it("a write queued while a sync runs is kept", async () => {
@@ -174,7 +199,7 @@ describe("the outbox", () => {
       })
     );
     await add();
-    const running = syncOfflineOutbox();
+    const running = syncOfflineOutbox({ force: true });
     await apiClient.addEntry({ id: OTHER, foodId: FOOD, grams: 50, mealSlot: "lunch", date: "2026-10-18" });
     await running;
     expect(outbox().map((i: { id: string }) => i.id)).toEqual([OTHER]);
@@ -186,7 +211,7 @@ describe("the outbox", () => {
       JSON.stringify([{ id: ID, date: "2026-10-18", payload: { id: ID }, createdAt: 1, retries: 2 }])
     );
     const calls = server({ "POST /days/2026-10-18/entries": [201] });
-    expect((await syncOfflineOutbox()).saved).toEqual([ID]);
+    expect((await syncOfflineOutbox({ force: true })).saved).toEqual([ID]);
     expect(calls).toEqual(["POST /days/2026-10-18/entries"]);
   });
 
@@ -196,7 +221,7 @@ describe("the outbox", () => {
     const sending = add();
     expect(pendingWriteIds().has(ID)).toBe(true);
     expect(writesInFlight()).toBe(1);
-    await Promise.resolve();
+    await vi.waitFor(() => expect(fetch).toHaveBeenCalled());
     release(new Response("{}", { status: 201 }));
     await sending;
     await Promise.resolve();
@@ -260,7 +285,7 @@ describe("accounts (review 05:30 M2: the outbox is pinned to its account)", () =
     vi.stubGlobal("fetch", vi.fn(() => new Promise<Response>((resolve) => (release = resolve))));
     const sending = add();
     localStorage.setItem("h1t_auth_current_email", "other@example.com");
-    await Promise.resolve();
+    await vi.waitFor(() => expect(fetch).toHaveBeenCalled());
     release(new Response("{}", { status: 500 }));
     await sending;
     expect(localStorage.getItem("h1t_offline_outbox_other@example.com")).toBeNull();
@@ -272,7 +297,7 @@ describe("accounts (review 05:30 M2: the outbox is pinned to its account)", () =
     vi.stubGlobal("fetch", vi.fn(() => new Promise<Response>((resolve) => (release = resolve))));
     const deleting = apiClient.deleteEntry(ID);
     localStorage.setItem("h1t_auth_current_email", "other@example.com");
-    await Promise.resolve();
+    await vi.waitFor(() => expect(fetch).toHaveBeenCalled());
     release(new Response("{}", { status: 503 }));
     await deleting;
     expect(outboxOf("sync@example.com")).toMatchObject([{ id: ID, method: "DELETE" }]);
@@ -291,13 +316,15 @@ describe("accounts (review 05:30 M2: the outbox is pinned to its account)", () =
     const sent: string[] = [];
     vi.stubGlobal(
       "fetch",
-      vi.fn(async (_url: string, init?: RequestInit) => {
+      vi.fn(async (url: string, init?: RequestInit) => {
+        // (items this old are also reported to /client-errors as outbox_age; that is not a diary write)
+        if (String(url).endsWith("/client-errors")) return new Response(null, { status: 204 });
         sent.push(JSON.parse(String(init?.body)).id);
         localStorage.setItem("h1t_auth_current_email", "other@example.com");
         return new Response("{}", { status: 201 });
       })
     );
-    await syncOfflineOutbox();
+    await syncOfflineOutbox({ force: true });
     expect(sent).toEqual([ID]);
     expect(outboxOf("sync@example.com").map((i) => i.id)).toEqual([OTHER]);
     expect(localStorage.getItem("h1t_offline_outbox_other@example.com")).toBeNull();
@@ -322,7 +349,7 @@ describe("writes that can never succeed (review 05:30 M1)", () => {
     );
     const fetchMock = vi.fn(async (_url: string) => new Response(JSON.stringify({ error: { code: "PAST_DAY_READ_ONLY", message: "Cannot write to past dates" } }), { status: 409 }));
     vi.stubGlobal("fetch", fetchMock);
-    const first = await syncOfflineOutbox();
+    const first = await syncOfflineOutbox({ force: true });
     expect(first.held).toEqual([{ id: ID, status: 409, date: "2026-10-17", final: true }]);
     expect(await syncOfflineOutbox({ retryHeld: true })).toEqual({ saved: [], held: [] });
     // cc-50: the refusal is reported once to /client-errors; the write itself went out once

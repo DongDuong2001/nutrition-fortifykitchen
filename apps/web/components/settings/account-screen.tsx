@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AuthNotice } from "@/components/auth/auth-notice";
@@ -11,9 +12,14 @@ import { Card } from "@/components/ui/card";
 import { FormRow } from "@/components/ui/form-row";
 import { Row } from "@/components/ui/row";
 import { useDiary } from "@/lib/diary-store";
-import { signOut } from "@/lib/auth-actions";
+import { currentAccountId, signOut } from "@/lib/auth-actions";
+import { isLiveMode } from "@/lib/api-mode";
+import { callEngine, syncOfflineOutbox } from "@/lib/api-client";
 import { useSaveDisplayName } from "@/hooks/use-save-display-name";
 import { cleanDisplayName, limitDisplayName, validateDisplayName } from "@/lib/display-name";
+
+// Only a person who signs out with writes waiting ever sees it: its chunk is not part of the page
+const SignOutConfirm = dynamic(() => import("@/components/settings/sign-out-confirm").then((m) => m.SignOutConfirm), { ssr: false });
 
 /** Tên hiển thị. It saves on blur or Enter. A name is required (it is on the share image): a blank or unusable one stays on screen with its error. */
 function DisplayNameRow() {
@@ -86,9 +92,35 @@ export function AccountScreen() {
   const router = useRouter();
   const ready = hydrated && loaded;
 
-  async function handleSignOut() {
+  // cc-68 (X8): Đăng xuất in a real account wipes what the device kept for it. With writes still waiting the person is asked first.
+  const [waiting, setWaiting] = useState<{ count: number; busy: boolean; failed: boolean } | null>(null);
+
+  async function leave(account: string | null, dropPending: boolean) {
     await signOut();
-    router.push("/signin");
+    if (account) await callEngine("wipeAccount", account, { dropPending });
+    // A full load: nothing of this account stays in the page's memory (the foods it made, its diary)
+    window.location.assign("/signin");
+  }
+
+  async function handleSignOut() {
+    if (!isLiveMode()) {
+      await signOut();
+      router.push("/signin");
+      return;
+    }
+    const account = currentAccountId();
+    const count = account ? await callEngine("unsyncedCount", account) : 0;
+    if (count > 0) setWaiting({ count, busy: false, failed: false });
+    else await leave(account, false);
+  }
+
+  async function syncThenLeave() {
+    const account = currentAccountId();
+    setWaiting((w) => w && { ...w, busy: true, failed: false });
+    await syncOfflineOutbox({ retryHeld: true }).catch(() => undefined);
+    const count = account ? await callEngine("unsyncedCount", account) : 0;
+    if (count === 0) await leave(account, false);
+    else setWaiting({ count, busy: false, failed: true });
   }
 
   return (
@@ -116,6 +148,17 @@ export function AccountScreen() {
         )}
       </main>
 
+      {waiting && (
+        <SignOutConfirm
+          open
+          count={waiting.count}
+          busy={waiting.busy}
+          failed={waiting.failed}
+          onSyncThenLeave={() => void syncThenLeave()}
+          onLeave={() => void leave(currentAccountId(), true)}
+          onClose={() => setWaiting(null)}
+        />
+      )}
       <AuthNotice />
     </AppShell>
   );

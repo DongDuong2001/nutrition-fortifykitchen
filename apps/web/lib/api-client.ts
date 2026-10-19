@@ -6,24 +6,18 @@ import {
   type MockMacroStat,
   type MockMicroStat,
 } from "./mock/sample-day";
-import { calculateTargets } from "./targets";
-import { MOCK_FOODS, addCatalogFood, catalogChanged, setCatalogFoods, setCatalogStatus, type FoodItem } from "./mock/foods";
-import { searchFoods as searchMockFoods } from "./search";
+import { MOCK_FOODS, addCatalogFood, catalogChanged, setCatalogFoods, setCatalogStatus, weighedFruit, type FoodItem } from "./mock/foods";
 import type { SetupProfile } from "./onboarding";
 import { currentAccountId } from "./auth-actions";
 import { yieldToMain } from "./idle";
-import { OFFLINE_OUTBOX_KEY, accountStorage, browserLocal, keyedStorage, type KeyValueStore } from "./storage-keys";
-import { isDemo } from "./demo";
-import { type CoachProfile, filterCoachesBySpecialty, getCoachById } from "./coaches";
-import { type LeaderboardPeriod, type LeaderboardResponse, getMockLeaderboard, setLeaderboardOptIn as setLeaderboardOptInState } from "./leaderboard";
+import type { OutboxItem } from "./outbox";
 import { readStoredProfile, type Profile } from "./profile";
-import { shiftIsoDate } from "./day-history";
 import { generateUuid, isUuid } from "./uuid";
 import { refreshServerSession } from "./server-session";
 import { reportClientError } from "./client-errors";
-import { addToCatalogCache, catalogCacheState, readCatalogCache, writeCatalogCache } from "./catalog-cache";
+// The device's copy of the catalogue (and IndexedDB behind it) is loaded when the catalogue is read or written, not with the page
+const catalogCache = () => import("./catalog-cache");
 import { normaliseCoaching } from "./coaching-link";
-import { isRecipeId } from "./recipe";
 import type { GoalType, SexType } from "./targets";
 
 export * from "./nutrients";
@@ -52,7 +46,7 @@ export function mapApiFoodToFoodItem(raw: any): FoodItem {
     nutrients.energy = nutrients.calories;
   }
 
-  return {
+  return weighedFruit({
     id: String(raw.id),
     nameVi,
     category: raw.category || "khac",
@@ -65,7 +59,7 @@ export function mapApiFoodToFoodItem(raw: any): FoodItem {
     match: raw.match,
     sourceRef: raw.sourceRef,
     recipe: mapApiRecipe(raw.recipe),
-  };
+  });
 }
 
 /** The API's `recipe` ({ ingredients: [{ food_id, name_vi, grams }], cooked_g }); anything else is no recipe. */
@@ -182,38 +176,6 @@ export interface DaySummaryResponse {
   meals: MealSlotSummary[];
 }
 
-export interface DiaryLog {
-  id: string;
-  user_id: string;
-  food_id: string;
-  kind?: "food" | "quick";
-  meal_slot: "breakfast" | "lunch" | "dinner" | "snack" | "pre_workout" | "preworkout" | "intraworkout" | "postworkout";
-  quantity: number;
-  serving_size_g: number;
-  nutrients_snapshot: NutrientValues;
-  log_date: string;
-  created_at: string;
-}
-
-export interface DailyProgress {
-  log_date: string;
-  total_nutrients: NutrientValues;
-  target_nutrients?: NutrientValues;
-  completion_percentages?: Record<string, number>;
-  logs_count: number;
-}
-
-export interface LogMealPayload {
-  id: string; // Client-generated UUID
-  food_id: string;
-  kind?: "food" | "quick";
-  meal_slot: "breakfast" | "lunch" | "dinner" | "snack" | "pre_workout" | "preworkout" | "intraworkout" | "postworkout";
-  quantity: number;
-  serving_size_g?: number;
-  log_date?: string;
-  calories?: number;
-}
-
 /**
  * POST /foods/custom: the values of one serving of `servingSize` (the server stores them per 100 g). `micros` takes
  * any canonical nutrient key (fiber and the 22 micros); null is unknown.
@@ -227,6 +189,8 @@ export interface CreateFoodInput {
   carbs?: number | null;
   fat?: number | null;
   micros?: Record<string, number | null | undefined>;
+  /** The one-off food of an edited dish: the API keeps it out of every list on every device (category one_off). */
+  oneOff?: boolean;
 }
 
 /** Thrown by searchFoods in live mode when /foods did not answer. */
@@ -243,6 +207,7 @@ let foodsInFlight: Promise<FoodItem[]> | null = null;
  */
 async function fetchAllFoods(): Promise<FoodItem[]> {
   const account = currentAccountId();
+  const { readCatalogCache, catalogCacheState } = await catalogCache();
   const saved = await readCatalogCache(account);
   const state = catalogCacheState(saved?.at ?? null, Date.now());
   if (saved && (state === "fresh" || state === "stale")) {
@@ -353,7 +318,7 @@ async function downloadCatalog(account: string | null, background: boolean): Pro
   }
   setCatalogFoods(foods);
   setCatalogStatus("ready");
-  if (complete) void writeCatalogCache(account, foods);
+  if (complete) void catalogCache().then((c) => c.writeCatalogCache(account, foods));
   return foods;
 }
 
@@ -405,10 +370,10 @@ export async function apiFetch(path: string, init: RequestInit = {}): Promise<Re
   return send();
 }
 
-// Diary writes and the outbox. A write that did not reach the server is never dropped: it waits in the outbox
-// (localStorage, per account) and is sent again on the next sync. OFFLINE_OUTBOX_KEY is read inside the functions
-// only: api-client, storage-keys and auth-actions import each other, so a module-level read of it can run before
-// storage-keys has finished loading ("Cannot access 'x' before initialization", depending on which page loads first).
+// Diary writes and the outbox (cc-68: write-ahead). Every write is committed to the outbox (lib/outbox: IndexedDB, one
+// record per write) BEFORE its request goes out, marked "sending"; it leaves the outbox when the server has it. A write
+// that did not reach the server is never dropped: it waits there to be sent again on the next sync. The outbox belongs
+// to the account that was signed in when the write was made (the scope is taken at that moment), never another's.
 
 /**
  * The server saved it, it waits in the outbox to be sent again, the server refused it (a 4xx) and it waits for Thử lại,
@@ -421,12 +386,13 @@ export interface WriteResult {
   state: WriteState;
   /** The answer's status (0 = no answer), for a held write. The server's body is never kept: it can be a proxy's page. */
   status?: number;
-  /** Held for good (409 PAST_DAY_READ_ONLY): never sent again, not even by Thử lại. */
+  message?: string;
+  /** Held for good (409 PAST_DAY_READ_ONLY on a day beyond the editable window): never sent again, not even by Thử lại. */
   final?: boolean;
 }
 
-/** The server's code for a write to a day that has passed: sending it again can never work. */
-const PAST_DAY_READ_ONLY = "PAST_DAY_READ_ONLY";
+/** The server's code for a write to a day that has passed: sending it again can never work (beyond the editable window). */
+export const PAST_DAY_READ_ONLY = "PAST_DAY_READ_ONLY";
 
 /** What a diary write's answer means. 0 = no answer (offline, or the request failed). */
 export function writeOutcome(status: number, method: string): "saved" | "retry" | "held" {
@@ -437,34 +403,7 @@ export function writeOutcome(status: number, method: string): "saved" | "retry" 
   return "held";
 }
 
-interface OutboxItem {
-  /** The entry the write is about. */
-  id: string;
-  date: string;
-  payload: Record<string, unknown>;
-  /** Absent on an add queued before cc-49: POST /days/{date}/entries. */
-  method?: "POST" | "PATCH" | "DELETE";
-  path?: string;
-  /** This one write (an entry can have several queued). Absent before cc-49: `${id}:${createdAt}`. */
-  key?: string;
-  createdAt: number;
-  retries?: number;
-  /**
-   * The server refused it with a 4xx: not sent again until Thử lại or the next app open (syncOfflineOutbox({ retryHeld:
-   * true })). `final`: refused for good (a past day), never sent again.
-   */
-  held?: { status: number; final?: boolean };
-}
-
-type DiaryWrite = Pick<OutboxItem, "id" | "date" | "payload" | "method" | "path">;
-
-const itemKey = (item: OutboxItem) => item.key ?? `${item.id}:${item.createdAt}`;
-const itemMethod = (item: DiaryWrite) => item.method ?? "POST";
-const itemPath = (item: DiaryWrite) => item.path ?? `/days/${item.date}/entries`;
-const isAdd = (item: DiaryWrite) => itemMethod(item) === "POST" && itemPath(item) === `/days/${item.date}/entries`;
-
-/** A write that names a recipe's local id: the server refuses it, so it waits until repointOutboxFood gives it the server food. */
-const waitsForFood = (item: DiaryWrite) => typeof item.payload?.food_id === "string" && isRecipeId(item.payload.food_id);
+export type { OutboxItem } from "./outbox";
 
 /** A write refused for good (held.final) is kept this long, then dropped so the outbox does not grow without end. */
 export const FINAL_OUTBOX_KEEP_MS = 7 * 24 * 60 * 60 * 1000;
@@ -474,93 +413,11 @@ export function pruneOutbox<T extends Pick<OutboxItem, "createdAt" | "held">>(it
   return items.filter((item) => !(item.held?.final && now - item.createdAt > FINAL_OUTBOX_KEEP_MS));
 }
 
-/** The storage of one account's outbox: the signed-in one, or `account` when a write or a run belongs to it. */
-function outboxStorage(account?: string | null): KeyValueStore | null {
-  if (account === undefined) return accountStorage();
-  const local = browserLocal();
-  return local ? keyedStorage(local, isDemo(), account) : null;
-}
-
-function readOutbox(account?: string | null): OutboxItem[] {
-  try {
-    const items: unknown = JSON.parse(outboxStorage(account)?.getItem(OFFLINE_OUTBOX_KEY) || "[]");
-    return Array.isArray(items) ? (items as OutboxItem[]) : [];
-  } catch {
-    return [];
-  }
-}
-
-function writeOutbox(items: OutboxItem[], account?: string | null): void {
-  try {
-    outboxStorage(account)?.setItem(OFFLINE_OUTBOX_KEY, JSON.stringify(items));
-  } catch {
-    // Storage unavailable
-  }
-}
-
-/** Queues a write in the outbox of `account` (default: the signed-in one), never another account's. */
-function queueWrite(write: DiaryWrite, held?: OutboxItem["held"], account?: string | null): void {
-  const createdAt = Date.now();
-  writeOutbox([...readOutbox(account), { ...write, key: `${write.id}:${createdAt}:${generateUuid()}`, createdAt, retries: 0, held }], account);
-}
-
-/** Queues an add to send later (kept for callers from before cc-49; diary writes queue themselves). */
-export function enqueueOfflineEntry(date: string, payload: Record<string, unknown>): void {
-  queueWrite({ id: (payload.id as string) || `offline-${Date.now()}`, date, payload });
-}
-
-/** Removes every queued write of an entry (an entry that never reached the server, deleted or undone). */
-export function dropOfflineEntry(id: string): void {
-  const items = readOutbox();
-  const kept = items.filter((item) => item.id !== id);
-  if (kept.length !== items.length) writeOutbox(kept);
-}
-
-/**
- * Points `account`'s queued writes that name food `from` (a recipe's local id) at `to` (its server food), and lifts
- * their hold (the server refused the local id), so the next sync sends them. A write held for good stays held.
- */
-export function repointOutboxFood(from: string, to: string, account: string | null): number {
-  let changed = 0;
-  const items = readOutbox(account).map((item) => {
-    if (item.payload?.food_id !== from) return item;
-    changed++;
-    return { ...item, payload: { ...item.payload, food_id: to }, held: item.held?.final ? item.held : undefined };
-  });
-  if (changed > 0) writeOutbox(items, account);
-  return changed;
-}
-
-/** Entry ids with a write in the outbox for the active account. */
-export function getPendingOfflineEntryIds(): string[] {
-  return readOutbox().map((item) => item.id);
-}
-
-// Writes being sent now, by entry: the next write of the same entry waits for it, so the server sees them in order
-const inFlight = new Map<string, Promise<WriteResult>>();
-// When each entry's last write started: a refetch that started before it must not overwrite it (diary-store)
-const writeStartedAt = new Map<string, number>();
-
-/** Entry ids a refetch must leave as they are on the device: a write is queued or being sent. */
-export function pendingWriteIds(): Set<string> {
-  return new Set([...getPendingOfflineEntryIds(), ...inFlight.keys()]);
-}
-
-/** Entry ids whose last write started at or after `time` (ms). */
-export function writtenSince(time: number): string[] {
-  return [...writeStartedAt].filter(([, at]) => at >= time).map(([id]) => id);
-}
-
-/** How many diary writes are being sent now. */
-export function writesInFlight(): number {
-  return inFlight.size;
-}
-
 /**
  * The error code of an answer ("PAST_DAY_READ_ONLY"), and nothing else of its body: the body can be a proxy's HTML page or
  * a stack trace, so it is never shown, logged or sent (cc-63, X7). A code that does not look like one is "".
  */
-async function serverCode(res: Response): Promise<string> {
+export async function serverCode(res: Response): Promise<string> {
   try {
     const code = JSON.parse(await res.text())?.error?.code;
     return typeof code === "string" && /^[A-Za-z0-9_.-]{1,64}$/.test(code) ? code : "";
@@ -570,66 +427,9 @@ async function serverCode(res: Response): Promise<string> {
 }
 
 /** Diary requests give up after this: a request a phone froze in the background must not hold the outbox or a refetch. */
-const DIARY_REQUEST_MS = 20 * 1000;
-const diaryTimeout = (): AbortSignal | undefined =>
+export const DIARY_REQUEST_MS = 20 * 1000;
+export const diaryTimeout = (): AbortSignal | undefined =>
   typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function" ? AbortSignal.timeout(DIARY_REQUEST_MS) : undefined;
-
-async function sendWrite(write: DiaryWrite): Promise<{ outcome: "saved" | "retry" | "held"; status: number; final: boolean }> {
-  const method = itemMethod(write);
-  let status = 0;
-  let code = "";
-  try {
-    const res = await apiFetch(itemPath(write), {
-      method,
-      body: method === "DELETE" ? undefined : JSON.stringify(write.payload),
-      signal: diaryTimeout(),
-    });
-    status = res.status;
-    if (status >= 300) code = await serverCode(res);
-  } catch {
-    // No answer: sent again from the outbox
-  }
-  const outcome = writeOutcome(status, method);
-  if (outcome === "held") console.warn(`Diary write not saved: ${method} ${itemPath(write)} → ${status} ${code}`.trim());
-  // Any non-2xx answer (not a 404 on a delete, which means done) is reported once: its status and error code only
-  if (status >= 300 && outcome !== "saved") reportClientError({ kind: "write", method, path: itemPath(write), status, message: code });
-  return { outcome, status, final: outcome === "held" && status === 409 && code === PAST_DAY_READ_ONLY };
-}
-
-/**
- * Sends one diary write, after any write of the same entry that is still being sent or still queued. What does not
- * reach the server goes to the outbox: no answer, 401 after the session refresh, 408, 429 and 5xx to be sent again,
- * any other 4xx held for Thử lại (its status only: the server's text is never kept).
- */
-function diaryWrite(write: DiaryWrite): Promise<WriteResult> {
-  writeStartedAt.set(write.id, Date.now());
-  const account = currentAccountId();
-  const before = inFlight.get(write.id) ?? Promise.resolve<WriteResult>({ state: "saved" });
-  const run = before.then(async (): Promise<WriteResult> => {
-    const queued = readOutbox().filter((item) => item.id === write.id);
-    if (itemMethod(write) === "DELETE" && queued.some(isAdd)) {
-      // The server never had this entry: nothing to delete, and its queued writes go too
-      dropOfflineEntry(write.id);
-      return { state: "saved" };
-    }
-    if (queued.length > 0) {
-      // Earlier writes of this entry wait in the outbox: this one goes after them
-      queueWrite(write);
-      void syncOfflineOutbox();
-      return { state: "queued" };
-    }
-    const { outcome, status, final } = await sendWrite(write);
-    if (outcome === "saved") return { state: "saved" };
-    // Into the outbox of the account the write belongs to, even when another one signed in meanwhile
-    queueWrite(write, outcome === "held" ? { status, final } : undefined, account);
-    return outcome === "held" ? { state: "held", status, final } : { state: "queued", status };
-  });
-  inFlight.set(write.id, run);
-  void run.finally(() => {
-    if (inFlight.get(write.id) === run) inFlight.delete(write.id);
-  });
-  return run;
-}
 
 export interface SyncResult {
   /** Entries whose add or edit the server has now (a delete is not listed). */
@@ -638,71 +438,132 @@ export interface SyncResult {
   held: Array<{ id: string; status: number; date: string; final: boolean }>;
 }
 
-let syncQueue: Promise<SyncResult> = Promise.resolve({ saved: [], held: [] });
 
-/**
- * Sends the outbox in order, one run at a time (a call during a run starts after it). A write that fails again stays,
- * and the later writes of its entry wait behind it; no answer at all ends the run (offline). Held writes are sent
- * only with `retryHeld` (Thử lại). Writes queued while a run is going are kept.
- */
-export function syncOfflineOutbox(options: { retryHeld?: boolean } = {}): Promise<SyncResult> {
-  syncQueue = syncQueue.catch(() => ({ saved: [], held: [] })).then(() => runOutbox(options.retryHeld === true));
-  return syncQueue;
+// The sending side of the outbox (lib/sync-engine, with lib/outbox and IndexedDB behind it) is loaded after the first
+// paint: the diary provider asks for it on mount, and the first write or sync loads it if it is not there yet. These
+// are its front. The reads the screens make while rendering answer "nothing waiting" until it is loaded, which is true:
+// nothing can be sent or queued by this page life before it is.
+type Engine = typeof import("./sync-engine");
+let engine: Engine | null = null;
+let engineLoading: Promise<Engine> | null = null;
+
+export function loadSyncEngine(): Promise<Engine> {
+  engineLoading ??= import("./sync-engine").then((loaded) => (engine = loaded));
+  return engineLoading;
 }
 
-async function runOutbox(retryHeld: boolean): Promise<SyncResult> {
-  const result: SyncResult = { saved: [], held: [] };
-  // The run belongs to the account signed in when it starts: its writes never go out with another account's session
-  const account = currentAccountId();
-  const items = readOutbox(account);
-  if (!items.length) return result;
-  const blocked = new Set<string>();
-  const sent = new Set<string>();
-  const changed = new Map<string, Partial<OutboxItem>>();
-  for (const item of items) {
-    if (blocked.has(item.id) || item.held?.final || (item.held && !retryHeld) || waitsForFood(item)) {
-      blocked.add(item.id);
-      continue;
+/** Runs `use` with the engine: at once when it is loaded (a write is registered in the same tick), else after it loads. */
+function withEngine<T>(use: (loaded: Engine) => T | Promise<T>): Promise<T> {
+  return engine ? Promise.resolve(use(engine)) : loadSyncEngine().then(use);
+}
+
+/** The diary's list could not be written (no room, storage blocked): the lasting banner goes up. */
+export function reportStorageFailure(error: unknown): void {
+  void loadSyncEngine().then((loaded) => loaded.storageFailed(error));
+}
+
+/** A write of the diary's list worked again: the banner of a full disk goes down. */
+export function reportStorageWorked(): void {
+  void loadSyncEngine().then((loaded) => loaded.storageWorked());
+}
+
+/**
+ * Sends the outbox in order, one run at a time. A write that fails again stays, and the later writes of its entry wait
+ * behind it; no answer at all ends the run (offline). Held writes are sent only with `retryHeld` (Thử lại). Only one
+ * tab drains at a time.
+ */
+export const syncOfflineOutbox = (options: { retryHeld?: boolean; force?: boolean } = {}): Promise<SyncResult> => withEngine((e) => e.syncOfflineOutbox(options));
+
+/** The outbox as the screens show it: what waits, what was refused, what gave up. Nothing before the engine is loaded. */
+export const outboxSummary = () => engine?.outboxSummary() ?? null;
+/** Every write of the active account that has not reached the server, oldest first (for the list behind the sync status). */
+export const outboxItems = (): OutboxItem[] => engine?.outboxItems() ?? [];
+
+/** Entry ids with a write in the outbox for the active account. */
+export const getPendingOfflineEntryIds = (): string[] => engine?.getPendingOfflineEntryIds() ?? [];
+/** Entry ids a refetch must leave as they are on the device: a write is queued or being sent. */
+export const pendingWriteIds = (): Set<string> => engine?.pendingWriteIds() ?? new Set<string>();
+/** How many diary writes are being sent now. */
+export const writesInFlight = (): number => engine?.writesInFlight() ?? 0;
+/** Whether a side write (profile, weight, favourite, training) is waiting: a server copy read now must not replace it. */
+export const hasPendingWrite = (entity: string): boolean => engine?.hasPendingWrite(entity) ?? false;
+/** The favourites changes waiting to be sent, oldest first: [foodId, on]. Applied on top of a list read from the server. */
+export const pendingFavouriteOps = (): Array<[string, boolean]> => engine?.pendingFavouriteOps() ?? [];
+
+/**
+ * Calls a function of the sync engine (loaded after the first paint). It is how the rest of the app reaches what lives there:
+ * the outbox, the history cache, the server-day merge, the account guard, the wipe on Đăng xuất.
+ */
+type EngineFn = { [K in keyof Engine]: Engine[K] extends (...args: never[]) => unknown ? K : never }[keyof Engine];
+export function callEngine<K extends EngineFn>(name: K, ...args: Parameters<Engine[K] extends (...a: never[]) => unknown ? Engine[K] : never>): Promise<Awaited<ReturnType<Engine[K] extends (...a: never[]) => unknown ? Engine[K] : never>>> {
+  return withEngine((loaded) => (loaded[name] as (...a: unknown[]) => unknown)(...args)) as never;
+}
+
+/**
+ * Runs `onChange` when the outbox changes, here or in another tab (the screens' "Chưa lưu" markers follow it), and `onDiary`
+ * when another tab saved something to the server (this tab then reads the server's day again).
+ */
+export function watchOutbox(onChange: () => void, onDiary?: () => void): () => void {
+  let stop = () => {};
+  let stopped = false;
+  void loadSyncEngine().then((loaded) => {
+    if (!stopped) stop = loaded.watchOutbox(onChange, onDiary);
+  });
+  return () => {
+    stopped = true;
+    stop();
+  };
+}
+
+/**
+ * Calls `onMismatch` when the account signed in on this browser is no longer `account` (another tab signed in as someone
+ * else, or signed out): from then on nothing of this page is written or sent (X1, lib/account-guard).
+ */
+export function watchAccountChange(account: string, onMismatch: (now: string | null) => void): () => void {
+  let stop = () => {};
+  let stopped = false;
+  void loadSyncEngine().then((loaded) => {
+    if (!stopped) {
+      stop = loaded.watchAccount(account, (now) => {
+        loaded.freezeWrites();
+        onMismatch(now);
+      });
     }
-    if (currentAccountId() !== account) break;
-    const { outcome, status, final } = await sendWrite(item);
-    if (outcome === "saved") {
-      sent.add(itemKey(item));
-      if (itemMethod(item) !== "DELETE") result.saved.push(item.id);
-      continue;
-    }
-    blocked.add(item.id);
-    const retries = (item.retries ?? 0) + 1;
-    if (outcome === "held") {
-      changed.set(itemKey(item), { retries, held: { status, final } });
-      result.held.push({ id: item.id, status, date: item.date, final });
-    } else {
-      changed.set(itemKey(item), { retries, held: undefined });
-      if (status === 0) break;
-    }
-  }
-  // Writes refused for good leave after FINAL_OUTBOX_KEEP_MS (their notice was shown when they were refused)
-  writeOutbox(
-    pruneOutbox(
-      readOutbox(account)
-        .filter((item) => !sent.has(itemKey(item)))
-        .map((item) => (changed.has(itemKey(item)) ? { ...item, ...changed.get(itemKey(item)) } : item)),
-      Date.now()
-    ),
-    account
-  );
-  return result;
+  });
+  return () => {
+    stopped = true;
+    stop();
+  };
+}
+
+/**
+ * Points `account`'s queued writes that name food `from` (a recipe's local id) at `to` (its server food), and lifts
+ * their hold (the server refused the local id), so the next sync sends them. A write held for good stays held.
+ */
+export function repointOutboxFood(from: string, to: string, account: string | null): number {
+  return engine?.repointOutboxFood(from, to, account) ?? 0;
+}
+
+/** For tests: forgets the writes this page life had in the air (a page that was killed has none). */
+export function resetWriteMemory(): void {
+  engine?.resetWriteMemory();
+}
+
+/** The body of PUT /me/profile. */
+function profileBody(profile: SetupProfile): Record<string, unknown> {
+  return {
+    sex: profile.sex,
+    birth_year: profile.birthYear,
+    weight_kg: profile.weightKg,
+    goal: profile.goal,
+    ...(profile.nearPeriod !== undefined || profile.periodMode !== undefined ? { near_period: Boolean(profile.nearPeriod ?? profile.periodMode) } : {}),
+    ...(profile.trainingMinutesDefault !== undefined ? { training_minutes_default: profile.trainingMinutesDefault } : {}),
+    // The display name travels with the profile save
+    ...(profile.displayName ? { display_name: profile.displayName } : {}),
+  };
 }
 
 export const apiClient = {
-  /**
-   * Get the complete typed day data matching design/SPEC.md
-   * (Backed by typed mock until backend API is ready)
-   */
-  async getTodayData(): Promise<MockDayData> {
-    return Promise.resolve(SAMPLE_DAY);
-  },
-
   /** The day as the server has it. Null in live mode when it could not be read: never an empty day, which a refetch would take for "everything was deleted". */
   async getDay(date?: string): Promise<DaySummaryResponse | null> {
     const targetDate = date || getTodayIsoVN();
@@ -733,196 +594,6 @@ export const apiClient = {
     };
   },
 
-  async getDailyProgress(date?: string): Promise<{ progress: DailyProgress; logs: DiaryLog[] }> {
-    if (isLiveMode()) {
-      try {
-        const targetDate = date || getTodayIsoVN();
-        const res = await apiFetch(`/days/${encodeURIComponent(targetDate)}`);
-        if (res.ok) {
-          const json = await res.json();
-          const dayData = json.data ?? json;
-          if (dayData.meals && dayData.summary) {
-            const logs: DiaryLog[] = [];
-            for (const m of dayData.meals) {
-              for (const e of m.entries || []) {
-                logs.push({
-                  id: e.id,
-                  user_id: "",
-                  food_id: e.food_id || "",
-                  kind: e.kind,
-                  meal_slot: e.meal_slot,
-                  quantity: 1,
-                  serving_size_g: e.grams,
-                  nutrients_snapshot: e.nutrients || {},
-                  log_date: dayData.date,
-                  created_at: e.created_at,
-                });
-              }
-            }
-            const progress: DailyProgress = {
-              log_date: dayData.date,
-              total_nutrients: {
-                calories: dayData.summary.calories || dayData.summary.energy || 0,
-                protein: dayData.summary.protein || 0,
-                carbohydrates: dayData.summary.carbs || 0,
-                fat: dayData.summary.fat || 0,
-                fiber: dayData.summary.fiber || 0,
-                sodium: dayData.summary.sodium || 0,
-                potassium: dayData.summary.potassium || 0,
-                calcium: dayData.summary.calcium || 0,
-                magnesium: dayData.summary.magnesium || 0,
-                iron: dayData.summary.iron || 0,
-                zinc: dayData.summary.zinc || 0,
-              },
-              logs_count: logs.length,
-            };
-            return { progress, logs };
-          }
-          return dayData;
-        }
-      } catch {
-        // Fallback to mock on transport failure
-      }
-      return {
-        progress: {
-          log_date: date || getTodayIsoVN(),
-          total_nutrients: {
-            calories: 0,
-            protein: 0,
-            carbohydrates: 0,
-            fat: 0,
-            fiber: 0,
-            sodium: 0,
-            potassium: 0,
-            calcium: 0,
-            magnesium: 0,
-            iron: 0,
-            zinc: 0,
-          },
-          logs_count: 0,
-        },
-        logs: [],
-      };
-    }
-
-    // Convert SAMPLE_DAY to DailyProgress fallback
-    const targets = calculateTargets({
-      weightKg: 65,
-      goal: "maintain",
-      trainingMinutes: 60,
-      sex: "male",
-    });
-
-    const mockProgress: DailyProgress = {
-      log_date: date || SAMPLE_DAY.date,
-      total_nutrients: {
-        calories: SAMPLE_DAY.calories.consumed,
-        protein: SAMPLE_DAY.macros.find((m) => m.key === "protein")?.consumed || 62,
-        carbohydrates: SAMPLE_DAY.macros.find((m) => m.key === "carbs")?.consumed || 133,
-        fat: SAMPLE_DAY.macros.find((m) => m.key === "fat")?.consumed || 21,
-        fiber: SAMPLE_DAY.macros.find((m) => m.key === "fiber")?.consumed || 14,
-        sodium: 2900,
-        potassium: 3900,
-        calcium: 331,
-        magnesium: 410,
-        iron: 11,
-        zinc: 12.4,
-      },
-      target_nutrients: {
-        calories: targets.calories.min,
-        protein: targets.protein.min,
-        carbohydrates: targets.carbs.min,
-        fat: targets.fat.min,
-        fiber: targets.fiber.min,
-        sodium: targets.sodium.min,
-        potassium: targets.potassium.min,
-        calcium: targets.calcium.min,
-        magnesium: targets.magnesium.min,
-        iron: targets.iron.min,
-        zinc: targets.zinc.min,
-      },
-      completion_percentages: {
-        calories: SAMPLE_DAY.calories.percentage,
-        protein: 60,
-        carbohydrates: 52,
-        fat: 64,
-        fiber: 47,
-      },
-      logs_count: SAMPLE_DAY.meals.reduce((acc, m) => acc + m.items.length, 0),
-    };
-
-    return { progress: mockProgress, logs: [] };
-  },
-
-  async logMeal(payload: LogMealPayload): Promise<{ log: DiaryLog; today_progress: DailyProgress }> {
-    if (isLiveMode()) {
-      try {
-        const date = payload.log_date || getTodayIsoVN();
-        const res = await apiFetch(`/days/${date}/entries`, {
-          method: "POST",
-          body: JSON.stringify(payload),
-        });
-        if (res.ok) {
-          const json = await res.json();
-          return json.data ?? json;
-        }
-      } catch {
-        enqueueOfflineEntry(payload.log_date || getTodayIsoVN(), payload as unknown as Record<string, unknown>);
-      }
-    }
-
-    const dummyLog: DiaryLog = {
-      id: payload.id,
-      user_id: "mock-user",
-      food_id: payload.food_id,
-      meal_slot: payload.meal_slot,
-      quantity: payload.quantity,
-      serving_size_g: payload.serving_size_g || 100,
-      nutrients_snapshot: {
-        calories: 100,
-        protein: 10,
-        carbohydrates: 10,
-        fat: 2,
-        fiber: 1,
-        sodium: 50,
-      },
-      log_date: payload.log_date || "2026-10-10",
-      created_at: new Date().toISOString(),
-    };
-
-    const { progress } = await this.getDailyProgress();
-    return { log: dummyLog, today_progress: progress };
-  },
-
-  async searchFoods(query = "", category?: string, limit = 500): Promise<FoodItem[]> {
-    if (isLiveMode()) {
-      try {
-        const params = new URLSearchParams();
-        if (query) params.set("q", query);
-        if (category) params.set("category", category);
-        if (limit) params.set("limit", String(limit));
-        const res = await apiFetch(`/foods?${params.toString()}`);
-        if (res.ok) {
-          const json = await res.json();
-          const payload = json.data ?? json;
-          const items = payload.items ?? (Array.isArray(payload) ? payload : []);
-          if (Array.isArray(items)) {
-            const mapped = items.map(mapApiFoodToFoodItem);
-            setCatalogFoods(mapped);
-            return mapped;
-          }
-        }
-      } catch {
-        // Falls through to the error below
-      }
-      // Live mode never answers with the sample foods: the caller shows an error with Thử lại
-      throw new Error(FOODS_UNAVAILABLE);
-    }
-
-    const filtered = category ? MOCK_FOODS.filter((f) => f.category === category) : MOCK_FOODS;
-    return searchMockFoods(filtered, query);
-  },
-
   /**
    * Live mode: the whole catalogue. Asks /foods?limit=500&page=1 and goes on with the next page (same limit) while
    * fewer foods than the response's total are collected, at most 30 pages (a server that caps a page at 50 still
@@ -934,8 +605,11 @@ export const apiClient = {
   loadAllFoods(): Promise<FoodItem[]> {
     if (!isLiveMode()) return Promise.resolve(MOCK_FOODS);
     if (!foodsInFlight) {
+      const started = performance.now();
       foodsInFlight = fetchAllFoods().finally(() => {
         foodsInFlight = null;
+        // User Timing, for DevTools and the probes: how long the foods took from the call to being usable
+        performance.measure("h1t:catalogue", { start: started });
       });
     }
     return foodsInFlight;
@@ -976,6 +650,7 @@ export const apiClient = {
           carbs: input.carbs,
           fat: input.fat,
           micros: input.micros,
+          ...(input.oneOff ? { one_off: true } : {}),
         };
         const res = await apiFetch(`/foods/custom`, {
           method: "POST",
@@ -986,7 +661,8 @@ export const apiClient = {
           const raw = json.data ?? json;
           const mapped = mapApiFoodToFoodItem(raw);
           addCatalogFood(mapped);
-          void addToCatalogCache(currentAccountId(), mapped);
+          // A one-off food is no part of the catalogue the server lists, so it is not kept in the device's copy of it
+          if (!input.oneOff) void catalogCache().then((c) => c.addToCatalogCache(currentAccountId(), mapped));
           return mapped;
         }
         // Fixed words and the status: the server's own text is never shown
@@ -1019,8 +695,7 @@ export const apiClient = {
         fat: input.fat != null ? Math.round(input.fat * factor * 10) / 10 : null,
       },
     };
-    MOCK_FOODS.unshift(newFood);
-    catalogChanged();
+    addCatalogFood(newFood);
     return newFood;
   },
 
@@ -1060,26 +735,11 @@ export const apiClient = {
       }
 
       // The id is the client's (idempotent on the server), so a write sent again never adds the entry twice
-      const result = await diaryWrite({ id: entryId, date, payload: body });
+      const result = await withEngine((e) => e.diaryWrite({ id: entryId, date, payload: body }));
       return { success: result.state === "saved", id: entryId, ...result };
     }
 
     return { success: true, id: entryId, state: "saved" };
-  },
-
-  async getTrends(days = 7, offset = 0): Promise<Record<string, unknown>> {
-    if (isLiveMode()) {
-      try {
-        const res = await apiFetch(`/trends?days=${days}&offset=${offset}`);
-        if (res.ok) {
-          const json = await res.json();
-          return (json.data ?? json) as Record<string, unknown>;
-        }
-      } catch {
-        // Fallback
-      }
-    }
-    return {};
   },
 
   async getFavourites(): Promise<FoodItem[]> {
@@ -1099,33 +759,16 @@ export const apiClient = {
     return [];
   },
 
-  async addFavourite(foodId: string): Promise<boolean> {
-    if (isLiveMode()) {
-      try {
-        const res = await apiFetch(`/favourites`, {
-          method: "POST",
-          body: JSON.stringify({ food_id: foodId }),
-        });
-        return res.ok;
-      } catch {
-        return false;
-      }
-    }
-    return true;
-  },
-
-  async removeFavourite(foodId: string): Promise<boolean> {
-    if (isLiveMode()) {
-      try {
-        const res = await apiFetch(`/favourites/${encodeURIComponent(foodId)}`, {
-          method: "DELETE",
-        });
-        return res.ok;
-      } catch {
-        return false;
-      }
-    }
-    return true;
+  /** A favourite on or off: through the outbox (S6), so an offline tap is sent later and the last one wins. */
+  async setFavourite(foodId: string, on: boolean): Promise<WriteResult> {
+    if (!isLiveMode() || !isUuid(foodId)) return { state: "saved" };
+    return withEngine((e) => e.sideWrite({
+      kind: "favourite",
+      entity: `fav:${foodId}`,
+      method: on ? "POST" : "DELETE",
+      path: on ? "/favourites" : `/favourites/${encodeURIComponent(foodId)}`,
+      payload: { food_id: foodId },
+    }));
   },
 
   async getRecents(): Promise<FoodItem[]> {
@@ -1145,161 +788,36 @@ export const apiClient = {
     return [];
   },
 
-  async getSavedMeals(): Promise<Array<{ id: string; name: string; items: unknown[] }>> {
-    if (isLiveMode()) {
-      try {
-        const res = await apiFetch(`/saved-meals`);
-        if (res.ok) {
-          const json = await res.json();
-          const payload = json.data ?? json;
-          return Array.isArray(payload) ? payload : (payload.items || []);
-        }
-      } catch {
-        // Fallback
-      }
-    }
-    return [];
+  /** The weight of a day: through the outbox (S6), the newest value of the day wins. */
+  async queueWeight(date: string, weightKg: number): Promise<WriteResult> {
+    if (!isLiveMode()) return { state: "saved" };
+    return withEngine((e) =>
+      e.sideWrite({
+        kind: "weight",
+        entity: `weight:${date}`,
+        method: "PUT",
+        path: `/me/weight/${encodeURIComponent(date)}`,
+        payload: { weight_kg: weightKg },
+        day: date,
+      })
+    );
   },
 
-  async createSavedMeal(name: string, items: Array<{ foodId: string; grams: number }>): Promise<{ id: string }> {
-    const id = `saved-meal-${Date.now()}`;
-    if (isLiveMode()) {
-      try {
-        const res = await apiFetch(`/saved-meals`, {
-          method: "POST",
-          body: JSON.stringify({
-            name,
-            items: items.map((it, idx) => ({
-              food_id: it.foodId,
-              grams: it.grams,
-              serving_size_g: it.grams,
-              portion_label: "Khẩu phần",
-              sort: idx,
-            })),
-          }),
-        });
-        if (res.ok) {
-          const json = await res.json();
-          const data = json.data ?? json;
-          return { id: data.id || id };
-        }
-      } catch {
-        // Fallback
-      }
-    }
-    return { id };
-  },
-
-  async deleteSavedMeal(id: string): Promise<boolean> {
-    if (isLiveMode()) {
-      try {
-        const res = await apiFetch(`/saved-meals/${encodeURIComponent(id)}`, {
-          method: "DELETE",
-        });
-        return res.ok;
-      } catch {
-        return false;
-      }
-    }
-    return true;
-  },
-
-  async logSavedMeal(date: string, savedMealId: string, meal: string): Promise<boolean> {
-    if (isLiveMode()) {
-      try {
-        const res = await apiFetch(`/days/${date}/entries/from-saved/${encodeURIComponent(savedMealId)}?meal=${encodeURIComponent(meal)}`, {
-          method: "POST",
-        });
-        return res.ok;
-      } catch {
-        return false;
-      }
-    }
-    return true;
-  },
-
-  async updateWeight(date: string, weightKg: number): Promise<boolean> {
-    if (isLiveMode()) {
-      try {
-        const res = await apiFetch(`/me/weight/${encodeURIComponent(date)}`, {
-          method: "PUT",
-          body: JSON.stringify({ weight_kg: weightKg }),
-        });
-        return res.ok;
-      } catch {
-        return false;
-      }
-    }
-    return true;
-  },
-
-  async getWeightLogs(from?: string, to?: string): Promise<Array<{ log_date: string; weight_kg: number }>> {
-    if (isLiveMode()) {
-      try {
-        const params = new URLSearchParams();
-        if (from) params.set("from", from);
-        if (to) params.set("to", to);
-        const res = await apiFetch(`/me/weight?${params.toString()}`);
-        if (res.ok) {
-          const json = await res.json();
-          const payload = json.data ?? json;
-          return Array.isArray(payload) ? payload : (payload.logs || []);
-        }
-      } catch {
-        // Fallback
-      }
-    }
-    return [];
-  },
-
+  /** A day's training minutes: through the outbox (S6), the newest value of the day wins. */
   async setTraining(date: string, minutes: number): Promise<boolean> {
-    if (isLiveMode()) {
-      try {
-        const res = await apiFetch(`/days/${encodeURIComponent(date)}/training`, {
-          method: "PUT",
-          body: JSON.stringify({ training_minutes: minutes }),
-        });
-        return res.ok;
-      } catch {
-        return false;
-      }
-    }
-    return true;
+    if (!isLiveMode()) return true;
+    const result = await withEngine((e) => e.sideWrite({
+      kind: "weight",
+      entity: `training:${date}`,
+      method: "PUT",
+      path: `/days/${encodeURIComponent(date)}/training`,
+      payload: { training_minutes: minutes },
+      day: date,
+    }));
+    return result.state !== "held";
   },
 
-  async copyYesterday(date: string, mealSlots?: string[]): Promise<boolean> {
-    if (isLiveMode()) {
-      try {
-        const sourceDate = shiftIsoDate(date, -1);
-        const res = await apiFetch(`/days/${encodeURIComponent(date)}/copy-yesterday`, {
-          method: "POST",
-          body: JSON.stringify({
-            source_date: sourceDate,
-            meal_slots: mealSlots || [],
-          }),
-        });
-        return res.ok;
-      } catch {
-        return false;
-      }
-    }
-    return true;
-  },
-
-  async deleteMeal(date: string, meal: string): Promise<boolean> {
-    if (isLiveMode()) {
-      try {
-        const res = await apiFetch(`/days/${encodeURIComponent(date)}/meals/${encodeURIComponent(meal)}`, {
-          method: "DELETE",
-        });
-        return res.ok;
-      } catch {
-        return false;
-      }
-    }
-    return true;
-  },
-
+  /** `day` is the entry's day, so a 409 for a day beyond the editable window is told from one the API does not allow yet. */
   async updateEntry(
     id: string,
     patch: {
@@ -1308,48 +826,42 @@ export const apiClient = {
       serving_size_g?: number;
       serving_label?: string;
       calories?: number;
-    }
+    },
+    day?: string
   ): Promise<WriteResult> {
     // Only a uuid can be on the server (a sample entry of the demo is not)
     if (!isLiveMode() || !isUuid(id)) return { state: "saved" };
     const slot = patch.meal_slot === "preworkout" ? "pre_workout" : patch.meal_slot;
-    return diaryWrite({
-      id,
-      date: "",
-      method: "PATCH",
-      path: `/entries/${encodeURIComponent(id)}`,
-      payload: {
-        meal_slot: slot,
-        grams: patch.grams,
-        serving_size_g: patch.serving_size_g ?? patch.grams,
-        serving_label: patch.serving_label,
-        calories: patch.calories,
-      },
-    });
+    return withEngine((e) =>
+      e.diaryWrite({
+        id,
+        date: "",
+        day,
+        method: "PATCH",
+        path: `/entries/${encodeURIComponent(id)}`,
+        payload: {
+          meal_slot: slot,
+          grams: patch.grams,
+          serving_size_g: patch.serving_size_g ?? patch.grams,
+          serving_label: patch.serving_label,
+          calories: patch.calories,
+        },
+      })
+    );
   },
 
-  async restoreEntry(id: string): Promise<WriteResult> {
+  async restoreEntry(id: string, day?: string): Promise<WriteResult> {
     if (!isLiveMode() || !isUuid(id)) return { state: "saved" };
-    // Undo of a delete that is still queued: the delete is taken back, the server never saw it
-    const queuedDelete = readOutbox().find((item) => item.id === id && item.method === "DELETE");
-    if (queuedDelete) {
-      writeOutbox(readOutbox().filter((item) => itemKey(item) !== itemKey(queuedDelete)));
-      return { state: "saved" };
-    }
-    return diaryWrite({ id, date: "", method: "POST", path: `/entries/${encodeURIComponent(id)}/restore`, payload: {} });
+    return withEngine((e) => e.restoreEntryWrite(id, day));
   },
 
-  async deleteEntry(id: string): Promise<WriteResult> {
+  async deleteEntry(id: string, day?: string): Promise<WriteResult> {
     if (!isLiveMode() || !isUuid(id)) return { state: "saved" };
-    return diaryWrite({ id, date: "", method: "DELETE", path: `/entries/${encodeURIComponent(id)}`, payload: {} });
+    return withEngine((e) => e.diaryWrite({ id, date: "", day, method: "DELETE", path: `/entries/${encodeURIComponent(id)}`, payload: {} }));
   },
 
   async requestMagicLink(email: string): Promise<{ ok: true }> {
     void email;
-    return { ok: true };
-  },
-
-  async signInWithGoogle(): Promise<{ ok: true }> {
     return { ok: true };
   },
 
@@ -1373,25 +885,18 @@ export const apiClient = {
     return readStoredProfile(new Date().getFullYear());
   },
 
-  /** Saves the profile (setup, and later name changes). Live mode throws when the API cannot be reached or says no. */
+  /** A profile change from Hồ sơ or a name edit: through the outbox (S6), the newest one wins. Setup uses saveSetup. */
+  async queueProfile(profile: SetupProfile): Promise<WriteResult> {
+    if (!isLiveMode()) return { state: "saved" };
+    return withEngine((e) => e.sideWrite({ kind: "profile", entity: "profile", method: "PUT", path: `/me/profile`, payload: profileBody(profile) }));
+  },
+
+  /** Saves the profile (setup). Live mode throws when the API cannot be reached or says no: the person sees it and tries again. */
   async saveSetup(profile: SetupProfile): Promise<{ ok: true }> {
     if (isLiveMode()) {
       const res = await apiFetch(`/me/profile`, {
         method: "PUT",
-        body: JSON.stringify({
-          sex: profile.sex,
-          birth_year: profile.birthYear,
-          weight_kg: profile.weightKg,
-          goal: profile.goal,
-          ...(profile.nearPeriod !== undefined || profile.periodMode !== undefined
-            ? { near_period: Boolean(profile.nearPeriod ?? profile.periodMode) }
-            : {}),
-          ...(profile.trainingMinutesDefault !== undefined
-            ? { training_minutes_default: profile.trainingMinutesDefault }
-            : {}),
-          // The display name travels with the profile save
-          ...(profile.displayName ? { display_name: profile.displayName } : {}),
-        }),
+        body: JSON.stringify(profileBody(profile)),
       });
       if (!res.ok) {
         throw new Error(`profile save failed (${res.status})`);
@@ -1400,73 +905,5 @@ export const apiClient = {
     return { ok: true };
   },
 
-  async getCoaches(specialty?: string): Promise<CoachProfile[]> {
-    if (isLiveMode()) {
-      try {
-        const query = specialty && specialty !== "Tất cả" ? `?specialty=${encodeURIComponent(specialty)}` : "";
-        const res = await apiFetch(`/coaches${query}`);
-        if (res.ok) {
-          const json = await res.json();
-          const payload = json.data ?? json;
-          if (Array.isArray(payload)) return payload;
-          if (Array.isArray(payload.items)) return payload.items;
-        }
-      } catch {
-        // No answer
-      }
-      // Live mode never shows the sample coaches
-      return [];
-    }
-    return filterCoachesBySpecialty(specialty || "Tất cả");
-  },
-
-  async getCoach(id: string): Promise<CoachProfile | null> {
-    if (isLiveMode()) {
-      try {
-        const res = await apiFetch(`/coaches/${encodeURIComponent(id)}`);
-        if (res.ok) {
-          const json = await res.json();
-          return json.data ?? json;
-        }
-      } catch {
-        // No answer
-      }
-      return null;
-    }
-    return getCoachById(id);
-  },
-
-  async getLeaderboard(period: LeaderboardPeriod = "weekly"): Promise<LeaderboardResponse> {
-    if (isLiveMode()) {
-      try {
-        const res = await apiFetch(`/leaderboard?period=${period}`);
-        if (res.ok) {
-          const json = await res.json();
-          return json.data ?? json;
-        }
-      } catch {
-        // No answer
-      }
-      // Live mode never shows the sample ranking
-      return { period, periodLabel: "", cycleEndDate: "", ranks: [], currentUserRank: null, optedIn: false };
-    }
-    return getMockLeaderboard(period);
-  },
-
-  async setLeaderboardOptIn(optIn: boolean): Promise<boolean> {
-    setLeaderboardOptInState(optIn);
-    if (isLiveMode()) {
-      try {
-        const res = await apiFetch(`/me/leaderboard-opt-in`, {
-          method: "PUT",
-          body: JSON.stringify({ opt_in: optIn }),
-        });
-        return res.ok;
-      } catch {
-        return false;
-      }
-    }
-    return true;
-  },
 };
 

@@ -1,5 +1,6 @@
-"""cc-08: profile and targets from the profile. Weight 65 -> 70 moves Today and Micros targets, the period
-switch moves iron to 28 mg, reload keeps it, an invalid weight shows the setup error.
+"""cc-08: profile and targets from the profile. Weight 65 -> 70 moves Today's kcal target and not the micros (cc-67: they are
+the VN 2016 amounts for sex and age), a woman's iron is 17,4 mg, or the coach's 28 mg with the period switch on, reload keeps it, an invalid
+weight shows the setup error.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc08.py
 """
 import os
@@ -89,7 +90,7 @@ def run_phone(browser):
 
     pg.goto(BASE + "/micros", wait_until="networkidle")
     pg.wait_for_timeout(600)
-    check("5.600–7.000 mg" in body(pg), "390 micros: potassium target reads 5.600–7.000 mg")
+    check("/ 2.500 mg" in body(pg), "390 micros: potassium target stays 2.500 mg at 70 kg (VN 2016, nam 20–29)")
 
     # 5. woman in the period: iron target 28 mg on Micros
     pg.goto(BASE + "/settings/profile", wait_until="networkidle")
@@ -98,6 +99,12 @@ def run_phone(browser):
     pg.wait_for_timeout(200)
     switch = pg.get_by_role("switch", name="Gần/đang trong kỳ")
     check(switch.count() == 1, "390 profile: period switch shows after choosing Nữ")
+    pg.goto(BASE + "/micros", wait_until="networkidle")
+    pg.wait_for_timeout(600)
+    check("/ 17,4 mg" in body(pg), "390 micros: iron target reads 17,4 mg for a woman of 23 (period off)")
+    pg.goto(BASE + "/settings/profile", wait_until="networkidle")
+    visible(pg, 'a[href="/settings/profile/weight"]').wait_for(state="visible")
+    switch = pg.get_by_role("switch", name="Gần/đang trong kỳ")
     switch.click()
     pg.wait_for_timeout(200)
     check(switch.get_attribute("aria-checked") == "true", "390 profile: period switch is on")
@@ -105,21 +112,20 @@ def run_phone(browser):
 
     pg.goto(BASE + "/micros", wait_until="networkidle")
     pg.wait_for_timeout(600)
-    check("/ 28 mg" in body(pg), "390 micros: iron target reads 28 mg in the period")
+    check("/ 28 mg" in body(pg), "390 micros: iron target reads 28 mg in the period (the coach rule)")
 
     # 6. reload keeps everything
     pg.reload(wait_until="networkidle")
     pg.wait_for_timeout(600)
     check("/ 28 mg" in body(pg), "390 micros: iron 28 mg kept after reload")
-    check("5.600–7.000 mg" in body(pg), "390 micros: potassium kept after reload")
+    check("/ 2.000 mg" in body(pg), "390 micros: a woman's potassium 2.000 mg kept after reload")
     pg.goto(BASE + "/settings/profile", wait_until="networkidle")
     visible(pg, 'a[href="/settings/profile/weight"]').wait_for(state="visible")
     pg.wait_for_timeout(300)
     check("70 kg" in body(pg), "390 profile: 70 kg kept after reload")
     female = pg.locator('[aria-labelledby="profile-sex-label"] button:has-text("Nữ") >> visible=true').first
     check(female.get_attribute("aria-pressed") == "true", "390 profile: Nữ kept after reload")
-    check(pg.get_by_role("switch", name="Gần/đang trong kỳ").get_attribute("aria-checked") == "true",
-          "390 profile: period switch kept after reload")
+    check(pg.get_by_role("switch", name="Gần/đang trong kỳ").get_attribute("aria-checked") == "true", "390 profile: period switch kept after reload")
     ctx.close()
 
 

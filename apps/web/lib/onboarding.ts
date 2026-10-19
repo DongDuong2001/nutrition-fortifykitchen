@@ -146,10 +146,6 @@ export function dailyTargetRows(weightKg: number | null, sex: SexType, goal: Goa
       label: "Chất béo (0,5–1 g/kg)",
       value: `${formatRange(targets.fat.min, targets.fat.max)} g`,
     },
-    {
-      label: `${nutrientName("potassium")} (80–100 mg/kg)`,
-      value: `${formatRange(targets.potassium.min, targets.potassium.max)} mg`,
-    },
   ];
 }
 

@@ -6,7 +6,7 @@ import { isLiveMode } from "./api-mode";
  * image, setup. Nothing personal is sent: the screen, the API path with ids replaced, the status, the server's (or the
  * error's) message and the app version. The API adds the user id.
  */
-export type ClientErrorKind = "write" | "sync" | "share" | "setup";
+export type ClientErrorKind = "write" | "sync" | "share" | "setup" | "storage" | "outbox_age";
 
 export interface ClientErrorReport {
   kind: ClientErrorKind;

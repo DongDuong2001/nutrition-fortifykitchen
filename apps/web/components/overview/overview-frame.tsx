@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense, createContext, startTransition, useContext, useMemo, useOptimistic } from "react";
+import React, { Suspense, createContext, startTransition, useContext, useEffect, useMemo, useOptimistic } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { Period } from "@/lib/period";
@@ -186,15 +186,21 @@ function FrameInner({ children }: { children: React.ReactNode }) {
   const current = overviewTabOf(usePathname() ?? "");
   // cc-58: the tapped sub-tab lights up on the tap, not when its content is ready
   const [active, setActive] = useOptimistic(current);
-  const { todayIso, data, targets } = useDiary();
+  const { todayIso, data, targets, loadDays, dayArchive } = useDiary();
 
   const { length, offset } = parsePeriodParams(searchParams?.get("p"), searchParams?.get("o"));
   const query = periodQuery(length, offset);
 
+  // dayArchive: days read from the server (S5) change what the period's totals are made of
   const overview = useMemo(
     () => (todayIso ? buildOverview({ todayIso, today: data, targets, length, offset }) : null),
-    [todayIso, data, targets, length, offset]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [todayIso, data, targets, length, offset, dayArchive]
   );
+  // The days of the period are read from the server (and cached on this device) when the period is shown
+  useEffect(() => {
+    if (overview) loadDays([...overview.period.days, ...overview.previous.days]);
+  }, [overview?.period.start, overview?.period.end, loadDays]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const ctx: OverviewContextValue | null =
     overview && todayIso

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"nutrition-api/internal/targets"
@@ -35,12 +36,17 @@ func (s *DefaultService) GetProfile(ctx context.Context, userID uuid.UUID) (*Pro
 		if p.Role == "" {
 			p.Role = "user"
 		}
+		age := targets.DefaultAge
+		if p.BirthYear > 0 {
+			age = time.Now().Year() - p.BirthYear
+		}
 		p.Targets = targets.CalculateTargets(targets.UserProfileForTargets{
 			Sex:             p.Sex,
 			WeightKg:        p.WeightKg,
 			Goal:            p.Goal,
 			TrainingMinutes: p.TrainingMinutesDefault,
 			IsPeriod:        p.NearPeriod,
+			Age:             age,
 		})
 	}
 	return p, nil

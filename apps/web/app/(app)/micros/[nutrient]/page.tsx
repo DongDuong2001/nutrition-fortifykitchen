@@ -1,6 +1,6 @@
 "use client";
 
-import React, { use, useMemo } from "react";
+import React, { use, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { AppHeader } from "@/components/ui/app-header";
@@ -31,13 +31,17 @@ interface PageProps {
 export default function NutrientDetailPage({ params }: PageProps) {
   const { nutrient } = use(params);
   const def = getNutrientDefinition(nutrient);
-  const { data, hydrated, todayIso, profile, nutrientSources } = useDiary();
+  const { data, hydrated, todayIso, profile, nutrientSources, isEditable, loadDays } = useDiary();
   const goBack = useBack();
   const searchParams = useSearchParams();
 
   // ?date= picks a past day (read-only). Read after mount, so the first render matches the server.
   const viewIso = hydrated && todayIso ? viewedIsoDate(searchParams?.get("date"), todayIso) : null;
   const isPast = viewIso !== null && viewIso !== todayIso;
+  // S5: an older day is read from the server (cached on this device) when it is on screen
+  useEffect(() => {
+    if (isPast && viewIso) loadDays([viewIso]);
+  }, [isPast, viewIso, loadDays]);
   const dayData = useMemo(
     () => (isPast && viewIso && todayIso ? pastDayData(viewIso, todayIso, profile) : data),
     [isPast, viewIso, todayIso, profile, data]
@@ -102,7 +106,7 @@ export default function NutrientDetailPage({ params }: PageProps) {
       <AppHeader
         variant="sub"
         title={def.name}
-        subtitle={isPast && viewIso ? `Vi chất · ${formatDayLabel(viewIso, new Date())} · Chỉ xem` : "Vi chất · Hôm nay"}
+        subtitle={isPast && viewIso ? `Vi chất · ${formatDayLabel(viewIso, new Date())}${isEditable(viewIso) ? "" : " · Chỉ xem"}` : "Vi chất · Hôm nay"}
         {...(isPast && viewIso ? { backHref: `/micros?date=${viewIso}` } : { onBack: goBack })}
         backLabel="Quay lại"
         summary={

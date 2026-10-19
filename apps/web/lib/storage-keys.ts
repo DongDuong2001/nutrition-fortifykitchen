@@ -6,7 +6,7 @@
 import { currentAccountId } from "./auth-actions";
 import { isDemo } from "./demo";
 import { FAVOURITES_KEY } from "./favourites";
-import { DAY_ARCHIVE_KEY } from "./day-archive";
+import { OFFLINE_OUTBOX_KEY } from "./legacy-outbox-owner";
 
 // One value per account: the profile (sex, birth year, weight, goal, period mode, name), the reminder settings and
 // the training ticks. Each is kept under the account's key too, so a second account on this browser never sees them.
@@ -18,8 +18,8 @@ export const SETTINGS_STORAGE_KEY = "h1t_settings_v1";
 export const TRAINING_CHECKLIST_KEY = "h1t_training_checklist_v1";
 export const TRAINING_PREFS_KEY = "h1t_training_prefs_v1";
 export const LEADERBOARD_STORAGE_KEY = "h1t_leaderboard_opt_in";
-/** Entries waiting to reach the server (lib/api-client). Once unscoped, now per account like the rest. */
-export const OFFLINE_OUTBOX_KEY = "h1t_offline_outbox";
+/** Entries waiting to reach the server (lib/api-client). Once unscoped, now per account like the rest (lib/legacy-outbox). */
+export { OFFLINE_OUTBOX_KEY };
 export const PERSONAL_KEYS: readonly string[] = [PROFILE_KEY, SETTINGS_STORAGE_KEY, TRAINING_CHECKLIST_KEY, TRAINING_PREFS_KEY, LEADERBOARD_STORAGE_KEY, OFFLINE_OUTBOX_KEY];
 
 export const ADDED_ENTRIES_KEY = "h1t_added_entries_v1";
@@ -30,8 +30,9 @@ export const RECENT_FOODS_KEY = "h1t_recent_foods_v2";
 
 export const DEMO_SUFFIX = "_demo";
 
-// Earlier days of the added entries, filed by date when the date moves on (lib/day-archive)
-export { DAY_ARCHIVE_KEY };
+// Earlier days of the added entries, filed by date when the date moves on (lib/day-archive). The key lives here, not in
+// lib/day-archive: the sign-in page reads this file and must not load the diary's day helpers with it.
+export const DAY_ARCHIVE_KEY = "h1t_day_archive_v1";
 
 /** The same shape as Storage, for the parts of it the app uses. */
 export interface KeyValueStore {
@@ -106,38 +107,30 @@ export function loadMigrated(key: string, local: KeyValueStore | null, session: 
 }
 
 /**
- * The one-time move from the old unscoped keys to an account. Runs for the first account that loads; an account
- * that already has data of its own leaves the old keys alone. An old sessionStorage copy goes to localStorage
- * first. Demo keys are never touched. Safe to call again: after the move there is nothing left to move.
+ * cc-68 (X8): the old unscoped keys (from before accounts existed) are deleted, not adopted. The first account that loaded
+ * used to take them, which on a shared device could hand one person's diary to another. An old sessionStorage copy goes too.
+ * Demo keys are never touched. Safe to call again.
  */
-export function adoptLegacyKeys(local: KeyValueStore | null, session: KeyValueStore | null, accountId: string): void {
-  if (!local) return;
+export function dropLegacyKeys(local: KeyValueStore | null, session: KeyValueStore | null): void {
   attempt(() => {
-    const legacy = ACCOUNT_KEYS.map((base) => ({ base, value: loadMigrated(base, local, session) }));
-    if (legacy.every((k) => k.value === null)) return;
-    const hasOwnData = ACCOUNT_KEYS.some((base) => !isEmptyStored(local.getItem(`${base}_${accountId}`)));
-    if (hasOwnData) return;
-    for (const { base, value } of legacy) {
-      if (value === null) continue;
-      local.setItem(`${base}_${accountId}`, value);
-      local.removeItem(base);
+    for (const base of ACCOUNT_KEYS) {
+      local?.removeItem(base);
+      session?.removeItem(base);
     }
   }, undefined);
 }
 
 /**
- * The one-time move of the old global profile, settings and training ticks to an account. The first account
- * that loads takes a value only when it has none of its own; the old key goes either way, so no later account can
- * pick it up. Demo keys are never touched (the caller skips demo).
+ * The same for the old global profile, settings and training ticks: they are deleted. The one exception is the old offline
+ * outbox: that is writes that never reached the server, so it is kept for the account it was written for
+ * (lib/legacy-outbox-owner, lib/legacy-outbox). Demo keys are never touched (the caller skips demo).
  */
-export function adoptLegacyPersonal(local: KeyValueStore | null, accountId: string): void {
+export function dropLegacyPersonal(local: KeyValueStore | null, accountId: string): void {
   if (!local) return;
   attempt(() => {
     for (const base of PERSONAL_KEYS) {
-      const legacy = local.getItem(base);
-      if (legacy === null) continue;
-      const own = `${base}_${accountId}`;
-      if (local.getItem(own) === null) local.setItem(own, legacy);
+      // The old outbox is not deleted here: lib/legacy-outbox gives it to its account when the outbox loads
+      if (base === OFFLINE_OUTBOX_KEY || local.getItem(base) === null) continue;
       local.removeItem(base);
     }
   }, undefined);
@@ -151,14 +144,14 @@ export function browserLocal(): KeyValueStore | null {
 /**
  * The storage the signed-in account (or demo) reads and writes its own values through. Null when there is no
  * browser storage; without an account it reads and writes nothing. The first read of the account also moves the
- * old global profile, settings and ticks to it (adoptLegacyPersonal).
+ * old global profile, settings and ticks are deleted (dropLegacyPersonal).
  */
 export function accountStorage(): KeyValueStore | null {
   const local = browserLocal();
   if (!local) return null;
   const demo = isDemo();
   const account = currentAccountId();
-  if (!demo && account) adoptLegacyPersonal(local, account);
+  if (!demo && account) dropLegacyPersonal(local, account);
   return keyedStorage(local, demo, account);
 }
 

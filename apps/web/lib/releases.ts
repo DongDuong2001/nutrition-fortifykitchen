@@ -31,6 +31,34 @@ export interface Release {
 }
 
 export const RELEASES: readonly Release[] = [
+  // cc-68: yesterday can be edited. The tour stays on Hôm nay ("Thử ngay" runs there): it points at the arrow that opens
+  // yesterday, then at + Thêm, which yesterday has too
+  {
+    id: "2026-10-19b",
+    date: "19/10",
+    items: [
+      { icon: "home", title: "Sửa được hôm qua", body: "Quên ghi bữa tối? Mở hôm qua rồi thêm, sửa, xóa hay chuyển bữa như hôm nay. Từ hôm kia trở về trước chỉ xem." },
+    ],
+    tour: [
+      { target: "day-prev", fallback: "header-actions", title: "Mở hôm qua", body: "Chạm mũi tên trái để sang hôm qua. Quên ghi bữa nào thì ghi bù ở đó." },
+      { target: "meal-add", fallback: "nav-add", title: "Ghi bù như hôm nay", body: "Hôm qua vẫn có + Thêm. Chạm một món để sửa hoặc xóa. Từ hôm kia trở về trước chỉ xem." },
+    ],
+  },
+  // cc-67: simple, fast food logging. The tour runs on Hôm nay: + Thêm, then the Thành phần of a dish (falls back to + Thêm)
+  {
+    id: "2026-10-19a",
+    date: "19/10",
+    items: [
+      { icon: "select", title: "Mỗi món một dòng", body: "Cơm, thịt, cá, khoai chỉ còn một dòng trong danh sách. Chọn Sống hay Chín ngay trong bảng khẩu phần." },
+      { icon: "meal", title: "Ghi phần ăn được", body: "Trái cây và món có vỏ, hạt, xương ghi theo gam của phần ăn được. Trứng vẫn ghi theo quả." },
+      { icon: "select", title: "Chỉnh thành phần món", body: "Mở Thành phần của món Việt, đổi gam từng phần hoặc thêm bún, thịt. Món vào nhật ký một dòng." },
+      { icon: "target", title: "Mục tiêu vi chất theo khuyến nghị", body: "Canxi, sắt, vitamin và các khoáng khác theo Khuyến nghị dinh dưỡng Việt Nam 2016, đúng giới tính và tuổi của bạn. Muối, năng lượng và đa lượng giữ nguyên." },
+    ],
+    tour: [
+      { target: "meal-add", fallback: "nav-add", title: "Mỗi món một dòng", body: "Chạm + Thêm rồi tìm món. Cơm, thịt, cá chỉ một dòng, chọn Sống hay Chín trong khẩu phần." },
+      { target: "dish-parts", fallback: "meal-add", title: "Chỉnh thành phần", body: "Ở món Việt, mở Thành phần rồi đổi gam từng phần hoặc chạm chip thêm bún, thịt." },
+    ],
+  },
   // cc-53b: the coach's portion model. The tour runs on Hôm nay: + Thêm (or the + of the nav), the food list, a meal
   {
     id: "2026-10-18f",
@@ -41,7 +69,7 @@ export const RELEASES: readonly Release[] = [
       { icon: "select", title: "Trứng ghi theo quả", body: "Chọn cỡ ghi trên hộp rồi chọn mấy quả. App tự trừ vỏ." },
       { icon: "home", title: "Khay gọn hơn", body: "Chạm từng món trong khay để chỉnh, rồi thêm cả khay vô bữa một lần." },
       // cc-54: premade Vietnamese dishes show what is inside, and take extras for one meal
-      { icon: "meal", title: "Thành phần của món Việt", body: "Mở Thành phần để xem món có gì. Thêm bún hay thịt cho riêng bữa đó, món chính giữ nguyên." },
+      { icon: "meal", title: "Thành phần của món Việt", body: "Mở Thành phần để xem món có gì. Đổi gam hoặc chạm chip để thêm bún, thịt cho riêng bữa đó." },
       // cc-57: an improvement, no tour
       { icon: "home", title: "Chuyển tab mượt hơn", body: "Thanh bên dưới đứng yên khi bạn chạm qua lại giữa các tab. Nút bấm phản hồi liền, kéo bảng xuống không bị giật." },
     ],
@@ -49,7 +77,7 @@ export const RELEASES: readonly Release[] = [
       { target: "meal-add", fallback: "nav-add", title: "Ghi theo gam", body: "Chạm + Thêm rồi chọn món. Gõ số gam hoặc chọn 100 g, bấm + để nhân lên." },
       { target: "home-food-list", fallback: "meal-pill", title: "Sống hay chín", body: "Dòng món ghi rõ bạn cân lúc sống hay đã nấu chín. Trứng ghi theo cỡ và số quả." },
       { target: "meal-pill", title: "Khay xem lại", body: "Ở + Thêm, gom nhiều món vô khay. Chạm từng món trong khay để chỉnh rồi thêm một lần." },
-      { target: "dish-parts", fallback: "meal-add", title: "Thành phần của món", body: "Món Việt có mục Thành phần. Mở ra xem trong tô có gì, chạm chip để thêm bún hay thịt cho bữa đó." },
+      { target: "dish-parts", fallback: "meal-add", title: "Thành phần của món", body: "Món Việt có mục Thành phần. Mở ra xem trong tô có gì, đổi gam hoặc chạm chip để thêm bún, thịt." },
     ],
   },
   // cc-52. The tour runs on Hôm nay, where the Ngày tập controls are not: each step falls back to the Ngày tập pill

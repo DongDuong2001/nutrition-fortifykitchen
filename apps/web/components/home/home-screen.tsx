@@ -2,13 +2,15 @@
 
 import dynamic from "next/dynamic";
 import { Suspense, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { whenIdle } from "@/lib/idle";
+import { loadFoodRows } from "@/lib/food-rows";
 import Link from "next/link";
 import { createPortal } from "react-dom";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useShellBottomBar } from "@/components/ui/shell-slot";
 import { AppHeader, HEADER_ICON_BUTTON } from "@/components/ui/app-header";
 import { IconShare } from "@/components/ui/icons";
-import { SyncStatus } from "./sync-status";
+import { setHomeDay } from "@/lib/home-scroll";
 import { copyMeals, dayEntries, shiftIsoDate, viewedIsoDate } from "@/lib/day-history";
 import { defaultMealName } from "@/lib/saved-meals";
 import { pastDayData, useDiary } from "@/lib/diary-store";
@@ -159,6 +161,8 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
     hydrated,
     todayIso,
     dayArchive,
+    isEditable,
+    loadDays,
     profile,
     addedEntries,
     getEntry,
@@ -202,6 +206,20 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
 
   const viewIsoParam = hydrated && todayIso ? viewedIsoDate(searchParams?.get("date"), todayIso) : null;
   const isPast = viewIsoParam !== null && viewIsoParam !== todayIso;
+  // cc-68: yesterday can be edited like today; a day older than that is read-only
+  const readOnly = isPast && viewIsoParam !== null && !isEditable(viewIsoParam);
+  const editablePast = isPast && !readOnly;
+  // S5: a day older than yesterday is the server's: it is read (and cached on this device) when it is on screen
+  useEffect(() => {
+    if (readOnly && viewIsoParam && !backdrop) loadDays([viewIsoParam]);
+  }, [readOnly, viewIsoParam, backdrop, loadDays]);
+  // The + of the nav adds to this day (see lib/home-scroll homeDay); the picture behind /add does not claim it
+  const shownDay = editablePast ? viewIsoParam : null;
+  useEffect(() => {
+    if (backdrop) return;
+    setHomeDay(shownDay);
+    return () => setHomeDay(null);
+  }, [shownDay, backdrop]);
   const pastData = useMemo(
     () => (isPast && viewIsoParam && todayIso ? pastDayData(viewIsoParam, todayIso, profile) : null),
     [isPast, viewIsoParam, todayIso, profile]
@@ -263,6 +281,12 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
     } catch {
       // Storage unavailable
     }
+  }, [backdrop]);
+
+  // cc-67: the add sheet's one-row-per-food index is a chunk of its own: fetched when Hôm nay is idle, so /add has it at once
+  useEffect(() => {
+    if (backdrop) return;
+    return whenIdle(() => void loadFoodRows());
   }, [backdrop]);
 
   const entries = useMemo(() => {
@@ -336,6 +360,8 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
   };
 
   const yesterdayEntries = useMemo(() => (todayIso ? dayEntries(shiftIsoDate(todayIso, -1), todayIso) : []), [todayIso, dayArchive]); // eslint-disable-line react-hooks/exhaustive-deps
+  // The day before the one on screen: what Chép hôm qua (hôm kia, on yesterday) copies from
+  const dayBeforeEntries = useMemo(() => (todayIso && viewIsoParam ? dayEntries(shiftIsoDate(viewIsoParam, -1), todayIso) : []), [todayIso, viewIsoParam, dayArchive]); // eslint-disable-line react-hooks/exhaustive-deps
   const menuMeal = menuSlot ? meals.find((m) => m.slot === menuSlot) ?? null : null;
   const yesterdayMeal = useMemo(() => (menuSlot ? yesterdayEntries.filter((e) => e.mealSlot === menuSlot) : []), [menuSlot, yesterdayEntries]);
 
@@ -370,7 +396,7 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
       pills.push({ key: "day-menu", label: "⋯", id: "home-day-menu", ariaLabel: "Tùy chọn ngày", onClick: () => setDayMenuOpen(true) });
     }
   } else {
-    if (!isPast && mode.kind === "food") pills.push({ key: "edit", label: "Sửa", href: `/entry/${mode.id}`, ariaLabel: "Sửa món này" });
+    if (!readOnly && mode.kind === "food") pills.push({ key: "edit", label: "Sửa", href: `/entry/${mode.id}`, ariaLabel: "Sửa món này" });
     if (mode.kind === "meal") {
       const meal = meals.find((m) => m.slot === mode.slot);
       pills.push({
@@ -395,7 +421,7 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
       >
         {formatDesktopDate(day.date)}
       </button>
-      {isPast ? " · Chỉ xem" : ""}
+      {readOnly ? " · Chỉ xem" : ""}
     </>
   ) : (
     day.desktopDateLabel
@@ -411,23 +437,23 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
   const todayDdMm = todayIso ? ddMm(todayIso) : "";
 
   function confirmCopy(target: CopyTarget) {
-    if (target === "keep" && !isPast) return;
+    if (target === "keep" && !readOnly) return;
     const copies = copyHomeEntries(chosen, target, `copy-${Date.now()}`, new Date().toISOString());
-    markUsed(isPast ? "copy-to-today" : "multi-select-action");
-    if (isPast) {
+    markUsed(readOnly ? "copy-to-today" : "multi-select-action");
+    if (readOnly) {
       copyEntries(copies, pastCopyToast(copies.length));
       exitSelect();
       navigateFromSheet(router, HOME_ROUTE);
       return;
     }
     const slot = target === "keep" ? "breakfast" : target;
-    copyEntries(copies, `Đã chép ${copies.length} món sang ${getMealSlotNameVi(slot)}`);
+    copyEntries(copies, `Đã chép ${copies.length} món sang ${getMealSlotNameVi(slot)}${editablePast ? " hôm qua" : ""}`, viewIso);
     exitSelect();
   }
 
   function confirmMove(target: CopyTarget) {
-    // A past day is read-only: nothing moves there
-    if (target === "keep" || isPast) return;
+    // A day older than yesterday is read-only: nothing moves there
+    if (target === "keep" || readOnly) return;
     moveEntries([...liveSelected], target, viewIso);
     markUsed("multi-select-action");
     exitSelect();
@@ -440,11 +466,11 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
           <SelectActionBar
             count={chosenCount}
             kcal={chosenKcal(entries, liveSelected)}
-            past={isPast}
+            past={readOnly}
             onCopy={() => setTargetSheet("copy")}
             onMove={() => setTargetSheet("move")}
             onDelete={() => {
-              if (isPast) return;
+              if (readOnly) return;
               deleteEntries([...liveSelected], viewIso);
               markUsed("multi-select-action");
               exitSelect();
@@ -486,7 +512,6 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
           actions={
             // header-actions: where the sync status shows, for the tour when there is no status to point at
             <div data-tour="header-actions" className="flex items-center gap-2">
-            {!isPast && !backdrop && <SyncStatus />}
             <button
               type="button"
               onClick={openShare}
@@ -568,17 +593,20 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
               <FoodList
                 meals={meals}
                 dayKey={viewIso}
-                onPullRefresh={isPast || backdrop ? undefined : refreshToday}
+                onPullRefresh={readOnly || backdrop ? undefined : refreshToday}
                 mode={mode}
-                readOnly={isPast}
+                readOnly={readOnly}
+                dayWord={editablePast ? "hôm qua" : "hôm nay"}
+                addDate={editablePast ? viewIso : undefined}
+                copyLabel={editablePast ? "Chép hôm kia" : "Chép hôm qua"}
                 isEmpty={nothingLogged}
-                canCopyYesterday={!isPast && nothingLogged && yesterdayEntries.length > 0}
+                canCopyYesterday={!readOnly && nothingLogged && dayBeforeEntries.length > 0}
                 onFood={(id) => setMode(toggleFood(mode, id))}
                 onMeal={(slot) => setMode(toggleMeal(mode, slot))}
                 onCopyYesterday={() => setIsCopySheetOpen(true)}
                 onLongPressSelect={(id) => startSelect(id)}
                 onMoveFood={(id, targetSlot) => {
-                  if (isPast) return;
+                  if (readOnly) return;
                   moveEntries([id], targetSlot, viewIso);
                 }}
                 select={
@@ -626,7 +654,8 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
           open={menuSlot !== null}
           onClose={() => setMenuSlot(null)}
           mealName={menuMeal?.fullName ?? ""}
-          readOnly={isPast}
+          readOnly={readOnly}
+          hideYesterday={editablePast}
           itemCount={menuMeal?.entries.length ?? 0}
           kcal={menuMeal?.kcal ?? null}
           savableCount={menuSlot ? mealFoods(menuSlot, viewIso).length : 0}
@@ -637,7 +666,7 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
           onCopyYesterday={copyMealFromYesterday}
           onDelete={() => {
             if (!menuSlot) return;
-            deleteMeal(menuSlot);
+            deleteMeal(menuSlot, viewIso);
             setMode(DAY_MODE);
           }}
         />
@@ -645,13 +674,13 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
       <InstallPromptHost busy={installBusy} />
       <WhatsNewHost busy={installBusy} />
       {explainerMounted && <LevelExplainerSheet open={explainerOpen} onClose={() => setExplainerOpen(false)} level={level} />}
-      {copySheetMounted && <CopyYesterdaySheet open={isCopySheetOpen} onClose={() => setIsCopySheetOpen(false)} />}
+      {copySheetMounted && <CopyYesterdaySheet open={isCopySheetOpen} onClose={() => setIsCopySheetOpen(false)} targetIso={viewIso} />}
       {dayMenuMounted && (
         <DayMenuSheet
           open={dayMenuOpen}
           onClose={() => setDayMenuOpen(false)}
           title={dayLabel}
-          past={isPast}
+          past={readOnly}
           hasEntries={!nothingLogged}
           onSelect={startSelect}
         />

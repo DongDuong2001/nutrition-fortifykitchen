@@ -4,9 +4,7 @@ Phở bò (the demo catalogue's dish, answering to vn_table|food-pho-bo) from /a
 - the section is there, collapsed (aria-expanded false), with its three add-on chips under it
 - opened (the shared Expand), 8 rows of name · grams · kcal for 1 tô (600 g): Bánh phở 200 g = 216 kcal
 - the portion ×2 doubles the grams and the chips' grams
-- "+ Bánh phở" switched on and saved: the diary shows Phở bò and Bánh phở (tươi) in the same meal, the dish first, and the
-  meal gained 450 + 108 kcal (the dish at 75 kcal per 100 g x 600 g, the ingredient 100 g at 108 kcal per 100 g)
-- Lưu & chọn tiếp puts the dish and the chip's food in the tray (two items)
+- cc-67: a part's grams are a field now and a chip adds a part to the list (no separate diary entries): cc_67_part3.py
 - a food without a recipe (Yến mạch) has no Thành phần; Hôm nay's tutorial target and the screenshots
 Screenshots: .screenshots/cc54/. Run with: ALIGN_BASE_URL=http://localhost:3107 npm run probe -- tests/probes/cc_54_dish_parts.py
 """
@@ -88,12 +86,13 @@ def main():
         pg.wait_for_timeout(600)
         check(toggle.get_attribute("aria-expanded") == "true", "Phở bò: Thành phần opens")
         rows = section.locator("li")
-        check(rows.count() == 8, f"Phở bò: eight ingredient rows ({rows.count()})")
+        check(rows.count() == 9, f"Phở bò: eight ingredient rows and the Tổng row ({rows.count()})")
         first = squash(rows.nth(0).inner_text())
-        check("Bánh phở" in first and "200 g" in first and "216 kcal" in first, f"Phở bò: Bánh phở 200 g, 216 kcal for 1 tô ({first!r})")
+        check("Bánh phở" in first and "216 kcal" in first, f"Phở bò: Bánh phở, 216 kcal for 1 tô ({first!r})")
+        check(rows.nth(0).get_by_label("Số gam Bánh phở (tươi)").input_value() == "200", "Phở bò: Bánh phở is 200 g in its field")
         check(all("kcal" in squash(rows.nth(i).inner_text()) for i in range(rows.count())), "Phở bò: every ingredient is in the demo catalogue, so every row has kcal")
         res = check_align_groups(pg, "dish-parts")
-        check(not res["errors"] and res["pairs"].get("dish-parts", 0) >= 7, f"Phở bò: rows share edges ({res['errors']}, pairs {res['pairs'].get('dish-parts', 0)})")
+        check(not res["errors"] and res["pairs"].get("dish-parts", 0) >= 8, f"Phở bò: rows share edges ({res['errors']}, pairs {res['pairs'].get('dish-parts', 0)})")
         pg.screenshot(path=str(SHOTS / "phobo-expanded.png"))
 
         # ×2: the grams double
@@ -101,47 +100,12 @@ def main():
         before = amount.input_value()
         amount.fill("2" if "," in before or before.replace(".", "").isdigit() and float(before.replace(",", ".")) < 20 else "1200")
         pg.wait_for_timeout(500)
-        row2 = squash(section.locator("li").nth(0).inner_text())
-        check("400 g" in row2 and "432 kcal" in row2, f"Phở bò ×2: Bánh phở 400 g, 432 kcal ({row2!r})")
+        row2 = section.locator("li").nth(0)
+        check(row2.get_by_label("Số gam Bánh phở (tươi)").input_value() == "400" and "432 kcal" in squash(row2.inner_text()), f"Phở bò ×2: Bánh phở 400 g, 432 kcal ({squash(row2.inner_text())!r})")
         check("+ Bánh phở 200 g" in squash(chips.nth(0).inner_text()), f"Phở bò ×2: the chip says 200 g ({chips.nth(0).inner_text()!r})")
         amount.fill(before)
         pg.wait_for_timeout(400)
 
-        # Lưu & chọn tiếp with the chip on: the tray holds the dish and the add-on
-        chips.nth(0).tap()
-        check(chips.nth(0).get_attribute("aria-pressed") == "true", "Phở bò: a chip turns on when tapped")
-        pg.get_by_role("button", name=re.compile("Lưu & chọn tiếp")).first.tap()
-        pg.wait_for_timeout(600)
-        tray_text = squash(pg.locator("body").inner_text())
-        check("2 món" in tray_text, "Lưu & chọn tiếp: the tray holds the dish and the add-on (2 món)")
-        ctx.close()
-
-        # Save: the dish and the add-on are in the same meal, the dish first, with the right kcal
-        ctx = browser.new_context(**PHONE)
-        pg = ctx.new_page()
-        pg.goto(BASE + "/app", wait_until="networkidle")
-        pg.wait_for_timeout(1000)
-        open_food(pg, "phở bò", "Phở bò")
-        meal = meal_of_cta(pg)
-        check(meal in MEAL_NAME, f"the add goes to a meal ({meal})")
-        pg.goto(BASE + "/app", wait_until="networkidle")
-        pg.wait_for_timeout(800)
-        kcal_before = kcal_of(section_text(pg, meal)) or 0
-        open_food(pg, "phở bò", "Phở bò")
-        section = pg.locator('[data-tour="dish-parts"]:visible').first
-        section.get_by_role("button", name=re.compile("^Thành phần")).tap()
-        pg.wait_for_timeout(400)
-        section.locator("button[aria-pressed]").filter(has_text=re.compile(r"^\+ Bánh phở")).first.tap()
-        pg.screenshot(path=str(SHOTS / "phobo-chip-on.png"))
-        pg.locator('[data-tour="portion-add"]:visible').first.tap()
-        pg.wait_for_url(re.compile(r".*/app(\?.*)?$"))
-        pg.wait_for_timeout(900)
-        text = section_text(pg, meal)
-        check("Phở bò" in text and "Bánh phở (tươi)" in text, f"the diary shows Phở bò and Bánh phở (tươi) in {meal}")
-        check(text.index("Phở bò") < text.index("Bánh phở (tươi)"), "the add-on comes right after the dish")
-        gained = (kcal_of(text) or 0) - kcal_before
-        check(gained == 450 + 108, f"{meal} gained 558 kcal: 450 for the dish and 108 for 100 g of Bánh phở ({gained})")
-        pg.screenshot(path=str(SHOTS / "diary-after-save.png"))
         ctx.close()
 
         # A food with no recipe has no section

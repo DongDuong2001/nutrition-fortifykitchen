@@ -14,6 +14,7 @@ const (
 	CodeValidationFailed    = "VALIDATION_FAILED"
 	CodePastDayReadOnly     = "PAST_DAY_READ_ONLY"
 	CodeConflict            = "CONFLICT"
+	CodeIDConflict          = "ID_CONFLICT"
 	CodeInternalServerError = "INTERNAL_SERVER_ERROR"
 )
 

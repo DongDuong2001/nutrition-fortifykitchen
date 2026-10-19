@@ -12,7 +12,6 @@ import {
   findEntry,
   hasEnergy,
   mealEntryIds,
-  mergeServerDay,
   parseAddedEntries,
   parseSampleEdits,
   moveEntriesIn,
@@ -24,6 +23,7 @@ import {
   undoDeleteIn,
   updateEntryIn,
 } from "../diary-edits";
+import { mergeServerDay } from "../server-day";
 
 const EMPTY: DiaryEdits = { added: [], sample: {}, undo: null };
 

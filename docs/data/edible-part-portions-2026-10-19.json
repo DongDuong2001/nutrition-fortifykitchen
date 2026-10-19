@@ -1,0 +1,2370 @@
+{
+  "generated": "2026-10-19",
+  "note": "cc-67 part 2. For Dong's importer: delete the listed unit portions (label_vi) of each food, keep the rest; apply the renames. Nutrients stay as they are (per 100 g edible part).",
+  "remove_portions": [
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 8001",
+      "name_vi": "Cá bống",
+      "kind": "fish",
+      "remove": [
+        "1 con vừa"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 174197",
+      "name_vi": "Cá bơn (chín)",
+      "kind": "fish",
+      "remove": [
+        "1 con vừa (cá 350 g)",
+        "1 con nhỏ (cá 200 g)",
+        "1 con lớn (cá 500 g)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 174196",
+      "name_vi": "Cá bơn (sống)",
+      "kind": "fish",
+      "remove": [
+        "1 con vừa (cá 350 g)",
+        "1 con nhỏ (cá 200 g)",
+        "1 con lớn (cá 500 g)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 8028",
+      "name_vi": "Cá chạch",
+      "kind": "fish",
+      "remove": [
+        "1 con vừa"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 174185",
+      "name_vi": "Cá chép (chín)",
+      "kind": "fish",
+      "remove": [
+        "1 miếng vừa (khúc)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 171952",
+      "name_vi": "Cá chép (sống)",
+      "kind": "fish",
+      "remove": [
+        "1 con vừa"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 8060",
+      "name_vi": "Cá chim (cá chim đen)",
+      "kind": "fish",
+      "remove": [
+        "1 con cá chim (phần ăn được)"
+      ],
+      "keep": [
+        "100 g",
+        "1 lạng (100 g)"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 173683",
+      "name_vi": "Cá chim (chín)",
+      "kind": "fish",
+      "remove": [
+        "1 con vừa"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 173682",
+      "name_vi": "Cá chim (sống)",
+      "kind": "fish",
+      "remove": [
+        "1 con vừa"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 8061",
+      "name_vi": "Cá chim trắng",
+      "kind": "fish",
+      "remove": [
+        "1 con cá chim trắng (phần ăn được)"
+      ],
+      "keep": [
+        "100 g",
+        "1 lạng (100 g)"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 8006",
+      "name_vi": "Cá diếc (sống)",
+      "kind": "fish",
+      "remove": [
+        "1 con vừa (cá 150 g)",
+        "1 con nhỏ (cá 100 g)",
+        "1 con lớn (cá 250 g)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 175177:ca-dieu-hong-chin",
+      "name_vi": "Cá diêu hồng (chín)",
+      "kind": "fish",
+      "remove": [
+        "1 miếng vừa (khúc)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 175176:ca-dieu-hong-song",
+      "name_vi": "Cá diêu hồng (sống)",
+      "kind": "fish",
+      "remove": [
+        "1 miếng vừa (khúc)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 8009",
+      "name_vi": "Cá đối",
+      "kind": "fish",
+      "remove": [
+        "1 con vừa"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 174192",
+      "name_vi": "Cá đù (sống)",
+      "kind": "fish",
+      "remove": [
+        "1 con vừa (cá 250 g)",
+        "1 con nhỏ (cá 150 g)",
+        "1 con lớn (cá 350 g)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 8010:ca-keo-song",
+      "name_vi": "Cá kèo",
+      "kind": "fish",
+      "remove": [
+        "1 con vừa"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 8032:ca-linh-song",
+      "name_vi": "Cá linh",
+      "kind": "fish",
+      "remove": [
+        "1 con"
+      ],
+      "keep": [
+        "1 chén",
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 173680",
+      "name_vi": "Cá lóc (sống)",
+      "kind": "fish",
+      "remove": [
+        "1 khúc cá lóc"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 175127",
+      "name_vi": "Cá lóc/cá quả (chín)",
+      "kind": "fish",
+      "remove": [
+        "1 miếng vừa (khúc)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 8022",
+      "name_vi": "Cá lóc/cá quả (sống)",
+      "kind": "fish",
+      "remove": [
+        "1 miếng vừa (khúc)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 8014",
+      "name_vi": "Cá mè",
+      "kind": "fish",
+      "remove": [
+        "1 miếng vừa (khúc)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 8015",
+      "name_vi": "Cá mòi (tươi)",
+      "kind": "fish",
+      "remove": [
+        "1 con vừa"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 175139",
+      "name_vi": "Cá mòi đóng hộp (ngâm dầu, cả xương)",
+      "kind": "fish",
+      "remove": [
+        "1 con nhỏ"
+      ],
+      "keep": [
+        "1 hộp (đã ráo)",
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 175140",
+      "name_vi": "Cá mòi đóng hộp (sốt cà chua, cả xương)",
+      "kind": "fish",
+      "remove": [
+        "1 con nhỏ"
+      ],
+      "keep": [
+        "1 hộp (đã ráo)",
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 8017",
+      "name_vi": "Cá mối (sống)",
+      "kind": "fish",
+      "remove": [
+        "1 con vừa (cá 120 g)",
+        "1 con nhỏ (cá 80 g)",
+        "1 con lớn (cá 200 g)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 171994",
+      "name_vi": "Cá nục (chín)",
+      "kind": "fish",
+      "remove": [
+        "1 con vừa"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 8020",
+      "name_vi": "Cá nục (sống, NIN)",
+      "kind": "fish",
+      "remove": [
+        "1 con cá nục (phần ăn được)"
+      ],
+      "keep": [
+        "100 g",
+        "1 lạng (100 g)"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 173672",
+      "name_vi": "Cá nục (sống)",
+      "kind": "fish",
+      "remove": [
+        "1 con vừa"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 8020002",
+      "name_vi": "Cá nục luộc (chín)",
+      "kind": "fish",
+      "remove": [
+        "1 con vừa"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 8020014",
+      "name_vi": "Cá nục nướng (chín)",
+      "kind": "fish",
+      "remove": [
+        "1 con vừa"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 8021",
+      "name_vi": "Cá phèn",
+      "kind": "fish",
+      "remove": [
+        "1 con vừa"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 173678",
+      "name_vi": "Cá rô đồng (sống)",
+      "kind": "fish",
+      "remove": [
+        "1 con cá rô đồng (phần ăn được)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 8023",
+      "name_vi": "Cá rô đồng (sống)",
+      "kind": "fish",
+      "remove": [
+        "1 con vừa"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 175177",
+      "name_vi": "Cá rô phi (chín)",
+      "kind": "fish",
+      "remove": [
+        "1 con vừa"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 175176",
+      "name_vi": "Cá rô phi (sống)",
+      "kind": "fish",
+      "remove": [
+        "1 con vừa"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 175120",
+      "name_vi": "Cá saba Na Uy (chín)",
+      "kind": "fish",
+      "remove": [
+        "1 miếng vừa (nửa con)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 175119",
+      "name_vi": "Cá saba Na Uy (sống)",
+      "kind": "fish",
+      "remove": [
+        "1 miếng vừa (nửa con)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 8013",
+      "name_vi": "Cá thát lát/cá lác (sống)",
+      "kind": "fish",
+      "remove": [
+        "1 con vừa"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 173673",
+      "name_vi": "Cá thu (sống)",
+      "kind": "fish",
+      "remove": [
+        "1 miếng vừa (khúc)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 8029",
+      "name_vi": "Cá trắm cỏ (cá trắm)",
+      "kind": "fish",
+      "remove": [
+        "1 miếng vừa (khúc)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 8030",
+      "name_vi": "Cá trê",
+      "kind": "fish",
+      "remove": [
+        "1 con vừa",
+        "1 miếng vừa (khúc)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 175117",
+      "name_vi": "Cá trích (chín)",
+      "kind": "fish",
+      "remove": [
+        "1 con vừa"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 175116",
+      "name_vi": "Cá trích (sống)",
+      "kind": "fish",
+      "remove": [
+        "1 con vừa"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 168173:berries-dong-lanh-hon-hop",
+      "name_vi": "Berries đông lạnh (hỗn hợp)",
+      "kind": "fruit",
+      "remove": [
+        "1 nắm",
+        "1 chén"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 5041",
+      "name_vi": "Bơ vỏ tím",
+      "kind": "fruit",
+      "remove": [
+        "1 trái nhỏ",
+        "1 trái vừa",
+        "1 trái lớn",
+        "1 muỗng canh (nghiền)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 5042",
+      "name_vi": "Bơ vỏ xanh",
+      "kind": "fruit",
+      "remove": [
+        "1 trái nhỏ",
+        "1 trái vừa",
+        "1 trái lớn",
+        "1 muỗng canh (nghiền)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 167754",
+      "name_vi": "Bưởi",
+      "kind": "fruit",
+      "remove": [
+        "1 miếng vừa (1/4 trái)",
+        "1 múi",
+        "1 chén (múi)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_table",
+      "source_id": "food-buoi",
+      "name_vi": "Bưởi da xanh",
+      "kind": "fruit",
+      "remove": [
+        "1 múi"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 5001:buoi-nam-roi-song",
+      "name_vi": "Bưởi Năm Roi",
+      "kind": "fruit",
+      "remove": [
+        "1 miếng vừa (1/4 trái)",
+        "1 múi",
+        "1 chén (tép bưởi)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 169097",
+      "name_vi": "Cam",
+      "kind": "fruit",
+      "remove": [
+        "1 trái nhỏ",
+        "1 trái vừa",
+        "1 trái lớn"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 169097:cam-sanh-song",
+      "name_vi": "Cam sành",
+      "kind": "fruit",
+      "remove": [
+        "1 trái nhỏ",
+        "1 trái vừa",
+        "1 trái lớn"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 5002:cam-sanh-song",
+      "name_vi": "Cam sành",
+      "kind": "fruit",
+      "remove": [
+        "1 quả vừa (bỏ vỏ)",
+        "1 múi"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_foundation",
+      "source_id": "food-cha-la",
+      "name_vi": "Chà là",
+      "kind": "fruit",
+      "remove": [
+        "1 quả",
+        "1 nắm (3 quả)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 168191",
+      "name_vi": "Chà là Medjool",
+      "kind": "fruit",
+      "remove": [
+        "1 quả"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 171726",
+      "name_vi": "Chà là Sanwan (Deglet Noor)",
+      "kind": "fruit",
+      "remove": [
+        "1 quả",
+        "1 nắm (4 quả)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 169108",
+      "name_vi": "Chanh dây",
+      "kind": "fruit",
+      "remove": [
+        "1 quả"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 5003",
+      "name_vi": "Chanh ta",
+      "kind": "fruit",
+      "remove": [
+        "1 quả",
+        "1 lát"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 171719",
+      "name_vi": "Cherry",
+      "kind": "fruit",
+      "remove": [
+        "1 quả",
+        "1 nắm (10 quả)",
+        "1 chén (bỏ hạt)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 5004",
+      "name_vi": "Chôm chôm",
+      "kind": "fruit",
+      "remove": [
+        "1 quả",
+        "1 nắm (10 quả)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 173944",
+      "name_vi": "Chuối",
+      "kind": "fruit",
+      "remove": [
+        "1 trái nhỏ",
+        "1 trái vừa",
+        "1 trái lớn",
+        "1 chén (cắt lát)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_foundation",
+      "source_id": "food-chuoi",
+      "name_vi": "Chuối",
+      "kind": "fruit",
+      "remove": [
+        "1 trái nhỏ",
+        "1 trái vừa",
+        "1 trái lớn"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 173944:chuoi-su-song",
+      "name_vi": "Chuối sứ",
+      "kind": "fruit",
+      "remove": [
+        "1 quả"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 5006",
+      "name_vi": "Chuối sứ (chuối tây)",
+      "kind": "fruit",
+      "remove": [
+        "1 trái nhỏ",
+        "1 trái vừa",
+        "1 trái lớn"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 5007",
+      "name_vi": "Chuối tiêu",
+      "kind": "fruit",
+      "remove": [
+        "1 trái nhỏ",
+        "1 trái vừa",
+        "1 trái lớn"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 5043",
+      "name_vi": "Cóc",
+      "kind": "fruit",
+      "remove": [
+        "1 quả"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 3001",
+      "name_vi": "Cơm dừa già (cùi dừa)",
+      "kind": "fruit",
+      "remove": [
+        "1 miếng nhỏ",
+        "1 chén (nạo)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 3002",
+      "name_vi": "Cơm dừa non (cùi dừa non)",
+      "kind": "fruit",
+      "remove": [
+        "1 trái (cùi)",
+        "1 chén"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 5008",
+      "name_vi": "Dâu da (dâu gia)",
+      "kind": "fruit",
+      "remove": [
+        "1 quả",
+        "1 nắm (5 quả)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 169913",
+      "name_vi": "Dâu tằm (sống)",
+      "kind": "fruit",
+      "remove": [
+        "1 nắm",
+        "1 chén"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 168173",
+      "name_vi": "Dâu tây",
+      "kind": "fruit",
+      "remove": [
+        "1 quả nhỏ",
+        "1 quả vừa",
+        "1 quả lớn",
+        "1 chén (đông lạnh)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 5010",
+      "name_vi": "Dưa bở",
+      "kind": "fruit",
+      "remove": [
+        "1 miếng vừa (1/8 quả)",
+        "1 chén (cắt miếng)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 167765",
+      "name_vi": "Dưa hấu",
+      "kind": "fruit",
+      "remove": [
+        "1 miếng nhỏ",
+        "1 miếng vừa",
+        "1 chén (cắt)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 5012",
+      "name_vi": "Dưa hồng",
+      "kind": "fruit",
+      "remove": [
+        "1 miếng vừa (1/8 quả)",
+        "1 chén (cắt miếng)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 5013",
+      "name_vi": "Dưa lê",
+      "kind": "fruit",
+      "remove": [
+        "1 miếng vừa (1/8 quả)",
+        "1 chén (cắt miếng)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 169092",
+      "name_vi": "Dưa lưới",
+      "kind": "fruit",
+      "remove": [
+        "1 miếng nhỏ",
+        "1 miếng vừa",
+        "1 chén (cắt)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 5014",
+      "name_vi": "Dứa ta (khóm)",
+      "kind": "fruit",
+      "remove": [
+        "1 miếng vừa",
+        "1 chén (cắt miếng)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 169928",
+      "name_vi": "Đào",
+      "kind": "fruit",
+      "remove": [
+        "1 trái nhỏ",
+        "1 trái vừa",
+        "1 trái lớn"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 169926",
+      "name_vi": "Đu đủ",
+      "kind": "fruit",
+      "remove": [
+        "1 miếng vừa",
+        "1 chén (miếng)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 169941",
+      "name_vi": "Hồng giòn",
+      "kind": "fruit",
+      "remove": [
+        "1 trái vừa"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 5020",
+      "name_vi": "Hồng mềm (hồng đỏ)",
+      "kind": "fruit",
+      "remove": [
+        "1 trái vừa"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 167759",
+      "name_vi": "Hồng xiêm",
+      "kind": "fruit",
+      "remove": [
+        "1 trái vừa"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 171715",
+      "name_vi": "Khế",
+      "kind": "fruit",
+      "remove": [
+        "1 trái nhỏ",
+        "1 trái vừa",
+        "1 trái lớn"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 168211",
+      "name_vi": "Kiwi vàng",
+      "kind": "fruit",
+      "remove": [
+        "1 trái"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_foundation",
+      "source_id": "FDC 327046",
+      "name_vi": "Kiwi xanh",
+      "kind": "fruit",
+      "remove": [
+        "1 trái",
+        "1 chén (cắt lát)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 168177",
+      "name_vi": "Lê",
+      "kind": "fruit",
+      "remove": [
+        "1 trái nhỏ",
+        "1 trái vừa",
+        "1 trái lớn"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 169134",
+      "name_vi": "Lựu",
+      "kind": "fruit",
+      "remove": [
+        "1 trái lớn (hạt)",
+        "1 chén (hạt)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 168175",
+      "name_vi": "Mãng cầu ta (na)",
+      "kind": "fruit",
+      "remove": [
+        "1 trái vừa",
+        "1 chén (thịt quả)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 167761",
+      "name_vi": "Mãng cầu xiêm",
+      "kind": "fruit",
+      "remove": [
+        "1 trái lớn",
+        "1 chén (thịt quả)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 5026",
+      "name_vi": "Mắc coọc",
+      "kind": "fruit",
+      "remove": [
+        "1 quả"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 5061",
+      "name_vi": "Măng cụt",
+      "kind": "fruit",
+      "remove": [
+        "1 quả"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 168209",
+      "name_vi": "Mâm xôi",
+      "kind": "fruit",
+      "remove": [
+        "1 nắm",
+        "1 chén (đông lạnh)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 169949",
+      "name_vi": "Mận Hà Nội",
+      "kind": "fruit",
+      "remove": [
+        "1 quả"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 168162",
+      "name_vi": "Mận khô (prunes)",
+      "kind": "fruit",
+      "remove": [
+        "1 quả",
+        "1 nắm (5 quả)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 167763",
+      "name_vi": "Me chín",
+      "kind": "fruit",
+      "remove": [
+        "1 nắm (cơm me)",
+        "1 chén (cơm me)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 174687",
+      "name_vi": "Mít",
+      "kind": "fruit",
+      "remove": [
+        "1 múi",
+        "1 chén"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 5028",
+      "name_vi": "Mít dai",
+      "kind": "fruit",
+      "remove": [
+        "1 múi",
+        "1 chén"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 5030",
+      "name_vi": "Mít mật",
+      "kind": "fruit",
+      "remove": [
+        "1 múi",
+        "1 chén"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 173941",
+      "name_vi": "Mơ khô",
+      "kind": "fruit",
+      "remove": [
+        "1 miếng (nửa quả)",
+        "1 nắm"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 5031",
+      "name_vi": "Mơ tươi",
+      "kind": "fruit",
+      "remove": [
+        "1 quả",
+        "1 nắm (5 quả)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 169089",
+      "name_vi": "Nhãn",
+      "kind": "fruit",
+      "remove": [
+        "1 quả",
+        "1 nắm (10 quả)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 5036",
+      "name_vi": "Nhãn sấy khô (long nhãn)",
+      "kind": "fruit",
+      "remove": [
+        "1 nắm",
+        "1 muỗng canh"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 168166",
+      "name_vi": "Nho khô",
+      "kind": "fruit",
+      "remove": [
+        "1 nắm nhỏ",
+        "1 muỗng canh"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 174683",
+      "name_vi": "Nho xanh",
+      "kind": "fruit",
+      "remove": [
+        "1 nắm",
+        "1 chén"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 5039",
+      "name_vi": "Nhót",
+      "kind": "fruit",
+      "remove": [
+        "1 quả",
+        "1 nắm (10 quả)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 173044",
+      "name_vi": "Ổi",
+      "kind": "fruit",
+      "remove": [
+        "1 trái nhỏ",
+        "1 trái vừa",
+        "1 chén (cắt)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_foundation",
+      "source_id": "food-bo",
+      "name_vi": "Quả bơ",
+      "kind": "fruit",
+      "remove": [
+        "1 trái nhỏ",
+        "1 trái vừa",
+        "1 trái lớn"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 169105",
+      "name_vi": "Quýt",
+      "kind": "fruit",
+      "remove": [
+        "1 trái nhỏ",
+        "1 trái vừa",
+        "1 trái lớn"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 168171",
+      "name_vi": "Roi (mận miền Nam)",
+      "kind": "fruit",
+      "remove": [
+        "1 quả"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 5049",
+      "name_vi": "Sấu chín",
+      "kind": "fruit",
+      "remove": [
+        "1 quả",
+        "1 nắm (5 quả)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 5048",
+      "name_vi": "Sầu riêng",
+      "kind": "fruit",
+      "remove": [
+        "1 múi",
+        "1 chén (cơm)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 171686",
+      "name_vi": "Sơri (acerola)",
+      "kind": "fruit",
+      "remove": [
+        "1 quả",
+        "1 chén"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 174665",
+      "name_vi": "Sung khô",
+      "kind": "fruit",
+      "remove": [
+        "1 quả",
+        "1 nắm (3 quả)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 171688",
+      "name_vi": "Táo (cả vỏ)",
+      "kind": "fruit",
+      "remove": [
+        "1 trái nhỏ",
+        "1 trái vừa",
+        "1 trái lớn"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_foundation",
+      "source_id": "food-tao",
+      "name_vi": "Táo Envy",
+      "kind": "fruit",
+      "remove": [
+        "1 trái nhỏ",
+        "1 trái vừa",
+        "1 trái lớn"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 5050",
+      "name_vi": "Táo ta",
+      "kind": "fruit",
+      "remove": [
+        "1 quả",
+        "1 nắm (5 quả)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 168203",
+      "name_vi": "Táo xanh",
+      "kind": "fruit",
+      "remove": [
+        "1 trái nhỏ",
+        "1 trái vừa",
+        "1 trái lớn"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "asean",
+      "source_id": "PhilFCT E117",
+      "name_vi": "Thanh long ruột đỏ",
+      "kind": "fruit",
+      "remove": [
+        "1 trái nhỏ",
+        "1 trái vừa",
+        "1 trái lớn"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 5044:thanh-long-ruot-trang-song",
+      "name_vi": "Thanh long ruột trắng",
+      "kind": "fruit",
+      "remove": [
+        "1 trái nhỏ",
+        "1 trái vừa",
+        "1 trái lớn",
+        "1 miếng vừa (1/2 trái)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 169124",
+      "name_vi": "Thơm (dứa)",
+      "kind": "fruit",
+      "remove": [
+        "1 miếng nhỏ",
+        "1 miếng vừa",
+        "1 miếng lớn",
+        "1 chén (cắt miếng)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 169086",
+      "name_vi": "Vải",
+      "kind": "fruit",
+      "remove": [
+        "1 quả",
+        "1 nắm (10 quả)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 173950",
+      "name_vi": "Việt quất",
+      "kind": "fruit",
+      "remove": [
+        "1 nắm",
+        "1 chén (đông lạnh)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 5054",
+      "name_vi": "Vú sữa",
+      "kind": "fruit",
+      "remove": [
+        "1 trái vừa"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 5055:xoai-cat-hoa-loc-song",
+      "name_vi": "Xoài cát Hòa Lộc",
+      "kind": "fruit",
+      "remove": [
+        "1 trái nhỏ",
+        "1 trái vừa",
+        "1 trái lớn",
+        "1 chén (cắt miếng)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 169910",
+      "name_vi": "Xoài chín",
+      "kind": "fruit",
+      "remove": [
+        "1 trái nhỏ",
+        "1 trái vừa",
+        "1 trái lớn",
+        "1 chén (cắt miếng)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 169910:xoai-keo-song",
+      "name_vi": "Xoài keo (chín)",
+      "kind": "fruit",
+      "remove": [
+        "1 trái nhỏ",
+        "1 trái vừa",
+        "1 trái lớn",
+        "1 chén (cắt miếng)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 169999",
+      "name_vi": "Bắp/ngô ngọt (chín)",
+      "kind": "other",
+      "remove": [
+        "1 trái nhỏ",
+        "1 trái vừa",
+        "1 trái lớn",
+        "1 chén (hạt)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 173630",
+      "name_vi": "Cánh gà (chín)",
+      "kind": "other",
+      "remove": [
+        "1 cái"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 172390",
+      "name_vi": "Cánh gà (sống)",
+      "kind": "other",
+      "remove": [
+        "1 cái"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 168226",
+      "name_vi": "Chân giò heo (sống)",
+      "kind": "other",
+      "remove": [
+        "1 miếng lớn (khúc)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 169902",
+      "name_vi": "Chim cút (chín)",
+      "kind": "other",
+      "remove": [
+        "1 con"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 172418",
+      "name_vi": "Chim cút (sống)",
+      "kind": "other",
+      "remove": [
+        "1 con"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 4019002",
+      "name_vi": "Chuối xanh (luộc)",
+      "kind": "other",
+      "remove": [
+        "1 quả (bỏ vỏ)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 4019",
+      "name_vi": "Chuối xanh (sống)",
+      "kind": "other",
+      "remove": [
+        "1 quả (bỏ vỏ)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 172007",
+      "name_vi": "Cua biển (chín)",
+      "kind": "other",
+      "remove": [
+        "1 con nhỏ",
+        "1 con vừa",
+        "1 con lớn"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 171968",
+      "name_vi": "Cua biển (sống)",
+      "kind": "other",
+      "remove": [
+        "1 con cua biển (thịt)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 8033",
+      "name_vi": "Cua biển (sống)",
+      "kind": "other",
+      "remove": [
+        "1 con nhỏ",
+        "1 con vừa",
+        "1 con lớn"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 8034",
+      "name_vi": "Cua đồng",
+      "kind": "other",
+      "remove": [
+        "1 con",
+        "1 chén"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 7080",
+      "name_vi": "Ếch (thịt đùi)",
+      "kind": "other",
+      "remove": [
+        "1 con",
+        "1 cái (cặp đùi)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 171450",
+      "name_vi": "Gà nguyên con có da (chín)",
+      "kind": "other",
+      "remove": [
+        "1 miếng nhỏ",
+        "1 miếng vừa",
+        "1 miếng lớn"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 171447",
+      "name_vi": "Gà nguyên con có da (sống)",
+      "kind": "other",
+      "remove": [
+        "1 miếng nhỏ",
+        "1 miếng vừa",
+        "1 miếng lớn"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 4034",
+      "name_vi": "Gấc (quả)",
+      "kind": "other",
+      "remove": [
+        "1 muỗng canh (màng gấc)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 8035",
+      "name_vi": "Ghẹ",
+      "kind": "other",
+      "remove": [
+        "1 con vừa"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 174205",
+      "name_vi": "Ghẹ (chín)",
+      "kind": "other",
+      "remove": [
+        "1 con vừa"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 174204",
+      "name_vi": "Ghẹ (sống)",
+      "kind": "other",
+      "remove": [
+        "1 con vừa"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 174250",
+      "name_vi": "Hàu (chín)",
+      "kind": "other",
+      "remove": [
+        "1 con vừa"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 174219",
+      "name_vi": "Hàu (sống)",
+      "kind": "other",
+      "remove": [
+        "1 con vừa"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 173617",
+      "name_vi": "Má đùi gà có da (chín)",
+      "kind": "other",
+      "remove": [
+        "1 cái"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 172378",
+      "name_vi": "Má đùi gà có da (sống)",
+      "kind": "other",
+      "remove": [
+        "1 cái"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 171975",
+      "name_vi": "Nghêu (chín)",
+      "kind": "other",
+      "remove": [
+        "1 con nhỏ",
+        "1 con vừa",
+        "1 con lớn"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 174214",
+      "name_vi": "Nghêu (sống)",
+      "kind": "other",
+      "remove": [
+        "1 con nhỏ",
+        "1 con vừa",
+        "1 con lớn"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 1023",
+      "name_vi": "Ngô nếp cả bắp (chín)",
+      "kind": "other",
+      "remove": [
+        "1 trái nhỏ",
+        "1 trái vừa",
+        "1 trái lớn"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "asean",
+      "source_id": "PhilFCT G129",
+      "name_vi": "Ốc",
+      "kind": "other",
+      "remove": [
+        "1 con"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 8041",
+      "name_vi": "Ốc bươu",
+      "kind": "other",
+      "remove": [
+        "1 con"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 8042",
+      "name_vi": "Ốc đá",
+      "kind": "other",
+      "remove": [
+        "1 con"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 171983:oc-huong-song",
+      "name_vi": "Ốc hương",
+      "kind": "other",
+      "remove": [
+        "1 con"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 8074002",
+      "name_vi": "Ốc móng tay (luộc)",
+      "kind": "other",
+      "remove": [
+        "1 con"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 8043",
+      "name_vi": "Ốc nhồi",
+      "kind": "other",
+      "remove": [
+        "1 con"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 8044",
+      "name_vi": "Ốc vặn",
+      "kind": "other",
+      "remove": [
+        "1 con"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 171705",
+      "name_vi": "Quả bơ",
+      "kind": "other",
+      "remove": [
+        "1 trái nhỏ",
+        "1 trái vừa",
+        "1 trái lớn"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 8046",
+      "name_vi": "Rạm",
+      "kind": "other",
+      "remove": [
+        "1 con"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 167742",
+      "name_vi": "Sò điệp (chín)",
+      "kind": "other",
+      "remove": [
+        "1 con vừa",
+        "1 dĩa nhỏ (5 con)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 174220",
+      "name_vi": "Sò điệp (sống)",
+      "kind": "other",
+      "remove": [
+        "1 con vừa",
+        "1 dĩa nhỏ (5 con)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 8048:so-huyet-song",
+      "name_vi": "Sò huyết",
+      "kind": "other",
+      "remove": [
+        "1 con",
+        "1 dĩa nhỏ (10 con)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 171975:so-long-hap",
+      "name_vi": "Sò lông (chín)",
+      "kind": "other",
+      "remove": [
+        "1 con",
+        "1 dĩa nhỏ (10 con)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 174214:so-long-song",
+      "name_vi": "Sò lông (sống)",
+      "kind": "other",
+      "remove": [
+        "1 con",
+        "1 dĩa nhỏ (10 con)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 168613",
+      "name_vi": "Sườn bò (chín)",
+      "kind": "other",
+      "remove": [
+        "1 miếng vừa"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 169439",
+      "name_vi": "Sườn bò (sống)",
+      "kind": "other",
+      "remove": [
+        "1 miếng vừa"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 167854",
+      "name_vi": "Sườn non heo (chín)",
+      "kind": "other",
+      "remove": [
+        "1 miếng vừa"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 167853",
+      "name_vi": "Sườn non heo (sống)",
+      "kind": "other",
+      "remove": [
+        "1 miếng vừa"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 171971",
+      "name_vi": "Tôm (chín)",
+      "kind": "other",
+      "remove": [
+        "1 con nhỏ",
+        "1 con vừa",
+        "1 con lớn"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 174210",
+      "name_vi": "Tôm (sống)",
+      "kind": "other",
+      "remove": [
+        "1 con nhỏ",
+        "1 con vừa",
+        "1 con lớn"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 8052014",
+      "name_vi": "Tôm đồng (chín)",
+      "kind": "other",
+      "remove": [
+        "1 chén"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 8052",
+      "name_vi": "Tôm đồng (sống)",
+      "kind": "other",
+      "remove": [
+        "1 con",
+        "1 chén"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 8051014:tom-su-nuong",
+      "name_vi": "Tôm sú (chín)",
+      "kind": "other",
+      "remove": [
+        "1 con vừa"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 8051:tom-su-song",
+      "name_vi": "Tôm sú (sống)",
+      "kind": "other",
+      "remove": [
+        "1 con nhỏ",
+        "1 con vừa",
+        "1 con lớn"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 171971:tom-the-luoc",
+      "name_vi": "Tôm thẻ chân trắng (chín)",
+      "kind": "other",
+      "remove": [
+        "1 con vừa"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 174210:tom-the-song",
+      "name_vi": "Tôm thẻ chân trắng (sống)",
+      "kind": "other",
+      "remove": [
+        "1 con vừa"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 8054",
+      "name_vi": "Trai sông (trai nước ngọt)",
+      "kind": "other",
+      "remove": [
+        "1 con"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "vn_nin",
+      "source_id": "NIN 8094",
+      "name_vi": "Tu hài",
+      "kind": "other",
+      "remove": [
+        "1 con vừa"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 174217",
+      "name_vi": "Vẹm (chín)",
+      "kind": "other",
+      "remove": [
+        "1 con",
+        "1 dĩa nhỏ (10 con)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 174216",
+      "name_vi": "Vẹm (sống)",
+      "kind": "other",
+      "remove": [
+        "1 con nhỏ",
+        "1 con vừa",
+        "1 con lớn",
+        "1 dĩa nhỏ (10 con)"
+      ],
+      "keep": [
+        "100 g"
+      ]
+    }
+  ],
+  "renames": [
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 171705",
+      "from": "Quả bơ",
+      "to": "Bơ (trái)"
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 171688",
+      "from": "Táo (cả vỏ)",
+      "to": "Táo"
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 168409",
+      "from": "Dưa leo (cả vỏ)",
+      "to": "Dưa leo"
+    },
+    {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 170148",
+      "from": "Hạt gai dầu (bóc vỏ)",
+      "to": "Hạt gai dầu"
+    },
+    {
+      "source": "usda_foundation",
+      "source_id": "food-bo",
+      "from": "Quả bơ",
+      "to": "Bơ (trái)"
+    }
+  ]
+}

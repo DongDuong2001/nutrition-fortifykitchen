@@ -16,13 +16,15 @@ type Repository interface {
 	GetDayEntries(ctx context.Context, userID uuid.UUID, date string) ([]DiaryEntryItem, error)
 	GetDayTraining(ctx context.Context, userID uuid.UUID, date string) (int, error)
 	GetUserDefaultTraining(ctx context.Context, userID uuid.UUID) (int, error)
-	GetUserProfile(ctx context.Context, userID uuid.UUID) (string, float64, string, int, bool, error)
+	GetUserProfile(ctx context.Context, userID uuid.UUID) (string, float64, string, int, bool, int, error)
 	GetFoodNutrients(ctx context.Context, foodID uuid.UUID) (string, map[string]*float64, error)
 	CreateEntry(ctx context.Context, userID uuid.UUID, date string, entry *DiaryEntryItem) (*DiaryEntryItem, error)
-	GetEntryByID(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) (*DiaryEntryItem, string, error)
+	GetEntryByID(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) (*DiaryEntryItem, string, bool, error)
 	UpdateEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID, entry *DiaryEntryItem) (*DiaryEntryItem, string, error)
 	SoftDeleteEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) error
 	RestoreEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) (*DiaryEntryItem, string, error)
+	GetRangeEntries(ctx context.Context, userID uuid.UUID, fromDate, toDate string) (map[string][]DiaryEntryItem, error)
+	GetRangeTraining(ctx context.Context, userID uuid.UUID, fromDate, toDate string) (map[string]int, error)
 	DeleteMealEntries(ctx context.Context, userID uuid.UUID, date string, mealSlot string) error
 	UpsertDayTraining(ctx context.Context, userID uuid.UUID, date string, minutes int) error
 }
@@ -109,14 +111,14 @@ func (r *pgxDiaryRepo) GetUserDefaultTraining(ctx context.Context, userID uuid.U
 	return minutes, nil
 }
 
-func (r *pgxDiaryRepo) GetUserProfile(ctx context.Context, userID uuid.UUID) (string, float64, string, int, bool, error) {
-	query := `SELECT sex, weight_kg, goal, training_minutes_default, near_period FROM nutrition.profiles WHERE user_id = $1`
+func (r *pgxDiaryRepo) GetUserProfile(ctx context.Context, userID uuid.UUID) (string, float64, string, int, bool, int, error) {
+	query := `SELECT sex, weight_kg, goal, training_minutes_default, near_period, COALESCE(birth_year, 0) FROM nutrition.profiles WHERE user_id = $1`
 	var sex, goal string
 	var weightKg float64
-	var trainingMinutes int
+	var trainingMinutes, birthYear int
 	var nearPeriod bool
-	err := r.pool.QueryRow(ctx, query, userID).Scan(&sex, &weightKg, &goal, &trainingMinutes, &nearPeriod)
-	return sex, weightKg, goal, trainingMinutes, nearPeriod, err
+	err := r.pool.QueryRow(ctx, query, userID).Scan(&sex, &weightKg, &goal, &trainingMinutes, &nearPeriod, &birthYear)
+	return sex, weightKg, goal, trainingMinutes, nearPeriod, birthYear, err
 }
 
 func (r *pgxDiaryRepo) GetFoodNutrients(ctx context.Context, foodID uuid.UUID) (string, map[string]*float64, error) {
@@ -145,7 +147,7 @@ const createEntrySQL = `
 		) VALUES (
 			$1::uuid, $1::uuid, $2, $3, $4, $5, $6, $7::numeric, $8, $9, $10, 1, COALESCE($7::numeric, 100), $11
 		)
-		ON CONFLICT (id) DO UPDATE SET id = EXCLUDED.id
+		ON CONFLICT (id) DO UPDATE SET id = EXCLUDED.id WHERE diary_logs.user_id = EXCLUDED.user_id
 		RETURNING created_at
 	`
 
@@ -166,34 +168,38 @@ func (r *pgxDiaryRepo) CreateEntry(ctx context.Context, userID uuid.UUID, date s
 		nutrientsJSON, parsedDate,
 	).Scan(&entry.CreatedAt)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrIDConflict
+		}
 		return nil, fmt.Errorf("failed to insert diary entry: %w", err)
 	}
 
 	return entry, nil
 }
 
-func (r *pgxDiaryRepo) GetEntryByID(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) (*DiaryEntryItem, string, error) {
+func (r *pgxDiaryRepo) GetEntryByID(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) (*DiaryEntryItem, string, bool, error) {
 	query := `
-		SELECT id, food_id, kind, meal_slot, portion_label, grams, calories, name_snapshot, nutrients_snapshot, log_date, created_at
+		SELECT id, food_id, kind, meal_slot, portion_label, grams, calories, name_snapshot, nutrients_snapshot, log_date, created_at, (deleted_at IS NOT NULL) AS is_deleted
 		FROM nutrition.diary_logs
-		WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL
+		WHERE id = $1 AND user_id = $2
 	`
 	var item DiaryEntryItem
 	var logDate time.Time
 	var portionLabel, nameSnapshot *string
 	var grams *float64
 	var nutrientsJSON []byte
+	var isDeleted bool
 
 	err := r.pool.QueryRow(ctx, query, entryID, userID).Scan(
 		&item.ID, &item.FoodID, &item.Kind, &item.MealSlot,
 		&portionLabel, &grams, &item.Calories, &nameSnapshot,
-		&nutrientsJSON, &logDate, &item.CreatedAt,
+		&nutrientsJSON, &logDate, &item.CreatedAt, &isDeleted,
 	)
 	if err != nil {
-		if err == pgx.ErrNoRows {
-			return nil, "", nil
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, "", false, nil
 		}
-		return nil, "", err
+		return nil, "", false, err
 	}
 
 	if portionLabel != nil {
@@ -209,7 +215,7 @@ func (r *pgxDiaryRepo) GetEntryByID(ctx context.Context, userID uuid.UUID, entry
 		_ = json.Unmarshal(nutrientsJSON, &item.Nutrients)
 	}
 
-	return &item, logDate.Format("2006-01-02"), nil
+	return &item, logDate.Format("2006-01-02"), isDeleted, nil
 }
 
 func (r *pgxDiaryRepo) UpdateEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID, entry *DiaryEntryItem) (*DiaryEntryItem, string, error) {
@@ -256,7 +262,7 @@ func (r *pgxDiaryRepo) RestoreEntry(ctx context.Context, userID uuid.UUID, entry
 	query := `
 		UPDATE nutrition.diary_logs
 		SET deleted_at = NULL
-		WHERE id = $1 AND user_id = $2 AND deleted_at IS NOT NULL AND deleted_at >= now() - interval '10 seconds'
+		WHERE id = $1 AND user_id = $2 AND deleted_at IS NOT NULL
 		RETURNING id, food_id, kind, meal_slot, portion_label, grams, calories, name_snapshot, nutrients_snapshot, log_date, created_at
 	`
 	var item DiaryEntryItem
@@ -272,11 +278,6 @@ func (r *pgxDiaryRepo) RestoreEntry(ctx context.Context, userID uuid.UUID, entry
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			var deletedAt *time.Time
-			checkErr := r.pool.QueryRow(ctx, "SELECT deleted_at FROM nutrition.diary_logs WHERE id = $1 AND user_id = $2", entryID, userID).Scan(&deletedAt)
-			if checkErr == nil && deletedAt != nil {
-				return nil, "", ErrRestoreWindowExpired
-			}
 			return nil, "", ErrEntryNotFound
 		}
 		return nil, "", err
@@ -318,4 +319,73 @@ func (r *pgxDiaryRepo) UpsertDayTraining(ctx context.Context, userID uuid.UUID, 
 	`
 	_, err := r.pool.Exec(ctx, query, userID, date, minutes)
 	return err
+}
+
+func (r *pgxDiaryRepo) GetRangeEntries(ctx context.Context, userID uuid.UUID, fromDate, toDate string) (map[string][]DiaryEntryItem, error) {
+	query := `
+		SELECT id, food_id, kind, meal_slot, portion_label, grams, calories, name_snapshot, nutrients_snapshot, to_char(log_date, 'YYYY-MM-DD'), created_at
+		FROM nutrition.diary_logs
+		WHERE user_id = $1 AND log_date >= $2 AND log_date <= $3 AND deleted_at IS NULL
+		ORDER BY created_at ASC
+	`
+	rows, err := r.pool.Query(ctx, query, userID, fromDate, toDate)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get range entries: %w", err)
+	}
+	defer rows.Close()
+
+	out := make(map[string][]DiaryEntryItem)
+	for rows.Next() {
+		var item DiaryEntryItem
+		var portionLabel, nameSnapshot *string
+		var grams *float64
+		var nutrientsJSON []byte
+		var logDateStr string
+
+		if err := rows.Scan(
+			&item.ID, &item.FoodID, &item.Kind, &item.MealSlot,
+			&portionLabel, &grams, &item.Calories, &nameSnapshot,
+			&nutrientsJSON, &logDateStr, &item.CreatedAt,
+		); err != nil {
+			return nil, fmt.Errorf("failed to scan range entry: %w", err)
+		}
+		if portionLabel != nil {
+			item.ServingLabel = *portionLabel
+		}
+		if nameSnapshot != nil {
+			item.FoodName = *nameSnapshot
+		}
+		if grams != nil {
+			item.Grams = *grams
+		}
+		if len(nutrientsJSON) > 0 {
+			_ = json.Unmarshal(nutrientsJSON, &item.Nutrients)
+		}
+		out[logDateStr] = append(out[logDateStr], item)
+	}
+	return out, rows.Err()
+}
+
+func (r *pgxDiaryRepo) GetRangeTraining(ctx context.Context, userID uuid.UUID, fromDate, toDate string) (map[string]int, error) {
+	query := `
+		SELECT to_char(log_date, 'YYYY-MM-DD'), minutes
+		FROM nutrition.day_training
+		WHERE user_id = $1 AND log_date >= $2 AND log_date <= $3
+	`
+	rows, err := r.pool.Query(ctx, query, userID, fromDate, toDate)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get range training: %w", err)
+	}
+	defer rows.Close()
+
+	out := make(map[string]int)
+	for rows.Next() {
+		var d string
+		var m int
+		if err := rows.Scan(&d, &m); err != nil {
+			return nil, fmt.Errorf("failed to scan range training: %w", err)
+		}
+		out[d] = m
+	}
+	return out, rows.Err()
 }

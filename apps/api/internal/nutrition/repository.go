@@ -86,7 +86,7 @@ func (r *pgxRepository) SearchFoods(ctx context.Context, filter FoodSearchFilter
 	}
 
 	if filter.UserID != nil {
-		whereClauses = append(whereClauses, fmt.Sprintf("(is_custom = false OR created_by = $%d) AND is_archived = false", argIdx))
+		whereClauses = append(whereClauses, fmt.Sprintf("(is_custom = false OR (created_by = $%d AND category != 'one_off')) AND is_archived = false", argIdx))
 		args = append(args, *filter.UserID)
 		argIdx++
 	} else {

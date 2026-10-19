@@ -127,7 +127,7 @@ export function BodyCard({ alignGroup }: { alignGroup?: string }) {
           <div className="flex min-h-[52px] items-center gap-3 border-t border-divider py-1">
             <div className="flex min-w-0 flex-1 flex-col gap-0.5">
               <span className="text-[15px]">Gần/đang trong kỳ</span>
-              <span className="text-[13px] leading-tight text-secondary">Chỉ với nữ · Iron 18 → 28 mg/ngày</span>
+              <span className="text-[13px] leading-tight text-secondary">Chỉ với nữ · Iron lên 28 mg/ngày</span>
             </div>
             <Switch
               checked={profile.periodMode}

@@ -1,7 +1,8 @@
 import { formatAmount, formatNumber } from "./format";
 import { parseNumberInput } from "./parse-number";
 import type { FoodItem } from "./mock/foods";
-import { cookSwitchFor, type CookState, type CookSwitch } from "./yield";
+import { cookSwitchFor } from "./food-rows";
+import type { CookState, CookSwitch } from "./yield";
 
 function parseDecimal(input: string): number | null {
   return parseNumberInput(input);
@@ -739,13 +740,13 @@ export function portionSummary(p: PortionState, sw: CookSwitch | null): string {
 }
 
 /**
- * The note under the kcal card: how eggs are weighed, or what a raw / cooked amount stands for. Null when there is
- * nothing to say. `loggedGrams` is what resolvePortion logs.
+ * The note under the kcal card: how eggs are weighed, what a raw / cooked amount stands for, or that fruit and the foods
+ * with a peel, shell or bone are weighed without it (cc-67). Null when there is nothing to say. `loggedGrams` is what resolvePortion logs.
  */
-export function portionNote(p: PortionState, sw: CookSwitch | null, loggedGrams: number, egg = false): string | null {
+export function portionNote(p: PortionState, sw: CookSwitch | null, loggedGrams: number, egg = false, edible = false): string | null {
   if (p.kind === "egg") return "Hộp ghi cân cả vỏ, app tự trừ vỏ khi tính.";
   if (egg) return "Bóc vỏ rồi cân thì nhập số gam ở đây.";
-  if (!sw) return null;
+  if (!sw) return edible ? "Cân phần ăn được, bỏ vỏ, hạt và xương." : null;
   const state = p.state ?? sw.own;
   const amount = p.base * p.mult;
   const g = (n: number) => `${formatAmount(Math.round(n), "g")} g`;

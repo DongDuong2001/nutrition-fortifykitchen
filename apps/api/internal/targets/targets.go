@@ -15,6 +15,7 @@ type UserProfileForTargets struct {
 	Goal            string  `json:"goal"`
 	TrainingMinutes int     `json:"trainingMinutes"`
 	IsPeriod        bool    `json:"isPeriod"`
+	Age             int     `json:"age"`
 }
 
 type CompleteTargets struct {
@@ -49,6 +50,122 @@ type CompleteTargets struct {
 	Phosphorus TargetRange `json:"phosphorus"`
 	Selenium   TargetRange `json:"selenium"`
 }
+
+const (
+	DefaultAge   = 25
+	PeriodIronMg = 28.0
+)
+
+var rdaBandFrom = []int{10, 12, 15, 18, 20, 30, 50, 70}
+
+func bandOf(age int) int {
+	if age <= 0 {
+		age = DefaultAge
+	}
+	at := 0
+	for i, from := range rdaBandFrom {
+		if age >= from {
+			at = i
+		}
+	}
+	return at
+}
+
+type rdaRow struct {
+	male   [8]float64
+	female *[8]float64
+}
+
+func (r rdaRow) value(sex string, band int) float64 {
+	if sex == "female" && r.female != nil {
+		return r.female[band]
+	}
+	return r.male[band]
+}
+
+func singleTarget(val float64) TargetRange {
+	return TargetRange{Min: val, Max: val}
+}
+
+var (
+	rdaCalcium = rdaRow{
+		male:   [8]float64{1000, 1000, 1000, 1000, 800, 800, 800, 1000},
+		female: &[8]float64{1000, 1000, 1000, 1000, 800, 800, 900, 1000},
+	}
+	rdaPhosphorus = rdaRow{
+		male: [8]float64{1250, 1250, 1250, 1250, 700, 700, 700, 700},
+	}
+	rdaMagnesium = rdaRow{
+		male:   [8]float64{210, 290, 350, 350, 340, 370, 350, 320},
+		female: &[8]float64{210, 280, 300, 300, 270, 290, 290, 260},
+	}
+	rdaIron = rdaRow{
+		male:   [8]float64{7.5, 10.2, 11.6, 11.6, 7.9, 7.9, 7.9, 7.3},
+		female: &[8]float64{7, 9.3, 19.8, 19.8, 17.4, 17.4, 6.7, 6.3},
+	}
+	rdaZinc = rdaRow{
+		male:   [8]float64{8.6, 9, 10, 10, 10, 10, 10, 9},
+		female: &[8]float64{7.2, 8, 8, 8, 8, 8, 8, 7},
+	}
+	rdaSelenium = rdaRow{
+		male:   [8]float64{32, 32, 32, 32, 34, 34, 34, 33},
+		female: &[8]float64{26, 26, 26, 26, 26, 26, 26, 25},
+	}
+	rdaCopper = rdaRow{
+		male: [8]float64{0.7, 0.7, 0.89, 0.89, 0.9, 0.9, 0.9, 0.9},
+	}
+	rdaManganese = rdaRow{
+		male:   [8]float64{1.9, 1.9, 2.2, 2.2, 2.3, 2.3, 2.3, 2.3},
+		female: &[8]float64{1.6, 1.6, 1.6, 1.6, 1.8, 1.8, 1.8, 1.8},
+	}
+	rdaPotassium = rdaRow{
+		male:   [8]float64{1900, 2400, 2800, 2800, 2500, 2500, 2500, 2500},
+		female: &[8]float64{1800, 2200, 2100, 2100, 2000, 2000, 2000, 2000},
+	}
+	rdaVitaminA = rdaRow{
+		male:   [8]float64{600, 800, 900, 850, 850, 900, 850, 800},
+		female: &[8]float64{600, 700, 650, 650, 650, 700, 700, 650},
+	}
+	rdaVitaminD = rdaRow{
+		male: [8]float64{15, 15, 15, 15, 15, 15, 20, 20},
+	}
+	rdaVitaminE = rdaRow{
+		male:   [8]float64{5.5, 7.5, 7.5, 6.5, 6.5, 6.5, 6.5, 6.5},
+		female: &[8]float64{5.5, 6, 6, 6, 6, 6, 6, 6},
+	}
+	rdaVitaminK = rdaRow{
+		male: [8]float64{120, 150, 160, 150, 150, 150, 150, 150},
+	}
+	rdaB1 = rdaRow{
+		male:   [8]float64{1.2, 1.4, 1.4, 1.4, 1.3, 1.2, 1.2, 1.1},
+		female: &[8]float64{1.1, 1.3, 1.2, 1.2, 1.1, 1, 1, 1},
+	}
+	rdaB2 = rdaRow{
+		male:   [8]float64{1.4, 1.6, 1.7, 1.7, 1.5, 1.4, 1.4, 1.3},
+		female: &[8]float64{1.3, 1.4, 1.4, 1.4, 1.2, 1.2, 1.2, 1.1},
+	}
+	rdaB3 = rdaRow{
+		male:   [8]float64{12, 12, 16, 16, 16, 16, 16, 16},
+		female: &[8]float64{12, 12, 14, 14, 14, 14, 14, 14},
+	}
+	rdaB5 = rdaRow{
+		male: [8]float64{4, 4, 5, 5, 5, 5, 5, 5},
+	}
+	rdaB6 = rdaRow{
+		male:   [8]float64{1, 1.2, 1.3, 1.3, 1.3, 1.3, 1.7, 1.7},
+		female: &[8]float64{1, 1.1, 1.2, 1.2, 1.3, 1.3, 1.5, 1.5},
+	}
+	rdaFolate = rdaRow{
+		male:   [8]float64{300, 300, 300, 300, 400, 400, 400, 400},
+		female: &[8]float64{300, 400, 400, 400, 400, 400, 400, 400},
+	}
+	rdaB12 = rdaRow{
+		male: [8]float64{1.8, 2.4, 2.4, 2.4, 2.4, 2.4, 2.4, 2.4},
+	}
+	rdaVitaminC = rdaRow{
+		male: [8]float64{75, 95, 100, 100, 100, 100, 100, 100},
+	}
+)
 
 func CalculateEnergyTarget(weightKg float64, goal string) TargetRange {
 	switch goal {
@@ -98,43 +215,6 @@ func CalculateSodiumTarget(trainingMinutes int) TargetRange {
 	}
 }
 
-func CalculatePotassiumTarget(weightKg float64) TargetRange {
-	return TargetRange{
-		Min: math.Round((weightKg*80)/10) * 10,
-		Max: math.Round((weightKg*100)/10) * 10,
-	}
-}
-
-func CalculateCalciumTarget() TargetRange {
-	return TargetRange{Min: 1200, Max: 1500}
-}
-
-func CalculateMagnesiumTarget(calcium TargetRange) TargetRange {
-	return TargetRange{
-		Min: math.Round(calcium.Min * 0.5),
-		Max: math.Round(calcium.Max * 0.5),
-	}
-}
-
-func CalculateIronTarget(sex string, isPeriod bool) TargetRange {
-	if sex == "female" {
-		val := 18.0
-		if isPeriod {
-			val = 28.0
-		}
-		return TargetRange{Min: val, Max: val}
-	}
-	return TargetRange{Min: 8, Max: 8}
-}
-
-func CalculateZincTarget(sex string) TargetRange {
-	val := 8.0
-	if sex == "male" {
-		val = 12.0
-	}
-	return TargetRange{Min: val, Max: val}
-}
-
 func CalculateFiberTarget(caloriesMin float64, sex string) TargetRange {
 	rawFiber := math.Round((caloriesMin / 1000) * 14)
 	if sex == "male" {
@@ -164,12 +244,37 @@ func CalculateTargets(profile UserProfileForTargets) CompleteTargets {
 	fatMid := (profile.WeightKg*0.5 + profile.WeightKg*1.0) / 2.0
 	carb := CalculateCarbTarget(cal.Min, proteinMid, fatMid)
 
-	calcium := CalculateCalciumTarget()
-	mag := CalculateMagnesiumTarget(calcium)
+	band := bandOf(profile.Age)
+
+	calcium := singleTarget(rdaCalcium.value(profile.Sex, band))
+	phos := singleTarget(rdaPhosphorus.value(profile.Sex, band))
+	mag := singleTarget(rdaMagnesium.value(profile.Sex, band))
+
+	ironVal := rdaIron.value(profile.Sex, band)
+	if profile.Sex == "female" && profile.IsPeriod {
+		ironVal = PeriodIronMg
+	}
+	iron := singleTarget(ironVal)
+
+	zinc := singleTarget(rdaZinc.value(profile.Sex, band))
+	sel := singleTarget(rdaSelenium.value(profile.Sex, band))
+	cop := singleTarget(rdaCopper.value(profile.Sex, band))
+	man := singleTarget(rdaManganese.value(profile.Sex, band))
+	pot := singleTarget(rdaPotassium.value(profile.Sex, band))
+	vitA := singleTarget(rdaVitaminA.value(profile.Sex, band))
+	vitD := singleTarget(rdaVitaminD.value(profile.Sex, band))
+	vitE := singleTarget(rdaVitaminE.value(profile.Sex, band))
+	vitK := singleTarget(rdaVitaminK.value(profile.Sex, band))
+	b1 := singleTarget(rdaB1.value(profile.Sex, band))
+	b2 := singleTarget(rdaB2.value(profile.Sex, band))
+	b3 := singleTarget(rdaB3.value(profile.Sex, band))
+	b5 := singleTarget(rdaB5.value(profile.Sex, band))
+	b6 := singleTarget(rdaB6.value(profile.Sex, band))
+	fol := singleTarget(rdaFolate.value(profile.Sex, band))
+	b12 := singleTarget(rdaB12.value(profile.Sex, band))
+	vitC := singleTarget(rdaVitaminC.value(profile.Sex, band))
+
 	sod := CalculateSodiumTarget(profile.TrainingMinutes)
-	pot := CalculatePotassiumTarget(profile.WeightKg)
-	iron := CalculateIronTarget(profile.Sex, profile.IsPeriod)
-	zinc := CalculateZincTarget(profile.Sex)
 	fiber := CalculateFiberTarget(cal.Min, profile.Sex)
 	fastCarbs := CalculateFastCarbsTarget(profile.TrainingMinutes)
 
@@ -186,21 +291,21 @@ func CalculateTargets(profile UserProfileForTargets) CompleteTargets {
 		Iron:       iron,
 		Zinc:       zinc,
 		FastCarbs:  fastCarbs,
-		B1:         TargetRange{Min: 1.2, Max: 1.2},
-		B2:         TargetRange{Min: 1.3, Max: 1.3},
-		B3:         TargetRange{Min: 16, Max: 16},
-		B5:         TargetRange{Min: 5, Max: 5},
-		B6:         TargetRange{Min: 1.3, Max: 1.3},
-		B12:        TargetRange{Min: 2.4, Max: 2.4},
-		Folate:     TargetRange{Min: 400, Max: 400},
-		VitaminA:   TargetRange{Min: 650, Max: 650},
-		VitaminC:   TargetRange{Min: 100, Max: 100},
-		VitaminD:   TargetRange{Min: 15, Max: 15},
-		VitaminE:   TargetRange{Min: 6.5, Max: 6.5},
-		VitaminK:   TargetRange{Min: 150, Max: 150},
-		Copper:     TargetRange{Min: 0.9, Max: 0.9},
-		Manganese:  TargetRange{Min: 2.3, Max: 2.3},
-		Phosphorus: TargetRange{Min: 700, Max: 700},
-		Selenium:   TargetRange{Min: 34, Max: 34},
+		B1:         b1,
+		B2:         b2,
+		B3:         b3,
+		B5:         b5,
+		B6:         b6,
+		B12:        b12,
+		Folate:     fol,
+		VitaminA:   vitA,
+		VitaminC:   vitC,
+		VitaminD:   vitD,
+		VitaminE:   vitE,
+		VitaminK:   vitK,
+		Copper:     cop,
+		Manganese:  man,
+		Phosphorus: phos,
+		Selenium:   sel,
 	}
 }

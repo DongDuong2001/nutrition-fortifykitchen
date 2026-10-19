@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { SectionTitle } from "@/components/ui/section-title";
 import { FoodRowLink } from "./food-row-link";
 import { foodRowMeta, foodRowKcal } from "@/lib/food-meta";
+import { rowName } from "@/lib/food-rows";
 
 const FOOD_CARD_LIMIT = 50;
 
@@ -38,7 +39,7 @@ export function FoodListCard({ title, action, foods, withCategory, empty }: Food
             <FoodRowLink
               key={`${food.id}-${i}`}
               href={`/foods/${food.id}`}
-              name={food.nameVi}
+              name={rowName(food)}
               meta={`${withCategory ? `${withCategory(food)} · ` : ""}${foodRowMeta(food, label)}`}
               value={foodRowKcal(food, grams)}
               withBorderTop={i > 0 || !!title}

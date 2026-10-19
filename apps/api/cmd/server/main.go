@@ -233,13 +233,16 @@ func SetupRouter(cfg *config.Config, pool *pgxpool.Pool) chi.Router {
 			r.Delete("/foods/custom/{id}", nutritionHandler.DeleteCustomFood)
 
 			// Diary routes (Phase 3)
-			r.Route("/days/{date}", func(r chi.Router) {
-				r.Get("/", diaryHandler.GetDay)
-				r.Post("/entries", diaryHandler.CreateEntry)
-				r.Post("/entries/from-saved/{id}", libraryHandler.AddFromSaved)
-				r.Post("/copy-yesterday", diaryHandler.CopyYesterday)
-				r.Delete("/meals/{meal}", diaryHandler.DeleteMeal)
-				r.Put("/training", diaryHandler.SetTraining)
+			r.Route("/days", func(r chi.Router) {
+				r.Get("/", diaryHandler.GetDays)
+				r.Route("/{date}", func(r chi.Router) {
+					r.Get("/", diaryHandler.GetDay)
+					r.Post("/entries", diaryHandler.CreateEntry)
+					r.Post("/entries/from-saved/{id}", libraryHandler.AddFromSaved)
+					r.Post("/copy-yesterday", diaryHandler.CopyYesterday)
+					r.Delete("/meals/{meal}", diaryHandler.DeleteMeal)
+					r.Put("/training", diaryHandler.SetTraining)
+				})
 			})
 
 			r.Route("/entries/{id}", func(r chi.Router) {

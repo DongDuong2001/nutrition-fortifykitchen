@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { formatDayLabel } from "@/lib/format";
 import { StepBars } from "@/components/ui/step-bars";
+import { SyncStatus } from "@/components/sync/sync-status";
 
 export type AppHeaderVariant = "daily" | "sub" | "tab";
 
@@ -126,6 +127,7 @@ export function AppHeader({
   }, [date, clientNow]);
 
   const hasDateNav = Boolean(onPrev || onNext);
+  const showSync = variant !== "sub" && Title === "h1";
   const prevDisabled = !onPrev;
   const nextDisabled = !onNext || canGoNext === false || (canGoNext === undefined && dateLabel.startsWith("Hôm nay"));
 
@@ -201,7 +203,7 @@ export function AppHeader({
 
           {hasDateNav && (
             <div className="flex shrink-0 items-center lg:gap-1.5">
-              <button type="button" onClick={onPrev} disabled={prevDisabled} aria-label="Ngày trước" className={DATE_BUTTON}>
+              <button type="button" onClick={onPrev} disabled={prevDisabled} aria-label="Ngày trước" data-tour="day-prev" className={DATE_BUTTON}>
                 <Chevron dir="left" />
               </button>
               {onDateTap ? (
@@ -226,7 +228,13 @@ export function AppHeader({
             </div>
           )}
 
-          {actions ? <div className="flex shrink-0 items-center gap-2">{actions}</div> : null}
+          {/* cc-68 (S13): the one sync status sits in the header of every tab (not a sub-screen, not the picture behind /add) */}
+          {actions || showSync ? (
+            <div className="flex shrink-0 items-center gap-2">
+              {showSync && <SyncStatus />}
+              {actions}
+            </div>
+          ) : null}
         </div>
 
         {progress && <StepBars current={progress.current} total={progress.total} tone="dark" />}

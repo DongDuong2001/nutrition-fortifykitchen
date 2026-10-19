@@ -1,5 +1,5 @@
 """cc2-01: nutrient detail, date labels without a comma, and the removed /foods catalog.
-The Vi chất row for Canxi opens /micros/calcium. The detail shows 331 / 1.200–1.500 mg and 28 %. An unknown
+The Vi chất row for Canxi opens /micros/calcium. The detail shows 331 / 800 mg and 41 %. An unknown
 amount shows "—", never "0" (alcohol on the sample day). /foods redirects to /explore. The date label has no comma.
 Screenshots at 390 and 1440 go to apps/web/.screenshots/cc2-01-*.png.
 Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/cc2_01.py
@@ -59,9 +59,9 @@ def probe_open_from_row(pg, width_name):
     pg.wait_for_timeout(400)
     text = page_text(pg)
     check(pg.url.endswith("/micros/calcium"), f"{width_name}: tapping the Canxi row opens /micros/calcium")
-    check("1.200–1.500 mg" in text, f"{width_name}: range 1.200–1.500 mg shows on the detail")
+    check("800 mg" in text, f"{width_name}: the recommended 800 mg shows on the detail (cc-67)")
     check("331 mg" in text, f"{width_name}: today's amount 331 mg shows on the detail")
-    check("28%" in pg.inner_text("body"), f"{width_name}: percentage 28% shows in the header")
+    check("41%" in pg.inner_text("body"), f"{width_name}: percentage 41% shows in the header")
     check("Gợi ý để bù" not in pg.inner_text("body"), f"{width_name}: no Gợi ý để bù section yet")
     pg.screenshot(path=shot(f"cc2-01-calcium-{width_name}.png"), full_page=True)
 

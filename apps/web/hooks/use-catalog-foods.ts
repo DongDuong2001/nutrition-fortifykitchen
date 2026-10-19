@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
 import { apiClient } from "@/lib/api-client";
 import { isLiveMode } from "@/lib/api-mode";
 import { demoActive } from "@/lib/demo";
+import { loadFoodRows } from "@/lib/food-rows";
 import { browsableFoods, catalogStatus, catalogVersion, subscribeCatalog } from "@/lib/mock/foods";
 
 /**
@@ -21,6 +22,11 @@ export function useCatalogFoods() {
   // A copy: in demo mode browsableFoods() is MOCK_FOODS itself, which is changed in place, so a memo keyed on
   // `foods` would otherwise never see a made food or a recipe sync
   const foods = useMemo(() => browsableFoods().slice(), [version, demo]);
+
+  // cc-67: a list has one row per food once the index is there (lib/food-rows); it draws again when it arrives
+  useEffect(() => {
+    void loadFoodRows();
+  }, []);
 
   // A screen opened directly (a deep link) starts the load itself; one call at a time, whoever asks
   useEffect(() => {

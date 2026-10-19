@@ -29,7 +29,8 @@ import {
   MAX_MULT,
   type PortionState,
 } from "@/lib/portion";
-import { cookSwitchFor, type CookState } from "@/lib/yield";
+import { cookSwitchFor, useRowsReady } from "@/lib/food-rows";
+import type { CookState } from "@/lib/yield";
 import { QuantityStepper, TimesStepper } from "@/components/ui/quantity-stepper";
 import { markUsed } from "@/lib/onboarding-store";
 import { setPresent, type Presence } from "@/lib/tour-bus";
@@ -83,7 +84,8 @@ function GramPortionArea({
   const panel = variant === "panel";
   const isEggFood = portionModeOf(food) === "egg";
   const canSwap = !!onFoodChange;
-  const sw = useMemo(() => cookSwitchFor(food, MOCK_FOODS, canSwap), [food, canSwap]);
+  const ready = useRowsReady();
+  const sw = useMemo(() => cookSwitchFor(food, MOCK_FOODS, canSwap), [food, canSwap, ready]);
   const sizes = useMemo(() => eggSizes(food), [food]);
   const parts = useMemo(() => (canSwap ? eggParts(food, MOCK_FOODS) : []), [food, canSwap]);
 
@@ -112,6 +114,9 @@ function GramPortionArea({
   // model's form (an old "1 trái vừa" becomes its grams)
   const shownFood = useRef<string | null>(null);
   useEffect(() => {
+    // cc-67: the raw / cooked data loads a moment after the first paint. Until it is here a "…đã nấu chín" label cannot be read,
+    // and writing the portion out now would turn it into plain grams: wait, and start again when the data arrives.
+    if (!ready) return;
     if (food.id === shownFood.current && selectedServingLabel === emitted.current) return;
     shownFood.current = food.id;
     const next = startPortion(food, selectedServingLabel, parseGramsInput(gramsInput));
@@ -120,7 +125,7 @@ function GramPortionArea({
     emit(next);
     // emit and gramsInput: read at the moment the label changes, not followed
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [food.id, selectedServingLabel]);
+  }, [food.id, selectedServingLabel, ready]);
 
   usePresent("multiply", panel && p.kind === "grams");
   usePresent("cook", panel && p.kind === "grams" && !!sw);

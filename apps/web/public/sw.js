@@ -4,8 +4,11 @@
  *  - page loads: network first (3 s, then the cached copy), then the cache, then /offline
  *  - auth routes and the API: never cached (always the network)
  *  - an update waits until the page asks for it (SKIP_WAITING); it never takes over mid-edit.
+ *  - Background Sync (Android Chrome; iOS has none): the diary's outbox in IndexedDB is sent from here when the network
+ *    comes back while the app is closed (cc-68). It only ever removes a write the server has; every other outcome is left
+ *    to the page, which owns retries and holds.
  * Bump VERSION on a release that changes this file or the shell list. lib/pwa.ts holds the tested copy of routeFor. */
-const VERSION = "2026-10-19.9";
+const VERSION = "2026-10-19.11";
 const SHELL_CACHE = "h1t-shell-" + VERSION;
 const STATIC_CACHE = "h1t-static-" + VERSION;
 const PAGES = ["/", "/app", "/trends", "/explore", "/settings", "/offline"];
@@ -176,6 +179,135 @@ self.addEventListener("message", function (event) {
   if (event.data && event.data.type === "SKIP_WAITING") self.skipWaiting();
 });
 
+/* ---- Background Sync: the outbox (IndexedDB "h1t", store "outbox", one record per write) ---- */
+const OUTBOX_TAG = "h1t-outbox";
+const DRAIN_LOCK = "h1t-outbox-drain";
+const SENDING_FRESH_MS = 30000;
+const REQUEST_MS = 20000;
+
+function idbWait(request) {
+  return new Promise(function (resolve, reject) {
+    request.onsuccess = function () { resolve(request.result); };
+    request.onerror = function () { reject(request.error); };
+  });
+}
+
+/** The database as the page made it, or null: opening one that is not there must not create it. */
+function openOutboxDb() {
+  return new Promise(function (resolve) {
+    try {
+      const request = indexedDB.open("h1t");
+      request.onupgradeneeded = function () { request.transaction.abort(); };
+      request.onsuccess = function () { resolve(request.result); };
+      request.onerror = function () { resolve(null); };
+    } catch (e) {
+      resolve(null);
+    }
+  });
+}
+
+async function sendOutboxItem(meta, item) {
+  const method = item.method || "POST";
+  const path = item.path || "/days/" + item.date + "/entries";
+  const send = function () {
+    const controller = typeof AbortController === "function" ? new AbortController() : null;
+    const timer = controller ? setTimeout(function () { controller.abort(); }, REQUEST_MS) : null;
+    return fetch(meta.apiBase + path, {
+      method: method,
+      headers: { "Content-Type": "application/json" },
+      body: method === "DELETE" ? undefined : JSON.stringify(item.payload),
+      credentials: "include",
+      signal: controller ? controller.signal : undefined,
+    }).finally(function () { if (timer) clearTimeout(timer); });
+  };
+  let res = await send();
+  if (res.status === 401) {
+    // The cookie lasts about an hour: the same renewal the page makes, once
+    await fetch("/auth/session", { cache: "no-store", credentials: "same-origin" }).catch(function () {});
+    res = await send();
+  }
+  return res.status;
+}
+
+/**
+ * Sends what waits for the account the page last loaded for (the record "sync-meta" in store "kv"), in order, one entry's writes
+ * after another, and removes each write the server has. A write that is held, parked, waiting out a backoff, being sent by a page, or
+ * about a recipe the server has no row for is left alone, and so is everything behind it for the same entry. Returns how many
+ * were sent and whether the network failed (the browser then tries again later).
+ */
+async function drainOutbox() {
+  const db = await openOutboxDb();
+  if (!db) return { sent: 0, offline: false };
+  try {
+    if (!db.objectStoreNames.contains("outbox") || !db.objectStoreNames.contains("kv")) return { sent: 0, offline: false };
+    const meta = await idbWait(db.transaction("kv").objectStore("kv").get("sync-meta"));
+    if (!meta || !meta.account || typeof meta.apiBase !== "string") return { sent: 0, offline: false };
+    const all = await idbWait(db.transaction("outbox").objectStore("outbox").getAll());
+    const mine = all.filter(function (i) { return i.scope === meta.account; }).sort(function (a, b) { return (a.seq || 0) - (b.seq || 0); });
+    const blocked = new Set();
+    let sent = 0;
+    let offline = false;
+    for (const item of mine) {
+      const now = Date.now();
+      const recipe = item.payload && typeof item.payload.food_id === "string" && item.payload.food_id.indexOf("recipe-") === 0;
+      const sending = item.state === "sending" && now - (item.lastAttemptAt || 0) < SENDING_FRESH_MS;
+      if (blocked.has(item.id) || item.held || item.parked || recipe || sending || (item.nextAttemptAt && item.nextAttemptAt > now)) {
+        blocked.add(item.id);
+        continue;
+      }
+      let status = 0;
+      try {
+        status = await sendOutboxItem(meta, item);
+      } catch (e) {
+        status = 0;
+      }
+      const method = item.method || "POST";
+      if ((status >= 200 && status < 300) || (status === 404 && method === "DELETE")) {
+        await idbWait(db.transaction("outbox", "readwrite").objectStore("outbox").delete(item.key));
+        sent++;
+        continue;
+      }
+      blocked.add(item.id);
+      if (status === 0) {
+        offline = true;
+        break;
+      }
+    }
+    if (sent > 0) {
+      try {
+        const channel = new BroadcastChannel("h1t-sync");
+        channel.postMessage({ from: "sw", message: { type: "outbox", scope: meta.account } });
+        channel.postMessage({ from: "sw", message: { type: "diary", scope: meta.account } });
+        channel.close();
+      } catch (e) {
+        /* the pages read the outbox again when they next look */
+      }
+    }
+    return { sent: sent, offline: offline };
+  } finally {
+    db.close();
+  }
+}
+
+/** One drainer at a time, with the page: the same Web Lock lib/sync-engine takes. */
+function drainWithLock() {
+  const locks = typeof navigator !== "undefined" ? navigator.locks : undefined;
+  if (!locks || typeof locks.request !== "function") return drainOutbox();
+  return locks.request(DRAIN_LOCK, { ifAvailable: true }, function (lock) {
+    return lock ? drainOutbox() : { sent: 0, offline: false };
+  });
+}
+
+self.addEventListener("sync", function (event) {
+  if (event.tag !== OUTBOX_TAG) return;
+  event.waitUntil(
+    drainWithLock().then(function (result) {
+      // No answer at all: let the browser try again when the network is back
+      if (result && result.offline) throw new Error("outbox: offline");
+    })
+  );
+});
+
 self.addEventListener("fetch", function (event) {
   const request = event.request;
   const url = new URL(request.url);
@@ -191,4 +323,4 @@ self.addEventListener("fetch", function (event) {
   }
 });
 
-if (typeof module !== "undefined" && module.exports) module.exports = { routeFor: routeFor, PAGES: PAGES, VERSION: VERSION, networkFirst: networkFirst, NAVIGATION_TIMEOUT_MS: NAVIGATION_TIMEOUT_MS, networkOnly: networkOnly };
+if (typeof module !== "undefined" && module.exports) module.exports = { routeFor: routeFor, PAGES: PAGES, VERSION: VERSION, networkFirst: networkFirst, NAVIGATION_TIMEOUT_MS: NAVIGATION_TIMEOUT_MS, networkOnly: networkOnly, drainOutbox: drainOutbox, drainWithLock: drainWithLock, OUTBOX_TAG: OUTBOX_TAG };

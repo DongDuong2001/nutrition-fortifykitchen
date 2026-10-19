@@ -180,10 +180,10 @@ describe("weighIns and weightShift", () => {
     ];
     expect(weighIns(dates, log)).toEqual({ count: 2, of: 7 });
   });
-  const profile = { sex: "male" as const, goal: "maintain" as const, trainingMinutesDefault: 60, periodMode: false };
-  it("kcal, đạm and kali before and now when the weight moved", () => {
+  const profile = { sex: "male" as const, goal: "maintain" as const, trainingMinutesDefault: 60, };
+  it("kcal and đạm before and now when the weight moved (the micros do not follow the weight)", () => {
     const rows = weightShift(profile, 80, 78);
-    expect(rows.map((r) => r.key)).toEqual(["calories", "protein", "potassium"]);
+    expect(rows.map((r) => r.key)).toEqual(["calories", "protein"]);
     expect(rows[1].changed).toBe(true);
     expect(rows[1].before).not.toEqual(rows[1].now);
   });

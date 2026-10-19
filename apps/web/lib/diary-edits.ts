@@ -4,7 +4,7 @@ import { MEAL_SLOTS, getMealSlotNameVi, type MealSlot } from "./meal-slot";
 import { hidesGrams, parseUnitAmount, parseUnitServing, scaleNutrients } from "./portion";
 import { isAmount } from "./amount";
 import { formatAmount } from "./format";
-import { isUuid } from "./uuid";
+import { entryIso } from "./day-archive";
 
 /** A diary entry the user added (from /add or the food detail page). */
 export interface AddedDiaryEntry {
@@ -25,6 +25,11 @@ export interface AddedDiaryEntry {
   fiber: number | null;
   nutrients: Record<string, number | null>;
   addedAt: string;
+  /**
+   * The diary day the entry belongs to (YYYY-MM-DD, Asia/Ho_Chi_Minh), when it is not the day of `addedAt`: an entry added
+   * to yesterday today, or one the server lists under a day it was created after. Absent: the day of `addedAt`.
+   */
+  day?: string;
   /**
    * Live mode: the server confirmed this entry (its add was saved, or a refetch listed it). A refetch drops a confirmed
    * entry the server no longer has (deleted on another device); an unconfirmed one stays and is sent again.
@@ -295,6 +300,8 @@ export interface EntryView {
   portionNote: string | null;
   /** A kcal-only entry (Chỉ ghi kcal): its name and numbers are edited directly, there is no portion. */
   quick: { protein: number | null; carbs: number | null; fat: number | null } | null;
+  /** The diary day of an added entry (YYYY-MM-DD), so a screen can go back to that day; null for a sample item. */
+  day: string | null;
 }
 
 export interface DiaryEdits {
@@ -334,6 +341,7 @@ export function findEntry(edits: DiaryEdits, id: string, samples: SampleItemInfo
       canChangePortion: food !== null,
       portionNote: isQuick || food ? null : NOT_IN_CATALOG,
       quick: isQuick ? { protein: added.protein, carbs: added.carbs, fat: added.fat } : null,
+      day: entryIso(added),
     };
   }
 
@@ -354,6 +362,7 @@ export function findEntry(edits: DiaryEdits, id: string, samples: SampleItemInfo
     canChangePortion,
     portionNote: canChangePortion ? null : NOT_IN_CATALOG,
     quick: null,
+    day: null,
   };
 }
 
@@ -406,21 +415,28 @@ export function deleteEntryIn(edits: DiaryEdits, id: string, samples: SampleItem
   };
 }
 
-/** The ids of the entries that are in a meal now (sample items with their edits applied, then added entries). */
-export function mealEntryIds(edits: DiaryEdits, slot: MealSlot, samples: SampleItemInfo[] = SAMPLE_ITEMS): string[] {
+/** Picks the added entries of one day out of a list that holds more than one (today and yesterday, cc-68). */
+export type DayFilter = (entry: AddedDiaryEntry) => boolean;
+
+/**
+ * The ids of the entries that are in a meal now (sample items with their edits applied, then added entries).
+ * `onlyDay` limits the added entries to one day; a caller that passes it for a day other than today passes no samples.
+ */
+export function mealEntryIds(edits: DiaryEdits, slot: MealSlot, samples: SampleItemInfo[] = SAMPLE_ITEMS, onlyDay?: DayFilter): string[] {
   const fromSamples = samples.flatMap((info) => {
     const effect = sampleEffect(info, edits.sample[info.item.id]);
     return !effect.deleted && effect.mealSlot === slot ? [info.item.id] : [];
   });
-  return [...fromSamples, ...edits.added.filter((e) => e.mealSlot === slot).map((e) => e.id)];
+  return [...fromSamples, ...edits.added.filter((e) => e.mealSlot === slot && (!onlyDay || onlyDay(e))).map((e) => e.id)];
 }
 
 /** Removes every entry of a meal, and keeps them for one undo (a new delete replaces it). Nothing to remove: no change. */
-export function deleteMealIn(edits: DiaryEdits, slot: MealSlot, samples: SampleItemInfo[] = SAMPLE_ITEMS): DiaryEdits {
-  const ids = mealEntryIds(edits, slot, samples);
+export function deleteMealIn(edits: DiaryEdits, slot: MealSlot, samples: SampleItemInfo[] = SAMPLE_ITEMS, onlyDay?: DayFilter): DiaryEdits {
+  const ids = mealEntryIds(edits, slot, samples, onlyDay);
   if (ids.length === 0) return edits;
 
-  const added = edits.added.flatMap((entry, index) => (entry.mealSlot === slot ? [{ entry, index }] : []));
+  const inMeal = (e: AddedDiaryEntry) => e.mealSlot === slot && (!onlyDay || onlyDay(e));
+  const added = edits.added.flatMap((entry, index) => (inMeal(entry) ? [{ entry, index }] : []));
   const addedIds = new Set(added.map((a) => a.entry.id));
   const sampleIds = ids.filter((id) => !addedIds.has(id));
   const sample = { ...edits.sample };
@@ -428,7 +444,7 @@ export function deleteMealIn(edits: DiaryEdits, slot: MealSlot, samples: SampleI
 
   return {
     ...edits,
-    added: edits.added.filter((e) => e.mealSlot !== slot),
+    added: edits.added.filter((e) => !inMeal(e)),
     sample,
     undo: { kind: "meal", name: getMealSlotNameVi(slot), count: ids.length, added, sampleIds },
   };
@@ -536,7 +552,7 @@ export interface MealPortion {
 }
 
 /** The foods of a meal of today as they stand now (sample items with edits applied, then added entries). */
-export function mealPortions(edits: DiaryEdits, slot: MealSlot, samples: SampleItemInfo[] = SAMPLE_ITEMS): MealPortion[] {
+export function mealPortions(edits: DiaryEdits, slot: MealSlot, samples: SampleItemInfo[] = SAMPLE_ITEMS, onlyDay?: DayFilter): MealPortion[] {
   const fromSamples = samples.flatMap((info): MealPortion[] => {
     const edit = edits.sample[info.item.id];
     const effect = sampleEffect(info, edit);
@@ -545,31 +561,7 @@ export function mealPortions(edits: DiaryEdits, slot: MealSlot, samples: SampleI
     return grams === null ? [] : [{ foodId: info.food.id, servingLabel: effect.qty, grams }];
   });
   const fromAdded = edits.added
-    .filter((e) => e.mealSlot === slot && e.kind !== "quick")
+    .filter((e) => e.mealSlot === slot && e.kind !== "quick" && (!onlyDay || onlyDay(e)))
     .map((e) => ({ foodId: e.foodId, servingLabel: e.displayQty, grams: e.grams }));
   return [...fromSamples, ...fromAdded];
-}
-
-/**
- * A day refetched from the server (diary-store refreshRemoteDay). `keep` holds the entries with a write queued, being
- * sent, or started after the refetch did: the device's version of those wins (an edit not sent yet stays, a delete
- * not sent yet does not come back). Any other entry is the server's. A local entry the server does not have stays
- * unless the server confirmed it before (`synced`: it was deleted elsewhere), or it was added before the refetch
- * started and its id is not a uuid (it can never reach the server).
- */
-export function mergeServerDay(
-  local: readonly AddedDiaryEntry[],
-  server: readonly AddedDiaryEntry[],
-  { keep, startedAt }: { keep: ReadonlySet<string>; startedAt: number }
-): AddedDiaryEntry[] {
-  const onServer = new Set(server.map((e) => e.id));
-  const mine = new Map(local.map((e) => [e.id, e]));
-  const fromServer = server.flatMap((e): AddedDiaryEntry[] => {
-    if (!keep.has(e.id)) return [{ ...e, synced: true }];
-    const own = mine.get(e.id);
-    return own ? [{ ...own, synced: true }] : [];
-  });
-  const stays = (e: AddedDiaryEntry) =>
-    keep.has(e.id) || Date.parse(e.addedAt) >= startedAt || (!e.synced && isUuid(e.id));
-  return [...fromServer, ...local.filter((e) => !onServer.has(e.id) && stays(e))];
 }
