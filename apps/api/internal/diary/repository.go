@@ -16,7 +16,7 @@ type Repository interface {
 	GetDayEntries(ctx context.Context, userID uuid.UUID, date string) ([]DiaryEntryItem, error)
 	GetDayTraining(ctx context.Context, userID uuid.UUID, date string) (int, error)
 	GetUserDefaultTraining(ctx context.Context, userID uuid.UUID) (int, error)
-	GetUserProfile(ctx context.Context, userID uuid.UUID) (string, float64, string, int, bool, error)
+	GetUserProfile(ctx context.Context, userID uuid.UUID) (string, float64, string, int, bool, int, error)
 	GetFoodNutrients(ctx context.Context, foodID uuid.UUID) (string, map[string]*float64, error)
 	CreateEntry(ctx context.Context, userID uuid.UUID, date string, entry *DiaryEntryItem) (*DiaryEntryItem, error)
 	GetEntryByID(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) (*DiaryEntryItem, string, error)
@@ -111,14 +111,14 @@ func (r *pgxDiaryRepo) GetUserDefaultTraining(ctx context.Context, userID uuid.U
 	return minutes, nil
 }
 
-func (r *pgxDiaryRepo) GetUserProfile(ctx context.Context, userID uuid.UUID) (string, float64, string, int, bool, error) {
-	query := `SELECT sex, weight_kg, goal, training_minutes_default, near_period FROM nutrition.profiles WHERE user_id = $1`
+func (r *pgxDiaryRepo) GetUserProfile(ctx context.Context, userID uuid.UUID) (string, float64, string, int, bool, int, error) {
+	query := `SELECT sex, weight_kg, goal, training_minutes_default, near_period, COALESCE(birth_year, 0) FROM nutrition.profiles WHERE user_id = $1`
 	var sex, goal string
 	var weightKg float64
-	var trainingMinutes int
+	var trainingMinutes, birthYear int
 	var nearPeriod bool
-	err := r.pool.QueryRow(ctx, query, userID).Scan(&sex, &weightKg, &goal, &trainingMinutes, &nearPeriod)
-	return sex, weightKg, goal, trainingMinutes, nearPeriod, err
+	err := r.pool.QueryRow(ctx, query, userID).Scan(&sex, &weightKg, &goal, &trainingMinutes, &nearPeriod, &birthYear)
+	return sex, weightKg, goal, trainingMinutes, nearPeriod, birthYear, err
 }
 
 func (r *pgxDiaryRepo) GetFoodNutrients(ctx context.Context, foodID uuid.UUID) (string, map[string]*float64, error) {
