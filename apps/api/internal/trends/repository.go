@@ -173,13 +173,13 @@ func (r *pgxTrendsRepo) GetDayTrainingFlags(ctx context.Context, userID uuid.UUI
 }
 
 func (r *pgxTrendsRepo) GetUserTargets(ctx context.Context, userID uuid.UUID) (*targets.CompleteTargets, string, float64, error) {
-	query := `SELECT sex, weight_kg, goal, training_minutes_default, near_period FROM nutrition.profiles WHERE user_id = $1`
+	query := `SELECT sex, weight_kg, goal, training_minutes_default, near_period, COALESCE(birth_year, 0) FROM nutrition.profiles WHERE user_id = $1`
 	var sex, goal string
 	var weightKg float64
-	var trainingMinutes int
+	var trainingMinutes, birthYear int
 	var nearPeriod bool
 
-	err := r.pool.QueryRow(ctx, query, userID).Scan(&sex, &weightKg, &goal, &trainingMinutes, &nearPeriod)
+	err := r.pool.QueryRow(ctx, query, userID).Scan(&sex, &weightKg, &goal, &trainingMinutes, &nearPeriod, &birthYear)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			computed := targets.CalculateTargets(targets.UserProfileForTargets{
@@ -187,10 +187,16 @@ func (r *pgxTrendsRepo) GetUserTargets(ctx context.Context, userID uuid.UUID) (*
 				WeightKg:        65,
 				Goal:            "maintain",
 				TrainingMinutes: 60,
+				Age:             targets.DefaultAge,
 			})
 			return &computed, "maintain", 65, nil
 		}
 		return nil, "", 0, err
+	}
+
+	age := targets.DefaultAge
+	if birthYear > 0 {
+		age = time.Now().Year() - birthYear
 	}
 
 	computed := targets.CalculateTargets(targets.UserProfileForTargets{
@@ -199,6 +205,7 @@ func (r *pgxTrendsRepo) GetUserTargets(ctx context.Context, userID uuid.UUID) (*
 		Goal:            goal,
 		TrainingMinutes: trainingMinutes,
 		IsPeriod:        nearPeriod,
+		Age:             age,
 	})
 
 	return &computed, goal, weightKg, nil
