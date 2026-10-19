@@ -378,3 +378,4 @@
 
 ## cc-61 (19/10/2026)
 - [ ] (Hao) Live auth check skipped locally (hCaptcha can't run on localhost); run a–f on lehongkhanh.vn right after the deploy. The cc-58 checks still open: sign-in sets the httpOnly sb-access-token and loads supabase-js only on the auth call; reload keeps the session and the middleware runs once per navigation (no prefetch call); a deleted sb-access-token is re-issued with a fresh exp; one GET /days/{today} after the refresh; sign-out clears both cookies, /app goes to /signin, /signin loads once; /join/abc signed out (note: in live mode /join/<code> is the app's 404, since coaching is off, so that check only applies to a mock build).
+- [ ] (Dong) Confirm migrations 000012–000014 are applied on production before the deploy; deploy.sh does not run migrations. (000012 custom_foods_archive, 000013 profiles_training_prefs, 000014 account_delete_cascade;)
