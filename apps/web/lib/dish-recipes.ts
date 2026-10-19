@@ -1,7 +1,7 @@
 import { EDITED_DISH_SUFFIX, catalogFoodById, catalogVersion, type FoodItem } from "./mock/foods";
 import { calculateMacroPreview } from "./portion";
 import { RECIPE_ID_PREFIX, rawTotalGrams, sameServerFood, totalNutrients, type Recipe, type RecipeIngredient } from "./recipe";
-import { readRecipes, saveRecipe } from "./recipe-store";
+import { readRecipes, saveRecipe, syncRecipeFoods } from "./recipe-store";
 import { generateUuid } from "./uuid";
 
 /**
@@ -218,5 +218,7 @@ export function saveEditedDish(dish: Pick<FoodItem, "nameVi">, ingredients: Reci
   const same = readRecipes().find((r) => r.oneOff && sameServerFood(r, made));
   const recipe = same ?? made;
   if (!same && !saveRecipe(recipe)) return null;
+  // A saved one was put in the catalogue when the app opened, before this dish's ingredients were there: work it out again
+  if (same) syncRecipeFoods();
   return catalogFoodById(recipe.id) ?? null;
 }

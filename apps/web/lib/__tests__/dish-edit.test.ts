@@ -103,6 +103,19 @@ describe("the one-off food of a changed dish", () => {
     expect(other.id).not.toBe(first.id);
   });
 
+  it("the same change after the app was opened again still has its numbers (the ingredients were not in the catalogue when it synced)", () => {
+    const first = saveEditedDish(phoBo, edited().ingredients)!;
+    // Opened again: the recipes are put in the catalogue before the ingredients of the dish are there
+    const ingredients = edited().ingredients.map((i) => MOCK_FOODS.find((f) => f.id === i.foodId)!);
+    for (const f of ingredients) MOCK_FOODS.splice(MOCK_FOODS.indexOf(f), 1);
+    syncRecipeFoods();
+    expect(catalogFoodById(first.id)?.nutrients.energy).toBeNull();
+    MOCK_FOODS.push(...ingredients);
+    const again = saveEditedDish(phoBo, edited().ingredients)!;
+    expect(again.id).toBe(first.id);
+    expect(typeof again.nutrients.energy).toBe("number");
+  });
+
   it("a dish with nothing left to log is not saved; storage that refuses it says so", () => {
     expect(saveEditedDish(phoBo, [])).toBeNull();
     vi.stubGlobal("window", {

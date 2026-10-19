@@ -37,6 +37,8 @@ export interface DishPartsProps {
   onEdit: (edit: DishEdit | null) => void;
 }
 
+const PARTS_OPEN_KEY = "h1t_dish_parts_open";
+
 const kcalOf = (part: EditPart, grams: number) => (part.food ? calculateMacroPreview(part.food.nutrients, grams).calories : null);
 
 /** The gram field of a part: typing is free (a comma, an empty box), the number is read as it comes. */
@@ -83,7 +85,15 @@ const stepClass =
  */
 export function DishParts({ food, portionGrams, onEdit }: DishPartsProps) {
   const [recipes, setRecipes] = useState<DishRecipes | null>(null);
+  // cc-67: a person who changes the parts of a dish finds them open the next time (a convenience of this device)
   const [open, setOpen] = useState(false);
+  useEffect(() => {
+    try {
+      if (window.localStorage.getItem(PARTS_OPEN_KEY) === "1") setOpen(true);
+    } catch {
+      // Storage unavailable: they start closed
+    }
+  }, []);
   // What the user changed, by part key (grams for one serving) and which add-ons are on (by chip label)
   const [typed, setTyped] = useState<Record<string, number>>({});
   const [added, setAdded] = useState<string[]>([]);
@@ -151,7 +161,14 @@ export function DishParts({ food, portionGrams, onEdit }: DishPartsProps) {
           type="button"
           aria-expanded={open}
           aria-controls={panelId}
-          onClick={() => setOpen((o) => !o)}
+          onClick={() => {
+            setOpen(!open);
+            try {
+              window.localStorage.setItem(PARTS_OPEN_KEY, open ? "0" : "1");
+            } catch {
+              // Storage unavailable
+            }
+          }}
           className="flex min-h-[48px] w-full cursor-pointer items-center justify-between gap-3 border-0 bg-transparent px-4 text-left text-text"
         >
           <span className="text-[15px] font-bold">Thành phần</span>

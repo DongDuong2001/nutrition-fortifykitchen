@@ -729,7 +729,15 @@ function AddFoodInner() {
       </div>
 
       {/* The portion sheet (phone): white, over the list, as in design/portion-mockup */}
-      <Sheet open={selectedFood !== null && !isDesktop} onClose={() => setSelectedFood(null)} labelledBy="portion-sheet-title">
+      <Sheet
+        open={selectedFood !== null && !isDesktop}
+        onClose={() => {
+          setSelectedFood(null);
+          // cc-67: back to the list with the keyboard ready, as when the sheet opened
+          phoneSearchInputRef.current?.focus({ preventScroll: true });
+        }}
+        labelledBy="portion-sheet-title"
+      >
         {selectedFood && (
           <div className="-mx-4 max-h-[86dvh] overflow-y-auto overscroll-contain px-4 pb-[env(safe-area-inset-bottom)]">
             <PortionPanel
