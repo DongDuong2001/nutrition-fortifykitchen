@@ -10,7 +10,7 @@ import { FoodSearchField } from "@/components/foods/food-search-field";
 import { ExploreSections } from "@/components/explore/explore-sections";
 import { CatalogNote, CatalogStatus } from "@/components/foods/catalog-status";
 import { useCatalogFoods } from "@/hooks/use-catalog-foods";
-import { searchFoods } from "@/lib/search";
+import { searchRows } from "@/lib/search";
 import { FOOD_CATEGORIES, categoryLabel, categoryOf } from "@/lib/food-categories";
 import { coachingAvailable } from "@/lib/coaching-link";
 import { isLiveMode } from "@/lib/api-mode";
@@ -36,7 +36,7 @@ function Results() {
   const searched = useDeferredValue(query);
   const searching = searched.trim().length > 0;
   const { foods, pending, failed, retry } = useCatalogFoods();
-  const results = useMemo(() => searchFoods(foods, searched), [searched, foods]);
+  const results = useMemo(() => searchRows(foods, searched), [searched, foods]);
   const waiting = results.length === 0 && (pending || failed);
   if (!searching) return <ExploreSections />;
   return (

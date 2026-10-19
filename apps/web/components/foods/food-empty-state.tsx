@@ -1,4 +1,5 @@
 import React from "react";
+import { rowName } from "@/lib/food-twins";
 import type { FoodItem } from "@/lib/mock/foods";
 import { CreateFoodButton } from "@/components/foods/create-food-button";
 import { categoryLabel, isCategoryFilter, type FoodFilter } from "@/lib/food-categories";
@@ -89,7 +90,7 @@ export function FoodEmptyState({
               onClick={() => onPickSimilar(s)}
               className="text-left py-3 px-3 rounded-xl hover:bg-surface text-sm font-semibold text-text border-0 bg-card cursor-pointer flex justify-between items-center min-h-[48px]"
             >
-              <span>{s.nameVi}</span>
+              <span>{rowName(s)}</span>
               <span className="text-xs text-secondary font-normal">{getMeta(s)}</span>
             </button>
           ))}

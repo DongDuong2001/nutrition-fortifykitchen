@@ -25,6 +25,7 @@ import { foodMeta } from "@/lib/food-meta";
 import { CreateFoodButton } from "@/components/foods/create-food-button";
 import { isCategoryFilter } from "@/lib/food-categories";
 import { resolveFavourites } from "@/lib/favourites";
+import { dedupeTwins, twinIdsOf } from "@/lib/food-twins";
 import { TrayBar, TrayReviewSheet } from "@/components/add/add-tray";
 import { markUsed } from "@/lib/onboarding-store";
 import { TOUR_STEPS } from "@/lib/tour";
@@ -134,9 +135,10 @@ function AddFoodInner() {
   // Pick a food with one serving (default: its first). Sets the amount too, so the portion panel shows it.
   // cc-51: a food opens on the portion this user last logged for it, else the catalogue's first portion
   const pickFood = useCallback((food: FoodItem, serving?: FoodServing) => {
-    const last = serving ? null : lastPortionOf(food.id, recentFoods, MOCK_FOODS);
+    // cc-67: raw and cooked are one list row, so the food opens in the state it was last logged in
+    const last = serving ? null : lastPortionOf(twinIdsOf(food), recentFoods, MOCK_FOODS);
     const s = serving ?? (last ? { label: last.label, grams: last.grams } : defaultPortionOf(food));
-    setSelectedFood(food);
+    setSelectedFood(last?.food ?? food);
     setGramsInput(String(s.grams));
     setSelectedServingLabel(s.label);
     tourAction("food-picked");
@@ -211,20 +213,26 @@ function AddFoodInner() {
   );
   // Recents are foods with the serving they were logged with: tap = add with that serving, chevron = portion panel
   const recentShortcuts = useMemo<RecentShortcut[]>(() => {
+    // cc-67: one card per food, in the state it was last logged in
     const ofMeal = mealSlot ? recentForMeal(diaryEntries, mealSlot).map((s) => shortcutOf(s, "meal")).filter((r): r is RecentShortcut => r !== null) : [];
-    if (ofMeal.length > 0) return ofMeal;
-    return recentFoods
-      .map((r) => resolveRecent(r, MOCK_FOODS))
-      .filter((r): r is ResolvedRecent => r !== null)
-      .map((r) => ({ key: `${r.food.id}|${r.label}`, food: r.food, label: r.label, grams: r.grams }))
-      .slice(0, MAX_SHORTCUT_RECENTS);
+    if (ofMeal.length > 0) return dedupeTwins(ofMeal, (r) => r.food);
+    return dedupeTwins(
+      recentFoods
+        .map((r) => resolveRecent(r, MOCK_FOODS))
+        .filter((r): r is ResolvedRecent => r !== null)
+        .map((r) => ({ key: `${r.food.id}|${r.label}`, food: r.food, label: r.label, grams: r.grams })),
+      (r) => r.food
+    ).slice(0, MAX_SHORTCUT_RECENTS);
   }, [recentFoods, diaryEntries, mealSlot, shortcutOf]);
   const frequentShortcuts = useMemo<RecentShortcut[]>(
     () =>
       todayIso
-        ? frequentFoods(diaryEntries, todayIso)
-            .map((s) => shortcutOf(s, "often"))
-            .filter((r): r is RecentShortcut => r !== null && !recentShortcuts.some((x) => x.food.id === r.food.id))
+        ? dedupeTwins(
+            frequentFoods(diaryEntries, todayIso)
+              .map((s) => shortcutOf(s, "often"))
+              .filter((r): r is RecentShortcut => r !== null && !recentShortcuts.some((x) => twinIdsOf(x.food).includes(r.food.id))),
+            (r) => r.food
+          )
         : [],
     [diaryEntries, todayIso, recentShortcuts, shortcutOf]
   );
@@ -232,13 +240,13 @@ function AddFoodInner() {
   // A favourite already in Gần đây is not repeated (two identical buttons confuse screen readers)
   const favouriteShortcuts = useMemo<RecentShortcut[]>(
     () =>
-      resolveFavourites(favouriteIds, MOCK_FOODS)
-        .filter((food) => !recentShortcuts.some((r) => r.food.id === food.id) && !frequentShortcuts.some((r) => r.food.id === food.id))
+      dedupeTwins(resolveFavourites(favouriteIds, MOCK_FOODS), (food) => food)
+        .filter((food) => !recentShortcuts.some((r) => twinIdsOf(r.food).includes(food.id)) && !frequentShortcuts.some((r) => twinIdsOf(r.food).includes(food.id)))
         .slice(0, MAX_SHORTCUT_FAVOURITES)
         .map((food) => {
-          const last = lastPortionOf(food.id, recentFoods, MOCK_FOODS);
-          const serving = last ? { label: last.label, grams: last.grams } : (food.servings[0] ?? { label: "100 g", grams: 100 });
-          return { key: `fav|${food.id}`, food, label: serving.label, grams: serving.grams };
+          const last = lastPortionOf(twinIdsOf(food), recentFoods, MOCK_FOODS);
+          const serving = last ? { label: last.label, grams: last.grams } : defaultPortionOf(food);
+          return { key: `fav|${food.id}`, food: last?.food ?? food, label: serving.label, grams: serving.grams };
         }),
     [favouriteIds, recentFoods, recentShortcuts, frequentShortcuts, catalogVersion]
   );
@@ -342,7 +350,7 @@ function AddFoodInner() {
 
   // A favourite with a last portion adds in one tap, like a recent. Without history the portion panel opens.
   const pickFromList = (food: FoodItem) => {
-    const last = favouritesOnly ? lastPortionOf(food.id, recentFoods, MOCK_FOODS) : null;
+    const last = favouritesOnly ? lastPortionOf(twinIdsOf(food), recentFoods, MOCK_FOODS) : null;
     if (last) void addWithPortion(last.food, last.grams, last.label);
     else pickFood(food);
   };

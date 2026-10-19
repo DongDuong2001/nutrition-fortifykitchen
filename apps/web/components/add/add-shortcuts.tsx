@@ -7,6 +7,7 @@ import type { FoodItem } from "@/lib/mock/foods";
 import type { SavedMeal } from "@/lib/saved-meals";
 import { formatAmount } from "@/lib/format";
 import { foodRowKcal } from "@/lib/food-meta";
+import { rowName } from "@/lib/food-twins";
 
 export interface RecentShortcut {
   key: string;
@@ -95,14 +96,15 @@ function ShortcutCard({
 export function AddShortcuts({ recents, frequent = [], favourites, savedMeals, onAddRecent, onOpenRecent, onAddSavedMeal, onQuickKcal }: AddShortcutsProps) {
   const foodCard = (r: RecentShortcut) => {
     const kcal = foodRowKcal(r.food, r.grams);
+    const name = rowName(r.food);
     return (
       <ShortcutCard
         key={r.key}
-        name={r.food.nameVi}
+        name={name}
         meta={`${r.label}${kcal ? ` · ${kcal}` : ""}`}
-        addLabel={`Thêm ${r.food.nameVi} ${r.label}`}
+        addLabel={`Thêm ${name} ${r.label}`}
         onAdd={() => onAddRecent(r)}
-        openLabel={`Chọn khẩu phần ${r.food.nameVi}`}
+        openLabel={`Chọn khẩu phần ${name}`}
         onOpen={() => onOpenRecent(r)}
       />
     );

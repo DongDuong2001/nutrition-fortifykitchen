@@ -1,4 +1,5 @@
 import { catalogVersion, type FoodItem } from "./mock/foods";
+import { collapseTwins, twinGroupOf, type TwinGroup } from "./food-twins";
 
 /**
  * Remove Vietnamese diacritical marks and tone markers for fuzzy/ascii comparison.
@@ -58,6 +59,13 @@ function foldedOf(food: FoodItem): Folded {
   }
   return f;
 }
+
+/**
+ * A name that says the food was made into something else (chiên, xào, nướng, kho, rim, rang, quay, sốt): in a search
+ * for the food it comes after the plain row, whatever its length ("Thịt bò kho" after "Thịt bò nạc").
+ */
+const PREPARED_RE = /(?:^|[\s(,/])(?:chiên|rán|xào|nướng|kho|rim|rang|quay|sốt)(?=$|[\s),/])/iu;
+const isPrepared = (name: string) => PREPARED_RE.test(name);
 
 /** One Vietnamese collator for every comparison (a new one per localeCompare call is slow). */
 const VI_COLLATOR = new Intl.Collator("vi");
@@ -128,31 +136,49 @@ export function queryVariants(query: string): string[] {
  * shorter name, then Vietnamese order. Duplicates collapse to one.
  */
 export function searchFoods(foods: FoodItem[], query: string): FoodItem[] {
+  return rank(foods, query, false);
+}
+
+/**
+ * cc-67: the same search, one row per food. A raw row and its plain cooked row are one result named without a state
+ * ("Khoai lang"), found by the name of either, at the place its best name earns and by the length of the plain name, so
+ * "Khoai lang" comes before "Khoai lang chiên". The row it opens on is the state the food is usually eaten in.
+ */
+export function searchRows(foods: FoodItem[], query: string): FoodItem[] {
+  return rank(foods, query, true);
+}
+
+function rank(foods: FoodItem[], query: string, twins: boolean): FoodItem[] {
   const q = norm(query);
-  if (!q) return withoutDuplicates(foods);
+  const unique = withoutDuplicates(foods);
+  if (!q) return twins ? collapseTwins(unique) : unique;
 
-  const variants = queryVariants(q);
-
-  const matches: { food: FoodItem; tier: number }[] = [];
-  for (const food of withoutDuplicates(foods)) {
-    let bestTier: number | null = null;
-    for (let i = 0; i < variants.length; i++) {
-      const v = variants[i];
-      const foldedV = removeVietnameseTones(v);
-      const tier = matchTier(food, v, foldedV);
-      if (tier !== null) {
-        const penalty = i === 0 ? 0 : i === 1 ? 0.05 : 0.2;
-        const adjustedTier = tier + penalty;
-        if (bestTier === null || adjustedTier < bestTier) {
-          bestTier = adjustedTier;
-        }
-      }
+  const variants = queryVariants(q).map((v, i) => ({ v, folded: removeVietnameseTones(v), penalty: i === 0 ? 0 : i === 1 ? 0.05 : 0.2 }));
+  const tierOfFood = (food: FoodItem) => {
+    let best = Infinity;
+    for (const { v, folded, penalty } of variants) {
+      const tier = matchTier(food, v, folded);
+      if (tier !== null) best = Math.min(best, tier + penalty);
     }
-    if (bestTier !== null) matches.push({ food, tier: bestTier });
+    return best;
+  };
+
+  const matches: { food: FoodItem; tier: number; prepared: boolean; length: number }[] = [];
+  const seen = new Set<TwinGroup>();
+  const present = twins ? new Set(foods.map((f) => f.id)) : null;
+  for (const food of unique) {
+    const group = twins ? twinGroupOf(food) : null;
+    if (group && seen.has(group)) continue;
+    if (group) seen.add(group);
+    // A food is found by the name of any of its rows, and listed under its plain name
+    const tier = Math.min(...(group ? group.members : [food]).map(tierOfFood));
+    if (tier === Infinity) continue;
+    const name = group?.name ?? food.nameVi;
+    matches.push({ food: group && present?.has(group.start.id) ? group.start : food, tier, prepared: twins && isPrepared(name), length: name.length });
   }
 
   return matches
-    .sort((a, b) => a.tier - b.tier || a.food.nameVi.length - b.food.nameVi.length || VI_COLLATOR.compare(a.food.nameVi, b.food.nameVi))
+    .sort((a, b) => a.tier - b.tier || Number(a.prepared) - Number(b.prepared) || a.length - b.length || VI_COLLATOR.compare(a.food.nameVi, b.food.nameVi))
     .map((m) => m.food);
 }
 

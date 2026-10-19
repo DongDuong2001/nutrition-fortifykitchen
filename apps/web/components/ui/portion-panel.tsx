@@ -13,6 +13,7 @@ import { getNutrientDefinition } from "@/lib/nutrients";
 import { useDiary } from "@/lib/diary-store";
 import { canLog as canLogFood, energyNotice } from "@/lib/diary-edits";
 import { kcalValue } from "@/lib/kcal";
+import { rowName } from "@/lib/food-twins";
 
 // cc-54: the Thành phần of a dish (and the recipes with it) is its own chunk, fetched when a Món Việt food's panel opens
 const DishParts = lazy(() => import("@/components/ui/dish-parts").then((m) => ({ default: m.DishParts })));
@@ -122,7 +123,7 @@ export function PortionPanel({
           {/* No line-clamp here: its overflow clipping cut the stacked marks of capitals like Ắ, Ẫ, Ổ ("TRẮNG" read
               "TRĂNG"). The line height leaves them room; a long name wraps. */}
           <h2 id={headingId} className="m-0 break-words font-display text-[32px] font-bold uppercase leading-[1.15] tracking-[0.01em]">
-            {food.nameVi}
+            {rowName(food)}
           </h2>
         </div>
         <Link

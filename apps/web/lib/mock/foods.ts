@@ -1140,6 +1140,28 @@ export const MOCK_FOODS: FoodItem[] = [
   },
 ];
 
+// cc-67: raw rows for the sample's cooked ones, so the demo shows one row per food (lib/food-twins): "Khoai lang" opens on
+// Chín (Khoai lang luộc) and Sống switches to this row. USDA SR Legacy sweet potato, raw (FDC 168482), per 100 g.
+MOCK_FOODS.push({
+  id: "food-khoai-lang-song",
+  category: "tinh_bot",
+  nameVi: "Khoai lang (sống)",
+  source: "USDA",
+  demoOnly: true,
+  match: "unknown",
+  sourceRef: fdc(168482),
+  servings: [{ label: "100 g", grams: 100 }],
+  nutrients: {
+    energy: 86,
+    carbs: 20.12,
+    protein: 1.57,
+    fat: 0.05,
+    fiber: 3,
+    potassium: 337,
+    vitamin_a: 709,
+  },
+});
+
 MOCK_FOODS.push(...RECIPE_INGREDIENT_FOODS, ...RECIPE_DISH_FOODS);
 
 /** The ids of the sample foods above, taken before the live mode drops them or a database catalogue arrives. */

@@ -31,6 +31,14 @@ export interface Release {
 }
 
 export const RELEASES: readonly Release[] = [
+  // cc-67: simple, fast food logging. No tour of its own except the editable parts of a dish (a step is added with them)
+  {
+    id: "2026-10-19a",
+    date: "19/10",
+    items: [
+      { icon: "select", title: "Mỗi món một dòng", body: "Cơm, thịt, cá, khoai chỉ còn một dòng trong danh sách. Chọn Sống hay Chín ngay trong bảng khẩu phần." },
+    ],
+  },
   // cc-53b: the coach's portion model. The tour runs on Hôm nay: + Thêm (or the + of the nav), the food list, a meal
   {
     id: "2026-10-18f",

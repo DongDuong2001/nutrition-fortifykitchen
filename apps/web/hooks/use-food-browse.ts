@@ -4,6 +4,7 @@ import { useCallback, useDeferredValue, useMemo, useState } from "react";
 import type { FoodItem } from "@/lib/mock/foods";
 import { useCatalogFoods } from "@/hooks/use-catalog-foods";
 import { findSimilarFoods } from "@/lib/search";
+import { dedupeTwins, twinIdsOf } from "@/lib/food-twins";
 import {
   buildFoodList,
   chipCategories,
@@ -17,7 +18,7 @@ import { useDiary } from "@/lib/diary-store";
  * Search, filter and list state for browsing foods. Shared by the add sheet and Khám phá, so both use
  * the same index, the same category chips and the same empty states.
  */
-export function useFoodBrowse() {
+export function useFoodBrowse({ oneRowPerFood = true }: { oneRowPerFood?: boolean } = {}) {
   const { favouriteIds, isFavourite } = useDiary();
   const { foods, version, pending: catalogPending, failed: catalogFailed, retry: retryCatalog } = useCatalogFoods();
   const [filter, setFilter] = useState<FoodFilter>("all");
@@ -28,10 +29,11 @@ export function useFoodBrowse() {
 
   // Filter and search combined. Grouped only for Tất cả with no query.
   // `foods` follows the catalogue (the live load, a made food) and demo mode
-  const list = useMemo(() => buildFoodList(foods, searched, filter, favouriteIds), [searched, filter, favouriteIds, foods]);
+  const list = useMemo(() => buildFoodList(foods, searched, filter, favouriteIds, oneRowPerFood), [searched, filter, favouriteIds, foods, oneRowPerFood]);
   const categories = useMemo(() => chipCategories(foods), [foods]);
   const categoryName = useCallback((food: FoodItem) => categoryLabel(categoryOf(food)), []);
-  const isFavouriteFood = useCallback((food: FoodItem) => isFavourite(food.id), [isFavourite]);
+  // A food is a favourite when any of its rows is (raw and cooked are one row of a list)
+  const isFavouriteFood = useCallback((food: FoodItem) => twinIdsOf(food).some(isFavourite), [isFavourite]);
 
   // Filter row: Tất cả, Yêu thích, then only the categories that have foods
   const filterItems = useMemo(
@@ -51,7 +53,7 @@ export function useFoodBrowse() {
   // Fuzzy suggestions when results are empty
   const similarFoods = useMemo(() => {
     if (list.foods.length === 0 && searched.trim()) {
-      return findSimilarFoods(foods, searched, 4);
+      return dedupeTwins(findSimilarFoods(foods, searched, 8), (f) => f).slice(0, 4);
     }
     return [];
   }, [list.foods, searched, foods]);

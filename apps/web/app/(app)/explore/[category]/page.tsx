@@ -9,6 +9,7 @@ import { FoodListCard } from "@/components/foods/food-list-card";
 import { CatalogNote, CatalogStatus } from "@/components/foods/catalog-status";
 import { useCatalogFoods } from "@/hooks/use-catalog-foods";
 import { FOOD_CATEGORIES, categoryOf, isOwnFood } from "@/lib/food-categories";
+import { collapseTwins } from "@/lib/food-twins";
 import { useBack } from "@/hooks/use-back";
 
 /** One food category, a pushed screen of Khám phá. */
@@ -19,9 +20,7 @@ export default function ExploreCategoryPage() {
   const { foods: catalogue, pending, failed, retry } = useCatalogFoods();
   if (!category) notFound();
 
-  const foods = catalogue
-    .filter((f) => (category.key === "cua_toi" ? isOwnFood(f) : categoryOf(f) === category.key))
-    .map((food) => ({ food }));
+  const foods = collapseTwins(catalogue.filter((f) => (category.key === "cua_toi" ? isOwnFood(f) : categoryOf(f) === category.key))).map((food) => ({ food }));
   // The live catalogue is not here yet, or did not come: say so, never "Chưa có món nào"
   const waiting = foods.length === 0 && (pending || failed);
 

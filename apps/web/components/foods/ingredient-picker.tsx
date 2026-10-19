@@ -37,7 +37,7 @@ export function IngredientPicker({
 
 // Mounted only while the sheet is open, so each opening starts with a blank search and nothing ticked
 function PickerBody({ onClose, onConfirm, disabledIds }: { onClose: () => void; onConfirm: (foods: FoodItem[]) => void; disabledIds: string[] }) {
-  const { query, setQuery, filter, setFilter, list, filterItems, categoryName, isFavouriteFood, catalogPending, catalogFailed, retryCatalog } = useFoodBrowse();
+  const { query, setQuery, filter, setFilter, list, filterItems, categoryName, isFavouriteFood, catalogPending, catalogFailed, retryCatalog } = useFoodBrowse({ oneRowPerFood: false });
   const [picked, setPicked] = useState<FoodItem[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
   const toggle = (food: FoodItem) =>

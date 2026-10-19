@@ -79,10 +79,13 @@ export function resolveRecent(recent: RecentFood, foods: FoodItem[]): ResolvedRe
 
 /**
  * The portion a food was last logged with, from the recents (newest first). Null when the food has no history
- * (or no longer exists): the caller then opens the portion panel instead of adding.
+ * (or no longer exists): the caller then opens the portion panel instead of adding. `foodId` can be every row id of a
+ * food whose raw and cooked rows share a list row (lib/food-twins twinIdsOf): the newest of them wins, so the food
+ * opens in the state it was last logged in.
  */
-export function lastPortionOf(foodId: string, recents: RecentFood[], foods: FoodItem[]): ResolvedRecent | null {
-  const last = recents.find((r) => r.foodId === foodId);
+export function lastPortionOf(foodId: string | readonly string[], recents: RecentFood[], foods: FoodItem[]): ResolvedRecent | null {
+  const ids = typeof foodId === "string" ? [foodId] : foodId;
+  const last = recents.find((r) => ids.includes(r.foodId));
   return last ? resolveRecent(last, foods) : null;
 }
 

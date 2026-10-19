@@ -191,7 +191,8 @@ def groups(pg):
     s.get_by_role("button", name="Cân sống", exact=True).click()
     s.get_by_label("Số gam").fill("200")
     pg.wait_for_timeout(200)
-    check("200 g lúc sống nấu xong thành khoảng 200 g" in s.inner_text(), "sweet potato: 200 g raw stays 200 g (tuber median 100)")
+    # cc-67: the demo catalogue has the raw row (Khoai lang (sống)), so Cân sống logs it as it is: no conversion note
+    check("nấu xong thành" not in s.inner_text() and "172 kcal" in s.inner_text(), "sweet potato: 200 g raw is the raw row itself (172 kcal, no conversion)")
     pg.screenshot(path=str(SHOTS / "cc-53c-sweet-potato-raw-390.png"))
     pg.keyboard.press("Escape")
     pg.wait_for_timeout(300)
