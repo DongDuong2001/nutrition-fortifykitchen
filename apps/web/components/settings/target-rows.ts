@@ -89,7 +89,8 @@ export function targetSections(profile: Profile): TargetSection[] {
         },
         ...["potassium", "calcium", "magnesium", "iron", "zinc"].map((key) => ({
           label: nutrientName(key),
-          detail: who,
+          // Iron in the period is the coach's 28 mg, not a recommended amount (TODO cc-67: Hao decides)
+          detail: key === "iron" && profile.sex === "female" && profile.periodMode ? "Gần/đang trong kỳ: quy tắc của huấn luyện viên" : who,
           value: `${formatAmount(t[key]?.min ?? 0, "mg")} mg`,
         })),
       ],

@@ -1,5 +1,8 @@
 import { rdaTargets } from "./rda";
 
+/** Iron for a woman in or near the period: the coach rule (mg a day) */
+const PERIOD_IRON_MG = 28;
+
 /** The age the micro targets use until the profile says one (the 20–29 band) */
 const DEFAULT_AGE = 25;
 
@@ -66,6 +69,8 @@ export interface UserProfileForTargets {
   trainingMinutes?: number;
   /** Age in years, for the recommended amounts of the 22 micros (lib/rda); 25 when not known */
   age?: number;
+  /** Women only: in or near the period. Iron is the coach's 28 mg then (the one micro the period changes) */
+  isPeriod?: boolean;
   macroMode?: MacroTargetMode;
   macroRatios?: MacroRatios;
   macroFixed?: MacroFixedGrams;
@@ -276,6 +281,8 @@ export function calculateTargets(profile: UserProfileForTargets): CompleteTarget
     // cc-67: 21 of the 22 vitamins and minerals are the recommended amounts for this sex and age (lib/rda), whatever the weight or training
     ...rdaTargets(profile.sex, profile.age ?? DEFAULT_AGE),
     sodium: calculateSodiumTarget(trainingMinutes),
+    // TODO(cc-67): iron in the period stays the coach's 28 mg, not VN 2016's amount for the age; Hao decides (OPEN_QUESTIONS, cc-67 period iron)
+    ...(profile.sex === "female" && profile.isPeriod ? { iron: { min: PERIOD_IRON_MG, max: PERIOD_IRON_MG } } : {}),
     calories,
     protein,
     fat,

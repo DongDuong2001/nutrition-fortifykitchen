@@ -71,6 +71,8 @@ def main():
             check(f"VN 2016, {label}" in text, f"Mục tiêu {sex} 30: says {label}")
             for want in wants:
                 check(want in text, f"Mục tiêu {sex} 30 shows {want}")
+            # The tab bar is fixed: left out, it would cut across the full-page shot
+            pg.add_style_tag(content="nav { display: none !important; }")
             pg.screenshot(path=str(SHOTS / f"targets-{sex}-30.png"), full_page=True)
             ctx.close()
         browser.close()

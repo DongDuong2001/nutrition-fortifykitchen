@@ -139,7 +139,7 @@ describe("the table for review", () => {
         `| Nữ | ${(r.female ?? r.male).map(cell).join(" | ")} |`,
         "",
       ]),
-      `Giữ nguyên: năng lượng, đạm, béo, tinh bột, chất xơ (công thức của huấn luyện viên). Natri giữ nguyên công thức theo phút tập. Bỏ: kali theo cân nặng, canxi 1.200–1.500, magie = 50% canxi, sắt theo kỳ kinh.`,
+      `Giữ nguyên: năng lượng, đạm, béo, tinh bột, chất xơ (công thức của huấn luyện viên). Natri giữ nguyên công thức theo phút tập, sắt khi nữ đang trong kỳ giữ 28 mg của huấn luyện viên. Bỏ: kali theo cân nặng, canxi 1.200–1.500, magie = 50% canxi.`,
     ];
     const file = path.resolve(__dirname, "../../../../docs/rda-vn2016-targets-2026-10-19.md");
     mkdirSync(path.dirname(file), { recursive: true });

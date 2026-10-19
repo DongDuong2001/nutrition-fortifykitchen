@@ -23,7 +23,7 @@ export interface Profile extends CoachingState {
   birthYear: number;
   weightKg: number;
   goal: GoalType;
-  /** Kept for the account (the server has near_period); since cc-67 the iron target is the VN 2016 amount for sex and age, so nothing reads it. Always false for men (see normaliseProfile). */
+  /** Women only: iron target 28 mg (the coach rule) instead of the VN 2016 amount for sex and age. Always false for men (see normaliseProfile). */
   periodMode: boolean;
   trainingMinutesDefault: number;
   /** Optional name shown on Cài đặt. "" means not set. */
@@ -155,6 +155,7 @@ export function targetsFor(profile: Profile, trainingMinutes = profile.trainingM
     weightKg: profile.weightKg,
     goal: profile.goal,
     trainingMinutes,
+    isPeriod: profile.sex === "female" && profile.periodMode,
     age: ageOf(profile.birthYear),
     macroMode: profile.macroMode,
     macroRatios: profile.macroRatios,

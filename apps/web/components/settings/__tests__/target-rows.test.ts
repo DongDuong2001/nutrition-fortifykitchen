@@ -76,12 +76,13 @@ describe("targetSections", () => {
     expect(row(deepCut, "Năng lượng và đa lượng", "Kcal")).toMatchObject({ value: "1.300–1.625 kcal" });
   });
 
-  it("gives a woman her own amounts, and the period switch is gone", () => {
+  it("gives a woman her own amounts, and iron 28 mg in the period", () => {
     const woman = { ...SAMPLE, sex: "female" as const };
     expect(row(woman, "Khoáng chất", "Iron")).toMatchObject({ value: "17,4 mg", detail: "VN 2016, nữ 20–29 tuổi" });
     expect(row(woman, "Khoáng chất", "Zinc")).toMatchObject({ value: "8 mg" });
     expect(row(woman, "Khoáng chất", "Potassium")).toMatchObject({ value: "2.000 mg" });
-    expect(row({ ...woman, periodMode: true }, "Khoáng chất", "Iron")).toMatchObject({ value: "17,4 mg" });
+    // In the period iron is the coach's 28 mg (TODO cc-67: Hao decides), the other rows stay VN 2016
+    expect(row({ ...woman, periodMode: true }, "Khoáng chất", "Iron")).toMatchObject({ value: "28 mg", detail: "Gần/đang trong kỳ: quy tắc của huấn luyện viên" });
   });
 
   it("lists the 16 other VN 2016 amounts with their units", () => {

@@ -5,6 +5,7 @@
       "goal": "build",
       "weightKg": 50,
       "trainingMinutes": 0,
+      "isPeriod": false,
       "age": 11
     },
     "output": {
@@ -128,6 +129,7 @@
       "goal": "build",
       "weightKg": 50,
       "trainingMinutes": 60,
+      "isPeriod": false,
       "age": 16
     },
     "output": {
@@ -251,6 +253,7 @@
       "goal": "build",
       "weightKg": 65,
       "trainingMinutes": 0,
+      "isPeriod": false,
       "age": 19
     },
     "output": {
@@ -374,6 +377,7 @@
       "goal": "build",
       "weightKg": 65,
       "trainingMinutes": 60,
+      "isPeriod": false,
       "age": 25
     },
     "output": {
@@ -497,6 +501,7 @@
       "goal": "build",
       "weightKg": 70.5,
       "trainingMinutes": 0,
+      "isPeriod": false,
       "age": 40
     },
     "output": {
@@ -620,6 +625,7 @@
       "goal": "build",
       "weightKg": 70.5,
       "trainingMinutes": 60,
+      "isPeriod": false,
       "age": 55
     },
     "output": {
@@ -743,6 +749,7 @@
       "goal": "build",
       "weightKg": 80,
       "trainingMinutes": 0,
+      "isPeriod": false,
       "age": 75
     },
     "output": {
@@ -866,6 +873,7 @@
       "goal": "build",
       "weightKg": 80,
       "trainingMinutes": 60,
+      "isPeriod": false,
       "age": 11
     },
     "output": {
@@ -989,6 +997,7 @@
       "goal": "build",
       "weightKg": 95,
       "trainingMinutes": 0,
+      "isPeriod": false,
       "age": 16
     },
     "output": {
@@ -1112,6 +1121,7 @@
       "goal": "build",
       "weightKg": 95,
       "trainingMinutes": 60,
+      "isPeriod": false,
       "age": 19
     },
     "output": {
@@ -1235,6 +1245,7 @@
       "goal": "maintain",
       "weightKg": 50,
       "trainingMinutes": 0,
+      "isPeriod": false,
       "age": 25
     },
     "output": {
@@ -1358,6 +1369,7 @@
       "goal": "maintain",
       "weightKg": 50,
       "trainingMinutes": 60,
+      "isPeriod": false,
       "age": 40
     },
     "output": {
@@ -1481,6 +1493,7 @@
       "goal": "maintain",
       "weightKg": 65,
       "trainingMinutes": 0,
+      "isPeriod": false,
       "age": 55
     },
     "output": {
@@ -1604,6 +1617,7 @@
       "goal": "maintain",
       "weightKg": 65,
       "trainingMinutes": 60,
+      "isPeriod": false,
       "age": 75
     },
     "output": {
@@ -1727,6 +1741,7 @@
       "goal": "maintain",
       "weightKg": 70.5,
       "trainingMinutes": 0,
+      "isPeriod": false,
       "age": 11
     },
     "output": {
@@ -1850,6 +1865,7 @@
       "goal": "maintain",
       "weightKg": 70.5,
       "trainingMinutes": 60,
+      "isPeriod": false,
       "age": 16
     },
     "output": {
@@ -1973,6 +1989,7 @@
       "goal": "maintain",
       "weightKg": 80,
       "trainingMinutes": 0,
+      "isPeriod": false,
       "age": 19
     },
     "output": {
@@ -2096,6 +2113,7 @@
       "goal": "maintain",
       "weightKg": 80,
       "trainingMinutes": 60,
+      "isPeriod": false,
       "age": 25
     },
     "output": {
@@ -2219,6 +2237,7 @@
       "goal": "maintain",
       "weightKg": 95,
       "trainingMinutes": 0,
+      "isPeriod": false,
       "age": 40
     },
     "output": {
@@ -2342,6 +2361,7 @@
       "goal": "maintain",
       "weightKg": 95,
       "trainingMinutes": 60,
+      "isPeriod": false,
       "age": 55
     },
     "output": {
@@ -2465,6 +2485,7 @@
       "goal": "cut",
       "weightKg": 50,
       "trainingMinutes": 0,
+      "isPeriod": false,
       "age": 75
     },
     "output": {
@@ -2588,6 +2609,7 @@
       "goal": "cut",
       "weightKg": 50,
       "trainingMinutes": 60,
+      "isPeriod": false,
       "age": 11
     },
     "output": {
@@ -2711,6 +2733,7 @@
       "goal": "cut",
       "weightKg": 65,
       "trainingMinutes": 0,
+      "isPeriod": false,
       "age": 16
     },
     "output": {
@@ -2834,6 +2857,7 @@
       "goal": "cut",
       "weightKg": 65,
       "trainingMinutes": 60,
+      "isPeriod": false,
       "age": 19
     },
     "output": {
@@ -2957,6 +2981,7 @@
       "goal": "cut",
       "weightKg": 70.5,
       "trainingMinutes": 0,
+      "isPeriod": false,
       "age": 25
     },
     "output": {
@@ -3080,6 +3105,7 @@
       "goal": "cut",
       "weightKg": 70.5,
       "trainingMinutes": 60,
+      "isPeriod": false,
       "age": 40
     },
     "output": {
@@ -3203,6 +3229,7 @@
       "goal": "cut",
       "weightKg": 80,
       "trainingMinutes": 0,
+      "isPeriod": false,
       "age": 55
     },
     "output": {
@@ -3326,6 +3353,7 @@
       "goal": "cut",
       "weightKg": 80,
       "trainingMinutes": 60,
+      "isPeriod": false,
       "age": 75
     },
     "output": {
@@ -3449,6 +3477,7 @@
       "goal": "cut",
       "weightKg": 95,
       "trainingMinutes": 0,
+      "isPeriod": false,
       "age": 11
     },
     "output": {
@@ -3572,6 +3601,7 @@
       "goal": "cut",
       "weightKg": 95,
       "trainingMinutes": 60,
+      "isPeriod": false,
       "age": 16
     },
     "output": {
@@ -3695,6 +3725,7 @@
       "goal": "deep_cut",
       "weightKg": 50,
       "trainingMinutes": 0,
+      "isPeriod": false,
       "age": 19
     },
     "output": {
@@ -3818,6 +3849,7 @@
       "goal": "deep_cut",
       "weightKg": 50,
       "trainingMinutes": 60,
+      "isPeriod": false,
       "age": 25
     },
     "output": {
@@ -3941,6 +3973,7 @@
       "goal": "deep_cut",
       "weightKg": 65,
       "trainingMinutes": 0,
+      "isPeriod": false,
       "age": 40
     },
     "output": {
@@ -4064,6 +4097,7 @@
       "goal": "deep_cut",
       "weightKg": 65,
       "trainingMinutes": 60,
+      "isPeriod": false,
       "age": 55
     },
     "output": {
@@ -4187,6 +4221,7 @@
       "goal": "deep_cut",
       "weightKg": 70.5,
       "trainingMinutes": 0,
+      "isPeriod": false,
       "age": 75
     },
     "output": {
@@ -4310,6 +4345,7 @@
       "goal": "deep_cut",
       "weightKg": 70.5,
       "trainingMinutes": 60,
+      "isPeriod": false,
       "age": 11
     },
     "output": {
@@ -4433,6 +4469,7 @@
       "goal": "deep_cut",
       "weightKg": 80,
       "trainingMinutes": 0,
+      "isPeriod": false,
       "age": 16
     },
     "output": {
@@ -4556,6 +4593,7 @@
       "goal": "deep_cut",
       "weightKg": 80,
       "trainingMinutes": 60,
+      "isPeriod": false,
       "age": 19
     },
     "output": {
@@ -4679,6 +4717,7 @@
       "goal": "deep_cut",
       "weightKg": 95,
       "trainingMinutes": 0,
+      "isPeriod": false,
       "age": 25
     },
     "output": {
@@ -4802,6 +4841,7 @@
       "goal": "deep_cut",
       "weightKg": 95,
       "trainingMinutes": 60,
+      "isPeriod": false,
       "age": 40
     },
     "output": {
@@ -4925,6 +4965,7 @@
       "goal": "build",
       "weightKg": 50,
       "trainingMinutes": 0,
+      "isPeriod": true,
       "age": 55
     },
     "output": {
@@ -4941,8 +4982,8 @@
         "max": 290
       },
       "iron": {
-        "min": 6.7,
-        "max": 6.7
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 8,
@@ -5048,6 +5089,7 @@
       "goal": "build",
       "weightKg": 50,
       "trainingMinutes": 60,
+      "isPeriod": true,
       "age": 75
     },
     "output": {
@@ -5064,8 +5106,8 @@
         "max": 260
       },
       "iron": {
-        "min": 6.3,
-        "max": 6.3
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 7,
@@ -5171,6 +5213,7 @@
       "goal": "build",
       "weightKg": 65,
       "trainingMinutes": 0,
+      "isPeriod": true,
       "age": 11
     },
     "output": {
@@ -5187,8 +5230,8 @@
         "max": 210
       },
       "iron": {
-        "min": 7,
-        "max": 7
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 7.2,
@@ -5294,6 +5337,7 @@
       "goal": "build",
       "weightKg": 65,
       "trainingMinutes": 60,
+      "isPeriod": true,
       "age": 16
     },
     "output": {
@@ -5310,8 +5354,8 @@
         "max": 300
       },
       "iron": {
-        "min": 19.8,
-        "max": 19.8
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 8,
@@ -5417,6 +5461,7 @@
       "goal": "build",
       "weightKg": 70.5,
       "trainingMinutes": 0,
+      "isPeriod": true,
       "age": 19
     },
     "output": {
@@ -5433,8 +5478,8 @@
         "max": 300
       },
       "iron": {
-        "min": 19.8,
-        "max": 19.8
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 8,
@@ -5540,6 +5585,7 @@
       "goal": "build",
       "weightKg": 70.5,
       "trainingMinutes": 60,
+      "isPeriod": true,
       "age": 25
     },
     "output": {
@@ -5556,8 +5602,8 @@
         "max": 270
       },
       "iron": {
-        "min": 17.4,
-        "max": 17.4
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 8,
@@ -5663,6 +5709,7 @@
       "goal": "build",
       "weightKg": 80,
       "trainingMinutes": 0,
+      "isPeriod": true,
       "age": 40
     },
     "output": {
@@ -5679,8 +5726,8 @@
         "max": 290
       },
       "iron": {
-        "min": 17.4,
-        "max": 17.4
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 8,
@@ -5786,6 +5833,7 @@
       "goal": "build",
       "weightKg": 80,
       "trainingMinutes": 60,
+      "isPeriod": true,
       "age": 55
     },
     "output": {
@@ -5802,8 +5850,8 @@
         "max": 290
       },
       "iron": {
-        "min": 6.7,
-        "max": 6.7
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 8,
@@ -5909,6 +5957,7 @@
       "goal": "build",
       "weightKg": 95,
       "trainingMinutes": 0,
+      "isPeriod": true,
       "age": 75
     },
     "output": {
@@ -5925,8 +5974,8 @@
         "max": 260
       },
       "iron": {
-        "min": 6.3,
-        "max": 6.3
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 7,
@@ -6032,6 +6081,7 @@
       "goal": "build",
       "weightKg": 95,
       "trainingMinutes": 60,
+      "isPeriod": true,
       "age": 11
     },
     "output": {
@@ -6048,8 +6098,8 @@
         "max": 210
       },
       "iron": {
-        "min": 7,
-        "max": 7
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 7.2,
@@ -6155,6 +6205,7 @@
       "goal": "maintain",
       "weightKg": 50,
       "trainingMinutes": 0,
+      "isPeriod": true,
       "age": 16
     },
     "output": {
@@ -6171,8 +6222,8 @@
         "max": 300
       },
       "iron": {
-        "min": 19.8,
-        "max": 19.8
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 8,
@@ -6278,6 +6329,7 @@
       "goal": "maintain",
       "weightKg": 50,
       "trainingMinutes": 60,
+      "isPeriod": true,
       "age": 19
     },
     "output": {
@@ -6294,8 +6346,8 @@
         "max": 300
       },
       "iron": {
-        "min": 19.8,
-        "max": 19.8
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 8,
@@ -6401,6 +6453,7 @@
       "goal": "maintain",
       "weightKg": 65,
       "trainingMinutes": 0,
+      "isPeriod": true,
       "age": 25
     },
     "output": {
@@ -6417,8 +6470,8 @@
         "max": 270
       },
       "iron": {
-        "min": 17.4,
-        "max": 17.4
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 8,
@@ -6524,6 +6577,7 @@
       "goal": "maintain",
       "weightKg": 65,
       "trainingMinutes": 60,
+      "isPeriod": true,
       "age": 40
     },
     "output": {
@@ -6540,8 +6594,8 @@
         "max": 290
       },
       "iron": {
-        "min": 17.4,
-        "max": 17.4
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 8,
@@ -6647,6 +6701,7 @@
       "goal": "maintain",
       "weightKg": 70.5,
       "trainingMinutes": 0,
+      "isPeriod": true,
       "age": 55
     },
     "output": {
@@ -6663,8 +6718,8 @@
         "max": 290
       },
       "iron": {
-        "min": 6.7,
-        "max": 6.7
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 8,
@@ -6770,6 +6825,7 @@
       "goal": "maintain",
       "weightKg": 70.5,
       "trainingMinutes": 60,
+      "isPeriod": true,
       "age": 75
     },
     "output": {
@@ -6786,8 +6842,8 @@
         "max": 260
       },
       "iron": {
-        "min": 6.3,
-        "max": 6.3
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 7,
@@ -6893,6 +6949,7 @@
       "goal": "maintain",
       "weightKg": 80,
       "trainingMinutes": 0,
+      "isPeriod": true,
       "age": 11
     },
     "output": {
@@ -6909,8 +6966,8 @@
         "max": 210
       },
       "iron": {
-        "min": 7,
-        "max": 7
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 7.2,
@@ -7016,6 +7073,7 @@
       "goal": "maintain",
       "weightKg": 80,
       "trainingMinutes": 60,
+      "isPeriod": true,
       "age": 16
     },
     "output": {
@@ -7032,8 +7090,8 @@
         "max": 300
       },
       "iron": {
-        "min": 19.8,
-        "max": 19.8
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 8,
@@ -7139,6 +7197,7 @@
       "goal": "maintain",
       "weightKg": 95,
       "trainingMinutes": 0,
+      "isPeriod": true,
       "age": 19
     },
     "output": {
@@ -7155,8 +7214,8 @@
         "max": 300
       },
       "iron": {
-        "min": 19.8,
-        "max": 19.8
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 8,
@@ -7262,6 +7321,7 @@
       "goal": "maintain",
       "weightKg": 95,
       "trainingMinutes": 60,
+      "isPeriod": true,
       "age": 25
     },
     "output": {
@@ -7278,8 +7338,8 @@
         "max": 270
       },
       "iron": {
-        "min": 17.4,
-        "max": 17.4
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 8,
@@ -7385,6 +7445,7 @@
       "goal": "cut",
       "weightKg": 50,
       "trainingMinutes": 0,
+      "isPeriod": true,
       "age": 40
     },
     "output": {
@@ -7401,8 +7462,8 @@
         "max": 290
       },
       "iron": {
-        "min": 17.4,
-        "max": 17.4
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 8,
@@ -7508,6 +7569,7 @@
       "goal": "cut",
       "weightKg": 50,
       "trainingMinutes": 60,
+      "isPeriod": true,
       "age": 55
     },
     "output": {
@@ -7524,8 +7586,8 @@
         "max": 290
       },
       "iron": {
-        "min": 6.7,
-        "max": 6.7
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 8,
@@ -7631,6 +7693,7 @@
       "goal": "cut",
       "weightKg": 65,
       "trainingMinutes": 0,
+      "isPeriod": true,
       "age": 75
     },
     "output": {
@@ -7647,8 +7710,8 @@
         "max": 260
       },
       "iron": {
-        "min": 6.3,
-        "max": 6.3
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 7,
@@ -7754,6 +7817,7 @@
       "goal": "cut",
       "weightKg": 65,
       "trainingMinutes": 60,
+      "isPeriod": true,
       "age": 11
     },
     "output": {
@@ -7770,8 +7834,8 @@
         "max": 210
       },
       "iron": {
-        "min": 7,
-        "max": 7
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 7.2,
@@ -7877,6 +7941,7 @@
       "goal": "cut",
       "weightKg": 70.5,
       "trainingMinutes": 0,
+      "isPeriod": true,
       "age": 16
     },
     "output": {
@@ -7893,8 +7958,8 @@
         "max": 300
       },
       "iron": {
-        "min": 19.8,
-        "max": 19.8
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 8,
@@ -8000,6 +8065,7 @@
       "goal": "cut",
       "weightKg": 70.5,
       "trainingMinutes": 60,
+      "isPeriod": true,
       "age": 19
     },
     "output": {
@@ -8016,8 +8082,8 @@
         "max": 300
       },
       "iron": {
-        "min": 19.8,
-        "max": 19.8
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 8,
@@ -8123,6 +8189,7 @@
       "goal": "cut",
       "weightKg": 80,
       "trainingMinutes": 0,
+      "isPeriod": true,
       "age": 25
     },
     "output": {
@@ -8139,8 +8206,8 @@
         "max": 270
       },
       "iron": {
-        "min": 17.4,
-        "max": 17.4
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 8,
@@ -8246,6 +8313,7 @@
       "goal": "cut",
       "weightKg": 80,
       "trainingMinutes": 60,
+      "isPeriod": true,
       "age": 40
     },
     "output": {
@@ -8262,8 +8330,8 @@
         "max": 290
       },
       "iron": {
-        "min": 17.4,
-        "max": 17.4
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 8,
@@ -8369,6 +8437,7 @@
       "goal": "cut",
       "weightKg": 95,
       "trainingMinutes": 0,
+      "isPeriod": true,
       "age": 55
     },
     "output": {
@@ -8385,8 +8454,8 @@
         "max": 290
       },
       "iron": {
-        "min": 6.7,
-        "max": 6.7
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 8,
@@ -8492,6 +8561,7 @@
       "goal": "cut",
       "weightKg": 95,
       "trainingMinutes": 60,
+      "isPeriod": true,
       "age": 75
     },
     "output": {
@@ -8508,8 +8578,8 @@
         "max": 260
       },
       "iron": {
-        "min": 6.3,
-        "max": 6.3
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 7,
@@ -8615,6 +8685,7 @@
       "goal": "deep_cut",
       "weightKg": 50,
       "trainingMinutes": 0,
+      "isPeriod": true,
       "age": 11
     },
     "output": {
@@ -8631,8 +8702,8 @@
         "max": 210
       },
       "iron": {
-        "min": 7,
-        "max": 7
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 7.2,
@@ -8738,6 +8809,7 @@
       "goal": "deep_cut",
       "weightKg": 50,
       "trainingMinutes": 60,
+      "isPeriod": true,
       "age": 16
     },
     "output": {
@@ -8754,8 +8826,8 @@
         "max": 300
       },
       "iron": {
-        "min": 19.8,
-        "max": 19.8
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 8,
@@ -8861,6 +8933,7 @@
       "goal": "deep_cut",
       "weightKg": 65,
       "trainingMinutes": 0,
+      "isPeriod": true,
       "age": 19
     },
     "output": {
@@ -8877,8 +8950,8 @@
         "max": 300
       },
       "iron": {
-        "min": 19.8,
-        "max": 19.8
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 8,
@@ -8984,6 +9057,7 @@
       "goal": "deep_cut",
       "weightKg": 65,
       "trainingMinutes": 60,
+      "isPeriod": true,
       "age": 25
     },
     "output": {
@@ -9000,8 +9074,8 @@
         "max": 270
       },
       "iron": {
-        "min": 17.4,
-        "max": 17.4
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 8,
@@ -9107,6 +9181,7 @@
       "goal": "deep_cut",
       "weightKg": 70.5,
       "trainingMinutes": 0,
+      "isPeriod": true,
       "age": 40
     },
     "output": {
@@ -9123,8 +9198,8 @@
         "max": 290
       },
       "iron": {
-        "min": 17.4,
-        "max": 17.4
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 8,
@@ -9230,6 +9305,7 @@
       "goal": "deep_cut",
       "weightKg": 70.5,
       "trainingMinutes": 60,
+      "isPeriod": true,
       "age": 55
     },
     "output": {
@@ -9246,8 +9322,8 @@
         "max": 290
       },
       "iron": {
-        "min": 6.7,
-        "max": 6.7
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 8,
@@ -9353,6 +9429,7 @@
       "goal": "deep_cut",
       "weightKg": 80,
       "trainingMinutes": 0,
+      "isPeriod": true,
       "age": 75
     },
     "output": {
@@ -9369,8 +9446,8 @@
         "max": 260
       },
       "iron": {
-        "min": 6.3,
-        "max": 6.3
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 7,
@@ -9476,6 +9553,7 @@
       "goal": "deep_cut",
       "weightKg": 80,
       "trainingMinutes": 60,
+      "isPeriod": true,
       "age": 11
     },
     "output": {
@@ -9492,8 +9570,8 @@
         "max": 210
       },
       "iron": {
-        "min": 7,
-        "max": 7
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 7.2,
@@ -9599,6 +9677,7 @@
       "goal": "deep_cut",
       "weightKg": 95,
       "trainingMinutes": 0,
+      "isPeriod": true,
       "age": 16
     },
     "output": {
@@ -9615,8 +9694,8 @@
         "max": 300
       },
       "iron": {
-        "min": 19.8,
-        "max": 19.8
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 8,
@@ -9722,6 +9801,7 @@
       "goal": "deep_cut",
       "weightKg": 95,
       "trainingMinutes": 60,
+      "isPeriod": true,
       "age": 19
     },
     "output": {
@@ -9738,8 +9818,8 @@
         "max": 300
       },
       "iron": {
-        "min": 19.8,
-        "max": 19.8
+        "min": 28,
+        "max": 28
       },
       "zinc": {
         "min": 8,

@@ -49,8 +49,8 @@ describe("sample profile", () => {
     expect(t.potassium).toEqual({ min: 2500, max: 2500 });
   });
 
-  it("gives a woman iron 17,4 mg whatever the period setting says", () => {
-    expect(targetsFor({ ...WOMAN, periodMode: true }).iron).toEqual({ min: 17.4, max: 17.4 });
+  it("gives a woman iron 28 mg in the period (the coach rule), 17,4 mg otherwise", () => {
+    expect(targetsFor({ ...WOMAN, periodMode: true }).iron).toEqual({ min: 28, max: 28 });
     expect(targetsFor({ ...WOMAN, periodMode: false }).iron).toEqual({ min: 17.4, max: 17.4 });
   });
 

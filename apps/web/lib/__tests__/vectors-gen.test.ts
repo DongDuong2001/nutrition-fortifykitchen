@@ -27,7 +27,8 @@ describe("Export shared test vectors for Go API", () => {
           for (const trainingMinutes of [0, 60]) {
             // cc-67: the 22 micros follow sex and age (lib/rda): the ages go round the VN 2016 bands
             const age = AGES[targetCases.length % AGES.length];
-            const profile: UserProfileForTargets = { sex, goal, weightKg, trainingMinutes, age };
+            const isPeriod = sex === "female";
+            const profile: UserProfileForTargets = { sex, goal, weightKg, trainingMinutes, isPeriod, age };
             const output = calculateTargets(profile);
             targetCases.push({ input: profile, output });
           }
@@ -56,6 +57,7 @@ describe("Export shared test vectors for Go API", () => {
       weightKg: 70,
       goal: "maintain",
       trainingMinutes: 60,
+      isPeriod: false,
       age: 25,
     });
 
