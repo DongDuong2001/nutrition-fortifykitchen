@@ -602,7 +602,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
 
   const onSync = useCallback(
     (result: SyncResult) => {
-      setSyncVersion((v) => v + 1);
+      // A sync that sent nothing (the 60 s poll) changes nothing on screen
+      if (result.saved.length > 0 || result.held.length > 0) setSyncVersion((v) => v + 1);
       markSynced(result.saved);
       showNotice(syncNotice(result.held, unsavedShown.current));
     },

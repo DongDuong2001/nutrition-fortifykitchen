@@ -50,13 +50,32 @@ export function mergeServerDay(
   const onServer = new Set(server.map((e) => e.id));
   const mine = new Map(local.map((e) => [e.id, e]));
   const fromServer = server.flatMap((e): AddedDiaryEntry[] => {
-    if (!keep.has(e.id)) return [{ ...e, synced: true }];
     const own = mine.get(e.id);
-    return own ? [{ ...own, synced: true }] : [];
+    if (keep.has(e.id) && !own) return [];
+    const next: AddedDiaryEntry = { ...(keep.has(e.id) && own ? own : e), synced: true };
+    // The entry the device already has, when the server says the same: the same object, so nothing that reads it renders again
+    return [own && sameEntry(own, next) ? own : next];
   });
   const stays = (e: AddedDiaryEntry) =>
     keep.has(e.id) || Date.parse(e.addedAt) >= startedAt || (!e.synced && isUuid(e.id));
-  return [...fromServer, ...local.filter((e) => !onServer.has(e.id) && stays(e))];
+  const merged = [...fromServer, ...local.filter((e) => !onServer.has(e.id) && stays(e))];
+  // Nothing changed (every 60 s poll): the list that was passed in
+  return merged.length === local.length && merged.every((e, i) => e === local[i]) ? (local as AddedDiaryEntry[]) : merged;
+}
+
+/** The same entry field for field. `addedAt` is left out: the server's stamp is whenever it was read when it sends none. */
+function sameEntry(a: AddedDiaryEntry, b: AddedDiaryEntry): boolean {
+  const x = a as unknown as Record<string, unknown>;
+  const y = b as unknown as Record<string, unknown>;
+  for (const key of new Set([...Object.keys(x), ...Object.keys(y)])) {
+    if (key === "addedAt" || x[key] === y[key]) continue;
+    if (key !== "nutrients") return false;
+    const n = a.nutrients;
+    const m = b.nutrients;
+    const keys = Object.keys(n);
+    if (keys.length !== Object.keys(m).length || keys.some((k) => n[k] !== m[k])) return false;
+  }
+  return true;
 }
 
 /** The list with the entries of `iso` replaced by `next`; the other days keep their place and order. */

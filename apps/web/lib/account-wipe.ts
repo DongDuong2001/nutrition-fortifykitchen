@@ -1,3 +1,4 @@
+import { dropCatalogCache } from "./catalog-cache";
 import { idbAll, idbBatch, idbKeys, idbRun } from "./idb";
 import { clearOutbox, loadOutbox, readItems, scopeFor } from "./outbox";
 import { SETTINGS_STORAGE_KEY } from "./storage-keys";
@@ -45,7 +46,10 @@ export async function wipeAccount(account: string, options: { dropPending?: bool
   const scope = scopeFor(account, false);
   if (options.dropPending !== false) await clearOutbox(scope);
   // IndexedDB: the catalogue copy (it holds the foods the person made), the history cache and, when asked, the outbox
-  await idbRun("kv", "readwrite", (store) => store.delete(`foods:${account}`));
+  await dropCatalogCache(account);
+  // The service worker sends nothing for an account that signed out
+  const meta = await idbRun<{ account?: string }>("kv", "readonly", (store) => store.get("sync-meta"));
+  if (meta.ok && meta.value?.account === account) await idbRun("kv", "readwrite", (store) => store.delete("sync-meta"));
   const days = await idbKeys("days");
   if (days.ok) await idbBatch("days", (days.value ?? []).filter((key) => String(key).startsWith(`${account}|`)).map((key) => ({ delete: key })));
   const records = await idbAll<{ key: string; scope?: string }>("outbox");
