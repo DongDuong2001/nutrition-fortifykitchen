@@ -4,7 +4,7 @@
 - the period control: ‹ › and 7/30 change the numbers, › is disabled on the current period, the period stays across sub-tabs
 - Năng lượng: the energy bars and the period control (cc2-31b: Tóm tắt is /trends, Năng lượng is /trends/energy)
 - Hôm nay (/) opens /micros and /training with the date shown; back returns to /; past-day screens keep the date and are read-only
-- Xóa bữa này asks for a confirm step and Hoàn tác puts the meal back
+- Xóa bữa này deletes at once (cc-62: no confirm step) and Hoàn tác puts the meal back
 - no ink band at the top of the window on desktop
 Screenshots: .screenshots/cc2-10-*.png
 Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/cc2_10.py
@@ -270,12 +270,9 @@ def check_delete_meal(browser, size_name, size):
     check("Lưu thành Bữa ăn của tôi" in dialog.inner_text(), f"{size_name} delete: the menu has Lưu thành Bữa ăn của tôi")
     check(dialog.locator('button:has-text("Lưu thành Bữa ăn của tôi")').is_enabled(), f"{size_name} delete: Lưu thành Bữa ăn của tôi is enabled for a meal with food")
     dialog.locator('button:has-text("Xóa bữa này")').click()
-    pg.wait_for_timeout(200)
-    check("Xóa Bữa sáng?" in text(pg), f"{size_name} delete: a confirm step appears")
-    check("Chưa ăn" not in breakfast.inner_text(), f"{size_name} delete: nothing is removed before confirming")
-    pg.locator('[role="dialog"] button:has-text("Xóa bữa này")').first.click()
     pg.wait_for_timeout(500)
-    check("Chưa ăn" in breakfast.inner_text(), f"{size_name} delete: breakfast is empty after confirming (Chưa ăn)")
+    check("Xóa Bữa sáng?" not in text(pg), f"{size_name} delete: no confirm step (cc-62, undo instead)")
+    check("Chưa ăn" in breakfast.inner_text(), f"{size_name} delete: breakfast is empty at once (Chưa ăn)")
     toast = pg.locator('button:has-text("Hoàn tác"):visible').first
     check(toast.count() == 1, f"{size_name} delete: the toast offers Hoàn tác")
     toast.click()

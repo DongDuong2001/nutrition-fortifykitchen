@@ -8,7 +8,7 @@ import { reactTransitionClass, screenCommitted } from "@/lib/nav-direction";
 /**
  * cc-55: the screen changes. Wraps every page in one view transition whose class says which way it goes
  * (lib/nav-direction): a push slides in from the right. Back (a popstate) is started by lib/nav-direction itself,
- * since React finishes a popstate without one. Tabs, first loads, reduced motion and Data Saver get "none", so no
+ * since React finishes a popstate without one. Tabs, first loads and Data Saver get "none" (reduced motion: a 120 ms cross-fade), so no
  * transition starts at all. The motion itself is CSS (globals.css ::view-transition-*).
  */
 export function RouteTransition({ children }: { children: React.ReactNode }) {

@@ -51,7 +51,7 @@ def sheet_part(browser):
     dialog = pg.locator('[role="dialog"]').first
     dialog.wait_for(state="visible")
     slide = dialog.evaluate("el => [el.dataset.state, el.classList.contains('m-sheet'), getComputedStyle(el).transitionProperty].join(' ')")
-    check(slide == "open true transform", f"sheet slides in ({slide})")
+    check(slide == "open true transform, scale", f"sheet slides in ({slide})")
     check("m-scrim" in (pg.locator(".bg-scrim").first.get_attribute("class") or ""), "the scrim fades in")
     pg.wait_for_timeout(400)
     pg.go_back()
@@ -92,7 +92,8 @@ def sheet_part(browser):
         pg.mouse.move(handle["x"] + handle["width"] / 2, handle["y"] + handle["height"] / 2 + step * 40)
         pg.wait_for_timeout(16)
     pg.mouse.up()
-    pg.wait_for_timeout(500)
+    # cc-62: a drag close slides away on a spring and the sheet is gone once it settles
+    pg.wait_for_timeout(1200)
     check(pg.locator('[role="dialog"]').count() == 0, "dragging the grabber down 400 px closes the sheet")
 
     pg.get_by_role("button", name="Chia sẻ ngày này").first.click()

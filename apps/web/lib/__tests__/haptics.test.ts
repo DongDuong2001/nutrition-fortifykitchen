@@ -11,7 +11,7 @@ function memoryStorage() {
 
 describe("HAPTIC_PATTERNS", () => {
   it("is the agreed table", () => {
-    expect(HAPTIC_PATTERNS).toEqual({ saved: 10, longPress: 20, moveDrop: 8, delete: [10, 40, 10], undo: 10, error: 60, goal100: [15, 60, 15] });
+    expect(HAPTIC_PATTERNS).toEqual({ saved: 10, longPress: 20, moveDrop: 8, delete: [10, 40, 10], undo: 10, error: 60, goal100: [15, 60, 15], snap: 12, tick: 5 });
   });
 });
 

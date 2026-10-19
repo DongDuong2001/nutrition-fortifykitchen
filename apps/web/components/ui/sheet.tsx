@@ -4,6 +4,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { markUsed } from "@/lib/onboarding-store";
 import { closeSheetEntry, openSheetEntry } from "@/lib/sheet-history";
 import { setPresent } from "@/lib/tour-bus";
+import { haptic } from "@/lib/haptics";
+import { setInertExceptDrag } from "@/components/ui/sheet-drag-controller";
 import { useSheetDrag } from "@/components/ui/use-sheet-drag";
 
 // The /add panel drags and closes like a sheet; it imports both from here, so they stay in the sheet's shared chunk
@@ -23,6 +25,8 @@ export interface SheetProps {
   desktopDialog?: boolean;
   /** The id of the element that takes focus on open (a heading with tabIndex -1), instead of the first control. */
   initialFocusId?: string;
+  /** cc-62: opened over another sheet (the portion sheet over /add): a lighter scrim, the first one is already there. */
+  stacked?: boolean;
 }
 
 /** cc-55: how long a closing sheet stays drawn (globals.css --m-sheet-out, the exit; the enter takes 350 ms). */
@@ -42,8 +46,13 @@ export function Sheet({
   className = "",
   desktopDialog = false,
   initialFocusId,
+  stacked = false,
 }: SheetProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
+  const scrimRef = useRef<HTMLDivElement>(null);
+  // cc-62: a drag that closes the sheet slides it away first and tells the parent once it is down, so a grab during the
+  // slide can still take it back
+  const dragClosing = useRef(false);
   const openerRef = useRef<HTMLElement | null>(null);
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
@@ -98,10 +107,43 @@ export function Sheet({
     };
   }, [open]);
 
-  const dragHandlers = useSheetDrag(dialogRef, () => {
-    markUsed("sheet-drag");
-    onCloseRef.current();
-  });
+  const setDragClosed = (closed: boolean) => {
+    const dialog = dialogRef.current;
+    if (scrimRef.current) scrimRef.current.dataset.state = closed ? "closed" : "open";
+    if (!dialog) return;
+    dialog.dataset.state = closed ? "closed" : "open";
+    setInertExceptDrag(dialog, closed);
+  };
+  const drag = useSheetDrag(
+    dialogRef,
+    () => {
+      markUsed("sheet-drag");
+      haptic("snap");
+      dragClosing.current = true;
+      setDragClosed(true);
+      // After the release has started its spring (or left the slide to the CSS transition, SHEET_EXIT_MS)
+      setTimeout(() => {
+        const done = () => {
+          if (!dragClosing.current) return;
+          dragClosing.current = false;
+          if (dialogRef.current) setInertExceptDrag(dialogRef.current, false);
+          instantClose.current = true;
+          onCloseRef.current();
+        };
+        if (drag.springing()) void drag.settled().then(done);
+        else setTimeout(done, SHEET_EXIT_MS);
+      }, 0);
+    },
+    {
+      scrimRef,
+      onRegrab: () => {
+        if (!dragClosing.current) return false;
+        dragClosing.current = false;
+        setDragClosed(false);
+        return true;
+      },
+    }
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -189,10 +231,11 @@ export function Sheet({
     <div className={`fixed inset-0 z-50 flex flex-col justify-end ${desktopDialog ? "lg:justify-center lg:items-center" : ""} ${showing ? "" : "pointer-events-none"}`} inert={!showing}>
       {/* Dim Scrim */}
       <div
+        ref={scrimRef}
         aria-hidden="true"
         onClick={onClose}
         data-state={state}
-        className={`m-scrim fixed inset-0 bg-scrim ${desktopDialog ? "m-scrim-dialog" : ""}`}
+        className={`m-scrim fixed inset-0 ${stacked ? "bg-scrim-2" : "bg-scrim"} ${desktopDialog ? "m-scrim-dialog" : ""}`}
       />
 
       {/* Bottom Sheet Dialog */}
@@ -206,12 +249,13 @@ export function Sheet({
         aria-labelledby={showing ? (title ? titleId : labelledBy) : undefined}
         className={`relative z-10 w-full max-w-[390px] mx-auto bg-card rounded-t-[20px] px-4 pt-3 pb-6 flex flex-col gap-2 shadow-2xl outline-none m-sheet ${desktopDialog ? "m-dialog lg:w-[420px] lg:max-w-[420px] lg:rounded-[20px] lg:px-6 lg:pt-6" : ""} ${className}`}
       >
-        {/* Grabber: drag it down to close (a 24 px strip around the 5 px bar) */}
+        {/* Grabber: drag it down to close (a 24 px strip around the 5 px bar); the title block below drags too */}
         <div
           aria-hidden="true"
           data-sheet-handle
+          data-sheet-drag
           data-tour="sheet-handle"
-          {...dragHandlers}
+          {...drag.handlers}
           style={{ touchAction: "none" }}
           className={`-mx-4 -mt-3 flex h-6 shrink-0 cursor-grab items-center justify-center self-stretch ${desktopDialog ? "lg:hidden" : ""}`}
         >
@@ -220,7 +264,7 @@ export function Sheet({
 
         {/* Optional Header */}
         {(content.title || content.description) && (
-          <div className="px-1 mb-1">
+          <div data-sheet-drag {...drag.handlers} style={{ touchAction: "none" }} className="px-1 mb-1">
             {content.title && (
               <h2
                 id={titleId}

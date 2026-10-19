@@ -37,8 +37,8 @@ export function Switch({
         }`}
       >
         <span
-          className={`absolute top-[2px] w-[27px] h-[27px] rounded-full bg-card shadow-[0_1px_3px_rgba(0,0,0,0.25)] transition-press duration-200 ${
-            checked ? "left-[22px]" : "left-[2px]"
+          className={`absolute left-[2px] top-[2px] w-[27px] h-[27px] rounded-full bg-card shadow-[0_1px_3px_rgba(0,0,0,0.25)] transition-transform duration-200 ease-out motion-reduce:transition-none ${
+            checked ? "translate-x-[20px]" : "translate-x-0"
           }`}
         />
       </span>

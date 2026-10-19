@@ -353,7 +353,8 @@ def reduced_motion(browser):
     go(pg, "/app", 1200)
     visible(sheet(pg))
     anim = sheet(pg).evaluate("el => { const s = getComputedStyle(el); return [s.transitionProperty, s.transitionDuration, s.transitionTimingFunction].join(' ') }")
-    check(anim == "transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)", f"slides up 350 ms on the drawer curve ({anim})")
+    # cc-62: the sheet also transitions `scale` (a sheet under another sheet steps back), on the same curve
+    check(anim.startswith("transform, scale 0.35s, 0.35s cubic-bezier(0.32, 0.72, 0, 1)"), f"slides up 350 ms on the drawer curve ({anim})")
     ctx.close()
 
 

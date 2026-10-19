@@ -82,6 +82,8 @@
   --color-track-on-dark: #666A75;
   --color-grabber: #D5D8DF;
   --color-scrim: rgba(17, 19, 23, 0.4);
+  /* cc-62 (S14): a sheet opened over another sheet dims less, the first scrim is already there */
+  --color-scrim-2: rgba(17, 19, 23, 0.22);
   /* A row, card or full-width button being pressed tints instead of shrinking (cc-55) */
   --color-press: rgba(17, 19, 23, 0.06);
   --color-surface-dark: #1A1C22;
@@ -107,6 +109,9 @@
   transition-property: transform, scale, background-color, border-color, color, opacity;
   transition-duration: var(--m-press);
   transition-timing-function: var(--ease-out);
+  &:active {
+    transition-duration: var(--m-press-in);
+  }
 }
 
 :root {
@@ -181,6 +186,8 @@
   button:active,
   a.inline-flex:active {
     transform: scale(0.97);
+    /* cc-62 (S7): the press goes in faster (100 ms) than it comes back (160 ms) */
+    transition-duration: var(--m-press-in);
   }
   /* an element with active:scale-* scales through that property alone (both would shrink it to 0.94) */
   button[class*="active:scale-"]:active,
@@ -329,6 +336,7 @@
  */
 :root {
   --m-press: 160ms;
+  --m-press-in: 100ms;
   --m-pop-in: 200ms;
   --m-pop-out: 150ms;
   --m-row: 200ms;
@@ -358,10 +366,21 @@
     opacity: 0;
   }
 }
+@keyframes m-pulse {
+  to {
+    opacity: 0.4;
+  }
+}
 
 /* Sheets (components/ui/sheet.tsx and the /add panel) slide up from their own height; the scrim fades with them */
 .m-sheet {
-  transition: transform var(--m-sheet-in) var(--ease-drawer);
+  transition:
+    transform var(--m-sheet-in) var(--ease-drawer),
+    scale var(--m-sheet-in) var(--ease-drawer);
+}
+/* cc-62 (S14): a sheet with another sheet over it steps back (the scale property, so it never clashes with its slide) */
+.m-sheet[data-under-sheet] {
+  scale: 0.97;
 }
 .m-sheet[data-state="closed"] {
   transform: translateY(100%);
@@ -392,9 +411,10 @@
     transition-duration: var(--m-pop-out);
   }
 }
-/* A finger on the grabber: the sheet follows it 1:1 (the transform is written on the element), then lets go with the
-   sheet's own curve from where it is */
-.m-sheet[data-dragging] {
+/* A finger on the grabber: the sheet follows it 1:1 (the transform is written on the element) and the scrim fades with it
+   (its opacity is written too). cc-62: on release a spring (motion, lazy) or the sheet's own curve takes over from there */
+.m-sheet[data-dragging],
+.m-scrim[data-dragging] {
   transition: none;
 }
 
@@ -768,8 +788,12 @@ button.m-drag-lift[data-touch-drag="dragging"] {
       opacity: 0;
     }
   }
-  .m-sheet[data-dragging] {
+  .m-sheet[data-dragging],
+  .m-scrim[data-dragging] {
     transition: none;
+  }
+  .m-sheet[data-under-sheet] {
+    scale: none;
   }
   /* the closing rules above set their own, longer durations: the 120 ms cap holds for them too */
   .m-sheet[data-state="closed"],
@@ -838,12 +862,18 @@ button.m-drag-lift[data-touch-drag="dragging"] {
   .m-drag-ghost[data-landing] {
     transition: none;
   }
+  /* cc-62 (S6): the spinner breathes instead of turning; push and Back cross-fade in 120 ms, nothing slides */
   .m-spin {
-    animation: none;
+    animation: m-pulse 900ms var(--ease-in-out) infinite alternate;
   }
   ::view-transition-group(*),
-  ::view-transition-old(*),
-  ::view-transition-new(*) {
+  ::view-transition-image-pair(*) {
     animation: none !important;
+  }
+  ::view-transition-old(*) {
+    animation: m-fade-out var(--m-fade) var(--ease-out) both !important;
+  }
+  ::view-transition-new(*) {
+    animation: m-fade-in var(--m-fade) var(--ease-out) both !important;
   }
 }

@@ -52,6 +52,8 @@ import { HOME_ROUTE } from "@/lib/nav";
 import { navigateFromSheet } from "@/lib/sheet-history";
 import { cameFromHome, homeDay, homeScroll } from "@/lib/home-scroll";
 import { SHEET_EXIT_MS, useSheetDrag } from "@/components/ui/sheet";
+import { setInertExceptDrag } from "@/components/ui/sheet-drag-controller";
+import { haptic } from "@/lib/haptics";
 
 // The add sheet shows carousels of the newest: Khám phá holds the full lists
 const MAX_SHORTCUT_RECENTS = 8;
@@ -124,6 +126,8 @@ function AddFoodInner() {
   const desktopWrapRef = useRef<HTMLDivElement>(null);
   const closingRef = useRef(false);
   const closeTimer = useRef<number | undefined>(undefined);
+  // cc-62: the panel's release spring; the route pops once it has settled
+  const panelSettled = useRef<() => Promise<void>>(() => Promise.resolve());
   const sheetState = "open";
   // The picture of Hôm nay behind the sheet is one element for the life of the page: nothing here re-renders it
   // (Hôm nay's own frame is app/(app)/(tabs)/layout.tsx, which /add is outside: the backdrop brings its own)
@@ -394,16 +398,20 @@ function AddFoodInner() {
     }
     // data-state="closed" also tells the Back that follows that the sheet has slid down already (lib/nav-direction)
     for (const el of [scrimRef.current, dialogRef.current, panelRef.current]) {
-      if (!el) continue;
-      el.dataset.state = "closed";
-      if (el !== scrimRef.current) el.inert = true;
+      if (el) el.dataset.state = "closed";
     }
+    if (dialogRef.current) dialogRef.current.inert = true;
+    // cc-62: the phone panel's drag areas stay grabbable while it slides away (a grab takes it back)
+    if (panelRef.current) setInertExceptDrag(panelRef.current, true);
     desktopWrapRef.current?.classList.add("pointer-events-none");
     if (instant) return goBack();
     // Stored, so a Back pressed during the slide cancels it instead of going back twice
     closeTimer.current = window.setTimeout(() => {
-      closeTimer.current = undefined;
-      if (window.location.pathname === "/add") goBack();
+      void panelSettled.current().then(() => {
+        if (!closingRef.current || closeTimer.current === undefined) return;
+        closeTimer.current = undefined;
+        if (window.location.pathname === "/add") goBack();
+      });
     }, SHEET_EXIT_MS);
   }, [mealSlot, goBack]);
   useEffect(() => {
@@ -417,10 +425,32 @@ function AddFoodInner() {
       cancel();
     };
   }, []);
-  const panelDrag = useSheetDrag(panelRef, () => {
-    markUsed("sheet-drag");
-    handleClose();
-  });
+  const panelDrag = useSheetDrag(
+    panelRef,
+    () => {
+      markUsed("sheet-drag");
+      haptic("snap");
+      handleClose();
+    },
+    {
+      scrimRef,
+      // A grab while the panel slides away takes it back: the close is called off
+      onRegrab: () => {
+        if (!closingRef.current) return false;
+        closingRef.current = false;
+        window.clearTimeout(closeTimer.current);
+        closeTimer.current = undefined;
+        for (const el of [scrimRef.current, dialogRef.current, panelRef.current]) {
+          if (el) el.dataset.state = "open";
+        }
+        if (dialogRef.current) dialogRef.current.inert = false;
+        if (panelRef.current) setInertExceptDrag(panelRef.current, false);
+        desktopWrapRef.current?.classList.remove("pointer-events-none");
+        return true;
+      },
+    }
+  );
+  panelSettled.current = panelDrag.settled;
 
   // Keyboard navigation on desktop: Enter adds, Esc closes
   useEffect(() => {
@@ -648,15 +678,17 @@ function AddFoodInner() {
           data-add-panel
           data-sheet-route
           data-state={sheetState}
+          data-under-sheet={selectedFood !== null && !isDesktop ? "" : undefined}
           className="m-sheet m-vt-sheet fixed inset-x-0 bottom-0 top-[8dvh] z-40 flex flex-col rounded-t-[20px] bg-card shadow-xl"
         >
-          {/* Pinned header: grabber, meal switcher + close, search, chips */}
-          <div className="flex shrink-0 flex-col gap-3 px-4 pt-3 pb-3">
+          {/* Pinned header: grabber, meal switcher + close, search, chips. cc-62 (S15): the list fades out under it (a 12 px edge) */}
+          <div className="relative z-10 flex shrink-0 flex-col gap-3 px-4 pt-3 pb-3 after:pointer-events-none after:absolute after:inset-x-0 after:top-full after:h-3 after:bg-linear-to-b after:from-card after:to-transparent">
             {/* Grabber: drag it down to close (a 24 px strip around the bar) */}
             <div
               aria-hidden="true"
               data-sheet-handle
-              {...panelDrag}
+              data-sheet-drag
+              {...panelDrag.handlers}
               style={{ touchAction: "none" }}
               className="-mx-4 -mt-3 -mb-2 flex h-6 shrink-0 cursor-grab items-center justify-center self-stretch"
             >
@@ -665,7 +697,7 @@ function AddFoodInner() {
             {/* The phone sheet's heading: /add has no visible h1 on a phone (the desktop modal sits over Today's header) */}
             <h1 className="sr-only">Thêm món</h1>
 
-            <div className="flex items-start justify-between gap-2">
+            <div data-sheet-drag {...panelDrag.handlers} style={{ touchAction: "none" }} className="flex items-start justify-between gap-2">
               <div className="flex flex-col items-start">
                 <button
                   type="button"
@@ -725,7 +757,7 @@ function AddFoodInner() {
 
           {/* The tray bar, under the list while the tray holds a food */}
           {tray.length > 0 && (
-            <div className="shrink-0 px-4 pb-2">
+            <div className="relative shrink-0 px-4 pb-2 before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-3 before:bg-linear-to-t before:from-card before:to-transparent">
               <TrayBar
                 totals={trayTotalsNow}
                 mealName={mealNameVi}
@@ -748,6 +780,7 @@ function AddFoodInner() {
           phoneSearchInputRef.current?.focus({ preventScroll: true });
         }}
         labelledBy="portion-sheet-title"
+        stacked
       >
         {selectedFood && (
           <div className="-mx-4 max-h-[86dvh] overflow-y-auto overscroll-contain px-4 pb-[env(safe-area-inset-bottom)]">

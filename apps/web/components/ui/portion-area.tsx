@@ -25,6 +25,8 @@ import {
   withMult,
   overGramLimit,
   MAX_GRAMS_MESSAGE,
+  MIN_GRAMS_MESSAGE,
+  gramsTooSmall,
   MAX_GRAMS_PER_PORTION,
   MAX_MULT,
   type PortionState,
@@ -98,6 +100,7 @@ function GramPortionArea({
 
   // The amount went over the limit: the field is written back clamped and says why
   const [overLimit, setOverLimit] = useState(false);
+  const [touched, setTouched] = useState(false);
 
   const emit = (next: PortionState, hit = false) => {
     const out = fitPortion(food, next, sw);
@@ -278,7 +281,9 @@ function GramPortionArea({
                 aria-label={panel ? "Số gam" : `Số gam ${food.nameVi}`}
                 value={text}
                 disabled={disabled}
-                aria-describedby={overLimit ? `${ids}-grams-error` : undefined}
+                aria-describedby={overLimit || gramsTooSmall(text, touched) ? `${ids}-grams-error` : undefined}
+                aria-invalid={gramsTooSmall(text, touched) || undefined}
+                onBlur={() => setTouched(true)}
                 onChange={(e) => {
                   const typed = parseGramsInput(e.target.value);
                   const next = withBase(p, typed);
@@ -304,9 +309,9 @@ function GramPortionArea({
               100 g
             </button>
           </div>
-          {overLimit && (
+          {(overLimit || gramsTooSmall(text, touched)) && (
             <p id={`${ids}-grams-error`} role="alert" className="m-0 px-1 text-[13px] font-semibold leading-snug text-destructive-text">
-              {MAX_GRAMS_MESSAGE}
+              {overLimit ? MAX_GRAMS_MESSAGE : MIN_GRAMS_MESSAGE}
             </p>
           )}
         </div>
@@ -360,6 +365,7 @@ function UnitPortionArea({
   const noGrams = hidesGrams(food);
   // One id per panel: two portion areas on one page (the Khay review) must not share an id
   const gramsId = useId();
+  const [gramsTouched, setGramsTouched] = useState(false);
   const [overLimit, setOverLimit] = useState(false);
 
   // Tabs for the food (in data order plus "Gam", e.g. "Lon | Gam", "Phần | Gam")
@@ -583,7 +589,9 @@ function UnitPortionArea({
                   aria-label="Số gam"
                   value={gramsInput}
                   disabled={disabled}
-                  aria-describedby={overLimit ? `${gramsId}-grams-error` : undefined}
+                  aria-describedby={overLimit || gramsTooSmall(gramsInput, gramsTouched) ? `${gramsId}-grams-error` : undefined}
+                  aria-invalid={gramsTooSmall(gramsInput, gramsTouched) || undefined}
+                  onBlur={() => setGramsTouched(true)}
                   onChange={(e) => {
                     // Over the limit: the field is written back clamped, so the label, the grams and the kcal agree
                     const over = overGramLimit(e.target.value);
@@ -612,9 +620,9 @@ function UnitPortionArea({
               },
             }))}
           />
-          {overLimit && (
+          {(overLimit || gramsTooSmall(gramsInput, gramsTouched)) && (
             <p id={`${gramsId}-grams-error`} role="alert" className="m-0 px-1 text-[13px] font-semibold leading-snug text-destructive-text">
-              {MAX_GRAMS_MESSAGE}
+              {overLimit ? MAX_GRAMS_MESSAGE : MIN_GRAMS_MESSAGE}
             </p>
           )}
         </div>

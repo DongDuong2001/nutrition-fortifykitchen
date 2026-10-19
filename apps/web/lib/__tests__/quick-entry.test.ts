@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { COUNTED_NUTRIENT_KEYS } from "../day-totals";
-import { parseDecimalInput, quickDetail, quickEntryFrom } from "../quick-entry";
+import { parseDecimalInput, quickDetail, quickEntryFrom, quickFieldError } from "../quick-entry";
 
 const base = { name: "", kcal: "350", protein: "", carbs: "", fat: "" };
 const make = (patch: Partial<typeof base>) => quickEntryFrom({ ...base, ...patch }, "lunch", "quick-1", "2026-10-13T12:00:00.000Z");
@@ -110,5 +110,17 @@ describe("quick entry limits (cc-63, B5)", () => {
     expect(r.ok && Array.from(r.entry.foodName).length).toBe(80);
     const emoji = make({ name: "🍜".repeat(90) });
     expect(emoji.ok && Array.from(emoji.entry.foodName).length).toBe(80);
+  });
+});
+
+describe("quickFieldError (cc-62: checked on blur)", () => {
+  it("kcal must round to 1–9.999; a macro is empty or a number from 0", () => {
+    expect(quickFieldError("kcal", "")).toBe("Nhập kcal lớn hơn 0");
+    expect(quickFieldError("kcal", "0,4")).toBe("Nhập kcal lớn hơn 0");
+    expect(quickFieldError("kcal", "10000")).toBe("Tối đa 9.999 kcal");
+    expect(quickFieldError("kcal", "250")).toBeNull();
+    expect(quickFieldError("protein", "")).toBeNull();
+    expect(quickFieldError("protein", "abc")).toBe("Nhập một số từ 0 trở lên");
+    expect(quickFieldError("fat", "2,5")).toBeNull();
   });
 });

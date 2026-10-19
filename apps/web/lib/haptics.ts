@@ -5,7 +5,7 @@ import { loadSettings } from "./settings";
  * cc-51 Part C: short vibrations on Android (navigator.vibrate). iOS has no vibrate, so nothing happens there and the
  * switch is not shown. Never on scroll, typing, a tab switch or a page load: only the actions below call haptic().
  */
-export type HapticKind = "saved" | "longPress" | "moveDrop" | "delete" | "undo" | "error" | "goal100";
+export type HapticKind = "saved" | "longPress" | "moveDrop" | "delete" | "undo" | "error" | "goal100" | "snap" | "tick";
 
 export const HAPTIC_PATTERNS: Readonly<Record<HapticKind, number | number[]>> = {
   saved: 10,
@@ -15,6 +15,9 @@ export const HAPTIC_PATTERNS: Readonly<Record<HapticKind, number | number[]>> = 
   undo: 10,
   error: 60,
   goal100: [15, 60, 15],
+  // cc-62: a sheet closing under the finger, and pull to refresh crossing its threshold
+  snap: 12,
+  tick: 5,
 };
 
 /** "Rung khi chạm": on unless switched off; with reduced motion it stays off until the user switches it on. */

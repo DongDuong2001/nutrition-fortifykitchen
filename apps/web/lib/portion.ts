@@ -365,6 +365,13 @@ export const MAX_GRAMS_PER_PORTION = 5000;
 
 /** The line under a gram field when what was typed or multiplied went over the limit. */
 export const MAX_GRAMS_MESSAGE = "Tối đa 5.000 g";
+/** cc-62 (S17): under a gram field that holds 0, junk, or was left empty. */
+export const MIN_GRAMS_MESSAGE = "Nhập số gam lớn hơn 0";
+
+/** The field needs MIN_GRAMS_MESSAGE: it reads as 0 g and has text in it, or it was left empty (touched). */
+export function gramsTooSmall(input: string, touched: boolean): boolean {
+  return parseGramsInput(input) === 0 && ((input ?? "").trim() !== "" || touched);
+}
 
 /**
  * Parses user-entered grams: Vietnamese decimal comma ("2,5"), a dot decimal ("2.5") and a thousands dot ("1.000" is
