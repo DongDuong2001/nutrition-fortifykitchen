@@ -153,7 +153,7 @@ def body(browser, size_name, size):
     check(re.search(r"Số lần cân \d+/7", t) is not None, f"{w}: weigh-ins n/6")
     check("So với kỳ trước" in t and "Mục tiêu theo cân nặng" in t, f"{w}: change vs previous and targets that follow weight")
     shift = squash(pg.locator("section[aria-labelledby='bd-shift']").inner_text())
-    check(all(k in shift for k in ("Kcal", "Đạm", "Potassium")), f"{w}: kcal, đạm and Potassium ({shift[:120]!r})")
+    check(all(k in shift for k in ("Kcal", "Đạm")) and "Potassium" not in shift, f"{w}: kcal and đạm only (the micros do not follow the weight, cc-67) ({shift[:120]!r})")
     check("→" in shift, f"{w}: before → now shown ({shift[:160]!r})")
     no_h_scroll(pg, w)
     shot(pg, "body", size_name)

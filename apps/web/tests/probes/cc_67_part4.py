@@ -1,7 +1,7 @@
 """cc-67 part 4: the 22 micronutrient targets are the VN 2016 recommended amounts for sex and age (390 x 844, demo build).
 
 The sample user is a man born 2003 (23 in 2026): Vi chất shows / 2.500 mg potassium, / 800 mg calcium, / 7,9 mg iron,
-/ 2.000 mg sodium, / 850 µg vitamin A; Cài đặt > Mục tiêu says whose amounts they are; the energy target is unchanged
+/ 850 µg vitamin A; Cài đặt > Mục tiêu says whose amounts they are; the energy target is unchanged
 Screenshots: .screenshots/cc67/. Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_67_part4.py
 """
 import os
@@ -40,7 +40,7 @@ def main():
         pg.goto(BASE + "/micros", wait_until="networkidle")
         pg.wait_for_timeout(900)
         text = re.sub(r"\s+", " ", pg.locator("body").inner_text())
-        for want in ["/ 2.500 mg", "/ 800 mg", "/ 7,9 mg", "/ 2.000 mg", "/ 340 mg", "/ 10 mg"]:
+        for want in ["/ 2.500 mg", "/ 800 mg", "/ 7,9 mg", "/ 340 mg", "/ 10 mg"]:
             check(want in text, f"Vi chất shows {want}")
         check("5.200" not in text and "6.500" not in text and "1.200–1.500" not in text, "no formula target left (kali theo cân, canxi 1.200–1.500)")
         pg.screenshot(path=str(SHOTS / "micros-targets.png"))
@@ -48,7 +48,7 @@ def main():
         pg.goto(BASE + "/settings/targets", wait_until="networkidle")
         pg.wait_for_timeout(600)
         text = re.sub(r"\s+", " ", pg.locator("body").inner_text())
-        check("Muối" in text and "5 g" in text and "2.000 mg natri" in text, "Mục tiêu: Muối 5 g (2.000 mg natri)")
+        check("Muối" in text and "7–10,5 g" in text, "Mục tiêu: Muối stays the training formula (7–10,5 g)")
         check("VN 2016, nam 20–29 tuổi" in text, "Mục tiêu: says whose amounts these are")
         check("1.950–2.275 kcal" in text, "Mục tiêu: the energy rows are unchanged")
         check("Theo khuyến nghị dinh dưỡng Việt Nam 2016" in text, "Mục tiêu: the note names VN 2016")

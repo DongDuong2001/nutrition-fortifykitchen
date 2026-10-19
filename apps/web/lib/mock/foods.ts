@@ -80,9 +80,10 @@ export function weighedFruit<T extends { category?: string; servings: FoodServin
 export function browsableFoods(): FoodItem[] {
   // Live mode lists the database's foods (and the user's own) only: the sample foods never mix in, not even before
   // the database catalogue has arrived. A recipe's server food is listed as the recipe, never a second time. A dish
-  // the user changed for one meal (cc-67) is a one-off recipe: its local and server food ids are hidden (by id, never by
-  // name: a food of the user's own may be called "… · đã chỉnh" and must list).
-  const listed = (f: FoodItem) => !hiddenFoodIds.has(f.id);
+  // the user changed for one meal (cc-67) is a one-off recipe: its local and server food ids are hidden. Another device has
+  // no recipe record of it, so a server food named "… · đã chỉnh" is hidden too, unless this device made it as the user's
+  // own food (then it lists).
+  const listed = (f: FoodItem) => !hiddenFoodIds.has(f.id) && !(f.nameVi.endsWith(EDITED_DISH_SUFFIX) && !madeHere.has(f.id));
   if (isLiveMode()) return MOCK_FOODS.filter((f) => !SAMPLE_FOOD_IDS.has(f.id) && listed(f));
   return (demoActive() ? MOCK_FOODS : MOCK_FOODS.filter((f) => !f.demoOnly)).filter(listed);
 }
@@ -91,6 +92,8 @@ export function browsableFoods(): FoodItem[] {
 export const EDITED_DISH_SUFFIX = " · đã chỉnh";
 
 let hiddenFoodIds: ReadonlySet<string> = new Set();
+/** The foods this device made through "Tạo món" in this session: the user's own, whatever their name */
+const madeHere = new Set<string>();
 
 /** The server foods that hold a recipe's totals (lib/recipe-store): left out of the lists, still found by id. */
 export function setHiddenFoodIds(ids: Iterable<string>): void {
@@ -139,6 +142,7 @@ export function catalogFoodById(id: string | undefined | null): FoodItem | undef
 export function addCatalogFood(food: FoodItem): void {
   const at = MOCK_FOODS.findIndex((f) => f.id === food.id);
   if (at >= 0) MOCK_FOODS.splice(at, 1);
+  madeHere.add(food.id);
   MOCK_FOODS.unshift(food);
   catalogChanged();
 }

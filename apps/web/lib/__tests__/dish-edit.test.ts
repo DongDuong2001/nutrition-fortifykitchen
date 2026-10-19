@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { apiClient } from "../api-client";
 import { entryNumbers } from "../diary-edits";
 import { DISH_DEMO_FOODS } from "../mock/dish-demo-foods";
-import { EDITED_DISH_SUFFIX, MOCK_FOODS, addDemoFoods, browsableFoods, catalogFoodById, type FoodItem } from "../mock/foods";
+import { EDITED_DISH_SUFFIX, MOCK_FOODS, addCatalogFood, addDemoFoods, browsableFoods, catalogFoodById, type FoodItem } from "../mock/foods";
 import { dishViewOf, editParts, editTotals, foodsByKey, saveEditedDish, type DishRecipes } from "../dish-recipes";
 import { isLocalOnly } from "../sync-notice";
 import { readRecipes, serverFoodIdOf, syncRecipeFoods, uploadPendingRecipes } from "../recipe-store";
@@ -88,14 +88,13 @@ describe("the one-off food of a changed dish", () => {
     expect(browsableFoods().filter(isOwnFood).map((f) => f.nameVi)).not.toContain(food.nameVi);
   });
 
-  it("is hidden by the recipe's one-off flag and its server food id, never by its name: a food of the user's own with that name lists", () => {
+  it("is hidden by the recipe's one-off flag and its server food id first; a food this device made as the user's own with that name still lists", () => {
     const food = saveEditedDish(phoBo, edited().ingredients)!;
     const server: FoodItem = { ...food, id: SERVER };
     const mine: FoodItem = { ...food, id: "55555555-5555-4555-8555-555555555555", nameVi: `Phở bò${EDITED_DISH_SUFFIX}`, source: "user", category: "cua_toi" };
-    MOCK_FOODS.push(server, mine);
-    // The server's copy is not told apart until the recipe knows its id (the upload sets it)
-    expect(browsableFoods().map((f) => f.id)).toContain(SERVER);
+    addCatalogFood(mine);
     syncRecipeFoods(readRecipes().map((r) => (r.id === food.id ? { ...r, serverFoodId: SERVER } : r)));
+    MOCK_FOODS.push(server);
     const listed = browsableFoods().map((f) => f.id);
     expect(listed).not.toContain(SERVER);
     expect(listed).not.toContain(food.id);
@@ -103,6 +102,19 @@ describe("the one-off food of a changed dish", () => {
     expect(browsableFoods().filter(isOwnFood).map((f) => f.id)).toContain(mine.id);
     MOCK_FOODS.splice(MOCK_FOODS.indexOf(server), 1);
     MOCK_FOODS.splice(MOCK_FOODS.indexOf(mine), 1);
+  });
+
+  it("another device has no recipe record: the server food named · đã chỉnh is hidden by its name, the same food made elsewhere as a plain name is not", () => {
+    const food = saveEditedDish(phoBo, edited().ingredients)!;
+    syncRecipeFoods([]);
+    const server: FoodItem = { ...food, id: SERVER, source: "user", category: "cua_toi" };
+    const plain: FoodItem = { ...server, id: "44444444-4444-4444-8444-444444444444", nameVi: "Phở bò nhà làm" };
+    MOCK_FOODS.push(server, plain);
+    const listed = browsableFoods().map((f) => f.id);
+    expect(listed).not.toContain(SERVER);
+    expect(listed).toContain(plain.id);
+    MOCK_FOODS.splice(MOCK_FOODS.indexOf(server), 1);
+    MOCK_FOODS.splice(MOCK_FOODS.indexOf(plain), 1);
   });
 
   it("the same change twice is one food", () => {

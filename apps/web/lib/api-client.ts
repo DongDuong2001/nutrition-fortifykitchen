@@ -7,7 +7,7 @@ import {
   type MockMicroStat,
 } from "./mock/sample-day";
 import { calculateTargets } from "./targets";
-import { MOCK_FOODS, addCatalogFood, catalogChanged, setCatalogFoods, setCatalogStatus, weighedFruit, type FoodItem } from "./mock/foods";
+import { MOCK_FOODS, addCatalogFood, setCatalogFoods, setCatalogStatus, weighedFruit, type FoodItem } from "./mock/foods";
 import { searchFoods as searchMockFoods } from "./search";
 import type { SetupProfile } from "./onboarding";
 import { currentAccountId } from "./auth-actions";
@@ -1019,8 +1019,7 @@ export const apiClient = {
         fat: input.fat != null ? Math.round(input.fat * factor * 10) / 10 : null,
       },
     };
-    MOCK_FOODS.unshift(newFood);
-    catalogChanged();
+    addCatalogFood(newFood);
     return newFood;
   },
 

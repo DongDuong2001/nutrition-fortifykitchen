@@ -52,7 +52,10 @@ def open_dish(pg):
     panel.wait_for(state="visible")
     section = pg.locator('[data-tour="dish-parts"]:visible').first
     section.wait_for(state="visible", timeout=8000)
-    section.get_by_role("button", name=re.compile("^Thành phần")).tap()
+    toggle = section.get_by_role("button", name=re.compile("^Thành phần"))
+    # cc-67: the section stays open on this device once a person opened it
+    if toggle.get_attribute("aria-expanded") != "true":
+        toggle.tap()
     pg.wait_for_timeout(600)
     return panel, section
 

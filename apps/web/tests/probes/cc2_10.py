@@ -161,7 +161,7 @@ def check_energy_bars(browser, size_name, size):
     check(today_grey, f"{size_name} energy: today is grey, not red")
     pg.goto(BASE + "/trends/micros", wait_until="networkidle")
     pg.wait_for_timeout(400)
-    check("mục tiêu 1.200–1.500 mg" in text(pg), f"{size_name} Vi chất: calcium shows its 1.200–1.500 mg range")
+    check("mục tiêu 800 mg" in text(pg), f"{size_name} Vi chất: calcium shows its 800 mg target (cc-67)")
     ctx.close()
 
 
