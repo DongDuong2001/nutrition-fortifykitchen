@@ -282,10 +282,12 @@ function AddFoodInner() {
   const parsedGrams = useMemo(() => {
     return parseGramsInput(gramsInput);
   }, [gramsInput]);
+  // The grams a save logs: the parts added up for a changed dish
+  const loggedGrams = dishEdit?.edited ? dishEdit.grams : parsedGrams;
 
   // Submit action
   const handleAddFood = async () => {
-    if (!selectedFood || (dishEdit?.edited ? dishEdit.grams : parsedGrams) <= 0 || isSubmitting || mealSlot === null) return;
+    if (!selectedFood || loggedGrams <= 0 || isSubmitting || mealSlot === null) return;
     setIsSubmitting(true);
     try {
       const entry = toLog();
@@ -301,7 +303,7 @@ function AddFoodInner() {
 
   // Lưu & chọn tiếp: the food with the chosen portion goes in the tray and the search stays as it was
   const handleAddAndContinue = () => {
-    if (!selectedFood || (dishEdit?.edited ? dishEdit.grams : parsedGrams) <= 0 || mealSlot === null) return;
+    if (!selectedFood || loggedGrams <= 0 || mealSlot === null) return;
     const entry = toLog();
     if (!entry) return;
     markUsed("tray-add");
@@ -421,14 +423,14 @@ function AddFoodInner() {
         handleClose(true);
       } else if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {
         // If not typing in input or if adding (the Chỉ ghi kcal form handles its own Enter)
-        if (selectedFood && (dishEdit?.edited ? dishEdit.grams : parsedGrams) > 0 && !quickOpen) {
+        if (selectedFood && loggedGrams > 0 && !quickOpen) {
           handleAddFood();
         }
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleClose, selectedFood, parsedGrams, dishEdit, handleAddFood, quickOpen, switcherOpen, reviewOpen, isDesktop]);
+  }, [handleClose, selectedFood, loggedGrams, handleAddFood, quickOpen, switcherOpen, reviewOpen, isDesktop]);
 
   const mealNameVi = mealSlot ? getMealSlotNameVi(mealSlot) : "—";
 
@@ -603,7 +605,7 @@ function AddFoodInner() {
                     onAdd={handleAddFood}
                     onAddAndContinue={handleAddAndContinue}
                     onDishEdit={onDishEdit}
-                    notice={dishNotice}
+              notice={dishNotice}
                     isSubmitting={isSubmitting}
                     showMicros={true}
                     className="rounded-[18px] border border-card-border bg-card p-4"

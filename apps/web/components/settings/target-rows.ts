@@ -1,3 +1,4 @@
+import { calculateSaltTarget, formatSaltRange } from "../../lib/training";
 import { formatAmount, formatNumber, formatRange } from "../../lib/format";
 import { goalName } from "../../lib/onboarding";
 import { calculateEnergyTarget, type TargetRange } from "../../lib/targets";
@@ -51,6 +52,7 @@ export function targetSections(profile: Profile): TargetSection[] {
   const who = `VN 2016, ${rdaWho(profile.sex, ageOf(profile.birthYear)).toLowerCase()}`;
   const weight = formatNumber(profile.weightKg);
   const perKg = calculateEnergyTarget(1, profile.goal);
+  const salt = calculateSaltTarget(profile.trainingMinutesDefault);
 
   return [
     {
@@ -79,8 +81,12 @@ export function targetSections(profile: Profile): TargetSection[] {
     {
       title: "Khoáng chất",
       rows: [
-        // cc-67: natri là mức khuyến nghị (dưới 2.000 mg), không tính theo phút tập: 2,5 g muối cho mỗi g natri
-        { label: "Muối", detail: `Dưới ${formatAmount(t.sodium.min / 400, "g")} g mỗi ngày (${formatAmount(t.sodium.min, "mg")} mg natri), ${who}`, value: `${formatAmount(t.sodium.min / 400, "g")} g` },
+        // Sodium stays the coach's training formula for now (TODO cc-67: Hao decides on VN 2016's 2.000 mg, OPEN_QUESTIONS)
+        {
+          label: "Muối",
+          detail: "Nền 4–6 g + 1–1,5 g mỗi 20 phút tập",
+          value: `${formatSaltRange(salt.totalMin, salt.totalMax)} g`,
+        },
         ...["potassium", "calcium", "magnesium", "iron", "zinc"].map((key) => ({
           label: nutrientName(key),
           detail: who,

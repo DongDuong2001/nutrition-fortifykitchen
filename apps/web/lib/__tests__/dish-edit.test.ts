@@ -86,11 +86,23 @@ describe("the one-off food of a changed dish", () => {
     expect(catalogFoodById(food.id)).toBeDefined();
     expect(browsableFoods().map((f) => f.id)).not.toContain(food.id);
     expect(browsableFoods().filter(isOwnFood).map((f) => f.nameVi)).not.toContain(food.nameVi);
-    // Another device, or the server's own copy, has no recipe record: the name alone keeps it out of the lists
-    const copy: FoodItem = { ...food, id: SERVER };
-    MOCK_FOODS.push(copy);
-    expect(browsableFoods().map((f) => f.id)).not.toContain(SERVER);
-    MOCK_FOODS.splice(MOCK_FOODS.indexOf(copy), 1);
+  });
+
+  it("is hidden by the recipe's one-off flag and its server food id, never by its name: a food of the user's own with that name lists", () => {
+    const food = saveEditedDish(phoBo, edited().ingredients)!;
+    const server: FoodItem = { ...food, id: SERVER };
+    const mine: FoodItem = { ...food, id: "55555555-5555-4555-8555-555555555555", nameVi: `Phở bò${EDITED_DISH_SUFFIX}`, source: "user", category: "cua_toi" };
+    MOCK_FOODS.push(server, mine);
+    // The server's copy is not told apart until the recipe knows its id (the upload sets it)
+    expect(browsableFoods().map((f) => f.id)).toContain(SERVER);
+    syncRecipeFoods(readRecipes().map((r) => (r.id === food.id ? { ...r, serverFoodId: SERVER } : r)));
+    const listed = browsableFoods().map((f) => f.id);
+    expect(listed).not.toContain(SERVER);
+    expect(listed).not.toContain(food.id);
+    expect(listed).toContain(mine.id);
+    expect(browsableFoods().filter(isOwnFood).map((f) => f.id)).toContain(mine.id);
+    MOCK_FOODS.splice(MOCK_FOODS.indexOf(server), 1);
+    MOCK_FOODS.splice(MOCK_FOODS.indexOf(mine), 1);
   });
 
   it("the same change twice is one food", () => {

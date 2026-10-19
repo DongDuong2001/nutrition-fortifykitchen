@@ -14,7 +14,6 @@ const NOTE: Record<string, string> = {
   zinc: "mức hấp thu vừa",
   copper: "đổi từ µg",
   manganese: "AI",
-  sodium: "mục tiêu chế độ ăn, dưới mức này (2.000 mg natri = 5 g muối); mức đủ (AI) là 600 mg",
   potassium: "mức tiêu thụ đủ (AI); mục tiêu chế độ ăn của WHO là trên 3.510 mg",
   vitamin_a: "µg RAE",
   vitamin_e: "AI, alpha-tocopherol",
@@ -25,10 +24,10 @@ const NOTE: Record<string, string> = {
 
 const at = (sex: "male" | "female", age: number) => Object.fromEntries(Object.entries(rdaTargets(sex, age)).map(([k, v]) => [k, v.min]));
 
-describe("the 22 targets", () => {
-  it("are exactly the counted micros, each with its unit as the catalogue has it", () => {
-    expect(RDA.map((r) => r.id).sort()).toEqual([...COUNTED_NUTRIENT_KEYS].sort());
-    expect(RDA).toHaveLength(22);
+describe("the targets of the recommended amounts", () => {
+  it("are the counted micros but sodium (Hao keeps the coach's training formula for it), each with its unit as the catalogue has it", () => {
+    expect(RDA.map((r) => r.id).sort()).toEqual([...COUNTED_NUTRIENT_KEYS].filter((k) => k !== "sodium").sort());
+    expect(RDA).toHaveLength(21);
     for (const row of RDA) expect(getNutrientDefinition(row.id)?.unit, row.id).toBeTruthy();
   });
 
@@ -70,14 +69,14 @@ describe("age bands (VN 2016: 10–11, 12–14, 15–17, 18–19, 20–29, 30–
 describe("the values, by sex and age (read from the tables of VN 2016)", () => {
   it("a man of 25 (Bảng 16–47)", () => {
     expect(at("male", 25)).toEqual({
-      calcium: 800, phosphorus: 700, magnesium: 340, iron: 7.9, zinc: 10, selenium: 34, copper: 0.9, manganese: 2.3, sodium: 2000, potassium: 2500,
+      calcium: 800, phosphorus: 700, magnesium: 340, iron: 7.9, zinc: 10, selenium: 34, copper: 0.9, manganese: 2.3, potassium: 2500,
       vitamin_a: 850, vitamin_d: 15, vitamin_e: 6.5, vitamin_k: 150, b1: 1.3, b2: 1.5, b3: 16, b5: 5, b6: 1.3, folate: 400, b12: 2.4, vitamin_c: 100,
     });
   });
 
   it("a woman of 25", () => {
     expect(at("female", 25)).toEqual({
-      calcium: 800, phosphorus: 700, magnesium: 270, iron: 17.4, zinc: 8, selenium: 26, copper: 0.9, manganese: 1.8, sodium: 2000, potassium: 2000,
+      calcium: 800, phosphorus: 700, magnesium: 270, iron: 17.4, zinc: 8, selenium: 26, copper: 0.9, manganese: 1.8, potassium: 2000,
       vitamin_a: 650, vitamin_d: 15, vitamin_e: 6, vitamin_k: 150, b1: 1.1, b2: 1.2, b3: 14, b5: 5, b6: 1.3, folate: 400, b12: 2.4, vitamin_c: 100,
     });
   });
@@ -108,8 +107,8 @@ describe("the values, by sex and age (read from the tables of VN 2016)", () => {
     expect(at("female", 16)).toMatchObject({ iron: 19.8, magnesium: 300, vitamin_a: 650, potassium: 2100 });
   });
 
-  it("a child of 11: sodium under 1.900", () => {
-    expect(at("male", 11)).toMatchObject({ sodium: 1900, calcium: 1000, vitamin_c: 75, b12: 1.8 });
+  it("a child of 11", () => {
+    expect(at("male", 11)).toMatchObject({ potassium: 1900, calcium: 1000, vitamin_c: 75, b12: 1.8 });
   });
 });
 
@@ -119,9 +118,9 @@ describe("the table for review", () => {
     const row = (id: string) => RDA.find((r) => r.id === id)!;
     const cell = (v: number) => String(v).replace(".", ",");
     const lines = [
-      "# Mục tiêu 22 vi chất theo khuyến nghị (cc-67 phần 4)",
+      "# Mục tiêu vi chất theo khuyến nghị (cc-67 phần 4): 21 trong 22 chất",
       "",
-      "Nguồn chính: Bộ Y tế, Viện Dinh dưỡng, *Nhu cầu dinh dưỡng khuyến nghị cho người Việt Nam*, ban hành kèm Quyết định 2615/QĐ-BYT ngày 16/6/2016 (VN 2016). Số liệu chép đúng như trong bảng: RDA, hoặc AI khi bảng không có RDA. VN 2016 có đủ 22 chất nên không cần lấy từ NIH ODS. App chọn nhóm tuổi theo năm sinh (tuổi = năm nay − năm sinh).",
+      "Nguồn chính: Bộ Y tế, Viện Dinh dưỡng, *Nhu cầu dinh dưỡng khuyến nghị cho người Việt Nam*, ban hành kèm Quyết định 2615/QĐ-BYT ngày 16/6/2016 (VN 2016). Số liệu chép đúng như trong bảng: RDA, hoặc AI khi bảng không có RDA. VN 2016 có đủ cả 21 chất nên không cần lấy từ NIH ODS. Natri chưa theo bảng này: giữ công thức của huấn luyện viên (theo phút tập) cho đến khi Hao quyết định (VN 2016 ghi 2.000 mg là mục tiêu chế độ ăn). App chọn nhóm tuổi theo năm sinh (tuổi = năm nay − năm sinh).",
       "",
       "## Nhóm 20–29 tuổi (nam, nữ)",
       "",
@@ -140,7 +139,7 @@ describe("the table for review", () => {
         `| Nữ | ${(r.female ?? r.male).map(cell).join(" | ")} |`,
         "",
       ]),
-      `Giữ nguyên: năng lượng, đạm, béo, tinh bột, chất xơ (công thức của huấn luyện viên). Bỏ: kali theo cân nặng, canxi 1.200–1.500, magie = 50% canxi, natri theo phút tập, sắt theo kỳ kinh.`,
+      `Giữ nguyên: năng lượng, đạm, béo, tinh bột, chất xơ (công thức của huấn luyện viên). Natri giữ nguyên công thức theo phút tập. Bỏ: kali theo cân nặng, canxi 1.200–1.500, magie = 50% canxi, sắt theo kỳ kinh.`,
     ];
     const file = path.resolve(__dirname, "../../../../docs/rda-vn2016-targets-2026-10-19.md");
     mkdirSync(path.dirname(file), { recursive: true });

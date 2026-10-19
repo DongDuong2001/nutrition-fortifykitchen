@@ -3,7 +3,7 @@ import { writeDay } from "../training-checklist";
 import { rememberServerTraining, subscribeTraining, trainingChanged, trainingMinutesFor, trainingVersion } from "../training-minutes";
 import { SAMPLE_PROFILE, applyProfileTargets, targetsFor } from "../profile";
 import { SAMPLE_DAY } from "../mock/sample-day";
-import { calculateFastCarbsTarget } from "../targets";
+import { calculateFastCarbsTarget, calculateSodiumTarget } from "../targets";
 
 function fakeStorage() {
   const data: Record<string, string> = {};
@@ -131,13 +131,13 @@ describe("trainingMinutesFor (lib/training-minutes.ts)", () => {
 });
 
 describe("the day's targets follow its training minutes", () => {
-  it("fast carbs are worked out from the day's minutes, not the Hồ sơ default; sodium is the recommended amount whatever the minutes (cc-67)", () => {
+  it("fast carbs are worked out from the day's minutes, not the Hồ sơ default; so is sodium (the coach's formula, kept until Hao decides on VN 2016)", () => {
     const t = targetsFor(SAMPLE_PROFILE, 90);
     expect(t.fastCarbs).toEqual(calculateFastCarbsTarget(90));
     expect(t.fastCarbs).not.toEqual(targetsFor(SAMPLE_PROFILE).fastCarbs);
     expect(targetsFor(SAMPLE_PROFILE).fastCarbs).toEqual(calculateFastCarbsTarget(SAMPLE_PROFILE.trainingMinutesDefault));
-    expect(t.sodium).toEqual({ min: 2000, max: 2000 });
-    expect(targetsFor(SAMPLE_PROFILE, 0).sodium).toEqual(t.sodium);
+    expect(t.sodium).toEqual(calculateSodiumTarget(90));
+    expect(targetsFor(SAMPLE_PROFILE, 0).sodium).toEqual(calculateSodiumTarget(0));
   });
 
   it("the day's user shows the day's minutes (Hôm nay's Ngày tập pill)", () => {

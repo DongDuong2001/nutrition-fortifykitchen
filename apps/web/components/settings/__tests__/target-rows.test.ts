@@ -57,7 +57,8 @@ describe("targetSections", () => {
   });
 
   it("cc-67: gives the sample user the VN 2016 amounts for a man of 20–29, with who they are for", () => {
-    expect(row(SAMPLE, "Khoáng chất", "Muối")).toMatchObject({ value: "5 g", detail: "Dưới 5 g mỗi ngày (2.000 mg natri), VN 2016, nam 20–29 tuổi" });
+    // Salt stays the coach's training formula until Hao decides on VN 2016's 2.000 mg (OPEN_QUESTIONS, cc-67 sodium)
+    expect(row(SAMPLE, "Khoáng chất", "Muối")).toMatchObject({ value: "7–10,5 g", detail: "Nền 4–6 g + 1–1,5 g mỗi 20 phút tập" });
     expect(row(SAMPLE, "Khoáng chất", "Potassium")).toMatchObject({ value: "2.500 mg", detail: "VN 2016, nam 20–29 tuổi" });
     expect(row(SAMPLE, "Khoáng chất", "Calcium")).toMatchObject({ value: "800 mg" });
     expect(row(SAMPLE, "Khoáng chất", "Magnesium")).toMatchObject({ value: "340 mg" });

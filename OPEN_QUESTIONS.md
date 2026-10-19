@@ -386,3 +386,5 @@
 - [ ] (Dong) API side of X7: /client-errors now gets the status and the error code only in `message`; nothing to change if the endpoint just logs it.
 - [ ] (Hao) Size budget: cc-63 grew first-load JS by 0.2 to 1.2 kB gzip per route (/add +1.2), accepted on 19/10 (table in PR #15).
 
+- [ ] (Hao) cc-67 sodium: the 21 other micro targets are the VN 2016 recommended amounts, but sodium keeps the coach's formula by training minutes (calculateSodiumTarget in lib/targets.ts, TODO there). VN 2016 gives 2.000 mg (5 g salt) as the dietary goal; say if it should replace the formula.
+- [ ] (Dong) cc-67: the Go port of lib/rda.ts (packages/vectors/targets.json has the new outputs) must land together with this branch: TestSharedTargetVectors and trends_test fail until then. The edible-part portions file (docs/data/edible-part-portions-2026-10-19.json) needs Dong's importer. An edited dish's server food ("Phở bò · đã chỉnh") is hidden by the recipe's one-off flag on the device that made it; another device lists it as a food of its own unless the API marks it (a flag on POST /foods/custom).

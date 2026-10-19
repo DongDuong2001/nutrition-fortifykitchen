@@ -5,7 +5,7 @@ import Link from "next/link";
 import { type FoodItem, MOCK_FOODS } from "@/lib/mock/foods";
 import { type MealSlot, getMealSlotNameVi } from "@/lib/meal-slot";
 import { parseGramsInput, calculateMacroPreview, macroGramsText, scaleNutrients, gramsServingLabel, unitAmountText, parsePortionLabel, portionModeOf, portionNote, portionSummary } from "@/lib/portion";
-import { cookSwitchFor, useRowsReady } from "@/lib/food-rows";
+import { cookSwitchFor, rowName, useRowsReady } from "@/lib/food-rows";
 import { PortionArea } from "@/components/ui/portion-area";
 import type { DishEdit } from "@/lib/dish-recipes";
 import { formatAmount, formatNumber } from "@/lib/format";
@@ -13,7 +13,6 @@ import { getNutrientDefinition } from "@/lib/nutrients";
 import { useDiary } from "@/lib/diary-store";
 import { canLog as canLogFood, energyNotice } from "@/lib/diary-edits";
 import { kcalValue } from "@/lib/kcal";
-import { rowName } from "@/lib/food-rows";
 
 // cc-54: the Thành phần of a dish (and the recipes with it) is its own chunk, fetched when a Món Việt food's panel opens
 const DishParts = lazy(() => import("@/components/ui/dish-parts").then((m) => ({ default: m.DishParts })));

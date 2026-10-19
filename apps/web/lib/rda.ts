@@ -2,9 +2,9 @@
  * cc-67 part 4 (Hao 19/10): the daily targets of the 22 vitamins and minerals are the standard recommended amounts by sex
  * and age, not our formulas. Source: Bộ Y tế, Viện Dinh dưỡng, "Nhu cầu dinh dưỡng khuyến nghị cho người Việt Nam" (VN 2016,
  * ban hành kèm Quyết định 2615/QĐ-BYT ngày 16/6/2016): the RDA, or the AI where the table has no RDA. VN 2016 has a value
- * for every one of the 22, so no NIH ODS fallback is needed. The table of each row is in `table`; where VN 2016 gives
+ * for every one of the 22, so no NIH ODS fallback is needed. Sodium is not in this table: Hao keeps the coach's training formula for it for now. The table of each row is in `table`; where VN 2016 gives
  * several columns the choice is in docs/rda-vn2016-targets-2026-10-19.md (iron at 15% absorption, zinc at moderate
- * absorption, sodium as the table's dietary goal, potassium as its AI). The numbers are copied as printed.
+ * absorption, potassium as its AI). The numbers are copied as printed.
  *
  * One value per sex and age band, eight bands: 10–11, 12–14, 15–17, 18–19, 20–29, 30–49, 50–69, 70+ (VN 2016's own).
  */
@@ -29,8 +29,7 @@ export interface RdaRow {
 
 /**
  * Per nutrient: the table of VN 2016 and the values for the eight bands, male then female. Units are the catalogue's
- * (lib/nutrients); the choice among columns (iron at 15% absorption, zinc at moderate absorption, sodium as the table's
- * dietary goal, potassium as its AI) is in docs/rda-vn2016-targets-2026-10-19.md. Copied as printed.
+ * (lib/nutrients); the choice among columns (iron at 15% absorption, zinc at moderate absorption, potassium as its AI) is in docs/rda-vn2016-targets-2026-10-19.md. Copied as printed.
  */
 export const RDA: readonly RdaRow[] = [
   { id: "calcium", table: 16, male: [1000, 1000, 1000, 1000, 800, 800, 800, 1000], female: [1000, 1000, 1000, 1000, 800, 800, 900, 1000] },
@@ -41,7 +40,6 @@ export const RDA: readonly RdaRow[] = [
   { id: "selenium", table: 22, male: [32, 32, 32, 32, 34, 34, 34, 33], female: [26, 26, 26, 26, 26, 26, 26, 25] },
   { id: "copper", table: 23, male: [0.7, 0.7, 0.89, 0.89, 0.9, 0.9, 0.9, 0.9] },
   { id: "manganese", table: 25, male: [1.9, 1.9, 2.2, 2.2, 2.3, 2.3, 2.3, 2.3], female: [1.6, 1.6, 1.6, 1.6, 1.8, 1.8, 1.8, 1.8] },
-  { id: "sodium", table: 46, male: [1900, 2000, 2000, 2000, 2000, 2000, 2000, 2000] },
   { id: "potassium", table: 47, male: [1900, 2400, 2800, 2800, 2500, 2500, 2500, 2500], female: [1800, 2200, 2100, 2100, 2000, 2000, 2000, 2000] },
   { id: "vitamin_a", table: 27, male: [600, 800, 900, 850, 850, 900, 850, 800], female: [600, 700, 650, 650, 650, 700, 700, 650] },
   { id: "vitamin_d", table: 28, male: [15, 15, 15, 15, 15, 15, 20, 20] },

@@ -95,7 +95,7 @@ const CATALOG: Omit<NutrientDefinition, "name">[] = [
   { id: "phosphorus", nameVi: "Phốt pho", nameEn: "Phosphorus", unit: "mg", group: "minerals", depth: 0, targetSource: "vn2016" },
   { id: "potassium", nameVi: "Kali", nameEn: "Potassium", unit: "mg", group: "minerals", depth: 0, targetSource: "vn2016" },
   { id: "selenium", nameVi: "Selen", nameEn: "Selenium", unit: "µg", group: "minerals", depth: 0, targetSource: "vn2016" },
-  { id: "sodium", nameVi: "Natri", nameEn: "Sodium", unit: "mg", group: "minerals", depth: 0, targetSource: "vn2016" },
+  { id: "sodium", nameVi: "Natri", nameEn: "Sodium", unit: "mg", group: "minerals", depth: 0, targetSource: "coach" },
   { id: "zinc", nameVi: "Kẽm", nameEn: "Zinc", unit: "mg", group: "minerals", depth: 0, targetSource: "vn2016" },
 ];
 

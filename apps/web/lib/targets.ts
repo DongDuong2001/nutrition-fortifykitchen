@@ -88,6 +88,21 @@ export interface CompleteTargets {
   [key: string]: TargetRange | undefined;
 }
 
+/**
+ * Salt: 4–6 g/day + 1–1.5 g per 20 min of training (the coach's rule), 1 g salt = 393 mg sodium, rounded to 10 mg.
+ * TODO(cc-67): VN 2016 gives 2.000 mg as the dietary goal; whether it replaces this formula is Hao's decision (OPEN_QUESTIONS, cc-67 sodium).
+ */
+export function calculateSodiumTarget(trainingMinutes = 0): TargetRange {
+  const trainingIntervals = trainingMinutes / 20;
+  const saltMin = 4 + 1.0 * trainingIntervals;
+  const saltMax = 6 + 1.5 * trainingIntervals;
+
+  return {
+    min: Math.round((saltMin * 393) / 10) * 10,
+    max: Math.round((saltMax * 393) / 10) * 10,
+  };
+}
+
 export function calculateEnergyTarget(weightKg: number, goal: GoalType): TargetRange {
   switch (goal) {
     case "build": // Tăng cơ
@@ -258,8 +273,9 @@ export function calculateTargets(profile: UserProfileForTargets): CompleteTarget
   const fastCarbs = calculateFastCarbsTarget(trainingMinutes);
 
   return {
-    // cc-67: the 22 vitamins and minerals are the recommended amounts for this sex and age (lib/rda), whatever the weight or training
+    // cc-67: 21 of the 22 vitamins and minerals are the recommended amounts for this sex and age (lib/rda), whatever the weight or training
     ...rdaTargets(profile.sex, profile.age ?? DEFAULT_AGE),
+    sodium: calculateSodiumTarget(trainingMinutes),
     calories,
     protein,
     fat,

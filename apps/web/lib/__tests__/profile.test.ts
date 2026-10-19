@@ -15,7 +15,7 @@ import { SAMPLE_DAY } from "../mock/sample-day";
 
 // Expected values come from the coach rules in design/SPEC.md (energy) and from VN 2016 (the micros), not from lib/targets.ts.
 // 65 kg, Giữ cân (30–35 kcal/kg) => 1.950–2.275 kcal. 70 kg, Giữ cân => 2.100–2.450 kcal.
-// cc-67: the 22 micros follow sex and age, not the weight: a man of 23 has potassium 2.500 mg, sodium 2.000 mg, iron 7,9 mg;
+// cc-67: the 22 micros follow sex and age, not the weight: a man of 23 has potassium 2.500 mg, iron 7,9 mg (sodium stays the training formula);
 // a woman of 23 has iron 17,4 mg. The age is the year less the year of birth: pin the year.
 beforeAll(() => vi.useFakeTimers({ toFake: ["Date"], now: new Date("2026-10-19T08:00:00+07:00") }));
 afterAll(() => vi.useRealTimers());
@@ -40,7 +40,7 @@ describe("sample profile", () => {
     expect(t.calories).toEqual({ min: 1950, max: 2275 });
     expect(t.potassium).toEqual({ min: 2500, max: 2500 });
     expect(t.iron).toEqual({ min: 7.9, max: 7.9 });
-    expect(t.sodium).toEqual({ min: 2000, max: 2000 });
+    expect(t.sodium).toEqual({ min: 2750, max: 4130 });
   });
 
   it("gives 2.100–2.450 kcal at 70 kg and the same micros (they do not follow the weight)", () => {

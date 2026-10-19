@@ -39,13 +39,12 @@ describe("lib/targets", () => {
       expect(targets.carbs.min).toBe(254);
     });
 
-    it("cc-67: the 22 vitamins and minerals are the VN 2016 recommended amounts for a man of 20–29, not formulas", () => {
+    it("cc-67: 21 of the 22 vitamins and minerals are the VN 2016 recommended amounts for a man of 20–29, not formulas", () => {
       const t = calculateTargets(sampleUser);
       const single = (id: string) => {
         expect(t[id]?.min, id).toBe(t[id]?.max);
         return t[id]?.min;
       };
-      expect(single("sodium")).toBe(2000);
       expect(single("potassium")).toBe(2500);
       expect(single("calcium")).toBe(800);
       expect(single("magnesium")).toBe(340);
@@ -55,10 +54,15 @@ describe("lib/targets", () => {
       expect(single("b6")).toBe(1.3);
     });
 
+    it("sodium stays the coach's training formula until Hao decides on VN 2016's 2.000 mg (OPEN_QUESTIONS, cc-67 sodium)", () => {
+      expect(calculateTargets({ ...sampleUser, trainingMinutes: 0 }).sodium).toEqual({ min: 1570, max: 2360 });
+      expect(calculateTargets({ ...sampleUser, trainingMinutes: 60 }).sodium).toEqual({ min: 2750, max: 4130 });
+    });
+
     it("the weight and the training minutes do not move them", () => {
       const light = calculateTargets({ ...sampleUser, weightKg: 50, trainingMinutes: 0 });
       const heavy = calculateTargets({ ...sampleUser, weightKg: 95, trainingMinutes: 120 });
-      for (const id of ["sodium", "potassium", "calcium", "magnesium", "iron", "zinc", "b1", "vitamin_a"]) expect(light[id]).toEqual(heavy[id]);
+      for (const id of ["potassium", "calcium", "magnesium", "iron", "zinc", "b1", "vitamin_a"]) expect(light[id]).toEqual(heavy[id]);
     });
 
     it("a woman and an older man get their own amounts", () => {

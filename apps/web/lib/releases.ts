@@ -31,7 +31,7 @@ export interface Release {
 }
 
 export const RELEASES: readonly Release[] = [
-  // cc-67: simple, fast food logging. No tour of its own except the editable parts of a dish (a step is added with them)
+  // cc-67: simple, fast food logging. The tour runs on Hôm nay: + Thêm, then the Thành phần of a dish (falls back to + Thêm)
   {
     id: "2026-10-19a",
     date: "19/10",
@@ -39,7 +39,7 @@ export const RELEASES: readonly Release[] = [
       { icon: "select", title: "Mỗi món một dòng", body: "Cơm, thịt, cá, khoai chỉ còn một dòng trong danh sách. Chọn Sống hay Chín ngay trong bảng khẩu phần." },
       { icon: "meal", title: "Ghi phần ăn được", body: "Trái cây và món có vỏ, hạt, xương ghi theo gam của phần ăn được. Trứng vẫn ghi theo quả." },
       { icon: "select", title: "Chỉnh thành phần món", body: "Mở Thành phần của món Việt, đổi gam từng phần hoặc thêm bún, thịt. Món vào nhật ký một dòng." },
-      { icon: "target", title: "Mục tiêu vi chất theo khuyến nghị", body: "22 vi chất theo Khuyến nghị dinh dưỡng Việt Nam 2016, đúng giới tính và tuổi của bạn. Năng lượng và đa lượng giữ nguyên." },
+      { icon: "target", title: "Mục tiêu vi chất theo khuyến nghị", body: "Canxi, sắt, vitamin và các khoáng khác theo Khuyến nghị dinh dưỡng Việt Nam 2016, đúng giới tính và tuổi của bạn. Muối, năng lượng và đa lượng giữ nguyên." },
     ],
     tour: [
       { target: "meal-add", fallback: "nav-add", title: "Mỗi món một dòng", body: "Chạm + Thêm rồi tìm món. Cơm, thịt, cá chỉ một dòng, chọn Sống hay Chín trong khẩu phần." },
