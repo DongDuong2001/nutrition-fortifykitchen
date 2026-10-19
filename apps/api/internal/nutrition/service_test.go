@@ -484,4 +484,27 @@ func TestCustomFood_PrivacyAndVisibility(t *testing.T) {
 	})
 }
 
+func TestNutritionService_CreateCustomFood_OneOff(t *testing.T) {
+	repo := &mockNutritionRepo{foods: make(map[uuid.UUID]*FoodDetail)}
+	svc := NewService(repo)
+
+	userID := uuid.New()
+	cal := 250.0
+	req := CreateCustomFoodRequest{
+		NameVi:      "Phở bò · đã chỉnh",
+		ServingUnit: "phần",
+		ServingSize: 300,
+		Calories:    &cal,
+		OneOff:      true,
+	}
+
+	food, err := svc.CreateCustomFood(context.Background(), userID, req)
+	if err != nil {
+		t.Fatalf("failed to create one-off custom food: %v", err)
+	}
+	if food.Category != "one_off" {
+		t.Errorf("expected category 'one_off', got '%s'", food.Category)
+	}
+}
+
 
