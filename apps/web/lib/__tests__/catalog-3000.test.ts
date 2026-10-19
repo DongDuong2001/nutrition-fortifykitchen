@@ -52,7 +52,17 @@ afterEach(() => {
 });
 
 describe("a 3,000-food catalogue over 60 pages", () => {
-  it("loads every food once from the production page size (500: 6 pages)", async () => {
+  it("one request from an API that pages by 5,000 (overnight 20/10, no search query)", async () => {
+    vi.spyOn(cache, "readCatalogCache").mockResolvedValue(null);
+    const written = vi.spyOn(cache, "writeCatalogCache").mockResolvedValue();
+    const pages = foodsServer(undefined, 5000);
+    const foods = await apiClient.loadAllFoods();
+    expect(pages).toEqual([1]);
+    expect(foods).toHaveLength(TOTAL);
+    await vi.waitFor(() => expect(written).toHaveBeenCalledTimes(1));
+  });
+
+  it("an API that still caps at 500: 6 pages, every food once (the old paging is the fallback)", async () => {
     vi.spyOn(cache, "readCatalogCache").mockResolvedValue(null);
     const written = vi.spyOn(cache, "writeCatalogCache").mockResolvedValue();
     const pages = foodsServer(undefined, 500);
@@ -64,15 +74,14 @@ describe("a 3,000-food catalogue over 60 pages", () => {
     expect(written.mock.calls[0][1]).toHaveLength(TOTAL);
   });
 
-  it("from a server that pages by 50, only the first 30 pages (1,500 foods) load and no copy is written (OPEN_QUESTIONS cc-65)", async () => {
+  it("a server that pages by 50: all 60 pages load now (the cap was 30 pages, 1,500 foods)", async () => {
     vi.spyOn(cache, "readCatalogCache").mockResolvedValue(null);
     const written = vi.spyOn(cache, "writeCatalogCache").mockResolvedValue();
     const pages = foodsServer();
     const foods = await apiClient.loadAllFoods();
-    expect(Math.max(...pages)).toBe(30);
-    expect(foods).toHaveLength(1500);
-    await new Promise((r) => setTimeout(r, 0));
-    expect(written).not.toHaveBeenCalled();
+    expect(Math.max(...pages)).toBe(60);
+    expect(foods).toHaveLength(TOTAL);
+    await vi.waitFor(() => expect(written).toHaveBeenCalledTimes(1));
   });
 
   it("page 17 fails during a background refresh: the copy stays on screen and in the cache, nothing partial is written", async () => {

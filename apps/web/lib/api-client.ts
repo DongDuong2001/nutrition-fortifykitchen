@@ -198,8 +198,10 @@ export interface CreateFoodInput {
 export const FOODS_UNAVAILABLE = "foods_unavailable";
 
 // The whole catalogue, kept for a while so a repeat visit does not page /foods again
-const FOODS_PAGE_LIMIT = 500;
-const FOODS_MAX_PAGES = 30;
+// Overnight 20/10 (Dong #4): the API answers up to 5,000 foods a page when there is no search (MaxCatalogueLimit), so the
+// whole catalogue is one request; an older API caps at 500 and the pages that come short are read as before
+const FOODS_PAGE_LIMIT = 5000;
+const FOODS_MAX_PAGES = 60;
 let foodsInFlight: Promise<FoodItem[]> | null = null;
 
 /**
@@ -594,8 +596,8 @@ export const apiClient = {
   },
 
   /**
-   * Live mode: the whole catalogue. Asks /foods?limit=500&page=1 and goes on with the next page (same limit) while
-   * fewer foods than the response's total are collected, at most 30 pages (a server that caps a page at 50 still
+   * Live mode: the whole catalogue. Asks /foods?limit=5000&page=1 and goes on with the next page (same limit) while
+   * fewer foods than the response's total are collected, at most 60 pages (a server that caps a page at 50 still
    * answers every page; with no total, it stops at an empty page). Everything goes to setCatalogFoods once. A page
    * that fails keeps what loaded before it; with nothing loaded it throws (the screen offers Thử lại). One load at a
    * time: a call made while one runs gets the same promise. The result is kept in sessionStorage for 10 minutes, per

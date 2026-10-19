@@ -5,6 +5,7 @@ import { NavHistoryTracker } from "@/components/nav-history-tracker";
 import { PwaRegister } from "@/components/pwa/pwa-register";
 import { RouteTransition } from "@/components/route-transition";
 import { TouchActive } from "@/components/touch-active";
+import { Vitals } from "@/components/vitals";
 import { INK_COLOR, STANDALONE_HOME_SCRIPT } from "@/lib/pwa";
 
 const manrope = Manrope({
@@ -60,6 +61,7 @@ export default function RootLayout({
         <NavHistoryTracker />
         <PwaRegister />
         <TouchActive />
+        <Vitals />
         <RouteTransition>{children}</RouteTransition>
       </body>
     </html>

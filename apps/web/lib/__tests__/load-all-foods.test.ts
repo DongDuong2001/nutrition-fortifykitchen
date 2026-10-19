@@ -47,11 +47,11 @@ describe("apiClient.loadAllFoods", () => {
     expect(browsableFoods()).toHaveLength(389);
   });
 
-  it("asks for 500 at a time: a server with no cap answers 389 foods in one call", async () => {
+  it("asks for 5,000 at a time (overnight 20/10): a server with no cap answers 389 foods in one call", async () => {
     const { calls } = foodsServer(389, undefined, 500);
     const foods = await apiClient.loadAllFoods();
     expect(calls).toHaveLength(1);
-    expect(calls[0]).toContain("limit=500");
+    expect(calls[0]).toContain("limit=5000");
     expect(calls[0]).toContain("page=1");
     expect(foods).toHaveLength(389);
   });
@@ -60,7 +60,7 @@ describe("apiClient.loadAllFoods", () => {
     const { calls } = foodsServer(389);
     await apiClient.loadAllFoods();
     expect(calls).toHaveLength(8);
-    expect(calls.every((url) => url.includes("limit=500"))).toBe(true);
+    expect(calls.every((url) => url.includes("limit=5000"))).toBe(true);
     expect(calls.map((url) => new URL(url).searchParams.get("page"))).toEqual(["1", "2", "3", "4", "5", "6", "7", "8"]);
   });
 
@@ -93,10 +93,10 @@ describe("apiClient.loadAllFoods", () => {
     expect(foods).toHaveLength(70);
   });
 
-  it("never asks for more than 30 pages", async () => {
-    const { calls } = foodsServer(50 * 40);
+  it("never asks for more than 60 pages", async () => {
+    const { calls } = foodsServer(50 * 80);
     await apiClient.loadAllFoods();
-    expect(calls).toHaveLength(30);
+    expect(calls).toHaveLength(60);
   });
 
   it("never mixes the sample foods into the live list", async () => {
