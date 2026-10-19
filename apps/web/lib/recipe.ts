@@ -361,6 +361,9 @@ export function recipeFoodInput(recipe: Recipe, lookup: IngredientLookup): Creat
     carbs: serving("carbs"),
     fat: serving("fat"),
     micros: Object.fromEntries(RECIPE_NUTRIENT_KEYS.filter((k) => !macros.includes(k)).map((k) => [k, serving(k)])),
+    // cc-67: the food of an edited dish is made for one meal; the API lists it nowhere. Foods made before this flag are
+    // still hidden by their id and name (lib/recipe-store, lib/mock/foods)
+    ...(recipe.oneOff ? { oneOff: true } : {}),
   };
 }
 

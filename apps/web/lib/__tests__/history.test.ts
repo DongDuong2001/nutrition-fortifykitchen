@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { loadSyncEngine } from "../api-client";
 import { DAY_CACHE_DAYS, dayKey, pruneDayRecords, readDayRecords, recordEntries, slimEntry, unslimEntry, writeDayRecords, type DayRecord } from "../day-cache";
 import type { AddedDiaryEntry } from "../diary-edits";
-import { loadHistory, migrateLegacyArchive, resetHistoryMemory, saveHistoryDays } from "../history";
+import { loadHistory, migrateLegacyArchive, rangeWindows, resetHistoryMemory, saveHistoryDays } from "../history";
 import { quotaError, createFakeIdb, type FakeIdb } from "./fake-idb";
 import { resetIdb } from "../idb";
 
@@ -43,8 +43,15 @@ const serverEntry = (id: string, grams = 100, extra: Record<string, unknown> = {
 });
 const summary = (date: string, ...ids: string[]) => ({ date, training_minutes: 0, is_read_only: true, summary: {}, meals: [{ slot: "all", name_vi: "", total_kcal: 0, target_min_kcal: 0, entries: ids.map((id) => serverEntry(id)) }] });
 
+/** Every date from `from` to `to`. */
+function eachDay(from: string, to: string): string[] {
+  const out: string[] = [];
+  for (let t = Date.parse(from); t <= Date.parse(to); t += 86_400_000) out.push(new Date(t).toISOString().slice(0, 10));
+  return out;
+}
+
 /** A server with some days; `range` says whether GET /days?from&to exists. */
-function server(days: Record<string, string[]>, options: { range?: boolean; fail?: string[] } = {}) {
+function server(days: Record<string, string[]>, options: { range?: boolean; everyDay?: boolean; fail?: string[] } = {}) {
   const calls: string[] = [];
   vi.stubGlobal(
     "fetch",
@@ -54,7 +61,9 @@ function server(days: Record<string, string[]>, options: { range?: boolean; fail
       const range = /^\/days\?from=([\d-]+)&to=([\d-]+)$/.exec(path);
       if (range) {
         if (!options.range) return new Response("{}", { status: 404 });
-        const list = Object.keys(days).filter((d) => d >= range[1] && d <= range[2]).map((d) => summary(d, ...days[d]));
+        // everyDay: the way apps/api answers, every date of the range with its meals (empty ones included)
+        const dates = options.everyDay ? eachDay(range[1], range[2]) : Object.keys(days).filter((d) => d >= range[1] && d <= range[2]);
+        const list = dates.map((d) => summary(d, ...(days[d] ?? [])));
         return new Response(JSON.stringify({ data: { days: list } }), { status: 200 });
       }
       const day = /^\/days\/([\d-]+)$/.exec(path)?.[1] ?? "";
@@ -154,6 +163,48 @@ describe("loadHistory: the server's days, cached on this device", () => {
     const again = server(days, { range: false });
     await loadHistory(SCOPE, dates, { fetch: true, today: TODAY });
     expect(again.filter((c) => c.includes("?from"))).toEqual([]);
+  });
+});
+
+describe("GET /days?from=&to= as apps/api answers it (cc-68)", () => {
+  it("reads a month in one request: every date comes back, the empty ones too, and none is asked for again", async () => {
+    const days = { "2026-10-05": ["a"], "2026-10-12": ["b"] };
+    const calls = server(days, { range: true, everyDay: true });
+    const dates = eachDay("2026-10-01", "2026-10-14");
+    const result = await loadHistory(SCOPE, dates, { fetch: true, today: TODAY });
+    expect(calls).toEqual(["/days?from=2026-10-01&to=2026-10-14"]);
+    expect(Object.keys(result.days)).toEqual(["2026-10-05", "2026-10-12"]);
+    // every date is cached (final), so the next load asks for nothing
+    expect(idb.values("days")).toHaveLength(14);
+    const again = server(days, { range: true, everyDay: true });
+    await loadHistory(SCOPE, dates, { fetch: true, today: TODAY });
+    expect(again).toEqual([]);
+  });
+
+  it("a span wider than the server allows (100 days) goes in windows of at most 90", async () => {
+    expect(rangeWindows(["2026-01-01", "2026-02-01", "2026-03-15", "2026-06-01", "2026-06-02"])).toEqual([
+      ["2026-01-01", "2026-03-15"],
+      ["2026-06-01", "2026-06-02"],
+    ]);
+    const calls = server({}, { range: true, everyDay: true });
+    await loadHistory(SCOPE, ["2026-01-01", "2026-02-01", "2026-03-15", "2026-06-01", "2026-06-02"], { fetch: true, today: TODAY });
+    expect(calls).toEqual(["/days?from=2026-01-01&to=2026-03-15", "/days?from=2026-06-01&to=2026-06-02"]);
+  });
+
+  it("a range that is refused (400) is not trusted: the days are read one by one, and the range is asked again next time", async () => {
+    const calls: string[] = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string) => {
+        const path = String(url).replace("https://api.test/api/v1", "");
+        calls.push(path);
+        if (path.startsWith("/days?")) return new Response(JSON.stringify({ error: { code: "VALIDATION_FAILED" } }), { status: 400 });
+        return new Response(JSON.stringify({ data: summary(path.split("/").pop()!, "x") }), { status: 200 });
+      })
+    );
+    const result = await loadHistory(SCOPE, ["2026-10-05", "2026-10-06", "2026-10-07"], { fetch: true, today: TODAY });
+    expect(calls.filter((c) => c.startsWith("/days/"))).toHaveLength(3);
+    expect(Object.keys(result.days)).toHaveLength(3);
   });
 });
 

@@ -1,3 +1,4 @@
+import { noteLegacyOutboxOwner } from "./legacy-outbox";
 import { isLiveMode } from "./api-mode";
 import {
   mockCurrentAccount,
@@ -113,6 +114,8 @@ export const isSigningOut = (): boolean => signingOut;
 function setStoredEmail(email: string | null): void {
   inMemoryEmail = email;
   try {
+    // cc-68: the old unscoped outbox goes to the account that was here until now, not to whoever signs in next
+    noteLegacyOutboxOwner(globalThis.localStorage ?? null, globalThis.localStorage?.getItem(CURRENT_USER_KEY) ?? null, email);
     if (email) {
       globalThis.localStorage?.setItem(CURRENT_USER_KEY, email);
       globalThis.localStorage?.removeItem(SIGNED_OUT_KEY);

@@ -2,6 +2,7 @@ import { apiClient, apiFetch, diaryTimeout, type DaySummaryResponse } from "./ap
 import { currentAccountId } from "./auth-actions";
 import { getTodayIsoVN } from "./date";
 import { editableFrom, isEditableDay } from "./day-rules";
+import { shiftIsoDate } from "./day-history";
 import { DAY_CACHE_DAYS, pruneDayRecords, readDayRecords, recordEntries, slimEntry, writeDayRecords, type DayRecord } from "./day-cache";
 import type { DayArchive } from "./day-archive";
 import type { AddedDiaryEntry } from "./diary-edits";
@@ -33,7 +34,7 @@ export interface HistoryResult {
   failed: string[];
 }
 
-// Whether GET /days?from=&to= exists (Dong may add it, apps/api has only GET /days/{date} today): learned once per page life
+// Whether GET /days?from=&to= answers ({ days: [...] }, every day of the range, at most 100 days apart): learned once per page life
 let rangeSupported: boolean | null = null;
 
 /** For tests. */
@@ -67,6 +68,19 @@ async function fetchRange(from: string, to: string): Promise<Map<string, DaySumm
   }
 }
 
+const RANGE_WINDOW_DAYS = 90;
+
+/** Sorted dates grouped into [from, to] windows no more than 90 days wide. */
+export function rangeWindows(sorted: readonly string[]): Array<[string, string]> {
+  const out: Array<[string, string]> = [];
+  for (const date of sorted) {
+    const last = out[out.length - 1];
+    if (last && shiftIsoDate(last[0], RANGE_WINDOW_DAYS) >= date) last[1] = date;
+    else out.push([date, date]);
+  }
+  return out;
+}
+
 /** Runs `work` for each item, `workers` at a time. */
 async function pool<T>(items: readonly T[], workers: number, work: (item: T) => Promise<void>): Promise<void> {
   let next = 0;
@@ -90,9 +104,12 @@ export async function loadHistory(scope: string, dates: readonly string[], optio
   const fresh: DayRecord[] = [];
   const summaries = new Map<string, DaySummaryResponse>();
   if (need.length >= 3) {
-    const sorted = [...need].sort();
-    const range = await fetchRange(sorted[0], sorted[sorted.length - 1]);
-    if (range) for (const d of need) if (range.has(d)) summaries.set(d, range.get(d)!);
+    // The server answers a range of up to 100 days: the needed days go in windows of at most 90 days
+    for (const [from, to] of rangeWindows([...need].sort())) {
+      const range = await fetchRange(from, to);
+      if (!range) break;
+      for (const d of need) if (d >= from && d <= to && range.has(d)) summaries.set(d, range.get(d)!);
+    }
   }
   await pool(need.filter((d) => !summaries.has(d)), workers, async (date) => {
     const day = await apiClient.getDay(date);

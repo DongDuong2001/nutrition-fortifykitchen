@@ -3,6 +3,8 @@ import { apiClient, getPendingOfflineEntryIds, hasPendingWrite, loadSyncEngine, 
 import { resetIdb } from "../idb";
 import { STALE_SENDING_MS, countItems, loadOutbox, putItem, readItems, resetOutboxState, scopeFor } from "../outbox";
 import { getSyncAlerts, resetSyncAlerts } from "../sync-state";
+import { accountStorage } from "../storage-keys";
+import { noteLegacyOutboxOwner, resetLegacyOutboxReport } from "../legacy-outbox";
 import { createFakeIdb, quotaError, type FakeIdb } from "./fake-idb";
 
 // cc-68 Part 1: the write-ahead outbox in IndexedDB. The requests are a mocked fetch; the disk is a fake IndexedDB that
@@ -445,6 +447,75 @@ describe("cc-68 Part 2: a write for yesterday", () => {
     expect(calls).toEqual(["POST /days/2026-10-18/entries", `PATCH /entries/${ID}`, `DELETE /entries/${ID}`]);
     expect(bodies[`PATCH /entries/${ID}`][0]).toMatchObject({ grams: 150 });
     expect(idb.values("outbox")).toEqual([]);
+  });
+});
+
+describe("the old unscoped outbox goes to its own account only (cc-68)", () => {
+  const B = "other@example.com";
+  const LEGACY = JSON.stringify([{ id: ID, date: "2026-10-18", payload: { id: ID, kind: "food", meal_slot: "lunch", food_id: FOOD, grams: 100 }, createdAt: 1000, key: "k1" }]);
+  const signIn = (email: string) => {
+    // What lib/auth-actions does when the browser's email changes
+    noteLegacyOutboxOwner(local, local.getItem("h1t_auth_current_email"), email);
+    local.setItem("h1t_auth_current_email", email);
+  };
+
+  it("A's old queue stays on disk when B signs in first, nothing is sent under B, and A's writes go out when A signs in", async () => {
+    resetLegacyOutboxReport();
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-10-19T03:00:00Z"));
+    local.setItem("h1t_offline_outbox", LEGACY);
+    const reports: unknown[] = [];
+    const { calls } = server({ "POST /days/2026-10-18/entries": [201] });
+    const sent = vi.mocked(fetch);
+    sent.mockImplementation(async (url: unknown, init?: RequestInit) => {
+      const path = String(url).replace("https://api.test/api/v1", "");
+      calls.push(`${init?.method ?? "GET"} ${path}`);
+      if (path === "/client-errors") reports.push(JSON.parse(String(init?.body)));
+      return new Response(path === "/client-errors" ? null : "{}", { status: path === "/client-errors" ? 204 : 201 });
+    });
+
+    // B signs in first (A was on this browser)
+    signIn(B);
+    accountStorage();
+    killPage();
+    await loadSyncEngine();
+    await loadOutbox(scopeFor(B, false)!);
+    expect((await syncOfflineOutbox({ force: true })).saved).toEqual([]);
+    expect(calls.filter((c) => c.startsWith("POST /days"))).toEqual([]);
+    expect(local.getItem("h1t_offline_outbox")).toBe(LEGACY);
+    expect(local.getItem(`h1t_offline_outbox_${B}`)).toBeNull();
+    await vi.waitFor(() => expect(reports).toEqual([expect.objectContaining({ kind: "storage", message: "legacy_outbox_unclaimed" })]));
+    // reported once, however often B's page loads
+    accountStorage();
+    accountStorage();
+    await Promise.resolve();
+    expect(reports).toHaveLength(1);
+
+    // A signs in: the queue is hers and goes out
+    signIn(ACCOUNT);
+    accountStorage();
+    expect(local.getItem("h1t_offline_outbox")).toBeNull();
+    killPage();
+    await loadSyncEngine();
+    await loadOutbox(scope);
+    expect((await syncOfflineOutbox({ force: true })).saved).toEqual([ID]);
+    expect(calls.filter((c) => c.startsWith("POST /days"))).toEqual(["POST /days/2026-10-18/entries"]);
+  });
+
+  it("a queue found with nobody switching accounts belongs to the account that loads, and a queue after a sign-out nobody can name stays unclaimed", () => {
+    local.setItem("h1t_offline_outbox", LEGACY);
+    accountStorage();
+    expect(local.getItem(`h1t_offline_outbox_${ACCOUNT}`)).toBe(LEGACY);
+    expect(local.getItem("h1t_offline_outbox")).toBeNull();
+
+    local.setItem("h1t_offline_outbox", LEGACY);
+    local.removeItem(`h1t_offline_outbox_${ACCOUNT}`);
+    local.removeItem("h1t_auth_current_email");
+    // Signed out under the old version (no email to name), then B signs in
+    signIn(B);
+    accountStorage();
+    expect(local.getItem("h1t_offline_outbox")).toBe(LEGACY);
+    expect(local.getItem(`h1t_offline_outbox_${B}`)).toBeNull();
   });
 });
 

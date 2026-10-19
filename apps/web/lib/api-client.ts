@@ -189,6 +189,8 @@ export interface CreateFoodInput {
   carbs?: number | null;
   fat?: number | null;
   micros?: Record<string, number | null | undefined>;
+  /** The one-off food of an edited dish: the API keeps it out of every list on every device (category one_off). */
+  oneOff?: boolean;
 }
 
 /** Thrown by searchFoods in live mode when /foods did not answer. */
@@ -648,6 +650,7 @@ export const apiClient = {
           carbs: input.carbs,
           fat: input.fat,
           micros: input.micros,
+          ...(input.oneOff ? { one_off: true } : {}),
         };
         const res = await apiFetch(`/foods/custom`, {
           method: "POST",
@@ -658,7 +661,8 @@ export const apiClient = {
           const raw = json.data ?? json;
           const mapped = mapApiFoodToFoodItem(raw);
           addCatalogFood(mapped);
-          void catalogCache().then((c) => c.addToCatalogCache(currentAccountId(), mapped));
+          // A one-off food is no part of the catalogue the server lists, so it is not kept in the device's copy of it
+          if (!input.oneOff) void catalogCache().then((c) => c.addToCatalogCache(currentAccountId(), mapped));
           return mapped;
         }
         // Fixed words and the status: the server's own text is never shown

@@ -6,6 +6,7 @@
 import { currentAccountId } from "./auth-actions";
 import { isDemo } from "./demo";
 import { FAVOURITES_KEY } from "./favourites";
+import { OFFLINE_OUTBOX_KEY, claimLegacyOutbox } from "./legacy-outbox";
 
 // One value per account: the profile (sex, birth year, weight, goal, period mode, name), the reminder settings and
 // the training ticks. Each is kept under the account's key too, so a second account on this browser never sees them.
@@ -17,8 +18,8 @@ export const SETTINGS_STORAGE_KEY = "h1t_settings_v1";
 export const TRAINING_CHECKLIST_KEY = "h1t_training_checklist_v1";
 export const TRAINING_PREFS_KEY = "h1t_training_prefs_v1";
 export const LEADERBOARD_STORAGE_KEY = "h1t_leaderboard_opt_in";
-/** Entries waiting to reach the server (lib/api-client). Once unscoped, now per account like the rest. */
-export const OFFLINE_OUTBOX_KEY = "h1t_offline_outbox";
+/** Entries waiting to reach the server (lib/api-client). Once unscoped, now per account like the rest (lib/legacy-outbox). */
+export { OFFLINE_OUTBOX_KEY };
 export const PERSONAL_KEYS: readonly string[] = [PROFILE_KEY, SETTINGS_STORAGE_KEY, TRAINING_CHECKLIST_KEY, TRAINING_PREFS_KEY, LEADERBOARD_STORAGE_KEY, OFFLINE_OUTBOX_KEY];
 
 export const ADDED_ENTRIES_KEY = "h1t_added_entries_v1";
@@ -121,17 +122,18 @@ export function dropLegacyKeys(local: KeyValueStore | null, session: KeyValueSto
 
 /**
  * The same for the old global profile, settings and training ticks: they are deleted. The one exception is the old offline
- * outbox: that is writes that never reached the server, so the first account that loads takes it (it is sent for them,
- * and never lost). Demo keys are never touched (the caller skips demo).
+ * outbox: that is writes that never reached the server, so it is kept, but only for the account it was written for (the one
+ * noteLegacyOutboxOwner recorded; with no change of account since the update, the account that loads). Another account that
+ * signs in first does not take it and nothing is sent for it: it stays on disk until its own account signs in, and the
+ * mismatch is reported once. Demo keys are never touched (the caller skips demo).
  */
 export function dropLegacyPersonal(local: KeyValueStore | null, accountId: string): void {
   if (!local) return;
   attempt(() => {
     for (const base of PERSONAL_KEYS) {
-      const legacy = local.getItem(base);
-      if (legacy === null) continue;
-      const own = `${base}_${accountId}`;
-      if (base === OFFLINE_OUTBOX_KEY && local.getItem(own) === null) local.setItem(own, legacy);
+      if (base === OFFLINE_OUTBOX_KEY) {
+        if (!claimLegacyOutbox(local, accountId)) continue;
+      } else if (local.getItem(base) === null) continue;
       local.removeItem(base);
     }
   }, undefined);
