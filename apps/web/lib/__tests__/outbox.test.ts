@@ -107,11 +107,11 @@ describe("S2: the write is in the outbox before the request goes out", () => {
     vi.setSystemTime(new Date("2026-10-18T10:00:10Z"));
     await loadOutbox(scope);
     expect(readItems(scope)).toMatchObject([{ id: ID, state: "sending" }]);
-    expect((await syncOfflineOutbox()).saved).toEqual([]);
+    expect((await syncOfflineOutbox({ force: true })).saved).toEqual([]);
     expect(calls).toEqual([]);
 
     vi.setSystemTime(new Date(Date.parse("2026-10-18T10:00:00Z") + STALE_SENDING_MS + 1000));
-    expect((await syncOfflineOutbox()).saved).toEqual([ID]);
+    expect((await syncOfflineOutbox({ force: true })).saved).toEqual([ID]);
     expect(calls).toEqual(["POST /days/2026-10-18/entries"]);
     expect((bodies["POST /days/2026-10-18/entries"][0] as { id: string }).id).toBe(ID);
     expect(idb.values("outbox")).toEqual([]);
@@ -124,7 +124,7 @@ describe("S2: the write is in the outbox before the request goes out", () => {
     expect((await apiClient.updateEntry(ID, { meal_slot: "lunch" })).state).toBe("queued");
     expect(calls.filter((c) => c.startsWith("PATCH"))).toEqual([]);
     expect(idb.values("outbox")).toHaveLength(2);
-    await syncOfflineOutbox();
+    await syncOfflineOutbox({ force: true });
     expect(calls.slice(-2)).toEqual(["POST /days/2026-10-18/entries", `PATCH /entries/${ID}`]);
   });
 });
@@ -170,7 +170,7 @@ describe("S8: one record per write; the old localStorage array is moved over wit
     await loadOutbox(other);
     expect(readItems(other)).toEqual([]);
     const { calls } = server();
-    await syncOfflineOutbox();
+    await syncOfflineOutbox({ force: true });
     expect(calls).toEqual([]);
   });
 });
@@ -274,7 +274,7 @@ describe("S6: profile, weight and favourites go through the outbox, newest wins"
     expect(hasPendingWrite("profile")).toBe(true);
 
     const { calls, bodies } = server({ "PUT /me/profile": [200], "PUT /me/weight/2026-10-19": [200] });
-    await syncOfflineOutbox();
+    await syncOfflineOutbox({ force: true });
     expect(calls).toEqual(["PUT /me/profile", "PUT /me/weight/2026-10-19"]);
     expect(bodies["PUT /me/profile"][0]).toMatchObject({ weight_kg: 72 });
     expect(bodies["PUT /me/weight/2026-10-19"][0]).toEqual({ weight_kg: 72 });
@@ -288,7 +288,7 @@ describe("S6: profile, weight and favourites go through the outbox, newest wins"
     await apiClient.setFavourite(FOOD, false);
     expect(pendingFavouriteOps()).toEqual([[FOOD, false]]);
     const { calls } = server({ [`DELETE /favourites/${FOOD}`]: [204] });
-    await syncOfflineOutbox();
+    await syncOfflineOutbox({ force: true });
     expect(calls).toEqual([`DELETE /favourites/${FOOD}`]);
   });
 
@@ -339,7 +339,7 @@ describe("S14: the day of a write is worked out when the write is made", () => {
     await apiClient.addEntry({ id: ID, foodId: FOOD, grams: 100, mealSlot: "dinner" });
     vi.setSystemTime(new Date("2026-10-18T18:00:00Z"));
     const { calls } = server({ "POST /days/2026-10-18/entries": [201] });
-    await syncOfflineOutbox();
+    await syncOfflineOutbox({ force: true });
     expect(calls).toEqual(["POST /days/2026-10-18/entries"]);
   });
 });
@@ -397,7 +397,7 @@ describe("cc-68 Part 2: a write for yesterday", () => {
     await apiClient.addEntry({ id: ID, foodId: FOOD, grams: 100, mealSlot: "dinner" });
     vi.setSystemTime(new Date("2026-10-19T03:00:00Z"));
     const { calls } = server({ "POST /days/2026-10-18/entries": [201] });
-    expect((await syncOfflineOutbox()).saved).toEqual([ID]);
+    expect((await syncOfflineOutbox({ force: true })).saved).toEqual([ID]);
     expect(calls).toEqual(["POST /days/2026-10-18/entries"]);
   });
 });

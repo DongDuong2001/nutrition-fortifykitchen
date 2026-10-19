@@ -187,7 +187,7 @@ describe("a tab whose account changed writes and sends nothing (the diary reload
     // Neither account's outbox got it
     expect(readItems(scopeFor("a@x.vn", false))).toEqual([]);
     expect(readItems(scopeFor("b@x.vn", false))).toEqual([]);
-    expect(await syncOfflineOutbox()).toEqual({ saved: [], held: [] });
+    expect(await syncOfflineOutbox({ force: true })).toEqual({ saved: [], held: [] });
     stop();
   });
 
@@ -198,7 +198,7 @@ describe("a tab whose account changed writes and sends nothing (the diary reload
     local.setItem(KEY, "b@x.vn");
     const fetchMock = vi.fn(async () => new Response("{}", { status: 201 }));
     vi.stubGlobal("fetch", fetchMock);
-    expect(await syncOfflineOutbox()).toEqual({ saved: [], held: [] });
+    expect(await syncOfflineOutbox({ force: true })).toEqual({ saved: [], held: [] });
     expect(fetchMock).not.toHaveBeenCalled();
     expect(readItems(scopeA)).toHaveLength(1);
   });

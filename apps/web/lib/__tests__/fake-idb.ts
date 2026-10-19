@@ -109,9 +109,10 @@ export function createFakeIdb(): FakeIdb {
 
   const factory = {
     open(name: string, version = 1) {
-      const req: { result: unknown; error: unknown; onsuccess: Handler; onerror: Handler; onblocked: Handler; onupgradeneeded: Handler } = {
+      const req: { result: unknown; error: unknown; transaction: unknown; onsuccess: Handler; onerror: Handler; onblocked: Handler; onupgradeneeded: Handler } = {
         result: undefined,
         error: null,
+        transaction: undefined,
         onsuccess: null,
         onerror: null,
         onblocked: null,
@@ -119,6 +120,7 @@ export function createFakeIdb(): FakeIdb {
       };
       later(() => {
         let data = disk.get(name);
+        const existedBefore = Boolean(data);
         const upgrading = !data || data.version < version;
         if (!data) {
           data = { version, stores: new Map() };
@@ -137,7 +139,16 @@ export function createFakeIdb(): FakeIdb {
         req.result = db;
         if (upgrading) {
           dbData.version = version;
+          // abort() inside onupgradeneeded cancels the open: the database is not created
+          let aborted = false;
+          req.transaction = { abort: () => void (aborted = true) };
           req.onupgradeneeded?.();
+          if (aborted) {
+            if (!existedBefore) disk.delete(name);
+            req.error = new DOMException("The transaction was aborted", "AbortError");
+            req.onerror?.();
+            return;
+          }
         }
         req.onsuccess?.();
       });

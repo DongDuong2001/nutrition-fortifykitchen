@@ -1,4 +1,4 @@
-import { apiClient, apiFetch, diaryTimeout, serverAnswer, writeOutcome, PAST_DAY_READ_ONLY, pruneOutbox, type SyncResult, type WriteResult } from "./api-client";
+import { getApiBaseUrl, apiClient, apiFetch, diaryTimeout, serverAnswer, writeOutcome, PAST_DAY_READ_ONLY, pruneOutbox, type SyncResult, type WriteResult } from "./api-client";
 import { currentAccountId } from "./auth-actions";
 import { isDemo } from "./demo";
 import { getTodayIsoVN } from "./date";
@@ -7,10 +7,12 @@ import { generateUuid } from "./uuid";
 import type { AddedDiaryEntry } from "./diary-edits";
 import { isRecipeId } from "./recipe";
 import { reportClientError } from "./client-errors";
-import { clearStorageAlert, raiseStorageAlert } from "./sync-state";
+import { afterFailure } from "./backoff";
+import { clearSessionExpired, clearStorageAlert, raiseSessionExpired, raiseStorageAlert } from "./sync-state";
 import { storageErrorKind } from "./storage-error";
 import { requestPersistentStorage } from "./storage-persist";
 import { onTab, postTab } from "./tab-sync";
+import { idbRun } from "./idb";
 export { watchAccount } from "./account-guard";
 export { unsyncedCount, wipeAccount } from "./account-wipe";
 export { initHistory, requestDays, saveHistoryDays } from "./history";
@@ -32,7 +34,9 @@ import {
   onStorageOk,
   listenForOtherTabs,
   subscribeOutbox,
+  countItems,
   type CommitResult,
+  type OutboxCounts,
   type OutboxItem,
   type OutboxKind,
   type OutboxScope,
@@ -65,6 +69,9 @@ function currentScope(): OutboxScope | null {
 /** Starts reading the account's outbox from disk (and moves the old localStorage array over). Call when an account loads. */
 export function loadOfflineOutbox(): Promise<void> {
   wireAlerts();
+  // The service worker may send what waits while the app is closed (Android): it needs to know whose writes, and where
+  const account = currentAccountId();
+  if (account && !isDemo()) void idbRun("kv", "readwrite", (store) => store.put({ account, apiBase: getApiBaseUrl() }, "sync-meta"));
   // After sign-in (an account is loading): ask the browser to keep this site's data (Safari clears it after 7 days otherwise)
   void requestPersistentStorage();
   return loadOutbox(currentScope());
@@ -116,6 +123,7 @@ const writeStartedAt = new Map<string, number>();
 export function resetWriteMemory(): void {
   wired = false;
   frozen = false;
+  unauthorized = 0;
   lastDiaryPost = 0;
   inFlight.clear();
   sendingKeys.clear();
@@ -136,6 +144,50 @@ export function writtenSince(time: number): string[] {
 /** How many diary writes are being sent now. */
 export function writesInFlight(): number {
   return inFlight.size;
+}
+
+/** Android Chrome can send the outbox from the service worker when the network is back with the app closed. iOS cannot: nothing happens there. */
+function requestBackgroundSync(): void {
+  try {
+    void navigator.serviceWorker?.ready
+      .then((registration) => (registration as ServiceWorkerRegistration & { sync?: { register(tag: string): Promise<void> } }).sync?.register("h1t-outbox"))
+      .catch(() => {});
+  } catch {
+    // No service worker here
+  }
+}
+
+/** The age buckets reported to /client-errors when the oldest write that waits is this old. */
+const AGE_BUCKETS: Array<[ms: number, label: string]> = [
+  [24 * 3600_000, "24h"],
+  [6 * 3600_000, "6h"],
+  [3600_000, "1h"],
+  [10 * 60_000, "10m"],
+];
+
+/**
+ * S13: a write that has waited a long time is worth knowing about: the oldest pending one is reported (kind outbox_age, once
+ * per bucket and page). Nothing personal is in it.
+ */
+export function reportOutboxAge(items: readonly OutboxItem[], now: number): string | null {
+  const counts = countItems(items);
+  if (counts.oldestPendingAt === null) return null;
+  const age = now - counts.oldestPendingAt;
+  const bucket = AGE_BUCKETS.find(([ms]) => age >= ms);
+  if (!bucket) return null;
+  const message = `oldest>=${bucket[1]}`;
+  reportClientError({ kind: "outbox_age", message });
+  return message;
+}
+
+/** Counts of the active account's outbox: pending, failed (refused, parked, refused for good), and how many of each kind. */
+export function outboxSummary(): OutboxCounts {
+  return countItems(readItems(currentScope()));
+}
+
+/** Every write of the active account that has not reached the server, oldest first. */
+export function outboxItems(): OutboxItem[] {
+  return readItems(currentScope());
 }
 
 /** Whether a side write (profile, weight, favourite, training) is waiting: a server copy read now must not replace it. */
@@ -164,11 +216,14 @@ interface Sent {
   final: boolean;
   /** Another part of this tab (a sync run, the write's own chain) is sending this item right now: nothing was sent. */
   busy?: boolean;
+  /** The Retry-After the server answered with, if any. */
+  retryAfter?: string | null;
 }
 
 async function sendWrite(write: Pick<OutboxItem, "method" | "path" | "date" | "payload" | "day">): Promise<Sent> {
   const method = itemMethod(write);
   let status = 0;
+  let retryAfter: string | null = null;
   let answer = { message: "", code: "" };
   try {
     const res = await apiFetch(itemPath(write), {
@@ -177,6 +232,7 @@ async function sendWrite(write: Pick<OutboxItem, "method" | "path" | "date" | "p
       signal: diaryTimeout(),
     });
     status = res.status;
+    retryAfter = res.headers?.get?.("Retry-After") ?? null;
     if (status >= 300) answer = await serverAnswer(res);
   } catch {
     // No answer: sent again from the outbox
@@ -186,7 +242,18 @@ async function sendWrite(write: Pick<OutboxItem, "method" | "path" | "date" | "p
   // Any non-2xx answer (not a 404 on a delete, which means done) is reported once
   if (status >= 300 && outcome !== "saved") reportClientError({ kind: "write", method, path: itemPath(write), status, message: answer.message });
   const pastDay = outcome === "held" && status === 409 && answer.code === PAST_DAY_READ_ONLY;
-  return { outcome, status, message: answer.message, final: pastDay && refusedForGood(write) };
+  return { outcome, status, message: answer.message, final: pastDay && refusedForGood(write), retryAfter };
+}
+
+// Writes that answered 401 one after another, after the session was renewed: the second one says the session ran out
+let unauthorized = 0;
+function noteSession(status: number): void {
+  if (status === 401) {
+    if (++unauthorized >= 2) raiseSessionExpired();
+  } else if (status > 0) {
+    unauthorized = 0;
+    clearSessionExpired();
+  }
 }
 
 /**
@@ -196,7 +263,9 @@ async function sendWrite(write: Pick<OutboxItem, "method" | "path" | "date" | "p
 async function attempt(scope: OutboxScope, item: OutboxItem): Promise<Sent> {
   // One request per item: a sync run and the write's own turn can reach the same item together; the second one leaves it
   if (sendingKeys.has(item.key)) return { outcome: "retry", status: -1, message: "", final: false, busy: true };
-  const started: OutboxItem = { ...item, state: "sending", attempts: (item.attempts ?? 0) + 1, lastAttemptAt: Date.now(), held: undefined, parked: undefined };
+  // A held or parked item that is sent again (Thử lại) starts with a clean count; the wait of a failed one is over
+  const fresh = Boolean(item.held || item.parked);
+  const started: OutboxItem = { ...item, state: "sending", attempts: (item.attempts ?? 0) + 1, lastAttemptAt: Date.now(), held: undefined, parked: undefined, nextAttemptAt: undefined, ...(fresh ? { retries: 0 } : {}) };
   sendingKeys.add(item.key);
   await putItem(scope, started);
   let sent: Sent;
@@ -205,15 +274,18 @@ async function attempt(scope: OutboxScope, item: OutboxItem): Promise<Sent> {
   } finally {
     sendingKeys.delete(item.key);
   }
+  noteSession(sent.status);
   const current = findItem(scope, item.key);
   if (!current) return sent;
   if (sent.outcome === "saved") {
     await removeItems(scope, [item.key]);
     tellOtherTabs(scope);
   } else if (sent.outcome === "held") {
-    await putItem(scope, { ...current, state: "held", retries: (current.retries ?? 0) + 1, held: { status: sent.status, message: sent.message, final: sent.final } });
+    await putItem(scope, { ...current, state: "held", retries: (current.retries ?? 0) + 1, nextAttemptAt: undefined, held: { status: sent.status, message: sent.message, final: sent.final } });
   } else {
-    await putItem(scope, { ...current, state: "queued", retries: (current.retries ?? 0) + 1, held: undefined });
+    // Not refused, not answered or answered "later": it goes again after a wait that grows, and is parked after MAX_ATTEMPTS
+    await putItem(scope, { ...current, state: "queued", held: undefined, ...afterFailure(current.retries, Date.now(), sent.retryAfter) });
+    requestBackgroundSync();
   }
   return sent;
 }
@@ -293,8 +365,8 @@ let syncQueue: Promise<SyncResult> = Promise.resolve({ saved: [], held: [] });
  * only with `retryHeld` (Thử lại). Writes queued while a run is going are kept. Only one tab drains at a time (a Web
  * Lock), and it reads the outbox from disk first, so what another tab queued is sent too.
  */
-export function syncOfflineOutbox(options: { retryHeld?: boolean } = {}): Promise<SyncResult> {
-  syncQueue = syncQueue.catch(() => ({ saved: [], held: [] })).then(() => runOutbox(options.retryHeld === true));
+export function syncOfflineOutbox(options: { retryHeld?: boolean; force?: boolean } = {}): Promise<SyncResult> {
+  syncQueue = syncQueue.catch(() => ({ saved: [], held: [] })).then(() => runOutbox(options.retryHeld === true, options.force === true || options.retryHeld === true));
   return syncQueue;
 }
 
@@ -313,7 +385,7 @@ function sendingElsewhere(item: OutboxItem, now: number): boolean {
   return sendingKeys.has(item.key) || now - (item.lastAttemptAt ?? 0) < STALE_SENDING_MS;
 }
 
-async function runOutbox(retryHeld: boolean): Promise<SyncResult> {
+async function runOutbox(retryHeld: boolean, force: boolean): Promise<SyncResult> {
   const result = EMPTY_RESULT();
   if (frozen) return result;
   // The run belongs to the account signed in when it starts: its writes never go out with another account's session
@@ -329,7 +401,9 @@ async function runOutbox(retryHeld: boolean): Promise<SyncResult> {
     for (const listed of items) {
       const item = findItem(scope, listed.key);
       if (!item) continue;
-      if (blocked.has(item.id) || item.held?.final || (item.held && !retryHeld) || waitsForFood(item) || sendingElsewhere(item, Date.now())) {
+      // Waiting after a failure (backoff) and parked ones stay put unless the person asked (Thử lại) or the network just came back (force)
+      const waiting = !force && (item.nextAttemptAt ?? 0) > Date.now();
+      if (blocked.has(item.id) || item.held?.final || (item.held && !retryHeld) || (item.parked && !retryHeld) || waiting || waitsForFood(item) || sendingElsewhere(item, Date.now())) {
         blocked.add(item.id);
         continue;
       }
@@ -352,6 +426,7 @@ async function runOutbox(retryHeld: boolean): Promise<SyncResult> {
     }
     // Writes refused for good leave after FINAL_OUTBOX_KEEP_MS (their notice was shown when they were refused)
     const now = Date.now();
+    reportOutboxAge(readItems(scope), now);
     const gone = readItems(scope).filter((item) => !pruneOutbox([item], now).length);
     if (gone.length > 0) await removeItems(scope, gone.map(itemKey));
     return result;
@@ -429,7 +504,9 @@ function wireAlerts(): void {
  */
 export function watchOutbox(onChange: () => void, onDiary?: () => void): () => void {
   wireAlerts();
-  const off = subscribeOutbox(onChange);
+  // Only what another tab changed: this tab's own commits are answered by its own writes (track, onSync), so the screens never see
+  // a write that was removed but not yet marked saved (they would send it again)
+  const off = subscribeOutbox(onChange, true);
   const offTabs = listenForOtherTabs(() => currentScope());
   const offDiary = onTab((message) => {
     if (message.type === "diary" && message.scope === currentScope()?.id) onDiary?.();

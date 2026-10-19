@@ -40,6 +40,7 @@ import {
   getPendingOfflineEntryIds,
   hasPendingWrite,
   callEngine,
+  outboxSummary,
   pendingFavouriteOps,
   pendingWriteIds,
   reportStorageFailure,
@@ -52,6 +53,7 @@ import {
   type WriteResult,
 } from "./api-client";
 import { refreshServerSession } from "./server-session";
+import { registerSyncNow, setSyncSummary } from "./sync-ui";
 import { markUsed } from "./onboarding-store";
 import { isLocalOnly, syncNotice } from "./sync-notice";
 import { errorText, reportClientError } from "./client-errors";
@@ -661,7 +663,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
    * Sends the outbox, then reads the server's day: `iso` (today), and with `earlier` the days before it that can still be
    * edited (yesterday), each merged into the list by its own day.
    */
-  const refreshRemoteDay = useCallback((iso: string, options: { retryHeld?: boolean; earlier?: boolean } = {}): Promise<void> => {
+  const refreshRemoteDay = useCallback((iso: string, options: { retryHeld?: boolean; earlier?: boolean; force?: boolean } = {}): Promise<void> => {
     const account = currentAccountId();
     if (!isLiveMode() || demo || !account) return Promise.resolve();
     const startedAt = Date.now();
@@ -834,25 +836,28 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   // browser), or the page restored from the back-forward cache. The session cookie is renewed first.
   useEffect(() => {
     if (!isLiveMode() || demo) return;
+    // The app is back (network, focus, tab shown): writes waiting out a backoff go now. Only the 60 s poll respects it.
     const handleSync = () => {
       const iso = todayIsoRef.current || getTodayIsoVN();
-      refreshServerSession().then(() => refreshRemoteDay(iso, { earlier: true })).catch(() => {});
+      refreshServerSession().then(() => refreshRemoteDay(iso, { earlier: true, force: true })).catch(() => {});
     };
+    const onOnline = handleSync;
     const onVisibilityChange = () => {
       if (document.visibilityState === "visible") {
         handleSync();
       }
     };
+    const onFocus = handleSync;
     const onPageShow = (event: PageTransitionEvent) => {
       if (event.persisted) handleSync();
     };
-    window.addEventListener("online", handleSync);
-    window.addEventListener("focus", handleSync);
+    window.addEventListener("online", onOnline);
+    window.addEventListener("focus", onFocus);
     window.addEventListener("pageshow", onPageShow);
     document.addEventListener("visibilitychange", onVisibilityChange);
     return () => {
-      window.removeEventListener("online", handleSync);
-      window.removeEventListener("focus", handleSync);
+      window.removeEventListener("online", onOnline);
+      window.removeEventListener("focus", onFocus);
       window.removeEventListener("pageshow", onPageShow);
       document.removeEventListener("visibilitychange", onVisibilityChange);
     };
@@ -864,7 +869,12 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     if (!isLiveMode() || demo || !accountId) return;
     const inFront = () => document.visibilityState === "visible";
     const poll = setInterval(() => {
-      if (pathname !== HOME_ROUTE || !inFront() || !navigator.onLine || writesInFlight() > 0) return;
+      if (!inFront() || !navigator.onLine || writesInFlight() > 0) return;
+      // Off Hôm nay only the outbox is sent (writes that waited out a backoff); the day is read again on Hôm nay
+      if (pathname !== HOME_ROUTE) {
+        void syncOfflineOutbox().then(onSync);
+        return;
+      }
       const today = todayIsoRef.current || getTodayIsoVN();
       // Yesterday is read again only while it is the day on screen (?date=)
       const onYesterday = new URLSearchParams(window.location.search).get("date") === yesterdayOf(today);
@@ -877,7 +887,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       clearInterval(poll);
       clearInterval(keepAlive);
     };
-  }, [demo, accountId, pathname, refreshRemoteDay]);
+  }, [demo, accountId, pathname, refreshRemoteDay, onSync]);
 
   // An entry of today the server never confirmed and nothing is sending (an add refused before cc-49, or one whose
   // write was dropped) is sent again. Only after the server's day was read, which confirms the entries it has.
@@ -1508,18 +1518,30 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   );
 
   const refreshToday = useCallback(
-    () => refreshServerSession().then(() => refreshRemoteDay(todayIsoRef.current || getTodayIsoVN(), { earlier: true })),
+    () => refreshServerSession().then(() => refreshRemoteDay(todayIsoRef.current || getTodayIsoVN(), { earlier: true, force: true })),
     [refreshRemoteDay]
   );
 
   // syncVersion: bumped when a write starts and when it answers
   const saving = useMemo(() => isLiveMode() && !demo && writesInFlight() > 0, [syncVersion, demo]);
 
+  // S13: what the sync status in every header shows comes from the outbox, kept up to date here (and read by the update toast)
+  useEffect(() => {
+    const counts = isLiveMode() && !demo && accountId ? outboxSummary() : null;
+    setSyncSummary({ pending: counts?.pending ?? 0, failed: counts?.failed ?? 0, final: counts?.final ?? 0, parked: counts?.parked ?? 0, saving });
+  }, [syncVersion, saving, demo, accountId]);
+
   const retryUnsaved = useCallback(() => {
     markUsed("retry-unsaved");
     unsavedShown.current = false;
     setToast(null);
     syncOfflineOutbox({ retryHeld: true }).then(onSync).catch(() => {});
+  }, [onSync]);
+
+  // The update toast (components/pwa) waits for the outbox: it asks for a send, with nothing held back
+  useEffect(() => {
+    registerSyncNow(() => syncOfflineOutbox({ retryHeld: true }).then(onSync));
+    return () => registerSyncNow(null);
   }, [onSync]);
 
   // Today's training minutes (lib/training-minutes): chosen on Ngày tập, else the server's, else Hồ sơ. Read after

@@ -100,6 +100,8 @@ interface ScopeState {
 
 const states = new Map<string, ScopeState>();
 const listeners = new Set<(scope: string) => void>();
+// Listeners that hear only what another tab changed (a read of the disk), not this tab's own commits
+const remoteListeners = new Set<(scope: string) => void>();
 const failureListeners = new Set<(failure: StorageFailure) => void>();
 const okListeners = new Set<() => void>();
 /** The last commit failed: the next one that works tells the okListeners (the "no room" banner goes). */
@@ -173,9 +175,10 @@ export function findItem(scope: OutboxScope | null, key: string): OutboxItem | u
   return scope ? stateOf(scope).items.get(key) : undefined;
 }
 
-export function subscribeOutbox(fn: (scope: string) => void): () => void {
-  listeners.add(fn);
-  return () => listeners.delete(fn);
+export function subscribeOutbox(fn: (scope: string) => void, remoteOnly = false): () => void {
+  const set = remoteOnly ? remoteListeners : listeners;
+  set.add(fn);
+  return () => set.delete(fn);
 }
 
 export function onStorageFailure(fn: (failure: StorageFailure) => void): () => void {
@@ -189,8 +192,9 @@ export function onStorageOk(fn: () => void): () => void {
   return () => okListeners.delete(fn);
 }
 
-function notify(scope: string): void {
+function notify(scope: string, remote = false): void {
   for (const fn of [...listeners]) fn(scope);
+  if (remote) for (const fn of [...remoteListeners]) fn(scope);
 }
 
 function fail(scope: string, error: unknown): CommitResult {
@@ -379,7 +383,7 @@ export async function reloadOutbox(scope: OutboxScope | null): Promise<void> {
       changed = true;
     }
   }
-  if (changed) notify(scope.id);
+  if (changed) notify(scope.id, true);
 }
 
 /** The scopes this tab has an outbox for are read again when another tab says it changed one. */
@@ -454,6 +458,7 @@ export function outboxCounts(scope: OutboxScope | null): OutboxCounts {
 export function resetOutboxState(): void {
   states.clear();
   listeners.clear();
+  remoteListeners.clear();
   failureListeners.clear();
   okListeners.clear();
   failing = false;

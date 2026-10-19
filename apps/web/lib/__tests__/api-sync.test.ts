@@ -113,7 +113,7 @@ describe("the outbox", () => {
     const result = await add();
     expect(result).toMatchObject({ state: "held", status: 400, message: "failed to insert diary entry" });
     expect(console.warn).toHaveBeenCalledWith(expect.stringContaining("400 failed to insert diary entry"));
-    expect(await syncOfflineOutbox()).toEqual({ saved: [], held: [] });
+    expect(await syncOfflineOutbox({ force: true })).toEqual({ saved: [], held: [] });
     expect(outbox()).toHaveLength(1);
     expect(await syncOfflineOutbox({ retryHeld: true })).toEqual({ saved: [ID], held: [] });
     expect(outbox()).toEqual([]);
@@ -125,9 +125,9 @@ describe("the outbox", () => {
   it("a 500 is sent again on the next sync and leaves the outbox once saved; five failures do not drop it", async () => {
     server({ "POST /days/2026-10-18/entries": [500, 500, 500, 500, 500, 500, 201] });
     expect((await add()).state).toBe("queued");
-    for (let i = 0; i < 5; i++) await syncOfflineOutbox();
+    for (let i = 0; i < 5; i++) await syncOfflineOutbox({ force: true });
     expect(outbox()).toHaveLength(1);
-    expect((await syncOfflineOutbox()).saved).toEqual([ID]);
+    expect((await syncOfflineOutbox({ force: true })).saved).toEqual([ID]);
     expect(outbox()).toEqual([]);
   });
 
@@ -137,7 +137,7 @@ describe("the outbox", () => {
     expect((await apiClient.updateEntry(ID, { meal_slot: "lunch", grams: 150 })).state).toBe("queued");
     expect(calls.filter((c) => c.startsWith("PATCH"))).toEqual([]);
     expect(outbox().map((i: { method?: string }) => i.method ?? "POST")).toEqual(["POST", "PATCH"]);
-    await syncOfflineOutbox();
+    await syncOfflineOutbox({ force: true });
     expect(calls.slice(-2)).toEqual(["POST /days/2026-10-18/entries", `PATCH /entries/${ID}`]);
     expect(outbox()).toEqual([]);
   });
@@ -149,7 +149,7 @@ describe("the outbox", () => {
     expect((await apiClient.deleteEntry(ID)).state).toBe("queued");
     expect(outbox().map((i: { method?: string }) => i.method ?? "POST")).toEqual(["POST", "DELETE"]);
     expect(calls.filter((c) => c.startsWith("DELETE"))).toEqual([]);
-    await syncOfflineOutbox();
+    await syncOfflineOutbox({ force: true });
     expect(calls.slice(-2)).toEqual(["POST /days/2026-10-18/entries", `DELETE /entries/${ID}`]);
     expect(outbox()).toEqual([]);
   });
@@ -196,7 +196,7 @@ describe("the outbox", () => {
       })
     );
     await add();
-    const running = syncOfflineOutbox();
+    const running = syncOfflineOutbox({ force: true });
     await apiClient.addEntry({ id: OTHER, foodId: FOOD, grams: 50, mealSlot: "lunch", date: "2026-10-18" });
     await running;
     expect(outbox().map((i: { id: string }) => i.id)).toEqual([OTHER]);
@@ -208,7 +208,7 @@ describe("the outbox", () => {
       JSON.stringify([{ id: ID, date: "2026-10-18", payload: { id: ID }, createdAt: 1, retries: 2 }])
     );
     const calls = server({ "POST /days/2026-10-18/entries": [201] });
-    expect((await syncOfflineOutbox()).saved).toEqual([ID]);
+    expect((await syncOfflineOutbox({ force: true })).saved).toEqual([ID]);
     expect(calls).toEqual(["POST /days/2026-10-18/entries"]);
   });
 
@@ -313,13 +313,15 @@ describe("accounts (review 05:30 M2: the outbox is pinned to its account)", () =
     const sent: string[] = [];
     vi.stubGlobal(
       "fetch",
-      vi.fn(async (_url: string, init?: RequestInit) => {
+      vi.fn(async (url: string, init?: RequestInit) => {
+        // (items this old are also reported to /client-errors as outbox_age; that is not a diary write)
+        if (String(url).endsWith("/client-errors")) return new Response(null, { status: 204 });
         sent.push(JSON.parse(String(init?.body)).id);
         localStorage.setItem("h1t_auth_current_email", "other@example.com");
         return new Response("{}", { status: 201 });
       })
     );
-    await syncOfflineOutbox();
+    await syncOfflineOutbox({ force: true });
     expect(sent).toEqual([ID]);
     expect(outboxOf("sync@example.com").map((i) => i.id)).toEqual([OTHER]);
     expect(localStorage.getItem("h1t_offline_outbox_other@example.com")).toBeNull();
@@ -344,7 +346,7 @@ describe("writes that can never succeed (review 05:30 M1)", () => {
     );
     const fetchMock = vi.fn(async (_url: string) => new Response(JSON.stringify({ error: { code: "PAST_DAY_READ_ONLY", message: "Cannot write to past dates" } }), { status: 409 }));
     vi.stubGlobal("fetch", fetchMock);
-    const first = await syncOfflineOutbox();
+    const first = await syncOfflineOutbox({ force: true });
     expect(first.held).toEqual([{ id: ID, status: 409, message: "Cannot write to past dates", date: "2026-10-17", final: true }]);
     expect(await syncOfflineOutbox({ retryHeld: true })).toEqual({ saved: [], held: [] });
     // cc-50: the refusal is reported once to /client-errors; the write itself went out once

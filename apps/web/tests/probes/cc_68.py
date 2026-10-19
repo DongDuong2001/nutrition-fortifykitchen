@@ -4,6 +4,9 @@ any anon key), not in probe:all. The API is a fake in this file (route intercept
   B  yesterday is editable: Hôm qua 18/10 has + Thêm, a food added there goes to POST /days/<yesterday>/entries and shows on that
      day (not today), and deleting it sends DELETE and takes it off; two days back is Chỉ xem, with no + Thêm, and /add?date= of
      it goes back to that day
+  E  one sync status on every tab: offline add, then Tổng quan's header shows Chưa lưu (1) (lasting, not a toast); a tap opens the list
+     (the food, where it stands) with Thử lại, which sends it once; two 401s after the session renewal raise the lasting banner
+     "Phiên đăng nhập hết hạn · Đăng nhập lại"
   D  history is the server's: a day three days back that this device never saw is read from GET /days/{date}, shows on Hôm nay
      (Chỉ xem), is cached (one IndexedDB record), shows again from the cache with the network gone, and a second device sees it too
   C  sign-out with writes waiting asks first (X8): "Còn 1 mục chưa đồng bộ. Đăng xuất bây giờ sẽ xóa chúng khỏi máy này." with
@@ -68,6 +71,8 @@ class FakeApi:
         self.posts = []
         # The network is gone: every API call fails without an answer (the page itself still loads)
         self.offline = False
+        # Every call answers 401 (the session ran out)
+        self.unauthorized = False
 
     def day(self, date):
         rows = sorted((e for e in self.entries.values() if e["date"] == date), key=lambda e: e["created_at"])
@@ -80,6 +85,8 @@ class FakeApi:
             device["calls"].append(f"{req.method} {path}" + (" (offline)" if self.offline else ""))
             if self.offline:
                 return route.abort("internetdisconnected")
+            if self.unauthorized and path != "/client-errors":
+                return route.fulfill(status=401, content_type="application/json", body='{"error":"unauthorized"}')
             if req.method == "POST" and path == "/client-errors":
                 return route.fulfill(status=204, body="")
             if req.method == "GET" and path == "/me":
@@ -335,6 +342,71 @@ with sync_playwright() as p:
         except Exception:
             pass
         check("/app?date=" + TWO_BACK in pg.url, f"B: /add?date= of it goes back to that day ({pg.url[len(BASE):]})")
+        ctx.close()
+
+    if want("E"):
+        api = FakeApi()
+        ctx, pg, st = device(browser, api)
+        open_day(pg)
+        api.offline = True
+        pg.locator('a[data-tour="meal-add"]:visible', has_text="Thêm").first.click()
+        pg.wait_for_url(re.compile(r".*/add.*"), timeout=15000)
+        pick_food(pg, "Khoai lang luộc", "^Thêm vào Bữa")
+        pg.wait_for_url(re.compile(r".*/app(\?.*)?$"), timeout=15000)
+        pg.wait_for_timeout(1200)
+        # Another tab of the app: Tổng quan (the Chưa lưu tip of a live account covers the screen first)
+        close_tips(pg)
+        pg.get_by_role("link", name="Tổng quan").locator("visible=true").first.click()
+        pg.wait_for_url(re.compile(r".*/trends.*"), timeout=15000)
+        pg.wait_for_timeout(1500)
+        status = pg.locator('[data-sync-state="unsaved"]:visible').first
+        check(status.count() == 1 and "Chưa lưu (1)" in status.inner_text(), f"E: Tổng quan's header says Chưa lưu (1) ({status.count()})")
+        pg.wait_for_timeout(8000)
+        check(pg.locator('[data-sync-state="unsaved"]:visible').count() == 1, "E: it is still there after the toast time (lasting)")
+        pg.screenshot(path=str(SHOTS / "E-status-trends-390.png"))
+        close_tips(pg)
+        pg.locator('[data-sync-state="unsaved"]:visible button').first.click()
+        dialog = pg.get_by_role("dialog", name="Chưa lưu")
+        dialog.wait_for(timeout=10000)
+        text = dialog.inner_text()
+        check("Khoai lang luộc" in text and ("Sẽ gửi lại" in text or "Chờ gửi" in text), f"E: the list names the food and where it stands ({text[:80]!r})")
+        pg.screenshot(path=str(SHOTS / "E-list-390.png"))
+        api.offline = False
+        dialog.get_by_role("button", name="Thử lại").click()
+        ok = False
+        for _ in range(20):
+            if len(api.posts) >= 1:
+                ok = True
+                break
+            pg.wait_for_timeout(500)
+        check(ok, "E: Thử lại sends it")
+        pg.wait_for_timeout(1500)
+        check(len(api.posts) == 1, f"E: …once ({api.posts}) {[c for c in st['calls'] if c.startswith('POST /days')]}")
+        check(len(outbox(pg)) == 0, "E: the outbox is empty")
+        check("Đã lưu hết" in pg.get_by_role("dialog", name="Chưa lưu").inner_text() or pg.get_by_role("dialog", name="Chưa lưu").count() == 0, "E: the list says everything is saved")
+        ctx.close()
+
+        # The session ran out: two writes get 401 after the renewal
+        api = FakeApi()
+        ctx, pg, st = device(browser, api)
+        open_day(pg)
+        api.unauthorized = True
+        for food in ("Bắp luộc", "Bún tươi"):
+            close_tips(pg)
+            pg.locator('a[data-tour="meal-add"]:visible', has_text="Thêm").first.click()
+            pg.wait_for_url(re.compile(r".*/add.*"), timeout=15000)
+            pick_food(pg, food, "^Thêm vào Bữa")
+            pg.wait_for_url(re.compile(r".*/app(\?.*)?$"), timeout=15000)
+            pg.wait_for_timeout(1500)
+        banner = pg.locator('[data-sync-alert="session"]')
+        try:
+            banner.first.wait_for(timeout=8000)
+        except Exception:
+            pass
+        check(banner.count() == 1 and "Phiên đăng nhập hết hạn" in banner.inner_text() and "Đăng nhập lại" in banner.inner_text(), "E: the lasting banner: Phiên đăng nhập hết hạn · Đăng nhập lại")
+        link = banner.get_by_role("link", name="Đăng nhập lại")
+        check(link.count() == 1 and (link.get_attribute("href") or "").startswith("/signin"), "E: it links to /signin")
+        pg.screenshot(path=str(SHOTS / "E-session-390.png"))
         ctx.close()
 
     if want("D"):

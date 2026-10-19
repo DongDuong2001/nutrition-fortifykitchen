@@ -103,10 +103,10 @@ describe("one drainer at a time", () => {
         return new Promise<Response>((resolve) => (release = resolve));
       })
     );
-    const first = a.api.syncOfflineOutbox();
+    const first = a.api.syncOfflineOutbox({ force: true });
     await vi.waitFor(() => expect(sent).toHaveLength(1));
     // Tab B asks while A holds the lock
-    expect(await b.api.syncOfflineOutbox()).toEqual({ saved: [], held: [] });
+    expect(await b.api.syncOfflineOutbox({ force: true })).toEqual({ saved: [], held: [] });
     expect(sent).toHaveLength(1);
     release(new Response("{}", { status: 201 }));
     expect((await first).saved).toEqual([ID]);
@@ -130,7 +130,7 @@ describe("one drainer at a time", () => {
         return new Response("{}", { status: 201 });
       })
     );
-    expect((await a.api.syncOfflineOutbox()).saved).toEqual([ID]);
+    expect((await a.api.syncOfflineOutbox({ force: true })).saved).toEqual([ID]);
     expect(calls).toEqual(["POST /days/2026-10-18/entries"]);
   });
 });

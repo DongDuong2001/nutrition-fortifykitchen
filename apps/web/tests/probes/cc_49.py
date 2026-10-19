@@ -358,7 +358,7 @@ with sync_playwright() as p:
         check(toast.count() >= 1, "4: the toast says Chưa lưu được món")
         pg.screenshot(path=str(SHOTS / "cc49-held-toast-390.png"))
         close_tips(pg)
-        retry = pg.get_by_role("button", name="Thử lại").locator("visible=true")
+        retry = pg.get_by_role("button", name="Thử lại", exact=True).locator("visible=true")
         check(retry.count() >= 1, "4: the toast offers Thử lại")
         # cc-50: the refusal is reported once, with the server's message and the app version
         writes = [r for r in st["reports"] if r.get("kind") == "write"]
@@ -451,7 +451,7 @@ with sync_playwright() as p:
         add_food(pg, "Bắp luộc")
         pg.wait_for_timeout(1500)
         check(pg.get_by_text("vì ngày đã qua", exact=False).count() == 0, "7: 409 for today: no 'day has passed' notice (the API may not allow it yet)")
-        check(pg.get_by_role("button", name="Thử lại").count() >= 1, "7: …it is held with Thử lại")
+        check(pg.get_by_role("button", name="Thử lại", exact=True).count() >= 1, "7: …it is held with Thử lại")
         ctx.close()
 
         api = FakeApi()
@@ -481,7 +481,7 @@ with sync_playwright() as p:
             pass
         check(notice.count() >= 1, "7: 409 for a day beyond the window: the notice says the day has passed and the food stays on this device")
         close_tips(pg)
-        check(pg.get_by_role("button", name="Thử lại").count() == 0, "7: …with no Thử lại (it can never work)")
+        check(pg.get_by_role("button", name="Thử lại", exact=True).count() == 0, "7: …with no Thử lại (it can never work)")
         posts = len([c for c in st["calls"] if c.startswith("POST /days/")])
         pg.reload(wait_until="domcontentloaded")
         pg.wait_for_timeout(3000)

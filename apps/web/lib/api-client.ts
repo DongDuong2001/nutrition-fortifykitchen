@@ -7,23 +7,17 @@ import {
   type MockMicroStat,
 } from "./mock/sample-day";
 import { MOCK_FOODS, addCatalogFood, catalogChanged, setCatalogFoods, setCatalogStatus, type FoodItem } from "./mock/foods";
-import { searchFoods as searchMockFoods } from "./search";
 import type { SetupProfile } from "./onboarding";
 import { currentAccountId } from "./auth-actions";
 import { yieldToMain } from "./idle";
 import type { OutboxItem } from "./outbox";
-import { isDemo } from "./demo";
-import { type CoachProfile, filterCoachesBySpecialty, getCoachById } from "./coaches";
-import { type LeaderboardPeriod, type LeaderboardResponse, getMockLeaderboard, setLeaderboardOptIn as setLeaderboardOptInState } from "./leaderboard";
 import { readStoredProfile, type Profile } from "./profile";
-import { shiftIsoDate } from "./day-history";
 import { generateUuid, isUuid } from "./uuid";
 import { refreshServerSession } from "./server-session";
 import { reportClientError } from "./client-errors";
 // The device's copy of the catalogue (and IndexedDB behind it) is loaded when the catalogue is read or written, not with the page
 const catalogCache = () => import("./catalog-cache");
 import { normaliseCoaching } from "./coaching-link";
-import { isRecipeId } from "./recipe";
 import type { GoalType, SexType } from "./targets";
 
 export * from "./nutrients";
@@ -477,7 +471,12 @@ export function reportStorageWorked(): void {
  * behind it; no answer at all ends the run (offline). Held writes are sent only with `retryHeld` (Thử lại). Only one
  * tab drains at a time.
  */
-export const syncOfflineOutbox = (options: { retryHeld?: boolean } = {}): Promise<SyncResult> => withEngine((e) => e.syncOfflineOutbox(options));
+export const syncOfflineOutbox = (options: { retryHeld?: boolean; force?: boolean } = {}): Promise<SyncResult> => withEngine((e) => e.syncOfflineOutbox(options));
+
+/** The outbox as the screens show it: what waits, what was refused, what gave up. Nothing before the engine is loaded. */
+export const outboxSummary = () => engine?.outboxSummary() ?? null;
+/** Every write of the active account that has not reached the server, oldest first (for the list behind the sync status). */
+export const outboxItems = (): OutboxItem[] => engine?.outboxItems() ?? [];
 
 /** Entry ids with a write in the outbox for the active account. */
 export const getPendingOfflineEntryIds = (): string[] => engine?.getPendingOfflineEntryIds() ?? [];
@@ -594,35 +593,6 @@ export const apiClient = {
     };
   },
 
-  async searchFoods(query = "", category?: string, limit = 500): Promise<FoodItem[]> {
-    if (isLiveMode()) {
-      try {
-        const params = new URLSearchParams();
-        if (query) params.set("q", query);
-        if (category) params.set("category", category);
-        if (limit) params.set("limit", String(limit));
-        const res = await apiFetch(`/foods?${params.toString()}`);
-        if (res.ok) {
-          const json = await res.json();
-          const payload = json.data ?? json;
-          const items = payload.items ?? (Array.isArray(payload) ? payload : []);
-          if (Array.isArray(items)) {
-            const mapped = items.map(mapApiFoodToFoodItem);
-            setCatalogFoods(mapped);
-            return mapped;
-          }
-        }
-      } catch {
-        // Falls through to the error below
-      }
-      // Live mode never answers with the sample foods: the caller shows an error with Thử lại
-      throw new Error(FOODS_UNAVAILABLE);
-    }
-
-    const filtered = category ? MOCK_FOODS.filter((f) => f.category === category) : MOCK_FOODS;
-    return searchMockFoods(filtered, query);
-  },
-
   /**
    * Live mode: the whole catalogue. Asks /foods?limit=500&page=1 and goes on with the next page (same limit) while
    * fewer foods than the response's total are collected, at most 30 pages (a server that caps a page at 50 still
@@ -634,8 +604,11 @@ export const apiClient = {
   loadAllFoods(): Promise<FoodItem[]> {
     if (!isLiveMode()) return Promise.resolve(MOCK_FOODS);
     if (!foodsInFlight) {
+      const started = performance.now();
       foodsInFlight = fetchAllFoods().finally(() => {
         foodsInFlight = null;
+        // User Timing, for DevTools and the probes: how long the foods took from the call to being usable
+        performance.measure("h1t:catalogue", { start: started });
       });
     }
     return foodsInFlight;
@@ -771,21 +744,6 @@ export const apiClient = {
     return { success: true, id: entryId, state: "saved" };
   },
 
-  async getTrends(days = 7, offset = 0): Promise<Record<string, unknown>> {
-    if (isLiveMode()) {
-      try {
-        const res = await apiFetch(`/trends?days=${days}&offset=${offset}`);
-        if (res.ok) {
-          const json = await res.json();
-          return (json.data ?? json) as Record<string, unknown>;
-        }
-      } catch {
-        // Fallback
-      }
-    }
-    return {};
-  },
-
   async getFavourites(): Promise<FoodItem[]> {
     if (isLiveMode()) {
       try {
@@ -815,14 +773,6 @@ export const apiClient = {
     }));
   },
 
-  async addFavourite(foodId: string): Promise<boolean> {
-    return (await apiClient.setFavourite(foodId, true)).state !== "held";
-  },
-
-  async removeFavourite(foodId: string): Promise<boolean> {
-    return (await apiClient.setFavourite(foodId, false)).state !== "held";
-  },
-
   async getRecents(): Promise<FoodItem[]> {
     if (isLiveMode()) {
       try {
@@ -840,79 +790,6 @@ export const apiClient = {
     return [];
   },
 
-  async getSavedMeals(): Promise<Array<{ id: string; name: string; items: unknown[] }>> {
-    if (isLiveMode()) {
-      try {
-        const res = await apiFetch(`/saved-meals`);
-        if (res.ok) {
-          const json = await res.json();
-          const payload = json.data ?? json;
-          return Array.isArray(payload) ? payload : (payload.items || []);
-        }
-      } catch {
-        // Fallback
-      }
-    }
-    return [];
-  },
-
-  async createSavedMeal(name: string, items: Array<{ foodId: string; grams: number }>): Promise<{ id: string }> {
-    const id = `saved-meal-${Date.now()}`;
-    if (isLiveMode()) {
-      try {
-        const res = await apiFetch(`/saved-meals`, {
-          method: "POST",
-          body: JSON.stringify({
-            name,
-            items: items.map((it, idx) => ({
-              food_id: it.foodId,
-              grams: it.grams,
-              serving_size_g: it.grams,
-              portion_label: "Khẩu phần",
-              sort: idx,
-            })),
-          }),
-        });
-        if (res.ok) {
-          const json = await res.json();
-          const data = json.data ?? json;
-          return { id: data.id || id };
-        }
-      } catch {
-        // Fallback
-      }
-    }
-    return { id };
-  },
-
-  async deleteSavedMeal(id: string): Promise<boolean> {
-    if (isLiveMode()) {
-      try {
-        const res = await apiFetch(`/saved-meals/${encodeURIComponent(id)}`, {
-          method: "DELETE",
-        });
-        return res.ok;
-      } catch {
-        return false;
-      }
-    }
-    return true;
-  },
-
-  async logSavedMeal(date: string, savedMealId: string, meal: string): Promise<boolean> {
-    if (isLiveMode()) {
-      try {
-        const res = await apiFetch(`/days/${date}/entries/from-saved/${encodeURIComponent(savedMealId)}?meal=${encodeURIComponent(meal)}`, {
-          method: "POST",
-        });
-        return res.ok;
-      } catch {
-        return false;
-      }
-    }
-    return true;
-  },
-
   /** The weight of a day: through the outbox (S6), the newest value of the day wins. */
   async queueWeight(date: string, weightKg: number): Promise<WriteResult> {
     if (!isLiveMode()) return { state: "saved" };
@@ -928,29 +805,6 @@ export const apiClient = {
     );
   },
 
-  async updateWeight(date: string, weightKg: number): Promise<boolean> {
-    return (await apiClient.queueWeight(date, weightKg)).state !== "held";
-  },
-
-  async getWeightLogs(from?: string, to?: string): Promise<Array<{ log_date: string; weight_kg: number }>> {
-    if (isLiveMode()) {
-      try {
-        const params = new URLSearchParams();
-        if (from) params.set("from", from);
-        if (to) params.set("to", to);
-        const res = await apiFetch(`/me/weight?${params.toString()}`);
-        if (res.ok) {
-          const json = await res.json();
-          const payload = json.data ?? json;
-          return Array.isArray(payload) ? payload : (payload.logs || []);
-        }
-      } catch {
-        // Fallback
-      }
-    }
-    return [];
-  },
-
   /** A day's training minutes: through the outbox (S6), the newest value of the day wins. */
   async setTraining(date: string, minutes: number): Promise<boolean> {
     if (!isLiveMode()) return true;
@@ -963,39 +817,6 @@ export const apiClient = {
       day: date,
     }));
     return result.state !== "held";
-  },
-
-  async copyYesterday(date: string, mealSlots?: string[]): Promise<boolean> {
-    if (isLiveMode()) {
-      try {
-        const sourceDate = shiftIsoDate(date, -1);
-        const res = await apiFetch(`/days/${encodeURIComponent(date)}/copy-yesterday`, {
-          method: "POST",
-          body: JSON.stringify({
-            source_date: sourceDate,
-            meal_slots: mealSlots || [],
-          }),
-        });
-        return res.ok;
-      } catch {
-        return false;
-      }
-    }
-    return true;
-  },
-
-  async deleteMeal(date: string, meal: string): Promise<boolean> {
-    if (isLiveMode()) {
-      try {
-        const res = await apiFetch(`/days/${encodeURIComponent(date)}/meals/${encodeURIComponent(meal)}`, {
-          method: "DELETE",
-        });
-        return res.ok;
-      } catch {
-        return false;
-      }
-    }
-    return true;
   },
 
   /** `day` is the entry's day, so a 409 for a day beyond the editable window is told from one the API does not allow yet. */
@@ -1046,10 +867,6 @@ export const apiClient = {
     return { ok: true };
   },
 
-  async signInWithGoogle(): Promise<{ ok: true }> {
-    return { ok: true };
-  },
-
   /** Fetches user profile from backend database. Returns null if not completed or unauthorized. */
   async getProfile(): Promise<Profile | null> {
     if (isLiveMode()) {
@@ -1097,73 +914,5 @@ export const apiClient = {
     return { ok: true };
   },
 
-  async getCoaches(specialty?: string): Promise<CoachProfile[]> {
-    if (isLiveMode()) {
-      try {
-        const query = specialty && specialty !== "Tất cả" ? `?specialty=${encodeURIComponent(specialty)}` : "";
-        const res = await apiFetch(`/coaches${query}`);
-        if (res.ok) {
-          const json = await res.json();
-          const payload = json.data ?? json;
-          if (Array.isArray(payload)) return payload;
-          if (Array.isArray(payload.items)) return payload.items;
-        }
-      } catch {
-        // No answer
-      }
-      // Live mode never shows the sample coaches
-      return [];
-    }
-    return filterCoachesBySpecialty(specialty || "Tất cả");
-  },
-
-  async getCoach(id: string): Promise<CoachProfile | null> {
-    if (isLiveMode()) {
-      try {
-        const res = await apiFetch(`/coaches/${encodeURIComponent(id)}`);
-        if (res.ok) {
-          const json = await res.json();
-          return json.data ?? json;
-        }
-      } catch {
-        // No answer
-      }
-      return null;
-    }
-    return getCoachById(id);
-  },
-
-  async getLeaderboard(period: LeaderboardPeriod = "weekly"): Promise<LeaderboardResponse> {
-    if (isLiveMode()) {
-      try {
-        const res = await apiFetch(`/leaderboard?period=${period}`);
-        if (res.ok) {
-          const json = await res.json();
-          return json.data ?? json;
-        }
-      } catch {
-        // No answer
-      }
-      // Live mode never shows the sample ranking
-      return { period, periodLabel: "", cycleEndDate: "", ranks: [], currentUserRank: null, optedIn: false };
-    }
-    return getMockLeaderboard(period);
-  },
-
-  async setLeaderboardOptIn(optIn: boolean): Promise<boolean> {
-    setLeaderboardOptInState(optIn);
-    if (isLiveMode()) {
-      try {
-        const res = await apiFetch(`/me/leaderboard-opt-in`, {
-          method: "PUT",
-          body: JSON.stringify({ opt_in: optIn }),
-        });
-        return res.ok;
-      } catch {
-        return false;
-      }
-    }
-    return true;
-  },
 };
 

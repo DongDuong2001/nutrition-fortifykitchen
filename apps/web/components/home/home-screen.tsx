@@ -8,7 +8,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useShellBottomBar } from "@/components/ui/shell-slot";
 import { AppHeader, HEADER_ICON_BUTTON } from "@/components/ui/app-header";
 import { IconShare } from "@/components/ui/icons";
-import { SyncStatus } from "./sync-status";
 import { setHomeDay } from "@/lib/home-scroll";
 import { copyMeals, dayEntries, shiftIsoDate, viewedIsoDate } from "@/lib/day-history";
 import { defaultMealName } from "@/lib/saved-meals";
@@ -505,7 +504,6 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
           actions={
             // header-actions: where the sync status shows, for the tour when there is no status to point at
             <div data-tour="header-actions" className="flex items-center gap-2">
-            {!readOnly && !backdrop && <SyncStatus />}
             <button
               type="button"
               onClick={openShare}
