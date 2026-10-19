@@ -17,8 +17,8 @@ export const PRECACHE_PAGES = ["/", HOME_ROUTE, "/trends", "/explore", "/setting
  */
 export const STANDALONE_HOME_SCRIPT = `(function(){try{var s=window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone===true;if(s&&window.location.pathname==="/"){document.documentElement.style.visibility="hidden";window.location.replace("${HOME_ROUTE}"+window.location.search)}}catch(e){}})();`;
 
-/** Sign-in and account routes plus the API: never read from or written to a cache. */
-export const NEVER_CACHED = ["/signin", "/signup", "/reset-password", "/login", "/api"] as const;
+/** Sign-in and account routes, the auth callback, the invite page (its code is in the path) and the API: never read from or written to a cache. */
+export const NEVER_CACHED = ["/signin", "/signup", "/reset-password", "/login", "/auth", "/join", "/api"] as const;
 
 export type RouteKind =
   | "never" // auth and API: always the network, never a cache

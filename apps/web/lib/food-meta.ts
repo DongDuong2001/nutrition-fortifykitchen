@@ -29,15 +29,17 @@ export function foodSourceLabel(source?: string | null): string {
   }
 }
 
-/** The second line of a food row: kcal per its first serving, then carbs and potassium when known. */
+/** The second line of a food row: kcal per its first serving ("Chưa có kcal" when unknown), then carbs and potassium when known. */
 export function foodMeta(food: FoodItem): string {
   const defaultServing = food.servings[0] || { label: "100 g", grams: 100 };
   const scaled = scaleNutrients(food.nutrients, defaultServing.grams);
-  const cals = Math.round(scaled.energy ?? 0);
+  const energy = scaled.energy;
   const carbs = Math.round((scaled.carbs ?? 0) * 10) / 10;
   const potassium = scaled.potassium ? Math.round(scaled.potassium) : null;
 
-  const parts = [`${formatAmount(cals, "kcal")} kcal / ${defaultServing.label}`];
+  // An unknown energy is never 0 kcal
+  const known = typeof energy === "number" && Number.isFinite(energy);
+  const parts = [`${known ? `${formatAmount(Math.round(energy), "kcal")} kcal` : "Chưa có kcal"} / ${defaultServing.label}`];
   if (carbs > 0) parts.push(`${formatAmount(carbs, "g")} g tinh bột`);
   if (potassium) parts.push(`${formatAmount(potassium, "mg")} mg ${nutrientName("potassium")}`);
   return parts.join(" · ");

@@ -20,13 +20,15 @@ export function LevelBar({
   /** A fill that is not a level (Tổng quan's share of nutrients reached). */
   color?: string;
 }) {
-  const value = Math.max(0, pct ?? 0);
+  // A NaN or an Infinity is no value: an empty track, as for null (translateX(NaN%) draws nothing and breaks the style)
+  const known = typeof pct === "number" && Number.isFinite(pct);
+  const value = known ? Math.max(0, pct) : 0;
   return (
     <div
       role="progressbar"
       aria-label={label}
-      aria-valuenow={pct === null ? undefined : Math.min(100, Math.round(value))}
-      aria-valuetext={pct === null ? "Chưa có dữ liệu" : `${Math.round(value)}% · ${getLevelLabel(getLevel(value))}`}
+      aria-valuenow={known ? Math.min(100, Math.round(value)) : undefined}
+      aria-valuetext={known ? `${Math.round(value)}% · ${getLevelLabel(getLevel(value))}` : "Chưa có dữ liệu"}
       aria-valuemin={0}
       aria-valuemax={100}
       className={`w-full overflow-hidden rounded-full ${heightClass} ${surface === "dark" ? "bg-level-empty-dark" : "bg-track"}`}

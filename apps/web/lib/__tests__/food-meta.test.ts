@@ -59,6 +59,18 @@ describe("foodMeta", () => {
     };
     expect(foodMeta(plain)).toBe("45 kcal / 30 g");
   });
+
+  it("says Chưa có kcal when the energy is unknown, never 0 kcal (cc-63, B2)", () => {
+    for (const energy of [null, undefined, Number.NaN, Number.POSITIVE_INFINITY]) {
+      const unknown = { ...BASE_FOOD, nutrients: { carbs: 0, energy } as FoodItem["nutrients"] };
+      expect(foodMeta(unknown)).toBe("Chưa có kcal / 30 g");
+    }
+    expect(foodMeta({ ...BASE_FOOD, servings: [{ label: "1 chén", grams: 150 }], nutrients: { carbs: 0 } as FoodItem["nutrients"] })).toBe("Chưa có kcal / 1 chén");
+  });
+
+  it("keeps a real 0 kcal as 0 kcal", () => {
+    expect(foodMeta({ ...BASE_FOOD, nutrients: { energy: 0, carbs: 0 } })).toBe("0 kcal / 30 g");
+  });
 });
 
 describe("foodRowMeta", () => {

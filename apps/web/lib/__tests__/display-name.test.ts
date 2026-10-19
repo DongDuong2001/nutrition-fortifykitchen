@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DISPLAY_NAME_MAX, cleanDisplayName, validateDisplayName } from "../display-name";
+import { DISPLAY_NAME_MAX, cleanDisplayName, limitDisplayName, validateDisplayName } from "../display-name";
 import { shareName, shareNeedsName } from "../share-card";
 import { validateSetupName } from "../onboarding";
 
@@ -49,5 +49,31 @@ describe("validateDisplayName", () => {
     }
     expect(shareName("  ​Học viên A ")).toBe("Học viên A");
     expect(shareName("...")).toBeNull();
+  });
+});
+
+describe("a name with emoji (cc-63, B7)", () => {
+  it("keeps the zero-width joiner of an emoji: 👩‍🍳 stays one picture", () => {
+    expect(cleanDisplayName("👩‍🍳 Mai")).toBe("👩‍🍳 Mai");
+    expect(cleanDisplayName("A​B")).toBe("AB");
+  });
+
+  it("drops a joiner at either end and the other invisible characters", () => {
+    expect(cleanDisplayName("‍Mai‍")).toBe("Mai");
+    expect(cleanDisplayName(" ‍ Mai")).toBe("Mai");
+    expect(cleanDisplayName("M‍‍ai")).toBe("M‍‍ai");
+  });
+
+  it("counts 40 as code points, so 40 emoji fit and 41 do not", () => {
+    expect(validateDisplayName("a🍜".repeat(20))).toBeNull();
+    expect(validateDisplayName(`${"a🍜".repeat(20)}🍜`)).toBe("Tên hiển thị tối đa 40 ký tự");
+  });
+
+  it("limitDisplayName cuts at 40 code points, never inside a pair", () => {
+    const cut = limitDisplayName("🍜".repeat(50));
+    expect(Array.from(cut)).toHaveLength(40);
+    expect(cut.includes("\uFFFD")).toBe(false);
+    expect(limitDisplayName("Học viên A")).toBe("Học viên A");
+    expect(limitDisplayName("a".repeat(40))).toBe("a".repeat(40));
   });
 });

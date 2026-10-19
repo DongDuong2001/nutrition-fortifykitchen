@@ -118,18 +118,18 @@ export const NutrientColumn = memo(function NutrientColumn({
                     : {})}
                   data-align-group="home-nutrient"
                   data-snap-row
-                  className={`flex snap-start flex-col justify-center gap-0.5 px-3 ${share ? "h-9" : "h-[34px] lg:h-12 lg:gap-1"} ${
+                  className={`flex snap-start flex-col justify-center gap-0.5 px-3 ${share ? "min-h-9" : "min-h-[34px] lg:min-h-12 lg:gap-1"} ${
                     Row === "button" ? "relative w-full cursor-pointer border-0 bg-transparent text-left before:absolute before:inset-x-0 before:-inset-y-1.5 before:content-['']" : ""
                   }`}
                 >
                   <div className="flex items-baseline justify-between gap-1">
                     <span className="flex min-w-0 items-baseline gap-1 whitespace-nowrap">
-                      <span className={`text-[13px] font-semibold leading-tight text-text ${lg}`}>{def.name}</span>
-                      <span className={`text-[13px] leading-tight text-secondary tabular-nums ${lg}`}>
+                      <span title={def.name} className={`min-w-0 truncate text-[13px] font-semibold leading-tight text-text ${lg}`}>{def.name}</span>
+                      <span className={`shrink-0 text-[13px] leading-tight text-secondary tabular-nums ${lg}`}>
                         {value === null ? "—" : `${formatAmount(value, def.unit)} ${def.unit}`}
                       </span>
                     </span>
-                    <span className={`font-display text-[15px] font-bold leading-none text-text tabular-nums ${share ? "" : "lg:text-[18px]"}`}>
+                    <span className={`shrink-0 whitespace-nowrap font-display text-[15px] font-bold leading-none text-text tabular-nums ${share ? "" : "lg:text-[18px]"}`}>
                       {pctLabel(value, targets[id] ?? null)}
                     </span>
                   </div>

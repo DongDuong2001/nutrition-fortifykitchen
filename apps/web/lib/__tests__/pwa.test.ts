@@ -17,7 +17,7 @@ import {
 
 describe("routeFor", () => {
   it("never caches auth routes and the API, for pages and for fetches", () => {
-    for (const p of ["/signin", "/signin/check-email", "/signin/expired", "/signup", "/reset-password", "/api/me", "/api"]) {
+    for (const p of ["/signin", "/signin/check-email", "/signin/expired", "/signup", "/reset-password", "/auth/callback", "/auth/session", "/join/ABC123", "/api/me", "/api"]) {
       expect(routeFor(p, "navigate", "GET"), p).toBe("never");
       expect(routeFor(p, "cors", "GET"), p).toBe("never");
     }
@@ -26,6 +26,8 @@ describe("routeFor", () => {
   it("matches a prefix on a path boundary only", () => {
     expect(isNeverCached("/signing")).toBe(false);
     expect(isNeverCached("/apiary")).toBe(false);
+    expect(isNeverCached("/authors")).toBe(false);
+    expect(isNeverCached("/joint")).toBe(false);
     expect(routeFor("/signing", "navigate", "GET")).toBe("navigate");
   });
 

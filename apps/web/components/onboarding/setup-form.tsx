@@ -9,7 +9,7 @@ import { readPendingCoachCode, writePendingCoachCode } from "@/lib/pending-coach
 import { coachingAvailable } from "@/lib/coaching-link";
 import { isLiveMode } from "@/lib/api-mode";
 import { formatNumber } from "@/lib/format";
-import { cleanDisplayName } from "@/lib/display-name";
+import { cleanDisplayName, limitDisplayName } from "@/lib/display-name";
 import { markWhatsNewSeen } from "@/lib/onboarding-store";
 import { latestRelease } from "@/lib/releases";
 import {
@@ -197,9 +197,8 @@ export function SetupForm({ step }: { step: SetupStep }) {
                 type="text"
                 autoComplete="nickname"
                 enterKeyHint="next"
-                maxLength={40}
                 value={draft.displayName ?? ""}
-                onChange={(e) => update({ displayName: e.target.value })}
+                onChange={(e) => update({ displayName: limitDisplayName(e.target.value) })}
                 onBlur={() => {
                   const message = validateSetupName(draft.displayName);
                   setErrors((prev) => {

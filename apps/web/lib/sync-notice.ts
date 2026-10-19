@@ -1,11 +1,9 @@
 import type { SyncResult } from "./api-client";
 import { isUuid } from "./uuid";
 
-/** The "unsaved" toast. The server's answer is in it, so a refused save is never silent. */
-export function unsavedMessage(status?: number, message?: string): string {
-  const text = (message ?? "").trim();
-  const detail = text ? `: ${text.length > 90 ? `${text.slice(0, 89)}…` : text}` : "";
-  return status ? `Chưa lưu được món (lỗi ${status}${detail})` : "Chưa lưu được món";
+/** The "unsaved" toast: fixed words and the status, so a refused save is never silent. The server's own text is never shown. */
+export function unsavedMessage(status?: number): string {
+  return status ? `Chưa lưu được món (lỗi ${status})` : "Chưa lưu được món";
 }
 
 /** A write to a day that has passed (409 PAST_DAY_READ_ONLY): it can never be saved; the entry stays on this device. */
@@ -22,7 +20,7 @@ export function pastDayMessage(date: string): string {
 export function syncNotice(held: SyncResult["held"], unsavedShown: boolean): { kind: "notice" | "unsaved"; message: string } | null {
   const final = held.find((h) => h.final);
   if (final) return { kind: "notice", message: pastDayMessage(final.date) };
-  if (held.length > 0 && !unsavedShown) return { kind: "unsaved", message: unsavedMessage(held[0].status, held[0].message) };
+  if (held.length > 0 && !unsavedShown) return { kind: "unsaved", message: unsavedMessage(held[0].status) };
   return null;
 }
 

@@ -17,6 +17,7 @@ import {
   getMockLeaderboard,
   isLeaderboardOptedIn,
   setLeaderboardOptIn,
+  splitRanks,
 } from "@/lib/leaderboard";
 import { LevelBadge } from "@/components/profile/level-badge";
 import { useCoaching } from "@/hooks/use-coaching";
@@ -43,8 +44,7 @@ export default function LeaderboardPage() {
   const data = getMockLeaderboard(period);
   // Level is the coach-set Level (0 with no coach); the earned Cấp is gone from the UI
   const { level, coach, available } = useCoaching();
-  const topThree = data.ranks.slice(0, 3);
-  const rest = data.ranks.slice(3);
+  const { podium: topThree, rows: rest } = splitRanks(data.ranks);
 
   const handleToggleOptIn = (checked: boolean) => {
     markUsed("leaderboard-optin");
@@ -131,7 +131,7 @@ export default function LeaderboardPage() {
           </Card>
         ) : (
           <>
-            {topThree.length === 3 && (
+            {topThree.length > 0 && (
               <section aria-labelledby="lb-top" className="flex flex-col gap-2">
                 <div className="flex items-baseline justify-between gap-2">
                   <SectionTitle as="h2" id="lb-top">

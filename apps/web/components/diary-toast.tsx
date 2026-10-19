@@ -5,6 +5,7 @@ import { Presence } from "@/components/ui/presence";
 import { Toast } from "@/components/ui/toast";
 import { useDiary, useDiaryToast, type ToastInfo } from "@/lib/diary-store";
 import { scrollBehavior } from "@/lib/scroll-behavior";
+import { usePathname } from "next/navigation";
 
 /**
  * The app's one toast, from the diary store. "Đã thêm …" offers Xem (jump to the meal), "Đã xóa …",
@@ -23,6 +24,9 @@ export function DiaryToast() {
     return map.get(t);
   };
 
+  // The nav is 72 px high plus the home-indicator inset: the toast sits 12 px above it. /add has no nav: the toast clears the Khay bar.
+  const onAdd = usePathname() === "/add";
+
   const mealSlot = toast?.mealSlot ?? null;
   const showMeal = () => {
     if (!mealSlot) return;
@@ -34,7 +38,9 @@ export function DiaryToast() {
 
   return (
     // cc-58: one live region that stays mounted: a toast put into it is announced, one that came with its own region often is not
-    <div role="status" className="pointer-events-none fixed inset-x-0 bottom-24 z-50 flex flex-col gap-2 px-3 lg:inset-x-auto lg:bottom-8 lg:right-8 lg:w-[400px]">
+    <div role="status" className={`pointer-events-none fixed inset-x-0 z-50 flex flex-col gap-2 px-3 lg:inset-x-auto lg:bottom-8 lg:right-8 lg:w-[400px] ${
+        onAdd ? "bottom-[calc(138px+env(safe-area-inset-bottom))]" : "bottom-[calc(72px+env(safe-area-inset-bottom)+12px)]"
+      }`}>
       <Presence>
         {parkedDelete && (
           <div className="pointer-events-auto">

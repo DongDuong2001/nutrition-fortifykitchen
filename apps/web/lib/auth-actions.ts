@@ -398,8 +398,20 @@ export async function signOut(): Promise<void> {
   clearOnboardingStorage();
   if (!isLiveMode()) return mockSignOut();
   setStoredEmail(null);
-  // The server call (global scope) can fail on the network. The cookie must go anyway, or the sign-in page and the
-  // gate would find the session again: fall back to a local sign-out, which only clears this browser's session.
+  try {
+    await signOutOfSupabase();
+  } finally {
+    // The httpOnly sb-access-token cookie outlives the Supabase session (about an hour) and pages outside the matcher
+    // never clear it: ask the server to drop it now, on every path (signed out, local fallback, client not loaded)
+    await syncServerSession();
+  }
+}
+
+/**
+ * The server call (global scope) can fail on the network. The cookie must go anyway, or the sign-in page and the
+ * gate would find the session again: fall back to a local sign-out, which only clears this browser's session.
+ */
+async function signOutOfSupabase(): Promise<void> {
   let supabase: Awaited<ReturnType<typeof supabaseClient>>;
   try {
     supabase = await supabaseClient();

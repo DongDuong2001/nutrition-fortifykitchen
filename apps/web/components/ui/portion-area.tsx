@@ -18,10 +18,13 @@ import {
   eggSizes,
   portionHint,
   portionModeOf,
+  fitPortion,
   resolvePortion,
   startPortion,
   withBase,
   withMult,
+  overGramLimit,
+  MAX_GRAMS_MESSAGE,
   MAX_GRAMS_PER_PORTION,
   MAX_MULT,
   type PortionState,
@@ -93,9 +96,14 @@ function GramPortionArea({
   const [text, setText] = useState(() => (p.kind === "grams" ? fieldText(p.base) : ""));
   const lastEgg = useRef<PortionState | null>(p.kind === "egg" ? p : null);
 
-  const emit = (next: PortionState) => {
-    setP(next);
-    const out = resolvePortion(food, next, sw);
+  // The amount went over the limit: the field is written back clamped and says why
+  const [overLimit, setOverLimit] = useState(false);
+
+  const emit = (next: PortionState, hit = false) => {
+    const out = fitPortion(food, next, sw);
+    setP(out.portion);
+    if (out.portion.kind === "grams" && (out.clamped || hit)) setText(fieldText(out.portion.base));
+    setOverLimit(out.clamped || hit);
     emitted.current = out.label;
     setGramsInput(fieldText(out.grams));
     setSelectedServingLabel(out.label);
@@ -267,9 +275,12 @@ function GramPortionArea({
                 aria-label={panel ? "Số gam" : `Số gam ${food.nameVi}`}
                 value={text}
                 disabled={disabled}
+                aria-describedby={overLimit ? `${ids}-grams-error` : undefined}
                 onChange={(e) => {
+                  const typed = parseGramsInput(e.target.value);
+                  const next = withBase(p, typed);
                   setText(e.target.value);
-                  emit(withBase(p, parseGramsInput(e.target.value)));
+                  emit(next, overGramLimit(e.target.value) || next.base < typed);
                 }}
                 className={`h-full w-full min-w-0 border-0 bg-transparent p-0 font-display font-bold text-text tabular-nums outline-none ${panel ? "text-[34px]" : "text-2xl"}`}
               />
@@ -290,6 +301,11 @@ function GramPortionArea({
               100 g
             </button>
           </div>
+          {overLimit && (
+            <p id={`${ids}-grams-error`} role="alert" className="m-0 px-1 text-[13px] font-semibold leading-snug text-destructive-text">
+              {MAX_GRAMS_MESSAGE}
+            </p>
+          )}
         </div>
       )}
 
@@ -339,6 +355,7 @@ function UnitPortionArea({
 }: PortionAreaProps) {
   const parsedGrams = useMemo(() => parseGramsInput(gramsInput), [gramsInput]);
   const noGrams = hidesGrams(food);
+  const [overLimit, setOverLimit] = useState(false);
 
   // Tabs for the food (in data order plus "Gam", e.g. "Lon | Gam", "Phần | Gam")
   const tabsInfo = useMemo(() => getFoodUnitTabs(food.servings, noGrams), [food.servings, noGrams]);
@@ -561,12 +578,16 @@ function UnitPortionArea({
                   aria-label="Số gam"
                   value={gramsInput}
                   disabled={disabled}
+                  aria-describedby={overLimit ? "portion-grams-error" : undefined}
                   onChange={(e) => {
-                    const text = e.target.value;
+                    // Over the limit: the field is written back clamped, so the label, the grams and the kcal agree
+                    const over = overGramLimit(e.target.value);
+                    const text = over ? fieldText(MAX_GRAMS_PER_PORTION) : e.target.value;
+                    setOverLimit(over);
                     setGramsInput(text);
                     setSelectedServingLabel(formatGramsServingLabel(text, `${text} g`));
                   }}
-                  className="w-full bg-transparent border-0 outline-none focus-visible:outline-none font-bold text-sm tabular-nums text-right text-text"
+                  className="w-full bg-transparent border-0 outline-none focus-visible:outline-none font-bold text-base tabular-nums text-right text-text"
                 />
                 <span
                   className="text-xs ml-1 font-semibold text-secondary"
@@ -582,9 +603,15 @@ function UnitPortionArea({
               onClick: () => {
                 setGramsInput(String(s.grams));
                 setSelectedServingLabel(s.label);
+                setOverLimit(false);
               },
             }))}
           />
+          {overLimit && (
+            <p id="portion-grams-error" role="alert" className="m-0 px-1 text-[13px] font-semibold leading-snug text-destructive-text">
+              {MAX_GRAMS_MESSAGE}
+            </p>
+          )}
         </div>
       )}
     </div>

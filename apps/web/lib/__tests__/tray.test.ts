@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { FoodItem } from "../mock/foods";
-import { canAddTray, inTray, patchTrayItem, putInTray, removeFromTray, setTrayPortion, toggleTray, trayTotals, type TrayItem } from "../tray";
+import { canAddTray, createStableKeys, inTray, patchTrayItem, putInTray, removeFromTray, setTrayPortion, toggleTray, trayTotals, type TrayItem } from "../tray";
 
 const food = (id: string, nutrients: Record<string, number | null>, servings = [{ label: "1 chén", grams: 200 }, { label: "100 g", grams: 100 }]): FoodItem => ({
   id,
@@ -99,5 +99,37 @@ describe("cc-53b: editing the tray", () => {
     const cooked = food("rice-cooked", { energy: 130 });
     const out = patchTrayItem(toggleTray(toggleTray([], rice), egg), "rice", { food: cooked });
     expect(out.map((i) => i.food.id)).toEqual(["rice-cooked", "egg"]);
+  });
+});
+
+describe("createStableKeys (cc-63: a Sống ↔ Chín swap keeps the card)", () => {
+  it("a card keeps its key when its food changes to the paired row", () => {
+    const keys = createStableKeys();
+    keys.keep(["rice-raw", "egg"]);
+    const before = keys.keyFor("rice-raw");
+    keys.renamed("rice-raw", "rice-cooked");
+    keys.keep(["rice-cooked", "egg"]);
+    expect(keys.keyFor("rice-cooked")).toBe(before);
+    expect(keys.keyFor("egg")).toBe("egg");
+    // and swapping back keeps it too
+    keys.renamed("rice-cooked", "rice-raw");
+    expect(keys.keyFor("rice-raw")).toBe(before);
+  });
+
+  it("another card for the id a swapped card started with gets its own key", () => {
+    const keys = createStableKeys();
+    const first = keys.keyFor("rice-raw");
+    keys.renamed("rice-raw", "rice-cooked");
+    const second = keys.keyFor("rice-raw");
+    expect(second).not.toBe(first);
+    expect(new Set([keys.keyFor("rice-cooked"), second]).size).toBe(2);
+  });
+
+  it("forgets a card that left", () => {
+    const keys = createStableKeys();
+    keys.keyFor("a");
+    keys.keep([]);
+    keys.renamed("b", "c");
+    expect(keys.keyFor("a")).toBe("a");
   });
 });

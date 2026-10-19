@@ -126,7 +126,7 @@ export function calculateNutrientPercentage(
   consumed: number | null,
   targetMin: number | null
 ): number | null {
-  if (consumed === null || targetMin === null || targetMin <= 0) {
+  if (consumed === null || targetMin === null || !Number.isFinite(consumed) || !Number.isFinite(targetMin) || targetMin <= 0) {
     return null;
   }
   return Math.round((consumed / targetMin) * 100);

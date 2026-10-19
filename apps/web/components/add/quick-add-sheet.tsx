@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Sheet } from "@/components/ui/sheet";
 import { FormRow } from "@/components/ui/form-row";
 import { PillButton } from "@/components/ui/pill-button";
-import type { QuickEntryInput, QuickEntryResult } from "@/lib/quick-entry";
+import { MAX_QUICK_NAME, type QuickEntryInput, type QuickEntryResult } from "@/lib/quick-entry";
 
 export interface QuickAddSheetProps {
   open: boolean;
@@ -66,6 +66,7 @@ export function QuickAddSheet({ open, onClose, mealName, onSubmit }: QuickAddShe
             value={input.name}
             onChange={set("name")}
             placeholder="Thêm nhanh"
+            maxLength={MAX_QUICK_NAME}
             autoComplete="off"
             className={fieldClass(false)}
           />

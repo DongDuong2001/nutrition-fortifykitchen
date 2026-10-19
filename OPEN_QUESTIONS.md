@@ -378,3 +378,11 @@
 
 ## cc-61 (19/10/2026)
 - [ ] (Hao) Live auth check skipped locally (hCaptcha can't run on localhost); run a–f on lehongkhanh.vn right after the deploy. The cc-58 checks still open: sign-in sets the httpOnly sb-access-token and loads supabase-js only on the auth call; reload keeps the session and the middleware runs once per navigation (no prefetch call); a deleted sb-access-token is re-issued with a fresh exp; one GET /days/{today} after the refresh; sign-out clears both cookies, /app goes to /signin, /signin loads once; /join/abc signed out (note: in live mode /join/<code> is the app's 404, since coaching is off, so that check only applies to a mock build).
+- [ ] (Dong) Confirm migrations 000012–000014 are applied on production before the deploy; deploy.sh does not run migrations. (000012 custom_foods_archive, 000013 profiles_training_prefs, 000014 account_delete_cascade;)
+
+## cc-63 (19/10/2026)
+- [ ] (Hao) The live auth check after the deploy stays open (see cc-61 above). cc-63 adds to it: Đăng xuất clears the httpOnly sb-access-token at once (X2), and a tampered access token gets no sb-access-token cookie (X3, middleware only issues it after getClaims verified the token).
+- [ ] (cc-68) X1 (two tabs, two accounts: account guard) and X8 (wipe the account's local data on Đăng xuất, with the "Còn n mục chưa đồng bộ" confirm, and deleting the legacy unscoped keys) moved to cc-68 (Hao 19/10): X8 is unsafe until the history is read from the server.
+- [ ] (Dong) API side of X7: /client-errors now gets the status and the error code only in `message`; nothing to change if the endpoint just logs it.
+- [ ] (Hao) Size budget: cc-63 grew first-load JS by 0.2 to 1.2 kB gzip per route (/add +1.2), accepted on 19/10 (table in PR #15).
+
