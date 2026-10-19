@@ -578,6 +578,47 @@
   animation: m-spin 800ms linear infinite;
 }
 
+/* Touch drag (cc-70): a food row held for 500 ms lifts (scale 1.03 and a shadow that is not animated); once it moves a
+   copy follows the finger (its inline transform, no transition) and the row stays at 0.4. Let go off target, the copy
+   eases back to the row (data-landing). button.w-full:active would flatten the lift, so the lifted rule names it too. */
+:root {
+  --m-drag-back: 200ms;
+}
+.m-drag-lift {
+  transition: transform var(--m-press) var(--ease-out);
+}
+/* The lifted row is 3% wider than the list: while a row is held the list does not scroll sideways */
+[data-food-scroll][data-touch-dragging] {
+  overflow-x: hidden;
+}
+button.m-drag-lift[data-touch-drag],
+button.m-drag-lift[data-touch-drag]:active {
+  position: relative;
+  z-index: 2;
+}
+button.m-drag-lift[data-touch-drag="lifted"],
+button.m-drag-lift[data-touch-drag="lifted"]:active {
+  transform: scale(1.03);
+  box-shadow: 0 4px 12px rgba(17, 19, 23, 0.18);
+}
+button.m-drag-lift[data-touch-drag="dragging"] {
+  opacity: 0.4;
+}
+.m-drag-ghost {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 60;
+  margin: 0;
+  pointer-events: none;
+  background-color: var(--color-page);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(17, 19, 23, 0.18);
+}
+.m-drag-ghost[data-landing] {
+  transition: transform var(--m-drag-back) var(--ease-out);
+}
+
 /* Desktop: a sheet that is a centred dialog pops (scale and fade) instead of sliding */
 @media (min-width: 1024px) {
   .m-dialog.m-sheet {
@@ -785,6 +826,16 @@
     transition: none;
   }
   .m-pull-arrow {
+    transition: none;
+  }
+  .m-drag-lift {
+    transition: none;
+  }
+  button.m-drag-lift[data-touch-drag="lifted"],
+  button.m-drag-lift[data-touch-drag="lifted"]:active {
+    transform: none;
+  }
+  .m-drag-ghost[data-landing] {
     transition: none;
   }
   .m-spin {
