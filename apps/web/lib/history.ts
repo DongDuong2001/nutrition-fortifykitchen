@@ -107,7 +107,11 @@ export async function loadHistory(scope: string, dates: readonly string[], optio
     // The server answers a range of up to 100 days: the needed days go in windows of at most 90 days
     for (const [from, to] of rangeWindows([...need].sort())) {
       const range = await fetchRange(from, to);
-      if (!range) break;
+      if (!range) {
+        // A window that failed (500, timeout) leaves the next one to try; only a missing endpoint ends the range
+        if (rangeSupported === false) break;
+        continue;
+      }
       for (const d of need) if (d >= from && d <= to && range.has(d)) summaries.set(d, range.get(d)!);
     }
   }
