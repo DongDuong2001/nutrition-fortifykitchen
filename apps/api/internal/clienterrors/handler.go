@@ -27,7 +27,14 @@ type Report struct {
 
 const maxBody = 4096
 
-var kinds = map[string]bool{"write": true, "sync": true, "share": true, "setup": true}
+var kinds = map[string]bool{
+	"write":      true,
+	"sync":       true,
+	"share":      true,
+	"setup":      true,
+	"storage":    true,
+	"outbox_age": true,
+}
 
 func cut(s string, n int) string {
 	s = strings.TrimSpace(s)

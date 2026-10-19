@@ -92,3 +92,13 @@ func TestBadReportsAreRefused(t *testing.T) {
 		}
 	}
 }
+
+func TestStorageAndOutboxAgeKindsAccepted(t *testing.T) {
+	capture(t)
+	for _, kind := range []string{"storage", "outbox_age"} {
+		rec := post(`{"kind":"`+kind+`","route":"/app","message":"test error","version":"v"}`, nil)
+		if rec.Code != http.StatusNoContent {
+			t.Errorf("kind %s: status %d, want 204", kind, rec.Code)
+		}
+	}
+}
