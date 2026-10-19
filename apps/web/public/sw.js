@@ -5,7 +5,7 @@
  *  - auth routes and the API: never cached (always the network)
  *  - an update waits until the page asks for it (SKIP_WAITING); it never takes over mid-edit.
  * Bump VERSION on a release that changes this file or the shell list (cc-58: the page-load race and navigation preload). lib/pwa.ts holds the tested copy of routeFor. */
-const VERSION = "2026-10-19.3";
+const VERSION = "2026-10-19.6";
 const SHELL_CACHE = "h1t-shell-" + VERSION;
 const STATIC_CACHE = "h1t-static-" + VERSION;
 const PAGES = ["/", "/app", "/trends", "/explore", "/settings", "/offline"];
@@ -101,6 +101,19 @@ async function offlinePage() {
   return page || new Response("Ngoại tuyến", { status: 503, headers: { "Content-Type": "text/plain; charset=utf-8" } });
 }
 
+/**
+ * Auth pages: the network only, never a cache. The request navigation preload already started is used instead of a second
+ * fetch (a second one would run the middleware twice); when the network fails the person sees /offline.
+ */
+async function networkOnly(request, preload) {
+  try {
+    const early = preload ? await preload : undefined;
+    return early || (await fetch(request));
+  } catch (e) {
+    return offlinePage();
+  }
+}
+
 /** A page load that has not answered in this long is served from the cache (when there is a copy) while the network goes on. */
 const NAVIGATION_TIMEOUT_MS = 3000;
 
@@ -174,8 +187,8 @@ self.addEventListener("fetch", function (event) {
     event.respondWith(networkFirst(request, url.pathname, event.preloadResponse, event));
   } else if (kind === "never" && request.mode === "navigate") {
     // Network only. When it fails the person sees /offline; the sign-in page itself is never served from a cache.
-    event.respondWith(fetch(request).catch(offlinePage));
+    event.respondWith(networkOnly(request, event.preloadResponse));
   }
 });
 
-if (typeof module !== "undefined" && module.exports) module.exports = { routeFor: routeFor, PAGES: PAGES, VERSION: VERSION, networkFirst: networkFirst, NAVIGATION_TIMEOUT_MS: NAVIGATION_TIMEOUT_MS };
+if (typeof module !== "undefined" && module.exports) module.exports = { routeFor: routeFor, PAGES: PAGES, VERSION: VERSION, networkFirst: networkFirst, NAVIGATION_TIMEOUT_MS: NAVIGATION_TIMEOUT_MS, networkOnly: networkOnly };
