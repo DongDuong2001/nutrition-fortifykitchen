@@ -33,10 +33,7 @@ REPORT_ONLY = {"ag04_audit.py", "screenshots.py", "cc_66_shots.py", "cc_66_weigh
 # cc-65: probes that are red on plain main for a known reason. A quarantined probe still runs; its failure is shown as
 # QUAR and does not fail the run, so a red probe:all means a regression. Past its expiry date it counts again.
 # name: (reason, expires YYYY-MM-DD)
-QUARANTINE = {
-    "cc_26.py": ("the share name line-height and the image's last row (OPEN_QUESTIONS cc-68); fixed by the overnight Part 7 commit", "2026-10-27"),
-    "cc_44.py": ("the WebKit run without fonts overlaps a B12 row the app never draws without fonts (OPEN_QUESTIONS cc-68); Part 7", "2026-10-27"),
-}
+QUARANTINE = {}
 TIMEOUT_S = 180
 DEFAULT_WORKERS = 6
 
