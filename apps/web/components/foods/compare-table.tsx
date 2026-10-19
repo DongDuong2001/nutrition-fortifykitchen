@@ -66,7 +66,7 @@ export function CompareTable({ columns, sections, onRemove }: CompareTableProps)
                   type="button"
                   onClick={() => onRemove(c.id)}
                   aria-label={`Bỏ ${c.name} khỏi so sánh`}
-                  className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border-0 bg-surface text-text active:scale-[0.97] motion-reduce:active:scale-100"
+                  className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border-0 bg-surface text-text active:scale-[0.97] transition-press motion-reduce:active:scale-100"
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                     <path d="M6 6l12 12M18 6L6 18" />

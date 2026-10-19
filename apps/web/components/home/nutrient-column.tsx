@@ -1,3 +1,4 @@
+import { memo } from "react";
 import Link from "next/link";
 import { formatAmount } from "@/lib/format";
 import { pctLabel, pctOf, type HomeValues } from "@/lib/home";
@@ -19,7 +20,7 @@ function Scroll({ share, children }: { share: boolean; children: React.ReactNode
  * first meal band. The extras (Level 3 and up) show an amount only: no bar, no percent. A food or a meal picked on
  * the left shows as a cobalt line on top. An unknown value is a dash and an empty bar, never 0.
  */
-export function NutrientColumn({
+export const NutrientColumn = memo(function NutrientColumn({
   values,
   extras,
   groups,
@@ -163,4 +164,4 @@ export function NutrientColumn({
       )}
     </aside>
   );
-}
+});

@@ -12,11 +12,11 @@ describe("RELEASES", () => {
     expect([...ids].sort().reverse()).toEqual(ids);
   });
 
-  it("starts with the portion model (2026-10-18f, cc-53b): four items and a 3-step tour on Hôm nay's controls", () => {
+  it("starts with the portion model (2026-10-18f, cc-53b, plus cc-57's smoother tabs): five items and a 3-step tour on Hôm nay's controls", () => {
     const r = latestRelease();
     expect(r?.id).toBe("2026-10-18f");
     expect(r?.date).toBe("18/10");
-    expect(r?.items.map((i) => i.title)).toEqual(["Khẩu phần theo gam", "Cân sống hay đã nấu chín", "Trứng ghi theo quả", "Khay gọn hơn"]);
+    expect(r?.items.map((i) => i.title)).toEqual(["Khẩu phần theo gam", "Cân sống hay đã nấu chín", "Trứng ghi theo quả", "Khay gọn hơn", "Chuyển tab mượt hơn"]);
     expect(r?.tour?.map((s) => [s.target, s.fallback ?? null])).toEqual([
       ["meal-add", "nav-add"],
       ["home-food-list", "meal-pill"],

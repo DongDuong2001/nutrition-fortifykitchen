@@ -31,7 +31,7 @@ export function BottomNav({ currentTab, className = "" }: BottomNavProps) {
         href={item.href}
         data-tour={item.tab === "settings" ? "nav-settings" : item.tab === "explore" ? "nav-explore" : undefined}
         aria-current={isActive ? "page" : undefined}
-        className={`relative flex flex-col items-center justify-center gap-[2px] min-h-[56px] text-xs font-semibold no-underline transition-colors active:scale-[0.97] motion-reduce:active:scale-100 ${
+        className={`relative flex flex-col items-center justify-center gap-[2px] min-h-[56px] text-xs font-semibold no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100 ${
           isActive ? "text-on-dark" : "text-muted-on-dark hover:text-on-dark"
         }`}
       >
@@ -64,7 +64,7 @@ export function BottomNav({ currentTab, className = "" }: BottomNavProps) {
             href="/add"
             onClick={() => rememberAddOpener("mobile-add-fab")}
             aria-label="Thêm món"
-            className="w-[50px] h-[50px] rounded-full bg-blue text-on-accent flex items-center justify-center no-underline shadow-md active:scale-[0.97] motion-reduce:active:scale-100 transition-transform"
+            className="w-[50px] h-[50px] rounded-full bg-blue text-on-accent flex items-center justify-center no-underline shadow-md active:scale-[0.97] transition-press motion-reduce:active:scale-100 "
           >
             <PlusIcon />
           </Link>

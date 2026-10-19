@@ -159,7 +159,7 @@ export default function LandingPage() {
           <div className="flex items-center gap-3">
             <Link
               href="/signin"
-              className="min-h-[44px] px-4 inline-flex items-center text-sm font-bold text-text hover:text-blue no-underline transition-colors"
+              className="min-h-[44px] px-4 inline-flex items-center text-sm font-bold text-text hover:text-blue no-underline transition-press"
             >
               Đăng nhập
             </Link>

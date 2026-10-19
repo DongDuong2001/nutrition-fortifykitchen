@@ -139,7 +139,7 @@ export function FoodList({
             data-tray-toggle
             data-tour="tray-toggle"
             onClick={() => tray.onToggle(food)}
-            className="mr-2 inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent p-0 active:scale-[0.97] motion-reduce:active:scale-100"
+            className="mr-2 inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent p-0 active:scale-[0.97] transition-press motion-reduce:active:scale-100"
           >
             <span
               className={`flex h-9 w-9 items-center justify-center rounded-full ${carried ? "bg-blue text-on-accent" : "bg-blue/10 text-blue"}`}
@@ -155,7 +155,7 @@ export function FoodList({
             type="button"
             onClick={() => onOpen(food)}
             aria-label={`Chọn khẩu phần ${food.nameVi}`}
-            className="mr-1 inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-secondary hover:bg-divider active:scale-[0.97] motion-reduce:active:scale-100"
+            className="mr-1 inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-secondary hover:bg-divider active:scale-[0.97] transition-press motion-reduce:active:scale-100"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
               <path d="M9 5l7 7-7 7" />

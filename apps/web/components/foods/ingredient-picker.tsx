@@ -78,7 +78,7 @@ function PickerBody({ onClose, onConfirm, disabledIds }: { onClose: () => void; 
                 <button
                   type="button"
                   onClick={sendRequest}
-                  className="min-h-11 cursor-pointer rounded-full border border-card-border bg-card px-5 text-sm font-semibold text-blue active:scale-[0.97] motion-reduce:active:scale-100"
+                  className="min-h-11 cursor-pointer rounded-full border border-card-border bg-card px-5 text-sm font-semibold text-blue active:scale-[0.97] transition-press motion-reduce:active:scale-100"
                 >
                   Gửi yêu cầu thêm món
                 </button>
@@ -96,7 +96,7 @@ function PickerBody({ onClose, onConfirm, disabledIds }: { onClose: () => void; 
                   <button
                     type="button"
                     onClick={() => setFilter("all")}
-                    className="min-h-[44px] cursor-pointer rounded-full border-0 bg-surface px-5 text-sm font-semibold text-text active:scale-[0.97]"
+                    className="min-h-[44px] cursor-pointer rounded-full border-0 bg-surface px-5 text-sm font-semibold text-text active:scale-[0.97] transition-press"
                   >
                     Bỏ lọc
                   </button>
@@ -121,7 +121,7 @@ function PickerBody({ onClose, onConfirm, disabledIds }: { onClose: () => void; 
           <button
             type="button"
             onClick={() => onConfirm(picked)}
-            className="min-h-11 shrink-0 cursor-pointer rounded-full border-0 bg-blue px-4 text-[13px] font-bold text-on-accent active:scale-[0.97] motion-reduce:active:scale-100"
+            className="min-h-11 shrink-0 cursor-pointer rounded-full border-0 bg-blue px-4 text-[13px] font-bold text-on-accent active:scale-[0.97] transition-press motion-reduce:active:scale-100"
           >
             Thêm vào món
           </button>

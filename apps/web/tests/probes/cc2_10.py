@@ -169,7 +169,8 @@ def check_micros_tab(browser, size_name, size):
     ctx, pg = new_page(browser, size)
     go(pg, "/trends/micros")
     # Open every section so each nutrient row is in the DOM
-    pg.evaluate("document.querySelectorAll('#mi-sections details').forEach(d => d.open = true)")
+    pg.evaluate("document.querySelectorAll('#mi-sections button[aria-expanded=\"false\"]').forEach(b => b.click())")
+    pg.wait_for_timeout(500)
     sel = '#mi-sections a[href^="/micros/"]'
     rows = pg.locator(sel).count()
     check(rows == 22, f"{size_name} Vi chất: one row per counted nutrient ({rows})")

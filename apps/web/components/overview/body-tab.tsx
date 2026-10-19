@@ -158,7 +158,7 @@ export function BodyTab() {
                   aria-label="Lần cân trước"
                   disabled={selected === 0}
                   onClick={() => setPickedDate(weight.points[selected - 1].date)}
-                  className="inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-card-border bg-card text-text active:scale-[0.97] motion-reduce:active:scale-100 disabled:cursor-default disabled:opacity-45"
+                  className="inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-card-border bg-card text-text active:scale-[0.97] transition-press motion-reduce:active:scale-100 disabled:cursor-default disabled:opacity-45"
                 >
                   <span aria-hidden="true">‹</span>
                 </button>
@@ -176,7 +176,7 @@ export function BodyTab() {
                   aria-label="Lần cân sau"
                   disabled={selected === weight.points.length - 1}
                   onClick={() => setPickedDate(weight.points[selected + 1].date)}
-                  className="inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-card-border bg-card text-text active:scale-[0.97] motion-reduce:active:scale-100 disabled:cursor-default disabled:opacity-45"
+                  className="inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-card-border bg-card text-text active:scale-[0.97] transition-press motion-reduce:active:scale-100 disabled:cursor-default disabled:opacity-45"
                 >
                   <span aria-hidden="true">›</span>
                 </button>

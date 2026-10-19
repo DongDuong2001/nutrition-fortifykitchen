@@ -104,7 +104,7 @@
 
 /* Press and hover feedback names its properties (cc-55), never all of them: "all" animates layout too */
 @utility transition-press {
-  transition-property: transform, background-color, border-color, color, opacity;
+  transition-property: transform, scale, background-color, border-color, color, opacity;
   transition-duration: var(--m-press);
   transition-timing-function: var(--ease-out);
 }
@@ -118,6 +118,8 @@
   html {
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+    /* cc-57: iOS paints its own grey flash on a tap; the press feedback below is the only one */
+    -webkit-tap-highlight-color: transparent;
   }
 
   body {
@@ -155,19 +157,51 @@
     outline-offset: 2px;
   }
 
-  /* Press feedback (cc-55): buttons, chips, icon buttons and pill links scale to 0.97. A row, card or action that fills
-     the width tints instead (instant, no movement): shrinking a full-width block reads as a glitch. */
+  /* Press feedback (cc-55, cc-57): buttons, chips, icon buttons and pill links scale to 0.97, including a full-width
+     pill (the main action of a screen). A row, card or list item that fills the width tints instead: shrinking a
+     full-width block reads as a glitch. The tint is an overlay (::after) that fades in 100 ms and out 150 ms. A
+     transition names both `transform` and `scale`: Tailwind's active:scale-* sets the `scale` property. */
   a,
   button {
     cursor: pointer;
   }
   button,
   a.inline-flex {
-    transition: transform var(--m-press) var(--ease-out);
+    transition:
+      transform var(--m-press) var(--ease-out),
+      scale var(--m-press) var(--ease-out);
   }
   button:active,
   a.inline-flex:active {
     transform: scale(0.97);
+  }
+  /* an element with active:scale-* scales through that property alone (both would shrink it to 0.94) */
+  button[class*="active:scale-"]:active,
+  a.inline-flex[class*="active:scale-"]:active {
+    transform: none;
+  }
+  button.w-full,
+  a.w-full,
+  a.block,
+  a.flex,
+  [role="option"],
+  .m-tint {
+    position: relative;
+  }
+  button.w-full::after,
+  a.w-full::after,
+  a.block::after,
+  a.flex::after,
+  [role="option"]::after,
+  .m-tint::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--color-press);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--m-tint-out) var(--ease-out);
   }
   button.w-full:active,
   a.w-full:active,
@@ -176,7 +210,28 @@
   [role="option"]:active,
   .m-tint:active {
     transform: none;
-    background-image: linear-gradient(var(--color-press), var(--color-press));
+  }
+  button.w-full:active::after,
+  a.w-full:active::after,
+  a.block:active::after,
+  a.flex:active::after,
+  [role="option"]:active::after,
+  .m-tint:active::after {
+    opacity: 1;
+    transition-duration: var(--m-tint-in);
+  }
+  /* A full-width pill is a main action (Lưu, Thêm vào ..., Lưu & chọn tiếp): it scales, no tint */
+  button.w-full.rounded-full:not([class*="active:scale-"]):active,
+  a.w-full.rounded-full:not([class*="active:scale-"]):active,
+  a.flex.rounded-full:not([class*="active:scale-"]):active,
+  a.block.rounded-full:not([class*="active:scale-"]):active {
+    transform: scale(0.97);
+  }
+  button.w-full.rounded-full::after,
+  a.w-full.rounded-full::after,
+  a.flex.rounded-full::after,
+  a.block.rounded-full::after {
+    content: none;
   }
 
   a,
@@ -194,8 +249,21 @@
       transition: none;
     }
     a:active,
-    button:active {
+    button:active,
+    button.w-full.rounded-full:not([class*="active:scale-"]):active,
+    a.w-full.rounded-full:not([class*="active:scale-"]):active,
+    a.flex.rounded-full:not([class*="active:scale-"]):active,
+    a.block.rounded-full:not([class*="active:scale-"]):active {
       transform: none;
+      scale: none;
+    }
+    button.w-full::after,
+    a.w-full::after,
+    a.block::after,
+    a.flex::after,
+    [role="option"]::after,
+    .m-tint::after {
+      transition: opacity var(--m-fade) var(--ease-out);
     }
   }
 }
@@ -261,6 +329,10 @@
   --m-sheet-in: 350ms;
   --m-sheet-out: 220ms;
   --m-fade: 120ms;
+  --m-tint-in: 100ms;
+  --m-tint-out: 150ms;
+  --m-bar: 300ms;
+  --m-day: 180ms;
 }
 
 @keyframes m-rise-in {
@@ -277,18 +349,6 @@
 @keyframes m-fade-out {
   to {
     opacity: 0;
-  }
-}
-@keyframes m-slide-from-right {
-  from {
-    opacity: 0;
-    transform: translateX(24px);
-  }
-}
-@keyframes m-slide-from-left {
-  from {
-    opacity: 0;
-    transform: translateX(-24px);
   }
 }
 
@@ -313,6 +373,16 @@
   }
   .m-scrim[data-state="open"] {
     opacity: 0;
+  }
+}
+/* A centred dialog (desktop Sheet, the /add dialog) pops in 200 ms and out 150 ms: its scrim keeps the same time, not the
+   sheet's 350 and 220 */
+@media (min-width: 1024px) {
+  .m-scrim-dialog {
+    transition-duration: var(--m-pop-in);
+  }
+  .m-scrim-dialog[data-state="closed"] {
+    transition-duration: var(--m-pop-out);
   }
 }
 /* A finger on the grabber: the sheet follows it 1:1 (the transform is written on the element), then lets go with the
@@ -400,15 +470,20 @@
     opacity: 0;
   }
 }
+.m-expand[data-instant] {
+  transition: none;
+}
 .m-expand > * {
   min-height: 0;
   overflow: hidden;
 }
+/* The chevron turns with the row: --m-pop-in to open, --m-pop-out to close, like .m-expand */
 .m-chevron {
-  transition: transform var(--m-row) var(--ease-out);
+  transition: transform var(--m-pop-out) var(--ease-out);
 }
 [aria-expanded="true"] .m-chevron {
   transform: rotate(180deg);
+  transition-duration: var(--m-pop-in);
 }
 
 /* Enter animations on wrappers fill backwards only: a fill that stays after the end keeps a stacking context (and, for
@@ -438,20 +513,43 @@
 /* Bars: the fill grows from the left (scaleX) */
 .m-bar {
   transform-origin: left center;
-  transition: transform 300ms var(--ease-out);
+  transition:
+    transform var(--m-bar) var(--ease-out),
+    background-color var(--m-bar) var(--ease-out);
 }
-/* A day changed with the arrows (direction: earlier from the left, later from the right) */
-.m-day-earlier {
-  animation: m-slide-from-left var(--m-row) var(--ease-out) backwards;
-}
+/* A day changed with the arrows (direction: earlier from the left, later from the right): the new day's wrapper
+   eases in from 12 px off to its place, as a transition from @starting-style, so a quick second tap starts from where
+   the first one is and nothing restarts from zero opacity */
+.m-day-earlier,
 .m-day-later {
-  animation: m-slide-from-right var(--m-row) var(--ease-out) backwards;
+  transition:
+    transform var(--m-day) var(--ease-out),
+    opacity var(--m-day) var(--ease-out);
 }
-/* Pull to refresh: the indicator follows the finger, then spins while the day is fetched */
+@starting-style {
+  .m-day-earlier {
+    transform: translateX(-12px);
+    opacity: 0.6;
+  }
+  .m-day-later {
+    transform: translateX(12px);
+    opacity: 0.6;
+  }
+}
+/* Pull to refresh: the indicator waits above the list, follows the finger with no transition (data-dragging, the
+   transform is written on the element), then eases back or settles at 12 px while the day is fetched */
 .m-pull {
+  transform: translateY(-40px);
+  opacity: 0;
   transition:
     transform var(--m-row) var(--ease-out),
     opacity var(--m-pop-out) var(--ease-out);
+}
+.m-pull[data-dragging] {
+  transition: none;
+}
+.m-pull-arrow {
+  transition: transform var(--m-pop-out) var(--ease-out);
 }
 @keyframes m-spin {
   to {
@@ -610,8 +708,23 @@
   .m-sheet[data-dragging] {
     transition: none;
   }
+  /* the closing rules above set their own, longer durations: the 120 ms cap holds for them too */
+  .m-sheet[data-state="closed"],
+  .m-scrim[data-state="closed"],
+  .m-scrim-dialog[data-state="closed"],
+  .m-pop[data-state="closed"],
+  .m-fade[data-state="closed"],
+  .m-toast[data-state="closed"],
+  .m-expand[data-state="closed"],
+  .m-dialog.m-sheet[data-state="closed"] {
+    transition-duration: var(--m-fade);
+  }
+  .m-scrim-dialog {
+    transition-duration: var(--m-fade);
+  }
+  /* the toast's countdown stays visible, as a slow fade over the same time, instead of freezing at full */
   .m-countdown {
-    animation: none;
+    animation-name: m-fade-out;
   }
   .m-expand {
     transition: opacity var(--m-fade) var(--ease-out);
@@ -634,10 +747,23 @@
   }
   .m-day-earlier,
   .m-day-later {
-    animation: m-fade-in var(--m-fade) var(--ease-out) backwards;
+    transition: opacity var(--m-fade) var(--ease-out);
+  }
+  @starting-style {
+    .m-day-earlier,
+    .m-day-later {
+      transform: none;
+      opacity: 0;
+    }
   }
   .m-pull {
     transition: opacity var(--m-fade) var(--ease-out);
+  }
+  .m-pull[data-dragging] {
+    transition: none;
+  }
+  .m-pull-arrow {
+    transition: none;
   }
   .m-spin {
     animation: none;

@@ -54,7 +54,11 @@ describe("motion classes", () => {
     for (const [selector, body] of rules(motion)) {
       const props = decl(body, "transition").flatMap((t) => t.split(",").map((p) => p.trim().split(/\s+/)[0]));
       for (const prop of props) {
-        const allowed = /\.m-(expand|row-exit)\b/.test(selector) ? /^(transform|opacity|grid-template-rows|none)$/ : /^(transform|opacity|none)$/;
+        const allowed = /\.m-(expand|row-exit)\b/.test(selector)
+          ? /^(transform|opacity|grid-template-rows|none)$/
+          : /^\.m-bar$/.test(selector)
+            ? /^(transform|background-color|none)$/ // the fill's colour changes with its level while it grows
+            : /^(transform|opacity|none)$/;
         expect([selector, prop]).toEqual([selector, expect.stringMatching(allowed)]);
       }
       for (const prop of decl(body, "transition-property").flatMap((t) => t.split(",").map((p) => p.trim()))) {
@@ -114,17 +118,87 @@ describe("motion classes", () => {
 
 describe("enter animations on wrappers", () => {
   it("fill backwards, never both or forwards (a lasting fill puts sheets under the bottom nav)", () => {
-    for (const name of ["m-row-enter", "m-day-earlier", "m-day-later"]) {
+    for (const name of ["m-row-enter"]) {
       const rule = main.match(new RegExp(`\\n\\.${name} \\{([^}]*)\\}`))?.[1] ?? "";
       expect([name, rule]).toEqual([name, expect.stringMatching(/backwards;/)]);
     }
+  });
+
+  it("a day changed with the arrows eases in as a transition from @starting-style (12 px, 180 ms), not a restarting keyframe", () => {
+    expect(main).toMatch(/--m-day: 180ms;/);
+    expect(main).toMatch(/\.m-day-earlier,\s*\.m-day-later \{\s*transition:\s*transform var\(--m-day\) var\(--ease-out\),\s*opacity var\(--m-day\) var\(--ease-out\);/);
+    expect(main).toMatch(/\.m-day-earlier \{\s*transform: translateX\(-12px\);\s*opacity: 0\.6;/);
+    expect(main).toMatch(/\.m-day-later \{\s*transform: translateX\(12px\);\s*opacity: 0\.6;/);
   });
 });
 
 describe("press feedback", () => {
   it("scales buttons and pill links only; a row, card or full-width action tints", () => {
     expect(css).toMatch(/button:active,\s*a\.inline-flex:active \{\s*transform: scale\(0\.97\);/);
-    expect(css).toMatch(/button\.w-full:active,[\s\S]*?\.m-tint:active \{\s*transform: none;\s*background-image/);
-    expect(css).toMatch(/transition: transform var\(--m-press\) var\(--ease-out\);/);
+    expect(css).toMatch(/button\.w-full:active,[\s\S]*?\.m-tint:active \{\s*transform: none;\s*\}/);
+    expect(css).toMatch(/transition:\s*transform var\(--m-press\) var\(--ease-out\),\s*scale var\(--m-press\) var\(--ease-out\);/);
+  });
+
+  it("a full-width pill (the main action) scales, no tint", () => {
+    expect(css).toMatch(/button\.w-full\.rounded-full:not\(\[class\*="active:scale-"\]\):active,[\s\S]*?\{\s*transform: scale\(0\.97\);/);
+    expect(css).toMatch(/button\.w-full\.rounded-full::after,[\s\S]*?\{\s*content: none;/);
+  });
+
+  it("the tint is an overlay that fades (100 ms in, 150 ms out), not an instant background", () => {
+    expect(css).not.toMatch(/background-image: linear-gradient\(var\(--color-press\)/);
+    expect(css).toMatch(/\.m-tint::after \{[^}]*opacity: 0;[^}]*transition: opacity var\(--m-tint-out\) var\(--ease-out\);/);
+    expect(css).toMatch(/\.m-tint:active::after \{\s*opacity: 1;\s*transition-duration: var\(--m-tint-in\);/);
+    expect(css).toMatch(/--m-tint-in: 100ms;/);
+    expect(css).toMatch(/--m-tint-out: 150ms;/);
+  });
+
+  it("iOS: no grey tap flash, and one passive touchstart listener so :active is matched", () => {
+    expect(css).toMatch(/-webkit-tap-highlight-color: transparent;/);
+    expect(readFileSync(path.join(ROOT, "components/touch-active.tsx"), "utf8")).toMatch(/addEventListener\("touchstart", noop, \{ passive: true \}\)/);
+    expect(readFileSync(path.join(ROOT, "app/layout.tsx"), "utf8")).toContain("<TouchActive />");
+  });
+
+  it("every active:scale-* element transitions `scale` (transition-press), never a utility that replaces it", () => {
+    expect(css).toMatch(/@utility transition-press \{\s*transition-property: transform, scale,/);
+    const files = (dir: string): string[] =>
+      readdirSync(dir).flatMap((n) => {
+        const f = path.join(dir, n);
+        if (n === "node_modules" || n === "__tests__") return [];
+        return statSync(f).isDirectory() ? files(f) : /\.tsx$/.test(n) ? [f] : [];
+      });
+    const offenders: string[] = [];
+    for (const f of [...files(path.join(ROOT, "components")), ...files(path.join(ROOT, "app"))]) {
+      readFileSync(f, "utf8")
+        .split("\n")
+        .forEach((line, i) => {
+          // the press itself (active:scale-[0.97]), not the reduced-motion reset (motion-reduce:active:scale-100)
+          if (!/(?<![\w:-])active:scale-\[/.test(line)) return;
+          const press = /(?<![\w:-])transition-press(?![\w-])/.test(line);
+          const replaces = /(?<![\w:-])(transition-(colors|opacity|transform|shadow|all)|transition-\[|duration-\d+)/.test(line);
+          if (!press || replaces) offenders.push(`${path.relative(ROOT, f)}:${i + 1}`);
+        });
+    }
+    expect(offenders).toEqual([]);
+  });
+});
+
+describe("cc-57 motion details", () => {
+  it("the bar has its own 300 ms token and the dialog scrim uses the pop time", () => {
+    expect(motion).toMatch(/--m-bar: 300ms;/);
+    expect(main).toMatch(/\.m-bar \{[^}]*transform var\(--m-bar\) var\(--ease-out\),\s*background-color var\(--m-bar\) var\(--ease-out\)/);
+    expect(main).toMatch(/\.m-scrim-dialog \{\s*transition-duration: var\(--m-pop-in\);/);
+    expect(main).toMatch(/\.m-scrim-dialog\[data-state="closed"\] \{\s*transition-duration: var\(--m-pop-out\);/);
+  });
+
+  it("the chevron turns in pop-in to open and pop-out to close, like .m-expand", () => {
+    expect(main).toMatch(/\.m-chevron \{\s*transition: transform var\(--m-pop-out\) var\(--ease-out\);/);
+    expect(main).toMatch(/\[aria-expanded="true"\] \.m-chevron \{\s*transform: rotate\(180deg\);\s*transition-duration: var\(--m-pop-in\);/);
+  });
+
+  it("reduced motion: the closing rules keep to the 120 ms cap, and the toast countdown fades instead of freezing", () => {
+    const closing = reduced.match(/\.m-sheet\[data-state="closed"\],\s*\.m-scrim\[data-state="closed"\][^{]*\{([^}]*)\}/)?.[1] ?? "";
+    expect(closing).toMatch(/transition-duration: var\(--m-fade\);/);
+    expect(reduced).toMatch(/\.m-countdown \{\s*animation-name: m-fade-out;/);
+    expect(reduced).not.toMatch(/\.m-countdown \{\s*animation: none;/);
   });
 });

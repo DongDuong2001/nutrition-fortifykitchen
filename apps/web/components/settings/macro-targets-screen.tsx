@@ -420,7 +420,7 @@ export function MacroTargetsScreen() {
                   key={key}
                   type="button"
                   onClick={() => handlePreset(key)}
-                  className="inline-flex min-h-[36px] items-center rounded-full border border-card-border bg-card px-3 text-xs font-bold text-text hover:bg-page active:scale-[0.97]"
+                  className="inline-flex min-h-[36px] items-center rounded-full border border-card-border bg-card px-3 text-xs font-bold text-text hover:bg-page active:scale-[0.97] transition-press"
                 >
                   {p.name} ({p.ratios.proteinPct}/{p.ratios.carbsPct}/{p.ratios.fatPct})
                 </button>

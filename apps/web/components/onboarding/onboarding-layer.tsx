@@ -68,9 +68,9 @@ const TOUR_COPY: Record<string, { title: string; body: string; hint?: string }> 
 };
 
 const primaryButton =
-  "min-h-11 cursor-pointer rounded-full border-0 bg-blue px-5 text-sm font-bold text-on-accent active:scale-[0.97] motion-reduce:active:scale-100";
+  "min-h-11 cursor-pointer rounded-full border-0 bg-blue px-5 text-sm font-bold text-on-accent active:scale-[0.97] transition-press motion-reduce:active:scale-100";
 const quietButton =
-  "min-h-11 cursor-pointer rounded-full border-0 bg-transparent px-3 text-sm font-semibold text-secondary active:scale-[0.97] motion-reduce:active:scale-100";
+  "min-h-11 cursor-pointer rounded-full border-0 bg-transparent px-3 text-sm font-semibold text-secondary active:scale-[0.97] transition-press motion-reduce:active:scale-100";
 
 /** The label of the real confirm button of step 4 ("Thêm vào Bữa trưa"), so the hint names the right meal. */
 function portionButtonText(): string {

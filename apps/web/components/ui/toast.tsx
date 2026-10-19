@@ -41,7 +41,7 @@ export function Toast({
           actionHref ? (
             <Link
               href={actionHref}
-              className="shrink-0 min-h-[44px] px-4 rounded-xl flex items-center text-sky text-[15px] font-bold no-underline hover:text-on-dark transition-colors active:scale-[0.97]"
+              className="shrink-0 min-h-[44px] px-4 rounded-xl flex items-center text-sky text-[15px] font-bold no-underline hover:text-on-dark active:scale-[0.97] transition-press"
             >
               {actionLabel}
             </Link>
@@ -49,7 +49,7 @@ export function Toast({
             <button
               type="button"
               onClick={onAction}
-              className="shrink-0 min-h-[44px] px-4 rounded-xl bg-transparent border-0 flex items-center text-sky text-[15px] font-bold cursor-pointer hover:text-on-dark transition-colors active:scale-[0.97]"
+              className="shrink-0 min-h-[44px] px-4 rounded-xl bg-transparent border-0 flex items-center text-sky text-[15px] font-bold cursor-pointer hover:text-on-dark active:scale-[0.97] transition-press"
             >
               {actionLabel}
             </button>

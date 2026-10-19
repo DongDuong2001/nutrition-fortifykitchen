@@ -14,7 +14,7 @@ import { NOT_LOGGED_TODAY, lastLoggedText, loggedToday } from "@/lib/coach-previ
 import { readClients, readCoaches, type MockClient, type MockCoach } from "@/lib/mock-coach-server";
 
 const BUTTON =
-  "inline-flex min-h-[44px] flex-1 cursor-pointer items-center justify-center rounded-full border border-card-border bg-card px-4 text-[15px] font-bold text-text active:scale-[0.97] motion-reduce:active:scale-100";
+  "inline-flex min-h-[44px] flex-1 cursor-pointer items-center justify-center rounded-full border border-card-border bg-card px-4 text-[15px] font-bold text-text active:scale-[0.97] transition-press motion-reduce:active:scale-100";
 
 /** Học viên: the coach's invite code and client list. Behind the role gate of app/coach/layout.tsx. */
 export default function CoachPage() {
@@ -101,7 +101,7 @@ export default function CoachPage() {
                   <Link
                     href={`/coach/clients/${encodeURIComponent(c.id)}`}
                     data-align-group="client-row"
-                    className="flex min-h-[64px] items-center gap-3 rounded-[18px] lg:shadow-card border border-card-border bg-card p-3 text-text no-underline active:scale-[0.99] motion-reduce:active:scale-100"
+                    className="flex min-h-[64px] items-center gap-3 rounded-[18px] lg:shadow-card border border-card-border bg-card p-3 text-text no-underline active:scale-[0.99] transition-press motion-reduce:active:scale-100"
                   >
                     <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                       <span className="break-words text-[15px] font-semibold leading-snug">{c.name}</span>

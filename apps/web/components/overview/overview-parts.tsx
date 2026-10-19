@@ -64,7 +64,7 @@ export function NotEnoughData() {
       </p>
       <Link
         href={HOME_ROUTE}
-        className="inline-flex min-h-[44px] items-center justify-center self-start rounded-full border border-card-border bg-card px-4 text-[15px] font-bold text-text no-underline active:scale-[0.97] motion-reduce:active:scale-100"
+        className="inline-flex min-h-[44px] items-center justify-center self-start rounded-full border border-card-border bg-card px-4 text-[15px] font-bold text-text no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100"
       >
         Xem hôm nay
       </Link>
@@ -82,7 +82,7 @@ function NothingLogged({ current }: { current: boolean }) {
       {current && (
         <Link
           href={summaryAddHref(new Date())}
-          className="inline-flex min-h-[44px] items-center justify-center self-start rounded-full border border-card-border bg-card px-4 text-[15px] font-bold text-blue no-underline active:scale-[0.97] motion-reduce:active:scale-100"
+          className="inline-flex min-h-[44px] items-center justify-center self-start rounded-full border border-card-border bg-card px-4 text-[15px] font-bold text-blue no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100"
         >
           Thêm bữa đầu tiên
         </Link>

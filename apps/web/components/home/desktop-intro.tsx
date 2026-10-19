@@ -50,7 +50,7 @@ export function DesktopIntroBanner() {
             type="button"
             onClick={toggleCollapsed}
             aria-expanded="false"
-            className="min-h-[44px] px-3 inline-flex items-center text-xs font-bold text-blue hover:underline bg-transparent border-0 cursor-pointer active:scale-[0.97] motion-reduce:active:scale-100"
+            className="min-h-[44px] px-3 inline-flex items-center text-xs font-bold text-blue hover:underline bg-transparent border-0 cursor-pointer active:scale-[0.97] transition-press motion-reduce:active:scale-100"
           >
             Xem giới thiệu
           </button>
@@ -78,7 +78,7 @@ export function DesktopIntroBanner() {
               type="button"
               onClick={toggleCollapsed}
               aria-expanded="true"
-              className="min-h-[44px] px-3 shrink-0 inline-flex items-center text-xs font-semibold text-secondary hover:text-text bg-transparent border-0 cursor-pointer active:scale-[0.97] motion-reduce:active:scale-100"
+              className="min-h-[44px] px-3 shrink-0 inline-flex items-center text-xs font-semibold text-secondary hover:text-text bg-transparent border-0 cursor-pointer active:scale-[0.97] transition-press motion-reduce:active:scale-100"
             >
               Thu gọn
             </button>

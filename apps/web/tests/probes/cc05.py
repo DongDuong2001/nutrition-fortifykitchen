@@ -91,7 +91,7 @@ def run():
             button(pg, "Lưu thay đổi").click()
             pg.wait_for_url(re.compile(r".*/app(\?.*)?$"))
             pg.wait_for_timeout(300)
-            check("Yến mạch 90 g" in meal_text(pg, "breakfast"), f"{name}: Yến mạch shows 90 g on Today")
+            check(re.search(r"Yến mạch (Cân sống )?90 g", meal_text(pg, "breakfast")) is not None, f"{name}: Yến mạch shows 90 g on Today")
             check("573 kcal" in meal_text(pg, "breakfast"), f"{name}: breakfast total updates to 573 kcal")
             check("1.155" in pg.inner_text("body"), f"{name}: day total updates to 1.155 kcal")
 
@@ -102,7 +102,7 @@ def run():
             button(pg, "Lưu thay đổi").click()
             pg.wait_for_url(re.compile(r".*/app(\?.*)?$"))
             pg.wait_for_timeout(300)
-            check("Yến mạch 90 g" in meal_text(pg, "dinner"), f"{name}: moved entry shows under Bữa tối")
+            check(re.search(r"Yến mạch (Cân sống )?90 g", meal_text(pg, "dinner")) is not None, f"{name}: moved entry shows under Bữa tối")
             check("Yến mạch" not in meal_text(pg, "breakfast"), f"{name}: moved entry leaves Bữa sáng")
             check("231 kcal" in meal_text(pg, "breakfast"), f"{name}: Bữa sáng drops to 231 kcal")
             check("1.155" in pg.inner_text("body"), f"{name}: moving keeps the day total at 1.155")
@@ -133,7 +133,7 @@ def run():
             pg.reload(wait_until="networkidle")
             pg.wait_for_timeout(300)
             check("Chuối" not in meal_text(pg, "breakfast"), f"{name}: deleted Chuối stays gone after reload")
-            check("Yến mạch 90 g" in meal_text(pg, "dinner"), f"{name}: moved edit survives reload")
+            check(re.search(r"Yến mạch (Cân sống )?90 g", meal_text(pg, "dinner")) is not None, f"{name}: moved edit survives reload")
             check("Yogurt kefir 200 ml" in meal_text(pg, "breakfast"), f"{name}: restored item survives reload")
 
             if errors:

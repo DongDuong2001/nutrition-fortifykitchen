@@ -45,7 +45,7 @@ export function NutrientGrid({
                 aria-pressed={isSel}
                 aria-label={`${s.name}${s.percentage === null ? "" : ` ${s.percentage}%`} · ${level}`}
                 onClick={() => onSelect(i)}
-                className={`block h-11 w-full cursor-pointer rounded-lg border-0 p-0 active:scale-[0.97] motion-reduce:active:scale-100 ${
+                className={`block h-11 w-full cursor-pointer rounded-lg border-0 p-0 active:scale-[0.97] transition-press motion-reduce:active:scale-100 ${
                   s.level ? SQUARE_BG[s.level] : "bg-level-empty-dark"
                 } ${isSel ? "opacity-100 ring-2 ring-on-dark" : "opacity-85"}`}
               />
@@ -71,7 +71,7 @@ export function NutrientGrid({
       {detailLink && square && (
         <Link
           href={`/micros/${square.key}`}
-          className="inline-flex min-h-[44px] items-center self-start rounded-full px-1 text-[15px] font-bold text-sky no-underline active:scale-[0.97] motion-reduce:active:scale-100"
+          className="inline-flex min-h-[44px] items-center self-start rounded-full px-1 text-[15px] font-bold text-sky no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100"
         >
           Xem chi tiết {square.name}
         </Link>

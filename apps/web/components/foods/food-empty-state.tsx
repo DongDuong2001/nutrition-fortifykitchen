@@ -31,7 +31,7 @@ export function FoodEmptyState({
     <button
       type="button"
       onClick={onClearFilter}
-      className="min-h-[44px] px-5 rounded-full bg-surface text-text font-semibold text-sm border-0 cursor-pointer active:scale-[0.97]"
+      className="min-h-[44px] px-5 rounded-full bg-surface text-text font-semibold text-sm border-0 cursor-pointer active:scale-[0.97] transition-press"
     >
       Bỏ lọc
     </button>
