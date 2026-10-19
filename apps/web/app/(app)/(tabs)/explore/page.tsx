@@ -10,7 +10,7 @@ import { FoodSearchField } from "@/components/foods/food-search-field";
 import { ExploreSections } from "@/components/explore/explore-sections";
 import { CatalogNote, CatalogStatus } from "@/components/foods/catalog-status";
 import { useCatalogFoods } from "@/hooks/use-catalog-foods";
-import { searchRows } from "@/lib/search";
+import { searchRows } from "@/lib/food-rows";
 import { FOOD_CATEGORIES, categoryLabel, categoryOf } from "@/lib/food-categories";
 import { coachingAvailable } from "@/lib/coaching-link";
 import { isLiveMode } from "@/lib/api-mode";

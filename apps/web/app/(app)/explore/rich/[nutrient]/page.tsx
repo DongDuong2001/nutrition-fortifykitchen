@@ -14,7 +14,7 @@ import { getNutrientDefinition } from "@/lib/nutrients";
 import { formatAmount } from "@/lib/format";
 import { isRichNutrientId, richInFoods, richName, type RichBasis } from "@/lib/rich-in";
 import { useBack } from "@/hooks/use-back";
-import { dedupeTwins, rowName } from "@/lib/food-twins";
+import { dedupeTwins, rowName } from "@/lib/food-rows";
 
 /** Foods ranked by one nutrient, per 100 g or per usual portion, with the share of the daily target. */
 export default function RichInPage() {

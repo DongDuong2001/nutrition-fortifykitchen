@@ -1,6 +1,5 @@
 import { catalogVersion, type FoodItem } from "./mock/foods";
-import { collapseTwins, twinGroupOf, type TwinGroup } from "./food-twins";
-import { isPrepared } from "./yield";
+import type { TwinGroup } from "./food-twins";
 
 /**
  * Remove Vietnamese diacritical marks and tone markers for fuzzy/ascii comparison.
@@ -122,7 +121,15 @@ export function queryVariants(query: string): string[] {
  * shorter name, then Vietnamese order. Duplicates collapse to one.
  */
 export function searchFoods(foods: FoodItem[], query: string): FoodItem[] {
-  return rank(foods, query, false);
+  return rank(foods, query, null);
+}
+
+/** How a search sees raw and cooked twins (lib/food-twins passes itself in: lib/food-rows loads it after the first paint). */
+export interface TwinLookup {
+  groupOf: (food: FoodItem) => TwinGroup | null;
+  collapse: (foods: readonly FoodItem[]) => FoodItem[];
+  /** A name that says the food was made into something else (chiên, xào, kho): it comes after the plain row */
+  prepared: (name: string) => boolean;
 }
 
 /**
@@ -130,14 +137,14 @@ export function searchFoods(foods: FoodItem[], query: string): FoodItem[] {
  * ("Khoai lang"), found by the name of either, at the place its best name earns and by the length of the plain name, so
  * "Khoai lang" comes before "Khoai lang chiên". The row it opens on is the state the food is usually eaten in.
  */
-export function searchRows(foods: FoodItem[], query: string): FoodItem[] {
-  return rank(foods, query, true);
+export function searchWithTwins(foods: FoodItem[], query: string, twins: TwinLookup): FoodItem[] {
+  return rank(foods, query, twins);
 }
 
-function rank(foods: FoodItem[], query: string, twins: boolean): FoodItem[] {
+function rank(foods: FoodItem[], query: string, twins: TwinLookup | null): FoodItem[] {
   const q = norm(query);
   const unique = withoutDuplicates(foods);
-  if (!q) return twins ? collapseTwins(unique) : unique;
+  if (!q) return twins ? twins.collapse(unique) : unique;
 
   const variants = queryVariants(q).map((v, i) => ({ v, folded: removeVietnameseTones(v), penalty: i === 0 ? 0 : i === 1 ? 0.05 : 0.2 }));
   const tierOfFood = (food: FoodItem) => {
@@ -153,14 +160,14 @@ function rank(foods: FoodItem[], query: string, twins: boolean): FoodItem[] {
   const seen = new Set<TwinGroup>();
   const present = twins ? new Set(foods.map((f) => f.id)) : null;
   for (const food of unique) {
-    const group = twins ? twinGroupOf(food) : null;
+    const group = twins?.groupOf(food) ?? null;
     if (group && seen.has(group)) continue;
     if (group) seen.add(group);
     // A food is found by the name of any of its rows, and listed under its plain name
     const tier = Math.min(...(group ? group.members : [food]).map(tierOfFood));
     if (tier === Infinity) continue;
     const name = group?.name ?? food.nameVi;
-    matches.push({ food: group && present?.has(group.start.id) ? group.start : food, tier, prepared: twins && isPrepared(name), length: name.length });
+    matches.push({ food: group && present?.has(group.start.id) ? group.start : food, tier, prepared: !!twins?.prepared(name), length: name.length });
   }
 
   return matches

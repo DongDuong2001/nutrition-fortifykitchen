@@ -25,7 +25,7 @@ import { foodMeta } from "@/lib/food-meta";
 import { CreateFoodButton } from "@/components/foods/create-food-button";
 import { isCategoryFilter } from "@/lib/food-categories";
 import { resolveFavourites } from "@/lib/favourites";
-import { dedupeTwins, twinIdsOf } from "@/lib/food-twins";
+import { dedupeTwins, twinIdsOf } from "@/lib/food-rows";
 import { TrayBar, TrayReviewSheet } from "@/components/add/add-tray";
 import { markUsed } from "@/lib/onboarding-store";
 import { TOUR_STEPS } from "@/lib/tour";
@@ -39,12 +39,12 @@ import {
   type MealSlot,
   MEAL_SLOTS,
 } from "@/lib/meal-slot";
-import { defaultPortionOf, parseGramsInput } from "@/lib/portion";
+import { defaultPortionOf, gramsServingLabel, parseGramsInput } from "@/lib/portion";
 import { MealSwitcher } from "@/components/meal-switcher";
 import { PortionPanel } from "@/components/ui/portion-panel";
 import { HomeScreen } from "@/components/home/home-screen";
 import { AppShell } from "@/components/ui/app-shell";
-import type { AddOnEntry } from "@/lib/dish-recipes";
+import type { DishEdit } from "@/lib/dish-recipes";
 
 import { useMealSlot } from "@/lib/use-meal-slot";
 import { HOME_ROUTE } from "@/lib/nav";
@@ -77,9 +77,25 @@ function AddFoodInner() {
   const [reviewOpen, setReviewOpen] = useState(false);
   const reopenReview = useRef(false);
 
-  // cc-54: the add-ons ("+ Bún") of a dish that are switched on: logged with it, each its own entry, in the same meal
-  const [extras, setExtras] = useState<AddOnEntry[]>([]);
-  const onExtrasChange = useCallback((next: AddOnEntry[]) => setExtras((prev) => (prev.length === 0 && next.length === 0 ? prev : next)), []);
+  // cc-67: the parts of a premade dish changed for this meal (Thành phần). Changed, it is logged as ONE entry of a food made
+  // for it ("Phở bò · đã chỉnh", listed nowhere): the parts added up. Unchanged, the dish is logged as it is.
+  const [dishEdit, setDishEdit] = useState<DishEdit | null>(null);
+  const [dishNotice, setDishNotice] = useState<string | null>(null);
+  const onDishEdit = useCallback((next: DishEdit | null) => {
+    setDishEdit(next);
+    setDishNotice(null);
+  }, []);
+  // What a save logs: the food, its grams and the portion label
+  const toLog = () => {
+    const changed = dishEdit?.edited ? dishEdit : null;
+    if (!selectedFood || !changed) return selectedFood ? { food: selectedFood, grams: parsedGrams, label: selectedServingLabel } : null;
+    const food = changed.save();
+    if (!food) {
+      setDishNotice("Chưa lưu được món đã chỉnh vào máy này. Bộ nhớ đầy hoặc đang bị chặn.");
+      return null;
+    }
+    return { food, grams: changed.grams, label: gramsServingLabel(changed.grams) };
+  };
 
   const [gramsInput, setGramsInput] = useState("");
   const [selectedServingLabel, setSelectedServingLabel] = useState("");
@@ -269,14 +285,11 @@ function AddFoodInner() {
 
   // Submit action
   const handleAddFood = async () => {
-    if (!selectedFood || parsedGrams <= 0 || isSubmitting || mealSlot === null) return;
+    if (!selectedFood || (dishEdit?.edited ? dishEdit.grams : parsedGrams) <= 0 || isSubmitting || mealSlot === null) return;
     setIsSubmitting(true);
     try {
-      // With add-ons: the dish and each add-on go in together (one update, one Hoàn tác), the add-ons right after the dish
-      const saved =
-        extras.length > 0
-          ? addFoodEntries([{ food: selectedFood, grams: parsedGrams, label: selectedServingLabel }, ...extras], mealSlot)
-          : await addFoodEntry(selectedFood, parsedGrams, mealSlot, selectedServingLabel);
+      const entry = toLog();
+      const saved = entry ? await addFoodEntry(entry.food, entry.grams, mealSlot, entry.label) : false;
       if (saved) {
         tourAction("portion-confirmed");
         navigateFromSheet(router, HOME_ROUTE);
@@ -288,9 +301,11 @@ function AddFoodInner() {
 
   // Lưu & chọn tiếp: the food with the chosen portion goes in the tray and the search stays as it was
   const handleAddAndContinue = () => {
-    if (!selectedFood || parsedGrams <= 0 || mealSlot === null) return;
+    if (!selectedFood || (dishEdit?.edited ? dishEdit.grams : parsedGrams) <= 0 || mealSlot === null) return;
+    const entry = toLog();
+    if (!entry) return;
     markUsed("tray-add");
-    setTray((t) => extras.reduce((acc, e) => putInTray(acc, e.food, e.grams, e.label), putInTray(t, selectedFood, parsedGrams, selectedServingLabel)));
+    setTray((t) => putInTray(t, entry.food, entry.grams, entry.label));
     setSelectedFood(null);
     setGramsInput("");
     setSelectedServingLabel("");
@@ -406,14 +421,14 @@ function AddFoodInner() {
         handleClose(true);
       } else if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {
         // If not typing in input or if adding (the Chỉ ghi kcal form handles its own Enter)
-        if (selectedFood && parsedGrams > 0 && !quickOpen) {
+        if (selectedFood && (dishEdit?.edited ? dishEdit.grams : parsedGrams) > 0 && !quickOpen) {
           handleAddFood();
         }
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleClose, selectedFood, parsedGrams, handleAddFood, quickOpen, switcherOpen, reviewOpen, isDesktop]);
+  }, [handleClose, selectedFood, parsedGrams, dishEdit, handleAddFood, quickOpen, switcherOpen, reviewOpen, isDesktop]);
 
   const mealNameVi = mealSlot ? getMealSlotNameVi(mealSlot) : "—";
 
@@ -587,7 +602,8 @@ function AddFoodInner() {
                     mealSlot={mealSlot}
                     onAdd={handleAddFood}
                     onAddAndContinue={handleAddAndContinue}
-                    onExtrasChange={onExtrasChange}
+                    onDishEdit={onDishEdit}
+                    notice={dishNotice}
                     isSubmitting={isSubmitting}
                     showMicros={true}
                     className="rounded-[18px] border border-card-border bg-card p-4"
@@ -726,7 +742,8 @@ function AddFoodInner() {
               mealSlot={mealSlot}
               onAdd={handleAddFood}
               onAddAndContinue={handleAddAndContinue}
-              onExtrasChange={onExtrasChange}
+              onDishEdit={onDishEdit}
+                    notice={dishNotice}
               isSubmitting={isSubmitting}
               headingId="portion-sheet-title"
             />

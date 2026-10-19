@@ -7,7 +7,7 @@ import type { FoodItem } from "@/lib/mock/foods";
 import type { SavedMeal } from "@/lib/saved-meals";
 import { formatAmount } from "@/lib/format";
 import { foodRowKcal } from "@/lib/food-meta";
-import { rowName } from "@/lib/food-twins";
+import { rowName } from "@/lib/food-rows";
 
 export interface RecentShortcut {
   key: string;

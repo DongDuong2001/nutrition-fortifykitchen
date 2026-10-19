@@ -9,7 +9,7 @@ import { FoodListCard } from "@/components/foods/food-list-card";
 import { CatalogNote, CatalogStatus } from "@/components/foods/catalog-status";
 import { useCatalogFoods } from "@/hooks/use-catalog-foods";
 import { FOOD_CATEGORIES, categoryOf, isOwnFood } from "@/lib/food-categories";
-import { collapseTwins } from "@/lib/food-twins";
+import { collapseTwins } from "@/lib/food-rows";
 import { useBack } from "@/hooks/use-back";
 
 /** One food category, a pushed screen of Khám phá. */

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import type { FoodItem } from "@/lib/mock/foods";
 import type { FoodList as FoodListData } from "@/lib/food-categories";
 import { searchTag } from "@/lib/food-source";
-import { rowName, twinIdsOf } from "@/lib/food-twins";
+import { rowName, twinIdsOf } from "@/lib/food-rows";
 
 function SourceTag({ food }: { food: FoodItem }) {
   const tag = searchTag(food);

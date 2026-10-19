@@ -1,5 +1,6 @@
 import { MOCK_FOODS, catalogVersion, type FoodItem } from "./mock/foods";
-import { COOKED_WORDS, RAW_COOKED_PAIRS, RAW_WORDS, rankIn, rowKey, cookStateOf, isPlainCooked, ownCookState, wordRe } from "./yield";
+import { searchWithTwins } from "./search";
+import { COOKED_WORDS, RAW_COOKED_PAIRS, RAW_WORDS, rankIn, rowKey, cookStateOf, isPlainCooked, isPrepared, ownCookState, wordRe } from "./yield";
 
 const PLAIN_RAW_RE = wordRe(["sống", "hạt khô", "khô"]);
 // Words that only describe a state, or the part that is thrown away (Hao 19/10: never "bỏ vỏ" or "thịt quả" in a name)
@@ -64,18 +65,18 @@ function roleOf(food: FoodItem): "raw" | "cooked" | null {
 }
 
 /** Starch staples (cơm, bún, phở, mì, miến, khoai, ngô, yến mạch) open on Chín; meat, fish, vegetables and dry beans on Sống */
-const startOf = ({ raw, cooked }: Pick<TwinGroup, "raw" | "cooked">) => (raw.category === "tinh_bot" || /^(khoai|ngô)/i.test(raw.nameVi) ? cooked : raw);
+const startOf = (raw: FoodItem, cooked: FoodItem) => (raw.category === "tinh_bot" || /^(khoai|ngô)/i.test(raw.nameVi) ? cooked : raw);
 
 function build(foods: readonly FoodItem[]): TwinIndex {
   const byId = new Map<string, TwinGroup>();
-  const groups: TwinGroup[] = [];
   // A raw row takes its first cooked row, and any other plain cooked row of the same raw. A cooked row that several raw
   // rows point at (Cơm trắng) belongs to the first; the others stay rows of their own.
   const join = (raw: FoodItem, cooked: FoodItem) => {
     const group = byId.get(raw.id);
     if (!group && !byId.has(cooked.id)) {
-      const made = { raw, cooked, members: [raw, cooked] } as TwinGroup;
-      groups.push(made);
+      // The row a list opens has the name people say ("Cơm trắng", not "Gạo tẻ trắng (hạt khô)")
+      const start = startOf(raw, cooked);
+      const made: TwinGroup = { raw, cooked, members: [raw, cooked], start, name: stripCookState(start.nameVi) };
       byId.set(raw.id, made).set(cooked.id, made);
     } else if (group?.raw === raw && !byId.has(cooked.id) && isPlainCooked(cooked.nameVi)) {
       group.members.push(cooked);
@@ -111,12 +112,6 @@ function build(foods: readonly FoodItem[]): TwinIndex {
     for (const row of cooked) join(raw[0], row);
     const group = byId.get(raw[0].id);
     for (const row of raw.slice(1)) if (group && !byId.has(row.id)) byId.set(row.id, group), group.members.push(row);
-  }
-
-  // The row a list opens has the name people say ("Cơm trắng", not "Gạo tẻ trắng (hạt khô)")
-  for (const group of groups) {
-    group.start = startOf(group);
-    group.name = stripCookState(group.start.nameVi);
   }
   return { version: catalogVersion(), size: foods.length, byId };
 }
@@ -166,3 +161,6 @@ export function dedupeTwins<T>(items: readonly T[], foodOf: (item: T) => FoodIte
     return true;
   });
 }
+
+/** The search with one row per food (lib/search searchWithTwins with this index). */
+export const searchRows = (foods: FoodItem[], query: string): FoodItem[] => searchWithTwins(foods, query, { groupOf: twinGroupOf, collapse: collapseTwins, prepared: isPrepared });

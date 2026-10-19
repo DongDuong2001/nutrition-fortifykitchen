@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { SectionTitle } from "@/components/ui/section-title";
 import { FoodRowLink } from "./food-row-link";
 import { foodRowMeta, foodRowKcal } from "@/lib/food-meta";
-import { rowName } from "@/lib/food-twins";
+import { rowName } from "@/lib/food-rows";
 
 const FOOD_CARD_LIMIT = 50;
 

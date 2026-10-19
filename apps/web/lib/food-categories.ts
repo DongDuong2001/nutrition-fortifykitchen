@@ -1,6 +1,7 @@
 import type { FoodItem } from "./mock/foods";
 import { resolveFavourites } from "./favourites";
-import { searchFoods, searchRows } from "./search";
+import { searchFoods } from "./search";
+import { searchRows } from "./food-rows";
 
 /** Web-side only for now. Dong adds a `category` column to foods with the same keys (see OPEN_QUESTIONS). */
 export type FoodCategory =

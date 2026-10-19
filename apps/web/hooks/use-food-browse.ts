@@ -4,7 +4,7 @@ import { useCallback, useDeferredValue, useMemo, useState } from "react";
 import type { FoodItem } from "@/lib/mock/foods";
 import { useCatalogFoods } from "@/hooks/use-catalog-foods";
 import { findSimilarFoods } from "@/lib/search";
-import { dedupeTwins, twinIdsOf } from "@/lib/food-twins";
+import { dedupeTwins, rowsReady, twinIdsOf } from "@/lib/food-rows";
 import {
   buildFoodList,
   chipCategories,
@@ -29,7 +29,12 @@ export function useFoodBrowse({ oneRowPerFood = true }: { oneRowPerFood?: boolea
 
   // Filter and search combined. Grouped only for Tất cả with no query.
   // `foods` follows the catalogue (the live load, a made food) and demo mode
-  const list = useMemo(() => buildFoodList(foods, searched, filter, favouriteIds, oneRowPerFood), [searched, filter, favouriteIds, foods, oneRowPerFood]);
+  // cc-67: a moment after the first paint the one-row-per-food index is there; a list is not drawn before (no rows that change names)
+  const waitingForRows = oneRowPerFood && !rowsReady();
+  const list = useMemo(
+    () => (waitingForRows ? { grouped: false, foods: [], groups: [] } : buildFoodList(foods, searched, filter, favouriteIds, oneRowPerFood)),
+    [searched, filter, favouriteIds, foods, oneRowPerFood, waitingForRows]
+  );
   const categories = useMemo(() => chipCategories(foods), [foods]);
   const categoryName = useCallback((food: FoodItem) => categoryLabel(categoryOf(food)), []);
   // A food is a favourite when any of its rows is (raw and cooked are one row of a list)
@@ -74,8 +79,8 @@ export function useFoodBrowse({ oneRowPerFood = true }: { oneRowPerFood?: boolea
     noFavourites,
     /** The catalogue the list is built from changed: put it in the deps of anything read from MOCK_FOODS. */
     catalogVersion: version,
-    /** The live catalogue is not here yet: show "Đang tải món…", not an empty state. */
-    catalogPending,
+    /** The live catalogue is not here yet (or the one-row-per-food index, a moment after the first paint): show "Đang tải món…", not an empty state. */
+    catalogPending: catalogPending || waitingForRows,
     /** The live load brought nothing: offer Thử lại (retryCatalog). */
     catalogFailed,
     retryCatalog,

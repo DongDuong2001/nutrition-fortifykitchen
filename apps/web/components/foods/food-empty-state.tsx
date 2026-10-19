@@ -1,5 +1,5 @@
 import React from "react";
-import { rowName } from "@/lib/food-twins";
+import { rowName } from "@/lib/food-rows";
 import type { FoodItem } from "@/lib/mock/foods";
 import { CreateFoodButton } from "@/components/foods/create-food-button";
 import { categoryLabel, isCategoryFilter, type FoodFilter } from "@/lib/food-categories";

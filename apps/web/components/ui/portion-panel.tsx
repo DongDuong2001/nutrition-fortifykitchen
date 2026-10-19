@@ -1,19 +1,19 @@
 "use client";
 
-import React, { Suspense, lazy, useMemo } from "react";
+import React, { Suspense, lazy, useCallback, useMemo, useState } from "react";
 import Link from "next/link";
 import { type FoodItem, MOCK_FOODS } from "@/lib/mock/foods";
 import { type MealSlot, getMealSlotNameVi } from "@/lib/meal-slot";
 import { parseGramsInput, calculateMacroPreview, macroGramsText, scaleNutrients, gramsServingLabel, unitAmountText, parsePortionLabel, portionModeOf, portionNote, portionSummary } from "@/lib/portion";
 import { cookSwitchFor } from "@/lib/yield";
 import { PortionArea } from "@/components/ui/portion-area";
-import type { AddOnEntry } from "@/lib/dish-recipes";
-import { formatAmount } from "@/lib/format";
+import type { DishEdit } from "@/lib/dish-recipes";
+import { formatAmount, formatNumber } from "@/lib/format";
 import { getNutrientDefinition } from "@/lib/nutrients";
 import { useDiary } from "@/lib/diary-store";
 import { canLog as canLogFood, energyNotice } from "@/lib/diary-edits";
 import { kcalValue } from "@/lib/kcal";
-import { rowName } from "@/lib/food-twins";
+import { rowName } from "@/lib/food-rows";
 
 // cc-54: the Thành phần of a dish (and the recipes with it) is its own chunk, fetched when a Món Việt food's panel opens
 const DishParts = lazy(() => import("@/components/ui/dish-parts").then((m) => ({ default: m.DishParts })));
@@ -34,10 +34,13 @@ export interface PortionPanelProps {
   /** The heading's id, for a sheet that is named by it */
   headingId?: string;
   /**
-   * cc-54: where the add-ons of a dish ("+ Bún") that are switched on are reported, as entries to log with it. Without
-   * this a dish shows no Thành phần (a screen that cannot log the extras does not offer them).
+   * cc-54, cc-67: where the Thành phần of a dish reports its parts as the user changed them (the parts added up, and a way
+   * to make the one-off food of the changed dish). Without this a dish shows no Thành phần (a screen that cannot log
+   * the changed dish does not offer to change it).
    */
-  onExtrasChange?: (entries: AddOnEntry[]) => void;
+  onDishEdit?: (edit: DishEdit | null) => void;
+  /** Why the last add did not happen (the changed dish could not be stored on this device) */
+  notice?: string | null;
 }
 
 /**
@@ -59,11 +62,22 @@ export function PortionPanel({
   className = "",
   onFoodChange,
   headingId,
-  onExtrasChange,
+  onDishEdit,
+  notice: addNotice,
 }: PortionPanelProps) {
   const canLog = canLogFood(food);
   const notice = energyNotice(food);
   const parsedGrams = useMemo(() => parseGramsInput(gramsInput), [gramsInput]);
+  // cc-67: the parts of a dish changed for this meal: their sum is what is shown and logged
+  const [dish, setDish] = useState<DishEdit | null>(null);
+  const changed = dish?.edited ? dish : null;
+  const handleDish = useCallback(
+    (next: DishEdit | null) => {
+      setDish(next);
+      onDishEdit?.(next);
+    },
+    [onDishEdit]
+  );
 
   // How the amount reads: "3 quả lớn", "300 g đã nấu chín"; a unit food keeps its quantity ("2 viên")
   const mode = portionModeOf(food);
@@ -73,10 +87,11 @@ export function PortionPanel({
   const canSwap = !!onFoodChange;
   const sw = useMemo(() => (mode === "grams" ? cookSwitchFor(food, MOCK_FOODS, canSwap) : null), [mode, food, canSwap]);
   const amountText = unitAmountText(food, selectedServingLabel, parsedGrams) ?? (selectedServingLabel.includes("g") ? gramsServingLabel(parsedGrams) : selectedServingLabel);
-  const summary = portion ? portionSummary(portion, sw) : amountText;
+  const summary = changed ? `${formatNumber(changed.grams)} g · đã chỉnh` : portion ? portionSummary(portion, sw) : amountText;
   const note = portion ? portionNote(portion, sw, parsedGrams, mode === "egg", food.category === "trai_cay") : null;
 
-  const macroPreview = useMemo(() => calculateMacroPreview(food.nutrients, parsedGrams), [food, parsedGrams]);
+  const shownGrams = changed ? changed.grams : parsedGrams;
+  const macroPreview = useMemo(() => calculateMacroPreview(changed ? changed.per100 : food.nutrients, shownGrams), [food, changed, shownGrams]);
 
   // Daily targets from the profile, for the micronutrient %
   const { targets: dailyTargets } = useDiary();
@@ -84,7 +99,7 @@ export function PortionPanel({
   // Scaled micros for desktop
   const scaledMicros = useMemo(() => {
     if (!showMicros) return [];
-    const scaled = scaleNutrients(food.nutrients, parsedGrams);
+    const scaled = scaleNutrients(changed ? changed.per100 : food.nutrients, shownGrams);
 
     const list: { name: string; value: string; pct: number | null }[] = [];
 
@@ -109,10 +124,10 @@ export function PortionPanel({
       }
     }
     return list;
-  }, [food, parsedGrams, dailyTargets, showMicros]);
+  }, [food, changed, shownGrams, dailyTargets, showMicros]);
 
   const mealNameVi = mealSlot ? getMealSlotNameVi(mealSlot) : "bữa ăn";
-  const cannotAdd = isSubmitting || parsedGrams <= 0 || mealSlot === null || !canLog;
+  const cannotAdd = isSubmitting || shownGrams <= 0 || mealSlot === null || !canLog || (!!changed && typeof changed.per100.energy !== "number");
 
   return (
     <div data-align-container="portion-panel" data-tour="portion-panel" className={`flex flex-col gap-4 text-text ${className}`}>
@@ -187,10 +202,15 @@ export function PortionPanel({
       )}
       {notice && canLog && <p role="note" className="m-0 text-[13px] leading-snug text-secondary">{notice}</p>}
       {/* cc-54: what is inside a premade dish, and its add-ons for this meal */}
-      {onExtrasChange && food.category === "mon_viet" && (
+      {onDishEdit && food.category === "mon_viet" && (
         <Suspense fallback={null}>
-          <DishParts key={food.id} food={food} portionGrams={parsedGrams} onAddOns={onExtrasChange} />
+          <DishParts key={food.id} food={food} portionGrams={parsedGrams} onEdit={handleDish} />
         </Suspense>
+      )}
+      {addNotice && (
+        <p role="alert" className="m-0 rounded-xl bg-warning-bg px-3 py-2 text-[13px] leading-snug text-warning-text">
+          {addNotice}
+        </p>
       )}
 
       {/* Side by side on a phone; stacked in the narrower desktop pane, the add on top */}

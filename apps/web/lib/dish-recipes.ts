@@ -1,5 +1,8 @@
-import { catalogVersion, type FoodItem } from "./mock/foods";
-import { calculateMacroPreview, gramsServingLabel } from "./portion";
+import { EDITED_DISH_SUFFIX, catalogFoodById, catalogVersion, type FoodItem } from "./mock/foods";
+import { calculateMacroPreview } from "./portion";
+import { RECIPE_ID_PREFIX, rawTotalGrams, sameServerFood, totalNutrients, type Recipe, type RecipeIngredient } from "./recipe";
+import { readRecipes, saveRecipe } from "./recipe-store";
+import { generateUuid } from "./uuid";
 
 /**
  * cc-54: what is inside a premade Vietnamese dish (the "Thành phần" of the portion sheet), and the add-ons a person can
@@ -138,22 +141,82 @@ export function scaledAddOn(addOn: DishAddOn, servings: number): { grams: number
   return { grams, kcal: calculateMacroPreview(addOn.food.nutrients, grams).calories };
 }
 
-export interface AddOnEntry {
-  food: FoodItem;
+/* ---------------------------------------------------------------------------------------------------------------- */
+/* cc-67: the parts of a dish can be changed for one meal (Hao 19/10). Each part keeps its grams for ONE serving, so    */
+/* the portion above still scales them all, the edited ones too.                                                       */
+/* ---------------------------------------------------------------------------------------------------------------- */
+
+/** A row of the Thành phần being edited */
+export interface EditPart {
+  key: string;
+  name: string;
+  /** The catalogue food, or null (a part with no data cannot be changed: its nutrients are unknown) */
+  food: FoodItem | null;
+  /** The recipe's grams for one serving (0 for an add-on) */
+  base: number;
+  /** The grams for one serving now: what the portion scales */
+  perServing: number;
+  /** Put in by an add-on chip */
+  added?: boolean;
+}
+
+export const EDIT_STEP_GRAMS = 10;
+export const addOnKey = (addOn: Pick<DishAddOn, "label">) => `add|${addOn.label}`;
+
+/**
+ * The parts to show: the recipe's, with the grams the user typed (`grams`, per serving, by part key), then the add-ons
+ * that are on (`added`, by chip label) with their own grams unless typed. Keyed state, not a copy of the rows, so a
+ * catalogue that arrives late (an ingredient's data) fills the rows without losing what was typed.
+ */
+export function editParts(view: DishView, grams: Readonly<Record<string, number>>, added: readonly string[]): EditPart[] {
+  const own = (key: string, perServing: number) => grams[key] ?? perServing;
+  const rows: EditPart[] = view.parts.map((p) => ({ key: p.key, name: p.name, food: p.food, base: p.grams, perServing: own(p.key, p.grams) }));
+  for (const addOn of view.addOns) {
+    if (added.includes(addOn.label)) rows.push({ key: addOnKey(addOn), name: addOn.food.nameVi, food: addOn.food, base: 0, perServing: own(addOnKey(addOn), addOn.grams), added: true });
+  }
+  return rows;
+}
+
+/** Grams of a part for this portion. */
+export const partGrams = (part: EditPart, servings: number): number => tenth(part.perServing * servings);
+
+/** Whether the parts differ from the recipe: a part changed, taken out, or put in. */
+export const isEdited = (parts: readonly EditPart[]): boolean => parts.some((p) => Math.abs(p.perServing - p.base) > 1e-6);
+
+/** Every part of the dish has data, so its numbers can be added up: otherwise the parts are shown but not changed. */
+export const canEditParts = (parts: readonly EditPart[]): boolean => parts.length > 0 && parts.every((p) => p.food !== null);
+
+/** What the edited dish adds up to for this portion: the weight, and the numbers per 100 g (null where a part lacks it). */
+export function editTotals(parts: readonly EditPart[], servings: number): { grams: number; per100: Record<string, number | null>; ingredients: RecipeIngredient[] } {
+  const ingredients = parts.flatMap((p): RecipeIngredient[] => (p.food && partGrams(p, servings) > 0 ? [{ foodId: p.food.id, name: p.name, grams: partGrams(p, servings), unit: "g" }] : []));
+  const grams = rawTotalGrams(ingredients);
+  const total = totalNutrients(ingredients, (id) => parts.find((p) => p.food?.id === id)?.food ?? null);
+  const per100 = Object.fromEntries(Object.entries(total).map(([k, v]) => [k, v === null || grams <= 0 ? null : Math.round((v / grams) * 10000) / 100]));
+  return { grams, per100, ingredients };
+}
+
+/** What the portion sheet knows of an edited dish. */
+export interface DishEdit {
+  /** The parts differ from the recipe */
+  edited: boolean;
+  /** The grams the parts add up to: what is logged */
   grams: number;
-  label: string;
+  /** The numbers of the edited dish per 100 g */
+  per100: Record<string, number | null>;
+  /** Makes the dish's one-off food (listed nowhere, like a recipe it reaches the server when it can) and returns it; null when it could not be stored on this device */
+  save: () => FoodItem | null;
 }
 
 /**
- * The entries the active add-ons log, each its own food, in the order of the chips, for the chosen portion: "+ Bún 100 g"
- * of a dish taken ×2 logs 200 g of Bún. Nothing for a portion that is not positive.
+ * The one-off food of an edited dish: a recipe of its parts named "Phở bò · đã chỉnh" that no list shows. Logged like any
+ * recipe: offline the entry waits on this device until its server food exists (lib/recipe-store, lib/diary-store), and the
+ * same edit twice is one food.
  */
-export function addOnEntries(addOns: readonly DishAddOn[], active: ReadonlySet<string>, servings: number): AddOnEntry[] {
-  if (servings <= 0) return [];
-  return addOns
-    .filter((a) => active.has(a.label))
-    .map((a) => {
-      const { grams } = scaledAddOn(a, servings);
-      return { food: a.food, grams, label: gramsServingLabel(grams) };
-    });
+export function saveEditedDish(dish: Pick<FoodItem, "nameVi">, ingredients: RecipeIngredient[]): FoodItem | null {
+  if (ingredients.length === 0) return null;
+  const made: Recipe = { id: `${RECIPE_ID_PREFIX}${generateUuid()}`, name: `${dish.nameVi}${EDITED_DISH_SUFFIX}`, servings: 1, cookedGrams: null, createdAt: new Date().toISOString(), ingredients, oneOff: true };
+  const same = readRecipes().find((r) => r.oneOff && sameServerFood(r, made));
+  const recipe = same ?? made;
+  if (!same && !saveRecipe(recipe)) return null;
+  return catalogFoodById(recipe.id) ?? null;
 }

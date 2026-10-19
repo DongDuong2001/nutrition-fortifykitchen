@@ -64,7 +64,7 @@ export function syncRecipeFoods(recipes: Recipe[] = readRecipes()): void {
     if (isRecipeId(MOCK_FOODS[i].id)) MOCK_FOODS.splice(i, 1);
   }
   MOCK_FOODS.unshift(...recipes.map((r) => recipeToFood(flattenRecipe(r, recipes), catalogueLookup)));
-  setHiddenFoodIds(recipes.flatMap((r) => [...(r.serverFoodId ? [r.serverFoodId] : []), ...(r.pastServerFoodIds ?? [])]));
+  setHiddenFoodIds(recipes.flatMap((r) => [...(r.oneOff ? [r.id] : []), ...(r.serverFoodId ? [r.serverFoodId] : []), ...(r.pastServerFoodIds ?? [])]));
   catalogChanged();
 }
 

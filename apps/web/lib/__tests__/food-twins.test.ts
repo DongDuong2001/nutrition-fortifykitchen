@@ -3,8 +3,10 @@ import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { MOCK_FOODS, catalogChanged, type FoodItem } from "../mock/foods";
 import { collapseTwins, dedupeTwins, rowName, stripCookState, tidyName, twinGroupOf, twinIdsOf } from "../food-twins";
-import { searchFoods, searchRows } from "../search";
+import { searchFoods } from "../search";
+import { searchRows } from "../food-twins";
 import { buildFoodList } from "../food-categories";
+import { collapseTwins as facadeCollapse, dedupeTwins as facadeDedupe, loadFoodRows, rowName as facadeName, rowsReady, searchRows as facadeSearch, twinIdsOf as facadeIds } from "../food-rows";
 import { cookSwitchFor } from "../yield";
 
 interface FixturePair {
@@ -225,7 +227,8 @@ describe("raw and cooked twins are one row (cc-67)", () => {
 
 describe("search returns one row per food (cc-67)", () => {
   let catalogue: FoodItem[];
-  beforeAll(() => {
+  beforeAll(async () => {
+    await loadFoodRows();
     catalogue = [
       ...fromFixture(),
       row("Khoai lang chiên", "tinh_bot"),
@@ -303,5 +306,20 @@ describe("search returns one row per food (cc-67)", () => {
   it("collapses favourites too", () => {
     const both = [find(catalogue, "Khoai tây (sống)").id, find(catalogue, "Khoai tây (luộc)").id];
     expect(buildFoodList(catalogue, "", "favorite", both).foods).toHaveLength(1);
+  });
+});
+
+describe("the screens' view of it (lib/food-rows)", () => {
+  it("one row per food once the index is loaded: names, ids, dedupe, collapse and search follow lib/food-twins", async () => {
+    const catalogue = [row("Khoai tây (sống)", "tinh_bot"), row("Khoai tây (luộc)", "tinh_bot"), row("Bơ", "trai_cay")];
+    install(catalogue);
+    await loadFoodRows();
+    expect(rowsReady()).toBe(true);
+    expect(facadeName(catalogue[1])).toBe("Khoai tây");
+    expect(facadeIds(catalogue[0])).toEqual([catalogue[0].id, catalogue[1].id]);
+    expect(facadeDedupe(catalogue, (f) => f)).toEqual([catalogue[0], catalogue[2]]);
+    expect(facadeCollapse(catalogue).map((f) => f.nameVi)).toEqual(["Khoai tây (luộc)", "Bơ"]);
+    expect(facadeSearch(catalogue, "khoai").map((f) => f.nameVi)).toEqual(["Khoai tây (luộc)"]);
+    install(original);
   });
 });

@@ -14,7 +14,7 @@ import { FoodCardLink } from "@/components/foods/food-card-link";
 import { RichCarousel } from "@/components/explore/rich-carousel";
 import { foodRowKcal, foodRowMeta } from "@/lib/food-meta";
 import { isOwnFood } from "@/lib/food-categories";
-import { dedupeTwins, rowName } from "@/lib/food-twins";
+import { dedupeTwins, rowName } from "@/lib/food-rows";
 import { FoodRowLink } from "@/components/foods/food-row-link";
 import { SavedMealsCard } from "@/components/explore/saved-meals-card";
 import { CoachesCarousel } from "@/components/coaching/coaches-carousel";

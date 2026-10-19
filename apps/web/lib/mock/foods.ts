@@ -79,10 +79,15 @@ export function weighedFruit<T extends { category?: string; servings: FoodServin
  */
 export function browsableFoods(): FoodItem[] {
   // Live mode lists the database's foods (and the user's own) only: the sample foods never mix in, not even before
-  // the database catalogue has arrived. A recipe's server food is listed as the recipe, never a second time.
-  if (isLiveMode()) return MOCK_FOODS.filter((f) => !SAMPLE_FOOD_IDS.has(f.id) && !hiddenFoodIds.has(f.id));
-  return demoActive() ? MOCK_FOODS : MOCK_FOODS.filter((f) => !f.demoOnly);
+  // the database catalogue has arrived. A recipe's server food is listed as the recipe, never a second time. A dish
+  // the user changed for one meal (cc-67) is a food of its own that no list shows, here or on another device.
+  const listed = (f: FoodItem) => !hiddenFoodIds.has(f.id) && !f.nameVi.endsWith(EDITED_DISH_SUFFIX);
+  if (isLiveMode()) return MOCK_FOODS.filter((f) => !SAMPLE_FOOD_IDS.has(f.id) && listed(f));
+  return (demoActive() ? MOCK_FOODS : MOCK_FOODS.filter((f) => !f.demoOnly)).filter(listed);
 }
+
+/** The name of a premade dish whose parts were changed for one meal: "Phở bò · đã chỉnh" (a hidden food, lib/dish-recipes). */
+export const EDITED_DISH_SUFFIX = " · đã chỉnh";
 
 let hiddenFoodIds: ReadonlySet<string> = new Set();
 
@@ -1172,8 +1177,6 @@ MOCK_FOODS.push({
     protein: 1.57,
     fat: 0.05,
     fiber: 3,
-    potassium: 337,
-    vitamin_a: 709,
   },
 });
 
