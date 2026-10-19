@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"math"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -100,5 +101,98 @@ func TestStorageAndOutboxAgeKindsAccepted(t *testing.T) {
 		if rec.Code != http.StatusNoContent {
 			t.Errorf("kind %s: status %d, want 204", kind, rec.Code)
 		}
+	}
+}
+
+func TestVitalsReportIsLoggedWithMetricPageAndValue(t *testing.T) {
+	buf := capture(t)
+	user := uuid.New()
+	rec := post(`{"kind":"vitals","name":"LCP","page":"/app?date=2026-10-20#top","value":2431.5,"version":"2026-10-20.1"}`, &user)
+	if rec.Code != http.StatusNoContent {
+		t.Fatalf("status %d: %s", rec.Code, rec.Body.String())
+	}
+	var line map[string]any
+	if err := json.Unmarshal(buf.Bytes(), &line); err != nil {
+		t.Fatalf("not one JSON line: %q", buf.String())
+	}
+	want := map[string]any{
+		"event": "client_error", "kind": "vitals", "metric": "LCP", "page": "/app", "value": 2431.5,
+		"version": "2026-10-20.1", "user_id": user.String(), "level": "info", "message": "client_error",
+	}
+	for k, v := range want {
+		if line[k] != v {
+			t.Errorf("%s = %v, want %v", k, line[k], v)
+		}
+	}
+	for _, k := range []string{"error_message", "status", "method", "path"} {
+		if _, ok := line[k]; ok {
+			t.Errorf("vitals line has the failure field %s: %s", k, buf.String())
+		}
+	}
+}
+
+func TestVitalsAcceptsEveryMetricAndZero(t *testing.T) {
+	capture(t)
+	for _, name := range []string{"LCP", "INP", "CLS", "FCP", "TTFB"} {
+		for _, value := range []string{"0", "0.05", "1200"} {
+			rec := post(`{"kind":"vitals","name":"`+name+`","page":"/app","value":`+value+`}`, nil)
+			if rec.Code != http.StatusNoContent {
+				t.Errorf("%s %s: status %d, want 204", name, value, rec.Code)
+			}
+		}
+	}
+}
+
+func TestVitalsPageIsCut(t *testing.T) {
+	buf := capture(t)
+	post(`{"kind":"vitals","name":"CLS","page":"/`+strings.Repeat("p", 2000)+`","value":0.1}`, nil)
+	var line map[string]any
+	_ = json.Unmarshal(buf.Bytes(), &line)
+	if n := len(line["page"].(string)); n > 120 {
+		t.Fatalf("page kept %d characters", n)
+	}
+}
+
+func TestBadVitalsAreRefused(t *testing.T) {
+	buf := capture(t)
+	for name, body := range map[string]string{
+		"unknown metric":     `{"kind":"vitals","name":"FID","page":"/app","value":1}`,
+		"lowercase metric":   `{"kind":"vitals","name":"lcp","page":"/app","value":1}`,
+		"missing metric":     `{"kind":"vitals","page":"/app","value":1}`,
+		"missing value":      `{"kind":"vitals","name":"LCP","page":"/app"}`,
+		"null value":         `{"kind":"vitals","name":"LCP","page":"/app","value":null}`,
+		"negative value":     `{"kind":"vitals","name":"LCP","page":"/app","value":-1}`,
+		"string value":       `{"kind":"vitals","name":"LCP","page":"/app","value":"12"}`,
+		"overflowing value":  `{"kind":"vitals","name":"LCP","page":"/app","value":1e999}`,
+		"non-finite literal": `{"kind":"vitals","name":"LCP","page":"/app","value":NaN}`,
+	} {
+		if rec := post(body, nil); rec.Code != http.StatusBadRequest {
+			t.Errorf("%s: status %d, want 400", name, rec.Code)
+		}
+	}
+	if buf.Len() != 0 {
+		t.Errorf("a refused report was logged: %s", buf.String())
+	}
+}
+
+func TestValidVitalsRejectsNonFinite(t *testing.T) {
+	for _, v := range []float64{math.NaN(), math.Inf(1), math.Inf(-1), -0.001} {
+		v := v
+		if validVitals(Report{Kind: "vitals", Name: "LCP", Value: &v}) {
+			t.Errorf("value %v accepted", v)
+		}
+	}
+}
+
+func TestVitalsFieldsDoNotMakeOtherKindsDifferent(t *testing.T) {
+	buf := capture(t)
+	post(`{"kind":"sync","route":"/app","message":"x","name":"LCP","page":"/y","value":3}`, nil)
+	var line map[string]any
+	_ = json.Unmarshal(buf.Bytes(), &line)
+	if line["level"] != "warn" || line["kind"] != "sync" {
+		t.Fatalf("a non-vitals report changed: %s", buf.String())
+	}
+	if _, ok := line["metric"]; ok {
+		t.Errorf("a non-vitals report logged vitals fields: %s", buf.String())
 	}
 }

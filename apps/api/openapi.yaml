@@ -502,6 +502,11 @@ paths:
       description: >-
         Signed in or not (the user id is logged when there is a session). At most 10 a minute per user or address.
         The route and path lose their query string and every field is cut short; nothing else personal is kept.
+
+        Kind vitals is a web-vitals sample, not a failure: send name (LCP, INP, CLS, FCP or TTFB), page (the route
+        path; the query is dropped) and value (a number, zero or more) and leave the failure fields out. It is logged
+        with the same event and message at info level, with the fields metric, page and value. An unknown name, a
+        missing, negative or non-numeric value is a 400. Vitals share the per-user rate limit with failure reports.
       requestBody:
         required: true
         content:
@@ -510,13 +515,16 @@ paths:
               type: object
               required: [kind]
               properties:
-                kind: { type: string, enum: [write, sync, share, setup] }
+                kind: { type: string, enum: [write, sync, share, setup, storage, outbox_age, vitals] }
                 route: { type: string, description: The app screen, e.g. /app }
                 method: { type: string }
                 path: { type: string, description: The API path that answered }
                 status: { type: integer }
                 message: { type: string, description: The server's message or the error text }
                 version: { type: string, description: The app version (sw.js VERSION) }
+                name: { type: string, enum: [LCP, INP, CLS, FCP, TTFB], description: Kind vitals only. The metric }
+                page: { type: string, description: Kind vitals only. The route path, e.g. /app }
+                value: { type: number, minimum: 0, description: 'Kind vitals only. The metric value: milliseconds, or unitless for CLS' }
       responses:
         '204': { description: Logged }
         '400': { description: Not a valid report }
