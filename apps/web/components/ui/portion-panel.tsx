@@ -74,7 +74,7 @@ export function PortionPanel({
   const sw = useMemo(() => (mode === "grams" ? cookSwitchFor(food, MOCK_FOODS, canSwap) : null), [mode, food, canSwap]);
   const amountText = unitAmountText(food, selectedServingLabel, parsedGrams) ?? (selectedServingLabel.includes("g") ? gramsServingLabel(parsedGrams) : selectedServingLabel);
   const summary = portion ? portionSummary(portion, sw) : amountText;
-  const note = portion ? portionNote(portion, sw, parsedGrams, mode === "egg") : null;
+  const note = portion ? portionNote(portion, sw, parsedGrams, mode === "egg", food.category === "trai_cay") : null;
 
   const macroPreview = useMemo(() => calculateMacroPreview(food.nutrients, parsedGrams), [food, parsedGrams]);
 

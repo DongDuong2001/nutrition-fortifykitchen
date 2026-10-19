@@ -117,7 +117,7 @@ def tap_targets_ok(pg, selector, where):
 def check_recents(browser, size_name, size):
     recents = [
         {"foodId": "food-yen-mach", "servingLabel": "45 g"},
-        {"foodId": "food-chuoi", "servingLabel": "1 quả"},
+        {"foodId": "food-chuoi", "servingLabel": "100 g"},
         {"foodId": "food-cha-la", "servingLabel": "30 g"},
     ]
     ctx, pg = new_page(browser, size, recents=recents)
@@ -166,7 +166,7 @@ def check_recents(browser, size_name, size):
 
 # 2. Favourites: with history = add, without history = portion panel
 def check_favourites(browser, size_name, size):
-    recents = [{"foodId": "food-chuoi", "servingLabel": "1 quả"}]
+    recents = [{"foodId": "food-chuoi", "servingLabel": "100 g"}]
     ctx, pg = new_page(browser, size, recents=recents, favourites=["food-cha-la", "food-chuoi"])
     go(pg, "/add?meal=dinner")
     pg.locator("[aria-label='Lọc món theo nhóm'] button:has-text('Yêu thích'):visible").first.click()
@@ -186,7 +186,7 @@ def check_favourites(browser, size_name, size):
     pg.locator("[data-food-row]:visible:has-text('Chuối')").first.click()
     pg.wait_for_url(re.compile(r".*/app(\?.*)?$"))
     pg.wait_for_timeout(300)
-    check("Chuối 1 quả" in toast_text(pg), f"{size_name} favourite with history: adds with its last portion ({toast_text(pg)!r})")
+    check("Chuối 100 g" in toast_text(pg), f"{size_name} favourite with history: adds with its last portion ({toast_text(pg)!r})")
     ctx.close()
 
 

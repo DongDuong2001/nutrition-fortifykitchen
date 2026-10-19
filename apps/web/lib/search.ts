@@ -1,5 +1,6 @@
 import { catalogVersion, type FoodItem } from "./mock/foods";
 import { collapseTwins, twinGroupOf, type TwinGroup } from "./food-twins";
+import { isPrepared } from "./yield";
 
 /**
  * Remove Vietnamese diacritical marks and tone markers for fuzzy/ascii comparison.
@@ -60,13 +61,6 @@ function foldedOf(food: FoodItem): Folded {
   return f;
 }
 
-/**
- * A name that says the food was made into something else (chiên, xào, nướng, kho, rim, rang, quay, sốt): in a search
- * for the food it comes after the plain row, whatever its length ("Thịt bò kho" after "Thịt bò nạc").
- */
-const PREPARED_RE = /(?:^|[\s(,/])(?:chiên|rán|xào|nướng|kho|rim|rang|quay|sốt)(?=$|[\s),/])/iu;
-const isPrepared = (name: string) => PREPARED_RE.test(name);
-
 /** One Vietnamese collator for every comparison (a new one per localeCompare call is slow). */
 const VI_COLLATOR = new Intl.Collator("vi");
 
@@ -113,20 +107,12 @@ function withoutDuplicates(foods: FoodItem[]): FoodItem[] {
  */
 export function queryVariants(query: string): string[] {
   const q = norm(query);
-  const variants = [q];
-  if (/\btrái\b/i.test(q)) {
-    variants.push(q.replace(/\btrái\b/gi, "quả"));
-    variants.push(q.replace(/\btrái\s+/gi, ""));
-  } else if (/\btrai\b/i.test(q)) {
-    variants.push(q.replace(/\btrai\b/gi, "qua"));
-    variants.push(q.replace(/\btrai\s+/gi, ""));
-  } else if (/\bquả\b/i.test(q)) {
-    variants.push(q.replace(/\bquả\b/gi, "trái"));
-    variants.push(q.replace(/\bquả\s+/gi, ""));
-  } else if (/\bqua\b/i.test(q)) {
-    variants.push(q.replace(/\bqua\b/gi, "trai"));
-    variants.push(q.replace(/\bqua\s+/gi, ""));
-  }
+  // trái ↔ quả (accented or not), and the query without the classifier
+  const swap: Record<string, string> = { "trái": "quả", trai: "qua", "quả": "trái", qua: "trai" };
+  const word = /\b(trái|trai|quả|qua)\b/i.exec(q)?.[1].toLowerCase();
+  const variants = word
+    ? [q, q.replace(new RegExp(`\\b${word}\\b`, "gi"), swap[word]), q.replace(new RegExp(`\\b${word}\\s+`, "gi"), "")]
+    : [q];
   return Array.from(new Set(variants.map(norm).filter(Boolean)));
 }
 

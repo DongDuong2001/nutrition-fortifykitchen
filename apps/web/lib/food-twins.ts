@@ -1,11 +1,13 @@
 import { MOCK_FOODS, catalogVersion, type FoodItem } from "./mock/foods";
-import { COOKED_WORDS, RAW_COOKED_PAIRS, RAW_WORDS, rankIn, rowKey, cookStateOf, isPlainCooked, ownCookState, wordRe, yieldGroupOf } from "./yield";
+import { COOKED_WORDS, RAW_COOKED_PAIRS, RAW_WORDS, rankIn, rowKey, cookStateOf, isPlainCooked, ownCookState, wordRe } from "./yield";
 
-const PLAIN_RAW_RE = wordRe(["sống", "hạt khô"]);
-// Words that only describe a state, to take out of a name that stands for both states ("Khoai lang luộc" → "Khoai lang")
-const STRIP_WORDS = [...COOKED_WORDS, ...RAW_WORDS, "hầm", "áp chảo"];
+const PLAIN_RAW_RE = wordRe(["sống", "hạt khô", "khô"]);
+// Words that only describe a state, or the part that is thrown away (Hao 19/10: never "bỏ vỏ" or "thịt quả" in a name)
+const REFUSE_WORDS = ["bỏ vỏ", "cả vỏ", "bóc vỏ", "thịt quả", "bỏ hạt", "bỏ xương"];
+const STRIP_WORDS = [...COOKED_WORDS, ...RAW_WORDS, "hầm", "áp chảo", ...REFUSE_WORDS];
 const STRIP_PAREN_RE = wordRe(STRIP_WORDS);
 const STRIP_BARE_RE = wordRe(STRIP_WORDS, "giu");
+const REFUSE_RE = new RegExp(`\\s*(?<=^|[\\s(,/])(?:${REFUSE_WORDS.join("|")})(?=$|[\\s),/])`, "giu");
 
 /**
  * The name without its state: the brackets that only hold a state or a cooking word go ("Cá lóc (cá quả, sống)" is
@@ -15,6 +17,15 @@ export function stripCookState(nameVi: string): string {
   const kept = nameVi.replace(/\s*\(([^)]*)\)/g, (all, inner: string) => (STRIP_PAREN_RE.test(inner) ? "" : all));
   const bare = kept.replace(STRIP_BARE_RE, (all) => all.slice(0, all.length - all.trimStart().length));
   return bare.replace(/\s+/g, " ").replace(/\s+([),])/g, "$1").trim() || nameVi;
+}
+
+/**
+ * A name as a list shows it when the food has no twin: without bỏ vỏ, cả vỏ, thịt quả ("Khoai lang (nướng, cả vỏ)" is
+ * "Khoai lang (nướng)"); the avocado is Bơ (trái), as Bơ lạt exists.
+ */
+export function tidyName(nameVi: string): string {
+  const tidy = nameVi.replace(REFUSE_RE, "").replace(/\(\s*,?\s*\)/g, "").replace(/\(\s*,\s*/g, "(").replace(/,\s*\)/g, ")").replace(/\s+/g, " ").trim();
+  return (tidy || nameVi).replace(/^(?:quả|trái) bơ$/i, "Bơ (trái)");
 }
 
 /**
@@ -43,10 +54,6 @@ interface TwinIndex {
   byId: ReadonlyMap<string, TwinGroup>;
 }
 
-/** Foods eaten cooked: a list row for them opens on Chín. Dry beans are weighed dry, so they open on Sống. */
-const COOKED_START = /^(khoai|củ|ngô|bắp ngô|bắp mỹ)(?=$|[\s(,])/iu;
-const COOKED_START_GROUPS = ["rice", "pasta", "noodle", "tuber", "grain"];
-
 /** A row that can be one state of a food: not an egg, not the user's own, not a supplement or a dish. Vegetables count since cc-67. */
 const canGroup = (food: FoodItem) => !/^(trứng|lòng (trắng|đỏ))(?=$|[\s(,])/iu.test(food.nameVi) && food.source !== "user" && ["dam", "tinh_bot", "rau"].includes(food.category);
 
@@ -56,12 +63,8 @@ function roleOf(food: FoodItem): "raw" | "cooked" | null {
   return PLAIN_RAW_RE.test(food.nameVi) || (cookStateOf(food.nameVi) === null && ownCookState(food) === "raw") ? "raw" : null;
 }
 
-function startOf({ raw, cooked }: Pick<TwinGroup, "raw" | "cooked">): FoodItem {
-  const group = yieldGroupOf(raw) ?? yieldGroupOf(cooked);
-  if (group === "legume") return raw;
-  if (COOKED_START_GROUPS.includes(group ?? "") || COOKED_START.test(stripCookState(cooked.nameVi))) return cooked;
-  return raw.category === "tinh_bot" ? cooked : raw;
-}
+/** Starch staples (cơm, bún, phở, mì, miến, khoai, ngô, yến mạch) open on Chín; meat, fish, vegetables and dry beans on Sống */
+const startOf = ({ raw, cooked }: Pick<TwinGroup, "raw" | "cooked">) => (raw.category === "tinh_bot" || /^(khoai|ngô)/i.test(raw.nameVi) ? cooked : raw);
 
 function build(foods: readonly FoodItem[]): TwinIndex {
   const byId = new Map<string, TwinGroup>();
@@ -131,7 +134,7 @@ export function twinGroupOf(food: Pick<FoodItem, "id"> | null | undefined): Twin
 
 /** What a list shows for a food: the name without its state when raw and cooked share a row, else its own name. */
 export function rowName(food: Pick<FoodItem, "id" | "nameVi">): string {
-  return twinGroupOf(food)?.name ?? food.nameVi;
+  return twinGroupOf(food)?.name ?? tidyName(food.nameVi);
 }
 
 /** The ids of every row of the food ([id] for a row that is alone): a list row is selected, favourite or in the tray by any of them. */

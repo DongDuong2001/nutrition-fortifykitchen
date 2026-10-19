@@ -16,7 +16,7 @@ export interface ResolvedRecent {
 export const DEFAULT_RECENT_FOODS: RecentFood[] = [
   { foodId: "food-yen-mach", servingLabel: "60 g" },
   { foodId: "food-yogurt-kefir", servingLabel: "200 ml" },
-  { foodId: "food-chuoi", servingLabel: "1 quả" },
+  { foodId: "food-chuoi", servingLabel: "100 g" },
 ];
 
 /** Guards values read back from sessionStorage. */

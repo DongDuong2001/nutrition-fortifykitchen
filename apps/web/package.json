@@ -30,6 +30,7 @@
     "test:hydration": "node scripts/py.mjs tests/probes/hydration.py",
     "probe": "node scripts/probe.mjs",
     "sizes": "node scripts/route-sizes.mjs",
+    "scan:edible": "EDIBLE_SCAN=1 vitest run lib/__tests__/edible-part-scan.test.ts",
     "probe:all": "node scripts/py.mjs tests/probes/run_all.py",
     "check": "npm run typecheck && npm run test && npm run build:demo && npm run test:align && npm run test:hydration"
   },

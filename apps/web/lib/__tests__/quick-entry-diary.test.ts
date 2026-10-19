@@ -41,7 +41,7 @@ describe("mealPortions", () => {
     expect(names).toEqual([
       ["food-yen-mach", "60 g", 60],
       ["food-yogurt-kefir", "200 ml", 200],
-      ["food-chuoi", "1 quả", 118],
+      ["food-chuoi", "118 g", 118],
     ]);
   });
 

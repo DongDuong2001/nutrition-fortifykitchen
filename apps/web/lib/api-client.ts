@@ -7,7 +7,7 @@ import {
   type MockMicroStat,
 } from "./mock/sample-day";
 import { calculateTargets } from "./targets";
-import { MOCK_FOODS, addCatalogFood, catalogChanged, setCatalogFoods, setCatalogStatus, type FoodItem } from "./mock/foods";
+import { MOCK_FOODS, addCatalogFood, catalogChanged, setCatalogFoods, setCatalogStatus, weighedFruit, type FoodItem } from "./mock/foods";
 import { searchFoods as searchMockFoods } from "./search";
 import type { SetupProfile } from "./onboarding";
 import { currentAccountId } from "./auth-actions";
@@ -52,7 +52,7 @@ export function mapApiFoodToFoodItem(raw: any): FoodItem {
     nutrients.energy = nutrients.calories;
   }
 
-  return {
+  return weighedFruit({
     id: String(raw.id),
     nameVi,
     category: raw.category || "khac",
@@ -65,7 +65,7 @@ export function mapApiFoodToFoodItem(raw: any): FoodItem {
     match: raw.match,
     sourceRef: raw.sourceRef,
     recipe: mapApiRecipe(raw.recipe),
-  };
+  });
 }
 
 /** The API's `recipe` ({ ingredients: [{ food_id, name_vi, grams }], cooked_g }); anything else is no recipe. */

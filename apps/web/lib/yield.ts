@@ -99,9 +99,12 @@ export function nameStem(nameVi: string): string {
  * sauce, char) and stay rows of their own.
  */
 const PLAIN_COOKED_RE = wordRe(["nấu chín", "chín", "luộc", "hấp"]);
+const PREPARED_RE = wordRe(["nướng", "chiên", "rán", "xào", "kho", "rim", "rang", "quay", "áp chảo", "sốt"]);
+/** True when the name says the food was made into something else (chiên, xào, nướng, kho, rim, rang, quay, sốt). */
+export const isPrepared = (nameVi: string): boolean => PREPARED_RE.test(nameVi);
 
-/** True when the name says plainly that the food is cooked: nấu chín, chín, luộc or hấp. */
-export const isPlainCooked = (nameVi: string): boolean => PLAIN_COOKED_RE.test(nameVi);
+/** True when the name says plainly that the food is cooked: nấu chín, chín, luộc or hấp, and not made into something (nướng, chiên, xào, kho...). */
+export const isPlainCooked = (nameVi: string): boolean => PLAIN_COOKED_RE.test(nameVi) && !isPrepared(nameVi);
 
 const has = (name: string, words: readonly string[]) => words.some((w) => new RegExp(`(?:^|\\s)${w}(?=$|[\\s,)])`, "iu").test(name));
 

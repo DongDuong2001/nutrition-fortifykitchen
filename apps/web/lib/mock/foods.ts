@@ -58,6 +58,21 @@ const unlisted = (db: string): FoodSourceRef => ({ db, id: "chưa rõ", verified
 
 const fdc = (id: number): FoodSourceRef => ({ db: "SR Legacy", id: `FDC ${id}`, url: `https://fdc.nal.usda.gov/food-details/${id}/nutrients`, verified: false });
 
+// A serving by weight or volume stays ("100 g", "3 oz", "200 ml"); a count ("1 quả", "1 chén") goes
+const BY_WEIGHT = /^[\d.,/ ]+\s*(?:g|kg|oz|ml|l)(?=$|[\s(])/i;
+
+/**
+ * cc-67 (Hao 19/10): fruit goes by grams of the edible part, so no trái, quả, múi or chén serving stays (the numbers are per
+ * 100 g of flesh already). The other foods with a peel, shell or bone lose theirs in the database
+ * (docs/data/edible-part-portions-2026-10-19.json, scripts/edible-part.ts).
+ */
+export function weighedFruit<T extends { category?: string; servings: FoodServing[] }>(food: T): T {
+  if (food.category !== "trai_cay") return food;
+  const kept = food.servings.filter((s) => BY_WEIGHT.test(s.label));
+  if (kept.length === food.servings.length) return food;
+  return { ...food, servings: kept.length > 0 ? kept : [{ label: "100 g", grams: 100 }] };
+}
+
 /**
  * The catalogue as lists and search read it. Foods that only exist for the demo day are left out unless demo mode
  * is on. Look-ups by id (a saved entry, a recent, a favourite) read MOCK_FOODS directly and still find them.
@@ -126,7 +141,7 @@ export function addCatalogFood(food: FoodItem): void {
 export function setCatalogFoods(foods: FoodItem[]): void {
   if (!foods || foods.length === 0) return;
   const byId = new Map(MOCK_FOODS.map((f) => [f.id, f]));
-  for (const f of foods) byId.set(f.id, f);
+  for (const f of foods) byId.set(f.id, weighedFruit(f));
   MOCK_FOODS.length = 0;
   MOCK_FOODS.push(...byId.values());
   catalogChanged();
@@ -140,7 +155,7 @@ export function addDemoFoods(foods: readonly FoodItem[]): void {
   const have = new Set(MOCK_FOODS.map((f) => f.id));
   const fresh = foods.filter((f) => !have.has(f.id));
   if (fresh.length === 0) return;
-  MOCK_FOODS.push(...fresh);
+  MOCK_FOODS.push(...fresh.map(weighedFruit));
   catalogChanged();
 }
 
@@ -767,11 +782,11 @@ export const MOCK_FOODS: FoodItem[] = [
       sodium: 27,
     },
   },
-  // 24. Quả bơ (100g = 160 kcal)
+  // 24. Bơ (trái) (100g = 160 kcal)
   {
     id: "food-bo",
     category: "trai_cay",
-    nameVi: "Quả bơ",
+    nameVi: "Bơ (trái)",
     source: "USDA",
     match: "unknown",
     sourceRef: fdc(171705),
@@ -1163,6 +1178,8 @@ MOCK_FOODS.push({
 });
 
 MOCK_FOODS.push(...RECIPE_INGREDIENT_FOODS, ...RECIPE_DISH_FOODS);
+// cc-67: fruit is logged by grams of the edible part
+MOCK_FOODS.forEach((food, i) => (MOCK_FOODS[i] = weighedFruit(food)));
 
 /** The ids of the sample foods above, taken before the live mode drops them or a database catalogue arrives. */
 const SAMPLE_FOOD_IDS: ReadonlySet<string> = new Set(MOCK_FOODS.map((f) => f.id));

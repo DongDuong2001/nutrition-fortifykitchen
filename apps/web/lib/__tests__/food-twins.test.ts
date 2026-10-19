@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { MOCK_FOODS, catalogChanged, type FoodItem } from "../mock/foods";
-import { collapseTwins, dedupeTwins, rowName, stripCookState, twinGroupOf, twinIdsOf } from "../food-twins";
+import { collapseTwins, dedupeTwins, rowName, stripCookState, tidyName, twinGroupOf, twinIdsOf } from "../food-twins";
 import { searchFoods, searchRows } from "../search";
 import { buildFoodList } from "../food-categories";
 import { cookSwitchFor } from "../yield";
@@ -15,6 +15,14 @@ interface FixturePair {
 // The food research's pairs (the same file the app's slim copy is made from) as catalogue rows, with the live API's
 // source and source_id: so the grouping is tried on the real names, not on names made up here.
 const FIXTURE: FixturePair[] = JSON.parse(readFileSync(path.resolve(__dirname, "../../tests/fixtures/raw-cooked-pairs.json"), "utf8"));
+
+// The names the live catalogue has since the units import (food-research, 18/10): the research pairs file still carries the older ones
+const LATEST_NAME: Record<string, string> = {
+  "usda_sr_legacy|FDC 168484": "Khoai lang luộc bỏ vỏ (chín)",
+  "usda_sr_legacy|FDC 168483": "Khoai lang nướng cả vỏ (chín)",
+  "usda_foundation|food-khoai-lang": "Khoai lang luộc (chín)",
+  "usda_foundation|FDC 2346404:khoai-nhat-song": "Khoai Nhật (sống)",
+};
 
 const CATEGORY_OF = (name: string): FoodItem["category"] => {
   if (/^(khoai|củ)/i.test(name)) return "tinh_bot";
@@ -37,7 +45,7 @@ function fromFixture(): FoodItem[] {
   const seen = new Map<string, FoodItem>();
   const take = (r: FixturePair["raw"]) => {
     const key = `${r.source}|${r.source_id}`;
-    if (!seen.has(key)) seen.set(key, row(r.name_vi, CATEGORY_OF(r.name_vi), { source: r.source as FoodItem["source"], sourceId: r.source_id }));
+    if (!seen.has(key)) seen.set(key, row(LATEST_NAME[key] ?? r.name_vi, CATEGORY_OF(r.name_vi), { source: r.source as FoodItem["source"], sourceId: r.source_id }));
   };
   for (const p of FIXTURE) {
     take(p.raw);
@@ -63,6 +71,7 @@ describe("stripCookState", () => {
   it("takes the state out of a name", () => {
     expect(stripCookState("Khoai lang luộc")).toBe("Khoai lang");
     expect(stripCookState("Khoai lang (luộc, bỏ vỏ)")).toBe("Khoai lang");
+    expect(stripCookState("Khoai lang luộc bỏ vỏ (chín)")).toBe("Khoai lang");
     expect(stripCookState("Cá lóc (cá quả, sống)")).toBe("Cá lóc");
     expect(stripCookState("Yến mạch cán dẹt (chín)")).toBe("Yến mạch cán dẹt");
     expect(stripCookState("Thịt bò thăn (áp chảo/nướng)")).toBe("Thịt bò thăn");
@@ -73,6 +82,22 @@ describe("stripCookState", () => {
   it("keeps a bracket that names the variety", () => {
     expect(stripCookState("Khoai lang (tím)")).toBe("Khoai lang (tím)");
     expect(stripCookState("Bơ (trái)")).toBe("Bơ (trái)");
+  });
+});
+
+describe("tidyName (no bỏ vỏ, cả vỏ or thịt quả in a name)", () => {
+  it("takes the words about the part thrown away out and keeps the rest", () => {
+    expect(tidyName("Táo (cả vỏ)")).toBe("Táo");
+    expect(tidyName("Hạt gai dầu (bóc vỏ)")).toBe("Hạt gai dầu");
+    expect(tidyName("Khoai lang (nướng, cả vỏ)")).toBe("Khoai lang (nướng)");
+    expect(tidyName("Mãng cầu xiêm (thịt quả)")).toBe("Mãng cầu xiêm");
+    expect(tidyName("Bơ vỏ tím")).toBe("Bơ vỏ tím");
+    expect(tidyName("Cá cơm cả xương")).toBe("Cá cơm cả xương");
+  });
+
+  it("names the avocado Bơ (trái), as Bơ lạt exists", () => {
+    expect(tidyName("Quả bơ")).toBe("Bơ (trái)");
+    expect(tidyName("Bơ lạt")).toBe("Bơ lạt");
   });
 });
 
@@ -123,10 +148,12 @@ describe("raw and cooked twins are one row (cc-67)", () => {
   });
 
   it("takes every plain cooked row of a raw row, and leaves the roasted and fried ones out", () => {
-    const sweet = twinGroupOf(find(catalogue, "Khoai Nhật"));
+    const sweet = twinGroupOf(find(catalogue, "Khoai Nhật (sống)"));
     expect(sweet?.name).toBe("Khoai lang");
-    expect(sweet?.members.map((m) => m.nameVi).sort()).toEqual(["Khoai Nhật", "Khoai lang (luộc, bỏ vỏ)", "Khoai lang luộc"].sort());
-    expect(twinGroupOf(find(catalogue, "Khoai lang (nướng, cả vỏ)"))).toBeNull();
+    expect(sweet?.members.map((m) => m.nameVi).sort()).toEqual(["Khoai Nhật (sống)", "Khoai lang luộc bỏ vỏ (chín)", "Khoai lang luộc (chín)"].sort());
+    // Roasted keeps its row, without the word about the peel
+    expect(twinGroupOf(find(catalogue, "Khoai lang nướng cả vỏ (chín)"))).toBeNull();
+    expect(rowName(find(catalogue, "Khoai lang nướng cả vỏ (chín)"))).toBe("Khoai lang nướng (chín)");
     expect(twinGroupOf(find(catalogue, "Khoai lang chiên"))).toBeNull();
     expect(twinGroupOf(find(catalogue, "Thịt bò kho"))).toBeNull();
   });
@@ -219,10 +246,10 @@ describe("search returns one row per food (cc-67)", () => {
   it("'khoai' lists Khoai lang, Khoai tây, Khoai môn once each, never a luộc or chín twin", () => {
     const list = shown("khoai");
     for (const name of ["Khoai lang", "Khoai tây", "Khoai môn", "Khoai mỡ", "Khoai sọ"]) once(list, name);
-    expect(list.filter((n) => /(luộc|chín|sống)/i.test(n) && !/chiên/.test(n))).toEqual([]);
+    expect(list.filter((n) => /(luộc|chín|sống)/i.test(n) && !/chiên|nướng/.test(n))).toEqual([]);
     // The plain row comes before the preparations of the same food
     expect(list.indexOf("Khoai lang")).toBeLessThan(list.indexOf("Khoai lang chiên"));
-    expect(list.indexOf("Khoai lang")).toBeLessThan(list.indexOf("Khoai lang (nướng, cả vỏ)"));
+    expect(list.indexOf("Khoai lang")).toBeLessThan(list.indexOf("Khoai lang nướng (chín)"));
   });
 
   it("'cơm' lists Cơm trắng once, and Cơm gạo lứt once", () => {
