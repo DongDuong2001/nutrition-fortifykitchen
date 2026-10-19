@@ -1,4 +1,4 @@
-"""cc-68 (Part 5, no lag): numbers, not looks. Live-mode build only (NEXT_PUBLIC_API_MODE=live, NEXT_PUBLIC_SUPABASE_URL=http://localhost:54399),
+"""cc-68 (Part 5, no lag): numbers, not looks. Live-mode build only (NEXT_PUBLIC_API_MODE=live, NEXT_PUBLIC_SUPABASE_URL=https://probe68.supabase.co),
 not in probe:all. The API is a small fake in this file.
   R  re-renders per refresh: the diary is open on Hôm nay with a few entries; the page is refreshed five times the way the 60 s poll
      does it (focus -> outbox, GET /days/today and yesterday) and the React commits are counted (a DevTools hook counts them).

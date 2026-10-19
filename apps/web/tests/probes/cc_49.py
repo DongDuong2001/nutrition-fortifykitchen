@@ -363,10 +363,10 @@ with sync_playwright() as p:
         # cc-50: the refusal is reported once, with the server's message and the app version
         writes = [r for r in st["reports"] if r.get("kind") == "write"]
         check(
-            len(writes) == 1 and writes[0].get("status") == 400 and writes[0].get("message") == "scripted"
+            len(writes) == 1 and writes[0].get("status") == 400 and writes[0].get("message") == ""
             and writes[0].get("path") == f"/days/{TODAY}/entries" and writes[0].get("route") == "/add"
             and re.fullmatch(r"\d{4}-\d{2}-\d{2}\.\d+", writes[0].get("version", "")) is not None,
-            f"4: one client error report: write 400 scripted, /days/…/entries, route /add (where it was added), app version ({writes})",
+            f"4: one client error report: write 400 (its status and error code only: the scripted body has none), /days/…/entries, route /add (where it was added), app version ({writes})",
         )
         if retry.count():
             retry.first.click()

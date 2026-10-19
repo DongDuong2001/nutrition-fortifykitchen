@@ -1,4 +1,4 @@
-"""cc-68: data saving, sync and queue. Live-mode build only (NEXT_PUBLIC_API_MODE=live, NEXT_PUBLIC_SUPABASE_URL=http://localhost:54399,
+"""cc-68: data saving, sync and queue. Live-mode build only (NEXT_PUBLIC_API_MODE=live, NEXT_PUBLIC_SUPABASE_URL=https://probe68.supabase.co (the CSP allows *.supabase.co only; every call to it is answered here),
 any anon key), not in probe:all. The API is a fake in this file (route interception); two contexts on one account are two devices.
   A  offline: an add made offline stays through a reload (offline), shows Chưa lưu, and is sent once when the network is back
   B  yesterday is editable: Hôm qua 18/10 has + Thêm, a food added there goes to POST /days/<yesterday>/entries and shows on that
@@ -36,6 +36,7 @@ ONLY = set(filter(None, os.environ.get("CC68_ONLY", "").split(",")))
 SHOTS = Path(__file__).resolve().parent.parent.parent / ".screenshots" / "cc68"
 SHOTS.mkdir(parents=True, exist_ok=True)
 PHONE = {"viewport": {"width": 390, "height": 844}}
+SUPABASE = os.environ.get("PROBE_SUPABASE_ORIGIN", "https://probe68.supabase.co")
 EMAIL = "probe68@example.com"
 NOW_VN = datetime.now(timezone.utc) + timedelta(hours=7)
 TODAY = NOW_VN.strftime("%Y-%m-%d")
@@ -196,7 +197,7 @@ def b64url(data):
 
 
 def supabase_session(email):
-    """A signed-in Supabase session as the browser client keeps it (cookie sb-localhost-auth-token), and the fake /auth/v1/user for it."""
+    """A signed-in Supabase session as the browser client keeps it (cookie sb-probe68-auth-token), and the fake /auth/v1/user for it."""
     now = int(time.time())
     user = {"id": "00000000-0000-4000-8000-000000000068", "aud": "authenticated", "role": "authenticated", "email": email, "app_metadata": {"provider": "email", "providers": ["email"]}, "user_metadata": {"has_password": True}, "identities": [{"provider": "email"}], "created_at": "2026-10-01T00:00:00Z"}
     jwt = ".".join([b64url(b'{"alg":"HS256","typ":"JWT"}'), b64url(json.dumps({"sub": user["id"], "email": email, "aud": "authenticated", "role": "authenticated", "exp": now + 3600}).encode()), "sig"])
@@ -208,11 +209,11 @@ def signed_in_device(browser, api):
     """A device on the fake API whose Supabase session is real enough for Cài đặt › Tài khoản to show the account and Đăng xuất."""
     ctx, pg, st = device(browser, api)
     user, cookie = supabase_session(EMAIL)
-    ctx.add_cookies([{"name": "sb-localhost-auth-token", "value": cookie, "url": BASE}])
+    ctx.add_cookies([{"name": "sb-probe68-auth-token", "value": cookie, "url": BASE}])
     # The last route registered wins: the catch-all first, then the two the account screen uses
-    ctx.route("http://localhost:54399/**", lambda route: route.fulfill(status=200, content_type="application/json", body="{}"))
-    ctx.route("http://localhost:54399/auth/v1/user", lambda route: route.fulfill(status=200, content_type="application/json", body=json.dumps(user)))
-    ctx.route("http://localhost:54399/auth/v1/logout*", lambda route: route.fulfill(status=204, body=""))
+    ctx.route(SUPABASE + "/**", lambda route: route.fulfill(status=200, content_type="application/json", body="{}"))
+    ctx.route(SUPABASE + "/auth/v1/user", lambda route: route.fulfill(status=200, content_type="application/json", body=json.dumps(user)))
+    ctx.route(SUPABASE + "/auth/v1/logout*", lambda route: route.fulfill(status=204, body=""))
     return ctx, pg, st
 
 

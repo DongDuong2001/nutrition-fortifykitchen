@@ -1,11 +1,12 @@
 """cc_tutorials: the "Có gì mới" releases and tours, and the one-time tips (hotfix/tutorials, cc-53 units, cc-53b portions).
 
 Production demo build at 390x844. Tour, tips and "Có gì mới" are on here (`_seed.onboarding(True)`, `_seed.whats_new(True)`).
-- Several unseen releases: an account that saw 18b gets 19b, 18f, 18e, 18d and 18c in one sheet (newest first, grouped);
-  Thử ngay runs the joined tour oldest first, capped at the newest 8: cc-52's 18e first two on the Ngày tập pill, cc-53b's
-  18f four (+ Thêm, the food list, the meal pill, Thành phần) and cc-68's 19b two (the arrow that opens yesterday, + Thêm).
-  18d has no tour (cc-53b retired it). The counter reads n/8; Xong ends it, entries unchanged
-- An account that saw 18c gets 19b, 18f, 18e and 18d, with Thử ngay
+- Several unseen releases: an account that saw 18b gets 19b, 19a, 18f, 18e, 18d and 18c in one sheet (newest first, grouped);
+  Thử ngay runs the joined tour oldest first, capped at the newest 8: cc-53b's 18f four (+ Thêm, the food list, the meal pill,
+  Thành phần), cc-67's 19a two (Mỗi món một dòng, Chỉnh thành phần) and cc-68's 19b two (the arrow that opens yesterday, + Thêm).
+  18e's steps (the Ngày tập pill) no longer fit the cap. 18d has no tour (cc-53b retired it). The counter reads n/8; Xong ends it,
+  entries unchanged
+- An account that saw 18c gets 19b, 19a, 18f, 18e and 18d, with Thử ngay
 - A step whose target is gone is skipped; a target that leaves the page mid-step moves the tour on (no stuck ring)
 - cc-53b: Cài đặt › Có gì mới lists 18d's corrected copy with no tour, and 18f with Xem hướng dẫn. The portion sheet's
   tips show once each: Trứng ghi theo quả on an egg, Cân sống hay đã nấu chín on rice, then Nhân khẩu phần nhanh, and
@@ -41,16 +42,16 @@ OLD_TIPS = [
     "food-detail", "compare", "food-new", "training", "micros", "trends-micros", "explore", "overview", "leaderboard",
 ]
 RETURNING = {"tourDone": True, "seen": OLD_TIPS, "whatsNewSeen": "2026-10-18b"}
-# The newest 8 of the joined tour: cc-52's 18e on the Ngày tập pill (its first two), then 18f on Hôm nay: cc-53b's three and
-# cc-54's Thành phần (a dish's control is not on Hôm nay, so it points at + Thêm, its fallback), then cc-68's 19b: the arrow
-# that opens yesterday and + Thêm
+# The newest 8 of the joined tour: 18f on Hôm nay (cc-53b's three and cc-54's Thành phần: a dish's control is not on Hôm nay, so
+# it points at + Thêm, its fallback), cc-67's 19a (Mỗi món một dòng and Chỉnh thành phần, both + Thêm there), then cc-68's 19b:
+# the arrow that opens yesterday and + Thêm
 STEPS = [
-    ("Nhóm Bự / Bé", ["training-size", "training-pill"]),
-    ("Đánh dấu để ghi", ["training-checklist", "training-pill"]),
     ("Ghi theo gam", ["meal-add", "nav-add"]),
     ("Sống hay chín", ["home-food-list", "meal-pill"]),
     ("Khay xem lại", ["meal-pill"]),
     ("Thành phần của món", ["meal-add", "nav-add"]),
+    ("Mỗi món một dòng", ["meal-add", "nav-add"]),
+    ("Chỉnh thành phần", ["meal-add", "nav-add"]),
     ("Mở hôm qua", ["day-prev", "header-actions"]),
     ("Ghi bù như hôm nay", ["meal-add", "nav-add"]),
 ]
@@ -140,9 +141,9 @@ def start_tour(pg):
     check("Ghi theo lon, viên, phần" in text and text.index("Ghi theo lon, viên, phần") < text.index("Gần đây và Hay ăn"), "…and 18d above it (newest first)")
     check("Ngày tập ghi vào nhật ký" in text and text.index("Ngày tập ghi vào nhật ký") < text.index("Ghi theo lon, viên, phần"), "…and cc-52's 18e above that")
     check("Khẩu phần theo gam" in text and text.index("Khẩu phần theo gam") < text.index("Ngày tập ghi vào nhật ký"), "…and cc-53b's 18f above that")
-    check("Sửa được hôm qua" in text and text.index("Sửa được hôm qua") < text.index("Khẩu phần theo gam"), "…and cc-68's 19b on top")
+    check("Sửa được hôm qua" in text and "Mỗi món một dòng" in text and text.index("Sửa được hôm qua") < text.index("Mỗi món một dòng") < text.index("Khẩu phần theo gam"), "…and cc-68's 19b and cc-67's 19a on top")
     check("Thực phẩm bổ sung\n" not in text + "\n" and "Đồng bộ ổn định hơn" not in text, "…not 18b or 18, which were seen")
-    check(sheet(pg).locator("section").count() == 5, "five groups, one per release")
+    check(sheet(pg).locator("section").count() == 6, "six groups, one per release")
     try_now = sheet(pg).get_by_role("button", name="Thử ngay (1 phút)")
     check(try_now.count() == 1, "Thử ngay (1 phút): the unseen releases have a tour")
     shot(pg, "sheet")
@@ -184,34 +185,29 @@ def tour(browser):
 
 
 def skipped(browser):
-    # Steps whose target is gone are skipped: no Ngày tập pill -> step 1 goes straight to step 3
+    # Steps whose target is gone are skipped: no food list and no meal pill -> step 1 goes straight to step 4
     ctx, pg = new_page(browser, RETURNING)
     start_tour(pg)
     check("Mới · 1/8" in step_text(pg), "skip: on step 1")
-    pg.evaluate("() => document.querySelectorAll('[data-tour^=\"training-\"]').forEach(el => el.removeAttribute('data-tour'))")
-    card(pg).get_by_role("button", name="Tiếp").click()
-    # Each missing step waits the spotlight's give-up time before it is skipped
-    for _ in range(20):
-        pg.wait_for_timeout(500)
-        if "Mới · 3/8" in step_text(pg):
-            break
-    check("Mới · 3/8" in step_text(pg), f"skip: step 2 has no target, so step 3 shows ({step_text(pg)[:30]!r})")
-    check(pg.locator("[data-onboarding-overlay]").count() == 1, "skip: one overlay, no ring left behind")
-    # A target that leaves the page mid-step moves the tour on (the ring is not left on an empty spot)
-    pg.evaluate("() => document.querySelectorAll('[data-tour=\"meal-add\"], [data-tour=\"nav-add\"]').forEach(el => el.remove())")
-    pg.wait_for_timeout(1200)
-    check("Mới · 4/8" in step_text(pg), f"gone mid-step: step 3's + Thêm left the page, step 4 shows ({step_text(pg)[:30]!r})")
-    check(ring_holds(pg, ["home-food-list", "meal-pill"]) is not None, "gone mid-step: the ring is on the food list")
-    shot(pg, "skipped")
-    # With the food list and the meal pills gone too, Tiếp after step 4 skips the Khay and Thành phần steps (no target) and lands on 19b's arrow
     pg.evaluate("() => document.querySelectorAll('[data-tour=\"meal-pill\"], [data-tour=\"home-food-list\"]').forEach(el => el.removeAttribute('data-tour'))")
     card(pg).get_by_role("button", name="Tiếp").click()
-    for _ in range(20):
+    # Each missing step waits the spotlight's give-up time before it is skipped
+    for _ in range(30):
+        pg.wait_for_timeout(500)
+        if "Mới · 4/8" in step_text(pg):
+            break
+    check("Mới · 4/8" in step_text(pg), f"skip: steps 2 and 3 have no target, so step 4 shows ({step_text(pg)[:30]!r})")
+    check(pg.locator("[data-onboarding-overlay]").count() == 1, "skip: one overlay, no ring left behind")
+    # A target that leaves the page mid-step moves the tour on (the ring is not left on an empty spot): steps 4 to 6 all point at + Thêm
+    pg.evaluate("() => document.querySelectorAll('[data-tour=\"meal-add\"], [data-tour=\"nav-add\"]').forEach(el => el.remove())")
+    for _ in range(30):
         pg.wait_for_timeout(500)
         if "Mới · 7/8" in step_text(pg):
             break
-    check("Mới · 7/8" in step_text(pg), f"skip: steps 5 and 6 have no target, so 19b's arrow shows ({step_text(pg)[:30]!r})")
-    # With the arrow and the header gone, Tiếp ends the tour (19b's last step, + Thêm, is gone too)
+    check("Mới · 7/8" in step_text(pg), f"gone mid-step: + Thêm left the page, steps 4 to 6 are skipped and 19b's arrow shows ({step_text(pg)[:30]!r})")
+    check(ring_holds(pg, ["day-prev", "header-actions"]) is not None, "gone mid-step: the ring is on the arrow")
+    shot(pg, "skipped")
+    # With the arrow and the header gone, the last step (+ Thêm) is gone too: Tiếp ends the tour
     pg.evaluate("() => document.querySelectorAll('[data-tour=\"day-prev\"], [data-tour=\"header-actions\"]').forEach(el => el.removeAttribute('data-tour'))")
     pg.wait_for_timeout(1500)
     if card(pg).count():
@@ -332,8 +328,8 @@ def seen_18c(browser):
     go(pg, "/app", 1200)
     check(visible(sheet(pg)), "seen 18c: Có gì mới opens")
     text = sheet(pg).inner_text()
-    check("Sửa được hôm qua" in text and "Khẩu phần theo gam" in text and "Ngày tập ghi vào nhật ký" in text and "Ghi theo lon, viên, phần" in text and "Gần đây và Hay ăn" not in text, "seen 18c: 19b's, 18f's, 18e's and 18d's items only")
-    check(sheet(pg).get_by_role("button", name="Thử ngay (1 phút)").count() == 1, "seen 18c: Thử ngay (19b's, 18e's and 18f's steps are on Hôm nay)")
+    check("Sửa được hôm qua" in text and "Mỗi món một dòng" in text and "Khẩu phần theo gam" in text and "Ngày tập ghi vào nhật ký" in text and "Ghi theo lon, viên, phần" in text and "Gần đây và Hay ăn" not in text, "seen 18c: 19b's, 19a's, 18f's, 18e's and 18d's items only")
+    check(sheet(pg).get_by_role("button", name="Thử ngay (1 phút)").count() == 1, "seen 18c: Thử ngay (19b's, 19a's and 18f's steps are on Hôm nay)")
     shot(pg, "seen-18c")
     sheet(pg).get_by_role("button", name="Để sau").click()
     pg.wait_for_timeout(500)
@@ -351,6 +347,7 @@ def units(browser):
     check(pg.locator('section[aria-labelledby="release-2026-10-18d"]').get_by_role("button", name="Xem hướng dẫn").count() == 0, "units: 18d has no tour now")
     check(pg.locator('section[aria-labelledby="release-2026-10-18f"]').get_by_role("button", name="Xem hướng dẫn").count() == 1, "units: 18f has Xem hướng dẫn")
     check(pg.locator('section[aria-labelledby="release-2026-10-19b"]').get_by_role("button", name="Xem hướng dẫn").count() == 1, "units: 19b has Xem hướng dẫn")
+    check(pg.locator('section[aria-labelledby="release-2026-10-19a"]').get_by_role("button", name="Xem hướng dẫn").count() == 1, "units: 19a has Xem hướng dẫn")
     shot(pg, "whats-new-history")
     ctx.close()
 
