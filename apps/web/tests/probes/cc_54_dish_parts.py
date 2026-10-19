@@ -8,6 +8,7 @@ Phở bò (the demo catalogue's dish, answering to vn_table|food-pho-bo) from /a
 - a food without a recipe (Yến mạch) has no Thành phần; Hôm nay's tutorial target and the screenshots
 Screenshots: .screenshots/cc54/. Run with: ALIGN_BASE_URL=http://localhost:3107 npm run probe -- tests/probes/cc_54_dish_parts.py
 """
+# PROBE_COVERS: app/(app)/add/**
 import os
 import re
 import sys

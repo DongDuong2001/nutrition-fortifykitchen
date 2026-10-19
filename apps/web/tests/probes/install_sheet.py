@@ -14,6 +14,7 @@ All at 390 px (a few checks at 360 and 1440). Needs a production demo build (npm
 Screenshots: .screenshots/install-*.png
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/install_sheet.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/(tabs)/explore/** app/(app)/(tabs)/settings/** app/install/**
 import json
 import os
 import re

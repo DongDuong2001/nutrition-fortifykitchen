@@ -15,6 +15,7 @@ Production demo build at 390x844. Tour, tips and "Có gì mới" are on here (`_
 Screenshots: .screenshots/cc-tutorials-*.png
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_tutorials.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/add/** app/(app)/foods/[id]/** app/(app)/settings/whats-new/**
 import json
 import os
 import re

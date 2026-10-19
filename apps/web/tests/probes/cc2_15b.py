@@ -8,6 +8,7 @@ Production build, cleared storage, clock fixed at 18:00 Asia/Ho_Chi_Minh (Bữa 
 Screenshots: .screenshots/cc2-15b-{diary,overview,explore,summary}-{390,1280}.png
 Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/cc2_15b.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/(tabs)/explore/** app/(app)/(tabs)/trends/** app/(app)/(tabs)/trends/body/** app/(app)/(tabs)/trends/micros/** app/(app)/add/** app/(app)/setup/profile/** app/signin/**
 import os
 import re
 import sys

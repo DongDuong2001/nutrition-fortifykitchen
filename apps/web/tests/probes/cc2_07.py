@@ -9,6 +9,7 @@
 Screenshots: .screenshots/cc2-07-*.png
 Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/cc2_07.py
 """
+# PROBE_COVERS: app/(app)/(dashboard)/training/** app/(app)/(tabs)/app/** app/(app)/(tabs)/explore/** app/(app)/(tabs)/settings/** app/(app)/(tabs)/trends/** app/(app)/(tabs)/trends/body/** app/(app)/(tabs)/trends/micros/** app/(app)/add/** app/(app)/foods/[id]/** app/(app)/foods/new/** app/(app)/micros/** app/(app)/micros/[nutrient]/** app/(app)/settings/profile/** app/(app)/settings/profile/weight/** app/(app)/setup/profile/** app/page.tsx
 import os
 import sys
 from datetime import date, timedelta

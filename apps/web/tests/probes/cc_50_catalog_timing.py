@@ -9,6 +9,7 @@ Per run: a first visit (nothing on the device) and a second visit in a new tab o
 - /explore/tinh_bot: ms until its list is shown (the screen waits for the catalogue)
 Run with: LIVE_BUILD=1 ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_50_catalog_timing.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/explore/[category]/** app/(app)/foods/[id]/**
 import asyncio
 import json
 import os

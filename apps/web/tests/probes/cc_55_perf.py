@@ -9,6 +9,7 @@ after FCP), with the same 4x CPU and a slow 4G network.
 Writes .screenshots/cc55/perf-<label>.json. Run with:
   ALIGN_BASE_URL=http://localhost:3106 PERF_LABEL=before npm run probe -- tests/probes/cc_55_perf.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/**
 import json
 import os
 from pathlib import Path

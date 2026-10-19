@@ -10,6 +10,7 @@
 Screenshots: .screenshots/cc2-12-*.png
 Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/cc2_12.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/(tabs)/explore/** app/(app)/add/** app/(app)/micros/**
 import json
 import os
 import re

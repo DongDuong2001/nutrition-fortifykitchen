@@ -10,6 +10,7 @@ Production build, clock fixed at 2026-10-15 10:00, demo mode (the sample account
 - Setup: the optional coach code field, used when setup is done.
 Run with: ALIGN_BASE_URL=http://localhost:3104 npm run probe -- tests/probes/cc_28c.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/(tabs)/settings/** app/(app)/coach/** app/(app)/settings/coach/** app/(app)/setup/goal/** app/(app)/setup/profile/** app/join/[code]/** app/signup/**
 import json
 import os
 import re

@@ -2,6 +2,7 @@
 setup step bars; the meal chips grid; the sticky /add group header covering the rows at 390.
 Run with: ALIGN_BASE_URL=http://localhost:3101 PATH=/usr/bin:$PATH npm run probe -- tests/probes/cc04.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/(tabs)/explore/** app/(app)/add/** app/(app)/entry/[id]/** app/(app)/foods/[id]/** app/(app)/foods/new/** app/(app)/setup/goal/** app/(app)/setup/profile/** app/signin/**
 import os
 import sys
 from urllib.parse import urlparse

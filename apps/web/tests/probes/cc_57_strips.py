@@ -11,6 +11,7 @@ them into .screenshots/cc57/strip-<NN-name>.png with the time under each frame. 
   08 level bar    a fill growing from 0 (the real .m-bar with its transition)
 Run with: ALIGN_BASE_URL=http://localhost:3107 npm run probe -- tests/probes/cc_57_strips.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/(tabs)/explore/** app/(app)/(tabs)/settings/** app/(app)/(tabs)/trends/** app/(app)/(tabs)/trends/body/** app/(app)/(tabs)/trends/energy/** app/(app)/(tabs)/trends/micros/** app/(app)/foods/[id]/**
 import base64
 import os
 from pathlib import Path

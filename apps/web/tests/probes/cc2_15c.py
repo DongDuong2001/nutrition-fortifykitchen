@@ -13,6 +13,7 @@ Production build, clock fixed at 18:00 Asia/Ho_Chi_Minh (Bữa tối). No _demo 
   under prefers-reduced-motion
 Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/cc2_15c.py
 """
+# PROBE_COVERS: app/(app)/(dashboard)/training/** app/(app)/(tabs)/app/** app/(app)/(tabs)/explore/** app/(app)/(tabs)/settings/** app/(app)/(tabs)/trends/** app/(app)/add/** app/(app)/foods/[id]/** app/(app)/micros/** app/(app)/setup/profile/** app/install/** app/offline/** app/signin/** app/signup/**
 import hashlib
 import json
 import os

@@ -7,6 +7,7 @@ Production build, demo mode, 390x844 and 1440x900.
   Sửa reopens the builder with the saved values; the recipe survives a reload and is found by /add search.
 Run with: ALIGN_BASE_URL=http://localhost:3104 npm run probe -- tests/probes/cc_27b.py
 """
+# PROBE_COVERS: app/(app)/add/** app/(app)/foods/new/**
 import os
 import re
 import sys

@@ -9,6 +9,7 @@ before the fix, the sheet's history.back() 50 ms after it closed made Next drop 
 - Back closes an open sheet and stays on /app
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_51_sheet_nav.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/(tabs)/explore/** app/(app)/micros/[nutrient]/**
 import os
 import re
 import sys

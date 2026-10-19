@@ -1,6 +1,7 @@
 """cc2-05: editing the profile (Hồ sơ) moves Today's desktop label, Training minutes and the salt cards.
 Run with: ALIGN_BASE_URL=http://localhost:3102 py -3 tests/probes/cc2_05.py
 """
+# PROBE_COVERS: app/(app)/(dashboard)/training/** app/(app)/(tabs)/app/** app/(app)/settings/profile/weight/**
 import os
 import re
 import sys

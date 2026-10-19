@@ -12,6 +12,7 @@ portion "1 viên" = 1 g, magnesium 8000 mg per 100 g (80 mg per capsule), no ene
 - Hôm nay with the capsule alone reads 0 kcal, not "—".
 Run with: LIVE_BUILD=1 ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/hotfix_supp_log.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/foods/[id]/** app/page.tsx
 import base64
 import json
 import os

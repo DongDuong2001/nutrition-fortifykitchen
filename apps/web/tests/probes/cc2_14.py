@@ -11,6 +11,7 @@
 Screenshots: .screenshots/cc2-14-*.png
 Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/cc2_14.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/(tabs)/explore/** app/(app)/(tabs)/settings/** app/(app)/add/** app/install/** app/offline/** app/page.tsx app/paywall/** app/reset-password/** app/signin/** app/signin/expired/** app/signup/**
 import json
 import os
 import re

@@ -1,6 +1,7 @@
 """cc-06: Hôm nay: a food row then Sửa opens Edit entry, one toast with Hoàn tác, no Next dev Issue badge, Micros header stays put.
 Run with: ALIGN_BASE_URL=http://localhost:3101 PATH=/usr/bin:$PATH npm run probe -- tests/probes/cc06.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/add/** app/(app)/entry/[id]/** app/(app)/micros/**
 import os
 import re
 import sys

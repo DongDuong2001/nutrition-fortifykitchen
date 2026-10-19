@@ -9,6 +9,7 @@
 Writes frame strips to .screenshots/cc55/. Run with:
   ALIGN_BASE_URL=http://localhost:3106 npm run probe -- tests/probes/cc_55_motion.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/(tabs)/explore/** app/(app)/add/**
 import os
 import re
 from pathlib import Path

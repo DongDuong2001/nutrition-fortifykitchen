@@ -20,6 +20,7 @@ tips off (_seed.py); this one turns them on with `_seed.onboarding(True)`.
 Screenshots: .screenshots/cc-42-*.png
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_42_onboarding.py
 """
+# PROBE_COVERS: app/(app)/(dashboard)/training/** app/(app)/(tabs)/app/** app/(app)/(tabs)/explore/** app/(app)/(tabs)/settings/** app/(app)/(tabs)/trends/** app/(app)/(tabs)/trends/micros/** app/(app)/add/** app/(app)/explore/leaderboard/** app/(app)/foods/[id]/** app/(app)/foods/compare/** app/(app)/foods/new/** app/(app)/micros/** app/(app)/setup/done/**
 import json
 import os
 import sys

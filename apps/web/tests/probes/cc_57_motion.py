@@ -9,6 +9,7 @@ Also long tasks (>50 ms) seen on the main thread during each tap.
 Run with:  ALIGN_BASE_URL=http://localhost:3107 PERF_LABEL=after npm run probe -- tests/probes/cc_57_motion.py
 Writes .screenshots/cc57/perf-<label>.json and prints it.
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/(tabs)/explore/** app/(app)/(tabs)/settings/** app/(app)/(tabs)/trends/** app/(app)/(tabs)/trends/body/** app/(app)/(tabs)/trends/energy/** app/(app)/(tabs)/trends/micros/**
 import json
 import os
 from pathlib import Path

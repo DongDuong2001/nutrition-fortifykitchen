@@ -6,6 +6,7 @@ Also reads the diary provider's memoised value (P-01): a toast opens and closes 
 Screenshots: .screenshots/cc2-17-*.png
 Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/cc2_17.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/add/**
 import os
 import sys
 from pathlib import Path

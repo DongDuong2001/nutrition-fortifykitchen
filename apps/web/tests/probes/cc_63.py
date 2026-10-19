@@ -12,6 +12,7 @@ Production demo build, 390x844 and 320x640.
 Screenshots: .screenshots/cc-63-*.png
 Run with: ALIGN_BASE_URL=http://localhost:3108 npm run probe -- tests/probes/cc_63.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/add/** app/(app)/foods/new/** app/(app)/settings/account/** app/(app)/settings/targets/macros/**
 import os
 import sys
 from pathlib import Path

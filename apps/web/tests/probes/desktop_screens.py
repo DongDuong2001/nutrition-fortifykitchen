@@ -1,3 +1,4 @@
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/add/** app/landing/** app/signin/**
 import os
 import sys
 from pathlib import Path

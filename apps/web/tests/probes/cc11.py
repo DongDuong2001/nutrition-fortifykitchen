@@ -4,6 +4,7 @@ day's Today view. The desktop date subtitle opens the calendar (no future days).
 today changes "Thiếu nhiều nhất" on Today.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc11.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/add/** app/(app)/entry/[id]/** app/(app)/micros/**
 import datetime
 import os
 import re

@@ -8,6 +8,7 @@
 - Pull to refresh: a touch pull from the top of the list shows the indicator and counts as used (onboarding flags)
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_51_motion.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/(tabs)/explore/**
 import json
 import os
 import re

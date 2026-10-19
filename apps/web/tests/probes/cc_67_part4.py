@@ -4,6 +4,7 @@ The sample user is a man born 2003 (23 in 2026): Vi chất shows / 2.500 mg pota
 / 850 µg vitamin A; Cài đặt > Mục tiêu says whose amounts they are; the energy target is unchanged
 Screenshots: .screenshots/cc67/. Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_67_part4.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/micros/** app/(app)/settings/targets/**
 import json
 import os
 import re

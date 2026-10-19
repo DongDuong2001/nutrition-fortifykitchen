@@ -5,6 +5,7 @@ field focused by keyboard (Tab) and by tap or click: the inner input has no outl
 wrapper label has the ring. Screenshots go to tests/probes/out/search-ring-<route>-<width>-<how>.png.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/v022b_search_ring.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/explore/** app/(app)/add/**
 import os
 import sys
 

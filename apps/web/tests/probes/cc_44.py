@@ -4,6 +4,7 @@ Screenshots of the main routes at 390x844 and 1440x900 into .screenshots/cc-44-<
 empty day is the demo account with the seven sample foods deleted, as cc_26). CC44_TAG=<tag> adds the tag to the names (cc-44-<tag>-...), for work-in-progress shots.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_44.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/(tabs)/explore/** app/(app)/(tabs)/settings/** app/(app)/(tabs)/trends/** app/(app)/add/** app/(app)/micros/**
 import json
 import os
 import re

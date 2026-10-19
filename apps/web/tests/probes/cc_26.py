@@ -17,6 +17,7 @@ Production build, clock fixed at 2026-10-15 10:00 Asia/Ho_Chi_Minh, sizes 390x84
 PNGs are saved to .screenshots/cc-27g-*.png (short, long and past days use the account "Học viên A").
 Run with: ALIGN_BASE_URL=http://localhost:3104 npm run probe -- tests/probes/cc_26.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/**
 import base64
 import json
 import math

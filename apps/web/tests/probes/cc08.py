@@ -3,6 +3,7 @@ the VN 2016 amounts for sex and age), a woman's iron is 17,4 mg, or the coach's 
 weight shows the setup error.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc08.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/micros/** app/(app)/settings/profile/** app/(app)/settings/profile/weight/** app/(app)/settings/targets/**
 import os
 import sys
 

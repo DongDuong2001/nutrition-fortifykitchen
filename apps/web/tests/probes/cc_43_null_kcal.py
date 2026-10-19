@@ -7,6 +7,7 @@
 Screenshots: .screenshots/cc-43-null-kcal-*.png
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_43_null_kcal.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/**
 import datetime
 import json
 import os

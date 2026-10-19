@@ -6,6 +6,7 @@ M2. The portion panel draws the size-chip row ("Kích cỡ") only when the food 
     shows the toggle and the stepper and no lone "Tô" chip (a food with several sizes keeps its chips: portion-panel.test.tsx).
 Run with: ALIGN_BASE_URL=http://localhost:3107 npm run probe -- tests/probes/cc_61.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/add/**
 import json
 import os
 import re

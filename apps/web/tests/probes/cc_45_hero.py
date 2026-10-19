@@ -5,6 +5,7 @@ box, amount then percent 8 px apart, and the line ends inside its cell (no overf
 bars share one grid (same widths, same top). Prints each cell's widths so a tight fit shows up before it breaks.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_45_hero.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/**
 import os
 import sys
 

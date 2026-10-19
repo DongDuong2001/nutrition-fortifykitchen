@@ -6,6 +6,7 @@ Tests:
 3. Multi-select deletion: tapping Delete removes selected items at once.
 4. Mục tiêu đa lượng screen (/settings/targets/macros) loads and saves custom ratios; at 390 its copy is Vietnamese only and the title fits one line.
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/settings/targets/macros/** app/page.tsx
 import os
 import re
 import sys

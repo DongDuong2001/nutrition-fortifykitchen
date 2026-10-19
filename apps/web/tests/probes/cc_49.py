@@ -17,6 +17,7 @@ every API call until it asks /auth/session, which is what the middleware's cooki
      reload it is not sent again and the notice does not come back
 Run with: LIVE_BUILD=1 ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_49.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/add/** app/landing/** app/page.tsx app/signin/**
 import json
 import os
 import re

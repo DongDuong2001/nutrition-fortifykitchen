@@ -6,6 +6,7 @@ what a phone shows when the fonts are not in the picture, into .screenshots/cc-4
 checks that layout: nothing runs over anything else).
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_47.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/**
 import base64
 import os
 import re

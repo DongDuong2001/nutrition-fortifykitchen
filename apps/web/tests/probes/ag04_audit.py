@@ -1,3 +1,4 @@
+# PROBE_COVERS: app/(app)/(dashboard)/training/** app/(app)/(tabs)/app/** app/(app)/(tabs)/explore/** app/(app)/add/** app/(app)/entry/[id]/** app/(app)/foods/[id]/** app/(app)/foods/new/** app/(app)/micros/** app/(app)/micros/[nutrient]/** app/(app)/settings/delete-account/** app/(app)/settings/language/** app/(app)/settings/notifications/** app/(app)/settings/profile/** app/(app)/settings/profile/weight/** app/(app)/setup/done/** app/(app)/setup/goal/** app/(app)/setup/profile/** app/install/** app/page.tsx app/paywall/** app/signin/** app/signin/check-email/** app/signin/expired/** app/signup/**
 import os
 import sys
 import re

@@ -7,6 +7,7 @@ Everywhere: no all-caps text outside the h1, Saira display text and Hôm nay's i
 Screenshots: .screenshots/cc2-unify-{overview,diary,explore,settings,micros,food}-{390,1280}.png
 Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/cc2_unify.py
 """
+# PROBE_COVERS: app/(app)/(dashboard)/training/** app/(app)/(tabs)/app/** app/(app)/(tabs)/explore/** app/(app)/(tabs)/settings/** app/(app)/(tabs)/trends/** app/(app)/(tabs)/trends/body/** app/(app)/(tabs)/trends/micros/** app/(app)/entry/[id]/** app/(app)/foods/[id]/** app/(app)/foods/new/** app/(app)/micros/** app/(app)/micros/[nutrient]/** app/(app)/settings/delete-account/** app/(app)/settings/language/** app/(app)/settings/notifications/** app/(app)/settings/profile/** app/(app)/settings/profile/weight/** app/(app)/setup/done/** app/(app)/setup/goal/** app/(app)/setup/profile/** app/install/** app/paywall/**
 import os
 import sys
 from pathlib import Path

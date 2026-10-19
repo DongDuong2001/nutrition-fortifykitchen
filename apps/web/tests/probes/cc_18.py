@@ -9,6 +9,7 @@ screens have the shared header, the auth screens have none. Runs at 390 and 1280
 Screenshots: .screenshots/cc-18-<screen>-<width>.png
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_18.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/(tabs)/settings/** app/(app)/settings/account/** app/(app)/settings/account/password/** app/(app)/setup/profile/** app/reset-password/** app/signin/** app/signin/forgot/** app/signup/**
 import os
 import sys
 import time

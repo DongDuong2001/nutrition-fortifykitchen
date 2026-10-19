@@ -15,6 +15,7 @@
    Hoàn tác.
 Run with: ALIGN_BASE_URL=http://localhost:3107 npm run probe -- tests/probes/cc_53_units.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/add/** app/(app)/entry/[id]/** app/(app)/foods/[id]/**
 import os
 import re
 import sys

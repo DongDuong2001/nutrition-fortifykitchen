@@ -3,6 +3,7 @@ Marks (ms after the pointerdown): click event, history.pushState (the route chan
 sheet's first frame with a different translateY. Run with:
   ALIGN_BASE_URL=http://localhost:3107 npm run probe -- tests/probes/cc_57_plus.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/**
 import os
 
 from playwright.sync_api import sync_playwright

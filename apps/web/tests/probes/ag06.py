@@ -1,6 +1,7 @@
 """ag-06: verification probe for a11y Must fixes, Should fixes, 22 vi chất copy, and reminder row status.
 Run with: ALIGN_BASE_URL=http://localhost:3100 npm run probe -- tests/probes/ag06.py
 """
+# PROBE_COVERS: app/(app)/(dashboard)/training/** app/(app)/(tabs)/app/** app/(app)/(tabs)/settings/** app/(app)/(tabs)/trends/** app/(app)/add/** app/(app)/entry/[id]/** app/(app)/foods/[id]/** app/(app)/micros/** app/(app)/micros/[nutrient]/** app/(app)/settings/notifications/** app/(app)/settings/profile/** app/(app)/settings/profile/weight/** app/(app)/setup/goal/** app/(app)/setup/profile/** app/paywall/**
 import os
 import re
 import sys

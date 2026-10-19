@@ -9,6 +9,7 @@ Production build, clock fixed at 2026-10-15 10:00 Asia/Ho_Chi_Minh, demo mode, 3
   with the toast.
 Run with: ALIGN_BASE_URL=http://localhost:3104 npm run probe -- tests/probes/cc_27a.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/**
 import os
 import re
 import sys

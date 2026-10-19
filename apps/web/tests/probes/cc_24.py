@@ -8,6 +8,7 @@ Per screen and width: no console or hydration errors, no horizontal scroll, one 
 screen links to /admin. Leaderboard rows show only the name and the score. Screenshots: .screenshots/cc-24-{leaderboard,coaches,admin,error}-390.png.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_24.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/(tabs)/explore/** app/(app)/(tabs)/settings/** app/(app)/(tabs)/trends/** app/(app)/admin/review/** app/(app)/explore/coaches/** app/(app)/explore/coaches/[id]/** app/(app)/explore/leaderboard/** app/(app)/micros/** app/(app)/settings/profile/** app/privacy/** app/terms/**
 import os
 import re
 import sys

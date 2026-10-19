@@ -4,6 +4,7 @@
 - (g) Hồ sơ › Cân nặng: the kcal and protein ranges change as the weight changes (before Lưu), and the new ranges are the ones Mục tiêu shows after saving.
 Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/cc2_19b.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/(tabs)/explore/** app/(app)/settings/profile/weight/** app/(app)/settings/targets/** app/(app)/setup/profile/** app/signin/**
 import os
 import re
 import sys

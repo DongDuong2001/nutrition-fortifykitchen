@@ -5,6 +5,7 @@ D a dish with one part changed (Phở bò, Bánh phở 200 → 150 g: row, Thàn
 + Thịt bò chip), E the same dish a second time (Thành phần is open already).
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_67_taps.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/**
 import os
 import re
 

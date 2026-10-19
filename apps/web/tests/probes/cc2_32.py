@@ -7,6 +7,7 @@
 Screenshots: .screenshots/cc2-32-redirect-390.png, .screenshots/cc2-32-home-from-diary-390.png
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc2_32.py
 """
+# PROBE_COVERS: app/(app)/(dashboard)/training/** app/(app)/(tabs)/app/** app/(app)/(tabs)/explore/** app/(app)/(tabs)/settings/** app/(app)/(tabs)/trends/** app/(app)/(tabs)/trends/body/** app/(app)/(tabs)/trends/energy/** app/(app)/(tabs)/trends/micros/** app/(app)/add/** app/(app)/entry/[id]/** app/(app)/foods/[id]/** app/(app)/micros/** app/(app)/micros/[nutrient]/** app/(app)/settings/profile/** app/page.tsx
 import json
 import os
 import re

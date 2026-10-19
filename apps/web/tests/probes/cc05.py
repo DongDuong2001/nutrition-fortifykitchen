@@ -3,6 +3,7 @@ Scenarios: portion change updates totals, move to another meal, delete with Hoà
 undo gone after reload with edits kept, unknown id, and the entry rows share edges.
 Run with: ALIGN_BASE_URL=http://localhost:3101 PATH=/usr/bin:$PATH npm run probe -- tests/probes/cc05.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/entry/[id]/**
 import os
 import re
 import sys

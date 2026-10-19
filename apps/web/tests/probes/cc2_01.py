@@ -4,6 +4,7 @@ amount shows "—", never "0" (alcohol on the sample day). /foods redirects to /
 Screenshots at 390 and 1440 go to apps/web/.screenshots/cc2-01-*.png.
 Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/cc2_01.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/(tabs)/explore/** app/(app)/micros/** app/(app)/micros/[nutrient]/** app/page.tsx
 import datetime
 import os
 import re

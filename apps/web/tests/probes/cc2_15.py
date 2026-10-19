@@ -10,6 +10,7 @@
 Screenshots: .screenshots/cc2-15-{profile,goal,summary,first-meal}-{390,1280}.png
 Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/cc2_15.py
 """
+# PROBE_COVERS: app/(app)/setup/done/** app/(app)/setup/profile/** app/page.tsx app/signup/**
 import os
 import re
 import sys

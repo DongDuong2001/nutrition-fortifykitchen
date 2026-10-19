@@ -7,6 +7,7 @@
 Screenshots: .screenshots/cc-41-landing-1440.png, cc-41-landing-390.png, cc-41-home-390.png, cc-41-add-portion-390.png
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_41_shots.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/add/** app/landing/**
 import os
 import sys
 from pathlib import Path

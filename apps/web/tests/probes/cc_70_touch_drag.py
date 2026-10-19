@@ -14,6 +14,7 @@ through CDP Input.dispatchTouchEvent (touchStart, hold, touchMove in steps, touc
 Screenshots: .screenshots/cc-70-*.png
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_70_touch_drag.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/add/**
 import json
 import os
 import re

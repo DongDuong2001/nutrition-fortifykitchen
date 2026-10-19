@@ -11,6 +11,7 @@ visitor to /setup. Sample account: on a production build, outside demo mode, ban
 dev, which always runs demo mode).
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_19.py
 """
+# PROBE_COVERS: app/(app)/(dashboard)/training/** app/(app)/(tabs)/settings/** app/(app)/foods/[id]/** app/(app)/micros/** app/(app)/micros/[nutrient]/** app/(app)/settings/account/** app/(app)/settings/account/password/** app/(app)/settings/data-sources/** app/(app)/settings/delete-account/** app/(app)/settings/language/** app/(app)/settings/notifications/** app/(app)/settings/profile/** app/(app)/settings/profile/weight/** app/(app)/settings/targets/** app/reset-password/** app/signin/** app/signin/forgot/** app/signup/**
 import os
 import sys
 

@@ -11,6 +11,7 @@ as the real server does for the signed-in user.
      loses "Chỉ trên máy này", and a reload creates nothing again
 Run with: LIVE_BUILD=1 ALIGN_BASE_URL=http://localhost:3104 npm run probe -- tests/probes/hotfix_recipes.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/add/** app/(app)/foods/[id]/** app/(app)/foods/new/**
 import json
 import os
 import re

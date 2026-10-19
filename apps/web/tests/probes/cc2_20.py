@@ -7,6 +7,7 @@
 Screenshots: .screenshots/cc2-20-*.png
 Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/cc2_20.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/trends/**
 import os
 import re
 import sys

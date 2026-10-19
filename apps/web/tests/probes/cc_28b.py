@@ -9,6 +9,7 @@ Production build, clock fixed at 2026-10-15 10:00 Asia/Ho_Chi_Minh, demo mode (?
   footer at the bottom edge.
 Run with: ALIGN_BASE_URL=http://localhost:3104 npm run probe -- tests/probes/cc_28b.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/micros/**
 import base64
 import os
 import re

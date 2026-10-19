@@ -17,6 +17,7 @@
 Screenshots: .screenshots/cc-52-*.png
 Run with: ALIGN_BASE_URL=http://localhost:3105 npm run probe -- tests/probes/cc_52_training.py
 """
+# PROBE_COVERS: app/(app)/(dashboard)/training/** app/(app)/(tabs)/app/** app/(app)/entry/[id]/** app/(app)/foods/new/** app/(app)/settings/profile/**
 import json
 import os
 import re

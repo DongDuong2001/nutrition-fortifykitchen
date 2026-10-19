@@ -8,6 +8,7 @@ Also: /admin/review keeps Cài đặt active in the bottom nav (cc-24 Should).
 Screenshots: .screenshots/cc-23-{compare,compare-serving,add-compare}-390.png and cc-23-compare-1440.png.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_23.py
 """
+# PROBE_COVERS: app/(app)/add/** app/(app)/admin/review/** app/(app)/foods/[id]/** app/(app)/foods/compare/**
 import os
 import re
 import sys

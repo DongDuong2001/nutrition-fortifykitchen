@@ -7,6 +7,7 @@ Asserted at both 390x844 (mobile) and 1440x900 (desktop).
 
 Run with: ALIGN_BASE_URL=http://localhost:3100 npm run probe -- tests/probes/ag07.py
 """
+# PROBE_COVERS: app/(app)/foods/[id]/** app/(app)/foods/new/** app/signin/**
 import os
 import re
 import sys

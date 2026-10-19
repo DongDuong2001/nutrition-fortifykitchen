@@ -1,6 +1,7 @@
 """cc2-03: audit items from docs/audit-ag04.md (Profile red text, CalorieDial track, AppHeader date button).
 Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/cc2_03.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/(tabs)/settings/** app/(app)/settings/account/**
 import os
 import re
 import sys
