@@ -6,8 +6,8 @@ import { apiClient } from "@/lib/api-client";
 import { useDiary } from "@/lib/diary-store";
 import { getMealSlotNameVi } from "@/lib/meal-slot";
 import { useMealSlot } from "@/lib/use-meal-slot";
-import { formatAmount, parseNumberInput } from "@/lib/format";
-import { MAX_QUICK_KCAL, MAX_QUICK_NAME } from "@/lib/quick-entry";
+import { formatAmount } from "@/lib/format";
+import { parseNumberInput } from "@/lib/parse-number";
 import { nutrientName } from "@/lib/nutrients";
 import { FormRow } from "@/components/ui/form-row";
 import { Expand } from "@/components/ui/expand";
@@ -115,7 +115,6 @@ function CreateFoodInner() {
       const num = parseNumberInput(val);
       if (val.trim() === "") err = "Nhập năng lượng (kcal) để ghi vào nhật ký";
       else if (num === null) err = "Nhập số năng lượng từ 0 trở lên";
-      else if (num > MAX_QUICK_KCAL) err = "Tối đa 9.999 kcal";
     }
     setErrors((prev) => ({ ...prev, [field]: err }));
     return err;
@@ -253,7 +252,6 @@ function CreateFoodInner() {
           <input
             id="cf-name"
             type="text"
-            maxLength={MAX_QUICK_NAME}
             value={nameVi}
             onChange={(e) => {
               setNameVi(e.target.value);

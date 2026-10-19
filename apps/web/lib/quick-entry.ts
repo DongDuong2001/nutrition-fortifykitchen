@@ -1,7 +1,8 @@
 import { COUNTED_NUTRIENT_KEYS } from "./day-totals";
 import type { AddedDiaryEntry } from "./diary-edits";
 import type { MealSlot } from "./meal-slot";
-import { formatAmount, parseNumberInput } from "./format";
+import { formatAmount } from "./format";
+import { parseNumberInput } from "./parse-number";
 
 export const QUICK_NAME = "Thêm nhanh";
 

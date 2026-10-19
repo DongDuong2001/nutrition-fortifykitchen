@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { formatNumber, formatRange, formatAmount, getWeekdayName, formatDesktopDate, formatDayLabel, parseNumberInput } from "../format";
+import { formatNumber, formatRange, formatAmount, getWeekdayName, formatDesktopDate, formatDayLabel } from "../format";
+import { parseNumberInput } from "../parse-number";
 
 describe("lib/format", () => {
   describe("formatNumber", () => {

@@ -1,4 +1,5 @@
-import { formatAmount, formatNumber, parseNumberInput } from "./format";
+import { formatAmount, formatNumber } from "./format";
+import { parseNumberInput } from "./parse-number";
 import type { FoodItem } from "./mock/foods";
 import { cookSwitchFor, type CookState, type CookSwitch } from "./yield";
 
