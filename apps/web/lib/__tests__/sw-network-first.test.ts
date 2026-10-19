@@ -11,6 +11,7 @@ function load() {
   const stored = new Map<string, unknown>();
   const timers: Array<() => void> = [];
   let fetches = 0;
+  const listeners = new Map<string, (event: unknown) => void>();
   const cache = {
     match: async (key: string) => stored.get(key),
     put: async (key: string, res: unknown) => void stored.set(key, res),
@@ -19,7 +20,7 @@ function load() {
   };
   const sandbox = {
     module: { exports: {} as Record<string, unknown> },
-    self: { addEventListener() {}, location: { origin: "http://x" } },
+    self: { addEventListener: (type: string, fn: (event: unknown) => void) => void listeners.set(type, fn), location: { origin: "http://x" } },
     caches: { open: async () => cache, match: async () => undefined },
     setTimeout: (fn: () => void) => void timers.push(fn),
     fetch: async (): Promise<unknown> => {
@@ -34,7 +35,7 @@ function load() {
   runInNewContext(source, sandbox);
   const sw = sandbox.module.exports as { networkFirst: (r: unknown, p: string, preload?: unknown, e?: unknown) => Promise<unknown>; NAVIGATION_TIMEOUT_MS: number };
   const page = (name: string) => ({ ok: true, redirected: false, type: "basic", name, clone() { return this; } });
-  return { sw, sandbox, stored, timers, fetches: () => fetches, page };
+  return { sw, sandbox, stored, timers, listeners, fetches: () => fetches, page };
 }
 
 describe("sw networkFirst (cc-58)", () => {
@@ -108,5 +109,54 @@ describe("sw networkFirst (cc-58)", () => {
   it("enables navigation preload when it activates", () => {
     expect(source).toContain("navigationPreload.enable()");
     expect(source).toContain("event.preloadResponse");
+  });
+
+  // The fetch listener itself: a page load of an auth route makes one network request, never two
+  async function navigate(t: ReturnType<typeof load>, path: string, preloadResponse: Promise<unknown>) {
+    let answer: Promise<unknown> | undefined;
+    t.listeners.get("fetch")?.({
+      request: { url: `http://x${path}`, mode: "navigate", method: "GET" },
+      preloadResponse,
+      respondWith: (p: Promise<unknown>) => void (answer = p),
+      waitUntil() {},
+    });
+    return answer;
+  }
+
+  describe.each(["/signin", "/signup", "/reset-password"])("%s (never cached)", (path) => {
+    it("uses the navigation preload: the page is the one request the browser started, no second fetch", async () => {
+      const t = load();
+      const early = t.page("preloaded");
+      let calls = 0;
+      t.sandbox.fetch = async () => {
+        calls++;
+        throw new Error("must not fetch");
+      };
+      expect(await navigate(t, path, Promise.resolve(early))).toBe(early);
+      expect(calls).toBe(0);
+      // and nothing is cached
+      expect(t.stored.size).toBe(0);
+    });
+
+    it("with no preload it fetches exactly once", async () => {
+      const t = load();
+      const own = t.page("own");
+      let calls = 0;
+      t.sandbox.fetch = async () => (calls++, own);
+      expect(await navigate(t, path, Promise.resolve(undefined))).toBe(own);
+      expect(calls).toBe(1);
+      expect(t.stored.size).toBe(0);
+    });
+
+    it("offline: the offline page, from the preload failing or the fetch failing", async () => {
+      const t = load();
+      t.sandbox.fetch = async () => {
+        throw new Error("offline");
+      };
+      const viaFetch = (await navigate(t, path, Promise.resolve(undefined))) as { init?: { status: number } };
+      expect(viaFetch.init?.status).toBe(503);
+      const viaPreload = (await navigate(t, path, Promise.reject(new Error("offline")))) as { init?: { status: number } };
+      expect(viaPreload.init?.status).toBe(503);
+    });
   });
 });

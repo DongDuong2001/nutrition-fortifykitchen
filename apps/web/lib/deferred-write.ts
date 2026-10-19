@@ -5,13 +5,8 @@ export interface WriteTarget {
   setItem(key: string, value: string): void;
 }
 
-interface Pending {
-  store: WriteTarget;
-  produce: () => string;
-}
-
 export interface DeferredWriter {
-  /** Writes `produce()` to `store[key]` when the browser is idle. A newer call for the same key replaces the waiting one. */
+  /** Writes `produce()` to `store[key]` when the browser is idle. A newer call for the same store and key replaces the waiting one. */
   schedule(store: WriteTarget, key: string, produce: () => string): void;
   /** Writes everything that is waiting, now. */
   flush(): void;
@@ -19,7 +14,7 @@ export interface DeferredWriter {
 
 /**
  * cc-58: localStorage writes are synchronous and the diary writes its lists after every change. They wait for an idle
- * moment instead (one write per key, the newest value), and go out at once when the page is hidden or closed
+ * moment instead (one write per store and key, the newest value), and go out at once when the page is hidden or closed
  * (visibilitychange to hidden, pagehide) or when the provider unmounts, so nothing is lost.
  * `idle`, `listen` and `hidden` are for tests; the defaults are the browser's.
  */
@@ -39,21 +34,26 @@ export function createDeferredWriter(deps?: {
       return () => target.removeEventListener(type, fn);
     });
 
-  const pending = new Map<string, Pending>();
+  // Per store, then per key: the account's own storage is a store of its own, so one account's waiting write is
+  // never replaced by another's for the same key
+  const pending = new Map<WriteTarget, Map<string, () => string>>();
   let cancelIdle: (() => void) | null = null;
   let listening = false;
 
   function flush() {
     cancelIdle?.();
     cancelIdle = null;
-    for (const [key, { store, produce }] of pending) {
-      try {
-        store.setItem(key, produce());
-      } catch {
-        // Quota or storage blocked: the same as an immediate write that failed
+    const waiting = [...pending];
+    pending.clear();
+    for (const [store, keys] of waiting) {
+      for (const [key, produce] of keys) {
+        try {
+          store.setItem(key, produce());
+        } catch {
+          // Quota or storage blocked: the same as an immediate write that failed
+        }
       }
     }
-    pending.clear();
   }
 
   function ensureListening() {
@@ -68,16 +68,9 @@ export function createDeferredWriter(deps?: {
   return {
     schedule(store, key, produce) {
       ensureListening();
-      const waiting = pending.get(key);
-      // The same key for another store (the account changed): the old value is written first
-      if (waiting && waiting.store !== store) {
-        try {
-          waiting.store.setItem(key, waiting.produce());
-        } catch {
-          // Ignore
-        }
-      }
-      pending.set(key, { store, produce });
+      let keys = pending.get(store);
+      if (!keys) pending.set(store, (keys = new Map()));
+      keys.set(key, produce);
       if (!cancelIdle) {
         cancelIdle = idle(() => {
           cancelIdle = null;

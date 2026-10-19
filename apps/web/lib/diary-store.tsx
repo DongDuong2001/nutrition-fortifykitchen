@@ -853,9 +853,16 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   }, [pathname, hydrated, demo, accountId, loadData, todayIso]);
 
   // The storage this account (or demo) writes to; without an account it reads and writes nothing
+  // One object per account: the deferred writer tells accounts apart by it
+  const ownStorageRef = useRef<{ local: KeyValueStore; demo: boolean; accountId: string | null; own: KeyValueStore } | null>(null);
   const ownStorage = useCallback((): KeyValueStore | null => {
     const local = browserLocal();
-    return local ? keyedStorage(local, demo, accountId) : null;
+    if (!local) return null;
+    const cached = ownStorageRef.current;
+    if (cached && cached.local === local && cached.demo === demo && cached.accountId === accountId) return cached.own;
+    const own = keyedStorage(local, demo, accountId);
+    ownStorageRef.current = { local, demo, accountId, own };
+    return own;
   }, [demo, accountId]);
 
   // Persist favourites only after hydrated
