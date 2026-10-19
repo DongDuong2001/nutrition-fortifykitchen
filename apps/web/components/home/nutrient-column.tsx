@@ -8,10 +8,11 @@ import type { ShareKeyItem } from "@/lib/share-card";
 import { ColumnScroll } from "./column-scroll";
 import { inkPill } from "./ink-pill";
 import { LevelBar } from "@/components/ui/level-bar";
+import { getLevel, getLevelLabel } from "@/lib/levels";
 
 /** The share image draws every row (no scrolling); the screen scrolls, with a fade while rows wait below. */
-function Scroll({ share, children }: { share: boolean; children: React.ReactNode }) {
-  return share ? <div className="flex flex-col">{children}</div> : <ColumnScroll>{children}</ColumnScroll>;
+function Scroll({ share, fitKey, children }: { share: boolean; fitKey: string; children: React.ReactNode }) {
+  return share ? <div className="flex flex-col">{children}</div> : <ColumnScroll fitKey={fitKey}>{children}</ColumnScroll>;
 }
 
 /**
@@ -57,7 +58,7 @@ export const NutrientColumn = memo(function NutrientColumn({
       }`}
     >
       {/* Sections stack at their natural height (34 px rows, 48 px from lg); space left over sits below the last one, and a column that does not fit scrolls */}
-      <Scroll share={share}>
+      <Scroll share={share} fitKey={groups.map((g) => `${g.title}:${g.ids.join(",")}`).join("|") + (selected ? "!" : "")}>
         {groups.map((group, groupIndex) => (
           <section key={group.title} aria-label={group.title} data-tour={groupIndex === 0 ? "nutrient-column" : undefined} className="flex shrink-0 flex-col">
             <h3 data-snap-row className={`m-0 flex-none snap-start ${pill.wrap}`}>
@@ -96,7 +97,7 @@ export const NutrientColumn = memo(function NutrientColumn({
                     ? {
                         type: "button" as const,
                         onClick: () => onNutrient?.(id),
-                        "aria-label": `${def.name}, ${value === null ? "chưa có dữ liệu" : `${formatAmount(value, def.unit)} ${def.unit}`}, ${pctLabel(value, targets[id] ?? null)} mục tiêu. Xem món góp phần`,
+                        "aria-label": `${def.name}, ${value === null ? "chưa có dữ liệu" : `${formatAmount(value, def.unit)} ${def.unit}`}, ${pctLabel(value, targets[id] ?? null)} mục tiêu${pct === null ? "" : `, ${getLevelLabel(getLevel(pct))}`}. Xem món góp phần`,
                         "aria-haspopup": "dialog" as const,
                       }
                     : {})}

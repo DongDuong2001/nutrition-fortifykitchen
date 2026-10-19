@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 
 /**
  * The scrolling part of the Hôm nay nutrient column. Nothing is ever drawn over a row: no fade, no overlay, and the
@@ -8,26 +8,31 @@ import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "re
  * to end on the bottom of the last whole row (at the top of the list), so no row is half cut above the block; the
  * strip left over is empty space. Scrolling snaps to row tops (proximity), so a list at rest starts on a row.
  */
-export function ColumnScroll({ children }: { children: ReactNode }) {
+export function ColumnScroll({ fitKey, children }: { fitKey: string; children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
   const [scrollable, setScrollable] = useState(false);
+  const scrollableRef = useRef(false);
 
-  // Measured after every render: the rows (and so the cut) change with the Level, the picked food and the data
+  // cc-58: the cut is measured when the rows change (`fitKey`: the Level's groups, the row count, the picked food) and
+  // when the column's box resizes, not after every render of the page
+  const measure = useCallback((el: HTMLElement) => {
+    fitToWholeRows(el);
+    const next = el.scrollHeight > el.clientHeight + 1;
+    if (next === scrollableRef.current) return;
+    scrollableRef.current = next;
+    setScrollable(next);
+  }, []);
+
   useLayoutEffect(() => {
     const el = ref.current;
-    if (!el) return;
-    fitToWholeRows(el);
-    setScrollable(el.scrollHeight > el.clientHeight + 1);
-  });
+    if (el) measure(el);
+  }, [fitKey, measure]);
 
   useEffect(() => {
     const el = ref.current;
     const parent = el?.parentElement;
     if (!el || !parent) return;
-    const observer = new ResizeObserver(() => {
-      fitToWholeRows(el);
-      setScrollable(el.scrollHeight > el.clientHeight + 1);
-    });
+    const observer = new ResizeObserver(() => measure(el));
     // The column's own box, not the scroll area: cutting the area must not trigger another fit
     observer.observe(parent);
     return () => observer.disconnect();

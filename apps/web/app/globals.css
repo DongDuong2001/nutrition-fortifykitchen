@@ -449,6 +449,11 @@
   transform-origin: left center;
   animation: m-countdown linear both;
 }
+/* Hover or focus on the toast stops its clock (the store stops its timer): the bar stops with it */
+.m-toast:hover .m-countdown,
+.m-toast:focus-within .m-countdown {
+  animation-play-state: paused;
+}
 
 /* An expanding row (accordion): its height opens with grid rows 0fr → 1fr while the content fades in; one row at a
    time. The chevron of its button turns 180°. */
@@ -668,6 +673,10 @@
 }
 ::view-transition-old(m-sheet) {
   animation: m-vt-sheet-down var(--m-sheet-out) var(--ease-drawer) both;
+}
+/* The sheet's own group does not morph between its two boxes: only the old image slides down */
+::view-transition-group(m-sheet) {
+  animation: none;
 }
 
 /* cc-55b: /add opened straight (a link, a reload): Hôm nay behind the sheet is a picture nobody saw a moment ago, so its

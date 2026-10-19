@@ -3,7 +3,7 @@
 import React, { useRef } from "react";
 import { Presence } from "@/components/ui/presence";
 import { Toast } from "@/components/ui/toast";
-import { useDiary, type ToastInfo } from "@/lib/diary-store";
+import { useDiary, useDiaryToast, type ToastInfo } from "@/lib/diary-store";
 import { scrollBehavior } from "@/lib/scroll-behavior";
 
 /**
@@ -13,7 +13,8 @@ import { scrollBehavior } from "@/lib/scroll-behavior";
  * CSS (no timer re-rendering the toast), and each toast rises in and fades away (Presence).
  */
 export function DiaryToast() {
-  const { toast, parkedDelete, undoParkedDelete, undoLastDelete, undoCopy, undoMove, retryUnsaved, setHighlightedMeal } = useDiary();
+  const { undoParkedDelete, undoLastDelete, undoCopy, undoMove, retryUnsaved, setHighlightedMeal, pauseToast, resumeToast } = useDiary();
+  const { toast, parkedDelete } = useDiaryToast();
   // A new toast is a new element: its countdown starts over
   const ids = useRef({ map: new WeakMap<ToastInfo, number>(), next: 0 });
   const idOf = (t: ToastInfo) => {
@@ -32,11 +33,13 @@ export function DiaryToast() {
   };
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-24 z-50 flex flex-col gap-2 px-3 lg:inset-x-auto lg:bottom-8 lg:right-8 lg:w-[400px]">
+    // cc-58: one live region that stays mounted: a toast put into it is announced, one that came with its own region often is not
+    <div role="status" className="pointer-events-none fixed inset-x-0 bottom-24 z-50 flex flex-col gap-2 px-3 lg:inset-x-auto lg:bottom-8 lg:right-8 lg:w-[400px]">
       <Presence>
         {parkedDelete && (
           <div className="pointer-events-auto">
             <Toast
+              announce={false}
               key={idOf(parkedDelete.toast)}
               message={parkedDelete.toast.message}
               actionLabel="Hoàn tác"
@@ -50,6 +53,9 @@ export function DiaryToast() {
         {toast && (
         <div className="pointer-events-auto">
           <Toast
+            announce={false}
+            onPause={pauseToast}
+            onResume={resumeToast}
             key={idOf(toast)}
             message={toast.message}
             actionLabel={

@@ -11,6 +11,7 @@ import { MOCK_FOODS, addCatalogFood, catalogChanged, setCatalogFoods, setCatalog
 import { searchFoods as searchMockFoods } from "./search";
 import type { SetupProfile } from "./onboarding";
 import { currentAccountId } from "./auth-actions";
+import { yieldToMain } from "./idle";
 import { OFFLINE_OUTBOX_KEY, accountStorage, browserLocal, keyedStorage, type KeyValueStore } from "./storage-keys";
 import { isDemo } from "./demo";
 import { type CoachProfile, filterCoachesBySpecialty, getCoachById } from "./coaches";
@@ -261,29 +262,83 @@ async function fetchAllFoods(): Promise<FoodItem[]> {
   }
 }
 
-/** Every page of /foods. A background refresh changes nothing on screen until it has the whole list. */
+/** One page of /foods: its foods and the catalogue total, or null when the call or the shape is not right. */
+async function fetchFoodsPage(page: number): Promise<{ items: unknown[]; total: number } | null> {
+  const res = await apiFetch(`/foods?limit=${FOODS_PAGE_LIMIT}&page=${page}`);
+  if (!res.ok) return null;
+  const json = await res.json();
+  const payload = json.data ?? json;
+  const items = payload.items ?? (Array.isArray(payload) ? payload : null);
+  if (!Array.isArray(items)) return null;
+  return { items, total: Number(payload.total) };
+}
+
+/** Pages loading at once after the first (cc-58). */
+const FOODS_PAGES_IN_FLIGHT = 4;
+
+/**
+ * Every page of /foods. Page 1 says how many there are; the rest are fetched together (at most 4 at a time) and added in
+ * page order. A background refresh changes nothing on screen until it has the whole list.
+ */
 async function downloadCatalog(account: string | null, background: boolean): Promise<FoodItem[]> {
   if (!background) setCatalogStatus("loading");
   const collected = new Map<string, FoodItem>();
   let complete = false;
+  const add = async (items: unknown[]) => {
+    // The mapping of thousands of rows goes in slices, so a tap between two of them is not held up
+    for (let i = 0; i < items.length; i++) {
+      const food = mapApiFoodToFoodItem(items[i]);
+      collected.set(food.id, food);
+      if (i % 250 === 249) await yieldToMain();
+    }
+  };
   try {
-    for (let page = 1; page <= FOODS_MAX_PAGES; page++) {
-      const res = await apiFetch(`/foods?limit=${FOODS_PAGE_LIMIT}&page=${page}`);
-      if (!res.ok) break;
-      const json = await res.json();
-      const payload = json.data ?? json;
-      const items = payload.items ?? (Array.isArray(payload) ? payload : null);
-      if (!Array.isArray(items)) break;
-      for (const raw of items) {
-        const food = mapApiFoodToFoodItem(raw);
-        collected.set(food.id, food);
-      }
-      const total = Number(payload.total);
-      if (total > 0 ? collected.size >= total : items.length === 0) {
+    const first = await fetchFoodsPage(1);
+    if (first) {
+      await add(first.items);
+      if (first.total > 0 ? collected.size >= first.total : first.items.length === 0) {
         complete = true;
-        break;
+      } else if (first.items.length > 0 && first.total > 0) {
+        // The server may cap a page below the limit asked for: the size that really came says how many pages there are
+        const pages = Math.min(FOODS_MAX_PAGES, Math.ceil(first.total / first.items.length));
+        const loaded: Array<{ items: unknown[] } | null> = new Array(pages + 1).fill(null);
+        let next = 2;
+        const worker = async () => {
+          while (next <= pages) {
+            const page = next++;
+            try {
+              loaded[page] = await fetchFoodsPage(page);
+            } catch {
+              loaded[page] = null;
+            }
+          }
+        };
+        await Promise.all(Array.from({ length: Math.min(FOODS_PAGES_IN_FLIGHT, pages - 1) }, worker));
+        // In page order, up to the first page that did not come: a short list is kept, as before
+        for (let page = 2; page <= pages; page++) {
+          const got = loaded[page];
+          if (!got || got.items.length === 0) break;
+          await add(got.items);
+        }
+        // Pages that came short leave a gap: the rest is read one after the other, as before
+        for (let page = pages + 1; collected.size < first.total && page <= FOODS_MAX_PAGES; page++) {
+          const got = await fetchFoodsPage(page);
+          if (!got || got.items.length === 0) break;
+          await add(got.items);
+        }
+        complete = collected.size >= first.total;
+      } else if (first.items.length > 0) {
+        // No total: the pages are read one after the other until one is empty
+        for (let page = 2; page <= FOODS_MAX_PAGES; page++) {
+          const got = await fetchFoodsPage(page);
+          if (!got) break;
+          if (got.items.length === 0) {
+            complete = true;
+            break;
+          }
+          await add(got.items);
+        }
       }
-      if (items.length === 0) break;
     }
   } catch {
     // Keep what loaded

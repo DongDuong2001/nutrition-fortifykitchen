@@ -42,8 +42,9 @@ export function EmailPasswordForm({ variant }: { variant: "signin" | "signup" })
   const [busy, setBusy] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | undefined>(undefined);
 
+  // The email a visitor typed before this effect ran is kept (a fast typist, or a form filled by a password manager)
   useEffect(() => {
-    setEmail(readPendingEmail());
+    setEmail((typed) => typed || readPendingEmail());
   }, []);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {

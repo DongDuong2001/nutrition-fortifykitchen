@@ -59,7 +59,7 @@ export function AppShell({
 }
 
 // ---- cc-57: the frame the four tabs share ----
-// app/(tabs)/layout.tsx renders TabsShell once, so a tap on a bottom tab keeps the sidebar, the nav and its active
+// app/(app)/(tabs)/layout.tsx renders TabsShell once, so a tap on a bottom tab keeps the sidebar, the nav and its active
 // state mounted and only swaps the page. The bar slot (components/ui/shell-slot) is for Hôm nay's select mode.
 
 /** The data-align-container of each tab page (the alignment check scopes its groups to it). */

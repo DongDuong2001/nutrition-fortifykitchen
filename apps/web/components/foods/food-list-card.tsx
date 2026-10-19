@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import type { FoodItem } from "@/lib/mock/foods";
 import { Card } from "@/components/ui/card";
 import { SectionTitle } from "@/components/ui/section-title";
 import { FoodRowLink } from "./food-row-link";
 import { foodRowMeta, foodRowKcal } from "@/lib/food-meta";
+
+const FOOD_CARD_LIMIT = 50;
 
 export interface FoodListCardProps {
   title?: string;
@@ -17,6 +19,11 @@ export interface FoodListCardProps {
 
 /** One Card holding a titled list of food rows with dividers (UI-RULES row pattern). */
 export function FoodListCard({ title, action, foods, withCategory, empty }: FoodListCardProps) {
+  // cc-58: the first 50 rows, then "Xem thêm" (a new list, from another query, starts again)
+  const listKey = `${foods.length}:${foods[0]?.food.id ?? ""}`;
+  const [more, setMore] = useState({ listKey, extra: 0 });
+  const extra = more.listKey === listKey ? more.extra : 0;
+  const limit = FOOD_CARD_LIMIT + extra;
   return (
     <Card as="section" aria-label={title} className="flex flex-col gap-1">
       {(title || action) && (
@@ -27,7 +34,7 @@ export function FoodListCard({ title, action, foods, withCategory, empty }: Food
       )}
       {foods.length === 0
         ? empty
-        : foods.map(({ food, label, grams }, i) => (
+        : foods.slice(0, limit).map(({ food, label, grams }, i) => (
             <FoodRowLink
               key={`${food.id}-${i}`}
               href={`/foods/${food.id}`}
@@ -37,6 +44,15 @@ export function FoodListCard({ title, action, foods, withCategory, empty }: Food
               withBorderTop={i > 0 || !!title}
             />
           ))}
+      {foods.length > limit && (
+        <button
+          type="button"
+          onClick={() => setMore({ listKey, extra: extra + FOOD_CARD_LIMIT })}
+          className="flex min-h-[56px] w-full cursor-pointer items-center justify-center border-0 border-t border-divider bg-transparent px-4 text-[15px] font-bold text-blue"
+        >
+          Xem thêm
+        </button>
+      )}
     </Card>
   );
 }

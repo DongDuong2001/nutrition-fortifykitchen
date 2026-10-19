@@ -5,7 +5,6 @@ import { isDemo } from "./demo";
 import { currentAccount, currentAccountId, wasExplicitlySignedOut } from "./auth-actions";
 import { isLiveMode } from "./api-mode";
 import { ADDED_ENTRIES_KEY, adoptLegacyKeys, adoptLegacyPersonal, browserLocal, browserSession, keyedStorage } from "./storage-keys";
-import { apiClient } from "./api-client";
 import { HOME_ROUTE } from "./nav";
 
 // The entries this user added live in localStorage under the signed-in account's key (lib/storage-keys). Only
@@ -109,6 +108,7 @@ export async function gateRedirect(pathname: string, demo: boolean = isDemo()): 
   const facts = readFirstRunFacts(demo);
   if (!demo && isLiveMode() && !facts.profileSaved && currentAccountId()) {
     try {
+      const { apiClient } = await import("./api-client");
       const profile = await apiClient.getProfile();
       if (profile) {
         writeStoredProfile(profile);

@@ -199,7 +199,8 @@ def stack_flow(browser, size, tag):
     pg.get_by_role("button", name="Xóa", exact=True).click()
     pg.evaluate(MOVE_IN_PAGE)
     check(hero_count(pg) == 6, f"{tag} stack: one food deleted ({hero_count(pg)})")
-    toasts = [squash(t) for t in pg.locator("[role=status] >> visible=true").all_inner_texts()]
+    # cc-58: the toasts sit in one persistent role=status host: each toast is an .m-toast inside it
+    toasts = [squash(t) for t in pg.locator("[role=status] .m-toast >> visible=true").all_inner_texts()]
     check(len(toasts) == 2 and "Đã xóa" in toasts[0] and "Đã chuyển 1 món sang Bữa phụ" in toasts[1], f"{tag} stack: both toasts are on screen ({toasts})")
     check(pg.get_by_role("button", name="Hoàn tác").count() == 2, f"{tag} stack: two Hoàn tác buttons")
     pg.screenshot(path=os.path.join(SHOTS, f"cc-27a-stacked-toasts-{w}.png"))

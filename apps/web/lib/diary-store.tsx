@@ -23,6 +23,8 @@ import {
   type KeyValueStore,
 } from "./storage-keys";
 import { blankDay, dayEntries, setDayArchive, statDisplay } from "./day-history";
+import { deferredWrites } from "./deferred-write";
+import { whenIdle } from "./idle";
 import { totalsFromEntries } from "./day-totals";
 import { microsSummaryFor } from "./lacking";
 import { nutrientSourcesIn, type NutrientSource } from "./nutrient-sources";
@@ -160,9 +162,10 @@ interface DiaryContextValue {
   addFoodEntries: (items: Array<{ food: FoodItem; grams: number; label: string; id?: string }>, mealSlot: MealSlot) => boolean;
   recentFoods: RecentFood[];
   addRecentFood: (food: FoodItem, servingLabel: string) => void;
-  toast: ToastInfo | null;
   dismissToast: () => void;
-  highlightedMeal: MealSlot | null;
+  /** The pointer is on the toast, or focus is in it: its time stops until resumeToast. */
+  pauseToast: () => void;
+  resumeToast: () => void;
   setHighlightedMeal: (meal: MealSlot | null) => void;
   /** Newest favourite first. Loaded after mount from localStorage (see lib/favourites.ts). */
   favouriteIds: string[];
@@ -186,8 +189,6 @@ interface DiaryContextValue {
   undoMove: () => void;
   /** Puts the last deleted entry back. Only works while the "deleted" toast is shown. */
   undoLastDelete: () => void;
-  /** A delete's toast that a Chuyển bữa toast pushed aside: still shown under it with its own time left. */
-  parkedDelete: ParkedToast | null;
   /** Hoàn tác of the parked delete. Leaves the toast on top alone. */
   undoParkedDelete: () => void;
   /** Adds copied entries to today in one step, with one undo toast. Existing entries are kept. */
@@ -236,7 +237,20 @@ interface DiaryContextValue {
   nutrientSources: (key: string) => NutrientSource[];
 }
 
+/**
+ * cc-58: the toast on screen, the delete toast parked under it and the meal to highlight. They change with every
+ * toast, so they live in their own context: a toast no longer re-renders every useDiary() consumer (48 of them). Only
+ * the toast host (components/diary-toast) reads them, with useDiaryToast().
+ */
+export interface DiaryToastState {
+  toast: ToastInfo | null;
+  /** A delete's toast that a Chuyển bữa toast pushed aside: still shown under it with its own time left. */
+  parkedDelete: ParkedToast | null;
+  highlightedMeal: MealSlot | null;
+}
+
 const DiaryContext = createContext<DiaryContextValue | null>(null);
+const DiaryToastContext = createContext<DiaryToastState | null>(null);
 
 
 /**
@@ -512,6 +526,9 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   const [parkedDelete, setParkedDelete] = useState<ParkedToast | null>(null);
   // When the toast on screen was set, so a delete's toast can keep its remaining time when it is parked
   const toastStartedAt = useRef(0);
+  // The undo actions read the toast through this ref, so they keep one identity while toasts come and go
+  const toastRef = useRef<ToastInfo | null>(null);
+  toastRef.current = toast;
   const [highlightedMeal, setHighlightedMeal] = useState<MealSlot | null>(null);
   const [favouriteIds, setFavouriteIds] = useState<string[]>([]);
   const [savedMeals, setSavedMeals] = useState<SavedMeal[]>([]);
@@ -704,7 +721,10 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       }).catch(() => {});
 
       // Recipes made before they were saved on the server get their server food, once the ingredients are known
-      apiClient.loadAllFoods().then(() => uploadPendingRecipes(account)).catch(() => {});
+      // cc-58: when the browser is idle, not during the first paint (/add asks for it at once when it opens first)
+      whenIdle(() => {
+        apiClient.loadAllFoods().then(() => uploadPendingRecipes(account)).catch(() => {});
+      });
     }
   }, [refreshRemoteDay]);
 
@@ -833,9 +853,16 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   }, [pathname, hydrated, demo, accountId, loadData, todayIso]);
 
   // The storage this account (or demo) writes to; without an account it reads and writes nothing
+  // One object per account: the deferred writer tells accounts apart by it
+  const ownStorageRef = useRef<{ local: KeyValueStore; demo: boolean; accountId: string | null; own: KeyValueStore } | null>(null);
   const ownStorage = useCallback((): KeyValueStore | null => {
     const local = browserLocal();
-    return local ? keyedStorage(local, demo, accountId) : null;
+    if (!local) return null;
+    const cached = ownStorageRef.current;
+    if (cached && cached.local === local && cached.demo === demo && cached.accountId === accountId) return cached.own;
+    const own = keyedStorage(local, demo, accountId);
+    ownStorageRef.current = { local, demo, accountId, own };
+    return own;
   }, [demo, accountId]);
 
   // Persist favourites only after hydrated
@@ -855,8 +882,10 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     if (!hydrated) return;
     try {
       const own = ownStorage();
-      own?.setItem(ADDED_ENTRIES_KEY, JSON.stringify(edits.added));
-      own?.setItem(SAMPLE_EDITS_KEY, JSON.stringify(edits.sample));
+      if (own) {
+        deferredWrites.schedule(own, ADDED_ENTRIES_KEY, () => JSON.stringify(edits.added));
+        deferredWrites.schedule(own, SAMPLE_EDITS_KEY, () => JSON.stringify(edits.sample));
+      }
     } catch {
       // Ignore quota/access errors
     }
@@ -880,11 +909,15 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     setArchive((prev) => mergeArchive(prev, past));
   }, [hydrated, todayIso, edits.added]);
 
+  // cc-58: writes that wait for an idle moment are written now when the provider goes (a route outside the diary)
+  useEffect(() => () => deferredWrites.flush(), []);
+
   // Persist the archive only after hydrated
   useEffect(() => {
     if (!hydrated) return;
     try {
-      ownStorage()?.setItem(DAY_ARCHIVE_KEY, JSON.stringify(archive));
+      const own = ownStorage();
+      if (own) deferredWrites.schedule(own, DAY_ARCHIVE_KEY, () => JSON.stringify(archive));
     } catch {
       // Ignore quota/access errors
     }
@@ -931,7 +964,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     // The sample recents are never saved: a real account must not inherit them when demo mode goes off
     if (recentFoods === DEFAULT_RECENT_FOODS) return;
     try {
-      ownStorage()?.setItem(RECENT_FOODS_KEY, JSON.stringify(recentFoods));
+      const own = ownStorage();
+      if (own) deferredWrites.schedule(own, RECENT_FOODS_KEY, () => JSON.stringify(recentFoods));
     } catch {
       // Ignore
     }
@@ -957,14 +991,33 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
 
   // Auto-dismiss the toast. When a "deleted" toast goes, the undo goes with it; a "moved" toast has its own undo
   // (in the toast) and leaves a delete's record alone.
+  // cc-58: while the pointer is on the toast or focus is in it, its time stops (WCAG 2.2.1: a Hoàn tác that leaves while
+  // you read or reach for it). `toastClock` keeps the time left for the toast that is on screen.
+  const [pausedToast, setPausedToast] = useState<ToastInfo | null>(null);
+  const toastClock = useRef<{ toast: ToastInfo | null; left: number; since: number }>({ toast: null, left: 0, since: 0 });
+  const toastPaused = toast !== null && pausedToast === toast;
   useEffect(() => {
-    if (!toast) return;
+    if (!toast || toastPaused) return;
+    const clock = toastClock.current;
+    if (clock.toast !== toast) {
+      clock.toast = toast;
+      clock.left = toast.durationMs;
+    }
+    clock.since = Date.now();
     const timer = setTimeout(() => {
       setToast(null);
       if (toast.kind !== "moved") setEdits((prev) => dismissUndoIn(prev));
-    }, toast.durationMs);
+    }, clock.left);
     return () => clearTimeout(timer);
-  }, [toast]);
+  }, [toast, toastPaused]);
+  const pauseToast = useCallback(() => {
+    const shown = toastRef.current;
+    const clock = toastClock.current;
+    if (!shown || clock.toast !== shown) return;
+    clock.left = Math.max(0, clock.left - (Date.now() - clock.since));
+    setPausedToast(shown);
+  }, []);
+  const resumeToast = useCallback(() => setPausedToast(null), []);
 
   // Remember a food with the serving it was logged with
   const addRecentFood = useCallback((food: FoodItem, servingLabel: string) => {
@@ -1147,9 +1200,10 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       // A move has its own undo (the toast carries it). A delete's toast it replaces is parked under it, so both
       // Hoàn tác stay reachable.
       const undoMoves = slotsBeforeMove(edits, ids, slot, samples);
-      if (toast?.kind === "deleted" && edits.undo) {
-        const expiresAt = toastStartedAt.current + toast.durationMs;
-        if (expiresAt > Date.now()) setParkedDelete({ toast, expiresAt });
+      const shown = toastRef.current;
+      if (shown?.kind === "deleted" && edits.undo) {
+        const expiresAt = toastStartedAt.current + shown.durationMs;
+        if (expiresAt > Date.now()) setParkedDelete({ toast: shown, expiresAt });
       }
       setEdits((prev) => moveEntriesIn(prev, ids, slot, samples));
       haptic("moveDrop");
@@ -1162,17 +1216,17 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       });
       if (isLiveMode()) ids.forEach((id) => track(id, apiClient.updateEntry(id, { meal_slot: slot })));
     },
-    [edits, samples, todayIso, toast, track]
+    [edits, samples, todayIso, track]
   );
 
   const undoMove = useCallback(() => {
-    const moves = toast?.undoMoves;
+    const moves = toastRef.current?.undoMoves;
     if (!moves) return;
     setEdits((prev) => restoreSlotsIn(prev, moves, samples));
     haptic("undo");
     if (isLiveMode()) moves.forEach((m) => track(m.id, apiClient.updateEntry(m.id, { meal_slot: m.slot })));
     setToast(null);
-  }, [toast, samples, track]);
+  }, [samples, track]);
 
   const undoLastDelete = useCallback(() => {
     const lastUndo = edits.undo;
@@ -1212,14 +1266,14 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   }, [todayIso, sendAdd]);
 
   const undoCopy = useCallback(() => {
-    const ids = toast?.undoIds;
+    const ids = toastRef.current?.undoIds;
     if (!ids) return;
     setEdits((prev) => removeAddedIn(prev, ids));
     haptic("undo");
     setToast(null);
     // The entries were already sent: undo removes them on the server too, or they come back on the next load
     if (isLiveMode()) ids.forEach((id) => track(id, apiClient.deleteEntry(id)));
-  }, [toast, track]);
+  }, [track]);
 
   const mealFoods = useCallback(
     (slot: MealSlot, iso: string) => {
@@ -1417,7 +1471,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     if (goal100Reached(over, before, localAdd, (key) => firstGoalToday(key, todayIso))) haptic("goal100");
   }, [compositeData, hydrated, todayIso]);
 
-  // Memoised so a toast or highlight change does not re-render every useDiary() consumer
+  // Memoised, and without the toast state (DiaryToastState): a toast does not re-render every useDiary() consumer
   const contextValue = useMemo(
     () => ({
       data: compositeData,
@@ -1426,9 +1480,9 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       addFoodEntries,
       recentFoods,
       addRecentFood,
-      toast,
       dismissToast,
-      highlightedMeal,
+      pauseToast,
+      resumeToast,
       setHighlightedMeal,
       favouriteIds,
       isFavourite,
@@ -1441,7 +1495,6 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       moveEntries,
       undoMove,
       undoLastDelete,
-      parkedDelete,
       undoParkedDelete,
       copyEntries,
       undoCopy,
@@ -1473,9 +1526,9 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       addFoodEntries,
       recentFoods,
       addRecentFood,
-      toast,
       dismissToast,
-      highlightedMeal,
+      pauseToast,
+      resumeToast,
       setHighlightedMeal,
       favouriteIds,
       isFavourite,
@@ -1488,7 +1541,6 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       moveEntries,
       undoMove,
       undoLastDelete,
-      parkedDelete,
       undoParkedDelete,
       copyEntries,
       undoCopy,
@@ -1515,7 +1567,19 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     ]
   );
 
-  return <DiaryContext.Provider value={contextValue}>{children}</DiaryContext.Provider>;
+  const toastValue = useMemo(() => ({ toast, parkedDelete, highlightedMeal }), [toast, parkedDelete, highlightedMeal]);
+
+  return (
+    <DiaryContext.Provider value={contextValue}>
+      <DiaryToastContext.Provider value={toastValue}>{children}</DiaryToastContext.Provider>
+    </DiaryContext.Provider>
+  );
+}
+
+export function useDiaryToast(): DiaryToastState {
+  const ctx = useContext(DiaryToastContext);
+  if (!ctx) throw new Error("useDiaryToast must be used within a DiaryProvider");
+  return ctx;
 }
 
 export function useDiary() {

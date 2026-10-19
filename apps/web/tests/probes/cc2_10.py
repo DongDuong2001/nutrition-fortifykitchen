@@ -58,7 +58,7 @@ def heading(pg):
 
 
 def tab(pg, label):
-    return pg.locator(f'a[role="tab"]:has-text("{label}") >> visible=true').first
+    return pg.locator(f'nav[aria-label="Tổng quan"] a:has-text("{label}") >> visible=true').first
 
 
 def no_h_scroll(pg, where):
@@ -79,13 +79,13 @@ def avg_text(pg):
 def check_subtabs(browser, size_name, size):
     ctx, pg = new_page(browser, size)
     go(pg, "/trends")
-    check(pg.locator('nav[role="tablist"][aria-label="Tổng quan"]:visible').count() == 1, f"{size_name} overview: tab bar is visible")
+    check(pg.locator('nav[aria-label="Tổng quan"]:visible').count() == 1, f"{size_name} overview: tab bar is visible")
     for label, route in SUBTABS:
         tab(pg, label).click()
         pg.wait_for_url(f"**{route}", timeout=8000) if route != "/app" else pg.wait_for_url(re.compile(r".*/app(\?.*)?$"), timeout=8000)
         pg.wait_for_timeout(500)
         check(path_of(pg) == route, f"{size_name} {label}: opens {route} (got {path_of(pg)})")
-        current = pg.locator('a[role="tab"][aria-current="page"]:visible').all_inner_texts()
+        current = pg.locator('nav[aria-label="Tổng quan"] a[aria-current="page"]:visible').all_inner_texts()
         check(current == [label], f"{size_name} {label}: it is the only active sub-tab ({current})")
         nav = pg.locator('nav[aria-label="Điều hướng chính"]:visible a[aria-current="page"]').all_inner_texts()
         check(any("Tổng quan" in t for t in nav), f"{size_name} {label}: Tổng quan is the active tab ({nav})")

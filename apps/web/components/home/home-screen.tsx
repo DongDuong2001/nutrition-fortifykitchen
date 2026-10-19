@@ -8,11 +8,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useShellBottomBar } from "@/components/ui/shell-slot";
 import { AppHeader, HEADER_ICON_BUTTON } from "@/components/ui/app-header";
 import { IconShare } from "@/components/ui/icons";
-import { CalendarSheet } from "@/components/calendar-sheet";
-import { CopyYesterdaySheet } from "@/components/copy-yesterday-sheet";
-import { MealMenuSheet } from "@/components/diary/meal-menu-sheet";
 import { SyncStatus } from "./sync-status";
-import { NutrientSourcesSheet } from "./nutrient-sources-sheet";
 import { copyMeals, dayEntries, shiftIsoDate, viewedIsoDate } from "@/lib/day-history";
 import { defaultMealName } from "@/lib/saved-meals";
 import { pastDayData, useDiary } from "@/lib/diary-store";
@@ -42,11 +38,9 @@ import { markUsed } from "@/lib/onboarding-store";
 import { emitSignal, subscribeSignal } from "@/lib/tour-bus";
 import { useCoaching } from "@/hooks/use-coaching";
 import { useSaveDisplayName } from "@/hooks/use-save-display-name";
-import { LevelExplainerSheet } from "@/components/coaching/level-explainer-sheet";
 import { LevelNoticeCard } from "@/components/coaching/level-notice-card";
 import { ZERO_HINT_TEXT, levelLabel, noticeText } from "@/lib/level-copy";
 import { columnGroups, countedForLevel, levelSummary, sumExtras } from "@/lib/level-nutrients";
-import { DayMenuSheet, MealTargetSheet, SelectActionBar, SelectHeader } from "./select-mode";
 import {
   chosenEntries,
   chosenKcal,
@@ -69,7 +63,60 @@ import { navigateFromSheet } from "@/lib/sheet-history";
 
 // cc-51: loaded after the first paint (the share image with html-to-image, Có gì mới); neither shows until it opens
 const ShareSheet = dynamic(() => import("./share-sheet").then((m) => m.ShareSheet), { ssr: false });
+// cc-58: the sheets that are closed by default, and select mode's bars, are their own chunks. They are fetched on the
+// first touch or when the browser is idle (loadSheets), well before a tap opens one, so the open motion still plays
+const loadCalendar = () => import("@/components/calendar-sheet");
+const loadCopyYesterday = () => import("@/components/copy-yesterday-sheet");
+const loadMealMenu = () => import("@/components/diary/meal-menu-sheet");
+const loadSources = () => import("./nutrient-sources-sheet");
+const loadExplainer = () => import("@/components/coaching/level-explainer-sheet");
+const loadSelect = () => import("./select-mode");
+const CalendarSheet = dynamic(() => loadCalendar().then((m) => m.CalendarSheet), { ssr: false });
+const CopyYesterdaySheet = dynamic(() => loadCopyYesterday().then((m) => m.CopyYesterdaySheet), { ssr: false });
+const MealMenuSheet = dynamic(() => loadMealMenu().then((m) => m.MealMenuSheet), { ssr: false });
+const NutrientSourcesSheet = dynamic(() => loadSources().then((m) => m.NutrientSourcesSheet), { ssr: false });
+const LevelExplainerSheet = dynamic(() => loadExplainer().then((m) => m.LevelExplainerSheet), { ssr: false });
+const DayMenuSheet = dynamic(() => loadSelect().then((m) => m.DayMenuSheet), { ssr: false });
+const MealTargetSheet = dynamic(() => loadSelect().then((m) => m.MealTargetSheet), { ssr: false });
+const SelectActionBar = dynamic(() => loadSelect().then((m) => m.SelectActionBar), { ssr: false });
+const SelectHeader = dynamic(() => loadSelect().then((m) => m.SelectHeader), { ssr: false });
+const loadShare = () => import("./share-sheet");
+/** True from the first time `open` is true: a sheet is mounted once it has been used, so a closed one costs nothing before that. */
+function useOnceOpen(open: boolean): boolean {
+  const [seen, setSeen] = useState(open);
+  if (open && !seen) setSeen(true);
+  return seen || open;
+}
+function loadSheets() {
+  void Promise.all([loadCalendar(), loadCopyYesterday(), loadMealMenu(), loadSources(), loadExplainer(), loadSelect(), loadShare()]);
+}
 const WhatsNewHost = dynamic(() => import("@/components/whats-new/whats-new-host").then((m) => m.WhatsNewHost), { ssr: false });
+
+/** The picture of Hôm nay while the diary is read (and the Suspense fallback): the ink band and the two column shapes. */
+function HomeLoading({ backdrop }: { backdrop: boolean }) {
+  return (
+    <>
+        {!backdrop && <h1 className="sr-only">Hôm nay</h1>}
+        <div className="h-[52px] rounded-b-[20px] bg-ink lg:hidden" />
+        <main role="status" aria-busy="true" className="mx-auto flex w-full max-w-[560px] flex-col gap-3 px-3 pt-2 lg:mx-0 lg:max-w-[1240px] lg:px-8 lg:pt-8">
+          <span className="sr-only">Đang tải…</span>
+          <div className="h-[152px] rounded-2xl bg-surface-dark motion-safe:animate-pulse" />
+          <div className="flex gap-0 motion-safe:animate-pulse">
+            <div className="flex flex-1 flex-col gap-2 p-3">
+              {[0, 1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="h-5 rounded bg-level-empty" />
+              ))}
+            </div>
+            <div className="flex w-[198px] flex-col gap-2 bg-card p-3">
+              {[0, 1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="h-5 rounded bg-level-empty" />
+              ))}
+            </div>
+          </div>
+        </main>
+      </>
+  );
+}
 
 function subscribeOnline(callback: () => void) {
   window.addEventListener("online", callback);
@@ -95,7 +142,7 @@ const getOnlineServerSnapshot = () => true;
  */
 export function HomeScreen({ backdrop = false }: { backdrop?: boolean } = {}) {
   return (
-    <Suspense fallback={<div className="min-h-dvh w-full bg-page" />}>
+    <Suspense fallback={<HomeLoading backdrop={backdrop} />}>
       <HomeContent backdrop={backdrop} />
     </Suspense>
   );
@@ -134,6 +181,13 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isCopySheetOpen, setIsCopySheetOpen] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
+  // The share sheet (and html-to-image with it) is mounted the first time the share button is used, and stays mounted so
+  // its close animation plays
+  const [shareUsed, setShareUsed] = useState(false);
+  const openShare = () => {
+    setShareUsed(true);
+    setIsShareOpen(true);
+  };
   const [menuSlot, setMenuSlot] = useState<MealSlot | null>(null);
   // cc-51 D4: the nutrient whose foods are listed in a sheet
   const [sourcesOf, setSourcesOf] = useState<string | null>(null);
@@ -164,11 +218,30 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
     setClientNow(true);
   }, []);
 
+  // cc-58: fetch the sheet chunks on the first touch, or when the browser is idle, whichever comes first
+  useEffect(() => {
+    if (backdrop) return;
+    let done = false;
+    const go = () => {
+      if (done) return;
+      done = true;
+      document.removeEventListener("pointerdown", go, true);
+      loadSheets();
+    };
+    document.addEventListener("pointerdown", go, { capture: true, passive: true });
+    const idle = typeof requestIdleCallback === "function" ? requestIdleCallback(go, { timeout: 3000 }) : window.setTimeout(go, 1500);
+    return () => {
+      document.removeEventListener("pointerdown", go, true);
+      if (typeof requestIdleCallback === "function") cancelIdleCallback(idle as number);
+      else window.clearTimeout(idle as number);
+    };
+  }, [backdrop]);
+
   // The share tip's "Thử ngay" opens the share sheet (which asks for a name first when there is none)
   useEffect(() => {
     if (backdrop) return;
     return subscribeSignal((signal) => {
-        if (signal === "open-share") setIsShareOpen(true);
+        if (signal === "open-share") openShare();
         // The "Có gì mới" tour ended: leave Chọn nhiều món, nothing else changes
         if (signal === "end-select") {
           setSelecting(false);
@@ -219,6 +292,16 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
   // cc-57: the frame and the hero come first; the food list and the nutrient column (the heavy part) follow in a
   // second, low-priority render, so a tab tap or the + shows its first frame sooner
   const heavyReady = useDeferredValue(true, false);
+  // cc-58: each sheet is mounted the first time it opens (the chunks are fetched ahead, see loadSheets)
+  const sourcesMounted = useOnceOpen(sourcesOf !== null);
+  const mealMenuMounted = useOnceOpen(menuSlot !== null);
+  const explainerMounted = useOnceOpen(explainerOpen);
+  const copySheetMounted = useOnceOpen(isCopySheetOpen);
+  const dayMenuMounted = useOnceOpen(dayMenuOpen);
+  const copyTargetMounted = useOnceOpen(targetSheet === "copy");
+  const moveTargetMounted = useOnceOpen(targetSheet === "move");
+  const pastTargetMounted = useOnceOpen(targetSheet === "past");
+  const calendarMounted = useOnceOpen(isCalendarOpen);
   const openSources = useCallback((id: string) => {
     markUsed("nutrient-sources");
     setSourcesOf(id);
@@ -268,30 +351,7 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
   const showLoading = forceLoading || !hydrated;
   const showOffline = forceOffline || !isOnline;
 
-  if (showLoading) {
-    return (
-      <>
-        {!backdrop && <h1 className="sr-only">Hôm nay</h1>}
-        <div className="h-[52px] rounded-b-[20px] bg-ink lg:hidden" />
-        <main role="status" aria-busy="true" className="mx-auto flex w-full max-w-[560px] flex-col gap-3 px-3 pt-2 lg:mx-0 lg:max-w-[1240px] lg:px-8 lg:pt-8">
-          <span className="sr-only">Đang tải…</span>
-          <div className="h-[152px] rounded-2xl bg-surface-dark motion-safe:animate-pulse" />
-          <div className="flex gap-0 motion-safe:animate-pulse">
-            <div className="flex flex-1 flex-col gap-2 p-3">
-              {[0, 1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="h-5 rounded bg-level-empty" />
-              ))}
-            </div>
-            <div className="flex w-[198px] flex-col gap-2 bg-card p-3">
-              {[0, 1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="h-5 rounded bg-level-empty" />
-              ))}
-            </div>
-          </div>
-        </main>
-      </>
-    );
-  }
+  if (showLoading) return <HomeLoading backdrop={backdrop} />;
 
   const nothingLogged = entries.length === 0;
   const selected = mode.kind !== "day";
@@ -429,7 +489,8 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
             {!isPast && !backdrop && <SyncStatus />}
             <button
               type="button"
-              onClick={() => setIsShareOpen(true)}
+              onClick={openShare}
+              onPointerDown={() => void loadShare()}
               disabled={nothingLogged}
               aria-label="Chia sẻ ngày này"
               data-tour="home-share"
@@ -454,7 +515,7 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
         />
         )}
         {nothingLogged && !selecting && (
-          <p id="share-reason" className="m-0 mx-3 mt-2 text-[13px] leading-snug text-secondary lg:mx-8">
+          <p id="share-reason" className="sr-only">
             Chưa có món nào để chia sẻ
           </p>
         )}
@@ -469,7 +530,11 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
           <LevelNoticeCard text={ZERO_HINT_TEXT} action={{ label: "Nhập mã", href: "/settings/coach" }} onClose={dismissHint} />
         )}
         {showOffline && (
-          <div role="status" className="mx-3 mt-2 rounded-xl bg-warning-bg px-3 py-2 text-[13px] leading-snug text-warning-text">
+          // cc-58: a bar over the page, above the bottom nav, so it pushes nothing down when it appears
+          <div
+            role="status"
+            className="pointer-events-none fixed inset-x-3 bottom-[calc(80px+env(safe-area-inset-bottom))] z-40 mx-auto max-w-[366px] rounded-xl bg-warning-bg px-3 py-2 text-[13px] leading-snug text-warning-text shadow-card lg:inset-x-auto lg:bottom-4 lg:right-8 lg:mx-0 lg:w-[400px] lg:max-w-none"
+          >
             Đang ngoại tuyến — món mới sẽ đồng bộ khi có mạng.
           </div>
         )}
@@ -548,73 +613,86 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
 
       {!backdrop && (
       <>
-      <NutrientSourcesSheet
-        nutrient={sourcesOf}
-        value={sourcesOf ? shown.nutrients[sourcesOf] ?? null : null}
-        target={sourcesOf ? nutrientTargets[sourcesOf] ?? null : null}
-        onClose={() => setSourcesOf(null)}
-      />
-      <MealMenuSheet
-        open={menuSlot !== null}
-        onClose={() => setMenuSlot(null)}
-        mealName={menuMeal?.fullName ?? ""}
-        readOnly={isPast}
-        itemCount={menuMeal?.entries.length ?? 0}
-        kcal={menuMeal?.kcal ?? null}
-        savableCount={menuSlot ? mealFoods(menuSlot, viewIso).length : 0}
-        defaultSaveName={menuSlot ? defaultMealName(menuSlot, viewIso) : ""}
-        onSave={(name) => menuSlot && saveMealAs(menuSlot, viewIso, name)}
-        yesterdayItemCount={yesterdayMeal.length}
-        yesterdayKcal={sumKcal(yesterdayMeal.map((e) => e.calories))}
-        onCopyYesterday={copyMealFromYesterday}
-        onDelete={() => {
-          if (!menuSlot) return;
-          deleteMeal(menuSlot);
-          setMode(DAY_MODE);
-        }}
-      />
+      {sourcesMounted && (
+        <NutrientSourcesSheet
+          nutrient={sourcesOf}
+          value={sourcesOf ? shown.nutrients[sourcesOf] ?? null : null}
+          target={sourcesOf ? nutrientTargets[sourcesOf] ?? null : null}
+          onClose={() => setSourcesOf(null)}
+        />
+      )}
+      {mealMenuMounted && (
+        <MealMenuSheet
+          open={menuSlot !== null}
+          onClose={() => setMenuSlot(null)}
+          mealName={menuMeal?.fullName ?? ""}
+          readOnly={isPast}
+          itemCount={menuMeal?.entries.length ?? 0}
+          kcal={menuMeal?.kcal ?? null}
+          savableCount={menuSlot ? mealFoods(menuSlot, viewIso).length : 0}
+          defaultSaveName={menuSlot ? defaultMealName(menuSlot, viewIso) : ""}
+          onSave={(name) => menuSlot && saveMealAs(menuSlot, viewIso, name)}
+          yesterdayItemCount={yesterdayMeal.length}
+          yesterdayKcal={sumKcal(yesterdayMeal.map((e) => e.calories))}
+          onCopyYesterday={copyMealFromYesterday}
+          onDelete={() => {
+            if (!menuSlot) return;
+            deleteMeal(menuSlot);
+            setMode(DAY_MODE);
+          }}
+        />
+      )}
       <InstallPromptHost busy={installBusy} />
       <WhatsNewHost busy={installBusy} />
-      <LevelExplainerSheet open={explainerOpen} onClose={() => setExplainerOpen(false)} level={level} />
-      <CopyYesterdaySheet open={isCopySheetOpen} onClose={() => setIsCopySheetOpen(false)} />
-      <DayMenuSheet
-        open={dayMenuOpen}
-        onClose={() => setDayMenuOpen(false)}
-        title={dayLabel}
-        past={isPast}
-        hasEntries={!nothingLogged}
-        onSelect={startSelect}
-      />
-      <MealTargetSheet
-        open={targetSheet === "copy"}
-        onClose={() => setTargetSheet(null)}
-        title={`Chép ${chosenCount} món sang`}
-        description={`${chosenCount} món · ${kcalLabel(chosenKcal(entries, liveSelected))}`}
-        withKeep={false}
-        initial={chosen[0]?.slot && chosen[0].slot !== "pre_workout" ? chosen[0].slot : "breakfast"}
-        confirmLabel="Chép"
-        onConfirm={confirmCopy}
-      />
-      <MealTargetSheet
-        open={targetSheet === "move"}
-        onClose={() => setTargetSheet(null)}
-        title={`Chuyển ${chosenCount} món sang`}
-        description={`${chosenCount} món · ${kcalLabel(chosenKcal(entries, liveSelected))}`}
-        withKeep={false}
-        initial={chosen[0]?.slot && chosen[0].slot !== "pre_workout" ? chosen[0].slot : "breakfast"}
-        confirmLabel="Chuyển"
-        onConfirm={confirmMove}
-      />
-      <MealTargetSheet
-        open={targetSheet === "past"}
-        onClose={() => setTargetSheet(null)}
-        title={pastCopyTitle(chosenCount)}
-        description={pastCopySubtitle(dayLabel, chosenKcal(entries, liveSelected), todayDdMm)}
-        withKeep
-        initial="keep"
-        confirmLabel="Chép vào hôm nay"
-        onConfirm={confirmCopy}
-      />
+      {explainerMounted && <LevelExplainerSheet open={explainerOpen} onClose={() => setExplainerOpen(false)} level={level} />}
+      {copySheetMounted && <CopyYesterdaySheet open={isCopySheetOpen} onClose={() => setIsCopySheetOpen(false)} />}
+      {dayMenuMounted && (
+        <DayMenuSheet
+          open={dayMenuOpen}
+          onClose={() => setDayMenuOpen(false)}
+          title={dayLabel}
+          past={isPast}
+          hasEntries={!nothingLogged}
+          onSelect={startSelect}
+        />
+      )}
+      {copyTargetMounted && (
+        <MealTargetSheet
+          open={targetSheet === "copy"}
+          onClose={() => setTargetSheet(null)}
+          title={`Chép ${chosenCount} món sang`}
+          description={`${chosenCount} món · ${kcalLabel(chosenKcal(entries, liveSelected))}`}
+          withKeep={false}
+          initial={chosen[0]?.slot && chosen[0].slot !== "pre_workout" ? chosen[0].slot : "breakfast"}
+          confirmLabel="Chép"
+          onConfirm={confirmCopy}
+        />
+      )}
+      {moveTargetMounted && (
+        <MealTargetSheet
+          open={targetSheet === "move"}
+          onClose={() => setTargetSheet(null)}
+          title={`Chuyển ${chosenCount} món sang`}
+          description={`${chosenCount} món · ${kcalLabel(chosenKcal(entries, liveSelected))}`}
+          withKeep={false}
+          initial={chosen[0]?.slot && chosen[0].slot !== "pre_workout" ? chosen[0].slot : "breakfast"}
+          confirmLabel="Chuyển"
+          onConfirm={confirmMove}
+        />
+      )}
+      {pastTargetMounted && (
+        <MealTargetSheet
+          open={targetSheet === "past"}
+          onClose={() => setTargetSheet(null)}
+          title={pastCopyTitle(chosenCount)}
+          description={pastCopySubtitle(dayLabel, chosenKcal(entries, liveSelected), todayDdMm)}
+          withKeep
+          initial="keep"
+          confirmLabel="Chép vào hôm nay"
+          onConfirm={confirmCopy}
+        />
+      )}
+      {shareUsed && (
       <ShareSheet
         open={isShareOpen}
         onClose={() => setIsShareOpen(false)}
@@ -626,7 +704,8 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
         level={level}
         onSaveName={saveName}
       />
-      {todayIso && (
+      )}
+      {todayIso && calendarMounted && (
         <CalendarSheet
           open={isCalendarOpen}
           onClose={() => setIsCalendarOpen(false)}

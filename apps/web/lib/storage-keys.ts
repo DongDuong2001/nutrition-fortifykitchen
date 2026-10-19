@@ -6,11 +6,13 @@
 import { currentAccountId } from "./auth-actions";
 import { isDemo } from "./demo";
 import { FAVOURITES_KEY } from "./favourites";
-import { SAVED_MEALS_KEY } from "./saved-meals";
 import { DAY_ARCHIVE_KEY } from "./day-archive";
 
 // One value per account: the profile (sex, birth year, weight, goal, period mode, name), the reminder settings and
 // the training ticks. Each is kept under the account's key too, so a second account on this browser never sees them.
+// Named here, not in lib/saved-meals: that file pulls the whole diary (diary-edits, the sample foods) and this one is
+// on the sign-in page's path (cc-58)
+export const SAVED_MEALS_KEY = "h1t_saved_meals_v1";
 export const PROFILE_KEY = "h1t_profile_v1";
 export const SETTINGS_STORAGE_KEY = "h1t_settings_v1";
 export const TRAINING_CHECKLIST_KEY = "h1t_training_checklist_v1";

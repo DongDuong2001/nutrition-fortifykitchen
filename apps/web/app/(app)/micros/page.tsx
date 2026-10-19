@@ -2,6 +2,7 @@
 
 import { Expand } from "@/components/ui/expand";
 import { scrollBehavior } from "@/lib/scroll-behavior";
+import { getLevel, getLevelLabel } from "@/lib/levels";
 import React, { useState, useEffect, useMemo, useRef, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -790,7 +791,7 @@ function NutrientRow({ row, dateQuery = "" }: { row: NutrientRowData; dateQuery?
         <div className="w-full">
           <LevelBar
             pct={percentage}
-            label={`${definition.name} ${percentage !== null ? `${percentage}%` : "chưa có dữ liệu"}`}
+            label={`${definition.name} ${percentage !== null ? `${percentage}%, ${getLevelLabel(getLevel(percentage))}` : "chưa có dữ liệu"}`}
             heightClass="h-[9px] lg:h-[10px]"
           />
         </div>

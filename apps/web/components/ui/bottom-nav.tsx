@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { startTransition, useOptimistic } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NAV_TABS, tabForPath, type NavTab } from "@/lib/nav";
@@ -20,7 +20,9 @@ export interface BottomNavProps {
  */
 export function BottomNav({ currentTab, className = "" }: BottomNavProps) {
   const pathname = usePathname();
-  const active = currentTab ?? tabForPath(pathname);
+  const current = currentTab ?? tabForPath(pathname);
+  // cc-58: the tapped tab lights up on the tap, not when the next screen is ready
+  const [active, setActive] = useOptimistic(current);
   const [first, second, third, fourth] = NAV_TABS;
 
   const renderTab = (item: (typeof NAV_TABS)[number]) => {
@@ -29,6 +31,7 @@ export function BottomNav({ currentTab, className = "" }: BottomNavProps) {
       <Link
         key={item.tab}
         href={item.href}
+        onNavigate={() => startTransition(() => setActive(item.tab))}
         data-tour={item.tab === "settings" ? "nav-settings" : item.tab === "explore" ? "nav-explore" : undefined}
         aria-current={isActive ? "page" : undefined}
         className={`relative flex flex-col items-center justify-center gap-[2px] min-h-[56px] text-xs font-semibold no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100 ${
