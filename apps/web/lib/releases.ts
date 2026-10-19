@@ -31,17 +31,22 @@ export interface Release {
 }
 
 export const RELEASES: readonly Release[] = [
-  // cc-68: yesterday can be edited. The tour stays on Hôm nay ("Thử ngay" runs there): it points at the arrow that opens
-  // yesterday, then at + Thêm, which yesterday has too
+  // cc-68: yesterday can be edited, history is read from the account, offline logging and the sync status. The tour stays on
+  // Hôm nay ("Thử ngay" runs there): the arrow that opens yesterday, + Thêm (yesterday has it too), then the save status
   {
     id: "2026-10-19b",
     date: "19/10",
     items: [
-      { icon: "home", title: "Sửa được hôm qua", body: "Quên ghi bữa tối? Mở hôm qua rồi thêm, sửa, xóa hay chuyển bữa như hôm nay. Từ hôm kia trở về trước chỉ xem." },
+      { icon: "home", title: "Quên ghi hôm qua? Ghi bù được rồi", body: "Bấm mũi tên trái để quay về hôm qua, thêm, sửa hay xóa món như bình thường. Từ hôm kia trở về trước thì chỉ xem." },
+      { icon: "home", title: "Mất mạng vẫn ghi được", body: "Sóng yếu hay lỡ tắt app cũng không sao. Món đã ghi vẫn nằm trong máy, có mạng là tự gửi lên." },
+      { icon: "home", title: "Nhìn góc trên là biết đã lưu chưa", body: "Thấy Đã lưu là yên tâm. Nếu ghi Chưa lưu, bấm vào để gửi lại." },
+      { icon: "bars", title: "Điện thoại, máy tính thấy y nhau", body: "Nhật ký các ngày trước giờ lấy từ tài khoản, đổi máy vẫn thấy đủ." },
+      { icon: "target", title: "Đăng xuất không lo mất món", body: "Còn món chưa gửi thì app nhắc trước, gửi xong rồi hãy thoát." },
     ],
     tour: [
-      { target: "day-prev", fallback: "header-actions", title: "Mở hôm qua", body: "Chạm mũi tên trái để sang hôm qua. Quên ghi bữa nào thì ghi bù ở đó." },
-      { target: "meal-add", fallback: "nav-add", title: "Ghi bù như hôm nay", body: "Hôm qua vẫn có + Thêm. Chạm một món để sửa hoặc xóa. Từ hôm kia trở về trước chỉ xem." },
+      { target: "day-prev", fallback: "header-actions", title: "Về hôm qua", body: "Bấm mũi tên này để mở hôm qua." },
+      { target: "meal-add", fallback: "nav-add", title: "Ghi bù", body: "Bấm + Thêm như mọi ngày. Bấm vào món để sửa hoặc xóa." },
+      { target: "sync-status", fallback: "header-actions", title: "Đã lưu chưa?", body: "Chữ ở đây cho biết món đã lên tài khoản chưa. Bấm vào để xem món đang chờ.", advanceOn: "tap" },
     ],
   },
   // cc-67: simple, fast food logging. The tour runs on Hôm nay: + Thêm, then the Thành phần of a dish (falls back to + Thêm)
@@ -49,14 +54,14 @@ export const RELEASES: readonly Release[] = [
     id: "2026-10-19a",
     date: "19/10",
     items: [
-      { icon: "select", title: "Mỗi món một dòng", body: "Cơm, thịt, cá, khoai chỉ còn một dòng trong danh sách. Chọn Sống hay Chín ngay trong bảng khẩu phần." },
-      { icon: "meal", title: "Ghi phần ăn được", body: "Trái cây và món có vỏ, hạt, xương ghi theo gam của phần ăn được. Trứng vẫn ghi theo quả." },
-      { icon: "select", title: "Chỉnh thành phần món", body: "Mở Thành phần của món Việt, đổi gam từng phần hoặc thêm bún, thịt. Món vào nhật ký một dòng." },
-      { icon: "target", title: "Mục tiêu vi chất theo khuyến nghị", body: "Canxi, sắt, vitamin và các khoáng khác theo Khuyến nghị dinh dưỡng Việt Nam 2016, đúng giới tính và tuổi của bạn. Muối, năng lượng và đa lượng giữ nguyên." },
+      { icon: "select", title: "Tìm món gọn hơn", body: "Gõ khoai là ra khoai, không còn cả chục dòng sống, chín. Muốn đổi sống hay chín thì chọn trong khẩu phần." },
+      { icon: "meal", title: "Trái cây chỉ tính phần ăn được", body: "Chuối, bơ, dưa hấu, cá hay gà có xương giờ cân phần ăn được thôi, bỏ vỏ, hạt, xương. Trứng vẫn ghi theo quả." },
+      { icon: "select", title: "Phở thêm thịt? Chỉnh được", body: "Mở Thành phần của món Việt để bớt bánh, thêm thịt cho đúng tô bạn ăn. Nhật ký vẫn chỉ một dòng." },
+      { icon: "target", title: "Mục tiêu vi chất theo Bộ Y tế", body: "Canxi, sắt, vitamin… giờ theo khuyến nghị cho người Việt (2016), đúng tuổi và giới tính của bạn. Muối, sắt ngày có kinh, kcal và đa lượng vẫn như cũ." },
     ],
     tour: [
-      { target: "meal-add", fallback: "nav-add", title: "Mỗi món một dòng", body: "Chạm + Thêm rồi tìm món. Cơm, thịt, cá chỉ một dòng, chọn Sống hay Chín trong khẩu phần." },
-      { target: "dish-parts", fallback: "meal-add", title: "Chỉnh thành phần", body: "Ở món Việt, mở Thành phần rồi đổi gam từng phần hoặc chạm chip thêm bún, thịt." },
+      { target: "meal-add", fallback: "nav-add", title: "Tìm món", body: "Bấm + Thêm rồi gõ tên món. Mỗi món giờ chỉ một dòng." },
+      { target: "dish-parts", fallback: "meal-add", title: "Chỉnh tô phở", body: "Ở món Việt, mở Thành phần để đổi gam hoặc thêm bún, thịt." },
     ],
   },
   // cc-53b: the coach's portion model. The tour runs on Hôm nay: + Thêm (or the + of the nav), the food list, a meal

@@ -6,8 +6,8 @@ Production demo build, 390x844 (and 1440x900 for the dialog). Tour, tips and "C�
 - Shows once on /app; Để sau and Esc hide it and mark the release seen; a reload shows nothing
 - A new account (setup finished) never sees it
 - Waits while a tip is open, opens after Đã hiểu
-- An account that has seen nothing gets the newest release only (2026-10-19b, cc-68, Sửa được hôm qua): its 2-step tour
-  is on Hôm nay (the arrow that opens yesterday, + Thêm), so the sheet has Thử ngay and runs it on /app; cc_tutorials.py covers
+- An account that has seen nothing gets the newest release only (2026-10-19b, cc-68, Quên ghi hôm qua? Ghi bù được rồi): its 3-step tour
+  is on Hôm nay (the arrow that opens yesterday, + Thêm, the save status), so the sheet has Thử ngay and runs it on /app; cc_tutorials.py covers
   several unseen releases in one sheet and their joined tour (with cc-52's 18e on the Ngày tập pill). The 17/10 tour is started from
   Cài đặt › Có gì mới › Xem hướng dẫn (the last one) -> 3 steps -> Xong; a long press moves step 1 and opens the select bar (step 2); step 3 points at Cài đặt with
   select mode off; Bỏ qua and Esc end it; the entries never change
@@ -38,8 +38,8 @@ SETTINGS_KEY = "h1t_settings_v1_demo"
 RELEASE = "2026-10-19b"
 HOME_TIPS = ["home-logged", "meal-add", "home-share"]
 # Newest first: cc-53b (2026-10-18f), cc-52 (2026-10-18e), cc-53 (2026-10-18d), cc-51 (2026-10-18c), Thực phẩm bổ sung và Gia vị (2026-10-18b), then cc-49 (2026-10-18)
-ITEMS = ["Sửa được hôm qua"]  # cc-68 (2026-10-19b)
-ITEMS_1910A = ["Mỗi món một dòng", "Ghi phần ăn được", "Chỉnh thành phần món", "Mục tiêu vi chất theo khuyến nghị"]  # cc-67 (2026-10-19a)
+ITEMS = ["Quên ghi hôm qua? Ghi bù được rồi", "Mất mạng vẫn ghi được", "Nhìn góc trên là biết đã lưu chưa", "Điện thoại, máy tính thấy y nhau", "Đăng xuất không lo mất món"]  # cc-68 (2026-10-19b)
+ITEMS_1910A = ["Tìm món gọn hơn", "Trái cây chỉ tính phần ăn được", "Phở thêm thịt? Chỉnh được", "Mục tiêu vi chất theo Bộ Y tế"]  # cc-67 (2026-10-19a)
 ITEMS_1810F = ["Khẩu phần theo gam", "Cân sống hay đã nấu chín", "Trứng ghi theo quả", "Khay gọn hơn"]
 ITEMS_1810E = ["Ngày tập ghi vào nhật ký", "Mở và đóng màn hình mượt hơn"]  # cc-55 adds the second
 ITEMS_1810D = ["Ghi theo lon, viên, phần"]
@@ -125,6 +125,13 @@ def targets_ok(pg, selector, label):
 SEEN_TIPS = {"tourDone": True, "seen": HOME_TIPS + ["unsaved", "pull-refresh", "nutrient-sources", "haptics", "add-shortlists"]}
 
 
+def wrapped_titles(pg, titles):
+    """Item titles in the open Có gì mới sheet that take more than one line (a title is 15 px with a 20 px line; two lines are 40)."""
+    return sheet(pg).locator("li p.font-bold").evaluate_all(
+        "(els, titles) => els.filter((p) => titles.includes(p.textContent.trim()) && p.getBoundingClientRect().height > 30).map((p) => p.textContent.trim())", titles
+    )
+
+
 def once(browser):
     ctx, pg = new_page(browser, onboarding=SEEN_TIPS)
     go(pg, "/app", 1200)
@@ -136,6 +143,8 @@ def once(browser):
     focus = pg.evaluate("() => { const a = document.activeElement; return a && a.tagName + '|' + a.textContent.trim() + '|' + getComputedStyle(a).outlineStyle }")
     check(focus == "H2|Có gì mới|none", f"initial focus on the heading, no ring ({focus})")
     check(all(t in text for t in ITEMS), "the release's items")
+    wrapped = wrapped_titles(pg, ITEMS)
+    check(not wrapped, f"each item title of 19b fits on one line at 390 px (wrapped: {wrapped})")
     check(sheet(pg).get_by_role("button", name="Thử ngay (1 phút)").count() == 1, "Thử ngay: 19b's tour is on Hôm nay")
     check(sheet(pg).get_by_role("button", name="Để sau").count() == 1, "Để sau")
     check(sheet(pg).get_by_role("button", name="Đóng").count() == 1, "close button named Đóng")
@@ -274,22 +283,23 @@ def tour(browser):
 
 
 def home_tour(browser):
-    """cc-68: Thử ngay runs the 19b tour on /app: the arrow that opens yesterday, then + Thêm."""
+    """cc-68: Thử ngay runs the 19b tour on /app: the arrow that opens yesterday, + Thêm, then the save status."""
     ctx, pg = new_page(browser, onboarding=SEEN_TIPS)
     go(pg, "/app", 1200)
     visible(sheet(pg))
     before = entries(pg)
     sheet(pg).get_by_role("button", name="Thử ngay (1 phút)").click()
-    steps = [("Mở hôm qua", ["day-prev", "header-actions"]), ("Ghi bù như hôm nay", ["meal-add", "nav-add"])]
+    steps = [("Về hôm qua", ["day-prev", "header-actions"]), ("Ghi bù", ["meal-add", "nav-add"]), ("Đã lưu chưa?", ["sync-status", "header-actions"])]
     for i, (title, targets) in enumerate(steps, start=1):
-        check(visible(card(pg)) and f"Mới · {i}/2" in card(pg).inner_text() and title in card(pg).inner_text(), f"19b step {i}: {title}")
+        check(visible(card(pg)) and f"Mới · {i}/3" in card(pg).inner_text() and title in card(pg).inner_text(), f"19b step {i}: {title}")
         hole = pg.locator("[data-onboarding-overlay] > div.border-sky").first.bounding_box()
-        boxes = [b for t in targets for b in [pg.locator(f'[data-tour="{t}"]:visible').first.bounding_box()] if b]
+        # A target with nothing on screen (the save status at rest is empty) has no box: the fallback holds the ring
+        boxes = [b for t in targets for loc in [pg.locator(f'[data-tour="{t}"]:visible')] for b in ([loc.first.bounding_box()] if loc.count() else []) if b]
         on = any(hole and hole["x"] <= b["x"] + 1 and hole["x"] + hole["width"] >= b["x"] + b["width"] - 1 for b in boxes)
         check(on, f"19b step {i}: the ring is on {' or '.join(targets)}")
         if i == 1:
             shot(pg, "tour-19b-390")
-        card(pg).get_by_role("button", name="Xong" if i == 2 else "Tiếp").click()
+        card(pg).get_by_role("button", name="Xong" if i == 3 else "Tiếp").click()
         pg.wait_for_timeout(500)
     check(card(pg).count() == 0 and pg.url.endswith("/app") and entries(pg) == before, "Xong ends the 19b tour on /app; entries unchanged")
     ctx.close()
@@ -306,7 +316,7 @@ def history(browser):
     text = pg.locator("main").inner_text()
     check(text.count("Cập nhật 18/10") == 6 and all(t in text for t in ITEMS_1810F + ITEMS_1810E + ITEMS_1810D + ITEMS_1810C + ITEMS_1810B + ITEMS_1810), "the history lists the six 18/10 releases and their items")
     check(text.count("Cập nhật 19/10") == 2 and all(t in text for t in ITEMS + ITEMS_1910A), "…and the two 19/10 releases (19b and 19a)")
-    check(text.index("Sửa được hôm qua") < text.index("Mỗi món một dòng") < text.index("Khẩu phần theo gam") < text.index("Ngày tập ghi vào nhật ký") < text.index("Ghi theo lon, viên, phần") < text.index("Kéo xuống để tải lại") < text.index("Thực phẩm bổ sung") < text.index("Đồng bộ ổn định hơn"), "…newest first: 19b, 18f, 18e, 18d, 18c, 18b, 18")
+    check(text.index("Quên ghi hôm qua? Ghi bù được rồi") < text.index("Tìm món gọn hơn") < text.index("Khẩu phần theo gam") < text.index("Ngày tập ghi vào nhật ký") < text.index("Ghi theo lon, viên, phần") < text.index("Kéo xuống để tải lại") < text.index("Thực phẩm bổ sung") < text.index("Đồng bộ ổn định hơn"), "…newest first: 19b, 18f, 18e, 18d, 18c, 18b, 18")
     check("Cập nhật 17/10" in text and "17/10/2026" not in text and all(t in text for t in ITEMS_1710), "the history lists the release (Cập nhật 17/10) and its items")
     check(text.index("Cập nhật 18/10") < text.index("Cập nhật 17/10"), "newest first")
     check(pg.get_by_role("button", name="Xem hướng dẫn").count() == 6, "Xem hướng dẫn on 19b, 19a, 18f, 18e, 18c and 17/10 (18d's tour is retired)")

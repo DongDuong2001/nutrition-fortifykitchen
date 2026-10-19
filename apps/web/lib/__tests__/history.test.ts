@@ -206,6 +206,47 @@ describe("GET /days?from=&to= as apps/api answers it (cc-68)", () => {
     expect(calls.filter((c) => c.startsWith("/days/"))).toHaveLength(3);
     expect(Object.keys(result.days)).toHaveLength(3);
   });
+
+  // Two windows (the first holds 01-01 and 03-15, the second 06-01 and 06-02)
+  const TWO_WINDOWS = ["2026-01-01", "2026-03-15", "2026-06-01", "2026-06-02"];
+  const stubWindows = (firstStatus: number) => {
+    const calls: string[] = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string) => {
+        const path = String(url).replace("https://api.test/api/v1", "");
+        calls.push(path);
+        const range = /^\/days\?from=([\d-]+)&to=([\d-]+)$/.exec(path);
+        if (range) {
+          if (range[1] === "2026-01-01") return new Response("{}", { status: firstStatus });
+          return new Response(JSON.stringify({ data: { days: eachDay(range[1], range[2]).map((d) => summary(d, "r")) } }), { status: 200 });
+        }
+        return new Response(JSON.stringify({ data: summary(path.split("/").pop()!, "x") }), { status: 200 });
+      })
+    );
+    return calls;
+  };
+
+  it("a window that fails (500) does not end the range: the next window still uses it, and only the failed one is read day by day", async () => {
+    const calls = stubWindows(500);
+    const result = await loadHistory(SCOPE, TWO_WINDOWS, { fetch: true, today: TODAY });
+    expect(calls).toEqual(["/days?from=2026-01-01&to=2026-03-15", "/days?from=2026-06-01&to=2026-06-02", "/days/2026-01-01", "/days/2026-03-15"]);
+    expect(Object.keys(result.days)).toEqual(TWO_WINDOWS);
+    // The range is still trusted: the next load asks for it again
+    resetIdb();
+    idb.disk.clear();
+    const again = stubWindows(500);
+    await loadHistory(SCOPE, TWO_WINDOWS, { fetch: true, today: TODAY });
+    expect(again.filter((c) => c.includes("?from"))).toHaveLength(2);
+  });
+
+  it("a missing endpoint (404) on the first window ends the range: every day is read one by one", async () => {
+    const calls = stubWindows(404);
+    const result = await loadHistory(SCOPE, TWO_WINDOWS, { fetch: true, today: TODAY });
+    expect(calls.filter((c) => c.includes("?from"))).toEqual(["/days?from=2026-01-01&to=2026-03-15"]);
+    expect(calls.filter((c) => c.startsWith("/days/"))).toHaveLength(4);
+    expect(Object.keys(result.days)).toEqual(TWO_WINDOWS);
+  });
 });
 
 describe("entries the server never confirmed stay in their day", () => {
