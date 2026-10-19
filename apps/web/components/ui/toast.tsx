@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePresence } from "@/components/ui/presence";
+import { useDocumentHidden } from "@/hooks/use-document-hidden";
 
 export interface ToastProps {
   message: string;
@@ -41,6 +42,8 @@ export function Toast({
 }: ToastProps) {
   // cc-55: rises in (m-toast, @starting-style); inside <Presence> it fades down and away when it goes
   const state = usePresence();
+  // In the background the bar waits with the clock (the store stops its timer): a Hoàn tác must not expire in another app
+  const hidden = useDocumentHidden();
   return (
     <div
       role={announce ? "status" : undefined}
@@ -49,6 +52,7 @@ export function Toast({
       onFocus={onPause}
       onBlur={onResume}
       data-state={state}
+      data-paused={hidden ? "" : undefined}
       inert={state === "closed"}
       className={`m-toast bg-ink text-on-dark rounded-xl overflow-hidden shadow-[0_8px_24px_rgba(10,10,11,0.35)] min-h-[56px] box-border flex flex-col justify-between w-full max-w-[366px] mx-auto select-none ${className}`}
     >

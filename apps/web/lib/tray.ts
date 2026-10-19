@@ -84,3 +84,41 @@ export function trayTotals(items: readonly TrayItem[]): TrayTotals {
 export function canAddTray(items: readonly TrayItem[]): boolean {
   return items.length > 0 && items.every((i) => i.grams > 0 && canLog(i.food));
 }
+
+/**
+ * Keys for the cards of Khay · xem lại that stay with the card: a Sống ↔ Chín swap changes the card's food (and its
+ * id) but it is the same card, so it must not remount and lose focus. A key is the card's first food id; a second
+ * card for the same id gets `#2`.
+ */
+export interface StableKeys {
+  keyFor(foodId: string): string;
+  /** The card showing `from` now shows `to`. */
+  renamed(from: string, to: string): void;
+  /** Forgets the cards that left (call with the ids now in the tray, before keyFor). */
+  keep(foodIds: readonly string[]): void;
+}
+
+export function createStableKeys(): StableKeys {
+  const keys = new Map<string, string>();
+  const keyFor = (foodId: string): string => {
+    const known = keys.get(foodId);
+    if (known !== undefined) return known;
+    const used = new Set(keys.values());
+    let key = foodId;
+    for (let n = 2; used.has(key); n++) key = `${foodId}#${n}`;
+    keys.set(foodId, key);
+    return key;
+  };
+  return {
+    keyFor,
+    renamed(from, to) {
+      const key = keyFor(from);
+      keys.delete(from);
+      keys.set(to, key);
+    },
+    keep(foodIds) {
+      const now = new Set(foodIds);
+      for (const id of [...keys.keys()]) if (!now.has(id)) keys.delete(id);
+    },
+  };
+}

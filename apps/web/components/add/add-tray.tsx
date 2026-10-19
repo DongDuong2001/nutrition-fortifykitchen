@@ -10,7 +10,7 @@ import { formatAmount } from "@/lib/format";
 import { markUsed } from "@/lib/onboarding-store";
 import { gramFieldText, parseGramsInput, parsePortionLabel, portionHint, scaleNutrients } from "@/lib/portion";
 import { setPresent } from "@/lib/tour-bus";
-import type { TrayItem, TrayTotals } from "@/lib/tray";
+import { createStableKeys, type TrayItem, type TrayTotals } from "@/lib/tray";
 
 const kcalText = (kcal: number | null) => (kcal === null ? "—" : formatAmount(kcal, "kcal"));
 
@@ -242,6 +242,9 @@ function TrayReview({ items, totals, mealName, canAdd, submitting, onRemove, onC
   const listRef = useRef<HTMLDivElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const [moreBelow, setMoreBelow] = useState(false);
+  // A Sống ↔ Chín swap changes a card's food id: the card keeps its key, so it does not remount or lose focus
+  const [cardKeys] = useState(createStableKeys);
+  cardKeys.keep(items.map((i) => i.food.id));
 
   // The ↓: shown while the end of the list is under the footer (an IntersectionObserver, no scroll handler)
   useEffect(() => {
@@ -277,7 +280,7 @@ function TrayReview({ items, totals, mealName, canAdd, submitting, onRemove, onC
         <ul className="m-0 flex list-none flex-col gap-3 p-0">
           {items.map((item, i) => (
             <TrayRow
-              key={item.food.id}
+              key={cardKeys.keyFor(item.food.id)}
               item={item}
               first={i === 0}
               open={openId === item.food.id}
@@ -287,6 +290,7 @@ function TrayReview({ items, totals, mealName, canAdd, submitting, onRemove, onC
               }}
               onRemove={() => onRemove(item.food.id)}
               onChange={(patch) => {
+                if (patch.food && patch.food.id !== item.food.id) cardKeys.renamed(item.food.id, patch.food.id);
                 onChangeItem(item.food.id, patch);
                 // A pair swaps the food: its row stays open
                 if (patch.food) setOpenId(patch.food.id);

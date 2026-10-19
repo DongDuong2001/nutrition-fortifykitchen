@@ -24,6 +24,7 @@ import {
 } from "./storage-keys";
 import { blankDay, dayEntries, setDayArchive, statDisplay } from "./day-history";
 import { deferredWrites } from "./deferred-write";
+import { useDocumentHidden } from "@/hooks/use-document-hidden";
 import { whenIdle } from "./idle";
 import { totalsFromEntries } from "./day-totals";
 import { microsSummaryFor } from "./lacking";
@@ -970,6 +971,11 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     toastStartedAt.current = Date.now();
   }, [toast]);
 
+  // cc-63: while the app is hidden (another app in front) no toast clock runs, so a Hoàn tác cannot expire where nobody
+  // sees it. The toast's own clock is frozen below; a parked delete keeps its time left by moving its end later.
+  const docHidden = useDocumentHidden();
+  const hiddenAt = useRef(0);
+
   // A parked delete lives until its time is up, or until its undo record is gone (another action dismissed it)
   useEffect(() => {
     if (!parkedDelete) return;
@@ -977,12 +983,13 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       setParkedDelete(null);
       return;
     }
+    if (docHidden) return;
     const timer = setTimeout(() => {
       setParkedDelete(null);
       setEdits((prev) => dismissUndoIn(prev));
     }, Math.max(0, parkedDelete.expiresAt - Date.now()));
     return () => clearTimeout(timer);
-  }, [parkedDelete, edits.undo]);
+  }, [parkedDelete, edits.undo, docHidden]);
 
   // Auto-dismiss the toast. When a "deleted" toast goes, the undo goes with it; a "moved" toast has its own undo
   // (in the toast) and leaves a delete's record alone.
@@ -990,7 +997,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   // you read or reach for it). `toastClock` keeps the time left for the toast that is on screen.
   const [pausedToast, setPausedToast] = useState<ToastInfo | null>(null);
   const toastClock = useRef<{ toast: ToastInfo | null; left: number; since: number }>({ toast: null, left: 0, since: 0 });
-  const toastPaused = toast !== null && pausedToast === toast;
+  const toastPaused = (toast !== null && pausedToast === toast) || docHidden;
   useEffect(() => {
     if (!toast || toastPaused) return;
     const clock = toastClock.current;
@@ -1005,13 +1012,30 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     }, clock.left);
     return () => clearTimeout(timer);
   }, [toast, toastPaused]);
+  // Takes the time that has run off the clock, once: a pause by hover and one by the page hiding never count it twice
+  const freezeToastClock = useCallback(() => {
+    const clock = toastClock.current;
+    if (clock.since === 0) return;
+    clock.left = Math.max(0, clock.left - (Date.now() - clock.since));
+    clock.since = 0;
+  }, []);
   const pauseToast = useCallback(() => {
     const shown = toastRef.current;
-    const clock = toastClock.current;
-    if (!shown || clock.toast !== shown) return;
-    clock.left = Math.max(0, clock.left - (Date.now() - clock.since));
+    if (!shown || toastClock.current.toast !== shown) return;
+    freezeToastClock();
     setPausedToast(shown);
-  }, []);
+  }, [freezeToastClock]);
+  useEffect(() => {
+    if (docHidden) {
+      hiddenAt.current = Date.now();
+      freezeToastClock();
+      return;
+    }
+    if (hiddenAt.current === 0) return;
+    const away = Date.now() - hiddenAt.current;
+    hiddenAt.current = 0;
+    setParkedDelete((prev) => (prev ? { ...prev, expiresAt: prev.expiresAt + away } : prev));
+  }, [docHidden, freezeToastClock]);
   const resumeToast = useCallback(() => setPausedToast(null), []);
 
   // Remember a food with the serving it was logged with

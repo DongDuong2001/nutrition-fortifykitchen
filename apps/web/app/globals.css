@@ -456,14 +456,15 @@
   transform-origin: left center;
   animation: m-countdown linear both;
 }
-/* Hover (a mouse only: a tap leaves :hover stuck on a phone) or focus on the toast stops its clock (the store stops
-   its timer): the bar stops with it */
+/* Hover (a mouse only: a tap leaves :hover stuck on a phone), focus, or the page being hidden (data-paused) stops the
+   toast's clock (the store stops its timer): the bar stops with it */
 @media (hover: hover) and (pointer: fine) {
   .m-toast:hover .m-countdown {
     animation-play-state: paused;
   }
 }
-.m-toast:focus-within .m-countdown {
+.m-toast:focus-within .m-countdown,
+.m-toast[data-paused] .m-countdown {
   animation-play-state: paused;
 }
 
