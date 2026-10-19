@@ -26,11 +26,16 @@ func GetServerToday() string {
 	return time.Now().In(hoChiMinhLocation).Format("2006-01-02")
 }
 
-// ValidateDateWritable checks if targetDate is today or future in Asia/Ho_Chi_Minh.
-// Past days return ErrPastDayReadOnly.
+// GetServerYesterday returns yesterday's date in Asia/Ho_Chi_Minh as "YYYY-MM-DD"
+func GetServerYesterday() string {
+	return time.Now().In(hoChiMinhLocation).AddDate(0, 0, -1).Format("2006-01-02")
+}
+
+// ValidateDateWritable checks if targetDate is today, yesterday, or future in Asia/Ho_Chi_Minh.
+// Days before yesterday return ErrPastDayReadOnly.
 func ValidateDateWritable(targetDate string) error {
-	today := GetServerToday()
-	if targetDate < today {
+	yesterday := GetServerYesterday()
+	if targetDate < yesterday {
 		return ErrPastDayReadOnly
 	}
 	return nil
