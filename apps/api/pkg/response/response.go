@@ -16,6 +16,8 @@ const (
 	CodeConflict            = "CONFLICT"
 	CodeIDConflict          = "ID_CONFLICT"
 	CodeInternalServerError = "INTERNAL_SERVER_ERROR"
+	CodeCSRFOrigin          = "CSRF_ORIGIN"
+	CodeCSRFContentType     = "CSRF_CONTENT_TYPE"
 )
 
 type ErrorDetail struct {

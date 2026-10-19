@@ -1,7 +1,15 @@
 openapi: 3.1.0
 info:
   title: H1T MICRO Nutrition API
-  description: High-performance Go modular monolith API for comprehensive 26-nutrient tracking and daily meal logging.
+  description: |-
+    High-performance Go modular monolith API for comprehensive 26-nutrient tracking and daily meal logging.
+
+    Write guard (every POST, PUT, PATCH and DELETE under /api/v1 except /payments/webhook and /vault/webhook):
+    a request that carries an Origin header must come from an allowed origin (CORS_ORIGINS, plus https://lehongkhanh.vn
+    always, or the API's own host), and one without Origin but with Sec-Fetch-Site must be same-origin; both absent is
+    allowed (non-browser clients). A request with a body must be Content-Type application/json (parameters such as
+    charset are fine); a request with no body may omit Content-Type. A refused request gets 403 with code CSRF_ORIGIN
+    or CSRF_CONTENT_TYPE. GET, HEAD and OPTIONS are not checked.
   version: 1.0.0
 
 servers:
@@ -27,6 +35,11 @@ components:
       properties:
         code:
           type: string
+          description: >-
+            Machine-readable code, e.g. VALIDATION_FAILED, UNAUTHORIZED, FORBIDDEN, NOT_FOUND, CONFLICT,
+            INTERNAL_SERVER_ERROR (the message is then generic; details are only in the server log), CSRF_ORIGIN (403:
+            the write came from an origin that is not allowed) and CSRF_CONTENT_TYPE (403: a write with a body that is
+            not application/json).
           example: VALIDATION_FAILED
         message:
           type: string

@@ -158,6 +158,13 @@ func (m *Middleware) validateOrigin(r *http.Request) bool {
 		}
 	}
 
+	return MatchOrigin(origin, r.Host, m.allowedOrigins)
+}
+
+// MatchOrigin reports whether origin (the value of an Origin header, or scheme://host taken from a Referer) is
+// acceptable for a request addressed to requestHost: it is empty-safe (empty never matches), compared
+// case-insensitively without a trailing slash, equal to the request's own host, or listed in allowed ("*" allows any).
+func MatchOrigin(origin, requestHost string, allowed []string) bool {
 	if origin == "" {
 		return false
 	}
@@ -166,13 +173,13 @@ func (m *Middleware) validateOrigin(r *http.Request) bool {
 
 	// Allow same-origin requests where origin host matches request host
 	if u, err := url.Parse(origin); err == nil {
-		if strings.EqualFold(u.Host, r.Host) {
+		if u.Host != "" && strings.EqualFold(u.Host, requestHost) {
 			return true
 		}
 	}
 
-	for _, allowed := range m.allowedOrigins {
-		normAllowed := strings.ToLower(strings.TrimRight(allowed, "/"))
+	for _, a := range allowed {
+		normAllowed := strings.ToLower(strings.TrimRight(a, "/"))
 		if normAllowed == "*" || normAllowed == normOrigin {
 			return true
 		}

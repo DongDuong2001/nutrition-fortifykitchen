@@ -561,3 +561,26 @@ func TestOptionalAuthenticate(t *testing.T) {
 	})
 }
 
+
+func TestMatchOrigin(t *testing.T) {
+	allowed := []string{"https://lehongkhanh.vn", "http://localhost:3000/"}
+	tests := []struct {
+		name, origin, host string
+		want               bool
+	}{
+		{"empty origin", "", "api.example.com", false},
+		{"listed", "https://lehongkhanh.vn", "api.example.com", true},
+		{"listed with different case and slash", "HTTP://LOCALHOST:3000", "api.example.com", true},
+		{"same host", "https://api.example.com", "api.example.com", true},
+		{"unlisted", "https://evil.example", "api.example.com", false},
+		{"null origin and empty host do not match each other", "null", "", false},
+	}
+	for _, tt := range tests {
+		if got := auth.MatchOrigin(tt.origin, tt.host, allowed); got != tt.want {
+			t.Errorf("%s: MatchOrigin(%q, %q) = %v, want %v", tt.name, tt.origin, tt.host, got, tt.want)
+		}
+	}
+	if !auth.MatchOrigin("https://anything.example", "x", []string{"*"}) {
+		t.Error("wildcard should allow any origin")
+	}
+}
