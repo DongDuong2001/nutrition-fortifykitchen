@@ -83,6 +83,23 @@ gate:full: all green
 - `apps/api` is untouched. No migration, no deploy.
 - New: `tests/probes/polish_1020.py` (in the gate), unit tests for the interruption order, the update phase, the add list limits (including the live-sized one) and the nutrient label.
 
+### After the review fixes and the toast (head of the branch, port 3126)
+
+```
+gate:full: 696 s wall clock
+  typecheck       ok      1 s
+  vitest          ok      9 s   (169 files, 2121 tests, 1 skipped)
+  build:demo      ok      9 s
+  test:align      ok     78 s
+  test:hydration  ok    112 s
+  probe:all       ok    677 s   probe:all: 115 PASS, 4 REPORT, 0 QUAR, 0 FAIL, 1 SKIP
+gate:full: all green
+```
+- The first run on this round failed `cc_42_onboarding.py`: it asserts a 44 px hit area on + Thêm, which my header change had narrowed too. + Thêm is back as it was (the header's 28 px is the only change; see For Hao 5). Smoke needed two fixes of its own checks (the install pop-up stood over the + in the new sheet check; the sheet's own heading is a second h1 in the document, so the check counts the h1 outside the inert screen).
+- By hand, outside the gate: `_polish_update_check.py` (the update toast, the tray / typed form not lost, the second tab) passes; `public/sw.js` is the committed version bump only.
+- New probes: `toast_undo.py`, and in `polish_1020.py` the slow start (network and CPU throttled), the touched-field tip, Xem thêm focus, the portion sheet's focus return (row, row behind Xem thêm, carousel chevron), the header and row hit test, measured thresholds. New unit tests: `unsaved-work`, `add-toast`, `interruption` (the report gating), `releases`.
+- Not done: a header hit area of 44 px (28, see above); the unsaved-work detector is a heuristic (see For Hao 9); the new probes were each run on the fixed build only, except where the old failure was seen (the first `toast_undo` run was against the fixed build; I did not run it against the old toast).
+
 ## For Hao
 
 1. **"Mid-sheet" read as "a sheet that is moving".** A tip waits (and tries again 400 ms later) while a sheet is moving or a field someone typed in has focus; it may come over the add sheet's own empty search field, because the add tips belong there. If you meant "any sheet open", it is one condition in `interruptionBlockedByUi` (`lib/interruption.ts`).
