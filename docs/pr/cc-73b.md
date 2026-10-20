@@ -31,4 +31,7 @@ Source of the DRI numbers (Health Canada's publication; nothing guessed), the ca
 
 ## Checks
 
-See the PR description for the gate output.
+- `npm run gate:full` (PORT=3120): typecheck, 2.034 unit tests, build:demo, test:align, test:hydration and probe:all, all green. `go vet ./...` and `go test ./...` green (`TestSharedTargetVectors`, `TestSharedPeriodVectors` and `TestSharedDRIVectors` run, none skips).
+- Probes changed to follow the new numbers, and one fixed for a clock bug: `cc_64_followups.py` failed after 14:00 because the meal an add goes to follows the time of day (it now pins the clock).
+- Screenshots at 390 (and Mục tiêu at 100 % and 150 % text): `docs/screenshots/cc-73b/`.
+- Mục tiêu shows "Theo DRI · nam 19–30 tuổi" once under each DRI card's title (Hao's review), checked with the ui-ux-pro-max rules at 390 and 150 % text.
