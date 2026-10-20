@@ -94,6 +94,19 @@ describe("summary of the level's own micros", () => {
     expect(s.lacking).toEqual(["Calcium", "Zinc"]);
   });
 
+  it("lists only micros under their target: a reached one is never lacking", () => {
+    // Calcium 30 %, iron 120 %, zinc 100 %: only calcium is under target
+    expect(levelSummary({ iron: 12, calcium: 300, zinc: 10 }, targets, ids).lacking).toEqual(["Calcium"]);
+    // 99,6 % shows as 100 % and counts as reached, so it is not lacking either
+    expect(levelSummary({ iron: 9.96, calcium: 300, zinc: 10 }, targets, ids)).toMatchObject({ reached: 2, lacking: ["Calcium"] });
+    // 99,4 % shows as 99 %: lacking
+    expect(levelSummary({ iron: 9.94, calcium: 1000, zinc: 10 }, targets, ids).lacking).toEqual(["Iron"]);
+  });
+
+  it("all reached → nothing lacking (the line is left out)", () => {
+    expect(levelSummary({ iron: 10, calcium: 1500, zinc: 30 }, targets, ids)).toEqual({ reached: 3, total: 3, lacking: [] });
+  });
+
   it("an unknown value is neither reached nor ranked as 0", () => {
     const s = levelSummary({ iron: null, calcium: 300 }, targets, ids);
     expect(s.reached).toBe(0);

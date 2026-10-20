@@ -159,9 +159,11 @@ function MicrosContent() {
   const readOnlyNote = isPast && viewIso && !isEditable(viewIso) ? " · Chỉ xem" : "";
   const phoneDateLabel = (clientNow && currentData?.date ? formatDayLabel(currentData.date, clientNow) : "") + readOnlyNote;
   const profileParts = [goalName(profile.goal), `${formatNumber(profile.weightKg)} kg`];
+  const lacking = currentData?.microsSummary.mostLacking ?? [];
+  const lackingPart = lacking.length > 0 ? [`Thiếu nhiều nhất: ${lacking.join(", ")}`] : [];
   const desktopSubtitle = clientNow
-    ? [formatDesktopDate(currentData?.date || getTodayIsoVN()) + readOnlyNote, ...profileParts].join(" · ") + ` · Thiếu nhiều nhất: ${currentData?.microsSummary.mostLacking.join(", ")}`
-    : [currentData?.desktopDateLabel, ...profileParts].filter(Boolean).join(" · ") + ` · Thiếu nhiều nhất: ${currentData?.microsSummary.mostLacking.join(", ")}`;
+    ? [formatDesktopDate(currentData?.date || getTodayIsoVN()) + readOnlyNote, ...profileParts, ...lackingPart].join(" · ")
+    : [currentData?.desktopDateLabel, ...profileParts, ...lackingPart].filter(Boolean).join(" · ");
 
   // Auto-scroll active chip into view horizontally so it always stays visible
   useEffect(() => {
@@ -439,11 +441,14 @@ function MicrosContent() {
               alignGroup="micros-header"
               summary={
                 <div className="flex items-center justify-between">
+                  {/* Only nutrients under their target are listed; when every one is reached the line is left out */}
                   <div>
-                    <div className="text-xs text-muted-subtitle font-normal">Thiếu nhiều nhất</div>
-                    <div className="text-sm font-semibold text-on-dark mt-0.5">
-                      {currentData?.microsSummary.mostLacking.join(", ")}
-                    </div>
+                    {lacking.length > 0 && (
+                      <>
+                        <div className="text-xs text-muted-subtitle font-normal">Thiếu nhiều nhất</div>
+                        <div className="text-sm font-semibold text-on-dark mt-0.5">{lacking.join(", ")}</div>
+                      </>
+                    )}
                   </div>
                   <div className="text-right shrink-0">
                     <div className="font-display italic font-black text-headline leading-none tabular-nums">

@@ -10,9 +10,9 @@ import { inkPill } from "./ink-pill";
 import { LevelBar } from "@/components/ui/level-bar";
 import { getLevel, getLevelLabel } from "@/lib/levels";
 
-/** The share image draws every row (no scrolling); the screen scrolls, with a fade while rows wait below. */
+/** The share image draws every row (no scrolling, never shrunk: the summary and the key go below it); the screen scrolls, with a fade while rows wait below. */
 function Scroll({ share, fitKey, children }: { share: boolean; fitKey: string; children: React.ReactNode }) {
-  return share ? <div className="flex flex-col">{children}</div> : <ColumnScroll fitKey={fitKey}>{children}</ColumnScroll>;
+  return share ? <div className="flex flex-none flex-col">{children}</div> : <ColumnScroll fitKey={fitKey}>{children}</ColumnScroll>;
 }
 
 /**
@@ -55,6 +55,8 @@ export const NutrientColumn = memo(function NutrientColumn({
   return (
     <aside
       aria-label="Vi chất"
+      // The share image keeps the lines this column has on the page (share-sheet markLines)
+      data-share-keep-lines={share || undefined}
       className={`relative flex w-[198px] flex-none flex-col border-l border-l-card-border bg-card pb-2 ${share ? "" : "lg:w-80 lg:overflow-hidden lg:rounded-2xl lg:border lg:border-card-border lg:shadow-card"} ${
         selected ? "before:absolute before:inset-x-0 before:top-0 before:z-20 before:h-[3px] before:bg-cobalt before:content-['']" : ""
       }`}
@@ -124,7 +126,7 @@ export const NutrientColumn = memo(function NutrientColumn({
                 >
                   <div className="flex items-baseline justify-between gap-1">
                     {/* The full name always shows; when name and amount do not fit on one line (large text) the amount moves under the name */}
-                    <span className="flex min-w-0 flex-wrap items-baseline gap-x-1">
+                    <span className={`flex min-w-0 flex-wrap items-baseline gap-x-1 ${share ? "gap-y-0.5" : ""}`}>
                       <span className={`min-w-0 break-words text-cap font-semibold leading-tight text-text ${lg}`}>{def.name}</span>
                       <span className={`whitespace-nowrap text-cap leading-tight text-secondary tabular-nums ${lg}`}>
                         {value === null ? "—" : `${formatAmount(value, def.unit)} ${def.unit}`}
