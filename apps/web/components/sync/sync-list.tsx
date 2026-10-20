@@ -57,13 +57,13 @@ export function SyncList({ open, onClose }: { open: boolean; onClose: () => void
               return (
                 <li key={item.key} className="flex min-h-11 flex-col justify-center gap-1 border-b border-divider py-2 last:border-b-0" data-sync-item={item.key}>
                   <span className="text-[15px] font-semibold leading-snug text-text">{labelOf(item, getEntry(item.id)?.name ?? archived(item.id))}</span>
-                  <span className="text-cap leading-snug text-secondary" data-sync-reason>
+                  <span className="text-[13px] leading-snug text-secondary" data-sync-reason>
                     {reasonOf(item, { online, now })}
                   </span>
                   {forGood &&
                     (confirming === item.key ? (
                       <div className="flex flex-col gap-2 pt-1">
-                        <span className="text-cap leading-snug text-text">Bỏ món này? Món sẽ mất khỏi máy này.</span>
+                        <span className="text-[13px] leading-snug text-text">Bỏ món này? Món sẽ mất khỏi máy này.</span>
                         <div className="grid grid-cols-2 gap-2">
                           <button type="button" className={ACTION} onClick={() => setConfirming(null)}>
                             Giữ lại
@@ -99,7 +99,7 @@ export function SyncList({ open, onClose }: { open: boolean; onClose: () => void
             })}
           </ul>
         )}
-        <p role="status" aria-live="polite" className="m-0 min-h-5 text-cap leading-snug text-secondary" data-sync-outcome>
+        <p role="status" aria-live="polite" className="m-0 min-h-5 text-[13px] leading-snug text-secondary" data-sync-outcome>
           {busy ? "Đang gửi…" : outcome ? retryMessage(outcome) : ""}
         </p>
         {items.length > 0 && (
@@ -115,4 +115,4 @@ export function SyncList({ open, onClose }: { open: boolean; onClose: () => void
   );
 }
 
-const ACTION = "min-h-11 cursor-pointer rounded-full border border-card-border bg-card px-3 text-cap font-bold leading-tight text-text active:scale-[0.97] transition-press motion-reduce:active:transform-none";
+const ACTION = "min-h-11 cursor-pointer rounded-full border border-card-border bg-card px-3 text-[13px] font-bold leading-tight text-text active:scale-[0.97] transition-press motion-reduce:active:transform-none";
