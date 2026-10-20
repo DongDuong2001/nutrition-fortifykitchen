@@ -64,6 +64,6 @@ Both runs went red once first (Job 3: `cc12`, `cc_57_strips` timing assumptions;
 
 All in `OPEN_QUESTIONS.md`: "Handover 20/10/2026", "feat/fluid-add (21/10/2026)" and "fix/polish-1020 (21/10/2026)". The ones that need an answer first:
 1. **Merges:** nothing was merged because the permission classifier refused `gh pr merge 28`; say go and run the commands above (or tell me to).
-2. **Jobs 3:** the back-button behaviour changed with the intercepting route (note: "routing changes"); check the add sheet on an iPhone once #29 is in, because the search field now takes focus after the slide.
+2. **Job 3:** the back-button behaviour changed with the intercepting route (note: "routing changes"); check the add sheet on an iPhone once #29 is in, because the search field now takes focus after the slide.
 3. **Job 4:** the 5-per-category limit is my number; the update bar reserves 64 px and select mode covers it; time to open /add at the live catalogue size was not measured in a browser.
 4. **Job 2:** the Red Bull "1 lon (250 ml)" portion is in no repo data file (OPEN_QUESTIONS, Handover 20/10).
