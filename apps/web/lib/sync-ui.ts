@@ -52,6 +52,23 @@ export const useSyncSummary = (): SyncSummary => useSyncExternalStore(subscribeS
 /** Anything still to send or sending: the update toast does not reload the page then. */
 export const isSyncBusy = (s: SyncSummary = summary): boolean => s.pending + s.failed > 0 || s.saving;
 
+// "Xem lý do" on the Thử lại toast: asks the sync status (in the header) to open the Chưa lưu list
+let listRequests = 0;
+const listRequestListeners = new Set<() => void>();
+export function openSyncList(): void {
+  listRequests++;
+  for (const fn of [...listRequestListeners]) fn();
+}
+export const useSyncListRequests = (): number =>
+  useSyncExternalStore(
+    (fn) => {
+      listRequestListeners.add(fn);
+      return () => listRequestListeners.delete(fn);
+    },
+    () => listRequests,
+    () => 0
+  );
+
 // The diary provider says how to send what waits now (Thử lại, without the network having come back): for the update toast
 let syncNow: (() => Promise<void>) | null = null;
 export function registerSyncNow(fn: (() => Promise<void>) | null): void {

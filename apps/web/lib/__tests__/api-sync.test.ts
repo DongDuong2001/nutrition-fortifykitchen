@@ -23,7 +23,8 @@ type Answer = number | "network";
 function server(answers: Record<string, Answer[]>) {
   const calls: string[] = [];
   const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
-    const path = url.replace("https://api.test/api/v1", "");
+    // The query (made_at on a DELETE) is not part of the route; the late-writes tests read it from the mock
+    const path = url.replace("https://api.test/api/v1", "").split("?")[0];
     const key = `${init?.method ?? "GET"} ${path}`;
     calls.push(key);
     const list = answers[key] ?? answers[path] ?? [200];
@@ -341,19 +342,23 @@ describe("writes that can never succeed (review 05:30 M1)", () => {
     expect(getPendingOfflineEntryIds()).toEqual([]);
   });
 
-  it("409 PAST_DAY_READ_ONLY is final: reported once, never sent again, not even on app open or Thử lại", async () => {
+  it("409 PAST_DAY_READ_ONLY on a write older than 14 days is final: not sent again on app open, but Thử lại sends it (and it is refused again)", async () => {
     vi.spyOn(console, "warn").mockImplementation(() => {});
     localStorage.setItem(
       "h1t_offline_outbox_sync@example.com",
-      JSON.stringify([{ id: ID, date: "2026-10-17", payload: { id: ID }, createdAt: Date.now(), key: "k1" }])
+      JSON.stringify([{ id: ID, date: "2026-10-01", payload: { id: ID }, createdAt: Date.now() - 15 * 24 * 60 * 60 * 1000, key: "k1" }])
     );
     const fetchMock = vi.fn(async (_url: string) => new Response(JSON.stringify({ error: { code: "PAST_DAY_READ_ONLY", message: "Cannot write to past dates" } }), { status: 409 }));
     vi.stubGlobal("fetch", fetchMock);
     const first = await syncOfflineOutbox({ force: true });
-    expect(first.held).toEqual([{ id: ID, status: 409, date: "2026-10-17", final: true }]);
-    expect(await syncOfflineOutbox({ retryHeld: true })).toEqual({ saved: [], held: [] });
-    // cc-50: the refusal is reported once to /client-errors; the write itself went out once
+    expect(first.held).toEqual([{ id: ID, status: 409, date: "2026-10-01", final: true }]);
+    // App open and the 60 s poll leave it alone
+    expect(await syncOfflineOutbox({ force: true })).toEqual({ saved: [], held: [] });
     expect(fetchMock.mock.calls.filter(([url]) => String(url).includes("/days/"))).toHaveLength(1);
+    // Thử lại sends everything the list shows, this one included, and says so again
+    const again = await syncOfflineOutbox({ retryHeld: true });
+    expect(again.held).toEqual([{ id: ID, status: 409, date: "2026-10-01", final: true }]);
+    expect(fetchMock.mock.calls.filter(([url]) => String(url).includes("/days/"))).toHaveLength(2);
     expect(getPendingOfflineEntryIds()).toEqual([ID]);
   });
 
@@ -422,7 +427,8 @@ describe("writes refused for good leave the outbox after 7 days (review 07:00)",
     );
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
-    await syncOfflineOutbox({ retryHeld: true });
+    // (app open or the poll, not Thử lại: Thử lại sends final writes too)
+    await syncOfflineOutbox({ force: true });
     expect(fetchMock).not.toHaveBeenCalled();
     expect(getPendingOfflineEntryIds()).toEqual([OTHER]);
   });

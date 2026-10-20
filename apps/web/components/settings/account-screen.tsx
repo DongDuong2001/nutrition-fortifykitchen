@@ -14,12 +14,15 @@ import { Row } from "@/components/ui/row";
 import { useDiary } from "@/lib/diary-store";
 import { currentAccountId, signOut } from "@/lib/auth-actions";
 import { isLiveMode } from "@/lib/api-mode";
-import { callEngine, syncOfflineOutbox } from "@/lib/api-client";
+import { callEngine } from "@/lib/api-client";
+import { syncBeforeSignOut } from "@/lib/sign-out-flow";
 import { useSaveDisplayName } from "@/hooks/use-save-display-name";
 import { cleanDisplayName, limitDisplayName, validateDisplayName } from "@/lib/display-name";
 
 // Only a person who signs out with writes waiting ever sees it: its chunk is not part of the page
+import type { SignOutFailure } from "@/components/settings/sign-out-confirm";
 const SignOutConfirm = dynamic(() => import("@/components/settings/sign-out-confirm").then((m) => m.SignOutConfirm), { ssr: false });
+const SyncList = dynamic(() => import("@/components/sync/sync-list").then((m) => m.SyncList), { ssr: false });
 
 /** Tên hiển thị. It saves on blur or Enter. A name is required (it is on the share image): a blank or unusable one stays on screen with its error. */
 function DisplayNameRow() {
@@ -93,11 +96,19 @@ export function AccountScreen() {
   const ready = hydrated && loaded;
 
   // cc-68 (X8): Đăng xuất in a real account wipes what the device kept for it. With writes still waiting the person is asked first.
-  const [waiting, setWaiting] = useState<{ count: number; busy: boolean; failed: boolean } | null>(null);
+  // Hotfix 20/10: it never just does nothing. A check or a sign-out that fails is said in words, and a sync that leaves writes
+  // behind says how many and why, with Xem các món and Vẫn đăng xuất (mất N món).
+  const [waiting, setWaiting] = useState<{ count: number; busy: boolean; progress: { done: number; total: number } | null; failure: SignOutFailure | null; error: string | null } | null>(null);
+  const [listOpen, setListOpen] = useState(false);
 
   async function leave(account: string | null, dropPending: boolean) {
-    await signOut();
-    if (account) await callEngine("wipeAccount", account, { dropPending });
+    try {
+      await signOut();
+      if (account) await callEngine("wipeAccount", account, { dropPending });
+    } catch {
+      setWaiting((w) => ({ count: w?.count ?? 0, busy: false, progress: null, failure: w?.failure ?? null, error: "Chưa đăng xuất được. Kiểm tra mạng rồi thử lại nhé." }));
+      return;
+    }
     // A full load: nothing of this account stays in the page's memory (the foods it made, its diary)
     window.location.assign("/signin");
   }
@@ -109,18 +120,32 @@ export function AccountScreen() {
       return;
     }
     const account = currentAccountId();
-    const count = account ? await callEngine("unsyncedCount", account) : 0;
-    if (count > 0) setWaiting({ count, busy: false, failed: false });
+    let count = 0;
+    try {
+      count = account ? await callEngine("unsyncedCount", account) : 0;
+    } catch {
+      // The check itself failed (the sync code did not load): ask, rather than sign out blind or do nothing
+      setWaiting({ count: 0, busy: false, progress: null, failure: null, error: "Chưa kiểm tra được món nào chưa lưu. Kiểm tra mạng rồi thử lại nhé." });
+      return;
+    }
+    if (count > 0) setWaiting({ count, busy: false, progress: null, failure: null, error: null });
     else await leave(account, false);
   }
 
   async function syncThenLeave() {
     const account = currentAccountId();
-    setWaiting((w) => w && { ...w, busy: true, failed: false });
-    await syncOfflineOutbox({ retryHeld: true }).catch(() => undefined);
-    const count = account ? await callEngine("unsyncedCount", account) : 0;
+    setWaiting((w) => w && { ...w, busy: true, progress: null, failure: null, error: null });
+    const left = await syncBeforeSignOut(account, (progress) => setWaiting((w) => w && { ...w, progress }));
+    if (!left) await leave(account, false);
+    else setWaiting({ count: left.left, busy: false, progress: null, failure: left, error: null });
+  }
+
+  async function closeList() {
+    setListOpen(false);
+    const account = currentAccountId();
+    const count = account ? await callEngine("unsyncedCount", account).catch(() => -1) : 0;
     if (count === 0) await leave(account, false);
-    else setWaiting({ count, busy: false, failed: true });
+    else if (count > 0) setWaiting((w) => w && { ...w, count, failure: w.failure && { ...w.failure, left: count } });
   }
 
   return (
@@ -150,15 +175,19 @@ export function AccountScreen() {
 
       {waiting && (
         <SignOutConfirm
-          open
+          open={!listOpen}
           count={waiting.count}
           busy={waiting.busy}
-          failed={waiting.failed}
+          progress={waiting.progress}
+          failure={waiting.failure}
+          error={waiting.error}
           onSyncThenLeave={() => void syncThenLeave()}
           onLeave={() => void leave(currentAccountId(), true)}
+          onSeeItems={() => setListOpen(true)}
           onClose={() => setWaiting(null)}
         />
       )}
+      {listOpen && <SyncList open onClose={() => void closeList()} />}
       <AuthNotice />
     </AppShell>
   );

@@ -209,7 +209,7 @@ func (s *diaryServiceImpl) CreateEntry(ctx context.Context, userID uuid.UUID, da
 		}
 	}
 
-	if err := ValidateDateWritable(date); err != nil {
+	if err := ValidateDateWritableCtx(ctx, date); err != nil {
 		return nil, nil, err
 	}
 
@@ -312,7 +312,7 @@ func (s *diaryServiceImpl) RestoreEntry(ctx context.Context, userID uuid.UUID, e
 		return existing, computeDayTotals(dayEntries), nil
 	}
 
-	if err := ValidateDateWritable(date); err != nil {
+	if err := ValidateDateWritableCtx(ctx, date); err != nil {
 		return nil, nil, err
 	}
 
@@ -343,7 +343,7 @@ func (s *diaryServiceImpl) UpdateEntry(ctx context.Context, userID uuid.UUID, en
 		return nil, nil, ErrEntryNotFound
 	}
 
-	if err := ValidateDateWritable(date); err != nil {
+	if err := ValidateDateWritableCtx(ctx, date); err != nil {
 		return nil, nil, err
 	}
 
@@ -420,7 +420,7 @@ func (s *diaryServiceImpl) DeleteEntry(ctx context.Context, userID uuid.UUID, en
 		return ErrEntryNotFound
 	}
 
-	if err := ValidateDateWritable(date); err != nil {
+	if err := ValidateDateWritableCtx(ctx, date); err != nil {
 		return err
 	}
 
@@ -428,7 +428,7 @@ func (s *diaryServiceImpl) DeleteEntry(ctx context.Context, userID uuid.UUID, en
 }
 
 func (s *diaryServiceImpl) CopyYesterday(ctx context.Context, userID uuid.UUID, targetDate string, req CopyYesterdayRequest) (*CopyYesterdayResponse, error) {
-	if err := ValidateDateWritable(targetDate); err != nil {
+	if err := ValidateDateWritableCtx(ctx, targetDate); err != nil {
 		return nil, err
 	}
 
@@ -480,7 +480,7 @@ func (s *diaryServiceImpl) CopyYesterday(ctx context.Context, userID uuid.UUID, 
 }
 
 func (s *diaryServiceImpl) DeleteMeal(ctx context.Context, userID uuid.UUID, date string, mealSlot string) error {
-	if err := ValidateDateWritable(date); err != nil {
+	if err := ValidateDateWritableCtx(ctx, date); err != nil {
 		return err
 	}
 	if mealSlot == "preworkout" {
@@ -490,7 +490,7 @@ func (s *diaryServiceImpl) DeleteMeal(ctx context.Context, userID uuid.UUID, dat
 }
 
 func (s *diaryServiceImpl) SetTraining(ctx context.Context, userID uuid.UUID, date string, minutes int) (*SetTrainingResponse, error) {
-	if err := ValidateDateWritable(date); err != nil {
+	if err := ValidateDateWritableCtx(ctx, date); err != nil {
 		return nil, err
 	}
 	if minutes != 0 && minutes != 45 && minutes != 60 && minutes != 90 && minutes != 120 && minutes != 240 {

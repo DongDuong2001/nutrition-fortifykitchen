@@ -1,6 +1,7 @@
 package diary
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -18,6 +19,24 @@ type Handler struct {
 
 func NewHandler(service Service) *Handler {
 	return &Handler{service: service}
+}
+
+// madeAtContext reads the optional made_at (body value first, then ?made_at=) and carries it in the
+// context so the date rule judges the write by when the user made it. A bad value is a 400.
+func madeAtContext(w http.ResponseWriter, r *http.Request, bodyValue string) (context.Context, bool) {
+	raw := bodyValue
+	if raw == "" {
+		raw = r.URL.Query().Get("made_at")
+	}
+	madeAt, err := ParseMadeAt(raw)
+	if err != nil {
+		response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, err.Error())
+		return nil, false
+	}
+	if madeAt == nil {
+		return r.Context(), true
+	}
+	return WithMadeAt(r.Context(), *madeAt), true
 }
 
 // GetDays handles GET /api/v1/days?from=YYYY-MM-DD&to=YYYY-MM-DD
@@ -97,7 +116,11 @@ func (h *Handler) CreateEntry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	entry, daySummary, err := h.service.CreateEntry(r.Context(), userID, date, req)
+	ctx, ok := madeAtContext(w, r, req.MadeAt)
+	if !ok {
+		return
+	}
+	entry, daySummary, err := h.service.CreateEntry(ctx, userID, date, req)
 	if err != nil {
 		if errors.Is(err, ErrPastDayReadOnly) {
 			response.Error(w, http.StatusConflict, response.CodePastDayReadOnly, "Cannot write to past dates")
@@ -143,7 +166,11 @@ func (h *Handler) UpdateEntry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	entry, daySummary, err := h.service.UpdateEntry(r.Context(), userID, entryID, req)
+	ctx, ok := madeAtContext(w, r, req.MadeAt)
+	if !ok {
+		return
+	}
+	entry, daySummary, err := h.service.UpdateEntry(ctx, userID, entryID, req)
 	if err != nil {
 		if errors.Is(err, ErrPastDayReadOnly) {
 			response.Error(w, http.StatusConflict, response.CodePastDayReadOnly, "Cannot write to past dates")
@@ -183,7 +210,11 @@ func (h *Handler) RestoreEntry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	entry, daySummary, err := h.service.RestoreEntry(r.Context(), userID, entryID)
+	ctx, ok := madeAtContext(w, r, "")
+	if !ok {
+		return
+	}
+	entry, daySummary, err := h.service.RestoreEntry(ctx, userID, entryID)
 	if err != nil {
 		if errors.Is(err, ErrPastDayReadOnly) {
 			response.Error(w, http.StatusConflict, response.CodePastDayReadOnly, "Cannot write to past dates")
@@ -223,7 +254,11 @@ func (h *Handler) DeleteEntry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.service.DeleteEntry(r.Context(), userID, entryID)
+	ctx, ok := madeAtContext(w, r, "")
+	if !ok {
+		return
+	}
+	err = h.service.DeleteEntry(ctx, userID, entryID)
 	if err != nil {
 		if errors.Is(err, ErrPastDayReadOnly) {
 			response.Error(w, http.StatusConflict, response.CodePastDayReadOnly, "Cannot write to past dates")
@@ -263,7 +298,11 @@ func (h *Handler) CopyYesterday(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := h.service.CopyYesterday(r.Context(), userID, date, req)
+	ctx, ok := madeAtContext(w, r, req.MadeAt)
+	if !ok {
+		return
+	}
+	res, err := h.service.CopyYesterday(ctx, userID, date, req)
 	if err != nil {
 		if errors.Is(err, ErrPastDayReadOnly) {
 			response.Error(w, http.StatusConflict, response.CodePastDayReadOnly, "Cannot write to past dates")
@@ -288,7 +327,11 @@ func (h *Handler) DeleteMeal(w http.ResponseWriter, r *http.Request) {
 	date := chi.URLParam(r, "date")
 	meal := chi.URLParam(r, "meal")
 
-	err = h.service.DeleteMeal(r.Context(), userID, date, meal)
+	ctx, ok := madeAtContext(w, r, "")
+	if !ok {
+		return
+	}
+	err = h.service.DeleteMeal(ctx, userID, date, meal)
 	if err != nil {
 		if errors.Is(err, ErrPastDayReadOnly) {
 			response.Error(w, http.StatusConflict, response.CodePastDayReadOnly, "Cannot write to past dates")
@@ -317,7 +360,11 @@ func (h *Handler) SetTraining(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := h.service.SetTraining(r.Context(), userID, date, req.TrainingMinutes)
+	ctx, ok := madeAtContext(w, r, req.MadeAt)
+	if !ok {
+		return
+	}
+	res, err := h.service.SetTraining(ctx, userID, date, req.TrainingMinutes)
 	if err != nil {
 		if errors.Is(err, ErrPastDayReadOnly) {
 			response.Error(w, http.StatusConflict, response.CodePastDayReadOnly, "Cannot write to past dates")

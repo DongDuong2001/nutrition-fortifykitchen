@@ -65,7 +65,7 @@ export interface AppHeaderProps {
 export const HEADER_ICON_BUTTON =
   "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0 text-on-dark lg:text-text no-underline cursor-pointer hover:text-sky lg:hover:text-cobalt active:scale-[0.97] transition-press motion-reduce:active:scale-100 focus-visible:outline-sky lg:focus-visible:outline-cobalt";
 const DATE_BUTTON =
-  "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0 text-on-dark cursor-pointer hover:text-sky active:scale-[0.97] transition-press motion-reduce:active:scale-100 disabled:cursor-default disabled:text-secondary disabled:opacity-50 lg:border lg:border-card-border lg:bg-card lg:text-ink lg:hover:bg-divider lg:hover:text-ink lg:disabled:text-secondary focus-visible:outline-sky lg:focus-visible:outline-cobalt";
+  "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0 text-on-dark cursor-pointer hover:text-sky active:scale-[0.97] transition-press motion-reduce:active:scale-100 disabled:pointer-events-none disabled:cursor-default disabled:text-secondary disabled:opacity-50 lg:border lg:border-card-border lg:bg-card lg:text-ink lg:hover:bg-divider lg:hover:text-ink lg:disabled:text-secondary focus-visible:outline-sky lg:focus-visible:outline-cobalt";
 
 /**
  * cc-72: the calendar beside the date (the icon set's Calendar path, drawn here like the chevrons: the header is on every

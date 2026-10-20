@@ -5,6 +5,7 @@ import { Presence } from "@/components/ui/presence";
 import { Toast } from "@/components/ui/toast";
 import { useDiary, useDiaryToast, type ToastInfo } from "@/lib/diary-store";
 import { scrollBehavior } from "@/lib/scroll-behavior";
+import { openSyncList } from "@/lib/sync-ui";
 import { usePathname } from "next/navigation";
 
 /**
@@ -69,7 +70,9 @@ export function DiaryToast() {
                 ? undefined
                 : toast.kind === "unsaved"
                   ? "Thử lại"
-                  : toast.kind === "added" || toast.kind === "saved"
+                  : toast.kind === "left"
+                    ? "Xem lý do"
+                    : toast.kind === "added" || toast.kind === "saved"
                     ? "Xem"
                     : "Hoàn tác"
             }
@@ -82,8 +85,10 @@ export function DiaryToast() {
                   : toast.kind === "moved"
                     ? undoMove
                     : toast.kind === "unsaved"
-                      ? retryUnsaved
-                      : showMeal
+                      ? () => void retryUnsaved()
+                      : toast.kind === "left"
+                        ? openSyncList
+                        : showMeal
             }
             countdown={{ totalMs: toast.durationMs, leftMs: toast.durationMs }}
           />

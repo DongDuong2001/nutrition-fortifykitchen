@@ -36,7 +36,8 @@ function server(answers: Record<string, number[]> = {}) {
   const calls: string[] = [];
   const bodies: Record<string, unknown[]> = {};
   const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
-    const path = url.replace("https://api.test/api/v1", "");
+    // The query (made_at on a DELETE) is not part of the route
+    const path = url.replace("https://api.test/api/v1", "").split("?")[0];
     const key = `${init?.method ?? "GET"} ${path}`;
     calls.push(key);
     if (init?.body) (bodies[key] ??= []).push(JSON.parse(String(init.body)));
@@ -242,7 +243,7 @@ describe("S7: delete racing an add", () => {
     vi.stubGlobal(
       "fetch",
       vi.fn((url: string, init?: RequestInit) => {
-        const key = `${init?.method ?? "GET"} ${String(url).replace("https://api.test/api/v1", "")}`;
+        const key = `${init?.method ?? "GET"} ${String(url).replace("https://api.test/api/v1", "").split("?")[0]}`;
         order.push(key);
         if (key.startsWith("POST")) return new Promise<Response>((resolve) => (releaseAdd = resolve));
         return Promise.resolve(new Response(null, { status: 204 }));
@@ -382,15 +383,29 @@ describe("cc-68 Part 2: a write for yesterday", () => {
     expect(await apiClient.deleteEntry(FOOD, "2026-10-18")).toMatchObject({ state: "held", final: false });
   });
 
-  it("two days back and older stay read-only: 409 is final, kept as a lasting marker and never sent again", async () => {
+  it("two days back is refused by a server that does not know made_at yet: held, not final (a write made now is never too old), and Thử lại sends it", async () => {
     vi.stubGlobal("fetch", answer409());
-    expect(await add("2026-10-17")).toMatchObject({ state: "held", status: 409, final: true });
-    expect(await apiClient.deleteEntry(FOOD, "2026-10-01")).toMatchObject({ state: "held", final: true });
+    expect(await add("2026-10-17")).toMatchObject({ state: "held", status: 409, final: false });
+    expect(await apiClient.deleteEntry(FOOD, "2026-10-01")).toMatchObject({ state: "held", final: false });
+    const { calls } = server({ "POST /days/2026-10-17/entries": [201], [`DELETE /entries/${FOOD}`]: [204] });
+    expect((await syncOfflineOutbox({ retryHeld: true })).saved).toEqual([ID]);
+    expect(calls).toHaveLength(2);
+    expect(idb.values("outbox")).toEqual([]);
+  });
+
+  it("a write older than the 14 days the server accepts is final: kept as a lasting marker, not sent on app open, sent by Thử lại", async () => {
+    // Made offline on 3/10 and only able to reach the server on 19/10: 16 days is past what the server accepts
+    vi.setSystemTime(new Date("2026-10-03T03:00:00Z"));
+    vi.stubGlobal("fetch", vi.fn(async () => Promise.reject(new TypeError("Failed to fetch"))));
+    expect(await add("2026-10-02")).toMatchObject({ state: "queued" });
+    vi.setSystemTime(new Date("2026-10-19T03:00:00Z"));
+    vi.stubGlobal("fetch", answer409());
+    await syncOfflineOutbox({ force: true });
+    expect(countItems(readItems(scope))).toMatchObject({ failed: 1, final: 1 });
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
-    expect(await syncOfflineOutbox({ retryHeld: true })).toEqual({ saved: [], held: [] });
+    expect(await syncOfflineOutbox({ force: true })).toEqual({ saved: [], held: [] });
     expect(fetchMock).not.toHaveBeenCalled();
-    expect(countItems(readItems(scope))).toMatchObject({ failed: 2, final: 2 });
   });
 
   it("an offline add made before midnight reaches the server after it, for the day it was made (yesterday by then)", async () => {
