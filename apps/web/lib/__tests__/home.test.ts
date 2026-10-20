@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
+  nutrientRowLabel,
   entriesFromAdded,
   groupMeals,
   heroLabel,
@@ -428,5 +429,21 @@ describe("pctLabel above 999 (cc-63, B6)", () => {
     expect(pctLabel(20833, 100)).toBe("999+%");
     expect(pctLabel(Number.NaN, 100)).toBe("—");
     expect(pctLabel(100, Number.POSITIVE_INFINITY)).toBe("—");
+  });
+});
+
+describe("nutrientRowLabel (fix/polish-1020: the row reads its real target, never a dash)", () => {
+  it("names the amount against the target, the share and the level", () => {
+    expect(nutrientRowLabel({ name: "Canxi", unit: "mg", value: 150, target: 1000, level: "Thiếu" })).toBe("Canxi, 150 mg trên mục tiêu 1.000 mg, 15%, Thiếu. Xem món góp phần");
+  });
+
+  it("no value yet: says so and still gives the target", () => {
+    expect(nutrientRowLabel({ name: "Sắt", unit: "mg", value: null, target: 18, level: null })).toBe("Sắt, chưa có dữ liệu, mục tiêu 18 mg. Xem món góp phần");
+  });
+
+  it("no target: no dash and no percent", () => {
+    const label = nutrientRowLabel({ name: "Kẽm", unit: "mg", value: 5, target: null, level: null });
+    expect(label).toBe("Kẽm, 5 mg. Xem món góp phần");
+    expect(label).not.toContain("—");
   });
 });

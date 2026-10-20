@@ -154,6 +154,14 @@ def check(browser, route, width, height):
         if not has_header and not exempt:
             reasons.append("no visible header (banner role or AppHeader)")
 
+        # fix/polish-1020: every screen has one <main> landmark and one h1 (a screen reader's two jump points)
+        mains = page.locator('main, [role="main"]').count()
+        h1s = page.locator("h1").count()
+        if mains != 1:
+            reasons.append(f"{mains} <main> landmarks (one per screen)")
+        if h1s != 1:
+            reasons.append(f"{h1s} h1 (one per screen)")
+
         scroll_w, inner_w = page.evaluate(
             "() => [Math.max(document.documentElement.scrollWidth, document.body.scrollWidth), window.innerWidth]"
         )
