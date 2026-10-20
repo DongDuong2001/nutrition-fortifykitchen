@@ -11,8 +11,8 @@
 
 Screenshots: `docs/screenshots/pr20-text/` (before / after / diff at 100 %, 125 %, 150 %).
 
-## Part B: one PR, not merged (Hao reviews)
-**PR: https://github.com/DongDuong2001/nutrition-fortifykitchen/pull/25** (`feat/followups-1020` → `main`), from main fc24b09 with origin/main merged in twice (7967c76 hotfix/late-writes, 16f7e1f the probe/pill fix). Final gate:full all green (110 PASS, 0 FAIL), go vet / go test clean.
+## Part B: one PR, merged after Hao's review
+**PR: https://github.com/DongDuong2001/nutrition-fortifykitchen/pull/25** (`feat/followups-1020` → `main`), **merged into main as `41e9034`** (merge commit, 20/10), built from main fc24b09 with origin/main merged in twice (7967c76 hotfix/late-writes, 16f7e1f the probe/pill fix). Final gate:full all green (110 PASS, 0 FAIL), go vet / go test clean.
 
 ### Done
 - **Logo → Hôm nay** (asked during the run, `home:`): the H1T MICRO wordmark on the phone header and the desktop sidebar links to Hôm nay; release 2026-10-21a item with a 1-step tour.

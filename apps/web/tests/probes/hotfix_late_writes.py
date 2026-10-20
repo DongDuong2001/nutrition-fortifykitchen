@@ -10,7 +10,8 @@ date rule (made_at within 14 days, else 409 PAST_DAY_READ_ONLY; without made_at 
   C  Đăng xuất with an item that cannot be sent: Đồng bộ rồi đăng xuất says how many are left and why, and offers Xem các món and
      Vẫn đăng xuất (mất N món) (it does not just stop)
   D  the sync status in the header (the Chưa lưu pill, or Ngoại tuyến · n chờ gửi offline) never shares its box with the day arrows or the
-     date, today and yesterday, at 360, 390 and 430 wide; five points across the pill all hit it, and the › arrow stays tappable
+     date, today and yesterday, at 360, 390 and 430 wide; five points across the pill all hit it, and the › arrow stays tappable; the logo
+     steps aside but the sr-only page h1 stays in the accessibility tree
   E  2026-10-20.4, what production showed (12 adds for a closed day, all 409): (1) the old app's localStorage outbox in its first
      shape ({ id, date, payload, createdAt, retries }), one item with no createdAt at all, moves to IndexedDB and is saved, made_at =
      its own createdAt, else its day at 23:00 Ho Chi Minh time; (2) a closed day's entries queued again with createdAt = the moment
@@ -399,7 +400,12 @@ with sync_playwright() as p:
           const nr = next ? next.getBoundingClientRect() : null;
           const nextTap = nr && !next.disabled ? (() => { const el = document.elementFromPoint(nr.left + nr.width / 2, nr.top + nr.height / 2); return !!el && (el === next || next.contains(el)); })() : null;
           const cover = nr && !next.disabled ? (() => { const el = document.elementFromPoint(nr.left + nr.width / 2, nr.top + nr.height / 2); return el && el !== next && !next.contains(el) ? el.outerHTML.slice(0, 120) : null; })() : null;
-          return { hits, overlap, nextTap, cover, offline: !pill, scrollW: document.documentElement.scrollWidth, width: window.innerWidth };
+          const h1 = document.querySelector('header h1');
+          const h1Shown = !!h1 && getComputedStyle(h1).display !== 'none';
+          // What shares the h1's row on a phone (the logo, or Hôm nay's phoneStart) steps aside
+          const beside = h1 ? [...h1.parentElement.children].filter((el) => el !== h1) : [];
+          const logoHidden = beside.length > 0 && beside.every((el) => getComputedStyle(el).display === 'none');
+          return { hits, overlap, nextTap, cover, offline: !pill, h1Shown, logoHidden, scrollW: document.documentElement.scrollWidth, width: window.innerWidth };
         }"""
         for width, net in [(w, n) for w in (360, 390, 430) for n in ("online", "offline")]:
             for label, day in (("today", None), ("yesterday", yesterday)):
@@ -429,6 +435,8 @@ with sync_playwright() as p:
                 check(got is not None and all(got["hits"]), f"D: {where}: every tap point on the Chưa lưu pill reaches it ({got})")
                 check(got is not None and got["overlap"] == [], f"D: {where}: no other control shares the status's box ({got and got['overlap']})")
                 check(got is not None and got["nextTap"] is not False and got["scrollW"] <= got["width"], f"D: {where}: the › arrow takes its own taps, and the header does not scroll sideways")
+                check(got is not None and got["h1Shown"] and pg.get_by_role("heading", level=1).count() >= 1, f"D: {where}: the page h1 stays in the accessibility tree while the status shows ({got and got['h1Shown']})")
+                check(got is not None and got["logoHidden"], f"D: {where}: …while the logo still steps aside")
                 if width == 390 and label == "yesterday" and net == "online":
                     pg.get_by_role("button", name=re.compile(r"^Chưa lưu 2")).locator("visible=true").first.click(position={"x": 6, "y": 20})
                     pg.wait_for_selector("[data-sync-list]", timeout=10000)
