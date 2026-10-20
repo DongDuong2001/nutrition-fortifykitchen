@@ -428,3 +428,6 @@
 - [ ] (Dong, cc-73b) Custom targets per vitamin or mineral need a column (`nutrition.profiles.custom_targets`), so the web side is built behind `CUSTOM_TARGETS_ENABLED = false` and the spec is docs/pr/cc-73b-custom-targets.md. The custom kcal and macros are on the device only today, so the API's trends already ignore them.
 - [ ] (Dong, cc-73b) `TestSharedTargetVectors` and `TestSharedPeriodVectors` were skipping on main (they looked for `packages/vectors` two and three levels up from their folder, and it is four), so they never ran. Fixed: the paths now include four levels, and the new `TestSharedDRIVectors` fails, not skips, when its file is missing.
 
+
+## fix/source-tags (20/10/2026)
+- [ ] (Hao) The food page and source sheet name the `asean` source "ASEAN" (it said "Khác" before; the search tag is "ASEAN" as asked). The rows are PhilFCT (Philippine FCT, ASEAN FCDB), e.g. Bông so đũa, Cá cơm cả xương. Options: (a) "ASEAN" as built, like "Tài liệu" (my pick: short and the same as the tag), (b) "PhilFCT (ASEAN)", like "CNF (Canada)", (c) other words. lib/source-names.ts is the one place to change it.
