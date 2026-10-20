@@ -23,7 +23,7 @@ export default function SyncStatusDetail({ state, unsaved, failed }: { state: st
   return (
     <>
       {state === "idle" ? null : state === "offline" ? (
-        <span className={text}>{unsaved > 0 ? `Ngoại tuyến · ${unsaved} chờ gửi` : "Ngoại tuyến"}</span>
+        <span className={`${text} max-lg:max-w-[96px] max-lg:text-right max-lg:leading-tight`}>{unsaved > 0 ? `Ngoại tuyến · ${unsaved} chờ gửi` : "Ngoại tuyến"}</span>
       ) : state === "saving" ? (
         <span className={text}>Đang lưu…</span>
       ) : state === "unsaved" ? (

@@ -175,11 +175,13 @@ export function AppHeader({
           data-align-group={alignGroup}
           data-align-edge={alignMode === "left" ? "left" : undefined}
           data-align-from={alignMode === "page" ? "lg" : undefined}
-          className="flex min-h-11 items-center gap-2"
+          className="group/hdr flex min-h-11 items-center gap-2"
         >
           {back}
-          {/* The phone wordmark is a logo: it never shrinks or wraps; at large text sizes the date gives way instead */}
-          <div className={`min-w-0 flex-1 ${wordmark ? "max-lg:min-w-fit" : ""}`}>
+          {/* The phone wordmark is a logo: it never shrinks or wraps; at large text sizes the date gives way instead. While the sync status
+              has something to say (Chưa lưu, Ngoại tuyến) the row has no room for both on a phone: the logo steps aside, so the status
+              never lands on the day arrows (hotfix 20/10) */}
+          <div className={`min-w-0 flex-1 ${wordmark ? "max-lg:min-w-fit group-has-[[data-sync-state=unsaved],[data-sync-state=offline]]/hdr:max-lg:min-w-0 group-has-[[data-sync-state=unsaved],[data-sync-state=offline]]/hdr:max-lg:*:hidden" : ""}`}>
             {wordmark ? (
               <>
                 {phoneStart ? (
@@ -236,7 +238,7 @@ export function AppHeader({
                   aria-label={`Chọn ngày, ${dateLabel}`}
                   data-tour="day-date"
                   aria-busy={dateLabel ? undefined : true}
-                  className="inline-flex min-h-11 min-w-[104px] shrink items-center justify-center rounded-full border-0 bg-transparent px-1 text-center text-sm font-semibold leading-tight tracking-tight text-on-dark cursor-pointer hover:text-sky focus-visible:outline-sky active:scale-[0.97] transition-press motion-reduce:active:scale-100 lg:hidden"
+                  className="inline-flex min-h-11 min-w-[76px] shrink items-center justify-center rounded-full border-0 bg-transparent px-1 text-center text-sm font-semibold leading-tight tracking-tight text-on-dark cursor-pointer hover:text-sky focus-visible:outline-sky active:scale-[0.97] transition-press motion-reduce:active:scale-100 lg:hidden"
                 >
                   {dateLabel ? (
                     // cc-72: the calendar glyph says the date opens the calendar (the date stays the one control)
@@ -249,12 +251,12 @@ export function AppHeader({
                       </span>
                     </span>
                   ) : (
-                    <span aria-hidden="true" className="inline-block h-5 w-[104px]" />
+                    <span aria-hidden="true" className="inline-block h-5 w-[76px]" />
                   )}
                 </button>
               ) : (
-                <span className="inline-flex min-w-[104px] items-center justify-center text-center text-sm font-semibold tracking-tight lg:hidden">
-                  {dateLabel || <span aria-hidden="true" className="inline-block h-5 w-[104px]" />}
+                <span className="inline-flex min-w-[76px] items-center justify-center text-center text-sm font-semibold tracking-tight lg:hidden">
+                  {dateLabel || <span aria-hidden="true" className="inline-block h-5 w-[76px]" />}
                 </span>
               )}
               <button type="button" onClick={onNext} disabled={nextDisabled} aria-label="Ngày sau" data-testid="day-next" className={DATE_BUTTON}>
