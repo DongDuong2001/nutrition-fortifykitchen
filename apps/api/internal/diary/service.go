@@ -7,6 +7,8 @@ import (
 	"math"
 	"strings"
 	"time"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/google/uuid"
 	"nutrition-api/internal/targets"
@@ -20,7 +22,24 @@ var (
 	ErrIDConflict             = errors.New("entry id conflict")
 	ErrInvalidDateRange       = errors.New("fromDate must be before or equal to toDate")
 	ErrRangeTooLarge          = errors.New("date range exceeds maximum of 100 days")
+	ErrFoodNameTooLong        = errors.New("tên món không được vượt quá 80 ký tự")
 )
+
+// sanitizeFoodName strips control characters, trims leading/trailing spaces, and enforces a max of 80 runes.
+func sanitizeFoodName(name string) (string, error) {
+	var b strings.Builder
+	b.Grow(len(name))
+	for _, r := range name {
+		if !unicode.IsControl(r) {
+			b.WriteRune(r)
+		}
+	}
+	trimmed := strings.TrimSpace(b.String())
+	if utf8.RuneCountInString(trimmed) > 80 {
+		return "", ErrFoodNameTooLong
+	}
+	return trimmed, nil
+}
 
 type RecentsTracker interface {
 	UpsertRecent(ctx context.Context, userID uuid.UUID, foodID uuid.UUID, portionLabel string, grams float64) error
@@ -240,8 +259,16 @@ func (s *diaryServiceImpl) CreateEntry(ctx context.Context, userID uuid.UUID, da
 
 	if req.Kind == "quick" {
 		item.FoodID = nil
-		if strings.TrimSpace(req.FoodName) != "" {
-			item.FoodName = strings.TrimSpace(req.FoodName)
+		if req.FoodName != "" {
+			cleaned, err := sanitizeFoodName(req.FoodName)
+			if err != nil {
+				return nil, nil, err
+			}
+			if cleaned != "" {
+				item.FoodName = cleaned
+			} else {
+				item.FoodName = "Chỉ ghi kcal"
+			}
 		} else {
 			item.FoodName = "Chỉ ghi kcal"
 		}
@@ -369,11 +396,16 @@ func (s *diaryServiceImpl) UpdateEntry(ctx context.Context, userID uuid.UUID, en
 		gramsVal = req.ServingSizeG
 	}
 
-	if req.FoodName != nil && strings.TrimSpace(*req.FoodName) != "" {
-		existing.FoodName = strings.TrimSpace(*req.FoodName)
-	}
-
 	if existing.Kind == "quick" {
+		if req.FoodName != nil {
+			cleaned, err := sanitizeFoodName(*req.FoodName)
+			if err != nil {
+				return nil, nil, err
+			}
+			if cleaned != "" {
+				existing.FoodName = cleaned
+			}
+		}
 		if req.Calories != nil {
 			existing.Calories = req.Calories
 		}
@@ -455,7 +487,7 @@ func (s *diaryServiceImpl) CopyYesterday(ctx context.Context, userID uuid.UUID, 
 		allowedSlots[sl] = true
 	}
 
-	var copied []DiaryEntryItem
+	var toCopy []*DiaryEntryItem
 	for _, src := range sourceEntries {
 		slot := src.MealSlot
 		if slot == "preworkout" {
@@ -465,7 +497,7 @@ func (s *diaryServiceImpl) CopyYesterday(ctx context.Context, userID uuid.UUID, 
 			continue
 		}
 
-		newEntry := &DiaryEntryItem{
+		toCopy = append(toCopy, &DiaryEntryItem{
 			ID:           uuid.New(),
 			FoodID:       src.FoodID,
 			FoodName:     src.FoodName,
@@ -475,13 +507,19 @@ func (s *diaryServiceImpl) CopyYesterday(ctx context.Context, userID uuid.UUID, 
 			Grams:        src.Grams,
 			Calories:     src.Calories,
 			Nutrients:    src.Nutrients,
-		}
+		})
+	}
 
-		saved, err := s.repo.CreateEntry(ctx, userID, targetDate, newEntry)
-		if err != nil {
-			return nil, fmt.Errorf("failed to copy entry: %w", err)
-		}
-		copied = append(copied, *saved)
+	if len(toCopy) == 0 {
+		return &CopyYesterdayResponse{
+			CopiedCount: 0,
+			Entries:     []DiaryEntryItem{},
+		}, nil
+	}
+
+	copied, err := s.repo.CreateEntriesBatch(ctx, userID, targetDate, toCopy)
+	if err != nil {
+		return nil, fmt.Errorf("failed to copy entries: %w", err)
 	}
 
 	return &CopyYesterdayResponse{

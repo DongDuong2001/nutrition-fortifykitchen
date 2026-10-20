@@ -126,7 +126,7 @@ func (h *Handler) CreateEntry(w http.ResponseWriter, r *http.Request) {
 			response.Error(w, http.StatusConflict, response.CodePastDayReadOnly, "Cannot write to past dates")
 			return
 		}
-		if errors.Is(err, ErrFoodIDRequired) || errors.Is(err, ErrInvalidDateFormat) {
+		if errors.Is(err, ErrFoodIDRequired) || errors.Is(err, ErrInvalidDateFormat) || errors.Is(err, ErrFoodNameTooLong) {
 			response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, err.Error())
 			return
 		}
@@ -182,6 +182,10 @@ func (h *Handler) UpdateEntry(w http.ResponseWriter, r *http.Request) {
 		}
 		if errors.Is(err, ErrRestoreWindowExpired) {
 			response.Error(w, http.StatusGone, response.CodeValidationFailed, "Restore window expired (must be within 10 seconds)")
+			return
+		}
+		if errors.Is(err, ErrFoodNameTooLong) {
+			response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, err.Error())
 			return
 		}
 		logger.Log.Error().Err(err).Str("user_id", userID.String()).Str("entry_id", entryID.String()).Msg("failed to update diary entry")

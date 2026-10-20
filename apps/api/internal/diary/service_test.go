@@ -3,6 +3,7 @@ package diary
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 	"time"
 
@@ -17,6 +18,7 @@ type mockDiaryRepo struct {
 	restoreExpired bool
 	conflictIDs    map[uuid.UUID]bool
 	dbError        error
+	failOnBatchIdx int
 }
 
 func newMockDiaryRepo() *mockDiaryRepo {
@@ -26,6 +28,7 @@ func newMockDiaryRepo() *mockDiaryRepo {
 		entryDates:     make(map[uuid.UUID]string),
 		training:       make(map[string]int),
 		conflictIDs:    make(map[uuid.UUID]bool),
+		failOnBatchIdx: -1,
 	}
 }
 
@@ -95,6 +98,34 @@ func (m *mockDiaryRepo) CreateEntry(ctx context.Context, userID uuid.UUID, date 
 	m.entries[entry.ID] = entry
 	m.entryDates[entry.ID] = date
 	return entry, nil
+}
+
+func (m *mockDiaryRepo) CreateEntriesBatch(ctx context.Context, userID uuid.UUID, date string, entries []*DiaryEntryItem) ([]DiaryEntryItem, error) {
+	if m.dbError != nil {
+		return nil, m.dbError
+	}
+	stagedEntries := make(map[uuid.UUID]*DiaryEntryItem)
+	stagedDates := make(map[uuid.UUID]string)
+	result := make([]DiaryEntryItem, 0, len(entries))
+
+	for i, entry := range entries {
+		if m.failOnBatchIdx >= 0 && i == m.failOnBatchIdx {
+			// Atomic failure: discard staged entries (all or nothing)
+			return nil, errors.New("simulated batch insert failure")
+		}
+		if m.conflictIDs[entry.ID] {
+			return nil, ErrIDConflict
+		}
+		stagedEntries[entry.ID] = entry
+		stagedDates[entry.ID] = date
+		result = append(result, *entry)
+	}
+
+	for id, entry := range stagedEntries {
+		m.entries[id] = entry
+		m.entryDates[id] = stagedDates[id]
+	}
+	return result, nil
 }
 
 func (m *mockDiaryRepo) GetEntryByID(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) (*DiaryEntryItem, string, bool, error) {
@@ -298,6 +329,164 @@ func TestDiaryService_FoodAndQuickEntries_NullHandling(t *testing.T) {
 	}
 	if updatedEntry.FoodName != updatedName {
 		t.Errorf("expected updated food name %q, got %q", updatedName, updatedEntry.FoodName)
+	}
+}
+
+func TestDiaryService_FoodNameValidationAndSanitization(t *testing.T) {
+	repo := newMockDiaryRepo()
+	svc := NewService(repo, nil)
+	userID := uuid.New()
+	today := GetServerToday()
+	cal := 200.0
+
+	// 1. Control characters stripped and whitespace trimmed
+	entryWithControlChars, _, err := svc.CreateEntry(context.Background(), userID, today, CreateEntryRequest{
+		ID:       uuid.New(),
+		Kind:     "quick",
+		FoodName: "  Trà sữa\x00\x07 trân châu\t  ",
+		MealSlot: "snack",
+		Calories: &cal,
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if entryWithControlChars.FoodName != "Trà sữa trân châu" {
+		t.Errorf("expected control chars stripped and trimmed 'Trà sữa trân châu', got %q", entryWithControlChars.FoodName)
+	}
+
+	// 2. Exactly 80 runes succeeds
+	name80 := strings.Repeat("a", 80)
+	entry80, _, err := svc.CreateEntry(context.Background(), userID, today, CreateEntryRequest{
+		ID:       uuid.New(),
+		Kind:     "quick",
+		FoodName: name80,
+		MealSlot: "snack",
+		Calories: &cal,
+	})
+	if err != nil {
+		t.Fatalf("unexpected error for 80 runes: %v", err)
+	}
+	if entry80.FoodName != name80 {
+		t.Errorf("expected 80 runes food name, got %q", entry80.FoodName)
+	}
+
+	// 3. 81 runes on create fails with ErrFoodNameTooLong
+	name81 := strings.Repeat("b", 81)
+	_, _, err = svc.CreateEntry(context.Background(), userID, today, CreateEntryRequest{
+		ID:       uuid.New(),
+		Kind:     "quick",
+		FoodName: name81,
+		MealSlot: "snack",
+		Calories: &cal,
+	})
+	if !errors.Is(err, ErrFoodNameTooLong) {
+		t.Fatalf("expected ErrFoodNameTooLong for 81 runes, got %v", err)
+	}
+
+	// 4. 81 runes on update fails with ErrFoodNameTooLong
+	_, _, err = svc.UpdateEntry(context.Background(), userID, entry80.ID, UpdateEntryRequest{
+		FoodName: &name81,
+	})
+	if !errors.Is(err, ErrFoodNameTooLong) {
+		t.Fatalf("expected ErrFoodNameTooLong on update, got %v", err)
+	}
+
+	// 5. food_name is ignored for food entries on CreateEntry
+	foodID := uuid.New()
+	spoofedName := "Tên giả mạo"
+	foodEntry, _, err := svc.CreateEntry(context.Background(), userID, today, CreateEntryRequest{
+		ID:       uuid.New(),
+		Kind:     "food",
+		FoodID:   &foodID,
+		FoodName: spoofedName,
+		MealSlot: "lunch",
+		Grams:    100,
+	})
+	if err != nil {
+		t.Fatalf("unexpected error for food entry: %v", err)
+	}
+	if foodEntry.FoodName == spoofedName || foodEntry.FoodName != "Yến mạch" {
+		t.Errorf("food entry must ignore supplied food_name; expected 'Yến mạch', got %q", foodEntry.FoodName)
+	}
+
+	// 6. food_name update is ignored for food entries on UpdateEntry
+	_, _, err = svc.UpdateEntry(context.Background(), userID, foodEntry.ID, UpdateEntryRequest{
+		FoodName: &spoofedName,
+	})
+	if err != nil {
+		t.Fatalf("unexpected error updating food entry: %v", err)
+	}
+	refetched, _, _, _ := repo.GetEntryByID(context.Background(), userID, foodEntry.ID)
+	if refetched.FoodName == spoofedName || refetched.FoodName != "Yến mạch" {
+		t.Errorf("food entry update must ignore food_name; expected 'Yến mạch', got %q", refetched.FoodName)
+	}
+}
+
+func TestDiaryService_CopyYesterday_AtomicTransaction(t *testing.T) {
+	repo := newMockDiaryRepo()
+	svc := NewService(repo, nil)
+	userID := uuid.New()
+	yesterday := time.Now().AddDate(0, 0, -1).Format("2006-01-02")
+	today := time.Now().Format("2006-01-02")
+
+	cal1 := 150.0
+	cal2 := 300.0
+	e1ID := uuid.New()
+	e2ID := uuid.New()
+	repo.entries[e1ID] = &DiaryEntryItem{
+		ID:       e1ID,
+		FoodName: "Món 1",
+		Kind:     "quick",
+		MealSlot: "breakfast",
+		Calories: &cal1,
+	}
+	repo.entryDates[e1ID] = yesterday
+
+	repo.entries[e2ID] = &DiaryEntryItem{
+		ID:       e2ID,
+		FoodName: "Món 2",
+		Kind:     "quick",
+		MealSlot: "lunch",
+		Calories: &cal2,
+	}
+	repo.entryDates[e2ID] = yesterday
+
+	// 1. Second insert fails in batch -> entire transaction rolls back; zero rows copied to today
+	repo.failOnBatchIdx = 1
+	_, err := svc.CopyYesterday(context.Background(), userID, today, CopyYesterdayRequest{
+		SourceDate: yesterday,
+	})
+	if err == nil {
+		t.Fatal("expected batch copy to fail on second insert, got nil")
+	}
+
+	// Verify zero entries on target date
+	targetEntries, err := repo.GetDayEntries(context.Background(), userID, today)
+	if err != nil {
+		t.Fatalf("failed to get day entries: %v", err)
+	}
+	if len(targetEntries) != 0 {
+		t.Fatalf("expected 0 entries on target date after rollback, got %d", len(targetEntries))
+	}
+
+	// 2. Retry with failure cleared -> copies exactly once (both entries present on today)
+	repo.failOnBatchIdx = -1
+	resp, err := svc.CopyYesterday(context.Background(), userID, today, CopyYesterdayRequest{
+		SourceDate: yesterday,
+	})
+	if err != nil {
+		t.Fatalf("unexpected error on retry: %v", err)
+	}
+	if resp.CopiedCount != 2 {
+		t.Fatalf("expected 2 copied entries, got %d", resp.CopiedCount)
+	}
+
+	targetEntriesAfter, err := repo.GetDayEntries(context.Background(), userID, today)
+	if err != nil {
+		t.Fatalf("failed to get day entries: %v", err)
+	}
+	if len(targetEntriesAfter) != 2 {
+		t.Fatalf("expected exactly 2 entries on target date after retry, got %d", len(targetEntriesAfter))
 	}
 }
 

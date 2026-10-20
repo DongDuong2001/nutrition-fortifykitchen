@@ -19,6 +19,7 @@ type Repository interface {
 	GetUserProfile(ctx context.Context, userID uuid.UUID) (string, float64, string, int, bool, int, error)
 	GetFoodNutrients(ctx context.Context, foodID uuid.UUID) (string, map[string]*float64, error)
 	CreateEntry(ctx context.Context, userID uuid.UUID, date string, entry *DiaryEntryItem) (*DiaryEntryItem, error)
+	CreateEntriesBatch(ctx context.Context, userID uuid.UUID, date string, entries []*DiaryEntryItem) ([]DiaryEntryItem, error)
 	GetEntryByID(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) (*DiaryEntryItem, string, bool, error)
 	UpdateEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID, entry *DiaryEntryItem) (*DiaryEntryItem, string, error)
 	SoftDeleteEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) error
@@ -175,6 +176,50 @@ func (r *pgxDiaryRepo) CreateEntry(ctx context.Context, userID uuid.UUID, date s
 	}
 
 	return entry, nil
+}
+
+func (r *pgxDiaryRepo) CreateEntriesBatch(ctx context.Context, userID uuid.UUID, date string, entries []*DiaryEntryItem) ([]DiaryEntryItem, error) {
+	if len(entries) == 0 {
+		return []DiaryEntryItem{}, nil
+	}
+
+	tx, err := r.pool.Begin(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	parsedDate, err := time.Parse("2006-01-02", date)
+	if err != nil {
+		return nil, fmt.Errorf("invalid date format: %w", err)
+	}
+
+	result := make([]DiaryEntryItem, 0, len(entries))
+	for _, entry := range entries {
+		nutrientsJSON, err := json.Marshal(entry.Nutrients)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal nutrients snapshot: %w", err)
+		}
+
+		err = tx.QueryRow(ctx, createEntrySQL,
+			entry.ID, userID, entry.FoodID, entry.Kind, entry.MealSlot,
+			entry.ServingLabel, entry.Grams, entry.Calories, entry.FoodName,
+			nutrientsJSON, parsedDate,
+		).Scan(&entry.CreatedAt)
+		if err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				return nil, ErrIDConflict
+			}
+			return nil, fmt.Errorf("failed to insert diary entry: %w", err)
+		}
+		result = append(result, *entry)
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return result, nil
 }
 
 func (r *pgxDiaryRepo) GetEntryByID(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) (*DiaryEntryItem, string, bool, error) {

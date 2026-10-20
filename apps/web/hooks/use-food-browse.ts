@@ -23,15 +23,18 @@ export function useFoodBrowse({ oneRowPerFood = true }: { oneRowPerFood?: boolea
   const { foods, version, pending: catalogPending, failed: catalogFailed, retry: retryCatalog } = useCatalogFoods();
   const [filter, setFilter] = useState<FoodFilter>("all");
   const [query, setQuery] = useState("");
-  // Short 120ms debounce so rapid keystrokes don't flash intermediate single-letter matches (e.g. 'c' before 'ch')
+  // 120ms debounce only for 1-character queries to avoid flashing intermediate single-letter matches; 2+ chars update immediately
   const [debouncedQuery, setDebouncedQuery] = useState("");
   useEffect(() => {
     if (!query) {
       setDebouncedQuery("");
       return;
     }
-    const timer = setTimeout(() => setDebouncedQuery(query), 120);
-    return () => clearTimeout(timer);
+    if (query.length === 1) {
+      const timer = setTimeout(() => setDebouncedQuery(query), 120);
+      return () => clearTimeout(timer);
+    }
+    setDebouncedQuery(query);
   }, [query]);
   // cc-58: the field follows every keystroke, the list follows the query when the browser has a moment, so a key
   // never waits for a search of the whole catalogue

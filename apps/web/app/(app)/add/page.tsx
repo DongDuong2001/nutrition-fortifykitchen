@@ -185,16 +185,35 @@ function AddFoodInner() {
     };
   }, [isDesktop]);
 
-  // Focus goes into the dialog: the search field, on a phone too (cc-58). Delay on mobile until 350ms slide-up finishes.
+  // Focus goes into the dialog: desktop focuses immediately; mobile focuses when the sheet's entrance animation settles
   useEffect(() => {
-    if (isDesktop && desktopSearchInputRef.current) {
-      desktopSearchInputRef.current.focus();
-    } else if (!isDesktop) {
-      const timer = setTimeout(() => {
-        phoneSearchInputRef.current?.focus({ preventScroll: true });
-      }, 360);
-      return () => clearTimeout(timer);
+    if (isDesktop) {
+      desktopSearchInputRef.current?.focus();
+      return;
     }
+
+    const panel = panelRef.current;
+    if (!panel) return;
+
+    let focused = false;
+    const focusSearch = () => {
+      if (focused) return;
+      focused = true;
+      phoneSearchInputRef.current?.focus({ preventScroll: true });
+    };
+
+    // Focus when slide-up animation / transition completes
+    panel.addEventListener("animationend", focusSearch, { once: true });
+    panel.addEventListener("transitionend", focusSearch, { once: true });
+
+    // Fallback in case reduced motion is active or animation event was skipped
+    const fallbackTimer = setTimeout(focusSearch, 400);
+
+    return () => {
+      panel.removeEventListener("animationend", focusSearch);
+      panel.removeEventListener("transitionend", focusSearch);
+      clearTimeout(fallbackTimer);
+    };
   }, [isDesktop]);
 
   // Pick a food with one serving (default: its first). Sets the amount too, so the portion panel shows it.
@@ -714,7 +733,7 @@ function AddFoodInner() {
           data-sheet-route
           data-state={sheetState}
           data-under-sheet={selectedFood !== null && !isDesktop ? "" : undefined}
-          style={keyboardHeight > 0 ? { bottom: `${keyboardHeight}px` } : undefined}
+          style={keyboardHeight > 0 ? { transform: `translateY(-${keyboardHeight}px)` } : undefined}
           className="m-sheet m-vt-sheet fixed inset-x-0 bottom-0 top-[8dvh] z-nav flex flex-col rounded-t-sheet bg-card shadow-sheet"
         >
           {/* Pinned header: grabber, meal switcher + close, search, chips. cc-62 (S15): the list fades out under it (a 12 px edge) */}
