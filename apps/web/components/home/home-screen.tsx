@@ -63,6 +63,7 @@ import { HomeHero, type HeroPill } from "./home-hero";
 import { NutrientColumn } from "./nutrient-column";
 import { HOME_ROUTE } from "@/lib/nav";
 import { navigateFromSheet } from "@/lib/sheet-history";
+import { WhatsNewDue } from "@/components/whats-new/whats-new-due";
 
 // cc-51, cc-58: the sheets that are closed by default, select mode's bars and the share image (html-to-image) are chunks of their
 // own, fetched on the first touch or when the browser is idle (loadSheets). They are not next/dynamic: a dynamic component
@@ -579,7 +580,7 @@ function HomeContent() {
           />,
           barHost
         )}
-      <main
+      <div
         className={`flex flex-col ${
           selecting
             ? "h-[calc(100dvh-112px-env(safe-area-inset-bottom))]"
@@ -665,7 +666,7 @@ function HomeContent() {
             Đang ngoại tuyến — món mới sẽ đồng bộ khi có mạng.
           </div>
         )}
-        <div className="mx-auto flex min-h-0 w-full max-w-[560px] flex-1 flex-col lg:mx-0 lg:max-w-[1240px] lg:px-8">
+        <main className="mx-auto flex min-h-0 w-full max-w-[560px] flex-1 flex-col lg:mx-0 lg:max-w-[1240px] lg:px-8">
           <HomeHero
             label={heroLabel(mode, entries, meals)}
             pills={selecting ? [] : pills}
@@ -740,8 +741,8 @@ function HomeContent() {
               />
             )}
           </div>
-        </div>
-      </main>
+        </main>
+      </div>
 
       <>
       {sheets && sourcesMounted && (
@@ -775,6 +776,7 @@ function HomeContent() {
         />
       )}
       <InstallPromptHost busy={installBusy} />
+      <WhatsNewDue />
       <WhatsNewHost busy={installBusy} />
       {sheets && explainerMounted && <sheets.LevelExplainerSheet open={explainerOpen} onClose={() => setExplainerOpen(false)} level={level} />}
       {sheets && copySheetMounted && <sheets.CopyYesterdaySheet open={isCopySheetOpen} onClose={() => setIsCopySheetOpen(false)} targetIso={viewIso} />}

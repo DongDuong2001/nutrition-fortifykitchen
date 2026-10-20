@@ -51,6 +51,7 @@ import { HOME_ROUTE } from "@/lib/nav";
 import { takeBackSheetEntries } from "@/lib/sheet-history";
 import { homeDay } from "@/lib/home-scroll";
 import { lockBodyScroll } from "@/lib/body-scroll-lock";
+import { useUnsavedWork } from "@/lib/unsaved-work";
 import { SHEET_CATCH_UP_MS, SHEET_EXIT_MS, SHEET_QUICK_ENTER_MS, useSheetDrag } from "@/components/ui/sheet";
 import { setInertExceptDrag } from "@/components/ui/sheet-drag-controller";
 import { haptic } from "@/lib/haptics";
@@ -184,9 +185,19 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
   // is taken from a field the person already tapped, and nothing at all when they touched the panel during the slide.
   useEffect(() => {
     // The field the screen focuses itself is marked: a tip may still come over it until someone types (lib/interruption)
+    // The mark goes at the first touch or key in the field: from then on someone is using it, and it blocks a tip like any focused field.
     const autofocus = (input: HTMLInputElement | null, options?: FocusOptions) => {
       if (!input) return;
       input.dataset.autofocused = "";
+      const clear = () => {
+        delete input.dataset.autofocused;
+        input.removeEventListener("pointerdown", clear);
+        input.removeEventListener("input", clear);
+        input.removeEventListener("keydown", clear);
+      };
+      input.addEventListener("pointerdown", clear);
+      input.addEventListener("input", clear);
+      input.addEventListener("keydown", clear);
       input.focus(options);
     };
     if (isDesktop) {
@@ -255,13 +266,36 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
 
   // The portion sheet's ✕, Esc, the scrim and a drag down: back to the list with focus on the row that opened it (the search field
   // when the food came from a card, and no keyboard is raised for it: a tap on the field does that)
+  // The control the person pressed last (any row of the list, behind "Xem thêm" or not, a card of a carousel, a chevron): the portion
+  // sheet it opens gives focus back to that very element. Noted before the click that opens the sheet, so pickFood can keep it.
+  const lastPressed = useRef<{ el: HTMLElement | null; touch: boolean }>({ el: null, touch: false });
+  const portionOpener = useRef<{ el: HTMLElement | null; touch: boolean }>({ el: null, touch: false });
+  useEffect(() => {
+    const note = (e: Event) => {
+      const target = e.target instanceof Element ? e.target : null;
+      lastPressed.current = {
+        el: target?.closest<HTMLElement>("button, a[href], [role=button]") ?? null,
+        touch: e.type === "pointerdown" && (e as PointerEvent).pointerType === "touch",
+      };
+    };
+    document.addEventListener("pointerdown", note, true);
+    document.addEventListener("keydown", note, true);
+    return () => {
+      document.removeEventListener("pointerdown", note, true);
+      document.removeEventListener("keydown", note, true);
+    };
+  }, []);
   const closePortionSheet = useCallback(() => {
     const id = selectedFood?.id;
+    const { el: opener, touch } = portionOpener.current;
     setSelectedFood(null);
     requestAnimationFrame(() => {
       const panel = phoneSearchInputRef.current?.closest("[data-add-panel]") ?? document;
       const row = id ? panel.querySelector<HTMLElement>(`[data-food-row][data-food-id="${CSS.escape(id)}"]`) : null;
-      (row ?? phoneSearchInputRef.current)?.focus({ preventScroll: true });
+      const back = opener?.isConnected && !opener.closest("[inert]") ? opener : row;
+      if (back) back.focus({ preventScroll: true });
+      // Never an input after a touch: on Android that raises the keyboard under a person who only closed a sheet
+      else if (!touch) phoneSearchInputRef.current?.focus({ preventScroll: true });
     });
   }, [selectedFood]);
 
@@ -271,6 +305,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
     // cc-67: raw and cooked are one list row, so the food opens in the state it was last logged in
     const last = serving ? null : lastPortionOf(twinIdsOf(food), recentFoods, MOCK_FOODS);
     const s = serving ?? (last ? { label: last.label, grams: last.grams } : defaultPortionOf(food));
+    portionOpener.current = lastPressed.current;
     setSelectedFood(last?.food ?? food);
     setGramsInput(String(s.grams));
     setSelectedServingLabel(s.label);
@@ -455,6 +490,8 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
     setSelectedServingLabel("");
   };
 
+  // A tray with foods in it, an open portion sheet or the Chỉ ghi kcal form is something a reload would lose: the update waits (lib/unsaved-work)
+  useUnsavedWork("add-sheet", tray.length > 0 || selectedFood !== null || quickOpen);
   const trayTotalsNow = useMemo(() => trayTotals(tray), [tray]);
   const trayAddable = canAddTray(tray);
   const handleAddTray = () => {

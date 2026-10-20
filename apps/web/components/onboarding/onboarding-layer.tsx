@@ -14,6 +14,7 @@ import { HOME_ROUTE } from "@/lib/nav";
 import {
   claimInterruption,
   interruptionBlockedByUi,
+  mayInterrupt,
   interruptionVersion,
   probeUi,
   setInterruptionDue,
@@ -375,6 +376,9 @@ export function OnboardingLayer() {
     if (!tip) return;
     let timer: ReturnType<typeof setTimeout>;
     const attempt = () => {
+      // Asked first, and nothing polls while it is no: something else opened or is due, and this effect looks again when that changes
+      // (the `interruptions` version) or on the next screen visit. The tip stays due; it is not dropped.
+      if (!mayInterrupt("tip")) return;
       if (interruptionBlockedByUi(probeUi())) {
         timer = setTimeout(attempt, TIP_RETRY_MS);
         return;

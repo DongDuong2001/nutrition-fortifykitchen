@@ -7,12 +7,19 @@
  * only if nothing has opened yet and nothing of a higher rank is due. A tip also waits while a field has focus or a sheet is moving
  * (see interruptionBlockedByUi). Pure module state, no React; the hosts subscribe to be told when to look again.
  */
+import { HOME_ROUTE } from "@/lib/nav";
+
 export type Interruption = "whats-new" | "install" | "tip";
 
 const RANK: Record<Interruption, number> = { "whats-new": 0, install: 1, tip: 2 };
 
 let shown: Interruption | null = null;
 let version = 0;
+// Which hosts have said, at least once, whether they are due. Có gì mới is lazy and may come late: on Hôm nay the others wait for its
+// report (up to REPORT_GRACE_MS after the page loaded) so a slow start cannot give its place to the install pop-up or a tip.
+const reported = new Set<Interruption>();
+const OPENED_AT = typeof performance !== "undefined" ? performance.now() : 0;
+export const REPORT_GRACE_MS = 6000;
 const due = new Set<Interruption>();
 const listeners = new Set<() => void>();
 const notify = () => {
@@ -22,7 +29,13 @@ const notify = () => {
 
 /** The host has something it wants to show now (or no longer does). A higher-ranked one that is due holds the others back. */
 export function setInterruptionDue(kind: Interruption, isDue: boolean): void {
-  if (isDue === due.has(kind)) return;
+  const firstReport = !reported.has(kind);
+  reported.add(kind);
+  if (isDue === due.has(kind) && !firstReport) return;
+  if (isDue === due.has(kind)) {
+    notify();
+    return;
+  }
   if (isDue) due.add(kind);
   else due.delete(kind);
   notify();
@@ -31,7 +44,18 @@ export function setInterruptionDue(kind: Interruption, isDue: boolean): void {
 /** Nothing has opened yet this app open, and no kind of a higher rank is due. */
 export function mayInterrupt(kind: Interruption): boolean {
   if (shown !== null) return false;
+  if (kind !== "whats-new" && waitingForWhatsNew()) return false;
   return !([...due] as Interruption[]).some((other) => RANK[other] < RANK[kind]);
+}
+
+/** On Hôm nay, before Có gì mới has said whether it is due, and while the grace period lasts. */
+function waitingForWhatsNew(): boolean {
+  if (reported.has("whats-new") || typeof location === "undefined" || location.pathname !== HOME_ROUTE) return false;
+  return typeof performance !== "undefined" && performance.now() - OPENED_AT < REPORT_GRACE_MS;
+}
+if (typeof window !== "undefined") {
+  // The grace period ends without anything else changing: the hosts that waited look again
+  window.setTimeout(notify, REPORT_GRACE_MS + 50);
 }
 
 /** The host is about to open: true when it may (and then nothing else opens this app open). */
@@ -60,6 +84,7 @@ export function subscribeInterruption(listener: () => void): () => void {
 
 /** For tests: a new app open. */
 export function resetInterruptions(): void {
+  reported.clear();
   shown = null;
   version = 0;
   due.clear();

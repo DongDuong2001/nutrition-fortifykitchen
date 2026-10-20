@@ -56,6 +56,7 @@ window.__seen = new Set();
 const note = () => {
   if (document.getElementById('whats-new-title')) window.__seen.add('whats-new');
   if (document.querySelector('[data-onboarding-card]:not([data-state="closed"])')) window.__seen.add('tip');
+  if ([...document.querySelectorAll('[role="dialog"] h2')].some((h) => /Cài|màn hình chính|ứng dụng/i.test(h.textContent || '') && !document.getElementById('whats-new-title'))) window.__seen.add('install');
 };
 setInterval(note, 50);
 """
@@ -82,6 +83,20 @@ def interruptions():
         pg.wait_for_timeout(4000)
         check("tip" not in set(pg.evaluate("[...window.__seen]")), "1: …even after Có gì mới is closed (one interruption per app open)")
         ctx.close()
+        # a slow start (slow network, a slow CPU): Có gì mới is lazy and late, the install pop-up and a tip are due too; Có gì mới still wins
+        due_install = {"installPrompt": {"dismissCount": 0, "snoozeUntil": 0, "done": False, "firstSeenIso": "2026-01-01"}}
+        slow = {"onboarding": {"tourDone": True, "tipsOff": False, "seen": [], "used": [], "replayOpened": True, "tourStartedIso": None, "whatsNewSeen": None}, **due_install}
+        ctx, pg = seeded(browser, slow, **dict(is_mobile=True, has_touch=True))
+        pg.add_init_script(WATCH)
+        cdp = ctx.new_cdp_session(pg)
+        cdp.send("Network.enable")
+        cdp.send("Network.emulateNetworkConditions", {"offline": False, "latency": 450, "downloadThroughput": 200 * 1024, "uploadThroughput": 100 * 1024})
+        cdp.send("Emulation.setCPUThrottlingRate", {"rate": 6})
+        pg.goto(BASE + "/app", wait_until="domcontentloaded")
+        pg.wait_for_timeout(20000)
+        seen = set(pg.evaluate("[...window.__seen]"))
+        check("whats-new" in seen and "tip" not in seen and "install" not in seen, f"1: on a slow start Có gì mới still comes first and alone ({sorted(seen)})")
+        ctx.close()
         # the next app open: Có gì mới is seen, one tip opens, only one
         settings["onboarding"]["whatsNewSeen"] = RELEASE
         ctx, pg = seeded(browser, settings)
@@ -97,18 +112,32 @@ def interruptions():
         pg.wait_for_timeout(4000)
         check(pg.locator('[data-onboarding-card]:not([data-state="closed"])').count() == 0 and "tip" not in set(pg.evaluate("[...window.__seen]")), "1: and no second tip follows it")
         ctx.close()
-        # a tip never opens over a field someone typed in: the sheet-drag tip waits
+        # a tip may come over the field the sheet focused itself (the add tips belong there) but not over one the person has touched or typed in:
+        # the sheet marks its own focus (data-autofocused) and the mark goes at the first touch or key
         settings = {"onboarding": {"tourDone": True, "tipsOff": False, "seen": HOME_TIPS, "used": [], "replayOpened": True, "tourStartedIso": None, "whatsNewSeen": RELEASE}, **NO_INSTALL}
         ctx, pg = seeded(browser, settings)
         home(pg)
         pg.wait_for_timeout(800)
         pg.locator("#mobile-add-fab").tap()
         pg.locator("[data-add-panel] [data-testid=food-search]").first.wait_for(state="visible", timeout=8000)
-        pg.locator("[data-add-panel] [data-testid=food-search]").first.fill("c")  # someone is typing: an empty field the sheet focused itself does not block a tip, a typed-in one does
+        pg.wait_for_function("() => !!document.querySelector('[data-testid=food-search][data-autofocused]')", timeout=4000)
+        pg.wait_for_timeout(3000)
+        cards = pg.locator('[data-onboarding-card]:not([data-state="closed"])').count()
+        check(cards == 1, f"1: untouched, the field the sheet focused itself does not hold a tip back ({cards} cards)")
+        ctx.close()
+        ctx, pg = seeded(browser, settings)
+        home(pg)
+        pg.wait_for_timeout(800)
+        pg.locator("#mobile-add-fab").tap()
+        field = pg.locator("[data-add-panel] [data-testid=food-search]").first
+        field.wait_for(state="visible", timeout=8000)
+        pg.wait_for_function("() => !!document.querySelector('[data-testid=food-search][data-autofocused]')", timeout=4000)
+        field.tap()  # the person touches it: it is theirs now
+        flag = pg.evaluate("document.querySelector('[data-testid=food-search]').hasAttribute('data-autofocused')")
         pg.wait_for_timeout(3500)
         focused = pg.evaluate("document.activeElement && document.activeElement.tagName")
         cards = pg.locator('[data-onboarding-card]:not([data-state="closed"])').count()
-        check(focused == "INPUT" and cards == 0, f"1: a tip does not open over a focused search field ({focused}, {cards} cards)")
+        check(not flag and focused == "INPUT" and cards == 0, f"1: a tip does not open over a focused search field that was touched (mark gone: {not flag}, {focused}, {cards} cards)")
         ctx.close()
         _seed.onboarding(False)
         _seed.whats_new(False)
@@ -122,21 +151,29 @@ def add_sheet():
         home(pg)
         pg.wait_for_timeout(1200)
 
-        # ---- 5: hit areas, by what a finger would hit 20 px above and below the centre
-        def hits(sel, name):
-            # the second meal: the first one's top edge is the scroller's edge, which clips a hit area that reaches above it
-            target = pg.locator(sel).locator("visible=true").nth(1)
-            box = target.bounding_box()
-            cx, cy = box["x"] + box["width"] / 2, box["y"] + box["height"] / 2
-            ok = []
-            for dy in (-20, 20):
-                ok.append(target.evaluate("(t, p) => { const e = document.elementFromPoint(p[0], p[1]); return !!e && (e === t || t.contains(e)) }", [cx, cy + dy]))
-            return all(ok), round(box["height"])
-
-        add_ok, add_h = hits('[data-testid="meal-add"]', "+ Thêm")
-        check(add_ok, f"5: a tap 20 px above or below + Thêm still lands on it (element {add_h} px, hit area 44)")
-        head_ok, head_h = hits('[data-testid="meal-header"]', "meal header")
-        check(head_ok, f"5: …and on a meal header (element {head_h} px, hit area 44)")
+        # ---- 5: hit areas, by what a finger would hit
+        # The header's pill is 24 px and the rows sit against it (0 px below, 0 px above the 4 px of paper that frames it), so the only room
+        # for a bigger hit area is that paper: 28 px. The rows keep every pixel of theirs (a hit area that reached 10 px into them stole
+        # their taps); 44 px would need 16 px more height (OPEN_QUESTIONS). By what a finger would hit, for the first and the second meal:
+        probe_js = """() => [...document.querySelectorAll('[data-testid=meal-header]')].filter((e) => e.getClientRects().length).slice(0, 2).map((h) => {
+            const hb = h.getBoundingClientRect();
+            const rows = [...document.querySelectorAll('button[data-entry-id]')].filter((e) => e.getClientRects().length);
+            const above = rows.map((r) => [r, r.getBoundingClientRect()]).filter(([, b]) => b.bottom <= hb.top + 1).sort((a, b) => b[1].bottom - a[1].bottom)[0];
+            const below = rows.map((r) => [r, r.getBoundingClientRect()]).filter(([, b]) => b.top >= hb.bottom - 1).sort((a, b) => a[1].top - b[1].top)[0];
+            const at = (x, y) => document.elementFromPoint(x, y);
+            const cx = hb.left + hb.width / 2;
+            const onRow = (r, y) => { const e = at(r.getBoundingClientRect().left + r.getBoundingClientRect().width / 2, y); return !!e && (e === r || r.contains(e)); };
+            return {
+              belowOk: below ? onRow(below[0], below[1].top + 2) : true,
+              aboveOk: above ? onRow(above[0], above[1].bottom - 2) : true,
+              headerAbove: (() => { const e = at(cx, hb.top - 3); return !!e && (e === h || h.contains(e)); })(),
+              headerHeight: hb.height,
+            };
+          })"""
+        for i, r in enumerate(pg.evaluate(probe_js)):
+            which = ["first", "second"][i]
+            check(r["belowOk"] and r["aboveOk"], f"5: the {which} meal: the rows above and below it are hit at their own edge (the header takes none of their pixels)")
+            check(r["headerAbove"], f"5: the {which} meal: a tap on the paper just above the header still lands on it ({round(r['headerHeight'])} px element, 28 px hit area)")
 
         # ---- 3: the add list
         pg.locator("#mobile-add-fab").tap()
@@ -146,15 +183,20 @@ def add_sheet():
         rows = pg.locator("[data-add-panel] button[data-food-row]").count()
         stops = pg.evaluate("() => [...document.querySelectorAll('[data-add-panel] button, [data-add-panel] a[href], [data-add-panel] input')].filter((e) => !e.disabled && e.tabIndex >= 0 && !e.closest('[inert]')).length")
         nodes = pg.evaluate("() => document.querySelectorAll('[data-add-panel] *').length")
-        check(rows <= 60, f"3: the add list draws {rows} food rows first (a few per category), not the whole catalogue")
-        check(stops <= 140, f"3: Tab has {stops} stops in the sheet (tens, not hundreds); the sheet is {nodes} nodes")
-        more = pg.get_by_role("button", name=re.compile(r"^Xem thêm \(")).first
-        check(more.count() == 1, "3: a category with more foods ends in Xem thêm (n món)")
+        # Measured on the demo catalogue (43 foods) at 390 px: 34 rows, 112 Tab stops, 488 nodes (before: 49, 140, 616); a small margin each
+        check(rows <= 40, f"3: the add list draws {rows} food rows first (measured 34; a few per category, not the whole catalogue)")
+        check(stops <= 125, f"3: Tab has {stops} stops in the sheet (measured 112; before 140)")
+        check(nodes <= 540, f"3: the sheet is {nodes} nodes (measured 488; before 616)")
+        more = pg.get_by_role("button", name=re.compile(r"^Xem thêm .+ \(\d+ món\)$")).first
+        check(more.count() == 1, "3: a category with more foods ends in Xem thêm <category> (n món)")
+        label = more.inner_text()
         before = pg.locator("[data-add-panel] button[data-food-row]").count()
         more.scroll_into_view_if_needed()
         more.click()
         pg.wait_for_timeout(300)
-        check(pg.locator("[data-add-panel] button[data-food-row]").count() > before, "3: Xem thêm adds more rows")
+        check(pg.locator("[data-add-panel] button[data-food-row]").count() > before, f"3: {label!r} adds more rows")
+        focus_row = pg.evaluate("(() => { const a = document.activeElement; return a && a.matches('button[data-food-row]') ? a.getAttribute('data-food-id') : null })()")
+        check(focus_row is not None, f"3: and focus goes to the first row it brought in ({focus_row})")
 
         # ---- 7: typing leaves the header where it is and the list starts at the top
         head_before = pg.locator("[data-add-panel] [data-testid=food-search]").first.bounding_box()["y"]
@@ -190,6 +232,37 @@ def add_sheet():
         pg.locator('[data-testid="portion-close"]:visible').first.tap()
         pg.wait_for_timeout(700)
         check(pg.locator('[data-testid="portion-add"]:visible').count() == 0, "4: the ✕ closes it too")
+        tag = pg.evaluate("document.activeElement && document.activeElement.tagName")
+        check(tag == "BUTTON", f"4: after a touch, focus is on a button, never on an input that would raise the keyboard ({tag})")
+        # a row that was behind "Xem thêm"
+        pg.locator("[data-add-panel] [data-testid=food-search]").first.fill("")
+        pg.wait_for_timeout(700)
+        more = pg.get_by_role("button", name=re.compile(r"^Xem thêm .+ \(\d+ món\)$")).first
+        more.scroll_into_view_if_needed()
+        more.click()
+        pg.wait_for_timeout(400)
+        revealed = pg.evaluate("(() => { const a = document.activeElement; return a && a.matches('button[data-food-row]') ? a.getAttribute('data-food-id') : null })()")
+        pg.locator(f'[data-add-panel] button[data-food-id="{revealed}"]').tap()
+        pg.locator('[data-testid="portion-add"]:visible').first.wait_for(state="visible", timeout=6000)
+        pg.wait_for_timeout(400)
+        pg.keyboard.press("Escape")
+        pg.wait_for_timeout(700)
+        back = pg.evaluate("(id) => { const a = document.activeElement; return !!a && a.getAttribute('data-food-id') === id }", revealed)
+        check(revealed is not None and back, f"4: a row that was behind Xem thêm gets the focus back too ({revealed})")
+        # a card of a carousel (its chevron opens the portion sheet)
+        chevron = pg.locator('[data-add-panel] #add-recents button[aria-label^="Chọn khẩu phần"]').first
+        if chevron.count():
+            label = chevron.get_attribute("aria-label")
+            chevron.scroll_into_view_if_needed()
+            chevron.tap()
+            pg.locator('[data-testid="portion-add"]:visible').first.wait_for(state="visible", timeout=6000)
+            pg.wait_for_timeout(400)
+            pg.keyboard.press("Escape")
+            pg.wait_for_timeout(700)
+            back = pg.evaluate("(l) => { const a = document.activeElement; return !!a && a.getAttribute('aria-label') === l }", label)
+            check(back, f"4: a carousel card gets the focus back too ({label})")
+        else:
+            check(False, "4: Gần đây has a card with a portion chevron in the demo")
         ctx.close()
 
         # ---- 7: 360 px wide, 150 % text

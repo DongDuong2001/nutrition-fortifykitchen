@@ -158,6 +158,8 @@ export function SetupForm({ step }: { step: SetupStep }) {
 
       {!loaded ? (
         <main aria-busy="true" aria-live="polite" className="flex flex-1 flex-col gap-3 px-4 py-5">
+          {/* The phone's header has the h1; from 1024 px the heading is in the form, which is not drawn yet */}
+          <h1 className="sr-only hidden lg:block">{isProfile ? "Về bạn" : "Mục tiêu"}</h1>
           <div className={SKELETON_CLASS} />
           <div className={SKELETON_CLASS} />
         </main>

@@ -226,6 +226,35 @@ def check_empty(browser, route, width, height):
     return reasons
 
 
+def check_sheet_landmarks(browser, width, height):
+    """/add as a sheet over Hôm nay adds no second <main>: the real screen under it is the page's one (the standalone /add has its own)."""
+    reasons = []
+    context = browser.new_context(viewport={"width": width, "height": height}, is_mobile=width < 768, has_touch=width < 768)
+    # The install pop-up (a phone, a first visit) would stand over the +: this check is about the landmarks
+    context.add_init_script(
+        "try { localStorage.setItem('h1t_settings_v1_demo', JSON.stringify({ installPrompt: { dismissCount: 0, snoozeUntil: 0, done: true, firstSeenIso: '2026-01-01' } })) } catch (e) {}"
+    )
+    page = context.new_page()
+    page.goto(BASE + "/app", wait_until="networkidle")
+    fab = page.locator("#mobile-add-fab:visible, #desktop-add-btn:visible").first
+    fab.wait_for(state="visible", timeout=10000)
+    page.wait_for_timeout(1200)
+    fab.click()
+    page.wait_for_url("**/add", timeout=8000)
+    page.locator("[data-add-panel] [data-testid=food-search]:visible, [role=dialog][data-sheet-route] [data-testid=food-search]:visible").first.wait_for(state="visible", timeout=8000)
+    page.wait_for_timeout(500)
+    mains = page.locator('main, [role="main"]').count()
+    if mains != 1:
+        reasons.append(f"{mains} <main> landmarks with the add sheet over Hôm nay (the screen under it is the one)")
+    # The screen under the sheet is inert (out of the accessibility tree) while the sheet is up, so the sheet's own heading is the one h1
+    # a screen reader finds, and Hôm nay's is the one under it
+    h1s = page.evaluate("[...document.querySelectorAll('h1')].filter((e) => !e.closest('[inert]')).length")
+    if h1s != 1:
+        reasons.append(f"{h1s} h1 outside the inert screen with the add sheet over Hôm nay (the sheet's own)")
+    context.close()
+    return reasons
+
+
 def main():
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     routes = []
@@ -248,6 +277,15 @@ def main():
                 else:
                     passed += 1
                     print(f"PASS {label}")
+        for width, height in WIDTHS:
+            reasons = check_sheet_landmarks(browser, width, height)
+            label = f"[sheet over Hôm nay] /add @{width}x{height}"
+            if reasons:
+                failed += 1
+                print(f"FAIL {label}: " + " | ".join(reasons))
+            else:
+                passed += 1
+                print(f"PASS {label}")
         # Pass 2: demo off, a fresh context per route (no storage), the main routes
         _demo.enable(False)
         print(f"\n=== Empty-account pass: {len(EMPTY_ROUTES)} routes x {len(WIDTHS)} widths, demo mode off ===")

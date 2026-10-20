@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import type { FoodItem } from "@/lib/mock/foods";
 import type { FoodList as FoodListData } from "@/lib/food-categories";
 import { searchTag } from "@/lib/food-source";
@@ -102,15 +102,28 @@ function FoodListView({
   const extra = more.list === list ? more.extra : {};
   const firstOf = (key: string) => (key === "flat" ? limits.flat : limits.grouped);
   const shownOf = (key: string, foods: FoodItem[]) => foods.slice(0, firstOf(key) + (extra[key] ?? 0));
-  const moreRow = (key: string, total: number) =>
-    total > firstOf(key) + (extra[key] ?? 0) ? (
+  // After "Xem thêm" focus goes to the first row it brought in (the button it was on is gone, and a keyboard or a screen reader
+  // would otherwise start again from the top of the page)
+  const focusAfterMore = useRef<string | null>(null);
+  useEffect(() => {
+    const id = focusAfterMore.current;
+    if (!id) return;
+    focusAfterMore.current = null;
+    document.querySelector<HTMLElement>(`[data-food-id="${CSS.escape(id)}"]`)?.focus();
+  }, [more]);
+  // The button names its category ("Xem thêm Rau củ (12 món)"): one per category on the page would otherwise read the same
+  const moreRow = (key: string, foods: FoodItem[], name?: string) =>
+    foods.length > firstOf(key) + (extra[key] ?? 0) ? (
       <li key="more" className="flex border-t border-divider">
         <button
           type="button"
-          onClick={() => setMore({ list, extra: { ...extra, [key]: (extra[key] ?? 0) + limits.step } })}
+          onClick={() => {
+            focusAfterMore.current = foods[firstOf(key) + (extra[key] ?? 0)]?.id ?? null;
+            setMore({ list, extra: { ...extra, [key]: (extra[key] ?? 0) + limits.step } });
+          }}
           className="flex min-h-14 w-full cursor-pointer items-center justify-center border-0 bg-transparent px-4 text-callout font-bold text-cobalt"
         >
-          {`Xem thêm (${total - firstOf(key) - (extra[key] ?? 0)} món)`}
+          {`Xem thêm${name ? ` ${name}` : ""} (${foods.length - firstOf(key) - (extra[key] ?? 0)} món)`}
         </button>
       </li>
     ) : null;
@@ -236,14 +249,14 @@ function FoodListView({
             </div>
             <ul className="m-0 flex list-none flex-col overflow-hidden rounded-b-card p-0">
               {shownOf(group.key, group.foods).map((food) => renderRow(food, false))}
-              {moreRow(group.key, group.foods.length)}
+              {moreRow(group.key, group.foods, group.label)}
             </ul>
           </section>
         ))
       ) : (
         <ul data-align-group="add-list" data-align-edge="left" className={`m-0 flex shrink-0 list-none flex-col overflow-hidden p-0 ${cardClass}`}>
           {shownOf("flat", list.foods).map((food) => renderRow(food, showCategory))}
-          {moreRow("flat", list.foods.length)}
+          {moreRow("flat", list.foods)}
         </ul>
       )}
       {footer}

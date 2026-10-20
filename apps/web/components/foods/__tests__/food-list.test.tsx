@@ -22,7 +22,7 @@ describe("the add list's limits", () => {
   it("a category shows 5 rows and says how many more", () => {
     const html = render(grouped, ADD_LIST_LIMITS);
     expect(rowsOf(html)).toBe(5);
-    expect(html).toContain("Xem thêm (35 món)");
+    expect(html).toContain("Xem thêm Trái cây (35 món)");
   });
 
   it("a flat (searched) list shows 30 and the rest behind Xem thêm", () => {
@@ -52,9 +52,9 @@ describe("the add list's limits", () => {
     const before = draw(DEFAULT_FOOD_LIST_LIMITS);
     const stops = (html: string) => (html.match(/<button/g) ?? []).length;
     expect(rowsOf(after)).toBe(50);
-    expect(stops(after)).toBeLessThanOrEqual(120);
+    expect(stops(after)).toBeLessThanOrEqual(120); // measured 110
     expect(rowsOf(before)).toBe(500);
     expect(stops(before)).toBeGreaterThan(1000);
-    expect((after.match(/<[a-z]/g) ?? []).length).toBeLessThan(600);
+    expect((after.match(/<[a-z]/g) ?? []).length).toBeLessThan(550);
   });
 });

@@ -1,8 +1,9 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   claimInterruption,
   interruptionBlockedByUi,
   interruptionShown,
+  REPORT_GRACE_MS,
   mayInterrupt,
   resetInterruptions,
   setInterruptionDue,
@@ -84,5 +85,57 @@ describe("a tip never opens over a field or a moving sheet", () => {
     expect(interruptionBlockedByUi({ activeElement: { tagName: "BODY" }, sheetMoving: false })).toBe(false);
     expect(interruptionBlockedByUi({ activeElement: null, sheetMoving: false })).toBe(false);
     expect(interruptionBlockedByUi({ activeElement: { tagName: "BUTTON" }, sheetMoving: true })).toBe(true);
+  });
+});
+
+describe("Có gì mới reports from a module that is not lazy (review item 12)", () => {
+  const home = () => vi.stubGlobal("location", { pathname: "/app" });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+    resetInterruptions();
+  });
+
+  it("on Hôm nay the install pop-up and the tips wait until Có gì mới has said whether it is due", () => {
+    resetInterruptions();
+    home();
+    expect(mayInterrupt("install")).toBe(false);
+    expect(mayInterrupt("tip")).toBe(false);
+    setInterruptionDue("whats-new", false); // reported: not due
+    expect(mayInterrupt("install")).toBe(true);
+    expect(mayInterrupt("tip")).toBe(true);
+  });
+
+  it("…and when it is due, it goes first", () => {
+    resetInterruptions();
+    home();
+    setInterruptionDue("whats-new", true);
+    expect(mayInterrupt("install")).toBe(false);
+    expect(mayInterrupt("whats-new")).toBe(true);
+    expect(claimInterruption("whats-new")).toBe(true);
+    expect(mayInterrupt("install")).toBe(false); // one per app open
+  });
+
+  it("a report that never comes holds them back only for the grace period", () => {
+    resetInterruptions();
+    home();
+    expect(mayInterrupt("tip")).toBe(false);
+    vi.spyOn(performance, "now").mockReturnValue(performance.now() + REPORT_GRACE_MS + 1);
+    expect(mayInterrupt("tip")).toBe(true);
+  });
+
+  it("off Hôm nay nothing waits for it", () => {
+    resetInterruptions();
+    vi.stubGlobal("location", { pathname: "/explore" });
+    expect(mayInterrupt("tip")).toBe(true);
+  });
+
+  it("the report is told to the hosts that wait, even when it says nothing is due", () => {
+    resetInterruptions();
+    home();
+    const fn = vi.fn();
+    subscribeInterruption(fn);
+    setInterruptionDue("whats-new", false);
+    expect(fn).toHaveBeenCalledTimes(1);
   });
 });

@@ -415,7 +415,7 @@ export function FoodList({
                 onClick={() => onMeal(meal.slot)}
                 data-testid="meal-header"
                 style={noSelect}
-                className="relative flex min-w-0 flex-1 cursor-pointer flex-wrap items-center self-stretch justify-between gap-x-2 gap-y-0.5 border-0 bg-transparent px-0 py-0.5 text-left text-inherit before:absolute before:-inset-y-2.5 before:inset-x-0 before:content-[''] lg:before:-inset-y-1"
+                className="relative flex min-w-0 flex-1 cursor-pointer flex-wrap items-center self-stretch justify-between gap-x-2 gap-y-0.5 border-0 bg-transparent px-0 py-0.5 text-left text-inherit before:absolute before:inset-x-0 before:-top-1 before:bottom-0 before:content-[''] lg:before:-top-1.5"
               >
                 <span className={pill.label}>{meal.label}</span>
                 <span className={`${pill.kcal} ${isDropTarget ? "shrink whitespace-normal text-right" : ""}`}>
@@ -434,7 +434,7 @@ export function FoodList({
                   data-export="hide"
                   data-tour="meal-add"
                   data-testid="meal-add"
-                  className={`relative flex h-6 shrink-0 items-center text-xs font-bold leading-none no-underline transition-press before:absolute before:-inset-y-2.5 before:-inset-x-2 before:content-[''] hover:text-on-dark focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-60 lg:h-9 lg:text-cap lg:before:-inset-y-1 ${
+                  className={`relative flex h-6 shrink-0 items-center text-xs font-bold leading-none no-underline transition-press before:absolute before:-top-1 before:bottom-0 before:-inset-x-2 before:content-[''] hover:text-on-dark focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-60 lg:h-9 lg:text-cap lg:before:-top-1.5 ${
                     mealSelected ? "text-on-accent focus-visible:outline-on-accent" : "text-sky focus-visible:outline-sky"
                   }`}
                 >
