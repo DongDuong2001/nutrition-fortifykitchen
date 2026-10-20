@@ -69,6 +69,8 @@ export function resetInterruptions(): void {
 /** The small part of the document a tip needs to look at before it opens. */
 export interface UiProbe {
   activeElement: { tagName: string; isContentEditable?: boolean } | null;
+  /** The focused field was focused by the screen itself (the add sheet's search field) and is still empty: nobody is typing in it. */
+  autofocusedEmpty?: boolean;
   /** A sheet is sliding in or out (a transition or animation of an .m-sheet is running). */
   sheetMoving: boolean;
 }
@@ -77,15 +79,19 @@ const FIELD_TAGS = new Set(["INPUT", "TEXTAREA", "SELECT"]);
 
 /**
  * A tip never opens over a field that has focus (it would take the keyboard's place on a phone and steal the person's typing)
- * or while a sheet is mid-motion (it would point at something that is still moving).
+ * or while a sheet is mid-motion (it would point at something that is still moving). A field the screen focused itself and
+ * nobody has typed in (the add sheet's search field, which is where the add tips belong) does not count: the person is not typing.
  */
-export function interruptionBlockedByUi({ activeElement, sheetMoving }: UiProbe): boolean {
+export function interruptionBlockedByUi({ activeElement, sheetMoving, autofocusedEmpty }: UiProbe): boolean {
   if (sheetMoving) return true;
+  if (autofocusedEmpty) return false;
   return !!activeElement && (FIELD_TAGS.has(activeElement.tagName) || activeElement.isContentEditable === true);
 }
 
 /** Reads the real document (client only). */
 export function probeUi(doc: Document = document): UiProbe {
   const sheetMoving = Array.from(doc.querySelectorAll<HTMLElement>(".m-sheet")).some((el) => el.getAnimations().some((a) => a.playState === "running"));
-  return { activeElement: doc.activeElement as Element | null, sheetMoving };
+  const field = doc.activeElement as HTMLInputElement | null;
+  const autofocusedEmpty = !!field && field.dataset?.autofocused !== undefined && (field.value ?? "") === "";
+  return { activeElement: field, sheetMoving, autofocusedEmpty };
 }

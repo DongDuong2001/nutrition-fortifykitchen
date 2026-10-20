@@ -156,8 +156,14 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
   // settled, so the keyboard never starts a third motion under the sheet and the scrim (and never moves a sheet that is
   // still on its way up). Nothing is taken from a field the person already tapped.
   useEffect(() => {
+    // The field the screen focuses itself is marked: a tip may still come over it until someone types (lib/interruption)
+    const autofocus = (input: HTMLInputElement | null, options?: FocusOptions) => {
+      if (!input) return;
+      input.dataset.autofocused = "";
+      input.focus(options);
+    };
     if (isDesktop) {
-      desktopSearchInputRef.current?.focus();
+      autofocus(desktopSearchInputRef.current);
       return;
     }
     const panel = panelRef.current;
@@ -167,7 +173,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
       done = true;
       const active = document.activeElement;
       if (active && active !== document.body && active.matches("input, textarea") && panel?.contains(active)) return;
-      phoneSearchInputRef.current?.focus({ preventScroll: true });
+      autofocus(phoneSearchInputRef.current, { preventScroll: true });
     };
     const onEnd = (e: TransitionEvent) => {
       if (e.target === panel) focusSearch();

@@ -71,6 +71,14 @@ describe("a tip never opens over a field or a moving sheet", () => {
     expect(interruptionBlockedByUi({ activeElement: { tagName: "DIV", isContentEditable: true }, sheetMoving: false })).toBe(true);
   });
 
+  it("a field the screen focused itself and nobody has typed in does not block (the add sheet's search field, where the add tips belong)", () => {
+    expect(interruptionBlockedByUi({ activeElement: { tagName: "INPUT" }, sheetMoving: false, autofocusedEmpty: true })).toBe(false);
+    // …but a sheet in motion still does
+    expect(interruptionBlockedByUi({ activeElement: { tagName: "INPUT" }, sheetMoving: true, autofocusedEmpty: true })).toBe(true);
+    // Typed in (autofocusedEmpty false): blocked again
+    expect(interruptionBlockedByUi({ activeElement: { tagName: "INPUT" }, sheetMoving: false, autofocusedEmpty: false })).toBe(true);
+  });
+
   it("a button, the body or nothing focused does not; a sheet in motion does", () => {
     expect(interruptionBlockedByUi({ activeElement: { tagName: "BUTTON" }, sheetMoving: false })).toBe(false);
     expect(interruptionBlockedByUi({ activeElement: { tagName: "BODY" }, sheetMoving: false })).toBe(false);
