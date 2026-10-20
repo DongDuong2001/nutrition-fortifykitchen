@@ -152,40 +152,6 @@
   ]
  },
  {
-  "source": "usda_foundation",
-  "source_id": "FDC 2263890",
-  "name": "Grapes, red, seedless, raw",
-  "name_vi": "Nho đỏ",
-  "category": "trai_cay",
-  "brand": null,
-  "tip_vi": null,
-  "nutrients": {
-   "energy": 85.9,
-   "protein": 0.9,
-   "carbs": 20.2,
-   "fat": 0.2,
-   "sugars": 17.3,
-   "water": 78.2,
-   "calcium": 10.2,
-   "iron": 0.162,
-   "magnesium": 8.56,
-   "phosphorus": 24.9,
-   "potassium": 229,
-   "sodium": 7,
-   "zinc": 0.036,
-   "copper": 0.0808,
-   "manganese": 0.0976,
-   "vitamin_c": 3.31
-  },
-  "portions": [
-   {
-    "label_vi": "100 g",
-    "grams": 100,
-    "sort": 0
-   }
-  ]
- },
- {
   "source": "usda_sr_legacy",
   "source_id": "FDC 173042",
   "name": "Grape juice, canned or bottled, unsweetened, without added ascorbic acid",
@@ -284,6 +250,58 @@
    "b6": 0.15,
    "folate": 5,
    "b12": 0.73
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   }
+  ]
+ },
+ {
+  "source": "usda_sr_legacy",
+  "source_id": "FDC 174683",
+  "name": "Grapes, red or green (European type, such as Thompson seedless), raw",
+  "name_vi": "Nho xanh, nho đỏ, nho đen",
+  "category": "trai_cay",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "energy": 69,
+   "protein": 0.7,
+   "carbs": 18.1,
+   "fat": 0.2,
+   "fiber": 0.9,
+   "sugars": 15.5,
+   "saturated_fat": 0.054,
+   "monounsaturated_fat": 0.007,
+   "polyunsaturated_fat": 0.048,
+   "trans_fat": 0,
+   "cholesterol": 0,
+   "water": 80.5,
+   "calcium": 10,
+   "iron": 0.36,
+   "magnesium": 7,
+   "phosphorus": 20,
+   "potassium": 191,
+   "sodium": 2,
+   "zinc": 0.07,
+   "copper": 0.127,
+   "manganese": 0.071,
+   "selenium": 0.1,
+   "vitamin_a": 3,
+   "vitamin_c": 3.2,
+   "vitamin_d": 0,
+   "vitamin_e": 0.19,
+   "vitamin_k": 14.6,
+   "b1": 0.069,
+   "b2": 0.07,
+   "b3": 0.188,
+   "b5": 0.05,
+   "b6": 0.086,
+   "folate": 2,
+   "b12": 0
   },
   "portions": [
    {
