@@ -1,10 +1,10 @@
-"""perf/live-bundle: what opening Hôm nay and adding one food cost the main thread (demo build), for the PR's before/after.
+"""perf/live-bundle (a measure, not a probe: the leading _ keeps it out of probe:all): what opening Hôm nay and adding one food cost the main thread (demo build), for the PR's before/after.
 
 Chromium at 4x CPU slowdown (a mid-range phone), 390 wide, demo day. Two measures, each the median of RUNS fresh pages:
 - open: /app until the first meal row is there and the page is idle; ScriptDuration and TaskDuration (CDP Performance).
 - add: from Chà là's food page, Thêm vào Bữa … until Hôm nay shows the new row; the same two numbers for that span.
 Prints a small table; never fails (a measure, not a check), except when the page never shows the row.
-Run with: ALIGN_BASE_URL=http://localhost:3104 npm run probe -- tests/probes/live_bundle_perf.py
+Run with: ALIGN_BASE_URL=http://localhost:3104 npm run probe -- tests/probes/_live_bundle_perf.py
 """
 # PROBE_COVERS:
 import os
