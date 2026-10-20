@@ -29,8 +29,12 @@ export interface SheetProps {
   stacked?: boolean;
 }
 
-/** cc-55: how long a closing sheet stays drawn (globals.css --m-sheet-out, the exit; the enter takes 350 ms). */
+/** cc-55: how long a closing sheet stays drawn (globals.css --m-sheet-out, the exit). */
 export const SHEET_EXIT_MS = 220;
+/** How long a sheet takes to come up (globals.css --m-sheet-in). */
+export const SHEET_ENTER_MS = 350;
+/** One frame at 60 Hz: how far into its slide a sheet that was rendered after a tap is set when it first appears. */
+export const SHEET_CATCH_UP_MS = 16;
 
 const FOCUSABLE_SELECTOR =
   'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';

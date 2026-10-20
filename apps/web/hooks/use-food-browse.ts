@@ -16,9 +16,10 @@ import { useDiary } from "@/lib/diary-store";
 
 /**
  * Search, filter and list state for browsing foods. Shared by the add sheet and Khám phá, so both use
- * the same index, the same category chips and the same empty states.
+ * the same index, the same category chips and the same empty states. `enabled` false (the add sheet's first frame): the
+ * list and the chips are not worked out yet, so the sheet's first frame costs only its own frame.
  */
-export function useFoodBrowse({ oneRowPerFood = true }: { oneRowPerFood?: boolean } = {}) {
+export function useFoodBrowse({ oneRowPerFood = true, enabled = true }: { oneRowPerFood?: boolean; enabled?: boolean } = {}) {
   const { favouriteIds, isFavourite } = useDiary();
   const { foods, version, pending: catalogPending, failed: catalogFailed, retry: retryCatalog } = useCatalogFoods();
   const [filter, setFilter] = useState<FoodFilter>("all");
@@ -32,10 +33,10 @@ export function useFoodBrowse({ oneRowPerFood = true }: { oneRowPerFood?: boolea
   // cc-67: a moment after the first paint the one-row-per-food index is there; a list is not drawn before (no rows that change names)
   const waitingForRows = oneRowPerFood && !rowsReady();
   const list = useMemo(
-    () => (waitingForRows ? { grouped: false, foods: [], groups: [] } : buildFoodList(foods, searched, filter, favouriteIds, oneRowPerFood)),
-    [searched, filter, favouriteIds, foods, oneRowPerFood, waitingForRows]
+    () => (waitingForRows || !enabled ? { grouped: false, foods: [], groups: [] } : buildFoodList(foods, searched, filter, favouriteIds, oneRowPerFood)),
+    [searched, filter, favouriteIds, foods, oneRowPerFood, waitingForRows, enabled]
   );
-  const categories = useMemo(() => chipCategories(foods), [foods]);
+  const categories = useMemo(() => (enabled ? chipCategories(foods) : []), [foods, enabled]);
   const categoryName = useCallback((food: FoodItem) => categoryLabel(categoryOf(food)), []);
   // A food is a favourite when any of its rows is (raw and cooked are one row of a list)
   const isFavouriteFood = useCallback((food: FoodItem) => twinIdsOf(food).some(isFavourite), [isFavourite]);

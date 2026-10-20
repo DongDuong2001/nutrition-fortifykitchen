@@ -12,8 +12,7 @@
  * chunks): a screen that goes back in code lands on a parent path, and the /add sheet that slid down by itself says
  * so on the page (data-sheet-route with data-state="closed").
  */
-import { setHomeScroll } from "./home-scroll";
-import { HOME_ROUTE, NAV_TABS } from "./nav";
+import { NAV_TABS } from "./nav";
 
 export type NavKind = "none" | "push" | "back" | "sheet-up" | "sheet-down" | "tab";
 
@@ -83,13 +82,12 @@ const sheetClosed = () => document.querySelector('[data-sheet-route][data-state=
 
 /**
  * The kind of change that lands on `pathname`, worked out once per path (React may render a screen more than once).
- * Called while the new screen renders, when the old one is still on screen: its scroll position is kept for /add.
+ * Called while the new screen renders, when the old one is still on screen.
  */
 export function navKindFor(pathname: string): NavKind {
   if (typeof window === "undefined") return "none";
   if (current?.path === pathname) return current.kind;
   const from = current?.path ?? null;
-  if (from !== null && path(from) === HOME_ROUTE) setHomeScroll(window.scrollY);
   const popped = poppedTo === path(pathname);
   let kind = navKind(from, pathname, { back: popped, sheetClosed: false });
   if (kind !== "sheet-up" && motionOff()) kind = "none";

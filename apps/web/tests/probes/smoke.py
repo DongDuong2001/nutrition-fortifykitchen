@@ -75,7 +75,11 @@ def discover_routes():
     routes = []
     for page_file in sorted(APP_DIR.rglob("page.tsx")):
         parts = []
-        for seg in page_file.parent.relative_to(APP_DIR).parts:
+        segments = page_file.parent.relative_to(APP_DIR).parts
+        # A parallel slot (@sheet) and an intercepting route ((.)add) are never a URL of their own: /add is its page.tsx
+        if any(seg.startswith("@") or seg.startswith("(.)") or seg.startswith("(..)") for seg in segments):
+            continue
+        for seg in segments:
             if seg.startswith("(") and seg.endswith(")"):
                 continue  # route group, not part of the URL
             if seg.startswith("[") and seg.endswith("]"):

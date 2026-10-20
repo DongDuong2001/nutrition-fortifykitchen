@@ -489,12 +489,23 @@
   transform: translateY(100%);
   transition-duration: var(--m-sheet-out);
 }
+/* A closing sheet takes no taps from the moment it starts to go (CSS, no re-render, nothing made inert under the slide), except
+   on its drag areas: a grab takes it back (cc-62). The scrim lets the taps through to the page at once. */
+.m-sheet[data-state="closed"],
+.m-sheet[data-state="closed"] * {
+  pointer-events: none;
+}
+.m-sheet[data-state="closed"] [data-sheet-drag],
+.m-sheet[data-state="closed"] [data-sheet-drag] * {
+  pointer-events: auto;
+}
 .m-scrim {
   transition: opacity var(--m-sheet-in) var(--ease-drawer);
 }
 .m-scrim[data-state="closed"] {
   opacity: 0;
   transition-duration: var(--m-sheet-out);
+  pointer-events: none;
 }
 @starting-style {
   .m-sheet[data-state="open"] {
@@ -564,6 +575,15 @@
   .m-toast:not([data-state="closed"]) {
     transform: translateY(8px);
     opacity: 0;
+  }
+}
+/* The toast host rides up over the add sheet's Khay bar while the sheet is open (phone) and back down, instead of jumping */
+.m-toast-host {
+  transition: translate var(--m-row) var(--ease-out);
+}
+@media (max-width: 1023.98px) {
+  .m-toast-host[data-lift] {
+    translate: 0 -54px;
   }
 }
 /* The toast's countdown bar empties at a constant pace (scaleX, linear: it is a clock, not a movement) */
@@ -873,15 +893,6 @@ button.m-drag-lift[data-touch-drag="dragging"] {
   animation: none;
 }
 
-/* cc-55b: /add opened straight (a link, a reload): Hôm nay behind the sheet is a picture nobody saw a moment ago, so its
-   meals and nutrient groups below the screen are not laid out or painted. Opened from Hôm nay it is drawn in full: its
-   real heights keep it where Hôm nay was, and content-visibility would re-check every section on each frame of the
-   slide (17 layouts instead of 4, measured at 4x CPU). */
-[data-add-behind="light"] section {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 240px;
-}
-
 /* Reduced motion: nothing moves; what fades does it in 120 ms at most */
 @media (prefers-reduced-motion: reduce) {
   .m-sheet,
@@ -932,6 +943,9 @@ button.m-drag-lift[data-touch-drag="dragging"] {
   /* the toast's countdown stays visible, as a slow fade over the same time, instead of freezing at full */
   .m-countdown {
     animation-name: m-fade-out;
+  }
+  .m-toast-host {
+    transition: none;
   }
   .m-expand {
     transition: opacity var(--m-fade) var(--ease-out);

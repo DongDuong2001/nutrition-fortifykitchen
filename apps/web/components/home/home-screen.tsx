@@ -121,6 +121,27 @@ function HomeLoading({ backdrop }: { backdrop: boolean }) {
   );
 }
 
+/** True once Hôm nay has been on screen in this page session: only the very first draw is split in two. */
+let homeDrawn = false;
+
+/** The food list and the nutrient column as shapes, for the one frame (the app's first load) before they are drawn. */
+function HomeBodySkeleton() {
+  return (
+    <>
+      <div aria-hidden="true" className="flex flex-1 flex-col gap-2 p-3">
+        {[0, 1, 2, 3, 4, 5].map((i) => (
+          <div key={i} className="h-5 rounded bg-level-empty" />
+        ))}
+      </div>
+      <div aria-hidden="true" className="flex w-[198px] flex-col gap-2 bg-card p-3">
+        {[0, 1, 2, 3, 4, 5].map((i) => (
+          <div key={i} className="h-5 rounded bg-level-empty" />
+        ))}
+      </div>
+    </>
+  );
+}
+
 function subscribeOnline(callback: () => void) {
   window.addEventListener("online", callback);
   window.addEventListener("offline", callback);
@@ -314,9 +335,13 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
     () => ({ carbs: targetOf(day, "carbs"), protein: targetOf(day, "protein"), fat: targetOf(day, "fat"), fiber: targetOf(day, "fiber") }),
     [day]
   );
-  // cc-57: the frame and the hero come first; the food list and the nutrient column (the heavy part) follow in a
-  // second, low-priority render, so a tab tap or the + shows its first frame sooner
-  const heavyReady = useDeferredValue(true, false);
+  // cc-57: on the very first app load the frame and the hero come first, with a skeleton where the food list and the nutrient
+  // column (the heavy part) follow in a second, low-priority render. Every later visit (a tab, Back) draws it all at once: a
+  // first frame with an empty list was a blank frame. (The sheet over Hôm nay no longer remounts it, so + never redraws it.)
+  const heavyReady = useDeferredValue(true, homeDrawn);
+  useEffect(() => {
+    homeDrawn = true;
+  }, []);
   // cc-58: each sheet is mounted the first time it opens (the chunks are fetched ahead, see loadSheets)
   const sourcesMounted = useOnceOpen(sourcesOf !== null);
   const mealMenuMounted = useOnceOpen(menuSlot !== null);
@@ -376,8 +401,12 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
   const barHost = useShellBottomBar(selecting && !backdrop);
 
   const showLoading = forceLoading || !hydrated;
-  // cc-64 (A2): the first draw after the skeleton fades in; later draws (another day) keep the day motion
+  // cc-64 (A2): the first draw after the skeleton fades in (a cross-fade with the skeleton that just went); later draws
+  // (another day) keep the day motion, and a draw with no skeleton before it (a tab, Back) does not fade: it would start
+  // from nothing, a blank frame
   const firstContent = useRef(true);
+  const sawSkeleton = useRef(false);
+  if (showLoading) sawSkeleton.current = true;
   useEffect(() => {
     if (!showLoading) firstContent.current = false;
   });
@@ -600,8 +629,8 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
               </button>
             </div>
           )}
-          <div key={viewIso} data-align-group="home-page" data-align-from="lg" className={`${firstContent.current ? "m-content-in" : dayMotion.current.className} flex min-h-0 flex-1 border-t border-t-divider lg:gap-4 lg:border-t-0 lg:pb-8 ${coach && !selecting ? "lg:mt-2" : "mt-2 lg:mt-4"}`}>
-            {!heavyReady && <div className="flex-1" aria-hidden="true" />}
+          <div key={viewIso} data-align-group="home-page" data-align-from="lg" className={`${firstContent.current ? (sawSkeleton.current ? "m-content-in" : "") : dayMotion.current.className} flex min-h-0 flex-1 border-t border-t-divider lg:gap-4 lg:border-t-0 lg:pb-8 ${coach && !selecting ? "lg:mt-2" : "mt-2 lg:mt-4"}`}>
+            {!heavyReady && <HomeBodySkeleton />}
             {heavyReady && (
               <FoodList
                 meals={meals}

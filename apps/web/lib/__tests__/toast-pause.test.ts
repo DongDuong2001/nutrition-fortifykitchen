@@ -28,6 +28,9 @@ describe("toast pause and place (cc-63, N4)", () => {
   it("sits 12 px above the 72 px nav and the home-indicator inset; on /add above the Khay bar", () => {
     expect(host).toContain("bottom-[calc(72px+env(safe-area-inset-bottom)+12px)]");
     expect(host).toContain('usePathname() === "/add"');
-    expect(host).toContain("bottom-[calc(138px+env(safe-area-inset-bottom))]");
+    // Over the add sheet the host rides up 54 px (72 + 12 → 138) with a transition: it is moved, never swapped for another class
+    expect(host).toContain("data-lift");
+    expect(css.replace(/\/\*[\s\S]*?\*\//g, "")).toMatch(/\.m-toast-host\[data-lift\] \{\s*translate: 0 -54px;/);
+    expect(css).toMatch(/\.m-toast-host \{\s*transition: translate var\(--m-row\) var\(--ease-out\);/);
   });
 });

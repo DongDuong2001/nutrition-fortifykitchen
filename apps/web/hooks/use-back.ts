@@ -15,6 +15,11 @@ export function useTrackHistory() {
   }, [pathname]);
 }
 
+/** The page before this one in this tab's in-app history, or null (a link or a reload landed here). */
+export function previousInAppPath(): string | null {
+  return history.length > 1 ? history[history.length - 2] : null;
+}
+
 /**
  * Back for pushed screens: the previous in-app page when there is one, otherwise the owning tab
  * (backFallback), so a direct link or a reload never leaves the app.

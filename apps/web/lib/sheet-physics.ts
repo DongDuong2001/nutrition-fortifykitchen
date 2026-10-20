@@ -15,6 +15,8 @@ export const VELOCITY_WINDOW_MS = 80;
 export const STILL_MS = 100;
 /** Faster than this downward (px/ms) closes whatever the distance. */
 export const FLICK_SPEED = 0.4;
+/** A toast is small and light: a swipe sideways this fast (px/ms) dismisses it whatever the distance. */
+export const TOAST_FLICK_SPEED = 0.11;
 /** Momentum projection with a deceleration rate of 0.998 per ms: the distance it would still travel is v · 0.998 / (1 − 0.998). */
 export const PROJECTION_MS = 499;
 

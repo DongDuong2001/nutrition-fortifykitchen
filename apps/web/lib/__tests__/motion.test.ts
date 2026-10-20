@@ -61,7 +61,7 @@ describe("motion classes", () => {
           ? /^(transform|opacity|grid-template-rows|none)$/
           : /^\.m-bar$/.test(selector)
             ? /^(transform|background-color|none)$/ // the fill's colour changes with its level while it grows
-            : /^(transform|scale|opacity|none)$/; // scale is a transform of its own (press, a sheet under a sheet)
+            : /^(transform|scale|translate|opacity|none)$/; // scale and translate are transforms of their own (press, a sheet under a sheet, the toast host riding up)
         expect([selector, prop]).toEqual([selector, expect.stringMatching(allowed)]);
       }
       for (const prop of decl(body, "transition-property").flatMap((t) => t.split(",").map((p) => p.trim()))) {

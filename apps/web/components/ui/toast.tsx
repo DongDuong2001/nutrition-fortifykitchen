@@ -13,6 +13,8 @@ export interface ToastProps {
   onAction?: () => void;
   /** A fixed fill of the bar, 0..100 (a static preview). */
   progressPercent?: number;
+  /** Restarts the countdown bar when it changes (a new toast in a reused element); the message by default. */
+  countdownKey?: string;
   /** cc-55: the auto-dismiss countdown. The bar empties on its own (CSS), from `leftMs` of `totalMs`. */
   countdown?: { totalMs: number; leftMs: number };
   /**
@@ -38,6 +40,7 @@ export function Toast({
   onAction,
   progressPercent,
   countdown,
+  countdownKey,
   announce = true,
   onPause,
   onResume,
@@ -102,7 +105,7 @@ export function Toast({
       {countdown ? (
         <div aria-hidden="true" className="h-1 bg-level-empty-dark w-full">
           <div
-            key={message}
+            key={countdownKey ?? message}
             className="m-countdown h-1 w-full bg-cobalt"
             style={{ animationDuration: `${countdown.totalMs}ms`, animationDelay: `${Math.min(0, countdown.leftMs - countdown.totalMs)}ms` }}
           />

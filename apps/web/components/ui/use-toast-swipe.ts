@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import type React from "react";
-import { FLICK_SPEED, pushSample, releaseVelocity, type DragSample } from "@/lib/sheet-physics";
+import { TOAST_FLICK_SPEED, pushSample, releaseVelocity, type DragSample } from "@/lib/sheet-physics";
 
 /** A sideways move under this many px is still a tap (the action button keeps working). */
 const SWIPE_SLOP_PX = 8;
@@ -13,12 +13,16 @@ export interface ToastSwipe {
   onPointerMove: (e: React.PointerEvent<HTMLDivElement>) => void;
   onPointerUp: (e: React.PointerEvent<HTMLDivElement>) => void;
   onPointerCancel: (e: React.PointerEvent<HTMLDivElement>) => void;
+  /** Back to rest with no inline style left (a new toast reuses the same element). */
+  reset: () => void;
 }
 
 /**
  * cc-64 (2b): a sideways swipe on a toast follows the finger and, on release, dismisses it (as accepted: no Hoàn tác)
- * when it went past half the toast or was a flick (the sheets' velocity window, lib/sheet-physics); otherwise it slides
- * back. Reduced motion: it fades instead of sliding away. Only the app's toast host uses it, so the sign-in pages'
+ * when it went past half the toast or was a flick (the sheets' velocity window, a flick being TOAST_FLICK_SPEED: a toast
+ * is small and light, so it takes a gentler flick than a sheet); otherwise it slides back. A second finger is ignored
+ * while one is swiping, and the transition written for the slide goes when it ends, so the toast's own CSS (its exit, its
+ * rise) is never overridden afterwards. Reduced motion: it fades instead of sliding away. Only the app's toast host uses it, so the sign-in pages'
  * toasts do not carry it.
  */
 export function useToastSwipe(onDismiss: () => void): ToastSwipe {
@@ -31,6 +35,18 @@ export function useToastSwipe(onDismiss: () => void): ToastSwipe {
     el.style.transform = x ? `translateX(${x}px)` : "";
     el.style.opacity = x ? String(Math.max(0, 1 - Math.abs(x) / el.offsetWidth)) : "";
   };
+  const reset = () => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.transition = "";
+    el.style.transform = "";
+    el.style.opacity = "";
+  };
+  // The slide back is over: the toast's own CSS transitions apply again
+  const onEnd = (e: TransitionEvent) => {
+    const el = ref.current;
+    if (el && e.target === el && drag.current === null && el.style.transition !== "none") el.style.transition = "";
+  };
   const end = (e: React.PointerEvent<HTMLDivElement>, cancelled: boolean) => {
     const d = drag.current;
     if (!d || d.id !== e.pointerId) return;
@@ -39,9 +55,10 @@ export function useToastSwipe(onDismiss: () => void): ToastSwipe {
     const dx = e.clientX - d.x0;
     const v = releaseVelocity(d.samples, e.timeStamp);
     const width = ref.current?.offsetWidth ?? 366;
-    const away = !cancelled && (Math.abs(dx) > width / 2 || (Math.abs(v) > FLICK_SPEED && Math.sign(v) === Math.sign(dx)));
+    const away = !cancelled && (Math.abs(dx) > width / 2 || (Math.abs(v) > TOAST_FLICK_SPEED && Math.sign(v) === Math.sign(dx)));
     if (!away) {
       setX(0, "transform var(--m-row) var(--ease-out), opacity var(--m-row) var(--ease-out)");
+      ref.current?.addEventListener("transitionend", onEnd as EventListener, { once: true });
       return;
     }
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -53,8 +70,10 @@ export function useToastSwipe(onDismiss: () => void): ToastSwipe {
   };
   return {
     ref,
+    reset,
     onPointerDown: (e) => {
-      if (e.button !== 0) return;
+      // A second finger while one is down is not a new swipe (it would replace the first one's samples and jump the toast)
+      if (e.button !== 0 || drag.current) return;
       drag.current = { id: e.pointerId, x0: e.clientX, y0: e.clientY, samples: [{ t: e.timeStamp, y: 0 }], swiping: false };
     },
     onPointerMove: (e) => {
