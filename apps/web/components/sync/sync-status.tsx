@@ -21,16 +21,19 @@ export function SyncStatus() {
   const [justSaved, setJustSaved] = useState(false);
   const [seen, setSeen] = useState(false);
   const wasSaving = useRef(false);
+  const hadUnsaved = useRef(false);
   const unsaved = pending + failed;
 
   useEffect(() => {
-    if (wasSaving.current && !saving && unsaved === 0) {
+    // Đã lưu after a live save, and also when the last writes that waited (offline, refused, found on the phone) have just gone
+    const done = (wasSaving.current || hadUnsaved.current) && !saving && unsaved === 0;
+    wasSaving.current = saving;
+    hadUnsaved.current = unsaved > 0;
+    if (done) {
       setJustSaved(true);
       const timer = setTimeout(() => setJustSaved(false), SAVED_MS);
-      wasSaving.current = saving;
       return () => clearTimeout(timer);
     }
-    wasSaving.current = saving;
   }, [saving, unsaved]);
 
   const state = !online ? "offline" : saving ? "saving" : unsaved > 0 ? "unsaved" : justSaved ? "saved" : "idle";

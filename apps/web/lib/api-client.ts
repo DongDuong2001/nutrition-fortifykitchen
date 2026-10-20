@@ -408,9 +408,12 @@ export type { OutboxItem } from "./outbox";
 /** A write refused for good (held.final) is kept this long, then dropped so the outbox does not grow without end. */
 export const FINAL_OUTBOX_KEEP_MS = 7 * 24 * 60 * 60 * 1000;
 
-/** The outbox without the writes refused for good more than FINAL_OUTBOX_KEEP_MS ago (by createdAt). */
+/**
+ * The outbox without the writes refused for good more than FINAL_OUTBOX_KEEP_MS ago. Counted from the refusal (held.at), not
+ * from when the write was made: one refused for being older than 14 days must still be on the list when the person sees it.
+ */
 export function pruneOutbox<T extends Pick<OutboxItem, "createdAt" | "held">>(items: T[], now: number): T[] {
-  return items.filter((item) => !(item.held?.final && now - item.createdAt > FINAL_OUTBOX_KEEP_MS));
+  return items.filter((item) => !(item.held?.final && now - (item.held.at ?? item.createdAt) > FINAL_OUTBOX_KEEP_MS));
 }
 
 /**
@@ -472,7 +475,7 @@ export function reportStorageWorked(): void {
  * behind it; no answer at all ends the run (offline). Held writes are sent only with `retryHeld` (Thử lại). Only one
  * tab drains at a time.
  */
-export const syncOfflineOutbox = (options: { retryHeld?: boolean; force?: boolean } = {}): Promise<SyncResult> => withEngine((e) => e.syncOfflineOutbox(options));
+export const syncOfflineOutbox = (options: { retryHeld?: boolean; force?: boolean; onProgress?: (progress: { done: number; total: number }) => void } = {}): Promise<SyncResult> => withEngine((e) => e.syncOfflineOutbox(options));
 
 /** The outbox as the screens show it: what waits, what was refused, what gave up. Nothing before the engine is loaded. */
 export const outboxSummary = () => engine?.outboxSummary() ?? null;
@@ -709,6 +712,8 @@ export const apiClient = {
     calories?: number;
     /** The portion as shown ("1 viên", "150 g"): stored by the server as the entry's portion label. */
     servingLabel?: string;
+    /** The food's name, kept in the outbox for the Chưa lưu list (never sent). */
+    label?: string;
   }): Promise<{ success: boolean; id: string } & WriteResult> {
     const entryId = isUuid(payload.id) ? payload.id! : generateUuid();
     const date = payload.date || getTodayIsoVN();
@@ -735,7 +740,7 @@ export const apiClient = {
       }
 
       // The id is the client's (idempotent on the server), so a write sent again never adds the entry twice
-      const result = await withEngine((e) => e.diaryWrite({ id: entryId, date, payload: body }));
+      const result = await withEngine((e) => e.diaryWrite({ id: entryId, date, payload: body, label: payload.label }));
       return { success: result.state === "saved", id: entryId, ...result };
     }
 

@@ -7,8 +7,10 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -165,5 +167,94 @@ func TestHandler_RestoreEntry_Replay(t *testing.T) {
 
 	if rec.Code != http.StatusOK {
 		t.Fatalf("expected 200 OK on replayed restore, got %d: %s", rec.Code, rec.Body.String())
+	}
+}
+
+func postEntry(t *testing.T, h *Handler, userID uuid.UUID, date string, payload map[string]any) *httptest.ResponseRecorder {
+	t.Helper()
+	body, _ := json.Marshal(payload)
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/days/"+date+"/entries", bytes.NewReader(body))
+	req = req.WithContext(context.WithValue(req.Context(), auth.UserIDKey, userID))
+	rctx := chi.NewRouteContext()
+	rctx.URLParams.Add("date", date)
+	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+	rec := httptest.NewRecorder()
+	h.CreateEntry(rec, req)
+	return rec
+}
+
+func TestHandler_CreateEntry_MadeAt(t *testing.T) {
+	ict := hoChiMinhLocation
+	daysAgo := func(n int) time.Time { return time.Now().In(ict).AddDate(0, 0, -n) }
+	dateOf := func(tm time.Time) string { return tm.Format("2006-01-02") }
+	entry := func(extra map[string]any) map[string]any {
+		m := map[string]any{"id": uuid.New(), "kind": "food", "food_id": uuid.New(), "meal_slot": "lunch", "grams": 100}
+		for k, v := range extra {
+			m[k] = v
+		}
+		return m
+	}
+	code := func(rec *httptest.ResponseRecorder) string {
+		var resp struct {
+			Error struct {
+				Code string `json:"code"`
+			} `json:"error"`
+		}
+		_ = json.Unmarshal(rec.Body.Bytes(), &resp)
+		return resp.Error.Code
+	}
+
+	cases := []struct {
+		name     string
+		dayAgo   int
+		extra    func() map[string]any
+		wantHTTP int
+		wantCode string
+	}{
+		{"3 days back, made then (17/10 case)", 3, func() map[string]any { return map[string]any{"made_at": daysAgo(3).Format(time.RFC3339)} }, http.StatusCreated, ""},
+		{"3 days back, no made_at", 3, func() map[string]any { return nil }, http.StatusConflict, "PAST_DAY_READ_ONLY"},
+		{"made 15 days ago", 15, func() map[string]any { return map[string]any{"made_at": daysAgo(15).Format(time.RFC3339)} }, http.StatusConflict, "PAST_DAY_READ_ONLY"},
+		{"made in the future", 0, func() map[string]any {
+			return map[string]any{"made_at": time.Now().Add(time.Hour).Format(time.RFC3339)}
+		}, http.StatusConflict, "PAST_DAY_READ_ONLY"},
+		{"malformed made_at", 0, func() map[string]any { return map[string]any{"made_at": "last night"} }, http.StatusBadRequest, "VALIDATION_FAILED"},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			h := NewHandler(NewService(newMockDiaryRepo()))
+			rec := postEntry(t, h, uuid.New(), dateOf(daysAgo(c.dayAgo)), entry(c.extra()))
+			if rec.Code != c.wantHTTP {
+				t.Fatalf("want %d, got %d: %s", c.wantHTTP, rec.Code, rec.Body.String())
+			}
+			if c.wantCode != "" && code(rec) != c.wantCode {
+				t.Fatalf("want code %s, got %s", c.wantCode, code(rec))
+			}
+		})
+	}
+}
+
+func TestHandler_DeleteEntry_MadeAtQuery(t *testing.T) {
+	old := time.Now().In(hoChiMinhLocation).AddDate(0, 0, -3)
+	run := func(query string) int {
+		repo := newMockDiaryRepo()
+		h := NewHandler(NewService(repo))
+		entryID := uuid.New()
+		foodID := uuid.New()
+		repo.entries[entryID] = &DiaryEntryItem{ID: entryID, Kind: "food", FoodID: &foodID, MealSlot: "lunch", Grams: 100}
+		repo.entryDates[entryID] = old.Format("2006-01-02")
+		req := httptest.NewRequest(http.MethodDelete, "/api/v1/entries/"+entryID.String()+query, nil)
+		req = req.WithContext(context.WithValue(req.Context(), auth.UserIDKey, uuid.New()))
+		rctx := chi.NewRouteContext()
+		rctx.URLParams.Add("id", entryID.String())
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+		rec := httptest.NewRecorder()
+		h.DeleteEntry(rec, req)
+		return rec.Code
+	}
+	if got := run(""); got != http.StatusConflict {
+		t.Fatalf("delete of a 3-day-old entry without made_at: want 409, got %d", got)
+	}
+	if got := run("?made_at=" + url.QueryEscape(old.Format(time.RFC3339))); got != http.StatusOK {
+		t.Fatalf("delete with made_at from that day: want 200, got %d", got)
 	}
 }

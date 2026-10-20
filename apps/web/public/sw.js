@@ -8,7 +8,7 @@
  *    comes back while the app is closed (cc-68). It only ever removes a write the server has; every other outcome is left
  *    to the page, which owns retries and holds.
  * Bump VERSION on a release that changes this file or the shell list. lib/pwa.ts holds the tested copy of routeFor. */
-const VERSION = "2026-10-20.1";
+const VERSION = "2026-10-20.3";
 const SHELL_CACHE = "h1t-shell-" + VERSION;
 const STATIC_CACHE = "h1t-static-" + VERSION;
 const PAGES = ["/", "/app", "/trends", "/explore", "/settings", "/offline"];
@@ -206,16 +206,25 @@ function openOutboxDb() {
   });
 }
 
+/* Hotfix 20/10: a diary write carries made_at, when the user made it (the item's createdAt, never the time of this send): the server judges the day by it. */
+function stampOutboxItem(item, method, path) {
+  const diary = /^\/(days|entries)\//.test(path);
+  const madeAt = diary && item.createdAt > Date.UTC(2020, 0, 1) ? new Date(item.createdAt).toISOString() : null;
+  if (method === "DELETE") return { path: madeAt ? path + (path.indexOf("?") >= 0 ? "&" : "?") + "made_at=" + encodeURIComponent(madeAt) : path, body: undefined };
+  const payload = madeAt ? Object.assign({}, item.payload, { made_at: madeAt }) : item.payload;
+  return { path: path, body: JSON.stringify(payload) };
+}
+
 async function sendOutboxItem(meta, item) {
   const method = item.method || "POST";
-  const path = item.path || "/days/" + item.date + "/entries";
+  const stamped = stampOutboxItem(item, method, item.path || "/days/" + item.date + "/entries");
   const send = function () {
     const controller = typeof AbortController === "function" ? new AbortController() : null;
     const timer = controller ? setTimeout(function () { controller.abort(); }, REQUEST_MS) : null;
-    return fetch(meta.apiBase + path, {
+    return fetch(meta.apiBase + stamped.path, {
       method: method,
       headers: { "Content-Type": "application/json" },
-      body: method === "DELETE" ? undefined : JSON.stringify(item.payload),
+      body: stamped.body,
       credentials: "include",
       signal: controller ? controller.signal : undefined,
     }).finally(function () { if (timer) clearTimeout(timer); });

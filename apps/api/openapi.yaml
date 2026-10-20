@@ -737,6 +737,14 @@ paths:
                   type: string
                 calories:
                   type: number
+                made_at:
+                  type: string
+                  format: date-time
+                  description: >-
+                    When the user made the write on their device (RFC 3339). A write is judged by this, not by when it
+                    reached the server: the day must be made_at's day (Asia/Ho_Chi_Minh) or the one before it. Refused
+                    with 409 PAST_DAY_READ_ONLY when older than 14 days or more than 5 minutes in the future. Without
+                    it, the day must be today or yesterday by the server clock.
       responses:
         '201':
           description: Entry created
@@ -853,6 +861,14 @@ paths:
                   type: number
                 restore:
                   type: boolean
+                made_at:
+                  type: string
+                  format: date-time
+                  description: >-
+                    When the user made the write on their device (RFC 3339). A write is judged by this, not by when it
+                    reached the server: the day must be made_at's day (Asia/Ho_Chi_Minh) or the one before it. Refused
+                    with 409 PAST_DAY_READ_ONLY when older than 14 days or more than 5 minutes in the future. Without
+                    it, the day must be today or yesterday by the server clock.
       responses:
         '200':
           description: Entry updated
@@ -869,6 +885,13 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: made_at
+          in: query
+          required: false
+          description: When the user made the write on their device (RFC 3339); see made_at on PATCH /entries/{id}.
+          schema:
+            type: string
+            format: date-time
       responses:
         '200':
           description: Entry deleted
@@ -885,6 +908,13 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: made_at
+          in: query
+          required: false
+          description: When the user made the write on their device (RFC 3339); see made_at on PATCH /entries/{id}.
+          schema:
+            type: string
+            format: date-time
       responses:
         '200':
           description: Entry restored

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
+import { useSyncListRequests } from "@/lib/sync-ui";
 
 // The list opens on a tap: its chunk (and the sheet it is in) is not part of any page
 const SyncList = dynamic(() => import("@/components/sync/sync-list").then((m) => m.SyncList), { ssr: false });
@@ -9,6 +10,15 @@ const SyncList = dynamic(() => import("@/components/sync/sync-list").then((m) =>
 /** What the sync status says (components/sync/sync-status holds the state); a tap on Chưa lưu opens the list. Once mounted it stays, so an open list is not cut off when the status goes back to idle. */
 export default function SyncStatusDetail({ state, unsaved, failed }: { state: string; unsaved: number; failed: number }) {
   const [listOpen, setListOpen] = useState(false);
+  // Xem lý do (the Thử lại toast) opens the list from outside
+  const requests = useSyncListRequests();
+  const seen = useRef(requests);
+  useEffect(() => {
+    if (requests !== seen.current) {
+      seen.current = requests;
+      setListOpen(true);
+    }
+  }, [requests]);
   const text = "text-xs font-semibold leading-none text-muted-on-dark lg:text-secondary";
   return (
     <>
