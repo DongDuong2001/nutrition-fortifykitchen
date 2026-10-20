@@ -41,6 +41,7 @@ import {
   getPendingOfflineEntryIds,
   hasPendingWrite,
   callEngine,
+  outboxItems,
   outboxSummary,
   pendingFavouriteOps,
   pendingWriteIds,
@@ -54,7 +55,8 @@ import {
   type WriteResult,
 } from "./api-client";
 import { refreshServerSession } from "./server-session";
-import { registerSyncNow, setSyncSummary } from "./sync-ui";
+import { openSyncList, registerSyncNow, setSyncSummary } from "./sync-ui";
+import { isDiaryAdd, retryMessage, type RetryOutcome } from "./late-writes";
 import { markUsed } from "./onboarding-store";
 import { isLocalOnly, syncNotice } from "./sync-notice";
 import { errorText, reportClientError } from "./client-errors";
@@ -132,7 +134,7 @@ export type { AddedDiaryEntry, EntryView, EntryPatch } from "./diary-edits";
  */
 export interface ToastInfo {
   message: string;
-  kind: "added" | "deleted" | "undoable" | "saved" | "moved" | "notice" | "unsaved";
+  kind: "added" | "deleted" | "undoable" | "saved" | "moved" | "notice" | "unsaved" | "left";
   mealSlot: MealSlot | null;
   /** How long it stays. A delete or a copy stays 5 s, which is also the undo window. */
   durationMs: number;
@@ -228,8 +230,15 @@ interface DiaryContextValue {
   unsavedIds: ReadonlySet<string>;
   /** Live mode: today's entries whose food has no server row (a recipe made in the app): they stay on this device. */
   localOnlyIds: ReadonlySet<string>;
-  /** Thử lại of the "unsaved" toast: the writes the server refused are sent again. */
-  retryUnsaved: () => void;
+  /**
+   * Thử lại (the "unsaved" toast, the Chưa lưu list): everything that has not reached the server is sent again, writes refused
+   * for good included. It always says what happened (a toast), and resolves with the same numbers.
+   */
+  retryUnsaved: () => Promise<RetryOutcome>;
+  /** Chuyển sang hôm nay: an add the server refuses for good is logged again on today, under the same entry. */
+  moveUnsavedToToday: (key: string) => Promise<void>;
+  /** Bỏ món này: the write leaves the outbox, and the entry it was for leaves this device. */
+  discardUnsaved: (key: string) => Promise<void>;
   /** Today as YYYY-MM-DD (Asia/Ho_Chi_Minh). Null until mounted. */
   todayIso: string | null;
   /** Earlier days the user logged, by date (yesterday's entries included while it is editable); memo dependency for anything that calls dayEntries. */
@@ -517,8 +526,8 @@ const REFRESH_STALE_MS = 45 * 1000;
 /** What addEntry sends for an entry of the diary. */
 function addPayload(entry: AddedDiaryEntry, date: string): Parameters<typeof apiClient.addEntry>[0] {
   return entry.kind === "quick"
-    ? { id: entry.id, kind: "quick", calories: entry.calories ?? undefined, mealSlot: entry.mealSlot, date }
-    : { id: entry.id, foodId: entry.foodId, grams: entry.grams, mealSlot: entry.mealSlot, date, servingLabel: entry.displayQty };
+    ? { id: entry.id, kind: "quick", calories: entry.calories ?? undefined, mealSlot: entry.mealSlot, date, label: entry.foodName }
+    : { id: entry.id, foodId: entry.foodId, grams: entry.grams, mealSlot: entry.mealSlot, date, servingLabel: entry.displayQty, label: entry.foodName };
 }
 
 /**
@@ -602,11 +611,11 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const onSync = useCallback(
-    (result: SyncResult) => {
+    (result: SyncResult, options: { quiet?: boolean } = {}) => {
       // A sync that sent nothing (the 60 s poll) changes nothing on screen
       if (result.saved.length > 0 || result.held.length > 0) setSyncVersion((v) => v + 1);
       markSynced(result.saved);
-      showNotice(syncNotice(result.held, unsavedShown.current));
+      if (!options.quiet) showNotice(syncNotice(result.held, unsavedShown.current));
     },
     [markSynced, showNotice]
   );
@@ -1556,12 +1565,53 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     setSyncSummary({ pending: counts?.pending ?? 0, failed: counts?.failed ?? 0, final: counts?.final ?? 0, parked: counts?.parked ?? 0, saving });
   }, [syncVersion, saving, demo, accountId]);
 
-  const retryUnsaved = useCallback(() => {
+  const retryUnsaved = useCallback(async (): Promise<RetryOutcome> => {
     markUsed("retry-unsaved");
     unsavedShown.current = false;
     setToast(null);
-    syncOfflineOutbox({ retryHeld: true }).then(onSync).catch(() => {});
+    const before = outboxItems().length;
+    // Hotfix 20/10: Thử lại is never silent. Whatever the run did, the person is told: how many were saved, how many are left
+    let outcome: RetryOutcome;
+    try {
+      onSync(await syncOfflineOutbox({ retryHeld: true }), { quiet: true });
+      const left = outboxItems().length;
+      outcome = { saved: Math.max(0, before - left), left };
+    } catch {
+      outcome = { saved: 0, left: Math.max(1, outboxItems().length) };
+    }
+    setSyncVersion((v) => v + 1);
+    setToast({ message: retryMessage(outcome), kind: outcome.left > 0 ? "left" : "notice", mealSlot: null, durationMs: NOTICE_TOAST_MS });
+    return outcome;
   }, [onSync]);
+
+  // Chuyển sang hôm nay: the stuck add is made again for today (the outbox) and the entry moves to today's list
+  const moveUnsavedToToday = useCallback(async (key: string) => {
+    const id = await callEngine("moveAddToToday", key);
+    if (!id) return;
+    const found = Object.values(archive).flat().find((e) => e.id === id);
+    setArchive((prev) => Object.fromEntries(Object.entries(prev).map(([day, list]) => [day, list.filter((e) => e.id !== id)])));
+    setEdits((prev) => {
+      const here = prev.added.find((e) => e.id === id);
+      const entry = here ?? found;
+      if (!entry) return prev;
+      const moved = { ...entry, addedAt: new Date().toISOString(), day: undefined, synced: false };
+      return { ...prev, added: [...prev.added.filter((e) => e.id !== id), moved] };
+    });
+    setSyncVersion((v) => v + 1);
+  }, [archive]);
+
+  const discardUnsaved = useCallback(async (key: string) => {
+    const item = outboxItems().find((i) => i.key === key);
+    if (!item) return;
+    // An add takes the entry's other writes with it (an edit or a delete of an entry the server never had is meaningless)
+    const keys = isDiaryAdd(item) ? outboxItems().filter((i) => i.id === item.id).map((i) => i.key) : [key];
+    await callEngine("discardOutboxItems", keys);
+    if (isDiaryAdd(item)) {
+      setEdits((prev) => removeAddedIn(prev, [item.id]));
+      setArchive((prev) => Object.fromEntries(Object.entries(prev).map(([day, list]) => [day, list.filter((e) => e.id !== item.id)])));
+    }
+    setSyncVersion((v) => v + 1);
+  }, []);
 
   // The update toast (components/pwa) waits for the outbox: it asks for a send, with nothing held back
   useEffect(() => {
@@ -1670,6 +1720,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       unsavedIds,
       localOnlyIds,
       retryUnsaved,
+      moveUnsavedToToday,
+      discardUnsaved,
       refreshToday,
       saving,
       todayIso,
@@ -1718,6 +1770,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       unsavedIds,
       localOnlyIds,
       retryUnsaved,
+      moveUnsavedToToday,
+      discardUnsaved,
       refreshToday,
       saving,
       todayIso,

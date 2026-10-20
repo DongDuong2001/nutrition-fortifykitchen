@@ -2,7 +2,6 @@ import { getApiBaseUrl, apiClient, apiFetch, diaryTimeout, serverCode, writeOutc
 import { currentAccountId } from "./auth-actions";
 import { isDemo } from "./demo";
 import { getTodayIsoVN } from "./date";
-import { isEditableDay } from "./day-rules";
 import { generateUuid } from "./uuid";
 import type { AddedDiaryEntry } from "./diary-edits";
 import { isRecipeId } from "./recipe";
@@ -13,6 +12,8 @@ import { storageErrorKind } from "./storage-error";
 import { requestPersistentStorage } from "./storage-persist";
 import { onTab, postTab } from "./tab-sync";
 import { idbRun } from "./idb";
+import { isDiaryAdd, stamp, tooOldForServer } from "./late-writes";
+import { unstickLateWrites } from "./unstick-late-writes";
 export { watchAccount } from "./account-guard";
 export { unsyncedCount, wipeAccount } from "./account-wipe";
 export { initHistory, requestDays, saveHistoryDays } from "./history";
@@ -49,7 +50,7 @@ import {
  */
 
 /** What a write needs to be made into an outbox item. */
-type DiaryWrite = Pick<OutboxItem, "id" | "date" | "payload" | "method" | "path" | "kind" | "entity" | "day">;
+type DiaryWrite = Pick<OutboxItem, "id" | "date" | "payload" | "method" | "path" | "kind" | "entity" | "day"> & { label?: string };
 
 const itemKey = (item: Pick<OutboxItem, "key">) => item.key;
 export const itemMethod = (item: Pick<OutboxItem, "method">) => item.method ?? "POST";
@@ -67,14 +68,17 @@ function currentScope(): OutboxScope | null {
 }
 
 /** Starts reading the account's outbox from disk (and moves the old localStorage array over). Call when an account loads. */
-export function loadOfflineOutbox(): Promise<void> {
+export async function loadOfflineOutbox(): Promise<void> {
   wireAlerts();
   // The service worker may send what waits while the app is closed (Android): it needs to know whose writes, and where
   const account = currentAccountId();
   if (account && !isDemo()) void idbRun("kv", "readwrite", (store) => store.put({ account, apiBase: getApiBaseUrl() }, "sync-meta"));
   // After sign-in (an account is loading): ask the browser to keep this site's data (Safari clears it after 7 days otherwise)
   void requestPersistentStorage();
-  return loadOutbox(currentScope());
+  const scope = currentScope();
+  await loadOutbox(scope);
+  // Hotfix 20/10: writes the old rule held for good go back to queued, once per app version, and are sent with made_at
+  if (scope && !isDemo() && (await unstickLateWrites(scope, process.env.NEXT_PUBLIC_APP_VERSION || "dev")) > 0) void syncOfflineOutbox({ force: true });
 }
 
 /** Queues a write in the outbox of the account it belongs to (default: the signed-in one). */
@@ -202,11 +206,13 @@ export function pendingFavouriteOps(): Array<[string, boolean]> {
   );
 }
 
-/** Whether a refusal of the day this write is about is for good: the day is older than the editable window. */
-function refusedForGood(write: Pick<OutboxItem, "day" | "date">): boolean {
-  const day = write.day || write.date;
-  // A write that names no day (an old item) keeps the old rule: any past-day refusal is final
-  return !day || !isEditableDay(day, getTodayIsoVN());
+/**
+ * Whether a refusal of the day this write is about is for good. The server judges a write by when the user made it (made_at),
+ * so only a write older than the 14 days it accepts can never be saved. Any younger one is refused only by a server that does
+ * not know made_at yet: it stays held for Thử lại, never final.
+ */
+function refusedForGood(write: Pick<OutboxItem, "createdAt">): boolean {
+  return tooOldForServer(write, Date.now());
 }
 
 interface Sent {
@@ -217,17 +223,21 @@ interface Sent {
   busy?: boolean;
   /** The Retry-After the server answered with, if any. */
   retryAfter?: string | null;
+  /** The server's error code ("PAST_DAY_READ_ONLY"), never its text. */
+  code?: string;
 }
 
-async function sendWrite(write: Pick<OutboxItem, "method" | "path" | "date" | "payload" | "day">): Promise<Sent> {
+async function sendWrite(write: Pick<OutboxItem, "method" | "path" | "date" | "payload" | "day" | "createdAt">): Promise<Sent> {
   const method = itemMethod(write);
   let status = 0;
   let retryAfter: string | null = null;
   let code = "";
+  // made_at is the item's own createdAt, on the first send and on every retry: the moment the user made the write
+  const request = stamp(write, method, itemPath(write), write.payload);
   try {
-    const res = await apiFetch(itemPath(write), {
+    const res = await apiFetch(request.path, {
       method,
-      body: method === "DELETE" ? undefined : JSON.stringify(write.payload),
+      body: request.body,
       signal: diaryTimeout(),
     });
     status = res.status;
@@ -241,7 +251,7 @@ async function sendWrite(write: Pick<OutboxItem, "method" | "path" | "date" | "p
   // Any non-2xx answer (not a 404 on a delete, which means done) is reported once: its status and error code only
   if (status >= 300 && outcome !== "saved") reportClientError({ kind: "write", method, path: itemPath(write), status, message: code });
   const pastDay = outcome === "held" && status === 409 && code === PAST_DAY_READ_ONLY;
-  return { outcome, status, final: pastDay && refusedForGood(write), retryAfter };
+  return { outcome, status, final: pastDay && refusedForGood(write), retryAfter, code: code || undefined };
 }
 
 // Writes that answered 401 one after another, after the session was renewed: the second one says the session ran out
@@ -280,10 +290,10 @@ async function attempt(scope: OutboxScope, item: OutboxItem): Promise<Sent> {
     await removeItems(scope, [item.key]);
     tellOtherTabs(scope);
   } else if (sent.outcome === "held") {
-    await putItem(scope, { ...current, state: "held", retries: (current.retries ?? 0) + 1, nextAttemptAt: undefined, held: { status: sent.status, final: sent.final } });
+    await putItem(scope, { ...current, state: "held", retries: (current.retries ?? 0) + 1, nextAttemptAt: undefined, lastStatus: undefined, held: { status: sent.status, final: sent.final, code: sent.code, at: Date.now() } });
   } else {
     // Not refused, not answered or answered "later": it goes again after a wait that grows, and is parked after MAX_ATTEMPTS
-    await putItem(scope, { ...current, state: "queued", held: undefined, ...afterFailure(current.retries, Date.now(), sent.retryAfter) });
+    await putItem(scope, { ...current, state: "queued", held: undefined, lastStatus: sent.status, ...afterFailure(current.retries, Date.now(), sent.retryAfter) });
     requestBackgroundSync();
   }
   return sent;
@@ -364,9 +374,16 @@ let syncQueue: Promise<SyncResult> = Promise.resolve({ saved: [], held: [] });
  * only with `retryHeld` (Thử lại). Writes queued while a run is going are kept. Only one tab drains at a time (a Web
  * Lock), and it reads the outbox from disk first, so what another tab queued is sent too.
  */
-export function syncOfflineOutbox(options: { retryHeld?: boolean; force?: boolean } = {}): Promise<SyncResult> {
-  syncQueue = syncQueue.catch(() => ({ saved: [], held: [] })).then(() => runOutbox(options.retryHeld === true, options.force === true || options.retryHeld === true));
+export function syncOfflineOutbox(options: SyncOptions = {}): Promise<SyncResult> {
+  syncQueue = syncQueue.catch(() => ({ saved: [], held: [] })).then(() => runOutbox(options.retryHeld === true, options.force === true || options.retryHeld === true, options.onProgress));
   return syncQueue;
+}
+
+export interface SyncOptions {
+  retryHeld?: boolean;
+  force?: boolean;
+  /** Called after each write of the run is dealt with: how many have been tried of the ones this run will try. */
+  onProgress?: (progress: { done: number; total: number }) => void;
 }
 
 const EMPTY_RESULT = (): SyncResult => ({ saved: [], held: [] });
@@ -384,7 +401,7 @@ function sendingElsewhere(item: OutboxItem, now: number): boolean {
   return sendingKeys.has(item.key) || now - (item.lastAttemptAt ?? 0) < STALE_SENDING_MS;
 }
 
-async function runOutbox(retryHeld: boolean, force: boolean): Promise<SyncResult> {
+async function runOutbox(retryHeld: boolean, force: boolean, onProgress?: SyncOptions["onProgress"]): Promise<SyncResult> {
   const result = EMPTY_RESULT();
   if (frozen) return result;
   // The run belongs to the account signed in when it starts: its writes never go out with another account's session
@@ -397,12 +414,15 @@ async function runOutbox(retryHeld: boolean, force: boolean): Promise<SyncResult
     const items = readItems(scope);
     if (!items.length) return result;
     const blocked = new Set<string>();
+    // Thử lại sends everything the list shows, writes refused for good included
+    const total = items.filter((item) => retryHeld || !(item.held || item.parked)).length;
+    let done = 0;
     for (const listed of items) {
       const item = findItem(scope, listed.key);
       if (!item) continue;
       // Waiting after a failure (backoff) and parked ones stay put unless the person asked (Thử lại) or the network just came back (force)
       const waiting = !force && (item.nextAttemptAt ?? 0) > Date.now();
-      if (blocked.has(item.id) || item.held?.final || (item.held && !retryHeld) || (item.parked && !retryHeld) || waiting || waitsForFood(item) || sendingElsewhere(item, Date.now())) {
+      if (blocked.has(item.id) || (item.held && !retryHeld) || (item.parked && !retryHeld) || waiting || waitsForFood(item) || sendingElsewhere(item, Date.now())) {
         blocked.add(item.id);
         continue;
       }
@@ -412,6 +432,7 @@ async function runOutbox(retryHeld: boolean, force: boolean): Promise<SyncResult
         blocked.add(item.id);
         continue;
       }
+      onProgress?.({ done: ++done, total });
       if (outcome === "saved") {
         if (itemMethod(item) !== "DELETE" && isDiary(item)) result.saved.push(item.id);
         continue;
@@ -430,6 +451,31 @@ async function runOutbox(retryHeld: boolean, force: boolean): Promise<SyncResult
     if (gone.length > 0) await removeItems(scope, gone.map(itemKey));
     return result;
   }, result);
+}
+
+/** Takes these writes out of the outbox for good (the person chose Bỏ món này). */
+export async function discardOutboxItems(keys: string[]): Promise<void> {
+  const scope = currentScope();
+  if (!scope) return;
+  await removeItems(scope, keys);
+  tellOtherTabs(scope);
+}
+
+/**
+ * Chuyển sang hôm nay: an add the server refuses for good is re-logged on today. It keeps its id (the server never had it)
+ * and becomes a new write, made now, for today. Returns the entry's id, or null when the item is not an add.
+ */
+export async function moveAddToToday(key: string): Promise<string | null> {
+  const scope = currentScope();
+  const item = scope ? findItem(scope, key) : undefined;
+  if (!scope || !item || !isDiaryAdd(item)) return null;
+  const today = getTodayIsoVN();
+  const now = Date.now();
+  const moved: OutboxItem = { ...item, key: `${item.id}:${now}:${generateUuid()}`, seq: newSeq(), date: today, day: undefined, path: undefined, createdAt: now, state: "queued", attempts: 0, retries: 0, held: undefined, parked: undefined, nextAttemptAt: undefined, lastStatus: undefined };
+  await removeItems(scope, [key]);
+  await putItem(scope, moved);
+  void syncOfflineOutbox({ force: true });
+  return item.id;
 }
 
 /**

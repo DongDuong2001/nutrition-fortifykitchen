@@ -4,8 +4,9 @@ import type { AddedDiaryEntry } from "../diary-edits";
 import { entriesFromDaySummary, mergeServerDay } from "../server-day";
 
 // cc-65: the real api-client and mergeServerDay against an in-memory API that behaves like apps/api: an add is an upsert
-// by the client's uuid (a replay never makes a second row), a day before yesterday answers 409 PAST_DAY_READ_ONLY, an
-// expired session answers 401 until GET /auth/session renews it, and the last write to an entry wins.
+// by the client's uuid (a replay never makes a second row), a day before yesterday answers 409 PAST_DAY_READ_ONLY (judged by
+// made_at, when the user made the write, within 14 days: hotfix 20/10), an expired session answers 401 until GET /auth/session
+// renews it, and the last write to an entry wins.
 
 const BASE = "https://api.test/api/v1";
 const TODAY = "2026-10-20";
@@ -31,9 +32,18 @@ function fakeApi() {
     /** The server saves the next add, then the answer never arrives (a dropped connection). */
     loseNextAnswer: false,
     offline: false,
+    /** false: a server from before the hotfix, which judges a day by the time the write arrives. */
+    knowsMadeAt: true,
     /** A write from another device, straight to the server. */
     patchFromElsewhere(id: string, grams: number) {
       rows.get(id)!.grams = grams;
+    },
+    /** apps/api's rule: made_at's day (Ho Chi Minh) or the one before, made_at no older than 14 days and not ahead; else the server clock. */
+    writable(day: string, madeAt?: string): boolean {
+      if (!api.knowsMadeAt || !madeAt) return day >= new Date(Date.now() + 7 * 3600_000 - 86_400_000).toISOString().slice(0, 10);
+      const when = Date.parse(madeAt);
+      if (when > Date.now() + 5 * 60_000 || Date.now() - when > 14 * 86_400_000) return false;
+      return day >= new Date(when + 7 * 3600_000 - 86_400_000).toISOString().slice(0, 10);
     },
     async handle(url: string, init?: RequestInit): Promise<Response> {
       const method = init?.method ?? "GET";
@@ -51,7 +61,7 @@ function fakeApi() {
       let m = path.match(/^\/days\/(\d{4}-\d{2}-\d{2})\/entries$/);
       if (m && method === "POST") {
         const day = m[1];
-        if (day < "2026-10-19") return json(409, { error: { code: "PAST_DAY_READ_ONLY", message: "read only" } });
+        if (!api.writable(day, body.made_at)) return json(409, { error: { code: "PAST_DAY_READ_ONLY", message: "read only" } });
         if (!rows.has(body.id)) rows.set(body.id, { id: body.id, day, food_id: body.food_id, grams: body.grams, meal_slot: body.meal_slot, created_at: new Date().toISOString() });
         if (api.loseNextAnswer) {
           api.loseNextAnswer = false;
@@ -136,14 +146,69 @@ describe("sync against a fake API", () => {
     expect(getPendingOfflineEntryIds()).toEqual([]);
   });
 
-  it("409 PAST_DAY_READ_ONLY is final: the server keeps nothing and the write is never sent again", async () => {
+  it("a server that does not know made_at refuses a two-day-old date: held, not final; the poll leaves it alone, Thử lại sends it again", async () => {
     const api = fakeApi();
-    const result = await add("2026-10-17");
-    expect(result).toMatchObject({ state: "held", status: 409 });
+    api.knowsMadeAt = false;
+    vi.useFakeTimers({ toFake: ["Date"] });
+    try {
+      // Made on 18/10 for 18/10, reaching the old server on 20/10: it refuses (two days back by its clock)
+      vi.setSystemTime(new Date("2026-10-18T05:00:00Z"));
+      api.offline = true;
+      await add("2026-10-18");
+      vi.setSystemTime(new Date("2026-10-20T03:00:00Z"));
+      api.offline = false;
+      const first = await syncOfflineOutbox({ force: true });
+      expect(first.held).toEqual([{ id: ID, status: 409, date: "2026-10-18", final: false }]);
+      const sent = api.calls.filter((c) => c.startsWith("POST /days")).length;
+      await syncOfflineOutbox({ force: true });
+      expect(api.calls.filter((c) => c.startsWith("POST /days"))).toHaveLength(sent);
+      // The server learns made_at (the deploy): Thử lại sends it, and it is saved
+      api.knowsMadeAt = true;
+      expect((await syncOfflineOutbox({ retryHeld: true })).saved).toEqual([ID]);
+    } finally {
+      vi.useRealTimers();
+    }
+    expect(api.rows.get(ID)?.day).toBe("2026-10-18");
+  });
+
+  it("a write made offline three days ago is judged by when it was made: saved for that day when it reaches the server", async () => {
+    const api = fakeApi();
+    vi.useFakeTimers({ toFake: ["Date"] });
+    try {
+      vi.setSystemTime(new Date("2026-10-17T05:00:00Z"));
+      api.offline = true;
+      expect((await add("2026-10-17")).state).toBe("queued");
+      vi.setSystemTime(new Date("2026-10-20T03:00:00Z"));
+      api.offline = false;
+      expect((await syncOfflineOutbox({ force: true })).saved).toEqual([ID]);
+    } finally {
+      vi.useRealTimers();
+    }
+    expect(api.rows.get(ID)?.day).toBe("2026-10-17");
+    expect(getPendingOfflineEntryIds()).toEqual([]);
+  });
+
+  it("a write made 15 days ago is refused for good: final, not sent by the poll, sent again (and refused again) by Thử lại", async () => {
+    const api = fakeApi();
+    vi.useFakeTimers({ toFake: ["Date"] });
+    try {
+      vi.setSystemTime(new Date("2026-10-04T05:00:00Z"));
+      api.offline = true;
+      await add("2026-10-04");
+      vi.setSystemTime(new Date("2026-10-20T03:00:00Z"));
+      api.offline = false;
+      const first = await syncOfflineOutbox({ force: true });
+      expect(first.held).toEqual([{ id: ID, status: 409, date: "2026-10-04", final: true }]);
+      const sent = api.calls.filter((c) => c.startsWith("POST /days")).length;
+      await syncOfflineOutbox({ force: true });
+      expect(api.calls.filter((c) => c.startsWith("POST /days"))).toHaveLength(sent);
+      await syncOfflineOutbox({ retryHeld: true });
+      expect(api.calls.filter((c) => c.startsWith("POST /days"))).toHaveLength(sent + 1);
+    } finally {
+      vi.useRealTimers();
+    }
     expect(api.rows.size).toBe(0);
-    await syncOfflineOutbox({ force: true });
-    await syncOfflineOutbox({ retryHeld: true });
-    expect(api.calls.filter((c) => c.startsWith("POST /days"))).toHaveLength(1);
+    expect(getPendingOfflineEntryIds()).toEqual([ID]);
   });
 
   it("a replayed uuid (the server saved it, the answer was lost) makes no second row, and the day shows it once", async () => {
