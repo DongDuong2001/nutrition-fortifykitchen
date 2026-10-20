@@ -5,7 +5,7 @@
 - step indicator (phone "Bước 1 / 2" and "Bước 2 / 2", desktop card "Bước 1/2"), one primary button per step
 - inputs: birth year inputMode numeric + autocomplete bday-year, weight inputMode decimal
 - inline validation on blur, Enter moves from the birth year to the weight, back keeps the typed values
-- summary numbers match the coach's rules for the sample profile (HANDOFF.md: 30-35 kcal/kg, 1,6-2,2 g/kg protein)
+- summary numbers match the coach's rules for the sample profile (cc-73b: the upper end, 35 kcal/kg, 2,2 g/kg protein)
 - the summary has no bottom nav, one h1, no horizontal scroll, targets >= 44 px
 Screenshots: .screenshots/cc2-15-{profile,goal,summary,first-meal}-{390,1280}.png
 Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/cc2_15.py
@@ -25,8 +25,8 @@ SHOTS = Path(__file__).resolve().parent.parent.parent / ".screenshots"
 SIZES = [("390", {"width": 390, "height": 844}), ("1280", {"width": 1280, "height": 800})]
 NOW = "2026-10-13T18:00:00+07:00"
 WEIGHT = 70
-# Expected from the coach's rules, not from the code: Giữ cân 30-35 kcal/kg, protein 1,6-2,2 g/kg
-SUMMARY_ROWS = ["Năng lượng 2.100–2.450 kcal", "Đạm 112–154 g"]  # the list rows of /setup/done (cc2-15b)
+# Expected from the coach's rules, not from the code: Giữ cân 35 kcal/kg, protein 2,2 g/kg (the upper end, cc-73b)
+SUMMARY_ROWS = ["Năng lượng 2.450 kcal", "Đạm 154 g"]  # the list rows of /setup/done (cc2-15b)
 problems, notes = [], []
 
 

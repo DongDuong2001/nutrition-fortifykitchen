@@ -78,7 +78,7 @@ def test_today_cards(browser):
         check(expected in txt, f"training @ 1440: shows '{expected}'")
     pg.goto(BASE + "/micros", wait_until="networkidle")
     pg.wait_for_timeout(400)
-    check("2.500 mg" in body_text(pg), "micros @ 1440: potassium target 2.500 mg (VN 2016, cc-67)")
+    check("3.400 mg" in body_text(pg), "micros @ 1440: potassium target 3.400 mg (DRI, cc-73b)")
     ctx.close()
 
 

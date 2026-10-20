@@ -131,7 +131,7 @@ export function monthGrid(month: string, todayIso: string): { leading: number; d
 export function statDisplay(consumed: number, stat: Pick<MockMacroStat, "unit" | "targetMin" | "targetMax">): string {
   const { unit, targetMin, targetMax } = stat;
   if (targetMin === null) return `${formatAmount(consumed, unit)} ${unit}`;
-  if (targetMax) return `${formatAmount(consumed, unit)} / ${formatAmount(targetMin, unit)}–${formatAmount(targetMax, unit)} ${unit}`;
+  if (targetMax && targetMax !== targetMin) return `${formatAmount(consumed, unit)} / ${formatAmount(targetMin, unit)}–${formatAmount(targetMax, unit)} ${unit}`;
   return `${formatAmount(consumed, unit)} / ${formatAmount(targetMin, unit)} ${unit}`;
 }
 

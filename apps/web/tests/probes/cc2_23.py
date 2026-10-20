@@ -2,7 +2,7 @@
 
 - Khám phá: Món giàu vi chất is the first section under the chips, a snapping horizontal carousel of coloured
   "Giàu <chất>" tiles in Saira; Gần đây and Yêu thích are carousels (or a one-line empty state); no horizontal scroll
-- Cài đặt: the profile card is the one dark card, with the targets in Saira ("1.950–2.275 kcal", "đạm 104–143 g");
+- Cài đặt: the profile card is the one dark card, with the targets in Saira ("2.275 kcal", "đạm 143 g");
   rows have icons; the danger zone is last and red; Pro is not a second dark card
 Screenshots: .screenshots/cc2-23-*.png
 Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/cc2_23.py

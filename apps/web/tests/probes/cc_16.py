@@ -2,7 +2,7 @@
 
 Cài đặt has the profile card, Mục tiêu row, Ứng dụng, Pro, Tài khoản and the danger zone. Hồ sơ has the body and
 goal cards (birth year as a FormRow once opened) and links to targets. Mục tiêu is read-only and shows the coach
-values from lib/targets.ts with the VN 2016 values marked *. Rows in one card share left and right edges.
+values from lib/targets.ts with the US DRI values marked *. Rows in one card share left and right edges.
 Checks at 390 and 1280; screenshots to .screenshots/cc-16-*.png.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_16.py
 """
@@ -110,7 +110,7 @@ def main():
             for text in ["Hồ sơ của bạn", "Mục tiêu mỗi ngày", "Ngôn ngữ", "Nhắc nhở", "Thêm vào màn hình chính", "Tài khoản", "Vùng nguy hiểm", "Xóa tài khoản"]:
                 check(text in body, f"{label} /settings shows {text!r}")
             check("Nam · sinh 2003 · 65 kg · Giữ cân" in body, f"{label} /settings profile sub reads Nam · sinh 2003 · 65 kg · Giữ cân")
-            check(re.search(r"1.950–2.275 kcal\s+đạm 104–143 g", body) is not None, f"{label} /settings targets sub reads kcal and đạm")
+            check(re.search(r"2.275 kcal\s+đạm 143 g", body) is not None, f"{label} /settings targets sub reads kcal and đạm")
             check(pg.locator("a[href='/settings/profile']").count() >= 1, f"{label} /settings links to /settings/profile")
             check(pg.locator("a[href='/settings/targets']").count() >= 1, f"{label} /settings links to /settings/targets")
             check(pg.locator("a[href='/settings/delete-account']").count() >= 1, f"{label} /settings links to delete-account")
@@ -148,9 +148,9 @@ def main():
             context, pg, errors = open_page(browser, size, "/settings/targets")
             pg.wait_for_selector("h1:has-text('Mục tiêu mỗi ngày')")
             body = pg.inner_text("main")
-            for text in ["1.950–2.275 kcal", "Giữ cân: 30–35 kcal/kg × 65 kg", "104–143 g", "33–65 g", "254 g", "30–40 g", "7–10,5 g", "2.500 mg", "800 mg", "340 mg", "7,9 mg", "10 mg", "Vitamin A", "850 µg", "Selenium", "34 µg", "VN 2016, nam 20–29 tuổi"]:
+            for text in ["2.275 kcal", "Giữ cân: 35 kcal/kg × 65 kg", "143 g", "65 g", "280 g", "32 g", "7–10,5 g", "3.400 mg", "1.000 mg", "400 mg", "8 mg", "11 mg", "Vitamin A", "900 µg", "Selenium", "55 µg", "DRI, nam 19–30 tuổi"]:
                 check(text in body, f"{label} /settings/targets shows {text!r}")
-            check("khuyến nghị dinh dưỡng Việt Nam 2016" in body, f"{label} /settings/targets names VN 2016")
+            check("khuyến nghị DRI của Mỹ và Canada" in body, f"{label} /settings/targets names the US and Canadian DRI")
             check(pg.locator("main input, main select, main textarea").count() == 0, f"{label} /settings/targets has no inputs (read-only)")
             check(pg.locator("a[href='/settings/profile']:has-text('Sửa trong Hồ sơ')").count() == 1, f"{label} /settings/targets has one 'Sửa trong Hồ sơ' link")
             check_edges(pg, "targets-row", f"{label} /settings/targets")

@@ -24,13 +24,13 @@ NOW = "2026-10-13T18:00:00+07:00"
 WEIGHT = 70
 # cc2-15c: without a saved profile every tab route goes to /setup/profile, so the empty-state checks start with one
 PROFILE = '{"sex":"male","birthYear":2003,"weightKg":65,"goal":"maintain","periodMode":false,"trainingMinutesDefault":60,"displayName":""}'
-# Expected from the coach's rules, not from the code: 70 kg, Giữ cân 30-35 kcal/kg, protein 1,6-2,2 g/kg, fat 0,5-1 g/kg,
-# carbs = (energy min - protein mid x 4 - fat mid x 9) / 4 = (2.100 - 133 x 4 - 52,5 x 9) / 4, salt 4-6 g + 1-1,5 g per 20 min x 3
+# Expected from the coach's rules, not from the code (cc-73b, the upper end): 70 kg, Giữ cân 35 kcal/kg, protein 2,2 g/kg, fat 1 g/kg,
+# carbs = (energy - protein x 4 - fat x 9) / 4 = (2.450 - 154 x 4 - 70 x 9) / 4 = 301, salt 4-6 g + 1-1,5 g per 20 min x 3
 SUMMARY_ROWS = [
-    ("Năng lượng", "2.100–2.450 kcal"),
-    ("Đạm", "112–154 g"),
-    ("Chất béo", "35–70 g"),
-    ("Tinh bột", "274 g"),
+    ("Năng lượng", "2.450 kcal"),
+    ("Đạm", "154 g"),
+    ("Chất béo", "70 g"),
+    ("Tinh bột", "301 g"),
     ("Muối", "7–10,5 g"),
 ]
 # The foods of the sample day (lib/mock/sample-day.ts). The probe logs another food, so these never come from the real entry.
