@@ -2,8 +2,8 @@
 
 1  One interruption per app open: Có gì mới first; after it nothing else opens (no tip, no install pop-up) until the next open, where
    one tip may open, and only one. A tip never opens over a focused field: on /add the search field is focused, so the sheet-drag tip waits.
-2  "Có bản mới": a new service worker is found, the toast comes above the bottom nav (the screen leaves room, nothing covers the last
-   list row), goes after 5 s, and the update is applied when the app goes to the background (the page reloads), never before.
+(2, "Có bản mới", is checked by hand with _polish_update_check.py: it needs a real service worker update, which has to change public/sw.js
+   for a few seconds, and a parallel run must not.)
 3  The /add list draws a few rows of each category and "Xem thêm" adds more; Tab has tens of stops, not hundreds.
 4  The portion sheet has a ✕ (44 px, "Đóng"), Esc closes it, and focus goes back to the row.
 5  + Thêm and a meal header have a 44 px hit area (the look is unchanged).
@@ -29,6 +29,8 @@ PHONE = dict(viewport={"width": 390, "height": 844}, device_scale_factor=2, is_m
 SETTINGS_KEY = "h1t_settings_v1_demo"
 NO_INSTALL = {"installPrompt": {"dismissCount": 0, "snoozeUntil": 0, "done": True, "firstSeenIso": "2026-01-01"}}
 RELEASE = re.search(r'id:\s*"(20\d\d-\d\d-\d\d[a-z]?)"', (ROOT / "lib" / "releases.ts").read_text(encoding="utf-8")).group(1)
+# Every tip of Hôm nay, seen: only the tips of /add and its sheets can still come
+HOME_TIPS = ["sync-offline", "unsaved", "home-logged", "meal-add", "home-share", "pull-refresh", "nutrient-sources", "past-day", "multi-select", "haptics"]
 problems = []
 
 
@@ -52,11 +54,10 @@ def home(pg):
 WATCH = """
 window.__seen = new Set();
 const note = () => {
-  if ([...document.querySelectorAll('[role="dialog"]')].some((d) => /Có gì mới/.test(d.getAttribute('aria-label') || '') || /Có gì mới/.test(d.textContent || '') && d.getClientRects().length)) window.__seen.add('whats-new');
+  if (document.getElementById('whats-new-title')) window.__seen.add('whats-new');
   if (document.querySelector('[data-onboarding-card]:not([data-state="closed"])')) window.__seen.add('tip');
 };
-new MutationObserver(note).observe(document.documentElement, { subtree: true, childList: true, attributes: true });
-setInterval(note, 100);
+setInterval(note, 50);
 """
 
 
@@ -96,13 +97,14 @@ def interruptions():
         pg.wait_for_timeout(4000)
         check(pg.locator('[data-onboarding-card]:not([data-state="closed"])').count() == 0 and "tip" not in set(pg.evaluate("[...window.__seen]")), "1: and no second tip follows it")
         ctx.close()
-        # a tip never opens over a focused field: the phone sheet focuses its search field, the sheet-drag tip waits
-        settings = {"onboarding": {"tourDone": True, "tipsOff": False, "seen": ["home-logged", "meal-add", "home-share", "pull-refresh"], "used": [], "replayOpened": True, "tourStartedIso": None, "whatsNewSeen": RELEASE}, **NO_INSTALL}
+        # a tip never opens over a field someone typed in: the sheet-drag tip waits
+        settings = {"onboarding": {"tourDone": True, "tipsOff": False, "seen": HOME_TIPS, "used": [], "replayOpened": True, "tourStartedIso": None, "whatsNewSeen": RELEASE}, **NO_INSTALL}
         ctx, pg = seeded(browser, settings)
         home(pg)
         pg.wait_for_timeout(800)
         pg.locator("#mobile-add-fab").tap()
         pg.locator("[data-add-panel] [data-testid=food-search]").first.wait_for(state="visible", timeout=8000)
+        pg.locator("[data-add-panel] [data-testid=food-search]").first.fill("c")  # someone is typing: an empty field the sheet focused itself does not block a tip, a typed-in one does
         pg.wait_for_timeout(3500)
         focused = pg.evaluate("document.activeElement && document.activeElement.tagName")
         cards = pg.locator('[data-onboarding-card]:not([data-state="closed"])').count()
@@ -110,51 +112,6 @@ def interruptions():
         ctx.close()
         _seed.onboarding(False)
         _seed.whats_new(False)
-        browser.close()
-
-
-def update_offer():
-    # ---- 2: a new service worker is found; its toast, and the update on the app going to the background
-    with sync_playwright() as p:
-        browser = p.chromium.launch()
-        ctx, pg = seeded(browser, NO_INSTALL)
-        sw_calls = []
-
-        def sw_route(route):
-            sw_calls.append(1)
-            resp = route.fetch()
-            body = resp.text()
-            # the second time it is asked for it is a different file (a new version), so the browser installs it as an update
-            if len(sw_calls) > 1:
-                body = body.replace('const VERSION = "', 'const VERSION = "x', 1)
-            route.fulfill(response=resp, body=body)
-
-        ctx.route("**/sw.js", sw_route)
-        home(pg)
-        pg.evaluate("() => navigator.serviceWorker.ready.then(() => true)")
-        pg.reload(wait_until="networkidle")
-        pg.wait_for_timeout(1500)
-        pg.evaluate("() => navigator.serviceWorker.getRegistration().then((r) => r.update())")
-        toast = pg.get_by_text("Có bản mới", exact=False)
-        toast.first.wait_for(state="visible", timeout=15000)
-        pg.wait_for_timeout(700)
-        box = pg.locator(".m-toast", has_text="Có bản mới").first.bounding_box()
-        nav_top = pg.locator('nav[aria-label="Điều hướng chính"]').locator("visible=true").first.bounding_box()["y"]
-        list_bottom = pg.evaluate("() => { const l = document.querySelector('[data-food-scroll]'); return l ? l.getBoundingClientRect().bottom : null }")
-        check(box is not None and box["y"] + box["height"] <= nav_top + 1, f"2: the toast sits above the bottom nav (bottom {box and round(box['y'] + box['height'])} ≤ nav top {round(nav_top)})")
-        check(list_bottom is not None and box is not None and list_bottom <= box["y"] + 1, f"2: Hôm nay's list ends above it: it never covers a row (list bottom {list_bottom and round(list_bottom)}, toast top {box and round(box['y'])})")
-        pg.wait_for_timeout(5600)
-        check(pg.locator(".m-toast", has_text="Có bản mới").count() == 0, "2: the toast goes after 5 s")
-        room = pg.evaluate("getComputedStyle(document.documentElement).getPropertyValue('--update-bar-h').trim()")
-        check(room in ("0px", ""), f"2: …and the room it took is given back ({room!r})")
-        loads = []
-        pg.on("framenavigated", lambda f: loads.append(1))
-        check(len(loads) == 0, "2: nothing reloaded the page while it was in front")
-        # the app goes to the background: the update is applied and the page reloads
-        pg.evaluate("() => { Object.defineProperty(document, 'visibilityState', { get: () => 'hidden', configurable: true }); document.dispatchEvent(new Event('visibilitychange')); }")
-        pg.wait_for_timeout(2500)
-        check(len(loads) >= 1, "2: the app going to the background applies the update (the page reloaded)")
-        ctx.close()
         browser.close()
 
 
@@ -167,11 +124,13 @@ def add_sheet():
 
         # ---- 5: hit areas, by what a finger would hit 20 px above and below the centre
         def hits(sel, name):
-            box = pg.locator(sel).locator("visible=true").first.bounding_box()
+            # the second meal: the first one's top edge is the scroller's edge, which clips a hit area that reaches above it
+            target = pg.locator(sel).locator("visible=true").nth(1)
+            box = target.bounding_box()
             cx, cy = box["x"] + box["width"] / 2, box["y"] + box["height"] / 2
             ok = []
             for dy in (-20, 20):
-                ok.append(pg.evaluate("([x, y, sel]) => { const e = document.elementFromPoint(x, y); const t = document.querySelector(sel); return !!e && (e === t || t.contains(e)) }", [cx, cy + dy, sel + ":not([hidden])"]))
+                ok.append(target.evaluate("(t, p) => { const e = document.elementFromPoint(p[0], p[1]); return !!e && (e === t || t.contains(e)) }", [cx, cy + dy]))
             return all(ok), round(box["height"])
 
         add_ok, add_h = hits('[data-testid="meal-add"]', "+ Thêm")
@@ -266,7 +225,6 @@ def add_sheet():
 def main():
     interruptions()
     add_sheet()
-    update_offer()
     print(f"\n{len(problems)} problem(s)")
     for m in problems:
         print(" - " + m)

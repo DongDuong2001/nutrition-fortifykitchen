@@ -40,4 +40,21 @@ describe("the add list's limits", () => {
   it("each row carries its food's id, for the portion sheet to give focus back to it", () => {
     expect(render(grouped, ADD_LIST_LIMITS)).toContain(`data-food-id="${foods[0].id}"`);
   });
+
+  it("a live-sized catalogue (683 foods in 10 categories): 50 rows and ~110 Tab stops, against 500 rows and ~1,010 before", () => {
+    const base = MOCK_FOODS.slice(0, 20);
+    const all = Array.from({ length: 683 }, (_, i) => ({ ...base[i % base.length], id: `f${i}` }));
+    const keys = ["tinh_bot", "dam", "beo", "sua", "do_uong", "rau", "trai_cay", "mon_viet", "an_vat", "gia_vi"] as const;
+    const list: FoodListData = { grouped: true, foods: all, groups: keys.map((key, k) => ({ key, label: key, foods: all.filter((_, i) => i % 10 === k) })) };
+    const draw = (limits: typeof ADD_LIST_LIMITS) =>
+      renderToString(<FoodList list={list} onPick={() => {}} getMeta={() => "meta"} categoryName={() => "nhóm"} empty={<p>trống</p>} limits={limits} tray={{ ids: [], onToggle: () => {} }} />);
+    const after = draw(ADD_LIST_LIMITS);
+    const before = draw(DEFAULT_FOOD_LIST_LIMITS);
+    const stops = (html: string) => (html.match(/<button/g) ?? []).length;
+    expect(rowsOf(after)).toBe(50);
+    expect(stops(after)).toBeLessThanOrEqual(120);
+    expect(rowsOf(before)).toBe(500);
+    expect(stops(before)).toBeGreaterThan(1000);
+    expect((after.match(/<[a-z]/g) ?? []).length).toBeLessThan(600);
+  });
 });

@@ -1,5 +1,5 @@
 """fix/polish-1020: screenshots at 390 and 1440 of the screens this PR touches, for the PR note: /add, the portion sheet, and Hôm nay with
-an update waiting ("Có bản mới" above the bottom nav). Not a probe (probe:all skips names that start with _).
+an update waiting ("Có bản mới" above the bottom nav). Not a probe (probe:all skips names that start with _; the update screenshot changes public/sw.js for a moment).
 Run with: ALIGN_BASE_URL=http://localhost:3101 python3 tests/probes/_polish_shots.py
 Writes docs/screenshots/polish-1020/<name>-<390|1440>.png
 """
@@ -8,6 +8,8 @@ import os
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright
+
+from _sw_update import waiting_update
 
 BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3100")
 OUT = Path(__file__).resolve().parents[4] / "docs" / "screenshots" / "polish-1020"
@@ -58,25 +60,12 @@ def main():
             pg.screenshot(path=str(OUT / f"portion-{width}.png"))
             ctx.close()
 
-            # Hôm nay with an update waiting: a second sw.js (the first is served as it is) makes the browser find an update
+            # Hôm nay with an update waiting (a real one: _sw_update changes public/sw.js for a moment)
             ctx = context(browser, width)
-            calls = []
-
-            def sw_route(route):
-                calls.append(1)
-                resp = route.fetch()
-                body = resp.text()
-                if len(calls) > 1:
-                    body = body.replace('const VERSION = "', 'const VERSION = "x', 1)
-                route.fulfill(response=resp, body=body)
-
-            ctx.route("**/sw.js", sw_route)
             pg = ctx.new_page()
             pg.goto(BASE + "/app", wait_until="networkidle")
-            pg.evaluate("() => navigator.serviceWorker.ready.then(() => true)")
-            pg.reload(wait_until="networkidle")
-            pg.wait_for_timeout(1500)
-            pg.evaluate("() => navigator.serviceWorker.getRegistration().then((r) => r.update())")
+            pg.locator('[data-testid="meal-header"]:visible').first.wait_for(state="visible", timeout=10000)
+            waiting_update(pg)
             toast = pg.locator(".m-toast", has_text="Có bản mới").first
             toast.wait_for(state="visible", timeout=15000)
             pg.wait_for_timeout(900)
