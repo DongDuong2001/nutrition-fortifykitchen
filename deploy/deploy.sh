@@ -61,8 +61,15 @@ main() {
   echo "==> Container status"
   "${compose[@]}" ps
 
-  echo "==> Pruning unused images"
-  docker image prune -f
+  # Every deploy builds on this VPS: BuildKit's cache and the old images pile up (about 1.5 GB per deploy). Only
+  # unused images and cache are removed, never a volume; the running containers and their images stay.
+  echo "==> Disk before cleanup"
+  docker system df
+  echo "==> Pruning build cache older than 3 days and unused images older than 7 days"
+  docker builder prune -f --filter until=72h || echo "Builder prune failed (deploy is fine)." >&2
+  docker image prune -af --filter until=168h || echo "Image prune failed (deploy is fine)." >&2
+  echo "==> Disk after cleanup"
+  docker system df
 
   # Last: the site, the API and a write round trip as a user. A failure exits non-zero and rolls nothing back.
   if ! deploy/smoke.sh; then
