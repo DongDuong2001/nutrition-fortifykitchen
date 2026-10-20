@@ -7,7 +7,7 @@ import { SAMPLE_DAY, type MockDayData, type MockFoodItem } from "./mock/sample-d
 import { type FoodItem } from "./mock/foods";
 import { type MealSlot, getMealSlotNameVi } from "./meal-slot";
 import { formatAmount } from "./format";
-import { portionAmountText } from "./portion";
+import { portionAmountText, withoutServingHint } from "./portion";
 import { sumKcal } from "./kcal";
 import { getTodayIsoVN, withRuntimeDate } from "./date";
 import { editableFrom, isEditableDay, pastDaysFor, yesterdayOf } from "./day-rules";
@@ -1194,8 +1194,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       haptic("saved");
 
       const mealNameVi = getMealSlotNameVi(mealSlot);
-      // cc-53b: the amount set ("150 g", "3 quả"), not the label's state words
-      const amount = portionAmountText(qty) ?? qty;
+      // cc-53b: the amount set ("150 g", "3 quả"), not the label's state words nor its "(…)" part
+      const amount = portionAmountText(qty) ?? withoutServingHint(qty);
       setEdits((prev) => dismissUndoIn(prev));
       const dayText = onDayText(day, getTodayIsoVN());
       if (!options?.undoable) {
