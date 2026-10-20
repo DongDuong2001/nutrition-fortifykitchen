@@ -147,7 +147,7 @@ Filmstrips (frames from just before the tap, each labelled with ms since it; a f
 | /add (opened straight) | 46 scripts, 376.5 kB | 28 scripts, 267.6 kB |
 | /explore | 45 scripts, 366.5 kB | 45 scripts, 368.6 kB |
 
-/app and /explore carry about 1–2 kB more (the slot and the sheet's code in the tab frame); /add opened straight loads about 109 kB less (no `motion` chunk, and the sheet code no longer sits in the page twice).
+/app and /explore carry about 1–2 kB more; /add opened straight loads about 109 kB (gzip) less. I did not break the difference down by chunk, so the reason is not stated here (the page shell no longer draws the second copy of the list, and the shared sheet code is split differently, but that is a guess).
 
 **For Dong (PR #29, `feat/ui-ag-18`).** The edits #29 makes to `app/(app)/add/page.tsx` (scroll lock, keyboard lift, focus after the slide, the 1-letter debounce) are in `components/add/add-screen.tsx` and `hooks/use-food-browse.ts` here, where the page's code moved. When you merge main into #29, take main's version of those add files (the page is now a two-line wrapper); the rest of #29 (search.ts, api-client, scripts) does not touch them.
 
