@@ -31,7 +31,7 @@ import { totalsFromEntries } from "./day-totals";
 import { microsSummaryFor } from "./lacking";
 import { nutrientSourcesIn, type NutrientSource } from "./nutrient-sources";
 import { DEFAULT_RECENT_FOODS, isRecentFood, pushRecent, type RecentFood } from "./recent-foods";
-import { CATALOG_FOODS, catalogVersion, subscribeCatalog } from "./catalog";
+import { CATALOG_FOODS, catalogFoodById, catalogVersion, subscribeCatalog } from "./catalog";
 import { readRecipes, serverFoodIdOf, syncRecipeFoods, uploadPendingRecipes } from "./recipe-store";
 import { withServerFoods } from "./recipe";
 import { personaPatch } from "./demo-persona";
@@ -1457,7 +1457,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
           ? mealPortions(edits, slot, samples, onlyDay(today))
           : itemsFromEntries(dayEntries(iso, today).filter((e) => e.mealSlot === slot));
       // Only foods the catalogue has: what is saved is what one tap can add back
-      return items.filter((item) => CATALOG_FOODS.some((f) => f.id === item.foodId));
+      return items.filter((item) => catalogFoodById(item.foodId) !== undefined);
     },
     [edits, samples, todayIso, history, onlyDay]
   );

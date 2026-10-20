@@ -329,7 +329,7 @@ export function findEntry(edits: DiaryEdits, id: string, samples: SampleItemInfo
   const added = edits.added.find((e) => e.id === id);
   if (added) {
     const isQuick = added.kind === "quick";
-    const food = isQuick ? null : CATALOG_FOODS.find((f) => f.id === added.foodId) ?? null;
+    const food = isQuick ? null : catalogFoodById(added.foodId) ?? null;
     return {
       id,
       name: added.foodName,

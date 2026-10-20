@@ -19,9 +19,9 @@ export function useCatalogFoods() {
   const live = isLiveMode();
   // Demo mode is known after mount and changes what browsableFoods returns
   const demo = demoActive();
-  // A copy: in demo mode browsableFoods() is CATALOG_FOODS itself, which is changed in place, so a memo keyed on
-  // `foods` would otherwise never see a made food or a recipe sync
-  const foods = useMemo(() => browsableFoods().slice(), [version, demo]);
+  // A new array whenever the catalogue changes (a made food, a recipe sync), shared by every screen until then
+  // (lib/catalog browsableFoods); it was copied once more per consumer
+  const foods = useMemo(() => browsableFoods(), [version, demo]);
 
   // cc-67: a list has one row per food once the index is there (lib/food-rows); it draws again when it arrives
   useEffect(() => {

@@ -7,7 +7,7 @@ import {
   type MockMacroStat,
   type MockMicroStat,
 } from "./mock/sample-day";
-import { CATALOG_FOODS, addCatalogFood, catalogChanged, setCatalogFoods, setCatalogStatus, weighedFruit, type FoodItem } from "./catalog";
+import { CATALOG_FOODS, addCatalogFood, catalogChanged, catalogFoodById, setCatalogFoods, setCatalogStatus, weighedFruit, type FoodItem } from "./catalog";
 import type { SetupProfile } from "./onboarding";
 import { currentAccountId } from "./auth-actions";
 import { yieldToMain } from "./idle";
@@ -21,10 +21,9 @@ const catalogCache = () => import("./catalog-cache");
 import { normaliseCoaching } from "./coaching-link";
 import type { GoalType, SexType } from "./targets";
 
-export * from "./nutrients";
-export * from "./catalog";
-export * from "./coaches";
-export * from "./leaderboard";
+// perf/live-bundle: no `export *` of the nutrients, the catalogue, the coaches or the ranking any more: every screen
+// imports those from their own module, and re-exporting them here pulled the sample data into every page that talks
+// to the API.
 export type { MockDayData, MockMeal, MockMacroStat, MockMicroStat };
 
 export function mapApiFoodToFoodItem(raw: any): FoodItem {
@@ -636,7 +635,7 @@ export const apiClient = {
       return null;
     }
 
-    return CATALOG_FOODS.find((f) => f.id === id) || null;
+    return catalogFoodById(id) || null;
   },
 
   async createFood(input: CreateFoodInput): Promise<FoodItem> {

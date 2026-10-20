@@ -76,19 +76,36 @@ export function weighedFruit<T extends { category?: string; servings: FoodServin
   return { ...food, servings: kept.length > 0 ? kept : [{ label: "100 g", grams: 100 }] };
 }
 
+// perf/live-bundle: the list is worked out once per catalogue change and shared by every screen that reads it
+// (it was filtered, then copied, once per hook). Callers read it and never change it in place.
+let browsable: { version: number; size: number; demo: boolean; live: boolean; hidden: ReadonlySet<string>; foods: FoodItem[] } | null = null;
+
 /**
  * The catalogue as lists and search read it. Foods that only exist for the demo day are left out unless demo mode
- * is on. Look-ups by id (a saved entry, a recent, a favourite) use catalogFoodById and still find them.
+ * is on. Look-ups by id (a saved entry, a recent, a favourite) use catalogFoodById and still find them. The same
+ * array until the catalogue changes: read it, never change it.
  */
 export function browsableFoods(): FoodItem[] {
+  const demo = demoActive();
+  const live = isLiveMode();
+  const b = browsable;
+  if (b && b.version === catalogVersionNumber && b.size === CATALOG_FOODS.length && b.demo === demo && b.live === live && b.hidden === hiddenFoodIds) {
+    return b.foods;
+  }
+  const foods = listBrowsable(demo, live);
+  browsable = { version: catalogVersionNumber, size: CATALOG_FOODS.length, demo, live, hidden: hiddenFoodIds, foods };
+  return foods;
+}
+
+function listBrowsable(demo: boolean, live: boolean): FoodItem[] {
   // Live mode lists the database's foods (and the user's own) only: the sample foods never mix in, not even before
   // the database catalogue has arrived. A recipe's server food is listed as the recipe, never a second time. A dish
   // the user changed for one meal (cc-67) is a one-off recipe: its local and server food ids are hidden. Another device has
   // no recipe record of it, so a server food named "… · đã chỉnh" is hidden too, unless this device made it as the user's
   // own food (then it lists).
   const listed = (f: FoodItem) => !hiddenFoodIds.has(f.id) && !(f.nameVi.endsWith(EDITED_DISH_SUFFIX) && !madeHere.has(f.id));
-  if (isLiveMode()) return CATALOG_FOODS.filter((f) => !SAMPLE_FOOD_IDS.has(f.id) && listed(f));
-  return (demoActive() ? CATALOG_FOODS : CATALOG_FOODS.filter((f) => !f.demoOnly)).filter(listed);
+  if (live) return CATALOG_FOODS.filter((f) => !SAMPLE_FOOD_IDS.has(f.id) && listed(f));
+  return (demo ? CATALOG_FOODS : CATALOG_FOODS.filter((f) => !f.demoOnly)).filter(listed);
 }
 
 /** The name of a premade dish whose parts were changed for one meal: "Phở bò · đã chỉnh" (lib/dish-recipes). */

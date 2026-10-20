@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { CATALOG_FOODS, addCatalogFood, catalogChanged, catalogFoodById, setCatalogFoods, type FoodItem } from "../catalog";
+import { CATALOG_FOODS, addCatalogFood, browsableFoods, catalogChanged, catalogFoodById, setCatalogFoods, setHiddenFoodIds, type FoodItem } from "../catalog";
+import { setDemoActive } from "../demo";
 
 // perf/live-bundle: catalogFoodById answers from an id → index map instead of scanning the catalogue, and still
 // answers exactly what Array.find did, whatever changed the catalogue and whether or not the change was announced.
@@ -63,5 +64,32 @@ describe("catalogFoodById", () => {
     for (let round = 0; round < 10; round++) for (const f of many) expect(catalogFoodById(f.id)?.id).toBe(f.id);
     // 30.000 look-ups; a scan per look-up was about 45 M comparisons
     expect(performance.now() - started).toBeLessThan(1000);
+  });
+});
+
+describe("browsableFoods", () => {
+  it("one shared array until the catalogue changes", () => {
+    const first = browsableFoods();
+    expect(browsableFoods()).toBe(first);
+    addCatalogFood(food("made-2"));
+    const next = browsableFoods();
+    expect(next).not.toBe(first);
+    expect(next.some((f) => f.id === "made-2")).toBe(true);
+  });
+
+  it("follows the hidden recipe foods and the demo switch", () => {
+    const id = browsableFoods()[0].id;
+    setHiddenFoodIds([id]);
+    expect(browsableFoods().some((f) => f.id === id)).toBe(false);
+    setHiddenFoodIds([]);
+    expect(browsableFoods().some((f) => f.id === id)).toBe(true);
+    const demoOnly = food("demo-only");
+    demoOnly.demoOnly = true;
+    addCatalogFood(demoOnly);
+    expect(browsableFoods().some((f) => f.id === "demo-only")).toBe(true);
+    setDemoActive(false);
+    expect(browsableFoods().some((f) => f.id === "demo-only")).toBe(false);
+    setDemoActive(true);
+    expect(browsableFoods().some((f) => f.id === "demo-only")).toBe(true);
   });
 });

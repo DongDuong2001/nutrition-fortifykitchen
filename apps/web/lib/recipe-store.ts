@@ -1,4 +1,4 @@
-import { CATALOG_FOODS, catalogChanged, setHiddenFoodIds } from "./catalog";
+import { CATALOG_FOODS, catalogChanged, catalogFoodById, setHiddenFoodIds } from "./catalog";
 import { accountStorage, browserLocal, keyedStorage, type KeyValueStore } from "./storage-keys";
 import { apiClient, isLiveMode, repointOutboxFood, syncOfflineOutbox } from "./api-client";
 import { currentAccountId } from "./auth-actions";
@@ -52,7 +52,7 @@ function writeRecipes(list: Recipe[], account?: string | null): boolean {
   }
 }
 
-export const catalogueLookup: IngredientLookup = (foodId) => CATALOG_FOODS.find((f) => f.id === foodId) ?? null;
+export const catalogueLookup: IngredientLookup = (foodId) => catalogFoodById(foodId) ?? null;
 
 /**
  * Puts the stored recipes into the catalogue as foods and drops recipe foods that are no longer stored. A recipe saved

@@ -2,7 +2,8 @@ import { BASE, run, startServer, stopServer, summary } from "./gate-lib.mjs";
 
 // gate:full, at the end of each part and before a PR: typecheck and the unit tests, build:demo once, one server, then
 // test:align, test:hydration and probe:all in parallel against it, then stop it. smoke.py runs inside probe:all, and
-// hydration.py is skipped there because test:hydration runs it.
+// hydration.py is skipped there because test:hydration runs it. Last, check:live-bundle: a live build into .next-live
+// ships no sample day or sample food (perf/live-bundle); it runs after the probes so its build does not slow them.
 
 const started = Date.now();
 const results = [];
@@ -25,5 +26,6 @@ if (results.every((r) => r.code === 0)) {
     stopServer(server);
   }
 } else console.log("[server] not started: typecheck, unit tests or build failed");
+results.push(await run("check:live-bundle", "npm", ["run", "check:live-bundle"]));
 
 process.exit(summary("gate:full", results, started));
