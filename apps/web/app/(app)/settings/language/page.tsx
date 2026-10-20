@@ -56,7 +56,7 @@ export default function LanguageSettingsPage() {
                   role="radio"
                   aria-checked={isSelected}
                   onClick={() => handleUpdate({ language: r.id as "vi" | "en" })}
-                  className="w-full text-left border-0 border-t border-divider first:border-t-0 bg-transparent text-text min-h-14 py-1.5 flex items-center justify-between gap-3 text-base cursor-pointer m-tint transition-transform"
+                  className="w-full text-left border-0 border-t border-divider first:border-t-0 bg-transparent text-text min-h-14 py-2 flex items-center justify-between gap-3 text-base cursor-pointer m-tint transition-transform"
                 >
                   <span className="flex-1 font-medium">{r.label}</span>
                   <span
@@ -105,7 +105,7 @@ export default function LanguageSettingsPage() {
                   onClick={() =>
                     handleUpdate({ decimalSeparator: r.id as "comma" | "dot" })
                   }
-                  className="w-full text-left border-0 border-t border-divider first:border-t-0 bg-transparent text-text min-h-14 py-1.5 flex items-center justify-between gap-3 text-base cursor-pointer m-tint transition-transform"
+                  className="w-full text-left border-0 border-t border-divider first:border-t-0 bg-transparent text-text min-h-14 py-2 flex items-center justify-between gap-3 text-base cursor-pointer m-tint transition-transform"
                 >
                   <span className="flex-1 font-medium">{r.label}</span>
                   <span
@@ -154,7 +154,7 @@ export default function LanguageSettingsPage() {
                   onClick={() =>
                     handleUpdate({ energyUnit: r.id as "kcal" | "kJ" })
                   }
-                  className="w-full text-left border-0 border-t border-divider first:border-t-0 bg-transparent text-text min-h-14 py-1.5 flex items-center justify-between gap-3 text-base cursor-pointer m-tint transition-transform"
+                  className="w-full text-left border-0 border-t border-divider first:border-t-0 bg-transparent text-text min-h-14 py-2 flex items-center justify-between gap-3 text-base cursor-pointer m-tint transition-transform"
                 >
                   <span className="flex-1 font-medium">{r.label}</span>
                   <span

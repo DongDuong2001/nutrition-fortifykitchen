@@ -1,16 +1,13 @@
-"use client";
-
-import React, { useState } from "react";
-import { AppHeader } from "@/components/ui/app-header";
+import { NotFoundHeader } from "@/components/not-found-header";
+import { NotFoundReport } from "@/components/not-found-report";
 import { PillButton } from "@/components/ui/pill-button";
-import { HOME_ROUTE } from "@/lib/nav";
+import { HOME_ROUTE } from "@/lib/home-route";
 
+// A server component: the screens around it do not load its header and buttons with their own first-load JS
 export default function NotFound() {
-  const [reported, setReported] = useState(false);
-
   return (
     <div className="flex min-h-dvh w-full flex-col bg-page text-text font-sans select-none">
-      <AppHeader variant="tab" title="Không tìm thấy trang" />
+      <NotFoundHeader />
       <main className="mx-auto flex w-full max-w-[560px] flex-1 flex-col gap-3 px-4 pt-4 pb-6 box-border">
         <div className="inline-flex flex-col items-start gap-2">
           <div aria-hidden="true" className="font-display italic font-black text-[5rem] leading-[0.9] text-ink tabular-nums tracking-display">
@@ -25,13 +22,7 @@ export default function NotFound() {
         <PillButton variant="primary" href={HOME_ROUTE} fullWidth>
           Về Tổng quan
         </PillButton>
-        <button
-          type="button"
-          onClick={() => setReported(true)}
-          className="flex h-[52px] cursor-pointer items-center justify-center rounded-full border border-card-border bg-card text-base font-semibold text-text transition-press active:scale-[0.97] motion-reduce:active:scale-100"
-        >
-          {reported ? "Đã ghi nhận báo lỗi" : "Báo lỗi"}
-        </button>
+        <NotFoundReport />
       </footer>
     </div>
   );

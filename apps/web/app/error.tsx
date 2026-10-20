@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { PillButton } from "@/components/ui/pill-button";
-import { HOME_ROUTE } from "@/lib/nav";
+import { HOME_ROUTE } from "@/lib/home-route";
 
 export interface ErrorProps {
   error: Error & { digest?: string };

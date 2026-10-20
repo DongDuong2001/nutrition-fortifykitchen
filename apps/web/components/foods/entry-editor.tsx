@@ -16,6 +16,7 @@ import { parseDecimalInput } from "../../lib/quick-entry";
 import { hidesGrams, portionModeOf } from "../../lib/portion";
 import { PortionArea } from "../ui/portion-area";
 import { HOME_ROUTE } from "@/lib/nav";
+import { Card } from "@/components/ui/card";
 
 const quickFieldClass =
   "h-12 w-full rounded-xl border-2 border-card-border bg-surface px-3 text-base text-text outline-none transition-colors focus:border-cobalt";
@@ -110,7 +111,7 @@ export function EntryEditor({ view }: { view: EntryView }) {
         backHref={homeHref}
       />
       <div className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-8 pt-4">
-        <section className="flex flex-col gap-4 rounded-card border border-transparent shadow-ring lg:shadow-card bg-card p-4">
+        <Card as="section" className="flex flex-col gap-4">
           {quick && (
             <div data-align-group="entry" className="flex w-full flex-col gap-3">
               <FormRow label="Tên" htmlFor="entry-quick-name">
@@ -218,7 +219,7 @@ export function EntryEditor({ view }: { view: EntryView }) {
             </button>
             <p className="m-0 text-center text-xs text-secondary">Sau khi xóa sẽ có nút “Hoàn tác” trong 5 giây.</p>
           </div>
-        </section>
+        </Card>
       </div>
 
     </div>

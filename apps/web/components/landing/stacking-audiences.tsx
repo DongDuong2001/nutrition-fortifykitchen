@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import Link from "next/link";
 
 interface AudienceCardData {
@@ -77,45 +77,43 @@ const AUDIENCES_DATA: AudienceCardData[] = [
 
 export function StackingAudiences() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [scales, setScales] = useState<number[]>([1, 1, 1]);
 
+  // cc-64 (P3): a card shrinks a little as the next ones stack over it (desktop). One measure per frame at most, the
+  // scale written straight to the card's style: no React render per scroll event
   useEffect(() => {
-    const handleScroll = () => {
-      if (!containerRef.current) return;
-      if (typeof window === "undefined" || window.innerWidth < 1024) return;
-
-      const cardEls = containerRef.current.querySelectorAll<HTMLElement>("[data-stack-card]");
-      const newScales: number[] = [];
-
-      cardEls.forEach((card, idx) => {
-        const rect = card.getBoundingClientRect();
-        // Top sticky trigger threshold
-        const stickyTop = 100 + idx * 28;
-        if (rect.top <= stickyTop + 20) {
-          const depth = Math.max(0, stickyTop - rect.top);
-          // Scale down slightly as subsequent cards stack over it
-          const scale = Math.max(0.92, 1 - (depth / 600) * 0.08);
-          newScales.push(scale);
-        } else {
-          newScales.push(1);
+    let frame = 0;
+    const measure = () => {
+      frame = 0;
+      const container = containerRef.current;
+      if (!container) return;
+      const wide = window.innerWidth >= 1024;
+      container.querySelectorAll<HTMLElement>("[data-stack-card]").forEach((card, idx) => {
+        let scale = 1;
+        if (wide) {
+          const rect = card.getBoundingClientRect();
+          // Top sticky trigger threshold
+          const stickyTop = 100 + idx * 28;
+          if (rect.top <= stickyTop + 20) scale = Math.max(0.92, 1 - (Math.max(0, stickyTop - rect.top) / 600) * 0.08);
         }
+        card.style.transform = scale === 1 ? "" : `scale(${scale})`;
       });
-
-      if (newScales.length === 3) {
-        setScales(newScales);
-      }
     };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(measure);
+    };
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    measure();
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+    };
   }, []);
 
   return (
     <div ref={containerRef} className="relative flex flex-col gap-8 lg:gap-12 pb-8">
       {AUDIENCES_DATA.map((aud, i) => {
-        const scale = scales[i] ?? 1;
-
         const themeClasses =
           aud.theme === "dark"
             ? "bg-surface-dark border-card-border/60 text-on-dark"
@@ -137,11 +135,8 @@ export function StackingAudiences() {
           <div
             key={aud.title}
             data-stack-card
-            className={`sticky rounded-2xl lg:rounded-3xl border p-6 sm:p-8 lg:p-10 shadow-xl origin-top transition-shadow transition-transform duration-100 ease-out ${themeClasses}`}
-            style={{
-              top: `calc(5.5rem + ${i * 24}px)`,
-              ...(scale !== 1 ? { transform: `scale(${scale})` } : {}),
-            }}
+            className={`sticky rounded-2xl lg:rounded-3xl border p-6 sm:p-8 lg:p-10 shadow-xl origin-top ${themeClasses}`}
+            style={{ top: `calc(5.5rem + ${i * 24}px)` }}
           >
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
               {/* Left Column: Info & Points */}

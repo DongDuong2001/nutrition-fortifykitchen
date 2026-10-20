@@ -14,6 +14,7 @@ import {
   foodsByKey,
   isEdited,
   loadDishRecipes,
+  peekDishRecipes,
   partGrams,
   saveEditedDish,
   scaledAddOn,
@@ -84,7 +85,8 @@ const stepClass =
  * dish without a recipe. The recipes (lib/dish-recipes) load when this mounts, never with the page.
  */
 export function DishParts({ food, portionGrams, onEdit }: DishPartsProps) {
-  const [recipes, setRecipes] = useState<DishRecipes | null>(null);
+  // cc-64 (A7): already loaded (a press on the row started it), the parts are there on the first frame
+  const [recipes, setRecipes] = useState<DishRecipes | null>(peekDishRecipes);
   // cc-67: a person who changes the parts of a dish finds them open the next time (a convenience of this device)
   const [open, setOpen] = useState(false);
   useEffect(() => {
@@ -142,123 +144,128 @@ export function DishParts({ food, portionGrams, onEdit }: DishPartsProps) {
     setAdded([]);
   };
 
-  if (!view || view.parts.length === 0) return null;
+  const shown = !!view && view.parts.length > 0;
+  // Recipes that arrive after the sheet opened: the block grows open (Expand) instead of pushing the button in one frame
+  // (-mt-4 / pt-4: the sheet's 16 px column gap moves inside, so it grows with the block)
+  if (!shown) return <Expand open={false} wrapClassName="-mt-4" className="pt-4">{null}</Expand>;
 
   const toggle = (label: string) => setAdded((prev) => (prev.includes(label) ? prev.filter((l) => l !== label) : [...prev, label]));
   const totalKcal = calculateMacroPreview(totals.per100, totals.grams).calories;
 
   return (
-    <div
-      role="group"
-      aria-label="Thành phần"
-      data-tour="dish-parts"
-      data-align-group="portion"
-      data-align-edge="left"
-      className="flex w-full flex-col gap-3"
-    >
-      <div className="flex w-full flex-col rounded-2xl border border-card-border bg-card">
-        <button
-          type="button"
-          aria-expanded={open}
-          aria-controls={panelId}
-          onClick={() => {
-            setOpen(!open);
-            try {
-              window.localStorage.setItem(PARTS_OPEN_KEY, open ? "0" : "1");
-            } catch {
-              // Storage unavailable
-            }
-          }}
-          className="flex min-h-12 w-full cursor-pointer items-center justify-between gap-3 border-0 bg-transparent px-4 text-left text-text"
-        >
-          <span className="text-callout font-bold">Thành phần</span>
-          <span className="flex items-center gap-2 text-cap text-secondary">
-            {edited ? "Đã chỉnh" : `${parts.length} nguyên liệu`}
-            <svg className="m-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M6 9l6 6 6-6" />
-            </svg>
-          </span>
-        </button>
-        <Expand open={open} id={panelId}>
-          <Expand open={edited}>
-            <div className="flex min-h-11 items-center justify-between gap-3 border-t border-divider px-4 text-cap text-secondary">
-              <span>Đã chỉnh so với công thức</span>
-              <button type="button" onClick={restore} className="flex min-h-11 cursor-pointer items-center border-0 bg-transparent p-0 text-cap font-bold text-cobalt">
-                Khôi phục
-              </button>
-            </div>
-          </Expand>
-          <ul className="m-0 flex list-none flex-col p-0">
-            {parts.map((part) => {
-              const grams = partGrams(part, servings);
-              const kcal = kcalOf(part, grams);
-              // An add-on can share a name with a part of the recipe (more beef): it says it was put in
-              const label = part.added ? `${part.name} (thêm)` : part.name;
-              return (
-                <li
-                  key={part.key}
-                  data-align-group="dish-parts"
-                  className={`grid min-h-14 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 border-t border-divider px-4 py-2 text-cap ${editable && grams <= 0 ? "opacity-60" : ""}`}
-                >
-                  <span className="flex min-w-0 flex-col gap-0.5">
-                    <span className="break-words font-semibold leading-snug text-text">{label}</span>
-                    <span className="tabular-nums text-secondary" aria-label={kcal === null && grams > 0 ? "chưa có dữ liệu năng lượng" : undefined}>
-                      {grams <= 0 ? "Không dùng" : kcal === null ? "—" : `${kcalValue(kcal)} kcal`}
+    <Expand open wrapClassName="-mt-4" className="pt-4">
+      <div
+        role="group"
+        aria-label="Thành phần"
+        data-tour="dish-parts"
+        data-align-group="portion"
+        data-align-edge="left"
+        className="flex w-full flex-col gap-3"
+      >
+        <div className="flex w-full flex-col rounded-2xl border border-card-border bg-card">
+          <button
+            type="button"
+            aria-expanded={open}
+            aria-controls={panelId}
+            onClick={() => {
+              setOpen(!open);
+              try {
+                window.localStorage.setItem(PARTS_OPEN_KEY, open ? "0" : "1");
+              } catch {
+                // Storage unavailable
+              }
+            }}
+            className="flex min-h-12 w-full cursor-pointer items-center justify-between gap-3 border-0 bg-transparent px-4 text-left text-text"
+          >
+            <span className="text-callout font-bold">Thành phần</span>
+            <span className="flex items-center gap-2 text-cap text-secondary">
+              {edited ? "Đã chỉnh" : `${parts.length} nguyên liệu`}
+              <svg className="m-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </span>
+          </button>
+          <Expand open={open} id={panelId}>
+            <Expand open={edited}>
+              <div className="flex min-h-11 items-center justify-between gap-3 border-t border-divider px-4 text-cap text-secondary">
+                <span>Đã chỉnh so với công thức</span>
+                <button type="button" onClick={restore} className="flex min-h-11 cursor-pointer items-center border-0 bg-transparent p-0 text-cap font-bold text-cobalt">
+                  Khôi phục
+                </button>
+              </div>
+            </Expand>
+            <ul className="m-0 flex list-none flex-col p-0">
+              {parts.map((part) => {
+                const grams = partGrams(part, servings);
+                const kcal = kcalOf(part, grams);
+                // An add-on can share a name with a part of the recipe (more beef): it says it was put in
+                const label = part.added ? `${part.name} (thêm)` : part.name;
+                return (
+                  <li
+                    key={part.key}
+                    data-align-group="dish-parts"
+                    className={`grid min-h-14 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 border-t border-divider px-4 py-2 text-cap ${editable && grams <= 0 ? "opacity-60" : ""}`}
+                  >
+                    <span className="flex min-w-0 flex-col gap-0.5">
+                      <span className="break-words font-semibold leading-snug text-text">{label}</span>
+                      <span className="tabular-nums text-secondary" aria-label={kcal === null && grams > 0 ? "chưa có dữ liệu năng lượng" : undefined}>
+                        {grams <= 0 ? "Không dùng" : kcal === null ? "—" : `${kcalValue(kcal)} kcal`}
+                      </span>
                     </span>
+                    {editable ? (
+                      <span className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          aria-label={`Giảm ${EDIT_STEP_GRAMS} g ${label}`}
+                          disabled={grams <= 0}
+                          onClick={() => setGrams(part, Math.max(0, Math.round((grams - EDIT_STEP_GRAMS) * 10) / 10))}
+                          className={stepClass}
+                        >
+                          −
+                        </button>
+                        <GramField name={label} grams={grams} onChange={(g) => setGrams(part, g)} />
+                        <button
+                          type="button"
+                          aria-label={`Tăng ${EDIT_STEP_GRAMS} g ${label}`}
+                          onClick={() => setGrams(part, Math.round((grams + EDIT_STEP_GRAMS) * 10) / 10)}
+                          className={stepClass}
+                        >
+                          +
+                        </button>
+                      </span>
+                    ) : (
+                      <span className="text-right tabular-nums text-secondary">{formatAmount(grams, "g")} g</span>
+                    )}
+                  </li>
+                );
+              })}
+              {editable && (
+                <li data-align-group="dish-parts" className="grid min-h-12 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 border-t border-divider px-4 py-2 text-cap font-bold text-text">
+                  <span>Tổng</span>
+                  <span className="tabular-nums">
+                    {formatAmount(totals.grams, "g")} g{typeof totalKcal === "number" ? ` · ${kcalValue(totalKcal)} kcal` : ""}
                   </span>
-                  {editable ? (
-                    <span className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        aria-label={`Giảm ${EDIT_STEP_GRAMS} g ${label}`}
-                        disabled={grams <= 0}
-                        onClick={() => setGrams(part, Math.max(0, Math.round((grams - EDIT_STEP_GRAMS) * 10) / 10))}
-                        className={stepClass}
-                      >
-                        −
-                      </button>
-                      <GramField name={label} grams={grams} onChange={(g) => setGrams(part, g)} />
-                      <button
-                        type="button"
-                        aria-label={`Tăng ${EDIT_STEP_GRAMS} g ${label}`}
-                        onClick={() => setGrams(part, Math.round((grams + EDIT_STEP_GRAMS) * 10) / 10)}
-                        className={stepClass}
-                      >
-                        +
-                      </button>
-                    </span>
-                  ) : (
-                    <span className="text-right tabular-nums text-secondary">{formatAmount(grams, "g")} g</span>
-                  )}
                 </li>
-              );
+              )}
+            </ul>
+          </Expand>
+        </div>
+        {editable && view.addOns.length > 0 && (
+          <ChipGroup
+            data-align-group="portion"
+            columns={view.addOns.length}
+            items={view.addOns.map((a) => {
+              const { grams } = scaledAddOn(a, servings);
+              return {
+                id: a.label,
+                label: `${a.label} ${formatAmount(grams, "g")} g`,
+                active: added.includes(a.label),
+                onClick: () => toggle(a.label),
+              };
             })}
-            {editable && (
-              <li data-align-group="dish-parts" className="grid min-h-12 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 border-t border-divider px-4 py-2 text-cap font-bold text-text">
-                <span>Tổng</span>
-                <span className="tabular-nums">
-                  {formatAmount(totals.grams, "g")} g{typeof totalKcal === "number" ? ` · ${kcalValue(totalKcal)} kcal` : ""}
-                </span>
-              </li>
-            )}
-          </ul>
-        </Expand>
+          />
+        )}
       </div>
-      {editable && view.addOns.length > 0 && (
-        <ChipGroup
-          data-align-group="portion"
-          columns={view.addOns.length}
-          items={view.addOns.map((a) => {
-            const { grams } = scaledAddOn(a, servings);
-            return {
-              id: a.label,
-              label: `${a.label} ${formatAmount(grams, "g")} g`,
-              active: added.includes(a.label),
-              onClick: () => toggle(a.label),
-            };
-          })}
-        />
-      )}
-    </div>
+    </Expand>
   );
 }

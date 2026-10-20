@@ -5,6 +5,8 @@ Measured in the page (performance.now at pointerdown, then the first frame after
             ms until the new screen's own content is on the page, and whether the nav bar element survived
   subtabs   Tổng quan Năng lượng -> Vi chất -> Cơ thể -> Tóm tắt: same, and whether the header + tab bar survived
   plus      Hôm nay + -> /add: ms until the sheet panel exists and ms until its first moved frame
+  add       /add, a food, Thêm vào (cc-64): ms from the tap until Hôm nay's kcal figure (under the sheet or back on
+            Hôm nay) has stopped changing after it changed (the count-up settled; unchanged for 300 ms), and the long tasks
 Also long tasks (>50 ms) seen on the main thread during each tap.
 Run with:  ALIGN_BASE_URL=http://localhost:3107 PERF_LABEL=after npm run probe -- tests/probes/cc_57_motion.py
 Writes .screenshots/cc57/perf-<label>.json and prints it.
@@ -168,19 +170,50 @@ def run_plus(pg):
     return rows
 
 
+def run_add(pg):
+    rows = []
+    for i in range(RUNS):
+        pg.goto(BASE + "/add?meal=lunch", wait_until="networkidle")
+        pg.wait_for_timeout(900)
+        pg.locator("[data-add-panel] button[data-food-row]:visible, [role=dialog] button[data-food-row]:visible").first.tap()
+        add = pg.locator('[data-testid="portion-add"]:visible, [data-tour="portion-add"]:visible').first
+        add.wait_for(state="visible")
+        pg.wait_for_timeout(500)
+        pg.evaluate(
+            """() => { window.__add = { t0: 0, settled: null, last: null, changedAt: 0, long: [] };
+              try { new PerformanceObserver((l) => { for (const e of l.getEntries()) window.__add.long.push(Math.round(e.duration)); }).observe({ type: 'longtask' }); } catch (e) {}
+              document.addEventListener('pointerdown', () => { window.__add.t0 = performance.now(); }, { capture: true, once: true });
+              const t = setInterval(() => {
+                const a = window.__add; if (!a.t0) return;
+                const hero = document.querySelector("section[aria-label='Tổng kcal và dinh dưỡng đa lượng']");
+                const text = hero ? hero.textContent : null;
+                const now = performance.now();
+                if (text !== a.last) { a.last = text; a.changedAt = now; a.changes = (a.changes || 0) + 1; }
+                else if (text && a.changes > 1 && now - a.changedAt >= 300) { a.settled = Math.round(a.changedAt - a.t0); clearInterval(t); }
+                if (now - a.t0 > 6000) clearInterval(t);
+              }, 2); }"""
+        )
+        add.tap()
+        pg.wait_for_function("() => window.__add && (window.__add.settled !== null || performance.now() - window.__add.t0 > 6000)", timeout=12000)
+        r = pg.evaluate("() => ({ settled: window.__add.settled, long: window.__add.long })")
+        r.update(kind="add")
+        rows.append(r)
+    return rows
+
+
 def summarise(rows):
     out = {}
-    for kind in ("tab", "subtab", "plus"):
+    for kind in ("tab", "subtab", "plus", "add"):
         sel = [r for r in rows if r["kind"] == kind]
         if not sel:
             continue
-        keys = ["active", "content", "full"] if kind != "plus" else ["exists", "moved"]
+        keys = {"plus": ["exists", "moved"], "add": ["settled"]}.get(kind, ["active", "content", "full"])
         agg = {}
         for k in keys:
             vals = sorted(v for v in (r.get(k) for r in sel) if v is not None)
             agg[k] = {"median": vals[len(vals) // 2] if vals else None, "max": vals[-1] if vals else None, "n": len(vals), "of": len(sel)}
         agg["long_tasks"] = sorted(sum((r.get("longTasks") or r.get("long") or [] for r in sel), []), reverse=True)[:8]
-        if kind != "plus":
+        if kind not in ("plus", "add"):
             agg["nav_kept"] = sum(1 for r in sel if r.get("navKept"))
             agg["header_kept"] = sum(1 for r in sel if r.get("headerKept"))
         out[kind] = agg
@@ -198,6 +231,7 @@ def main():
         rows = run_tabs(pg)
         rows += run_subtabs(pg)
         rows += run_plus(pg)
+        rows += run_add(pg)
         browser.close()
     data = {"label": LABEL, "runs": RUNS, "summary": summarise(rows), "rows": rows}
     (OUT / f"perf-{LABEL}.json").write_text(json.dumps(data, ensure_ascii=False, indent=1))

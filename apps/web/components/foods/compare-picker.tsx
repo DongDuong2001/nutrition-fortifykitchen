@@ -3,7 +3,7 @@
 import React, { useMemo, useState } from "react";
 import { Sheet } from "@/components/ui/sheet";
 import { PillButton } from "@/components/ui/pill-button";
-import { ChipRow } from "@/components/foods/chip-row";
+import { ChipGroup } from "@/components/ui/chip-group";
 import { FoodList } from "@/components/foods/food-list";
 import { FoodSearchField } from "@/components/foods/food-search-field";
 import { useFoodBrowse } from "@/hooks/use-food-browse";
@@ -11,6 +11,7 @@ import { foodMeta } from "@/lib/food-meta";
 import { isCategoryFilter } from "@/lib/food-categories";
 import { MAX_COMPARE_FOODS, MIN_COMPARE_FOODS } from "@/lib/food-compare";
 import type { FoodItem } from "@/lib/mock/foods";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export interface ComparePickerProps {
   open: boolean;
@@ -58,7 +59,7 @@ function PickerBody({ lockedIds, onClose, onConfirm }: Omit<ComparePickerProps, 
         Đã chọn {selected.length}/{MAX_COMPARE_FOODS} món{full ? ". Bỏ một món để chọn món khác." : "."}
       </p>
       <FoodSearchField value={query} onChange={setQuery} />
-      <ChipRow items={filterItems} ariaLabel="Lọc món theo nhóm" />
+      <ChipGroup scroll items={filterItems} ariaLabel="Lọc món theo nhóm" />
       <div data-compare-picker-list className="max-h-[44dvh] overflow-y-auto">
         <FoodList
           list={list}
@@ -70,19 +71,18 @@ function PickerBody({ lockedIds, onClose, onConfirm }: Omit<ComparePickerProps, 
           showCategory={!isCategoryFilter(filter)}
           isFavourite={isFavouriteFood}
           empty={
-            <div className="flex flex-col items-center gap-2 py-6 text-center">
-              <div className="text-base font-bold">{query.trim() ? `Không có “${query.trim()}”` : "Chưa có món nào"}</div>
-              <div className="text-sm text-secondary">Thử từ ngắn hơn hoặc bỏ dấu.</div>
-              {filter !== "all" && (
-                <button
-                  type="button"
-                  onClick={() => setFilter("all")}
-                  className="min-h-11 cursor-pointer rounded-full border-0 bg-surface px-5 text-sm font-semibold text-text active:scale-[0.97] transition-press"
-                >
-                  Bỏ lọc
-                </button>
-              )}
-            </div>
+            <EmptyState
+              title={query.trim() ? `Không có “${query.trim()}”` : "Chưa có món nào"}
+              actions={
+                filter !== "all" && (
+                  <PillButton variant="tertiary" size="md" type="button" onClick={() => setFilter("all")}>
+                    Bỏ lọc
+                  </PillButton>
+                )
+              }
+            >
+              Thử từ ngắn hơn hoặc bỏ dấu.
+            </EmptyState>
           }
         />
       </div>

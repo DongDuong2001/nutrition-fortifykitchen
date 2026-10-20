@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 
-export interface ChipRowItem {
+export interface ChipScrollerItem {
   id: string;
   label: React.ReactNode;
   active?: boolean;
@@ -10,20 +10,20 @@ export interface ChipRowItem {
   ariaLabel?: string;
 }
 
-export interface ChipRowProps {
-  items: ChipRowItem[];
+export interface ChipScrollerProps {
+  items: ChipScrollerItem[];
   ariaLabel: string;
   "data-align-group"?: string;
   "data-align-edge"?: string;
 }
 
 /**
- * One row of pill chips. Same colours and 44 px height as the ChipGroup md chips.
+ * ChipGroup's `scroll` row (it used to be its own ChipRow): one row of pill chips. Same colours and 44 px height as the ChipGroup md chips.
  * On phone it scrolls sideways: a right fade always shows, and a left fade shows once the row is scrolled.
  * From 1024 px it wraps onto more lines, with no scrolling and no fades.
  * The active chip is brought into view.
  */
-export function ChipRow({ items, ariaLabel, "data-align-group": dataAlignGroup, "data-align-edge": dataAlignEdge }: ChipRowProps) {
+export function ChipScroller({ items, ariaLabel, "data-align-group": dataAlignGroup, "data-align-edge": dataAlignEdge }: ChipScrollerProps) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [scrolled, setScrolled] = useState(false);
   const activeId = items.find((it) => it.active)?.id;

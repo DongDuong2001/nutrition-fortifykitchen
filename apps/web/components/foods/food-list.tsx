@@ -3,6 +3,8 @@ import type { FoodItem } from "@/lib/mock/foods";
 import type { FoodList as FoodListData } from "@/lib/food-categories";
 import { searchTag } from "@/lib/food-source";
 import { rowName, twinIdsOf } from "@/lib/food-rows";
+import { IconButton } from "@/components/ui/icon-button";
+import { prefetchDishParts } from "@/components/ui/dish-parts-prefetch";
 
 function SourceTag({ food }: { food: FoodItem }) {
   const tag = searchTag(food);
@@ -113,6 +115,7 @@ export function FoodList({
           aria-pressed={selected}
           disabled={disabled}
           onClick={() => onPick(food)}
+          onPointerDown={() => prefetchDishParts(food)}
           className={`flex min-h-14 min-w-0 flex-1 items-center gap-3 border-0 py-2 pl-4 text-left text-text transition-colors active:bg-divider motion-reduce:active:bg-transparent disabled:active:bg-transparent ${
             onOpen || tray ? "pr-1" : "pr-4"
           } ${selected && !carried ? "bg-cobalt/10" : "bg-transparent"} ${disabled ? "cursor-default opacity-50" : "cursor-pointer"}`}
@@ -176,16 +179,15 @@ export function FoodList({
           </button>
         )}
         {onOpen && (
-          <button
-            type="button"
+          <IconButton
             onClick={() => onOpen(food)}
-            aria-label={`Chọn khẩu phần ${name}`}
-            className="mr-1 inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-secondary hover:bg-divider active:scale-[0.97] transition-press motion-reduce:active:scale-100"
+            label={`Chọn khẩu phần ${name}`}
+            className="mr-1 text-secondary hover:bg-divider"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
               <path d="M9 5l7 7-7 7" />
             </svg>
-          </button>
+          </IconButton>
         )}
       </li>
     );

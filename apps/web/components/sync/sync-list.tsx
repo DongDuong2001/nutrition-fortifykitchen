@@ -65,33 +65,34 @@ export function SyncList({ open, onClose }: { open: boolean; onClose: () => void
                       <div className="flex flex-col gap-2 pt-1">
                         <span className="text-cap leading-snug text-text">Bỏ món này? Món sẽ mất khỏi máy này.</span>
                         <div className="grid grid-cols-2 gap-2">
-                          <button type="button" className={ACTION} onClick={() => setConfirming(null)}>
+                          <PillButton type="button" variant="secondary" size="sm" onClick={() => setConfirming(null)}>
                             Giữ lại
-                          </button>
-                          <button
+                          </PillButton>
+                          <PillButton
                             type="button"
-                            className={`${ACTION} text-destructive-text`}
+                            variant="danger"
+                            size="sm"
                             onClick={() => {
                               setConfirming(null);
                               void discardUnsaved(item.key);
                             }}
                           >
                             Bỏ món này
-                          </button>
+                          </PillButton>
                         </div>
                       </div>
                     ) : (
                       <div className="grid grid-cols-2 gap-2 pt-1">
                         {isDiaryAdd(item) ? (
-                          <button type="button" className={ACTION} onClick={() => void moveUnsavedToToday(item.key)}>
+                          <PillButton type="button" variant="secondary" size="sm" onClick={() => void moveUnsavedToToday(item.key)}>
                             Chuyển sang hôm nay
-                          </button>
+                          </PillButton>
                         ) : (
                           <span aria-hidden="true" />
                         )}
-                        <button type="button" className={`${ACTION} text-destructive-text`} onClick={() => setConfirming(item.key)}>
+                        <PillButton type="button" variant="danger" size="sm" onClick={() => setConfirming(item.key)}>
                           Bỏ món này
-                        </button>
+                        </PillButton>
                       </div>
                     ))}
                 </li>
@@ -115,4 +116,3 @@ export function SyncList({ open, onClose }: { open: boolean; onClose: () => void
   );
 }
 
-const ACTION = "min-h-11 cursor-pointer rounded-full border border-card-border bg-card px-3 text-cap font-bold leading-tight text-text active:scale-[0.97] transition-press motion-reduce:active:transform-none";

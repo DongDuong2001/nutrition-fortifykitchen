@@ -13,6 +13,7 @@ import { weekdayShort } from "@/lib/overview-board";
 import { bestWorstDays, energyAttention, macroScoreRow, trainingSplit, type DayPick, type SplitSide } from "@/lib/overview-detail";
 import { readDay } from "@/lib/training-checklist";
 import { HOME_ROUTE } from "@/lib/nav";
+import { Card } from "@/components/ui/card";
 
 const dm = (iso: string) => `${iso.slice(8, 10)}/${iso.slice(5, 7)}`;
 
@@ -24,7 +25,7 @@ function MacroSplit({ protein, fat, carbs }: { protein: number; fat: number; car
     { key: "carbs", label: "Tinh bột", share: carbs, bg: "bg-sky" },
   ];
   return (
-    <section aria-labelledby="en-split" className="flex flex-col gap-3 rounded-card border border-transparent shadow-ring lg:shadow-card bg-card p-4 text-text">
+    <Card as="section" aria-labelledby="en-split" className="flex flex-col gap-3">
       <SectionTitle id="en-split">Chia kcal</SectionTitle>
       <div
         role="img"
@@ -46,7 +47,7 @@ function MacroSplit({ protein, fat, carbs }: { protein: number; fat: number; car
           </li>
         ))}
       </ul>
-    </section>
+    </Card>
   );
 }
 
@@ -160,7 +161,7 @@ export function EnergyTab() {
       <div className="flex flex-col gap-3 lg:col-span-5 lg:gap-5">
         <MacroSplit protein={composition.protein} fat={composition.fat} carbs={composition.carbs} />
 
-        <section aria-labelledby="en-train" className="flex flex-col gap-3 rounded-card border border-transparent shadow-ring lg:shadow-card bg-card p-4 text-text">
+        <Card as="section" aria-labelledby="en-train" className="flex flex-col gap-3">
           <SectionTitle id="en-train">Ngày tập và ngày nghỉ</SectionTitle>
           <div className="grid grid-cols-2 gap-3">
             <SplitTile title="Ngày tập" side={split.training} />
@@ -174,9 +175,9 @@ export function EnergyTab() {
               </Link>
             </p>
           )}
-        </section>
+        </Card>
 
-        <section aria-labelledby="en-days" className="flex flex-col gap-3 rounded-card border border-transparent shadow-ring lg:shadow-card bg-card p-4 text-text">
+        <Card as="section" aria-labelledby="en-days" className="flex flex-col gap-3">
           <SectionTitle id="en-days">Ngày gần và xa mục tiêu</SectionTitle>
           <div className="grid grid-cols-2 gap-3">
             <PickTile title="Gần mục tiêu nhất" pick={picks.best} />
@@ -186,7 +187,7 @@ export function EnergyTab() {
               note={worst ? (worst.value < kcal.min ? `thiếu ${formatNumber(worst.distance)} kcal` : `trên ${formatNumber(worst.distance)} kcal`) : undefined}
             />
           </div>
-        </section>
+        </Card>
 
         <AttentionList items={items} />
       </div>

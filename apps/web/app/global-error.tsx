@@ -4,7 +4,7 @@ import * as React from "react";
 import { Manrope, Saira_Condensed } from "next/font/google";
 // The root layout is gone when this renders, so it brings the tokens (colours, press feedback) and fonts itself.
 import "./globals.css";
-import { HOME_ROUTE } from "@/lib/nav";
+import { HOME_ROUTE } from "@/lib/home-route";
 
 const manrope = Manrope({
   subsets: ["vietnamese", "latin"],

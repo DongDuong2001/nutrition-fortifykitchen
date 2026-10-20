@@ -6,6 +6,7 @@ import { getLevel, getLevelLabel } from "@/lib/levels";
 import { LevelBar } from "@/components/ui/level-bar";
 import { useRef } from "react";
 import { useCountUpText } from "@/lib/count-up";
+import { Expand } from "@/components/ui/expand";
 
 // The 24 px pill sits inside a 44 px hit area: padding that the negative margin takes back
 const PILL = "-m-2.5 inline-flex shrink-0 items-center border-0 bg-transparent p-2.5 text-on-dark no-underline hover:text-sky";
@@ -65,6 +66,9 @@ export function HomeHero({
   // cc-51, cc-64 (R1): the big kcal and its percent count to a new value in 300 ms after an add or a delete, written to
   // their text nodes (no React render per frame); the first value, "—", a new day and a new selection show at once
   const kcalRef = useRef<HTMLSpanElement>(null);
+  // The unknown-kcal line keeps its last text while it closes
+  const lastNote = useRef<string | null>(null);
+  if (kcalNote) lastNote.current = kcalNote;
   const pctRef = useRef<HTMLSpanElement>(null);
   useCountUpText(share ? null : values.kcal, countKey ?? label, [
     { ref: kcalRef, format: (n) => kcalValue(n) },
@@ -140,7 +144,14 @@ export function HomeHero({
           })}
         </div>
       </section>
-      {kcalNote && <p className="m-0 mx-3 mt-1 lg:mx-0 flex-none text-cap leading-snug text-secondary">{kcalNote}</p>}
+      {share ? (
+        kcalNote && <p className="m-0 mx-3 mt-1 flex-none text-cap leading-snug text-secondary">{kcalNote}</p>
+      ) : (
+        // cc-64 (A3): the line opens and closes with Expand; the text it last had stays while it closes
+        <Expand open={!!kcalNote} wrapClassName="flex-none">
+          <p className="m-0 mx-3 mt-1 lg:mx-0 text-cap leading-snug text-secondary">{kcalNote ?? lastNote.current}</p>
+        </Expand>
+      )}
     </>
   );
 }

@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { usePresence } from "@/components/ui/presence";
 import { useDocumentHidden } from "@/hooks/use-document-hidden";
+import type { ToastSwipe } from "@/components/ui/use-toast-swipe";
 
 export interface ToastProps {
   message: string;
@@ -25,6 +26,8 @@ export interface ToastProps {
    */
   onPause?: () => void;
   onResume?: () => void;
+  /** cc-64 (2b): the sideways swipe that dismisses it (components/ui/use-toast-swipe), from the app's toast host only. */
+  swipe?: ToastSwipe;
   className?: string;
 }
 
@@ -38,6 +41,7 @@ export function Toast({
   announce = true,
   onPause,
   onResume,
+  swipe,
   className = "",
 }: ToastProps) {
   // cc-55: rises in (m-toast, @starting-style); inside <Presence> it fades down and away when it goes
@@ -46,11 +50,27 @@ export function Toast({
   const hidden = useDocumentHidden();
   return (
     <div
+      ref={swipe?.ref}
       role={announce ? "status" : undefined}
       onPointerEnter={(e) => e.pointerType === "mouse" && onPause?.()}
       onPointerLeave={(e) => e.pointerType === "mouse" && onResume?.()}
+      // cc-64 (2b): a finger on the toast stops its clock while it presses
+      onPointerDown={(e) => {
+        if (e.pointerType !== "mouse") onPause?.();
+        swipe?.onPointerDown(e);
+      }}
+      onPointerMove={swipe?.onPointerMove}
+      onPointerUp={(e) => {
+        if (e.pointerType !== "mouse") onResume?.();
+        swipe?.onPointerUp(e);
+      }}
+      onPointerCancel={(e) => {
+        if (e.pointerType !== "mouse") onResume?.();
+        swipe?.onPointerCancel(e);
+      }}
       onFocus={onPause}
       onBlur={onResume}
+      style={swipe ? { touchAction: "pan-y" } : undefined}
       data-state={state}
       data-paused={hidden ? "" : undefined}
       inert={state === "closed"}
@@ -82,6 +102,7 @@ export function Toast({
       {countdown ? (
         <div aria-hidden="true" className="h-1 bg-level-empty-dark w-full">
           <div
+            key={message}
             className="m-countdown h-1 w-full bg-cobalt"
             style={{ animationDuration: `${countdown.totalMs}ms`, animationDelay: `${Math.min(0, countdown.leftMs - countdown.totalMs)}ms` }}
           />

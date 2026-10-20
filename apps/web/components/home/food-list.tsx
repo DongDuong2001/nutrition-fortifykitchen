@@ -14,6 +14,7 @@ import { inkPill } from "./ink-pill";
 import { useRowMotion } from "./row-motion";
 import { PullIndicator, usePullRefresh } from "./pull-refresh";
 import { useTouchDrag } from "@/lib/use-touch-drag";
+import { Expand } from "@/components/ui/expand";
 
 const LONG_PRESS_MS = 500;
 const MOVE_LIMIT_PX = 10;
@@ -316,6 +317,8 @@ export function FoodList({
   const [dragOverSlot, setDragOverSlot] = useState<HomeMeal["slot"] | null>(null);
   const { listRef, rowsOf } = useRowMotion(meals, dayKey);
   const pull = usePullRefresh(listRef, onPullRefresh, !share && !select && !readOnly);
+  // Whether the empty-day line offered Như hôm qua: it keeps the button while it closes
+  const hadCopy = useRef(false);
 
   if (select) return <SelectList meals={meals} select={select} />;
   if (share) {
@@ -341,13 +344,15 @@ export function FoodList({
     );
   }
   const pill = inkPill();
+  if (isEmpty) hadCopy.current = canCopyYesterday;
   return (
     <div ref={listRef} data-food-scroll className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-y-contain bg-page pb-3 lg:rounded-2xl lg:border lg:border-card-border lg:shadow-card">
       {onPullRefresh && !readOnly && <PullIndicator {...pull} />}
-      {isEmpty && (
-        <div className="flex min-h-11 flex-col items-start px-3 pt-2 lg:flex-row lg:items-center lg:justify-between lg:gap-2 lg:py-2">
+      {/* cc-64 (A8): the first food of the day closes this line (150 ms) while the food's row rises in, so the list does
+          not jump up 44 px; Như hôm qua stays in it while it closes */}
+      <Expand open={isEmpty} className="flex min-h-11 flex-col items-start px-3 pt-2 lg:flex-row lg:items-center lg:justify-between lg:gap-2 lg:py-2">
           <p className="m-0 text-callout font-semibold text-text">{readOnly ? "Chưa có món nào ngày này" : `Chưa có món nào ${dayWord}`}</p>
-          {canCopyYesterday && (
+          {(isEmpty ? canCopyYesterday : hadCopy.current) && (
             <button
               type="button"
               onClick={onCopyYesterday}
@@ -356,8 +361,7 @@ export function FoodList({
               {copyLabel}
             </button>
           )}
-        </div>
-      )}
+      </Expand>
       {meals.map((meal) => {
         const firstEntryId = meals.find((m) => m.entries.length > 0)?.entries[0].id;
         const mealSelected = mode.kind === "meal" && mode.slot === meal.slot;

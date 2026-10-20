@@ -20,6 +20,7 @@ import { getRecipe, saveRecipe } from "@/lib/recipe-store";
 import { useBack } from "@/hooks/use-back";
 import { markUsed } from "@/lib/onboarding-store";
 import { HOME_ROUTE } from "@/lib/nav";
+import { AlertLine } from "@/components/ui/alert-line";
 
 function CreateFoodInner() {
   const router = useRouter();
@@ -232,11 +233,9 @@ function CreateFoodInner() {
           ) : (
             <>
               <RecipeBuilder state={recipeState} excludeId={editId ?? undefined} />
-              {recipeSaveError && (
-                <p role="alert" className="m-0 text-cap font-medium leading-snug text-destructive-text">
-                  {recipeSaveError}
-                </p>
-              )}
+              <AlertLine show={!!recipeSaveError} gap={4} className="m-0 text-cap font-medium leading-snug text-destructive-text">
+                {recipeSaveError}
+              </AlertLine>
               <p className="m-0 text-xs leading-snug text-secondary">Món được lưu vào tài khoản. Danh sách nguyên liệu chỉ có trên máy này.</p>
             </>
           )

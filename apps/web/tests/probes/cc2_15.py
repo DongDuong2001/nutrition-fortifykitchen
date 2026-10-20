@@ -123,6 +123,7 @@ def first_run(browser, name, size):
     year.press("Tab")
     check("1920" in text(pg), f"{where} validation: birth year error shows on blur")
     year.fill("2003")
+    pg.wait_for_timeout(300)  # cc-64 (A4): the error line closes (Expand, 150 ms) before it leaves the page
     check("Nhập năm sinh" not in text(pg), f"{where} validation: error clears when the year is valid")
     weight.fill("20")
     weight.press("Tab")

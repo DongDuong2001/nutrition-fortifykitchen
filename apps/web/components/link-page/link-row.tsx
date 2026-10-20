@@ -4,8 +4,9 @@ import type { ReactNode } from "react";
  * One row of the link page (LinkKhanh.dc.html): icon, name over one line, and the action word. The whole row is the
  * one link or button (ROW_CLASS goes on it); the 1 px divider is on the <li> around it, inside the 68 px (72 px) row.
  */
+// cc-64 (2b): a row tints while pressed (m-tint), like every other full-width row
 export const ROW_CLASS =
-  "grid min-h-[67px] grid-cols-[32px_minmax(0,1fr)_auto] items-center gap-x-[14px] px-1 text-left no-underline lg:min-h-[71px] lg:grid-cols-[36px_minmax(0,1fr)_auto] lg:gap-x-4";
+  "m-tint rounded-lg grid min-h-[67px] grid-cols-[32px_minmax(0,1fr)_auto] items-center gap-x-[14px] px-1 text-left no-underline lg:min-h-[71px] lg:grid-cols-[36px_minmax(0,1fr)_auto] lg:gap-x-4";
 
 /** The 32 px (36 px on desktop) square the icon fills. */
 export const ROW_ICON_CLASS = "h-8 w-8 rounded-lg lg:h-9 lg:w-9 lg:rounded-[9px]";

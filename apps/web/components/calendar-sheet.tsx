@@ -138,11 +138,11 @@ function CalendarMonth({ selectedIso, onPick }: Pick<CalendarSheetProps, "select
       </div>
 
       <div className="flex flex-wrap gap-x-4 gap-y-1 text-cap text-secondary px-1">
-        <span className="inline-flex items-center gap-1.5">
+        <span className="inline-flex items-center gap-2">
           <span aria-hidden="true" className="w-1.5 h-1.5 rounded-full bg-cobalt" />
           Đạt mục tiêu kcal
         </span>
-        <span className="inline-flex items-center gap-1.5">
+        <span className="inline-flex items-center gap-2">
           <span aria-hidden="true" className="w-1.5 h-1.5 rounded-full bg-destructive" />
           Thiếu
         </span>

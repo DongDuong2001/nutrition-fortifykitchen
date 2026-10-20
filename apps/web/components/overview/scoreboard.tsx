@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { ScoreRow } from "@/components/overview/parts/score-row";
 import type { ScoreRowData } from "@/lib/overview-detail";
+import { Card } from "@/components/ui/card";
 
 export type { ScoreRowData };
 
@@ -16,7 +17,7 @@ export function Scoreboard({ rows, label = "Bảng điểm" }: { rows: ScoreRowD
   const [picked, setPicked] = useState<Record<string, number>>({});
 
   return (
-    <section aria-label={label} className="overflow-hidden rounded-card border border-transparent shadow-ring lg:shadow-card bg-card text-text">
+    <Card as="section" padding={false} aria-label={label} className="overflow-hidden">
       <ul className="m-0 flex list-none flex-col p-0">
         {rows.map((row, i) => (
           <ScoreRow
@@ -31,6 +32,6 @@ export function Scoreboard({ rows, label = "Bảng điểm" }: { rows: ScoreRowD
           />
         ))}
       </ul>
-    </section>
+    </Card>
   );
 }

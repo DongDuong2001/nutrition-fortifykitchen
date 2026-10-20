@@ -23,6 +23,7 @@ import {
 import { catalogueLookup } from "@/lib/recipe-store";
 import type { FoodItem } from "@/lib/mock/foods";
 import { IngredientPicker } from "./ingredient-picker";
+import { IconButton } from "@/components/ui/icon-button";
 
 export const EMPTY_DRAFT: RecipeDraft = { name: "", servings: 1, ingredients: [], cooked: "" };
 
@@ -102,15 +103,14 @@ const BORDER_BAD = "border-destructive";
 
 function StepButton({ label, onClick, disabled, children }: { label: string; onClick: () => void; disabled: boolean; children: React.ReactNode }) {
   return (
-    <button
-      type="button"
-      aria-label={label}
+    <IconButton
+      label={label}
       onClick={onClick}
       disabled={disabled}
-      className="inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-card-border bg-card text-xl font-bold text-text active:scale-[0.97] transition-press disabled:cursor-default disabled:opacity-40 motion-reduce:active:scale-100"
+      tone="card" className="text-xl font-bold text-text disabled:cursor-default disabled:opacity-40"
     >
       {children}
-    </button>
+    </IconButton>
   );
 }
 
@@ -181,16 +181,15 @@ export function RecipeBuilder({ state, excludeId }: { state: RecipeDraftState; e
                 <li key={`${ingredient.foodId}-${index}`} data-align-group="recipe-row" className="flex flex-col gap-1 rounded-card border border-transparent shadow-ring lg:shadow-card bg-card p-3">
                   <div className="flex items-center gap-2">
                     <span className="min-w-0 flex-1 break-words text-callout font-semibold leading-snug text-text">{ingredient.name}</span>
-                    <button
-                      type="button"
-                      aria-label={`Bỏ ${ingredient.name}`}
+                    <IconButton
+                      label={`Bỏ ${ingredient.name}`}
                       onClick={() => removeIngredient(index)}
-                      className="-mr-1 inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-secondary hover:bg-surface active:scale-[0.97] transition-press motion-reduce:active:scale-100"
+                      className="-mr-1 text-secondary hover:bg-surface"
                     >
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                         <path d="M6 6l12 12M18 6L6 18" />
                       </svg>
-                    </button>
+                    </IconButton>
                   </div>
                   <div className="flex items-center gap-2">
                     <input
@@ -247,7 +246,7 @@ export function RecipeBuilder({ state, excludeId }: { state: RecipeDraftState; e
         htmlFor="rb-cooked"
         error={showCooked ? errors.cooked : undefined}
       >
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
           <input
             id="rb-cooked"
