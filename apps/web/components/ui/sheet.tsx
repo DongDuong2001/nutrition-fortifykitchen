@@ -1,5 +1,6 @@
 "use client";
 
+import { lockBodyScroll } from "@/lib/body-scroll-lock";
 import React, { useEffect, useRef, useState } from "react";
 import { markUsed } from "@/lib/onboarding-store";
 import { closeSheetEntry, openSheetEntry } from "@/lib/sheet-history";
@@ -161,8 +162,7 @@ export function Sheet({
     openerRef.current = document.activeElement as HTMLElement | null;
 
     // Lock body scroll
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    const unlockScroll = lockBodyScroll();
     // The drag-down tip waits for an open sheet
     setPresent("sheet", true);
 
@@ -225,7 +225,7 @@ export function Sheet({
       clearTimeout(focusTimer);
       window.removeEventListener("keydown", handleKeyDown);
       setPresent("sheet", false);
-      document.body.style.overflow = originalOverflow;
+      unlockScroll();
       openerRef.current?.focus?.();
     };
   }, [open, initialFocusId]);

@@ -50,6 +50,7 @@ import { useMealSlot } from "@/lib/use-meal-slot";
 import { HOME_ROUTE } from "@/lib/nav";
 import { takeBackSheetEntries } from "@/lib/sheet-history";
 import { homeDay } from "@/lib/home-scroll";
+import { lockBodyScroll } from "@/lib/body-scroll-lock";
 import { SHEET_CATCH_UP_MS, SHEET_EXIT_MS, SHEET_QUICK_ENTER_MS, useSheetDrag } from "@/components/ui/sheet";
 import { setInertExceptDrag } from "@/components/ui/sheet-drag-controller";
 import { haptic } from "@/lib/haptics";
@@ -148,9 +149,35 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
       });
     }
   }, []);
-  // Focus goes into the dialog: the search field. A centred dialog gets it at once; the phone sheet when its slide has
-  // settled, so the keyboard never starts a third motion under the sheet and the scrim (and never moves a sheet that is
-  // still on its way up). Nothing is taken from a field the person already tapped.
+  // Phone: the page behind does not scroll (iOS Safari scrolls it when the keyboard opens). Counted with the portion sheet's own lock.
+  useEffect(() => {
+    if (isDesktop) return;
+    return lockBodyScroll();
+  }, [isDesktop]);
+
+  // Phone: the panel lifts above the on-screen keyboard. The `translate` property, not `transform`: the drag and the release
+  // animation own `transform` (sheet-drag-controller, use-sheet-drag read and write it).
+  useEffect(() => {
+    if (isDesktop) return;
+    const vv = window.visualViewport;
+    const panel = panelRef.current;
+    if (!vv || !panel) return;
+    const lift = () => {
+      const keyboard = window.innerHeight - vv.height - vv.offsetTop;
+      panel.style.translate = keyboard > 100 ? `0 -${Math.round(keyboard)}px` : "";
+    };
+    vv.addEventListener("resize", lift);
+    vv.addEventListener("scroll", lift);
+    return () => {
+      vv.removeEventListener("resize", lift);
+      vv.removeEventListener("scroll", lift);
+      panel.style.translate = "";
+    };
+  }, [isDesktop]);
+
+  // Focus goes into the dialog: the search field. A centred dialog gets it at once; the phone sheet once, when its slide has
+  // settled (at once under reduced motion), so the keyboard never starts a third motion under the sheet and the scrim. Nothing
+  // is taken from a field the person already tapped, and nothing at all when they touched the panel during the slide.
   useEffect(() => {
     if (isDesktop) {
       desktopSearchInputRef.current?.focus();
@@ -158,9 +185,18 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
     }
     const panel = panelRef.current;
     let done = false;
+    let touched = false;
+    let timer: number | undefined;
+    const cleanup = () => {
+      panel?.removeEventListener("transitionend", onEnd);
+      panel?.removeEventListener("pointerdown", onTouch, true);
+      window.clearTimeout(timer);
+    };
     const focusSearch = () => {
       if (done) return;
       done = true;
+      cleanup();
+      if (touched) return;
       const active = document.activeElement;
       if (active && active !== document.body && active.matches("input, textarea") && panel?.contains(active)) return;
       phoneSearchInputRef.current?.focus({ preventScroll: true });
@@ -168,13 +204,21 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
     const onEnd = (e: TransitionEvent) => {
       if (e.target === panel) focusSearch();
     };
+    const onTouch = (e: Event) => {
+      const input = phoneSearchInputRef.current;
+      if (!(input && (e.target === input || input.contains(e.target as Node)))) touched = true;
+    };
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      focusSearch();
+      return;
+    }
     panel?.addEventListener("transitionend", onEnd);
-    // A reduced-motion or interrupted slide may end with no event of its own: never wait longer than the slide takes
-    const timer = window.setTimeout(focusSearch, SHEET_QUICK_ENTER_MS + 100);
+    panel?.addEventListener("pointerdown", onTouch, true);
+    // A slide that was interrupted may end with no event of its own: never wait longer than the slide takes
+    timer = window.setTimeout(focusSearch, SHEET_QUICK_ENTER_MS + 100);
     return () => {
       done = true;
-      panel?.removeEventListener("transitionend", onEnd);
-      window.clearTimeout(timer);
+      cleanup();
     };
   }, [isDesktop]);
 
