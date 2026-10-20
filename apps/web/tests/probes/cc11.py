@@ -59,15 +59,15 @@ def open_today(pg, query=""):
     wait_home(pg)
 
 
-def log_tofu_today(pg):
-    # Đậu hũ trắng: 1 bìa is about 525 mg calcium, enough to push Calcium out of the two lacking most
+def log_salmon_today(pg):
+    # Cá hồi: 100 g is 11 µg of vitamin D, enough to push Vitamin D out of the two lacking most (cc-73b: with the DRI targets the sample day lacks vitamins D and E, not calcium)
     pg.goto(BASE + "/add?meal=dinner", wait_until="networkidle")
     search = vis(pg, 'input[aria-label="Tìm món"]')
     search.wait_for(state="visible", timeout=8000)
-    search.fill("Đậu hũ")
-    vis(pg, 'button:has-text("Đậu hũ trắng")').click()
+    search.fill("Cá hồi")
+    vis(pg, 'button:has-text("Cá hồi")').first.click()
     vis(pg, 'button:has-text("Thêm vào Bữa tối")').click()
-    vis(pg, 'text=Đã thêm Đậu hũ').wait_for(state="visible", timeout=8000)
+    vis(pg, 'text=Đã thêm Cá hồi').wait_for(state="visible", timeout=8000)
     pg.wait_for_timeout(300)
 
 
@@ -75,15 +75,15 @@ def run_phone(browser):
     ctx = browser.new_context(viewport=PHONE)
     pg = ctx.new_page()
 
-    # Calcium-rich food today changes the lacking list
+    # A vitamin D-rich food today changes the lacking list
     open_today(pg)
     before = lacking(pg)
-    check(before is not None and "Calcium" in before, f"390 today lacks Calcium before logging ({before})")
-    log_tofu_today(pg)
+    check(before is not None and "Vitamin D" in before, f"390 today lacks Vitamin D before logging ({before})")
+    log_salmon_today(pg)
     open_today(pg)
     after = lacking(pg)
-    check(after is not None and after != before and "Calcium" not in after,
-          f"390 logging Đậu hũ trắng changes Thiếu nhiều nhất ({before} -> {after})")
+    check(after is not None and after != before and "Vitamin D" not in after,
+          f"390 logging Cá hồi changes Thiếu nhiều nhất ({before} -> {after})")
     pg.screenshot(path=shot("cc11-lacking-390.png"), animations="disabled")
 
     # Past day: read-only

@@ -1,7 +1,7 @@
 """cc2-19b: the two journeys cc2-19 did not walk, at 390 and 1280.
 
 - (f) Hôm nay › a meal header › ⋯ › Lưu thành Bữa ăn của tôi: the name field opens with the default name selected, so a typed name replaces it; the saved meal appears in Khám phá › Bữa ăn của tôi with its foods, and one tap adds it to the current meal.
-- (g) Hồ sơ › Cân nặng: the kcal and protein ranges change as the weight changes (before Lưu), and the new ranges are the ones Mục tiêu shows after saving.
+- (g) Hồ sơ › Cân nặng: the kcal and protein targets change as the weight changes (before Lưu), and the new ranges are the ones Mục tiêu shows after saving.
 Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/cc2_19b.py
 """
 # PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/(tabs)/explore/** app/(app)/settings/profile/weight/** app/(app)/settings/targets/** app/(app)/setup/profile/** app/signin/**
@@ -48,7 +48,7 @@ def no_h_scroll(pg, where):
 
 
 def kcal_range(pg):
-    m = re.search(r"([\d.]+–[\d.]+) kcal", text(pg))
+    m = re.search(r"([\d.]+) kcal", text(pg))
     return m.group(1) if m else None
 
 
@@ -93,13 +93,13 @@ def run(browser, size_name, size):
     for _ in range(10):
         pg.get_by_role("button", name="Tăng 0,1 kg").click()
     after = kcal_range(pg)
-    check(before is not None and after is not None and before != after, f"{w}: kcal range updates before saving ({before} → {after})")
+    check(before is not None and after is not None and before != after, f"{w}: kcal target updates before saving ({before} → {after})")
     pg.get_by_role("button", name=re.compile("^Lưu$")).click()
     pg.wait_for_timeout(500)
 
     go("/settings/targets")
     w = f"{size_name} Mục tiêu sau khi đổi cân"
-    check(after is not None and after in text(pg), f"{w}: targets show the new range {after}")
+    check(after is not None and after in text(pg), f"{w}: targets show the new target {after}")
     no_h_scroll(pg, w)
     shot(pg, "weight-targets", size_name)
     ctx.close()

@@ -163,7 +163,7 @@ def first_run(browser, name, size):
         pg.wait_for_timeout(300)
         check(checked_goal(pg) == "Tăng cơ", f"{where} back: the chosen goal is kept ({checked_goal(pg)})")
         pg.get_by_role("radio", name=re.compile("^Giữ cân")).click()
-        check("2.100–2.450 kcal" in text(pg), f"{where} goal: the targets card follows the weight")
+        check("2.450 kcal" in text(pg), f"{where} goal: the targets card follows the weight")
     else:
         shot(pg, "goal", name)
         pg.get_by_role("radio", name=re.compile("^Tăng cơ")).click()
@@ -172,7 +172,7 @@ def first_run(browser, name, size):
         check(pg.locator("#setup-weight").input_value() == str(WEIGHT), f"{where} reload: the typed weight is kept")
         check(checked_goal(pg) == "Tăng cơ", f"{where} reload: the chosen goal is kept ({checked_goal(pg)})")
         pg.get_by_role("radio", name=re.compile("^Giữ cân")).click()
-        check("2.100–2.450 kcal" in text(pg), f"{where} goal: the targets card follows the weight")
+        check("2.450 kcal" in text(pg), f"{where} goal: the targets card follows the weight")
 
     # 4. finish: Hoàn tất saves and shows the summary
     pg.get_by_role("button", name="Hoàn tất").locator("visible=true").first.click()
@@ -181,7 +181,7 @@ def first_run(browser, name, size):
     pg.wait_for_timeout(500)
     t = text(pg)
     # cc-42: the board shows the energy target in one sentence (the other rows are in Cài đặt)
-    check("Mục tiêu của bạn: 2.100–2.450 kcal mỗi ngày" in t, f"{where} summary: the energy target (page: {t[:200]!r})")
+    check("Mục tiêu của bạn: 2.450 kcal mỗi ngày" in t, f"{where} summary: the energy target (page: {t[:200]!r})")
     cta = pg.get_by_role("button", name="Thêm bữa đầu tiên")
     check(cta.count() == 1, f"{where} summary: one button Thêm bữa đầu tiên (tour off in probes: it opens the add sheet)")
     check(visible_h1(pg) == 1, f"{where} summary: one h1")

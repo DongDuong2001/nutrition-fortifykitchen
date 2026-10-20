@@ -119,7 +119,7 @@ def run_phone(browser):
     pg.reload(wait_until="networkidle")
     pg.wait_for_timeout(600)
     check("/ 28 mg" in body(pg), "390 micros: iron 28 mg kept after reload")
-    check("/ 2.000 mg" in body(pg), "390 micros: a woman's potassium 2.000 mg kept after reload")
+    check("/ 2.600 mg" in body(pg), "390 micros: a woman's potassium 2.600 mg kept after reload")
     pg.goto(BASE + "/settings/profile", wait_until="networkidle")
     visible(pg, 'a[href="/settings/profile/weight"]').wait_for(state="visible")
     pg.wait_for_timeout(300)

@@ -37,6 +37,14 @@ def body(pg):
     return squash(pg.locator("body").inner_text())
 
 
+def dismiss_install(pg):
+    """The "Cài H1T MICRO vào máy" sheet opens on a first visit and would cover the shot."""
+    later = pg.get_by_role("button", name="Để sau")
+    if later.count():
+        later.first.click()
+        pg.wait_for_timeout(500)
+
+
 def main():
     SHOTS.mkdir(parents=True, exist_ok=True)
     with sync_playwright() as p:
@@ -47,6 +55,7 @@ def main():
         # Hôm nay: the kcal target is one number
         pg.goto(BASE + "/app", wait_until="networkidle")
         pg.wait_for_timeout(900)
+        dismiss_install(pg)
         text = body(pg)
         check("/ 2.275 kcal" in text, "Hôm nay: the kcal target is one number (/ 2.275 kcal)")
         check("1.950" not in text and "2.275–" not in text, "Hôm nay: no kcal range left")

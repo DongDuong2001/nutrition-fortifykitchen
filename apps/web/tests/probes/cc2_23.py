@@ -99,7 +99,7 @@ def settings(browser, size_name, size):
     bg = hero.evaluate("e => getComputedStyle(e).backgroundColor")
     check(bg == "rgb(26, 28, 34)", f"{w}: the profile card is the dark surface ({bg})")
     t = squash(hero.inner_text())
-    check(re.search(r"\d\.\d{3}–\d\.\d{3} kcal", t) is not None and re.search(r"đạm \d+–\d+ g", t) is not None, f"{w}: targets in the card ({t!r})")
+    check(re.search(r"\d\.\d{3} kcal", t) is not None and re.search(r"đạm \d+ g", t) is not None, f"{w}: targets in the card ({t!r})")
     big = hero.locator("span", has_text=re.compile(r"kcal$")).last
     check("saira" in big.evaluate("e => getComputedStyle(e).fontFamily").lower(), f"{w}: targets are Saira")
     dark = pg.evaluate(
