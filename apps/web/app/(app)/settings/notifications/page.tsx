@@ -146,7 +146,7 @@ export default function NotificationsSettingsPage() {
             <button
               type="button"
               onClick={requestPermission}
-              className="self-start h-11 px-4.5 rounded-full border border-card-border bg-card text-ink text-sm font-semibold hover:bg-surface active:scale-[0.97] transition-press cursor-pointer"
+              className="self-start h-11 px-5 rounded-full border border-card-border bg-card text-ink text-sm font-semibold hover:bg-surface active:scale-[0.97] transition-press cursor-pointer"
             >
               Bật quyền thông báo
             </button>

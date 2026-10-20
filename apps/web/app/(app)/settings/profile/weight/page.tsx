@@ -69,7 +69,7 @@ export default function WeightPage() {
             >
               −0,1
             </button>
-            <div className="flex items-baseline gap-1.5">
+            <div className="flex items-baseline gap-2">
               <input
                 id="weight-input"
                 type="text"

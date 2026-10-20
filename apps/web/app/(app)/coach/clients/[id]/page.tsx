@@ -100,12 +100,12 @@ export default function CoachClientPage() {
               {groups.map((g) => (
                 <div key={g.title} className="flex flex-col gap-1">
                   <h3 className="m-0 text-micro font-extrabold leading-snug text-secondary">{g.title}</h3>
-                  <ul className="m-0 flex list-none flex-wrap gap-1.5 p-0">
+                  <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
                     {g.items.map((item) => (
                       <li
                         key={item.id}
                         data-status={item.status}
-                        className={`rounded-full px-2.5 py-1 text-cap font-semibold leading-none ${
+                        className={`rounded-full px-3 py-1 text-cap font-semibold leading-none ${
                           item.status === "added"
                             ? "bg-cobalt/10 text-cobalt"
                             : item.status === "removed"

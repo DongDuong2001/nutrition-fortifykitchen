@@ -21,12 +21,12 @@ export function FloatingPhone() {
         }
         .floating-phone-wrap {
           transform-style: preserve-3d;
-          animation: float-phone 5s var(--ease-in-out) infinite;
+          transform: translateZ(16px) translateY(-6px) rotateY(-18deg) rotateX(8deg);
         }
-        @media (prefers-reduced-motion: reduce) {
+        /* cc-64 (2b): the phone floats only on a desktop screen; on a phone it rests at its first pose */
+        @media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
           .floating-phone-wrap {
-            animation: none;
-            transform: translateZ(16px) translateY(-6px) rotateY(-18deg) rotateX(8deg);
+            animation: float-phone 5s var(--ease-in-out) infinite;
           }
         }
       `}</style>

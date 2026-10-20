@@ -32,7 +32,7 @@ export function MealSwitcher({
       <div
         role="listbox"
         aria-labelledby="meal-switcher-title"
-        className="flex flex-col gap-1.5 py-1"
+        className="flex flex-col gap-2 py-1"
       >
         {MEAL_SLOTS.map((slot) => {
           const isSelected = selectedSlot === slot.id;

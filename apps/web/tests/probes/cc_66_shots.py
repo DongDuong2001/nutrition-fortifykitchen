@@ -6,6 +6,7 @@ demo data, into docs/screenshots/cc-66/<set>/<screen>-<width>.png.
 CC66_SET=diff: compares each before/after pair in the browser (a pixel differs when a channel moves by more than 8),
 writes docs/screenshots/cc-66/diff/<screen>-<width>.png (changed pixels in red over a faded "after") and prints the
 share of changed pixels. CC66_TEXT=125 (or 150): the same set at that text size (the root font-size), into <set>-text125/.
+CC66_EXTRA=1 swaps in 19 more screens (food, micros, training, the Tổng quan tabs, settings pages, landing, sign-in, 404…).
 CC66_DIR=<name> writes under docs/screenshots/<name>/ instead of cc-66/ (cc-66b, pr20-text); CC66_ONLY=home,add keeps
 those screens and CC66_WIDTHS=390 those widths.
 Run with: CC66_SET=before ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_66_shots.py
@@ -48,6 +49,16 @@ SCREENS = [
     ("targets", "/settings/targets", None),
     ("whats-new", "/settings/whats-new", None),
 ]
+# CC66_EXTRA=1: more screens for a wider check (not part of the committed 8-screen sets)
+if os.environ.get("CC66_EXTRA"):
+    SCREENS = [
+        ("x-food", "/foods/food-cha-la", None), ("x-micros", "/micros", None), ("x-training", "/training", None),
+        ("x-body", "/trends/body", None), ("x-energy", "/trends/energy", None), ("x-trends-micros", "/trends/micros", None),
+        ("x-coaches", "/explore/coaches", None), ("x-meals", "/explore/meals", None), ("x-profile", "/settings/profile", None),
+        ("x-notifications", "/settings/notifications", None), ("x-language", "/settings/language", None), ("x-account", "/settings/account", None),
+        ("x-food-new", "/foods/new", None), ("x-entry", "/entry/item-1", None), ("x-landing", "/landing", None), ("x-signin", "/signin", None),
+        ("x-404", "/no-such-page", None), ("x-coach", "/coach", None), ("x-delete", "/settings/delete-account", None),
+    ]
 if os.environ.get("CC66_ONLY"):
     SCREENS = [s for s in SCREENS if s[0] in os.environ["CC66_ONLY"].split(",")]
 

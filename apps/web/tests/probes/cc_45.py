@@ -252,7 +252,9 @@ def reduced_motion(browser):
               return { d: pick('.link-d'), p: pick('.link-p'), dn: svg.querySelectorAll('.link-d').length, pn: svg.querySelectorAll('.link-p').length };
             }""")
             w = size["viewport"]["width"]
-            check(names["d"] == [expect_bob] and names["p"] == [expect_wind], f"{mode} @{w}: objects {names['d']}, dust {names['p']}")
+            # cc-64 (2b): on a phone (every visitor's first screen) the doodles stay still whatever the setting
+            bob, wind = (expect_bob, expect_wind) if w >= 1024 else ("none", "none")
+            check(names["d"] == [bob] and names["p"] == [wind], f"{mode} @{w}: objects {names['d']}, dust {names['p']}")
             if mode == "reduce":
                 count = (15, 26) if w == 390 else (15, 44)
                 check((names["dn"], names["pn"]) == count, f"@{w}: {count[0] - 1} objects + barbell, {count[1]} dust ({names['dn']}, {names['pn']})")

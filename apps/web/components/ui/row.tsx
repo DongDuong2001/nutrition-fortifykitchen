@@ -65,7 +65,7 @@ export function Row({
     </>
   );
 
-  const containerClasses = `flex items-center gap-2 min-h-12 py-1.5 text-text no-underline select-none transition-colors ${
+  const containerClasses = `flex items-center gap-2 min-h-12 py-2 text-text no-underline select-none transition-colors ${
     withBorderTop ? "border-t border-divider" : ""
   } ${className}`;
 

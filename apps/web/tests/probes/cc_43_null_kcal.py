@@ -73,7 +73,9 @@ def note_info(pg):
     return pg.evaluate(
         """() => {
           const hero = [...document.querySelectorAll("section[aria-label='Tổng kcal và dinh dưỡng đa lượng']")].find(e => e.getBoundingClientRect().width > 0);
-          const p = hero.nextElementSibling;
+          // cc-64 (A3): the note opens and closes with Expand, so it sits inside the .m-expand after the hero
+          const next = hero.nextElementSibling;
+          const p = next && next.classList.contains('m-expand') ? next.querySelector('p') : next;
           if (!p || p.tagName !== 'P') return null;
           const cs = getComputedStyle(p);
           return { text: p.textContent.trim(), size: cs.fontSize, left: p.getBoundingClientRect().left, heroLeft: hero.getBoundingClientRect().left };

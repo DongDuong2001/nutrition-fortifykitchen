@@ -104,7 +104,7 @@ function CopyChoices({ entries, onDone, target, sourceWord, isToday }: { entries
         })}
       </div>
       <div className="text-cap text-secondary px-1">Món đã có {isToday ? "hôm nay" : "hôm qua"} sẽ không bị ghi đè.</div>
-      <PillButton variant="primary" onClick={copy} disabled={chosen.length === 0} className="mt-1.5">
+      <PillButton variant="primary" onClick={copy} disabled={chosen.length === 0} className="mt-2">
         {chosen.length > 0 ? `Chép ${chosen.length} bữa` : "Chọn bữa để chép"}
       </PillButton>
       <PillButton variant="secondary" onClick={onDone}>

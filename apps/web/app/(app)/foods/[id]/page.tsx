@@ -254,7 +254,7 @@ function FoodDetailInner() {
         </div>
 
         {/* Big Kcal & 3-up Macro Card */}
-        <div data-align-group="food-detail" className="w-full bg-card rounded-card border border-transparent shadow-ring lg:shadow-card p-4">
+        <Card data-align-group="food-detail" className="w-full">
           <StatGroup
             columns={4}
             tone="light"
@@ -267,7 +267,7 @@ function FoodDetailInner() {
           />
           {/* A supplement whose label states no energy: logged all the same, counted as 0 kcal */}
           {canLog(food) && energyNotice(food) && <p role="note" className="m-0 mt-3 text-cap leading-snug text-secondary">{energyNotice(food)}</p>}
-        </div>
+        </Card>
 
         {recipe && (
           <Card as="section" aria-label="Trong 1 phần" data-align-group="food-detail" className="flex flex-col gap-1 p-4">

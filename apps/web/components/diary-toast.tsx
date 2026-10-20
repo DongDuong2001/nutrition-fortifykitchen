@@ -3,6 +3,7 @@
 import React, { useRef } from "react";
 import { Presence } from "@/components/ui/presence";
 import { Toast } from "@/components/ui/toast";
+import { useToastSwipe } from "@/components/ui/use-toast-swipe";
 import { useDiary, useDiaryToast, type ToastInfo } from "@/lib/diary-store";
 import { scrollBehavior } from "@/lib/scroll-behavior";
 import { openSyncList } from "@/lib/sync-ui";
@@ -15,8 +16,9 @@ import { usePathname } from "next/navigation";
  * CSS (no timer re-rendering the toast), and each toast rises in and fades away (Presence).
  */
 export function DiaryToast() {
-  const { undoParkedDelete, undoLastDelete, undoCopy, undoMove, retryUnsaved, setHighlightedMeal, pauseToast, resumeToast } = useDiary();
+  const { undoParkedDelete, undoLastDelete, undoCopy, undoMove, retryUnsaved, setHighlightedMeal, pauseToast, resumeToast, dismissToast } = useDiary();
   const { toast, parkedDelete } = useDiaryToast();
+  const swipe = useToastSwipe(dismissToast);
   // A new toast is a new element: its countdown starts over
   const ids = useRef({ map: new WeakMap<ToastInfo, number>(), next: 0 });
   const idOf = (t: ToastInfo) => {
@@ -63,7 +65,9 @@ export function DiaryToast() {
             announce={false}
             onPause={pauseToast}
             onResume={resumeToast}
-            key={idOf(toast)}
+            swipe={swipe}
+            // cc-64 (2b): repeated adds into one meal are one toast that updates in place (same element, text and clock renewed)
+            key={toast.groupId !== undefined ? `g${toast.groupId}` : idOf(toast)}
             message={toast.message}
             actionLabel={
               toast.kind === "notice"

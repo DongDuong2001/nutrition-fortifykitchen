@@ -17,7 +17,7 @@ import type { QuickEntryInput, QuickEntryResult } from "@/lib/quick-entry";
 import { AddShortcuts, type RecentShortcut, type SavedMealShortcut } from "@/components/add/add-shortcuts";
 import { QuickAddSheet } from "@/components/add/quick-add-sheet";
 import { Sheet } from "@/components/ui/sheet";
-import { ChipRow } from "@/components/foods/chip-row";
+import { ChipGroup } from "@/components/ui/chip-group";
 import { FoodList } from "@/components/foods/food-list";
 import { FoodEmptyState } from "@/components/foods/food-empty-state";
 import { CatalogNote, CatalogStatus } from "@/components/foods/catalog-status";
@@ -55,6 +55,7 @@ import { cameFromHome, homeDay, homeScroll } from "@/lib/home-scroll";
 import { SHEET_EXIT_MS, useSheetDrag } from "@/components/ui/sheet";
 import { setInertExceptDrag } from "@/components/ui/sheet-drag-controller";
 import { haptic } from "@/lib/haptics";
+import { IconButton } from "@/components/ui/icon-button";
 
 // The add sheet shows carousels of the newest: Khám phá holds the full lists
 const MAX_SHORTCUT_RECENTS = 8;
@@ -580,16 +581,15 @@ function AddFoodInner() {
               </div>
 
               <div className="flex shrink-0 items-center gap-2">
-                <button
-                  type="button"
+                <IconButton
                   onClick={() => handleClose()}
-                  aria-label="Đóng"
-                  className="w-11 h-11 rounded-full bg-surface text-text flex items-center justify-center border-0 cursor-pointer hover:bg-divider active:scale-[0.97] transition-press"
+                  label="Đóng"
+                  tone="surface" className="text-text hover:bg-divider"
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                     <path d="M6 6l12 12M18 6L6 18" />
                   </svg>
-                </button>
+                </IconButton>
               </div>
             </div>
 
@@ -600,7 +600,7 @@ function AddFoodInner() {
                 <FoodSearchField value={query} onChange={setQuery} inputRef={desktopSearchInputRef} />
 
                 {/* Filter row: Tất cả, Yêu thích, then categories with foods */}
-                <ChipRow items={filterItems} ariaLabel="Lọc món theo nhóm" data-align-group="add-list" data-align-edge="left" />
+                <ChipGroup scroll items={filterItems} ariaLabel="Lọc món theo nhóm" data-align-group="add-list" data-align-edge="left" />
 
                 {showShortcuts && shortcuts}
 
@@ -718,23 +718,22 @@ function AddFoodInner() {
               </div>
 
               <div className="flex shrink-0 items-center gap-2">
-                <button
-                  type="button"
+                <IconButton
                   onClick={() => handleClose()}
-                  aria-label="Đóng"
-                  className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border-0 bg-surface text-text active:scale-[0.97] transition-press"
+                  label="Đóng"
+                  tone="surface" className="text-text"
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                     <path d="M6 6l12 12M18 6L6 18" />
                   </svg>
-                </button>
+                </IconButton>
               </div>
             </div>
 
             <FoodSearchField value={query} onChange={setQuery} inputRef={phoneSearchInputRef} className="shrink-0" />
 
             {/* Filter row: Tất cả, Yêu thích, then categories with foods */}
-            <ChipRow items={filterItems} ariaLabel="Lọc món theo nhóm" data-align-group="add-list" data-align-edge="left" />
+            <ChipGroup scroll items={filterItems} ariaLabel="Lọc món theo nhóm" data-align-group="add-list" data-align-edge="left" />
           </div>
 
           {/* One scroll region: carousels, the food list and the create button (the last item stays reachable) */}

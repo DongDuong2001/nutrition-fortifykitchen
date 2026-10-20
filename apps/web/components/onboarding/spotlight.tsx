@@ -120,6 +120,9 @@ export function Spotlight({
     let poll: ReturnType<typeof setInterval> | null = null;
     let watch: ReturnType<typeof setInterval> | null = null;
     let usingFallback = false;
+    // cc-64 (2b): whether to look for a running animation before measuring. Only a new target or a change of its size
+    // asks (a sheet sliding in); a scroll frame does not scan every animation of the document
+    let checkMotion = true;
     const started = Date.now();
 
     // The element left the page: point at its new copy if there is one, else the step or tip is skipped (no ring
@@ -129,6 +132,7 @@ export function Spotlight({
       if (!found.every((el): el is HTMLElement => el !== null)) return false;
       observer?.disconnect();
       elements = found;
+      checkMotion = true;
       for (const el of found) observer?.observe(el);
       return true;
     };
@@ -140,27 +144,34 @@ export function Spotlight({
         callbacks.current.onMissing();
         return;
       }
-      const settling = moving(elements);
+      const settling = checkMotion ? moving(elements) : null;
       if (settling) {
-        settling.finished.then(schedule, schedule);
+        settling.finished.then(resized, resized);
         return;
       }
+      checkMotion = false;
       const r = unionBox(elements.map((el) => el.getBoundingClientRect()));
-      setView({ width: window.innerWidth, height: window.innerHeight });
+      // Shallow compares: a frame where nothing moved renders nothing
+      setView((v) => (v.width === window.innerWidth && v.height === window.innerHeight ? v : { width: window.innerWidth, height: window.innerHeight }));
       if (r.width === 0 || r.height === 0 || r.top + r.height < 0 || r.top > window.innerHeight || r.left + r.width < 0 || r.left > window.innerWidth) {
         callbacks.current.onMissing();
         return;
       }
-      setBox(r);
+      setBox((b) => (b && b.top === r.top && b.left === r.left && b.width === r.width && b.height === r.height ? b : r));
     };
     const schedule = () => {
       if (!frame) frame = requestAnimationFrame(measure);
+    };
+    const resized = () => {
+      checkMotion = true;
+      schedule();
     };
 
     const attach = (els: HTMLElement[]) => {
       elements = els;
       if (scroll) els[0].scrollIntoView({ block: "center" });
-      observer = new ResizeObserver(schedule);
+      checkMotion = true;
+      observer = new ResizeObserver(resized);
       for (const el of els) observer.observe(el);
       window.addEventListener("scroll", schedule, true);
       window.addEventListener("resize", schedule);
