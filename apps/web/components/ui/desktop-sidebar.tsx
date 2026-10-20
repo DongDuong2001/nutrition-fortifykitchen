@@ -23,7 +23,7 @@ export function DesktopSidebar({ currentTab }: { currentTab?: NavTab }) {
         href={HOME_ROUTE}
         aria-label="H1T MICRO, về Hôm nay"
         data-tour="home-logo"
-        className="block w-fit rounded-md px-2 font-display italic font-black text-2xl tracking-display text-on-dark no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100 focus-visible:outline-sky"
+        className="-my-1.5 block w-fit rounded-md px-2 py-1.5 font-display italic font-black text-2xl tracking-display text-on-dark no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100 focus-visible:outline-sky"
       >
         <span aria-hidden="true">
           H1T <span className="text-sky">MICRO</span>
