@@ -54,8 +54,34 @@ Read first, then clean. Every command starts with `ssh deploy@14.225.210.185` an
 3. Old logs of containers created before the switch to `local`: they go when the containers are recreated by the
    next deploy. Check with `sudo du -sh /var/lib/docker/containers`.
 
+## Images from GitHub (ci/ghcr-images)
+`.github/workflows/images.yml` builds the web and API images on every push to main and pushes them to
+`ghcr.io/dongduong2001/nutrition-web` and `nutrition-api`, tagged with the commit sha and `main`. `deploy/deploy.sh`
+pulls the images of the commit it checks out and starts them (`up -d --no-build`). The VPS no longer builds, so there
+is no build peak and no build cache on its disk. `deploy/deploy.sh <ref> --build` still builds on the server, for a
+ref that has no images.
+
+Once, before the first deploy that pulls:
+1. **Actions variables** (GitHub → the repo → Settings → Secrets and variables → Actions → Variables), the same
+   values as `deploy/.env.prod`: `NEXT_PUBLIC_API_MODE`, `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SITE_URL`,
+   `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_HCAPTCHA_SITE_KEY`. All are public (the
+   browser gets them); no secret goes into an image. The API reads its secrets from `deploy/.env.prod` at run time,
+   as before.
+2. **Package visibility:** the first run creates both packages under Dong's account, private. Keep them private and
+   log the VPS in (step 3), or make them public in the package settings and skip step 3.
+3. **Registry login on the VPS** with a classic personal access token that has only `read:packages`:
+   ```bash
+   ssh deploy@14.225.210.185
+   cd /var/www/nutrition-meals
+   echo "<token>" | docker login ghcr.io -u <github user> --password-stdin
+   ```
+4. Run the Images workflow once by hand (Actions → Images → Run workflow), or push to main, then
+   `deploy/deploy.sh` as usual.
+
 ## Rolling back
-- **The app:** `deploy/deploy.sh <tag or commit>` as before. It checks out that ref and builds it.
-- **This change:** deploy the commit before it. The old Dockerfile runs `next start` again, and the compose file
-  goes back to `json-file` logs and a 768 MB heap. Nothing on the server has to change. Pruned images are rebuilt
-  from source by the deploy, so pruning never blocks a rollback.
+- **The app:** `deploy/deploy.sh <commit of main>`. It checks out that commit and pulls its images: nothing is rebuilt,
+  so a rollback takes about as long as the pull. A ref with no images (a tag or branch off main, or a commit older
+  than this workflow): `deploy/deploy.sh <ref> --build`.
+- **This change:** deploy the commit before it with `--build`. The old Dockerfile runs `next start` again, and the
+  compose file goes back to `json-file` logs and a 768 MB heap. Nothing on the server has to change. A pruned image
+  is pulled again or rebuilt from source, so pruning never blocks a rollback.

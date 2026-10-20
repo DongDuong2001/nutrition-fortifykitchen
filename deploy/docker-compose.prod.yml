@@ -1,6 +1,6 @@
 # Production stack for one VPS. Database and Auth are Supabase (no local Postgres).
-# Run from the repo root:
-#   docker compose -f deploy/docker-compose.prod.yml --env-file deploy/.env.prod up -d --build
+# deploy/deploy.sh runs it: web and api are pulled from GitHub's registry at IMAGE_TAG (the commit sha, built by
+# .github/workflows/images.yml); `build:` stays so `deploy.sh <ref> --build` can still build them here.
 name: nutrition
 
 # The local driver keeps logs compressed on disk and rotates them (json-file kept them as plain text)
@@ -21,7 +21,7 @@ services:
         NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:?set NEXT_PUBLIC_SUPABASE_URL in deploy/.env.prod}
         NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:?set NEXT_PUBLIC_SUPABASE_ANON_KEY in deploy/.env.prod}
         NEXT_PUBLIC_HCAPTCHA_SITE_KEY: ${NEXT_PUBLIC_HCAPTCHA_SITE_KEY:?set NEXT_PUBLIC_HCAPTCHA_SITE_KEY in deploy/.env.prod}
-    image: nutrition-web:prod
+    image: ghcr.io/dongduong2001/nutrition-web:${IMAGE_TAG:-main}
     restart: unless-stopped
     environment:
       NODE_ENV: production
@@ -41,7 +41,7 @@ services:
   api:
     build:
       context: ../apps/api
-    image: nutrition-api:prod
+    image: ghcr.io/dongduong2001/nutrition-api:${IMAGE_TAG:-main}
     restart: unless-stopped
     env_file:
       - .env.prod
