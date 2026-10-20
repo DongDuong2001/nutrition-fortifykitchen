@@ -56,7 +56,7 @@ import {
 } from "./api-client";
 import { refreshServerSession } from "./server-session";
 import { openSyncList, registerSyncNow, setSyncSummary } from "./sync-ui";
-import { isDiaryAdd, retryMessage, type RetryOutcome } from "./late-writes";
+import { entryMadeAt, isDiaryAdd, retryMessage, type RetryOutcome } from "./late-writes";
 import { markUsed } from "./onboarding-store";
 import { isLocalOnly, syncNotice } from "./sync-notice";
 import { errorText, reportClientError } from "./client-errors";
@@ -649,11 +649,14 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   // A food without a server row (a recipe made in the app) is never sent: it stays on this device (Chỉ trên máy này).
   // S14: the day is the entry's own, worked out when the write is made (not the date the screen last showed, which is
   // wrong after the phone slept past midnight)
+  // `again`: an entry made earlier that the server never confirmed, sent again. Its write was made when the entry was (its
+  // addedAt, else its day at 23:00), not now: the server judges the day by that (hotfix 20/10).
   const sendAdd = useCallback(
-    (entry: AddedDiaryEntry) => {
+    (entry: AddedDiaryEntry, again = false) => {
       if (isLocalOnly(entry)) return;
       const date = entryIso(entry) ?? getTodayIsoVN();
-      track(entry.id, apiClient.addEntry(addPayload(entry, date)), date);
+      const madeAt = again ? (entryMadeAt(entry.addedAt, date, Date.now()) ?? undefined) : undefined;
+      track(entry.id, apiClient.addEntry({ ...addPayload(entry, date), madeAt }), date);
     },
     [track]
   );
@@ -674,7 +677,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     const account = currentAccountId();
     if (!isLiveMode() || !account) return;
     // Entries of those days the server never confirmed are sent again; a day beyond the window refuses them (lasting marker)
-    void callEngine("saveHistoryDays", account, past).then((unsent) => unsent.forEach((e) => sendAdd(e)));
+    void callEngine("saveHistoryDays", account, past).then((unsent) => unsent.forEach((e) => sendAdd(e, true)));
   }, [sendAdd]);
 
   /**
@@ -764,7 +767,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       void (async () => {
         const { days: found, unsent } = await callEngine("initHistory", account, filed.archive, iso, days);
         // Entries of those days the server never confirmed are sent again; a day beyond the window refuses them (lasting marker)
-        unsent.forEach((e) => sendAdd(e));
+        unsent.forEach((e) => sendAdd(e, true));
         if (currentAccountId() === account && Object.keys(found).length > 0) setArchive((prev) => ({ ...prev, ...found }));
       })();
 
@@ -913,7 +916,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     if (!isLiveMode() || demo || !accountId || !serverDayRead || !todayIso) return;
     const pending = pendingWriteIds();
     for (const e of edits.added) {
-      if (!e.synced && isUuid(e.id) && !isLocalOnly(e) && !pending.has(e.id)) sendAdd(e);
+      if (!e.synced && isUuid(e.id) && !isLocalOnly(e) && !pending.has(e.id)) sendAdd(e, true);
     }
   }, [edits.added, serverDayRead, demo, accountId, todayIso, sendAdd, syncVersion]);
 

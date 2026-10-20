@@ -9,8 +9,9 @@ any anon key), not in probe:all. The API is a fake in this file (route intercept
      "Phiên đăng nhập hết hạn · Đăng nhập lại"
   D  history is the server's: a day three days back that this device never saw is read from GET /days/{date}, shows on Hôm nay
      (Chỉ xem), is cached (one IndexedDB record), shows again from the cache with the network gone, and a second device sees it too
-  C  sign-out with writes waiting asks first (X8): "Còn 1 mục chưa đồng bộ. Đăng xuất bây giờ sẽ xóa chúng khỏi máy này." with
-     "Đồng bộ rồi đăng xuất" (the default) and "Vẫn đăng xuất"; offline the first keeps the dialog (the count stays), online it sends
+  C  sign-out with writes waiting asks first (X8): "Còn 1 món chưa đồng bộ. Đăng xuất bây giờ sẽ xóa chúng khỏi máy này." with
+     "Đồng bộ rồi đăng xuất" (the default) and "Vẫn đăng xuất"; offline the first keeps the dialog and says "Còn 1 món chưa đồng bộ
+     được: <why>." (the count stays), online it sends
      the write and signs out; sign-out with nothing waiting goes straight to /signin; either way what the device kept is gone
 Run with: LIVE_BUILD=1 ALIGN_BASE_URL=http://localhost:3112 npm run probe -- tests/probes/cc_68.py
 Pick parts with CC68_ONLY=A,B
@@ -371,7 +372,7 @@ with sync_playwright() as p:
         dialog = pg.get_by_role("dialog", name="Chưa lưu")
         dialog.wait_for(timeout=10000)
         text = dialog.inner_text()
-        check("Khoai lang luộc" in text and ("Sẽ gửi lại" in text or "Chờ gửi" in text), f"E: the list names the food and where it stands ({text[:80]!r})")
+        check("Khoai lang luộc" in text and any(w in text for w in ("Đang chờ mạng", "Đang chờ gửi", "Đang gửi")), f"E: the list names the food and where it stands ({text[:80]!r})")
         pg.screenshot(path=str(SHOTS / "E-list-390.png"))
         api.offline = False
         dialog.get_by_role("button", name="Thử lại").click()
@@ -463,7 +464,7 @@ with sync_playwright() as p:
         dialog = pg.get_by_role("dialog", name="Đăng xuất?")
         dialog.wait_for(timeout=10000)
         text = dialog.inner_text()
-        check("Còn 1 mục chưa đồng bộ. Đăng xuất bây giờ sẽ xóa chúng khỏi máy này." in text, f"C: the confirm says how many ({text[:90]!r})")
+        check("Còn 1 món chưa đồng bộ. Đăng xuất bây giờ sẽ xóa chúng khỏi máy này." in text, f"C: the confirm says how many ({text[:90]!r})")
         sync_button = dialog.get_by_role("button", name="Đồng bộ rồi đăng xuất")
         leave_button = dialog.get_by_role("button", name="Vẫn đăng xuất")
         check(sync_button.count() == 1 and leave_button.count() == 1, "C: Đồng bộ rồi đăng xuất and Vẫn đăng xuất")
@@ -474,7 +475,7 @@ with sync_playwright() as p:
         # Offline the sync cannot send it: the dialog stays and says so
         sync_button.click()
         pg.wait_for_timeout(2500)
-        check(dialog.count() == 1 and "Chưa đồng bộ hết được" in dialog.inner_text() and "Còn 1 mục" in dialog.inner_text(), "C: offline the sync keeps the dialog and the count")
+        check(dialog.count() == 1 and "Còn 1 món chưa đồng bộ được:" in dialog.inner_text(), f"C: offline the sync keeps the dialog and the count ({dialog.inner_text()[:160]!r})")
         check(len(outbox(pg)) == 1, "C: the write is still in the outbox")
         # Back online: it is sent, then the person is signed out and the device is clean
         api.offline = False

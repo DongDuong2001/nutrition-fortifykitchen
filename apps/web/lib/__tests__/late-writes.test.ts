@@ -3,7 +3,9 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { apiClient, callEngine, getPendingOfflineEntryIds, loadSyncEngine, outboxItems, resetWriteMemory, syncOfflineOutbox } from "../api-client";
 import { resetIdb } from "../idb";
-import { dayLabel, isDiaryAdd, reasonOf, reasonSummary, refusedForGoodItem, retryMessage, stamp } from "../late-writes";
+import { writeDayRecords } from "../day-cache";
+import type { AddedDiaryEntry } from "../diary-edits";
+import { dayLabel, entryMadeAt, isDiaryAdd, madeAtOf, madeTooLate, reasonOf, reasonSummary, refusedForGoodItem, retryMessage, stamp, tooOldForServer } from "../late-writes";
 import { countItems, loadOutbox, putItems, readItems, resetOutboxState, scopeFor, type OutboxItem } from "../outbox";
 import { syncBeforeSignOut } from "../sign-out-flow";
 import { resetSyncAlerts } from "../sync-state";
@@ -170,7 +172,7 @@ describe("the writes already on phones: final 409 items from 17/10 go back to qu
     expect(countItems(readItems(scope))).toMatchObject({ pending: 0, failed: 2 });
   });
 
-  it("runs once per version: a write refused again stays held until the next version", async () => {
+  it("runs once per version: a write refused again stays held until the next version, which sends it once more", async () => {
     await seed();
     vi.stubGlobal("fetch", vi.fn(async () => new Response(PAST_DAY, { status: 409 })));
     expect(await unstickLateWrites(scope, "2026-10-20.2")).toBe(4);
@@ -179,6 +181,8 @@ describe("the writes already on phones: final 409 items from 17/10 go back to qu
     expect(readItems(scope).filter((i) => i.date === "2026-10-17")).toHaveLength(4);
     expect(readItems(scope).filter((i) => i.date === "2026-10-17").every((i) => i.held && !i.held.final)).toBe(true);
     expect(await unstickLateWrites(scope, "2026-10-20.2")).toBe(0);
+    // A held 409 (final or not) goes back to queued once per version: the next version tries again, once
+    expect(await unstickLateWrites(scope, "2026-10-21.1")).toBe(4);
     expect(await unstickLateWrites(scope, "2026-10-21.1")).toBe(0);
   });
 });
@@ -295,5 +299,216 @@ describe("Đồng bộ rồi đăng xuất never does nothing", () => {
     const failed = renderToStaticMarkup(React.createElement(SignOutConfirm, { ...base, busy: false, progress: null, error: "Chưa đăng xuất được. Kiểm tra mạng rồi thử lại nhé." }));
     expect(failed).toContain("Chưa đăng xuất được");
     expect(failed).toContain("Xem các món");
+  });
+});
+
+// 2026-10-20.4. Production after the deploy: a phone sent 12 adds for 17/10 at 05:21 UTC on 20/10, all 409. The outbox items of
+// the old app (every shape back to the first one) carry a numeric createdAt, so they were not it: the adds were the local
+// diary's entries of 17/10 the server never confirmed, queued again when the day closed (fileDays, initHistory), and stamped
+// with createdAt = the moment they were queued again.
+
+/** The server with the real date rule (apps/api/internal/diary/date.go): made_at within 14 days and not ahead, the day at most one before it. */
+function ruleServer() {
+  const calls: Call[] = [];
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (url: string, init?: RequestInit) => {
+      const [path, query = ""] = url.replace("https://api.test/api/v1", "").split("?");
+      const body = init?.body ? JSON.parse(String(init.body)) : undefined;
+      calls.push({ method: init?.method ?? "GET", path, query, body });
+      const day = /^\/days\/([\d-]+)\/entries$/.exec(path)?.[1];
+      if (!day) return new Response("{}", { status: 200 });
+      const madeAt = typeof body?.made_at === "string" ? Date.parse(body.made_at) : null;
+      const now = Date.now();
+      const from = madeAt ?? now;
+      const tooFar = madeAt !== null && (madeAt > now + 5 * 60_000 || now - madeAt > 14 * DAY);
+      const floor = new Date(from + 7 * 3_600_000 - DAY).toISOString().slice(0, 10);
+      return tooFar || day < floor ? new Response(PAST_DAY, { status: 409 }) : new Response("{}", { status: 201 });
+    })
+  );
+  return calls;
+}
+
+const entry = (n: number, addedAt: string): AddedDiaryEntry =>
+  ({ id: ids[n], foodId: FOOD, foodName: "Khoai lang luộc", grams: 100, displayQty: "100 g", mealSlot: "lunch", calories: 101, protein: 2, carbs: 20, fat: 1, fiber: 0, nutrients: {}, addedAt }) as AddedDiaryEntry;
+
+describe("madeAtOf: when the user made the write, whatever the item kept", () => {
+  const now = Date.parse("2026-10-20T05:21:00Z");
+  const base = { createdAt: 0, date: "2026-10-17" };
+
+  it("a plausible createdAt is the time", () => {
+    expect(madeAtOf({ ...base, createdAt: Date.parse("2026-10-17T05:00:00Z") }, now)).toBe("2026-10-17T05:00:00.000Z");
+  });
+
+  it("madeAt (the diary entry's own time) wins over createdAt", () => {
+    expect(madeAtOf({ ...base, createdAt: now, madeAt: Date.parse("2026-10-17T02:15:00Z") }, now)).toBe("2026-10-17T02:15:00.000Z");
+  });
+
+  it("no plausible createdAt and no madeAt: the write's day at 23:00 Ho Chi Minh time (an add's date, else an edit's day)", () => {
+    expect(madeAtOf(base, now)).toBe("2026-10-17T16:00:00.000Z");
+    expect(madeAtOf({ ...base, createdAt: Date.parse("2019-12-31T00:00:00Z") }, now)).toBe("2026-10-17T16:00:00.000Z");
+    expect(madeAtOf({ ...base, createdAt: Number.NaN }, now)).toBe("2026-10-17T16:00:00.000Z");
+    expect(madeAtOf({ createdAt: 0, date: "", day: "2026-10-16" }, now)).toBe("2026-10-16T16:00:00.000Z");
+  });
+
+  it("never later than now", () => {
+    expect(madeAtOf({ createdAt: 0, date: "2026-10-20" }, now)).toBe("2026-10-20T05:21:00.000Z");
+    expect(madeAtOf({ createdAt: now + DAY }, now)).toBe("2026-10-20T05:21:00.000Z");
+    expect(entryMadeAt("2026-10-21T00:00:00Z", "2026-10-21", now)).toBe(now);
+  });
+
+  it("nothing says when: null (the server applies today and yesterday)", () => {
+    expect(madeAtOf({ createdAt: 0 }, now)).toBeNull();
+    expect(madeAtOf({ createdAt: 0, date: "17/10" }, now)).toBeNull();
+  });
+
+  it("the 14-day cap judges the same time", () => {
+    expect(tooOldForServer({ createdAt: 0, date: "2026-10-17" }, now)).toBe(false);
+    expect(tooOldForServer({ createdAt: 0, date: "2026-10-05" }, now)).toBe(true);
+    expect(tooOldForServer({ createdAt: now, madeAt: now - 15 * DAY }, now)).toBe(true);
+    expect(tooOldForServer({ createdAt: 0 }, now)).toBe(true);
+  });
+
+  it("an entry's made time: its addedAt, else its day at 23:00", () => {
+    expect(entryMadeAt("2026-10-17T02:15:00.000Z", "2026-10-17", now)).toBe(Date.parse("2026-10-17T02:15:00Z"));
+    expect(entryMadeAt("not a time", "2026-10-17", now)).toBe(Date.parse("2026-10-17T16:00:00Z"));
+    expect(entryMadeAt(undefined, "2026-10-17", now)).toBe(Date.parse("2026-10-17T16:00:00Z"));
+  });
+
+  it("an add made too late for its day can only be a re-send", () => {
+    const add = (over: Partial<OutboxItem>) => stuck(0, { state: "queued", held: undefined, ...over });
+    expect(madeTooLate(add({ createdAt: now }), now)).toBe(true);
+    expect(madeTooLate(add({ createdAt: Date.parse("2026-10-18T10:00:00Z") }), now)).toBe(false);
+    expect(madeTooLate(add({ createdAt: now, madeAt: Date.parse("2026-10-17T02:15:00Z") }), now)).toBe(false);
+    expect(madeTooLate(add({ createdAt: now, method: "PATCH", path: `/entries/${ID}`, date: "", day: "2026-10-17" }), now)).toBe(false);
+  });
+});
+
+describe("the old app's outbox: every shape keeps its time when it moves to IndexedDB", () => {
+  const madeOn17 = Date.parse("2026-10-17T05:00:00Z");
+  const payload = (n: number) => ({ id: ids[n], kind: "food", meal_slot: "lunch", food_id: FOOD, grams: 100 });
+
+  it("the first shapes ({ id, date, payload, createdAt }, then retries) under the scoped and the unscoped key are sent with their own createdAt", async () => {
+    vi.setSystemTime(new Date("2026-10-20T05:21:00Z"));
+    localStorage.setItem(`h1t_offline_outbox_${ACCOUNT}`, JSON.stringify([{ id: ids[0], date: "2026-10-17", payload: payload(0), createdAt: madeOn17, retries: 0 }]));
+    localStorage.setItem("h1t_offline_outbox", JSON.stringify([{ id: ids[1], date: "2026-10-17", payload: payload(1), createdAt: madeOn17 + 60_000 }]));
+    killPage();
+    const calls = ruleServer();
+    await callEngine("loadOfflineOutbox");
+    expect(readItems(scope).map((i) => i.createdAt).sort()).toEqual([madeOn17, madeOn17 + 60_000]);
+    expect(idb.values("outbox")).toHaveLength(2);
+    await syncOfflineOutbox({ force: true });
+    expect(calls.filter((c) => c.method === "POST").map((c) => c.body?.made_at)).toEqual(["2026-10-17T05:00:00.000Z", "2026-10-17T05:01:00.000Z"]);
+    expect(outboxItems()).toEqual([]);
+  });
+
+  it("an item with no usable time (missing, or not a number) goes with its day at 23:00, and is saved", async () => {
+    vi.setSystemTime(new Date("2026-10-20T05:21:00Z"));
+    localStorage.setItem(`h1t_offline_outbox_${ACCOUNT}`, JSON.stringify([{ id: ids[0], date: "2026-10-17", payload: payload(0) }, { id: ids[1], date: "2026-10-17", payload: payload(1), createdAt: "2026-10-17T05:00:00Z" }]));
+    killPage();
+    const calls = ruleServer();
+    await callEngine("loadOfflineOutbox");
+    await syncOfflineOutbox({ force: true });
+    const posts = calls.filter((c) => c.method === "POST");
+    expect(posts.map((c) => c.body?.made_at)).toEqual(["2026-10-17T16:00:00.000Z", "2026-10-17T16:00:00.000Z"]);
+    expect(outboxItems()).toEqual([]);
+  });
+});
+
+describe("the 12 adds of 17/10: entries of a closed day sent again with the time they were made", () => {
+  const at0521 = new Date("2026-10-20T05:21:00Z");
+  const addedOn17 = (n: number) => `2026-10-17T0${n}:30:00.000Z`;
+
+  /** What 2026-10-20.3 did with them: queued again at 05:21 with createdAt = then, sent, refused, held (not final). */
+  const as203 = async () => {
+    vi.setSystemTime(at0521);
+    const calls = ruleServer();
+    for (const n of [0, 1, 2, 3]) await apiClient.addEntry({ id: ids[n], foodId: FOOD, grams: 100, mealSlot: "lunch", date: "2026-10-17" });
+    return calls;
+  };
+
+  it("reproduces production: made_at is the moment they were queued again, and the server says 409", async () => {
+    const calls = await as203();
+    expect(calls).toHaveLength(4);
+    expect(calls.every((c) => c.path === "/days/2026-10-17/entries" && c.body?.made_at === "2026-10-20T05:21:00.000Z")).toBe(true);
+    expect(readItems(scope).every((i) => i.state === "held" && i.held?.status === 409 && !i.held.final)).toBe(true);
+  });
+
+  it("2026-10-20.4 puts their time right from the local diary (addedAt, else 23:00 of 17/10), sends them again once, and they save", async () => {
+    await as203();
+    // The closed day's record keeps the entries the server never confirmed, whole (fileDays → saveHistoryDays); entry 3 is not in it
+    await writeDayRecords([{ scope: ACCOUNT, date: "2026-10-17", at: 0, final: false, entries: [], unsynced: [0, 1, 2].map((n) => entry(n, addedOn17(n))) }]);
+    killPage();
+    vi.setSystemTime(new Date("2026-10-20T06:00:00Z"));
+    vi.stubEnv("NEXT_PUBLIC_APP_VERSION", "2026-10-20.4");
+    const calls = ruleServer();
+    await callEngine("loadOfflineOutbox");
+    await syncOfflineOutbox({ force: true });
+    const posts = calls.filter((c) => c.method === "POST");
+    expect(posts.map((c) => c.body?.made_at)).toEqual([addedOn17(0), addedOn17(1), addedOn17(2), "2026-10-17T16:00:00.000Z"]);
+    expect(outboxItems()).toEqual([]);
+    expect(await unstickLateWrites(scope, "2026-10-20.4")).toBe(0);
+  });
+
+  it("the sync that starts on app open (it sends held writes too) waits until their time is put right", async () => {
+    await as203();
+    await writeDayRecords([{ scope: ACCOUNT, date: "2026-10-17", at: 0, final: false, entries: [], unsynced: [0, 1, 2, 3].map((n) => entry(n, addedOn17(n))) }]);
+    killPage();
+    vi.stubEnv("NEXT_PUBLIC_APP_VERSION", "2026-10-20.4");
+    const calls = ruleServer();
+    // diary-store starts refreshRemoteDay(…, { retryHeld: true }) and loadOfflineOutbox together; here the sync even goes first
+    const open = syncOfflineOutbox({ retryHeld: true });
+    await callEngine("loadOfflineOutbox");
+    await open;
+    await syncOfflineOutbox({ force: true });
+    const posts = calls.filter((c) => c.method === "POST");
+    expect(posts.map((c) => c.body?.made_at)).toEqual([0, 1, 2, 3].map(addedOn17));
+    expect(outboxItems()).toEqual([]);
+  });
+
+  it("an add queued again but not sent yet (offline) gets its time put right too, and stays queued", async () => {
+    vi.setSystemTime(at0521);
+    server(["network"]);
+    await apiClient.addEntry({ id: ids[0], foodId: FOOD, grams: 100, mealSlot: "lunch", date: "2026-10-17" });
+    await writeDayRecords([{ scope: ACCOUNT, date: "2026-10-17", at: 0, final: false, entries: [], unsynced: [entry(0, addedOn17(0))] }]);
+    expect(await unstickLateWrites(scope, "2026-10-20.4")).toBe(0);
+    expect(readItems(scope)[0]).toMatchObject({ state: "queued", madeAt: Date.parse(addedOn17(0)) });
+    const calls = ruleServer();
+    await syncOfflineOutbox({ force: true });
+    expect(calls[0].body?.made_at).toBe(addedOn17(0));
+    expect(outboxItems()).toEqual([]);
+  });
+
+  it("from now on an entry sent again carries its own time (addEntry madeAt), not the time it was queued", async () => {
+    vi.setSystemTime(at0521);
+    const calls = ruleServer();
+    const result = await apiClient.addEntry({ id: ids[0], foodId: FOOD, grams: 100, mealSlot: "lunch", date: "2026-10-17", madeAt: Date.parse(addedOn17(0)) });
+    expect(result.state).toBe("saved");
+    expect(calls[0].body?.made_at).toBe(addedOn17(0));
+  });
+
+  it("leaves alone what it must: a write made in time, an edit, a 400, and one older than 14 days", async () => {
+    vi.setSystemTime(at0521);
+    const now = Date.now();
+    await putItems(scope, [
+      stuck(0, { state: "queued", held: undefined, createdAt: Date.parse("2026-10-19T10:00:00Z"), date: "2026-10-19" }),
+      stuck(1, { method: "PATCH", path: `/entries/${ids[1]}`, date: "", day: "2026-10-17", createdAt: now, held: { status: 400 } }),
+      stuck(2, { createdAt: now, held: { status: 400 } }),
+      stuck(3, { date: "2026-10-01", createdAt: now, held: { status: 409, final: true } }),
+    ]);
+    const before = readItems(scope);
+    expect(await unstickLateWrites(scope, "2026-10-20.4", now)).toBe(0);
+    expect(readItems(scope).map((i) => ({ key: i.key, state: i.state, held: i.held }))).toEqual(before.map((i) => ({ key: i.key, state: i.state, held: i.held })));
+    // The one of 01/10 got its day's time (more than 14 days back): it stays held, refused for good
+    expect(readItems(scope).find((i) => i.id === ids[3])?.madeAt).toBe(Date.parse("2026-10-01T16:00:00Z"));
+    expect(refusedForGoodItem(readItems(scope).find((i) => i.id === ids[3])!, now)).toBe(true);
+  });
+
+  it("Chuyển sang hôm nay is made now: the moved add drops the entry's old time", async () => {
+    await putItems(scope, [stuck(0, { createdAt: Date.now() - 20 * DAY, madeAt: Date.now() - 20 * DAY, date: "2026-09-30" })]);
+    const calls = server([201]);
+    expect(await callEngine("moveAddToToday", readItems(scope)[0].key)).toBe(ids[0]);
+    await syncOfflineOutbox({ force: true });
+    expect(calls[0]).toMatchObject({ path: "/days/2026-10-20/entries", body: { made_at: "2026-10-20T03:00:00.000Z" } });
   });
 });

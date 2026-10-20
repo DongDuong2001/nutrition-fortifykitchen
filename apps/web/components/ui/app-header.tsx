@@ -180,8 +180,9 @@ export function AppHeader({
           {back}
           {/* The phone wordmark is a logo: it never shrinks or wraps; at large text sizes the date gives way instead. While the sync status
               has something to say (Chưa lưu, Ngoại tuyến) the row has no room for both on a phone: the logo steps aside, so the status
-              never lands on the day arrows (hotfix 20/10) */}
-          <div className={`min-w-0 flex-1 ${wordmark ? "max-lg:min-w-fit group-has-[[data-sync-state=unsaved],[data-sync-state=offline]]/hdr:max-lg:min-w-0 group-has-[[data-sync-state=unsaved],[data-sync-state=offline]]/hdr:max-lg:*:hidden" : ""}`}>
+              never lands on the day arrows (hotfix 20/10). The page title (sr-only on a phone) is not hidden with them: it stays in the
+              accessibility tree, so the page keeps its h1 */}
+          <div className={`min-w-0 flex-1 ${wordmark ? "max-lg:min-w-fit group-has-[[data-sync-state=unsaved],[data-sync-state=offline]]/hdr:max-lg:min-w-0 group-has-[[data-sync-state=unsaved],[data-sync-state=offline]]/hdr:max-lg:*:not-data-sr-title:hidden" : ""}`}>
             {wordmark ? (
               <>
                 {phoneStart ? (
@@ -200,7 +201,7 @@ export function AppHeader({
                   </Link>
                 )}
                 {title && (
-                  <Title className="sr-only lg:not-sr-only m-0 font-display italic font-extrabold text-2xl lg:text-display-sm leading-tight uppercase tracking-display">
+                  <Title data-sr-title="" className="sr-only lg:not-sr-only m-0 font-display italic font-extrabold text-2xl lg:text-display-sm leading-tight uppercase tracking-display">
                     {title}
                   </Title>
                 )}

@@ -12,7 +12,7 @@ import { storageErrorKind } from "./storage-error";
 import { requestPersistentStorage } from "./storage-persist";
 import { onTab, postTab } from "./tab-sync";
 import { idbRun } from "./idb";
-import { isDiaryAdd, stamp, tooOldForServer } from "./late-writes";
+import { isDiaryAdd, stamp, tooOldForServer, type MadeAtFields } from "./late-writes";
 import { unstickLateWrites } from "./unstick-late-writes";
 export { watchAccount } from "./account-guard";
 export { unsyncedCount, wipeAccount } from "./account-wipe";
@@ -50,7 +50,7 @@ import {
  */
 
 /** What a write needs to be made into an outbox item. */
-type DiaryWrite = Pick<OutboxItem, "id" | "date" | "payload" | "method" | "path" | "kind" | "entity" | "day"> & { label?: string };
+type DiaryWrite = Pick<OutboxItem, "id" | "date" | "payload" | "method" | "path" | "kind" | "entity" | "day" | "madeAt"> & { label?: string };
 
 const itemKey = (item: Pick<OutboxItem, "key">) => item.key;
 export const itemMethod = (item: Pick<OutboxItem, "method">) => item.method ?? "POST";
@@ -77,8 +77,22 @@ export async function loadOfflineOutbox(): Promise<void> {
   void requestPersistentStorage();
   const scope = currentScope();
   await loadOutbox(scope);
-  // Hotfix 20/10: writes the old rule held for good go back to queued, once per app version, and are sent with made_at
-  if (scope && !isDemo() && (await unstickLateWrites(scope, process.env.NEXT_PUBLIC_APP_VERSION || "dev")) > 0) void syncOfflineOutbox({ force: true });
+  // Hotfix 20/10: writes the server held with the 409 for a past day go back to queued, once per app version, and are sent with made_at
+  if (scope && (await prepareOutbox(scope)) > 0) void syncOfflineOutbox({ force: true });
+}
+
+// Per account, this page life: the outbox loaded and the 409 writes put right (unstick-late-writes). Every run waits for it, so
+// the sync that starts on app open (Thử lại included) never sends a held write before its made time is put right.
+const prepared = new Map<string, Promise<number>>();
+function prepareOutbox(scope: OutboxScope): Promise<number> {
+  let ready = prepared.get(scope.id);
+  if (!ready) {
+    ready = loadOutbox(scope)
+      .then(() => (isDemo() ? 0 : unstickLateWrites(scope, process.env.NEXT_PUBLIC_APP_VERSION || "dev")))
+      .catch(() => 0);
+    prepared.set(scope.id, ready);
+  }
+  return ready;
 }
 
 /** Queues a write in the outbox of the account it belongs to (default: the signed-in one). */
@@ -125,6 +139,7 @@ const writeStartedAt = new Map<string, number>();
 
 /** For tests: forgets the writes this page life had in the air (a page that was killed has none). */
 export function resetWriteMemory(): void {
+  prepared.clear();
   wired = false;
   frozen = false;
   unauthorized = 0;
@@ -211,7 +226,7 @@ export function pendingFavouriteOps(): Array<[string, boolean]> {
  * so only a write older than the 14 days it accepts can never be saved. Any younger one is refused only by a server that does
  * not know made_at yet: it stays held for Thử lại, never final.
  */
-function refusedForGood(write: Pick<OutboxItem, "createdAt">): boolean {
+function refusedForGood(write: MadeAtFields): boolean {
   return tooOldForServer(write, Date.now());
 }
 
@@ -227,12 +242,12 @@ interface Sent {
   code?: string;
 }
 
-async function sendWrite(write: Pick<OutboxItem, "method" | "path" | "date" | "payload" | "day" | "createdAt">): Promise<Sent> {
+async function sendWrite(write: Pick<OutboxItem, "method" | "path" | "date" | "payload" | "day" | "createdAt" | "madeAt">): Promise<Sent> {
   const method = itemMethod(write);
   let status = 0;
   let retryAfter: string | null = null;
   let code = "";
-  // made_at is the item's own createdAt, on the first send and on every retry: the moment the user made the write
+  // made_at is when the user made the write (madeAt, else the item's own createdAt), on the first send and on every retry
   const request = stamp(write, method, itemPath(write), write.payload);
   try {
     const res = await apiFetch(request.path, {
@@ -408,7 +423,7 @@ async function runOutbox(retryHeld: boolean, force: boolean, onProgress?: SyncOp
   const account = currentAccountId();
   const scope = currentScope();
   if (!scope) return result;
-  await loadOutbox(scope);
+  await prepareOutbox(scope);
   return withDrainLock(async () => {
     await reloadOutbox(scope);
     const items = readItems(scope);
@@ -471,7 +486,7 @@ export async function moveAddToToday(key: string): Promise<string | null> {
   if (!scope || !item || !isDiaryAdd(item)) return null;
   const today = getTodayIsoVN();
   const now = Date.now();
-  const moved: OutboxItem = { ...item, key: `${item.id}:${now}:${generateUuid()}`, seq: newSeq(), date: today, day: undefined, path: undefined, createdAt: now, state: "queued", attempts: 0, retries: 0, held: undefined, parked: undefined, nextAttemptAt: undefined, lastStatus: undefined };
+  const moved: OutboxItem = { ...item, key: `${item.id}:${now}:${generateUuid()}`, seq: newSeq(), date: today, day: undefined, path: undefined, createdAt: now, madeAt: undefined, state: "queued", attempts: 0, retries: 0, held: undefined, parked: undefined, nextAttemptAt: undefined, lastStatus: undefined };
   await removeItems(scope, [key]);
   await putItem(scope, moved);
   void syncOfflineOutbox({ force: true });
