@@ -32,13 +32,15 @@ export interface Release {
 
 export const RELEASES: readonly Release[] = [
   // cc-73b (Hao 20/10): targets at the upper end of the coach's range, one number each; vitamins and minerals by the US DRI
-  // with the safe upper limit. The tour is Hôm nay: the kcal target, then the vitamins and minerals column
+  // with the safe upper limit. The tour is Hôm nay: the kcal target, then the vitamins and minerals column. fix/rich-tabs
+  // (Hao 21/10) adds one item, no tour step: the two tabs are in plain sight on the "Giàu …" list
   {
     id: "2026-10-21b",
     date: "21/10",
     items: [
       { icon: "target", title: "Mục tiêu rõ ràng hơn", body: "Mỗi mục giờ chỉ còn một con số để hướng tới, lấy ở mức cao của công thức huấn luyện viên." },
       { icon: "target", title: "Vi chất theo chuẩn DRI", body: "Canxi, sắt, kẽm, vitamin… giờ theo khuyến nghị DRI của Mỹ và Canada, đúng tuổi và giới tính. Ăn quá mức an toàn thì app nhắc nhẹ." },
+      { icon: "bars", title: "Danh sách Giàu … giờ tách riêng thực phẩm và thực phẩm bổ sung", body: "Trong Khám phá, thực phẩm và thực phẩm bổ sung nằm ở hai thẻ riêng, nên viên uống không còn đứng đầu danh sách món ăn." },
     ],
     tour: [
       { target: "home-hero", title: "Một con số", body: "Con số sau dấu gạch chéo là mục tiêu kcal của bạn hôm nay." },

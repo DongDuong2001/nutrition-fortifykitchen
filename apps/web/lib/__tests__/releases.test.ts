@@ -155,13 +155,14 @@ describe("unseenReleases (what Có gì mới lists)", () => {
     expect(ids(null)).toEqual(["2026-10-21b"]);
   });
 
-  it("cc-73b: the newest release (2026-10-21b) is the upper-end targets and the DRI vitamins (two items, the words of the brief); a 2-step tour on Hôm nay (the kcal target, then the vitamins column)", () => {
+  it("cc-73b: the newest release (2026-10-21b) is the upper-end targets and the DRI vitamins (two items, the words of the brief), plus the rich-list tabs (fix/rich-tabs, Hao 21/10); a 2-step tour on Hôm nay (the kcal target, then the vitamins column)", () => {
     const r = latestRelease();
     expect(r?.id).toBe("2026-10-21b");
     expect(r?.date).toBe("21/10");
     expect(r?.items.map((i) => [i.icon, i.title, i.body])).toEqual([
       ["target", "Mục tiêu rõ ràng hơn", "Mỗi mục giờ chỉ còn một con số để hướng tới, lấy ở mức cao của công thức huấn luyện viên."],
       ["target", "Vi chất theo chuẩn DRI", "Canxi, sắt, kẽm, vitamin… giờ theo khuyến nghị DRI của Mỹ và Canada, đúng tuổi và giới tính. Ăn quá mức an toàn thì app nhắc nhẹ."],
+      ["bars", "Danh sách Giàu … giờ tách riêng thực phẩm và thực phẩm bổ sung", "Trong Khám phá, thực phẩm và thực phẩm bổ sung nằm ở hai thẻ riêng, nên viên uống không còn đứng đầu danh sách món ăn."],
     ]);
     for (const i of r?.items ?? []) expect(i.body).not.toContain(":");
     expect(r?.tour?.map((s) => [s.target, s.fallback ?? null, s.advanceOn ?? null, s.title])).toEqual([
