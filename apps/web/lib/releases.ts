@@ -39,8 +39,6 @@ export const RELEASES: readonly Release[] = [
     items: [
       { icon: "target", title: "Mục tiêu rõ ràng hơn", body: "Mỗi mục giờ chỉ còn một con số để hướng tới, lấy ở mức cao của công thức huấn luyện viên." },
       { icon: "target", title: "Vi chất theo chuẩn DRI", body: "Canxi, sắt, kẽm, vitamin… giờ theo khuyến nghị DRI của Mỹ và Canada, đúng tuổi và giới tính. Ăn quá mức an toàn thì app nhắc nhẹ." },
-      // fix/share-micros (Hao 20/10): the share image's nutrient rows no longer run over the summary; "Thiếu nhiều nhất" lists only what is under target
-      { icon: "share", title: "Ảnh chia sẻ gọn gàng hơn", body: "Ngày ăn nhiều món, các dòng vi chất trên ảnh không còn đè lên nhau. \"Thiếu nhiều nhất\" chỉ nêu chất chưa đạt, đạt hết thì không hiện." },
     ],
     tour: [
       { target: "home-hero", title: "Một con số", body: "Con số sau dấu gạch chéo là mục tiêu kcal của bạn hôm nay." },
