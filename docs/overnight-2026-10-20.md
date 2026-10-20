@@ -78,7 +78,7 @@ Overnight run 20/10. One branch, `feat/overnight-1020`, off origin/main 0d232ad;
 
 ## Part 6: cc-72 (`cc-72:`)
 - A calendar icon next to the date at the top of Hôm nay, in the icon set's style (the set's Calendar path, stroke 1.8, drawn inline in the header like its chevrons, so the header does not pull the whole icon module into every route). Phone: inside the date button (16 px, 44 px tall control). Desktop: before the full date (18 px). Still one control (checked against ui-ux-pro-max: affordance, 44 px, no duplicate control).
-- **Release 2026-10-20b**: "Bấm vào ngày để mở lịch" (text as given), plus "Kéo bảng xuống mượt hơn", "Xóa bữa không cần hỏi lại", "Chữ to theo máy bạn" and "Gõ số dễ hơn" (5 items; cap 8). Tour: one step on the date (fallback the day arrow).
+- **Release 2026-10-20b**: three items in Hao's words (follow-up 20/10): "Bấm vào ngày để mở lịch", "Xóa bữa không cần hỏi lại", "Chữ to theo máy bạn". Tour: one step on the date (fallback the day arrow).
 - releases.test, cc_46 and cc_tutorials updated; sw.js **2026-10-20.2**.
 
 ## Part 7: probes cc_26 and cc_44 (`probes:`)
@@ -88,6 +88,16 @@ Overnight run 20/10. One branch, `feat/overnight-1020`, off origin/main 0d232ad;
 
 ## Part 8: API hardening (`api:`)
 See **For Dong** below. Web side: the catalogue in 5,000-food pages with the old paging as the fallback, and vitals reporting.
+
+## Follow-up before merge (20/10 morning)
+| Commit | What |
+|---|---|
+| 8241134 `cc-66:` | 125 % / 150 % text on Hôm nay: the wordmark is a logo (fixed px, one line), the date beside it wraps before its last word; a meal pill keeps "459 kcal" on one line (the label gives way first, then the kcal takes a second line of the pill); nutrient rows show the full name with the amount under it; the portion panel's ×N buttons move under their label when squeezed. **0.00 % pixel change at 100 %** on all 16 screens. cc_64_worst_case adds the portion panel, Mục tiêu and 390 px at 150 %, with header / wordmark / meal-kcal / nutrient-name checks. |
+| 5afbf4f `cc-64:` | Hard cut only when `navigator.deviceMemory` is reported and ≤ 2; never by core count (iPhones keep the slide). `isLowEndDevice` + tests. |
+| (cc-72) | Release 2026-10-20b trimmed to the three given items; releases.test, cc_46, cc_tutorials. |
+
+Screens at 390 px, before → after → diff: `docs/screenshots/pr20-text/{before,after,diff}-text125/` and `-text150/` (Hôm nay, + Thêm, portion, Mục tiêu, Cài đặt); the 100 % sets in `before/`, `after/`, `diff/` (16 screens, all 0.00 %).
+Left: at 150 % a food row whose name wraps puts its grey "thiếu dữ liệu" dot on a line of its own (not overlapping; cosmetic), and the bottom nav labels take two lines.
 
 ## gate:full output (branch head)
 ```
