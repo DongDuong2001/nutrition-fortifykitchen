@@ -26,6 +26,12 @@ describe("PillButton sizes and tertiary (cc-66 D6)", () => {
     expect(t).toEqual(expect.arrayContaining(["bg-surface", "text-text", "border-0", "font-semibold"]));
     expect(t).not.toContain("font-bold");
   });
+
+  it("danger is the bordered pill with destructive text (Bỏ món này)", () => {
+    const d = cls(renderToStaticMarkup(<PillButton variant="danger" size="sm">Bỏ món này</PillButton>));
+    expect(d).toEqual(expect.arrayContaining(["bg-card", "border-card-border", "text-destructive-text", "font-bold"]));
+    expect(d).not.toContain("text-text");
+  });
 });
 
 describe("IconButton (cc-66 D6)", () => {

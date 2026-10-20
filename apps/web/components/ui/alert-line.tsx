@@ -17,21 +17,25 @@ export function AlertLine({
   id,
   className,
   as: Tag = "p",
+  role = "alert",
   children,
+  ...attrs
 }: {
   show: boolean;
   gap?: keyof typeof GAP;
   id?: string;
   className?: string;
   as?: "p" | "span" | "div";
+  /** "status" for a progress line (announced politely), else an alert */
+  role?: "alert" | "status";
   children: React.ReactNode;
-}) {
+} & Omit<React.HTMLAttributes<HTMLElement>, "role" | "children" | "id" | "className">) {
   const last = useRef<React.ReactNode>(null);
   if (show) last.current = children;
   const [pull, push] = GAP[gap];
   return (
     <Expand open={show} wrapClassName={pull} className={push}>
-      <Tag id={id} role="alert" className={className}>
+      <Tag id={id} role={role} className={className} {...attrs}>
         {show ? children : last.current}
       </Tag>
     </Expand>

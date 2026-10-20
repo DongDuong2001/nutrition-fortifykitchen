@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 
-export type PillButtonVariant = "primary" | "secondary" | "destructive" | "tertiary";
+export type PillButtonVariant = "primary" | "secondary" | "destructive" | "tertiary" | "danger";
 /** lg: the 52 px full-width call to action; md and sm: 44 px pills in a row or a card (md 14 px text, sm 13 px). */
 export type PillButtonSize = "lg" | "md" | "sm";
 
@@ -50,6 +50,8 @@ export function PillButton({
       "font-bold bg-card text-text border border-card-border hover:bg-surface",
     destructive: "font-bold bg-destructive text-on-accent hover:bg-destructive/90 border-0 shadow-sm",
     tertiary: "font-semibold bg-surface text-text border-0",
+    // A bordered pill whose action loses something (Bỏ món này): the secondary shape with destructive text
+    danger: "font-bold bg-card text-destructive-text border border-card-border hover:bg-surface",
   }[variant];
 
   const widthClass = fullWidth ? "w-full" : "w-auto";
