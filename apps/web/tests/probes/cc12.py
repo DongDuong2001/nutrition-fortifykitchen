@@ -172,7 +172,7 @@ def check_calendar(browser):
         opener.click()
         dialog = page.get_by_role("dialog", name="Chọn ngày")
         dialog.wait_for(state="visible", timeout=8000)
-        page.wait_for_timeout(300)  # cc-51: a sheet slides in for 250 ms; measure where it lands
+        page.wait_for_timeout(500)  # cc-51: a sheet slides in for 350 ms (it opens at once now: the first open no longer waits 300 ms for its chunk); measure where it lands
         box = dialog.bounding_box()
         centre_x = box["x"] + box["width"] / 2
         if label == "1440":
