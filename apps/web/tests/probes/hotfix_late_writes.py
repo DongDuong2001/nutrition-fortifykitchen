@@ -9,8 +9,10 @@ date rule (made_at within 14 days, else 409 PAST_DAY_READ_ONLY; without made_at 
      "Còn 2 món chưa lưu được, xem lý do"); Chuyển sang hôm nay sends it for today under the same id; Bỏ món này asks first, then takes it off
   C  Đăng xuất with an item that cannot be sent: Đồng bộ rồi đăng xuất says how many are left and why, and offers Xem các món and
      Vẫn đăng xuất (mất N món) (it does not just stop)
+  D  the sync status in the header (the Chưa lưu pill, or Ngoại tuyến · n chờ gửi offline) never shares its box with the day arrows or the
+     date, today and yesterday, at 360, 390 and 430 wide; five points across the pill all hit it, and the › arrow stays tappable
 Run with: LIVE_BUILD=1 ALIGN_BASE_URL=http://localhost:3112 npm run probe -- tests/probes/hotfix_late_writes.py
-Pick parts with HLW_ONLY=A,B
+Pick parts with HLW_ONLY=A,B,C,D
 """
 # PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/settings/account/**
 import base64
@@ -335,6 +337,58 @@ with sync_playwright() as p:
         pg.wait_for_selector("[data-sync-list]", timeout=10000)
         check(pg.locator("[data-sync-list]").inner_text().count("ngày đã khóa") == 1, "C: Xem các món opens the list with the reason")
         ctx.close()
+
+    if want("D"):
+        yesterday = (NOW_VN - timedelta(days=1)).strftime("%Y-%m-%d")
+        js = """() => {
+          const status = document.querySelector('[data-tour="sync-status"]');
+          const pill = [...document.querySelectorAll('button')].find((b) => /Chưa lưu/.test(b.getAttribute('aria-label') || ''));
+          if (!status || status.getBoundingClientRect().width === 0) return null;
+          const sr = status.getBoundingClientRect();
+          let hits = [];
+          if (pill) { const pr = pill.getBoundingClientRect(); hits = [0.03, 0.25, 0.5, 0.75, 0.97].map((f) => { const el = document.elementFromPoint(pr.left + pr.width * f, pr.top + pr.height / 2); return !!el && (el === pill || pill.contains(el)); }); }
+          const others = [...document.querySelectorAll('header button, header a')].filter((b) => !status.contains(b) && b.getBoundingClientRect().width > 0);
+          const overlap = others.filter((b) => { const r = b.getBoundingClientRect(); return r.left < sr.right && r.right > sr.left && r.top < sr.bottom && r.bottom > sr.top; }).map((b) => b.getAttribute('aria-label') || b.textContent.trim());
+          const next = document.querySelector('[aria-label="Ngày sau"]');
+          const nr = next ? next.getBoundingClientRect() : null;
+          const nextTap = nr && !next.disabled ? (() => { const el = document.elementFromPoint(nr.left + nr.width / 2, nr.top + nr.height / 2); return !!el && (el === next || next.contains(el)); })() : null;
+          const cover = nr && !next.disabled ? (() => { const el = document.elementFromPoint(nr.left + nr.width / 2, nr.top + nr.height / 2); return el && el !== next && !next.contains(el) ? el.outerHTML.slice(0, 120) : null; })() : null;
+          return { hits, overlap, nextTap, cover, offline: !pill, scrollW: document.documentElement.scrollWidth, width: window.innerWidth };
+        }"""
+        for width, net in [(w, n) for w in (360, 390, 430) for n in ("online", "offline")]:
+            for label, day in (("today", None), ("yesterday", yesterday)):
+                api = FakeApi()
+                ctx = browser.new_context(viewport={"width": width, "height": 844})
+                ctx.add_init_script(f"try {{ localStorage.setItem('h1t_auth_current_email', '{EMAIL}'); }} catch (e) {{}}")
+                user, cookie = supabase_session(EMAIL)
+                ctx.add_cookies([{"name": "sb-probe68-auth-token", "value": cookie, "url": BASE}])
+                ctx.route(SUPABASE + "/**", lambda route: route.fulfill(status=200, content_type="application/json", body="{}"))
+                ctx.route(SUPABASE + "/auth/v1/user", lambda route, user=user: route.fulfill(status=200, content_type="application/json", body=json.dumps(user)))
+                ctx.route("**/api/v1/**", api.handler())
+                ctx.route(BASE + "/auth/session", lambda route: route.fulfill(status=204, body=""))
+                pg = ctx.new_page()
+                open_home(pg)
+                seed(pg, [item(1, TWENTY_BACK, 20), item(2, TWENTY_BACK, 20)])
+                pg.goto(BASE + "/app" + (f"?date={day}" if day else ""), wait_until="domcontentloaded")
+                pg.locator('[data-align-group="home-page"]').first.wait_for(state="visible", timeout=20000)
+                pg.wait_for_timeout(2500)
+                close_tips(pg)
+                if net == "offline":
+                    ctx.set_offline(True)
+                    pg.evaluate("window.dispatchEvent(new Event('offline'))")
+                    pg.wait_for_timeout(600)
+                close_tips(pg)  # the sync tip that a status first shown can raise
+                got = pg.evaluate(js)
+                where = f"{width} {label} {net}"
+                check(got is not None and all(got["hits"]), f"D: {where}: every tap point on the Chưa lưu pill reaches it ({got})")
+                check(got is not None and got["overlap"] == [], f"D: {where}: no other control shares the status's box ({got and got['overlap']})")
+                check(got is not None and got["nextTap"] is not False and got["scrollW"] <= got["width"], f"D: {where}: the › arrow takes its own taps, and the header does not scroll sideways")
+                if width == 390 and label == "yesterday" and net == "online":
+                    pg.get_by_role("button", name=re.compile(r"^Chưa lưu 2")).locator("visible=true").first.click(position={"x": 6, "y": 20})
+                    pg.wait_for_selector("[data-sync-list]", timeout=10000)
+                    check(True, "D: a tap on the left edge of the pill opens the list")
+                    pg.screenshot(path=str(SHOTS / "D-yesterday-390.png"))
+                ctx.close()
 
     browser.close()
 
