@@ -5,7 +5,7 @@ Production demo build, 390x844 (and 1440x900 for the dialog). Tour, tips and "C�
 
 - Shows once on /app; Để sau and Esc hide it and mark the release seen; a reload shows nothing
 - A new account (setup finished) never sees it
-- Waits while a tip is open, opens after Đã hiểu
+- Comes before a tip (one interruption per app open, fix/polish-1020): opens first with no tip beside it, and no tip follows it in the same open
 - An account that has seen nothing gets the newest release only (2026-10-21b, cc-73b, Mục tiêu rõ ràng hơn): its
   2-step tour is on Hôm nay (the kcal target, then the vitamin column), so the sheet has Thử ngay and runs it on /app; cc_tutorials.py covers
   several unseen releases in one sheet and their joined tour (with cc-52's 18e on the Ngày tập pill). The 17/10 tour is started from
@@ -198,15 +198,14 @@ def new_account(browser):
     ctx.close()
 
 
-def waits_for_tip(browser):
+def comes_before_tips(browser):
     ctx, pg = new_page(browser, onboarding={"tourDone": True})
     go(pg, "/app", 300)
-    check(visible(card(pg), 4000), "a tip opens first")
-    pg.wait_for_timeout(1200)
-    check(sheet(pg).count() == 0, "Có gì mới waits while the tip is open")
-    card(pg).get_by_role("button", name="Đã hiểu").click()
-    check(visible(sheet(pg), 3000), "opens once the tip is closed")
-    check(card(pg).count() == 0, "no tip on top of it")
+    check(visible(sheet(pg), 4000), "Có gì mới opens first, before any tip")
+    check(card(pg).count() == 0, "no tip beside it")
+    sheet(pg).get_by_role("button", name="Để sau").click()
+    pg.wait_for_timeout(3000)
+    check(card(pg).count() == 0, "no tip after it in the same app open (one interruption per open)")
     ctx.close()
 
 
@@ -365,7 +364,7 @@ def reduced_motion(browser):
 def main():
     with sync_playwright() as p:
         browser = p.chromium.launch()
-        for part in (once, new_account, waits_for_tip, tour, home_tour, history, desktop, reduced_motion):
+        for part in (once, new_account, comes_before_tips, tour, home_tour, history, desktop, reduced_motion):
             print(f"\n=== {part.__name__} ===")
             try:
                 part(browser)

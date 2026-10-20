@@ -12,9 +12,10 @@ import { HOME_ROUTE } from "@/lib/nav";
 import { tourOpenOn } from "@/lib/onboarding-flags";
 import { loadFlags, markWhatsNewSeen, subscribeFlags, whatsNewDisabled } from "@/lib/onboarding-store";
 import { latestRelease, shouldShowWhatsNew, tourSteps, unseenReleases, type Release } from "@/lib/releases";
-import { isOverlayOpen, isTipBusy, readTour, setOverlayOpen, subscribeTipBusy, subscribeTour, writeWhatsNewTour } from "@/lib/tour-bus";
+import { claimInterruption, setInterruptionDue } from "@/lib/interruption";
+import { isOverlayOpen, readTour, setOverlayOpen, subscribeTour, writeWhatsNewTour } from "@/lib/tour-bus";
 
-/** A tip (open or due), the install pop-up, the onboarding tour or the what's-new tour is on screen. */
+/** The install pop-up, the onboarding tour or the what's-new tour is on screen. (A tip is not waited for: Có gì mới comes first, lib/interruption.) */
 function useOthersBusy(todayIso: string | null): boolean {
   const [busy, setBusy] = useState(true);
   useEffect(() => {
@@ -24,11 +25,10 @@ function useOthersBusy(todayIso: string | null): boolean {
         isOverlayOpen("install") ||
           isOverlayOpen("whats-new-tour") ||
           readTour().status === "step" ||
-          isTipBusy() !== false ||
           tourOpenOn(loadFlags(), todayIso)
       );
     read();
-    const offs = [subscribeTour(read), subscribeFlags(read), subscribeTipBusy(read)];
+    const offs = [subscribeTour(read), subscribeFlags(read)];
     return () => offs.forEach((off) => off());
   }, [todayIso]);
   return busy;
@@ -61,22 +61,28 @@ export function WhatsNewHost({ busy }: { busy: boolean }) {
   const latest = latestRelease();
 
   useEffect(() => {
-    if (!hydrated || open || !latest || pathname !== HOME_ROUTE || whatsNewDisabled()) return;
+    if (!hydrated || open || !latest || pathname !== HOME_ROUTE || whatsNewDisabled()) {
+      setInterruptionDue("whats-new", false);
+      return;
+    }
     const demo = isDemo();
     const facts = readFirstRunFacts(demo);
-    if (!demo && facts.signedIn !== true) return;
+    if (!demo && facts.signedIn !== true) {
+      setInterruptionDue("whats-new", false);
+      return;
+    }
     const seenId = loadFlags().whatsNewSeen;
-    const show = shouldShowWhatsNew({
-      seenId,
-      latestId: latest.id,
-      firstRun: !(demo || facts.profileSaved),
-      busy: busy || othersBusy || saving,
-    });
+    // It wants to show (and holds the install pop-up and the tips back) even while something else is busy; it opens when none is
+    const wants = shouldShowWhatsNew({ seenId, latestId: latest.id, firstRun: !(demo || facts.profileSaved), busy: false });
+    setInterruptionDue("whats-new", wants);
+    const show = wants && !(busy || othersBusy || saving);
     if (!show) return;
     // cc-64: it waits until Hôm nay has painted and the page is idle (at least 600 ms), so it never covers the first frame
     let cancelIdle = () => {};
     const timer = window.setTimeout(() => {
       cancelIdle = whenIdle(() => {
+        // One interruption per app open: if something else has opened already, it waits for the next one
+        if (!claimInterruption("whats-new")) return;
         const releases = unseenReleases(seenId);
         setShown(releases);
         setTourSteps(stepsOnPage(releases));
@@ -90,7 +96,13 @@ export function WhatsNewHost({ busy }: { busy: boolean }) {
   }, [hydrated, open, latest, pathname, busy, othersBusy, saving]);
 
   useEffect(() => setOverlayOpen("whats-new", open), [open]);
-  useEffect(() => () => setOverlayOpen("whats-new", false), []);
+  useEffect(
+    () => () => {
+      setOverlayOpen("whats-new", false);
+      setInterruptionDue("whats-new", false);
+    },
+    []
+  );
 
   if (!latest || shown.length === 0) return null;
   return (

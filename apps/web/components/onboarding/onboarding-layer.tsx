@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 import { Presence } from "@/components/ui/presence";
 import { Spotlight } from "@/components/onboarding/spotlight";
@@ -11,6 +11,14 @@ import { getTodayIsoVN } from "@/lib/date";
 import { DEFAULT_FLAGS, type OnboardingFlags } from "@/lib/onboarding-flags";
 import { finishTour, loadFlags, markTipSeen, onboardingDisabled, setTipsOff, subscribeFlags } from "@/lib/onboarding-store";
 import { HOME_ROUTE } from "@/lib/nav";
+import {
+  claimInterruption,
+  interruptionBlockedByUi,
+  interruptionVersion,
+  probeUi,
+  setInterruptionDue,
+  subscribeInterruption,
+} from "@/lib/interruption";
 import { tourStepAfter, type ReleaseTourStep } from "@/lib/releases";
 import { TIPS, pickTip, tipDue, type PortionControls, type Tip, type TipContext } from "@/lib/tips";
 import { TOUR_STEPS, tourReduce, tourStepFor, type TourState } from "@/lib/tour";
@@ -34,6 +42,8 @@ import {
 
 const OFF: TourState = { status: "off" };
 const TIP_DELAY_MS = 500;
+/** A tip held back by a focused field or a moving sheet looks again this often. */
+const TIP_RETRY_MS = 400;
 
 const LEVELS = [
   { name: "Thiếu", range: "dưới 50%", bar: "bg-level-red" },
@@ -354,17 +364,29 @@ export function OnboardingLayer() {
     return () => document.removeEventListener("click", onClick, true);
   }, [wn, wnStep]);
 
-  // The tip of this visit, once the screen has settled
+  // The tip of this visit, once the screen has settled. It is the last of the three things that open by themselves (Có gì mới,
+  // the install pop-up, a tip) and only one of them opens per app open (lib/interruption); and it never opens over a field that has
+  // focus or a sheet that is still moving: it tries again a moment later.
+  const interruptions = useSyncExternalStore(subscribeInterruption, interruptionVersion, () => 0);
   useEffect(() => {
     if (!mounted || tipId) return;
     const tip = dueTip();
+    setInterruptionDue("tip", tip !== null);
     if (!tip) return;
-    const timer = setTimeout(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    const attempt = () => {
+      if (interruptionBlockedByUi(probeUi())) {
+        timer = setTimeout(attempt, TIP_RETRY_MS);
+        return;
+      }
+      if (!claimInterruption("tip")) return;
       visit.current.tipShown = true;
       setTipId(tip.id);
-    }, TIP_DELAY_MS);
+    };
+    timer = setTimeout(attempt, TIP_DELAY_MS);
     return () => clearTimeout(timer);
-  }, [mounted, tipId, dueTip]);
+  }, [mounted, tipId, dueTip, interruptions]);
+  useEffect(() => () => setInterruptionDue("tip", false), []);
 
   // Others that open by themselves (the install pop-up) wait while a tip is open or due
   useEffect(() => {
