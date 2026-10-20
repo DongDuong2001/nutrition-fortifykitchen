@@ -1,12 +1,12 @@
 """cc_tutorials: the "Có gì mới" releases and tours, and the one-time tips (hotfix/tutorials, cc-53 units, cc-53b portions).
 
 Production demo build at 390x844. Tour, tips and "Có gì mới" are on here (`_seed.onboarding(True)`, `_seed.whats_new(True)`).
-- Several unseen releases: an account that saw 18b gets 20b, 20a, 19b, 19a, 18f, 18e, 18d and 18c in one sheet (newest first, grouped);
-  Thử ngay runs the joined tour oldest first, capped at the newest 8: cc-53b's 18f first one (+ Thêm; its 2nd to 4th no longer fit), cc-67's 19a two (Tìm món, Chỉnh tô phở),
-  cc-68's 19b three (the arrow that opens yesterday, + Thêm, the save status), cc-70's 20a one (Thử kéo món, on the food list) and the
-  overnight 20b one (Mở lịch, on the date). 18e's steps (the Ngày tập pill) no longer fit the cap. 18d has no tour (cc-53b retired it). The counter reads n/8; Xong ends it,
+- Several unseen releases: an account that saw 18b gets 21a, 20b, 20a, 19b, 19a, 18f, 18e, 18d and 18c in one sheet (newest first, grouped);
+  Thử ngay runs the joined tour oldest first, capped at the newest 8: cc-67's 19a two (Tìm món, Chỉnh tô phở),
+  cc-68's 19b three (the arrow that opens yesterday, + Thêm, the save status), cc-70's 20a one (Thử kéo món, on the food list), the
+  overnight 20b one (Mở lịch, on the date) and the follow-ups' 21a one (Về Hôm nay, on the wordmark). 18f's and 18e's steps no longer fit the cap. 18d has no tour (cc-53b retired it). The counter reads n/8; Xong ends it,
   entries unchanged
-- An account that saw 18c gets 20b, 20a, 19b, 19a, 18f, 18e and 18d, with Thử ngay
+- An account that saw 18c gets 21a, 20b, 20a, 19b, 19a, 18f, 18e and 18d, with Thử ngay
 - A step whose target is gone is skipped; a target that leaves the page mid-step moves the tour on (no stuck ring)
 - cc-53b: Cài đặt › Có gì mới lists 18d's corrected copy with no tour, and 18f with Xem hướng dẫn. The portion sheet's
   tips show once each: Trứng ghi theo quả on an egg, Cân sống hay đã nấu chín on rice, then Nhân khẩu phần nhanh, and
@@ -36,18 +36,17 @@ SHOTS.mkdir(exist_ok=True)
 PHONE = {"width": 390, "height": 844}
 TOUCH = {"has_touch": True, "is_mobile": True}
 SETTINGS_KEY = "h1t_settings_v1_demo"
-RELEASE = "2026-10-20b"
+RELEASE = "2026-10-21a"
 # Every tip that existed before 18c: a returning user has seen them
 OLD_TIPS = [
     "unsaved", "home-logged", "meal-add", "home-share", "pull-refresh", "nutrient-sources", "past-day", "multi-select", "add-tray", "add-shortlists", "haptics",
     "food-detail", "compare", "food-new", "training", "micros", "trends-micros", "explore", "overview", "leaderboard",
 ]
 RETURNING = {"tourDone": True, "seen": OLD_TIPS, "whatsNewSeen": "2026-10-18b"}
-# The newest 8 of the joined tour: 18f on Hôm nay (cc-53b's first one; the rest is cut by the cap), cc-67's 19a (Tìm món and
-# Chỉnh tô phở, both + Thêm there), cc-68's 19b (the arrow that opens yesterday, + Thêm, the save status), cc-70's 20a (the food list),
-# then the overnight 20b: the date at the top
+# The newest 8 of the joined tour: cc-67's 19a (Tìm món and Chỉnh tô phở, both + Thêm there), cc-68's 19b (the arrow that opens
+# yesterday, + Thêm, the save status), cc-70's 20a (the food list), the overnight 20b (the date at the top), then the follow-ups'
+# 21a (the H1T MICRO wordmark); 18f's steps are cut by the cap
 STEPS = [
-    ("Ghi theo gam", ["meal-add", "nav-add"]),
     ("Tìm món", ["meal-add", "nav-add"]),
     ("Chỉnh tô phở", ["meal-add", "nav-add"]),
     ("Về hôm qua", ["day-prev", "header-actions"]),
@@ -55,9 +54,11 @@ STEPS = [
     ("Đã lưu chưa?", ["sync-status", "header-actions"]),
     ("Thử kéo món", ["home-food-list", "meal-pill"]),
     ("Mở lịch", ["day-date", "day-prev"]),
+    ("Về Hôm nay", ["home-logo", "day-date"]),
 ]
-# The item titles of 20b, 20a, 19b and 19a (overnight, cc-70, cc-68, cc-67), each of which must fit on one line in the sheet
+# The item titles of 21a, 20b, 20a, 19b and 19a (follow-ups, overnight, cc-70, cc-68, cc-67), each of which must fit on one line in the sheet
 TITLES_1910 = [
+    "Bấm chữ H1T MICRO để về Hôm nay", "Vuốt ngang để tắt thông báo",
     "Bấm vào ngày để mở lịch", "Xóa bữa không cần hỏi lại", "Chữ to theo máy bạn",
     "Giữ rồi kéo món sang bữa khác",
     "Quên ghi hôm qua? Ghi bù được rồi", "Mất mạng vẫn ghi được", "Nhìn góc trên là biết đã lưu chưa", "Điện thoại, máy tính thấy y nhau", "Đăng xuất không lo mất món",
@@ -149,9 +150,9 @@ def start_tour(pg):
     check("Ghi theo lon, viên, phần" in text and text.index("Ghi theo lon, viên, phần") < text.index("Gần đây và Hay ăn"), "…and 18d above it (newest first)")
     check("Ngày tập ghi vào nhật ký" in text and text.index("Ngày tập ghi vào nhật ký") < text.index("Ghi theo lon, viên, phần"), "…and cc-52's 18e above that")
     check("Khẩu phần theo gam" in text and text.index("Khẩu phần theo gam") < text.index("Ngày tập ghi vào nhật ký"), "…and cc-53b's 18f above that")
-    check("Quên ghi hôm qua? Ghi bù được rồi" in text and "Tìm món gọn hơn" in text and "Giữ rồi kéo món sang bữa khác" in text and text.index("Bấm vào ngày để mở lịch") < text.index("Giữ rồi kéo món sang bữa khác") < text.index("Quên ghi hôm qua? Ghi bù được rồi") < text.index("Tìm món gọn hơn") < text.index("Khẩu phần theo gam"), "…and the overnight 20b, cc-70's 20a, cc-68's 19b and cc-67's 19a on top")
+    check("Quên ghi hôm qua? Ghi bù được rồi" in text and "Tìm món gọn hơn" in text and "Giữ rồi kéo món sang bữa khác" in text and text.index("Bấm chữ H1T MICRO để về Hôm nay") < text.index("Bấm vào ngày để mở lịch") < text.index("Giữ rồi kéo món sang bữa khác") < text.index("Quên ghi hôm qua? Ghi bù được rồi") < text.index("Tìm món gọn hơn") < text.index("Khẩu phần theo gam"), "…and the follow-ups' 21a, the overnight 20b, cc-70's 20a, cc-68's 19b and cc-67's 19a on top")
     check("Thực phẩm bổ sung\n" not in text + "\n" and "Đồng bộ ổn định hơn" not in text, "…not 18b or 18, which were seen")
-    check(sheet(pg).locator("section").count() == 8, "eight groups, one per release")
+    check(sheet(pg).locator("section").count() == 9, "nine groups, one per release")
     try_now = sheet(pg).get_by_role("button", name="Thử ngay (1 phút)")
     check(try_now.count() == 1, "Thử ngay (1 phút): the unseen releases have a tour")
     shot(pg, "sheet")
@@ -165,7 +166,7 @@ def tour(browser):
     before = entries(pg)
     start_tour(pg)
     check(sheet(pg).count() == 0, "Thử ngay closes the sheet")
-    check(flags(pg).get("whatsNewSeen") == RELEASE, "the newest release (20b) is marked seen")
+    check(flags(pg).get("whatsNewSeen") == RELEASE, "the newest release (21a) is marked seen")
     for i, (title, targets) in enumerate(STEPS):
         ok = visible(card(pg))
         text = step_text(pg)
@@ -193,8 +194,8 @@ def tour(browser):
 
 
 def skipped(browser):
-    # Steps whose target is gone are skipped. Steps 2 and 3 (Tìm món, Chỉnh tô phở) both point at + Thêm: with + Thêm off the
-    # page, Tiếp on step 1 goes straight to step 4 (the arrow that opens yesterday)
+    # Steps whose target is gone are skipped. Steps 1 and 2 (Tìm món, Chỉnh tô phở) both point at + Thêm: with + Thêm off the
+    # page, Tiếp on step 1 goes straight to step 3 (the arrow that opens yesterday)
     ctx, pg = new_page(browser, RETURNING)
     start_tour(pg)
     check("Mới · 1/8" in step_text(pg), "skip: on step 1")
@@ -203,23 +204,23 @@ def skipped(browser):
     # Each missing step waits the spotlight's give-up time before it is skipped
     for _ in range(30):
         pg.wait_for_timeout(500)
-        if "Mới · 4/8" in step_text(pg):
+        if "Mới · 3/8" in step_text(pg):
             break
-    check("Mới · 4/8" in step_text(pg), f"skip: steps 2 and 3 have no target, so step 4 shows ({step_text(pg)[:30]!r})")
+    check("Mới · 3/8" in step_text(pg), f"skip: step 2 has no target, so step 3 shows ({step_text(pg)[:30]!r})")
     check(pg.locator("[data-onboarding-overlay]").count() == 1, "skip: one overlay, no ring left behind")
     check(ring_holds(pg, ["day-prev", "header-actions"]) is not None, "skip: the ring is on the arrow")
     # A target that leaves the page mid-step moves the tour on (the ring is not left on an empty spot): with the arrow, the
-    # header actions and the save status gone, steps 5 (+ Thêm) and 6 (the save status) have nothing either: step 7 shows
+    # header actions and the save status gone, steps 4 (+ Thêm) and 5 (the save status) have nothing either: step 6 shows
     pg.evaluate("() => document.querySelectorAll('[data-tour=\"day-prev\"], [data-tour=\"header-actions\"], [data-tour=\"sync-status\"]').forEach(el => el.remove())")
     for _ in range(30):
         pg.wait_for_timeout(500)
-        if "Mới · 7/8" in step_text(pg):
+        if "Mới · 6/8" in step_text(pg):
             break
-    check("Mới · 7/8" in step_text(pg), f"gone mid-step: steps 5 and 6 are skipped and 20a's food list shows ({step_text(pg)[:30]!r})")
+    check("Mới · 6/8" in step_text(pg), f"gone mid-step: steps 4 and 5 are skipped and 20a's food list shows ({step_text(pg)[:30]!r})")
     check(ring_holds(pg, ["home-food-list", "meal-pill"]) is not None, "gone mid-step: the ring is on the food list")
     shot(pg, "skipped")
-    # With the date gone too, the last step has no target: the tour ends
-    pg.evaluate("() => document.querySelectorAll('[data-tour=\"day-date\"]').forEach(el => el.removeAttribute('data-tour'))")
+    # With the date and the wordmark gone too, the last two steps have no target: the tour ends
+    pg.evaluate("() => document.querySelectorAll('[data-tour=\"day-date\"], [data-tour=\"home-logo\"]').forEach(el => el.removeAttribute('data-tour'))")
     card(pg).get_by_role("button", name=re.compile("^(Tiếp|Xong)$")).click()
     for _ in range(30):
         pg.wait_for_timeout(500)
@@ -341,16 +342,16 @@ def seen_18c(browser):
     go(pg, "/app", 1200)
     check(visible(sheet(pg)), "seen 18c: Có gì mới opens")
     text = sheet(pg).inner_text()
-    check("Giữ rồi kéo món sang bữa khác" in text and "Quên ghi hôm qua? Ghi bù được rồi" in text and "Tìm món gọn hơn" in text and "Khẩu phần theo gam" in text and "Ngày tập ghi vào nhật ký" in text and "Ghi theo lon, viên, phần" in text and "Gần đây và Hay ăn" not in text, "seen 18c: 20b's, 20a's, 19b's, 19a's, 18f's, 18e's and 18d's items only")
+    check("Giữ rồi kéo món sang bữa khác" in text and "Quên ghi hôm qua? Ghi bù được rồi" in text and "Tìm món gọn hơn" in text and "Khẩu phần theo gam" in text and "Ngày tập ghi vào nhật ký" in text and "Ghi theo lon, viên, phần" in text and "Gần đây và Hay ăn" not in text, "seen 18c: 21a's, 20b's, 20a's, 19b's, 19a's, 18f's, 18e's and 18d's items only")
     wrapped = sheet(pg).locator("li p.font-bold").evaluate_all(
         "(els, titles) => els.filter((p) => titles.includes(p.textContent.trim()) && p.getBoundingClientRect().height > 30).map((p) => p.textContent.trim())", TITLES_1910
     )
-    check(not wrapped, f"seen 18c: each 20b, 20a, 19b and 19a item title fits on one line at 390 px (wrapped: {wrapped})")
-    check(sheet(pg).get_by_role("button", name="Thử ngay (1 phút)").count() == 1, "seen 18c: Thử ngay (20b's, 20a's, 19b's, 19a's and 18f's steps are on Hôm nay)")
+    check(not wrapped, f"seen 18c: each 21a, 20b, 20a, 19b and 19a item title fits on one line at 390 px (wrapped: {wrapped})")
+    check(sheet(pg).get_by_role("button", name="Thử ngay (1 phút)").count() == 1, "seen 18c: Thử ngay (21a's, 20b's, 20a's, 19b's, 19a's and 18f's steps are on Hôm nay)")
     shot(pg, "seen-18c")
     sheet(pg).get_by_role("button", name="Để sau").click()
     pg.wait_for_timeout(500)
-    check(flags(pg).get("whatsNewSeen") == RELEASE, "seen 18c: Để sau marks 20b seen")
+    check(flags(pg).get("whatsNewSeen") == RELEASE, "seen 18c: Để sau marks 21a seen")
     ctx.close()
     # (A new account never sees it: cc_46.py new_account)
 

@@ -4,7 +4,7 @@ import React, { createContext, useContext, useDeferredValue, useMemo, useState }
 import { useRouter } from "next/navigation";
 import { AppHeader } from "@/components/ui/app-header";
 import { CreateFoodButton } from "@/components/foods/create-food-button";
-import { ChipRow } from "@/components/foods/chip-row";
+import { ChipGroup } from "@/components/ui/chip-group";
 import { FoodListCard } from "@/components/foods/food-list-card";
 import { FoodSearchField } from "@/components/foods/food-search-field";
 import { ExploreSections } from "@/components/explore/explore-sections";
@@ -98,7 +98,7 @@ export default function ExplorePage() {
       />
 
       <main className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-6 pt-4 lg:mx-0 lg:max-w-[1240px] lg:px-8">
-        <ChipRow items={chips} ariaLabel="Lọc món theo nhóm" data-align-group="add-list" data-align-edge="left" />
+        <ChipGroup scroll items={chips} ariaLabel="Lọc món theo nhóm" data-align-group="add-list" data-align-edge="left" />
         <div data-align-group="add-list" data-align-edge="left" className="flex flex-col gap-4">
           <Results />
         </div>

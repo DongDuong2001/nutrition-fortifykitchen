@@ -41,6 +41,7 @@ import { emitSignal, subscribeSignal } from "@/lib/tour-bus";
 import { useCoaching } from "@/hooks/use-coaching";
 import { useSaveDisplayName } from "@/hooks/use-save-display-name";
 import { LevelNoticeCard } from "@/components/coaching/level-notice-card";
+import { Expand } from "@/components/ui/expand";
 import { ZERO_HINT_TEXT, levelLabel, noticeText } from "@/lib/level-copy";
 import { columnGroups, countedForLevel, levelSummary, sumExtras } from "@/lib/level-nutrients";
 import {
@@ -552,16 +553,19 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
             Chưa có món nào để chia sẻ
           </p>
         )}
-        {!selecting && coach && notice && (
-          <LevelNoticeCard
-            text={noticeText(coach.name, notice)}
-            action={notice.kind === "raised" ? { label: "Xem", onClick: () => setExplainerOpen(true) } : undefined}
-            onClose={dismissNotice}
-          />
-        )}
-        {!selecting && !coach && showHint && (
+        {/* cc-64 (A3): a notice opens and closes with Expand instead of pushing the page in one frame */}
+        <Expand open={!selecting && !!coach && !!notice} wrapClassName="flex-none">
+          {coach && notice && (
+            <LevelNoticeCard
+              text={noticeText(coach.name, notice)}
+              action={notice.kind === "raised" ? { label: "Xem", onClick: () => setExplainerOpen(true) } : undefined}
+              onClose={dismissNotice}
+            />
+          )}
+        </Expand>
+        <Expand open={!selecting && !coach && showHint} wrapClassName="flex-none">
           <LevelNoticeCard text={ZERO_HINT_TEXT} action={{ label: "Nhập mã", href: "/settings/coach" }} onClose={dismissHint} />
-        )}
+        </Expand>
         {showOffline && (
           // cc-58: a bar over the page, above the bottom nav, so it pushes nothing down when it appears
           <div

@@ -70,7 +70,7 @@ INK_TOP = """
 """
 
 WORDMARK = """
-() => [...document.querySelectorAll('header')].filter(h => [...h.querySelectorAll('div')].some(el => {
+() => [...document.querySelectorAll('header')].filter(h => [...h.querySelectorAll('div, a')].some(el => {
   const r = el.getBoundingClientRect();
   return r.width > 0 && r.height > 0 && getComputedStyle(el).display !== 'none' && /^H1T\s*MICRO$/i.test(el.textContent.trim());
 })).length

@@ -8,7 +8,7 @@ import { ADDED_ENTRIES_KEY, browserLocal, storageKey } from "./storage-keys";
  * Hotfix 20/10: phones hold diary writes the server refused with 409 PAST_DAY_READ_ONLY although the user made them while
  * the day was still editable. Once per app version, those go back to queued and are sent again with made_at.
  *
- * Second run (2026-10-20.4): an add re-sent from the local diary (a closed day's entry the server never confirmed) was queued
+ * Second run (2026-10-20.4 on the prod build, 2026-10-21.2 on main): an add re-sent from the local diary (a closed day's entry the server never confirmed) was queued
  * with createdAt = the moment it was queued again, days after the user made it, so its made_at was refused as well. Before
  * 20/10 a past day could not be edited, so such an add was made on its day: it gets the entry's own addedAt from the local
  * diary, else its day at 23:00 Ho Chi Minh time (the same for an add with no usable time at all). Writes older than the 14 days

@@ -27,7 +27,7 @@ export default function SignInPage() {
             <p className="m-0 text-balance text-callout leading-normal text-muted-subtitle">
               Đăng nhập để xem tiếp nhật ký và theo dõi 22 vi chất của bạn.
             </p>
-            <ul className="m-0 hidden list-none flex-col gap-3.5 p-0 lg:flex pt-2">
+            <ul className="m-0 hidden list-none flex-col gap-4 p-0 lg:flex pt-2">
               {DESKTOP_SIGNIN_POINTS.map((point) => (
                 <li key={point} className="flex items-center gap-3 text-sm leading-normal text-muted-subtitle">
                   <svg

@@ -45,7 +45,7 @@ describe("motion classes", () => {
     expect(motion).toMatch(/--m-fade: 120ms;/);
   });
 
-  it("keyframes and transitions move only transform and opacity (grid rows for .m-expand and .m-row-exit)", () => {
+  it("keyframes and transitions move only transform and opacity (grid rows for .m-expand and .m-row-exit, plus margin-top for .m-row-exit.m-gap-3)", () => {
     const frames = [...css.matchAll(/@keyframes ([a-z-]+) \{([\s\S]*?)\n\}/g)];
     for (const [, name, body] of frames) {
       const props = [...body.matchAll(/^\s*([a-z-]+):/gm)].map((m) => m[1]);
@@ -54,7 +54,10 @@ describe("motion classes", () => {
     for (const [selector, body] of rules(motion)) {
       const props = decl(body, "transition").flatMap((t) => t.split(",").map((p) => p.trim().split(/\s+/)[0]));
       for (const prop of props) {
-        const allowed = /\.m-(expand|row-exit)\b/.test(selector)
+        // A closing row may also take back its column's gap (.m-gap-3, the tray cards): margin-top with the grid rows
+        const allowed = /\.m-row-exit\.m-gap-3\b/.test(selector)
+          ? /^(grid-template-rows|margin-top|none)$/
+          : /\.m-(expand|row-exit)\b/.test(selector)
           ? /^(transform|opacity|grid-template-rows|none)$/
           : /^\.m-bar$/.test(selector)
             ? /^(transform|background-color|none)$/ // the fill's colour changes with its level while it grows

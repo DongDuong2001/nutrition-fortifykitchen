@@ -8,6 +8,7 @@ import type { SavedMeal } from "@/lib/saved-meals";
 import { formatAmount } from "@/lib/format";
 import { foodRowKcal } from "@/lib/food-meta";
 import { rowName } from "@/lib/food-rows";
+import { Card } from "@/components/ui/card";
 
 export interface RecentShortcut {
   key: string;
@@ -61,7 +62,7 @@ function ShortcutCard({
     </>
   );
   return (
-    <li className="flex w-[11rem] shrink-0 snap-start overflow-hidden rounded-card border border-transparent shadow-ring lg:shadow-card bg-card">
+    <Card as="li" padding={false} className="flex w-[11rem] shrink-0 snap-start overflow-hidden">
       {onOpen ? (
         <button
           type="button"
@@ -84,7 +85,7 @@ function ShortcutCard({
           <path d="M12 5v14M5 12h14" />
         </svg>
       </button>
-    </li>
+    </Card>
   );
 }
 

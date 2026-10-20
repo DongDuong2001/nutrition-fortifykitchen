@@ -16,6 +16,7 @@ import { validateSetupName } from "@/lib/onboarding";
 import { ShareDay } from "./share-day";
 import { countedForLevel } from "@/lib/level-nutrients";
 import type { Level } from "@/lib/coaching-link";
+import { AlertLine } from "@/components/ui/alert-line";
 
 type Failure = "generate" | "fonts" | "share" | "save";
 
@@ -402,11 +403,9 @@ export function ShareSheet({
         )}
       </div>
 
-      {nameSyncFailed && (
-        <p role="alert" className="m-0 px-1 text-cap leading-snug text-destructive-text">
-          Đã lưu tên trên máy này, chưa gửi lên máy chủ được.
-        </p>
-      )}
+      <AlertLine show={nameSyncFailed} gap={3} className="m-0 px-1 text-cap leading-snug text-destructive-text">
+        Đã lưu tên trên máy này, chưa gửi lên máy chủ được.
+      </AlertLine>
 
       {failure && (
         <div role="alert" className="flex items-center justify-between gap-3 px-1">

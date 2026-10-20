@@ -404,16 +404,22 @@
   transform: translate(var(--x), var(--y));
   transform-box: fill-box;
   transform-origin: center;
-  animation: link-bob calc(var(--t) / 4) var(--ease-in-out) var(--dl) infinite alternate;
 }
 .link-p {
   transform: translate(var(--sx, var(--wind-from)), var(--y));
-  animation: link-wind var(--t) linear var(--dl) infinite;
 }
-@media (prefers-reduced-motion: reduce) {
-  .link-d,
+/* cc-64 (2b): the doodles bob and the dust drifts only on a desktop screen (on a phone, every visitor's first screen,
+   they stay still) and never under reduced motion; they stop while the scene is off screen or Data Saver is on */
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+  .link-d {
+    animation: link-bob calc(var(--t) / 4) var(--ease-in-out) var(--dl) infinite alternate;
+  }
   .link-p {
-    animation: none;
+    animation: link-wind var(--t) linear var(--dl) infinite;
+  }
+  [data-still] .link-d,
+  [data-still] .link-p {
+    animation-play-state: paused;
   }
 }
 
@@ -605,6 +611,11 @@
     opacity: 0;
   }
 }
+/* cc-64 (P4): a long block (a Vi chất group over 6 rows) snaps to its height and only fades in; growing a dozen bars
+   row by row costs a layout per frame */
+.m-expand.m-expand-fade {
+  transition: opacity var(--m-fade) var(--ease-out);
+}
 .m-expand[data-instant] {
   transition: none;
 }
@@ -640,6 +651,15 @@
 .m-row-exit > * {
   min-height: 0;
   overflow: hidden;
+}
+/* In a column with a 12 px gap (the tray cards), the row also takes back the gap above it as it closes */
+.m-row-exit.m-gap-3 {
+  transition:
+    grid-template-rows var(--m-row) var(--ease-out),
+    margin-top var(--m-row) var(--ease-out);
+}
+.m-row-exit.m-gap-3.m-collapsed {
+  margin-top: -0.75rem;
 }
 /* A row that moved (FLIP): the inline transform eases back to none */
 .m-flip {
@@ -922,7 +942,8 @@ button.m-drag-lift[data-touch-drag="dragging"] {
   .m-row-enter {
     animation: m-fade-in var(--m-fade) var(--ease-out) backwards;
   }
-  .m-row-exit {
+  .m-row-exit,
+  .m-row-exit.m-gap-3 {
     animation-duration: var(--m-fade);
     transition: none;
   }

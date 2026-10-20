@@ -46,7 +46,7 @@ export function CoachHeader() {
       </div>
       <div className="flex items-center justify-center gap-[2px] lg:gap-1">
         {COACH_SOCIAL.map((s) => (
-          <a key={s.id} href={s.href} aria-label={s.label} className="flex h-11 w-11 items-center justify-center text-secondary">
+          <a key={s.id} href={s.href} aria-label={s.label} className="flex h-11 w-11 items-center justify-center rounded-full text-secondary">
             {ICONS[s.id]}
           </a>
         ))}

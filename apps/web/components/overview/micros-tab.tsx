@@ -15,6 +15,7 @@ import { microRows } from "@/lib/overview";
 import { microBoard } from "@/lib/overview-board";
 import { microSections, nutrientAttention } from "@/lib/overview-detail";
 import { SectionTitle } from "@/components/ui/section-title";
+import { Card } from "@/components/ui/card";
 
 const DOT: Record<NutrientLevel, string> = {
   thieu: "bg-level-red",
@@ -59,7 +60,7 @@ function Accordion({
   const [open, setOpen] = useState(defaultOpen);
   const id = useId();
   return (
-    <div data-align-group="overview-micro" className="overflow-hidden rounded-card border border-transparent shadow-ring lg:shadow-card bg-card text-text">
+    <Card padding={false} data-align-group="overview-micro" className="overflow-hidden">
       <button
         type="button"
         aria-expanded={open}
@@ -79,7 +80,7 @@ function Accordion({
       <Expand open={open} id={id}>
         {children}
       </Expand>
-    </div>
+    </Card>
   );
 }
 

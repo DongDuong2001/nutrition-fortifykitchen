@@ -141,6 +141,9 @@ export interface ToastInfo {
   undoIds?: string[];
   /** "moved": where each moved entry was, for Hoàn tác. */
   undoMoves?: SlotMove[];
+  /** cc-64 (2b): "added" toasts that follow one another into the same meal update one toast ("Đã thêm 3 món …"): how many, and the toast's id. */
+  count?: number;
+  groupId?: number;
 }
 
 /** A "deleted" toast kept on screen under a newer one, until `expiresAt` (ms since epoch). */
@@ -150,6 +153,8 @@ export interface ParkedToast {
 }
 
 const ADDED_TOAST_MS = 4000;
+/** Ids for the in-place "added" toast (ToastInfo.groupId). */
+let toastGroupSeq = 0;
 const UNDO_TOAST_MS = 8000;
 const NOTICE_TOAST_MS = 6000;
 
@@ -175,6 +180,8 @@ interface DiaryContextValue {
   recentFoods: RecentFood[];
   addRecentFood: (food: FoodItem, servingLabel: string) => void;
   dismissToast: () => void;
+  /** A plain message in the app's toast (no action), e.g. "Đã lưu mục tiêu…": it stays across a screen change. */
+  notify: (message: string) => void;
   /** The pointer is on the toast, or focus is in it: its time stops until resumeToast. */
   pauseToast: () => void;
   resumeToast: () => void;
@@ -1190,22 +1197,30 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       // cc-53b: the amount set ("150 g", "3 quả"), not the label's state words
       const amount = portionAmountText(qty) ?? qty;
       setEdits((prev) => dismissUndoIn(prev));
-      setToast(
-        options?.undoable
-          ? {
-              message: `Đã thêm ${food.nameVi} ${amount} vào ${mealNameVi}${onDayText(day, getTodayIsoVN())}`,
-              kind: "undoable",
-              mealSlot,
-              durationMs: UNDO_TOAST_MS,
-              undoIds: [newEntry.id],
-            }
-          : {
-              message: `Đã thêm ${food.nameVi} ${amount} vào ${mealNameVi}${onDayText(day, getTodayIsoVN())}`,
-              kind: "added",
-              mealSlot,
-              durationMs: ADDED_TOAST_MS,
-            }
-      );
+      const dayText = onDayText(day, getTodayIsoVN());
+      if (!options?.undoable) {
+        // cc-64 (2b): another add into the meal whose "Đã thêm" toast is still up updates that toast in place
+        setToast((prev) => {
+          const more = prev?.kind === "added" && prev.mealSlot === mealSlot && prev.groupId !== undefined;
+          const count = more ? (prev.count ?? 1) + 1 : 1;
+          return {
+            message: count > 1 ? `Đã thêm ${count} món vào ${mealNameVi}${dayText}` : `Đã thêm ${food.nameVi} ${amount} vào ${mealNameVi}${dayText}`,
+            kind: "added",
+            mealSlot,
+            durationMs: ADDED_TOAST_MS,
+            count,
+            groupId: more ? prev.groupId : ++toastGroupSeq,
+          };
+        });
+      } else {
+        setToast({
+          message: `Đã thêm ${food.nameVi} ${amount} vào ${mealNameVi}${dayText}`,
+          kind: "undoable",
+          mealSlot,
+          durationMs: UNDO_TOAST_MS,
+          undoIds: [newEntry.id],
+        });
+      }
 
       addRecentFood(food, qty);
 
@@ -1253,6 +1268,10 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   const dismissToast = useCallback(() => {
     setToast(null);
     setEdits((prev) => dismissUndoIn(prev));
+  }, []);
+
+  const notify = useCallback((message: string) => {
+    setToast({ message, kind: "notice", mealSlot: null, durationMs: ADDED_TOAST_MS });
   }, []);
 
   const isFavourite = useCallback((foodId: string) => favouriteIds.includes(foodId), [favouriteIds]);
@@ -1696,6 +1715,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       recentFoods,
       addRecentFood,
       dismissToast,
+      notify,
       pauseToast,
       resumeToast,
       setHighlightedMeal,
@@ -1746,6 +1766,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       recentFoods,
       addRecentFood,
       dismissToast,
+      notify,
       pauseToast,
       resumeToast,
       setHighlightedMeal,

@@ -6,7 +6,7 @@ import { PillButton } from "@/components/ui/pill-button";
 import { CatalogStatus } from "@/components/foods/catalog-status";
 import { Toast } from "@/components/ui/toast";
 import { Presence } from "@/components/ui/presence";
-import { ChipRow } from "@/components/foods/chip-row";
+import { ChipGroup } from "@/components/ui/chip-group";
 import { FoodList } from "@/components/foods/food-list";
 import { FoodSearchField } from "@/components/foods/food-search-field";
 import { useFoodBrowse } from "@/hooks/use-food-browse";
@@ -15,6 +15,7 @@ import { foodMeta } from "@/lib/food-meta";
 import { isCategoryFilter } from "@/lib/food-categories";
 import { saveFoodRequest } from "@/lib/food-requests";
 import type { FoodItem } from "@/lib/mock/foods";
+import { EmptyState } from "@/components/ui/empty-state";
 
 /** "Chọn nguyên liệu": the food search in a sheet; tick several foods (the + circle) and add them to the dish together. */
 export function IngredientPicker({
@@ -58,7 +59,7 @@ function PickerBody({ onClose, onConfirm, disabledIds }: { onClose: () => void; 
   return (
     <div className="flex min-h-0 flex-col gap-3">
       <FoodSearchField value={query} onChange={setQuery} />
-      <ChipRow items={filterItems} ariaLabel="Lọc món theo nhóm" />
+      <ChipGroup scroll items={filterItems} ariaLabel="Lọc món theo nhóm" />
       <div data-ingredient-picker-list className="max-h-[44dvh] overflow-y-auto">
         <FoodList
           list={list}
@@ -89,19 +90,18 @@ function PickerBody({ onClose, onConfirm, disabledIds }: { onClose: () => void; 
             catalogPending || catalogFailed ? (
               <CatalogStatus failed={catalogFailed} onRetry={retryCatalog} />
             ) : (
-              <div className="flex flex-col items-center gap-2 py-6 text-center">
-                <div className="text-base font-bold">{query.trim() ? `Không có “${query.trim()}”` : "Chưa có món nào"}</div>
-                <div className="text-sm text-secondary">Thử từ ngắn hơn hoặc bỏ dấu.</div>
-                {filter !== "all" && (
-                  <button
-                    type="button"
-                    onClick={() => setFilter("all")}
-                    className="min-h-11 cursor-pointer rounded-full border-0 bg-surface px-5 text-sm font-semibold text-text active:scale-[0.97] transition-press"
-                  >
-                    Bỏ lọc
-                  </button>
-                )}
-              </div>
+              <EmptyState
+                title={query.trim() ? `Không có “${query.trim()}”` : "Chưa có món nào"}
+                actions={
+                  filter !== "all" && (
+                    <PillButton variant="tertiary" size="md" type="button" onClick={() => setFilter("all")}>
+                      Bỏ lọc
+                    </PillButton>
+                  )
+                }
+              >
+                Thử từ ngắn hơn hoặc bỏ dấu.
+              </EmptyState>
             )
           }
         />

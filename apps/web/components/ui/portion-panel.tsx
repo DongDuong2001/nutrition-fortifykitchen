@@ -7,7 +7,8 @@ import { type MealSlot, getMealSlotNameVi } from "@/lib/meal-slot";
 import { parseGramsInput, calculateMacroPreview, macroGramsText, scaleNutrients, gramsServingLabel, unitAmountText, parsePortionLabel, portionModeOf, portionNote, portionSummary } from "@/lib/portion";
 import { cookSwitchFor, rowName, useRowsReady } from "@/lib/food-rows";
 import { PortionArea } from "@/components/ui/portion-area";
-import type { DishEdit } from "@/lib/dish-recipes";
+import { recipeKnown, type DishEdit } from "@/lib/dish-recipes";
+import { loadDishPartsModule, loadedDishParts } from "@/components/ui/dish-parts-prefetch";
 import { formatAmount, formatNumber } from "@/lib/format";
 import { getNutrientDefinition } from "@/lib/nutrients";
 import { useDiary } from "@/lib/diary-store";
@@ -15,7 +16,7 @@ import { canLog as canLogFood, energyNotice } from "@/lib/diary-edits";
 import { kcalValue } from "@/lib/kcal";
 
 // cc-54: the Thành phần of a dish (and the recipes with it) is its own chunk, fetched when a Món Việt food's panel opens
-const DishParts = lazy(() => import("@/components/ui/dish-parts").then((m) => ({ default: m.DishParts })));
+const DishParts = lazy(() => loadDishPartsModule().then((m) => ({ default: m.DishParts })));
 
 export interface PortionPanelProps {
   food: FoodItem;
@@ -69,6 +70,8 @@ export function PortionPanel({
   const parsedGrams = useMemo(() => parseGramsInput(gramsInput), [gramsInput]);
   // cc-67: the parts of a dish changed for this meal: their sum is what is shown and logged
   const [dish, setDish] = useState<DishEdit | null>(null);
+  // The Thành phần component when its chunk is already here (read once per food, so it does not switch mid-sheet)
+  const LoadedDishParts = useMemo(() => loadedDishParts(), [food.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const changed = dish?.edited ? dish : null;
   const handleDish = useCallback(
     (next: DishEdit | null) => {
@@ -204,9 +207,16 @@ export function PortionPanel({
       {notice && canLog && <p role="note" className="m-0 text-cap leading-snug text-secondary">{notice}</p>}
       {/* cc-54: what is inside a premade dish, and its add-ons for this meal */}
       {onDishEdit && food.category === "mon_viet" && (
-        <Suspense fallback={null}>
-          <DishParts key={food.id} food={food} portionGrams={parsedGrams} onEdit={handleDish} />
-        </Suspense>
+        // cc-64 (A7): a chunk already loaded (a press on the row started it) renders at once; React holds a revealed
+        // Suspense boundary ~300 ms, so it is not used then. While only the chunk is on its way and the recipe is known,
+        // a box of the closed block's size holds the place, so the add button does not move when it arrives
+        LoadedDishParts ? (
+          <LoadedDishParts key={food.id} food={food} portionGrams={parsedGrams} onEdit={handleDish} />
+        ) : (
+          <Suspense fallback={recipeKnown(food) ? <div aria-hidden="true" className="min-h-[50px] w-full rounded-2xl border border-card-border bg-card" /> : null}>
+            <DishParts key={food.id} food={food} portionGrams={parsedGrams} onEdit={handleDish} />
+          </Suspense>
+        )
       )}
       {addNotice && (
         <p role="alert" className="m-0 rounded-xl bg-warning-bg px-3 py-2 text-cap leading-snug text-warning-text">
@@ -240,7 +250,7 @@ export function PortionPanel({
 
       {/* Desktop Micros Breakdown */}
       {showMicros && scaledMicros.length > 0 && (
-        <div className="w-full bg-card rounded-xl p-3 border border-card-border flex flex-col gap-1.5 mt-1">
+        <div className="w-full bg-card rounded-xl p-3 border border-card-border flex flex-col gap-2 mt-1">
           <div className="text-xs font-semibold text-secondary pb-1 border-b border-card-border">
             Vi chất trong {summary}:
           </div>

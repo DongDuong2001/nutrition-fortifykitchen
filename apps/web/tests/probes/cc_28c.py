@@ -126,6 +126,7 @@ def run(browser, size, tag):
     pg.wait_for_timeout(200)
     check("Mã không đúng. Kiểm tra lại với HLV của bạn." in body(pg), f"{tag} coach: an empty or wrong code shows the error")
     field.fill("H1T-NOPE")
+    pg.wait_for_timeout(300)  # cc-64 (A4): the error line closes (Expand, 150 ms) before it leaves the page
     check("Mã không đúng" not in body(pg), f"{tag} coach: typing clears the error")
     pg.get_by_role("button", name="Tham gia", exact=True).click()
     pg.wait_for_timeout(200)
