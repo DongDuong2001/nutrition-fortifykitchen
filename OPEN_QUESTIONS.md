@@ -438,3 +438,13 @@
 - [ ] (Hao) Read as asked, from short names in the brief: "fix the day-key comment" = the `dayKey` comments in food-list.tsx and row-motion.ts that said nothing animates when the day changes (the day itself slides in); "gate stacking-audiences" = no scroll-scaled cards under reduced motion; "the dead floating-phone hover" = `hover:rotate-0` and its transition on the landing phone (a CSS transform overrode it); "TrayCard m-pop" = the scale-pop on each tray card. Say if one of them meant something else.
 - [ ] (Hao) In demo mode yesterday is read-only, so the nav's + carrying `?date=` is checked by cc_68 (live build, run by hand: `LIVE_BUILD=1`) and by add-opener.test.ts, not by the gate. cc_49 part 7 fails the same way on main with a live build (not from this branch).
 - Measured in headless Chromium (frame samples from requestAnimationFrame; blank frames from the CDP screencast): times are frame start times, so an absolute number is a few ms optimistic; before and after use the same method (docs/pr/feat-fluid-add.md).
+
+## fix/polish-1020 (21/10/2026, docs/pr/fix-polish-1020.md)
+
+- **"Mid-sheet" read as "a sheet that is moving".** A tip waits (and tries again 400 ms later) while a sheet is moving or a field someone typed in has focus; it may come over the add sheet's own empty search field, because the add tips belong there. If you meant "any sheet open", it is one condition in `interruptionBlockedByUi` (`lib/interruption.ts`).
+- **After Có gì mới, a tip waits for the next app open** (one interruption per open, as asked). The first-run tour still blocks everything, as before.
+- **The update bar reserves 64 px** (`--update-bar-h`) while it shows, and select mode on Hôm nay covers it (the select bar has the same place). Say if select mode should push it up instead.
+- **5 per category / 30 for a search is my number**, with "Xem thêm (n món)" (it used to read "Xem thêm"). Tell me if you want a different count; it is `ADD_LIST_LIMITS`.
+- **The meal header's 44 px hit area is clipped at the scroller edge for the first meal** (its top edge is the top of the scrolling area); the probe checks the second meal. The look is unchanged.
+- **Time to open /add at the live catalogue size was not measured in a browser** (the demo build has 43 foods; the 683-food numbers are server-rendered counts in a unit test). Worth a look on the real build.
+- **The hand-run update check changes `public/sw.js` for a few seconds** (`_sw_update.py`, `_polish_update_check.py`; not in any gate, because Playwright cannot route the browser's own sw.js fetch). It restores the file.
