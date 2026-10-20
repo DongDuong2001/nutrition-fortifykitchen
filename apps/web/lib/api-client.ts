@@ -735,6 +735,7 @@ export const apiClient = {
       if (isQuick) {
         // A quick entry is kcal only; an unknown value is left out so the server stores NULL (migration 000011), never 0
         if (typeof payload.calories === "number") body.calories = payload.calories;
+        if (payload.label) body.food_name = payload.label;
       } else {
         body.food_id = payload.foodId;
         body.grams = payload.grams ?? 100;
@@ -829,6 +830,7 @@ export const apiClient = {
   async updateEntry(
     id: string,
     patch: {
+      food_name?: string;
       meal_slot?: string;
       grams?: number;
       serving_size_g?: number;
@@ -848,6 +850,7 @@ export const apiClient = {
         method: "PATCH",
         path: `/entries/${encodeURIComponent(id)}`,
         payload: {
+          food_name: patch.food_name,
           meal_slot: slot,
           grams: patch.grams,
           serving_size_g: patch.serving_size_g ?? patch.grams,

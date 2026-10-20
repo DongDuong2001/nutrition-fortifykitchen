@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -239,7 +240,11 @@ func (s *diaryServiceImpl) CreateEntry(ctx context.Context, userID uuid.UUID, da
 
 	if req.Kind == "quick" {
 		item.FoodID = nil
-		item.FoodName = "Chỉ ghi kcal"
+		if strings.TrimSpace(req.FoodName) != "" {
+			item.FoodName = strings.TrimSpace(req.FoodName)
+		} else {
+			item.FoodName = "Chỉ ghi kcal"
+		}
 		item.Nutrients = nil
 	} else {
 		if req.FoodID == nil {
@@ -364,6 +369,10 @@ func (s *diaryServiceImpl) UpdateEntry(ctx context.Context, userID uuid.UUID, en
 		gramsVal = req.ServingSizeG
 	}
 
+	if req.FoodName != nil && strings.TrimSpace(*req.FoodName) != "" {
+		existing.FoodName = strings.TrimSpace(*req.FoodName)
+	}
+
 	if existing.Kind == "quick" {
 		if req.Calories != nil {
 			existing.Calories = req.Calories
@@ -469,9 +478,10 @@ func (s *diaryServiceImpl) CopyYesterday(ctx context.Context, userID uuid.UUID, 
 		}
 
 		saved, err := s.repo.CreateEntry(ctx, userID, targetDate, newEntry)
-		if err == nil {
-			copied = append(copied, *saved)
+		if err != nil {
+			return nil, fmt.Errorf("failed to copy entry: %w", err)
 		}
+		copied = append(copied, *saved)
 	}
 
 	return &CopyYesterdayResponse{

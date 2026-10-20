@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -47,7 +48,10 @@ func (m *mockRecentsTracker) UpsertRecent(ctx context.Context, userID uuid.UUID,
 
 func (m *mockDiaryRepo) GetDayEntries(ctx context.Context, userID uuid.UUID, date string) ([]DiaryEntryItem, error) {
 	var list []DiaryEntryItem
-	for _, e := range m.entries {
+	for id, e := range m.entries {
+		if d, ok := m.entryDates[id]; ok && d != date {
+			continue
+		}
 		list = append(list, *e)
 	}
 	return list, nil
@@ -82,6 +86,9 @@ func (m *mockDiaryRepo) GetFoodNutrients(ctx context.Context, foodID uuid.UUID) 
 }
 
 func (m *mockDiaryRepo) CreateEntry(ctx context.Context, userID uuid.UUID, date string, entry *DiaryEntryItem) (*DiaryEntryItem, error) {
+	if m.dbError != nil {
+		return nil, m.dbError
+	}
 	if m.conflictIDs[entry.ID] {
 		return nil, ErrIDConflict
 	}
@@ -260,6 +267,79 @@ func TestDiaryService_FoodAndQuickEntries_NullHandling(t *testing.T) {
 	// Potassium still nil (never coerced to 0)
 	if totals2["potassium"] != nil {
 		t.Errorf("expected nil potassium after quick entry, got %v", totals2["potassium"])
+	}
+	if entry2.FoodName != "Chỉ ghi kcal" {
+		t.Errorf("expected default food name 'Chỉ ghi kcal', got %q", entry2.FoodName)
+	}
+
+	// 3. Add quick entry with custom food name
+	customName := "Bánh mì kẹp"
+	entry3, _, err := svc.CreateEntry(context.Background(), userID, today, CreateEntryRequest{
+		ID:       uuid.New(),
+		Kind:     "quick",
+		FoodName: customName,
+		MealSlot: "dinner",
+		Calories: &quickCal,
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if entry3.FoodName != customName {
+		t.Errorf("expected food name %q, got %q", customName, entry3.FoodName)
+	}
+
+	// 4. Update quick entry food name
+	updatedName := "Bánh mì pate"
+	updatedEntry, _, err := svc.UpdateEntry(context.Background(), userID, entry3.ID, UpdateEntryRequest{
+		FoodName: &updatedName,
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if updatedEntry.FoodName != updatedName {
+		t.Errorf("expected updated food name %q, got %q", updatedName, updatedEntry.FoodName)
+	}
+}
+
+func TestDiaryService_CopyYesterday(t *testing.T) {
+	repo := newMockDiaryRepo()
+	svc := NewService(repo, nil)
+	userID := uuid.New()
+	yesterday := time.Now().AddDate(0, 0, -1).Format("2006-01-02")
+	today := time.Now().Format("2006-01-02")
+
+	cal := 150.0
+	entryID := uuid.New()
+	repo.entries[entryID] = &DiaryEntryItem{
+		ID:       entryID,
+		FoodName: "Trà đào",
+		Kind:     "quick",
+		MealSlot: "snack",
+		Calories: &cal,
+	}
+	repo.entryDates[entryID] = yesterday
+
+	// 1. Successful copy
+	resp, err := svc.CopyYesterday(context.Background(), userID, today, CopyYesterdayRequest{
+		SourceDate: yesterday,
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resp.CopiedCount != 1 {
+		t.Fatalf("expected 1 copied entry, got %d", resp.CopiedCount)
+	}
+	if resp.Entries[0].FoodName != "Trà đào" {
+		t.Errorf("expected copied food name 'Trà đào', got %q", resp.Entries[0].FoodName)
+	}
+
+	// 2. Error handling when repo fails
+	repo.dbError = errors.New("db connection failure")
+	_, err = svc.CopyYesterday(context.Background(), userID, today, CopyYesterdayRequest{
+		SourceDate: yesterday,
+	})
+	if err == nil {
+		t.Fatal("expected error from CopyYesterday when db fails, got nil")
 	}
 }
 

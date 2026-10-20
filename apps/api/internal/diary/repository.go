@@ -226,13 +226,13 @@ func (r *pgxDiaryRepo) UpdateEntry(ctx context.Context, userID uuid.UUID, entryI
 
 	query := `
 		UPDATE nutrition.diary_logs
-		SET meal_slot = $1, portion_label = $2, grams = $3, calories = $4, nutrients_snapshot = $5
-		WHERE id = $6 AND user_id = $7 AND deleted_at IS NULL
+		SET meal_slot = $1, portion_label = $2, grams = $3, calories = $4, nutrients_snapshot = $5, name_snapshot = $6
+		WHERE id = $7 AND user_id = $8 AND deleted_at IS NULL
 		RETURNING log_date, created_at
 	`
 	var logDate time.Time
 	err = r.pool.QueryRow(ctx, query,
-		entry.MealSlot, entry.ServingLabel, entry.Grams, entry.Calories, nutrientsJSON,
+		entry.MealSlot, entry.ServingLabel, entry.Grams, entry.Calories, nutrientsJSON, entry.FoodName,
 		entryID, userID,
 	).Scan(&logDate, &entry.CreatedAt)
 	if err != nil {
