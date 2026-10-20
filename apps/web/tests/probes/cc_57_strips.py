@@ -169,9 +169,10 @@ def main():
         r.save()
         pg.wait_for_url("**/app**", timeout=8000)
 
-        # 05 grab mid-open (slowed to 2% so the 24 px grabber stays under the finger while this script aims)
+        # 05 grab mid-open (slowed to 0.2% so the 24 px grabber stays under the finger while this script aims: the sheet is on the steep
+        # part of its curve one frame into the slide, where it moves 8 px per ms of animation time, so 2% was marginal under load)
         open_today(pg)
-        cdp.send("Animation.setPlaybackRate", {"playbackRate": 0.02})
+        cdp.send("Animation.setPlaybackRate", {"playbackRate": 0.002})
         pg.locator("#mobile-add-fab").tap()
         pg.wait_for_url("**/add**")
         pg.locator("[data-add-panel]").wait_for(state="visible")
