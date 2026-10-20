@@ -59,10 +59,10 @@ export function TargetsScreen() {
             />
             <p className="m-0 text-cap text-secondary">Cân nặng, mục tiêu và ngày tập mặc định sửa trong Hồ sơ. Bạn cũng có thể tùy chỉnh tỉ lệ đa lượng riêng.</p>
             <div className="flex flex-col gap-2">
-              <PillButton href="/settings/targets/macros" variant="primary">
+              <PillButton href="/settings/targets/macros" variant="primary" className="h-auto! min-h-[52px] py-3 text-center">
                 Tùy chỉnh tỉ lệ đa lượng ›
               </PillButton>
-              <PillButton href="/settings/profile" variant="secondary">
+              <PillButton href="/settings/profile" variant="secondary" className="h-auto! min-h-[52px] py-3 text-center">
                 Sửa trong Hồ sơ
               </PillButton>
             </div>
@@ -82,8 +82,13 @@ export function TargetsScreen() {
 function TargetCard({ id, section, note, onEdit }: { id: string; section: TargetSection; note?: string; onEdit?: (row: TargetRowData) => void }) {
   const titleId = `${id}-title`;
   return (
-    <Card as="section" id={id} aria-labelledby={titleId} className="flex flex-col gap-1">
+    <Card as="section" id={id} aria-labelledby={titleId} aria-describedby={section.subtitle ? `${id}-who` : undefined} className="flex flex-col gap-1">
       <SectionTitle id={titleId}>{section.title}</SectionTitle>
+      {section.subtitle && (
+        <p id={`${id}-who`} className="m-0 pb-2 text-cap text-secondary">
+          {section.subtitle}
+        </p>
+      )}
       {section.rows.map((row) => {
         const body = (
           <>

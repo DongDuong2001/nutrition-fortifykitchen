@@ -148,7 +148,7 @@ def main():
             context, pg, errors = open_page(browser, size, "/settings/targets")
             pg.wait_for_selector("h1:has-text('Mục tiêu mỗi ngày')")
             body = pg.inner_text("main")
-            for text in ["2.275 kcal", "Giữ cân: 35 kcal/kg × 65 kg", "143 g", "65 g", "280 g", "32 g", "7–10,5 g", "3.400 mg", "1.000 mg", "400 mg", "8 mg", "11 mg", "Vitamin A", "900 µg", "Selenium", "55 µg", "DRI, nam 19–30 tuổi"]:
+            for text in ["2.275 kcal", "Giữ cân: 35 kcal/kg × 65 kg", "143 g", "65 g", "280 g", "32 g", "7–10,5 g", "3.400 mg", "1.000 mg", "400 mg", "8 mg", "11 mg", "Vitamin A", "900 µg", "Selenium", "55 µg", "Theo DRI · nam 19–30 tuổi"]:
                 check(text in body, f"{label} /settings/targets shows {text!r}")
             check("khuyến nghị DRI của Mỹ và Canada" in body, f"{label} /settings/targets names the US and Canadian DRI")
             check(pg.locator("main input, main select, main textarea").count() == 0, f"{label} /settings/targets has no inputs (read-only)")

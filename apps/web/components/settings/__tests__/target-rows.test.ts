@@ -56,7 +56,7 @@ describe("targetSections", () => {
   it("cc-73b: gives the sample user the DRI amounts for a man of 19–30, with who they are for and the maximum under each", () => {
     // Salt stays the coach's training formula and a range
     expect(row(SAMPLE, "Khoáng chất", "Muối")).toMatchObject({ value: "7–10,5 g", detail: "Nền 4–6 g + 1–1,5 g mỗi 20 phút tập" });
-    expect(row(SAMPLE, "Khoáng chất", "Potassium")).toMatchObject({ value: "3.400 mg", detail: "DRI, nam 19–30 tuổi", max: undefined });
+    expect(row(SAMPLE, "Khoáng chất", "Potassium")).toMatchObject({ value: "3.400 mg", detail: "", max: undefined });
     expect(row(SAMPLE, "Khoáng chất", "Calcium")).toMatchObject({ value: "1.000 mg", max: "Tối đa 2.500 mg" });
     expect(row(SAMPLE, "Khoáng chất", "Magnesium")).toMatchObject({ value: "400 mg", max: "Tối đa 350 mg, chỉ tính từ thực phẩm bổ sung" });
     expect(row(SAMPLE, "Khoáng chất", "Iron")).toMatchObject({ value: "8 mg", max: "Tối đa 45 mg" });
@@ -76,7 +76,7 @@ describe("targetSections", () => {
 
   it("gives a woman her own amounts, and iron 28 mg in the period", () => {
     const woman = { ...SAMPLE, sex: "female" as const };
-    expect(row(woman, "Khoáng chất", "Iron")).toMatchObject({ value: "18 mg", detail: "DRI, nữ 19–30 tuổi" });
+    expect(row(woman, "Khoáng chất", "Iron")).toMatchObject({ value: "18 mg", detail: "" });
     expect(row(woman, "Khoáng chất", "Zinc")).toMatchObject({ value: "8 mg" });
     expect(row(woman, "Khoáng chất", "Potassium")).toMatchObject({ value: "2.600 mg" });
     expect(row(woman, "Năng lượng và đa lượng", "Chất xơ*")).toMatchObject({ value: "30 g", detail: "14 g mỗi 1.000 kcal, tối đa 30 g" });
@@ -84,14 +84,34 @@ describe("targetSections", () => {
     expect(row({ ...woman, periodMode: true }, "Khoáng chất", "Iron")).toMatchObject({ value: "28 mg", detail: "Gần/đang trong kỳ: quy tắc của huấn luyện viên" });
   });
 
+  it("says whose amounts they are once per card, not on each row (Theo DRI · nam 19–30 tuổi)", () => {
+    const sections = targetSections(SAMPLE);
+    expect(sections.map((x) => x.subtitle)).toEqual([undefined, "Theo DRI · nam 19–30 tuổi", "Theo DRI · nam 19–30 tuổi"]);
+    // no DRI row repeats it, and the energy card (formulas) has none; each row keeps only its own extra line
+    for (const section of sections.slice(1)) {
+      for (const r of section.rows) expect(r.detail.includes("DRI"), r.label).toBe(false);
+    }
+    expect(row(SAMPLE, "Khoáng chất", "Calcium").detail).toBe("");
+    // salt and fibre keep their formula lines
+    expect(row(SAMPLE, "Khoáng chất", "Muối").detail).toBe("Nền 4–6 g + 1–1,5 g mỗi 20 phút tập");
+    expect(row(SAMPLE, "Năng lượng và đa lượng", "Chất xơ*").detail).toBe("14 g mỗi 1.000 kcal, tối đa 40 g");
+    // the English mineral names stay as they were
+    expect(sections[1].rows.map((r) => r.label)).toEqual(["Muối", "Potassium", "Calcium", "Magnesium", "Iron", "Zinc"]);
+  });
+
   it("names the life stage of the age: a woman of 30 is 19–30, at 31 she is 31–50", () => {
-    expect(row({ ...SAMPLE, sex: "female" as const, birthYear: 1996 }, "Khoáng chất", "Calcium").detail).toBe("DRI, nữ 19–30 tuổi");
-    expect(row({ ...SAMPLE, sex: "female" as const, birthYear: 1995 }, "Khoáng chất", "Magnesium")).toMatchObject({ detail: "DRI, nữ 31–50 tuổi", value: "320 mg" });
+    const subtitle = (profile: Profile, title = "Khoáng chất") => targetSections(profile).find((x) => x.title === title)?.subtitle;
+    expect(subtitle({ ...SAMPLE, sex: "female" as const, birthYear: 1996 })).toBe("Theo DRI · nữ 19–30 tuổi");
+    expect(subtitle({ ...SAMPLE, sex: "female" as const, birthYear: 1995 })).toBe("Theo DRI · nữ 31–50 tuổi");
+    expect(subtitle({ ...SAMPLE, sex: "female" as const, birthYear: 1995 }, "Vitamin và khoáng khác")).toBe("Theo DRI · nữ 31–50 tuổi");
+    expect(row({ ...SAMPLE, sex: "female" as const, birthYear: 1995 }, "Khoáng chất", "Magnesium")).toMatchObject({ value: "320 mg" });
+    expect(subtitle({ ...SAMPLE, birthYear: 2015 })).toBe("Theo DRI · nam 9–13 tuổi");
+    expect(subtitle({ ...SAMPLE, birthYear: 2010 })).toBe("Theo DRI · nam 14–18 tuổi");
   });
 
   it("gives a child and a teenager their own amounts and limits", () => {
-    expect(row({ ...SAMPLE, birthYear: 2015 }, "Khoáng chất", "Calcium")).toMatchObject({ value: "1.300 mg", detail: "DRI, nam 9–13 tuổi", max: "Tối đa 3.000 mg" });
-    expect(row({ ...SAMPLE, birthYear: 2010 }, "Khoáng chất", "Magnesium")).toMatchObject({ value: "410 mg", detail: "DRI, nam 14–18 tuổi" });
+    expect(row({ ...SAMPLE, birthYear: 2015 }, "Khoáng chất", "Calcium")).toMatchObject({ value: "1.300 mg", max: "Tối đa 3.000 mg" });
+    expect(row({ ...SAMPLE, birthYear: 2010 }, "Khoáng chất", "Magnesium")).toMatchObject({ value: "410 mg" });
     expect(row({ ...SAMPLE, birthYear: 2010 }, "Khoáng chất", "Zinc")).toMatchObject({ max: "Tối đa 34 mg" });
   });
 

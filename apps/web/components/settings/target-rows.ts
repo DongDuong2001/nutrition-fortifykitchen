@@ -9,7 +9,7 @@ import { ageOf, rdaWho, upperLimits } from "../../lib/rda";
 
 export interface TargetRowData {
   label: string;
-  /** The formula, or the source of the value: "Giữ cân: 35 kcal/kg × 65 kg". */
+  /** The formula of the value ("Giữ cân: 35 kcal/kg × 65 kg"), or a reason it is not the DRI (iron in the period). Empty on a DRI row: the card says whose they are. */
   detail: string;
   value: string;
   /** The nutrient id of a vitamin or mineral row (the ones that can be tapped to set a custom target) */
@@ -30,6 +30,8 @@ export interface TargetRowData {
 
 export interface TargetSection {
   title: string;
+  /** Whose amounts the card shows, once for all its rows: "Theo DRI · nam 19–30 tuổi" (the cards of the DRI amounts only) */
+  subtitle?: string;
   rows: TargetRowData[];
 }
 
@@ -70,7 +72,7 @@ function maxText(limit: { limit: number; supplementsOnly: boolean } | undefined,
 export function targetSections(profile: Profile, customEditable = CUSTOM_TARGETS_ENABLED): TargetSection[] {
   const t = customEditable ? applyCustomTargets(targetsFor(profile), profile.customTargets) : targetsFor(profile);
   const age = ageOf(profile.birthYear);
-  const who = `DRI, ${rdaWho(profile.sex, age).toLowerCase()}`;
+  const who = `Theo DRI · ${rdaWho(profile.sex, age).toLowerCase()}`;
   const weight = formatNumber(profile.weightKg);
   const salt = calculateSaltTarget(profile.trainingMinutesDefault);
   const limits = upperLimits(age);
@@ -83,8 +85,8 @@ export function targetSections(profile: Profile, customEditable = CUSTOM_TARGETS
     const periodIron = key === "iron" && profile.sex === "female" && profile.periodMode;
     return {
       label: nutrientName(key),
-      // Iron in the period is the coach's 28 mg, not a DRI amount
-      detail: periodIron ? "Gần/đang trong kỳ: quy tắc của huấn luyện viên" : who,
+      // Whose amounts these are is on the card once; a row keeps only its own line. Iron in the period is the coach's 28 mg, not a DRI amount
+      detail: periodIron ? "Gần/đang trong kỳ: quy tắc của huấn luyện viên" : "",
       value: target ? `${formatAmount(target.min, unit)} ${unit}` : "—",
       id: key,
       unit,
@@ -122,6 +124,7 @@ export function targetSections(profile: Profile, customEditable = CUSTOM_TARGETS
     },
     {
       title: "Khoáng chất",
+      subtitle: who,
       rows: [
         // Salt stays the coach's training formula and a range (Hao 20/10), not the DRI's 1.500 mg
         {
@@ -134,6 +137,7 @@ export function targetSections(profile: Profile, customEditable = CUSTOM_TARGETS
     },
     {
       title: "Vitamin và khoáng khác",
+      subtitle: who,
       rows: VITAMIN_ROWS.map(microRow),
     },
   ];

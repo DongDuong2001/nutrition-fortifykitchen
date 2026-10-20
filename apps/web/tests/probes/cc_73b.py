@@ -1,7 +1,7 @@
 """cc-73b: the coach's targets at the upper end (one number each) and the US DRI micronutrients with their upper limits (390 x 844, demo build).
 
 The sample user is a man born 2003 (23 in 2026, DRI stage 19–30, 65 kg, Giữ cân): Hôm nay reads "/ 2.275 kcal" (one number, no range);
-Vi chất shows / 3.400 mg potassium, / 1.000 mg calcium, / 8 mg iron, / 400 mg magnesium; Mục tiêu says "DRI, nam 19–30 tuổi", one number per
+Vi chất shows / 3.400 mg potassium, / 1.000 mg calcium, / 8 mg iron, / 400 mg magnesium; Mục tiêu says "Theo DRI · nam 19–30 tuổi" once per card, one number per
 row, the maximum under the row, the footnote of the DRI; a man and a woman of 30; 5 magnesium capsules (a supplement, 400 mg against the
 350 mg limit) make a calm "Vượt mức an toàn (350 mg)" line on Vi chất and its detail on the nutrient page; a training day keeps the
 salt and fast carbs ranges. Custom targets are off: no row on Mục tiêu can be tapped.
@@ -74,7 +74,7 @@ def main():
         pg.goto(BASE + "/settings/targets", wait_until="networkidle")
         pg.wait_for_timeout(600)
         text = body(pg)
-        check("DRI, nam 19–30 tuổi" in text, "Mục tiêu: says whose amounts these are (DRI, nam 19–30 tuổi)")
+        check(text.count("Theo DRI · nam 19–30 tuổi") == 2 and "DRI, nam" not in text, "Mục tiêu: says whose amounts these are once per card, under the title (Theo DRI · nam 19–30 tuổi, two cards), not on each row")
         for want in ["2.275 kcal", "143 g", "65 g", "280 g", "32 g", "7–10,5 g", "Tối đa 2.500 mg", "Tối đa 350 mg, chỉ tính từ thực phẩm bổ sung", "Tối đa 40 mg"]:
             check(want in text, f"Mục tiêu shows {want!r}")
         check("Theo khuyến nghị DRI của Mỹ và Canada, đúng tuổi và giới tính của bạn" in text, "Mục tiêu: the footnote names the US and Canadian DRI")
@@ -83,6 +83,39 @@ def main():
         check(pg.locator("main button[data-align-group='targets-row']").count() == 0, "Mục tiêu: custom targets are off, so no row is a button")
         pg.screenshot(path=str(SHOTS / "targets-man-23.png"), full_page=True)
         ctx.close()
+
+        # The layout of Mục tiêu at 390 px and at 150 % text (the root font size: rem sizes follow it): the subtitle sits under each
+        # DRI card's title, nothing wraps past a card edge, no sideways scroll, every row is at least 44 px tall (ui-ux-pro-max: dynamic type, truncation, touch targets)
+        for pct in (100, 150):
+            tctx = browser.new_context(**PHONE)
+            if pct != 100:
+                tctx.add_init_script(f"document.addEventListener('DOMContentLoaded', () => {{ document.documentElement.style.fontSize = '{pct}%'; }});")
+            tpg = tctx.new_page()
+            tpg.goto(BASE + "/settings/targets", wait_until="networkidle")
+            tpg.wait_for_timeout(700)
+            where = f"Mục tiêu at {pct} % text"
+            cards = tpg.locator("main section[id^='targets-']")
+            check(cards.count() == 3, f"{where}: three cards")
+            subs = tpg.locator("main section[id^='targets-'] p[id$='-who']")
+            check(subs.count() == 2 and all("Theo DRI · nam 19–30 tuổi" in subs.nth(i).inner_text() for i in range(2)), f"{where}: the subtitle is on the two DRI cards only")
+            order_ok = tpg.evaluate(
+                "() => [...document.querySelectorAll(\"main section[id^='targets-'] p[id$='-who']\")].every((p) => p.previousElementSibling !== null && p.previousElementSibling.id.endsWith('-title'))"
+            )
+            check(order_ok, f"{where}: the subtitle comes right under the card title")
+            overflow = tpg.evaluate(
+                "() => { const out = []; document.querySelectorAll(\"main section[id^='targets-']\").forEach((s) => { const r = s.getBoundingClientRect(); s.querySelectorAll('*').forEach((e) => { const b = e.getBoundingClientRect(); if (b.width > 0 && (b.right > r.right + 1 || b.left < r.left - 1)) out.push(e.textContent.trim().slice(0, 30)); }); }); return out; }"
+            )
+            check(not overflow, f"{where}: nothing runs past a card edge ({overflow[:3]})")
+            scroll = tpg.evaluate("() => [Math.max(document.documentElement.scrollWidth, document.body.scrollWidth), window.innerWidth]")
+            check(scroll[0] <= scroll[1], f"{where}: no sideways scroll ({scroll[0]} <= {scroll[1]})")
+            short = tpg.evaluate("() => [...document.querySelectorAll('[data-align-group=targets-row]')].filter((r) => r.getBoundingClientRect().height < 44).length")
+            check(short == 0, f"{where}: every row is at least 44 px tall ({short} short)")
+            clipped = tpg.evaluate("() => [...document.querySelectorAll('main a')].filter((a) => a.scrollHeight > a.clientHeight + 1 || a.scrollWidth > a.clientWidth + 1).map((a) => a.textContent.trim())")
+            check(not clipped, f"{where}: the two buttons grow with the text, nothing is cut off ({clipped})")
+            check(tpg.evaluate("() => parseFloat(getComputedStyle(document.querySelector(\"main section[id^='targets-'] p[id$='-who']\")).fontSize)") >= 11 * pct / 100 - 0.5, f"{where}: the subtitle grows with the text size")
+            tpg.add_style_tag(content="nav { display: none !important; }")
+            tpg.screenshot(path=str(SHOTS / f"targets-text{pct}.png"), full_page=True)
+            tctx.close()
 
         # A man and a woman of 30 (born 1996, 30 in 2026): the 19–30 stage
         for sex, born, label, wants in [
@@ -96,7 +129,7 @@ def main():
             pg.goto(BASE + "/settings/targets", wait_until="networkidle")
             pg.wait_for_timeout(600)
             text = body(pg)
-            check(f"DRI, {label}" in text, f"Mục tiêu {sex} 30: says {label}")
+            check(text.count(f"Theo DRI · {label}") == 2, f"Mục tiêu {sex} 30: says {label} once per card")
             for want in wants:
                 check(want in text, f"Mục tiêu {sex} 30 shows {want}")
             # The tab bar is fixed: left out, it would cut across the full-page shot

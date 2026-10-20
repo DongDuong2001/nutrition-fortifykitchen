@@ -54,7 +54,7 @@ export function CustomTargetSheet({
           }}
         >
           <p className="m-0 text-cap text-secondary">
-            {row.defaultValue !== undefined ? `Mặc định: ${formatAmount(row.defaultValue, unit)} ${unit} (${row.detail}).` : row.detail}
+            {row.defaultValue !== undefined ? `Mặc định: ${formatAmount(row.defaultValue, unit)} ${unit}${row.detail ? ` (${row.detail})` : ""}.` : row.detail}
             {row.max ? ` ${row.max}.` : ""}
           </p>
           <label className="flex flex-col gap-1 text-callout font-semibold" htmlFor="custom-target-input">
