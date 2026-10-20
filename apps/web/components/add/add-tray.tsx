@@ -11,6 +11,7 @@ import { markUsed } from "@/lib/onboarding-store";
 import { gramFieldText, parseGramsInput, parsePortionLabel, portionHint, scaleNutrients } from "@/lib/portion";
 import { setPresent } from "@/lib/tour-bus";
 import { createStableKeys, type TrayItem, type TrayTotals } from "@/lib/tray";
+import { AlertLine } from "@/components/ui/alert-line";
 
 const kcalText = (kcal: number | null) => (kcal === null ? "—" : formatAmount(kcal, "kcal"));
 
@@ -74,8 +75,8 @@ function rowHint(item: TrayItem): string | null {
   return converted ? `${portionHint(p)}, bằng khoảng ${formatAmount(Math.round(item.grams), "g")} g lúc ${p.state === "cooked" ? "sống" : "chín"}` : portionHint(p);
 }
 
-/** How long a removed card takes to leave: Presence's exit (the .m-pop out, --m-pop-out). */
-const LEAVE_MS = 150;
+/** How long a removed card takes to leave: .m-row-exit (fade and height close, --m-row). */
+const LEAVE_MS = 200;
 
 interface TrayRowProps {
   item: TrayItem;
@@ -88,19 +89,32 @@ interface TrayRowProps {
 
 /**
  * One food of the tray (Tray.dc.html): a bordered card whose header opens its editor (one at a time, cc-55's Expand),
- * and a × apart from it. The × lets the card pop out (Presence) before the food leaves the tray.
+ * and a × apart from it. cc-64 (2b): the × fades the card and closes its height together with the 12 px gap above it
+ * (.m-row-exit .m-gap-3), so the cards below glide up instead of jumping when the food leaves the tray.
  */
 function TrayRow({ onRemove, ...props }: TrayRowProps) {
   const [leaving, setLeaving] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   // The latest onRemove, so a re-render while the card leaves does not restart its timer
   const remove = useRef(onRemove);
   remove.current = onRemove;
   useEffect(() => {
     if (!leaving) return;
+    // The full height is drawn once before it closes, so the close is a transition
+    let frame = requestAnimationFrame(() => (frame = requestAnimationFrame(() => setCollapsed(true))));
     const timer = setTimeout(() => remove.current(), LEAVE_MS);
-    return () => clearTimeout(timer);
+    return () => {
+      cancelAnimationFrame(frame);
+      clearTimeout(timer);
+    };
   }, [leaving]);
-  return <Presence exitMs={LEAVE_MS}>{!leaving && <TrayCard {...props} onRemove={() => setLeaving(true)} />}</Presence>;
+  return (
+    <li className={leaving ? `m-row-exit m-gap-3 ${collapsed ? "m-collapsed" : ""}` : undefined} aria-hidden={leaving || undefined} inert={leaving || undefined}>
+      <div>
+        <TrayCard {...props} onRemove={() => setLeaving(true)} />
+      </div>
+    </li>
+  );
 }
 
 /** The card: the editor is the portion sheet's own area, compact: Sống | Chín or the egg sizes, grams + 100 g, ×N, Xong. */
@@ -111,7 +125,7 @@ function TrayCard({ item, open, first, onToggle, onRemove, onChange }: TrayRowPr
   const hint = rowHint(item);
   const editorId = `tray-edit-${food.id}`;
   return (
-    <li data-state={state} data-align-group="tray-review" className="m-pop flex flex-col rounded-2xl border border-card-border bg-card">
+    <div data-state={state} data-align-group="tray-review" className="m-pop flex flex-col rounded-2xl border border-card-border bg-card">
       <div className="flex items-center">
         <button
           type="button"
@@ -166,7 +180,7 @@ function TrayCard({ item, open, first, onToggle, onRemove, onChange }: TrayRowPr
           </button>
         </div>
       </Expand>
-    </li>
+    </div>
   );
 }
 
@@ -300,11 +314,9 @@ function TrayReview({ items, totals, mealName, canAdd, submitting, onRemove, onC
             />
           ))}
         </ul>
-        {items.length > 0 && !canAdd && (
-          <p role="alert" className="m-0 mt-3 rounded-xl bg-warning-bg px-3 py-2 text-cap leading-snug text-warning-text">
-            {NO_ENERGY_MESSAGE}
-          </p>
-        )}
+        <AlertLine show={items.length > 0 && !canAdd} className="m-0 mt-3 rounded-xl bg-warning-bg px-3 py-2 text-cap leading-snug text-warning-text">
+          {NO_ENERGY_MESSAGE}
+        </AlertLine>
         <div ref={endRef} aria-hidden="true" className="h-px" />
       </div>
 

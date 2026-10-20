@@ -37,6 +37,7 @@ import { QuantityStepper, TimesStepper } from "@/components/ui/quantity-stepper"
 import { markUsed } from "@/lib/onboarding-store";
 import { setPresent, type Presence } from "@/lib/tour-bus";
 import { ChipGroup } from "@/components/ui/chip-group";
+import { AlertLine } from "@/components/ui/alert-line";
 
 export interface PortionAreaProps {
   food: FoodItem;
@@ -309,11 +310,9 @@ function GramPortionArea({
               100 g
             </button>
           </div>
-          {(overLimit || gramsTooSmall(text, touched)) && (
-            <p id={`${ids}-grams-error`} role="alert" className="m-0 px-1 text-cap font-semibold leading-snug text-destructive-text">
-              {overLimit ? MAX_GRAMS_MESSAGE : MIN_GRAMS_MESSAGE}
-            </p>
-          )}
+          <AlertLine show={overLimit || gramsTooSmall(text, touched)} gap={2} id={`${ids}-grams-error`} className="m-0 px-1 text-cap font-semibold leading-snug text-destructive-text">
+            {overLimit ? MAX_GRAMS_MESSAGE : MIN_GRAMS_MESSAGE}
+          </AlertLine>
         </div>
       )}
 
@@ -620,11 +619,9 @@ function UnitPortionArea({
               },
             }))}
           />
-          {(overLimit || gramsTooSmall(gramsInput, gramsTouched)) && (
-            <p id={`${gramsId}-grams-error`} role="alert" className="m-0 px-1 text-cap font-semibold leading-snug text-destructive-text">
-              {overLimit ? MAX_GRAMS_MESSAGE : MIN_GRAMS_MESSAGE}
-            </p>
-          )}
+          <AlertLine show={overLimit || gramsTooSmall(gramsInput, gramsTouched)} gap={2} id={`${gramsId}-grams-error`} className="m-0 px-1 text-cap font-semibold leading-snug text-destructive-text">
+            {overLimit ? MAX_GRAMS_MESSAGE : MIN_GRAMS_MESSAGE}
+          </AlertLine>
         </div>
       )}
     </div>

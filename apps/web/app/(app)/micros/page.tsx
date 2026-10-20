@@ -712,7 +712,8 @@ function GroupCard({
       </div>
 
       {/* Rows */}
-      <Expand open={isOpen} className="px-4 py-1 divide-y divide-divider">
+      {/* cc-64 (P4): a group of more than 6 rows snaps open and fades in */}
+      <Expand open={isOpen} fadeOnly={rows.length > 6} className="px-4 py-1 divide-y divide-divider">
         {rows.map((row) => (
           <NutrientRow key={row.definition.id} row={row} dateQuery={dateQuery} />
         ))}

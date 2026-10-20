@@ -58,7 +58,7 @@ STEPS = [
 ]
 # The item titles of 21a, 20b, 20a, 19b and 19a (follow-ups, overnight, cc-70, cc-68, cc-67), each of which must fit on one line in the sheet
 TITLES_1910 = [
-    "Bấm chữ H1T MICRO để về Hôm nay",
+    "Bấm chữ H1T MICRO để về Hôm nay", "Vuốt ngang để tắt thông báo",
     "Bấm vào ngày để mở lịch", "Xóa bữa không cần hỏi lại", "Chữ to theo máy bạn",
     "Giữ rồi kéo món sang bữa khác",
     "Quên ghi hôm qua? Ghi bù được rồi", "Mất mạng vẫn ghi được", "Nhìn góc trên là biết đã lưu chưa", "Điện thoại, máy tính thấy y nhau", "Đăng xuất không lo mất món",

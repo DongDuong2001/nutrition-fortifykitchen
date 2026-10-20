@@ -20,13 +20,24 @@ export type DishEntry = readonly [servingGrams: number, rows: readonly DishRow[]
 export type DishRecipes = Readonly<Record<string, DishEntry>>;
 
 let loading: Promise<DishRecipes> | null = null;
+let loaded: DishRecipes | null = null;
+
+/** The recipes if they have already loaded (a dish row's pointerdown starts the load), else null. */
+export const peekDishRecipes = (): DishRecipes | null => loaded;
+
+/** Whether the loaded recipes have one for this food; null while they have not loaded. */
+export function recipeKnown(food: Pick<FoodItem, "id" | "source" | "sourceId" | "sourceRef">): boolean | null {
+  if (!loaded) return null;
+  return keysOfFood(food).some((key) => key in loaded!);
+}
 
 /** The slim recipes, loaded once. In demo mode the few demo ingredient foods come with them (lib/mock/dish-demo-foods). */
 export function loadDishRecipes(): Promise<DishRecipes> {
   if (!loading) {
     loading = (async () => {
       const [{ default: recipes }] = await Promise.all([import("./data/dish-recipes.slim.json"), loadDemoFoods()]);
-      return recipes as unknown as DishRecipes;
+      loaded = recipes as unknown as DishRecipes;
+      return loaded;
     })().catch((error) => {
       loading = null;
       throw error;

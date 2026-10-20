@@ -53,11 +53,10 @@ function NumberField({ value, onCommit, min, max, className, "aria-label": ariaL
 
 export function MacroTargetsScreen() {
   const router = useRouter();
-  const { profile, targets, hydrated, updateProfile } = useDiary();
+  const { profile, targets, hydrated, updateProfile, notify } = useDiary();
 
   // Mode: "ratios" | "fixed" | "keto" | "default"
   const [mode, setMode] = useState<MacroTargetMode>(profile.macroMode ?? "ratios");
-  const [savedToast, setSavedToast] = useState(false);
 
   // Ratios state
   const defaultRatios: MacroRatios = profile.macroRatios ?? { proteinPct: 25, carbsPct: 55, fatPct: 20 };
@@ -128,7 +127,8 @@ export function MacroTargetsScreen() {
       });
     }
 
-    setSavedToast(true);
+    // cc-64 (A3): the app's toast, which stays while the screen goes back to Mục tiêu
+    notify("Đã lưu mục tiêu đa lượng mới");
     setTimeout(() => {
       router.push("/settings/targets");
     }, 600);
@@ -145,7 +145,8 @@ export function MacroTargetsScreen() {
       macroFixed: undefined,
       customEnergyKcal: undefined,
     });
-    setSavedToast(true);
+    // cc-64 (A3): the app's toast, which stays while the screen goes back to Mục tiêu
+    notify("Đã lưu mục tiêu đa lượng mới");
     setTimeout(() => {
       router.push("/settings/targets");
     }, 600);
@@ -174,12 +175,6 @@ export function MacroTargetsScreen() {
       />
 
       <main className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-12 pt-4 lg:mx-0 lg:max-w-[780px] lg:px-8 lg:pt-6">
-        {savedToast && (
-          <div role="status" aria-live="polite" className="rounded-xl bg-cobalt/20 border border-cobalt px-4 py-3 text-[0.875rem] font-bold text-sky">
-            Đã lưu mục tiêu đa lượng mới
-          </div>
-        )}
-
         {/* Thẻ mục tiêu năng lượng */}
         <Card as="section" aria-labelledby="energy-target-title" className="flex flex-col gap-2">
           <SectionTitle id="energy-target-title">Mục tiêu năng lượng</SectionTitle>

@@ -29,6 +29,7 @@ import { ChipGroup } from "@/components/ui/chip-group";
 import { FormRow } from "@/components/ui/form-row";
 import { PillButton } from "@/components/ui/pill-button";
 import { AppHeader } from "@/components/ui/app-header";
+import { AlertLine } from "@/components/ui/alert-line";
 
 export type SetupStep = "profile" | "goal";
 
@@ -352,11 +353,9 @@ export function SetupForm({ step }: { step: SetupStep }) {
             </Card>
           </section>
 
-          {saveError && (
-            <p role="alert" className="m-0 text-cap text-destructive-text">
-              {saveError}
-            </p>
-          )}
+          <AlertLine show={!!saveError} gap={6} className="m-0 text-cap text-destructive-text">
+            {saveError}
+          </AlertLine>
 
           {/* Phone: one CTA per step */}
           <div className={`${isProfile ? "flex" : "hidden"} mt-auto lg:hidden`}>

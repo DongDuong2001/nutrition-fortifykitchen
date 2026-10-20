@@ -1,4 +1,6 @@
-import type { CSSProperties, ReactNode } from "react";
+"use client";
+
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 
 /**
  * The link page's background (LinkKhanh.dc.html, LinkKhanhDesktop.dc.html): line doodles that bob in place, a barbell
@@ -355,12 +357,28 @@ function Scene({ layout }: { layout: Layout }) {
 
 /** Phone (under 1024 px): the 390 × 844 scene scaled to the viewport width. Desktop: 1440 × 900, cropped to cover. */
 export function LinkBackground() {
+  // The desktop scene's loops stop while it is off screen and under Data Saver (globals.css [data-still])
+  const desk = useRef<SVGSVGElement>(null);
+  const [still, setStill] = useState(false);
+  useEffect(() => {
+    const el = desk.current;
+    if ((navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData) {
+      setStill(true);
+      return;
+    }
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(([e]) => setStill(!e.isIntersecting));
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
   return (
     <>
       <svg aria-hidden="true" viewBox="0 0 390 844" className="pointer-events-none absolute top-0 left-0 h-auto w-full lg:hidden">
         <Scene layout={PHONE} />
       </svg>
       <svg
+        ref={desk}
+        data-still={still ? "" : undefined}
         aria-hidden="true"
         viewBox="0 0 1440 900"
         preserveAspectRatio="xMidYMid slice"

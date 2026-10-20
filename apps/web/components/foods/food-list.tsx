@@ -4,6 +4,7 @@ import type { FoodList as FoodListData } from "@/lib/food-categories";
 import { searchTag } from "@/lib/food-source";
 import { rowName, twinIdsOf } from "@/lib/food-rows";
 import { IconButton } from "@/components/ui/icon-button";
+import { prefetchDishParts } from "@/components/ui/dish-parts-prefetch";
 
 function SourceTag({ food }: { food: FoodItem }) {
   const tag = searchTag(food);
@@ -107,13 +108,15 @@ export function FoodList({
     const showHeart = list.grouped && !!isFavourite?.(food);
     const carried = !!tray?.ids.some((id) => ids.includes(id));
     return (
-      <li key={food.id} data-tour={dataTour && food.id === firstFoodId ? `${dataTour}-first` : undefined} className={`flex items-center border-t border-divider first:border-t-0 ${carried ? "bg-cobalt/10" : ""}`}>
+      // cc-64 (P9): a row off screen is not laid out or painted until it nears the view (56 px kept for it, then its own height)
+      <li key={food.id} data-tour={dataTour && food.id === firstFoodId ? `${dataTour}-first` : undefined} className={`flex items-center border-t border-divider first:border-t-0 [content-visibility:auto] [contain-intrinsic-size:auto_56px] ${carried ? "bg-cobalt/10" : ""}`}>
         <button
           type="button"
           data-food-row
           aria-pressed={selected}
           disabled={disabled}
           onClick={() => onPick(food)}
+          onPointerDown={() => prefetchDishParts(food)}
           className={`flex min-h-14 min-w-0 flex-1 items-center gap-3 border-0 py-2 pl-4 text-left text-text transition-colors active:bg-divider motion-reduce:active:bg-transparent disabled:active:bg-transparent ${
             onOpen || tray ? "pr-1" : "pr-4"
           } ${selected && !carried ? "bg-cobalt/10" : "bg-transparent"} ${disabled ? "cursor-default opacity-50" : "cursor-pointer"}`}

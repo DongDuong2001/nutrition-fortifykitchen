@@ -154,11 +154,14 @@ describe("unseenReleases (what Có gì mới lists)", () => {
     expect(ids(null)).toEqual(["2026-10-21a"]);
   });
 
-  it("follow-ups 20/10: the newest release (2026-10-21a) says the H1T MICRO wordmark goes back to Hôm nay; a 1-step tour on the wordmark (the date when it is missing)", () => {
+  it("follow-ups 20/10: the newest release (2026-10-21a) says the H1T MICRO wordmark goes back to Hôm nay and toasts swipe away; a 1-step tour on the wordmark (the date when it is missing)", () => {
     const r = latestRelease();
     expect(r?.id).toBe("2026-10-21a");
     expect(r?.date).toBe("21/10");
-    expect(r?.items.map((i) => [i.icon, i.title])).toEqual([["home", "Bấm chữ H1T MICRO để về Hôm nay"]]);
+    expect(r?.items.map((i) => [i.icon, i.title])).toEqual([
+      ["home", "Bấm chữ H1T MICRO để về Hôm nay"],
+      ["select", "Vuốt ngang để tắt thông báo"],
+    ]);
     for (const i of r?.items ?? []) expect(i.body).not.toContain(":");
     expect(r?.tour?.map((s) => [s.target, s.fallback ?? null, s.advanceOn ?? null, s.title])).toEqual([["home-logo", "day-date", null, "Về Hôm nay"]]);
     expect(r?.tour?.[0].body.length).toBeLessThanOrEqual(100);

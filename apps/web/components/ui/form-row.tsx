@@ -1,4 +1,5 @@
 import React, { cloneElement, isValidElement } from "react";
+import { AlertLine } from "@/components/ui/alert-line";
 
 export interface FormRowProps {
   label: React.ReactNode;
@@ -48,11 +49,9 @@ export function FormRow({
         ? cloneElement(children, { "aria-describedby": described(children) })
         : children}
 
-      {error && (
-        <span id={errorId} role="alert" className="text-xs font-semibold text-destructive-text">
-          {error}
-        </span>
-      )}
+      <AlertLine show={!!error} gap={2} as="span" id={errorId} className="text-xs font-semibold text-destructive-text">
+        {error}
+      </AlertLine>
     </div>
   );
 }

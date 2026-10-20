@@ -134,7 +134,7 @@ export default function LandingPage() {
       {/* ============================================================== */}
       {/* 1. TOP NAVBAR                                                 */}
       {/* ============================================================== */}
-      <header className="sticky top-0 z-nav w-full pt-[env(safe-area-inset-top)] border-b border-card-border/80 bg-page/90 backdrop-blur-md reduced-transparency:bg-page reduced-transparency:backdrop-blur-none">
+      <header className="sticky top-0 z-nav w-full pt-[env(safe-area-inset-top)] border-b border-card-border/80 bg-page">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link href="/landing" className="flex items-center gap-2 no-underline text-text">
             <span className="font-display italic font-black text-2xl tracking-wide text-ink">
@@ -257,7 +257,9 @@ export default function LandingPage() {
       {/* ============================================================== */}
       {/* 4. HOW IT WORKS (3 STEPS)                                     */}
       {/* ============================================================== */}
-      <section id="how-it-works" className="py-24 border-t border-card-border bg-card/20">
+      {/* cc-64 (P8): the two sections below the fold are not laid out or painted until they near the view; their kept
+          sizes are the measured heights at 390, 768 and 1440 px (20/10), so the header's anchor jumps still land */}
+      <section id="how-it-works" className="py-24 border-t border-card-border bg-card/20 [content-visibility:auto] [contain-intrinsic-size:auto_1410px] md:[contain-intrinsic-size:auto_884px] lg:[contain-intrinsic-size:auto_787px]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <span className="text-xs font-extrabold uppercase tracking-wider text-cobalt">
@@ -275,7 +277,7 @@ export default function LandingPage() {
             {STEPS.map((step) => (
               <div
                 key={step.num}
-                className="relative flex flex-col justify-between p-6 sm:p-8 rounded-3xl border border-card-border/90 bg-card shadow-sm hover:shadow-lg hover:border-cobalt/50 transition-press duration-300 group"
+                className="relative flex flex-col justify-between p-6 sm:p-8 rounded-3xl border border-card-border/90 bg-card shadow-sm hover:border-cobalt/50 transition-press duration-300 group after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit] after:shadow-lg after:opacity-0 after:content-[''] after:[transition:opacity_160ms_var(--ease-out)] hover:after:opacity-100"
               >
                 <div>
                   <div className="flex items-center justify-between mb-4">
@@ -307,7 +309,7 @@ export default function LandingPage() {
       {/* ============================================================== */}
       {/* 5. TRANSPARENCY & SCIENTIFIC PRINCIPLES                       */}
       {/* ============================================================== */}
-      <section id="transparency" className="py-24 border-t border-card-border bg-page">
+      <section id="transparency" className="py-24 border-t border-card-border bg-page [content-visibility:auto] [contain-intrinsic-size:auto_1939px] md:[contain-intrinsic-size:auto_1218px] lg:[contain-intrinsic-size:auto_1038px]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <span className="text-xs font-extrabold uppercase tracking-wider text-cobalt">
@@ -325,7 +327,7 @@ export default function LandingPage() {
             {TRANSPARENCY_PRINCIPLES.map((item) => (
               <div
                 key={item.title}
-                className="rounded-3xl border border-card-border/85 bg-card p-7 sm:p-8 shadow-sm hover:shadow-md hover:border-cobalt/40 transition-press duration-300 flex flex-col justify-between group"
+                className="relative rounded-3xl border border-card-border/85 bg-card p-7 sm:p-8 shadow-sm hover:border-cobalt/40 transition-press duration-300 flex flex-col justify-between group after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit] after:shadow-md after:opacity-0 after:content-[''] after:[transition:opacity_160ms_var(--ease-out)] hover:after:opacity-100"
               >
                 <div>
                   <div className="flex items-center justify-between gap-4 mb-4">

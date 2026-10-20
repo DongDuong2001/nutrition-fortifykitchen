@@ -31,13 +31,15 @@ export interface Release {
 }
 
 export const RELEASES: readonly Release[] = [
-  // Follow-ups 20/10: the H1T MICRO wordmark goes back to Hôm nay. The tour is the wordmark, on Hôm nay (the date when it
+  // Follow-ups 20/10: the H1T MICRO wordmark goes back to Hôm nay; toasts swipe away and repeated adds share one (cc-64).
+  // The tour is the wordmark, on Hôm nay (the date when it
   // is missing, e.g. on a past day where "Về hôm nay" takes its place)
   {
     id: "2026-10-21a",
     date: "21/10",
     items: [
       { icon: "home", title: "Bấm chữ H1T MICRO để về Hôm nay", body: "Đang xem Tổng quan hay trang khác, bấm chữ H1T MICRO ở góc trên là về ngay Hôm nay." },
+      { icon: "select", title: "Vuốt ngang để tắt thông báo", body: "Thông báo ở cuối màn hình vuốt sang một bên là tắt. Thêm mấy món liền tay thì chỉ hiện một thông báo đếm số món." },
     ],
     tour: [{ target: "home-logo", fallback: "day-date", title: "Về Hôm nay", body: "Bấm chữ H1T MICRO ở đây để về Hôm nay từ trang khác." }],
   },
