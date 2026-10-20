@@ -8,6 +8,7 @@ import { whenIdle } from "@/lib/idle";
 import { canApplyUpdate, updatePhase, updateToastVisible, UPDATE_TOAST_MS } from "@/lib/update-phase";
 import { setUpdateBar } from "@/lib/update-bar";
 import { isSyncBusy, requestSyncNow, useSyncSummary } from "@/lib/sync-ui";
+import { useHasUnsavedWork } from "@/lib/unsaved-work";
 
 /**
  * The "Có bản mới" toast. It comes when the page is idle, sits right above the bottom nav (the screens leave room for it, so it
@@ -22,6 +23,7 @@ export default function UpdateOffer({ worker, onApply }: { worker: ServiceWorker
   const inBackground = useDocumentHidden();
   const summary = useSyncSummary();
   const busy = isSyncBusy(summary);
+  const editing = useHasUnsavedWork();
 
   // It shows once the page is idle, not in the middle of a scroll or a tap, and then for UPDATE_TOAST_MS
   useEffect(() => whenIdle(() => setArmed(true), 4000), []);
@@ -32,10 +34,10 @@ export default function UpdateOffer({ worker, onApply }: { worker: ServiceWorker
   }, [armed, tapped]);
 
   useEffect(() => {
-    if (!canApplyUpdate({ tapped, inBackground, busy })) return;
+    if (!canApplyUpdate({ tapped, inBackground, busy, editing })) return;
     onApply();
     worker.postMessage({ type: "SKIP_WAITING" });
-  }, [worker, tapped, inBackground, busy, onApply]);
+  }, [worker, tapped, inBackground, busy, editing, onApply]);
 
   const visible = armed && updateToastVisible({ tapped, expired });
   useEffect(() => {
@@ -43,7 +45,7 @@ export default function UpdateOffer({ worker, onApply }: { worker: ServiceWorker
     return () => setUpdateBar(false);
   }, [visible]);
 
-  const phase = updatePhase({ tapped, busy, saving: summary.saving, offline: typeof navigator !== "undefined" && !navigator.onLine, failed: summary.failed });
+  const phase = updatePhase({ tapped, busy, saving: summary.saving, offline: typeof navigator !== "undefined" && !navigator.onLine, failed: summary.failed, editing });
   const reload = () => {
     setTapped(true);
     // Writes that wait are sent now; the page reloads when they are gone
@@ -56,8 +58,16 @@ export default function UpdateOffer({ worker, onApply }: { worker: ServiceWorker
         {visible && (
           <div className="pointer-events-auto">
             <Toast
-              message={phase === "ready" ? "Có bản mới" : phase === "waiting" ? "Có bản mới · đang gửi dữ liệu, xong sẽ tải lại" : "Có bản mới · còn mục chưa lưu, xử lý xong rồi tải lại"}
-              actionLabel={phase === "waiting" ? undefined : "Tải lại"}
+              message={
+                phase === "ready"
+                  ? "Có bản mới"
+                  : phase === "waiting"
+                    ? "Có bản mới · đang gửi dữ liệu, xong sẽ tải lại"
+                    : phase === "editing"
+                      ? "Có bản mới · bạn xong việc đang làm là tải lại"
+                      : "Có bản mới · còn mục chưa lưu, xử lý xong rồi tải lại"
+              }
+              actionLabel={phase === "waiting" || phase === "editing" ? undefined : "Tải lại"}
               onAction={reload}
             />
           </div>

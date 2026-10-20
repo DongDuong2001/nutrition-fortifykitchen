@@ -30,7 +30,7 @@ describe("applying the update", () => {
 
 describe("the toast", () => {
   it("stays 5 s when nobody taps it, and as long as a tap on Tải lại waits on writes", () => {
-    expect(UPDATE_TOAST_MS).toBe(5000);
+    expect(UPDATE_TOAST_MS).toBe(10000);
     expect(updateToastVisible({ tapped: false, expired: false })).toBe(true);
     expect(updateToastVisible({ tapped: false, expired: true })).toBe(false);
     expect(updateToastVisible({ tapped: true, expired: true })).toBe(true);

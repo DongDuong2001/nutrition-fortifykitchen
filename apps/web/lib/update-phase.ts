@@ -7,20 +7,32 @@
  * to the background (the person is not looking: a reload costs nothing) or, failing that, by the next cold open (a waiting worker
  * takes over when the app has been closed). Either way never while writes wait.
  */
-export type UpdatePhase = "ready" | "waiting" | "blocked";
+export type UpdatePhase = "ready" | "waiting" | "blocked" | "editing";
 
 /** How long the "Có bản mới" toast stays when nobody taps it. */
-export const UPDATE_TOAST_MS = 5000;
+export const UPDATE_TOAST_MS = 10000;
 
-export function updatePhase(input: { tapped: boolean; busy: boolean; saving: boolean; offline: boolean; failed: number }): UpdatePhase {
+export function updatePhase(input: { tapped: boolean; busy: boolean; saving: boolean; offline: boolean; failed: number; editing?: boolean }): UpdatePhase {
   if (!input.tapped) return "ready";
+  // Nothing waits to be sent, but a tray, an open portion sheet or a form holds something a reload would lose: the person finishes first
+  if (input.editing && !input.busy) return "editing";
   // Something is being sent: wait for it. Nothing is, yet writes wait on the person or on the network: say so
   return input.saving || (!input.offline && input.failed === 0) || !input.busy ? "waiting" : "blocked";
 }
 
-/** The update may take over now: the person tapped Tải lại, or the app is in the background, and nothing is waiting or being sent. */
-export const canApplyUpdate = (input: { tapped: boolean; inBackground?: boolean; busy: boolean }): boolean =>
-  (input.tapped || input.inBackground === true) && !input.busy;
+/**
+ * The update may take over now: the person tapped Tải lại, or the app is in the background, and nothing is waiting or being sent
+ * (the outbox) and nothing is in hand that a reload would lose (`editing`: lib/unsaved-work: a tray, a portion sheet, a form).
+ */
+export const canApplyUpdate = (input: { tapped: boolean; inBackground?: boolean; busy: boolean; editing?: boolean }): boolean =>
+  (input.tapped || input.inBackground === true) && !input.busy && input.editing !== true;
+
+/**
+ * A tab whose page still runs the old code after the new worker took over (another tab applied the update) reloads itself, never
+ * mid-edit: only while it is in the background and nothing is waiting, being sent, or held.
+ */
+export const shouldReloadStaleTab = (input: { stale: boolean; hidden: boolean; busy: boolean; editing: boolean }): boolean =>
+  input.stale && input.hidden && !input.busy && !input.editing;
 
 /** The toast is on screen: until it has been up UPDATE_TOAST_MS, and for as long as a tap on Tải lại is waiting on writes. */
 export const updateToastVisible = (input: { tapped: boolean; expired: boolean }): boolean => input.tapped || !input.expired;
