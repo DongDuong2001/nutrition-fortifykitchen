@@ -6,7 +6,7 @@ import { whenIdle } from "@/lib/idle";
 import { loadFoodRows } from "@/lib/food-rows";
 import Link from "next/link";
 import { createPortal } from "react-dom";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useShellBottomBar } from "@/components/ui/shell-slot";
 import { AppHeader, HEADER_ICON_BUTTON, CalendarGlyph } from "@/components/ui/app-header";
 import { IconShare } from "@/components/ui/icons";
@@ -262,7 +262,12 @@ function HomeContent() {
   const [clientNow, setClientNow] = useState(false);
   const isOnline = useSyncExternalStore(subscribeOnline, getOnlineSnapshot, getOnlineServerSnapshot);
 
-  const viewIsoParam = hydrated && todayIso ? viewedIsoDate(searchParams?.get("date"), todayIso) : null;
+  // The day is read from the address only while the address is Hôm nay's: with the add sheet over it (/add, /add?meal=…) the
+  // address has no `date` unless the opener carried it, and the day under the sheet must not flip to today and back
+  const pathname = usePathname();
+  const shownDateParam = useRef<string | null>(null);
+  if (pathname === "/app") shownDateParam.current = searchParams?.get("date") ?? null;
+  const viewIsoParam = hydrated && todayIso ? viewedIsoDate(shownDateParam.current, todayIso) : null;
   const isPast = viewIsoParam !== null && viewIsoParam !== todayIso;
   // cc-68: yesterday can be edited like today; a day older than that is read-only
   const readOnly = isPast && viewIsoParam !== null && !isEditable(viewIsoParam);

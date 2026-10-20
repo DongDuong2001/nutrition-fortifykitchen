@@ -343,9 +343,15 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
   // The grams a save logs: the parts added up for a changed dish
   const loggedGrams = dishEdit?.edited ? dishEdit.grams : parsedGrams;
 
+  // The add lock: one tap on a recent (or a favourite with history) adds with the last portion, a portion sheet's Thêm saves
+  // A ref, not state: two taps in the same frame must not both add (the second would replace the undo of the first)
+  const oneTapLock = useRef(false);
+
   // Submit action
   const handleAddFood = async () => {
-    if (!selectedFood || loggedGrams <= 0 || isSubmitting || mealSlot === null) return;
+    if (closingRef.current || oneTapLock.current || !selectedFood || loggedGrams <= 0 || isSubmitting || mealSlot === null) return;
+    // A ref, not only the state: two taps in the same frame both see isSubmitting false
+    oneTapLock.current = true;
     setIsSubmitting(true);
     let saved = false;
     try {
@@ -359,7 +365,10 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
       }
     } finally {
       // After a save the buttons stay as they are until the sheet is gone: nothing to press twice, no label that changes
-      if (!saved) setIsSubmitting(false);
+      if (!saved) {
+        oneTapLock.current = false;
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -378,7 +387,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
   const trayTotalsNow = useMemo(() => trayTotals(tray), [tray]);
   const trayAddable = canAddTray(tray);
   const handleAddTray = () => {
-    if (!trayAddable || mealSlot === null || isSubmitting) return;
+    if (closingRef.current || !trayAddable || mealSlot === null || isSubmitting) return;
     setIsSubmitting(true);
     if (addFoodEntries(tray, mealSlot, addToDay)) {
       // The tray is left as it is: it goes with the sheet, so the button never reads "Thêm 0 món" while the sheet slides away
@@ -388,12 +397,9 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
     }
   };
 
-  // One tap on a recent (or a favourite with history): add with the last portion, 5 s undo, back to the diary
-  // A ref, not state: two taps in the same frame must not both add (the second would replace the undo of the first)
-  const oneTapLock = useRef(false);
 
   const addWithPortion = async (food: FoodItem, grams: number, label: string) => {
-    if (oneTapLock.current || isSubmitting || mealSlot === null) return;
+    if (closingRef.current || oneTapLock.current || isSubmitting || mealSlot === null) return;
     // Unknown energy cannot be logged in one tap: open the portion panel, which says why
     if (!canLog(food)) {
       pickFood(food, { label, grams });
@@ -410,14 +416,14 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
   };
 
   const addSavedMealToMeal = (meal: SavedMeal) => {
-    if (oneTapLock.current || mealSlot === null) return;
+    if (closingRef.current || oneTapLock.current || mealSlot === null) return;
     oneTapLock.current = true;
     addSavedMeal(meal, mealSlot, addToDay);
     leave(homeHref);
   };
 
   const submitQuickEntry = (input: QuickEntryInput): QuickEntryResult => {
-    if (oneTapLock.current) return { ok: false, field: "kcal", message: "Đang thêm…" };
+    if (closingRef.current || oneTapLock.current) return { ok: false, field: "kcal", message: "Đang thêm…" };
     if (mealSlot === null) return { ok: false, field: "kcal", message: "Chưa chọn bữa" };
     const result = addQuickEntry(input, mealSlot, addToDay);
     if (result.ok) {
