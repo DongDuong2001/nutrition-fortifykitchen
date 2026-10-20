@@ -138,7 +138,7 @@ describe("PortionPanel by the coach's portion model (cc-53b)", () => {
     expect(html).toContain("Đã nấu chín");
     expect(html).toContain("150 g đã nấu chín");
     expect(html).toContain("bằng khoảng 214 g sống");
-    expect(html).toContain("Bấm + để nhân 150 g này lên");
+    expect(html).not.toContain("Bấm + để nhân");
   });
 
   it("Red Bull keeps its lon tabs and the unit stepper (coach rule 5)", () => {
@@ -170,5 +170,30 @@ describe("PortionPanel size chips (cc-61)", () => {
     expect(html).toContain('aria-label="Kích cỡ"');
     expect(html.match(/aria-pressed/g)?.length).toBeGreaterThanOrEqual(5);
     for (const size of ["Nhỏ", "Vừa", "Lớn"]) expect(html).toContain(`>${size}</button>`);
+  });
+});
+
+describe("PortionPanel close (fix/polish-1020 item 4)", () => {
+  const render = (onClose?: () => void) =>
+    renderToString(
+      <DiaryProvider>
+        <PortionPanel food={MOCK_FOODS[0]} gramsInput="100" setGramsInput={vi.fn()} selectedServingLabel="100 g" setSelectedServingLabel={vi.fn()} mealSlot="lunch" onAdd={vi.fn()} onClose={onClose} />
+      </DiaryProvider>
+    );
+
+  it("a sheet gets a visible ✕: a 44 px button named Đóng", () => {
+    const html = render(vi.fn());
+    expect(html).toMatch(/<button[^>]*aria-label="Đóng"[^>]*data-testid="portion-close"|<button[^>]*data-testid="portion-close"[^>]*aria-label="Đóng"/);
+    expect(html).toMatch(/aria-label="Đóng"[^>]*class="[^"]*\bh-11 w-11\b/);
+  });
+
+  it("the desktop pane, which has no sheet to close, gets none", () => {
+    expect(render()).not.toContain("portion-close");
+  });
+
+  it("the primary buttons may wrap to two lines (min-h-14, not h-14) so a long label never clips at 360 px and 150 % text", () => {
+    const html = render();
+    expect(html).toMatch(/data-testid="portion-add"[^>]*class="[^"]*min-h-14/);
+    expect(html).not.toMatch(/data-testid="portion-add"[^>]*class="[^"]*(?<![-\w])h-14\b/);
   });
 });

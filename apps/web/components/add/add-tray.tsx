@@ -56,9 +56,10 @@ export function TrayBar({ totals, mealName, canAdd, submitting = false, onReview
         onClick={onAdd}
         disabled={!canAdd || submitting}
         data-testid="tray-add"
-        className="flex h-12 w-full min-w-0 cursor-pointer items-center justify-center rounded-full border-0 bg-cobalt px-4 text-callout font-bold text-on-accent disabled:cursor-default disabled:opacity-50"
+        className="flex min-h-12 w-full min-w-0 cursor-pointer items-center justify-center rounded-3xl border-0 bg-cobalt px-4 py-2 text-center text-callout font-bold leading-snug text-on-accent disabled:cursor-default disabled:opacity-50"
       >
-        <span className="truncate">{`Thêm ${totals.count} món vào ${mealName}`}</span>
+        {/* The label wraps to a second line at large text instead of being cut (360 px wide at 150 % text) */}
+        <span className="min-w-0 break-words">{`Thêm ${totals.count} món vào ${mealName}`}</span>
       </button>
     </div>
   );
@@ -72,7 +73,9 @@ function rowHint(item: TrayItem): string | null {
   if (p.kind === "egg") return p.size ? "Cỡ ghi trên hộp, app tự trừ vỏ." : null;
   // Logged at other grams than the amount set: a raw / cooked conversion (lib/portion portionDetail reads it the same way)
   const converted = p.state !== null && Math.abs(item.grams - p.base * p.mult) > 0.5;
-  return converted ? `${portionHint(p)}, bằng khoảng ${formatAmount(Math.round(item.grams), "g")} g lúc ${p.state === "cooked" ? "sống" : "chín"}` : portionHint(p);
+  const sum = portionHint(p);
+  const about = `bằng khoảng ${formatAmount(Math.round(item.grams), "g")} g lúc ${p.state === "cooked" ? "sống" : "chín"}`;
+  return converted ? (sum ? `${sum}, ${about}` : `${about[0].toUpperCase()}${about.slice(1)}`) : sum;
 }
 
 /** How long a removed card takes to leave: .m-row-exit (fade and height close, --m-row). */

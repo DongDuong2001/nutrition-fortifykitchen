@@ -561,10 +561,9 @@ export function withMult(p: GramPortion, mult: number): GramPortion {
   return { ...p, mult: Math.min(MAX_MULT, Math.max(1, Math.round(mult))) };
 }
 
-/** "100 g × 3 = 300 g", or how to start when N is 1. */
-export function portionHint(p: GramPortion): string {
-  const base = formatNumber(p.base);
-  return p.mult === 1 ? `Bấm + để nhân ${base} g này lên` : `${base} g × ${p.mult} = ${formatNumber(round1(p.base * p.mult))} g`;
+/** "100 g × 3 = 300 g" once N is more than 1; nothing at 1 (the line that told how to start, "Bấm + để nhân …", is gone). */
+export function portionHint(p: GramPortion): string | null {
+  return p.mult === 1 ? null : `${formatNumber(p.base)} g × ${p.mult} = ${formatNumber(round1(p.base * p.mult))} g`;
 }
 
 /**
