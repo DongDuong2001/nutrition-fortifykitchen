@@ -35,7 +35,7 @@ export function BottomNav({ currentTab, className = "" }: BottomNavProps) {
         onNavigate={() => startTransition(() => setActive(item.tab))}
         data-tour={item.tab === "settings" ? "nav-settings" : item.tab === "explore" ? "nav-explore" : undefined}
         aria-current={isActive ? "page" : undefined}
-        className={`relative flex flex-col items-center justify-center gap-[2px] min-h-14 text-xs font-semibold no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100 ${
+        className={`m-tint m-tint-dark relative flex flex-col items-center justify-center gap-[2px] min-h-14 rounded-2xl text-xs font-semibold no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100 ${
           isActive ? "text-on-dark" : "text-muted-on-dark hover:text-on-dark"
         }`}
       >
