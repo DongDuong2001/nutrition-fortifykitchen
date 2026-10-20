@@ -145,7 +145,8 @@ def main():
         meal = re.sub(r"^Thêm vào ", "", pg.locator('[data-tour="portion-add"]:visible').first.inner_text().strip())
         pg.goto(BASE + "/app", wait_until="networkidle")
         pg.wait_for_timeout(800)
-        kcal_before = kcal_of(squash(pg.locator(f"section[aria-label='{meal}'] >> visible=true").first.inner_text())) or 0
+        text_before = squash(pg.locator(f"section[aria-label='{meal}'] >> visible=true").first.inner_text())
+        kcal_before = kcal_of(text_before) or 0
         panel, section = open_dish(pg)
         for _ in range(5):
             section.get_by_role("button", name="Giảm 10 g Bánh phở (tươi)").tap()
@@ -158,7 +159,8 @@ def main():
         pg.wait_for_timeout(1000)
         text = squash(pg.locator(f"section[aria-label='{meal}'] >> visible=true").first.inner_text())
         check(text.count("Phở bò") == 1 and "Phở bò · đã chỉnh" in text, f"{meal}: one row, Phở bò · đã chỉnh ({text[:200]!r})")
-        check("Bánh phở" not in text and "Thịt bò" not in text, "no separate Bánh phở or Thịt bò row")
+        # The demo day's own rows are in the meal too (at lunchtime it holds "Thịt bò nạc"): only rows that were not there before count
+        check("Bánh phở" not in text and text.count("Thịt bò") == text_before.count("Thịt bò"), "no separate Bánh phở or Thịt bò row")
         check((kcal_of(text) or 0) - kcal_before == kcal_card, f"the meal gained the card's {kcal_card} kcal ({kcal_before} → {kcal_of(text)})")
         pg.screenshot(path=str(SHOTS / "phobo-edited-row.png"))
         # The edited dish is in no list
