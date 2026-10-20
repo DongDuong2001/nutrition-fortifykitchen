@@ -61,7 +61,7 @@ export const DRI: readonly DriRow[] = [
   { id: "copper", table: "Elements", report: R_MIN, male: [[9, 0.7], [14, 0.89], [19, 0.9]], ul: [[9, 5], [14, 8], [19, 10]] },
   { id: "manganese", table: "Elements", report: R_MIN, ai: true, male: [[9, 1.9], [14, 2.2], [19, 2.3]], female: [[9, 1.6], [19, 1.8]], ul: [[9, 6], [14, 9], [19, 11]] },
   { id: "potassium", table: "Elements", report: "Dietary Reference Intakes for Sodium and Potassium (2019)", ai: true, male: [[9, 2500], [14, 3000], [19, 3400]], female: [[9, 2300], [19, 2600]] },
-  { id: "vitamin_a", table: "Vitamins", report: R_VIT, male: [[9, 600], [14, 900]], female: [[9, 600], [14, 700]], ul: [[9, 1700], [14, 2800], [19, 3000]], ulNote: "tính cho vitamin A có sẵn (retinol), không tính cho beta-carotene" },
+  { id: "vitamin_a", table: "Vitamins", report: R_VIT, male: [[9, 600], [14, 900]], female: [[9, 600], [14, 700]], ul: [[9, 1700], [14, 2800], [19, 3000]], ulSupplementsOnly: true, ulNote: "tính cho vitamin A (retinol) từ thực phẩm bổ sung, không tính cho thức ăn thường" },
   { id: "vitamin_d", table: "Vitamins", report: "Dietary Reference Intakes for Calcium and Vitamin D (2011)", male: [[9, 15], [71, 20]], ul: [[9, 100]] },
   { id: "vitamin_e", table: "Vitamins", report: R_VIT, male: [[9, 11], [14, 15]], ul: [[9, 600], [14, 800], [19, 1000]], ulSupplementsOnly: true, ulNote: "tính cho vitamin E tổng hợp từ thực phẩm bổ sung, không tính cho thức ăn thường" },
   { id: "vitamin_k", table: "Vitamins", report: R_VIT, ai: true, male: [[9, 60], [14, 75], [19, 120]], female: [[9, 60], [14, 75], [19, 90]] },

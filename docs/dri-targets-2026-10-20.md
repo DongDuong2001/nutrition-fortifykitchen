@@ -5,7 +5,7 @@ Hao's brief: someone switching from Cronometer sees the same micronutrient targe
 ## What a target is
 
 - The **RDA**, or the **AI** where the DRI has no RDA (marked AI below), for the person's sex and age, from the Dietary Reference Intakes of the National Academies of Sciences, Engineering, and Medicine (formerly the Institute of Medicine), as Cronometer uses them. Percent is intake ÷ target; the red, yellow, green and blue levels are against it.
-- The **Tolerable Upper Intake Level (UL)** is the "max": the highest daily intake unlikely to cause harm. Above it a nutrient gets a calm extra line ("Vượt mức an toàn (40 mg)"), in the page's normal colours. A UL marked *supplements only* counts only foods of the supplement category (`bo_sung`), because the DRI sets it for that form (magnesium from drugs and supplements, synthetic vitamin E, synthetic niacin, folic acid), not for ordinary food. No UL, no note.
+- The **Tolerable Upper Intake Level (UL)** is the "max": the highest daily intake unlikely to cause harm. Above it a nutrient gets a calm extra line ("Vượt mức an toàn (40 mg)"), in the page's normal colours. A UL marked *supplements only* counts only foods of the supplement category (`bo_sung`), because the DRI sets it for that form (preformed vitamin A, magnesium from drugs and supplements, synthetic vitamin E, synthetic niacin, folic acid), not for ordinary food. Vitamin A is in that list by Hao's decision (21/10): the DRI's limit is for preformed retinol, the catalogue holds only total vitamin A (µg RAE), so food counts for nothing and only supplement foods are compared with it. No UL, no note.
 - Life stages are the DRI's own: 9–13, 14–18, 19–30, 31–50, 51–70, 71+. A profile younger than 9 takes the 9–13 values (the app does not allow it: birth year ≤ 2015). No pregnancy or breastfeeding stage.
 - **Coach overrides (Hao)**: sodium stays the salt formula (4–6 g + 1–1,5 g per 20 min of training, × 393 mg), not the DRI's 1.500 mg; a woman in the period has iron 28 mg. Both appear in the app unchanged.
 
@@ -72,7 +72,7 @@ The DRI tables for the tables per row: *Vitamins* = "Reference values for vitami
 | Copper (mg) | all food and supplements | 5 | 8 | 10 | 10 | 10 | 10 |
 | Manganese (mg) | all food and supplements | 6 | 9 | 11 | 11 | 11 | 11 |
 | Potassium | no UL set | — | — | — | — | — | — |
-| Vitamin A (µg RAE) | preformed vitamin A (retinol) only | 1700 | 2800 | 3000 | 3000 | 3000 | 3000 |
+| Vitamin A (µg RAE) | supplements only (retinol from supplements; Hao 21/10) | 1700 | 2800 | 3000 | 3000 | 3000 | 3000 |
 | Vitamin D (µg) | all food and supplements | 100 | 100 | 100 | 100 | 100 | 100 |
 | Vitamin E (mg) | supplements only (synthetic vitamin E) | 600 | 800 | 1000 | 1000 | 1000 | 1000 |
 | Vitamin K | no UL set | — | — | — | — | — | — |
@@ -85,7 +85,7 @@ The DRI tables for the tables per row: *Vitamins* = "Reference values for vitami
 | Vitamin B12 | no UL set | — | — | — | — | — | — |
 | Vitamin C (mg) | all food and supplements | 1200 | 1800 | 2000 | 2000 | 2000 | 2000 |
 
-Vitamin A's UL is for preformed retinol, but the catalogue holds only total vitamin A (µg RAE), so the app compares the day's total with it. A day of carotene-rich food (sweet potato, carrot) can show the note without any retinol; see OPEN_QUESTIONS (cc-73b).
+Vitamin A's UL is for preformed retinol and the catalogue holds only total vitamin A (µg RAE), so Hao decided (21/10) that it counts like the other supplements-only limits: vitamin A from ordinary food (carotene in sweet potato or carrot, liver) never triggers the note, and a day's vitamin A from supplement foods (`bo_sung`) is compared with the limit. The note's detail says so ("Mức này chỉ tính cho thực phẩm bổ sung…").
 
 ## What the app does with it
 

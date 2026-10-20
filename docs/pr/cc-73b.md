@@ -5,7 +5,7 @@ For Hao's review (not merged). Brief: `prompts/cc-73b-upper-dri.md`. One PR, off
 ## What changes for a user
 
 - **Every target is one number**, the upper end of the coach's range: energy 40 / 35 / 30 / 25 kcal/kg (build, maintain, cut, deep cut), protein 2,2 g/kg, fat 1 g/kg, carbs the remainder, fibre 14 g per 1.000 kcal capped at 40 g (men) / 30 g (women). Hôm nay reads "1.041 / 2.275 kcal". Percentages and the red, yellow, green and blue levels are against it. **Unchanged:** fast carbs (30–45 g per training hour) and salt (4–6 g + 1–1,5 g per 20 min), still ranges. The user's custom kcal, macro ratios and fixed grams still win.
-- **Vitamins and minerals follow the US and Canadian DRI** by sex and age (RDA, or AI), the way Cronometer does, replacing VN 2016. The Tolerable Upper Intake Level is the "max": shown under each row on Mục tiêu ("Tối đa 2.500 mg"), and above it a calm extra line, "Vượt mức an toàn (350 mg)", on Vi chất and the nutrient page. Limits for magnesium, vitamin E, niacin and folate count only supplement foods. Coach overrides kept: salt formula, iron 28 mg in the period.
+- **Vitamins and minerals follow the US and Canadian DRI** by sex and age (RDA, or AI), the way Cronometer does, replacing VN 2016. The Tolerable Upper Intake Level is the "max": shown under each row on Mục tiêu ("Tối đa 2.500 mg"), and above it a calm extra line, "Vượt mức an toàn (350 mg)", on Vi chất and the nutrient page. Limits for vitamin A, magnesium, vitamin E, niacin and folate count only supplement foods. Coach overrides kept: salt formula, iron 28 mg in the period.
 - **Release 2026-10-21b** (two items, the words of the brief, a 2-step tour on Hôm nay), and release 19a no longer claims VN 2016.
 
 ## Where
@@ -27,7 +27,7 @@ For Hao's review (not merged). Brief: `prompts/cc-73b-upper-dri.md`. One PR, off
 
 ## Open questions (OPEN_QUESTIONS.md, cc-73b)
 
-Source of the DRI numbers (Health Canada's publication; nothing guessed), the calendar "met" band (90 %), vitamin A's UL vs the total RAE, no fortified flag, no fibre floor, stage labels, the note not in the narrow Hôm nay column.
+Source of the DRI numbers (Health Canada's publication; nothing guessed), the calendar "met" band (90 %), no fortified flag, no fibre floor, stage labels, the note not in the narrow Hôm nay column.
 
 ## Checks
 

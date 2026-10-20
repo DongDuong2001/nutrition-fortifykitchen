@@ -107,7 +107,7 @@ var dri = map[string]driRow{
 	"copper":     {male: []step{{9, 0.7}, {14, 0.89}, {19, 0.9}}, ul: []step{{9, 5}, {14, 8}, {19, 10}}},
 	"manganese":  {male: []step{{9, 1.9}, {14, 2.2}, {19, 2.3}}, female: []step{{9, 1.6}, {19, 1.8}}, ul: []step{{9, 6}, {14, 9}, {19, 11}}},
 	"potassium":  {male: []step{{9, 2500}, {14, 3000}, {19, 3400}}, female: []step{{9, 2300}, {19, 2600}}},
-	"vitamin_a":  {male: []step{{9, 600}, {14, 900}}, female: []step{{9, 600}, {14, 700}}, ul: []step{{9, 1700}, {14, 2800}, {19, 3000}}},
+	"vitamin_a":  {male: []step{{9, 600}, {14, 900}}, female: []step{{9, 600}, {14, 700}}, ul: []step{{9, 1700}, {14, 2800}, {19, 3000}}, supplementsOnly: true},
 	"vitamin_d":  {male: []step{{9, 15}, {71, 20}}, ul: []step{{9, 100}}},
 	"vitamin_e":  {male: []step{{9, 11}, {14, 15}}, ul: []step{{9, 600}, {14, 800}, {19, 1000}}, supplementsOnly: true},
 	"vitamin_k":  {male: []step{{9, 60}, {14, 75}, {19, 120}}, female: []step{{9, 60}, {14, 75}, {19, 90}}},

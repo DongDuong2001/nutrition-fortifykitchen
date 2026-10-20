@@ -166,9 +166,9 @@ describe("the Tolerable Upper Intake Levels", () => {
   it("nutrients with no UL have none: potassium, vitamin K, B1, B2, B5, B12", () => {
     for (const id of ["potassium", "vitamin_k", "b1", "b2", "b5", "b12"]) expect(upperLimits(30)[id], id).toBeUndefined();
   });
-  it("only magnesium, vitamin E, niacin (B3) and folate count supplements only", () => {
+  it("only vitamin A, magnesium, vitamin E, niacin (B3) and folate count supplements only", () => {
     const only = Object.entries(upperLimits(30)).filter(([, v]) => v.supplementsOnly).map(([k]) => k).sort();
-    expect(only).toEqual(["b3", "folate", "magnesium", "vitamin_e"]);
+    expect(only).toEqual(["b3", "folate", "magnesium", "vitamin_a", "vitamin_e"]);
   });
   it("a limit is never under the target it belongs to (magnesium's 350 mg is for supplements only, below an adult's food target)", () => {
     for (const age of [11, 16, 25, 40, 55, 75]) {

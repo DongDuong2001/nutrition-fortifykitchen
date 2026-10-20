@@ -75,7 +75,7 @@ def main():
         pg.wait_for_timeout(600)
         text = body(pg)
         check(text.count("Theo DRI · nam 19–30 tuổi") == 2 and "DRI, nam" not in text, "Mục tiêu: says whose amounts these are once per card, under the title (Theo DRI · nam 19–30 tuổi, two cards), not on each row")
-        for want in ["2.275 kcal", "143 g", "65 g", "280 g", "32 g", "7–10,5 g", "Tối đa 2.500 mg", "Tối đa 350 mg, chỉ tính từ thực phẩm bổ sung", "Tối đa 40 mg"]:
+        for want in ["2.275 kcal", "143 g", "65 g", "280 g", "32 g", "7–10,5 g", "Tối đa 2.500 mg", "Tối đa 350 mg, chỉ tính từ thực phẩm bổ sung", "Tối đa 3.000 µg, chỉ tính từ thực phẩm bổ sung", "Tối đa 40 mg"]:
             check(want in text, f"Mục tiêu shows {want!r}")
         check("Theo khuyến nghị DRI của Mỹ và Canada, đúng tuổi và giới tính của bạn" in text, "Mục tiêu: the footnote names the US and Canadian DRI")
         check("2016" not in text and "Bộ Y tế" not in text, "Mục tiêu: no VN 2016 left")

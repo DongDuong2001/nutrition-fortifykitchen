@@ -1,7 +1,7 @@
 /**
  * cc-73b: the calm note on a nutrient whose day total is above its Tolerable Upper Intake Level (Cronometer's "maximum
  * thresholds"). An extra line in the nutrient's own level colours, never an alarm. A UL that covers supplements only
- * (magnesium, vitamin E, niacin, folate) counts only foods of the supplement category, not ordinary food. A nutrient with
+ * (vitamin A, magnesium, vitamin E, niacin, folate) counts only foods of the supplement category, not ordinary food. A nutrient with
  * no UL never gets a note. Pure.
  */
 import { catalogFoodById } from "./mock/foods";

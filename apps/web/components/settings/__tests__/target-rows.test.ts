@@ -118,7 +118,7 @@ describe("targetSections", () => {
   it("lists the 16 other DRI amounts with their units and their maximum", () => {
     const vitamins = targetSections(SAMPLE)[2].rows;
     expect(vitamins).toHaveLength(16);
-    expect(vitamins[0]).toMatchObject({ label: "Vitamin A", value: "900 µg", max: "Tối đa 3.000 µg" });
+    expect(vitamins[0]).toMatchObject({ label: "Vitamin A", value: "900 µg", max: "Tối đa 3.000 µg, chỉ tính từ thực phẩm bổ sung" });
     expect(vitamins[1]).toMatchObject({ label: "Vitamin C", value: "90 mg", max: "Tối đa 2.000 mg" });
     expect(vitamins[4]).toMatchObject({ label: "Vitamin K", value: "120 µg", max: undefined });
     expect(vitamins[5]).toMatchObject({ label: "Vitamin B1", value: "1,2 mg", max: undefined });
