@@ -244,5 +244,127 @@
     "sort": 2
    }
   ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 2009",
+  "name": "Sweet potato, yellow, raw [Khoai lang nghệ]",
+  "name_vi": "Khoai lang nghệ",
+  "category": "tinh_bot",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.078,
+   "b12": 0,
+   "b2": 0.061,
+   "b3": 0.557,
+   "b5": 0.8,
+   "b6": 0.209,
+   "calcium": 30,
+   "carbs": 27.9,
+   "copper": 0.151,
+   "energy": 119,
+   "fat": 0.3,
+   "fiber": 0.8,
+   "folate": 11,
+   "iron": 0.61,
+   "magnesium": 25,
+   "manganese": 0.258,
+   "phosphorus": 47,
+   "potassium": 337,
+   "protein": 1.2,
+   "selenium": 0.6,
+   "sodium": 55,
+   "vitamin_a": 122.5,
+   "vitamin_c": 2.4,
+   "vitamin_d": 0,
+   "vitamin_e": 0.26,
+   "vitamin_k": 1.8,
+   "water": 69.9,
+   "zinc": 0.3
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 củ vừa",
+    "grams": 150,
+    "sort": 1
+   },
+   {
+    "label_vi": "1 củ nhỏ",
+    "grams": 100,
+    "sort": 2
+   },
+   {
+    "label_vi": "1 lạng (100 g)",
+    "grams": 100,
+    "sort": 3
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 2009:khoai-mat-song",
+  "name": "Sweet potato, yellow, raw",
+  "name_vi": "Khoai mật",
+  "category": "tinh_bot",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "b1": 0.078,
+   "b12": 0,
+   "b2": 0.061,
+   "b3": 0.557,
+   "b5": 0.8,
+   "b6": 0.209,
+   "calcium": 30,
+   "carbs": 27.9,
+   "copper": 0.151,
+   "energy": 119,
+   "fat": 0.3,
+   "fiber": 0.8,
+   "folate": 11,
+   "iron": 0.61,
+   "magnesium": 25,
+   "manganese": 0.258,
+   "phosphorus": 47,
+   "potassium": 337,
+   "protein": 1.2,
+   "selenium": 0.6,
+   "sodium": 55,
+   "vitamin_a": 122.5,
+   "vitamin_c": 2.4,
+   "vitamin_d": 0,
+   "vitamin_e": 0.26,
+   "vitamin_k": 1.8,
+   "water": 69.9,
+   "zinc": 0.3
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 củ vừa",
+    "grams": 150,
+    "sort": 1
+   },
+   {
+    "label_vi": "1 củ nhỏ",
+    "grams": 100,
+    "sort": 2
+   },
+   {
+    "label_vi": "1 lạng (100 g)",
+    "grams": 100,
+    "sort": 3
+   }
+  ]
  }
 ]

@@ -1,12 +1,12 @@
 # Outlier check, 20/10/2026
 
-Data only: `docs/data/fix-outliers-2026-10-20.json` holds **4 full-row upserts** (Khoai tím and Khoai lang trắng, raw and boiled), applied on Hao's decision (section 2). No migration, no API or DB change was made.
+Data only: `docs/data/fix-outliers-2026-10-20.json` holds **6 full-row upserts** (Khoai tím and Khoai lang trắng, raw and boiled, plus Khoai lang nghệ and Khoai mật), applied on Hao's decision (section 2). No migration, no API or DB change was made.
 
 ## Result
 
 - **The 201 mg magnesium in Khoai lang is what the original NIN 2007 table prints**, so it is not a digitisation error. The scan therefore found **no clear data error**: no live row differs from its own source record *and* is an outlier. Every other flagged NIN row also equals its source.
-- **Hao decided to replace the sweet-potato micronutrients with USDA anyway** (raw FDC 168482, boiled FDC 168484), because the NIN print is almost certainly wrong for magnesium. That is the only change in this file (section 2). The rows keep `source = vn_nin` and their `source_id`, so the import updates the 4 existing rows and creates nothing.
-- 12 other rows in 8 groups are **doubtful** and need Hao's call (section 3). Khoai lang nghệ and Khoai mật were not in the swap and are unchanged.
+- **Hao decided to replace the sweet-potato micronutrients with USDA anyway** (raw FDC 168482, boiled FDC 168484), because the NIN print is almost certainly wrong for magnesium. The same swap was then extended to Khoai lang nghệ and Khoai mật (NIN 2009, raw FDC 168482), whose Mg, K and Na the 2007 table does not contain. That is the only change in this file (section 2). The rows keep `source = vn_nin` and their `source_id`, so the import updates the 6 existing rows and creates nothing.
+- 10 other rows in 7 groups are **doubtful** and need Hao's call (section 3).
 
 The live catalogue was read on 20/10/2026 from `GET /api/v1/foods` on lehongkhanh.vn: 1,278 foods (3 pages of 500; the count was 1,273 earlier today).
 
@@ -18,7 +18,7 @@ Source: *Bảng thành phần thực phẩm Việt Nam*, Viện Dinh dưỡng, N
 |---|---|---|---|---|---|
 | Khoai tím; Khoai lang trắng | 2008 "Khoai lang" (Sweet potato, white) | p.46 (printed 31) | Mg **201**, K 210, Na 31, Ca 34, Fe 1.00, P 49, Zn 0.20, Cu 260 µg, Mn 0.390, source code 1 | Mg 201, K 210 | **Source really says 201.** Replaced by USDA on Hao's decision (section 2). |
 | Khoai tím (luộc); Khoai lang trắng (luộc) | 2008002 | not in the 2007 table | no printed record | Mg 197.06, K 205.88 | Derived from 2008 (every value is 2008 × 0.98). Follows 2008; replaced by USDA boiled (section 2). |
-| Khoai lang nghệ; Khoai mật | 2009 "Khoai lang nghệ" (Sweet potato, yellow) | p.47 (printed 32) | Mg `-`, K `-`, Na `-` (not analysed). Printed: Ca 36, Fe 0.90, P 56, vit C 30 | Mg 68, K 107, Na 350 | **Cannot be verified against the 2007 table.** Mg, K and Na come only from NIN's online lookup (`viendinhduong.vn`, the snapshot in `food-research/vn_nin`). Not changed; see D3. |
+| Khoai lang nghệ; Khoai mật | 2009 "Khoai lang nghệ" (Sweet potato, yellow) | p.47 (printed 32) | Mg `-`, K `-`, Na `-` (not analysed). Printed: Ca 36, Fe 0.90, P 56, vit C 30 | Mg 68, K 107, Na 350 | **Cannot be verified against the 2007 table.** Mg, K and Na come only from NIN's online lookup (`viendinhduong.vn`, the snapshot in `food-research/vn_nin`). Replaced by USDA raw on Hao's decision (section 2). |
 
 Notes: the NIN online lookup is a later, partly revised dataset, not a copy of the print (for example it rescales Lá lốt, and it lowers calcium for Ốc nhồi and Ốc vặn). So a value that matches the lookup but not the print is "unverified", not "wrong". On 2008 the lookup matches the print for every micronutrient; it differs on energy (124 vs 119 kcal) and carbs (29.8 vs 28.5 g).
 
@@ -28,14 +28,14 @@ Khoai tím and Khoai lang trắng are **the same NIN record (2008)** with two na
 
 The NIN print says 201, so this is a **choice, not a correction of a typo**: Hao decided that USDA is the better reference for these rows. Mg is the loudest value, but selenium (7.1 vs 0.6 µg) and raw vitamin C (23 vs 2.4 mg) also differ a lot, so the whole micronutrient set comes from one source.
 
-**Source per row.** Raw rows (`NIN 2008:khoai-tim-song`, `NIN 2008:khoai-lang-trang-song`): USDA SR Legacy **FDC 168482** "Sweet potato, raw, unprepared". Boiled rows (`NIN 2008002:khoai-tim-luoc`, `NIN 2008002:khoai-lang-trang-luoc`): **FDC 168484** "Sweet potato, cooked, boiled, without skin". The brief named 168483 for boiled; 168483 is *baked in skin*, so 168484 was used (as agreed). The catalogue already uses 168483 and 168484 for "Khoai lang (nướng, cả vỏ)" and "Khoai lang (luộc, bỏ vỏ)".
+**Source per row.** Raw rows (`NIN 2008:khoai-tim-song`, `NIN 2008:khoai-lang-trang-song`): USDA SR Legacy **FDC 168482** "Sweet potato, raw, unprepared". Boiled rows (`NIN 2008002:khoai-tim-luoc`, `NIN 2008002:khoai-lang-trang-luoc`): **FDC 168484** "Sweet potato, cooked, boiled, without skin". Yellow-variety rows (`NIN 2009` Khoai lang nghệ, `NIN 2009:khoai-mat-song` Khoai mật): **FDC 168482** raw. The brief named 168483 for boiled; 168483 is *baked in skin*, so 168484 was used (as agreed). The catalogue already uses 168483 and 168484 for "Khoai lang (nướng, cả vỏ)" and "Khoai lang (luộc, bỏ vỏ)".
 
-**What was replaced.** 21 of the 22 counted micronutrients (calcium, copper, iron, magnesium, manganese, phosphorus, potassium, selenium, sodium, zinc, vitamins C, D, E, K, B1, B2, B3, B5, B6, folate, B12), rounded as the other import files are (3 significant figures). Where USDA's value equals the live one the number is simply unchanged: raw vitamin E, K, B5 and folate. Vitamin D and B12 did not exist on the live rows; USDA reports a measured 0 for both, so they are added as 0.
+**What was replaced.** 21 of the 22 counted micronutrients (calcium, copper, iron, magnesium, manganese, phosphorus, potassium, selenium, sodium, zinc, vitamins C, D, E, K, B1, B2, B3, B5, B6, folate, B12), rounded as the other import files are (3 significant figures). Where USDA's value equals the live one the number is simply unchanged: raw vitamin E, K, B5 and folate. Vitamin D and B12 did not exist on the live rows; USDA reports a measured 0 for both, so they are added as 0. The two yellow-variety rows had only 9 micronutrients, so they gain 11 more keys (zinc, copper, manganese, selenium, D, E, K, B5, B6, folate, B12) and now carry all 22.
 
 **What was kept, and one deliberate exception.**
-- **Vitamin A stays at NIN's 12.5 µg (raw) / 12.25 µg (boiled).** FDC 168482 is orange-fleshed sweet potato (709 µg RAE; boiled 787), which would overstate a white or purple sweet potato by about 60×. Say if Hao prefers USDA's value anyway.
+- **Vitamin A stays at NIN's value in every row** (12.5 µg raw / 12.25 µg boiled for white and purple; **122.5 µg for the yellow rows**). FDC 168482 is orange-fleshed sweet potato (709 µg RAE; boiled 787). Hao asked whether 709 fits the yellow variety: **it does not.** NIN measured β-carotene 1470 µg for Khoai lang nghệ (2007 table, p.47), which is 122.5 µg RAE; USDA's orange flesh has β-carotene 8509 µg, 5.8× more. For the white and purple rows the gap is about 60×. Say if Hao prefers USDA's value anyway.
 - **Energy, protein, carbs, fat, fiber, water and fatty acids stay NIN** (the brief asks for micronutrients only). So each row now mixes sources: USDA micros on NIN macros. NIN raw is 124 kcal, 29.8 g carbs, 68 g water; USDA raw is 86 kcal, 20.1 g carbs, 77 g water. This gap is not part of this change and is left for Hao.
-- `source`, `source_id`, `name`, `name_vi`, `category`, `brand` (null), `tip_vi` (null) and the portions are exactly as live, so the upsert hits the 4 existing rows. `source` is still `vn_nin` because the upsert key must not change.
+- `source`, `source_id`, `name`, `name_vi`, `category`, `brand` (null), `tip_vi` (null) and the portions are exactly as live, so the upsert hits the 6 existing rows. `source` is still `vn_nin` because the upsert key must not change.
 
 **Before / after** (per 100 g; identical for Khoai tím and Khoai lang trắng, which share one NIN record):
 
@@ -64,7 +64,29 @@ The NIN print says 201, so this is a **choice, not a correction of a typo**: Hao
 | Folate (µg) | 11 | 11 | 5.39 | 6 |
 | B12 (µg) | absent | 0 | absent | 0 |
 
-Rows changed: 4 (raw rows 17 values changed or added, boiled rows 20). Not in this file: Khoai lang nghệ and Khoai mật (`NIN 2009`, see D3), which share the family but were not part of the decision.
+**Yellow variety, before / after** (Khoai lang nghệ `NIN 2009` and Khoai mật `NIN 2009:khoai-mat-song`, identical values):
+
+| Nutrient | Before | After (FDC 168482) | Where the "before" came from |
+|---|---|---|---|
+| Magnesium (mg) | 68 | 25 | NIN online lookup only (2007 table: `-`) |
+| Potassium (mg) | 107 | 337 | NIN online lookup only (`-`) |
+| Sodium (mg) | 350 | 55 | NIN online lookup only (`-`) |
+| Calcium (mg) | 36 | 30 | 2007 table |
+| Iron (mg) | 0.9 | 0.61 | 2007 table |
+| Phosphorus (mg) | 56 | 47 | 2007 table |
+| Zinc, copper, manganese, selenium (mg, mg, mg, µg) | absent | 0.3, 0.151, 0.258, 0.6 | not in NIN |
+| Vitamin A (µg) | 122.5 | 122.5 (kept) | 2007 table (β-carotene 1470 µg) |
+| Vitamin C (mg) | 30 | 2.4 | 2007 table |
+| Vitamin D, B12 (µg) | absent | 0, 0 | not in NIN |
+| Vitamin E (mg), vitamin K (µg) | absent | 0.26, 1.8 | not in NIN |
+| B1 (mg) | 0.12 | 0.078 | 2007 table |
+| B2 (mg) | 0.05 | 0.061 | 2007 table |
+| B3 (mg) | 0.6 | 0.557 | 2007 table |
+| B5 (mg), B6 (mg), folate (µg) | absent | 0.8, 0.209, 11 | not in NIN |
+
+**One trade-off to know about on the yellow rows.** Seven of the replaced values (calcium 36, iron 0.9, phosphorus 56, vitamin C 30, B1 0.12, B2 0.05, B3 0.6) *are* printed in the 2007 table for this variety, so they were verified and are now overwritten by USDA's orange-fleshed values, most visibly vitamin C (30 vs 2.4 mg). Only magnesium, potassium and sodium were unverifiable. The brief asked for the USDA micronutrients, so all were replaced for one consistent source. If Hao prefers to keep the verified NIN values and replace only Mg, K and Na (and add the missing ones from USDA), that is a quick change.
+
+Rows changed: 6 (raw white and purple rows 17 values changed or added, boiled rows 20, yellow rows 21).
 
 ## 3. Whole-catalogue scan
 
@@ -74,15 +96,15 @@ Rows changed: 4 (raw rows 17 values changed or added, boiled rows 20). Not in th
 3. *Tier 2 (lower confidence):* non-USDA rows above 2× the group's 95th percentile (69 values in 46 rows). All were reviewed; they are mostly real extremes (fish sauce sodium, chili vitamin C, nuts). Only the shell-inclusive calcium values below are kept.
 4. *Print check:* every flagged NIN row was matched to its printed 2007 record by code and English name.
 
-Result: 19 flags in 18 rows in step 2. 10 of the groups below were doubtful: D1 and D2 (the 4 sweet-potato rows) were resolved by the swap in section 2, the other 8 groups (12 rows) remain open. The other flagged rows are legitimate (section 4).
+Result: 19 flags in 18 rows in step 2. 10 groups below were doubtful: D1, D2 and D3 (the 6 sweet-potato rows) were resolved by the swap in section 2, the other 7 groups (10 rows) remain open. The other flagged rows are legitimate (section 4).
 
-### Doubtful rows for Hao (D1 and D2 resolved in section 2; the rest not changed)
+### Doubtful rows for Hao (D1 to D3 resolved in section 2; the rest not changed)
 
 | # | Live row (source, source_id) | Nutrient | Live | Original NIN 2007 | Reference | Note |
 |---|---|---|---|---|---|---|
 | D1 | Khoai tím, Khoai lang trắng (vn_nin, `NIN 2008:khoai-tim-song`, `NIN 2008:khoai-lang-trang-song`) | Mg | 201 | 201 (p.46) | USDA raw 25 (8×) | Source-faithful. **Resolved: swapped to USDA (section 2).** |
 | D2 | Khoai tím (luộc), Khoai lang trắng (luộc) (`NIN 2008002:khoai-tim-luoc`, `NIN 2008002:khoai-lang-trang-luoc`) | Mg | 197.06 | derived from 2008 | USDA boiled 18 (11×) | Follows D1. **Resolved: swapped to USDA boiled (section 2).** |
-| D3 | Khoai lang nghệ (`NIN 2009`), Khoai mật (`NIN 2009:khoai-mat-song`) | Mg / K / Na | 68 / 107 / 350 | `-` / `-` / `-` (p.47) | USDA raw 25 / 337 / 55 | Not in the 2007 table. Na 350 is 6× USDA, K 107 is a third of USDA. Origin is the online lookup only. Same family as D1; the same USDA swap (FDC 168482) would apply if Hao wants it. |
+| D3 | Khoai lang nghệ (`NIN 2009`), Khoai mật (`NIN 2009:khoai-mat-song`) | Mg / K / Na | 68 / 107 / 350 | `-` / `-` / `-` (p.47) | USDA raw 25 / 337 / 55 | Not in the 2007 table. Na 350 is 6× USDA, K 107 is a third of USDA. Origin is the online lookup only. **Resolved: swapped to USDA raw (section 2).** |
 | D4 | Cơm dừa già (vn_nin, `NIN 3001`) | Fe, Zn | 30, 5 | 30, 5 (p.67) | USDA coconut meat raw Fe 2.43, Zn 1.1 (12×, 4.5×) | Source-faithful. Probably an error in the NIN table itself. |
 | D5 | Củ cái (khoai cái) (`NIN 2002`) | Zn | 11 | 11 (p.40) | USDA yam raw 0.24, taro 0.23 (~45×) | Source-faithful. |
 | D6 | Lá lốt (`NIN 4046`) | P | 651.53 | 980 (p.148) | USDA fresh herbs 48–66; leafy veg max 197 | The lookup is 0.665× the print for every mineral. P is implausible in both versions. |
@@ -120,11 +142,11 @@ go run ./cmd/importfoods --dry-run --file ../../docs/data/fix-outliers-2026-10-2
 ```
 === H1T MICRO Food Catalog Importer ===
 Mode: DRY RUN (No database changes will be saved)
-Loaded 4 food records from ../../docs/data/fix-outliers-2026-10-20.json
-Completeness Report: 100.0% average coverage of the 22 counted nutrients across 4 foods
+Loaded 6 food records from ../../docs/data/fix-outliers-2026-10-20.json
+Completeness Report: 100.0% average coverage of the 22 counted nutrients across 6 foods
 ```
 
-The dry run only parses the file and never opens the database. Separately checked against the live catalogue read of 20/10/2026: each of the 4 `source` + `source_id` pairs exists, and each record's `name`, `name_vi`, `category` and portions equal the live row, so the real run updates 4 rows and inserts none. The importer replaces the whole nutrient map and the portions on upsert, which is why every record carries the complete row.
+The dry run only parses the file and never opens the database. Separately checked against the live catalogue read of 20/10/2026: each of the 6 `source` + `source_id` pairs exists, and each record's `name_vi`, `category` and portions equal the live row (and its macros and vitamin A are unchanged), so the real run updates 6 rows and inserts none. The importer replaces the whole nutrient map and the portions on upsert, which is why every record carries the complete row.
 
 The real import, for Dong, from `apps/api` with `DATABASE_URL` set (upsert on `source` + `source_id`, safe to re-run):
 
