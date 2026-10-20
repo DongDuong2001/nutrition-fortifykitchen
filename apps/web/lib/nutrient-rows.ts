@@ -105,7 +105,7 @@ export function buildNutrientRows(data: MockDayData | null): Record<NutrientGrou
       formattedAmount = `${formatAmount(consumed, def.unit)} ${def.unit}`;
     }
 
-    // cc-67: the 22 micros are the published recommended amounts (VN 2016), no longer marked as reference values
+    // cc-73b: the micros are the published DRI amounts, not marked as reference values
     const isProvisional = def.targetSource === "coach-provisional";
 
     result[def.group].push({

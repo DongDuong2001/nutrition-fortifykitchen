@@ -148,7 +148,7 @@ export function EnergyTab() {
               </p>
             }
           />
-          <div role="img" aria-label="Trung bình so với mức kcal tối thiểu">
+          <div role="img" aria-label="Trung bình so với mục tiêu kcal">
             <HeroBar pct={kcal.min > 0 ? (averages.calories / kcal.min) * 100 : 0} />
           </div>
         </HeroCard>

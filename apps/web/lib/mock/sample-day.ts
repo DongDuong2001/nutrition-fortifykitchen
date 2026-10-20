@@ -356,7 +356,7 @@ export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
       displayValue: "1,8 / 2,3 mg",
       percentage: 78,
       isCoachRule: false,
-      targetSource: "vn2016",
+      targetSource: "dri",
     },
   ],
   vitamins: [
@@ -370,7 +370,7 @@ export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
       displayValue: "3,1 / 2,4 µg",
       percentage: 100,
       isCoachRule: false,
-      targetSource: "vn2016",
+      targetSource: "dri",
     },
     {
       key: "b2",
@@ -382,7 +382,7 @@ export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
       displayValue: "1,4 / 1,3 mg",
       percentage: 100,
       isCoachRule: false,
-      targetSource: "vn2016",
+      targetSource: "dri",
     },
     {
       key: "b3",
@@ -394,7 +394,7 @@ export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
       displayValue: "18 / 16 mg",
       percentage: 100,
       isCoachRule: false,
-      targetSource: "vn2016",
+      targetSource: "dri",
     },
     {
       key: "b6",
@@ -406,7 +406,7 @@ export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
       displayValue: "1,1 / 1,3 mg",
       percentage: 85,
       isCoachRule: false,
-      targetSource: "vn2016",
+      targetSource: "dri",
     },
     {
       key: "b5",
@@ -418,7 +418,7 @@ export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
       displayValue: "4,1 / 5 mg",
       percentage: 82,
       isCoachRule: false,
-      targetSource: "vn2016",
+      targetSource: "dri",
     },
     {
       key: "vitamin_a",
@@ -430,7 +430,7 @@ export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
       displayValue: "520 / 650 µg",
       percentage: 80,
       isCoachRule: false,
-      targetSource: "vn2016",
+      targetSource: "dri",
     },
     {
       key: "b1",
@@ -442,7 +442,7 @@ export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
       displayValue: "0,9 / 1,2 mg",
       percentage: 75,
       isCoachRule: false,
-      targetSource: "vn2016",
+      targetSource: "dri",
     },
     {
       key: "folate",
@@ -454,7 +454,7 @@ export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
       displayValue: "290 / 400 µg",
       percentage: 73,
       isCoachRule: false,
-      targetSource: "vn2016",
+      targetSource: "dri",
     },
     {
       key: "vitamin_k",
@@ -466,7 +466,7 @@ export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
       displayValue: "85 / 150 µg",
       percentage: 57,
       isCoachRule: false,
-      targetSource: "vn2016",
+      targetSource: "dri",
     },
     {
       key: "vitamin_e",
@@ -478,7 +478,7 @@ export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
       displayValue: "3,2 / 6,5 mg",
       percentage: 49,
       isCoachRule: false,
-      targetSource: "vn2016",
+      targetSource: "dri",
     },
     {
       key: "vitamin_c",
@@ -490,7 +490,7 @@ export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
       displayValue: "48 / 100 mg",
       percentage: 48,
       isCoachRule: false,
-      targetSource: "vn2016",
+      targetSource: "dri",
     },
     {
       key: "vitamin_d",
@@ -502,7 +502,7 @@ export const SAMPLE_DAY: MockDayData & { calories: { consumed: number } } = {
       displayValue: "2,1 / 15 µg",
       percentage: 14,
       isCoachRule: false,
-      targetSource: "vn2016",
+      targetSource: "dri",
     },
   ],
   microsSummary: {

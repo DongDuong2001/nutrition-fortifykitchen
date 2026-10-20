@@ -57,7 +57,7 @@ describe("Nutrient Catalogue & Null Handling", () => {
     const list = [
       { id: "water", consumed: 2000, targetMin: null, targetSource: "none" as const }, // no target
       { id: "caffeine", consumed: null, targetMin: null, targetSource: "none" as const }, // no target, null
-      { id: "vitamin_d", consumed: null, targetMin: 15, targetSource: "vn2016" as const }, // has target, null consumed
+      { id: "vitamin_d", consumed: null, targetMin: 15, targetSource: "dri" as const }, // has target, null consumed
       { id: "calcium", consumed: 331, targetMin: 1200, targetSource: "coach" as const }, // not reached (28%)
       { id: "zinc", consumed: 12.4, targetMin: 12, targetSource: "coach" as const }, // reached (100%+)
       { id: "iron", consumed: 11, targetMin: 8, targetSource: "coach" as const }, // reached (100%+)
@@ -72,7 +72,7 @@ describe("Nutrient Catalogue & Null Handling", () => {
 
   it("cc-67: 21 of the 22 micros are VN 2016 recommended amounts, not provisional (sodium keeps the coach's formula); fiber still is", () => {
     for (const id of ["vitamin_d", "b12", "copper", "manganese", "potassium", "calcium", "magnesium", "iron", "zinc"]) {
-      expect(getNutrientDefinition(id)?.targetSource, id).toBe("vn2016");
+      expect(getNutrientDefinition(id)?.targetSource, id).toBe("dri");
     }
     expect(getNutrientDefinition("sodium")?.targetSource).toBe("coach");
     expect(getNutrientDefinition("fiber")?.targetSource).toBe("coach-provisional");

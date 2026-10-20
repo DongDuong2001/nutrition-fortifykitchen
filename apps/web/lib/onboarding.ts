@@ -51,10 +51,10 @@ export const DEFAULT_DRAFT: SetupDraft = {
 };
 
 const GOAL_COPY: Record<GoalType, { name: string; note: string; rule: string }> = {
-  build: { name: "Tăng cơ", note: "Ăn dư một chút để lên cơ", rule: "35–40 kcal / kg" },
-  maintain: { name: "Giữ cân", note: "Duy trì cân nặng hiện tại", rule: "30–35 kcal / kg" },
-  cut: { name: "Giảm mỡ", note: "Thâm hụt vừa phải, giữ cơ", rule: "25–30 kcal / kg" },
-  deep_cut: { name: "Giảm mỡ nhanh", note: "Ngắn hạn — tối đa 4–6 tuần", rule: "20–25 kcal / kg" },
+  build: { name: "Tăng cơ", note: "Ăn dư một chút để lên cơ", rule: "40 kcal / kg" },
+  maintain: { name: "Giữ cân", note: "Duy trì cân nặng hiện tại", rule: "35 kcal / kg" },
+  cut: { name: "Giảm mỡ", note: "Thâm hụt vừa phải, giữ cơ", rule: "30 kcal / kg" },
+  deep_cut: { name: "Giảm mỡ nhanh", note: "Ngắn hạn — tối đa 4–6 tuần", rule: "25 kcal / kg" },
 };
 
 const GOAL_ORDER: GoalType[] = ["build", "maintain", "cut", "deep_cut"];
@@ -139,11 +139,11 @@ export function dailyTargetRows(weightKg: number | null, sex: SexType, goal: Goa
       value: `${formatRange(targets.calories.min, targets.calories.max)} kcal`,
     },
     {
-      label: "Đạm (1,6–2,2 g/kg)",
+      label: "Đạm (2,2 g/kg)",
       value: `${formatRange(targets.protein.min, targets.protein.max)} g`,
     },
     {
-      label: "Chất béo (0,5–1 g/kg)",
+      label: "Chất béo (1 g/kg)",
       value: `${formatRange(targets.fat.min, targets.fat.max)} g`,
     },
   ];

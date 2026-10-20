@@ -14,7 +14,7 @@ import { calculateTargets } from "../targets";
 import type { DayTotals } from "../day-totals";
 
 const TODAY = "2026-10-12"; // Monday
-const TARGETS = calculateTargets({ sex: "male", weightKg: 65, goal: "maintain" }); // kcal 1.950–2.275, protein 104–143
+const TARGETS = calculateTargets({ sex: "male", weightKg: 65, goal: "maintain" }); // cc-73b: kcal 2.275, protein 143, calcium 1.000, iron 8 (a man of 25, the DRI)
 
 /** A logged day; any nutrient not given is null (unknown), never 0. */
 function day(
@@ -133,24 +133,24 @@ describe("periodAverages: logged days only, today and null skipped, never 0", ()
   });
 });
 
-describe("periodTargetDays: above the range is đạt, null days are not counted", () => {
+describe("periodTargetDays: above the target is đạt, null days are not counted", () => {
   const days = [
-    day("2026-10-06", { calories: 2380, protein: 118, carbs: 280, fat: 60, nutrients: { calcium: 1600, iron: 9 } }), // above max: đạt
-    day("2026-10-07", { calories: 1950, protein: 104, carbs: 250, fat: 60, nutrients: { calcium: 1200, iron: 7 } }), // exactly min: đạt
-    day("2026-10-08", { calories: 1640, protein: 94, carbs: 210, fat: 46, nutrients: { calcium: 700, iron: null } }), // below (calcium min 800 for a man of 20–29, VN 2016)
+    day("2026-10-06", { calories: 2380, protein: 150, carbs: 280, fat: 60, nutrients: { calcium: 1600, iron: 9 } }), // above the target: đạt
+    day("2026-10-07", { calories: 2275, protein: 143, carbs: 250, fat: 60, nutrients: { calcium: 1000, iron: 7 } }), // exactly the target: đạt (iron 7 is under 8)
+    day("2026-10-08", { calories: 1640, protein: 94, carbs: 210, fat: 46, nutrients: { calcium: 700, iron: null } }), // below (calcium 1.000 for a man of 19–30, DRI)
     empty("2026-10-09"),
     day(TODAY, { calories: 3000, protein: 200, carbs: 300, fat: 60, nutrients: { calcium: 2000, iron: 20 } }), // today: not counted
   ];
   const result = periodTargetDays(days, TODAY, TARGETS);
 
-  it("counts kcal and protein days at or above the minimum", () => {
+  it("counts kcal and protein days at or above the target", () => {
     expect(result.calories).toEqual({ met: 2, of: 3 });
     expect(result.protein).toEqual({ met: 2, of: 3 });
   });
 
   it("counts a nutrient only on days where it is known", () => {
     expect(result.nutrients.calcium).toEqual({ met: 2, of: 3 });
-    expect(result.nutrients.iron).toEqual({ met: 1, of: 2 }); // iron min 7,9: 9 yes, 7 no, null skipped
+    expect(result.nutrients.iron).toEqual({ met: 1, of: 2 }); // iron 8: 9 yes, 7 no, null skipped
   });
 
   it("has of = 0 for a nutrient no day knows", () => {

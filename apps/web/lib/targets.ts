@@ -3,7 +3,7 @@ import { rdaTargets } from "./rda";
 /** Iron for a woman in or near the period: the coach rule (mg a day) */
 const PERIOD_IRON_MG = 28;
 
-/** The age the micro targets use until the profile says one (the 20–29 band) */
+/** The age the micro targets use until the profile says one (the 19–30 stage) */
 const DEFAULT_AGE = 25;
 
 export type GoalType = "build" | "maintain" | "cut" | "deep_cut";
@@ -67,7 +67,7 @@ export interface UserProfileForTargets {
   weightKg: number;
   goal: GoalType;
   trainingMinutes?: number;
-  /** Age in years, for the recommended amounts of the 22 micros (lib/rda); 25 when not known */
+  /** Age in years, for the DRI amounts of the 21 micros (lib/rda); 25 when not known */
   age?: number;
   /** Women only: in or near the period. Iron is the coach's 28 mg then (the one micro the period changes) */
   isPeriod?: boolean;
@@ -95,7 +95,7 @@ export interface CompleteTargets {
 
 /**
  * Salt: 4–6 g/day + 1–1.5 g per 20 min of training (the coach's rule), 1 g salt = 393 mg sodium, rounded to 10 mg.
- * TODO(cc-67): VN 2016 gives 2.000 mg as the dietary goal; whether it replaces this formula is Hao's decision (OPEN_QUESTIONS, cc-67 sodium).
+ * Stays a range and stays the coach's formula (Hao 20/10), not the DRI's 1.500 mg.
  */
 export function calculateSodiumTarget(trainingMinutes = 0): TargetRange {
   const trainingIntervals = trainingMinutes / 20;
@@ -108,62 +108,43 @@ export function calculateSodiumTarget(trainingMinutes = 0): TargetRange {
   };
 }
 
+const one = (value: number): TargetRange => ({ min: value, max: value });
+
+/** kcal per kg, the upper end of the coach's range (Hao 20/10): one number, not a range. */
+export const KCAL_PER_KG: Record<GoalType, number> = { build: 40, maintain: 35, cut: 30, deep_cut: 25 };
+
 export function calculateEnergyTarget(weightKg: number, goal: GoalType): TargetRange {
-  switch (goal) {
-    case "build": // Tăng cơ
-      return { min: Math.round(weightKg * 35), max: Math.round(weightKg * 40) };
-    case "maintain": // Giữ cân
-      return { min: Math.round(weightKg * 30), max: Math.round(weightKg * 35) };
-    case "cut": // Giảm mỡ
-      return { min: Math.round(weightKg * 25), max: Math.round(weightKg * 30) };
-    case "deep_cut": // Giảm mỡ nhanh
-      return { min: Math.round(weightKg * 20), max: Math.round(weightKg * 25) };
-  }
+  return one(Math.round(weightKg * KCAL_PER_KG[goal]));
 }
 
+/** 2.2 g/kg, the upper end of the coach's 1.6–2.2. */
+export const PROTEIN_G_PER_KG = 2.2;
+/** 1.0 g/kg, the upper end of the coach's 0.5–1.0. */
+export const FAT_G_PER_KG = 1.0;
+
 export function calculateProteinTarget(weightKg: number): TargetRange {
-  return {
-    min: Math.round(weightKg * 1.6),
-    max: Math.round(weightKg * 2.2),
-  };
+  return one(Math.round(weightKg * PROTEIN_G_PER_KG));
 }
 
 export function calculateFatTarget(weightKg: number): TargetRange {
-  return {
-    // 0.5 g/kg: for 65 kg this is 32.5 g, standard coach display rounds up to 33 g
-    min: Math.ceil(weightKg * 0.5),
-    max: Math.round(weightKg * 1.0),
-  };
+  return one(Math.round(weightKg * FAT_G_PER_KG));
 }
 
-export function calculateCarbTarget(caloriesMin: number, proteinMid: number, fatMid: number): TargetRange {
-  // Coach remainder formula: (energy - protein mid * 4 - fat mid * 9) / 4
-  const carbGrams = Math.round((caloriesMin - proteinMid * 4 - fatMid * 9) / 4);
-  return {
-    min: carbGrams,
-    max: carbGrams,
-  };
+export function calculateCarbTarget(energyKcal: number, proteinGrams: number, fatGrams: number): TargetRange {
+  // Coach remainder formula: (energy - protein * 4 - fat * 9) / 4, from the upper protein and fat
+  return one(Math.round((energyKcal - proteinGrams * 4 - fatGrams * 9) / 4));
 }
 
-/**
- * PROVISIONAL: 14 g per 1000 kcal, kept within men 30–40 g, women 20–30 g.
- */
-export function calculateFiberTarget(caloriesMin: number, sex: SexType): TargetRange {
-  const rawFiber = Math.round((caloriesMin / 1000) * 14);
-  if (sex === "male") {
-    return {
-      min: Math.max(30, Math.min(40, rawFiber)),
-      max: 40,
-    };
-  }
-  return {
-    min: Math.max(20, Math.min(30, rawFiber)),
-    max: 30,
-  };
+/** Fibre is 14 g per 1,000 kcal of the day's energy (provisional), at most 40 g for men and 30 g for women. */
+export const FIBER_G_PER_1000_KCAL = 14;
+export const FIBER_MAX_G: Record<SexType, number> = { male: 40, female: 30 };
+
+export function calculateFiberTarget(energyKcal: number, sex: SexType): TargetRange {
+  return one(Math.min(FIBER_MAX_G[sex], Math.round((energyKcal / 1000) * FIBER_G_PER_1000_KCAL)));
 }
 
 /**
- * PROVISIONAL: Training fast carbs 30–45 g * trainingMinutes / 60.
+ * PROVISIONAL: Training fast carbs 30–45 g * trainingMinutes / 60. Stays a range (Hao 20/10).
  */
 export function calculateFastCarbsTarget(trainingMinutes: number): TargetRange {
   if (trainingMinutes <= 0) {
@@ -268,20 +249,18 @@ export function calculateTargets(profile: UserProfileForTargets): CompleteTarget
   } else {
     protein = calculateProteinTarget(profile.weightKg);
     fat = calculateFatTarget(profile.weightKg);
-    const proteinMid = (protein.min + protein.max) / 2;
-    const fatMid = (profile.weightKg * 0.5 + profile.weightKg * 1.0) / 2;
-    carbs = calculateCarbTarget(calories.min, proteinMid, fatMid);
+    carbs = calculateCarbTarget(energyKcal, protein.min, fat.min);
   }
 
   const trainingMinutes = profile.trainingMinutes ?? 0;
-  const fiber = calculateFiberTarget(calories.min, profile.sex);
+  const fiber = calculateFiberTarget(energyKcal, profile.sex);
   const fastCarbs = calculateFastCarbsTarget(trainingMinutes);
 
   return {
-    // cc-67: 21 of the 22 vitamins and minerals are the recommended amounts for this sex and age (lib/rda), whatever the weight or training
+    // cc-73b: 21 of the 22 vitamins and minerals are the US DRI amounts for this sex and age (lib/rda), whatever the weight or training
     ...rdaTargets(profile.sex, profile.age ?? DEFAULT_AGE),
     sodium: calculateSodiumTarget(trainingMinutes),
-    // TODO(cc-67): iron in the period stays the coach's 28 mg, not VN 2016's amount for the age; Hao decides (OPEN_QUESTIONS, cc-67 period iron)
+    // Iron in the period is the coach's 28 mg, not the DRI amount for the age (Hao 20/10)
     ...(profile.sex === "female" && profile.isPeriod ? { iron: { min: PERIOD_IRON_MG, max: PERIOD_IRON_MG } } : {}),
     calories,
     protein,

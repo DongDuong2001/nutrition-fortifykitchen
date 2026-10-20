@@ -64,6 +64,7 @@ func almostEqual(a, b *float64) bool {
 
 func TestSharedPeriodVectors(t *testing.T) {
 	candidates := []string{
+		filepath.Join("..", "..", "..", "..", "packages", "vectors", "period.json"),
 		filepath.Join("..", "..", "packages", "vectors", "period.json"),
 		filepath.Join("..", "..", "..", "packages", "vectors", "period.json"),
 		filepath.Join("packages", "vectors", "period.json"),

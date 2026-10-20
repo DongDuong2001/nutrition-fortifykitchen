@@ -270,16 +270,16 @@
       },
       "targetDaysOutput": {
         "calories": {
-          "met": 2,
+          "met": 0,
           "of": 4
         },
         "protein": {
-          "met": 4,
+          "met": 1,
           "of": 4
         },
         "nutrients": {
           "b1": {
-            "met": 2,
+            "met": 3,
             "of": 4
           },
           "b2": {
@@ -327,7 +327,7 @@
             "of": 0
           },
           "calcium": {
-            "met": 4,
+            "met": 3,
             "of": 4
           },
           "copper": {
@@ -474,7 +474,7 @@
       },
       "targetDaysOutput": {
         "calories": {
-          "met": 1,
+          "met": 0,
           "of": 2
         },
         "protein": {

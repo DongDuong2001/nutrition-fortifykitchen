@@ -206,14 +206,14 @@ describe("Training calculations (lib/training.ts)", () => {
       const tips = getRestDayTips(targetsFor(SAMPLE_PROFILE));
       expect(tips).toHaveLength(3);
       expect(tips[0].text).toBe("Ngủ đủ 7–9 tiếng");
-      expect(tips[1].text).toBe("Giữ mức đạm 104–143 g");
-      expect(tips[2].text).toBe("Năng lượng giữ 1.950–2.275 kcal");
+      expect(tips[1].text).toBe("Giữ mức đạm 143 g");
+      expect(tips[2].text).toBe("Năng lượng giữ 2.275 kcal");
     });
 
     it("uses the profile's own targets, not the 65 kg sample", () => {
       const heavier = getRestDayTips(targetsFor({ ...SAMPLE_PROFILE, weightKg: 80 }));
-      expect(heavier[1].text).not.toBe("Giữ mức đạm 104–143 g");
-      expect(heavier[2].text).not.toBe("Năng lượng giữ 1.950–2.275 kcal");
+      expect(heavier[1].text).not.toBe("Giữ mức đạm 143 g");
+      expect(heavier[2].text).not.toBe("Năng lượng giữ 2.275 kcal");
     });
   });
 

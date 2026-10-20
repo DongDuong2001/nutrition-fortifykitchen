@@ -10,6 +10,7 @@ import {
 } from "./targets";
 import { DRAFT_KEY, goalName, readDraft, validateSetupDraft, type SetupDraft } from "./onboarding";
 import { formatAmount } from "./format";
+import { applyCustomTargets, CUSTOM_TARGETS_ENABLED, parseCustomTargets, type CustomTargets } from "./custom-targets";
 import { ageOf } from "./rda";
 import type { MockDayData, MockMacroStat, MockMicroStat } from "./mock/sample-day";
 import { PROFILE_KEY, accountStorage } from "./storage-keys";
@@ -23,7 +24,7 @@ export interface Profile extends CoachingState {
   birthYear: number;
   weightKg: number;
   goal: GoalType;
-  /** Women only: iron target 28 mg (the coach rule) instead of the VN 2016 amount for sex and age. Always false for men (see normaliseProfile). */
+  /** Women only: iron target 28 mg (the coach rule) instead of the DRI amount for sex and age. Always false for men (see normaliseProfile). */
   periodMode: boolean;
   trainingMinutesDefault: number;
   /** Optional name shown on Cài đặt. "" means not set. */
@@ -33,6 +34,8 @@ export interface Profile extends CoachingState {
   macroRatios?: MacroRatios;
   macroFixed?: MacroFixedGrams;
   customEnergyKcal?: number;
+  /** cc-73b: a custom daily target per vitamin or mineral (lib/custom-targets). Read only while the flag is on. */
+  customTargets?: CustomTargets;
 }
 
 // The sample-day user. Used when nothing is saved and no setup has started.
@@ -112,6 +115,7 @@ export function parseStoredProfile(raw: string | null, currentYear: number): Pro
         ? (stored.macroFixed as MacroFixedGrams)
         : undefined,
     customEnergyKcal: typeof stored.customEnergyKcal === "number" ? stored.customEnergyKcal : undefined,
+    customTargets: parseCustomTargets(stored.customTargets),
     // Role, Level, coach: a profile saved before they existed loads as user, Level 0, no coach
     ...normaliseCoaching(stored),
   };
@@ -150,7 +154,7 @@ export function loadProfile(currentYear: number): Profile {
 
 /** The profile's targets on a day of `trainingMinutes` (lib/training-minutes); the Hồ sơ default when not given. */
 export function targetsFor(profile: Profile, trainingMinutes = profile.trainingMinutesDefault): CompleteTargets {
-  return calculateTargets({
+  const targets = calculateTargets({
     sex: profile.sex,
     weightKg: profile.weightKg,
     goal: profile.goal,
@@ -162,6 +166,7 @@ export function targetsFor(profile: Profile, trainingMinutes = profile.trainingM
     macroFixed: profile.macroFixed,
     customEnergyKcal: profile.customEnergyKcal,
   });
+  return CUSTOM_TARGETS_ENABLED ? applyCustomTargets(targets, profile.customTargets) : targets;
 }
 
 /** "1.950–2.275 kcal", or "28 mg" when the target is one value. */

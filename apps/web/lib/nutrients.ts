@@ -2,7 +2,7 @@ import { getLevel, type NutrientLevel } from "./levels";
 
 export type NutrientGroup = "general" | "carbs" | "lipids" | "protein" | "vitamins" | "minerals";
 
-export type TargetSource = "coach" | "coach-provisional" | "vn2016" | "none";
+export type TargetSource = "coach" | "coach-provisional" | "dri" | "none";
 
 export type NutrientValueSource = "usda" | "cnf" | "vn-fct" | "custom";
 
@@ -73,30 +73,30 @@ const CATALOG: Omit<NutrientDefinition, "name">[] = [
   { id: "valine", nameVi: "Valine", nameEn: "Valine", unit: "g", group: "protein", depth: 1, parentId: "protein", targetSource: "none" },
 
   // 5. Vitamin (12)
-  { id: "b1", nameVi: "Vitamin B1", nameEn: "Vitamin B1", unit: "mg", group: "vitamins", depth: 0, targetSource: "vn2016" },
-  { id: "b2", nameVi: "Vitamin B2", nameEn: "Vitamin B2", unit: "mg", group: "vitamins", depth: 0, targetSource: "vn2016" },
-  { id: "b3", nameVi: "Vitamin B3", nameEn: "Vitamin B3", unit: "mg", group: "vitamins", depth: 0, targetSource: "vn2016" },
-  { id: "b5", nameVi: "Vitamin B5", nameEn: "Vitamin B5", unit: "mg", group: "vitamins", depth: 0, targetSource: "vn2016" },
-  { id: "b6", nameVi: "Vitamin B6", nameEn: "Vitamin B6", unit: "mg", group: "vitamins", depth: 0, targetSource: "vn2016" },
-  { id: "folate", nameVi: "Vitamin B9", nameEn: "Folate", unit: "µg", group: "vitamins", depth: 0, targetSource: "vn2016" },
-  { id: "b12", nameVi: "Vitamin B12", nameEn: "Vitamin B12", unit: "µg", group: "vitamins", depth: 0, targetSource: "vn2016" },
-  { id: "vitamin_a", nameVi: "Vitamin A", nameEn: "Vitamin A", unit: "µg", group: "vitamins", depth: 0, targetSource: "vn2016" },
-  { id: "vitamin_c", nameVi: "Vitamin C", nameEn: "Vitamin C", unit: "mg", group: "vitamins", depth: 0, targetSource: "vn2016" },
-  { id: "vitamin_d", nameVi: "Vitamin D", nameEn: "Vitamin D", unit: "µg", group: "vitamins", depth: 0, targetSource: "vn2016" },
-  { id: "vitamin_e", nameVi: "Vitamin E", nameEn: "Vitamin E", unit: "mg", group: "vitamins", depth: 0, targetSource: "vn2016" },
-  { id: "vitamin_k", nameVi: "Vitamin K", nameEn: "Vitamin K", unit: "µg", group: "vitamins", depth: 0, targetSource: "vn2016" },
+  { id: "b1", nameVi: "Vitamin B1", nameEn: "Vitamin B1", unit: "mg", group: "vitamins", depth: 0, targetSource: "dri" },
+  { id: "b2", nameVi: "Vitamin B2", nameEn: "Vitamin B2", unit: "mg", group: "vitamins", depth: 0, targetSource: "dri" },
+  { id: "b3", nameVi: "Vitamin B3", nameEn: "Vitamin B3", unit: "mg", group: "vitamins", depth: 0, targetSource: "dri" },
+  { id: "b5", nameVi: "Vitamin B5", nameEn: "Vitamin B5", unit: "mg", group: "vitamins", depth: 0, targetSource: "dri" },
+  { id: "b6", nameVi: "Vitamin B6", nameEn: "Vitamin B6", unit: "mg", group: "vitamins", depth: 0, targetSource: "dri" },
+  { id: "folate", nameVi: "Vitamin B9", nameEn: "Folate", unit: "µg", group: "vitamins", depth: 0, targetSource: "dri" },
+  { id: "b12", nameVi: "Vitamin B12", nameEn: "Vitamin B12", unit: "µg", group: "vitamins", depth: 0, targetSource: "dri" },
+  { id: "vitamin_a", nameVi: "Vitamin A", nameEn: "Vitamin A", unit: "µg", group: "vitamins", depth: 0, targetSource: "dri" },
+  { id: "vitamin_c", nameVi: "Vitamin C", nameEn: "Vitamin C", unit: "mg", group: "vitamins", depth: 0, targetSource: "dri" },
+  { id: "vitamin_d", nameVi: "Vitamin D", nameEn: "Vitamin D", unit: "µg", group: "vitamins", depth: 0, targetSource: "dri" },
+  { id: "vitamin_e", nameVi: "Vitamin E", nameEn: "Vitamin E", unit: "mg", group: "vitamins", depth: 0, targetSource: "dri" },
+  { id: "vitamin_k", nameVi: "Vitamin K", nameEn: "Vitamin K", unit: "µg", group: "vitamins", depth: 0, targetSource: "dri" },
 
   // 6. Minerals (10)
-  { id: "calcium", nameVi: "Canxi", nameEn: "Calcium", unit: "mg", group: "minerals", depth: 0, targetSource: "vn2016" },
-  { id: "copper", nameVi: "Đồng", nameEn: "Copper", unit: "mg", group: "minerals", depth: 0, targetSource: "vn2016" },
-  { id: "iron", nameVi: "Sắt", nameEn: "Iron", unit: "mg", group: "minerals", depth: 0, targetSource: "vn2016" },
-  { id: "magnesium", nameVi: "Magie", nameEn: "Magnesium", unit: "mg", group: "minerals", depth: 0, targetSource: "vn2016" },
-  { id: "manganese", nameVi: "Mangan", nameEn: "Manganese", unit: "mg", group: "minerals", depth: 0, targetSource: "vn2016" },
-  { id: "phosphorus", nameVi: "Phốt pho", nameEn: "Phosphorus", unit: "mg", group: "minerals", depth: 0, targetSource: "vn2016" },
-  { id: "potassium", nameVi: "Kali", nameEn: "Potassium", unit: "mg", group: "minerals", depth: 0, targetSource: "vn2016" },
-  { id: "selenium", nameVi: "Selen", nameEn: "Selenium", unit: "µg", group: "minerals", depth: 0, targetSource: "vn2016" },
+  { id: "calcium", nameVi: "Canxi", nameEn: "Calcium", unit: "mg", group: "minerals", depth: 0, targetSource: "dri" },
+  { id: "copper", nameVi: "Đồng", nameEn: "Copper", unit: "mg", group: "minerals", depth: 0, targetSource: "dri" },
+  { id: "iron", nameVi: "Sắt", nameEn: "Iron", unit: "mg", group: "minerals", depth: 0, targetSource: "dri" },
+  { id: "magnesium", nameVi: "Magie", nameEn: "Magnesium", unit: "mg", group: "minerals", depth: 0, targetSource: "dri" },
+  { id: "manganese", nameVi: "Mangan", nameEn: "Manganese", unit: "mg", group: "minerals", depth: 0, targetSource: "dri" },
+  { id: "phosphorus", nameVi: "Phốt pho", nameEn: "Phosphorus", unit: "mg", group: "minerals", depth: 0, targetSource: "dri" },
+  { id: "potassium", nameVi: "Kali", nameEn: "Potassium", unit: "mg", group: "minerals", depth: 0, targetSource: "dri" },
+  { id: "selenium", nameVi: "Selen", nameEn: "Selenium", unit: "µg", group: "minerals", depth: 0, targetSource: "dri" },
   { id: "sodium", nameVi: "Natri", nameEn: "Sodium", unit: "mg", group: "minerals", depth: 0, targetSource: "coach" },
-  { id: "zinc", nameVi: "Kẽm", nameEn: "Zinc", unit: "mg", group: "minerals", depth: 0, targetSource: "vn2016" },
+  { id: "zinc", nameVi: "Kẽm", nameEn: "Zinc", unit: "mg", group: "minerals", depth: 0, targetSource: "dri" },
 ];
 
 /** Minerals and vitamins show their English name, everything else its Vietnamese name. */
