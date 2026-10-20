@@ -51,7 +51,7 @@ const tick = () => {
     kcal: hero ? (hero.querySelector('span.font-display') || hero).textContent : null,
     tray: tray ? tray.textContent : null,
     rise: document.querySelectorAll('.m-row-enter').length,
-    bar: (() => { const b = [...document.querySelectorAll('[aria-label="Kcal so với mục tiêu ngày"]')].find((e) => visible(e) && !e.closest('[aria-hidden="true"]')); const f = b && (b.querySelector('[style*="transform"]') || b.firstElementChild); return f ? f.style.transform || getComputedStyle(f).transform : null; })(),
+    bar: (() => { const b = [...document.querySelectorAll('[aria-label="Kcal so với mục tiêu ngày"]')].find((e) => visible(e) && !e.closest('[aria-hidden="true"]')); const f = b && (b.querySelector('[style*="transform"]') || b.firstElementChild); return f ? getComputedStyle(f).transform : null; })(),
     meal,
     path: location.pathname,
   });

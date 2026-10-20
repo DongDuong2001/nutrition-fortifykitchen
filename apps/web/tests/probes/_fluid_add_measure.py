@@ -68,7 +68,7 @@ RECORDER_JS = """
     for (const el of document.querySelectorAll('[aria-label="Kcal so với mục tiêu ngày"]')) {
       if (visible(el) && !el.closest('[aria-hidden="true"]')) {
         const fill = el.querySelector('[style*="transform"]') || el.firstElementChild;
-        return fill ? fill.style.transform || getComputedStyle(fill).transform : null;
+        return fill ? getComputedStyle(fill).transform : null;
       }
     }
     return null;
@@ -173,12 +173,14 @@ async def blank_ratios(page, frames):
     return await page.evaluate(BLANK_JS, [f[1] for f in frames])
 
 
-async def write_strip(page, path, title, frames, blanks, t0, max_frames=14):
-    """A filmstrip PNG: evenly thinned frames from the tap, each labelled with ms since the tap; blank frames outlined red."""
-    if not frames:
+async def write_strip(page, path, title, frames, blanks, t0, max_frames=14, window_ms=450):
+    """A filmstrip PNG: the frames from just before the tap to window_ms after it (the motion), thinned evenly to at most max_frames,
+    each labelled with ms since the tap; blank frames outlined red."""
+    keep = [i for i, f in enumerate(frames) if -60 <= f[0] - t0 <= window_ms]
+    if not keep:
         return
-    step = max(1, len(frames) // max_frames)
-    picked = list(range(0, len(frames), step))[:max_frames]
+    step = max(1, -(-len(keep) // max_frames))
+    picked = keep[::step][:max_frames]
     cells = []
     for i in picked:
         ms = round(frames[i][0] - t0)
