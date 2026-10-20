@@ -186,7 +186,7 @@ export function energyAttention(input: {
 }): AttentionRow[] {
   const { days, targets, todayIso, length } = input;
   const rows = [
-    underDaysRow({ days, key: "calories", min: targets.calories.min, title: "Chưa đạt kcal tối thiểu", unit: "kcal", todayIso, length }),
+    underDaysRow({ days, key: "calories", min: targets.calories.min, title: "Chưa đạt mục tiêu kcal", unit: "kcal", todayIso, length }),
     underDaysRow({ days, key: "protein", min: targets.protein.min, title: "Chưa đạt mục tiêu Đạm", unit: "g", todayIso, length }),
     underDaysRow({ days, key: "fiber", min: targets.fiber.min, title: "Chưa đạt mục tiêu Chất xơ", unit: "g", todayIso, length }),
   ];

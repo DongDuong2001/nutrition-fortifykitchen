@@ -2,7 +2,7 @@
 
 - Khám phá: Món giàu vi chất is the first section under the chips, a snapping horizontal carousel of coloured
   "Giàu <chất>" tiles in Saira; Gần đây and Yêu thích are carousels (or a one-line empty state); no horizontal scroll
-- Cài đặt: the profile card is the one dark card, with the targets in Saira ("1.950–2.275 kcal", "đạm 104–143 g");
+- Cài đặt: the profile card is the one dark card, with the targets in Saira ("2.275 kcal", "đạm 143 g");
   rows have icons; the danger zone is last and red; Pro is not a second dark card
 Screenshots: .screenshots/cc2-23-*.png
 Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/cc2_23.py
@@ -99,7 +99,7 @@ def settings(browser, size_name, size):
     bg = hero.evaluate("e => getComputedStyle(e).backgroundColor")
     check(bg == "rgb(26, 28, 34)", f"{w}: the profile card is the dark surface ({bg})")
     t = squash(hero.inner_text())
-    check(re.search(r"\d\.\d{3}–\d\.\d{3} kcal", t) is not None and re.search(r"đạm \d+–\d+ g", t) is not None, f"{w}: targets in the card ({t!r})")
+    check(re.search(r"\d\.\d{3} kcal", t) is not None and re.search(r"đạm \d+ g", t) is not None, f"{w}: targets in the card ({t!r})")
     big = hero.locator("span", has_text=re.compile(r"kcal$")).last
     check("saira" in big.evaluate("e => getComputedStyle(e).fontFamily").lower(), f"{w}: targets are Saira")
     dark = pg.evaluate(

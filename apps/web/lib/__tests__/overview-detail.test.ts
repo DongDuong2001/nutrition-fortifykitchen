@@ -95,10 +95,10 @@ describe("bestWorstDays", () => {
 });
 
 describe("energyAttention", () => {
-  it("kcal and đạm days under the minimum, then fibre; at most three rows, facts only", () => {
-    const days = [day("2026-10-07", 1800, 90), day("2026-10-08", 2300, 140), day("2026-10-10", 1700, 95), day("2026-10-12", 500, 20)];
+  it("kcal and đạm days under the target, then fibre; at most three rows, facts only", () => {
+    const days = [day("2026-10-07", 1800, 90), day("2026-10-08", 2300, 150), day("2026-10-10", 1700, 95), day("2026-10-12", 500, 20)];
     const rows = energyAttention({ days, targets: TARGETS, todayIso: TODAY, length: 7 });
-    expect(rows[0]).toMatchObject({ title: "Chưa đạt kcal tối thiểu vào 2 ngày", line: "Thứ Tư, Thứ Bảy" });
+    expect(rows[0]).toMatchObject({ title: "Chưa đạt mục tiêu kcal vào 2 ngày", line: "Thứ Tư, Thứ Bảy" });
     expect(rows[0].number).toBe(`−${TARGETS.calories.min - 1700} kcal`);
     expect(rows[1].title).toBe("Chưa đạt mục tiêu Đạm vào 2 ngày");
     expect(rows.length).toBeLessThanOrEqual(3);

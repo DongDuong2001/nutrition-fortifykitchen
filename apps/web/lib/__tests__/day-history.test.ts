@@ -136,20 +136,21 @@ describe("copyMeals", () => {
 });
 
 describe("dayStatus", () => {
-  const range = { min: 1950, max: 2275 };
+  // cc-73b: the kcal target is one number (2.275 here); a day is met from 90 % of it (2.047,5) up to it
+  const target = 2275;
 
   it("is none with nothing logged", () => {
-    expect(dayStatus(0, range)).toBe("none");
+    expect(dayStatus(0, target)).toBe("none");
   });
 
-  it("is under below the minimum and over above the maximum", () => {
-    expect(dayStatus(1949, range)).toBe("under");
-    expect(dayStatus(2276, range)).toBe("over");
+  it("is under below 90 % of the target and over above the target", () => {
+    expect(dayStatus(2047, target)).toBe("under");
+    expect(dayStatus(2276, target)).toBe("over");
   });
 
-  it("is met at both ends of the range", () => {
-    expect(dayStatus(1950, range)).toBe("met");
-    expect(dayStatus(2275, range)).toBe("met");
+  it("is met from 90 % of the target up to the target itself", () => {
+    expect(dayStatus(2048, target)).toBe("met");
+    expect(dayStatus(2275, target)).toBe("met");
   });
 });
 

@@ -17,6 +17,9 @@ import { nutrientSourcesIn } from "@/lib/nutrient-sources";
 import { getLevelLabel } from "@/lib/levels";
 import { getNutrientDefinition } from "@/lib/nutrients";
 import { targetRangeText } from "@/lib/profile";
+import { CUSTOM_TARGETS_ENABLED, isCustom } from "@/lib/custom-targets";
+import { ageOf, upperLimits } from "@/lib/rda";
+import { supplementAmount, upperLimitNote } from "@/lib/upper-limits";
 import {
   amountLabel,
   historyDays,
@@ -65,6 +68,15 @@ export default function NutrientDetailPage({ params }: PageProps) {
     if (isPast && viewIso && todayIso) return nutrientSourcesIn(dayEntries(viewIso, todayIso), {}, def.id, []);
     return nutrientSources(def.id);
   }, [def, hydrated, isPast, viewIso, todayIso, nutrientSources]);
+
+  // cc-73b: above the Tolerable Upper Intake Level a calm extra line says so; no UL, no note
+  const upperNote = useMemo(
+    () =>
+      def && row
+        ? upperLimitNote({ ul: upperLimits(ageOf(profile.birthYear))[def.id], unit: def.unit, total: row.consumed, supplement: supplementAmount(sources) })
+        : null,
+    [def, row, profile.birthYear, sources]
+  );
 
   if (!def) {
     return (
@@ -126,7 +138,15 @@ export default function NutrientDetailPage({ params }: PageProps) {
               <span className="text-sm font-bold text-on-dark">{levelText}</span>
             )}
             {targetText && (
-              <p data-align-group="nutrient-header" className="m-0 text-cap text-muted-subtitle">Mục tiêu: {targetText}/ngày.</p>
+              <p data-align-group="nutrient-header" className="m-0 text-cap text-muted-subtitle">
+                Mục tiêu: {targetText}/ngày{CUSTOM_TARGETS_ENABLED && isCustom(profile.customTargets, def.id) ? " · tự đặt" : ""}.
+              </p>
+            )}
+            {upperNote && (
+              <div data-align-group="nutrient-header" data-testid="upper-limit-note" className="flex flex-col gap-1">
+                <span className="text-sm font-bold text-on-dark">{upperNote.line}</span>
+                <p className="m-0 text-cap text-muted-subtitle">{upperNote.detail}</p>
+              </div>
             )}
           </div>
         }

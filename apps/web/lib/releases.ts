@@ -31,6 +31,20 @@ export interface Release {
 }
 
 export const RELEASES: readonly Release[] = [
+  // cc-73b (Hao 20/10): targets at the upper end of the coach's range, one number each; vitamins and minerals by the US DRI
+  // with the safe upper limit. The tour is Hôm nay: the kcal target, then the vitamins and minerals column
+  {
+    id: "2026-10-21b",
+    date: "21/10",
+    items: [
+      { icon: "target", title: "Mục tiêu rõ ràng hơn", body: "Mỗi mục giờ chỉ còn một con số để hướng tới, lấy ở mức cao của công thức huấn luyện viên." },
+      { icon: "target", title: "Vi chất theo chuẩn DRI", body: "Canxi, sắt, kẽm, vitamin… giờ theo khuyến nghị DRI của Mỹ và Canada, đúng tuổi và giới tính. Ăn quá mức an toàn thì app nhắc nhẹ." },
+    ],
+    tour: [
+      { target: "home-hero", title: "Một con số", body: "Con số sau dấu gạch chéo là mục tiêu kcal của bạn hôm nay." },
+      { target: "nutrient-column", fallback: "home-hero", title: "Vi chất theo DRI", body: "Mỗi vi chất so với khuyến nghị đúng tuổi và giới tính của bạn." },
+    ],
+  },
   // Follow-ups 20/10: the H1T MICRO wordmark goes back to Hôm nay; toasts swipe away and repeated adds share one (cc-64).
   // The tour is the wordmark, on Hôm nay (the date when it
   // is missing, e.g. on a past day where "Về hôm nay" takes its place)
@@ -93,7 +107,7 @@ export const RELEASES: readonly Release[] = [
       { icon: "select", title: "Tìm món gọn hơn", body: "Gõ khoai là ra khoai, không còn cả chục dòng sống, chín. Muốn đổi sống hay chín thì chọn trong khẩu phần." },
       { icon: "meal", title: "Trái cây chỉ tính phần ăn được", body: "Chuối, bơ, dưa hấu, cá hay gà có xương giờ cân phần ăn được thôi, bỏ vỏ, hạt, xương. Trứng vẫn ghi theo quả." },
       { icon: "select", title: "Phở thêm thịt? Chỉnh được", body: "Mở Thành phần của món Việt để bớt bánh, thêm thịt cho đúng tô bạn ăn. Nhật ký vẫn chỉ một dòng." },
-      { icon: "target", title: "Mục tiêu vi chất theo Bộ Y tế", body: "Canxi, sắt, vitamin… giờ theo khuyến nghị cho người Việt (2016), đúng tuổi và giới tính của bạn. Muối, sắt ngày có kinh, kcal và đa lượng vẫn như cũ." },
+      { icon: "target", title: "Mục tiêu vi chất theo khuyến nghị", body: "Canxi, sắt, vitamin… giờ theo khuyến nghị dinh dưỡng, đúng tuổi và giới tính của bạn. Muối, sắt ngày có kinh, kcal và đa lượng vẫn như cũ." },
     ],
     tour: [
       { target: "meal-add", fallback: "nav-add", title: "Tìm món", body: "Bấm + Thêm rồi gõ tên món. Mỗi món giờ chỉ một dòng." },

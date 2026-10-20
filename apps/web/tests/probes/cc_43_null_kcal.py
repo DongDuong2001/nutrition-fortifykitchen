@@ -111,8 +111,8 @@ def main():
         browser = p.chromium.launch()
         for size_name, size in SIZES:
             scenario(browser, "all unknown", size_name, size, [entry("a", None), entry("b", None)], "—", "—", "2 món chưa rõ kcal")
-            scenario(browser, "one unknown", size_name, size, [entry("a", None), entry("b", 500)], "500", "26%", "1 món chưa rõ kcal")
-            scenario(browser, "all known", size_name, size, [entry("a", 300), entry("b", 500)], "800", "41%", None)
+            scenario(browser, "one unknown", size_name, size, [entry("a", None), entry("b", 500)], "500", "22%", "1 món chưa rõ kcal")
+            scenario(browser, "all known", size_name, size, [entry("a", 300), entry("b", 500)], "800", "35%", None)
         browser.close()
     print()
     print(f"{len(problems)} problem(s)")

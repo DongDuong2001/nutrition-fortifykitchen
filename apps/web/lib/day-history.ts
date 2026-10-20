@@ -87,11 +87,14 @@ export function entriesKcal(entries: AddedDiaryEntry[]): number | null {
 
 export type DayStatus = "none" | "under" | "met" | "over";
 
-/** How a day's kcal sits against the target range. Both ends count as met. */
-export function dayStatus(kcal: number, range: { min: number; max: number }): DayStatus {
+/** A day counts as met from this share of the kcal target up to the target itself (cc-73b: the target is one number now). */
+export const DAY_MET_FROM = 0.9;
+
+/** How a day's kcal sits against the day's kcal target: under below 90 % of it, met from there up to the target, over above it. */
+export function dayStatus(kcal: number, target: number): DayStatus {
   if (kcal <= 0) return "none";
-  if (kcal < range.min) return "under";
-  if (kcal > range.max) return "over";
+  if (kcal < target * DAY_MET_FROM) return "under";
+  if (kcal > target) return "over";
   return "met";
 }
 
@@ -128,7 +131,7 @@ export function monthGrid(month: string, todayIso: string): { leading: number; d
 export function statDisplay(consumed: number, stat: Pick<MockMacroStat, "unit" | "targetMin" | "targetMax">): string {
   const { unit, targetMin, targetMax } = stat;
   if (targetMin === null) return `${formatAmount(consumed, unit)} ${unit}`;
-  if (targetMax) return `${formatAmount(consumed, unit)} / ${formatAmount(targetMin, unit)}–${formatAmount(targetMax, unit)} ${unit}`;
+  if (targetMax && targetMax !== targetMin) return `${formatAmount(consumed, unit)} / ${formatAmount(targetMin, unit)}–${formatAmount(targetMax, unit)} ${unit}`;
   return `${formatAmount(consumed, unit)} / ${formatAmount(targetMin, unit)} ${unit}`;
 }
 

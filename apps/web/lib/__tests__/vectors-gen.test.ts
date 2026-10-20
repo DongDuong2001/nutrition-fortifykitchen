@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import * as fs from "fs";
 import * as path from "path";
 import { calculateTargets, type UserProfileForTargets } from "../targets";
+import { rdaTargets, upperLimits } from "../rda";
 import {
   periodAverages,
   macroComposition,
@@ -187,5 +188,28 @@ describe("Export shared test vectors for Go API", () => {
     }
 
     expect(averagesCases.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it("generates packages/vectors/dri.json: every age from 9 to 100, both sexes, the targets and the upper limits", () => {
+    // cc-73b: one case per age and sex, so every DRI life-stage edge (18/19, 30/31, 50/51, 70/71) is checked on both sides
+    const cases: any[] = [];
+    for (const sex of ["male", "female"] as const) {
+      for (let age = 9; age <= 100; age++) {
+        cases.push({
+          sex,
+          age,
+          targets: Object.fromEntries(Object.entries(rdaTargets(sex, age)).map(([id, r]) => [id, r.min])),
+          upper_limits: Object.fromEntries(Object.entries(upperLimits(age)).map(([id, u]) => [id, { limit: u.limit, supplementsOnly: u.supplementsOnly }])),
+        });
+      }
+    }
+    const file = path.join(path.resolve(__dirname, "../../../../packages/vectors"), "dri.json");
+    if (process.env.UPDATE_VECTORS === "1" || !fs.existsSync(file)) {
+      fs.mkdirSync(path.dirname(file), { recursive: true });
+      fs.writeFileSync(file, "[\n" + cases.map((c) => "  " + JSON.stringify(c)).join(",\n") + "\n]\n");
+    } else {
+      expect(cases).toEqual(JSON.parse(fs.readFileSync(file, "utf-8")));
+    }
+    expect(cases).toHaveLength(184);
   });
 });

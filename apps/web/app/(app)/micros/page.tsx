@@ -10,13 +10,17 @@ import { BottomNav } from "@/components/ui/bottom-nav";
 import { DesktopSidebar } from "@/components/ui/desktop-sidebar";
 import { AppHeader } from "@/components/ui/app-header";
 import { LevelBar } from "@/components/ui/level-bar";
-import { type NutrientGroup } from "@/lib/nutrients";
+import { getNutrientDefinition, type NutrientGroup } from "@/lib/nutrients";
+import { nutrientOnDay } from "@/lib/nutrient-detail";
+import { nutrientSourcesIn } from "@/lib/nutrient-sources";
+import { ageOf, upperLimits } from "@/lib/rda";
+import { supplementAmount, upperLimitNote, type UpperLimitNote } from "@/lib/upper-limits";
 import { buildNutrientRows, type NutrientRowData } from "@/lib/nutrient-rows";
 import { formatAmount, formatDayLabel, formatDesktopDate, formatNumber } from "@/lib/format";
 import { goalName } from "@/lib/onboarding";
 import { getTodayIsoVN } from "@/lib/date";
 import { pastDayData, useDiary } from "@/lib/diary-store";
-import { viewedIsoDate } from "@/lib/day-history";
+import { dayEntries, viewedIsoDate } from "@/lib/day-history";
 import { markUsed } from "@/lib/onboarding-store";
 import { HOME_ROUTE } from "@/lib/nav";
 import { Card } from "@/components/ui/card";
@@ -91,7 +95,7 @@ export default function MicrosPage() {
 }
 
 function MicrosContent() {
-  const { data: diaryData, hydrated, profile, todayIso, isEditable, loadDays } = useDiary();
+  const { data: diaryData, hydrated, profile, todayIso, isEditable, loadDays, nutrientSources } = useDiary();
   const searchParams = useSearchParams();
   // ?date= picks a past day (read-only, as everything about a past day). Read after mount so the first render matches the server.
   const viewIso = hydrated && todayIso ? viewedIsoDate(searchParams?.get("date"), todayIso) : null;
@@ -106,6 +110,20 @@ function MicrosContent() {
     () => (isPast && viewIso && todayIso ? pastDayData(viewIso, todayIso, profile) : null),
     [isPast, viewIso, todayIso, profile]
   );
+  // cc-73b: a calm line on each nutrient whose day total is above its Tolerable Upper Intake Level
+  const upperNotes = useMemo(() => {
+    const day = pastData || (hydrated ? diaryData : null);
+    const notes: Record<string, UpperLimitNote> = {};
+    if (!day || !todayIso || !viewIso) return notes;
+    for (const [id, ul] of Object.entries(upperLimits(ageOf(profile.birthYear)))) {
+      const def = getNutrientDefinition(id);
+      if (!def) continue;
+      const sources = isPast ? nutrientSourcesIn(dayEntries(viewIso, todayIso), {}, id, []) : nutrientSources(id);
+      const note = upperLimitNote({ ul, unit: def.unit, total: nutrientOnDay(day, def)?.consumed ?? null, supplement: supplementAmount(sources) });
+      if (note) notes[id] = note;
+    }
+    return notes;
+  }, [pastData, hydrated, diaryData, todayIso, viewIso, isPast, profile.birthYear, nutrientSources]);
   const [activeGroup, setActiveGroup] = useState<NutrientGroup>("vitamins");
   const [openGroups, setOpenGroups] = useState<Record<NutrientGroup, boolean>>({
     vitamins: true,
@@ -495,6 +513,7 @@ function MicrosContent() {
             <div className="flex flex-col gap-4">
               {GROUPS_CONFIG.map((group, idx) => (
                 <GroupCard
+                  upperNotes={upperNotes}
                   dateQuery={dateQuery}
                   key={group.key}
                   group={group}
@@ -597,6 +616,7 @@ function MicrosContent() {
             {GROUPS_CONFIG.map((group, idx) => (
               <div key={group.key} className="break-inside-avoid mb-4">
                 <GroupCard
+                  upperNotes={upperNotes}
                   dateQuery={dateQuery}
                   group={group}
                   rows={rowsByGroup[group.key]}
@@ -664,6 +684,7 @@ function GroupCard({
   idPrefix = "group-",
   alignGroup,
   dateQuery = "",
+  upperNotes = {},
 }: {
   group: GroupConfig;
   rows: NutrientRowData[];
@@ -672,6 +693,7 @@ function GroupCard({
   idPrefix?: string;
   alignGroup?: string;
   dateQuery?: string;
+  upperNotes?: Record<string, UpperLimitNote>;
 }) {
   return (
     <Card as="section" padding={false}
@@ -715,7 +737,7 @@ function GroupCard({
       {/* cc-64 (P4): a group of more than 6 rows snaps open and fades in */}
       <Expand open={isOpen} fadeOnly={rows.length > 6} className="px-4 py-1 divide-y divide-divider">
         {rows.map((row) => (
-          <NutrientRow key={row.definition.id} row={row} dateQuery={dateQuery} />
+          <NutrientRow key={row.definition.id} row={row} dateQuery={dateQuery} upperNote={upperNotes[row.definition.id]} />
         ))}
       </Expand>
     </Card>
@@ -727,7 +749,7 @@ function GroupCard({
  * Line 1: name | amount / target · % (bold)
  * Line 2: slanted bar directly under it (only for nutrients with target)
  */
-function NutrientRow({ row, dateQuery = "" }: { row: NutrientRowData; dateQuery?: string }) {
+function NutrientRow({ row, dateQuery = "", upperNote }: { row: NutrientRowData; dateQuery?: string; upperNote?: UpperLimitNote }) {
   const { definition, consumed, targetMin, targetMax, percentage, formattedAmount, targetSource, isProvisional } = row;
   const hasTarget = targetSource !== "none";
   const indentPx = definition.depth * 16;
@@ -801,6 +823,13 @@ function NutrientRow({ row, dateQuery = "" }: { row: NutrientRowData; dateQuery?
             heightClass="h-[9px] lg:h-[10px]"
           />
         </div>
+      )}
+
+      {/* Line 3 (cc-73b): above the Tolerable Upper Intake Level, a calm extra line; the detail is on the nutrient's page */}
+      {upperNote && (
+        <p data-testid="upper-limit-line" className="m-0 text-xs font-semibold leading-snug text-secondary">
+          {upperNote.line}
+        </p>
       )}
     </div>
   );

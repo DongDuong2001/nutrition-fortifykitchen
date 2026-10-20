@@ -92,7 +92,7 @@ describe("share model", () => {
   it("shows the whole day's numbers and targets (as Hôm nay does)", () => {
     const m = model();
     expect(m.values.kcal).toBe(1041);
-    expect(m.kcalTarget).toEqual({ min: 1950, max: 2275 });
+    expect(m.kcalTarget).toEqual({ min: 2275, max: 2275 });
     expect(m.macroTargets.protein).not.toBeNull();
     expect(Object.keys(m.nutrientTargets)).toEqual(countedForLevel(2));
   });
@@ -112,7 +112,7 @@ describe("share model", () => {
   it("describes the image for a screen reader with the same numbers", () => {
     const alt = model({ displayName: "Linh" }).alt;
     expect(alt).toContain("Ảnh tóm tắt Hôm nay 15/10 của Linh");
-    expect(alt).toContain("1.041 / 1.950–2.275 kcal, 53%");
+    expect(alt).toContain("1.041 / 2.275 kcal, 46%");
     expect(alt).toMatch(/Vi chất đạt \d+\/14/);
   });
 

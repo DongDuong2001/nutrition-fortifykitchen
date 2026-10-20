@@ -32,7 +32,7 @@ const AUDIENCES_DATA: AudienceCardData[] = [
     stats: [
       { label: "Mục tiêu đạm", value: "120–160 g", hint: "2.0 g/kg thể trọng" },
       { label: "Natri tăng thêm", value: "+1.180–1.770 mg", hint: "Ngày tập 60 phút" },
-      { label: "Kiểm soát Calo", value: "1.950–2.275", hint: "Thâm hụt chuẩn xác" },
+      { label: "Kiểm soát Calo", value: "2.275", hint: "Thâm hụt chuẩn xác" },
     ],
   },
   {

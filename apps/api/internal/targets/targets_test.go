@@ -14,6 +14,7 @@ type TargetTestCase struct {
 
 func TestSharedTargetVectors(t *testing.T) {
 	candidates := []string{
+		filepath.Join("..", "..", "..", "..", "packages", "vectors", "targets.json"),
 		filepath.Join("..", "..", "packages", "vectors", "targets.json"),
 		filepath.Join("..", "..", "..", "packages", "vectors", "targets.json"),
 		filepath.Join("packages", "vectors", "targets.json"),
@@ -126,5 +127,129 @@ func TestSharedTargetVectors(t *testing.T) {
 		if calculated.VitaminC.Min != tc.Output.VitaminC.Min || calculated.VitaminC.Max != tc.Output.VitaminC.Max {
 			t.Errorf("[%d] VitaminC mismatch: got %+v, want %+v", idx, calculated.VitaminC, tc.Output.VitaminC)
 		}
+	}
+}
+
+type driCase struct {
+	Sex    string             `json:"sex"`
+	Age    int                `json:"age"`
+	Target map[string]float64 `json:"targets"`
+	Upper  map[string]struct {
+		Limit           float64 `json:"limit"`
+		SupplementsOnly bool    `json:"supplementsOnly"`
+	} `json:"upper_limits"`
+}
+
+func readVector(t *testing.T, name string) []byte {
+	t.Helper()
+	for _, p := range []string{
+		filepath.Join("..", "..", "..", "..", "packages", "vectors", name),
+		filepath.Join("..", "..", "packages", "vectors", name),
+		filepath.Join("packages", "vectors", name),
+	} {
+		if data, err := os.ReadFile(p); err == nil {
+			return data
+		}
+	}
+	t.Fatalf("%s not found: the DRI vectors are part of the repo, a test that cannot read them must fail, not skip", name)
+	return nil
+}
+
+// cc-73b: every age 9 to 100 for both sexes, the DRI target and the upper limit of each nutrient, from the web's lib/rda.
+func TestSharedDRIVectors(t *testing.T) {
+	var cases []driCase
+	if err := json.Unmarshal(readVector(t, "dri.json"), &cases); err != nil {
+		t.Fatalf("failed to unmarshal: %v", err)
+	}
+	if len(cases) != 184 {
+		t.Fatalf("expected 184 cases (92 ages x 2 sexes), got %d", len(cases))
+	}
+	for _, c := range cases {
+		got := CalculateTargets(UserProfileForTargets{Sex: c.Sex, WeightKg: 65, Goal: "maintain", Age: c.Age})
+		byID := map[string]TargetRange{
+			"calcium": got.Calcium, "phosphorus": got.Phosphorus, "magnesium": got.Magnesium, "iron": got.Iron, "zinc": got.Zinc,
+			"selenium": got.Selenium, "copper": got.Copper, "manganese": got.Manganese, "potassium": got.Potassium,
+			"vitamin_a": got.VitaminA, "vitamin_d": got.VitaminD, "vitamin_e": got.VitaminE, "vitamin_k": got.VitaminK,
+			"b1": got.B1, "b2": got.B2, "b3": got.B3, "b5": got.B5, "b6": got.B6, "folate": got.Folate, "b12": got.B12, "vitamin_c": got.VitaminC,
+		}
+		if len(c.Target) != len(byID) {
+			t.Fatalf("%s %d: %d targets in the vector, %d in the API", c.Sex, c.Age, len(c.Target), len(byID))
+		}
+		for id, want := range c.Target {
+			r, ok := byID[id]
+			if !ok || r.Min != want || r.Max != want {
+				t.Errorf("%s %d %s: got %+v, want %v", c.Sex, c.Age, id, r, want)
+			}
+		}
+		for id := range dri {
+			want, has := c.Upper[id]
+			ul, ok := UpperLimitFor(id, c.Age)
+			if has != ok {
+				t.Errorf("%s %d %s: has a UL in the vector %v, in the API %v", c.Sex, c.Age, id, has, ok)
+				continue
+			}
+			if ok && (ul.Limit != want.Limit || ul.SupplementsOnly != want.SupplementsOnly) {
+				t.Errorf("%s %d %s UL: got %+v, want %+v", c.Sex, c.Age, id, ul, want)
+			}
+		}
+	}
+}
+
+// The coach's macros are the upper end: 65 kg and 69 kg, every goal, worked out by hand.
+func TestUpperEndMacros(t *testing.T) {
+	cases := []struct {
+		kg                        float64
+		goal                      string
+		kcal, protein, fat, carbs float64
+		fiberMan, fiberWoman      float64
+	}{
+		{65, "build", 2600, 143, 65, 361, 36, 30},
+		{65, "maintain", 2275, 143, 65, 280, 32, 30},
+		{65, "cut", 1950, 143, 65, 198, 27, 27},
+		{65, "deep_cut", 1625, 143, 65, 117, 23, 23},
+		{69, "build", 2760, 152, 69, 383, 39, 30},
+		{69, "maintain", 2415, 152, 69, 297, 34, 30},
+		{69, "cut", 2070, 152, 69, 210, 29, 29},
+		{69, "deep_cut", 1725, 152, 69, 124, 24, 24},
+	}
+	for _, c := range cases {
+		m := CalculateTargets(UserProfileForTargets{Sex: "male", WeightKg: c.kg, Goal: c.goal, Age: 25})
+		w := CalculateTargets(UserProfileForTargets{Sex: "female", WeightKg: c.kg, Goal: c.goal, Age: 25})
+		one := func(name string, r TargetRange, want float64) {
+			if r.Min != want || r.Max != want {
+				t.Errorf("%v kg %s %s: got %+v, want %v", c.kg, c.goal, name, r, want)
+			}
+		}
+		one("kcal", m.Calories, c.kcal)
+		one("protein", m.Protein, c.protein)
+		one("fat", m.Fat, c.fat)
+		one("carbs", m.Carbs, c.carbs)
+		one("fibre man", m.Fiber, c.fiberMan)
+		one("fibre woman", w.Fiber, c.fiberWoman)
+	}
+}
+
+// Fast carbs and salt stay ranges (Hao 20/10); the period makes a woman's iron the coach's 28 mg.
+func TestRangesAndPeriodIron(t *testing.T) {
+	for _, c := range []struct {
+		minutes                        int
+		fastMin, fastMax, naMin, naMax float64
+	}{{0, 0, 0, 1570, 2360}, {60, 30, 45, 2750, 4130}, {120, 60, 90, 3930, 5900}} {
+		got := CalculateTargets(UserProfileForTargets{Sex: "male", WeightKg: 65, Goal: "maintain", TrainingMinutes: c.minutes, Age: 25})
+		if got.FastCarbs.Min != c.fastMin || got.FastCarbs.Max != c.fastMax {
+			t.Errorf("%d min fast carbs: got %+v", c.minutes, got.FastCarbs)
+		}
+		if got.Sodium.Min != c.naMin || got.Sodium.Max != c.naMax {
+			t.Errorf("%d min sodium: got %+v", c.minutes, got.Sodium)
+		}
+	}
+	base := CalculateTargets(UserProfileForTargets{Sex: "female", WeightKg: 65, Goal: "maintain", Age: 25})
+	period := CalculateTargets(UserProfileForTargets{Sex: "female", WeightKg: 65, Goal: "maintain", Age: 25, IsPeriod: true})
+	if base.Iron.Min != 18 || period.Iron.Min != 28 || period.Iron.Max != 28 {
+		t.Errorf("iron: base %+v, period %+v", base.Iron, period.Iron)
+	}
+	man := CalculateTargets(UserProfileForTargets{Sex: "male", WeightKg: 65, Goal: "maintain", Age: 25, IsPeriod: true})
+	if man.Iron.Min != 8 {
+		t.Errorf("a man ignores the period: %+v", man.Iron)
 	}
 }

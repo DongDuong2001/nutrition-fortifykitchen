@@ -62,7 +62,7 @@ function CalendarMonth({ selectedIso, onPick }: Pick<CalendarSheetProps, "select
   const today: string = todayIso;
 
   const grid = monthGrid(month, today);
-  const range = targets.calories;
+  const kcalTarget = targets.calories.min;
   const canGoNext = month < monthOf(today);
 
   // Today's kcal comes from the diary; a past day from its own entries
@@ -70,7 +70,7 @@ function CalendarMonth({ selectedIso, onPick }: Pick<CalendarSheetProps, "select
   void dayArchive;
   const statusOf = (iso: string): DayStatus => {
     const kcal = iso === today ? data.calories.consumed : entriesKcal(dayEntries(iso, today));
-    return dayStatus(kcal ?? 0, range);
+    return dayStatus(kcal ?? 0, kcalTarget);
   };
 
   const [, m] = month.split("-");

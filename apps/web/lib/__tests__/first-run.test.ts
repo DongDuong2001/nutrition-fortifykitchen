@@ -38,23 +38,23 @@ describe("lib/first-run", () => {
     expect(countStoredEntries('{"id":"a"}')).toBe(0);
   });
 
-  // Expected values from HANDOFF.md: 30–35 kcal/kg and 1,6–2,2 g/kg protein for "Giữ cân" at 65 kg
-  it("summary for the sample profile: 1.950–2.275 kcal and protein 104–143 g", () => {
+  // cc-73b: the upper end of the coach's range: 35 kcal/kg and 2,2 g/kg protein for "Giữ cân" at 65 kg
+  it("summary for the sample profile: 2.275 kcal and protein 143 g", () => {
     const summary = setupSummary(SAMPLE_PROFILE);
-    expect(summary.energy).toBe("1.950–2.275 kcal");
-    expect(summary.protein).toBe("104–143 g");
-    expect(summary.line).toBe("Mục tiêu mỗi ngày: 1.950–2.275 kcal · đạm 104–143 g");
+    expect(summary.energy).toBe("2.275 kcal");
+    expect(summary.protein).toBe("143 g");
+    expect(summary.line).toBe("Mục tiêu mỗi ngày: 2.275 kcal · đạm 143 g");
   });
 
-  // Coach rules (HANDOFF.md) for 65 kg, Giữ cân, 60 min of training: fat 0,5–1 g/kg, carbs = (energy min - protein mid x 4 - fat mid x 9) / 4,
+  // Coach rules for 65 kg, Giữ cân, 60 min of training: fat 1 g/kg, carbs = (energy - protein x 4 - fat x 9) / 4 = 279,5 → 280,
   // salt 4–6 g + 1–1,5 g per 20 min
   it("the day targets list: Năng lượng, Đạm, Chất béo, Tinh bột and Muối with the default training minutes", () => {
     const { targets } = setupSummary(SAMPLE_PROFILE);
     expect(targets.map((t) => [t.label, t.value])).toEqual([
-      ["Năng lượng", "1.950–2.275 kcal"],
-      ["Đạm", "104–143 g"],
-      ["Chất béo", "33–65 g"],
-      ["Tinh bột", "254 g"],
+      ["Năng lượng", "2.275 kcal"],
+      ["Đạm", "143 g"],
+      ["Chất béo", "65 g"],
+      ["Tinh bột", "280 g"],
       ["Muối", "7–10,5 g"],
     ]);
     expect(targets.find((t) => t.label === "Muối")?.hint).toBe("Ngày tập 60′");

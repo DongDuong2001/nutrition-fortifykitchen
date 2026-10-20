@@ -155,14 +155,14 @@ def check_energy_bars(browser, size_name, size):
             continue
         if kcal > 2275:
             over += 1
-            check("bg-cobalt" in col["bar"] and not red, f"{size_name} energy: {kcal} kcal above the range is on target")
+            check("bg-cobalt" in col["bar"] and not red, f"{size_name} energy: {kcal} kcal above the target is on target")
         if red:
-            check(kcal < 1950, f"{size_name} energy: red only below the minimum ({kcal})")
-    check(over >= 1, f"{size_name} energy: a day above the range is shown ({over})")
+            check(kcal < 2275, f"{size_name} energy: red only below the target ({kcal})")
+    check(over >= 1, f"{size_name} energy: a day above the target is shown ({over})")
     check(today_grey, f"{size_name} energy: today is grey, not red")
     pg.goto(BASE + "/trends/micros", wait_until="networkidle")
     pg.wait_for_timeout(400)
-    check("mục tiêu 800 mg" in text(pg), f"{size_name} Vi chất: calcium shows its 800 mg target (cc-67)")
+    check("mục tiêu 1.000 mg" in text(pg), f"{size_name} Vi chất: calcium shows its 1.000 mg target (cc-73b)")
     ctx.close()
 
 
@@ -278,8 +278,8 @@ def check_delete_meal(browser, size_name, size):
     toast.click()
     pg.wait_for_timeout(500)
     check("459" in re.sub(r"\s+", " ", breakfast.inner_text()), f"{size_name} delete: Hoàn tác puts the meal back")
-    # cc2-32: Hôm nay's hero shows the eaten total over the target ("1.041 / 1.950–2.275 kcal"), not the remainder
-    check(re.search(r"1\.041\s*/\s*1\.950", text(pg)) is not None, f"{size_name} delete: the hero total is back to 1.041 eaten")
+    # cc2-32: Hôm nay's hero shows the eaten total over the target ("1.041 / 2.275 kcal"), not the remainder
+    check(re.search(r"1\.041\s*/\s*2\.275", text(pg)) is not None, f"{size_name} delete: the hero total is back to 1.041 eaten")
     ctx.close()
 
 

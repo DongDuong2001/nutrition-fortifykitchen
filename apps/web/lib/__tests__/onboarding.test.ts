@@ -67,12 +67,13 @@ describe("isValidEmail", () => {
 });
 
 describe("goalOptions", () => {
-  it("lists the four goals in design order with the kcal range for the weight", () => {
+  it("lists the four goals in design order with the kcal for the weight", () => {
     const options = goalOptions(65);
     expect(options.map((o) => o.goal)).toEqual(["build", "maintain", "cut", "deep_cut"]);
     expect(options.map((o) => o.name)).toEqual(["Tăng cơ", "Giữ cân", "Giảm mỡ", "Giảm mỡ nhanh"]);
-    // 65 kg × 35–40, 30–35, 25–30, 20–25 kcal/kg
-    expect(options.map((o) => o.kcal)).toEqual(["2.275–2.600", "1.950–2.275", "1.625–1.950", "1.300–1.625"]);
+    // 65 kg × 40, 35, 30, 25 kcal/kg
+    expect(options.map((o) => o.kcal)).toEqual(["2.600", "2.275", "1.950", "1.625"]);
+    expect(options.map((o) => o.rule)).toEqual(["40 kcal / kg", "35 kcal / kg", "30 kcal / kg", "25 kcal / kg"]);
   });
 });
 
@@ -87,11 +88,11 @@ describe("goal and target rows without a valid weight", () => {
 });
 
 describe("dailyTargetRows", () => {
-  it("shows the energy and macro targets from lib/targets.ts for the profile (the micros are the recommended amounts, not shown here)", () => {
+  it("shows the energy and macro targets from lib/targets.ts for the profile (the micros are the DRI amounts, not shown here)", () => {
     expect(dailyTargetRows(65, "male", "maintain")).toEqual([
-      { label: "Năng lượng", value: "1.950–2.275 kcal" },
-      { label: "Đạm (1,6–2,2 g/kg)", value: "104–143 g" },
-      { label: "Chất béo (0,5–1 g/kg)", value: "33–65 g" },
+      { label: "Năng lượng", value: "2.275 kcal" },
+      { label: "Đạm (2,2 g/kg)", value: "143 g" },
+      { label: "Chất béo (1 g/kg)", value: "65 g" },
     ]);
   });
 });

@@ -1,5 +1,5 @@
 """cc-08: profile and targets from the profile. Weight 65 -> 70 moves Today's kcal target and not the micros (cc-67: they are
-the VN 2016 amounts for sex and age), a woman's iron is 17,4 mg, or the coach's 28 mg with the period switch on, reload keeps it, an invalid
+the US DRI amounts for sex and age), a woman's iron is 18 mg, or the coach's 28 mg with the period switch on, reload keeps it, an invalid
 weight shows the setup error.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc08.py
 """
@@ -54,7 +54,7 @@ def run_phone(browser):
     # The targets live on /settings/targets (IA v2), read-only, from the profile
     pg.goto(BASE + "/settings/targets", wait_until="networkidle")
     pg.wait_for_timeout(300)
-    check("1.950–2.275 kcal" in body(pg), "390 targets: sample targets show 1.950–2.275 kcal")
+    check("2.275 kcal" in body(pg) and "1.950" not in body(pg), "390 targets: sample targets show one number, 2.275 kcal")
     pg.goto(BASE + "/settings/profile", wait_until="networkidle")
     visible(pg, 'a[href="/settings/profile/weight"]').wait_for(state="visible")
     active_sex = pg.locator('[aria-labelledby="profile-sex-label"] button[aria-pressed="true"] >> visible=true').first
@@ -83,15 +83,15 @@ def run_phone(browser):
     check("70 kg" in body(pg), "390 profile: weight row shows 70 kg after save")
     pg.goto(BASE + "/settings/targets", wait_until="networkidle")
     pg.wait_for_timeout(300)
-    check("2.100–2.450 kcal" in body(pg), "390 targets: kcal target moves to 2.100–2.450")
+    check("2.450 kcal" in body(pg), "390 targets: kcal target moves to 2.450")
 
     pg.goto(BASE + "/app", wait_until="networkidle")
     pg.wait_for_timeout(600)
-    check("2.100–2.450" in body(pg), "390 today: kcal target reads 2.100–2.450")
+    check("/ 2.450 kcal" in body(pg), "390 today: kcal target reads 2.450")
 
     pg.goto(BASE + "/micros", wait_until="networkidle")
     pg.wait_for_timeout(600)
-    check("/ 2.500 mg" in body(pg), "390 micros: potassium target stays 2.500 mg at 70 kg (VN 2016, nam 20–29)")
+    check("/ 3.400 mg" in body(pg), "390 micros: potassium target stays 3.400 mg at 70 kg (DRI, nam 19–30)")
 
     # 5. woman in the period: iron target 28 mg on Micros
     pg.goto(BASE + "/settings/profile", wait_until="networkidle")
@@ -102,7 +102,7 @@ def run_phone(browser):
     check(switch.count() == 1, "390 profile: period switch shows after choosing Nữ")
     pg.goto(BASE + "/micros", wait_until="networkidle")
     pg.wait_for_timeout(600)
-    check("/ 17,4 mg" in body(pg), "390 micros: iron target reads 17,4 mg for a woman of 23 (period off)")
+    check("/ 18 mg" in body(pg), "390 micros: iron target reads 18 mg for a woman of 23 (period off)")
     pg.goto(BASE + "/settings/profile", wait_until="networkidle")
     visible(pg, 'a[href="/settings/profile/weight"]').wait_for(state="visible")
     switch = pg.get_by_role("switch", name="Gần/đang trong kỳ")
@@ -119,7 +119,7 @@ def run_phone(browser):
     pg.reload(wait_until="networkidle")
     pg.wait_for_timeout(600)
     check("/ 28 mg" in body(pg), "390 micros: iron 28 mg kept after reload")
-    check("/ 2.000 mg" in body(pg), "390 micros: a woman's potassium 2.000 mg kept after reload")
+    check("/ 2.600 mg" in body(pg), "390 micros: a woman's potassium 2.600 mg kept after reload")
     pg.goto(BASE + "/settings/profile", wait_until="networkidle")
     visible(pg, 'a[href="/settings/profile/weight"]').wait_for(state="visible")
     pg.wait_for_timeout(300)

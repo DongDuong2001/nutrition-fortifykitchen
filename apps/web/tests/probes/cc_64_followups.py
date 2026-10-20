@@ -40,6 +40,8 @@ def toast(pg):
 def toasts(browser):
     ctx = browser.new_context(viewport={"width": 390, "height": 844})
     pg = ctx.new_page()
+    # The meal an add goes to follows the time of day (Bữa trưa at lunch time): pin the clock so the toast text does not
+    pg.clock.set_fixed_time("2026-10-20T12:30:00+07:00")
     add_first_food(pg)
     pg.wait_for_url("**/app**", timeout=5000)
     pg.wait_for_timeout(300)

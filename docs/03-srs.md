@@ -34,21 +34,17 @@ W = body weight in kg, M = today's training minutes (0 on rest days). 1 g salt =
 
 | Nutrient | Rule | Source |
 | --- | --- | --- |
-| Energy | Build 35–40, maintain 30–35, cut 25–30, deep cut 20–25 kcal × W | Coach |
-| Protein | 1.6–2.2 g × W | Coach |
-| Fat | 0.5–1.0 g × W | Coach |
-| Carbs | (energy − protein mid × 4 − fat mid × 9) / 4, for the energy min and max | Coach ("remainder") |
-| Fiber | 14 g per 1000 kcal, kept within men 30–40 g, women 20–30 g | Coach |
-| Potassium | 80–100 mg × W | Coach |
+| Energy | Build 40, maintain 35, cut 30, deep cut 25 kcal × W (the upper end of the coach's range, cc-73b 20/10) | Coach |
+| Protein | 2.2 g × W | Coach |
+| Fat | 1.0 g × W | Coach |
+| Carbs | (energy − protein × 4 − fat × 9) / 4 | Coach ("remainder") |
+| Fiber | 14 g per 1000 kcal, at most men 40 g, women 30 g | Coach |
 | Sodium | (4–6 g salt + 1–1.5 g salt × M / 20) × 393 mg | Coach, update 08/10/2026 |
-| Calcium | 1200–1500 mg | Coach |
-| Magnesium | 50% of calcium: 600–750 mg | Coach |
-| Iron | Men 8 mg; women 18 mg, 28 mg near or during the period | Coach |
-| Zinc | Men 12 mg, women 8 mg | Coach |
+| Iron, woman near or in the period | 28 mg | Coach |
 | Training fast carbs | 30–45 g × M / 60 | Coach |
-| Vitamins A, C, D, E, K, B1–B12, phosphorus, selenium, copper | Vietnamese RDA by sex and age band, shown as reference | Viện Dinh dưỡng 2016; WHO/IOM for gaps |
+| The other 21 vitamins and minerals (calcium, phosphorus, magnesium, iron, zinc, selenium, copper, manganese, potassium, vitamins A, C, D, E, K, B1, B2, B3, B5, B6, folate, B12) | The US DRI (RDA, or AI) by sex and age; the Tolerable Upper Intake Level is the maximum (cc-73b, 20/10; before: VN 2016, 19/10) | National Academies DRI, docs/dri-targets-2026-10-20.md |
 
-Example: a 65 kg man maintaining weight, training 60 minutes, gets 1950–2275 kcal, 104–143 g protein, and 2751–4127 mg sodium (7–10.5 g salt).
+Example: a 65 kg man maintaining weight, training 60 minutes, gets 2275 kcal, 143 g protein, and 2751–4127 mg sodium (7–10.5 g salt).
 
 Release 1 uses the rules above as the first knowledge version, loaded from `docs/coach-food-list.md` and reviewed by Hào. From Release 2 they come from the coach's Obsidian vault.
 

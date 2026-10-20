@@ -5,7 +5,7 @@
 - step indicator (phone "Bước 1 / 2" and "Bước 2 / 2", desktop card "Bước 1/2"), one primary button per step
 - inputs: birth year inputMode numeric + autocomplete bday-year, weight inputMode decimal
 - inline validation on blur, Enter moves from the birth year to the weight, back keeps the typed values
-- summary numbers match the coach's rules for the sample profile (HANDOFF.md: 30-35 kcal/kg, 1,6-2,2 g/kg protein)
+- summary numbers match the coach's rules for the sample profile (cc-73b: the upper end, 35 kcal/kg, 2,2 g/kg protein)
 - the summary has no bottom nav, one h1, no horizontal scroll, targets >= 44 px
 Screenshots: .screenshots/cc2-15-{profile,goal,summary,first-meal}-{390,1280}.png
 Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/cc2_15.py
@@ -25,8 +25,8 @@ SHOTS = Path(__file__).resolve().parent.parent.parent / ".screenshots"
 SIZES = [("390", {"width": 390, "height": 844}), ("1280", {"width": 1280, "height": 800})]
 NOW = "2026-10-13T18:00:00+07:00"
 WEIGHT = 70
-# Expected from the coach's rules, not from the code: Giữ cân 30-35 kcal/kg, protein 1,6-2,2 g/kg
-SUMMARY_ROWS = ["Năng lượng 2.100–2.450 kcal", "Đạm 112–154 g"]  # the list rows of /setup/done (cc2-15b)
+# Expected from the coach's rules, not from the code: Giữ cân 35 kcal/kg, protein 2,2 g/kg (the upper end, cc-73b)
+SUMMARY_ROWS = ["Năng lượng 2.450 kcal", "Đạm 154 g"]  # the list rows of /setup/done (cc2-15b)
 problems, notes = [], []
 
 
@@ -163,7 +163,7 @@ def first_run(browser, name, size):
         pg.wait_for_timeout(300)
         check(checked_goal(pg) == "Tăng cơ", f"{where} back: the chosen goal is kept ({checked_goal(pg)})")
         pg.get_by_role("radio", name=re.compile("^Giữ cân")).click()
-        check("2.100–2.450 kcal" in text(pg), f"{where} goal: the targets card follows the weight")
+        check("2.450 kcal" in text(pg), f"{where} goal: the targets card follows the weight")
     else:
         shot(pg, "goal", name)
         pg.get_by_role("radio", name=re.compile("^Tăng cơ")).click()
@@ -172,7 +172,7 @@ def first_run(browser, name, size):
         check(pg.locator("#setup-weight").input_value() == str(WEIGHT), f"{where} reload: the typed weight is kept")
         check(checked_goal(pg) == "Tăng cơ", f"{where} reload: the chosen goal is kept ({checked_goal(pg)})")
         pg.get_by_role("radio", name=re.compile("^Giữ cân")).click()
-        check("2.100–2.450 kcal" in text(pg), f"{where} goal: the targets card follows the weight")
+        check("2.450 kcal" in text(pg), f"{where} goal: the targets card follows the weight")
 
     # 4. finish: Hoàn tất saves and shows the summary
     pg.get_by_role("button", name="Hoàn tất").locator("visible=true").first.click()
@@ -181,7 +181,7 @@ def first_run(browser, name, size):
     pg.wait_for_timeout(500)
     t = text(pg)
     # cc-42: the board shows the energy target in one sentence (the other rows are in Cài đặt)
-    check("Mục tiêu của bạn: 2.100–2.450 kcal mỗi ngày" in t, f"{where} summary: the energy target (page: {t[:200]!r})")
+    check("Mục tiêu của bạn: 2.450 kcal mỗi ngày" in t, f"{where} summary: the energy target (page: {t[:200]!r})")
     cta = pg.get_by_role("button", name="Thêm bữa đầu tiên")
     check(cta.count() == 1, f"{where} summary: one button Thêm bữa đầu tiên (tour off in probes: it opens the add sheet)")
     check(visible_h1(pg) == 1, f"{where} summary: one h1")

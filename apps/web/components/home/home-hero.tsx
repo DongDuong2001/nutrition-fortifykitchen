@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { formatAmount } from "@/lib/format";
+import { formatAmount, formatRange } from "@/lib/format";
 import { kcalValue } from "@/lib/kcal";
 import { pctLabel, pctOf, type HomeValues } from "@/lib/home";
 import { getLevel, getLevelLabel } from "@/lib/levels";
@@ -108,7 +108,7 @@ export function HomeHero({
         <div data-align-group="home-hero" className="flex flex-wrap items-baseline gap-x-1.5">
           <span ref={kcalRef} className="font-display text-display-sm font-extrabold leading-none tabular-nums tracking-display">{kcalValue(shownKcal)}</span>
           <span className={`text-cap text-muted-on-dark ${share ? "whitespace-nowrap" : ""}`}>
-            / {formatAmount(kcalTarget.min, "kcal")}–{formatAmount(kcalTarget.max, "kcal")} kcal
+            / {formatRange(kcalTarget.min, kcalTarget.max)} kcal
           </span>
           <span ref={pctRef} className="ml-1 font-display text-display-sm font-extrabold italic leading-none tabular-nums tracking-display">{pctLabel(shownKcal, kcalTarget.min)}</span>
           {finished && kcalKnown !== null && <span className="text-cap font-bold text-sky">{getLevelLabel(getLevel(kcalKnown))}</span>}

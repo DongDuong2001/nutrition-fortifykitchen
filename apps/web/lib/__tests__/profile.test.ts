@@ -13,10 +13,10 @@ import {
 } from "../profile";
 import { SAMPLE_DAY } from "../mock/sample-day";
 
-// Expected values come from the coach rules in design/SPEC.md (energy) and from VN 2016 (the micros), not from lib/targets.ts.
-// 65 kg, Giữ cân (30–35 kcal/kg) => 1.950–2.275 kcal. 70 kg, Giữ cân => 2.100–2.450 kcal.
-// cc-67: the 22 micros follow sex and age, not the weight: a man of 23 has potassium 2.500 mg, iron 7,9 mg (sodium stays the training formula);
-// a woman of 23 has iron 17,4 mg. The age is the year less the year of birth: pin the year.
+// Expected values come from the coach rules (energy: the upper end, 35 kcal/kg for Giữ cân) and from the US DRI (the micros), not from lib/targets.ts.
+// 65 kg, Giữ cân => 2.275 kcal. 70 kg, Giữ cân => 2.450 kcal.
+// cc-73b: the micros follow sex and age, not the weight: a man of 23 has potassium 3.400 mg, iron 8 mg (sodium stays the training formula);
+// a woman of 23 has iron 18 mg. The age is the year less the year of birth: pin the year.
 beforeAll(() => vi.useFakeTimers({ toFake: ["Date"], now: new Date("2026-10-19T08:00:00+07:00") }));
 afterAll(() => vi.useRealTimers());
 
@@ -37,31 +37,31 @@ describe("sample profile", () => {
 
   it("gives the sample-day targets at 65 kg", () => {
     const t = targetsFor(SAMPLE_PROFILE);
-    expect(t.calories).toEqual({ min: 1950, max: 2275 });
-    expect(t.potassium).toEqual({ min: 2500, max: 2500 });
-    expect(t.iron).toEqual({ min: 7.9, max: 7.9 });
+    expect(t.calories).toEqual({ min: 2275, max: 2275 });
+    expect(t.potassium).toEqual({ min: 3400, max: 3400 });
+    expect(t.iron).toEqual({ min: 8, max: 8 });
     expect(t.sodium).toEqual({ min: 2750, max: 4130 });
   });
 
-  it("gives 2.100–2.450 kcal at 70 kg and the same micros (they do not follow the weight)", () => {
+  it("gives 2.450 kcal at 70 kg and the same micros (they do not follow the weight)", () => {
     const t = targetsFor({ ...SAMPLE_PROFILE, weightKg: 70 });
-    expect(t.calories).toEqual({ min: 2100, max: 2450 });
-    expect(t.potassium).toEqual({ min: 2500, max: 2500 });
+    expect(t.calories).toEqual({ min: 2450, max: 2450 });
+    expect(t.potassium).toEqual({ min: 3400, max: 3400 });
   });
 
-  it("gives a woman iron 28 mg in the period (the coach rule), 17,4 mg otherwise", () => {
+  it("gives a woman iron 28 mg in the period (the coach rule), 18 mg otherwise", () => {
     expect(targetsFor({ ...WOMAN, periodMode: true }).iron).toEqual({ min: 28, max: 28 });
-    expect(targetsFor({ ...WOMAN, periodMode: false }).iron).toEqual({ min: 17.4, max: 17.4 });
+    expect(targetsFor({ ...WOMAN, periodMode: false }).iron).toEqual({ min: 18, max: 18 });
   });
 
-  it("follows the age: the same woman at 55 has 6,7 mg iron and 900 mg calcium", () => {
+  it("follows the age: the same woman at 55 has 8 mg iron and 1.200 mg calcium", () => {
     const t = targetsFor({ ...WOMAN, birthYear: 1971 });
-    expect(t.iron).toEqual({ min: 6.7, max: 6.7 });
-    expect(t.calcium).toEqual({ min: 900, max: 900 });
+    expect(t.iron).toEqual({ min: 8, max: 8 });
+    expect(t.calcium).toEqual({ min: 1200, max: 1200 });
   });
 
   it("ignores the period setting for men", () => {
-    expect(targetsFor({ ...SAMPLE_PROFILE, periodMode: true }).iron).toEqual({ min: 7.9, max: 7.9 });
+    expect(targetsFor({ ...SAMPLE_PROFILE, periodMode: true }).iron).toEqual({ min: 8, max: 8 });
   });
 });
 
@@ -177,19 +177,19 @@ describe("targetRangeText", () => {
 });
 
 describe("applyProfileTargets", () => {
-  it("keeps the energy target of the sample day for the sample profile, and gives the micros VN 2016's", () => {
+  it("gives the sample day the upper-end energy target for the sample profile, and the micros the DRI's", () => {
     const day = applyProfileTargets(SAMPLE_DAY, SAMPLE_PROFILE, targetsFor(SAMPLE_PROFILE));
-    expect(day.calories).toMatchObject({ targetMin: 1950, targetMax: 2275 });
+    expect(day.calories).toMatchObject({ targetMin: 2275, targetMax: 2275 });
     const potassium = day.minerals.find((m) => m.key === "potassium");
-    expect(potassium).toMatchObject({ targetMin: 2500 });
+    expect(potassium).toMatchObject({ targetMin: 3400 });
   });
 
   it("moves the calorie target when the weight changes to 70 kg, and leaves the potassium target", () => {
     const profile = { ...SAMPLE_PROFILE, weightKg: 70 };
     const day = applyProfileTargets(SAMPLE_DAY, profile, targetsFor(profile));
-    expect(day.calories).toMatchObject({ targetMin: 2100, targetMax: 2450 });
+    expect(day.calories).toMatchObject({ targetMin: 2450, targetMax: 2450 });
     const potassium = day.minerals.find((m) => m.key === "potassium");
-    expect(potassium).toMatchObject({ targetMin: 2500 });
+    expect(potassium).toMatchObject({ targetMin: 3400 });
     expect(day.user).toMatchObject({ weightKg: 70, goalLabel: "Giữ cân" });
   });
 
@@ -197,14 +197,14 @@ describe("applyProfileTargets", () => {
     const profile = { ...SAMPLE_PROFILE, birthYear: 1990 };
     const day = applyProfileTargets(SAMPLE_DAY, profile, targetsFor(profile));
     const magnesium = day.minerals.find((m) => m.key === "magnesium");
-    expect(magnesium?.targetMin).toBe(370);
-    expect(magnesium?.percentage).toBe(Math.round(((magnesium?.consumed ?? 0) / 370) * 100));
+    expect(magnesium?.targetMin).toBe(420);
+    expect(magnesium?.percentage).toBe(Math.round(((magnesium?.consumed ?? 0) / 420) * 100));
   });
 
-  it("shows iron as a single 17,4 mg target for a woman of 23", () => {
+  it("shows iron as a single 18 mg target for a woman of 23", () => {
     const day = applyProfileTargets(SAMPLE_DAY, WOMAN, targetsFor(WOMAN));
     const iron = day.minerals.find((m) => m.key === "iron");
-    expect(iron).toMatchObject({ targetMin: 17.4 });
+    expect(iron).toMatchObject({ targetMin: 18 });
     expect(iron?.targetMax).toBeUndefined();
   });
 });

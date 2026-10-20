@@ -20,7 +20,7 @@ def wait_home(pg):
 
 def hero_kcal(pg):
     """The eaten kcal in the hero ("1.041"), or None."""
-    m = re.search(r"([\d.]+)\s*/\s*[\d.]+–", vis(pg, HERO).inner_text())
+    m = re.search(r"([\d.]+)\s*/\s*[\d.]+\s*kcal", vis(pg, HERO).inner_text())
     return m.group(1) if m else None
 
 
