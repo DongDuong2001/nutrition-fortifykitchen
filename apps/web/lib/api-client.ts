@@ -714,6 +714,8 @@ export const apiClient = {
     servingLabel?: string;
     /** The food's name, kept in the outbox for the Chưa lưu list (never sent). */
     label?: string;
+    /** When the user made the entry (ms), for an entry sent again later: the write's made_at. Absent: now. */
+    madeAt?: number;
   }): Promise<{ success: boolean; id: string } & WriteResult> {
     const entryId = isUuid(payload.id) ? payload.id! : generateUuid();
     const date = payload.date || getTodayIsoVN();
@@ -740,7 +742,7 @@ export const apiClient = {
       }
 
       // The id is the client's (idempotent on the server), so a write sent again never adds the entry twice
-      const result = await withEngine((e) => e.diaryWrite({ id: entryId, date, payload: body, label: payload.label }));
+      const result = await withEngine((e) => e.diaryWrite({ id: entryId, date, payload: body, label: payload.label, madeAt: payload.madeAt }));
       return { success: result.state === "saved", id: entryId, ...result };
     }
 

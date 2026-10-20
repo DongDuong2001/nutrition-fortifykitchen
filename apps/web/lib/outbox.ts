@@ -36,6 +36,11 @@ export interface OutboxItem {
   method?: "POST" | "PATCH" | "DELETE" | "PUT";
   path?: string;
   createdAt: number;
+  /**
+   * When the user made the write, when that is not createdAt: an entry of the local diary sent again (a closed day's entry
+   * the server never confirmed) was made at its own addedAt, not when it was queued again. Absent: createdAt.
+   */
+  madeAt?: number;
   /** When a side write was last changed by the user: the newest wins. */
   updatedAt?: number;
   /** Absent = queued. "sending": its request is out (or the app was killed during it). */
