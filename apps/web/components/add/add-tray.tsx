@@ -293,7 +293,7 @@ function TrayReview({ items, totals, mealName, canAdd, submitting, onRemove, onC
         </p>
       </div>
       <div ref={listRef} className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-60">
-        <ul className="m-0 flex list-none flex-col gap-3 p-0">
+        <ul data-align-container="tray-review" className="m-0 flex list-none flex-col gap-3 p-0">
           {items.map((item, i) => (
             <TrayRow
               key={cardKeys.keyFor(item.food.id)}

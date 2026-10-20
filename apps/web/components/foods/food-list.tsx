@@ -108,8 +108,7 @@ export function FoodList({
     const showHeart = list.grouped && !!isFavourite?.(food);
     const carried = !!tray?.ids.some((id) => ids.includes(id));
     return (
-      // cc-64 (P9): a row off screen is not laid out or painted until it nears the view (56 px kept for it, then its own height)
-      <li key={food.id} data-tour={dataTour && food.id === firstFoodId ? `${dataTour}-first` : undefined} className={`flex items-center border-t border-divider first:border-t-0 [content-visibility:auto] [contain-intrinsic-size:auto_56px] ${carried ? "bg-cobalt/10" : ""}`}>
+      <li key={food.id} data-tour={dataTour && food.id === firstFoodId ? `${dataTour}-first` : undefined} className={`flex items-center border-t border-divider first:border-t-0 ${carried ? "bg-cobalt/10" : ""}`}>
         <button
           type="button"
           data-food-row
