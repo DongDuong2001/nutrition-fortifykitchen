@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { microsSummaryFor } from "../lacking";
+import { lowestMicros, microsSummaryFor } from "../lacking";
 import { computeCompositeDayData } from "../diary-store";
 import { entryNumbers, type AddedDiaryEntry } from "../diary-edits";
 import { MOCK_FOODS } from "../mock/foods";
@@ -66,6 +66,15 @@ describe("microsSummaryFor", () => {
     expect(summary.mostLacking).toEqual(["Iron"]);
   });
 
+  it("lists only nutrients under 100 % of their target", () => {
+    const summary = microsSummaryFor({
+      minerals: [micro("Zinc", 12, 12), micro("Calcium", 1300, 1200), micro("Magnesium", 300, 600)],
+      vitamins: [micro("Vitamin D", 20, 15, "vitamin")],
+    });
+    // Magnesium 50 %; Zinc 100 %, Calcium 108 %, Vitamin D 133 % are reached
+    expect(summary.mostLacking).toEqual(["Magnesium"]);
+  });
+
   it("is empty when nothing has a target", () => {
     const summary = microsSummaryFor({ minerals: [micro("Sodium", 1000, null)], vitamins: [] });
     expect(summary.mostLacking).toEqual([]);
@@ -82,5 +91,32 @@ describe("microsSummaryFor", () => {
     expect(summary.vitaminsTotal).toBe(3);
     expect(summary.achieved).toBe(2);
     expect(summary.total).toBe(5);
+  });
+});
+
+describe("lowestMicros", () => {
+  it("all reached → empty", () => {
+    const day = {
+      minerals: [micro("Zinc", 12, 12), micro("Calcium", 1300, 1200)],
+      vitamins: [micro("Vitamin A", 700, 650, "vitamin"), micro("Vitamin C", 99.6, 100, "vitamin")],
+    };
+    // Vitamin C 99,6 % rounds to 100 %: reached, as on the Micros screen
+    expect(lowestMicros(day, 3)).toEqual([]);
+    expect(microsSummaryFor(day).mostLacking).toEqual([]);
+  });
+
+  it("only those under target, lowest share first, at most count", () => {
+    const day = {
+      minerals: [micro("Zinc", 6, 12), micro("Calcium", 1300, 1200), micro("Iron", 1, 8)],
+      vitamins: [micro("Vitamin D", 14.9, 15, "vitamin"), micro("Vitamin C", 99.4, 100, "vitamin")],
+    };
+    // Iron 13 %, Zinc 50 %, Vitamin D 99,3 %, Vitamin C 99,4 %; Calcium 108 % is left out
+    expect(lowestMicros(day, 2).map((s) => s.name)).toEqual(["Iron", "Zinc"]);
+    expect(lowestMicros(day, 10).map((s) => s.name)).toEqual(["Iron", "Zinc", "Vitamin D", "Vitamin C"]);
+  });
+
+  it("never ranks an unknown amount or a missing target", () => {
+    const day = { minerals: [micro("Potassium", null, 3900), micro("Sodium", 10, null)], vitamins: [] };
+    expect(lowestMicros(day, 2)).toEqual([]);
   });
 });
