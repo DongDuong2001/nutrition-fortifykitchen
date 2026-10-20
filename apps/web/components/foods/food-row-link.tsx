@@ -11,13 +11,17 @@ export interface FoodRowLinkProps {
   withBorderTop?: boolean;
 }
 
-/** One food in a Khám phá list: name and meta on the left, a figure and a chevron on the right. Min 48 px. */
+/**
+ * One food in a Khám phá list: name and meta on the left, a figure and a chevron on the right. Min 48 px.
+ * perf/live-bundle: a row below the screen is not laid out or painted until it nears it (a "Giàu …" list holds every
+ * food with the nutrient); `auto` keeps each row's real height once drawn, 64 px until then (one or two lines).
+ */
 export function FoodRowLink({ href, name, meta, value, withBorderTop = true }: FoodRowLinkProps) {
   return (
     <Link
       href={href}
       data-food-row
-      className={`flex min-h-14 items-center gap-3 py-2 text-text no-underline m-tint transition-press ${
+      className={`flex min-h-14 items-center gap-3 py-2 text-text no-underline m-tint transition-press [content-visibility:auto] [contain-intrinsic-size:auto_64px] ${
         withBorderTop ? "border-t border-divider" : ""
       }`}
     >
