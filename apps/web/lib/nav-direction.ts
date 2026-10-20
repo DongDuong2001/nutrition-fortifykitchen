@@ -62,14 +62,20 @@ export function transitionClass(kind: NavKind): string {
 let poppedTo: string | null = null;
 let current: { path: string; kind: NavKind; popped: boolean } | null = null;
 
+/**
+ * cc-64 (P5): a view transition snapshots the whole screen twice; on a phone with 2 GB of memory or less that is a
+ * stutter, so a screen change is a hard cut there. Only a reported deviceMemory counts (Chrome reports it, Safari does
+ * not), never the core count: iPhones report 4 cores or more and keep the slide (Hao, 20/10).
+ */
+export function isLowEndDevice(nav: { deviceMemory?: number }): boolean {
+  return typeof nav.deviceMemory === "number" && nav.deviceMemory > 0 && nav.deviceMemory <= 2;
+}
+
 // cc-62 (S6): reduced motion keeps the view transition (globals.css turns it into a 120 ms cross-fade, nothing slides);
-// only Data Saver turns it off
+// only Data Saver and a low-end device turn it off
 const motionOff = () => {
   const nav = navigator as Navigator & { connection?: { saveData?: boolean }; deviceMemory?: number };
-  // cc-64 (P5): a view transition snapshots the whole screen twice; on a 2 GB or 4-core phone that is a stutter, so a
-  // screen change is a hard cut there
-  const lowEnd = (nav.deviceMemory !== undefined && nav.deviceMemory <= 2) || (nav.hardwareConcurrency > 0 && nav.hardwareConcurrency <= 4);
-  return nav.connection?.saveData === true || lowEnd;
+  return nav.connection?.saveData === true || isLowEndDevice(nav);
 };
 
 /** The /add sheet (data-sheet-route) already slid down by its ✕, the scrim or a drag: Back has nothing to animate. */

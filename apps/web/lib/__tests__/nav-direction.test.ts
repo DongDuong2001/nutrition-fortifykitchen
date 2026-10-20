@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { navKind, transitionClass } from "../nav-direction";
+import { isLowEndDevice, navKind, transitionClass } from "../nav-direction";
 
 const PUSH = { back: false, sheetClosed: false };
 const BACK = { back: true, sheetClosed: false };
@@ -52,5 +52,21 @@ describe("navKind (cc-55 route direction)", () => {
     expect(transitionClass("sheet-down")).toBe("m-vt-sheet-down");
     expect(transitionClass("tab")).toBe("none");
     expect(transitionClass("sheet-up")).toBe("none");
+  });
+});
+
+describe("isLowEndDevice (cc-64 P5, hard cut instead of a slide)", () => {
+  it("cuts only when deviceMemory is reported and at most 2 GB", () => {
+    expect(isLowEndDevice({ deviceMemory: 0.5 })).toBe(true);
+    expect(isLowEndDevice({ deviceMemory: 1 })).toBe(true);
+    expect(isLowEndDevice({ deviceMemory: 2 })).toBe(true);
+    expect(isLowEndDevice({ deviceMemory: 4 })).toBe(false);
+    expect(isLowEndDevice({ deviceMemory: 8 })).toBe(false);
+  });
+
+  it("never decides by core count: Safari reports no deviceMemory, so iPhones keep the slide", () => {
+    expect(isLowEndDevice({})).toBe(false);
+    expect(isLowEndDevice({ hardwareConcurrency: 4 } as { deviceMemory?: number })).toBe(false);
+    expect(isLowEndDevice({ deviceMemory: 4, hardwareConcurrency: 2 } as { deviceMemory?: number })).toBe(false);
   });
 });
