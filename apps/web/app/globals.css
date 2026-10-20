@@ -516,13 +516,12 @@
   transition-duration: var(--m-sheet-out);
 }
 /* A closing sheet takes no taps from the moment it starts to go (CSS, no re-render, nothing made inert under the slide), except
-   on its drag areas: a grab takes it back (cc-62). The scrim lets the taps through to the page at once. */
-.m-sheet[data-state="closed"],
-.m-sheet[data-state="closed"] * {
+   on its drag areas: a grab takes it back (cc-62). The scrim lets the taps through to the page at once. pointer-events inherits, so
+   the sheet alone says none (no universal selector over every node in it) and a drag area says auto for itself and what is in it. */
+.m-sheet[data-state="closed"] {
   pointer-events: none;
 }
-.m-sheet[data-state="closed"] [data-sheet-drag],
-.m-sheet[data-state="closed"] [data-sheet-drag] * {
+.m-sheet[data-state="closed"] [data-sheet-drag] {
   pointer-events: auto;
 }
 .m-scrim {

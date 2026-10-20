@@ -597,19 +597,27 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
   // Shared by the phone sheet and the desktop dialog
   const newFoodHref = mealSlot ? `/foods/new?meal=${mealSlot}` : "/foods/new";
   // The live catalogue is not here yet (or did not come): say that, never "no foods"
-  const emptyState = catalogPending || catalogFailed ? (
-    <CatalogStatus failed={catalogFailed} onRetry={retryCatalog} />
-  ) : (
-    <FoodEmptyState
-      query={query}
-      filter={filter}
-      noFavourites={noFavourites}
-      similarFoods={similarFoods}
-      getMeta={getFoodMeta}
-      onPickSimilar={(food) => pickFood(food)}
-      onClearFilter={() => setFilter("all")}
-      newFoodHref={newFoodHref}
-    />
+  const onPickSimilar = useCallback((food: FoodItem) => pickFood(food), [pickFood]);
+  const clearFilter = useCallback(() => setFilter("all"), [setFilter]);
+  // Memoised with the list's other props (listPick): a keystroke in the grams field must not redraw the list
+  const emptyState = useMemo(
+    () =>
+      catalogPending || catalogFailed ? (
+        <CatalogStatus failed={catalogFailed} onRetry={retryCatalog} />
+      ) : (
+        <FoodEmptyState
+          query={query}
+          filter={filter}
+          noFavourites={noFavourites}
+          similarFoods={similarFoods}
+          getMeta={getFoodMeta}
+          onPickSimilar={onPickSimilar}
+          onClearFilter={clearFilter}
+          newFoodHref={newFoodHref}
+        />
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [catalogPending, catalogFailed, retryCatalog, query, filter, noFavourites, similarFoods, newFoodHref]
   );
 
   // Chỉ ghi kcal, Gần đây and Bữa ăn của tôi: shared by the phone sheet and the desktop dialog
@@ -629,21 +637,28 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
     />
   );
 
-  const createFoodLink = <CreateFoodButton href={newFoodHref} />;
+  const createFoodLink = useMemo(() => <CreateFoodButton href={newFoodHref} />, [newFoodHref]);
 
-  // The list's selection props: one tapped row for the portion panel; the + circle of each row is the tray
-  const listPick = {
-    selectedId: selectedFood?.id,
-    onPick: pickFromList,
-    onOpen: favouritesOnly ? pickFood : undefined,
-    tray: {
-      ids: tray.map((t) => t.food.id),
-      onToggle: (food: FoodItem) => {
-        markUsed("tray-add");
-        setTray((t) => toggleTray(t, food));
-      },
-    },
-  };
+  // The list's selection props: one tapped row for the portion panel; the + circle of each row is the tray. Stable between renders
+  // (the callbacks read the latest handlers through a ref), so a keystroke in the grams field does not redraw the list.
+  const latest = useRef({ pickFromList, pickFood, setFilter });
+  latest.current = { pickFromList, pickFood, setFilter };
+  const onPickRow = useCallback((food: FoodItem) => latest.current.pickFromList(food), []);
+  const onOpenRow = useCallback((food: FoodItem) => latest.current.pickFood(food), []);
+  const onToggleTray = useCallback((food: FoodItem) => {
+    markUsed("tray-add");
+    setTray((t) => toggleTray(t, food));
+  }, []);
+  const trayIds = useMemo(() => tray.map((t) => t.food.id), [tray]);
+  const listPick = useMemo(
+    () => ({
+      selectedId: selectedFood?.id,
+      onPick: onPickRow,
+      onOpen: favouritesOnly ? onOpenRow : undefined,
+      tray: { ids: trayIds, onToggle: onToggleTray },
+    }),
+    [selectedFood?.id, onPickRow, favouritesOnly, onOpenRow, trayIds, onToggleTray]
+  );
 
   return (
     // Opened over a tab (the intercepting route) the page under it is the real screen, still mounted; nothing here is in the

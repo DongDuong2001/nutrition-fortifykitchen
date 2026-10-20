@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Suspense, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { Suspense, startTransition, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { whenIdle } from "@/lib/idle";
 import { loadFoodRows } from "@/lib/food-rows";
 import Link from "next/link";
@@ -119,9 +119,20 @@ const subscribeSheets = (listener: () => void) => {
   sheetListeners.add(listener);
   return () => void sheetListeners.delete(listener);
 };
-/** The sheets once their chunks are in (null before): mounted closed as soon as they are, so no first open waits for a chunk. */
+/**
+ * The sheets once their chunks are in (null before): mounted closed as soon as they are, so no first open waits for a chunk. The
+ * commit that mounts the nine of them is a transition: a render that lands in the middle of the add sheet's slide yields to it.
+ */
 function useHomeSheets(): HomeSheets | null {
-  return useSyncExternalStore(subscribeSheets, () => loadedSheets, () => null);
+  const [sheets, setSheets] = useState<HomeSheets | null>(() => loadedSheets);
+  useEffect(() => {
+    if (loadedSheets) {
+      setSheets(loadedSheets);
+      return;
+    }
+    return subscribeSheets(() => startTransition(() => setSheets(loadedSheets)));
+  }, []);
+  return sheets;
 }
 /** True from the first time `open` is true, or from `ready`: a sheet is mounted closed once its chunk is in, so it costs nothing before that. */
 function useOnceOpen(open: boolean, ready = false): boolean {
@@ -298,21 +309,35 @@ function HomeContent() {
     setClientNow(true);
   }, []);
 
-  // cc-58: fetch the sheet chunks on the first touch, or when the browser is idle, whichever comes first
+  // cc-58: fetch the sheet chunks on the first touch, or when the browser is idle, whichever comes first. Never on the + that opens
+  // the add sheet (the chunks and the mount of nine sheets would land in its slide): that touch is skipped, the next one or the idle
+  // moment loads them, and only while Hôm nay is the page (not while the sheet is up over it).
   useEffect(() => {
     let done = false;
+    let idle: number | undefined;
+    let retry: number | undefined;
     const go = () => {
       if (done) return;
+      if (window.location.pathname !== HOME_ROUTE) {
+        retry = window.setTimeout(go, 800);
+        return;
+      }
       done = true;
-      document.removeEventListener("pointerdown", go, true);
+      document.removeEventListener("pointerdown", onTouch, true);
       loadSheets();
     };
-    document.addEventListener("pointerdown", go, { capture: true, passive: true });
-    const idle = typeof requestIdleCallback === "function" ? requestIdleCallback(go, { timeout: 3000 }) : window.setTimeout(go, 1500);
+    const onTouch = (e: PointerEvent) => {
+      if ((e.target as Element | null)?.closest?.('#mobile-add-fab, #desktop-add-btn, a[href^="/add"]')) return;
+      go();
+    };
+    document.addEventListener("pointerdown", onTouch, { capture: true, passive: true });
+    idle = typeof requestIdleCallback === "function" ? requestIdleCallback(go, { timeout: 3000 }) : window.setTimeout(go, 1500);
     return () => {
-      document.removeEventListener("pointerdown", go, true);
+      done = true;
+      document.removeEventListener("pointerdown", onTouch, true);
       if (typeof requestIdleCallback === "function") cancelIdleCallback(idle as number);
-      else window.clearTimeout(idle as number);
+      else window.clearTimeout(idle);
+      window.clearTimeout(retry);
     };
   }, []);
 
