@@ -141,7 +141,7 @@ func SetupRouter(cfg *config.Config, pool *pgxpool.Pool) chi.Router {
 		logger.Log.Fatal().Msg("Authentication configuration missing: SUPABASE_JWT_SECRET (or SUPABASE_SERVICE_ROLE_KEY) or SUPABASE_JWKS_URL (or SUPABASE_URL) is required to start the server")
 	}
 
-	authMiddleware := auth.NewMiddleware().WithAllowedOrigins(cfg.AllowedOrigins).WithRoleLookup(profileRepo)
+	authMiddleware := auth.NewMiddleware().WithAllowedOrigins(cfg.AllowedOrigins).WithRoleLookup(profileRepo).WithSessionChecker(auth.NewDBSessionChecker(pool))
 
 	// Setup Chi Router
 	r := chi.NewRouter()
@@ -225,6 +225,9 @@ func SetupRouter(cfg *config.Config, pool *pgxpool.Pool) chi.Router {
 		r.Group(func(r chi.Router) {
 			r.Use(authMiddleware.Authenticate)
 			r.Use(userRateLimiter.LimitWrites)
+
+			// Payments (Phase 2)
+			r.Post("/payments/create-link", paymentHandler.CreatePaymentLink)
 
 			// Profile & Weight endpoints (Phase 1)
 			r.Route("/me", func(r chi.Router) {

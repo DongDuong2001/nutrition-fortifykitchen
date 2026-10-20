@@ -584,3 +584,60 @@ func TestMatchOrigin(t *testing.T) {
 		t.Error("wildcard should allow any origin")
 	}
 }
+
+type stubSessionChecker struct {
+	revokedSessions map[uuid.UUID]bool
+}
+
+func (s *stubSessionChecker) IsSessionRevoked(ctx context.Context, sessionID uuid.UUID) (bool, error) {
+	return s.revokedSessions[sessionID], nil
+}
+
+func TestAuthMiddleware_SessionRevocation(t *testing.T) {
+	secret := []byte("super-secret-key-12345-very-long")
+	sessionID := uuid.New()
+	userID := uuid.New()
+
+	claims := auth.SupabaseClaims{
+		Sub:       userID.String(),
+		SessionID: sessionID.String(),
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenStr, err := token.SignedString(secret)
+	if err != nil {
+		t.Fatalf("failed to sign token: %v", err)
+	}
+
+	checker := &stubSessionChecker{
+		revokedSessions: map[uuid.UUID]bool{
+			sessionID: true,
+		},
+	}
+
+	mw := auth.NewMiddlewareWithSecret(secret).WithSessionChecker(checker)
+
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+
+	// Test Authenticate with revoked session returns 401
+	req := httptest.NewRequest("GET", "/api/v1/days/today", nil)
+	req.Header.Set("Authorization", "Bearer "+tokenStr)
+	rec := httptest.NewRecorder()
+	mw.Authenticate(handler).ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("expected 401 Unauthorized for revoked session, got %d", rec.Code)
+	}
+	if !strings.Contains(rec.Body.String(), "session revoked") {
+		t.Errorf("expected 'session revoked' in body, got %s", rec.Body.String())
+	}
+
+	// Test Authenticate when unrevoked
+	checker.revokedSessions[sessionID] = false
+	rec2 := httptest.NewRecorder()
+	mw.Authenticate(handler).ServeHTTP(rec2, req)
+	if rec2.Code != http.StatusOK {
+		t.Fatalf("expected 200 OK for valid session, got %d", rec2.Code)
+	}
+}

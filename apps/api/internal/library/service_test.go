@@ -2,6 +2,7 @@ package library
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/google/uuid"
@@ -162,5 +163,40 @@ func TestLibraryService_AddFromSaved(t *testing.T) {
 	// Check recents were updated
 	if len(repo.recents) != 2 {
 		t.Errorf("expected 2 recent foods recorded, got %d", len(repo.recents))
+	}
+}
+
+type errDiaryService struct {
+	mockDiaryService
+	err error
+}
+
+func (e *errDiaryService) CreateEntry(ctx context.Context, userID uuid.UUID, date string, req diary.CreateEntryRequest) (*diary.DiaryEntryItem, map[string]*float64, error) {
+	return nil, nil, e.err
+}
+
+func TestLibraryService_AddFromSaved_ErrorPropagation(t *testing.T) {
+	repo := newMockLibRepo()
+	expectedErr := errors.New("db insert failed")
+	dService := &errDiaryService{err: expectedErr}
+	svc := NewService(repo, dService)
+
+	userID := uuid.New()
+	f1 := uuid.New()
+
+	meal, err := svc.CreateSavedMeal(context.Background(), userID, CreateSavedMealRequest{
+		Name: "Test meal",
+		Items: []SavedMealItem{
+			{FoodID: f1, PortionLabel: "100 g", Grams: 100},
+		},
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	today := diary.GetServerToday()
+	_, err = svc.AddFromSaved(context.Background(), userID, today, meal.ID, "dinner")
+	if !errors.Is(err, expectedErr) {
+		t.Fatalf("expected error %v, got %v", expectedErr, err)
 	}
 }

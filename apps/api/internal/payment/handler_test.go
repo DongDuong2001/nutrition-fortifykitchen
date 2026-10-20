@@ -8,6 +8,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/google/uuid"
+	"nutrition-api/internal/auth"
 	"nutrition-api/internal/payment"
 )
 
@@ -20,6 +22,15 @@ func (s stubService) VerifySignature(payload payment.PayOSWebhookPayload) bool {
 
 func (s stubService) ProcessPaymentWebhook(ctx context.Context, payload payment.PayOSWebhookPayload) error {
 	return s.processErr
+}
+
+func (s stubService) CreatePaymentLink(ctx context.Context, userID uuid.UUID, req payment.CreatePaymentLinkRequest) (*payment.CreatePaymentLinkResponse, error) {
+	return &payment.CreatePaymentLinkResponse{
+		OrderCode:   12345,
+		Amount:      99000,
+		CheckoutURL: "https://pay.payos.vn/web/12345",
+		Status:      "PENDING",
+	}, nil
 }
 
 func TestWebhook_ProcessErrorIsNotLeaked(t *testing.T) {
@@ -69,5 +80,34 @@ func TestWebhook_BadSignatureIs401(t *testing.T) {
 
 	if rec.Code != http.StatusUnauthorized {
 		t.Fatalf("expected 401, got %d", rec.Code)
+	}
+}
+
+func TestCreatePaymentLink_UnauthorizedWithoutAuth(t *testing.T) {
+	h := payment.NewHandler(stubService{verifyOK: true})
+	req := httptest.NewRequest(http.MethodPost, "/payments/create-link", strings.NewReader(`{"plan":"pro_monthly"}`))
+	rec := httptest.NewRecorder()
+
+	h.CreatePaymentLink(rec, req)
+
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("expected 401, got %d", rec.Code)
+	}
+}
+
+func TestCreatePaymentLink_SuccessWithAuth(t *testing.T) {
+	h := payment.NewHandler(stubService{verifyOK: true})
+	req := httptest.NewRequest(http.MethodPost, "/payments/create-link", strings.NewReader(`{"plan":"pro_yearly"}`))
+	ctx := context.WithValue(req.Context(), auth.UserIDKey, uuid.New())
+	req = req.WithContext(ctx)
+	rec := httptest.NewRecorder()
+
+	h.CreatePaymentLink(rec, req)
+
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("expected 201, got %d: %s", rec.Code, rec.Body.String())
+	}
+	if !strings.Contains(rec.Body.String(), "https://pay.payos.vn/web/12345") {
+		t.Errorf("expected checkoutUrl in response, got %s", rec.Body.String())
 	}
 }

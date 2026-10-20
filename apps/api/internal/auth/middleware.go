@@ -9,9 +9,12 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"nutrition-api/internal/logger"
 	"nutrition-api/pkg/response"
 )
@@ -26,10 +29,11 @@ const (
 
 // SupabaseClaims represents the standard Supabase Auth JWT claims
 type SupabaseClaims struct {
-	Sub         string                 `json:"sub"`
-	Email       string                 `json:"email"`
-	Role        string                 `json:"role"`
-	AppMetadata map[string]interface{} `json:"app_metadata"`
+	Sub          string                 `json:"sub"`
+	Email        string                 `json:"email"`
+	Role         string                 `json:"role"`
+	SessionID    string                 `json:"session_id,omitempty"`
+	AppMetadata  map[string]interface{} `json:"app_metadata"`
 	UserMetadata map[string]interface{} `json:"user_metadata"`
 	jwt.RegisteredClaims
 }
@@ -43,12 +47,71 @@ type RoleLookup interface {
 	GetRole(ctx context.Context, userID uuid.UUID) (string, error)
 }
 
+// SessionChecker verifies whether a session ID is still valid (not revoked / deleted in auth.sessions).
+type SessionChecker interface {
+	IsSessionRevoked(ctx context.Context, sessionID uuid.UUID) (bool, error)
+}
+
+type sessionCacheEntry struct {
+	revoked bool
+	expires time.Time
+}
+
+// DBSessionChecker checks session validity against auth.sessions with an in-memory TTL cache to preserve VPS performance.
+type DBSessionChecker struct {
+	pool  *pgxpool.Pool
+	mu    sync.RWMutex
+	cache map[uuid.UUID]sessionCacheEntry
+}
+
+func NewDBSessionChecker(pool *pgxpool.Pool) *DBSessionChecker {
+	return &DBSessionChecker{
+		pool:  pool,
+		cache: make(map[uuid.UUID]sessionCacheEntry),
+	}
+}
+
+func (c *DBSessionChecker) IsSessionRevoked(ctx context.Context, sessionID uuid.UUID) (bool, error) {
+	if c.pool == nil {
+		return false, nil
+	}
+
+	now := time.Now()
+	c.mu.RLock()
+	entry, ok := c.cache[sessionID]
+	c.mu.RUnlock()
+	if ok && entry.expires.After(now) {
+		return entry.revoked, nil
+	}
+
+	var exists bool
+	err := c.pool.QueryRow(ctx, "SELECT EXISTS(SELECT 1 FROM auth.sessions WHERE id = $1 AND (not_after IS NULL OR not_after > NOW()))", sessionID).Scan(&exists)
+	if err != nil {
+		return false, nil // Table absent or error, fail open
+	}
+
+	revoked := !exists
+
+	c.mu.Lock()
+	if len(c.cache) > 5000 {
+		c.cache = make(map[uuid.UUID]sessionCacheEntry)
+	}
+	c.cache[sessionID] = sessionCacheEntry{
+		revoked: revoked,
+		expires: now.Add(30 * time.Second),
+	}
+	c.mu.Unlock()
+
+	return revoked, nil
+}
+
 // Middleware handles JWT authentication and user context injection
 type Middleware struct {
 	jwtSecret      []byte
 	jwksCache      *JWKSCache
 	allowedOrigins []string
 	roles          RoleLookup
+	sessions       SessionChecker
 }
 
 func defaultAllowedOrigins() []string {
@@ -135,6 +198,12 @@ func (m *Middleware) WithAllowedOrigins(origins []string) *Middleware {
 // Without one, both deny every request with 500 (fail closed).
 func (m *Middleware) WithRoleLookup(l RoleLookup) *Middleware {
 	m.roles = l
+	return m
+}
+
+// WithSessionChecker sets the session revocation checker used to reject revoked sessions.
+func (m *Middleware) WithSessionChecker(s SessionChecker) *Middleware {
+	m.sessions = s
 	return m
 }
 
@@ -313,6 +382,15 @@ func (m *Middleware) Authenticate(next http.Handler) http.Handler {
 			return
 		}
 
+		if m.sessions != nil && claims.SessionID != "" {
+			if sID, err := uuid.Parse(claims.SessionID); err == nil {
+				if revoked, _ := m.sessions.IsSessionRevoked(r.Context(), sID); revoked {
+					response.Error(w, http.StatusUnauthorized, response.CodeUnauthorized, "session revoked")
+					return
+				}
+			}
+		}
+
 		// Inject user id and claims into context
 		ctx := context.WithValue(r.Context(), UserIDKey, *parsedUserID)
 		ctx = context.WithValue(ctx, ClaimsKey, claims)
@@ -336,6 +414,15 @@ func (m *Middleware) OptionalAuthenticate(next http.Handler) http.Handler {
 			// Token invalid or expired, continue as guest
 			next.ServeHTTP(w, r)
 			return
+		}
+
+		if m.sessions != nil && claims.SessionID != "" {
+			if sID, err := uuid.Parse(claims.SessionID); err == nil {
+				if revoked, _ := m.sessions.IsSessionRevoked(r.Context(), sID); revoked {
+					next.ServeHTTP(w, r)
+					return
+				}
+			}
 		}
 
 		ctx := context.WithValue(r.Context(), UserIDKey, *parsedUserID)
