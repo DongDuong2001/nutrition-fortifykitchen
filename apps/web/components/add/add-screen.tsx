@@ -50,6 +50,7 @@ import { useMealSlot } from "@/lib/use-meal-slot";
 import { HOME_ROUTE } from "@/lib/nav";
 import { takeBackSheetEntries } from "@/lib/sheet-history";
 import { homeDay } from "@/lib/home-scroll";
+import { lockBodyScroll } from "@/lib/body-scroll-lock";
 import { SHEET_CATCH_UP_MS, SHEET_EXIT_MS, SHEET_QUICK_ENTER_MS, useSheetDrag } from "@/components/ui/sheet";
 import { setInertExceptDrag } from "@/components/ui/sheet-drag-controller";
 import { haptic } from "@/lib/haptics";
@@ -152,9 +153,35 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
       });
     }
   }, []);
-  // Focus goes into the dialog: the search field. A centred dialog gets it at once; the phone sheet when its slide has
-  // settled, so the keyboard never starts a third motion under the sheet and the scrim (and never moves a sheet that is
-  // still on its way up). Nothing is taken from a field the person already tapped.
+  // Phone: the page behind does not scroll (iOS Safari scrolls it when the keyboard opens). Counted with the portion sheet's own lock.
+  useEffect(() => {
+    if (isDesktop) return;
+    return lockBodyScroll();
+  }, [isDesktop]);
+
+  // Phone: the panel lifts above the on-screen keyboard. The `translate` property, not `transform`: the drag and the release
+  // animation own `transform` (sheet-drag-controller, use-sheet-drag read and write it).
+  useEffect(() => {
+    if (isDesktop) return;
+    const vv = window.visualViewport;
+    const panel = panelRef.current;
+    if (!vv || !panel) return;
+    const lift = () => {
+      const keyboard = window.innerHeight - vv.height - vv.offsetTop;
+      panel.style.translate = keyboard > 100 ? `0 -${Math.round(keyboard)}px` : "";
+    };
+    vv.addEventListener("resize", lift);
+    vv.addEventListener("scroll", lift);
+    return () => {
+      vv.removeEventListener("resize", lift);
+      vv.removeEventListener("scroll", lift);
+      panel.style.translate = "";
+    };
+  }, [isDesktop]);
+
+  // Focus goes into the dialog: the search field. A centred dialog gets it at once; the phone sheet once, when its slide has
+  // settled (at once under reduced motion), so the keyboard never starts a third motion under the sheet and the scrim. Nothing
+  // is taken from a field the person already tapped, and nothing at all when they touched the panel during the slide.
   useEffect(() => {
     // The field the screen focuses itself is marked: a tip may still come over it until someone types (lib/interruption)
     const autofocus = (input: HTMLInputElement | null, options?: FocusOptions) => {
@@ -168,9 +195,18 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
     }
     const panel = panelRef.current;
     let done = false;
+    let touched = false;
+    let timer: number | undefined;
+    const cleanup = () => {
+      panel?.removeEventListener("transitionend", onEnd);
+      panel?.removeEventListener("pointerdown", onTouch, true);
+      window.clearTimeout(timer);
+    };
     const focusSearch = () => {
       if (done) return;
       done = true;
+      cleanup();
+      if (touched) return;
       const active = document.activeElement;
       if (active && active !== document.body && active.matches("input, textarea") && panel?.contains(active)) return;
       autofocus(phoneSearchInputRef.current, { preventScroll: true });
@@ -178,13 +214,21 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
     const onEnd = (e: TransitionEvent) => {
       if (e.target === panel) focusSearch();
     };
+    const onTouch = (e: Event) => {
+      const input = phoneSearchInputRef.current;
+      if (!(input && (e.target === input || input.contains(e.target as Node)))) touched = true;
+    };
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      focusSearch();
+      return;
+    }
     panel?.addEventListener("transitionend", onEnd);
-    // A reduced-motion or interrupted slide may end with no event of its own: never wait longer than the slide takes
-    const timer = window.setTimeout(focusSearch, SHEET_QUICK_ENTER_MS + 100);
+    panel?.addEventListener("pointerdown", onTouch, true);
+    // A slide that was interrupted may end with no event of its own: never wait longer than the slide takes
+    timer = window.setTimeout(focusSearch, SHEET_QUICK_ENTER_MS + 100);
     return () => {
       done = true;
-      panel?.removeEventListener("transitionend", onEnd);
-      window.clearTimeout(timer);
+      cleanup();
     };
   }, [isDesktop]);
 
@@ -370,9 +414,15 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
   // The grams a save logs: the parts added up for a changed dish
   const loggedGrams = dishEdit?.edited ? dishEdit.grams : parsedGrams;
 
+  // The add lock: one tap on a recent (or a favourite with history) adds with the last portion, a portion sheet's Thêm saves
+  // A ref, not state: two taps in the same frame must not both add (the second would replace the undo of the first)
+  const oneTapLock = useRef(false);
+
   // Submit action
   const handleAddFood = async () => {
-    if (!selectedFood || loggedGrams <= 0 || isSubmitting || mealSlot === null) return;
+    if (closingRef.current || oneTapLock.current || !selectedFood || loggedGrams <= 0 || isSubmitting || mealSlot === null) return;
+    // A ref, not only the state: two taps in the same frame both see isSubmitting false
+    oneTapLock.current = true;
     setIsSubmitting(true);
     let saved = false;
     try {
@@ -386,7 +436,10 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
       }
     } finally {
       // After a save the buttons stay as they are until the sheet is gone: nothing to press twice, no label that changes
-      if (!saved) setIsSubmitting(false);
+      if (!saved) {
+        oneTapLock.current = false;
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -405,7 +458,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
   const trayTotalsNow = useMemo(() => trayTotals(tray), [tray]);
   const trayAddable = canAddTray(tray);
   const handleAddTray = () => {
-    if (!trayAddable || mealSlot === null || isSubmitting) return;
+    if (closingRef.current || !trayAddable || mealSlot === null || isSubmitting) return;
     setIsSubmitting(true);
     if (addFoodEntries(tray, mealSlot, addToDay)) {
       // The tray is left as it is: it goes with the sheet, so the button never reads "Thêm 0 món" while the sheet slides away
@@ -415,12 +468,9 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
     }
   };
 
-  // One tap on a recent (or a favourite with history): add with the last portion, 5 s undo, back to the diary
-  // A ref, not state: two taps in the same frame must not both add (the second would replace the undo of the first)
-  const oneTapLock = useRef(false);
 
   const addWithPortion = async (food: FoodItem, grams: number, label: string) => {
-    if (oneTapLock.current || isSubmitting || mealSlot === null) return;
+    if (closingRef.current || oneTapLock.current || isSubmitting || mealSlot === null) return;
     // Unknown energy cannot be logged in one tap: open the portion panel, which says why
     if (!canLog(food)) {
       pickFood(food, { label, grams });
@@ -437,14 +487,14 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
   };
 
   const addSavedMealToMeal = (meal: SavedMeal) => {
-    if (oneTapLock.current || mealSlot === null) return;
+    if (closingRef.current || oneTapLock.current || mealSlot === null) return;
     oneTapLock.current = true;
     addSavedMeal(meal, mealSlot, addToDay);
     leave(homeHref);
   };
 
   const submitQuickEntry = (input: QuickEntryInput): QuickEntryResult => {
-    if (oneTapLock.current) return { ok: false, field: "kcal", message: "Đang thêm…" };
+    if (closingRef.current || oneTapLock.current) return { ok: false, field: "kcal", message: "Đang thêm…" };
     if (mealSlot === null) return { ok: false, field: "kcal", message: "Chưa chọn bữa" };
     const result = addQuickEntry(input, mealSlot, addToDay);
     if (result.ok) {
@@ -574,19 +624,27 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
   // Shared by the phone sheet and the desktop dialog
   const newFoodHref = mealSlot ? `/foods/new?meal=${mealSlot}` : "/foods/new";
   // The live catalogue is not here yet (or did not come): say that, never "no foods"
-  const emptyState = catalogPending || catalogFailed ? (
-    <CatalogStatus failed={catalogFailed} onRetry={retryCatalog} />
-  ) : (
-    <FoodEmptyState
-      query={query}
-      filter={filter}
-      noFavourites={noFavourites}
-      similarFoods={similarFoods}
-      getMeta={getFoodMeta}
-      onPickSimilar={(food) => pickFood(food)}
-      onClearFilter={() => setFilter("all")}
-      newFoodHref={newFoodHref}
-    />
+  const onPickSimilar = useCallback((food: FoodItem) => pickFood(food), [pickFood]);
+  const clearFilter = useCallback(() => setFilter("all"), [setFilter]);
+  // Memoised with the list's other props (listPick): a keystroke in the grams field must not redraw the list
+  const emptyState = useMemo(
+    () =>
+      catalogPending || catalogFailed ? (
+        <CatalogStatus failed={catalogFailed} onRetry={retryCatalog} />
+      ) : (
+        <FoodEmptyState
+          query={query}
+          filter={filter}
+          noFavourites={noFavourites}
+          similarFoods={similarFoods}
+          getMeta={getFoodMeta}
+          onPickSimilar={onPickSimilar}
+          onClearFilter={clearFilter}
+          newFoodHref={newFoodHref}
+        />
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [catalogPending, catalogFailed, retryCatalog, query, filter, noFavourites, similarFoods, newFoodHref]
   );
 
   // Chỉ ghi kcal, Gần đây and Bữa ăn của tôi: shared by the phone sheet and the desktop dialog
@@ -606,21 +664,28 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
     />
   );
 
-  const createFoodLink = <CreateFoodButton href={newFoodHref} />;
+  const createFoodLink = useMemo(() => <CreateFoodButton href={newFoodHref} />, [newFoodHref]);
 
-  // The list's selection props: one tapped row for the portion panel; the + circle of each row is the tray
-  const listPick = {
-    selectedId: selectedFood?.id,
-    onPick: pickFromList,
-    onOpen: favouritesOnly ? pickFood : undefined,
-    tray: {
-      ids: tray.map((t) => t.food.id),
-      onToggle: (food: FoodItem) => {
-        markUsed("tray-add");
-        setTray((t) => toggleTray(t, food));
-      },
-    },
-  };
+  // The list's selection props: one tapped row for the portion panel; the + circle of each row is the tray. Stable between renders
+  // (the callbacks read the latest handlers through a ref), so a keystroke in the grams field does not redraw the list.
+  const latest = useRef({ pickFromList, pickFood, setFilter });
+  latest.current = { pickFromList, pickFood, setFilter };
+  const onPickRow = useCallback((food: FoodItem) => latest.current.pickFromList(food), []);
+  const onOpenRow = useCallback((food: FoodItem) => latest.current.pickFood(food), []);
+  const onToggleTray = useCallback((food: FoodItem) => {
+    markUsed("tray-add");
+    setTray((t) => toggleTray(t, food));
+  }, []);
+  const trayIds = useMemo(() => tray.map((t) => t.food.id), [tray]);
+  const listPick = useMemo(
+    () => ({
+      selectedId: selectedFood?.id,
+      onPick: onPickRow,
+      onOpen: favouritesOnly ? onOpenRow : undefined,
+      tray: { ids: trayIds, onToggle: onToggleTray },
+    }),
+    [selectedFood?.id, onPickRow, favouritesOnly, onOpenRow, trayIds, onToggleTray]
+  );
 
   // Opened straight the sheet is the whole page: its landmark is <main>. Over a tab the page under it has its own (and is inert).
   const Root = standalone ? "main" : "div";

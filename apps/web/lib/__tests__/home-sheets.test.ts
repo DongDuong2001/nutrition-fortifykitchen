@@ -16,9 +16,16 @@ describe("Hôm nay's lazy sheets", () => {
 
   it("resolve their modules on the first touch or when idle, into one module variable every screen reads", () => {
     expect(src).toContain("let loadedSheets: HomeSheets | null = null;");
-    expect(src).toContain("useSyncExternalStore(subscribeSheets, () => loadedSheets");
-    expect(src).toMatch(/document\.addEventListener\("pointerdown", go, \{ capture: true, passive: true \}\)/);
+    expect(src).toContain("subscribeSheets(() => startTransition(() => setSheets(loadedSheets)))");
+    expect(src).toMatch(/document\.addEventListener\("pointerdown", onTouch, \{ capture: true, passive: true \}\)/);
     expect(src).toMatch(/requestIdleCallback\(go, \{ timeout: 3000 \}\)/);
+  });
+
+  it("mount the nine closed sheets in a transition, and never load them from the touch on the + that opens the add sheet", () => {
+    expect(src).toMatch(/startTransition\(\(\) => setSheets\(loadedSheets\)\)/);
+    expect(src).toContain('closest?.(\'#mobile-add-fab, #desktop-add-btn, a[href^="/add"]\')');
+    // …and only while Hôm nay is the page, not while the add sheet is up over it
+    expect(src).toMatch(/window\.location\.pathname !== HOME_ROUTE/);
   });
 
   it("mount each sheet closed once its chunk is in (the second argument of useOnceOpen)", () => {

@@ -237,8 +237,10 @@ describe("cc-57 motion details", () => {
   });
 
   it("a closing sheet and its scrim take no taps from the moment they start to go, except on a sheet's drag areas", () => {
-    expect(css).toMatch(/\.m-sheet\[data-state="closed"\],\s*\.m-sheet\[data-state="closed"\] \* \{\s*pointer-events: none;/);
-    expect(css).toMatch(/\.m-sheet\[data-state="closed"\] \[data-sheet-drag\],\s*\.m-sheet\[data-state="closed"\] \[data-sheet-drag\] \* \{\s*pointer-events: auto;/);
+    expect(css).toMatch(/\.m-sheet\[data-state="closed"\] \{\s*pointer-events: none;/);
+    // pointer-events inherits: no selector over every node of a closing sheet
+    expect(css).not.toMatch(/\.m-sheet\[data-state="closed"\] \*/);
+    expect(css).toMatch(/\.m-sheet\[data-state="closed"\] \[data-sheet-drag\] \{\s*pointer-events: auto;/);
     expect(css).toMatch(/\.m-scrim\[data-state="closed"\] \{[^}]*pointer-events: none;/);
   });
 

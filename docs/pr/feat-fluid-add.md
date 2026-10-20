@@ -125,6 +125,32 @@ Filmstrips (frames from just before the tap, each labelled with ms since it; a f
 | snap: frames with no movement after the release | 0 | 0 | 0 | 0 |
 
 
+## Review fixes (21/10, after Hao's review)
+
+| # | What | Where |
+|---|---|---|
+| 1 | **Stuck sheet after an add from another tab.** `router.replace("/app")` from Khám phá, Tổng quan or Cài đặt left the sheet's slot as it was (Next keeps a parallel slot's state on a soft navigation when the new URL matches none of its pages): the panel stayed mounted, closed, with `[data-app-frame]` inert, so the app took no taps. The slot now has a page that draws nothing for each tab (`@sheet/app`, `explore`, `trends`, `settings`). A `[...catchAll]` would do it in one file, but the build refuses it ("Every page must be part of at least one complete route": strict route matching leaves `/add` without a canonical route). Probe `add_from_tabs.py`: from the three tabs, tray add, one-tap add and ✕, then a reload on /add and an add; it failed before the fix (a nav tap was intercepted by the body) and passes after. | `app/(app)/(tabs)/@sheet/{app,explore,trends,settings}/page.tsx`, `default.tsx` |
+| 2 | **PR #29's /add behaviours, ported into `add-screen.tsx`** (see the note for Dong below): the page behind the phone sheet is locked, counted (`lib/body-scroll-lock.ts`, the Sheet uses it too, so the portion sheet closing first no longer gives the page its scroll back under the add sheet); the panel lifts above the keyboard from `visualViewport` (resize and scroll) with the `translate` property, never `transform` (the drag and the release own it); the search field is focused once after the slide (a done flag, nothing if the panel was touched during the slide, at once under reduced motion, listeners and timer cleared); a first letter waits 120 ms before the list follows it, two letters or more do not (`hooks/use-food-browse.ts`). | `components/add/add-screen.tsx`, `components/ui/sheet.tsx`, `lib/body-scroll-lock.ts`, `hooks/use-food-browse.ts` |
+| 3 | **The day under the sheet no longer flips.** Hôm nay read `date` from the live address, so an opener that carries none (older days: the meal's + Thêm, the first-run, the desktop intro, a read-only day) flipped the day to today under the sheet and back. The day is read only while the pathname is /app. The probe fails without the fix (the header went "Chủ nhật 18/10" → "Hôm nay 21/10"). | `components/home/home-screen.tsx` |
+| 4 | **Double add.** Every add function returns at once when the sheet is already closing; the portion sheet's Thêm also takes the add lock before its first await (two clicks in one frame added two entries: 7 → 9 before the fix, 7 → 8 after). | `components/add/add-screen.tsx` |
+| 5 | **Probes at full strength again.** `fluid_add.py` samples the hold tint every frame (rising, at least four values, from under 0.5 by at least 0.3) instead of accepting a tint stuck at 1; `cc_62_sheet.py` checks the WAAPI release for real (one animation on the panel, `linear()` easing, 100–400 ms, back to `translateY(0px)`, cancelled once settled) instead of "no chunk was fetched"; `cc_49.py` part 4 (live build, by hand) accepts the report's `/add` only when the sheet was closing then, and the sheet is gone after. New: `add_from_tabs.py` (item 1, `?meal=` from the link and from the sheet over Hôm nay, Android back during the slide, the rapid double add, the day under the sheet, and item 2's scroll lock, keyboard lift, focus and debounce). | `tests/probes/` |
+| 6 | **Lazy sheets.** The nine closed sheets are mounted in `startTransition`, and the chunks are no longer fetched from the touch on the + (the next touch or the idle moment loads them, and only while Hôm nay is the page). Not done: Calendar, CopyYesterday and Sources still read the diary context while closed: a closed Sheet returns null, so each re-render costs nothing, and avoiding it means splitting their title and description out of the Sheet props. | `components/home/home-screen.tsx` |
+| 7 | `.m-sheet[data-state="closed"] *` is gone: pointer-events inherits from the sheet; the drag-handle exception stays (`[data-sheet-drag]`). `motion.test.ts` checks there is no universal selector. | `app/globals.css` |
+| 8 | **Render cost.** `listPick` is memoised (the callbacks read the latest handlers through a ref), the empty state and the create-food link too, and `FoodList` is `React.memo`: a keystroke in the grams field does not redraw the rows; the query stays urgent and the list deferred. | `components/add/add-screen.tsx`, `components/foods/food-list.tsx` |
+| 9 | The unused `motion` dependency is gone (`package.json` and the lockfile: `motion`, `framer-motion`, `motion-dom`, `motion-utils`; nothing imports it). | `package.json`, `package-lock.json` |
+
+**Route table.** Next 16's webpack build prints no First Load JS column, so `tests/probes/_route_js.py` loads each route cold (390 px phone, demo build) and adds up the gzip size of every script until the network is idle:
+
+| Route | origin/main | feat/fluid-add |
+|---|---|---|
+| /app | 55 scripts, 400.4 kB | 55 scripts, 401.4 kB |
+| /add (opened straight) | 46 scripts, 376.5 kB | 28 scripts, 267.6 kB |
+| /explore | 45 scripts, 366.5 kB | 45 scripts, 368.6 kB |
+
+/app and /explore carry about 1–2 kB more; /add opened straight loads about 109 kB (gzip) less. I did not break the difference down by chunk, so the reason is not stated here (the page shell no longer draws the second copy of the list, and the shared sheet code is split differently, but that is a guess).
+
+**For Dong (PR #29, `feat/ui-ag-18`).** The edits #29 makes to `app/(app)/add/page.tsx` (scroll lock, keyboard lift, focus after the slide, the 1-letter debounce) are in `components/add/add-screen.tsx` and `hooks/use-food-browse.ts` here, where the page's code moved. When you merge main into #29, take main's version of those add files (the page is now a two-line wrapper); the rest of #29 (search.ts, api-client, scripts) does not touch them.
+
 ## Routing and back-button behaviour (changed)
 
 - **`/add` from a tab** (the + of the nav, a meal's + Thêm, the sidebar button): the URL is still `/add` (or `/add?meal=…&date=…`), but
@@ -158,6 +184,21 @@ gate:full: all green
 - By hand, on a live-mode build (`LIVE_BUILD=1`, not part of probe:all): `cc_68.py` (A, B, C, D, E: offline add, yesterday add through `/add?date=…`, sync status, sign-out) passes, `hotfix_late_writes.py` and `hotfix_recipes.py` pass, `cc_49.py` passes except its part 7, which fails the same way on origin/main.
 - New: `tests/probes/fluid_add.py` (what the flow promises; in the gate, tagged smoke), `tests/probes/_fluid_add_measure.py` (the numbers above), unit tests for the sheet physics, the controller, the sheet entries, press feedback, the touch-drag landing, the toast swipe, the nav's +, the lazy sheets and the new CSS rules (`motion.test.ts`).
 
+
+### After the review fixes (head of the branch, port 3126)
+
+```
+gate:full: 658 s wall clock
+  typecheck       ok      0 s
+  vitest          ok      5 s   (164 files, 2077 tests, 1 skipped)
+  build:demo      ok      7 s
+  test:align      ok     73 s
+  test:hydration  ok    109 s
+  probe:all       ok    645 s   probe:all: 113 PASS, 4 REPORT, 0 QUAR, 0 FAIL, 1 SKIP
+gate:full: all green
+```
+- `gate:fast` was not run per commit this round: the probes the changes touch (`add_from_tabs`, `fluid_add`, `cc_62_sheet`, `cc_57_strips`, and `cc_49` part 4 on a live build by hand) were run after each change, and gate:full covers the rest.
+- Each new check was run against the unfixed code first: the stuck sheet (item 1), the day flip (3) and the double add (4) failed there and pass now.
 
 ## For Hao
 

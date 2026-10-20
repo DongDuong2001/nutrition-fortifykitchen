@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useDeferredValue, useMemo, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
 import type { FoodItem } from "@/lib/mock/foods";
 import { useCatalogFoods } from "@/hooks/use-catalog-foods";
 import { findSimilarFoods } from "@/lib/search";
@@ -24,9 +24,21 @@ export function useFoodBrowse({ oneRowPerFood = true, enabled = true }: { oneRow
   const { foods, version, pending: catalogPending, failed: catalogFailed, retry: retryCatalog } = useCatalogFoods();
   const [filter, setFilter] = useState<FoodFilter>("all");
   const [query, setQuery] = useState("");
+  // The first letter alone waits 120 ms before the list follows it, so the list does not flash the matches of every single
+  // letter passed on the way to a word; from the second letter the list follows at once (port of the behaviour of PR #29)
+  const [firstLetter, setFirstLetter] = useState("");
+  useEffect(() => {
+    if (query.length !== 1) {
+      setFirstLetter("");
+      return;
+    }
+    const timer = setTimeout(() => setFirstLetter(query), 120);
+    return () => clearTimeout(timer);
+  }, [query]);
+  const listQuery = query.length === 1 ? firstLetter : query;
   // cc-58: the field follows every keystroke, the list follows the query when the browser has a moment, so a key
   // never waits for a search of the whole catalogue
-  const searched = useDeferredValue(query);
+  const searched = useDeferredValue(listQuery);
 
   // Filter and search combined. Grouped only for Tất cả with no query.
   // `foods` follows the catalogue (the live load, a made food) and demo mode
