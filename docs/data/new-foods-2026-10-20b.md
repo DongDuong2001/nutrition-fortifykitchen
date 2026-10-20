@@ -11,7 +11,7 @@ The database has no alias or keywords column: `name_search` is built by a trigge
 | File | Run with | What it does |
 |---|---|---|
 | `docs/data/new-foods-2026-10-20b.json` | `--file` | 4 new rows (inserts) |
-| `docs/data/new-foods-2026-10-20b-aliases.json` | `--edible-portions` | 8 renames of live rows, matched on `source` + `source_id`; `UPDATE ... SET name_vi` only. Nutrients, portions, category, tip and brand are not touched (a full-record upsert would have overwritten `tip_vi`, brand and the English name, which the API does not return). `remove_portions` is empty |
+| `docs/data/new-foods-2026-10-20b-aliases.json` | `--edible-portions` | 9 renames of live rows, matched on `source` + `source_id`; `UPDATE ... SET name_vi` only. Nutrients, portions, category, tip and brand are not touched (a full-record upsert would have overwritten `tip_vi`, brand and the English name, which the API does not return). `remove_portions` is empty |
 
 The trigger fires on `name_vi` updates, so `name_search` follows. Accents need no extra text: the API folds them with `unaccent` and the web search with `removeVietnameseTones`, so "bap non" finds "bắp non". Twin foods keep one stem once the state is stripped (`Bông bí (hoa bí, sống)` and `Bông bí (hoa bí, luộc)` are both "Bông bí" to `lib/food-twins`), the way "Cá lóc (cá quả, sống)" already is.
 
@@ -21,7 +21,7 @@ kcal, protein, fat and carbs are per 100 g. "→" is the live name changing to t
 
 | Requested | Action | Row | Source + id | kcal | Protein g | Fat g | Carbs g |
 |---|---|---|---|---|---|---|---|
-| Bông hẹ (hoa hẹ) | Skipped | none | no allowed source (see below) | | | | |
+| Bông hẹ (hoa hẹ), leaf row stands in | Alias added | Hẹ lá → **Hẹ lá (bông hẹ, hoa hẹ)** | vn_nin NIN 4042 | 21 | 2.2 | 0.21 | 2.49 |
 | Bắp non (ngô non, bắp bao tử) | Alias added | Ngô bao tử → **Ngô bao tử (bắp non, ngô non, bắp bao tử)** | vn_nin NIN 4058 | 42 | 2.2 | 0.2 | 7.8 |
 | Bông bí (hoa bí) | Alias added | Bông bí → **Bông bí (hoa bí, sống)** | usda_sr_legacy FDC 169270 | 15 | 1.03 | 0.07 | 3.28 |
 | Bông bí (hoa bí), boiled | Alias added | Bông bí (luộc) → **Bông bí (hoa bí, luộc)** | usda_sr_legacy FDC 169271 | 15 | 1.09 | 0.08 | 3.3 |
@@ -34,8 +34,8 @@ kcal, protein, fat and carbs are per 100 g. "→" is the live name changing to t
 | Măng tây, boiled | Already there | Măng tây (luộc) | usda_sr_legacy FDC 168390 | 22 | 2.4 | 0.22 | 4.11 |
 | Đậu tuyết (đậu Hà Lan ăn cả vỏ) | New row | **Đậu tuyết (đậu Hà Lan ăn cả vỏ, sống)** | usda_sr_legacy FDC 170010 | 42 | 2.8 | 0.2 | 7.5 |
 | Đậu tuyết, boiled | New row | **Đậu tuyết (đậu Hà Lan ăn cả vỏ, luộc)** | usda_sr_legacy FDC 170011 | 42 | 3.3 | 0.2 | 7 |
-| Cải ngồng (rau cải làn, ngồng cải) | Alias added | Cải ngồng → **Cải ngồng (rau cải làn, ngồng cải, sống)** | vn_nin NIN 4134 | 17 | 1.5 | 0.2 | 2.18 |
-| Cải ngồng, boiled | Alias added | Cải ngồng (luộc) → **Cải ngồng (rau cải làn, ngồng cải, luộc)** | vn_nin NIN 4134002 | 18 | 1.6 | 0.21 | 2.32 |
+| Cải ngồng (ngồng cải) | Alias added | Cải ngồng → **Cải ngồng (ngồng cải, sống)** | vn_nin NIN 4134 | 17 | 1.5 | 0.2 | 2.18 |
+| Cải ngồng, boiled | Alias added | Cải ngồng (luộc) → **Cải ngồng (ngồng cải, luộc)** | vn_nin NIN 4134002 | 18 | 1.6 | 0.21 | 2.32 |
 | Ngọn su su (su su đọt) | Alias added | Ngọn su su → **Ngọn su su (su su đọt, sống)** | vn_nin NIN 4110 | 24 | 3.3 | 0.1 | 2.5 |
 | Ngọn su su, boiled | Alias added | Ngọn su su (luộc) → **Ngọn su su (su su đọt, luộc)** | vn_nin NIN 4110002 | 14 | 3.37 | 0.1 | not in source |
 | Nấm kim châm | Already there | Nấm kim châm | usda_sr_legacy FDC 169382 | 37 | 2.66 | 0.29 | 7.81 |
@@ -44,11 +44,11 @@ kcal, protein, fat and carbs are per 100 g. "→" is the live name changing to t
 | Củ sen, boiled | Already there | Củ sen (luộc) | usda_sr_legacy FDC 168430 | 66 | 1.58 | 0.07 | 16.02 |
 | Hoa atisô, boiled | New row | **Atisô (hoa atisô, luộc)** | usda_sr_legacy FDC 168386 | 53 | 2.9 | 0.3 | 11.9 |
 
-Counts for the dry run: **4 inserts, 8 alias updates**.
+Counts for the dry run: **4 inserts, 9 alias updates**.
 
 ## Search proof
 
-The real `searchFoods` (`apps/web/lib/search.ts`) was run over all 1,278 live names with the 8 renames and 4 new rows applied (a throwaway test, not committed). Each of these finds its row, with and without accents: bắp non, ngô non, bắp bao tử, bông bí, hoa bí, bông thiên lý, bông điên điển, bông so đũa, hoa chuối, bắp chuối, măng tây, đậu Hà Lan (also finds the existing shelled-pea rows), đậu tuyết, cải ngồng, ngồng cải, rau cải làn, ngọn su su, su su đọt, nấm kim châm, ngó sen, củ sen, hoa atisô. "bông hẹ", "bong he" and "hoa hẹ" find nothing: that food is skipped.
+The real `searchFoods` (`apps/web/lib/search.ts`) was run over all 1,278 live names with the 9 renames and 4 new rows applied (a throwaway test, not committed). Each of these finds its row, with and without accents: bắp non, ngô non, bắp bao tử, bông bí, hoa bí, bông thiên lý, bông điên điển, bông so đũa, hoa chuối, bắp chuối, măng tây, đậu Hà Lan (also finds the existing shelled-pea rows), đậu tuyết, bông hẹ, hoa hẹ (both find Hẹ lá), cải ngồng, ngồng cải, ngọn su su, su su đọt, nấm kim châm, ngó sen, củ sen, hoa atisô. "cải làn" and "cai lan" find only the two Cải làn rows, never Cải ngồng.
 
 ## New rows: sources and portions
 
@@ -62,13 +62,15 @@ The real `searchFoods` (`apps/web/lib/search.ts`) was run over all 1,278 live na
 - **Bông điên điển, hoa chuối, măng tây, nấm kim châm, ngó sen, củ sen**: found under the requested names, so no change. Hoa chuối already reads "Hoa chuối (bắp chuối)".
 - **Ngó sen, boiled**: no NIN or USDA record (USDA's lotus root is the củ sen, which is there raw and boiled).
 
-## Skipped foods
+## Bông hẹ: the leaf row stands in (Hao's decision)
 
-- **Bông hẹ (hoa hẹ, garlic chive flower)**: not in NIN (only the leaf, NIN 4042) or USDA (only the leaf, "Chives, raw"), and not in PhilFCT. The Thai INMU table has it ("กุยช่าย, ดอก, ดิบ"), but its host `inmu2.mahidol.ac.th` does not resolve from here, and the only copy I could reach is a third-party site (hdmall.co.th) that I could not open. No allowed source with an exact id was readable, so nothing was added. If someone can open the INMU table, the row is one record to add.
+No allowed source has the garlic chive flower: NIN has only the leaf ("Hẹ lá, tươi", NIN 4042), USDA only the leaf ("Chives, raw"), and PhilFCT has neither. The Thai INMU table lists it ("กุยช่าย, ดอก, ดิบ"), but its host `inmu2.mahidol.ac.th` does not resolve from here, and the only copy found is a third-party site (hdmall.co.th). That copy does not add up: the figures in its search summary (the site itself returned 403) are protein 3.0 + fat 1.0 + carbohydrate 9.3 + water 93.8 = 107.1 g per 100 g, more than the food weighs, so it was not used.
+
+So by Hao's decision the live row "Hẹ lá" (NIN 4042) becomes "Hẹ lá (bông hẹ, hoa hẹ)", so "bông hẹ" and "hoa hẹ" find it. Its values stay the leaf's (21 kcal, protein 2.2 g, fat 0.21 g, carbs 2.49 g per 100 g): they are not the flower's. The name keeps "hẹ lá" as a phrase, so searching "hẹ lá" still works (the form "Hẹ (lá, bông hẹ, hoa hẹ)" would not match it).
 
 ## Check before merging
 
-- **"rau cải làn" is an alias of Cải ngồng, as Hao asked, but the catalogue also has a separate "Cải làn"** (USDA "Broccoli, chinese", FDC 169404 raw and 169392 cooked). Cải làn is Chinese broccoli and cải ngồng is choy sum, two vegetables. Result: "rau cải làn" finds only Cải ngồng, and "cải làn" finds the Cải làn rows first and the Cải ngồng rows after them. If that confuses people logging cải làn, take "rau cải làn, " out of the two names in the aliases file.
+- **"rau cải làn" is not an alias of Cải ngồng** (Hao's review): cải làn is Chinese broccoli and already has its own rows ("Cải làn", USDA "Broccoli, chinese", FDC 169404 and 169392). Cải ngồng gets only "ngồng cải".
 - **Bông so đũa vs bông điên điển** are different plants (so đũa is Sesbania grandiflora; điên điển is usually Sesbania sesban), but USDA's single "Sesbania flower" row stands for điên điển. Fine for search; the numbers differ slightly (27 vs 31 kcal).
 
 ## Missing nutrients (not in the source record, left out)
@@ -91,11 +93,11 @@ Dry-run output on 20/10/2026 (run without `DATABASE_URL`):
 Loaded 4 food records from ../../docs/data/new-foods-2026-10-20b.json
 Completeness Report: 87.5% average coverage of the 22 counted nutrients across 4 foods
 
-Loaded 0 remove_portions rules and 8 renames from ../../docs/data/new-foods-2026-10-20b-aliases.json
+Loaded 0 remove_portions rules and 9 renames from ../../docs/data/new-foods-2026-10-20b-aliases.json
 Dry-run: edible-portions updates simulated successfully.
 ```
 
-No clash: none of the 4 new `source` + `source_id` pairs exists in the live catalogue, and all 8 rename targets exist there with the name shown in the `from` field. Then the real runs (both are safe to repeat):
+No clash: none of the 4 new `source` + `source_id` pairs exists in the live catalogue, and all 9 rename targets exist there with the name shown in the `from` field. Then the real runs (both are safe to repeat):
 
 ```bash
 go run ./cmd/importfoods --file ../../docs/data/new-foods-2026-10-20b.json
