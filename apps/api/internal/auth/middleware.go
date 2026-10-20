@@ -14,7 +14,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5"
 	"nutrition-api/internal/logger"
 	"nutrition-api/pkg/response"
 )
@@ -57,24 +57,46 @@ type sessionCacheEntry struct {
 	expires time.Time
 }
 
+// SessionQuerier abstracts querying auth.sessions to allow testing without an active database.
+type SessionQuerier interface {
+	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
+}
+
 // DBSessionChecker checks session validity against auth.sessions with an in-memory TTL cache to preserve VPS performance.
 // Note: Must be tested on hitmicro-staging first to verify whether the API's database role has SELECT permission on auth.sessions.
 type DBSessionChecker struct {
-	pool       *pgxpool.Pool
+	pool       SessionQuerier
+	enabled    bool
 	mu         sync.RWMutex
 	cache      map[uuid.UUID]sessionCacheEntry
 	lastErrLog time.Time
 }
 
-func NewDBSessionChecker(pool *pgxpool.Pool) *DBSessionChecker {
+func IsSessionRevocationEnabled() bool {
+	v := strings.ToLower(strings.TrimSpace(os.Getenv("SESSION_REVOCATION_ENABLED")))
+	return v == "true" || v == "1"
+}
+
+func NewDBSessionChecker(pool SessionQuerier) *DBSessionChecker {
+	enabled := IsSessionRevocationEnabled()
+	if !enabled {
+		logger.Log.Info().Msg("session revocation off")
+	}
 	return &DBSessionChecker{
-		pool:  pool,
-		cache: make(map[uuid.UUID]sessionCacheEntry),
+		pool:    pool,
+		enabled: enabled,
+		cache:   make(map[uuid.UUID]sessionCacheEntry),
 	}
 }
 
+func (c *DBSessionChecker) SetEnabled(enabled bool) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.enabled = enabled
+}
+
 func (c *DBSessionChecker) IsSessionRevoked(ctx context.Context, sessionID uuid.UUID) (bool, error) {
-	if c.pool == nil {
+	if !c.enabled || c.pool == nil {
 		return false, nil
 	}
 

@@ -77,6 +77,7 @@ func (m *mockLibRepo) DeleteSavedMeal(ctx context.Context, userID uuid.UUID, mea
 
 type mockDiaryService struct {
 	createdEntries []diary.DiaryEntryItem
+	recents        diary.RecentsTracker
 }
 
 func (d *mockDiaryService) GetDay(ctx context.Context, userID uuid.UUID, date string) (*diary.DaySummaryResponse, error) {
@@ -135,13 +136,16 @@ func (d *mockDiaryService) CreateEntriesBatch(ctx context.Context, userID uuid.U
 		}
 		result = append(result, item)
 		d.createdEntries = append(d.createdEntries, item)
+		if d.recents != nil && req.FoodID != nil {
+			_ = d.recents.UpsertRecent(ctx, userID, *req.FoodID, req.ServingLabel, req.Grams)
+		}
 	}
 	return result, nil
 }
 
 func TestLibraryService_AddFromSaved(t *testing.T) {
 	repo := newMockLibRepo()
-	dService := &mockDiaryService{}
+	dService := &mockDiaryService{recents: repo}
 	svc := NewService(repo, dService)
 
 	userID := uuid.New()

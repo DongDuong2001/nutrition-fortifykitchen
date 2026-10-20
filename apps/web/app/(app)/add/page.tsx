@@ -195,11 +195,44 @@ function AddFoodInner() {
     const panel = panelRef.current;
     if (!panel) return;
 
-    let focused = false;
+    let done = false;
+    let touched = false;
+    let fallbackTimer: ReturnType<typeof setTimeout> | undefined;
+
+    const cleanup = () => {
+      panel.removeEventListener("animationend", onEnd);
+      panel.removeEventListener("transitionend", onEnd);
+      panel.removeEventListener("touchstart", onTouch);
+      if (fallbackTimer !== undefined) {
+        clearTimeout(fallbackTimer);
+        fallbackTimer = undefined;
+      }
+    };
+
     const focusSearch = () => {
-      if (focused) return;
-      focused = true;
-      phoneSearchInputRef.current?.focus({ preventScroll: true });
+      if (done) return;
+      done = true;
+      cleanup();
+
+      const input = phoneSearchInputRef.current;
+      if (!input) return;
+      if (document.activeElement === input || touched) return;
+
+      input.focus({ preventScroll: true });
+    };
+
+    const onTouch = (e: TouchEvent) => {
+      const input = phoneSearchInputRef.current;
+      if (input && (e.target === input || input.contains(e.target as Node))) {
+        return;
+      }
+      touched = true;
+    };
+
+    const onEnd = (e: Event) => {
+      if (e.target === panel) {
+        focusSearch();
+      }
     };
 
     // Immediate focus when prefers-reduced-motion is active
@@ -209,23 +242,15 @@ function AddFoodInner() {
       return;
     }
 
-    // Listen only to the panel's own entrance animation/transition settling (not bubbling children)
-    const onEnd = (e: Event) => {
-      if (e.target === panel) {
-        focusSearch();
-      }
-    };
-
     panel.addEventListener("animationend", onEnd);
     panel.addEventListener("transitionend", onEnd);
+    panel.addEventListener("touchstart", onTouch, { passive: true });
 
     // Fallback in case animation event was interrupted or missed
-    const fallbackTimer = setTimeout(focusSearch, 1000);
+    fallbackTimer = setTimeout(focusSearch, 1000);
 
     return () => {
-      panel.removeEventListener("animationend", onEnd);
-      panel.removeEventListener("transitionend", onEnd);
-      clearTimeout(fallbackTimer);
+      cleanup();
     };
   }, [isDesktop]);
 

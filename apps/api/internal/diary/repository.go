@@ -9,6 +9,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -30,12 +31,25 @@ type Repository interface {
 	UpsertDayTraining(ctx context.Context, userID uuid.UUID, date string, minutes int) error
 }
 
+// PgxDB abstracts database interactions used by pgxDiaryRepo so it can be tested with mock transactions.
+type PgxDB interface {
+	Begin(ctx context.Context) (pgx.Tx, error)
+	Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error)
+	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
+	Exec(ctx context.Context, sql string, args ...any) (pgconn.CommandTag, error)
+}
+
 type pgxDiaryRepo struct {
-	pool *pgxpool.Pool
+	pool PgxDB
 }
 
 func NewRepository(pool *pgxpool.Pool) Repository {
 	return &pgxDiaryRepo{pool: pool}
+}
+
+// NewRepositoryWithDB creates a repository with any PgxDB implementation (used for tests).
+func NewRepositoryWithDB(db PgxDB) Repository {
+	return &pgxDiaryRepo{pool: db}
 }
 
 func (r *pgxDiaryRepo) GetDayEntries(ctx context.Context, userID uuid.UUID, date string) ([]DiaryEntryItem, error) {

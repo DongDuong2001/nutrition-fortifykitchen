@@ -125,15 +125,5 @@ func (s *libraryServiceImpl) AddFromSaved(ctx context.Context, userID uuid.UUID,
 		})
 	}
 
-	addedEntries, err := s.diaryService.CreateEntriesBatch(ctx, userID, targetDate, reqs)
-	if err != nil {
-		return nil, err
-	}
-
-	// Upsert recents only after successful batch commit
-	for _, item := range meal.Items {
-		_ = s.repo.UpsertRecent(ctx, userID, item.FoodID, item.PortionLabel, item.Grams)
-	}
-
-	return addedEntries, nil
+	return s.diaryService.CreateEntriesBatch(ctx, userID, targetDate, reqs)
 }

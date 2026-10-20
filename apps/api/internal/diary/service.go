@@ -86,6 +86,27 @@ func round2(val float64) float64 {
 	return math.Round(val*100) / 100
 }
 
+// scaleNutrients scales per-100g nutrients to the given grams and resolves calories.
+func scaleNutrients(per100g map[string]*float64, grams float64) (map[string]*float64, *float64) {
+	ratio := grams / 100.0
+	scaled := make(map[string]*float64, len(per100g))
+	for k, v := range per100g {
+		if v != nil {
+			s := round2(*v * ratio)
+			scaled[k] = &s
+		} else {
+			scaled[k] = nil
+		}
+	}
+	var cal *float64
+	if c, ok := scaled["calories"]; ok && c != nil {
+		cal = c
+	} else if e, ok := scaled["energy"]; ok && e != nil {
+		cal = e
+	}
+	return scaled, cal
+}
+
 func computeDayTotals(entries []DiaryEntryItem) map[string]*float64 {
 	rawTotals := make(map[string]float64)
 	hasValue := make(map[string]bool)
@@ -289,27 +310,7 @@ func (s *diaryServiceImpl) CreateEntry(ctx context.Context, userID uuid.UUID, da
 			return nil, nil, fmt.Errorf("failed to load food nutrients: %w", err)
 		}
 		item.FoodName = foodName
-
-		// Snapshot nutrients scaled to grams: per_100g * grams / 100
-		ratio := req.Grams / 100.0
-		scaledNutrients := make(map[string]*float64)
-		for k, v := range per100g {
-			if v != nil {
-				scaled := round2(*v * ratio)
-				scaledNutrients[k] = &scaled
-			} else {
-				scaledNutrients[k] = nil
-			}
-		}
-		item.Nutrients = scaledNutrients
-
-		if cal, ok := scaledNutrients["calories"]; ok && cal != nil {
-			item.Calories = cal
-		} else if energy, ok := scaledNutrients["energy"]; ok && energy != nil {
-			item.Calories = energy
-		} else {
-			item.Calories = nil
-		}
+		item.Nutrients, item.Calories = scaleNutrients(per100g, item.Grams)
 	}
 
 	saved, err := s.repo.CreateEntry(ctx, userID, date, item)
@@ -370,25 +371,7 @@ func (s *diaryServiceImpl) CreateEntriesBatch(ctx context.Context, userID uuid.U
 			return nil, fmt.Errorf("failed to load food nutrients: %w", err)
 		}
 		item.FoodName = foodName
-
-		ratio := item.Grams / 100.0
-		scaledNutrients := make(map[string]*float64)
-		for k, v := range per100g {
-			if v != nil {
-				scaled := round2(*v * ratio)
-				scaledNutrients[k] = &scaled
-			} else {
-				scaledNutrients[k] = nil
-			}
-		}
-		item.Nutrients = scaledNutrients
-		if cal, ok := scaledNutrients["calories"]; ok && cal != nil {
-			item.Calories = cal
-		} else if energy, ok := scaledNutrients["energy"]; ok && energy != nil {
-			item.Calories = energy
-		} else {
-			item.Calories = nil
-		}
+		item.Nutrients, item.Calories = scaleNutrients(per100g, item.Grams)
 
 		items = append(items, item)
 	}

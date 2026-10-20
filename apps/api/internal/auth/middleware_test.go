@@ -17,6 +17,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"nutrition-api/internal/auth"
 )
 
@@ -640,4 +641,88 @@ func TestAuthMiddleware_SessionRevocation(t *testing.T) {
 	if rec2.Code != http.StatusOK {
 		t.Fatalf("expected 200 OK for valid session, got %d", rec2.Code)
 	}
+}
+
+type mockSessionRow struct {
+	exists bool
+	err    error
+}
+
+func (r *mockSessionRow) Scan(dest ...any) error {
+	if r.err != nil {
+		return r.err
+	}
+	if len(dest) > 0 {
+		if b, ok := dest[0].(*bool); ok {
+			*b = r.exists
+		}
+	}
+	return nil
+}
+
+type panickingSessionQuerier struct{}
+
+func (p *panickingSessionQuerier) QueryRow(ctx context.Context, sql string, args ...any) pgx.Row {
+	panic("QueryRow should not be called when SESSION_REVOCATION_ENABLED is false")
+}
+
+type missingSessionQuerier struct{}
+
+func (m *missingSessionQuerier) QueryRow(ctx context.Context, sql string, args ...any) pgx.Row {
+	return &mockSessionRow{exists: false}
+}
+
+func TestDBSessionChecker_Flag(t *testing.T) {
+	secret := []byte("test-session-flag-secret-123456789")
+	sessionID := uuid.New()
+	userID := uuid.New()
+
+	claims := auth.SupabaseClaims{
+		Sub:       userID.String(),
+		SessionID: sessionID.String(),
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenStr, err := token.SignedString(secret)
+	if err != nil {
+		t.Fatalf("failed to sign token: %v", err)
+	}
+
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+
+	t.Run("flag off skips query and request passes", func(t *testing.T) {
+		t.Setenv("SESSION_REVOCATION_ENABLED", "false")
+		checker := auth.NewDBSessionChecker(&panickingSessionQuerier{})
+		mw := auth.NewMiddlewareWithSecret(secret).WithSessionChecker(checker)
+
+		req := httptest.NewRequest("GET", "/api/v1/days/today", nil)
+		req.Header.Set("Authorization", "Bearer "+tokenStr)
+		rec := httptest.NewRecorder()
+
+		mw.Authenticate(handler).ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusOK {
+			t.Fatalf("expected 200 OK when flag is off, got %d", rec.Code)
+		}
+	})
+
+	t.Run("flag on and session row missing returns 401", func(t *testing.T) {
+		t.Setenv("SESSION_REVOCATION_ENABLED", "true")
+		checker := auth.NewDBSessionChecker(&missingSessionQuerier{})
+		mw := auth.NewMiddlewareWithSecret(secret).WithSessionChecker(checker)
+
+		req := httptest.NewRequest("GET", "/api/v1/days/today", nil)
+		req.Header.Set("Authorization", "Bearer "+tokenStr)
+		rec := httptest.NewRecorder()
+
+		mw.Authenticate(handler).ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusUnauthorized {
+			t.Fatalf("expected 401 Unauthorized when session missing, got %d", rec.Code)
+		}
+		if !strings.Contains(rec.Body.String(), "session revoked") {
+			t.Errorf("expected 'session revoked' in body, got %s", rec.Body.String())
+		}
+	})
 }
