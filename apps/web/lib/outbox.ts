@@ -53,7 +53,11 @@ export interface OutboxItem {
    * The server refused it with a 4xx: not sent again until Thử lại or the next app open. `final`: refused for good (a
    * day too old), never sent again.
    */
-  held?: { status: number; final?: boolean };
+  held?: { status: number; final?: boolean; /** The server's error code ("PAST_DAY_READ_ONLY"), never its text. */ code?: string; /** When it was refused (ms). */ at?: number };
+  /** The status of the last request that did not settle it (0 = no answer, 401, 408, 429, 5xx): why it still waits. */
+  lastStatus?: number;
+  /** The food's name, for the Chưa lưu list when the diary no longer shows the entry. */
+  label?: string;
 }
 
 /** The outbox of one account (or of demo): the id in memory and the old localStorage key it came from. */

@@ -45,6 +45,7 @@ type CreateEntryRequest struct {
 	ServingSizeG float64    `json:"serving_size_g,omitempty"`
 	ServingLabel string     `json:"serving_label,omitempty"`
 	Calories     *float64   `json:"calories,omitempty"`
+	MadeAt       string     `json:"made_at,omitempty"` // RFC3339, when the user made it on the device
 }
 
 type UpdateEntryRequest struct {
@@ -54,11 +55,13 @@ type UpdateEntryRequest struct {
 	ServingLabel *string  `json:"serving_label,omitempty"`
 	Calories     *float64 `json:"calories,omitempty"`
 	Restore      *bool    `json:"restore,omitempty"`
+	MadeAt       string   `json:"made_at,omitempty"`
 }
 
 type CopyYesterdayRequest struct {
 	SourceDate string   `json:"source_date"`
 	MealSlots  []string `json:"meal_slots"`
+	MadeAt     string   `json:"made_at,omitempty"`
 }
 
 type CopyYesterdayResponse struct {
@@ -67,7 +70,8 @@ type CopyYesterdayResponse struct {
 }
 
 type SetTrainingRequest struct {
-	TrainingMinutes int `json:"training_minutes"`
+	TrainingMinutes int    `json:"training_minutes"`
+	MadeAt          string `json:"made_at,omitempty"`
 }
 
 type SetTrainingResponse struct {
