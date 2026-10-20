@@ -7,6 +7,9 @@
 3  `?meal=` is honoured: /add?meal=dinner names Bữa tối, from the link and from the sheet over a tab.
 4  Android back during the slide: the sheet closes once, the URL is the tab's, nothing is inert.
 5  Two taps on the add in the same frame add one entry, not two.
+7  The phone sheet's own behaviours (ported from PR #29's /add edits): the page behind is locked (counted with the portion sheet's lock),
+   the panel lifts above the keyboard by the `translate` property (never `transform`), the search field is focused once after the slide
+   (at once under reduced motion, not at all after a touch on the panel), and one letter waits 120 ms before the list follows it.
 6  The day under the sheet does not flip: Hôm nay on an older day, + (which carries no date for a read-only day) → the day stays.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/add_from_tabs.py
 """
@@ -209,6 +212,82 @@ def main():
         pg.wait_for_timeout(1500)
         heads = pg.evaluate("window.__stopHeads = true; [...window.__heads]")
         check(len([h for h in heads if h]) == 1, f"the day under the sheet does not flip while it opens and closes ({heads})")
+        ctx.close()
+
+        # ---- 7: PR #29's behaviours in the sheet
+        FAKE_VV = """
+        (() => {
+          const t = new EventTarget();
+          Object.assign(t, { height: window.innerHeight, offsetTop: 0, width: window.innerWidth, offsetLeft: 0, scale: 1 });
+          Object.defineProperty(window, 'visualViewport', { value: t, configurable: true });
+          window.__vv = t;
+        })();
+        """
+        ctx = new_context(browser)
+        ctx.add_init_script(FAKE_VV)
+        pg = ctx.new_page()
+        open_tab(pg, "/app")
+        overflow_before = pg.evaluate("document.body.style.overflow")
+        pg.locator("#mobile-add-fab").tap()
+        pg.locator("[data-add-panel] [data-testid=food-search]").first.wait_for(state="visible", timeout=8000)
+        pg.wait_for_timeout(900)
+        check(pg.evaluate("document.body.style.overflow") == "hidden", "the phone sheet locks the page behind it")
+        focused = pg.evaluate("document.activeElement && document.activeElement.getAttribute('data-testid')")
+        check(focused == "food-search", f"the search field has focus once the slide is over ({focused})")
+        # the keyboard: the panel lifts by the `translate` property, `transform` stays the drag's
+        pg.evaluate("window.__vv.height = window.innerHeight - 300; window.__vv.dispatchEvent(new Event('resize'))")
+        pg.wait_for_timeout(100)
+        lift = pg.evaluate("(() => { const p = document.querySelector('[data-add-panel]'); return { translate: p.style.translate, transform: p.style.transform, m42: new DOMMatrix(getComputedStyle(p).transform).m42 }; })()")
+        check("-300px" in lift["translate"] and lift["transform"] == "" and lift["m42"] == 0, f"the keyboard lifts the panel with `translate` and leaves `transform` alone ({lift})")
+        pg.evaluate("window.__vv.height = window.innerHeight; window.__vv.dispatchEvent(new Event('resize'))")
+        pg.wait_for_timeout(100)
+        check(pg.evaluate("document.querySelector('[data-add-panel]').style.translate") == "", "…and puts it back when the keyboard goes")
+        # one letter waits, two do not
+        search = pg.locator("[data-add-panel] [data-testid=food-search]").first
+        rows = lambda: pg.locator("[data-add-panel] button[data-food-row]:visible").count()
+        before_rows = rows()
+        search.fill("c")
+        pg.wait_for_timeout(40)
+        early = rows()
+        pg.wait_for_timeout(500)
+        late = rows()
+        check(early == before_rows and late != before_rows, f"one letter: the list waits ~120 ms before it follows ({before_rows} → {early} → {late})")
+        search.fill("")
+        pg.wait_for_timeout(300)
+        # the portion sheet over it: still locked when it closes, free once both are gone
+        search.fill("trứng")
+        pg.locator("[data-add-panel] button[data-food-row]:visible").first.wait_for(state="visible", timeout=6000)
+        pg.locator("[data-add-panel] button[data-food-row]:visible").first.tap()
+        pg.locator('[data-testid="portion-add"]:visible').first.wait_for(state="visible", timeout=6000)
+        pg.wait_for_timeout(500)
+        pg.keyboard.press("Escape")
+        pg.wait_for_timeout(700)
+        check(pg.evaluate("document.body.style.overflow") == "hidden", "the portion sheet closes first: the page stays locked under the add sheet")
+        close_x(pg)
+        pg.wait_for_timeout(1200)
+        check(pg.evaluate("document.body.style.overflow") == overflow_before, f"both gone: the page scrolls again ({pg.evaluate('document.body.style.overflow')!r} vs {overflow_before!r})")
+        ctx.close()
+        # a touch on the panel during the slide: focus is not taken afterwards
+        ctx = new_context(browser)
+        pg = ctx.new_page()
+        open_tab(pg, "/app")
+        pg.locator("#mobile-add-fab").tap()
+        pg.locator("[data-add-panel]").first.wait_for(state="attached", timeout=8000)
+        pg.evaluate("document.querySelector('[data-add-panel]').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))")
+        pg.wait_for_timeout(1300)
+        focused = pg.evaluate("document.activeElement && document.activeElement.getAttribute('data-testid')")
+        check(focused != "food-search", f"a touch on the panel during the slide: the search field is not focused afterwards ({focused})")
+        ctx.close()
+        # reduced motion: at once
+        ctx = browser.new_context(**PHONE, reduced_motion="reduce")
+        ctx.add_init_script("try { localStorage.setItem('h1t_settings_v1_demo', %r) } catch (e) {}" % json.dumps(SEED))
+        pg = ctx.new_page()
+        open_tab(pg, "/app")
+        pg.locator("#mobile-add-fab").tap()
+        pg.locator("[data-add-panel] [data-testid=food-search]").first.wait_for(state="visible", timeout=8000)
+        pg.wait_for_timeout(120)
+        focused = pg.evaluate("document.activeElement && document.activeElement.getAttribute('data-testid')")
+        check(focused == "food-search", f"reduced motion: the search field is focused at once ({focused})")
         ctx.close()
 
         browser.close()

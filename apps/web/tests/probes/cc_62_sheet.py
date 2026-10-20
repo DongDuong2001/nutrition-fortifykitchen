@@ -105,9 +105,20 @@ def check_add_panel(browser):
     opacity = pg.evaluate("() => getComputedStyle(document.querySelector('.m-scrim')).opacity")
     check(float(opacity) < 1, f"/add: the scrim fades with the drag (opacity {opacity})")
     f.up()
+    # The release is one Web Animations API animation on the panel, started in the pointerup: a spring sampled into linear(), from the
+    # finger's offset back to 0, a few hundred ms
+    anim = pg.evaluate(
+        "(sel) => { const a = document.querySelector(sel).getAnimations().find((x) => x.effect && x.effect.getKeyframes().some((k) => k.transform && k.transform !== 'none'));"
+        " if (!a) return null; const t = a.effect.getTiming(); const k = a.effect.getKeyframes(); return { easing: t.easing, duration: t.duration, fill: t.fill, from: k[0].transform, to: k[k.length - 1].transform }; }",
+        PANEL,
+    )
+    check(anim is not None and anim["easing"].startswith("linear(") and 100 <= anim["duration"] <= 400 and anim["fill"] == "forwards" and anim["to"] == "translateY(0px)",
+          f"/add: the release is one WAAPI animation back to 0 (linear() spring, {anim})")
     pg.wait_for_timeout(900)
     check("/add" in pg.url and state(pg, PANEL) == "open", "/add: a slow 60 px drag stays open")
-    check(not any("sheet-spring" in u for u in requests), "/add: and none after it (the release is a WAAPI animation, nothing to load)")
+    left = pg.evaluate("(sel) => document.querySelector(sel).getAnimations().filter((x) => x.effect && x.effect.getKeyframes().some((k) => k.transform && k.transform !== 'none')).length", PANEL)
+    check(left == 0, f"/add: and the animation is cancelled once it has settled (the sheet's own style holds the position; {left} left)")
+    check(not any("sheet-spring" in u or "motion" in u for u in requests), "/add: no spring chunk was loaded for it")
 
     # Down 250 px slowly, then a quick flick back up: stays open
     f.down(x, y)

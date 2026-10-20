@@ -352,7 +352,13 @@ with sync_playwright() as p:
         ctx, pg, st = device(browser, api)
         open_today(pg)
         api.script["POST"] = [400]
-        add_food(pg, "Yến mạch cán")
+        # Every frame from just before the add: the route and the add sheet's state. The report below may name /add only while the sheet
+        # is visibly closing (the page was opened straight on /add here, so the sampler goes in once it is loaded)
+        sampler = lambda: pg.evaluate(
+            "window.__sheetLog = []; const tick = () => { const p = document.querySelector('[data-add-panel], [role=dialog][data-sheet-route]');"
+            " window.__sheetLog.push([location.pathname, p ? p.dataset.state || '' : null]); requestAnimationFrame(tick); }; tick();"
+        )
+        add_food(pg, "Yến mạch cán", before_add=sampler)
         check(row_of(pg, "Yến mạch cán").count() == 1, "4: POST 400: the entry stays on Hôm nay")
         check(pg.locator("[data-unsaved]:visible").count() == 1, "4: …marked Chưa lưu")
         toast = pg.get_by_text("Chưa lưu được món", exact=False)
@@ -371,6 +377,12 @@ with sync_playwright() as p:
             and re.fullmatch(r"\d{4}-\d{2}-\d{2}\.\d+", writes[0].get("version", "")) is not None,
             f"4: one client error report: write 400 (its status and error code only: the scripted body has none), /days/…/entries, route /add or /app (the page when the answer came), app version ({writes})",
         )
+        # …and /add only while the sheet slid away: a sample at /add with the sheet closed, never the sheet open or still there at the end
+        log = pg.evaluate("window.__sheetLog")
+        closing = [e for e in log if e[0] == "/add" and e[1] == "closed"]
+        if writes and writes[0].get("route") == "/add":
+            check(len(closing) > 0, "4: the report named /add: the sheet was closing then (data-state closed)")
+        check(pg.locator("[data-add-panel]").count() == 0 and pg.evaluate("location.pathname") == "/app", "4: afterwards the sheet is gone and the page is Hôm nay")
         if retry.count():
             retry.first.click()
         ok = wait_until(lambda: on_server(api, "Yến mạch cán"), 10, pg=pg)

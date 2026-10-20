@@ -324,15 +324,26 @@ def main():
         rowbox.scroll_into_view_if_needed()
         b = rowbox.bounding_box()
         cdp.send("Input.dispatchTouchEvent", {"type": "touchStart", "touchPoints": [{"x": b["x"] + b["width"] / 2, "y": b["y"] + b["height"] / 2}]})
-        pg.wait_for_timeout(120)
-        early = rowbox.evaluate("el => [el.dataset.touchDrag, parseFloat(getComputedStyle(el, '::after').opacity)]")
-        pg.wait_for_timeout(250)
-        mid = rowbox.evaluate("el => parseFloat(getComputedStyle(el, '::after').opacity)")
-        pg.wait_for_timeout(450)
+        # Sampled in the page every frame while the finger rests: while the row is "pressing" the tint rises step after step
+        # (strictly more than once, and by a visible amount), it does not sit at one value; then the row lifts
+        series = rowbox.evaluate(
+            """el => new Promise((resolve) => {
+              const out = [];
+              const t0 = performance.now();
+              const tick = () => {
+                out.push([Math.round(performance.now() - t0), el.dataset.touchDrag || '', parseFloat(getComputedStyle(el, '::after').opacity)]);
+                if (performance.now() - t0 < 900) requestAnimationFrame(tick); else resolve(out);
+              };
+              tick();
+            })"""
+        )
         lifted = rowbox.evaluate("el => [el.dataset.touchDrag, getComputedStyle(el).transform]")
         cdp.send("Input.dispatchTouchEvent", {"type": "touchCancel", "touchPoints": []})
-        # Under load a step can take longer than it should: the tint may already be at its deepest ("lifted") at the second look
-        check(early[0] in ("pressing", "lifted") and 0 < early[1] <= mid <= 1, f"the hold: the tint deepens while the finger rests ({early[1]:.2f} → {mid:.2f})")
+        pressing = [o for _, st, o in series if st == "pressing"]
+        distinct = sorted(set(round(o, 2) for o in pressing))
+        rising = all(b2 >= a2 - 0.001 for a2, b2 in zip(pressing, pressing[1:]))
+        check(len(pressing) >= 4 and rising and len(distinct) >= 4 and pressing[-1] - pressing[0] >= 0.3 and pressing[0] < 0.5,
+              f"the hold: the tint deepens step by step while the finger rests ({len(pressing)} frames, {len(distinct)} values, {pressing[0] if pressing else None:.2f} → {pressing[-1] if pressing else None:.2f})")
         check(lifted[0] == "lifted" and lifted[1] != "none", f"…then the row lifts ({lifted})")
         ctx.close()
 
