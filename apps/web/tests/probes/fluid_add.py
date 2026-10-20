@@ -50,6 +50,8 @@ const tick = () => {
     top: panel ? panel.getBoundingClientRect().top : null,
     kcal: hero ? (hero.querySelector('span.font-display') || hero).textContent : null,
     tray: tray ? tray.textContent : null,
+    rise: document.querySelectorAll('.m-row-enter').length,
+    bar: (() => { const b = [...document.querySelectorAll('[aria-label="Kcal so với mục tiêu ngày"]')].find((e) => visible(e) && !e.closest('[aria-hidden="true"]')); const f = b && (b.querySelector('[style*="transform"]') || b.firstElementChild); return f ? f.style.transform || getComputedStyle(f).transform : null; })(),
     meal,
     path: location.pathname,
   });
@@ -145,6 +147,27 @@ def main():
         check("Khám phá" in before and before == after, f"the nav highlight stays on the tab the sheet came from ({before!r} → {after!r})")
         ctx.close()
 
+        # ---- the desktop dialog: the same route, a dialog over the real Hôm nay; Esc closes it at once
+        ctx = browser.new_context(viewport={"width": 1440, "height": 900})
+        ctx.add_init_script("try { localStorage.setItem('h1t_settings_v1_demo', %r) } catch (e) {}" % __import__("json").dumps(SEED))
+        pg = ctx.new_page()
+        pg.goto(BASE + "/app", wait_until="networkidle")
+        pg.locator('[data-testid="meal-header"]:visible').first.wait_for(state="visible", timeout=10000)
+        pg.wait_for_timeout(1200)
+        pg.evaluate("document.querySelector('[aria-label=\"Tổng kcal và dinh dưỡng đa lượng\"]').__keep = 'mounted'")
+        pg.locator("#desktop-add-btn").click()
+        pg.wait_for_url(re.compile(r".*/add$"))
+        dlg = pg.locator('[role="dialog"][data-sheet-route]').first
+        dlg.wait_for(state="visible", timeout=6000)
+        pg.wait_for_timeout(500)
+        check(pg.locator("[data-add-panel]").count() == 0 and pg.locator('[data-app-frame] [data-align-group="home-page"]').count() > 0, "1440: the dialog is drawn once, over the real Hôm nay")
+        check("Thêm vào" in dlg.inner_text() and "—" not in dlg.inner_text().split("Thêm vào:")[1][:12], "1440: the meal name is there at once")
+        pg.keyboard.press("Escape")
+        pg.wait_for_url(re.compile(r".*/app$"), timeout=6000)
+        pg.wait_for_timeout(400)
+        check(pg.evaluate("document.querySelector('[aria-label=\"Tổng kcal và dinh dưỡng đa lượng\"]').__keep") == "mounted", "1440: Esc closes it and Hôm nay is the same element")
+        ctx.close()
+
         # ---- 3, 4, 6, 9: an add from the tray
         ctx = new_context(browser)
         pg = ctx.new_page()
@@ -183,6 +206,12 @@ def main():
             if s["kcal"] is not None and (not kcals or kcals[-1] != s["kcal"]):
                 kcals.append(s["kcal"])
         check(len(kcals) >= 3, f"Hôm nay behind counts up to the new kcal ({len(kcals)} values: {kcals[:6]})")
+        bars = []
+        for s_ in samples:
+            if s_["bar"] is not None and (not bars or bars[-1] != s_["bar"]):
+                bars.append(s_["bar"])
+        check(len(bars) >= 3, f"…the kcal bar grows to it ({len(bars)} steps)")
+        check(any(s_["rise"] > 0 for s_ in samples), "…and the new row rises in (m-row-enter on the page that stayed mounted)")
         check(pg.evaluate("history.length") == history_with_sheet, "the add went back past the sheet: no entry added")
         pg.go_back()
         pg.wait_for_timeout(500)
@@ -283,6 +312,26 @@ def main():
         cdp.send("Input.dispatchTouchEvent", {"type": "touchCancel", "touchPoints": []})
         pg.wait_for_timeout(300)
         check(not tab.evaluate("el => el.hasAttribute('data-pressed')"), "…and the release takes it off")
+        ctx.close()
+
+        # ---- 10: the hold on a food row deepens, then lifts
+        ctx = new_context(browser)
+        pg = ctx.new_page()
+        open_home(pg)
+        cdp = ctx.new_cdp_session(pg)
+        rowbox = pg.locator("button[data-entry-id]:visible").first
+        rowbox.scroll_into_view_if_needed()
+        b = rowbox.bounding_box()
+        cdp.send("Input.dispatchTouchEvent", {"type": "touchStart", "touchPoints": [{"x": b["x"] + b["width"] / 2, "y": b["y"] + b["height"] / 2}]})
+        pg.wait_for_timeout(120)
+        early = rowbox.evaluate("el => [el.dataset.touchDrag, parseFloat(getComputedStyle(el, '::after').opacity)]")
+        pg.wait_for_timeout(250)
+        mid = rowbox.evaluate("el => parseFloat(getComputedStyle(el, '::after').opacity)")
+        pg.wait_for_timeout(450)
+        lifted = rowbox.evaluate("el => [el.dataset.touchDrag, getComputedStyle(el).transform]")
+        cdp.send("Input.dispatchTouchEvent", {"type": "touchCancel", "touchPoints": []})
+        check(early[0] == "pressing" and 0 < early[1] < mid <= 1, f"the hold: the tint deepens while the finger rests ({early[1]:.2f} → {mid:.2f})")
+        check(lifted[0] == "lifted" and lifted[1] != "none", f"…then the row lifts ({lifted})")
         ctx.close()
 
         # ---- 14: reduced motion

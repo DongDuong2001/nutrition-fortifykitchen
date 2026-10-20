@@ -389,7 +389,7 @@ async def sc_rich(browser, rate, label, strip_page, runs):
           }).observe(document.documentElement, { subtree: true, childList: true });
           const pressed = setInterval(() => {
             const a = document.querySelector('a[href^="/explore/rich/"]:active, a[data-pressed]');
-            const el = [...document.querySelectorAll('a[href^="/explore/rich/"]')].find((x) => { const s = getComputedStyle(x); return (s.scale !== 'none' && s.scale !== '1') || (s.transform !== 'none' && s.transform !== 'matrix(1, 0, 0, 1, 0, 0)'); });
+            const el = [...document.querySelectorAll('a[href^="/explore/rich/"]')].find((x) => { const s = getComputedStyle(x); return x.hasAttribute('data-pressed') || (s.scale !== 'none' && s.scale !== '1') || (s.transform !== 'none' && s.transform !== 'matrix(1, 0, 0, 1, 0, 0)'); });
             if (el && window.__rich.pressed === undefined) { window.__rich.pressed = performance.now(); clearInterval(pressed); }
           }, 1);
         """)

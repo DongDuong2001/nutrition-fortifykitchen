@@ -75,7 +75,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
   const searchParams = useSearchParams();
   const { data, addFoodEntry, addFoodEntries, recentFoods, savedMeals, addSavedMeal, addQuickEntry, favouriteIds, addedEntries, dayArchive, todayIso, hydrated } = useDiary();
   // cc-68: /add?date=YYYY-MM-DD adds to yesterday (the gate below sends a day that cannot be edited back to Hôm nay)
-  // (the + of the nav carries no date: it adds to the day Hôm nay was showing, which lib/home-scroll remembers)
+  // (the + of the nav opens /add?date= itself when Hôm nay shows yesterday: components/ui/add-opener; dayBehind is the fallback)
   const [dayBehind] = useState(() => homeDay());
   const dateParam = searchParams.get("date") ?? dayBehind;
   const addDay = hydrated && todayIso ? viewedIsoDate(dateParam, todayIso) : todayIso;
@@ -125,18 +125,18 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
   const desktopSearchInputRef = useRef<HTMLInputElement>(null);
   const phoneSearchInputRef = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
-  // cc-55: /add is a sheet over Hôm nay. Hôm nay is drawn behind it where it was scrolled to; the panel (a dialog on a
-  // desktop) slides up from @starting-style, and ✕, the scrim or a drag down slide it away before the route pops.
+  // cc-55: /add is a sheet over the tab it was opened from (the real screen, still mounted: an intercepting route). The panel (a
+  // dialog on a desktop) slides up from @starting-style, and ✕, the scrim, a drag down or an add slide it away before the route goes.
   const panelRef = useRef<HTMLDivElement>(null);
-  // cc-57: closing sets data-state="closed" on these elements directly (no React re-render of the page and its Hôm nay
-  // backdrop just as the slide starts), so the render below never changes sheetState
+  // cc-57: closing sets data-state="closed" on these elements directly (no React re-render of the page just as the slide
+  // starts), so the render below never changes sheetState
   const scrimRef = useRef<HTMLDivElement>(null);
   const desktopWrapRef = useRef<HTMLDivElement>(null);
   const closingRef = useRef(false);
   // An add went through: the sheet leaves for good (a grab on its way down does not bring it back)
   const committedRef = useRef(false);
   const closeTimer = useRef<number | undefined>(undefined);
-  // cc-62: the panel's release spring; the route pops once it has settled
+  // cc-62: the panel's release animation; the route goes once it has settled
   const panelSettled = useRef<() => Promise<void>>(() => Promise.resolve());
   const sheetState = "open";
   // The slide counts from the tap, not from the render: the sheet comes up as if it had started one frame ago (the tap's own
