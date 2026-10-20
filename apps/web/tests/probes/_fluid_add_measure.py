@@ -7,6 +7,8 @@
            behind it plays the kcal count-up / bar growth after the add
   tabs     Hôm nay -> Khám phá -> Hôm nay: nav highlight and new screen in ms, blank frames, ms until the food list is drawn
   rich     Khám phá -> a "Giàu ..." tile: pressed state and new screen in ms
+  release  drag the sheet down by its grabber and let go: frames with no movement after the release, the jump of the first
+           frame against the finger's own speed (a stall or a lurch), and how long the slide takes
   sheets   first and second open of the calendar and of the day's ⋯ menu: tap -> first sheet frame in ms
 Frames come from two sources: requestAnimationFrame in the page (timing, the sheet's position) and the CDP screencast
 (pixels: a frame whose lower page is one flat colour is blank; also the filmstrips).
@@ -428,7 +430,59 @@ async def sc_sheets(browser, rate, label, strip_page, runs):
     return out
 
 
-SCENARIOS = {"openclose": sc_open_close, "addtray": sc_addtray, "tabs": sc_tabs, "rich": sc_rich, "sheets": sc_sheets}
+async def sc_release(browser, rate, label, strip_page, runs):
+    """Open /add, drag the sheet down from its grabber at a steady speed, let go (a close, then a snap back), and look at the frames."""
+    out = {"close": [], "snap": []}
+    for run in range(runs):
+        for kind, dy, dur_ms in (("close", 330, 140), ("snap", 90, 900)):
+            ctx, page, cdp = await new_ctx(browser, rate)
+            await open_home(page, cdp, rate)
+            await cdp.send("Emulation.setCPUThrottlingRate", {"rate": 1})
+            await page.locator("#mobile-add-fab").tap()
+            await page.locator("[data-add-panel] [data-testid=food-search]").first.wait_for(state="visible", timeout=8000)
+            await page.wait_for_timeout(900)
+            await cdp.send("Emulation.setCPUThrottlingRate", {"rate": rate})
+            box = await page.locator("[data-add-panel] [data-sheet-handle]").bounding_box()
+            x, y0 = box["x"] + box["width"] / 2, box["y"] + box["height"] / 2
+            await page.evaluate("window.__fa.reset(); window.__fa.start()")
+            steps = 10
+            await cdp.send("Input.dispatchTouchEvent", {"type": "touchStart", "touchPoints": [{"x": x, "y": y0}]})
+            t_move0 = None
+            for i in range(1, steps + 1):
+                await asyncio.sleep(dur_ms / steps / 1000)
+                await cdp.send("Input.dispatchTouchEvent", {"type": "touchMove", "touchPoints": [{"x": x, "y": y0 + dy * i / steps}]})
+            release_t = await page.evaluate("performance.now()")
+            await cdp.send("Input.dispatchTouchEvent", {"type": "touchEnd", "touchPoints": []})
+            await page.wait_for_timeout(900)
+            rows = await page.evaluate("window.__fa.stop()")
+            after = [r for r in rows if r["t"] >= release_t - 1]
+            before = [r for r in rows if r["t"] < release_t - 1 and r["sheetTop"] is not None]
+            last_before = before[-1]["sheetTop"] if before else None
+            speed = (dy / dur_ms)  # px per ms of the finger
+            first_moves = [r for r in after if r["sheetTop"] is not None]
+            tops = [r["sheetTop"] for r in first_moves]
+            stall = 0
+            for r in first_moves:
+                if last_before is not None and abs(r["sheetTop"] - last_before) < 0.5:
+                    stall += 1
+                else:
+                    break
+            frame_dt = 16.7
+            first_delta = (tops[min(stall, len(tops) - 1)] - last_before) if tops and last_before is not None else None
+            gone = next((r for r in after if r["sheetTop"] is None), None)
+            out[kind].append({
+                "stall_frames": stall,
+                "first_jump_px": round(first_delta, 1) if first_delta is not None else None,
+                "finger_px_per_frame": round(speed * frame_dt, 1),
+                "end_ms": round(gone["t"] - release_t, 1) if gone else None,
+                "path_after": rows[-1]["path"] if rows else None,
+                "tops_after": [round(t, 1) for t in tops[:14]],
+            })
+            await ctx.close()
+    return out
+
+
+SCENARIOS = {"openclose": sc_open_close, "addtray": sc_addtray, "tabs": sc_tabs, "rich": sc_rich, "sheets": sc_sheets, "release": sc_release}
 
 
 def summarize(name, rate, data):
@@ -471,6 +525,13 @@ def summarize(name, rate, data):
         }
     if name == "rich":
         return {"Giàu tile pressed (ms)": med(data, "pressed_ms"), "Giàu screen (ms)": med(data, "screen_ms")}
+    if name == "release":
+        return {
+            "close: finger px/frame": med(data["close"], "finger_px_per_frame"), "close: first frame after release (px moved)": med(data["close"], "first_jump_px"),
+            "close: frames with no movement after the release": med(data["close"], "stall_frames"), "close: slide ends (ms)": med(data["close"], "end_ms"),
+            "snap: finger px/frame": med(data["snap"], "finger_px_per_frame"), "snap: first frame after release (px moved)": med(data["snap"], "first_jump_px"),
+            "snap: frames with no movement after the release": med(data["snap"], "stall_frames"),
+        }
     if name == "sheets":
         return {
             "calendar first open (ms)": med(data["calendar"], "first"), "calendar second open (ms)": med(data["calendar"], "second"),
