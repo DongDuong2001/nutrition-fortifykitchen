@@ -144,8 +144,8 @@ function FoodDetailInner() {
       <AppShell>
         <AppHeader variant="sub" title="Không tìm thấy món" onBack={goBack} layout="wide" />
         <main className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pt-4 lg:mx-0 lg:px-8">
-          <p className="m-0 text-[15px] text-secondary">Món này không còn trong danh sách.</p>
-          <Link href="/explore" className="inline-flex min-h-[44px] items-center font-bold text-blue no-underline">
+          <p className="m-0 text-callout text-secondary">Món này không còn trong danh sách.</p>
+          <Link href="/explore" className="inline-flex min-h-11 items-center font-bold text-cobalt no-underline">
             Về Khám phá
           </Link>
         </main>
@@ -161,7 +161,7 @@ function FoodDetailInner() {
           data-tour="food-add-cta"
           onClick={handleAdd}
           disabled={isSubmitting || parsedGrams <= 0 || mealSlot === null || !canLog(food)}
-          className="w-full min-h-[52px] rounded-full bg-blue text-on-accent font-bold text-base cursor-pointer hover:bg-blue/90 m-tint transition-press border-0 flex items-center justify-center shadow-md disabled:opacity-50"
+          className="w-full min-h-[52px] rounded-full bg-cobalt text-on-accent font-bold text-base cursor-pointer hover:bg-cobalt/90 m-tint transition-press border-0 flex items-center justify-center shadow-md disabled:opacity-50"
         >
           Thêm vào {mealSlot ? mealNameVi : "—"}
         </button>
@@ -191,7 +191,7 @@ function FoodDetailInner() {
               type="button"
               onClick={() => setSourceOpen(true)}
               aria-haspopup="dialog"
-              className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] -my-2.5 px-2 -mx-2 cursor-pointer border-0 bg-transparent text-inherit underline hover:text-blue transition-press"
+              className="inline-flex items-center justify-center min-h-11 min-w-11 -my-2.5 px-2 -mx-2 cursor-pointer border-0 bg-transparent text-inherit underline hover:text-cobalt transition-press"
             >
               {foodSourceLabel(food.source)}
             </button>
@@ -235,13 +235,13 @@ function FoodDetailInner() {
       {/* Main Content Area */}
       <main className="flex-1 w-full max-w-[560px] mx-auto p-4 flex flex-col gap-4">
         {!canLog(food) && (
-          <p role="alert" data-align-group="food-detail" className="m-0 rounded-xl bg-warning-bg px-3 py-2 text-[13px] leading-snug text-warning-text">
+          <p role="alert" data-align-group="food-detail" className="m-0 rounded-xl bg-warning-bg px-3 py-2 text-cap leading-snug text-warning-text">
             {energyNotice(food)}
           </p>
         )}
         {/* Serving and Gram Selection */}
         <div data-align-group="food-detail" className="flex w-full flex-col gap-2">
-          <span className="text-[13px] font-semibold text-secondary">Khẩu phần</span>
+          <span className="text-cap font-semibold text-secondary">Khẩu phần</span>
           <PortionArea
             food={food}
             gramsInput={gramsInput}
@@ -254,7 +254,7 @@ function FoodDetailInner() {
         </div>
 
         {/* Big Kcal & 3-up Macro Card */}
-        <div data-align-group="food-detail" className="w-full bg-card border border-card-border rounded-[18px] lg:shadow-card p-4">
+        <div data-align-group="food-detail" className="w-full bg-card rounded-card border border-transparent shadow-ring lg:shadow-card p-4">
           <StatGroup
             columns={4}
             tone="light"
@@ -266,16 +266,16 @@ function FoodDetailInner() {
             ]}
           />
           {/* A supplement whose label states no energy: logged all the same, counted as 0 kcal */}
-          {canLog(food) && energyNotice(food) && <p role="note" className="m-0 mt-3 text-[13px] leading-snug text-secondary">{energyNotice(food)}</p>}
+          {canLog(food) && energyNotice(food) && <p role="note" className="m-0 mt-3 text-cap leading-snug text-secondary">{energyNotice(food)}</p>}
         </div>
 
         {recipe && (
           <Card as="section" aria-label="Trong 1 phần" data-align-group="food-detail" className="flex flex-col gap-1 p-4">
-            <div className="flex min-h-[44px] items-center justify-between gap-2">
+            <div className="flex min-h-11 items-center justify-between gap-2">
               <h2 className="m-0 text-base font-bold text-text">Trong 1 phần</h2>
               <Link
                 href={`/foods/new?recipe=${recipe.id}${searchParams.get("meal") ? `&meal=${searchParams.get("meal")}` : ""}`}
-                className="inline-flex min-h-[44px] items-center px-2 text-sm font-bold text-blue no-underline"
+                className="inline-flex min-h-11 items-center px-2 text-sm font-bold text-cobalt no-underline"
               >
                 Sửa
               </Link>
@@ -283,8 +283,8 @@ function FoodDetailInner() {
             <ul className="m-0 flex list-none flex-col p-0">
               {recipe.ingredients.map((ingredient, index) => (
                 <li key={`${ingredient.foodId}-${index}`} className="flex items-baseline justify-between gap-3 border-t border-divider py-2">
-                  <span className="min-w-0 break-words text-[15px] leading-snug text-text">{ingredient.name}</span>
-                  <span className="shrink-0 text-[15px] font-semibold tabular-nums text-text">
+                  <span className="min-w-0 break-words text-callout leading-snug text-text">{ingredient.name}</span>
+                  <span className="shrink-0 text-callout font-semibold tabular-nums text-text">
                     {formatAmount(ingredientPerServing(ingredient, recipe.servings), ingredient.unit)} {ingredient.unit}
                   </span>
                 </li>
@@ -325,7 +325,7 @@ function FoodDetailInner() {
       {/* Favourite toast, just above the sticky CTA */}
       <Presence>
         {favouriteToast && (
-          <div className="fixed bottom-[168px] lg:bottom-24 inset-x-0 px-4 z-40 pointer-events-none">
+          <div className="fixed bottom-[168px] lg:bottom-24 inset-x-0 px-4 z-nav pointer-events-none">
             <Toast message={favouriteToast.message} />
           </div>
         )}
@@ -338,7 +338,7 @@ const CUSTOM_PORTION = "__custom";
 
 export default function FoodDetailPage() {
   return (
-    <Suspense fallback={<div className="w-full min-h-screen bg-page" />}>
+    <Suspense fallback={<div className="w-full min-h-dvh bg-page" />}>
       <FoodDetailInner />
     </Suspense>
   );

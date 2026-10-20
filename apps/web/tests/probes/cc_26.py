@@ -17,6 +17,7 @@ Production build, clock fixed at 2026-10-15 10:00 Asia/Ho_Chi_Minh, sizes 390x84
 PNGs are saved to .screenshots/cc-27g-*.png (short, long and past days use the account "Học viên A").
 Run with: ALIGN_BASE_URL=http://localhost:3104 npm run probe -- tests/probes/cc_26.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/**
 import base64
 import json
 import math
@@ -225,7 +226,8 @@ def check_head(s, tag, label, named):
     check(h["badge"] is not None and h["first"]["right"] <= h["badge"]["left"] - 4, f"{tag} {label}: the name stops short of the badge (the skewed badge's box reaches 4.7 px left of its face) ({h['first']['right']:.1f} vs {h['badge']['left']:.1f})")
     if named:
         lh = h["first"]["bottom"] - h["first"]["top"]
-        check(abs(lh / h["firstFs"] / round(lh / (h["firstFs"] * 0.9)) - 0.9) < 0.02, f"{tag} {label}: name line-height 0.9 ({lh:.1f} px for {h['firstFs']} px)")
+        # cc-66 (S12): 1.1, so stacked Vietnamese marks (Ắ, Ổ, Ế) on a two-line name never touch (OPEN_QUESTIONS cc-68)
+        check(abs(lh / h["firstFs"] / round(lh / (h["firstFs"] * 1.1)) - 1.1) < 0.02, f"{tag} {label}: name line-height 1.1 ({lh:.1f} px for {h['firstFs']} px)")
         check(h["date"] is not None and abs(h["date"]["top"] - h["first"]["bottom"] - 8) <= 1, f"{tag} {label}: the date sits 8 px under the name ({h['date'] and h['date']['top'] - h['first']['bottom']:.1f})")
         check(abs(h["dateFs"] - 13) < 0.5 and h["dateWeight"] == "500" and h["dateTransform"] == "none" and h["dateColor"] == "rgb(107, 106, 102)", f"{tag} {label}: the date is 13 px 500 secondary, sentence case ({h['dateFs']}, {h['dateWeight']}, {h['dateTransform']}, {h['dateColor']})")
         check(abs(h["date"]["left"] - h["first"]["left"]) <= 1, f"{tag} {label}: date and name share a left edge")

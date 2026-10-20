@@ -148,7 +148,7 @@ export interface ParkedToast {
 }
 
 const ADDED_TOAST_MS = 4000;
-const UNDO_TOAST_MS = 5000;
+const UNDO_TOAST_MS = 8000;
 const NOTICE_TOAST_MS = 6000;
 
 interface DiaryContextValue {

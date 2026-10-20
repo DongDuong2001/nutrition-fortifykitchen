@@ -28,7 +28,7 @@ export default function UpdateOffer({ worker, onApply }: { worker: ServiceWorker
   };
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-[calc(168px+env(safe-area-inset-bottom))] z-50 px-3 lg:inset-x-auto lg:bottom-24 lg:right-8 lg:w-[400px]">
+    <div className="pointer-events-none fixed inset-x-0 bottom-[calc(168px+env(safe-area-inset-bottom))] z-sheet px-3 lg:inset-x-auto lg:bottom-24 lg:right-8 lg:w-[400px]">
       <div className="pointer-events-auto">
         <Toast
           message={phase === "ready" ? "Có bản mới" : phase === "waiting" ? "Có bản mới · đang gửi dữ liệu, xong sẽ tải lại" : "Có bản mới · còn mục chưa lưu, xử lý xong rồi tải lại"}

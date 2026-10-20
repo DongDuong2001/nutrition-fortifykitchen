@@ -7,6 +7,7 @@
 Screenshots: .screenshots/cc-41-landing-1440.png, cc-41-landing-390.png, cc-41-home-390.png, cc-41-add-portion-390.png
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_41_shots.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/add/** app/landing/**
 import os
 import sys
 from pathlib import Path
@@ -41,11 +42,13 @@ def small_targets(pg):
             if (label) h = Math.max(h, label.getBoundingClientRect().height);
             return h;
           };
+          // cc-62: a screen under a sheet is stepped back to .97 behind its scrim (not tappable): its controls are not counted
           return [...document.querySelectorAll('button, input, select, textarea, a[role=button]')]
+            .filter(e => !e.closest('[data-under-sheet]'))
             .filter(e => { const r = e.getBoundingClientRect(); const s = getComputedStyle(e);
               return r.width > 0 && r.height > 0 && s.visibility !== 'hidden' && s.display !== 'none' && e.type !== 'hidden' && e.type !== 'checkbox' && e.type !== 'radio'; })
             // Hôm nay's phone list is a design decision (32 px food rows, 24 px meal pills, 48 and 36 px from lg): see cc-22, cc-44
-            .filter(e => !(e.classList.contains('min-h-8') || (e.parentElement && e.parentElement.classList.contains('h-6'))) && hit(e) < 43.5)
+            .filter(e => !(e.classList.contains('min-h-8') || (e.parentElement && e.parentElement.closest('[data-ink-pill]'))) && hit(e) < 43.5)
             .map(e => (e.getAttribute('aria-label') || e.textContent || e.tagName).trim().slice(0, 40) + ' ' + Math.round(hit(e)));
         }"""
     )

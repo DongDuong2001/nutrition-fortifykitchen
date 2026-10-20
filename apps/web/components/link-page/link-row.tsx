@@ -15,10 +15,10 @@ export function LinkRowContent({ icon, title, line, action }: { icon: ReactNode;
     <>
       {icon}
       <span className="flex min-w-0 flex-col gap-[2px]">
-        <span className="text-[19px] font-bold leading-[normal] text-ink lg:text-[20px]">{title}</span>
-        <span className="text-sm leading-[normal] text-secondary lg:text-[15px]">{line}</span>
+        <span className="text-[1.1875rem] font-bold leading-[normal] text-ink lg:text-[1.25rem]">{title}</span>
+        <span className="text-sm leading-[normal] text-secondary lg:text-callout">{line}</span>
       </span>
-      <span className="flex min-h-11 items-center text-[17px] font-bold text-blue lg:text-[18px]">{action}</span>
+      <span className="flex min-h-11 items-center text-body-lg font-bold text-cobalt lg:text-[1.125rem]">{action}</span>
     </>
   );
 }

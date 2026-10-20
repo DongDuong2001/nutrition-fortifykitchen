@@ -7,6 +7,7 @@ Asserted at both 390x844 (mobile) and 1440x900 (desktop).
 
 Run with: ALIGN_BASE_URL=http://localhost:3100 npm run probe -- tests/probes/ag07.py
 """
+# PROBE_COVERS: app/(app)/foods/[id]/** app/(app)/foods/new/** app/signin/**
 import os
 import re
 import sys
@@ -75,7 +76,7 @@ def test_item_1(browser, vp_name, vp):
     inp.focus()
     pg.wait_for_timeout(100)
     box_classes = box_el.get_attribute("class") or ""
-    check("focus-within:ring-2" in box_classes and "ring-blue" in box_classes, f"[{vp_name}] foods/[id]: the gram box has focus ring classes ({box_classes})")
+    check("focus-within:ring-2" in box_classes and "ring-cobalt" in box_classes, f"[{vp_name}] foods/[id]: the gram box has focus ring classes ({box_classes})")
 
     ctx.close()
 
@@ -140,7 +141,7 @@ def test_item_4(browser, vp_name, vp):
     check(email_inp.count() > 0, f"[{vp_name}] signin: email input exists")
 
     inp_classes = email_inp.get_attribute("class") or ""
-    has_focus_classes = ("focus-visible:ring-2" in inp_classes and "focus-visible:ring-blue" in inp_classes)
+    has_focus_classes = ("focus-visible:ring-2" in inp_classes and "focus-visible:ring-cobalt" in inp_classes)
     check(has_focus_classes, f"[{vp_name}] signin: email input has focus ring classes ({inp_classes})")
 
     # Focus and verify

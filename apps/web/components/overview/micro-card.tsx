@@ -41,7 +41,7 @@ export function MicroCard({ board }: { board: MicroBoard }) {
   const change = board.change;
 
   return (
-    <section id="ov-micro" aria-labelledby="ov-micro-title" className="overflow-hidden rounded-[18px] bg-surface-dark text-on-dark">
+    <section id="ov-micro" aria-labelledby="ov-micro-title" className="overflow-hidden rounded-card bg-surface-dark text-on-dark">
       <h2 id="ov-micro-title" className="sr-only">
         Vi chất đạt {board.achieved} trên {board.total}
       </h2>
@@ -54,12 +54,12 @@ export function MicroCard({ board }: { board: MicroBoard }) {
         className="flex w-full cursor-pointer flex-col gap-3 border-0 bg-transparent p-4 text-left font-sans text-on-dark active:opacity-90 motion-reduce:active:opacity-100"
       >
         <span aria-hidden="true" className="flex w-full items-baseline justify-between">
-          <span className="text-[15px] font-bold">Vi chất đạt</span>
+          <span className="text-callout font-bold">Vi chất đạt</span>
           <span>
-            <span className="font-display text-4xl font-bold leading-none tabular-nums">{board.achieved}</span>
-            <span className="font-display text-4xl font-bold leading-none text-muted-subtitle">/{board.total}</span>
+            <span className="font-display text-4xl font-extrabold leading-none tabular-nums tracking-display">{board.achieved}</span>
+            <span className="font-display text-4xl font-extrabold leading-none text-muted-subtitle tracking-display">/{board.total}</span>
             {change !== null && (
-              <span className="ml-2 text-[13px] font-bold text-sky">
+              <span className="ml-2 text-cap font-bold text-sky">
                 {change > 0 ? `▲ ${change}` : change < 0 ? `▼ ${Math.abs(change)}` : "Không đổi"}
               </span>
             )}
@@ -68,7 +68,7 @@ export function MicroCard({ board }: { board: MicroBoard }) {
         <span aria-hidden="true" className="w-full">
           <HeroBar pct={board.total > 0 ? (board.achieved / board.total) * 100 : 0} />
         </span>
-        <span className="flex w-full items-center justify-between gap-3 text-[13px] text-muted-subtitle">
+        <span className="flex w-full items-center justify-between gap-3 text-cap text-muted-subtitle">
           <span>{open ? "Chạm vào từng ô để xem chi tiết" : hint}</span>
           <Chevron />
         </span>

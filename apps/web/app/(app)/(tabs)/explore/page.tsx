@@ -51,7 +51,7 @@ function Results() {
             <CatalogStatus failed={failed} onRetry={retry} />
           ) : (
             <div className="flex flex-col gap-3 py-2">
-              <p className="m-0 text-[13px] leading-snug text-secondary">
+              <p className="m-0 text-cap leading-snug text-secondary">
                 Không có món nào khớp. Thử từ ngắn hơn, bỏ dấu, hoặc tạo món mới.
               </p>
               <CreateFoodButton href="/foods/new" helper={null} />

@@ -43,11 +43,11 @@ export function InstallPanel() {
 
   if (view === "installed") {
     return (
-      <Card as="section" aria-label="Đã cài" className="flex min-h-[56px] items-center gap-3">
-        <span aria-hidden="true" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue text-on-accent">
+      <Card as="section" aria-label="Đã cài" className="flex min-h-14 items-center gap-3">
+        <span aria-hidden="true" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-cobalt text-on-accent">
           <CheckIcon />
         </span>
-        <p className="m-0 text-[15px] font-bold text-text">Đã cài trên máy này</p>
+        <p className="m-0 text-callout font-bold text-text">Đã cài trên máy này</p>
       </Card>
     );
   }
@@ -64,20 +64,20 @@ export function InstallPanel() {
     return (
       <div className="flex flex-col gap-3">
         {!env.safari && (
-          <p className="m-0 text-[13px] leading-snug text-secondary">Mở trang này bằng Safari để thêm vào màn hình chính.</p>
+          <p className="m-0 text-cap leading-snug text-secondary">Mở trang này bằng Safari để thêm vào màn hình chính.</p>
         )}
         <ol aria-label="Các bước cài trên iPhone" className="m-0 flex list-none flex-col gap-3 p-0">
           {IOS_STEPS.map((step, i) => (
             <li key={step.text}>
-              <Card className="flex min-h-[56px] items-center gap-3">
+              <Card className="flex min-h-14 items-center gap-3">
                 <span
                   aria-hidden="true"
-                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue text-sm font-bold tabular-nums text-on-accent"
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cobalt text-sm font-bold tabular-nums text-on-accent"
                 >
                   {i + 1}
                 </span>
-                <span className="min-w-0 flex-1 text-[15px] leading-snug text-text">{step.text}</span>
-                <span aria-hidden="true" className="shrink-0 text-blue">
+                <span className="min-w-0 flex-1 text-callout leading-snug text-text">{step.text}</span>
+                <span aria-hidden="true" className="shrink-0 text-cobalt">
                   {step.icon}
                 </span>
               </Card>
@@ -89,8 +89,8 @@ export function InstallPanel() {
   }
 
   return (
-    <Card as="section" aria-label="Chưa hỗ trợ cài" className="min-h-[56px]">
-      <p className="m-0 text-[15px] leading-snug text-text">
+    <Card as="section" aria-label="Chưa hỗ trợ cài" className="min-h-14">
+      <p className="m-0 text-callout leading-snug text-text">
         Trình duyệt này chưa cho cài ứng dụng. Mở H1T MICRO bằng Chrome hoặc Safari để cài.
       </p>
     </Card>

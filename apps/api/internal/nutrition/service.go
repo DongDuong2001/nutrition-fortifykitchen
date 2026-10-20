@@ -12,6 +12,10 @@ import (
 var (
 	ErrFoodNotFound       = errors.New("food not found")
 	ErrInvalidNutrientKey = errors.New("invalid nutrient key")
+
+	ErrNameRequired           = errors.New("name_vi is required")
+	ErrInvalidServingSize     = errors.New("serving_size must be greater than zero")
+	ErrNegativeMacronutrients = errors.New("macronutrients cannot be negative")
 )
 
 type Service interface {
@@ -104,16 +108,16 @@ func (s *nutritionService) CreateCustomFood(ctx context.Context, userID uuid.UUI
 	}
 
 	if req.NameVi == "" {
-		return nil, errors.New("name_vi is required")
+		return nil, ErrNameRequired
 	}
 	if req.ServingSize <= 0 {
-		return nil, errors.New("serving_size must be greater than zero")
+		return nil, ErrInvalidServingSize
 	}
 	if (req.Calories != nil && *req.Calories < 0) ||
 		(req.Protein != nil && *req.Protein < 0) ||
 		(req.Carbs != nil && *req.Carbs < 0) ||
 		(req.Fat != nil && *req.Fat < 0) {
-		return nil, errors.New("macronutrients cannot be negative")
+		return nil, ErrNegativeMacronutrients
 	}
 
 	// Scale factor to convert user's portion to 100g standard

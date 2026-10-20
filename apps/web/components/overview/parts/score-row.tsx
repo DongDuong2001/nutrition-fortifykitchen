@@ -56,11 +56,11 @@ export function ScoreRow({
         onClick={onToggle}
         className="grid w-full cursor-pointer grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 border-0 bg-transparent p-4 text-left font-sans text-text active:bg-surface motion-reduce:active:bg-transparent"
       >
-        <span className="text-[15px] font-bold">{row.title}</span>
-        <span className="text-right text-[13px] font-semibold text-secondary">{row.change}</span>
+        <span className="text-callout font-bold">{row.title}</span>
+        <span className="text-right text-cap font-semibold text-secondary">{row.change}</span>
         <span className="min-w-0">
-          <span className="font-display text-[44px] font-bold leading-none tabular-nums">{row.value}</span>
-          <span className="block text-[13px] text-secondary">{row.sub}</span>
+          <span className="font-display text-[2.75rem] font-bold leading-none tabular-nums tracking-display">{row.value}</span>
+          <span className="block text-cap text-secondary">{row.sub}</span>
         </span>
         <span className="flex flex-col items-end justify-center gap-1">
           {row.target && (
@@ -68,12 +68,12 @@ export function ScoreRow({
               {row.days.map((d) => (
                 <span
                   key={d.iso}
-                  className={`h-3 w-3 rounded-[3px] ${d.met ? "bg-blue" : d.inProgress ? "border border-card-border" : "bg-card-border"}`}
+                  className={`h-3 w-3 rounded-[3px] ${d.met ? "bg-cobalt" : d.inProgress ? "border border-card-border" : "bg-card-border"}`}
                 />
               ))}
             </span>
           )}
-          <span className="flex items-center gap-2 text-[13px] font-bold">
+          <span className="flex items-center gap-2 text-cap font-bold">
             {row.caption}
             <Chevron />
           </span>

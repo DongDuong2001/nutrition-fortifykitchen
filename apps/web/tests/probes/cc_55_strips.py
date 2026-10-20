@@ -4,6 +4,7 @@ Reads .screenshots/cc55/<NN-name>-<t>ms.png and writes .screenshots/cc55/strip-<
 195 px wide, the capture time under each). The times are when each capture started; a capture takes a few ms itself.
 Run with: npm run probe -- tests/probes/cc_55_strips.py
 """
+# PROBE_COVERS:
 import base64
 import re
 from collections import defaultdict

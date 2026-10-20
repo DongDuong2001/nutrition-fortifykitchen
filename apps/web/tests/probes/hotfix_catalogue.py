@@ -7,6 +7,7 @@ probe:all): /explore/tinh_bot opened directly, with /foods mocked to 35 Tinh b�
 "Đang tải món…", never "Chưa có món nào", while /foods is slow); a failed /foods shows Thử lại, which loads them.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/hotfix_catalogue.py
 """
+# PROBE_COVERS: app/(app)/add/** app/(app)/explore/[category]/** app/(app)/foods/[id]/**
 import base64
 import json
 import os

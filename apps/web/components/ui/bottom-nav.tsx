@@ -34,15 +34,15 @@ export function BottomNav({ currentTab, className = "" }: BottomNavProps) {
         onNavigate={() => startTransition(() => setActive(item.tab))}
         data-tour={item.tab === "settings" ? "nav-settings" : item.tab === "explore" ? "nav-explore" : undefined}
         aria-current={isActive ? "page" : undefined}
-        className={`relative flex flex-col items-center justify-center gap-[2px] min-h-[56px] text-xs font-semibold no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100 ${
+        className={`relative flex flex-col items-center justify-center gap-[2px] min-h-14 text-xs font-semibold no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100 ${
           isActive ? "text-on-dark" : "text-muted-on-dark hover:text-on-dark"
         }`}
       >
         <NavIcon tab={item.tab} />
-        <span className="text-[11px] leading-tight">{item.label}</span>
+        <span className="text-micro leading-tight">{item.label}</span>
         {isActive && (
           <span
-            className="absolute bottom-1 w-5 h-[3px] rounded-[1px] bg-blue"
+            className="absolute bottom-1 w-5 h-[3px] rounded-[1px] bg-cobalt"
             style={{ transform: "skewX(-14deg)" }}
             aria-hidden="true"
           />
@@ -63,11 +63,12 @@ export function BottomNav({ currentTab, className = "" }: BottomNavProps) {
         <div className="flex justify-center items-center">
           <Link
             id="mobile-add-fab"
+            data-testid="add-fab"
             data-tour="nav-add"
             href="/add"
             onClick={() => rememberAddOpener("mobile-add-fab")}
             aria-label="Thêm món"
-            className="w-[50px] h-[50px] rounded-full bg-blue text-on-accent flex items-center justify-center no-underline shadow-md active:scale-[0.97] transition-press motion-reduce:active:scale-100 "
+            className="w-[50px] h-[50px] rounded-full bg-cobalt text-on-accent flex items-center justify-center no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100 "
           >
             <PlusIcon />
           </Link>

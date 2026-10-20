@@ -18,7 +18,7 @@ import { PortionArea } from "../ui/portion-area";
 import { HOME_ROUTE } from "@/lib/nav";
 
 const quickFieldClass =
-  "h-12 w-full rounded-xl border-2 border-card-border bg-surface px-3 text-base text-text outline-none transition-colors focus:border-blue";
+  "h-12 w-full rounded-xl border-2 border-card-border bg-surface px-3 text-base text-text outline-none transition-colors focus:border-cobalt";
 
 /**
  * Edit one diary entry: portion, meal, save or delete. Shown on the entry route, phone and desktop.
@@ -91,7 +91,7 @@ export function EntryEditor({ view }: { view: EntryView }) {
   };
 
   return (
-    <div className="min-h-screen bg-page text-text font-sans">
+    <div className="min-h-dvh bg-page text-text font-sans">
       {/* Title is the food, subtitle the meal, as in design/screens/EditEntry.dc.html */}
       <AppHeader
         variant="sub"
@@ -110,7 +110,7 @@ export function EntryEditor({ view }: { view: EntryView }) {
         backHref={homeHref}
       />
       <div className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-8 pt-4">
-        <section className="flex flex-col gap-4 rounded-[18px] lg:shadow-card border border-card-border bg-card p-4">
+        <section className="flex flex-col gap-4 rounded-card border border-transparent shadow-ring lg:shadow-card bg-card p-4">
           {quick && (
             <div data-align-group="entry" className="flex w-full flex-col gap-3">
               <FormRow label="Tên" htmlFor="entry-quick-name">
@@ -202,14 +202,14 @@ export function EntryEditor({ view }: { view: EntryView }) {
               type="button"
               onClick={handleSave}
               disabled={!canSave}
-              className="flex min-h-[52px] w-full cursor-pointer items-center justify-center rounded-full border-0 bg-blue text-base font-bold text-on-accent disabled:opacity-50"
+              className="flex min-h-[52px] w-full cursor-pointer items-center justify-center rounded-full border-0 bg-cobalt text-base font-bold text-on-accent disabled:opacity-50"
             >
               Lưu thay đổi
             </button>
             <button
               type="button"
               onClick={handleDelete}
-              className="flex min-h-[48px] w-full cursor-pointer items-center justify-center gap-2 rounded-xl border-0 bg-transparent text-[15px] font-bold text-destructive-text "
+              className="flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border-0 bg-transparent text-callout font-bold text-destructive-text "
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" />
@@ -228,8 +228,8 @@ export function EntryEditor({ view }: { view: EntryView }) {
 function Stat({ value, label }: { value: string; label: string }) {
   return (
     <div className="flex flex-col gap-0.5">
-      <div className="text-[17px] font-bold tabular-nums">{value}</div>
-      <div className="text-[13px] text-secondary">{label}</div>
+      <div className="text-body-lg font-bold tabular-nums">{value}</div>
+      <div className="text-cap text-secondary">{label}</div>
     </div>
   );
 }

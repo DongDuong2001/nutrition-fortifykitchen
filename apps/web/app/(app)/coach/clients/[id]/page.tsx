@@ -60,17 +60,17 @@ export default function CoachClientPage() {
       <AppHeader variant="sub" title={client ? client.name : "Học viên"} onBack={goBack} layout="wide" />
       <main className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-6 pt-4 lg:mx-0 lg:max-w-[760px] lg:px-8">
         {client === undefined ? (
-          <div aria-busy="true" className="h-[160px] rounded-[18px] bg-divider motion-safe:animate-pulse" />
+          <div aria-busy="true" className="h-[160px] rounded-card bg-divider motion-safe:animate-pulse" />
         ) : client === null ? (
           <Card>
-            <p className="m-0 text-[15px] text-secondary">Không tìm thấy học viên này.</p>
+            <p className="m-0 text-callout text-secondary">Không tìm thấy học viên này.</p>
           </Card>
         ) : (
           <>
             <Card as="section" aria-label="Level hiện tại" className="flex items-center justify-between gap-3">
               <div className="flex flex-col gap-1">
-                <span className="text-[13px] font-semibold text-secondary">Level hiện tại</span>
-                <span className="text-[15px] font-bold text-text">Level {client.level}</span>
+                <span className="text-cap font-semibold text-secondary">Level hiện tại</span>
+                <span className="text-callout font-bold text-text">Level {client.level}</span>
               </div>
               <LevelBadge level={toLevel(client.level)} size="share" />
             </Card>
@@ -99,15 +99,15 @@ export default function CoachClientPage() {
               </h2>
               {groups.map((g) => (
                 <div key={g.title} className="flex flex-col gap-1">
-                  <h3 className="m-0 text-[11px] font-extrabold leading-snug text-secondary">{g.title}</h3>
+                  <h3 className="m-0 text-micro font-extrabold leading-snug text-secondary">{g.title}</h3>
                   <ul className="m-0 flex list-none flex-wrap gap-1.5 p-0">
                     {g.items.map((item) => (
                       <li
                         key={item.id}
                         data-status={item.status}
-                        className={`rounded-full px-2.5 py-1 text-[13px] font-semibold leading-none ${
+                        className={`rounded-full px-2.5 py-1 text-cap font-semibold leading-none ${
                           item.status === "added"
-                            ? "bg-blue/10 text-blue"
+                            ? "bg-cobalt/10 text-cobalt"
                             : item.status === "removed"
                               ? "bg-surface text-secondary line-through"
                               : "bg-surface text-text"
@@ -123,7 +123,7 @@ export default function CoachClientPage() {
                 </div>
               ))}
               {previewHasChanges(groups) && (
-                <p className="m-0 text-[13px] leading-snug text-secondary">+ là chỉ số được thêm, − là chỉ số bị bỏ so với Level hiện tại.</p>
+                <p className="m-0 text-cap leading-snug text-secondary">+ là chỉ số được thêm, − là chỉ số bị bỏ so với Level hiện tại.</p>
               )}
             </Card>
 
@@ -135,7 +135,7 @@ export default function CoachClientPage() {
       </main>
       <Presence>
         {toast && (
-          <div className="pointer-events-none fixed inset-x-0 bottom-[calc(88px+env(safe-area-inset-bottom))] z-40 px-4 lg:bottom-8 lg:left-60">
+          <div className="pointer-events-none fixed inset-x-0 bottom-[calc(88px+env(safe-area-inset-bottom))] z-nav px-4 lg:bottom-8 lg:left-60">
             <Toast message={toast} />
           </div>
         )}

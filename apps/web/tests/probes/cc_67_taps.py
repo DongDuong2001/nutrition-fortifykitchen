@@ -5,6 +5,9 @@ D a dish with one part changed (Phở bò, Bánh phở 200 → 150 g: row, Thàn
 + Thịt bò chip), E the same dish a second time (Thành phần is open already).
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_67_taps.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/**
+# PROBE_TAGS: smoke
+import json
 import os
 import re
 
@@ -13,6 +16,9 @@ import _demo  # noqa: F401  (demo mode, tour and tips off)
 
 BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3100")
 PHONE = dict(viewport={"width": 390, "height": 844}, device_scale_factor=2, is_mobile=True, has_touch=True)
+SETTINGS_KEY = "h1t_settings_v1_demo"
+# The install pop-up (it opens by itself on a phone, a moment after load) is done, so nothing covers the page
+SEED = {"installPrompt": {"dismissCount": 0, "snoozeUntil": 0, "done": True, "firstSeenIso": "2026-01-01"}}
 taps = 0
 counted = {}
 
@@ -26,24 +32,16 @@ def tap(locator, force=False):
 
 def open_add(pg):
     pg.goto(BASE + "/app", wait_until="networkidle")
-    pg.wait_for_timeout(1200)
-    # The first-visit pop-up of the demo account is not part of logging a food
-    later = pg.get_by_role("button", name="Để sau")
-    try:
-        later.first.wait_for(state="visible", timeout=3000)
-        later.first.tap()
-        pg.wait_for_timeout(600)
-    except Exception:
-        pass
-    add = pg.locator('[data-tour="nav-add"]:visible').first
+    pg.locator('[data-testid="meal-header"]:visible').first.wait_for(state="visible", timeout=8000)
+    add = pg.locator('[data-testid="add-fab"]:visible').first
     tap(add)
     pg.wait_for_url(re.compile(r".*/add.*"))
-    pg.wait_for_timeout(900)
+    pg.locator('[data-add-panel] [data-testid="food-search"]').first.wait_for(state="visible", timeout=8000)
 
 
 def done(pg, label):
     pg.wait_for_url(re.compile(r".*/app(\?.*)?$"))
-    pg.wait_for_timeout(400)
+    pg.locator('[data-testid="meal-header"]:visible').first.wait_for(state="visible", timeout=8000)
     print(f"{label}: {taps} taps")
     counted[label[0]] = taps
 
@@ -57,9 +55,9 @@ def change_part(pg, section):
 
 
 def search(pg, text):
-    field = pg.locator('[data-add-panel] input').first
+    field = pg.locator('[data-add-panel] [data-testid="food-search"]').first
     field.fill(text)
-    pg.wait_for_timeout(700)
+    row(pg, "").wait_for(state="visible", timeout=5000)
 
 
 def row(pg, name):
@@ -73,6 +71,7 @@ def main():
 
         def fresh():
             ctx = browser.new_context(**PHONE)
+            ctx.add_init_script(f"if (localStorage.getItem('{SETTINGS_KEY}') === null) localStorage.setItem('{SETTINGS_KEY}', {json.dumps(json.dumps(SEED))});")
             return ctx, ctx.new_page()
 
         ctx, pg = fresh()
@@ -86,7 +85,7 @@ def main():
         taps = 0
         open_add(pg)
         tap(pg.locator('[data-tour="add-recents"]:visible button[aria-label^="Chọn khẩu phần "]').first)
-        tap(pg.locator('[data-tour="portion-add"]:visible').first)
+        tap(pg.locator('[data-testid="portion-add"]:visible').first)
         done(pg, "B recent food through the portion sheet")
         ctx.close()
 
@@ -95,7 +94,7 @@ def main():
         open_add(pg)
         search(pg, "chuối")
         tap(row(pg, "Chuối"))
-        tap(pg.locator('[data-tour="portion-add"]:visible').first)
+        tap(pg.locator('[data-testid="portion-add"]:visible').first)
         done(pg, "C searched food")
         ctx.close()
 
@@ -110,7 +109,7 @@ def main():
             tap(section.get_by_role("button", name=re.compile("^Thành phần")))
             pg.wait_for_timeout(500)
         change_part(pg, section)
-        tap(pg.locator('[data-tour="portion-add"]:visible').first)
+        tap(pg.locator('[data-testid="portion-add"]:visible').first)
         done(pg, "D dish with one part changed (main: the + Thịt bò chip, 5 taps)")
 
         # E: the same context, the parts stay open
@@ -125,7 +124,7 @@ def main():
             tap(section.get_by_role("button", name=re.compile("^Thành phần")))
             pg.wait_for_timeout(500)
         change_part(pg, section)
-        tap(pg.locator('[data-tour="portion-add"]:visible').first)
+        tap(pg.locator('[data-testid="portion-add"]:visible').first)
         done(pg, "E the same dish again")
         ctx.close()
         browser.close()

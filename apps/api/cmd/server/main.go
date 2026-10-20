@@ -19,6 +19,7 @@ import (
 	"nutrition-api/internal/clienterrors"
 	"nutrition-api/internal/coaching"
 	"nutrition-api/internal/config"
+	"nutrition-api/internal/csrf"
 	"nutrition-api/internal/diary"
 	"nutrition-api/internal/library"
 	"nutrition-api/internal/logger"
@@ -195,6 +196,13 @@ func SetupRouter(cfg *config.Config, pool *pgxpool.Pool) chi.Router {
 
 	// API v1 Routes
 	r.Route("/api/v1", func(r chi.Router) {
+		// Writes must come from an allowed origin and carry JSON (the CORS handler above answers preflights first).
+		// The two webhooks are server to server: no browser Origin, they verify their own signature.
+		r.Use(csrf.Middleware(csrf.Options{
+			AllowedOrigins: cfg.AllowedOrigins,
+			ExemptPaths:    []string{"/api/v1/payments/webhook", "/api/v1/vault/webhook"},
+		}))
+
 		// Public Webhook: PayOS VietQR
 		r.Post("/payments/webhook", paymentHandler.HandleWebhook)
 

@@ -3,6 +3,7 @@
 Hồ sơ birth year as a row that opens the field (1899 shows the error, 1990 saves). No hydration errors on any date.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc10.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/settings/profile/**
 import datetime
 import os
 import re

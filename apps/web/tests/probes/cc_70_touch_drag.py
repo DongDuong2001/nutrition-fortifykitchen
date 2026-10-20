@@ -14,6 +14,7 @@ through CDP Input.dispatchTouchEvent (touchStart, hold, touchMove in steps, touc
 Screenshots: .screenshots/cc-70-*.png
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_70_touch_drag.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/add/**
 import json
 import os
 import re
@@ -172,7 +173,7 @@ def phone_drag(browser):
     check(g and abs(g["y"] + g["height"] / 2 - ty) < 24, f"…the copy is under the finger ({g and round(g['y'] + g['height'] / 2)} vs {round(ty)})")
     check("Thả vào đây để chuyển" in snack.inner_text(), "…the meal under the finger shows Thả vào đây để chuyển")
     ring = snack.evaluate("el => el.className")
-    check("ring-blue" in ring or "bg-blue" in ring, "…and has the drop highlight")
+    check("ring-cobalt" in ring or "bg-cobalt" in ring, "…and has the drop highlight")
     shot(pg, "2-dragging")
     finger.up()
     pg.wait_for_timeout(700)

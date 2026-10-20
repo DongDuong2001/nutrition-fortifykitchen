@@ -120,12 +120,12 @@ export function StackingAudiences() {
           aud.theme === "dark"
             ? "bg-surface-dark border-card-border/60 text-on-dark"
             : aud.theme === "cobalt"
-              ? "bg-ink border-blue/50 text-on-dark"
+              ? "bg-ink border-cobalt/50 text-on-dark"
               : "bg-card border-card-border text-text";
 
         const badgeClasses =
           aud.theme === "light"
-            ? "bg-blue/10 text-blue border-blue/20"
+            ? "bg-cobalt/10 text-cobalt border-cobalt/20"
             : "bg-card/15 text-sky border-card/25";
 
         const statBoxClasses =
@@ -149,17 +149,17 @@ export function StackingAudiences() {
                 <div>
                   <div className="flex items-center gap-3 mb-3">
                     <span
-                      className={`inline-block text-[11px] font-extrabold tracking-wider uppercase px-3 py-1 rounded-full border ${badgeClasses}`}
+                      className={`inline-block text-micro font-bold tracking-wider uppercase px-3 py-1 rounded-full border ${badgeClasses}`}
                     >
                       {aud.tag}
                     </span>
                     <span className="text-xs font-semibold opacity-70">Phân khúc {i + 1}/3</span>
                   </div>
 
-                  <h4 className="m-0 text-2xl sm:text-3xl font-black font-display tracking-tight leading-tight mb-2">
+                  <h4 className="m-0 text-2xl sm:text-3xl font-black font-display tracking-display leading-tight mb-2">
                     {aud.title}
                   </h4>
-                  <p className="m-0 text-sm font-semibold opacity-90 mb-4 text-blue dark:text-sky">
+                  <p className="m-0 text-sm font-semibold opacity-90 mb-4 text-cobalt dark:text-sky">
                     {aud.subtitle}
                   </p>
                   <p className="m-0 text-sm opacity-80 leading-relaxed mb-6 font-normal">
@@ -169,7 +169,7 @@ export function StackingAudiences() {
                   <ul className="m-0 list-none p-0 flex flex-col gap-2.5 mb-8">
                     {aud.points.map((pt) => (
                       <li key={pt} className="flex items-start gap-2.5 text-xs sm:text-sm leading-snug">
-                        <span className="font-bold text-blue shrink-0 mt-0.5" aria-hidden="true">
+                        <span className="font-bold text-cobalt shrink-0 mt-0.5" aria-hidden="true">
                           ✓
                         </span>
                         <span>{pt}</span>
@@ -181,7 +181,7 @@ export function StackingAudiences() {
                 <div>
                   <Link
                     href={aud.ctaHref}
-                    className="min-h-[44px] px-6 rounded-full bg-blue text-on-accent text-xs sm:text-sm font-bold inline-flex items-center gap-2 no-underline hover:bg-blue/90 active:scale-[0.97] motion-reduce:active:scale-100 transition-press shadow-sm"
+                    className="min-h-11 px-6 rounded-full bg-cobalt text-on-accent text-xs sm:text-sm font-bold inline-flex items-center gap-2 no-underline hover:bg-cobalt/90 active:scale-[0.97] motion-reduce:active:scale-100 transition-press shadow-sm"
                   >
                     <span>{aud.ctaText}</span>
                     <span aria-hidden="true">&rarr;</span>
@@ -191,7 +191,7 @@ export function StackingAudiences() {
 
               {/* Right Column: Visual Data Highlights */}
               <div className="lg:col-span-5 flex flex-col gap-3">
-                <div className="text-[11px] font-extrabold uppercase tracking-wider opacity-70 mb-1">
+                <div className="text-micro font-bold uppercase tracking-wider opacity-70 mb-1">
                   Chỉ số định lượng cốt lõi
                 </div>
 
@@ -207,7 +207,7 @@ export function StackingAudiences() {
                           {st.value}
                         </span>
                       </div>
-                      <div className="text-[11px] opacity-70 mt-1">{st.hint}</div>
+                      <div className="text-micro opacity-70 mt-1">{st.hint}</div>
                     </div>
                   ))}
                 </div>

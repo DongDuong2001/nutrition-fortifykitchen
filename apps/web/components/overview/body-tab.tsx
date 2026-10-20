@@ -44,7 +44,7 @@ function WeightLine({
       <div className={`relative ${CHART_HEIGHT} border-b border-card-border`}>
         <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" className="absolute inset-0 h-full w-full">
           {points.length > 1 && (
-            <polyline points={line} fill="none" className="stroke-blue" strokeWidth="2.5" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+            <polyline points={line} fill="none" className="stroke-cobalt" strokeWidth="2.5" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
           )}
         </svg>
         {points.map((p, i) => {
@@ -62,7 +62,7 @@ function WeightLine({
               <span
                 aria-hidden="true"
                 className={`absolute left-1/2 block -translate-x-1/2 -translate-y-1/2 rounded-full ${
-                  isSel ? "h-4 w-4 bg-blue ring-4 ring-sky/50" : "h-2 w-2 bg-blue"
+                  isSel ? "h-4 w-4 bg-cobalt ring-4 ring-sky/50" : "h-2 w-2 bg-cobalt"
                 }`}
                 style={{ top: `${y(p.kg)}%` }}
               />
@@ -106,9 +106,9 @@ export function BodyTab() {
         <HeroCard id="bd-hero" label="Cân nặng">
           <HeroNumber value="—" unit="kg" side={<p className="m-0">Hồ sơ {kg(profile.weightKg)} kg</p>} />
         </HeroCard>
-        <section className="rounded-[18px] lg:shadow-card border border-card-border bg-card p-4 text-text">
-          <p className="m-0 text-[15px] font-semibold">Chưa có số cân</p>
-          <p className="m-0 mt-1 text-[13px] leading-snug text-secondary">Chưa có số cân trong kỳ này. Mỗi lần cân bạn ghi sẽ hiện ở đây.</p>
+        <section className="rounded-card border border-transparent shadow-ring lg:shadow-card bg-card p-4 text-text">
+          <p className="m-0 text-callout font-semibold">Chưa có số cân</p>
+          <p className="m-0 mt-1 text-cap leading-snug text-secondary">Chưa có số cân trong kỳ này. Mỗi lần cân bạn ghi sẽ hiện ở đây.</p>
         </section>
       </div>
     );
@@ -136,13 +136,13 @@ export function BodyTab() {
               </p>
             }
           />
-          {demo && <p className="m-0 text-[13px] text-muted-subtitle">Dữ liệu mẫu cho đến khi có nhật ký cân thật.</p>}
+          {demo && <p className="m-0 text-cap text-muted-subtitle">Dữ liệu mẫu cho đến khi có nhật ký cân thật.</p>}
         </HeroCard>
 
-        <section aria-labelledby="bd-line" className="flex flex-col gap-3 rounded-[18px] lg:shadow-card border border-card-border bg-card p-4 text-text">
-          <div className="flex min-h-[44px] items-center justify-between gap-3">
+        <section aria-labelledby="bd-line" className="flex flex-col gap-3 rounded-card border border-transparent shadow-ring lg:shadow-card bg-card p-4 text-text">
+          <div className="flex min-h-11 items-center justify-between gap-3">
             <SectionTitle id="bd-line">Cân nặng {period.length} ngày</SectionTitle>
-            {demo && <span className="inline-flex min-h-[28px] items-center rounded-full bg-surface px-3 text-[13px] font-bold">Dữ liệu mẫu</span>}
+            {demo && <span className="inline-flex min-h-[28px] items-center rounded-full bg-surface px-3 text-cap font-bold">Dữ liệu mẫu</span>}
           </div>
           {hasPoints && point ? (
             <>
@@ -163,11 +163,11 @@ export function BodyTab() {
                   <span aria-hidden="true">‹</span>
                 </button>
                 <p aria-live="polite" className="m-0 flex min-w-0 flex-1 items-baseline justify-between gap-3 rounded-xl bg-surface px-3 py-3">
-                  <span className="whitespace-nowrap text-[13px] font-semibold text-secondary">
+                  <span className="whitespace-nowrap text-cap font-semibold text-secondary">
                     {weekdayShort(point.date)} {dm(point.date)}
                   </span>
                   <span className="text-right">
-                    <span className="font-display text-2xl font-bold tabular-nums">{kg(point.kg)} kg</span>
+                    <span className="font-display text-2xl font-extrabold tabular-nums tracking-display">{kg(point.kg)} kg</span>
                     {pointNote && <span className="ml-2 text-xs font-bold text-secondary">{pointNote}</span>}
                   </span>
                 </p>
@@ -183,50 +183,50 @@ export function BodyTab() {
               </div>
             </>
           ) : (
-            <p className="m-0 text-[15px] font-semibold">Chưa có số cân trong kỳ này.</p>
+            <p className="m-0 text-callout font-semibold">Chưa có số cân trong kỳ này.</p>
           )}
         </section>
       </div>
 
       <div className="flex flex-col gap-3 lg:col-span-5 lg:gap-5">
-        <section aria-labelledby="bd-facts" className="flex flex-col rounded-[18px] lg:shadow-card border border-card-border bg-card px-4 text-text">
+        <section aria-labelledby="bd-facts" className="flex flex-col rounded-card border border-transparent shadow-ring lg:shadow-card bg-card px-4 text-text">
           <SectionTitle id="bd-facts" className="py-3">Trong kỳ này</SectionTitle>
           <dl className="m-0 flex flex-col">
-            <div data-align-group="overview-stats" className="flex min-h-[56px] items-center justify-between gap-3 border-t border-divider">
-              <dt className="text-[15px]">Số lần cân</dt>
-              <dd className="m-0 font-display text-[26px] font-bold tabular-nums">
+            <div data-align-group="overview-stats" className="flex min-h-14 items-center justify-between gap-3 border-t border-divider">
+              <dt className="text-callout">Số lần cân</dt>
+              <dd className="m-0 font-display text-title font-extrabold tabular-nums">
                 {counted.count}/{counted.of}
               </dd>
             </div>
-            <div data-align-group="overview-stats" className="flex min-h-[56px] items-center justify-between gap-3 border-t border-divider">
-              <dt className="text-[15px]">So với kỳ trước</dt>
-              <dd className="m-0 font-display text-[26px] font-bold tabular-nums">
+            <div data-align-group="overview-stats" className="flex min-h-14 items-center justify-between gap-3 border-t border-divider">
+              <dt className="text-callout">So với kỳ trước</dt>
+              <dd className="m-0 font-display text-title font-extrabold tabular-nums">
                 {sincePrevious === null ? "—" : `${formatSigned(sincePrevious, { decimals: 1 })} kg`}
               </dd>
             </div>
-            <div data-align-group="overview-stats" className="flex min-h-[56px] items-center justify-between gap-3 border-t border-divider">
-              <dt className="text-[15px]">Từ lần cân đầu tiên</dt>
-              <dd className="m-0 font-display text-[26px] font-bold tabular-nums">
+            <div data-align-group="overview-stats" className="flex min-h-14 items-center justify-between gap-3 border-t border-divider">
+              <dt className="text-callout">Từ lần cân đầu tiên</dt>
+              <dd className="m-0 font-display text-title font-extrabold tabular-nums">
                 {weight.sinceStart === null ? "—" : `${formatSigned(weight.sinceStart, { decimals: 1 })} kg`}
               </dd>
             </div>
           </dl>
         </section>
 
-        <section aria-labelledby="bd-shift" className="flex flex-col gap-3 rounded-[18px] lg:shadow-card border border-card-border bg-card p-4 text-text">
+        <section aria-labelledby="bd-shift" className="flex flex-col gap-3 rounded-card border border-transparent shadow-ring lg:shadow-card bg-card p-4 text-text">
           <SectionTitle id="bd-shift">Mục tiêu theo cân nặng</SectionTitle>
           {shift === null ? (
-            <p className="m-0 text-[13px] leading-snug text-secondary">Cần ít nhất hai lần cân trong kỳ để so sánh mục tiêu.</p>
+            <p className="m-0 text-cap leading-snug text-secondary">Cần ít nhất hai lần cân trong kỳ để so sánh mục tiêu.</p>
           ) : (
             <>
-              <p className="m-0 text-[13px] text-secondary">
+              <p className="m-0 text-cap text-secondary">
                 {kg(weight.points[0].kg)} kg → {kg(weight.points[weight.points.length - 1].kg)} kg
               </p>
               <ul className="m-0 flex list-none flex-col p-0">
                 {shift.map((row, i) => (
-                  <li key={row.key} className={`flex min-h-[56px] items-center justify-between gap-3 ${i > 0 ? "border-t border-divider" : ""}`}>
-                    <span className="text-[15px] font-semibold">{row.label}</span>
-                    <span className="text-right text-[15px] font-bold tabular-nums">
+                  <li key={row.key} className={`flex min-h-14 items-center justify-between gap-3 ${i > 0 ? "border-t border-divider" : ""}`}>
+                    <span className="text-callout font-semibold">{row.label}</span>
+                    <span className="text-right text-callout font-bold tabular-nums">
                       {row.changed ? (
                         <>
                           <span className="font-semibold text-secondary">{formatRange(row.before.min, row.before.max)}</span> →{" "}

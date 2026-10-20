@@ -8,6 +8,7 @@ not in probe:all. The API is a small fake in this file.
 Run with: LIVE_BUILD=1 ALIGN_BASE_URL=http://localhost:3112 npm run probe -- tests/probes/cc_68_perf.py
 Pick parts with CC68_ONLY=R or C
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/**
 import json
 import os
 import re

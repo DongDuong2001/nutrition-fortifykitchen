@@ -62,14 +62,14 @@ export function AccessRow() {
       <Sheet open={choosing} onClose={() => setChoosing(false)} labelledBy={TITLE_ID}>
         <div className="flex flex-col gap-4">
           <header className="flex items-center gap-2">
-            <h2 id={TITLE_ID} className={`${SHEET_TITLE_CLASS} min-w-0 flex-1 text-[26px]`}>
+            <h2 id={TITLE_ID} className={`${SHEET_TITLE_CLASS} min-w-0 flex-1 text-title`}>
               Dùng H1T MICRO
             </h2>
             <button type="button" aria-label="Đóng" onClick={() => setChoosing(false)} className={`${SHEET_ICON_BUTTON} -mr-2`}>
               <CloseIcon />
             </button>
           </header>
-          <p className="m-0 text-[15px] leading-snug text-text">Cài app lên màn hình chính để mở nhanh, như một ứng dụng.</p>
+          <p className="m-0 text-callout leading-snug text-text">Cài app lên màn hình chính để mở nhanh, như một ứng dụng.</p>
           <div className="flex flex-col gap-2">
             <PillButton type="button" onClick={install}>
               Cài app

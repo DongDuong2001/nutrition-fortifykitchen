@@ -1,7 +1,15 @@
 openapi: 3.1.0
 info:
   title: H1T MICRO Nutrition API
-  description: High-performance Go modular monolith API for comprehensive 26-nutrient tracking and daily meal logging.
+  description: |-
+    High-performance Go modular monolith API for comprehensive 26-nutrient tracking and daily meal logging.
+
+    Write guard (every POST, PUT, PATCH and DELETE under /api/v1 except /payments/webhook and /vault/webhook):
+    a request that carries an Origin header must come from an allowed origin (CORS_ORIGINS, plus https://lehongkhanh.vn
+    always, or the API's own host), and one without Origin but with Sec-Fetch-Site must be same-origin; both absent is
+    allowed (non-browser clients). A request with a body must be Content-Type application/json (parameters such as
+    charset are fine); a request with no body may omit Content-Type. A refused request gets 403 with code CSRF_ORIGIN
+    or CSRF_CONTENT_TYPE. GET, HEAD and OPTIONS are not checked.
   version: 1.0.0
 
 servers:
@@ -27,6 +35,11 @@ components:
       properties:
         code:
           type: string
+          description: >-
+            Machine-readable code, e.g. VALIDATION_FAILED, UNAUTHORIZED, FORBIDDEN, NOT_FOUND, CONFLICT,
+            INTERNAL_SERVER_ERROR (the message is then generic; details are only in the server log), CSRF_ORIGIN (403:
+            the write came from an origin that is not allowed) and CSRF_CONTENT_TYPE (403: a write with a body that is
+            not application/json).
           example: VALIDATION_FAILED
         message:
           type: string
@@ -489,6 +502,11 @@ paths:
       description: >-
         Signed in or not (the user id is logged when there is a session). At most 10 a minute per user or address.
         The route and path lose their query string and every field is cut short; nothing else personal is kept.
+
+        Kind vitals is a web-vitals sample, not a failure: send name (LCP, INP, CLS, FCP or TTFB), page (the route
+        path; the query is dropped) and value (a number, zero or more) and leave the failure fields out. It is logged
+        with the same event and message at info level, with the fields metric, page and value. An unknown name, a
+        missing, negative or non-numeric value is a 400. Vitals share the per-user rate limit with failure reports.
       requestBody:
         required: true
         content:
@@ -497,13 +515,16 @@ paths:
               type: object
               required: [kind]
               properties:
-                kind: { type: string, enum: [write, sync, share, setup] }
+                kind: { type: string, enum: [write, sync, share, setup, storage, outbox_age, vitals] }
                 route: { type: string, description: The app screen, e.g. /app }
                 method: { type: string }
                 path: { type: string, description: The API path that answered }
                 status: { type: integer }
                 message: { type: string, description: The server's message or the error text }
                 version: { type: string, description: The app version (sw.js VERSION) }
+                name: { type: string, enum: [LCP, INP, CLS, FCP, TTFB], description: Kind vitals only. The metric }
+                page: { type: string, description: Kind vitals only. The route path, e.g. /app }
+                value: { type: number, minimum: 0, description: 'Kind vitals only. The metric value: milliseconds, or unitless for CLS' }
       responses:
         '204': { description: Logged }
         '400': { description: Not a valid report }
@@ -511,6 +532,12 @@ paths:
   /foods:
     get:
       summary: Search and browse food catalog
+      description: >-
+        Paged with page and limit. A request with q returns at most 500 rows; a request without q (browsing, or
+        downloading the whole catalogue) returns at most 5000 rows. A larger limit is cut to that cap, and the
+        response's limit field says what was used; an API from before this change cuts to 500 either way, so a client
+        asking for 5000 checks the echoed limit. total is the size of the filtered catalogue, so the client fetches
+        ceil(total / limit) pages.
       parameters:
         - name: q
           in: query
@@ -527,9 +554,11 @@ paths:
             default: 1
         - name: limit
           in: query
+          description: Page size. Default 20; maximum 500 with q, 5000 without q.
           schema:
             type: integer
             default: 20
+            maximum: 5000
       responses:
         '200':
           description: List of matching food items

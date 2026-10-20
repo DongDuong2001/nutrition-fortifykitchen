@@ -31,6 +31,18 @@ export interface Release {
 }
 
 export const RELEASES: readonly Release[] = [
+  // Overnight 20/10: the date at the top of Hôm nay opens the calendar (cc-72), Xóa bữa with Hoàn tác only (cc-62), text
+  // that follows the phone's text size (cc-66); these three only (Hao, 20/10). The tour is the date, on Hôm nay
+  {
+    id: "2026-10-20b",
+    date: "20/10",
+    items: [
+      { icon: "home", title: "Bấm vào ngày để mở lịch", body: "Muốn xem lại ngày cũ thì bấm vào ngày ở đầu trang, chọn ngày bất kỳ trên lịch. Ngày có ghi món sẽ có chấm." },
+      { icon: "meal", title: "Xóa bữa không cần hỏi lại", body: "Bấm Xóa bữa này là xóa liền. Lỡ tay thì bấm Hoàn tác trong 8 giây." },
+      { icon: "home", title: "Chữ to theo máy bạn", body: "Chỉnh chữ to trong cài đặt điện thoại thì chữ trong app cũng to theo, đọc đỡ mỏi mắt." },
+    ],
+    tour: [{ target: "day-date", fallback: "day-prev", title: "Mở lịch", body: "Bấm vào ngày để chọn ngày khác trên lịch. Ngày có chấm là ngày có ghi món." }],
+  },
   // cc-70: hold a food, then drag it to another meal (a finger or a pen). The tour stays on Hôm nay: the food list, or the
   // meal pill when the day has no food yet
   {
@@ -211,8 +223,6 @@ export const RELEASES: readonly Release[] = [
 ];
 
 export const latestRelease = (): Release | null => RELEASES[0] ?? null;
-
-export const releaseById = (id: string): Release | null => RELEASES.find((r) => r.id === id) ?? null;
 
 /**
  * "Có gì mới" shows every release newer than the last one the account has seen, newest first (ids sort by day, then

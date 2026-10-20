@@ -6,10 +6,10 @@ import { WRONG_CODE } from "@/lib/level-copy";
 export function WrongCode() {
   return (
     <Card className="flex flex-col gap-3">
-      <p role="alert" className="m-0 text-[15px] leading-snug text-text">
+      <p role="alert" className="m-0 text-callout leading-snug text-text">
         {WRONG_CODE}
       </p>
-      <Link href="/settings/coach" className="inline-flex min-h-[44px] items-center text-[15px] font-bold text-blue no-underline">
+      <Link href="/settings/coach" className="inline-flex min-h-11 items-center text-callout font-bold text-cobalt no-underline">
         Nhập mã khác
       </Link>
     </Card>

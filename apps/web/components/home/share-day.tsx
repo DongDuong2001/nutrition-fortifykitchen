@@ -17,13 +17,13 @@ export function ShareDay({ model }: { model: ShareModel }) {
       data-share-root
       // A fixed 390 px design: the phone's text size setting does not enlarge it
       style={{ width: SHARE_CSS_WIDTH, minHeight: SHARE_MIN_CSS_HEIGHT, WebkitTextSizeAdjust: "100%", textSizeAdjust: "100%" }}
-      className="flex flex-col bg-paper font-sans text-text"
+      className="flex flex-col bg-page font-sans text-text"
     >
       {/* ShareC2: the name in big Saira with the date under it and the Level badge on the right, all centred in 86 px
           (a long name wraps and the header grows), a 1 px divider under it. */}
       <div data-share-header className="flex min-h-[86px] flex-none items-center justify-between gap-3 border-b border-b-divider px-3 py-2">
         <div className="flex min-w-0 flex-1 flex-col gap-2">
-          <p data-share-wrap className="m-0 min-w-0 break-words font-display text-[38px] font-extrabold italic uppercase leading-[1.05] text-ink">
+          <p data-share-wrap className="m-0 min-w-0 break-words font-display text-[38px] font-extrabold italic uppercase leading-[1.1] text-ink">
             {model.name ?? model.dateLabel}
           </p>
           {model.name && <p className="m-0 whitespace-nowrap text-[13px] font-medium leading-snug text-secondary">{model.dateLabel}</p>}

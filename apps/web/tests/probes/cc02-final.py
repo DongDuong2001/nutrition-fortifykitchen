@@ -2,6 +2,7 @@
 recents opening the panel, unit-aware amounts on Today, and the onboarding flow.
 Run with: ALIGN_BASE_URL=http://localhost:3101 PATH=/usr/bin:$PATH npm run probe -- tests/probes/cc02-final.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/add/** app/(app)/micros/** app/(app)/setup/done/** app/(app)/setup/goal/** app/(app)/setup/profile/** app/signin/check-email/** app/signup/**
 import os
 import re
 import sys

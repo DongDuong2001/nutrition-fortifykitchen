@@ -97,7 +97,7 @@ function previewRecipe(draft: RecipeDraft): Recipe {
 
 const INPUT =
   "h-12 w-full rounded-xl border-2 bg-surface px-4 text-base text-text outline-none transition-colors";
-const BORDER_OK = "border-card-border focus:border-blue";
+const BORDER_OK = "border-card-border focus:border-cobalt";
 const BORDER_BAD = "border-destructive";
 
 function StepButton({ label, onClick, disabled, children }: { label: string; onClick: () => void; disabled: boolean; children: React.ReactNode }) {
@@ -169,7 +169,7 @@ export function RecipeBuilder({ state, excludeId }: { state: RecipeDraftState; e
           Nguyên liệu
         </h2>
         {draft.ingredients.length === 0 ? (
-          <p className="m-0 rounded-xl border border-dashed border-card-border bg-card px-4 py-3 text-[13px] leading-snug text-secondary">
+          <p className="m-0 rounded-xl border border-dashed border-card-border bg-card px-4 py-3 text-cap leading-snug text-secondary">
             Chưa có nguyên liệu
           </p>
         ) : (
@@ -178,9 +178,9 @@ export function RecipeBuilder({ state, excludeId }: { state: RecipeDraftState; e
               const amountError = shown.amounts[index] ? errors.amounts[index] : undefined;
               const id = `rb-amount-${index}`;
               return (
-                <li key={`${ingredient.foodId}-${index}`} data-align-group="recipe-row" className="flex flex-col gap-1 rounded-[18px] lg:shadow-card border border-card-border bg-card p-3">
+                <li key={`${ingredient.foodId}-${index}`} data-align-group="recipe-row" className="flex flex-col gap-1 rounded-card border border-transparent shadow-ring lg:shadow-card bg-card p-3">
                   <div className="flex items-center gap-2">
-                    <span className="min-w-0 flex-1 break-words text-[15px] font-semibold leading-snug text-text">{ingredient.name}</span>
+                    <span className="min-w-0 flex-1 break-words text-callout font-semibold leading-snug text-text">{ingredient.name}</span>
                     <button
                       type="button"
                       aria-label={`Bỏ ${ingredient.name}`}
@@ -236,7 +236,7 @@ export function RecipeBuilder({ state, excludeId }: { state: RecipeDraftState; e
           type="button"
           onClick={() => setPickerOpen(true)}
           aria-haspopup="dialog"
-          className="flex min-h-[48px] w-full cursor-pointer items-center justify-center rounded-xl border border-card-border bg-card px-4 text-sm font-semibold text-blue m-tint"
+          className="flex min-h-12 w-full cursor-pointer items-center justify-center rounded-xl border border-card-border bg-card px-4 text-sm font-semibold text-cobalt m-tint"
         >
           + Thêm nguyên liệu
         </button>
@@ -272,23 +272,23 @@ export function RecipeBuilder({ state, excludeId }: { state: RecipeDraftState; e
         </div>
       </FormRow>
 
-      <section aria-label="Mỗi phần" data-recipe-card className="flex flex-col gap-3 rounded-[18px] bg-surface-dark p-4 text-on-dark">
+      <section aria-label="Mỗi phần" data-recipe-card className="flex flex-col gap-3 rounded-card bg-surface-dark p-4 text-on-dark">
         <div className="flex items-baseline justify-between gap-2">
-          <h2 className="m-0 text-[13px] font-bold text-sky">Mỗi phần · {hasWeight ? `${formatAmount(grams, "g")} g` : "—"}</h2>
-          <span className="font-display text-[32px] font-extrabold leading-none tabular-nums">
+          <h2 className="m-0 text-cap font-bold text-sky">Mỗi phần · {hasWeight ? `${formatAmount(grams, "g")} g` : "—"}</h2>
+          <span className="font-display text-display-sm font-extrabold leading-none tabular-nums tracking-display">
             {kcal === null || kcal === undefined ? "—" : formatAmount(kcal, "kcal")}
-            <span className="ml-1 text-[13px] font-semibold text-muted-on-dark">kcal</span>
+            <span className="ml-1 text-cap font-semibold text-muted-on-dark">kcal</span>
           </span>
         </div>
         <div className="grid grid-cols-3 gap-2">
           {stats.map((s) => (
             <div key={s.key} className="flex flex-col gap-0.5">
               <span className="text-xs text-muted-on-dark">{s.label}</span>
-              <span className="text-[15px] font-bold tabular-nums">{s.value}</span>
+              <span className="text-callout font-bold tabular-nums">{s.value}</span>
             </div>
           ))}
         </div>
-        <p className="m-0 border-t border-muted-on-dark/30 pt-2 text-[13px] leading-snug text-muted-on-dark">
+        <p className="m-0 border-t border-muted-on-dark/30 pt-2 text-cap leading-snug text-muted-on-dark">
           {hasWeight ? `Đủ dữ liệu ${known}/${COUNTED_NUTRIENT_KEYS.length} vi chất` : "Thêm nguyên liệu để xem dinh dưỡng"}
         </p>
       </section>

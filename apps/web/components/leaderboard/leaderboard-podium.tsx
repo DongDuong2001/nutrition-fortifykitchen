@@ -14,7 +14,7 @@ function PodiumPlace({ item, place }: { item: LeaderboardRankItem; place: 1 | 2 
   const first = place === 1;
   return (
     <li
-      className={`flex min-w-0 flex-col items-center gap-2 rounded-[18px] bg-card p-3 text-center ${
+      className={`flex min-w-0 flex-col items-center gap-2 rounded-card bg-card p-3 text-center ${
         first ? "border-2 border-amber" : "border border-card-border"
       }`}
     >
@@ -27,14 +27,14 @@ function PodiumPlace({ item, place }: { item: LeaderboardRankItem; place: 1 | 2 
       <span className="sr-only">Hạng {place}</span>
       <span
         title={item.displayName}
-        className="line-clamp-2 w-full break-words text-[15px] font-bold leading-snug text-text"
+        className="line-clamp-2 w-full break-words text-callout font-bold leading-snug text-text"
       >
         {item.displayName}
       </span>
-      <span className="font-display text-[28px] font-extrabold italic leading-none tabular-nums text-blue">
+      <span className="font-display text-headline font-extrabold italic leading-none tabular-nums text-cobalt">
         {formatNumber(item.totalScore)}
       </span>
-      <span className="text-[13px] text-secondary">điểm</span>
+      <span className="text-cap text-secondary">điểm</span>
     </li>
   );
 }

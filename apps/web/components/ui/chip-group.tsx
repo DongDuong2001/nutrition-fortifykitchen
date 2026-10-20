@@ -41,7 +41,7 @@ export function ChipGroup({
   const colCountLg = columnsLg || colCount;
 
   const sizeClass =
-    size === "lg" ? "h-[52px] rounded-full text-base" : "min-h-[44px] rounded-full text-xs";
+    size === "lg" ? "h-[52px] rounded-full text-base" : "min-h-11 rounded-full text-xs";
 
   return (
     <div
@@ -50,24 +50,24 @@ export function ChipGroup({
       className={`grid grid-cols-[repeat(var(--chip-cols),minmax(0,1fr))] lg:grid-cols-[repeat(var(--chip-cols-lg),minmax(0,1fr))] gap-2 w-full ${className}`}
     >
       {leadingInput && (
-        <div className="flex items-center min-h-[44px] w-full">
+        <div className="flex items-center min-h-11 w-full">
           {leadingInput}
         </div>
       )}
       {items.map((it) => {
         const isActive = !!it.active;
-        // lg matches the 52 px inputs: 2 px grabber border. md keeps its shipped 1 px card border.
-        const inactiveBorder = size === "lg" ? "border-2 border-grabber" : "border border-card-border";
+        // cc-66 (D10): a ring, never a border, so a chip keeps its size when it is picked (no 2 px jump). lg matches the
+        // 52 px inputs with a 2 px grabber ring; md the 1 px chip ring. A picked chip has none (its fill is enough).
+        const inactiveRing = size === "lg" ? "shadow-[inset_0_0_0_2px_var(--color-grabber)]" : "shadow-chip";
         const btnClasses =
           tone === "dark"
             ? isActive
               ? "bg-card text-ink font-bold shadow-xs"
-              : "border border-track-on-dark bg-transparent text-on-dark font-medium hover:bg-surface-dark"
+              : "shadow-[inset_0_0_0_1px_var(--color-track-on-dark)] bg-transparent text-on-dark font-medium hover:bg-surface-dark"
             : isActive
             ? "bg-ink text-on-dark font-bold shadow-xs"
-            : `bg-surface text-text ${inactiveBorder} font-medium hover:bg-paper-dark`;
-        // md keeps border-0 on every chip, as shipped in ui-05-fix. lg draws the inactive border.
-        const noBorder = size === "md" || isActive ? "border-0" : "";
+            : `bg-surface text-text ${inactiveRing} font-medium hover:bg-paper-dark`;
+        const noBorder = "border-0";
 
         return (
           <button

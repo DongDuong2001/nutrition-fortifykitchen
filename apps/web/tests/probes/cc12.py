@@ -5,6 +5,7 @@ support.js runtime, which is not in the repo), so only their static copy is comp
 the design source.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc12.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/add/** app/(app)/entry/[id]/** app/(app)/foods/[id]/** app/(app)/foods/new/** app/(app)/micros/** app/(app)/micros/[nutrient]/** app/(app)/settings/profile/** app/(app)/settings/profile/weight/** app/(app)/setup/goal/** app/(app)/setup/profile/** app/signin/** app/signin/check-email/** app/signin/expired/** app/signup/**
 import datetime
 import os
 import re

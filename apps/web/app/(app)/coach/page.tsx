@@ -14,7 +14,7 @@ import { NOT_LOGGED_TODAY, lastLoggedText, loggedToday } from "@/lib/coach-previ
 import { readClients, readCoaches, type MockClient, type MockCoach } from "@/lib/mock-coach-server";
 
 const BUTTON =
-  "inline-flex min-h-[44px] flex-1 cursor-pointer items-center justify-center rounded-full border border-card-border bg-card px-4 text-[15px] font-bold text-text active:scale-[0.97] transition-press motion-reduce:active:scale-100";
+  "inline-flex min-h-11 flex-1 cursor-pointer items-center justify-center rounded-full border border-card-border bg-card px-4 text-callout font-bold text-text active:scale-[0.97] transition-press motion-reduce:active:scale-100";
 
 /** Học viên: the coach's invite code and client list. Behind the role gate of app/coach/layout.tsx. */
 export default function CoachPage() {
@@ -63,7 +63,7 @@ export default function CoachPage() {
           <h2 id="coach-code" className="m-0 text-base font-bold">
             Mã mời của bạn
           </h2>
-          <p data-align-group="coach-invite" className="m-0 font-display text-[32px] font-extrabold italic leading-none tabular-nums text-text">
+          <p data-align-group="coach-invite" className="m-0 font-display text-display-sm font-extrabold italic leading-none tabular-nums text-text tracking-display">
             {code || "Chưa tạo được mã"}
           </p>
           <div data-align-group="coach-invite" className="flex flex-wrap gap-2">
@@ -79,7 +79,7 @@ export default function CoachPage() {
               </button>
             )}
           </div>
-          <p role="status" className="m-0 min-h-[20px] text-[13px] leading-snug text-secondary">
+          <p role="status" className="m-0 min-h-[20px] text-cap leading-snug text-secondary">
             {copied === "code" ? "Đã sao chép mã" : copied === "link" ? "Đã sao chép liên kết" : `Liên kết: /join/${code}`}
           </p>
         </Card>
@@ -89,10 +89,10 @@ export default function CoachPage() {
             Danh sách học viên
           </h2>
           {clients === null ? (
-            <div aria-busy="true" className="h-[120px] rounded-[18px] bg-divider motion-safe:animate-pulse" />
+            <div aria-busy="true" className="h-[120px] rounded-card bg-divider motion-safe:animate-pulse" />
           ) : clients.length === 0 ? (
             <Card>
-              <p className="m-0 text-[15px] leading-snug text-secondary">Chưa có học viên. Gửi mã cho học viên để bắt đầu.</p>
+              <p className="m-0 text-callout leading-snug text-secondary">Chưa có học viên. Gửi mã cho học viên để bắt đầu.</p>
             </Card>
           ) : (
             <ul className="m-0 flex list-none flex-col gap-2 p-0">
@@ -101,13 +101,13 @@ export default function CoachPage() {
                   <Link
                     href={`/coach/clients/${encodeURIComponent(c.id)}`}
                     data-align-group="client-row"
-                    className="flex min-h-[64px] items-center gap-3 rounded-[18px] lg:shadow-card border border-card-border bg-card p-3 text-text no-underline active:scale-[0.99] transition-press motion-reduce:active:scale-100"
+                    className="flex min-h-[64px] items-center gap-3 rounded-card border border-transparent shadow-ring lg:shadow-card bg-card p-3 text-text no-underline m-tint transition-press"
                   >
                     <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                      <span className="break-words text-[15px] font-semibold leading-snug">{c.name}</span>
-                      <span className="text-[13px] leading-snug text-secondary">{lastLoggedText(c.lastLoggedDaysAgo, dayLabel(c.lastLoggedDaysAgo))}</span>
+                      <span className="break-words text-callout font-semibold leading-snug">{c.name}</span>
+                      <span className="text-cap leading-snug text-secondary">{lastLoggedText(c.lastLoggedDaysAgo, dayLabel(c.lastLoggedDaysAgo))}</span>
                       {!loggedToday(c.lastLoggedDaysAgo) && (
-                        <span className="text-[13px] font-semibold leading-snug text-warning-text">{NOT_LOGGED_TODAY}</span>
+                        <span className="text-cap font-semibold leading-snug text-warning-text">{NOT_LOGGED_TODAY}</span>
                       )}
                     </span>
                     <LevelBadge level={c.level} />

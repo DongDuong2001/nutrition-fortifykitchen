@@ -43,6 +43,7 @@ import {
 import { defaultPortionOf, gramsServingLabel, parseGramsInput } from "@/lib/portion";
 import { MealSwitcher } from "@/components/meal-switcher";
 import { PortionPanel } from "@/components/ui/portion-panel";
+import { Expand } from "@/components/ui/expand";
 import { HomeScreen } from "@/components/home/home-screen";
 import { AppShell } from "@/components/ui/app-shell";
 import type { DishEdit } from "@/lib/dish-recipes";
@@ -52,6 +53,8 @@ import { HOME_ROUTE } from "@/lib/nav";
 import { navigateFromSheet } from "@/lib/sheet-history";
 import { cameFromHome, homeDay, homeScroll } from "@/lib/home-scroll";
 import { SHEET_EXIT_MS, useSheetDrag } from "@/components/ui/sheet";
+import { setInertExceptDrag } from "@/components/ui/sheet-drag-controller";
+import { haptic } from "@/lib/haptics";
 
 // The add sheet shows carousels of the newest: Khám phá holds the full lists
 const MAX_SHORTCUT_RECENTS = 8;
@@ -124,6 +127,8 @@ function AddFoodInner() {
   const desktopWrapRef = useRef<HTMLDivElement>(null);
   const closingRef = useRef(false);
   const closeTimer = useRef<number | undefined>(undefined);
+  // cc-62: the panel's release spring; the route pops once it has settled
+  const panelSettled = useRef<() => Promise<void>>(() => Promise.resolve());
   const sheetState = "open";
   // The picture of Hôm nay behind the sheet is one element for the life of the page: nothing here re-renders it
   // (Hôm nay's own frame is app/(app)/(tabs)/layout.tsx, which /add is outside: the backdrop brings its own)
@@ -394,16 +399,20 @@ function AddFoodInner() {
     }
     // data-state="closed" also tells the Back that follows that the sheet has slid down already (lib/nav-direction)
     for (const el of [scrimRef.current, dialogRef.current, panelRef.current]) {
-      if (!el) continue;
-      el.dataset.state = "closed";
-      if (el !== scrimRef.current) el.inert = true;
+      if (el) el.dataset.state = "closed";
     }
+    if (dialogRef.current) dialogRef.current.inert = true;
+    // cc-62: the phone panel's drag areas stay grabbable while it slides away (a grab takes it back)
+    if (panelRef.current) setInertExceptDrag(panelRef.current, true);
     desktopWrapRef.current?.classList.add("pointer-events-none");
     if (instant) return goBack();
     // Stored, so a Back pressed during the slide cancels it instead of going back twice
     closeTimer.current = window.setTimeout(() => {
-      closeTimer.current = undefined;
-      if (window.location.pathname === "/add") goBack();
+      void panelSettled.current().then(() => {
+        if (!closingRef.current || closeTimer.current === undefined) return;
+        closeTimer.current = undefined;
+        if (window.location.pathname === "/add") goBack();
+      });
     }, SHEET_EXIT_MS);
   }, [mealSlot, goBack]);
   useEffect(() => {
@@ -417,10 +426,32 @@ function AddFoodInner() {
       cancel();
     };
   }, []);
-  const panelDrag = useSheetDrag(panelRef, () => {
-    markUsed("sheet-drag");
-    handleClose();
-  });
+  const panelDrag = useSheetDrag(
+    panelRef,
+    () => {
+      markUsed("sheet-drag");
+      haptic("snap");
+      handleClose();
+    },
+    {
+      scrimRef,
+      // A grab while the panel slides away takes it back: the close is called off
+      onRegrab: () => {
+        if (!closingRef.current) return false;
+        closingRef.current = false;
+        window.clearTimeout(closeTimer.current);
+        closeTimer.current = undefined;
+        for (const el of [scrimRef.current, dialogRef.current, panelRef.current]) {
+          if (el) el.dataset.state = "open";
+        }
+        if (dialogRef.current) dialogRef.current.inert = false;
+        if (panelRef.current) setInertExceptDrag(panelRef.current, false);
+        desktopWrapRef.current?.classList.remove("pointer-events-none");
+        return true;
+      },
+    }
+  );
+  panelSettled.current = panelDrag.settled;
 
   // Keyboard navigation on desktop: Enter adds, Esc closes
   useEffect(() => {
@@ -498,13 +529,13 @@ function AddFoodInner() {
   };
 
   return (
-    <div className="min-h-screen bg-page text-text font-sans">
+    <div className="min-h-dvh bg-page text-text font-sans">
       {/* Hôm nay behind the sheet (both widths), scrolled to where it was left: a light, inert copy (HomeScreen backdrop);
           no blur on the scrim */}
       <div ref={behindRef} data-add-behind={cameFromHome() ? "home" : "light"} aria-hidden="true" inert className="pointer-events-none fixed inset-0 select-none overflow-hidden">
         {backdrop}
       </div>
-      <div ref={scrimRef} aria-hidden="true" data-state={sheetState} onClick={() => handleClose()} className="m-scrim m-scrim-dialog fixed inset-0 z-40 bg-scrim" />
+      <div ref={scrimRef} aria-hidden="true" data-state={sheetState} onClick={() => handleClose()} className="m-scrim m-scrim-dialog fixed inset-0 z-nav bg-scrim" />
 
       {/* ============================================================== */}
       {/* DESKTOP MODAL OVER TODAY (≥1024px)                             */}
@@ -513,7 +544,7 @@ function AddFoodInner() {
         <div
           ref={desktopWrapRef}
           onClick={() => handleClose()}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 z-sheet flex items-center justify-center p-4"
         >
           <div
             ref={dialogRef}
@@ -523,7 +554,7 @@ function AddFoodInner() {
             data-sheet-route
             data-state={sheetState}
             onClick={(e) => e.stopPropagation()}
-            className="m-pop w-[min(900px,100%-32px)] bg-card border border-card-border rounded-[18px] p-6 shadow-2xl flex flex-col gap-4 max-h-[92vh] overflow-y-auto"
+            className="m-pop w-[min(900px,100%-32px)] bg-card rounded-card border border-transparent p-6 shadow-2xl flex flex-col gap-4 max-h-[92dvh] overflow-y-auto"
           >
             {/* The page's heading (Hôm nay behind is a picture without one since cc-55b), as the phone sheet has */}
             <h1 className="sr-only">Thêm món</h1>
@@ -534,7 +565,7 @@ function AddFoodInner() {
                   type="button"
                   onClick={() => setSwitcherOpen(true)}
                   aria-haspopup="listbox"
-                  className="min-h-[44px] px-2 -ml-2 rounded-lg bg-transparent border-0 text-text font-normal text-lg flex items-center gap-2 cursor-pointer hover:bg-surface active:scale-[0.98] transition-press"
+                  className="min-h-11 px-2 -ml-2 rounded-lg bg-transparent border-0 text-text font-normal text-lg flex items-center gap-2 cursor-pointer hover:bg-surface active:scale-[0.98] transition-press"
                 >
                   <span id="dlg-title">
                     Thêm vào: <strong className="font-bold">{mealNameVi}</strong>{dayText}
@@ -617,7 +648,7 @@ function AddFoodInner() {
               notice={dishNotice}
                     isSubmitting={isSubmitting}
                     showMicros={true}
-                    className="rounded-[18px] border border-card-border bg-card p-4"
+                    className="rounded-card border border-transparent shadow-ring bg-card p-4"
                   />
                 ) : (
                   <div className="h-full flex items-center justify-center text-center text-sm text-secondary p-4">
@@ -648,15 +679,17 @@ function AddFoodInner() {
           data-add-panel
           data-sheet-route
           data-state={sheetState}
-          className="m-sheet m-vt-sheet fixed inset-x-0 bottom-0 top-[8dvh] z-40 flex flex-col rounded-t-[20px] bg-card shadow-xl"
+          data-under-sheet={selectedFood !== null && !isDesktop ? "" : undefined}
+          className="m-sheet m-vt-sheet fixed inset-x-0 bottom-0 top-[8dvh] z-nav flex flex-col rounded-t-sheet bg-card shadow-sheet"
         >
-          {/* Pinned header: grabber, meal switcher + close, search, chips */}
-          <div className="flex shrink-0 flex-col gap-3 px-4 pt-3 pb-3">
+          {/* Pinned header: grabber, meal switcher + close, search, chips. cc-62 (S15): the list fades out under it (a 12 px edge) */}
+          <div className="relative z-sticky flex shrink-0 flex-col gap-3 px-4 pt-3 pb-3 after:pointer-events-none after:absolute after:inset-x-0 after:top-full after:h-3 after:bg-linear-to-b after:from-card after:to-transparent">
             {/* Grabber: drag it down to close (a 24 px strip around the bar) */}
             <div
               aria-hidden="true"
               data-sheet-handle
-              {...panelDrag}
+              data-sheet-drag
+              {...panelDrag.handlers}
               style={{ touchAction: "none" }}
               className="-mx-4 -mt-3 -mb-2 flex h-6 shrink-0 cursor-grab items-center justify-center self-stretch"
             >
@@ -665,14 +698,14 @@ function AddFoodInner() {
             {/* The phone sheet's heading: /add has no visible h1 on a phone (the desktop modal sits over Today's header) */}
             <h1 className="sr-only">Thêm món</h1>
 
-            <div className="flex items-start justify-between gap-2">
+            <div data-sheet-drag {...panelDrag.handlers} style={{ touchAction: "none" }} className="flex items-start justify-between gap-2">
               <div className="flex flex-col items-start">
                 <button
                   type="button"
                   onClick={() => setSwitcherOpen(true)}
                   aria-haspopup="listbox"
                   aria-label="Đổi bữa"
-                  className="-ml-2 flex min-h-[44px] cursor-pointer items-center gap-2 rounded-lg border-0 bg-transparent px-2 text-lg text-text active:scale-[0.98] transition-press"
+                  className="-ml-2 flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border-0 bg-transparent px-2 text-lg text-text active:scale-[0.98] transition-press"
                 >
                   <span>
                     Thêm vào: <strong className="font-bold">{mealNameVi}</strong>{dayText}
@@ -681,7 +714,7 @@ function AddFoodInner() {
                     <path d="M6 9l6 6 6-6" />
                   </svg>
                 </button>
-                <div className="text-xs font-medium text-secondary">Tự chọn theo giờ trong ngày · chạm để đổi</div>
+                <div className="text-xs font-normal text-secondary">Tự chọn theo giờ trong ngày · chạm để đổi</div>
               </div>
 
               <div className="flex shrink-0 items-center gap-2">
@@ -705,7 +738,7 @@ function AddFoodInner() {
           </div>
 
           {/* One scroll region: carousels, the food list and the create button (the last item stays reachable) */}
-          <div data-add-scroll className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pb-6">
+          <div data-add-scroll className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain px-4 pb-[max(24px,env(safe-area-inset-bottom))]">
             {showShortcuts && shortcuts}
 
             {catalogPending && list.foods.length > 0 && <CatalogNote />}
@@ -723,9 +756,14 @@ function AddFoodInner() {
             />
           </div>
 
-          {/* The tray bar, under the list while the tray holds a food */}
-          {tray.length > 0 && (
-            <div className="shrink-0 px-4 pb-2">
+          {/* The tray bar, under the list while the tray holds a food. cc-64 (A1): it opens and closes with Expand, so the
+              list above eases instead of jumping */}
+          <div
+            className={`relative shrink-0 ${
+              tray.length > 0 ? "before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-3 before:bg-linear-to-t before:from-card before:to-transparent" : ""
+            }`}
+          >
+            <Expand open={tray.length > 0} className="px-4 pb-2">
               <TrayBar
                 totals={trayTotalsNow}
                 mealName={mealNameVi}
@@ -734,8 +772,8 @@ function AddFoodInner() {
                 onReview={() => setReviewOpen(true)}
                 onAdd={handleAddTray}
               />
-            </div>
-          )}
+            </Expand>
+          </div>
         </div>
       </div>
 
@@ -748,6 +786,7 @@ function AddFoodInner() {
           phoneSearchInputRef.current?.focus({ preventScroll: true });
         }}
         labelledBy="portion-sheet-title"
+        stacked
       >
         {selectedFood && (
           <div className="-mx-4 max-h-[86dvh] overflow-y-auto overscroll-contain px-4 pb-[env(safe-area-inset-bottom)]">
@@ -815,13 +854,13 @@ function AddFoodInner() {
 // Days older than yesterday are read-only, so the add form opens for today and yesterday (an older ?date= goes back to that day's Today view)
 function AddFoodGate() {
   const isPastDay = usePastDayRedirect();
-  if (isPastDay) return <div className="w-full min-h-screen bg-page" />;
+  if (isPastDay) return <div className="w-full min-h-dvh bg-page" />;
   return <AddFoodInner />;
 }
 
 export default function AddFoodPage() {
   return (
-    <Suspense fallback={<div className="w-full min-h-screen bg-page" />}>
+    <Suspense fallback={<div className="w-full min-h-dvh bg-page" />}>
       <AddFoodGate />
     </Suspense>
   );

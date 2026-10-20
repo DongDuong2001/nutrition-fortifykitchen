@@ -6,6 +6,7 @@
 - D1 the add sheet for a meal shows Gần đây and Hay ăn
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_51_ux.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/add/**
 import os
 import re
 import sys

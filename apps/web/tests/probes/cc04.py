@@ -2,6 +2,7 @@
 setup step bars; the meal chips grid; the sticky /add group header covering the rows at 390.
 Run with: ALIGN_BASE_URL=http://localhost:3101 PATH=/usr/bin:$PATH npm run probe -- tests/probes/cc04.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/(tabs)/explore/** app/(app)/add/** app/(app)/entry/[id]/** app/(app)/foods/[id]/** app/(app)/foods/new/** app/(app)/setup/goal/** app/(app)/setup/profile/** app/signin/**
 import os
 import sys
 from urllib.parse import urlparse
@@ -66,7 +67,7 @@ def run():
             pg.wait_for_timeout(400)
             check(pg.locator(f'text="{text}" >> visible=true').count() == 1, f"{route}: shows {text}")
             bars = pg.locator("header span.h-1 >> visible=true")
-            filled = pg.locator("header span.h-1.bg-blue >> visible=true").count()
+            filled = pg.locator("header span.h-1.bg-cobalt >> visible=true").count()
             check(bars.count() == 2 and filled == done, f"{route}: step bars {filled}/{bars.count()} done, want {done}/2")
             if route == "/setup/profile":
                 pg.screenshot(path=os.path.join(SHOTS, "cc04-setup-profile-390.png"), animations="disabled")

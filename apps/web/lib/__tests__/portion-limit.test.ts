@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   MAX_GRAMS_MESSAGE,
   MAX_GRAMS_PER_PORTION,
+  MIN_GRAMS_MESSAGE,
+  gramsTooSmall,
   fitPortion,
   formatGramsServingLabel,
   formatPortionLabel,
@@ -90,5 +92,17 @@ describe("number parsing (cc-63, B5)", () => {
 
   it("rejects text, exponents, signs and a second separator", () => {
     for (const bad of ["12abc", "1e3", "abc", "-5", "+5", "1.2.3", "0x10", "Infinity", "NaN", "", "  "]) expect(parseGramsInput(bad), bad).toBe(0);
+  });
+});
+
+describe("gramsTooSmall (cc-62, S17)", () => {
+  it("asks for more than 0 g when the field holds 0 or junk, or was left empty after a touch", () => {
+    expect(gramsTooSmall("0", false)).toBe(true);
+    expect(gramsTooSmall("abc", false)).toBe(true);
+    expect(gramsTooSmall("", false)).toBe(false);
+    expect(gramsTooSmall("  ", true)).toBe(true);
+    expect(gramsTooSmall("150", true)).toBe(false);
+    expect(gramsTooSmall("0,5", false)).toBe(false);
+    expect(MIN_GRAMS_MESSAGE).toBe("Nhập số gam lớn hơn 0");
   });
 });

@@ -1,5 +1,6 @@
 import { createBrowserClient } from "@supabase/ssr";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { isLiveMode } from "./api-mode";
 
 let clientInstance: SupabaseClient | null = null;
 
@@ -16,7 +17,7 @@ export function createClient() {
   if (typeof window !== "undefined" && clientInstance) {
     return clientInstance;
   }
-  const isLive = process.env.NEXT_PUBLIC_API_MODE === "live";
+  const isLive = isLiveMode();
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 

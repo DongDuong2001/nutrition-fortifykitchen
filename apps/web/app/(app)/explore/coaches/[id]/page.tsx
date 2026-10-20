@@ -24,7 +24,7 @@ function CoachDetailInner() {
         <AppHeader variant="sub" title="Không tìm thấy huấn luyện viên" onBack={goBack} layout="wide" alignGroup="coach-header" />
         <main className={MAIN}>
           <Card as="section" aria-label="Không tìm thấy" className="flex flex-col gap-3">
-            <p className="m-0 text-[13px] leading-snug text-secondary">
+            <p className="m-0 text-cap leading-snug text-secondary">
               Không tìm thấy thông tin huấn luyện viên này. Có thể hồ sơ đã được gỡ.
             </p>
             <PillButton href="/explore/coaches">Về danh sách huấn luyện viên</PillButton>
@@ -51,8 +51,8 @@ export default function CoachDetailPage() {
       fallback={
         <AppShell alignContainer="coach-detail">
           <main className={MAIN} aria-busy="true">
-            <div className="h-40 rounded-[18px] bg-level-empty motion-safe:animate-pulse" />
-            <div className="h-24 rounded-[18px] bg-level-empty motion-safe:animate-pulse" />
+            <div className="h-40 rounded-card bg-level-empty motion-safe:animate-pulse" />
+            <div className="h-24 rounded-card bg-level-empty motion-safe:animate-pulse" />
           </main>
         </AppShell>
       }

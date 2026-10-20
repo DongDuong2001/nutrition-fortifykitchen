@@ -8,6 +8,7 @@ Production build, demo mode, 390x844 (the list scrolls inside the page) and 1280
 - Back at the top the full header is back; no horizontal scroll.
 Run with: ALIGN_BASE_URL=http://localhost:3104 npm run probe -- tests/probes/cc_27c.py
 """
+# PROBE_COVERS: app/(app)/micros/**
 import json
 import os
 import re

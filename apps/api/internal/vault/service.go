@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -41,6 +42,11 @@ type GitHubWebhookPayload struct {
 		Removed  []string `json:"removed"`
 	} `json:"commits"`
 }
+
+var (
+	ErrInvalidDraftStatus = errors.New("invalid status: must be draft, published, or rejected")
+	ErrDraftNotFound      = errors.New("draft not found")
+)
 
 type Service interface {
 	VerifyGitHubSignature(signatureHeader string, body []byte) bool
@@ -193,7 +199,7 @@ func (s *vaultService) ListDrafts(ctx context.Context, status string) ([]CoachDr
 
 func (s *vaultService) UpdateDraftStatus(ctx context.Context, id uuid.UUID, newStatus string) (*CoachDraft, error) {
 	if newStatus != "draft" && newStatus != "published" && newStatus != "rejected" {
-		return nil, errors.New("invalid status: must be draft, published, or rejected")
+		return nil, ErrInvalidDraftStatus
 	}
 
 	query := `
@@ -207,6 +213,9 @@ func (s *vaultService) UpdateDraftStatus(ctx context.Context, id uuid.UUID, newS
 		&d.ID, &d.FilePath, &d.MarkdownContent, &d.ParsedData, &d.Status, &d.CommitHash, &d.UpdatedAt,
 	)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrDraftNotFound
+		}
 		return nil, fmt.Errorf("failed to update draft status: %w", err)
 	}
 

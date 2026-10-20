@@ -44,15 +44,15 @@ export function TrainingSizeSheet({
             type="button"
             aria-pressed={value === size}
             onClick={() => onChoose(size)}
-            className={`flex min-h-[120px] cursor-pointer flex-col items-start justify-between gap-2 rounded-[18px] border-2 p-4 text-left active:scale-[0.97] transition-press motion-reduce:transition-none motion-reduce:active:scale-100 ${
-              value === size ? "border-blue bg-cobalt-tint" : "border-card-border bg-card hover:bg-hover"
+            className={`flex min-h-[120px] cursor-pointer flex-col items-start justify-between gap-2 rounded-card border-2 p-4 text-left active:scale-[0.97] transition-press motion-reduce:transition-none motion-reduce:active:scale-100 ${
+              value === size ? "border-cobalt bg-cobalt-tint" : "border-card-border bg-card hover:bg-hover"
             }`}
           >
             <span className="flex flex-col">
-              <span className="font-display text-[32px] font-extrabold italic leading-none text-text">{TRAINING_SIZE_NAME[size]}</span>
+              <span className="font-display text-display-sm font-extrabold italic leading-none text-text tracking-display">{TRAINING_SIZE_NAME[size]}</span>
               <span className="text-sm font-semibold text-secondary">{hint}</span>
             </span>
-            <span className="text-[13px] leading-snug text-text">{dosesOf(size)}</span>
+            <span className="text-cap leading-snug text-text">{dosesOf(size)}</span>
           </button>
         ))}
       </div>

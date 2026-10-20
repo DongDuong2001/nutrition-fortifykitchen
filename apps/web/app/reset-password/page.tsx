@@ -10,8 +10,8 @@ export default function ResetPasswordPage() {
         <>
           <BrandMark className="self-center" />
           <div className="flex flex-col gap-2">
-            <h1 className="m-0 font-display text-[26px] font-black italic uppercase leading-tight">ĐẶT LẠI MẬT KHẨU.</h1>
-            <p className="m-0 text-[15px] leading-normal text-muted-subtitle">Nhập mật khẩu mới cho tài khoản của bạn.</p>
+            <h1 className="m-0 font-display text-title font-black italic uppercase leading-tight">ĐẶT LẠI MẬT KHẨU.</h1>
+            <p className="m-0 text-callout leading-normal text-muted-subtitle">Nhập mật khẩu mới cho tài khoản của bạn.</p>
           </div>
         </>
       }

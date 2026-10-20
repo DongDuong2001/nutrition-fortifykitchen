@@ -367,7 +367,7 @@ export function ShareSheet({
               }}
               placeholder="Tên của bạn"
               aria-invalid={nameError ? true : undefined}
-              className={`h-[52px] w-full rounded-xl border-2 bg-surface px-4 text-base font-semibold text-text outline-none focus:border-blue ${
+              className={`h-[52px] w-full rounded-xl border-2 bg-surface px-4 text-base font-semibold text-text outline-none focus:border-cobalt ${
                 nameError ? "border-destructive" : "border-card-border"
               }`}
             />
@@ -386,6 +386,7 @@ export function ShareSheet({
         {ready ? (
           // eslint-disable-next-line @next/next/no-img-element -- a blob URL made in the page, not a file to optimise
           <img
+            data-share-image
             src={ready.url}
             alt={ready.alt}
             width={ready.width}
@@ -402,18 +403,18 @@ export function ShareSheet({
       </div>
 
       {nameSyncFailed && (
-        <p role="alert" className="m-0 px-1 text-[13px] leading-snug text-destructive-text">
+        <p role="alert" className="m-0 px-1 text-cap leading-snug text-destructive-text">
           Đã lưu tên trên máy này, chưa gửi lên máy chủ được.
         </p>
       )}
 
       {failure && (
         <div role="alert" className="flex items-center justify-between gap-3 px-1">
-          <p className="m-0 text-[13px] leading-snug text-destructive-text">{FAILURE_TEXT[failure]}</p>
+          <p className="m-0 text-cap leading-snug text-destructive-text">{FAILURE_TEXT[failure]}</p>
           <button
             type="button"
             onClick={retry}
-            className="inline-flex min-h-[44px] shrink-0 cursor-pointer items-center rounded-full border-0 bg-transparent px-3 text-[13px] font-bold text-blue active:scale-[0.97] transition-press motion-reduce:active:scale-100"
+            className="inline-flex min-h-11 shrink-0 cursor-pointer items-center rounded-full border-0 bg-transparent px-3 text-cap font-bold text-cobalt active:scale-[0.97] transition-press motion-reduce:active:scale-100"
           >
             Thử lại
           </button>

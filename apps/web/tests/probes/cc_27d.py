@@ -8,6 +8,7 @@ Production build, demo mode, 390x844 and 1440x900.
 - /add: the tag per row (USDA, Nhãn, VN, Ước tính, Của tôi, Chưa rõ) shows on search results only.
 Run with: ALIGN_BASE_URL=http://localhost:3104 npm run probe -- tests/probes/cc_27d.py
 """
+# PROBE_COVERS: app/(app)/add/** app/(app)/foods/[id]/** app/(app)/settings/data-sources/**
 import os
 import re
 import sys

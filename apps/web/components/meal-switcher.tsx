@@ -51,7 +51,7 @@ export function MealSwitcher({
               }}
               className={`w-full min-h-[52px] px-4 rounded-xl flex items-center gap-3 cursor-pointer text-left transition-colors m-tint border-0 ${
                 isSelected
-                  ? "bg-blue/10 text-text font-bold"
+                  ? "bg-cobalt/10 text-text font-bold"
                   : "bg-surface hover:bg-paper-dark text-text font-medium"
               }`}
             >
@@ -60,7 +60,7 @@ export function MealSwitcher({
                 aria-hidden="true"
                 className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-colors ${
                   isSelected
-                    ? "bg-blue text-on-accent ring-4 ring-sky/40"
+                    ? "bg-cobalt text-on-accent ring-4 ring-sky/40"
                     : "border-2 border-grabber bg-surface"
                 }`}
               >
@@ -82,7 +82,7 @@ export function MealSwitcher({
               </span>
 
               {/* Meal Name */}
-              <span className="flex-1 text-[16px]">{slot.nameVi}</span>
+              <span className="flex-1 text-[1rem]">{slot.nameVi}</span>
 
               {/* Current Calories */}
               <span

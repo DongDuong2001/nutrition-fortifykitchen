@@ -38,19 +38,29 @@ function unknownNutrients(): Record<string, number | null> {
  * "Chỉ thêm kcal": kcal above zero is required, the name is optional (Thêm nhanh), the macros are optional
  * (a blank one is unknown: null, never 0; a typed 0 stays 0). No food, so no micronutrient value and no fibre.
  */
+/** What is wrong with one field, or null (cc-62: the sheet checks a field when it loses focus, and all of them on submit). */
+export function quickFieldError(field: "kcal" | "protein" | "carbs" | "fat", text: string): string | null {
+  if (field === "kcal") {
+    const kcal = parseDecimalInput(text);
+    // Stored as whole kcal, so "0,4" would become 0: it must round to at least 1
+    if (kcal === null || Math.round(kcal) < 1) return "Nhập kcal lớn hơn 0";
+    if (kcal > MAX_QUICK_KCAL) return "Tối đa 9.999 kcal";
+    return null;
+  }
+  return text.trim() && parseDecimalInput(text) === null ? "Nhập một số từ 0 trở lên" : null;
+}
+
 export function quickEntryFrom(input: QuickEntryInput, slot: MealSlot, id: string, addedAt: string): QuickEntryResult {
-  const kcal = parseDecimalInput(input.kcal);
-  // Stored as whole kcal, so "0,4" would become 0: it must round to at least 1
-  if (kcal === null || Math.round(kcal) < 1) return { ok: false, field: "kcal", message: "Nhập kcal lớn hơn 0" };
-  if (kcal > MAX_QUICK_KCAL) return { ok: false, field: "kcal", message: "Tối đa 9.999 kcal" };
+  for (const field of ["kcal", "protein", "carbs", "fat"] as const) {
+    const message = quickFieldError(field, input[field]);
+    if (message) return { ok: false, field, message };
+  }
+  const kcal = parseDecimalInput(input.kcal) as number;
 
   const macros: Record<"protein" | "carbs" | "fat", number | null> = { protein: null, carbs: null, fat: null };
   for (const field of ["protein", "carbs", "fat"] as const) {
     const text = input[field];
-    if (!text.trim()) continue;
-    const value = parseDecimalInput(text);
-    if (value === null) return { ok: false, field, message: "Nhập một số từ 0 trở lên" };
-    macros[field] = round1(value);
+    if (text.trim()) macros[field] = round1(parseDecimalInput(text) as number);
   }
 
   const name = Array.from(input.name.trim()).slice(0, MAX_QUICK_NAME).join("") || QUICK_NAME;

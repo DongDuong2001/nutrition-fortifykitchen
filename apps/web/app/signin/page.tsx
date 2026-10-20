@@ -21,10 +21,10 @@ export default function SignInPage() {
         <>
           <BrandMark className="self-center" />
           <div className="flex flex-col gap-2">
-            <h1 className="m-0 font-display text-[26px] font-black italic uppercase leading-tight lg:text-[34px]">
+            <h1 className="m-0 font-display text-title font-black italic uppercase leading-tight lg:text-display">
               CHÀO MỪNG TRỞ LẠI.
             </h1>
-            <p className="m-0 text-balance text-[15px] leading-normal text-muted-subtitle">
+            <p className="m-0 text-balance text-callout leading-normal text-muted-subtitle">
               Đăng nhập để xem tiếp nhật ký và theo dõi 22 vi chất của bạn.
             </p>
             <ul className="m-0 hidden list-none flex-col gap-3.5 p-0 lg:flex pt-2">
@@ -59,19 +59,19 @@ export default function SignInPage() {
     >
       <SessionRedirect />
       <GoogleSignInButton />
-      <div className="flex items-center gap-3 text-[13px] text-secondary" aria-hidden="true">
+      <div className="flex items-center gap-3 text-cap text-secondary" aria-hidden="true">
         <span className="h-px flex-1 bg-divider" />
         hoặc
         <span className="h-px flex-1 bg-divider" />
       </div>
       <EmailPasswordForm variant="signin" />
-      <p className="m-0 text-center text-[15px] text-secondary">
+      <p className="m-0 text-center text-callout text-secondary">
         Chưa có tài khoản?{" "}
-        <Link href="/signup" className="inline-flex min-h-[44px] items-center px-2 font-semibold text-blue">
+        <Link href="/signup" className="inline-flex min-h-11 items-center px-2 font-semibold text-cobalt">
           Đăng ký
         </Link>
       </p>
-      <p className="m-0 text-center text-[12px] leading-relaxed text-secondary">
+      <p className="m-0 text-center text-[0.75rem] leading-relaxed text-secondary">
         Bằng việc tiếp tục, bạn đồng ý với{" "}
         <Link href="/terms" className="underline hover:text-text">Điều khoản dịch vụ</Link>
         {" "}và{" "}

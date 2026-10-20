@@ -40,8 +40,8 @@ export function ProfileEditScreen() {
           </>
         ) : (
           <div aria-busy="true" aria-live="polite" className="flex flex-col gap-4 lg:col-span-2">
-            <div className="h-[220px] rounded-[18px] bg-divider animate-pulse motion-reduce:animate-none" />
-            <div className="h-[160px] rounded-[18px] bg-divider animate-pulse motion-reduce:animate-none" />
+            <div className="h-[220px] rounded-card bg-divider animate-pulse motion-reduce:animate-none" />
+            <div className="h-[160px] rounded-card bg-divider animate-pulse motion-reduce:animate-none" />
           </div>
         )}
       </main>

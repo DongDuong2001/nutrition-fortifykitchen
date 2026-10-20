@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import type React from "react";
+import { useEffect, useRef } from "react";
 
 /** cc-51: how long a number takes to count to its new value. */
 export const COUNT_MS = 300;
@@ -24,32 +25,54 @@ export function shouldCount(from: number | null, to: number | null): boolean {
 
 const reducedMotion = () => typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
 
+/** An element whose text is counted, and how a number is written in it. */
+export interface CountTarget {
+  ref: React.RefObject<HTMLElement | null>;
+  format: (value: number | null) => string;
+}
+
 /**
- * A number that counts from its old value to the new one in 300 ms. The first value shows at once; null (unknown,
- * drawn as "—") never counts, nor does a change from or to null; with reduced motion every change is instant.
+ * cc-64 (R1): the count without a React render per frame. The caller renders the final value as the element's text;
+ * when `value` changes and `resetKey` (the day and the selection) did not, each target's text node is written for 300 ms
+ * from the old number to the new one, through its nodeValue, so React keeps the same text node. A new day, a new
+ * selection, the first value, null and reduced motion show the new number at once (what React rendered).
  */
-export function useCountUp(value: number | null): number | null {
-  const [shown, setShown] = useState(value);
-  const shownRef = useRef(value);
+export function useCountUpText(value: number | null, resetKey: string, targets: readonly CountTarget[]): void {
+  const last = useRef<{ value: number | null; key: string } | null>(null);
+  // The number on screen right now (mid-count it is between the old value and the new one)
+  const onScreen = useRef<number | null>(null);
+  const targetsRef = useRef(targets);
+  targetsRef.current = targets;
 
   useEffect(() => {
-    const from = shownRef.current;
-    if (value === null || from === null || !shouldCount(from, value) || reducedMotion()) {
-      shownRef.current = value;
-      setShown(value);
-      return;
-    }
+    const before = last.current;
+    last.current = { value, key: resetKey };
+    const from = onScreen.current ?? before?.value ?? null;
+    onScreen.current = value;
+    if (!before || before.key !== resetKey || value === null || from === null || !shouldCount(from, value) || reducedMotion()) return;
+    const write = (n: number) => {
+      onScreen.current = n;
+      for (const t of targetsRef.current) {
+        const node = t.ref.current?.firstChild;
+        if (node && node.nodeType === Node.TEXT_NODE) node.nodeValue = t.format(n);
+      }
+    };
     let frame = 0;
     const start = performance.now();
     const step = (time: number) => {
       const next = countAt(from, value, time - start);
-      shownRef.current = next;
-      setShown(next);
+      write(next);
       if (!Object.is(next, value)) frame = requestAnimationFrame(step);
     };
+    write(from);
     frame = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(frame);
-  }, [value]);
-
-  return shown;
+    return () => {
+      cancelAnimationFrame(frame);
+      // Leave the text as React rendered it (it may not render again), but remember where the count was, so a new count
+      // starts from the number that was on screen
+      const mid = onScreen.current;
+      write(value);
+      onScreen.current = mid;
+    };
+  }, [value, resetKey]);
 }

@@ -32,7 +32,7 @@ export function FoodEmptyState({
     <button
       type="button"
       onClick={onClearFilter}
-      className="min-h-[44px] px-5 rounded-full bg-surface text-text font-semibold text-sm border-0 cursor-pointer active:scale-[0.97] transition-press"
+      className="min-h-11 px-5 rounded-full bg-surface text-text font-semibold text-sm border-0 cursor-pointer active:scale-[0.97] transition-press"
     >
       Bỏ lọc
     </button>
@@ -88,7 +88,7 @@ export function FoodEmptyState({
               key={s.id}
               type="button"
               onClick={() => onPickSimilar(s)}
-              className="text-left py-3 px-3 rounded-xl hover:bg-surface text-sm font-semibold text-text border-0 bg-card cursor-pointer flex justify-between items-center min-h-[48px]"
+              className="text-left py-3 px-3 rounded-xl hover:bg-surface text-sm font-semibold text-text border-0 bg-card cursor-pointer flex justify-between items-center min-h-12"
             >
               <span>{rowName(s)}</span>
               <span className="text-xs text-secondary font-normal">{getMeta(s)}</span>

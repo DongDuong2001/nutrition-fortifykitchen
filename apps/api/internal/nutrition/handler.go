@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"nutrition-api/internal/auth"
+	"nutrition-api/internal/logger"
 	"nutrition-api/pkg/response"
 )
 
@@ -26,11 +27,7 @@ func (h *Handler) SearchFoods(w http.ResponseWriter, r *http.Request) {
 	category := r.URL.Query().Get("category")
 	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
 	limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
-	if limit <= 0 {
-		limit = 20
-	} else if limit > 500 {
-		limit = 500
-	}
+	limit = ClampFoodsLimit(q, limit)
 	if page <= 0 {
 		page = 1
 	}
@@ -126,7 +123,12 @@ func (h *Handler) CreateCustomFood(w http.ResponseWriter, r *http.Request) {
 
 	food, err := h.service.CreateCustomFood(r.Context(), userID, req)
 	if err != nil {
-		response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, err.Error())
+		if errors.Is(err, ErrNameRequired) || errors.Is(err, ErrInvalidServingSize) || errors.Is(err, ErrNegativeMacronutrients) {
+			response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, err.Error())
+			return
+		}
+		logger.Log.Error().Err(err).Str("user_id", userID.String()).Msg("failed to create custom food")
+		response.Error(w, http.StatusInternalServerError, response.CodeInternalServerError, "Failed to create custom food")
 		return
 	}
 

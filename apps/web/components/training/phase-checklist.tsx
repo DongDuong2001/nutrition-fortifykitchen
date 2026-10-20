@@ -33,7 +33,7 @@ export function PhaseChecklist({
   if (phases.length === 0) return null;
 
   const isDesktop = variant === "desktop";
-  const rowClass = `flex items-center border-t border-divider first:border-t-0 ${isDesktop ? "min-h-[56px] -mx-2 px-2 rounded-lg hover:bg-hover" : "min-h-[48px]"}`;
+  const rowClass = `flex items-center border-t border-divider first:border-t-0 ${isDesktop ? "min-h-14 -mx-2 px-2 rounded-lg hover:bg-hover" : "min-h-12"}`;
 
   const renderItem = (it: TrainingCheckItem) => {
     const isChecked = ticked.includes(it.id);
@@ -43,7 +43,7 @@ export function PhaseChecklist({
       <div key={it.id} className={rowClass} aria-busy={busy || undefined}>
         <label
           className={`flex flex-1 min-w-0 items-center self-stretch transition-transform ${
-            readOnly ? "cursor-default" : "cursor-pointer active:scale-[0.99] transition-press motion-reduce:active:scale-100"
+            readOnly ? "cursor-default" : "cursor-pointer m-tint transition-press"
           } ${isDesktop ? "gap-4" : "gap-3"}`}
         >
           <span className="w-11 h-11 -ml-2.5 flex items-center justify-center shrink-0">
@@ -53,25 +53,25 @@ export function PhaseChecklist({
               disabled={readOnly}
               onChange={() => onToggle(it)}
               aria-label={it.label}
-              className={`w-[22px] h-[22px] rounded accent-blue shrink-0 ${readOnly ? "" : "cursor-pointer"}`}
+              className={`w-[22px] h-[22px] rounded accent-cobalt shrink-0 ${readOnly ? "" : "cursor-pointer"}`}
             />
           </span>
           <span className="flex-1 flex flex-col py-1 min-w-0">
-            <span title={it.own ? it.label : undefined} className={`${isDesktop ? "text-[15px]" : "text-sm"} font-semibold text-text leading-snug line-clamp-2 break-words`}>
+            <span title={it.own ? it.label : undefined} className={`${isDesktop ? "text-callout" : "text-sm"} font-semibold text-text leading-snug line-clamp-2 break-words`}>
               {it.label}
             </span>
             {busy ? (
-              <span role="status" className="text-[13px] text-secondary leading-normal">Đang tải danh mục…</span>
+              <span role="status" className="text-cap text-secondary leading-normal">Đang tải danh mục…</span>
             ) : it.note ? (
-              <span className="text-[13px] text-secondary leading-normal">{it.note}</span>
+              <span className="text-cap text-secondary leading-normal">{it.note}</span>
             ) : null}
           </span>
           {busy && (
-            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" className="shrink-0 text-blue animate-spin motion-reduce:animate-none">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" className="shrink-0 text-cobalt animate-spin motion-reduce:animate-none">
               <path d="M12 3a9 9 0 1 0 9 9" />
             </svg>
           )}
-          <span className="font-bold text-[15px] tabular-nums text-text shrink-0">{it.dose}</span>
+          <span className="font-bold text-callout tabular-nums text-text shrink-0">{it.dose}</span>
         </label>
         {removable && (
           <button
@@ -90,8 +90,8 @@ export function PhaseChecklist({
   };
 
   const cardClass = isDesktop
-    ? "bg-card border border-card-border rounded-[18px] lg:shadow-card px-5 pt-2 pb-3 flex flex-col"
-    : "bg-card border border-card-border rounded-[18px] lg:shadow-card px-4 pt-3 pb-1 flex flex-col";
+    ? "bg-card rounded-card border border-transparent shadow-ring lg:shadow-card px-5 pt-2 pb-3 flex flex-col"
+    : "bg-card rounded-card border border-transparent shadow-ring lg:shadow-card px-4 pt-3 pb-1 flex flex-col";
 
   return (
     <div
@@ -113,7 +113,7 @@ export function PhaseChecklist({
           <div key={ph.id} data-align-group={isDesktop ? undefined : "training-content"} className={sectionClass}>
             <div className="flex justify-between items-baseline pb-1">
               <h2 className={`m-0 font-bold text-text ${isDesktop ? "text-lg" : "text-base"}`}>{ph.name}</h2>
-              <span className={`font-semibold text-secondary tabular-nums ${isDesktop ? "text-sm" : "text-[13px]"}`}>
+              <span className={`font-semibold text-secondary tabular-nums ${isDesktop ? "text-sm" : "text-cap"}`}>
                 {completedCount} / {totalCount}
               </span>
             </div>
@@ -125,7 +125,7 @@ export function PhaseChecklist({
                     type="button"
                     onClick={() => onAddItem(ph)}
                     data-tour={idx === 0 ? "training-add-item" : undefined}
-                    className="-ml-1 flex min-h-[44px] cursor-pointer items-center rounded-full border-0 bg-transparent px-1 text-sm font-semibold text-blue active:scale-[0.97] transition-press motion-reduce:active:scale-100"
+                    className="-ml-1 flex min-h-11 cursor-pointer items-center rounded-full border-0 bg-transparent px-1 text-sm font-semibold text-cobalt active:scale-[0.97] transition-press motion-reduce:active:scale-100"
                   >
                     + Thêm món
                   </button>

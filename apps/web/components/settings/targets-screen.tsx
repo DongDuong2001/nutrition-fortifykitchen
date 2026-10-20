@@ -43,7 +43,7 @@ export function TargetsScreen() {
               section={sections[2]}
               note="Theo khuyến nghị dinh dưỡng Việt Nam 2016 (Bộ Y tế), đúng giới tính và tuổi của bạn."
             />
-            <p className="m-0 text-[13px] text-secondary">Cân nặng, mục tiêu và ngày tập mặc định sửa trong Hồ sơ. Bạn cũng có thể tùy chỉnh tỉ lệ đa lượng riêng.</p>
+            <p className="m-0 text-cap text-secondary">Cân nặng, mục tiêu và ngày tập mặc định sửa trong Hồ sơ. Bạn cũng có thể tùy chỉnh tỉ lệ đa lượng riêng.</p>
             <div className="flex flex-col gap-2">
               <PillButton href="/settings/targets/macros" variant="primary">
                 Tùy chỉnh tỉ lệ đa lượng ›
@@ -55,8 +55,8 @@ export function TargetsScreen() {
           </div>
         ) : (
           <div aria-busy="true" aria-live="polite" className="flex flex-col gap-4">
-            <div className="h-[260px] rounded-[18px] bg-divider animate-pulse motion-reduce:animate-none" />
-            <div className="h-[260px] rounded-[18px] bg-divider animate-pulse motion-reduce:animate-none" />
+            <div className="h-[260px] rounded-card bg-divider animate-pulse motion-reduce:animate-none" />
+            <div className="h-[260px] rounded-card bg-divider animate-pulse motion-reduce:animate-none" />
           </div>
         )}
       </main>
@@ -73,16 +73,16 @@ function TargetCard({ id, section, note }: { id: string; section: TargetSection;
         <div
           key={row.label}
           data-align-group="targets-row"
-          className="flex min-h-[48px] items-center justify-between gap-3 border-t border-divider py-2"
+          className="flex min-h-12 items-center justify-between gap-3 border-t border-divider py-2"
         >
           <div className="flex min-w-0 flex-col">
-            <span className="text-[15px]">{row.label}</span>
-            {row.detail && <span className="text-[13px] leading-snug text-secondary">{row.detail}</span>}
+            <span className="text-callout">{row.label}</span>
+            {row.detail && <span className="text-cap leading-snug text-secondary">{row.detail}</span>}
           </div>
-          <span className="shrink-0 text-right text-[15px] font-semibold tabular-nums">{row.value}</span>
+          <span className="shrink-0 text-right text-callout font-semibold tabular-nums">{row.value}</span>
         </div>
       ))}
-      {note && <p className="m-0 border-t border-divider pt-3 text-[13px] text-secondary">{note}</p>}
+      {note && <p className="m-0 border-t border-divider pt-3 text-cap text-secondary">{note}</p>}
     </Card>
   );
 }

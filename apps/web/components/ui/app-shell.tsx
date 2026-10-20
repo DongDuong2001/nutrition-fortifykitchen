@@ -43,14 +43,14 @@ export function AppShell({
         {children}
       </div>
       {cta && (
-        <div className="fixed inset-x-0 bottom-[calc(72px+env(safe-area-inset-bottom))] z-30 border-t border-card-border bg-page/95 p-3 lg:bottom-0 lg:left-60">
+        <div className="fixed inset-x-0 bottom-[calc(72px+env(safe-area-inset-bottom))] z-30 bg-page p-3 before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-3 before:bg-linear-to-t before:from-page before:to-transparent lg:bottom-0 lg:left-60">
           <div className="mx-auto w-full max-w-[560px]">{cta}</div>
         </div>
       )}
       {bottomBar ? (
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-card-border bg-card pb-[env(safe-area-inset-bottom)] lg:left-60">{bottomBar}</div>
+        <div className="fixed inset-x-0 bottom-0 z-nav border-t border-card-border bg-card pb-[env(safe-area-inset-bottom)] lg:left-60">{bottomBar}</div>
       ) : (
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-ink lg:hidden">
+        <div className="fixed bottom-0 left-0 right-0 z-nav bg-ink lg:hidden">
           <BottomNav />
         </div>
       )}

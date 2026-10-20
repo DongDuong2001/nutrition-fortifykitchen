@@ -15,10 +15,10 @@ export function RestDayCard({ targets, className = "" }: RestDayCardProps) {
       aria-labelledby="rest-title"
       data-align-group="training-content"
       data-align-edge="left"
-      className={`bg-card border border-card-border rounded-[18px] lg:shadow-card px-4 pt-4 pb-1.5 flex flex-col ${className}`}
+      className={`bg-card rounded-card border border-transparent shadow-ring lg:shadow-card px-4 pt-4 pb-1.5 flex flex-col ${className}`}
     >
       <div className="flex items-center gap-3 pb-3">
-        <div className="w-11 h-11 rounded-full bg-blue/10 text-blue flex items-center justify-center shrink-0">
+        <div className="w-11 h-11 rounded-full bg-cobalt/10 text-cobalt flex items-center justify-center shrink-0">
           <svg
             width="26"
             height="26"
@@ -54,11 +54,11 @@ export function RestDayCard({ targets, className = "" }: RestDayCardProps) {
               strokeLinecap="round"
               strokeLinejoin="round"
               aria-hidden="true"
-              className="text-blue shrink-0"
+              className="text-cobalt shrink-0"
             >
               <path d={t.path} />
             </svg>
-            <span className="text-[15px] font-semibold text-text">{t.text}</span>
+            <span className="text-callout font-semibold text-text">{t.text}</span>
           </div>
         ))}
       </div>

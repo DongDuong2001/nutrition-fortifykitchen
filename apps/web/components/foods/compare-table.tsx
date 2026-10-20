@@ -19,16 +19,16 @@ function Value({ row, index }: { row: CompareRow; index: number }) {
   const value = row.values[index];
   if (value === null) {
     return (
-      <span className="text-[15px] text-secondary" aria-label="Chưa có dữ liệu">
+      <span className="text-callout text-secondary" aria-label="Chưa có dữ liệu">
         —
       </span>
     );
   }
   const top = row.highest[index];
   return (
-    <span className={`inline-flex items-baseline justify-center gap-1 tabular-nums ${top ? "font-bold text-blue" : "font-medium text-text"}`}>
-      {top && <span aria-hidden="true" className="h-2 w-2 shrink-0 self-center rounded-full bg-blue" />}
-      <span className="text-[15px]">{formatAmount(value, row.unit)}</span>
+    <span className={`inline-flex items-baseline justify-center gap-1 tabular-nums ${top ? "font-bold text-cobalt" : "font-medium text-text"}`}>
+      {top && <span aria-hidden="true" className="h-2 w-2 shrink-0 self-center rounded-full bg-cobalt" />}
+      <span className="text-callout">{formatAmount(value, row.unit)}</span>
       <span className="text-xs font-normal text-secondary">{row.unit}</span>
       {top && <span className="sr-only"> (cao nhất)</span>}
     </span>
@@ -46,9 +46,9 @@ export function CompareTable({ columns, sections, onRemove }: CompareTableProps)
   return (
     <Card as="section" aria-label="So sánh dinh dưỡng" className="flex flex-col">
       <div role="table" aria-label="So sánh dinh dưỡng" className="flex flex-col">
-        <div role="rowgroup" className="z-10 bg-card lg:sticky lg:top-0 lg:border-b lg:border-card-border">
+        <div role="rowgroup" className="z-sticky bg-card lg:sticky lg:top-0 lg:border-b lg:border-card-border">
           <div role="row" style={vars} className={`${ROW_GRID} items-start pb-2`}>
-            <div role="columnheader" className="hidden pb-2 text-[13px] font-semibold text-secondary lg:block">
+            <div role="columnheader" className="hidden pb-2 text-cap font-semibold text-secondary lg:block">
               Dinh dưỡng
             </div>
             {columns.map((c, i) => (
@@ -58,7 +58,7 @@ export function CompareTable({ columns, sections, onRemove }: CompareTableProps)
                 data-align-group={`compare-col-${i}`}
                 className="flex min-w-0 flex-col items-center gap-1 text-center"
               >
-                <span title={c.name} className="break-words text-[13px] font-bold leading-snug text-text">
+                <span title={c.name} className="break-words text-cap font-bold leading-snug text-text">
                   {c.name}
                 </span>
                 {c.portion && <span className="break-words text-xs leading-snug text-secondary">{c.portion}</span>}
@@ -86,7 +86,7 @@ export function CompareTable({ columns, sections, onRemove }: CompareTableProps)
             </div>
             {section.rows.length > 0 && section.rows.map((row) => (
               <div key={row.id} role="row" style={vars} className={`${ROW_GRID} gap-y-1 border-t border-divider py-2`}>
-                <div role="rowheader" className="col-span-full text-[13px] font-semibold text-secondary lg:col-span-1 lg:text-[15px] lg:text-text">
+                <div role="rowheader" className="col-span-full text-cap font-semibold text-secondary lg:col-span-1 lg:text-callout lg:text-text">
                   {row.name}
                 </div>
                 {columns.map((c, i) => (
@@ -97,7 +97,7 @@ export function CompareTable({ columns, sections, onRemove }: CompareTableProps)
               </div>
             ))}
             {section.missing.length > 0 && (
-              <p className="m-0 border-t border-divider pt-2 text-[13px] leading-snug text-secondary">
+              <p className="m-0 border-t border-divider pt-2 text-cap leading-snug text-secondary">
                 Chưa có dữ liệu: {section.missing.join(", ")}
               </p>
             )}

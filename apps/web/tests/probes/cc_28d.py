@@ -8,6 +8,7 @@ Production build, clock fixed at 2026-10-15 10:00, demo mode as the coach (?as=c
 - Cài đặt shows the Học viên row for a coach and an admin only.
 Run with: ALIGN_BASE_URL=http://localhost:3104 npm run probe -- tests/probes/cc_28d.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/settings/** app/(app)/coach/** app/join/[code]/**
 import os
 import re
 import sys

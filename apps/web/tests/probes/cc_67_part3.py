@@ -9,6 +9,7 @@ Phở bò from /add: Thành phần opens with a gram field and − / + 10 g on e
 - an unchanged dish is logged as plain Phở bò
 Screenshots: .screenshots/cc67/. Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_67_part3.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/add/**
 import os
 import re
 import sys

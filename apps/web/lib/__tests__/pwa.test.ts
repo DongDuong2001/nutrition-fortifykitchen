@@ -136,7 +136,7 @@ describe("public/sw.js", () => {
     const paths = [
       "/", "/explore", "/settings", "/offline", "/entry/1", "/signin", "/signin/expired", "/signup",
       "/reset-password", "/api/x", "/login", "/signing", "/_next/static/a.js", "/icons/icon-512.png", "/m.woff2",
-      "/manifest.webmanifest",
+      "/manifest.webmanifest", "/auth", "/auth/callback", "/join/ABC123", "/joining", "/add", "/settings/whats-new",
     ];
     for (const path of paths) {
       for (const mode of ["navigate", "cors", "no-cors"]) {
@@ -156,7 +156,7 @@ describe("public/sw.js", () => {
 describe("manifest colours", () => {
   it("are the paper and ink tokens", () => {
     const css = readFileSync(join(__dirname, "..", "..", "app", "globals.css"), "utf8").toLowerCase();
-    expect(css).toContain(`--color-paper: ${PAPER_COLOR.toLowerCase()}`);
+    expect(css).toContain(`--color-page: ${PAPER_COLOR.toLowerCase()}`);
     expect(css).toContain(`--color-ink: ${INK_COLOR.toLowerCase()}`);
   });
 });

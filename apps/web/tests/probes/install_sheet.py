@@ -14,6 +14,7 @@ All at 390 px (a few checks at 360 and 1440). Needs a production demo build (npm
 Screenshots: .screenshots/install-*.png
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/install_sheet.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/(tabs)/explore/** app/(app)/(tabs)/settings/** app/install/**
 import json
 import os
 import re
@@ -141,7 +142,7 @@ def put_prompt(pg, prompt):
 
 
 def is_filled(btn):
-    return "bg-blue" in (btn.get_attribute("class") or "")
+    return "bg-cobalt" in (btn.get_attribute("class") or "")
 
 
 def iphone_flow(browser):
@@ -158,7 +159,7 @@ def iphone_flow(browser):
     andr = dialog(pg).get_by_role("button", name=re.compile("Android"))
     check("Máy của bạn" in iph.inner_text(), "ask: iPhone card carries 'Máy của bạn'")
     check("Máy của bạn" not in andr.inner_text(), "ask: Android card does not")
-    check("border-blue" in (iph.get_attribute("class") or ""), "ask: the detected card has the cobalt border")
+    check("border-cobalt" in (iph.get_attribute("class") or ""), "ask: the detected card has the cobalt border")
     box = iph.bounding_box()
     check(box["height"] >= 76, f"ask: choice card min-height 76 ({box['height']})")
     check(dialog(pg).locator("img[src='/icons/icon-512.png']").count() == 1, "ask: app icon")

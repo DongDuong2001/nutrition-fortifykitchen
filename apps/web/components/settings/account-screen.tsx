@@ -62,7 +62,7 @@ function DisplayNameRow() {
           if (e.key === "Enter") e.currentTarget.blur();
         }}
         aria-invalid={error ? true : undefined}
-        className={`h-[52px] w-full rounded-xl border-2 bg-surface px-4 text-base text-text outline-none focus:border-blue ${
+        className={`h-[52px] w-full rounded-xl border-2 bg-surface px-4 text-base text-text outline-none focus:border-cobalt ${
           error ? "border-destructive" : "border-grabber"
         }`}
       />
@@ -74,10 +74,10 @@ function DisplayNameRow() {
 export function SignedOutCard() {
   return (
     <Card as="section" aria-label="Tài khoản" className="flex flex-col gap-3">
-      <p className="m-0 text-[15px] text-secondary">Bạn chưa đăng nhập.</p>
+      <p className="m-0 text-callout text-secondary">Bạn chưa đăng nhập.</p>
       <Link
         href="/signin"
-        className="inline-flex min-h-[44px] items-center self-start font-semibold text-blue"
+        className="inline-flex min-h-11 items-center self-start font-semibold text-cobalt"
       >
         Đăng nhập
       </Link>
@@ -129,7 +129,7 @@ export function AccountScreen() {
 
       <main className="mx-auto grid w-full max-w-[560px] grid-cols-1 items-start gap-4 px-4 pb-6 pt-4 lg:mx-0 lg:px-8 lg:pb-12 lg:pt-5">
         {!ready ? (
-          <div aria-busy="true" aria-live="polite" className="h-[240px] rounded-[18px] bg-divider animate-pulse motion-reduce:animate-none" />
+          <div aria-busy="true" aria-live="polite" className="h-[240px] rounded-card bg-divider animate-pulse motion-reduce:animate-none" />
         ) : account ? (
           <Card as="section" aria-label="Thông tin tài khoản" className="flex flex-col gap-1">
             <DisplayNameRow />

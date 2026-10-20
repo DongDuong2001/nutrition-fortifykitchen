@@ -11,6 +11,7 @@ visitor to /setup. Sample account: on a production build, outside demo mode, ban
 dev, which always runs demo mode).
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_19.py
 """
+# PROBE_COVERS: app/(app)/(dashboard)/training/** app/(app)/(tabs)/settings/** app/(app)/foods/[id]/** app/(app)/micros/** app/(app)/micros/[nutrient]/** app/(app)/settings/account/** app/(app)/settings/account/password/** app/(app)/settings/data-sources/** app/(app)/settings/delete-account/** app/(app)/settings/language/** app/(app)/settings/notifications/** app/(app)/settings/profile/** app/(app)/settings/profile/weight/** app/(app)/settings/targets/** app/reset-password/** app/signin/** app/signin/forgot/** app/signup/**
 import os
 import sys
 
@@ -96,7 +97,7 @@ KEYBOARD_PATHS = [
 MAX_TABS = 150  # the walk stops earlier when focus leaves the page
 
 # Visual state of a control: outline, shadow and border colours. A focus ring shows as any change from the idle state,
-# so a border turning blue (focus:border-blue on the inputs) counts. nextjs-portal is the dev-only error overlay.
+# so a border turning blue (focus:border-cobalt on the inputs) counts. nextjs-portal is the dev-only error overlay.
 IDLE_SNAPSHOT = """() => {
   const snap = (s) => [s.outlineStyle, s.outlineWidth, s.outlineColor, s.boxShadow, s.borderTopColor, s.borderRightColor, s.borderBottomColor, s.borderLeftColor].join('|');
   window.__idle = new Map();

@@ -7,8 +7,10 @@ two pages), each answer delayed by server time (180 ms, production's median) + o
 Per run: a first visit (nothing on the device) and a second visit in a new tab of the same browser profile.
 - /app: ms until Hôm nay is shown, and the /foods requests made in the first 5 s with their compressed bytes
 - /explore/tinh_bot: ms until its list is shown (the screen waits for the catalogue)
+CC50_CAP: the API's page cap (500, the API before 20/10; 5000 after). CC50_TOTAL: the number of foods (683).
 Run with: LIVE_BUILD=1 ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_50_catalog_timing.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/explore/[category]/** app/(app)/foods/[id]/**
 import asyncio
 import json
 import os
@@ -28,7 +30,9 @@ EMAIL = "timing@example.com"
 RTT_S = 0.040
 SERVER_S = 0.180
 DOWN_BPS = 9_000_000 / 8
-TOTAL = 683
+TOTAL = int(os.environ.get("CC50_TOTAL", "683"))
+# The API's largest page: 500 before overnight 20/10, 5000 for a catalogue download (no search query) after it
+CAP = int(os.environ.get("CC50_CAP", "500"))
 PROFILE = {"sex": "male", "birth_year": 2000, "weight_kg": 65, "goal": "maintain", "display_name": "Probe", "training_minutes_default": 60}
 NUTRIENTS = ["energy", "protein", "carbs", "fat", "fiber", "sodium", "potassium", "calcium", "magnesium", "iron", "zinc", "phosphorus",
              "vitamin_a", "vitamin_c", "vitamin_d", "vitamin_e", "vitamin_k", "b1", "b2", "b3", "b6", "b9", "b12", "selenium", "copper"]
@@ -54,9 +58,9 @@ async def handler(route, stats):
     path = req.url.split("/api/v1", 1)[1].split("?")[0]
     if path == "/foods":
         q = req.url.split("?", 1)[1] if "?" in req.url else ""
-        limit = int(re.search(r"limit=(\d+)", q).group(1)) if "limit=" in q else 50
+        limit = min(CAP, int(re.search(r"limit=(\d+)", q).group(1)) if "limit=" in q else 20)
         page = int(re.search(r"page=(\d+)", q).group(1)) if "page=" in q else 1
-        body = json.dumps({"data": {"items": FOODS[(page - 1) * limit: page * limit], "total": TOTAL}})
+        body = json.dumps({"data": {"items": FOODS[(page - 1) * limit: page * limit], "total": TOTAL, "page": page, "limit": limit}})
         wire = len(body) // 4  # zstd on production: ~4x on this JSON
         stats["foods"].append((time.time(), wire))
         await asyncio.sleep(SERVER_S + RTT_S + wire / DOWN_BPS)
@@ -109,7 +113,7 @@ async def main():
                 rows.append((name, visit_name, ms, n, wire))
             await ctx.close()
         await browser.close()
-    print(f"[REPORT] {LABEL}: Fast 4G (40 ms, 9 Mbps), 683 foods")
+    print(f"[REPORT] {LABEL}: Fast 4G (40 ms, 9 Mbps), {TOTAL} foods, API page cap {CAP}")
     for name, visit_name, ms, n, wire in rows:
         print(f"[REPORT] {name:32} {visit_name:24} {ms:6.0f} ms   /foods requests: {n}, {wire / 1024:.0f} kB on the wire")
 

@@ -18,7 +18,7 @@ export function DesktopSidebar({ currentTab }: { currentTab?: NavTab }) {
 
   return (
     <aside className="hidden w-60 shrink-0 flex-col gap-6 bg-ink p-6 text-on-dark box-border lg:flex">
-      <div className="px-2 font-display italic font-black text-2xl">
+      <div className="px-2 font-display italic font-black text-2xl tracking-display">
         H1T <span className="text-sky">MICRO</span>
       </div>
       <Link
@@ -26,7 +26,7 @@ export function DesktopSidebar({ currentTab }: { currentTab?: NavTab }) {
         data-tour="nav-add"
         href="/add"
         onClick={() => rememberAddOpener("desktop-add-btn")}
-        className="no-underline flex h-12 items-center justify-center gap-2 rounded-full bg-blue text-on-accent text-[15px] font-bold hover:bg-blue/90 active:scale-[0.97] motion-reduce:active:scale-100 transition-press"
+        className="no-underline flex h-12 items-center justify-center gap-2 rounded-full bg-cobalt text-on-accent text-callout font-bold hover:bg-cobalt/90 active:scale-[0.97] motion-reduce:active:scale-100 transition-press"
       >
         <PlusIcon size={18} />
         Thêm món
@@ -41,7 +41,7 @@ export function DesktopSidebar({ currentTab }: { currentTab?: NavTab }) {
               onNavigate={() => startTransition(() => setActive(item.tab))}
               data-tour={item.tab === "settings" ? "nav-settings" : item.tab === "explore" ? "nav-explore" : undefined}
               aria-current={isActive ? "page" : undefined}
-              className={`no-underline flex min-h-[44px] items-center gap-3 rounded-xl px-3 text-[15px] font-semibold transition-colors ${
+              className={`no-underline flex min-h-11 items-center gap-3 rounded-xl px-3 text-callout font-semibold transition-colors ${
                 isActive ? "bg-card/10 text-on-dark" : "text-muted-on-dark hover:bg-card/5 hover:text-on-dark"
               }`}
             >

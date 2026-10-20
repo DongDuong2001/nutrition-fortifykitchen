@@ -1,6 +1,7 @@
 """ag-06: verification probe for a11y Must fixes, Should fixes, 22 vi chất copy, and reminder row status.
 Run with: ALIGN_BASE_URL=http://localhost:3100 npm run probe -- tests/probes/ag06.py
 """
+# PROBE_COVERS: app/(app)/(dashboard)/training/** app/(app)/(tabs)/app/** app/(app)/(tabs)/settings/** app/(app)/(tabs)/trends/** app/(app)/add/** app/(app)/entry/[id]/** app/(app)/foods/[id]/** app/(app)/micros/** app/(app)/micros/[nutrient]/** app/(app)/settings/notifications/** app/(app)/settings/profile/** app/(app)/settings/profile/weight/** app/(app)/setup/goal/** app/(app)/setup/profile/** app/paywall/**
 import os
 import re
 import sys
@@ -37,7 +38,7 @@ def test_item_1_and_2(browser):
     inp_classes = search_input.get_attribute("class") or ""
     # One focus indicator: the wrapper label's focus-within ring; the input itself has no ring or outline of its own
     wrapper_classes = search_input.evaluate("el => el.closest('label').className") or ""
-    check("focus-within:ring-blue" in wrapper_classes and "focus-within:ring-2" in wrapper_classes,
+    check("focus-within:ring-cobalt" in wrapper_classes and "focus-within:ring-2" in wrapper_classes,
           f"add: the search wrapper has the focus-within ring ({wrapper_classes})")
     check("focus-visible:ring" not in inp_classes and "focus-visible:outline-none" in inp_classes,
           f"add: the search input has no ring of its own ({inp_classes})")
@@ -84,7 +85,7 @@ def test_item_1_and_2(browser):
     check(grams_input.count() > 0, "entry: grams input present")
     parent = grams_input.locator("..")
     p_classes = parent.get_attribute("class") or ""
-    check("focus-within:ring-blue" in p_classes or "focus-within:ring-2" in p_classes,
+    check("focus-within:ring-cobalt" in p_classes or "focus-within:ring-2" in p_classes,
           f"entry: grams input wrapper has focus-within ring ({p_classes})")
     ctx.close()
 

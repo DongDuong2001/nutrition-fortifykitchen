@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"nutrition-api/internal/auth"
+	"nutrition-api/internal/logger"
 	"nutrition-api/pkg/response"
 )
 
@@ -28,7 +29,7 @@ func (h *Handler) Apply(w http.ResponseWriter, r *http.Request) {
 
 	var req ApplyCoachRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, "invalid request body: "+err.Error())
+		response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, "Invalid request body")
 		return
 	}
 
@@ -42,7 +43,8 @@ func (h *Handler) Apply(w http.ResponseWriter, r *http.Request) {
 			response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, err.Error())
 			return
 		}
-		response.Error(w, http.StatusInternalServerError, response.CodeInternalServerError, err.Error())
+		logger.Log.Error().Err(err).Str("user_id", userID.String()).Msg("failed to submit coach application")
+		response.Error(w, http.StatusInternalServerError, response.CodeInternalServerError, "Failed to submit application")
 		return
 	}
 
@@ -63,7 +65,8 @@ func (h *Handler) GetMyApplication(w http.ResponseWriter, r *http.Request) {
 			response.JSON(w, http.StatusOK, nil)
 			return
 		}
-		response.Error(w, http.StatusInternalServerError, response.CodeInternalServerError, err.Error())
+		logger.Log.Error().Err(err).Str("user_id", userID.String()).Msg("failed to load coach application")
+		response.Error(w, http.StatusInternalServerError, response.CodeInternalServerError, "Failed to load application")
 		return
 	}
 
@@ -75,7 +78,8 @@ func (h *Handler) ListApplications(w http.ResponseWriter, r *http.Request) {
 	status := r.URL.Query().Get("status")
 	apps, err := h.service.ListApplications(r.Context(), status)
 	if err != nil {
-		response.Error(w, http.StatusInternalServerError, response.CodeInternalServerError, err.Error())
+		logger.Log.Error().Err(err).Str("status", status).Msg("failed to list coach applications")
+		response.Error(w, http.StatusInternalServerError, response.CodeInternalServerError, "Failed to load applications")
 		return
 	}
 
@@ -99,7 +103,7 @@ func (h *Handler) UpdateStatus(w http.ResponseWriter, r *http.Request) {
 
 	var req UpdateStatusRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, "invalid request body: "+err.Error())
+		response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, "Invalid request body")
 		return
 	}
 
@@ -113,7 +117,8 @@ func (h *Handler) UpdateStatus(w http.ResponseWriter, r *http.Request) {
 			response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, err.Error())
 			return
 		}
-		response.Error(w, http.StatusInternalServerError, response.CodeInternalServerError, err.Error())
+		logger.Log.Error().Err(err).Str("reviewer_id", reviewerID.String()).Str("application_id", appID.String()).Msg("failed to update coach application status")
+		response.Error(w, http.StatusInternalServerError, response.CodeInternalServerError, "Failed to update application")
 		return
 	}
 

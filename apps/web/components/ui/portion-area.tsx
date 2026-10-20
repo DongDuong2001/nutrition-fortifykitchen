@@ -25,6 +25,8 @@ import {
   withMult,
   overGramLimit,
   MAX_GRAMS_MESSAGE,
+  MIN_GRAMS_MESSAGE,
+  gramsTooSmall,
   MAX_GRAMS_PER_PORTION,
   MAX_MULT,
   type PortionState,
@@ -98,6 +100,7 @@ function GramPortionArea({
 
   // The amount went over the limit: the field is written back clamped and says why
   const [overLimit, setOverLimit] = useState(false);
+  const [touched, setTouched] = useState(false);
 
   const emit = (next: PortionState, hit = false) => {
     const out = fitPortion(food, next, sw);
@@ -136,7 +139,7 @@ function GramPortionArea({
   const align = { "data-align-group": alignGroup, "data-align-edge": "left" } as const;
 
   const segment = (on: boolean) =>
-    `${panel ? "h-11 rounded-[10px] text-[15px]" : "h-11 rounded-[9px] text-sm"} cursor-pointer border-0      disabled:opacity-50 ${
+    `${panel ? "h-11 rounded-[10px] text-callout" : "h-11 rounded-[9px] text-sm"} cursor-pointer border-0      disabled:opacity-50 ${
       on ? "bg-ink font-bold text-on-dark" : "bg-transparent font-semibold text-text"
     }`;
   const track = `grid grid-cols-2 gap-1 bg-divider p-1 ${panel ? "rounded-[14px]" : "rounded-xl"}`;
@@ -146,7 +149,7 @@ function GramPortionArea({
       {/* Sống | Chín: where raw or cooked matters and something true can be logged for both */}
       {p.kind === "grams" && sw && (
         <div {...align} className="flex flex-col gap-2">
-          {panel && <span className="text-[13px] font-bold text-text">Bạn cân lúc nào?</span>}
+          {panel && <span className="text-cap font-bold text-text">Bạn cân lúc nào?</span>}
           <div role="group" aria-label="Sống hoặc chín" data-tour={panel ? "cook-state" : undefined} className={track}>
             {(["raw", "cooked"] as const).map((s) => (
               <button
@@ -202,7 +205,7 @@ function GramPortionArea({
           {p.kind === "egg" && sizes.length > 1 && (
             <div className="flex flex-col gap-2">
               {panel && (
-                <span className="text-[13px] font-bold text-text">
+                <span className="text-cap font-bold text-text">
                   Trứng cỡ nào? <span className="font-normal text-secondary">Xem trên hộp là biết</span>
                 </span>
               )}
@@ -220,10 +223,10 @@ function GramPortionArea({
                         emit({ ...p, size: z.size });
                       }}
                       className={`flex cursor-pointer flex-col justify-center rounded-xl bg-card text-text disabled:opacity-50 ${
- panel ? "min-h-[52px] items-start px-3 py-1.5 text-left" : "h-11 items-center px-1 text-[13px]"
- } ${on ? `border-2 border-blue ${panel ? "" : "bg-cobalt-tint font-bold text-blue"}` : "border border-card-border"}`}
+ panel ? "min-h-[52px] items-start px-3 py-1.5 text-left" : "h-11 items-center px-1 text-cap"
+ } ${on ? `border-2 border-cobalt ${panel ? "" : "bg-cobalt-tint font-bold text-cobalt"}` : "border border-card-border"}`}
                     >
-                      <span className={panel ? `text-[15px] ${on ? "font-bold" : "font-semibold"}` : ""}>{z.label}</span>
+                      <span className={panel ? `text-callout ${on ? "font-bold" : "font-semibold"}` : ""}>{z.label}</span>
                       {panel && z.hint && <span className="text-xs text-secondary">{z.hint}</span>}
                     </button>
                   );
@@ -246,7 +249,7 @@ function GramPortionArea({
               onClick={() => {
                 if (!part.active) onFoodChange?.(part.food);
               }}
-              className={`min-h-11 cursor-pointer rounded-full px-2 text-[13px] disabled:opacity-50 ${
+              className={`min-h-11 cursor-pointer rounded-full px-2 text-cap disabled:opacity-50 ${
  part.active ? "border-0 bg-ink font-bold text-on-dark" : "border border-card-border bg-card font-semibold text-text"
  }`}
             >
@@ -260,13 +263,13 @@ function GramPortionArea({
       {p.kind === "grams" && (
         <div {...align} className="flex flex-col gap-2">
           {panel && (
-            <label htmlFor={`${ids}-grams`} className="text-[13px] font-bold text-text">
+            <label htmlFor={`${ids}-grams`} className="text-cap font-bold text-text">
               Bao nhiêu gam?
             </label>
           )}
           <div className="flex items-stretch gap-2">
             <div
-              className={`flex min-w-0 flex-1 items-center gap-1 border-2 border-blue bg-card focus-within:ring-2 focus-within:ring-blue/30 ${
+              className={`flex min-w-0 flex-1 items-center gap-1 border-2 border-cobalt bg-card focus-within:ring-2 focus-within:ring-cobalt/30 ${
  panel ? "h-15 rounded-[14px] px-4" : "h-12 rounded-xl px-3"
  }`}
             >
@@ -278,14 +281,16 @@ function GramPortionArea({
                 aria-label={panel ? "Số gam" : `Số gam ${food.nameVi}`}
                 value={text}
                 disabled={disabled}
-                aria-describedby={overLimit ? `${ids}-grams-error` : undefined}
+                aria-describedby={overLimit || gramsTooSmall(text, touched) ? `${ids}-grams-error` : undefined}
+                aria-invalid={gramsTooSmall(text, touched) || undefined}
+                onBlur={() => setTouched(true)}
                 onChange={(e) => {
                   const typed = parseGramsInput(e.target.value);
                   const next = withBase(p, typed);
                   setText(e.target.value);
                   emit(next, overGramLimit(e.target.value) || next.base < typed);
                 }}
-                className={`h-full w-full min-w-0 border-0 bg-transparent p-0 font-display font-bold text-text tabular-nums outline-none ${panel ? "text-[34px]" : "text-2xl"}`}
+                className={`h-full w-full min-w-0 border-0 bg-transparent p-0 font-display font-bold text-text tabular-nums outline-none ${panel ? "text-display" : "text-2xl"}`}
               />
               <span className={`font-semibold text-secondary ${panel ? "text-base" : "text-sm"}`}>g</span>
             </div>
@@ -299,14 +304,14 @@ function GramPortionArea({
               }}
               className={`shrink-0 cursor-pointer whitespace-nowrap rounded-[14px] disabled:opacity-50 ${
  panel ? "w-23 text-base" : "h-12 rounded-xl px-3 text-sm"
- } ${p.base === 100 ? "border-2 border-blue bg-cobalt-tint font-bold text-blue" : "border border-card-border bg-card font-semibold text-text"}`}
+ } ${p.base === 100 ? "border-2 border-cobalt bg-cobalt-tint font-bold text-cobalt" : "border border-card-border bg-card font-semibold text-text"}`}
             >
               100 g
             </button>
           </div>
-          {overLimit && (
-            <p id={`${ids}-grams-error`} role="alert" className="m-0 px-1 text-[13px] font-semibold leading-snug text-destructive-text">
-              {MAX_GRAMS_MESSAGE}
+          {(overLimit || gramsTooSmall(text, touched)) && (
+            <p id={`${ids}-grams-error`} role="alert" className="m-0 px-1 text-cap font-semibold leading-snug text-destructive-text">
+              {overLimit ? MAX_GRAMS_MESSAGE : MIN_GRAMS_MESSAGE}
             </p>
           )}
         </div>
@@ -358,6 +363,9 @@ function UnitPortionArea({
 }: PortionAreaProps) {
   const parsedGrams = useMemo(() => parseGramsInput(gramsInput), [gramsInput]);
   const noGrams = hidesGrams(food);
+  // One id per panel: two portion areas on one page (the Khay review) must not share an id
+  const gramsId = useId();
+  const [gramsTouched, setGramsTouched] = useState(false);
   const [overLimit, setOverLimit] = useState(false);
 
   // Tabs for the food (in data order plus "Gam", e.g. "Lon | Gam", "Phần | Gam")
@@ -480,7 +488,7 @@ function UnitPortionArea({
                 aria-pressed={isActive}
                 disabled={disabled}
                 onClick={() => handleTabChange(tab.id)}
-                className={`min-h-[44px] rounded-xl text-sm font-bold flex items-center justify-center transition-press cursor-pointer disabled:opacity-50 ${
+                className={`min-h-11 rounded-xl text-sm font-bold flex items-center justify-center transition-press cursor-pointer disabled:opacity-50 ${
  isActive
  ? "bg-ink text-on-dark shadow-xs"
  : "text-secondary hover:text-text"
@@ -536,7 +544,7 @@ function UnitPortionArea({
                       setGramsInput(String(newGrams));
                       setSelectedServingLabel(newLabel);
                     }}
-                    className={`min-h-[44px] rounded-full text-xs px-2 flex items-center justify-center text-center transition-press cursor-pointer font-semibold border disabled:opacity-50 ${
+                    className={`min-h-11 rounded-full text-xs px-2 flex items-center justify-center text-center transition-press cursor-pointer font-semibold border disabled:opacity-50 ${
  isActive
  ? "bg-ink text-on-dark font-bold shadow-xs border-transparent"
  : "bg-surface text-text border-card-border hover:bg-paper-dark"
@@ -571,17 +579,19 @@ function UnitPortionArea({
             columns={Math.max(1, gramServings.length + 1)}
             leadingInput={
               <label
-                className="flex items-center justify-center rounded-xl px-2 h-11 w-full cursor-text box-border border-2 focus-within:ring-2 bg-card border-blue text-text focus-within:ring-blue"
+                className="flex items-center justify-center rounded-xl px-2 h-11 w-full cursor-text box-border border-2 focus-within:ring-2 bg-card border-cobalt text-text focus-within:ring-cobalt"
               >
                 <input
-                  id="portion-grams-input"
+                  id={`${gramsId}-grams`}
                   data-tour="portion-grams-input"
                   type="text"
                   inputMode="decimal"
                   aria-label="Số gam"
                   value={gramsInput}
                   disabled={disabled}
-                  aria-describedby={overLimit ? "portion-grams-error" : undefined}
+                  aria-describedby={overLimit || gramsTooSmall(gramsInput, gramsTouched) ? `${gramsId}-grams-error` : undefined}
+                  aria-invalid={gramsTooSmall(gramsInput, gramsTouched) || undefined}
+                  onBlur={() => setGramsTouched(true)}
                   onChange={(e) => {
                     // Over the limit: the field is written back clamped, so the label, the grams and the kcal agree
                     const over = overGramLimit(e.target.value);
@@ -610,9 +620,9 @@ function UnitPortionArea({
               },
             }))}
           />
-          {overLimit && (
-            <p id="portion-grams-error" role="alert" className="m-0 px-1 text-[13px] font-semibold leading-snug text-destructive-text">
-              {MAX_GRAMS_MESSAGE}
+          {(overLimit || gramsTooSmall(gramsInput, gramsTouched)) && (
+            <p id={`${gramsId}-grams-error`} role="alert" className="m-0 px-1 text-cap font-semibold leading-snug text-destructive-text">
+              {overLimit ? MAX_GRAMS_MESSAGE : MIN_GRAMS_MESSAGE}
             </p>
           )}
         </div>

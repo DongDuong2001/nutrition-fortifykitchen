@@ -63,9 +63,21 @@ export interface AppHeaderProps {
 }
 
 export const HEADER_ICON_BUTTON =
-  "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0 text-on-dark lg:text-text no-underline cursor-pointer hover:text-sky lg:hover:text-blue active:scale-[0.97] transition-press motion-reduce:active:scale-100 focus-visible:outline-sky lg:focus-visible:outline-blue";
+  "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0 text-on-dark lg:text-text no-underline cursor-pointer hover:text-sky lg:hover:text-cobalt active:scale-[0.97] transition-press motion-reduce:active:scale-100 focus-visible:outline-sky lg:focus-visible:outline-cobalt";
 const DATE_BUTTON =
-  "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0 text-on-dark cursor-pointer hover:text-sky active:scale-[0.97] transition-press motion-reduce:active:scale-100 disabled:cursor-default disabled:text-secondary disabled:opacity-50 lg:border lg:border-card-border lg:bg-card lg:text-ink lg:hover:bg-divider lg:hover:text-ink lg:disabled:text-secondary focus-visible:outline-sky lg:focus-visible:outline-blue";
+  "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0 text-on-dark cursor-pointer hover:text-sky active:scale-[0.97] transition-press motion-reduce:active:scale-100 disabled:cursor-default disabled:text-secondary disabled:opacity-50 lg:border lg:border-card-border lg:bg-card lg:text-ink lg:hover:bg-divider lg:hover:text-ink lg:disabled:text-secondary focus-visible:outline-sky lg:focus-visible:outline-cobalt";
+
+/**
+ * cc-72: the calendar beside the date (the icon set's Calendar path, drawn here like the chevrons: the header is on every
+ * screen, and importing the icon module would put the whole icon set in every route's first load).
+ */
+export function CalendarGlyph({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" data-testid="date-calendar-icon">
+      <path d="M16.5 5V3m-9 2V3M3.25 8h17.5M3 10.044c0-2.115 0-3.173.436-3.981a3.9 3.9 0 0 1 1.748-1.651C6.04 4 7.16 4 9.4 4h5.2c2.24 0 3.36 0 4.216.412.753.362 1.364.94 1.748 1.65.436.81.436 1.868.436 3.983v4.912c0 2.115 0 3.173-.436 3.981a3.9 3.9 0 0 1-1.748 1.651C17.96 21 16.84 21 14.6 21H9.4c-2.24 0-3.36 0-4.216-.412a3.9 3.9 0 0 1-1.748-1.65C3 18.128 3 17.07 3 14.955z" />
+    </svg>
+  );
+}
 
 function Chevron({ dir }: { dir: "left" | "right" }) {
   return (
@@ -153,7 +165,7 @@ export function AppHeader({
 
   return (
     <header
-      className={`w-full flex-none select-none bg-ink text-on-dark rounded-b-[20px] lg:rounded-none lg:bg-page lg:text-text ${className}`}
+      className={`w-full flex-none select-none bg-ink text-on-dark rounded-b-sheet lg:rounded-none lg:bg-page lg:text-text ${className}`}
     >
       <div
         className={`flex w-full flex-col gap-3 ${phonePad} box-border ${column} ${deskPad}`}
@@ -162,35 +174,36 @@ export function AppHeader({
           data-align-group={alignGroup}
           data-align-edge={alignMode === "left" ? "left" : undefined}
           data-align-from={alignMode === "page" ? "lg" : undefined}
-          className="flex min-h-[44px] items-center gap-2"
+          className="flex min-h-11 items-center gap-2"
         >
           {back}
-          <div className="min-w-0 flex-1">
+          {/* The phone wordmark is a logo: it never shrinks or wraps; at large text sizes the date gives way instead */}
+          <div className={`min-w-0 flex-1 ${wordmark ? "max-lg:min-w-fit" : ""}`}>
             {wordmark ? (
               <>
                 {phoneStart ? (
                   <div className="lg:hidden">{phoneStart}</div>
                 ) : (
-                  <div aria-hidden="true" className={`font-display italic font-black ${compact ? "text-[21px]" : "text-xl"} uppercase tracking-tight lg:hidden`}>
+                  <div aria-hidden="true" className={`whitespace-nowrap font-display italic font-black ${compact ? "text-[21px]" : "text-[20px] leading-[28px]"} uppercase tracking-tight lg:hidden`}>
                     H1T <span className="text-sky">MICRO</span>
                   </div>
                 )}
                 {title && (
-                  <Title className="sr-only lg:not-sr-only m-0 font-display italic font-extrabold text-2xl lg:text-[32px] leading-tight uppercase tracking-tight">
+                  <Title className="sr-only lg:not-sr-only m-0 font-display italic font-extrabold text-2xl lg:text-display-sm leading-tight uppercase tracking-display">
                     {title}
                   </Title>
                 )}
               </>
             ) : (
               title && (
-                <Title title={typeof title === "string" ? title : undefined} className="m-0 break-words font-display italic font-extrabold text-2xl lg:text-[32px] leading-tight uppercase tracking-tight line-clamp-2">
+                <Title title={typeof title === "string" ? title : undefined} className="m-0 break-words font-display italic font-extrabold text-2xl lg:text-display-sm leading-tight uppercase tracking-display line-clamp-2">
                   {title}
                 </Title>
               )
             )}
             {subtitle && (
               <div
-                className={`m-0 mt-0.5 text-[13px] leading-snug text-muted-subtitle lg:text-sm lg:text-secondary ${
+                className={`m-0 mt-0.5 text-cap leading-snug text-muted-subtitle lg:text-sm lg:text-secondary ${
                   variant === "daily" ? "hidden lg:block" : ""
                 }`}
               >
@@ -202,8 +215,8 @@ export function AppHeader({
           {desktopStat ? <div className="hidden lg:flex">{desktopStat}</div> : null}
 
           {hasDateNav && (
-            <div className="flex shrink-0 items-center lg:gap-1.5">
-              <button type="button" onClick={onPrev} disabled={prevDisabled} aria-label="Ngày trước" data-tour="day-prev" className={DATE_BUTTON}>
+            <div className="flex min-w-0 items-center lg:shrink-0 lg:gap-1.5">
+              <button type="button" onClick={onPrev} disabled={prevDisabled} aria-label="Ngày trước" data-tour="day-prev" data-testid="day-prev" className={DATE_BUTTON}>
                 <Chevron dir="left" />
               </button>
               {onDateTap ? (
@@ -212,17 +225,30 @@ export function AppHeader({
                   onClick={onDateTap}
                   aria-haspopup="dialog"
                   aria-label={`Chọn ngày, ${dateLabel}`}
+                  data-tour="day-date"
                   aria-busy={dateLabel ? undefined : true}
-                  className="inline-flex min-h-[44px] min-w-[104px] items-center justify-center rounded-full border-0 bg-transparent px-1 text-center text-sm font-semibold tracking-tight text-on-dark cursor-pointer hover:text-sky focus-visible:outline-sky active:scale-[0.97] transition-press motion-reduce:active:scale-100 lg:hidden"
+                  className="inline-flex min-h-11 min-w-[104px] shrink items-center justify-center rounded-full border-0 bg-transparent px-1 text-center text-sm font-semibold leading-tight tracking-tight text-on-dark cursor-pointer hover:text-sky focus-visible:outline-sky active:scale-[0.97] transition-press motion-reduce:active:scale-100 lg:hidden"
                 >
-                  {dateLabel || <span aria-hidden="true" className="inline-block h-5 w-[104px]" />}
+                  {dateLabel ? (
+                    // cc-72: the calendar glyph says the date opens the calendar (the date stays the one control)
+                    // At large text sizes the label wraps before its last word, which keeps the glyph
+                    <span>
+                      {dateLabel.slice(0, dateLabel.lastIndexOf(" ") + 1)}
+                      <span className="inline-flex items-center gap-1 whitespace-nowrap align-top">
+                        {dateLabel.slice(dateLabel.lastIndexOf(" ") + 1)}
+                        <CalendarGlyph size={16} />
+                      </span>
+                    </span>
+                  ) : (
+                    <span aria-hidden="true" className="inline-block h-5 w-[104px]" />
+                  )}
                 </button>
               ) : (
                 <span className="inline-flex min-w-[104px] items-center justify-center text-center text-sm font-semibold tracking-tight lg:hidden">
                   {dateLabel || <span aria-hidden="true" className="inline-block h-5 w-[104px]" />}
                 </span>
               )}
-              <button type="button" onClick={onNext} disabled={nextDisabled} aria-label="Ngày sau" className={DATE_BUTTON}>
+              <button type="button" onClick={onNext} disabled={nextDisabled} aria-label="Ngày sau" data-testid="day-next" className={DATE_BUTTON}>
                 <Chevron dir="right" />
               </button>
             </div>
@@ -242,7 +268,7 @@ export function AppHeader({
         {search}
         {summary && (
           <div
-            className={`w-full rounded-[18px] bg-surface-dark p-4 text-on-dark lg:bg-ink ${summaryPhoneOnly ? "lg:hidden" : ""}`}
+            className={`w-full rounded-card bg-surface-dark p-4 text-on-dark lg:bg-ink ${summaryPhoneOnly ? "lg:hidden" : ""}`}
           >
             {summary}
           </div>

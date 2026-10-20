@@ -33,11 +33,11 @@ export function FloatingPhone() {
 
       {/* Ambient background glow */}
       <div
-        className="absolute -inset-4 rounded-full bg-gradient-to-tr from-blue/20 via-sky/20 to-transparent blur-2xl pointer-events-none"
+        className="absolute -inset-4 rounded-full bg-gradient-to-tr from-cobalt/20 via-sky/20 to-transparent blur-2xl pointer-events-none"
         aria-hidden="true"
       />
 
-      <div className="floating-phone-wrap relative rounded-[40px] bg-gradient-to-tr from-blue via-sky/60 to-card p-1 shadow-2xl transition-transform duration-500 hover:rotate-0">
+      <div className="floating-phone-wrap relative rounded-[40px] bg-gradient-to-tr from-cobalt via-sky/60 to-card p-1 shadow-2xl transition-transform duration-500 hover:rotate-0">
         {/* Outer Phone Hardware Chassis */}
         <div className="relative w-[280px] sm:w-[310px] h-[590px] rounded-[38px] border-4 border-ink/80 bg-ink p-2.5 shadow-2xl flex flex-col overflow-hidden">
           {/* Dynamic Island / Speaker Notch */}
@@ -47,9 +47,9 @@ export function FloatingPhone() {
           </div>
 
           {/* Phone Screen Display */}
-          <div className="relative z-10 w-full h-full rounded-[30px] bg-page overflow-hidden flex flex-col text-text font-sans select-none border border-card-border/60">
+          <div className="relative z-sticky w-full h-full rounded-[30px] bg-page overflow-hidden flex flex-col text-text font-sans select-none border border-card-border/60">
             {/* Status Bar */}
-            <div className="pt-2 px-5 flex items-center justify-between text-[11px] font-bold text-ink">
+            <div className="pt-2 px-5 flex items-center justify-between text-micro font-bold text-ink">
               <span>09:41</span>
               <div className="flex items-center gap-1.5 opacity-80">
                 {/* Signal Icon */}
@@ -71,10 +71,10 @@ export function FloatingPhone() {
             <div className="px-4 pt-3 pb-2 flex items-center justify-between border-b border-card-border/60 bg-page">
               <div className="flex items-center gap-1.5">
                 <span className="font-display italic font-black text-base text-ink tracking-tight">
-                  H1T <span className="text-blue">MICRO</span>
+                  H1T <span className="text-cobalt">MICRO</span>
                 </span>
               </div>
-              <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-blue/10 text-blue border border-blue/20">
+              <span className="text-2xs font-bold uppercase px-2 py-0.5 rounded-full bg-cobalt/10 text-cobalt border border-cobalt/20">
                 Hôm nay
               </span>
             </div>
@@ -85,54 +85,54 @@ export function FloatingPhone() {
               <div className="rounded-xl bg-surface-dark p-3 text-on-dark flex flex-col gap-2 shadow-sm border border-card-border/20">
                 <div className="flex justify-between items-baseline">
                   <div>
-                    <div className="text-[10px] font-bold text-sky uppercase tracking-wider">Năng lượng nạp</div>
+                    <div className="text-2xs font-bold text-sky uppercase tracking-wider">Năng lượng nạp</div>
                     <div className="text-xl font-black font-display italic leading-none mt-0.5">
-                      1.041 <span className="text-[11px] font-normal text-muted-on-dark font-sans">/ 2.050 kcal</span>
+                      1.041 <span className="text-micro font-normal text-muted-on-dark font-sans">/ 2.050 kcal</span>
                     </div>
                   </div>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue/30 text-sky border border-blue/40">
+                  <span className="text-2xs font-bold px-2 py-0.5 rounded-full bg-cobalt/30 text-sky border border-cobalt/40">
                     51%
                   </span>
                 </div>
 
                 {/* Calorie progress bar */}
                 <div className="w-full h-1.5 rounded-full bg-card/15 overflow-hidden">
-                  <div className="h-full bg-blue rounded-full w-[51%]" />
+                  <div className="h-full bg-cobalt rounded-full w-[51%]" />
                 </div>
 
                 {/* 4 Macros mini grid */}
-                <div className="grid grid-cols-4 gap-1.5 pt-1 text-[10px] text-center border-t border-card-border/20">
+                <div className="grid grid-cols-4 gap-1.5 pt-1 text-2xs text-center border-t border-card-border/20">
                   <div className="bg-card/10 rounded py-1">
-                    <div className="text-muted-on-dark text-[9px]">Đạm</div>
+                    <div className="text-muted-on-dark text-[0.5625rem]">Đạm</div>
                     <div className="font-bold">62g</div>
                   </div>
                   <div className="bg-card/10 rounded py-1">
-                    <div className="text-muted-on-dark text-[9px]">Carb</div>
+                    <div className="text-muted-on-dark text-[0.5625rem]">Carb</div>
                     <div className="font-bold">133g</div>
                   </div>
                   <div className="bg-card/10 rounded py-1">
-                    <div className="text-muted-on-dark text-[9px]">Béo</div>
+                    <div className="text-muted-on-dark text-[0.5625rem]">Béo</div>
                     <div className="font-bold">21g</div>
                   </div>
                   <div className="bg-card/10 rounded py-1">
-                    <div className="text-muted-on-dark text-[9px]">Xơ</div>
+                    <div className="text-muted-on-dark text-[0.5625rem]">Xơ</div>
                     <div className="font-bold">14g</div>
                   </div>
                 </div>
               </div>
 
               {/* 22 Micronutrients Status Pill */}
-              <div className="rounded-lg bg-card border border-card-border p-2 flex items-center justify-between text-[11px] shadow-2xs">
+              <div className="rounded-lg bg-card border border-card-border p-2 flex items-center justify-between text-micro shadow-2xs">
                 <div className="flex items-center gap-1.5 font-bold text-ink">
                   <span className="h-2 w-2 rounded-full bg-success" />
                   <span>Vi chất đạt 18/22</span>
                 </div>
-                <span className="text-[10px] font-semibold text-blue">Xem chi tiết &rsaquo;</span>
+                <span className="text-2xs font-semibold text-cobalt">Xem chi tiết &rsaquo;</span>
               </div>
 
               {/* Meals List */}
               <div className="flex flex-col gap-1.5">
-                <div className="text-[10px] font-extrabold uppercase text-secondary tracking-wider px-1">
+                <div className="text-2xs font-bold uppercase text-secondary tracking-wider px-1">
                   Nhật ký món ăn
                 </div>
 
@@ -140,7 +140,7 @@ export function FloatingPhone() {
                 <div className="rounded-lg bg-card border border-card-border p-2 flex items-center justify-between shadow-2xs">
                   <div className="flex flex-col min-w-0">
                     <span className="text-xs font-bold text-text truncate">Phở bò tái nạm</span>
-                    <span className="text-[10px] text-secondary">Bữa sáng · 1 tô (520g)</span>
+                    <span className="text-2xs text-secondary">Bữa sáng · 1 tô (520g)</span>
                   </div>
                   <span className="text-xs font-bold text-ink">480 kcal</span>
                 </div>
@@ -149,7 +149,7 @@ export function FloatingPhone() {
                 <div className="rounded-lg bg-card border border-card-border p-2 flex items-center justify-between shadow-2xs">
                   <div className="flex flex-col min-w-0">
                     <span className="text-xs font-bold text-text truncate">Ức gà áp chảo</span>
-                    <span className="text-[10px] text-secondary">Bữa trưa · 150g</span>
+                    <span className="text-2xs text-secondary">Bữa trưa · 150g</span>
                   </div>
                   <span className="text-xs font-bold text-ink">247 kcal</span>
                 </div>
@@ -158,7 +158,7 @@ export function FloatingPhone() {
                 <div className="rounded-lg bg-card border border-card-border p-2 flex items-center justify-between shadow-2xs">
                   <div className="flex flex-col min-w-0">
                     <span className="text-xs font-bold text-text truncate">Cơm gạo lứt</span>
-                    <span className="text-[10px] text-secondary">Bữa trưa · 1 chén (120g)</span>
+                    <span className="text-2xs text-secondary">Bữa trưa · 1 chén (120g)</span>
                   </div>
                   <span className="text-xs font-bold text-ink">150 kcal</span>
                 </div>
@@ -166,8 +166,8 @@ export function FloatingPhone() {
             </div>
 
             {/* Phone Bottom Tab Bar */}
-            <div className="px-4 py-2 border-t border-card-border bg-card/90 flex items-center justify-around text-[9px] font-bold text-secondary">
-              <div className="flex flex-col items-center text-blue">
+            <div className="px-4 py-2 border-t border-card-border bg-card/90 flex items-center justify-around text-[0.5625rem] font-bold text-secondary">
+              <div className="flex flex-col items-center text-cobalt">
                 <span className="text-xs leading-none">■</span>
                 <span className="mt-0.5">Hôm nay</span>
               </div>
@@ -176,7 +176,7 @@ export function FloatingPhone() {
                 <span className="mt-0.5">Tổng quan</span>
               </div>
               <div className="flex flex-col items-center -mt-2">
-                <div className="h-7 w-7 rounded-full bg-blue text-on-accent flex items-center justify-center font-bold text-sm shadow">
+                <div className="h-7 w-7 rounded-full bg-cobalt text-on-accent flex items-center justify-center font-bold text-sm shadow">
                   +
                 </div>
               </div>

@@ -28,11 +28,7 @@ func NewRepository(pool *pgxpool.Pool) Repository {
 }
 
 func (r *pgxRepository) SearchFoods(ctx context.Context, filter FoodSearchFilter) (*FoodSearchResponse, error) {
-	if filter.Limit <= 0 {
-		filter.Limit = 20
-	} else if filter.Limit > 500 {
-		filter.Limit = 500
-	}
+	filter.Limit = ClampFoodsLimit(filter.Query, filter.Limit)
 	if filter.Page <= 0 {
 		filter.Page = 1
 	}

@@ -6,6 +6,7 @@ values from lib/targets.ts with the VN 2016 values marked *. Rows in one card sh
 Checks at 390 and 1280; screenshots to .screenshots/cc-16-*.png.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_16.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/settings/** app/(app)/settings/delete-account/** app/(app)/settings/profile/** app/(app)/settings/profile/weight/** app/(app)/settings/targets/**
 import os
 import re
 import sys

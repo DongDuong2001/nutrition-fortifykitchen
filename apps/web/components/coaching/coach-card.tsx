@@ -11,7 +11,7 @@ export function CoachCard({ coach }: { coach: CoachProfile }) {
       <div className="flex items-start gap-3">
         <span
           aria-hidden="true"
-          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-surface text-base font-bold text-blue"
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-surface text-base font-bold text-cobalt"
         >
           {initialsOf(coach.name)}
         </span>
@@ -19,25 +19,25 @@ export function CoachCard({ coach }: { coach: CoachProfile }) {
           <span className="flex flex-wrap items-center gap-2">
             <h2 className="m-0 text-base font-bold leading-snug text-text">{coach.name}</h2>
             {coach.featured && (
-              <span className="shrink-0 rounded-full bg-blue px-2 py-0.5 text-[11px] font-bold text-on-accent">
+              <span className="shrink-0 rounded-full bg-cobalt px-2 py-0.5 text-micro font-bold text-on-accent">
                 Tiêu biểu
               </span>
             )}
           </span>
-          <p className="m-0 text-[13px] leading-snug text-secondary">{coach.title}</p>
+          <p className="m-0 text-cap leading-snug text-secondary">{coach.title}</p>
         </div>
       </div>
 
-      <p className="m-0 line-clamp-2 text-[13px] leading-snug text-secondary">{coach.bio}</p>
+      <p className="m-0 line-clamp-2 text-cap leading-snug text-secondary">{coach.bio}</p>
 
       <ul role="list" aria-label="Lĩnh vực chuyên môn" className="m-0 flex list-none flex-wrap gap-2 p-0">
         {coach.specialties.slice(0, 2).map((s) => (
-          <li key={s} className="rounded-full border border-card-border bg-surface px-3 py-1 text-[13px] text-secondary">
+          <li key={s} className="rounded-full border border-card-border bg-surface px-3 py-1 text-cap text-secondary">
             {s}
           </li>
         ))}
         {coach.specialties.length > 2 && (
-          <li className="rounded-full bg-surface px-3 py-1 text-[13px] text-secondary">
+          <li className="rounded-full bg-surface px-3 py-1 text-cap text-secondary">
             +{coach.specialties.length - 2} lĩnh vực
           </li>
         )}
@@ -45,7 +45,7 @@ export function CoachCard({ coach }: { coach: CoachProfile }) {
 
       <Link
         href={`/explore/coaches/${coach.id}`}
-        className="flex min-h-11 w-full items-center justify-center rounded-full border border-card-border bg-card px-4 text-[13px] font-bold text-text no-underline hover:bg-surface hover:text-text"
+        className="flex min-h-11 w-full items-center justify-center rounded-full border border-card-border bg-card px-4 text-cap font-bold text-text no-underline hover:bg-surface hover:text-text"
       >
         Xem hồ sơ và liên hệ
       </Link>

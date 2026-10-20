@@ -4,6 +4,7 @@ The demo catalogue has Khoai lang luộc (cooked) and, since cc-67, Khoai lang (
 in Khám phá, opening on Chín (a starch staple), with the Sống | Chín switch reaching the raw row. No row is called "… luộc".
 Screenshots: .screenshots/cc67/. Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_67_part1.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/explore/** app/(app)/add/**
 import os
 import re
 import sys

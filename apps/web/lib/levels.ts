@@ -29,20 +29,7 @@ export function getLevelLabel(lvl: NutrientLevel): string {
 
 // The colours are the level tokens in app/globals.css (@theme), so no hex lives here
 export function getLevelColor(lvl: NutrientLevel, tone: SegmentTone = "light"): string {
-  if (tone === "dark") {
-    switch (lvl) {
-      case "thieu":
-        return "var(--color-level-red-dark)";
-      case "trungbinh":
-        return "var(--color-level-yellow-dark)";
-      case "ganDu":
-        return "var(--color-level-green-dark)";
-      case "dat":
-        return "var(--color-level-blue-dark)";
-    }
-  }
-
-  // Light tone default
+  // One palette on light and on ink (17/10); `tone` still picks the empty track below
   switch (lvl) {
     case "thieu":
       return "var(--color-level-red)";

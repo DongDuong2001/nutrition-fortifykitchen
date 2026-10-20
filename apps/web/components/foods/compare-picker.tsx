@@ -54,7 +54,7 @@ function PickerBody({ lockedIds, onClose, onConfirm }: Omit<ComparePickerProps, 
 
   return (
     <div className="flex min-h-0 flex-col gap-3">
-      <p aria-live="polite" className="m-0 px-1 text-[13px] leading-snug text-secondary">
+      <p aria-live="polite" className="m-0 px-1 text-cap leading-snug text-secondary">
         Đã chọn {selected.length}/{MAX_COMPARE_FOODS} món{full ? ". Bỏ một món để chọn món khác." : "."}
       </p>
       <FoodSearchField value={query} onChange={setQuery} />
@@ -77,7 +77,7 @@ function PickerBody({ lockedIds, onClose, onConfirm }: Omit<ComparePickerProps, 
                 <button
                   type="button"
                   onClick={() => setFilter("all")}
-                  className="min-h-[44px] cursor-pointer rounded-full border-0 bg-surface px-5 text-sm font-semibold text-text active:scale-[0.97] transition-press"
+                  className="min-h-11 cursor-pointer rounded-full border-0 bg-surface px-5 text-sm font-semibold text-text active:scale-[0.97] transition-press"
                 >
                   Bỏ lọc
                 </button>

@@ -5,6 +5,7 @@
 - The share sheet's name step: a name with no letter or digit is refused.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/v021_shots.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/foods/[id]/**
 import os
 import sys
 

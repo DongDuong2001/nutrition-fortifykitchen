@@ -1,6 +1,7 @@
 """cc-07: Micros group chips scroll only the list. Header, chip bar and page stay put (390 and 1440).
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc07.py
 """
+# PROBE_COVERS: app/(app)/micros/**
 import os
 import sys
 

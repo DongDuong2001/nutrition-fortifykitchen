@@ -8,6 +8,7 @@ Production demo build (DEMO_BUILD=1), clock fixed at 2026-10-15 10:00 Asia/Ho_Ch
 Screenshots: .screenshots/v022-home-L2-390.png, v022-home-L5-390.png (and the scrolled-to-end twins).
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/v022_column.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/**
 import os
 import sys
 

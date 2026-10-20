@@ -7,10 +7,10 @@ import { formatNumber } from "@/lib/format";
 import type { MicroSquare } from "@/lib/overview-board";
 
 const SQUARE_BG: Record<NutrientLevel, string> = {
-  thieu: "bg-level-red-dark",
-  trungbinh: "bg-level-yellow-dark",
-  ganDu: "bg-level-green-dark",
-  dat: "bg-level-blue-dark",
+  thieu: "bg-level-red",
+  trungbinh: "bg-level-yellow",
+  ganDu: "bg-level-green",
+  dat: "bg-level-blue",
 };
 
 /**
@@ -54,11 +54,11 @@ export function NutrientGrid({
         })}
       </ul>
       <p aria-live="polite" className="m-0 flex items-baseline justify-between gap-3 rounded-xl bg-level-empty-dark px-3 py-3">
-        <span className="text-[15px] font-bold">{square?.name}</span>
+        <span className="text-callout font-bold">{square?.name}</span>
         <span className="text-right">
           {square && square.percentage !== null && square.level ? (
             <>
-              <span className="font-display text-2xl font-bold tabular-nums text-on-dark">
+              <span className="font-display text-2xl font-extrabold tabular-nums text-on-dark tracking-display">
                 {formatNumber(square.percentage)}%
               </span>
               <span className="ml-2 text-xs font-bold text-muted-subtitle">{getLevelLabel(square.level)}</span>
@@ -71,7 +71,7 @@ export function NutrientGrid({
       {detailLink && square && (
         <Link
           href={`/micros/${square.key}`}
-          className="inline-flex min-h-[44px] items-center self-start rounded-full px-1 text-[15px] font-bold text-sky no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100"
+          className="inline-flex min-h-11 items-center self-start rounded-full px-1 text-callout font-bold text-sky no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100"
         >
           Xem chi tiết {square.name}
         </Link>

@@ -9,6 +9,7 @@
 Screenshots: .screenshots/cc2-31-nav-390.png, cc2-31-sidebar-1280.png, cc2-31-trends-390.png
 Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/cc2_31.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/(tabs)/explore/** app/(app)/(tabs)/settings/** app/(app)/(tabs)/trends/** app/(app)/(tabs)/trends/body/** app/(app)/(tabs)/trends/energy/** app/(app)/(tabs)/trends/micros/** app/(app)/micros/** app/page.tsx
 import os
 import sys
 from pathlib import Path

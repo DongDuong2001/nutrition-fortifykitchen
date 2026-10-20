@@ -59,13 +59,13 @@ function Accordion({
   const [open, setOpen] = useState(defaultOpen);
   const id = useId();
   return (
-    <div data-align-group="overview-micro" className="overflow-hidden rounded-[18px] lg:shadow-card border border-card-border bg-card text-text">
+    <div data-align-group="overview-micro" className="overflow-hidden rounded-card border border-transparent shadow-ring lg:shadow-card bg-card text-text">
       <button
         type="button"
         aria-expanded={open}
         aria-controls={id}
         onClick={() => setOpen((o) => !o)}
-        className="flex min-h-[56px] w-full cursor-pointer items-center justify-between gap-3 border-0 bg-transparent p-4 text-left text-inherit"
+        className="flex min-h-14 w-full cursor-pointer items-center justify-between gap-3 border-0 bg-transparent p-4 text-left text-inherit"
       >
         <span className="flex items-center gap-3">
           <span aria-hidden="true" className={`inline-block h-[9px] w-[9px] shrink-0 rounded-[3px] ${dot}`} />
@@ -158,7 +158,7 @@ export function MicrosTab() {
         {sections.map((section) => (
           <Accordion key={section.level} defaultOpen={section.level !== "dat"} dot={DOT[section.level]} title={section.label} count={section.items.length}>
             {section.items.length === 0 ? (
-              <p className="m-0 border-t border-divider px-4 py-4 text-[13px] text-secondary">Không có vi chất nào ở mức này.</p>
+              <p className="m-0 border-t border-divider px-4 py-4 text-cap text-secondary">Không có vi chất nào ở mức này.</p>
             ) : (
               <ul className="m-0 list-none p-0">
                 {section.items.map((item) => {
@@ -173,17 +173,17 @@ export function MicrosTab() {
                     <li key={item.key} className="border-t border-divider">
                       <Link
                         href={`/micros/${item.key}`}
-                        className="grid min-h-[56px] grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 text-text no-underline active:bg-surface motion-reduce:active:bg-transparent"
+                        className="grid min-h-14 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 text-text no-underline active:bg-surface motion-reduce:active:bg-transparent"
                       >
                         <span className="min-w-0">
-                          <span className="block text-[15px] font-semibold">{item.name}</span>
-                          <span className="block text-[13px] leading-snug text-secondary">
+                          <span className="block text-callout font-semibold">{item.name}</span>
+                          <span className="block text-cap leading-snug text-secondary">
                             {item.average === null ? "Chưa có dữ liệu" : `TB ${formatAmount(item.average, item.unit)} ${item.unit}`}
                             {range ? ` · mục tiêu ${range} ${item.unit}` : ""}
                             {row && row.of > 0 ? ` · ${row.met}/${row.of} ngày đạt` : ""}
                           </span>
                         </span>
-                        <span className="font-display text-[26px] font-bold leading-none tabular-nums">
+                        <span className="font-display text-title font-bold leading-none tabular-nums">
                           {item.percentage === null ? "—" : `${formatNumber(item.percentage)}%`}
                         </span>
                       </Link>
@@ -203,13 +203,13 @@ export function MicrosTab() {
                   <li key={s.key} className="border-t border-divider">
                     <Link
                       href={`/micros/${s.key}`}
-                      className="grid min-h-[56px] grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 text-text no-underline active:bg-surface motion-reduce:active:bg-transparent"
+                      className="grid min-h-14 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 text-text no-underline active:bg-surface motion-reduce:active:bg-transparent"
                     >
                       <span className="min-w-0">
-                        <span className="block text-[15px] font-semibold">{s.name}</span>
-                        <span className="block text-[13px] leading-snug text-secondary">Chưa có món nào có dữ liệu chất này trong kỳ</span>
+                        <span className="block text-callout font-semibold">{s.name}</span>
+                        <span className="block text-cap leading-snug text-secondary">Chưa có món nào có dữ liệu chất này trong kỳ</span>
                       </span>
-                      <span className="font-display text-[26px] font-bold leading-none text-secondary">—</span>
+                      <span className="font-display text-title font-bold leading-none text-secondary">—</span>
                     </Link>
                   </li>
                 ))}

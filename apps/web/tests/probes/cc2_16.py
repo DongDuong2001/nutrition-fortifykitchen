@@ -8,6 +8,7 @@
 Screenshots: .screenshots/cc2-16-*.png
 Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/cc2_16.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/foods/[id]/** app/(app)/foods/new/**
 import json
 import os
 import re

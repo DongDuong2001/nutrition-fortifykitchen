@@ -10,6 +10,7 @@ Production build, clock fixed at 18:00 Asia/Ho_Chi_Minh (Bữa tối), sizes 390
 - Grams typed on /foods/food-cha-la reach the diary as "2,5 g" and "1.000 g" (not "2.5 g" or "1000 g").
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_21.py
 """
+# PROBE_COVERS: app/(app)/(dashboard)/training/** app/(app)/foods/[id]/** app/(app)/settings/account/** app/(app)/settings/notifications/** app/(app)/settings/profile/** app/(app)/setup/profile/** app/signin/**
 import hashlib
 import json
 import os

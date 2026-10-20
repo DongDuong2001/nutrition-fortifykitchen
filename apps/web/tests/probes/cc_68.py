@@ -15,6 +15,7 @@ any anon key), not in probe:all. The API is a fake in this file (route intercept
 Run with: LIVE_BUILD=1 ALIGN_BASE_URL=http://localhost:3112 npm run probe -- tests/probes/cc_68.py
 Pick parts with CC68_ONLY=A,B
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/add/** app/(app)/settings/account/** app/signin/**
 import base64
 import json
 import os

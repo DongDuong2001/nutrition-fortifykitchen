@@ -78,8 +78,8 @@ export default function WeightPage() {
                 disabled={!hydrated}
                 onChange={(e) => change(e.target.value)}
                 aria-invalid={error ? true : undefined}
-                className={`h-16 w-[140px] rounded-xl border-2 bg-surface text-center font-display text-[44px] font-black italic tabular-nums text-text outline-none focus:border-blue focus:ring-2 focus:ring-blue focus:ring-offset-2 ${
-                  error ? "border-destructive" : "border-blue"
+                className={`h-16 w-[140px] rounded-xl border-2 bg-surface text-center font-display text-[2.75rem] font-black italic tabular-nums text-text outline-none focus:border-cobalt focus:ring-2 focus:ring-cobalt focus:ring-offset-2 ${
+                  error ? "border-destructive" : "border-cobalt"
                 }`}
               />
               <span className="text-base font-semibold text-secondary">kg</span>
@@ -97,7 +97,7 @@ export default function WeightPage() {
       </Card>
 
       <Card className="flex flex-col gap-2">
-        <h2 className="m-0 text-[15px] font-bold">Mục tiêu sẽ cập nhật</h2>
+        <h2 className="m-0 text-callout font-bold">Mục tiêu sẽ cập nhật</h2>
         {preview ? (
           <>
             <TargetLine label="Năng lượng" value={targetRangeText(preview.calories, "kcal")} />
@@ -107,7 +107,7 @@ export default function WeightPage() {
         ) : (
           <p className="m-0 text-sm text-secondary">Nhập cân nặng để xem mục tiêu</p>
         )}
-        <p className="m-0 text-[13px] text-secondary">Tính lại theo cân nặng mới.</p>
+        <p className="m-0 text-cap text-secondary">Tính lại theo cân nặng mới.</p>
       </Card>
 
       <PillButton type="submit" disabled={!hydrated}>

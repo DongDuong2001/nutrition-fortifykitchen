@@ -7,36 +7,6 @@ import { formatPeriodRange } from "@/lib/format";
 import { summaryAddHref } from "@/lib/first-run";
 import { HOME_ROUTE } from "@/lib/nav";
 
-/** A white card with a 16 px heading row. `aside` is a short caption at the right of the heading. */
-export function OverviewCard({
-  id,
-  title,
-  aside,
-  className = "",
-  children,
-}: {
-  id: string;
-  title: string;
-  aside?: React.ReactNode;
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section
-      aria-labelledby={id}
-      className={`bg-card border border-card-border rounded-[18px] lg:shadow-card p-4 flex flex-col gap-3 text-text ${className}`}
-    >
-      <div className="flex min-h-[44px] items-center justify-between gap-3">
-        <h2 id={id} className="m-0 text-base font-bold lg:text-lg">
-          {title}
-        </h2>
-        {aside ? <span className="text-[13px] font-semibold text-secondary">{aside}</span> : null}
-      </div>
-      {children}
-    </section>
-  );
-}
-
 export function ChevronRight() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true" className="shrink-0 text-secondary">
@@ -55,16 +25,16 @@ export function NotEnoughData() {
   const days = overview.days.filter((d) => d.logged).length;
   if (days === 0) return <NothingLogged current={overview.period.isCurrent} />;
   return (
-    <section aria-labelledby="ov-empty" className="bg-card border border-card-border rounded-[18px] lg:shadow-card p-4 flex flex-col gap-3 text-text">
+    <section aria-labelledby="ov-empty" className="bg-card rounded-card border border-transparent shadow-ring lg:shadow-card p-4 flex flex-col gap-3 text-text">
       <h2 id="ov-empty" className="m-0 text-base font-bold lg:text-lg">
         Chưa đủ dữ liệu
       </h2>
-      <p className="m-0 text-[13px] leading-snug text-secondary">
+      <p className="m-0 text-cap leading-snug text-secondary">
         Kỳ này có {days} ngày đã ghi. Cần ít nhất 3 ngày để xem trung bình, số ngày đạt và xu hướng.
       </p>
       <Link
         href={HOME_ROUTE}
-        className="inline-flex min-h-[44px] items-center justify-center self-start rounded-full border border-card-border bg-card px-4 text-[15px] font-bold text-text no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100"
+        className="inline-flex min-h-11 items-center justify-center self-start rounded-full border border-card-border bg-card px-4 text-callout font-bold text-text no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100"
       >
         Xem hôm nay
       </Link>
@@ -75,14 +45,14 @@ export function NotEnoughData() {
 /** No day of the period is logged: one fact, and for the current period one link to the first meal. */
 function NothingLogged({ current }: { current: boolean }) {
   return (
-    <section aria-labelledby="ov-empty" className="bg-card border border-card-border rounded-[18px] lg:shadow-card p-4 flex flex-col gap-3 text-text">
+    <section aria-labelledby="ov-empty" className="bg-card rounded-card border border-transparent shadow-ring lg:shadow-card p-4 flex flex-col gap-3 text-text">
       <h2 id="ov-empty" className="m-0 text-base font-bold lg:text-lg">
         Chưa có ngày nào được ghi
       </h2>
       {current && (
         <Link
           href={summaryAddHref(new Date())}
-          className="inline-flex min-h-[44px] items-center justify-center self-start rounded-full border border-card-border bg-card px-4 text-[15px] font-bold text-blue no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100"
+          className="inline-flex min-h-11 items-center justify-center self-start rounded-full border border-card-border bg-card px-4 text-callout font-bold text-cobalt no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100"
         >
           Thêm bữa đầu tiên
         </Link>

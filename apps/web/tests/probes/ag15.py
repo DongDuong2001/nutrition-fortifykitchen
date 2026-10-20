@@ -12,6 +12,7 @@ Audits:
 - 200% zoom without horizontal scroll
 Outputs findings to stdout and JSON/summary for docs/a11y-audit-ag15.md.
 """
+# PROBE_COVERS: app/page.tsx
 
 import os
 import sys

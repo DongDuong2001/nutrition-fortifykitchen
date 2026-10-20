@@ -17,6 +17,7 @@
 Screenshots: .screenshots/cc-52-*.png
 Run with: ALIGN_BASE_URL=http://localhost:3105 npm run probe -- tests/probes/cc_52_training.py
 """
+# PROBE_COVERS: app/(app)/(dashboard)/training/** app/(app)/(tabs)/app/** app/(app)/entry/[id]/** app/(app)/foods/new/** app/(app)/settings/profile/**
 import json
 import os
 import re
@@ -85,7 +86,7 @@ def row_text(pg, name):
 
 
 def header_total(pg):
-    return pg.locator(MOBILE).locator(".font-display.italic.font-bold").first.inner_text().replace("\n", " ").strip()
+    return pg.locator(MOBILE).locator(".font-display.italic.text-display.tabular-nums").first.inner_text().replace("\n", " ").strip()
 
 
 def small_targets(pg, selector):

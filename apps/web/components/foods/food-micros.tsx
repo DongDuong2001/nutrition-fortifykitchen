@@ -19,7 +19,7 @@ function ShareBar({ share, label }: { share: number; label: string }) {
       aria-label={label}
       className="h-2 w-full overflow-hidden rounded-full bg-track"
     >
-      <div className="h-full rounded-full bg-blue" style={{ width: `${Math.min(100, Math.max(0, share))}%` }} />
+      <div className="h-full rounded-full bg-cobalt" style={{ width: `${Math.min(100, Math.max(0, share))}%` }} />
     </div>
   );
 }
@@ -28,8 +28,8 @@ function MicroLine({ row }: { row: MicroRow }) {
   const known = row.value !== null;
   const share = shareText(row);
   return (
-    <li className="flex min-h-[44px] flex-col justify-center gap-1 border-t border-divider py-2">
-      <div className="flex items-baseline justify-between gap-2 text-[15px]">
+    <li className="flex min-h-11 flex-col justify-center gap-1 border-t border-divider py-2">
+      <div className="flex items-baseline justify-between gap-2 text-callout">
         <span className="font-semibold text-text">{row.name}</span>
         {known ? (
           <span className="shrink-0 tabular-nums text-secondary">
@@ -60,12 +60,12 @@ export function GoodSources({ rows }: { rows: MicroRow[] }) {
   return (
     <Card as="section" aria-labelledby="good-sources" className="flex flex-col gap-2">
       <SectionTitle id="good-sources">Nguồn tốt của</SectionTitle>
-      <p className="m-0 text-[13px] leading-snug text-secondary">Từ 20% mục tiêu ngày mỗi khẩu phần</p>
+      <p className="m-0 text-cap leading-snug text-secondary">Từ 20% mục tiêu ngày mỗi khẩu phần</p>
       <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
         {rows.map((r) => (
           <li
             key={r.id}
-            className="inline-flex min-h-[32px] items-center rounded-full bg-surface px-3 text-[13px] font-bold text-text"
+            className="inline-flex min-h-[32px] items-center rounded-full bg-surface px-3 text-cap font-bold text-text"
           >
             {r.name} · {r.pct}%
           </li>
@@ -81,11 +81,11 @@ export function FoodMicros({ rows, unknown, portionLabel }: { rows: MicroRow[]; 
     <Card as="section" aria-labelledby="food-micros" className="flex flex-col gap-2">
       <div className="flex flex-col gap-1">
         <SectionTitle id="food-micros">Vi chất trong {portionLabel}</SectionTitle>
-        <p className="m-0 text-[13px] leading-snug text-secondary">% mục tiêu ngày</p>
+        <p className="m-0 text-cap leading-snug text-secondary">% mục tiêu ngày</p>
       </div>
       {GROUPS.map((g) => (
         <div key={g.key} className="flex flex-col">
-          <h3 className="m-0 pt-2 text-[13px] font-semibold text-secondary">{g.title}</h3>
+          <h3 className="m-0 pt-2 text-cap font-semibold text-secondary">{g.title}</h3>
           <ul className="m-0 flex list-none flex-col p-0">
             {rows
               .filter((r) => r.group === g.key)
@@ -96,7 +96,7 @@ export function FoodMicros({ rows, unknown, portionLabel }: { rows: MicroRow[]; 
         </div>
       ))}
       {unknown > 0 && (
-        <p className="m-0 text-[13px] leading-snug text-secondary">
+        <p className="m-0 text-cap leading-snug text-secondary">
           Chưa có dữ liệu cho {unknown} trong {rows.length} vi chất.
         </p>
       )}

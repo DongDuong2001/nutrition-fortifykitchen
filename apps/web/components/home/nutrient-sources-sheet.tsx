@@ -43,12 +43,12 @@ export function NutrientSourcesSheet({
           {sources.map((s) => (
             <li key={s.id} data-align-group="nutrient-sources" className="flex min-h-11 items-center justify-between gap-3 border-b border-divider px-1 py-2">
               <span className="flex min-w-0 flex-col">
-                <span className="line-clamp-2 text-[15px] font-semibold leading-snug text-text">{s.name}</span>
-                <span className="text-[13px] text-secondary">{portionLabel({ qty: s.qty, grams: s.grams ?? null, foodId: s.foodId ?? "" })}</span>
+                <span className="line-clamp-2 text-callout font-semibold leading-snug text-text">{s.name}</span>
+                <span className="text-cap text-secondary">{portionLabel({ qty: s.qty, grams: s.grams ?? null, foodId: s.foodId ?? "" })}</span>
               </span>
               <span className="flex shrink-0 flex-col items-end">
-                <span className="font-display text-[15px] font-bold leading-none tabular-nums text-text">{pctLabel(s.amount, target)}</span>
-                <span className="text-[13px] tabular-nums text-secondary">
+                <span className="font-display text-callout font-bold leading-none tabular-nums text-text tracking-label">{pctLabel(s.amount, target)}</span>
+                <span className="text-cap tabular-nums text-secondary">
                   {formatAmount(s.amount, unit)} {unit}
                 </span>
               </span>
@@ -57,7 +57,7 @@ export function NutrientSourcesSheet({
         </ul>
       )}
       {nutrient && (
-        <Link href={`/micros/${nutrient}`} replace className="flex min-h-11 items-center px-1 text-[15px] font-bold text-blue no-underline">
+        <Link href={`/micros/${nutrient}`} replace className="flex min-h-11 items-center px-1 text-callout font-bold text-cobalt no-underline">
           Xem chi tiết ›
         </Link>
       )}

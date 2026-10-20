@@ -3,6 +3,7 @@ shows the setup error and a valid year saves. Training default 90 shows on /trai
 stay on one line at 1440.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc09.py
 """
+# PROBE_COVERS: app/(app)/(dashboard)/training/** app/(app)/(tabs)/settings/** app/(app)/settings/account/** app/(app)/settings/delete-account/** app/(app)/settings/language/** app/(app)/settings/notifications/** app/(app)/settings/profile/** app/(app)/settings/profile/weight/** app/install/** app/paywall/**
 import datetime
 import os
 import sys

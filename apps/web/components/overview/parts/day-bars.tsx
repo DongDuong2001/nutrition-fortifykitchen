@@ -48,7 +48,7 @@ export function DayBars({
   } else if (row.target) {
     const n = dayNote(day.value, row.target.min, row.unit);
     note = n.text;
-    noteClass = n.tone === "met" ? "text-blue" : "text-destructive-text";
+    noteClass = n.tone === "met" ? "text-cobalt" : "text-destructive-text";
   } else if (row.weightLog) {
     note = weightDayNote(row.weightLog, day.iso);
   }
@@ -60,7 +60,7 @@ export function DayBars({
         <div aria-hidden="true" className={`pointer-events-none absolute inset-x-0 top-0 ${CHART_HEIGHT} border-b border-card-border`}>
           {hasBand && metrics && (
             <div
-              className="absolute inset-x-0 border-y border-dashed border-blue bg-sky/30"
+              className="absolute inset-x-0 border-y border-dashed border-cobalt bg-sky/30"
               style={{ bottom: `${metrics.bandLo}%`, height: `${Math.max(0, Math.min(100, metrics.bandHi) - metrics.bandLo)}%` }}
             />
           )}
@@ -69,7 +69,7 @@ export function DayBars({
           {row.days.map((d, i) => {
             const isSel = i === selected;
             let color = "bg-ink";
-            if (row.target) color = d.inProgress ? "bg-muted-dark" : d.met ? "bg-blue" : "bg-destructive";
+            if (row.target) color = d.inProgress ? "bg-secondary" : d.met ? "bg-cobalt" : "bg-destructive";
             const aria =
               d.value === null
                 ? `${d.dateLabel}: ${missing}`
@@ -81,7 +81,7 @@ export function DayBars({
                 aria-label={aria}
                 aria-pressed={isSel}
                 onClick={() => onSelect(i)}
-                className="flex min-h-[44px] min-w-0 flex-1 cursor-pointer flex-col items-stretch border-0 bg-transparent p-0"
+                className="flex min-h-11 min-w-0 flex-1 cursor-pointer flex-col items-stretch border-0 bg-transparent p-0"
               >
                 <span className={`flex ${CHART_HEIGHT} items-end px-1`}>
                   {d.value !== null && metrics ? (
@@ -93,7 +93,7 @@ export function DayBars({
                     <span className="block h-1 w-full rounded-[1px] bg-level-empty" />
                   )}
                 </span>
-                <span className={`flex h-8 items-center justify-center text-xs ${isSel ? "font-extrabold text-text" : "font-semibold text-secondary"}`}>
+                <span className={`flex h-8 items-center justify-center text-xs ${isSel ? "font-bold text-text" : "font-semibold text-secondary"}`}>
                   {d.label}
                 </span>
               </button>
@@ -102,9 +102,9 @@ export function DayBars({
         </div>
       </div>
       <p aria-live="polite" className="m-0 flex items-baseline justify-between gap-3 rounded-xl bg-surface px-3 py-3">
-        <span className="text-[13px] font-semibold text-secondary">{day.dateLabel}</span>
+        <span className="text-cap font-semibold text-secondary">{day.dateLabel}</span>
         <span className="text-right">
-          <span className="font-display text-2xl font-bold tabular-nums">{shown}</span>
+          <span className="font-display text-2xl font-bold tabular-nums tracking-display">{shown}</span>
           {note && <span className={`ml-2 text-xs font-bold ${noteClass}`}>{note}</span>}
         </span>
       </p>

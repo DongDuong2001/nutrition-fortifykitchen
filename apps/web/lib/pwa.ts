@@ -4,7 +4,7 @@
 
 import { HOME_ROUTE } from "./nav";
 
-/** Manifest colours, the same values as --color-paper and --color-ink in globals.css (a manifest cannot read CSS). */
+/** Manifest colours, the same values as --color-page and --color-ink in globals.css (a manifest cannot read CSS). */
 export const PAPER_COLOR = "#FFFFFF";
 export const INK_COLOR = "#111317";
 

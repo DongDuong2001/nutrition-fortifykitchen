@@ -4,7 +4,8 @@ import { kcalValue } from "@/lib/kcal";
 import { pctLabel, pctOf, type HomeValues } from "@/lib/home";
 import { getLevel, getLevelLabel } from "@/lib/levels";
 import { LevelBar } from "@/components/ui/level-bar";
-import { useCountUp } from "@/lib/count-up";
+import { useRef } from "react";
+import { useCountUpText } from "@/lib/count-up";
 
 // The 24 px pill sits inside a 44 px hit area: padding that the negative margin takes back
 const PILL = "-m-2.5 inline-flex shrink-0 items-center border-0 bg-transparent p-2.5 text-on-dark no-underline hover:text-sky";
@@ -43,6 +44,7 @@ export function HomeHero({
   selected,
   kcalNote,
   share = false,
+  countKey,
 }: {
   label: string;
   pills: HeroPill[];
@@ -56,10 +58,19 @@ export function HomeHero({
   kcalNote?: string | null;
   /** The share image: drawn at 390 px on any screen, so no desktop classes. */
   share?: boolean;
+  /** The day and the selection: the kcal counts only while this stays the same (an add or a delete), never on a change of day or selection. */
+  countKey?: string;
 }) {
   const kcalKnown = pctOf(values.kcal, kcalTarget.min);
-  // cc-51: the big kcal and its percent count to a new value (300 ms); the first value and "—" show as they are
-  const shownKcal = useCountUp(values.kcal);
+  // cc-51, cc-64 (R1): the big kcal and its percent count to a new value in 300 ms after an add or a delete, written to
+  // their text nodes (no React render per frame); the first value, "—", a new day and a new selection show at once
+  const kcalRef = useRef<HTMLSpanElement>(null);
+  const pctRef = useRef<HTMLSpanElement>(null);
+  useCountUpText(share ? null : values.kcal, countKey ?? label, [
+    { ref: kcalRef, format: (n) => kcalValue(n) },
+    { ref: pctRef, format: (n) => pctLabel(n, kcalTarget.min) },
+  ]);
+  const shownKcal = values.kcal;
   const kcalPct = kcalKnown ?? 0;
   return (
     <>
@@ -70,7 +81,8 @@ export function HomeHero({
           selected ? "border-sky" : "border-surface-dark"
         }`}
       >
-        <div data-align-group="home-hero" className="flex min-h-[22px] items-center justify-between gap-2">
+        {/* cc-64: with large text the pills wrap under the label instead of running past the card */}
+        <div data-align-group="home-hero" className="flex min-h-[22px] flex-wrap items-center justify-between gap-x-2 gap-y-1">
           <h2 aria-live="polite" className={`m-0 min-w-0 text-xs font-bold leading-snug text-sky ${share ? "whitespace-nowrap" : "break-words"}`}>
             {label}
           </h2>
@@ -90,12 +102,12 @@ export function HomeHero({
         </div>
 
         <div data-align-group="home-hero" className="flex flex-wrap items-baseline gap-x-1.5">
-          <span className="font-display text-[32px] font-extrabold leading-none tabular-nums">{kcalValue(shownKcal)}</span>
-          <span className={`text-[13px] text-muted-on-dark ${share ? "whitespace-nowrap" : ""}`}>
+          <span ref={kcalRef} className="font-display text-display-sm font-extrabold leading-none tabular-nums tracking-display">{kcalValue(shownKcal)}</span>
+          <span className={`text-cap text-muted-on-dark ${share ? "whitespace-nowrap" : ""}`}>
             / {formatAmount(kcalTarget.min, "kcal")}–{formatAmount(kcalTarget.max, "kcal")} kcal
           </span>
-          <span className="ml-1 font-display text-[32px] font-extrabold italic leading-none tabular-nums">{pctLabel(shownKcal, kcalTarget.min)}</span>
-          {finished && kcalKnown !== null && <span className="text-[13px] font-bold text-sky">{getLevelLabel(getLevel(kcalKnown))}</span>}
+          <span ref={pctRef} className="ml-1 font-display text-display-sm font-extrabold italic leading-none tabular-nums tracking-display">{pctLabel(shownKcal, kcalTarget.min)}</span>
+          {finished && kcalKnown !== null && <span className="text-cap font-bold text-sky">{getLevelLabel(getLevel(kcalKnown))}</span>}
         </div>
 
         <div data-align-group="home-hero">
@@ -118,7 +130,7 @@ export function HomeHero({
                     {value === null ? "—" : formatAmount(value, "g")}
                     {target !== null ? `/${formatAmount(target, "g")} g` : " g"}
                   </span>
-                  <span className="shrink-0 whitespace-nowrap font-display text-[15px] font-bold leading-none tabular-nums">
+                  <span className="shrink-0 whitespace-nowrap font-display text-callout font-extrabold leading-none tabular-nums">
                     {pctLabel(value, target)}
                   </span>
                 </div>
@@ -128,7 +140,7 @@ export function HomeHero({
           })}
         </div>
       </section>
-      {kcalNote && <p className="m-0 mx-3 mt-1 lg:mx-0 flex-none text-[13px] leading-snug text-secondary">{kcalNote}</p>}
+      {kcalNote && <p className="m-0 mx-3 mt-1 lg:mx-0 flex-none text-cap leading-snug text-secondary">{kcalNote}</p>}
     </>
   );
 }

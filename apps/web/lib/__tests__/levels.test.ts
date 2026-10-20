@@ -73,11 +73,9 @@ describe("lib/levels", () => {
       expect(getLevelColor("dat", "light")).toBe("var(--color-level-blue)");
     });
 
-    it("returns dark mode token variables", () => {
-      expect(getLevelColor("thieu", "dark")).toBe("var(--color-level-red-dark)");
-      expect(getLevelColor("trungbinh", "dark")).toBe("var(--color-level-yellow-dark)");
-      expect(getLevelColor("ganDu", "dark")).toBe("var(--color-level-green-dark)");
-      expect(getLevelColor("dat", "dark")).toBe("var(--color-level-blue-dark)");
+    it("uses the same four level tokens inside ink cards (one palette since 17/10; cc-66 dropped the -dark copies)", () => {
+      for (const lvl of ["thieu", "trungbinh", "ganDu", "dat"] as const) expect(getLevelColor(lvl, "dark")).toBe(getLevelColor(lvl, "light"));
+      expect(getLevelColor("thieu", "dark")).toBe("var(--color-level-red)");
     });
   });
 
@@ -134,7 +132,7 @@ describe("lib/levels", () => {
       return (hi + 0.05) / (lo + 0.05);
     };
     it.each(["red", "yellow", "green", "blue"])("%s is at least 3:1 against the empty segment and the card", (name) => {
-      const lit = token(`level-${name}-dark`);
+      const lit = token(`level-${name}`);
       expect(lit).not.toBe("");
       expect(ratio(lit, token("level-empty-dark"))).toBeGreaterThanOrEqual(3);
       expect(ratio(lit, token("surface-dark"))).toBeGreaterThanOrEqual(3);

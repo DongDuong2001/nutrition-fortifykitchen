@@ -7,6 +7,7 @@
 Screenshots: .screenshots/cc2-23-*.png
 Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/cc2_23.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/explore/** app/(app)/(tabs)/settings/** app/(app)/explore/[category]/** app/(app)/settings/profile/**
 import os
 import re
 import sys

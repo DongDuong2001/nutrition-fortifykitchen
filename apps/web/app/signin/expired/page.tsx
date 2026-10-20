@@ -25,10 +25,10 @@ export default function LinkExpiredPage() {
               <circle cx="12" cy="12" r="9" />
               <path d="M12 7v5l3.5 2" />
             </svg>
-            <h1 className="m-0 font-display text-[28px] font-black italic uppercase leading-tight text-amber-on-dark">
+            <h1 className="m-0 font-display text-headline font-black italic uppercase leading-tight text-amber-on-dark">
               LIÊN KẾT ĐÃ HẾT HẠN
             </h1>
-            <p className="m-0 text-[15px] leading-normal text-muted-subtitle">
+            <p className="m-0 text-callout leading-normal text-muted-subtitle">
               Liên kết đăng nhập chỉ dùng được một lần và trong 15 phút.
             </p>
           </div>
@@ -39,7 +39,7 @@ export default function LinkExpiredPage() {
       <div className="text-center">
         <Link
           href="/signin"
-          className="inline-flex min-h-[44px] items-center px-2 text-[15px] font-semibold text-blue"
+          className="inline-flex min-h-11 items-center px-2 text-callout font-semibold text-cobalt"
         >
           Quay lại
         </Link>

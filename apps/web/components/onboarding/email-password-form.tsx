@@ -142,7 +142,7 @@ export function EmailPasswordForm({ variant }: { variant: "signin" | "signup" })
             onChange={setPassword}
             error={errors.password}
           />
-          <Link href="/signin/forgot" className="inline-flex min-h-[44px] items-center self-end px-2 text-[15px] font-semibold text-blue">
+          <Link href="/signin/forgot" className="inline-flex min-h-11 items-center self-end px-2 text-callout font-semibold text-cobalt">
             Quên mật khẩu?
           </Link>
         </>
@@ -153,14 +153,14 @@ export function EmailPasswordForm({ variant }: { variant: "signin" | "signup" })
           onExpire={() => setCaptchaToken(undefined)}
         />
       )}
-      <PillButton type="submit" disabled={busy}>
+      <PillButton type="submit" disabled={busy} data-testid="auth-submit">
         {COPY[variant].primary}
       </PillButton>
       <button
         type="button"
         onClick={handleMagicLink}
         disabled={busy}
-        className="inline-flex min-h-[44px] cursor-pointer items-center justify-center border-0 bg-transparent px-2 text-[15px] font-semibold text-blue active:scale-[0.97] transition-press disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100"
+        className="inline-flex min-h-11 cursor-pointer items-center justify-center border-0 bg-transparent px-2 text-callout font-semibold text-cobalt active:scale-[0.97] transition-press disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100"
       >
         {COPY[variant].magic}
       </button>

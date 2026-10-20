@@ -93,7 +93,7 @@ export function QuantityStepper({ servings, label, grams, onChange, disabled = f
           <span aria-hidden="true">−</span>
         </button>
         <div
-          className="flex h-11 min-w-[72px] items-center justify-center rounded-xl border px-2 focus-within:ring-2 border-card-border bg-card focus-within:ring-blue text-text"
+          className="flex h-11 min-w-[72px] items-center justify-center rounded-xl border px-2 focus-within:ring-2 border-card-border bg-card focus-within:ring-cobalt text-text"
         >
           <span className="sr-only">{`×${count}`}</span>
           <span aria-hidden="true" className="font-bold select-none text-base mr-0.5 text-secondary">
@@ -156,11 +156,11 @@ export function TimesStepper({ label, hint, value, valueText, min = 1, max, onCh
   const panel = variant === "panel";
   const button = stepButton(panel ? "bg-card text-xl text-text" : "bg-transparent text-xl text-text");
   const controls = (
-    <div role="group" aria-label={label} className={`flex shrink-0 items-center gap-1 ${panel ? "" : "rounded-full bg-surface p-0.5"}`}>
+    <div role="group" aria-label={label} className={`ml-auto flex shrink-0 items-center gap-1 ${panel ? "" : "rounded-full bg-surface p-0.5"}`}>
       <button type="button" aria-label={`Giảm ${label.toLowerCase()}`} disabled={disabled || value <= min} onClick={() => step(value - 1)} className={button}>
         <span aria-hidden="true">−</span>
       </button>
-      <output aria-live="polite" className={`text-center font-display font-bold tabular-nums ${panel ? "min-w-[52px] text-[26px]" : "min-w-10 text-xl"}`}>
+      <output aria-live="polite" className={`text-center font-display font-bold tabular-nums ${panel ? "min-w-[52px] text-title" : "min-w-10 text-xl"}`}>
         {valueText}
       </output>
       <button type="button" aria-label={`Tăng ${label.toLowerCase()}`} disabled={disabled || value >= max} onClick={() => step(value + 1)} className={button}>
@@ -169,10 +169,11 @@ export function TimesStepper({ label, hint, value, valueText, min = 1, max, onCh
     </div>
   );
   return (
-    <div data-tour={dataTour} className={`flex items-center justify-between gap-3 ${panel ? "rounded-[14px] bg-surface py-2 pr-2 pl-4" : ""}`}>
-      <span className="flex min-w-0 flex-col gap-0.5">
-        <span className="text-[13px] font-bold text-text">{label}</span>
-        {panel && hint && <span className="text-[13px] text-secondary">{hint}</span>}
+    // At large text sizes the label keeps at least 7.5rem and the buttons move to a line of their own, at the right
+    <div data-tour={dataTour} className={`flex flex-wrap items-center justify-between gap-x-3 gap-y-2 ${panel ? "rounded-[14px] bg-surface py-2 pr-2 pl-4" : ""}`}>
+      <span className="flex min-w-0 grow basis-[7.5rem] flex-col gap-0.5">
+        <span className="text-cap font-bold text-text">{label}</span>
+        {panel && hint && <span className="text-cap text-secondary">{hint}</span>}
       </span>
       {controls}
     </div>

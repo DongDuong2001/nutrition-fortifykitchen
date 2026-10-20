@@ -8,6 +8,7 @@
   focus     Cài đặt > Mục tiêu macro and Cân nặng: Tab to the field, screenshot with the focus ring
 Run with: ALIGN_BASE_URL=http://localhost:3107 CHECK_LABEL=after npm run probe -- tests/probes/cc_58_checks.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/add/** app/(app)/settings/profile/weight/** app/(app)/settings/targets/macros/** app/landing/** app/signin/**
 import json
 import os
 import re

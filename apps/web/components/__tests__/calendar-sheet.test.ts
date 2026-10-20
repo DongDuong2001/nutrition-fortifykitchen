@@ -6,9 +6,9 @@ describe("calendar-sheet status and labels", () => {
     expect(STATUS_TEXT.met).toBe("đạt mục tiêu");
     expect(STATUS_TEXT.over).toBe("đạt mục tiêu");
     expect(Object.values(STATUS_TEXT).some((text) => text.includes("vượt"))).toBe(false);
-    expect(calendarDayDot("met")).toBe("bg-blue");
-    expect(calendarDayDot("over")).toBe("bg-blue");
-    expect(calendarDayDot("under")).toBe("bg-red");
+    expect(calendarDayDot("met")).toBe("bg-cobalt");
+    expect(calendarDayDot("over")).toBe("bg-cobalt");
+    expect(calendarDayDot("under")).toBe("bg-destructive");
     expect(calendarDayDot("none")).toBe("bg-transparent");
   });
 

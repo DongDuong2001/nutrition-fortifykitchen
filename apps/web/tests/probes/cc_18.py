@@ -9,6 +9,7 @@ screens have the shared header, the auth screens have none. Runs at 390 and 1280
 Screenshots: .screenshots/cc-18-<screen>-<width>.png
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_18.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/(tabs)/settings/** app/(app)/settings/account/** app/(app)/settings/account/password/** app/(app)/setup/profile/** app/reset-password/** app/signin/** app/signin/forgot/** app/signup/**
 import os
 import sys
 import time
@@ -68,7 +69,7 @@ def check_single_form(pg, width, path, primary):
     # One form per auth screen: one email field, one "hoặc" divider, one primary (blue) button
     check(pg.locator('input[type="email"]').count() == 1, f"{width} {path}: exactly one email input")
     check(pg.get_by_text("hoặc", exact=True).count() == 1, f"{width} {path}: exactly one divider hoặc")
-    primaries = pg.locator("button.bg-blue")
+    primaries = pg.locator("button.bg-cobalt")
     check(
         primaries.count() == 1 and primaries.first.inner_text().strip() == primary,
         f"{width} {path}: one primary button, {primary} ({primaries.count()} found)",

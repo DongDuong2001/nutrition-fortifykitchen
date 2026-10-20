@@ -21,7 +21,7 @@ export function SaltSummaryCard({
       <div
         className={`flex items-end justify-between pt-1 gap-3 w-full ${className}`}
       >
-        <div className="text-[13px] text-muted-on-dark leading-snug">
+        <div className="text-cap text-muted-on-dark leading-snug">
           {isRestDay ? (
             <>
               Muối hôm nay
@@ -36,9 +36,9 @@ export function SaltSummaryCard({
             </>
           )}
         </div>
-        <div className="font-display italic font-bold text-[34px] leading-none tabular-nums text-on-dark shrink-0">
+        <div className="font-display italic font-extrabold text-display leading-none tabular-nums text-on-dark shrink-0 tracking-display">
           {saltTarget.formattedTotal}
-          <span className="text-lg not-italic font-normal text-sky"> g</span>
+          <span className="text-lg not-italic font-extrabold text-sky"> g</span>
         </div>
       </div>
     );
@@ -49,33 +49,33 @@ export function SaltSummaryCard({
     <div
       data-align-group="training-summary"
       data-align-edge="left"
-      className={`bg-ink text-on-dark rounded-[18px] p-6 flex flex-col justify-between gap-3 ${className}`}
+      className={`bg-ink text-on-dark rounded-card p-6 flex flex-col justify-between gap-3 ${className}`}
     >
       <div className="text-sm text-muted-on-dark">
         {isRestDay ? "Muối hôm nay" : "Muối cần hôm nay"}
       </div>
 
-      <div className="font-display italic font-extrabold text-[56px] leading-none tabular-nums text-on-dark">
+      <div className="font-display italic font-extrabold text-[3.5rem] leading-none tabular-nums text-on-dark tracking-display">
         {saltTarget.formattedTotal}
-        <span className="text-[26px] not-italic font-normal text-sky"> g</span>
+        <span className="text-title not-italic font-extrabold text-sky"> g</span>
       </div>
 
       <div className="flex flex-wrap gap-3">
         <div className="flex-1 min-w-[140px] bg-surface-dark rounded-xl p-3">
           <div className="text-xl font-bold tabular-nums">{formatSaltRange(saltTarget.baseMin, saltTarget.baseMax)} g</div>
-          <div className="text-[13px] text-muted-on-dark mt-0.5">nền cả ngày</div>
+          <div className="text-cap text-muted-on-dark mt-0.5">nền cả ngày</div>
         </div>
         <div className="flex-1 min-w-[140px] bg-surface-dark rounded-xl p-3">
           <div className="text-xl font-bold tabular-nums">
             {isRestDay ? "0 g" : `${saltTarget.formattedTopUp} g`}
           </div>
-          <div className="text-[13px] text-muted-on-dark mt-0.5">
+          <div className="text-cap text-muted-on-dark mt-0.5">
             {isRestDay ? "ngày nghỉ" : `khi tập ${trainingMinutes} phút`}
           </div>
         </div>
       </div>
 
-      <div className="text-[13px] text-sky mt-1">
+      <div className="text-cap text-sky mt-1">
         {isRestDay
           ? "Ngày nghỉ: chỉ cần muối nền, không cộng thêm"
           : "Cách tính: 4–6 g/ngày + 1–1,5 g mỗi 20 phút tập"}

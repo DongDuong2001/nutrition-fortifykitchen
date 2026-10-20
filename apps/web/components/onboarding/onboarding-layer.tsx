@@ -68,7 +68,7 @@ const TOUR_COPY: Record<string, { title: string; body: string; hint?: string }> 
 };
 
 const primaryButton =
-  "min-h-11 cursor-pointer rounded-full border-0 bg-blue px-5 text-sm font-bold text-on-accent active:scale-[0.97] transition-press motion-reduce:active:scale-100";
+  "min-h-11 cursor-pointer rounded-full border-0 bg-cobalt px-5 text-sm font-bold text-on-accent active:scale-[0.97] transition-press motion-reduce:active:scale-100";
 const quietButton =
   "min-h-11 cursor-pointer rounded-full border-0 bg-transparent px-3 text-sm font-semibold text-secondary active:scale-[0.97] transition-press motion-reduce:active:scale-100";
 
@@ -85,7 +85,7 @@ function TourCard({ index, onNext, onSkip }: { index: number; onNext: () => void
   const last = index === TOUR_STEPS.length - 1;
   return (
     <>
-      <p className="m-0 text-xs font-bold text-blue">
+      <p className="m-0 text-xs font-bold text-cobalt">
         Bước {index + 1}/{TOUR_STEPS.length}
       </p>
       <h2 id="tour-title" className="m-0 text-lg font-bold leading-snug">
@@ -95,7 +95,7 @@ function TourCard({ index, onNext, onSkip }: { index: number; onNext: () => void
       {last && (
         <ul className="m-0 grid list-none grid-cols-2 gap-2 p-0">
           {LEVELS.map((l) => (
-            <li key={l.name} className="flex items-center gap-2 text-[13px]">
+            <li key={l.name} className="flex items-center gap-2 text-cap">
               <span aria-hidden="true" className={`h-[9px] w-[9px] shrink-0 rounded-[3px] ${l.bar}`} />
               <span>
                 <strong className="font-bold">{l.name}</strong> <span className="text-secondary">{l.range}</span>
@@ -113,7 +113,7 @@ function TourCard({ index, onNext, onSkip }: { index: number; onNext: () => void
             {last ? "Hoàn tất" : "Tiếp"}
           </button>
         ) : (
-          <span className="inline-flex items-center gap-1 text-[13px] font-bold text-blue">
+          <span className="inline-flex items-center gap-1 text-cap font-bold text-cobalt">
             {hint}
             {/* Points at the highlighted element: up when the card is under it, down when the card is above it */}
             <IconArrowUp size={16} className="group-data-[placement=above]:rotate-180" />
@@ -133,7 +133,7 @@ function WhatsNewCard({ step, index, total, onNext, onSkip }: { step: ReleaseTou
         Mới · {index + 1}/{total}
       </p>
       <h2 className="m-0 text-lg font-bold leading-snug">{step.title}</h2>
-      <p className="m-0 text-[15px] leading-relaxed text-secondary">{step.body}</p>
+      <p className="m-0 text-callout leading-relaxed text-secondary">{step.body}</p>
       <div className="flex items-center justify-between gap-2">
         <span aria-hidden="true" className="flex gap-1">
           {Array.from({ length: total }, (_, i) => (
@@ -158,12 +158,12 @@ function WhatsNewCard({ step, index, total, onNext, onSkip }: { step: ReleaseTou
 function TipCard({ tip, onGotIt, onTry, onTurnOff }: { tip: Tip; onGotIt: () => void; onTry: () => void; onTurnOff: () => void }) {
   return (
     <>
-      <p className="m-0 text-xs font-bold text-blue">Mẹo · lần đầu</p>
+      <p className="m-0 text-xs font-bold text-cobalt">Mẹo · lần đầu</p>
       <h2 id="tip-title" className="m-0 text-lg font-bold leading-snug">
         {tip.title}
       </h2>
       <p className="m-0 text-sm leading-relaxed text-secondary">{tip.body}</p>
-      {tip.note && <p className="m-0 text-[13px] leading-snug text-secondary">{tip.note}</p>}
+      {tip.note && <p className="m-0 text-cap leading-snug text-secondary">{tip.note}</p>}
       <div className="flex items-center justify-between gap-2">
         <button type="button" onClick={onTurnOff} className={`${quietButton} -ml-3`}>
           Tắt mọi mẹo

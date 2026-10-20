@@ -7,6 +7,7 @@
 - Review 07:00: desktop Chrome (vibrate exists, but a mouse, 1280 x 800): no switch and no tip in Cài đặt
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_51_haptics.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/(tabs)/explore/** app/(app)/(tabs)/settings/**
 import json
 import os
 import sys

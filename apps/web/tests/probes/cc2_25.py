@@ -9,6 +9,7 @@
 Screenshots: .screenshots/cc2-25-*.png
 Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/cc2_25.py
 """
+# PROBE_COVERS: app/(app)/(dashboard)/training/** app/(app)/(tabs)/app/** app/(app)/(tabs)/explore/** app/(app)/foods/new/** app/(app)/micros/** app/(app)/settings/profile/weight/** app/(app)/setup/goal/**
 import os
 import re
 import sys

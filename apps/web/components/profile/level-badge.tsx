@@ -19,8 +19,8 @@ export type LevelBadgeSize = "share" | "list";
 
 // share: 26 px at the 390 px scale of the share image. list: smaller, for rows and cards.
 const SIZE: Record<LevelBadgeSize, string> = {
-  share: "text-[26px] px-3 py-1.5",
-  list: "text-[14px] px-2 py-1",
+  share: "text-title px-3 py-1.5",
+  list: "text-[0.875rem] px-2 py-1",
 };
 
 export function LevelBadge({ level, size = "list", className = "" }: { level: Level; size?: LevelBadgeSize; className?: string }) {

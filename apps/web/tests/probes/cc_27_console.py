@@ -1,6 +1,7 @@
 """cc-27f: lists console messages that mention localhost (warnings and errors) per route, so their source can be reported.
 Run with: ALIGN_BASE_URL=http://localhost:3104 npm run probe -- tests/probes/cc_27_console.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/(tabs)/explore/** app/(app)/(tabs)/settings/** app/(app)/(tabs)/trends/** app/(app)/add/** app/(app)/foods/[id]/** app/(app)/foods/compare/** app/(app)/micros/**
 import os
 import sys
 

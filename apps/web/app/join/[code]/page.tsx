@@ -51,7 +51,7 @@ export default function JoinPage() {
       <AppHeader variant="sub" title="Tham gia HLV" backHref={HOME_ROUTE} layout="wide" />
       <main className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-6 pt-4 lg:mx-0 lg:px-8">
         {signedIn === null || target ? (
-          <div aria-busy="true" className="h-[120px] rounded-[18px] bg-divider motion-safe:animate-pulse" />
+          <div aria-busy="true" className="h-[120px] rounded-card bg-divider motion-safe:animate-pulse" />
         ) : (
           <WrongCode />
         )}

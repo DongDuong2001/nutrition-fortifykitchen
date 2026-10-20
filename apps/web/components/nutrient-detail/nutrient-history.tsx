@@ -43,7 +43,7 @@ export function NutrientHistory({ points, unit, todayIso }: NutrientHistoryProps
             aria-current={point.iso === todayIso ? "date" : undefined}
             className="flex flex-col items-center gap-1 min-w-0"
           >
-            <span className="text-[11px] font-semibold tabular-nums leading-none text-text">{value}</span>
+            <span className="text-micro font-semibold tabular-nums leading-none text-text">{value}</span>
             {level ? (
               <span aria-hidden="true" className="flex h-16 w-6 flex-col justify-end overflow-hidden rounded-sm bg-level-empty">
                 <span className={`block w-full ${FILL[level]}`} style={{ height: `${Math.min(point.percentage ?? 0, 100)}%` }} />
@@ -51,8 +51,8 @@ export function NutrientHistory({ points, unit, todayIso }: NutrientHistoryProps
             ) : (
               <span aria-hidden="true" className="h-16 w-6" />
             )}
-            <span className="text-[11px] leading-none text-secondary">{weekdayShortVi(point.iso)}</span>
-            <span className="text-[11px] leading-none tabular-nums text-secondary">{point.iso.slice(8)}</span>
+            <span className="text-micro leading-none text-secondary">{weekdayShortVi(point.iso)}</span>
+            <span className="text-micro leading-none tabular-nums text-secondary">{point.iso.slice(8)}</span>
           </li>
         );
       })}

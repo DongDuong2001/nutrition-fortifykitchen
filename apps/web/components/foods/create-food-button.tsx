@@ -14,7 +14,7 @@ export function CreateFoodButton({ href, helper = "Không thấy món? Tự nh�
         </svg>
         Tạo món mới
       </PillButton>
-      {helper && <p className="m-0 text-[13px] leading-snug text-secondary">{helper}</p>}
+      {helper && <p className="m-0 text-cap leading-snug text-secondary">{helper}</p>}
     </div>
   );
 }

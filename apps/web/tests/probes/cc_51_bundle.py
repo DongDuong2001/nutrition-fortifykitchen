@@ -4,6 +4,7 @@ First-load JS = every script the page's initial HTML references (script src and 
 summed raw and gzip-compressed. Code split with next/dynamic is fetched later and is not counted.
 Run with: ALIGN_BASE_URL=http://localhost:3101 CC51_LABEL=after npm run probe -- tests/probes/cc_51_bundle.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/page.tsx
 import gzip
 import os
 import re

@@ -55,10 +55,10 @@ export function SavedMealsCard({ limit }: { limit?: number }) {
 
   return (
     <Card as="section" aria-labelledby="explore-saved-meals" className="flex flex-col gap-1">
-      <div className="flex min-h-[44px] items-center justify-between gap-2">
+      <div className="flex min-h-11 items-center justify-between gap-2">
         <SectionTitle id="explore-saved-meals">Bữa ăn của tôi</SectionTitle>
         {limit && rows.length > limit && (
-          <Link href="/explore/meals" className="flex min-h-[44px] items-center text-[13px] font-bold text-blue no-underline">
+          <Link href="/explore/meals" className="flex min-h-11 items-center text-cap font-bold text-cobalt no-underline">
             Xem tất cả ({rows.length})
           </Link>
         )}
@@ -67,12 +67,12 @@ export function SavedMealsCard({ limit }: { limit?: number }) {
       {!hydrated ? (
         <div aria-hidden="true" className="h-[52px] rounded-xl bg-level-empty motion-safe:animate-pulse" />
       ) : shown.length === 0 ? (
-        <p className="m-0 py-2 text-[13px] leading-snug text-secondary">
+        <p className="m-0 py-2 text-cap leading-snug text-secondary">
           Chưa có Bữa ăn của tôi. Mở ⋯ ở một bữa trên Hôm nay và chọn Lưu thành Bữa ăn của tôi.
         </p>
       ) : (
         <>
-          {slotName && <p className="m-0 text-[13px] leading-snug text-secondary">Một chạm thêm cả bữa vào {slotName}.</p>}
+          {slotName && <p className="m-0 text-cap leading-snug text-secondary">Một chạm thêm cả bữa vào {slotName}.</p>}
           {shown.map(({ meal, itemCount, kcal }, i) => (
             <QuickAddRow
               key={meal.id}

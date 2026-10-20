@@ -81,7 +81,7 @@ export default function LeaderboardPage() {
               <SectionTitle as="h2" id="lb-optin">
                 Tham gia Bảng xếp hạng
               </SectionTitle>
-              <span aria-live="polite" className="text-[13px] leading-snug text-secondary">
+              <span aria-live="polite" className="text-cap leading-snug text-secondary">
                 {!hydrated ? "Đang tải" : optedIn ? "Đang công khai tên hiển thị" : "Đang ở chế độ ẩn danh"}
               </span>
             </div>
@@ -92,7 +92,7 @@ export default function LeaderboardPage() {
               aria-label="Tham gia Bảng xếp hạng"
             />
           </div>
-          <p className="m-0 border-t border-divider pt-2 text-[13px] leading-snug text-secondary">
+          <p className="m-0 border-t border-divider pt-2 text-cap leading-snug text-secondary">
             Chỉ hiển thị tên hiển thị và điểm kỷ luật vi chất. Nhật ký ăn uống cá nhân luôn được giữ riêng tư.
           </p>
         </Card>
@@ -102,13 +102,13 @@ export default function LeaderboardPage() {
             Level của bạn
           </SectionTitle>
           <Card className="flex items-center justify-between gap-3">
-            <p className="m-0 min-w-0 text-[15px] leading-snug text-text">
+            <p className="m-0 min-w-0 text-callout leading-snug text-text">
               {coach ? `${coach.name} · ${levelSourceText(level)}` : "Chưa có huấn luyện viên"}
             </p>
             <LevelBadge level={level} />
           </Card>
           {available && !coach && (
-            <Link href="/settings/coach" className="inline-flex min-h-[44px] items-center px-1 text-[15px] font-bold text-blue no-underline">
+            <Link href="/settings/coach" className="inline-flex min-h-11 items-center px-1 text-callout font-bold text-cobalt no-underline">
               Nhập mã huấn luyện viên
             </Link>
           )}
@@ -126,7 +126,7 @@ export default function LeaderboardPage() {
         )}
 
         {data.ranks.length === 0 ? (
-          <Card as="section" aria-label="Bảng xếp hạng trống" className="text-[13px] leading-snug text-secondary">
+          <Card as="section" aria-label="Bảng xếp hạng trống" className="text-cap leading-snug text-secondary">
             Kỳ này chưa có ai trong bảng. Hãy quay lại sau khi có người ghi nhật ký.
           </Card>
         ) : (
@@ -137,7 +137,7 @@ export default function LeaderboardPage() {
                   <SectionTitle as="h2" id="lb-top">
                     Ba người đứng đầu
                   </SectionTitle>
-                  <span className="text-[13px] text-secondary">Chốt kỳ: {data.cycleEndDate}</span>
+                  <span className="text-cap text-secondary">Chốt kỳ: {data.cycleEndDate}</span>
                 </div>
                 <LeaderboardPodium topThree={topThree} />
               </section>

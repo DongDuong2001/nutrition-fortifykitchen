@@ -1,11 +1,25 @@
 "use client";
 
 import { useEffect, useRef, useState, type RefObject } from "react";
+import { haptic } from "@/lib/haptics";
 import { markUsed } from "@/lib/onboarding-store";
 
-/** Pull this far (after the 0.5 resistance) and let go: the day is read again. */
-const PULL_TRIGGER_PX = 64;
-const PULL_MAX_PX = 96;
+/** Pull this far and let go: the day is read again. */
+export const PULL_TRIGGER_PX = 64;
+/** cc-62 (S4): the pull follows the finger with rubber-band resistance and never passes this. */
+const PULL_RANGE_PX = 120;
+/** The finger must move this far, more down than sideways, before it pulls (a sideways swipe or a tap never does). */
+export const PULL_SLOP_PX = 8;
+
+/** How far the indicator is pulled for `dy` px of finger travel: 120 · (1 − e^(−dy/120)), 0 for an upward move. */
+export function pullOffset(dy: number): number {
+  return dy <= 0 ? 0 : PULL_RANGE_PX * (1 - Math.exp(-dy / PULL_RANGE_PX));
+}
+
+/** Whether a touch that moved (dx, dy) from where it started is a pull: past the slop, downward, more down than across. */
+export function startsPull(dx: number, dy: number): boolean {
+  return dy >= PULL_SLOP_PX && Math.abs(dy) > Math.abs(dx);
+}
 /** Where the indicator waits above the list, and where it sits while the day is read. */
 const REST_PX = -40;
 
@@ -20,7 +34,7 @@ export function usePullRefresh(listRef: RefObject<HTMLElement | null>, onRefresh
   const indicatorRef = useRef<HTMLDivElement>(null);
   const arrowRef = useRef<SVGSVGElement>(null);
   const [refreshing, setRefreshing] = useState(false);
-  const start = useRef<number | null>(null);
+  const start = useRef<{ x: number; y: number; pulling: boolean; armed: boolean } | null>(null);
   const pullRef = useRef(0);
   const refreshRef = useRef(onRefresh);
   refreshRef.current = onRefresh;
@@ -44,7 +58,7 @@ export function usePullRefresh(listRef: RefObject<HTMLElement | null>, onRefresh
       if (arrowRef.current) arrowRef.current.style.transform = `rotate(${px >= PULL_TRIGGER_PX ? 180 : 0}deg)`;
     };
     const down = (e: TouchEvent) => {
-      start.current = list.scrollTop <= 0 && e.touches.length === 1 ? e.touches[0].clientY : null;
+      start.current = list.scrollTop <= 0 && e.touches.length === 1 ? { x: e.touches[0].clientX, y: e.touches[0].clientY, pulling: false, armed: false } : null;
     };
     const move = (e: TouchEvent) => {
       if (start.current === null) return;
@@ -55,14 +69,31 @@ export function usePullRefresh(listRef: RefObject<HTMLElement | null>, onRefresh
         paint(0);
         return;
       }
-      const dy = (e.touches[0].clientY - start.current) * 0.5;
+      const s = start.current;
+      const dx = e.touches[0].clientX - s.x;
+      const dy = e.touches[0].clientY - s.y;
+      if (!s.pulling) {
+        // Not decided yet: wait for the slop; a move up or sideways leaves the touch to the list
+        if (Math.abs(dx) < PULL_SLOP_PX && Math.abs(dy) < PULL_SLOP_PX) return;
+        if (!startsPull(dx, dy)) {
+          start.current = null;
+          return;
+        }
+        s.pulling = true;
+      }
       if (dy <= 0) {
         pullRef.current = 0;
         paint(0);
         return;
       }
       if (e.cancelable) e.preventDefault();
-      pullRef.current = Math.min(PULL_MAX_PX, dy);
+      pullRef.current = pullOffset(dy);
+      // One tick each way across the threshold, so the finger feels where a release would refresh
+      const armed = pullRef.current >= PULL_TRIGGER_PX;
+      if (armed !== s.armed) {
+        s.armed = armed;
+        haptic("tick");
+      }
       paint(pullRef.current);
     };
     const up = () => {
@@ -102,15 +133,15 @@ export function PullIndicator({
   refreshing: boolean;
 }) {
   return (
-    <div className="pointer-events-none sticky top-0 z-10 h-0">
+    <div className="pointer-events-none sticky top-0 z-sticky h-0">
       <div
         ref={indicatorRef}
         aria-hidden="true"
-        className="m-pull mx-auto flex h-9 w-9 items-center justify-center rounded-full bg-card text-blue shadow-card"
+        className="m-pull mx-auto flex h-9 w-9 items-center justify-center rounded-full bg-card text-cobalt shadow-card"
         style={refreshing ? { transform: "translateY(12px)", opacity: 1 } : undefined}
       >
         {refreshing ? (
-          <span className="m-spin block h-4 w-4 rounded-full border-2 border-blue border-t-transparent" />
+          <span className="m-spin block h-4 w-4 rounded-full border-2 border-cobalt border-t-transparent" />
         ) : (
           <svg ref={arrowRef} className="m-pull-arrow" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
             <path d="M8 2v11M3.5 8.5 8 13l4.5-4.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />

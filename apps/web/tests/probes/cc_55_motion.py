@@ -5,10 +5,12 @@
 - /add: the panel (m-sheet) and its scrim are open; ✕ closes them (data-state="closed") and the route stays until the
   exit is over (still on /add 100 ms later, on Hôm nay after it); Hôm nay is drawn behind the panel.
 - Sheets: open = data-state open with a transform transition (not keyframes); reopening mid-close reverses.
-- Reduced motion: a sheet that opens has no transform at any point, and no view transition starts.
+- Reduced motion: a sheet that opens has no transform at any point; a push is a 120 ms cross-fade (cc-62: m-fade-in and
+  m-fade-out on the view transition, nothing slides).
 Writes frame strips to .screenshots/cc55/. Run with:
   ALIGN_BASE_URL=http://localhost:3106 npm run probe -- tests/probes/cc_55_motion.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/(tabs)/explore/** app/(app)/add/**
 import os
 import re
 from pathlib import Path
@@ -205,7 +207,9 @@ def reduced(browser):
     pg.locator('a[href^="/foods/"]').first.tap()
     pg.wait_for_url("**/foods/**")
     pg.wait_for_timeout(400)
-    check(vts(pg) == [], f"reduced motion: no view transition ({vts(pg)})")
+    # cc-62 (S6): reduced motion keeps the view transition as a cross-fade (fade animations only, never a slide)
+    names = " ".join(vts(pg)).split()
+    check(names and all(n in ("m-fade-in", "m-fade-out") for n in names), f"reduced motion: a cross-fade, nothing slides ({vts(pg)})")
     ctx.close()
 
 

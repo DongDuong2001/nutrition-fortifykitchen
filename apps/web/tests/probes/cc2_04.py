@@ -2,6 +2,7 @@
 (not hard-coded), the salt and potassium cards match the calculators, no fixed date in fallback copy.
 Run with: ALIGN_BASE_URL=http://localhost:3102 npm run probe -- tests/probes/cc2_04.py
 """
+# PROBE_COVERS: app/(app)/(dashboard)/training/** app/(app)/(tabs)/app/** app/(app)/add/** app/(app)/foods/new/** app/(app)/micros/** app/(app)/settings/notifications/** app/(app)/settings/profile/** app/paywall/**
 import os
 import re
 import sys

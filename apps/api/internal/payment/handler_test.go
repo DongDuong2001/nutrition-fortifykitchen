@@ -1,0 +1,73 @@
+package payment_test
+
+import (
+	"context"
+	"errors"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+
+	"nutrition-api/internal/payment"
+)
+
+type stubService struct {
+	verifyOK   bool
+	processErr error
+}
+
+func (s stubService) VerifySignature(payload payment.PayOSWebhookPayload) bool { return s.verifyOK }
+
+func (s stubService) ProcessPaymentWebhook(ctx context.Context, payload payment.PayOSWebhookPayload) error {
+	return s.processErr
+}
+
+func TestWebhook_ProcessErrorIsNotLeaked(t *testing.T) {
+	h := payment.NewHandler(stubService{verifyOK: true, processErr: errors.New("pq: relation payments secret_table does not exist")})
+	req := httptest.NewRequest(http.MethodPost, "/payments/webhook", strings.NewReader(`{"code":"00","data":{"orderCode":42}}`))
+	rec := httptest.NewRecorder()
+
+	h.HandleWebhook(rec, req)
+
+	if rec.Code != http.StatusInternalServerError {
+		t.Fatalf("expected 500, got %d", rec.Code)
+	}
+	body := rec.Body.String()
+	if strings.Contains(body, "secret_table") || strings.Contains(body, "pq:") {
+		t.Errorf("response leaks internal error: %s", body)
+	}
+	if !strings.Contains(body, "Failed to process payment") || !strings.Contains(body, `"code":"INTERNAL_SERVER_ERROR"`) {
+		t.Errorf("unexpected body: %s", body)
+	}
+}
+
+func TestWebhook_BadJSONDoesNotEchoDecoderError(t *testing.T) {
+	h := payment.NewHandler(stubService{verifyOK: true})
+	req := httptest.NewRequest(http.MethodPost, "/payments/webhook", strings.NewReader(`{"code": 5`))
+	rec := httptest.NewRecorder()
+
+	h.HandleWebhook(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400, got %d", rec.Code)
+	}
+	body := rec.Body.String()
+	if strings.Contains(body, "EOF") || strings.Contains(body, "unexpected") || strings.Contains(body, "cannot unmarshal") {
+		t.Errorf("response echoes decoder error: %s", body)
+	}
+	if !strings.Contains(body, "Invalid request body") {
+		t.Errorf("unexpected body: %s", body)
+	}
+}
+
+func TestWebhook_BadSignatureIs401(t *testing.T) {
+	h := payment.NewHandler(stubService{verifyOK: false})
+	req := httptest.NewRequest(http.MethodPost, "/payments/webhook", strings.NewReader(`{}`))
+	rec := httptest.NewRecorder()
+
+	h.HandleWebhook(rec, req)
+
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("expected 401, got %d", rec.Code)
+	}
+}

@@ -2,72 +2,65 @@
 
 import { useRef } from "react";
 import type React from "react";
+import { createSheetDrag, type AnimateFn, type DragElement } from "@/components/ui/sheet-drag-controller";
 
-/** Let go after dragging down this share of the sheet's height, or faster than this (px per ms, a flick): it closes. */
-const DISMISS_SHARE = 0.25;
-const DISMISS_SPEED = 0.11;
-/** Above the top the sheet follows the finger 1:1 at first, then tightens up to this many px. */
-const STRETCH = 24;
-const stretch = (up: number) => STRETCH * (1 - Math.exp(-up / STRETCH));
+// motion's animate, loaded on the first pointerdown on a sheet (cc-62: never in a route's first-load JS)
+let animateFn: AnimateFn | null = null;
+let loading: Promise<void> | null = null;
+function loadAnimate(): void {
+  loading ??= import(/* webpackChunkName: "sheet-spring", webpackExports: ["animate"] */ "motion")
+    .then((m) => {
+      animateFn = m.animate as unknown as AnimateFn;
+    })
+    .catch(() => {
+      // Offline before the chunk was cached: the CSS release stays, the next grab tries again
+      loading = null;
+    });
+}
 
-/** A finger that stood still this long before letting go was not flicking. */
-const STILL_MS = 100;
+const readOffset = (el: DragElement) => new DOMMatrix(getComputedStyle(el as unknown as HTMLElement).transform).m42;
+const reducedMotion = () => typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
+
+export interface SheetDragOptions {
+  /** The scrim behind the sheet: its opacity follows the drag (1 − pos / height). */
+  scrimRef?: React.RefObject<HTMLElement | null>;
+  /** A sheet sliding away was grabbed: open it again and return true, or return false to ignore the grab. */
+  onRegrab?: () => boolean;
+}
 
 /**
- * cc-55: drag a sheet down by its grabber (Sheet and the /add panel). The sheet follows the finger 1:1: the transform
- * is written on the element itself while `data-dragging` turns its transition off. Past the top it moves with
- * friction instead of stopping (1:1 at first, then it tightens). A sheet grabbed while it is still sliding open or
- * closed is held where it is, not snapped to 0. A second finger is ignored. On release it closes on distance or on a quick flick
- * (`onDismiss`, with data-state="closed" set at once), or goes back up; either way the CSS transition finishes from
- * where the finger let go, with the sheet's own curve.
+ * cc-55, cc-62: drag a sheet down by its drag areas (the grabber and the title block; Sheet and the /add panel). See
+ * sheet-drag-controller.ts for the behaviour. Pointerdowns on a control inside a drag area (a button, a link, a field)
+ * are left to the control. A second finger is ignored.
  */
-export function useSheetDrag(sheetRef: React.RefObject<HTMLElement | null>, onDismiss: () => void) {
-  // base: where the sheet was when the finger came down (a sheet grabbed mid-open is not at 0); dy: the finger's travel
-  // (for the flick speed); pos: where the sheet is now
-  const drag = useRef<{ id: number; y: number; t: number; dy: number; moved: number; base: number; pos: number } | null>(null);
-  const dismissRef = useRef(onDismiss);
-  dismissRef.current = onDismiss;
-
-  const end = (e: React.PointerEvent<HTMLElement>, cancelled: boolean) => {
-    const d = drag.current;
-    const el = sheetRef.current;
-    if (!d || e.pointerId !== d.id) return;
-    drag.current = null;
-    if (!el) return;
-    const speed = e.timeStamp - d.moved > STILL_MS ? 0 : d.dy / Math.max(1, e.timeStamp - d.t);
-    const dismiss = !cancelled && (d.pos > el.offsetHeight * DISMISS_SHARE || speed > DISMISS_SPEED);
-    el.removeAttribute("data-dragging");
-    el.style.transform = "";
-    if (dismiss) {
-      el.dataset.state = "closed";
-      dismissRef.current();
-    }
-  };
+export function useSheetDrag(sheetRef: React.RefObject<HTMLElement | null>, onDismiss: () => void, options: SheetDragOptions = {}) {
+  const latest = useRef({ onDismiss, options });
+  latest.current = { onDismiss, options };
+  const controller = useRef<ReturnType<typeof createSheetDrag> | null>(null);
+  controller.current ??= createSheetDrag({
+    sheet: () => sheetRef.current as unknown as DragElement | null,
+    scrim: () => (latest.current.options.scrimRef?.current ?? null) as unknown as DragElement | null,
+    readOffset,
+    reducedMotion,
+    animate: () => animateFn,
+    load: loadAnimate,
+    onDismiss: () => latest.current.onDismiss(),
+    onRegrab: () => latest.current.options.onRegrab?.() ?? false,
+  });
+  const drag = controller.current;
 
   return {
-    onPointerDown: (e: React.PointerEvent<HTMLElement>) => {
-      if (drag.current || (e.pointerType === "mouse" && e.button !== 0)) return;
-      const el = sheetRef.current;
-      // Read where the sheet is right now (it may be mid-transition), pin it there, then switch the transition off
-      const base = el ? new DOMMatrix(getComputedStyle(el).transform).m42 : 0;
-      drag.current = { id: e.pointerId, y: e.clientY, t: e.timeStamp, dy: 0, moved: e.timeStamp, base, pos: base };
-      e.currentTarget.setPointerCapture(e.pointerId);
-      if (el) {
-        el.style.transform = `translateY(${base}px)`;
-        el.setAttribute("data-dragging", "");
-      }
+    settled: drag.settled,
+    springing: drag.springing,
+    handlers: {
+      onPointerDown: (e: React.PointerEvent<HTMLElement>) => {
+        if (e.pointerType === "mouse" && e.button !== 0) return;
+        if ((e.target as Element).closest?.("button, a, input, select, textarea, label")) return;
+        if (drag.down(e.pointerId, e.clientY, e.timeStamp)) e.currentTarget.setPointerCapture(e.pointerId);
+      },
+      onPointerMove: (e: React.PointerEvent<HTMLElement>) => drag.move(e.pointerId, e.clientY, e.timeStamp),
+      onPointerUp: (e: React.PointerEvent<HTMLElement>) => drag.up(e.pointerId, e.timeStamp, false),
+      onPointerCancel: (e: React.PointerEvent<HTMLElement>) => drag.up(e.pointerId, e.timeStamp, true),
     },
-    onPointerMove: (e: React.PointerEvent<HTMLElement>) => {
-      const d = drag.current;
-      const el = sheetRef.current;
-      if (!d || !el || e.pointerId !== d.id) return;
-      d.dy = e.clientY - d.y;
-      const total = d.base + d.dy;
-      d.pos = total >= 0 ? total : -stretch(-total);
-      d.moved = e.timeStamp;
-      el.style.transform = `translateY(${d.pos}px)`;
-    },
-    onPointerUp: (e: React.PointerEvent<HTMLElement>) => end(e, false),
-    onPointerCancel: (e: React.PointerEvent<HTMLElement>) => end(e, true),
   };
 }

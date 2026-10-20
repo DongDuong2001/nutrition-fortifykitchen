@@ -3,6 +3,7 @@
 Not part of probe:all (it needs a live build; run_all skips names it cannot run in demo mode via the LIVE_BUILD flag).
 Run with: LIVE_BUILD=1 ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/v022c_live_gate.py
 """
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/(tabs)/explore/** app/(app)/(tabs)/settings/** app/signin/**
 import os
 import sys
 

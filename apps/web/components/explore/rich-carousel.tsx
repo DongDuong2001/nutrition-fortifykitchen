@@ -7,7 +7,7 @@ import { RICH_NUTRIENT_IDS, richName } from "@/lib/rich-in";
 
 // The tile colour follows the nutrient group: vitamins cobalt, minerals ink, everything else the dark surface
 const TILE_TONE: Record<string, string> = {
-  vitamins: "bg-blue text-on-accent",
+  vitamins: "bg-cobalt text-on-accent",
   minerals: "bg-ink text-on-dark",
 };
 const DEFAULT_TONE = "bg-surface-dark text-on-dark";
@@ -28,12 +28,12 @@ export function RichCarousel() {
             <Link
               href={`/explore/rich/${id}`}
               onClick={() => markUsed("rich-in")}
-              className={`flex min-h-[112px] flex-col justify-between gap-3 rounded-[18px] p-4 no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100 ${tone}`}
+              className={`flex min-h-[112px] flex-col justify-between gap-3 rounded-card p-4 no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100 ${tone}`}
             >
-              <span className="font-display text-[26px] font-black italic leading-none">
+              <span className="font-display text-title font-black italic leading-none">
                 Giàu {name}
               </span>
-              <span className="text-[13px] font-semibold opacity-80">Xem món</span>
+              <span className="text-cap font-semibold opacity-80">Xem món</span>
             </Link>
           </li>
         );

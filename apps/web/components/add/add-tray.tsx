@@ -35,16 +35,17 @@ export function TrayBar({ totals, mealName, canAdd, submitting = false, onReview
       aria-label={`${totals.count} món · ${kcalText(totals.kcal)} kcal`}
       data-tray-bar
       data-tour="tray-bar"
-      className={`flex flex-col gap-1.5 rounded-[18px] bg-ink p-2 text-on-dark shadow-lg ${className}`}
+      className={`flex flex-col gap-1.5 rounded-card bg-ink p-2 text-on-dark shadow-lg ${className}`}
     >
       <div className="flex items-center gap-2 pl-3">
-        <span aria-hidden="true" className="min-w-0 flex-1 truncate text-[15px] font-semibold leading-tight tabular-nums">
+        <span aria-hidden="true" className="min-w-0 flex-1 truncate text-callout font-semibold leading-tight tabular-nums">
           {totals.count} món · <span className="font-display text-lg font-bold">{kcalText(totals.kcal)}</span> kcal
         </span>
         <button
           type="button"
           onClick={onReview}
-          className="min-h-11 min-w-11 shrink-0 cursor-pointer rounded-full border-0 bg-transparent px-3 text-[15px] font-bold text-sky"
+          data-testid="tray-review"
+          className="min-h-11 min-w-11 shrink-0 cursor-pointer rounded-full border-0 bg-transparent px-3 text-callout font-bold text-sky"
         >
           Xem lại
         </button>
@@ -53,7 +54,8 @@ export function TrayBar({ totals, mealName, canAdd, submitting = false, onReview
         type="button"
         onClick={onAdd}
         disabled={!canAdd || submitting}
-        className="flex h-12 w-full min-w-0 cursor-pointer items-center justify-center rounded-full border-0 bg-blue px-4 text-[15px] font-bold text-on-accent disabled:cursor-default disabled:opacity-50"
+        data-testid="tray-add"
+        className="flex h-12 w-full min-w-0 cursor-pointer items-center justify-center rounded-full border-0 bg-cobalt px-4 text-callout font-bold text-on-accent disabled:cursor-default disabled:opacity-50"
       >
         <span className="truncate">{`Thêm ${totals.count} món vào ${mealName}`}</span>
       </button>
@@ -120,14 +122,14 @@ function TrayCard({ item, open, first, onToggle, onRemove, onChange }: TrayRowPr
           className="m-tint flex min-h-15 min-w-0 flex-1 cursor-pointer items-center justify-between gap-3 rounded-l-2xl border-0 bg-transparent py-2 pr-1 pl-3 text-left text-text"
         >
           <span className="flex min-w-0 flex-col gap-0.5">
-            <span title={food.nameVi} className="line-clamp-2 break-words text-[15px] font-bold leading-snug">
+            <span title={food.nameVi} className="line-clamp-2 break-words text-callout font-bold leading-snug">
               {food.nameVi}
             </span>
-            <span className="text-[13px] text-secondary">{item.label}</span>
+            <span className="text-cap text-secondary">{item.label}</span>
           </span>
           <span className="flex shrink-0 items-center gap-3">
-            <span className="font-display text-xl font-bold tabular-nums">
-              {typeof kcal === "number" ? formatAmount(kcal, "kcal") : "—"} <span className="text-[13px] text-secondary">kcal</span>
+            <span className="font-display text-xl font-extrabold tabular-nums">
+              {typeof kcal === "number" ? formatAmount(kcal, "kcal") : "—"} <span className="text-cap text-secondary">kcal</span>
             </span>
             {/* .m-chevron turns while the button has aria-expanded="true" */}
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="m-chevron text-secondary-strong">
@@ -158,7 +160,7 @@ function TrayCard({ item, open, first, onToggle, onRemove, onChange }: TrayRowPr
           data-align-group="tray-edit"
         />
         <div data-align-group="tray-edit" data-align-edge="left" className="flex items-center justify-between gap-2">
-          <span className="text-[13px] text-secondary-strong">{hint}</span>
+          <span className="text-cap text-secondary-strong">{hint}</span>
           <button type="button" onClick={onToggle} className="h-11 shrink-0 cursor-pointer rounded-full border-0 bg-ink px-4 text-sm font-bold text-on-dark">
             Xong
           </button>
@@ -269,10 +271,10 @@ function TrayReview({ items, totals, mealName, canAdd, submitting, onRemove, onC
   return (
     <div data-tray-review className="relative -mx-4 -mb-6 flex h-[min(790px,88dvh)] flex-col lg:h-[min(720px,80dvh)]">
       <div className="flex shrink-0 flex-col gap-0.5 px-5 pb-3">
-        <h2 id="tray-review-title" className="m-0 font-display text-[28px] font-bold uppercase leading-tight">
+        <h2 id="tray-review-title" className="m-0 font-display text-headline font-bold uppercase leading-tight">
           Khay · xem lại
         </h2>
-        <p className="m-0 text-[13px] text-secondary">
+        <p className="m-0 text-cap text-secondary">
           {mealName} · {items.length} món · chạm từng món để chỉnh
         </p>
       </div>
@@ -299,7 +301,7 @@ function TrayReview({ items, totals, mealName, canAdd, submitting, onRemove, onC
           ))}
         </ul>
         {items.length > 0 && !canAdd && (
-          <p role="alert" className="m-0 mt-3 rounded-xl bg-warning-bg px-3 py-2 text-[13px] leading-snug text-warning-text">
+          <p role="alert" className="m-0 mt-3 rounded-xl bg-warning-bg px-3 py-2 text-cap leading-snug text-warning-text">
             {NO_ENERGY_MESSAGE}
           </p>
         )}
@@ -334,15 +336,16 @@ function TrayReview({ items, totals, mealName, canAdd, submitting, onRemove, onC
         </div>
         <div className="flex items-center justify-between gap-3 px-1">
           <span className="text-sm font-semibold text-muted-subtitle">Tổng cộng</span>
-          <span className="font-display text-[30px] font-bold leading-none tabular-nums">
-            {kcal} <span className="text-[15px] text-sky">kcal</span>
+          <span className="font-display text-[1.875rem] font-bold leading-none tabular-nums">
+            {kcal} <span className="text-callout text-sky">kcal</span>
           </span>
         </div>
         <button
           type="button"
           onClick={onAdd}
           disabled={!canAdd || submitting}
-          className="flex h-14 cursor-pointer items-center justify-center gap-2 rounded-2xl border-0 bg-blue text-[17px] font-bold text-on-accent disabled:cursor-default disabled:opacity-50"
+          data-testid="tray-add"
+          className="flex h-14 cursor-pointer items-center justify-center gap-2 rounded-2xl border-0 bg-cobalt text-body-lg font-bold text-on-accent disabled:cursor-default disabled:opacity-50"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
             <path d="M12 5v14M5 12h14" />

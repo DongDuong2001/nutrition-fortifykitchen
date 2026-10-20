@@ -9,6 +9,9 @@
   }
 }
 
+/* cc-66 (S16): see-through surfaces become solid when the system asks for less transparency */
+@custom-variant reduced-transparency (@media (prefers-reduced-transparency: reduce));
+
 @theme {
   --font-sans: var(--font-manrope-face), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-display: var(--font-saira-condensed-face), sans-serif;
@@ -16,7 +19,6 @@
 
   /* Cobalt Sign core tokens */
   /* The app background is white (Hao, 17/10). */
-  --color-paper: #FFFFFF;
   --color-page: #FFFFFF;
   /* Second surface on white: chips, search fields, segmented tabs, inputs and small tiles. */
   --color-surface: #F6F5F2;
@@ -25,17 +27,16 @@
   --color-paper-dark: #EAE6DE;
   --color-card-border: #E8E5DE;
   --color-ink: #111317;
-  --color-text: #141519;
+  /* cc-66 (D1): text is ink */
+  --color-text: var(--color-ink);
   --color-secondary: #6B6A66;
   --color-cobalt: #1238D6;
-  --color-blue: #1238D6;
   --color-sky: #9EC3FF;
   /* Light cobalt wash: the phone you are on in the install sheet, and its info box. */
   --color-cobalt-tint: #F2F5FF;
   --color-destructive: #D93F44;
   /* Darker shade of #D93F44 for text contrast >= 4.5:1 (5.30:1 on #FFFFFF, 4.9:1 on --color-surface) */
   --color-destructive-text: #C4373C;
-  --color-red: #D93F44;
 
   /* 4 level fill colours (Hao, 17/10): Thiếu, Trung bình, Gần đủ, Đạt. Fills only, never text. The names are kept
      from the first palette, so "blue" is the Đạt fill (green now). */
@@ -47,11 +48,6 @@
   /* Track of the continuous level bar on light surfaces (inside ink cards it is --color-level-empty-dark). */
   --color-track: #ECEAE6;
 
-  /* The same 4 level fills inside ink cards (one palette on both surfaces since 17/10). */
-  --color-level-red-dark: #F2453D;
-  --color-level-yellow-dark: #FFB020;
-  --color-level-green-dark: #80D8A0;
-  --color-level-blue-dark: #2FC46B;
 
   /* The first palette's values, kept for what is not a level fill: the landing's green ticks and amber chip border,
      the medal, the expired-link icon and title on ink, and "MICRO" in the share image footer. */
@@ -69,7 +65,6 @@
   --color-doodle-line: #D6D2CA;
   --color-doodle-dust: #D2CEC5;
   --color-hover: #FAF9F6;
-  --color-muted-dark: #6B6A66;
   --color-muted-subtitle: #C9CDD6;
   --color-muted-on-dark: #8C92A0;
   /* Small secondary text on ink that is lighter than --color-muted-on-dark: the share image footer's tagline. */
@@ -82,6 +77,8 @@
   --color-track-on-dark: #666A75;
   --color-grabber: #D5D8DF;
   --color-scrim: rgba(17, 19, 23, 0.4);
+  /* cc-62 (S14): a sheet opened over another sheet dims less, the first scrim is already there */
+  --color-scrim-2: rgba(17, 19, 23, 0.22);
   /* A row, card or full-width button being pressed tints instead of shrinking (cc-55) */
   --color-press: rgba(17, 19, 23, 0.06);
   --color-surface-dark: #1A1C22;
@@ -89,6 +86,8 @@
   --color-warning-text: #7A4A00;
   /* Level badge (cc-28): provisional, the coach may change them. Gold is for Level 4 and 5 only. */
   --color-gold: #E0B54A;
+  /* The landing footer's warm paper (kiln wordmark footer) */
+  --color-kiln-paper: #F3F1EC;
 
   /* Motion curves (cc-55). They replace Tailwind's ease-out / ease-in-out and feed every transition-* utility; the
      durations live with the motion classes at the end of this file. */
@@ -98,8 +97,70 @@
   --default-transition-duration: 160ms;
   --default-transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
 
-  /* Soft card shadow, desktop only (lg:shadow-card). */
-  --shadow-card: 0 1px 2px rgba(17, 19, 23, 0.06);
+  /* cc-66 (D10): semi-transparent rings and ink-tinted layered shadows instead of solid borders and black shadows.
+     A ring is a box-shadow: it sits on any background. Cards keep a 1 px transparent border under the ring, so nothing
+     inside moves (only the edge changes). Cards carry the ring; on desktop lg:shadow-card
+     (the ring plus a soft lift); chips an inset ring in both states, transparent when selected (no 2 px jump). */
+  --shadow-ring: 0 0 0 1px rgb(17 19 23 / 0.1), 0 1px 2px rgb(17 19 23 / 0.04);
+  --shadow-chip: inset 0 0 0 1px rgb(17 19 23 / 0.1);
+  --shadow-card: 0 0 0 1px rgb(17 19 23 / 0.08), 0 1px 2px rgb(17 19 23 / 0.04), 0 4px 12px rgb(17 19 23 / 0.04);
+  --shadow-sheet: 0 -6px 24px rgb(17 19 23 / 0.12);
+  /* Tailwind's scale, same geometry, ink instead of black */
+  --shadow-2xs: 0 1px rgb(17 19 23 / 0.05);
+  --shadow-xs: 0 1px 2px 0 rgb(17 19 23 / 0.05);
+  --shadow-sm: 0 1px 3px 0 rgb(17 19 23 / 0.1), 0 1px 2px -1px rgb(17 19 23 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(17 19 23 / 0.1), 0 2px 4px -2px rgb(17 19 23 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(17 19 23 / 0.1), 0 4px 6px -4px rgb(17 19 23 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(17 19 23 / 0.1), 0 8px 10px -6px rgb(17 19 23 / 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgb(17 19 23 / 0.25);
+
+  /* cc-66 (D3): two radii for every surface */
+  --radius-card: 18px;
+  --radius-sheet: 20px;
+
+  /* cc-66 (S13): the type scale in rem, the same px at a 16 px root, so text follows the browser and phone text size.
+     Font size only: the line height stays what the element inherits or sets with leading-*. Tailwind's own xs–5xl
+     (rem, with their line heights) stay as they are. */
+  --text-2xs: 0.625rem;
+  --text-micro: 0.6875rem;
+  --text-cap: 0.8125rem;
+  --text-callout: 0.9375rem;
+  --text-body-lg: 1.0625rem;
+  --text-title-sm: 1.375rem;
+  --text-title: 1.625rem;
+  --text-headline: 1.75rem;
+  --text-display-sm: 2rem;
+  --text-display: 2.125rem;
+
+  /* cc-66 (S11): tracking by size. Saira numbers and titles of 32 px and up close up a little; Saira at 15 px and
+     under opens a little; the 11 px uppercase meal labels a little more. */
+  --tracking-display: -0.01em;
+  --tracking-label: 0.02em;
+  --tracking-caps: 0.04em;
+}
+
+/* cc-66 (D9): one stacking scale. Sticky headers and meal pills, the nav, sheets and dialogs, toasts, the tour. */
+:root {
+  --z-sticky: 10;
+  --z-nav: 40;
+  --z-sheet: 50;
+  --z-toast: 55;
+  --z-tour: 60;
+}
+@utility z-sticky {
+  z-index: var(--z-sticky);
+}
+@utility z-nav {
+  z-index: var(--z-nav);
+}
+@utility z-sheet {
+  z-index: var(--z-sheet);
+}
+@utility z-toast {
+  z-index: var(--z-toast);
+}
+@utility z-tour {
+  z-index: var(--z-tour);
 }
 
 /* Press and hover feedback names its properties (cc-55), never all of them: "all" animates layout too */
@@ -107,10 +168,27 @@
   transition-property: transform, scale, background-color, border-color, color, opacity;
   transition-duration: var(--m-press);
   transition-timing-function: var(--ease-out);
+  &:active {
+    transition-duration: var(--m-press-in);
+  }
 }
 
 :root {
   color-scheme: light;
+}
+
+/* cc-66 (S16): "Increase contrast" (iOS, macOS, Windows): darker edges and dividers, the stronger secondary text and a
+   darker scrim. Only the tokens change; every screen follows. */
+@media (prefers-contrast: more) {
+  :root {
+    --color-card-border: #B9B4AA;
+    --color-divider: #B9B4AA;
+    --color-secondary: var(--color-secondary-strong);
+    --color-scrim: rgba(17, 19, 23, 0.55);
+    --shadow-ring: 0 0 0 1px rgb(17 19 23 / 0.32);
+    --shadow-chip: inset 0 0 0 1px rgb(17 19 23 / 0.32);
+    --shadow-card: 0 0 0 1px rgb(17 19 23 / 0.32), 0 1px 2px rgb(17 19 23 / 0.06);
+  }
 }
 
 @layer base {
@@ -129,22 +207,42 @@
     overscroll-behavior-y: none;
   }
 
+  /* cc-64 (N8): a long press on a control does not select its text or open the link menu (iOS callout). The share
+     image keeps its menu: a long press is how a picture is saved there. Fields stay selectable. */
+  button,
+  nav a,
+  a.flex,
+  a.block,
+  a.inline-flex,
+  [role="button"],
+  [role="tab"] {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  a,
+  img {
+    -webkit-touch-callout: none;
+  }
+  img[data-share-image] {
+    -webkit-touch-callout: default;
+  }
+
   body {
     margin: 0;
-    background-color: var(--color-page, #FFFFFF);
-    color: var(--color-text, #141519);
+    background-color: var(--color-page);
+    color: var(--color-text);
     font-family: var(--font-sans);
-    min-height: 100vh;
+    min-height: 100dvh;
     overflow-x: hidden;
   }
 
   /* Global interaction and accessibility rules from design */
   a {
-    color: var(--color-blue, #1238D6);
+    color: var(--color-cobalt);
   }
   @media (hover: hover) and (pointer: fine) {
     a:hover {
-      color: var(--color-ink, #111317);
+      color: var(--color-ink);
     }
   }
 
@@ -160,7 +258,7 @@
   input:focus-visible,
   select:focus-visible,
   textarea:focus-visible {
-    outline: 3px solid var(--color-blue, #1238D6);
+    outline: 3px solid var(--color-cobalt);
     outline-offset: 2px;
   }
 
@@ -181,6 +279,8 @@
   button:active,
   a.inline-flex:active {
     transform: scale(0.97);
+    /* cc-62 (S7): the press goes in faster (100 ms) than it comes back (160 ms) */
+    transition-duration: var(--m-press-in);
   }
   /* an element with active:scale-* scales through that property alone (both would shrink it to 0.94) */
   button[class*="active:scale-"]:active,
@@ -188,6 +288,7 @@
     transform: none;
   }
   button.w-full,
+  button.flex-1,
   a.w-full,
   a.block,
   a.flex,
@@ -196,6 +297,7 @@
     position: relative;
   }
   button.w-full::after,
+  button.flex-1::after,
   a.w-full::after,
   a.block::after,
   a.flex::after,
@@ -211,6 +313,7 @@
     transition: opacity var(--m-tint-out) var(--ease-out);
   }
   button.w-full:active,
+  button.flex-1:active,
   a.w-full:active,
   a.block:active,
   a.flex:active,
@@ -219,6 +322,7 @@
     transform: none;
   }
   button.w-full:active::after,
+  button.flex-1:active::after,
   a.w-full:active::after,
   a.block:active::after,
   a.flex:active::after,
@@ -329,6 +433,7 @@
  */
 :root {
   --m-press: 160ms;
+  --m-press-in: 100ms;
   --m-pop-in: 200ms;
   --m-pop-out: 150ms;
   --m-row: 200ms;
@@ -358,10 +463,21 @@
     opacity: 0;
   }
 }
+@keyframes m-pulse {
+  to {
+    opacity: 0.4;
+  }
+}
 
 /* Sheets (components/ui/sheet.tsx and the /add panel) slide up from their own height; the scrim fades with them */
 .m-sheet {
-  transition: transform var(--m-sheet-in) var(--ease-drawer);
+  transition:
+    transform var(--m-sheet-in) var(--ease-drawer),
+    scale var(--m-sheet-in) var(--ease-drawer);
+}
+/* cc-62 (S14): a sheet with another sheet over it steps back (the scale property, so it never clashes with its slide) */
+.m-sheet[data-under-sheet] {
+  scale: 0.97;
 }
 .m-sheet[data-state="closed"] {
   transform: translateY(100%);
@@ -392,9 +508,10 @@
     transition-duration: var(--m-pop-out);
   }
 }
-/* A finger on the grabber: the sheet follows it 1:1 (the transform is written on the element), then lets go with the
-   sheet's own curve from where it is */
-.m-sheet[data-dragging] {
+/* A finger on the grabber: the sheet follows it 1:1 (the transform is written on the element) and the scrim fades with it
+   (its opacity is written too). cc-62: on release a spring (motion, lazy) or the sheet's own curve takes over from there */
+.m-sheet[data-dragging],
+.m-scrim[data-dragging] {
   transition: none;
 }
 
@@ -528,12 +645,15 @@
 .m-flip {
   transition: transform var(--m-row) var(--ease-in-out);
 }
-/* Bars: the fill grows from the left (scaleX) */
+/* cc-64 (A2): content that replaces its skeleton fades in (a cross-fade with the skeleton that just went) */
+.m-content-in {
+  animation: m-fade-in var(--m-fade) var(--ease-out) both;
+}
+/* Bars: the fill grows from the left (scaleX). cc-64 (R3): only the transform animates (compositor); the colour snaps
+   when the fill crosses a level, instead of repainting ~30 bars every frame */
 .m-bar {
   transform-origin: left center;
-  transition:
-    transform var(--m-bar) var(--ease-out),
-    background-color var(--m-bar) var(--ease-out);
+  transition: transform var(--m-bar) var(--ease-out);
 }
 /* A day changed with the arrows (direction: earlier from the left, later from the right): the new day's wrapper
    eases in from 12 px off to its place, as a transition from @starting-style, so a quick second tap starts from where
@@ -768,8 +888,12 @@ button.m-drag-lift[data-touch-drag="dragging"] {
       opacity: 0;
     }
   }
-  .m-sheet[data-dragging] {
+  .m-sheet[data-dragging],
+  .m-scrim[data-dragging] {
     transition: none;
+  }
+  .m-sheet[data-under-sheet] {
+    scale: none;
   }
   /* the closing rules above set their own, longer durations: the 120 ms cap holds for them too */
   .m-sheet[data-state="closed"],
@@ -808,6 +932,9 @@ button.m-drag-lift[data-touch-drag="dragging"] {
   .m-bar {
     transition: none;
   }
+  .m-content-in {
+    animation-duration: var(--m-fade);
+  }
   .m-day-earlier,
   .m-day-later {
     transition: opacity var(--m-fade) var(--ease-out);
@@ -838,12 +965,18 @@ button.m-drag-lift[data-touch-drag="dragging"] {
   .m-drag-ghost[data-landing] {
     transition: none;
   }
+  /* cc-62 (S6): the spinner breathes instead of turning; push and Back cross-fade in 120 ms, nothing slides */
   .m-spin {
-    animation: none;
+    animation: m-pulse 900ms var(--ease-in-out) infinite alternate;
   }
   ::view-transition-group(*),
-  ::view-transition-old(*),
-  ::view-transition-new(*) {
+  ::view-transition-image-pair(*) {
     animation: none !important;
+  }
+  ::view-transition-old(*) {
+    animation: m-fade-out var(--m-fade) var(--ease-out) both !important;
+  }
+  ::view-transition-new(*) {
+    animation: m-fade-in var(--m-fade) var(--ease-out) both !important;
   }
 }

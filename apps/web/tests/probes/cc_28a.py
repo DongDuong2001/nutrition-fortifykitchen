@@ -7,6 +7,8 @@ Production build, demo mode, 390x844 and 1280x800.
 - The role is read before the page decides: a coach who opens /coach straight from the URL never flashes the 404.
 Run with: ALIGN_BASE_URL=http://localhost:3104 npm run probe -- tests/probes/cc_28a.py
 """
+# PROBE_COVERS: app/(app)/admin/review/** app/(app)/coach/** app/(app)/coach/clients/[id]/**
+# PROBE_TAGS: smoke
 import os
 import re
 import sys

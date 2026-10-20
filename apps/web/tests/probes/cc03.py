@@ -2,6 +2,7 @@
 reload persistence, the small heart in the grouped list, and one × in the search box.
 Run with: ALIGN_BASE_URL=http://localhost:3101 PATH=/usr/bin:$PATH npm run probe -- tests/probes/cc03.py
 """
+# PROBE_COVERS: app/(app)/add/** app/(app)/foods/[id]/**
 import os
 import sys
 

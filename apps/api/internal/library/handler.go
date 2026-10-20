@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	"nutrition-api/internal/auth"
 	"nutrition-api/internal/diary"
+	"nutrition-api/internal/logger"
 	"nutrition-api/pkg/response"
 )
 
@@ -136,7 +137,12 @@ func (h *Handler) CreateSavedMeal(w http.ResponseWriter, r *http.Request) {
 
 	meal, err := h.service.CreateSavedMeal(r.Context(), userID, req)
 	if err != nil {
-		response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, err.Error())
+		if errors.Is(err, ErrSavedMealNameRequired) {
+			response.Error(w, http.StatusBadRequest, response.CodeValidationFailed, err.Error())
+			return
+		}
+		logger.Log.Error().Err(err).Str("user_id", userID.String()).Msg("failed to create saved meal")
+		response.Error(w, http.StatusInternalServerError, response.CodeInternalServerError, "Failed to create saved meal")
 		return
 	}
 
