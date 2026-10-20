@@ -1,4 +1,4 @@
-import type { FoodItem, FoodServing } from "./mock/foods";
+import type { FoodItem, FoodServing } from "./catalog";
 import { UNIT_AMOUNT_STEP, formatUnitServingLabel, parseUnitServing } from "./portion";
 
 /**

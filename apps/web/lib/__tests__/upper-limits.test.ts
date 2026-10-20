@@ -3,7 +3,7 @@ import { upperLimits } from "../rda";
 import { supplementAmount, upperLimitNote } from "../upper-limits";
 
 // A catalogue of two foods: a supplement and an ordinary food
-vi.mock("../mock/foods", () => ({
+vi.mock("../catalog", () => ({
   catalogFoodById: (id: string) => (id === "supp" ? { id, category: "bo_sung" } : id === "rice" ? { id, category: "tinh_bot" } : undefined),
 }));
 

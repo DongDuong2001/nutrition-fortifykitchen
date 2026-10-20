@@ -1,4 +1,4 @@
-import { EDITED_DISH_SUFFIX, catalogFoodById, catalogVersion, type FoodItem } from "./mock/foods";
+import { EDITED_DISH_SUFFIX, catalogFoodById, catalogVersion, type FoodItem } from "./catalog";
 import { calculateMacroPreview } from "./portion";
 import { RECIPE_ID_PREFIX, rawTotalGrams, sameServerFood, totalNutrients, type Recipe, type RecipeIngredient } from "./recipe";
 import { readRecipes, saveRecipe, syncRecipeFoods } from "./recipe-store";
@@ -49,7 +49,7 @@ export function loadDishRecipes(): Promise<DishRecipes> {
 async function loadDemoFoods(): Promise<void> {
   const { demoActive } = await import("./demo");
   if (!demoActive()) return;
-  const [{ DISH_DEMO_FOODS }, { addDemoFoods }] = await Promise.all([import("./mock/dish-demo-foods"), import("./mock/foods")]);
+  const [{ DISH_DEMO_FOODS }, { addDemoFoods }] = await Promise.all([import("./mock/dish-demo-foods"), import("./catalog")]);
   addDemoFoods(DISH_DEMO_FOODS);
 }
 

@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useDiary } from "@/lib/diary-store";
-import { MOCK_FOODS } from "@/lib/mock/foods";
+import { CATALOG_FOODS } from "@/lib/catalog";
 import { useCatalogFoods } from "@/hooks/use-catalog-foods";
 import { resolveFavourites } from "@/lib/favourites";
 import { resolveRecent } from "@/lib/recent-foods";
@@ -34,7 +34,7 @@ export function ExploreSections() {
   // cc-67: one card per food, whatever state it was logged in
   const recents = dedupeTwins(
     recentFoods.flatMap((r) => {
-      const resolved = resolveRecent(r, MOCK_FOODS);
+      const resolved = resolveRecent(r, CATALOG_FOODS);
       return resolved ? [resolved] : [];
     }),
     (r) => r.food
@@ -42,7 +42,7 @@ export function ExploreSections() {
     .slice(0, SHOWN)
     .map(({ food, grams, label }) => ({ food, grams, label }));
 
-  const favourites = dedupeTwins(resolveFavourites(favouriteIds, MOCK_FOODS), (f) => f);
+  const favourites = dedupeTwins(resolveFavourites(favouriteIds, CATALOG_FOODS), (f) => f);
   // The sample user food (Bột củ dền) is demo-only: a new account owns nothing until it creates a food
   const mine = catalogue.filter(isOwnFood);
 

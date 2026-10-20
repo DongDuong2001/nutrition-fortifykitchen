@@ -1,6 +1,6 @@
 import { COUNTED_NUTRIENT_KEYS } from "./day-totals";
 import { isRecipeId } from "./recipe";
-import type { FoodItem, FoodMatch } from "./mock/foods";
+import type { FoodItem, FoodMatch } from "./catalog";
 
 /** Data sources of a food (cc-27d): how close its numbers are, where they come from, how much they cover. */
 

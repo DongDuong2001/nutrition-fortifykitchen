@@ -1,4 +1,4 @@
-import type { FoodItem } from "./mock/foods";
+import type { FoodItem } from "./catalog";
 import { getNutrientDefinition, type NutrientDefinition } from "./nutrients";
 
 /** The nutrients with a "Giàu …" list in Khám phá, in display order. Ids are catalog ids. */

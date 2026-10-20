@@ -2,7 +2,7 @@ import { canLog, entryNumbers, type AddedDiaryEntry } from "./diary-edits";
 import { formatAmount } from "./format";
 import { sumKcal } from "./kcal";
 import type { MealSlot } from "./meal-slot";
-import { MOCK_FOODS } from "./mock/foods";
+import { CATALOG_FOODS } from "./catalog";
 import type { MockDayData, MockMacroStat, MockMicroStat } from "./mock/sample-day";
 import { historyItems } from "./mock/history";
 import { isLiveMode } from "./api-mode";
@@ -52,7 +52,7 @@ export function dayEntries(iso: string, todayIso: string): AddedDiaryEntry[] {
   const items = historyItems(daysBefore(iso, todayIso));
   if (!items) return [];
   return items.flatMap((item, i) => {
-    const food = MOCK_FOODS.find((f) => f.id === item.foodId);
+    const food = CATALOG_FOODS.find((f) => f.id === item.foodId);
     if (!food || !canLog(food)) return [];
     return [
       {

@@ -1,4 +1,4 @@
-import type { FoodItem } from "./mock/foods";
+import type { FoodItem } from "./catalog";
 
 /** Saved in localStorage, so favourites last past the session. Local to this browser until accounts exist. */
 export const FAVOURITES_KEY = "h1t_favourite_foods_v1";

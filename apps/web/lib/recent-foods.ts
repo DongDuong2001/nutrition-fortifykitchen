@@ -1,4 +1,4 @@
-import type { FoodItem } from "./mock/foods";
+import type { FoodItem } from "./catalog";
 import { MAX_UNIT_COUNT, unitPortionText, parseUnitAmount, parseUnitServing } from "./portion";
 
 /** A recently logged food, with the serving it was logged with. */

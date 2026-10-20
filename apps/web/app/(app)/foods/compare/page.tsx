@@ -19,11 +19,11 @@ import {
   parseCompareIds,
   type CompareBasis,
 } from "@/lib/food-compare";
-import { MOCK_FOODS, type FoodItem } from "@/lib/mock/foods";
+import { CATALOG_FOODS, type FoodItem } from "@/lib/catalog";
 import { markUsed } from "@/lib/onboarding-store";
 import { useCatalogFoods } from "@/hooks/use-catalog-foods";
 
-const isKnownFood = (id: string) => MOCK_FOODS.some((f) => f.id === id);
+const isKnownFood = (id: string) => CATALOG_FOODS.some((f) => f.id === id);
 
 function PlusIcon() {
   return (
@@ -45,7 +45,7 @@ function CompareInner() {
   // The ids are checked against the catalogue: until the live one has arrived they are kept, not dropped as unknown
   const ids = useMemo(() => (pending || failed ? parseCompareIds(raw, () => true) : parseCompareIds(raw, isKnownFood)), [raw, version, pending, failed]);
   const foods = useMemo(
-    () => ids.map((id) => MOCK_FOODS.find((f) => f.id === id)).filter((f): f is FoodItem => !!f),
+    () => ids.map((id) => CATALOG_FOODS.find((f) => f.id === id)).filter((f): f is FoodItem => !!f),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [ids, version]
   );

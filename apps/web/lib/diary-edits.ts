@@ -1,4 +1,4 @@
-import { MOCK_FOODS, catalogFoodById, type FoodItem } from "./mock/foods";
+import { CATALOG_FOODS, catalogFoodById, type FoodItem } from "./catalog";
 import { SAMPLE_DAY, type MockDayData, type MockFoodItem } from "./mock/sample-day";
 import { MEAL_SLOTS, getMealSlotNameVi, type MealSlot } from "./meal-slot";
 import { hidesGrams, parseUnitAmount, parseUnitServing, scaleNutrients } from "./portion";
@@ -142,7 +142,7 @@ export interface SampleItemInfo {
   grams: number | null;
 }
 
-export function resolveSampleItems(day: Pick<MockDayData, "meals">, foods: FoodItem[] = MOCK_FOODS): SampleItemInfo[] {
+export function resolveSampleItems(day: Pick<MockDayData, "meals">, foods: FoodItem[] = CATALOG_FOODS): SampleItemInfo[] {
   return day.meals.flatMap((meal) =>
     meal.items.map((item) => {
       const food = foods.find((f) => f.nameVi === item.name) ?? null;
@@ -329,7 +329,7 @@ export function findEntry(edits: DiaryEdits, id: string, samples: SampleItemInfo
   const added = edits.added.find((e) => e.id === id);
   if (added) {
     const isQuick = added.kind === "quick";
-    const food = isQuick ? null : MOCK_FOODS.find((f) => f.id === added.foodId) ?? null;
+    const food = isQuick ? null : CATALOG_FOODS.find((f) => f.id === added.foodId) ?? null;
     return {
       id,
       name: added.foodName,

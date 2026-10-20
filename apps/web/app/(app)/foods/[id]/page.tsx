@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useDiary } from "@/lib/diary-store";
 import { canLog, energyNotice } from "@/lib/diary-edits";
 import { kcalValue } from "@/lib/kcal";
-import { MOCK_FOODS, type FoodItem } from "@/lib/mock/foods";
+import { CATALOG_FOODS, type FoodItem } from "@/lib/catalog";
 import { getMealSlotNameVi } from "@/lib/meal-slot";
 import { useMealSlot } from "@/lib/use-meal-slot";
 import { defaultPortionOf, portionAmountText, parseGramsInput, calculateMacroPreview, macroGramsText, gramsServingLabel, hidesGrams, unitAmountText } from "@/lib/portion";
@@ -56,7 +56,7 @@ function FoodDetailInner() {
   }, [foodId]);
   const { version: catalogVersion, pending: catalogPending, failed: catalogFailed, retry: retryCatalog } = useCatalogFoods();
   const food = useMemo(() => {
-    return MOCK_FOODS.find((f) => f.id === foodId);
+    return CATALOG_FOODS.find((f) => f.id === foodId);
     // recipesReady: the stored recipes are put into the catalogue by then. catalogVersion: so is the live catalogue.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [foodId, recipesReady, catalogVersion]);

@@ -21,7 +21,7 @@ import {
   type RecipeErrors,
 } from "@/lib/recipe";
 import { catalogueLookup } from "@/lib/recipe-store";
-import type { FoodItem } from "@/lib/mock/foods";
+import type { FoodItem } from "@/lib/catalog";
 import { IngredientPicker } from "./ingredient-picker";
 import { IconButton } from "@/components/ui/icon-button";
 

@@ -9,7 +9,7 @@ import { PortionPanel } from "@/components/ui/portion-panel";
 import { useDiary } from "@/lib/diary-store";
 import { canLog } from "@/lib/diary-edits";
 import { formatAmount } from "@/lib/format";
-import { catalogFoodById, type FoodItem } from "@/lib/mock/foods";
+import { catalogFoodById, type FoodItem } from "@/lib/catalog";
 import { gramsServingLabel, parseGramsInput } from "@/lib/portion";
 import { navigateFromSheet } from "@/lib/sheet-history";
 import type { TrainingCheckItem } from "@/lib/training";

@@ -7,7 +7,7 @@ import {
   type MockMacroStat,
   type MockMicroStat,
 } from "./mock/sample-day";
-import { MOCK_FOODS, addCatalogFood, catalogChanged, setCatalogFoods, setCatalogStatus, weighedFruit, type FoodItem } from "./mock/foods";
+import { CATALOG_FOODS, addCatalogFood, catalogChanged, setCatalogFoods, setCatalogStatus, weighedFruit, type FoodItem } from "./catalog";
 import type { SetupProfile } from "./onboarding";
 import { currentAccountId } from "./auth-actions";
 import { yieldToMain } from "./idle";
@@ -22,7 +22,7 @@ import { normaliseCoaching } from "./coaching-link";
 import type { GoalType, SexType } from "./targets";
 
 export * from "./nutrients";
-export * from "./mock/foods";
+export * from "./catalog";
 export * from "./coaches";
 export * from "./leaderboard";
 export type { MockDayData, MockMeal, MockMacroStat, MockMicroStat };
@@ -607,7 +607,7 @@ export const apiClient = {
    * account. Mock mode: nothing to load.
    */
   loadAllFoods(): Promise<FoodItem[]> {
-    if (!isLiveMode()) return Promise.resolve(MOCK_FOODS);
+    if (!isLiveMode()) return Promise.resolve(CATALOG_FOODS);
     if (!foodsInFlight) {
       const started = performance.now();
       foodsInFlight = fetchAllFoods().finally(() => {
@@ -636,7 +636,7 @@ export const apiClient = {
       return null;
     }
 
-    return MOCK_FOODS.find((f) => f.id === id) || null;
+    return CATALOG_FOODS.find((f) => f.id === id) || null;
   },
 
   async createFood(input: CreateFoodInput): Promise<FoodItem> {

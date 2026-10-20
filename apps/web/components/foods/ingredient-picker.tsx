@@ -14,7 +14,7 @@ import { isLiveMode } from "@/lib/api-mode";
 import { foodMeta } from "@/lib/food-meta";
 import { isCategoryFilter } from "@/lib/food-categories";
 import { saveFoodRequest } from "@/lib/food-requests";
-import type { FoodItem } from "@/lib/mock/foods";
+import type { FoodItem } from "@/lib/catalog";
 import { EmptyState } from "@/components/ui/empty-state";
 
 /** "Chọn nguyên liệu": the food search in a sheet; tick several foods (the + circle) and add them to the dish together. */

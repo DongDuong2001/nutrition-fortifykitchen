@@ -10,7 +10,7 @@ import { useFoodBrowse } from "@/hooks/use-food-browse";
 import { foodMeta } from "@/lib/food-meta";
 import { isCategoryFilter } from "@/lib/food-categories";
 import { MAX_COMPARE_FOODS, MIN_COMPARE_FOODS } from "@/lib/food-compare";
-import type { FoodItem } from "@/lib/mock/foods";
+import type { FoodItem } from "@/lib/catalog";
 import { EmptyState } from "@/components/ui/empty-state";
 
 export interface ComparePickerProps {
