@@ -254,29 +254,29 @@
   "brand": null,
   "tip_vi": null,
   "nutrients": {
-   "b1": 0.078,
+   "b1": 0.12,
    "b12": 0,
-   "b2": 0.061,
-   "b3": 0.557,
+   "b2": 0.05,
+   "b3": 0.6,
    "b5": 0.8,
    "b6": 0.209,
-   "calcium": 30,
+   "calcium": 36,
    "carbs": 27.9,
    "copper": 0.151,
    "energy": 119,
    "fat": 0.3,
    "fiber": 0.8,
    "folate": 11,
-   "iron": 0.61,
+   "iron": 0.9,
    "magnesium": 25,
    "manganese": 0.258,
-   "phosphorus": 47,
+   "phosphorus": 56,
    "potassium": 337,
    "protein": 1.2,
    "selenium": 0.6,
    "sodium": 55,
    "vitamin_a": 122.5,
-   "vitamin_c": 2.4,
+   "vitamin_c": 30,
    "vitamin_d": 0,
    "vitamin_e": 0.26,
    "vitamin_k": 1.8,
@@ -315,29 +315,29 @@
   "brand": null,
   "tip_vi": null,
   "nutrients": {
-   "b1": 0.078,
+   "b1": 0.12,
    "b12": 0,
-   "b2": 0.061,
-   "b3": 0.557,
+   "b2": 0.05,
+   "b3": 0.6,
    "b5": 0.8,
    "b6": 0.209,
-   "calcium": 30,
+   "calcium": 36,
    "carbs": 27.9,
    "copper": 0.151,
    "energy": 119,
    "fat": 0.3,
    "fiber": 0.8,
    "folate": 11,
-   "iron": 0.61,
+   "iron": 0.9,
    "magnesium": 25,
    "manganese": 0.258,
-   "phosphorus": 47,
+   "phosphorus": 56,
    "potassium": 337,
    "protein": 1.2,
    "selenium": 0.6,
    "sodium": 55,
    "vitamin_a": 122.5,
-   "vitamin_c": 2.4,
+   "vitamin_c": 30,
    "vitamin_d": 0,
    "vitamin_e": 0.26,
    "vitamin_k": 1.8,
@@ -364,6 +364,134 @@
     "label_vi": "1 lạng (100 g)",
     "grams": 100,
     "sort": 3
+   }
+  ]
+ },
+ {
+  "source": "usda_foundation",
+  "source_id": "food-khoai-lang",
+  "name": "Khoai lang luộc",
+  "name_vi": "Khoai lang luộc",
+  "category": "tinh_bot",
+  "brand": null,
+  "tip_vi": "Nguồn carb chậm tự nhiên và beta-carotene dồi dào.",
+  "nutrients": {
+   "alcohol": 0,
+   "b1": 0.056,
+   "b12": 0,
+   "b2": 0.047,
+   "b3": 0.538,
+   "b5": 0.581,
+   "b6": 0.165,
+   "calcium": 27,
+   "carbs": 17.7,
+   "cholesterol": 0,
+   "copper": 0.094,
+   "energy": 76,
+   "fat": 0.14,
+   "fiber": 2.5,
+   "folate": 6,
+   "iron": 0.72,
+   "magnesium": 18,
+   "manganese": 0.266,
+   "monounsaturated_fat": 0,
+   "phosphorus": 32,
+   "polyunsaturated_fat": 0.061,
+   "potassium": 230,
+   "protein": 1.37,
+   "saturated_fat": 0.031,
+   "selenium": 0.2,
+   "sodium": 27,
+   "sugars": 5.74,
+   "trans_fat": 0,
+   "vitamin_a": 787,
+   "vitamin_c": 12.8,
+   "vitamin_d": 0,
+   "vitamin_e": 0.94,
+   "vitamin_k": 2.1,
+   "water": 80.1,
+   "zinc": 0.2
+  },
+  "portions": [
+   {
+    "label_vi": "1 củ",
+    "grams": 150,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 8041",
+  "name": "Snail, medium - size, raw",
+  "name_vi": "Ốc bươu",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "calcium": 10,
+   "carbs": 8.3,
+   "energy": 84,
+   "fat": 0.7,
+   "phosphorus": 64,
+   "protein": 11.1,
+   "water": 76.8
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 con (ruột)",
+    "grams": 20,
+    "sort": 1
+   },
+   {
+    "label_vi": "1 lạng (100 g)",
+    "grams": 100,
+    "sort": 2
+   }
+  ]
+ },
+ {
+  "source": "vn_nin",
+  "source_id": "NIN 8042",
+  "name": "Snail, marble snail, Chinese mysterysnail, raw",
+  "name_vi": "Ốc đá",
+  "category": "dam",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "calcium": 10,
+   "carbs": 3.9,
+   "energy": 63,
+   "fat": 0.3,
+   "phosphorus": 83,
+   "protein": 11.2,
+   "water": 80.3
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 con (ruột)",
+    "grams": 10,
+    "sort": 1
+   },
+   {
+    "label_vi": "1 lạng (100 g)",
+    "grams": 100,
+    "sort": 2
    }
   ]
  }
