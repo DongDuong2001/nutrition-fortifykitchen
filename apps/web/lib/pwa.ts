@@ -2,7 +2,7 @@
 // public/sw.js is plain JS served as-is and cannot import this file, so it carries a copy of routeFor;
 // lib/__tests__/pwa.test.ts runs the real sw.js and checks both agree.
 
-import { HOME_ROUTE } from "./nav";
+import { HOME_ROUTE } from "./home-route";
 
 /** Manifest colours, the same values as --color-page and --color-ink in globals.css (a manifest cannot read CSS). */
 export const PAPER_COLOR = "#FFFFFF";

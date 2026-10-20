@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { formatDayLabel } from "@/lib/format";
-import { HOME_ROUTE } from "@/lib/nav";
+import { HOME_ROUTE } from "@/lib/home-route";
 import { StepBars } from "@/components/ui/step-bars";
 import { SyncStatus } from "@/components/sync/sync-status";
 
