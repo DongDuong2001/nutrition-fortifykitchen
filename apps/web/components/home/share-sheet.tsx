@@ -96,6 +96,12 @@ function relayoutText(svg: string): string {
   doc.querySelectorAll<HTMLElement>("[data-share-root] *").forEach((el) => {
     const s = el.style;
     if (!s || !el.textContent?.trim()) return;
+    // Lines kept as the page drew them (markLines)
+    if (el.hasAttribute("data-share-one-line")) s.whiteSpace = "nowrap";
+    if (el.getAttribute("data-share-wrapped") === "0") {
+      s.flexWrap = "nowrap";
+      [...el.children].forEach((child) => (child as HTMLElement).style?.setProperty("flex-shrink", "0"));
+    }
     const ownText = [...el.childNodes].some((n) => n.nodeType === Node.TEXT_NODE && n.textContent?.trim());
     if (ownText || s.display.startsWith("inline") || /\binline-(flex|block|grid)\b/.test(el.getAttribute("class") ?? "")) {
       ["width", "height", "inline-size", "block-size"].forEach((p) => s.removeProperty(p));
@@ -108,6 +114,30 @@ function relayoutText(svg: string): string {
     s.removeProperty("grid-template-rows");
   });
   return svg.slice(0, comma + 1) + encodeURIComponent(new XMLSerializer().serializeToString(doc));
+}
+
+/**
+ * The SVG can draw text a hair wider than the page did (another rasteriser, rounding at the 1080 px scale). In the
+ * nutrient column a row whose name and amount just fit on one line would then wrap and grow, and with the page's
+ * height fixed the column ran over its own "x/N đạt" line and colour key. So, on the page, every text of a
+ * [data-share-keep-lines] area that is one line is marked to stay one line, and every wrapping flex row records
+ * whether it wrapped; relayoutText keeps both in the SVG, so the column has the rows the page measured.
+ */
+function markLines(root: HTMLElement) {
+  root.querySelectorAll<HTMLElement>("[data-share-keep-lines] *").forEach((el) => {
+    if (getComputedStyle(el).flexWrap === "wrap" && el.children.length > 1) {
+      const tops = [...el.children].map((c) => c.getBoundingClientRect());
+      el.dataset.shareWrapped = tops.some((r) => r.top >= tops[0].bottom - 1) ? "1" : "0";
+    }
+    const lines = new Set<number>();
+    el.childNodes.forEach((n) => {
+      if (n.nodeType !== Node.TEXT_NODE || !n.textContent?.trim()) return;
+      const range = document.createRange();
+      range.selectNodeContents(n);
+      [...range.getClientRects()].forEach((r) => r.width > 0 && lines.add(Math.round(r.top)));
+    });
+    if (lines.size === 1) el.dataset.shareOneLine = "";
+  });
 }
 
 function loadImage(src: string): Promise<HTMLImageElement> {
@@ -147,6 +177,7 @@ function ShareCapture({
       await loadShareFonts(node);
       await nextFrame();
       await nextFrame();
+      markLines(node);
       const cssHeight = node.getBoundingClientRect().height;
       const { scale, width, height } = shareImageSize(cssHeight);
       const fontEmbedCSS = await shareFontCSS(node);

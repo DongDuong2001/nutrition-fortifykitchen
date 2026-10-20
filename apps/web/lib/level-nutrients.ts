@@ -70,7 +70,10 @@ export function isExtra(id: string): boolean {
   return EXTRA_NUTRIENT_IDS.includes(id);
 }
 
-/** "x/N đạt" and the two lowest of the level's own micros. An unknown value is not ranked, never read as 0. */
+/**
+ * "x/N đạt" and up to two of the level's own micros under their target (below 100 %), lowest first; empty when all
+ * are reached. An unknown value is not ranked, never read as 0.
+ */
 export function levelSummary(
   values: Record<string, number | null | undefined>,
   targets: Record<string, number | null | undefined>,
@@ -83,7 +86,8 @@ export function levelSummary(
     return [{ id, ratio: value / target }];
   });
   const reached = known.filter((k) => Math.round(k.ratio * 100) >= 100).length;
-  const lacking = [...known]
+  const lacking = known
+    .filter((k) => Math.round(k.ratio * 100) < 100)
     .sort((a, b) => a.ratio - b.ratio)
     .slice(0, 2)
     .map((k) => getNutrientDefinition(k.id)?.name ?? k.id);
