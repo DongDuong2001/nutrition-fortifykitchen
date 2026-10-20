@@ -47,6 +47,9 @@ jobs:
       - name: Typecheck
         working-directory: apps/web
         run: npx tsc --noEmit
+      - name: Run Tests
+        working-directory: apps/web
+        run: npm test
       - name: Build
         working-directory: apps/web
         run: npm run build

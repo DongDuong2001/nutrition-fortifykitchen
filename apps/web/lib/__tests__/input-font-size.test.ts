@@ -43,9 +43,9 @@ function withDefinitions(expr: string, src: string, depth = 3): string {
   let text = expr;
   if (depth === 0) return text;
   for (const id of new Set(expr.match(/\b[A-Za-z_]\w*\b/g) ?? [])) {
-    const def = new RegExp(`(?:const|let)\\s+${id}\\b[^=]*=\\s*([\\s\\S]*?);\\n`).exec(src);
+    const def = new RegExp(`(?:const|let)\\s+${id}\\b[^=]*=\\s*([\\s\\S]*?);\\r?\\n`).exec(src);
     if (def) text += ` ${withDefinitions(def[1], src, depth - 1)}`;
-    const fn = new RegExp(`function\\s+${id}\\s*\\([^)]*\\)[^{]*\\{([\\s\\S]*?)\\n\\}`).exec(src);
+    const fn = new RegExp(`function\\s+${id}\\s*\\([^)]*\\)[^{]*\\{([\\s\\S]*?)\\r?\\n\\}`).exec(src);
     if (fn) text += ` ${withDefinitions(fn[1], src, depth - 1)}`;
   }
   return text;

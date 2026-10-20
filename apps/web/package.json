@@ -23,7 +23,7 @@
     "prebuild:demo": "node scripts/slim-pairs.mjs && node scripts/slim-dishes.mjs",
     "build:demo": "node scripts/build-demo.mjs",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:align": "node scripts/py.mjs tests/alignment.py",

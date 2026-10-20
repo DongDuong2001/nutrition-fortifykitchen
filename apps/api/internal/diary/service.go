@@ -66,20 +66,13 @@ func round2(val float64) float64 {
 }
 
 func computeDayTotals(entries []DiaryEntryItem) map[string]*float64 {
-	totals := make(map[string]*float64)
+	rawTotals := make(map[string]float64)
 	hasValue := make(map[string]bool)
 
 	for _, entry := range entries {
 		// Energy / calories is accounted when known
 		if entry.Calories != nil && *entry.Calories >= 0 {
-			if totals["calories"] == nil {
-				cal := 0.0
-				en := 0.0
-				totals["calories"] = &cal
-				totals["energy"] = &en
-			}
-			*totals["calories"] = round2(*totals["calories"] + *entry.Calories)
-			*totals["energy"] = *totals["calories"]
+			rawTotals["calories"] += *entry.Calories
 			hasValue["calories"] = true
 			hasValue["energy"] = true
 		}
@@ -93,14 +86,19 @@ func computeDayTotals(entries []DiaryEntryItem) map[string]*float64 {
 				continue // already accounted via entry.Calories
 			}
 			if v != nil {
-				if totals[k] == nil {
-					val := 0.0
-					totals[k] = &val
-				}
-				*totals[k] = round2(*totals[k] + *v)
+				rawTotals[k] += *v
 				hasValue[k] = true
 			}
 		}
+	}
+
+	totals := make(map[string]*float64, len(hasValue))
+	for k := range hasValue {
+		v := round2(rawTotals[k])
+		if k == "energy" {
+			v = round2(rawTotals["calories"])
+		}
+		totals[k] = &v
 	}
 
 	return totals
@@ -148,11 +146,14 @@ func (s *diaryServiceImpl) GetDay(ctx context.Context, userID uuid.UUID, date st
 			if meals[i].Slot == slot {
 				meals[i].Entries = append(meals[i].Entries, e)
 				if e.Calories != nil {
-					meals[i].TotalKcal = round2(meals[i].TotalKcal + *e.Calories)
+					meals[i].TotalKcal += *e.Calories
 				}
 				break
 			}
 		}
+	}
+	for i := range meals {
+		meals[i].TotalKcal = round2(meals[i].TotalKcal)
 	}
 
 	dayTotals := computeDayTotals(entries)
@@ -583,11 +584,14 @@ func (s *diaryServiceImpl) GetDaysRange(ctx context.Context, userID uuid.UUID, f
 				if meals[i].Slot == slot {
 					meals[i].Entries = append(meals[i].Entries, e)
 					if e.Calories != nil {
-						meals[i].TotalKcal = round2(meals[i].TotalKcal + *e.Calories)
+						meals[i].TotalKcal += *e.Calories
 					}
 					break
 				}
 			}
+		}
+		for i := range meals {
+			meals[i].TotalKcal = round2(meals[i].TotalKcal)
 		}
 
 		dayTotals := computeDayTotals(entries)
