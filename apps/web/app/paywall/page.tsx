@@ -57,7 +57,7 @@ export default function PaywallPage() {
         </main>
       </div>
 
-      <footer className="w-full max-w-[560px] mx-auto px-4 pt-2 pb-5 flex flex-col items-center gap-1.5">
+      <footer className="w-full max-w-[560px] mx-auto px-4 pt-2 pb-5 flex flex-col items-center gap-2">
         <div className="text-xs text-secondary text-center">
           Gói miễn phí vẫn theo dõi đủ 22 vi chất.
         </div>

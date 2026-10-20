@@ -34,7 +34,7 @@ export function FormRow({
   return (
     <div
       data-align-group={dataAlignGroup}
-      className={`flex flex-col gap-1.5 w-full ${className}`}
+      className={`flex flex-col gap-2 w-full ${className}`}
     >
       <div className="flex justify-between items-baseline">
         <label htmlFor={htmlFor} className="text-xs font-bold text-text">

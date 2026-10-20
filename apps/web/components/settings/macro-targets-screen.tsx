@@ -185,7 +185,7 @@ export function MacroTargetsScreen() {
           <SectionTitle id="energy-target-title">Mục tiêu năng lượng</SectionTitle>
           <div className="flex items-baseline justify-between py-1">
             <span className="text-[0.875rem] text-secondary">Năng lượng mục tiêu</span>
-            <div className="flex items-baseline gap-1.5">
+            <div className="flex items-baseline gap-2">
               <span className="font-display text-headline font-extrabold leading-none tabular-nums text-text">
                 {formatNumber(mode === "fixed" ? fixedCalc.totalKcal : energyKcal)}
               </span>
@@ -251,7 +251,7 @@ export function MacroTargetsScreen() {
           <div className="flex flex-col divide-y divide-divider border-t border-b border-divider">
             {/* Đạm */}
             <div className="flex min-h-14 items-center justify-between gap-3 py-2">
-              <div className="flex items-center gap-2.5 min-w-0">
+              <div className="flex items-center gap-3 min-w-0">
                 <span className="h-3 w-3 shrink-0 rounded-full bg-success" aria-hidden="true" />
                 <div className="flex flex-col">
                   <span className="text-callout font-bold text-text">Đạm</span>
@@ -281,7 +281,7 @@ export function MacroTargetsScreen() {
                 )}
 
                 {mode === "keto" && (
-                  <span className="rounded-lg border border-card-border bg-page px-2.5 py-1 text-xs font-bold text-secondary">
+                  <span className="rounded-lg border border-card-border bg-page px-3 py-1 text-xs font-bold text-secondary">
                     20 %
                   </span>
                 )}
@@ -290,7 +290,7 @@ export function MacroTargetsScreen() {
 
             {/* Tinh bột */}
             <div className="flex min-h-14 items-center justify-between gap-3 py-2">
-              <div className="flex items-center gap-2.5 min-w-0">
+              <div className="flex items-center gap-3 min-w-0">
                 <span className="h-3 w-3 shrink-0 rounded-full bg-sky" aria-hidden="true" />
                 <div className="flex flex-col">
                   <span className="text-callout font-bold text-text">Tinh bột</span>
@@ -320,7 +320,7 @@ export function MacroTargetsScreen() {
                 )}
 
                 {mode === "keto" && (
-                  <span className="rounded-lg border border-card-border bg-page px-2.5 py-1 text-xs font-bold text-secondary">
+                  <span className="rounded-lg border border-card-border bg-page px-3 py-1 text-xs font-bold text-secondary">
                     5 %
                   </span>
                 )}
@@ -329,7 +329,7 @@ export function MacroTargetsScreen() {
 
             {/* Chất béo */}
             <div className="flex min-h-14 items-center justify-between gap-3 py-2">
-              <div className="flex items-center gap-2.5 min-w-0">
+              <div className="flex items-center gap-3 min-w-0">
                 <span className="h-3 w-3 shrink-0 rounded-full bg-amber-500" aria-hidden="true" />
                 <div className="flex flex-col">
                   <span className="text-callout font-bold text-text">Chất béo</span>
@@ -359,7 +359,7 @@ export function MacroTargetsScreen() {
                 )}
 
                 {mode === "keto" && (
-                  <span className="rounded-lg border border-card-border bg-page px-2.5 py-1 text-xs font-bold text-secondary">
+                  <span className="rounded-lg border border-card-border bg-page px-3 py-1 text-xs font-bold text-secondary">
                     75 %
                   </span>
                 )}

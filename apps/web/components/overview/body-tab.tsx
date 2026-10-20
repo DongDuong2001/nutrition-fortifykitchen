@@ -9,6 +9,8 @@ import { formatNumber, formatRange, formatSigned } from "@/lib/format";
 import { weekdayShort, weightDayNote } from "@/lib/overview-board";
 import { weighIns, weightShift } from "@/lib/overview-detail";
 import { weightSummary, type WeightPoint } from "@/lib/period";
+import { IconButton } from "@/components/ui/icon-button";
+import { Card } from "@/components/ui/card";
 
 const CHART_HEIGHT = "h-[176px]";
 const PAD = 6; // percent of the chart width kept free at both ends
@@ -106,10 +108,10 @@ export function BodyTab() {
         <HeroCard id="bd-hero" label="Cân nặng">
           <HeroNumber value="—" unit="kg" side={<p className="m-0">Hồ sơ {kg(profile.weightKg)} kg</p>} />
         </HeroCard>
-        <section className="rounded-card border border-transparent shadow-ring lg:shadow-card bg-card p-4 text-text">
+        <Card as="section">
           <p className="m-0 text-callout font-semibold">Chưa có số cân</p>
           <p className="m-0 mt-1 text-cap leading-snug text-secondary">Chưa có số cân trong kỳ này. Mỗi lần cân bạn ghi sẽ hiện ở đây.</p>
-        </section>
+        </Card>
       </div>
     );
   }
@@ -139,7 +141,7 @@ export function BodyTab() {
           {demo && <p className="m-0 text-cap text-muted-subtitle">Dữ liệu mẫu cho đến khi có nhật ký cân thật.</p>}
         </HeroCard>
 
-        <section aria-labelledby="bd-line" className="flex flex-col gap-3 rounded-card border border-transparent shadow-ring lg:shadow-card bg-card p-4 text-text">
+        <Card as="section" aria-labelledby="bd-line" className="flex flex-col gap-3">
           <div className="flex min-h-11 items-center justify-between gap-3">
             <SectionTitle id="bd-line">Cân nặng {period.length} ngày</SectionTitle>
             {demo && <span className="inline-flex min-h-[28px] items-center rounded-full bg-surface px-3 text-cap font-bold">Dữ liệu mẫu</span>}
@@ -153,15 +155,14 @@ export function BodyTab() {
                 onSelect={(i) => setPickedDate(weight.points[i].date)}
               />
               <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  aria-label="Lần cân trước"
+                <IconButton
+                  label="Lần cân trước"
                   disabled={selected === 0}
                   onClick={() => setPickedDate(weight.points[selected - 1].date)}
-                  className="inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-card-border bg-card text-text active:scale-[0.97] transition-press motion-reduce:active:scale-100 disabled:cursor-default disabled:opacity-45"
+                  tone="card" className="text-text disabled:cursor-default disabled:opacity-45"
                 >
                   <span aria-hidden="true">‹</span>
-                </button>
+                </IconButton>
                 <p aria-live="polite" className="m-0 flex min-w-0 flex-1 items-baseline justify-between gap-3 rounded-xl bg-surface px-3 py-3">
                   <span className="whitespace-nowrap text-cap font-semibold text-secondary">
                     {weekdayShort(point.date)} {dm(point.date)}
@@ -171,21 +172,20 @@ export function BodyTab() {
                     {pointNote && <span className="ml-2 text-xs font-bold text-secondary">{pointNote}</span>}
                   </span>
                 </p>
-                <button
-                  type="button"
-                  aria-label="Lần cân sau"
+                <IconButton
+                  label="Lần cân sau"
                   disabled={selected === weight.points.length - 1}
                   onClick={() => setPickedDate(weight.points[selected + 1].date)}
-                  className="inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-card-border bg-card text-text active:scale-[0.97] transition-press motion-reduce:active:scale-100 disabled:cursor-default disabled:opacity-45"
+                  tone="card" className="text-text disabled:cursor-default disabled:opacity-45"
                 >
                   <span aria-hidden="true">›</span>
-                </button>
+                </IconButton>
               </div>
             </>
           ) : (
             <p className="m-0 text-callout font-semibold">Chưa có số cân trong kỳ này.</p>
           )}
-        </section>
+        </Card>
       </div>
 
       <div className="flex flex-col gap-3 lg:col-span-5 lg:gap-5">
@@ -213,7 +213,7 @@ export function BodyTab() {
           </dl>
         </section>
 
-        <section aria-labelledby="bd-shift" className="flex flex-col gap-3 rounded-card border border-transparent shadow-ring lg:shadow-card bg-card p-4 text-text">
+        <Card as="section" aria-labelledby="bd-shift" className="flex flex-col gap-3">
           <SectionTitle id="bd-shift">Mục tiêu theo cân nặng</SectionTitle>
           {shift === null ? (
             <p className="m-0 text-cap leading-snug text-secondary">Cần ít nhất hai lần cân trong kỳ để so sánh mục tiêu.</p>
@@ -244,7 +244,7 @@ export function BodyTab() {
               </ul>
             </>
           )}
-        </section>
+        </Card>
       </div>
     </div>
   );

@@ -223,7 +223,7 @@ function GramPortionArea({
                         emit({ ...p, size: z.size });
                       }}
                       className={`flex cursor-pointer flex-col justify-center rounded-xl bg-card text-text disabled:opacity-50 ${
- panel ? "min-h-[52px] items-start px-3 py-1.5 text-left" : "h-11 items-center px-1 text-cap"
+ panel ? "min-h-[52px] items-start px-3 py-2 text-left" : "h-11 items-center px-1 text-cap"
  } ${on ? `border-2 border-cobalt ${panel ? "" : "bg-cobalt-tint font-bold text-cobalt"}` : "border border-card-border"}`}
                     >
                       <span className={panel ? `text-callout ${on ? "font-bold" : "font-semibold"}` : ""}>{z.label}</span>

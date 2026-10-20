@@ -19,6 +19,7 @@ import { pastDayData, useDiary } from "@/lib/diary-store";
 import { viewedIsoDate } from "@/lib/day-history";
 import { markUsed } from "@/lib/onboarding-store";
 import { HOME_ROUTE } from "@/lib/nav";
+import { Card } from "@/components/ui/card";
 
 interface GroupConfig {
   key: NutrientGroup;
@@ -636,7 +637,7 @@ function Legend() {
     >
       {tiers.map((t) => (
         <div key={t.name} className="flex flex-col items-center text-center gap-0.5 min-w-0 lg:items-start lg:text-left">
-          <div className="flex items-center justify-center gap-1.5 min-w-0">
+          <div className="flex items-center justify-center gap-2 min-w-0">
             <span
               aria-hidden="true"
               className={`h-[9px] w-[9px] rounded-[3px] ${t.colorClass} inline-block shrink-0`}
@@ -673,12 +674,12 @@ function GroupCard({
   dateQuery?: string;
 }) {
   return (
-    <section
+    <Card as="section" padding={false}
       id={`${idPrefix}${group.key}`}
       data-align-group={alignGroup}
       data-align-edge={alignGroup && idPrefix.includes("desktop") ? "left" : undefined}
-      className="bg-card rounded-card border border-transparent shadow-ring lg:shadow-card overflow-clip flex flex-col scroll-mt-2 lg:scroll-mt-6 break-inside-avoid"
-    >
+      className="overflow-clip flex flex-col scroll-mt-2 lg:scroll-mt-6 break-inside-avoid"
+>
       {/* Sticky group header: sticks to the top of the scrolling body */}
       <div className="sticky top-[var(--micros-sticky,0px)] z-sticky bg-card border-b border-card-border">
         <button
@@ -716,7 +717,7 @@ function GroupCard({
           <NutrientRow key={row.definition.id} row={row} dateQuery={dateQuery} />
         ))}
       </Expand>
-    </section>
+    </Card>
   );
 }
 
@@ -743,7 +744,7 @@ function NutrientRow({ row, dateQuery = "" }: { row: NutrientRowData; dateQuery?
   const content = (
     <div
       style={{ paddingLeft: `${indentPx}px` }}
-      className="min-h-11 py-2 flex flex-col justify-center gap-1.5 w-full"
+      className="min-h-11 py-2 flex flex-col justify-center gap-2 w-full"
     >
       {/* Line 1: Name (* tham khảo) | amount / target · % (bold) */}
       <div className="flex items-baseline justify-between text-sm leading-tight gap-2">
@@ -765,7 +766,7 @@ function NutrientRow({ row, dateQuery = "" }: { row: NutrientRowData; dateQuery?
         </div>
 
         {/* Right side: amount [/ target] [· %] */}
-        <div className="shrink-0 text-right flex items-baseline gap-1.5">
+        <div className="shrink-0 text-right flex items-baseline gap-2">
           {consumed === null ? (
             <>
               <span className="sr-only">chưa có dữ liệu</span>

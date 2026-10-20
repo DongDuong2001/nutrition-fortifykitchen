@@ -2,6 +2,7 @@
 
 import React from "react";
 import { type TrainingCheckItem, type TrainingPhase } from "@/lib/training";
+import { IconButton } from "@/components/ui/icon-button";
 
 export interface PhaseChecklistProps {
   phases: TrainingPhase[];
@@ -74,16 +75,15 @@ export function PhaseChecklist({
           <span className="font-bold text-callout tabular-nums text-text shrink-0">{it.dose}</span>
         </label>
         {removable && (
-          <button
-            type="button"
+          <IconButton
             onClick={() => onRemoveItem(it)}
-            aria-label={`Bỏ ${it.label} khỏi danh sách`}
-            className="-mr-2.5 ml-1 flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-secondary hover:bg-hover active:scale-[0.97] transition-press motion-reduce:active:scale-100"
+            label={`Bỏ ${it.label} khỏi danh sách`}
+            className="-mr-2.5 ml-1 text-secondary hover:bg-hover"
           >
             <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
               <path d="M6 6l12 12M18 6L6 18" />
             </svg>
-          </button>
+          </IconButton>
         )}
       </div>
     );

@@ -1,4 +1,5 @@
 import React from "react";
+import { Notice } from "@/components/ui/notice";
 
 export interface TrainingTipBannerProps {
   isRestDay: boolean;
@@ -14,16 +15,8 @@ export function TrainingTipBanner({
     : "Nhấp tinh bột nhẹ theo từng hiệp ở ngưỡng nặng.";
 
   return (
-    <div
-      className={`bg-card rounded-card border border-transparent shadow-ring lg:shadow-card p-3 sm:p-4 text-cap sm:text-sm leading-relaxed flex items-start gap-3 text-text ${className}`}
-    >
-      <span
-        className="w-1 self-stretch rounded-full bg-cobalt shrink-0"
-        aria-hidden="true"
-      />
-      <div>
-        <strong className="font-bold">Mẹo:</strong> {tipText}
-      </div>
-    </div>
+    <Notice tone="promo" className={`p-3 sm:p-4 text-cap sm:text-sm leading-relaxed ${className}`}>
+      <strong className="font-bold">Mẹo:</strong> {tipText}
+    </Notice>
   );
 }

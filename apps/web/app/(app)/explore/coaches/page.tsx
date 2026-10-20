@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { AppHeader } from "@/components/ui/app-header";
 import { AppShell } from "@/components/ui/app-shell";
 import { Card } from "@/components/ui/card";
-import { ChipRow } from "@/components/foods/chip-row";
+import { ChipGroup } from "@/components/ui/chip-group";
 import { CoachCard } from "@/components/coaching/coach-card";
 import { useBack } from "@/hooks/use-back";
 import { COACH_SPECIALTIES, filterCoachesBySpecialty } from "@/lib/coaches";
@@ -34,7 +34,7 @@ export default function CoachesPage() {
       />
 
       <main className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-6 pt-4 lg:mx-0 lg:max-w-[720px] lg:px-8">
-        <ChipRow items={chips} ariaLabel="Lọc huấn luyện viên theo chuyên môn" />
+        <ChipGroup scroll items={chips} ariaLabel="Lọc huấn luyện viên theo chuyên môn" />
 
         {coaches.length === 0 ? (
           <Card as="section" aria-label="Chưa có huấn luyện viên" className="text-cap leading-snug text-secondary">

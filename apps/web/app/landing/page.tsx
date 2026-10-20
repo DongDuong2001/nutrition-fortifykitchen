@@ -4,6 +4,7 @@ import { IconCheck } from "@/components/ui/icons";
 import { StackingAudiences } from "@/components/landing/stacking-audiences";
 import { KilnWordmarkFooter } from "@/components/landing/kiln-wordmark-footer";
 import { FloatingPhone } from "@/components/landing/floating-phone";
+import { PillButton } from "@/components/ui/pill-button";
 
 export const metadata = {
   title: "H1T MICRO — Hệ thống theo dõi 22 vi chất và năng lượng",
@@ -163,12 +164,9 @@ export default function LandingPage() {
             >
               Đăng nhập
             </Link>
-            <Link
-              href="/signup"
-              className="min-h-11 px-5 rounded-full bg-cobalt text-on-accent text-sm font-bold inline-flex items-center justify-center no-underline hover:bg-cobalt/90 active:scale-[0.97] motion-reduce:active:scale-100 transition-press shadow-sm"
-            >
+            <PillButton href="/signup" size="md">
               Bắt đầu ngay
-            </Link>
+            </PillButton>
           </div>
         </div>
       </header>

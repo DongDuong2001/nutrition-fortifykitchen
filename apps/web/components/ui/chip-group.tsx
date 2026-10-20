@@ -1,4 +1,5 @@
 import React from "react";
+import { ChipScroller } from "@/components/ui/chip-scroller";
 
 export interface ChipGroupItem {
   id: string;
@@ -20,6 +21,10 @@ export interface ChipGroupProps {
   tone?: "light" | "dark";
   size?: "md" | "lg";
   "data-align-group"?: string;
+  /** One row that scrolls sideways on phones and wraps from 1024 px (the food filters); needs ariaLabel */
+  scroll?: boolean;
+  ariaLabel?: string;
+  "data-align-edge"?: string;
 }
 
 /**
@@ -35,7 +40,11 @@ export function ChipGroup({
   tone = "light",
   size = "md",
   "data-align-group": dataAlignGroup,
+  scroll = false,
+  ariaLabel = "",
+  "data-align-edge": dataAlignEdge,
 }: ChipGroupProps) {
+  if (scroll) return <ChipScroller items={items} ariaLabel={ariaLabel} data-align-group={dataAlignGroup} data-align-edge={dataAlignEdge} />;
   const totalCount = (leadingInput ? 1 : 0) + items.length;
   const colCount = columns || (totalCount > 0 ? totalCount : 4);
   const colCountLg = columnsLg || colCount;

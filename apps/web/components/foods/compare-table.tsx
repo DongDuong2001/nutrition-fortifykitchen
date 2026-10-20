@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { SectionTitle } from "@/components/ui/section-title";
 import { formatAmount } from "@/lib/format";
 import type { CompareColumn, CompareRow, CompareSection } from "@/lib/food-compare";
+import { IconButton } from "@/components/ui/icon-button";
 
 export interface CompareTableProps {
   columns: CompareColumn[];
@@ -62,16 +63,15 @@ export function CompareTable({ columns, sections, onRemove }: CompareTableProps)
                   {c.name}
                 </span>
                 {c.portion && <span className="break-words text-xs leading-snug text-secondary">{c.portion}</span>}
-                <button
-                  type="button"
+                <IconButton
                   onClick={() => onRemove(c.id)}
-                  aria-label={`Bỏ ${c.name} khỏi so sánh`}
-                  className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border-0 bg-surface text-text active:scale-[0.97] transition-press motion-reduce:active:scale-100"
+                  label={`Bỏ ${c.name} khỏi so sánh`}
+                  tone="surface" className="text-text"
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                     <path d="M6 6l12 12M18 6L6 18" />
                   </svg>
-                </button>
+                </IconButton>
               </div>
             ))}
           </div>

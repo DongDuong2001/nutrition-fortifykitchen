@@ -112,13 +112,13 @@ Always use **your agent's fixed port**: **3100 for Antigravity, 3101 for Claude 
 5. Playwright screenshots use `http://localhost:3100`.
 
 ## Layout and alignment rules (hard rules, checked in review)
-1. **Spacing scale only.** Use 4 · 8 · 12 · 16 · 20 · 24 · 32 px (Tailwind 1, 2, 3, 4, 5, 6, 8). No other margins, paddings or gaps.
+1. **Spacing scale only.** Use 4 · 8 · 12 · 16 · 20 · 24 · 32 px (Tailwind 1, 2, 3, 4, 5, 6, 8). No other margins, paddings or gaps. Allowed exceptions (cc-66b, 20/10): 0.5 (2 px) as the micro-gap between a title and its subtitle; negative insets that grow an invisible hit area (`before:-inset-y-1.5`); negative margins that put a glyph inside a 44 px button on the text edge (`-mr-2.5`); the pixel-fitted Hôm nay hero, nutrient column and food list, the Khay bar (cc-63) and the share image.
 2. **Shared edges.** Inside a card or panel, every row starts and ends on the same left and right edges. No row stops short, leaving a ragged right side.
 3. **Rows that sit above one another share one grid.** If a row of stats sits under a row of chips or inputs, both use the same `grid grid-cols-N` with the same gap, so item *i* is directly above item *i*. Use one text alignment per grid (all centered or all start), never a mix.
 4. **Fill or align, never float.** A row of N controls is either a full-width equal-column grid, or a start-aligned flex row with a defined gap. Never leave leftover space without a reason.
 5. **No truncating meaningful text.** Tips, food names and nutrient names wrap to a second line (`line-clamp-2` at most). Ellipsis is only for user-generated long strings, with the full text in `title`.
 6. **One control per action.** Don't add an icon button that does the same thing as a visible text link.
-7. **Use the shared primitives.** Use `ChipGroup`, `StatGroup`, `FormRow` and `Card` sections from `components/ui` instead of hand-built rows. If a primitive is missing, create it there first.
+7. **Use the shared primitives.** Use `ChipGroup` (`scroll` for one sideways row of filters), `StatGroup`, `FormRow`, `Card` (`padding={false}` when rows reach the edges), `PillButton` (`size` lg 52 px full width · md 44 px 14 px text · sm 44 px 13 px text; variants primary, secondary, destructive and tertiary, the grey pill), `IconButton` (44 px round, `label` required, tone ghost / surface / card), `Notice` (info, promo), `EmptyState` and `SectionTitle` (`size` md 16 · lg 17 · sm 13) from `components/ui` instead of hand-built ones. If a primitive is missing, create it there first.
 
 ### Alignment self-check (required before "done")
 - Run the Playwright alignment check, `apps/web/tests/alignment.spec.ts`. Every element with `data-align-group="<name>"` must share left and right edges within 1 px with the other members of its group. Put the attribute on the rows of every card, panel and sheet you build.

@@ -240,7 +240,7 @@ export function PortionPanel({
 
       {/* Desktop Micros Breakdown */}
       {showMicros && scaledMicros.length > 0 && (
-        <div className="w-full bg-card rounded-xl p-3 border border-card-border flex flex-col gap-1.5 mt-1">
+        <div className="w-full bg-card rounded-xl p-3 border border-card-border flex flex-col gap-2 mt-1">
           <div className="text-xs font-semibold text-secondary pb-1 border-b border-card-border">
             Vi chất trong {summary}:
           </div>

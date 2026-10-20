@@ -13,6 +13,7 @@ import { getMealSlotNameVi } from "@/lib/meal-slot";
 import { useMealSlot } from "@/lib/use-meal-slot";
 import { useCatalogFoods } from "@/hooks/use-catalog-foods";
 import { savedMealTotals, type SavedMeal } from "@/lib/saved-meals";
+import { IconButton } from "@/components/ui/icon-button";
 
 function MoreIcon() {
   return (
@@ -82,15 +83,14 @@ export function SavedMealsCard({ limit }: { limit?: number }) {
               onAdd={() => addOnce(meal)}
               withBorderTop={i > 0}
               trailing={
-                <button
-                  type="button"
-                  aria-label={`Tùy chọn ${meal.name}`}
+                <IconButton
+                  label={`Tùy chọn ${meal.name}`}
                   aria-haspopup="dialog"
                   onClick={() => setManagedId(meal.id)}
-                  className="inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-text hover:bg-divider active:scale-[0.97] transition-press motion-reduce:active:scale-100"
+                  className="text-text hover:bg-divider"
                 >
                   <MoreIcon />
-                </button>
+                </IconButton>
               }
             />
           ))}

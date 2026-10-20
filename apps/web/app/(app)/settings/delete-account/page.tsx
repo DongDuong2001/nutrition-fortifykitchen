@@ -7,6 +7,7 @@ import { AppHeader } from "@/components/ui/app-header";
 import { useBack } from "@/hooks/use-back";
 import { Toast } from "@/components/ui/toast";
 import { Presence } from "@/components/ui/presence";
+import { Card } from "@/components/ui/card";
 
 const LOST_ITEMS = [
   "Nhật ký bữa ăn và ngày tập",
@@ -53,7 +54,7 @@ export default function DeleteAccountPage() {
 
         <main className="w-full max-w-[560px] mx-auto px-4 pt-4 pb-4 flex flex-col gap-3">
           {/* Warning card */}
-          <div className="bg-card rounded-card border border-transparent shadow-ring lg:shadow-card p-4 md:p-4 flex flex-col gap-2">
+          <Card className="md:p-4 flex flex-col gap-2">
             <div className="flex gap-3 items-start">
               <svg
                 width="28"
@@ -79,7 +80,7 @@ export default function DeleteAccountPage() {
                 <li key={item}>{item}</li>
               ))}
             </ul>
-          </div>
+          </Card>
 
           {/* Export CSV button */}
           <button

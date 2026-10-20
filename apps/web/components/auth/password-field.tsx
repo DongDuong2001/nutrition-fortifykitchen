@@ -3,6 +3,7 @@
 import { useId, useState } from "react";
 import { FormRow } from "@/components/ui/form-row";
 import { IconEye, IconEyeOff } from "@/components/ui/icons";
+import { IconButton } from "@/components/ui/icon-button";
 
 export interface PasswordFieldProps {
   label: string;
@@ -39,15 +40,14 @@ export function PasswordField({ label, value, onChange, error, autoComplete, hin
             error ? "border-destructive" : "border-grabber"
           }`}
         />
-        <button
-          type="button"
+        <IconButton
           onClick={() => setVisible((v) => !v)}
-          aria-label={visible ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+          label={visible ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
           aria-controls={inputId}
-          className="absolute right-1 top-1/2 flex h-11 w-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-secondary active:scale-[0.97] transition-press focus-visible:ring-2 focus-visible:ring-cobalt motion-reduce:transition-none motion-reduce:active:scale-100"
+          className="absolute right-1 top-1/2 -translate-y-1/2 text-secondary focus-visible:ring-2 focus-visible:ring-cobalt motion-reduce:transition-none"
         >
           {visible ? <IconEyeOff size={22} /> : <IconEye size={22} />}
-        </button>
+        </IconButton>
       </div>
     </FormRow>
   );
