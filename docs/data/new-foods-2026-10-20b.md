@@ -34,8 +34,8 @@ kcal, protein, fat and carbs are per 100 g. "→" is the live name changing to t
 | Măng tây, boiled | Already there | Măng tây (luộc) | usda_sr_legacy FDC 168390 | 22 | 2.4 | 0.22 | 4.11 |
 | Đậu tuyết (đậu Hà Lan ăn cả vỏ) | New row | **Đậu tuyết (đậu Hà Lan ăn cả vỏ, sống)** | usda_sr_legacy FDC 170010 | 42 | 2.8 | 0.2 | 7.5 |
 | Đậu tuyết, boiled | New row | **Đậu tuyết (đậu Hà Lan ăn cả vỏ, luộc)** | usda_sr_legacy FDC 170011 | 42 | 3.3 | 0.2 | 7 |
-| Cải ngồng (ngồng cải) | Alias added | Cải ngồng → **Cải ngồng (ngồng cải, sống)** | vn_nin NIN 4134 | 17 | 1.5 | 0.2 | 2.18 |
-| Cải ngồng, boiled | Alias added | Cải ngồng (luộc) → **Cải ngồng (ngồng cải, luộc)** | vn_nin NIN 4134002 | 18 | 1.6 | 0.21 | 2.32 |
+| Cải ngồng (rau cải làn, ngồng cải) | Alias added | Cải ngồng → **Cải ngồng (rau cải làn, ngồng cải, sống)** | vn_nin NIN 4134 | 17 | 1.5 | 0.2 | 2.18 |
+| Cải ngồng, boiled | Alias added | Cải ngồng (luộc) → **Cải ngồng (rau cải làn, ngồng cải, luộc)** | vn_nin NIN 4134002 | 18 | 1.6 | 0.21 | 2.32 |
 | Ngọn su su (su su đọt) | Alias added | Ngọn su su → **Ngọn su su (su su đọt, sống)** | vn_nin NIN 4110 | 24 | 3.3 | 0.1 | 2.5 |
 | Ngọn su su, boiled | Alias added | Ngọn su su (luộc) → **Ngọn su su (su su đọt, luộc)** | vn_nin NIN 4110002 | 14 | 3.37 | 0.1 | not in source |
 | Nấm kim châm | Already there | Nấm kim châm | usda_sr_legacy FDC 169382 | 37 | 2.66 | 0.29 | 7.81 |
@@ -48,7 +48,7 @@ Counts for the dry run: **4 inserts, 8 alias updates**.
 
 ## Search proof
 
-The real `searchFoods` (`apps/web/lib/search.ts`) was run over all 1,278 live names with the 8 renames and 4 new rows applied (a throwaway test, not committed). Each of these finds its row, with and without accents: bắp non, ngô non, bắp bao tử, bông bí, hoa bí, bông thiên lý, bông điên điển, bông so đũa, hoa chuối, bắp chuối, măng tây, đậu Hà Lan (also finds the existing shelled-pea rows), đậu tuyết, cải ngồng, ngồng cải, ngọn su su, su su đọt, nấm kim châm, ngó sen, củ sen, hoa atisô. "bông hẹ", "bong he" and "hoa hẹ" find nothing: that food is skipped.
+The real `searchFoods` (`apps/web/lib/search.ts`) was run over all 1,278 live names with the 8 renames and 4 new rows applied (a throwaway test, not committed). Each of these finds its row, with and without accents: bắp non, ngô non, bắp bao tử, bông bí, hoa bí, bông thiên lý, bông điên điển, bông so đũa, hoa chuối, bắp chuối, măng tây, đậu Hà Lan (also finds the existing shelled-pea rows), đậu tuyết, cải ngồng, ngồng cải, rau cải làn, ngọn su su, su su đọt, nấm kim châm, ngó sen, củ sen, hoa atisô. "bông hẹ", "bong he" and "hoa hẹ" find nothing: that food is skipped.
 
 ## New rows: sources and portions
 
@@ -68,7 +68,7 @@ The real `searchFoods` (`apps/web/lib/search.ts`) was run over all 1,278 live na
 
 ## Check before merging
 
-- **"rau cải làn" is not added to Cải ngồng.** Hao's list had "Cải ngồng (rau cải làn, ngồng cải)", but the catalogue already has a separate "Cải làn" (USDA "Broccoli, chinese", FDC 169404 and 169392): cải làn is Chinese broccoli and cải ngồng is choy sum, two vegetables. An alias would send people who log cải làn to the wrong nutrients. "ngồng cải" is added. To add the other, change the two names in the aliases file.
+- **"rau cải làn" is an alias of Cải ngồng, as Hao asked, but the catalogue also has a separate "Cải làn"** (USDA "Broccoli, chinese", FDC 169404 raw and 169392 cooked). Cải làn is Chinese broccoli and cải ngồng is choy sum, two vegetables. Result: "rau cải làn" finds only Cải ngồng, and "cải làn" finds the Cải làn rows first and the Cải ngồng rows after them. If that confuses people logging cải làn, take "rau cải làn, " out of the two names in the aliases file.
 - **Bông so đũa vs bông điên điển** are different plants (so đũa is Sesbania grandiflora; điên điển is usually Sesbania sesban), but USDA's single "Sesbania flower" row stands for điên điển. Fine for search; the numbers differ slightly (27 vs 31 kcal).
 
 ## Missing nutrients (not in the source record, left out)
