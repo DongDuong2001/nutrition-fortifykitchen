@@ -95,8 +95,8 @@ The root must start with exactly:
 - **Macros:** Đạm 62/104 g, Tinh bột 133/254 g, Béo 21/33–65 g, Chất xơ 14/30 g.
 - **Micros:** 8/21 đạt (Khoáng chất 5/9, Vitamin 3/12). Most lacking: Vitamin D 2,1/15 µg and Canxi 331/1.200 mg.
 - **Coach rules:**
-  - kcal/kg by goal: Tăng cơ 35–40, Giữ cân 30–35, Giảm mỡ 25–30, Giảm mỡ nhanh 20–25.
-  - Protein 1,6–2,2 g/kg; fat 0,5–1 g/kg.
+  - kcal/kg by goal, the upper end of the coach's range (cc-73b, 20/10; the sample day below is from before): Tăng cơ 40, Giữ cân 35, Giảm mỡ 30, Giảm mỡ nhanh 25.
+  - Protein 2,2 g/kg; fat 1 g/kg.
   - Salt 4–6 g/day + 1–1,5 g per 20 min of training.
   - Iron 8 mg (men) / 18 mg (women), 28 mg when near or in a period.
 - **Vietnamese number format:** dot thousands, comma decimals (1.041; 2,1).

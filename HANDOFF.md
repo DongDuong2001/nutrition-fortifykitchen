@@ -77,8 +77,9 @@ Treat the design files as the **visual source of truth**. Rebuild them as real c
 
 ## Business rules (all recommendations come only from the coach's rules)
 
-- **Calories:** 35–40 kcal/kg (Tăng cơ), 30–35 (Giữ cân), 25–30 (Giảm mỡ), 20–25 (Giảm mỡ nhanh).
-- **Macros:** protein 1.6–2.2 g/kg; fat 0.5–1 g/kg.
+- **Calories (the upper end of the coach's range, Hao 20/10, one number):** 40 kcal/kg (Tăng cơ), 35 (Giữ cân), 30 (Giảm mỡ), 25 (Giảm mỡ nhanh).
+- **Macros (upper end, one number):** protein 2.2 g/kg; fat 1.0 g/kg; carbs the remainder; fibre 14 g per 1,000 kcal, at most 40 g (men) / 30 g (women). Fast carbs (30–45 g per training hour) and salt stay ranges.
+- **Vitamins and minerals:** the US DRI (RDA, or AI) by sex and age with the Tolerable Upper Intake Level as the maximum: docs/dri-targets-2026-10-20.md.
 - **Macro presets:** Cân bằng 25/55/20, Tăng cơ cao đạm 30/45/25, Giảm mỡ 35/35/30, Keto 20/5/75: approved by the coach (17/10).
 - **Salt:** 4–6 g/day, plus 1–1.5 g per 20 min of training. Sodium mg = salt g × 393.
 - **Minerals:**
