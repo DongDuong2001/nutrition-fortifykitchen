@@ -31,18 +31,15 @@ export interface Release {
 }
 
 export const RELEASES: readonly Release[] = [
-  // Overnight 20/10: the date at the top of Hôm nay opens the calendar (cc-72), sheets that follow the finger (cc-62),
-  // Xóa bữa with Hoàn tác only (cc-62), text that follows the phone's text size (cc-66), number fields that are easier
-  // to type in (cc-62, cc-64). The tour is the date, on Hôm nay
+  // Overnight 20/10: the date at the top of Hôm nay opens the calendar (cc-72), Xóa bữa with Hoàn tác only (cc-62), text
+  // that follows the phone's text size (cc-66); these three only (Hao, 20/10). The tour is the date, on Hôm nay
   {
     id: "2026-10-20b",
     date: "20/10",
     items: [
       { icon: "home", title: "Bấm vào ngày để mở lịch", body: "Muốn xem lại ngày cũ thì bấm vào ngày ở đầu trang, chọn ngày bất kỳ trên lịch. Ngày có ghi món sẽ có chấm." },
-      { icon: "select", title: "Kéo bảng xuống mượt hơn", body: "Vuốt nhanh xuống là bảng đóng, kéo chậm thì bảng trở lại chỗ cũ. Lỡ vuốt thì chụp lại bảng ngay lúc nó đang trượt." },
-      { icon: "meal", title: "Xóa bữa không cần hỏi lại", body: "Bấm Xóa bữa này là xóa liền. Lỡ tay thì bấm Hoàn tác, có 8 giây." },
-      { icon: "home", title: "Chữ to theo máy bạn", body: "Ai chỉnh chữ to trong cài đặt điện thoại thì chữ trong app cũng to theo, đọc đỡ mỏi mắt." },
-      { icon: "target", title: "Gõ số dễ hơn", body: "Ô gam để trống hay ghi 0 sẽ nhắc nhập số lớn hơn 0. Ô mục tiêu đạm, béo không tự nhảy về 0 khi đang xóa số." },
+      { icon: "meal", title: "Xóa bữa không cần hỏi lại", body: "Bấm Xóa bữa này là xóa liền. Lỡ tay thì bấm Hoàn tác trong 8 giây." },
+      { icon: "home", title: "Chữ to theo máy bạn", body: "Chỉnh chữ to trong cài đặt điện thoại thì chữ trong app cũng to theo, đọc đỡ mỏi mắt." },
     ],
     tour: [{ target: "day-date", fallback: "day-prev", title: "Mở lịch", body: "Bấm vào ngày để chọn ngày khác trên lịch. Ngày có chấm là ngày có ghi món." }],
   },

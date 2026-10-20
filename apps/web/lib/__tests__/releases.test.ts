@@ -153,18 +153,20 @@ describe("unseenReleases (what Có gì mới lists)", () => {
     expect(ids(null)).toEqual(["2026-10-20b"]);
   });
 
-  it("overnight 20/10: the newest release (2026-10-20b) is the date that opens the calendar, then four changes users notice; a 1-step tour on the date (the day arrow when it is missing)", () => {
+  it("overnight 20/10: the newest release (2026-10-20b) is the date that opens the calendar, then two changes users notice (these three items only, Hao 20/10); a 1-step tour on the date (the day arrow when it is missing)", () => {
     const r = latestRelease();
     expect(r?.id).toBe("2026-10-20b");
     expect(r?.date).toBe("20/10");
     expect(r?.items.map((i) => [i.icon, i.title])).toEqual([
       ["home", "Bấm vào ngày để mở lịch"],
-      ["select", "Kéo bảng xuống mượt hơn"],
       ["meal", "Xóa bữa không cần hỏi lại"],
       ["home", "Chữ to theo máy bạn"],
-      ["target", "Gõ số dễ hơn"],
     ]);
-    expect(r?.items[0].body).toBe("Muốn xem lại ngày cũ thì bấm vào ngày ở đầu trang, chọn ngày bất kỳ trên lịch. Ngày có ghi món sẽ có chấm.");
+    expect(r?.items.map((i) => i.body)).toEqual([
+      "Muốn xem lại ngày cũ thì bấm vào ngày ở đầu trang, chọn ngày bất kỳ trên lịch. Ngày có ghi món sẽ có chấm.",
+      "Bấm Xóa bữa này là xóa liền. Lỡ tay thì bấm Hoàn tác trong 8 giây.",
+      "Chỉnh chữ to trong cài đặt điện thoại thì chữ trong app cũng to theo, đọc đỡ mỏi mắt.",
+    ]);
     for (const i of r?.items ?? []) expect(i.body).not.toContain(":");
     expect(r?.tour?.map((s) => [s.target, s.fallback ?? null, s.advanceOn ?? null, s.title])).toEqual([["day-date", "day-prev", null, "Mở lịch"]]);
     expect(r?.tour?.[0].body.length).toBeLessThanOrEqual(100);

@@ -39,7 +39,7 @@ SETTINGS_KEY = "h1t_settings_v1_demo"
 RELEASE = "2026-10-20b"
 HOME_TIPS = ["home-logged", "meal-add", "home-share"]
 # Newest first: cc-53b (2026-10-18f), cc-52 (2026-10-18e), cc-53 (2026-10-18d), cc-51 (2026-10-18c), Thực phẩm bổ sung và Gia vị (2026-10-18b), then cc-49 (2026-10-18)
-ITEMS = ["Bấm vào ngày để mở lịch", "Kéo bảng xuống mượt hơn", "Xóa bữa không cần hỏi lại", "Chữ to theo máy bạn", "Gõ số dễ hơn"]  # overnight 20/10 (2026-10-20b)
+ITEMS = ["Bấm vào ngày để mở lịch", "Xóa bữa không cần hỏi lại", "Chữ to theo máy bạn"]  # overnight 20/10 (2026-10-20b)
 ITEMS_2010A = ["Giữ rồi kéo món sang bữa khác"]  # cc-70 (2026-10-20a)
 ITEMS_1910B = ["Quên ghi hôm qua? Ghi bù được rồi", "Mất mạng vẫn ghi được", "Nhìn góc trên là biết đã lưu chưa", "Điện thoại, máy tính thấy y nhau", "Đăng xuất không lo mất món"]  # cc-68 (2026-10-19b)
 ITEMS_1910A = ["Tìm món gọn hơn", "Trái cây chỉ tính phần ăn được", "Phở thêm thịt? Chỉnh được", "Mục tiêu vi chất theo Bộ Y tế"]  # cc-67 (2026-10-19a)
