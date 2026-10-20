@@ -50,7 +50,7 @@ import { useMealSlot } from "@/lib/use-meal-slot";
 import { HOME_ROUTE } from "@/lib/nav";
 import { takeBackSheetEntries } from "@/lib/sheet-history";
 import { homeDay } from "@/lib/home-scroll";
-import { SHEET_CATCH_UP_MS, SHEET_ENTER_MS, SHEET_EXIT_MS, useSheetDrag } from "@/components/ui/sheet";
+import { SHEET_CATCH_UP_MS, SHEET_EXIT_MS, SHEET_QUICK_ENTER_MS, useSheetDrag } from "@/components/ui/sheet";
 import { setInertExceptDrag } from "@/components/ui/sheet-drag-controller";
 import { haptic } from "@/lib/haptics";
 import { IconButton } from "@/components/ui/icon-button";
@@ -170,7 +170,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
     };
     panel?.addEventListener("transitionend", onEnd);
     // A reduced-motion or interrupted slide may end with no event of its own: never wait longer than the slide takes
-    const timer = window.setTimeout(focusSearch, SHEET_ENTER_MS + 100);
+    const timer = window.setTimeout(focusSearch, SHEET_QUICK_ENTER_MS + 100);
     return () => {
       done = true;
       panel?.removeEventListener("transitionend", onEnd);
@@ -599,7 +599,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
     // Opened over a tab (the intercepting route) the page under it is the real screen, still mounted; nothing here is in the
     // page's flow. Opened straight (a link, a reload) there is nothing under it: plain paper.
     <div className={standalone ? "min-h-dvh bg-page text-text font-sans" : "text-text font-sans"}>
-      <div ref={scrimRef} aria-hidden="true" data-state={sheetState} onClick={() => handleClose()} className="m-scrim m-scrim-dialog fixed inset-0 z-nav bg-scrim" />
+      <div ref={scrimRef} aria-hidden="true" data-state={sheetState} onClick={() => handleClose()} className="m-scrim m-scrim-dialog m-quick fixed inset-0 z-nav bg-scrim" />
 
       {/* ============================================================== */}
       {/* DESKTOP MODAL OVER TODAY (≥1024px)                             */}
@@ -748,7 +748,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
           data-sheet-route
           data-state={sheetState}
           data-under-sheet={selectedFood !== null && !isDesktop ? "" : undefined}
-          className="m-sheet m-vt-sheet fixed inset-x-0 bottom-0 top-[8dvh] z-nav flex flex-col rounded-t-sheet bg-card shadow-sheet"
+          className="m-sheet m-quick m-vt-sheet fixed inset-x-0 bottom-0 top-[8dvh] z-nav flex flex-col rounded-t-sheet bg-card shadow-sheet"
         >
           {/* Pinned header: grabber, meal switcher + close, search, chips. cc-62 (S15): the list fades out under it (a 12 px edge) */}
           <div className="relative z-sticky flex shrink-0 flex-col gap-3 px-4 pt-3 pb-3 after:pointer-events-none after:absolute after:inset-x-0 after:top-full after:h-3 after:bg-linear-to-b after:from-card after:to-transparent">
@@ -857,6 +857,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
         }}
         labelledBy="portion-sheet-title"
         stacked
+        quick
       >
         {selectedFood && (
           <div className="-mx-4 max-h-[86dvh] overflow-y-auto overscroll-contain px-4 pb-[env(safe-area-inset-bottom)]">

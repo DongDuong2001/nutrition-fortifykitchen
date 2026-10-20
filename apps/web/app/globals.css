@@ -9,6 +9,15 @@
   }
 }
 
+/* Press feedback starts on touch-down (cc-fluid-add): `active:` also matches an element lib/press-feedback has marked data-pressed at
+   the pointerdown, so a phone shows the press at once instead of when the browser decides a touch is a press (and :active is
+   there for a mouse and the keyboard as before) */
+@custom-variant active {
+  &:is(:active, [data-pressed]) {
+    @slot;
+  }
+}
+
 /* cc-66 (S16): see-through surfaces become solid when the system asks for less transparency */
 @custom-variant reduced-transparency (@media (prefers-reduced-transparency: reduce));
 
@@ -81,6 +90,10 @@
   --color-scrim-2: rgba(17, 19, 23, 0.22);
   /* A row, card or full-width button being pressed tints instead of shrinking (cc-55) */
   --color-press: rgba(17, 19, 23, 0.06);
+  /* The hold on a food row (touch drag): the tint deepens over the 500 ms before the row lifts */
+  --color-press-hold: rgba(17, 19, 23, 0.14);
+  /* The press wash on ink (the Hôm nay pills, the bottom nav): a dark tint does not read there */
+  --color-press-on-dark: rgba(255, 255, 255, 0.16);
   --color-surface-dark: #1A1C22;
   --color-warning-bg: #FFF4E0;
   --color-warning-text: #7A4A00;
@@ -168,7 +181,7 @@
   transition-property: transform, scale, background-color, border-color, color, opacity;
   transition-duration: var(--m-press);
   transition-timing-function: var(--ease-out);
-  &:active {
+  &:is(:active, [data-pressed]) {
     transition-duration: var(--m-press-in);
   }
 }
@@ -276,15 +289,15 @@
       transform var(--m-press) var(--ease-out),
       scale var(--m-press) var(--ease-out);
   }
-  button:active,
-  a.inline-flex:active {
+  button:is(:active, [data-pressed]),
+  a.inline-flex:is(:active, [data-pressed]) {
     transform: scale(0.97);
     /* cc-62 (S7): the press goes in faster (100 ms) than it comes back (160 ms) */
     transition-duration: var(--m-press-in);
   }
   /* an element with active:scale-* scales through that property alone (both would shrink it to 0.94) */
-  button[class*="active:scale-"]:active,
-  a.inline-flex[class*="active:scale-"]:active {
+  button[class*="active:scale-"]:is(:active, [data-pressed]),
+  a.inline-flex[class*="active:scale-"]:is(:active, [data-pressed]) {
     transform: none;
   }
   button.w-full,
@@ -312,30 +325,30 @@
     pointer-events: none;
     transition: opacity var(--m-tint-out) var(--ease-out);
   }
-  button.w-full:active,
-  button.flex-1:active,
-  a.w-full:active,
-  a.block:active,
-  a.flex:active,
-  [role="option"]:active,
-  .m-tint:active {
+  button.w-full:is(:active, [data-pressed]),
+  button.flex-1:is(:active, [data-pressed]),
+  a.w-full:is(:active, [data-pressed]),
+  a.block:is(:active, [data-pressed]),
+  a.flex:is(:active, [data-pressed]),
+  [role="option"]:is(:active, [data-pressed]),
+  .m-tint:is(:active, [data-pressed]) {
     transform: none;
   }
-  button.w-full:active::after,
-  button.flex-1:active::after,
-  a.w-full:active::after,
-  a.block:active::after,
-  a.flex:active::after,
-  [role="option"]:active::after,
-  .m-tint:active::after {
+  button.w-full:is(:active, [data-pressed])::after,
+  button.flex-1:is(:active, [data-pressed])::after,
+  a.w-full:is(:active, [data-pressed])::after,
+  a.block:is(:active, [data-pressed])::after,
+  a.flex:is(:active, [data-pressed])::after,
+  [role="option"]:is(:active, [data-pressed])::after,
+  .m-tint:is(:active, [data-pressed])::after {
     opacity: 1;
     transition-duration: var(--m-tint-in);
   }
   /* A full-width pill is a main action (Lưu, Thêm vào ..., Lưu & chọn tiếp): it scales, no tint */
-  button.w-full.rounded-full:not([class*="active:scale-"]):active,
-  a.w-full.rounded-full:not([class*="active:scale-"]):active,
-  a.flex.rounded-full:not([class*="active:scale-"]):active,
-  a.block.rounded-full:not([class*="active:scale-"]):active {
+  button.w-full.rounded-full:not([class*="active:scale-"]):is(:active, [data-pressed]),
+  a.w-full.rounded-full:not([class*="active:scale-"]):is(:active, [data-pressed]),
+  a.flex.rounded-full:not([class*="active:scale-"]):is(:active, [data-pressed]),
+  a.block.rounded-full:not([class*="active:scale-"]):is(:active, [data-pressed]) {
     transform: scale(0.97);
   }
   button.w-full.rounded-full::after,
@@ -343,6 +356,19 @@
   a.flex.rounded-full::after,
   a.block.rounded-full::after {
     content: none;
+  }
+
+  /* On ink (the Hôm nay pills, the bottom nav) the press shows as a light wash: a tint of ink does not read there, nor does 0.97.
+     .m-tint-dark recolours the tint overlay; .m-on-ink-press washes the face of a control whose first child is the face. */
+  .m-tint.m-tint-dark::after {
+    background: var(--color-press-on-dark);
+  }
+  .m-on-ink-press > :first-child {
+    transition: background-color var(--m-tint-out) var(--ease-out);
+  }
+  .m-on-ink-press:is(:active, [data-pressed]) > :first-child {
+    background-color: var(--color-press-on-dark);
+    transition-duration: var(--m-tint-in);
   }
 
   a,
@@ -359,12 +385,12 @@
     button {
       transition: none;
     }
-    a:active,
-    button:active,
-    button.w-full.rounded-full:not([class*="active:scale-"]):active,
-    a.w-full.rounded-full:not([class*="active:scale-"]):active,
-    a.flex.rounded-full:not([class*="active:scale-"]):active,
-    a.block.rounded-full:not([class*="active:scale-"]):active {
+    a:is(:active, [data-pressed]),
+    button:is(:active, [data-pressed]),
+    button.w-full.rounded-full:not([class*="active:scale-"]):is(:active, [data-pressed]),
+    a.w-full.rounded-full:not([class*="active:scale-"]):is(:active, [data-pressed]),
+    a.flex.rounded-full:not([class*="active:scale-"]):is(:active, [data-pressed]),
+    a.block.rounded-full:not([class*="active:scale-"]):is(:active, [data-pressed]) {
       transform: none;
       scale: none;
     }
@@ -743,6 +769,16 @@
    eases back to the row (data-landing). button.w-full:active would flatten the lift, so the lifted rule names it too. */
 :root {
   --m-drag-back: 200ms;
+  /* How long a finger rests on a food row before it lifts: lib/use-touch-drag TOUCH_LIFT_MS (a unit test keeps them equal) */
+  --m-hold: 500ms;
+}
+@keyframes m-hold-tint {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 .m-drag-lift {
   transition: transform var(--m-press) var(--ease-out);
@@ -760,6 +796,19 @@ button.m-drag-lift[data-touch-drag="lifted"],
 button.m-drag-lift[data-touch-drag="lifted"]:active {
   transform: scale(1.03);
   box-shadow: 0 4px 12px rgba(17, 19, 23, 0.18);
+}
+/* The hold: from the touch-down the tint of the row deepens for the 500 ms the finger rests (linear: it is a clock), then the
+   lift takes 160 ms (the transition above). It stays that deep while the row is lifted. */
+button.m-drag-lift[data-touch-drag="pressing"]::after {
+  background: var(--color-press-hold);
+  opacity: 0;
+  animation: m-hold-tint var(--m-hold) linear forwards;
+}
+button.m-drag-lift[data-touch-drag="lifted"]::after,
+button.m-drag-lift[data-touch-drag="dragging"]::after {
+  background: var(--color-press-hold);
+  opacity: 1;
+  animation: none;
 }
 button.m-drag-lift[data-touch-drag="dragging"] {
   opacity: 0.4;
@@ -893,6 +942,20 @@ button.m-drag-lift[data-touch-drag="dragging"] {
   animation: none;
 }
 
+/* Reduced motion: nothing scales when pressed. The press rules above are in @layer base and Tailwind's active:scale-* utilities
+   in @layer utilities, which wins over base, so the reset has to be outside every layer to beat them both. */
+@media (prefers-reduced-motion: reduce) {
+  :is(:active, [data-pressed]) {
+    scale: none;
+  }
+}
+
+/* /add and the portion sheet come up in 300 ms; every other sheet keeps 350 (the exit is 220 for all) */
+.m-sheet.m-quick,
+.m-scrim.m-quick {
+  --m-sheet-in: 300ms;
+}
+
 /* Reduced motion: nothing moves; what fades does it in 120 ms at most */
 @media (prefers-reduced-motion: reduce) {
   .m-sheet,
@@ -996,6 +1059,10 @@ button.m-drag-lift[data-touch-drag="dragging"] {
   button.m-drag-lift[data-touch-drag="lifted"],
   button.m-drag-lift[data-touch-drag="lifted"]:active {
     transform: none;
+  }
+  button.m-drag-lift[data-touch-drag="pressing"]::after {
+    animation: none;
+    opacity: 1;
   }
   .m-drag-ghost[data-landing] {
     transition: none;
