@@ -143,7 +143,21 @@ Filmstrips (frames from just before the tap, each labelled with ms since it; a f
 
 ## Gates
 
-@@GATES@@
+```
+gate:full: 642 s wall clock   (feat/fluid-add head, port 3126)
+  typecheck       ok      0 s
+  vitest          ok      6 s   (163 files, 2073 tests, 1 skipped)
+  build:demo      ok      7 s
+  test:align      ok     73 s
+  test:hydration  ok    109 s
+  probe:all       ok    629 s   probe:all: 112 PASS, 4 REPORT, 0 QUAR, 0 FAIL, 1 SKIP (cc02-final, dev only)
+gate:full: all green
+```
+- `apps/api` is untouched (no `go vet` / `go test` needed). No migration, no deploy.
+- The first gate:full run failed two probes, both timing assumptions the change broke, not behaviour: `cc12.py` waited 300 ms for the calendar to land (it used to open 300 ms late, now at once) and `cc_57_strips.py` aimed a touch at a 24 px grabber that, one frame into the slide, moves 8 px per ms of animation time (slowed to 0.2 % instead of 2 %). Both fixed in the probe; the second run is the green one above.
+- By hand, on a live-mode build (`LIVE_BUILD=1`, not part of probe:all): `cc_68.py` (A, B, C, D, E: offline add, yesterday add through `/add?date=…`, sync status, sign-out) passes, `hotfix_late_writes.py` and `hotfix_recipes.py` pass, `cc_49.py` passes except its part 7, which fails the same way on origin/main.
+- New: `tests/probes/fluid_add.py` (what the flow promises; in the gate, tagged smoke), `tests/probes/_fluid_add_measure.py` (the numbers above), unit tests for the sheet physics, the controller, the sheet entries, press feedback, the touch-drag landing, the toast swipe, the nav's +, the lazy sheets and the new CSS rules (`motion.test.ts`).
+
 
 ## For Hao
 
