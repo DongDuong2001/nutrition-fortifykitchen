@@ -47,7 +47,7 @@ Written by `tests/probes/_polish_shots.py` (not a gate probe), looked at one by 
 ```
 gate:full: 656 s wall clock   (fix/polish-1020 head 66b6c91, port 3126)
   typecheck       ok      0 s
-  vitest          ok      6 s
+  vitest          ok      6 s   (166 files, 2097 tests, 1 skipped)
   build:demo      ok      7 s
   test:align      ok     73 s
   test:hydration  ok    109 s
