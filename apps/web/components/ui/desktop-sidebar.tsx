@@ -3,7 +3,7 @@
 import { startTransition, useOptimistic } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { NAV_TABS, tabForPath, type NavTab } from "@/lib/nav";
+import { HOME_ROUTE, NAV_TABS, tabForPath, type NavTab } from "@/lib/nav";
 import { NavIcon, PlusIcon } from "@/components/ui/nav-icons";
 import { rememberAddOpener } from "@/components/ui/add-opener";
 
@@ -18,9 +18,17 @@ export function DesktopSidebar({ currentTab }: { currentTab?: NavTab }) {
 
   return (
     <aside className="hidden w-60 shrink-0 flex-col gap-6 bg-ink p-6 text-on-dark box-border lg:flex">
-      <div className="px-2 font-display italic font-black text-2xl tracking-display">
-        H1T <span className="text-sky">MICRO</span>
-      </div>
+      {/* The wordmark goes back to Hôm nay (Hao, 20/10) */}
+      <Link
+        href={HOME_ROUTE}
+        aria-label="H1T MICRO, về Hôm nay"
+        data-tour="home-logo"
+        className="block w-fit rounded-md px-2 font-display italic font-black text-2xl tracking-display text-on-dark no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100 focus-visible:outline-sky"
+      >
+        <span aria-hidden="true">
+          H1T <span className="text-sky">MICRO</span>
+        </span>
+      </Link>
       <Link
         id="desktop-add-btn"
         data-tour="nav-add"

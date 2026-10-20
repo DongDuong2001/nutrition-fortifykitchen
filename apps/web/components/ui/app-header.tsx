@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { formatDayLabel } from "@/lib/format";
+import { HOME_ROUTE } from "@/lib/nav";
 import { StepBars } from "@/components/ui/step-bars";
 import { SyncStatus } from "@/components/sync/sync-status";
 
@@ -184,9 +185,17 @@ export function AppHeader({
                 {phoneStart ? (
                   <div className="lg:hidden">{phoneStart}</div>
                 ) : (
-                  <div aria-hidden="true" className={`whitespace-nowrap font-display italic font-black ${compact ? "text-[21px]" : "text-[20px] leading-[28px]"} uppercase tracking-tight lg:hidden`}>
-                    H1T <span className="text-sky">MICRO</span>
-                  </div>
+                  // The wordmark is the way back to Hôm nay from any screen that shows it (Hao, 20/10)
+                  <Link
+                    href={HOME_ROUTE}
+                    aria-label="H1T MICRO, về Hôm nay"
+                    data-tour="home-logo"
+                    className={`inline-flex min-h-11 items-center whitespace-nowrap rounded-md font-display italic font-black text-on-dark no-underline ${compact ? "text-[21px]" : "text-[20px] leading-[28px]"} uppercase tracking-tight active:scale-[0.97] transition-press motion-reduce:active:scale-100 focus-visible:outline-sky lg:hidden`}
+                  >
+                    <span aria-hidden="true">
+                      H1T <span className="text-sky">MICRO</span>
+                    </span>
+                  </Link>
                 )}
                 {title && (
                   <Title className="sr-only lg:not-sr-only m-0 font-display italic font-extrabold text-2xl lg:text-display-sm leading-tight uppercase tracking-display">
