@@ -185,6 +185,21 @@ gate:full: all green
 - New: `tests/probes/fluid_add.py` (what the flow promises; in the gate, tagged smoke), `tests/probes/_fluid_add_measure.py` (the numbers above), unit tests for the sheet physics, the controller, the sheet entries, press feedback, the touch-drag landing, the toast swipe, the nav's +, the lazy sheets and the new CSS rules (`motion.test.ts`).
 
 
+### After the review fixes (head of the branch, port 3126)
+
+```
+gate:full: 658 s wall clock
+  typecheck       ok      0 s
+  vitest          ok      5 s   (164 files, 2077 tests, 1 skipped)
+  build:demo      ok      7 s
+  test:align      ok     73 s
+  test:hydration  ok    109 s
+  probe:all       ok    645 s   probe:all: 113 PASS, 4 REPORT, 0 QUAR, 0 FAIL, 1 SKIP
+gate:full: all green
+```
+- `gate:fast` was not run per commit this round: the probes the changes touch (`add_from_tabs`, `fluid_add`, `cc_62_sheet`, `cc_57_strips`, and `cc_49` part 4 on a live build by hand) were run after each change, and gate:full covers the rest.
+- Each new check was run against the unfixed code first: the stuck sheet (item 1), the day flip (3) and the double add (4) failed there and pass now.
+
 ## For Hao
 
 Decisions and checks that are yours; the same lines are in `OPEN_QUESTIONS.md` (feat/fluid-add):
