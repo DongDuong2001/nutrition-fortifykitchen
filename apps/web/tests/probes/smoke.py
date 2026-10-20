@@ -155,8 +155,9 @@ def check(browser, route, width, height):
             reasons.append("no visible header (banner role or AppHeader)")
 
         # fix/polish-1020: every screen has one <main> landmark and one h1 (a screen reader's two jump points)
-        mains = page.locator('main, [role="main"]').count()
-        h1s = page.locator("h1").count()
+        # counted as a screen reader sees them: an element hidden by CSS (the phone or the desktop copy of a layout) is not there
+        mains = page.locator('main:visible, [role="main"]:visible').count()
+        h1s = page.locator("h1:visible").count()
         if mains != 1:
             reasons.append(f"{mains} <main> landmarks (one per screen)")
         if h1s != 1:

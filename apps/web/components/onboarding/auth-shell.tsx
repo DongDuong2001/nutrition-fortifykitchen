@@ -14,7 +14,7 @@ export interface AuthShellProps {
  */
 export function AuthShell({ hero, children, split = false }: AuthShellProps) {
   return (
-    <div className={`flex min-h-dvh flex-col ${split ? "lg:flex-row" : ""}`}>
+    <main className={`flex min-h-dvh flex-col ${split ? "lg:flex-row" : ""}`}>
       <section
         className={`bg-ink text-on-dark rounded-b-sheet px-6 pt-[max(44px,calc(env(safe-area-inset-top)+16px))] pb-6 ${
           split ? "lg:flex-1 lg:rounded-none lg:px-8 lg:py-8 lg:flex lg:flex-col lg:justify-center" : ""
@@ -28,6 +28,6 @@ export function AuthShell({ hero, children, split = false }: AuthShellProps) {
       <div className={`flex flex-1 flex-col px-6 py-6 ${split ? "lg:justify-center lg:px-8 lg:py-8" : ""}`}>
         <div className="mx-auto flex w-full max-w-[420px] flex-col gap-3">{children}</div>
       </div>
-    </div>
+    </main>
   );
 }

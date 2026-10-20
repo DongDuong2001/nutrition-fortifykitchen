@@ -157,11 +157,12 @@ export function SetupForm({ step }: { step: SetupStep }) {
       </div>
 
       {!loaded ? (
-        <div aria-busy="true" aria-live="polite" className="flex flex-1 flex-col gap-3 px-4 py-5">
+        <main aria-busy="true" aria-live="polite" className="flex flex-1 flex-col gap-3 px-4 py-5">
           <div className={SKELETON_CLASS} />
           <div className={SKELETON_CLASS} />
-        </div>
+        </main>
       ) : (
+        <main className="flex flex-1 flex-col lg:w-full lg:max-w-[760px] lg:flex-none">
         <form
           onSubmit={handleSubmit}
           noValidate
@@ -379,6 +380,7 @@ export function SetupForm({ step }: { step: SetupStep }) {
             </PillButton>
           </div>
         </form>
+        </main>
       )}
     </div>
   );
