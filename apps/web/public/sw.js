@@ -8,7 +8,7 @@
  *    comes back while the app is closed (cc-68). It only ever removes a write the server has; every other outcome is left
  *    to the page, which owns retries and holds.
  * Bump VERSION on a release that changes this file or the shell list. lib/pwa.ts holds the tested copy of routeFor. */
-const VERSION = "2026-10-20.3";
+const VERSION = "2026-10-20.4";
 const SHELL_CACHE = "h1t-shell-" + VERSION;
 const STATIC_CACHE = "h1t-static-" + VERSION;
 const PAGES = ["/", "/app", "/trends", "/explore", "/settings", "/offline"];
@@ -206,10 +206,20 @@ function openOutboxDb() {
   });
 }
 
-/* Hotfix 20/10: a diary write carries made_at, when the user made it (the item's createdAt, never the time of this send): the server judges the day by it. */
+/* Hotfix 20/10: a diary write carries made_at, when the user made it (never the time of this send): the server judges the day by it.
+   lib/late-writes madeAtMs holds the tested copy: madeAt (an entry sent again: its own time), else a plausible createdAt, else the
+   write's day at 23:00 Ho Chi Minh time; never later than now. */
+function madeAtOfItem(item) {
+  const plausible = function (t) { return typeof t === "number" && isFinite(t) && t > Date.UTC(2020, 0, 1); };
+  const day = item.date || item.day || "";
+  const dayEnd = /^\d{4}-\d{2}-\d{2}$/.test(day) ? Date.parse(day + "T23:00:00+07:00") : NaN;
+  const t = plausible(item.madeAt) ? item.madeAt : plausible(item.createdAt) ? item.createdAt : dayEnd;
+  return isNaN(t) ? null : new Date(Math.min(t, Date.now())).toISOString();
+}
+
 function stampOutboxItem(item, method, path) {
   const diary = /^\/(days|entries)\//.test(path);
-  const madeAt = diary && item.createdAt > Date.UTC(2020, 0, 1) ? new Date(item.createdAt).toISOString() : null;
+  const madeAt = diary ? madeAtOfItem(item) : null;
   if (method === "DELETE") return { path: madeAt ? path + (path.indexOf("?") >= 0 ? "&" : "?") + "made_at=" + encodeURIComponent(madeAt) : path, body: undefined };
   const payload = madeAt ? Object.assign({}, item.payload, { made_at: madeAt }) : item.payload;
   return { path: path, body: JSON.stringify(payload) };

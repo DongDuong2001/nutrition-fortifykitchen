@@ -72,6 +72,24 @@ describe("the service worker's sync event", () => {
     expect(t.posted).toEqual([{ from: "sw", message: { type: "outbox", scope: ACCOUNT } }, { from: "sw", message: { type: "diary", scope: ACCOUNT } }]);
   });
 
+  it("made_at as the page sends it (lib/late-writes madeAtMs): madeAt, else a plausible createdAt, else the day at 23:00 Ho Chi Minh time, never later than now", async () => {
+    const made = Date.parse("2026-10-17T05:00:00Z");
+    await seed([
+      record({ id: ID, key: "a", seq: 1, date: "2026-10-17", createdAt: Date.now(), madeAt: made }),
+      record({ id: ID, key: "b", seq: 2, date: "2026-10-17", createdAt: made }),
+      record({ id: ID, key: "c", seq: 3, date: "2026-10-17" }),
+      record({ id: ID, key: "d", seq: 4, date: "", day: "2026-10-16", method: "PATCH", path: `/entries/${ID}`, payload: {} }),
+      record({ id: ID, key: "e", seq: 5, date: "2999-01-01" }),
+    ]);
+    const t = loadWorker(async () => ({ status: 201 }));
+    const before = Date.now();
+    await t.sw.drainOutbox();
+    const stamps = t.calls.map((c) => (c.body as { made_at?: string }).made_at);
+    expect(stamps.slice(0, 4)).toEqual(["2026-10-17T05:00:00.000Z", "2026-10-17T05:00:00.000Z", "2026-10-17T16:00:00.000Z", "2026-10-16T16:00:00.000Z"]);
+    expect(Date.parse(stamps[4]!)).toBeGreaterThanOrEqual(before);
+    expect(Date.parse(stamps[4]!)).toBeLessThanOrEqual(Date.now());
+  });
+
   it("a delete the server no longer has (404) is done", async () => {
     await seed([record({ key: "d", method: "DELETE", path: `/entries/${ID}`, payload: {} })]);
     const t = loadWorker(async () => ({ status: 404 }));

@@ -11,8 +11,13 @@ date rule (made_at within 14 days, else 409 PAST_DAY_READ_ONLY; without made_at 
      Vẫn đăng xuất (mất N món) (it does not just stop)
   D  the sync status in the header (the Chưa lưu pill, or Ngoại tuyến · n chờ gửi offline) never shares its box with the day arrows or the
      date, today and yesterday, at 360, 390 and 430 wide; five points across the pill all hit it, and the › arrow stays tappable
+  E  2026-10-20.4, what production showed (12 adds for a closed day, all 409): (1) the old app's localStorage outbox in its first
+     shape ({ id, date, payload, createdAt, retries }), one item with no createdAt at all, moves to IndexedDB and is saved, made_at =
+     its own createdAt, else its day at 23:00 Ho Chi Minh time; (2) a closed day's entries queued again with createdAt = the moment
+     they were queued again, held by a 409 (not final), and the day's record holding them as unsynced: on load their time is put
+     right (the entry's addedAt, else the day at 23:00), they are sent once more and saved
 Run with: LIVE_BUILD=1 ALIGN_BASE_URL=http://localhost:3112 npm run probe -- tests/probes/hotfix_late_writes.py
-Pick parts with HLW_ONLY=A,B,C,D
+Pick parts with HLW_ONLY=A,B,C,D,E
 """
 # PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/settings/account/**
 import base64
@@ -191,13 +196,54 @@ def seed(pg, items):
                  items.forEach((i) => outbox.put(i));
                };
                const kv = tx.objectStore('kv');
-               kv.getAllKeys().onsuccess = (e) => e.target.result.filter((k) => String(k).startsWith('unstick-late-writes:')).forEach((k) => kv.delete(k));
+               kv.getAllKeys().onsuccess = (e) => e.target.result.filter((k) => String(k).startsWith('unstick-late-writes')).forEach((k) => kv.delete(k));
                tx.oncomplete = () => { db.close(); resolve(true); };
                tx.onerror = () => reject(tx.error);
              };
            })""",
         {"items": items, "email": EMAIL},
     )
+
+
+def seed_legacy(pg, legacy):
+    """The old app's outbox: a JSON array in localStorage under the account's key, IndexedDB's outbox empty for the account."""
+    seed(pg, [])
+    pg.evaluate("({ key, value }) => localStorage.setItem(key, value)", {"key": f"h1t_offline_outbox_{EMAIL}", "value": json.dumps(legacy)})
+
+
+def seed_day(pg, day, unsynced):
+    """The closed day's record in the cache (lib/day-cache), with the entries the server never confirmed, whole."""
+    pg.evaluate(
+        """({ record, key }) => new Promise((resolve, reject) => {
+             const open = indexedDB.open('h1t');
+             open.onerror = () => reject(open.error);
+             open.onsuccess = () => {
+               const db = open.result;
+               const tx = db.transaction('days', 'readwrite');
+               tx.objectStore('days').put(record, key);
+               tx.oncomplete = () => { db.close(); resolve(true); };
+               tx.onerror = () => reject(tx.error);
+             };
+           })""",
+        {"record": {"scope": EMAIL, "date": day, "at": 0, "final": False, "entries": [], "unsynced": unsynced}, "key": f"{EMAIL}|{day}"},
+    )
+
+
+def diary_entry(n, added_at):
+    return {"id": f"{n}{n}{n}{n}{n}{n}{n}{n}-1111-4111-8111-111111111111", "foodId": FOOD_ID, "foodName": "Khoai lang luộc", "grams": 100, "displayQty": "100 g", "mealSlot": "lunch", "calories": 101, "protein": 2, "carbs": 20, "fat": 1, "fiber": 0, "nutrients": {}, "addedAt": added_at}
+
+
+def day_end(day):
+    """Day `day` at 23:00 Asia/Ho_Chi_Minh, as the app sends it."""
+    return datetime.fromisoformat(day + "T23:00:00+07:00").astimezone(timezone.utc)
+
+
+def wait_saved(pg, api, n):
+    for _ in range(60):
+        if len([x for x in api.posts if x[3] == 201]) >= n:
+            break
+        pg.wait_for_timeout(250)
+    pg.wait_for_timeout(1500)
 
 
 def outbox(pg):
@@ -389,6 +435,59 @@ with sync_playwright() as p:
                     check(True, "D: a tap on the left edge of the pill opens the list")
                     pg.screenshot(path=str(SHOTS / "D-yesterday-390.png"))
                 ctx.close()
+
+    if want("E"):
+        # (1) the old app's outbox, first shape, one item with no time
+        api = FakeApi()
+        ctx, pg = device(browser, api)
+        open_home(pg)
+        made = NOW - timedelta(days=3)
+        made_ms = int(made.timestamp() * 1000)
+        legacy = [
+            {"id": "55555555-1111-4111-8111-111111111111", "date": THREE_BACK, "payload": {"id": "55555555-1111-4111-8111-111111111111", "kind": "food", "meal_slot": "lunch", "food_id": FOOD_ID, "grams": 100}, "createdAt": made_ms, "retries": 0},
+            {"id": "66666666-1111-4111-8111-111111111111", "date": THREE_BACK, "payload": {"id": "66666666-1111-4111-8111-111111111111", "kind": "food", "meal_slot": "lunch", "food_id": FOOD_ID, "grams": 100}},
+        ]
+        seed_legacy(pg, legacy)
+        pg.reload(wait_until="domcontentloaded")
+        pg.locator('[data-align-group="home-page"]').first.wait_for(state="visible", timeout=20000)
+        wait_saved(pg, api, 2)
+        saved = {x[1]: x for x in api.posts if x[3] == 201}
+        check(len(saved) == 2 and all(x[0] == THREE_BACK for x in saved.values()), f"E1: both items of the old outbox were saved for their day ({api.posts})")
+        first = saved.get(legacy[0]["id"])
+        check(first is not None and first[2] and abs((parse_iso(first[2]) - made).total_seconds()) < 1, f"E1: …the first with made_at = its own createdAt ({first})")
+        second = saved.get(legacy[1]["id"])
+        check(second is not None and second[2] and parse_iso(second[2]) == day_end(THREE_BACK), f"E1: …the one with no createdAt with its day at 23:00 ({second})")
+        check(pg.evaluate("(key) => localStorage.getItem(key)", f"h1t_offline_outbox_{EMAIL}") is None and len(outbox(pg)) == 0, "E1: the old key is gone and the outbox is empty")
+        ctx.close()
+
+        # (2) production: a closed day's entries queued again just now, held by a 409, the day's record holding them
+        api = FakeApi()
+        ctx, pg = device(browser, api)
+        open_home(pg)
+        requeued = []
+        for n in (1, 2, 3):
+            record = item(n, THREE_BACK, 0)
+            record["createdAt"] = int((NOW - timedelta(hours=1)).timestamp() * 1000) + n * 1000
+            record["held"] = {"status": 409, "code": "PAST_DAY_READ_ONLY"}
+            requeued.append(record)
+        added = {n: (NOW - timedelta(days=3, minutes=n)).strftime("%Y-%m-%dT%H:%M:%S.000Z") for n in (1, 2)}
+        seed(pg, requeued)
+        seed_day(pg, THREE_BACK, [diary_entry(n, added[n]) for n in (1, 2)])
+        check(api.accepts(THREE_BACK, datetime.fromtimestamp(requeued[0]["createdAt"] / 1000, timezone.utc).isoformat()) is False, "E2: the server refuses them with the time they carried (the 409 production saw)")
+        pg.reload(wait_until="domcontentloaded")
+        pg.locator('[data-align-group="home-page"]').first.wait_for(state="visible", timeout=20000)
+        wait_saved(pg, api, 3)
+        saved = {x[1]: x for x in api.posts if x[3] == 201}
+        check(len(saved) == 3 and all(x[0] == THREE_BACK for x in saved.values()), f"E2: all three were saved for their day ({api.posts})")
+        for n in (1, 2):
+            got = saved.get(requeued[n - 1]["id"])
+            check(got is not None and got[2] and parse_iso(got[2]) == parse_iso(added[n]), f"E2: …entry {n} with made_at = its addedAt in the local diary ({got})")
+        got = saved.get(requeued[2]["id"])
+        check(got is not None and got[2] and parse_iso(got[2]) == day_end(THREE_BACK), f"E2: …the one not in the diary with its day at 23:00 ({got})")
+        check(len(outbox(pg)) == 0, f"E2: the outbox is empty ({outbox(pg)})")
+        check(pg.get_by_text("Chưa lưu (").count() == 0, "E2: no Chưa lưu in the header")
+        pg.screenshot(path=str(SHOTS / "E-saved-390.png"))
+        ctx.close()
 
     browser.close()
 
