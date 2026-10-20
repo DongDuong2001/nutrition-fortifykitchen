@@ -177,13 +177,14 @@ export function AppHeader({
           className="flex min-h-11 items-center gap-2"
         >
           {back}
-          <div className="min-w-0 flex-1">
+          {/* The phone wordmark is a logo: it never shrinks or wraps; at large text sizes the date gives way instead */}
+          <div className={`min-w-0 flex-1 ${wordmark ? "max-lg:min-w-fit" : ""}`}>
             {wordmark ? (
               <>
                 {phoneStart ? (
                   <div className="lg:hidden">{phoneStart}</div>
                 ) : (
-                  <div aria-hidden="true" className={`font-display italic font-black ${compact ? "text-[1.3125rem]" : "text-xl"} uppercase tracking-tight lg:hidden`}>
+                  <div aria-hidden="true" className={`whitespace-nowrap font-display italic font-black ${compact ? "text-[21px]" : "text-[20px] leading-[28px]"} uppercase tracking-tight lg:hidden`}>
                     H1T <span className="text-sky">MICRO</span>
                   </div>
                 )}
@@ -214,7 +215,7 @@ export function AppHeader({
           {desktopStat ? <div className="hidden lg:flex">{desktopStat}</div> : null}
 
           {hasDateNav && (
-            <div className="flex shrink-0 items-center lg:gap-1.5">
+            <div className="flex min-w-0 items-center lg:shrink-0 lg:gap-1.5">
               <button type="button" onClick={onPrev} disabled={prevDisabled} aria-label="Ngày trước" data-tour="day-prev" data-testid="day-prev" className={DATE_BUTTON}>
                 <Chevron dir="left" />
               </button>
@@ -226,13 +227,17 @@ export function AppHeader({
                   aria-label={`Chọn ngày, ${dateLabel}`}
                   data-tour="day-date"
                   aria-busy={dateLabel ? undefined : true}
-                  className="inline-flex min-h-11 min-w-[104px] items-center justify-center rounded-full border-0 bg-transparent px-1 text-center text-sm font-semibold tracking-tight text-on-dark cursor-pointer hover:text-sky focus-visible:outline-sky active:scale-[0.97] transition-press motion-reduce:active:scale-100 lg:hidden"
+                  className="inline-flex min-h-11 min-w-[104px] shrink items-center justify-center rounded-full border-0 bg-transparent px-1 text-center text-sm font-semibold leading-tight tracking-tight text-on-dark cursor-pointer hover:text-sky focus-visible:outline-sky active:scale-[0.97] transition-press motion-reduce:active:scale-100 lg:hidden"
                 >
                   {dateLabel ? (
                     // cc-72: the calendar glyph says the date opens the calendar (the date stays the one control)
-                    <span className="inline-flex items-center gap-1">
-                      {dateLabel}
-                      <CalendarGlyph size={16} />
+                    // At large text sizes the label wraps before its last word, which keeps the glyph
+                    <span>
+                      {dateLabel.slice(0, dateLabel.lastIndexOf(" ") + 1)}
+                      <span className="inline-flex items-center gap-1 whitespace-nowrap align-top">
+                        {dateLabel.slice(dateLabel.lastIndexOf(" ") + 1)}
+                        <CalendarGlyph size={16} />
+                      </span>
                     </span>
                   ) : (
                     <span aria-hidden="true" className="inline-block h-5 w-[104px]" />

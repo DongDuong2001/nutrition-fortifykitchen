@@ -156,7 +156,7 @@ export function TimesStepper({ label, hint, value, valueText, min = 1, max, onCh
   const panel = variant === "panel";
   const button = stepButton(panel ? "bg-card text-xl text-text" : "bg-transparent text-xl text-text");
   const controls = (
-    <div role="group" aria-label={label} className={`flex shrink-0 items-center gap-1 ${panel ? "" : "rounded-full bg-surface p-0.5"}`}>
+    <div role="group" aria-label={label} className={`ml-auto flex shrink-0 items-center gap-1 ${panel ? "" : "rounded-full bg-surface p-0.5"}`}>
       <button type="button" aria-label={`Giảm ${label.toLowerCase()}`} disabled={disabled || value <= min} onClick={() => step(value - 1)} className={button}>
         <span aria-hidden="true">−</span>
       </button>
@@ -169,8 +169,9 @@ export function TimesStepper({ label, hint, value, valueText, min = 1, max, onCh
     </div>
   );
   return (
-    <div data-tour={dataTour} className={`flex items-center justify-between gap-3 ${panel ? "rounded-[14px] bg-surface py-2 pr-2 pl-4" : ""}`}>
-      <span className="flex min-w-0 flex-col gap-0.5">
+    // At large text sizes the label keeps at least 7.5rem and the buttons move to a line of their own, at the right
+    <div data-tour={dataTour} className={`flex flex-wrap items-center justify-between gap-x-3 gap-y-2 ${panel ? "rounded-[14px] bg-surface py-2 pr-2 pl-4" : ""}`}>
+      <span className="flex min-w-0 grow basis-[7.5rem] flex-col gap-0.5">
         <span className="text-cap font-bold text-text">{label}</span>
         {panel && hint && <span className="text-cap text-secondary">{hint}</span>}
       </span>

@@ -411,10 +411,10 @@ export function FoodList({
                 onClick={() => onMeal(meal.slot)}
                 data-testid="meal-header"
                 style={noSelect}
-                className="flex h-full min-w-0 flex-1 cursor-pointer items-center justify-between gap-2 border-0 bg-transparent p-0 text-inherit"
+                className="flex h-full min-w-0 flex-1 cursor-pointer flex-wrap items-center justify-between gap-x-2 gap-y-0.5 border-0 bg-transparent px-0 py-0.5 text-left text-inherit"
               >
                 <span className={pill.label}>{meal.label}</span>
-                <span className={pill.kcal}>
+                <span className={`${pill.kcal} ${isDropTarget ? "shrink whitespace-normal text-right" : ""}`}>
                   {isDropTarget ? "Thả vào đây để chuyển" : meal.entries.length > 0 ? kcalLabel(meal.kcal) : ""}
                 </span>
               </button>

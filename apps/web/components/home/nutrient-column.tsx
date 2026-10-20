@@ -123,9 +123,10 @@ export const NutrientColumn = memo(function NutrientColumn({
                   }`}
                 >
                   <div className="flex items-baseline justify-between gap-1">
-                    <span className="flex min-w-0 items-baseline gap-1 whitespace-nowrap">
-                      <span title={def.name} className={`min-w-0 truncate text-cap font-semibold leading-tight text-text ${lg}`}>{def.name}</span>
-                      <span className={`shrink-0 text-cap leading-tight text-secondary tabular-nums ${lg}`}>
+                    {/* The full name always shows; when name and amount do not fit on one line (large text) the amount moves under the name */}
+                    <span className="flex min-w-0 flex-wrap items-baseline gap-x-1">
+                      <span className={`min-w-0 break-words text-cap font-semibold leading-tight text-text ${lg}`}>{def.name}</span>
+                      <span className={`whitespace-nowrap text-cap leading-tight text-secondary tabular-nums ${lg}`}>
                         {value === null ? "—" : `${formatAmount(value, def.unit)} ${def.unit}`}
                       </span>
                     </span>

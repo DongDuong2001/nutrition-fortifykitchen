@@ -5,7 +5,9 @@ Có gì mới at 390x844 and 1440x900, clock fixed at 2026-10-20 10:00 Asia/Ho_C
 demo data, into docs/screenshots/cc-66/<set>/<screen>-<width>.png.
 CC66_SET=diff: compares each before/after pair in the browser (a pixel differs when a channel moves by more than 8),
 writes docs/screenshots/cc-66/diff/<screen>-<width>.png (changed pixels in red over a faded "after") and prints the
-share of changed pixels. CC66_TEXT=125: the same set at 125 % text size (the root font-size), into <set>-text125/.
+share of changed pixels. CC66_TEXT=125 (or 150): the same set at that text size (the root font-size), into <set>-text125/.
+CC66_DIR=<name> writes under docs/screenshots/<name>/ instead of cc-66/ (cc-66b, pr20-text); CC66_ONLY=home,add keeps
+those screens and CC66_WIDTHS=390 those widths.
 Run with: CC66_SET=before ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_66_shots.py
 """
 # PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/(tabs)/explore/** app/(app)/(tabs)/settings/** app/(app)/(tabs)/trends/** app/(app)/add/** app/(app)/settings/targets/** app/(app)/settings/whats-new/**
@@ -23,10 +25,12 @@ import _seed  # noqa: F401
 BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3101")
 SET = os.environ.get("CC66_SET", "")
 TEXT = os.environ.get("CC66_TEXT", "")
-OUT = Path(__file__).resolve().parent.parent.parent.parent.parent / "docs" / "screenshots" / "cc-66"
+OUT = Path(__file__).resolve().parent.parent.parent.parent.parent / "docs" / "screenshots" / os.environ.get("CC66_DIR", "cc-66")
 NOW = datetime(2026, 10, 20, 10, 0, tzinfo=timezone(timedelta(hours=7)))
 SETTINGS_KEY = "h1t_settings_v1_demo"
 SIZES = [({"width": 390, "height": 844}, "390"), ({"width": 1440, "height": 900}, "1440")]
+if os.environ.get("CC66_WIDTHS"):
+    SIZES = [s for s in SIZES if s[1] in os.environ["CC66_WIDTHS"].split(",")]
 
 
 def first_food(pg):
@@ -44,6 +48,8 @@ SCREENS = [
     ("targets", "/settings/targets", None),
     ("whats-new", "/settings/whats-new", None),
 ]
+if os.environ.get("CC66_ONLY"):
+    SCREENS = [s for s in SCREENS if s[0] in os.environ["CC66_ONLY"].split(",")]
 
 
 def capture():
@@ -91,7 +97,8 @@ DIFF = """async ([a, b]) => {
 
 
 def diff():
-    before, after, out = OUT / "before", OUT / "after", OUT / "diff"
+    suffix = f"-text{TEXT}" if TEXT else ""
+    before, after, out = OUT / f"before{suffix}", OUT / f"after{suffix}", OUT / f"diff{suffix}"
     out.mkdir(parents=True, exist_ok=True)
     rows = []
     with sync_playwright() as p:

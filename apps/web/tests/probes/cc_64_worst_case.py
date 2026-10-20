@@ -1,16 +1,18 @@
-"""cc-64 (break-ui): the worst cases on Hôm nay, + Thêm, Tổng quan and Cài đặt, at 390 and 320 px, with the text at 125 %,
-and offline.
+"""cc-64 (break-ui): the worst cases on Hôm nay, + Thêm, the portion panel, Tổng quan, Mục tiêu and Cài đặt, at 390 and
+320 px, with the text at 125 %, offline, and at 390 px with the text at 150 %.
 
 The worst-case data set is written into the demo account's storage by this probe only (demo build), so it can never
 reach a live account: names that start with Ắ, Ổ and Ế, a 90-character name, a meal of 40 foods, a food with no known
 kcal, one of 0 g, one of 100.000 g, one of 99.999 kcal, a vitamin B12 amount at about 20.833 % of its target, and a
 display name that starts with an emoji followed by 40 letters with no space.
 Fails on: text drawn past its card or panel (scroll areas and invisible 44 px hit areas excepted), any
-"NaN" or "Infinity" on screen, and "0 kcal" on the row of the food whose kcal is unknown.
-Screenshots: .screenshots/cc-64/worst-<screen>-<width>.png
+"NaN" or "Infinity" on screen, and "0 kcal" on the row of the food whose kcal is unknown. On Hôm nay also (PR #20,
+125/150 %): anything in the header past the screen's edge, the "H1T MICRO" wordmark on more than one line, a meal's
+"459 kcal" broken over two lines, and a nutrient name cut with "…".
+Screenshots: .screenshots/cc-64/worst-<screen>-<width>[-offline][-text150].png
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_64_worst_case.py
 """
-# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/add/** app/(app)/(tabs)/trends/** app/(app)/(tabs)/settings/**
+# PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/add/** app/(app)/(tabs)/trends/** app/(app)/(tabs)/settings/** app/(app)/settings/targets/**
 import json
 import os
 import sys
@@ -61,8 +63,8 @@ SEED = (
     f"localStorage.setItem('h1t_added_entries_v1_demo', {json.dumps(json.dumps(ENTRIES))});"
     f"localStorage.setItem('h1t_profile_v1_demo', {json.dumps(json.dumps(PROFILE))});"
     f"localStorage.setItem('{SETTINGS_KEY}', {json.dumps(json.dumps({'installPrompt': {'dismissCount': 0, 'snoozeUntil': 0, 'done': True, 'firstSeenIso': '2026-01-01'}}))});"
-    "document.addEventListener('DOMContentLoaded', () => { document.documentElement.style.fontSize = '125%'; });"
 )
+TEXT_SIZE = "document.addEventListener('DOMContentLoaded', () => { document.documentElement.style.fontSize = '%d%%'; });"
 
 OVERFLOW = """() => {
   // Text that is drawn past its card or panel (a 44 px hit area reaching past the edge is invisible and does not count)
@@ -96,17 +98,64 @@ OVERFLOW = """() => {
 }"""
 
 
-def run(browser, width, offline=False):
+HOME_TEXT = """() => {
+  const bad = [];
+  const W = innerWidth;
+  // The header: nothing past the screen's edge (the sr-only title excepted)
+  const header = document.querySelector('header');
+  if (header) for (const el of header.querySelectorAll('*')) {
+    if (el.closest('.sr-only')) continue;
+    const r = el.getBoundingClientRect();
+    if (r.width && r.right > W + 1) { bad.push(`header ${el.tagName.toLowerCase()} ends at ${Math.round(r.right)} > ${W}`); break; }
+  }
+  // The wordmark is a logo: one line
+  const mark = [...document.querySelectorAll('header [aria-hidden=true]')].find((e) => e.textContent.replace(/\\s+/g, ' ').trim() === 'H1T MICRO');
+  if (!mark) bad.push('wordmark not found');
+  else {
+    const lh = parseFloat(getComputedStyle(mark).fontSize) * 1.6;
+    if (mark.getBoundingClientRect().height > lh) bad.push(`wordmark on more than one line (${Math.round(mark.getBoundingClientRect().height)} px)`);
+  }
+  // A meal's kcal on one line
+  for (const k of document.querySelectorAll('[data-testid=meal-header] > span:nth-child(2)')) {
+    if (!k.textContent.trim()) continue;
+    const lh = parseFloat(getComputedStyle(k).fontSize) * 1.6;
+    if (k.getBoundingClientRect().height > lh) bad.push(`meal kcal "${k.textContent}" on two lines`);
+  }
+  // The nutrient names in full, never cut with an ellipsis
+  for (const row of document.querySelectorAll('aside [data-align-group=home-nutrient]')) {
+    for (const n of row.querySelectorAll('span')) {
+      const s = getComputedStyle(n);
+      if (s.textOverflow === 'ellipsis' || n.scrollWidth > n.clientWidth + 1) { bad.push(`nutrient "${n.textContent.slice(0, 20)}" is cut`); break; }
+    }
+  }
+  return bad.slice(0, 8);
+}"""
+
+
+def first_food(pg):
+    pg.locator("[data-add-panel] button[data-food-row]:visible, [role=dialog] button[data-food-row]:visible").first.click()
+    pg.wait_for_timeout(700)
+
+
+SCREENS = [("home", "/app", None), ("add", "/add?meal=snack", None), ("portion", "/add?meal=lunch", first_food),
+           ("overview", "/trends", None), ("targets", "/settings/targets", None), ("settings", "/settings", None)]
+
+
+def run(browser, width, offline=False, text=125):
     ctx = browser.new_context(viewport={"width": width, "height": 800}, is_mobile=True, has_touch=True)
-    ctx.add_init_script("try { if (!sessionStorage.getItem('worst-seeded')) { " + SEED + " sessionStorage.setItem('worst-seeded', '1'); } else { document.addEventListener('DOMContentLoaded', () => { document.documentElement.style.fontSize = '125%'; }); } } catch (e) {}")
+    ctx.add_init_script("try { if (!sessionStorage.getItem('worst-seeded')) { " + SEED + " sessionStorage.setItem('worst-seeded', '1'); } } catch (e) {} " + TEXT_SIZE % text)
     pg = ctx.new_page()
     pg.clock.set_fixed_time(NOW)
-    tag = f"{width}{'-offline' if offline else ''}"
-    for name, route in [("home", "/app"), ("add", "/add?meal=snack"), ("overview", "/trends"), ("settings", "/settings")]:
+    tag = f"{width}{'-offline' if offline else ''}{'' if text == 125 else f'-text{text}'}"
+    for name, route, step in SCREENS:
+        if offline and step:
+            continue  # offline, the catalogue rows behind the portion panel may not be there to tap
         pg.goto(BASE + route, wait_until="networkidle")
         if offline and name == "home":
             ctx.set_offline(True)
         pg.wait_for_timeout(900)
+        if step:
+            step(pg)
         body = pg.locator("body").inner_text()
         check("NaN" not in body and "Infinity" not in body, f"{name} @{tag}: no NaN or Infinity")
         bad = pg.evaluate(OVERFLOW)
@@ -117,6 +166,8 @@ def run(browser, width, offline=False):
                 check("0 kcal" not in row.inner_text(), f"home @{tag}: the food with unknown kcal does not read 0 kcal ({row.inner_text()[:60]!r})")
             else:
                 check(False, f"home @{tag}: the food with unknown kcal is listed")
+            bad = pg.evaluate(HOME_TEXT)
+            check(not bad, f"home @{tag}: header on screen, wordmark and meal kcal on one line, nutrient names in full ({bad})")
         pg.screenshot(path=str(SHOTS / f"worst-{name}-{tag}.png"), full_page=True)
     ctx.close()
 
@@ -127,6 +178,7 @@ def main():
         run(browser, 390)
         run(browser, 320)
         run(browser, 390, offline=True)
+        run(browser, 390, text=150)
         browser.close()
     print(f"\n{len(problems)} problem(s)")
     sys.exit(1 if problems else 0)
