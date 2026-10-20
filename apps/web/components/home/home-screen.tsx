@@ -549,7 +549,7 @@ function HomeContent() {
           />,
           barHost
         )}
-      <div
+      <main
         className={`flex flex-col ${
           selecting
             ? "h-[calc(100dvh-112px-env(safe-area-inset-bottom))]"
@@ -635,7 +635,7 @@ function HomeContent() {
             Đang ngoại tuyến — món mới sẽ đồng bộ khi có mạng.
           </div>
         )}
-        <main className="mx-auto flex min-h-0 w-full max-w-[560px] flex-1 flex-col lg:mx-0 lg:max-w-[1240px] lg:px-8">
+        <div className="mx-auto flex min-h-0 w-full max-w-[560px] flex-1 flex-col lg:mx-0 lg:max-w-[1240px] lg:px-8">
           <HomeHero
             label={heroLabel(mode, entries, meals)}
             pills={selecting ? [] : pills}
@@ -710,8 +710,8 @@ function HomeContent() {
               />
             )}
           </div>
-        </main>
-      </div>
+        </div>
+      </main>
 
       <>
       {sheets && sourcesMounted && (
