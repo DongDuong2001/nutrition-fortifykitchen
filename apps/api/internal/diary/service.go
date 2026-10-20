@@ -49,6 +49,7 @@ type Service interface {
 	GetDay(ctx context.Context, userID uuid.UUID, date string) (*DaySummaryResponse, error)
 	GetDaysRange(ctx context.Context, userID uuid.UUID, fromDate, toDate string) ([]*DaySummaryResponse, error)
 	CreateEntry(ctx context.Context, userID uuid.UUID, date string, req CreateEntryRequest) (*DiaryEntryItem, map[string]*float64, error)
+	CreateEntriesBatch(ctx context.Context, userID uuid.UUID, date string, reqs []CreateEntryRequest) ([]DiaryEntryItem, error)
 	UpdateEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID, req UpdateEntryRequest) (*DiaryEntryItem, map[string]*float64, error)
 	RestoreEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) (*DiaryEntryItem, map[string]*float64, error)
 	DeleteEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) error
@@ -327,6 +328,85 @@ func (s *diaryServiceImpl) CreateEntry(ctx context.Context, userID uuid.UUID, da
 	totals := computeDayTotals(dayEntries)
 
 	return saved, totals, nil
+}
+
+func (s *diaryServiceImpl) CreateEntriesBatch(ctx context.Context, userID uuid.UUID, date string, reqs []CreateEntryRequest) ([]DiaryEntryItem, error) {
+	if err := ValidateDateWritableCtx(ctx, date); err != nil {
+		return nil, err
+	}
+	if len(reqs) == 0 {
+		return []DiaryEntryItem{}, nil
+	}
+
+	items := make([]*DiaryEntryItem, 0, len(reqs))
+	for _, req := range reqs {
+		item := &DiaryEntryItem{
+			ID:           req.ID,
+			Kind:         req.Kind,
+			MealSlot:     req.MealSlot,
+			ServingLabel: req.ServingLabel,
+			Grams:        req.Grams,
+		}
+		if item.ID == uuid.Nil {
+			item.ID = uuid.New()
+		}
+		if item.MealSlot == "preworkout" {
+			item.MealSlot = "pre_workout"
+		}
+		if item.Kind == "" {
+			item.Kind = "food"
+		}
+
+		if req.FoodID == nil {
+			return nil, ErrFoodIDRequired
+		}
+		item.FoodID = req.FoodID
+		if item.Grams <= 0 {
+			item.Grams = 100
+		}
+
+		foodName, per100g, err := s.repo.GetFoodNutrients(ctx, *req.FoodID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to load food nutrients: %w", err)
+		}
+		item.FoodName = foodName
+
+		ratio := item.Grams / 100.0
+		scaledNutrients := make(map[string]*float64)
+		for k, v := range per100g {
+			if v != nil {
+				scaled := round2(*v * ratio)
+				scaledNutrients[k] = &scaled
+			} else {
+				scaledNutrients[k] = nil
+			}
+		}
+		item.Nutrients = scaledNutrients
+		if cal, ok := scaledNutrients["calories"]; ok && cal != nil {
+			item.Calories = cal
+		} else if energy, ok := scaledNutrients["energy"]; ok && energy != nil {
+			item.Calories = energy
+		} else {
+			item.Calories = nil
+		}
+
+		items = append(items, item)
+	}
+
+	saved, err := s.repo.CreateEntriesBatch(ctx, userID, date, items)
+	if err != nil {
+		return nil, err
+	}
+
+	if s.recents != nil {
+		for _, item := range items {
+			if item.FoodID != nil {
+				_ = s.recents.UpsertRecent(ctx, userID, *item.FoodID, item.ServingLabel, item.Grams)
+			}
+		}
+	}
+
+	return saved, nil
 }
 
 func (s *diaryServiceImpl) RestoreEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) (*DiaryEntryItem, map[string]*float64, error) {

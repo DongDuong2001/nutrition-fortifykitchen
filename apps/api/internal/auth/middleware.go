@@ -58,10 +58,12 @@ type sessionCacheEntry struct {
 }
 
 // DBSessionChecker checks session validity against auth.sessions with an in-memory TTL cache to preserve VPS performance.
+// Note: Must be tested on hitmicro-staging first to verify whether the API's database role has SELECT permission on auth.sessions.
 type DBSessionChecker struct {
-	pool  *pgxpool.Pool
-	mu    sync.RWMutex
-	cache map[uuid.UUID]sessionCacheEntry
+	pool       *pgxpool.Pool
+	mu         sync.RWMutex
+	cache      map[uuid.UUID]sessionCacheEntry
+	lastErrLog time.Time
 }
 
 func NewDBSessionChecker(pool *pgxpool.Pool) *DBSessionChecker {
@@ -86,13 +88,29 @@ func (c *DBSessionChecker) IsSessionRevoked(ctx context.Context, sessionID uuid.
 
 	var exists bool
 	err := c.pool.QueryRow(ctx, "SELECT EXISTS(SELECT 1 FROM auth.sessions WHERE id = $1 AND (not_after IS NULL OR not_after > NOW()))", sessionID).Scan(&exists)
+
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
 	if err != nil {
-		return false, nil // Table absent or error, fail open
+		// Log failure at most once per minute, not per request
+		if now.Sub(c.lastErrLog) >= 1*time.Minute {
+			logger.Log.Warn().Err(err).Msg("auth.sessions query failed; caching fail-open for 30s (rate-limited log 1/min)")
+			c.lastErrLog = now
+		}
+		// Cache failed check (fail-open) for 30s so an error never means a DB query per request
+		if len(c.cache) > 5000 {
+			c.cache = make(map[uuid.UUID]sessionCacheEntry)
+		}
+		c.cache[sessionID] = sessionCacheEntry{
+			revoked: false,
+			expires: now.Add(30 * time.Second),
+		}
+		return false, nil
 	}
 
 	revoked := !exists
 
-	c.mu.Lock()
 	if len(c.cache) > 5000 {
 		c.cache = make(map[uuid.UUID]sessionCacheEntry)
 	}
@@ -100,7 +118,6 @@ func (c *DBSessionChecker) IsSessionRevoked(ctx context.Context, sessionID uuid.
 		revoked: revoked,
 		expires: now.Add(30 * time.Second),
 	}
-	c.mu.Unlock()
 
 	return revoked, nil
 }

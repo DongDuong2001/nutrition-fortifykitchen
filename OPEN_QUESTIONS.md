@@ -428,3 +428,13 @@
 - [ ] (Dong, cc-73b) Custom targets per vitamin or mineral need a column (`nutrition.profiles.custom_targets`), so the web side is built behind `CUSTOM_TARGETS_ENABLED = false` and the spec is docs/pr/cc-73b-custom-targets.md. The custom kcal and macros are on the device only today, so the API's trends already ignore them.
 - [ ] (Dong, cc-73b) `TestSharedTargetVectors` and `TestSharedPeriodVectors` were skipping on main (they looked for `packages/vectors` two and three levels up from their folder, and it is four), so they never ran. Fixed: the paths now include four levels, and the new `TestSharedDRIVectors` fails, not skips, when its file is missing.
 
+## PayOS Payment Gateway (feat/payos-link)
+- [ ] (Hao/Dong, PayOS) Pricing and plan tiers: Confirm official price points (monthly vs. yearly vs. lifetime plan option). No hard-coded prices.
+- [ ] (Hao/Dong, PayOS) Coach-linked clients policy: Are clients linked to an active coach entitled to H1T MICRO Pro for free?
+- [ ] (Hao/Dong, PayOS) Redirection allowlist: Strict server-side constants or URL allowlist on `https://lehongkhanh.vn/*` for `returnUrl` and `cancelUrl` (never accept arbitrary client redirect URLs).
+- [ ] (Dong, PayOS) Order persistence: Table to persist order details (`order_code`, `user_id`, `plan`, `amount`, `status`) before initiating PayOS checkout.
+- [ ] (Dong, PayOS) Webhook user reconciliation: Webhook handler maps incoming `order_code` to user and idempotently updates `nutrition.profiles.role` / subscription status.
+- [ ] (Dong, PayOS) Production environment guard: When `APP_ENV=production` or `ENVIRONMENT=production`, return HTTP 503 "Thanh toán chưa mở" if PayOS credentials are unset (no mock links).
+- [ ] (Hao/Dong, PayOS) Feature flag: Route gated behind `PAYMENTS_ENABLED` flag (default off).
+
+

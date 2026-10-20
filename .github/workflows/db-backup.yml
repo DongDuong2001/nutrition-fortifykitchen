@@ -67,21 +67,22 @@ jobs:
           GPG_PUBLIC_KEY: ${{ secrets.BACKUP_GPG_PUBLIC_KEY }}
         run: |
           BACKUP_FILE="$BACKUP_RAW_FILE"
-          if [ -n "$GPG_PUBLIC_KEY" ]; then
-            echo "Importing GPG public key for asymmetric encryption..."
-            echo "$GPG_PUBLIC_KEY" | gpg --batch --import
-            RECIPIENT=$(gpg --batch --list-keys --with-colons | grep '^pub:' | cut -d: -f5 | head -n1)
-            if [ -z "$RECIPIENT" ]; then
-              echo "Error: Could not determine key ID from BACKUP_GPG_PUBLIC_KEY" >&2
-              exit 1
-            fi
-            echo "Encrypting $BACKUP_FILE with public key $RECIPIENT..."
-            gpg --batch --yes --trust-model always --encrypt --recipient "$RECIPIENT" --output "${BACKUP_FILE}.gpg" "$BACKUP_FILE"
-            rm -f "$BACKUP_FILE"
-            BACKUP_FILE="${BACKUP_FILE}.gpg"
-          else
-            echo "Warning: BACKUP_GPG_PUBLIC_KEY is not configured; upload will remain unencrypted."
+          if [ -z "$GPG_PUBLIC_KEY" ]; then
+            echo "Error: BACKUP_GPG_PUBLIC_KEY secret is missing. Never upload an unencrypted dump that includes auth." >&2
+            exit 1
           fi
+
+          echo "Importing GPG public key for asymmetric encryption..."
+          echo "$GPG_PUBLIC_KEY" | gpg --batch --import
+          RECIPIENT=$(gpg --batch --list-keys --with-colons | grep '^pub:' | cut -d: -f5 | head -n1)
+          if [ -z "$RECIPIENT" ]; then
+            echo "Error: Could not determine key ID from BACKUP_GPG_PUBLIC_KEY" >&2
+            exit 1
+          fi
+          echo "Encrypting $BACKUP_FILE with public key $RECIPIENT..."
+          gpg --batch --yes --trust-model always --encrypt --recipient "$RECIPIENT" --output "${BACKUP_FILE}.gpg" "$BACKUP_FILE"
+          rm -f "$BACKUP_FILE"
+          BACKUP_FILE="${BACKUP_FILE}.gpg"
 
           FILE_SIZE=$(ls -lh "$BACKUP_FILE" | awk '{print $5}')
           SHA256=$(sha256sum "$BACKUP_FILE" | awk '{print $1}')

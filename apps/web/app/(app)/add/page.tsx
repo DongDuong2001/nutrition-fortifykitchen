@@ -202,16 +202,29 @@ function AddFoodInner() {
       phoneSearchInputRef.current?.focus({ preventScroll: true });
     };
 
-    // Focus when slide-up animation / transition completes
-    panel.addEventListener("animationend", focusSearch, { once: true });
-    panel.addEventListener("transitionend", focusSearch, { once: true });
+    // Immediate focus when prefers-reduced-motion is active
+    const prefersReducedMotion = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion) {
+      focusSearch();
+      return;
+    }
 
-    // Fallback in case reduced motion is active or animation event was skipped
-    const fallbackTimer = setTimeout(focusSearch, 400);
+    // Listen only to the panel's own entrance animation/transition settling (not bubbling children)
+    const onEnd = (e: Event) => {
+      if (e.target === panel) {
+        focusSearch();
+      }
+    };
+
+    panel.addEventListener("animationend", onEnd);
+    panel.addEventListener("transitionend", onEnd);
+
+    // Fallback in case animation event was interrupted or missed
+    const fallbackTimer = setTimeout(focusSearch, 1000);
 
     return () => {
-      panel.removeEventListener("animationend", focusSearch);
-      panel.removeEventListener("transitionend", focusSearch);
+      panel.removeEventListener("animationend", onEnd);
+      panel.removeEventListener("transitionend", onEnd);
       clearTimeout(fallbackTimer);
     };
   }, [isDesktop]);

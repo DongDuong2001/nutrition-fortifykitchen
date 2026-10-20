@@ -48,19 +48,3 @@ func TestPayOSSignatureVerification(t *testing.T) {
 		t.Errorf("Expected tampered signature verification to fail")
 	}
 }
-
-func TestCreatePaymentLink_MockFallback(t *testing.T) {
-	service := payment.NewService(nil)
-	res, err := service.CreatePaymentLink(nil, [16]byte{}, payment.CreatePaymentLinkRequest{
-		Plan: "pro_monthly",
-	})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if res.Status != "MOCK" {
-		t.Errorf("expected status MOCK, got %s", res.Status)
-	}
-	if res.Amount != 99000 {
-		t.Errorf("expected amount 99000, got %d", res.Amount)
-	}
-}

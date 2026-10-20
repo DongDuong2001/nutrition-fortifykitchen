@@ -112,27 +112,27 @@ func (s *libraryServiceImpl) AddFromSaved(ctx context.Context, userID uuid.UUID,
 		mealSlot = "lunch"
 	}
 
-	var addedEntries []diary.DiaryEntryItem
+	reqs := make([]diary.CreateEntryRequest, 0, len(meal.Items))
 	for _, item := range meal.Items {
 		fID := item.FoodID
-		entryReq := diary.CreateEntryRequest{
+		reqs = append(reqs, diary.CreateEntryRequest{
 			ID:           uuid.New(),
 			Kind:         "food",
 			FoodID:       &fID,
 			MealSlot:     mealSlot,
 			Grams:        item.Grams,
 			ServingLabel: item.PortionLabel,
-		}
+		})
+	}
 
-		entry, _, err := s.diaryService.CreateEntry(ctx, userID, targetDate, entryReq)
-		if err != nil {
-			return nil, err
-		}
-		if entry != nil {
-			addedEntries = append(addedEntries, *entry)
-			// Upsert recent food
-			_ = s.repo.UpsertRecent(ctx, userID, item.FoodID, item.PortionLabel, item.Grams)
-		}
+	addedEntries, err := s.diaryService.CreateEntriesBatch(ctx, userID, targetDate, reqs)
+	if err != nil {
+		return nil, err
+	}
+
+	// Upsert recents only after successful batch commit
+	for _, item := range meal.Items {
+		_ = s.repo.UpsertRecent(ctx, userID, item.FoodID, item.PortionLabel, item.Grams)
 	}
 
 	return addedEntries, nil

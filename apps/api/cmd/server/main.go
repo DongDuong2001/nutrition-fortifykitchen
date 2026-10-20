@@ -226,9 +226,6 @@ func SetupRouter(cfg *config.Config, pool *pgxpool.Pool) chi.Router {
 			r.Use(authMiddleware.Authenticate)
 			r.Use(userRateLimiter.LimitWrites)
 
-			// Payments (Phase 2)
-			r.Post("/payments/create-link", paymentHandler.CreatePaymentLink)
-
 			// Profile & Weight endpoints (Phase 1)
 			r.Route("/me", func(r chi.Router) {
 				r.Get("/", profileHandler.GetMe)

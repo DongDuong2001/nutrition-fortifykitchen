@@ -123,6 +123,22 @@ func (d *mockDiaryService) SetTraining(ctx context.Context, userID uuid.UUID, da
 	return nil, nil
 }
 
+func (d *mockDiaryService) CreateEntriesBatch(ctx context.Context, userID uuid.UUID, date string, reqs []diary.CreateEntryRequest) ([]diary.DiaryEntryItem, error) {
+	var result []diary.DiaryEntryItem
+	for _, req := range reqs {
+		item := diary.DiaryEntryItem{
+			ID:           req.ID,
+			FoodID:       req.FoodID,
+			MealSlot:     req.MealSlot,
+			Grams:        req.Grams,
+			ServingLabel: req.ServingLabel,
+		}
+		result = append(result, item)
+		d.createdEntries = append(d.createdEntries, item)
+	}
+	return result, nil
+}
+
 func TestLibraryService_AddFromSaved(t *testing.T) {
 	repo := newMockLibRepo()
 	dService := &mockDiaryService{}
@@ -171,23 +187,25 @@ type errDiaryService struct {
 	err error
 }
 
-func (e *errDiaryService) CreateEntry(ctx context.Context, userID uuid.UUID, date string, req diary.CreateEntryRequest) (*diary.DiaryEntryItem, map[string]*float64, error) {
-	return nil, nil, e.err
+func (e *errDiaryService) CreateEntriesBatch(ctx context.Context, userID uuid.UUID, date string, reqs []diary.CreateEntryRequest) ([]diary.DiaryEntryItem, error) {
+	return nil, e.err
 }
 
-func TestLibraryService_AddFromSaved_ErrorPropagation(t *testing.T) {
+func TestLibraryService_AddFromSaved_AtomicRollback(t *testing.T) {
 	repo := newMockLibRepo()
-	expectedErr := errors.New("db insert failed")
+	expectedErr := errors.New("atomic batch insert failed")
 	dService := &errDiaryService{err: expectedErr}
 	svc := NewService(repo, dService)
 
 	userID := uuid.New()
 	f1 := uuid.New()
+	f2 := uuid.New()
 
 	meal, err := svc.CreateSavedMeal(context.Background(), userID, CreateSavedMealRequest{
 		Name: "Test meal",
 		Items: []SavedMealItem{
 			{FoodID: f1, PortionLabel: "100 g", Grams: 100},
+			{FoodID: f2, PortionLabel: "200 g", Grams: 200},
 		},
 	})
 	if err != nil {
@@ -195,8 +213,15 @@ func TestLibraryService_AddFromSaved_ErrorPropagation(t *testing.T) {
 	}
 
 	today := diary.GetServerToday()
-	_, err = svc.AddFromSaved(context.Background(), userID, today, meal.ID, "dinner")
+	entries, err := svc.AddFromSaved(context.Background(), userID, today, meal.ID, "dinner")
 	if !errors.Is(err, expectedErr) {
 		t.Fatalf("expected error %v, got %v", expectedErr, err)
+	}
+	if len(entries) != 0 {
+		t.Fatalf("expected 0 entries returned on error, got %d", len(entries))
+	}
+	// Assert all-or-nothing: no recents should be written when transaction fails
+	if len(repo.recents) != 0 {
+		t.Fatalf("expected 0 recents recorded on atomic rollback, got %d", len(repo.recents))
 	}
 }
