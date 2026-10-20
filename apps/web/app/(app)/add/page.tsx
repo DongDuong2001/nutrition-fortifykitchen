@@ -154,12 +154,46 @@ function AddFoodInner() {
     return () => window.removeEventListener("resize", checkDesktop);
   }, []);
 
-  // Focus goes into the dialog: the search field, on a phone too (cc-58). No scroll, so the open motion stays as it is.
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  // Lock body scroll on mobile so iOS Safari does not scroll the background page when the keyboard opens
+  useEffect(() => {
+    if (isDesktop) return;
+    const original = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = original;
+    };
+  }, [isDesktop]);
+
+  // Track visualViewport on mobile to lift the sheet above the on-screen keyboard
+  useEffect(() => {
+    if (isDesktop) return;
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const onViewportChange = () => {
+      const rawKb = window.innerHeight - vv.height - vv.offsetTop;
+      setKeyboardHeight(rawKb > 100 ? Math.round(rawKb) : 0);
+    };
+
+    vv.addEventListener("resize", onViewportChange);
+    vv.addEventListener("scroll", onViewportChange);
+    return () => {
+      vv.removeEventListener("resize", onViewportChange);
+      vv.removeEventListener("scroll", onViewportChange);
+    };
+  }, [isDesktop]);
+
+  // Focus goes into the dialog: the search field, on a phone too (cc-58). Delay on mobile until 350ms slide-up finishes.
   useEffect(() => {
     if (isDesktop && desktopSearchInputRef.current) {
       desktopSearchInputRef.current.focus();
     } else if (!isDesktop) {
-      phoneSearchInputRef.current?.focus({ preventScroll: true });
+      const timer = setTimeout(() => {
+        phoneSearchInputRef.current?.focus({ preventScroll: true });
+      }, 360);
+      return () => clearTimeout(timer);
     }
   }, [isDesktop]);
 
@@ -680,6 +714,7 @@ function AddFoodInner() {
           data-sheet-route
           data-state={sheetState}
           data-under-sheet={selectedFood !== null && !isDesktop ? "" : undefined}
+          style={keyboardHeight > 0 ? { bottom: `${keyboardHeight}px` } : undefined}
           className="m-sheet m-vt-sheet fixed inset-x-0 bottom-0 top-[8dvh] z-nav flex flex-col rounded-t-sheet bg-card shadow-sheet"
         >
           {/* Pinned header: grabber, meal switcher + close, search, chips. cc-62 (S15): the list fades out under it (a 12 px edge) */}

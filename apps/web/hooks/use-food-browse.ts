@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useDeferredValue, useMemo, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
 import type { FoodItem } from "@/lib/mock/foods";
 import { useCatalogFoods } from "@/hooks/use-catalog-foods";
 import { findSimilarFoods } from "@/lib/search";
@@ -23,9 +23,19 @@ export function useFoodBrowse({ oneRowPerFood = true }: { oneRowPerFood?: boolea
   const { foods, version, pending: catalogPending, failed: catalogFailed, retry: retryCatalog } = useCatalogFoods();
   const [filter, setFilter] = useState<FoodFilter>("all");
   const [query, setQuery] = useState("");
+  // Short 120ms debounce so rapid keystrokes don't flash intermediate single-letter matches (e.g. 'c' before 'ch')
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+  useEffect(() => {
+    if (!query) {
+      setDebouncedQuery("");
+      return;
+    }
+    const timer = setTimeout(() => setDebouncedQuery(query), 120);
+    return () => clearTimeout(timer);
+  }, [query]);
   // cc-58: the field follows every keystroke, the list follows the query when the browser has a moment, so a key
   // never waits for a search of the whole catalogue
-  const searched = useDeferredValue(query);
+  const searched = useDeferredValue(debouncedQuery);
 
   // Filter and search combined. Grouped only for Tất cả with no query.
   // `foods` follows the catalogue (the live load, a made food) and demo mode
