@@ -42,7 +42,7 @@ export type { SearchTagLabel } from "./source-names";
 /**
  * The small tag of an /add search result. A proxy says Ước tính whatever its database. Otherwise the source decides, from the
  * one table lib/source-names shares with foodSourceLabel: usda* is USDA, label is Nhãn, the Vietnamese table is VN, cnf is
- * Canada, asean is ASEAN, literature is Tài liệu, community (numbers from a shared database, not checked against the pack) and
+ * Canada, asean is ASEAN, literature is Tài liệu, fortify_kitchen (Fortify Kitchen's own recipes) is Fortify Kitchen, community (numbers from a shared database, not checked against the pack) and
  * recipe_calc (worked out from a recipe) are Ước tính, user is Tự nhập (typed by hand) or Của tôi (a recipe). A source the
  * table does not know, or none, says Chưa rõ.
  */

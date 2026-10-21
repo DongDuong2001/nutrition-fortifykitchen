@@ -47,6 +47,11 @@ describe("food source helpers", () => {
     expect(searchTag({ source: "CNF" })).toEqual({ label: "Canada", warning: false });
     expect(searchTag({ source: "asean" })).toEqual({ label: "ASEAN", warning: false });
     expect(searchTag({ source: "literature" })).toEqual({ label: "Tài liệu", warning: false });
+    // Fortify Kitchen's own recipes (21/10): the brand, not an estimate
+    for (const source of ["fortify_kitchen", "fortify-kitchen", "Fortify Kitchen"]) {
+      expect(searchTag({ source })).toEqual({ label: "Fortify Kitchen", warning: false });
+      expect(foodSourceLabel(source)).toBe("Fortify Kitchen");
+    }
     expect(searchTag({ source: "vn_nin" })).toEqual({ label: "VN", warning: false });
     expect(searchTag({ source: "custom" })).toEqual({ label: "Của tôi", warning: false });
   });

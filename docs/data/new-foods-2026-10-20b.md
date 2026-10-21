@@ -103,3 +103,53 @@ No clash: none of the 4 new `source` + `source_id` pairs exists in the live cata
 go run ./cmd/importfoods --file ../../docs/data/new-foods-2026-10-20b.json
 go run ./cmd/importfoods --edible-portions ../../docs/data/new-foods-2026-10-20b-aliases.json
 ```
+
+## On the VPS (what worked on 21/10/2026)
+
+The commands above assume Go and a current Postgres client on the machine. The VPS (`ssh deploy@14.225.210.185`, repo in `/var/www/nutrition-meals`) has no Go, and its `pg_dump` is 16 while the database is 17, so everything runs in throw-away containers with `--network host`, with `DATABASE_URL` taken from `deploy/.env.prod` and passed as `-e DATABASE_URL` (no value on the command line). The full walk-through, with the dump, the check and the rollback, is `docs/data/new-foods-2026-10-21-import.md`.
+
+Dump first (`postgres:17-alpine`, same server version as the database):
+
+```bash
+ssh deploy@14.225.210.185
+cd /var/www/nutrition-meals
+export DATABASE_URL="$(grep -E '^DATABASE_URL=' deploy/.env.prod | cut -d= -f2- | tr -d '"')"
+mkdir -p ~/backups
+docker run --rm --network host -e DATABASE_URL postgres:17-alpine sh -c \
+  'pg_dump "$DATABASE_URL" --data-only --column-inserts --no-owner --no-acl --table=nutrition.foods --table=nutrition.food_portions' \
+  | gzip -9 > ~/backups/foods-before-$(date +%Y%m%d).sql.gz
+```
+
+Dry run both, then import both:
+
+```bash
+ssh deploy@14.225.210.185
+cd /var/www/nutrition-meals
+export DATABASE_URL="$(grep -E '^DATABASE_URL=' deploy/.env.prod | cut -d= -f2- | tr -d '"')"
+docker run --rm --network host -e DATABASE_URL -v "$PWD":/src -w /src/apps/api \
+  golang:1.24-alpine go run ./cmd/importfoods --dry-run --file /src/docs/data/new-foods-2026-10-20b.json
+```
+
+```bash
+ssh deploy@14.225.210.185
+cd /var/www/nutrition-meals
+export DATABASE_URL="$(grep -E '^DATABASE_URL=' deploy/.env.prod | cut -d= -f2- | tr -d '"')"
+docker run --rm --network host -e DATABASE_URL -v "$PWD":/src -w /src/apps/api \
+  golang:1.24-alpine go run ./cmd/importfoods --dry-run --edible-portions /src/docs/data/new-foods-2026-10-20b-aliases.json
+```
+
+```bash
+ssh deploy@14.225.210.185
+cd /var/www/nutrition-meals
+export DATABASE_URL="$(grep -E '^DATABASE_URL=' deploy/.env.prod | cut -d= -f2- | tr -d '"')"
+docker run --rm --network host -e DATABASE_URL -v "$PWD":/src -w /src/apps/api \
+  golang:1.24-alpine go run ./cmd/importfoods --file /src/docs/data/new-foods-2026-10-20b.json
+```
+
+```bash
+ssh deploy@14.225.210.185
+cd /var/www/nutrition-meals
+export DATABASE_URL="$(grep -E '^DATABASE_URL=' deploy/.env.prod | cut -d= -f2- | tr -d '"')"
+docker run --rm --network host -e DATABASE_URL -v "$PWD":/src -w /src/apps/api \
+  golang:1.24-alpine go run ./cmd/importfoods --edible-portions /src/docs/data/new-foods-2026-10-20b-aliases.json
+```
