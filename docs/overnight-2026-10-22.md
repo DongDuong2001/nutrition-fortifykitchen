@@ -8,7 +8,7 @@ Brief: ~/Documents/HITMicro/prompts/overnight-1022-v3.md (Job 1 → Job 2 → Jo
 | 1 | Macro split saves | fix/macro-split-save | https://github.com/DongDuong2001/nutrition-fortifykitchen/pull/44 | open, gate:full all green, not merged |
 | 2 | V3 redesign | feat/v3-redesign | https://github.com/DongDuong2001/nutrition-fortifykitchen/pull/45 | open, gate:full all green, not merged. Carries #44's three commits, so merge #44 first |
 | 3 | Compare in the + sheet | feat/compare-in-add | https://github.com/DongDuong2001/nutrition-fortifykitchen/pull/46 | open, stacked on #45, gate:full all green, not merged |
-| 4 | Ngày ăn mẫu, Part A | feat/ngay-mau | JOB4_PR | JOB4_STATUS |
+| 4 | Ngày ăn mẫu, Part A | feat/ngay-mau | https://github.com/DongDuong2001/nutrition-fortifykitchen/pull/47 | open, stacked on #46, gate:full all green, not merged |
 
 ## Gate summaries
 - **#44** (e61725d): all green, 727 s.
@@ -19,7 +19,7 @@ Brief: ~/Documents/HITMicro/prompts/overnight-1022-v3.md (Job 1 → Job 2 → Jo
   - Also lint:design, test:align, test:hydration, check:live-bundle.
   - The first gate:full (20de29d) was red. 27 probes that gate:fast never selected still encoded the old look, test:align failed on 4 routes, and test:hydration failed. Each failing check was replaced with its V3 equivalent. Three alignment groups were moved in the app, and the /training desktop column became a `<main>`.
 - **#46** (3312c68): all green, 744 s. probe:all: 127 PASS / 4 REPORT / 1 QUAR / 0 FAIL / 1 SKIP.
-- **Job 4:** JOB4_GATE.
+- **#47** (92bc89b): all green, 766 s. probe:all: 128 PASS / 4 REPORT / 1 QUAR / 0 FAIL / 1 SKIP.
 - **gate:fast** ran after every commit. For #45 it ran on a separate clean worktree (nutrition-fk-v3-gate) checked out at the commit, so the ports in progress never leaked into a gate.
 
 ## Screenshots
