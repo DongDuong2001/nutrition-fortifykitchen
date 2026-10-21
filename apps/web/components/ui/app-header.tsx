@@ -171,7 +171,12 @@ export function AppHeader({
       ? "max-w-[560px] mx-auto px-4 lg:max-w-[1240px] lg:mx-0 lg:px-8 lg:pt-8"
       : "max-w-[560px] mx-auto px-4 lg:pt-8";
   const deskPad = "lg:pb-0";
-  const phonePad = compact ? "pt-[max(4px,env(safe-area-inset-top))] pb-1" : "pt-[max(12px,env(safe-area-inset-top))] pb-4";
+  // V3 push screens: 8 px above the Back row and nothing under the header (the page's own 16 px follows), as on the boards
+  const phonePad = compact
+    ? "pt-[max(4px,env(safe-area-inset-top))] pb-1"
+    : back
+      ? "pt-[max(8px,env(safe-area-inset-top))] pb-0"
+      : "pt-[max(12px,env(safe-area-inset-top))] pb-4";
 
   return (
     <header
