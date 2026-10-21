@@ -35,12 +35,21 @@ main() {
   fi
   echo "==> At $(git rev-parse --short HEAD) ($(git describe --tags --always))"
 
+  # The images running now become :prev before the build replaces :prod, so a bad deploy rolls back in seconds
+  # (docs/ops/server-disk.md, "Rolling back")
+  local svc
+  for svc in web api; do
+    if docker image inspect "nutrition-$svc:prod" >/dev/null 2>&1; then
+      docker tag "nutrition-$svc:prod" "nutrition-$svc:prev"
+    fi
+  done
+
   echo "==> Building and starting"
   "${compose[@]}" up -d --build
 
   echo "==> Waiting for health (up to 180 s)"
   local deadline=$((SECONDS + 180))
-  local svc status all_ok
+  local status all_ok
   while :; do
     all_ok=1
     for svc in web api caddy; do
@@ -61,15 +70,19 @@ main() {
   echo "==> Container status"
   "${compose[@]}" ps
 
-  # Every deploy builds on this VPS: BuildKit's cache and the old images pile up (about 1.5 GB per deploy). Only
-  # unused images and cache are removed, never a volume; the running containers and their images stay.
+  # Every deploy builds on this VPS: BuildKit's cache and the old images pile up (about 1.5 GB per deploy). Removed:
+  # build cache older than 3 days, our own images other than :prod (running) and :prev (the rollback), and dangling
+  # layers. Kept: the base images (node, golang, alpine, caddy), so the next build does not download them again, and
+  # every volume. Nothing here fails the deploy.
   echo "==> Disk before cleanup"
-  docker system df
-  echo "==> Pruning build cache older than 3 days and unused images older than 7 days"
+  docker system df || true
+  echo "==> Pruning build cache older than 3 days and our old images"
   docker builder prune -f --filter until=72h || echo "Builder prune failed (deploy is fine)." >&2
-  docker image prune -af --filter until=168h || echo "Image prune failed (deploy is fine)." >&2
+  docker image ls --format '{{.Repository}}:{{.Tag}}' | grep -E '^nutrition-(web|api):' | grep -vE ':(prod|prev)$' \
+    | xargs -r docker image rm || echo "Removing old images failed (deploy is fine)." >&2
+  docker image prune -f || echo "Dangling image prune failed (deploy is fine)." >&2
   echo "==> Disk after cleanup"
-  docker system df
+  docker system df || true
 
   # Last: the site, the API and a write round trip as a user. A failure exits non-zero and rolls nothing back.
   if ! deploy/smoke.sh; then
