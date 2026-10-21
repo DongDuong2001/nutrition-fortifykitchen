@@ -6,6 +6,7 @@ The shared rules above apply to every agent. Everything below applies only to Cl
 
 ## Context to load (read on demand, not all at once)
 - `HANDOFF.md` and `design/SPEC.md`: design source of truth.
+- `DESIGN.md`: the design floor, rule IDs; read only the section a task needs.
 - `PROGRESS.md`: what's done, plus the **Now working** board.
 - `docs/` (00–06, nutrient-catalog.md): read only the section a task needs.
 - `design/screens/<Screen>.dc.html`: open only the screens named in the task.

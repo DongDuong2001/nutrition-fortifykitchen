@@ -66,6 +66,9 @@ def actions(pg, name):
     if name == "Portion":
         pg.locator("[role='option'], ul button").first.click()
         pg.wait_for_timeout(600)
+    if name == "AddSearch":  # the + sheet with "gà" typed, as design/v3/renders/V3Add.png shows it (V3_SHOTS="AddSearch=/add")
+        pg.locator("[data-add-panel] [data-testid=food-search]").first.fill("gà")
+        pg.wait_for_timeout(800)
     if name == "EditEntry":
         pg.locator("section[aria-label*='Bữa'] button[aria-label*=', ']").first.click()
         pg.wait_for_timeout(600)

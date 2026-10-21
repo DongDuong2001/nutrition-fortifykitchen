@@ -34,6 +34,7 @@
     "scan:rda": "RDA_DOC=1 vitest run lib/__tests__/rda.test.ts",
     "probe:all": "node scripts/py.mjs tests/probes/run_all.py",
     "probe:covers": "node scripts/probe-covers.mjs",
+    "lint:design": "node scripts/lint-design.mjs",
     "gate:fast": "node scripts/gate-fast.mjs",
     "gate:full": "node scripts/gate-full.mjs",
     "probe:smoke": "node scripts/py.mjs tests/probes/run_all.py --tag smoke",
