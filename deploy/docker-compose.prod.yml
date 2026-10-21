@@ -3,8 +3,9 @@
 #   docker compose -f deploy/docker-compose.prod.yml --env-file deploy/.env.prod up -d --build
 name: nutrition
 
+# The local driver keeps logs compressed on disk and rotates them (json-file kept them as plain text)
 x-logging: &default-logging
-  driver: json-file
+  driver: local
   options:
     max-size: "10m"
     max-file: "3"
@@ -24,7 +25,8 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: production
-      NODE_OPTIONS: --max-old-space-size=768
+      # node server.js (standalone) settles at about 110 MB RSS idle and 150 MB after browsing; 512 MB of heap is ample
+      NODE_OPTIONS: --max-old-space-size=512
     mem_limit: 1g
     security_opt:
       - no-new-privileges:true
