@@ -584,7 +584,7 @@ function HomeContent() {
         className={`flex flex-col ${
           selecting
             ? "h-[calc(100dvh-112px-env(safe-area-inset-bottom))]"
-            : "h-[calc(100dvh-88px-var(--update-bar-h,0px)-env(safe-area-inset-bottom))] lg:h-dvh"
+            : "h-[calc(100dvh-104px-var(--update-bar-h,0px)-env(safe-area-inset-bottom))] lg:h-dvh"
         }`}
       >
         {selecting ? (
