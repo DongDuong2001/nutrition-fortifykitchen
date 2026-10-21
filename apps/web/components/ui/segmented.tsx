@@ -44,7 +44,7 @@ export function Segmented<K extends string>({
     `relative flex h-9 w-full items-center justify-center whitespace-nowrap rounded-[9px] px-3 text-cap transition-press ${
       on ? "bg-raised font-bold text-text shadow-[0_0_0_1px_var(--color-card-border)]" : "font-semibold text-secondary"
     }`;
-  const cell = "-my-1 flex min-h-11 min-w-11 items-center justify-center no-underline active:scale-[0.97] motion-reduce:active:scale-100";
+  const cell = "-my-1 flex min-h-11 min-w-11 items-center justify-center no-underline transition-press active:scale-[0.97] motion-reduce:active:scale-100";
   const body = items.map((item) => {
     const on = item.key === value;
     const inner = (

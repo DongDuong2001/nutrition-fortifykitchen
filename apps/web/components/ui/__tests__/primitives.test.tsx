@@ -65,9 +65,10 @@ describe("Notice, EmptyState, SectionTitle, ChipGroup scroll, Card padding (cc-6
     expect(cls(renderToStaticMarkup(<EmptyState gap={3} title="x" />))).toContain("gap-3");
   });
 
-  it("SectionTitle sizes: md 16 px (default), lg 17 px, sm 13 px", () => {
-    expect(cls(renderToStaticMarkup(<SectionTitle>a</SectionTitle>))).toContain("text-base");
-    expect(cls(renderToStaticMarkup(<SectionTitle size="lg">a</SectionTitle>))).toContain("text-body-lg");
+  it("SectionTitle sizes: md and lg the V3 section header (Saira italic 17 px uppercase), sm 13 px", () => {
+    for (const html of [renderToStaticMarkup(<SectionTitle>a</SectionTitle>), renderToStaticMarkup(<SectionTitle size="lg">a</SectionTitle>)]) {
+      expect(cls(html)).toEqual(expect.arrayContaining(["font-display", "italic", "text-body-lg", "uppercase"]));
+    }
     expect(cls(renderToStaticMarkup(<SectionTitle size="sm">a</SectionTitle>))).toContain("text-cap");
   });
 
