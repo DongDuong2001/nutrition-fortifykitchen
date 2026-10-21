@@ -18,6 +18,7 @@ import { AddShortcuts, type RecentShortcut, type SavedMealShortcut } from "@/com
 import { QuickAddSheet } from "@/components/add/quick-add-sheet";
 import { Sheet } from "@/components/ui/sheet";
 import { ChipGroup } from "@/components/ui/chip-group";
+import { SwitchGlide } from "@/components/ui/switch-glide";
 import { ADD_LIST_LIMITS, FoodList } from "@/components/foods/food-list";
 import { FoodEmptyState } from "@/components/foods/food-empty-state";
 import { CatalogNote, CatalogStatus } from "@/components/foods/catalog-status";
@@ -346,6 +347,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
     setFilter,
     list,
     filterItems,
+    filterIndex,
     categoryName,
     isFavouriteFood,
     similarFoods,
@@ -806,21 +808,23 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
                 {catalogPending && list.foods.length > 0 && <CatalogNote />}
                 {/* A fixed height (it was a maximum): the dialog keeps its size while the results change, so a few results never shrink and recentre it */}
                 {ready && (
-                <FoodList
-                  dataTour="add-results"
-                  limits={ADD_LIST_LIMITS}
-                  scrollRef={desktopListRef}
-                  list={list}
-                  {...listPick}
-                  getMeta={getFoodMeta}
-                  categoryName={categoryName}
-                  showCategory={!isCategoryFilter(filter)}
-                  isFavourite={isFavouriteFood}
-                  showSourceTag={query.trim() !== ""}
-                  empty={emptyState}
-                  footer={createFoodLink}
-                  className="h-[360px] overflow-y-auto pb-1"
-                />
+                <SwitchGlide id={filter} order={filterIndex}>
+                  <FoodList
+                    dataTour="add-results"
+                    limits={ADD_LIST_LIMITS}
+                    scrollRef={desktopListRef}
+                    list={list}
+                    {...listPick}
+                    getMeta={getFoodMeta}
+                    categoryName={categoryName}
+                    showCategory={!isCategoryFilter(filter)}
+                    isFavourite={isFavouriteFood}
+                    showSourceTag={query.trim() !== ""}
+                    empty={emptyState}
+                    footer={createFoodLink}
+                    className="h-[360px] overflow-y-auto pb-1"
+                  />
+                </SwitchGlide>
                 )}
                 {tray.length > 0 && (
                   <TrayBar
@@ -949,19 +953,21 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
 
             {catalogPending && list.foods.length > 0 && <CatalogNote />}
             {ready && (
-            <FoodList
-              dataTour="add-results"
-              limits={ADD_LIST_LIMITS}
-              list={list}
-              {...listPick}
-              getMeta={getFoodMeta}
-              categoryName={categoryName}
-              showCategory={!isCategoryFilter(filter)}
-              isFavourite={isFavouriteFood}
-              showSourceTag={query.trim() !== ""}
-              empty={emptyState}
-              footer={createFoodLink}
-            />
+            <SwitchGlide id={filter} order={filterIndex}>
+              <FoodList
+                dataTour="add-results"
+                limits={ADD_LIST_LIMITS}
+                list={list}
+                {...listPick}
+                getMeta={getFoodMeta}
+                categoryName={categoryName}
+                showCategory={!isCategoryFilter(filter)}
+                isFavourite={isFavouriteFood}
+                showSourceTag={query.trim() !== ""}
+                empty={emptyState}
+                footer={createFoodLink}
+              />
+            </SwitchGlide>
             )}
           </div>
 

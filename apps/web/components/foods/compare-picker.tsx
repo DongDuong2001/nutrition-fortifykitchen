@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from "react";
 import { Sheet } from "@/components/ui/sheet";
 import { PillButton } from "@/components/ui/pill-button";
+import { SwitchGlide } from "@/components/ui/switch-glide";
 import { ChipGroup } from "@/components/ui/chip-group";
 import { FoodList } from "@/components/foods/food-list";
 import { FoodSearchField } from "@/components/foods/food-search-field";
@@ -33,7 +34,7 @@ export function ComparePicker({ open, onClose, lockedIds, onConfirm }: ComparePi
 
 // Mounted only while the sheet is open, so each opening starts with a blank search and no new picks
 function PickerBody({ lockedIds, onClose, onConfirm }: Omit<ComparePickerProps, "open">) {
-  const { query, setQuery, filter, setFilter, list, filterItems, categoryName, isFavouriteFood } = useFoodBrowse();
+  const { query, setQuery, filter, setFilter, list, filterItems, filterIndex, categoryName, isFavouriteFood } = useFoodBrowse();
   const [picked, setPicked] = useState<string[]>([]);
 
   const selected = useMemo(() => [...lockedIds, ...picked], [lockedIds, picked]);
@@ -61,30 +62,32 @@ function PickerBody({ lockedIds, onClose, onConfirm }: Omit<ComparePickerProps, 
       <FoodSearchField value={query} onChange={setQuery} />
       <ChipGroup scroll items={filterItems} ariaLabel="Lọc món theo nhóm" />
       <div data-compare-picker-list className="max-h-[44dvh] overflow-y-auto">
-        <FoodList
-          list={list}
-          selectedIds={selected}
-          disabledIds={disabledIds}
-          onPick={toggle}
-          getMeta={foodMeta}
-          categoryName={categoryName}
-          showCategory={!isCategoryFilter(filter)}
-          isFavourite={isFavouriteFood}
-          empty={
-            <EmptyState
-              title={query.trim() ? `Không có “${query.trim()}”` : "Chưa có món nào"}
-              actions={
-                filter !== "all" && (
-                  <PillButton variant="tertiary" size="md" type="button" onClick={() => setFilter("all")}>
-                    Bỏ lọc
-                  </PillButton>
-                )
-              }
-            >
-              Thử từ ngắn hơn hoặc bỏ dấu.
-            </EmptyState>
-          }
-        />
+        <SwitchGlide id={filter} order={filterIndex}>
+          <FoodList
+            list={list}
+            selectedIds={selected}
+            disabledIds={disabledIds}
+            onPick={toggle}
+            getMeta={foodMeta}
+            categoryName={categoryName}
+            showCategory={!isCategoryFilter(filter)}
+            isFavourite={isFavouriteFood}
+            empty={
+              <EmptyState
+                title={query.trim() ? `Không có “${query.trim()}”` : "Chưa có món nào"}
+                actions={
+                  filter !== "all" && (
+                    <PillButton variant="tertiary" size="md" type="button" onClick={() => setFilter("all")}>
+                      Bỏ lọc
+                    </PillButton>
+                  )
+                }
+              >
+                Thử từ ngắn hơn hoặc bỏ dấu.
+              </EmptyState>
+            }
+          />
+        </SwitchGlide>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <PillButton variant="secondary" onClick={onClose}>

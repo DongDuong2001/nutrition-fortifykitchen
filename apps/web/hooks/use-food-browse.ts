@@ -99,6 +99,8 @@ export function useFoodBrowse({
     setFilter,
     list,
     filterItems,
+    /** The place of the active chip in the row (Tất cả 0, Đồ ăn của Minh Hào 1 when it shows, Yêu thích …): SwitchGlide enters from the side it grew toward. */
+    filterIndex: Math.max(0, filterItems.findIndex((item) => item.active)),
     categoryName,
     isFavouriteFood,
     similarFoods,

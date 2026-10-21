@@ -2,6 +2,7 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { TOUCH_LIFT_MS } from "../use-touch-drag";
+import { EASE_OUT, REDUCED_MS, SWITCH_IN_MS, SWITCH_OUT_MS, SWITCH_SHIFT_PX, TAB_IN_MS, TAB_SHIFT_PX, glideDirection } from "../motion";
 
 // cc-51 Part B, extended by cc-55: the motion classes (.m-*) in globals.css. Each has a prefers-reduced-motion rule
 // (no movement, opacity only); only transform and opacity move (grid-template-rows for .m-expand and .m-row-exit);
@@ -251,5 +252,67 @@ describe("cc-57 motion details", () => {
     expect(phone).not.toContain("hover:rotate-0");
     const audiences = readFileSync(path.join(ROOT, "components/landing/stacking-audiences.tsx"), "utf8");
     expect(audiences).toContain('matchMedia?.("(prefers-reduced-motion: reduce)")');
+  });
+});
+
+// feat/glide (Hao 21/10): every switch glides in, nothing pops
+describe("glide tokens", () => {
+  const px = (name: string) => Number(motion.match(new RegExp(`--m-${name}: (\\d+)px;`))?.[1]);
+  const ms = (name: string) => Number(motion.match(new RegExp(`--m-${name}: (\\d+)ms;`))?.[1]);
+
+  it("lib/motion.ts and the :root tokens of globals.css are the same numbers: switch 80 ms out, 200 ms in, 16 px; tab 200 ms, 12 px; reduced 120 ms", () => {
+    expect([ms("switch-out"), ms("switch-in"), px("switch-shift"), ms("tab-in"), px("tab-shift"), ms("fade")]).toEqual([SWITCH_OUT_MS, SWITCH_IN_MS, SWITCH_SHIFT_PX, TAB_IN_MS, TAB_SHIFT_PX, REDUCED_MS]);
+    expect([SWITCH_OUT_MS, SWITCH_IN_MS, SWITCH_SHIFT_PX, TAB_IN_MS, TAB_SHIFT_PX, REDUCED_MS]).toEqual([80, 200, 16, 200, 12, 120]);
+  });
+
+  it("UI motion stays between 150 and 300 ms, and the fade-out is shorter than the way in", () => {
+    for (const t of [SWITCH_IN_MS, TAB_IN_MS]) expect(t).toBeGreaterThanOrEqual(150), expect(t).toBeLessThanOrEqual(300);
+    expect(SWITCH_OUT_MS).toBeLessThan(SWITCH_IN_MS);
+  });
+
+  it("JavaScript's curve is the app's --ease-out", () => {
+    expect(css).toContain(`--ease-out: ${EASE_OUT};`);
+  });
+
+  it("a tab enters as a transition from @starting-style (12 px, transparent), a rule of its own in reduced motion (opacity only, 120 ms)", () => {
+    expect(main).toMatch(/\.m-tab-in \{\s*transition:\s*transform var\(--m-tab-in\) var\(--ease-out\),\s*opacity var\(--m-tab-in\) var\(--ease-out\);/);
+    expect(main).toMatch(/\.m-tab-in \{\s*transform: translateX\(calc\(var\(--m-tab-dir, 1\) \* var\(--m-tab-shift\)\)\);\s*opacity: 0;/);
+    expect(reduced).toMatch(/\.m-tab-in \{\s*transition: opacity var\(--m-fade\) var\(--ease-out\);/);
+    expect(reduced).toMatch(/\.m-tab-in \{\s*transform: none;\s*opacity: 0;/);
+  });
+
+  it("the motion tokens are written down in AGENTS.md: sheets keep their spring, switch glide 200 ms / 16 px, tab glide 200 ms / 12 px, push and back once, reduced motion 120 ms", () => {
+    const doc = readFileSync(path.join(ROOT, "../../AGENTS.md"), "utf8");
+    for (const phrase of ["Sheets** keep the spring", "Switch glide", "200 ms, `--ease-out`", "16 px", "Tab glide", "12 px", "runs **once**", "120 ms cross-fade"]) expect([phrase, doc.includes(phrase)]).toEqual([phrase, true]);
+    expect(source).toContain("feat/glide");
+  });
+
+  it("glideDirection: later is +1 (from the right), earlier -1, the same place 0 (a fade only)", () => {
+    expect([glideDirection(0, 1), glideDirection(3, 1), glideDirection(2, 2)]).toEqual([1, -1, 0]);
+  });
+
+  it("the switch glide animates transform and opacity only, uses the shared tokens, and never leaves a fill behind", () => {
+    // The code only: the comments name what it avoids
+    const src = readFileSync(path.join(ROOT, "components/ui/switch-glide.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+    expect(src).not.toMatch(/will-change|filter|blur|width:|height:|left:|top:/);
+    expect(src).toMatch(/SWITCH_OUT_MS/);
+    expect(src).toMatch(/SWITCH_IN_MS/);
+    expect(src).toMatch(/SWITCH_SHIFT_PX/);
+    // the way in fills backwards only (a lasting fill keeps a stacking context), the way out is cancelled when the new content is in
+    expect(src).toMatch(/fill: "backwards"/);
+    expect(src).toMatch(/leaving\.current\?\.cancel\(\)/);
+  });
+
+  it("the places that switch content use the glide: /add and the pickers (filter), Giàu (kind and basis), the tabs and Tổng quan", () => {
+    const uses: [string, RegExp][] = [
+      ["components/add/add-screen.tsx", /<SwitchGlide id=\{filter\} order=\{filterIndex\}>/],
+      ["components/foods/compare-picker.tsx", /<SwitchGlide id=\{filter\} order=\{filterIndex\}>/],
+      ["components/foods/ingredient-picker.tsx", /<SwitchGlide id=\{filter\} order=\{filterIndex\}>/],
+      ["components/training/own-item-sheet.tsx", /<SwitchGlide id=\{filter\} order=\{filterIndex\}>/],
+      ["app/(app)/explore/rich/[nutrient]/page.tsx", /<SwitchGlide id=\{`\$\{kind\}:\$\{shownBasis\}`\}/],
+      ["components/ui/app-shell.tsx", /<EnterGlide id=\{tab \?\? pathname\}/],
+      ["components/overview/overview-frame.tsx", /<EnterGlide id=\{current\}/],
+    ];
+    for (const [file, pattern] of uses) expect([file, pattern.test(readFileSync(path.join(ROOT, file), "utf8"))]).toEqual([file, true]);
   });
 });
