@@ -128,6 +128,16 @@ def ensure_food(pg, slot="breakfast", name=FOOD):
     go_home(pg)
 
 
+def reveal(pg):
+    """V3: the page scrolls on a phone and the floating tab bar covers the bottom 104 px; scroll so the Bữa phụ header is above it."""
+    pg.evaluate(
+        """() => { const h = document.querySelector('section[data-meal-slot="snack"] [data-meal-header]'); if (!h) return;
+          const bottom = h.getBoundingClientRect().bottom; const limit = innerHeight - 140;
+          if (bottom > limit) window.scrollBy(0, bottom - limit); }"""
+    )
+    pg.wait_for_timeout(200)
+
+
 def lift(pg, finger, name=FOOD):
     """Finger down on the row and hold 600 ms. Returns the point."""
     x, y = center(row(pg, name))
@@ -149,6 +159,7 @@ def phone_drag(browser):
     ctx, pg, cdp = phone(browser)
     go_home(pg)
     ensure_food(pg)
+    reveal(pg)
     print("   Sáng:", meal_text(pg, "breakfast")[:90])
     check(slot_of_row(pg) == "breakfast", f"{FOOD} is in Sáng")
     finger = Finger(cdp)
@@ -188,10 +199,29 @@ def phone_drag(browser):
     ctx.close()
 
 
+def autoscroll_page(browser):
+    """V3: a food held near the bottom edge scrolls the page (the list card does not scroll itself on a phone)."""
+    ctx, pg, cdp = phone(browser)
+    go_home(pg)
+    ensure_food(pg)
+    finger = Finger(cdp)
+    over = pg.evaluate("document.documentElement.scrollHeight - innerHeight")
+    x, y = lift(pg, finger)
+    finger.glide(pg, x, y, x, 844 - 88 - 6, steps=8)
+    pg.wait_for_timeout(700)
+    after = pg.evaluate("window.scrollY")
+    check(over <= 0 or after > 20, f"held near the bottom edge: the page scrolls ({after} px of {over})")
+    finger.up()
+    pg.wait_for_timeout(500)
+    check(pg.locator("[data-touch-drag]").count() == 0 and ghost_count(pg) == 0, "…and letting go leaves nothing behind")
+    ctx.close()
+
+
 def springs_back(browser):
     ctx, pg, cdp = phone(browser)
     go_home(pg)
     ensure_food(pg)
+    reveal(pg)
     finger = Finger(cdp)
     x, y = lift(pg, finger)
     # Over its own meal: down 30 px and back
@@ -231,6 +261,8 @@ def swipe_and_hold(browser):
     go_home(pg)
     ensure_food(pg)
     # Hold and let go without moving: the long press action, Chọn nhiều món
+    pg.evaluate("window.scrollTo(0, 200)")  # V3: the row is above the floating tab bar (390x560 is short)
+    pg.wait_for_timeout(200)
     lift(pg, finger)
     check(state(pg)["drag"] == "lifted", "hold: lifted")
     finger.up()
@@ -244,6 +276,7 @@ def cancelled(browser):
     ctx, pg, cdp = phone(browser)
     go_home(pg)
     ensure_food(pg)
+    reveal(pg)
     finger = Finger(cdp)
     x, y = lift(pg, finger)
     tx, ty = center(section(pg, "snack").locator("[data-meal-header]"))
@@ -285,6 +318,7 @@ def reduced(browser):
     ctx, pg, cdp = phone(browser, reduced_motion="reduce")
     go_home(pg)
     ensure_food(pg)
+    reveal(pg)
     finger = Finger(cdp)
     x, y = lift(pg, finger)
     s = state(pg)
@@ -316,7 +350,7 @@ def desktop_mouse(browser):
 def main():
     with sync_playwright() as p:
         browser = p.chromium.launch()
-        for part in (phone_drag, springs_back, swipe_and_hold, cancelled, days, reduced, desktop_mouse):
+        for part in (phone_drag, autoscroll_page, springs_back, swipe_and_hold, cancelled, days, reduced, desktop_mouse):
             print(f"\n=== {part.__name__} ===")
             try:
                 part(browser)
