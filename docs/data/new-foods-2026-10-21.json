@@ -1,0 +1,825 @@
+[
+ {
+  "source": "label",
+  "source_id": "thegarlicfarm.co.uk/products/black-garlic-ready-to-eat-cloves (đọc 2026-10-21)",
+  "name": "Black garlic cloves, ready to eat (The Garlic Farm)",
+  "name_vi": "Tỏi đen (The Garlic Farm)",
+  "category": "rau",
+  "brand": "The Garlic Farm",
+  "tip_vi": null,
+  "nutrients": {
+   "energy": 264,
+   "carbs": 53.5,
+   "sugars": 26.6,
+   "protein": 13.3
+  },
+  "portions": [
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 0
+   }
+  ]
+ },
+ {
+  "source": "usda_sr_legacy",
+  "source_id": "FDC 168156:nuoc-cot-chanh-ta",
+  "name": "Lime juice, raw (chanh ta, Mexican lime)",
+  "name_vi": "Nước cốt chanh ta (có hạt)",
+  "category": "gia_vi",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "energy": 25,
+   "water": 90.8,
+   "carbs": 8.4,
+   "fiber": 0.4,
+   "sugars": 1.69,
+   "fat": 0.1,
+   "monounsaturated_fat": 0.008,
+   "polyunsaturated_fat": 0.023,
+   "saturated_fat": 0.008,
+   "trans_fat": 0.0,
+   "cholesterol": 0.0,
+   "protein": 0.4,
+   "b1": 0.025,
+   "b2": 0.015,
+   "b3": 0.142,
+   "b5": 0.123,
+   "b6": 0.038,
+   "folate": 10,
+   "b12": 0.0,
+   "vitamin_a": 2,
+   "vitamin_c": 30,
+   "vitamin_d": 0.0,
+   "vitamin_e": 0.22,
+   "vitamin_k": 0.6,
+   "calcium": 14,
+   "copper": 0.027,
+   "iron": 0.09,
+   "magnesium": 8,
+   "manganese": 0.018,
+   "phosphorus": 14,
+   "potassium": 117,
+   "selenium": 0.1,
+   "sodium": 2,
+   "zinc": 0.08
+  },
+  "portions": [
+   {
+    "label_vi": "1 quả (nước cốt)",
+    "grams": 18,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 muỗng canh",
+    "grams": 15.12,
+    "sort": 1
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 2
+   }
+  ]
+ },
+ {
+  "source": "usda_sr_legacy",
+  "source_id": "FDC 168156:nuoc-cot-chanh-khong-hat",
+  "name": "Lime juice, raw (seedless Persian/Tahiti lime)",
+  "name_vi": "Nước cốt chanh không hạt",
+  "category": "gia_vi",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "energy": 25,
+   "water": 90.8,
+   "carbs": 8.4,
+   "fiber": 0.4,
+   "sugars": 1.69,
+   "fat": 0.1,
+   "monounsaturated_fat": 0.008,
+   "polyunsaturated_fat": 0.023,
+   "saturated_fat": 0.008,
+   "trans_fat": 0.0,
+   "cholesterol": 0.0,
+   "protein": 0.4,
+   "b1": 0.025,
+   "b2": 0.015,
+   "b3": 0.142,
+   "b5": 0.123,
+   "b6": 0.038,
+   "folate": 10,
+   "b12": 0.0,
+   "vitamin_a": 2,
+   "vitamin_c": 30,
+   "vitamin_d": 0.0,
+   "vitamin_e": 0.22,
+   "vitamin_k": 0.6,
+   "calcium": 14,
+   "copper": 0.027,
+   "iron": 0.09,
+   "magnesium": 8,
+   "manganese": 0.018,
+   "phosphorus": 14,
+   "potassium": 117,
+   "selenium": 0.1,
+   "sodium": 2,
+   "zinc": 0.08
+  },
+  "portions": [
+   {
+    "label_vi": "1 quả (nước cốt)",
+    "grams": 44,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 muỗng canh",
+    "grams": 15.12,
+    "sort": 1
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 2
+   }
+  ]
+ },
+ {
+  "source": "usda_sr_legacy",
+  "source_id": "FDC 167747:nuoc-cot-chanh-vang",
+  "name": "Lemon juice, raw (chanh vàng)",
+  "name_vi": "Nước cốt chanh vàng",
+  "category": "gia_vi",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "energy": 22,
+   "water": 92.3,
+   "carbs": 6.9,
+   "fiber": 0.3,
+   "sugars": 2.52,
+   "fat": 0.2,
+   "monounsaturated_fat": 0.006,
+   "polyunsaturated_fat": 0.021,
+   "saturated_fat": 0.04,
+   "trans_fat": 0.0,
+   "cholesterol": 0.0,
+   "protein": 0.3,
+   "b1": 0.024,
+   "b2": 0.015,
+   "b3": 0.091,
+   "b5": 0.131,
+   "b6": 0.046,
+   "folate": 20,
+   "b12": 0.0,
+   "vitamin_a": 0.0,
+   "vitamin_c": 38.7,
+   "vitamin_d": 0.0,
+   "vitamin_e": 0.15,
+   "vitamin_k": 0.0,
+   "calcium": 6,
+   "copper": 0.016,
+   "iron": 0.08,
+   "magnesium": 6,
+   "manganese": 0.012,
+   "phosphorus": 8,
+   "potassium": 103,
+   "selenium": 0.1,
+   "sodium": 1,
+   "zinc": 0.05
+  },
+  "portions": [
+   {
+    "label_vi": "1 quả (nước cốt)",
+    "grams": 48,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 muỗng canh",
+    "grams": 15.25,
+    "sort": 1
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 2
+   }
+  ]
+ },
+ {
+  "source": "usda_sr_legacy",
+  "source_id": "FDC 169108:ruot-chanh-day",
+  "name": "Passion-fruit, (granadilla), purple, raw (pulp with seeds)",
+  "name_vi": "Ruột chanh dây",
+  "category": "gia_vi",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "energy": 97,
+   "water": 72.9,
+   "carbs": 23.4,
+   "fiber": 10.4,
+   "sugars": 11.2,
+   "fat": 0.7,
+   "monounsaturated_fat": 0.086,
+   "polyunsaturated_fat": 0.411,
+   "saturated_fat": 0.059,
+   "trans_fat": 0.0,
+   "cholesterol": 0.0,
+   "protein": 2.2,
+   "b1": 0.0,
+   "b2": 0.13,
+   "b3": 1.5,
+   "b6": 0.1,
+   "folate": 14,
+   "b12": 0.0,
+   "vitamin_a": 64,
+   "vitamin_c": 30,
+   "vitamin_d": 0.0,
+   "vitamin_e": 0.02,
+   "vitamin_k": 0.7,
+   "calcium": 12,
+   "copper": 0.086,
+   "iron": 1.6,
+   "magnesium": 29,
+   "phosphorus": 68,
+   "potassium": 348,
+   "selenium": 0.6,
+   "sodium": 28,
+   "zinc": 0.1
+  },
+  "portions": [
+   {
+    "label_vi": "1 quả (ruột + hạt)",
+    "grams": 18,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "recipe_calc",
+  "source_id": "recipe:cha-ram-quang-binh-chien-khong-dau",
+  "name": "Cha ram Quang Binh, homemade, air-fried",
+  "name_vi": "Chả ram Quảng Bình nhà làm (chiên không dầu)",
+  "category": "mon_viet",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "energy": 244.3,
+   "water": 44.2,
+   "carbs": 28.2,
+   "fiber": 0.4,
+   "fat": 7.3,
+   "protein": 15.5,
+   "calcium": 29.9,
+   "iron": 3,
+   "phosphorus": 174
+  },
+  "portions": [
+   {
+    "label_vi": "5 cái",
+    "grams": 70,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 cái",
+    "grams": 14,
+    "sort": 1
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 2
+   }
+  ]
+ },
+ {
+  "source": "recipe_calc",
+  "source_id": "recipe:cha-ram-quang-binh-chien-dau",
+  "name": "Cha ram Quang Binh, homemade, deep-fried",
+  "name_vi": "Chả ram Quảng Bình nhà làm (chiên dầu)",
+  "category": "mon_viet",
+  "brand": null,
+  "tip_vi": null,
+  "nutrients": {
+   "energy": 279.3,
+   "water": 40.3,
+   "carbs": 28.2,
+   "fiber": 0.4,
+   "fat": 11.3,
+   "protein": 15.5,
+   "calcium": 29.9,
+   "iron": 3,
+   "phosphorus": 174
+  },
+  "portions": [
+   {
+    "label_vi": "5 cái",
+    "grams": 70,
+    "sort": 0
+   },
+   {
+    "label_vi": "1 cái",
+    "grams": 14,
+    "sort": 1
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 2
+   }
+  ]
+ },
+ {
+  "source": "label",
+  "source_id": "cocoavia.com/products/500mg-cocoa-flavanols-powder (đọc 2026-10-21)",
+  "name": "CocoaVia Cocoa Flavanols 500 mg (powder)",
+  "name_vi": "Cocovia (CocoaVia) cacao flavanol 500 mg, bột hộp",
+  "category": "bo_sung",
+  "brand": "CocoaVia",
+  "tip_vi": null,
+  "nutrients": {
+   "energy": 234.4,
+   "caffeine": 469,
+   "carbs": 78.1,
+   "fiber": 46.9
+  },
+  "portions": [
+   {
+    "label_vi": "1 muỗng (6.4 g)",
+    "grams": 6.4,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "label",
+  "source_id": "cocoavia.com/products/500mg-cocoa-flavanols-powder-stick-packs (đọc 2026-10-21)",
+  "name": "CocoaVia Cocoa Flavanols 500 mg (sticks)",
+  "name_vi": "Cocovia (CocoaVia) cacao flavanol 500 mg, bột gói",
+  "category": "bo_sung",
+  "brand": "CocoaVia",
+  "tip_vi": null,
+  "nutrients": {
+   "energy": 234.4,
+   "caffeine": 469,
+   "carbs": 78.1,
+   "fiber": 46.9
+  },
+  "portions": [
+   {
+    "label_vi": "1 gói (6.4 g)",
+    "grams": 6.4,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "fortify_kitchen",
+  "source_id": "fortify_kitchen:ga-ma-dui-nau-cham",
+  "name": "Slow-cooked chicken thigh, Minh Hao",
+  "name_vi": "Má đùi gà nấu chậm Minh Hào",
+  "category": "mon_viet",
+  "brand": "Fortify Kitchen",
+  "tip_vi": "Số gram là cân nặng thịt sống (chưa nấu).",
+  "nutrients": {
+   "energy": 137,
+   "water": 81.3,
+   "carbs": 3.8,
+   "fiber": 0.1,
+   "sugars": 3.09,
+   "fat": 4.2,
+   "monounsaturated_fat": 1.5,
+   "polyunsaturated_fat": 0.949,
+   "saturated_fat": 1.1,
+   "trans_fat": 0.02,
+   "cholesterol": 94,
+   "protein": 19.7,
+   "b1": 0.0901,
+   "b2": 0.201,
+   "b3": 5.61,
+   "b6": 0.458,
+   "folate": 4.19,
+   "b12": 0.61,
+   "vitamin_a": 8.02,
+   "vitamin_c": 0.0558,
+   "vitamin_d": 0.0,
+   "vitamin_e": 0.254,
+   "vitamin_k": 3.07,
+   "calcium": 10.1,
+   "copper": 0.0687,
+   "iron": 0.87,
+   "magnesium": 24.2,
+   "manganese": 0.0247,
+   "phosphorus": 187,
+   "potassium": 264,
+   "selenium": 23,
+   "sodium": 191,
+   "zinc": 1.6
+  },
+  "portions": [
+   {
+    "label_vi": "1 phần lẻ (200 g sống)",
+    "grams": 200,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "fortify_kitchen",
+  "source_id": "fortify_kitchen:uc-ga-nau-cham",
+  "name": "Slow-cooked chicken breast, Minh Hao",
+  "name_vi": "Ức gà nấu chậm Minh Hào",
+  "category": "mon_viet",
+  "brand": "Fortify Kitchen",
+  "tip_vi": "Số gram là cân nặng thịt sống (chưa nấu).",
+  "nutrients": {
+   "energy": 136,
+   "water": 79,
+   "carbs": 3.8,
+   "fiber": 0.1,
+   "sugars": 3.09,
+   "fat": 2.7,
+   "monounsaturated_fat": 0.697,
+   "polyunsaturated_fat": 0.433,
+   "saturated_fat": 0.567,
+   "trans_fat": 0.007,
+   "cholesterol": 73,
+   "protein": 22.6,
+   "b1": 0.0961,
+   "b2": 0.182,
+   "b3": 9.66,
+   "b5": 1.51,
+   "b6": 0.818,
+   "folate": 9.19,
+   "b12": 0.21,
+   "vitamin_a": 10,
+   "vitamin_c": 0.0558,
+   "vitamin_d": 0.0,
+   "vitamin_e": 0.634,
+   "vitamin_k": 0.167,
+   "calcium": 8.07,
+   "copper": 0.0437,
+   "iron": 0.43,
+   "magnesium": 29.2,
+   "manganese": 0.0227,
+   "phosphorus": 215,
+   "potassium": 356,
+   "selenium": 22.9,
+   "sodium": 141,
+   "zinc": 0.696
+  },
+  "portions": [
+   {
+    "label_vi": "1 phần lẻ (150 g sống)",
+    "grams": 150,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "fortify_kitchen",
+  "source_id": "fortify_kitchen:tom-su-nau-cham",
+  "name": "Slow-cooked tiger prawn, Minh Hao",
+  "name_vi": "Tôm sú nấu chậm Minh Hào",
+  "category": "mon_viet",
+  "brand": "Fortify Kitchen",
+  "tip_vi": "Số gram là cân nặng thịt sống (chưa nấu).",
+  "nutrients": {
+   "energy": 98,
+   "water": 84.3,
+   "carbs": 4.7,
+   "fat": 1,
+   "monounsaturated_fat": 0.0876,
+   "polyunsaturated_fat": 0.139,
+   "saturated_fat": 0.124,
+   "protein": 17.7,
+   "b1": 0.0421,
+   "b2": 0.0852,
+   "b3": 2.36,
+   "b5": 0.295,
+   "b6": 0.107,
+   "folate": 3.19,
+   "vitamin_a": 21.4,
+   "vitamin_d": 0.05,
+   "vitamin_e": 1.17,
+   "calcium": 82.1,
+   "copper": 0.267,
+   "iron": 1.66,
+   "magnesium": 38.2,
+   "manganese": 0.0617,
+   "phosphorus": 186,
+   "potassium": 207,
+   "selenium": 38.1,
+   "sodium": 244,
+   "zinc": 1.13
+  },
+  "portions": [
+   {
+    "label_vi": "1 phần lẻ (150 g sống)",
+    "grams": 150,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "fortify_kitchen",
+  "source_id": "fortify_kitchen:tom-the-nau-cham",
+  "name": "Slow-cooked white shrimp, Minh Hao",
+  "name_vi": "Tôm thẻ nấu chậm Minh Hào",
+  "category": "mon_viet",
+  "brand": "Fortify Kitchen",
+  "tip_vi": "Số gram là cân nặng thịt sống (chưa nấu).",
+  "nutrients": {
+   "energy": 87,
+   "water": 88.1,
+   "carbs": 4.7,
+   "fiber": 0.1,
+   "sugars": 3.09,
+   "fat": 1.1,
+   "monounsaturated_fat": 0.189,
+   "polyunsaturated_fat": 0.304,
+   "saturated_fat": 0.265,
+   "trans_fat": 0.018,
+   "cholesterol": 126,
+   "protein": 13.7,
+   "b1": 0.0221,
+   "b2": 0.0202,
+   "b3": 1.83,
+   "b5": 0.325,
+   "b6": 0.168,
+   "folate": 19.2,
+   "b12": 1.11,
+   "vitamin_a": 55,
+   "vitamin_c": 0.0558,
+   "vitamin_d": 0.1,
+   "vitamin_e": 1.39,
+   "vitamin_k": 0.467,
+   "calcium": 57.1,
+   "copper": 0.189,
+   "iron": 0.27,
+   "magnesium": 23.2,
+   "manganese": 0.0407,
+   "phosphorus": 246,
+   "potassium": 135,
+   "selenium": 29.7,
+   "sodium": 662,
+   "zinc": 0.986
+  },
+  "portions": [
+   {
+    "label_vi": "1 phần lẻ (150 g sống)",
+    "grams": 150,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "fortify_kitchen",
+  "source_id": "fortify_kitchen:than-bo-nau-cham",
+  "name": "Slow-cooked beef tenderloin, Minh Hao",
+  "name_vi": "Thăn bò nấu chậm Minh Hào",
+  "category": "mon_viet",
+  "brand": "Fortify Kitchen",
+  "tip_vi": "Số gram là cân nặng thịt sống (chưa nấu).",
+  "nutrients": {
+   "energy": 175.9,
+   "water": 70.9,
+   "carbs": 1.5,
+   "fiber": 0,
+   "sugars": 0.0009,
+   "fat": 9.1,
+   "monounsaturated_fat": 3.97,
+   "polyunsaturated_fat": 0.471,
+   "saturated_fat": 3.36,
+   "cholesterol": 68.2,
+   "protein": 22.1,
+   "b1": 0.0681,
+   "b2": 0.112,
+   "b3": 6.85,
+   "b5": 0.656,
+   "b6": 0.619,
+   "folate": 13,
+   "b12": 1.09,
+   "vitamin_a": 10.3,
+   "vitamin_c": 0.0,
+   "vitamin_e": 0.551,
+   "vitamin_k": 2.23,
+   "calcium": 24.5,
+   "copper": 0.0744,
+   "iron": 1.61,
+   "magnesium": 23,
+   "manganese": 0.0136,
+   "phosphorus": 206,
+   "potassium": 347,
+   "selenium": 26.9,
+   "sodium": 499,
+   "zinc": 4.01
+  },
+  "portions": [
+   {
+    "label_vi": "1 phần lẻ (150 g sống)",
+    "grams": 150,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "fortify_kitchen",
+  "source_id": "fortify_kitchen:sot-ca-chua-nuong",
+  "name": "Roasted tomato sauce, Minh Hao",
+  "name_vi": "Sốt cà chua nướng Minh Hào",
+  "category": "mon_viet",
+  "brand": "Fortify Kitchen",
+  "tip_vi": null,
+  "nutrients": {
+   "energy": 45.3,
+   "water": 88.8,
+   "carbs": 6.2,
+   "fiber": 2.2,
+   "fat": 2.2,
+   "saturated_fat": 0.618,
+   "trans_fat": 0.0,
+   "cholesterol": 1.72,
+   "protein": 1.4,
+   "b2": 0.311,
+   "b3": 2.29,
+   "b5": 0.182,
+   "b6": 0.464,
+   "folate": 34.8,
+   "b12": 0.6,
+   "vitamin_a": 52.2,
+   "vitamin_c": 54.3,
+   "vitamin_d": 0.0,
+   "calcium": 31.3,
+   "copper": 0.0731,
+   "iron": 0.672,
+   "magnesium": 13.9,
+   "manganese": 0.133,
+   "phosphorus": 28.3,
+   "potassium": 271,
+   "selenium": 0.686,
+   "sodium": 313,
+   "zinc": 0.208
+  },
+  "portions": [
+   {
+    "label_vi": "1 phần",
+    "grams": 170.9,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "fortify_kitchen",
+  "source_id": "fortify_kitchen:mi-y-sot-ca",
+  "name": "Spaghetti with roasted tomato sauce, Minh Hao",
+  "name_vi": "Mì Ý sốt cà Minh Hào",
+  "category": "mon_viet",
+  "brand": "Fortify Kitchen",
+  "tip_vi": null,
+  "nutrients": {
+   "energy": 102.2,
+   "water": 74.4,
+   "carbs": 18.9,
+   "fiber": 1.7,
+   "fat": 1.5,
+   "saturated_fat": 0.398,
+   "trans_fat": 0.0,
+   "cholesterol": 0.791,
+   "protein": 3.5,
+   "b2": 0.157,
+   "b3": 1.44,
+   "b5": 0.182,
+   "b6": 0.246,
+   "folate": 20.1,
+   "b12": 0.276,
+   "vitamin_a": 24,
+   "vitamin_c": 25,
+   "vitamin_d": 0.0,
+   "calcium": 19.2,
+   "copper": 0.0992,
+   "iron": 0.604,
+   "magnesium": 18.4,
+   "manganese": 0.269,
+   "phosphorus": 55.9,
+   "potassium": 176,
+   "selenium": 14.6,
+   "sodium": 145,
+   "zinc": 0.415
+  },
+  "portions": [
+   {
+    "label_vi": "1 phần",
+    "grams": 370.9,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "fortify_kitchen",
+  "source_id": "fortify_kitchen:bo-ham",
+  "name": "Braised beef stew, Minh Hao",
+  "name_vi": "Bò hầm Minh Hào",
+  "category": "mon_viet",
+  "brand": "Fortify Kitchen",
+  "tip_vi": null,
+  "nutrients": {
+   "energy": 110.8,
+   "water": 72.8,
+   "carbs": 10.4,
+   "fiber": 2.8,
+   "sugars": 2.43,
+   "fat": 2.9,
+   "monounsaturated_fat": 1.23,
+   "polyunsaturated_fat": 0.236,
+   "saturated_fat": 1.07,
+   "cholesterol": 19.7,
+   "protein": 11.3,
+   "b1": 0.114,
+   "b2": 0.0953,
+   "b3": 3.07,
+   "b5": 0.494,
+   "b6": 0.319,
+   "folate": 62.5,
+   "b12": 0.398,
+   "vitamin_a": 59.3,
+   "vitamin_c": 3.41,
+   "vitamin_e": 0.708,
+   "vitamin_k": 3.14,
+   "calcium": 35.6,
+   "copper": 0.174,
+   "iron": 1.87,
+   "magnesium": 38.4,
+   "manganese": 0.227,
+   "phosphorus": 133,
+   "potassium": 450,
+   "selenium": 10.8,
+   "sodium": 237,
+   "zinc": 1.88
+  },
+  "portions": [
+   {
+    "label_vi": "1 phần",
+    "grams": 427.1,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ }
+]
