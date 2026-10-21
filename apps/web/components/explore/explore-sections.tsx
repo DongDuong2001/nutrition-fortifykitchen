@@ -12,6 +12,7 @@ import { CreateFoodButton } from "@/components/foods/create-food-button";
 import { Carousel } from "@/components/ui/carousel";
 import { FoodCardLink } from "@/components/foods/food-card-link";
 import { RichCarousel } from "@/components/explore/rich-carousel";
+import { MinhHaoCarousel } from "@/components/explore/minh-hao-carousel";
 import { foodRowKcal, foodRowMeta } from "@/lib/food-meta";
 import { isOwnFood } from "@/lib/food-categories";
 import { dedupeTwins, rowName } from "@/lib/food-rows";
@@ -62,6 +63,8 @@ export function ExploreSections() {
           <CoachesCarousel />
         </>
       )}
+
+      <MinhHaoCarousel />
 
       <RichCarousel />
 

@@ -6,7 +6,7 @@ import { rowName, twinIdsOf } from "@/lib/food-rows";
 import { IconButton } from "@/components/ui/icon-button";
 import { prefetchDishParts } from "@/components/ui/dish-parts-prefetch";
 
-function SourceTag({ food }: { food: FoodItem }) {
+export function SourceTag({ food }: { food: FoodItem }) {
   const tag = searchTag(food);
   return (
     <span
