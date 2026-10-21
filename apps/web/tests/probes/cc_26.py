@@ -309,7 +309,7 @@ def run(browser, size, tag):
     s = snap(pg)
     check(s is not None, f"{tag} the drawn page was read")
     check_png(info, s, tag, "today")
-    check(info["corner"] == "255,255,255", f"{tag} white background {info['corner']}")
+    check(info["corner"] == "242,242,247", f"{tag} the V3 page background {info['corner']}")
     lv = info["found"]
     check(lv["red"] + lv["yellow"] + lv["green"] + lv["blue"] > 0, f"{tag} today uses the level colours in the image {lv}")
     if s:

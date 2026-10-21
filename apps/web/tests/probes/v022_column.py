@@ -22,7 +22,7 @@ HERO = "section[aria-label='Tổng kcal và dinh dưỡng đa lượng']"
 LEVEL_COLOURS = {  # cc-44: one palette on ink and on light surfaces
     "rgb(255, 56, 60)", "rgb(255, 204, 0)", "rgb(0, 200, 179)", "rgb(52, 199, 89)",
 }
-EMPTY = {"rgb(236, 234, 230)", "rgb(42, 44, 49)"}  # the light track and the ink track
+EMPTY = {"rgb(229, 229, 234)", "rgb(46, 49, 57)"}  # the light track and the ink track (V3)
 problems = []
 
 GEOMETRY = """() => {
