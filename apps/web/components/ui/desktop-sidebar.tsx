@@ -2,19 +2,20 @@
 
 import { startTransition, useOptimistic } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { HOME_ROUTE, NAV_TABS, tabForPath, type NavTab } from "@/lib/nav";
+import { useRouter } from "next/navigation";
+import { HOME_ROUTE, NAV_TABS, type NavTab } from "@/lib/nav";
+import { useActiveTab } from "@/lib/use-active-tab";
 import { NavIcon, PlusIcon } from "@/components/ui/nav-icons";
-import { rememberAddOpener } from "@/components/ui/add-opener";
+import { openAddFrom } from "@/components/ui/add-opener";
 
 /**
  * Left column from 1024 px up (the phone uses BottomNav): logo, the primary "Thêm món" button, then the four tabs
  * in the same order, with the same icons and labels, as the bottom nav.
  */
 export function DesktopSidebar({ currentTab }: { currentTab?: NavTab }) {
-  const pathname = usePathname();
+  const router = useRouter();
   // cc-58: the tapped tab lights up on the tap, not when the next screen is ready
-  const [active, setActive] = useOptimistic(currentTab ?? tabForPath(pathname));
+  const [active, setActive] = useOptimistic(useActiveTab(currentTab));
 
   return (
     <aside className="hidden w-60 shrink-0 flex-col gap-6 bg-ink p-6 text-on-dark box-border lg:flex">
@@ -33,7 +34,7 @@ export function DesktopSidebar({ currentTab }: { currentTab?: NavTab }) {
         id="desktop-add-btn"
         data-tour="nav-add"
         href="/add"
-        onClick={() => rememberAddOpener("desktop-add-btn")}
+        onClick={(e) => openAddFrom("desktop-add-btn", e, router)}
         className="no-underline flex h-12 items-center justify-center gap-2 rounded-full bg-cobalt text-on-accent text-callout font-bold hover:bg-cobalt/90 active:scale-[0.97] motion-reduce:active:scale-100 transition-press"
       >
         <PlusIcon size={18} />

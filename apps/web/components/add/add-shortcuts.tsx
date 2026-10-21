@@ -3,7 +3,7 @@
 import React from "react";
 import { Carousel } from "@/components/ui/carousel";
 import { QuickAddRow } from "@/components/add/quick-add-row";
-import type { FoodItem } from "@/lib/mock/foods";
+import type { FoodItem } from "@/lib/catalog";
 import type { SavedMeal } from "@/lib/saved-meals";
 import { formatAmount } from "@/lib/format";
 import { foodRowKcal } from "@/lib/food-meta";

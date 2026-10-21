@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
-import { notFound, useParams } from "next/navigation";
+import React, { useDeferredValue, useMemo, useState } from "react";
+import { notFound, useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 import { AppHeader } from "@/components/ui/app-header";
 import { AppShell } from "@/components/ui/app-shell";
 import { Card } from "@/components/ui/card";
@@ -12,23 +12,38 @@ import { CatalogStatus } from "@/components/foods/catalog-status";
 import { useCatalogFoods } from "@/hooks/use-catalog-foods";
 import { getNutrientDefinition } from "@/lib/nutrients";
 import { formatAmount } from "@/lib/format";
-import { isRichNutrientId, richInFoods, richName, type RichBasis } from "@/lib/rich-in";
+import { isRichNutrientId, richInFoods, richName, type RichBasis, type RichKind } from "@/lib/rich-in";
+import { defaultPortionOf } from "@/lib/portion";
 import { useBack } from "@/hooks/use-back";
 import { dedupeTwins, rowName } from "@/lib/food-rows";
 
-/** Foods ranked by one nutrient, per 100 g or per usual portion, with the share of the daily target. */
+/**
+ * Foods ranked by one nutrient, per 100 g or per usual portion, with the share of the daily target. Two tabs: Thực phẩm
+ * (every food but the supplements) and Thực phẩm bổ sung (per usual serving), kept in the URL (?loai=bo-sung) so back
+ * from a food returns to the same tab.
+ */
 export default function RichInPage() {
   const params = useParams<{ nutrient: string }>();
   const goBack = useBack();
   const { targets } = useDiary();
   const [basis, setBasis] = useState<RichBasis>("per100");
+  const router = useRouter();
+  const pathname = usePathname();
+  const kind: RichKind = useSearchParams()?.get("loai") === "bo-sung" ? "supplement" : "food";
+  const setKind = (next: RichKind) => router.replace(next === "supplement" ? `${pathname}?loai=bo-sung` : pathname, { scroll: false });
+  const supplement = kind === "supplement";
+  // A supplement is counted per usual serving (1 viên, 1 gói, 1 muỗng), never per 100 g
+  const shownBasis: RichBasis = supplement ? "portion" : basis;
 
   const id = params?.nutrient ?? "";
   const valid = isRichNutrientId(id);
   const definition = valid ? getNutrientDefinition(id) : undefined;
   const min = valid ? (targets[id]?.min ?? null) : null;
   const { foods, pending, failed, retry } = useCatalogFoods();
-  const rows = useMemo(() => (valid ? dedupeTwins(richInFoods(foods, id, basis, min), (r) => r.food) : []), [valid, id, basis, min, foods]);
+  // The list (every food with the nutrient, ranked) is worked out in a second render after the screen is up: the tap on a
+  // "Giàu …" tile answers with the header and the chips at once, and the rows follow
+  const listed = useDeferredValue(true, false);
+  const rows = useMemo(() => (valid && listed ? dedupeTwins(richInFoods(foods, id, shownBasis, min, kind), (r) => r.food) : []), [valid, listed, id, shownBasis, min, kind, foods]);
   if (!valid || !definition) notFound();
 
   const name = richName(definition);
@@ -38,7 +53,7 @@ export default function RichInPage() {
       <AppHeader
         variant="sub"
         title={`Giàu ${name}`}
-        subtitle={`${definition.unit} ${basis === "per100" ? "mỗi 100 g" : "mỗi khẩu phần"}`}
+        subtitle={`${definition.unit} ${supplement ? "mỗi lần dùng" : basis === "per100" ? "mỗi 100 g" : "mỗi khẩu phần"}`}
         onBack={goBack}
         layout="wide"
       />
@@ -46,27 +61,52 @@ export default function RichInPage() {
         <ChipGroup
           columns={2}
           tone="light"
+          tabs
+          ariaLabel="Loại"
           items={[
-            { id: "per100", label: "Mỗi 100 g", active: basis === "per100", onClick: () => setBasis("per100") },
-            { id: "portion", label: "Mỗi khẩu phần", active: basis === "portion", onClick: () => setBasis("portion") },
+            { id: "food", label: "Thực phẩm", active: !supplement, onClick: () => setKind("food") },
+            { id: "supplement", label: "Thực phẩm bổ sung", active: supplement, onClick: () => setKind("supplement") },
           ]}
         />
-        <Card as="section" aria-label={`Món giàu ${name}`} className="flex flex-col">
-          {rows.length === 0 && (pending || failed) ? (
+        {!supplement && (
+          <ChipGroup
+            columns={2}
+            tone="light"
+            items={[
+              { id: "per100", label: "Mỗi 100 g", active: basis === "per100", onClick: () => setBasis("per100") },
+              { id: "portion", label: "Mỗi khẩu phần", active: basis === "portion", onClick: () => setBasis("portion") },
+            ]}
+          />
+        )}
+        <Card as="section" aria-label={`${supplement ? "Thực phẩm bổ sung" : "Món"} giàu ${name}`} className="flex flex-col">
+          {!listed ? (
+            <div aria-hidden="true" className="flex flex-col gap-3 py-3">
+              {[0, 1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-5 rounded bg-level-empty" />
+              ))}
+            </div>
+          ) : rows.length === 0 && (pending || failed) ? (
             <CatalogStatus failed={failed} onRetry={retry} />
           ) : rows.length === 0 ? (
-            <p className="m-0 py-3 text-cap leading-snug text-secondary">Chưa có món nào có dữ liệu {name}. Bạn có thể tự tạo món mới từ nhãn bao bì.</p>
+            <p className="m-0 py-3 text-cap leading-snug text-secondary">
+              {supplement ? `Chưa có thực phẩm bổ sung nào có dữ liệu ${name}.` : `Chưa có thực phẩm nào có dữ liệu ${name}. Bạn có thể tự tạo món mới từ nhãn bao bì.`}
+            </p>
           ) : (
-            rows.map((row, i) => (
-              <FoodRowLink
-                key={row.food.id}
-                href={`/foods/${row.food.id}`}
-                name={rowName(row.food)}
-                meta={row.pct === null ? row.basis : `${row.pct}% mục tiêu ngày · ${row.basis}`}
-                value={`${formatAmount(row.amount, row.unit)} ${row.unit}`}
-                withBorderTop={i > 0}
-              />
-            ))
+            rows.map((row, i) => {
+              // A supplement's serving as it is called ("2 viên"), never its grams
+              const per = supplement ? defaultPortionOf(row.food).label : row.basis;
+              return (
+                <FoodRowLink
+                  key={row.food.id}
+                  href={`/foods/${row.food.id}`}
+                  name={rowName(row.food)}
+                  meta={row.pct === null ? per : `${row.pct}% mục tiêu ngày · ${per}`}
+                  value={`${formatAmount(row.amount, row.unit)} ${row.unit}`}
+                  withBorderTop={i > 0}
+                  category={row.food.category}
+                />
+              );
+            })
           )}
         </Card>
       </main>

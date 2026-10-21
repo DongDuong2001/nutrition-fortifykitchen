@@ -25,10 +25,12 @@ export interface ChipGroupProps {
   scroll?: boolean;
   ariaLabel?: string;
   "data-align-edge"?: string;
+  /** A tab switch (one choice changes what the screen lists): role tablist / tab and aria-selected, not aria-pressed; needs ariaLabel */
+  tabs?: boolean;
 }
 
 /**
- * ChipGroup: N equal columns, full width, aria-pressed, optional leading input cell.
+ * ChipGroup: N equal columns, full width, aria-pressed (aria-selected as tabs), optional leading input cell.
  * size "md" (default): 44 px items, text-xs. size "lg": 52 px items, text-base, same height as the inputs.
  */
 export function ChipGroup({
@@ -43,6 +45,7 @@ export function ChipGroup({
   scroll = false,
   ariaLabel = "",
   "data-align-edge": dataAlignEdge,
+  tabs = false,
 }: ChipGroupProps) {
   if (scroll) return <ChipScroller items={items} ariaLabel={ariaLabel} data-align-group={dataAlignGroup} data-align-edge={dataAlignEdge} />;
   const totalCount = (leadingInput ? 1 : 0) + items.length;
@@ -55,6 +58,8 @@ export function ChipGroup({
   return (
     <div
       data-align-group={dataAlignGroup}
+      role={tabs ? "tablist" : undefined}
+      aria-label={tabs ? ariaLabel : undefined}
       style={{ "--chip-cols": colCount, "--chip-cols-lg": colCountLg } as React.CSSProperties}
       className={`grid grid-cols-[repeat(var(--chip-cols),minmax(0,1fr))] lg:grid-cols-[repeat(var(--chip-cols-lg),minmax(0,1fr))] gap-2 w-full ${className}`}
     >
@@ -82,7 +87,9 @@ export function ChipGroup({
           <button
             key={it.id}
             type="button"
-            aria-pressed={isActive}
+            role={tabs ? "tab" : undefined}
+            aria-pressed={tabs ? undefined : isActive}
+            aria-selected={tabs ? isActive : undefined}
             aria-label={it.ariaLabel}
             disabled={it.disabled}
             onClick={it.onClick}

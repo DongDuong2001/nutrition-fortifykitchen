@@ -1,4 +1,4 @@
-import { catalogVersion, type FoodItem } from "./mock/foods";
+import { catalogVersion, type FoodItem } from "./catalog";
 import type { TwinGroup } from "./food-twins";
 
 /**

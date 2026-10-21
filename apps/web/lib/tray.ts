@@ -1,6 +1,6 @@
 import { isAmount } from "./amount";
 import { canLog } from "./diary-edits";
-import type { FoodItem } from "./mock/foods";
+import type { FoodItem } from "./catalog";
 import { defaultPortionOf, hidesGrams, scaleNutrients } from "./portion";
 
 /** One food in the add tray with the portion it will be logged at. */

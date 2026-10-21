@@ -1,12 +1,12 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Suspense, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { Suspense, startTransition, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { whenIdle } from "@/lib/idle";
 import { loadFoodRows } from "@/lib/food-rows";
 import Link from "next/link";
 import { createPortal } from "react-dom";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useShellBottomBar } from "@/components/ui/shell-slot";
 import { AppHeader, HEADER_ICON_BUTTON, CalendarGlyph } from "@/components/ui/app-header";
 import { IconShare } from "@/components/ui/icons";
@@ -63,43 +63,91 @@ import { HomeHero, type HeroPill } from "./home-hero";
 import { NutrientColumn } from "./nutrient-column";
 import { HOME_ROUTE } from "@/lib/nav";
 import { navigateFromSheet } from "@/lib/sheet-history";
+import { WhatsNewDue } from "@/components/whats-new/whats-new-due";
 
-// cc-51: loaded after the first paint (the share image with html-to-image, Có gì mới); neither shows until it opens
-const ShareSheet = dynamic(() => import("./share-sheet").then((m) => m.ShareSheet), { ssr: false });
-// cc-58: the sheets that are closed by default, and select mode's bars, are their own chunks. They are fetched on the
-// first touch or when the browser is idle (loadSheets), well before a tap opens one, so the open motion still plays
+// cc-51, cc-58: the sheets that are closed by default, select mode's bars and the share image (html-to-image) are chunks of their
+// own, fetched on the first touch or when the browser is idle (loadSheets). They are not next/dynamic: a dynamic component
+// that suspends the first time it renders is shown only 300 ms after its fallback (React throttles a reveal), so the first open of
+// each sheet took 300 ms longer than the second. Here the modules are resolved first, kept in a module variable, and every sheet is
+// then mounted closed once, so a first open only toggles `open`, as fast as the second.
 const loadCalendar = () => import("@/components/calendar-sheet");
 const loadCopyYesterday = () => import("@/components/copy-yesterday-sheet");
 const loadMealMenu = () => import("@/components/diary/meal-menu-sheet");
 const loadSources = () => import("./nutrient-sources-sheet");
 const loadExplainer = () => import("@/components/coaching/level-explainer-sheet");
 const loadSelect = () => import("./select-mode");
-const CalendarSheet = dynamic(() => loadCalendar().then((m) => m.CalendarSheet), { ssr: false });
-const CopyYesterdaySheet = dynamic(() => loadCopyYesterday().then((m) => m.CopyYesterdaySheet), { ssr: false });
-const MealMenuSheet = dynamic(() => loadMealMenu().then((m) => m.MealMenuSheet), { ssr: false });
-const NutrientSourcesSheet = dynamic(() => loadSources().then((m) => m.NutrientSourcesSheet), { ssr: false });
-const LevelExplainerSheet = dynamic(() => loadExplainer().then((m) => m.LevelExplainerSheet), { ssr: false });
-const DayMenuSheet = dynamic(() => loadSelect().then((m) => m.DayMenuSheet), { ssr: false });
-const MealTargetSheet = dynamic(() => loadSelect().then((m) => m.MealTargetSheet), { ssr: false });
-const SelectActionBar = dynamic(() => loadSelect().then((m) => m.SelectActionBar), { ssr: false });
-const SelectHeader = dynamic(() => loadSelect().then((m) => m.SelectHeader), { ssr: false });
 const loadShare = () => import("./share-sheet");
-/** True from the first time `open` is true: a sheet is mounted once it has been used, so a closed one costs nothing before that. */
-function useOnceOpen(open: boolean): boolean {
+
+interface HomeSheets {
+  CalendarSheet: Awaited<ReturnType<typeof loadCalendar>>["CalendarSheet"];
+  CopyYesterdaySheet: Awaited<ReturnType<typeof loadCopyYesterday>>["CopyYesterdaySheet"];
+  MealMenuSheet: Awaited<ReturnType<typeof loadMealMenu>>["MealMenuSheet"];
+  NutrientSourcesSheet: Awaited<ReturnType<typeof loadSources>>["NutrientSourcesSheet"];
+  LevelExplainerSheet: Awaited<ReturnType<typeof loadExplainer>>["LevelExplainerSheet"];
+  DayMenuSheet: Awaited<ReturnType<typeof loadSelect>>["DayMenuSheet"];
+  MealTargetSheet: Awaited<ReturnType<typeof loadSelect>>["MealTargetSheet"];
+  SelectActionBar: Awaited<ReturnType<typeof loadSelect>>["SelectActionBar"];
+  SelectHeader: Awaited<ReturnType<typeof loadSelect>>["SelectHeader"];
+  ShareSheet: Awaited<ReturnType<typeof loadShare>>["ShareSheet"];
+}
+let loadedSheets: HomeSheets | null = null;
+let sheetsLoading: Promise<void> | null = null;
+const sheetListeners = new Set<() => void>();
+function loadSheets(): Promise<void> {
+  sheetsLoading ??= Promise.all([loadCalendar(), loadCopyYesterday(), loadMealMenu(), loadSources(), loadExplainer(), loadSelect(), loadShare()])
+    .then(([cal, copy, menu, src, exp, sel, share]) => {
+      loadedSheets = {
+        CalendarSheet: cal.CalendarSheet,
+        CopyYesterdaySheet: copy.CopyYesterdaySheet,
+        MealMenuSheet: menu.MealMenuSheet,
+        NutrientSourcesSheet: src.NutrientSourcesSheet,
+        LevelExplainerSheet: exp.LevelExplainerSheet,
+        DayMenuSheet: sel.DayMenuSheet,
+        MealTargetSheet: sel.MealTargetSheet,
+        SelectActionBar: sel.SelectActionBar,
+        SelectHeader: sel.SelectHeader,
+        ShareSheet: share.ShareSheet,
+      };
+      sheetListeners.forEach((l) => l());
+    })
+    .catch(() => {
+      // Offline before the chunks were cached: the next touch tries again
+      sheetsLoading = null;
+    });
+  return sheetsLoading;
+}
+const subscribeSheets = (listener: () => void) => {
+  sheetListeners.add(listener);
+  return () => void sheetListeners.delete(listener);
+};
+/**
+ * The sheets once their chunks are in (null before): mounted closed as soon as they are, so no first open waits for a chunk. The
+ * commit that mounts the nine of them is a transition: a render that lands in the middle of the add sheet's slide yields to it.
+ */
+function useHomeSheets(): HomeSheets | null {
+  const [sheets, setSheets] = useState<HomeSheets | null>(() => loadedSheets);
+  useEffect(() => {
+    if (loadedSheets) {
+      setSheets(loadedSheets);
+      return;
+    }
+    return subscribeSheets(() => startTransition(() => setSheets(loadedSheets)));
+  }, []);
+  return sheets;
+}
+/** True from the first time `open` is true, or from `ready`: a sheet is mounted closed once its chunk is in, so it costs nothing before that. */
+function useOnceOpen(open: boolean, ready = false): boolean {
   const [seen, setSeen] = useState(open);
   if (open && !seen) setSeen(true);
-  return seen || open;
-}
-function loadSheets() {
-  void Promise.all([loadCalendar(), loadCopyYesterday(), loadMealMenu(), loadSources(), loadExplainer(), loadSelect(), loadShare()]);
+  return seen || open || ready;
 }
 const WhatsNewHost = dynamic(() => import("@/components/whats-new/whats-new-host").then((m) => m.WhatsNewHost), { ssr: false });
 
 /** The picture of Hôm nay while the diary is read (and the Suspense fallback): the ink band and the two column shapes. */
-function HomeLoading({ backdrop }: { backdrop: boolean }) {
+function HomeLoading() {
   return (
     <>
-        {!backdrop && <h1 className="sr-only">Hôm nay</h1>}
+        <h1 className="sr-only">Hôm nay</h1>
         <div className="h-[52px] rounded-b-sheet bg-ink lg:hidden" />
         <main role="status" aria-busy="true" className="mx-auto flex w-full max-w-[560px] flex-col gap-3 px-3 pt-2 lg:mx-0 lg:max-w-[1240px] lg:px-8 lg:pt-8">
           <span className="sr-only">Đang tải…</span>
@@ -121,6 +169,27 @@ function HomeLoading({ backdrop }: { backdrop: boolean }) {
   );
 }
 
+/** True once Hôm nay has been on screen in this page session: only the very first draw is split in two. */
+let homeDrawn = false;
+
+/** The food list and the nutrient column as shapes, for the one frame (the app's first load) before they are drawn. */
+function HomeBodySkeleton() {
+  return (
+    <>
+      <div aria-hidden="true" className="flex flex-1 flex-col gap-2 p-3">
+        {[0, 1, 2, 3, 4, 5].map((i) => (
+          <div key={i} className="h-5 rounded bg-level-empty" />
+        ))}
+      </div>
+      <div aria-hidden="true" className="flex w-[198px] flex-col gap-2 bg-card p-3">
+        {[0, 1, 2, 3, 4, 5].map((i) => (
+          <div key={i} className="h-5 rounded bg-level-empty" />
+        ))}
+      </div>
+    </>
+  );
+}
+
 function subscribeOnline(callback: () => void) {
   window.addEventListener("online", callback);
   window.addEventListener("offline", callback);
@@ -139,19 +208,19 @@ const getOnlineServerSnapshot = () => true;
  * (read-only). Everything the Nhật ký day view did lives here.
  */
 /**
- * Hôm nay. `backdrop` (cc-55b): the picture of Hôm nay that the /add sheet sits on. The same markup, so it looks the
- * same, but nothing of its own runs: no Có gì mới, install pop-up or sheets, no sync status or pull to refresh, no tour
- * signals and no focus return. It is inert behind the sheet.
+ * Hôm nay (the tabs' first screen at /app): the day at a glance. The ink card holds the day's kcal and macros, the food list
+ * on the left and the 14 watched nutrients on the right. Tap a food or a meal to see that alone; ?date= shows a past day
+ * (editable for yesterday, read-only older). The add sheet opens over it (an intercepting route) and leaves it mounted.
  */
-export function HomeScreen({ backdrop = false }: { backdrop?: boolean } = {}) {
+export function HomeScreen() {
   return (
-    <Suspense fallback={<HomeLoading backdrop={backdrop} />}>
-      <HomeContent backdrop={backdrop} />
+    <Suspense fallback={<HomeLoading />}>
+      <HomeContent />
     </Suspense>
   );
 }
 
-function HomeContent({ backdrop }: { backdrop: boolean }) {
+function HomeContent() {
   const searchParams = useSearchParams();
   const forceLoading = searchParams?.get("loading") === "1";
   const forceOffline = searchParams?.get("offline") === "1";
@@ -205,22 +274,26 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
   const [clientNow, setClientNow] = useState(false);
   const isOnline = useSyncExternalStore(subscribeOnline, getOnlineSnapshot, getOnlineServerSnapshot);
 
-  const viewIsoParam = hydrated && todayIso ? viewedIsoDate(searchParams?.get("date"), todayIso) : null;
+  // The day is read from the address only while the address is Hôm nay's: with the add sheet over it (/add, /add?meal=…) the
+  // address has no `date` unless the opener carried it, and the day under the sheet must not flip to today and back
+  const pathname = usePathname();
+  const shownDateParam = useRef<string | null>(null);
+  if (pathname === "/app") shownDateParam.current = searchParams?.get("date") ?? null;
+  const viewIsoParam = hydrated && todayIso ? viewedIsoDate(shownDateParam.current, todayIso) : null;
   const isPast = viewIsoParam !== null && viewIsoParam !== todayIso;
   // cc-68: yesterday can be edited like today; a day older than that is read-only
   const readOnly = isPast && viewIsoParam !== null && !isEditable(viewIsoParam);
   const editablePast = isPast && !readOnly;
   // S5: a day older than yesterday is the server's: it is read (and cached on this device) when it is on screen
   useEffect(() => {
-    if (readOnly && viewIsoParam && !backdrop) loadDays([viewIsoParam]);
-  }, [readOnly, viewIsoParam, backdrop, loadDays]);
-  // The + of the nav adds to this day (see lib/home-scroll homeDay); the picture behind /add does not claim it
+    if (readOnly && viewIsoParam) loadDays([viewIsoParam]);
+  }, [readOnly, viewIsoParam, loadDays]);
+  // The + of the nav adds to this day (see lib/home-scroll homeDay)
   const shownDay = editablePast ? viewIsoParam : null;
   useEffect(() => {
-    if (backdrop) return;
     setHomeDay(shownDay);
     return () => setHomeDay(null);
-  }, [shownDay, backdrop]);
+  }, [shownDay]);
   const pastData = useMemo(
     () => (isPast && viewIsoParam && todayIso ? pastDayData(viewIsoParam, todayIso, profile) : null),
     [isPast, viewIsoParam, todayIso, profile]
@@ -237,28 +310,40 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
     setClientNow(true);
   }, []);
 
-  // cc-58: fetch the sheet chunks on the first touch, or when the browser is idle, whichever comes first
+  // cc-58: fetch the sheet chunks on the first touch, or when the browser is idle, whichever comes first. Never on the + that opens
+  // the add sheet (the chunks and the mount of nine sheets would land in its slide): that touch is skipped, the next one or the idle
+  // moment loads them, and only while Hôm nay is the page (not while the sheet is up over it).
   useEffect(() => {
-    if (backdrop) return;
     let done = false;
+    let idle: number | undefined;
+    let retry: number | undefined;
     const go = () => {
       if (done) return;
+      if (window.location.pathname !== HOME_ROUTE) {
+        retry = window.setTimeout(go, 800);
+        return;
+      }
       done = true;
-      document.removeEventListener("pointerdown", go, true);
+      document.removeEventListener("pointerdown", onTouch, true);
       loadSheets();
     };
-    document.addEventListener("pointerdown", go, { capture: true, passive: true });
-    const idle = typeof requestIdleCallback === "function" ? requestIdleCallback(go, { timeout: 3000 }) : window.setTimeout(go, 1500);
-    return () => {
-      document.removeEventListener("pointerdown", go, true);
-      if (typeof requestIdleCallback === "function") cancelIdleCallback(idle as number);
-      else window.clearTimeout(idle as number);
+    const onTouch = (e: PointerEvent) => {
+      if ((e.target as Element | null)?.closest?.('#mobile-add-fab, #desktop-add-btn, a[href^="/add"]')) return;
+      go();
     };
-  }, [backdrop]);
+    document.addEventListener("pointerdown", onTouch, { capture: true, passive: true });
+    idle = typeof requestIdleCallback === "function" ? requestIdleCallback(go, { timeout: 3000 }) : window.setTimeout(go, 1500);
+    return () => {
+      done = true;
+      document.removeEventListener("pointerdown", onTouch, true);
+      if (typeof requestIdleCallback === "function") cancelIdleCallback(idle as number);
+      else window.clearTimeout(idle);
+      window.clearTimeout(retry);
+    };
+  }, []);
 
   // The share tip's "Thử ngay" opens the share sheet (which asks for a name first when there is none)
   useEffect(() => {
-    if (backdrop) return;
     return subscribeSignal((signal) => {
         if (signal === "open-share") openShare();
         // The "Có gì mới" tour ended: leave Chọn nhiều món, nothing else changes
@@ -268,11 +353,10 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
           setTargetSheet(null);
         }
     });
-  }, [backdrop]);
+  }, []);
 
   // Return focus to the control that opened /add (same contract as the diary)
   useEffect(() => {
-    if (backdrop) return;
     try {
       const returnId = sessionStorage.getItem("return_focus_id");
       if (returnId) {
@@ -282,13 +366,12 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
     } catch {
       // Storage unavailable
     }
-  }, [backdrop]);
+  }, []);
 
   // cc-67: the add sheet's one-row-per-food index is a chunk of its own: fetched when Hôm nay is idle, so /add has it at once
   useEffect(() => {
-    if (backdrop) return;
     return whenIdle(() => void loadFoodRows());
-  }, [backdrop]);
+  }, []);
 
   const entries = useMemo(() => {
     if (isPast && viewIsoParam && todayIso) return entriesFromAdded(dayEntries(viewIsoParam, todayIso));
@@ -314,19 +397,24 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
     () => ({ carbs: targetOf(day, "carbs"), protein: targetOf(day, "protein"), fat: targetOf(day, "fat"), fiber: targetOf(day, "fiber") }),
     [day]
   );
-  // cc-57: the frame and the hero come first; the food list and the nutrient column (the heavy part) follow in a
-  // second, low-priority render, so a tab tap or the + shows its first frame sooner
-  const heavyReady = useDeferredValue(true, false);
-  // cc-58: each sheet is mounted the first time it opens (the chunks are fetched ahead, see loadSheets)
-  const sourcesMounted = useOnceOpen(sourcesOf !== null);
-  const mealMenuMounted = useOnceOpen(menuSlot !== null);
-  const explainerMounted = useOnceOpen(explainerOpen);
-  const copySheetMounted = useOnceOpen(isCopySheetOpen);
-  const dayMenuMounted = useOnceOpen(dayMenuOpen);
-  const copyTargetMounted = useOnceOpen(targetSheet === "copy");
-  const moveTargetMounted = useOnceOpen(targetSheet === "move");
-  const pastTargetMounted = useOnceOpen(targetSheet === "past");
-  const calendarMounted = useOnceOpen(isCalendarOpen);
+  // cc-57: on the very first app load the frame and the hero come first, with a skeleton where the food list and the nutrient
+  // column (the heavy part) follow in a second, low-priority render. Every later visit (a tab, Back) draws it all at once: a
+  // first frame with an empty list was a blank frame. (The sheet over Hôm nay no longer remounts it, so + never redraws it.)
+  const heavyReady = useDeferredValue(true, homeDrawn);
+  useEffect(() => {
+    homeDrawn = true;
+  }, []);
+  // cc-58: each sheet is mounted closed once its chunk is in (see loadSheets), and open from then on by its flag
+  const sheets = useHomeSheets();
+  const sourcesMounted = useOnceOpen(sourcesOf !== null, sheets !== null);
+  const mealMenuMounted = useOnceOpen(menuSlot !== null, sheets !== null);
+  const explainerMounted = useOnceOpen(explainerOpen, sheets !== null);
+  const copySheetMounted = useOnceOpen(isCopySheetOpen, sheets !== null);
+  const dayMenuMounted = useOnceOpen(dayMenuOpen, sheets !== null);
+  const copyTargetMounted = useOnceOpen(targetSheet === "copy", sheets !== null);
+  const moveTargetMounted = useOnceOpen(targetSheet === "move", sheets !== null);
+  const pastTargetMounted = useOnceOpen(targetSheet === "past", sheets !== null);
+  const calendarMounted = useOnceOpen(isCalendarOpen, sheets !== null);
   const openSources = useCallback((id: string) => {
     markUsed("nutrient-sources");
     setSourcesOf(id);
@@ -344,8 +432,8 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
     if (selecting && entries.length === 0) setSelecting(false);
   }, [selecting, entries.length]);
   useEffect(() => {
-    if (!selecting && !backdrop) emitSignal("select-off");
-  }, [selecting, backdrop]);
+    if (!selecting) emitSignal("select-off");
+  }, [selecting]);
   // Foods deleted or moved away leave the chosen set
   const liveSelected = useMemo(() => new Set(chosenEntries(entries, selectedIds).map((e) => e.id)), [entries, selectedIds]);
   const exitSelect = () => {
@@ -372,18 +460,22 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
     copyEntries(copies, `Đã chép ${menuMeal.fullName} từ hôm qua · ${copies.length} món`);
   }
 
-  // Select mode's action bar takes the bottom nav's place (the shell's bar slot); the backdrop has no select mode
-  const barHost = useShellBottomBar(selecting && !backdrop);
+  // Select mode's action bar takes the bottom nav's place (the shell's bar slot)
+  const barHost = useShellBottomBar(selecting);
 
   const showLoading = forceLoading || !hydrated;
-  // cc-64 (A2): the first draw after the skeleton fades in; later draws (another day) keep the day motion
+  // cc-64 (A2): the first draw after the skeleton fades in (a cross-fade with the skeleton that just went); later draws
+  // (another day) keep the day motion, and a draw with no skeleton before it (a tab, Back) does not fade: it would start
+  // from nothing, a blank frame
   const firstContent = useRef(true);
+  const sawSkeleton = useRef(false);
+  if (showLoading) sawSkeleton.current = true;
   useEffect(() => {
     if (!showLoading) firstContent.current = false;
   });
   const showOffline = forceOffline || !isOnline;
 
-  if (showLoading) return <HomeLoading backdrop={backdrop} />;
+  if (showLoading) return <HomeLoading />;
 
   const nothingLogged = entries.length === 0;
   const selected = mode.kind !== "day";
@@ -470,9 +562,9 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
 
   return (
     <>
-      {barHost &&
+      {barHost && sheets &&
         createPortal(
-          <SelectActionBar
+          <sheets.SelectActionBar
             count={chosenCount}
             kcal={chosenKcal(entries, liveSelected)}
             past={readOnly}
@@ -492,11 +584,11 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
         className={`flex flex-col ${
           selecting
             ? "h-[calc(100dvh-112px-env(safe-area-inset-bottom))]"
-            : "h-[calc(100dvh-88px-env(safe-area-inset-bottom))] lg:h-dvh"
+            : "h-[calc(100dvh-88px-var(--update-bar-h,0px)-env(safe-area-inset-bottom))] lg:h-dvh"
         }`}
       >
         {selecting ? (
-          <SelectHeader
+          sheets && <sheets.SelectHeader
             count={chosenCount}
             dateLabel={dayLabel}
             allSelected={entries.length > 0 && chosenCount === entries.length}
@@ -505,7 +597,6 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
           />
         ) : (
         <AppHeader
-          titleAs={backdrop ? "p" : "h1"}
           variant="daily"
           title="Hôm nay"
           wordmark
@@ -524,7 +615,7 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
             <button
               type="button"
               onClick={openShare}
-              onPointerDown={() => void loadShare()}
+              onPointerDown={() => void loadSheets()}
               disabled={nothingLogged}
               aria-label="Chia sẻ ngày này"
               data-tour="home-share"
@@ -570,12 +661,12 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
           // cc-58: a bar over the page, above the bottom nav, so it pushes nothing down when it appears
           <div
             role="status"
-            className="pointer-events-none fixed inset-x-3 bottom-[calc(80px+env(safe-area-inset-bottom))] z-nav mx-auto max-w-[366px] rounded-xl bg-warning-bg px-3 py-2 text-cap leading-snug text-warning-text shadow-card lg:inset-x-auto lg:bottom-4 lg:right-8 lg:mx-0 lg:w-[400px] lg:max-w-none"
+            className="pointer-events-none fixed inset-x-3 bottom-[calc(80px+var(--update-bar-h,0px)+env(safe-area-inset-bottom))] z-nav mx-auto max-w-[366px] rounded-xl bg-warning-bg px-3 py-2 text-cap leading-snug text-warning-text shadow-card lg:inset-x-auto lg:bottom-4 lg:right-8 lg:mx-0 lg:w-[400px] lg:max-w-none"
           >
             Đang ngoại tuyến — món mới sẽ đồng bộ khi có mạng.
           </div>
         )}
-        <div className="mx-auto flex min-h-0 w-full max-w-[560px] flex-1 flex-col lg:mx-0 lg:max-w-[1240px] lg:px-8">
+        <main className="mx-auto flex min-h-0 w-full max-w-[560px] flex-1 flex-col lg:mx-0 lg:max-w-[1240px] lg:px-8">
           <HomeHero
             label={heroLabel(mode, entries, meals)}
             pills={selecting ? [] : pills}
@@ -600,13 +691,13 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
               </button>
             </div>
           )}
-          <div key={viewIso} data-align-group="home-page" data-align-from="lg" className={`${firstContent.current ? "m-content-in" : dayMotion.current.className} flex min-h-0 flex-1 border-t border-t-divider lg:gap-4 lg:border-t-0 lg:pb-8 ${coach && !selecting ? "lg:mt-2" : "mt-2 lg:mt-4"}`}>
-            {!heavyReady && <div className="flex-1" aria-hidden="true" />}
+          <div key={viewIso} data-align-group="home-page" data-align-from="lg" className={`${firstContent.current ? (sawSkeleton.current ? "m-content-in" : "") : dayMotion.current.className} flex min-h-0 flex-1 border-t border-t-divider lg:gap-4 lg:border-t-0 lg:pb-8 ${coach && !selecting ? "lg:mt-2" : "mt-2 lg:mt-4"}`}>
+            {!heavyReady && <HomeBodySkeleton />}
             {heavyReady && (
               <FoodList
                 meals={meals}
                 dayKey={viewIso}
-                onPullRefresh={readOnly || backdrop ? undefined : refreshToday}
+                onPullRefresh={readOnly ? undefined : refreshToday}
                 mode={mode}
                 readOnly={readOnly}
                 dayWord={editablePast ? "hôm qua" : "hôm nay"}
@@ -618,7 +709,7 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
                 onMeal={(slot) => setMode(toggleMeal(mode, slot))}
                 onCopyYesterday={() => setIsCopySheetOpen(true)}
                 onLongPressSelect={(id) => startSelect(id)}
-                touchDrag={!backdrop && !sheetOpen && sourcesOf === null}
+                touchDrag={!sheetOpen && sourcesOf === null}
                 onMoveFood={(id, targetSlot) => {
                   if (readOnly) return;
                   moveEntries([id], targetSlot, viewIso);
@@ -650,21 +741,20 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
               />
             )}
           </div>
-        </div>
+        </main>
       </div>
 
-      {!backdrop && (
       <>
-      {sourcesMounted && (
-        <NutrientSourcesSheet
+      {sheets && sourcesMounted && (
+        <sheets.NutrientSourcesSheet
           nutrient={sourcesOf}
           value={sourcesOf ? shown.nutrients[sourcesOf] ?? null : null}
           target={sourcesOf ? nutrientTargets[sourcesOf] ?? null : null}
           onClose={() => setSourcesOf(null)}
         />
       )}
-      {mealMenuMounted && (
-        <MealMenuSheet
+      {sheets && mealMenuMounted && (
+        <sheets.MealMenuSheet
           open={menuSlot !== null}
           onClose={() => setMenuSlot(null)}
           mealName={menuMeal?.fullName ?? ""}
@@ -686,11 +776,12 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
         />
       )}
       <InstallPromptHost busy={installBusy} />
+      <WhatsNewDue />
       <WhatsNewHost busy={installBusy} />
-      {explainerMounted && <LevelExplainerSheet open={explainerOpen} onClose={() => setExplainerOpen(false)} level={level} />}
-      {copySheetMounted && <CopyYesterdaySheet open={isCopySheetOpen} onClose={() => setIsCopySheetOpen(false)} targetIso={viewIso} />}
-      {dayMenuMounted && (
-        <DayMenuSheet
+      {sheets && explainerMounted && <sheets.LevelExplainerSheet open={explainerOpen} onClose={() => setExplainerOpen(false)} level={level} />}
+      {sheets && copySheetMounted && <sheets.CopyYesterdaySheet open={isCopySheetOpen} onClose={() => setIsCopySheetOpen(false)} targetIso={viewIso} />}
+      {sheets && dayMenuMounted && (
+        <sheets.DayMenuSheet
           open={dayMenuOpen}
           onClose={() => setDayMenuOpen(false)}
           title={dayLabel}
@@ -699,8 +790,8 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
           onSelect={startSelect}
         />
       )}
-      {copyTargetMounted && (
-        <MealTargetSheet
+      {sheets && copyTargetMounted && (
+        <sheets.MealTargetSheet
           open={targetSheet === "copy"}
           onClose={() => setTargetSheet(null)}
           title={`Chép ${chosenCount} món sang`}
@@ -711,8 +802,8 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
           onConfirm={confirmCopy}
         />
       )}
-      {moveTargetMounted && (
-        <MealTargetSheet
+      {sheets && moveTargetMounted && (
+        <sheets.MealTargetSheet
           open={targetSheet === "move"}
           onClose={() => setTargetSheet(null)}
           title={`Chuyển ${chosenCount} món sang`}
@@ -723,8 +814,8 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
           onConfirm={confirmMove}
         />
       )}
-      {pastTargetMounted && (
-        <MealTargetSheet
+      {sheets && pastTargetMounted && (
+        <sheets.MealTargetSheet
           open={targetSheet === "past"}
           onClose={() => setTargetSheet(null)}
           title={pastCopyTitle(chosenCount)}
@@ -735,8 +826,8 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
           onConfirm={confirmCopy}
         />
       )}
-      {shareUsed && (
-      <ShareSheet
+      {shareUsed && sheets && (
+      <sheets.ShareSheet
         open={isShareOpen}
         onClose={() => setIsShareOpen(false)}
         day={day}
@@ -748,8 +839,8 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
         onSaveName={saveName}
       />
       )}
-      {todayIso && calendarMounted && (
-        <CalendarSheet
+      {sheets && todayIso && calendarMounted && (
+        <sheets.CalendarSheet
           open={isCalendarOpen}
           onClose={() => setIsCalendarOpen(false)}
           selectedIso={viewIso}
@@ -760,7 +851,6 @@ function HomeContent({ backdrop }: { backdrop: boolean }) {
         />
       )}
       </>
-      )}
     </>
   );
 }

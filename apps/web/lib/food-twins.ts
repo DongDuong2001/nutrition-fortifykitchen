@@ -1,4 +1,4 @@
-import { MOCK_FOODS, catalogVersion, type FoodItem } from "./mock/foods";
+import { CATALOG_FOODS, catalogVersion, type FoodItem } from "./catalog";
 import { searchWithTwins } from "./search";
 
 export { cookSwitchFor } from "./yield";
@@ -120,7 +120,7 @@ function build(foods: readonly FoodItem[]): TwinIndex {
 
 let cached: TwinIndex | null = null;
 function index(): TwinIndex {
-  if (!cached || cached.version !== catalogVersion() || cached.size !== MOCK_FOODS.length) cached = build(MOCK_FOODS);
+  if (!cached || cached.version !== catalogVersion() || cached.size !== CATALOG_FOODS.length) cached = build(CATALOG_FOODS);
   return cached;
 }
 

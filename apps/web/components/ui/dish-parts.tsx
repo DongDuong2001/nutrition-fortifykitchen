@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useId, useMemo, useState } from "react";
 import { Expand } from "@/components/ui/expand";
 import { ChipGroup } from "@/components/ui/chip-group";
 import { useCatalogFoods } from "@/hooks/use-catalog-foods";
-import { MOCK_FOODS, type FoodItem } from "@/lib/mock/foods";
+import { CATALOG_FOODS, type FoodItem } from "@/lib/catalog";
 import {
   EDIT_STEP_GRAMS,
   canEditParts,
@@ -114,7 +114,7 @@ export function DishParts({ food, portionGrams, onEdit }: DishPartsProps) {
     };
   }, []);
 
-  const view = useMemo(() => (recipes ? dishViewOf(food, recipes, foodsByKey(MOCK_FOODS)) : null), [recipes, food, version]);
+  const view = useMemo(() => (recipes ? dishViewOf(food, recipes, foodsByKey(CATALOG_FOODS)) : null), [recipes, food, version]);
   // No grams yet: one serving of the recipe
   const servings = view ? (portionGrams > 0 ? servingsOf(portionGrams, view.servingGrams) : 1) : 0;
   const parts = useMemo(() => (view ? editParts(view, typed, added) : []), [view, typed, added]);

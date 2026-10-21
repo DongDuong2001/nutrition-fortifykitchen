@@ -1,32 +1,12 @@
-import type { FoodItem } from "./mock/foods";
+import type { FoodItem } from "./catalog";
 import { scaleNutrients } from "./portion";
 import { formatAmount } from "./format";
 import { nutrientName } from "./nutrients";
+import { sourceName } from "./source-names";
 
-/** Maps a food source code to a Vietnamese UI label, never returning a raw code. */
+/** Maps a food source code to a Vietnamese UI label, never returning a raw code (the table in lib/source-names). */
 export function foodSourceLabel(source?: string | null): string {
-  const key = (source ?? "").trim().toLowerCase().replace(/[\s_]+/g, "-");
-  if (key.startsWith("usda")) return "USDA"; // usda, usda_sr_legacy, usda_foundation, usda_fndds
-  switch (key) {
-    case "label":
-      return "Nhãn";
-    case "community":
-    case "recipe-calc":
-      return "Ước tính";
-    case "cnf":
-      return "CNF (Canada)";
-    case "vn-table":
-    case "vn-fct":
-    case "vn-nin":
-      return "Bảng TPDD Việt Nam";
-    case "literature":
-      return "Tài liệu";
-    case "custom":
-    case "user":
-      return "Của tôi";
-    default:
-      return "Khác";
-  }
+  return sourceName(source)?.label ?? "Khác";
 }
 
 /** The second line of a food row: kcal per its first serving ("Chưa có kcal" when unknown), then carbs and potassium when known. */

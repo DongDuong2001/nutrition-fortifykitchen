@@ -1,4 +1,4 @@
-import type { FoodItem } from "./mock/foods";
+import type { FoodItem } from "./catalog";
 import { MAX_UNIT_COUNT, unitPortionText, parseUnitAmount, parseUnitServing } from "./portion";
 
 /** A recently logged food, with the serving it was logged with. */
@@ -13,11 +13,8 @@ export interface ResolvedRecent {
   label: string;
 }
 
-export const DEFAULT_RECENT_FOODS: RecentFood[] = [
-  { foodId: "food-yen-mach", servingLabel: "60 g" },
-  { foodId: "food-yogurt-kefir", servingLabel: "200 ml" },
-  { foodId: "food-chuoi", servingLabel: "100 g" },
-];
+// Demo mode's seeded Gần đây (perf/live-bundle: in lib/mock, so a live build leaves it out)
+export { DEFAULT_RECENT_FOODS } from "./mock/recent-seed";
 
 /** Guards values read back from sessionStorage. */
 export function isRecentFood(value: unknown): value is RecentFood {

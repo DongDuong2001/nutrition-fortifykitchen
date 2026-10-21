@@ -1,6 +1,7 @@
 import { useEffect, useRef, type PointerEvent as ReactPointerEvent } from "react";
 import { haptic } from "./haptics";
 import { markUsed } from "./onboarding-store";
+import { setLanding } from "./touch-drag-landing";
 
 /**
  * cc-70: move a food to another meal by holding it and dragging, with a finger or a pen. The mouse keeps the HTML5 drag
@@ -299,6 +300,12 @@ export function useTouchDrag(props: TouchDragProps) {
         if (slot !== null) haptic("moveDrop");
       },
       onDrop: (slot) => {
+        // The row is drawn in its new meal from where the copy is now (row-motion plays it in from this box)
+        const id = el.dataset.entryId;
+        if (ghost && id) {
+          const box = ghost.getBoundingClientRect();
+          setLanding(id, { cx: box.left + box.width / 2, cy: box.top + box.height / 2, width: box.width });
+        }
         end();
         latest.current.onDrop(slot);
       },
@@ -317,6 +324,8 @@ export function useTouchDrag(props: TouchDragProps) {
       onCancel: end,
     });
     gesture.current = { ctrl, id: pointerId };
+    // From the touch-down the row's tint deepens for the hold (globals.css m-hold-tint); onLift makes it "lifted"
+    el.setAttribute("data-touch-drag", "pressing");
     ctrl.down(e.clientX, e.clientY);
   };
 
