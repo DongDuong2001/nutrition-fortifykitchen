@@ -13,7 +13,12 @@ const fmt = (ms) => `${(ms / 1000).toFixed(0)} s`;
 export function run(label, cmd, args, env = {}) {
   const started = Date.now();
   return new Promise((done) => {
-    const child = spawn(cmd, args, { cwd: WEB, env: { ...process.env, ...env }, stdio: ["ignore", "pipe", "pipe"] });
+    const child = spawn(cmd, args, {
+      cwd: WEB,
+      env: { ...process.env, ...env },
+      stdio: ["ignore", "pipe", "pipe"],
+      shell: process.platform === "win32",
+    });
     const prefix = (chunk) =>
       chunk
         .toString()
@@ -44,7 +49,12 @@ export async function startServer() {
     console.error(`Port ${PORT} is in use. Stop that server first (PORT=${PORT} npm run port:free).`);
     process.exit(1);
   }
-  const server = spawn("npx", ["next", "start", "-p", PORT], { cwd: WEB, stdio: "ignore", detached: true });
+  const server = spawn("npx", ["next", "start", "-p", PORT], {
+    cwd: WEB,
+    stdio: "ignore",
+    detached: process.platform !== "win32",
+    shell: process.platform === "win32",
+  });
   for (let i = 0; i < 150 && !(await portOpen()); i++) await new Promise((r) => setTimeout(r, 200));
   if (!(await portOpen())) {
     stopServer(server);
@@ -57,7 +67,11 @@ export async function startServer() {
 
 export function stopServer(server) {
   try {
-    process.kill(-server.pid, "SIGTERM"); // the whole group: npx and the next server under it
+    if (process.platform === "win32") {
+      spawn("taskkill", ["/PID", String(server.pid), "/T", "/F"], { stdio: "ignore" });
+    } else {
+      process.kill(-server.pid, "SIGTERM"); // the whole group: npx and the next server under it
+    }
   } catch {
     // already gone
   }

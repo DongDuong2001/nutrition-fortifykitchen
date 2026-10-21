@@ -27,7 +27,7 @@ func NewRepository(pool *pgxpool.Pool) Repository {
 	return &pgxRepository{pool: pool}
 }
 
-func (r *pgxRepository) SearchFoods(ctx context.Context, filter FoodSearchFilter) (*FoodSearchResponse, error) {
+func buildSearchFoodsQuery(filter FoodSearchFilter) (string, string, []any, []any) {
 	filter.Limit = ClampFoodsLimit(filter.Query, filter.Limit)
 	if filter.Page <= 0 {
 		filter.Page = 1
@@ -38,6 +38,7 @@ func (r *pgxRepository) SearchFoods(ctx context.Context, filter FoodSearchFilter
 	args := []any{}
 	argIdx := 1
 	var searchTerms []string
+	var termArgIndices []int
 
 	if filter.Query != "" {
 		q := strings.TrimSpace(filter.Query)
@@ -63,10 +64,12 @@ func (r *pgxRepository) SearchFoods(ctx context.Context, filter FoodSearchFilter
 					args = append(args, w)
 					argIdx++
 				}
+				termArgIndices = append(termArgIndices, argIdx)
 				orClauses = append(orClauses, fmt.Sprintf("(name_search ILIKE '%%' || lower(unaccent($%d::text)) || '%%' OR name_search %% lower(unaccent($%d::text)) OR (%s))", argIdx, argIdx, strings.Join(andWords, " AND ")))
 				args = append(args, term)
 				argIdx++
 			} else {
+				termArgIndices = append(termArgIndices, argIdx)
 				orClauses = append(orClauses, fmt.Sprintf("(name_search ILIKE '%%' || lower(unaccent($%d::text)) || '%%' OR name_search %% lower(unaccent($%d::text)))", argIdx, argIdx))
 				args = append(args, term)
 				argIdx++
@@ -90,20 +93,18 @@ func (r *pgxRepository) SearchFoods(ctx context.Context, filter FoodSearchFilter
 	}
 
 	whereSQL := strings.Join(whereClauses, " AND ")
-
 	countSQL := fmt.Sprintf("SELECT COUNT(*) FROM nutrition.foods WHERE %s", whereSQL)
-	var total int
-	err := r.pool.QueryRow(ctx, countSQL, args...).Scan(&total)
-	if err != nil {
-		return nil, fmt.Errorf("failed to count foods: %w", err)
-	}
+	countArgs := make([]any, len(args))
+	copy(countArgs, args)
 
 	orderBy := "is_custom ASC, name_vi ASC"
-	if filter.Query != "" {
-		if len(searchTerms) > 1 {
-			orderBy = "CASE WHEN name_search ILIKE lower(unaccent($1::text)) || '%' THEN 1 WHEN name_search ILIKE '%' || lower(unaccent($1::text)) || '%' THEN 2 WHEN name_search ILIKE '%' || lower(unaccent($2::text)) || '%' THEN 3 ELSE 4 END, similarity(name_search, lower(unaccent($1::text))) DESC, similarity(name_search, lower(unaccent($2::text))) DESC, is_custom ASC, name_vi ASC"
+	if filter.Query != "" && len(termArgIndices) > 0 {
+		p1 := termArgIndices[0]
+		if len(termArgIndices) > 1 {
+			p2 := termArgIndices[1]
+			orderBy = fmt.Sprintf("CASE WHEN name_search ILIKE lower(unaccent($%d::text)) || '%%' THEN 1 WHEN name_search ILIKE '%%' || lower(unaccent($%d::text)) || '%%' THEN 2 WHEN name_search ILIKE '%%' || lower(unaccent($%d::text)) || '%%' THEN 3 ELSE 4 END, similarity(name_search, lower(unaccent($%d::text))) DESC, similarity(name_search, lower(unaccent($%d::text))) DESC, is_custom ASC, name_vi ASC", p1, p1, p2, p1, p2)
 		} else {
-			orderBy = "CASE WHEN name_search ILIKE lower(unaccent($1::text)) || '%' THEN 1 WHEN name_search ILIKE '%' || lower(unaccent($1::text)) || '%' THEN 2 ELSE 3 END, similarity(name_search, lower(unaccent($1::text))) DESC, is_custom ASC, name_vi ASC"
+			orderBy = fmt.Sprintf("CASE WHEN name_search ILIKE lower(unaccent($%d::text)) || '%%' THEN 1 WHEN name_search ILIKE '%%' || lower(unaccent($%d::text)) || '%%' THEN 2 ELSE 3 END, similarity(name_search, lower(unaccent($%d::text))) DESC, is_custom ASC, name_vi ASC", p1, p1, p1)
 		}
 	}
 
@@ -114,9 +115,21 @@ func (r *pgxRepository) SearchFoods(ctx context.Context, filter FoodSearchFilter
 		ORDER BY %s
 		LIMIT $%d OFFSET $%d
 	`, whereSQL, orderBy, argIdx, argIdx+1)
-	args = append(args, filter.Limit, offset)
+	queryArgs := append(args, filter.Limit, offset)
 
-	rows, err := r.pool.Query(ctx, querySQL, args...)
+	return countSQL, querySQL, countArgs, queryArgs
+}
+
+func (r *pgxRepository) SearchFoods(ctx context.Context, filter FoodSearchFilter) (*FoodSearchResponse, error) {
+	countSQL, querySQL, countArgs, queryArgs := buildSearchFoodsQuery(filter)
+
+	var total int
+	err := r.pool.QueryRow(ctx, countSQL, countArgs...).Scan(&total)
+	if err != nil {
+		return nil, fmt.Errorf("failed to count foods: %w", err)
+	}
+
+	rows, err := r.pool.Query(ctx, querySQL, queryArgs...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query foods: %w", err)
 	}

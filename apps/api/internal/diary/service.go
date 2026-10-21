@@ -5,7 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"strings"
 	"time"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/google/uuid"
 	"nutrition-api/internal/targets"
@@ -19,7 +22,24 @@ var (
 	ErrIDConflict             = errors.New("entry id conflict")
 	ErrInvalidDateRange       = errors.New("fromDate must be before or equal to toDate")
 	ErrRangeTooLarge          = errors.New("date range exceeds maximum of 100 days")
+	ErrFoodNameTooLong        = errors.New("tên món không được vượt quá 80 ký tự")
 )
+
+// sanitizeFoodName strips control characters, trims leading/trailing spaces, and enforces a max of 80 runes.
+func sanitizeFoodName(name string) (string, error) {
+	var b strings.Builder
+	b.Grow(len(name))
+	for _, r := range name {
+		if !unicode.IsControl(r) {
+			b.WriteRune(r)
+		}
+	}
+	trimmed := strings.TrimSpace(b.String())
+	if utf8.RuneCountInString(trimmed) > 80 {
+		return "", ErrFoodNameTooLong
+	}
+	return trimmed, nil
+}
 
 type RecentsTracker interface {
 	UpsertRecent(ctx context.Context, userID uuid.UUID, foodID uuid.UUID, portionLabel string, grams float64) error
@@ -29,6 +49,7 @@ type Service interface {
 	GetDay(ctx context.Context, userID uuid.UUID, date string) (*DaySummaryResponse, error)
 	GetDaysRange(ctx context.Context, userID uuid.UUID, fromDate, toDate string) ([]*DaySummaryResponse, error)
 	CreateEntry(ctx context.Context, userID uuid.UUID, date string, req CreateEntryRequest) (*DiaryEntryItem, map[string]*float64, error)
+	CreateEntriesBatch(ctx context.Context, userID uuid.UUID, date string, reqs []CreateEntryRequest) ([]DiaryEntryItem, error)
 	UpdateEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID, req UpdateEntryRequest) (*DiaryEntryItem, map[string]*float64, error)
 	RestoreEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) (*DiaryEntryItem, map[string]*float64, error)
 	DeleteEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) error
@@ -65,21 +86,35 @@ func round2(val float64) float64 {
 	return math.Round(val*100) / 100
 }
 
+// scaleNutrients scales per-100g nutrients to the given grams and resolves calories.
+func scaleNutrients(per100g map[string]*float64, grams float64) (map[string]*float64, *float64) {
+	ratio := grams / 100.0
+	scaled := make(map[string]*float64, len(per100g))
+	for k, v := range per100g {
+		if v != nil {
+			s := round2(*v * ratio)
+			scaled[k] = &s
+		} else {
+			scaled[k] = nil
+		}
+	}
+	var cal *float64
+	if c, ok := scaled["calories"]; ok && c != nil {
+		cal = c
+	} else if e, ok := scaled["energy"]; ok && e != nil {
+		cal = e
+	}
+	return scaled, cal
+}
+
 func computeDayTotals(entries []DiaryEntryItem) map[string]*float64 {
-	totals := make(map[string]*float64)
+	rawTotals := make(map[string]float64)
 	hasValue := make(map[string]bool)
 
 	for _, entry := range entries {
 		// Energy / calories is accounted when known
 		if entry.Calories != nil && *entry.Calories >= 0 {
-			if totals["calories"] == nil {
-				cal := 0.0
-				en := 0.0
-				totals["calories"] = &cal
-				totals["energy"] = &en
-			}
-			*totals["calories"] = round2(*totals["calories"] + *entry.Calories)
-			*totals["energy"] = *totals["calories"]
+			rawTotals["calories"] += *entry.Calories
 			hasValue["calories"] = true
 			hasValue["energy"] = true
 		}
@@ -93,14 +128,19 @@ func computeDayTotals(entries []DiaryEntryItem) map[string]*float64 {
 				continue // already accounted via entry.Calories
 			}
 			if v != nil {
-				if totals[k] == nil {
-					val := 0.0
-					totals[k] = &val
-				}
-				*totals[k] = round2(*totals[k] + *v)
+				rawTotals[k] += *v
 				hasValue[k] = true
 			}
 		}
+	}
+
+	totals := make(map[string]*float64, len(hasValue))
+	for k := range hasValue {
+		v := round2(rawTotals[k])
+		if k == "energy" {
+			v = round2(rawTotals["calories"])
+		}
+		totals[k] = &v
 	}
 
 	return totals
@@ -148,11 +188,14 @@ func (s *diaryServiceImpl) GetDay(ctx context.Context, userID uuid.UUID, date st
 			if meals[i].Slot == slot {
 				meals[i].Entries = append(meals[i].Entries, e)
 				if e.Calories != nil {
-					meals[i].TotalKcal = round2(meals[i].TotalKcal + *e.Calories)
+					meals[i].TotalKcal += *e.Calories
 				}
 				break
 			}
 		}
+	}
+	for i := range meals {
+		meals[i].TotalKcal = round2(meals[i].TotalKcal)
 	}
 
 	dayTotals := computeDayTotals(entries)
@@ -238,7 +281,19 @@ func (s *diaryServiceImpl) CreateEntry(ctx context.Context, userID uuid.UUID, da
 
 	if req.Kind == "quick" {
 		item.FoodID = nil
-		item.FoodName = "Chỉ ghi kcal"
+		if req.FoodName != "" {
+			cleaned, err := sanitizeFoodName(req.FoodName)
+			if err != nil {
+				return nil, nil, err
+			}
+			if cleaned != "" {
+				item.FoodName = cleaned
+			} else {
+				item.FoodName = "Chỉ ghi kcal"
+			}
+		} else {
+			item.FoodName = "Chỉ ghi kcal"
+		}
 		item.Nutrients = nil
 	} else {
 		if req.FoodID == nil {
@@ -255,27 +310,7 @@ func (s *diaryServiceImpl) CreateEntry(ctx context.Context, userID uuid.UUID, da
 			return nil, nil, fmt.Errorf("failed to load food nutrients: %w", err)
 		}
 		item.FoodName = foodName
-
-		// Snapshot nutrients scaled to grams: per_100g * grams / 100
-		ratio := req.Grams / 100.0
-		scaledNutrients := make(map[string]*float64)
-		for k, v := range per100g {
-			if v != nil {
-				scaled := round2(*v * ratio)
-				scaledNutrients[k] = &scaled
-			} else {
-				scaledNutrients[k] = nil
-			}
-		}
-		item.Nutrients = scaledNutrients
-
-		if cal, ok := scaledNutrients["calories"]; ok && cal != nil {
-			item.Calories = cal
-		} else if energy, ok := scaledNutrients["energy"]; ok && energy != nil {
-			item.Calories = energy
-		} else {
-			item.Calories = nil
-		}
+		item.Nutrients, item.Calories = scaleNutrients(per100g, item.Grams)
 	}
 
 	saved, err := s.repo.CreateEntry(ctx, userID, date, item)
@@ -294,6 +329,67 @@ func (s *diaryServiceImpl) CreateEntry(ctx context.Context, userID uuid.UUID, da
 	totals := computeDayTotals(dayEntries)
 
 	return saved, totals, nil
+}
+
+func (s *diaryServiceImpl) CreateEntriesBatch(ctx context.Context, userID uuid.UUID, date string, reqs []CreateEntryRequest) ([]DiaryEntryItem, error) {
+	if err := ValidateDateWritableCtx(ctx, date); err != nil {
+		return nil, err
+	}
+	if len(reqs) == 0 {
+		return []DiaryEntryItem{}, nil
+	}
+
+	items := make([]*DiaryEntryItem, 0, len(reqs))
+	for _, req := range reqs {
+		item := &DiaryEntryItem{
+			ID:           req.ID,
+			Kind:         req.Kind,
+			MealSlot:     req.MealSlot,
+			ServingLabel: req.ServingLabel,
+			Grams:        req.Grams,
+		}
+		if item.ID == uuid.Nil {
+			item.ID = uuid.New()
+		}
+		if item.MealSlot == "preworkout" {
+			item.MealSlot = "pre_workout"
+		}
+		if item.Kind == "" {
+			item.Kind = "food"
+		}
+
+		if req.FoodID == nil {
+			return nil, ErrFoodIDRequired
+		}
+		item.FoodID = req.FoodID
+		if item.Grams <= 0 {
+			item.Grams = 100
+		}
+
+		foodName, per100g, err := s.repo.GetFoodNutrients(ctx, *req.FoodID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to load food nutrients: %w", err)
+		}
+		item.FoodName = foodName
+		item.Nutrients, item.Calories = scaleNutrients(per100g, item.Grams)
+
+		items = append(items, item)
+	}
+
+	saved, err := s.repo.CreateEntriesBatch(ctx, userID, date, items)
+	if err != nil {
+		return nil, err
+	}
+
+	if s.recents != nil {
+		for _, item := range items {
+			if item.FoodID != nil {
+				_ = s.recents.UpsertRecent(ctx, userID, *item.FoodID, item.ServingLabel, item.Grams)
+			}
+		}
+	}
+
+	return saved, nil
 }
 
 func (s *diaryServiceImpl) RestoreEntry(ctx context.Context, userID uuid.UUID, entryID uuid.UUID) (*DiaryEntryItem, map[string]*float64, error) {
@@ -364,6 +460,15 @@ func (s *diaryServiceImpl) UpdateEntry(ctx context.Context, userID uuid.UUID, en
 	}
 
 	if existing.Kind == "quick" {
+		if req.FoodName != nil {
+			cleaned, err := sanitizeFoodName(*req.FoodName)
+			if err != nil {
+				return nil, nil, err
+			}
+			if cleaned != "" {
+				existing.FoodName = cleaned
+			}
+		}
 		if req.Calories != nil {
 			existing.Calories = req.Calories
 		}
@@ -445,7 +550,7 @@ func (s *diaryServiceImpl) CopyYesterday(ctx context.Context, userID uuid.UUID, 
 		allowedSlots[sl] = true
 	}
 
-	var copied []DiaryEntryItem
+	var toCopy []*DiaryEntryItem
 	for _, src := range sourceEntries {
 		slot := src.MealSlot
 		if slot == "preworkout" {
@@ -455,7 +560,7 @@ func (s *diaryServiceImpl) CopyYesterday(ctx context.Context, userID uuid.UUID, 
 			continue
 		}
 
-		newEntry := &DiaryEntryItem{
+		toCopy = append(toCopy, &DiaryEntryItem{
 			ID:           uuid.New(),
 			FoodID:       src.FoodID,
 			FoodName:     src.FoodName,
@@ -465,12 +570,19 @@ func (s *diaryServiceImpl) CopyYesterday(ctx context.Context, userID uuid.UUID, 
 			Grams:        src.Grams,
 			Calories:     src.Calories,
 			Nutrients:    src.Nutrients,
-		}
+		})
+	}
 
-		saved, err := s.repo.CreateEntry(ctx, userID, targetDate, newEntry)
-		if err == nil {
-			copied = append(copied, *saved)
-		}
+	if len(toCopy) == 0 {
+		return &CopyYesterdayResponse{
+			CopiedCount: 0,
+			Entries:     []DiaryEntryItem{},
+		}, nil
+	}
+
+	copied, err := s.repo.CreateEntriesBatch(ctx, userID, targetDate, toCopy)
+	if err != nil {
+		return nil, fmt.Errorf("failed to copy entries: %w", err)
 	}
 
 	return &CopyYesterdayResponse{
@@ -583,11 +695,14 @@ func (s *diaryServiceImpl) GetDaysRange(ctx context.Context, userID uuid.UUID, f
 				if meals[i].Slot == slot {
 					meals[i].Entries = append(meals[i].Entries, e)
 					if e.Calories != nil {
-						meals[i].TotalKcal = round2(meals[i].TotalKcal + *e.Calories)
+						meals[i].TotalKcal += *e.Calories
 					}
 					break
 				}
 			}
+		}
+		for i := range meals {
+			meals[i].TotalKcal = round2(meals[i].TotalKcal)
 		}
 
 		dayTotals := computeDayTotals(entries)
