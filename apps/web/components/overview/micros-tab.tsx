@@ -6,16 +6,24 @@ import Link from "next/link";
 import { NotEnoughData } from "@/components/overview/overview-parts";
 import { useOverview } from "@/components/overview/overview-frame";
 import { AttentionList, type AttentionItem } from "@/components/overview/attention-list";
-import { HeroCard, HeroNumber, HeroBar } from "@/components/overview/parts/hero-card";
-import { NutrientGrid } from "@/components/overview/parts/nutrient-grid";
+import { HeroCard, HeroNumber, HeroBar, HeroNote } from "@/components/overview/parts/hero-card";
+import { NutrientBars } from "@/components/overview/parts/nutrient-bars";
 import { dayEntries } from "@/lib/day-history";
 import { formatAmount, formatNumber, formatRange } from "@/lib/format";
 import type { NutrientLevel } from "@/lib/levels";
+import { nutrientDot } from "@/lib/nutrient-colors";
 import { microRows } from "@/lib/overview";
 import { microBoard } from "@/lib/overview-board";
 import { microSections, nutrientAttention } from "@/lib/overview-detail";
-import { SectionTitle } from "@/components/ui/section-title";
 import { Card } from "@/components/ui/card";
+
+/** A level as text on a white card: the deep shade (V3-SPEC §1) */
+const LEVEL_TEXT: Record<NutrientLevel, string> = {
+  thieu: "text-deep-red",
+  trungbinh: "text-deep-yellow",
+  ganDu: "text-deep-mint",
+  dat: "text-deep-green",
+};
 
 const DOT: Record<NutrientLevel, string> = {
   thieu: "bg-level-thieu",
@@ -39,6 +47,14 @@ function Chevron() {
       className="m-chevron shrink-0 text-secondary"
     >
       <path d="M6 9l6 6 6-6" />
+    </svg>
+  );
+}
+
+function RowChevron() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="shrink-0 text-secondary">
+      <path d="m9 6 6 6-6 6" />
     </svg>
   );
 }
@@ -70,10 +86,10 @@ function Accordion({
       >
         <span className="flex items-center gap-3">
           <span aria-hidden="true" className={`inline-block h-[9px] w-[9px] shrink-0 rounded-[3px] ${dot}`} />
-          <SectionTitle as="p">{title}</SectionTitle>
+          <span className="text-body-lg font-bold">{title}</span>
         </span>
         <span className="flex items-center gap-3">
-          <span className="font-display text-xl font-bold tabular-nums">{count}</span>
+          <span className="font-display text-xl font-extrabold leading-none tabular-nums">{count}</span>
           <Chevron />
         </span>
       </button>
@@ -92,14 +108,11 @@ function Accordion({
 export function MicrosTab() {
   const { overview, targets, todayIso } = useOverview();
   const { averages, previousAverages, targetDays, days } = overview;
-  // The selected nutrient by key, so a new period (a different order) keeps naming the same nutrient
-  const [selectedKey, setSelectedKey] = useState<string | null>(null);
-
+  
   const rows = useMemo(() => microRows(averages, targetDays, targets), [averages, targetDays, targets]);
   const previousRows = useMemo(() => microRows(previousAverages, targetDays, targets), [previousAverages, targetDays, targets]);
   const board = useMemo(() => microBoard(rows, previousRows), [rows, previousRows]);
   const sections = useMemo(() => microSections(board), [board]);
-  const selected = Math.max(0, board.squares.findIndex((s) => s.key === selectedKey));
   const byKey = useMemo(() => new Map(rows.map((r) => [r.key, r])), [rows]);
 
   // The finished logged days the averages cover, and what was eaten on them
@@ -112,6 +125,7 @@ export function MicrosTab() {
 
   if (!overview.enough) return <NotEnoughData />;
 
+  const achievedPct = board.total > 0 ? (board.achieved / board.total) * 100 : 0;
   const change = board.change;
   const changeText =
     change === null ? null : change === 0 ? "Không đổi so với kỳ trước" : `${change > 0 ? "Tăng" : "Giảm"} ${Math.abs(change)} so với kỳ trước`;
@@ -122,6 +136,8 @@ export function MicrosTab() {
     line: row.line,
     extra: row.foods,
     number: row.number,
+    dotKey: row.key,
+    percentage: byKey.get(row.key ?? "")?.percentage ?? null,
   }));
 
   return (
@@ -140,16 +156,21 @@ export function MicrosTab() {
               </p>
             }
           />
-          <div data-tour="trends-summary" role="img" aria-label={`${board.achieved} trên ${board.total} vi chất đạt mục tiêu`}>
-            <HeroBar pct={board.total > 0 ? (board.achieved / board.total) * 100 : 0} />
+          <div
+            data-tour="trends-summary"
+            role="meter"
+            aria-label={`${board.achieved} trên ${board.total} vi chất đạt mục tiêu`}
+            aria-valuemin={0}
+            aria-valuemax={board.total}
+            aria-valuenow={board.achieved}
+            aria-valuetext={`${board.achieved} trên ${board.total} vi chất đạt mục tiêu`}
+          >
+            <HeroBar pct={achievedPct} level scale={{ from: "0", to: `${board.total} vi chất` }} />
           </div>
-          <NutrientGrid id="mi-grid" squares={board.squares} selected={selected} onSelect={(i) => setSelectedKey(board.squares[i]?.key ?? null)} detailLink />
-          <p className="m-0 flex flex-wrap gap-x-3 gap-y-1 text-xs font-semibold text-muted-subtitle">
-            <span>Thiếu {board.counts.thieu}</span>
-            <span>Trung bình {board.counts.trungbinh}</span>
-            <span>Gần đủ {board.counts.ganDu}</span>
-            <span>Đạt {board.counts.dat}</span>
-          </p>
+          <HeroNote>
+            {board.achieved} trên {board.total} vi chất đạt mục tiêu; {board.counts.thieu} đang thiếu.
+          </HeroNote>
+          <NutrientBars id="mi-grid" board={board} />
         </HeroCard>
 
         <AttentionList items={items} title="Cần chú ý: thấp nhất kỳ này" />
@@ -174,19 +195,23 @@ export function MicrosTab() {
                     <li key={item.key} className="border-t border-divider">
                       <Link
                         href={`/micros/${item.key}`}
-                        className="grid min-h-14 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 text-text no-underline active:bg-surface motion-reduce:active:bg-transparent"
+                        className="grid min-h-14 grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-3 px-4 py-3 text-text no-underline active:bg-surface motion-reduce:active:bg-transparent"
                       >
                         <span className="min-w-0">
-                          <span className="block text-callout font-semibold">{item.name}</span>
+                          <span className="block text-callout font-semibold">
+                            <span aria-hidden="true" className="mr-2 inline-block h-2 w-2 rounded-full align-[1px]" style={{ backgroundColor: nutrientDot(item.key) }} />
+                            {item.name}
+                          </span>
                           <span className="block text-cap leading-snug text-secondary">
                             {item.average === null ? "Chưa có dữ liệu" : `TB ${formatAmount(item.average, item.unit)} ${item.unit}`}
                             {range ? ` · mục tiêu ${range} ${item.unit}` : ""}
                             {row && row.of > 0 ? ` · ${row.met}/${row.of} ngày đạt` : ""}
                           </span>
                         </span>
-                        <span className="font-display text-title font-bold leading-none tabular-nums">
+                        <span className={`font-display text-title font-extrabold leading-none tabular-nums ${LEVEL_TEXT[section.level]}`}>
                           {item.percentage === null ? "—" : `${formatNumber(item.percentage)}%`}
                         </span>
+                        <RowChevron />
                       </Link>
                     </li>
                   );
@@ -204,13 +229,17 @@ export function MicrosTab() {
                   <li key={s.key} className="border-t border-divider">
                     <Link
                       href={`/micros/${s.key}`}
-                      className="grid min-h-14 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 text-text no-underline active:bg-surface motion-reduce:active:bg-transparent"
+                      className="grid min-h-14 grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-3 px-4 py-3 text-text no-underline active:bg-surface motion-reduce:active:bg-transparent"
                     >
                       <span className="min-w-0">
-                        <span className="block text-callout font-semibold">{s.name}</span>
+                        <span className="block text-callout font-semibold">
+                          <span aria-hidden="true" className="mr-2 inline-block h-2 w-2 rounded-full align-[1px]" style={{ backgroundColor: nutrientDot(s.key) }} />
+                          {s.name}
+                        </span>
                         <span className="block text-cap leading-snug text-secondary">Chưa có món nào có dữ liệu chất này trong kỳ</span>
                       </span>
-                      <span className="font-display text-title font-bold leading-none text-secondary">—</span>
+                      <span className="font-display text-title font-extrabold leading-none text-secondary">—</span>
+                      <RowChevron />
                     </Link>
                   </li>
                 ))}

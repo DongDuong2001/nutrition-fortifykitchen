@@ -33,6 +33,7 @@ def text(pg):
 
 def new_page(browser, size, route="/trends"):  # cc2-31b: Tóm tắt is /trends (/ is the home screen)
     ctx = browser.new_context(viewport=size)
+    ctx.add_init_script("try { localStorage.setItem('h1t_onboarding_off', '1'); } catch (e) {}")  # no tip over the 7|30 control
     pg = ctx.new_page()
     pg.clock.set_fixed_time(NOW)
     pg.goto(BASE + route, wait_until="networkidle")
@@ -62,7 +63,7 @@ def run(browser, size_name, size):
     expanded = lambda: pg.locator("section[aria-label='Bảng điểm'] button[aria-expanded='true']").count()
     check(expanded() == 1 and rows.nth(0).get_attribute("aria-expanded") == "true", f"{size_name} scoreboard: Kcal open by default")
     rows.nth(1).click()
-    pg.wait_for_timeout(150)
+    pg.wait_for_timeout(500)
     check(expanded() == 1 and rows.nth(1).get_attribute("aria-expanded") == "true" and rows.nth(0).get_attribute("aria-expanded") == "false",
           f"{size_name} scoreboard: opening Đạm closes Kcal")
     bars = pg.locator("#ov-score-protein button[aria-pressed]")
@@ -71,7 +72,7 @@ def run(browser, size_name, size):
     line = lambda: re.sub(r"\s+", " ", pg.locator("#ov-score-protein p[aria-live]").inner_text())
     before = line()
     bars.nth(2).click()
-    pg.wait_for_timeout(150)
+    pg.wait_for_timeout(500)
     after = line()
     check(before != after and bars.nth(2).get_attribute("aria-pressed") == "true", f"{size_name} scoreboard: a bar tap updates the day line ({before!r} -> {after!r})")
     check("T5 08/10" in after and re.search(r"\d+ g", after) is not None, f"{size_name} scoreboard: day line names the day and the grams ({after!r})")
@@ -80,11 +81,11 @@ def run(browser, size_name, size):
     check(re.match(r"T5 08/10: [\d.]+ g", aria) is not None, f"{size_name} scoreboard: bar aria-label ({aria!r})")
     shot(pg, "protein-open", size_name)
     rows.nth(2).click()
-    pg.wait_for_timeout(150)
+    pg.wait_for_timeout(500)
     wline = re.sub(r"\s+", " ", pg.locator("#ov-score-weight p[aria-live]").inner_text())
     check("kg" in wline, f"{size_name} scoreboard: weight day line ({wline!r})")
     rows.nth(0).click()
-    pg.wait_for_timeout(150)
+    pg.wait_for_timeout(500)
 
     # Vi chất card
     micro = pg.locator("#ov-micro")
@@ -92,13 +93,13 @@ def run(browser, size_name, size):
     check(re.search(r"Vi chất đạt \d+/22", mt) is not None, f"{size_name} Vi chất: 'Vi chất đạt n/22' ({mt[:70]!r})")
     check("Thiếu nhiều nhất:" in mt, f"{size_name} Vi chất: hint names the lowest")
     micro.locator("button[aria-expanded]").click()
-    pg.wait_for_timeout(150)
+    pg.wait_for_timeout(500)
     squares = pg.locator("#ov-micro-grid ul button")
     check(squares.count() == 22, f"{size_name} Vi chất: 22 squares ({squares.count()})")
     sizes = [squares.nth(i).bounding_box() for i in range(squares.count())]
     check(all(b and b["height"] >= 44 and b["width"] >= 40 for b in sizes), f"{size_name} Vi chất: squares are tap-sized")
     squares.nth(5).click()
-    pg.wait_for_timeout(150)
+    pg.wait_for_timeout(500)
     sel = re.sub(r"\s+", " ", pg.locator("#ov-micro-grid p[aria-live]").inner_text())
     check(re.search(r"%", sel) is not None and (squares.nth(5).get_attribute("aria-label") or "").split(" ")[0] in sel, f"{size_name} Vi chất: a square names the nutrient and % ({sel!r})")
     check("Thiếu" in text(pg) and "Đạt" in text(pg), f"{size_name} Vi chất: level counts shown")
@@ -114,7 +115,7 @@ def run(browser, size_name, size):
     check(not h, f"{size_name}: no horizontal scroll")
 
     # 30 days
-    pg.locator('a:has-text("30 ngày") >> visible=true').first.click()
+    pg.locator('[aria-label="Độ dài kỳ"] button:has-text("30") >> visible=true').first.click()
     pg.wait_for_timeout(500)
     check("30 ngày qua · 13/09 – 12/10" in text(pg), f"{size_name} 30 days: period row reads 30 ngày qua · 13/09 – 12/10")
     check(pg.locator("section[aria-label='Bảng điểm'] #ov-score-calories button[aria-pressed]").count() == 7,
