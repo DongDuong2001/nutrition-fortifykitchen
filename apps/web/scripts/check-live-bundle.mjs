@@ -46,7 +46,7 @@ if (!process.argv.includes("--no-build")) {
   // next build points next-env.d.ts and tsconfig.json at the folder it builds into: they are put back after it
   const kept = ["next-env.d.ts", "tsconfig.json"].map((f) => [f, readFileSync(f, "utf8")]);
   const env = { ...process.env, NEXT_PUBLIC_API_MODE: "live", NEXT_DIST_DIR: DIST, DEMO_BUILD: "" };
-  const res = spawnSync("npx", ["next", "build", "--webpack"], { stdio: "inherit", env, shell: true });
+  const res = spawnSync("npx", ["next", "build", "--webpack"], { stdio: "inherit", env, shell: process.platform === "win32" });
   for (const [f, text] of kept) writeFileSync(f, text);
   if (res.status !== 0) process.exit(res.status ?? 1);
 }
