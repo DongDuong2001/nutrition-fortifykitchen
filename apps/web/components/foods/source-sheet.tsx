@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { Sheet } from "@/components/ui/sheet";
-import { PillButton } from "@/components/ui/pill-button";
 import { MATCH_LABEL, MATCH_ORDER, PROXY_NOTICE, UNVERIFIED_TEXT, coverageText, isProxy, matchOf } from "@/lib/food-source";
 import { foodSourceLabel } from "@/lib/food-meta";
 import type { FoodItem } from "@/lib/catalog";
@@ -63,9 +62,6 @@ export function SourceSheet({ food, open, onClose }: { food: FoodItem; open: boo
       <Link href="/settings/data-sources" replace className="inline-flex min-h-11 items-center px-1 text-callout font-bold text-cobalt no-underline">
         Xem tất cả nguồn dữ liệu
       </Link>
-      <PillButton type="button" variant="secondary" onClick={onClose}>
-        Đóng
-      </PillButton>
     </Sheet>
   );
 }

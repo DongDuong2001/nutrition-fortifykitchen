@@ -23,7 +23,7 @@ import { ComparePicker } from "@/components/foods/compare-picker";
 import { PillButton } from "@/components/ui/pill-button";
 import { compareHref } from "@/lib/food-compare";
 import { ChipGroup } from "@/components/ui/chip-group";
-import { StatGroup } from "@/components/ui/stat-group";
+import { SectionTitle } from "@/components/ui/section-title";
 import { Toast } from "@/components/ui/toast";
 import { Presence } from "@/components/ui/presence";
 import { AppHeader, HEADER_ICON_BUTTON } from "@/components/ui/app-header";
@@ -161,7 +161,7 @@ function FoodDetailInner() {
           data-tour="food-add-cta"
           onClick={handleAdd}
           disabled={isSubmitting || parsedGrams <= 0 || mealSlot === null || !canLog(food)}
-          className="w-full min-h-[52px] rounded-full bg-cobalt text-on-accent font-bold text-base cursor-pointer hover:bg-cobalt/90 m-tint transition-press border-0 flex items-center justify-center shadow-md disabled:opacity-50"
+          className="glass-cobalt flex min-h-[52px] w-full cursor-pointer items-center justify-center rounded-full border-0 text-body-lg font-bold text-on-accent m-tint transition-press disabled:opacity-50"
         >
           Thêm vào {mealSlot ? mealNameVi : "—"}
         </button>
@@ -239,9 +239,9 @@ function FoodDetailInner() {
             {energyNotice(food)}
           </p>
         )}
-        {/* Serving and Gram Selection */}
-        <div data-align-group="food-detail" className="flex w-full flex-col gap-2">
-          <span className="text-cap font-semibold text-secondary">Khẩu phần</span>
+        {/* Serving and Gram Selection: the portion section is one white card (V3 "Khẩu phần") */}
+        <Card as="section" aria-labelledby="portion-h" data-align-group="food-detail" className="flex w-full flex-col gap-2">
+          <SectionTitle id="portion-h">Khẩu phần</SectionTitle>
           <PortionArea
             food={food}
             gramsInput={gramsInput}
@@ -251,20 +251,21 @@ function FoodDetailInner() {
             onFoodChange={(newFood) => router.replace(`/foods/${newFood.id}${searchParams.get("meal") ? `?meal=${searchParams.get("meal")}` : ""}`)}
             data-align-group="food-detail"
           />
-        </div>
+        </Card>
 
         {/* Big Kcal & 3-up Macro Card */}
         <Card data-align-group="food-detail" className="w-full">
-          <StatGroup
-            columns={4}
-            tone="light"
-            items={[
-              { id: "cal", value: kcalValue(macros.calories), label: "kcal" },
-              { id: "carb", value: macroGramsText(macros.carbs), label: "Tinh bột" },
-              { id: "protein", value: macroGramsText(macros.protein), label: "Đạm" },
-              { id: "fat", value: macroGramsText(macros.fat), label: "Chất béo" },
-            ]}
-          />
+          <div className="grid w-full grid-cols-4 gap-2">
+            {MACRO_STATS.map((m) => (
+              <div key={m.id} className="flex flex-col items-center justify-center gap-0.5 text-center">
+                <span className={`font-display text-title-sm font-black italic leading-tight tabular-nums ${m.text}`}>{m.value(macros)}</span>
+                <span className="text-xs font-semibold text-secondary">
+                  <span aria-hidden="true" className={`mr-1 inline-block h-2 w-2 rounded-full ${m.dot}`} />
+                  {m.label}
+                </span>
+              </div>
+            ))}
+          </div>
           {/* A supplement whose label states no energy: logged all the same, counted as 0 kcal */}
           {canLog(food) && energyNotice(food) && <p role="note" className="m-0 mt-3 text-cap leading-snug text-secondary">{energyNotice(food)}</p>}
         </Card>
@@ -272,7 +273,7 @@ function FoodDetailInner() {
         {recipe && (
           <Card as="section" aria-label="Trong 1 phần" data-align-group="food-detail" className="flex flex-col gap-1 p-4">
             <div className="flex min-h-11 items-center justify-between gap-2">
-              <h2 className="m-0 text-base font-bold text-text">Trong 1 phần</h2>
+              <SectionTitle>Trong 1 phần</SectionTitle>
               <Link
                 href={`/foods/new?recipe=${recipe.id}${searchParams.get("meal") ? `&meal=${searchParams.get("meal")}` : ""}`}
                 className="inline-flex min-h-11 items-center px-2 text-sm font-bold text-cobalt no-underline"
@@ -335,6 +336,14 @@ function FoodDetailInner() {
 }
 
 const CUSTOM_PORTION = "__custom";
+
+/** Kcal and the three macros under the portion: each in its identity colour (V3-SPEC §1) */
+const MACRO_STATS: { id: string; label: string; dot: string; text: string; value: (m: ReturnType<typeof calculateMacroPreview>) => string }[] = [
+  { id: "cal", label: "kcal", dot: "bg-macro-kcal", text: "text-macro-kcal-text", value: (m) => String(kcalValue(m.calories)) },
+  { id: "carb", label: "Tinh bột", dot: "bg-macro-tinhbot", text: "text-macro-tinhbot-text", value: (m) => macroGramsText(m.carbs) },
+  { id: "protein", label: "Đạm", dot: "bg-macro-dam", text: "text-macro-dam-text", value: (m) => macroGramsText(m.protein) },
+  { id: "fat", label: "Chất béo", dot: "bg-macro-beo", text: "text-macro-beo-text", value: (m) => macroGramsText(m.fat) },
+];
 
 export default function FoodDetailPage() {
   return (
