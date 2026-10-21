@@ -452,3 +452,11 @@
 - (review, 21/10) **Release 2026-10-21c has no tour**, and is a new id although AGENTS.md says a fix extends the top entry (Hao asked for one entry for #32 and #33). Pick the id and the sw.js VERSION again on origin/main before merging.
 - (review, 21/10) **Unsaved work is detected from form fields** (lib/unsaved-work.ts): a settings screen that saves on blur keeps an update waiting until the screen is left; `data-no-unsaved` opts a field out.
 - (review, 21/10) **The "Có bản mới" toast stays 10 s** (the ui-ux-pro-max rule is 3–5 s for a toast); it carries a decision and the reserve is the same size.
+
+## Handover 20/10/2026 (docs/dong-handover-2026-10-20.md)
+- (Hao) The handover for Dong is docs/dong-handover-2026-10-20.md: the made_at rule, the PR #20 API hardening, targets (DRI and upper limits), the 20/10 imports, the kefir SQL, the Red Bull portion, the backups, the open items and the rules used while he is away.
+- [ ] (Hao) Red Bull (nước tăng lực), food 2d27e50a-3cf8-49f4-ba55-10def014f96f, has "1 lon (250 ml)" = 260 g (sort 0) and "100 ml" = 104 g (sort 1) on the server, set by SQL on 20/10. No file in this repo holds that food (it is not in data/seed_foods.json); its record is in food-research/h1t-foods-batch3-import.json, outside the repo, which still has only "100 ml" = 104 g (sort 0), and h1t-foods-units-import.json has "1 lon (250 ml)" = 260 g with "100 g". A re-import from those files would drop the lon portion. Which file does the importer read for it, and should that record be added to the repo (a data/ file)?
+- [ ] (idea, Hao) The catalogue cache on phones (10 min fresh, 24 h stale) delays data fixes: a corrected food or portion can take up to a day to show on a phone that has the old copy. Options: a version stamp from the API that drops the copy, or a shorter stale window after a data import.
+
+## fix/source-tags (20/10/2026)
+- [ ] (Hao) The food page and source sheet name the `asean` source "ASEAN" (it said "Khác" before; the search tag is "ASEAN" as asked). The rows are PhilFCT (Philippine FCT, ASEAN FCDB), e.g. Bông so đũa, Cá cơm cả xương. Options: (a) "ASEAN" as built, like "Tài liệu" (my pick: short and the same as the tag), (b) "PhilFCT (ASEAN)", like "CNF (Canada)", (c) other words. lib/source-names.ts is the one place to change it.

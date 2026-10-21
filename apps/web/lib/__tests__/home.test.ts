@@ -379,8 +379,8 @@ describe("portionLabel: a supplement shows its unit quantity, never grams", () =
     expect(portionLabel({ foodId: food.id, qty: "1 viên", grams: 1 })).toBe("1 viên");
   });
 
-  it("keeps the label dose as written", () => {
-    expect(portionLabel({ foodId: food.id, qty: "2 viên (liều trên nhãn)", grams: 2 })).toBe("2 viên (liều trên nhãn)");
+  it("shows the label dose as its amount; the (…) part is the line under the name (fix/dish-portion-label)", () => {
+    expect(portionLabel({ foodId: food.id, qty: "2 viên (liều trên nhãn)", grams: 2 })).toBe("2 viên");
   });
 
   it("is the hero label too", () => {

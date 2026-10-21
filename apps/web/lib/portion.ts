@@ -723,10 +723,27 @@ export function portionAmountText(label: string | null | undefined): string | nu
   return `${formatAmount(p.base * p.mult, "g")} g`;
 }
 
-/** The line under a Hôm nay row: how it was weighed ("Đã nấu chín · bằng 203 g lúc sống", "100 g × 3", "Cỡ lớn"). */
-export function portionDetail(label: string | null | undefined, grams: number | null): string | null {
+const SERVING_HINT = /^(.*\S)\s*\(([^()]+)\)$/;
+
+/** A portion without its "(…)" part, as the amount column shows it: "1 phần (495 g, gồm 46 g mắm tôm)" is "1 phần". */
+export function withoutServingHint(text: string): string {
+  const t = text.trim();
+  return SERVING_HINT.exec(t)?.[1] ?? t;
+}
+
+/**
+ * The line under a Hôm nay row: how it was weighed ("Đã nấu chín · bằng 203 g lúc sống", "100 g × 3", "Cỡ lớn"), or a
+ * serving label's "(…)" part ("495 g · gồm 46 g mắm tôm"; "Mỗi phần: …" when `count` portions of that label were eaten).
+ */
+export function portionDetail(label: string | null | undefined, grams: number | null, count = 1): string | null {
   const p = parsePortionLabel(label);
-  if (!p) return null;
+  if (!p) {
+    const m = SERVING_HINT.exec((label ?? "").trim());
+    if (!m) return null;
+    const hint = m[2].trim().replace(/,\s+/g, " · ");
+    if (count !== 1) return `Mỗi ${m[1].replace(/^1\s+/, "")}: ${hint}`;
+    return hint.charAt(0).toLocaleUpperCase("vi") + hint.slice(1);
+  }
   if (p.kind === "egg") return p.size ? `Cỡ ${p.size}` : null;
   const times = p.mult > 1 ? `${formatNumber(p.base)} g × ${p.mult}` : null;
   if (!p.state) return times;
