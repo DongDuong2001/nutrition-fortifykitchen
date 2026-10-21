@@ -448,7 +448,7 @@
 - **The meal header's 44 px hit area is clipped at the scroller edge for the first meal** (its top edge is the top of the scrolling area); the probe checks the second meal. The look is unchanged.
 - **Time to open /add at the live catalogue size was not measured in a browser** (the demo build has 43 foods; the 683-food numbers are server-rendered counts in a unit test). Worth a look on the real build.
 - **The hand-run update check changes `public/sw.js` for a few seconds** (`_sw_update.py`, `_polish_update_check.py`; not in any gate, because Playwright cannot route the browser's own sw.js fetch). It restores the file.
-- (review, 21/10) **The meal header's hit area is 28 px, not 44**: the pill is 24 px with the rows against it, so only the 4 px of paper above is free; 44 px without touching a row needs 16 px more height per meal. Hao decides (docs/pr/fix-polish-1020.md).
+- (review, 21/10) **The meal header's hit area is 28 px, not 44**: the pill is 24 px with the rows against it, so only the 4 px of paper above is free; 44 px without touching a row needs 16 px more height per meal. Decided by Hao 21/10: stays 28 px, no layout change.
 - (review, 21/10) **Release 2026-10-21c has no tour**, and is a new id although AGENTS.md says a fix extends the top entry (Hao asked for one entry for #32 and #33). Pick the id and the sw.js VERSION again on origin/main before merging.
 - (review, 21/10) **Unsaved work is detected from form fields** (lib/unsaved-work.ts): a settings screen that saves on blur keeps an update waiting until the screen is left; `data-no-unsaved` opts a field out.
 - (review, 21/10) **The "Có bản mới" toast stays 10 s** (the ui-ux-pro-max rule is 3–5 s for a toast); it carries a decision and the reserve is the same size.
