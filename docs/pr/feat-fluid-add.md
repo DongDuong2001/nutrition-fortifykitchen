@@ -207,6 +207,19 @@ gate:full: all green
 - `gate:fast` was not run per commit this round: the probes the changes touch (`add_from_tabs`, `fluid_add`, `cc_62_sheet`, `cc_57_strips`, and `cc_49` part 4 on a live build by hand) were run after each change, and gate:full covers the rest.
 - Each new check was run against the unfixed code first: the stuck sheet (item 1), the day flip (3) and the double add (4) failed there and pass now.
 
+### After the night review fixes (port 3126)
+
+```
+gate:full: 683 s wall clock
+  typecheck       ok      1 s
+  vitest          ok     10 s   (164 files, 2077 tests, 1 skipped)
+  build:demo      ok      9 s
+  test:align      ok     77 s
+  test:hydration  ok    114 s
+  probe:all       ok    662 s   probe:all: 113 PASS, 4 REPORT, 0 QUAR, 0 FAIL, 1 SKIP
+gate:full: all green
+```
+
 ## For Hao
 
 Decisions and checks that are yours; the same lines are in `OPEN_QUESTIONS.md` (feat/fluid-add):
