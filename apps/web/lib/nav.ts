@@ -73,6 +73,7 @@ function backTarget(first: string | undefined, second: string | undefined, third
     return "/settings";
   }
   if (first === "explore" && second === "coaches" && third) return "/explore/coaches";
+  if (first === "explore" && second === "ngay-mau" && third) return "/explore/ngay-mau";
   if (first === "foods" && second === "compare") return compareBack(search);
   if (first === "explore" || first === "foods") return "/explore";
   if (first === "privacy" || first === "terms" || first === "admin") return "/settings";

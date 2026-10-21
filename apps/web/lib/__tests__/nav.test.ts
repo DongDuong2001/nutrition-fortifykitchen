@@ -76,6 +76,15 @@ describe("lib/nav, Dong's screens (cc-24)", () => {
   });
 });
 
+describe("lib/nav, Ngày ăn mẫu (feat/ngay-mau)", () => {
+  it("keeps the list and the editor under Khám phá, and Back goes editor to list to Khám phá", () => {
+    expect(tabForPath("/explore/ngay-mau")).toBe("explore");
+    expect(tabForPath("/explore/ngay-mau/dt-1")).toBe("explore");
+    expect(backFallback("/explore/ngay-mau/dt-1")).toBe("/explore/ngay-mau");
+    expect(backFallback("/explore/ngay-mau")).toBe("/explore");
+  });
+});
+
 describe("lib/nav, compare foods (cc-23)", () => {
   it("keeps the compare page under Khám phá, like a food", () => {
     expect(tabForPath("/foods/compare")).toBe("explore");
