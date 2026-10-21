@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { SHEET_BACK_DELAY_MS, closeSheetEntry, navigateFromSheet, openSheetEntry, topSheetId } from "../sheet-history";
+import { SHEET_BACK_DELAY_MS, closeSheetEntry, navigateFromSheet, openSheetEntry, takeBackSheetEntries, topSheetId } from "../sheet-history";
 
 // Review 07:00 M1: a navigation from a sheet is never cancelled by the sheet taking its history entry back, and
 // leaves no stray entry. A fake history: an array of states with the current index.
@@ -124,5 +124,35 @@ describe("sheet history entries", () => {
     expect(h.length()).toBe(2);
     expect(topSheetId()).toBe(second);
     closeSheetEntry(second, window.location.href, true);
+  });
+});
+
+describe("takeBackSheetEntries (the add sheet leaving past the sheets over it)", () => {
+  it("counts the open sheets' entries and stops them taking their entry back while they close", () => {
+    const h = fakeHistory();
+    const portion = openSheetEntry();
+    expect(takeBackSheetEntries()).toBe(1);
+    // The portion sheet closes with the page going: it must not call history.back() itself
+    closeSheetEntry(portion, window.location.href, false);
+    vi.advanceTimersByTime(SHEET_BACK_DELAY_MS);
+    expect(h.history.back).not.toHaveBeenCalled();
+  });
+
+  it("counts a closed sheet whose entry was about to be taken back, and cancels that take-back", () => {
+    const h = fakeHistory();
+    const id = openSheetEntry();
+    closeSheetEntry(id, window.location.href, false);
+    expect(takeBackSheetEntries()).toBe(1);
+    vi.advanceTimersByTime(SHEET_BACK_DELAY_MS);
+    expect(h.history.back).not.toHaveBeenCalled();
+  });
+
+  it("is 0 with no sheet over the page, and later closes behave as before", () => {
+    const h = fakeHistory();
+    expect(takeBackSheetEntries()).toBe(0);
+    const id = openSheetEntry();
+    closeSheetEntry(id, window.location.href, false);
+    vi.advanceTimersByTime(SHEET_BACK_DELAY_MS);
+    expect(h.history.back).toHaveBeenCalledTimes(1);
   });
 });

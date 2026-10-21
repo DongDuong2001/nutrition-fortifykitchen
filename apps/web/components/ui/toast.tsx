@@ -13,6 +13,8 @@ export interface ToastProps {
   onAction?: () => void;
   /** A fixed fill of the bar, 0..100 (a static preview). */
   progressPercent?: number;
+  /** Restarts the countdown bar when it changes (a new toast in a reused element); the message by default. */
+  countdownKey?: string;
   /** cc-55: the auto-dismiss countdown. The bar empties on its own (CSS), from `leftMs` of `totalMs`. */
   countdown?: { totalMs: number; leftMs: number };
   /**
@@ -26,6 +28,8 @@ export interface ToastProps {
    */
   onPause?: () => void;
   onResume?: () => void;
+  /** Called after the action button or link was used: every action ends its toast at once (the caller dismisses it). */
+  onDismiss?: () => void;
   /** cc-64 (2b): the sideways swipe that dismisses it (components/ui/use-toast-swipe), from the app's toast host only. */
   swipe?: ToastSwipe;
   className?: string;
@@ -38,12 +42,17 @@ export function Toast({
   onAction,
   progressPercent,
   countdown,
+  countdownKey,
   announce = true,
   onPause,
   onResume,
+  onDismiss,
   swipe,
   className = "",
 }: ToastProps) {
+  // Focus stops the clock only when it is the keyboard's (WCAG 2.2.1); a tap focuses the button too, and the clock would wait for a blur
+  // that never comes. A press stops it from down to up/cancel, below.
+  const focusPaused = React.useRef(false);
   // cc-55: rises in (m-toast, @starting-style); inside <Presence> it fades down and away when it goes
   const state = usePresence();
   // In the background the bar waits with the clock (the store stops its timer): a Hoàn tác must not expire in another app
@@ -68,8 +77,16 @@ export function Toast({
         if (e.pointerType !== "mouse") onResume?.();
         swipe?.onPointerCancel(e);
       }}
-      onFocus={onPause}
-      onBlur={onResume}
+      onFocus={(e) => {
+        if (!(e.target as Element).matches(":focus-visible") || focusPaused.current) return;
+        focusPaused.current = true;
+        onPause?.();
+      }}
+      onBlur={(e) => {
+        if (!focusPaused.current || e.currentTarget.contains(e.relatedTarget as Node | null)) return;
+        focusPaused.current = false;
+        onResume?.();
+      }}
       style={swipe ? { touchAction: "pan-y" } : undefined}
       data-state={state}
       data-paused={hidden ? "" : undefined}
@@ -83,6 +100,7 @@ export function Toast({
           actionHref ? (
             <Link
               href={actionHref}
+              onClick={() => onDismiss?.()}
               className="shrink-0 min-h-11 px-4 rounded-xl flex items-center text-sky text-callout font-bold no-underline hover:text-on-dark active:scale-[0.97] transition-press"
             >
               {actionLabel}
@@ -90,7 +108,10 @@ export function Toast({
           ) : (
             <button
               type="button"
-              onClick={onAction}
+              onClick={() => {
+                onAction?.();
+                onDismiss?.();
+              }}
               className="shrink-0 min-h-11 px-4 rounded-xl bg-transparent border-0 flex items-center text-sky text-callout font-bold cursor-pointer hover:text-on-dark active:scale-[0.97] transition-press"
             >
               {actionLabel}
@@ -102,7 +123,7 @@ export function Toast({
       {countdown ? (
         <div aria-hidden="true" className="h-1 bg-level-empty-dark w-full">
           <div
-            key={message}
+            key={countdownKey ?? message}
             className="m-countdown h-1 w-full bg-cobalt"
             style={{ animationDuration: `${countdown.totalMs}ms`, animationDelay: `${Math.min(0, countdown.leftMs - countdown.totalMs)}ms` }}
           />

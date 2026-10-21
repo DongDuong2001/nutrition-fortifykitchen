@@ -1,6 +1,7 @@
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
+import { TOUCH_LIFT_MS } from "../use-touch-drag";
 
 // cc-51 Part B, extended by cc-55: the motion classes (.m-*) in globals.css. Each has a prefers-reduced-motion rule
 // (no movement, opacity only); only transform and opacity move (grid-template-rows for .m-expand and .m-row-exit);
@@ -61,7 +62,7 @@ describe("motion classes", () => {
           ? /^(transform|opacity|grid-template-rows|none)$/
           : /^\.m-bar$/.test(selector)
             ? /^(transform|background-color|none)$/ // the fill's colour changes with its level while it grows
-            : /^(transform|scale|opacity|none)$/; // scale is a transform of its own (press, a sheet under a sheet)
+            : /^(transform|scale|translate|opacity|none)$/; // scale and translate are transforms of their own (press, a sheet under a sheet, the toast host riding up)
         expect([selector, prop]).toEqual([selector, expect.stringMatching(allowed)]);
       }
       for (const prop of decl(body, "transition-property").flatMap((t) => t.split(",").map((p) => p.trim()))) {
@@ -137,20 +138,20 @@ describe("enter animations on wrappers", () => {
 
 describe("press feedback", () => {
   it("scales buttons and pill links only; a row, card or full-width action tints", () => {
-    expect(css).toMatch(/button:active,\s*a\.inline-flex:active \{\s*transform: scale\(0\.97\);/);
-    expect(css).toMatch(/button\.w-full:active,[\s\S]*?\.m-tint:active \{\s*transform: none;\s*\}/);
+    expect(css).toMatch(/button:is\(:active, \[data-pressed\]\),\s*a\.inline-flex:is\(:active, \[data-pressed\]\) \{\s*transform: scale\(0\.97\);/);
+    expect(css).toMatch(/button\.w-full:is\(:active, \[data-pressed\]\),[\s\S]*?\.m-tint:is\(:active, \[data-pressed\]\) \{\s*transform: none;\s*\}/);
     expect(css).toMatch(/transition:\s*transform var\(--m-press\) var\(--ease-out\),\s*scale var\(--m-press\) var\(--ease-out\);/);
   });
 
   it("a full-width pill (the main action) scales, no tint", () => {
-    expect(css).toMatch(/button\.w-full\.rounded-full:not\(\[class\*="active:scale-"\]\):active,[\s\S]*?\{\s*transform: scale\(0\.97\);/);
+    expect(css).toMatch(/button\.w-full\.rounded-full:not\(\[class\*="active:scale-"\]\):is\(:active, \[data-pressed\]\),[\s\S]*?\{\s*transform: scale\(0\.97\);/);
     expect(css).toMatch(/button\.w-full\.rounded-full::after,[\s\S]*?\{\s*content: none;/);
   });
 
   it("the tint is an overlay that fades (100 ms in, 150 ms out), not an instant background", () => {
     expect(css).not.toMatch(/background-image: linear-gradient\(var\(--color-press\)/);
     expect(css).toMatch(/\.m-tint::after \{[^}]*opacity: 0;[^}]*transition: opacity var\(--m-tint-out\) var\(--ease-out\);/);
-    expect(css).toMatch(/\.m-tint:active::after \{\s*opacity: 1;\s*transition-duration: var\(--m-tint-in\);/);
+    expect(css).toMatch(/\.m-tint:is\(:active, \[data-pressed\]\)::after \{\s*opacity: 1;\s*transition-duration: var\(--m-tint-in\);/);
     expect(css).toMatch(/--m-tint-in: 100ms;/);
     expect(css).toMatch(/--m-tint-out: 150ms;/);
   });
@@ -205,5 +206,50 @@ describe("cc-57 motion details", () => {
     expect(closing).toMatch(/transition-duration: var\(--m-fade\);/);
     expect(reduced).toMatch(/\.m-countdown \{\s*animation-name: m-fade-out;/);
     expect(reduced).not.toMatch(/\.m-countdown \{\s*animation: none;/);
+  });
+
+  // cc-fluid-add
+  it("reduced motion: nothing scales when pressed, in a rule outside every layer (utilities beat base, so only an unlayered rule wins)", () => {
+    const at = css.indexOf("@media (prefers-reduced-motion: reduce) {\n  :is(:active, [data-pressed]) {\n    scale: none;");
+    expect(at).toBeGreaterThan(-1);
+    // brace depth at that point is 0: not inside @layer base or any other block
+    let depth = 0;
+    for (const ch of css.slice(0, at)) depth += ch === "{" ? 1 : ch === "}" ? -1 : 0;
+    expect(depth).toBe(0);
+    expect(css).toContain("@custom-variant active {");
+    expect(css).toMatch(/@custom-variant active \{\s*&:is\(:active, \[data-pressed\]\)/);
+  });
+
+  it("/add and the portion sheet come up in 300 ms (m-quick); every other sheet keeps 350", () => {
+    expect(css).toMatch(/\.m-sheet\.m-quick,\s*\.m-scrim\.m-quick \{\s*--m-sheet-in: 300ms;/);
+    expect(motion).toMatch(/--m-sheet-in: 350ms;/);
+    const add = readFileSync(path.join(ROOT, "components/add/add-screen.tsx"), "utf8");
+    expect(add).toMatch(/m-sheet m-quick/);
+    expect(add).toMatch(/m-scrim m-scrim-dialog m-quick/);
+    expect(add).toMatch(/stacked\s+quick/);
+  });
+
+  it("the hold tint takes as long as the hold before a row lifts, and the lift is the 160 ms press transition", () => {
+    expect(motion).toContain(`--m-hold: ${TOUCH_LIFT_MS}ms;`);
+    expect(motion).toMatch(/button\.m-drag-lift\[data-touch-drag="pressing"\]::after \{[^}]*animation: m-hold-tint var\(--m-hold\) linear forwards;/);
+    expect(motion).toMatch(/\.m-drag-lift \{\s*transition: transform var\(--m-press\) var\(--ease-out\);/);
+    expect(motion).toMatch(/--m-press: 160ms;/);
+  });
+
+  it("a closing sheet and its scrim take no taps from the moment they start to go, except on a sheet's drag areas", () => {
+    expect(css).toMatch(/\.m-sheet\[data-state="closed"\] \{\s*pointer-events: none;/);
+    // pointer-events inherits: no selector over every node of a closing sheet
+    expect(css).not.toMatch(/\.m-sheet\[data-state="closed"\] \*/);
+    expect(css).toMatch(/\.m-sheet\[data-state="closed"\] \[data-sheet-drag\] \{\s*pointer-events: auto;/);
+    expect(css).toMatch(/\.m-scrim\[data-state="closed"\] \{[^}]*pointer-events: none;/);
+  });
+
+  it("the tray card has no scale pop of its own, and the landing's phone no hover", () => {
+    const tray = readFileSync(path.join(ROOT, "components/add/add-tray.tsx"), "utf8");
+    expect(tray).not.toMatch(/data-align-group="tray-review" className="m-pop/);
+    const phone = readFileSync(path.join(ROOT, "components/landing/floating-phone.tsx"), "utf8");
+    expect(phone).not.toContain("hover:rotate-0");
+    const audiences = readFileSync(path.join(ROOT, "components/landing/stacking-audiences.tsx"), "utf8");
+    expect(audiences).toContain('matchMedia?.("(prefers-reduced-motion: reduce)")');
   });
 });

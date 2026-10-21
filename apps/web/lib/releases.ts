@@ -31,13 +31,17 @@ export interface Release {
 }
 
 export const RELEASES: readonly Release[] = [
-  // fix/rich-tabs (Hao 21/10, review 03:00): the "Giàu …" lists split into Thực phẩm and Thực phẩm bổ sung. 21b is live, so this
-  // is the next release; #33 (fix/polish-1020) adds its own 21c, and whichever merges second puts both into this one entry. No
-  // tour: the two tabs are in plain sight at the top of the list
+  // fluid-add + polish-1020 + rich-tabs (Hao 21/10): the add sheet slides over the screen you are on, Hoàn tác after every add, a lighter add
+  // list, the update notice above the bottom bar, and the "Giàu …" lists in two tabs. One entry for all of them. No tour and no tip, on
+  // purpose: every control here is a labelled button or a tab in plain sight (+, ✕, Xem thêm, Hoàn tác, Thực phẩm / Thực phẩm bổ sung)
   {
     id: "2026-10-21c",
     date: "21/10",
     items: [
+      { icon: "meal", title: "Thêm món mượt hơn", body: "Bấm dấu + thì bảng thêm món trượt lên ngay trên màn hình bạn đang xem. Thêm xong, bảng trượt xuống và món mới hiện ở Hôm nay." },
+      { icon: "meal", title: "Thêm nhầm thì Hoàn tác", body: "Thêm xong bấm Hoàn tác trong vài giây là bỏ đúng những món vừa thêm, dù là một món hay cả khay." },
+      { icon: "home", title: "Danh sách món gọn hơn", body: "Mỗi nhóm hiện vài món đầu, bấm Xem thêm để xem tiếp. Bảng chọn khẩu phần có nút ✕ để đóng." },
+      { icon: "home", title: "Thông báo có bản mới không che món", body: "Khi có bản mới, thông báo nằm ngay trên thanh dưới và tự tắt sau vài giây. App tự cập nhật khi bạn thoát ra, không làm mất món đang chọn." },
       { icon: "bars", title: "Danh sách Giàu … có hai thẻ", body: "Danh sách Giàu … giờ tách riêng thực phẩm và thực phẩm bổ sung thành hai thẻ trong Khám phá, nên viên uống không còn đứng đầu danh sách món ăn." },
     ],
   },

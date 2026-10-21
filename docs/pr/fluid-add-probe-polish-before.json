@@ -1,0 +1,82 @@
+{
+ "addlist@1x": {
+  "summary": {
+   "DOM nodes in the /add sheet": 616,
+   "food rows drawn": 49,
+   "Tab stops in the sheet": 140,
+   "first food row drawn (ms after the tap)": 44.6
+  },
+  "raw": [
+   {
+    "nodes": 616,
+    "rows": 49,
+    "stops": 140,
+    "first_row_ms": 32.7
+   },
+   {
+    "nodes": 616,
+    "rows": 49,
+    "stops": 140,
+    "first_row_ms": 44.6
+   },
+   {
+    "nodes": 616,
+    "rows": 49,
+    "stops": 140,
+    "first_row_ms": 45.5
+   },
+   {
+    "nodes": 616,
+    "rows": 49,
+    "stops": 140,
+    "first_row_ms": 46.8
+   },
+   {
+    "nodes": 616,
+    "rows": 49,
+    "stops": 140,
+    "first_row_ms": 41.2
+   }
+  ]
+ },
+ "addlist@4x": {
+  "summary": {
+   "DOM nodes in the /add sheet": 616,
+   "food rows drawn": 49,
+   "Tab stops in the sheet": 140,
+   "first food row drawn (ms after the tap)": 104.6
+  },
+  "raw": [
+   {
+    "nodes": 616,
+    "rows": 49,
+    "stops": 140,
+    "first_row_ms": 98.7
+   },
+   {
+    "nodes": 616,
+    "rows": 49,
+    "stops": 140,
+    "first_row_ms": 102.4
+   },
+   {
+    "nodes": 616,
+    "rows": 49,
+    "stops": 140,
+    "first_row_ms": 108.7
+   },
+   {
+    "nodes": 616,
+    "rows": 49,
+    "stops": 140,
+    "first_row_ms": 106.1
+   },
+   {
+    "nodes": 616,
+    "rows": 49,
+    "stops": 140,
+    "first_row_ms": 104.6
+   }
+  ]
+ }
+}

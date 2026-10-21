@@ -171,13 +171,11 @@ describe("unseenReleases (what Có gì mới lists)", () => {
     for (const s of r?.tour ?? []) expect(s.body.length).toBeLessThanOrEqual(100);
   });
 
-  // fix/rich-tabs (review 03:00): 21b is live already, so the rich-list item is in the next release, 21c. #33 (fix/polish-1020)
-  // brings its own 21c with four items: whichever merges second puts both into one entry and one test
-  it("the newest release (2026-10-21c) has the rich-list tabs: plain words, and no tour (the tabs are in plain sight)", () => {
+  it("the newest release (2026-10-21c) is the add sheet, Hoàn tác, the lighter list, the update notice and the rich-list tabs: five items, plain words, and no tour (every control is a labelled button or a tab in plain sight)", () => {
     const r = latestRelease();
     expect(r?.id).toBe("2026-10-21c");
     expect(r?.date).toBe("21/10");
-    expect(r?.items.map((i) => i.title)).toContain("Danh sách Giàu … có hai thẻ");
+    expect(r?.items.map((i) => i.title)).toEqual(["Thêm món mượt hơn", "Thêm nhầm thì Hoàn tác", "Danh sách món gọn hơn", "Thông báo có bản mới không che món", "Danh sách Giàu … có hai thẻ"]);
     expect(r?.tour).toBeUndefined();
     for (const i of r?.items ?? []) expect(i.body).not.toContain(":");
   });

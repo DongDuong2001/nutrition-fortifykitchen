@@ -165,6 +165,8 @@ def close_tips(pg):
 
 def add_food(pg, name, before_add=None):
     pg.goto(BASE + "/add?meal=dinner", wait_until="domcontentloaded")
+    # The add list shows 5 rows of a category (fix/polish-1020): a food past them is found by its name
+    pg.locator("[data-testid=food-search]:visible").first.fill(name)
     row = pg.locator("[data-food-row]:visible", has_text=name).first
     row.wait_for(timeout=20000)
     row.click()
@@ -352,7 +354,13 @@ with sync_playwright() as p:
         ctx, pg, st = device(browser, api)
         open_today(pg)
         api.script["POST"] = [400]
-        add_food(pg, "Yến mạch cán")
+        # Every frame from just before the add: the route and the add sheet's state. The report below may name /add only while the sheet
+        # is visibly closing (the page was opened straight on /add here, so the sampler goes in once it is loaded)
+        sampler = lambda: pg.evaluate(
+            "window.__sheetLog = []; const tick = () => { const p = document.querySelector('[data-add-panel], [role=dialog][data-sheet-route]');"
+            " window.__sheetLog.push([location.pathname, p ? p.dataset.state || '' : null]); requestAnimationFrame(tick); }; tick();"
+        )
+        add_food(pg, "Yến mạch cán", before_add=sampler)
         check(row_of(pg, "Yến mạch cán").count() == 1, "4: POST 400: the entry stays on Hôm nay")
         check(pg.locator("[data-unsaved]:visible").count() == 1, "4: …marked Chưa lưu")
         toast = pg.get_by_text("Chưa lưu được món", exact=False)
@@ -362,14 +370,21 @@ with sync_playwright() as p:
         retry = pg.get_by_role("button", name="Thử lại", exact=True).locator("visible=true")
         check(retry.count() >= 1, "4: the toast offers Thử lại")
         # cc-50: the refusal is reported once, with the status, the error code (none in this body) and the app version. cc-68: the write is
-        # committed to the outbox first and answered after the page went back to Hôm nay, so the route is /app, not /add
+        # committed to the outbox first and answered while the sheet slides away or after it is gone (fluid-add: the add slides the sheet down
+        # like the ✕ before the route goes back), so the route is /add or /app
         writes = [r for r in st["reports"] if r.get("kind") == "write"]
         check(
             len(writes) == 1 and writes[0].get("status") == 400 and writes[0].get("message") == ""
-            and writes[0].get("path") == f"/days/{TODAY}/entries" and writes[0].get("route") == "/app"
+            and writes[0].get("path") == f"/days/{TODAY}/entries" and writes[0].get("route") in ("/add", "/app")
             and re.fullmatch(r"\d{4}-\d{2}-\d{2}\.\d+", writes[0].get("version", "")) is not None,
-            f"4: one client error report: write 400 (its status and error code only: the scripted body has none), /days/…/entries, route /app (the page when the answer came, after the add sheet closed), app version ({writes})",
+            f"4: one client error report: write 400 (its status and error code only: the scripted body has none), /days/…/entries, route /add or /app (the page when the answer came), app version ({writes})",
         )
+        # …and /add only while the sheet slid away: a sample at /add with the sheet closed, never the sheet open or still there at the end
+        log = pg.evaluate("window.__sheetLog")
+        closing = [e for e in log if e[0] == "/add" and e[1] == "closed"]
+        if writes and writes[0].get("route") == "/add":
+            check(len(closing) > 0, "4: the report named /add: the sheet was closing then (data-state closed)")
+        check(pg.locator("[data-add-panel]").count() == 0 and pg.evaluate("location.pathname") == "/app", "4: afterwards the sheet is gone and the page is Hôm nay")
         if retry.count():
             retry.first.click()
         ok = wait_until(lambda: on_server(api, "Yến mạch cán"), 10, pg=pg)
@@ -490,6 +505,36 @@ with sync_playwright() as p:
         check(len([c for c in st["calls"] if c.startswith("POST /days/")]) == posts, f"7: after a reload it is not sent again ({posts} POST)")
         check(pg.get_by_text("vì ngày đã qua", exact=False).count() == 0, "7: …and the notice does not come back")
         ctx.close()
+
+    if want(8):
+        # Hoàn tác right after an add (the toast now offers it after every add): the DELETE never overtakes the POST of the same entry, an add
+        # that has not left the device is dropped with it, and the server ends with no entry (no orphan). Unit tests: outbox.test.ts S7.
+        for how in ("portion", "tray"):
+            api = FakeApi()
+            ctx, pg, st = device(browser, api)
+            open_today(pg)
+            pg.goto(BASE + "/add?meal=dinner", wait_until="domcontentloaded")
+            first = pg.locator("[data-food-row]:visible").first
+            first.wait_for(timeout=20000)
+            if how == "portion":
+                first.click()
+                pg.get_by_role("button", name=re.compile("^Thêm vào Bữa tối")).locator("visible=true").first.click()
+            else:
+                pg.locator("[data-testid=tray-toggle]:visible").nth(0).click()
+                pg.locator("[data-testid=tray-toggle]:visible").nth(1).click()
+                pg.locator("[data-testid=tray-add]:visible").first.click()
+            undo = pg.get_by_role("button", name="Hoàn tác").locator("visible=true")
+            undo.first.wait_for(timeout=8000)
+            # As soon as it is there: the toast rides with the closing sheet, and a click waits for it to hold still; this one does not
+            undo.first.dispatch_event("click")
+            pg.wait_for_timeout(5000)
+            posts = [i for i, c in enumerate(st["calls"]) if c.startswith("POST /days/")]
+            deletes = [i for i, c in enumerate(st["calls"]) if c.startswith("DELETE /entries/")]
+            check(len(api.entries) == 0, f"8 {how}: add → Hoàn tác at once: the server has no entry afterwards ({len(api.entries)} left)")
+            check(not posts or not deletes or min(deletes) > min(posts), f"8 {how}: a DELETE is never sent before the first POST ({len(posts)} POST, {len(deletes)} DELETE; calls at {posts} / {deletes})")
+            check(outbox_ids(pg) == [], f"8 {how}: …and nothing is left in the outbox ({outbox_ids(pg)})")
+            check(pg.locator("button[data-entry-id]:visible").count() == 0, f"8 {how}: …and no row on Hôm nay")
+            ctx.close()
 
     browser.close()
 

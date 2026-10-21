@@ -7,7 +7,7 @@ import { SAMPLE_DAY, type MockDayData, type MockFoodItem } from "./mock/sample-d
 import { type FoodItem } from "./mock/foods";
 import { type MealSlot, getMealSlotNameVi } from "./meal-slot";
 import { formatAmount } from "./format";
-import { portionAmountText } from "./portion";
+import { portionAmountText, withoutServingHint } from "./portion";
 import { sumKcal } from "./kcal";
 import { getTodayIsoVN, withRuntimeDate } from "./date";
 import { editableFrom, isEditableDay, pastDaysFor, yesterdayOf } from "./day-rules";
@@ -86,6 +86,7 @@ import {
   writeStoredProfile,
   type Profile,
 } from "./profile";
+import { addedToast, toastAfterAction, undoIdsOf } from "./add-toast";
 import type { CompleteTargets } from "./targets";
 import { subscribeTraining, trainingMinutesFor, trainingVersion } from "./training-minutes";
 import {
@@ -128,8 +129,8 @@ import {
 export type { AddedDiaryEntry, EntryView, EntryPatch } from "./diary-edits";
 
 /**
- * The one toast of the app. "added" offers Xem (jump to the meal), "deleted" offers Hoàn tác,
- * "undoable" offers Hoàn tác for the entries one action added (undoIds: a copy, a recent, a Bữa ăn của tôi),
+ * The one toast of the app. "added" is a move that cannot be undone and offers Xem (jump to the meal), "deleted" offers Hoàn tác,
+ * "undoable" offers Hoàn tác for the entries one action added (undoIds: every add: a tray, a portion, a recent, a Bữa ăn của tôi, a copy),
  * "saved" offers Xem (Bữa ăn của tôi in Khám phá), and "unsaved" offers Thử lại (the server refused a write).
  */
 export interface ToastInfo {
@@ -162,8 +163,9 @@ interface DiaryContextValue {
   data: MockDayData;
   addedEntries: AddedDiaryEntry[];
   /**
-   * `undoable` is the one-tap add of a recent: the toast offers Hoàn tác for 5 s instead of Xem. `id` is the new entry's
-   * id when the caller keeps a link to it (a Ngày tập tick, cc-52); a fresh one otherwise.
+   * Every add's toast offers Hoàn tác for the entries it added (lib/add-toast); `undoable` no longer changes anything and stays only
+   * so the callers need no change. `id` is the new entry's id when the caller keeps a link to it (a Ngày tập tick, cc-52); a fresh one
+   * otherwise.
    */
   addFoodEntry: (
     food: FoodItem,
@@ -180,6 +182,8 @@ interface DiaryContextValue {
   recentFoods: RecentFood[];
   addRecentFood: (food: FoodItem, servingLabel: string) => void;
   dismissToast: () => void;
+  /** After a toast's action: ends `shown` only if it is still the toast on screen (the action may have put a new one up, or none). */
+  dismissToastAfterAction: (shown: ToastInfo) => void;
   /** A plain message in the app's toast (no action), e.g. "Đã lưu mục tiêu…": it stays across a screen change. */
   notify: (message: string) => void;
   /** The pointer is on the toast, or focus is in it: its time stops until resumeToast. */
@@ -1194,33 +1198,13 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       haptic("saved");
 
       const mealNameVi = getMealSlotNameVi(mealSlot);
-      // cc-53b: the amount set ("150 g", "3 quả"), not the label's state words
-      const amount = portionAmountText(qty) ?? qty;
+      // cc-53b: the amount set ("150 g", "3 quả"), not the label's state words nor its "(…)" part
+      const amount = portionAmountText(qty) ?? withoutServingHint(qty);
       setEdits((prev) => dismissUndoIn(prev));
       const dayText = onDayText(day, getTodayIsoVN());
-      if (!options?.undoable) {
-        // cc-64 (2b): another add into the meal whose "Đã thêm" toast is still up updates that toast in place
-        setToast((prev) => {
-          const more = prev?.kind === "added" && prev.mealSlot === mealSlot && prev.groupId !== undefined;
-          const count = more ? (prev.count ?? 1) + 1 : 1;
-          return {
-            message: count > 1 ? `Đã thêm ${count} món vào ${mealNameVi}${dayText}` : `Đã thêm ${food.nameVi} ${amount} vào ${mealNameVi}${dayText}`,
-            kind: "added",
-            mealSlot,
-            durationMs: ADDED_TOAST_MS,
-            count,
-            groupId: more ? prev.groupId : ++toastGroupSeq,
-          };
-        });
-      } else {
-        setToast({
-          message: `Đã thêm ${food.nameVi} ${amount} vào ${mealNameVi}${dayText}`,
-          kind: "undoable",
-          mealSlot,
-          durationMs: UNDO_TOAST_MS,
-          undoIds: [newEntry.id],
-        });
-      }
+      // Every add offers Hoàn tác for what it added; adds into the same meal that follow one another share the toast, and its Hoàn tác
+      // takes out all of them (lib/add-toast). The one-tap options.undoable is the same now.
+      setToast((prev) => addedToast(prev, { entryId: newEntry.id, foodName: food.nameVi, amount, mealSlot, mealNameVi, dayText }, () => ++toastGroupSeq));
 
       addRecentFood(food, qty);
 
@@ -1268,6 +1252,10 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   const dismissToast = useCallback(() => {
     setToast(null);
     setEdits((prev) => dismissUndoIn(prev));
+  }, []);
+
+  const dismissToastAfterAction = useCallback((shown: ToastInfo) => {
+    setToast((current) => toastAfterAction(current, shown));
   }, []);
 
   const notify = useCallback((message: string) => {
@@ -1440,8 +1428,8 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
   }, [targetDay, sendAdd]);
 
   const undoCopy = useCallback(() => {
-    const ids = toastRef.current?.undoIds;
-    if (!ids) return;
+    const ids = undoIdsOf(toastRef.current);
+    if (ids.length === 0) return;
     setEdits((prev) => removeAddedIn(prev, ids));
     haptic("undo");
     setToast(null);
@@ -1715,6 +1703,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       recentFoods,
       addRecentFood,
       dismissToast,
+      dismissToastAfterAction,
       notify,
       pauseToast,
       resumeToast,
@@ -1766,6 +1755,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       recentFoods,
       addRecentFood,
       dismissToast,
+      dismissToastAfterAction,
       notify,
       pauseToast,
       resumeToast,

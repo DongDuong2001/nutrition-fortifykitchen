@@ -5,10 +5,9 @@ Production demo build, 390x844 (and 1440x900 for the dialog). Tour, tips and "C�
 
 - Shows once on /app; Để sau and Esc hide it and mark the release seen; a reload shows nothing
 - A new account (setup finished) never sees it
-- Waits while a tip is open, opens after Đã hiểu
-- An account that has seen nothing gets the newest release only (2026-10-21c, fix/rich-tabs, no tour: Danh sách Giàu …
-  có hai thẻ); one that saw 21a gets 21c and 21b, whose 2-step tour is on Hôm nay (the kcal target, then the vitamin
-  column), so the sheet has Thử ngay and runs it on /app; cc_tutorials.py covers
+- Comes before a tip (one interruption per app open, fix/polish-1020): opens first with no tip beside it, and no tip follows it in the same open
+- An account that has seen nothing gets the newest release only (2026-10-21c, no tour: Thêm món mượt hơn… and Danh sách Giàu … có hai thẻ): its
+  2-step tour is on Hôm nay (the kcal target, then the vitamin column), so the sheet has Thử ngay and runs it on /app; cc_tutorials.py covers
   several unseen releases in one sheet and their joined tour (with cc-52's 18e on the Ngày tập pill). The 17/10 tour is started from
   Cài đặt › Có gì mới › Xem hướng dẫn (the last one) -> 3 steps -> Xong; a long press moves step 1 and opens the select bar (step 2); step 3 points at Cài đặt with
   select mode off; Bỏ qua and Esc end it; the entries never change
@@ -40,7 +39,7 @@ SETTINGS_KEY = "h1t_settings_v1_demo"
 RELEASE = "2026-10-21c"
 HOME_TIPS = ["home-logged", "meal-add", "home-share"]
 # Newest first: cc-53b (2026-10-18f), cc-52 (2026-10-18e), cc-53 (2026-10-18d), cc-51 (2026-10-18c), Thực phẩm bổ sung và Gia vị (2026-10-18b), then cc-49 (2026-10-18)
-ITEMS = ["Danh sách Giàu … có hai thẻ"]  # fix/rich-tabs (2026-10-21c, no tour; #33 adds its four items to the same release)
+ITEMS = ["Thêm món mượt hơn", "Thêm nhầm thì Hoàn tác", "Danh sách món gọn hơn", "Thông báo có bản mới không che món", "Danh sách Giàu … có hai thẻ"]  # fluid-add + polish-1020 + rich-tabs (2026-10-21c, no tour)
 ITEMS_2110B = ["Mục tiêu rõ ràng hơn", "Vi chất theo chuẩn DRI"]  # cc-73b (2026-10-21b)
 ITEMS_2110A = ["Bấm chữ H1T MICRO để về Hôm nay", "Vuốt ngang để tắt thông báo"]  # follow-ups 20/10 (2026-10-21a)
 ITEMS_2010B = ["Bấm vào ngày để mở lịch", "Xóa bữa không cần hỏi lại", "Chữ to theo máy bạn"]  # overnight 20/10 (2026-10-20b)
@@ -152,7 +151,7 @@ def once(browser):
     check(all(t in text for t in ITEMS), "the release's items")
     wrapped = wrapped_titles(pg, ITEMS)
     check(not wrapped, f"each item title of 21c fits on one line at 390 px (wrapped: {wrapped})")
-    check(sheet(pg).get_by_role("button", name="Thử ngay (1 phút)").count() == 0, "no Thử ngay: 21c has no tour (the tabs are in plain sight)")
+    check(sheet(pg).get_by_role("button", name="Thử ngay (1 phút)").count() == 0, "no Thử ngay: 21c has no tour (every control in it is a labelled button)")
     check(sheet(pg).get_by_role("button", name="Để sau").count() == 1, "Để sau")
     check(sheet(pg).get_by_role("button", name="Đóng").count() == 1, "close button named Đóng")
     check(sheet(pg).get_attribute("aria-modal") == "true", "aria-modal")
@@ -200,15 +199,14 @@ def new_account(browser):
     ctx.close()
 
 
-def waits_for_tip(browser):
+def comes_before_tips(browser):
     ctx, pg = new_page(browser, onboarding={"tourDone": True})
     go(pg, "/app", 300)
-    check(visible(card(pg), 4000), "a tip opens first")
-    pg.wait_for_timeout(1200)
-    check(sheet(pg).count() == 0, "Có gì mới waits while the tip is open")
-    card(pg).get_by_role("button", name="Đã hiểu").click()
-    check(visible(sheet(pg), 3000), "opens once the tip is closed")
-    check(card(pg).count() == 0, "no tip on top of it")
+    check(visible(sheet(pg), 4000), "Có gì mới opens first, before any tip")
+    check(card(pg).count() == 0, "no tip beside it")
+    sheet(pg).get_by_role("button", name="Để sau").click()
+    pg.wait_for_timeout(3000)
+    check(card(pg).count() == 0, "no tip after it in the same app open (one interruption per open)")
     ctx.close()
 
 
@@ -368,7 +366,7 @@ def reduced_motion(browser):
 def main():
     with sync_playwright() as p:
         browser = p.chromium.launch()
-        for part in (once, new_account, waits_for_tip, tour, home_tour, history, desktop, reduced_motion):
+        for part in (once, new_account, comes_before_tips, tour, home_tour, history, desktop, reduced_motion):
             print(f"\n=== {part.__name__} ===")
             try:
                 part(browser)
