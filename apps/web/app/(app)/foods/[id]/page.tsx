@@ -240,7 +240,8 @@ function FoodDetailInner() {
           </p>
         )}
         {/* Serving and Gram Selection: the portion section is one white card (V3 "Khẩu phần") */}
-        <Card as="section" aria-labelledby="portion-h" data-align-group="food-detail" className="flex w-full flex-col gap-2">
+        {/* The portion card's own members are the rows inside it (PortionArea); the card itself is the container, not one of them */}
+        <Card as="section" aria-labelledby="portion-h" className="flex w-full flex-col gap-2">
           <SectionTitle id="portion-h">Khẩu phần</SectionTitle>
           <PortionArea
             food={food}
