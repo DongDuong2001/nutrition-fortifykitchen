@@ -268,3 +268,46 @@ func TestCustomFoodsFavouritesWeightAndSearch(t *testing.T) {
 		}
 	}
 }
+
+func TestCreateEntriesBatch_RollbackOnBadFoodID(t *testing.T) {
+	_, pool, userID := setup(t)
+	repo := diary.NewRepository(pool)
+	validFoodID := insertFood(t, pool, "Cơm trắng IT", 130)
+	badFoodID := uuid.New() // non-existent food_id
+
+	today := diary.GetServerToday()
+	entries := []*diary.DiaryEntryItem{
+		{
+			ID:           uuid.New(),
+			FoodID:       &validFoodID,
+			Kind:         "food",
+			MealSlot:     "lunch",
+			ServingLabel: "100 g",
+			Grams:        100,
+			FoodName:     "Cơm trắng IT",
+		},
+		{
+			ID:           uuid.New(),
+			FoodID:       &badFoodID,
+			Kind:         "food",
+			MealSlot:     "lunch",
+			ServingLabel: "100 g",
+			Grams:        100,
+			FoodName:     "Món ma",
+		},
+	}
+
+	_, err := repo.CreateEntriesBatch(context.Background(), userID, today, entries)
+	if err == nil {
+		t.Fatal("expected batch insert to fail on bad food_id, got nil")
+	}
+
+	// Verify that the transaction rolled back: validFoodID was not inserted
+	dayEntries, err := repo.GetDayEntries(context.Background(), userID, today)
+	if err != nil {
+		t.Fatalf("failed to query day entries: %v", err)
+	}
+	if len(dayEntries) != 0 {
+		t.Fatalf("expected 0 entries saved due to rollback, got %d", len(dayEntries))
+	}
+}

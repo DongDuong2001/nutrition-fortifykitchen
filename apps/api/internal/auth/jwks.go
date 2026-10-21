@@ -38,6 +38,7 @@ type JWKSCache struct {
 	mu          sync.RWMutex
 	keys        map[string]crypto.PublicKey
 	lastFetched time.Time
+	lastAttempt time.Time
 	cacheTTL    time.Duration
 }
 
@@ -103,10 +104,10 @@ func (c *JWKSCache) refresh(ctx context.Context) error {
 	if len(c.keys) > 0 {
 		minInterval = 10 * time.Second
 	}
-	if time.Since(c.lastFetched) < minInterval {
+	if time.Since(c.lastFetched) < minInterval || time.Since(c.lastAttempt) < 1*time.Second {
 		return nil
 	}
-	c.lastFetched = time.Now()
+	c.lastAttempt = time.Now()
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.jwksURL, nil)
 	if err != nil {

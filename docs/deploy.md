@@ -94,6 +94,7 @@ nano deploy/.env.prod
 | `SUPABASE_JWT_SECRET` | api | Supabase JWT secret |
 | `CORS_ALLOWED_ORIGINS` | api | `https://lehongkhanh.vn,https://www.lehongkhanh.vn` |
 | `HCAPTCHA_SECRET_KEY` | api | hCaptcha secret key |
+| `SESSION_REVOCATION_ENABLED` | api | `false` (default; turn on only after hitmicro-staging shows real sessions are found and valid logins get 200) |
 
 `NEXT_PUBLIC_*` values are baked into the web bundle (and the CSP `connect-src`) when the image is built. Changing one needs a rebuild: run `deploy/deploy.sh` again.
 

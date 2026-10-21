@@ -1281,6 +1281,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
         apiClient.updateEntry(
           id,
           {
+            food_name: patch.quick?.name ? patch.quick.name.trim() : undefined,
             meal_slot: patch.mealSlot,
             grams: patch.grams,
             serving_size_g: patch.grams,

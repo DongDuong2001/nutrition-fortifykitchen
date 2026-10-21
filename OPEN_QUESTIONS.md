@@ -427,9 +427,17 @@
 - [x] (Hao, decided 21/10 in the PR #27 review: no note in the Hôm nay nutrient column) (Hao, cc-73b) The max note shows on Vi chất rows and the nutrient page, not in the narrow Hôm nay nutrient column (198 px). Say if it should also be a dot or a word there.
 - [ ] (Dong, cc-73b) Custom targets per vitamin or mineral need a column (`nutrition.profiles.custom_targets`), so the web side is built behind `CUSTOM_TARGETS_ENABLED = false` and the spec is docs/pr/cc-73b-custom-targets.md. The custom kcal and macros are on the device only today, so the API's trends already ignore them.
 - [ ] (Dong, cc-73b) `TestSharedTargetVectors` and `TestSharedPeriodVectors` were skipping on main (they looked for `packages/vectors` two and three levels up from their folder, and it is four), so they never ran. Fixed: the paths now include four levels, and the new `TestSharedDRIVectors` fails, not skips, when its file is missing.
-
 - [ ] (Dong, perf/live-bundle 21/10) `lib/api-client.ts` (your file, web-side edit): the four `export *` lines (nutrients, the catalogue, coaches, leaderboard) are gone, because no file imported those names through api-client, and they pulled the mock catalogue into every page that talks to the API. api-client now imports the store from `lib/catalog.ts` and uses `catalogFoodById` in `getFood`. The live build no longer ships the sample day or the sample foods: `next.config.ts` swaps lib/mock/{sample-foods, sample-day, history, weight-log, dish-demo-foods, recent-seed} for the stand-ins in lib/mock/live when NEXT_PUBLIC_API_MODE=live. Not a dynamic `import()` as first planned: demo and mock mode need the sample day and foods on the first render (the day starts from them), and vitest cannot `require` a .ts module. `lib/__tests__/live-stubs.test.ts` holds each stand-in to its real module. check:live-bundle is clean and runs in gate:full; the AGENTS.md command table still says "red today" (that file is on #32 / #33), so update the line after they merge. Your call whether CI runs it too.
 - [ ] (Hao, perf/live-bundle) Seven files still import `@/lib/mock/foods` (now a re-export of lib/catalog): app/(app)/add/page.tsx, components/ui/portion-area.tsx, portion-panel.tsx, components/foods/food-list.tsx, hooks/use-food-browse.ts, lib/home.ts, lib/portion.ts. They are on #32 / #33, so they are left for a one-line repoint after those merge; behaviour is the same either way.
+
+## PayOS Payment Gateway (feat/payos-link)
+- [ ] (Hao/Dong, PayOS) Pricing and plan tiers: Confirm official price points (monthly vs. yearly vs. lifetime plan option). No hard-coded prices.
+- [ ] (Hao/Dong, PayOS) Coach-linked clients policy: Are clients linked to an active coach entitled to H1T MICRO Pro for free?
+- [ ] (Hao/Dong, PayOS) Redirection allowlist: Strict server-side constants or URL allowlist on `https://lehongkhanh.vn/*` for `returnUrl` and `cancelUrl` (never accept arbitrary client redirect URLs).
+- [ ] (Dong, PayOS) Order persistence: Table to persist order details (`order_code`, `user_id`, `plan`, `amount`, `status`) before initiating PayOS checkout.
+- [ ] (Dong, PayOS) Webhook user reconciliation: Webhook handler maps incoming `order_code` to user and idempotently updates `nutrition.profiles.role` / subscription status.
+- [ ] (Dong, PayOS) Production environment guard: When `APP_ENV=production` or `ENVIRONMENT=production`, return HTTP 503 "Thanh toán chưa mở" if PayOS credentials are unset (no mock links).
+- [ ] (Hao/Dong, PayOS) Feature flag: Route gated behind `PAYMENTS_ENABLED` flag (default off).
 
 ## feat/fluid-add (21/10/2026, docs/pr/feat-fluid-add.md)
 - [ ] (Hao) No release note and no sw.js bump in this PR (2026-10-21b is pinned to its items; sw.js is unchanged). What a person sees: the sheet comes up at once, the press shows at the touch, the first open of the calendar is as fast as the second. If you want a "Có gì mới" line, add it at the merge and take the next sw.js VERSION then.
@@ -462,3 +470,4 @@
 
 ## fix/source-tags (20/10/2026)
 - [ ] (Hao) The food page and source sheet name the `asean` source "ASEAN" (it said "Khác" before; the search tag is "ASEAN" as asked). The rows are PhilFCT (Philippine FCT, ASEAN FCDB), e.g. Bông so đũa, Cá cơm cả xương. Options: (a) "ASEAN" as built, like "Tài liệu" (my pick: short and the same as the tag), (b) "PhilFCT (ASEAN)", like "CNF (Canada)", (c) other words. lib/source-names.ts is the one place to change it.
+

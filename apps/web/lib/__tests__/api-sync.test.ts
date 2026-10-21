@@ -398,6 +398,49 @@ describe("the portion label is stored with the entry", () => {
     await add();
     expect(bodies[0]).not.toHaveProperty("serving_label");
   });
+
+  it("a quick entry with a custom label sends food_name to the server", async () => {
+    const bodies: Array<Record<string, unknown>> = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (_url: string, init?: RequestInit) => {
+        bodies.push(JSON.parse(String(init?.body ?? "{}")));
+        return new Response("{}", { status: 201 });
+      })
+    );
+    await apiClient.addEntry({
+      id: "44444444-4444-4444-8444-444444444444",
+      kind: "quick",
+      calories: 250,
+      mealSlot: "snack",
+      date: "2026-10-18",
+      label: "Trà sữa",
+    });
+    expect(bodies[0]).toMatchObject({
+      kind: "quick",
+      calories: 250,
+      food_name: "Trà sữa",
+    });
+  });
+
+  it("updateEntry sends food_name when patched", async () => {
+    const bodies: Array<Record<string, unknown>> = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (_url: string, init?: RequestInit) => {
+        bodies.push(JSON.parse(String(init?.body ?? "{}")));
+        return new Response("{}", { status: 200 });
+      })
+    );
+    await apiClient.updateEntry("44444444-4444-4444-8444-444444444444", {
+      food_name: "Trà đào",
+      calories: 180,
+    });
+    expect(bodies[0]).toMatchObject({
+      food_name: "Trà đào",
+      calories: 180,
+    });
+  });
 });
 
 describe("writes refused for good leave the outbox after 7 days (review 07:00)", () => {
