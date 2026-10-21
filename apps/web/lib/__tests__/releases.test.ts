@@ -171,11 +171,11 @@ describe("unseenReleases (what Có gì mới lists)", () => {
     for (const s of r?.tour ?? []) expect(s.body.length).toBeLessThanOrEqual(100);
   });
 
-  it("the newest release (2026-10-21c) is the add sheet, Hoàn tác, the lighter list and the update notice: four items, plain words, and no tour (every control is a labelled button)", () => {
+  it("the newest release (2026-10-21c) is the add sheet, Hoàn tác, the lighter list, the update notice and the rich-list tabs: five items, plain words, and no tour (every control is a labelled button or a tab in plain sight)", () => {
     const r = latestRelease();
     expect(r?.id).toBe("2026-10-21c");
     expect(r?.date).toBe("21/10");
-    expect(r?.items.map((i) => i.title)).toEqual(["Thêm món mượt hơn", "Thêm nhầm thì Hoàn tác", "Danh sách món gọn hơn", "Thông báo có bản mới không che món"]);
+    expect(r?.items.map((i) => i.title)).toEqual(["Thêm món mượt hơn", "Thêm nhầm thì Hoàn tác", "Danh sách món gọn hơn", "Thông báo có bản mới không che món", "Danh sách Giàu … có hai thẻ"]);
     expect(r?.tour).toBeUndefined();
     for (const i of r?.items ?? []) expect(i.body).not.toContain(":");
   });
