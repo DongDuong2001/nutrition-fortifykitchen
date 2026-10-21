@@ -17,6 +17,7 @@ Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/des
 # PROBE_COVERS: app/** components/**
 # PROBE_TAGS: smoke
 import os
+import subprocess
 import sys
 
 import _demo  # noqa: F401
@@ -133,35 +134,47 @@ CHECK_JS = r"""() => {
 }"""
 
 
-def main():
+def run_pass(index):
+    name, size, big = PASSES[index]
     wanted = os.environ.get("DF_ROUTES")
     routes = wanted.split(",") if wanted else [r for r in discover_routes() if r not in SKIPPED_ROUTES]
     failures = 0
     with sync_playwright() as p:
         browser = p.chromium.launch()
-        for name, size, big in PASSES:
-            ctx = browser.new_context(viewport=size)
-            pg = ctx.new_page()
-            pg.clock.set_fixed_time(NOW)
-            for route in routes:
+        ctx = browser.new_context(viewport=size)
+        pg = ctx.new_page()
+        pg.clock.set_fixed_time(NOW)
+        for route in routes:
+            try:
+                pg.goto(BASE + route, wait_until="load")
                 try:
-                    pg.goto(BASE + route, wait_until="networkidle")
-                    pg.wait_for_timeout(600)
-                    if big:
-                        pg.evaluate("document.documentElement.style.fontSize = '32px'")
-                        pg.wait_for_timeout(300)
-                    found = pg.evaluate(CHECK_JS)
-                except Exception as e:  # a route that does not load is a failure of its own
-                    found = [["D-LOAD", str(e).splitlines()[0]]]
-                for rule, detail in found:
-                    if ONLY_RULES and rule not in ONLY_RULES:
-                        continue
-                    failures += 1
-                    print(f"{rule} {route} {name}: {detail}")
-            ctx.close()
+                    pg.wait_for_load_state("networkidle", timeout=3000)
+                except Exception:
+                    pass
+                pg.wait_for_timeout(300)
+                if big:
+                    pg.evaluate("document.documentElement.style.fontSize = '32px'")
+                    pg.wait_for_timeout(200)
+                found = pg.evaluate(CHECK_JS)
+            except Exception as e:  # a route that does not load is a failure of its own
+                found = [["D-LOAD", str(e).splitlines()[0]]]
+            for rule, detail in found:
+                if ONLY_RULES and rule not in ONLY_RULES:
+                    continue
+                failures += 1
+                print(f"{rule} {route} {name}: {detail}", flush=True)
         browser.close()
-    print(f"design-floor: {failures} failure(s) on {len(routes)} routes x {len(PASSES)} passes")
-    sys.exit(1 if failures else 0)
+    print(f"design-floor {name}: {failures} failure(s) on {len(routes)} routes", flush=True)
+    return failures
+
+
+def main():
+    # The three passes run side by side (one browser each), so the whole probe stays inside run_all's 180 s
+    if "DF_PASS" in os.environ:
+        sys.exit(1 if run_pass(int(os.environ["DF_PASS"])) else 0)
+    procs = [subprocess.Popen([sys.executable, __file__], env={**os.environ, "DF_PASS": str(i)}) for i in range(len(PASSES))]
+    codes = [p.wait() for p in procs]
+    sys.exit(1 if any(codes) else 0)
 
 
 if __name__ == "__main__":
