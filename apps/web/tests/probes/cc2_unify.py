@@ -25,7 +25,7 @@ ROUTES = [
     "/paywall", "/install", "/setup/profile", "/setup/goal", "/setup/done", "/this-page-does-not-exist",
 ]
 # V3 (Cài đặt group): no ink slab; the screens ported so far
-V3_SETTINGS = {"/settings", "/settings/profile", "/settings/profile/weight"}
+V3_SETTINGS = {"/settings", "/settings/profile", "/settings/profile/weight", "/settings/language", "/settings/notifications", "/settings/delete-account"}
 # Setup keeps its own desktop card layout (no header at desktop), see IA-v2 Decided 12/10
 NO_HEADER_DESKTOP = {"/setup/profile", "/setup/goal", "/setup/done"}
 SHOT_NAMES = {"/app": "diary", "/explore": "explore", "/settings": "settings", "/micros": "micros", "/foods/food-cha-la": "food"}

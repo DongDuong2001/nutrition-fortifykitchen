@@ -39,7 +39,8 @@ ROUTES = [
 ]
 INK_BAND_PHONE = {"/app"}
 # V3: Tổng quan has no ink band and no wordmark: a 34 px page title, the sub-tab Segmented and white / ink data cards
-V3_PAGE_TITLE = {"/trends", "/trends/micros", "/trends/body", "/settings", "/settings/account", "/settings/profile", "/settings/profile/weight"}
+V3_PAGE_TITLE = {"/trends", "/trends/micros", "/trends/body", "/settings", "/settings/account", "/settings/profile", "/settings/profile/weight",
+                 "/settings/targets", "/settings/targets/macros", "/settings/language", "/settings/notifications", "/settings/data-sources", "/settings/whats-new", "/settings/delete-account"}
 SHOT_NAMES = {"/app": "home", "/micros": "micros", "/settings": "settings", "/settings/profile": "profile"}
 problems, notes = [], []
 sys.stdout.reconfigure(encoding="utf-8")
