@@ -26,6 +26,9 @@ export function richName(def: NutrientDefinition): string {
 
 export type RichBasis = "per100" | "portion";
 
+/** Which tab of a "Giàu …" list: every food but the supplements, or the supplements (category bo_sung) alone. */
+export type RichKind = "food" | "supplement";
+
 export interface RichInRow {
   food: FoodItem;
   /** Amount of the nutrient in `basis`, in the catalog unit. */
@@ -38,18 +41,20 @@ export interface RichInRow {
 }
 
 /**
- * Foods ranked by one nutrient, highest first. Foods with no value (null) or none (0) are left out.
+ * Foods of one kind ranked by one nutrient, highest first. Foods with no value (null) or none (0) are left out.
  * "portion" scales to each food's first serving. Ties keep the catalogue order.
  */
 export function richInFoods(
   foods: FoodItem[],
   nutrientId: string,
   basis: RichBasis,
-  targetMin: number | null
+  targetMin: number | null,
+  kind: RichKind
 ): RichInRow[] {
   const unit = getNutrientDefinition(nutrientId)?.unit ?? "mg";
   const rows: RichInRow[] = [];
   for (const food of foods) {
+    if ((food.category === "bo_sung") !== (kind === "supplement")) continue;
     const per100 = food.nutrients[nutrientId];
     if (per100 === null || per100 === undefined || per100 <= 0) continue;
     const grams = basis === "portion" ? (food.servings[0]?.grams ?? 100) : 100;

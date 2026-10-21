@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FLICK_SPEED, SAMPLE_COUNT, projectedOffset, pushSample, releaseSpring, releaseVelocity, shouldDismiss, type DragSample } from "../sheet-physics";
+import { FLICK_SPEED, SAMPLE_COUNT, projectedOffset, pushSample, releasePlan, releaseVelocity, shouldDismiss, springProgress, RELEASE_FALLBACK, RELEASE_SETTLE_MS, type DragSample } from "../sheet-physics";
 
 // cc-62 (audit M1–M2): the release of a dragged sheet decides by velocity over the last 80 ms, never closes on an upward
 // flick, and projects the momentum (pos + 499 · v) against half the sheet.
@@ -69,9 +69,45 @@ describe("the release decision", () => {
 });
 
 describe("the release spring", () => {
-  it("closes with no bounce, snaps back with 0.15 after a flick and 0 otherwise, velocity in px/s", () => {
-    expect(releaseSpring(true, 1.2)).toEqual({ type: "spring", bounce: 0, visualDuration: 0.3, velocity: 1200 });
-    expect(releaseSpring(false, -0.8)).toMatchObject({ bounce: 0.15, velocity: -800 });
-    expect(releaseSpring(false, 0.1).bounce).toBe(0);
+  const samples = (easing: string) => easing.slice("linear(".length, -1).split(", ").map(Number);
+
+  it("springProgress starts at 0 with the given speed and settles at 1", () => {
+    const omega = 24;
+    for (const [zeta, v0] of [[1, 0], [1, 6], [0.85, 4], [0.85, -3]] as const) {
+      expect(springProgress(0, omega, zeta, v0)).toBeCloseTo(0, 9);
+      const dt = 1e-5;
+      expect((springProgress(dt, omega, zeta, v0) - springProgress(0, omega, zeta, v0)) / dt).toBeCloseTo(v0, 1);
+      expect(springProgress(2, omega, zeta, v0)).toBeCloseTo(1, 6);
+    }
+  });
+
+  it("a close carries the finger's speed over and never bounces; a slow snap back does not bounce either", () => {
+    const close = releasePlan(40, true, 0.8, 600);
+    expect([close.from, close.to, close.durationMs]).toEqual([40, 600, RELEASE_SETTLE_MS]);
+    const s = samples(close.easing);
+    expect(s[0]).toBe(0);
+    expect(s[s.length - 1]).toBe(1);
+    // 0.8 px/ms over 560 px: the sheet already moves at 1.43 per second at the start, so the first 7 ms are well over a plain ease
+    expect(s[1]).toBeGreaterThan((1.43 * 0.007) * 0.8);
+    expect(Math.max(...s)).toBeLessThanOrEqual(1.0001);
+    const slow = samples(releasePlan(60, false, 0.05, 600).easing);
+    expect(Math.max(...slow)).toBeLessThanOrEqual(1.0001);
+  });
+
+  it("a flick that did not close goes a little past the top; the overshoot stays small however hard the flick", () => {
+    const flick = samples(releasePlan(100, false, -1.2, 600).easing);
+    expect(Math.max(...flick)).toBeGreaterThan(1.001);
+    expect(Math.max(...samples(releasePlan(3, false, -3, 600).easing))).toBeLessThan(1.5);
+  });
+
+  it("a finger moving away from the target first goes on that way, then comes back (negative start)", () => {
+    // Let go at 100 px moving down at 0.2 px/ms but not enough to close: back to 0, so the first samples dip below 0
+    const s = samples(releasePlan(100, false, 0.2, 600).easing);
+    expect(Math.min(...s)).toBeLessThan(0);
+    expect(s[s.length - 1]).toBe(1);
+  });
+
+  it("without linear() the sheet's own curve is used", () => {
+    expect(releasePlan(40, true, 1, 600, false)).toEqual({ from: 40, to: 600, ...RELEASE_FALLBACK });
   });
 });

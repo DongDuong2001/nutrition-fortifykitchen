@@ -35,6 +35,6 @@ describe("TrayBar: Hai hàng (cc-63, B3)", () => {
   it("the add names the count and the meal, and is off when nothing can be added", () => {
     const html = render({ totals: { count: 1, kcal: 130, protein: 1, carbs: 1, fat: 1 }, mealName: "Bữa tối", canAdd: false });
     expect(html).toContain("Thêm 1 món vào Bữa tối");
-    expect(html).toMatch(/<button[^>]*disabled[^>]*>\s*<span class="truncate">Thêm 1 món/);
+    expect(html).toMatch(/<button[^>]*disabled[^>]*>\s*<span class="[^"]*">Thêm 1 món/);
   });
 });

@@ -1,0 +1,61 @@
+{
+ "generated": "2026-10-20",
+ "note": "Search aliases for rows already in the catalogue (new-foods-2026-10-20b.md). Run with --edible-portions: renames set name_vi by source + source_id and touch nothing else; remove_portions is empty.",
+ "remove_portions": [],
+ "renames": [
+  {
+   "source": "vn_nin",
+   "source_id": "NIN 4058",
+   "from": "Ngô bao tử",
+   "to": "Ngô bao tử (bắp non, ngô non, bắp bao tử)"
+  },
+  {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 169270",
+   "from": "Bông bí",
+   "to": "Bông bí (hoa bí, sống)"
+  },
+  {
+   "source": "usda_sr_legacy",
+   "source_id": "FDC 169271",
+   "from": "Bông bí (luộc)",
+   "to": "Bông bí (hoa bí, luộc)"
+  },
+  {
+   "source": "vn_nin",
+   "source_id": "NIN 4044",
+   "from": "Hoa thiên lý (hoa lý)",
+   "to": "Hoa thiên lý (hoa lý, bông thiên lý)"
+  },
+  {
+   "source": "vn_nin",
+   "source_id": "NIN 4042",
+   "from": "Hẹ lá",
+   "to": "Hẹ lá (bông hẹ, hoa hẹ)"
+  },
+  {
+   "source": "vn_nin",
+   "source_id": "NIN 4134",
+   "from": "Cải ngồng",
+   "to": "Cải ngồng (ngồng cải, sống)"
+  },
+  {
+   "source": "vn_nin",
+   "source_id": "NIN 4134002",
+   "from": "Cải ngồng (luộc)",
+   "to": "Cải ngồng (ngồng cải, luộc)"
+  },
+  {
+   "source": "vn_nin",
+   "source_id": "NIN 4110",
+   "from": "Ngọn su su",
+   "to": "Ngọn su su (su su đọt, sống)"
+  },
+  {
+   "source": "vn_nin",
+   "source_id": "NIN 4110002",
+   "from": "Ngọn su su (luộc)",
+   "to": "Ngọn su su (su su đọt, luộc)"
+  }
+ ]
+}

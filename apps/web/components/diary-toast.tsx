@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { Presence } from "@/components/ui/presence";
 import { Toast } from "@/components/ui/toast";
 import { useToastSwipe } from "@/components/ui/use-toast-swipe";
@@ -10,13 +10,13 @@ import { openSyncList } from "@/lib/sync-ui";
 import { usePathname } from "next/navigation";
 
 /**
- * The app's one toast, from the diary store. "Đã thêm …" offers Xem (jump to the meal), "Đã xóa …",
- * "Đã chép …", "Đã chuyển …" and the one-tap adds (a recent, a Bữa ăn của tôi, Chỉ ghi kcal) offer Hoàn tác, "Đã lưu …" offers
- * Xem (Khám phá), "Chưa lưu được món" offers Thử lại. The store ends it after its duration. cc-55: the countdown bar is
+ * The app's one toast, from the diary store. Every "Đã thêm …" (a tray, a portion, a recent, a Bữa ăn của tôi, Chỉ ghi kcal, a copy),
+ * "Đã xóa …" and "Đã chuyển …" offers Hoàn tác, "Đã lưu …" offers Xem (Khám phá), "Chưa lưu được món" offers Thử lại. Every action
+ * ends its toast at once. The store ends it after its duration. cc-55: the countdown bar is
  * CSS (no timer re-rendering the toast), and each toast rises in and fades away (Presence).
  */
 export function DiaryToast() {
-  const { undoParkedDelete, undoLastDelete, undoCopy, undoMove, retryUnsaved, setHighlightedMeal, pauseToast, resumeToast, dismissToast } = useDiary();
+  const { undoParkedDelete, undoLastDelete, undoCopy, undoMove, retryUnsaved, setHighlightedMeal, pauseToast, resumeToast, dismissToast, dismissToastAfterAction } = useDiary();
   const { toast, parkedDelete } = useDiaryToast();
   const swipe = useToastSwipe(dismissToast);
   // A new toast is a new element: its countdown starts over
@@ -27,8 +27,17 @@ export function DiaryToast() {
     return map.get(t);
   };
 
-  // The nav is 72 px high plus the home-indicator inset: the toast sits 12 px above it. /add has no nav: the toast clears the Khay bar.
+  // The nav is 72 px high plus the home-indicator inset: the toast sits 12 px above it. Over the add sheet (which covers the nav)
+  // it rides up to clear the Khay bar, and back down when the sheet goes: the same element, moved with a transition.
   const onAdd = usePathname() === "/add";
+  // One toast element for the life of the app (Presence keeps it for its exit): a new toast, and a toast that is updated in
+  // place ("Đã thêm 2 món vào …"), change its text and action and restart its clock, and are never unmounted and mounted again,
+  // so nothing blinks while the sheet closes under it. A swipe leaves inline styles on it: a new toast starts clean.
+  const current = toast ? idOf(toast) : null;
+  useEffect(() => {
+    if (current !== null) swipe.reset();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [current]);
 
   const mealSlot = toast?.mealSlot ?? null;
   const showMeal = () => {
@@ -41,9 +50,11 @@ export function DiaryToast() {
 
   return (
     // cc-58: one live region that stays mounted: a toast put into it is announced, one that came with its own region often is not
-    <div role="status" className={`pointer-events-none fixed inset-x-0 z-sheet flex flex-col gap-2 px-3 lg:inset-x-auto lg:bottom-8 lg:right-8 lg:w-[400px] ${
-        onAdd ? "bottom-[calc(138px+env(safe-area-inset-bottom))]" : "bottom-[calc(72px+env(safe-area-inset-bottom)+12px)]"
-      }`}>
+    <div
+      role="status"
+      data-lift={onAdd ? "" : undefined}
+      className="m-toast-host pointer-events-none fixed inset-x-0 bottom-[calc(72px+var(--update-bar-h,0px)+env(safe-area-inset-bottom)+12px)] z-sheet flex flex-col gap-2 px-3 lg:inset-x-auto lg:bottom-8 lg:right-8 lg:w-[400px]"
+    >
       <Presence>
         {parkedDelete && (
           <div className="pointer-events-auto">
@@ -65,9 +76,11 @@ export function DiaryToast() {
             announce={false}
             onPause={pauseToast}
             onResume={resumeToast}
+            onDismiss={() => dismissToastAfterAction(toast)}
             swipe={swipe}
-            // cc-64 (2b): repeated adds into one meal are one toast that updates in place (same element, text and clock renewed)
-            key={toast.groupId !== undefined ? `g${toast.groupId}` : idOf(toast)}
+            // One element for every toast: its text, action and clock are renewed in place (cc-64 2b grouped only some)
+            key="diary-toast"
+            countdownKey={toast.groupId !== undefined ? `g${toast.groupId}:${toast.message}` : String(idOf(toast))}
             message={toast.message}
             actionLabel={
               toast.kind === "notice"

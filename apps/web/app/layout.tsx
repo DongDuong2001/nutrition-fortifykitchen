@@ -3,6 +3,7 @@ import { Manrope, Saira_Condensed } from "next/font/google";
 import "./globals.css";
 import { NavHistoryTracker } from "@/components/nav-history-tracker";
 import { PwaRegister } from "@/components/pwa/pwa-register";
+import { UnsavedWorkWatch } from "@/components/unsaved-work-watch";
 import { RouteTransition } from "@/components/route-transition";
 import { TouchActive } from "@/components/touch-active";
 import { Vitals } from "@/components/vitals";
@@ -60,6 +61,7 @@ export default function RootLayout({
       <body className="bg-page text-text antialiased min-h-dvh flex flex-col font-sans">
         <NavHistoryTracker />
         <PwaRegister />
+        <UnsavedWorkWatch />
         <TouchActive />
         <Vitals />
         <RouteTransition>{children}</RouteTransition>

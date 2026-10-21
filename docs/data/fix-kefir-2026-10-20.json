@@ -1,0 +1,59 @@
+[
+ {
+  "source": "usda_foundation",
+  "source_id": "food-yogurt-kefir",
+  "name": "Kefir, (2-3.9% M.F.)",
+  "name_vi": "Kefir",
+  "category": "sua",
+  "brand": null,
+  "tip_vi": "Lợi khuẩn đường ruột, hỗ trợ hấp thu vi chất.",
+  "nutrients": {
+   "energy": 63,
+   "protein": 3.5,
+   "carbs": 4.2,
+   "fat": 3.6,
+   "fiber": 0,
+   "sugars": 3.92,
+   "saturated_fat": 2.31,
+   "monounsaturated_fat": 0.985,
+   "polyunsaturated_fat": 0.1,
+   "trans_fat": 0.18,
+   "cholesterol": 15,
+   "water": 87.8,
+   "calcium": 114,
+   "iron": 0.075,
+   "magnesium": 11.5,
+   "phosphorus": 90,
+   "potassium": 152,
+   "sodium": 42.5,
+   "zinc": 0.42,
+   "copper": 0.01,
+   "manganese": 0.009,
+   "selenium": 1.15,
+   "vitamin_a": 36,
+   "vitamin_c": 0.3,
+   "vitamin_d": 0.1,
+   "vitamin_e": 0.09,
+   "vitamin_k": 0,
+   "b1": 0.048,
+   "b2": 0.182,
+   "b3": 0.1,
+   "b5": 0.31,
+   "b6": 0.039,
+   "folate": 14,
+   "b12": 0.2
+  },
+  "portions": [
+   {
+    "label_vi": "1 ly (200 ml)",
+    "grams": 200,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ }
+]

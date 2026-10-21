@@ -171,6 +171,7 @@ export default function LandingPage() {
         </div>
       </header>
 
+      <main>
       {/* ============================================================== */}
       {/* 2. HERO SECTION                                               */}
       {/* ============================================================== */}
@@ -403,6 +404,7 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+      </main>
 
       {/* ============================================================== */}
       {/* 7. FOOTER (KILN WORDMARK FOOTER)                               */}

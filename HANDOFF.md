@@ -89,6 +89,10 @@ Treat the design files as the **visual source of truth**. Rebuild them as real c
   - Zinc 12 mg (men), 8 mg (women).
 - **Other vitamins:** reference values from Vietnam's 2016 recommended intakes. These still need to be verified.
 
+## Handover while Dong is away (20/10/2026)
+
+Read `docs/dong-handover-2026-10-20.md` first for the backend and the data: the made_at rule, API hardening, the 20/10 food imports, the backups and the open items. Open questions are in `OPEN_QUESTIONS.md` (Handover 20/10/2026).
+
 ## Where the code lives
 
 This repo is the project; the repo name `nutrition-fortifykitchen` is legacy. It is a monorepo:

@@ -39,7 +39,7 @@ export function PillButton({
   children,
   ...props
 }: PillButtonProps) {
-  const baseClasses = `group inline-flex items-center justify-center rounded-full ${SIZE_CLASSES[size]} active:scale-[0.97] transition-press disabled:opacity-50 disabled:pointer-events-none select-none box-border no-underline cursor-pointer motion-reduce:active:transform-none`;
+  const baseClasses = `group inline-flex items-center justify-center rounded-full ${SIZE_CLASSES[size]} active:scale-[0.97] transition-press disabled:opacity-50 disabled:pointer-events-none select-none box-border no-underline cursor-pointer motion-reduce:active:transform-none motion-reduce:active:scale-100`;
 
   // The skew motif belongs to the big call to action only
   const isPrimary = variant === "primary" && size === "lg";

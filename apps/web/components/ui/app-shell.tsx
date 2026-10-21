@@ -26,6 +26,7 @@ export function AppShell({
 }) {
   return (
     <div
+      data-app-frame
       data-align-container={alignContainer}
       className="flex min-h-dvh w-full flex-col bg-page text-text font-sans lg:flex-row"
     >
@@ -36,8 +37,8 @@ export function AppShell({
           bottomBar
             ? "pb-[calc(112px+env(safe-area-inset-bottom))]"
             : cta
-              ? "pb-[calc(168px+env(safe-area-inset-bottom))] lg:pb-24"
-              : "pb-[calc(88px+env(safe-area-inset-bottom))] lg:pb-0"
+              ? "pb-[calc(168px+var(--update-bar-h,0px)+env(safe-area-inset-bottom))] lg:pb-24"
+              : "pb-[calc(88px+var(--update-bar-h,0px)+env(safe-area-inset-bottom))] lg:pb-0"
         }`}
       >
         {children}
