@@ -63,10 +63,11 @@ export interface AppHeaderProps {
   className?: string;
 }
 
+/** V3-SPEC §4: Back and trailing actions are 44 px Liquid Glass circles on a phone; plain icon buttons from 1024 px. */
 export const HEADER_ICON_BUTTON =
-  "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0 text-on-dark lg:text-text no-underline cursor-pointer hover:text-sky lg:hover:text-cobalt active:scale-[0.97] transition-press motion-reduce:active:scale-100 focus-visible:outline-sky lg:focus-visible:outline-cobalt";
+  "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0 text-text max-lg:glass no-underline cursor-pointer hover:text-cobalt active:scale-[0.97] transition-press motion-reduce:active:scale-100 focus-visible:outline-cobalt";
 const DATE_BUTTON =
-  "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0 text-on-dark cursor-pointer hover:text-sky active:scale-[0.97] transition-press motion-reduce:active:scale-100 disabled:pointer-events-none disabled:cursor-default disabled:text-secondary disabled:opacity-50 lg:border lg:border-card-border lg:bg-card lg:text-ink lg:hover:bg-divider lg:hover:text-ink lg:disabled:text-secondary focus-visible:outline-sky lg:focus-visible:outline-cobalt";
+  "inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0 text-text cursor-pointer hover:text-cobalt active:scale-[0.97] transition-press motion-reduce:active:scale-100 disabled:pointer-events-none disabled:cursor-default disabled:text-secondary disabled:opacity-50 lg:border lg:border-card-border lg:bg-card lg:text-ink lg:hover:bg-divider lg:hover:text-ink lg:disabled:text-secondary focus-visible:outline-cobalt";
 
 /**
  * cc-72: the calendar beside the date (the icon set's Calendar path, drawn here like the chevrons: the header is on every
@@ -89,11 +90,13 @@ function Chevron({ dir }: { dir: "left" | "right" }) {
 }
 
 /**
- * The one header of H1T MICRO (design/UI-RULES.md, IA v2 "Headers and UI unity").
- * Phone: `bg-ink`, bottom corners 20 px, safe-area top, 16 px sides, one 44 px title row (back, Saira 24 title,
- * up to two icon actions), plus an optional second row INSIDE the same header (tabs, date summary, search).
- * Desktop (>= 1024 px): no ink band; the same row sits on paper (Saira 32), ink only in the summary card.
- * It is one DOM for both, so there is exactly one h1.
+ * The one header of H1T MICRO (V3-SPEC §3.1–3.3; the brief's ScreenHeader). No ink slab: it sits on the grey page.
+ * - Tab roots (variant "tab"): a 34 px Saira italic large title, controls under it (search, sub-tabs, period).
+ * - Push screens ("sub"): one row with the 44 px glass Back circle, the 28 px title 12 px after it (24 px when it is
+ *   long, two lines at most), then the trailing actions; the subtitle sits under the title, aligned to it. A 24 px
+ *   fade from the page colour sits at the top, under the floating circles.
+ * - Hôm nay ("daily"): the wordmark, the date stepper and the actions.
+ * Desktop (>= 1024 px): the same row on the page (Saira 32), ink only in the summary card. One DOM, one h1.
  */
 export function AppHeader({
   variant = "daily",
@@ -145,11 +148,11 @@ export function AppHeader({
   const nextDisabled = !onNext || canGoNext === false || (canGoNext === undefined && dateLabel.startsWith("Hôm nay"));
 
   const back = backHref ? (
-    <Link href={backHref} aria-label={backLabel} className={`${HEADER_ICON_BUTTON} -ml-2`}>
+    <Link href={backHref} aria-label={backLabel} className={HEADER_ICON_BUTTON}>
       <Chevron dir="left" />
     </Link>
   ) : onBack ? (
-    <button type="button" onClick={onBack} aria-label={backLabel} className={`${HEADER_ICON_BUTTON} -ml-2`}>
+    <button type="button" onClick={onBack} aria-label={backLabel} className={HEADER_ICON_BUTTON}>
       <Chevron dir="left" />
     </button>
   ) : null;
@@ -166,8 +169,9 @@ export function AppHeader({
 
   return (
     <header
-      className={`w-full flex-none select-none bg-ink text-on-dark rounded-b-sheet lg:rounded-none lg:bg-page lg:text-text ${className}`}
+      className={`w-full flex-none select-none bg-page text-text ${className}`}
     >
+      {back && <div aria-hidden="true" className="pointer-events-none fixed inset-x-0 top-0 z-sticky h-6 bg-linear-to-b from-page to-transparent lg:hidden" />}
       <div
         className={`flex w-full flex-col gap-3 ${phonePad} box-border ${column} ${deskPad}`}
       >
@@ -175,7 +179,7 @@ export function AppHeader({
           data-align-group={alignGroup}
           data-align-edge={alignMode === "left" ? "left" : undefined}
           data-align-from={alignMode === "page" ? "lg" : undefined}
-          className="group/hdr flex min-h-11 items-center gap-2"
+          className={`group/hdr flex min-h-11 gap-3 ${back ? "items-start" : "items-center"}`}
         >
           {back}
           {/* The phone wordmark is a logo: it never shrinks or wraps; at large text sizes the date gives way instead. While the sync status
@@ -193,10 +197,10 @@ export function AppHeader({
                     href={HOME_ROUTE}
                     aria-label="H1T MICRO, về Hôm nay"
                     data-tour="home-logo"
-                    className={`inline-flex min-h-11 items-center whitespace-nowrap rounded-md font-display italic font-black text-on-dark no-underline ${compact ? "text-[21px]" : "text-[20px] leading-[28px]"} uppercase tracking-tight active:scale-[0.97] transition-press motion-reduce:active:scale-100 focus-visible:outline-sky lg:hidden`}
+                    className={`inline-flex min-h-11 items-center whitespace-nowrap rounded-md font-display italic font-black text-text no-underline ${compact ? "text-[21px]" : "text-[20px] leading-[28px]"} uppercase tracking-tight active:scale-[0.97] transition-press motion-reduce:active:scale-100 lg:hidden`}
                   >
                     <span aria-hidden="true">
-                      H1T <span className="text-sky">MICRO</span>
+                      H1T <span className="text-cobalt">MICRO</span>
                     </span>
                   </Link>
                 )}
@@ -208,14 +212,21 @@ export function AppHeader({
               </>
             ) : (
               title && (
-                <Title title={typeof title === "string" ? title : undefined} className="m-0 break-words font-display italic font-extrabold text-2xl lg:text-display-sm leading-tight uppercase tracking-display line-clamp-2">
-                  {title}
-                </Title>
+                <div className={back ? "flex min-h-11 items-center" : undefined}>
+                  <Title
+                    title={typeof title === "string" ? title : undefined}
+                    className={`m-0 break-words font-display italic font-extrabold leading-tight uppercase tracking-display line-clamp-2 lg:text-display-sm ${
+                      back ? (typeof title === "string" && title.length > 18 ? "text-2xl" : "text-headline") : variant === "tab" ? "text-display" : "text-2xl"
+                    }`}
+                  >
+                    {title}
+                  </Title>
+                </div>
               )
             )}
             {subtitle && (
               <div
-                className={`m-0 mt-0.5 text-cap leading-snug text-muted-subtitle lg:text-sm lg:text-secondary ${
+                className={`m-0 mt-0.5 text-callout leading-snug text-secondary lg:text-sm ${
                   variant === "daily" ? "hidden lg:block" : ""
                 }`}
               >
@@ -239,7 +250,7 @@ export function AppHeader({
                   aria-label={`Chọn ngày, ${dateLabel}`}
                   data-tour="day-date"
                   aria-busy={dateLabel ? undefined : true}
-                  className="inline-flex min-h-11 min-w-[76px] shrink items-center justify-center rounded-full border-0 bg-transparent px-1 text-center text-sm font-semibold leading-tight tracking-tight text-on-dark cursor-pointer hover:text-sky focus-visible:outline-sky active:scale-[0.97] transition-press motion-reduce:active:scale-100 lg:hidden"
+                  className="inline-flex min-h-11 min-w-[76px] shrink items-center justify-center rounded-full border-0 bg-transparent px-1 text-center text-body-lg font-semibold leading-tight tracking-tight text-text cursor-pointer hover:text-cobalt focus-visible:outline-cobalt active:scale-[0.97] transition-press motion-reduce:active:scale-100 lg:hidden"
                 >
                   {dateLabel ? (
                     // cc-72: the calendar glyph says the date opens the calendar (the date stays the one control)
@@ -275,12 +286,12 @@ export function AppHeader({
           ) : null}
         </div>
 
-        {progress && <StepBars current={progress.current} total={progress.total} tone="dark" />}
+        {progress && <StepBars current={progress.current} total={progress.total} tone="light" />}
         {tabs}
         {search}
         {summary && (
           <div
-            className={`w-full rounded-card bg-surface-dark p-4 text-on-dark lg:bg-ink ${summaryPhoneOnly ? "lg:hidden" : ""}`}
+            className={`w-full rounded-card bg-ink p-4 text-on-dark ${summaryPhoneOnly ? "lg:hidden" : ""}`}
           >
             {summary}
           </div>

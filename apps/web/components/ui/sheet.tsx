@@ -256,7 +256,8 @@ export function Sheet({
         aria-modal={showing ? "true" : undefined}
         aria-hidden={showing ? undefined : true}
         aria-labelledby={showing ? (title ? titleId : labelledBy) : undefined}
-        className={`relative z-sticky w-full max-w-[390px] mx-auto bg-card rounded-t-sheet px-4 pt-3 pb-[max(24px,env(safe-area-inset-bottom))] max-h-[calc(100dvh-24px)] overflow-y-auto overscroll-contain flex flex-col gap-2 shadow-sheet outline-none m-sheet ${quick ? "m-quick" : ""} ${desktopDialog ? "m-dialog lg:w-[420px] lg:max-w-[420px] lg:rounded-sheet lg:px-6 lg:pt-6" : ""} ${className}`}
+        // V3-SPEC §4: the sheet floats inset 8 px from the sides and the bottom, 28 px corners all round
+        className={`relative z-sticky mx-2 mb-[max(8px,env(safe-area-inset-bottom))] w-[calc(100%-16px)] max-w-[374px] self-center bg-card rounded-sheet px-4 pt-3 pb-6 max-h-[calc(100dvh-32px)] overflow-y-auto overscroll-contain flex flex-col gap-2 shadow-sheet outline-none m-sheet ${quick ? "m-quick" : ""} ${desktopDialog ? "m-dialog lg:mb-0 lg:w-[420px] lg:max-w-[420px] lg:px-6 lg:pt-6" : ""} ${className}`}
       >
         {/* Grabber: drag it down to close (a 24 px strip around the 5 px bar); the title block below drags too */}
         <div
@@ -271,22 +272,34 @@ export function Sheet({
           <div className="w-9 h-[5px] rounded-full bg-grabber" />
         </div>
 
-        {/* Optional Header */}
+        {/* Header (V3-SPEC §4): glass, Close as a 44 px circle on the leading side with a plain fill (no glass on glass),
+            the title centred. It drags the sheet like the grabber. */}
         {(content.title || content.description) && (
-          <div data-sheet-drag {...drag.handlers} style={{ touchAction: "none" }} className="px-1 mb-1">
-            {content.title && (
-              <h2
-                id={titleId}
-                className="m-0 text-lg font-bold text-text leading-tight"
-              >
-                {content.title}
-              </h2>
-            )}
-            {content.description && (
-              <p className="m-0 text-sm text-secondary tabular-nums mt-0.5">
-                {content.description}
-              </p>
-            )}
+          <div
+            data-sheet-drag
+            {...drag.handlers}
+            style={{ touchAction: "none" }}
+            className="glass-bar sticky top-0 z-sticky -mx-4 mb-1 flex items-center gap-2 px-4 pt-1 pb-2"
+          >
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Đóng"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-0 bg-fill p-0 text-text active:scale-[0.97] transition-press motion-reduce:active:scale-100"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                <path d="M6 6l12 12M18 6 6 18" />
+              </svg>
+            </button>
+            <div className="min-w-0 flex-1 text-center">
+              {content.title && (
+                <h2 id={titleId} className="m-0 text-body-lg font-bold leading-tight text-text">
+                  {content.title}
+                </h2>
+              )}
+              {content.description && <p className="m-0 mt-0.5 text-sm text-secondary tabular-nums">{content.description}</p>}
+            </div>
+            <span aria-hidden="true" className="h-11 w-11 shrink-0" />
           </div>
         )}
 

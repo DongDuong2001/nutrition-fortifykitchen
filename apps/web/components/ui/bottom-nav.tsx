@@ -15,9 +15,10 @@ export interface BottomNavProps {
 }
 
 /**
- * H1T MICRO bottom navigation (Cobalt Sign): Hôm nay · Tổng quan · [+] · Khám phá · Cài đặt.
- * Full-bleed on <1024px with content centered at max-w-[560px] and 16px side padding.
- * The active tab gets on-dark text plus a slanted bar (skewX(-14deg)); the text itself stays unslanted.
+ * H1T MICRO tab bar (V3-SPEC §4): Hôm nay · Tổng quan · [+] · Khám phá · Cài đặt, a floating Liquid Glass capsule
+ * 16 px in from the sides and 24 px above the bottom (safe area added), 64 px tall; content scrolls under it.
+ * Labels in --color-glass-tab-off; the selected tab's icon is filled and it and its label are cobalt. The + is a 52 px
+ * cobalt tinted-glass circle with its glow (D-NAV-07: an action, never selected like a tab).
  */
 export function BottomNav({ currentTab, className = "" }: BottomNavProps) {
   const router = useRouter();
@@ -35,33 +36,23 @@ export function BottomNav({ currentTab, className = "" }: BottomNavProps) {
         onNavigate={() => startTransition(() => setActive(item.tab))}
         data-tour={item.tab === "settings" ? "nav-settings" : item.tab === "explore" ? "nav-explore" : undefined}
         aria-current={isActive ? "page" : undefined}
-        className={`m-tint m-tint-dark relative flex flex-col items-center justify-center gap-[2px] min-h-14 rounded-2xl text-xs font-semibold no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100 ${
-          isActive ? "text-on-dark" : "text-muted-on-dark hover:text-on-dark"
+        className={`m-tint relative flex h-14 flex-col items-center justify-center gap-0.5 rounded-full text-micro leading-tight no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100 ${
+          isActive ? "font-bold text-cobalt" : "font-semibold text-glass-tab-off hover:text-text"
         }`}
       >
-        <NavIcon tab={item.tab} />
-        <span className="text-micro leading-tight">{item.label}</span>
-        {isActive && (
-          <span
-            className="absolute bottom-1 w-5 h-[3px] rounded-[1px] bg-cobalt"
-            style={{ transform: "skewX(-14deg)" }}
-            aria-hidden="true"
-          />
-        )}
+        <NavIcon tab={item.tab} filled={isActive} />
+        <span>{item.label}</span>
       </Link>
     );
   };
 
   return (
-    <nav
-      aria-label="Điều hướng chính"
-      className={`m-vt-nav h-[calc(72px+env(safe-area-inset-bottom))] pb-[env(safe-area-inset-bottom)] flex-none bg-ink w-full select-none box-border ${className}`}
-    >
-      <div className="w-full max-w-[560px] mx-auto px-4 h-[72px] grid grid-cols-5 items-center">
+    <nav aria-label="Điều hướng chính" className={`m-vt-nav w-full select-none box-border ${className}`}>
+      <div className="glass mx-auto grid h-16 w-full max-w-[528px] grid-cols-5 items-center rounded-full px-1">
         {renderTab(first)}
         {renderTab(second)}
 
-        <div className="flex justify-center items-center">
+        <div className="flex items-center justify-center">
           <Link
             id="mobile-add-fab"
             data-testid="add-fab"
@@ -69,7 +60,7 @@ export function BottomNav({ currentTab, className = "" }: BottomNavProps) {
             href="/add"
             onClick={(e) => openAddFrom("mobile-add-fab", e, router)}
             aria-label="Thêm món"
-            className="w-[50px] h-[50px] rounded-full bg-cobalt text-on-accent flex items-center justify-center no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100 "
+            className="glass-cobalt flex h-[52px] w-[52px] items-center justify-center rounded-full text-on-accent no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100"
           >
             <PlusIcon />
           </Link>

@@ -39,21 +39,22 @@ export function AppShell({
           bottomBar
             ? "pb-[calc(112px+env(safe-area-inset-bottom))]"
             : cta
-              ? "pb-[calc(168px+var(--update-bar-h,0px)+env(safe-area-inset-bottom))] lg:pb-24"
-              : "pb-[calc(88px+var(--update-bar-h,0px)+env(safe-area-inset-bottom))] lg:pb-0"
+              ? "pb-[calc(184px+var(--update-bar-h,0px)+env(safe-area-inset-bottom))] lg:pb-24"
+              : "pb-[calc(104px+var(--update-bar-h,0px)+env(safe-area-inset-bottom))] lg:pb-0"
         }`}
       >
         {children}
       </div>
       {cta && (
-        <div className="fixed inset-x-0 bottom-[calc(72px+env(safe-area-inset-bottom))] z-30 bg-page p-3 before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-3 before:bg-linear-to-t before:from-page before:to-transparent lg:bottom-0 lg:left-60">
+        <div className="fixed inset-x-0 bottom-[calc(88px+env(safe-area-inset-bottom))] z-30 bg-page p-3 before:pointer-events-none before:absolute before:inset-x-0 before:bottom-full before:h-3 before:bg-linear-to-t before:from-page before:to-transparent lg:bottom-0 lg:left-60">
           <div className="mx-auto w-full max-w-[560px]">{cta}</div>
         </div>
       )}
       {bottomBar ? (
         <div className="fixed inset-x-0 bottom-0 z-nav border-t border-card-border bg-card pb-[env(safe-area-inset-bottom)] lg:left-60">{bottomBar}</div>
       ) : (
-        <div className="fixed bottom-0 left-0 right-0 z-nav bg-ink lg:hidden">
+        // V3-SPEC §4: the glass capsule floats 16 px in from the sides and 24 px above the bottom; content scrolls under it
+        <div className="pointer-events-none fixed inset-x-4 bottom-[calc(24px+env(safe-area-inset-bottom))] z-nav *:pointer-events-auto lg:hidden">
           <BottomNav />
         </div>
       )}

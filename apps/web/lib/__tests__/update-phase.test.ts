@@ -39,7 +39,7 @@ describe("the toast", () => {
   it("sits right above the 72 px nav, and the tab frame, Hôm nay's list and the diary toast leave room for it (--update-bar-h)", () => {
     const root = path.resolve(__dirname, "../..");
     const offer = readFileSync(path.join(root, "components/pwa/update-offer.tsx"), "utf8");
-    expect(offer).toContain("bottom-[calc(72px+env(safe-area-inset-bottom))]");
+    expect(offer).toContain("bottom-[calc(88px+env(safe-area-inset-bottom))]");
     expect(offer).toContain("setUpdateBar(visible)");
     expect(UPDATE_BAR_HEIGHT_PX).toBe(64);
     for (const file of ["components/ui/app-shell.tsx", "components/home/home-screen.tsx", "components/diary-toast.tsx"]) {
