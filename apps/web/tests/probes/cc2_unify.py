@@ -24,6 +24,8 @@ ROUTES = [
     "/settings/profile/weight", "/settings/language", "/settings/notifications", "/settings/delete-account",
     "/paywall", "/install", "/setup/profile", "/setup/goal", "/setup/done", "/this-page-does-not-exist",
 ]
+# V3 (Cài đặt group): no ink slab; the screens ported so far
+V3_SETTINGS = {"/settings", "/settings/profile", "/settings/profile/weight"}
 # Setup keeps its own desktop card layout (no header at desktop), see IA-v2 Decided 12/10
 NO_HEADER_DESKTOP = {"/setup/profile", "/setup/goal", "/setup/done"}
 SHOT_NAMES = {"/app": "diary", "/explore": "explore", "/settings": "settings", "/micros": "micros", "/foods/food-cha-la": "food"}
@@ -102,6 +104,11 @@ def main():
                     if desktop:
                         check(h["size"] == "32px" or not h["h1Visible"], f"{where}: desktop title 32px (got {h['size']})")
                         check(h["bg"] != "rgb(17, 19, 23)" or h["width"] < 1000, f"{where}: no full-width ink header on desktop")
+                    elif route in V3_SETTINGS:
+                        # V3 Cài đặt: the tab root has a 34 px page title, its push screens the glass Back and a 28 px title, all on the grey page
+                        check(h["bg"] == "rgb(242, 242, 247)", f"{where}: V3 header sits on the page ({h['bg']})")
+                        check(h["size"] == ("34px" if route == "/settings" else "28px"), f"{where}: V3 title size ({h['size']})")
+                        check(h["top"] == 0, f"{where}: header at the top ({h['top']})")
                     elif route.startswith("/trends"):
                         # V3: Tổng quan is a 34 px page title on the grey page (no ink slab)
                         check(h["bg"] == "rgb(242, 242, 247)", f"{where}: V3 header sits on the page ({h['bg']})")
