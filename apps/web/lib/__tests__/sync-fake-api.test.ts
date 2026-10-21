@@ -120,6 +120,9 @@ async function refetch(local: AddedDiaryEntry[], day: string, keep: Set<string> 
 const add = (date = TODAY, id = ID) => apiClient.addEntry({ id, foodId: FOOD, grams: 100, mealSlot: "lunch", date });
 
 beforeEach(async () => {
+  // The fake API judges a day by the clock, and TODAY is a fixed date: pin the clock to it (10:00 in Ho Chi Minh) so the
+  // suite does not turn red two days after it was written. Only Date is faked; timers stay real.
+  vi.useFakeTimers({ toFake: ["Date"], now: new Date(`${TODAY}T03:00:00Z`) });
   vi.stubEnv("NEXT_PUBLIC_API_MODE", "live");
   vi.stubEnv("NEXT_PUBLIC_API_URL", BASE);
   const local = memoryStorage();
@@ -131,6 +134,7 @@ beforeEach(async () => {
 });
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.unstubAllEnvs();
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
