@@ -8,7 +8,7 @@ Production demo build, 390x844 and 320x640.
 - B3: the Khay bar is two rows (count, kcal, Xem lại / Thêm n món vào Bữa), with many foods and a big total nothing
   overflows or overlaps at 390 and 320, and the list clears the bar
 - N1: no visible input under 16 px on /add, /foods/new, /settings/targets/macros
-- N5: html and body have overscroll-behavior-y: none, Hôm nay's list keeps contain
+- N5: html and body have overscroll-behavior-y: none, Hôm nay's list keeps contain (from lg, V3 22/10)
 Screenshots: .screenshots/cc-63-*.png
 Run with: ALIGN_BASE_URL=http://localhost:3108 npm run probe -- tests/probes/cc_63.py
 """
@@ -234,7 +234,7 @@ def n5_overscroll(browser):
     body = pg.evaluate("getComputedStyle(document.body).overscrollBehaviorY")
     check(html == "none" and body == "none", f"N5: html and body overscroll-behavior-y none ({html}, {body})")
     inner = pg.evaluate(
-        "[...document.querySelectorAll('div')].filter(e => getComputedStyle(e).overflowY === 'auto' && e.className.includes('overscroll-y-contain')).length"
+        "[...document.querySelectorAll('div')].filter(e => e.className.includes('lg:overscroll-y-contain')).length"  # V3: the page scrolls on a phone, the list card only from lg
     )
     check(inner >= 1, f"N5: Hôm nay's own list keeps overscroll-y contain ({inner})")
     ctx.close()

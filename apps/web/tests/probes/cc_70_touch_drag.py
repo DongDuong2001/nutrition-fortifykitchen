@@ -7,7 +7,7 @@ through CDP Input.dispatchTouchEvent (touchStart, hold, touchMove in steps, touc
   row stays at opacity 0.4
 - Release over Bữa phụ: Mì Ý moves from Sáng to Bữa phụ with the Undo toast; Hoàn tác brings it back
 - Release over its own meal, or outside any meal: the copy springs back, nothing changes
-- A quick swipe still scrolls the list and lifts nothing; a hold and release without moving is the long press action
+- A quick swipe still scrolls (the page, from V3 22/10) and lifts nothing; a hold and release without moving is the long press action
   (Chọn nhiều món); a touchCancel in the drag restores everything
 - A read-only day (the demo's past) lifts nothing; reduced motion: no lift scale, the move still works
 - 1440 with a mouse: the HTML5 drag still moves the food
@@ -153,7 +153,7 @@ def phone_drag(browser):
     check(slot_of_row(pg) == "breakfast", f"{FOOD} is in Sáng")
     finger = Finger(cdp)
     snack = section(pg, "snack")
-    snack_pill = snack.locator("[data-ink-pill]")
+    snack_pill = snack.locator("[data-meal-header]")
 
     x, y = lift(pg, finger)
     s = state(pg)
@@ -216,18 +216,17 @@ def swipe_and_hold(browser):
     go_home(pg)
     ensure_food(pg)
     finger = Finger(cdp)
-    scroller = pg.locator("[data-food-scroll]:visible").first
-    info = scroller.evaluate("el => ({ top: el.scrollTop, over: el.scrollHeight - el.clientHeight })")
-    check(info["over"] > 40, f"the list overflows at 390x560 ({info['over']} px), so it can scroll")
-    box = scroller.bounding_box()
-    x, y = 120, box["y"] + box["height"] - 70
+    # V3 22/10: on a phone the page scrolls (the list card does not scroll itself)
+    info = pg.evaluate("({ top: window.scrollY, over: document.documentElement.scrollHeight - innerHeight })")
+    check(info["over"] > 40, f"the page overflows at 390x560 ({info['over']} px), so it can scroll")
+    x, y = 120, 450
     # A quick swipe up inside the list: 150 ms in all, well under the hold
     finger.down(x, y)
     finger.glide(pg, x, y, x, y - 160, steps=10, pause=12)
     finger.up()
     pg.wait_for_timeout(700)
-    after = scroller.evaluate("el => el.scrollTop")
-    check(after > info["top"] + 20, f"a quick swipe still scrolls the list ({info['top']} -> {after})")
+    after = pg.evaluate("window.scrollY")
+    check(after > info["top"] + 20, f"a quick swipe still scrolls the page ({info['top']} -> {after})")
     check(pg.locator("[data-touch-drag]").count() == 0 and ghost_count(pg) == 0, "…and lifts nothing")
     go_home(pg)
     ensure_food(pg)
@@ -247,7 +246,7 @@ def cancelled(browser):
     ensure_food(pg)
     finger = Finger(cdp)
     x, y = lift(pg, finger)
-    tx, ty = center(section(pg, "snack").locator("[data-ink-pill]"))
+    tx, ty = center(section(pg, "snack").locator("[data-meal-header]"))
     finger.glide(pg, x, y, tx, ty, steps=10)
     check(ghost_count(pg) == 1, "cancel: dragging")
     finger.cancel()
@@ -290,7 +289,7 @@ def reduced(browser):
     x, y = lift(pg, finger)
     s = state(pg)
     check(s["drag"] == "lifted" and s["transform"] in ("none", "matrix(1, 0, 0, 1, 0, 0)"), f"reduced motion: no lift scale ({s['transform']})")
-    tx, ty = center(section(pg, "snack").locator("[data-ink-pill]"))
+    tx, ty = center(section(pg, "snack").locator("[data-meal-header]"))
     finger.glide(pg, x, y, tx, ty, steps=10)
     check("Thả vào đây để chuyển" in section(pg, "snack").inner_text(), "reduced motion: the highlight stays")
     finger.up()
@@ -307,7 +306,7 @@ def desktop_mouse(browser):
     go_home(pg)
     ensure_food(pg)
     check(slot_of_row(pg) == "breakfast", "1440: Mì Ý is in Sáng")
-    row(pg).drag_to(section(pg, "snack").locator("[data-ink-pill]"))
+    row(pg).drag_to(section(pg, "snack").locator("[data-meal-header]"))
     pg.wait_for_timeout(700)
     check(slot_of_row(pg) == "snack", f"1440 mouse: the HTML5 drag still moves the food ({slot_of_row(pg)})")
     check(pg.locator("[data-touch-drag]").count() == 0 and ghost_count(pg) == 0, "1440 mouse: no touch lift, no copy")

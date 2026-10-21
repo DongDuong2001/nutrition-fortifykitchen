@@ -58,7 +58,8 @@ export function usePullRefresh(listRef: RefObject<HTMLElement | null>, onRefresh
       if (arrowRef.current) arrowRef.current.style.transform = `rotate(${px >= PULL_TRIGGER_PX ? 180 : 0}deg)`;
     };
     const down = (e: TouchEvent) => {
-      start.current = list.scrollTop <= 0 && e.touches.length === 1 ? { x: e.touches[0].clientX, y: e.touches[0].clientY, pulling: false, armed: false } : null;
+      // On a phone the page scrolls, not the list (V3): a pull starts at the top of both
+      start.current = list.scrollTop <= 0 && window.scrollY <= 0 && e.touches.length === 1 ? { x: e.touches[0].clientX, y: e.touches[0].clientY, pulling: false, armed: false } : null;
     };
     const move = (e: TouchEvent) => {
       if (start.current === null) return;

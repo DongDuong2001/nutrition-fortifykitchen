@@ -74,6 +74,7 @@ def run(browser, size, level, tag):
     pg.clock.set_fixed_time(NOW)
     pg.goto(BASE + f"/app?level={level}", wait_until="networkidle")
     pg.locator(HERO + " >> visible=true").first.wait_for(state="visible", timeout=8000)
+    pg.locator("aside[aria-label='Vi chất'] >> visible=true").first.wait_for(state="visible", timeout=15000)  # the column follows the hero in a second render
     pg.wait_for_timeout(700)
     g = pg.evaluate(GEOMETRY)
     w = size["width"]

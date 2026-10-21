@@ -14,9 +14,8 @@ tips off (_seed.py); this one turns them on with `_seed.onboarding(True)`.
 - Cài đặt: Xem lại hướng dẫn with the Mới pill, the tips switch
 - Share tip (home-share): at 3 foods today, not at 2, not on a past day, not after a share; round 44 px hole centred on the
   share button, arrow under it; Thử ngay opens the share sheet, Đã hiểu closes; a successful save marks share-day used
-- Hôm nay: the meal pill's + Thêm is a text link (no background, border or radius; sky, Manrope 12 px, 13 px from lg, 700;
-  hit area 44x44 that leaves the 24/36 px pill alone; 12 px from the kcal; focus ring, hover white, pressed opacity;
-  hidden on a past day) (cc-44)
+- Hôm nay: the meal header's add control is a 44x44 cobalt + icon button labelled "Thêm vào <bữa>" (V3 22/10; it was the
+  "+ Thêm" text link): no fill, at the card's right edge, focus ring, hidden on a past day
 Screenshots: .screenshots/cc-42-*.png
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_42_onboarding.py
 """
@@ -696,56 +695,39 @@ MEAL_ADD = "a[data-tour='meal-add']"
 
 
 def meal_add_link(browser):
-    """The + Thêm on a meal header is a text link: looks, hit area, row height, states (390 and 1440)."""
-    for size, tag, row_h, add_fs in ((PHONE, "390", 24, "12px"), (DESKTOP, "1440", 36, "13px")):  # cc-44: the ink meal pill
+    """V3 22/10: the meal header's add control is a 44x44 cobalt + icon button (it was the "+ Thêm" text link): looks, hit area, states (390 and 1440)."""
+    for size, tag in ((PHONE, "390"), (DESKTOP, "1440")):
         ctx, pg = ctx_page(browser, size)
         ctx.add_init_script("try { localStorage.setItem('h1t_onboarding_off', '1'); } catch (e) {}")
         go(pg, "/app")
         pg.locator("section[aria-label='Tổng kcal và dinh dưỡng đa lượng']").first.wait_for(state="visible", timeout=8000)
         links = pg.locator(MEAL_ADD + ":visible")
-        check(links.count() >= 4, f"{tag} meal add: one + Thêm per meal ({links.count()})")
+        check(links.count() >= 4, f"{tag} meal add: one + per meal ({links.count()})")
         link = links.first
         info = link.evaluate(
             """el => {
-              const cs = getComputedStyle(el), before = getComputedStyle(el, '::before');
-              const row = el.parentElement.getBoundingClientRect(), r = el.getBoundingClientRect(), list = el.closest('section').getBoundingClientRect();
-              const btn = el.parentElement.querySelector('button'), kcal = btn.querySelector('span:last-child').getBoundingClientRect();
+              const cs = getComputedStyle(el);
+              const row = el.parentElement.getBoundingClientRect(), r = el.getBoundingClientRect(), card = el.closest('[data-food-scroll]').getBoundingClientRect();
               return {
-                text: el.textContent.trim(), label: el.getAttribute('aria-label'), exp: el.getAttribute('data-export'),
-                bg: cs.backgroundColor, borderW: cs.borderTopWidth, radius: cs.borderTopLeftRadius, shadow: cs.boxShadow,
-                color: cs.color, fs: cs.fontSize, fw: cs.fontWeight, ff: cs.fontFamily,
-                hitW: parseFloat(before.width), hitH: parseFloat(before.height),
-                rowH: row.height, mid: (r.top + r.bottom) / 2, rowMid: (row.top + row.bottom) / 2,
-                rightGap: list.right - r.right, kcalGap: r.left - kcal.right, kcalText: btn.querySelector('span:last-child').textContent.trim(),
+                text: el.textContent.trim(), label: el.getAttribute('aria-label'), exp: el.getAttribute('data-export'), svg: !!el.querySelector('svg[aria-hidden=true]'),
+                bg: cs.backgroundColor, color: cs.color, w: r.width, h: r.height,
+                rowH: row.height, mid: (r.top + r.bottom) / 2, rowMid: (row.top + row.bottom) / 2, rightGap: card.right - r.right,
               };
             }"""
         )
-        check(info["text"] == "+ Thêm" and info["exp"] == "hide" and info["label"].startswith("Thêm vào Bữa"), f"{tag} meal add: text, data-export and label kept ({info['text']!r}, {info['label']!r}, {info['exp']!r})")
-        check(info["bg"] == "rgba(0, 0, 0, 0)" and info["borderW"] == "0px" and info["radius"] == "0px" and info["shadow"] == "none", f"{tag} meal add: no background, border, radius or shadow ({info['bg']}, {info['borderW']}, {info['radius']}, {info['shadow']})")
-        check(info["color"] == "rgb(92, 184, 255)" and info["fs"] == add_fs and info["fw"] == "700" and "Manrope" in info["ff"], f"{tag} meal add: sky Manrope {add_fs} 700 ({info['color']}, {info['fs']}, {info['fw']}, {info['ff'][:30]})")
-        check(info["hitW"] >= 44 and info["hitH"] >= 44, f"{tag} meal add: hit area at least 44x44 ({info['hitW']}x{info['hitH']})")
-        check(info["rowH"] == row_h, f"{tag} meal add: the meal pill is {row_h} px ({info['rowH']})")
+        check(info["text"] == "" and info["svg"] and info["exp"] == "hide" and info["label"].startswith("Thêm vào Bữa"), f"{tag} meal add: an icon with its label and data-export kept ({info['text']!r}, {info['label']!r}, {info['exp']!r})")
+        check(info["bg"] == "rgba(0, 0, 0, 0)" and info["color"] == "rgb(36, 87, 245)", f"{tag} meal add: cobalt glyph, no fill ({info['color']}, {info['bg']})")
+        check(info["w"] >= 44 and info["h"] >= 44, f"{tag} meal add: 44x44 ({info['w']}x{info['h']})")
+        check(info["rowH"] >= 44, f"{tag} meal add: the meal header row is at least 44 px ({info['rowH']})")
         check(abs(info["mid"] - info["rowMid"]) <= 1, f"{tag} meal add: centred with the meal name ({info['mid']} vs {info['rowMid']})")
-        check(abs(info["rightGap"] - 12) <= 1, f"{tag} meal add: right-aligned on the list's 12 px text edge ({info['rightGap']})")
-        if info["kcalText"]:
-            check(abs(info["kcalGap"] - 12) <= 1, f"{tag} meal add: 12 px from the kcal value ({info['kcalGap']})")
-        # the invisible hit area: a point just inside the 44 px hit area above the link still reaches it (10 px on the
-        # 24 px phone pill, 4 px on the 36 px desktop pill, cc-44)
-        # (the first meal header sits at the top edge of the list's scroll box, which clips the overlay above it, so the
-        # second one is used)
+        check(abs(info["rightGap"]) <= 1.5, f"{tag} meal add: at the card's right edge ({info['rightGap']})")
         box = links.nth(1).bounding_box()
-        above = (44 - box["height"]) / 2 - 0.5
-        top = pg.evaluate("([x, y]) => document.elementFromPoint(x, y)?.closest(\"a[data-tour='meal-add']\") !== null", [box["x"] + box["width"] / 2, box["y"] - above])
-        check(top, f"{tag} meal add: a tap {above:.1f} px above the link still lands on it")
-        # hover turns the text white (cc-44), pressed opacity
+        hit = pg.evaluate("([x, y]) => document.elementFromPoint(x, y)?.closest(\"a[data-tour='meal-add']\") !== null", [box["x"] + box["width"] / 2, box["y"] + box["height"] / 2])
+        check(hit, f"{tag} meal add: the centre of the 44 px button lands on it")
+        # letting go elsewhere does not open /add
         link.hover()
-        pg.wait_for_timeout(200)
-        deco = link.evaluate("el => getComputedStyle(el).color")
-        check(deco == "rgb(255, 255, 255)", f"{tag} meal add: hover turns white ({deco})")
         pg.mouse.down()
         pg.wait_for_timeout(300)
-        op = link.evaluate("el => getComputedStyle(el).opacity")
-        check(float(op) == 0.6, f"{tag} meal add: pressed opacity 0.6 ({op})")
         pg.mouse.move(5, 5)
         pg.mouse.up()
         pg.wait_for_timeout(300)
@@ -758,7 +740,7 @@ def meal_add_link(browser):
                 break
             pg.keyboard.press("Tab")
         ring = pg.evaluate("() => { const e = document.activeElement, cs = getComputedStyle(e); return { w: cs.outlineWidth, s: cs.outlineStyle, o: cs.outlineOffset, c: cs.outlineColor, ok: e.matches(\"a[data-tour='meal-add']\") }; }")
-        check(ring["ok"] and ring["w"] == "2px" and ring["s"] == "solid" and ring["o"] == "2px" and ring["c"] == "rgb(92, 184, 255)", f"{tag} meal add: focus ring 2 px sky, offset 2 ({ring})")
+        check(ring["ok"] and ring["w"] == "2px" and ring["s"] == "solid" and ring["o"] == "2px" and ring["c"] == "rgb(36, 87, 245)", f"{tag} meal add: focus ring 2 px cobalt, offset 2 ({ring})")
         pg.screenshot(path=str(SHOTS / f"cc-42-meal-add-{tag}.png"))
         ctx.close()
         # a past day has none
