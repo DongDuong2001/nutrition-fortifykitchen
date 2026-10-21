@@ -2,6 +2,7 @@
 
 import { useEffect, useLayoutEffect, useReducer, useRef } from "react";
 import type { HomeEntry, HomeMeal } from "@/lib/home";
+import { landingTransform, takeLanding } from "@/lib/touch-drag-landing";
 
 const EXIT_MS = 200;
 /** A row moved to another meal slides there in this long (globals.css --m-row). */
@@ -22,7 +23,7 @@ interface Drawn {
 /**
  * cc-51: motion of the Hôm nay food rows (globals.css .m-row-enter, .m-row-exit, .m-flip). A row that arrives rises in;
  * a deleted row stays in its place for 200 ms while it fades and its height closes, so the rows below glide up; a row
- * moved to another meal slides from where it was (FLIP, played with the Web Animations API). Nothing moves on the first draw or when `dayKey` changes.
+ * moved to another meal slides from where it was (FLIP, played with the Web Animations API). No row enters, leaves or moves on the first draw or when `dayKey` (the day shown) changes: a new day is a new list, and the day itself slides in from the side (home-screen .m-day-*).
  */
 export function useRowMotion(meals: HomeMeal[], dayKey: string) {
   const listRef = useRef<HTMLDivElement>(null);
@@ -67,7 +68,7 @@ export function useRowMotion(meals: HomeMeal[], dayKey: string) {
     const origin = list.getBoundingClientRect();
     const scrollTop = list.scrollTop;
     const next = new Map<string, { x: number; y: number }>();
-    const flips: { el: HTMLElement; dx: number; dy: number }[] = [];
+    const flips: { el: HTMLElement; from: string }[] = [];
     list.querySelectorAll<HTMLElement>("[data-entry-id]").forEach((el) => {
       const id = el.dataset.entryId ?? "";
       const r = el.getBoundingClientRect();
@@ -75,14 +76,18 @@ export function useRowMotion(meals: HomeMeal[], dayKey: string) {
       next.set(id, pos);
       const old = boxes.current.get(id);
       const moved = before?.slotOf.has(id) && before.slotOf.get(id) !== slotOf.get(id);
-      if (moved && old && !el.closest("[data-exiting]")) flips.push({ el, dx: old.x - pos.x, dy: old.y - pos.y });
+      if (moved && old && !el.closest("[data-exiting]")) {
+        // A row let go by a finger (touch drag) lands from where the copy under the finger was; any other move from its old place
+        const landing = takeLanding(id);
+        flips.push({ el, from: landing ? landingTransform(landing, r) : `translate(${old.x - pos.x}px, ${old.y - pos.y}px)` });
+      }
     });
     // cc-64 (P1): the browser never painted the inverted transform when it was set and cleared in one frame, so a moved
     // row snapped. WAAPI plays it from the inverted place to its own, on the compositor; reduced motion: no slide
     if (flips.length > 0 && !window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
       const easing = getComputedStyle(document.documentElement).getPropertyValue("--ease-in-out").trim() || "cubic-bezier(0.77, 0, 0.175, 1)";
-      for (const { el, dx, dy } of flips) {
-        el.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: "none" }], { duration: FLIP_MS, easing });
+      for (const { el, from } of flips) {
+        el.animate([{ transform: from }, { transform: "none" }], { duration: FLIP_MS, easing });
       }
     }
     boxes.current = next;

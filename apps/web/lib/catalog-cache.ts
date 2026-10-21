@@ -1,4 +1,4 @@
-import type { FoodItem } from "./mock/foods";
+import type { FoodItem } from "./catalog";
 import { idbBatch, idbRun } from "./idb";
 import { yieldToMain } from "./idle";
 

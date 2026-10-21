@@ -3,7 +3,7 @@
 - Route direction: a push (Hôm nay › a food) starts a view transition with m-vt-push, Back with m-vt-back; a tab
   starts none; /add starts none (its panel slides itself up from @starting-style) and Back out of it m-vt-sheet-down.
 - /add: the panel (m-sheet) and its scrim are open; ✕ closes them (data-state="closed") and the route stays until the
-  exit is over (still on /add 100 ms later, on Hôm nay after it); Hôm nay is drawn behind the panel.
+  exit is over (still on /add 100 ms later, on Hôm nay after it); the real Hôm nay stays mounted (inert) under the panel.
 - Sheets: open = data-state open with a transform transition (not keyframes); reopening mid-close reverses.
 - Reduced motion: a sheet that opens has no transform at any point; a push is a 120 ms cross-fade (cc-62: m-fade-in and
   m-fade-out on the view transition, nothing slides).
@@ -88,10 +88,9 @@ def routes(browser):
     check(vts(pg) == [], f"+ → /add: no view transition, the panel slides itself ({vts(pg)})")
     check(panel.get_attribute("data-state") == "open", "/add: the panel is open")
     check("m-sheet" in (panel.get_attribute("class") or ""), "/add: the panel is an m-sheet")
-    check(pg.locator('[data-add-behind] [data-align-group="home-page"]').count() > 0, "/add: Hôm nay is drawn behind the panel")
-    # cc-55b: a light copy: none of Hôm nay's own sheets, pop-ups or sync status run behind the sheet
-    behind = pg.evaluate("() => { const b = document.querySelector('[data-add-behind]'); return [b.dataset.addBehind, b.querySelectorAll('[role=dialog], .m-sheet, [data-sync-state]').length] }")
-    check(behind == ["home", 0], f"/add: the backdrop is static, drawn in full when opened from Hôm nay, nothing of its own mounted ({behind})")
+    check(pg.locator('[data-app-frame] [data-align-group="home-page"]').count() > 0, "/add: Hôm nay stays mounted under the panel (the intercepting route, no copy)")
+    check(pg.evaluate("() => document.querySelector('[data-app-frame]').inert") is True, "/add: the screen under the sheet is inert while the sheet is up")
+    check(pg.locator("[data-add-behind]").count() == 0, "/add: no backdrop copy of Hôm nay")
 
     pg.evaluate("window.__vts = []")
     pg.go_back()

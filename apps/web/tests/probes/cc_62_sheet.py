@@ -6,7 +6,7 @@ Sheet (the ⋯ menu of a meal on Hôm nay).
 - a sheet sliding away is grabbed again: it opens again and stays (the /add route does not pop)
 - the title block drags too (the menu sheet's title)
 - the scrim fades with the drag (its opacity under 1 while the finger is down)
-- motion is loaded only after the first touch on a sheet (no "sheet-spring" chunk before)
+- nothing is loaded for the release: it is a Web Animations API animation (no "sheet-spring" chunk, before or after a touch)
 Frames of a flick and release: docs/screenshots/cc-62/strip-flick.png (and the single frames in .screenshots/cc-62/).
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/cc_62_sheet.py
 """
@@ -96,7 +96,7 @@ def check_add_panel(browser):
     requests = []
     pg.on("request", lambda r: requests.append(r.url))
     open_add(pg)
-    check(not any("sheet-spring" in u for u in requests), "/add: the spring chunk is not loaded before a touch")
+    check(not any("sheet-spring" in u for u in requests), "/add: no spring chunk before a touch")
 
     x, y = handle_point(pg, PANEL)
     # Slow 60 px, then still for a moment: stays open
@@ -105,9 +105,20 @@ def check_add_panel(browser):
     opacity = pg.evaluate("() => getComputedStyle(document.querySelector('.m-scrim')).opacity")
     check(float(opacity) < 1, f"/add: the scrim fades with the drag (opacity {opacity})")
     f.up()
+    # The release is one Web Animations API animation on the panel, started in the pointerup: a spring sampled into linear(), from the
+    # finger's offset back to 0, a few hundred ms
+    anim = pg.evaluate(
+        "(sel) => { const a = document.querySelector(sel).getAnimations().find((x) => x.effect && x.effect.getKeyframes().some((k) => k.transform && k.transform !== 'none'));"
+        " if (!a) return null; const t = a.effect.getTiming(); const k = a.effect.getKeyframes(); return { easing: t.easing, duration: t.duration, fill: t.fill, from: k[0].transform, to: k[k.length - 1].transform }; }",
+        PANEL,
+    )
+    check(anim is not None and anim["easing"].startswith("linear(") and 100 <= anim["duration"] <= 400 and anim["fill"] == "forwards" and anim["to"] == "translateY(0px)",
+          f"/add: the release is one WAAPI animation back to 0 (linear() spring, {anim})")
     pg.wait_for_timeout(900)
     check("/add" in pg.url and state(pg, PANEL) == "open", "/add: a slow 60 px drag stays open")
-    check(any("sheet-spring" in u for u in requests), "/add: the spring chunk loads after the first touch")
+    left = pg.evaluate("(sel) => document.querySelector(sel).getAnimations().filter((x) => x.effect && x.effect.getKeyframes().some((k) => k.transform && k.transform !== 'none')).length", PANEL)
+    check(left == 0, f"/add: and the animation is cancelled once it has settled (the sheet's own style holds the position; {left} left)")
+    check(not any("sheet-spring" in u or "motion" in u for u in requests), "/add: no spring chunk was loaded for it")
 
     # Down 250 px slowly, then a quick flick back up: stays open
     f.down(x, y)
@@ -144,7 +155,7 @@ def check_flick(browser):
     ctx, pg, f = phone(browser)
     open_add(pg)
     x, y = handle_point(pg, PANEL)
-    # The spring loads on the first touch: one small drag first, so the flick below is the spring, not the CSS release
+    # One small drag first, as before the spring had to load: the flick below is then the release in its usual state
     f.down(x, y)
     f.glide(x, y, y + 10, steps=2, pause=30)
     f.up()

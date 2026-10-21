@@ -4,20 +4,34 @@ import { useRef } from "react";
 import type React from "react";
 import { createSheetDrag, type AnimateFn, type DragElement } from "@/components/ui/sheet-drag-controller";
 
-// motion's animate, loaded on the first pointerdown on a sheet (cc-62: never in a route's first-load JS)
-let animateFn: AnimateFn | null = null;
-let loading: Promise<void> | null = null;
-function loadAnimate(): void {
-  loading ??= import(/* webpackChunkName: "sheet-spring", webpackExports: ["animate"] */ "motion")
-    .then((m) => {
-      animateFn = m.animate as unknown as AnimateFn;
-    })
-    .catch(() => {
-      // Offline before the chunk was cached: the CSS release stays, the next grab tries again
-      loading = null;
-    });
-}
+/**
+ * The release as one Web Animations API animation (compositor, nothing to load, started in the pointerup). fill "forwards"
+ * holds the end position until the controller has put the sheet's own style back, then the animation is cancelled in the
+ * same task, so no frame shows the sheet anywhere else.
+ */
+const animateRelease: AnimateFn = (el, plan) => {
+  const node = el as unknown as HTMLElement;
+  const anim = node.animate([{ transform: `translateY(${plan.from}px)` }, { transform: `translateY(${plan.to}px)` }], {
+    duration: plan.durationMs,
+    easing: plan.easing,
+    fill: "forwards",
+  });
+  return {
+    stop: () => anim.cancel(),
+    then: (onResolve) => {
+      void anim.finished.then(
+        () => {
+          onResolve();
+          anim.cancel();
+        },
+        () => onResolve()
+      );
+    },
+  };
+};
 
+const hasWaapi = () => typeof Element !== "undefined" && typeof Element.prototype.animate === "function";
+const linearSupported = () => typeof CSS !== "undefined" && CSS.supports?.("animation-timing-function", "linear(0, 1)") === true;
 const readOffset = (el: DragElement) => new DOMMatrix(getComputedStyle(el as unknown as HTMLElement).transform).m42;
 const reducedMotion = () => typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
 
@@ -42,8 +56,8 @@ export function useSheetDrag(sheetRef: React.RefObject<HTMLElement | null>, onDi
     scrim: () => (latest.current.options.scrimRef?.current ?? null) as unknown as DragElement | null,
     readOffset,
     reducedMotion,
-    animate: () => animateFn,
-    load: loadAnimate,
+    animate: () => (hasWaapi() ? animateRelease : null),
+    linearSupported,
     onDismiss: () => latest.current.onDismiss(),
     onRegrab: () => latest.current.options.onRegrab?.() ?? false,
   });

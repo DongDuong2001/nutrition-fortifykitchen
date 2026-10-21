@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import type { FoodItem } from "@/lib/mock/foods";
 import { useCatalogFoods } from "@/hooks/use-catalog-foods";
 import { findSimilarFoods } from "@/lib/search";
@@ -16,39 +16,43 @@ import { useDiary } from "@/lib/diary-store";
 
 /**
  * Search, filter and list state for browsing foods. Shared by the add sheet and Khám phá, so both use
- * the same index, the same category chips and the same empty states.
+ * the same index, the same category chips and the same empty states. `enabled` false (the add sheet's first frame): the
+ * list and the chips are not worked out yet, so the sheet's first frame costs only its own frame.
  */
-export function useFoodBrowse({ oneRowPerFood = true }: { oneRowPerFood?: boolean } = {}) {
+export function useFoodBrowse({ oneRowPerFood = true, enabled = true }: { oneRowPerFood?: boolean; enabled?: boolean } = {}) {
   const { favouriteIds, isFavourite } = useDiary();
   const { foods, version, pending: catalogPending, failed: catalogFailed, retry: retryCatalog } = useCatalogFoods();
   const [filter, setFilter] = useState<FoodFilter>("all");
   const [query, setQuery] = useState("");
-  // 120ms debounce only for 1-character queries to avoid flashing intermediate single-letter matches; 2+ chars update immediately
-  const [debouncedQuery, setDebouncedQuery] = useState("");
+  // The first letter alone waits 120 ms before the list follows it, so the list does not flash the matches of every single
+  // letter passed on the way to a word; from the second letter the list follows at once (port of the behaviour of PR #29)
+  const [firstLetter, setFirstLetter] = useState("");
   useEffect(() => {
-    if (!query) {
-      setDebouncedQuery("");
+    if (query.length !== 1) {
+      setFirstLetter("");
       return;
     }
-    if (query.length === 1) {
-      const timer = setTimeout(() => setDebouncedQuery(query), 120);
-      return () => clearTimeout(timer);
-    }
-    setDebouncedQuery(query);
+    const timer = setTimeout(() => setFirstLetter(query), 120);
+    return () => clearTimeout(timer);
   }, [query]);
+  // While one letter waits, the list stays as it was (the list of the query before it: backspace "ab" → "a" must not flash the
+  // whole catalogue for 120 ms); from the second letter it follows at once
+  const heldQuery = useRef("");
+  const listQuery = query.length === 1 && firstLetter !== query ? heldQuery.current : query;
+  heldQuery.current = listQuery;
   // cc-58: the field follows every keystroke, the list follows the query when the browser has a moment, so a key
   // never waits for a search of the whole catalogue
-  const searched = useDeferredValue(debouncedQuery);
+  const searched = useDeferredValue(listQuery);
 
   // Filter and search combined. Grouped only for Tất cả with no query.
   // `foods` follows the catalogue (the live load, a made food) and demo mode
   // cc-67: a moment after the first paint the one-row-per-food index is there; a list is not drawn before (no rows that change names)
   const waitingForRows = oneRowPerFood && !rowsReady();
   const list = useMemo(
-    () => (waitingForRows ? { grouped: false, foods: [], groups: [] } : buildFoodList(foods, searched, filter, favouriteIds, oneRowPerFood)),
-    [searched, filter, favouriteIds, foods, oneRowPerFood, waitingForRows]
+    () => (waitingForRows || !enabled ? { grouped: false, foods: [], groups: [] } : buildFoodList(foods, searched, filter, favouriteIds, oneRowPerFood)),
+    [searched, filter, favouriteIds, foods, oneRowPerFood, waitingForRows, enabled]
   );
-  const categories = useMemo(() => chipCategories(foods), [foods]);
+  const categories = useMemo(() => (enabled ? chipCategories(foods) : []), [foods, enabled]);
   const categoryName = useCallback((food: FoodItem) => categoryLabel(categoryOf(food)), []);
   // A food is a favourite when any of its rows is (raw and cooked are one row of a list)
   const isFavouriteFood = useCallback((food: FoodItem) => twinIdsOf(food).some(isFavourite), [isFavourite]);

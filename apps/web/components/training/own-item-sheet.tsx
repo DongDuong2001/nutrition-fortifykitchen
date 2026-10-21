@@ -12,7 +12,7 @@ import { useFoodBrowse } from "@/hooks/use-food-browse";
 import { foodMeta } from "@/lib/food-meta";
 import { isCategoryFilter } from "@/lib/food-categories";
 import { gramsText } from "@/components/training/training-log-sheet";
-import type { FoodItem } from "@/lib/mock/foods";
+import type { FoodItem } from "@/lib/catalog";
 import { formatGramsServingLabel, gramsServingLabel, hidesGrams, parseGramsInput } from "@/lib/portion";
 import type { OwnTrainingItem, TrainingPhaseId } from "@/lib/training-prefs";
 import { EmptyState } from "@/components/ui/empty-state";

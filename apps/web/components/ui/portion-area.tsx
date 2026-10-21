@@ -321,7 +321,7 @@ function GramPortionArea({
         {p.kind === "grams" ? (
           <TimesStepper
             label="Nhân khẩu phần nhanh"
-            hint={portionHint(p)}
+            hint={portionHint(p) ?? undefined}
             value={p.mult}
             valueText={`×${p.mult}`}
             max={p.base > 0 ? Math.max(1, Math.min(MAX_MULT, Math.floor(MAX_GRAMS_PER_PORTION / p.base))) : MAX_MULT}

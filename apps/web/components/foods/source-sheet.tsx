@@ -5,7 +5,7 @@ import { Sheet } from "@/components/ui/sheet";
 import { PillButton } from "@/components/ui/pill-button";
 import { MATCH_LABEL, MATCH_ORDER, PROXY_NOTICE, UNVERIFIED_TEXT, coverageText, isProxy, matchOf } from "@/lib/food-source";
 import { foodSourceLabel } from "@/lib/food-meta";
-import type { FoodItem } from "@/lib/mock/foods";
+import type { FoodItem } from "@/lib/catalog";
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (

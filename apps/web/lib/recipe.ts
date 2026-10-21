@@ -1,6 +1,6 @@
 import { COUNTED_NUTRIENT_KEYS } from "./day-totals";
 import type { CreateFoodInput } from "./api-client";
-import type { FoodItem } from "./mock/foods";
+import type { FoodItem } from "./catalog";
 import { isUuid } from "./uuid";
 
 /**
@@ -39,7 +39,7 @@ export interface Recipe {
   serverFoodId?: string;
   /** The server foods of earlier versions: past entries still name them, so they stay on the server, out of the lists. */
   pastServerFoodIds?: string[];
-  /** cc-67: a premade dish with its parts changed for one meal. Logged like any recipe, listed nowhere (lib/mock/foods). */
+  /** cc-67: a premade dish with its parts changed for one meal. Logged like any recipe, listed nowhere (lib/catalog). */
   oneOff?: boolean;
 }
 
@@ -362,7 +362,7 @@ export function recipeFoodInput(recipe: Recipe, lookup: IngredientLookup): Creat
     fat: serving("fat"),
     micros: Object.fromEntries(RECIPE_NUTRIENT_KEYS.filter((k) => !macros.includes(k)).map((k) => [k, serving(k)])),
     // cc-67: the food of an edited dish is made for one meal; the API lists it nowhere. Foods made before this flag are
-    // still hidden by their id and name (lib/recipe-store, lib/mock/foods)
+    // still hidden by their id and name (lib/recipe-store, lib/catalog)
     ...(recipe.oneOff ? { oneOff: true } : {}),
   };
 }

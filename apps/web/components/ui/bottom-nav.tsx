@@ -2,10 +2,11 @@
 
 import React, { startTransition, useOptimistic } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { NAV_TABS, tabForPath, type NavTab } from "@/lib/nav";
+import { useRouter } from "next/navigation";
+import { NAV_TABS, type NavTab } from "@/lib/nav";
+import { useActiveTab } from "@/lib/use-active-tab";
 import { NavIcon, PlusIcon } from "@/components/ui/nav-icons";
-import { rememberAddOpener } from "@/components/ui/add-opener";
+import { openAddFrom } from "@/components/ui/add-opener";
 
 export interface BottomNavProps {
   /** Overrides the tab taken from the URL. Pushed screens leave it out: the owning tab is found from the path. */
@@ -19,8 +20,8 @@ export interface BottomNavProps {
  * The active tab gets on-dark text plus a slanted bar (skewX(-14deg)); the text itself stays unslanted.
  */
 export function BottomNav({ currentTab, className = "" }: BottomNavProps) {
-  const pathname = usePathname();
-  const current = currentTab ?? tabForPath(pathname);
+  const router = useRouter();
+  const current = useActiveTab(currentTab);
   // cc-58: the tapped tab lights up on the tap, not when the next screen is ready
   const [active, setActive] = useOptimistic(current);
   const [first, second, third, fourth] = NAV_TABS;
@@ -34,7 +35,7 @@ export function BottomNav({ currentTab, className = "" }: BottomNavProps) {
         onNavigate={() => startTransition(() => setActive(item.tab))}
         data-tour={item.tab === "settings" ? "nav-settings" : item.tab === "explore" ? "nav-explore" : undefined}
         aria-current={isActive ? "page" : undefined}
-        className={`relative flex flex-col items-center justify-center gap-[2px] min-h-14 text-xs font-semibold no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100 ${
+        className={`m-tint m-tint-dark relative flex flex-col items-center justify-center gap-[2px] min-h-14 rounded-2xl text-xs font-semibold no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100 ${
           isActive ? "text-on-dark" : "text-muted-on-dark hover:text-on-dark"
         }`}
       >
@@ -66,7 +67,7 @@ export function BottomNav({ currentTab, className = "" }: BottomNavProps) {
             data-testid="add-fab"
             data-tour="nav-add"
             href="/add"
-            onClick={() => rememberAddOpener("mobile-add-fab")}
+            onClick={(e) => openAddFrom("mobile-add-fab", e, router)}
             aria-label="Thêm món"
             className="w-[50px] h-[50px] rounded-full bg-cobalt text-on-accent flex items-center justify-center no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100 "
           >

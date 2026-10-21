@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { MATCH_LABEL, coverageText, isProxy, matchOf, microCoverage, searchTag, isManualFood } from "../food-source";
+import { foodSourceLabel } from "../food-meta";
+import { SOURCE_NAMES } from "../source-names";
 import { MOCK_FOODS } from "../mock/foods";
 import { COUNTED_NUTRIENT_KEYS } from "../day-totals";
 
@@ -40,6 +42,28 @@ describe("food source helpers", () => {
     for (const source of ["recipe_calc", "recipe-calc", "Recipe Calc"]) {
       expect(searchTag({ source })).toEqual({ label: "Ước tính", warning: true });
     }
+    // The catalogue's other tables: Canada's CNF, ASEAN (PhilFCT rows: Bông so đũa, Cá cơm cả xương), published papers
+    expect(searchTag({ source: "cnf" })).toEqual({ label: "Canada", warning: false });
+    expect(searchTag({ source: "CNF" })).toEqual({ label: "Canada", warning: false });
+    expect(searchTag({ source: "asean" })).toEqual({ label: "ASEAN", warning: false });
+    expect(searchTag({ source: "literature" })).toEqual({ label: "Tài liệu", warning: false });
+    // Fortify Kitchen's own recipes (21/10): the brand, not an estimate
+    for (const source of ["fortify_kitchen", "fortify-kitchen", "Fortify Kitchen"]) {
+      expect(searchTag({ source })).toEqual({ label: "Fortify Kitchen", warning: false });
+      expect(foodSourceLabel(source)).toBe("Fortify Kitchen");
+    }
+    expect(searchTag({ source: "vn_nin" })).toEqual({ label: "VN", warning: false });
+    expect(searchTag({ source: "custom" })).toEqual({ label: "Của tôi", warning: false });
+  });
+
+  it("the tag and the food page's source name come from one table, so they cannot drift", () => {
+    for (const [code, name] of Object.entries(SOURCE_NAMES)) {
+      expect(foodSourceLabel(code)).toBe(name.label);
+      // user is Tự nhập or Của tôi by its id; every other code is its table tag
+      if (code !== "user") expect(searchTag({ source: code })).toEqual({ label: name.tag, warning: name.warning === true });
+      expect(searchTag({ source: code }).label).not.toBe("Chưa rõ");
+    }
+    expect(foodSourceLabel("cnf")).toBe("CNF (Canada)");
   });
 
   it("a user's food typed in by hand says Tự nhập; a recipe or a food with no id says Của tôi", () => {
@@ -52,15 +76,18 @@ describe("food source helpers", () => {
     expect(isManualFood({ source: "USDA", id: "food-1" })).toBe(false);
   });
 
-  it("says Chưa rõ for a source it does not know, or none", () => {
-    expect(searchTag({ source: "literature" })).toEqual({ label: "Chưa rõ", warning: false });
-    expect(searchTag({ source: "asean" })).toEqual({ label: "Chưa rõ", warning: false });
+  it("says Chưa rõ only for a source it does not know, or none", () => {
+    expect(searchTag({ source: "openfoodfacts" })).toEqual({ label: "Chưa rõ", warning: false });
+    expect(searchTag({ source: "toString" })).toEqual({ label: "Chưa rõ", warning: false });
     expect(searchTag({ source: "" })).toEqual({ label: "Chưa rõ", warning: false });
+    expect(searchTag({ source: "   " })).toEqual({ label: "Chưa rõ", warning: false });
+    expect(searchTag({ source: null })).toEqual({ label: "Chưa rõ", warning: false });
     expect(searchTag({})).toEqual({ label: "Chưa rõ", warning: false });
+    expect(foodSourceLabel("openfoodfacts")).toBe("Khác");
   });
 
   it("a proxy says Ước tính whatever its source, and match decides before the source", () => {
-    for (const source of ["usda_sr_legacy", "label", "VN FCT", "community", "user", "literature", undefined]) {
+    for (const source of ["usda_sr_legacy", "label", "VN FCT", "community", "user", "literature", "cnf", "asean", undefined]) {
       expect(searchTag({ source, match: "proxy" })).toEqual({ label: "Ước tính", warning: true });
     }
     expect(searchTag({ source: "label", match: "close" })).toEqual({ label: "Nhãn", warning: false });

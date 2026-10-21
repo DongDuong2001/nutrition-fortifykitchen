@@ -1,0 +1,13 @@
+// The live build's stand-ins for lib/mock/* (perf/live-bundle). next.config.ts swaps each sample module for the file of
+// the same name here when NEXT_PUBLIC_API_MODE=live, so the sample day, the sample foods and their history never ship to
+// the browser. Live mode never has a demo (lib/demo.ts), so it read nothing but these values before: each stub keeps the
+// real module's exports and what it gives outside demo mode. lib/__tests__/live-stubs.test.ts holds them to that.
+import type { MockHistoryItem } from "../yesterday";
+
+export const HISTORY_DAYS = 29;
+
+/** No sample history outside demo mode. */
+export function historyItems(daysAgo: number): MockHistoryItem[] | null {
+  void daysAgo;
+  return null;
+}

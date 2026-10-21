@@ -1,6 +1,7 @@
 import { COUNTED_NUTRIENT_KEYS } from "./day-totals";
 import { isRecipeId } from "./recipe";
-import type { FoodItem, FoodMatch } from "./mock/foods";
+import type { FoodItem, FoodMatch } from "./catalog";
+import { sourceKey, sourceName, type SearchTagLabel } from "./source-names";
 
 /** Data sources of a food (cc-27d): how close its numbers are, where they come from, how much they cover. */
 
@@ -36,22 +37,20 @@ export function isProxy(food: Pick<FoodItem, "match">): boolean {
   return matchOf(food) === "proxy";
 }
 
-export type SearchTagLabel = "USDA" | "Nhãn" | "VN" | "Ước tính" | "Của tôi" | "Tự nhập" | "Chưa rõ";
+export type { SearchTagLabel } from "./source-names";
 
 /**
- * The small tag of an /add search result. A proxy says Ước tính whatever its database. Otherwise the source decides:
- * usda* is USDA, label is Nhãn, the Vietnamese table is VN, community (numbers from a shared database, not checked
- * against the pack) and recipe_calc (worked out from a recipe) are Ước tính, user is Tự nhập (typed by hand) or Của tôi (a recipe). A source it does not know, or none, says Chưa rõ.
+ * The small tag of an /add search result. A proxy says Ước tính whatever its database. Otherwise the source decides, from the
+ * one table lib/source-names shares with foodSourceLabel: usda* is USDA, label is Nhãn, the Vietnamese table is VN, cnf is
+ * Canada, asean is ASEAN, literature is Tài liệu, fortify_kitchen (Fortify Kitchen's own recipes) is Fortify Kitchen, community (numbers from a shared database, not checked against the pack) and
+ * recipe_calc (worked out from a recipe) are Ước tính, user is Tự nhập (typed by hand) or Của tôi (a recipe). A source the
+ * table does not know, or none, says Chưa rõ.
  */
 export function searchTag(food: Pick<FoodItem, "match"> & { source?: string | null; id?: string }): { label: SearchTagLabel; warning: boolean } {
   if (isProxy(food)) return { label: "Ước tính", warning: true };
-  const source = (food.source ?? "").trim().toLowerCase().replace(/[\s_]+/g, "-");
-  if (source.startsWith("usda")) return { label: "USDA", warning: false };
-  if (source === "label") return { label: "Nhãn", warning: false };
-  if (source === "vn-fct" || source === "vn-table") return { label: "VN", warning: false };
-  if (source === "community" || source === "recipe-calc") return { label: "Ước tính", warning: true };
-  if (source === "user") return { label: isManualFood(food) ? "Tự nhập" : "Của tôi", warning: false };
-  return { label: "Chưa rõ", warning: false };
+  if (sourceKey(food.source) === "user") return { label: isManualFood(food) ? "Tự nhập" : "Của tôi", warning: false };
+  const name = sourceName(food.source);
+  return name ? { label: name.tag, warning: name.warning === true } : { label: "Chưa rõ", warning: false };
 }
 
 /** How many of the 22 counted micros the food has a value for. An unknown (null or missing) is not counted. */

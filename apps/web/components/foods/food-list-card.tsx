@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import type { FoodItem } from "@/lib/mock/foods";
+import type { FoodItem } from "@/lib/catalog";
 import { Card } from "@/components/ui/card";
 import { SectionTitle } from "@/components/ui/section-title";
 import { FoodRowLink } from "./food-row-link";

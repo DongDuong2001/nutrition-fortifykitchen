@@ -2,7 +2,7 @@ import { COUNTED_NUTRIENT_KEYS } from "./day-totals";
 import { SAMPLE_SLOT, entryNumbers, type AddedDiaryEntry, type EntryView } from "./diary-edits";
 import { formatAmount, formatNumber } from "./format";
 import { catalogFoodById } from "./mock/foods";
-import { portionAmountText, portionDetail, unitAmountText } from "./portion";
+import { portionAmountText, portionDetail, unitAmountText, withoutServingHint } from "./portion";
 import { isAmount } from "./amount";
 import { sumKcal } from "./kcal";
 import { MEAL_SLOTS, type MealSlot } from "./meal-slot";
@@ -130,7 +130,8 @@ const VOLUME_QTY = /^\d+(?:[.,]\d+)?\s*(?:ml|l)$/i;
 /**
  * The portion a home row shows: a food logged in ml or l keeps "200 ml" as logged; a supplement shows its unit
  * quantity ("2 viên", see lib/portion); everything else shows its grams ("60 g" for "1 quả"), or the typed portion
- * when there are no grams.
+ * when there are no grams. Never a serving label's "(…)" part: "1 phần (495 g, gồm 46 g mắm tôm)" shows "1 phần", the
+ * rest is the line under the name (portionDetailOf).
  */
 export function portionLabel(entry: Pick<HomeEntry, "qty" | "grams" | "foodId">): string {
   // cc-53b: what the user set ("150 g" of cooked chicken, never the 203 g of raw it was logged as; "3 quả")
@@ -138,15 +139,24 @@ export function portionLabel(entry: Pick<HomeEntry, "qty" | "grams" | "foodId">)
   if (set) return set;
   // A supplement logged by the unit shows its quantity ("2 viên"), never its nominal grams
   const unit = unitAmountText(catalogFoodById(entry.foodId), entry.qty, entry.grams);
-  if (unit) return unit;
+  if (unit) return withoutServingHint(unit);
   if (VOLUME_QTY.test(entry.qty.trim())) return entry.qty.trim();
-  return entry.grams !== null ? `${formatAmount(entry.grams, "g")} g` : entry.qty;
+  return entry.grams !== null ? `${formatAmount(entry.grams, "g")} g` : withoutServingHint(entry.qty);
 }
 
-/** The line under a home row: how it was weighed ("Đã nấu chín · 100 g × 3", "Cỡ lớn"), or null. */
-export function portionDetailOf(entry: Pick<HomeEntry, "qty" | "grams">): string | null {
-  return portionDetail(entry.qty, entry.grams);
+/** The line under a home row: how it was weighed ("Đã nấu chín · 100 g × 3", "Cỡ lớn"), the label's "(…)" part, or null. */
+export function portionDetailOf(entry: Pick<HomeEntry, "qty" | "grams" | "foodId">): string | null {
+  // "1 phần (495 g, …)" shown as "2 phần": the label's hint is for one of the two
+  const shown = leadingNumber(portionLabel(entry));
+  const own = leadingNumber(entry.qty);
+  return portionDetail(entry.qty, entry.grams, shown && own ? shown / own : 1);
 }
+
+/** "2 dĩa 8 cái" is 2, "1,5 phần" 1.5; null without a leading number. */
+const leadingNumber = (text: string): number | null => {
+  const m = /^(\d+(?:,\d+)?)\s/.exec(text.trim());
+  return m ? Number(m[1].replace(",", ".")) : null;
+};
 
 /** First line of the hero card, in sentence case: "Cả ngày · 16 món", "Cá hồi nướng · 120 g", "Yogurt kefir · 200 ml", "Bữa trưa · 3 món". */
 export function heroLabel(mode: HomeMode, entries: HomeEntry[], meals: HomeMeal[]): string {
@@ -264,6 +274,20 @@ export function pctLabel(value: number | null, target: number | null): string {
   if (pct === 0 && value !== null && value > 0) return "<1%";
   if (pct > MAX_PCT_SHOWN) return `${MAX_PCT_SHOWN}+%`;
   return `${formatNumber(pct)}%`;
+}
+
+/**
+ * What a screen reader says for one row of the nutrient column: the name, the amount against the real target, the share and the
+ * level. It names the target itself ("mục tiêu 1.000 mg"), and leaves out what is unknown: the row used to say "— mục tiêu" (a dash
+ * read aloud) when the value or the target was missing.
+ */
+export function nutrientRowLabel(input: { name: string; unit: string; value: number | null; target: number | null; level: string | null }): string {
+  const { name, unit, value, target, level } = input;
+  const amount = value === null ? "chưa có dữ liệu" : `${formatAmount(value, unit)} ${unit}`;
+  const goal = target === null || target <= 0 ? "" : value === null ? `, mục tiêu ${formatAmount(target, unit)} ${unit}` : ` trên mục tiêu ${formatAmount(target, unit)} ${unit}`;
+  const pct = pctOf(value, target);
+  const share = pct === null ? "" : `, ${pctLabel(value, target)}`;
+  return `${name}, ${amount}${goal}${share}${level ? `, ${level}` : ""}. Xem món góp phần`;
 }
 
 /** "2 món chưa rõ kcal": the foods of the shown set whose energy is unknown. Null when every food has a value. */

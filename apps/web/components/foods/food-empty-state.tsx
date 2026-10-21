@@ -1,6 +1,6 @@
 import React from "react";
 import { rowName } from "@/lib/food-rows";
-import type { FoodItem } from "@/lib/mock/foods";
+import type { FoodItem } from "@/lib/catalog";
 import { CreateFoodButton } from "@/components/foods/create-food-button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PillButton } from "@/components/ui/pill-button";
