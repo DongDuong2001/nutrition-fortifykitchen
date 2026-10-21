@@ -151,6 +151,13 @@ Filmstrips (frames from just before the tap, each labelled with ms since it; a f
 
 **For Dong (PR #29, `feat/ui-ag-18`).** The edits #29 makes to `app/(app)/add/page.tsx` (scroll lock, keyboard lift, focus after the slide, the 1-letter debounce) are in `components/add/add-screen.tsx` and `hooks/use-food-browse.ts` here, where the page's code moved. When you merge main into #29, take main's version of those add files (the page is now a two-line wrapper); the rest of #29 (search.ts, api-client, scripts) does not touch them.
 
+## Night review fixes (21/10 03:00)
+
+| # | What | Where |
+|---|---|---|
+| 1 | **Keyboard: the panel is shortened, not lifted.** The panel is `fixed bottom-0 top-[8dvh]`; lifting it by the keyboard's height took its top, and the search field with it, off the screen on Android (the layout viewport does not shrink there). Now `--add-keyboard` (from `visualViewport` resize and scroll) is the panel's `bottom`, its top stays at 8dvh and the list inside it shrinks; no `translate`, no `transform`. Probe (`add_from_tabs.py`, a faked 300 px keyboard at 390×844 and 360×640): the variable is set, the top does not move, the bottom is `innerHeight − 300`, and the search field is inside the visual viewport. | `components/add/add-screen.tsx` |
+| 2 | **One letter keeps the previous list.** Backspace "ab" → "a" showed the whole catalogue for 120 ms; the list now stays the list of "ab" until the letter's 120 ms are over (a ref holds the last list query). Probe: backspace, 30 ms later the rows are still those of "ab". | `hooks/use-food-browse.ts` |
+
 ## Routing and back-button behaviour (changed)
 
 - **`/add` from a tab** (the + of the nav, a meal's + Thêm, the sidebar button): the URL is still `/add` (or `/add?meal=…&date=…`), but

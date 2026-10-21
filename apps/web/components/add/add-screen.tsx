@@ -155,8 +155,10 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
     return lockBodyScroll();
   }, [isDesktop]);
 
-  // Phone: the panel lifts above the on-screen keyboard. The `translate` property, not `transform`: the drag and the release
-  // animation own `transform` (sheet-drag-controller, use-sheet-drag read and write it).
+  // Phone: the panel's bottom edge rides above the on-screen keyboard (--add-keyboard, read by `bottom` of the panel) and its top stays at
+  // 8dvh, so the panel gets shorter and the list inside it shrinks. It is not moved up as a whole: on Android the layout viewport does not
+  // shrink with the keyboard, and a panel lifted by the keyboard's height would take its top, and the search field, off the screen.
+  // Nothing here touches `transform` (the drag and the release animation own it: sheet-drag-controller, use-sheet-drag).
   useEffect(() => {
     if (isDesktop) return;
     const vv = window.visualViewport;
@@ -164,14 +166,15 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
     if (!vv || !panel) return;
     const lift = () => {
       const keyboard = window.innerHeight - vv.height - vv.offsetTop;
-      panel.style.translate = keyboard > 100 ? `0 -${Math.round(keyboard)}px` : "";
+      if (keyboard > 100) panel.style.setProperty("--add-keyboard", `${Math.round(keyboard)}px`);
+      else panel.style.removeProperty("--add-keyboard");
     };
     vv.addEventListener("resize", lift);
     vv.addEventListener("scroll", lift);
     return () => {
       vv.removeEventListener("resize", lift);
       vv.removeEventListener("scroll", lift);
-      panel.style.translate = "";
+      panel.style.removeProperty("--add-keyboard");
     };
   }, [isDesktop]);
 
@@ -813,7 +816,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
           data-sheet-route
           data-state={sheetState}
           data-under-sheet={selectedFood !== null && !isDesktop ? "" : undefined}
-          className="m-sheet m-quick m-vt-sheet fixed inset-x-0 bottom-0 top-[8dvh] z-nav flex flex-col rounded-t-sheet bg-card shadow-sheet"
+          className="m-sheet m-quick m-vt-sheet fixed inset-x-0 bottom-[var(--add-keyboard,0px)] top-[8dvh] z-nav flex flex-col rounded-t-sheet bg-card shadow-sheet"
         >
           {/* Pinned header: grabber, meal switcher + close, search, chips. cc-62 (S15): the list fades out under it (a 12 px edge) */}
           <div className="relative z-sticky flex shrink-0 flex-col gap-3 px-4 pt-3 pb-3 after:pointer-events-none after:absolute after:inset-x-0 after:top-full after:h-3 after:bg-linear-to-b after:from-card after:to-transparent">

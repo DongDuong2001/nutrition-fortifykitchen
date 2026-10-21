@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import type { FoodItem } from "@/lib/mock/foods";
 import { useCatalogFoods } from "@/hooks/use-catalog-foods";
 import { findSimilarFoods } from "@/lib/search";
@@ -35,7 +35,11 @@ export function useFoodBrowse({ oneRowPerFood = true, enabled = true }: { oneRow
     const timer = setTimeout(() => setFirstLetter(query), 120);
     return () => clearTimeout(timer);
   }, [query]);
-  const listQuery = query.length === 1 ? firstLetter : query;
+  // While one letter waits, the list stays as it was (the list of the query before it: backspace "ab" → "a" must not flash the
+  // whole catalogue for 120 ms); from the second letter it follows at once
+  const heldQuery = useRef("");
+  const listQuery = query.length === 1 && firstLetter !== query ? heldQuery.current : query;
+  heldQuery.current = listQuery;
   // cc-58: the field follows every keystroke, the list follows the query when the browser has a moment, so a key
   // never waits for a search of the whole catalogue
   const searched = useDeferredValue(listQuery);
