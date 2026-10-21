@@ -43,7 +43,7 @@ export function Segmented<K extends string>({
   const track = `rounded-xl bg-seg-track p-1 ${fill ? "grid" : "inline-flex"} ${className}`;
   const style = fill ? { gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` } : undefined;
   const pill = (on: boolean) =>
-    `relative flex h-9 w-full items-center justify-center whitespace-nowrap rounded-[9px] px-3 text-cap transition-press ${
+    `relative flex min-h-9 w-full items-center justify-center rounded-[9px] px-3 py-1 text-center text-cap leading-tight transition-press ${
       on ? "bg-raised font-bold text-text shadow-[0_0_0_1px_var(--color-card-border)]" : "font-semibold text-secondary"
     }`;
   const cell = "-my-1 flex min-h-11 min-w-11 items-center justify-center no-underline transition-press active:scale-[0.97] motion-reduce:active:scale-100";

@@ -634,14 +634,15 @@ function NutrientRow({ row, showDot, dateQuery = "", upperNote }: { row: Nutrien
     >
       {/* Line 1: Name (* tham khảo) | amount / target · % (bold) */}
       <div className="flex items-baseline justify-between text-sm leading-tight gap-2">
-        <div className="flex items-baseline gap-2 min-w-0">
+        {/* The leading edge of the row (the dot when there is one, else the name) is what lines up with the group title */}
+        <div
+          {...(definition.depth === 0 ? { "data-align-group": "micros-card", "data-align-edge": "left" } : {})}
+          className="flex items-baseline gap-2 min-w-0"
+        >
           {showDot && (
             <span aria-hidden="true" className="h-2 w-2 shrink-0 self-center rounded-full" style={{ backgroundColor: nutrientDot(definition.id) }} />
           )}
-          <span
-            {...(definition.depth === 0 ? { "data-align-group": "micros-card", "data-align-edge": "left" } : {})}
-            className="min-w-0 break-words font-semibold text-text"
-          >
+          <span className="min-w-0 break-words font-semibold text-text">
             {definition.name}
           </span>
           {isProvisional && (

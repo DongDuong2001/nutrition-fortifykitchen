@@ -251,7 +251,7 @@ def past_flow(browser, size, tag):
     check("Đã chép 2 món vào hôm nay" in toast, f"{tag} past: toast ({toast!r})")
     check(hero_count(pg) == 9, f"{tag} past: two foods added to today ({hero_count(pg)})")
     snack = squash(pg.locator("section[aria-label='Bữa phụ']").inner_text())
-    check(snack.count("kcal") >= 1 and meal_count(pg, "Bữa phụ") >= 2, f"{tag} past: both copies are in Bữa phụ ({snack[:80]})")
+    check(re.search(r"BỮA PHỤ \d+", snack.upper()) is not None and meal_count(pg, "Bữa phụ") >= 2, f"{tag} past: both copies are in Bữa phụ ({snack[:80]})")
     # the past day is unchanged
     go(pg, f"/app?date={PAST}")
     check(hero_count(pg) == n_past, f"{tag} past: the past day is unchanged ({hero_count(pg)} vs {n_past})")

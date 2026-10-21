@@ -43,7 +43,7 @@ with sync_playwright() as p:
     iron = pg.locator('button[aria-haspopup="dialog"][aria-label^="Iron,"]:visible').first
     check(iron.count() == 1, "D4: Iron on Hôm nay is a button")
     box = iron.bounding_box() or {"height": 0}
-    hit = iron.evaluate("el => { const b = getComputedStyle(el, '::before'); return parseFloat(b.top) }")
+    hit = iron.evaluate("el => { const b = getComputedStyle(el, '::before'); const t = parseFloat(b.top); return b.content === 'none' || Number.isNaN(t) ? 0 : t }")  # V3: the row is a 44 px button itself, no ::before hit extension
     check(box["height"] - 2 * hit >= 44, f"D4: its tap area is at least 44 px ({box['height']} + 2×{-hit})")
     iron.click()
     dialog = pg.get_by_role("dialog", name="Iron")

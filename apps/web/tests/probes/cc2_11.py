@@ -89,7 +89,10 @@ def check_explore(browser, size_name, size):
     body = text(pg)
     check(pg.locator("h1:visible").count() == 1, f"{size_name} explore: one visible h1")
     for label in ["Gần đây", "Yêu thích", "Món của tôi", "Tạo món mới", "Món giàu vi chất", "Nhóm món", "Của bạn"]:
-        check(label in body, f"{size_name} explore: shows {label}")
+        if label == "Nhóm món" and size_name != "390":
+            continue  # V3: from 1024 px the category chips take the place of the Nhóm món section
+        # V3: section headings are Saira uppercase on screen, so compare case-insensitively
+        check(label.lower() in body.lower(), f"{size_name} explore: shows {label}")
     # V3: Của bạn is three rows (Yêu thích, Bữa ăn của tôi, Món của tôi) with their counts, then Tạo món mới
     yours = re.sub(r"\s+", " ", pg.locator("section[aria-labelledby=explore-yours]").inner_text())
     check(re.search(r"Món của tôi · \d+ món", yours) is not None, f"{size_name} explore: Của bạn counts Món của tôi ({yours[:120]!r})")
@@ -164,9 +167,9 @@ def check_food(browser, size_name, size):
     pg.wait_for_url("**/foods/**")
     body = text(pg)
     check(path_of(pg) == "/foods/food-yen-mach", f"{size_name} food: opens /foods/food-yen-mach ({path_of(pg)})")
-    check("Nguồn tốt của" in body, f"{size_name} food: Nguồn tốt của")
+    check("nguồn tốt của" in body.lower(), f"{size_name} food: Nguồn tốt của")
     check(re.search(r"Chưa có dữ liệu cho \d+ trong 22 vi chất", body) is not None, f"{size_name} food: unknown count line")
-    check("Khoáng chất" in body and "Vitamin" in body, f"{size_name} food: mineral and vitamin groups")
+    check("khoáng chất" in body.lower() and "vitamin" in body.lower(), f"{size_name} food: mineral and vitamin groups")
     check(pg.locator("section[aria-labelledby=food-micros] li").count() == 22, f"{size_name} food: 22 nutrient rows")
     check(re.search(r"Thêm vào (Bữa|Trước|Sau|Tối|Sáng|Trưa|Ăn)", body) is not None or "Thêm vào" in body, f"{size_name} food: Thêm vào <bữa>")
     # good-source threshold: every chip is >= 20 %

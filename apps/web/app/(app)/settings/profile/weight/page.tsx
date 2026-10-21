@@ -62,7 +62,8 @@ export default function WeightPage() {
     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
       <Card as="section" aria-label="Cân nặng hôm nay" className="flex flex-col items-center gap-3">
         <FormRow label="Cân nặng hôm nay" htmlFor="weight-input" error={error} className="items-center gap-3">
-          <div className="flex items-center gap-3">
+          {/* Wraps at large text sizes (D-LAY-04) instead of pushing the page sideways */}
+          <div className="flex flex-wrap items-center justify-center gap-3">
             <button
               type="button"
               aria-label="Giảm 0,1 kg"

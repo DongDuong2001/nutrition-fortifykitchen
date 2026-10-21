@@ -134,7 +134,7 @@ def leaderboard_behaviour(browser, size_name, size):
     sw.click()
     pg.wait_for_timeout(300)
     check(sw.get_attribute("aria-checked") == "true", f"{w}: the switch turns on")
-    check("Vị trí của bạn" in pg.inner_text("main"), f"{w}: own rank shows after opting in")
+    check("vị trí của bạn" in pg.inner_text("main").lower(), f"{w}: own rank shows after opting in")  # V3 section labels are uppercase on screen
     body = pg.inner_text("main")
     check("Chỉ hiển thị tên hiển thị và điểm kỷ luật vi chất" in body, f"{w}: the opt-in text states what is shown")
     # Hao 15/10: a place shows the display name and the discipline score, nothing else (the opt-in promise)

@@ -10,7 +10,8 @@ import { openAddFrom } from "@/components/ui/add-opener";
 
 /**
  * Left column from 1024 px up (the phone uses BottomNav): logo, the primary "Thêm món" button, then the four tabs
- * in the same order, with the same icons and labels, as the bottom nav.
+ * in the same order, with the same icons and labels, as the bottom nav. V3 (22/10): no ink slab; a white column with a
+ * hairline edge, the wordmark in ink with MICRO in cobalt, the current tab cobalt on its tint with the filled icon.
  */
 export function DesktopSidebar({ currentTab }: { currentTab?: NavTab }) {
   const router = useRouter();
@@ -18,16 +19,16 @@ export function DesktopSidebar({ currentTab }: { currentTab?: NavTab }) {
   const [active, setActive] = useOptimistic(useActiveTab(currentTab));
 
   return (
-    <aside className="hidden w-60 shrink-0 flex-col gap-6 bg-ink p-6 text-on-dark box-border lg:flex">
+    <aside className="hidden w-60 shrink-0 flex-col gap-6 border-r border-card-border bg-card p-6 text-text box-border lg:flex">
       {/* The wordmark goes back to Hôm nay (Hao, 20/10) */}
       <Link
         href={HOME_ROUTE}
         aria-label="H1T MICRO, về Hôm nay"
         data-tour="home-logo"
-        className="-my-1.5 block w-fit rounded-md px-2 py-1.5 font-display italic font-black text-2xl tracking-display text-on-dark no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100 focus-visible:outline-sky"
+        className="-my-1.5 block w-fit rounded-md px-2 py-1.5 font-display italic font-black text-2xl tracking-display text-text no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100"
       >
         <span aria-hidden="true">
-          H1T <span className="text-sky">MICRO</span>
+          H1T <span className="text-cobalt">MICRO</span>
         </span>
       </Link>
       <Link
@@ -50,11 +51,11 @@ export function DesktopSidebar({ currentTab }: { currentTab?: NavTab }) {
               onNavigate={() => startTransition(() => setActive(item.tab))}
               data-tour={item.tab === "settings" ? "nav-settings" : item.tab === "explore" ? "nav-explore" : undefined}
               aria-current={isActive ? "page" : undefined}
-              className={`no-underline flex min-h-11 items-center gap-3 rounded-xl px-3 text-callout font-semibold transition-colors ${
-                isActive ? "bg-card/10 text-on-dark" : "text-muted-on-dark hover:bg-card/5 hover:text-on-dark"
+              className={`no-underline flex min-h-11 items-center gap-3 rounded-xl px-3 text-callout transition-colors ${
+                isActive ? "bg-cobalt-tint font-bold text-cobalt" : "font-semibold text-glass-tab-off hover:bg-hover hover:text-text"
               }`}
             >
-              <NavIcon tab={item.tab} />
+              <NavIcon tab={item.tab} filled={isActive} />
               {item.label}
             </Link>
           );

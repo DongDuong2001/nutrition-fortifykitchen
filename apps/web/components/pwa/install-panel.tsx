@@ -30,7 +30,7 @@ export function InstallPanel() {
     return () => window.removeEventListener("appinstalled", onInstalled);
   }, []);
 
-  if (!env) return <div aria-hidden="true" className="min-h-[120px]" />;
+  if (!env) return <div aria-hidden="true" className="min-h-[120px] flex-1 lg:flex-none" />;
 
   const view: InstallView = installView({ standalone: env.standalone, canPrompt: event !== null, ios: env.ios });
 
@@ -44,7 +44,7 @@ export function InstallPanel() {
   if (view === "installed") {
     return (
       <Card as="section" aria-label="Đã cài" className="flex min-h-14 items-center gap-3">
-        <span aria-hidden="true" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-cobalt text-on-accent">
+        <span aria-hidden="true" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-ink text-on-dark">
           <CheckIcon />
         </span>
         <p className="m-0 text-callout font-bold text-text">Đã cài trên máy này</p>
@@ -54,7 +54,7 @@ export function InstallPanel() {
 
   if (view === "prompt") {
     return (
-      <PillButton type="button" onClick={install}>
+      <PillButton type="button" onClick={install} className="mt-auto lg:mt-0">
         Cài ứng dụng
       </PillButton>
     );
@@ -62,7 +62,10 @@ export function InstallPanel() {
 
   if (view === "ios") {
     return (
-      <div className="flex flex-col gap-3">
+      <section aria-labelledby="ios-title" className="flex flex-col gap-2">
+        <h2 id="ios-title" className="m-0 text-cap font-semibold text-text">
+          Cài trên iPhone, 3 bước
+        </h2>
         {!env.safari && (
           <p className="m-0 text-cap leading-snug text-secondary">Mở trang này bằng Safari để thêm vào màn hình chính.</p>
         )}
@@ -72,19 +75,19 @@ export function InstallPanel() {
               <Card className="flex min-h-14 items-center gap-3">
                 <span
                   aria-hidden="true"
-                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cobalt text-sm font-bold tabular-nums text-on-accent"
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-ink text-sm font-bold tabular-nums text-on-dark"
                 >
                   {i + 1}
                 </span>
                 <span className="min-w-0 flex-1 text-callout leading-snug text-text">{step.text}</span>
-                <span aria-hidden="true" className="shrink-0 text-cobalt">
+                <span aria-hidden="true" className="shrink-0 text-text">
                   {step.icon}
                 </span>
               </Card>
             </li>
           ))}
         </ol>
-      </div>
+      </section>
     );
   }
 

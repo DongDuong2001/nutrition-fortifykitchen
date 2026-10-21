@@ -11,6 +11,7 @@ import {
   shareImageSize,
   SHARE_MAX_HEIGHT,
   shareKey,
+  shareMealDot,
   shareMeals,
   shareName,
   shareFontsEmbedded,
@@ -135,6 +136,16 @@ describe("share model", () => {
 
   it("works from added entries too (a past day)", () => {
     expect(entriesFromAdded([])).toEqual([]);
+  });
+});
+
+describe("share meal dots", () => {
+  it("are the deep shade of the meal's colour, one token per slot", () => {
+    expect(shareMealDot("breakfast")).toBe("var(--color-deep-orange)");
+    expect(shareMealDot("lunch")).toBe("var(--color-deep-yellow)");
+    expect(shareMealDot("pre_workout")).toBe("var(--color-deep-pink)");
+    expect(shareMealDot("dinner")).toBe("var(--color-deep-indigo)");
+    expect(shareMealDot("snack")).toBe("var(--color-deep-mint)");
   });
 });
 

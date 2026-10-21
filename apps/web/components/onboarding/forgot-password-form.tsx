@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
-import { EmailField } from "@/components/auth/email-field";
+import { AuthEmailField } from "@/components/onboarding/auth-field";
 import { PillButton } from "@/components/ui/pill-button";
 import { sendPasswordReset, validateEmail } from "@/lib/auth-actions";
 import { readPendingEmail } from "@/lib/onboarding";
@@ -35,7 +35,7 @@ export function ForgotPasswordForm() {
 
   return (
     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-3">
-      <EmailField value={email} onChange={setEmail} error={error} />
+      <AuthEmailField value={email} onChange={setEmail} error={error} />
       <PillButton type="submit" disabled={busy}>
         Gửi liên kết đặt lại
       </PillButton>

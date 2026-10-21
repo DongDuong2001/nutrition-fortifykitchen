@@ -82,7 +82,9 @@ import {
   applyProfileTargets,
   loadProfile,
   normaliseProfile,
+  readStoredProfile,
   targetsFor,
+  withLocalOnly,
   writeStoredProfile,
   type Profile,
 } from "./profile";
@@ -807,8 +809,10 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       .getProfile()
       .then((serverProfile) => {
         if (!serverProfile || hasPendingWrite("profile")) return;
-        writeStoredProfile(serverProfile);
-        setProfile(serverProfile);
+        // The macro split and the custom targets are kept on the device only; the server's profile has none of them
+        const adopted = withLocalOnly(serverProfile, readStoredProfile(new Date().getFullYear()));
+        writeStoredProfile(adopted);
+        setProfile(adopted);
       })
       .catch(() => {});
   }, []);

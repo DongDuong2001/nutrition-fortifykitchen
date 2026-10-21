@@ -16,9 +16,9 @@ import { NAV_TABS } from "@/lib/nav";
 function GateSkeleton() {
   return (
     <div className="flex min-h-dvh w-full flex-col bg-page text-text font-sans lg:flex-row">
-      <div aria-hidden="true" className="hidden w-60 shrink-0 bg-ink p-6 text-on-dark lg:block">
+      <div aria-hidden="true" className="hidden w-60 shrink-0 border-r border-card-border bg-card p-6 text-text lg:block">
         <div className="px-2 font-display text-2xl font-black italic tracking-display">
-          H1T <span className="text-sky">MICRO</span>
+          H1T <span className="text-cobalt">MICRO</span>
         </div>
       </div>
       <div className="flex min-w-0 flex-1 flex-col pb-[calc(104px+env(safe-area-inset-bottom))] lg:pb-0">

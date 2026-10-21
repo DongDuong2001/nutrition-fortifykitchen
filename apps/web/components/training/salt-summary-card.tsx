@@ -19,7 +19,8 @@ export function SaltSummaryCard({
   if (variant === "mobile-banner") {
     return (
       <div
-        className={`flex items-end justify-between pt-1 gap-3 w-full ${className}`}
+        data-align-group="training-summary"
+        className={`flex w-full flex-wrap items-end justify-between gap-3 rounded-card bg-ink p-4 text-on-dark ${className}`}
       >
         <div className="text-cap text-muted-on-dark leading-snug">
           {isRestDay ? (

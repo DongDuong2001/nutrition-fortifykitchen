@@ -105,7 +105,7 @@ export default function ExplorePage() {
         {/* Phone: the groups are Nhóm món below, so only the demo shortcuts stay as chips; desktop: the whole row */}
         {demoChips.length > 0 && (
           <div className="lg:hidden">
-            <ChipGroup scroll items={demoChips} ariaLabel="Huấn luyện viên và bảng xếp hạng" data-align-group="explore-demo" data-align-edge="left" />
+            <ChipGroup scroll items={demoChips} ariaLabel="Huấn luyện viên và bảng xếp hạng" data-align-group="add-list" data-align-edge="left" />
           </div>
         )}
         <div className="max-lg:hidden">

@@ -57,7 +57,7 @@ def chip_report(pg):
     return pg.evaluate(
         """() => Array.from(document.querySelectorAll('[role=group][aria-label="Thời gian tập"] button')).map((b) => {
             const range = document.createRange();
-            range.selectNodeContents(b);
+            range.selectNodeContents(b.querySelector('span') || b);
             const lines = new Set(Array.from(range.getClientRects()).map((r) => Math.round(r.top))).size;
             const r = b.getBoundingClientRect();
             return {
@@ -132,17 +132,12 @@ def check_training(browser, size_name, size):
     check(carb.is_checked(), f"{label}: the tick survives a reload")
     check(not carb.is_disabled(), f"{label}: today's tick stays editable after reload")
 
-    # Chips: one row of five equal columns, no wrapped label, every target 44 px
+    # Chips (V3 segmented control): one row of five equal columns on the phone and on desktop, no wrapped label, every target 44 px
     chips = [c for c in chip_report(pg) if c["visible"]]
     check(len(chips) == 5, f"{label}: five duration chips ({len(chips)})")
     if chips:
-        # Phone: 3 equal columns, so rows of 3 and 2 with the sixth cell empty. Desktop: one row of 5.
         tops = [c["top"] for c in chips]
-        if size_name == "390":
-            check(len(set(tops[:3])) == 1 and len(set(tops[3:])) == 1 and tops[0] != tops[3],
-                  f"{label}: chips sit in a 3 + 2 grid of equal columns (tops {tops})")
-        else:
-            check(len(set(tops)) == 1, f"{label}: the five chips share one row (tops {tops})")
+        check(len(set(tops)) == 1, f"{label}: the five chips share one row (tops {tops})")
         widths = [c["width"] for c in chips]
         check(max(widths) - min(widths) <= 1.0, f"{label}: the five chips are equal width ({widths})")
         check(all(c["lines"] == 1 for c in chips), f"{label}: no chip label wraps ({[c['label'] + ':' + str(c['lines']) for c in chips]})")

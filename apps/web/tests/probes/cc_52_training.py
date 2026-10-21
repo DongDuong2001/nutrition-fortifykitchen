@@ -384,7 +384,7 @@ def minutes_stick(browser):
     check(day["minutes"] == 90, f"choosing 90 saves it for today ({day})")
     # Back to Hôm nay in the app (no reload): the pill and the salt follow
     pg.evaluate("() => { window.__noReload = 1 }")
-    pg.locator(f'{MOBILE} a[href="/app"]').first.click()
+    pg.locator("header a[href=\"/app\"]:visible").first.click()  # the one header (V3) sits above the mobile column
     pg.wait_for_url("**/app")
     pg.wait_for_timeout(800)
     check(pg.evaluate("() => window.__noReload === 1"), "Hôm nay was reached without a reload")
