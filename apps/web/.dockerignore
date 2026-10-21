@@ -10,7 +10,7 @@ tests/probes/out
 Dockerfile
 .dockerignore
 # perf/server-image: only what `npm run build` reads goes into the build (the prebuild step slims tests/fixtures)
-*.md
+**/*.md
 tests
 !tests/fixtures
 **/__tests__

@@ -1,11 +1,15 @@
 # Production images, built here instead of on the VPS (ci/ghcr-images). Every push to main (and a manual run) builds
-# the web and the API image and pushes them to GitHub's registry, tagged with the commit sha and `main`.
-# deploy/deploy.sh <sha> then pulls them: the VPS no longer builds (no 1.7 GB build peak, no BuildKit cache on its disk).
+# the web and the API image and pushes them to GitHub's registry, tagged with the commit sha, and `main` when the run
+# is on main. deploy/deploy.sh <sha> then pulls them: the VPS no longer builds (no 1.7 GB build peak, no BuildKit cache
+# on its disk).
 #
 # NEXT_PUBLIC_* are inlined into the web build, so they come from the repo's Actions variables (Settings → Secrets and
 # variables → Actions → Variables): NEXT_PUBLIC_API_MODE, NEXT_PUBLIC_API_URL, NEXT_PUBLIC_SITE_URL,
 # NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, NEXT_PUBLIC_HCAPTCHA_SITE_KEY. They are public values (the
-# browser gets them anyway); no secret goes into an image.
+# browser gets them anyway); no secret goes into an image. The first job stops the run when one is missing: an empty
+# NEXT_PUBLIC_API_MODE would build the mock app (sample data, accounts in the browser) for production.
+#
+# Actions are pinned by commit sha (the tag is in the comment); update them together.
 name: Images
 
 on:
@@ -23,26 +27,53 @@ concurrency:
 
 env:
   REGISTRY: ghcr.io/dongduong2001
+  SOURCE: https://github.com/${{ github.repository }}
 
 jobs:
-  web:
-    name: Web image
+  check:
+    name: The six NEXT_PUBLIC_* variables are set, and the API mode is live
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: docker/setup-buildx-action@v3
-      - uses: docker/login-action@v3
+      - name: Check the Actions variables
+        env:
+          NEXT_PUBLIC_API_MODE: ${{ vars.NEXT_PUBLIC_API_MODE }}
+          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
+          NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_HCAPTCHA_SITE_KEY: ${{ vars.NEXT_PUBLIC_HCAPTCHA_SITE_KEY }}
+        run: |
+          missing=0
+          for name in NEXT_PUBLIC_API_MODE NEXT_PUBLIC_API_URL NEXT_PUBLIC_SITE_URL NEXT_PUBLIC_SUPABASE_URL NEXT_PUBLIC_SUPABASE_ANON_KEY NEXT_PUBLIC_HCAPTCHA_SITE_KEY; do
+            if [ -z "${!name}" ]; then echo "::error::Actions variable $name is empty"; missing=1; fi
+          done
+          if [ "$NEXT_PUBLIC_API_MODE" != "live" ]; then echo "::error::NEXT_PUBLIC_API_MODE is '$NEXT_PUBLIC_API_MODE', not live: this would build the mock app"; missing=1; fi
+          exit $missing
+
+  web:
+    name: Web image
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
+      - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/build-push-action@v6
+      - uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
         with:
           context: apps/web
           push: true
+          # One manifest per push: no attestation versions, so the retention below counts real images
+          provenance: false
           tags: |
             ${{ env.REGISTRY }}/nutrition-web:${{ github.sha }}
-            ${{ env.REGISTRY }}/nutrition-web:main
+            ${{ github.ref == 'refs/heads/main' && format('{0}/nutrition-web:main', env.REGISTRY) || '' }}
+          labels: |
+            org.opencontainers.image.source=${{ env.SOURCE }}
+            org.opencontainers.image.revision=${{ github.sha }}
           build-args: |
             NEXT_PUBLIC_API_MODE=${{ vars.NEXT_PUBLIC_API_MODE }}
             NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
@@ -55,21 +86,41 @@ jobs:
 
   api:
     name: API image
+    needs: check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: docker/setup-buildx-action@v3
-      - uses: docker/login-action@v3
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
+      - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/build-push-action@v6
+      - uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
         with:
           context: apps/api
           push: true
+          provenance: false
           tags: |
             ${{ env.REGISTRY }}/nutrition-api:${{ github.sha }}
-            ${{ env.REGISTRY }}/nutrition-api:main
+            ${{ github.ref == 'refs/heads/main' && format('{0}/nutrition-api:main', env.REGISTRY) || '' }}
+          labels: |
+            org.opencontainers.image.source=${{ env.SOURCE }}
+            org.opencontainers.image.revision=${{ github.sha }}
           cache-from: type=gha,scope=api
           cache-to: type=gha,mode=max,scope=api
+
+  retention:
+    name: Keep the last 20 images of each
+    needs: [web, api]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package: [nutrition-web, nutrition-api]
+    steps:
+      # The 20 newest versions stay (one per push to main, so about the last 20 deploys to roll back to); older ones go
+      - uses: actions/delete-package-versions@e5bc658cc4c965c472efe991f8beea3981499c55 # v5.0.0
+        with:
+          package-name: ${{ matrix.package }}
+          package-type: container
+          min-versions-to-keep: 20
