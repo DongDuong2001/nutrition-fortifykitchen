@@ -318,7 +318,8 @@ def history(browser):
     row.click()
     pg.wait_for_url(re.compile(r".*/settings/whats-new$"), timeout=5000)
     pg.wait_for_timeout(400)
-    text = pg.locator("main").inner_text()
+    # V3: the release headings are Saira section headers, uppercase on screen
+    text = re.sub(r"CẬP NHẬT (\d\d/\d\d)", r"Cập nhật \1", pg.locator("main").inner_text())
     check(text.count("Cập nhật 18/10") == 6 and all(t in text for t in ITEMS_1810F + ITEMS_1810E + ITEMS_1810D + ITEMS_1810C + ITEMS_1810B + ITEMS_1810), "the history lists the six 18/10 releases and their items")
     check(text.count("Cập nhật 19/10") == 2 and all(t in text for t in ITEMS_1910B + ITEMS_1910A), "…and the two 19/10 releases (19b and 19a)")
     check(text.count("Cập nhật 20/10") == 2 and all(t in text for t in ITEMS_2010B + ITEMS_2010A), "…and the two 20/10 releases (20b and 20a)")
