@@ -48,7 +48,7 @@ Expected (a dry run never opens the database):
 === H1T MICRO Food Catalog Importer ===
 Mode: DRY RUN (No database changes will be saved)
 Loaded 17 food records from /home/deploy/new-foods-2026-10-21.json
-Completeness Report: 68.4% average coverage of the 22 counted nutrients across 17 foods
+Completeness Report: 78.6% average coverage of the 22 counted nutrients across 17 foods
 ```
 
 If `go` is not installed on the server, the same command in Docker (the API image does not contain the importer):
