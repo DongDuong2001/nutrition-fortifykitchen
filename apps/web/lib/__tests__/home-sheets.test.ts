@@ -21,7 +21,7 @@ describe("Hôm nay's lazy sheets", () => {
     expect(src).toMatch(/requestIdleCallback\(go, \{ timeout: 3000 \}\)/);
   });
 
-  it("mount the nine closed sheets in a transition, and never load them from the touch on the + that opens the add sheet", () => {
+  it("mount the closed sheets in a transition, and never load them from the touch on the + that opens the add sheet", () => {
     expect(src).toMatch(/startTransition\(\(\) => setSheets\(loadedSheets\)\)/);
     expect(src).toContain('closest?.(\'#mobile-add-fab, #desktop-add-btn, a[href^="/add"]\')');
     // …and only while Hôm nay is the page, not while the add sheet is up over it
@@ -29,7 +29,7 @@ describe("Hôm nay's lazy sheets", () => {
   });
 
   it("mount each sheet closed once its chunk is in (the second argument of useOnceOpen)", () => {
-    for (const flag of ["sourcesMounted", "mealMenuMounted", "explainerMounted", "copySheetMounted", "dayMenuMounted", "copyTargetMounted", "moveTargetMounted", "pastTargetMounted", "calendarMounted"]) {
+    for (const flag of ["sourcesMounted", "mealMenuMounted", "explainerMounted", "saveDayMounted", "pickerMounted", "dayMenuMounted", "copyTargetMounted", "moveTargetMounted", "pastTargetMounted", "calendarMounted"]) {
       expect(src).toMatch(new RegExp(`const ${flag} = useOnceOpen\\([^;]*, sheets !== null\\);`));
     }
   });

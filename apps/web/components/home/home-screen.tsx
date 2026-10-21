@@ -11,8 +11,26 @@ import { useShellBottomBar } from "@/components/ui/shell-slot";
 import { AppHeader, HEADER_ICON_BUTTON, CalendarGlyph } from "@/components/ui/app-header";
 import { IconShare } from "@/components/ui/icons";
 import { setHomeDay } from "@/lib/home-scroll";
-import { copyMeals, dayEntries, shiftIsoDate, viewedIsoDate } from "@/lib/day-history";
+import { copyMeals, dayEntries, entriesKcal, shiftIsoDate, viewedIsoDate } from "@/lib/day-history";
 import { defaultMealName } from "@/lib/saved-meals";
+import { CATALOG_FOODS } from "@/lib/catalog";
+import {
+  applyTemplate,
+  buildDayTemplate,
+  dayTemplateMeals,
+  defaultTemplateName,
+  defaultTemplateTag,
+  fallbackTemplateName,
+  mealNamesLine,
+  mealsKcalLine,
+  templateSavedMessage,
+  templateTotals,
+  yesterdayCopyMessage,
+  yesterdayCopySlots,
+  type DayTemplateTag,
+} from "@/lib/day-templates";
+import { useDayTemplateRows, useTemplatePillHidden } from "@/hooks/use-day-templates";
+import type { PickerOption } from "./template-picker-sheet";
 import { pastDayData, useDiary } from "@/lib/diary-store";
 import { formatDesktopDate } from "@/lib/format";
 import { kcalLabel, sumKcal } from "@/lib/kcal";
@@ -65,6 +83,9 @@ import { HOME_ROUTE } from "@/lib/nav";
 import { navigateFromSheet } from "@/lib/sheet-history";
 import { WhatsNewDue } from "@/components/whats-new/whats-new-due";
 
+/** The picker's first card: Chép hôm qua (Chép hôm kia on yesterday). */
+const YESTERDAY_OPTION = "yesterday";
+
 /** V3-SPEC §3.1: the share button is a 44 px glass circle with a cobalt glyph */
 const SHARE_BUTTON = HEADER_ICON_BUTTON.replace("text-text", "text-cobalt");
 
@@ -74,16 +95,16 @@ const SHARE_BUTTON = HEADER_ICON_BUTTON.replace("text-text", "text-cobalt");
 // each sheet took 300 ms longer than the second. Here the modules are resolved first, kept in a module variable, and every sheet is
 // then mounted closed once, so a first open only toggles `open`, as fast as the second.
 const loadCalendar = () => import("@/components/calendar-sheet");
-const loadCopyYesterday = () => import("@/components/copy-yesterday-sheet");
 const loadMealMenu = () => import("@/components/diary/meal-menu-sheet");
 const loadSources = () => import("./nutrient-sources-sheet");
 const loadExplainer = () => import("@/components/coaching/level-explainer-sheet");
 const loadSelect = () => import("./select-mode");
 const loadShare = () => import("./share-sheet");
+const loadSaveDay = () => import("./save-day-sheet");
+const loadTemplatePicker = () => import("./template-picker-sheet");
 
 interface HomeSheets {
   CalendarSheet: Awaited<ReturnType<typeof loadCalendar>>["CalendarSheet"];
-  CopyYesterdaySheet: Awaited<ReturnType<typeof loadCopyYesterday>>["CopyYesterdaySheet"];
   MealMenuSheet: Awaited<ReturnType<typeof loadMealMenu>>["MealMenuSheet"];
   NutrientSourcesSheet: Awaited<ReturnType<typeof loadSources>>["NutrientSourcesSheet"];
   LevelExplainerSheet: Awaited<ReturnType<typeof loadExplainer>>["LevelExplainerSheet"];
@@ -92,16 +113,17 @@ interface HomeSheets {
   SelectActionBar: Awaited<ReturnType<typeof loadSelect>>["SelectActionBar"];
   SelectHeader: Awaited<ReturnType<typeof loadSelect>>["SelectHeader"];
   ShareSheet: Awaited<ReturnType<typeof loadShare>>["ShareSheet"];
+  SaveDaySheet: Awaited<ReturnType<typeof loadSaveDay>>["SaveDaySheet"];
+  TemplatePickerSheet: Awaited<ReturnType<typeof loadTemplatePicker>>["TemplatePickerSheet"];
 }
 let loadedSheets: HomeSheets | null = null;
 let sheetsLoading: Promise<void> | null = null;
 const sheetListeners = new Set<() => void>();
 function loadSheets(): Promise<void> {
-  sheetsLoading ??= Promise.all([loadCalendar(), loadCopyYesterday(), loadMealMenu(), loadSources(), loadExplainer(), loadSelect(), loadShare()])
-    .then(([cal, copy, menu, src, exp, sel, share]) => {
+  sheetsLoading ??= Promise.all([loadCalendar(), loadMealMenu(), loadSources(), loadExplainer(), loadSelect(), loadShare(), loadSaveDay(), loadTemplatePicker()])
+    .then(([cal, menu, src, exp, sel, share, saveDay, picker]) => {
       loadedSheets = {
         CalendarSheet: cal.CalendarSheet,
-        CopyYesterdaySheet: copy.CopyYesterdaySheet,
         MealMenuSheet: menu.MealMenuSheet,
         NutrientSourcesSheet: src.NutrientSourcesSheet,
         LevelExplainerSheet: exp.LevelExplainerSheet,
@@ -110,6 +132,8 @@ function loadSheets(): Promise<void> {
         SelectActionBar: sel.SelectActionBar,
         SelectHeader: sel.SelectHeader,
         ShareSheet: share.ShareSheet,
+        SaveDaySheet: saveDay.SaveDaySheet,
+        TemplatePickerSheet: picker.TemplatePickerSheet,
       };
       sheetListeners.forEach((l) => l());
     })
@@ -125,7 +149,7 @@ const subscribeSheets = (listener: () => void) => {
 };
 /**
  * The sheets once their chunks are in (null before): mounted closed as soon as they are, so no first open waits for a chunk. The
- * commit that mounts the nine of them is a transition: a render that lands in the middle of the add sheet's slide yields to it.
+ * commit that mounts the eleven of them is a transition: a render that lands in the middle of the add sheet's slide yields to it.
  */
 function useHomeSheets(): HomeSheets | null {
   const [sheets, setSheets] = useState<HomeSheets | null>(() => loadedSheets);
@@ -237,7 +261,9 @@ function HomeContent() {
     refreshToday,
     mealFoods,
     saveMealAs,
+    notify,
   } = useDiary();
+  const { rows: templateRows, templates: savedTemplates, setTemplates } = useDayTemplateRows();
   const saveName = useSaveDisplayName();
 
   // The Level decides which nutrients the column lists (lib/level-nutrients)
@@ -247,7 +273,9 @@ function HomeContent() {
   const countedIds = useMemo(() => countedForLevel(level), [level]);
 
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  const [isCopySheetOpen, setIsCopySheetOpen] = useState(false);
+  // Ngày ăn mẫu: the save sheet (day ⋯) and the picker (the "Chép ngày mẫu" pill)
+  const [isSaveDayOpen, setIsSaveDayOpen] = useState(false);
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
   // The share sheet (and html-to-image with it) is mounted the first time the share button is used, and stays mounted so
   // its close animation plays
@@ -403,7 +431,8 @@ function HomeContent() {
   const sourcesMounted = useOnceOpen(sourcesOf !== null, sheets !== null);
   const mealMenuMounted = useOnceOpen(menuSlot !== null, sheets !== null);
   const explainerMounted = useOnceOpen(explainerOpen, sheets !== null);
-  const copySheetMounted = useOnceOpen(isCopySheetOpen, sheets !== null);
+  const saveDayMounted = useOnceOpen(isSaveDayOpen, sheets !== null);
+  const pickerMounted = useOnceOpen(isPickerOpen, sheets !== null);
   const dayMenuMounted = useOnceOpen(dayMenuOpen, sheets !== null);
   const copyTargetMounted = useOnceOpen(targetSheet === "copy", sheets !== null);
   const moveTargetMounted = useOnceOpen(targetSheet === "move", sheets !== null);
@@ -454,6 +483,64 @@ function HomeContent() {
     copyEntries(copies, `Đã chép ${menuMeal.fullName} từ hôm qua · ${copies.length} món`);
   }
 
+  // Ngày ăn mẫu. The pill's × is remembered per date; the picker lists Hôm qua first (when it has food), then the saved days
+  const pillHidden = useTemplatePillHidden(viewIsoParam, todayIso);
+  const kcalTargetMin = day.calories.targetMin;
+  const yesterdaySlots = useMemo(() => yesterdayCopySlots(dayBeforeEntries), [dayBeforeEntries]);
+  const pickerOptions = useMemo<PickerOption[]>(() => {
+    const options: PickerOption[] = [];
+    const copied = dayBeforeEntries.filter((e) => yesterdaySlots.includes(e.mealSlot));
+    if (copied.length > 0) {
+      options.push({
+        id: YESTERDAY_OPTION,
+        name: editablePast ? "Hôm kia" : "Hôm qua",
+        itemCount: copied.length,
+        kcal: entriesKcal(copied) ?? 0,
+        meals: mealsKcalLine(yesterdaySlots.map((slot) => ({ slot, kcal: entriesKcal(copied.filter((e) => e.mealSlot === slot)) ?? 0 }))),
+      });
+    }
+    for (const r of templateRows) {
+      options.push({ id: r.template.id, name: r.template.name, tag: r.template.tag, itemCount: r.itemCount, kcal: r.kcal, meals: mealsKcalLine(r.perMeal) });
+    }
+    return options;
+  }, [dayBeforeEntries, yesterdaySlots, templateRows, editablePast]);
+  // The day as a template: every meal's foods (the ones the catalogue still has), empty meals left out
+  const saveMeals = useMemo(() => dayTemplateMeals((slot) => mealFoods(slot, viewIso)), [mealFoods, viewIso]);
+  const saveTotals = useMemo(
+    () => templateTotals({ id: "", name: "", tag: "khac", meals: saveMeals, createdAt: "" }, CATALOG_FOODS),
+    [saveMeals]
+  );
+
+  function saveDayAsTemplate(name: string, tag: DayTemplateTag) {
+    const template = buildDayTemplate({
+      id: `dt-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      name,
+      tag,
+      fallbackName: fallbackTemplateName(tag, viewIso),
+      meals: saveMeals,
+      createdAt: new Date().toISOString(),
+    });
+    if (!template) return;
+    setTemplates([template, ...savedTemplates]);
+    const totals = templateTotals(template, CATALOG_FOODS);
+    notify(templateSavedMessage(template.name, totals.itemCount, totals.kcal));
+  }
+
+  // Both copies go through copyEntries, the call Chép hôm qua has always made: one toast, and its Hoàn tác takes out exactly what was copied
+  function applyPicked(id: string) {
+    if (readOnly) return;
+    if (id === YESTERDAY_OPTION) {
+      const copied = copyMeals(dayBeforeEntries, yesterdaySlots, `copy-${Date.now()}`, new Date().toISOString());
+      copyEntries(copied, yesterdayCopyMessage(yesterdaySlots.length, !editablePast), viewIso);
+      return;
+    }
+    const row = templateRows.find((r) => r.template.id === id);
+    if (!row) return;
+    const { entries: copied, message } = applyTemplate(row.template, CATALOG_FOODS, { idPrefix: `dt-${Date.now()}`, addedAt: new Date().toISOString() });
+    if (copied.length === 0) notify(message);
+    else copyEntries(copied, message, viewIso);
+  }
+
   // Select mode's action bar takes the bottom nav's place (the shell's bar slot)
   const barHost = useShellBottomBar(selecting);
 
@@ -484,7 +571,7 @@ function HomeContent() {
   const pills: HeroPill[] = [];
   if (mode.kind === "day") {
     if (!nothingLogged) {
-      pills.push({ key: "day-menu", label: "⋯", id: "home-day-menu", ariaLabel: "Tùy chọn ngày", onClick: () => setDayMenuOpen(true) });
+      pills.push({ key: "day-menu", label: "⋯", id: "home-day-menu", ariaLabel: "Tùy chọn ngày", tour: "day-menu", onClick: () => setDayMenuOpen(true) });
     }
   } else {
     if (!readOnly && mode.kind === "food") pills.push({ key: "edit", label: "Sửa", href: `/entry/${mode.id}`, ariaLabel: "Sửa món này" });
@@ -536,7 +623,7 @@ function HomeContent() {
   );
 
   // The install pop-up waits while anything else is open, and on a past day
-  const sheetOpen = isCalendarOpen || isCopySheetOpen || isShareOpen || explainerOpen || dayMenuOpen || menuSlot !== null || targetSheet !== null;
+  const sheetOpen = isCalendarOpen || isSaveDayOpen || isPickerOpen || isShareOpen || explainerOpen || dayMenuOpen || menuSlot !== null || targetSheet !== null;
   const installBusy = isPast || selecting || sheetOpen;
 
   const chosen = chosenEntries(entries, liveSelected);
@@ -712,12 +799,21 @@ function HomeContent() {
                 readOnly={readOnly}
                 dayWord={editablePast ? "hôm qua" : "hôm nay"}
                 addDate={editablePast ? viewIso : undefined}
-                copyLabel={editablePast ? "Chép hôm kia" : "Chép hôm qua"}
                 isEmpty={nothingLogged}
-                canCopyYesterday={!readOnly && nothingLogged && dayBeforeEntries.length > 0}
+                templatePill={
+                  !readOnly && !pillHidden.hidden
+                    ? {
+                        onOpen: () => {
+                          markUsed("day-template");
+                          setIsPickerOpen(true);
+                        },
+                        onHide: pillHidden.hide,
+                        hideLabel: `Ẩn gợi ý ngày mẫu ${editablePast ? "hôm qua" : "hôm nay"}`,
+                      }
+                    : null
+                }
                 onFood={(id) => setMode(toggleFood(mode, id))}
                 onMeal={(slot) => setMode(toggleMeal(mode, slot))}
-                onCopyYesterday={() => setIsCopySheetOpen(true)}
                 onLongPressSelect={(id) => startSelect(id)}
                 touchDrag={!sheetOpen && sourcesOf === null}
                 onMoveFood={(id, targetSlot) => {
@@ -789,7 +885,6 @@ function HomeContent() {
       <WhatsNewDue />
       <WhatsNewHost busy={installBusy} />
       {sheets && explainerMounted && <sheets.LevelExplainerSheet open={explainerOpen} onClose={() => setExplainerOpen(false)} level={level} />}
-      {sheets && copySheetMounted && <sheets.CopyYesterdaySheet open={isCopySheetOpen} onClose={() => setIsCopySheetOpen(false)} targetIso={viewIso} />}
       {sheets && dayMenuMounted && (
         <sheets.DayMenuSheet
           open={dayMenuOpen}
@@ -798,6 +893,29 @@ function HomeContent() {
           past={readOnly}
           hasEntries={!nothingLogged}
           onSelect={startSelect}
+          onSaveTemplate={() => setIsSaveDayOpen(true)}
+        />
+      )}
+      {sheets && saveDayMounted && (
+        <sheets.SaveDaySheet
+          open={isSaveDayOpen}
+          onClose={() => setIsSaveDayOpen(false)}
+          summary={`${saveTotals.itemCount} món · ${kcalLabel(saveTotals.kcal)}`}
+          mealsText={mealNamesLine(saveMeals)}
+          defaultName={defaultTemplateName(day.user.trainingMinutes)}
+          defaultTag={defaultTemplateTag(day.user.trainingMinutes)}
+          onSave={saveDayAsTemplate}
+        />
+      )}
+      {sheets && pickerMounted && (
+        <sheets.TemplatePickerSheet
+          open={isPickerOpen}
+          onClose={() => setIsPickerOpen(false)}
+          options={pickerOptions}
+          hasTemplates={savedTemplates.length > 0}
+          kcalTarget={kcalTargetMin}
+          applyLabel={`Chép vào ${dayLabel}`}
+          onApply={applyPicked}
         />
       )}
       {sheets && copyTargetMounted && (

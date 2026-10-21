@@ -11,6 +11,8 @@ import { markUsed } from "@/lib/onboarding-store";
 import { useDiary } from "@/lib/diary-store";
 import { haptic } from "@/lib/haptics";
 import { inkPill } from "./ink-pill";
+import { MEAL_DOT } from "./meal-dot";
+import { TemplatePill } from "@/components/templates/template-pill";
 import { useRowMotion } from "./row-motion";
 import { PullIndicator, usePullRefresh } from "./pull-refresh";
 import { useTouchDrag } from "@/lib/use-touch-drag";
@@ -18,15 +20,6 @@ import { Expand } from "@/components/ui/expand";
 
 const LONG_PRESS_MS = 500;
 const MOVE_LIMIT_PX = 10;
-
-// V3-SPEC §3.7: the meal dot, in the deep shade of the meal's colour (Sáng orange, Trưa yellow, Trước tập pink, Tối indigo, Bữa phụ mint)
-const MEAL_DOT: Record<HomeMeal["slot"], string> = {
-  breakfast: "bg-deep-orange",
-  lunch: "bg-deep-yellow",
-  pre_workout: "bg-deep-pink",
-  dinner: "bg-deep-indigo",
-  snack: "bg-deep-mint",
-};
 
 const noSelect: React.CSSProperties = { WebkitUserSelect: "none", userSelect: "none", WebkitTouchCallout: "none" };
 
@@ -288,11 +281,9 @@ export function FoodList({
   dayWord = "hôm nay",
   addDate,
   isEmpty,
-  canCopyYesterday,
-  copyLabel = "Chép hôm qua",
+  templatePill,
   onFood,
   onMeal,
-  onCopyYesterday,
   onLongPressSelect,
   onMoveFood,
   touchDrag = true,
@@ -310,12 +301,13 @@ export function FoodList({
   /** The day a food added from here goes to, when it is not today (yesterday): /add?date=. */
   addDate?: string;
   isEmpty: boolean;
-  canCopyYesterday: boolean;
-  /** The label of the copy button: "Chép hôm qua", or "Chép hôm kia" on yesterday. */
-  copyLabel?: string;
+  /**
+   * The "Chép ngày mẫu" pill at the top of the meals card of an empty day (it opens the picker, which also holds Hôm qua), and its ×
+   * (hides the pill for this day only). Absent: no pill, the plain empty line shows.
+   */
+  templatePill?: { onOpen: () => void; onHide: () => void; hideLabel: string } | null;
   onFood: (id: string) => void;
   onMeal: (slot: HomeMeal["slot"]) => void;
-  onCopyYesterday: () => void;
   onLongPressSelect?: (id: string) => void;
   onMoveFood?: (entryId: string, targetSlot: HomeMeal["slot"]) => void;
   /** cc-70: foods lift after a hold and drag to another meal with a finger. False while a sheet is open. */
@@ -332,8 +324,8 @@ export function FoodList({
   const [dragOverSlot, setDragOverSlot] = useState<HomeMeal["slot"] | null>(null);
   const { listRef, rowsOf } = useRowMotion(meals, dayKey);
   const pull = usePullRefresh(listRef, onPullRefresh, !share && !select && !readOnly);
-  // Whether the empty-day line offered Như hôm qua: it keeps the button while it closes
-  const hadCopy = useRef(false);
+  // The pill keeps its place while the empty row closes (the first food of the day)
+  const lastPill = useRef<NonNullable<typeof templatePill> | null>(null);
 
   if (select) return <SelectList meals={meals} select={select} />;
   if (share) {
@@ -358,24 +350,26 @@ export function FoodList({
       </div>
     );
   }
-  if (isEmpty) hadCopy.current = canCopyYesterday;
+  if (templatePill) lastPill.current = templatePill;
+  const shownPill = templatePill ?? lastPill.current;
   return (
     // V3: a white card (178 px at 390) beside the vi chất card. The page scrolls on a phone; from lg the card keeps its own scroll.
     <div ref={listRef} data-food-scroll className="min-w-0 flex-1 overflow-hidden rounded-card bg-card lg:min-h-0 lg:overflow-y-auto lg:overscroll-y-contain lg:border lg:border-card-border lg:shadow-card">
       {onPullRefresh && !readOnly && <PullIndicator {...pull} />}
-      {/* cc-64 (A8): the first food of the day closes this line (150 ms) while the food's row rises in, so the list does
-          not jump up 44 px; Như hôm qua stays in it while it closes */}
-      <Expand open={isEmpty} className="flex min-h-11 flex-col items-start px-3 pt-2 lg:flex-row lg:items-center lg:justify-between lg:gap-2 lg:py-2">
-          <p className="m-0 text-callout font-semibold text-text">{readOnly ? "Chưa có món nào ngày này" : `Chưa có món nào ${dayWord}`}</p>
-          {(isEmpty ? canCopyYesterday : hadCopy.current) && (
-            <button
-              type="button"
-              onClick={onCopyYesterday}
-              className="-mx-2 min-h-11 shrink-0 cursor-pointer rounded-full border-0 bg-transparent px-2 text-cap font-bold text-cobalt lg:mx-0"
-            >
-              {copyLabel}
-            </button>
-          )}
+      {/* cc-64 (A8): the first food of the day closes this row (150 ms) while the food's row rises in, so the list does
+          not jump up 44 px. An empty day offers "Chép ngày mẫu" (NMEmpty); a day that is only viewed, or whose pill was hidden with
+          its ×, keeps the plain line */}
+      <Expand open={isEmpty && !!templatePill}>
+        {shownPill && (
+          <>
+            {/* The empty line stays for screen readers while the pill stands in for it on the page */}
+            <p className="sr-only">{`Chưa có món nào ${dayWord}`}</p>
+            <TemplatePill onOpen={shownPill.onOpen} onHide={shownPill.onHide} hideLabel={shownPill.hideLabel} />
+          </>
+        )}
+      </Expand>
+      <Expand open={isEmpty && !templatePill} className="flex min-h-11 flex-col items-start px-3 pt-2 lg:flex-row lg:items-center lg:justify-between lg:gap-2 lg:py-2">
+        <p className="m-0 text-callout font-semibold text-text">{readOnly ? "Chưa có món nào ngày này" : `Chưa có món nào ${dayWord}`}</p>
       </Expand>
       {meals.map((meal) => {
         const firstEntryId = meals.find((m) => m.entries.length > 0)?.entries[0].id;

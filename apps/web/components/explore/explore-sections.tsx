@@ -20,6 +20,8 @@ import { foodRowKcal, foodRowMeta } from "@/lib/food-meta";
 import { FOOD_CATEGORIES, categoryOf, isOwnFood } from "@/lib/food-categories";
 import { collapseTwins, dedupeTwins, rowName } from "@/lib/food-rows";
 import { useSavedMealRows } from "@/components/explore/saved-meals-card";
+import { TemplateGlyphShapes } from "@/components/templates/template-glyph";
+import { useDayTemplates } from "@/hooks/use-day-templates";
 import { CoachesCarousel } from "@/components/coaching/coaches-carousel";
 import { LeaderboardBanner } from "@/components/leaderboard/leaderboard-banner";
 import { coachingAvailable } from "@/lib/coaching-link";
@@ -99,6 +101,14 @@ const OWN_ROWS: { id: string; label: string; href: string | null; tone: Settings
     tone: "profile",
     glyph: <path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 8v8M8 12h8" />,
   },
+  // Ngày ăn mẫu: the language tile is indigo (V3-SPEC §3.4), the calendar with a filled day
+  {
+    id: "ngay-mau",
+    label: "Ngày ăn mẫu",
+    href: "/explore/ngay-mau",
+    tone: "language",
+    glyph: <TemplateGlyphShapes />,
+  },
 ];
 
 /** Gần đây, Yêu thích, Của bạn (Yêu thích, Bữa ăn của tôi, Món của tôi) and the "Giàu …" index: the Khám phá home when nothing is searched. */
@@ -107,6 +117,7 @@ export function ExploreSections() {
   // Re-renders when the catalogue arrives: Gần đây and Yêu thích are looked up in it
   const { foods: catalogue } = useCatalogFoods();
   const savedMeals = useSavedMealRows();
+  const { templates: dayTemplates } = useDayTemplates();
 
   // perf/live-bundle: worked out when the recents, the favourites or the catalogue change, not on every render.
   // `catalogue` is a new array whenever the catalogue changes (useCatalogFoods), so it stands for CATALOG_FOODS too.
@@ -134,6 +145,7 @@ export function ExploreSections() {
     favourites: hydrated ? `${favourites.length} món` : null,
     meals: hydrated ? `${savedMeals.length} bữa` : null,
     mine: `${mine.length} món`,
+    "ngay-mau": hydrated ? `${dayTemplates.length} mẫu` : null,
   };
 
   return (

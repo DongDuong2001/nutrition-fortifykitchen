@@ -49,10 +49,8 @@ export function ShareDay({ model }: { model: ShareModel }) {
             mode={{ kind: "day" }}
             readOnly
             isEmpty={false}
-            canCopyYesterday={false}
             onFood={noop}
             onMeal={noop}
-            onCopyYesterday={noop}
           />
           <NutrientColumn
             values={model.values}

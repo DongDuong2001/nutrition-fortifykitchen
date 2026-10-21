@@ -97,7 +97,7 @@ export function HomeHero({
                   <span className={PILL_FACE}>{p.label}</span>
                 </Link>
               ) : (
-                <button key={p.key} id={p.id} type="button" onClick={p.onClick} aria-label={p.ariaLabel} className={PILL}>
+                <button key={p.key} id={p.id} type="button" onClick={p.onClick} aria-label={p.ariaLabel} data-tour={p.tour} className={PILL}>
                   <span className={PILL_FACE}>{p.label}</span>
                 </button>
               )
