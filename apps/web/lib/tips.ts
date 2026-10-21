@@ -95,7 +95,7 @@ export const TIPS: readonly Tip[] = [
     id: "meal-add",
     target: "meal-add",
     title: "Thêm vào bữa bất kỳ lúc nào",
-    body: "Chạm vào nút + Thêm ở dòng tên bữa để thêm món vào bữa ăn đó.",
+    body: "Chạm nút + màu xanh ở dòng tên bữa để thêm món vào bữa ăn đó.",
     used: ["meal-add"],
     when: today,
   },
