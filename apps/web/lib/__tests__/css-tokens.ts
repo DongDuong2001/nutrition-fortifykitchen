@@ -5,7 +5,10 @@ import { join } from "node:path";
 // var() of another token resolves through it. Not a test file itself (vitest runs *.test.ts only).
 
 const css = readFileSync(join(__dirname, "../../app/globals.css"), "utf8");
-const theme = css.slice(css.indexOf("@theme {"), css.indexOf("\n}", css.indexOf("@theme {")));
+// `@theme static`: Tailwind v4 drops theme variables no utility uses, but lib/nutrient-colors and lib/food-group-colors name
+// tokens in a template string (var(--color-deep-cyan), --color-tile-*), which the scanner cannot see: static keeps them all.
+const themeStart = css.indexOf("@theme static {");
+const theme = css.slice(themeStart, css.indexOf("\n}", themeStart));
 
 /** The light value of `--color-<name>` as #RRGGBB, resolving var() chains; "" when it is missing or not a hex. */
 export function token(name: string): string {

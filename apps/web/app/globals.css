@@ -65,7 +65,9 @@
   }
 }
 
-@theme {
+/* static: lib/nutrient-colors and lib/food-group-colors name tokens in template strings (var(--color-deep-cyan),
+   --color-tile-*), which Tailwind's scanner cannot see; without static v4 leaves those variables out of the CSS. */
+@theme static {
   --font-sans: var(--font-manrope-face), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   /* V3-SPEC §2: Saira italic 800 for headers and key numbers (only the italic face is loaded, so display text is italic) */
   --font-display: var(--font-saira-face), sans-serif;
