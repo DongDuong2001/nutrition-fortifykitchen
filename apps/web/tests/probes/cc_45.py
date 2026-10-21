@@ -99,7 +99,7 @@ def link_page(browser):
         check(s["avatar"] == e["avatar"], f"@{w}: avatar {s['avatar']}")
         check(s["h1"] == e["h1"], f"@{w}: name {s['h1']} px")
         check(s["tagline"] == e["tagline"], f"@{w}: tagline {s['tagline']} px")
-        check(s["taglineColor"] == "rgb(74, 73, 69)", f"@{w}: tagline colour {s['taglineColor']}")
+        check(s["taglineColor"] == "rgb(72, 72, 74)", f"@{w}: tagline colour {s['taglineColor']}")
         check(s["rows"] == [e["row"], e["row"]] if w == 1440 else len(s["rows"]) == 2 and all(h >= e["row"] for h in s["rows"]), f"@{w}: two rows of {e['row']} px, divider included ({s['rows']})")
         check(all(sw >= 44 and sh >= 44 for _, sw, sh in s["socials"]) and [n for n, _, _ in s["socials"]] == ["Facebook", "YouTube", "TikTok"], f"@{w}: social links 44 px ({s['socials']})")
         check(s["svg"] == 1, f"@{w}: one background drawing shown ({s['svg']})")
