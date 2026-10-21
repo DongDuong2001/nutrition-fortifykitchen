@@ -8,6 +8,8 @@ import { BASE, run, startServer, stopServer, summary } from "./gate-lib.mjs";
 const started = Date.now();
 const results = [];
 results.push(await run("typecheck", "npx", ["tsc", "--noEmit"]));
+// DESIGN.md "Enforcement": the design lint (D-TYPE-06, D-COL-07, D-WRT-04, D-A11Y-02)
+results.push(await run("lint:design", "node", ["scripts/lint-design.mjs"]));
 results.push(await run("vitest", "npx", ["vitest", "run"]));
 results.push(await run("build:demo", "npm", ["run", "build:demo"]));
 
