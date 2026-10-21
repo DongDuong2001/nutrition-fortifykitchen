@@ -8,7 +8,7 @@
 4  Android back during the slide: the sheet closes once, the URL is the tab's, nothing is inert.
 5  Two taps on the add in the same frame add one entry, not two.
 7  The phone sheet's own behaviours (ported from PR #29's /add edits): the page behind is locked (counted with the portion sheet's lock),
-   the panel lifts above the keyboard by the `translate` property (never `transform`), the search field is focused once after the slide
+   the panel's bottom rides above the keyboard (--add-keyboard: it gets shorter, never moved, no transform) with the search field inside the visual viewport at 390x844 and 360x640, the search field is focused once after the slide
    (at once under reduced motion, not at all after a touch on the panel), and one letter waits 120 ms before the list follows it.
 6  The day under the sheet does not flip: Hôm nay on an older day, + (which carries no date for a read-only day) → the day stays.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/add_from_tabs.py
@@ -95,6 +95,35 @@ def clean_after(pg, label, expect_path):
         check(True, f"{label}: a tap on a nav item works")
     except Exception:
         check(False, f"{label}: a tap on a nav item works (still on {pg.evaluate('location.pathname')})")
+
+
+FAKE_VV = """
+(() => {
+  const t = new EventTarget();
+  Object.assign(t, { height: window.innerHeight, offsetTop: 0, width: window.innerWidth, offsetLeft: 0, scale: 1 });
+  Object.defineProperty(window, 'visualViewport', { value: t, configurable: true });
+  window.__vv = t;
+})();
+"""
+
+
+def keyboard_case(pg, label):
+    """A faked 300 px keyboard: the panel is shortened from below (--add-keyboard), never moved as a whole, and the search field is inside
+    the visual viewport (on Android the layout viewport does not shrink, so a lifted panel would lose its top)."""
+    before = pg.evaluate("(() => { const p = document.querySelector('[data-add-panel]'); const r = p.getBoundingClientRect(); return { top: r.top, bottom: r.bottom }; })()")
+    pg.evaluate("window.__vv.height = window.innerHeight - 300; window.__vv.dispatchEvent(new Event('resize'))")
+    pg.wait_for_timeout(120)
+    now = pg.evaluate(
+        "(() => { const p = document.querySelector('[data-add-panel]'); const r = p.getBoundingClientRect(); const f = p.querySelector('[data-testid=food-search]').getBoundingClientRect();"
+        " return { top: r.top, bottom: r.bottom, kb: p.style.getPropertyValue('--add-keyboard'), translate: p.style.translate, transform: p.style.transform,"
+        " fieldTop: f.top, fieldBottom: f.bottom, vvBottom: window.__vv.offsetTop + window.__vv.height, inner: window.innerHeight }; })()"
+    )
+    check(now["kb"] == "300px" and now["transform"] == "" and now["translate"] == "", f"{label}: the keyboard sets --add-keyboard and leaves transform and translate alone ({now['kb']!r})")
+    check(abs(now["top"] - before["top"]) < 1 and abs(now["bottom"] - (now["inner"] - 300)) < 1, f"{label}: the panel keeps its top ({round(now['top'])}) and its bottom rides above the keyboard ({round(now['bottom'])} = {now['inner']} - 300)")
+    check(now["fieldTop"] >= 0 and now["fieldBottom"] <= now["vvBottom"], f"{label}: the search field is inside the visual viewport ({round(now['fieldTop'])}–{round(now['fieldBottom'])} within 0–{round(now['vvBottom'])})")
+    pg.evaluate("window.__vv.height = window.innerHeight; window.__vv.dispatchEvent(new Event('resize'))")
+    pg.wait_for_timeout(120)
+    check(pg.evaluate("document.querySelector('[data-add-panel]').style.getPropertyValue('--add-keyboard')") == "", f"{label}: and the panel is whole again when the keyboard goes")
 
 
 def main():
@@ -215,14 +244,6 @@ def main():
         ctx.close()
 
         # ---- 7: PR #29's behaviours in the sheet
-        FAKE_VV = """
-        (() => {
-          const t = new EventTarget();
-          Object.assign(t, { height: window.innerHeight, offsetTop: 0, width: window.innerWidth, offsetLeft: 0, scale: 1 });
-          Object.defineProperty(window, 'visualViewport', { value: t, configurable: true });
-          window.__vv = t;
-        })();
-        """
         ctx = new_context(browser)
         ctx.add_init_script(FAKE_VV)
         pg = ctx.new_page()
@@ -234,14 +255,8 @@ def main():
         check(pg.evaluate("document.body.style.overflow") == "hidden", "the phone sheet locks the page behind it")
         focused = pg.evaluate("document.activeElement && document.activeElement.getAttribute('data-testid')")
         check(focused == "food-search", f"the search field has focus once the slide is over ({focused})")
-        # the keyboard: the panel lifts by the `translate` property, `transform` stays the drag's
-        pg.evaluate("window.__vv.height = window.innerHeight - 300; window.__vv.dispatchEvent(new Event('resize'))")
-        pg.wait_for_timeout(100)
-        lift = pg.evaluate("(() => { const p = document.querySelector('[data-add-panel]'); return { translate: p.style.translate, transform: p.style.transform, m42: new DOMMatrix(getComputedStyle(p).transform).m42 }; })()")
-        check("-300px" in lift["translate"] and lift["transform"] == "" and lift["m42"] == 0, f"the keyboard lifts the panel with `translate` and leaves `transform` alone ({lift})")
-        pg.evaluate("window.__vv.height = window.innerHeight; window.__vv.dispatchEvent(new Event('resize'))")
-        pg.wait_for_timeout(100)
-        check(pg.evaluate("document.querySelector('[data-add-panel]').style.translate") == "", "…and puts it back when the keyboard goes")
+        # the keyboard (faked, 300 px): the panel's bottom rides above it and the panel gets shorter; its top and the search field stay on the screen
+        keyboard_case(pg, "390x844")
         # one letter waits, two do not
         search = pg.locator("[data-add-panel] [data-testid=food-search]").first
         rows = lambda: pg.locator("[data-add-panel] button[data-food-row]:visible").count()
@@ -252,6 +267,17 @@ def main():
         pg.wait_for_timeout(500)
         late = rows()
         check(early == before_rows and late != before_rows, f"one letter: the list waits ~120 ms before it follows ({before_rows} → {early} → {late})")
+        search.fill("")
+        pg.wait_for_timeout(300)
+        # backspace "ab" → "a": the list stays the list of "ab" while the letter waits (it does not flash the whole catalogue)
+        search.fill("ab")
+        pg.wait_for_timeout(500)
+        ab_rows = rows()
+        search.press("Backspace")
+        pg.wait_for_timeout(30)
+        held = rows()
+        pg.wait_for_timeout(500)
+        check(held == ab_rows and ab_rows != before_rows, f"backspace ab → a: the list is still the list of ab while the letter waits ({before_rows} whole, {ab_rows} for ab, {held} at 30 ms)")
         search.fill("")
         pg.wait_for_timeout(300)
         # the portion sheet over it: still locked when it closes, free once both are gone
@@ -266,6 +292,17 @@ def main():
         close_x(pg)
         pg.wait_for_timeout(1200)
         check(pg.evaluate("document.body.style.overflow") == overflow_before, f"both gone: the page scrolls again ({pg.evaluate('document.body.style.overflow')!r} vs {overflow_before!r})")
+        ctx.close()
+        # the same on a small phone (360 x 640)
+        ctx = browser.new_context(viewport={"width": 360, "height": 640}, device_scale_factor=2, is_mobile=True, has_touch=True)
+        ctx.add_init_script("try { localStorage.setItem('h1t_settings_v1_demo', %r) } catch (e) {}" % json.dumps(SEED))
+        ctx.add_init_script(FAKE_VV)
+        pg = ctx.new_page()
+        open_tab(pg, "/app")
+        pg.locator("#mobile-add-fab").tap()
+        pg.locator("[data-add-panel] [data-testid=food-search]").first.wait_for(state="visible", timeout=8000)
+        pg.wait_for_timeout(900)
+        keyboard_case(pg, "360x640")
         ctx.close()
         # a touch on the panel during the slide: focus is not taken afterwards
         ctx = new_context(browser)

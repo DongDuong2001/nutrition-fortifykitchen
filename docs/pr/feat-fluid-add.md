@@ -151,6 +151,13 @@ Filmstrips (frames from just before the tap, each labelled with ms since it; a f
 
 **For Dong (PR #29, `feat/ui-ag-18`).** The edits #29 makes to `app/(app)/add/page.tsx` (scroll lock, keyboard lift, focus after the slide, the 1-letter debounce) are in `components/add/add-screen.tsx` and `hooks/use-food-browse.ts` here, where the page's code moved. When you merge main into #29, take main's version of those add files (the page is now a two-line wrapper); the rest of #29 (search.ts, api-client, scripts) does not touch them.
 
+## Night review fixes (21/10 03:00)
+
+| # | What | Where |
+|---|---|---|
+| 1 | **Keyboard: the panel is shortened, not lifted.** The panel is `fixed bottom-0 top-[8dvh]`; lifting it by the keyboard's height took its top, and the search field with it, off the screen on Android (the layout viewport does not shrink there). Now `--add-keyboard` (from `visualViewport` resize and scroll) is the panel's `bottom`, its top stays at 8dvh and the list inside it shrinks; no `translate`, no `transform`. Probe (`add_from_tabs.py`, a faked 300 px keyboard at 390×844 and 360×640): the variable is set, the top does not move, the bottom is `innerHeight − 300`, and the search field is inside the visual viewport. | `components/add/add-screen.tsx` |
+| 2 | **One letter keeps the previous list.** Backspace "ab" → "a" showed the whole catalogue for 120 ms; the list now stays the list of "ab" until the letter's 120 ms are over (a ref holds the last list query). Probe: backspace, 30 ms later the rows are still those of "ab". | `hooks/use-food-browse.ts` |
+
 ## Routing and back-button behaviour (changed)
 
 - **`/add` from a tab** (the + of the nav, a meal's + Thêm, the sidebar button): the URL is still `/add` (or `/add?meal=…&date=…`), but
@@ -199,6 +206,19 @@ gate:full: all green
 ```
 - `gate:fast` was not run per commit this round: the probes the changes touch (`add_from_tabs`, `fluid_add`, `cc_62_sheet`, `cc_57_strips`, and `cc_49` part 4 on a live build by hand) were run after each change, and gate:full covers the rest.
 - Each new check was run against the unfixed code first: the stuck sheet (item 1), the day flip (3) and the double add (4) failed there and pass now.
+
+### After the night review fixes (port 3126)
+
+```
+gate:full: 683 s wall clock
+  typecheck       ok      1 s
+  vitest          ok     10 s   (164 files, 2077 tests, 1 skipped)
+  build:demo      ok      9 s
+  test:align      ok     77 s
+  test:hydration  ok    114 s
+  probe:all       ok    662 s   probe:all: 113 PASS, 4 REPORT, 0 QUAR, 0 FAIL, 1 SKIP
+gate:full: all green
+```
 
 ## For Hao
 
