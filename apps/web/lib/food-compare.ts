@@ -1,6 +1,6 @@
 import { COUNTED_NUTRIENT_KEYS } from "./day-totals";
 import { formatAmount } from "./format";
-import type { FoodItem } from "./mock/foods";
+import type { FoodItem } from "./catalog";
 import { getNutrientDefinition } from "./nutrients";
 
 /** Compare foods (/foods/compare?ids=a,b,c): pure helpers, no React. Data is read-only from the food catalogue. */

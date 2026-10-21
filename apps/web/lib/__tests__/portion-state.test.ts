@@ -69,9 +69,9 @@ describe("portion math (coach rule 2: ×N multiplies whatever gram amount is set
     expect(withMult(grams(100), 2.6)).toEqual(grams(100, 3));
   });
 
-  it("hints the product, or how to start", () => {
+  it("hints the product once N is more than 1, and says nothing at 1", () => {
     expect(portionHint(grams(100, 3))).toBe("100 g × 3 = 300 g");
-    expect(portionHint(grams(150))).toBe("Bấm + để nhân 150 g này lên");
+    expect(portionHint(grams(150))).toBeNull();
   });
 });
 

@@ -1,7 +1,7 @@
 import { memo } from "react";
 import Link from "next/link";
 import { formatAmount } from "@/lib/format";
-import { pctLabel, pctOf, type HomeValues } from "@/lib/home";
+import { nutrientRowLabel, pctLabel, pctOf, type HomeValues } from "@/lib/home";
 import { isExtra, type ColumnGroup } from "@/lib/level-nutrients";
 import { getNutrientDefinition } from "@/lib/nutrients";
 import type { ShareKeyItem } from "@/lib/share-card";
@@ -114,7 +114,7 @@ export const NutrientColumn = memo(function NutrientColumn({
                     ? {
                         type: "button" as const,
                         onClick: () => onNutrient?.(id),
-                        "aria-label": `${def.name}, ${value === null ? "chưa có dữ liệu" : `${formatAmount(value, def.unit)} ${def.unit}`}, ${pctLabel(value, targets[id] ?? null)} mục tiêu${pct === null ? "" : `, ${getLevelLabel(getLevel(pct))}`}. Xem món góp phần`,
+                        "aria-label": nutrientRowLabel({ name: def.name, unit: def.unit, value, target: targets[id] ?? null, level: pct === null ? null : getLevelLabel(getLevel(pct)) }),
                         "aria-haspopup": "dialog" as const,
                       }
                     : {})}

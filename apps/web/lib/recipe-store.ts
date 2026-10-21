@@ -1,4 +1,4 @@
-import { MOCK_FOODS, catalogChanged, setHiddenFoodIds } from "./mock/foods";
+import { CATALOG_FOODS, catalogChanged, catalogFoodById, setHiddenFoodIds } from "./catalog";
 import { accountStorage, browserLocal, keyedStorage, type KeyValueStore } from "./storage-keys";
 import { apiClient, isLiveMode, repointOutboxFood, syncOfflineOutbox } from "./api-client";
 import { currentAccountId } from "./auth-actions";
@@ -21,7 +21,7 @@ import {
 
 /**
  * Where the signed-in account's recipes live (localStorage, under the account's keys; demo mode has its own twin)
- * and how they reach the catalogue: each recipe is put into MOCK_FOODS as a food, replacing the earlier copy, so
+ * and how they reach the catalogue: each recipe is put into CATALOG_FOODS as a food, replacing the earlier copy, so
  * search, the food page and the diary find it like any food. Client only.
  * Live mode: each version is also a server food (POST /foods/custom, per-100 g totals only; the ingredients stay on
  * the device), and entries are logged with it. `account` pins a read or write to one account; default the signed-in one.
@@ -52,7 +52,7 @@ function writeRecipes(list: Recipe[], account?: string | null): boolean {
   }
 }
 
-export const catalogueLookup: IngredientLookup = (foodId) => MOCK_FOODS.find((f) => f.id === foodId) ?? null;
+export const catalogueLookup: IngredientLookup = (foodId) => catalogFoodById(foodId) ?? null;
 
 /**
  * Puts the stored recipes into the catalogue as foods and drops recipe foods that are no longer stored. A recipe saved
@@ -60,10 +60,10 @@ export const catalogueLookup: IngredientLookup = (foodId) => MOCK_FOODS.find((f)
  * out of the lists (the recipe stands for them).
  */
 export function syncRecipeFoods(recipes: Recipe[] = readRecipes()): void {
-  for (let i = MOCK_FOODS.length - 1; i >= 0; i--) {
-    if (isRecipeId(MOCK_FOODS[i].id)) MOCK_FOODS.splice(i, 1);
+  for (let i = CATALOG_FOODS.length - 1; i >= 0; i--) {
+    if (isRecipeId(CATALOG_FOODS[i].id)) CATALOG_FOODS.splice(i, 1);
   }
-  MOCK_FOODS.unshift(...recipes.map((r) => recipeToFood(flattenRecipe(r, recipes), catalogueLookup)));
+  CATALOG_FOODS.unshift(...recipes.map((r) => recipeToFood(flattenRecipe(r, recipes), catalogueLookup)));
   setHiddenFoodIds(recipes.flatMap((r) => [...(r.oneOff ? [r.id] : []), ...(r.serverFoodId ? [r.serverFoodId] : []), ...(r.pastServerFoodIds ?? [])]));
   catalogChanged();
 }

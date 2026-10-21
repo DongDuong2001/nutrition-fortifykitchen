@@ -1,4 +1,4 @@
-import type { FoodItem } from "./mock/foods";
+import type { FoodItem } from "./catalog";
 import PAIRS from "./data/raw-cooked-pairs.slim.json";
 import GROUP_MEDIANS from "./data/raw-cooked-group-yields.slim.json";
 

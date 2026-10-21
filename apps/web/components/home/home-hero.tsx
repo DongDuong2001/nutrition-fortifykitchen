@@ -9,7 +9,7 @@ import { useCountUpText } from "@/lib/count-up";
 import { Expand } from "@/components/ui/expand";
 
 // The 24 px pill sits inside a 44 px hit area: padding that the negative margin takes back
-const PILL = "-m-2.5 inline-flex shrink-0 items-center border-0 bg-transparent p-2.5 text-on-dark no-underline hover:text-sky";
+const PILL = "m-on-ink-press -m-2.5 inline-flex shrink-0 items-center border-0 bg-transparent p-2.5 text-on-dark no-underline hover:text-sky";
 const PILL_FACE =
   "inline-flex h-6 items-center rounded-full border border-muted-on-dark px-2 text-xs font-bold leading-none whitespace-nowrap";
 

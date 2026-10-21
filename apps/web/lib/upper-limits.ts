@@ -4,7 +4,7 @@
  * (vitamin A, magnesium, vitamin E, niacin, folate) counts only foods of the supplement category, not ordinary food. A nutrient with
  * no UL never gets a note. Pure.
  */
-import { catalogFoodById } from "./mock/foods";
+import { catalogFoodById } from "./catalog";
 import { formatAmount } from "./format";
 import type { NutrientSource } from "./nutrient-sources";
 import type { UpperLimit } from "./rda";

@@ -276,6 +276,20 @@ export function pctLabel(value: number | null, target: number | null): string {
   return `${formatNumber(pct)}%`;
 }
 
+/**
+ * What a screen reader says for one row of the nutrient column: the name, the amount against the real target, the share and the
+ * level. It names the target itself ("mục tiêu 1.000 mg"), and leaves out what is unknown: the row used to say "— mục tiêu" (a dash
+ * read aloud) when the value or the target was missing.
+ */
+export function nutrientRowLabel(input: { name: string; unit: string; value: number | null; target: number | null; level: string | null }): string {
+  const { name, unit, value, target, level } = input;
+  const amount = value === null ? "chưa có dữ liệu" : `${formatAmount(value, unit)} ${unit}`;
+  const goal = target === null || target <= 0 ? "" : value === null ? `, mục tiêu ${formatAmount(target, unit)} ${unit}` : ` trên mục tiêu ${formatAmount(target, unit)} ${unit}`;
+  const pct = pctOf(value, target);
+  const share = pct === null ? "" : `, ${pctLabel(value, target)}`;
+  return `${name}, ${amount}${goal}${share}${level ? `, ${level}` : ""}. Xem món góp phần`;
+}
+
 /** "2 món chưa rõ kcal": the foods of the shown set whose energy is unknown. Null when every food has a value. */
 export function unknownKcalNote(entries: readonly Pick<HomeEntry, "kcal">[]): string | null {
   const n = entries.filter((e) => e.kcal === null).length;

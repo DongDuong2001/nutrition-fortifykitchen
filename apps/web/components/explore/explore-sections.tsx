@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import { useDiary } from "@/lib/diary-store";
-import { MOCK_FOODS } from "@/lib/mock/foods";
+import { CATALOG_FOODS } from "@/lib/catalog";
 import { useCatalogFoods } from "@/hooks/use-catalog-foods";
 import { resolveFavourites } from "@/lib/favourites";
 import { resolveRecent } from "@/lib/recent-foods";
@@ -31,20 +31,26 @@ export function ExploreSections() {
   // Re-renders when the catalogue arrives: Gần đây and Yêu thích are looked up in it
   const { foods: catalogue } = useCatalogFoods();
 
+  // perf/live-bundle: worked out when the recents, the favourites or the catalogue change, not on every render.
+  // `catalogue` is a new array whenever the catalogue changes (useCatalogFoods), so it stands for CATALOG_FOODS too.
   // cc-67: one card per food, whatever state it was logged in
-  const recents = dedupeTwins(
-    recentFoods.flatMap((r) => {
-      const resolved = resolveRecent(r, MOCK_FOODS);
-      return resolved ? [resolved] : [];
-    }),
-    (r) => r.food
-  )
-    .slice(0, SHOWN)
-    .map(({ food, grams, label }) => ({ food, grams, label }));
+  const recents = useMemo(
+    () =>
+      dedupeTwins(
+        recentFoods.flatMap((r) => {
+          const resolved = resolveRecent(r, CATALOG_FOODS);
+          return resolved ? [resolved] : [];
+        }),
+        (r) => r.food
+      )
+        .slice(0, SHOWN)
+        .map(({ food, grams, label }) => ({ food, grams, label })),
+    [recentFoods, catalogue]
+  );
 
-  const favourites = dedupeTwins(resolveFavourites(favouriteIds, MOCK_FOODS), (f) => f);
+  const favourites = useMemo(() => dedupeTwins(resolveFavourites(favouriteIds, CATALOG_FOODS), (f) => f), [favouriteIds, catalogue]);
   // The sample user food (Bột củ dền) is demo-only: a new account owns nothing until it creates a food
-  const mine = catalogue.filter(isOwnFood);
+  const mine = useMemo(() => catalogue.filter(isOwnFood), [catalogue]);
 
   return (
     <>

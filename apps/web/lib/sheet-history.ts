@@ -19,7 +19,8 @@ export const SHEET_BACK_DELAY_MS = 50;
 // The open sheets with an entry, the topmost last
 const openIds: number[] = [];
 let lastId = 0;
-let sheetNavigating = false;
+// How many closing sheets must not take their entry back themselves (a navigation takes it, or goes back past it)
+let sheetNavigating = 0;
 // A closed sheet whose entry is about to be taken back
 let pendingBack: { id: number; timer: ReturnType<typeof setTimeout> } | null = null;
 
@@ -54,8 +55,8 @@ export function closeSheetEntry(id: number, href: string, popped: boolean): void
   const wasTop = openIds[openIds.length - 1] === id;
   const at = openIds.indexOf(id);
   if (at >= 0) openIds.splice(at, 1);
-  if (sheetNavigating) {
-    sheetNavigating = false;
+  if (sheetNavigating > 0) {
+    sheetNavigating--;
     return;
   }
   if (popped || !wasTop) return;
@@ -80,8 +81,24 @@ export function navigateFromSheet(router: SheetRouter, href: string): void {
     return router.replace(href);
   }
   if (top !== undefined && topSheetId() === top) {
-    sheetNavigating = true;
+    sheetNavigating++;
     return router.replace(href);
   }
   router.push(href);
+}
+
+/**
+ * The page under some sheets is about to be left by going back past their entries (the add sheet closing after an add,
+ * with a portion or kcal sheet still open over it). Those sheets must not take their entry back themselves while they
+ * close; this says how many entries sit on top of the page's own, so the caller can go back past all of them at once.
+ */
+export function takeBackSheetEntries(): number {
+  let count = openIds.length;
+  if (pendingBack && entryOnTop() === pendingBack.id) {
+    clearTimeout(pendingBack.timer);
+    pendingBack = null;
+    count++;
+  }
+  sheetNavigating += openIds.length;
+  return count;
 }

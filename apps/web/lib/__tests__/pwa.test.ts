@@ -80,7 +80,7 @@ describe("a service-worker update never reloads while the outbox is busy (cc-68)
 
   it("the update offer reads the sync summary before it asks the worker to take over", () => {
     const source = readFileSync(path.resolve(__dirname, "../../components/pwa/update-offer.tsx"), "utf8");
-    expect(source).toMatch(/canApplyUpdate\(\{ tapped, busy \}\)/);
+    expect(source).toMatch(/canApplyUpdate\(\{ tapped, inBackground, busy, editing \}\)/);
     // The tap itself only asks for a send; SKIP_WAITING is posted from the effect that waits for an idle outbox
     expect(source.indexOf("SKIP_WAITING")).toBeGreaterThan(source.indexOf("canApplyUpdate"));
   });

@@ -66,3 +66,13 @@ jobs:
           docker cp "$id:/srv/web/.next/server/app/page_client-reference-manifest.js" root-manifest.js
           docker rm "$id" >/dev/null
           apps/web/scripts/check-root-page.sh build.log root-manifest.js
+      # perf/server-image: the image runs `node server.js` (the standalone server). Run it as the VPS does and check that it
+      # serves /, /app, /signin, a redirect source (308), /sw.js, robots, sitemap and manifest, with the security headers
+      # (CSP, HSTS, X-Frame-Options DENY, nosniff, Referrer-Policy, Permissions-Policy) and no app-side compression
+      - name: The image runs (node server.js) and serves the pages, a redirect, /sw.js and the security headers
+        run: |
+          echo "web image size: $(docker image inspect web-guard --format '{{.Size}}') bytes"
+          docker run -d --name web-run -p 3000:3000 web-guard
+          for i in $(seq 1 30); do curl -fsS -o /dev/null http://127.0.0.1:3000/ && break; sleep 1; done
+          ALIGN_BASE_URL=http://127.0.0.1:3000 python3 apps/web/tests/probes/server_image.py || { docker logs web-run; exit 1; }
+          docker rm -f web-run >/dev/null

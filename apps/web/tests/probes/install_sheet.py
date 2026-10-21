@@ -8,8 +8,8 @@ All at 390 px (a few checks at 360 and 1440). Needs a production demo build (npm
 - standalone (matchMedia stub) -> never; 1440 desktop -> never
 - Để sau and Esc: dismissCount + 1 and a 3-day snooze that survives a new tab; an expired snooze shows again; 3 dismissals never
 - Cài đặt › Ứng dụng › "Cài ứng dụng lên điện thoại" opens it any time and does not snooze; hidden in standalone
-- the pop-up waits for the first-visit tip and for the first-run tour (tour and tips switched on for those checks),
-  and shows once the tip is dismissed / the tour is skipped; a tour left halfway blocks it for the day
+- the pop-up comes before a first-visit tip (one interruption per app open) and waits for the first-run tour (tour and tips switched on for those checks),
+  and shows once the tour is skipped; a tour left halfway blocks it for the day
 - 44 px targets, no horizontal scroll at 360 and 390, an h2 per view; screenshots of all four views
 Screenshots: .screenshots/install-*.png
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/install_sheet.py
@@ -402,16 +402,16 @@ def put_flags(pg, flags):
 def onboarding_flow(browser):
     _seed.onboarding(True)
     try:
-        # a first-visit tip is due on Hôm nay: the pop-up waits, then follows the tip
+        # a first-visit tip is due on Hôm nay too: the pop-up comes first (fix/polish-1020: Có gì mới > the pop-up > a tip, one per app open),
+        # with no tip beside it and none after it in the same open
         ctx = phone(browser, IPHONE)
         pg = ctx.new_page()
         pg.goto(BASE + "/app", wait_until="networkidle")
-        pg.get_by_text("Mẹo · lần đầu").wait_for(state="visible", timeout=8000)
-        pg.wait_for_timeout(1500)
-        check(install_dialog(pg).count() == 0, "tip open: the install pop-up waits")
-        pg.get_by_role("button", name="Đã hiểu").click()
         install_dialog(pg).wait_for(state="visible", timeout=8000)
-        check(True, "tip dismissed: the install pop-up follows")
+        check(pg.get_by_text("Mẹo · lần đầu").count() == 0, "the install pop-up comes first, with no tip beside it")
+        pg.get_by_role("button", name="Để sau").first.click()
+        pg.wait_for_timeout(3500)
+        check(pg.get_by_text("Mẹo · lần đầu").count() == 0, "no tip follows it in the same app open (one interruption per open)")
         ctx.close()
 
         # the tour runs: no pop-up; skipping ends it and the pop-up comes

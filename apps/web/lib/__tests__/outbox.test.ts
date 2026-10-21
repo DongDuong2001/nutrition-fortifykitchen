@@ -263,6 +263,81 @@ describe("S7: delete racing an add", () => {
   });
 });
 
+describe("Hoàn tác right after an add (the toast offers it after every add)", () => {
+  const ids = (n: number) => Array.from({ length: n }, (_, i) => `1111111${i}-1111-4111-8111-111111111111`);
+  const addOf = (id: string) => apiClient.addEntry({ id, foodId: FOOD, grams: 100, mealSlot: "breakfast", date: "2026-10-18" });
+
+  /** A server that keeps the entries it was given: a POST puts one in (after `latency` ms), a DELETE takes it out; calls in order. */
+  function entryServer(latency: number) {
+    const entries = new Set<string>();
+    const calls: string[] = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string, init?: RequestInit) => {
+        const method = init?.method ?? "GET";
+        const path = String(url).replace("https://api.test/api/v1", "").split("?")[0];
+        calls.push(`${method} ${path}`);
+        await new Promise((resolve) => setTimeout(resolve, latency));
+        const del = path.match(/^\/entries\/([0-9a-f-]+)$/);
+        if (method === "POST" && /^\/days\/[\d-]+\/entries$/.test(path)) entries.add(JSON.parse(String(init?.body)).id);
+        else if (method === "DELETE" && del) entries.delete(del[1]);
+        return new Response(method === "DELETE" ? null : "{}", { status: method === "DELETE" ? 204 : 201 });
+      })
+    );
+    return { entries, calls };
+  }
+
+  it("undo in the same tick as the add: the POST never leaves the device, nothing is sent, nothing is left", async () => {
+    const { entries, calls } = entryServer(5);
+    const adding = addOf(ID);
+    const deleting = apiClient.deleteEntry(ID);
+    expect((await adding).state).toBe("saved");
+    expect((await deleting).state).toBe("saved");
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    expect(calls).toEqual([]);
+    expect(entries.size).toBe(0);
+    expect(idb.values("outbox")).toEqual([]);
+  });
+
+  it("undo at any moment of the add's life (before the request, in the air, after the answer): the server ends with no entry, the DELETE after the POST", async () => {
+    for (const wait of [0, 1, 3, 8, 15, 30, 60]) {
+      killPage();
+      await loadSyncEngine();
+      const { entries, calls } = entryServer(20);
+      const adding = addOf(ID);
+      await new Promise((resolve) => setTimeout(resolve, wait));
+      const deleting = apiClient.deleteEntry(ID);
+      await Promise.all([adding, deleting]);
+      await vi.waitFor(() => expect(idb.values("outbox")).toEqual([]), { timeout: 2000 });
+      expect(entries.size, `undo ${wait} ms after the add: no orphan on the server (${calls.join(", ")})`).toBe(0);
+      const post = calls.findIndex((c) => c.startsWith("POST"));
+      const del = calls.findIndex((c) => c.startsWith("DELETE"));
+      if (post >= 0) expect(del, `undo ${wait} ms after the add: the DELETE goes after the POST (${calls.join(", ")})`).toBeGreaterThan(post);
+      else expect(del, `undo ${wait} ms after the add: nothing was sent at all`).toBe(-1);
+    }
+  });
+
+  it("a tray add of 3, undone at once, leaves the server with none of the three", async () => {
+    for (const wait of [0, 4, 12, 30]) {
+      killPage();
+      await loadSyncEngine();
+      const { entries, calls } = entryServer(15);
+      const list = ids(3);
+      const adds = list.map((id) => addOf(id));
+      await new Promise((resolve) => setTimeout(resolve, wait));
+      const deletes = list.map((id) => apiClient.deleteEntry(id));
+      await Promise.all([...adds, ...deletes]);
+      await vi.waitFor(() => expect(idb.values("outbox")).toEqual([]), { timeout: 2000 });
+      expect([...entries], `undo ${wait} ms after a tray add of 3 (${calls.join(", ")})`).toEqual([]);
+      for (const id of list) {
+        const post = calls.indexOf(`POST /days/2026-10-18/entries`);
+        const del = calls.indexOf(`DELETE /entries/${id}`);
+        if (del >= 0) expect(post, `${id}: the DELETE goes after a POST`).toBeGreaterThanOrEqual(0);
+      }
+    }
+  });
+});
+
 describe("S6: profile, weight and favourites go through the outbox, newest wins", () => {
   const profile = { sex: "male" as const, birthYear: 2000, weightKg: 70, goal: "maintain" as const };
 

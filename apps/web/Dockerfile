@@ -1,4 +1,4 @@
-# Production image for apps/web: plain `next start` (no standalone output).
+# Production image for apps/web: the standalone server (`output: "standalone"` in next.config.ts).
 # NEXT_PUBLIC_* values are inlined at build time, so they come in as build args.
 
 FROM node:22-alpine AS deps
@@ -26,7 +26,8 @@ ENV NEXT_PUBLIC_API_MODE=$NEXT_PUBLIC_API_MODE \
 
 COPY --from=deps /srv/web/node_modules ./node_modules
 COPY . .
-RUN npm run build
+# The webpack cache (300+ MB) is only for the next build on this machine; nothing below copies it
+RUN npm run build && rm -rf .next/cache
 
 FROM node:22-alpine AS runner
 WORKDIR /srv/web
@@ -35,9 +36,12 @@ ENV NEXT_TELEMETRY_DISABLED=1 \
     PORT=3000 \
     HOSTNAME=0.0.0.0
 
-# next.config.ts is loaded by `next start`, so the app tree and node_modules stay as built.
-COPY --from=builder --chown=node:node /srv/web ./
+# server.js with next.config.ts already applied and the node_modules it traced; static files and public are not in the
+# standalone folder, so they are copied next to it. Everything is the node user's, so .next stays writable.
+COPY --from=builder --chown=node:node /srv/web/.next/standalone ./
+COPY --from=builder --chown=node:node /srv/web/.next/static ./.next/static
+COPY --from=builder --chown=node:node /srv/web/public ./public
 
 USER node
 EXPOSE 3000
-CMD ["node_modules/.bin/next", "start", "-p", "3000"]
+CMD ["node", "server.js"]

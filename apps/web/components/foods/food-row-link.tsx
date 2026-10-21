@@ -9,14 +9,17 @@ export interface FoodRowLinkProps {
   /** Right side, bold: kcal or an amount. */
   value?: string;
   withBorderTop?: boolean;
+  /** The food's category as data-category, for the probes (fix/rich-tabs) */
+  category?: string;
 }
 
 /** One food in a Khám phá list: name and meta on the left, a figure and a chevron on the right. Min 48 px. */
-export function FoodRowLink({ href, name, meta, value, withBorderTop = true }: FoodRowLinkProps) {
+export function FoodRowLink({ href, name, meta, value, withBorderTop = true, category }: FoodRowLinkProps) {
   return (
     <Link
       href={href}
       data-food-row
+      data-category={category}
       className={`flex min-h-14 items-center gap-3 py-2 text-text no-underline m-tint transition-press ${
         withBorderTop ? "border-t border-divider" : ""
       }`}

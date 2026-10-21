@@ -3,10 +3,10 @@ import { RICH_NUTRIENT_IDS, richInFoods, richName } from "../rich-in";
 import { getNutrientDefinition } from "../nutrients";
 import type { FoodItem } from "../mock/foods";
 
-const food = (id: string, calcium: number | null, grams = 100): FoodItem => ({
+const food = (id: string, calcium: number | null, grams = 100, category: FoodItem["category"] = "dam"): FoodItem => ({
   id,
   nameVi: id,
-  category: "dam",
+  category,
   source: "USDA",
   servings: [{ label: `${grams} g`, grams }],
   nutrients: { calcium },
@@ -16,19 +16,42 @@ describe("richInFoods", () => {
   const foods = [food("a", 100), food("b", 300), food("c", null), food("d", 0), food("e", 200, 50)];
 
   it("ranks by amount per 100 g, highest first, and leaves out unknown and zero", () => {
-    const rows = richInFoods(foods, "calcium", "per100", 1000);
+    const rows = richInFoods(foods, "calcium", "per100", 1000, "food");
     expect(rows.map((r) => r.food.id)).toEqual(["b", "e", "a"]);
     expect(rows[0]).toMatchObject({ amount: 300, pct: 30, basis: "100 g" });
   });
 
   it("per portion scales to the first serving", () => {
-    const rows = richInFoods(foods, "calcium", "portion", 1000);
+    const rows = richInFoods(foods, "calcium", "portion", 1000, "food");
     expect(rows.map((r) => r.food.id)).toEqual(["b", "a", "e"]);
     expect(rows.find((r) => r.food.id === "e")).toMatchObject({ amount: 100, pct: 10, basis: "50 g" });
   });
 
   it("pct is null when the target is unknown", () => {
-    expect(richInFoods(foods, "calcium", "per100", null)[0].pct).toBeNull();
+    expect(richInFoods(foods, "calcium", "per100", null, "food")[0].pct).toBeNull();
+  });
+
+  // fix/rich-tabs: supplements (bo_sung) hold far more per 100 g than any food, so they get their own tab
+  describe("food or supplement", () => {
+    const mixed = [...foods, food("pill", 50000, 1, "bo_sung"), food("powder", 900, 30, "bo_sung"), food("pill-none", null, 1, "bo_sung"), food("pill-zero", 0, 1, "bo_sung")];
+
+    it("a supplement never appears among the foods", () => {
+      const ids = richInFoods(mixed, "calcium", "per100", 1000, "food").map((r) => r.food.id);
+      expect(ids).toEqual(["b", "e", "a"]);
+      expect(richInFoods(mixed, "calcium", "portion", 1000, "food").every((r) => r.food.category !== "bo_sung")).toBe(true);
+    });
+
+    it("a food never appears among the supplements", () => {
+      const rows = richInFoods(mixed, "calcium", "portion", 1000, "supplement");
+      expect(rows.every((r) => r.food.category === "bo_sung")).toBe(true);
+      // Same ranking and null / 0 rules: per usual serving, highest first, unknown and zero left out
+      expect(rows.map((r) => r.food.id)).toEqual(["pill", "powder"]);
+      expect(rows[0]).toMatchObject({ amount: 500, pct: 50, basis: "1 g" });
+    });
+
+    it("an empty list when there is no supplement", () => {
+      expect(richInFoods(foods, "calcium", "portion", 1000, "supplement")).toEqual([]);
+    });
   });
 
   it("lists the eight nutrients of the brief", () => {

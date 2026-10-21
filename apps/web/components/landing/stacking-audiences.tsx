@@ -79,8 +79,10 @@ export function StackingAudiences() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   // cc-64 (P3): a card shrinks a little as the next ones stack over it (desktop). One measure per frame at most, the
-  // scale written straight to the card's style: no React render per scroll event
+  // scale written straight to the card's style: no React render per scroll event. Not at all under reduced motion: the cards
+  // still stick, and stay their size.
   useEffect(() => {
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
     let frame = 0;
     const measure = () => {
       frame = 0;

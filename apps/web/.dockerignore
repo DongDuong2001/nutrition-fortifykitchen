@@ -9,3 +9,12 @@ tests/probes/out
 .DS_Store
 Dockerfile
 .dockerignore
+# perf/server-image: only what `npm run build` reads goes into the build (the prebuild step slims tests/fixtures)
+**/*.md
+tests
+!tests/fixtures
+**/__tests__
+vitest.config.ts
+scripts
+!scripts/slim-pairs.mjs
+!scripts/slim-dishes.mjs

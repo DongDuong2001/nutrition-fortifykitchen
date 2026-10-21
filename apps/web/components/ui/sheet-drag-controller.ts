@@ -1,12 +1,12 @@
-import { pushSample, releaseSpring, releaseVelocity, shouldDismiss, type DragSample } from "@/lib/sheet-physics";
+import { pushSample, releasePlan, releaseVelocity, shouldDismiss, type DragSample, type ReleasePlan } from "@/lib/sheet-physics";
 
 // cc-62: the drag of a sheet (Sheet and the /add panel), without React so it can be tested with plain objects.
 // The sheet follows the finger 1:1 (an inline transform while data-dragging turns the CSS transition off); the scrim
 // fades with it. On release the decision comes from lib/sheet-physics (velocity over the last 80 ms, momentum
-// projection); the motion then is a spring from the live position with the release velocity, using motion's animate,
-// loaded on the first pointerdown so it never is in a route's first-load JS. A new grab stops a running spring where it
-// is, and a sheet that is sliding away can be grabbed back. Reduced motion, or motion not loaded yet: the CSS transition
-// finishes from where the finger let go, as before.
+// projection); the motion then is one WAAPI animation started in that same pointerup (no frame between the drag and the
+// settle): a spring from the live position that begins with the finger's own speed (an easing sampled into linear(), no
+// library, nothing to load). A new grab stops a running spring where it is, and a sheet that is sliding away can be grabbed
+// back. Reduced motion: the CSS transition finishes from where the finger let go.
 
 /** What the controller needs of the sheet element (an HTMLElement in the app, a plain object in tests). */
 export interface DragElement {
@@ -22,7 +22,8 @@ export interface SpringControls {
   then(onResolve: () => void): unknown;
 }
 
-export type AnimateFn = (el: DragElement, keyframes: { transform: string[] }, options: ReturnType<typeof releaseSpring>) => SpringControls;
+/** Runs a release (the host plays it with the Web Animations API). */
+export type AnimateFn = (el: DragElement, plan: ReleasePlan) => SpringControls;
 
 export interface DragHost {
   sheet(): DragElement | null;
@@ -30,10 +31,10 @@ export interface DragHost {
   /** The sheet's current offset in px (the live transform, also mid-animation). */
   readOffset(el: DragElement): number;
   reducedMotion(): boolean;
-  /** motion's animate once it has loaded, else null (the release then uses the CSS transition). */
+  /** The release animation, or null when there is none to play (the release then uses the CSS transition). */
   animate(): AnimateFn | null;
-  /** Called on the first pointerdown: start loading motion. */
-  load(): void;
+  /** Whether the browser's linear() easing is there (else the release uses the sheet curve, with no velocity). */
+  linearSupported?(): boolean;
   /** The release closes the sheet (called at once, before the slide). */
   onDismiss(): void;
   /** A sheet that is sliding away was grabbed: true when the host opened it again (the drag goes on), false to ignore the grab. */
@@ -79,7 +80,6 @@ export function createSheetDrag(host: DragHost) {
 
     down(pointerId: number, clientY: number, timeStamp: number) {
       if (drag) return false;
-      host.load();
       const el = host.sheet();
       // Read where the sheet is right now (mid-spring or mid-transition), then stop what moves it and pin it there
       const base = el ? host.readOffset(el) : 0;
@@ -122,18 +122,18 @@ export function createSheetDrag(host: DragHost) {
       const velocity = releaseVelocity(d.samples, timeStamp);
       const dismiss = !cancelled && shouldDismiss(d.pos, velocity, height);
       const animate = host.reducedMotion() ? null : host.animate();
+      // Played first, in this pointerup: nothing below (the host's close work) can sit between the drag and the settle
+      const controls = animate ? animate(el, releasePlan(d.pos, dismiss, velocity, height, host.linearSupported?.() ?? true)) : null;
       if (dismiss) {
         el.dataset.state = "closed";
         host.onDismiss();
       }
-      if (!animate) {
+      if (!controls) {
         // The CSS transition takes it from where the finger let go
         el.removeAttribute("data-dragging");
         el.style.transform = "";
         return;
       }
-      const target = dismiss ? height : 0;
-      const controls = animate(el, { transform: [`translateY(${d.pos}px)`, `translateY(${target}px)`] }, releaseSpring(dismiss, velocity));
       spring = controls;
       settle = new Promise<void>((resolve) => {
         resolveSettle = resolve;

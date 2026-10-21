@@ -313,7 +313,7 @@ export function FoodList({
   share?: boolean;
   /** Select mode (Chọn nhiều món): rows are checkboxes and nothing else is pressable. */
   select?: SelectProps;
-  /** The day shown: rows of another day are a new list, nothing animates when it changes (cc-51). */
+  /** The day shown: rows of another day are a new list, so no row enters, leaves or moves when it changes (cc-51); the day itself slides in (home-screen .m-day-*). */
   dayKey?: string;
   /** Pull to refresh (cc-51): today only. */
   onPullRefresh?: () => Promise<void>;
@@ -419,7 +419,7 @@ export function FoodList({
                 onClick={() => onMeal(meal.slot)}
                 data-testid="meal-header"
                 style={noSelect}
-                className="flex min-w-0 flex-1 cursor-pointer flex-wrap items-center self-stretch justify-between gap-x-2 gap-y-0.5 border-0 bg-transparent px-0 py-0.5 text-left text-inherit"
+                className="relative flex min-w-0 flex-1 cursor-pointer flex-wrap items-center self-stretch justify-between gap-x-2 gap-y-0.5 border-0 bg-transparent px-0 py-0.5 text-left text-inherit before:absolute before:inset-x-0 before:-top-1 before:bottom-0 before:content-[''] lg:before:-top-1.5"
               >
                 <span className={pill.label}>{meal.label}</span>
                 <span className={`${pill.kcal} ${isDropTarget ? "shrink whitespace-normal text-right" : ""}`}>

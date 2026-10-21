@@ -206,6 +206,7 @@ function CreateFoodInner() {
       />
 
       {/* Form Content */}
+      <main className="flex flex-1 flex-col">
       <form onSubmit={handleSubmit} className="flex-1 w-full max-w-[560px] mx-auto p-4 flex flex-col gap-4">
         {!editId && (
           <div role="group" aria-label="Cách tạo món" data-tour="create-mode" className="flex flex-col gap-2">
@@ -466,6 +467,7 @@ function CreateFoodInner() {
         </>
         )}
       </form>
+      </main>
     </AppShell>
   );
 }

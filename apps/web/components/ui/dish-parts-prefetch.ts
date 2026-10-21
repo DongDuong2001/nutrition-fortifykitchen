@@ -1,4 +1,4 @@
-import type { FoodItem } from "@/lib/mock/foods";
+import type { FoodItem } from "@/lib/catalog";
 
 type DishPartsModule = typeof import("@/components/ui/dish-parts");
 
