@@ -14,12 +14,7 @@ import { MINH_HAO_LABEL, MINH_HAO_SLUG, fortifyKitchenFoods } from "@/lib/fortif
 const SHOWN = 8;
 
 /** The card's second line: the food's first portion and its kcal ("1 phần lẻ (150 g sống) · 205 kcal"). */
-export const minhHaoMeta = (food: FoodItem): { meta: string; kcal?: string } => {
-  const portion = food.servings[0]?.label ?? "100 g";
-  const kcal = foodRowKcal(food);
-  // The kcal is the bold link-coloured part (V3); a food without energy says so in plain text
-  return kcal ? { meta: portion, kcal } : { meta: `${portion} · Chưa có kcal` };
-};
+export const minhHaoMeta = (food: FoodItem): string => `${food.servings[0]?.label ?? "100 g"} · ${foodRowKcal(food) ?? "Chưa có kcal"}`;
 
 /**
  * "Đồ ăn của Minh Hào" (Hao 21/10): the catalogue's Fortify Kitchen foods as a carousel near the top of Khám phá, one card
@@ -56,7 +51,7 @@ export function MinhHaoCarousel() {
       }
     >
       {rows.slice(0, SHOWN).map((food) => (
-        <FoodCardLink key={food.id} href={`/foods/${food.id}`} name={rowName(food)} {...minhHaoMeta(food)} tag={<SourceTag food={food} />} />
+        <FoodCardLink key={food.id} href={`/foods/${food.id}`} name={rowName(food)} meta={minhHaoMeta(food)} tag={<SourceTag food={food} />} />
       ))}
     </Carousel>
   );

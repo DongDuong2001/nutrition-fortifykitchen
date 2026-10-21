@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { AppHeader } from "@/components/ui/app-header";
 import { CreateFoodButton } from "@/components/foods/create-food-button";
 import { ChipGroup } from "@/components/ui/chip-group";
-import { IconTile } from "@/components/ui/icon-tile";
 import { FoodListCard } from "@/components/foods/food-list-card";
 import { FoodSearchField } from "@/components/foods/food-search-field";
 import { ExploreSections } from "@/components/explore/explore-sections";
@@ -28,7 +27,7 @@ function QueryProvider({ children }: { children: React.ReactNode }) {
 
 function SearchField() {
   const { query, setQuery } = useContext(QueryContext);
-  return <FoodSearchField value={query} onChange={setQuery} className="border-transparent! bg-card! shadow-field lg:max-w-[656px]" />;
+  return <FoodSearchField value={query} onChange={setQuery} className="bg-surface lg:max-w-[656px]" />;
 }
 
 /** Search results, or the sections when nothing is typed. The field keeps up with the keys; this follows when it can. */
@@ -65,27 +64,24 @@ function Results() {
 }
 
 /**
- * Khám phá (IA v2, V3): find a food and understand it. The large title, the search field, then Đồ ăn của Minh Hào, Món
- * giàu vi chất, Nhóm món, Gần đây and Của bạn. A group or a rich-in list is a pushed screen; a food opens its detail.
- * From 1024 px the category chips take the place of Nhóm món (the desktop layout is unchanged).
+ * Khám phá (IA v2): find a food and understand it. Search, the category chips, then Gần đây, Yêu thích,
+ * Món của tôi and the "Giàu …" lists. A category or a rich-in list is a pushed screen; a food opens its detail.
  */
 export default function ExplorePage() {
   const router = useRouter();
 
-  // Sample coaches and ranking exist in mock and demo mode only (no mock data in live mode)
-  const demoChips = coachingAvailable(isLiveMode())
-    ? [
-        { id: "coaches", label: "Huấn luyện viên", onClick: () => router.push("/explore/coaches") },
-        { id: "leaderboard", label: "Bảng xếp hạng", onClick: () => router.push("/explore/leaderboard") },
-      ]
-    : [];
   const chips = [
-    { id: "all", label: "Tất cả", active: true, icon: <IconTile k="all" size={20} /> },
-    ...demoChips,
+    { id: "all", label: "Tất cả", active: true },
+    // Sample coaches and ranking exist in mock and demo mode only (no mock data in live mode)
+    ...(coachingAvailable(isLiveMode())
+      ? [
+          { id: "coaches", label: "Huấn luyện viên", onClick: () => router.push("/explore/coaches") },
+          { id: "leaderboard", label: "Bảng xếp hạng", onClick: () => router.push("/explore/leaderboard") },
+        ]
+      : []),
     ...FOOD_CATEGORIES.map((c) => ({
       id: c.key,
       label: c.label,
-      icon: <IconTile k={c.key} size={20} />,
       onClick: () => router.push(`/explore/${c.key}`),
     })),
   ];
@@ -101,16 +97,8 @@ export default function ExplorePage() {
         search={<SearchField />}
       />
 
-      <main className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-6 lg:mx-0 lg:max-w-[1240px] lg:px-8 lg:pt-4">
-        {/* Phone: the groups are Nhóm món below, so only the demo shortcuts stay as chips; desktop: the whole row */}
-        {demoChips.length > 0 && (
-          <div className="lg:hidden">
-            <ChipGroup scroll items={demoChips} ariaLabel="Huấn luyện viên và bảng xếp hạng" data-align-group="explore-demo" data-align-edge="left" />
-          </div>
-        )}
-        <div className="max-lg:hidden">
-          <ChipGroup scroll items={chips} ariaLabel="Lọc món theo nhóm" data-align-group="add-list" data-align-edge="left" />
-        </div>
+      <main className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-6 pt-4 lg:mx-0 lg:max-w-[1240px] lg:px-8">
+        <ChipGroup scroll items={chips} ariaLabel="Lọc món theo nhóm" data-align-group="add-list" data-align-edge="left" />
         <div data-align-group="add-list" data-align-edge="left" className="flex flex-col gap-4">
           <Results />
         </div>

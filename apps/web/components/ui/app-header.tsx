@@ -54,10 +54,8 @@ export interface AppHeaderProps {
   layout?: "narrow" | "wide";
   /** Desktop: the page's main already has 32 px padding, so the header adds none. */
   flush?: boolean;
-  /** Phone: a 52 px band (4 px above and below the 44 px row) and a 20 px wordmark. The home screen. */
+  /** Phone: a 52 px band (4 px above and below the 44 px row) and a 21 px wordmark. The home screen. */
   compact?: boolean;
-  /** Phone: the date stepper moves to a second row and this sits at its right end (Hôm nay's "Ngày tập 60′ ›"). From 1024 px it sits before the stepper in the one row. */
-  dateRow?: React.ReactNode;
   /** data-align-group attribute for alignment tests */
   alignGroup?: string;
   /** "page": the row shares both edges with the page body, checked from 1024 px (data-align-from="lg"); default: left edge only. */
@@ -126,7 +124,6 @@ export function AppHeader({
   layout,
   flush = false,
   compact = false,
-  dateRow,
   alignGroup,
   alignMode = "left",
   className = "",
@@ -182,14 +179,14 @@ export function AppHeader({
           data-align-group={alignGroup}
           data-align-edge={alignMode === "left" ? "left" : undefined}
           data-align-from={alignMode === "page" ? "lg" : undefined}
-          className={`group/hdr flex min-h-11 gap-3 ${back ? "items-start" : "items-center"} ${dateRow ? "max-lg:grid max-lg:grid-cols-[minmax(0,1fr)_auto] max-lg:gap-x-2 max-lg:gap-y-0" : ""}`}
+          className={`group/hdr flex min-h-11 gap-3 ${back ? "items-start" : "items-center"}`}
         >
           {back}
           {/* The phone wordmark is a logo: it never shrinks or wraps; at large text sizes the date gives way instead. While the sync status
               has something to say (Chưa lưu, Ngoại tuyến) the row has no room for both on a phone: the logo steps aside, so the status
               never lands on the day arrows (hotfix 20/10). The page title (sr-only on a phone) is not hidden with them: it stays in the
               accessibility tree, so the page keeps its h1 */}
-          <div className={`min-w-0 flex-1 ${dateRow ? "max-lg:col-start-1 max-lg:row-start-1" : ""} ${wordmark ? "max-lg:min-w-fit group-has-[[data-sync-state=unsaved],[data-sync-state=offline]]/hdr:max-lg:min-w-0 group-has-[[data-sync-state=unsaved],[data-sync-state=offline]]/hdr:max-lg:*:not-data-sr-title:hidden" : ""}`}>
+          <div className={`min-w-0 flex-1 ${wordmark ? "max-lg:min-w-fit group-has-[[data-sync-state=unsaved],[data-sync-state=offline]]/hdr:max-lg:min-w-0 group-has-[[data-sync-state=unsaved],[data-sync-state=offline]]/hdr:max-lg:*:not-data-sr-title:hidden" : ""}`}>
             {wordmark ? (
               <>
                 {phoneStart ? (
@@ -200,7 +197,7 @@ export function AppHeader({
                     href={HOME_ROUTE}
                     aria-label="H1T MICRO, về Hôm nay"
                     data-tour="home-logo"
-                    className={`inline-flex min-h-11 items-center whitespace-nowrap rounded-md font-display italic font-black text-text no-underline ${compact ? "text-[20px]" : "text-[20px] leading-[28px]"} uppercase tracking-tight active:scale-[0.97] transition-press motion-reduce:active:scale-100 lg:hidden`}
+                    className={`inline-flex min-h-11 items-center whitespace-nowrap rounded-md font-display italic font-black text-text no-underline ${compact ? "text-[21px]" : "text-[20px] leading-[28px]"} uppercase tracking-tight active:scale-[0.97] transition-press motion-reduce:active:scale-100 lg:hidden`}
                   >
                     <span aria-hidden="true">
                       H1T <span className="text-cobalt">MICRO</span>
@@ -240,10 +237,8 @@ export function AppHeader({
 
           {desktopStat ? <div className="hidden lg:flex">{desktopStat}</div> : null}
 
-          {dateRow && <div className="flex min-w-0 items-center max-lg:col-start-2 max-lg:row-start-2 max-lg:justify-self-end lg:shrink-0">{dateRow}</div>}
-
           {hasDateNav && (
-            <div className={`flex min-w-0 items-center lg:shrink-0 lg:gap-1.5 ${dateRow ? "max-lg:col-start-1 max-lg:row-start-2 max-lg:-ml-3" : ""}`}>
+            <div className="flex min-w-0 items-center lg:shrink-0 lg:gap-1.5">
               <button type="button" onClick={onPrev} disabled={prevDisabled} aria-label="Ngày trước" data-tour="day-prev" data-testid="day-prev" className={DATE_BUTTON}>
                 <Chevron dir="left" />
               </button>
@@ -284,7 +279,7 @@ export function AppHeader({
 
           {/* cc-68 (S13): the one sync status sits in the header of every tab (not a sub-screen, not the picture behind /add) */}
           {actions || showSync ? (
-            <div className={`flex shrink-0 items-center gap-2 ${dateRow ? "max-lg:col-start-2 max-lg:row-start-1 max-lg:justify-self-end" : ""}`}>
+            <div className="flex shrink-0 items-center gap-2">
               {showSync && <SyncStatus />}
               {actions}
             </div>

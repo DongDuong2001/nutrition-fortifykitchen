@@ -2,16 +2,16 @@ import Link from "next/link";
 import { formatAmount, formatRange } from "@/lib/format";
 import { kcalValue } from "@/lib/kcal";
 import { pctLabel, pctOf, type HomeValues } from "@/lib/home";
-import { getLevel, getLevelColor, getLevelLabel } from "@/lib/levels";
+import { getLevel, getLevelLabel } from "@/lib/levels";
 import { LevelBar } from "@/components/ui/level-bar";
 import { useRef } from "react";
 import { useCountUpText } from "@/lib/count-up";
 import { Expand } from "@/components/ui/expand";
 
-// The 32 px pill sits inside a 44 px hit area: the row is 32 px high, so the negative margin takes the extra 12 px back
-const PILL = "m-on-ink-press -my-1.5 inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center border-0 bg-transparent p-0 text-on-dark no-underline hover:text-sky";
+// The 24 px pill sits inside a 44 px hit area: padding that the negative margin takes back
+const PILL = "m-on-ink-press -m-2.5 inline-flex shrink-0 items-center border-0 bg-transparent p-2.5 text-on-dark no-underline hover:text-sky";
 const PILL_FACE =
-  "inline-flex h-8 min-w-8 items-center justify-center rounded-full border border-muted-on-dark px-2 text-callout font-bold leading-none whitespace-nowrap";
+  "inline-flex h-6 items-center rounded-full border border-muted-on-dark px-2 text-xs font-bold leading-none whitespace-nowrap";
 
 export interface HeroPill {
   key: string;
@@ -81,12 +81,12 @@ export function HomeHero({
       <section
         aria-label="Tổng kcal và dinh dưỡng đa lượng"
         data-tour="home-hero"
-        className={`mx-3 mt-2 flex flex-none flex-col gap-2 rounded-2xl ${share ? "" : "lg:mx-0"} bg-ink px-4 pt-3 pb-4 text-on-dark ${
-          selected ? "ring-2 ring-inset ring-sky" : ""
+        className={`mx-3 mt-2 flex flex-none flex-col gap-1 rounded-2xl border-2 ${share ? "" : "lg:mx-0"} bg-surface-dark px-3.5 pt-2 pb-2.5 text-on-dark ${
+          selected ? "border-sky" : "border-surface-dark"
         }`}
       >
         {/* cc-64: with large text the pills wrap under the label instead of running past the card */}
-        <div data-align-group="home-hero" className="flex min-h-8 flex-wrap items-center justify-between gap-x-2 gap-y-1">
+        <div data-align-group="home-hero" className="flex min-h-[22px] flex-wrap items-center justify-between gap-x-2 gap-y-1">
           <h2 aria-live="polite" className={`m-0 min-w-0 text-xs font-bold leading-snug text-sky ${share ? "whitespace-nowrap" : "break-words"}`}>
             {label}
           </h2>
@@ -106,11 +106,11 @@ export function HomeHero({
         </div>
 
         <div data-align-group="home-hero" className="flex flex-wrap items-baseline gap-x-1.5">
-          <span ref={kcalRef} className="font-display text-display font-black italic leading-none tabular-nums tracking-display">{kcalValue(shownKcal)}</span>
+          <span ref={kcalRef} className="font-display text-display-sm font-extrabold leading-none tabular-nums tracking-display">{kcalValue(shownKcal)}</span>
           <span className={`text-cap text-muted-on-dark ${share ? "whitespace-nowrap" : ""}`}>
             / {formatRange(kcalTarget.min, kcalTarget.max)} kcal
           </span>
-          <span ref={pctRef} className="ml-1 font-display text-display font-extrabold italic leading-none tabular-nums tracking-display">{pctLabel(shownKcal, kcalTarget.min)}</span>
+          <span ref={pctRef} className="ml-1 font-display text-display-sm font-extrabold italic leading-none tabular-nums tracking-display">{pctLabel(shownKcal, kcalTarget.min)}</span>
           {finished && kcalKnown !== null && <span className="text-cap font-bold text-sky">{getLevelLabel(getLevel(kcalKnown))}</span>}
         </div>
 
@@ -134,11 +134,7 @@ export function HomeHero({
                     {value === null ? "—" : formatAmount(value, "g")}
                     {target !== null ? `/${formatAmount(target, "g")} g` : " g"}
                   </span>
-                  {/* The percent takes its level's colour (V3-SPEC §1); unknown stays white */}
-                  <span
-                    className="shrink-0 whitespace-nowrap font-condensed text-callout font-extrabold leading-none tabular-nums"
-                    style={pct === null ? undefined : { color: getLevelColor(getLevel(pct)) }}
-                  >
+                  <span className="shrink-0 whitespace-nowrap font-condensed text-callout font-extrabold leading-none tabular-nums">
                     {pctLabel(value, target)}
                   </span>
                 </div>

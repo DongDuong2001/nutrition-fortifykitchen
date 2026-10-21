@@ -25,23 +25,12 @@ function MoreIcon() {
   );
 }
 
-/** The saved meals that still have foods, newest first, with their item count and kcal (a meal whose foods are gone is left out). */
-export function useSavedMealRows() {
-  const { savedMeals } = useDiary();
-  // The foods of a saved meal are looked up in the catalogue, which may still be on its way
-  const { version: catalogVersion } = useCatalogFoods();
-  return useMemo(
-    () => savedMeals.map((meal) => ({ meal, ...savedMealTotals(meal, CATALOG_FOODS) })).filter((r) => r.itemCount > 0),
-    [savedMeals, catalogVersion]
-  );
-}
-
 /**
- * Bữa ăn của tôi (the pushed screen /explore/meals; Khám phá shows it as a row of Của bạn): each saved meal is one tap that adds every food to the meal of the time of day
+ * Bữa ăn của tôi in Khám phá: each saved meal is one tap that adds every food to the meal of the time of day
  * (one undo toast removes them all). The ⋯ renames or deletes it. `limit` shows the newest few with a link to all.
  */
 export function SavedMealsCard({ limit }: { limit?: number }) {
-  const { addSavedMeal, renameSavedMeal, deleteSavedMeal, hydrated } = useDiary();
+  const { savedMeals, addSavedMeal, renameSavedMeal, deleteSavedMeal, hydrated } = useDiary();
   const slot = useMealSlot(null);
   // The card stays on screen after a tap, and each add replaces the toast (and its undo): a short lock stops a double tap
   const lock = useRef(false);
@@ -55,7 +44,12 @@ export function SavedMealsCard({ limit }: { limit?: number }) {
   };
   const [managedId, setManagedId] = useState<string | null>(null);
 
-  const rows = useSavedMealRows();
+  // The foods of a saved meal are looked up in the catalogue, which may still be on its way
+  const { version: catalogVersion } = useCatalogFoods();
+  const rows = useMemo(
+    () => savedMeals.map((meal) => ({ meal, ...savedMealTotals(meal, CATALOG_FOODS) })).filter((r) => r.itemCount > 0),
+    [savedMeals, catalogVersion]
+  );
   const shown = limit ? rows.slice(0, limit) : rows;
   const managed = rows.find((r) => r.meal.id === managedId) ?? null;
   const slotName = slot ? getMealSlotNameVi(slot) : null;
