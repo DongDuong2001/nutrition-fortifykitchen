@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Manrope, Saira_Condensed } from "next/font/google";
+import { Manrope, Saira } from "next/font/google";
 import "./globals.css";
 import { NavHistoryTracker } from "@/components/nav-history-tracker";
 import { PwaRegister } from "@/components/pwa/pwa-register";
@@ -16,10 +16,13 @@ const manrope = Manrope({
   display: "swap",
 });
 
-const sairaCondensed = Saira_Condensed({
+// V3-SPEC §2: Saira italic 800/900 for headers and key numbers. Only the italic face is loaded, so every font-display
+// text is italic without a class on each element.
+const saira = Saira({
   subsets: ["vietnamese", "latin"],
   weight: ["800", "900"],
-  variable: "--font-saira-condensed-face",
+  style: ["italic"],
+  variable: "--font-saira-face",
   display: "swap",
 });
 
@@ -53,7 +56,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="vi" className={`${manrope.variable} ${sairaCondensed.variable}`}>
+    <html lang="vi" className={`${manrope.variable} ${saira.variable}`}>
       <head>
         {/* Before the first paint: an app installed with the old start_url "/" opens Hôm nay, not the link page */}
         <script dangerouslySetInnerHTML={{ __html: STANDALONE_HOME_SCRIPT }} />

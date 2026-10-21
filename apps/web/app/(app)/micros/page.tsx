@@ -649,10 +649,10 @@ function MicrosContent() {
  */
 function Legend() {
   const tiers = [
-    { name: "Thiếu", range: "<50%", colorClass: "bg-level-red" },
-    { name: "Trung bình", range: "50–79%", colorClass: "bg-level-yellow" },
-    { name: "Gần đủ", range: "80–99%", colorClass: "bg-level-green" },
-    { name: "Đạt", range: "≥100%", colorClass: "bg-level-blue" },
+    { name: "Thiếu", range: "<50%", colorClass: "bg-level-thieu" },
+    { name: "Trung bình", range: "50–79%", colorClass: "bg-level-trungbinh" },
+    { name: "Gần đủ", range: "80–99%", colorClass: "bg-level-gandu" },
+    { name: "Đạt", range: "≥100%", colorClass: "bg-level-dat" },
   ];
 
   return (

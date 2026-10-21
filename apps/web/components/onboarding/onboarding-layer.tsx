@@ -47,10 +47,10 @@ const TIP_DELAY_MS = 500;
 const TIP_RETRY_MS = 400;
 
 const LEVELS = [
-  { name: "Thiếu", range: "dưới 50%", bar: "bg-level-red" },
-  { name: "Trung bình", range: "50–79%", bar: "bg-level-yellow" },
-  { name: "Gần đủ", range: "80–99%", bar: "bg-level-green" },
-  { name: "Đạt", range: "từ 100% trở lên", bar: "bg-level-blue" },
+  { name: "Thiếu", range: "dưới 50%", bar: "bg-level-thieu" },
+  { name: "Trung bình", range: "50–79%", bar: "bg-level-trungbinh" },
+  { name: "Gần đủ", range: "80–99%", bar: "bg-level-gandu" },
+  { name: "Đạt", range: "từ 100% trở lên", bar: "bg-level-dat" },
 ] as const;
 
 const TOUR_COPY: Record<string, { title: string; body: string; hint?: string }> = {

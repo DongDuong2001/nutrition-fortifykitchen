@@ -18,10 +18,10 @@ import { SectionTitle } from "@/components/ui/section-title";
 import { Card } from "@/components/ui/card";
 
 const DOT: Record<NutrientLevel, string> = {
-  thieu: "bg-level-red",
-  trungbinh: "bg-level-yellow",
-  ganDu: "bg-level-green",
-  dat: "bg-level-blue",
+  thieu: "bg-level-thieu",
+  trungbinh: "bg-level-trungbinh",
+  ganDu: "bg-level-gandu",
+  dat: "bg-level-dat",
 };
 
 function Chevron() {
