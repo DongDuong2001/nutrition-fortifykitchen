@@ -39,7 +39,7 @@ ROUTES = [
 ]
 INK_BAND_PHONE = {"/app"}
 # V3: Tổng quan has no ink band and no wordmark: a 34 px page title, the sub-tab Segmented and white / ink data cards
-V3_PAGE_TITLE = {"/trends", "/trends/micros", "/trends/body", "/settings", "/settings/account", "/settings/profile", "/settings/profile/weight",
+V3_PAGE_TITLE = {"/app", "/explore", "/training", "/foods/new", "/trends", "/trends/micros", "/trends/body", "/settings", "/settings/account", "/settings/profile", "/settings/profile/weight",
                  "/settings/targets", "/settings/targets/macros", "/settings/language", "/settings/notifications", "/settings/data-sources", "/settings/whats-new", "/settings/delete-account"}
 SHOT_NAMES = {"/app": "home", "/micros": "micros", "/settings": "settings", "/settings/profile": "profile"}
 problems, notes = [], []
@@ -64,6 +64,8 @@ INK_TOP = """
     let fixed = false;
     for (let p = el; p; p = p.parentElement) if (getComputedStyle(p).position === 'fixed' || p.tagName === 'ASIDE') { fixed = true; break; }
     if (fixed) continue;
+    // V3-SPEC 3.3: an ink DATA CARD (all four corners rounded, e.g. the Hôm nay hero) is not a header band
+    if (parseFloat(cs.borderTopLeftRadius) >= 12 && parseFloat(cs.borderBottomLeftRadius) >= 12) continue;
     const r = el.getBoundingClientRect();
     if (r.width === 0 || r.height === 0 || r.top > 200 || r.top + window.scrollY > 200) continue;
     out.push([el.tagName, Math.round(r.left), Math.round(r.top), Math.round(r.width)]);

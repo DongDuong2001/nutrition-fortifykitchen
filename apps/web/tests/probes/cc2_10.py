@@ -133,7 +133,7 @@ def check_period(browser, size_name, size):
 
 
 def check_energy_bars(browser, size_name, size):
-    """Above the range is on target (blue, never red); red only below the minimum; today is grey (đang ghi), not red."""
+    """Above the range is on target (green, never red); red only below the minimum; today is grey (đang ghi), not red."""
     ctx, pg = new_page(browser, size)
     go(pg, "/trends/energy")
     cols = pg.evaluate(
@@ -150,13 +150,14 @@ def check_energy_bars(browser, size_name, size):
         if not m:
             continue
         kcal = int(m.group(1).replace(".", ""))
-        red = "bg-destructive" in col["bar"]
+        # V3: the bars use the four level colours; red is level-thieu, a day above the target is level-dat (green), never red
+        red = "bg-destructive" in col["bar"] or "bg-level-thieu" in col["bar"]
         if i == len(cols) - 1:
             today_grey = "bg-secondary" in col["bar"] and not red
             continue
         if kcal > 2275:
             over += 1
-            check("bg-cobalt" in col["bar"] and not red, f"{size_name} energy: {kcal} kcal above the target is on target")
+            check(("bg-level-dat" in col["bar"] or "bg-cobalt" in col["bar"]) and not red, f"{size_name} energy: {kcal} kcal above the target is on target")
         if red:
             check(kcal < 2275, f"{size_name} energy: red only below the target ({kcal})")
     check(over >= 1, f"{size_name} energy: a day above the target is shown ({over})")
@@ -226,7 +227,7 @@ def check_past_day(browser, size_name, size):
     check(pg.locator(add).count() == 0, f"{size_name} past home: no add link on a meal")
     check(pg.locator('a[aria-label^="Thêm vào"]:visible').count() == 0, f"{size_name} past home: no + on a meal")
     # ⋯ lives in meal mode: tap the header of a meal with food, then look for the pill
-    with_food = pg.locator("button[aria-label^='Xem riêng']:visible", has_text="kcal")
+    with_food = pg.locator("button[aria-label^='Xem riêng']:visible", has_text=re.compile(r"\d"))  # V3: a meal header shows its kcal as a bare number, an empty meal shows none
     check(with_food.count() > 0, f"{size_name} past home: a meal with food is listed ({with_food.count()})")
     if with_food.count():
         with_food.first.click()
