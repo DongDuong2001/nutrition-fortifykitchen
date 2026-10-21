@@ -442,24 +442,39 @@
  },
  {
   "source": "label",
-  "source_id": "easygym.vn/banh-bong-lean (đọc 2026-10-21)",
-  "name": "Bánh Bông Lean sponge cake (Easygym)",
-  "name_vi": "Bánh bông lan Easygym",
+  "source_id": "EasyGYM Bánh Bông Lean - nhãn sản phẩm (ảnh chụp 2026-10-21)",
+  "name": "Bánh Bông Lean sponge cake (EasyGYM)",
+  "name_vi": "Bánh bông lan EasyGYM",
   "category": "an_vat",
-  "brand": "Easygym",
-  "tip_vi": null,
+  "brand": "EasyGYM",
+  "tip_vi": "Cùng bảng dinh dưỡng cho 3 vị matcha, socola, supervani",
   "nutrients": {
    "energy": 223,
    "carbs": 28.7,
-   "fiber": 14,
    "fat": 5.4,
+   "saturated_fat": 0.5,
    "protein": 16
   },
   "portions": [
    {
+    "label_vi": "Bánh size 10 (200 g)",
+    "grams": 200,
+    "sort": 0
+   },
+   {
+    "label_vi": "Bánh size 14 (450 g)",
+    "grams": 450,
+    "sort": 1
+   },
+   {
+    "label_vi": "Bánh size 18 (700 g)",
+    "grams": 700,
+    "sort": 2
+   },
+   {
     "label_vi": "100 g",
     "grams": 100,
-    "sort": 0
+    "sort": 3
    }
   ]
  },
