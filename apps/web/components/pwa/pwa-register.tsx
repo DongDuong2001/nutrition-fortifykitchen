@@ -7,7 +7,7 @@ import { shouldRegisterServiceWorker } from "@/lib/pwa";
 import { whenIdle } from "@/lib/idle";
 import { getSyncSummary, isSyncBusy, subscribeSyncSummary } from "@/lib/sync-ui";
 import { hasUnsavedWork, subscribeUnsavedWork } from "@/lib/unsaved-work";
-import { shouldReloadStaleTab } from "@/lib/update-phase";
+import { reloadAfterTakeover } from "@/lib/update-phase";
 
 // The toast and its wait for the outbox are loaded when an update is waiting
 const UpdateOffer = dynamic(() => import("@/components/pwa/update-offer"), { ssr: false });
@@ -20,13 +20,17 @@ const UpdateOffer = dynamic(() => import("@/components/pwa/update-offer"), { ssr
  *
  * Every tab of the app is taken over at once. A tab that did not ask for it keeps running the old code until it reloads itself, and
  * does that only while it is in the background with nothing waiting or held, on its own next visibilitychange; the tab that asked
- * checks again at the takeover, because something may have been started since it asked.
+ * checks again at the takeover, because something may have been started since it asked. An update the app started by itself (in the
+ * background) never reloads a page that is visible: a person who came back before the worker took over keeps working, and the page
+ * reloads the next time it is hidden.
  */
 export function PwaRegister() {
   const [waiting, setWaiting] = useState<ServiceWorker | null>(null);
-  const applying = useRef(false);
-  const apply = useRef(() => {
-    applying.current = true;
+  // Who started the takeover: a tap on Tải lại reloads even while the app is in front (the person asked); one started by the app going to
+  // the background reloads only while the page is hidden or on the next cold open, never under a person who came back in the meantime.
+  const applying = useRef<"tap" | "background" | null>(null);
+  const apply = useRef((by: "tap" | "background") => {
+    applying.current = by;
   }).current;
 
   useEffect(() => {
@@ -44,8 +48,7 @@ export function PwaRegister() {
       if (!stale) return;
       const busy = isSyncBusy(getSyncSummary());
       const editing = hasUnsavedWork();
-      const asked = applying.current && !busy && !editing;
-      if (asked || shouldReloadStaleTab({ stale, hidden: document.visibilityState === "hidden", busy, editing })) {
+      if (reloadAfterTakeover({ by: applying.current, hidden: document.visibilityState === "hidden", busy, editing })) {
         stale = false;
         window.location.reload();
       }

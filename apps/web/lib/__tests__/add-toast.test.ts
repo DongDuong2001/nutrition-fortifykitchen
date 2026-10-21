@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { MOCK_FOODS } from "../mock/foods";
-import { addedToast, ADD_TOAST_MS, undoIdsOf } from "../add-toast";
+import { addedToast, ADD_TOAST_MS, toastAfterAction, undoIdsOf } from "../add-toast";
 import { entryNumbers, removeAddedIn, type AddedDiaryEntry, type DiaryEdits } from "../diary-edits";
 import type { ToastInfo } from "../diary-store";
 
@@ -77,5 +77,22 @@ describe("Hoàn tác after an add", () => {
   it("another kind of toast on screen has nothing to undo here", () => {
     const deleted: ToastInfo = { message: "Đã xóa", kind: "deleted", mealSlot: null, durationMs: 1 };
     expect(undoIdsOf(deleted)).toEqual([]);
+  });
+});
+
+describe("ending a toast after its action", () => {
+  const shown: ToastInfo = { message: "Đã xóa 1 món", kind: "deleted", mealSlot: null, durationMs: 8000 };
+
+  it("ends the toast the action was on (Xem changes nothing)", () => {
+    expect(toastAfterAction(shown, shown)).toBeNull();
+  });
+
+  it("leaves alone the toast an action put up (undoMove, undoLastDelete and a retry may set one)", () => {
+    const followUp: ToastInfo = { message: "Đã chuyển 2 món", kind: "notice", mealSlot: null, durationMs: 4000 };
+    expect(toastAfterAction(followUp, shown)).toBe(followUp);
+  });
+
+  it("an action that already cleared the toast leaves it cleared", () => {
+    expect(toastAfterAction(null, shown)).toBeNull();
   });
 });

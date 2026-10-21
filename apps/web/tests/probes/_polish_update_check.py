@@ -93,6 +93,27 @@ def item10_form(browser):
     ctx.close()
 
 
+def item_back_in_front(browser):
+    """Night review: an update the app started in the background never reloads a page that is visible again; it reloads when hidden next."""
+    ctx = browser.new_context(viewport={"width": 390, "height": 844}, device_scale_factor=2, is_mobile=True, has_touch=True)
+    ctx.add_init_script(f"if (localStorage.getItem('{SETTINGS_KEY}') === null) localStorage.setItem('{SETTINGS_KEY}', {json.dumps(json.dumps(NO_INSTALL))});")
+    pg = ctx.new_page()
+    pg.goto(BASE + "/app", wait_until="networkidle")
+    pg.locator("#mobile-add-fab").wait_for(state="visible", timeout=10000)
+    waiting_update(pg)
+    pg.wait_for_timeout(5200)  # the toast has been armed (idle), nothing is held
+    pg.evaluate("window.__keep = 1")
+    hide(pg)
+    pg.wait_for_timeout(15)  # SKIP_WAITING is on its way …
+    show(pg)  # … and the person is back before the worker takes over
+    pg.wait_for_timeout(4000)
+    check(kept(pg), "5: an update the app started in the background does not reload a page that is visible again")
+    hide(pg)
+    pg.wait_for_timeout(3500)
+    check(not kept(pg), "5: …and the page reloads the next time it is hidden")
+    ctx.close()
+
+
 def main():
     with sync_playwright() as p:
         browser = p.chromium.launch()
@@ -125,6 +146,7 @@ def main():
         ctx.close()
         item10(browser)
         item10_form(browser)
+        item_back_in_front(browser)
         browser.close()
     print(f"\n{len(problems)} problem(s)")
     sys.exit(1 if problems else 0)

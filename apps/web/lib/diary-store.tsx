@@ -86,7 +86,7 @@ import {
   writeStoredProfile,
   type Profile,
 } from "./profile";
-import { addedToast, undoIdsOf } from "./add-toast";
+import { addedToast, toastAfterAction, undoIdsOf } from "./add-toast";
 import type { CompleteTargets } from "./targets";
 import { subscribeTraining, trainingMinutesFor, trainingVersion } from "./training-minutes";
 import {
@@ -182,6 +182,8 @@ interface DiaryContextValue {
   recentFoods: RecentFood[];
   addRecentFood: (food: FoodItem, servingLabel: string) => void;
   dismissToast: () => void;
+  /** After a toast's action: ends `shown` only if it is still the toast on screen (the action may have put a new one up, or none). */
+  dismissToastAfterAction: (shown: ToastInfo) => void;
   /** A plain message in the app's toast (no action), e.g. "Đã lưu mục tiêu…": it stays across a screen change. */
   notify: (message: string) => void;
   /** The pointer is on the toast, or focus is in it: its time stops until resumeToast. */
@@ -1252,6 +1254,10 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
     setEdits((prev) => dismissUndoIn(prev));
   }, []);
 
+  const dismissToastAfterAction = useCallback((shown: ToastInfo) => {
+    setToast((current) => toastAfterAction(current, shown));
+  }, []);
+
   const notify = useCallback((message: string) => {
     setToast({ message, kind: "notice", mealSlot: null, durationMs: ADDED_TOAST_MS });
   }, []);
@@ -1697,6 +1703,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       recentFoods,
       addRecentFood,
       dismissToast,
+      dismissToastAfterAction,
       notify,
       pauseToast,
       resumeToast,
@@ -1748,6 +1755,7 @@ export function DiaryProvider({ children }: { children: React.ReactNode }) {
       recentFoods,
       addRecentFood,
       dismissToast,
+      dismissToastAfterAction,
       notify,
       pauseToast,
       resumeToast,

@@ -26,7 +26,16 @@ export function setUnsavedWork(id: string, active: boolean): void {
 
 /** True while anything is marked or an edited field is still on the page. */
 export function hasUnsavedWork(): boolean {
-  for (const el of dirtyFields) if (!el.isConnected) dirtyFields.delete(el);
+  let dropped = false;
+  for (const el of dirtyFields) {
+    if (!el.isConnected) {
+      dirtyFields.delete(el);
+      dropped = true;
+    }
+  }
+  // A field that left the page (its screen closed without a submit) was the reason for the wait: those who wait are told it is over. Not
+  // now: this is also read while rendering (useSyncExternalStore), and a listener must not run in the middle of a render.
+  if (dropped) queueMicrotask(emit);
   return marks.size > 0 || dirtyFields.size > 0;
 }
 
@@ -99,6 +108,12 @@ export function installFormWatch(): () => void {
     document.removeEventListener("input", onInput, true);
     document.removeEventListener("submit", onSubmit, true);
   };
+}
+
+/** Tests only: counts an edited field as installFormWatch would. */
+export function trackFieldForTest(el: Element): void {
+  dirtyFields.add(el);
+  emit();
 }
 
 /** Tests only. */

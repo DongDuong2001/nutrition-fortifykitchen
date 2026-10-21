@@ -16,7 +16,7 @@ import { usePathname } from "next/navigation";
  * CSS (no timer re-rendering the toast), and each toast rises in and fades away (Presence).
  */
 export function DiaryToast() {
-  const { undoParkedDelete, undoLastDelete, undoCopy, undoMove, retryUnsaved, setHighlightedMeal, pauseToast, resumeToast, dismissToast } = useDiary();
+  const { undoParkedDelete, undoLastDelete, undoCopy, undoMove, retryUnsaved, setHighlightedMeal, pauseToast, resumeToast, dismissToast, dismissToastAfterAction } = useDiary();
   const { toast, parkedDelete } = useDiaryToast();
   const swipe = useToastSwipe(dismissToast);
   // A new toast is a new element: its countdown starts over
@@ -76,7 +76,7 @@ export function DiaryToast() {
             announce={false}
             onPause={pauseToast}
             onResume={resumeToast}
-            onDismiss={dismissToast}
+            onDismiss={() => dismissToastAfterAction(toast)}
             swipe={swipe}
             // One element for every toast: its text, action and clock are renewed in place (cc-64 2b grouped only some)
             key="diary-toast"

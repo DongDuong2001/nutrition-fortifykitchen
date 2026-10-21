@@ -16,7 +16,7 @@ import { useHasUnsavedWork } from "@/lib/unsaved-work";
  * app goes to the background or by the next cold open. The new worker takes over (and the page reloads) only once nothing waits
  * to be sent and nothing is being sent (cc-68). Its own chunk: it is needed only when an update is waiting.
  */
-export default function UpdateOffer({ worker, onApply }: { worker: ServiceWorker; onApply: () => void }) {
+export default function UpdateOffer({ worker, onApply }: { worker: ServiceWorker; onApply: (by: "tap" | "background") => void }) {
   const [tapped, setTapped] = useState(false);
   const [expired, setExpired] = useState(false);
   const [armed, setArmed] = useState(false);
@@ -35,7 +35,7 @@ export default function UpdateOffer({ worker, onApply }: { worker: ServiceWorker
 
   useEffect(() => {
     if (!canApplyUpdate({ tapped, inBackground, busy, editing })) return;
-    onApply();
+    onApply(tapped ? "tap" : "background");
     worker.postMessage({ type: "SKIP_WAITING" });
   }, [worker, tapped, inBackground, busy, editing, onApply]);
 

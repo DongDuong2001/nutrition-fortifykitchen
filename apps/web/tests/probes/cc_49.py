@@ -504,6 +504,35 @@ with sync_playwright() as p:
         check(pg.get_by_text("vì ngày đã qua", exact=False).count() == 0, "7: …and the notice does not come back")
         ctx.close()
 
+    if want(8):
+        # Hoàn tác right after an add (the toast now offers it after every add): the DELETE never overtakes the POST of the same entry, an add
+        # that has not left the device is dropped with it, and the server ends with no entry (no orphan). Unit tests: outbox.test.ts S7.
+        for how in ("portion", "tray"):
+            api = FakeApi()
+            ctx, pg, st = device(browser, api)
+            open_today(pg)
+            pg.goto(BASE + "/add?meal=dinner", wait_until="domcontentloaded")
+            first = pg.locator("[data-food-row]:visible").first
+            first.wait_for(timeout=20000)
+            if how == "portion":
+                first.click()
+                pg.get_by_role("button", name=re.compile("^Thêm vào Bữa tối")).locator("visible=true").first.click()
+            else:
+                pg.locator("[data-testid=tray-toggle]:visible").nth(0).click()
+                pg.locator("[data-testid=tray-toggle]:visible").nth(1).click()
+                pg.locator("[data-testid=tray-add]:visible").first.click()
+            undo = pg.get_by_role("button", name="Hoàn tác").locator("visible=true")
+            undo.first.wait_for(timeout=8000)
+            undo.first.click()
+            pg.wait_for_timeout(5000)
+            posts = [i for i, c in enumerate(st["calls"]) if c.startswith("POST /days/")]
+            deletes = [i for i, c in enumerate(st["calls"]) if c.startswith("DELETE /entries/")]
+            check(len(api.entries) == 0, f"8 {how}: add → Hoàn tác at once: the server has no entry afterwards ({len(api.entries)} left)")
+            check(not posts or not deletes or min(deletes) > min(posts), f"8 {how}: a DELETE is never sent before the first POST ({len(posts)} POST, {len(deletes)} DELETE; calls at {posts} / {deletes})")
+            check(outbox_ids(pg) == [], f"8 {how}: …and nothing is left in the outbox ({outbox_ids(pg)})")
+            check(pg.locator("button[data-entry-id]:visible").count() == 0, f"8 {how}: …and no row on Hôm nay")
+            ctx.close()
+
     browser.close()
 
 print(f"\n{len(problems)} problem(s)")

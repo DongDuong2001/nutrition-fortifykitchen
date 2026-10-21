@@ -36,3 +36,12 @@ export const shouldReloadStaleTab = (input: { stale: boolean; hidden: boolean; b
 
 /** The toast is on screen: until it has been up UPDATE_TOAST_MS, and for as long as a tap on Tải lại is waiting on writes. */
 export const updateToastVisible = (input: { tapped: boolean; expired: boolean }): boolean => input.tapped || !input.expired;
+
+/**
+ * The new worker has taken over this page: does it reload now? Only with nothing waiting in the outbox and nothing in hand. A tap on
+ * Tải lại reloads at once, in front or not (the person asked). Anything else (the app started the update on its own when it went to the
+ * background, or another tab did) reloads only while the page is hidden, never under a person who came back in the meantime; the
+ * reload then waits for the next time it is hidden or the next cold open.
+ */
+export const reloadAfterTakeover = (input: { by: "tap" | "background" | null; hidden: boolean; busy: boolean; editing: boolean }): boolean =>
+  !input.busy && !input.editing && (input.by === "tap" || input.hidden);

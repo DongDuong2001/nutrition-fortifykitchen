@@ -35,6 +35,14 @@ export function addedToast(prev: ToastInfo | null, fact: AddedFact, nextGroupId:
   };
 }
 
+/**
+ * What is on screen after a toast's action ran and the toast is to end. The action may have put another toast up (undoLastDelete's
+ * follow-up, a retry's notice) or none: only the toast that was shown is ended, a newer one is left alone.
+ */
+export function toastAfterAction(current: ToastInfo | null, shown: ToastInfo): ToastInfo | null {
+  return current === shown ? null : current;
+}
+
 /** The ids Hoàn tác takes out: those of the toast on screen, none when there is no such toast (it expired, or another kind is up). */
 export function undoIdsOf(toast: ToastInfo | null | undefined): string[] {
   return toast?.kind === "undoable" && toast.undoIds ? toast.undoIds : [];

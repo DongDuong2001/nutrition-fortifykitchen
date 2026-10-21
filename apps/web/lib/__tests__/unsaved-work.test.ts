@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { hasUnsavedWork, isFormField, resetUnsavedWork, setUnsavedWork, subscribeUnsavedWork } from "../unsaved-work";
-import { canApplyUpdate, shouldReloadStaleTab, updatePhase } from "../update-phase";
+import { hasUnsavedWork, isFormField, resetUnsavedWork, setUnsavedWork, subscribeUnsavedWork, trackFieldForTest } from "../unsaved-work";
+import { canApplyUpdate, reloadAfterTakeover, shouldReloadStaleTab, updatePhase } from "../update-phase";
 
 // fix/polish-1020 review (item 10): the update never reloads over a tray, an open portion sheet or a form someone is typing in.
 
@@ -69,5 +69,41 @@ describe("the update decision with unsaved work", () => {
     expect(shouldReloadStaleTab({ ...base, busy: true })).toBe(false);
     expect(shouldReloadStaleTab({ ...base, editing: true })).toBe(false);
     expect(shouldReloadStaleTab({ ...base, stale: false })).toBe(false);
+  });
+});
+
+describe("reload after the worker took over", () => {
+  const base = { by: null, hidden: false, busy: false, editing: false } as const;
+
+  it("a tap on Tải lại reloads at once, in front", () => {
+    expect(reloadAfterTakeover({ ...base, by: "tap" })).toBe(true);
+    expect(reloadAfterTakeover({ ...base, by: "tap", editing: true })).toBe(false);
+    expect(reloadAfterTakeover({ ...base, by: "tap", busy: true })).toBe(false);
+  });
+
+  it("an update the app started in the background, or another tab's, never reloads a visible page", () => {
+    expect(reloadAfterTakeover({ ...base, by: "background", hidden: false })).toBe(false);
+    expect(reloadAfterTakeover({ ...base, by: null, hidden: false })).toBe(false);
+  });
+
+  it("…and reloads once the page is hidden with nothing waiting or held", () => {
+    expect(reloadAfterTakeover({ ...base, by: "background", hidden: true })).toBe(true);
+    expect(reloadAfterTakeover({ ...base, by: "background", hidden: true, editing: true })).toBe(false);
+  });
+});
+
+describe("unsaved work drops a field that left the page and tells those who wait", () => {
+  it("emits (after the read, not during it) when a disconnected field is forgotten", async () => {
+    const field = { isConnected: true } as unknown as Element;
+    trackFieldForTest(field);
+    expect(hasUnsavedWork()).toBe(true);
+    const fn = vi.fn();
+    const off = subscribeUnsavedWork(fn);
+    (field as unknown as { isConnected: boolean }).isConnected = false;
+    expect(hasUnsavedWork()).toBe(false);
+    expect(fn).not.toHaveBeenCalled(); // not inside the read: it may be a render
+    await Promise.resolve();
+    expect(fn).toHaveBeenCalledTimes(1);
+    off();
   });
 });
