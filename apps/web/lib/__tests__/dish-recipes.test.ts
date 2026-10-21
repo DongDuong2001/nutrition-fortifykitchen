@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { FULL_DISHES, SLIM_DISHES, slimText } from "../../scripts/slim-dishes.mjs";
-import { canEditParts, dishViewOf, editParts, editTotals, foodsByKey, isDishFood, isEdited, keysOfFood, partGrams, scaledAddOn, scaledPart, servingsOf, type DishRecipes } from "../dish-recipes";
+import { canEditParts, dishViewOf, editParts, editTotals, foodsByKey, isEdited, keysOfFood, partGrams, recipeKnown, scaledAddOn, scaledPart, servingsOf, startsDishLoad, type DishRecipes } from "../dish-recipes";
 import { calculateMacroPreview } from "../portion";
 import { DISH_DEMO_FOODS } from "../mock/dish-demo-foods";
 import { MOCK_FOODS, type FoodItem } from "../mock/foods";
@@ -72,11 +72,16 @@ describe("a dish and its ingredients are found by (source, source_id)", () => {
     expect(bare && scaledPart(bare.parts[0], 1).kcal).toBeNull();
   });
 
-  it("a food with no recipe has no view, and only Món Việt foods open the recipes at all", () => {
-    expect(dishViewOf(MOCK_FOODS.find((f) => f.id !== "food-pho-bo" && f.category !== "mon_viet") as FoodItem, recipes, foodsByKey(withDemo))).toBeNull();
-    expect(isDishFood(phoBo)).toBe(true);
-    expect(isDishFood({ category: "rau" })).toBe(false);
-  });
+  it("a food with no recipe has no view; a food with one has it whatever its category (Bánh khoai nướng Minh Hào is Đồ ngọt & ăn vặt)", () => {
+    expect(dishViewOf(MOCK_FOODS.find((f) => f.id !== "food-pho-bo" && f.id !== "food-banh-khoai-nuong" && f.category !== "mon_viet") as FoodItem, recipes, foodsByKey(withDemo))).toBeNull();
+    const cake = MOCK_FOODS.find((f) => f.id === "food-banh-khoai-nuong") as FoodItem;
+    expect(cake.category).toBe("an_vat");
+    expect(dishViewOf(cake, recipes, foodsByKey(withDemo))?.parts.length).toBeGreaterThan(0);
+    expect(recipeKnown(cake)).toBeNull(); // the recipes are not loaded in a unit test: the panel asks, and draws Thành phần once it knows
+    // A Món Việt row's press starts the load before anyone knows; any other row loads the recipes only
+    expect(startsDishLoad(phoBo)).toBe(true);
+    expect(startsDishLoad({ category: "an_vat" })).toBe(false);
+});
 });
 
 describe("scaling to the chosen portion", () => {

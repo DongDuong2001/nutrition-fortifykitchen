@@ -58,27 +58,31 @@ describe("Đồ ăn của Minh Hào", () => {
     expect(foodSourceLabel("fortify_kitchen")).toBe("Fortify Kitchen");
   });
 
-  it("the demo catalogue holds a few demo-only rows, plain foods with a weighed first portion", () => {
-    const demo = fortifyKitchenFoods(SAMPLE_FOODS);
+  it("the demo catalogue holds a few demo-only rows, plain foods with a weighed first portion, and the cake with its recipe", () => {
+    const rows = fortifyKitchenFoods(SAMPLE_FOODS);
+    const demo = rows.filter((f) => f.nameVi.includes("(mẫu demo)"));
     expect(demo.length).toBeGreaterThanOrEqual(2);
     expect(demo.length).toBeLessThanOrEqual(3);
-    for (const row of demo) {
+    // Bánh khoai nướng Minh Hào is the one with parts: a dish with a public recipe, filed under Đồ ngọt & ăn vặt (not Món Việt)
+    expect(rows.filter((f) => !demo.includes(f)).map((f) => [f.id, f.category])).toEqual([["food-banh-khoai-nuong", "an_vat"]]);
+    for (const row of rows) {
       expect(row.demoOnly, row.id).toBe(true);
-      expect(row.nameVi, row.id).toContain("(mẫu demo)");
       expect(row.recipe, row.id).toBeUndefined();
-      expect(categoryOf(row)).toBe("mon_viet");
       // The kcal on a card is the first portion's: kcal per 100 g × its grams
       expect(foodRowKcal(row), row.id).toBe(`${Math.round(((row.nutrients.energy ?? 0) * row.servings[0].grams) / 100)} kcal`);
-      // Never a dish: no recipe of the research holds a Fortify Kitchen key, so no Thành phần and no parts
-      expect(dishViewOf(row, { "usda_sr_legacy|FDC 1": [100, []] }, new Map()), row.id).toBeNull();
       expect(keysOfFood(row).every((k) => k.startsWith("fortify_kitchen|"))).toBe(true);
+    }
+    for (const row of demo) {
+      expect(categoryOf(row)).toBe("mon_viet");
+      // Plain foods: no recipe of the research holds their key, so no Thành phần and no parts
+      expect(dishViewOf(row, { "usda_sr_legacy|FDC 1": [100, []] }, new Map()), row.id).toBeNull();
     }
   });
 
-  it("no dish recipe of the research is for a Fortify Kitchen food", async () => {
+  it("the only Fortify Kitchen food with a recipe of the research is the cake: the plain rows have none, and no ingredient is a Fortify Kitchen row", async () => {
     const { default: recipes } = await import("../data/dish-recipes.slim.json");
     const ingredientKeys = Object.values(recipes as unknown as Record<string, [number, [string][]]>).flatMap(([, rows]) => rows.map((r) => r[0]));
-    expect(Object.keys(recipes).filter((k) => k.startsWith("fortify_kitchen|"))).toEqual([]);
+    expect(Object.keys(recipes).filter((k) => k.startsWith("fortify_kitchen|"))).toEqual(["fortify_kitchen|fortify_kitchen:banh-khoai-nuong"]);
     expect(ingredientKeys.filter((k) => k.startsWith("fortify_kitchen|"))).toEqual([]);
   });
 });

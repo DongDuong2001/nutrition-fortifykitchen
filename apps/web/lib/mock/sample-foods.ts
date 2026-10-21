@@ -357,7 +357,8 @@ export const SAMPLE_FOODS: FoodItem[] = [
   // Bánh khoai nướng Minh Hào (1 miếng = 1/10 khuôn, 102,8 g = 216 kcal): a dish with swappable parts (Hao 21/10), values as in docs/data/new-foods-2026-10-21c.json
   {
     id: "food-banh-khoai-nuong",
-    category: "mon_viet",
+    category: "an_vat",
+    demoOnly: true,
     nameVi: "Bánh khoai nướng Minh Hào",
     source: "fortify_kitchen" as FoodItem["source"],
     sourceId: "fortify_kitchen:banh-khoai-nuong",

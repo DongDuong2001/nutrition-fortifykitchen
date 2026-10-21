@@ -31,7 +31,10 @@ EXPECTED = {
     "Ức gà nấu chậm Minh Hào (mẫu demo)": ("1 phần lẻ (150 g sống)", int(136 * 150 / 100 + 0.5)),
     "Tôm thẻ nấu chậm Minh Hào (mẫu demo)": ("1 phần lẻ (150 g sống)", int(87 * 150 / 100 + 0.5)),
     "Mì Ý sốt cà Minh Hào (mẫu demo)": ("1 phần", int(102.2 * 370.9 / 100 + 0.5)),
+    # The cake is a dish with a public recipe (Đồ ngọt & ăn vặt): the only row here with Thành phần
+    "Bánh khoai nướng Minh Hào": ("1 miếng (1/10 khuôn)", int(210.6 * 102.8 / 100 + 0.5)),
 }
+PLAIN = "Ức gà nấu chậm Minh Hào (mẫu demo)"
 SAVED_PROFILE = '{"sex":"male","birthYear":2003,"weightKg":65,"goal":"maintain","periodMode":false,"trainingMinutesDefault":60,"displayName":"Probe"}'
 # A signed-in mock account with no sample data (lib/auth-mock.ts): without it a non-demo visit goes to /signin
 MOCK_ACCOUNT = '{"current":"probe@example.com","accounts":{"probe@example.com":{"hash":null,"providers":["google"]}}}'
@@ -107,10 +110,10 @@ def part_a(browser, w, size):
     check(listed == ["Tôm thẻ nấu chậm Minh Hào (mẫu demo)"], f"A {w}: searching tôm inside the chip narrows to the Tôm thẻ row ({listed})")
     pg.locator("input[type=search]:visible, input[inputmode=search]:visible, [role=searchbox]:visible").first.fill("")
     pg.wait_for_timeout(500)
-    check(len(rows(pg)) == len(EXPECTED), f"A {w}: clearing the search brings the three rows back")
+    check(len(rows(pg)) == len(EXPECTED), f"A {w}: clearing the search brings all the rows back")
 
     # A row opens the portion sheet: a plain food, so no Thành phần (never ingredients or dish parts)
-    pg.locator("[data-food-row]:visible").first.click()
+    pg.locator("[data-food-row]:visible").filter(has_text="Ức gà").first.click()
     pg.wait_for_timeout(1800)  # the Thành phần chunk of a dish loads on the press: give it the time it needs to show up
     body = pg.inner_text("body")
     check("Minh Hào (mẫu demo)" in body, f"A {w}: a row opens its portion sheet")
@@ -127,6 +130,12 @@ def part_a(browser, w, size):
     pg.locator("[data-food-row]:visible").first.click()
     pg.wait_for_timeout(1800)
     check(pg.locator("[data-tour=dish-parts]").count() >= 1, f"A {w}: control, Phở bò does show Thành phần")
+    # The cake is filed under Đồ ngọt & ăn vặt, not Món Việt, and has a recipe: Thành phần opens for any food that has one
+    pg.locator("input[type=search]:visible, input[inputmode=search]:visible, [role=searchbox]:visible").first.fill("bánh khoai")
+    pg.wait_for_timeout(500)
+    pg.locator("[data-food-row]:visible").filter(has_text="Bánh khoai nướng Minh Hào").first.click()
+    pg.wait_for_timeout(2500)
+    check(pg.locator("[data-tour=dish-parts]").count() >= 1, f"A {w}: the cake (Đồ ngọt & ăn vặt) shows Thành phần: a recipe, not a category, opens it")
     ctx.close()
 
     # Keyboard: Tab walks the chips in order
@@ -202,7 +211,7 @@ def part_c(browser, w, size):
     check(order == ["Xem tất cả", *list(seen)], f"C {w}: Tab order ({order})")
 
     # A card opens its food page
-    cards.first.click()
+    cards.filter(has_text="Ức gà").first.click()
     pg.wait_for_url(re.compile(r"/foods/demo-fk-"), timeout=10000)
     page_text = pg.inner_text("body")
     check("minh hào (mẫu demo)" in page_text.lower(), f"C {w}: a card opens its food page ({pg.url}; {page_text[:160]!r})")
@@ -217,7 +226,7 @@ def part_c(browser, w, size):
     pg.wait_for_url("**/explore/minh-hao", timeout=10000)
     pg.locator("[data-food-row]:visible").first.wait_for(timeout=10000)
     body = pg.inner_text("body")
-    check(CHIP.lower() in body.lower() and "3 món" in body, f"C {w}: the list screen is titled Đồ ăn của Minh Hào with 3 món ({body[:160]!r})")
+    check(CHIP.lower() in body.lower() and f"{len(EXPECTED)} món" in body, f"C {w}: the list screen is titled Đồ ăn của Minh Hào with {len(EXPECTED)} món ({body[:160]!r})")
     listed = rows(pg)
     check(sorted(listed) == sorted(EXPECTED), f"C {w}: the list holds every row ({listed})")
     values = pg.locator("[data-food-row]:visible").all_inner_texts()

@@ -18,7 +18,7 @@ The live catalogue was read on 21/10/2026 from `GET /api/v1/foods` on lehongkhan
 | New | Bột nở | gia_vi | usda_sr_legacy | FDC 172803 | Leavening agents, baking powder, double-acting, sodium aluminum sulfate [link](https://fdc.nal.usda.gov/fdc-app.html#/food-details/172803/nutrients) | 53 | 0 | 0 | 27.7 | 22/22 | 100 g; 1 muỗng cà phê = 4.6 g |
 | New | Chocolate đen 70–85 % | an_vat | usda_sr_legacy | FDC 170273 | Chocolate, dark, 70-85% cacao solids [link](https://fdc.nal.usda.gov/fdc-app.html#/food-details/170273/nutrients) | 598 | 7.8 | 42.6 | 45.9 | 19/22 | 100 g |
 | New | Sữa chua thường (nguyên kem, không đường) | sua | usda_sr_legacy | FDC 171284 | Yogurt, plain, whole milk [link](https://fdc.nal.usda.gov/fdc-app.html#/food-details/171284/nutrients) | 61 | 3.5 | 3.2 | 4.7 | 22/22 | 100 g; 1 chén = 245 g |
-| New | Bánh khoai nướng Minh Hào | mon_viet | fortify_kitchen | fortify_kitchen:banh-khoai-nuong | Công thức riêng của Fortify Kitchen; giá trị tính từ nguyên liệu (USDA/NIN/nhãn sản phẩm) | 210.6 | 6.1 | 10.6 | 22.8 | 20/22 | 1 miếng (1/10 khuôn) = 102.8 g; 100 g |
+| New | Bánh khoai nướng Minh Hào | an_vat | fortify_kitchen | fortify_kitchen:banh-khoai-nuong | Công thức riêng của Fortify Kitchen; giá trị tính từ nguyên liệu (USDA/NIN/nhãn sản phẩm) | 210.6 | 6.1 | 10.6 | 22.8 | 20/22 | 1 miếng (1/10 khuôn) = 102.8 g; 100 g |
 
 ## The recipe (Thành phần)
 

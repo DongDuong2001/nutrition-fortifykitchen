@@ -64,8 +64,12 @@ async function loadDemoFoods(): Promise<void> {
   addDemoFoods(DISH_DEMO_FOODS);
 }
 
-/** A dish is a food of the Món Việt category: only those open the recipes file at all (components/ui/portion-panel checks the same). */
-export const isDishFood = (food: Pick<FoodItem, "category">): boolean => food.category === "mon_viet";
+/**
+ * Thành phần opens for a food the research has a recipe for, whatever its category (Bánh khoai nướng Minh Hào is Đồ ngọt & ăn vặt,
+ * not Món Việt: recipeKnown says so once the recipes are here). A Món Việt food is the usual case, so a press on its row starts the
+ * load before anyone knows; any other row's press loads the recipes only (components/ui/dish-parts-prefetch).
+ */
+export const startsDishLoad = (food: Pick<FoodItem, "category">): boolean => food.category === "mon_viet";
 
 // The mock catalogue (demo and mock mode) names its sources the way the sheet shows them, and its ids are the source ids
 const MOCK_SOURCE_KEYS: Record<string, string> = { "VN FCT": "vn_table" };
