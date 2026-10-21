@@ -103,8 +103,10 @@ def item_back_in_front(browser):
     waiting_update(pg)
     pg.wait_for_timeout(5200)  # the toast has been armed (idle), nothing is held
     pg.evaluate("window.__keep = 1")
+    # The worker takes over 1.5 s after the app asks (a slow device): the person is back in front by then
+    pg.evaluate("() => { const post = ServiceWorker.prototype.postMessage; ServiceWorker.prototype.postMessage = function (m, ...rest) { if (m && m.type === 'SKIP_WAITING') { setTimeout(() => post.call(this, m, ...rest), 1500); return; } return post.call(this, m, ...rest); }; }")
     hide(pg)
-    pg.wait_for_timeout(15)  # SKIP_WAITING is on its way …
+    pg.wait_for_timeout(300)  # the app has asked …
     show(pg)  # … and the person is back before the worker takes over
     pg.wait_for_timeout(4000)
     check(kept(pg), "5: an update the app started in the background does not reload a page that is visible again")

@@ -111,6 +111,20 @@ gate:full: all green
 - New probes: `toast_undo.py`, and in `polish_1020.py` the slow start (network and CPU throttled), the touched-field tip, Xem thêm focus, the portion sheet's focus return (row, row behind Xem thêm, carousel chevron), the header and row hit test, measured thresholds. New unit tests: `unsaved-work`, `add-toast`, `interruption` (the report gating), `releases`.
 - Not done: a header hit area of 44 px (28, see above); the unsaved-work detector is a heuristic (see For Hao 9); the new probes were each run on the fixed build only, except where the old failure was seen (the first `toast_undo` run was against the fixed build; I did not run it against the old toast).
 
+### After the night review fixes (port 3126)
+
+```
+gate:full: 699 s wall clock
+  typecheck       ok      1 s
+  vitest          ok      8 s   (169 files, 2131 tests, 1 skipped)
+  build:demo      ok      9 s
+  test:align      ok     77 s
+  test:hydration  ok    112 s
+  probe:all       ok    682 s   probe:all: 115 PASS, 4 REPORT, 0 QUAR, 0 FAIL, 1 SKIP
+gate:full: all green
+```
+- By hand, outside the gate: `_polish_update_check.py` passes, with the new scenario (the worker takes over 1.5 s after the app asked and the person is back in front: no reload; hidden again: reload). `cc_49.py` on a live build passes except part 7, which fails as it does on main; part 8 is the new undo-after-add check (3 solo runs, 3 more in the full run: one early run, on a freshly started server, waited 30 s for the toast button to hold still; the probe now fires the click as an event instead).
+
 ## For Hao
 
 1. **"Mid-sheet" read as "a sheet that is moving".** A tip waits (and tries again 400 ms later) while a sheet is moving or a field someone typed in has focus; it may come over the add sheet's own empty search field, because the add tips belong there. If you meant "any sheet open", it is one condition in `interruptionBlockedByUi` (`lib/interruption.ts`).
