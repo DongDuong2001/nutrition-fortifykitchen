@@ -23,7 +23,7 @@ Foods are the catalogue rows with source `fortify_kitchen` (also any row whose b
 
 ## Notes for review
 
-- The food page of these rows reads "Món Việt · Fortify Kitchen · Fortify Kitchen · 150 g mỗi khẩu phần": the brand and the source name are both "Fortify Kitchen". Existing behaviour of the page, left as it is (not part of this ask).
+- The food page names "Fortify Kitchen" once: its brand and its source name are the same, so the brand is left out when it only repeats the source (`brandToShow` in `lib/food-meta.ts`; a test and the probe check it).
 - The real rows are category `mon_viet`, so on /add they also stay under "Món Việt" and "Tất cả"; the chip is an extra way in, not a move.
 - In demo mode Khám phá shows the sample ranking and coaches above the carousel; in the live build the carousel is the first card.
 

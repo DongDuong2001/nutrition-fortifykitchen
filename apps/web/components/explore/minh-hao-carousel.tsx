@@ -4,7 +4,7 @@ import React, { useMemo } from "react";
 import Link from "next/link";
 import { Carousel } from "@/components/ui/carousel";
 import { FoodCardLink } from "@/components/foods/food-card-link";
-import { SourceTag } from "@/components/foods/food-list";
+import { SourceTag } from "@/components/foods/source-tag";
 import { useCatalogFoods } from "@/hooks/use-catalog-foods";
 import type { FoodItem } from "@/lib/catalog";
 import { foodRowKcal } from "@/lib/food-meta";
