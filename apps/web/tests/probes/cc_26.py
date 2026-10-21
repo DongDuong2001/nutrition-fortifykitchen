@@ -116,7 +116,8 @@ ANALYSE = """async (b64) => {
   for (let i = 0; i < W; i++) { if (!near(px(i, 0))) mark(i, 0); if (!nearInk(px(i, H - 1))) mark(i, H - 1); }
   let lastInk = -1;
   for (let y = H - 1; y >= 0 && lastInk < 0; y--) for (let ix = 0; ix < W; ix += 2) if (px(ix, y) !== PAPER) { lastInk = y; break; }
-  const levels = { red: '242,69,61', yellow: '255,176,32', green: '128,216,160', blue: '47,196,107' };
+  // V3 level fills (globals.css level-thieu, -trungbinh, -gandu, -dat); the keys keep their old names
+  const levels = { red: '255,56,60', yellow: '255,204,0', green: '0,200,179', blue: '52,199,89' };
   const found = { red: 0, yellow: 0, green: 0, blue: 0 };
   const whole = new Set();
   for (let i = 0; i < all.length; i += 4) {
@@ -229,7 +230,7 @@ def check_head(s, tag, label, named):
         # cc-66 (S12): 1.1, so stacked Vietnamese marks (Ắ, Ổ, Ế) on a two-line name never touch (OPEN_QUESTIONS cc-68)
         check(abs(lh / h["firstFs"] / round(lh / (h["firstFs"] * 1.1)) - 1.1) < 0.02, f"{tag} {label}: name line-height 1.1 ({lh:.1f} px for {h['firstFs']} px)")
         check(h["date"] is not None and abs(h["date"]["top"] - h["first"]["bottom"] - 8) <= 1, f"{tag} {label}: the date sits 8 px under the name ({h['date'] and h['date']['top'] - h['first']['bottom']:.1f})")
-        check(abs(h["dateFs"] - 13) < 0.5 and h["dateWeight"] == "500" and h["dateTransform"] == "none" and h["dateColor"] == "rgb(107, 106, 102)", f"{tag} {label}: the date is 13 px 500 secondary, sentence case ({h['dateFs']}, {h['dateWeight']}, {h['dateTransform']}, {h['dateColor']})")
+        check(abs(h["dateFs"] - 13) < 0.5 and h["dateWeight"] == "500" and h["dateTransform"] == "none" and h["dateColor"] == "rgb(99, 99, 102)", f"{tag} {label}: the date is 13 px 500 secondary, sentence case ({h['dateFs']}, {h['dateWeight']}, {h['dateTransform']}, {h['dateColor']})")
         check(abs(h["date"]["left"] - h["first"]["left"]) <= 1, f"{tag} {label}: date and name share a left edge")
     else:
         check(h["date"] is None, f"{tag} {label}: no second row without a name")
@@ -242,8 +243,8 @@ def check_frame(s, tag, label):
         check(False, f"{tag} {label}: footer geometry was not read")
         return
     check(f["bg"] == "rgb(17, 19, 23)" and abs(f["h"] - 58) <= 0.5 and f["padL"] == 16 and f["padR"] == 16, f"{tag} {label}: footer is a 58 px ink band, padding 16 ({f['bg']}, {f['h']}, {f['padL']}, {f['padR']})")
-    check(f["h1t"]["color"] == "rgb(255, 255, 255)" and f["micro"]["color"] == "rgb(92, 134, 242)" and f["h1t"]["fs"] == 24 and f["micro"]["fs"] == 24 and f["h1t"]["style"] == "italic" and "Saira" in f["h1t"]["family"],
-          f"{tag} {label}: H1T white, MICRO #5C86F2 token, Saira italic 24 px ({f['h1t']['color']}, {f['micro']['color']}, {f['h1t']['fs']})")
+    check(f["h1t"]["color"] == "rgb(255, 255, 255)" and f["micro"]["color"] == "rgb(92, 184, 255)" and f["h1t"]["fs"] == 24 and f["micro"]["fs"] == 24 and f["h1t"]["style"] == "italic" and "Saira" in f["h1t"]["family"],
+          f"{tag} {label}: H1T white, MICRO sky #5CB8FF token, Saira italic 24 px ({f['h1t']['color']}, {f['micro']['color']}, {f['h1t']['fs']})")
     check(f["site"]["fs"] == 13 and f["site"]["fw"] == "800" and f["site"]["color"] == "rgb(255, 255, 255)", f"{tag} {label}: lehongkhanh.vn 13 px 800 white ({f['site']['fs']}, {f['site']['fw']}, {f['site']['color']})")
     check(f["line"]["fs"] == 11 and f["line"]["fw"] == "500" and f["line"]["color"] == "rgb(169, 168, 163)", f"{tag} {label}: the line is 11 px 500 #A9A8A3 ({f['line']['fs']}, {f['line']['fw']}, {f['line']['color']})")
     check(abs(f["siteBox"]["right"] - f["lineBox"]["right"]) <= 0.6 and abs(f["right"] - 16 - f["siteBox"]["right"]) <= 0.6, f"{tag} {label}: the right column is right-aligned on the 16 px edge")

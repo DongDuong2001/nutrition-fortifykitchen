@@ -42,7 +42,7 @@ def verify(pg, tag):
     check(s["inputOutlineStyle"] == "none" or s["inputOutlineWidth"] in ("0px", "0"), f"{tag}: the input has no outline ({s['inputOutlineStyle']} {s['inputOutlineWidth']})")
     check(s["inputShadow"] == "none", f"{tag}: the input has no box-shadow ring ({s['inputShadow']})")
     check(s["labelShadow"] != "none", f"{tag}: the wrapper has the ring ({s['labelShadow'][:60]})")
-    check("rgb(18, 56, 214)" in s["labelShadow"] and s["labelBorder"] == "rgb(18, 56, 214)", f"{tag}: the ring and border are blue ({s['labelBorder']})")
+    check("rgb(36, 87, 245)" in s["labelShadow"] and s["labelBorder"] == "rgb(36, 87, 245)", f"{tag}: the ring and border are blue ({s['labelBorder']})")
 
 
 def run(browser, size, route, name):

@@ -103,7 +103,7 @@ def run(browser, size, tag):
     check(pg.get_by_role("link", name="Sửa món này").count() == 0 and pg.get_by_role("button", name=re.compile("^Tùy chọn Bữa")).count() == 0, f"{tag} no Sửa or meal ⋯ in day mode (cc-27a: the day has its own ⋯)")
     # today: the four level colours (one palette on ink and light since cc-44: red, amber, light green, green)
     kcal = fills(pg, "Kcal so với mục tiêu ngày")
-    level_dark = {"rgb(242, 69, 61)", "rgb(255, 176, 32)", "rgb(128, 216, 160)", "rgb(47, 196, 107)"}
+    level_dark = {"rgb(255, 56, 60)", "rgb(255, 204, 0)", "rgb(0, 200, 179)", "rgb(52, 199, 89)"}
     empty_dark = "rgb(42, 44, 49)"
     lit = [c for c in kcal if c != empty_dark]
     check(len(lit) > 0 and len(set(lit)) == 1 and set(lit) <= level_dark, f"{tag} today kcal bar is lit in one level colour ({set(lit)})")
@@ -187,7 +187,7 @@ def run(browser, size, tag):
     allfills = set()
     for label in ["Kcal so với mục tiêu ngày", "Đạm so với mục tiêu ngày", "Chất béo so với mục tiêu ngày", "Sodium so với mục tiêu ngày", "Calcium so với mục tiêu ngày", "Vitamin C so với mục tiêu ngày"]:
         allfills |= set(fills(pg, label))
-    coloured = {"rgb(242, 69, 61)", "rgb(255, 176, 32)", "rgb(128, 216, 160)", "rgb(47, 196, 107)"} & allfills
+    coloured = {"rgb(255, 56, 60)", "rgb(255, 204, 0)", "rgb(0, 200, 179)", "rgb(52, 199, 89)"} & allfills
     check(len(coloured) >= 1, f"{tag} past day bars use level colours {sorted(coloured)}")
     pg.screenshot(path=os.path.join(SHOTS, f"cc-22-past-{w}.png"))
     ctx.close()

@@ -20,7 +20,7 @@ NOW = "2026-10-15T10:00:00+07:00"
 SHOTS = os.path.join(os.path.dirname(__file__), "..", "..", ".screenshots")
 HERO = "section[aria-label='Tổng kcal và dinh dưỡng đa lượng']"
 LEVEL_COLOURS = {  # cc-44: one palette on ink and on light surfaces
-    "rgb(242, 69, 61)", "rgb(255, 176, 32)", "rgb(128, 216, 160)", "rgb(47, 196, 107)",
+    "rgb(255, 56, 60)", "rgb(255, 204, 0)", "rgb(0, 200, 179)", "rgb(52, 199, 89)",
 }
 EMPTY = {"rgb(236, 234, 230)", "rgb(42, 44, 49)"}  # the light track and the ink track
 problems = []
