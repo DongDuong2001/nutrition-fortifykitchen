@@ -190,13 +190,9 @@ function ShareCapture({
         width,
         height,
         fontEmbedCSS,
-        // A page height that is not a whole number of image rows leaves a last row the page only partly covers: the
-        // canvas fill gives it the footer's ink. html-to-image also paints this colour on the page, so `style` puts the
-        // page's white back, with ink under the footer so the blended last row stays ink to the corners.
+        // The page's root is ink (share-day), so a last image row the page covers only in part stays ink to the corners
         backgroundColor: ink,
         style: {
-          backgroundColor: getComputedStyle(node).backgroundColor,
-          backgroundImage: `linear-gradient(to top, ${ink} ${footer?.offsetHeight ?? 0}px, transparent 0)`,
           transform: `scale(${scale})`,
           transformOrigin: "top left",
           width: `${SHARE_CSS_WIDTH}px`,
@@ -423,7 +419,7 @@ export function ShareSheet({
             alt={ready.alt}
             width={ready.width}
             height={ready.height}
-            className="h-auto max-h-full w-auto max-w-full rounded-xl border border-card-border object-contain"
+            className="h-auto max-h-full w-auto max-w-full rounded-card border border-card-border object-contain"
           />
         ) : failure === "generate" ? (
           <div className="aspect-[9/16] h-full rounded-xl border border-card-border bg-surface" />

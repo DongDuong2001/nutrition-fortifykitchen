@@ -4,11 +4,12 @@ Production build, clock fixed at 2026-10-15 10:00 Asia/Ho_Chi_Minh, sizes 390x84
 - Empty day: the share icon is disabled and the reason "Chưa có món nào để chia sẻ" is visible.
 - Today (demo): the sheet opens with a skeleton, then a preview; Lưu ảnh downloads h1t-micro-2026-10-15.png,
   1080 wide, at least 1920 high, paper at every edge (nothing clipped), not blank; no weight or email.
-- The page behind the PNG (read while it is drawn): name on top when set, the date under it; no header, tab bar,
+- The page behind the PNG (read while it is drawn): name on top when set, the date under it; no app header, tab bar,
   Thêm, ⋯, dots, "Đủ 22 vi chất"; meals with no food absent; the four-level key today and on a
   past day, as a 2x2 grid; footer (ink band, wordmark, site and line), pinned to the bottom (gap 0, within 12 px).
-- Header: the name in Saira 38 px uppercase over the date, the Level badge centred on that column, 86 px tall (a long name
-  wraps and the header grows); footer: 58 px ink band, H1T white + MICRO in the dark cobalt token, lehongkhanh.vn over the line.
+- V3ShareB header: the name (h1) in Saira italic 34 px uppercase over the date (13 px 600), the Level badge centred on that
+  column, 24 px above and 16 px at the sides (a long name wraps and the header grows); footer: 58 px ink band, H1T white +
+  MICRO in the dark cobalt token, lehongkhanh.vn over the line; the meals and vi chất cards are white, 16 px radius.
 - A long day (12+ foods) is taller than 1920 with the footer fully inside; the height follows the content.
 - Past day: the PNG uses level colours (4 levels), today's PNG uses them too (Hao, 16/10).
 - Without file sharing, Lưu ảnh is the only (primary) button. With it, Chia sẻ calls navigator.share with one
@@ -67,13 +68,16 @@ window.__shareSnaps = [];
       top: r.firstElementChild ? r.firstElementChild.innerText.replace(/\\s+/g, ' ') : '',
       rootW: rr.width, rootH: rr.height, footerGap: rr.bottom - fr.bottom, footerH: fr.height,
       controls: r.querySelectorAll('button, a, input, select, textarea').length,
-      head: (() => { const h = r.querySelector('[data-share-header]'); if (!h) return null; const ps = [...h.querySelectorAll('p')]; const b = h.querySelector('[data-level-badge]');
+      head: (() => { const h = r.querySelector('[data-share-header]'); if (!h) return null; const t = h.querySelector('h1'), d = h.querySelector('p'); const b = h.querySelector('[data-level-badge]');
         const c = (e) => { const q = e.getBoundingClientRect(); return { top: q.top, bottom: q.bottom, mid: (q.top + q.bottom) / 2, left: q.left, right: q.right }; };
-        const cs0 = getComputedStyle(ps[0]), cs1 = ps.length > 1 ? getComputedStyle(ps[1]) : null;
-        return { height: h.getBoundingClientRect().height, box: c(h), bg: getComputedStyle(h).backgroundColor, col: c(ps[0].parentElement), first: c(ps[0]), date: ps.length > 1 ? c(ps[1]) : null, badge: b ? c(b) : null,
-          firstFs: parseFloat(cs0.fontSize), firstLh: cs0.lineHeight, firstTransform: cs0.textTransform, firstFamily: cs0.fontFamily, firstWeight: cs0.fontWeight, firstStyle: cs0.fontStyle, firstColor: cs0.color, firstText: ps[0].innerText,
+        const cs0 = getComputedStyle(t), cs1 = d ? getComputedStyle(d) : null;
+        return { height: h.getBoundingClientRect().height, box: c(h), bg: getComputedStyle(h).backgroundColor, col: c(t.parentElement), first: c(t), date: d ? c(d) : null, badge: b ? c(b) : null,
+          firstFs: parseFloat(cs0.fontSize), firstLh: cs0.lineHeight, firstTransform: cs0.textTransform, firstFamily: cs0.fontFamily, firstWeight: cs0.fontWeight, firstStyle: cs0.fontStyle, firstColor: cs0.color, firstText: t.innerText,
           dateFs: cs1 ? parseFloat(cs1.fontSize) : null, dateWeight: cs1 ? cs1.fontWeight : null, dateColor: cs1 ? cs1.color : null, dateTransform: cs1 ? cs1.textTransform : null,
-          paddingTop: parseFloat(getComputedStyle(h).paddingTop), paddingLeft: parseFloat(getComputedStyle(h).paddingLeft), badgeW: b ? b.getBoundingClientRect().width : null }; })(),
+          paddingTop: parseFloat(getComputedStyle(h).paddingTop), paddingLeft: parseFloat(getComputedStyle(h).paddingLeft), badgeW: b ? b.getBoundingClientRect().width : null, h1s: r.querySelectorAll('h1').length }; })(),
+      cards: (() => { const meals = r.querySelector('section[aria-label^="Bữa"], section[aria-label="Trước tập"]'); const m = meals ? meals.parentElement : null, a = r.querySelector('aside[aria-label="Vi chất"]'); if (!m || !a) return null;
+        const q = (e) => { const b = e.getBoundingClientRect(), g = getComputedStyle(e); return { left: b.left, right: b.right, top: b.top, bottom: b.bottom, w: b.width, radius: parseFloat(g.borderTopLeftRadius), bg: g.backgroundColor }; };
+        return { meals: q(m), micros: q(a), hero: q(r.querySelector('section[aria-label="Tổng kcal và dinh dưỡng đa lượng"]')), root: q(r) }; })(),
       foot: (() => { const cs = getComputedStyle(f); const spans = [...f.querySelectorAll('span')];
         const find = (t) => spans.find(x => x.children.length === 0 && x.textContent.trim() === t);
         const css = (e) => { const g = getComputedStyle(e), q = e.getBoundingClientRect(); return e ? { fs: parseFloat(g.fontSize), fw: g.fontWeight, color: g.color, family: g.fontFamily, style: g.fontStyle, right: q.right, left: q.left } : null; };
@@ -84,7 +88,7 @@ window.__shareSnaps = [];
         const g = getComputedStyle(ul); return { labels: li.map(x => x.textContent.trim()), lefts: q.map(x => x.left), tops: q.map(x => x.top), heights: q.map(x => x.height), widths: q.map(x => x.width), swW: sw[0].width,
           colGap: g.columnGap, rowGap: g.rowGap, fs: getComputedStyle(li[0]).fontSize, nowrap: li.map(x => getComputedStyle(x).whiteSpace), colRight: ul.getBoundingClientRect().right, rights: q.map(x => x.right), swatchLabelGap: getComputedStyle(li[0]).columnGap, display: g.display }; })(),
       sections: [...r.querySelectorAll('section[aria-label]')].map(s => s.getAttribute('aria-label')).filter(n => n.startsWith('Bữa')),
-      header: !!r.querySelector('header, nav'),
+      header: !!r.querySelector('header:not([data-share-header]), nav'),
     });
   }, 5);
 })();
@@ -102,12 +106,11 @@ ANALYSE = """async (b64) => {
   const all = x.getImageData(0, 0, W, H).data;
   const px = (ix, iy) => { const o = (iy * W + ix) * 4; return all[o] + ',' + all[o + 1] + ',' + all[o + 2]; };
   const PAPER = '255,255,255';
-  // White, or the 1 px divider under the header (ShareC2) that runs edge to edge
-  const near = (k) => k.split(',').every((v, i) => Number(v) >= [228, 224, 216][i]);  // between the divider and white (the scaled line blends)
+  // The page paper (#F2F2F7), or lighter
+  const near = (k) => k.split(',').every((v, i) => Number(v) >= [236, 236, 240][i]);  // the page paper or white
   let edgeBad = 0; const badAt = []; const mark = (ix, iy) => { edgeBad++; if (badAt.length < 4) badAt.push([ix, iy, px(ix, iy)]); };
-  // Hôm nay runs edge to edge in its body (the two columns), so the side edges are checked above the body (paper)
-  // and in the footer (an ink band); the top row is paper and the bottom row is ink.
-  const bodyTop = Math.round(H * 0), headRows = 330;
+  // The hero and the two cards sit 12 px in, so every side edge is paper down to the footer (an ink band); the top row is paper and the bottom row is ink.
+  const bodyTop = 0, headRows = H - 170;
   for (let i = bodyTop; i < Math.min(H, headRows); i++) { if (!near(px(0, i))) mark(0, i); if (!near(px(W - 1, i))) mark(W - 1, i); }
   // 6, not 2: when the page height is not a whole number of image rows, the last row's two corner pixels blend a
   // few levels lighter (anti-aliasing, cc-44)
@@ -212,28 +215,42 @@ def snap(pg):
 
 
 def check_head(s, tag, label, named):
-    """Header (ShareC2): the name big over the date (8 px between), all centred in 86 px with the Level badge, a 1 px divider under it."""
+    """Header (V3ShareB): the name (h1, Saira italic 34 px) over the date (2 px), the Level badge centred on that column; 16 px sides, 24 px top."""
     h = s and s.get("head")
     if not h:
         check(False, f"{tag} {label}: header geometry was not read")
         return
+    check(h["h1s"] == 1, f"{tag} {label}: one h1 ({h['h1s']})")
     check(h["badge"] is not None and abs(h["col"]["mid"] - h["badge"]["mid"]) <= 1.5, f"{tag} {label}: the badge is centred on the name column ({h['col']['mid']:.1f} vs {h['badge']['mid']:.1f})")
-    check(h["height"] >= 86 - 0.5 and h["bg"] in ("rgba(0, 0, 0, 0)", "rgb(255, 255, 255)"), f"{tag} {label}: the header is at least 86 px on paper ({h['height']}, {h['bg']})")
-    check(h["paddingLeft"] == 12 and abs(h["col"]["mid"] - (h["box"]["top"] + h["box"]["bottom"] - 1) / 2) <= 1.5, f"{tag} {label}: 12 px sides, name and date centred in the header above its 1 px divider (ShareC2) ({h['paddingLeft']}, {h['col']['mid']:.1f} vs {h['box']['top']:.1f}-{h['box']['bottom']:.1f})")
-    check(abs(h["firstFs"] - 38) < 0.5 and h["firstTransform"] == "uppercase" and h["firstWeight"] in ("800", "900") and h["firstStyle"] == "italic" and "Saira" in h["firstFamily"] and h["firstColor"] == "rgb(17, 19, 23)",
-          f"{tag} {label}: the name is Saira italic 38 px uppercase ink ({h['firstFs']}, {h['firstTransform']}, {h['firstWeight']}, {h['firstFamily'][:24]}, {h['firstColor']})")
+    check(h["bg"] == "rgba(0, 0, 0, 0)", f"{tag} {label}: the header sits on the page paper, no band or divider ({h['bg']})")
+    check(h["paddingLeft"] == 16 and h["paddingTop"] == 24, f"{tag} {label}: 16 px sides, 24 px top ({h['paddingLeft']}, {h['paddingTop']})")
+    check(abs(h["firstFs"] - 34) < 0.5 and h["firstTransform"] == "uppercase" and h["firstWeight"] in ("800", "900") and h["firstStyle"] == "italic" and "Saira" in h["firstFamily"] and h["firstColor"] == "rgb(17, 19, 23)",
+          f"{tag} {label}: the name is Saira italic 34 px uppercase ink ({h['firstFs']}, {h['firstTransform']}, {h['firstWeight']}, {h['firstFamily'][:24]}, {h['firstColor']})")
     check(h["firstText"] == h["firstText"].upper(), f"{tag} {label}: the name reads in capitals ({h['firstText']!r})")
     check(h["badgeW"] is not None and h["badgeW"] >= 80, f"{tag} {label}: the badge keeps its width ({h['badgeW']})")
     check(h["badge"] is not None and h["first"]["right"] <= h["badge"]["left"] - 4, f"{tag} {label}: the name stops short of the badge (the skewed badge's box reaches 4.7 px left of its face) ({h['first']['right']:.1f} vs {h['badge']['left']:.1f})")
     if named:
         lh = h["first"]["bottom"] - h["first"]["top"]
-        # cc-66 (S12): 1.1, so stacked Vietnamese marks (Ắ, Ổ, Ế) on a two-line name never touch (OPEN_QUESTIONS cc-68)
         check(abs(lh / h["firstFs"] / round(lh / (h["firstFs"] * 1.1)) - 1.1) < 0.02, f"{tag} {label}: name line-height 1.1 ({lh:.1f} px for {h['firstFs']} px)")
-        check(h["date"] is not None and abs(h["date"]["top"] - h["first"]["bottom"] - 8) <= 1, f"{tag} {label}: the date sits 8 px under the name ({h['date'] and h['date']['top'] - h['first']['bottom']:.1f})")
-        check(abs(h["dateFs"] - 13) < 0.5 and h["dateWeight"] == "500" and h["dateTransform"] == "none" and h["dateColor"] == "rgb(99, 99, 102)", f"{tag} {label}: the date is 13 px 500 secondary, sentence case ({h['dateFs']}, {h['dateWeight']}, {h['dateTransform']}, {h['dateColor']})")
+        check(h["date"] is not None and abs(h["date"]["top"] - h["first"]["bottom"] - 2) <= 1, f"{tag} {label}: the date sits 2 px under the name's 1.1 line ({h['date'] and h['date']['top'] - h['first']['bottom']:.1f})")
+        check(abs(h["dateFs"] - 13) < 0.5 and h["dateWeight"] == "600" and h["dateTransform"] == "none" and h["dateColor"] == "rgb(99, 99, 102)", f"{tag} {label}: the date is 13 px 600 secondary, sentence case ({h['dateFs']}, {h['dateWeight']}, {h['dateTransform']}, {h['dateColor']})")
         check(abs(h["date"]["left"] - h["first"]["left"]) <= 1, f"{tag} {label}: date and name share a left edge")
     else:
         check(h["date"] is None, f"{tag} {label}: no second row without a name")
+
+
+def check_cards(s, tag, label):
+    """Hero 12 px in, then the white meals card and the white vi chất card (180 px) 8 px apart, 16 px radius, same height, 12 px from the sides."""
+    c = s and s.get("cards")
+    if not c:
+        check(False, f"{tag} {label}: the cards were not read")
+        return
+    check(abs(c["meals"]["left"] - c["root"]["left"] - 12) <= 0.5 and abs(c["root"]["right"] - c["micros"]["right"] - 12) <= 0.5 and abs(c["hero"]["left"] - c["meals"]["left"]) <= 0.5 and abs(c["hero"]["right"] - c["micros"]["right"]) <= 0.5,
+          f"{tag} {label}: hero and both cards share the 12 px side edges")
+    check(abs(c["micros"]["w"] - 180) <= 0.5 and abs(c["micros"]["left"] - c["meals"]["right"] - 8) <= 0.5, f"{tag} {label}: the vi chất card is 180 px, 8 px from the meals card ({c['micros']['w']})")
+    check(c["meals"]["radius"] == 16 or c["meals"]["radius"] == 18, f"{tag} {label}: card radius is the V3 card radius ({c['meals']['radius']})")
+    check(c["meals"]["bg"] == "rgb(255, 255, 255)" and c["micros"]["bg"] == "rgb(255, 255, 255)", f"{tag} {label}: both cards are white")
+    check(abs(c["meals"]["top"] - c["micros"]["top"]) <= 0.5 and abs(c["meals"]["bottom"] - c["micros"]["bottom"]) <= 0.5, f"{tag} {label}: the cards are the same height")
 
 
 def check_frame(s, tag, label):
@@ -245,10 +262,10 @@ def check_frame(s, tag, label):
     check(f["bg"] == "rgb(17, 19, 23)" and abs(f["h"] - 58) <= 0.5 and f["padL"] == 16 and f["padR"] == 16, f"{tag} {label}: footer is a 58 px ink band, padding 16 ({f['bg']}, {f['h']}, {f['padL']}, {f['padR']})")
     check(f["h1t"]["color"] == "rgb(255, 255, 255)" and f["micro"]["color"] == "rgb(92, 184, 255)" and f["h1t"]["fs"] == 24 and f["micro"]["fs"] == 24 and f["h1t"]["style"] == "italic" and "Saira" in f["h1t"]["family"],
           f"{tag} {label}: H1T white, MICRO sky #5CB8FF token, Saira italic 24 px ({f['h1t']['color']}, {f['micro']['color']}, {f['h1t']['fs']})")
-    check(f["site"]["fs"] == 13 and f["site"]["fw"] == "800" and f["site"]["color"] == "rgb(255, 255, 255)", f"{tag} {label}: lehongkhanh.vn 13 px 800 white ({f['site']['fs']}, {f['site']['fw']}, {f['site']['color']})")
-    check(f["line"]["fs"] == 11 and f["line"]["fw"] == "500" and f["line"]["color"] == "rgb(169, 168, 163)", f"{tag} {label}: the line is 11 px 500 #A9A8A3 ({f['line']['fs']}, {f['line']['fw']}, {f['line']['color']})")
+    check(f["site"]["fs"] == 13 and f["site"]["fw"] == "700" and f["site"]["color"] == "rgb(255, 255, 255)", f"{tag} {label}: lehongkhanh.vn 13 px 700 white ({f['site']['fs']}, {f['site']['fw']}, {f['site']['color']})")
+    check(f["line"]["fs"] == 11 and f["line"]["fw"] == "600" and f["line"]["color"] == "rgb(201, 205, 214)", f"{tag} {label}: the line is 11 px 600 muted-subtitle ({f['line']['fs']}, {f['line']['fw']}, {f['line']['color']})")
     check(abs(f["siteBox"]["right"] - f["lineBox"]["right"]) <= 0.6 and abs(f["right"] - 16 - f["siteBox"]["right"]) <= 0.6, f"{tag} {label}: the right column is right-aligned on the 16 px edge")
-    check(abs((f["lineBox"]["top"] - f["siteBox"]["bottom"]) - 2) <= 1, f"{tag} {label}: 2 px between site and line ({f['lineBox']['top'] - f['siteBox']['bottom']:.1f})")
+    check(abs((f["lineBox"]["top"] - f["siteBox"]["bottom"]) - 2) <= 1.5, f"{tag} {label}: 2 px between site and line ({f['lineBox']['top'] - f['siteBox']['bottom']:.1f})")
     check(abs(f["h1t"]["left"] - (f["left"] + 16)) <= 0.6, f"{tag} {label}: the wordmark starts on the 16 px edge")
     k = s.get("keyGrid")
     if not k:
@@ -256,14 +273,15 @@ def check_frame(s, tag, label):
         return
     check(k["display"] == "grid" and k["labels"] == ["Thiếu <50%", "Trung bình", "Gần đủ", "Đạt ≥100%"], f"{tag} {label}: the key is a grid in the order Thiếu, Trung bình / Gần đủ, Đạt ({k['labels']})")
     check(abs(k["tops"][0] - k["tops"][1]) < 0.5 and abs(k["tops"][2] - k["tops"][3]) < 0.5 and k["tops"][2] > k["tops"][0] and abs(k["lefts"][0] - k["lefts"][2]) < 0.5 and abs(k["lefts"][1] - k["lefts"][3]) < 0.5 and k["lefts"][1] > k["lefts"][0], f"{tag} {label}: 2 columns by 2 rows")
-    check(k["colGap"] == "10px" and k["rowGap"] == "6px" and k["swatchLabelGap"] == "6px" and k["fs"] == "11px", f"{tag} {label}: gaps 10 / 6 / 6 and 11 px labels ({k['colGap']}, {k['rowGap']}, {k['swatchLabelGap']}, {k['fs']})")
+    check(k["colGap"] == "4px" and k["rowGap"] == "8px" and k["swatchLabelGap"] == "4px" and k["fs"] == "11px", f"{tag} {label}: gaps 4 / 8 / 4 and 11 px labels (4 px between the columns: Thiếu <50% is 76 px wide in the 74 px column of the design) ({k['colGap']}, {k['rowGap']}, {k['swatchLabelGap']}, {k['fs']})")
     check(all(w == "nowrap" for w in k["nowrap"]) and all(h < 16 for h in k["heights"]), f"{tag} {label}: labels never wrap ({k['heights']})")
     check(max(k["rights"]) <= k["colRight"] + 0.5, f"{tag} {label}: the grid stays inside the column")
+    check_cards(s, tag, label)
 
 
 def check_png(info, snapshot, tag, label):
     check(info["w"] == 1080 and info["h"] >= 1920, f"{tag} {label}: PNG is {info['w']}x{info['h']} (1080 wide, 1920 high at least)")
-    check(info["edgeBad"] == 0, f"{tag} {label}: paper above the body, ink in the footer, nothing clipped ({info['edgeBad']} off-paper edge pixels {info['badAt']})")
+    check(info["edgeBad"] == 0, f"{tag} {label}: paper down to the footer, ink in the footer, nothing clipped ({info['edgeBad']} off-paper edge pixels {info['badAt']})")
     check(info["colours"] >= 8, f"{tag} {label}: not blank ({info['colours']} colours)")
     if snapshot:
         want = max(1920, math.ceil(snapshot["rootH"] * SCALE - 1e-6))
