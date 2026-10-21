@@ -6,6 +6,7 @@ import { AppHeader } from "@/components/ui/app-header";
 import { AppShell } from "@/components/ui/app-shell";
 import { Card } from "@/components/ui/card";
 import { ChipGroup } from "@/components/ui/chip-group";
+import { SwitchGlide } from "@/components/ui/switch-glide";
 import { FoodRowLink } from "@/components/foods/food-row-link";
 import { useDiary } from "@/lib/diary-store";
 import { CatalogStatus } from "@/components/foods/catalog-status";
@@ -78,37 +79,39 @@ export default function RichInPage() {
             ]}
           />
         )}
-        <Card as="section" aria-label={`${supplement ? "Thực phẩm bổ sung" : "Món"} giàu ${name}`} className="flex flex-col">
-          {!listed ? (
-            <div aria-hidden="true" className="flex flex-col gap-3 py-3">
-              {[0, 1, 2, 3, 4].map((i) => (
-                <div key={i} className="h-5 rounded bg-level-empty" />
-              ))}
-            </div>
-          ) : rows.length === 0 && (pending || failed) ? (
-            <CatalogStatus failed={failed} onRetry={retry} />
-          ) : rows.length === 0 ? (
-            <p className="m-0 py-3 text-cap leading-snug text-secondary">
-              {supplement ? `Chưa có thực phẩm bổ sung nào có dữ liệu ${name}.` : `Chưa có thực phẩm nào có dữ liệu ${name}. Bạn có thể tự tạo món mới từ nhãn bao bì.`}
-            </p>
-          ) : (
-            rows.map((row, i) => {
-              // A supplement's serving as it is called ("2 viên"), never its grams
-              const per = supplement ? defaultPortionOf(row.food).label : row.basis;
-              return (
-                <FoodRowLink
-                  key={row.food.id}
-                  href={`/foods/${row.food.id}`}
-                  name={rowName(row.food)}
-                  meta={row.pct === null ? per : `${row.pct}% mục tiêu ngày · ${per}`}
-                  value={`${formatAmount(row.amount, row.unit)} ${row.unit}`}
-                  withBorderTop={i > 0}
-                  category={row.food.category}
-                />
-              );
-            })
-          )}
-        </Card>
+        <SwitchGlide id={`${kind}:${shownBasis}`} order={(supplement ? 2 : 0) + (shownBasis === "per100" ? 0 : 1)}>
+          <Card as="section" aria-label={`${supplement ? "Thực phẩm bổ sung" : "Món"} giàu ${name}`} className="flex flex-col">
+            {!listed ? (
+              <div aria-hidden="true" className="flex flex-col gap-3 py-3">
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <div key={i} className="h-5 rounded bg-level-empty" />
+                ))}
+              </div>
+            ) : rows.length === 0 && (pending || failed) ? (
+              <CatalogStatus failed={failed} onRetry={retry} />
+            ) : rows.length === 0 ? (
+              <p className="m-0 py-3 text-cap leading-snug text-secondary">
+                {supplement ? `Chưa có thực phẩm bổ sung nào có dữ liệu ${name}.` : `Chưa có thực phẩm nào có dữ liệu ${name}. Bạn có thể tự tạo món mới từ nhãn bao bì.`}
+              </p>
+            ) : (
+              rows.map((row, i) => {
+                // A supplement's serving as it is called ("2 viên"), never its grams
+                const per = supplement ? defaultPortionOf(row.food).label : row.basis;
+                return (
+                  <FoodRowLink
+                    key={row.food.id}
+                    href={`/foods/${row.food.id}`}
+                    name={rowName(row.food)}
+                    meta={row.pct === null ? per : `${row.pct}% mục tiêu ngày · ${per}`}
+                    value={`${formatAmount(row.amount, row.unit)} ${row.unit}`}
+                    withBorderTop={i > 0}
+                    category={row.food.category}
+                  />
+                );
+              })
+            )}
+          </Card>
+        </SwitchGlide>
       </main>
     </AppShell>
   );

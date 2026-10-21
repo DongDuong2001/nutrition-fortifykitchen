@@ -2,6 +2,7 @@ import type { FoodItem } from "./catalog";
 import { resolveFavourites } from "./favourites";
 import { searchFoods } from "./search";
 import { searchRows } from "./food-rows";
+import { isFortifyKitchenFood } from "./fortify-kitchen";
 
 /** Web-side only for now. Dong adds a `category` column to foods with the same keys (see OPEN_QUESTIONS). */
 export type FoodCategory =
@@ -39,8 +40,8 @@ export const FOOD_CATEGORIES: FoodCategoryDef[] = [
   { key: "cua_toi", label: "Món của tôi" },
 ];
 
-/** "all" = Tất cả, "favorite" = Yêu thích (the saved favourite ids, see lib/favourites.ts). */
-export type FoodFilter = "all" | "favorite" | FoodCategory;
+/** "all" = Tất cả, "favorite" = Yêu thích (the saved favourite ids, see lib/favourites.ts), "minh_hao" = Đồ ăn của Minh Hào (lib/fortify-kitchen). */
+export type FoodFilter = "all" | "favorite" | "minh_hao" | FoodCategory;
 
 export interface FoodGroup {
   key: FoodCategory;
@@ -114,6 +115,7 @@ export function buildFoodList(foods: FoodItem[], query: string, filter: FoodFilt
   if (filter === "favorite") {
     return { grouped: false, foods: find(resolveFavourites(favouriteIds, foods), query), groups: [] };
   }
+  if (filter === "minh_hao") return { grouped: false, foods: find(foods.filter(isFortifyKitchenFood), query), groups: [] };
   const category = isCategoryFilter(filter) ? filter : null;
   const scope = category ? foods.filter((f) => categoryOf(f) === category) : foods;
   const ranked = find(scope, query);

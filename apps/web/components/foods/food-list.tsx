@@ -1,23 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import type { FoodItem } from "@/lib/mock/foods";
 import type { FoodList as FoodListData } from "@/lib/food-categories";
-import { searchTag } from "@/lib/food-source";
 import { rowName, twinIdsOf } from "@/lib/food-rows";
 import { IconButton } from "@/components/ui/icon-button";
 import { prefetchDishParts } from "@/components/ui/dish-parts-prefetch";
-
-function SourceTag({ food }: { food: FoodItem }) {
-  const tag = searchTag(food);
-  return (
-    <span
-      className={`inline-flex h-6 shrink-0 items-center rounded-full px-2 text-xs font-bold ${
-        tag.warning ? "bg-warning-bg text-warning-text" : "border border-card-border bg-surface text-secondary"
-      }`}
-    >
-      {tag.label}
-    </span>
-  );
-}
+import { SourceTag } from "@/components/foods/source-tag";
 
 /** A list shows this many rows first (the live catalogue has thousands); "Xem thêm" adds as many again. */
 export const FOOD_LIST_LIMIT = 50;

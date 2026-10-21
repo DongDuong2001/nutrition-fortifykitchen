@@ -12,6 +12,7 @@ import {
   categoryOf,
   type FoodFilter,
 } from "@/lib/food-categories";
+import { MINH_HAO_LABEL, isFortifyKitchenFood } from "@/lib/fortify-kitchen";
 import { useDiary } from "@/lib/diary-store";
 
 /**
@@ -19,10 +20,17 @@ import { useDiary } from "@/lib/diary-store";
  * the same index, the same category chips and the same empty states. `enabled` false (the add sheet's first frame): the
  * list and the chips are not worked out yet, so the sheet's first frame costs only its own frame.
  */
-export function useFoodBrowse({ oneRowPerFood = true, enabled = true }: { oneRowPerFood?: boolean; enabled?: boolean } = {}) {
+export function useFoodBrowse({
+  oneRowPerFood = true,
+  enabled = true,
+  fortifyTab = false,
+}: { oneRowPerFood?: boolean; enabled?: boolean; /** The Đồ ăn của Minh Hào chip after Tất cả (the add sheet): only while the catalogue has such a row */ fortifyTab?: boolean } = {}) {
   const { favouriteIds, isFavourite } = useDiary();
   const { foods, version, pending: catalogPending, failed: catalogFailed, retry: retryCatalog } = useCatalogFoods();
-  const [filter, setFilter] = useState<FoodFilter>("all");
+  const [picked, setFilter] = useState<FoodFilter>("all");
+  const hasFortify = useMemo(() => fortifyTab && enabled && foods.some(isFortifyKitchenFood), [fortifyTab, enabled, foods]);
+  // The chip goes when the catalogue loses its rows (another account, a reload): the list falls back to Tất cả, never an empty tab
+  const filter: FoodFilter = picked === "minh_hao" && !hasFortify ? "all" : picked;
   const [query, setQuery] = useState("");
   // The first letter alone waits 120 ms before the list follows it, so the list does not flash the matches of every single
   // letter passed on the way to a word; from the second letter the list follows at once (port of the behaviour of PR #29)
@@ -43,14 +51,17 @@ export function useFoodBrowse({ oneRowPerFood = true, enabled = true }: { oneRow
   // cc-58: the field follows every keystroke, the list follows the query when the browser has a moment, so a key
   // never waits for a search of the whole catalogue
   const searched = useDeferredValue(listQuery);
+  // feat/glide: the same for the chip. `filter` lights the chip at once (and starts the glide in the tap's frame); the list is built from
+  // `listFilter`, which follows when the browser has a moment, so the tap's own render stays small (motion first, work after)
+  const listFilter = useDeferredValue(filter);
 
   // Filter and search combined. Grouped only for Tất cả with no query.
   // `foods` follows the catalogue (the live load, a made food) and demo mode
   // cc-67: a moment after the first paint the one-row-per-food index is there; a list is not drawn before (no rows that change names)
   const waitingForRows = oneRowPerFood && !rowsReady();
   const list = useMemo(
-    () => (waitingForRows || !enabled ? { grouped: false, foods: [], groups: [] } : buildFoodList(foods, searched, filter, favouriteIds, oneRowPerFood)),
-    [searched, filter, favouriteIds, foods, oneRowPerFood, waitingForRows, enabled]
+    () => (waitingForRows || !enabled ? { grouped: false, foods: [], groups: [] } : buildFoodList(foods, searched, listFilter, favouriteIds, oneRowPerFood)),
+    [searched, listFilter, favouriteIds, foods, oneRowPerFood, waitingForRows, enabled]
   );
   const categories = useMemo(() => (enabled ? chipCategories(foods) : []), [foods, enabled]);
   const categoryName = useCallback((food: FoodItem) => categoryLabel(categoryOf(food)), []);
@@ -61,6 +72,7 @@ export function useFoodBrowse({ oneRowPerFood = true, enabled = true }: { oneRow
   const filterItems = useMemo(
     () => [
       { id: "all", label: "Tất cả", active: filter === "all", onClick: () => setFilter("all") },
+      ...(hasFortify ? [{ id: "minh_hao", label: MINH_HAO_LABEL, active: filter === "minh_hao", onClick: () => setFilter("minh_hao") }] : []),
       { id: "favorite", label: "Yêu thích", active: filter === "favorite", onClick: () => setFilter("favorite") },
       ...categories.map((c) => ({
         id: c.key,
@@ -69,7 +81,7 @@ export function useFoodBrowse({ oneRowPerFood = true, enabled = true }: { oneRow
         onClick: () => setFilter(c.key),
       })),
     ],
-    [filter, categories]
+    [filter, categories, hasFortify]
   );
 
   // Fuzzy suggestions when results are empty
@@ -81,15 +93,19 @@ export function useFoodBrowse({ oneRowPerFood = true, enabled = true }: { oneRow
   }, [list.foods, searched, foods]);
 
   // No saved favourite: the Yêu thích filter, no query, nothing in the list
-  const noFavourites = filter === "favorite" && !searched.trim() && list.foods.length === 0;
+  const noFavourites = listFilter === "favorite" && !searched.trim() && list.foods.length === 0;
 
   return {
     query,
     setQuery,
     filter,
+    /** The filter the list was built from: it follows `filter` a moment later (the chip lights first) */
+    listFilter,
     setFilter,
     list,
     filterItems,
+    /** The place of the active chip in the row (Tất cả 0, Đồ ăn của Minh Hào 1 when it shows, Yêu thích …): SwitchGlide enters from the side it grew toward. */
+    filterIndex: Math.max(0, filterItems.findIndex((item) => item.active)),
     categoryName,
     isFavouriteFood,
     similarFoods,

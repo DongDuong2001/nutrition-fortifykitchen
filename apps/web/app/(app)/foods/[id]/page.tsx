@@ -14,7 +14,7 @@ import { PortionArea } from "@/components/ui/portion-area";
 import { goodSourcesOf, microRowsFor } from "@/lib/food-detail";
 import { categoryLabel, categoryOf } from "@/lib/food-categories";
 import { formatAmount } from "@/lib/format";
-import { foodSourceLabel } from "@/lib/food-meta";
+import { brandToShow, foodSourceLabel } from "@/lib/food-meta";
 import { isManualFood, isProxy } from "@/lib/food-source";
 import { markUsed } from "@/lib/onboarding-store";
 import { SourceSheet } from "@/components/foods/source-sheet";
@@ -181,9 +181,9 @@ function FoodDetailInner() {
             {food.nameVi.length > 40 && <span className="basis-full break-words font-semibold">{food.nameVi}</span>}
             <span>{categoryLabel(categoryOf(food))}</span>
             <span>·</span>
-            {food.brand && (
+            {brandToShow(food) && (
               <>
-                <span>{food.brand}</span>
+                <span>{brandToShow(food)}</span>
                 <span>·</span>
               </>
             )}

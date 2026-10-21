@@ -471,7 +471,8 @@
  * - Curves: --ease-out for anything that enters, leaves or is pressed, --ease-drawer for sheets, --ease-in-out for
  *   something that moves on screen. Never the bare ease / ease-in / ease-out keywords, never ease-in.
  * - Durations: press 160 ms; dialogs, popovers, tips and toasts 200 ms in, 150 ms out; rows 200 ms; push screens
- *   300 ms; sheets 350 ms in, 220 ms out (the one place over 300 ms). An exit is always shorter than its enter.
+ *   300 ms; sheets 350 ms in, 220 ms out (the one place over 300 ms); content that switches in place (feat/glide) 80 ms out and
+ *   200 ms in 16 px off, a tab 200 ms in 12 px off. An exit is always shorter than its enter.
  * - Only transform and opacity move (grid-template-rows for an expanding row and a deleted row's collapse).
  * - Anything that can be interrupted (sheets, dialogs, popovers, tips, toasts, expanding rows) is a CSS transition on
  *   data-state="open" | "closed" that enters from @starting-style, so closing it mid-open reverses from where it is.
@@ -494,6 +495,12 @@
   --m-tint-out: 150ms;
   --m-bar: 300ms;
   --m-day: 180ms;
+  /* feat/glide: content that switches in place leaves in 80 ms and enters 16 px off, 200 ms (components/ui/switch-glide); a tab enters 12 px off, 200 ms (.m-tab-in). lib/motion.ts mirrors them. */
+  --m-switch-out: 80ms;
+  --m-switch-in: 200ms;
+  --m-switch-shift: 16px;
+  --m-tab-in: 200ms;
+  --m-tab-shift: 12px;
 }
 
 @keyframes m-rise-in {
@@ -754,6 +761,21 @@
   .m-day-later {
     transform: translateX(12px);
     opacity: 0.6;
+  }
+}
+/* A bottom-nav tab or a Tổng quan sub-tab (components/ui/switch-glide EnterGlide): the new screen is a new element that eases in from
+   12 px off to the side of the tab order (--m-tab-dir: 1 from the right, -1 from the left) and from half opacity (never from nothing: a
+   screen change has no blank frame, cc-fluid-add), as a transition from
+   @starting-style (nothing is left behind after it, no snapshot of the screen). The old screen does not slide out. */
+.m-tab-in {
+  transition:
+    transform var(--m-tab-in) var(--ease-out),
+    opacity var(--m-tab-in) var(--ease-out);
+}
+@starting-style {
+  .m-tab-in {
+    transform: translateX(calc(var(--m-tab-dir, 1) * var(--m-tab-shift)));
+    opacity: 0.5;
   }
 }
 /* Pull to refresh: the indicator waits above the list, follows the finger with no transition (data-dragging, the
@@ -1058,6 +1080,15 @@ button.m-drag-lift[data-touch-drag="dragging"] {
     .m-day-later {
       transform: none;
       opacity: 0;
+    }
+  }
+  .m-tab-in {
+    transition: opacity var(--m-fade) var(--ease-out);
+  }
+  @starting-style {
+    .m-tab-in {
+      transform: none;
+      opacity: 0.5;
     }
   }
   .m-pull {
