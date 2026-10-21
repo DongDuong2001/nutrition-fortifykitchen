@@ -40,7 +40,7 @@ export const FOOD_CATEGORIES: FoodCategoryDef[] = [
   { key: "cua_toi", label: "Món của tôi" },
 ];
 
-/** "all" = Tất cả, "favorite" = Yêu thích (the saved favourite ids, see lib/favourites.ts), "minh_hao" = Đồ ăn Minh Hào (lib/fortify-kitchen). */
+/** "all" = Tất cả, "favorite" = Yêu thích (the saved favourite ids, see lib/favourites.ts), "minh_hao" = Đồ ăn của Minh Hào (lib/fortify-kitchen). */
 export type FoodFilter = "all" | "favorite" | "minh_hao" | FoodCategory;
 
 export interface FoodGroup {

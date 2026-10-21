@@ -1019,7 +1019,7 @@ SAMPLE_FOODS.push({
 
 SAMPLE_FOODS.push(...RECIPE_INGREDIENT_FOODS, ...RECIPE_DISH_FOODS);
 
-// Hao 21/10: Đồ ăn Minh Hào has demo rows, so the chip, the Khám phá carousel and their probes have data. Demo only
+// Hao 21/10: Đồ ăn của Minh Hào has demo rows, so the chip, the Khám phá carousel and their probes have data. Demo only
 // (never in the live bundle: lib/mock/live/sample-foods.ts is empty), named "(mẫu demo)" so nobody takes them for the
 // real rows of Fortify Kitchen that the import brings. Plain foods: a weighed portion first, never parts or ingredients.
 const FORTIFY_DEMO_SOURCE = "fortify_kitchen" as FoodItem["source"];

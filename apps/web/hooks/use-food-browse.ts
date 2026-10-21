@@ -24,7 +24,7 @@ export function useFoodBrowse({
   oneRowPerFood = true,
   enabled = true,
   fortifyTab = false,
-}: { oneRowPerFood?: boolean; enabled?: boolean; /** The Đồ ăn Minh Hào chip after Tất cả (the add sheet): only while the catalogue has such a row */ fortifyTab?: boolean } = {}) {
+}: { oneRowPerFood?: boolean; enabled?: boolean; /** The Đồ ăn của Minh Hào chip after Tất cả (the add sheet): only while the catalogue has such a row */ fortifyTab?: boolean } = {}) {
   const { favouriteIds, isFavourite } = useDiary();
   const { foods, version, pending: catalogPending, failed: catalogFailed, retry: retryCatalog } = useCatalogFoods();
   const [picked, setFilter] = useState<FoodFilter>("all");

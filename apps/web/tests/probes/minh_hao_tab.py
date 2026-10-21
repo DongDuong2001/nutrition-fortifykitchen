@@ -1,11 +1,11 @@
-"""feat/minh-hao-tab: the "Đồ ăn Minh Hào" chip on /add and its carousel in Khám phá (demo build, 390 and 1280).
+"""feat/minh-hao-tab: the "Đồ ăn của Minh Hào" chip on /add and its carousel in Khám phá (demo build, 390 and 1280).
 
 A  /add with the demo rows (source fortify_kitchen, "(mẫu demo)" in the name): the chip is right after Tất cả (so before Yêu thích), 44 px
    tall; picking it lists exactly those rows and no other, and no shortcut cards; the chip row keeps its height and the chips keep
    their places (no layout shift); searching inside it narrows the same rows ("tôm" → Tôm thẻ); a row opens the portion sheet with no
-   Thành phần (plain foods, never ingredients or dish parts); Tab walks the chips in order (Tất cả, Đồ ăn Minh Hào, Yêu thích).
+   Thành phần (plain foods, never ingredients or dish parts); Tab walks the chips in order (Tất cả, Đồ ăn của Minh Hào, Yêu thích).
 B  The same screen without the demo rows (a non-demo build's catalogue has none): no chip, and nothing else changes (Tất cả, Yêu thích).
-C  Khám phá with the demo rows: the carousel "Đồ ăn Minh Hào" sits above "Món giàu vi chất", one card per food with its name, the
+C  Khám phá with the demo rows: the carousel "Đồ ăn của Minh Hào" sits above "Món giàu vi chất", one card per food with its name, the
    kcal of its FIRST portion ("1 phần lẻ (150 g sống) · 204 kcal" = 150 g of 136 kcal per 100 g) and the Fortify Kitchen tag; a card opens
    its food page; "Xem tất cả" opens /explore/minh-hao with every row (the same kcal as the cards); Tab goes Xem tất cả, then the cards in order.
 D  Khám phá without the demo rows: no carousel.
@@ -25,7 +25,7 @@ BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3101")
 SHOTS = Path(__file__).resolve().parent.parent.parent / ".screenshots"
 SHOTS.mkdir(exist_ok=True)
 SIZES = [("390", {"width": 390, "height": 844}), ("1280", {"width": 1280, "height": 800})]
-CHIP = "Đồ ăn Minh Hào"
+CHIP = "Đồ ăn của Minh Hào"
 # name → kcal of its first portion (kcal per 100 g × the portion's grams ÷ 100, rounded half up): lib/mock/sample-foods.ts
 EXPECTED = {
     "Ức gà nấu chậm Minh Hào (mẫu demo)": ("1 phần lẻ (150 g sống)", int(136 * 150 / 100 + 0.5)),
@@ -157,13 +157,13 @@ def part_b(browser, w, size):
     open_add(pg)
     names = chip_names(pg)
     check(CHIP not in names and names[:2] == ["Tất cả", "Yêu thích"], f"B {w}: no chip when the catalogue has no such row ({names[:4]})")
-    check(pg.get_by_text(CHIP).count() == 0, f"B {w}: no Đồ ăn Minh Hào anywhere on /add")
+    check(pg.get_by_text(CHIP).count() == 0, f"B {w}: no Đồ ăn của Minh Hào anywhere on /add")
     ctx.close()
     _demo.enable(True)
 
 
 def card_texts(pg):
-    section = pg.locator("section[aria-label='Đồ ăn Minh Hào']")
+    section = pg.locator("section[aria-label='Đồ ăn của Minh Hào']")
     cards = section.locator("ul > li a")
     return section, cards
 
@@ -175,7 +175,7 @@ def part_c(browser, w, size):
     pg.goto(f"{BASE}/explore", wait_until="networkidle")
     section, cards = card_texts(pg)
     section.wait_for(timeout=15000)
-    check(section.count() == 1, f"C {w}: the Đồ ăn Minh Hào carousel is there")
+    check(section.count() == 1, f"C {w}: the Đồ ăn của Minh Hào carousel is there")
     rich = pg.locator("section[aria-label='Món giàu vi chất']")
     check(section.bounding_box()["y"] < rich.bounding_box()["y"], f"C {w}: it sits above Món giàu vi chất")
     check(cards.count() == len(EXPECTED), f"C {w}: one card per food ({cards.count()})")
@@ -215,7 +215,7 @@ def part_c(browser, w, size):
     pg.wait_for_url("**/explore/minh-hao", timeout=10000)
     pg.locator("[data-food-row]:visible").first.wait_for(timeout=10000)
     body = pg.inner_text("body")
-    check(CHIP.lower() in body.lower() and "3 món" in body, f"C {w}: the list screen is titled Đồ ăn Minh Hào with 3 món ({body[:160]!r})")
+    check(CHIP.lower() in body.lower() and "3 món" in body, f"C {w}: the list screen is titled Đồ ăn của Minh Hào with 3 món ({body[:160]!r})")
     listed = rows(pg)
     check(sorted(listed) == sorted(EXPECTED), f"C {w}: the list holds every row ({listed})")
     values = pg.locator("[data-food-row]:visible").all_inner_texts()
@@ -233,7 +233,7 @@ def part_d(browser, w, size):
     pg.goto(f"{BASE}/explore", wait_until="networkidle")
     pg.wait_for_timeout(600)
     check(pg.locator("section[aria-label='Món giàu vi chất']").count() == 1, f"D {w}: Khám phá is up")
-    check(pg.locator("section[aria-label='Đồ ăn Minh Hào']").count() == 0, f"D {w}: no carousel when the catalogue has none")
+    check(pg.locator("section[aria-label='Đồ ăn của Minh Hào']").count() == 0, f"D {w}: no carousel when the catalogue has none")
     ctx.close()
     _demo.enable(True)
 

@@ -13,7 +13,7 @@ import { MINH_HAO_LABEL, MINH_HAO_SLUG, fortifyKitchenFoods } from "@/lib/fortif
 import { collapseTwins } from "@/lib/food-rows";
 import { useBack } from "@/hooks/use-back";
 
-/** One food category, or Đồ ăn Minh Hào (/explore/minh-hao): a pushed screen of Khám phá. */
+/** One food category, or Đồ ăn của Minh Hào (/explore/minh-hao): a pushed screen of Khám phá. */
 export default function ExploreCategoryPage() {
   const params = useParams<{ category: string }>();
   const goBack = useBack();

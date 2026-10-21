@@ -171,12 +171,12 @@ describe("unseenReleases (what Có gì mới lists)", () => {
     for (const s of r?.tour ?? []) expect(s.body.length).toBeLessThanOrEqual(100);
   });
 
-  it("the newest release (2026-10-21c) is the add sheet, Hoàn tác, the lighter list, the update notice, the rich-list tabs and Đồ ăn Minh Hào: six items, plain words, and a 1-step tour on the Khám phá carousel (the Khám phá tab on Hôm nay)", () => {
+  it("the newest release (2026-10-21c) is the add sheet, Hoàn tác, the lighter list, the update notice, the rich-list tabs and Đồ ăn của Minh Hào: six items, plain words, and a 1-step tour on the Khám phá carousel (the Khám phá tab on Hôm nay)", () => {
     const r = latestRelease();
     expect(r?.id).toBe("2026-10-21c");
     expect(r?.date).toBe("21/10");
-    expect(r?.items.map((i) => i.title)).toEqual(["Thêm món mượt hơn", "Thêm nhầm thì Hoàn tác", "Danh sách món gọn hơn", "Thông báo có bản mới không che món", "Danh sách Giàu … có hai thẻ", "Tab Đồ ăn Minh Hào"]);
-    expect(r?.tour?.map((s) => [s.target, s.fallback ?? null, s.advanceOn ?? null, s.title])).toEqual([["explore-minh-hao", "nav-explore", null, "Đồ ăn Minh Hào"]]);
+    expect(r?.items.map((i) => i.title)).toEqual(["Thêm món mượt hơn", "Thêm nhầm thì Hoàn tác", "Danh sách món gọn hơn", "Thông báo có bản mới không che món", "Danh sách Giàu … có hai thẻ", "Tab Đồ ăn của Minh Hào"]);
+    expect(r?.tour?.map((s) => [s.target, s.fallback ?? null, s.advanceOn ?? null, s.title])).toEqual([["explore-minh-hao", "nav-explore", null, "Đồ ăn của Minh Hào"]]);
     expect(r?.tour?.[0].body.length).toBeLessThanOrEqual(100);
     for (const i of r?.items ?? []) expect(i.body).not.toContain(":");
   });
@@ -266,7 +266,7 @@ describe("joinedTour (what Thử ngay runs)", () => {
   const T20B = ["Mở lịch"];
   const T21A = ["Về Hôm nay"];
   const T21B = ["Một con số", "Vi chất theo DRI"];
-  const T21C = ["Đồ ăn Minh Hào"];
+  const T21C = ["Đồ ăn của Minh Hào"];
   // 23 steps from 18c on, 8 at most: the oldest releases give up their last steps first (18c, 18e, 18f and 19a go, 19b keeps its first two; 20a, 20b, 21a, 21b and 21c go whole)
   const CAPPED = [...T19B.slice(0, 2), ...T20A, ...T20B, ...T21A, ...T21B, ...T21C];
 

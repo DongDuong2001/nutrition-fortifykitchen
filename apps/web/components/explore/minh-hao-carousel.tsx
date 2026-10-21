@@ -17,7 +17,7 @@ const SHOWN = 8;
 export const minhHaoMeta = (food: FoodItem): string => `${food.servings[0]?.label ?? "100 g"} · ${foodRowKcal(food) ?? "Chưa có kcal"}`;
 
 /**
- * "Đồ ăn Minh Hào" (Hao 21/10): the catalogue's Fortify Kitchen foods as a carousel near the top of Khám phá, one card
+ * "Đồ ăn của Minh Hào" (Hao 21/10): the catalogue's Fortify Kitchen foods as a carousel near the top of Khám phá, one card
  * per food, "Xem tất cả" to /explore/minh-hao. Hidden when the catalogue has none; a skeleton while the live
  * catalogue is on its way.
  */

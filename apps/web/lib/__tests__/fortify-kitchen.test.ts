@@ -16,7 +16,7 @@ const food = (over: Partial<FoodItem> & { id: string }): FoodItem => ({
 });
 const kitchen = (id: string, over: Partial<FoodItem> = {}) => food({ id, source: "fortify_kitchen" as FoodItem["source"], category: "mon_viet", ...over });
 
-describe("Đồ ăn Minh Hào", () => {
+describe("Đồ ăn của Minh Hào", () => {
   it("is the fortify_kitchen source, however the API spells it, or the brand Fortify Kitchen", () => {
     expect(isFortifyKitchenFood({ source: "fortify_kitchen" as FoodItem["source"] })).toBe(true);
     expect(isFortifyKitchenFood({ source: "Fortify Kitchen" as FoodItem["source"] })).toBe(true);
@@ -27,7 +27,7 @@ describe("Đồ ăn Minh Hào", () => {
   });
 
   it("names its tab and its list route", () => {
-    expect(MINH_HAO_LABEL).toBe("Đồ ăn Minh Hào");
+    expect(MINH_HAO_LABEL).toBe("Đồ ăn của Minh Hào");
     expect(MINH_HAO_SLUG).toBe("minh-hao");
   });
 
