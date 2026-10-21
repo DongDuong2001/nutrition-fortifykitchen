@@ -1,0 +1,106 @@
+[
+ {
+  "source": "fortify_kitchen",
+  "source_id": "fortify_kitchen:banh-khoai-nuong-sua-chua-thuong",
+  "name": "Minh Hao baked khoai cake (regular yogurt)",
+  "name_vi": "Bánh khoai nướng Minh Hào (sữa chua thường)",
+  "category": "an_vat",
+  "brand": "Fortify Kitchen",
+  "tip_vi": null,
+  "nutrients": {
+   "energy": 247.7,
+   "water": 51.1,
+   "carbs": 26.9,
+   "fiber": 3.7,
+   "fat": 12.5,
+   "monounsaturated_fat": 2.48,
+   "polyunsaturated_fat": 0.69,
+   "saturated_fat": 3.17,
+   "protein": 7.1,
+   "b1": 0.0665,
+   "b2": 0.275,
+   "b3": 1,
+   "b5": 0.738,
+   "b6": 0.223,
+   "folate": 22.3,
+   "b12": 0.23,
+   "vitamin_a": 36.6,
+   "vitamin_e": 0.816,
+   "vitamin_k": 1.76,
+   "calcium": 122,
+   "copper": 0.384,
+   "iron": 2.33,
+   "magnesium": 78.2,
+   "manganese": 0.83,
+   "phosphorus": 174,
+   "potassium": 438,
+   "selenium": 7.24,
+   "sodium": 109,
+   "zinc": 1.16
+  },
+  "portions": [
+   {
+    "label_vi": "1 miếng (1/10 khuôn)",
+    "grams": 87.4,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ },
+ {
+  "source": "fortify_kitchen",
+  "source_id": "fortify_kitchen:banh-khoai-nuong-sua-chua-hy-lap",
+  "name": "Minh Hao baked khoai cake (Greek yogurt)",
+  "name_vi": "Bánh khoai nướng Minh Hào (sữa chua Hy Lạp)",
+  "category": "an_vat",
+  "brand": "Fortify Kitchen",
+  "tip_vi": null,
+  "nutrients": {
+   "energy": 252.8,
+   "water": 50.1,
+   "carbs": 26.8,
+   "fiber": 3.7,
+   "fat": 12.7,
+   "monounsaturated_fat": 2.65,
+   "polyunsaturated_fat": 0.743,
+   "saturated_fat": 3.22,
+   "protein": 7.9,
+   "b1": 0.0656,
+   "b2": 0.294,
+   "b3": 1.02,
+   "b5": 0.73,
+   "b6": 0.228,
+   "folate": 22,
+   "b12": 0.284,
+   "vitamin_a": 33,
+   "vitamin_e": 0.809,
+   "vitamin_k": 1.73,
+   "calcium": 119,
+   "copper": 0.386,
+   "iron": 2.32,
+   "magnesium": 78.1,
+   "manganese": 0.83,
+   "phosphorus": 179,
+   "potassium": 436,
+   "selenium": 8.29,
+   "sodium": 107,
+   "zinc": 1.15
+  },
+  "portions": [
+   {
+    "label_vi": "1 miếng (1/10 khuôn)",
+    "grams": 87.4,
+    "sort": 0
+   },
+   {
+    "label_vi": "100 g",
+    "grams": 100,
+    "sort": 1
+   }
+  ]
+ }
+]
