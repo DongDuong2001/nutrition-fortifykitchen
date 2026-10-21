@@ -3,7 +3,7 @@ import type { FoodItem } from "../catalog";
 import { SAMPLE_FOODS } from "../mock/sample-foods";
 import { buildFoodList, categoryOf } from "../food-categories";
 import { dishViewOf, keysOfFood } from "../dish-recipes";
-import { foodRowKcal, foodSourceLabel } from "../food-meta";
+import { brandToShow, foodRowKcal, foodSourceLabel } from "../food-meta";
 import { MINH_HAO_LABEL, MINH_HAO_SLUG, fortifyKitchenFoods, isFortifyKitchenFood } from "../fortify-kitchen";
 
 const food = (over: Partial<FoodItem> & { id: string }): FoodItem => ({
@@ -44,6 +44,14 @@ describe("Đồ ăn của Minh Hào", () => {
   it("gives no list when the catalogue has none of those rows", () => {
     expect(fortifyKitchenFoods([food({ id: "a" })])).toEqual([]);
     expect(buildFoodList([food({ id: "a" })], "", "minh_hao").foods).toEqual([]);
+  });
+
+  it("a food page names the source once when it is the brand (Fortify Kitchen, not Fortify Kitchen · Fortify Kitchen)", () => {
+    expect(brandToShow(kitchen("k", { brand: "Fortify Kitchen" }))).toBeNull();
+    expect(brandToShow(kitchen("k", { brand: " fortify  kitchen " }))).toBeNull();
+    expect(brandToShow(food({ id: "d", source: "label", brand: "Dalahouse" }))).toBe("Dalahouse");
+    expect(brandToShow(food({ id: "u", source: "USDA", brand: "Fortify Kitchen" }))).toBe("Fortify Kitchen");
+    expect(brandToShow(food({ id: "n" }))).toBeNull();
   });
 
   it("the source reads Fortify Kitchen on its card", () => {

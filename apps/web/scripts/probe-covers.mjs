@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 // Picks the probes that cover a change, for gate:fast.
 // Each probe in tests/probes/ has a "# PROBE_COVERS: <glob> <glob> …" line (paths relative to apps/web). A changed file
@@ -8,7 +9,7 @@ import { dirname, join, relative, resolve } from "node:path";
 // one of the probe's globs. A layout counts for every page under it. A changed probe always runs; a changed _helper.py
 // runs the probes that import it.
 
-export const WEB = resolve(dirname(new URL(import.meta.url).pathname), "..");
+export const WEB = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const PROBES = join(WEB, "tests/probes");
 const SOURCE_EXT = [".ts", ".tsx", ".js", ".jsx", ".mjs", ".css"];
 const SKIP_DIRS = new Set(["node_modules", ".next", "tests", "public", ".screenshots"]);

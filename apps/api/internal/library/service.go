@@ -99,7 +99,7 @@ func (s *libraryServiceImpl) DeleteSavedMeal(ctx context.Context, userID uuid.UU
 }
 
 func (s *libraryServiceImpl) AddFromSaved(ctx context.Context, userID uuid.UUID, targetDate string, mealID uuid.UUID, mealSlot string) ([]diary.DiaryEntryItem, error) {
-	if err := diary.ValidateDateWritable(targetDate); err != nil {
+	if err := diary.ValidateDateWritableCtx(ctx, targetDate); err != nil {
 		return nil, err
 	}
 
@@ -112,25 +112,18 @@ func (s *libraryServiceImpl) AddFromSaved(ctx context.Context, userID uuid.UUID,
 		mealSlot = "lunch"
 	}
 
-	var addedEntries []diary.DiaryEntryItem
+	reqs := make([]diary.CreateEntryRequest, 0, len(meal.Items))
 	for _, item := range meal.Items {
 		fID := item.FoodID
-		entryReq := diary.CreateEntryRequest{
+		reqs = append(reqs, diary.CreateEntryRequest{
 			ID:           uuid.New(),
 			Kind:         "food",
 			FoodID:       &fID,
 			MealSlot:     mealSlot,
 			Grams:        item.Grams,
 			ServingLabel: item.PortionLabel,
-		}
-
-		entry, _, err := s.diaryService.CreateEntry(ctx, userID, targetDate, entryReq)
-		if err == nil && entry != nil {
-			addedEntries = append(addedEntries, *entry)
-			// Upsert recent food
-			_ = s.repo.UpsertRecent(ctx, userID, item.FoodID, item.PortionLabel, item.Grams)
-		}
+		})
 	}
 
-	return addedEntries, nil
+	return s.diaryService.CreateEntriesBatch(ctx, userID, targetDate, reqs)
 }

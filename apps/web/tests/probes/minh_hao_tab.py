@@ -207,6 +207,8 @@ def part_c(browser, w, size):
     page_text = pg.inner_text("body")
     check("minh hào (mẫu demo)" in page_text.lower(), f"C {w}: a card opens its food page ({pg.url}; {page_text[:160]!r})")
     check("thành phần" not in pg.inner_text("body").lower(), f"C {w}: the food page lists no ingredients or parts")
+    page_text = pg.inner_text("body")
+    check("Fortify Kitchen\n·\nFortify Kitchen" not in page_text and page_text.count("Fortify Kitchen") >= 1, f"C {w}: the food page names Fortify Kitchen once, not brand and source ({page_text[:140]!r})")
 
     # Xem tất cả: the list screen
     pg.goto(f"{BASE}/explore", wait_until="networkidle")

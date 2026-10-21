@@ -70,12 +70,16 @@ const VI_COLLATOR = new Intl.Collator("vi");
 function matchTier(food: FoodItem, query: string, foldedQuery: string): number | null {
   const f = foldedOf(food);
   if (f.name === query) return 0;
-  if (hasWholeWords(f.words, query)) return 1;
+  const ww = hasWholeWords(f.words, query);
+  if (query.length >= 2 && ww) return 1;
   if (f.name.startsWith(query)) return 2;
+  if (ww) return 2.5;
   if (f.name.includes(query)) return 3;
   if (f.foldedName === foldedQuery) return 3.5;
-  if (hasWholeWords(f.foldedWords, foldedQuery)) return 4;
+  const fww = hasWholeWords(f.foldedWords, foldedQuery);
+  if (foldedQuery.length >= 2 && fww) return 4;
   if (f.foldedName.startsWith(foldedQuery)) return 5;
+  if (fww) return 5.5;
   if (f.foldedName.includes(foldedQuery)) return 6;
   if (f.foldedBrand !== null && f.foldedBrand.includes(foldedQuery)) return 7;
   return null;

@@ -258,3 +258,53 @@ func TestHandler_DeleteEntry_MadeAtQuery(t *testing.T) {
 		t.Fatalf("delete with made_at from that day: want 200, got %d", got)
 	}
 }
+
+func TestHandler_FoodNameValidation400(t *testing.T) {
+	repo := newMockDiaryRepo()
+	h := NewHandler(NewService(repo))
+	userID := uuid.New()
+	today := GetServerToday()
+
+	// 1. CreateEntry with > 80 runes returns 400 Bad Request
+	body, _ := json.Marshal(map[string]any{
+		"id":        uuid.New(),
+		"kind":      "quick",
+		"food_name": strings.Repeat("x", 81),
+		"meal_slot": "snack",
+		"calories":  150,
+	})
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/days/"+today+"/entries", bytes.NewReader(body))
+	req = req.WithContext(context.WithValue(req.Context(), auth.UserIDKey, userID))
+	rctx := chi.NewRouteContext()
+	rctx.URLParams.Add("date", today)
+	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+
+	rec := httptest.NewRecorder()
+	h.CreateEntry(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400 for food_name > 80 runes on create, got %d: %s", rec.Code, rec.Body.String())
+	}
+
+	// 2. UpdateEntry with > 80 runes returns 400 Bad Request
+	existingID := uuid.New()
+	cal := 150.0
+	repo.entries[existingID] = &DiaryEntryItem{ID: existingID, Kind: "quick", FoodName: "Trà", MealSlot: "snack", Calories: &cal}
+	repo.entryDates[existingID] = today
+
+	updateBody, _ := json.Marshal(map[string]any{
+		"food_name": strings.Repeat("x", 81),
+	})
+	updateReq := httptest.NewRequest(http.MethodPatch, "/api/v1/entries/"+existingID.String(), bytes.NewReader(updateBody))
+	updateReq = updateReq.WithContext(context.WithValue(updateReq.Context(), auth.UserIDKey, userID))
+	updateRctx := chi.NewRouteContext()
+	updateRctx.URLParams.Add("id", existingID.String())
+	updateReq = updateReq.WithContext(context.WithValue(updateReq.Context(), chi.RouteCtxKey, updateRctx))
+
+	updateRec := httptest.NewRecorder()
+	h.UpdateEntry(updateRec, updateReq)
+
+	if updateRec.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400 for food_name > 80 runes on update, got %d: %s", updateRec.Code, updateRec.Body.String())
+	}
+}

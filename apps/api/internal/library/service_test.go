@@ -2,6 +2,7 @@ package library
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/google/uuid"
@@ -76,6 +77,7 @@ func (m *mockLibRepo) DeleteSavedMeal(ctx context.Context, userID uuid.UUID, mea
 
 type mockDiaryService struct {
 	createdEntries []diary.DiaryEntryItem
+	recents        diary.RecentsTracker
 }
 
 func (d *mockDiaryService) GetDay(ctx context.Context, userID uuid.UUID, date string) (*diary.DaySummaryResponse, error) {
@@ -122,9 +124,28 @@ func (d *mockDiaryService) SetTraining(ctx context.Context, userID uuid.UUID, da
 	return nil, nil
 }
 
+func (d *mockDiaryService) CreateEntriesBatch(ctx context.Context, userID uuid.UUID, date string, reqs []diary.CreateEntryRequest) ([]diary.DiaryEntryItem, error) {
+	var result []diary.DiaryEntryItem
+	for _, req := range reqs {
+		item := diary.DiaryEntryItem{
+			ID:           req.ID,
+			FoodID:       req.FoodID,
+			MealSlot:     req.MealSlot,
+			Grams:        req.Grams,
+			ServingLabel: req.ServingLabel,
+		}
+		result = append(result, item)
+		d.createdEntries = append(d.createdEntries, item)
+		if d.recents != nil && req.FoodID != nil {
+			_ = d.recents.UpsertRecent(ctx, userID, *req.FoodID, req.ServingLabel, req.Grams)
+		}
+	}
+	return result, nil
+}
+
 func TestLibraryService_AddFromSaved(t *testing.T) {
 	repo := newMockLibRepo()
-	dService := &mockDiaryService{}
+	dService := &mockDiaryService{recents: repo}
 	svc := NewService(repo, dService)
 
 	userID := uuid.New()
@@ -162,5 +183,49 @@ func TestLibraryService_AddFromSaved(t *testing.T) {
 	// Check recents were updated
 	if len(repo.recents) != 2 {
 		t.Errorf("expected 2 recent foods recorded, got %d", len(repo.recents))
+	}
+}
+
+type errDiaryService struct {
+	mockDiaryService
+	err error
+}
+
+func (e *errDiaryService) CreateEntriesBatch(ctx context.Context, userID uuid.UUID, date string, reqs []diary.CreateEntryRequest) ([]diary.DiaryEntryItem, error) {
+	return nil, e.err
+}
+
+func TestLibraryService_AddFromSaved_AtomicRollback(t *testing.T) {
+	repo := newMockLibRepo()
+	expectedErr := errors.New("atomic batch insert failed")
+	dService := &errDiaryService{err: expectedErr}
+	svc := NewService(repo, dService)
+
+	userID := uuid.New()
+	f1 := uuid.New()
+	f2 := uuid.New()
+
+	meal, err := svc.CreateSavedMeal(context.Background(), userID, CreateSavedMealRequest{
+		Name: "Test meal",
+		Items: []SavedMealItem{
+			{FoodID: f1, PortionLabel: "100 g", Grams: 100},
+			{FoodID: f2, PortionLabel: "200 g", Grams: 200},
+		},
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	today := diary.GetServerToday()
+	entries, err := svc.AddFromSaved(context.Background(), userID, today, meal.ID, "dinner")
+	if !errors.Is(err, expectedErr) {
+		t.Fatalf("expected error %v, got %v", expectedErr, err)
+	}
+	if len(entries) != 0 {
+		t.Fatalf("expected 0 entries returned on error, got %d", len(entries))
+	}
+	// Assert all-or-nothing: no recents should be written when transaction fails
+	if len(repo.recents) != 0 {
+		t.Fatalf("expected 0 recents recorded on atomic rollback, got %d", len(repo.recents))
 	}
 }

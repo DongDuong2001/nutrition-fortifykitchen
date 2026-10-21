@@ -199,3 +199,38 @@ describe("searchFoods ignores Vietnamese accents (cc-51 D7)", () => {
   });
   it("accents in the query still match exactly", () => expect(names("cơm")).toEqual(["com"]));
 });
+
+
+describe("searchFoods short queries and single-letter ranking", () => {
+  const items = [
+    food("CanPrev Pureway C 600 mg", null, "canprev-c", "CanPrev"),
+    food("Codeage Whole Food Vitamin C", null, "codeage-c", "Codeage"),
+    food("Chuối", 89, "chuoi"),
+    food("Cơm", 130, "com"),
+    food("Chanh", 29, "chanh"),
+  ];
+
+  it("ranks foods starting with 'c' ahead of isolated single-letter 'C' whole-word hits", () => {
+    const res = names(searchFoods(items, "c"));
+    const chuoiIdx = res.indexOf("Chuối");
+    const comIdx = res.indexOf("Cơm");
+    const canprevIdx = res.indexOf("CanPrev Pureway C 600 mg");
+    const codeageIdx = res.indexOf("Codeage Whole Food Vitamin C");
+
+    expect(chuoiIdx).toBeLessThan(canprevIdx);
+    expect(comIdx).toBeLessThan(canprevIdx);
+    expect(chuoiIdx).toBeLessThan(codeageIdx);
+  });
+
+  it("ranks foods starting with 'ch' ahead, with no irrelevant vitamin C hits", () => {
+    const res = names(searchFoods(items, "ch"));
+    expect(res.slice(0, 2).sort()).toEqual(["Chanh", "Chuối"].sort());
+    expect(res).not.toContain("CanPrev Pureway C 600 mg");
+    expect(res).not.toContain("Codeage Whole Food Vitamin C");
+  });
+
+  it("ranks 'Chuối' at top for 'chu' and 'chuoi'", () => {
+    expect(names(searchFoods(items, "chu"))[0]).toBe("Chuối");
+    expect(names(searchFoods(items, "chuoi"))[0]).toBe("Chuối");
+  });
+});
