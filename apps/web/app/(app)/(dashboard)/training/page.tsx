@@ -327,7 +327,7 @@ function TrainingContent() {
       {/* ============================================================== */}
       {/* DESKTOP LAYOUT (>=1024px): DesktopTraining.dc.html */}
       {/* ============================================================== */}
-      <div
+      <main
         data-align-container="training-desktop"
         className="hidden w-full max-w-[1240px] flex-col gap-5 px-8 pt-5 pb-12 box-border lg:flex"
       >
@@ -372,7 +372,7 @@ function TrainingContent() {
             {!isPast && <TrainingTipBanner isRestDay={isRestDay} />}
           </section>
         )}
-      </div>
+      </main>
 
       <TrainingSizeSheet open={sizeOpen} value={size} onChoose={chooseSize} onClose={() => setSizeOpen(false)} />
       <TrainingLogSheet item={logItem} foods={foods} onClose={() => setLogItem(null)} onLogged={handleLogged} />
