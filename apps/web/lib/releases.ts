@@ -32,8 +32,10 @@ export interface Release {
 
 export const RELEASES: readonly Release[] = [
   // fluid-add + polish-1020 + rich-tabs (Hao 21/10): the add sheet slides over the screen you are on, Hoàn tác after every add, a lighter add
-  // list, the update notice above the bottom bar, and the "Giàu …" lists in two tabs. One entry for all of them. No tour and no tip, on
-  // purpose: every control here is a labelled button or a tab in plain sight (+, ✕, Xem thêm, Hoàn tác, Thực phẩm / Thực phẩm bổ sung)
+  // list, the update notice above the bottom bar, and the "Giàu …" lists in two tabs, and (feat/minh-hao-tab) Đồ ăn Minh Hào. One entry
+  // for all of them. No tip, on purpose: every control here is a labelled button or a tab in plain sight (+, ✕, Xem thêm, Hoàn tác,
+  // Thực phẩm / Thực phẩm bổ sung, Đồ ăn Minh Hào). The one tour step is the Khám phá carousel, which is not on Hôm nay: it points at
+  // the Khám phá tab there (fallback) and at the carousel itself wherever it is on screen
   {
     id: "2026-10-21c",
     date: "21/10",
@@ -43,6 +45,10 @@ export const RELEASES: readonly Release[] = [
       { icon: "home", title: "Danh sách món gọn hơn", body: "Mỗi nhóm hiện vài món đầu, bấm Xem thêm để xem tiếp. Bảng chọn khẩu phần có nút ✕ để đóng." },
       { icon: "home", title: "Thông báo có bản mới không che món", body: "Khi có bản mới, thông báo nằm ngay trên thanh dưới và tự tắt sau vài giây. App tự cập nhật khi bạn thoát ra, không làm mất món đang chọn." },
       { icon: "bars", title: "Danh sách Giàu … có hai thẻ", body: "Danh sách Giàu … giờ tách riêng thực phẩm và thực phẩm bổ sung thành hai thẻ trong Khám phá, nên viên uống không còn đứng đầu danh sách món ăn." },
+      { icon: "meal", title: "Tab Đồ ăn Minh Hào", body: "Có tab Đồ ăn Minh Hào để chọn nhanh các món của Fortify Kitchen. Khi thêm món, chip này nằm ngay sau Tất cả, và ở Khám phá có hàng thẻ riêng." },
+    ],
+    tour: [
+      { target: "explore-minh-hao", fallback: "nav-explore", title: "Đồ ăn Minh Hào", body: "Ở Khám phá có hàng thẻ Đồ ăn Minh Hào. Khi thêm món, chạm chip cùng tên để chọn nhanh." },
     ],
   },
   // cc-73b (Hao 20/10): targets at the upper end of the coach's range, one number each; vitamins and minerals by the US DRI
