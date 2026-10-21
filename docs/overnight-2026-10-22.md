@@ -104,5 +104,5 @@ Brief: ~/Documents/HITMicro/prompts/overnight-1022-v3.md (Job 1 → Job 2 → Jo
   - "before" shots on 3112;
   - Job 3 on 3121, Job 4 on 3131;
   - two early gates on 3111 while #44's gate:full held 3101.
-- **Dev servers in other worktrees:** one fix subagent's cleanup (`pkill` on its own port) may also have stopped the dev servers on 3109 and 3207, which belong to other worktrees. They were not restarted. The 3102 dev server was restarted and is still running.
+- **Dev servers in other worktrees:** one fix subagent's cleanup (`pkill` on its own port) may also have stopped the dev servers on 3109 and 3207, which belong to other worktrees. They were not restarted. The 3102 dev server was restarted then, and stopped at the end of the night; no server of this run is left running.
 - **@theme static:** Tailwind v4 dropped the theme variables that are only named in template strings, so IconTiles and the Giàu tiles drew blank until `@theme static` (791faf6). The token tests read the static block.
