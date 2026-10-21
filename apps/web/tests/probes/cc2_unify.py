@@ -102,6 +102,12 @@ def main():
                     if desktop:
                         check(h["size"] == "32px" or not h["h1Visible"], f"{where}: desktop title 32px (got {h['size']})")
                         check(h["bg"] != "rgb(17, 19, 23)" or h["width"] < 1000, f"{where}: no full-width ink header on desktop")
+                    elif route.startswith("/trends"):
+                        # V3: Tổng quan is a 34 px page title on the grey page (no ink slab)
+                        check(h["bg"] == "rgb(242, 242, 247)", f"{where}: V3 header sits on the page ({h['bg']})")
+                        check(h["size"] == "34px", f"{where}: V3 large title 34px ({h['size']})")
+                        check(h["padLeft"] == "16px", f"{where}: 16 px sides ({h['padLeft']})")
+                        check(h["top"] == 0, f"{where}: header at the top ({h['top']})")
                     else:
                         check(h["bg"] == "rgb(17, 19, 23)", f"{where}: phone header is ink ({h['bg']})")
                         check(h["radius"] == "20px", f"{where}: bottom radius 20 ({h['radius']})")

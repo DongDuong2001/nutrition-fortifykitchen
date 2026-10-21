@@ -36,6 +36,7 @@ def check(cond, msg):
 
 def new_page(browser, size):
     ctx = browser.new_context(viewport=size)
+    ctx.add_init_script("try { localStorage.setItem('h1t_onboarding_off', '1'); } catch (e) {}")  # no tip over the 7|30 control
     pg = ctx.new_page()
     pg.clock.set_fixed_time(NOW)
     return ctx, pg
@@ -117,7 +118,7 @@ def check_period(browser, size_name, size):
     pg.wait_for_timeout(500)
     check(avg_text(pg) == before, f"{size_name} › comes back to the same numbers")
 
-    pg.locator('a:has-text("30 ngày") >> visible=true').first.click()
+    pg.locator('[aria-label="Độ dài kỳ"] button:has-text("30") >> visible=true').first.click()
     pg.wait_for_timeout(600)
     check(heading(pg).endswith("13/09 – 12/10"), f"{size_name} 30 ngày is 13/09–12/10 ({heading(pg)})")
     check(avg_text(pg) != before, f"{size_name} 30 ngày changes the average ({avg_text(pg)})")

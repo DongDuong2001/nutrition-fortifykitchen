@@ -10,9 +10,9 @@ export type { ScoreRowData };
 /**
  * The scoreboard: one white card of ScoreRows (Kcal, Đạm, Cân nặng, …). One row open at a time; the first row
  * starts open. Each row remembers its selected day, the last day of the period until the user picks another.
- * Only the open row draws its chart.
+ * Only the open row draws its chart. `levels`: day squares and bars take the four level colours (Năng lượng); otherwise met / not met (Tóm tắt).
  */
-export function Scoreboard({ rows, label = "Bảng điểm" }: { rows: ScoreRowData[]; label?: string }) {
+export function Scoreboard({ rows, label = "Bảng điểm", levels = false }: { rows: ScoreRowData[]; label?: string; levels?: boolean }) {
   const [open, setOpen] = useState<string | null>(rows[0]?.key ?? null);
   const [picked, setPicked] = useState<Record<string, number>>({});
 
@@ -29,6 +29,7 @@ export function Scoreboard({ rows, label = "Bảng điểm" }: { rows: ScoreRowD
             onToggle={() => setOpen(open === row.key ? null : row.key)}
             onSelect={(d) => setPicked((p) => ({ ...p, [row.key]: d }))}
             alignGroup="overview-rows"
+            levels={levels}
           />
         ))}
       </ul>
