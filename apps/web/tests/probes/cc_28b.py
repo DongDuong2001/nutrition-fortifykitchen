@@ -60,7 +60,7 @@ window.__shareSnaps = [];
       badge: badge ? badge.getAttribute('data-level-badge') : null,
       badgeText: badge ? badge.innerText.replace(/\\s+/g, ' ').trim() : null,
       top: r.firstElementChild ? r.firstElementChild.innerText.replace(/\\s+/g, ' ') : '',
-      head: (() => { const h = r.querySelector('[data-share-header]'); if (!h) return null; const p0 = h.querySelector('p'); const b = h.querySelector('[data-level-badge]');
+      head: (() => { const h = r.querySelector('[data-share-header]'); if (!h) return null; const p0 = h.querySelector('h1, h2') || h.querySelector('p'); const b = h.querySelector('[data-level-badge]');
         const m = (e) => { const q = e.getBoundingClientRect(); return (q.top + q.bottom) / 2; };
         return { name: p0.innerText.trim(), nameMid: m(p0.parentElement), badgeMid: b ? m(b) : null }; })(),
       groups: [...r.querySelectorAll('aside[aria-label="Vi chất"] h3')].map(h => h.textContent.trim()),
