@@ -4,7 +4,8 @@
  * - "back": Back (the browser's, the phone's or a screen's own back button): the slide reverses.
  * - "sheet-up": /add opens. It is a sheet over Hôm nay and slides itself up, so the screen change has no transition.
  * - "sheet-down": Back out of /add: its panel slides down off Hôm nay.
- * - "tab": a tab of the bottom nav or the sidebar, or a Tổng quan sub-tab: no transition at all (tapped hundreds of times a day).
+ * - "tab": a tab of the bottom nav or the sidebar, or a Tổng quan sub-tab: no view transition (tapped hundreds of times a day, and a
+ *   snapshot of the whole screen is a stutter on a phone with 2 GB). The new screen glides in with CSS instead (EnterGlide, .m-tab-in).
  * - "none": the first screen, the same screen with another query, /add closed by its own ✕ (it slid down already),
  *   and everything when Data Saver is on or on a low-end phone (2 GB or 4 cores, cc-64); reduced motion keeps the
  *   change as a 120 ms cross-fade (cc-62).

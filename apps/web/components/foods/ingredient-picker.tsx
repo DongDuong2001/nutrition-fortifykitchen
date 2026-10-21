@@ -6,6 +6,7 @@ import { PillButton } from "@/components/ui/pill-button";
 import { CatalogStatus } from "@/components/foods/catalog-status";
 import { Toast } from "@/components/ui/toast";
 import { Presence } from "@/components/ui/presence";
+import { SwitchGlide } from "@/components/ui/switch-glide";
 import { ChipGroup } from "@/components/ui/chip-group";
 import { FoodList } from "@/components/foods/food-list";
 import { FoodSearchField } from "@/components/foods/food-search-field";
@@ -38,7 +39,7 @@ export function IngredientPicker({
 
 // Mounted only while the sheet is open, so each opening starts with a blank search and nothing ticked
 function PickerBody({ onClose, onConfirm, disabledIds }: { onClose: () => void; onConfirm: (foods: FoodItem[]) => void; disabledIds: string[] }) {
-  const { query, setQuery, filter, setFilter, list, filterItems, categoryName, isFavouriteFood, catalogPending, catalogFailed, retryCatalog } = useFoodBrowse({ oneRowPerFood: false });
+  const { query, setQuery, filter, listFilter, setFilter, list, filterItems, filterIndex, categoryName, isFavouriteFood, catalogPending, catalogFailed, retryCatalog } = useFoodBrowse({ oneRowPerFood: false });
   const [picked, setPicked] = useState<FoodItem[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
   const toggle = (food: FoodItem) =>
@@ -61,50 +62,52 @@ function PickerBody({ onClose, onConfirm, disabledIds }: { onClose: () => void; 
       <FoodSearchField value={query} onChange={setQuery} />
       <ChipGroup scroll items={filterItems} ariaLabel="Lọc món theo nhóm" />
       <div data-ingredient-picker-list className="max-h-[44dvh] overflow-y-auto">
-        <FoodList
-          list={list}
-          disabledIds={disabledIds}
-          onPick={toggle}
-          tray={{ ids: picked.map((f) => f.id), onToggle: toggle }}
-          getMeta={foodMeta}
-          categoryName={categoryName}
-          showCategory={!isCategoryFilter(filter)}
-          isFavourite={isFavouriteFood}
-          showSourceTag={query.trim() !== ""}
-          footer={
-            // The request goes nowhere in live mode until the API has POST /food-requests
-            !isLiveMode() && (
-              <div data-align-group="ingredient-picker" data-align-edge="left" className="flex flex-col items-center gap-2 py-3 text-center">
-                <p className="m-0 text-sm font-semibold text-text">Không tìm thấy nguyên liệu?</p>
-                <button
-                  type="button"
-                  onClick={sendRequest}
-                  className="min-h-11 cursor-pointer rounded-full border border-card-border bg-card px-5 text-sm font-semibold text-cobalt active:scale-[0.97] transition-press motion-reduce:active:scale-100"
+        <SwitchGlide id={filter} order={filterIndex} ready={listFilter === filter}>
+          <FoodList
+            list={list}
+            disabledIds={disabledIds}
+            onPick={toggle}
+            tray={{ ids: picked.map((f) => f.id), onToggle: toggle }}
+            getMeta={foodMeta}
+            categoryName={categoryName}
+            showCategory={!isCategoryFilter(listFilter)}
+            isFavourite={isFavouriteFood}
+            showSourceTag={query.trim() !== ""}
+            footer={
+              // The request goes nowhere in live mode until the API has POST /food-requests
+              !isLiveMode() && (
+                <div data-align-group="ingredient-picker" data-align-edge="left" className="flex flex-col items-center gap-2 py-3 text-center">
+                  <p className="m-0 text-sm font-semibold text-text">Không tìm thấy nguyên liệu?</p>
+                  <button
+                    type="button"
+                    onClick={sendRequest}
+                    className="min-h-11 cursor-pointer rounded-full border border-card-border bg-card px-5 text-sm font-semibold text-cobalt active:scale-[0.97] transition-press motion-reduce:active:scale-100"
+                  >
+                    Gửi yêu cầu thêm món
+                  </button>
+                </div>
+              )
+            }
+            empty={
+              catalogPending || catalogFailed ? (
+                <CatalogStatus failed={catalogFailed} onRetry={retryCatalog} />
+              ) : (
+                <EmptyState
+                  title={query.trim() ? `Không có “${query.trim()}”` : "Chưa có món nào"}
+                  actions={
+                    listFilter !== "all" && (
+                      <PillButton variant="tertiary" size="md" type="button" onClick={() => setFilter("all")}>
+                        Bỏ lọc
+                      </PillButton>
+                    )
+                  }
                 >
-                  Gửi yêu cầu thêm món
-                </button>
-              </div>
-            )
-          }
-          empty={
-            catalogPending || catalogFailed ? (
-              <CatalogStatus failed={catalogFailed} onRetry={retryCatalog} />
-            ) : (
-              <EmptyState
-                title={query.trim() ? `Không có “${query.trim()}”` : "Chưa có món nào"}
-                actions={
-                  filter !== "all" && (
-                    <PillButton variant="tertiary" size="md" type="button" onClick={() => setFilter("all")}>
-                      Bỏ lọc
-                    </PillButton>
-                  )
-                }
-              >
-                Thử từ ngắn hơn hoặc bỏ dấu.
-              </EmptyState>
-            )
-          }
-        />
+                  Thử từ ngắn hơn hoặc bỏ dấu.
+                </EmptyState>
+              )
+            }
+          />
+        </SwitchGlide>
       </div>
       <Presence>{notice && <Toast message={notice} />}</Presence>
       {picked.length > 0 ? (

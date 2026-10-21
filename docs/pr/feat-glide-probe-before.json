@@ -1,0 +1,74 @@
+{
+ "chip@1x": {
+  "first_ms": 12.4,
+  "animated": 0,
+  "jank25": 0,
+  "jank33": 0,
+  "pop": 1,
+  "vt": 0,
+  "tap_ms": 3.6
+ },
+ "chip@4x": {
+  "first_ms": 8.8,
+  "animated": 0,
+  "jank25": 0,
+  "jank33": 0,
+  "pop": 1,
+  "vt": 0,
+  "tap_ms": 9.4
+ },
+ "giau-open@1x": {
+  "first_ms": 28.7,
+  "animated": 41,
+  "jank25": 0,
+  "jank33": 0,
+  "pop": 0,
+  "vt": 2,
+  "tap_ms": 2.3
+ },
+ "giau-open@4x": {
+  "first_ms": 42.3,
+  "animated": 40,
+  "jank25": 1,
+  "jank33": 1,
+  "pop": 0,
+  "vt": 2,
+  "tap_ms": 5.3
+ },
+ "giau-tab@1x": {
+  "first_ms": 31.4,
+  "animated": 0,
+  "jank25": 0,
+  "jank33": 0,
+  "pop": 1,
+  "vt": 0,
+  "tap_ms": 2.2
+ },
+ "giau-tab@4x": {
+  "first_ms": 27.5,
+  "animated": 0,
+  "jank25": 0,
+  "jank33": 0,
+  "pop": 1,
+  "vt": 0,
+  "tap_ms": 5.4
+ },
+ "nav-tab@1x": {
+  "first_ms": 30.3,
+  "animated": 0,
+  "jank25": 0,
+  "jank33": 0,
+  "pop": 1,
+  "vt": 0,
+  "tap_ms": 1.5
+ },
+ "nav-tab@4x": {
+  "first_ms": 46.1,
+  "animated": 0,
+  "jank25": 1,
+  "jank33": 1,
+  "pop": 1,
+  "vt": 0,
+  "tap_ms": 3.6
+ }
+}

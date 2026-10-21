@@ -1,0 +1,184 @@
+{
+ "tabs@1x": {
+  "summary": {
+   "tab -> Khám phá nav highlight (ms)": 30.7,
+   "tab -> Khám phá screen (ms)": 30.7,
+   "tab -> Hôm nay nav highlight (ms)": 31.5,
+   "tab -> Hôm nay screen (ms)": 31.5,
+   "tab -> Hôm nay food list drawn (ms)": 31.5,
+   "tab -> Hôm nay empty-list DOM frames": 0,
+   "tab -> Hôm nay blank frames": 0
+  },
+  "raw": [
+   {
+    "to_explore": {
+     "nav_ms": 27.6,
+     "screen_ms": 27.6,
+     "jank": {
+      "frames": 30,
+      "gt16": 0,
+      "gt33": 0,
+      "max_ms": 16.8
+     }
+    },
+    "to_today": {
+     "nav_ms": 31.4,
+     "screen_ms": 31.4,
+     "list_ms": 31.4,
+     "empty_dom_frames": 0,
+     "blank": 0,
+     "shots": 20,
+     "jank": {
+      "frames": 30,
+      "gt16": 0,
+      "gt33": 0,
+      "max_ms": 16.8
+     }
+    }
+   },
+   {
+    "to_explore": {
+     "nav_ms": 31.4,
+     "screen_ms": 31.4,
+     "jank": {
+      "frames": 30,
+      "gt16": 0,
+      "gt33": 0,
+      "max_ms": 16.8
+     }
+    },
+    "to_today": {
+     "nav_ms": 31.7,
+     "screen_ms": 31.7,
+     "list_ms": 31.7,
+     "empty_dom_frames": 0,
+     "blank": 0,
+     "shots": 20,
+     "jank": {
+      "frames": 30,
+      "gt16": 0,
+      "gt33": 0,
+      "max_ms": 16.8
+     }
+    }
+   },
+   {
+    "to_explore": {
+     "nav_ms": 30.7,
+     "screen_ms": 30.7,
+     "jank": {
+      "frames": 30,
+      "gt16": 0,
+      "gt33": 0,
+      "max_ms": 16.8
+     }
+    },
+    "to_today": {
+     "nav_ms": 31.5,
+     "screen_ms": 31.5,
+     "list_ms": 31.5,
+     "empty_dom_frames": 0,
+     "blank": 0,
+     "shots": 20,
+     "jank": {
+      "frames": 30,
+      "gt16": 0,
+      "gt33": 0,
+      "max_ms": 16.8
+     }
+    }
+   }
+  ]
+ },
+ "tabs@4x": {
+  "summary": {
+   "tab -> Khám phá nav highlight (ms)": 43.7,
+   "tab -> Khám phá screen (ms)": 43.7,
+   "tab -> Hôm nay nav highlight (ms)": 29.9,
+   "tab -> Hôm nay screen (ms)": 29.9,
+   "tab -> Hôm nay food list drawn (ms)": 29.9,
+   "tab -> Hôm nay empty-list DOM frames": 0,
+   "tab -> Hôm nay blank frames": 0
+  },
+  "raw": [
+   {
+    "to_explore": {
+     "nav_ms": 44.4,
+     "screen_ms": 44.4,
+     "jank": {
+      "frames": 29,
+      "gt16": 1,
+      "gt33": 0,
+      "max_ms": 33.3
+     }
+    },
+    "to_today": {
+     "nav_ms": 29.9,
+     "screen_ms": 29.9,
+     "list_ms": 29.9,
+     "empty_dom_frames": 0,
+     "blank": 0,
+     "shots": 21,
+     "jank": {
+      "frames": 30,
+      "gt16": 0,
+      "gt33": 0,
+      "max_ms": 16.8
+     }
+    }
+   },
+   {
+    "to_explore": {
+     "nav_ms": 43.7,
+     "screen_ms": 43.7,
+     "jank": {
+      "frames": 28,
+      "gt16": 1,
+      "gt33": 1,
+      "max_ms": 50
+     }
+    },
+    "to_today": {
+     "nav_ms": 31.1,
+     "screen_ms": 31.1,
+     "list_ms": 31.1,
+     "empty_dom_frames": 0,
+     "blank": 0,
+     "shots": 21,
+     "jank": {
+      "frames": 30,
+      "gt16": 0,
+      "gt33": 0,
+      "max_ms": 16.8
+     }
+    }
+   },
+   {
+    "to_explore": {
+     "nav_ms": 42.8,
+     "screen_ms": 42.8,
+     "jank": {
+      "frames": 29,
+      "gt16": 1,
+      "gt33": 0,
+      "max_ms": 33.3
+     }
+    },
+    "to_today": {
+     "nav_ms": 28.4,
+     "screen_ms": 28.4,
+     "list_ms": 28.4,
+     "empty_dom_frames": 0,
+     "blank": 0,
+     "shots": 21,
+     "jank": {
+      "frames": 30,
+      "gt16": 0,
+      "gt33": 0,
+      "max_ms": 16.8
+     }
+    }
+   }
+  ]
+ }
+}

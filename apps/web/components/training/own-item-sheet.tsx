@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Sheet } from "@/components/ui/sheet";
 import { PillButton } from "@/components/ui/pill-button";
+import { SwitchGlide } from "@/components/ui/switch-glide";
 import { ChipGroup } from "@/components/ui/chip-group";
 import { FormRow } from "@/components/ui/form-row";
 import { CatalogStatus } from "@/components/foods/catalog-status";
@@ -53,39 +54,41 @@ function OwnItemBody({ target, onClose, onAdd }: { target: OwnItemTarget; onClos
 }
 
 function PickStep({ onPick, onClose }: { onPick: (food: FoodItem) => void; onClose: () => void }) {
-  const { query, setQuery, filter, setFilter, list, filterItems, categoryName, isFavouriteFood, catalogPending, catalogFailed, retryCatalog } = useFoodBrowse();
+  const { query, setQuery, filter, listFilter, setFilter, list, filterItems, filterIndex, categoryName, isFavouriteFood, catalogPending, catalogFailed, retryCatalog } = useFoodBrowse();
   return (
     <div className="flex min-h-0 flex-col gap-3">
       <FoodSearchField value={query} onChange={setQuery} />
       <ChipGroup scroll items={filterItems} ariaLabel="Lọc món theo nhóm" />
       <div className="max-h-[44dvh] overflow-y-auto">
-        <FoodList
-          list={list}
-          onPick={onPick}
-          getMeta={foodMeta}
-          categoryName={categoryName}
-          showCategory={!isCategoryFilter(filter)}
-          isFavourite={isFavouriteFood}
-          showSourceTag={query.trim() !== ""}
-          empty={
-            catalogPending || catalogFailed ? (
-              <CatalogStatus failed={catalogFailed} onRetry={retryCatalog} />
-            ) : (
-              <EmptyState
-                title={query.trim() ? `Không có “${query.trim()}”` : "Chưa có món nào"}
-                actions={
-                  filter !== "all" && (
-                    <PillButton variant="tertiary" size="md" type="button" onClick={() => setFilter("all")}>
-                      Bỏ lọc
-                    </PillButton>
-                  )
-                }
-              >
-                Thử từ ngắn hơn hoặc bỏ dấu.
-              </EmptyState>
-            )
-          }
-        />
+        <SwitchGlide id={filter} order={filterIndex} ready={listFilter === filter}>
+          <FoodList
+            list={list}
+            onPick={onPick}
+            getMeta={foodMeta}
+            categoryName={categoryName}
+            showCategory={!isCategoryFilter(listFilter)}
+            isFavourite={isFavouriteFood}
+            showSourceTag={query.trim() !== ""}
+            empty={
+              catalogPending || catalogFailed ? (
+                <CatalogStatus failed={catalogFailed} onRetry={retryCatalog} />
+              ) : (
+                <EmptyState
+                  title={query.trim() ? `Không có “${query.trim()}”` : "Chưa có món nào"}
+                  actions={
+                    listFilter !== "all" && (
+                      <PillButton variant="tertiary" size="md" type="button" onClick={() => setFilter("all")}>
+                        Bỏ lọc
+                      </PillButton>
+                    )
+                  }
+                >
+                  Thử từ ngắn hơn hoặc bỏ dấu.
+                </EmptyState>
+              )
+            }
+          />
+        </SwitchGlide>
       </div>
       <PillButton variant="secondary" onClick={onClose}>
         Hủy
