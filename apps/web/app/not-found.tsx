@@ -1,7 +1,7 @@
 import { NotFoundHeader } from "@/components/not-found-header";
 import { NotFoundReport } from "@/components/not-found-report";
 import { PillButton } from "@/components/ui/pill-button";
-import { HOME_ROUTE } from "@/lib/home-route";
+import { OVERVIEW_ROUTE } from "@/lib/home-route";
 
 // A server component: the screens around it do not load its header and buttons with their own first-load JS
 export default function NotFound() {
@@ -19,7 +19,7 @@ export default function NotFound() {
       </main>
 
       <footer className="mx-auto flex w-full max-w-[560px] flex-col gap-3 px-4 pb-6 box-border">
-        <PillButton variant="primary" href={HOME_ROUTE} fullWidth>
+        <PillButton variant="primary" href={OVERVIEW_ROUTE} fullWidth>
           Về Tổng quan
         </PillButton>
         <NotFoundReport />

@@ -4,3 +4,6 @@
  * copied into every one of them.
  */
 export const HOME_ROUTE = "/app";
+
+/** Tổng quan's route (the bottom nav's second tab, lib/nav NAV_TABS), for the same pages: the 404 and the error page's "Về Tổng quan". */
+export const OVERVIEW_ROUTE = "/trends";
