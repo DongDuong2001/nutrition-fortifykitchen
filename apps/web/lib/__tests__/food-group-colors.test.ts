@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FOOD_CATEGORIES } from "../food-categories";
-import { FOOD_GROUP_COLORS, foodGroupAccent } from "../food-group-colors";
+import { FOOD_GROUP_COLORS, foodGroupAccent, foodGroupText } from "../food-group-colors";
 import { token } from "./css-tokens";
 
 // V3-SPEC §1: the icon tile colour of each food group, also the group's accent on its list page.
@@ -30,5 +30,15 @@ describe("food group colours", () => {
       const name = foodGroupAccent(key as keyof typeof FOOD_GROUP_COLORS).match(/--color-([\w-]+)/)![1];
       expect(token(name), key).not.toBe("");
     }
+  });
+
+  it("gives every group a figure colour that names a real token (deep shade for the system colours)", () => {
+    for (const key of Object.keys(FOOD_GROUP_COLORS)) {
+      const name = foodGroupText(key as keyof typeof FOOD_GROUP_COLORS).match(/--color-([\w-]+)/)![1];
+      expect(token(name), key).not.toBe("");
+    }
+    expect(foodGroupText("rau")).toBe("var(--color-deep-orange)");
+    expect(foodGroupText("cua_toi")).toBe("var(--color-cobalt)");
+    expect(foodGroupText("minh_hao")).toBe("var(--color-cobalt)");
   });
 });

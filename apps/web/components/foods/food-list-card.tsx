@@ -16,10 +16,12 @@ export interface FoodListCardProps {
   /** Prefix for the meta line, e.g. the category name. */
   withCategory?: (food: FoodItem) => string;
   empty?: React.ReactNode;
+  /** Colour of each row's kcal (a group's list page); default: the text colour. */
+  valueColor?: string;
 }
 
 /** One Card holding a titled list of food rows with dividers (UI-RULES row pattern). */
-export function FoodListCard({ title, action, foods, withCategory, empty }: FoodListCardProps) {
+export function FoodListCard({ title, action, foods, withCategory, empty, valueColor }: FoodListCardProps) {
   // cc-58: the first 50 rows, then "Xem thêm" (a new list, from another query, starts again)
   const listKey = `${foods.length}:${foods[0]?.food.id ?? ""}`;
   const [more, setMore] = useState({ listKey, extra: 0 });
@@ -42,6 +44,7 @@ export function FoodListCard({ title, action, foods, withCategory, empty }: Food
               name={rowName(food)}
               meta={`${withCategory ? `${withCategory(food)} · ` : ""}${foodRowMeta(food, label)}`}
               value={foodRowKcal(food, grams)}
+              valueColor={valueColor}
               withBorderTop={i > 0 || !!title}
             />
           ))}

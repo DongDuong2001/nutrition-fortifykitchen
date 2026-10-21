@@ -51,3 +51,11 @@ export function foodGroupAccent(key: FoodFilter): string {
   const colour = FOOD_GROUP_COLORS[key];
   return colour === "rainbow" ? "var(--color-cobalt)" : `var(--color-tile-${colour}-base)`;
 }
+
+/** The group's colour as text on white (a figure on its list page): the deep shade of the system colour, cobalt for Của tôi and the rainbow, ink for Tất cả. */
+export function foodGroupText(key: FoodFilter): string {
+  const colour = FOOD_GROUP_COLORS[key];
+  if (colour === "rainbow" || colour === "cobalt") return "var(--color-cobalt)";
+  if (colour === "ink") return "var(--color-text)";
+  return `var(--color-deep-${colour})`;
+}
