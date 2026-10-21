@@ -43,18 +43,18 @@ OLD_TIPS = [
     "food-detail", "compare", "food-new", "training", "micros", "trends-micros", "explore", "overview", "leaderboard",
 ]
 RETURNING = {"tourDone": True, "seen": OLD_TIPS, "whatsNewSeen": "2026-10-18b"}
-# The newest 8 of the joined tour: cc-68's 19b (its first two: the arrow that opens yesterday, + Thêm), cc-70's 20a (the food
-# list), the overnight 20b (the date at the top), the follow-ups' 21a (the H1T MICRO wordmark), cc-73b's 21b (the kcal
-# target, the vitamin column), then 21c's Đồ ăn của Minh Hào (the Khám phá tab on Hôm nay); 19b's save status, 19a's and 18f's steps are cut by the cap
+# The newest 8 of the joined tour: cc-68's 19b (its first step: the arrow that opens yesterday), cc-70's 20a (the food list), the overnight
+# 20b (the date at the top), the follow-ups' 21a (the H1T MICRO wordmark), cc-73b's 21b (the kcal target, the vitamin column), then 21c's two:
+# Đồ ăn của Minh Hào (the Khám phá tab on Hôm nay) and Đổi nguyên liệu (Thành phần, + Thêm on Hôm nay); 19b's other steps, 19a's and 18f's are cut by the cap
 STEPS = [
     ("Về hôm qua", ["day-prev", "header-actions"]),
-    ("Ghi bù", ["meal-add", "nav-add"]),
     ("Thử kéo món", ["home-food-list", "meal-pill"]),
     ("Mở lịch", ["day-date", "day-prev"]),
     ("Về Hôm nay", ["home-logo", "day-date"]),
     ("Một con số", ["home-hero"]),
     ("Vi chất theo DRI", ["nutrient-column", "home-hero"]),
     ("Đồ ăn của Minh Hào", ["nav-explore"]),
+    ("Đổi nguyên liệu", ["meal-add", "nav-add"]),
 ]
 # The item titles of 21b, 21a, 20b, 20a, 19b and 19a (cc-73b, follow-ups, overnight, cc-70, cc-68, cc-67), each of which must fit on one line in the sheet
 TITLES_1910 = [
@@ -195,12 +195,12 @@ def tour(browser):
 
 
 def skipped(browser):
-    # Steps whose target is gone are skipped. Step 2 (Ghi bù) points at + Thêm: with + Thêm off the page, Tiếp on step 1
-    # (the arrow that opens yesterday) goes straight to step 3 (the food list)
+    # Steps whose target is gone are skipped. Step 2 (Thử kéo món) points at the food list or the meal pill: with both off the page, Tiếp on
+    # step 1 (the arrow that opens yesterday) goes straight to step 3 (the date)
     ctx, pg = new_page(browser, RETURNING)
     start_tour(pg)
     check("Mới · 1/8" in step_text(pg), "skip: on step 1")
-    pg.evaluate("() => document.querySelectorAll('[data-tour=\"meal-add\"], [data-tour=\"nav-add\"]').forEach(el => el.removeAttribute('data-tour'))")
+    pg.evaluate("() => document.querySelectorAll('[data-tour=\"home-food-list\"], [data-tour=\"meal-pill\"]').forEach(el => el.removeAttribute('data-tour'))")
     card(pg).get_by_role("button", name="Tiếp").click()
     # Each missing step waits the spotlight's give-up time before it is skipped
     for _ in range(30):
@@ -209,19 +209,19 @@ def skipped(browser):
             break
     check("Mới · 3/8" in step_text(pg), f"skip: step 2 has no target, so step 3 shows ({step_text(pg)[:30]!r})")
     check(pg.locator("[data-onboarding-overlay]").count() == 1, "skip: one overlay, no ring left behind")
-    check(ring_holds(pg, ["home-food-list", "meal-pill"]) is not None, "skip: the ring is on the food list")
-    # A target that leaves the page mid-step moves the tour on (the ring is not left on an empty spot): with the food list and
-    # the meal pill gone, step 3 has nothing: step 4 (the date) shows
-    pg.evaluate("() => document.querySelectorAll('[data-tour=\"home-food-list\"], [data-tour=\"meal-pill\"]').forEach(el => el.remove())")
+    check(ring_holds(pg, ["day-date", "day-prev"]) is not None, "skip: the ring is on the date")
+    # A target that leaves the page mid-step moves the tour on (the ring is not left on an empty spot): with the date and the
+    # arrow gone, step 3 has nothing: step 4 (the wordmark) shows
+    pg.evaluate("() => document.querySelectorAll('[data-tour=\"day-date\"], [data-tour=\"day-prev\"]').forEach(el => el.remove())")
     for _ in range(30):
         pg.wait_for_timeout(500)
         if "Mới · 4/8" in step_text(pg):
             break
-    check("Mới · 4/8" in step_text(pg), f"gone mid-step: step 3 is skipped and 20b's date shows ({step_text(pg)[:30]!r})")
-    check(ring_holds(pg, ["day-date", "day-prev"]) is not None, "gone mid-step: the ring is on the date")
+    check("Mới · 4/8" in step_text(pg), f"gone mid-step: step 3 is skipped and 21a's wordmark shows ({step_text(pg)[:30]!r})")
+    check(ring_holds(pg, ["home-logo", "day-date"]) is not None, "gone mid-step: the ring is on the wordmark")
     shot(pg, "skipped")
-    # With the date, the wordmark, the hero, the vitamin column and the Khám phá tab gone too, the last five steps have no target: the tour ends
-    pg.evaluate("() => document.querySelectorAll('[data-tour=\"day-date\"], [data-tour=\"day-prev\"], [data-tour=\"home-logo\"], [data-tour=\"home-hero\"], [data-tour=\"nutrient-column\"], [data-tour=\"nav-explore\"]').forEach(el => el.removeAttribute('data-tour'))")
+    # With the wordmark, the hero, the vitamin column, the Khám phá tab and + Thêm gone too, the last five steps have no target: the tour ends
+    pg.evaluate("() => document.querySelectorAll('[data-tour=\"home-logo\"], [data-tour=\"home-hero\"], [data-tour=\"nutrient-column\"], [data-tour=\"nav-explore\"], [data-tour=\"meal-add\"], [data-tour=\"nav-add\"]').forEach(el => el.removeAttribute('data-tour'))")
     card(pg).get_by_role("button", name=re.compile("^(Tiếp|Xong)$")).click()
     for _ in range(40):
         pg.wait_for_timeout(500)

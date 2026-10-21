@@ -1,7 +1,8 @@
 // The food research's dish recipes (tests/fixtures/dish-recipes.json, copied unchanged from food-research) carry the
 // serving label and more than the app reads. This writes what the portion sheet's "Thành phần" needs, keyed by the
 // dish's "source|source_id": its serving grams and, per ingredient, "source|source_id", grams, role, the name (shown
-// only when an ingredient is not in the catalogue; never used to find one) and the add-on label and grams.
+// only when an ingredient is not in the catalogue; never used to find one), the add-on label and grams and, when the
+// ingredient can be swapped for another food, its alternatives [["source|source_id", name], ...].
 // Runs before every build; lib/__tests__/dish-recipes.test.ts fails if the files drift.
 import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
@@ -26,7 +27,12 @@ export function slimText(dishes) {
   for (const d of dishes) {
     const k = key(d.dish);
     if (out.has(k)) throw new Error(`dish key twice: ${k}`);
-    const ingredients = d.ingredients.map((i) => [key(i), i.grams, i.role, i.name_vi, i.addon ? i.addon.label : null, i.addon ? i.addon.grams : null]);
+    // A 7th element, only on an ingredient that has alternatives (Hao 21/10: a user can swap it): [[key, name], ...]
+    const ingredients = d.ingredients.map((i) => {
+      const row = [key(i), i.grams, i.role, i.name_vi, i.addon ? i.addon.label : null, i.addon ? i.addon.grams : null];
+      if (i.alternatives?.length) row.push(i.alternatives.map((a) => [key(a), a.name_vi]));
+      return row;
+    });
     out.set(k, [d.serving_grams, ingredients]);
   }
   const lines = [...out].map(([k, v]) => `${JSON.stringify(k)}: ${JSON.stringify(v)}`);

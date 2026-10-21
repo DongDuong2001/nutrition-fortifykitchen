@@ -1,13 +1,13 @@
 "use client";
 
-import React, { Suspense, lazy, useCallback, useMemo, useState } from "react";
+import React, { Suspense, lazy, useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import Link from "next/link";
 import { type FoodItem, MOCK_FOODS } from "@/lib/mock/foods";
 import { type MealSlot, getMealSlotNameVi } from "@/lib/meal-slot";
 import { parseGramsInput, calculateMacroPreview, macroGramsText, scaleNutrients, gramsServingLabel, unitAmountText, parsePortionLabel, portionModeOf, portionNote, portionSummary } from "@/lib/portion";
 import { cookSwitchFor, rowName, useRowsReady } from "@/lib/food-rows";
 import { PortionArea } from "@/components/ui/portion-area";
-import { recipeKnown, type DishEdit } from "@/lib/dish-recipes";
+import { loadDishRecipes, recipeKnown, startsDishLoad, type DishEdit } from "@/lib/dish-recipes";
 import { loadDishPartsModule, loadedDishParts } from "@/components/ui/dish-parts-prefetch";
 import { formatAmount, formatNumber } from "@/lib/format";
 import { getNutrientDefinition } from "@/lib/nutrients";
@@ -77,6 +77,18 @@ export function PortionPanel({
   // The Thành phần component when its chunk is already here (read once per food, so it does not switch mid-sheet)
   const LoadedDishParts = useMemo(() => loadedDishParts(), [food.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const changed = dish?.edited ? dish : null;
+  // Thành phần is for any food that has a recipe, whatever its category: a food outside Món Việt waits for the recipes (a press on its row
+  // started them) and draws the block when they say it has one
+  const [, recipesArrived] = useReducer((n: number) => n + 1, 0);
+  useEffect(() => {
+    if (!onDishEdit || startsDishLoad(food) || recipeKnown(food) !== null) return;
+    let live = true;
+    void loadDishRecipes().then(() => live && recipesArrived(), () => {});
+    return () => {
+      live = false;
+    };
+  }, [food, onDishEdit]);
+  const hasParts = !!onDishEdit && (startsDishLoad(food) || recipeKnown(food) === true);
   const handleDish = useCallback(
     (next: DishEdit | null) => {
       setDish(next);
@@ -219,7 +231,7 @@ export function PortionPanel({
       )}
       {notice && canLog && <p role="note" className="m-0 text-cap leading-snug text-secondary">{notice}</p>}
       {/* cc-54: what is inside a premade dish, and its add-ons for this meal */}
-      {onDishEdit && food.category === "mon_viet" && (
+      {hasParts && (
         // cc-64 (A7): a chunk already loaded (a press on the row started it) renders at once; React holds a revealed
         // Suspense boundary ~300 ms, so it is not used then. While only the chunk is on its way and the recipe is known,
         // a box of the closed block's size holds the place, so the add button does not move when it arrives

@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { FULL_DISHES, SLIM_DISHES, slimText } from "../../scripts/slim-dishes.mjs";
-import { canEditParts, dishViewOf, editParts, editTotals, foodsByKey, isDishFood, isEdited, keysOfFood, partGrams, scaledAddOn, scaledPart, servingsOf, type DishRecipes } from "../dish-recipes";
+import { canEditParts, dishViewOf, editParts, editTotals, foodsByKey, isEdited, keysOfFood, partGrams, recipeKnown, scaledAddOn, scaledPart, servingsOf, startsDishLoad, type DishRecipes } from "../dish-recipes";
 import { calculateMacroPreview } from "../portion";
 import { DISH_DEMO_FOODS } from "../mock/dish-demo-foods";
 import { MOCK_FOODS, type FoodItem } from "../mock/foods";
@@ -24,6 +24,26 @@ describe("the slim dish recipes the portion sheet reads (scripts/slim-dishes.mjs
     expect(rows).toHaveLength(8);
     expect(rows[0]).toEqual(["usda_sr_legacy|FDC 168914:banh-pho-chin", 200, "base", "Bánh phở (tươi)", "+ Bánh phở", 100]);
     expect(rows[3]).toEqual(["usda_sr_legacy|FDC 170005", 6, "veg", "Hành lá", null, null]);
+  });
+});
+
+describe("the alternatives of an ingredient (Hao 21/10: a person can swap it)", () => {
+  it("the slim file keeps them as a 7th element, only on an ingredient that has alternatives", () => {
+    const [serving, rows] = recipes["fortify_kitchen|fortify_kitchen:banh-khoai-nuong"];
+    expect(serving).toBe(1027.9);
+    const withAlts = rows.filter((r) => r.length === 7);
+    expect(withAlts.map((r) => r[3])).toEqual(["Sữa chua thường (nguyên kem, không đường)", "Bột hạnh nhân", "Hạnh nhân", "Siro cây phong"]);
+    expect(rows.find((r) => r[3].startsWith("Sữa chua"))?.[6]).toEqual([["usda_sr_legacy|FDC 171304", "Sữa chua Hy Lạp không đường"]]);
+    expect(rows.find((r) => r[3] === "Bột hạnh nhân")?.[6]).toEqual([["usda_sr_legacy|FDC 168894:bot-mi-kho", "Bột mì (khô)"]]);
+    expect(rows.find((r) => r[3] === "Hạnh nhân")?.[6]).toEqual([["usda_sr_legacy|FDC 170556", "Hạt bí (sấy khô)"]]);
+    // no other recipe changed shape: six elements everywhere else
+    const others = Object.entries(recipes).filter(([k]) => !k.startsWith("fortify_kitchen|"));
+    expect(others.every(([, [, r]]) => r.every((row) => row.length === 6))).toBe(true);
+  });
+
+  it("the cake's parts add up to its serving grams, so a portion scales them exactly", () => {
+    const [serving, rows] = recipes["fortify_kitchen|fortify_kitchen:banh-khoai-nuong"];
+    expect(Math.round(rows.reduce((sum, r) => sum + r[1], 0) * 10) / 10).toBe(serving);
   });
 });
 
@@ -52,11 +72,16 @@ describe("a dish and its ingredients are found by (source, source_id)", () => {
     expect(bare && scaledPart(bare.parts[0], 1).kcal).toBeNull();
   });
 
-  it("a food with no recipe has no view, and only Món Việt foods open the recipes at all", () => {
-    expect(dishViewOf(MOCK_FOODS.find((f) => f.id !== "food-pho-bo" && f.category !== "mon_viet") as FoodItem, recipes, foodsByKey(withDemo))).toBeNull();
-    expect(isDishFood(phoBo)).toBe(true);
-    expect(isDishFood({ category: "rau" })).toBe(false);
-  });
+  it("a food with no recipe has no view; a food with one has it whatever its category (Bánh khoai nướng Minh Hào is Đồ ngọt & ăn vặt)", () => {
+    expect(dishViewOf(MOCK_FOODS.find((f) => f.id !== "food-pho-bo" && f.id !== "food-banh-khoai-nuong" && f.category !== "mon_viet") as FoodItem, recipes, foodsByKey(withDemo))).toBeNull();
+    const cake = MOCK_FOODS.find((f) => f.id === "food-banh-khoai-nuong") as FoodItem;
+    expect(cake.category).toBe("an_vat");
+    expect(dishViewOf(cake, recipes, foodsByKey(withDemo))?.parts.length).toBeGreaterThan(0);
+    expect(recipeKnown(cake)).toBeNull(); // the recipes are not loaded in a unit test: the panel asks, and draws Thành phần once it knows
+    // A Món Việt row's press starts the load before anyone knows; any other row loads the recipes only
+    expect(startsDishLoad(phoBo)).toBe(true);
+    expect(startsDishLoad({ category: "an_vat" })).toBe(false);
+});
 });
 
 describe("scaling to the chosen portion", () => {

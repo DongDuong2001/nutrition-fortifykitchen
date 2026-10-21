@@ -6,8 +6,8 @@ Production demo build, 390x844 (and 1440x900 for the dialog). Tour, tips and "C�
 - Shows once on /app; Để sau and Esc hide it and mark the release seen; a reload shows nothing
 - A new account (setup finished) never sees it
 - Comes before a tip (one interruption per app open, fix/polish-1020): opens first with no tip beside it, and no tip follows it in the same open
-- An account that has seen nothing gets the newest release only (2026-10-21c: Thêm món mượt hơn…, Danh sách Giàu … có hai thẻ and Tab Đồ ăn của Minh Hào): its
-  1-step tour is on Hôm nay (the Khám phá tab, the carousel itself is not on Hôm nay), so the sheet has Thử ngay and runs it on /app; cc_tutorials.py covers
+- An account that has seen nothing gets the newest release only (2026-10-21c: Thêm món mượt hơn…, Danh sách Giàu … có hai thẻ, Tab Đồ ăn của Minh Hào, the glide and Đổi nguyên liệu trong món): its
+  2-step tour is on Hôm nay (the Khám phá tab, the carousel itself is not on Hôm nay; then + Thêm, where Thành phần is), so the sheet has Thử ngay and runs it on /app; cc_tutorials.py covers
   several unseen releases in one sheet and their joined tour (with cc-52's 18e on the Ngày tập pill). The 17/10 tour is started from
   Cài đặt › Có gì mới › Xem hướng dẫn (the last one) -> 3 steps -> Xong; a long press moves step 1 and opens the select bar (step 2); step 3 points at Cài đặt with
   select mode off; Bỏ qua and Esc end it; the entries never change
@@ -39,7 +39,7 @@ SETTINGS_KEY = "h1t_settings_v1_demo"
 RELEASE = "2026-10-21c"
 HOME_TIPS = ["home-logged", "meal-add", "home-share"]
 # Newest first: cc-53b (2026-10-18f), cc-52 (2026-10-18e), cc-53 (2026-10-18d), cc-51 (2026-10-18c), Thực phẩm bổ sung và Gia vị (2026-10-18b), then cc-49 (2026-10-18)
-ITEMS = ["Thêm món mượt hơn", "Thêm nhầm thì Hoàn tác", "Danh sách món gọn hơn", "Thông báo có bản mới không che món", "Danh sách Giàu … có hai thẻ", "Tab Đồ ăn của Minh Hào", "Chuyển nhóm, chuyển tab mượt hơn"]  # fluid-add + polish-1020 + rich-tabs + minh-hao-tab (2026-10-21c, a 1-step tour on the Khám phá tab)
+ITEMS = ["Thêm món mượt hơn", "Thêm nhầm thì Hoàn tác", "Danh sách món gọn hơn", "Thông báo có bản mới không che món", "Danh sách Giàu … có hai thẻ", "Tab Đồ ăn của Minh Hào", "Chuyển nhóm, chuyển tab mượt hơn", "Đổi nguyên liệu trong món"]  # fluid-add + polish-1020 + rich-tabs + minh-hao-tab (2026-10-21c, a 1-step tour on the Khám phá tab)
 ITEMS_2110B = ["Mục tiêu rõ ràng hơn", "Vi chất theo chuẩn DRI"]  # cc-73b (2026-10-21b)
 ITEMS_2110A = ["Bấm chữ H1T MICRO để về Hôm nay", "Vuốt ngang để tắt thông báo"]  # follow-ups 20/10 (2026-10-21a)
 ITEMS_2010B = ["Bấm vào ngày để mở lịch", "Xóa bữa không cần hỏi lại", "Chữ to theo máy bạn"]  # overnight 20/10 (2026-10-20b)
@@ -151,7 +151,7 @@ def once(browser):
     check(all(t in text for t in ITEMS), "the release's items")
     wrapped = wrapped_titles(pg, ITEMS)
     check(not wrapped, f"each item title of 21c fits on one line at 390 px (wrapped: {wrapped})")
-    check(sheet(pg).get_by_role("button", name="Thử ngay (1 phút)").count() == 1, "Thử ngay: 21c has a 1-step tour (Đồ ăn của Minh Hào, on the Khám phá tab)")
+    check(sheet(pg).get_by_role("button", name="Thử ngay (1 phút)").count() == 1, "Thử ngay: 21c has a 2-step tour (Đồ ăn của Minh Hào on the Khám phá tab, Đổi nguyên liệu on Thành phần)")
     check(sheet(pg).get_by_role("button", name="Để sau").count() == 1, "Để sau")
     check(sheet(pg).get_by_role("button", name="Đóng").count() == 1, "close button named Đóng")
     check(sheet(pg).get_attribute("aria-modal") == "true", "aria-modal")
@@ -289,13 +289,13 @@ def tour(browser):
 
 def home_tour(browser):
     """cc-73b: Thử ngay runs the 21b tour on /app: two steps, the kcal target (the hero), then the vitamin column (the hero when it is missing).
-    An account that saw 21a gets 21b and 21c: the tour is 21b's two steps, then 21c's (the Khám phá tab, where Đồ ăn của Minh Hào is)."""
+    An account that saw 21a gets 21b and 21c: the tour is 21b's two steps, then 21c's two (the Khám phá tab, where Đồ ăn của Minh Hào is; then + Thêm, the way to a dish's Thành phần)."""
     ctx, pg = new_page(browser, onboarding={**SEEN_TIPS, "whatsNewSeen": "2026-10-21a"})
     go(pg, "/app", 1200)
     visible(sheet(pg))
     before = entries(pg)
     sheet(pg).get_by_role("button", name="Thử ngay (1 phút)").click()
-    steps = [("Một con số", ["home-hero"]), ("Vi chất theo DRI", ["nutrient-column", "home-hero"]), ("Đồ ăn của Minh Hào", ["nav-explore"])]
+    steps = [("Một con số", ["home-hero"]), ("Vi chất theo DRI", ["nutrient-column", "home-hero"]), ("Đồ ăn của Minh Hào", ["nav-explore"]), ("Đổi nguyên liệu", ["meal-add", "nav-add"])]
     for i, (title, targets) in enumerate(steps, start=1):
         check(visible(card(pg)) and f"Mới · {i}/{len(steps)}" in card(pg).inner_text() and title in card(pg).inner_text(), f"21b step {i}: {title}")
         hole = pg.locator("[data-onboarding-overlay] > div.border-sky").first.bounding_box()

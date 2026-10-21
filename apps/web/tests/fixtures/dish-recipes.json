@@ -6447,5 +6447,140 @@
     "addon": null
    }
   ]
+ },
+ {
+  "dish": {
+   "source": "fortify_kitchen",
+   "source_id": "fortify_kitchen:banh-khoai-nuong",
+   "name_vi": "Bánh khoai nướng Minh Hào"
+  },
+  "serving_label": "1 khuôn 20×20 cm (10 miếng)",
+  "serving_grams": 1027.9,
+  "ingredients": [
+   {
+    "source": "vn_nin",
+    "source_id": "NIN 2008:khoai-tim-song",
+    "name_vi": "Khoai tím",
+    "grams": 300.0,
+    "role": "base",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171284",
+    "name_vi": "Sữa chua thường (nguyên kem, không đường)",
+    "grams": 122.5,
+    "role": "protein",
+    "addon": null,
+    "alternatives": [
+     {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 171304",
+      "name_vi": "Sữa chua Hy Lạp không đường"
+     }
+    ]
+   },
+   {
+    "source": "usda_foundation",
+    "source_id": "FDC 2261420",
+    "name_vi": "Bột hạnh nhân",
+    "grams": 95.0,
+    "role": "base",
+    "addon": null,
+    "alternatives": [
+     {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 168894:bot-mi-kho",
+      "name_vi": "Bột mì (khô)"
+     }
+    ]
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 173944",
+    "name_vi": "Chuối",
+    "grams": 200.0,
+    "role": "base",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171287",
+    "name_vi": "Trứng gà (sống)",
+    "grams": 150.0,
+    "role": "protein",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170273",
+    "name_vi": "Chocolate đen 70–85 %",
+    "grams": 80.0,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 170567",
+    "name_vi": "Hạnh nhân",
+    "grams": 15.0,
+    "role": "topping",
+    "addon": null,
+    "alternatives": [
+     {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 170556",
+      "name_vi": "Hạt bí (sấy khô)"
+     }
+    ]
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 169661",
+    "name_vi": "Siro cây phong",
+    "grams": 20.0,
+    "role": "sauce",
+    "addon": null,
+    "alternatives": [
+     {
+      "source": "usda_sr_legacy",
+      "source_id": "FDC 169640",
+      "name_vi": "Mật ong"
+     }
+    ]
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 168820",
+    "name_vi": "Mật mía (USDA, chung)",
+    "grams": 20.0,
+    "role": "sauce",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 173471",
+    "name_vi": "Chiết xuất vani",
+    "grams": 13.0,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 171320",
+    "name_vi": "Bột quế",
+    "grams": 7.8,
+    "role": "topping",
+    "addon": null
+   },
+   {
+    "source": "usda_sr_legacy",
+    "source_id": "FDC 172803",
+    "name_vi": "Bột nở",
+    "grams": 4.6,
+    "role": "topping",
+    "addon": null
+   }
+  ]
  }
 ]
