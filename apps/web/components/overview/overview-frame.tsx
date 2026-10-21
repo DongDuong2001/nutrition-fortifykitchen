@@ -6,6 +6,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { Period } from "@/lib/period";
 import { markUsed } from "@/lib/onboarding-store";
 import { AppHeader } from "@/components/ui/app-header";
+import { EnterGlide } from "@/components/ui/switch-glide";
 import { useDiary } from "@/lib/diary-store";
 import type { MockDayData } from "@/lib/mock/sample-day";
 import { buildOverview, type Overview } from "@/lib/overview";
@@ -248,7 +249,10 @@ function FrameInner({ children }: { children: React.ReactNode }) {
           <PeriodControl compact heading={period ? periodHeading(period) : ""} period={period} length={length} />
         )}
 
-        {ctx ? <OverviewContext.Provider value={ctx}>{children}</OverviewContext.Provider> : <ContentSkeleton />}
+        {/* feat/glide: a sub-tab change glides in (keyed on the committed tab, not the optimistic one, so the old content never plays it) */}
+        <EnterGlide id={current} order={TABS.findIndex((t) => t.id === current)} className="flex flex-col gap-3 lg:gap-5">
+          {ctx ? <OverviewContext.Provider value={ctx}>{children}</OverviewContext.Provider> : <ContentSkeleton />}
+        </EnterGlide>
       </main>
     </>
   );

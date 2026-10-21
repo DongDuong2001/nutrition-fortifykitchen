@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { DesktopSidebar } from "@/components/ui/desktop-sidebar";
 import { ShellSlotContext } from "@/components/ui/shell-slot";
+import { EnterGlide } from "@/components/ui/switch-glide";
+import { NAV_TABS, tabForPath } from "@/lib/nav";
 
 /**
  * The page frame for a screen with the main navigation: the desktop sidebar on the left (from 1024 px),
@@ -76,10 +78,15 @@ export function TabsShell({ children }: { children: React.ReactNode }) {
   const [barActive, setBarActive] = useState(false);
   const [barHost, setBarHost] = useState<HTMLElement | null>(null);
   const alignContainer = TAB_ALIGN_CONTAINER.find(([prefix]) => pathname === prefix || pathname.startsWith(prefix + "/"))?.[1];
+  // feat/glide: a bottom-nav tab change glides (the new tab enters 12 px off on the side of the tab order; CSS, no snapshot)
+  const tab = tabForPath(pathname);
+  const tabOrder = NAV_TABS.findIndex((t) => t.tab === tab);
   return (
     <ShellSlotContext.Provider value={{ setBarActive, barHost }}>
       <AppShell alignContainer={alignContainer} bottomBar={barActive ? <div ref={setBarHost} /> : undefined}>
-        {children}
+        <EnterGlide id={tab ?? pathname} order={tabOrder} className="flex min-w-0 flex-1 flex-col">
+          {children}
+        </EnterGlide>
       </AppShell>
     </ShellSlotContext.Provider>
   );
