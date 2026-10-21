@@ -165,6 +165,8 @@ def close_tips(pg):
 
 def add_food(pg, name, before_add=None):
     pg.goto(BASE + "/add?meal=dinner", wait_until="domcontentloaded")
+    # The add list shows 5 rows of a category (fix/polish-1020): a food past them is found by its name
+    pg.locator("[data-testid=food-search]:visible").first.fill(name)
     row = pg.locator("[data-food-row]:visible", has_text=name).first
     row.wait_for(timeout=20000)
     row.click()
@@ -523,7 +525,8 @@ with sync_playwright() as p:
                 pg.locator("[data-testid=tray-add]:visible").first.click()
             undo = pg.get_by_role("button", name="Hoàn tác").locator("visible=true")
             undo.first.wait_for(timeout=8000)
-            undo.first.click()
+            # As soon as it is there: the toast rides with the closing sheet, and a click waits for it to hold still; this one does not
+            undo.first.dispatch_event("click")
             pg.wait_for_timeout(5000)
             posts = [i for i, c in enumerate(st["calls"]) if c.startswith("POST /days/")]
             deletes = [i for i, c in enumerate(st["calls"]) if c.startswith("DELETE /entries/")]
