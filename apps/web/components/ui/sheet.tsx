@@ -1,5 +1,6 @@
 "use client";
 
+import { lockBodyScroll } from "@/lib/body-scroll-lock";
 import React, { useEffect, useRef, useState } from "react";
 import { markUsed } from "@/lib/onboarding-store";
 import { closeSheetEntry, openSheetEntry } from "@/lib/sheet-history";
@@ -27,10 +28,18 @@ export interface SheetProps {
   initialFocusId?: string;
   /** cc-62: opened over another sheet (the portion sheet over /add): a lighter scrim, the first one is already there. */
   stacked?: boolean;
+  /** Comes up in SHEET_QUICK_ENTER_MS instead of SHEET_ENTER_MS (globals.css .m-quick): the sheets of the add flow. */
+  quick?: boolean;
 }
 
-/** cc-55: how long a closing sheet stays drawn (globals.css --m-sheet-out, the exit; the enter takes 350 ms). */
+/** cc-55: how long a closing sheet stays drawn (globals.css --m-sheet-out, the exit). */
 export const SHEET_EXIT_MS = 220;
+/** How long a sheet takes to come up (globals.css --m-sheet-in). */
+export const SHEET_ENTER_MS = 350;
+/** The add sheet and the portion sheet come up faster (globals.css .m-quick). */
+export const SHEET_QUICK_ENTER_MS = 300;
+/** One frame at 60 Hz: how far into its slide a sheet that was rendered after a tap is set when it first appears. */
+export const SHEET_CATCH_UP_MS = 16;
 
 const FOCUSABLE_SELECTOR =
   'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -47,6 +56,7 @@ export function Sheet({
   desktopDialog = false,
   initialFocusId,
   stacked = false,
+  quick = false,
 }: SheetProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const scrimRef = useRef<HTMLDivElement>(null);
@@ -152,8 +162,7 @@ export function Sheet({
     openerRef.current = document.activeElement as HTMLElement | null;
 
     // Lock body scroll
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    const unlockScroll = lockBodyScroll();
     // The drag-down tip waits for an open sheet
     setPresent("sheet", true);
 
@@ -216,7 +225,7 @@ export function Sheet({
       clearTimeout(focusTimer);
       window.removeEventListener("keydown", handleKeyDown);
       setPresent("sheet", false);
-      document.body.style.overflow = originalOverflow;
+      unlockScroll();
       openerRef.current?.focus?.();
     };
   }, [open, initialFocusId]);
@@ -235,7 +244,7 @@ export function Sheet({
         aria-hidden="true"
         onClick={onClose}
         data-state={state}
-        className={`m-scrim fixed inset-0 ${stacked ? "bg-scrim-2" : "bg-scrim"} ${desktopDialog ? "m-scrim-dialog" : ""}`}
+        className={`m-scrim fixed inset-0 ${stacked ? "bg-scrim-2" : "bg-scrim"} ${desktopDialog ? "m-scrim-dialog" : ""} ${quick ? "m-quick" : ""}`}
       />
 
       {/* Bottom Sheet Dialog */}
@@ -247,7 +256,7 @@ export function Sheet({
         aria-modal={showing ? "true" : undefined}
         aria-hidden={showing ? undefined : true}
         aria-labelledby={showing ? (title ? titleId : labelledBy) : undefined}
-        className={`relative z-sticky w-full max-w-[390px] mx-auto bg-card rounded-t-sheet px-4 pt-3 pb-[max(24px,env(safe-area-inset-bottom))] max-h-[calc(100dvh-24px)] overflow-y-auto overscroll-contain flex flex-col gap-2 shadow-sheet outline-none m-sheet ${desktopDialog ? "m-dialog lg:w-[420px] lg:max-w-[420px] lg:rounded-sheet lg:px-6 lg:pt-6" : ""} ${className}`}
+        className={`relative z-sticky w-full max-w-[390px] mx-auto bg-card rounded-t-sheet px-4 pt-3 pb-[max(24px,env(safe-area-inset-bottom))] max-h-[calc(100dvh-24px)] overflow-y-auto overscroll-contain flex flex-col gap-2 shadow-sheet outline-none m-sheet ${quick ? "m-quick" : ""} ${desktopDialog ? "m-dialog lg:w-[420px] lg:max-w-[420px] lg:rounded-sheet lg:px-6 lg:pt-6" : ""} ${className}`}
       >
         {/* Grabber: drag it down to close (a 24 px strip around the 5 px bar); the title block below drags too */}
         <div

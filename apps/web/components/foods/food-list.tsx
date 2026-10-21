@@ -60,7 +60,7 @@ export interface FoodListProps {
  * Flat shows one ranked list in one Card; the category name is in each row's meta line unless a category chip
  * is active. The first Card carries data-align-group="add-list" for the alignment check.
  */
-export function FoodList({
+function FoodListView({
   list,
   selectedId,
   selectedIds,
@@ -229,3 +229,6 @@ export function FoodList({
     </div>
   );
 }
+
+/** Memoised: the add sheet passes stable props, so a keystroke in its grams field (or any state of the sheet that is not the list's) does not redraw the rows. */
+export const FoodList = React.memo(FoodListView);

@@ -119,13 +119,12 @@ function TrayRow({ onRemove, ...props }: TrayRowProps) {
 
 /** The card: the editor is the portion sheet's own area, compact: Sống | Chín or the egg sizes, grams + 100 g, ×N, Xong. */
 function TrayCard({ item, open, first, onToggle, onRemove, onChange }: TrayRowProps) {
-  const state = usePresence();
   const { food } = item;
   const kcal = scaleNutrients(food.nutrients, item.grams).energy;
   const hint = rowHint(item);
   const editorId = `tray-edit-${food.id}`;
   return (
-    <div data-state={state} data-align-group="tray-review" className="m-pop flex flex-col rounded-2xl border border-card-border bg-card">
+    <div data-align-group="tray-review" className="flex flex-col rounded-2xl border border-card-border bg-card">
       <div className="flex items-center">
         <button
           type="button"

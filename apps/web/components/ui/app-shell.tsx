@@ -26,6 +26,7 @@ export function AppShell({
 }) {
   return (
     <div
+      data-app-frame
       data-align-container={alignContainer}
       className="flex min-h-dvh w-full flex-col bg-page text-text font-sans lg:flex-row"
     >

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useDeferredValue, useMemo, useState } from "react";
 import { notFound, useParams } from "next/navigation";
 import { AppHeader } from "@/components/ui/app-header";
 import { AppShell } from "@/components/ui/app-shell";
@@ -28,7 +28,10 @@ export default function RichInPage() {
   const definition = valid ? getNutrientDefinition(id) : undefined;
   const min = valid ? (targets[id]?.min ?? null) : null;
   const { foods, pending, failed, retry } = useCatalogFoods();
-  const rows = useMemo(() => (valid ? dedupeTwins(richInFoods(foods, id, basis, min), (r) => r.food) : []), [valid, id, basis, min, foods]);
+  // The list (every food with the nutrient, ranked) is worked out in a second render after the screen is up: the tap on a
+  // "Giàu …" tile answers with the header and the chips at once, and the rows follow
+  const listed = useDeferredValue(true, false);
+  const rows = useMemo(() => (valid && listed ? dedupeTwins(richInFoods(foods, id, basis, min), (r) => r.food) : []), [valid, listed, id, basis, min, foods]);
   if (!valid || !definition) notFound();
 
   const name = richName(definition);
@@ -52,7 +55,13 @@ export default function RichInPage() {
           ]}
         />
         <Card as="section" aria-label={`Món giàu ${name}`} className="flex flex-col">
-          {rows.length === 0 && (pending || failed) ? (
+          {!listed ? (
+            <div aria-hidden="true" className="flex flex-col gap-3 py-3">
+              {[0, 1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-5 rounded bg-level-empty" />
+              ))}
+            </div>
+          ) : rows.length === 0 && (pending || failed) ? (
             <CatalogStatus failed={failed} onRetry={retry} />
           ) : rows.length === 0 ? (
             <p className="m-0 py-3 text-cap leading-snug text-secondary">Chưa có món nào có dữ liệu {name}. Bạn có thể tự tạo món mới từ nhãn bao bì.</p>

@@ -313,7 +313,7 @@ export function FoodList({
   share?: boolean;
   /** Select mode (Chọn nhiều món): rows are checkboxes and nothing else is pressable. */
   select?: SelectProps;
-  /** The day shown: rows of another day are a new list, nothing animates when it changes (cc-51). */
+  /** The day shown: rows of another day are a new list, so no row enters, leaves or moves when it changes (cc-51); the day itself slides in (home-screen .m-day-*). */
   dayKey?: string;
   /** Pull to refresh (cc-51): today only. */
   onPullRefresh?: () => Promise<void>;

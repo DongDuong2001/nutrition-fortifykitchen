@@ -1,8 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
 import { createSheetDrag, type AnimateFn, type DragElement, type DragHost } from "../ui/sheet-drag-controller";
+import type { ReleasePlan } from "@/lib/sheet-physics";
 
 // cc-62: the sheet drag without a browser. The element and motion's animate are fakes; the decisions come from
-// lib/sheet-physics (tested there), these check what the controller does with them.
+// lib/sheet-physics (tested there), these check what the controller does with them. The host's animate is a fake that records
+// the plan (from, to, the linear() easing) and lets a test finish or stop it.
+
+/** The samples of a plan's linear() easing. */
+const samplesOf = (plan: ReleasePlan) => plan.easing.slice("linear(".length, -1).split(", ").map(Number);
 
 function fakeEl(height = 600): DragElement & { attrs: Set<string> } {
   const attrs = new Set<string>();
@@ -17,10 +22,10 @@ function fakeEl(height = 600): DragElement & { attrs: Set<string> } {
 }
 
 function fakeAnimate() {
-  const runs: Array<{ keyframes: string[]; options: Parameters<AnimateFn>[2]; finish: () => void; stopped: boolean }> = [];
-  const animate: AnimateFn = (_el, keyframes, options) => {
+  const runs: Array<{ plan: ReleasePlan; finish: () => void; stopped: boolean }> = [];
+  const animate: AnimateFn = (_el, plan) => {
     let done: () => void = () => {};
-    const run = { keyframes: keyframes.transform, options, finish: () => done(), stopped: false };
+    const run = { plan, finish: () => done(), stopped: false };
     runs.push(run);
     return {
       stop: () => void (run.stopped = true),
@@ -41,7 +46,6 @@ function setup(over: Partial<DragHost> = {}) {
     readOffset: () => offset,
     reducedMotion: () => false,
     animate: () => animate,
-    load: vi.fn(),
     onDismiss: vi.fn(),
     ...over,
   };
@@ -57,10 +61,9 @@ function gesture(drag: ReturnType<typeof createSheetDrag>, points: Array<[number
 }
 
 describe("the sheet drag controller", () => {
-  it("loads motion on the first pointerdown and follows the finger, the scrim fading with it", () => {
-    const { drag, host, sheet, scrim } = setup();
+  it("follows the finger, the scrim fading with it", () => {
+    const { drag, sheet, scrim } = setup();
     drag.down(1, 100, 0);
-    expect(host.load).toHaveBeenCalledTimes(1);
     drag.move(1, 400, 16);
     expect(sheet.style.transform).toBe("translateY(300px)");
     expect(sheet.attrs.has("data-dragging")).toBe(true);
@@ -71,8 +74,8 @@ describe("the sheet drag controller", () => {
     const { drag, host, runs } = setup();
     gesture(drag, [[300, 20], [600, 40], [900, 60]], 905);
     expect(host.onDismiss).not.toHaveBeenCalled();
-    expect(runs[0].keyframes).toEqual(["translateY(60px)", "translateY(0px)"]);
-    expect(runs[0].options.bounce).toBe(0);
+    expect([runs[0].plan.from, runs[0].plan.to]).toEqual([60, 0]);
+    expect(Math.max(...samplesOf(runs[0].plan))).toBeLessThanOrEqual(1.0001);
   });
 
   it("a fast flick closes: onDismiss at once, data-state closed, a spring to the sheet's height with the release velocity", () => {
@@ -80,16 +83,27 @@ describe("the sheet drag controller", () => {
     gesture(drag, [[16, 12], [32, 24], [48, 40]], 50);
     expect(host.onDismiss).toHaveBeenCalledTimes(1);
     expect(sheet.dataset.state).toBe("closed");
-    expect(runs[0].keyframes).toEqual(["translateY(40px)", "translateY(600px)"]);
-    expect(runs[0].options).toMatchObject({ type: "spring", bounce: 0, visualDuration: 0.3 });
-    expect(runs[0].options.velocity).toBeCloseTo((40 / 48) * 1000, 0);
+    expect([runs[0].plan.from, runs[0].plan.to]).toEqual([40, 600]);
+    // The spring starts with the finger's speed (0.83 px/ms over the 560 px still to go): no bounce on a close
+    expect(runs[0].plan.easing.startsWith("linear(0, ")).toBe(true);
+    expect(Math.max(...samplesOf(runs[0].plan))).toBeLessThanOrEqual(1.0001);
+  });
+
+  it("the release animation is played before the close work, in the same pointerup", () => {
+    const order: string[] = [];
+    const onDismiss = vi.fn(() => order.push("dismiss"));
+    const { drag, host } = setup({ onDismiss, animate: () => (() => (order.push("animate"), { stop: () => {}, then: () => {} })) });
+    expect(host).toBeDefined();
+    gesture(drag, [[16, 12], [32, 24], [48, 40]], 50);
+    expect(order).toEqual(["animate", "dismiss"]);
   });
 
   it("drag down then flick back up stays open, with a little bounce", () => {
     const { drag, host, runs } = setup();
     gesture(drag, [[200, 250], [400, 320], [416, 300], [432, 280], [448, 260]], 450);
     expect(host.onDismiss).not.toHaveBeenCalled();
-    expect(runs[0].options.bounce).toBe(0.15);
+    // A flick that did not close settles with a little bounce: the spring goes a little past the top
+    expect(Math.max(...samplesOf(runs[0].plan))).toBeGreaterThan(1.001);
   });
 
   it("clears the inline transform and data-dragging once the spring has finished, and settled() resolves", async () => {
@@ -133,7 +147,7 @@ describe("the sheet drag controller", () => {
     expect(sheet.attrs.has("data-dragging")).toBe(false);
   });
 
-  it("reduced motion, or motion not loaded yet: no spring, the CSS transition finishes from the release point", () => {
+  it("reduced motion, or no animation to play: no spring, the CSS transition finishes from the release point", () => {
     for (const over of [{ reducedMotion: () => true }, { animate: () => null }]) {
       const { drag, sheet, runs, host } = setup(over);
       gesture(drag, [[16, 12], [32, 24], [48, 40]], 50);
