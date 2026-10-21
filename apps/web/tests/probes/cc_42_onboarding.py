@@ -722,7 +722,7 @@ def meal_add_link(browser):
         )
         check(info["text"] == "+ Thêm" and info["exp"] == "hide" and info["label"].startswith("Thêm vào Bữa"), f"{tag} meal add: text, data-export and label kept ({info['text']!r}, {info['label']!r}, {info['exp']!r})")
         check(info["bg"] == "rgba(0, 0, 0, 0)" and info["borderW"] == "0px" and info["radius"] == "0px" and info["shadow"] == "none", f"{tag} meal add: no background, border, radius or shadow ({info['bg']}, {info['borderW']}, {info['radius']}, {info['shadow']})")
-        check(info["color"] == "rgb(158, 195, 255)" and info["fs"] == add_fs and info["fw"] == "700" and "Manrope" in info["ff"], f"{tag} meal add: sky Manrope {add_fs} 700 ({info['color']}, {info['fs']}, {info['fw']}, {info['ff'][:30]})")
+        check(info["color"] == "rgb(92, 184, 255)" and info["fs"] == add_fs and info["fw"] == "700" and "Manrope" in info["ff"], f"{tag} meal add: sky Manrope {add_fs} 700 ({info['color']}, {info['fs']}, {info['fw']}, {info['ff'][:30]})")
         check(info["hitW"] >= 44 and info["hitH"] >= 44, f"{tag} meal add: hit area at least 44x44 ({info['hitW']}x{info['hitH']})")
         check(info["rowH"] == row_h, f"{tag} meal add: the meal pill is {row_h} px ({info['rowH']})")
         check(abs(info["mid"] - info["rowMid"]) <= 1, f"{tag} meal add: centred with the meal name ({info['mid']} vs {info['rowMid']})")
@@ -758,7 +758,7 @@ def meal_add_link(browser):
                 break
             pg.keyboard.press("Tab")
         ring = pg.evaluate("() => { const e = document.activeElement, cs = getComputedStyle(e); return { w: cs.outlineWidth, s: cs.outlineStyle, o: cs.outlineOffset, c: cs.outlineColor, ok: e.matches(\"a[data-tour='meal-add']\") }; }")
-        check(ring["ok"] and ring["w"] == "2px" and ring["s"] == "solid" and ring["o"] == "2px" and ring["c"] == "rgb(158, 195, 255)", f"{tag} meal add: focus ring 2 px sky, offset 2 ({ring})")
+        check(ring["ok"] and ring["w"] == "2px" and ring["s"] == "solid" and ring["o"] == "2px" and ring["c"] == "rgb(92, 184, 255)", f"{tag} meal add: focus ring 2 px sky, offset 2 ({ring})")
         pg.screenshot(path=str(SHOTS / f"cc-42-meal-add-{tag}.png"))
         ctx.close()
         # a past day has none
