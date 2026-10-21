@@ -9,11 +9,13 @@ import { useMealSlot } from "@/lib/use-meal-slot";
 import { formatAmount } from "@/lib/format";
 import { parseNumberInput } from "@/lib/parse-number";
 import { nutrientName } from "@/lib/nutrients";
-import { FormRow } from "@/components/ui/form-row";
 import { Expand } from "@/components/ui/expand";
 import { AppHeader } from "@/components/ui/app-header";
 import { AppShell } from "@/components/ui/app-shell";
-import { ChipGroup } from "@/components/ui/chip-group";
+import { Segmented } from "@/components/ui/segmented";
+import { SectionTitle } from "@/components/ui/section-title";
+import { Field, UnitField, fieldClass, fieldErrorId } from "@/components/foods/food-field";
+import { nutrientDot } from "@/lib/nutrient-colors";
 import { RecipeBuilder, useRecipeDraft } from "@/components/foods/recipe-builder";
 import { draftToRecipe, recipeDraftFromFood, recipeToDraft, RECIPE_ID_PREFIX } from "@/lib/recipe";
 import { getRecipe, saveRecipe } from "@/lib/recipe-store";
@@ -21,6 +23,21 @@ import { useBack } from "@/hooks/use-back";
 import { markUsed } from "@/lib/onboarding-store";
 import { HOME_ROUTE } from "@/lib/nav";
 import { AlertLine } from "@/components/ui/alert-line";
+
+/** The typed-in food: kcal and the three macros (dot = macro identity colour), then the optional micros (dot = nutrient colour). */
+const MACRO_FIELDS = [
+  { id: "cf-kcal", label: "Năng lượng", unit: "kcal", dot: "bg-macro-kcal", placeholder: "Ví dụ: 250" },
+  { id: "cf-pro", label: "Đạm", unit: "g", dot: "bg-macro-dam", placeholder: "Ví dụ: 12" },
+  { id: "cf-carbs", label: "Tinh bột", unit: "g", dot: "bg-macro-tinhbot", placeholder: "Ví dụ: 30" },
+  { id: "cf-fat", label: "Chất béo", unit: "g", dot: "bg-macro-beo", placeholder: "Ví dụ: 8" },
+] as const;
+const MICRO_FIELDS = [
+  { id: "cf-na", label: nutrientName("sodium"), unit: "mg", nutrient: "sodium", placeholder: "Ví dụ: 200" },
+  { id: "cf-k", label: nutrientName("potassium"), unit: "mg", nutrient: "potassium", placeholder: "Ví dụ: 300" },
+  { id: "cf-ca", label: nutrientName("calcium"), unit: "mg", nutrient: "calcium", placeholder: "Ví dụ: 120" },
+  { id: "cf-fe", label: nutrientName("iron"), unit: "mg", nutrient: "iron", placeholder: "Ví dụ: 2" },
+  { id: "cf-vitd", label: "Vitamin D", unit: "µg", nutrient: "vitamin_d", placeholder: "Ví dụ: 1" },
+] as const;
 
 function CreateFoodInner() {
   const router = useRouter();
@@ -193,7 +210,7 @@ function CreateFoodInner() {
           type="button"
           onClick={handleSubmit}
           disabled={mode === "recipe" ? recipeMissing : isSubmitting || mealSlot === null}
-          className="w-full min-h-[52px] rounded-full bg-cobalt text-on-accent font-bold text-base cursor-pointer hover:bg-cobalt/90 m-tint transition-press border-0 flex items-center justify-center shadow-md disabled:opacity-50"
+          className="glass-cobalt flex min-h-[52px] w-full cursor-pointer items-center justify-center rounded-full border-0 text-body-lg font-bold text-on-accent m-tint transition-press disabled:opacity-50"
         >
           {mode === "recipe" ? "Lưu món" : `Lưu và thêm vào ${mealNameVi}`}
         </button>
@@ -209,14 +226,15 @@ function CreateFoodInner() {
       <main className="flex flex-1 flex-col">
       <form onSubmit={handleSubmit} className="flex-1 w-full max-w-[560px] mx-auto p-4 flex flex-col gap-4">
         {!editId && (
-          <div role="group" aria-label="Cách tạo món" data-tour="create-mode" className="flex flex-col gap-2">
-            <ChipGroup
-              columns={2}
-              tone="light"
-              data-align-group="create-mode"
+          <div data-tour="create-mode" className="flex flex-col gap-2">
+            <Segmented
+              label="Cách tạo món"
+              alignGroup="create-mode"
+              value={mode === "recipe" ? "recipe" : "nutrition"}
+              onChange={setMode}
               items={[
-                { id: "recipe", label: "Tính từ nguyên liệu", active: mode === "recipe", onClick: () => setMode("recipe") },
-                { id: "nutrition", label: "Tự nhập", active: mode === "nutrition", onClick: () => setMode("nutrition") },
+                { key: "recipe", label: "Tính từ nguyên liệu" },
+                { key: "nutrition", label: "Tự nhập" },
               ]}
             />
             {mode === "recipe" ? (
@@ -243,15 +261,12 @@ function CreateFoodInner() {
         ) : (
         <>
         {/* Name Field */}
-        <FormRow
-          label="Tên món"
-          htmlFor="cf-name"
-          required
-          error={touched.nameVi ? errors.nameVi : undefined}
-        >
+        <Field label="Tên món" htmlFor="cf-name" required error={touched.nameVi ? errors.nameVi : undefined}>
           <input
             id="cf-name"
             type="text"
+            autoComplete="off"
+            enterKeyHint="next"
             value={nameVi}
             onChange={(e) => {
               setNameVi(e.target.value);
@@ -259,32 +274,30 @@ function CreateFoodInner() {
             }}
             onBlur={() => handleBlur("nameVi", nameVi)}
             placeholder="Ví dụ: Bánh tráng trộn"
-            className={`h-12 px-4 rounded-xl border-2 bg-surface text-base text-text outline-none transition-colors ${
-              touched.nameVi && errors.nameVi ? "border-destructive" : "border-card-border focus:border-cobalt"
-            }`}
+            aria-invalid={touched.nameVi && errors.nameVi ? true : undefined}
+            aria-describedby={touched.nameVi && errors.nameVi ? fieldErrorId("cf-name") : undefined}
+            className={`text-base ${fieldClass({ bad: !!(touched.nameVi && errors.nameVi) })}`}
           />
-        </FormRow>
+        </Field>
 
         {/* Serving Size & Unit */}
-        <FormRow
-          label="Khẩu phần"
-          htmlFor="cf-size"
-          error={touched.servingSize ? errors.servingSize : undefined}
-        >
-          <div className="flex items-center gap-3">
+        <Field label="Khẩu phần" htmlFor="cf-size" error={touched.servingSize ? errors.servingSize : undefined}>
+          <div className="flex flex-wrap items-center gap-3">
             <input
               id="cf-size"
               type="text"
               inputMode="decimal"
+              enterKeyHint="next"
               value={servingSize}
               onChange={(e) => {
                 setServingSize(e.target.value);
                 if (touched.servingSize) validateField("servingSize", e.target.value);
               }}
               onBlur={() => handleBlur("servingSize", servingSize)}
-              className={`h-12 px-4 rounded-xl border-2 bg-surface text-base font-bold tabular-nums text-text outline-none text-right transition-colors w-32 shrink-0 ${
-                touched.servingSize && errors.servingSize ? "border-destructive" : "border-card-border focus:border-cobalt"
-              }`}
+              placeholder="Ví dụ: 100"
+              aria-invalid={touched.servingSize && errors.servingSize ? true : undefined}
+              aria-describedby={touched.servingSize && errors.servingSize ? fieldErrorId("cf-size") : undefined}
+              className={`text-base ${fieldClass({ bad: !!(touched.servingSize && errors.servingSize), number: true })} !w-32 shrink-0`}
             />
             {/* Unit radio group */}
             <div role="radiogroup" aria-label="Đơn vị khẩu phần" className="flex gap-2">
@@ -297,8 +310,8 @@ function CreateFoodInner() {
                     role="radio"
                     aria-checked={isChecked}
                     onClick={() => setServingUnit(u)}
-                    className={`min-h-11 min-w-[52px] px-4 rounded-full text-sm font-semibold border-0 cursor-pointer active:scale-[0.97] transition-press ${
-                      isChecked ? "bg-ink text-on-dark" : "bg-surface text-text border border-card-border hover:bg-paper-dark"
+                    className={`min-h-11 min-w-[52px] cursor-pointer rounded-full border-0 px-4 text-callout font-semibold transition-press active:scale-[0.97] motion-reduce:active:scale-100 ${
+                      isChecked ? "bg-ink text-on-dark" : "bg-card text-text shadow-field"
                     }`}
                   >
                     {u}
@@ -307,73 +320,47 @@ function CreateFoodInner() {
               })}
             </div>
           </div>
-        </FormRow>
+        </Field>
 
         {/* Nutrition Info Card */}
-        <div className="bg-card rounded-card border border-transparent shadow-ring lg:shadow-card p-4 flex flex-col gap-3">
+        <section aria-labelledby="cf-nutrition" className="flex flex-col gap-3 rounded-card border border-transparent bg-card p-4 shadow-ring lg:shadow-card">
           <div>
-            <h2 className="m-0 text-base font-bold text-text">Dinh dưỡng mỗi khẩu phần</h2>
-            <p className="m-0 text-xs text-secondary mt-1 leading-relaxed">
+            <SectionTitle id="cf-nutrition">Dinh dưỡng mỗi khẩu phần</SectionTitle>
+            <p className="m-0 mt-1 text-cap leading-snug text-secondary">
               Lấy số trên nhãn dinh dưỡng của gói. Bỏ trống = chưa có dữ liệu, không phải 0.
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 pt-1">
-            <FormRow label="Năng lượng (kcal)" htmlFor="cf-kcal" required error={touched.calories ? errors.calories : undefined}>
-              <input
-                id="cf-kcal"
-                type="text"
-                inputMode="decimal"
-                value={calories}
-                onChange={(e) => {
-                  setCalories(e.target.value);
-                  if (touched.calories) validateField("calories", e.target.value);
-                }}
-                onBlur={() => handleBlur("calories", calories)}
-                placeholder="0"
-                className={`h-12 px-3 rounded-xl border-2 bg-surface text-base font-bold tabular-nums text-text outline-none text-right ${
-                  touched.calories && errors.calories ? "border-destructive" : "border-card-border focus:border-cobalt"
-                }`}
-              />
-            </FormRow>
-
-            <FormRow label="Đạm (g)" htmlFor="cf-pro">
-              <input
-                id="cf-pro"
-                type="text"
-                inputMode="decimal"
-                value={protein}
-                onChange={(e) => setProtein(e.target.value)}
-                placeholder="0"
-                className="h-12 px-3 rounded-xl border-2 border-card-border focus:border-cobalt bg-surface text-base font-bold tabular-nums text-text outline-none text-right"
-              />
-            </FormRow>
-
-            <FormRow label="Tinh bột (g)" htmlFor="cf-carbs">
-              <input
-                id="cf-carbs"
-                type="text"
-                inputMode="decimal"
-                value={carbs}
-                onChange={(e) => setCarbs(e.target.value)}
-                placeholder="0"
-                className="h-12 px-3 rounded-xl border-2 border-card-border focus:border-cobalt bg-surface text-base font-bold tabular-nums text-text outline-none text-right"
-              />
-            </FormRow>
-
-            <FormRow label="Chất béo (g)" htmlFor="cf-fat">
-              <input
-                id="cf-fat"
-                type="text"
-                inputMode="decimal"
-                value={fat}
-                onChange={(e) => setFat(e.target.value)}
-                placeholder="0"
-                className="h-12 px-3 rounded-xl border-2 border-card-border focus:border-cobalt bg-surface text-base font-bold tabular-nums text-text outline-none text-right"
-              />
-            </FormRow>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+            {MACRO_FIELDS.map((f) => {
+              const error = f.id === "cf-kcal" && touched.calories ? errors.calories : undefined;
+              const value = { "cf-kcal": calories, "cf-pro": protein, "cf-carbs": carbs, "cf-fat": fat }[f.id] as string;
+              const set = { "cf-kcal": setCalories, "cf-pro": setProtein, "cf-carbs": setCarbs, "cf-fat": setFat }[f.id] as (v: string) => void;
+              return (
+                <Field key={f.id} label={f.label} htmlFor={f.id} required={f.id === "cf-kcal"} dot={{ className: f.dot }} error={error} data-align-group="create-macro">
+                  <UnitField unit={f.unit}>
+                    <input
+                      id={f.id}
+                      type="text"
+                      inputMode="decimal"
+                      enterKeyHint={f.id === "cf-fat" ? "done" : "next"}
+                      value={value}
+                      onChange={(e) => {
+                        set(e.target.value);
+                        if (f.id === "cf-kcal" && touched.calories) validateField("calories", e.target.value);
+                      }}
+                      onBlur={f.id === "cf-kcal" ? () => handleBlur("calories", calories) : undefined}
+                      placeholder={f.placeholder}
+                      aria-invalid={error ? true : undefined}
+                      aria-describedby={error ? fieldErrorId(f.id) : undefined}
+                      className={`text-base ${fieldClass({ bad: !!error, inCard: true, number: true })}`}
+                    />
+                  </UnitField>
+                </Field>
+              );
+            })}
           </div>
-        </div>
+        </section>
 
         {/* Expandable Micros */}
         <div className="flex flex-col gap-2">
@@ -381,7 +368,7 @@ function CreateFoodInner() {
             type="button"
             aria-expanded={showMicros}
             onClick={() => setShowMicros(!showMicros)}
-            className="w-full min-h-12 px-4 rounded-xl border border-card-border bg-card text-text flex items-center justify-between font-semibold text-sm cursor-pointer hover:bg-surface transition-colors"
+            className="flex min-h-[52px] w-full cursor-pointer items-center justify-between gap-2 rounded-[14px] border border-transparent bg-card px-4 text-left text-callout font-semibold text-text shadow-ring m-tint transition-press"
           >
             <span>+ Thêm vi chất ({nutrientName("sodium")}, {nutrientName("calcium")}, {nutrientName("iron")}…)</span>
             <svg
@@ -393,75 +380,34 @@ function CreateFoodInner() {
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="m-chevron text-secondary"
+              className="m-chevron shrink-0 text-secondary"
               aria-hidden="true"
             >
               <path d="M6 9l6 6 6-6" />
             </svg>
           </button>
 
-          <Expand open={showMicros} className="bg-card rounded-card border border-transparent shadow-ring lg:shadow-card p-4 grid grid-cols-2 gap-3">
-              <FormRow label={`${nutrientName("sodium")} (mg)`} htmlFor="cf-na">
-                <input
-                  id="cf-na"
-                  type="text"
-                  inputMode="decimal"
-                  value={sodium}
-                  onChange={(e) => setSodium(e.target.value)}
-                  placeholder="—"
-                  className="h-11 px-3 rounded-xl border border-card-border focus:border-cobalt bg-surface text-base font-semibold tabular-nums text-text outline-none text-right"
-                />
-              </FormRow>
-
-              <FormRow label={`${nutrientName("potassium")} (mg)`} htmlFor="cf-k">
-                <input
-                  id="cf-k"
-                  type="text"
-                  inputMode="decimal"
-                  value={potassium}
-                  onChange={(e) => setPotassium(e.target.value)}
-                  placeholder="—"
-                  className="h-11 px-3 rounded-xl border border-card-border focus:border-cobalt bg-surface text-base font-semibold tabular-nums text-text outline-none text-right"
-                />
-              </FormRow>
-
-              <FormRow label={`${nutrientName("calcium")} (mg)`} htmlFor="cf-ca">
-                <input
-                  id="cf-ca"
-                  type="text"
-                  inputMode="decimal"
-                  value={calcium}
-                  onChange={(e) => setCalcium(e.target.value)}
-                  placeholder="—"
-                  className="h-11 px-3 rounded-xl border border-card-border focus:border-cobalt bg-surface text-base font-semibold tabular-nums text-text outline-none text-right"
-                />
-              </FormRow>
-
-              <FormRow label={`${nutrientName("iron")} (mg)`} htmlFor="cf-fe">
-                <input
-                  id="cf-fe"
-                  type="text"
-                  inputMode="decimal"
-                  value={iron}
-                  onChange={(e) => setIron(e.target.value)}
-                  placeholder="—"
-                  className="h-11 px-3 rounded-xl border border-card-border focus:border-cobalt bg-surface text-base font-semibold tabular-nums text-text outline-none text-right"
-                />
-              </FormRow>
-
-              <div className="col-span-2">
-                <FormRow label="Vitamin D (µg)" htmlFor="cf-vitd">
-                  <input
-                    id="cf-vitd"
-                    type="text"
-                    inputMode="decimal"
-                    value={vitaminD}
-                    onChange={(e) => setVitaminD(e.target.value)}
-                    placeholder="—"
-                    className="h-11 px-3 rounded-xl border border-card-border focus:border-cobalt bg-surface text-base font-semibold tabular-nums text-text outline-none text-right"
-                  />
-                </FormRow>
-              </div>
+          <Expand open={showMicros} className="grid grid-cols-2 gap-x-4 gap-y-3 rounded-card border border-transparent bg-card p-4 shadow-ring lg:shadow-card">
+            {MICRO_FIELDS.map((f) => {
+              const value = { "cf-na": sodium, "cf-k": potassium, "cf-ca": calcium, "cf-fe": iron, "cf-vitd": vitaminD }[f.id] as string;
+              const set = { "cf-na": setSodium, "cf-k": setPotassium, "cf-ca": setCalcium, "cf-fe": setIron, "cf-vitd": setVitaminD }[f.id] as (v: string) => void;
+              return (
+                <Field key={f.id} label={f.label} htmlFor={f.id} dot={{ color: nutrientDot(f.nutrient) }} data-align-group="create-micro">
+                  <UnitField unit={f.unit}>
+                    <input
+                      id={f.id}
+                      type="text"
+                      inputMode="decimal"
+                      enterKeyHint={f.id === "cf-vitd" ? "done" : "next"}
+                      value={value}
+                      onChange={(e) => set(e.target.value)}
+                      placeholder={f.placeholder}
+                      className={`text-base ${fieldClass({ inCard: true, number: true })}`}
+                    />
+                  </UnitField>
+                </Field>
+              );
+            })}
           </Expand>
         </div>
         </>

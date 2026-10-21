@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useMemo, useState } from "react";
-import { FormRow } from "@/components/ui/form-row";
+import { Field, fieldClass, fieldErrorId } from "@/components/foods/food-field";
 import { formatAmount } from "@/lib/format";
 import { COUNTED_NUTRIENT_KEYS } from "@/lib/day-totals";
 import {
@@ -96,11 +96,6 @@ function previewRecipe(draft: RecipeDraft): Recipe {
   };
 }
 
-const INPUT =
-  "h-12 w-full rounded-xl border-2 bg-surface px-4 text-base text-text outline-none transition-colors";
-const BORDER_OK = "border-card-border focus:border-cobalt";
-const BORDER_BAD = "border-destructive";
-
 function StepButton({ label, onClick, disabled, children }: { label: string; onClick: () => void; disabled: boolean; children: React.ReactNode }) {
   return (
     <IconButton
@@ -138,19 +133,22 @@ export function RecipeBuilder({ state, excludeId }: { state: RecipeDraftState; e
 
   return (
     <div className="flex flex-col gap-4">
-      <FormRow label="Tên món" htmlFor="rb-name" required error={showName ? errors.name : undefined}>
+      <Field label="Tên món" htmlFor="rb-name" required error={showName ? errors.name : undefined}>
         <input
           id="rb-name"
           type="text"
+          autoComplete="off"
           value={draft.name}
           onChange={(e) => update({ name: e.target.value })}
           onBlur={() => setShown((s) => ({ ...s, name: true }))}
           placeholder="Ví dụ: Cơm chiên trứng"
-          className={`${INPUT} ${showName ? BORDER_BAD : BORDER_OK}`}
+          aria-invalid={showName ? true : undefined}
+          aria-describedby={showName ? fieldErrorId("rb-name") : undefined}
+          className={`text-base ${fieldClass({ bad: !!showName })}`}
         />
-      </FormRow>
+      </Field>
 
-      <FormRow label="Số phần" htmlFor="rb-servings">
+      <Field label="Số phần" htmlFor="rb-servings">
         <div className="flex items-center gap-3">
           <StepButton label="Bớt một phần" onClick={() => setServings(draft.servings - 1)} disabled={draft.servings <= MIN_SERVINGS}>
             −
@@ -162,14 +160,14 @@ export function RecipeBuilder({ state, excludeId }: { state: RecipeDraftState; e
             +
           </StepButton>
         </div>
-      </FormRow>
+      </Field>
 
       <section aria-labelledby="rb-ingredients" className="flex flex-col gap-2">
-        <h2 id="rb-ingredients" className="m-0 text-xs font-bold text-text">
+        <h2 id="rb-ingredients" className="m-0 text-cap font-semibold text-text">
           Nguyên liệu
         </h2>
         {draft.ingredients.length === 0 ? (
-          <p className="m-0 rounded-xl border border-dashed border-card-border bg-card px-4 py-3 text-cap leading-snug text-secondary">
+          <p className="m-0 rounded-xl border border-dashed border-card-border px-4 py-3 text-cap leading-snug text-secondary">
             Chưa có nguyên liệu
           </p>
         ) : (
@@ -178,7 +176,7 @@ export function RecipeBuilder({ state, excludeId }: { state: RecipeDraftState; e
               const amountError = shown.amounts[index] ? errors.amounts[index] : undefined;
               const id = `rb-amount-${index}`;
               return (
-                <li key={`${ingredient.foodId}-${index}`} data-align-group="recipe-row" className="flex flex-col gap-1 rounded-card border border-transparent shadow-ring lg:shadow-card bg-card p-3">
+                <li key={`${ingredient.foodId}-${index}`} data-align-group="recipe-row" className="flex flex-col gap-2 rounded-card border border-transparent bg-card p-3 shadow-ring lg:shadow-card">
                   <div className="flex items-center gap-2">
                     <span className="min-w-0 flex-1 break-words text-callout font-semibold leading-snug text-text">{ingredient.name}</span>
                     <IconButton
@@ -202,22 +200,20 @@ export function RecipeBuilder({ state, excludeId }: { state: RecipeDraftState; e
                       value={ingredient.amount}
                       onChange={(e) => setAmount(index, e.target.value)}
                       onBlur={() => setShown((s) => ({ ...s, amounts: { ...s.amounts, [index]: true } }))}
-                      placeholder="0"
-                      className={`h-11 min-w-0 flex-1 rounded-xl border-2 bg-surface px-3 text-right text-base font-bold tabular-nums text-text outline-none ${
-                        amountError ? BORDER_BAD : BORDER_OK
-                      }`}
+                      placeholder="Ví dụ: 150"
+                      className={`text-base ${fieldClass({ bad: !!amountError, inCard: true, number: true })}`}
                     />
                     <button
                       type="button"
                       onClick={() => toggleUnit(index)}
                       aria-label={`Đơn vị của ${ingredient.name}: ${ingredient.unit}. Chạm để đổi`}
-                      className="inline-flex h-11 min-w-[56px] shrink-0 cursor-pointer items-center justify-center rounded-full border border-card-border bg-surface px-3 text-sm font-semibold text-text active:scale-[0.97] transition-press motion-reduce:active:scale-100"
+                      className="inline-flex h-11 min-w-[56px] shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-surface px-3 text-callout font-semibold text-text active:scale-[0.97] transition-press motion-reduce:active:scale-100"
                     >
                       {ingredient.unit}
                     </button>
                   </div>
                   {amountError && (
-                    <p id={`${id}-error`} role="alert" className="m-0 text-xs font-medium leading-snug text-destructive-text">
+                    <p id={`${id}-error`} role="alert" className="m-0 px-1 text-cap font-semibold leading-snug text-destructive-text">
                       {amountError}
                     </p>
                   )}
@@ -227,7 +223,7 @@ export function RecipeBuilder({ state, excludeId }: { state: RecipeDraftState; e
           </ul>
         )}
         {showList && (
-          <p role="alert" className="m-0 text-xs font-medium leading-snug text-destructive-text">
+          <p role="alert" className="m-0 px-1 text-cap font-semibold leading-snug text-destructive-text">
             {errors.ingredients}
           </p>
         )}
@@ -235,17 +231,13 @@ export function RecipeBuilder({ state, excludeId }: { state: RecipeDraftState; e
           type="button"
           onClick={() => setPickerOpen(true)}
           aria-haspopup="dialog"
-          className="flex min-h-12 w-full cursor-pointer items-center justify-center rounded-xl border border-card-border bg-card px-4 text-sm font-semibold text-cobalt m-tint"
+          className="flex min-h-12 w-full cursor-pointer items-center justify-center rounded-[14px] border border-transparent bg-card px-4 text-callout font-semibold text-cobalt shadow-ring m-tint transition-press"
         >
           + Thêm nguyên liệu
         </button>
       </section>
 
-      <FormRow
-        label="Khối lượng sau khi nấu (không bắt buộc)"
-        htmlFor="rb-cooked"
-        error={showCooked ? errors.cooked : undefined}
-      >
+      <Field label="Khối lượng sau khi nấu (không bắt buộc)" htmlFor="rb-cooked" error={showCooked ? errors.cooked : undefined}>
         <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
           <input
@@ -255,21 +247,23 @@ export function RecipeBuilder({ state, excludeId }: { state: RecipeDraftState; e
             value={draft.cooked}
             onChange={(e) => update({ cooked: e.target.value })}
             onBlur={() => setShown((s) => ({ ...s, cooked: true }))}
-            placeholder="—"
-            className={`${INPUT} text-right font-bold tabular-nums ${showCooked ? BORDER_BAD : BORDER_OK}`}
+            placeholder="Ví dụ: 850"
+            aria-invalid={showCooked ? true : undefined}
+            aria-describedby={showCooked ? fieldErrorId("rb-cooked") : undefined}
+            className={`text-base ${fieldClass({ bad: !!showCooked, number: true })}`}
           />
-          <span className="shrink-0 text-sm font-semibold text-secondary">g</span>
+          <span className="w-8 shrink-0 text-cap text-secondary">g</span>
         </div>
-        <p className="m-0 text-xs leading-snug text-secondary">
+        <p className="m-0 text-cap leading-snug text-secondary">
           Cân cả nồi sau khi nấu để ghi theo gram cho đúng. Bỏ trống thì mỗi phần tính theo tổng nguyên liệu.
         </p>
         {cookedNote && (
-          <p role="note" className="m-0 rounded-xl bg-warning-bg px-3 py-2 text-xs leading-snug text-warning-text">
+          <p role="note" className="m-0 rounded-xl bg-warning-bg px-3 py-2 text-cap leading-snug text-warning-text">
             {cookedNote}
           </p>
         )}
         </div>
-      </FormRow>
+      </Field>
 
       <section aria-label="Mỗi phần" data-recipe-card className="flex flex-col gap-3 rounded-card bg-surface-dark p-4 text-on-dark">
         <div className="flex items-baseline justify-between gap-2">
