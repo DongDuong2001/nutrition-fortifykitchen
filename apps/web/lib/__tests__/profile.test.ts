@@ -10,6 +10,8 @@ import {
   targetRangeText,
   targetsFor,
   type Profile,
+  LOCAL_ONLY_PROFILE_KEYS,
+  withLocalOnly,
 } from "../profile";
 import { SAMPLE_DAY } from "../mock/sample-day";
 
@@ -206,5 +208,51 @@ describe("applyProfileTargets", () => {
     const iron = day.minerals.find((m) => m.key === "iron");
     expect(iron).toMatchObject({ targetMin: 18 });
     expect(iron?.targetMax).toBeUndefined();
+  });
+});
+
+// fix/macro-split-save: the macro split, the custom energy and the custom micro targets live on the device only (the API has
+// no columns for them yet). Adopting the server's profile keeps them from the local one; the server wins for every other key.
+describe("withLocalOnly", () => {
+  const local: Profile = {
+    ...SAMPLE_PROFILE,
+    weightKg: 70,
+    macroMode: "ratios",
+    macroRatios: { proteinPct: 30, carbsPct: 40, fatPct: 30 },
+    macroFixed: { proteinGrams: 150, carbsGrams: 200, fatGrams: 60 },
+    customEnergyKcal: 2100,
+    customTargets: { iron: 20 },
+  };
+
+  it("lists the five device-only keys", () => {
+    expect([...LOCAL_ONLY_PROFILE_KEYS].sort()).toEqual(
+      ["customEnergyKcal", "customTargets", "macroFixed", "macroMode", "macroRatios"].sort(),
+    );
+  });
+
+  it("keeps the local macro fields when the server profile has none", () => {
+    const server: Profile = { ...SAMPLE_PROFILE, weightKg: 68 };
+    const merged = withLocalOnly(server, local);
+    expect(merged.macroMode).toBe("ratios");
+    expect(merged.macroRatios).toEqual({ proteinPct: 30, carbsPct: 40, fatPct: 30 });
+    expect(merged.macroFixed).toEqual({ proteinGrams: 150, carbsGrams: 200, fatGrams: 60 });
+    expect(merged.customEnergyKcal).toBe(2100);
+    expect(merged.customTargets).toEqual({ iron: 20 });
+  });
+
+  it("takes every other key from the server", () => {
+    const server: Profile = { ...SAMPLE_PROFILE, weightKg: 68, goal: "cut", displayName: "Lan", trainingMinutesDefault: 90 };
+    const merged = withLocalOnly(server, local);
+    expect(merged).toMatchObject({ weightKg: 68, goal: "cut", displayName: "Lan", trainingMinutesDefault: 90 });
+  });
+
+  it("keeps the server profile as it is when there is no local one", () => {
+    const server: Profile = { ...SAMPLE_PROFILE, weightKg: 68 };
+    expect(withLocalOnly(server, null)).toEqual(server);
+  });
+
+  it("does not add keys the local profile does not have", () => {
+    const merged = withLocalOnly({ ...SAMPLE_PROFILE }, { ...SAMPLE_PROFILE });
+    expect(Object.keys(merged).sort()).toEqual(Object.keys(SAMPLE_PROFILE).sort());
   });
 });

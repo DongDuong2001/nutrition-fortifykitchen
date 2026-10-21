@@ -72,7 +72,8 @@ def visible_submit(pg):
 
 
 def checked_goal(pg):
-    return pg.locator("[role=radio][aria-checked=true]:visible").first.inner_text().split("\n")[0].strip()
+    # V3: the sex control is a radiogroup too (Nam, Nữ), so the goal is read from its own group
+    return pg.locator("[role=radiogroup][aria-label='Mục tiêu'] [role=radio][aria-checked=true]:visible").first.inner_text().split("\n")[0].strip()
 
 
 def first_run(browser, name, size):

@@ -255,7 +255,8 @@ def run(browser, name, size):
         check(box is not None and box["height"] > 40 and header.inner_text().strip() == "", f"{where} first paint ({scheme}): header shape, no title text")
         if name == "390":
             style = header.evaluate("(h) => [getComputedStyle(h).borderBottomLeftRadius, getComputedStyle(h).backgroundColor]")
-            check(style[0] == "20px" and style[1] != "rgba(0, 0, 0, 0)", f"{where} first paint ({scheme}): ink header, 20 px bottom radius ({style})")
+            # V3: the header is on the grey page (no ink slab, no rounded bottom)
+            check(style[0] == "0px" and style[1] == "rgba(0, 0, 0, 0)", f"{where} first paint ({scheme}): V3 header on the page, no ink slab ({style})")
         anim = cards.first.evaluate("(c) => getComputedStyle(c).animationName")
         check(expect in anim, f"{where} first paint ({scheme}): card animation is {anim!r} (expect {expect})")
         ctx.close()

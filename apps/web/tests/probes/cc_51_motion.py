@@ -17,6 +17,19 @@ from pathlib import Path
 
 from playwright.sync_api import sync_playwright
 import _demo  # noqa: F401  (demo mode, tour and tips off)
+from playwright.sync_api import Browser
+
+# next dev draws its round indicator over the first bottom-nav tab (a prod build has none): keep it out of the touches
+_new_context = Browser.new_context
+
+
+def _context_without_dev_badge(self, *args, **kwargs):
+    ctx = _new_context(self, *args, **kwargs)
+    ctx.add_init_script("document.addEventListener('DOMContentLoaded', () => { const s = document.createElement('style'); s.textContent = 'nextjs-portal { pointer-events: none !important; }'; document.head.appendChild(s); });")
+    return ctx
+
+
+Browser.new_context = _context_without_dev_badge
 
 BASE = os.environ.get("ALIGN_BASE_URL", "http://localhost:3101")
 SHOTS = Path(__file__).resolve().parent.parent.parent / ".screenshots"
@@ -164,7 +177,9 @@ def pull(browser):
     if pg.locator('[role="dialog"]').count() > 0:
         pg.keyboard.press("Escape")
         pg.wait_for_timeout(500)
-    list_box = pg.locator('[data-align-group="home-page"] .overscroll-y-contain').first.bounding_box()
+    # V3: on a phone the page scrolls as one; the pull listens on the meals card, and starts at the top of the page
+
+    list_box = pg.locator('[data-align-group="home-page"] [data-food-scroll]').first.bounding_box()
     x, y = list_box["x"] + 40, list_box["y"] + 20
     cdp = ctx.new_cdp_session(pg)
     cdp.send("Input.dispatchTouchEvent", {"type": "touchStart", "touchPoints": [{"x": x, "y": y}]})

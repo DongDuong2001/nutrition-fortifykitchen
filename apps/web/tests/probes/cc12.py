@@ -170,7 +170,7 @@ def check_calendar(browser):
         if label == "1440":
             if abs(centre_x - viewport["width"] / 2) > 4 or box["y"] < 40 or box["y"] + box["height"] > viewport["height"] - 40:
                 problems.append(f"{label}: calendar is not a centred dialog ({box})")
-        elif abs(box["y"] + box["height"] - viewport["height"]) > 2:
+        elif not 0 <= viewport["height"] - (box["y"] + box["height"]) <= 12:  # V3: a floating sheet, 8 px above the bottom edge
             problems.append(f"{label}: calendar is not a bottom sheet ({box})")
         page.screenshot(path=os.path.join(SHOTS, f"cc12-CalendarPicker-{label}.png"))
         page.keyboard.press("Escape")

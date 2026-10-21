@@ -38,7 +38,9 @@ def test_item_1_and_2(browser):
     inp_classes = search_input.get_attribute("class") or ""
     # One focus indicator: the wrapper label's focus-within ring; the input itself has no ring or outline of its own
     wrapper_classes = search_input.evaluate("el => el.closest('label').className") or ""
-    check("focus-within:ring-cobalt" in wrapper_classes and "focus-within:ring-2" in wrapper_classes,
+    # V3: the add sheet's field shows a 2 px cobalt inset edge on focus-within; the Khám phá field keeps the ring
+    check(("focus-within:ring-cobalt" in wrapper_classes and "focus-within:ring-2" in wrapper_classes)
+          or "focus-within:shadow-[inset_0_0_0_2px_var(--color-cobalt)]" in wrapper_classes,
           f"add: the search wrapper has the focus-within ring ({wrapper_classes})")
     check("focus-visible:ring" not in inp_classes and "focus-visible:outline-none" in inp_classes,
           f"add: the search input has no ring of its own ({inp_classes})")

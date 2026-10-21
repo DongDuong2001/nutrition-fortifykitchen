@@ -1,6 +1,7 @@
 import React from "react";
 import { getRestDayTips } from "@/lib/training";
 import type { CompleteTargets } from "@/lib/targets";
+import { SectionHeader } from "@/components/ui/section-title";
 
 export interface RestDayCardProps {
   targets: Pick<CompleteTargets, "calories" | "protein">;
@@ -33,9 +34,7 @@ export function RestDayCard({ targets, className = "" }: RestDayCardProps) {
             <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" />
           </svg>
         </div>
-        <h2 id="rest-title" className="m-0 text-lg font-bold text-text">
-          Hôm nay nghỉ tập
-        </h2>
+        <SectionHeader id="rest-title">Hôm nay nghỉ tập</SectionHeader>
       </div>
 
       <div className="flex flex-col">

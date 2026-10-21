@@ -84,7 +84,7 @@ def check_manifest(browser):
     check(bool(m.get("description")) and re.search(r"[ạảãàáâấầẩẫậăắằẳẵặđêếềểễệôốồổỗộơớờởỡợưứừửữự]", m["description"]) is not None, "manifest: description is Vietnamese")
     check(m.get("start_url") == "/app" and m.get("scope") == "/", "manifest: start_url is /app (Hôm nay), scope is /")
     check(m.get("display") == "standalone", "manifest: display standalone")
-    check(m.get("background_color", "").upper() == "#FFFFFF", f"manifest: background_color is the white page ({m.get('background_color')})")
+    check(m.get("background_color", "").upper() == "#F2F2F7", f"manifest: background_color is the V3 grey page (--color-page) ({m.get('background_color')})")
     check(m.get("theme_color", "").upper() == "#111317", f"manifest: theme_color is ink ({m.get('theme_color')})")
 
     icons = m.get("icons", [])
@@ -306,7 +306,7 @@ def check_offline_page(browser):
         check("Bạn đang ngoại tuyến" in body, f"offline page {size_name}: Bạn đang ngoại tuyến")
         check("Dữ liệu đã ghi trên máy này vẫn dùng được." in body, f"offline page {size_name}: the saved-data line")
         check(pg.get_by_role("button", name="Thử lại").count() == 1, f"offline page {size_name}: Thử lại button")
-        check(pg.locator("header").count() == 1, f"offline page {size_name}: shared header")
+        check(pg.locator("header").count() == 1, f"offline page {size_name}: the status header (circle, title, note)")
         no_h_scroll(pg, f"offline page {size_name}")
         small_targets(pg, f"offline page {size_name}")
         shot(pg, "offline", size_name)

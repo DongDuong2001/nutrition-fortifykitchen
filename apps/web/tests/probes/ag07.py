@@ -116,7 +116,10 @@ def test_item_3(browser, vp_name, vp):
     check(asterisk.count() > 0, f"[{vp_name}] foods/new: required '*' element exists")
 
     star_class = asterisk.get_attribute("class") or ""
-    check("text-destructive-text" in star_class, f"[{vp_name}] foods/new: asterisk uses text-destructive-text ({star_class})")
+    # V3 Field: the asterisk is decoration in the label's own ink (aria-hidden); the label also says "(bắt buộc)" for screen readers
+    star_hidden = asterisk.first.get_attribute("aria-hidden")
+    sr_note = pg.locator('label[for="cf-name"] .sr-only:has-text("bắt buộc")').count()
+    check(star_hidden == "true" and sr_note > 0, f"[{vp_name}] foods/new: asterisk is aria-hidden and the label says bắt buộc to screen readers ({star_class})")
 
     color_rgb = asterisk.evaluate("el => window.getComputedStyle(el).color")
     rgb = parse_rgb(color_rgb)
@@ -141,7 +144,8 @@ def test_item_4(browser, vp_name, vp):
     check(email_inp.count() > 0, f"[{vp_name}] signin: email input exists")
 
     inp_classes = email_inp.get_attribute("class") or ""
-    has_focus_classes = ("focus-visible:ring-2" in inp_classes and "focus-visible:ring-cobalt" in inp_classes)
+    # V3 field: the cobalt 2 px edge (inset shadow) on focus replaces the ring
+    has_focus_classes = ("focus:shadow-[inset_0_0_0_2px_var(--color-cobalt)]" in inp_classes or ("focus-visible:ring-2" in inp_classes and "focus-visible:ring-cobalt" in inp_classes))
     check(has_focus_classes, f"[{vp_name}] signin: email input has focus ring classes ({inp_classes})")
 
     # Focus and verify

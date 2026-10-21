@@ -40,6 +40,22 @@ export interface Profile extends CoachingState {
   customTargets?: CustomTargets;
 }
 
+/**
+ * fix/macro-split-save: the profile keys that live on this device only. The API has no columns for them yet (OPEN_QUESTIONS,
+ * Dong), so the server's profile never carries them and adopting it must not wipe them.
+ */
+export const LOCAL_ONLY_PROFILE_KEYS = ["macroMode", "macroRatios", "macroFixed", "customEnergyKcal", "customTargets"] as const;
+
+/** The server's profile with the device-only keys taken from the local one. The server wins for every other key. */
+export function withLocalOnly(server: Profile, local: Profile | null): Profile {
+  if (!local) return server;
+  const merged: Profile = { ...server };
+  for (const key of LOCAL_ONLY_PROFILE_KEYS) {
+    if (local[key] !== undefined) (merged as unknown as Record<string, unknown>)[key] = local[key];
+  }
+  return merged;
+}
+
 // The sample-day user. Used when nothing is saved and no setup has started.
 export const SAMPLE_PROFILE: Profile = {
   sex: "male",

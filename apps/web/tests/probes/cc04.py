@@ -1,5 +1,5 @@
 """cc-04: AppHeader on food, new food, entry and setup screens; the favourite heart in the header;
-setup step bars; the meal chips grid; the sticky /add group header covering the rows at 390.
+setup step bars; the meal chips grid; the pinned /add glass header covering the rows at 390.
 Run with: ALIGN_BASE_URL=http://localhost:3101 PATH=/usr/bin:$PATH npm run probe -- tests/probes/cc04.py
 """
 # PROBE_COVERS: app/(app)/(tabs)/app/** app/(app)/(tabs)/explore/** app/(app)/add/** app/(app)/entry/[id]/** app/(app)/foods/[id]/** app/(app)/foods/new/** app/(app)/setup/goal/** app/(app)/setup/profile/** app/signin/**
@@ -107,38 +107,35 @@ def run():
                 check(pg.locator('[aria-label="Quay lại"] >> visible=true').count() == 1, "390: entry has one back control")
         ctx.close()
 
-        # 5. /add sticky group header: at every scroll position the header is on top across its full
-        # width, including the 12 px bleed on each side, so no row shows through it
+        # 5. /add pinned glass header (V3: the group labels no longer stick; the header with the search and chips does): at every
+        # scroll position it stays on top of the panel across its full width, so no row draws over it
         ctx = browser.new_context(viewport=PHONE)
         pg = ctx.new_page()
         pg.goto(BASE + "/add?meal=snack", wait_until="networkidle")
         pg.wait_for_timeout(400)
         result = pg.evaluate("""() => {
-            const headers = [...document.querySelectorAll('[role=group] > div.sticky')].filter(e => e.offsetParent);
-            const sc = (headers[0].closest('[data-add-scroll]') || headers[0].parentElement.parentElement);
+            const sc = document.querySelector('[data-add-scroll]');
+            const header = sc && sc.parentElement.querySelector('.glass-bar');
+            if (!sc || !header) return { stuckChecks: 0, failures: ['no scroller or header'], failCount: 1 };
             const r = sc.getBoundingClientRect();
             const failures = []; let stuckChecks = 0;
             for (let y = 0; y <= sc.scrollHeight; y += 17) {
                 sc.scrollTop = y;
-                for (const h of headers) {
-                    const hr = h.getBoundingClientRect();
-                    if (hr.top < r.top - 0.5 || hr.top > r.top + 1) continue; // only the header stuck at the top
-                    stuckChecks++;
-                    const my = hr.top + hr.height / 2;
-                    const xs = [hr.left + 1, hr.left + 8, hr.left + 4, (hr.left + hr.right) / 2, hr.right - 4, hr.right - 8, hr.right - 1];
-                    for (const x of xs) {
-                        const el = document.elementFromPoint(x, my);
-                        const hit = el && el.closest('div.sticky');
-                        if (hit !== h) failures.push([y, h.textContent.trim().slice(0, 12), Math.round(x)]);
-                    }
+                const hr = header.getBoundingClientRect();
+                stuckChecks++;
+                if (Math.abs(hr.top - r.top) > 1) failures.push([y, 'moved', Math.round(hr.top - r.top)]);
+                const my = hr.top + hr.height / 2;
+                const xs = [hr.left + 1, hr.left + 8, hr.left + 4, (hr.left + hr.right) / 2, hr.right - 4, hr.right - 8, hr.right - 1];
+                for (const x of xs) {
+                    const el = document.elementFromPoint(x, my);
+                    if (!el || !header.contains(el)) failures.push([y, 'covered', Math.round(x)]);
                 }
             }
             return { stuckChecks, failures: failures.slice(0, 5), failCount: failures.length };
         }""")
-        check(result["stuckChecks"] > 20, f"/add: stuck header checked at many positions ({result['stuckChecks']})")
-        check(result["failCount"] == 0, f"/add: sticky header covers the rows at every scroll position ({result['failCount']} misses {result['failures']})")
-        pg.evaluate("""() => { const h = [...document.querySelectorAll('[role=group] > div.sticky')].find(e => e.offsetParent);
-            (h.closest('[data-add-scroll]') || h.parentElement.parentElement).scrollTop = 390; }""")
+        check(result["stuckChecks"] > 20, f"/add: pinned header checked at many positions ({result['stuckChecks']})")
+        check(result["failCount"] == 0, f"/add: the glass header stays on top of the rows at every scroll position ({result['failCount']} misses {result['failures']})")
+        pg.evaluate("""() => { document.querySelector('[data-add-scroll]').scrollTop = 390; }""")
         pg.wait_for_timeout(200)
         pg.screenshot(path=os.path.join(SHOTS, "cc04-add-sticky-390.png"), animations="disabled")
         ctx.close()

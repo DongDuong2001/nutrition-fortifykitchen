@@ -58,9 +58,10 @@ def run(browser, size_name, size):
     # (c) + (d): Tổng quan › Vi chất
     ctx, pg = new_page(browser, size, "/trends/micros")
     w = f"{size_name} Vi chất"
-    first = pg.locator("button[aria-label^='Vitamin B1 ']").first
-    check(first.count() > 0, f"{w}: Vitamin B1 square is present")
-    names = pg.eval_on_selector_all("button[aria-label*='%']", "els => els.map(e => e.getAttribute('aria-label'))")
+    # V3: the Vi chất hero has a bar per nutrient ("Vitamin B1, 26%, Thiếu"), not a square
+    first = pg.locator("li[aria-label^='Vitamin B1,']").first
+    check(first.count() > 0, f"{w}: Vitamin B1 bar is present")
+    names = pg.eval_on_selector_all("li[aria-label*='%']", "els => els.map(e => e.getAttribute('aria-label'))")
     check(bool(names) and names[0].startswith("Vitamin B1"), f"{w}: lowest nutrient is first ({names[:1]})")
     check(pg.locator("a[href='/micros/b1']").count() > 0, f"{w}: detail link to /micros/b1")
     label = pg.locator("#ov-period").first.inner_text()

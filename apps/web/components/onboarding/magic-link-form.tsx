@@ -4,11 +4,24 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { readPendingEmail, writePendingEmail } from "@/lib/onboarding";
 import { requestMagicLink, validateEmail } from "@/lib/auth-actions";
-import { EmailField } from "@/components/auth/email-field";
+import Link from "next/link";
+import { AuthEmailField } from "@/components/onboarding/auth-field";
+import { StatusScreen, type StatusScreenProps } from "@/components/onboarding/status-screen";
 import { PillButton } from "@/components/ui/pill-button";
 
-/** Email field that sends a magic link (no password). Used by the expired link screen. */
-export function MagicLinkForm({ submitLabel }: { submitLabel: string }) {
+/**
+ * The expired-link screen's body: the status header (`status`), the email field that sends a magic link (no password), and
+ * the buttons at the bottom. The form is the page, so Enter sends it.
+ */
+export function MagicLinkForm({
+  submitLabel,
+  hint,
+  status,
+}: {
+  submitLabel: string;
+  hint: string;
+  status: Pick<StatusScreenProps, "icon" | "tone" | "title" | "body">;
+}) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -45,11 +58,26 @@ export function MagicLinkForm({ submitLabel }: { submitLabel: string }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-3">
-      <EmailField value={email} onChange={setEmail} error={error ?? undefined} />
-      <PillButton type="submit" disabled={sending}>
-        {submitLabel}
-      </PillButton>
-    </form>
+    <StatusScreen
+      as="form"
+      formProps={{ onSubmit: handleSubmit }}
+      {...status}
+      actions={
+        <>
+          <PillButton type="submit" disabled={sending}>
+            {submitLabel}
+          </PillButton>
+          <div className="flex flex-col items-center">
+            <Link href="/signin" className="inline-flex min-h-11 items-center px-2 text-callout font-semibold text-cobalt">
+              Quay lại
+            </Link>
+          </div>
+        </>
+      }
+    >
+      <div className="mt-8">
+        <AuthEmailField value={email} onChange={setEmail} error={error ?? undefined} hint={hint} />
+      </div>
+    </StatusScreen>
   );
 }

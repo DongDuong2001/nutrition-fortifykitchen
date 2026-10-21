@@ -171,8 +171,6 @@
   --color-hover: #F7F7FA;
   --color-muted-subtitle: #C9CDD6;
   --color-muted-on-dark: #8C92A0;
-  /* Small secondary text on ink that is lighter than --color-muted-on-dark: the share image footer's tagline. */
-  --color-secondary-light: #A9A8A3;
   /* Text on ink: the hero, the toast, the share footer */
   --color-on-dark: #FFFFFF;
   /* Text on accent fills: cobalt and destructive buttons, badges and selected chips. */

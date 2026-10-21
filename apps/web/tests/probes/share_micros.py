@@ -2,8 +2,8 @@
 
 For a long day (20 foods, every nutrient reached), a mixed day (12 foods) and a short day (2 foods), at Level 0 and
 Level 5, the share image is made (Lưu ảnh) and its SVG laid out as a page: in the nutrient column no text line
-crosses another, every row is drawn, the "x/N đạt" summary sits below the last row and the colour key below the
-summary. The PNGs go to docs/screenshots/share-micros/. A day with every nutrient reached has no "Thiếu nhiều nhất".
+crosses another, every row is drawn, the "x/N đạt" summary heads the card (V3ShareB), above the first group, and the colour key
+sits below the last row. The PNGs go to docs/screenshots/share-micros/. A day with every nutrient reached has no "Thiếu nhiều nhất".
 SHARE_MICROS_HOME=<tag> also saves Hôm nay at 390 and 1440 (sample day) as .screenshots/share-micros-home-<tag>-<w>.png,
 to compare before and after.
 Run with: ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/share_micros.py
@@ -99,7 +99,7 @@ GRAB_SVG = """
 """
 
 # The nutrient column of the laid-out share page: text lines of different texts must not cross; the summary sits
-# below the last row (bar included); the colour key below the summary; the column ends above the footer.
+# above the first row; the colour key below the last row (bar included); the column ends above the footer.
 COLUMN = """() => {
   const aside = document.querySelector('[data-share-root] aside[aria-label="Vi chất"]');
   if (!aside) return null;
@@ -136,13 +136,14 @@ COLUMN = """() => {
   const summary = aside.querySelector('[data-level-summary]');
   const key = aside.querySelector('ul');
   // The last row's box and its bar
+  const firstRow = Math.min(...rows.map((r) => r.getBoundingClientRect().top));
   const lastRow = Math.max(...rows.map((r) => r.getBoundingClientRect().bottom), ...bars.map((b) => b.bottom));
   const footer = document.querySelector('[data-share-footer]');
   const s = summary.getBoundingClientRect(), k = key.getBoundingClientRect(), a = aside.getBoundingClientRect();
   const keyLines = lines.filter((l) => key.contains(document.elementFromPoint(l.r.left + 1, l.r.top + 1)));
   return {
     overlap, onBar, rows: rows.length, bars: bars.length,
-    lastRow, summaryTop: s.top, summaryBottom: s.bottom, keyTop: k.top, keyBottom: k.bottom, asideBottom: a.bottom,
+    firstRow, lastRow, summaryTop: s.top, summaryBottom: s.bottom, keyTop: k.top, keyBottom: k.bottom, asideBottom: a.bottom,
     footerTop: footer ? footer.getBoundingClientRect().top : null,
     summaryText: summary.innerText.replace(/\\s+/g, ' ').trim(),
     textBottom: Math.max(...lines.map((l) => l.r.bottom)),
@@ -223,8 +224,8 @@ def column_checks(browser, body, kind, level, tag, stress):
     check(r["rows"] == want_rows, f"{tag}: every row drawn ({r['rows']}/{want_rows})")
     check(not r["overlap"], f"{tag}: no text line crosses another in the column ({r['overlap'][:4]})")
     check(not r["onBar"], f"{tag}: no text over a bar ({r['onBar'][:4]})")
-    check(r["summaryTop"] >= r["lastRow"] - 0.5, f"{tag}: summary below the last row (summary {r['summaryTop']:.1f} ≥ last row {r['lastRow']:.1f})")
-    check(r["keyTop"] >= r["summaryBottom"] - 0.5, f"{tag}: colour key below the summary (key {r['keyTop']:.1f} ≥ {r['summaryBottom']:.1f})")
+    check(r["summaryBottom"] <= r["firstRow"] + 0.5, f"{tag}: summary above the first row (summary bottom {r['summaryBottom']:.1f} ≤ first row {r['firstRow']:.1f})")
+    check(r["keyTop"] >= r["lastRow"] - 0.5, f"{tag}: colour key below the last row (key {r['keyTop']:.1f} ≥ last row {r['lastRow']:.1f})")
     check(r["keyBottom"] <= r["asideBottom"] + 0.5 and (r["footerTop"] is None or r["textBottom"] <= r["footerTop"] + 0.5),
           f"{tag}: column text ends above the footer ({r['textBottom']:.1f} ≤ {r['footerTop']})")
     lacking = "Thiếu nhiều nhất" in r["summaryText"]
