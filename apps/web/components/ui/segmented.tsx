@@ -34,7 +34,9 @@ export function Segmented<K extends string>({
   /** The accessible name of the group or nav. */
   label: string;
   fill?: boolean;
-  as?: "group" | "nav";
+  /** "group" (buttons with aria-pressed), "nav" (links with aria-current) or "tabs" (role tablist / tab with aria-selected: one
+   * choice switches what the screen lists). */
+  as?: "group" | "nav" | "tabs";
   className?: string;
   alignGroup?: string;
 }) {
@@ -57,6 +59,10 @@ export function Segmented<K extends string>({
       <Link key={item.key} href={item.href} aria-current={on ? "page" : undefined} onClick={() => onChange?.(item.key)} className={cell}>
         {inner}
       </Link>
+    ) : as === "tabs" ? (
+      <button key={item.key} type="button" role="tab" aria-selected={on} onClick={() => onChange?.(item.key)} className={`${cell} border-0 bg-transparent p-0`}>
+        {inner}
+      </button>
     ) : (
       <button key={item.key} type="button" aria-pressed={on} onClick={() => onChange?.(item.key)} className={`${cell} border-0 bg-transparent p-0`}>
         {inner}
@@ -68,7 +74,7 @@ export function Segmented<K extends string>({
       {body}
     </nav>
   ) : (
-    <div role="group" aria-label={label} data-align-group={alignGroup} className={track} style={style}>
+    <div role={as === "tabs" ? "tablist" : "group"} aria-label={label} data-align-group={alignGroup} className={track} style={style}>
       {body}
     </div>
   );

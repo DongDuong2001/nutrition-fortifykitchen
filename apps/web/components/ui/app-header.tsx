@@ -58,6 +58,8 @@ export interface AppHeaderProps {
   compact?: boolean;
   /** Phone: the date stepper moves to a second row and this sits at its right end (Hôm nay's "Ngày tập 60′ ›"). From 1024 px it sits before the stepper in the one row. */
   dateRow?: React.ReactNode;
+  /** Push screens: drawn between Back and the title (V3-SPEC §3.2: a group's accent bar and 36 px tile, a nutrient's accent bar). */
+  lead?: React.ReactNode;
   /** data-align-group attribute for alignment tests */
   alignGroup?: string;
   /** "page": the row shares both edges with the page body, checked from 1024 px (data-align-from="lg"); default: left edge only. */
@@ -127,6 +129,7 @@ export function AppHeader({
   flush = false,
   compact = false,
   dateRow,
+  lead,
   alignGroup,
   alignMode = "left",
   className = "",
@@ -185,6 +188,7 @@ export function AppHeader({
           className={`group/hdr flex min-h-11 gap-3 ${back ? "items-start" : "items-center"} ${dateRow ? "max-lg:grid max-lg:grid-cols-[minmax(0,1fr)_auto] max-lg:gap-x-2 max-lg:gap-y-0" : ""}`}
         >
           {back}
+          {lead && <div className="flex min-h-11 shrink-0 items-center gap-3">{lead}</div>}
           {/* The phone wordmark is a logo: it never shrinks or wraps; at large text sizes the date gives way instead. While the sync status
               has something to say (Chưa lưu, Ngoại tuyến) the row has no room for both on a phone: the logo steps aside, so the status
               never lands on the day arrows (hotfix 20/10). The page title (sr-only on a phone) is not hidden with them: it stays in the
