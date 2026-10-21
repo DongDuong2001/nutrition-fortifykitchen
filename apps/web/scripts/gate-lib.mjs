@@ -4,7 +4,7 @@ import { WEB } from "./probe-covers.mjs";
 
 // Shared steps for gate:fast and gate:full: run a command with a label and its time, and own one `next start` server.
 
-export const PORT = process.env.PORT || "3100";
+export const PORT = process.env.PORT || "3101";
 export const BASE = `http://localhost:${PORT}`;
 
 const fmt = (ms) => `${(ms / 1000).toFixed(0)} s`;
