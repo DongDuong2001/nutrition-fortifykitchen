@@ -3,7 +3,7 @@ import { apiClient } from "../api-client";
 import { entryNumbers } from "../diary-edits";
 import { DISH_DEMO_FOODS } from "../mock/dish-demo-foods";
 import { EDITED_DISH_SUFFIX, MOCK_FOODS, addCatalogFood, addDemoFoods, browsableFoods, catalogFoodById, type FoodItem } from "../mock/foods";
-import { dishViewOf, editParts, editTotals, foodsByKey, saveEditedDish, type DishRecipes } from "../dish-recipes";
+import { canEditParts, dishViewOf, editParts, editTotals, foodsByKey, isEdited, saveEditedDish, type DishRecipes } from "../dish-recipes";
 import { isLocalOnly } from "../sync-notice";
 import { readRecipes, serverFoodIdOf, syncRecipeFoods, uploadPendingRecipes } from "../recipe-store";
 import { calculateMacroPreview } from "../portion";
@@ -197,5 +197,61 @@ describe("offline: the entry waits on this device until the server has the food"
     // The server's copy is not listed either
     expect(browsableFoods().map((f) => f.id)).not.toContain(SERVER);
     expect(browsableFoods().map((f) => f.id)).not.toContain(food.id);
+  });
+});
+
+// Hao 21/10: an ingredient can be swapped for an alternative food (Hy Lạp for thường, hạt bí for hạnh nhân), same grams
+describe("swapping a part for an alternative food", () => {
+  const BEEF = "usda_sr_legacy|FDC 171811";
+  const withAlt = (alts: readonly (readonly [string, string])[]): DishRecipes => {
+    const [serving, rows] = recipes["vn_table|food-pho-bo"];
+    return { "vn_table|food-pho-bo": [serving, rows.map((row, i) => (i === 0 ? ([row[0], row[1], row[2], row[3], row[4], row[5], alts] as const) : row))] };
+  };
+  const swapView = dishViewOf(phoBo, withAlt([[BEEF, "Thịt bò thăn"]]), foodsByKey(MOCK_FOODS));
+  if (!swapView) throw new Error("no swap view");
+
+  it("a part with alternatives lists its own food first, then the alternatives the catalogue has", () => {
+    const [banh, ...others] = editParts(swapView, {}, []);
+    expect(banh.options.map((o) => o.key)).toEqual([banh.key, BEEF]);
+    expect(banh.choice).toBe(banh.key);
+    expect(banh.swapped).toBe(false);
+    expect(others.every((p) => p.options.length === 0)).toBe(true);
+    expect(isEdited([banh, ...others])).toBe(false);
+  });
+
+  it("an alternative the catalogue does not have is left out, so a part with none cannot be swapped", () => {
+    const missing = dishViewOf(phoBo, withAlt([["usda_sr_legacy|FDC 1", "Không có"]]), foodsByKey(MOCK_FOODS));
+    expect(missing?.parts[0].alternatives).toEqual([]);
+    expect(editParts(missing!, {}, [])[0].options).toEqual([]);
+  });
+
+  it("a swap puts the alternative's food and name in the part, keeps the grams, and counts as an edit", () => {
+    const parts = editParts(swapView, {}, [], { [BANH]: BEEF });
+    expect(parts[0].swapped).toBe(true);
+    expect(parts[0].choice).toBe(BEEF);
+    expect(parts[0].food?.sourceId).toBe("FDC 171811");
+    expect(parts[0].name).toBe(parts[0].food?.nameVi);
+    expect(parts[0].perServing).toBe(swapView.parts[0].grams);
+    expect(isEdited(parts)).toBe(true);
+    expect(canEditParts(parts)).toBe(true);
+  });
+
+  it("the edited dish adds up the alternative's numbers and logs its food id", () => {
+    const plain = editTotals(editParts(swapView, {}, []), 1);
+    const swapped = editTotals(editParts(swapView, {}, [], { [BANH]: BEEF }), 1);
+    expect(swapped.grams).toBe(plain.grams);
+    expect(swapped.ingredients[0].foodId).not.toBe(plain.ingredients[0].foodId);
+    expect(swapped.ingredients[0].grams).toBe(plain.ingredients[0].grams);
+    expect(swapped.per100.energy).not.toBe(plain.per100.energy);
+  });
+
+  it("a swap and typed grams work together, and choosing the recipe's own food (or a stale key) is no swap", () => {
+    const both = editParts(swapView, { [BANH]: 150 }, [], { [BANH]: BEEF });
+    expect(both[0].perServing).toBe(150);
+    expect(both[0].swapped).toBe(true);
+    const back = editParts(swapView, {}, [], { [BANH]: BANH });
+    expect(back[0].swapped).toBe(false);
+    expect(editParts(swapView, {}, [], { [BANH]: "usda_sr_legacy|nope" })[0].swapped).toBe(false);
+    expect(isEdited(back)).toBe(false);
   });
 });

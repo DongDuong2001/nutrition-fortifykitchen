@@ -354,6 +354,21 @@ export const SAMPLE_FOODS: FoodItem[] = [
       fiber: 0.8,
     },
   },
+  // Bánh khoai nướng Minh Hào (1 miếng = 1/10 khuôn, 102,8 g = 216 kcal): a dish with swappable parts (Hao 21/10), values as in docs/data/new-foods-2026-10-21c.json
+  {
+    id: "food-banh-khoai-nuong",
+    category: "mon_viet",
+    nameVi: "Bánh khoai nướng Minh Hào",
+    source: "fortify_kitchen" as FoodItem["source"],
+    sourceId: "fortify_kitchen:banh-khoai-nuong",
+    match: "unknown",
+    sourceRef: unlisted("Fortify Kitchen"),
+    servings: [
+      { label: "1 miếng (1/10 khuôn)", grams: 102.8 },
+      { label: "100 g", grams: 100 },
+    ],
+    nutrients: {energy: 210.6, water: 58.4, carbs: 22.8, fiber: 3.2, fat: 10.6, monounsaturated_fat: 2.11, polyunsaturated_fat: 0.586, saturated_fat: 2.7, protein: 6.1, b1: 0.0565, b2: 0.234, b3: 0.852, b5: 0.626, b6: 0.19, folate: 19, b12: 0.196, vitamin_a: 31.1, vitamin_e: 0.693, vitamin_k: 1.5, calcium: 103, copper: 0.327, iron: 1.98, magnesium: 66.5, manganese: 0.705, phosphorus: 148, potassium: 372, selenium: 6.15, sodium: 92.7, zinc: 0.986},
+  },
   // 14. Bánh mì thịt (1 ổ ~ 200g = 420 kcal)
   {
     id: "food-banh-mi-thit",

@@ -99,6 +99,8 @@ export function DishParts({ food, portionGrams, onEdit }: DishPartsProps) {
   // What the user changed, by part key (grams for one serving) and which add-ons are on (by chip label)
   const [typed, setTyped] = useState<Record<string, number>>({});
   const [added, setAdded] = useState<string[]>([]);
+  // The alternative chosen for a part (Đổi nguyên liệu), by part key: the alternative's key
+  const [swaps, setSwaps] = useState<Record<string, string>>({});
   const panelId = useId();
   // Subscribes to the catalogue: the demo ingredients (or the live load) arrive after this mounts
   const { version } = useCatalogFoods();
@@ -117,7 +119,7 @@ export function DishParts({ food, portionGrams, onEdit }: DishPartsProps) {
   const view = useMemo(() => (recipes ? dishViewOf(food, recipes, foodsByKey(CATALOG_FOODS)) : null), [recipes, food, version]);
   // No grams yet: one serving of the recipe
   const servings = view ? (portionGrams > 0 ? servingsOf(portionGrams, view.servingGrams) : 1) : 0;
-  const parts = useMemo(() => (view ? editParts(view, typed, added) : []), [view, typed, added]);
+  const parts = useMemo(() => (view ? editParts(view, typed, added, swaps) : []), [view, typed, added, swaps]);
   const editable = canEditParts(parts);
   const totals = useMemo(() => editTotals(parts, servings), [parts, servings]);
   const edited = editable && isEdited(parts);
@@ -142,7 +144,15 @@ export function DishParts({ food, portionGrams, onEdit }: DishPartsProps) {
   const restore = () => {
     setTyped({});
     setAdded([]);
+    setSwaps({});
   };
+  // Choosing the recipe's own food again takes the swap away
+  const swap = (part: EditPart, choice: string) =>
+    setSwaps((prev) => {
+      const next = { ...prev, [part.key]: choice };
+      if (choice === part.key) delete next[part.key];
+      return next;
+    });
 
   const shown = !!view && view.parts.length > 0;
   // Recipes that arrive after the sheet opened: the block grows open (Expand) instead of pushing the button in one frame
@@ -235,6 +245,23 @@ export function DishParts({ food, portionGrams, onEdit }: DishPartsProps) {
                       </span>
                     ) : (
                       <span className="text-right tabular-nums text-secondary">{formatAmount(grams, "g")} g</span>
+                    )}
+                    {editable && part.options.length > 1 && (
+                      <label className="col-span-2 mt-2 flex min-h-11 items-center justify-between gap-3 text-secondary">
+                        <span>Đổi nguyên liệu</span>
+                        <select
+                          aria-label={`Đổi nguyên liệu ${part.options[0].name}`}
+                          value={part.choice}
+                          onChange={(e) => swap(part, e.target.value)}
+                          className="h-11 min-w-0 max-w-[70%] flex-1 cursor-pointer rounded-xl border-0 bg-surface px-3 text-cap font-semibold text-text focus-visible:outline-2 focus-visible:outline-cobalt"
+                        >
+                          {part.options.map((o) => (
+                            <option key={o.key} value={o.key}>
+                              {o.name}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
                     )}
                   </li>
                 );

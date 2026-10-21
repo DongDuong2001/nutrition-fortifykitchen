@@ -15,7 +15,18 @@ import { generateUuid } from "./uuid";
  * catalogue does not have is shown without kcal (its name, from the file, only labels the row) and cannot be an add-on.
  */
 
-export type DishRow = readonly [key: string, grams: number, role: string, name: string, addOnLabel: string | null, addOnGrams: number | null];
+/** An alternative food for an ingredient: [key, name]. The name only labels it when the catalogue does not have it. */
+export type DishAlternativeRow = readonly [key: string, name: string];
+export type DishRow = readonly [
+  key: string,
+  grams: number,
+  role: string,
+  name: string,
+  addOnLabel: string | null,
+  addOnGrams: number | null,
+  /** Foods a person can use instead of this ingredient, same grams (Hao 21/10: Hy Lạp for thường, hạt bí for hạnh nhân) */
+  alternatives?: readonly DishAlternativeRow[],
+];
 export type DishEntry = readonly [servingGrams: number, rows: readonly DishRow[]];
 export type DishRecipes = Readonly<Record<string, DishEntry>>;
 
@@ -84,6 +95,13 @@ export function foodsByKey(foods: readonly FoodItem[]): FoodsByKey {
   return index;
 }
 
+/** A food an ingredient can be swapped for, found in the catalogue by its key */
+export interface DishAlternative {
+  key: string;
+  name: string;
+  food: FoodItem;
+}
+
 export interface DishPart {
   key: string;
   name: string;
@@ -92,6 +110,8 @@ export interface DishPart {
   grams: number;
   /** The catalogue food, or null when the catalogue does not have it */
   food: FoodItem | null;
+  /** The foods it can be swapped for (only those the catalogue has); empty for most parts */
+  alternatives: DishAlternative[];
 }
 
 export interface DishAddOn {
@@ -123,10 +143,14 @@ export function dishViewOf(dish: Pick<FoodItem, "id" | "source" | "sourceId" | "
   const parts: DishPart[] = [];
   const addOns: DishAddOn[] = [];
   const unresolved: string[] = [];
-  for (const [key, grams, role, name, addOnLabel, addOnGrams] of rows) {
+  for (const [key, grams, role, name, addOnLabel, addOnGrams, alts] of rows) {
     const food = byKey.get(key) ?? null;
     if (!food) unresolved.push(key);
-    parts.push({ key, name: food?.nameVi ?? name, role, grams, food });
+    const alternatives = (alts ?? []).flatMap(([altKey, altName]): DishAlternative[] => {
+      const alt = byKey.get(altKey);
+      return alt ? [{ key: altKey, name: alt.nameVi || altName, food: alt }] : [];
+    });
+    parts.push({ key, name: food?.nameVi ?? name, role, grams, food, alternatives });
     if (food && addOnLabel && addOnGrams) addOns.push({ label: addOnLabel, grams: addOnGrams, food });
   }
   return { servingGrams, parts, addOns, unresolved };
@@ -169,21 +193,35 @@ export interface EditPart {
   perServing: number;
   /** Put in by an add-on chip */
   added?: boolean;
+  /** The recipe's food first, then its alternatives: more than one means the part can be swapped (Đổi nguyên liệu) */
+  options: readonly DishAlternative[];
+  /** The key of the option in use (the part's own key when it is not swapped) */
+  choice: string;
+  /** An alternative is in use instead of the recipe's food */
+  swapped: boolean;
 }
 
 export const EDIT_STEP_GRAMS = 10;
 export const addOnKey = (addOn: Pick<DishAddOn, "label">) => `add|${addOn.label}`;
 
 /**
- * The parts to show: the recipe's, with the grams the user typed (`grams`, per serving, by part key), then the add-ons
+ * The parts to show: the recipe's, with the grams the user typed (`grams`, per serving, by part key) and the alternative
+ * chosen for a part (`swaps`: part key → alternative key; the grams stay), then the add-ons
  * that are on (`added`, by chip label) with their own grams unless typed. Keyed state, not a copy of the rows, so a
  * catalogue that arrives late (an ingredient's data) fills the rows without losing what was typed.
  */
-export function editParts(view: DishView, grams: Readonly<Record<string, number>>, added: readonly string[]): EditPart[] {
+export function editParts(view: DishView, grams: Readonly<Record<string, number>>, added: readonly string[], swaps: Readonly<Record<string, string>> = {}): EditPart[] {
   const own = (key: string, perServing: number) => grams[key] ?? perServing;
-  const rows: EditPart[] = view.parts.map((p) => ({ key: p.key, name: p.name, food: p.food, base: p.grams, perServing: own(p.key, p.grams) }));
+  const rows: EditPart[] = view.parts.map((p) => {
+    // A swap names one of the part's alternatives; anything else (a stale key) means the recipe's own food
+    const alt = p.food ? p.alternatives.find((a) => a.key === swaps[p.key]) : undefined;
+    const options: DishAlternative[] = p.food && p.alternatives.length > 0 ? [{ key: p.key, name: p.name, food: p.food }, ...p.alternatives] : [];
+    return { key: p.key, name: alt?.name ?? p.name, food: alt?.food ?? p.food, base: p.grams, perServing: own(p.key, p.grams), options, choice: alt ? alt.key : p.key, swapped: !!alt };
+  });
   for (const addOn of view.addOns) {
-    if (added.includes(addOn.label)) rows.push({ key: addOnKey(addOn), name: addOn.food.nameVi, food: addOn.food, base: 0, perServing: own(addOnKey(addOn), addOn.grams), added: true });
+    if (added.includes(addOn.label)) {
+      rows.push({ key: addOnKey(addOn), name: addOn.food.nameVi, food: addOn.food, base: 0, perServing: own(addOnKey(addOn), addOn.grams), added: true, options: [], choice: addOnKey(addOn), swapped: false });
+    }
   }
   return rows;
 }
@@ -191,8 +229,8 @@ export function editParts(view: DishView, grams: Readonly<Record<string, number>
 /** Grams of a part for this portion. */
 export const partGrams = (part: EditPart, servings: number): number => tenth(part.perServing * servings);
 
-/** Whether the parts differ from the recipe: a part changed, taken out, or put in. */
-export const isEdited = (parts: readonly EditPart[]): boolean => parts.some((p) => Math.abs(p.perServing - p.base) > 1e-6);
+/** Whether the parts differ from the recipe: a part changed, taken out, put in, or swapped for an alternative. */
+export const isEdited = (parts: readonly EditPart[]): boolean => parts.some((p) => p.swapped || Math.abs(p.perServing - p.base) > 1e-6);
 
 /** Every part of the dish has data, so its numbers can be added up: otherwise the parts are shown but not changed. */
 export const canEditParts = (parts: readonly EditPart[]): boolean => parts.length > 0 && parts.every((p) => p.food !== null);

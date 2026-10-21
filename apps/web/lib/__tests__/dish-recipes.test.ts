@@ -27,6 +27,24 @@ describe("the slim dish recipes the portion sheet reads (scripts/slim-dishes.mjs
   });
 });
 
+describe("the alternatives of an ingredient (Hao 21/10: a person can swap it)", () => {
+  it("the slim file keeps them as a 7th element, only on an ingredient that has alternatives", () => {
+    const [serving, rows] = recipes["fortify_kitchen|fortify_kitchen:banh-khoai-nuong"];
+    expect(serving).toBe(1027.9);
+    const withAlts = rows.filter((r) => r.length === 7);
+    expect(withAlts.map((r) => r[3])).toEqual(["Sữa chua thường (nguyên kem, không đường)", "Bột hạnh nhân", "Hạnh nhân", "Siro cây phong"]);
+    expect(rows.find((r) => r[3].startsWith("Sữa chua"))?.[6]).toEqual([["usda_sr_legacy|FDC 171304", "Sữa chua Hy Lạp không đường"]]);
+    // no other recipe changed shape: six elements everywhere else
+    const others = Object.entries(recipes).filter(([k]) => !k.startsWith("fortify_kitchen|"));
+    expect(others.every(([, [, r]]) => r.every((row) => row.length === 6))).toBe(true);
+  });
+
+  it("the cake's parts add up to its serving grams, so a portion scales them exactly", () => {
+    const [serving, rows] = recipes["fortify_kitchen|fortify_kitchen:banh-khoai-nuong"];
+    expect(Math.round(rows.reduce((sum, r) => sum + r[1], 0) * 10) / 10).toBe(serving);
+  });
+});
+
 describe("a dish and its ingredients are found by (source, source_id)", () => {
   it("the demo catalogue's Phở bò answers to vn_table|food-pho-bo; a live food to its own source and source_id", () => {
     expect(keysOfFood(phoBo)).toContain("vn_table|food-pho-bo");

@@ -31,6 +31,18 @@ export interface Release {
 }
 
 export const RELEASES: readonly Release[] = [
+  // swap-ingredients (Hao 21/10): in Thành phần a part with alternatives has "Đổi nguyên liệu" (Bánh khoai nướng: sữa chua Hy Lạp or thường,
+  // hạnh nhân or hạt bí, siro cây phong or mật ong). The select carries its own label in plain sight, so no tip; the tour points at Thành phần
+  {
+    id: "2026-10-21d",
+    date: "21/10",
+    items: [
+      { icon: "meal", title: "Đổi nguyên liệu trong món", body: "Món có Thành phần cho đổi nguyên liệu, như sữa chua thường hay Hy Lạp, hạnh nhân hay hạt bí. Chọn ở dòng Đổi nguyên liệu, số gam giữ nguyên, và món ghi lại đúng theo bạn chọn." },
+    ],
+    tour: [
+      { target: "dish-parts", fallback: "meal-add", title: "Đổi nguyên liệu", body: "Mở Thành phần của món. Nguyên liệu nào đổi được thì có dòng Đổi nguyên liệu, chọn loại bạn dùng." },
+    ],
+  },
   // fluid-add + polish-1020 + rich-tabs (Hao 21/10): the add sheet slides over the screen you are on, Hoàn tác after every add, a lighter add
   // list, the update notice above the bottom bar, and the "Giàu …" lists in two tabs. One entry for all of them. No tour and no tip, on
   // purpose: every control here is a labelled button or a tab in plain sight (+, ✕, Xem thêm, Hoàn tác, Thực phẩm / Thực phẩm bổ sung)
