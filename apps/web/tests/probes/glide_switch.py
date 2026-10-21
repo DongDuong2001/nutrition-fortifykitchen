@@ -182,7 +182,7 @@ def part_tabs(browser):
     s = summary(sample(pg, sel, lambda: nav("Khám phá").tap(), 700))
     check(s["animated"] >= 4 and s["vt"] == 0, f"tabs Hôm nay → Khám phá: it glides ({s['animated']} frames in motion), no view transition ({s['vt']})")
     check(0 < s["peak_tx"] <= 12.5, f"tabs Hôm nay → Khám phá: from the right, at most 12 px (peak {s['peak_tx']:.1f})")
-    check(s["min_op"] < 0.6 and s["end_op"] == 1 and abs(s["end_tx"]) < 0.01, f"tabs Hôm nay → Khám phá: fades in and ends in place (lowest {s['min_op']:.2f}, end {s['end_op']}, {s['end_tx']})")
+    check(0.4 < s["min_op"] < 0.6 and s["end_op"] == 1 and abs(s["end_tx"]) < 0.01, f"tabs Hôm nay → Khám phá: fades in and ends in place (lowest {s['min_op']:.2f}, end {s['end_op']}, {s['end_tx']})")
     check(pg.evaluate("() => document.querySelectorAll('.m-tab-in').length") == 1 and settled(pg, sel)[1] == 0, "tabs: nothing is left running or held after it")
     s = summary(sample(pg, sel, lambda: nav("Hôm nay").tap(), 700))
     check(-12.5 <= s["peak_tx"] < 0 and s["animated"] >= 4 and s["vt"] == 0, f"tabs Khám phá → Hôm nay: from the left (peak {s['peak_tx']:.1f}, {s['animated']} frames, vt {s['vt']})")

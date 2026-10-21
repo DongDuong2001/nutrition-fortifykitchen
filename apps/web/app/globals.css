@@ -764,7 +764,8 @@
   }
 }
 /* A bottom-nav tab or a Tổng quan sub-tab (components/ui/switch-glide EnterGlide): the new screen is a new element that eases in from
-   12 px off to the side of the tab order (--m-tab-dir: 1 from the right, -1 from the left) and from transparent, as a transition from
+   12 px off to the side of the tab order (--m-tab-dir: 1 from the right, -1 from the left) and from half opacity (never from nothing: a
+   screen change has no blank frame, cc-fluid-add), as a transition from
    @starting-style (nothing is left behind after it, no snapshot of the screen). The old screen does not slide out. */
 .m-tab-in {
   transition:
@@ -774,7 +775,7 @@
 @starting-style {
   .m-tab-in {
     transform: translateX(calc(var(--m-tab-dir, 1) * var(--m-tab-shift)));
-    opacity: 0;
+    opacity: 0.5;
   }
 }
 /* Pull to refresh: the indicator waits above the list, follows the finger with no transition (data-dragging, the
@@ -1087,7 +1088,7 @@ button.m-drag-lift[data-touch-drag="dragging"] {
   @starting-style {
     .m-tab-in {
       transform: none;
-      opacity: 0;
+      opacity: 0.5;
     }
   }
   .m-pull {

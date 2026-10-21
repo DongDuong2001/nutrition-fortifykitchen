@@ -274,11 +274,11 @@ describe("glide tokens", () => {
     expect(css).toContain(`--ease-out: ${EASE_OUT};`);
   });
 
-  it("a tab enters as a transition from @starting-style (12 px, transparent), a rule of its own in reduced motion (opacity only, 120 ms)", () => {
+  it("a tab enters as a transition from @starting-style (12 px, half opacity: never a blank frame), a rule of its own in reduced motion (opacity only, 120 ms)", () => {
     expect(main).toMatch(/\.m-tab-in \{\s*transition:\s*transform var\(--m-tab-in\) var\(--ease-out\),\s*opacity var\(--m-tab-in\) var\(--ease-out\);/);
-    expect(main).toMatch(/\.m-tab-in \{\s*transform: translateX\(calc\(var\(--m-tab-dir, 1\) \* var\(--m-tab-shift\)\)\);\s*opacity: 0;/);
+    expect(main).toMatch(/\.m-tab-in \{\s*transform: translateX\(calc\(var\(--m-tab-dir, 1\) \* var\(--m-tab-shift\)\)\);\s*opacity: 0\.5;/);
     expect(reduced).toMatch(/\.m-tab-in \{\s*transition: opacity var\(--m-fade\) var\(--ease-out\);/);
-    expect(reduced).toMatch(/\.m-tab-in \{\s*transform: none;\s*opacity: 0;/);
+    expect(reduced).toMatch(/\.m-tab-in \{\s*transform: none;\s*opacity: 0\.5;/);
   });
 
   it("the motion tokens are written down in AGENTS.md: sheets keep their spring, switch glide 200 ms / 16 px, tab glide 200 ms / 12 px, push and back once, reduced motion 120 ms", () => {
