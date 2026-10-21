@@ -149,7 +149,8 @@ def level_run(browser, size, tag, level):
         pg.goto(BASE + "/micros", wait_until="networkidle")
         pg.wait_for_timeout(500)
         body = squash(pg.inner_text("body"))
-        check("Vitamin (12)" in body and "Khoáng chất (10)" in body, f"{tag} L{level}: /micros lists all 12 vitamins and 10 minerals")
+        # V3Micros: the segmented pair (phone) and the chips (desktop) carry the counts, x of the 12 vitamins and the 10 minerals
+        check(re.search(r"Vitamin · \d+/12", body) is not None and re.search(r"Khoáng chất · \d+/10", body) is not None, f"{tag} L{level}: /micros lists all 12 vitamins and 10 minerals")
     ctx.close()
 
 

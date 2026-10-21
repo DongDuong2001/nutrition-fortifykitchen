@@ -106,25 +106,13 @@ def run():
             check("Yogurt kefir 200 ml" in meal_text(pg, "breakfast"), f"{name}: Hoàn tác restores")
             check(pg.locator('[role=status] >> visible=true').count() == 0, f"{name}: toast gone after Hoàn tác")
 
-            # 4. Micros: header and chip bar stay put while the body scrolls (phone)
+            # 4. Micros (V3): the header scrolls away with the page; the segmented pair has no sticky bar
             if name == "390":
                 pg.goto(BASE + "/micros", wait_until="networkidle")
                 pg.wait_for_timeout(600)
-                measure = """() => {
-                    const h = document.querySelector('[data-align-container="micros-page"] [data-micros-compact]');
-                    const chip = [...document.querySelectorAll('[data-align-container="micros-page"] button')].find(b => b.textContent.includes('Khoáng chất'));
-                    return { headerTop: h.getBoundingClientRect().top, headerBottom: h.getBoundingClientRect().bottom,
-                             chipTop: chip.getBoundingClientRect().top };
-                }"""
-                before = pg.evaluate(measure)
-                pg.evaluate("() => { document.querySelector('[data-align-container=\"micros-page\"] .overflow-y-auto').scrollTop = 700; }")
-                pg.wait_for_timeout(500)
-                after = pg.evaluate(measure)
-                # cc-27c: the full header scrolls away and the 60 px compact bar is at the top; the chips stick under it
-                check(abs(after["headerTop"]) < 1, f"390: Micros compact bar is at the top ({after['headerTop']})")
-                gap_after = after["chipTop"] - after["headerBottom"]
-                check(abs(gap_after) < 1 + 8, f"390: chip bar stays under the compact bar (gap {gap_after:.1f})")
-                pg.screenshot(path=os.path.join(SHOTS, "cc06-micros-stuck-390.png"), animations="disabled")
+                check(pg.locator("[data-micros-compact]").count() == 0, "390: Micros has no compact bar")
+                check(pg.locator("h1").count() == 1, f"390: Micros has one h1 ({pg.locator('h1').count()})")
+                pg.screenshot(path=os.path.join(SHOTS, "cc06-micros-390.png"), animations="disabled")
             ctx.close()
         browser.close()
 
