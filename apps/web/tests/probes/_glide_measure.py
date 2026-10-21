@@ -11,6 +11,7 @@ Numbers per run (the median of --runs):
   jank       frames later than 25 ms (1.5 frames) / 33 ms (2 frames) since the previous one, from the tap to the end of the window
   pop        frames where the content changed while nothing was in motion before or after (the hard swap Hao saw)
   vt         document.startViewTransition calls (counted in the page)
+  tap_ms     the longest main-thread processing of a tap event (handlers + the render they flush, Event Timing); 0 = none reached 16 ms
 Frames come from requestAnimationFrame in the page; the filmstrips from the CDP screencast.
 Run (a built demo server must be up; about 3 minutes):
   ALIGN_BASE_URL=http://localhost:3101 npm run probe -- tests/probes/_glide_measure.py --label after
@@ -45,7 +46,7 @@ try {
 """
 RECORDER_JS = """
 (() => {
-  const rec = { on: false, frames: [], down: null, vt: 0, active: 0 };
+  const rec = { on: false, frames: [], down: null, vt: 0, active: 0, events: [] };
   window.__g = rec;
   const orig = document.startViewTransition && document.startViewTransition.bind(document);
   if (orig) document.startViewTransition = function (...a) {
@@ -73,12 +74,18 @@ RECORDER_JS = """
     };
   };
   const loop = (t) => { if (!rec.on) return; rec.frames.push(sample(t)); requestAnimationFrame(loop); };
-  rec.start = () => { rec.frames = []; rec.vt = 0; rec.active = 0; rec.down = null; rec.on = true; requestAnimationFrame(loop); };
+  rec.start = () => { rec.frames = []; rec.vt = 0; rec.active = 0; rec.events = []; rec.down = null; rec.on = true; requestAnimationFrame(loop); };
   rec.stop = () => { rec.on = false; return rec.frames; };
   const pd = () => { if (rec.on && rec.down === null) rec.down = performance.now(); };
   document.addEventListener('pointerdown', pd, { capture: true });
   document.addEventListener('touchstart', pd, { capture: true, passive: true });
   rec.origin = performance.timeOrigin;
+  // Event Timing: the main-thread work of the tap itself (the handlers and the render they flush), for events of 16 ms or more
+  try {
+    new PerformanceObserver((list) => {
+      for (const e of list.getEntries()) if (rec.on) rec.events.push({ name: e.name, proc: e.processingEnd - e.processingStart, dur: e.duration });
+    }).observe({ type: 'event', durationThreshold: 16 });
+  } catch (e) {}
 })();
 """
 STRIP_HTML = """<!doctype html><meta charset=utf-8><style>
@@ -159,9 +166,10 @@ async def record(page, cdp, action, settle_ms=900):
     rows = await page.evaluate("window.__g.stop()")
     down = await page.evaluate("window.__g.down")
     vt = await page.evaluate("window.__g.vt")
+    events = await page.evaluate("window.__g.events")
     origin = await page.evaluate("window.__g.origin")
     shots = await sc.stop()
-    return rows, down, vt, shots, (origin + down if down is not None else wall0)
+    return rows, down, vt, shots, (origin + down if down is not None else wall0), events
 
 
 async def scenario(browser, name, rate, strip_page, label):
@@ -193,9 +201,11 @@ async def scenario(browser, name, rate, strip_page, label):
             await cdp.send("Emulation.setCPUThrottlingRate", {"rate": rate})
             link = page.get_by_role("link", name="Khám phá").locator("visible=true").first
             act = lambda: link.tap()
-        rows, down, vt, shots, t0 = await record(page, cdp, act)
+        rows, down, vt, shots, t0, events = await record(page, cdp, act)
         out = analyse(rows, down)
         out["vt"] = vt
+        # The longest processing time of a tap event (0: none was 16 ms or more)
+        out["tap_ms"] = round(max([e["proc"] for e in events], default=0), 1)
         if strip_page is not None and rate == 1:
             await write_strip(strip_page, ROOT / "docs" / "screenshots" / "glide" / label / f"{name}.png", f"{label}: {name}", shots, t0)
         return out
@@ -225,7 +235,7 @@ async def main():
                 runs = []
                 for i in range(args.runs):
                     runs.append(await scenario(browser, name, rate, strip_page if i == 0 else None, args.label))
-                keys = ["first_ms", "animated", "jank25", "jank33", "pop", "vt"]
+                keys = ["first_ms", "animated", "jank25", "jank33", "pop", "vt", "tap_ms"]
                 result[f"{name}@{rate}x"] = {k: median([r.get(k) for r in runs]) for k in keys}
                 print(f"{name:10} {rate}x  " + "  ".join(f"{k}={result[f'{name}@{rate}x'][k]}" for k in keys), flush=True)
         await browser.close()

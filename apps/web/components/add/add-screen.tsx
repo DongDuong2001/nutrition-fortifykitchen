@@ -344,6 +344,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
     query,
     setQuery,
     filter,
+    listFilter,
     setFilter,
     list,
     filterItems,
@@ -676,7 +677,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
       ) : (
         <FoodEmptyState
           query={query}
-          filter={filter}
+          filter={listFilter}
           noFavourites={noFavourites}
           similarFoods={similarFoods}
           getMeta={getFoodMeta}
@@ -686,7 +687,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
         />
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [catalogPending, catalogFailed, retryCatalog, query, filter, noFavourites, similarFoods, newFoodHref]
+    [catalogPending, catalogFailed, retryCatalog, query, listFilter, noFavourites, similarFoods, newFoodHref]
   );
 
   // Chỉ ghi kcal, Gần đây and Bữa ăn của tôi: shared by the phone sheet and the desktop dialog
@@ -808,7 +809,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
                 {catalogPending && list.foods.length > 0 && <CatalogNote />}
                 {/* A fixed height (it was a maximum): the dialog keeps its size while the results change, so a few results never shrink and recentre it */}
                 {ready && (
-                <SwitchGlide id={filter} order={filterIndex}>
+                <SwitchGlide id={filter} order={filterIndex} ready={listFilter === filter}>
                   <FoodList
                     dataTour="add-results"
                     limits={ADD_LIST_LIMITS}
@@ -817,7 +818,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
                     {...listPick}
                     getMeta={getFoodMeta}
                     categoryName={categoryName}
-                    showCategory={!isCategoryFilter(filter)}
+                    showCategory={!isCategoryFilter(listFilter)}
                     isFavourite={isFavouriteFood}
                     showSourceTag={query.trim() !== ""}
                     empty={emptyState}
@@ -953,7 +954,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
 
             {catalogPending && list.foods.length > 0 && <CatalogNote />}
             {ready && (
-            <SwitchGlide id={filter} order={filterIndex}>
+            <SwitchGlide id={filter} order={filterIndex} ready={listFilter === filter}>
               <FoodList
                 dataTour="add-results"
                 limits={ADD_LIST_LIMITS}
@@ -961,7 +962,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
                 {...listPick}
                 getMeta={getFoodMeta}
                 categoryName={categoryName}
-                showCategory={!isCategoryFilter(filter)}
+                showCategory={!isCategoryFilter(listFilter)}
                 isFavourite={isFavouriteFood}
                 showSourceTag={query.trim() !== ""}
                 empty={emptyState}

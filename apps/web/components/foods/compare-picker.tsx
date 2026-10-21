@@ -34,7 +34,7 @@ export function ComparePicker({ open, onClose, lockedIds, onConfirm }: ComparePi
 
 // Mounted only while the sheet is open, so each opening starts with a blank search and no new picks
 function PickerBody({ lockedIds, onClose, onConfirm }: Omit<ComparePickerProps, "open">) {
-  const { query, setQuery, filter, setFilter, list, filterItems, filterIndex, categoryName, isFavouriteFood } = useFoodBrowse();
+  const { query, setQuery, filter, listFilter, setFilter, list, filterItems, filterIndex, categoryName, isFavouriteFood } = useFoodBrowse();
   const [picked, setPicked] = useState<string[]>([]);
 
   const selected = useMemo(() => [...lockedIds, ...picked], [lockedIds, picked]);
@@ -62,7 +62,7 @@ function PickerBody({ lockedIds, onClose, onConfirm }: Omit<ComparePickerProps, 
       <FoodSearchField value={query} onChange={setQuery} />
       <ChipGroup scroll items={filterItems} ariaLabel="Lọc món theo nhóm" />
       <div data-compare-picker-list className="max-h-[44dvh] overflow-y-auto">
-        <SwitchGlide id={filter} order={filterIndex}>
+        <SwitchGlide id={filter} order={filterIndex} ready={listFilter === filter}>
           <FoodList
             list={list}
             selectedIds={selected}
@@ -70,13 +70,13 @@ function PickerBody({ lockedIds, onClose, onConfirm }: Omit<ComparePickerProps, 
             onPick={toggle}
             getMeta={foodMeta}
             categoryName={categoryName}
-            showCategory={!isCategoryFilter(filter)}
+            showCategory={!isCategoryFilter(listFilter)}
             isFavourite={isFavouriteFood}
             empty={
               <EmptyState
                 title={query.trim() ? `Không có “${query.trim()}”` : "Chưa có món nào"}
                 actions={
-                  filter !== "all" && (
+                  listFilter !== "all" && (
                     <PillButton variant="tertiary" size="md" type="button" onClick={() => setFilter("all")}>
                       Bỏ lọc
                     </PillButton>

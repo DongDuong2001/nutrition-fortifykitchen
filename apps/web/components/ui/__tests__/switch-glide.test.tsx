@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { EnterGlide, SwitchGlide } from "../switch-glide";
+import { EnterGlide } from "../enter-glide";
+import { SwitchGlide } from "../switch-glide";
 
 // What can be seen without a browser: the first render of both glides plays nothing and shows the content as it is. The motion
 // itself (frames, directions, interrupts) is checked on the running app by tests/probes/glide_switch.py.

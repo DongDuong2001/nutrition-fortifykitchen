@@ -54,19 +54,19 @@ function OwnItemBody({ target, onClose, onAdd }: { target: OwnItemTarget; onClos
 }
 
 function PickStep({ onPick, onClose }: { onPick: (food: FoodItem) => void; onClose: () => void }) {
-  const { query, setQuery, filter, setFilter, list, filterItems, filterIndex, categoryName, isFavouriteFood, catalogPending, catalogFailed, retryCatalog } = useFoodBrowse();
+  const { query, setQuery, filter, listFilter, setFilter, list, filterItems, filterIndex, categoryName, isFavouriteFood, catalogPending, catalogFailed, retryCatalog } = useFoodBrowse();
   return (
     <div className="flex min-h-0 flex-col gap-3">
       <FoodSearchField value={query} onChange={setQuery} />
       <ChipGroup scroll items={filterItems} ariaLabel="Lọc món theo nhóm" />
       <div className="max-h-[44dvh] overflow-y-auto">
-        <SwitchGlide id={filter} order={filterIndex}>
+        <SwitchGlide id={filter} order={filterIndex} ready={listFilter === filter}>
           <FoodList
             list={list}
             onPick={onPick}
             getMeta={foodMeta}
             categoryName={categoryName}
-            showCategory={!isCategoryFilter(filter)}
+            showCategory={!isCategoryFilter(listFilter)}
             isFavourite={isFavouriteFood}
             showSourceTag={query.trim() !== ""}
             empty={
@@ -76,7 +76,7 @@ function PickStep({ onPick, onClose }: { onPick: (food: FoodItem) => void; onClo
                 <EmptyState
                   title={query.trim() ? `Không có “${query.trim()}”` : "Chưa có món nào"}
                   actions={
-                    filter !== "all" && (
+                    listFilter !== "all" && (
                       <PillButton variant="tertiary" size="md" type="button" onClick={() => setFilter("all")}>
                         Bỏ lọc
                       </PillButton>

@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { DesktopSidebar } from "@/components/ui/desktop-sidebar";
 import { ShellSlotContext } from "@/components/ui/shell-slot";
-import { EnterGlide } from "@/components/ui/switch-glide";
+import { EnterGlide } from "@/components/ui/enter-glide";
 import { NAV_TABS, tabForPath } from "@/lib/nav";
 
 /**

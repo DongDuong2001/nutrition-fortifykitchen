@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { startTransition, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { EASE_OUT, REDUCED_MS, SWITCH_IN_MS, SWITCH_OUT_MS, SWITCH_SHIFT_PX, glideDirection } from "@/lib/motion";
 
 type Dir = -1 | 0 | 1;
@@ -17,17 +17,23 @@ const prefersReducedMotion = () => typeof window !== "undefined" && window.match
  * - the wrapper holds the height of the content that left until the new content has come in, so the page does not jump;
  * - no animation on first mount, and with reduced motion only a 120 ms cross-fade;
  * - while the content leaves, the wrapper still draws the children of the id it showed (what was drawn last for it), so the
- *   caller changes its state at once (the chip lights up on the tap) and the new list is drawn when its turn comes.
+ *   caller changes its state at once (the chip lights up on the tap) and the new list is drawn when its turn comes: the fade-out
+ *   starts in the tap's frame, the swap is a low-priority transition, and with `ready` false (the caller's list is still on its way,
+ *   see useFoodBrowse listFilter) the swap waits for it. The rows are never re-keyed or remounted: the same children type sits at
+ *   the same place, so FoodList keeps its memo; only the wrapper's transform and opacity move.
  * `id` is what the content is (a filter, a tab); a change of the children under the same id is drawn at once.
  */
 export function SwitchGlide({
   id,
   order = 0,
+  ready = true,
   children,
   className,
   ...rest
 }: {
   id: string;
+  /** False while the children for `id` are not built yet: the swap waits (the old content stays out, faded) until it is true. */
+  ready?: boolean;
   /** The place of the active chip or tab in its row: new content comes from the right when it grew, from the left when it fell. */
   order?: number;
   children: React.ReactNode;
@@ -38,6 +44,8 @@ export function SwitchGlide({
   const [shown, setShown] = useState<{ id: string; order: number; dir: Dir; swaps: number }>({ id, order, dir: 0, swaps: 0 });
   const shownRef = useRef(shown);
   const wanted = useRef({ id, order });
+  const readyRef = useRef(ready);
+  const waiting = useRef(false);
   const drawn = useRef<React.ReactNode>(children);
   const leaving = useRef<Animation | null>(null);
   const entering = useRef<Animation | null>(null);
@@ -45,14 +53,26 @@ export function SwitchGlide({
   useLayoutEffect(() => {
     shownRef.current = shown;
     wanted.current = { id, order };
+    readyRef.current = ready;
     if (id === shown.id) drawn.current = children;
   });
 
   const swap = () => {
+    if (!readyRef.current) {
+      waiting.current = true;
+      return;
+    }
+    waiting.current = false;
     const to = wanted.current;
     const from = shownRef.current;
-    setShown({ id: to.id, order: to.order, dir: glideDirection(from.order, to.order), swaps: from.swaps + 1 });
+    // Low priority: a tap or a keystroke during the render of the new list goes first
+    startTransition(() => setShown({ id: to.id, order: to.order, dir: glideDirection(from.order, to.order), swaps: from.swaps + 1 }));
   };
+
+  // The children for the wanted id arrived while the old content was already out
+  useLayoutEffect(() => {
+    if (ready && waiting.current) swap();
+  }, [ready]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // The content on screen leaves (80 ms), then phase 2 draws the one that is wanted by then
   const leave = () => {
@@ -118,29 +138,6 @@ export function SwitchGlide({
   return (
     <div ref={ref} data-glide={id} className={className} {...rest}>
       {id === shown.id ? children : drawn.current}
-    </div>
-  );
-}
-
-/**
- * The glide of a screen change that is not a push: a bottom-nav tab or a Tổng quan sub-tab. Keyed on `id`, so the new screen
- * is a new element that enters with the CSS .m-tab-in (12 px off to the side of the tab order, opacity, 200 ms, a transition
- * from @starting-style); the old one is simply gone, it does not slide out. No snapshots (a view transition snapshots the
- * whole screen twice, which a phone with 2 GB feels), no animation on first mount. `order` is the place of the tab in the
- * row: the new screen comes from the right when it grew.
- */
-export function EnterGlide({ id, order = 0, children, className = "" }: { id: string; order?: number; children: React.ReactNode; className?: string }) {
-  const [state, setState] = useState<{ id: string; order: number; dir: Dir; changed: boolean }>({ id, order, dir: 0, changed: false });
-  if (state.id !== id) setState({ id, order, dir: glideDirection(state.order, order), changed: true });
-  return (
-    <div
-      key={id}
-      data-glide-enter={id}
-      data-glide-dir={state.changed ? state.dir : undefined}
-      style={state.changed ? ({ "--m-tab-dir": state.dir } as React.CSSProperties) : undefined}
-      className={`${className} ${state.changed ? "m-tab-in" : ""}`.trim()}
-    >
-      {children}
     </div>
   );
 }

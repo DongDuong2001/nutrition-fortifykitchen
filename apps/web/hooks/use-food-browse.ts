@@ -51,14 +51,17 @@ export function useFoodBrowse({
   // cc-58: the field follows every keystroke, the list follows the query when the browser has a moment, so a key
   // never waits for a search of the whole catalogue
   const searched = useDeferredValue(listQuery);
+  // feat/glide: the same for the chip. `filter` lights the chip at once (and starts the glide in the tap's frame); the list is built from
+  // `listFilter`, which follows when the browser has a moment, so the tap's own render stays small (motion first, work after)
+  const listFilter = useDeferredValue(filter);
 
   // Filter and search combined. Grouped only for Tất cả with no query.
   // `foods` follows the catalogue (the live load, a made food) and demo mode
   // cc-67: a moment after the first paint the one-row-per-food index is there; a list is not drawn before (no rows that change names)
   const waitingForRows = oneRowPerFood && !rowsReady();
   const list = useMemo(
-    () => (waitingForRows || !enabled ? { grouped: false, foods: [], groups: [] } : buildFoodList(foods, searched, filter, favouriteIds, oneRowPerFood)),
-    [searched, filter, favouriteIds, foods, oneRowPerFood, waitingForRows, enabled]
+    () => (waitingForRows || !enabled ? { grouped: false, foods: [], groups: [] } : buildFoodList(foods, searched, listFilter, favouriteIds, oneRowPerFood)),
+    [searched, listFilter, favouriteIds, foods, oneRowPerFood, waitingForRows, enabled]
   );
   const categories = useMemo(() => (enabled ? chipCategories(foods) : []), [foods, enabled]);
   const categoryName = useCallback((food: FoodItem) => categoryLabel(categoryOf(food)), []);
@@ -90,12 +93,14 @@ export function useFoodBrowse({
   }, [list.foods, searched, foods]);
 
   // No saved favourite: the Yêu thích filter, no query, nothing in the list
-  const noFavourites = filter === "favorite" && !searched.trim() && list.foods.length === 0;
+  const noFavourites = listFilter === "favorite" && !searched.trim() && list.foods.length === 0;
 
   return {
     query,
     setQuery,
     filter,
+    /** The filter the list was built from: it follows `filter` a moment later (the chip lights first) */
+    listFilter,
     setFilter,
     list,
     filterItems,

@@ -287,6 +287,18 @@ describe("glide tokens", () => {
     expect(source).toContain("feat/glide");
   });
 
+  it("no animation library came back: CSS, the Web Animations API and lib/sheet-physics only", () => {
+    const pkg = JSON.parse(readFileSync(path.join(ROOT, "package.json"), "utf8"));
+    const deps = Object.keys({ ...pkg.dependencies, ...pkg.devDependencies });
+    expect(deps.filter((d) => /^(motion|framer-motion|react-spring|gsap|@react-spring\/.*)$/.test(d))).toEqual([]);
+  });
+
+  it("the chip lights at once and the list follows a moment later: the hook builds the list from a deferred filter", () => {
+    const hook = readFileSync(path.join(ROOT, "hooks/use-food-browse.ts"), "utf8");
+    expect(hook).toMatch(/const listFilter = useDeferredValue\(filter\);/);
+    expect(hook).toMatch(/buildFoodList\(foods, searched, listFilter,/);
+  });
+
   it("glideDirection: later is +1 (from the right), earlier -1, the same place 0 (a fade only)", () => {
     expect([glideDirection(0, 1), glideDirection(3, 1), glideDirection(2, 2)]).toEqual([1, -1, 0]);
   });
@@ -300,15 +312,20 @@ describe("glide tokens", () => {
     expect(src).toMatch(/SWITCH_SHIFT_PX/);
     // the way in fills backwards only (a lasting fill keeps a stacking context), the way out is cancelled when the new content is in
     expect(src).toMatch(/fill: "backwards"/);
+    // never re-keyed: the rows under it are the same elements before and after a switch, so FoodList keeps its memo
+    expect(src).not.toMatch(/\bkey=/);
+    // the swap is a low-priority transition and waits for a list that is still on its way (motion first, work after)
+    expect(src).toMatch(/startTransition\(/);
+    expect(src).toMatch(/readyRef/);
     expect(src).toMatch(/leaving\.current\?\.cancel\(\)/);
   });
 
   it("the places that switch content use the glide: /add and the pickers (filter), Giàu (kind and basis), the tabs and Tổng quan", () => {
     const uses: [string, RegExp][] = [
-      ["components/add/add-screen.tsx", /<SwitchGlide id=\{filter\} order=\{filterIndex\}>/],
-      ["components/foods/compare-picker.tsx", /<SwitchGlide id=\{filter\} order=\{filterIndex\}>/],
-      ["components/foods/ingredient-picker.tsx", /<SwitchGlide id=\{filter\} order=\{filterIndex\}>/],
-      ["components/training/own-item-sheet.tsx", /<SwitchGlide id=\{filter\} order=\{filterIndex\}>/],
+      ["components/add/add-screen.tsx", /<SwitchGlide id=\{filter\} order=\{filterIndex\} ready=\{listFilter === filter\}>/],
+      ["components/foods/compare-picker.tsx", /<SwitchGlide id=\{filter\} order=\{filterIndex\} ready=\{listFilter === filter\}>/],
+      ["components/foods/ingredient-picker.tsx", /<SwitchGlide id=\{filter\} order=\{filterIndex\} ready=\{listFilter === filter\}>/],
+      ["components/training/own-item-sheet.tsx", /<SwitchGlide id=\{filter\} order=\{filterIndex\} ready=\{listFilter === filter\}>/],
       ["app/(app)/explore/rich/[nutrient]/page.tsx", /<SwitchGlide id=\{`\$\{kind\}:\$\{shownBasis\}`\}/],
       ["components/ui/app-shell.tsx", /<EnterGlide id=\{tab \?\? pathname\}/],
       ["components/overview/overview-frame.tsx", /<EnterGlide id=\{current\}/],

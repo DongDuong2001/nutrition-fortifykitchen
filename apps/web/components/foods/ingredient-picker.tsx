@@ -39,7 +39,7 @@ export function IngredientPicker({
 
 // Mounted only while the sheet is open, so each opening starts with a blank search and nothing ticked
 function PickerBody({ onClose, onConfirm, disabledIds }: { onClose: () => void; onConfirm: (foods: FoodItem[]) => void; disabledIds: string[] }) {
-  const { query, setQuery, filter, setFilter, list, filterItems, filterIndex, categoryName, isFavouriteFood, catalogPending, catalogFailed, retryCatalog } = useFoodBrowse({ oneRowPerFood: false });
+  const { query, setQuery, filter, listFilter, setFilter, list, filterItems, filterIndex, categoryName, isFavouriteFood, catalogPending, catalogFailed, retryCatalog } = useFoodBrowse({ oneRowPerFood: false });
   const [picked, setPicked] = useState<FoodItem[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
   const toggle = (food: FoodItem) =>
@@ -62,7 +62,7 @@ function PickerBody({ onClose, onConfirm, disabledIds }: { onClose: () => void; 
       <FoodSearchField value={query} onChange={setQuery} />
       <ChipGroup scroll items={filterItems} ariaLabel="Lọc món theo nhóm" />
       <div data-ingredient-picker-list className="max-h-[44dvh] overflow-y-auto">
-        <SwitchGlide id={filter} order={filterIndex}>
+        <SwitchGlide id={filter} order={filterIndex} ready={listFilter === filter}>
           <FoodList
             list={list}
             disabledIds={disabledIds}
@@ -70,7 +70,7 @@ function PickerBody({ onClose, onConfirm, disabledIds }: { onClose: () => void; 
             tray={{ ids: picked.map((f) => f.id), onToggle: toggle }}
             getMeta={foodMeta}
             categoryName={categoryName}
-            showCategory={!isCategoryFilter(filter)}
+            showCategory={!isCategoryFilter(listFilter)}
             isFavourite={isFavouriteFood}
             showSourceTag={query.trim() !== ""}
             footer={
@@ -95,7 +95,7 @@ function PickerBody({ onClose, onConfirm, disabledIds }: { onClose: () => void; 
                 <EmptyState
                   title={query.trim() ? `Không có “${query.trim()}”` : "Chưa có món nào"}
                   actions={
-                    filter !== "all" && (
+                    listFilter !== "all" && (
                       <PillButton variant="tertiary" size="md" type="button" onClick={() => setFilter("all")}>
                         Bỏ lọc
                       </PillButton>
