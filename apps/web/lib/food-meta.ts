@@ -20,6 +20,19 @@ export function brandToShow(food: Pick<FoodItem, "brand" | "source">): string | 
   return same(brand, foodSourceLabel(food.source)) ? null : brand;
 }
 
+/** The first serving of a food row, 100 g when the food has none. */
+function firstServing(food: FoodItem) {
+  return food.servings[0] || { label: "100 g", grams: 100 };
+}
+
+/** "84 kcal / 30 g": the energy of the first serving ("Chưa có kcal" when unknown, never 0 kcal). The + sheet's second line; V3 shows no carbs or potassium here. */
+export function foodServingMeta(food: FoodItem): string {
+  const serving = firstServing(food);
+  const energy = scaleNutrients(food.nutrients, serving.grams).energy;
+  const known = typeof energy === "number" && Number.isFinite(energy);
+  return `${known ? `${formatAmount(Math.round(energy), "kcal")} kcal` : "Chưa có kcal"} / ${serving.label}`;
+}
+
 /** The second line of a food row: kcal per its first serving ("Chưa có kcal" when unknown), then carbs and potassium when known. */
 export function foodMeta(food: FoodItem): string {
   const defaultServing = food.servings[0] || { label: "100 g", grams: 100 };

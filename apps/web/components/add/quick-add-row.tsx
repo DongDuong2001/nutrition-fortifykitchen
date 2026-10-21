@@ -10,20 +10,27 @@ export interface QuickAddRowProps {
   /** After the row: a chevron that opens the portion panel, or a ⋯ that manages the item. */
   trailing?: React.ReactNode;
   withBorderTop?: boolean;
+  /** V3: the row is a white card of its own (18 px corners, the ring, 16 px inside) on the grey page: the + sheet's Chỉ thêm kcal */
+  card?: boolean;
 }
 
 /**
  * One tap adds. A row of the add sheet and of Bữa ăn của tôi in Khám phá: the whole left part is the add button
  * (name, meta, a + mark), the right part is a separate 44 px control. Row min 52 px (UI-RULES row pattern).
  */
-export function QuickAddRow({ name, meta, addLabel, onAdd, trailing, withBorderTop = true }: QuickAddRowProps) {
+export function QuickAddRow({ name, meta, addLabel, onAdd, trailing, withBorderTop = true, card = false }: QuickAddRowProps) {
   return (
-    <div data-quick-row className={`flex items-center gap-1 ${withBorderTop ? "border-t border-divider" : ""}`}>
+    <div
+      data-quick-row
+      className={`flex items-center gap-1 ${card ? "rounded-card border border-transparent bg-card shadow-ring lg:shadow-card" : withBorderTop ? "border-t border-divider" : ""}`}
+    >
       <button
         type="button"
         onClick={onAdd}
         aria-label={addLabel}
-        className="flex min-h-[52px] min-w-0 flex-1 cursor-pointer items-center gap-3 rounded-xl border-0 bg-transparent py-2 text-left text-text m-tint transition-press"
+        className={`flex min-w-0 flex-1 cursor-pointer items-center gap-3 border-0 bg-transparent py-2 text-left text-text m-tint transition-press ${
+          card ? "min-h-14 rounded-card px-4" : "min-h-[52px] rounded-xl"
+        }`}
       >
         <span className="flex min-w-0 flex-1 flex-col gap-1">
           <span className="line-clamp-2 text-callout font-semibold leading-snug">{name}</span>

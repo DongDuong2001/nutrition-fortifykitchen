@@ -86,3 +86,14 @@ describe("Notice, EmptyState, SectionTitle, ChipGroup scroll, Card padding (cc-6
     expect(renderToStaticMarkup(<Card as="li">a</Card>)).toMatch(/^<li /);
   });
 });
+
+describe("ChipGroup scroll with an icon (V3 filter chips)", () => {
+  it("draws the icon before the label and keeps the 44 px chip", () => {
+    const html = renderToStaticMarkup(
+      <ChipGroup scroll sheet ariaLabel="Lọc món" items={[{ id: "dam", label: "Đạm", icon: <i data-testid="tile" />, onClick: () => {} }]} />
+    );
+    expect(html.indexOf("data-testid=\"tile\"")).toBeLessThan(html.indexOf("Đạm"));
+    expect(html).toContain("min-h-11");
+    expect(html).not.toContain("data-fade");
+  });
+});

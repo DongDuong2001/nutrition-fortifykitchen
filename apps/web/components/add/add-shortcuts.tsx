@@ -9,6 +9,7 @@ import { formatAmount } from "@/lib/format";
 import { foodRowKcal } from "@/lib/food-meta";
 import { rowName } from "@/lib/food-rows";
 import { Card } from "@/components/ui/card";
+import { Expand } from "@/components/ui/expand";
 
 export interface RecentShortcut {
   key: string;
@@ -35,6 +36,10 @@ export interface AddShortcutsProps {
   onOpenRecent: (item: RecentShortcut) => void;
   onAddSavedMeal: (meal: SavedMeal) => void;
   onQuickKcal: () => void;
+  /** Gần đây, Hay ăn, Yêu thích and Bữa ăn của tôi: nothing here while searching (default true) */
+  showCarousels?: boolean;
+  /** Chỉ thêm kcal (default true): V3 keeps it one tap away while searching too, only a category chip takes it away */
+  showQuick?: boolean;
 }
 
 /** One small card of a carousel: the body opens the portion panel (or says what it is), the + adds in one tap. */
@@ -94,7 +99,7 @@ function ShortcutCard({
  * + = add with that portion) and Bữa ăn của tôi (+ adds every food), as carousels; then Chỉ thêm kcal.
  * Nothing here is shown while searching.
  */
-export function AddShortcuts({ recents, frequent = [], favourites, savedMeals, onAddRecent, onOpenRecent, onAddSavedMeal, onQuickKcal }: AddShortcutsProps) {
+export function AddShortcuts({ recents, frequent = [], favourites, savedMeals, onAddRecent, onOpenRecent, onAddSavedMeal, onQuickKcal, showCarousels = true, showQuick = true }: AddShortcutsProps) {
   const foodCard = (r: RecentShortcut) => {
     const kcal = foodRowKcal(r.food, r.grams);
     const name = rowName(r.food);
@@ -111,36 +116,38 @@ export function AddShortcuts({ recents, frequent = [], favourites, savedMeals, o
     );
   };
 
+  // Expand clips what it holds: the wrapper is 16 px wider and 4 px taller on every side than its content, so a card's ring and the
+  // carousel's bleed to the sheet's edge are not cut (the padding inside puts the content back where it was)
+  const hasCarousels = recents.length + frequent.length + favourites.length + savedMeals.length > 0;
   return (
-    <div className="flex shrink-0 flex-col gap-3">
-      {recents.length > 0 && (
-        <Carousel title="Gần đây" id="add-recents">
-          {recents.map(foodCard)}
-        </Carousel>
-      )}
-      {frequent.length > 0 && <Carousel title="Hay ăn">{frequent.map(foodCard)}</Carousel>}
-      {favourites.length > 0 && <Carousel title="Yêu thích">{favourites.map(foodCard)}</Carousel>}
-      {savedMeals.length > 0 && (
-        <Carousel title="Bữa ăn của tôi">
-          {savedMeals.map(({ meal, itemCount, kcal }) => (
-            <ShortcutCard
-              key={meal.id}
-              name={meal.name}
-              meta={`${itemCount} món · ${formatAmount(kcal, "kcal")} kcal`}
-              addLabel={`Thêm ${meal.name}, ${itemCount} món`}
-              onAdd={() => onAddSavedMeal(meal)}
-            />
-          ))}
-        </Carousel>
-      )}
-
-      <QuickAddRow
-        name="Chỉ thêm kcal"
-        meta="Nhập kcal, không cần chọn món"
-        addLabel="Chỉ thêm kcal"
-        onAdd={onQuickKcal}
-        withBorderTop={false}
-      />
-    </div>
+    <>
+      <Expand open={showCarousels && hasCarousels} wrapClassName="flex-none -mx-4 -my-1" className="px-4 py-1">
+        <div className="flex shrink-0 flex-col gap-3">
+          {recents.length > 0 && (
+            <Carousel title="Gần đây" id="add-recents">
+              {recents.map(foodCard)}
+            </Carousel>
+          )}
+          {frequent.length > 0 && <Carousel title="Hay ăn">{frequent.map(foodCard)}</Carousel>}
+          {favourites.length > 0 && <Carousel title="Yêu thích">{favourites.map(foodCard)}</Carousel>}
+          {savedMeals.length > 0 && (
+            <Carousel title="Bữa ăn của tôi">
+              {savedMeals.map(({ meal, itemCount, kcal }) => (
+                <ShortcutCard
+                  key={meal.id}
+                  name={meal.name}
+                  meta={`${itemCount} món · ${formatAmount(kcal, "kcal")} kcal`}
+                  addLabel={`Thêm ${meal.name}, ${itemCount} món`}
+                  onAdd={() => onAddSavedMeal(meal)}
+                />
+              ))}
+            </Carousel>
+          )}
+        </div>
+      </Expand>
+      <Expand open={showQuick} wrapClassName="flex-none -mx-4 -my-1" className="px-4 py-1">
+        <QuickAddRow name="Chỉ thêm kcal" meta="Nhập kcal, không cần chọn món" addLabel="Chỉ thêm kcal" onAdd={onQuickKcal} card />
+      </Expand>
+    </>
   );
 }
