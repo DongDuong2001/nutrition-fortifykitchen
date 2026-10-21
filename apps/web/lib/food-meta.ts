@@ -9,6 +9,17 @@ export function foodSourceLabel(source?: string | null): string {
   return sourceName(source)?.label ?? "Khác";
 }
 
+/**
+ * The brand a food page names before its source, or null when it only repeats the source's own name: a Fortify Kitchen row has the
+ * brand "Fortify Kitchen" and the source "Fortify Kitchen", and the page says it once.
+ */
+export function brandToShow(food: Pick<FoodItem, "brand" | "source">): string | null {
+  const brand = food.brand?.trim();
+  if (!brand) return null;
+  const same = (a: string, b: string) => a.trim().replace(/\s+/g, " ").toLowerCase() === b.trim().replace(/\s+/g, " ").toLowerCase();
+  return same(brand, foodSourceLabel(food.source)) ? null : brand;
+}
+
 /** The second line of a food row: kcal per its first serving ("Chưa có kcal" when unknown), then carbs and potassium when known. */
 export function foodMeta(food: FoodItem): string {
   const defaultServing = food.servings[0] || { label: "100 g", grams: 100 };

@@ -12,6 +12,7 @@ import {
   categoryOf,
   type FoodFilter,
 } from "@/lib/food-categories";
+import { MINH_HAO_LABEL, isFortifyKitchenFood } from "@/lib/fortify-kitchen";
 import { useDiary } from "@/lib/diary-store";
 
 /**
@@ -19,10 +20,17 @@ import { useDiary } from "@/lib/diary-store";
  * the same index, the same category chips and the same empty states. `enabled` false (the add sheet's first frame): the
  * list and the chips are not worked out yet, so the sheet's first frame costs only its own frame.
  */
-export function useFoodBrowse({ oneRowPerFood = true, enabled = true }: { oneRowPerFood?: boolean; enabled?: boolean } = {}) {
+export function useFoodBrowse({
+  oneRowPerFood = true,
+  enabled = true,
+  fortifyTab = false,
+}: { oneRowPerFood?: boolean; enabled?: boolean; /** The Đồ ăn của Minh Hào chip after Tất cả (the add sheet): only while the catalogue has such a row */ fortifyTab?: boolean } = {}) {
   const { favouriteIds, isFavourite } = useDiary();
   const { foods, version, pending: catalogPending, failed: catalogFailed, retry: retryCatalog } = useCatalogFoods();
-  const [filter, setFilter] = useState<FoodFilter>("all");
+  const [picked, setFilter] = useState<FoodFilter>("all");
+  const hasFortify = useMemo(() => fortifyTab && enabled && foods.some(isFortifyKitchenFood), [fortifyTab, enabled, foods]);
+  // The chip goes when the catalogue loses its rows (another account, a reload): the list falls back to Tất cả, never an empty tab
+  const filter: FoodFilter = picked === "minh_hao" && !hasFortify ? "all" : picked;
   const [query, setQuery] = useState("");
   // The first letter alone waits 120 ms before the list follows it, so the list does not flash the matches of every single
   // letter passed on the way to a word; from the second letter the list follows at once (port of the behaviour of PR #29)
@@ -61,6 +69,7 @@ export function useFoodBrowse({ oneRowPerFood = true, enabled = true }: { oneRow
   const filterItems = useMemo(
     () => [
       { id: "all", label: "Tất cả", active: filter === "all", onClick: () => setFilter("all") },
+      ...(hasFortify ? [{ id: "minh_hao", label: MINH_HAO_LABEL, active: filter === "minh_hao", onClick: () => setFilter("minh_hao") }] : []),
       { id: "favorite", label: "Yêu thích", active: filter === "favorite", onClick: () => setFilter("favorite") },
       ...categories.map((c) => ({
         id: c.key,
@@ -69,7 +78,7 @@ export function useFoodBrowse({ oneRowPerFood = true, enabled = true }: { oneRow
         onClick: () => setFilter(c.key),
       })),
     ],
-    [filter, categories]
+    [filter, categories, hasFortify]
   );
 
   // Fuzzy suggestions when results are empty

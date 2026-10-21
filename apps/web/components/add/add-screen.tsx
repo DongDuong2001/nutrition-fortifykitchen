@@ -354,7 +354,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
     catalogPending,
     catalogFailed,
     retryCatalog,
-  } = useFoodBrowse({ enabled: ready });
+  } = useFoodBrowse({ enabled: ready, fortifyTab: true });
 
   useEffect(() => {
     phoneScrollRef.current?.scrollTo({ top: 0 });

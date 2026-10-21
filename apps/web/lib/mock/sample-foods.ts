@@ -1018,3 +1018,58 @@ SAMPLE_FOODS.push({
 });
 
 SAMPLE_FOODS.push(...RECIPE_INGREDIENT_FOODS, ...RECIPE_DISH_FOODS);
+
+// Hao 21/10: Đồ ăn của Minh Hào has demo rows, so the chip, the Khám phá carousel and their probes have data. Demo only
+// (never in the live bundle: lib/mock/live/sample-foods.ts is empty), named "(mẫu demo)" so nobody takes them for the
+// real rows of Fortify Kitchen that the import brings. Plain foods: a weighed portion first, never parts or ingredients.
+const FORTIFY_DEMO_SOURCE = "fortify_kitchen" as FoodItem["source"];
+SAMPLE_FOODS.push(
+  {
+    id: "demo-fk-uc-ga",
+    category: "mon_viet",
+    nameVi: "Ức gà nấu chậm Minh Hào (mẫu demo)",
+    brand: "Fortify Kitchen",
+    source: FORTIFY_DEMO_SOURCE,
+    sourceId: "fortify_kitchen:demo-uc-ga",
+    match: "unknown",
+    sourceRef: unlisted("Fortify Kitchen"),
+    demoOnly: true,
+    servings: [
+      { label: "1 phần lẻ (150 g sống)", grams: 150 },
+      { label: "100 g", grams: 100 },
+    ],
+    nutrients: { energy: 136, protein: 22.6, fat: 2.7, carbs: 3.8, fiber: 0.1, sugars: 3.09, saturated_fat: 0.567, sodium: 141 },
+  },
+  {
+    id: "demo-fk-tom-the",
+    category: "mon_viet",
+    nameVi: "Tôm thẻ nấu chậm Minh Hào (mẫu demo)",
+    brand: "Fortify Kitchen",
+    source: FORTIFY_DEMO_SOURCE,
+    sourceId: "fortify_kitchen:demo-tom-the",
+    match: "unknown",
+    sourceRef: unlisted("Fortify Kitchen"),
+    demoOnly: true,
+    servings: [
+      { label: "1 phần lẻ (150 g sống)", grams: 150 },
+      { label: "100 g", grams: 100 },
+    ],
+    nutrients: { energy: 87, protein: 13.7, fat: 1.1, carbs: 4.7, fiber: 0.1, sugars: 3.09, saturated_fat: 0.265, sodium: 662 },
+  },
+  {
+    id: "demo-fk-mi-y",
+    category: "mon_viet",
+    nameVi: "Mì Ý sốt cà Minh Hào (mẫu demo)",
+    brand: "Fortify Kitchen",
+    source: FORTIFY_DEMO_SOURCE,
+    sourceId: "fortify_kitchen:demo-mi-y-sot-ca",
+    match: "unknown",
+    sourceRef: unlisted("Fortify Kitchen"),
+    demoOnly: true,
+    servings: [
+      { label: "1 phần", grams: 370.9 },
+      { label: "100 g", grams: 100 },
+    ],
+    nutrients: { energy: 102.2, protein: 3.5, fat: 1.5, carbs: 18.9, fiber: 1.7, saturated_fat: 0.398, sodium: 145 },
+  }
+);
