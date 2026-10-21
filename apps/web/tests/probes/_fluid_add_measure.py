@@ -9,6 +9,7 @@
   rich     Khám phá -> a "Giàu ..." tile: pressed state and new screen in ms
   release  drag the sheet down by its grabber and let go: frames with no movement after the release, the jump of the first
            frame against the finger's own speed (a stall or a lurch), and how long the slide takes
+  addlist  what the /add list costs: nodes and food rows in the sheet, Tab stops, ms until the first food row is drawn (fix/polish-1020)
   sheets   first and second open of the calendar and of the day's ⋯ menu: tap -> first sheet frame in ms
 Frames come from two sources: requestAnimationFrame in the page (timing, the sheet's position) and the CDP screencast
 (pixels: a frame whose lower page is one flat colour is blank; also the filmstrips).
@@ -484,7 +485,34 @@ async def sc_release(browser, rate, label, strip_page, runs):
     return out
 
 
-SCENARIOS = {"openclose": sc_open_close, "addtray": sc_addtray, "tabs": sc_tabs, "rich": sc_rich, "sheets": sc_sheets, "release": sc_release}
+async def sc_addlist(browser, rate, label, strip_page, runs):
+    """Open /add and count what the list costs: DOM nodes in the sheet, food rows, Tab stops, and the time until the first food row is drawn."""
+    out = []
+    for run in range(runs):
+        ctx, page, cdp = await new_ctx(browser, rate)
+        await open_home(page, cdp, rate)
+        await page.evaluate("""
+          window.__al = {};
+          const iv = setInterval(() => {
+            const r = document.querySelector('[data-add-panel] button[data-food-row]');
+            if (r && r.getClientRects().length && window.__al.row === undefined) { window.__al.row = performance.now(); }
+            if (window.__al.row !== undefined && window.__al.down !== undefined) clearInterval(iv);
+          }, 1);
+        """)
+        fab = page.locator("#mobile-add-fab")
+        rows, down, origin, shots, tdw = await record(page, cdp, lambda: fab.tap(), settle_ms=1200)
+        t = await page.evaluate("window.__al")
+        stats = await page.evaluate("""() => {
+          const p = document.querySelector('[data-add-panel]');
+          const stops = [...p.querySelectorAll('button, a[href], input')].filter((e) => !e.disabled && e.tabIndex >= 0 && !e.closest('[inert]')).length;
+          return { nodes: p.querySelectorAll('*').length, rows: p.querySelectorAll('button[data-food-row]').length, stops };
+        }""")
+        out.append({**stats, "first_row_ms": round(t["row"] - (down or 0), 1) if t.get("row") else None})
+        await ctx.close()
+    return out
+
+
+SCENARIOS = {"openclose": sc_open_close, "addtray": sc_addtray, "tabs": sc_tabs, "rich": sc_rich, "sheets": sc_sheets, "release": sc_release, "addlist": sc_addlist}
 
 
 def summarize(name, rate, data):
@@ -527,6 +555,8 @@ def summarize(name, rate, data):
         }
     if name == "rich":
         return {"Giàu tile pressed (ms)": med(data, "pressed_ms"), "Giàu screen (ms)": med(data, "screen_ms")}
+    if name == "addlist":
+        return {"DOM nodes in the /add sheet": med(data, "nodes"), "food rows drawn": med(data, "rows"), "Tab stops in the sheet": med(data, "stops"), "first food row drawn (ms after the tap)": med(data, "first_row_ms")}
     if name == "release":
         return {
             "close: finger px/frame": med(data["close"], "finger_px_per_frame"), "close: first frame after release (px moved)": med(data["close"], "first_jump_px"),

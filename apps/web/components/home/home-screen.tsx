@@ -63,6 +63,7 @@ import { HomeHero, type HeroPill } from "./home-hero";
 import { NutrientColumn } from "./nutrient-column";
 import { HOME_ROUTE } from "@/lib/nav";
 import { navigateFromSheet } from "@/lib/sheet-history";
+import { WhatsNewDue } from "@/components/whats-new/whats-new-due";
 
 // cc-51, cc-58: the sheets that are closed by default, select mode's bars and the share image (html-to-image) are chunks of their
 // own, fetched on the first touch or when the browser is idle (loadSheets). They are not next/dynamic: a dynamic component
@@ -583,7 +584,7 @@ function HomeContent() {
         className={`flex flex-col ${
           selecting
             ? "h-[calc(100dvh-112px-env(safe-area-inset-bottom))]"
-            : "h-[calc(100dvh-88px-env(safe-area-inset-bottom))] lg:h-dvh"
+            : "h-[calc(100dvh-88px-var(--update-bar-h,0px)-env(safe-area-inset-bottom))] lg:h-dvh"
         }`}
       >
         {selecting ? (
@@ -660,12 +661,12 @@ function HomeContent() {
           // cc-58: a bar over the page, above the bottom nav, so it pushes nothing down when it appears
           <div
             role="status"
-            className="pointer-events-none fixed inset-x-3 bottom-[calc(80px+env(safe-area-inset-bottom))] z-nav mx-auto max-w-[366px] rounded-xl bg-warning-bg px-3 py-2 text-cap leading-snug text-warning-text shadow-card lg:inset-x-auto lg:bottom-4 lg:right-8 lg:mx-0 lg:w-[400px] lg:max-w-none"
+            className="pointer-events-none fixed inset-x-3 bottom-[calc(80px+var(--update-bar-h,0px)+env(safe-area-inset-bottom))] z-nav mx-auto max-w-[366px] rounded-xl bg-warning-bg px-3 py-2 text-cap leading-snug text-warning-text shadow-card lg:inset-x-auto lg:bottom-4 lg:right-8 lg:mx-0 lg:w-[400px] lg:max-w-none"
           >
             Đang ngoại tuyến — món mới sẽ đồng bộ khi có mạng.
           </div>
         )}
-        <div className="mx-auto flex min-h-0 w-full max-w-[560px] flex-1 flex-col lg:mx-0 lg:max-w-[1240px] lg:px-8">
+        <main className="mx-auto flex min-h-0 w-full max-w-[560px] flex-1 flex-col lg:mx-0 lg:max-w-[1240px] lg:px-8">
           <HomeHero
             label={heroLabel(mode, entries, meals)}
             pills={selecting ? [] : pills}
@@ -740,7 +741,7 @@ function HomeContent() {
               />
             )}
           </div>
-        </div>
+        </main>
       </div>
 
       <>
@@ -775,6 +776,7 @@ function HomeContent() {
         />
       )}
       <InstallPromptHost busy={installBusy} />
+      <WhatsNewDue />
       <WhatsNewHost busy={installBusy} />
       {sheets && explainerMounted && <sheets.LevelExplainerSheet open={explainerOpen} onClose={() => setExplainerOpen(false)} level={level} />}
       {sheets && copySheetMounted && <sheets.CopyYesterdaySheet open={isCopySheetOpen} onClose={() => setIsCopySheetOpen(false)} targetIso={viewIso} />}

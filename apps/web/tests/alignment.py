@@ -107,7 +107,9 @@ def check_align_groups(page, group_name=None, edges="lr"):
             const buckets = new Map();
             for (const el of list) {
                 // Find logical container (section, card container, main, or portion panel container)
-                const container = name.endsWith("-header")
+                // A "-header" group, and the Hôm nay page group (its h1 row sits outside the page's <main>, its body inside), are scoped to the
+                // data-align-container: a <main> between two members must not split them
+                const container = (name.endsWith("-header") || name === "home-page")
                     ? (el.closest('[data-align-container]') || document.body)
                     : (el.closest('[data-align-container], section, main') || el.parentElement);
                 const bucket = buckets.get(container) || [];

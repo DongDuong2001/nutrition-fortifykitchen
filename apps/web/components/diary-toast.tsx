@@ -10,13 +10,13 @@ import { openSyncList } from "@/lib/sync-ui";
 import { usePathname } from "next/navigation";
 
 /**
- * The app's one toast, from the diary store. "Đã thêm …" offers Xem (jump to the meal), "Đã xóa …",
- * "Đã chép …", "Đã chuyển …" and the one-tap adds (a recent, a Bữa ăn của tôi, Chỉ ghi kcal) offer Hoàn tác, "Đã lưu …" offers
- * Xem (Khám phá), "Chưa lưu được món" offers Thử lại. The store ends it after its duration. cc-55: the countdown bar is
+ * The app's one toast, from the diary store. Every "Đã thêm …" (a tray, a portion, a recent, a Bữa ăn của tôi, Chỉ ghi kcal, a copy),
+ * "Đã xóa …" and "Đã chuyển …" offers Hoàn tác, "Đã lưu …" offers Xem (Khám phá), "Chưa lưu được món" offers Thử lại. Every action
+ * ends its toast at once. The store ends it after its duration. cc-55: the countdown bar is
  * CSS (no timer re-rendering the toast), and each toast rises in and fades away (Presence).
  */
 export function DiaryToast() {
-  const { undoParkedDelete, undoLastDelete, undoCopy, undoMove, retryUnsaved, setHighlightedMeal, pauseToast, resumeToast, dismissToast } = useDiary();
+  const { undoParkedDelete, undoLastDelete, undoCopy, undoMove, retryUnsaved, setHighlightedMeal, pauseToast, resumeToast, dismissToast, dismissToastAfterAction } = useDiary();
   const { toast, parkedDelete } = useDiaryToast();
   const swipe = useToastSwipe(dismissToast);
   // A new toast is a new element: its countdown starts over
@@ -53,7 +53,7 @@ export function DiaryToast() {
     <div
       role="status"
       data-lift={onAdd ? "" : undefined}
-      className="m-toast-host pointer-events-none fixed inset-x-0 bottom-[calc(72px+env(safe-area-inset-bottom)+12px)] z-sheet flex flex-col gap-2 px-3 lg:inset-x-auto lg:bottom-8 lg:right-8 lg:w-[400px]"
+      className="m-toast-host pointer-events-none fixed inset-x-0 bottom-[calc(72px+var(--update-bar-h,0px)+env(safe-area-inset-bottom)+12px)] z-sheet flex flex-col gap-2 px-3 lg:inset-x-auto lg:bottom-8 lg:right-8 lg:w-[400px]"
     >
       <Presence>
         {parkedDelete && (
@@ -76,6 +76,7 @@ export function DiaryToast() {
             announce={false}
             onPause={pauseToast}
             onResume={resumeToast}
+            onDismiss={() => dismissToastAfterAction(toast)}
             swipe={swipe}
             // One element for every toast: its text, action and clock are renewed in place (cc-64 2b grouped only some)
             key="diary-toast"

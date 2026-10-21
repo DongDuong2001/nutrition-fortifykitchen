@@ -449,6 +449,23 @@
   }
 }
 
+/* "Có bản mới" reserves 64 px at the bottom while it is up (lib/update-bar sets --update-bar-h on <html>; the tab frame's padding, Hôm nay's
+   list height and the diary toast's place read it). Registered as a length so the room grows and shrinks over --m-row with the toast
+   instead of the rows jumping under a finger. */
+@property --update-bar-h {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
+:root {
+  transition: --update-bar-h var(--m-row) var(--ease-out);
+}
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    transition: none;
+  }
+}
+
 /*
  * Motion (cc-51, retuned by cc-55). One motion language for the whole app:
  * - Curves: --ease-out for anything that enters, leaves or is pressed, --ease-drawer for sheets, --ease-in-out for

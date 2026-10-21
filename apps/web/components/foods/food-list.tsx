@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import type { FoodItem } from "@/lib/mock/foods";
 import type { FoodList as FoodListData } from "@/lib/food-categories";
 import { searchTag } from "@/lib/food-source";
@@ -21,6 +21,19 @@ function SourceTag({ food }: { food: FoodItem }) {
 
 /** A list shows this many rows first (the live catalogue has thousands); "Xem thêm" adds as many again. */
 export const FOOD_LIST_LIMIT = 50;
+
+/** How many rows a list draws first, and how many "Xem thêm" adds: per category when grouped, and for a flat (searched or filtered) list. */
+export interface FoodListLimits {
+  grouped: number;
+  flat: number;
+  step: number;
+}
+export const DEFAULT_FOOD_LIST_LIMITS: FoodListLimits = { grouped: FOOD_LIST_LIMIT, flat: FOOD_LIST_LIMIT, step: FOOD_LIST_LIMIT };
+/**
+ * The add sheet's lists: a few rows of each category (Tab walks tens of controls, not hundreds, and the sheet draws a few hundred
+ * nodes, not thousands), more on request.
+ */
+export const ADD_LIST_LIMITS: FoodListLimits = { grouped: 5, flat: 30, step: 30 };
 
 export interface FoodListProps {
   list: FoodListData;
@@ -52,6 +65,10 @@ export interface FoodListProps {
   className?: string;
   /** data-tour value of the list, for the tour and tips. */
   dataTour?: string;
+  /** How many rows to draw first and per "Xem thêm"; every list but the add sheet's uses DEFAULT_FOOD_LIST_LIMITS. */
+  limits?: FoodListLimits;
+  /** The list's own element, for a caller that scrolls it (the add dialog's list on a desktop). */
+  scrollRef?: React.Ref<HTMLDivElement>;
 }
 
 /**
@@ -77,20 +94,36 @@ function FoodListView({
   footer,
   className = "",
   dataTour,
+  limits = DEFAULT_FOOD_LIST_LIMITS,
+  scrollRef,
 }: FoodListProps) {
   // cc-58: rows past the limit wait behind "Xem thêm", per list (a new list, from a query or a filter, starts again)
   const [more, setMore] = useState<{ list: FoodListData; extra: Record<string, number> }>({ list, extra: {} });
   const extra = more.list === list ? more.extra : {};
-  const shownOf = (key: string, foods: FoodItem[]) => foods.slice(0, FOOD_LIST_LIMIT + (extra[key] ?? 0));
-  const moreRow = (key: string, total: number) =>
-    total > FOOD_LIST_LIMIT + (extra[key] ?? 0) ? (
+  const firstOf = (key: string) => (key === "flat" ? limits.flat : limits.grouped);
+  const shownOf = (key: string, foods: FoodItem[]) => foods.slice(0, firstOf(key) + (extra[key] ?? 0));
+  // After "Xem thêm" focus goes to the first row it brought in (the button it was on is gone, and a keyboard or a screen reader
+  // would otherwise start again from the top of the page)
+  const focusAfterMore = useRef<string | null>(null);
+  useEffect(() => {
+    const id = focusAfterMore.current;
+    if (!id) return;
+    focusAfterMore.current = null;
+    document.querySelector<HTMLElement>(`[data-food-id="${CSS.escape(id)}"]`)?.focus();
+  }, [more]);
+  // The button names its category ("Xem thêm Rau củ (12 món)"): one per category on the page would otherwise read the same
+  const moreRow = (key: string, foods: FoodItem[], name?: string) =>
+    foods.length > firstOf(key) + (extra[key] ?? 0) ? (
       <li key="more" className="flex border-t border-divider">
         <button
           type="button"
-          onClick={() => setMore({ list, extra: { ...extra, [key]: (extra[key] ?? 0) + FOOD_LIST_LIMIT } })}
+          onClick={() => {
+            focusAfterMore.current = foods[firstOf(key) + (extra[key] ?? 0)]?.id ?? null;
+            setMore({ list, extra: { ...extra, [key]: (extra[key] ?? 0) + limits.step } });
+          }}
           className="flex min-h-14 w-full cursor-pointer items-center justify-center border-0 bg-transparent px-4 text-callout font-bold text-cobalt"
         >
-          Xem thêm
+          {`Xem thêm${name ? ` ${name}` : ""} (${foods.length - firstOf(key) - (extra[key] ?? 0)} món)`}
         </button>
       </li>
     ) : null;
@@ -112,6 +145,7 @@ function FoodListView({
         <button
           type="button"
           data-food-row
+          data-food-id={food.id}
           aria-pressed={selected}
           disabled={disabled}
           onClick={() => onPick(food)}
@@ -197,7 +231,7 @@ function FoodListView({
   const cardClass = "rounded-card border border-transparent shadow-ring lg:shadow-card bg-card";
 
   return (
-    <div data-tour={dataTour} className={`flex flex-col gap-3 ${className}`}>
+    <div ref={scrollRef} data-tour={dataTour} className={`flex flex-col gap-3 ${className}`}>
       {list.foods.length === 0 ? (
         empty
       ) : list.grouped ? (
@@ -215,14 +249,14 @@ function FoodListView({
             </div>
             <ul className="m-0 flex list-none flex-col overflow-hidden rounded-b-card p-0">
               {shownOf(group.key, group.foods).map((food) => renderRow(food, false))}
-              {moreRow(group.key, group.foods.length)}
+              {moreRow(group.key, group.foods, group.label)}
             </ul>
           </section>
         ))
       ) : (
         <ul data-align-group="add-list" data-align-edge="left" className={`m-0 flex shrink-0 list-none flex-col overflow-hidden p-0 ${cardClass}`}>
           {shownOf("flat", list.foods).map((food) => renderRow(food, showCategory))}
-          {moreRow("flat", list.foods.length)}
+          {moreRow("flat", list.foods)}
         </ul>
       )}
       {footer}

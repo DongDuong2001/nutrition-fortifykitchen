@@ -439,6 +439,20 @@
 - [ ] (Hao) In demo mode yesterday is read-only, so the nav's + carrying `?date=` is checked by cc_68 (live build, run by hand: `LIVE_BUILD=1`) and by add-opener.test.ts, not by the gate. cc_49 part 7 fails the same way on main with a live build (not from this branch).
 - Measured in headless Chromium (frame samples from requestAnimationFrame; blank frames from the CDP screencast): times are frame start times, so an absolute number is a few ms optimistic; before and after use the same method (docs/pr/feat-fluid-add.md).
 
+## fix/polish-1020 (21/10/2026, docs/pr/fix-polish-1020.md)
+
+- **"Mid-sheet" read as "a sheet that is moving".** A tip waits (and tries again 400 ms later) while a sheet is moving or a field someone typed in has focus; it may come over the add sheet's own empty search field, because the add tips belong there. If you meant "any sheet open", it is one condition in `interruptionBlockedByUi` (`lib/interruption.ts`).
+- **After Có gì mới, a tip waits for the next app open** (one interruption per open, as asked). The first-run tour still blocks everything, as before.
+- **The update bar reserves 64 px** (`--update-bar-h`) while it shows, and select mode on Hôm nay covers it (the select bar has the same place). Say if select mode should push it up instead.
+- **5 per category / 30 for a search is my number**, with "Xem thêm (n món)" (it used to read "Xem thêm"). Tell me if you want a different count; it is `ADD_LIST_LIMITS`.
+- **The meal header's 44 px hit area is clipped at the scroller edge for the first meal** (its top edge is the top of the scrolling area); the probe checks the second meal. The look is unchanged.
+- **Time to open /add at the live catalogue size was not measured in a browser** (the demo build has 43 foods; the 683-food numbers are server-rendered counts in a unit test). Worth a look on the real build.
+- **The hand-run update check changes `public/sw.js` for a few seconds** (`_sw_update.py`, `_polish_update_check.py`; not in any gate, because Playwright cannot route the browser's own sw.js fetch). It restores the file.
+- (review, 21/10) **The meal header's hit area is 28 px, not 44**: the pill is 24 px with the rows against it, so only the 4 px of paper above is free; 44 px without touching a row needs 16 px more height per meal. Decided by Hao 21/10: stays 28 px, no layout change.
+- (review, 21/10) **Release 2026-10-21c has no tour**, and is a new id although AGENTS.md says a fix extends the top entry (Hao asked for one entry for #32 and #33). Pick the id and the sw.js VERSION again on origin/main before merging.
+- (review, 21/10) **Unsaved work is detected from form fields** (lib/unsaved-work.ts): a settings screen that saves on blur keeps an update waiting until the screen is left; `data-no-unsaved` opts a field out.
+- (review, 21/10) **The "Có bản mới" toast stays 10 s** (the ui-ux-pro-max rule is 3–5 s for a toast); it carries a decision and the reserve is the same size.
+
 ## Handover 20/10/2026 (docs/dong-handover-2026-10-20.md)
 - (Hao) The handover for Dong is docs/dong-handover-2026-10-20.md: the made_at rule, the PR #20 API hardening, targets (DRI and upper limits), the 20/10 imports, the kefir SQL, the Red Bull portion, the backups, the open items and the rules used while he is away.
 - [ ] (Hao) Red Bull (nước tăng lực), food 2d27e50a-3cf8-49f4-ba55-10def014f96f, has "1 lon (250 ml)" = 260 g (sort 0) and "100 ml" = 104 g (sort 1) on the server, set by SQL on 20/10. No file in this repo holds that food (it is not in data/seed_foods.json); its record is in food-research/h1t-foods-batch3-import.json, outside the repo, which still has only "100 ml" = 104 g (sort 0), and h1t-foods-units-import.json has "1 lon (250 ml)" = 260 g with "100 g". A re-import from those files would drop the lon portion. Which file does the importer read for it, and should that record be added to the repo (a data/ file)?

@@ -18,7 +18,7 @@ import { AddShortcuts, type RecentShortcut, type SavedMealShortcut } from "@/com
 import { QuickAddSheet } from "@/components/add/quick-add-sheet";
 import { Sheet } from "@/components/ui/sheet";
 import { ChipGroup } from "@/components/ui/chip-group";
-import { FoodList } from "@/components/foods/food-list";
+import { ADD_LIST_LIMITS, FoodList } from "@/components/foods/food-list";
 import { FoodEmptyState } from "@/components/foods/food-empty-state";
 import { CatalogNote, CatalogStatus } from "@/components/foods/catalog-status";
 import { FoodSearchField } from "@/components/foods/food-search-field";
@@ -51,6 +51,7 @@ import { HOME_ROUTE } from "@/lib/nav";
 import { takeBackSheetEntries } from "@/lib/sheet-history";
 import { homeDay } from "@/lib/home-scroll";
 import { lockBodyScroll } from "@/lib/body-scroll-lock";
+import { useUnsavedWork } from "@/lib/unsaved-work";
 import { SHEET_CATCH_UP_MS, SHEET_EXIT_MS, SHEET_QUICK_ENTER_MS, useSheetDrag } from "@/components/ui/sheet";
 import { setInertExceptDrag } from "@/components/ui/sheet-drag-controller";
 import { haptic } from "@/lib/haptics";
@@ -123,6 +124,10 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
   // One layout is drawn, not both (cc-fluid-add): the hidden one used to cost a second food list on every open
   const isDesktop = useSyncExternalStore(subscribeDesktop, desktopNow, () => false);
 
+  // The lists scroll to the top when the query or the filter changes, so the first results are what is on screen, not a place far down the
+  // previous list (and the carousels fold away instead of cutting out)
+  const phoneScrollRef = useRef<HTMLDivElement>(null);
+  const desktopListRef = useRef<HTMLDivElement>(null);
   const desktopSearchInputRef = useRef<HTMLInputElement>(null);
   const phoneSearchInputRef = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -182,8 +187,24 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
   // settled (at once under reduced motion), so the keyboard never starts a third motion under the sheet and the scrim. Nothing
   // is taken from a field the person already tapped, and nothing at all when they touched the panel during the slide.
   useEffect(() => {
+    // The field the screen focuses itself is marked: a tip may still come over it until someone types (lib/interruption)
+    // The mark goes at the first touch or key in the field: from then on someone is using it, and it blocks a tip like any focused field.
+    const autofocus = (input: HTMLInputElement | null, options?: FocusOptions) => {
+      if (!input) return;
+      input.dataset.autofocused = "";
+      const clear = () => {
+        delete input.dataset.autofocused;
+        input.removeEventListener("pointerdown", clear);
+        input.removeEventListener("input", clear);
+        input.removeEventListener("keydown", clear);
+      };
+      input.addEventListener("pointerdown", clear);
+      input.addEventListener("input", clear);
+      input.addEventListener("keydown", clear);
+      input.focus(options);
+    };
     if (isDesktop) {
-      desktopSearchInputRef.current?.focus();
+      autofocus(desktopSearchInputRef.current);
       return;
     }
     const panel = panelRef.current;
@@ -202,7 +223,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
       if (touched) return;
       const active = document.activeElement;
       if (active && active !== document.body && active.matches("input, textarea") && panel?.contains(active)) return;
-      phoneSearchInputRef.current?.focus({ preventScroll: true });
+      autofocus(phoneSearchInputRef.current, { preventScroll: true });
     };
     const onEnd = (e: TransitionEvent) => {
       if (e.target === panel) focusSearch();
@@ -246,12 +267,48 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
     };
   }, [standalone]);
 
+  // The portion sheet's ✕, Esc, the scrim and a drag down: back to the list with focus on the row that opened it (the search field
+  // when the food came from a card, and no keyboard is raised for it: a tap on the field does that)
+  // The control the person pressed last (any row of the list, behind "Xem thêm" or not, a card of a carousel, a chevron): the portion
+  // sheet it opens gives focus back to that very element. Noted before the click that opens the sheet, so pickFood can keep it.
+  const lastPressed = useRef<{ el: HTMLElement | null; touch: boolean }>({ el: null, touch: false });
+  const portionOpener = useRef<{ el: HTMLElement | null; touch: boolean }>({ el: null, touch: false });
+  useEffect(() => {
+    const note = (e: Event) => {
+      const target = e.target instanceof Element ? e.target : null;
+      lastPressed.current = {
+        el: target?.closest<HTMLElement>("button, a[href], [role=button]") ?? null,
+        touch: e.type === "pointerdown" && (e as PointerEvent).pointerType === "touch",
+      };
+    };
+    document.addEventListener("pointerdown", note, true);
+    document.addEventListener("keydown", note, true);
+    return () => {
+      document.removeEventListener("pointerdown", note, true);
+      document.removeEventListener("keydown", note, true);
+    };
+  }, []);
+  const closePortionSheet = useCallback(() => {
+    const id = selectedFood?.id;
+    const { el: opener, touch } = portionOpener.current;
+    setSelectedFood(null);
+    requestAnimationFrame(() => {
+      const panel = phoneSearchInputRef.current?.closest("[data-add-panel]") ?? document;
+      const row = id ? panel.querySelector<HTMLElement>(`[data-food-row][data-food-id="${CSS.escape(id)}"]`) : null;
+      const back = opener?.isConnected && !opener.closest("[inert]") ? opener : row;
+      if (back) back.focus({ preventScroll: true });
+      // Never an input after a touch: on Android that raises the keyboard under a person who only closed a sheet
+      else if (!touch) phoneSearchInputRef.current?.focus({ preventScroll: true });
+    });
+  }, [selectedFood]);
+
   // Pick a food with one serving (default: its first). Sets the amount too, so the portion panel shows it.
   // cc-51: a food opens on the portion this user last logged for it, else the catalogue's first portion
   const pickFood = useCallback((food: FoodItem, serving?: FoodServing) => {
     // cc-67: raw and cooked are one list row, so the food opens in the state it was last logged in
     const last = serving ? null : lastPortionOf(twinIdsOf(food), recentFoods, MOCK_FOODS);
     const s = serving ?? (last ? { label: last.label, grams: last.grams } : defaultPortionOf(food));
+    portionOpener.current = lastPressed.current;
     setSelectedFood(last?.food ?? food);
     setGramsInput(String(s.grams));
     setSelectedServingLabel(s.label);
@@ -298,6 +355,11 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
     catalogFailed,
     retryCatalog,
   } = useFoodBrowse({ enabled: ready });
+
+  useEffect(() => {
+    phoneScrollRef.current?.scrollTo({ top: 0 });
+    desktopListRef.current?.scrollTo({ top: 0 });
+  }, [query, filter]);
 
   // The tour's search step starts with "phở" typed, so the results are already there to tap
   useEffect(() => {
@@ -431,6 +493,8 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
     setSelectedServingLabel("");
   };
 
+  // A tray with foods in it, an open portion sheet or the Chỉ ghi kcal form is something a reload would lose: the update waits (lib/unsaved-work)
+  useUnsavedWork("add-sheet", tray.length > 0 || selectedFood !== null || quickOpen);
   const trayTotalsNow = useMemo(() => trayTotals(tray), [tray]);
   const trayAddable = canAddTray(tray);
   const handleAddTray = () => {
@@ -663,10 +727,12 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
     [selectedFood?.id, onPickRow, favouritesOnly, onOpenRow, trayIds, onToggleTray]
   );
 
+  // Opened straight the sheet is the whole page: its landmark is <main>. Over a tab the page under it has its own (and is inert).
+  const Root = standalone ? "main" : "div";
   return (
     // Opened over a tab (the intercepting route) the page under it is the real screen, still mounted; nothing here is in the
     // page's flow. Opened straight (a link, a reload) there is nothing under it: plain paper.
-    <div className={standalone ? "min-h-dvh bg-page text-text font-sans" : "text-text font-sans"}>
+    <Root className={standalone ? "min-h-dvh bg-page text-text font-sans" : "text-text font-sans"}>
       <div ref={scrimRef} aria-hidden="true" data-state={sheetState} onClick={() => handleClose()} className="m-scrim m-scrim-dialog m-quick fixed inset-0 z-nav bg-scrim" />
 
       {/* ============================================================== */}
@@ -734,13 +800,16 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
                 {/* Filter row: Tất cả, Yêu thích, then categories with foods */}
                 <ChipGroup scroll items={filterItems} ariaLabel="Lọc món theo nhóm" data-align-group="add-list" data-align-edge="left" />
 
-                {ready && showShortcuts && shortcuts}
+                <Expand open={ready && showShortcuts}>{shortcuts}</Expand>
 
                 {/* Results: grouped or flat */}
                 {catalogPending && list.foods.length > 0 && <CatalogNote />}
+                {/* A fixed height (it was a maximum): the dialog keeps its size while the results change, so a few results never shrink and recentre it */}
                 {ready && (
                 <FoodList
                   dataTour="add-results"
+                  limits={ADD_LIST_LIMITS}
+                  scrollRef={desktopListRef}
                   list={list}
                   {...listPick}
                   getMeta={getFoodMeta}
@@ -750,7 +819,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
                   showSourceTag={query.trim() !== ""}
                   empty={emptyState}
                   footer={createFoodLink}
-                  className="max-h-[360px] overflow-y-auto pb-1"
+                  className="h-[360px] overflow-y-auto pb-1"
                 />
                 )}
                 {tray.length > 0 && (
@@ -873,13 +942,16 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
           </div>
 
           {/* One scroll region: carousels, the food list and the create button (the last item stays reachable) */}
-          <div data-add-scroll className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain px-4 pb-[max(24px,env(safe-area-inset-bottom))]">
-            {ready && showShortcuts && shortcuts}
+          <div ref={phoneScrollRef} data-add-scroll className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain px-4 pb-[max(24px,env(safe-area-inset-bottom))]">
+            <Expand open={ready && showShortcuts} wrapClassName="flex-none">
+              {shortcuts}
+            </Expand>
 
             {catalogPending && list.foods.length > 0 && <CatalogNote />}
             {ready && (
             <FoodList
               dataTour="add-results"
+              limits={ADD_LIST_LIMITS}
               list={list}
               {...listPick}
               getMeta={getFoodMeta}
@@ -918,11 +990,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
       {/* The portion sheet (phone): white, over the list, as in design/portion-mockup */}
       <Sheet
         open={selectedFood !== null && !isDesktop}
-        onClose={() => {
-          setSelectedFood(null);
-          // cc-67: back to the list with the keyboard ready, as when the sheet opened
-          phoneSearchInputRef.current?.focus({ preventScroll: true });
-        }}
+        onClose={closePortionSheet}
         labelledBy="portion-sheet-title"
         stacked
         quick
@@ -943,6 +1011,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
                     notice={dishNotice}
               isSubmitting={isSubmitting}
               headingId="portion-sheet-title"
+              onClose={closePortionSheet}
             />
           </div>
         )}
@@ -986,7 +1055,7 @@ function AddFoodInner({ standalone }: { standalone: boolean }) {
         onSelectSlot={(slot) => setOverrideSlot(slot)}
         mealCalories={mealCalories}
       />
-    </div>
+    </Root>
   );
 }
 
