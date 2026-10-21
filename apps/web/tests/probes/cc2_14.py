@@ -306,7 +306,7 @@ def check_offline_page(browser):
         check("Bạn đang ngoại tuyến" in body, f"offline page {size_name}: Bạn đang ngoại tuyến")
         check("Dữ liệu đã ghi trên máy này vẫn dùng được." in body, f"offline page {size_name}: the saved-data line")
         check(pg.get_by_role("button", name="Thử lại").count() == 1, f"offline page {size_name}: Thử lại button")
-        check(pg.locator("header").count() == 1, f"offline page {size_name}: shared header")
+        check(pg.locator("header").count() == 1, f"offline page {size_name}: the status header (circle, title, note)")
         no_h_scroll(pg, f"offline page {size_name}")
         small_targets(pg, f"offline page {size_name}")
         shot(pg, "offline", size_name)
