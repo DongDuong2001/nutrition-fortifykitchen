@@ -38,7 +38,7 @@ MEAL_NAME = {"breakfast": "Bữa sáng", "lunch": "Bữa trưa", "snack": "Bữa
 
 
 def meal_text(pg, slot):
-    # Hôm nay: one section per meal, a header with the kcal and one row per food ("Yến mạch 90 g")
+    # Hôm nay: one section per meal, a header with the kcal number (V3: no "kcal" word) and one row per food ("Yến mạch 90 g")
     return re.sub(r"\s+", " ", pg.locator(f"section[aria-label='{MEAL_NAME[slot]}'] >> visible=true").first.inner_text())
 
 
@@ -83,7 +83,7 @@ def run():
             # Baseline on Today before any edit
             pg.goto(BASE + "/app", wait_until="networkidle")
             pg.wait_for_timeout(300)
-            check("459 kcal" in meal_text(pg, "breakfast"), f"{name}: breakfast starts at 459 kcal")
+            check(re.search(r"\b459\b", meal_text(pg, "breakfast")) is not None, f"{name}: breakfast starts at 459 kcal")
             check("1.041" in pg.inner_text("body"), f"{name}: day starts at 1.041 kcal")
 
             # 3. change Yến mạch to 90 g, save, totals update
@@ -93,7 +93,7 @@ def run():
             pg.wait_for_url(re.compile(r".*/app(\?.*)?$"))
             pg.wait_for_timeout(300)
             check(re.search(r"Yến mạch (Cân sống )?90 g", meal_text(pg, "breakfast")) is not None, f"{name}: Yến mạch shows 90 g on Today")
-            check("573 kcal" in meal_text(pg, "breakfast"), f"{name}: breakfast total updates to 573 kcal")
+            check(re.search(r"\b573\b", meal_text(pg, "breakfast")) is not None, f"{name}: breakfast total updates to 573 kcal")
             check("1.155" in pg.inner_text("body"), f"{name}: day total updates to 1.155 kcal")
 
             # 4. move Yến mạch to Bữa tối
@@ -105,7 +105,7 @@ def run():
             pg.wait_for_timeout(300)
             check(re.search(r"Yến mạch (Cân sống )?90 g", meal_text(pg, "dinner")) is not None, f"{name}: moved entry shows under Bữa tối")
             check("Yến mạch" not in meal_text(pg, "breakfast"), f"{name}: moved entry leaves Bữa sáng")
-            check("231 kcal" in meal_text(pg, "breakfast"), f"{name}: Bữa sáng drops to 231 kcal")
+            check(re.search(r"\b231\b", meal_text(pg, "breakfast")) is not None, f"{name}: Bữa sáng drops to 231 kcal")
             check("1.155" in pg.inner_text("body"), f"{name}: moving keeps the day total at 1.155")
 
             # 5. delete Yogurt kefir: toast shows, Hoàn tác puts it back in place
