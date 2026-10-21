@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AppHeader } from "@/components/ui/app-header";
 import { AppShell } from "@/components/ui/app-shell";
 import { Card } from "@/components/ui/card";
 import { PillButton } from "@/components/ui/pill-button";
 import { SectionTitle } from "@/components/ui/section-title";
+import { Segmented } from "@/components/ui/segmented";
 import { useDiary } from "@/lib/diary-store";
 import { formatAmount, formatNumber } from "@/lib/format";
 import {
@@ -47,6 +49,115 @@ function NumberField({ value, onCommit, min, max, className, "aria-label": ariaL
       }}
       // 16 px at least (iOS zooms into smaller fields); the call sites pass text-base too
       className={`text-base ${className}`}
+    />
+  );
+}
+
+
+type MacroTone = "dam" | "tinhbot" | "beo";
+/** V3-SPEC §1: a macro's identity colour on its dot, its grams and its slider fill (the deep shade; classes are written out so Tailwind finds them). */
+const MACRO_TONE: Record<MacroTone, { dot: string; text: string }> = {
+  dam: { dot: "bg-macro-dam-text", text: "text-macro-dam-text" },
+  tinhbot: { dot: "bg-macro-tinhbot-text", text: "text-macro-tinhbot-text" },
+  beo: { dot: "bg-macro-beo-text", text: "text-macro-beo-text" },
+};
+
+const STEP_BUTTON =
+  "flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-surface p-0 text-text active:scale-[0.97] transition-press motion-reduce:active:scale-100 disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-cobalt";
+
+/**
+ * The slider of a ratio row (V3Macros): an 8 px track in the macro's colour, a 28 px white thumb in a 44 px hit area. A custom
+ * role="slider" like the design's: arrows step by 1, Page keys by 5, Home and End jump to the ends; a drag follows the pointer.
+ */
+function RatioSlider({ value, min, max, onChange, label, tone }: { value: number; min: number; max: number; onChange: (n: number) => void; label: string; tone: MacroTone }) {
+  const track = useRef<HTMLDivElement>(null);
+  const dragging = useRef(false);
+  const pos = ((value - min) / (max - min)) * 100;
+  const clamp = (n: number) => Math.min(max, Math.max(min, Math.round(n)));
+  const fromPointer = (clientX: number) => {
+    const rect = track.current?.getBoundingClientRect();
+    if (!rect || rect.width === 0) return;
+    onChange(clamp(min + ((clientX - rect.left) / rect.width) * (max - min)));
+  };
+  return (
+    <div className="grid grid-cols-[28px_minmax(0,1fr)_32px] items-center gap-1">
+      <span className="text-xs tabular-nums text-secondary">{min}%</span>
+      <div
+        ref={track}
+        role="slider"
+        tabIndex={0}
+        aria-label={label}
+        aria-valuemin={min}
+        aria-valuemax={max}
+        aria-valuenow={value}
+        aria-valuetext={`${value} phần trăm`}
+        style={{ touchAction: "pan-y" }}
+        className="relative mx-[14px] h-11 cursor-pointer select-none rounded-full focus-visible:outline-cobalt"
+        onPointerDown={(e) => {
+          dragging.current = true;
+          e.currentTarget.setPointerCapture(e.pointerId);
+          fromPointer(e.clientX);
+        }}
+        onPointerMove={(e) => dragging.current && fromPointer(e.clientX)}
+        onPointerUp={() => (dragging.current = false)}
+        onPointerCancel={() => (dragging.current = false)}
+        onKeyDown={(e) => {
+          const step = { ArrowLeft: -1, ArrowDown: -1, ArrowRight: 1, ArrowUp: 1, PageDown: -5, PageUp: 5 }[e.key];
+          if (step !== undefined) onChange(clamp(value + step));
+          else if (e.key === "Home") onChange(min);
+          else if (e.key === "End") onChange(max);
+          else return;
+          e.preventDefault();
+        }}
+      >
+        <div aria-hidden="true" className="absolute -left-[14px] -right-[14px] top-[18px] h-2 rounded-full bg-track" />
+        <div aria-hidden="true" style={{ width: `calc(${pos}% + 14px)` }} className={`absolute -left-[14px] top-[18px] h-2 rounded-full ${MACRO_TONE[tone].dot}`} />
+        <div aria-hidden="true" style={{ left: `${pos}%` }} className="absolute top-2 -ml-[14px] h-7 w-7 rounded-full border border-card-border bg-card shadow-md" />
+      </div>
+      <span className="text-right text-xs tabular-nums text-secondary">{max}%</span>
+    </div>
+  );
+}
+
+function MacroRowName({ name, tone, grams, kcal }: { name: string; tone: MacroTone; grams: string; kcal: number }) {
+  return (
+    <div className="flex min-w-0 flex-col gap-0.5">
+      <span className="text-callout font-bold text-text">
+        <span aria-hidden="true" className={`mr-2 inline-block h-2 w-2 rounded-full align-[1px] ${MACRO_TONE[tone].dot}`} />
+        {name}
+      </span>
+      <span className="text-cap tabular-nums text-secondary">
+        <span className={`font-bold ${MACRO_TONE[tone].text}`}>{grams}</span> · {formatNumber(kcal)} kcal
+      </span>
+    </div>
+  );
+}
+
+/** The V3 header of this screen: Huỷ on the leading side and Lưu on the trailing side of the title (an edit screen, as in V3Macros). */
+function MacroHeader({ onSave, saveDisabled }: { onSave?: () => void; saveDisabled?: boolean }) {
+  return (
+    <AppHeader
+      variant="sub"
+      title="Mục tiêu đa lượng"
+      lead={
+        <Link href="/settings/targets" className="inline-flex h-11 w-16 items-center justify-center rounded-full bg-fill text-callout font-semibold text-text no-underline active:scale-[0.97] transition-press motion-reduce:active:scale-100 focus-visible:outline-cobalt">
+          Huỷ
+        </Link>
+      }
+      actions={
+        onSave ? (
+          <button
+            type="button"
+            onClick={onSave}
+            disabled={saveDisabled}
+            className="inline-flex h-11 w-16 cursor-pointer items-center justify-center rounded-full border-0 bg-cobalt p-0 text-callout font-bold text-on-accent active:scale-[0.97] transition-press motion-reduce:active:scale-100 disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-cobalt"
+          >
+            Lưu<span className="sr-only"> mục tiêu đa lượng</span>
+          </button>
+        ) : undefined
+      }
+      layout="wide"
+      alignGroup="macro-targets-header"
     />
   );
 }
@@ -155,39 +266,57 @@ export function MacroTargetsScreen() {
   if (!hydrated) {
     return (
       <AppShell alignContainer="macro-targets-page">
-        <AppHeader variant="sub" title="Mục tiêu đa lượng" backHref="/settings/targets" layout="wide" />
-        <main className="mx-auto w-full max-w-[560px] p-4 lg:mx-0 lg:max-w-[1240px] lg:p-8">
-          <div className="h-64 rounded-2xl bg-divider animate-pulse motion-reduce:animate-none" />
+        <MacroHeader />
+        <main className="mx-auto w-full max-w-[560px] p-4 lg:mx-0 lg:max-w-[780px] lg:p-8">
+          <div className="h-64 rounded-card bg-divider animate-pulse motion-reduce:animate-none" />
         </main>
       </AppShell>
     );
   }
 
+  const shownKcal = mode === "fixed" ? fixedCalc.totalKcal : energyKcal;
+  const rows: {
+    tone: MacroTone;
+    name: string;
+    word: string;
+    pct: number;
+    setPct: (n: number) => void;
+    pctRange: [number, number];
+    fixed: number;
+    setFixed: (n: number) => void;
+    fixedRange: [number, number];
+    ratioGrams: number;
+    ratioKcal: number;
+    fixedKcal: number;
+    fixedAria: string;
+    ketoPct: number;
+  }[] = [
+    { tone: "dam", name: "Đạm", word: "đạm", pct: proteinPct, setPct: setProteinPct, pctRange: [5, 80], fixed: fixedProtein, setFixed: setFixedProtein, fixedRange: [10, 400], ratioGrams: ratioCalc.protein.min, ratioKcal: ratioCalc.proteinKcal, fixedKcal: fixedCalc.proteinKcal, fixedAria: "Số gram đạm cố định", ketoPct: 20 },
+    { tone: "tinhbot", name: "Tinh bột", word: "tinh bột", pct: carbsPct, setPct: setCarbsPct, pctRange: [5, 85], fixed: fixedCarbs, setFixed: setFixedCarbs, fixedRange: [10, 600], ratioGrams: ratioCalc.carbs.min, ratioKcal: ratioCalc.carbsKcal, fixedKcal: fixedCalc.carbsKcal, fixedAria: "Số gram tinh bột cố định", ketoPct: 5 },
+    { tone: "beo", name: "Chất béo", word: "chất béo", pct: fatPct, setPct: setFatPct, pctRange: [5, 80], fixed: fixedFat, setFixed: setFixedFat, fixedRange: [10, 300], ratioGrams: ratioCalc.fat.min, ratioKcal: ratioCalc.fatKcal, fixedKcal: fixedCalc.fatKcal, fixedAria: "Số gram chất béo cố định", ketoPct: 75 },
+  ];
+  const presetOn = (r: MacroRatios) => mode === "ratios" && proteinPct === r.proteinPct && carbsPct === r.carbsPct && fatPct === r.fatPct;
+  const FIELD = "h-11 rounded-[10px] border-0 bg-surface text-center font-bold tabular-nums text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-cobalt";
+
   return (
     <AppShell alignContainer="macro-targets-page">
-      <AppHeader
-        variant="sub"
-        title="Mục tiêu đa lượng"
-        subtitle="Chia tỉ lệ đạm, tinh bột và chất béo theo mục tiêu của bạn"
-        backHref="/settings/targets"
-        layout="wide"
-        alignGroup="macro-targets-header"
-      />
+      <MacroHeader onSave={handleSave} saveDisabled={mode === "ratios" && !isRatioValid} />
 
-      <main className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-12 pt-4 lg:mx-0 lg:max-w-[780px] lg:px-8 lg:pt-6">
+      <main className="mx-auto flex w-full max-w-[560px] flex-col gap-4 px-4 pb-12 pt-0 lg:mx-0 lg:max-w-[780px] lg:px-8 lg:pt-6">
+        {/* The subtitle sits under the title, aligned to it (Huỷ 64 px + 12 px gap) */}
+        <p className="m-0 pl-[76px] text-callout leading-snug text-secondary">Chia tỉ lệ đạm, tinh bột và chất béo theo mục tiêu của bạn</p>
+
         {/* Thẻ mục tiêu năng lượng */}
         <Card as="section" aria-labelledby="energy-target-title" className="flex flex-col gap-2">
           <SectionTitle id="energy-target-title">Mục tiêu năng lượng</SectionTitle>
           <div className="flex items-baseline justify-between py-1">
-            <span className="text-[0.875rem] text-secondary">Năng lượng mục tiêu</span>
-            <div className="flex items-baseline gap-2">
-              <span className="font-display text-headline font-extrabold leading-none tabular-nums text-text">
-                {formatNumber(mode === "fixed" ? fixedCalc.totalKcal : energyKcal)}
-              </span>
-              <span className="text-callout font-semibold text-secondary">kcal</span>
+            <span className="text-sm text-secondary">Năng lượng mục tiêu</span>
+            <div className="flex items-baseline gap-2 text-cobalt">
+              <span className="font-display text-headline italic font-extrabold leading-none tabular-nums">{formatNumber(shownKcal)}</span>
+              <span className="text-callout font-semibold">kcal</span>
             </div>
           </div>
-          <p className="m-0 text-cap leading-relaxed text-secondary border-t border-divider pt-2">
+          <p className="m-0 border-t border-divider pt-2 text-cap leading-snug text-secondary">
             Tính từ hồ sơ ({formatNumber(profile.weightKg)} kg) và mục tiêu thể trạng. Số kcal này dùng làm cơ sở chia các chất đa lượng.
           </p>
         </Card>
@@ -200,38 +329,17 @@ export function MacroTargetsScreen() {
           </div>
 
           {/* Segmented control: Tỉ lệ | Cố định | Keto */}
-          <div role="group" aria-label="Cách chia đa lượng" className="grid grid-cols-3 gap-1 rounded-xl bg-page p-1 border border-card-border">
-            <button
-              type="button"
-              aria-pressed={mode === "ratios"}
-              onClick={() => setMode("ratios")}
-              className={`min-h-11 rounded-lg text-cap font-bold transition-press ${
-                mode === "ratios" ? "bg-card text-text shadow-sm" : "bg-transparent text-secondary hover:text-text"
-              }`}
-            >
-              Tỉ lệ
-            </button>
-            <button
-              type="button"
-              aria-pressed={mode === "fixed"}
-              onClick={() => setMode("fixed")}
-              className={`min-h-11 rounded-lg text-cap font-bold transition-press ${
-                mode === "fixed" ? "bg-card text-text shadow-sm" : "bg-transparent text-secondary hover:text-text"
-              }`}
-            >
-              Cố định
-            </button>
-            <button
-              type="button"
-              aria-pressed={mode === "keto"}
-              onClick={() => setMode("keto")}
-              className={`min-h-11 rounded-lg text-cap font-bold transition-press ${
-                mode === "keto" ? "bg-card text-text shadow-sm" : "bg-transparent text-secondary hover:text-text"
-              }`}
-            >
-              Keto
-            </button>
-          </div>
+          <Segmented<MacroTargetMode>
+            label="Cách chia đa lượng"
+            value={mode}
+            onChange={setMode}
+            items={[
+              { key: "ratios", label: "Tỉ lệ" },
+              { key: "fixed", label: "Cố định" },
+              { key: "keto", label: "Keto" },
+            ]}
+            className="bg-surface!"
+          />
 
           <p className="m-0 text-cap leading-snug text-secondary">
             {mode === "ratios" &&
@@ -242,138 +350,60 @@ export function MacroTargetsScreen() {
               "Chế độ Keto phân bổ năng lượng cực thấp từ tinh bột (5%), vừa phải đạm (20%) và rất giàu chất béo (75%)."}
           </p>
 
-          {/* 3 Hàng Macro: Đạm, Tinh bột, Béo */}
-          <div className="flex flex-col divide-y divide-divider border-t border-b border-divider">
-            {/* Đạm */}
-            <div className="flex min-h-14 items-center justify-between gap-3 py-2">
-              <div className="flex items-center gap-3 min-w-0">
-                <span className="h-3 w-3 shrink-0 rounded-full bg-success" aria-hidden="true" />
-                <div className="flex flex-col">
-                  <span className="text-callout font-bold text-text">Đạm</span>
-                  <span className="text-cap tabular-nums text-secondary">
-                    {mode === "fixed" ? `${formatNumber(fixedCalc.proteinKcal)} kcal` : `${formatNumber(ratioCalc.proteinKcal)} kcal`}
-                  </span>
+          {/* 3 hàng đa lượng: Đạm, Tinh bột, Chất béo */}
+          <div>
+            {rows.map((r, i) => {
+              const grams = mode === "fixed" ? `${formatAmount(r.fixed, "g")} g` : `${formatAmount(r.ratioGrams, "g")} g`;
+              const kcal = mode === "fixed" ? r.fixedKcal : r.ratioKcal;
+              return (
+                <div key={r.tone} data-align-group="macro-row" className={`flex flex-col gap-0.5 py-3 ${i === 0 ? "pt-0" : "border-t border-divider"}`}>
+                  <div className="flex items-center justify-between gap-2">
+                    <MacroRowName name={r.name} tone={r.tone} grams={grams} kcal={kcal} />
+                    <div className="flex shrink-0 items-center gap-1">
+                      {mode === "ratios" && (
+                        <>
+                          <button type="button" aria-label={`Giảm tỉ lệ phần trăm ${r.word}`} disabled={r.pct <= r.pctRange[0]} onClick={() => r.setPct(Math.max(r.pctRange[0], r.pct - 1))} className={STEP_BUTTON}>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                              <path d="M6 12h12" />
+                            </svg>
+                          </button>
+                          <span className="flex items-center gap-0.5">
+                            <NumberField min={r.pctRange[0]} max={r.pctRange[1]} aria-label={`Tỉ lệ phần trăm ${r.word}`} value={r.pct} onCommit={r.setPct} className={`w-[52px] ${FIELD}`} />
+                            <span className="text-cap font-semibold text-secondary">%</span>
+                          </span>
+                          <button type="button" aria-label={`Tăng tỉ lệ phần trăm ${r.word}`} disabled={r.pct >= r.pctRange[1]} onClick={() => r.setPct(Math.min(r.pctRange[1], r.pct + 1))} className={STEP_BUTTON}>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                              <path d="M12 6v12M6 12h12" />
+                            </svg>
+                          </button>
+                        </>
+                      )}
+                      {mode === "fixed" && (
+                        <span className="flex items-center gap-1">
+                          <NumberField min={r.fixedRange[0]} max={r.fixedRange[1]} aria-label={r.fixedAria} value={r.fixed} onCommit={r.setFixed} className={`w-16 ${FIELD}`} />
+                          <span className="text-cap font-semibold text-secondary">g</span>
+                        </span>
+                      )}
+                      {mode === "keto" && <span className="inline-flex h-11 items-center rounded-[10px] bg-surface px-3 text-cap font-bold text-secondary">{r.ketoPct} %</span>}
+                    </div>
+                  </div>
+                  {mode === "ratios" && <RatioSlider value={r.pct} min={r.pctRange[0]} max={r.pctRange[1]} onChange={r.setPct} label={`Tỉ lệ ${r.word}`} tone={r.tone} />}
                 </div>
-              </div>
-
-              <div className="flex items-center gap-3 shrink-0">
-                <span className="font-display text-[1rem] font-extrabold tabular-nums text-text">
-                  {mode === "fixed" ? `${formatAmount(fixedProtein, "g")} g` : `${formatAmount(ratioCalc.protein.min, "g")} g`}
-                </span>
-
-                {mode === "ratios" && (
-                  <div className="flex items-center gap-1 rounded-lg border border-card-border bg-page px-2 py-1 focus-within:ring-2 focus-within:ring-cobalt">
-                    <NumberField                      min={5}                      max={80}                      aria-label="Tỉ lệ phần trăm đạm"                      value={proteinPct}                      onCommit={setProteinPct}                      className="w-12 border-0 bg-transparent text-center font-display text-base font-extrabold tabular-nums text-text focus:outline-none"                    />
-                    <span className="text-xs font-semibold text-secondary">%</span>
-                  </div>
-                )}
-
-                {mode === "fixed" && (
-                  <div className="flex items-center gap-1 rounded-lg border border-card-border bg-page px-2 py-1 focus-within:ring-2 focus-within:ring-cobalt">
-                    <NumberField                      min={10}                      max={400}                      aria-label="Số gram đạm cố định"                      value={fixedProtein}                      onCommit={setFixedProtein}                      className="w-16 border-0 bg-transparent text-center font-display text-base font-bold tabular-nums text-text focus:outline-none"                    />
-                    <span className="text-xs font-semibold text-secondary">g</span>
-                  </div>
-                )}
-
-                {mode === "keto" && (
-                  <span className="rounded-lg border border-card-border bg-page px-3 py-1 text-xs font-bold text-secondary">
-                    20 %
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Tinh bột */}
-            <div className="flex min-h-14 items-center justify-between gap-3 py-2">
-              <div className="flex items-center gap-3 min-w-0">
-                <span className="h-3 w-3 shrink-0 rounded-full bg-sky" aria-hidden="true" />
-                <div className="flex flex-col">
-                  <span className="text-callout font-bold text-text">Tinh bột</span>
-                  <span className="text-cap tabular-nums text-secondary">
-                    {mode === "fixed" ? `${formatNumber(fixedCalc.carbsKcal)} kcal` : `${formatNumber(ratioCalc.carbsKcal)} kcal`}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 shrink-0">
-                <span className="font-display text-[1rem] font-bold tabular-nums text-text">
-                  {mode === "fixed" ? `${formatAmount(fixedCarbs, "g")} g` : `${formatAmount(ratioCalc.carbs.min, "g")} g`}
-                </span>
-
-                {mode === "ratios" && (
-                  <div className="flex items-center gap-1 rounded-lg border border-card-border bg-page px-2 py-1 focus-within:ring-2 focus-within:ring-cobalt">
-                    <NumberField                      min={5}                      max={85}                      aria-label="Tỉ lệ phần trăm tinh bột"                      value={carbsPct}                      onCommit={setCarbsPct}                      className="w-12 border-0 bg-transparent text-center font-display text-base font-bold tabular-nums text-text focus:outline-none"                    />
-                    <span className="text-xs font-semibold text-secondary">%</span>
-                  </div>
-                )}
-
-                {mode === "fixed" && (
-                  <div className="flex items-center gap-1 rounded-lg border border-card-border bg-page px-2 py-1 focus-within:ring-2 focus-within:ring-cobalt">
-                    <NumberField                      min={10}                      max={600}                      aria-label="Số gram tinh bột cố định"                      value={fixedCarbs}                      onCommit={setFixedCarbs}                      className="w-16 border-0 bg-transparent text-center font-display text-base font-bold tabular-nums text-text focus:outline-none"                    />
-                    <span className="text-xs font-semibold text-secondary">g</span>
-                  </div>
-                )}
-
-                {mode === "keto" && (
-                  <span className="rounded-lg border border-card-border bg-page px-3 py-1 text-xs font-bold text-secondary">
-                    5 %
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Chất béo */}
-            <div className="flex min-h-14 items-center justify-between gap-3 py-2">
-              <div className="flex items-center gap-3 min-w-0">
-                <span className="h-3 w-3 shrink-0 rounded-full bg-amber-500" aria-hidden="true" />
-                <div className="flex flex-col">
-                  <span className="text-callout font-bold text-text">Chất béo</span>
-                  <span className="text-cap tabular-nums text-secondary">
-                    {mode === "fixed" ? `${formatNumber(fixedCalc.fatKcal)} kcal` : `${formatNumber(ratioCalc.fatKcal)} kcal`}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 shrink-0">
-                <span className="font-display text-[1rem] font-bold tabular-nums text-text">
-                  {mode === "fixed" ? `${formatAmount(fixedFat, "g")} g` : `${formatAmount(ratioCalc.fat.min, "g")} g`}
-                </span>
-
-                {mode === "ratios" && (
-                  <div className="flex items-center gap-1 rounded-lg border border-card-border bg-page px-2 py-1 focus-within:ring-2 focus-within:ring-cobalt">
-                    <NumberField                      min={5}                      max={80}                      aria-label="Tỉ lệ phần trăm chất béo"                      value={fatPct}                      onCommit={setFatPct}                      className="w-12 border-0 bg-transparent text-center font-display text-base font-bold tabular-nums text-text focus:outline-none"                    />
-                    <span className="text-xs font-semibold text-secondary">%</span>
-                  </div>
-                )}
-
-                {mode === "fixed" && (
-                  <div className="flex items-center gap-1 rounded-lg border border-card-border bg-page px-2 py-1 focus-within:ring-2 focus-within:ring-cobalt">
-                    <NumberField                      min={10}                      max={300}                      aria-label="Số gram chất béo cố định"                      value={fixedFat}                      onCommit={setFixedFat}                      className="w-16 border-0 bg-transparent text-center font-display text-base font-bold tabular-nums text-text focus:outline-none"                    />
-                    <span className="text-xs font-semibold text-secondary">g</span>
-                  </div>
-                )}
-
-                {mode === "keto" && (
-                  <span className="rounded-lg border border-card-border bg-page px-3 py-1 text-xs font-bold text-secondary">
-                    75 %
-                  </span>
-                )}
-              </div>
-            </div>
+              );
+            })}
           </div>
 
-          {/* Hàng tổng phần trăm và cảnh báo */}
-          <div className="flex items-center justify-between pt-1">
-            <span className="text-[0.875rem] font-bold text-text">Tổng tỉ lệ phần trăm</span>
-            <div className="flex items-center gap-2">
-              <span
-                className={`font-display text-[1rem] font-extrabold tabular-nums ${
-                  isRatioValid ? "text-success" : "text-destructive-text"
-                }`}
-              >
-                {formatNumber(totalPct)},0 %
-              </span>
-            </div>
+          {/* Tổng tỉ lệ và cảnh báo */}
+          <div className="flex items-center justify-between gap-2 border-t border-divider pt-3">
+            <span role="status" className={`flex items-center gap-1.5 text-callout font-bold ${isRatioValid ? "text-success" : "text-destructive-text"}`}>
+              {isRatioValid && (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M5 12.5l4.5 4.5L19 7.5" />
+                </svg>
+              )}
+              Tổng {formatNumber(totalPct)}%
+            </span>
+            <span className="text-cap font-semibold tabular-nums text-cobalt">{formatNumber(shownKcal)} kcal</span>
           </div>
 
           {mode === "ratios" && !isRatioValid && (
@@ -383,31 +413,31 @@ export function MacroTargetsScreen() {
           )}
 
           {/* Gợi ý tỉ lệ nhanh (Presets) */}
-          <div className="flex flex-col gap-2 pt-2 border-t border-divider">
-            <span className="text-cap font-semibold text-secondary">Gợi ý tỉ lệ phổ biến</span>
+          <div className="flex flex-col gap-2 border-t border-divider pt-4">
+            <SectionTitle as="h3">Gợi ý tỉ lệ phổ biến</SectionTitle>
             <div className="flex flex-wrap gap-2">
-              {Object.entries(MACRO_PRESETS).map(([key, p]) => (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => handlePreset(key)}
-                  className="inline-flex min-h-[36px] items-center rounded-full border border-card-border bg-card px-3 text-xs font-bold text-text hover:bg-page active:scale-[0.97] transition-press"
-                >
-                  {p.name} ({p.ratios.proteinPct}/{p.ratios.carbsPct}/{p.ratios.fatPct})
-                </button>
-              ))}
+              {Object.entries(MACRO_PRESETS).map(([key, p]) => {
+                const on = presetOn(p.ratios);
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    aria-pressed={on}
+                    onClick={() => handlePreset(key)}
+                    className={`inline-flex min-h-11 cursor-pointer items-center rounded-full border-0 px-3.5 text-cap active:scale-[0.97] transition-press motion-reduce:active:scale-100 focus-visible:outline-cobalt ${
+                      on ? "bg-ink font-bold text-on-dark" : "bg-surface font-semibold text-text"
+                    }`}
+                  >
+                    {p.name} ({p.ratios.proteinPct}/{p.ratios.carbsPct}/{p.ratios.fatPct})
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* Nút hành động */}
-          <div className="flex flex-col gap-2 pt-4">
-            <PillButton type="button" variant="primary" disabled={mode === "ratios" && !isRatioValid} onClick={handleSave}>
-              Lưu mục tiêu đa lượng
-            </PillButton>
-            <PillButton type="button" variant="secondary" onClick={handleResetDefault}>
-              Khôi phục mặc định theo HLV
-            </PillButton>
-          </div>
+          <PillButton type="button" variant="tertiary" onClick={handleResetDefault} className="text-body-lg">
+            Khôi phục mặc định theo HLV
+          </PillButton>
         </Card>
       </main>
     </AppShell>
